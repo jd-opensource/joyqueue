@@ -17,7 +17,7 @@ public class ClientConsts {
 
     protected static final Logger logger = LoggerFactory.getLogger(ClientConsts.class);
 
-    private static final String VERSION_FILE = "META-INF/jmq/version.properties";
+    private static final String VERSION_FILE = "META-INF/journalq/version.properties";
 
     public static final String PACKAGE_VERSION = Client.class.getPackage().getImplementationVersion();
 
