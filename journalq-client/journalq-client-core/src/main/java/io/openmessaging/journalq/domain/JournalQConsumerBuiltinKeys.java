@@ -3,12 +3,12 @@ package io.openmessaging.journalq.domain;
 import io.openmessaging.OMSBuiltinKeys;
 
 /**
- * JMQConsumerBuiltinKeys
+ * JournalQConsumerBuiltinKeys
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2019/2/19
  */
-public interface JMQConsumerBuiltinKeys extends OMSBuiltinKeys {
+public interface JournalQConsumerBuiltinKeys extends OMSBuiltinKeys {
 
     String GROUP = "CONSUMER_GROUP";
 

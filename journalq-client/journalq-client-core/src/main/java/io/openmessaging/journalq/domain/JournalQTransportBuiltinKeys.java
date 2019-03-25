@@ -3,12 +3,12 @@ package io.openmessaging.journalq.domain;
 import io.openmessaging.OMSBuiltinKeys;
 
 /**
- * JMQTransportBuiltinKeys
+ * JournalQTransportBuiltinKeys
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2019/2/19
  */
-public interface JMQTransportBuiltinKeys extends OMSBuiltinKeys {
+public interface JournalQTransportBuiltinKeys extends OMSBuiltinKeys {
 
     String CONNECTIONS = "TRANSPORT_CONNECTIONS";
 

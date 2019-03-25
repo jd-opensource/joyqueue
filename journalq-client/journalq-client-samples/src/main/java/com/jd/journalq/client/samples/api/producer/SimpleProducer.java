@@ -4,7 +4,7 @@ import com.jd.journalq.toolkit.network.IpUtil;
 import io.openmessaging.KeyValue;
 import io.openmessaging.MessagingAccessPoint;
 import io.openmessaging.OMS;
-import io.openmessaging.journalq.JMQBuiltinKeys;
+import io.openmessaging.journalq.JournalQBuiltinKeys;
 import io.openmessaging.message.Message;
 import io.openmessaging.producer.Producer;
 import io.openmessaging.producer.SendResult;
@@ -19,7 +19,7 @@ public class SimpleProducer {
 
     public static void main(String[] args) {
         KeyValue keyValue = OMS.newKeyValue();
-        keyValue.put(JMQBuiltinKeys.ACCOUNT_KEY, "test_token");
+        keyValue.put(JournalQBuiltinKeys.ACCOUNT_KEY, "test_token");
 
         MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint(String.format("oms:jmq://test_app@%s:50088/UNKNOWN", IpUtil.getLocalIp()), keyValue);
 
