@@ -3,7 +3,7 @@ package com.jd.journalq.broker.jmq.coordinator.assignment;
 import com.jd.journalq.broker.jmq.coordinator.domain.JMQCoordinatorGroup;
 import com.jd.journalq.broker.jmq.coordinator.domain.JMQCoordinatorGroupMember;
 import com.jd.journalq.broker.jmq.coordinator.domain.PartitionAssignment;
-import com.jd.journalq.common.domain.PartitionGroup;
+import com.jd.journalq.domain.PartitionGroup;
 import com.jd.laf.extension.Type;
 
 import java.util.List;

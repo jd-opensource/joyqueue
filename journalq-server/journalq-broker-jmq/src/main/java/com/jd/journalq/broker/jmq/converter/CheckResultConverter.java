@@ -1,6 +1,6 @@
 package com.jd.journalq.broker.jmq.converter;
 
-import com.jd.journalq.common.exception.JMQCode;
+import com.jd.journalq.exception.JMQCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

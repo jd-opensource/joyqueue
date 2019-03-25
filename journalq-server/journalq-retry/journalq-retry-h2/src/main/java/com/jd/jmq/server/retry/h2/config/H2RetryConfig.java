@@ -1,6 +1,6 @@
 package com.jd.journalq.server.retry.h2.config;
 
-import com.jd.journalq.common.exception.JMQConfigException;
+import com.jd.journalq.exception.JMQConfigException;
 import com.jd.journalq.datasource.DataSourceConfig;
 import com.jd.journalq.toolkit.retry.RetryPolicy;
 import org.slf4j.Logger;

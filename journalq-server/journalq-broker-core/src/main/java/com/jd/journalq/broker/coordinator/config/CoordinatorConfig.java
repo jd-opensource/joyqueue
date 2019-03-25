@@ -1,6 +1,6 @@
 package com.jd.journalq.broker.coordinator.config;
 
-import com.jd.journalq.common.domain.TopicName;
+import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.toolkit.config.PropertySupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

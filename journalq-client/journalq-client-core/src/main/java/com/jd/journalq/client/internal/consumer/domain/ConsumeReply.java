@@ -1,6 +1,6 @@
 package com.jd.journalq.client.internal.consumer.domain;
 
-import com.jd.journalq.common.network.command.RetryType;
+import com.jd.journalq.network.command.RetryType;
 
 /**
  * ConsumeReply

@@ -4,8 +4,8 @@ import com.jd.journalq.broker.kafka.message.serializer.AbstractKafkaMessageSeria
 import com.jd.journalq.broker.kafka.message.serializer.KafkaMessageV0Serializer;
 import com.jd.journalq.broker.kafka.message.serializer.KafkaMessageV1Serializer;
 import com.jd.journalq.broker.kafka.message.serializer.KafkaMessageV2Serializer;
-import com.jd.journalq.common.message.BrokerMessage;
-import com.jd.journalq.common.message.SourceType;
+import com.jd.journalq.message.BrokerMessage;
+import com.jd.journalq.message.SourceType;
 import io.netty.buffer.ByteBuf;
 import org.apache.commons.collections.CollectionUtils;
 

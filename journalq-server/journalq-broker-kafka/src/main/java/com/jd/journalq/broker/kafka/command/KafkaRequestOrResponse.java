@@ -1,8 +1,8 @@
 package com.jd.journalq.broker.kafka.command;
 
-import com.jd.journalq.common.network.transport.command.Direction;
-import com.jd.journalq.common.network.transport.command.Payload;
-import com.jd.journalq.common.network.transport.command.Type;
+import com.jd.journalq.network.transport.command.Direction;
+import com.jd.journalq.network.transport.command.Payload;
+import com.jd.journalq.network.transport.command.Type;
 
 /**
  * Created by zhuduohui on 2018/8/30.

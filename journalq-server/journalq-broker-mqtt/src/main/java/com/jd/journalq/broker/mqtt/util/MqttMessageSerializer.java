@@ -1,7 +1,7 @@
 package com.jd.journalq.broker.mqtt.util;
 
-import com.jd.journalq.common.message.BrokerMessage;
-import com.jd.journalq.common.message.SourceType;
+import com.jd.journalq.message.BrokerMessage;
+import com.jd.journalq.message.SourceType;
 import com.jd.journalq.toolkit.network.IpUtil;
 import com.jd.journalq.toolkit.time.SystemClock;
 import io.netty.buffer.ByteBuf;

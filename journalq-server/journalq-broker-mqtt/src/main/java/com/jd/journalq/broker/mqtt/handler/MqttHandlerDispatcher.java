@@ -3,7 +3,7 @@ package com.jd.journalq.broker.mqtt.handler;
 import com.jd.journalq.broker.mqtt.config.MqttConfig;
 import com.jd.journalq.broker.mqtt.config.MqttContext;
 import com.jd.journalq.broker.BrokerContext;
-import com.jd.journalq.common.network.transport.command.handler.CommandHandlerFactory;
+import com.jd.journalq.network.transport.command.handler.CommandHandlerFactory;
 import com.jd.journalq.broker.mqtt.command.MqttHandlerFactory;
 import com.jd.journalq.toolkit.service.Service;
 import io.netty.handler.codec.mqtt.MqttMessageType;

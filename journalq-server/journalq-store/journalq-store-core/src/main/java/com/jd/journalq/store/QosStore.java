@@ -1,6 +1,6 @@
 package com.jd.journalq.store;
 
-import com.jd.journalq.common.domain.QosLevel;
+import com.jd.journalq.domain.QosLevel;
 import com.jd.journalq.store.file.PositioningStore;
 import com.jd.journalq.store.index.IndexItem;
 import com.jd.journalq.toolkit.concurrent.EventFuture;

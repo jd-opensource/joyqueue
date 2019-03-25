@@ -1,9 +1,9 @@
 package com.jd.journalq.api;
 
-import com.jd.journalq.common.model.PageResult;
-import com.jd.journalq.common.model.Pagination;
-import com.jd.journalq.common.monitor.PartitionAckMonitorInfo;
-import com.jd.journalq.common.monitor.PendingMonitorInfo;
+import com.jd.journalq.model.PageResult;
+import com.jd.journalq.model.Pagination;
+import com.jd.journalq.monitor.PartitionAckMonitorInfo;
+import com.jd.journalq.monitor.PendingMonitorInfo;
 import com.jd.journalq.model.domain.*;
 import com.jd.journalq.model.query.QBrokerGroup;
 

@@ -7,7 +7,7 @@ import com.jd.journalq.client.internal.consumer.coordinator.domain.BrokerAssignm
 import com.jd.journalq.client.internal.consumer.coordinator.domain.PartitionAssignment;
 import com.jd.journalq.client.internal.metadata.domain.PartitionMetadata;
 import com.jd.journalq.client.internal.metadata.domain.TopicMetadata;
-import com.jd.journalq.common.network.domain.BrokerNode;
+import com.jd.journalq.network.domain.BrokerNode;
 
 import java.util.List;
 import java.util.Map;

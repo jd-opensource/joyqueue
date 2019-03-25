@@ -1,13 +1,13 @@
 package com.jd.journalq.server.retry.remote;
 
-import com.jd.journalq.common.exception.JMQCode;
-import com.jd.journalq.common.exception.JMQException;
-import com.jd.journalq.common.network.command.CommandType;
-import com.jd.journalq.common.network.transport.Transport;
-import com.jd.journalq.common.network.transport.TransportClient;
-import com.jd.journalq.common.network.transport.codec.JMQHeader;
-import com.jd.journalq.common.network.transport.command.Command;
-import com.jd.journalq.common.network.transport.command.Direction;
+import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.network.command.CommandType;
+import com.jd.journalq.network.transport.Transport;
+import com.jd.journalq.network.transport.TransportClient;
+import com.jd.journalq.network.transport.codec.JMQHeader;
+import com.jd.journalq.network.transport.command.Command;
+import com.jd.journalq.network.transport.command.Direction;
 import com.jd.journalq.server.retry.api.MessageRetry;
 import com.jd.journalq.server.retry.api.RetryPolicyProvider;
 import com.jd.journalq.server.retry.model.RetryMessageModel;

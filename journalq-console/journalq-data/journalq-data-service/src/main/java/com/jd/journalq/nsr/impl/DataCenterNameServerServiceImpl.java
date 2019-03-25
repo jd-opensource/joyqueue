@@ -2,8 +2,8 @@ package com.jd.journalq.nsr.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
-import com.jd.journalq.common.model.PageResult;
-import com.jd.journalq.common.model.QPageQuery;
+import com.jd.journalq.model.PageResult;
+import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.convert.NsrDataCenterConverter;
 import com.jd.journalq.model.domain.DataCenter;
 import com.jd.journalq.model.domain.OperLog;
@@ -39,20 +39,20 @@ public class DataCenterNameServerServiceImpl extends NameServerBase implements D
     @Override
     public List<DataCenter> findAllDataCenter(DataCenterQuery dataCenterQuery) throws Exception {
         String result = post(LIST_DATACENTER,dataCenterQuery);
-        List<com.jd.journalq.common.domain.DataCenter> dataCenterList = JSON.parseArray(result).toJavaList(com.jd.journalq.common.domain.DataCenter.class);
+        List<com.jd.journalq.domain.DataCenter> dataCenterList = JSON.parseArray(result).toJavaList(com.jd.journalq.domain.DataCenter.class);
         return dataCenterList.stream().map(dataCenter -> nsrDataCenterConverter.revert(dataCenter)).collect(Collectors.toList());
     }
 
     @Override
     public int add(DataCenter dataCenter) throws Exception {
-        com.jd.journalq.common.domain.DataCenter nsrDataCenter = nsrDataCenterConverter.convert(dataCenter);
+        com.jd.journalq.domain.DataCenter nsrDataCenter = nsrDataCenterConverter.convert(dataCenter);
         String result = postWithLog(ADD_DATACENTER, nsrDataCenter,OperLog.Type.DATA_CENTER.value(),OperLog.OperType.ADD.value(),nsrDataCenter.getId());
         return isSuccess(result);
     }
 
     @Override
     public int update(DataCenter dataCenter) throws Exception {
-        com.jd.journalq.common.domain.DataCenter nsrDataCenter = nsrDataCenterConverter.convert(dataCenter);
+        com.jd.journalq.domain.DataCenter nsrDataCenter = nsrDataCenterConverter.convert(dataCenter);
         String result1 =  postWithLog(UPDATE_DATACENTER, nsrDataCenter,OperLog.Type.DATA_CENTER.value(),OperLog.OperType.UPDATE.value(),nsrDataCenter.getId());
         return isSuccess(result1);
     }
@@ -64,7 +64,7 @@ public class DataCenterNameServerServiceImpl extends NameServerBase implements D
 
     @Override
     public int delete(DataCenter dataCenter) throws Exception {
-        com.jd.journalq.common.domain.DataCenter nsrConfig = nsrDataCenterConverter.convert(dataCenter);
+        com.jd.journalq.domain.DataCenter nsrConfig = nsrDataCenterConverter.convert(dataCenter);
         String result = postWithLog(REMOVE_DATACENTER, nsrConfig,OperLog.Type.DATA_CENTER.value(),OperLog.OperType.DELETE.value(),nsrConfig.getId());
         return isSuccess(result);
     }
@@ -72,7 +72,7 @@ public class DataCenterNameServerServiceImpl extends NameServerBase implements D
     @Override
     public DataCenter findById(String id) throws Exception {
         String result = post(GETBYID_DATACENTER,id);
-        com.jd.journalq.common.domain.DataCenter nsrDataCenter = JSON.parseObject(result, com.jd.journalq.common.domain.DataCenter.class);
+        com.jd.journalq.domain.DataCenter nsrDataCenter = JSON.parseObject(result, com.jd.journalq.domain.DataCenter.class);
         return nsrDataCenterConverter.revert(nsrDataCenter);
     }
 
@@ -89,7 +89,7 @@ public class DataCenterNameServerServiceImpl extends NameServerBase implements D
         String result = post(FINDBYQUERY_DATACENTER,pageQuery);
 
         PageResult<DataCenter> pageResult2 = new PageResult<>();
-        PageResult<com.jd.journalq.common.domain.DataCenter> pageResult = JSON.parseObject(result,new TypeReference<PageResult<com.jd.journalq.common.domain.DataCenter>>(){});
+        PageResult<com.jd.journalq.domain.DataCenter> pageResult = JSON.parseObject(result,new TypeReference<PageResult<com.jd.journalq.domain.DataCenter>>(){});
         pageResult2.setPagination(pageResult.getPagination());
         pageResult2.setResult(pageResult.getResult().stream().map(dataCenter -> nsrDataCenterConverter.revert(dataCenter)).collect(Collectors.toList()));
         return pageResult2;

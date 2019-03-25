@@ -6,10 +6,9 @@ import com.jd.journalq.handler.error.ErrorCode;
 import com.jd.journalq.handler.routing.command.CommandSupport;
 
 import com.jd.journalq.handler.Constants;
-import com.jd.journalq.handler.binder.annotation.*;
 import com.jd.journalq.model.domain.Identity;
 import com.jd.journalq.model.domain.User;
-import com.jd.journalq.common.model.QPageQuery;
+import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.model.query.QUser;
 import com.jd.journalq.service.UserService;
 

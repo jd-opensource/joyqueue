@@ -9,7 +9,7 @@ import com.jd.journalq.client.internal.consumer.config.ConsumerConfig;
 import com.jd.journalq.client.internal.consumer.domain.ConsumeReply;
 import com.jd.journalq.client.internal.consumer.domain.FetchIndexData;
 import com.jd.journalq.client.internal.consumer.domain.LocalIndexData;
-import com.jd.journalq.common.exception.JMQCode;
+import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.toolkit.service.Service;
 import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;

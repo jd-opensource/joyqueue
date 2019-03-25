@@ -5,7 +5,7 @@ import com.jd.journalq.broker.network.listener.BrokerTransportListener;
 import com.jd.journalq.broker.network.protocol.ProtocolManager;
 import com.jd.journalq.broker.BrokerContext;
 import com.jd.journalq.broker.monitor.SessionManager;
-import com.jd.journalq.common.network.transport.config.ServerConfig;
+import com.jd.journalq.network.transport.config.ServerConfig;
 import com.jd.journalq.broker.network.backend.BackendServer;
 import com.jd.journalq.toolkit.lang.Preconditions;
 import com.jd.journalq.toolkit.service.Service;

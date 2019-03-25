@@ -6,7 +6,7 @@ import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 import com.google.common.collect.Lists;
 import com.jd.journalq.client.internal.transport.config.TransportConfig;
-import com.jd.journalq.common.network.domain.BrokerNode;
+import com.jd.journalq.network.domain.BrokerNode;
 import com.jd.journalq.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

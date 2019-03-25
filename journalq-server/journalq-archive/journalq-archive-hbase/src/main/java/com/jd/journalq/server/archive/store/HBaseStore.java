@@ -1,8 +1,8 @@
 package com.jd.journalq.server.archive.store;
 
-import com.jd.journalq.common.exception.JMQCode;
-import com.jd.journalq.common.exception.JMQException;
-import com.jd.journalq.common.hbase.HBaseClient;
+import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.hbase.HBaseClient;
 import com.jd.journalq.server.archive.store.api.ArchiveStore;
 import com.jd.journalq.server.archive.store.model.AchivePosition;
 import com.jd.journalq.server.archive.store.model.ConsumeLog;

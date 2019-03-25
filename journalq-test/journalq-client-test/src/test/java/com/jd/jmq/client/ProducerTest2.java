@@ -1,12 +1,12 @@
 package com.jd.journalq.client;
 
-import com.jd.journalq.common.exception.JMQCode;
+import com.jd.journalq.exception.JMQCode;
 import io.openmessaging.KeyValue;
 import io.openmessaging.OMS;
 import io.openmessaging.OMSBuiltinKeys;
 import io.openmessaging.exception.OMSRuntimeException;
-import io.openmessaging.jmq.domain.JMQProducerBuiltinKeys;
-import io.openmessaging.jmq.producer.ExtensionProducer;
+import io.openmessaging.journalq.domain.JMQProducerBuiltinKeys;
+import io.openmessaging.journalq.producer.ExtensionProducer;
 import io.openmessaging.message.Message;
 import org.junit.Assert;
 import org.junit.Before;

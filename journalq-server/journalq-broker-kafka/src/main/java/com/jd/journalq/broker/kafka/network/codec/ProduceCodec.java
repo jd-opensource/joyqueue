@@ -10,10 +10,10 @@ import com.jd.journalq.broker.kafka.message.KafkaMessageSerializer;
 import com.jd.journalq.broker.kafka.model.ProducePartitionStatus;
 import com.jd.journalq.broker.kafka.network.KafkaHeader;
 import com.jd.journalq.broker.kafka.network.KafkaPayloadCodec;
-import com.jd.journalq.common.domain.TopicName;
-import com.jd.journalq.common.network.serializer.Serializer;
-import com.jd.journalq.common.network.transport.command.Type;
-import com.jd.journalq.common.network.transport.exception.TransportException;
+import com.jd.journalq.domain.TopicName;
+import com.jd.journalq.network.serializer.Serializer;
+import com.jd.journalq.network.transport.command.Type;
+import com.jd.journalq.network.transport.exception.TransportException;
 import io.netty.buffer.ByteBuf;
 
 import java.nio.ByteBuffer;

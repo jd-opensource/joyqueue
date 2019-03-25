@@ -1,9 +1,9 @@
 package com.jd.journalq.broker.buffer;
 
-import com.jd.journalq.common.message.BrokerMessage;
-import com.jd.journalq.common.message.BrokerPrepare;
-import com.jd.journalq.common.message.JournalLog;
-import com.jd.journalq.common.message.Message;
+import com.jd.journalq.message.BrokerMessage;
+import com.jd.journalq.message.BrokerPrepare;
+import com.jd.journalq.message.JournalLog;
+import com.jd.journalq.message.Message;
 import com.jd.journalq.toolkit.io.Compressors;
 import com.jd.journalq.toolkit.io.Zip;
 import com.jd.journalq.toolkit.io.ZipUtil;

@@ -3,7 +3,7 @@ package com.jd.journalq.nsr.ignite.message;
 import com.alibaba.fastjson.JSON;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.jd.journalq.common.event.MetaEvent;
+import com.jd.journalq.event.MetaEvent;
 import com.jd.journalq.nsr.ignite.model.IgniteMessage;
 import com.jd.journalq.nsr.ignite.dao.IgniteMessageDao;
 import com.jd.journalq.nsr.message.MessageListener;

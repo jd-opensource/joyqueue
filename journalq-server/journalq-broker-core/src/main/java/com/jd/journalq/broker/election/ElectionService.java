@@ -1,8 +1,8 @@
 package com.jd.journalq.broker.election;
 
-import com.jd.journalq.common.domain.Broker;
-import com.jd.journalq.common.domain.PartitionGroup;
-import com.jd.journalq.common.domain.TopicName;
+import com.jd.journalq.domain.Broker;
+import com.jd.journalq.domain.PartitionGroup;
+import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.toolkit.concurrent.EventListener;
 
 import java.util.List;

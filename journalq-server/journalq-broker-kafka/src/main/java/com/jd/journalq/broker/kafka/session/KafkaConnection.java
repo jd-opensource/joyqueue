@@ -1,6 +1,6 @@
 package com.jd.journalq.broker.kafka.session;
 
-import com.jd.journalq.common.network.session.Connection;
+import com.jd.journalq.network.session.Connection;
 
 /**
  * kafka连接

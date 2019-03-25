@@ -1,8 +1,8 @@
 package com.jd.journalq.broker.election.command;
 
 import com.jd.journalq.broker.election.TopicPartitionGroup;
-import com.jd.journalq.common.network.command.CommandType;
-import com.jd.journalq.common.network.transport.command.JMQPayload;
+import com.jd.journalq.network.command.CommandType;
+import com.jd.journalq.network.transport.command.JMQPayload;
 
 import java.nio.ByteBuffer;
 

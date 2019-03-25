@@ -1,6 +1,6 @@
 package com.jd.journalq.service;
 
-import com.jd.journalq.common.monitor.PartitionAckMonitorInfo;
+import com.jd.journalq.monitor.PartitionAckMonitorInfo;
 import com.jd.journalq.model.domain.PartitionOffset;
 import com.jd.journalq.model.domain.Subscribe;
 

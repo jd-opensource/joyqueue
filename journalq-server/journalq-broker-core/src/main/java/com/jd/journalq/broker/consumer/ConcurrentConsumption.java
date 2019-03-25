@@ -10,13 +10,13 @@ import com.jd.journalq.broker.consumer.model.ConsumePartition;
 import com.jd.journalq.broker.consumer.model.PullResult;
 import com.jd.journalq.broker.consumer.position.PositionManager;
 import com.jd.journalq.broker.consumer.position.model.Position;
-import com.jd.journalq.common.domain.Partition;
-import com.jd.journalq.common.domain.TopicName;
-import com.jd.journalq.common.exception.JMQCode;
-import com.jd.journalq.common.exception.JMQException;
-import com.jd.journalq.common.message.MessageLocation;
-import com.jd.journalq.common.network.session.Connection;
-import com.jd.journalq.common.network.session.Consumer;
+import com.jd.journalq.domain.Partition;
+import com.jd.journalq.domain.TopicName;
+import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.message.MessageLocation;
+import com.jd.journalq.network.session.Connection;
+import com.jd.journalq.network.session.Consumer;
 import com.jd.journalq.server.retry.api.MessageRetry;
 import com.jd.journalq.server.retry.model.RetryMessageModel;
 import com.jd.journalq.store.PartitionGroupStore;
@@ -402,7 +402,7 @@ class ConcurrentConsumption extends Service {
             ReadResult readRst = store.read(partition, index, count, Long.MAX_VALUE);
             if (readRst.getCode() == JMQCode.SUCCESS) {
                 List<ByteBuffer> byteBufferList = Lists.newArrayList(readRst.getMessages());
-                com.jd.journalq.common.domain.Consumer consumerConfig = clusterManager.getConsumer(TopicName.parse(consumer.getTopic()), consumer.getApp());
+                com.jd.journalq.domain.Consumer consumerConfig = clusterManager.getConsumer(TopicName.parse(consumer.getTopic()), consumer.getApp());
                 // 过滤消息
                 List<ByteBuffer> byteBuffers = filterMessageSupport.filter(consumerConfig, byteBufferList, new FilterCallbackImpl(consumer));
 

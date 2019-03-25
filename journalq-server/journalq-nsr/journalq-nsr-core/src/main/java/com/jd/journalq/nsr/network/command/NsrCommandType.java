@@ -1,6 +1,6 @@
 package com.jd.journalq.nsr.network.command;
 
-import com.jd.journalq.common.network.command.CommandType;
+import com.jd.journalq.network.command.CommandType;
 
 /**
  * @author wylixiaobin

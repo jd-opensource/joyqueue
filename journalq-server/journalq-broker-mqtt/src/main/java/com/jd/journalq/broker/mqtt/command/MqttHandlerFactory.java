@@ -1,9 +1,9 @@
 package com.jd.journalq.broker.mqtt.command;
 
 import com.jd.journalq.broker.mqtt.handler.Handler;
-import com.jd.journalq.common.network.transport.command.Command;
-import com.jd.journalq.common.network.transport.command.handler.CommandHandler;
-import com.jd.journalq.common.network.transport.command.handler.CommandHandlerFactory;
+import com.jd.journalq.network.transport.command.Command;
+import com.jd.journalq.network.transport.command.handler.CommandHandler;
+import com.jd.journalq.network.transport.command.handler.CommandHandlerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

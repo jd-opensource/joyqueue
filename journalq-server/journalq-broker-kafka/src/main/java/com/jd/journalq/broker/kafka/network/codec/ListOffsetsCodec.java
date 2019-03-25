@@ -9,9 +9,9 @@ import com.jd.journalq.broker.kafka.command.ListOffsetsResponse;
 import com.jd.journalq.broker.kafka.model.IsolationLevel;
 import com.jd.journalq.broker.kafka.model.PartitionOffsetsResponse;
 import com.jd.journalq.broker.kafka.network.KafkaHeader;
-import com.jd.journalq.common.domain.TopicName;
-import com.jd.journalq.common.network.serializer.Serializer;
-import com.jd.journalq.common.network.transport.command.Type;
+import com.jd.journalq.domain.TopicName;
+import com.jd.journalq.network.serializer.Serializer;
+import com.jd.journalq.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
 
 import java.util.Map;

@@ -1,6 +1,6 @@
 package com.jd.journalq.other;
 
-import com.jd.journalq.common.monitor.RestResponse;
+import com.jd.journalq.monitor.RestResponse;
 import com.jd.journalq.exception.ServiceException;
 import com.jd.journalq.service.BrokerRestUrlMappingService;
 import com.jd.journalq.util.HttpUtil;

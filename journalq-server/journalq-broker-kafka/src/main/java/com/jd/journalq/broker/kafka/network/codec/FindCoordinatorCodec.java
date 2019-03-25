@@ -7,8 +7,8 @@ import com.jd.journalq.broker.kafka.command.FindCoordinatorRequest;
 import com.jd.journalq.broker.kafka.command.FindCoordinatorResponse;
 import com.jd.journalq.broker.kafka.model.KafkaBroker;
 import com.jd.journalq.broker.kafka.network.KafkaHeader;
-import com.jd.journalq.common.network.serializer.Serializer;
-import com.jd.journalq.common.network.transport.command.Type;
+import com.jd.journalq.network.serializer.Serializer;
+import com.jd.journalq.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
 import org.apache.commons.lang3.StringUtils;
 

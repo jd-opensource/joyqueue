@@ -1,7 +1,7 @@
 package com.jd.journalq.nsr.ignite.model;
 
-import com.jd.journalq.common.domain.Replica;
-import com.jd.journalq.common.domain.TopicName;
+import com.jd.journalq.domain.Replica;
+import com.jd.journalq.domain.TopicName;
 import org.apache.ignite.binary.BinaryObjectException;
 import org.apache.ignite.binary.BinaryReader;
 import org.apache.ignite.binary.BinaryWriter;

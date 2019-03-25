@@ -3,7 +3,7 @@ package com.jd.journalq.client.internal.consumer;
 import com.google.common.collect.Table;
 import com.jd.journalq.client.internal.consumer.domain.ConsumeReply;
 import com.jd.journalq.client.internal.consumer.domain.FetchIndexData;
-import com.jd.journalq.common.exception.JMQCode;
+import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.toolkit.lang.LifeCycle;
 
 import java.util.List;

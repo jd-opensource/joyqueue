@@ -1,8 +1,8 @@
 package com.jd.journalq.broker.kafka.network;
 
-import com.jd.journalq.common.domain.QosLevel;
-import com.jd.journalq.common.network.transport.command.Direction;
-import com.jd.journalq.common.network.transport.command.Header;
+import com.jd.journalq.domain.QosLevel;
+import com.jd.journalq.network.transport.command.Direction;
+import com.jd.journalq.network.transport.command.Header;
 
 /**
  * kafka协议头

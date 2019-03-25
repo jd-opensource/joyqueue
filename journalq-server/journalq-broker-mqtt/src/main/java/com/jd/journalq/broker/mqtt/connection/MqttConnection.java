@@ -1,6 +1,6 @@
 package com.jd.journalq.broker.mqtt.connection;
 
-import com.jd.journalq.common.network.session.Connection;
+import com.jd.journalq.network.session.Connection;
 import com.jd.journalq.toolkit.network.IpUtil;
 import io.netty.channel.Channel;
 

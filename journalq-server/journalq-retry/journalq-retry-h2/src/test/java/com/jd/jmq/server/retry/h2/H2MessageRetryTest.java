@@ -1,7 +1,7 @@
 package com.jd.journalq.server.retry.h2;
 
-import com.jd.journalq.common.domain.TopicName;
-import com.jd.journalq.common.exception.JMQException;
+import com.jd.journalq.domain.TopicName;
+import com.jd.journalq.exception.JMQException;
 import com.jd.journalq.server.retry.api.RetryPolicyProvider;
 import com.jd.journalq.server.retry.model.RetryMessageModel;
 import com.jd.journalq.toolkit.retry.RetryPolicy;

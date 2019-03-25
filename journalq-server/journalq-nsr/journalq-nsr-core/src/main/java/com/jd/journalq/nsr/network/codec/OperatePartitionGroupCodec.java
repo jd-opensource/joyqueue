@@ -1,13 +1,13 @@
 package com.jd.journalq.nsr.network.codec;
 
-import com.jd.journalq.common.domain.PartitionGroup;
+import com.jd.journalq.domain.PartitionGroup;
 
 import com.jd.journalq.nsr.network.NsrPayloadCodec;
 import com.jd.journalq.nsr.network.command.CreatePartitionGroup;
 import com.jd.journalq.nsr.network.command.RemovePartitionGroup;
-import com.jd.journalq.common.network.serializer.Serializer;
-import com.jd.journalq.common.network.transport.command.Header;
-import com.jd.journalq.common.network.transport.command.Types;
+import com.jd.journalq.network.serializer.Serializer;
+import com.jd.journalq.network.transport.command.Header;
+import com.jd.journalq.network.transport.command.Types;
 import com.jd.journalq.nsr.network.command.NsrCommandType;
 import com.jd.journalq.nsr.network.command.OperatePartitionGroup;
 import com.jd.journalq.nsr.network.command.UpdatePartitionGroup;

@@ -1,8 +1,8 @@
 package com.jd.journalq.repository.mybatis.interceptor;
 
 
-import com.jd.journalq.common.model.PageResult;
-import com.jd.journalq.common.model.QPageQuery;
+import com.jd.journalq.model.PageResult;
+import com.jd.journalq.model.QPageQuery;
 import org.apache.ibatis.executor.resultset.ResultSetHandler;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.plugin.Intercepts;

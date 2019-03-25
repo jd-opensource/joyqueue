@@ -5,8 +5,8 @@ import com.jd.journalq.broker.kafka.KafkaCommandType;
 import com.jd.journalq.broker.kafka.command.HeartbeatRequest;
 import com.jd.journalq.broker.kafka.command.HeartbeatResponse;
 import com.jd.journalq.broker.kafka.network.KafkaHeader;
-import com.jd.journalq.common.network.serializer.Serializer;
-import com.jd.journalq.common.network.transport.command.Type;
+import com.jd.journalq.network.serializer.Serializer;
+import com.jd.journalq.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
 
 /**

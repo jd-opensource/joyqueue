@@ -1,6 +1,6 @@
 package com.jd.journalq.broker.consumer.model;
 
-import com.jd.journalq.common.network.session.Consumer;
+import com.jd.journalq.network.session.Consumer;
 
 /**
  * Created by lining48 on 2018/8/16.

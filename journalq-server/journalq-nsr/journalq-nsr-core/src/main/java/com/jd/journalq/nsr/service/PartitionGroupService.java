@@ -1,8 +1,8 @@
 package com.jd.journalq.nsr.service;
 
 
-import com.jd.journalq.common.domain.PartitionGroup;
-import com.jd.journalq.common.domain.TopicName;
+import com.jd.journalq.domain.PartitionGroup;
+import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.nsr.model.PartitionGroupQuery;
 
 import java.util.List;

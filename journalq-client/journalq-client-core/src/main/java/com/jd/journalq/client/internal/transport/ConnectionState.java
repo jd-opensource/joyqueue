@@ -1,7 +1,7 @@
 package com.jd.journalq.client.internal.transport;
 
 import com.google.common.collect.Sets;
-import com.jd.journalq.common.network.domain.BrokerNode;
+import com.jd.journalq.network.domain.BrokerNode;
 
 import java.util.Collection;
 import java.util.Set;

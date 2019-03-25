@@ -1,6 +1,6 @@
 package com.jd.journalq.broker.consumer.filter;
 
-import com.jd.journalq.common.exception.JMQException;
+import com.jd.journalq.exception.JMQException;
 
 import java.nio.ByteBuffer;
 import java.util.Iterator;

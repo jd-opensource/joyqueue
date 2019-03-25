@@ -1,6 +1,6 @@
 package com.jd.journalq.client.internal.metadata.domain;
 
-import com.jd.journalq.common.network.domain.BrokerNode;
+import com.jd.journalq.network.domain.BrokerNode;
 
 import java.io.Serializable;
 import java.util.Map;

@@ -1,6 +1,6 @@
 package com.jd.journalq.broker.buffer;
 
-import com.jd.journalq.common.message.BrokerMessage;
+import com.jd.journalq.message.BrokerMessage;
 import com.jd.journalq.toolkit.network.IpUtil;
 import org.junit.Assert;
 import org.junit.Test;

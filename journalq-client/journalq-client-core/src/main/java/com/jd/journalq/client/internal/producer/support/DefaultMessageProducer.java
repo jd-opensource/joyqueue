@@ -16,7 +16,7 @@ import com.jd.journalq.client.internal.producer.exception.ProducerException;
 import com.jd.journalq.client.internal.producer.interceptor.ProducerInterceptor;
 import com.jd.journalq.client.internal.producer.interceptor.ProducerInterceptorManager;
 import com.jd.journalq.client.internal.producer.transport.ProducerClientManager;
-import com.jd.journalq.common.exception.JMQCode;
+import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.toolkit.concurrent.SimpleFuture;
 import com.jd.journalq.toolkit.lang.Preconditions;
 import com.jd.journalq.toolkit.service.Service;

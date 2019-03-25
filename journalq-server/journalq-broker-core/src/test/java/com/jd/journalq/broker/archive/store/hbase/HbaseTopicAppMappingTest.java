@@ -1,7 +1,7 @@
 package com.jd.journalq.broker.archive.store.hbase;
 
-import com.jd.journalq.common.exception.JMQException;
-import com.jd.journalq.common.hbase.HBaseClient;
+import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.hbase.HBaseClient;
 import com.jd.journalq.server.archive.store.HBaseTopicAppMapping;
 import org.junit.Test;
 

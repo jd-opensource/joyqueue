@@ -1,7 +1,7 @@
 package com.jd.journalq.service.impl;
 
 import com.jd.journalq.model.query.QArchive;
-import com.jd.journalq.common.exception.JMQException;
+import com.jd.journalq.exception.JMQException;
 import com.jd.journalq.server.archive.store.QueryCondition;
 import com.jd.journalq.server.archive.store.api.ArchiveStore;
 import com.jd.journalq.server.archive.store.model.ConsumeLog;

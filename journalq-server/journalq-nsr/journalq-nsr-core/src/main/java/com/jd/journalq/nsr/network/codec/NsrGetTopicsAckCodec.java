@@ -1,8 +1,8 @@
 package com.jd.journalq.nsr.network.codec;
 
-import com.jd.journalq.common.network.codec.GetTopicsAckCodec;
-import com.jd.journalq.common.network.command.GetTopicsAck;
-import com.jd.journalq.common.network.transport.command.Types;
+import com.jd.journalq.network.codec.GetTopicsAckCodec;
+import com.jd.journalq.network.command.GetTopicsAck;
+import com.jd.journalq.network.transport.command.Types;
 import com.jd.journalq.nsr.network.NsrPayloadCodec;
 import com.jd.journalq.nsr.network.command.NsrCommandType;
 

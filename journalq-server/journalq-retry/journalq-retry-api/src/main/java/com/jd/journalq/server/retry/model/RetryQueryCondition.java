@@ -1,6 +1,6 @@
 package com.jd.journalq.server.retry.model;
 
-import com.jd.journalq.common.model.Pagination;
+import com.jd.journalq.model.Pagination;
 
 /**
  * Created by chengzhiliang on 2019/2/20.

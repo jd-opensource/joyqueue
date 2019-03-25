@@ -1,9 +1,9 @@
 package com.jd.journalq.broker.manage.converter;
 
-import com.jd.journalq.common.manage.IndexItem;
-import com.jd.journalq.common.manage.PartitionGroupMetric;
-import com.jd.journalq.common.manage.PartitionMetric;
-import com.jd.journalq.common.manage.TopicMetric;
+import com.jd.journalq.manage.IndexItem;
+import com.jd.journalq.manage.PartitionGroupMetric;
+import com.jd.journalq.manage.PartitionMetric;
+import com.jd.journalq.manage.TopicMetric;
 import com.jd.journalq.store.StoreManagementService;
 
 import java.util.Arrays;

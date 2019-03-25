@@ -1,6 +1,6 @@
 package com.jd.journalq.nsr.model;
 
-import com.jd.journalq.common.model.Query;
+import com.jd.journalq.model.Query;
 
 import java.util.List;
 

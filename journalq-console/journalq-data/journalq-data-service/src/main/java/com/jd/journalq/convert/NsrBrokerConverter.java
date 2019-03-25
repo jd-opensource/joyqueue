@@ -7,10 +7,10 @@ import com.jd.journalq.model.domain.Identity;
 /**
  * Created by wangxiaofei1 on 2019/1/2.
  */
-public class NsrBrokerConverter extends Converter<Broker, com.jd.journalq.common.domain.Broker> {
+public class NsrBrokerConverter extends Converter<Broker, com.jd.journalq.domain.Broker> {
     @Override
-    protected com.jd.journalq.common.domain.Broker forward(Broker broker) {
-        com.jd.journalq.common.domain.Broker nsrBroker = new com.jd.journalq.common.domain.Broker();
+    protected com.jd.journalq.domain.Broker forward(Broker broker) {
+        com.jd.journalq.domain.Broker nsrBroker = new com.jd.journalq.domain.Broker();
         nsrBroker.setId(Long.valueOf(String.valueOf(broker.getId())).intValue());
         if (broker.getIp() != null) {
             nsrBroker.setIp(broker.getIp());
@@ -26,7 +26,7 @@ public class NsrBrokerConverter extends Converter<Broker, com.jd.journalq.common
     }
 
     @Override
-    protected Broker backward(com.jd.journalq.common.domain.Broker nsrBroker) {
+    protected Broker backward(com.jd.journalq.domain.Broker nsrBroker) {
         Broker broker = new Broker();
         broker.setId(nsrBroker.getId());
         broker.setIp(nsrBroker.getIp());

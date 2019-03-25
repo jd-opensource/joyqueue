@@ -1,11 +1,11 @@
 package com.jd.journalq.broker.producer;
 
-import com.jd.journalq.common.domain.QosLevel;
-import com.jd.journalq.common.exception.JMQException;
-import com.jd.journalq.common.message.BrokerMessage;
-import com.jd.journalq.common.message.JournalLog;
-import com.jd.journalq.common.network.session.Producer;
-import com.jd.journalq.common.network.session.TransactionId;
+import com.jd.journalq.domain.QosLevel;
+import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.message.BrokerMessage;
+import com.jd.journalq.message.JournalLog;
+import com.jd.journalq.network.session.Producer;
+import com.jd.journalq.network.session.TransactionId;
 import com.jd.journalq.store.WriteResult;
 import com.jd.journalq.toolkit.concurrent.EventListener;
 

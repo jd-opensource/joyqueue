@@ -2,8 +2,8 @@ package com.jd.journalq.broker.network.codec;
 
 import com.jd.journalq.broker.election.network.codec.*;
 import com.jd.journalq.broker.index.network.codec.*;
-import com.jd.journalq.common.network.codec.BooleanAckCodec;
-import com.jd.journalq.common.network.transport.codec.PayloadCodecFactory;
+import com.jd.journalq.network.codec.BooleanAckCodec;
+import com.jd.journalq.network.transport.codec.PayloadCodecFactory;
 import com.jd.journalq.nsr.network.codec.OperatePartitionGroupCodec;
 
 /**

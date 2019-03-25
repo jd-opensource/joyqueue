@@ -1,7 +1,7 @@
 package com.jd.journalq.nsr.network.codec;
 
-import com.jd.journalq.common.network.codec.AuthorizationCodec;
-import com.jd.journalq.common.network.command.Authorization;
+import com.jd.journalq.network.codec.AuthorizationCodec;
+import com.jd.journalq.network.command.Authorization;
 import com.jd.journalq.nsr.network.NsrPayloadCodec;
 import com.jd.journalq.nsr.network.command.NsrCommandType;
 

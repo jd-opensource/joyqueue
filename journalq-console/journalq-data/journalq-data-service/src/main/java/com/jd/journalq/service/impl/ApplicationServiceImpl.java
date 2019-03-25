@@ -1,15 +1,15 @@
 package com.jd.journalq.service.impl;
 
-import com.jd.journalq.common.model.ListQuery;
+import com.jd.journalq.model.ListQuery;
 import com.jd.journalq.exception.ServiceException;
 import com.jd.journalq.exception.ValidationException;
-import com.jd.journalq.common.model.PageResult;
+import com.jd.journalq.model.PageResult;
 import com.jd.journalq.model.domain.Application;
 import com.jd.journalq.model.domain.Consumer;
 import com.jd.journalq.model.domain.Producer;
 import com.jd.journalq.model.domain.TopicUnsubscribedApplication;
 import com.jd.journalq.model.query.QApplication;
-import com.jd.journalq.common.model.QPageQuery;
+import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.model.query.QConsumer;
 import com.jd.journalq.model.query.QProducer;
 import com.jd.journalq.nsr.ConsumerNameServerService;

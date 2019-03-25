@@ -1,7 +1,7 @@
 package com.jd.journalq.broker.store;
 
 import com.jd.journalq.broker.config.BrokerStoreConfig;
-import com.jd.journalq.common.domain.TopicName;
+import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.store.PartitionGroupStore;
 import com.jd.journalq.store.StoreService;
 import com.jd.journalq.toolkit.config.PropertySupplier;

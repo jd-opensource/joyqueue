@@ -1,6 +1,6 @@
 package com.jd.journalq.broker.polling;
 
-import com.jd.journalq.common.network.session.Consumer;
+import com.jd.journalq.network.session.Consumer;
 import com.jd.journalq.toolkit.time.SystemClock;
 
 /**

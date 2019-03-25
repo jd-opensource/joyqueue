@@ -4,10 +4,10 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
-import com.jd.journalq.common.domain.PartitionGroup;
-import com.jd.journalq.common.domain.TopicName;
-import com.jd.journalq.common.model.PageResult;
-import com.jd.journalq.common.model.QPageQuery;
+import com.jd.journalq.domain.PartitionGroup;
+import com.jd.journalq.domain.TopicName;
+import com.jd.journalq.model.PageResult;
+import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.convert.CodeConverter;
 import com.jd.journalq.convert.NsrTopicConverter;
 import com.jd.journalq.exception.ServiceException;
@@ -55,10 +55,10 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
     @Override
     public String addTopic(Topic topic, List<TopicPartitionGroup> partitionGroups) throws Exception {
         JSONObject request = new JSONObject();
-        com.jd.journalq.common.domain.Topic nsrTopic = new com.jd.journalq.common.domain.Topic();
+        com.jd.journalq.domain.Topic nsrTopic = new com.jd.journalq.domain.Topic();
         //数据组装
         nsrTopic.setName(CodeConverter.convertTopic(topic.getNamespace(),topic));
-        nsrTopic.setType(com.jd.journalq.common.domain.Topic.Type.valueOf((byte)topic.getType()));
+        nsrTopic.setType(com.jd.journalq.domain.Topic.Type.valueOf((byte)topic.getType()));
         nsrTopic.setPartitions((short)topic.getPartitions());
         List<PartitionGroup> nsrPartitionGroups = new ArrayList<>(partitionGroups.size());
         for(TopicPartitionGroup group : partitionGroups){
@@ -94,9 +94,9 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
      */
     @Override
     public int removeTopic(Topic topic) throws Exception {
-        com.jd.journalq.common.domain.Topic nsrTopic = new com.jd.journalq.common.domain.Topic();
+        com.jd.journalq.domain.Topic nsrTopic = new com.jd.journalq.domain.Topic();
         nsrTopic.setName(CodeConverter.convertTopic(topic.getNamespace(),topic));
-        nsrTopic.setType(com.jd.journalq.common.domain.Topic.Type.valueOf((byte)topic.getType()));
+        nsrTopic.setType(com.jd.journalq.domain.Topic.Type.valueOf((byte)topic.getType()));
         nsrTopic.setPartitions((short)topic.getPartitions());
         String result =  postWithLog(REMOVE_TOPIC, nsrTopic,OperLog.Type.TOPIC.value(),OperLog.OperType.DELETE.value(),nsrTopic.getName().getCode());
         return isSuccess(result);
@@ -206,14 +206,14 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
     public PageResult<Topic> findByQuery(QPageQuery<QTopic> query) throws Exception {
         TopicQuery topicQuery = topicQueryConvert(query.getQuery());
         String result = post(FINDBYQUERY_TOPIC,new QPageQuery<>(query.getPagination(),topicQuery));
-        PageResult<com.jd.journalq.common.domain.Topic> pageResult = JSON.parseObject(result,new TypeReference<PageResult<com.jd.journalq.common.domain.Topic>>(){});
+        PageResult<com.jd.journalq.domain.Topic> pageResult = JSON.parseObject(result,new TypeReference<PageResult<com.jd.journalq.domain.Topic>>(){});
         if (pageResult == null || pageResult.getResult() == null) return PageResult.empty();
         return new PageResult<>(pageResult.getPagination(),pageResult.getResult().stream().map(topic -> nsrTopicConverter.revert(topic)).collect(Collectors.toList()));
     }
 
     @Override
     public int delete(Topic model) throws Exception {
-        com.jd.journalq.common.domain.Topic nsrTopic = nsrTopicConverter.convert(model);
+        com.jd.journalq.domain.Topic nsrTopic = nsrTopicConverter.convert(model);
        String result = postWithLog(REMOVE_TOPIC,nsrTopic,OperLog.Type.TOPIC.value(),OperLog.OperType.DELETE.value(),nsrTopic.getName().getCode());
        return isSuccess(result);
     }
@@ -229,7 +229,7 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
 
     @Override
     public int update(Topic model) throws Exception {
-        com.jd.journalq.common.domain.Topic nsrTopic = nsrTopicConverter.convert(model);
+        com.jd.journalq.domain.Topic nsrTopic = nsrTopicConverter.convert(model);
         String result = postWithLog(UPDATE_TOPIC,nsrTopic,OperLog.Type.TOPIC.value(),OperLog.OperType.UPDATE.value(),nsrTopic.getName().getCode());
         return isSuccess(result);
     }
@@ -238,7 +238,7 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
     public List<Topic> findByQuery(QTopic query) throws Exception {
         TopicQuery topicQuery = topicQueryConvert(query);
         String result = post(LIST_TOPIC,topicQuery);
-        List<com.jd.journalq.common.domain.Topic> topics = JSON.parseArray(result, com.jd.journalq.common.domain.Topic.class);
+        List<com.jd.journalq.domain.Topic> topics = JSON.parseArray(result, com.jd.journalq.domain.Topic.class);
         if (topics == null || topics.size() <=0 )return null;
         return topics.stream().map(topic -> nsrTopicConverter.revert(topic)).collect(Collectors.toList());
     }
@@ -248,7 +248,7 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
         try {
             TopicQuery topicQuery = topicQueryConvert(query.getQuery());
             String result =  post(UNSUB_TOPIC,new QPageQuery<>(query.getPagination(),topicQuery));
-            PageResult<com.jd.journalq.common.domain.Topic> pageResult = JSON.parseObject(result,new TypeReference<PageResult<com.jd.journalq.common.domain.Topic>>(){});
+            PageResult<com.jd.journalq.domain.Topic> pageResult = JSON.parseObject(result,new TypeReference<PageResult<com.jd.journalq.domain.Topic>>(){});
             if (pageResult == null || pageResult.getResult() == null) return PageResult.empty();
             return new PageResult<>(pageResult.getPagination(),pageResult.getResult().stream().map(topic -> nsrTopicConverter.revert(topic)).collect(Collectors.toList()));
         } catch (Exception e) {
@@ -270,7 +270,7 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
     @Override
     public Topic findById(String id) {
         try {
-            com.jd.journalq.common.domain.Topic nsrToic= JSON.parseObject(post(GETBYID_TOPIC,id), com.jd.journalq.common.domain.Topic.class);
+            com.jd.journalq.domain.Topic nsrToic= JSON.parseObject(post(GETBYID_TOPIC,id), com.jd.journalq.domain.Topic.class);
             return nsrTopicConverter.revert(nsrToic);
         } catch (Exception e) {
             throw new ServiceException(IGNITE_RPC_ERROR,e.getMessage());
@@ -280,7 +280,7 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
         if ( qTopic == null) return null;
         TopicQuery topicQuery = new TopicQuery();
         if (qTopic.getType() >= 0) {
-            topicQuery.setType(com.jd.journalq.common.domain.Topic.Type.valueOf((byte) qTopic.getType()).code());
+            topicQuery.setType(com.jd.journalq.domain.Topic.Type.valueOf((byte) qTopic.getType()).code());
         }
         if (qTopic.getNamespace() != null) {
             topicQuery.setNamespace(qTopic.getNamespace());

@@ -10,12 +10,12 @@ import com.jd.journalq.broker.jmq.coordinator.JMQCoordinatorGroupManager;
 import com.jd.journalq.broker.jmq.coordinator.assignment.PartitionAssignmentHandler;
 import com.jd.journalq.broker.jmq.network.protocol.helper.JMQProtocolHelper;
 import com.jd.journalq.broker.polling.LongPollingManager;
-import com.jd.journalq.common.network.codec.JMQCodecFactory;
-import com.jd.journalq.common.network.protocol.ExceptionHandlerProvider;
-import com.jd.journalq.common.network.protocol.ProtocolService;
-import com.jd.journalq.common.network.transport.codec.CodecFactory;
-import com.jd.journalq.common.network.transport.command.handler.CommandHandlerFactory;
-import com.jd.journalq.common.network.transport.command.handler.ExceptionHandler;
+import com.jd.journalq.network.codec.JMQCodecFactory;
+import com.jd.journalq.network.protocol.ExceptionHandlerProvider;
+import com.jd.journalq.network.protocol.ProtocolService;
+import com.jd.journalq.network.transport.codec.CodecFactory;
+import com.jd.journalq.network.transport.command.handler.CommandHandlerFactory;
+import com.jd.journalq.network.transport.command.handler.ExceptionHandler;
 import com.jd.journalq.toolkit.service.Service;
 import io.netty.buffer.ByteBuf;
 

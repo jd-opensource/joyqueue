@@ -2,11 +2,11 @@ package com.jd.journalq.api.Impl;
 
 
 import com.jd.journalq.api.OpenAPIService;
-import com.jd.journalq.common.model.PageResult;
-import com.jd.journalq.common.model.Pagination;
-import com.jd.journalq.common.model.QPageQuery;
-import com.jd.journalq.common.monitor.PartitionAckMonitorInfo;
-import com.jd.journalq.common.monitor.PendingMonitorInfo;
+import com.jd.journalq.model.PageResult;
+import com.jd.journalq.model.Pagination;
+import com.jd.journalq.model.QPageQuery;
+import com.jd.journalq.monitor.PartitionAckMonitorInfo;
+import com.jd.journalq.monitor.PendingMonitorInfo;
 import com.jd.journalq.convert.CodeConverter;
 import com.jd.journalq.exception.ServiceException;
 import com.jd.journalq.service.*;

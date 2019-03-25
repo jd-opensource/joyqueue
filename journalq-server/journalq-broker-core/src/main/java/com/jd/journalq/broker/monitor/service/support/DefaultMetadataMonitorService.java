@@ -1,9 +1,9 @@
 package com.jd.journalq.broker.monitor.service.support;
 
 import com.jd.journalq.broker.cluster.ClusterManager;
-import com.jd.journalq.common.domain.TopicConfig;
-import com.jd.journalq.common.domain.TopicName;
-import com.jd.journalq.common.response.BooleanResponse;
+import com.jd.journalq.domain.TopicConfig;
+import com.jd.journalq.domain.TopicName;
+import com.jd.journalq.response.BooleanResponse;
 import com.jd.journalq.broker.monitor.service.MetadataMonitorService;
 
 /**

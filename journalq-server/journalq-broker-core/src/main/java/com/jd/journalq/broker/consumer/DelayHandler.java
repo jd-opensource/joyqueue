@@ -1,7 +1,7 @@
 package com.jd.journalq.broker.consumer;
 
 import com.jd.journalq.broker.buffer.Serializer;
-import com.jd.journalq.common.domain.Consumer;
+import com.jd.journalq.domain.Consumer;
 import com.jd.journalq.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

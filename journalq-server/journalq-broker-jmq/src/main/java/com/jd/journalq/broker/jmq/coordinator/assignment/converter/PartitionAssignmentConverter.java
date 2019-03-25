@@ -2,7 +2,7 @@ package com.jd.journalq.broker.jmq.coordinator.assignment.converter;
 
 import com.google.common.collect.Lists;
 import com.jd.journalq.broker.jmq.coordinator.domain.PartitionAssignment;
-import com.jd.journalq.common.domain.PartitionGroup;
+import com.jd.journalq.domain.PartitionGroup;
 
 import java.util.List;
 

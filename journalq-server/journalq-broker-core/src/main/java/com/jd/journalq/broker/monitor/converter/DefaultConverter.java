@@ -2,8 +2,7 @@ package com.jd.journalq.broker.monitor.converter;
 
 import com.jd.journalq.broker.monitor.PendingStat;
 import com.jd.journalq.broker.monitor.stat.*;
-import com.jd.journalq.broker.monitor.stat.*;
-import com.jd.journalq.common.model.MonitorRecord;
+import com.jd.journalq.model.MonitorRecord;
 import com.jd.journalq.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

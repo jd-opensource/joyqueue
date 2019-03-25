@@ -8,10 +8,10 @@ import com.jd.journalq.client.internal.producer.domain.ProduceMessage;
 import com.jd.journalq.client.internal.producer.domain.SendBatchResultData;
 import com.jd.journalq.client.internal.producer.domain.SendPrepareResult;
 import com.jd.journalq.client.internal.producer.domain.SendResultData;
-import com.jd.journalq.common.domain.QosLevel;
-import com.jd.journalq.common.exception.JMQCode;
-import com.jd.journalq.common.network.command.TxStatus;
-import com.jd.journalq.common.network.domain.BrokerNode;
+import com.jd.journalq.domain.QosLevel;
+import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.network.command.TxStatus;
+import com.jd.journalq.network.domain.BrokerNode;
 import com.jd.journalq.toolkit.lang.LifeCycle;
 
 import java.util.List;

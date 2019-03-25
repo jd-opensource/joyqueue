@@ -1,13 +1,12 @@
 package com.jd.journalq.broker.manage.service.support;
 
 import com.jd.journalq.broker.manage.service.*;
-import com.jd.journalq.broker.manage.service.*;
-import com.jd.journalq.common.manage.IndexItem;
-import com.jd.journalq.common.manage.PartitionGroupMetric;
-import com.jd.journalq.common.manage.PartitionMetric;
-import com.jd.journalq.common.manage.TopicMetric;
-import com.jd.journalq.common.monitor.BrokerMessageInfo;
-import com.jd.journalq.common.monitor.PartitionAckMonitorInfo;
+import com.jd.journalq.manage.IndexItem;
+import com.jd.journalq.manage.PartitionGroupMetric;
+import com.jd.journalq.manage.PartitionMetric;
+import com.jd.journalq.manage.TopicMetric;
+import com.jd.journalq.monitor.BrokerMessageInfo;
+import com.jd.journalq.monitor.PartitionAckMonitorInfo;
 
 import java.io.File;
 import java.util.List;

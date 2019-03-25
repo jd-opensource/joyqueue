@@ -2,8 +2,8 @@ package com.jd.journalq.broker.manage.service.support;
 
 import com.google.common.collect.Lists;
 import com.jd.journalq.broker.manage.service.ConnectionManageService;
-import com.jd.journalq.common.network.session.Consumer;
-import com.jd.journalq.common.network.session.Producer;
+import com.jd.journalq.network.session.Consumer;
+import com.jd.journalq.network.session.Producer;
 import com.jd.journalq.broker.monitor.SessionManager;
 
 import java.util.List;

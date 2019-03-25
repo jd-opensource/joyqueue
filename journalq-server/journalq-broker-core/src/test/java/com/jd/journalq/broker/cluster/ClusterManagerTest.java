@@ -1,9 +1,9 @@
 package com.jd.journalq.broker.cluster;
 
 import com.alibaba.fastjson.JSON;
-import com.jd.journalq.common.domain.TopicConfig;
-import com.jd.journalq.common.domain.TopicName;
-import com.jd.journalq.common.exception.JMQException;
+import com.jd.journalq.domain.TopicConfig;
+import com.jd.journalq.domain.TopicName;
+import com.jd.journalq.exception.JMQException;
 import com.jd.journalq.toolkit.network.IpUtil;
 import org.junit.After;
 import org.junit.Before;

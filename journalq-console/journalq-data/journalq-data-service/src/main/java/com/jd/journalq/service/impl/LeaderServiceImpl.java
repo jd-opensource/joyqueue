@@ -1,7 +1,7 @@
 package com.jd.journalq.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.jd.journalq.common.domain.PartitionGroup;
+import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.convert.CodeConverter;
 import com.jd.journalq.exception.ServiceException;
 import com.jd.journalq.model.domain.Broker;

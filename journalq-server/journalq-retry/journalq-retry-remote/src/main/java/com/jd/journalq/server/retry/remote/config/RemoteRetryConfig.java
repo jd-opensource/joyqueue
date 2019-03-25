@@ -1,6 +1,6 @@
 package com.jd.journalq.server.retry.remote.config;
 
-import com.jd.journalq.common.exception.JMQConfigException;
+import com.jd.journalq.exception.JMQConfigException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -2,9 +2,9 @@ package com.jd.journalq.broker.network.listener;
 
 import com.jd.journalq.broker.helper.SessionHelper;
 import com.jd.journalq.broker.monitor.SessionManager;
-import com.jd.journalq.common.network.event.TransportEvent;
-import com.jd.journalq.common.network.event.TransportEventType;
-import com.jd.journalq.common.network.session.Connection;
+import com.jd.journalq.network.event.TransportEvent;
+import com.jd.journalq.network.event.TransportEventType;
+import com.jd.journalq.network.session.Connection;
 import com.jd.journalq.toolkit.concurrent.EventListener;
 
 /**

@@ -1,7 +1,7 @@
 package com.jd.journalq.nsr.ignite.dao.impl;
 
-import com.jd.journalq.common.model.PageResult;
-import com.jd.journalq.common.model.QPageQuery;
+import com.jd.journalq.model.PageResult;
+import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.nsr.ignite.dao.IgniteDao;
 import com.jd.journalq.nsr.ignite.dao.ProducerConfigDao;
 import com.jd.journalq.nsr.ignite.model.IgniteProducerConfig;

@@ -1,10 +1,10 @@
 package com.jd.journalq.handler.routing.command.retry;
 
-import com.jd.journalq.common.domain.ConsumeRetry;
-import com.jd.journalq.common.exception.JMQException;
-import com.jd.journalq.common.message.BrokerMessage;
-import com.jd.journalq.common.model.PageResult;
-import com.jd.journalq.common.model.QPageQuery;
+import com.jd.journalq.domain.ConsumeRetry;
+import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.message.BrokerMessage;
+import com.jd.journalq.model.PageResult;
+import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.handler.binder.annotation.Operator;
 import com.jd.journalq.handler.binder.annotation.Page;
 import com.jd.journalq.handler.binder.annotation.ParamterValue;

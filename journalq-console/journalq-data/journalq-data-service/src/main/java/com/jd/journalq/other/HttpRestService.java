@@ -1,6 +1,6 @@
 package com.jd.journalq.other;
 
-import com.jd.journalq.common.monitor.RestResponse;
+import com.jd.journalq.monitor.RestResponse;
 
 //todo 添加一个broker service 抽象类，把这些东西放到抽象类里面去
 public interface HttpRestService {

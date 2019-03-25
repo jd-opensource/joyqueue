@@ -1,6 +1,6 @@
 package com.jd.journalq.model.query;
 
-import com.jd.journalq.common.model.QKeyword;
+import com.jd.journalq.model.QKeyword;
 
 /**
  * Created by wangxiaofei1 on 2018/10/17.

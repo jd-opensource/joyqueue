@@ -1,6 +1,6 @@
 package com.jd.journalq.client.internal.consumer.domain;
 
-import com.jd.journalq.common.domain.TopicName;
+import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.toolkit.lang.Objects;
 
 import java.io.Serializable;

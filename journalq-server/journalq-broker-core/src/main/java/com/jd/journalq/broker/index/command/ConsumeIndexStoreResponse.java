@@ -1,7 +1,7 @@
 package com.jd.journalq.broker.index.command;
 
-import com.jd.journalq.common.network.transport.command.JMQPayload;
-import com.jd.journalq.common.network.command.CommandType;
+import com.jd.journalq.network.transport.command.JMQPayload;
+import com.jd.journalq.network.command.CommandType;
 
 import java.util.Map;
 

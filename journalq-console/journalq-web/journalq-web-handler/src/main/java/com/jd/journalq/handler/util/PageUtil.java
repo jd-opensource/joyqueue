@@ -1,7 +1,7 @@
 package com.jd.journalq.handler.util;
 
-import com.jd.journalq.common.model.Pager;
-import com.jd.journalq.common.model.Pagination;
+import com.jd.journalq.model.Pager;
+import com.jd.journalq.model.Pagination;
 
 public class PageUtil {
 

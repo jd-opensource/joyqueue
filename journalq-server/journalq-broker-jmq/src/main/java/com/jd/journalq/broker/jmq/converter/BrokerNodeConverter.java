@@ -1,8 +1,8 @@
 package com.jd.journalq.broker.jmq.converter;
 
-import com.jd.journalq.common.domain.Broker;
-import com.jd.journalq.common.domain.DataCenter;
-import com.jd.journalq.common.network.domain.BrokerNode;
+import com.jd.journalq.domain.Broker;
+import com.jd.journalq.domain.DataCenter;
+import com.jd.journalq.network.domain.BrokerNode;
 import org.apache.commons.lang3.StringUtils;
 
 /**

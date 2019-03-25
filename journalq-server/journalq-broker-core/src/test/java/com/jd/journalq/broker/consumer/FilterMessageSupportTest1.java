@@ -1,7 +1,7 @@
 package com.jd.journalq.broker.consumer;
 
-import com.jd.journalq.common.exception.JMQException;
-import com.jd.journalq.common.message.BrokerMessage;
+import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.message.BrokerMessage;
 import org.junit.Assert;
 import org.junit.Test;
 

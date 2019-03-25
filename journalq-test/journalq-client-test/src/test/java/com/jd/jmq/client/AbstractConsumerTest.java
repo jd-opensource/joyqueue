@@ -2,8 +2,8 @@ package com.jd.journalq.client;
 
 import io.openmessaging.KeyValue;
 import io.openmessaging.OMS;
-import io.openmessaging.jmq.consumer.ExtensionConsumer;
-import io.openmessaging.jmq.domain.JMQConsumerBuiltinKeys;
+import io.openmessaging.journalq.consumer.ExtensionConsumer;
+import io.openmessaging.journalq.domain.JMQConsumerBuiltinKeys;
 import org.junit.Before;
 
 /**

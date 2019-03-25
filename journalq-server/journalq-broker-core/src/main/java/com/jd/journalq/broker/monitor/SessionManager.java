@@ -1,10 +1,10 @@
 package com.jd.journalq.broker.monitor;
 
 import com.google.common.collect.Sets;
-import com.jd.journalq.common.network.session.Connection;
-import com.jd.journalq.common.network.session.Consumer;
-import com.jd.journalq.common.network.session.Producer;
-import com.jd.journalq.common.network.transport.Transport;
+import com.jd.journalq.network.session.Connection;
+import com.jd.journalq.network.session.Consumer;
+import com.jd.journalq.network.session.Producer;
+import com.jd.journalq.network.transport.Transport;
 import com.jd.journalq.toolkit.concurrent.EventBus;
 import com.jd.journalq.toolkit.concurrent.EventListener;
 import com.jd.journalq.toolkit.service.Service;

@@ -1,9 +1,9 @@
 package com.jd.journalq.broker.monitor;
 
-import com.jd.journalq.common.monitor.Client;
-import com.jd.journalq.common.network.session.Connection;
-import com.jd.journalq.common.network.session.Consumer;
-import com.jd.journalq.common.network.session.Producer;
+import com.jd.journalq.monitor.Client;
+import com.jd.journalq.network.session.Connection;
+import com.jd.journalq.network.session.Consumer;
+import com.jd.journalq.network.session.Producer;
 
 import java.util.List;
 

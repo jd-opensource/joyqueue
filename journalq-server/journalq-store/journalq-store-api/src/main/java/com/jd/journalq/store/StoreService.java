@@ -1,6 +1,6 @@
 package com.jd.journalq.store;
 
-import com.jd.journalq.common.domain.QosLevel;
+import com.jd.journalq.domain.QosLevel;
 import com.jd.journalq.store.replication.ReplicableStore;
 import com.jd.journalq.store.transaction.TransactionStore;
 

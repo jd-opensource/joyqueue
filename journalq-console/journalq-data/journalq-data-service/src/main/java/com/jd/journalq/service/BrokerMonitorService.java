@@ -1,7 +1,7 @@
 package com.jd.journalq.service;
 
 
-import com.jd.journalq.common.monitor.ArchiveMonitorInfo;
+import com.jd.journalq.monitor.ArchiveMonitorInfo;
 import com.jd.journalq.model.domain.BrokerClient;
 import com.jd.journalq.model.domain.ConnectionMonitorInfoWithIp;
 import com.jd.journalq.model.domain.BrokerMonitorRecord;

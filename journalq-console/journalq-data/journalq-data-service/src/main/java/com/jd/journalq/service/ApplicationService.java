@@ -1,10 +1,10 @@
 package com.jd.journalq.service;
 
 import com.jd.journalq.model.domain.Application;
-import com.jd.journalq.common.model.PageResult;
+import com.jd.journalq.model.PageResult;
 import com.jd.journalq.model.domain.TopicUnsubscribedApplication;
 import com.jd.journalq.model.query.QApplication;
-import com.jd.journalq.common.model.QPageQuery;
+import com.jd.journalq.model.QPageQuery;
 
 import java.util.List;
 

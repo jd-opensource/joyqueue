@@ -1,9 +1,9 @@
 package com.jd.journalq.repository;
 
 import com.jd.journalq.model.domain.Application;
-import com.jd.journalq.common.model.PageResult;
+import com.jd.journalq.model.PageResult;
 import com.jd.journalq.model.query.QApplication;
-import com.jd.journalq.common.model.QPageQuery;
+import com.jd.journalq.model.QPageQuery;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;

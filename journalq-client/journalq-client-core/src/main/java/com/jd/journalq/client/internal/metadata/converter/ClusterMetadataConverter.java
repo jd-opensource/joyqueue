@@ -6,12 +6,12 @@ import com.jd.journalq.client.internal.metadata.domain.ClusterMetadata;
 import com.jd.journalq.client.internal.metadata.domain.PartitionGroupMetadata;
 import com.jd.journalq.client.internal.metadata.domain.PartitionMetadata;
 import com.jd.journalq.client.internal.metadata.domain.TopicMetadata;
-import com.jd.journalq.common.exception.JMQCode;
-import com.jd.journalq.common.network.command.FetchClusterAck;
-import com.jd.journalq.common.network.command.Topic;
-import com.jd.journalq.common.network.command.TopicPartition;
-import com.jd.journalq.common.network.command.TopicPartitionGroup;
-import com.jd.journalq.common.network.domain.BrokerNode;
+import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.network.command.FetchClusterAck;
+import com.jd.journalq.network.command.Topic;
+import com.jd.journalq.network.command.TopicPartition;
+import com.jd.journalq.network.command.TopicPartitionGroup;
+import com.jd.journalq.network.domain.BrokerNode;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 

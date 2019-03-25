@@ -1,7 +1,7 @@
 package com.jd.journalq.client.internal.cluster.domain;
 
 import com.jd.journalq.client.internal.metadata.domain.TopicMetadata;
-import com.jd.journalq.common.exception.JMQCode;
+import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.toolkit.time.SystemClock;
 
 /**

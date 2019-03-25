@@ -1,8 +1,8 @@
 package com.jd.journalq.client;
 
 import io.openmessaging.KeyValue;
-import io.openmessaging.jmq.domain.JMQProducerBuiltinKeys;
-import io.openmessaging.jmq.producer.ExtensionProducer;
+import io.openmessaging.journalq.domain.JMQProducerBuiltinKeys;
+import io.openmessaging.journalq.producer.ExtensionProducer;
 import org.junit.Before;
 
 /**

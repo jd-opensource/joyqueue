@@ -1,7 +1,7 @@
 package com.jd.journalq.broker.monitor.service;
 
 import com.jd.journalq.broker.monitor.stat.BrokerStatExt;
-import com.jd.journalq.common.monitor.BrokerMonitorInfo;
+import com.jd.journalq.monitor.BrokerMonitorInfo;
 
 /**
  * broker monitor service

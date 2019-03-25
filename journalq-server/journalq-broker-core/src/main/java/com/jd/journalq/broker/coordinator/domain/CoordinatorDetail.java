@@ -1,7 +1,7 @@
 package com.jd.journalq.broker.coordinator.domain;
 
-import com.jd.journalq.common.domain.Broker;
-import com.jd.journalq.common.domain.TopicName;
+import com.jd.journalq.domain.Broker;
+import com.jd.journalq.domain.TopicName;
 
 import java.util.List;
 

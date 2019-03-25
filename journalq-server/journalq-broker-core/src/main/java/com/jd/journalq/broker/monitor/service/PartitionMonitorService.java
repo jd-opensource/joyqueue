@@ -1,7 +1,7 @@
 package com.jd.journalq.broker.monitor.service;
 
-import com.jd.journalq.common.monitor.PartitionGroupMonitorInfo;
-import com.jd.journalq.common.monitor.PartitionMonitorInfo;
+import com.jd.journalq.monitor.PartitionGroupMonitorInfo;
+import com.jd.journalq.monitor.PartitionMonitorInfo;
 
 import java.util.List;
 

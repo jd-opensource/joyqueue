@@ -3,7 +3,7 @@ package com.jd.journalq.client.internal.producer.checker;
 import com.jd.journalq.client.internal.producer.config.ProducerConfig;
 import com.jd.journalq.client.internal.producer.domain.ProduceMessage;
 import com.jd.journalq.client.internal.producer.exception.ProducerException;
-import com.jd.journalq.common.exception.JMQCode;
+import com.jd.journalq.exception.JMQCode;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 

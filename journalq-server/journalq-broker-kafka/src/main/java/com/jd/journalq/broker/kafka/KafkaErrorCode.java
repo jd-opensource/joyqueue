@@ -2,8 +2,8 @@ package com.jd.journalq.broker.kafka;
 
 import com.google.common.collect.Maps;
 import com.jd.journalq.broker.kafka.exception.LeaderNotAvailableException;
-import com.jd.journalq.common.exception.JMQCode;
-import com.jd.journalq.common.exception.JMQException;
+import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JMQException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

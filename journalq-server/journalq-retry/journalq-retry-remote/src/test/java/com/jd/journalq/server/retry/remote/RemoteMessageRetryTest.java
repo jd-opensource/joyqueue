@@ -1,7 +1,7 @@
 package com.jd.journalq.server.retry.remote;
 
 import com.google.common.collect.Sets;
-import com.jd.journalq.common.network.transport.TransportClient;
+import com.jd.journalq.network.transport.TransportClient;
 import org.junit.Before;
 import org.junit.Test;
 

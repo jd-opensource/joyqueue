@@ -1,6 +1,6 @@
 package com.jd.journalq.broker.monitor.service;
 
-import com.jd.journalq.common.monitor.ArchiveMonitorInfo;
+import com.jd.journalq.monitor.ArchiveMonitorInfo;
 
 /**
  * Created by chengzhiliang on 2018/12/18.

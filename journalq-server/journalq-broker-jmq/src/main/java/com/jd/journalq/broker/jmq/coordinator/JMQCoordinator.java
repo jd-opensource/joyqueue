@@ -1,7 +1,7 @@
 package com.jd.journalq.broker.jmq.coordinator;
 
 import com.jd.journalq.broker.coordinator.Coordinator;
-import com.jd.journalq.common.domain.Broker;
+import com.jd.journalq.domain.Broker;
 
 /**
  * Coordinator

@@ -1,8 +1,8 @@
 package com.jd.journalq.nsr.service;
 
 
-import com.jd.journalq.common.domain.Replica;
-import com.jd.journalq.common.domain.TopicName;
+import com.jd.journalq.domain.Replica;
+import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.nsr.model.ReplicaQuery;
 
 import java.util.List;

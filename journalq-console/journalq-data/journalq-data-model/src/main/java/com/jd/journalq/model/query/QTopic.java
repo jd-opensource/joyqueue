@@ -1,7 +1,7 @@
 package com.jd.journalq.model.query;
 
-import com.jd.journalq.common.model.QKeyword;
-import com.jd.journalq.common.model.Query;
+import com.jd.journalq.model.QKeyword;
+import com.jd.journalq.model.Query;
 import com.jd.journalq.model.domain.Identity;
 
 /**

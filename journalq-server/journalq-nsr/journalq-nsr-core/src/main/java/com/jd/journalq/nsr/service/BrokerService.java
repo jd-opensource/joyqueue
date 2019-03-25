@@ -1,6 +1,6 @@
 package com.jd.journalq.nsr.service;
 
-import com.jd.journalq.common.domain.Broker;
+import com.jd.journalq.domain.Broker;
 import com.jd.journalq.nsr.model.BrokerQuery;
 
 import java.util.List;

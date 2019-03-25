@@ -1,20 +1,20 @@
 package com.jd.journalq.service.impl;
 
-import com.jd.journalq.common.manage.PartitionGroupMetric;
-import com.jd.journalq.common.model.PageResult;
-import com.jd.journalq.common.model.Pagination;
-import com.jd.journalq.common.model.QPageQuery;
-import com.jd.journalq.common.monitor.*;
+import com.jd.journalq.manage.PartitionGroupMetric;
+import com.jd.journalq.model.PageResult;
+import com.jd.journalq.model.Pagination;
+import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.model.domain.*;
 import com.jd.journalq.model.query.QConsumer;
 import com.jd.journalq.model.query.QMonitor;
 import com.jd.journalq.model.query.QProducer;
+import com.jd.journalq.monitor.*;
+import com.jd.journalq.monitor.Client;
 import com.jd.journalq.other.HttpRestService;
 import com.jd.journalq.service.BrokerService;
 import com.jd.journalq.service.BrokerTopicMonitorService;
 import com.jd.journalq.service.ConsumerService;
 import com.jd.journalq.service.ProducerService;
-import com.jd.journalq.common.monitor.Client;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

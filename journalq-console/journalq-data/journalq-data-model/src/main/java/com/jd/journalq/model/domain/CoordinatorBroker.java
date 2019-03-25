@@ -1,6 +1,6 @@
 package com.jd.journalq.model.domain;
 
-import com.jd.journalq.common.domain.Broker;
+import com.jd.journalq.domain.Broker;
 
 public class CoordinatorBroker {
     private Broker broker;

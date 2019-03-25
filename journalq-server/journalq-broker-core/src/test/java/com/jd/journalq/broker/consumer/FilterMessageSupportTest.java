@@ -2,8 +2,8 @@ package com.jd.journalq.broker.consumer;
 
 import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.consumer.filter.FilterCallback;
-import com.jd.journalq.common.domain.Consumer;
-import com.jd.journalq.common.exception.JMQException;
+import com.jd.journalq.domain.Consumer;
+import com.jd.journalq.exception.JMQException;
 import org.assertj.core.util.Maps;
 import org.junit.Assert;
 import org.junit.Before;

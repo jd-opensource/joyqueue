@@ -1,12 +1,12 @@
 package com.jd.journalq.nsr.ignite.service;
 
 import com.google.inject.Inject;
-import com.jd.journalq.common.domain.Producer;
-import com.jd.journalq.common.domain.TopicName;
-import com.jd.journalq.common.event.MetaEvent;
-import com.jd.journalq.common.event.ProducerEvent;
-import com.jd.journalq.common.model.PageResult;
-import com.jd.journalq.common.model.QPageQuery;
+import com.jd.journalq.domain.Producer;
+import com.jd.journalq.domain.TopicName;
+import com.jd.journalq.event.MetaEvent;
+import com.jd.journalq.event.ProducerEvent;
+import com.jd.journalq.model.PageResult;
+import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.nsr.ignite.dao.ProducerConfigDao;
 import com.jd.journalq.nsr.ignite.dao.ProducerDao;
 import com.jd.journalq.nsr.ignite.model.IgniteProducer;

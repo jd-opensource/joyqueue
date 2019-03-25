@@ -1,7 +1,7 @@
 package com.jd.journalq.handler.routing.command.application;
 
-import com.jd.journalq.common.model.ListQuery;
-import com.jd.journalq.common.model.PageResult;
+import com.jd.journalq.model.ListQuery;
+import com.jd.journalq.model.PageResult;
 import com.jd.journalq.handler.binder.annotation.Page;
 import com.jd.journalq.handler.binder.annotation.Path;
 import com.jd.journalq.handler.error.ConfigException;
@@ -11,7 +11,7 @@ import com.jd.journalq.model.domain.Application;
 import com.jd.journalq.model.domain.TopicUnsubscribedApplication;
 import com.jd.journalq.model.domain.User;
 import com.jd.journalq.model.query.QApplication;
-import com.jd.journalq.common.model.QPageQuery;
+import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.service.ApplicationService;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;

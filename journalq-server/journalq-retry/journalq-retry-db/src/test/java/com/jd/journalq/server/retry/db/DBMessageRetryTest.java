@@ -1,6 +1,6 @@
 package com.jd.journalq.server.retry.db;
 
-import com.jd.journalq.common.exception.JMQException;
+import com.jd.journalq.exception.JMQException;
 import com.jd.journalq.server.retry.model.RetryMessageModel;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.junit.Before;

@@ -2,7 +2,7 @@ package com.jd.journalq.broker.kafka.command;
 
 
 import com.jd.journalq.broker.kafka.KafkaCommandType;
-import com.jd.journalq.common.domain.TopicName;
+import com.jd.journalq.domain.TopicName;
 
 import java.util.List;
 

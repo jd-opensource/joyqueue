@@ -1,7 +1,7 @@
 package com.jd.journalq.service.impl;
 
-import com.jd.journalq.common.model.PageResult;
-import com.jd.journalq.common.model.QPageQuery;
+import com.jd.journalq.model.PageResult;
+import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.exception.ServiceException;
 import com.jd.journalq.model.domain.Broker;
 import com.jd.journalq.model.domain.BrokerGroupRelated;

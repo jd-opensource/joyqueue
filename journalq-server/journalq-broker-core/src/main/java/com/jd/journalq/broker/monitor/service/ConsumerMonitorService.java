@@ -1,9 +1,9 @@
 package com.jd.journalq.broker.monitor.service;
 
-import com.jd.journalq.common.model.Pager;
-import com.jd.journalq.common.monitor.ConsumerMonitorInfo;
-import com.jd.journalq.common.monitor.ConsumerPartitionGroupMonitorInfo;
-import com.jd.journalq.common.monitor.ConsumerPartitionMonitorInfo;
+import com.jd.journalq.model.Pager;
+import com.jd.journalq.monitor.ConsumerMonitorInfo;
+import com.jd.journalq.monitor.ConsumerPartitionGroupMonitorInfo;
+import com.jd.journalq.monitor.ConsumerPartitionMonitorInfo;
 
 import java.util.List;
 

@@ -1,6 +1,6 @@
 package com.jd.journalq.model.query;
 
-import com.jd.journalq.common.model.Query;
+import com.jd.journalq.model.Query;
 
 /**
  * Created by wangxiaofei1 on 2018/12/28.

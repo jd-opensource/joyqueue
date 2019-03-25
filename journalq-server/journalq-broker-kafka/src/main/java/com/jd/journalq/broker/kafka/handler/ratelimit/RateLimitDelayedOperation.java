@@ -2,8 +2,8 @@ package com.jd.journalq.broker.kafka.handler.ratelimit;
 
 import com.jd.journalq.broker.kafka.KafkaCommandHandler;
 import com.jd.journalq.broker.kafka.command.KafkaRequestOrResponse;
-import com.jd.journalq.common.network.transport.Transport;
-import com.jd.journalq.common.network.transport.command.Command;
+import com.jd.journalq.network.transport.Transport;
+import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.toolkit.delay.AbstractDelayedOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,6 +1,6 @@
 package com.jd.journalq.broker.kafka.session;
 
-import com.jd.journalq.common.network.transport.Transport;
+import com.jd.journalq.network.transport.Transport;
 
 /**
  * KafkaConnectionHelper

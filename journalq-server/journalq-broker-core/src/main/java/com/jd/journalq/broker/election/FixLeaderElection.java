@@ -4,11 +4,11 @@ import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.election.command.AppendEntriesRequest;
 import com.jd.journalq.broker.election.command.AppendEntriesResponse;
 import com.jd.journalq.broker.replication.ReplicaGroup;
-import com.jd.journalq.common.network.transport.codec.JMQHeader;
-import com.jd.journalq.common.domain.PartitionGroup;
-import com.jd.journalq.common.network.command.CommandType;
-import com.jd.journalq.common.network.transport.command.Command;
-import com.jd.journalq.common.network.transport.command.Direction;
+import com.jd.journalq.network.transport.codec.JMQHeader;
+import com.jd.journalq.domain.PartitionGroup;
+import com.jd.journalq.network.command.CommandType;
+import com.jd.journalq.network.transport.command.Command;
+import com.jd.journalq.network.transport.command.Direction;
 import com.jd.journalq.store.replication.ReplicableStore;
 
 import com.jd.journalq.toolkit.concurrent.EventBus;

@@ -6,9 +6,9 @@ import com.jd.journalq.broker.kafka.KafkaCommandType;
 import com.jd.journalq.broker.kafka.command.JoinGroupRequest;
 import com.jd.journalq.broker.kafka.command.JoinGroupResponse;
 import com.jd.journalq.broker.kafka.network.KafkaHeader;
-import com.jd.journalq.common.network.serializer.Serializer;
-import com.jd.journalq.common.network.transport.command.Type;
-import com.jd.journalq.common.network.transport.exception.TransportException;
+import com.jd.journalq.network.serializer.Serializer;
+import com.jd.journalq.network.transport.command.Type;
+import com.jd.journalq.network.transport.exception.TransportException;
 import io.netty.buffer.ByteBuf;
 import org.apache.commons.lang3.StringUtils;
 

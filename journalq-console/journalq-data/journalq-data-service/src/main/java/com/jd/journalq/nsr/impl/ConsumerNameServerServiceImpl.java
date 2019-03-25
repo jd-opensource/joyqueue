@@ -4,10 +4,10 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
-import com.jd.journalq.common.domain.ClientType;
-import com.jd.journalq.common.domain.TopicName;
-import com.jd.journalq.common.model.PageResult;
-import com.jd.journalq.common.model.QPageQuery;
+import com.jd.journalq.domain.ClientType;
+import com.jd.journalq.domain.TopicName;
+import com.jd.journalq.model.PageResult;
+import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.convert.CodeConverter;
 import com.jd.journalq.convert.NsrConsumerConverter;
 import com.jd.journalq.model.domain.*;
@@ -46,7 +46,7 @@ public class ConsumerNameServerServiceImpl extends NameServerBase implements Con
      * @throws Exception
      */
     public int add(Consumer consumer) throws Exception {
-        com.jd.journalq.common.domain.Consumer nsrConsumer = nsrConsumerConverter.convert(consumer);
+        com.jd.journalq.domain.Consumer nsrConsumer = nsrConsumerConverter.convert(consumer);
         String result = postWithLog(ADD_CONSUMER, nsrConsumer, OperLog.Type.CONSUMER.value(),OperLog.OperType.ADD.value(),consumer.getTopic().getCode());
         return isSuccess(result);
     }
@@ -57,7 +57,7 @@ public class ConsumerNameServerServiceImpl extends NameServerBase implements Con
      * @throws Exception
      */
     public int update(Consumer consumer) throws Exception {
-        com.jd.journalq.common.domain.Consumer nsrConsumer = nsrConsumerConverter.convert(consumer);
+        com.jd.journalq.domain.Consumer nsrConsumer = nsrConsumerConverter.convert(consumer);
         String result1 = postWithLog(UPDATE_CONSUMER, nsrConsumer,OperLog.Type.CONSUMER.value(),OperLog.OperType.UPDATE.value(),consumer.getTopic().getCode());
         return isSuccess(result1);
     }
@@ -70,7 +70,7 @@ public class ConsumerNameServerServiceImpl extends NameServerBase implements Con
      * @throws Exception
      */
     public int delete(Consumer consumer) throws Exception {
-        com.jd.journalq.common.domain.Consumer nsrConsumer = new com.jd.journalq.common.domain.Consumer();
+        com.jd.journalq.domain.Consumer nsrConsumer = new com.jd.journalq.domain.Consumer();
         nsrConsumer.setApp(CodeConverter.convertApp(consumer.getApp(), consumer.getSubscribeGroup()));
         nsrConsumer.setClientType(ClientType.valueOf(consumer.getClientType()));
         nsrConsumer.setTopic(CodeConverter.convertTopic(consumer.getNamespace(),consumer.getTopic()));
@@ -81,7 +81,7 @@ public class ConsumerNameServerServiceImpl extends NameServerBase implements Con
     public List<Consumer> syncConsumer(byte clientType) throws Exception{
         JSONObject request = new JSONObject();
         request.put("client_type",clientType);
-        List<com.jd.journalq.common.domain.Consumer>  nsrConsumers = JSONArray.parseArray(post(CONSUMER_GETALL_BY_CLIENTTYPE,request), com.jd.journalq.common.domain.Consumer.class);
+        List<com.jd.journalq.domain.Consumer>  nsrConsumers = JSONArray.parseArray(post(CONSUMER_GETALL_BY_CLIENTTYPE,request), com.jd.journalq.domain.Consumer.class);
         List<Consumer> consumerList = new ArrayList<>(nsrConsumers.size());
         nsrConsumers.forEach(nsrConsumer->{
             Consumer consumer = new Consumer();
@@ -106,7 +106,7 @@ public class ConsumerNameServerServiceImpl extends NameServerBase implements Con
         pageQuery.setPagination(query.getPagination());
         pageQuery.setQuery(qConsumerConvert(query.getQuery()));
         String result = post(FINDBYQUERY_CONSUMER,pageQuery);
-        PageResult<com.jd.journalq.common.domain.Consumer> pageResult = JSON.parseObject(result,new TypeReference<PageResult<com.jd.journalq.common.domain.Consumer>>(){});
+        PageResult<com.jd.journalq.domain.Consumer> pageResult = JSON.parseObject(result,new TypeReference<PageResult<com.jd.journalq.domain.Consumer>>(){});
 
         PageResult<Consumer> consumerPageResult = new PageResult<>();
         consumerPageResult.setPagination(pageResult.getPagination());
@@ -116,13 +116,13 @@ public class ConsumerNameServerServiceImpl extends NameServerBase implements Con
     @Override
     public List<Consumer> findByQuery(QConsumer qConsumer) throws Exception {
         String result = post(LIST_CONSUMER,qConsumerConvert(qConsumer));
-        List<com.jd.journalq.common.domain.Consumer> consumerList = JSON.parseArray(result).toJavaList(com.jd.journalq.common.domain.Consumer.class);
+        List<com.jd.journalq.domain.Consumer> consumerList = JSON.parseArray(result).toJavaList(com.jd.journalq.domain.Consumer.class);
         return consumerList.stream().map(consumer -> nsrConsumerConverter.revert(consumer)).collect(Collectors.toList());
     }
     @Override
     public Consumer findById(String  id) throws Exception {
         String result = post(GETBYID_CONSUMER,id);
-        com.jd.journalq.common.domain.Consumer nsrConsumer = JSONObject.parseObject(result, com.jd.journalq.common.domain.Consumer.class);
+        com.jd.journalq.domain.Consumer nsrConsumer = JSONObject.parseObject(result, com.jd.journalq.domain.Consumer.class);
         return nsrConsumerConverter.revert(nsrConsumer);
     }
 

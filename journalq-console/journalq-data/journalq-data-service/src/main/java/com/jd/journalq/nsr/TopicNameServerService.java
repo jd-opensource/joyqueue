@@ -1,8 +1,8 @@
 package com.jd.journalq.nsr;
 
-import com.jd.journalq.common.domain.PartitionGroup;
-import com.jd.journalq.common.model.PageResult;
-import com.jd.journalq.common.model.QPageQuery;
+import com.jd.journalq.domain.PartitionGroup;
+import com.jd.journalq.model.PageResult;
+import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.model.domain.Topic;
 import com.jd.journalq.model.domain.TopicPartitionGroup;
 import com.jd.journalq.model.query.QTopic;

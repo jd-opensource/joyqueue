@@ -1,9 +1,9 @@
 package com.jd.journalq.model.domain;
 
-import com.jd.journalq.common.monitor.DeQueueMonitorInfo;
-import com.jd.journalq.common.monitor.EnQueueMonitorInfo;
-import com.jd.journalq.common.monitor.PendingMonitorInfo;
-import com.jd.journalq.common.monitor.RetryMonitorInfo;
+import com.jd.journalq.monitor.DeQueueMonitorInfo;
+import com.jd.journalq.monitor.EnQueueMonitorInfo;
+import com.jd.journalq.monitor.PendingMonitorInfo;
+import com.jd.journalq.monitor.RetryMonitorInfo;
 
 
 /**

@@ -1,7 +1,7 @@
 package com.jd.journalq.nsr.service;
 
-import com.jd.journalq.common.domain.Consumer;
-import com.jd.journalq.common.domain.TopicName;
+import com.jd.journalq.domain.Consumer;
+import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.nsr.model.ConsumerQuery;
 
 import java.util.List;

@@ -2,8 +2,8 @@ package com.jd.journalq.nsr.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
-import com.jd.journalq.common.model.PageResult;
-import com.jd.journalq.common.model.QPageQuery;
+import com.jd.journalq.model.PageResult;
+import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.convert.NsrNameSpaceConverter;
 import com.jd.journalq.model.domain.Namespace;
 import com.jd.journalq.model.domain.OperLog;
@@ -46,7 +46,7 @@ public class NameSpaceServerServiceImpl extends NameServerBase implements NameSp
 
     @Override
     public int add(Namespace model){
-        com.jd.journalq.common.domain.Namespace namespace = nsrNameSpaceConverter.convert(model);
+        com.jd.journalq.domain.Namespace namespace = nsrNameSpaceConverter.convert(model);
         String result= postWithLog(ADD_NAMESPACE,namespace,NAMESPACE.value(), OperLog.OperType.ADD.value(),namespace.getCode());
         return isSuccess(result);
     }
@@ -54,7 +54,7 @@ public class NameSpaceServerServiceImpl extends NameServerBase implements NameSp
     @Override
     public Namespace findById(String s) throws Exception {
         String result = post(GETBYID_NAMESPACE,s);
-        com.jd.journalq.common.domain.Namespace namespace = JSON.parseObject(result, com.jd.journalq.common.domain.Namespace.class);
+        com.jd.journalq.domain.Namespace namespace = JSON.parseObject(result, com.jd.journalq.domain.Namespace.class);
         return nsrNameSpaceConverter.revert(namespace);
     }
 
@@ -68,7 +68,7 @@ public class NameSpaceServerServiceImpl extends NameServerBase implements NameSp
             queryQPageQuery.setQuery(namespaceQuery);
         }
         String result = post(FINDBYQUERY_NAMESPACE,queryQPageQuery);
-        PageResult<com.jd.journalq.common.domain.Namespace> namespacePageResult = JSON.parseObject(result,new TypeReference<PageResult<com.jd.journalq.common.domain.Namespace>>(){});
+        PageResult<com.jd.journalq.domain.Namespace> namespacePageResult = JSON.parseObject(result,new TypeReference<PageResult<com.jd.journalq.domain.Namespace>>(){});
         PageResult<Namespace> namespacePageResult1 = new PageResult<>();
         namespacePageResult1.setPagination(namespacePageResult.getPagination());
         namespacePageResult1.setResult(namespacePageResult.getResult().stream().map(namespace -> nsrNameSpaceConverter.revert(namespace)).collect(Collectors.toList()));
@@ -77,14 +77,14 @@ public class NameSpaceServerServiceImpl extends NameServerBase implements NameSp
 
     @Override
     public int delete(Namespace model) {
-        com.jd.journalq.common.domain.Namespace namespace = nsrNameSpaceConverter.convert(model);
+        com.jd.journalq.domain.Namespace namespace = nsrNameSpaceConverter.convert(model);
         String result = postWithLog(REMOVE_NAMESPACE,namespace,NAMESPACE.value(), OperLog.OperType.UPDATE.value(),namespace.getCode());
         return isSuccess(result);
     }
 
     @Override
     public int update(Namespace model) {
-        com.jd.journalq.common.domain.Namespace namespace = nsrNameSpaceConverter.convert(model);
+        com.jd.journalq.domain.Namespace namespace = nsrNameSpaceConverter.convert(model);
         String result = postWithLog(UPDATE_NAMESPACE,namespace,NAMESPACE.value(), OperLog.OperType.UPDATE.value(),namespace.getCode());
         return isSuccess(result);
     }
@@ -96,7 +96,7 @@ public class NameSpaceServerServiceImpl extends NameServerBase implements NameSp
             namespaceQuery.setCode(query.getCode());
         }
         String result = post(LIST_NAMESPACE,namespaceQuery);
-        List<com.jd.journalq.common.domain.Namespace> namespaceList = JSON.parseArray(result).toJavaList(com.jd.journalq.common.domain.Namespace.class);
+        List<com.jd.journalq.domain.Namespace> namespaceList = JSON.parseArray(result).toJavaList(com.jd.journalq.domain.Namespace.class);
         return namespaceList.stream().map(namespace -> nsrNameSpaceConverter.revert(namespace)).collect(Collectors.toList());
     }
 }

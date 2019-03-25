@@ -1,8 +1,8 @@
 package com.jd.journalq.service;
 
-import com.jd.journalq.common.domain.CoordinatorGroup;
-import com.jd.journalq.common.domain.CoordinatorGroupExpiredMember;
-import com.jd.journalq.common.domain.CoordinatorGroupMember;
+import com.jd.journalq.domain.CoordinatorGroup;
+import com.jd.journalq.domain.CoordinatorGroupExpiredMember;
+import com.jd.journalq.domain.CoordinatorGroupMember;
 import com.jd.journalq.model.domain.CoordinatorBroker;
 import com.jd.journalq.model.domain.Subscribe;
 

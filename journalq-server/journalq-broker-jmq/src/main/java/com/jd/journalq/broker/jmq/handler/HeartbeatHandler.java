@@ -1,11 +1,11 @@
 package com.jd.journalq.broker.jmq.handler;
 
 import com.jd.journalq.broker.jmq.JMQCommandHandler;
-import com.jd.journalq.common.network.command.BooleanAck;
-import com.jd.journalq.common.network.command.JMQCommandType;
-import com.jd.journalq.common.network.transport.Transport;
-import com.jd.journalq.common.network.transport.command.Command;
-import com.jd.journalq.common.network.transport.command.Type;
+import com.jd.journalq.network.command.BooleanAck;
+import com.jd.journalq.network.command.JMQCommandType;
+import com.jd.journalq.network.transport.Transport;
+import com.jd.journalq.network.transport.command.Command;
+import com.jd.journalq.network.transport.command.Type;
 
 /**
  * HeartbeatHandler

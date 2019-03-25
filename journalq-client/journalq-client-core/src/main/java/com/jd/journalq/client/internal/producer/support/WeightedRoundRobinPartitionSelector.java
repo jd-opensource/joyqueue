@@ -3,7 +3,7 @@ package com.jd.journalq.client.internal.producer.support;
 import com.jd.journalq.client.internal.metadata.domain.PartitionMetadata;
 import com.jd.journalq.client.internal.metadata.domain.TopicMetadata;
 import com.jd.journalq.client.internal.producer.domain.ProduceMessage;
-import com.jd.journalq.common.network.domain.BrokerNode;
+import com.jd.journalq.network.domain.BrokerNode;
 import com.jd.laf.extension.Extension;
 
 import java.math.BigInteger;

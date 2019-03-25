@@ -1,10 +1,10 @@
 package com.jd.journalq.server.retry.remote.command.codec;
 
-import com.jd.journalq.common.network.command.BooleanAck;
-import com.jd.journalq.common.network.command.CommandType;
-import com.jd.journalq.common.network.transport.codec.JMQHeader;
-import com.jd.journalq.common.network.transport.codec.PayloadCodec;
-import com.jd.journalq.common.network.transport.command.Type;
+import com.jd.journalq.network.command.BooleanAck;
+import com.jd.journalq.network.command.CommandType;
+import com.jd.journalq.network.transport.codec.JMQHeader;
+import com.jd.journalq.network.transport.codec.PayloadCodec;
+import com.jd.journalq.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
 
 /**

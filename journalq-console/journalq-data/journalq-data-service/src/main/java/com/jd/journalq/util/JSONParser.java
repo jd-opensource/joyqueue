@@ -2,8 +2,8 @@ package com.jd.journalq.util;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jd.journalq.common.monitor.RestResponse;
-import com.jd.journalq.common.monitor.RestResponseCode;
+import com.jd.journalq.monitor.RestResponse;
+import com.jd.journalq.monitor.RestResponseCode;
 import com.jd.journalq.exception.ServiceException;
 
 import java.io.IOException;

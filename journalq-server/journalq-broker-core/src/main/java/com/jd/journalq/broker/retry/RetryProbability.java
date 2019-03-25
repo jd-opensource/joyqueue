@@ -1,6 +1,6 @@
 package com.jd.journalq.broker.retry;
 
-import com.jd.journalq.common.network.session.Joint;
+import com.jd.journalq.network.session.Joint;
 import com.jd.journalq.toolkit.service.Service;
 
 import java.util.Map;

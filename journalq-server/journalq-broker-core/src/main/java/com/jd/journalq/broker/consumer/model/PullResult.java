@@ -1,7 +1,7 @@
 package com.jd.journalq.broker.consumer.model;
 
-import com.jd.journalq.common.exception.JMQCode;
-import com.jd.journalq.common.network.session.Consumer;
+import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.network.session.Consumer;
 
 import java.nio.ByteBuffer;
 import java.util.List;

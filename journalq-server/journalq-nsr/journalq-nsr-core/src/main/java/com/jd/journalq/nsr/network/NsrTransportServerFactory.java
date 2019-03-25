@@ -1,10 +1,10 @@
 package com.jd.journalq.nsr.network;
 
-import com.jd.journalq.common.network.event.TransportEvent;
-import com.jd.journalq.common.network.transport.codec.Codec;
-import com.jd.journalq.common.network.transport.command.handler.CommandHandlerFactory;
-import com.jd.journalq.common.network.transport.command.handler.ExceptionHandler;
-import com.jd.journalq.common.network.transport.support.DefaultTransportServerFactory;
+import com.jd.journalq.network.event.TransportEvent;
+import com.jd.journalq.network.transport.codec.Codec;
+import com.jd.journalq.network.transport.command.handler.CommandHandlerFactory;
+import com.jd.journalq.network.transport.command.handler.ExceptionHandler;
+import com.jd.journalq.network.transport.support.DefaultTransportServerFactory;
 import com.jd.journalq.nsr.NameService;
 import com.jd.journalq.toolkit.concurrent.EventBus;
 import com.jd.journalq.toolkit.concurrent.EventListener;

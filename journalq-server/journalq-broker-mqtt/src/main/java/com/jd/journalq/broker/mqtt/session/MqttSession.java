@@ -1,6 +1,6 @@
 package com.jd.journalq.broker.mqtt.session;
 
-import com.jd.journalq.common.message.BrokerMessage;
+import com.jd.journalq.message.BrokerMessage;
 import com.jd.journalq.broker.mqtt.subscriptions.MqttSubscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

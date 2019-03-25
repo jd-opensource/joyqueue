@@ -1,7 +1,7 @@
 package com.jd.journalq.nsr.service;
 
 
-import com.jd.journalq.common.domain.AppToken;
+import com.jd.journalq.domain.AppToken;
 import com.jd.journalq.nsr.model.AppTokenQuery;
 
 /**

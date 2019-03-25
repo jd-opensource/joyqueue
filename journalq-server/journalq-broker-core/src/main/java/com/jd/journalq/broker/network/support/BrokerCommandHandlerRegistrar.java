@@ -11,8 +11,8 @@ import com.jd.journalq.broker.handler.RemovePartitionGroupHandler;
 import com.jd.journalq.broker.handler.UpdatePartitionGroupHandler;
 import com.jd.journalq.broker.index.handler.ConsumeIndexQueryHandler;
 import com.jd.journalq.broker.index.handler.ConsumeIndexStoreHandler;
-import com.jd.journalq.common.network.command.CommandType;
-import com.jd.journalq.common.network.transport.command.support.DefaultCommandHandlerFactory;
+import com.jd.journalq.network.command.CommandType;
+import com.jd.journalq.network.transport.command.support.DefaultCommandHandlerFactory;
 import com.jd.journalq.nsr.network.command.NsrCommandType;
 import com.jd.journalq.server.retry.remote.handler.RemoteRetryMessageHandler;
 

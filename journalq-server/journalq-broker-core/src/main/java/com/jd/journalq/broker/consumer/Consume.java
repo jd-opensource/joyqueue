@@ -1,11 +1,11 @@
 package com.jd.journalq.broker.consumer;
 
 import com.jd.journalq.broker.consumer.model.PullResult;
-import com.jd.journalq.common.domain.TopicName;
-import com.jd.journalq.common.network.session.Connection;
-import com.jd.journalq.common.network.session.Consumer;
-import com.jd.journalq.common.exception.JMQException;
-import com.jd.journalq.common.message.MessageLocation;
+import com.jd.journalq.domain.TopicName;
+import com.jd.journalq.network.session.Connection;
+import com.jd.journalq.network.session.Consumer;
+import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.message.MessageLocation;
 
 /**
  * Created by chengzhiliang on 2018/8/16.

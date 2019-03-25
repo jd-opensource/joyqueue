@@ -1,10 +1,10 @@
 package com.jd.journalq.nsr.ignite.service;
 
 import com.google.inject.Inject;
-import com.jd.journalq.common.domain.Replica;
-import com.jd.journalq.common.domain.TopicName;
-import com.jd.journalq.common.model.PageResult;
-import com.jd.journalq.common.model.QPageQuery;
+import com.jd.journalq.domain.Replica;
+import com.jd.journalq.domain.TopicName;
+import com.jd.journalq.model.PageResult;
+import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.nsr.ignite.dao.PartitionGroupReplicaDao;
 import com.jd.journalq.nsr.ignite.model.IgnitePartitionGroupReplica;
 import com.jd.journalq.nsr.model.ReplicaQuery;

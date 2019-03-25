@@ -1,7 +1,7 @@
 package com.jd.journalq.nsr.ignite.model;
 
-import com.jd.journalq.common.domain.PartitionGroup;
-import com.jd.journalq.common.domain.TopicName;
+import com.jd.journalq.domain.PartitionGroup;
+import com.jd.journalq.domain.TopicName;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ignite.binary.BinaryObjectException;
 import org.apache.ignite.binary.BinaryReader;

@@ -5,11 +5,11 @@ import com.jd.journalq.model.domain.Namespace;
 /**
  * Created by wangxiaofei1 on 2019/1/2.
  */
-public class NsrNameSpaceConverter extends Converter<Namespace, com.jd.journalq.common.domain.Namespace> {
+public class NsrNameSpaceConverter extends Converter<Namespace, com.jd.journalq.domain.Namespace> {
 
     @Override
-    protected com.jd.journalq.common.domain.Namespace forward(Namespace namespace) {
-        com.jd.journalq.common.domain.Namespace nsrNameSpace = new com.jd.journalq.common.domain.Namespace();
+    protected com.jd.journalq.domain.Namespace forward(Namespace namespace) {
+        com.jd.journalq.domain.Namespace nsrNameSpace = new com.jd.journalq.domain.Namespace();
         if (namespace.getCode() != null) {
             nsrNameSpace.setCode(namespace.getCode());
         }
@@ -20,7 +20,7 @@ public class NsrNameSpaceConverter extends Converter<Namespace, com.jd.journalq.
     }
 
     @Override
-    protected Namespace backward(com.jd.journalq.common.domain.Namespace nsrNamespace) {
+    protected Namespace backward(com.jd.journalq.domain.Namespace nsrNamespace) {
         Namespace namespace = new Namespace();
         namespace.setId(nsrNamespace.getCode());
         namespace.setCode(nsrNamespace.getCode());

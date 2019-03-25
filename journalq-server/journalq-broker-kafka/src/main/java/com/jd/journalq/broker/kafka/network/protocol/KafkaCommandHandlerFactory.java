@@ -6,8 +6,8 @@ import com.jd.journalq.broker.kafka.KafkaContextAware;
 import com.jd.journalq.broker.kafka.handler.AbstractKafkaCommandHandler;
 import com.jd.journalq.broker.BrokerContextAware;
 import com.jd.journalq.broker.kafka.KafkaContext;
-import com.jd.journalq.common.network.transport.command.handler.CommandHandler;
-import com.jd.journalq.common.network.transport.command.support.DefaultCommandHandlerFactory;
+import com.jd.journalq.network.transport.command.handler.CommandHandler;
+import com.jd.journalq.network.transport.command.support.DefaultCommandHandlerFactory;
 import com.jd.laf.extension.ExtensionManager;
 
 import java.util.List;

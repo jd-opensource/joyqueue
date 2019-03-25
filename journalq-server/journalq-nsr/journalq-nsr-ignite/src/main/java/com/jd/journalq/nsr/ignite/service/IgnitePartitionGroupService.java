@@ -1,10 +1,10 @@
 package com.jd.journalq.nsr.ignite.service;
 
 import com.google.inject.Inject;
-import com.jd.journalq.common.domain.PartitionGroup;
-import com.jd.journalq.common.domain.TopicName;
-import com.jd.journalq.common.model.PageResult;
-import com.jd.journalq.common.model.QPageQuery;
+import com.jd.journalq.domain.PartitionGroup;
+import com.jd.journalq.domain.TopicName;
+import com.jd.journalq.model.PageResult;
+import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.nsr.ignite.dao.PartitionGroupDao;
 import com.jd.journalq.nsr.ignite.model.IgnitePartitionGroup;
 import com.jd.journalq.nsr.model.PartitionGroupQuery;

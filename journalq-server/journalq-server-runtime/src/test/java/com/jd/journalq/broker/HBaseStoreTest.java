@@ -1,8 +1,8 @@
 package com.jd.journalq.broker;
 
 import com.google.common.collect.Lists;
-import com.jd.journalq.common.exception.JMQException;
-import com.jd.journalq.common.hbase.HBaseClient;
+import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.hbase.HBaseClient;
 import com.jd.journalq.server.archive.store.HBaseSerializer;
 import com.jd.journalq.server.archive.store.HBaseStore;
 import com.jd.journalq.server.archive.store.HBaseTopicAppMapping;

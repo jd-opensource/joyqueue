@@ -1,6 +1,6 @@
 package com.jd.journalq.nsr.model;
 
-import com.jd.journalq.common.model.Query;
+import com.jd.journalq.model.Query;
 
 public class ConfigQuery implements Query {
     /**

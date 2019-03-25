@@ -1,10 +1,10 @@
 package com.jd.journalq.broker.network.codec;
 
 import com.google.common.collect.Lists;
-import com.jd.journalq.common.network.transport.codec.Codec;
-import com.jd.journalq.common.network.transport.codec.CodecFactory;
-import com.jd.journalq.common.network.transport.codec.PayloadCodecFactory;
-import com.jd.journalq.common.network.transport.codec.support.JMQCodec;
+import com.jd.journalq.network.transport.codec.Codec;
+import com.jd.journalq.network.transport.codec.CodecFactory;
+import com.jd.journalq.network.transport.codec.PayloadCodecFactory;
+import com.jd.journalq.network.transport.codec.support.JMQCodec;
 import com.jd.laf.extension.ExtensionManager;
 
 import java.util.List;

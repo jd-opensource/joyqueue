@@ -1,12 +1,12 @@
 package com.jd.journalq.broker.network.protocol.support;
 
 import com.jd.journalq.broker.network.protocol.ProtocolHandlerPipelineFactory;
-import com.jd.journalq.common.network.transport.command.CommandDispatcher;
-import com.jd.journalq.common.network.transport.command.CommandDispatcherFactory;
-import com.jd.journalq.common.network.event.TransportEventHandler;
-import com.jd.journalq.common.network.handler.ConnectionHandler;
-import com.jd.journalq.common.network.protocol.ChannelHandlerProvider;
-import com.jd.journalq.common.network.protocol.Protocol;
+import com.jd.journalq.network.transport.command.CommandDispatcher;
+import com.jd.journalq.network.transport.command.CommandDispatcherFactory;
+import com.jd.journalq.network.event.TransportEventHandler;
+import com.jd.journalq.network.handler.ConnectionHandler;
+import com.jd.journalq.network.protocol.ChannelHandlerProvider;
+import com.jd.journalq.network.protocol.Protocol;
 import io.netty.channel.ChannelHandler;
 
 /**

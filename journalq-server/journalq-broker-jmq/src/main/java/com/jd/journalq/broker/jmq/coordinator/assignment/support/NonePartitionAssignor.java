@@ -4,7 +4,7 @@ import com.jd.journalq.broker.jmq.coordinator.assignment.PartitionAssignor;
 import com.jd.journalq.broker.jmq.coordinator.domain.JMQCoordinatorGroup;
 import com.jd.journalq.broker.jmq.coordinator.domain.JMQCoordinatorGroupMember;
 import com.jd.journalq.broker.jmq.coordinator.domain.PartitionAssignment;
-import com.jd.journalq.common.domain.PartitionGroup;
+import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.broker.jmq.coordinator.assignment.converter.PartitionAssignmentConverter;
 
 import java.util.List;

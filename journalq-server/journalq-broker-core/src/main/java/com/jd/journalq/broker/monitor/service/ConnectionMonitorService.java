@@ -1,7 +1,7 @@
 package com.jd.journalq.broker.monitor.service;
 
-import com.jd.journalq.common.monitor.ConnectionMonitorDetailInfo;
-import com.jd.journalq.common.monitor.ConnectionMonitorInfo;
+import com.jd.journalq.monitor.ConnectionMonitorDetailInfo;
+import com.jd.journalq.monitor.ConnectionMonitorInfo;
 
 /**
  * broker监控服务

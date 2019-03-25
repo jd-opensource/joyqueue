@@ -6,8 +6,8 @@ import com.jd.journalq.broker.kafka.KafkaCommandType;
 import com.jd.journalq.broker.kafka.KafkaContext;
 import com.jd.journalq.broker.kafka.command.HeartbeatRequest;
 import com.jd.journalq.broker.kafka.command.HeartbeatResponse;
-import com.jd.journalq.common.network.transport.Transport;
-import com.jd.journalq.common.network.transport.command.Command;
+import com.jd.journalq.network.transport.Transport;
+import com.jd.journalq.network.transport.command.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

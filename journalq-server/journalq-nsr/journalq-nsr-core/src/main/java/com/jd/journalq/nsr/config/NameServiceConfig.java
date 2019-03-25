@@ -1,7 +1,7 @@
 package com.jd.journalq.nsr.config;
 
-import com.jd.journalq.common.network.transport.config.ClientConfig;
-import com.jd.journalq.common.network.transport.config.TransportConfigSupport;
+import com.jd.journalq.network.transport.config.ClientConfig;
+import com.jd.journalq.network.transport.config.TransportConfigSupport;
 import com.jd.journalq.toolkit.config.PropertySupplier;
 import com.jd.journalq.toolkit.lang.Preconditions;
 

@@ -2,10 +2,10 @@ package com.jd.journalq.broker.index.network.codec;
 
 import com.jd.journalq.broker.index.command.ConsumeIndexStoreRequest;
 import com.jd.journalq.broker.index.model.IndexAndMetadata;
-import com.jd.journalq.common.network.transport.codec.PayloadEncoder;
-import com.jd.journalq.common.network.command.CommandType;
-import com.jd.journalq.common.network.serializer.Serializer;
-import com.jd.journalq.common.network.transport.command.Type;
+import com.jd.journalq.network.transport.codec.PayloadEncoder;
+import com.jd.journalq.network.command.CommandType;
+import com.jd.journalq.network.serializer.Serializer;
+import com.jd.journalq.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
 
 import java.util.Map;

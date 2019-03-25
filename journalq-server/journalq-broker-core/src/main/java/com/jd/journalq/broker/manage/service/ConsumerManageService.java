@@ -1,6 +1,6 @@
 package com.jd.journalq.broker.manage.service;
 
-import com.jd.journalq.common.monitor.PartitionAckMonitorInfo;
+import com.jd.journalq.monitor.PartitionAckMonitorInfo;
 
 import java.util.List;
 

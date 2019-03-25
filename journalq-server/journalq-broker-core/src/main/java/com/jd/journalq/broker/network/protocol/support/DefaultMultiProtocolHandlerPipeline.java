@@ -5,7 +5,7 @@ import com.jd.journalq.broker.network.protocol.ProtocolHandlerPipelineFactory;
 import com.jd.journalq.broker.network.protocol.ProtocolContext;
 import com.jd.journalq.broker.network.protocol.ProtocolManager;
 import com.jd.journalq.broker.network.protocol.ProtocolResolver;
-import com.jd.journalq.common.network.protocol.ProtocolService;
+import com.jd.journalq.network.protocol.ProtocolService;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;

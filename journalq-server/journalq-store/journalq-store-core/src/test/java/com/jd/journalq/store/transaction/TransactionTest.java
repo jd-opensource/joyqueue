@@ -1,6 +1,6 @@
 package com.jd.journalq.store.transaction;
 
-import com.jd.journalq.common.exception.JMQCode;
+import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.store.WriteResult;
 import com.jd.journalq.store.file.PositioningStore;
 import com.jd.journalq.store.utils.BaseDirUtils;

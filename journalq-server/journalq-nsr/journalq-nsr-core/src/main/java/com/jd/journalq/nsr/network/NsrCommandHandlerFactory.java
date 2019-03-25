@@ -1,6 +1,6 @@
 package com.jd.journalq.nsr.network;
 
-import com.jd.journalq.common.network.transport.command.support.DefaultCommandHandlerFactory;
+import com.jd.journalq.network.transport.command.support.DefaultCommandHandlerFactory;
 import com.jd.journalq.nsr.NameService;
 import com.jd.journalq.nsr.NameServiceAware;
 import com.jd.journalq.nsr.NsrPlugins;

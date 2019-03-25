@@ -3,7 +3,7 @@ package com.jd.journalq.broker.kafka.message.serializer;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jd.journalq.broker.kafka.command.SyncGroupAssignment;
-import com.jd.journalq.common.network.serializer.Serializer;
+import com.jd.journalq.network.serializer.Serializer;
 import io.netty.buffer.ByteBuf;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;

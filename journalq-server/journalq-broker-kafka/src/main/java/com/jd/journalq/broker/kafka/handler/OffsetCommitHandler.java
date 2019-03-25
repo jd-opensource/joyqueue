@@ -10,8 +10,8 @@ import com.jd.journalq.broker.kafka.command.OffsetCommitRequest;
 import com.jd.journalq.broker.kafka.command.OffsetCommitResponse;
 import com.jd.journalq.broker.kafka.coordinator.GroupCoordinator;
 import com.jd.journalq.broker.kafka.model.OffsetMetadataAndError;
-import com.jd.journalq.common.network.transport.Transport;
-import com.jd.journalq.common.network.transport.command.Command;
+import com.jd.journalq.network.transport.Transport;
+import com.jd.journalq.network.transport.command.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

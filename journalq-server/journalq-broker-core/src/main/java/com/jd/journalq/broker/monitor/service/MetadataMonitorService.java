@@ -1,7 +1,7 @@
 package com.jd.journalq.broker.monitor.service;
 
-import com.jd.journalq.common.domain.TopicConfig;
-import com.jd.journalq.common.response.BooleanResponse;
+import com.jd.journalq.domain.TopicConfig;
+import com.jd.journalq.response.BooleanResponse;
 
 /**
  * MetadataMonitorService

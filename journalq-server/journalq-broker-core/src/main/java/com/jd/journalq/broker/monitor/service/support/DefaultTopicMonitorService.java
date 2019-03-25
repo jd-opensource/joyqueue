@@ -5,8 +5,8 @@ import com.jd.journalq.broker.monitor.converter.BrokerMonitorConverter;
 import com.jd.journalq.broker.monitor.service.TopicMonitorService;
 import com.jd.journalq.broker.monitor.stat.BrokerStat;
 import com.jd.journalq.broker.monitor.stat.TopicStat;
-import com.jd.journalq.common.model.Pager;
-import com.jd.journalq.common.monitor.TopicMonitorInfo;
+import com.jd.journalq.model.Pager;
+import com.jd.journalq.monitor.TopicMonitorInfo;
 
 import java.util.List;
 import java.util.Map;

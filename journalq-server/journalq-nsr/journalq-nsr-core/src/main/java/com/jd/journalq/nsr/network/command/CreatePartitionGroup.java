@@ -1,6 +1,6 @@
 package com.jd.journalq.nsr.network.command;
 
-import com.jd.journalq.common.domain.PartitionGroup;
+import com.jd.journalq.domain.PartitionGroup;
 
 public class CreatePartitionGroup extends OperatePartitionGroup {
 

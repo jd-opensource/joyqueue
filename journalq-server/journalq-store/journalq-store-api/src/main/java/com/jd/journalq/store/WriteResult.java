@@ -1,6 +1,6 @@
 package com.jd.journalq.store;
 
-import com.jd.journalq.common.exception.JMQCode;
+import com.jd.journalq.exception.JMQCode;
 
 /**
  * 写消息结果

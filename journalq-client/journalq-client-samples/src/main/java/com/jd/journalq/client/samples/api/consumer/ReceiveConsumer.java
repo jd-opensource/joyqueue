@@ -5,7 +5,7 @@ import io.openmessaging.KeyValue;
 import io.openmessaging.MessagingAccessPoint;
 import io.openmessaging.OMS;
 import io.openmessaging.consumer.Consumer;
-import io.openmessaging.jmq.JMQBuiltinKeys;
+import io.openmessaging.journalq.JMQBuiltinKeys;
 import io.openmessaging.message.Message;
 
 /**

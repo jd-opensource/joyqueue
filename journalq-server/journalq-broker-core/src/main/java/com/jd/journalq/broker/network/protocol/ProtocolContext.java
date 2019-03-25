@@ -1,8 +1,8 @@
 package com.jd.journalq.broker.network.protocol;
 
-import com.jd.journalq.common.network.protocol.Protocol;
-import com.jd.journalq.common.network.protocol.ProtocolService;
-import com.jd.journalq.common.network.transport.TransportServer;
+import com.jd.journalq.network.protocol.Protocol;
+import com.jd.journalq.network.protocol.ProtocolService;
+import com.jd.journalq.network.transport.TransportServer;
 import io.netty.channel.ChannelHandler;
 
 public class ProtocolContext {

@@ -10,10 +10,10 @@ import java.util.List;
 /**
  * Created by wangxiaofei1 on 2018/12/28.
  */
-public class NsrDataCenterConverter extends Converter<DataCenter, com.jd.journalq.common.domain.DataCenter> {
+public class NsrDataCenterConverter extends Converter<DataCenter, com.jd.journalq.domain.DataCenter> {
     @Override
-    protected com.jd.journalq.common.domain.DataCenter forward(DataCenter dataCenter) {
-        com.jd.journalq.common.domain.DataCenter nsrDataCenter = new com.jd.journalq.common.domain.DataCenter();
+    protected com.jd.journalq.domain.DataCenter forward(DataCenter dataCenter) {
+        com.jd.journalq.domain.DataCenter nsrDataCenter = new com.jd.journalq.domain.DataCenter();
         if (dataCenter.getMatchType() != null && dataCenter.getIps() != null) {
             String ips = dataCenter.getIps();
             String ipArray[] = ips.split(";");
@@ -37,7 +37,7 @@ public class NsrDataCenterConverter extends Converter<DataCenter, com.jd.journal
     }
 
     @Override
-    protected DataCenter backward(com.jd.journalq.common.domain.DataCenter nsrDataCenter) {
+    protected DataCenter backward(com.jd.journalq.domain.DataCenter nsrDataCenter) {
         DataCenter dataCenter = new DataCenter();
         dataCenter.setId(nsrDataCenter.getId());
         String[] array = nsrDataCenter.getUrl().split(";");

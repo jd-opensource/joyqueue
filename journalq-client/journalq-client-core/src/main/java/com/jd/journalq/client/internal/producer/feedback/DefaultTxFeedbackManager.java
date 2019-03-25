@@ -10,7 +10,7 @@ import com.jd.journalq.client.internal.producer.TxFeedbackManager;
 import com.jd.journalq.client.internal.producer.callback.TxFeedbackCallback;
 import com.jd.journalq.client.internal.producer.exception.ProducerException;
 import com.jd.journalq.client.internal.producer.feedback.config.TxFeedbackConfig;
-import com.jd.journalq.common.exception.JMQCode;
+import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.toolkit.lang.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import org.apache.commons.lang3.StringUtils;

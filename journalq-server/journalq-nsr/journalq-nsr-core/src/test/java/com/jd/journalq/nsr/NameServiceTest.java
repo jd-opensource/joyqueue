@@ -1,8 +1,8 @@
 package com.jd.journalq.nsr;
 
+import com.jd.journalq.domain.*;
 import com.jd.journalq.nsr.config.NameServiceConfig;
 import com.jd.journalq.toolkit.network.IpUtil;
-import com.jd.journalq.common.domain.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

@@ -6,7 +6,7 @@ import com.jd.journalq.client.internal.consumer.callback.BatchPartitionFetchList
 import com.jd.journalq.client.internal.consumer.callback.FetchListener;
 import com.jd.journalq.client.internal.consumer.callback.PartitionFetchListener;
 import com.jd.journalq.client.internal.consumer.domain.FetchMessageData;
-import com.jd.journalq.common.network.domain.BrokerNode;
+import com.jd.journalq.network.domain.BrokerNode;
 import com.jd.journalq.toolkit.lang.LifeCycle;
 
 import java.util.List;

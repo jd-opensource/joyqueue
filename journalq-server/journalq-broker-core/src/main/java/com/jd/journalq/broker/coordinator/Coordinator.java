@@ -3,8 +3,8 @@ package com.jd.journalq.broker.coordinator;
 import com.jd.journalq.broker.coordinator.config.CoordinatorConfig;
 import com.jd.journalq.broker.coordinator.domain.CoordinatorDetail;
 import com.jd.journalq.broker.cluster.ClusterManager;
-import com.jd.journalq.common.domain.Broker;
-import com.jd.journalq.common.domain.TopicName;
+import com.jd.journalq.domain.Broker;
+import com.jd.journalq.domain.TopicName;
 
 /**
  * Coordinator

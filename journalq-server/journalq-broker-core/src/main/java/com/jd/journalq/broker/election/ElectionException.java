@@ -1,7 +1,7 @@
 package com.jd.journalq.broker.election;
 
-import com.jd.journalq.common.exception.JMQCode;
-import com.jd.journalq.common.exception.JMQException;
+import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JMQException;
 
 /**
  * author: zhuduohui

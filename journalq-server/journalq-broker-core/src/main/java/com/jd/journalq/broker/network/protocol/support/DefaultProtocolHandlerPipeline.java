@@ -1,14 +1,14 @@
 package com.jd.journalq.broker.network.protocol.support;
 
-import com.jd.journalq.common.network.transport.codec.Codec;
-import com.jd.journalq.common.network.transport.codec.CodecFactory;
-import com.jd.journalq.common.network.transport.codec.support.NettyDecoder;
-import com.jd.journalq.common.network.transport.codec.support.NettyEncoder;
-import com.jd.journalq.common.network.transport.command.CommandDispatcher;
-import com.jd.journalq.common.network.event.TransportEventHandler;
-import com.jd.journalq.common.network.handler.ConnectionHandler;
-import com.jd.journalq.common.network.protocol.Protocol;
-import com.jd.journalq.common.network.transport.handler.CommandInvocation;
+import com.jd.journalq.network.transport.codec.Codec;
+import com.jd.journalq.network.transport.codec.CodecFactory;
+import com.jd.journalq.network.transport.codec.support.NettyDecoder;
+import com.jd.journalq.network.transport.codec.support.NettyEncoder;
+import com.jd.journalq.network.transport.command.CommandDispatcher;
+import com.jd.journalq.network.event.TransportEventHandler;
+import com.jd.journalq.network.handler.ConnectionHandler;
+import com.jd.journalq.network.protocol.Protocol;
+import com.jd.journalq.network.transport.handler.CommandInvocation;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;

@@ -12,7 +12,7 @@ import com.jd.journalq.client.internal.consumer.exception.ConsumerException;
 import com.jd.journalq.client.internal.consumer.support.TopicMessageConsumer;
 import com.jd.journalq.client.internal.consumer.transport.ConsumerClientManager;
 import com.jd.journalq.client.internal.nameserver.NameServerConfig;
-import com.jd.journalq.common.exception.JMQCode;
+import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.toolkit.lang.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import org.apache.commons.lang3.StringUtils;

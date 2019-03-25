@@ -11,7 +11,7 @@ import com.jd.journalq.model.domain.Application;
 import com.jd.journalq.model.domain.ApplicationUser;
 import com.jd.journalq.model.domain.Identity;
 import com.jd.journalq.model.domain.User;
-import com.jd.journalq.common.model.QPageQuery;
+import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.model.query.QUser;
 import com.jd.journalq.service.UserService;
 import com.jd.journalq.sync.SyncService;

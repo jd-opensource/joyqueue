@@ -1,7 +1,7 @@
 package com.jd.journalq.store;
 
-import com.jd.journalq.common.domain.QosLevel;
-import com.jd.journalq.common.exception.JMQCode;
+import com.jd.journalq.domain.QosLevel;
+import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.store.utils.BaseDirUtils;
 import com.jd.journalq.store.utils.MessageUtils;
 import org.junit.After;

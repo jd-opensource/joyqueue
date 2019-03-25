@@ -5,7 +5,7 @@ import com.jd.journalq.client.internal.transport.Client;
 import com.jd.journalq.client.internal.transport.ClientGroup;
 import com.jd.journalq.client.internal.transport.ClientManager;
 import com.jd.journalq.client.internal.transport.config.TransportConfig;
-import com.jd.journalq.common.network.domain.BrokerNode;
+import com.jd.journalq.network.domain.BrokerNode;
 import com.jd.journalq.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

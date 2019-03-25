@@ -1,7 +1,7 @@
 package com.jd.journalq.broker.monitor.service;
 
-import com.jd.journalq.common.model.Pager;
-import com.jd.journalq.common.monitor.TopicMonitorInfo;
+import com.jd.journalq.model.Pager;
+import com.jd.journalq.monitor.TopicMonitorInfo;
 
 import java.util.List;
 

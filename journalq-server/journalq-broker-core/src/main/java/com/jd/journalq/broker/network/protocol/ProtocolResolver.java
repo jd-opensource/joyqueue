@@ -1,6 +1,6 @@
 package com.jd.journalq.broker.network.protocol;
 
-import com.jd.journalq.common.network.protocol.ProtocolService;
+import com.jd.journalq.network.protocol.ProtocolService;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;

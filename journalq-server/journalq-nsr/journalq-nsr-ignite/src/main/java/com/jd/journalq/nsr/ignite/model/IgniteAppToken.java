@@ -1,6 +1,6 @@
 package com.jd.journalq.nsr.ignite.model;
 
-import com.jd.journalq.common.domain.AppToken;
+import com.jd.journalq.domain.AppToken;
 import org.apache.ignite.binary.BinaryObjectException;
 import org.apache.ignite.binary.BinaryReader;
 import org.apache.ignite.binary.BinaryWriter;

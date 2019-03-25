@@ -12,7 +12,7 @@ import com.jd.journalq.model.domain.Application;
 import com.jd.journalq.model.domain.ApplicationToken;
 import com.jd.journalq.model.domain.Identity;
 import com.jd.journalq.model.query.QApplicationToken;
-import com.jd.journalq.common.model.QPageQuery;
+import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.service.ApplicationTokenService;
 import com.jd.laf.binding.annotation.Value;
 import com.jd.laf.web.vertx.response.Response;

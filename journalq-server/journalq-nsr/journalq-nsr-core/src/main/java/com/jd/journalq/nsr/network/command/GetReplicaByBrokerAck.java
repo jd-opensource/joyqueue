@@ -1,7 +1,7 @@
 package com.jd.journalq.nsr.network.command;
 
-import com.jd.journalq.common.domain.Replica;
-import com.jd.journalq.common.network.transport.command.JMQPayload;
+import com.jd.journalq.domain.Replica;
+import com.jd.journalq.network.transport.command.JMQPayload;
 
 import java.util.List;
 

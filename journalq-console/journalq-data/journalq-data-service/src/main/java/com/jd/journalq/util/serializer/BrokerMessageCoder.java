@@ -1,9 +1,9 @@
 package com.jd.journalq.util.serializer;
 
-import com.jd.journalq.common.message.JournalLog;
-import com.jd.journalq.common.message.BrokerMessage;
-import com.jd.journalq.common.message.Message;
-import com.jd.journalq.common.network.serializer.JMQMapTools;
+import com.jd.journalq.message.JournalLog;
+import com.jd.journalq.message.BrokerMessage;
+import com.jd.journalq.message.Message;
+import com.jd.journalq.network.serializer.JMQMapTools;
 import com.jd.journalq.toolkit.io.Compressors;
 import com.jd.journalq.toolkit.io.Zip;
 import com.jd.journalq.toolkit.io.ZipUtil;

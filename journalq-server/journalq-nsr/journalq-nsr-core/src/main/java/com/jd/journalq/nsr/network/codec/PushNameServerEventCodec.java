@@ -1,11 +1,11 @@
 package com.jd.journalq.nsr.network.codec;
 
 import com.alibaba.fastjson.JSON;
-import com.jd.journalq.common.event.MetaEvent;
-import com.jd.journalq.common.event.NameServerEvent;
-import com.jd.journalq.common.network.serializer.Serializer;
-import com.jd.journalq.common.network.transport.command.Header;
-import com.jd.journalq.common.network.transport.command.Type;
+import com.jd.journalq.event.MetaEvent;
+import com.jd.journalq.event.NameServerEvent;
+import com.jd.journalq.network.serializer.Serializer;
+import com.jd.journalq.network.transport.command.Header;
+import com.jd.journalq.network.transport.command.Type;
 import com.jd.journalq.nsr.network.NsrPayloadCodec;
 import com.jd.journalq.nsr.network.command.NsrCommandType;
 import com.jd.journalq.nsr.network.command.PushNameServerEvent;

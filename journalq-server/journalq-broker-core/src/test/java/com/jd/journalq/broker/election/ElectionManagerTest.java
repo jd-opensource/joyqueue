@@ -2,9 +2,9 @@ package com.jd.journalq.broker.election;
 
 import com.jd.journalq.broker.BrokerContext;
 import com.jd.journalq.broker.BrokerService;
-import com.jd.journalq.common.domain.Broker;
-import com.jd.journalq.common.domain.PartitionGroup;
-import com.jd.journalq.common.domain.TopicName;
+import com.jd.journalq.domain.Broker;
+import com.jd.journalq.domain.PartitionGroup;
+import com.jd.journalq.domain.TopicName;
 
 import com.jd.journalq.store.StoreService;
 import org.junit.After;

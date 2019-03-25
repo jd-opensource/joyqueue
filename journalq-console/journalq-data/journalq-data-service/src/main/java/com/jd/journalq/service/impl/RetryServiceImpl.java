@@ -1,9 +1,9 @@
 package com.jd.journalq.service.impl;
 
-import com.jd.journalq.common.domain.ConsumeRetry;
-import com.jd.journalq.common.exception.JMQException;
-import com.jd.journalq.common.model.PageResult;
-import com.jd.journalq.common.model.QPageQuery;
+import com.jd.journalq.domain.ConsumeRetry;
+import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.model.PageResult;
+import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.model.query.QRetry;
 import com.jd.journalq.server.retry.api.ConsoleMessageRetry;
 import com.jd.journalq.server.retry.model.RetryMessageModel;

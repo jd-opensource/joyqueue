@@ -1,6 +1,6 @@
 package com.jd.journalq.broker.manage.service;
 
-import com.jd.journalq.common.monitor.BrokerMessageInfo;
+import com.jd.journalq.monitor.BrokerMessageInfo;
 
 import java.util.List;
 

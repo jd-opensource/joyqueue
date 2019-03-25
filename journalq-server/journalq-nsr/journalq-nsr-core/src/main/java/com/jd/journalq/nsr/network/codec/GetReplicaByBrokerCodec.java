@@ -1,7 +1,7 @@
 package com.jd.journalq.nsr.network.codec;
 
-import com.jd.journalq.common.network.transport.command.Header;
-import com.jd.journalq.common.network.transport.command.Type;
+import com.jd.journalq.network.transport.command.Header;
+import com.jd.journalq.network.transport.command.Type;
 import com.jd.journalq.nsr.network.NsrPayloadCodec;
 import com.jd.journalq.nsr.network.command.GetReplicaByBroker;
 import com.jd.journalq.nsr.network.command.NsrCommandType;

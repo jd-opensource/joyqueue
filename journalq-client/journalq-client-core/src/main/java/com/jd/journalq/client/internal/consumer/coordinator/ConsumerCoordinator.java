@@ -7,7 +7,7 @@ import com.jd.journalq.client.internal.consumer.converter.BrokerAssignmentConver
 import com.jd.journalq.client.internal.consumer.coordinator.domain.BrokerAssignments;
 import com.jd.journalq.client.internal.consumer.coordinator.domain.BrokerAssignmentsHolder;
 import com.jd.journalq.client.internal.metadata.domain.TopicMetadata;
-import com.jd.journalq.common.network.domain.BrokerNode;
+import com.jd.journalq.network.domain.BrokerNode;
 import com.jd.journalq.toolkit.service.Service;
 import com.jd.journalq.toolkit.time.SystemClock;
 import org.slf4j.Logger;

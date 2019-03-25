@@ -1,6 +1,6 @@
 package com.jd.journalq.broker.network;
 
-import com.jd.journalq.common.network.transport.command.handler.CommandHandler;
+import com.jd.journalq.network.transport.command.handler.CommandHandler;
 
 /**
  * BrokerCommandHandler

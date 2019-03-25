@@ -4,14 +4,14 @@ import com.jd.journalq.broker.BrokerContext;
 import com.jd.journalq.broker.BrokerContextAware;
 import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.network.support.BrokerTransportClientFactory;
-import com.jd.journalq.common.domain.Broker;
-import com.jd.journalq.common.domain.Consumer;
-import com.jd.journalq.common.event.BrokerEvent;
-import com.jd.journalq.common.event.EventType;
-import com.jd.journalq.common.event.MetaEvent;
-import com.jd.journalq.common.exception.JMQException;
-import com.jd.journalq.common.network.transport.TransportClient;
-import com.jd.journalq.common.network.transport.config.ClientConfig;
+import com.jd.journalq.domain.Broker;
+import com.jd.journalq.domain.Consumer;
+import com.jd.journalq.event.BrokerEvent;
+import com.jd.journalq.event.EventType;
+import com.jd.journalq.event.MetaEvent;
+import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.network.transport.TransportClient;
+import com.jd.journalq.network.transport.config.ClientConfig;
 import com.jd.journalq.nsr.NameService;
 import com.jd.journalq.server.retry.api.MessageRetry;
 import com.jd.journalq.server.retry.api.RetryPolicyProvider;
@@ -29,7 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static com.jd.journalq.common.domain.Broker.DEFAULT_RETRY_TYPE;
+import static com.jd.journalq.domain.Broker.DEFAULT_RETRY_TYPE;
 
 /**
  * 服务端重试消息管理

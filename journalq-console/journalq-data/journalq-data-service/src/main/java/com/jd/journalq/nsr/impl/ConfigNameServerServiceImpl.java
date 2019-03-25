@@ -2,8 +2,8 @@ package com.jd.journalq.nsr.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
-import com.jd.journalq.common.model.PageResult;
-import com.jd.journalq.common.model.QPageQuery;
+import com.jd.journalq.model.PageResult;
+import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.convert.NsrConfigConverter;
 import com.jd.journalq.model.domain.Config;
 import com.jd.journalq.model.domain.OperLog;
@@ -33,7 +33,7 @@ public class ConfigNameServerServiceImpl extends NameServerBase implements Confi
 
     @Override
     public int add(Config config) throws Exception {
-        com.jd.journalq.common.domain.Config nsrConfig = new com.jd.journalq.common.domain.Config();
+        com.jd.journalq.domain.Config nsrConfig = new com.jd.journalq.domain.Config();
         nsrConfig.setKey(config.getKey());
         nsrConfig.setValue(config.getValue());
         nsrConfig.setGroup(config.getGroup());
@@ -44,9 +44,9 @@ public class ConfigNameServerServiceImpl extends NameServerBase implements Confi
     @Override
     public int update(Config config) throws Exception {
         String result = post(GETBYID_CONFIG,config.getId());
-        com.jd.journalq.common.domain.Config nsrConfig = JSON.parseObject(result, com.jd.journalq.common.domain.Config.class);
+        com.jd.journalq.domain.Config nsrConfig = JSON.parseObject(result, com.jd.journalq.domain.Config.class);
         if (nsrConfig == null) {
-            nsrConfig = new com.jd.journalq.common.domain.Config();
+            nsrConfig = new com.jd.journalq.domain.Config();
         }
         nsrConfig.setKey(config.getKey());
         nsrConfig.setValue(config.getValue());
@@ -57,7 +57,7 @@ public class ConfigNameServerServiceImpl extends NameServerBase implements Confi
 
     @Override
     public int delete(Config config) throws Exception {
-        com.jd.journalq.common.domain.Config nsrConfig = new com.jd.journalq.common.domain.Config();
+        com.jd.journalq.domain.Config nsrConfig = new com.jd.journalq.domain.Config();
         nsrConfig.setKey(config.getKey());
         nsrConfig.setValue(config.getValue());
         nsrConfig.setGroup(config.getGroup());
@@ -73,14 +73,14 @@ public class ConfigNameServerServiceImpl extends NameServerBase implements Confi
             configQuery.setKeyword(qConfig.getKeyword());
         }
         String result = post(LIST_CONFIG, configQuery);
-        List<com.jd.journalq.common.domain.Config> configList = JSON.parseArray(result).toJavaList(com.jd.journalq.common.domain.Config.class);
+        List<com.jd.journalq.domain.Config> configList = JSON.parseArray(result).toJavaList(com.jd.journalq.domain.Config.class);
         return configList.stream().map(config -> nsrConfigConverter.revert(config)).collect(Collectors.toList());
     }
 
     @Override
     public Config findById(String s) throws Exception {
         String result = post(GETBYID_CONFIG,s);
-        com.jd.journalq.common.domain.Config nsrConfig = JSON.parseObject(result, com.jd.journalq.common.domain.Config.class);
+        com.jd.journalq.domain.Config nsrConfig = JSON.parseObject(result, com.jd.journalq.domain.Config.class);
         return nsrConfigConverter.revert(nsrConfig);
     }
 
@@ -96,7 +96,7 @@ public class ConfigNameServerServiceImpl extends NameServerBase implements Confi
         }
         pageQuery.setQuery(configQuery);
         String result = post(FINDBYQUERY_CONFIG,pageQuery);
-        PageResult<com.jd.journalq.common.domain.Config> pageResult = JSON.parseObject(result,new TypeReference<PageResult<com.jd.journalq.common.domain.Config>>(){});
+        PageResult<com.jd.journalq.domain.Config> pageResult = JSON.parseObject(result,new TypeReference<PageResult<com.jd.journalq.domain.Config>>(){});
         PageResult<Config> configPageResult = new PageResult<>();
         configPageResult.setPagination(pageResult.getPagination());
         configPageResult.setResult(pageResult.getResult().stream().map(config -> nsrConfigConverter.revert(config)).collect(Collectors.toList()));

@@ -1,10 +1,10 @@
 package com.jd.journalq.broker.election.network.codec;
 
 import com.jd.journalq.broker.election.command.AppendEntriesRequest;
-import com.jd.journalq.common.network.command.CommandType;
-import com.jd.journalq.common.network.serializer.Serializer;
-import com.jd.journalq.common.network.transport.codec.PayloadEncoder;
-import com.jd.journalq.common.network.transport.command.Type;
+import com.jd.journalq.network.command.CommandType;
+import com.jd.journalq.network.serializer.Serializer;
+import com.jd.journalq.network.transport.codec.PayloadEncoder;
+import com.jd.journalq.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
 
 import java.nio.ByteBuffer;

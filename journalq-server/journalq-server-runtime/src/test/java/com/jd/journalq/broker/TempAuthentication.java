@@ -1,9 +1,9 @@
 package com.jd.journalq.broker;
 
-import com.jd.journalq.common.response.BooleanResponse;
-import com.jd.journalq.common.security.Authentication;
-import com.jd.journalq.common.security.PasswordEncoder;
-import com.jd.journalq.common.security.UserDetails;
+import com.jd.journalq.response.BooleanResponse;
+import com.jd.journalq.security.Authentication;
+import com.jd.journalq.security.PasswordEncoder;
+import com.jd.journalq.security.UserDetails;
 import com.jd.journalq.toolkit.security.auth.AuthException;
 
 /**

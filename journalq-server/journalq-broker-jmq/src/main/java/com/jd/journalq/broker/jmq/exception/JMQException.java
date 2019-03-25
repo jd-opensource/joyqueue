@@ -1,6 +1,6 @@
 package com.jd.journalq.broker.jmq.exception;
 
-import com.jd.journalq.common.exception.JMQCode;
+import com.jd.journalq.exception.JMQCode;
 
 /**
  * JMQException

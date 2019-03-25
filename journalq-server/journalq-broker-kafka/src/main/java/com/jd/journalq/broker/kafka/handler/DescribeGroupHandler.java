@@ -7,8 +7,8 @@ import com.jd.journalq.broker.kafka.coordinator.domain.GroupDescribe;
 import com.jd.journalq.broker.kafka.KafkaCommandType;
 import com.jd.journalq.broker.kafka.KafkaContext;
 import com.jd.journalq.broker.kafka.command.DescribeGroupsRequest;
-import com.jd.journalq.common.network.transport.Transport;
-import com.jd.journalq.common.network.transport.command.Command;
+import com.jd.journalq.network.transport.Transport;
+import com.jd.journalq.network.transport.command.Command;
 
 import java.util.List;
 

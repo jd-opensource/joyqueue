@@ -3,8 +3,8 @@ package com.jd.journalq.client;
 import com.jd.journalq.client.internal.metadata.domain.TopicMetadata;
 import io.openmessaging.KeyValue;
 import io.openmessaging.extension.QueueMetaData;
-import io.openmessaging.jmq.domain.JMQNameServerBuiltinKeys;
-import io.openmessaging.jmq.extension.QueueMetaDataAdapter;
+import io.openmessaging.journalq.domain.JMQNameServerBuiltinKeys;
+import io.openmessaging.journalq.extension.QueueMetaDataAdapter;
 import org.junit.Assert;
 import org.junit.Test;
 

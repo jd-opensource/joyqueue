@@ -1,10 +1,10 @@
 package com.jd.journalq.broker.network.support;
 
-import com.jd.journalq.common.network.transport.codec.Codec;
-import com.jd.journalq.common.network.transport.command.handler.CommandHandlerFactory;
-import com.jd.journalq.common.network.transport.command.handler.ExceptionHandler;
-import com.jd.journalq.common.network.transport.command.support.DefaultCommandHandlerFactory;
-import com.jd.journalq.common.network.transport.support.DefaultTransportClientFactory;
+import com.jd.journalq.network.transport.codec.Codec;
+import com.jd.journalq.network.transport.command.handler.CommandHandlerFactory;
+import com.jd.journalq.network.transport.command.handler.ExceptionHandler;
+import com.jd.journalq.network.transport.command.support.DefaultCommandHandlerFactory;
+import com.jd.journalq.network.transport.support.DefaultTransportClientFactory;
 import com.jd.journalq.broker.network.codec.BrokerCodecFactory;
 
 /**

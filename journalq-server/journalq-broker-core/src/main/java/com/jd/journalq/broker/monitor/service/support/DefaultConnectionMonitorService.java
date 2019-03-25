@@ -7,9 +7,9 @@ import com.jd.journalq.broker.monitor.stat.AppStat;
 import com.jd.journalq.broker.monitor.stat.BrokerStat;
 import com.jd.journalq.broker.monitor.stat.ConnectionStat;
 import com.jd.journalq.broker.monitor.stat.TopicStat;
-import com.jd.journalq.common.monitor.Client;
-import com.jd.journalq.common.monitor.ConnectionMonitorDetailInfo;
-import com.jd.journalq.common.monitor.ConnectionMonitorInfo;
+import com.jd.journalq.monitor.Client;
+import com.jd.journalq.monitor.ConnectionMonitorDetailInfo;
+import com.jd.journalq.monitor.ConnectionMonitorInfo;
 
 import java.util.List;
 import java.util.Map;

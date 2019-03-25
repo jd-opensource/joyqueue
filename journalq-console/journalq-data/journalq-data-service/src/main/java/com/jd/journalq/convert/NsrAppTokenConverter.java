@@ -1,6 +1,6 @@
 package com.jd.journalq.convert;
 
-import com.jd.journalq.common.domain.AppToken;
+import com.jd.journalq.domain.AppToken;
 import com.jd.journalq.model.domain.ApplicationToken;
 import com.jd.journalq.model.domain.Identity;
 

@@ -1,6 +1,6 @@
 package com.jd.journalq.convert;
 
-import com.jd.journalq.common.domain.ClientType;
+import com.jd.journalq.domain.ClientType;
 import com.jd.journalq.model.domain.*;
 import com.jd.journalq.util.NullUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -12,16 +12,16 @@ import java.util.stream.Collectors;
 /**
  * Created by wangxiaofei1 on 2019/1/2.
  */
-public class NsrProducerConverter extends Converter<Producer, com.jd.journalq.common.domain.Producer>{
+public class NsrProducerConverter extends Converter<Producer, com.jd.journalq.domain.Producer>{
 
     @Override
-    protected com.jd.journalq.common.domain.Producer forward(Producer producer) {
-        com.jd.journalq.common.domain.Producer nsrProducer = new com.jd.journalq.common.domain.Producer();
+    protected com.jd.journalq.domain.Producer forward(Producer producer) {
+        com.jd.journalq.domain.Producer nsrProducer = new com.jd.journalq.domain.Producer();
         nsrProducer.setApp(producer.getApp().getCode());
         nsrProducer.setClientType(ClientType.valueOf(producer.getClientType()));
         nsrProducer.setTopic(CodeConverter.convertTopic(producer.getNamespace(),producer.getTopic()));
         if(!NullUtil.isEmpty(producer.getConfig())){
-            nsrProducer.setProducerPolicy(com.jd.journalq.common.domain.Producer.ProducerPolicy.Builder.build()
+            nsrProducer.setProducerPolicy(com.jd.journalq.domain.Producer.ProducerPolicy.Builder.build()
                     .nearby(producer.getConfig().isNearBy())
                     .single(producer.getConfig().isSingle())
                     .blackList(producer.getConfig().getBlackList())
@@ -34,7 +34,7 @@ public class NsrProducerConverter extends Converter<Producer, com.jd.journalq.co
     }
 
     @Override
-    protected Producer backward(com.jd.journalq.common.domain.Producer nsrProducer) {
+    protected Producer backward(com.jd.journalq.domain.Producer nsrProducer) {
         Producer producer = new Producer();
         producer.setId(nsrProducer.getId());
         producer.setApp(new Identity(nsrProducer.getApp()));
@@ -42,7 +42,7 @@ public class NsrProducerConverter extends Converter<Producer, com.jd.journalq.co
         producer.setTopic(new Topic(nsrProducer.getTopic().getCode()));
         producer.setNamespace(new Namespace(nsrProducer.getTopic().getNamespace()));
         ProducerConfig producerConfig = new ProducerConfig();
-        com.jd.journalq.common.domain.Producer.ProducerPolicy producerPolicy = nsrProducer.getProducerPolicy();
+        com.jd.journalq.domain.Producer.ProducerPolicy producerPolicy = nsrProducer.getProducerPolicy();
         if (producerPolicy != null) {
             producerConfig.setNearBy(producerPolicy.getNearby());
             producerConfig.setBlackList(StringUtils.join(producerPolicy.getBlackList(), ","));

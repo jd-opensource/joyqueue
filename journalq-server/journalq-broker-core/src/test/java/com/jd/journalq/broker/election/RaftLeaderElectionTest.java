@@ -1,13 +1,12 @@
 package com.jd.journalq.broker.election;
 
 import com.jd.journalq.broker.buffer.Serializer;
-import com.jd.journalq.common.domain.Broker;
-import com.jd.journalq.common.domain.PartitionGroup;
-import com.jd.journalq.common.domain.QosLevel;
-import com.jd.journalq.common.domain.TopicName;
-import com.jd.journalq.common.message.BrokerMessage;
-import com.jd.journalq.common.message.SourceType;
-import com.jd.journalq.store.*;
+import com.jd.journalq.domain.Broker;
+import com.jd.journalq.domain.PartitionGroup;
+import com.jd.journalq.domain.QosLevel;
+import com.jd.journalq.domain.TopicName;
+import com.jd.journalq.message.BrokerMessage;
+import com.jd.journalq.message.SourceType;
 import com.jd.journalq.store.PartitionGroupStore;
 import com.jd.journalq.store.StoreService;
 import com.jd.journalq.store.WriteRequest;

@@ -2,11 +2,11 @@ package com.jd.journalq.broker.cluster;
 
 import com.jd.journalq.broker.BrokerContext;
 import com.jd.journalq.broker.config.BrokerConfig;
-import com.jd.journalq.common.domain.*;
-import com.jd.journalq.common.event.*;
-import com.jd.journalq.common.exception.JMQCode;
-import com.jd.journalq.common.exception.JMQException;
-import com.jd.journalq.common.response.BooleanResponse;
+import com.jd.journalq.domain.*;
+import com.jd.journalq.event.*;
+import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.response.BooleanResponse;
 import com.jd.journalq.nsr.NameService;
 import com.jd.journalq.toolkit.concurrent.EventBus;
 import com.jd.journalq.toolkit.concurrent.EventListener;

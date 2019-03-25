@@ -1,7 +1,7 @@
 package com.jd.journalq.nsr.ignite.model;
 
 
-import com.jd.journalq.common.domain.Broker;
+import com.jd.journalq.domain.Broker;
 import org.apache.ignite.binary.BinaryObjectException;
 import org.apache.ignite.binary.BinaryReader;
 import org.apache.ignite.binary.BinaryWriter;

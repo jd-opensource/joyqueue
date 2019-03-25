@@ -1,10 +1,10 @@
 package com.jd.journalq.nsr.service;
 
 
-import com.jd.journalq.common.domain.PartitionGroup;
-import com.jd.journalq.common.domain.Topic;
-import com.jd.journalq.common.model.PageResult;
-import com.jd.journalq.common.model.QPageQuery;
+import com.jd.journalq.domain.PartitionGroup;
+import com.jd.journalq.domain.Topic;
+import com.jd.journalq.model.PageResult;
+import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.nsr.model.TopicQuery;
 
 import java.util.Collection;

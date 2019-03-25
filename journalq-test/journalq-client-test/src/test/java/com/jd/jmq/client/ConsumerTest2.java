@@ -1,7 +1,7 @@
 package com.jd.journalq.client;
 
 import io.openmessaging.KeyValue;
-import io.openmessaging.jmq.domain.JMQConsumerBuiltinKeys;
+import io.openmessaging.journalq.domain.JMQConsumerBuiltinKeys;
 
 /**
  * author: gaohaoxiang

@@ -1,9 +1,9 @@
 package com.jd.journalq.handler.routing.command.monitor;
 
-import com.jd.journalq.common.domain.Broker;
-import com.jd.journalq.common.model.PageResult;
-import com.jd.journalq.common.model.QPageQuery;
-import com.jd.journalq.common.monitor.Client;
+import com.jd.journalq.domain.Broker;
+import com.jd.journalq.model.PageResult;
+import com.jd.journalq.model.QPageQuery;
+import com.jd.journalq.monitor.Client;
 import com.jd.journalq.handler.binder.annotation.Body;
 import com.jd.journalq.handler.binder.annotation.Page;
 import com.jd.journalq.handler.binder.annotation.Path;

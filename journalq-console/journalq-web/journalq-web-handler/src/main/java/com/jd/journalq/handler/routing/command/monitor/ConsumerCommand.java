@@ -1,9 +1,8 @@
 package com.jd.journalq.handler.routing.command.monitor;
 
-import com.jd.journalq.common.domain.ClientType;
-import com.jd.journalq.common.domain.TopicName;
+import com.jd.journalq.domain.ClientType;
+import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.handler.binder.BodyType;
-import com.jd.journalq.handler.binder.annotation.*;
 import com.jd.journalq.handler.error.ConfigException;
 import com.jd.journalq.handler.error.ErrorCode;
 import com.jd.journalq.handler.routing.command.NsrCommandSupport;

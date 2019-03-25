@@ -1,12 +1,11 @@
 package com.jd.journalq.nsr;
 
-import com.jd.journalq.common.domain.*;
-import com.jd.journalq.common.event.ConsumerEvent;
-import com.jd.journalq.common.event.MetaEvent;
-import com.jd.journalq.common.event.PartitionGroupEvent;
+import com.jd.journalq.domain.*;
+import com.jd.journalq.event.ConsumerEvent;
+import com.jd.journalq.event.MetaEvent;
+import com.jd.journalq.event.PartitionGroupEvent;
 import com.jd.journalq.nsr.message.MessageListener;
 import com.jd.journalq.nsr.message.Messenger;
-import com.jd.journalq.nsr.service.*;
 import com.jd.journalq.nsr.service.*;
 import com.jd.journalq.toolkit.lang.Preconditions;
 import com.jd.journalq.toolkit.service.Service;

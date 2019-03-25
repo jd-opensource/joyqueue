@@ -1,9 +1,9 @@
 package com.jd.journalq.nsr.ignite.service;
 
 
-import com.jd.journalq.common.domain.AppToken;
-import com.jd.journalq.common.model.PageResult;
-import com.jd.journalq.common.model.QPageQuery;
+import com.jd.journalq.domain.AppToken;
+import com.jd.journalq.model.PageResult;
+import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.nsr.ignite.dao.AppTokenDao;
 import com.jd.journalq.nsr.ignite.model.IgniteAppToken;
 import com.jd.journalq.nsr.model.AppTokenQuery;

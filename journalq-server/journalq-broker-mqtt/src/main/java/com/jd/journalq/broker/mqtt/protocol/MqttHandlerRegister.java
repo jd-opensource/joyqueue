@@ -3,7 +3,7 @@ package com.jd.journalq.broker.mqtt.protocol;
 import com.google.common.collect.Lists;
 import com.jd.journalq.broker.mqtt.command.MqttHandlerFactory;
 import com.jd.journalq.broker.mqtt.handler.Handler;
-import com.jd.journalq.common.network.transport.command.handler.CommandHandlerFactory;
+import com.jd.journalq.network.transport.command.handler.CommandHandlerFactory;
 import com.jd.laf.extension.ExtensionManager;
 
 import java.util.List;

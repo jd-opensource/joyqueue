@@ -1,8 +1,8 @@
 package com.jd.journalq.broker.jmq.network.protocol.helper;
 
-import com.jd.journalq.common.network.command.JMQCommandType;
-import com.jd.journalq.common.network.transport.codec.JMQHeader;
-import com.jd.journalq.common.network.transport.codec.JMQHeaderCodec;
+import com.jd.journalq.network.command.JMQCommandType;
+import com.jd.journalq.network.transport.codec.JMQHeader;
+import com.jd.journalq.network.transport.codec.JMQHeaderCodec;
 import io.netty.buffer.ByteBuf;
 
 /**

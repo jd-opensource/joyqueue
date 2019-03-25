@@ -1,6 +1,6 @@
 package com.jd.journalq.client.internal.consumer.coordinator.domain;
 
-import com.jd.journalq.common.network.domain.BrokerNode;
+import com.jd.journalq.network.domain.BrokerNode;
 
 /**
  * BrokerAssignment

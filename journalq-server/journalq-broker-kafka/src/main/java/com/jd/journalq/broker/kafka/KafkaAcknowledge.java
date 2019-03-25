@@ -1,6 +1,6 @@
 package com.jd.journalq.broker.kafka;
 
-import com.jd.journalq.common.domain.QosLevel;
+import com.jd.journalq.domain.QosLevel;
 
 /**
  * KafkaAcknowledge

@@ -1,6 +1,6 @@
 package com.jd.journalq.model.domain;
 
-import com.jd.journalq.common.manage.PartitionGroupMetric;
+import com.jd.journalq.manage.PartitionGroupMetric;
 
 import java.util.List;
 

@@ -1,8 +1,8 @@
 package com.jd.journalq.broker.polling;
 
 import com.jd.journalq.broker.consumer.model.PullResult;
-import com.jd.journalq.common.network.session.Consumer;
-import com.jd.journalq.common.network.transport.exception.TransportException;
+import com.jd.journalq.network.session.Consumer;
+import com.jd.journalq.network.transport.exception.TransportException;
 
 /**
  * 长轮询回调

@@ -1,6 +1,6 @@
 package com.jd.journalq.broker.index.model;
 
-import com.jd.journalq.common.exception.JMQCode;
+import com.jd.journalq.exception.JMQCode;
 
 /**
  * Created by zhuduohui on 2018/9/17.

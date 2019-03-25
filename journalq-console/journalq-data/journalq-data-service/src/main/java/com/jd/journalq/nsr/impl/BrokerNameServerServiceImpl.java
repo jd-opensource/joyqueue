@@ -3,8 +3,8 @@ package com.jd.journalq.nsr.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.TypeReference;
-import com.jd.journalq.common.model.PageResult;
-import com.jd.journalq.common.model.QPageQuery;
+import com.jd.journalq.model.PageResult;
+import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.convert.NsrBrokerConverter;
 import com.jd.journalq.model.domain.Broker;
 import com.jd.journalq.model.domain.Identity;
@@ -37,7 +37,7 @@ public class BrokerNameServerServiceImpl extends NameServerBase implements Broke
     @Override
     public Broker findById(Long id) throws Exception {
         String result = post(GETBYID_BROKER,id);
-        com.jd.journalq.common.domain.Broker nsrBroker = JSON.parseObject(result, com.jd.journalq.common.domain.Broker.class);
+        com.jd.journalq.domain.Broker nsrBroker = JSON.parseObject(result, com.jd.journalq.domain.Broker.class);
         return nsrBrokerConverter.revert(nsrBroker);
     }
 
@@ -49,7 +49,7 @@ public class BrokerNameServerServiceImpl extends NameServerBase implements Broke
         try {
             PageResult<Broker> pageResult = new PageResult<>();
             String result = post(FINDBYQUERY_BROKER,queryQPageQuery);
-            PageResult<com.jd.journalq.common.domain.Broker> brokerPageResult = JSON.parseObject(result,new TypeReference<PageResult<com.jd.journalq.common.domain.Broker>>(){});
+            PageResult<com.jd.journalq.domain.Broker> brokerPageResult = JSON.parseObject(result,new TypeReference<PageResult<com.jd.journalq.domain.Broker>>(){});
             pageResult.setPagination(brokerPageResult.getPagination());
             pageResult.setResult(brokerPageResult.getResult().stream().map(broker -> nsrBrokerConverter.revert(broker)).collect(Collectors.toList()));
             return pageResult;
@@ -66,7 +66,7 @@ public class BrokerNameServerServiceImpl extends NameServerBase implements Broke
      */
     @Override
     public int add(Broker broker) throws Exception {
-        com.jd.journalq.common.domain.Broker nsrBroker = nsrBrokerConverter.convert(broker);
+        com.jd.journalq.domain.Broker nsrBroker = nsrBrokerConverter.convert(broker);
         String result =  postWithLog(ADD_BROKER, nsrBroker,OperLog.Type.BROKER.value(),OperLog.OperType.ADD.value(),String.valueOf(broker.getId()));
         return isSuccess(result);
     }
@@ -78,10 +78,10 @@ public class BrokerNameServerServiceImpl extends NameServerBase implements Broke
     @Override
     public int update(Broker broker) throws Exception {
         String result = post(GETBYID_BROKER,broker.getId());
-        com.jd.journalq.common.domain.Broker nsrBroker = JSON.parseObject(result, com.jd.journalq.common.domain.Broker.class);
+        com.jd.journalq.domain.Broker nsrBroker = JSON.parseObject(result, com.jd.journalq.domain.Broker.class);
 
         if(nsrBroker == null) {
-            nsrBroker = new com.jd.journalq.common.domain.Broker();
+            nsrBroker = new com.jd.journalq.domain.Broker();
         }
         if (broker.getIp() != null) {
             nsrBroker.setIp(broker.getIp());
@@ -101,7 +101,7 @@ public class BrokerNameServerServiceImpl extends NameServerBase implements Broke
     @Override
     public List<Broker> findByQuery(QBroker query) throws Exception {
         BrokerQuery brokerQuery = brokerQueryConvert(query);
-        List<com.jd.journalq.common.domain.Broker> nsrBrokers = JSONArray.parseArray(post(LIST_BROKER,brokerQuery), com.jd.journalq.common.domain.Broker.class);
+        List<com.jd.journalq.domain.Broker> nsrBrokers = JSONArray.parseArray(post(LIST_BROKER,brokerQuery), com.jd.journalq.domain.Broker.class);
         return nsrBrokers.stream().map(broker -> nsrBrokerConverter.revert(broker)).collect(Collectors.toList());
     }
 
@@ -109,14 +109,14 @@ public class BrokerNameServerServiceImpl extends NameServerBase implements Broke
     public List<Broker> getByIdsBroker(List<Integer> ids) throws Exception {
         String result = post(GETBYIDS_BROKER,ids);
 
-        List<com.jd.journalq.common.domain.Broker> brokerList = JSON.parseArray(result, com.jd.journalq.common.domain.Broker.class);
+        List<com.jd.journalq.domain.Broker> brokerList = JSON.parseArray(result, com.jd.journalq.domain.Broker.class);
         if (brokerList == null || brokerList.size() <=0) return null;
         return brokerList.stream().map(broker -> nsrBrokerConverter.revert(broker)).collect(Collectors.toList());
     }
 
     @Override
     public List<Broker> syncBrokers() throws Exception {
-        List<com.jd.journalq.common.domain.Broker>  nsrBrokers = JSONArray.parseArray(post(LIST_BROKER,null), com.jd.journalq.common.domain.Broker.class);
+        List<com.jd.journalq.domain.Broker>  nsrBrokers = JSONArray.parseArray(post(LIST_BROKER,null), com.jd.journalq.domain.Broker.class);
         List<Broker> brokerList = new ArrayList<>(nsrBrokers.size());
         nsrBrokers.forEach(nsrBroker->{
             Broker broker = new Broker();
@@ -136,7 +136,7 @@ public class BrokerNameServerServiceImpl extends NameServerBase implements Broke
      */
     @Override
     public int delete(Broker broker) throws Exception {
-        com.jd.journalq.common.domain.Broker nsrBroker = new com.jd.journalq.common.domain.Broker();
+        com.jd.journalq.domain.Broker nsrBroker = new com.jd.journalq.domain.Broker();
         nsrBroker.setIp(broker.getIp());
         nsrBroker.setRetryType(broker.getRetryType());
         nsrBroker.setPort(broker.getPort());

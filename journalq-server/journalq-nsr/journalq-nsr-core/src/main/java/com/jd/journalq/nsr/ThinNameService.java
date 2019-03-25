@@ -1,23 +1,22 @@
 package com.jd.journalq.nsr;
 
 import com.google.common.collect.Lists;
-import com.jd.journalq.common.domain.*;
-import com.jd.journalq.common.event.NameServerEvent;
-import com.jd.journalq.common.network.command.CommandType;
-import com.jd.journalq.common.network.command.GetTopics;
-import com.jd.journalq.common.network.command.GetTopicsAck;
-import com.jd.journalq.common.network.command.SubscribeAck;
-import com.jd.journalq.common.network.event.TransportEvent;
-import com.jd.journalq.common.network.command.UnSubscribe;
-import com.jd.journalq.common.network.transport.Transport;
-import com.jd.journalq.common.network.transport.TransportClient;
-import com.jd.journalq.common.network.transport.codec.JMQHeader;
-import com.jd.journalq.common.network.transport.command.Command;
-import com.jd.journalq.common.network.transport.command.Direction;
-import com.jd.journalq.common.network.transport.exception.TransportException;
+import com.jd.journalq.domain.*;
+import com.jd.journalq.event.NameServerEvent;
+import com.jd.journalq.network.command.CommandType;
+import com.jd.journalq.network.command.GetTopics;
+import com.jd.journalq.network.command.GetTopicsAck;
+import com.jd.journalq.network.command.SubscribeAck;
+import com.jd.journalq.network.event.TransportEvent;
+import com.jd.journalq.network.command.UnSubscribe;
+import com.jd.journalq.network.transport.Transport;
+import com.jd.journalq.network.transport.TransportClient;
+import com.jd.journalq.network.transport.codec.JMQHeader;
+import com.jd.journalq.network.transport.command.Command;
+import com.jd.journalq.network.transport.command.Direction;
+import com.jd.journalq.network.transport.exception.TransportException;
 import com.jd.journalq.nsr.config.NameServiceConfig;
 import com.jd.journalq.nsr.network.NsrTransportClientFactory;
-import com.jd.journalq.nsr.network.command.*;
 import com.jd.journalq.nsr.network.command.*;
 import com.jd.journalq.toolkit.concurrent.EventBus;
 import com.jd.journalq.toolkit.concurrent.EventListener;
@@ -79,7 +78,7 @@ public class ThinNameService extends Service implements NameService, PropertySup
 
     @Override
     public List<TopicConfig> subscribe(List<Subscription> subscriptions, ClientType clientType) {
-        Command request = new Command(new JMQHeader(Direction.REQUEST, NsrCommandType.SUBSCRIBE), new com.jd.journalq.common.network.command.Subscribe().subscriptions(subscriptions).clientType(clientType));
+        Command request = new Command(new JMQHeader(Direction.REQUEST, NsrCommandType.SUBSCRIBE), new com.jd.journalq.network.command.Subscribe().subscriptions(subscriptions).clientType(clientType));
         Command response = send(request);
         if (!response.isSuccess()) {
             logger.error("subscribe error request {},response {}", request, response);

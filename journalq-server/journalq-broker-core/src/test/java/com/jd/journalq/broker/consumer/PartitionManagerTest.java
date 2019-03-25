@@ -4,9 +4,9 @@ import com.google.common.collect.Lists;
 import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.consumer.model.ConsumePartition;
 import com.jd.journalq.broker.consumer.model.OwnerShip;
-import com.jd.journalq.common.domain.TopicName;
-import com.jd.journalq.common.exception.JMQException;
-import com.jd.journalq.common.network.session.Consumer;
+import com.jd.journalq.domain.TopicName;
+import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.network.session.Consumer;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,7 +32,7 @@ public class PartitionManagerTest {
         consumer.setTopic("topic");
         consumer.setApp("app");
 
-        com.jd.journalq.common.domain.Consumer.ConsumerPolicy consumerPolicy = new com.jd.journalq.common.domain.Consumer.ConsumerPolicy();
+        com.jd.journalq.domain.Consumer.ConsumerPolicy consumerPolicy = new com.jd.journalq.domain.Consumer.ConsumerPolicy();
         consumerPolicy.setMaxPartitionNum(3);
         consumerPolicy.setErrTimes(1);
 

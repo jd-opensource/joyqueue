@@ -1,7 +1,7 @@
 package com.jd.journalq.broker.monitor.service.support;
 
 import com.jd.journalq.broker.archive.ArchiveManager;
-import com.jd.journalq.common.monitor.ArchiveMonitorInfo;
+import com.jd.journalq.monitor.ArchiveMonitorInfo;
 import com.jd.journalq.broker.monitor.service.ArchiveMonitorService;
 
 /**

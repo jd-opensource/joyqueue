@@ -1,7 +1,7 @@
 package com.jd.journalq.nsr;
 
-import com.jd.journalq.common.domain.*;
-import com.jd.journalq.common.event.NameServerEvent;
+import com.jd.journalq.domain.*;
+import com.jd.journalq.event.NameServerEvent;
 import com.jd.journalq.toolkit.concurrent.EventListener;
 import com.jd.journalq.toolkit.lang.LifeCycle;
 

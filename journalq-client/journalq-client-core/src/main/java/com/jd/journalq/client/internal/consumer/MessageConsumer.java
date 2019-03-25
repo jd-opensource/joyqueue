@@ -5,7 +5,7 @@ import com.jd.journalq.client.internal.consumer.domain.ConsumeMessage;
 import com.jd.journalq.client.internal.consumer.domain.ConsumeReply;
 import com.jd.journalq.client.internal.consumer.interceptor.ConsumerInterceptor;
 import com.jd.journalq.client.internal.metadata.domain.TopicMetadata;
-import com.jd.journalq.common.exception.JMQCode;
+import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.toolkit.lang.LifeCycle;
 
 import java.util.List;

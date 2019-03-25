@@ -1,6 +1,6 @@
 package com.jd.journalq.handler.routing.command.monitor;
 
-import com.jd.journalq.common.monitor.PartitionAckMonitorInfo;
+import com.jd.journalq.monitor.PartitionAckMonitorInfo;
 import com.jd.journalq.handler.binder.annotation.Body;
 import com.jd.journalq.handler.binder.annotation.GenericValue;
 import com.jd.journalq.handler.binder.annotation.ParamterValue;

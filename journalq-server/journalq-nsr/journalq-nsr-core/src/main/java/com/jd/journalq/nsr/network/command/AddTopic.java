@@ -1,8 +1,8 @@
 package com.jd.journalq.nsr.network.command;
 
-import com.jd.journalq.common.domain.PartitionGroup;
-import com.jd.journalq.common.domain.Topic;
-import com.jd.journalq.common.network.transport.command.JMQPayload;
+import com.jd.journalq.domain.PartitionGroup;
+import com.jd.journalq.domain.Topic;
+import com.jd.journalq.network.transport.command.JMQPayload;
 
 import java.util.List;
 

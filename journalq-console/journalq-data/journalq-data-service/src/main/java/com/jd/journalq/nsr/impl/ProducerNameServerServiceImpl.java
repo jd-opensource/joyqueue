@@ -4,10 +4,10 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
-import com.jd.journalq.common.domain.ClientType;
-import com.jd.journalq.common.domain.TopicName;
-import com.jd.journalq.common.model.PageResult;
-import com.jd.journalq.common.model.QPageQuery;
+import com.jd.journalq.domain.ClientType;
+import com.jd.journalq.domain.TopicName;
+import com.jd.journalq.model.PageResult;
+import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.convert.CodeConverter;
 import com.jd.journalq.convert.NsrProducerConverter;
 import com.jd.journalq.exception.ServiceException;
@@ -50,12 +50,12 @@ public class ProducerNameServerServiceImpl extends NameServerBase implements Pro
      */
     @Override
     public int add(Producer producer) throws Exception {
-        com.jd.journalq.common.domain.Producer nsrProducer = new com.jd.journalq.common.domain.Producer();
+        com.jd.journalq.domain.Producer nsrProducer = new com.jd.journalq.domain.Producer();
         nsrProducer.setApp(producer.getApp().getCode());
         nsrProducer.setClientType(ClientType.valueOf(producer.getClientType()));
         nsrProducer.setTopic(CodeConverter.convertTopic(producer.getNamespace(),producer.getTopic()));
         if(!NullUtil.isEmpty(producer.getConfig())){
-            nsrProducer.setProducerPolicy(com.jd.journalq.common.domain.Producer.ProducerPolicy.Builder.build()
+            nsrProducer.setProducerPolicy(com.jd.journalq.domain.Producer.ProducerPolicy.Builder.build()
                     .nearby(producer.getConfig().isNearBy())
                     .single(producer.getConfig().isSingle())
                     .blackList(producer.getConfig().getBlackList())
@@ -77,17 +77,17 @@ public class ProducerNameServerServiceImpl extends NameServerBase implements Pro
     public int update(Producer producer) throws Exception {
 
         String result = post(GETBYID_PRODUCER,producer.getId());
-        com.jd.journalq.common.domain.Producer nsrProducer = JSON.parseObject(result, com.jd.journalq.common.domain.Producer.class);
+        com.jd.journalq.domain.Producer nsrProducer = JSON.parseObject(result, com.jd.journalq.domain.Producer.class);
 
         if (nsrProducer == null) {
-            nsrProducer = new com.jd.journalq.common.domain.Producer();
+            nsrProducer = new com.jd.journalq.domain.Producer();
         }
 
         nsrProducer.setApp(producer.getApp().getCode());
         nsrProducer.setTopic(CodeConverter.convertTopic(producer.getNamespace(),producer.getTopic()));
         nsrProducer.setClientType(ClientType.valueOf(producer.getClientType()));
         if(!NullUtil.isEmpty(producer.getConfig())){
-            nsrProducer.setProducerPolicy(com.jd.journalq.common.domain.Producer.ProducerPolicy.Builder.build()
+            nsrProducer.setProducerPolicy(com.jd.journalq.domain.Producer.ProducerPolicy.Builder.build()
                     .nearby(producer.getConfig().isNearBy())
                     .single(producer.getConfig().isSingle())
                     .blackList(producer.getConfig().getBlackList())
@@ -113,7 +113,7 @@ public class ProducerNameServerServiceImpl extends NameServerBase implements Pro
      */
     @Override
     public int delete(Producer producer) throws Exception {
-        com.jd.journalq.common.domain.Producer nsrProducer = new com.jd.journalq.common.domain.Producer();
+        com.jd.journalq.domain.Producer nsrProducer = new com.jd.journalq.domain.Producer();
         nsrProducer.setApp(producer.getApp().getCode());
         nsrProducer.setClientType(ClientType.valueOf(producer.getClientType()));
         nsrProducer.setTopic(CodeConverter.convertTopic(producer.getNamespace(),producer.getTopic()));
@@ -125,7 +125,7 @@ public class ProducerNameServerServiceImpl extends NameServerBase implements Pro
     public List<Producer> syncProducer(byte clientType) throws Exception {
         JSONObject request = new JSONObject();
         request.put("client_type",clientType);
-        List<com.jd.journalq.common.domain.Producer>  nsrProducers = JSONArray.parseArray(post(PRODUCER_GETALL_BY_CLIENTTYPE,request), com.jd.journalq.common.domain.Producer.class);
+        List<com.jd.journalq.domain.Producer>  nsrProducers = JSONArray.parseArray(post(PRODUCER_GETALL_BY_CLIENTTYPE,request), com.jd.journalq.domain.Producer.class);
         List<Producer> producerList = new ArrayList<>(nsrProducers.size());
         nsrProducers.forEach(nsrProducer->{
             Producer producer = new Producer();
@@ -150,7 +150,7 @@ public class ProducerNameServerServiceImpl extends NameServerBase implements Pro
         pageQuery.setPagination(query.getPagination());
         pageQuery.setQuery(producerQueryConvert(query.getQuery()));
         String result = post(FINDBYQUERY_PRODUCER,pageQuery);
-        PageResult<com.jd.journalq.common.domain.Producer> pageResult = JSON.parseObject(result,new TypeReference<PageResult<com.jd.journalq.common.domain.Producer>>(){});
+        PageResult<com.jd.journalq.domain.Producer> pageResult = JSON.parseObject(result,new TypeReference<PageResult<com.jd.journalq.domain.Producer>>(){});
 
         PageResult<Producer> producerPageResult = new PageResult<>();
         producerPageResult.setPagination(pageResult.getPagination());
@@ -160,13 +160,13 @@ public class ProducerNameServerServiceImpl extends NameServerBase implements Pro
     @Override
     public List<Producer> getListProducer(ProducerQuery producerQuery) throws Exception {
         String result = post(LIST_PRODUCER,producerQuery);
-        List<com.jd.journalq.common.domain.Producer> producerList = JSON.parseArray(result).toJavaList(com.jd.journalq.common.domain.Producer.class);
+        List<com.jd.journalq.domain.Producer> producerList = JSON.parseArray(result).toJavaList(com.jd.journalq.domain.Producer.class);
         return producerList.stream().map(producer -> nsrProducerConverter.revert(producer)).collect(Collectors.toList());
     }
     @Override
     public Producer findById(String nsrProducerId) throws Exception {
         String result = post(GETBYID_PRODUCER,nsrProducerId);
-        com.jd.journalq.common.domain.Producer nsrProducer = JSONObject.parseObject(result, com.jd.journalq.common.domain.Producer.class);
+        com.jd.journalq.domain.Producer nsrProducer = JSONObject.parseObject(result, com.jd.journalq.domain.Producer.class);
         return nsrProducerConverter.revert(nsrProducer);
     }
 

@@ -5,7 +5,7 @@ import com.google.common.collect.Maps;
 import com.jd.journalq.client.internal.cluster.domain.TopicMetadataHolder;
 import com.jd.journalq.client.internal.metadata.domain.TopicMetadata;
 import com.jd.journalq.client.internal.nameserver.NameServerConfig;
-import com.jd.journalq.common.exception.JMQCode;
+import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.toolkit.time.SystemClock;
 
 import java.util.List;

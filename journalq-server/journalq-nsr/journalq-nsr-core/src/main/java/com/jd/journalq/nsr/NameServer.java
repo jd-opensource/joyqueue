@@ -1,18 +1,17 @@
 package com.jd.journalq.nsr;
 
-import com.jd.journalq.common.domain.*;
-import com.jd.journalq.common.event.*;
-import com.jd.journalq.common.network.event.TransportEvent;
-import com.jd.journalq.common.network.transport.Transport;
-import com.jd.journalq.common.network.transport.TransportServer;
-import com.jd.journalq.common.network.transport.config.ServerConfig;
+import com.jd.journalq.domain.*;
+import com.jd.journalq.event.*;
+import com.jd.journalq.network.event.TransportEvent;
+import com.jd.journalq.network.transport.Transport;
+import com.jd.journalq.network.transport.TransportServer;
+import com.jd.journalq.network.transport.config.ServerConfig;
 import com.jd.journalq.nsr.config.NameServerConfig;
 import com.jd.journalq.nsr.message.MessageListener;
 import com.jd.journalq.nsr.message.Messenger;
 import com.jd.journalq.nsr.network.NsrTransportServerFactory;
 import com.jd.journalq.nsr.service.*;
 import com.jd.journalq.nsr.util.DCWrapper;
-import com.jd.journalq.nsr.service.*;
 import com.jd.journalq.toolkit.concurrent.EventBus;
 import com.jd.journalq.toolkit.concurrent.EventListener;
 import com.jd.journalq.toolkit.config.PropertySupplier;

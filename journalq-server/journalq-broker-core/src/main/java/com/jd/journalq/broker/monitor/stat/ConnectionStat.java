@@ -2,7 +2,7 @@ package com.jd.journalq.broker.monitor.stat;
 
 import com.google.common.collect.Maps;
 import com.jd.journalq.broker.monitor.metrics.Metrics;
-import com.jd.journalq.common.monitor.Client;
+import com.jd.journalq.monitor.Client;
 
 import java.util.concurrent.ConcurrentMap;
 

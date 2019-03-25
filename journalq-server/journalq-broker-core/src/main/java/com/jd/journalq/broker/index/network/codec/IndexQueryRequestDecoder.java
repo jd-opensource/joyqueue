@@ -1,11 +1,11 @@
 package com.jd.journalq.broker.index.network.codec;
 
 import com.jd.journalq.broker.index.command.ConsumeIndexQueryRequest;
-import com.jd.journalq.common.network.transport.codec.JMQHeader;
-import com.jd.journalq.common.network.transport.codec.PayloadDecoder;
-import com.jd.journalq.common.network.command.CommandType;
-import com.jd.journalq.common.network.serializer.Serializer;
-import com.jd.journalq.common.network.transport.command.Type;
+import com.jd.journalq.network.transport.codec.JMQHeader;
+import com.jd.journalq.network.transport.codec.PayloadDecoder;
+import com.jd.journalq.network.command.CommandType;
+import com.jd.journalq.network.serializer.Serializer;
+import com.jd.journalq.network.transport.command.Type;
 
 import io.netty.buffer.ByteBuf;
 import org.apache.commons.collections.map.HashedMap;

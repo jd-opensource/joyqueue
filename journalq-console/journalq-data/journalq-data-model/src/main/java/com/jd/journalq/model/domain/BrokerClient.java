@@ -1,6 +1,6 @@
 package com.jd.journalq.model.domain;
 
-import com.jd.journalq.common.monitor.Client;
+import com.jd.journalq.monitor.Client;
 
 public class BrokerClient {
 

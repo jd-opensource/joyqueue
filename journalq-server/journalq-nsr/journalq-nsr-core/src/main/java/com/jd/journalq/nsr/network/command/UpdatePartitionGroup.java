@@ -1,7 +1,7 @@
 package com.jd.journalq.nsr.network.command;
 
-import com.jd.journalq.common.domain.PartitionGroup;
-import com.jd.journalq.common.network.transport.command.Types;
+import com.jd.journalq.domain.PartitionGroup;
+import com.jd.journalq.network.transport.command.Types;
 
 public class UpdatePartitionGroup extends OperatePartitionGroup implements Types {
     public UpdatePartitionGroup(PartitionGroup partitionGroup, boolean rollback) {

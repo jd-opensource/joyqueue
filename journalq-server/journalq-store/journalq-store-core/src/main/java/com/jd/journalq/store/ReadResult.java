@@ -1,6 +1,6 @@
 package com.jd.journalq.store;
 
-import com.jd.journalq.common.exception.JMQCode;
+import com.jd.journalq.exception.JMQCode;
 
 import java.nio.ByteBuffer;
 

@@ -1,6 +1,6 @@
 package com.jd.journalq.repository;
 
-import com.jd.journalq.common.model.QKeyword;
+import com.jd.journalq.model.QKeyword;
 import com.jd.journalq.model.domain.UserToken;
 import org.springframework.stereotype.Repository;
 

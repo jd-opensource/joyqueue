@@ -5,14 +5,14 @@ import com.jd.journalq.broker.archive.ArchiveManager;
 import com.jd.journalq.broker.archive.ConsumeArchiveService;
 import com.jd.journalq.broker.buffer.Serializer;
 import com.jd.journalq.broker.cluster.ClusterManager;
-import com.jd.journalq.common.domain.Partition;
-import com.jd.journalq.common.domain.QosLevel;
-import com.jd.journalq.common.domain.TopicName;
-import com.jd.journalq.common.exception.JMQCode;
-import com.jd.journalq.common.exception.JMQException;
-import com.jd.journalq.common.message.MessageLocation;
-import com.jd.journalq.common.network.session.Connection;
-import com.jd.journalq.common.network.session.Consumer;
+import com.jd.journalq.domain.Partition;
+import com.jd.journalq.domain.QosLevel;
+import com.jd.journalq.domain.TopicName;
+import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.message.MessageLocation;
+import com.jd.journalq.network.session.Connection;
+import com.jd.journalq.network.session.Consumer;
 import com.jd.journalq.broker.consumer.filter.FilterCallback;
 import com.jd.journalq.broker.consumer.model.PullResult;
 import com.jd.journalq.broker.consumer.position.PositionManager;
@@ -200,7 +200,7 @@ class PartitionConsumption extends Service {
 
                 List<ByteBuffer> byteBuffers = Lists.newArrayList(byteBufferArr);
                 if (StringUtils.isNotEmpty(consumer.getApp())) {
-                    com.jd.journalq.common.domain.Consumer consumerConfig = clusterManager.getConsumer(TopicName.parse(consumer.getTopic()), consumer.getApp());
+                    com.jd.journalq.domain.Consumer consumerConfig = clusterManager.getConsumer(TopicName.parse(consumer.getTopic()), consumer.getApp());
 
                     // 过滤消息
                     byteBuffers = filterMessageSupport.filter(consumerConfig, byteBuffers, new FilterCallbackImpl(consumer));
@@ -264,7 +264,7 @@ class PartitionConsumption extends Service {
                 }
 
                 List<ByteBuffer> rByteBufferList = Lists.newArrayList(byteBuffers);
-                com.jd.journalq.common.domain.Consumer consumerConfig = clusterManager.getConsumer(TopicName.parse(consumer.getTopic()), consumer.getApp());
+                com.jd.journalq.domain.Consumer consumerConfig = clusterManager.getConsumer(TopicName.parse(consumer.getTopic()), consumer.getApp());
 
                 // 过滤消息
                 rByteBufferList = filterMessageSupport.filter(consumerConfig, rByteBufferList, new FilterCallbackImpl(consumer));

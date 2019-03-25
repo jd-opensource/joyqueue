@@ -1,7 +1,7 @@
 package com.jd.journalq.broker.kafka.network;
 
-import com.jd.journalq.common.network.transport.codec.PayloadCodec;
-import com.jd.journalq.common.network.transport.command.Payload;
+import com.jd.journalq.network.transport.codec.PayloadCodec;
+import com.jd.journalq.network.transport.command.Payload;
 
 /**
  * KafkaPayloadCodec

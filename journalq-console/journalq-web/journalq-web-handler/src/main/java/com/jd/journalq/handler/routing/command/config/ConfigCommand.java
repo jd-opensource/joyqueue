@@ -8,7 +8,7 @@ import com.jd.journalq.handler.routing.command.NsrCommandSupport;
 import com.jd.journalq.handler.Constants;
 import com.jd.journalq.model.domain.Config;
 import com.jd.journalq.model.query.QConfig;
-import com.jd.journalq.common.model.QPageQuery;
+import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.service.ConfigService;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;

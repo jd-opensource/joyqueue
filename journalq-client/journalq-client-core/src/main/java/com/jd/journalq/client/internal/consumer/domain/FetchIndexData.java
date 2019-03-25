@@ -1,6 +1,6 @@
 package com.jd.journalq.client.internal.consumer.domain;
 
-import com.jd.journalq.common.exception.JMQCode;
+import com.jd.journalq.exception.JMQCode;
 
 /**
  * FetchIndexData

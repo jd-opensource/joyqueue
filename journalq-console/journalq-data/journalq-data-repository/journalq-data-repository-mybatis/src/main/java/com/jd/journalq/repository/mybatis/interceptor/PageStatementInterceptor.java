@@ -1,7 +1,7 @@
 package com.jd.journalq.repository.mybatis.interceptor;
 
-import com.jd.journalq.common.model.Pagination;
-import com.jd.journalq.common.model.QPageQuery;
+import com.jd.journalq.model.Pagination;
+import com.jd.journalq.model.QPageQuery;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.statement.StatementHandler;
 import org.apache.ibatis.mapping.BoundSql;

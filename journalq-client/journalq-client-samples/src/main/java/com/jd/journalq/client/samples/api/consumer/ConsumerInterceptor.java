@@ -7,7 +7,7 @@ import io.openmessaging.OMS;
 import io.openmessaging.consumer.Consumer;
 import io.openmessaging.consumer.MessageListener;
 import io.openmessaging.interceptor.Context;
-import io.openmessaging.jmq.JMQBuiltinKeys;
+import io.openmessaging.journalq.JMQBuiltinKeys;
 import io.openmessaging.message.Message;
 
 /**

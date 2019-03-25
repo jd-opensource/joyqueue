@@ -1,11 +1,10 @@
 package com.jd.journalq.store.cli;
 
-import com.jd.journalq.common.domain.QosLevel;
-import com.jd.journalq.common.exception.JMQCode;
+import com.jd.journalq.domain.QosLevel;
+import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.store.*;
 import com.jd.journalq.store.message.BatchMessageParser;
 import com.jd.journalq.store.utils.MessageUtils;
-import com.jd.journalq.store.*;
 import com.jd.journalq.toolkit.concurrent.LoopThread;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

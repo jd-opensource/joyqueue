@@ -1,7 +1,7 @@
 package com.jd.journalq.client.internal.nameserver.helper;
 
 import com.jd.journalq.client.internal.nameserver.NameServerConfig;
-import com.jd.journalq.common.domain.TopicName;
+import com.jd.journalq.domain.TopicName;
 import org.apache.commons.lang3.StringUtils;
 
 /**

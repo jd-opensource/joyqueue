@@ -2,8 +2,8 @@ package com.jd.journalq.broker.producer;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.jd.journalq.common.network.session.Producer;
-import com.jd.journalq.common.network.session.TransactionId;
+import com.jd.journalq.network.session.Producer;
+import com.jd.journalq.network.session.TransactionId;
 import com.jd.journalq.toolkit.time.SystemClock;
 
 import java.util.List;

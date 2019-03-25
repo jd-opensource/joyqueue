@@ -1,6 +1,6 @@
 package com.jd.journalq.nsr.util;
 
-import com.jd.journalq.common.domain.DataCenter;
+import com.jd.journalq.domain.DataCenter;
 import com.jd.journalq.nsr.NsrPlugins;
 import com.jd.journalq.toolkit.URL;
 

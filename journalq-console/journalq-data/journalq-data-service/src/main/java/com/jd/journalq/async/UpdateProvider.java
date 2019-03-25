@@ -1,6 +1,6 @@
 package com.jd.journalq.async;
 
-import com.jd.journalq.common.domain.PartitionGroup;
+import com.jd.journalq.domain.PartitionGroup;
 import org.apache.http.client.methods.HttpUriRequest;
 
 /**

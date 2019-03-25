@@ -1,6 +1,6 @@
 package com.jd.journalq.broker.retry;
 
-import com.jd.journalq.common.exception.JMQException;
+import com.jd.journalq.exception.JMQException;
 import com.jd.journalq.server.retry.api.MessageRetry;
 import com.jd.journalq.server.retry.api.RetryPolicyProvider;
 import com.jd.journalq.server.retry.model.RetryMessageModel;

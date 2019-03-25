@@ -1,7 +1,7 @@
 package com.jd.journalq.server.retry.remote;
 
 
-import com.jd.journalq.common.network.transport.TransportClient;
+import com.jd.journalq.network.transport.TransportClient;
 
 import java.util.Set;
 

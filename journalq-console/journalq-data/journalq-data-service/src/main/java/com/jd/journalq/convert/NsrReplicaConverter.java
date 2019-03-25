@@ -1,7 +1,7 @@
 package com.jd.journalq.convert;
 
-import com.jd.journalq.common.domain.Replica;
-import com.jd.journalq.common.domain.TopicName;
+import com.jd.journalq.domain.Replica;
+import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.model.domain.Namespace;
 import com.jd.journalq.model.domain.PartitionGroupReplica;
 import com.jd.journalq.model.domain.Topic;

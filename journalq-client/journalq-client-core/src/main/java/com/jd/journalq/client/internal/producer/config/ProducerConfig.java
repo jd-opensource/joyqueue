@@ -1,6 +1,6 @@
 package com.jd.journalq.client.internal.producer.config;
 
-import com.jd.journalq.common.domain.QosLevel;
+import com.jd.journalq.domain.QosLevel;
 import com.jd.journalq.toolkit.retry.RetryPolicy;
 
 /**

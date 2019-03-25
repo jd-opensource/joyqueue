@@ -1,6 +1,6 @@
 package com.jd.journalq.broker.consumer;
 
-import com.jd.journalq.common.domain.Consumer;
+import com.jd.journalq.domain.Consumer;
 import com.jd.journalq.toolkit.time.SystemClock;
 import org.junit.Assert;
 import org.junit.Test;

@@ -6,7 +6,7 @@ import com.jd.journalq.broker.kafka.KafkaCommandType;
 import com.jd.journalq.broker.kafka.command.ApiVersionsRequest;
 import com.jd.journalq.broker.kafka.command.ApiVersionsResponse;
 import com.jd.journalq.broker.kafka.model.ApiVersion;
-import com.jd.journalq.common.network.transport.command.Type;
+import com.jd.journalq.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
 
 /**

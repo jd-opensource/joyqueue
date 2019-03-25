@@ -3,7 +3,7 @@ package com.jd.journalq.broker;
 import com.jd.journalq.broker.consumer.Consume;
 import com.jd.journalq.broker.election.ElectionService;
 import com.jd.journalq.broker.producer.Produce;
-import com.jd.journalq.common.security.Authentication;
+import com.jd.journalq.security.Authentication;
 import com.jd.journalq.nsr.NameService;
 import com.jd.journalq.server.archive.store.api.ArchiveStore;
 import com.jd.journalq.server.retry.api.MessageRetry;

@@ -1,8 +1,8 @@
 package com.jd.journalq.broker.helper;
 
 import com.jd.journalq.broker.monitor.SessionManager;
-import com.jd.journalq.common.network.session.Connection;
-import com.jd.journalq.common.network.transport.Transport;
+import com.jd.journalq.network.session.Connection;
+import com.jd.journalq.network.transport.Transport;
 
 /**
  * session帮助类

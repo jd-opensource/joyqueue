@@ -5,11 +5,11 @@ import com.jd.journalq.model.domain.Config;
 /**
  * Created by wangxiaofei1 on 2018/12/27.
  */
-public class NsrConfigConverter extends Converter<Config, com.jd.journalq.common.domain.Config> {
+public class NsrConfigConverter extends Converter<Config, com.jd.journalq.domain.Config> {
 
     @Override
-    protected com.jd.journalq.common.domain.Config forward(Config config) {
-        com.jd.journalq.common.domain.Config nsrConfig = new com.jd.journalq.common.domain.Config();
+    protected com.jd.journalq.domain.Config forward(Config config) {
+        com.jd.journalq.domain.Config nsrConfig = new com.jd.journalq.domain.Config();
         nsrConfig.setGroup(config.getGroup());
         nsrConfig.setKey(config.getKey());
         nsrConfig.setValue(config.getValue());
@@ -17,7 +17,7 @@ public class NsrConfigConverter extends Converter<Config, com.jd.journalq.common
     }
 
     @Override
-    protected Config backward(com.jd.journalq.common.domain.Config nsrConfig) {
+    protected Config backward(com.jd.journalq.domain.Config nsrConfig) {
         Config config = new Config();
         config.setId(nsrConfig.getId());
         config.setGroup(nsrConfig.getGroup());

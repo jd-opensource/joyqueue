@@ -1,8 +1,8 @@
 package com.jd.journalq.convert;
 
-import com.jd.journalq.common.domain.ClientType;
-import com.jd.journalq.common.domain.TopicName;
-import com.jd.journalq.common.domain.TopicType;
+import com.jd.journalq.domain.ClientType;
+import com.jd.journalq.domain.TopicName;
+import com.jd.journalq.domain.TopicType;
 import com.jd.journalq.model.domain.*;
 import com.jd.journalq.toolkit.retry.RetryPolicy;
 import org.apache.commons.lang3.StringUtils;
@@ -14,10 +14,10 @@ import java.util.stream.Collectors;
 /**
  * Created by wangxiaofei1 on 2019/1/2.
  */
-public class NsrConsumerConverter extends Converter<Consumer, com.jd.journalq.common.domain.Consumer> {
+public class NsrConsumerConverter extends Converter<Consumer, com.jd.journalq.domain.Consumer> {
     @Override
-    protected com.jd.journalq.common.domain.Consumer forward(Consumer consumer) {
-        com.jd.journalq.common.domain.Consumer nsrConsumer = new com.jd.journalq.common.domain.Consumer();
+    protected com.jd.journalq.domain.Consumer forward(Consumer consumer) {
+        com.jd.journalq.domain.Consumer nsrConsumer = new com.jd.journalq.domain.Consumer();
 
         TopicName topicName = CodeConverter.convertTopic(consumer.getNamespace(),consumer.getTopic());
         nsrConsumer.setApp(CodeConverter.convertApp(consumer.getApp(), consumer.getSubscribeGroup()));
@@ -26,7 +26,7 @@ public class NsrConsumerConverter extends Converter<Consumer, com.jd.journalq.co
         nsrConsumer.setTopic(topicName);
 
         if (consumer.getConfig() != null) {
-            nsrConsumer.setConsumerPolicy(com.jd.journalq.common.domain.Consumer.ConsumerPolicy.Builder.build()
+            nsrConsumer.setConsumerPolicy(com.jd.journalq.domain.Consumer.ConsumerPolicy.Builder.build()
                     .nearby(consumer.getConfig().isNearBy())
                     .concurrent(consumer.getConfig().getConcurrent())
                     .blackList(consumer.getConfig().getBlackList())
@@ -52,7 +52,7 @@ public class NsrConsumerConverter extends Converter<Consumer, com.jd.journalq.co
     }
 
     @Override
-    protected Consumer backward(com.jd.journalq.common.domain.Consumer nsrConsumer) {
+    protected Consumer backward(com.jd.journalq.domain.Consumer nsrConsumer) {
         Consumer consumer = new Consumer();
         consumer.setId(nsrConsumer.getId());
         TopicName topicName = nsrConsumer.getTopic();
@@ -69,7 +69,7 @@ public class NsrConsumerConverter extends Converter<Consumer, com.jd.journalq.co
         }
 
         ConsumerConfig consumerConfig = new ConsumerConfig();
-        com.jd.journalq.common.domain.Consumer.ConsumerPolicy consumerPolicy = nsrConsumer.getConsumerPolicy();
+        com.jd.journalq.domain.Consumer.ConsumerPolicy consumerPolicy = nsrConsumer.getConsumerPolicy();
         if (consumerPolicy != null) {
             consumerConfig.setConsumerId(nsrConsumer.getId());
             consumerConfig.setNearBy(consumerPolicy.getNearby());

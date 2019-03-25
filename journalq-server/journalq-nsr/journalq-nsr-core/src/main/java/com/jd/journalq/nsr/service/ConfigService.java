@@ -1,6 +1,6 @@
 package com.jd.journalq.nsr.service;
 
-import com.jd.journalq.common.domain.Config;
+import com.jd.journalq.domain.Config;
 import com.jd.journalq.nsr.model.ConfigQuery;
 
 

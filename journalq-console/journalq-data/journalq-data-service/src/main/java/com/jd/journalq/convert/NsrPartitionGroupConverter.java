@@ -1,6 +1,6 @@
 package com.jd.journalq.convert;
 
-import com.jd.journalq.common.domain.PartitionGroup;
+import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.model.domain.Namespace;
 import com.jd.journalq.model.domain.PartitionGroupReplica;
 import com.jd.journalq.model.domain.Topic;

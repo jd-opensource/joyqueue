@@ -9,10 +9,10 @@ import com.jd.journalq.broker.monitor.stat.PartitionGroupStat;
 import com.jd.journalq.broker.monitor.stat.PartitionStat;
 import com.jd.journalq.broker.monitor.stat.ProducerStat;
 import com.jd.journalq.broker.monitor.stat.TopicStat;
-import com.jd.journalq.common.model.Pager;
-import com.jd.journalq.common.monitor.ProducerMonitorInfo;
-import com.jd.journalq.common.monitor.ProducerPartitionGroupMonitorInfo;
-import com.jd.journalq.common.monitor.ProducerPartitionMonitorInfo;
+import com.jd.journalq.model.Pager;
+import com.jd.journalq.monitor.ProducerMonitorInfo;
+import com.jd.journalq.monitor.ProducerPartitionGroupMonitorInfo;
+import com.jd.journalq.monitor.ProducerPartitionMonitorInfo;
 import com.jd.journalq.store.StoreManagementService;
 
 import java.util.List;

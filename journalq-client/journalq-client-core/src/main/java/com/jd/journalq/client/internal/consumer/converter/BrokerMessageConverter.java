@@ -6,10 +6,10 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Table;
 import com.jd.journalq.client.internal.consumer.domain.ConsumeMessage;
 import com.jd.journalq.client.internal.consumer.domain.FetchMessageData;
-import com.jd.journalq.common.domain.TopicName;
-import com.jd.journalq.common.message.BrokerMessage;
-import com.jd.journalq.common.network.command.FetchPartitionMessageAckData;
-import com.jd.journalq.common.network.command.FetchTopicMessageAckData;
+import com.jd.journalq.domain.TopicName;
+import com.jd.journalq.message.BrokerMessage;
+import com.jd.journalq.network.command.FetchPartitionMessageAckData;
+import com.jd.journalq.network.command.FetchTopicMessageAckData;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 

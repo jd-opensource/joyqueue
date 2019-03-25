@@ -1,9 +1,9 @@
 package com.jd.journalq.nsr.service;
 
 
-import com.jd.journalq.common.model.PageResult;
-import com.jd.journalq.common.model.QPageQuery;
-import com.jd.journalq.common.model.Query;
+import com.jd.journalq.model.PageResult;
+import com.jd.journalq.model.QPageQuery;
+import com.jd.journalq.model.Query;
 
 import java.util.List;
 

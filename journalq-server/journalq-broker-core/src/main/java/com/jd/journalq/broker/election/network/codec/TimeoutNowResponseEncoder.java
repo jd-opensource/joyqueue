@@ -1,8 +1,8 @@
 package com.jd.journalq.broker.election.network.codec;
 
-import com.jd.journalq.common.network.transport.codec.PayloadEncoder;
-import com.jd.journalq.common.network.command.CommandType;
-import com.jd.journalq.common.network.transport.command.Type;
+import com.jd.journalq.network.transport.codec.PayloadEncoder;
+import com.jd.journalq.network.command.CommandType;
+import com.jd.journalq.network.transport.command.Type;
 import com.jd.journalq.broker.election.command.TimeoutNowResponse;
 import io.netty.buffer.ByteBuf;
 

@@ -4,16 +4,16 @@ import com.google.common.collect.Lists;
 import com.jd.journalq.broker.buffer.Serializer;
 import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.monitor.BrokerMonitor;
-import com.jd.journalq.common.domain.PartitionGroup;
-import com.jd.journalq.common.domain.QosLevel;
-import com.jd.journalq.common.domain.TopicName;
-import com.jd.journalq.common.exception.JMQCode;
-import com.jd.journalq.common.exception.JMQException;
-import com.jd.journalq.common.message.BrokerCommit;
-import com.jd.journalq.common.message.BrokerPrepare;
-import com.jd.journalq.common.message.BrokerRollback;
-import com.jd.journalq.common.network.session.Producer;
-import com.jd.journalq.common.network.session.TransactionId;
+import com.jd.journalq.domain.PartitionGroup;
+import com.jd.journalq.domain.QosLevel;
+import com.jd.journalq.domain.TopicName;
+import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.message.BrokerCommit;
+import com.jd.journalq.message.BrokerPrepare;
+import com.jd.journalq.message.BrokerRollback;
+import com.jd.journalq.network.session.Producer;
+import com.jd.journalq.network.session.TransactionId;
 import com.jd.journalq.store.PartitionGroupStore;
 import com.jd.journalq.store.StoreService;
 import com.jd.journalq.store.WriteRequest;
@@ -162,7 +162,7 @@ public class TransactionManager extends Service {
 
     private void waitFuture(Producer producer, Future<WriteResult> future, long receiveTime) throws JMQException {
         try {
-            com.jd.journalq.common.domain.Producer.ProducerPolicy producerPolicy = clusterManager.tryGetProducerPolicy(TopicName.parse(producer.getTopic()), producer.getApp());
+            com.jd.journalq.domain.Producer.ProducerPolicy producerPolicy = clusterManager.tryGetProducerPolicy(TopicName.parse(producer.getTopic()), producer.getApp());
             if (producerPolicy == null) {
                 throw new JMQException(JMQCode.FW_PRODUCER_NOT_EXISTS);
             }

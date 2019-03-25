@@ -5,12 +5,12 @@ import com.jd.journalq.broker.BrokerContext;
 import com.jd.journalq.broker.election.ElectionManager;
 import com.jd.journalq.broker.election.ElectionService;
 import com.jd.journalq.broker.election.RaftLeaderElection;
-import com.jd.journalq.common.network.transport.command.Command;
-import com.jd.journalq.common.network.command.CommandType;
-import com.jd.journalq.common.network.transport.command.Type;
-import com.jd.journalq.common.network.transport.command.handler.CommandHandler;
-import com.jd.journalq.common.network.transport.Transport;
-import com.jd.journalq.common.network.transport.exception.TransportException;
+import com.jd.journalq.network.transport.command.Command;
+import com.jd.journalq.network.command.CommandType;
+import com.jd.journalq.network.transport.command.Type;
+import com.jd.journalq.network.transport.command.handler.CommandHandler;
+import com.jd.journalq.network.transport.Transport;
+import com.jd.journalq.network.transport.exception.TransportException;
 import com.jd.journalq.toolkit.lang.Preconditions;
 
 /**

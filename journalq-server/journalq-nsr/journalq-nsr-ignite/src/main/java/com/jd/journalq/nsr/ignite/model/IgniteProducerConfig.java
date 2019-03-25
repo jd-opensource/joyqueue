@@ -1,6 +1,6 @@
 package com.jd.journalq.nsr.ignite.model;
 
-import com.jd.journalq.common.domain.Producer;
+import com.jd.journalq.domain.Producer;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ignite.binary.BinaryObjectException;
 import org.apache.ignite.binary.BinaryReader;

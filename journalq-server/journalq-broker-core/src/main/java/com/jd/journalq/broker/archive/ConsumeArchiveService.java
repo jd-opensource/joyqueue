@@ -2,9 +2,9 @@ package com.jd.journalq.broker.archive;
 
 import com.jd.journalq.broker.Plugins;
 import com.jd.journalq.broker.cluster.ClusterManager;
-import com.jd.journalq.common.exception.JMQException;
-import com.jd.journalq.common.message.MessageLocation;
-import com.jd.journalq.common.network.session.Connection;
+import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.message.MessageLocation;
+import com.jd.journalq.network.session.Connection;
 import com.jd.journalq.server.archive.store.api.ArchiveStore;
 import com.jd.journalq.server.archive.store.model.ConsumeLog;
 import com.jd.journalq.toolkit.concurrent.LoopThread;

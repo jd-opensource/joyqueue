@@ -1,9 +1,9 @@
 package com.jd.journalq.server.retry.remote.command.codec;
 
-import com.jd.journalq.common.network.command.CommandType;
-import com.jd.journalq.common.network.transport.codec.JMQHeader;
-import com.jd.journalq.common.network.transport.codec.PayloadCodec;
-import com.jd.journalq.common.network.transport.command.Type;
+import com.jd.journalq.network.command.CommandType;
+import com.jd.journalq.network.transport.codec.JMQHeader;
+import com.jd.journalq.network.transport.codec.PayloadCodec;
+import com.jd.journalq.network.transport.command.Type;
 import com.jd.journalq.server.retry.model.RetryMessageModel;
 import com.jd.journalq.server.retry.remote.command.GetRetryAck;
 import com.jd.journalq.server.retry.util.RetrySerializerUtil;

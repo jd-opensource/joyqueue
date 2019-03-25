@@ -1,7 +1,7 @@
 package com.jd.journalq.nsr.network.codec;
 
-import com.jd.journalq.common.network.codec.SubscribeCodec;
-import com.jd.journalq.common.network.command.Subscribe;
+import com.jd.journalq.network.codec.SubscribeCodec;
+import com.jd.journalq.network.command.Subscribe;
 import com.jd.journalq.nsr.network.NsrPayloadCodec;
 import com.jd.journalq.nsr.network.command.NsrCommandType;
 

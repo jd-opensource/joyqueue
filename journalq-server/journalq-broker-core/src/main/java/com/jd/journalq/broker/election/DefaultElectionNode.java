@@ -1,6 +1,6 @@
 package com.jd.journalq.broker.election;
 
-import com.jd.journalq.common.domain.Broker;
+import com.jd.journalq.domain.Broker;
 
 /**
  * author: zhuduohui

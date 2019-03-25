@@ -2,8 +2,8 @@ package com.jd.journalq.service.impl;
 
 
 import com.alibaba.fastjson.JSON;
-import com.jd.journalq.common.domain.*;
-import com.jd.journalq.common.monitor.RestResponse;
+import com.jd.journalq.domain.*;
+import com.jd.journalq.monitor.RestResponse;
 import com.jd.journalq.convert.CodeConverter;
 import com.jd.journalq.service.CoordinatorMonitorService;
 import com.jd.journalq.model.domain.CoordinatorBroker;

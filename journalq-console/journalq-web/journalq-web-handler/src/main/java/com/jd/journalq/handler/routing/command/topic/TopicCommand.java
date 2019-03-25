@@ -1,7 +1,7 @@
 package com.jd.journalq.handler.routing.command.topic;
 
-import com.jd.journalq.common.model.PageResult;
-import com.jd.journalq.common.model.QPageQuery;
+import com.jd.journalq.model.PageResult;
+import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.handler.binder.annotation.GenericBody;
 import com.jd.journalq.handler.binder.annotation.GenericValue;
 import com.jd.journalq.handler.binder.annotation.Page;

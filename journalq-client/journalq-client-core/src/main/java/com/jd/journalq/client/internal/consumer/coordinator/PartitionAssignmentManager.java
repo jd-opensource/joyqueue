@@ -8,10 +8,10 @@ import com.jd.journalq.client.internal.consumer.coordinator.domain.BrokerAssignm
 import com.jd.journalq.client.internal.consumer.coordinator.domain.PartitionAssignment;
 import com.jd.journalq.client.internal.metadata.domain.PartitionMetadata;
 import com.jd.journalq.client.internal.metadata.domain.TopicMetadata;
-import com.jd.journalq.common.exception.JMQCode;
-import com.jd.journalq.common.network.command.FetchAssignedPartitionAck;
-import com.jd.journalq.common.network.command.FetchAssignedPartitionAckData;
-import com.jd.journalq.common.network.domain.BrokerNode;
+import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.network.command.FetchAssignedPartitionAck;
+import com.jd.journalq.network.command.FetchAssignedPartitionAckData;
+import com.jd.journalq.network.domain.BrokerNode;
 import com.jd.journalq.toolkit.service.Service;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;

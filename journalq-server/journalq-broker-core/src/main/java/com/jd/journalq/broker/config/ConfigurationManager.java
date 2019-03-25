@@ -1,9 +1,9 @@
 package com.jd.journalq.broker.config;
 
-import com.jd.journalq.common.domain.Config;
-import com.jd.journalq.common.event.ConfigEvent;
-import com.jd.journalq.common.event.EventType;
-import com.jd.journalq.common.event.NameServerEvent;
+import com.jd.journalq.domain.Config;
+import com.jd.journalq.event.ConfigEvent;
+import com.jd.journalq.event.EventType;
+import com.jd.journalq.event.NameServerEvent;
 import com.jd.journalq.toolkit.concurrent.EventBus;
 import com.jd.journalq.toolkit.concurrent.EventListener;
 import com.jd.journalq.toolkit.service.Service;

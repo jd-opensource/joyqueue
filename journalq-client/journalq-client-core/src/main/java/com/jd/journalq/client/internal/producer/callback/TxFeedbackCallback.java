@@ -1,7 +1,7 @@
 package com.jd.journalq.client.internal.producer.callback;
 
 import com.jd.journalq.client.internal.producer.domain.TransactionStatus;
-import com.jd.journalq.common.domain.TopicName;
+import com.jd.journalq.domain.TopicName;
 
 /**
  * TxFeedbackCallback

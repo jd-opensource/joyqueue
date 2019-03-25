@@ -4,15 +4,15 @@ import com.jd.journalq.client.internal.nameserver.NameServerConfig;
 import com.jd.journalq.client.internal.transport.Client;
 import com.jd.journalq.client.internal.transport.ClientState;
 import com.jd.journalq.client.internal.transport.config.TransportConfig;
-import com.jd.journalq.common.network.command.FetchAssignedPartition;
-import com.jd.journalq.common.network.command.FetchAssignedPartitionAck;
-import com.jd.journalq.common.network.command.FetchAssignedPartitionData;
-import com.jd.journalq.common.network.command.FetchCluster;
-import com.jd.journalq.common.network.command.FetchClusterAck;
-import com.jd.journalq.common.network.command.FindCoordinator;
-import com.jd.journalq.common.network.command.FindCoordinatorAck;
-import com.jd.journalq.common.network.transport.command.Command;
-import com.jd.journalq.common.network.transport.command.JMQCommand;
+import com.jd.journalq.network.command.FetchAssignedPartition;
+import com.jd.journalq.network.command.FetchAssignedPartitionAck;
+import com.jd.journalq.network.command.FetchAssignedPartitionData;
+import com.jd.journalq.network.command.FetchCluster;
+import com.jd.journalq.network.command.FetchClusterAck;
+import com.jd.journalq.network.command.FindCoordinator;
+import com.jd.journalq.network.command.FindCoordinatorAck;
+import com.jd.journalq.network.transport.command.Command;
+import com.jd.journalq.network.transport.command.JMQCommand;
 
 import java.util.List;
 

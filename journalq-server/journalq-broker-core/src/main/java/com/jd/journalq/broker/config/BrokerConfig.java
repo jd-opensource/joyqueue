@@ -1,8 +1,8 @@
 package com.jd.journalq.broker.config;
 
-import com.jd.journalq.common.domain.Broker;
-import com.jd.journalq.common.network.transport.config.ServerConfig;
-import com.jd.journalq.common.network.transport.config.TransportConfigSupport;
+import com.jd.journalq.domain.Broker;
+import com.jd.journalq.network.transport.config.ServerConfig;
+import com.jd.journalq.network.transport.config.TransportConfigSupport;
 import com.jd.journalq.toolkit.config.Property;
 import com.jd.journalq.toolkit.config.PropertySupplier;
 import com.jd.journalq.toolkit.config.PropertySupplierAware;

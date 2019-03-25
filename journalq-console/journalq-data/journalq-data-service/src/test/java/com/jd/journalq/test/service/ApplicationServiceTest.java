@@ -1,8 +1,8 @@
 package com.jd.journalq.test.service;
 
 import com.jd.journalq.model.query.QApplication;
-import com.jd.journalq.common.model.Pagination;
-import com.jd.journalq.common.model.QPageQuery;
+import com.jd.journalq.model.Pagination;
+import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.service.ApplicationService;
 import org.junit.Test;
 import org.junit.runner.RunWith;

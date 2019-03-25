@@ -6,7 +6,7 @@ import com.jd.journalq.client.internal.cluster.ClusterClientManager;
 import com.jd.journalq.client.internal.metadata.converter.ClusterMetadataConverter;
 import com.jd.journalq.client.internal.metadata.domain.ClusterMetadata;
 import com.jd.journalq.client.internal.metadata.domain.TopicMetadata;
-import com.jd.journalq.common.network.command.FetchClusterAck;
+import com.jd.journalq.network.command.FetchClusterAck;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

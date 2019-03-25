@@ -4,9 +4,9 @@ import com.jd.journalq.toolkit.network.IpUtil;
 import io.openmessaging.KeyValue;
 import io.openmessaging.MessagingAccessPoint;
 import io.openmessaging.OMS;
-import io.openmessaging.jmq.JMQBuiltinKeys;
-import io.openmessaging.jmq.producer.ExtensionProducer;
-import io.openmessaging.jmq.producer.ExtensionTransactionalResult;
+import io.openmessaging.journalq.JMQBuiltinKeys;
+import io.openmessaging.journalq.producer.ExtensionProducer;
+import io.openmessaging.journalq.producer.ExtensionTransactionalResult;
 import io.openmessaging.message.Message;
 import io.openmessaging.producer.SendResult;
 

@@ -1,6 +1,6 @@
 package com.jd.journalq.nsr.ignite.model;
 
-import com.jd.journalq.common.domain.Consumer;
+import com.jd.journalq.domain.Consumer;
 import com.jd.journalq.toolkit.retry.RetryPolicy;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ignite.binary.BinaryObjectException;

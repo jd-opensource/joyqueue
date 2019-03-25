@@ -5,12 +5,12 @@ import com.jd.journalq.broker.monitor.stat.ConnectionStat;
 import com.jd.journalq.broker.monitor.stat.DeQueueStat;
 import com.jd.journalq.broker.monitor.stat.EnQueueStat;
 import com.jd.journalq.broker.monitor.stat.ReplicationStat;
-import com.jd.journalq.common.monitor.Client;
-import com.jd.journalq.common.monitor.ConnectionMonitorDetailInfo;
-import com.jd.journalq.common.monitor.ConnectionMonitorInfo;
-import com.jd.journalq.common.monitor.DeQueueMonitorInfo;
-import com.jd.journalq.common.monitor.EnQueueMonitorInfo;
-import com.jd.journalq.common.monitor.ReplicationMonitorInfo;
+import com.jd.journalq.monitor.Client;
+import com.jd.journalq.monitor.ConnectionMonitorDetailInfo;
+import com.jd.journalq.monitor.ConnectionMonitorInfo;
+import com.jd.journalq.monitor.DeQueueMonitorInfo;
+import com.jd.journalq.monitor.EnQueueMonitorInfo;
+import com.jd.journalq.monitor.ReplicationMonitorInfo;
 
 import java.util.List;
 import java.util.Map;

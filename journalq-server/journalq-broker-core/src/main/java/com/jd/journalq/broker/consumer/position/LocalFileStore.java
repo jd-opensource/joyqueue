@@ -5,7 +5,7 @@ import com.alibaba.fastjson.TypeReference;
 import com.jd.journalq.broker.consumer.position.model.ConsumeBill;
 import com.jd.journalq.broker.consumer.model.ConsumePartition;
 import com.jd.journalq.broker.consumer.position.model.Position;
-import com.jd.journalq.common.network.session.Joint;
+import com.jd.journalq.network.session.Joint;
 import com.jd.journalq.toolkit.concurrent.LoopThread;
 import com.jd.journalq.toolkit.io.Files;
 import com.jd.journalq.toolkit.lang.Charsets;

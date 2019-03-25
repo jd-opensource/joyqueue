@@ -1,8 +1,8 @@
 package com.jd.journalq.nsr.ignite.dao.impl;
 
 import com.google.inject.Inject;
-import com.jd.journalq.common.model.PageResult;
-import com.jd.journalq.common.model.QPageQuery;
+import com.jd.journalq.model.PageResult;
+import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.nsr.ignite.dao.DataCenterDao;
 import com.jd.journalq.nsr.ignite.dao.IgniteDao;
 import com.jd.journalq.nsr.ignite.model.IgniteDataCenter;

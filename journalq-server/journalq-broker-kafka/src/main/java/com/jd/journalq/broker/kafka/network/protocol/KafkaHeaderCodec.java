@@ -1,11 +1,11 @@
 package com.jd.journalq.broker.kafka.network.protocol;
 
 import com.jd.journalq.broker.kafka.network.KafkaHeader;
-import com.jd.journalq.common.domain.QosLevel;
-import com.jd.journalq.common.network.transport.codec.Codec;
-import com.jd.journalq.common.network.transport.command.Direction;
-import com.jd.journalq.common.network.serializer.Serializer;
-import com.jd.journalq.common.network.transport.exception.TransportException;
+import com.jd.journalq.domain.QosLevel;
+import com.jd.journalq.network.transport.codec.Codec;
+import com.jd.journalq.network.transport.command.Direction;
+import com.jd.journalq.network.serializer.Serializer;
+import com.jd.journalq.network.transport.exception.TransportException;
 import io.netty.buffer.ByteBuf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

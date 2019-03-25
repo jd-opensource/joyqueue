@@ -1,10 +1,10 @@
 package com.jd.journalq.broker.network.protocol;
 
 import com.google.common.collect.Lists;
-import com.jd.journalq.common.network.protocol.ProtocolServer;
-import com.jd.journalq.common.network.transport.TransportServer;
-import com.jd.journalq.common.network.transport.config.ServerConfig;
-import com.jd.journalq.common.network.transport.support.ChannelTransportServer;
+import com.jd.journalq.network.protocol.ProtocolServer;
+import com.jd.journalq.network.transport.TransportServer;
+import com.jd.journalq.network.transport.config.ServerConfig;
+import com.jd.journalq.network.transport.support.ChannelTransportServer;
 import com.jd.journalq.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

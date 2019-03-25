@@ -1,7 +1,7 @@
 package com.jd.journalq.broker.kafka.handler;
 
 import com.jd.journalq.broker.kafka.KafkaCommandHandler;
-import com.jd.journalq.common.network.transport.command.Type;
+import com.jd.journalq.network.transport.command.Type;
 
 /**
  * AbstractKafkaCommandHandler

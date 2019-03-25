@@ -1,6 +1,6 @@
 package com.jd.journalq.broker.config;
 
-import com.jd.journalq.common.context.ConfigDef;
+import com.jd.journalq.context.ConfigDef;
 
 public enum ConfigKey {
     ;

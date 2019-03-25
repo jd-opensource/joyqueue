@@ -1,8 +1,8 @@
 package com.jd.journalq.nsr.service;
 
 
-import com.jd.journalq.common.domain.Producer;
-import com.jd.journalq.common.domain.TopicName;
+import com.jd.journalq.domain.Producer;
+import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.nsr.model.ProducerQuery;
 
 import java.util.List;

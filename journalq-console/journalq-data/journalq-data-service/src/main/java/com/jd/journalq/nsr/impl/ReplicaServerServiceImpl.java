@@ -2,9 +2,9 @@ package com.jd.journalq.nsr.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
-import com.jd.journalq.common.domain.Replica;
-import com.jd.journalq.common.model.PageResult;
-import com.jd.journalq.common.model.QPageQuery;
+import com.jd.journalq.domain.Replica;
+import com.jd.journalq.model.PageResult;
+import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.convert.NsrReplicaConverter;
 import com.jd.journalq.model.domain.OperLog;
 import com.jd.journalq.model.domain.PartitionGroupReplica;

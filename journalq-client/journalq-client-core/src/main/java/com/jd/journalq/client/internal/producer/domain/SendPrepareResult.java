@@ -1,6 +1,6 @@
 package com.jd.journalq.client.internal.producer.domain;
 
-import com.jd.journalq.common.exception.JMQCode;
+import com.jd.journalq.exception.JMQCode;
 
 import java.io.Serializable;
 

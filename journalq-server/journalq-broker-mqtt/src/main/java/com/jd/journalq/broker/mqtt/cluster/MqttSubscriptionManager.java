@@ -2,9 +2,9 @@ package com.jd.journalq.broker.mqtt.cluster;
 
 import com.jd.journalq.broker.mqtt.subscriptions.TopicFilter;
 import com.jd.journalq.broker.BrokerContext;
-import com.jd.journalq.common.domain.ClientType;
-import com.jd.journalq.common.domain.Subscription;
-import com.jd.journalq.common.domain.TopicName;
+import com.jd.journalq.domain.ClientType;
+import com.jd.journalq.domain.Subscription;
+import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.nsr.NameService;
 import com.jd.journalq.broker.mqtt.subscriptions.MqttSubscription;
 import com.jd.journalq.toolkit.service.Service;

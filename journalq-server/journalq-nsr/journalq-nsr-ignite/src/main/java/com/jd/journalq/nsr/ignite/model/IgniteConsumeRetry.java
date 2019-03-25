@@ -1,6 +1,6 @@
 package com.jd.journalq.nsr.ignite.model;
 
-import com.jd.journalq.common.domain.ConsumeRetry;
+import com.jd.journalq.domain.ConsumeRetry;
 import org.apache.ignite.cache.query.annotations.QuerySqlField;
 
 /**

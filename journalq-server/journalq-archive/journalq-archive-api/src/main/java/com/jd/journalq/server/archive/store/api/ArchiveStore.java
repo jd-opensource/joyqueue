@@ -1,6 +1,6 @@
 package com.jd.journalq.server.archive.store.api;
 
-import com.jd.journalq.common.exception.JMQException;
+import com.jd.journalq.exception.JMQException;
 import com.jd.journalq.server.archive.store.model.AchivePosition;
 import com.jd.journalq.server.archive.store.model.ConsumeLog;
 import com.jd.journalq.server.archive.store.model.Query;

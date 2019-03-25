@@ -1,10 +1,10 @@
 package com.jd.journalq.service.impl;
 
 import com.jd.journalq.model.domain.BaseModel;
-import com.jd.journalq.common.model.ListQuery;
-import com.jd.journalq.common.model.PageResult;
-import com.jd.journalq.common.model.QPageQuery;
-import com.jd.journalq.common.model.Query;
+import com.jd.journalq.model.ListQuery;
+import com.jd.journalq.model.PageResult;
+import com.jd.journalq.model.QPageQuery;
+import com.jd.journalq.model.Query;
 import com.jd.journalq.repository.PageRepository;
 import com.jd.journalq.service.PageService;
 

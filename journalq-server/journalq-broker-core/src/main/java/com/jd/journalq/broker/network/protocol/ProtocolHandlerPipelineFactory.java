@@ -1,6 +1,6 @@
 package com.jd.journalq.broker.network.protocol;
 
-import com.jd.journalq.common.network.protocol.Protocol;
+import com.jd.journalq.network.protocol.Protocol;
 import io.netty.channel.ChannelHandler;
 
 /**

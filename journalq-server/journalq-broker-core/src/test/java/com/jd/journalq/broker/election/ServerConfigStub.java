@@ -1,6 +1,6 @@
 package com.jd.journalq.broker.election;
 
-import com.jd.journalq.common.network.transport.config.ServerConfig;
+import com.jd.journalq.network.transport.config.ServerConfig;
 
 /**
  * Created by zhuduohui on 2018/10/31.

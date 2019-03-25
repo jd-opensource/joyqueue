@@ -1,9 +1,9 @@
 import com.google.common.collect.Lists;
-import com.jd.journalq.common.domain.ConsumeRetry;
-import com.jd.journalq.common.exception.JMQCode;
-import com.jd.journalq.common.exception.JMQException;
-import com.jd.journalq.common.model.PageResult;
-import com.jd.journalq.common.model.Pagination;
+import com.jd.journalq.domain.ConsumeRetry;
+import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.model.PageResult;
+import com.jd.journalq.model.Pagination;
 import com.jd.journalq.server.retry.api.ConsoleMessageRetry;
 import com.jd.journalq.server.retry.api.RetryPolicyProvider;
 import com.jd.journalq.server.retry.db.DBMessageRetry;

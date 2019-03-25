@@ -1,11 +1,11 @@
 package com.jd.journalq.nsr.ignite.service;
 
 import com.google.inject.Inject;
-import com.jd.journalq.common.domain.DataCenter;
-import com.jd.journalq.common.event.DataCenterEvent;
-import com.jd.journalq.common.event.MetaEvent;
-import com.jd.journalq.common.model.PageResult;
-import com.jd.journalq.common.model.QPageQuery;
+import com.jd.journalq.domain.DataCenter;
+import com.jd.journalq.event.DataCenterEvent;
+import com.jd.journalq.event.MetaEvent;
+import com.jd.journalq.model.PageResult;
+import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.nsr.ignite.dao.DataCenterDao;
 import com.jd.journalq.nsr.ignite.model.IgniteDataCenter;
 import com.jd.journalq.nsr.message.Messenger;

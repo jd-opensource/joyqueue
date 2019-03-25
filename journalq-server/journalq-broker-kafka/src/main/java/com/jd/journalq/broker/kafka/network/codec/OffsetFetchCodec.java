@@ -9,8 +9,8 @@ import com.jd.journalq.broker.kafka.KafkaErrorCode;
 import com.jd.journalq.broker.kafka.command.OffsetFetchRequest;
 import com.jd.journalq.broker.kafka.command.OffsetFetchResponse;
 import com.jd.journalq.broker.kafka.model.OffsetMetadataAndError;
-import com.jd.journalq.common.network.serializer.Serializer;
-import com.jd.journalq.common.network.transport.command.Type;
+import com.jd.journalq.network.serializer.Serializer;
+import com.jd.journalq.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
 
 import java.util.Map;

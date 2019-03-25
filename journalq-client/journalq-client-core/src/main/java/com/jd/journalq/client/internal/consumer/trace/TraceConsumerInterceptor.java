@@ -7,7 +7,7 @@ import com.jd.journalq.client.internal.consumer.interceptor.ConsumerInterceptor;
 import com.jd.journalq.client.internal.trace.TraceBuilder;
 import com.jd.journalq.client.internal.trace.TraceCaller;
 import com.jd.journalq.client.internal.trace.TraceType;
-import com.jd.journalq.common.network.command.RetryType;
+import com.jd.journalq.network.command.RetryType;
 
 import java.util.List;
 

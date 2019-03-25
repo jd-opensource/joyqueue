@@ -1,9 +1,9 @@
 package com.jd.journalq.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.jd.journalq.common.model.ListQuery;
-import com.jd.journalq.common.model.PageResult;
-import com.jd.journalq.common.model.QPageQuery;
+import com.jd.journalq.model.ListQuery;
+import com.jd.journalq.model.PageResult;
+import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.convert.CodeConverter;
 import com.jd.journalq.model.domain.*;
 import com.jd.journalq.model.query.QApplication;

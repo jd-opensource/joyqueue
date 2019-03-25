@@ -8,7 +8,7 @@ import com.jd.journalq.broker.kafka.coordinator.callback.SyncCallback;
 import com.jd.journalq.broker.kafka.coordinator.domain.GroupDescribe;
 import com.jd.journalq.broker.kafka.model.OffsetAndMetadata;
 import com.jd.journalq.broker.kafka.model.OffsetMetadataAndError;
-import com.jd.journalq.common.domain.Broker;
+import com.jd.journalq.domain.Broker;
 import com.jd.journalq.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

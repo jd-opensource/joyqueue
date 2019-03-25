@@ -1,7 +1,7 @@
 package com.jd.journalq.server.retry.remote.command;
 
-import com.jd.journalq.common.network.command.CommandType;
-import com.jd.journalq.common.network.transport.command.JMQPayload;
+import com.jd.journalq.network.command.CommandType;
+import com.jd.journalq.network.transport.command.JMQPayload;
 import com.jd.journalq.server.retry.model.RetryMessageModel;
 
 import java.util.List;

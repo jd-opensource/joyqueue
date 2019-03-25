@@ -5,7 +5,7 @@ import com.jd.journalq.broker.BrokerContextAware;
 import com.jd.journalq.broker.jmq.JMQCommandHandler;
 import com.jd.journalq.broker.jmq.JMQContext;
 import com.jd.journalq.broker.jmq.JMQContextAware;
-import com.jd.journalq.common.network.transport.command.support.DefaultCommandHandlerFactory;
+import com.jd.journalq.network.transport.command.support.DefaultCommandHandlerFactory;
 import com.jd.laf.extension.ExtensionManager;
 
 import java.util.List;

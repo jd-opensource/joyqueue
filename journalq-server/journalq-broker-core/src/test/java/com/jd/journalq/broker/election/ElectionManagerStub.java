@@ -3,12 +3,11 @@ package com.jd.journalq.broker.election;
 import com.jd.journalq.broker.consumer.Consume;
 import com.jd.journalq.broker.election.network.codec.*;
 import com.jd.journalq.broker.network.codec.BrokerPayloadCodecRegistrar;
-import com.jd.journalq.broker.election.network.codec.*;
-import com.jd.journalq.common.network.transport.TransportServer;
-import com.jd.journalq.common.network.transport.codec.*;
-import com.jd.journalq.common.network.transport.codec.support.DefaultCodec;
-import com.jd.journalq.common.network.transport.command.support.DefaultCommandHandlerFactory;
-import com.jd.journalq.common.network.transport.support.DefaultTransportServerFactory;
+import com.jd.journalq.network.transport.TransportServer;
+import com.jd.journalq.network.transport.codec.*;
+import com.jd.journalq.network.transport.codec.support.DefaultCodec;
+import com.jd.journalq.network.transport.command.support.DefaultCommandHandlerFactory;
+import com.jd.journalq.network.transport.support.DefaultTransportServerFactory;
 import com.jd.journalq.store.StoreService;
 
 /**

@@ -1,6 +1,6 @@
 package com.jd.journalq.convert;
 
-import com.jd.journalq.common.domain.TopicName;
+import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.model.domain.AppName;
 import com.jd.journalq.model.domain.Identity;
 import com.jd.journalq.model.domain.Namespace;

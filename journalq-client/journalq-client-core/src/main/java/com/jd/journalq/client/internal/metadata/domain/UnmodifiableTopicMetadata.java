@@ -1,10 +1,10 @@
 package com.jd.journalq.client.internal.metadata.domain;
 
-import com.jd.journalq.common.domain.Consumer;
-import com.jd.journalq.common.domain.Producer;
-import com.jd.journalq.common.domain.Topic;
-import com.jd.journalq.common.exception.JMQCode;
-import com.jd.journalq.common.network.domain.BrokerNode;
+import com.jd.journalq.domain.Consumer;
+import com.jd.journalq.domain.Producer;
+import com.jd.journalq.domain.Topic;
+import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.network.domain.BrokerNode;
 
 import java.util.Collections;
 import java.util.List;

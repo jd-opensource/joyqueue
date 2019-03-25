@@ -1,6 +1,6 @@
 package com.jd.journalq.broker.election;
 
-import com.jd.journalq.common.domain.PartitionGroup;
+import com.jd.journalq.domain.PartitionGroup;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;

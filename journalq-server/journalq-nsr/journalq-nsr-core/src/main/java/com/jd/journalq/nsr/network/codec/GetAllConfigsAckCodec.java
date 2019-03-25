@@ -1,9 +1,9 @@
 package com.jd.journalq.nsr.network.codec;
 
-import com.jd.journalq.common.domain.Config;
-import com.jd.journalq.common.network.serializer.Serializer;
-import com.jd.journalq.common.network.transport.command.Header;
-import com.jd.journalq.common.network.transport.command.Type;
+import com.jd.journalq.domain.Config;
+import com.jd.journalq.network.serializer.Serializer;
+import com.jd.journalq.network.transport.command.Header;
+import com.jd.journalq.network.transport.command.Type;
 import com.jd.journalq.nsr.network.NsrPayloadCodec;
 import com.jd.journalq.nsr.network.command.GetAllConfigsAck;
 import com.jd.journalq.nsr.network.command.NsrCommandType;

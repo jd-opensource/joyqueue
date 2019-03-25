@@ -4,9 +4,9 @@ import com.google.common.collect.Lists;
 import com.jd.journalq.client.internal.exception.ClientException;
 import com.jd.journalq.client.internal.nameserver.NameServerConfig;
 import com.jd.journalq.client.internal.transport.config.TransportConfig;
-import com.jd.journalq.common.network.domain.BrokerNode;
-import com.jd.journalq.common.network.transport.TransportClient;
-import com.jd.journalq.common.network.transport.exception.TransportException;
+import com.jd.journalq.network.domain.BrokerNode;
+import com.jd.journalq.network.transport.TransportClient;
+import com.jd.journalq.network.transport.exception.TransportException;
 import com.jd.journalq.toolkit.service.Service;
 
 import java.util.List;

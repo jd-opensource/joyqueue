@@ -1,9 +1,9 @@
 package com.jd.journalq.broker.consumer.filter;
 
 import com.jd.journalq.broker.buffer.Serializer;
-import com.jd.journalq.common.exception.JMQCode;
-import com.jd.journalq.common.exception.JMQException;
-import com.jd.journalq.common.message.BrokerMessage;
+import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.message.BrokerMessage;
 import com.jd.laf.extension.Extension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

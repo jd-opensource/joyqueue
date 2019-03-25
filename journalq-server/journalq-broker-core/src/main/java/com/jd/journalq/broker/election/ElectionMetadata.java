@@ -6,7 +6,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.jd.journalq.common.domain.PartitionGroup.ElectType;
+import static com.jd.journalq.domain.PartitionGroup.ElectType;
 
 /**
  * author: zhuduohui

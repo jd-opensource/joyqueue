@@ -1,7 +1,7 @@
 package com.jd.journalq.broker.election;
 
 import com.jd.journalq.broker.cluster.ClusterManager;
-import com.jd.journalq.common.domain.TopicName;
+import com.jd.journalq.domain.TopicName;
 
 import java.util.Set;
 

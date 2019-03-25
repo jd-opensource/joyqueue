@@ -4,9 +4,9 @@ import com.jd.journalq.broker.election.handler.AppendEntriesRequestHandler;
 import com.jd.journalq.broker.election.handler.ReplicateConsumePosRequestHandler;
 import com.jd.journalq.broker.election.handler.TimeoutNowRequestHandler;
 import com.jd.journalq.broker.election.handler.VoteRequestHandler;
-import com.jd.journalq.common.network.command.CommandType;
-import com.jd.journalq.common.network.transport.command.handler.CommandHandlerFactory;
-import com.jd.journalq.common.network.transport.command.support.DefaultCommandHandlerFactory;
+import com.jd.journalq.network.command.CommandType;
+import com.jd.journalq.network.transport.command.handler.CommandHandlerFactory;
+import com.jd.journalq.network.transport.command.support.DefaultCommandHandlerFactory;
 
 /**
  * Created by zhuduohui on 2018/10/8.

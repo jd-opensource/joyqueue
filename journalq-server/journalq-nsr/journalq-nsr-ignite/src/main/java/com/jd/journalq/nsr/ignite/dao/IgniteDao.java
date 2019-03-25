@@ -1,7 +1,7 @@
 package com.jd.journalq.nsr.ignite.dao;
 
-import com.jd.journalq.common.model.PageResult;
-import com.jd.journalq.common.model.Pagination;
+import com.jd.journalq.model.PageResult;
+import com.jd.journalq.model.Pagination;
 import com.jd.journalq.nsr.ignite.model.IgniteBaseModel;
 import com.jd.journalq.toolkit.lang.Preconditions;
 import org.apache.ignite.Ignite;

@@ -1,6 +1,6 @@
 package com.jd.journalq.service.impl;
 
-import com.jd.journalq.common.model.QKeyword;
+import com.jd.journalq.model.QKeyword;
 import com.jd.journalq.model.domain.UserToken;
 import com.jd.journalq.repository.UserTokenRepository;
 import com.jd.journalq.service.UserTokenService;

@@ -2,10 +2,10 @@ package com.jd.journalq.service;
 
 import com.jd.journalq.model.domain.BaseModel;
 import com.jd.journalq.model.exception.RepositoryException;
-import com.jd.journalq.common.model.ListQuery;
-import com.jd.journalq.common.model.PageResult;
-import com.jd.journalq.common.model.QPageQuery;
-import com.jd.journalq.common.model.Query;
+import com.jd.journalq.model.ListQuery;
+import com.jd.journalq.model.PageResult;
+import com.jd.journalq.model.QPageQuery;
+import com.jd.journalq.model.Query;
 
 import java.util.List;
 

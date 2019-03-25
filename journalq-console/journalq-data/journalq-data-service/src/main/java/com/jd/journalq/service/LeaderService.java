@@ -1,7 +1,7 @@
 package com.jd.journalq.service;
 
 
-import com.jd.journalq.common.domain.PartitionGroup;
+import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.model.domain.Broker;
 
 import java.util.List;

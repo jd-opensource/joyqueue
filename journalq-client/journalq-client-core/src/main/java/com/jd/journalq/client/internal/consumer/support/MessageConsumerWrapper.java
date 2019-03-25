@@ -13,7 +13,7 @@ import com.jd.journalq.client.internal.consumer.interceptor.ConsumerInterceptor;
 import com.jd.journalq.client.internal.consumer.transport.ConsumerClientManager;
 import com.jd.journalq.client.internal.metadata.domain.TopicMetadata;
 import com.jd.journalq.client.internal.nameserver.NameServerConfig;
-import com.jd.journalq.common.exception.JMQCode;
+import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.toolkit.service.Service;
 
 import java.util.List;

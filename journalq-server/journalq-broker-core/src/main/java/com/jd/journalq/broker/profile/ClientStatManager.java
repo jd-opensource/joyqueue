@@ -1,7 +1,7 @@
 package com.jd.journalq.broker.profile;
 
 import com.jd.journalq.broker.cluster.ClusterManager;
-import com.jd.journalq.common.stat.ClientTPStat;
+import com.jd.journalq.stat.ClientTPStat;
 import com.jd.journalq.toolkit.lang.LifeCycle;
 
 import java.util.List;

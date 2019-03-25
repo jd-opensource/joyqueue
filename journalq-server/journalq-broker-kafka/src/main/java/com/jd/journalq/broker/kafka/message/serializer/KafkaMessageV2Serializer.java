@@ -6,7 +6,7 @@ import com.jd.journalq.broker.kafka.message.KafkaBrokerMessage;
 import com.jd.journalq.broker.kafka.message.compressor.KafkaCompressionCodec;
 import com.jd.journalq.broker.kafka.util.KafkaBufferUtils;
 import com.jd.journalq.broker.kafka.util.PureJavaCrc32C;
-import com.jd.journalq.common.message.BrokerMessage;
+import com.jd.journalq.message.BrokerMessage;
 import io.netty.buffer.ByteBuf;
 import org.apache.commons.lang3.ArrayUtils;
 

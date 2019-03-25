@@ -3,7 +3,7 @@ package com.jd.journalq.client.internal.consumer.converter;
 import com.google.common.collect.Lists;
 import com.jd.journalq.client.internal.consumer.domain.ConsumeMessage;
 import com.jd.journalq.client.internal.consumer.domain.ConsumeReply;
-import com.jd.journalq.common.network.command.RetryType;
+import com.jd.journalq.network.command.RetryType;
 
 import java.util.List;
 

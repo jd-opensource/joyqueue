@@ -2,9 +2,9 @@ package com.jd.journalq.broker;
 
 import com.google.common.collect.Sets;
 import com.jd.journalq.broker.network.support.BrokerTransportClientFactory;
-import com.jd.journalq.common.exception.JMQException;
-import com.jd.journalq.common.network.transport.TransportClient;
-import com.jd.journalq.common.network.transport.config.ClientConfig;
+import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.network.transport.TransportClient;
+import com.jd.journalq.network.transport.config.ClientConfig;
 import com.jd.journalq.server.retry.model.RetryMessageModel;
 import com.jd.journalq.server.retry.remote.RemoteMessageRetry;
 import com.jd.journalq.server.retry.remote.RemoteRetryProvider;

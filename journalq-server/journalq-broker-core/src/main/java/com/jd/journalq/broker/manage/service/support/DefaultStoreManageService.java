@@ -3,10 +3,10 @@ package com.jd.journalq.broker.manage.service.support;
 import com.google.common.collect.Lists;
 import com.jd.journalq.broker.manage.converter.StoreManageConverter;
 import com.jd.journalq.broker.manage.service.StoreManageService;
-import com.jd.journalq.common.manage.IndexItem;
-import com.jd.journalq.common.manage.PartitionGroupMetric;
-import com.jd.journalq.common.manage.PartitionMetric;
-import com.jd.journalq.common.manage.TopicMetric;
+import com.jd.journalq.manage.IndexItem;
+import com.jd.journalq.manage.PartitionGroupMetric;
+import com.jd.journalq.manage.PartitionMetric;
+import com.jd.journalq.manage.TopicMetric;
 import com.jd.journalq.store.StoreManagementService;
 import com.jd.journalq.store.message.MessageParser;
 

@@ -1,6 +1,6 @@
 package com.jd.journalq.broker.consumer;
 
-import com.jd.journalq.common.message.MessageLocation;
+import com.jd.journalq.message.MessageLocation;
 import org.junit.Test;
 
 import java.util.ArrayList;
