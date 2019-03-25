@@ -1,0 +1,50 @@
+@charset "utf-8";
+/* CSS Document */
+
+.search .el-input__inner, 
+.search .el-input-group__prepend, 
+.search .el-input-group__append,
+.search .el-select-dropdown,
+.search .el-button{
+  border-radius: 0;
+}
+.search .el-input-group__append, 
+.search .el-input-group__prepend{
+  background-color: #eff2f7; color: #000; font-size: 16px; border: none;
+}
+.search .el-form-item__label{
+  background-color: #eff2f7; color: #000; font-size: 16px; padding: 0 20px;
+}
+.search .el-button{
+  background-color: #20a0ff;
+  border-color: #20a0ff;
+  color: #fff;
+  padding: 12px 15px;
+  margin-left: -15px;
+}
+.search-btns{display: inline-block; margin-left: 5px;}
+.search-btns .el-button{background-color: #fff; border-color: #20a0ff; color: #20a0ff; border-radius: 0;}
+.search-btns .el-button+.el-button{margin-left: 5px}
+
+.el-table td, .el-table th{padding-top: 6px;padding-bottom: 6px;}
+.el-table th{background-color: #eff2f7; color: #000; font-size: 16px;}
+
+.table-operates .el-button:first-child:focus, 
+.table-operates .el-button:first-child:hover{
+	color: #606266;
+	background-color: #fff;
+	border-color:#dcdfe6;
+}
+.table-operates .el-button-group .el-button:not(:last-child){margin-right: 0;}
+.el-dropdown-menu--mini .el-dropdown-menu__item{ padding: 5px 30px;}
+
+.el-pagination{margin-top: 10px; text-align: right;}
+.el-pagination .btn-prev{border: 1px solid #e9edf3; border-right: 0}
+.el-pagination .btn-next{border: 1px solid #e9edf3;} 
+.el-pager li{border: 1px solid #e9edf3; background-color: #fff; border-right: 0;}
+.el-pager li.active{ color: #fff; background-color: #50bfff;}
+
+.status-label{display: inline-block; vertical-align: middle; padding: 0 10px; color: #fff;}
+.status-on{background-color: #5db85c;}
+.status-off{background-color: #f89406;}
+.status-grey{background-color: #ccc; color: #333;}

@@ -1,0 +1,7 @@
+com.jd.journalq.handler.binder.OperatorBinder
+com.jd.journalq.handler.binder.PageBinder
+com.jd.journalq.handler.binder.PathBinder
+com.jd.journalq.handler.binder.GenericValueBinder
+com.jd.journalq.handler.binder.GenericBodyBinder
+com.jd.journalq.handler.binder.BodyBinder
+com.jd.journalq.handler.binder.ParamterValueBinder

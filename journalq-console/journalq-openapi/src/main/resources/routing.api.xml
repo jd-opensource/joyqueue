@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<vertx>
+    <routes>
+        <route name="put" type="PUT"  route="true"
+               consumers="application/json" produces="application/json"
+               handlers="body validateAppToken"/>
+        <route name="post" type="POST"  route="true"
+               consumers="application/json" produces="application/json"
+               handlers="body validateAppToken"/>/>
+        <route name="get" type="GET"  route="true"
+               consumers="application/json" produces="application/json"
+               handlers="validateAppToken"/>
+        <route name="delete" type="DELETE"  route="true"
+               consumers="application/json" produces="application/json"
+               handlers="validateAppToken"/>
+
+        <!--namespace 操作-->
+        <!--<route inherit="get"-->
+               <!--path="/v1/namespace/:nsId" handlers="validateNamespacePrivilege getNamespace render"-->
+               <!--errors="error"/>-->
+        <!--<route inherit="get"-->
+               <!--path="/v1/namespaces/search" handlers="validateApplication searchNamespaces render"-->
+               <!--errors="error"/>-->
+        <!--<route inherit="post"-->
+               <!--path="/v1/namespace" handlers="validateApplication addNamespace render"-->
+               <!--errors="error"/>-->
+        <!--<route inherit="put"-->
+               <!--path="/v1/namespace/:nsId" handlers="validateNamespacePrivilege updateNamespace render"-->
+               <!--errors="error"/>-->
+
+    </routes>
+    <messages></messages>
+</vertx>

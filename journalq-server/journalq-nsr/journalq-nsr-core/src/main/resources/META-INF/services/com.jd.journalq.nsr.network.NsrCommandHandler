@@ -1,0 +1,2 @@
+com.jd.journalq.nsr.network.handler.NameServiceCommandHandler
+com.jd.journalq.nsr.network.handler.PushNameServerEventHandler

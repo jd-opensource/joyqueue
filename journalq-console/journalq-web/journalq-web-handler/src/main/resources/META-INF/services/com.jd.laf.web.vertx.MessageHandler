@@ -1,0 +1,2 @@
+com.jd.journalq.handler.message.AuditLogMessageHandler
+com.jd.journalq.handler.message.OperLogMessageHandler

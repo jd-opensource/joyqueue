@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jd.journalq.repository.UserTokenRepository">
+    <resultMap id="baseResultMap" type="UserToken">
+        <result property="id" column="id" jdbcType="BIGINT"/>
+        <result property="code" column="code" jdbcType="VARCHAR"/>
+        <result property="token" column="token" jdbcType="VARCHAR"/>
+        <result property="expireTime" column="expire_time" jdbcType="TIMESTAMP"/>
+        <result property="status" column="status" jdbcType="BIGINT"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="createBy.id" column="create_by" jdbcType="BIGINT"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+        <result property="updateBy.id" column="update_by" jdbcType="BIGINT"/>
+    </resultMap>
+
+    <sql id="baseColumn">
+        id,
+        code,
+        `status`,
+        `token`,
+        `expire_time`,
+        create_time,
+        create_by,
+        update_time,
+        update_by
+    </sql>
+
+    <insert id="add" parameterType="user" useGeneratedKeys="true" keyProperty="id">
+        insert into `user_token`
+        (
+        code,
+        token,
+        expire_time,
+        create_time,
+        create_by,
+        update_time,
+        update_by,
+        status)
+        values
+        (
+        #{code},
+        #{token},
+        #{expireTime},
+        #{createTime},
+        #{createBy.id},
+        #{updateTime},
+        #{updateBy.id},
+        #{status}
+        )
+    </insert>
+
+    <update id="update" parameterType="user">
+        UPDATE `user_token`
+        <set>
+        <if test="token != null">
+            `token`=#{token},
+        </if>
+        <if test="expireTime != null">
+            `expire_time`=#{expireTime},
+        </if>
+        <if test="status != null">
+            `status`=#{status},
+        </if>
+        <if test="updateBy != null">update_by = #{updateBy.id},</if>
+        <if test="updateTime != null">update_time = #{updateTime},</if>
+        </set>
+        WHERE
+        id=#{id}
+    </update>
+    <select id="findById" parameterType="long" resultMap="baseResultMap">
+        SELECT
+        <include refid="baseColumn"/>
+        FROM
+        `user_token`
+        WHERE id=#{id}
+    </select>
+    <update id="deleteById" parameterType="long">
+        UPDATE `user_token`
+        set status=-1 ,
+           `update_by`=#{updateBy.id},
+           `update_time`=#{updateTime}
+        WHERE
+        id=#{id}
+    </update>
+
+    <select id="findByCode" parameterType="String" resultMap="baseResultMap">
+        SELECT
+        <include refid="baseColumn"/>
+        FROM
+        `user_token`
+        WHERE code = #{code}
+        and status!=-1
+    </select>
+
+    <select id="findByQuery" parameterType="QPageQuery" resultMap="baseResultMap">
+        select
+        <include refid="baseColumn"/>
+        from `user_token`
+        <where>
+            <if test="query.keyword != null and query.keyword != '' ">
+                `code` like concat('%', #{query.keyword},'%') and
+            </if>
+            status!=-1
+        </where>
+    </select>
+
+    <select id="findCountByQuery" parameterType="QPageQuery" resultType="int">
+        select count(id)
+        from `user_token`
+        <where>
+            <if test="query.keyword != null and query.keyword != '' ">
+                code like concat('%', #{query.keyword},'%') and
+            </if>
+            status!=-1
+        </where>
+    </select>
+
+    <update id="state" parameterType="UserToken">
+        <![CDATA[
+        UPDATE
+            `user_token`
+        SET
+           `status`=#{status},
+           `update_by`=#{updateBy.id},
+           `update_time`=#{updateTime}
+        WHERE
+            id=#{id}
+        ]]>
+    </update>
+
+</mapper>

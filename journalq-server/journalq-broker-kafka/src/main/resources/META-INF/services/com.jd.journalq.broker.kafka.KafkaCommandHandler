@@ -1,0 +1,13 @@
+com.jd.journalq.broker.kafka.handler.ApiVersionsHandler
+com.jd.journalq.broker.kafka.handler.TopicMetadataHandler
+com.jd.journalq.broker.kafka.handler.OffsetCommitHandler
+com.jd.journalq.broker.kafka.handler.OffsetFetchHandler
+com.jd.journalq.broker.kafka.handler.ListOffsetsHandler
+com.jd.journalq.broker.kafka.handler.ProduceHandler
+com.jd.journalq.broker.kafka.handler.FetchHandler
+com.jd.journalq.broker.kafka.handler.FindCoordinatorHandler
+com.jd.journalq.broker.kafka.handler.JoinGroupHandler
+com.jd.journalq.broker.kafka.handler.LeaveGroupHandler
+com.jd.journalq.broker.kafka.handler.SyncGroupHandler
+com.jd.journalq.broker.kafka.handler.DescribeGroupHandler
+com.jd.journalq.broker.kafka.handler.HeartbeatHandler

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<vertx>
+    <routes>
+        <!-- monitor -->
+
+        <!-- manage -->
+        <!-- group -->
+        <route path="/kafka/group/:groupId" inherit="delete"
+               handlers="kafkaManageService.removeGroup"/>
+        <route path="/kafka/group/:groupId/rebalance" inherit="put"
+               handlers="kafkaManageService.rebalanceGroup"/>
+    </routes>
+</vertx>

@@ -1,0 +1,92 @@
+package com.jd.journalq.broker.jmq.handler;
+
+import com.jd.journalq.broker.jmq.JMQCommandHandler;
+import com.jd.journalq.broker.jmq.converter.CheckResultConverter;
+import com.jd.journalq.broker.BrokerContext;
+import com.jd.journalq.broker.BrokerContextAware;
+import com.jd.journalq.broker.cluster.ClusterManager;
+import com.jd.journalq.broker.helper.SessionHelper;
+import com.jd.journalq.broker.producer.Produce;
+import com.jd.journalq.common.domain.TopicName;
+import com.jd.journalq.common.exception.JMQCode;
+import com.jd.journalq.common.exception.JMQException;
+import com.jd.journalq.common.message.BrokerCommit;
+import com.jd.journalq.common.network.command.BooleanAck;
+import com.jd.journalq.common.network.command.JMQCommandType;
+import com.jd.journalq.common.network.command.ProduceMessageCommit;
+import com.jd.journalq.common.network.command.ProduceMessageCommitAck;
+import com.jd.journalq.common.network.session.Connection;
+import com.jd.journalq.common.network.session.Producer;
+import com.jd.journalq.common.network.transport.Transport;
+import com.jd.journalq.common.network.transport.command.Command;
+import com.jd.journalq.common.network.transport.command.Type;
+import com.jd.journalq.common.response.BooleanResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * ProduceMessageCommitHandler
+ * author: gaohaoxiang
+ * email: gaohaoxiang@jd.com
+ * date: 2018/12/19
+ */
+public class ProduceMessageCommitHandler implements JMQCommandHandler, Type, BrokerContextAware {
+
+    protected static final Logger logger = LoggerFactory.getLogger(ProduceMessageCommitHandler.class);
+
+    private Produce produce;
+    private ClusterManager clusterManager;
+
+    @Override
+    public void setBrokerContext(BrokerContext brokerContext) {
+        this.produce = brokerContext.getProduce();
+        this.clusterManager = brokerContext.getClusterManager();
+    }
+
+    @Override
+    public Command handle(Transport transport, Command command) {
+        ProduceMessageCommit produceMessageCommit = (ProduceMessageCommit) command.getPayload();
+        Connection connection = SessionHelper.getConnection(transport);
+
+        if (connection == null || !connection.isAuthorized(produceMessageCommit.getApp())) {
+            logger.warn("connection is not exists, transport: {}", transport);
+            return BooleanAck.build(JMQCode.FW_CONNECTION_NOT_EXISTS.getCode());
+        }
+
+        BooleanResponse checkResult = clusterManager.checkWritable(TopicName.parse(produceMessageCommit.getTopic()), produceMessageCommit.getApp(), connection.getHost());
+        if (!checkResult.isSuccess()) {
+            logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}", transport, produceMessageCommit.getTopic(), produceMessageCommit.getApp());
+            return new Command(new ProduceMessageCommitAck(CheckResultConverter.convertCommonCode(checkResult.getJmqCode())));
+        }
+
+        ProduceMessageCommitAck produceMessageCommitAck = produceMessageCommit(connection, produceMessageCommit);
+        return new Command(produceMessageCommitAck);
+    }
+
+    protected ProduceMessageCommitAck produceMessageCommit(Connection connection, ProduceMessageCommit produceMessageCommit) {
+        Producer producer = new Producer(connection.getId(), produceMessageCommit.getTopic(), produceMessageCommit.getApp(), Producer.ProducerType.JMQ);
+
+        BrokerCommit brokerCommit = new BrokerCommit();
+        brokerCommit.setTopic(produceMessageCommit.getTopic());
+        brokerCommit.setApp(produceMessageCommit.getApp());
+        brokerCommit.setTxId(produceMessageCommit.getTxId());
+
+        try {
+            produce.putTransactionMessage(producer, brokerCommit);
+            return new ProduceMessageCommitAck(JMQCode.SUCCESS);
+        } catch (JMQException e) {
+            logger.error("produceMessage prepare exception, transport: {}, topic: {}, app: {}",
+                    connection.getTransport().remoteAddress(), produceMessageCommit.getTopic(), produceMessageCommit.getApp(), e);
+            return new ProduceMessageCommitAck(JMQCode.valueOf(e.getCode()));
+        } catch (Exception e) {
+            logger.error("produceMessage prepare exception, transport: {}, topic: {}, app: {}",
+                    connection.getTransport().remoteAddress(), produceMessageCommit.getTopic(), produceMessageCommit.getApp(), e);
+            return new ProduceMessageCommitAck(JMQCode.CN_UNKNOWN_ERROR);
+        }
+    }
+
+    @Override
+    public int type() {
+        return JMQCommandType.PRODUCE_MESSAGE_COMMIT.getCode();
+    }
+}

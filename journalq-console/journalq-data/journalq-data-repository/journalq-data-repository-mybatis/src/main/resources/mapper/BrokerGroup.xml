@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jd.journalq.repository.BrokerGroupRepository">
+    <sql id="select">
+        SELECT
+            id,
+            `name`,
+            code,
+            labels,
+            create_time,
+            create_by as `createBy.id`,
+            update_time,
+            update_by as `updateBy.id`,
+            status
+        FROM
+            broker_group s
+    </sql>
+
+    <insert id="add" parameterType="BrokerGroup" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO broker_group(
+            code,
+            `name`,
+            labels,
+            create_time,
+            create_by,
+            update_time,
+            update_by,
+            status)
+        VALUES (
+            #{code},
+            #{name},
+            #{labels},
+            #{createTime},
+            #{createBy.id},
+            #{updateTime},
+            #{updateBy.id},
+            #{status})
+    </insert>
+
+    <select id="findById" parameterType="long" resultType="BrokerGroup">
+        <include refid="select"/>
+        where s.status !=-1 and s.id =#{id}
+    </select>
+
+    <select id="findByCode" parameterType="string" resultType="BrokerGroup">
+        <include refid="select"/>
+        where s.status !=-1 and s.code =#{code}
+    </select>
+
+    <select id="findAll" parameterType="QBrokerGroup" resultType="BrokerGroup">
+        <include refid="select"/>
+        where status!=-1
+        <if test="role == 0">
+            and status = 1
+        </if>
+
+    </select>
+
+    <delete id="deleteById" parameterType="long">
+        delete broker_group
+        WHERE id = #{id}
+    </delete>
+
+    <update id="update" parameterType="BrokerGroup">
+        UPDATE
+          broker_group
+        SET
+            code=#{code},
+            `name`=#{name},
+            update_time=#{updateTime},
+            update_by=#{updateBy.id}
+        WHERE
+            id=#{id}
+            AND status !=-1
+    </update>
+
+    <update id="updateLabels" parameterType="BrokerGroup">
+        UPDATE
+          broker_group
+        SET
+            update_time=#{updateTime},
+            update_by=#{updateBy.id},
+            labels=#{labels}
+        WHERE
+            id=#{id}
+            AND status !=-1
+    </update>
+
+    <sql id="queryCondition">
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+            <if test="query.keyword==null or query.keyword==''">1=1</if>
+            <if test="query.keyword!=null and query.keyword!=''">
+                (code LIKE CONCAT('%', #{query.keyword}, '%') OR  name LIKE CONCAT('%', #{query.keyword}, '%'))
+            </if>
+--             普通用户
+            <if test="query.role == 0">
+                and status = 1;
+            </if>
+            AND status!=-1
+        </trim>
+    </sql>
+    <select id="findCountByQuery" parameterType="QPageQuery" resultType="int">
+        SELECT COUNT(id) FROM broker_group
+        <include refid="queryCondition"/>
+    </select>
+
+    <select id="findByQuery" parameterType="QPageQuery" resultType="BrokerGroup">
+        <include refid="select"/>
+        <include refid="queryCondition"/>
+        ORDER BY s.id DESC
+    </select>
+
+    <select id="exists" parameterType="BrokerGroup" resultType="BrokerGroup">
+        <include refid="select"/>
+        WHERE s.code=#{code} AND s.status > 0
+    </select>
+
+    <update id="state" parameterType="BrokerGroup">
+        UPDATE
+            `broker_group`
+        SET
+           `status`=#{status},
+           `update_by`=#{updateBy.id},
+           `update_time`=#{updateTime}
+        WHERE
+            id=#{id}
+    </update>
+</mapper>

@@ -1,0 +1,18 @@
+*.iml
+.idea/
+.vertx/
+target
+.classpath
+.settings
+.project
+*.log
+
+# macOS
+.DS_Store
+
+.vpp.vbak
+.vpp.bak*
+.vpp.lck
+
+.version.properties
+filter.properties

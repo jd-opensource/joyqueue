@@ -1,0 +1,160 @@
+package com.jd.journalq.broker.kafka.coordinator.domain;
+
+
+import com.jd.journalq.broker.coordinator.domain.CoordinatorGroupMember;
+import com.jd.journalq.broker.kafka.command.SyncGroupAssignment;
+import com.jd.journalq.broker.kafka.coordinator.callback.JoinCallback;
+import com.jd.journalq.broker.kafka.coordinator.callback.SyncCallback;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
+
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * KafkaCoordinatorGroupMember
+ * author: gaohaoxiang
+ * email: gaohaoxiang@jd.com
+ * date: 2018/12/4
+ */
+public class KafkaCoordinatorGroupMember extends CoordinatorGroupMember {
+
+    private SyncGroupAssignment assignment;
+    private JoinCallback awaitingJoinCallback;
+    private SyncCallback awaitingSyncCallback;
+    private boolean isLeaving = false;
+
+    private String clientId;
+    private int rebalanceTimeoutMs;
+    private Map<String, byte[]> supportedProtocols;
+
+    public KafkaCoordinatorGroupMember(String memberId, String groupId, String clientId, String clientHost,
+                                       int rebalanceTimeoutMs, int sessionTimeoutMs, Map<String, byte[]> supportedProtocols) {
+        setId(memberId);
+        setGroupId(groupId);
+        setConnectionHost(clientHost);
+        setSessionTimeout(sessionTimeoutMs);
+        this.clientId = clientId;
+        this.rebalanceTimeoutMs = (rebalanceTimeoutMs <= 0 ? sessionTimeoutMs : rebalanceTimeoutMs);
+        this.supportedProtocols = supportedProtocols;
+    }
+
+    public int getRebalanceTimeoutMs() {
+        return rebalanceTimeoutMs;
+    }
+
+    public String getClientId() {
+        return clientId;
+    }
+
+    public boolean isLeaving() {
+        return isLeaving;
+    }
+
+    public void setLeaving(boolean isLeaving) {
+        this.isLeaving = isLeaving;
+    }
+
+    public Map<String, byte[]> getSupportedProtocols() {
+        return supportedProtocols;
+    }
+
+    public void setSupportedProtocols(Map<String, byte[]> supportedProtocols) {
+        this.supportedProtocols = supportedProtocols;
+    }
+
+    public SyncGroupAssignment getAssignment() {
+        return assignment;
+    }
+
+    public void setAssignment(SyncGroupAssignment assignment) {
+        this.assignment = assignment;
+    }
+
+    public JoinCallback getAwaitingJoinCallback() {
+        return awaitingJoinCallback;
+    }
+
+    public void setAwaitingJoinCallback(JoinCallback awaitingJoinCallback) {
+        this.awaitingJoinCallback = awaitingJoinCallback;
+    }
+
+    public void setAwaitingSyncCallback(SyncCallback awaitingSyncCallback) {
+        this.awaitingSyncCallback = awaitingSyncCallback;
+    }
+
+    public SyncCallback getAwaitingSyncCallback() {
+        return awaitingSyncCallback;
+    }
+
+    /**
+     * Check if the provided protocol metadata matches the currently stored metadata.
+     */
+    public boolean matches(Map<String, byte[]> protocols) {
+        if (protocols != null && supportedProtocols != null) {
+            if (protocols.size() != this.supportedProtocols.size()) {
+                return false;
+            }
+            Iterator<Map.Entry<String, byte[]>> protocolsIter = protocols.entrySet().iterator();
+            while(protocolsIter.hasNext()){
+                Map.Entry<String, byte[]> protocolsEntry = (Map.Entry<String, byte[]>) protocolsIter.next();
+                byte[] protocolsValue = protocolsEntry.getValue() == null ? null : protocolsEntry.getValue();
+                byte[] supportedProtocolsvalue = supportedProtocols.get(protocolsEntry.getKey()) == null ? null : supportedProtocols.get(protocolsEntry.getKey());
+
+                if (!Arrays.equals(protocolsValue, supportedProtocolsvalue)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public Set<String> protocols() {
+        if (supportedProtocols != null && !supportedProtocols.isEmpty()) {
+            return supportedProtocols.keySet();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Get metadata corresponding to the provided protocol.
+     */
+    public byte[] metadata(String protocol) {
+        if (supportedProtocols != null && !supportedProtocols.isEmpty()) {
+            Set<String> protocols = supportedProtocols.keySet();
+            for (String supportProtocol : protocols) {
+                if (supportProtocol.equals(protocol)) {
+                    return supportedProtocols.get(supportProtocol);
+                }
+            }
+        }
+        throw new IllegalArgumentException("Member does not support protocol");
+    }
+
+    /**
+     * Vote for one of the potential group protocols. This takes into account the protocol preference as
+     * indicated by the order of supported protocols and returns the first one also contained in the set
+     */
+    public String vote(List<String> candidates) {
+        if (CollectionUtils.isNotEmpty(candidates)) {
+            if (MapUtils.isNotEmpty(supportedProtocols)) {
+                for (Map.Entry<String, byte[]> entry : supportedProtocols.entrySet()) {
+                    if (candidates.contains(entry.getKey())) {
+                        return entry.getKey();
+                    }
+                }
+            }
+        }
+        throw new IllegalArgumentException("Member does not support any of the candidate protocols");
+    }
+
+    @Override
+    public String toString() {
+        return String.format("[%s,%s,%s,%s,%d]", getId(), getGroupId(), clientId, getConnectionHost(), getSessionTimeout());
+    }
+
+}

@@ -1,0 +1,12 @@
+com.jd.journalq.broker.mqtt.handler.ConnectHandler
+com.jd.journalq.broker.mqtt.handler.ConnectAckHandler
+com.jd.journalq.broker.mqtt.handler.DisconnectHandler
+com.jd.journalq.broker.mqtt.handler.PingReqHandler
+com.jd.journalq.broker.mqtt.handler.PingRespHandler
+com.jd.journalq.broker.mqtt.handler.SubscribeHandler
+com.jd.journalq.broker.mqtt.handler.UnSubscribeHandler
+com.jd.journalq.broker.mqtt.handler.PublishHandler
+com.jd.journalq.broker.mqtt.handler.PublishAckHandler
+com.jd.journalq.broker.mqtt.handler.PublishRecHandler
+com.jd.journalq.broker.mqtt.handler.PublishRelHandler
+com.jd.journalq.broker.mqtt.handler.PublishCompHandler

@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ArchiveTaskRepository">
+    <resultMap id="baseResultMap" type="ArchiveTask">
+        <result property="id" column="id" jdbcType="BIGINT"/>
+        <result property="type" column="type" jdbcType="BIGINT"/>
+        <result property="topic" column="topic" jdbcType="VARCHAR"/>
+        <result property="params" column="params" jdbcType="VARCHAR"/>
+        <result property="sendTime" column="send_time" jdbcType="TIMESTAMP"/>
+        <result property="total" column="total" jdbcType="BIGINT"/>
+        <result property="count" column="count" jdbcType="BIGINT"/>
+        <result property="url" column="url" jdbcType="VARCHAR"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="createBy.id" column="create_by" jdbcType="BIGINT"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+        <result property="updateBy.id" column="update_by" jdbcType="BIGINT"/>
+        <result property="status" column="status" jdbcType="BIGINT"/>
+    </resultMap>
+    <sql id="baseColumn">
+        a.id,
+        a.type,
+        a.topic,
+        a.params,
+        a.send_time,
+        a.total,
+        a.count,
+        a.url,
+        a.create_time,
+        a.create_by,
+        a.update_time,
+        a.update_by,
+        a.`status`
+     </sql>
+    <insert id="add" parameterType="archiveTask" useGeneratedKeys="true" keyProperty="id">
+        insert into archive_task
+        (
+        type,
+        topic,
+        params,
+        send_time,
+        total,
+        count,
+        url,
+        create_time,
+        create_by,
+        update_time,
+        update_by,
+        `status`)
+        values
+        (
+        #{type},
+        #{topic},
+        #{params},
+        #{sendTime},
+        #{total},
+        #{count},
+        #{url},
+        #{createTime},
+        #{createBy.id},
+        #{updateTime},
+        #{updateBy.id},
+        #{status}
+        )
+    </insert>
+
+    <update id="update" parameterType="archiveTask">
+        UPDATE archive_task
+        <set>
+            <if test="type != null">type = #{type},</if>
+            <if test="topic != null">topic = #{topic},</if>
+            <if test="params != null">params = #{params},</if>
+            <if test="sendTime != null">send_time = #{sendTime},</if>
+            <if test="total != null">total = #{total},</if>
+            <if test="count != null">count = #{count},</if>
+            <if test="url != null">url = #{url},</if>
+            <if test="updateBy != null">update_by = #{updateBy.id},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="status != null">status = #{status},</if>
+        </set>
+        WHERE
+        id=#{id}
+    </update>
+
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM archive_task
+        WHERE
+        id=#{id}
+    </delete>
+
+    <select id="findById" parameterType="long" resultMap="baseResultMap">
+        SELECT
+        <include refid="baseColumn"/>
+        FROM
+        archive_task a
+        WHERE a.id=#{id}
+    </select>
+
+    <sql id="queryCondition">
+        <where>
+            a.`status` > 0
+            <if test="query != null" >
+                <if test="query.topic != null and query.topic != '' ">
+                    AND topic=#{query.topic}
+                </if>
+                <if test="query.beginTime != null">AND a.create_time <![CDATA[>=]]>#{query.beginTime} </if>
+                <if test="query.endTime != null">AND a.create_time <![CDATA[<=]]> #{query.endTime} </if>
+            </if>
+        </where>
+    </sql>
+    <select id="findByQuery" parameterType="qpagequery" resultMap="baseResultMap">
+        select
+        <include refid="baseColumn"/>
+        from archive_task a
+        <include refid="queryCondition"/>
+        order by a.id desc
+    </select>
+    <select id="findCountByQuery" parameterType="qpagequery" resultType="int">
+        select count(1)
+        from archive_task a
+        <include refid="queryCondition"/>
+    </select>
+
+    <update id="state" parameterType="archiveTask">
+        UPDATE
+            `archive_task`
+        SET
+           `status`=#{status},
+           `update_by`=#{updateBy.id},
+           `update_time`=#{updateTime}
+        WHERE
+            id=#{id}
+    </update>
+</mapper>

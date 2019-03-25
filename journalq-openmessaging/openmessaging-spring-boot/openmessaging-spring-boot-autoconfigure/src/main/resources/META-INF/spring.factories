@@ -1,0 +1,2 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+io.openmessaging.spring.boot.configuration.OMSAutoConfiguration

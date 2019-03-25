@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>journalq-console</artifactId>
+        <groupId>com.jd.journalq</groupId>
+        <version>4.0.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <version>4.0.0-SNAPSHOT</version>
+
+    <artifactId>journalq-data</artifactId>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>journalq-data-model</module>
+        <module>journalq-data-repository</module>
+        <module>journalq-token</module>
+        <module>journalq-data-service</module>
+    </modules>
+
+</project>

@@ -1,0 +1,187 @@
+<template>
+  <div
+    :class="[prefixCls]"
+    v-click-outside="onClickoutside"
+    @mouseenter="handleMouseenter"
+    @mouseleave="handleMouseleave"
+  >
+    <div :class="relClasses" ref="reference" @click="handleClick" @contextmenu.prevent="handleRightClick"><slot></slot></div>
+    <transition name="transition-drop">
+      <Drop
+        v-show="currentVisible"
+        :prevElRect="prevElRect"
+        ref="drop"
+        @mouseenter.native="handleMouseenter"
+        @mouseleave.native="handleMouseleave">
+        <slot name="list"></slot>
+      </Drop>
+    </transition>
+  </div>
+</template>
+<script>
+import Config from '../../config'
+import Drop from '../select/dropdown-select.vue'
+import {directive as ClickOutside} from 'v-click-outside-x'
+import { oneOf, findComponentUpward } from '../../utils/assist'
+
+const prefixCls = `${Config.clsPrefix}dropdown`
+
+export default {
+  name: `${Config.namePrefix}Dropdown`,
+  directives: { ClickOutside },
+  components: { Drop },
+  props: {
+    trigger: {
+      validator (value) {
+        return oneOf(value, ['click', 'hover'])
+      },
+      default: 'hover'
+    },
+    prevElRect: {
+      type: Object
+    },
+    // placement: {
+    //   validator (value) {
+    //     return oneOf(value, ['top', 'top-start', 'top-end', 'bottom', 'bottom-start', 'bottom-end', 'left', 'left-start', 'left-end', 'right', 'right-start', 'right-end']);
+    //   },
+    //   default: 'bottom'
+    // },
+    visible: {
+      type: Boolean,
+      default: false
+    }
+  },
+  computed: {
+    transition () {
+      return ['bottom-start', 'bottom', 'bottom-end'].indexOf(this.placement) > -1 ? 'slide-up' : 'fade'
+    },
+    relClasses () {
+      return [
+        `${prefixCls}-rel`,
+        {
+          [`${prefixCls}-rel-user-select-none`]: this.trigger === 'contextMenu'
+        }
+      ]
+    }
+  },
+  data () {
+    return {
+      prefixCls: prefixCls,
+      currentVisible: this.visible
+    }
+  },
+  watch: {
+    // visible (val) {
+    //   console.log(111)
+    //   this.currentVisible = val;
+    // },
+    // currentVisible (val) {
+    //   console.log(val)
+    //   // if (val) {
+    //   //   this.$refs.drop.update();
+    //   // } else {
+    //   //   this.$refs.drop.destroy();
+    //   // }
+    //   // this.$emit('on-visible-change', val);
+    // }
+  },
+  methods: {
+    handleClick () {
+      if (this.trigger === 'custom') return false
+      if (this.trigger !== 'click') {
+        return false
+      }
+      this.currentVisible = !this.currentVisible
+    },
+    handleRightClick () {
+      if (this.trigger === 'custom') return false
+      if (this.trigger !== 'contextMenu') {
+        return false
+      }
+      this.currentVisible = !this.currentVisible
+    },
+    handleMouseenter () {
+      if (this.trigger === 'custom') return false
+      if (this.trigger !== 'hover') {
+        return false
+      }
+      if (this.timeout) clearTimeout(this.timeout)
+      this.timeout = setTimeout(() => {
+        this.currentVisible = true
+      }, 250)
+    },
+    handleMouseleave () {
+      if (this.trigger === 'custom') return false
+      if (this.trigger !== 'hover') {
+        return false
+      }
+      if (this.timeout) {
+        clearTimeout(this.timeout)
+        this.timeout = setTimeout(() => {
+          this.currentVisible = false
+        }, 150)
+      }
+    },
+    onClickoutside (e) {
+      this.handleClose()
+      this.handleRightClose()
+      if (this.currentVisible) this.$emit('on-clickoutside', e)
+    },
+    handleClose () {
+      if (this.trigger === 'custom') return false
+      if (this.trigger !== 'click') {
+        return false
+      }
+      this.currentVisible = false
+    },
+    handleRightClose () {
+      if (this.trigger === 'custom') return false
+      if (this.trigger !== 'contextMenu') {
+        return false
+      }
+      this.currentVisible = false
+    },
+    hasParent () {
+      const $parent = findComponentUpward(this, 'Dropdown')
+      if ($parent) {
+        return $parent
+      } else {
+        return false
+      }
+    },
+    handleMenuItemClick (command, instance) {
+      this.$emit('on-command', command, instance)
+    }
+  },
+  mounted () {
+    this.$on('on-click', this.handleMenuItemClick)
+    // this.$on('on-click', (key) => {
+    //   const $parent = this.hasParent();
+    //   if ($parent) $parent.$emit('on-click', key);
+    // });
+    this.$on('on-hover-click', () => {
+      const $parent = this.hasParent()
+      if ($parent) {
+        this.$nextTick(() => {
+          if (this.trigger === 'custom') return false
+          this.currentVisible = false
+        })
+        $parent.$emit('on-hover-click')
+      } else {
+        this.$nextTick(() => {
+          if (this.trigger === 'custom') return false
+          this.currentVisible = false
+        })
+      }
+    })
+    this.$on('on-haschild-click', () => {
+      this.$nextTick(() => {
+        if (this.trigger === 'custom') return false
+        this.currentVisible = true
+      })
+      const $parent = this.hasParent()
+      if ($parent) $parent.$emit('on-haschild-click')
+    })
+  }
+}
+</script>

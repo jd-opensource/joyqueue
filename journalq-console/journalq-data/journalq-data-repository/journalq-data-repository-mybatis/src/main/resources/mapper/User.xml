@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jd.journalq.repository.UserRepository">
+    <resultMap id="baseResultMap" type="User">
+        <result property="id" column="id" jdbcType="BIGINT"/>
+        <result property="code" column="code" jdbcType="VARCHAR"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="orgId" column="org_id" jdbcType="VARCHAR"/>
+        <result property="orgName" column="org_name" jdbcType="VARCHAR"/>
+        <result property="email" column="email" jdbcType="VARCHAR"/>
+        <result property="mobile" column="mobile" jdbcType="VARCHAR"/>
+        <result property="sign" column="sign" jdbcType="INTEGER"/>
+        <result property="role" column="role" jdbcType="BIGINT"/>
+        <result property="status" column="status" jdbcType="BIGINT"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="createBy.id" column="create_by" jdbcType="BIGINT"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+        <result property="updateBy.id" column="update_by" jdbcType="BIGINT"/>
+    </resultMap>
+
+    <resultMap id="appUserMap" type="ApplicationUser">
+        <result property="id" column="id" jdbcType="BIGINT"/>
+        <result property="application.id" column="app_id" jdbcType="BIGINT"/>
+        <result property="application.code" column="app_code" jdbcType="VARCHAR"/>
+        <result property="user.id" column="user_id" jdbcType="BIGINT"/>
+        <result property="user.code" column="user_code" jdbcType="VARCHAR"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="createBy.id" column="create_by" jdbcType="BIGINT"/>
+        <result property="createBy.code" column="create_by_code" jdbcType="VARCHAR"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+        <result property="updateBy.id" column="update_by" jdbcType="BIGINT"/>
+        <result property="updateBy.code" column="update_by" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="baseColumn">
+        u.id,
+        u.code,
+        u.`name`,
+        u.`org_id`,
+        u.`org_name`,
+        u.`email`,
+        u.`mobile`,
+        u.`sign`,
+        u.`role`,
+        u.`status`,
+        u.create_time,
+        u.create_by,
+        u.update_time,
+        u.update_by
+    </sql>
+
+    <insert id="add" parameterType="user" useGeneratedKeys="true" keyProperty="id">
+        insert into `user`
+        (
+        code,
+        `name`,
+        `org_id`,
+        `org_name`,
+        `email`,
+        `mobile`,
+        `sign`,
+        `role`,
+        `status`,
+        create_time,
+        create_by,
+        update_time,
+        update_by)
+        values
+        (
+        #{code},
+        #{name},
+        #{orgId},
+        #{orgName},
+        #{email},
+        #{mobile},
+        #{sign},
+        #{role},
+        #{status},
+        #{createTime},
+        #{createBy.id},
+        #{updateTime},
+        #{updateBy.id}
+        )
+    </insert>
+
+    <update id="update" parameterType="user">
+        UPDATE `user`
+        SET
+        <if test="name != null and name !=''">
+            `name`=#{name},
+        </if>
+        <if test="email != null and email !=''">
+            `email`=#{email},
+        </if>
+        <if test="mobile != null and mobile !=''">
+            `mobile`=#{mobile},
+        </if>
+        <if test="orgId != null and orgId !=''">
+            `org_id`=#{orgId},
+        </if>
+        <if test="orgName != null and orgName !=''">
+            `org_name`=#{orgName},
+        </if>
+        <if test="role != null">
+            `role`=#{role},
+        </if>
+        <if test="status != null">
+            `status`=#{status},
+        </if>
+        `sign`=#{sign}
+        WHERE
+        id=#{id}
+    </update>
+
+    <delete id="deleteById" parameterType="long">
+        delete FROM `user`
+        WHERE
+        id=#{id}
+    </delete>
+
+    <insert id="addAppUser" parameterType="applicationUser" useGeneratedKeys="true" keyProperty="id">
+        insert into `application_user`
+        (
+        app_id,
+        app_code,
+        user_id,
+        user_code,
+        create_time,
+        create_by,
+        create_by_code,
+        update_time,
+        update_by,
+        update_by_code)
+        values
+        (
+        #{application.id},
+        #{application.code},
+        #{user.id},
+        #{user.code},
+        now(),
+        #{createBy.id},
+        #{createBy.code},
+        now(),
+        #{updateBy.id},
+        #{updateBy.code}
+        )
+    </insert>
+
+    <delete id="deleteAppUser">
+        DELETE FROM `application_user`
+        WHERE
+        application_id=#{app_id} AND user_id=#{userId}
+    </delete>
+
+    <delete id="deleteAppUserById">
+        DELETE FROM `application_user` WHERE id=#{id}
+    </delete>
+
+    <select id="findById" parameterType="long" resultMap="baseResultMap">
+        SELECT
+        <include refid="baseColumn"/>
+        FROM
+        `user` u
+        WHERE u.id=#{id}
+    </select>
+
+    <select id="findByAppId" parameterType="long" resultMap="baseResultMap">
+        SELECT
+        <include refid="baseColumn"/>
+        FROM
+        application_user au INNER JOIN `user` u ON au.user_id=u.id
+        WHERE au.app_id=#{id}
+    </select>
+
+    <select id="findAppUserById" parameterType="long" resultMap="appUserMap">
+        SELECT
+          app_id,app_code,user_id,user_code,create_time,create_by,create_by_code,update_time,update_by,update_by_code
+        FROM
+          `application_user`
+        WHERE id=#{id}
+    </select>
+
+    <select id="findAppUserByAppIdAndUserId" resultMap="appUserMap">
+        SELECT
+          app_id,app_code,user_id,user_code,create_time,create_by,create_by_code,update_time,update_by,update_by_code
+        FROM
+          `application_user`
+        WHERE app_id=#{appId} AND user_id=#{userId}
+    </select>
+
+    <select id="belong" resultType="boolean">
+        SELECT COUNT(1) FROM application_user WHERE app_id=#{appId} AND user_id=#{userId}
+    </select>
+
+    <select id="findByCode" parameterType="String" resultMap="baseResultMap">
+        SELECT
+        <include refid="baseColumn"/>
+        FROM
+        `user` u
+        WHERE u.code = #{code}
+        limit 1
+    </select>
+
+    <select id="findByRole" parameterType="int" resultMap="baseResultMap">
+        SELECT
+        <include refid="baseColumn"/>
+        FROM
+        `user` u
+        WHERE u.role = #{role}
+    </select>
+
+
+    <select id="findByQuery" parameterType="qpagequery" resultMap="baseResultMap">
+        select
+        <include refid="baseColumn"/>
+        from `user` u
+        <if test="query.appId != null ">
+            INNER JOIN application_user au ON u.id=au.user_id AND au.app_id=#{query.appId}
+        </if>
+        <where>
+            <if test="query.keyword != null and query.keyword != '' ">
+                (u.`code` like concat('%', #{query.keyword},'%' ) or u.`name` like concat('%', #{query.keyword},'%' ))
+            </if>
+            <if test="query.status != null ">
+                and u.`status`=#{status}
+            </if>
+        </where>
+        order by u.id desc
+    </select>
+
+    <select id="findCountByQuery" parameterType="qpagequery" resultType="int">
+        select count(1)
+        from `user` u
+        <if test="query.appId != null ">
+            INNER JOIN application_user au ON u.id=au.user_id AND au.app_id=#{query.appId}
+        </if>
+        <where>
+            <if test="query.keyword != null and query.keyword != '' ">
+                (u.`code` like concat('%', #{query.keyword},'%' ) or u.`name` like concat('%', #{query.keyword},'%' ))
+            </if>
+            <if test="query.status != null ">
+                and u.`status`=#{status}
+            </if>
+        </where>
+    </select>
+    <update id="state" parameterType="user">
+        <![CDATA[
+        UPDATE
+            `user`
+        SET
+           `status`=#{status},
+           `update_by`=#{updateBy.id},
+           `update_time`=#{updateTime}
+        WHERE
+            id=#{id}
+        ]]>
+    </update>
+
+    <select id="findByWhereSql" parameterType="String" resultMap="baseResultMap">
+        SELECT
+        <include refid="baseColumn"/>
+        FROM `user` u
+        WHERE ${value}
+    </select>
+
+    <select id="findByCodes" resultMap="baseResultMap">
+        SELECT
+        <include refid="baseColumn"/>
+        FROM
+        `user` u
+        WHERE u.code IN
+        <foreach collection="list" close=")" open="(" index="index" item="item" separator=",">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="findByIds" resultMap="baseResultMap">
+        SELECT
+        <include refid="baseColumn"/>
+        FROM
+        `user` u
+        WHERE u.id IN
+        <foreach collection="list" close=")" open="(" index="index" item="item" separator=",">
+            #{item}
+        </foreach>
+    </select>
+</mapper>

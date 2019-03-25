@@ -1,0 +1,46 @@
+package io.openmessaging.jmq.domain;
+
+import io.openmessaging.OMSBuiltinKeys;
+
+/**
+ * JMQConsumerBuiltinKeys
+ * author: gaohaoxiang
+ * email: gaohaoxiang@jd.com
+ * date: 2019/2/19
+ */
+public interface JMQConsumerBuiltinKeys extends OMSBuiltinKeys {
+
+    String GROUP = "CONSUMER_GROUP";
+
+    String BATCH_SIZE = "CONSUMER_BATCH_SIZE";
+
+    String ACK_TIMEOUT = "CONSUMER_ACK_TIMEOUT";
+
+    String TIMEOUT = "CONSUMER_TIMEOUT";
+
+    String POLL_TIMEOUT = "CONSUMER_POLL_TIMEOUT";
+
+    String LONGPOLL_TIMEOUT = "CONSUMER_LONGPOLL_TIMEOUT";
+
+    String INTERVAL = "CONSUMER_INTERVAL";
+
+    String IDLE_INTERVAL = "CONSUMER_IDLE_INTERVAL";
+
+    String SESSION_TIMEOUT = "CONSUMER_SESSION_TIMEOUT";
+
+    String THREAD = "CONSUMER_THREAD";
+
+    String FAILOVER = "CONSUMER_FAILOVER";
+
+    String LOADBALANCE = "CONSUMER_LOADBALANCE";
+
+    String LOADBALANCE_TYPE = "CONSUMER_LOADBALANCE_TYPE";
+
+    String BROADCAST_GROUP = "CONSUMER_BROADCAST_GROUP";
+
+    String BROADCAST_LOCAL_PATH = "CONSUMER_BROADCAST_LOCAL_PATH";
+
+    String BROADCAST_PERSIST_INTERVAL = "CONSUMER_BROADCAST_PERSIST_INTERVAL";
+
+    String BROADCAST_INDEX_EXPIRE_TIME = "CONSUMER_BROADCAST_INDEX_EXPIRE_TIME";
+}

@@ -1,0 +1,2 @@
+com.jd.journalq.broker.store.FixedSizeStoreCleaningStrategy
+com.jd.journalq.broker.store.IntervalTimeStoreCleaningStrategy

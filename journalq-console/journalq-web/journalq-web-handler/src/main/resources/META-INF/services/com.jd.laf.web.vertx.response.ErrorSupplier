@@ -1,0 +1,4 @@
+com.jd.journalq.handler.error.ConfigExceptionSupplier
+com.jd.journalq.handler.error.HttpStatusExceptionSupplier
+com.jd.journalq.handler.error.SQLExceptionSupplier
+com.jd.journalq.handler.error.ThrowableSupplier

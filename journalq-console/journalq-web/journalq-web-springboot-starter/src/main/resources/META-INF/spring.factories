@@ -1,0 +1,3 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.jd.journalq.springboot.starter.JMQVertxWebAutoConfiguration,\
+com.jd.journalq.springboot.starter.ServiceAutoConfiguration

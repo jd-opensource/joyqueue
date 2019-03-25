@@ -1,0 +1,8 @@
+com.jd.journalq.handler.routing.validate.ValidateAdminHandler
+com.jd.journalq.handler.routing.validate.ValidateApplicationHandler
+com.jd.journalq.handler.routing.validate.ValidateApplicationMemberHandler
+com.jd.journalq.handler.routing.validate.ValidateApplicationOwnerHandler
+com.jd.journalq.handler.routing.validate.ValidateApplicationOfHeaderHandler
+com.jd.journalq.handler.routing.validate.ValidateTokenOfApplicationHandler
+com.jd.journalq.handler.routing.validate.ValidateAppTokenHandler
+com.jd.journalq.handler.routing.GetLoginUserHandler

@@ -1,0 +1,2 @@
+com.jd.journalq.client.internal.consumer.support.RoundRobinBrokerLoadBalance
+com.jd.journalq.client.internal.consumer.support.RandomBrokerLoadBalance

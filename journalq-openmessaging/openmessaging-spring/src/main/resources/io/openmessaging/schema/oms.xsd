@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns="http://openmessaging.io/schema"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://openmessaging.io/schema"
+            elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+    <xsd:complexType name="accessPointType">
+        <xsd:choice minOccurs="0" maxOccurs="unbounded">
+            <xsd:element ref="attribute"/>
+        </xsd:choice>
+        <xsd:attribute name="id" type="xsd:string" />
+        <xsd:attribute name="url" type="xsd:string" use="required"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="attributeType">
+        <xsd:attribute name="key" type="xsd:string" use="required"/>
+        <xsd:attribute name="value" type="xsd:string" use="required"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="consumerType">
+        <xsd:attribute name="id" type="xsd:string"/>
+        <xsd:attribute name="access-point" type="xsd:string"/>
+        <xsd:attribute name="queue-name" type="xsd:string" use="required"/>
+        <xsd:attribute name="listener" type="xsd:string"/>
+        <xsd:attribute name="listener-ref" type="xsd:string"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="producerType">
+        <xsd:attribute name="id" type="xsd:string" use="required"/>
+        <xsd:attribute name="access-point" type="xsd:string"/>
+        <xsd:attribute name="listener" type="xsd:string"/>
+        <xsd:attribute name="listener-ref" type="xsd:string"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="interceptorType">
+        <xsd:attribute name="access-point" type="xsd:string"/>
+        <xsd:attribute name="class" type="xsd:string"/>
+        <xsd:attribute name="ref" type="xsd:string"/>
+    </xsd:complexType>
+
+    <xsd:element name="access-point" type="accessPointType"/>
+    <xsd:element name="attribute" type="attributeType"/>
+    <xsd:element name="producer" type="producerType"/>
+    <xsd:element name="consumer" type="consumerType"/>
+    <xsd:element name="interceptor" type="interceptorType"/>
+</xsd:schema>

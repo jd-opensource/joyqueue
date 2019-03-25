@@ -1,0 +1,236 @@
+<template>
+  <div>
+    <div class="ml20 mt30">
+      <d-input v-model="searchData.keyword" placeholder="请输入编码/名称" class="left mr10" style="width: 20%">
+        <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
+      </d-input>
+      <d-button type="primary" @click="openDialog('addDialog')">新建分组<icon name="plus-circle" style="margin-left: 5px;"></icon></d-button>
+    </div>
+    <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange"
+              @on-selection-change="handleSelectionChange" @on-detail="goDetail" @on-add-broker="addBroker" @on-del="del" @on-edit="edit">
+    </my-table>
+
+    <!--新建分组-->
+    <my-dialog :dialog="addDialog" @on-dialog-confirm="submit()" @on-dialog-cancel="addCancel()">
+      <grid-row class="mb10">
+        <grid-col :span="4" class="label">编码:</grid-col>
+        <grid-col :span="16" class="val">
+          <d-input v-model="addData.code"></d-input>
+        </grid-col>
+      </grid-row>
+      <grid-row class="mb10">
+        <grid-col :span="4" class="label">名称:</grid-col>
+        <grid-col :span="16" class="val">
+          <d-input v-model="addData.name"></d-input>
+        </grid-col>
+      </grid-row>
+      <grid-row class="mb10">
+        <grid-col :span="4" class="label">仅管理员:</grid-col>
+        <grid-col :span="16" class="val">
+          <d-radio-group v-model="addData.status">
+            <d-radio :label="2">是</d-radio>
+            <d-radio :label="1">否</d-radio>
+          </d-radio-group>
+        </grid-col>
+      </grid-row>
+    </my-dialog>
+    <my-dialog :dialog="editDialog" @on-dialog-confirm="editSubmit()" @on-dialog-cancel="editCancel()">
+      <grid-row class="mb10">
+        <grid-col :span="4" class="label">编码:</grid-col>
+        <grid-col :span="16" class="val">
+          <d-input v-model="editData.code"></d-input>
+        </grid-col>
+      </grid-row>
+      <grid-row class="mb10">
+        <grid-col :span="4" class="label">名称:</grid-col>
+        <grid-col :span="16" class="val">
+          <d-input v-model="editData.name"></d-input>
+        </grid-col>
+      </grid-row>
+      <grid-row class="mb10">
+        <grid-col :span="4" class="label">仅管理员:</grid-col>
+        <grid-col :span="16" class="val">
+          <d-radio-group v-model="editData.status">
+            <d-radio :label="2">是</d-radio>
+            <d-radio :label="1">否</d-radio>
+          </d-radio-group>
+        </grid-col>
+      </grid-row>
+    </my-dialog>
+    <!--添加broker-->
+    <my-dialog :dialog="addBrokerDialog" @on-dialog-cancel="addBrokerCancel()">
+      <add-broker :group="group" :data="brokerData" ref="broker"></add-broker>
+    </my-dialog>
+  </div>
+</template>
+
+<script>
+import myTable from '../../components/common/myTable.vue'
+import myDialog from '../../components/common/myDialog.vue'
+import addBroker from './addBroker.vue'
+import crud from '../../mixins/crud.js'
+
+export default {
+  name: 'application',
+  components: {
+    myTable,
+    myDialog,
+    addBroker
+  },
+  mixins: [ crud ],
+  data () {
+    return {
+      group: {
+        id: 0,
+        code: ''
+      },
+      searchData: {
+        keyword: ''
+      },
+      searchRules: {
+      },
+      tableData: {
+        rowData: [],
+        colData: [
+          {
+            title: 'ID',
+            key: 'id'
+          },
+          {
+            title: '编码',
+            key: 'code'
+          },
+          {
+            title: '名称',
+            key: 'name'
+          },
+          {
+            title: '仅管理员',
+            key: 'status',
+            formatter (row) {
+              if (row.status === 2) {
+                return '是'
+              }
+              if (row.status === 1) {
+                return '否'
+              }
+            }
+          }
+        ],
+        // 表格操作，如果需要根据特定值隐藏显示， 设置bindKey对应的属性名和bindVal对应的属性值
+        btns: [
+          {
+            txt: '查看详情',
+            method: 'on-detail'
+          },
+          {
+            txt: '编辑',
+            method: 'on-edit'
+          },
+          {
+            txt: '删除',
+            method: 'on-del'
+          },
+          // {
+          //   txt: '编辑标签',
+          //   method: 'on-edit-label'
+          // },
+          {
+            txt: '添加Broker',
+            method: 'on-add-broker'
+          }
+        ]
+      },
+      multipleSelection: [],
+      addDialog: {
+        visible: false,
+        title: '新建分组',
+        showFooter: true
+      },
+      addData: {
+        code: '',
+        name: '',
+        status: 1
+      },
+      editDialog: {
+        visible: false,
+        title: '编辑分组',
+        showFooter: true
+      },
+      editData: {
+        code: '',
+        name: '',
+        status: 1
+      },
+      addBrokerDialog: {
+        visible: false,
+        width: 700,
+        title: '添加Broker',
+        showFooter: false
+      },
+      brokerData: {}
+    }
+  },
+  computed: {
+    curLang () {
+      return this.$i18n.locale
+    },
+  },
+  methods: {
+    openDialog (dialog) {
+      this[dialog].visible = true
+      this.addData.code = ''
+      this.addData.name = ''
+    },
+    goDetail (item) {
+      this.$router.push({name: `/${this.curLang}/setting/brokerGroup/detail`, query: {id: item.id, code: item.code, name: item.name}})
+    },
+    addBroker (item, index) {
+      this.group = {
+        id: item.id,
+        code: item.code
+      }
+      this.addBrokerDialog.visible = true
+      this.$nextTick(() => {
+        this.$refs.broker.getList()
+      })
+    },
+    submit () {
+      if (!this.addData.code) {
+        this.$Message.error('编码不能为空')
+        return false
+      }
+
+      if (!this.addData.name) {
+        this.$Message.error('名称不能为空')
+        return false
+      }
+      this.addConfirm()
+    },
+    editSubmit () {
+      if (!this.editData.code) {
+        this.$Message.error('编码不能为空')
+        return false
+      }
+
+      if (!this.editData.name) {
+        this.$Message.error('名称不能为空')
+        return false
+      }
+      this.editConfirm()
+    },
+    addBrokerCancel (index, row) {
+      this.addBrokerDialog.visible = false
+    }
+  },
+  mounted () {
+    this.getList()
+  }
+}
+</script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped>
+  .label{text-align: right; line-height: 32px;}
+  .val{}
+</style>

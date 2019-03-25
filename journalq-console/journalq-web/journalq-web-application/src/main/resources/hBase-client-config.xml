@@ -1,0 +1,33 @@
+<configuration>
+    <!-- 线上配置
+    <property>
+        <name>hbase.zookeeper.quorum</name>
+        <value>11.3.20.100:2181,11.3.20.101:2181,11.3.20.106:2181</value>
+    </property>
+    <property>
+        <name>zookeeper.znode.parent</name>
+        <value>/hb/ump01</value>
+    </property>
+    -->
+
+    <!-- 测试环境配置 -->
+    <property>
+        <name>hbase.zookeeper.quorum</name>
+        <value>192.168.112.172:2181,192.168.112.174:2181,192.168.112.175:2181</value>
+    </property>
+    <property>
+        <name>zookeeper.znode.parent</name>
+        <value>/hb/app01</value>
+    </property>
+
+    <!-- 此参数决定了每次从服务器scan获取的数据量，默认会是1，性能很低，因此设置为100以上，每行数据太大的，可以小一些，否则可以更高 -->
+    <property>
+        <name>hbase.client.scanner.caching</name>
+        <value>200</value>
+    </property>
+    <!-- 此参数定义客户端写缓存的大小,这里配置了5M -->
+    <property>
+        <name>hbase.client.write.buffer</name>
+        <value>5242880</value>
+    </property>
+</configuration>
