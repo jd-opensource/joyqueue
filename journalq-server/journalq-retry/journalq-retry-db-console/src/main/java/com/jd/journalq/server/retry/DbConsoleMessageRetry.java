@@ -1,3 +1,5 @@
+package com.jd.journalq.server.retry;
+
 import com.google.common.collect.Lists;
 import com.jd.journalq.domain.ConsumeRetry;
 import com.jd.journalq.exception.JMQCode;

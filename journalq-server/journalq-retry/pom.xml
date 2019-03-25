@@ -15,9 +15,8 @@
         <module>journalq-retry-api</module>
         <module>journalq-retry-db</module>
         <module>journalq-retry-remote</module>
-        <module>journalq-retry-plugins</module>
         <module>journalq-retry-db-console</module>
-        <!--<module>journalq-retry-h2</module>-->
+        <module>journalq-retry-h2</module>
     </modules>
 
 
