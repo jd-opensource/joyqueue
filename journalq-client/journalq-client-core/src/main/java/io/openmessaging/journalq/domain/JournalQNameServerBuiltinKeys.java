@@ -3,12 +3,12 @@ package io.openmessaging.journalq.domain;
 import io.openmessaging.OMSBuiltinKeys;
 
 /**
- * JMQNameServerBuiltinKeys
+ * JournalQNameServerBuiltinKeys
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2019/2/19
  */
-public interface JMQNameServerBuiltinKeys extends OMSBuiltinKeys {
+public interface JournalQNameServerBuiltinKeys extends OMSBuiltinKeys {
 
     String NAMESPACE = "NAMESERVER_NAMESPACE";
 

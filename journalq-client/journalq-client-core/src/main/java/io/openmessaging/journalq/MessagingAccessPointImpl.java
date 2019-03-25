@@ -109,6 +109,6 @@ public class MessagingAccessPointImpl implements MessagingAccessPoint {
 
     @Override
     public String version() {
-        return JMQOMSConsts.VERSION;
+        return JournalQOMSConsts.VERSION;
     }
 }
