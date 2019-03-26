@@ -78,7 +78,7 @@ public class FetchHandler extends AbstractKafkaCommandHandler implements KafkaCo
 
                 BooleanResponse checkResult = clusterManager.checkReadable(topic, clientId, clientIp, (short) partition);
                 if (!checkResult.isSuccess()) {
-                    logger.warn("checkReadable failed, transport: {}, topic: {}, app: {}", transport, topic, clientId);
+                    logger.warn("checkReadable failed, transport: {}, topic: {}, app: {}, code: {}", transport, topic, clientId, checkResult.getJmqCode());
                     short errorCode = CheckResultConverter.convertFetchCode(checkResult.getJmqCode());
                     fetchResponseTable.put(topic.getFullName(), partition, new FetchResponsePartitionData(errorCode, -1, Collections.emptyList()));
                     continue;

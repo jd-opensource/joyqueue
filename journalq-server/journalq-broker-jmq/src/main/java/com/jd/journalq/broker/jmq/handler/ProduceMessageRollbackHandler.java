@@ -55,7 +55,7 @@ public class ProduceMessageRollbackHandler implements JMQCommandHandler, Type, B
 
         BooleanResponse checkResult = clusterManager.checkWritable(TopicName.parse(produceMessageRollback.getTopic()), produceMessageRollback.getApp(), connection.getHost());
         if (!checkResult.isSuccess()) {
-            logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}", transport, produceMessageRollback.getTopic(), produceMessageRollback.getApp());
+            logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport, produceMessageRollback.getTopic(), produceMessageRollback.getApp(), checkResult.getJmqCode());
             return new Command(new ProduceMessageRollbackAck(CheckResultConverter.convertCommonCode(checkResult.getJmqCode())));
         }
 

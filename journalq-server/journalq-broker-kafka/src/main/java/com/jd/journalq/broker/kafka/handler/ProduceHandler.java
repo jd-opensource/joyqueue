@@ -86,7 +86,7 @@ public class ProduceHandler extends AbstractKafkaCommandHandler implements Broke
                 int partition = entry.getKey();
                 BooleanResponse checkResult = clusterManager.checkWritable(topic, clientId, clientIp, (short) partition);
                 if (!checkResult.isSuccess()) {
-                    logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}", transport, topic, clientId);
+                    logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport, topic, clientId, checkResult.getJmqCode());
                     short kafkaErrorCode = CheckResultConverter.convertProduceCode(checkResult.getJmqCode());
                     buildPartitionStatus(partition, null, kafkaErrorCode, entry.getValue(), producePartitionStatusList);
                     latch.countDown();

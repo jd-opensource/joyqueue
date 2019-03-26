@@ -18,6 +18,7 @@ import com.jd.journalq.network.session.Consumer;
 import com.jd.journalq.network.transport.Transport;
 import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.transport.command.Type;
+import com.jd.journalq.response.BooleanResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,8 +58,9 @@ public class AddConsumerHandler implements JMQCommandHandler, Type, BrokerContex
         for (String topic : addConsumer.getTopics()) {
             TopicName topicName = TopicName.parse(topic);
 
-            if (!clusterManager.checkReadable(topicName, addConsumer.getApp(), null).isSuccess()) {
-                logger.warn("checkReadable failed, transport: {}, topic: {}, app: {}", transport, topicName, addConsumer.getApp());
+            BooleanResponse checkResult = clusterManager.checkReadable(topicName, addConsumer.getApp(), null);
+            if (!checkResult.isSuccess()) {
+                logger.warn("checkReadable failed, transport: {}, topic: {}, app: {}, code: {}", transport, topicName, addConsumer.getApp(), checkResult.getJmqCode());
                 return BooleanAck.build(JMQCode.CN_NO_PERMISSION);
             }
 

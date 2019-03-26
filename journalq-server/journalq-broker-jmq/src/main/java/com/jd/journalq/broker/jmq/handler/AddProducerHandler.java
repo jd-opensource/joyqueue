@@ -18,6 +18,7 @@ import com.jd.journalq.network.session.Producer;
 import com.jd.journalq.network.transport.Transport;
 import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.transport.command.Type;
+import com.jd.journalq.response.BooleanResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,8 +58,9 @@ public class AddProducerHandler implements JMQCommandHandler, Type, BrokerContex
         for (String topic : addProducer.getTopics()) {
             TopicName topicName = TopicName.parse(topic);
 
-            if (!clusterManager.checkWritable(topicName, addProducer.getApp(), null).isSuccess()) {
-                logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}", transport, topicName, addProducer.getApp());
+            BooleanResponse checkResult = clusterManager.checkWritable(topicName, addProducer.getApp(), null);
+            if (!checkResult.isSuccess()) {
+                logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport, topicName, addProducer.getApp(), checkResult.getJmqCode());
                 return BooleanAck.build(JMQCode.CN_NO_PERMISSION);
             }
 

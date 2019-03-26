@@ -55,7 +55,7 @@ public class ProduceMessageCommitHandler implements JMQCommandHandler, Type, Bro
 
         BooleanResponse checkResult = clusterManager.checkWritable(TopicName.parse(produceMessageCommit.getTopic()), produceMessageCommit.getApp(), connection.getHost());
         if (!checkResult.isSuccess()) {
-            logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}", transport, produceMessageCommit.getTopic(), produceMessageCommit.getApp());
+            logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport, produceMessageCommit.getTopic(), produceMessageCommit.getApp(), checkResult.getJmqCode());
             return new Command(new ProduceMessageCommitAck(CheckResultConverter.convertCommonCode(checkResult.getJmqCode())));
         }
 
