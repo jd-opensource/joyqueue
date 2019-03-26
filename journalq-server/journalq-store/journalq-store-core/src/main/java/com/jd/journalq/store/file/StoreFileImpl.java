@@ -172,7 +172,7 @@ public class StoreFileImpl<T> implements StoreFile<T> {
     }
 
     public long timestamp() {
-        if (timestamp == -1L) {
+        if (timestamp <= 0) {
             // 文件存在初始化时间戳
             readTimestamp();
         }
