@@ -108,10 +108,10 @@ export default {
                   that.tableData.rowData[i].deQuence = monitorData[j].deQuence || {count: 0}
                   that.tableData.rowData[i].pending = monitorData[j].pending || {count: 0}
                 }
-                that.tableData.rowData[i].subscribe = payload
                 that.$set(this.tableData.rowData, i, that.tableData.rowData[i])
               }
             }
+            that.tableData.rowData[i].subscribe = payload
           }
         })
       })
