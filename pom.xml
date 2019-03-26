@@ -153,11 +153,11 @@
                 <artifactId>journalq-retry-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <dependency>
-                <groupId>com.jd.journalq</groupId>
-                <artifactId>journalq-retry-plugins</artifactId>
-                <version>${project.version}</version>
-            </dependency>
+            <!--<dependency>-->
+                <!--<groupId>com.jd.journalq</groupId>-->
+                <!--<artifactId>journalq-retry-plugins</artifactId>-->
+                <!--<version>${project.version}</version>-->
+            <!--</dependency>-->
             <dependency>
                 <groupId>com.jd.journalq</groupId>
                 <artifactId>journalq-web-handler</artifactId>
