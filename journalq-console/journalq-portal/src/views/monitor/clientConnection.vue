@@ -68,7 +68,7 @@ export default {
             key: 'client.language'
           }, {
             title: '来源',
-            key: 'source'
+            key: 'client.source'
           },
           {
             title: '消息服务器',
