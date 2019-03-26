@@ -11,6 +11,10 @@
 
     <artifactId>journalq-client-core</artifactId>
 
+    <properties>
+        <openmessaging-api.version>1.0.0-alpha</openmessaging-api.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.slf4j</groupId>
