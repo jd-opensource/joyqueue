@@ -65,6 +65,7 @@ public class TransactionRecover {
 
                 if (transactionId.isExpired(config.getTransactionExpireTime())) {
                     isExpired = true;
+                    logger.info("recover transaction is expired, topic: {}, app: {}, txId: {}", brokerPrepare.getTopic(), brokerPrepare.getApp(), brokerPrepare.getTxId());
                 } else {
                     unCompleteTransactionManager.putTransaction(transactionId);
                     logger.info("recover transaction, topic: {}, app: {}, txId: {}", brokerPrepare.getTopic(), brokerPrepare.getApp(), brokerPrepare.getTxId());
