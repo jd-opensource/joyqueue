@@ -535,8 +535,10 @@ public class PositioningStore<T> implements Closeable {
 
     public boolean isEarly(long timestamp, long minIndexedPhysicalPosition) {
         for (StoreFile<T> storeFile : storeFileMap.headMap(minIndexedPhysicalPosition).values()) {
-            if (storeFile.timestamp() < timestamp) {
-                return true;
+            if (storeFile.timestamp() >= 0) {
+                if (storeFile.timestamp() < timestamp) {
+                    return true;
+                }
             }
         }
         return false;

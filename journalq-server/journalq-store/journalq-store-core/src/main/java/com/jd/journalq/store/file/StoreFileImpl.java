@@ -185,9 +185,13 @@ public class StoreFileImpl<T> implements StoreFile<T> {
             fileChannel.position(0);
             fileChannel.read(timeBuffer);
         } catch (Exception e) {
-            logger.error("Error to read timestamp from file: <{}> header.", file.getAbsolutePath());
+            logger.error("Error to read timestamp from file: <{}> header, error: <{}>", file.getAbsolutePath(), e.getMessage());
         } finally {
-            timestamp = timeBuffer.getLong(0);
+            try {
+                timestamp = timeBuffer.getLong(0);
+            } catch (IndexOutOfBoundsException iobe) {
+                logger.error("Error to read timestamp long value from file: <{}> header, error: <{}>", file.getAbsolutePath(), iobe.getMessage());
+            }
         }
     }
 
@@ -200,7 +204,7 @@ public class StoreFileImpl<T> implements StoreFile<T> {
             fileChannel.write(timeBuffer);
             fileChannel.force(true);
         } catch (Exception e) {
-            logger.error("Error to write timestamp from file: <{}> header.", file.getAbsolutePath());
+            logger.error("Error to write timestamp from file: <{}> header, error: <{}>", file.getAbsolutePath(), e.getMessage());
         } finally {
             timestamp = creationTime;
         }
