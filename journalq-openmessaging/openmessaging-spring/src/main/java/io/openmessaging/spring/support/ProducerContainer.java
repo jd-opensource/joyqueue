@@ -77,4 +77,9 @@ public class ProducerContainer implements InitializingBean, DisposableBean, Fact
     public Object getObject() {
         return producer;
     }
+
+    @Override
+    public boolean isSingleton() {
+        return false;
+    }
 }
