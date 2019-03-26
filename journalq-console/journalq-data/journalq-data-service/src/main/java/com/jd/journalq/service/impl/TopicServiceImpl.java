@@ -41,17 +41,14 @@ public class TopicServiceImpl implements TopicService {
     @Override
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
     public void addWithBrokerGroup(Topic topic, BrokerGroup brokerGroup, List<Broker> brokers, Identity operator) {
-        //1. 保存主题
-//        super.add(topic);
-        //2. 保存主题队列-Broker分组
+        Namespace namespace = topic.getNamespace();
+        Topic oldTopic = findByCode(namespace == null?null:namespace.getCode(),topic.getCode());
+        if (oldTopic != null) {
+            throw new DuplicateKeyException("topic aleady exist");
+        }
+
         List<TopicPartitionGroup> partitionGroups = addPartitionGroup(topic, brokers, operator);
-        //3. 同步到NameServer
         try {
-            Namespace namespace = topic.getNamespace();
-            Topic oldTopic = findByCode(namespace == null?null:namespace.getCode(),topic.getCode());
-            if (oldTopic != null) {
-                throw new DuplicateKeyException("topic aleady exist");
-            }
             topicNameServerService.addTopic(topic, partitionGroups);
         } catch (Exception e) {
             String errorMsg = "新建主题，同步NameServer失败";
