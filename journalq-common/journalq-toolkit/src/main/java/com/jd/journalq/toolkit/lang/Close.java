@@ -1,6 +1,4 @@
-/**
- *
- */
+
 package com.jd.journalq.toolkit.lang;
 
 import javax.sql.DataSource;

@@ -9,7 +9,7 @@ import java.nio.ByteBuffer;
  */
 public class IndexItem {
 
-    public final static int STORAGE_SIZE = 8 + 4;
+    public static final int STORAGE_SIZE = 8 + 4;
 
     /**
      * 分区

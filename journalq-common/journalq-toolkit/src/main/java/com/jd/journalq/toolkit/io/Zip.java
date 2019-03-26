@@ -1,6 +1,3 @@
-/**
- *
- */
 package com.jd.journalq.toolkit.io;
 
 import java.io.ByteArrayInputStream;

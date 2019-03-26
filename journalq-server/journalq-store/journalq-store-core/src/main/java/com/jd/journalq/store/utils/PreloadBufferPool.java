@@ -28,7 +28,7 @@ public class PreloadBufferPool {
 
     // 缓存比率： 如果非堆内存使用率超过这个比率，就不再申请内存，抛出OOM。
     // 由于jvm在读写文件的时候会用到少量DirectBuffer作为缓存，必须预留一部分。
-    private final static float CACHE_RATIO = 0.9f;
+    private static final float CACHE_RATIO = 0.9f;
     private final AtomicLong usedSize = new AtomicLong(0L);
     public PreloadBufferPool(long intervalMs) {
         this(intervalMs, 0L);

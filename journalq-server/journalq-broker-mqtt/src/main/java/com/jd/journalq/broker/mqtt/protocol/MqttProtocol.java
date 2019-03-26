@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
  * @author majun8
  */
 public class MqttProtocol implements ProtocolService, BrokerContextAware, ChannelHandlerProvider {
-    private final static Logger logger = LoggerFactory.getLogger(MqttProtocol.class);
+    private static final Logger logger = LoggerFactory.getLogger(MqttProtocol.class);
 
     private BrokerContext brokerContext;
 

@@ -12,7 +12,7 @@ import java.util.concurrent.ExecutorService;
  * @author majun8
  */
 public class PublishCompHandler extends Handler implements ExecutorsProvider {
-    private final static Logger logger = LoggerFactory.getLogger(PublishCompHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(PublishCompHandler.class);
 
     @Override
     public void handleRequest(Channel client, MqttMessage message) throws Exception {

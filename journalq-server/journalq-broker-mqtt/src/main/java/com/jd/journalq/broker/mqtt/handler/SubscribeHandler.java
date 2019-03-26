@@ -11,7 +11,7 @@ import java.util.concurrent.ExecutorService;
  * @author majun8
  */
 public class SubscribeHandler extends Handler implements ExecutorsProvider {
-    private final static Logger LOG = LoggerFactory.getLogger(SubscribeHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SubscribeHandler.class);
 
     public SubscribeHandler() {
 

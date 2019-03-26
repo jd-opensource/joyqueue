@@ -48,7 +48,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class ProduceArchiveService extends Service {
 
-    private final static Logger logger = LoggerFactory.getLogger(ProduceArchiveService.class);
+    private static final Logger logger = LoggerFactory.getLogger(ProduceArchiveService.class);
     // 每批读取/写入量
     private int batchNum = 1000;
     // 集群管理

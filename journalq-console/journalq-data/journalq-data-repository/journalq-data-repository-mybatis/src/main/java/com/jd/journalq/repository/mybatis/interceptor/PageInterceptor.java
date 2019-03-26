@@ -13,7 +13,7 @@ import java.util.Properties;
  * @version V1.0
  */
 public abstract class PageInterceptor implements Interceptor {
-    protected final static Log logger = LogFactory.getLog(PageInterceptor.class);
+    protected static final Log logger = LogFactory.getLog(PageInterceptor.class);
 
     public static final String PAGE_SQL_KEY_PREFIX = "pageSqlKeyPrefix";
     public static final String PAGE_SQL_KEY_SUFFIX = "pageSqlKeySuffix";

@@ -19,9 +19,9 @@ public class ConsumeLog {
     private String app;
 
     //16个字节messageId + 4个字节appId + 4个字节brokerId + 16个字节clientIP + 8个字节消费时间
-    public final static int len = 16 + 4 + 4 + 16 + 8;
-    public final static int keyLen = 16 + 4;
-    public final static int valLen = 4 + 16 + 8;
+    public static final int len = 16 + 4 + 4 + 16 + 8;
+    public static final int keyLen = 16 + 4;
+    public static final int valLen = 4 + 16 + 8;
 
     public ConsumeLog() {
     }

@@ -22,7 +22,7 @@ public class BrokerRestUrlMappingServiceImpl implements BrokerRestUrlMappingServ
     private Logger logger= LoggerFactory.getLogger(BrokerRestUrlMappingServiceImpl.class);
 
     /** message preview path  */
-    private final static String pendingByteMessagePath="/manage/topic/%s/app/%s/message/pending?count=%s";
+    private static final String pendingByteMessagePath="/manage/topic/%s/app/%s/message/pending?count=%s";
     private String lastestMessagePath="/manage/topic/%s/app/%s/message/last";
     private String partitoinMessagePath="/manage/topic/%s/app/%s/partition/%d/message";
 

@@ -44,7 +44,7 @@ public class StoreFileImpl<T> implements StoreFile<T> {
     // 读写：
     // DIRECT_BUFFER: 数据先写入DirectBuffer，异步刷盘到文件，性能最好；
     // WRITE_MAP：数据保存到Map中，异步刷盘到文件，性能稍差，节省内存；
-    private final static int MAPPED_BUFFER = 0, DIRECT_BUFFER = 1, WRITE_MAP = 2, NO_BUFFER = -1;
+    private static final int MAPPED_BUFFER = 0, DIRECT_BUFFER = 1, WRITE_MAP = 2, NO_BUFFER = -1;
     private int bufferType = NO_BUFFER;
 
     private PreloadBufferPool bufferPool;

@@ -3,6 +3,7 @@ package com.jd.journalq.manage;
 import java.io.Serializable;
 
 public class TopicMetric implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String topic;
     private PartitionGroupMetric[] partitionGroupMetrics;
 

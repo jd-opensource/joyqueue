@@ -27,7 +27,7 @@ import java.util.concurrent.*;
 public class StoreCleanManager extends Service {
     private static final Logger LOG = LoggerFactory.getLogger(StoreCleanManager.class);
 
-    private final static int SCHEDULE_EXECUTOR_THREADS = 16;
+    private static final int SCHEDULE_EXECUTOR_THREADS = 16;
     private PropertySupplier propertySupplier;
     private StoreService storeService;
     private ClusterManager clusterManager;

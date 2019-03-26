@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
  * date: 2018/10/18
  */
 public class DefaultStoreManageService implements StoreManageService {
-    private final static String TOPICS_DIR = "topics";
+    private static final String TOPICS_DIR = "topics";
 
     private StoreManagementService storeManagementService;
 

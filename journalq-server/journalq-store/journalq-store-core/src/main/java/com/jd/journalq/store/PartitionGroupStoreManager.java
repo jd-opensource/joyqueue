@@ -38,12 +38,12 @@ import java.util.stream.Stream;
  * Date: 2018/8/13
  */
 public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, Closeable {
-    private final static Logger logger = LoggerFactory.getLogger(PartitionGroupStoreManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(PartitionGroupStoreManager.class);
     private final PositioningStore<ByteBuffer> store;
     private final File base;
     private final String topic;
     private final int partitionGroup;
-    private final static long EVENT_TIMEOUT_MILLS = 60 * 1000L;
+    private static final long EVENT_TIMEOUT_MILLS = 60 * 1000L;
     private final CallbackPositioningBelt flushCallbackBelt, commitCallbackBelt;
     private final Map<Short, Partition> partitionMap = new ConcurrentHashMap<>();
     private final Config config;
@@ -1131,16 +1131,16 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
 
 
     public static class Config {
-        public final static int DEFAULT_MAX_MESSAGE_LENGTH = 4 * 1024 * 1024;
-        public final static long DEFAULT_MAX_STORE_SIZE = 10L * 1024 * 1024 * 1024;
-        public final static long DEFAULT_MAX_STORE_TIME = 1000 * 60 * 60 * 24 * 7;
-        public final static int DEFAULT_WRITE_REQUEST_CACHE_SIZE = 128;
-        public final static long DEFAULT_FLUSH_INTERVAL_MS = 50L;
-        public final static long DEFAULT_EVICT_INTERVAL_MS = 100L;
-        public final static long DEFAULT_WRITE_TIMEOUT_MS = 5000L;
-        public final static long DEFAULT_MAX_DIRTY_SIZE = 10L * 1024 * 1024;
-        public final static int DEFAULT_INDEX_BUFFER_LENGTH = 8196;
-        public final static int DEFAULT_MESSAGE_BUFFER_LENGTH = 2 * DEFAULT_MAX_MESSAGE_LENGTH;
+        public static final int DEFAULT_MAX_MESSAGE_LENGTH = 4 * 1024 * 1024;
+        public static final long DEFAULT_MAX_STORE_SIZE = 10L * 1024 * 1024 * 1024;
+        public static final long DEFAULT_MAX_STORE_TIME = 1000 * 60 * 60 * 24 * 7;
+        public static final int DEFAULT_WRITE_REQUEST_CACHE_SIZE = 128;
+        public static final long DEFAULT_FLUSH_INTERVAL_MS = 50L;
+        public static final long DEFAULT_EVICT_INTERVAL_MS = 100L;
+        public static final long DEFAULT_WRITE_TIMEOUT_MS = 5000L;
+        public static final long DEFAULT_MAX_DIRTY_SIZE = 10L * 1024 * 1024;
+        public static final int DEFAULT_INDEX_BUFFER_LENGTH = 8196;
+        public static final int DEFAULT_MESSAGE_BUFFER_LENGTH = 2 * DEFAULT_MAX_MESSAGE_LENGTH;
 
         /**
          * 允许脏数据的最大长度，超过这个长度就阻塞写入。
