@@ -183,6 +183,9 @@ public class FailoverChannelTransport implements ChannelTransport {
     }
 
     protected boolean tryReconnect() {
+        if (isChannelActive()) {
+            return false;
+        }
         if (!isNeedReconnect()) {
             return false;
         }
