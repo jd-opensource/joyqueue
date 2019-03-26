@@ -71,7 +71,7 @@ public class FailoverChannelTransport implements ChannelTransport {
                 break;
             } catch (TransportException e) {
                 if (!(e instanceof TransportException.RequestTimeoutException)) {
-                    if (!tryReconnect()) {
+                    if (!isChannelActive() && !tryReconnect()) {
                         // 重连失败，抛出异常
                         throw e;
                     }
@@ -183,9 +183,6 @@ public class FailoverChannelTransport implements ChannelTransport {
     }
 
     protected boolean tryReconnect() {
-        if (isChannelActive()) {
-            return false;
-        }
         if (!isNeedReconnect()) {
             return false;
         }
