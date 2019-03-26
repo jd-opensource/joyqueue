@@ -1,11 +1,12 @@
 package com.jd.journalq.broker.jmq.handler;
 
-import com.jd.journalq.broker.jmq.JMQCommandHandler;
-import com.jd.journalq.broker.jmq.converter.CheckResultConverter;
 import com.jd.journalq.broker.BrokerContext;
 import com.jd.journalq.broker.BrokerContextAware;
 import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.helper.SessionHelper;
+import com.jd.journalq.broker.jmq.JMQCommandHandler;
+import com.jd.journalq.broker.jmq.converter.CheckResultConverter;
+import com.jd.journalq.broker.monitor.SessionManager;
 import com.jd.journalq.broker.producer.Produce;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.exception.JMQCode;
@@ -17,10 +18,12 @@ import com.jd.journalq.network.command.ProduceMessagePrepare;
 import com.jd.journalq.network.command.ProduceMessagePrepareAck;
 import com.jd.journalq.network.session.Connection;
 import com.jd.journalq.network.session.Producer;
+import com.jd.journalq.network.session.TransactionId;
 import com.jd.journalq.network.transport.Transport;
 import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.transport.command.Type;
 import com.jd.journalq.response.BooleanResponse;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,11 +39,13 @@ public class ProduceMessagePrepareHandler implements JMQCommandHandler, Type, Br
 
     private Produce produce;
     private ClusterManager clusterManager;
+    private SessionManager sessionManager;
 
     @Override
     public void setBrokerContext(BrokerContext brokerContext) {
         this.produce = brokerContext.getProduce();
         this.clusterManager = brokerContext.getClusterManager();
+        this.sessionManager = brokerContext.getSessionManager();
     }
 
     @Override
@@ -53,30 +58,33 @@ public class ProduceMessagePrepareHandler implements JMQCommandHandler, Type, Br
             return BooleanAck.build(JMQCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
+        String producerId = connection.getProducer(produceMessagePrepare.getTopic(), produceMessagePrepare.getApp());
+        Producer producer = (StringUtils.isBlank(producerId) ? null : sessionManager.getProducerById(producerId));
+        if (producer == null) {
+            logger.warn("producer is not exists, transport: {}", transport);
+            return BooleanAck.build(JMQCode.FW_PRODUCER_NOT_EXISTS.getCode());
+        }
+
         BooleanResponse checkResult = clusterManager.checkWritable(TopicName.parse(produceMessagePrepare.getTopic()), produceMessagePrepare.getApp(), connection.getHost());
         if (!checkResult.isSuccess()) {
             logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}", transport, produceMessagePrepare, produceMessagePrepare.getApp());
             return new Command(new ProduceMessagePrepareAck(CheckResultConverter.convertCommonCode(checkResult.getJmqCode())));
         }
 
-        ProduceMessagePrepareAck produceMessagePrepareAck = produceMessagePrepare(connection, produceMessagePrepare);
+        ProduceMessagePrepareAck produceMessagePrepareAck = produceMessagePrepare(producer, connection, produceMessagePrepare);
         return new Command(produceMessagePrepareAck);
     }
 
-    protected ProduceMessagePrepareAck produceMessagePrepare(Connection connection, ProduceMessagePrepare produceMessagePrepare) {
-        String txId = generateTxId(connection, produceMessagePrepare.getTopic(), produceMessagePrepare.getApp(), produceMessagePrepare.getSequence());
-        Producer producer = new Producer(txId, produceMessagePrepare.getTopic(), produceMessagePrepare.getApp(), Producer.ProducerType.JMQ);
-
+    protected ProduceMessagePrepareAck produceMessagePrepare(Producer producer, Connection connection, ProduceMessagePrepare produceMessagePrepare) {
         BrokerPrepare brokerPrepare = new BrokerPrepare();
-        brokerPrepare.setTxId(txId);
         brokerPrepare.setTopic(produceMessagePrepare.getTopic());
         brokerPrepare.setApp(produceMessagePrepare.getApp());
         brokerPrepare.setQueryId(produceMessagePrepare.getTransactionId());
         brokerPrepare.setTimeout(produceMessagePrepare.getTimeout());
 
         try {
-            produce.putTransactionMessage(producer, brokerPrepare);
-            return new ProduceMessagePrepareAck(txId, JMQCode.SUCCESS);
+            TransactionId transactionId = produce.putTransactionMessage(producer, brokerPrepare);
+            return new ProduceMessagePrepareAck(transactionId.getTxId(), JMQCode.SUCCESS);
         } catch (JMQException e) {
             logger.error("produceMessage prepare exception, transport: {}, topic: {}, app: {}",
                     connection.getTransport().remoteAddress(), produceMessagePrepare.getTopic(), produceMessagePrepare.getApp(), e);
@@ -86,10 +94,6 @@ public class ProduceMessagePrepareHandler implements JMQCommandHandler, Type, Br
                     connection.getTransport().remoteAddress(), produceMessagePrepare.getTopic(), produceMessagePrepare.getApp(), e);
             return new ProduceMessagePrepareAck(JMQCode.CN_UNKNOWN_ERROR);
         }
-    }
-
-    protected String generateTxId(Connection connection, String topic, String app, long sequence) {
-        return connection.getId() + "_" + topic + "_" + app + "_" + sequence;
     }
 
     @Override

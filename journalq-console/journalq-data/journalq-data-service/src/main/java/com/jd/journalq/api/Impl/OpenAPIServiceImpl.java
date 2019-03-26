@@ -113,23 +113,23 @@ public class OpenAPIServiceImpl implements OpenAPIService {
         slimTopic.setIps(ips);
         slimTopic.setCode(topic.getCode());
         pubSub.setTopic(slimTopic);
-        List<String> apps=new ArrayList<>();
+        List<String> cosumerAppList=new ArrayList<>();
         Identity identity;
         for(Consumer consumer:consumers){
             identity=consumer.getApp();
             if(!NullUtil.isEmpty(identity)) {
-                apps.add(String.valueOf(identity.getCode()));
+                cosumerAppList.add(String.valueOf(identity.getCode()));
             }
         }
-        apps.clear();
+        pubSub.setConsumers(appsToApplication(cosumerAppList));
+        List<String> producerAppList=new ArrayList<>();
         for(Producer producer:producers){
             identity=producer.getApp();
             if(!NullUtil.isEmpty(identity)) {
-                apps.add(String.valueOf(identity.getCode()));
+                producerAppList.add(String.valueOf(identity.getCode()));
             }
         }
-        pubSub.setConsumers(appsToApplication(apps));
-        pubSub.setProducers(appsToApplication(apps));
+        pubSub.setProducers(appsToApplication(producerAppList));
         return pubSub;
     }
     @Override

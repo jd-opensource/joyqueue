@@ -30,6 +30,10 @@ public class UnCompleteTransactionManager {
         return getOrCreateTransactionMap(transactionId.getApp(), transactionId.getTopic()).put(transactionId.getTxId(), transactionId) == null;
     }
 
+    public boolean removeTransaction(TransactionId transactionId) {
+        return removeTransaction(transactionId.getTopic(), transactionId.getApp(), transactionId.getTxId());
+    }
+
     public boolean removeTransaction(String topic, String app, String txId) {
         return getOrCreateTransactionMap(app, topic).remove(txId) != null;
     }
@@ -38,7 +42,11 @@ public class UnCompleteTransactionManager {
         return getOrCreateTransactionMap(app, topic).get(txId);
     }
 
-    public List<TransactionId> txFeedback(Producer producer, int count) {
+    public int getTransactionCount(String topic, String app) {
+        return getOrCreateTransactionMap(app, topic).size();
+    }
+
+    public List<TransactionId> getFeedback(Producer producer, int count) {
         ConcurrentMap<String, TransactionId> transactionMap = getOrCreateTransactionMap(producer.getApp(), producer.getTopic());
         List<TransactionId> result = Lists.newArrayListWithCapacity(count);
         long now = SystemClock.now();

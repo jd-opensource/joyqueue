@@ -8,7 +8,9 @@ public enum ProducerConfigKey implements PropertyDef {
     FEEDBACK_TIMEOUT("produce.feedback.timeout", 1000 * 60 * 1, Type.INT),
     TRANSACTION_EXPIRE_TIME("produce.transaction.expire.time", 1000 * 60 * 60 * 24 * 7, Type.INT),
     TRANSACTION_CLEAR_INTERVAL("produce.transaction.expire.clear.interval", 1000 * 60 * 10, Type.INT),
-    BROKER_QOS_LEVEL("broker.qos.level", -1, Type.INT);
+    TRANSACTION_MAX_UNCOMPLETE("produce.transaction.max.uncomplete", 10240, Type.INT),
+    BROKER_QOS_LEVEL("produce.broker.qos.level", -1, Type.INT),
+    ;
 
     private String name;
     private Object value;

@@ -33,6 +33,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * 事务管理器
@@ -43,6 +44,8 @@ import java.util.concurrent.TimeoutException;
 public class TransactionManager extends Service {
 
     private static final Logger logger = LoggerFactory.getLogger(TransactionManager.class);
+
+    private final AtomicLong sequence = new AtomicLong();
 
     private ProduceConfig config;
     private StoreService store;
@@ -60,44 +63,67 @@ public class TransactionManager extends Service {
         this.brokerMonitor = brokerMonitor;
     }
 
-    public void txPrepare(final Producer producer, final BrokerPrepare prepare) throws JMQException {
+    public TransactionId prepare(Producer producer, BrokerPrepare prepare) throws JMQException {
+        if (unCompleteTransactionManager.getTransactionCount(producer.getTopic(), producer.getApp()) > config.getTransactionMaxUncomplete()) {
+            logger.warn("too many transactions, topic: {}, app: {}. txId: {}", prepare.getTopic(), prepare.getApp(), prepare.getTxId());
+            throw new JMQException(JMQCode.FW_TRANSACTION_LIMIT);
+        }
+
         TransactionStore transactionStore = store.getTransactionStore(producer.getTopic());
+        if (transactionStore == null) {
+            logger.error("transaction store not exist, topic: {}", producer.getTopic());
+            throw new JMQException(JMQCode.CN_TRANSACTION_NOT_EXISTS);
+        }
+
         int storeId = transactionStore.next();
-        TransactionId transactionId = new TransactionId(prepare.getTopic(), prepare.getApp(), prepare.getTxId(), prepare.getQueryId(), storeId, prepare.getTimeout(), SystemClock.now());
-        Future<WriteResult> prepareFuture = null;
+        TransactionId transactionId = generateTransactionId(prepare, storeId);
 
         try {
+            unCompleteTransactionManager.putTransaction(transactionId);
+
             ByteBuffer buffer = ByteBuffer.allocate(Serializer.sizeOfBrokerPrepare(prepare));
             Serializer.writeBrokerPrepare(prepare, buffer);
             buffer.flip();
-            prepareFuture = transactionStore.asyncWrite(storeId, buffer.slice());
+
+            Future<WriteResult> prepareFuture = transactionStore.asyncWrite(storeId, buffer.slice());
+            waitFuture(producer, prepareFuture);
         } catch (Exception e) {
+            try {
+                transactionStore.remove(storeId);
+                unCompleteTransactionManager.removeTransaction(transactionId);
+            } catch (Exception ex) {
+                logger.error("clear prepare exception, topic: {}, app: {}. txId: {}", prepare.getTopic(), prepare.getApp(), prepare.getTxId(), ex);
+            }
+
             logger.error("write prepare exception, topic: {}, app: {}. txId: {}", prepare.getTopic(), prepare.getApp(), prepare.getTxId(), e);
             throw new JMQException(JMQCode.CN_TRANSACTION_PREPARE_ERROR);
         }
 
-        try {
-            prepareFuture.get(prepare.getTimeout(), TimeUnit.MILLISECONDS);
-        } catch (Exception e) {
-            logger.error("write prepare wait exception, topic: {}, app: {}. txId: {}", prepare.getTopic(), prepare.getApp(), prepare.getTxId(), e);
-            throw new JMQException(JMQCode.SE_WRITE_TIMEOUT);
-        }
-        unCompleteTransactionManager.putTransaction(transactionId);
+        return transactionId;
     }
 
-    public void txCommit(final Producer producer, final BrokerCommit commit) throws JMQException {
-        TransactionStore transactionStore = store.getTransactionStore(producer.getTopic());
-        TransactionId transactionId = unCompleteTransactionManager.getTransaction(commit.getTopic(), commit.getApp(), commit.getTxId());
+    protected TransactionId generateTransactionId(BrokerPrepare prepare, int storeId) {
+        long now = SystemClock.now();
+        String txId = String.format("transactionId_%s_%s_%s_%s", prepare.getTopic(), prepare.getApp(), sequence.getAndIncrement(), now);
+        return new TransactionId(prepare.getTopic(), prepare.getApp(), txId, prepare.getQueryId(), storeId, prepare.getTimeout(), now);
+    }
 
+    public TransactionId commit(final Producer producer, final BrokerCommit commit) throws JMQException {
+        TransactionStore transactionStore = store.getTransactionStore(producer.getTopic());
+        if (transactionStore == null) {
+            logger.error("transaction store not exist, topic: {}", producer.getTopic());
+            throw new JMQException(JMQCode.CN_TRANSACTION_NOT_EXISTS);
+        }
+
+        TransactionId transactionId = unCompleteTransactionManager.getTransaction(commit.getTopic(), commit.getApp(), commit.getTxId());
         if (transactionId == null) {
             logger.error("The current tx is not in txManager, topic: {}, app: {}, txId: {}", commit.getTxId(), commit.getApp(), commit.getTxId());
             throw new JMQException(JMQCode.CN_TRANSACTION_NOT_EXISTS);
         }
 
         BrokerPrepare brokerPrepare = null;
-        short partition = -1;
         PartitionGroup partitionGroup = null;
-        List<ByteBuffer> messageBuffers = Lists.newLinkedList();
+        List<WriteRequest> writeRequests = Lists.newLinkedList();
         int messageSize = 0;
 
         try {
@@ -110,16 +136,13 @@ public class TransactionManager extends Service {
                 } else {
                     short currentPartition = dispatchPartition(byteBuffer, (short) 0);
                     PartitionGroup currentPartitionGroup = clusterManager.getPartitionGroup(TopicName.parse(producer.getTopic()), currentPartition);
-                    if (partition == -1) {
-                        partition = currentPartition;
-                    }
                     if (partitionGroup == null) {
                         partitionGroup = currentPartitionGroup;
                     }
-                    if (currentPartitionGroup == null || currentPartitionGroup.getGroup() != partitionGroup.getGroup() || currentPartition != partition) {
+                    if (currentPartitionGroup == null || currentPartitionGroup.getGroup() != partitionGroup.getGroup()) {
                         throw new JMQException(JMQCode.SE_WRITE_FAILED);
                     }
-                    messageBuffers.add(byteBuffer);
+                    writeRequests.add(new WriteRequest(currentPartition, byteBuffer));
                     messageSize += byteBuffer.limit();
                 }
                 index++;
@@ -128,17 +151,19 @@ public class TransactionManager extends Service {
             try {
                 PartitionGroupStore partitionStoreService = store.getStore(commit.getTopic(), partitionGroup.getGroup(), QosLevel.REPLICATION);
                 long startTime = SystemClock.now();
-                WriteRequest[] writeRequests = new WriteRequest[messageBuffers.size()];
-                for (int i = 0; i < messageBuffers.size(); i++) {
-                    writeRequests[i] = new WriteRequest(partition, messageBuffers.get(i));
+                Future<WriteResult> future = partitionStoreService.asyncWrite(writeRequests.toArray(new WriteRequest[0]));
+                waitFuture(producer, future);
+                long endTime = SystemClock.now();
+
+                for (WriteRequest writeRequest : writeRequests) {
+                    brokerMonitor.onPutMessage(producer.getTopic(), producer.getApp(), partitionGroup.getGroup(), writeRequest.getPartition(), 1, messageSize, endTime - startTime);
                 }
-                Future<WriteResult> future = partitionStoreService.asyncWrite(writeRequests);
-                waitFuture(producer, future, commit.getStartTime());
-                brokerMonitor.onPutMessage(producer.getTopic(), producer.getApp(), partitionGroup.getGroup(), partition, messageBuffers.size(), messageSize, SystemClock.now() - startTime);
             } catch (Exception e) {
                 logger.warn("write transaction message exception, topic: {}, app: {}, txId: {}", brokerPrepare.getTopic(), brokerPrepare.getApp(), brokerPrepare.getTxId(), e);
                 throw new JMQException(JMQCode.SE_IO_ERROR);
             }
+
+            unCompleteTransactionManager.removeTransaction(transactionId);
         } catch (Exception e) {
             logger.error("write transaction message exception, topic: {}, app: {}, txId: {}", commit.getTopic(), commit.getApp(), commit.getTxId(), e);
             if (e instanceof JMQException) {
@@ -147,26 +172,18 @@ public class TransactionManager extends Service {
                 throw new JMQException(JMQCode.SE_IO_ERROR);
             }
         }
-        unCompleteTransactionManager.removeTransaction(commit.getTopic(), commit.getApp(), commit.getTxId());
+        return transactionId;
     }
 
-    /**
-     * @param msg              需要dispatch 的消息。
-     * @param defaultPartition 当前broker所持有的所有主partition的数组。
-     * @return 除指定partition和isOrdered=true,其他情况，返回的结果中，只包含一个结果。
-     */
-    private short dispatchPartition(ByteBuffer msg, short defaultPartition) {
+    protected short dispatchPartition(ByteBuffer msg, short defaultPartition) {
         short partition = MessageParser.getShort(msg, MessageParser.PARTITION);
         return partition < 0 ? defaultPartition : partition;
     }
 
-    private void waitFuture(Producer producer, Future<WriteResult> future, long receiveTime) throws JMQException {
+    protected void waitFuture(Producer producer, Future<WriteResult> future) throws JMQException {
         try {
             com.jd.journalq.domain.Producer.ProducerPolicy producerPolicy = clusterManager.tryGetProducerPolicy(TopicName.parse(producer.getTopic()), producer.getApp());
-            if (producerPolicy == null) {
-                throw new JMQException(JMQCode.FW_PRODUCER_NOT_EXISTS);
-            }
-            int configTimeOut = producerPolicy.getTimeOut();
+            int configTimeOut = (producerPolicy == null ? 0 : producerPolicy.getTimeOut());
             if (configTimeOut == 0) {
                 future.get();
             } else {
@@ -176,15 +193,12 @@ public class TransactionManager extends Service {
             throw new JMQException(JMQCode.SE_DISK_FLUSH_SLOW);
         } catch (ExecutionException | TimeoutException e) {
             throw new JMQException(JMQCode.SE_WRITE_TIMEOUT);
-        } catch (JMQException e) {
-            throw e;
         } catch (Exception e) {
             throw new JMQException(JMQCode.CN_CONNECTION_TIMEOUT);
         }
     }
 
-
-    public void txRollback(final Producer producer, final BrokerRollback rollback) throws JMQException {
+    public TransactionId rollback(final Producer producer, final BrokerRollback rollback) throws JMQException {
         TransactionStore transactionStore = store.getTransactionStore(producer.getTopic());
         if (transactionStore == null) {
             logger.error("transaction store not exist, topic: {}", producer.getTopic());
@@ -198,25 +212,28 @@ public class TransactionManager extends Service {
         }
 
         transactionStore.remove(transactionId.getStoreId());
-        unCompleteTransactionManager.removeTransaction(rollback.getTopic(), rollback.getApp(), rollback.getTxId());
+        unCompleteTransactionManager.removeTransaction(transactionId);
+        return transactionId;
     }
 
-    public Future<WriteResult> txMessage(Producer producer, final String txId, ByteBuffer... byteBuffers) throws JMQException {
+    public Future<WriteResult> putMessage(Producer producer, String txId, ByteBuffer... byteBuffers) throws JMQException {
         TransactionStore transactionStore = store.getTransactionStore(producer.getTopic());
         if (Strings.isNullOrEmpty(txId)) {
             logger.error("The current message is not a tx message!");
             throw new JMQException(JMQCode.CN_UNKNOWN_ERROR);
         }
+
         TransactionId transactionId = unCompleteTransactionManager.getTransaction(producer.getTopic(), producer.getApp(), txId);
         if (transactionId == null) {
             logger.error("The current tx is not in txManager! txId:{}...", txId);
             throw new JMQException(JMQCode.CN_TRANSACTION_NOT_EXISTS);
         }
+
         return transactionStore.asyncWrite(transactionId.getStoreId(), byteBuffers);
     }
 
-    public List<TransactionId> txFeedback(Producer producer, int count) {
-        return unCompleteTransactionManager.txFeedback(producer, count);
+    public List<TransactionId> getFeedback(Producer producer, int count) {
+        return unCompleteTransactionManager.getFeedback(producer, count);
     }
 
     @Override
