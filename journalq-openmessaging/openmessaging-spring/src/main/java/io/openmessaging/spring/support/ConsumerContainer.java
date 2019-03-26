@@ -80,9 +80,4 @@ public class ConsumerContainer implements InitializingBean, DisposableBean, Fact
     public Class<?> getObjectType() {
         return Consumer.class;
     }
-
-    @Override
-    public boolean isSingleton() {
-        return false;
-    }
 }
