@@ -93,7 +93,7 @@ public class ProduceMessageHandler implements JMQCommandHandler, Type, JMQContex
 
             BooleanResponse checkResult = clusterManager.checkWritable(TopicName.parse(topic), produceMessage.getApp(), connection.getHost(), produceMessageData.getMessages().get(0).getPartition());
             if (!checkResult.isSuccess()) {
-                logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}", transport, topic, produceMessage.getApp());
+                logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport, topic, produceMessage.getApp(), checkResult.getJmqCode());
                 resultData.put(topic, buildProduceMessageAckData(produceMessageData, CheckResultConverter.convertProduceCode(checkResult.getJmqCode())));
                 latch.countDown();
                 continue;

@@ -67,7 +67,7 @@ public class ProduceMessagePrepareHandler implements JMQCommandHandler, Type, Br
 
         BooleanResponse checkResult = clusterManager.checkWritable(TopicName.parse(produceMessagePrepare.getTopic()), produceMessagePrepare.getApp(), connection.getHost());
         if (!checkResult.isSuccess()) {
-            logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}", transport, produceMessagePrepare, produceMessagePrepare.getApp());
+            logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport, produceMessagePrepare, produceMessagePrepare.getApp(), checkResult.getJmqCode());
             return new Command(new ProduceMessagePrepareAck(CheckResultConverter.convertCommonCode(checkResult.getJmqCode())));
         }
 
