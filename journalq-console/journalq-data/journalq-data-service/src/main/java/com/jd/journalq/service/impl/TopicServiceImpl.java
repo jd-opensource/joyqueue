@@ -4,6 +4,7 @@ import com.jd.journalq.model.PageResult;
 import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.exception.ServiceException;
 import com.jd.journalq.model.domain.*;
+import com.jd.journalq.model.exception.DuplicateKeyException;
 import com.jd.journalq.model.query.QConsumer;
 import com.jd.journalq.model.query.QTopic;
 import com.jd.journalq.service.NameServerService;
@@ -46,6 +47,11 @@ public class TopicServiceImpl implements TopicService {
         List<TopicPartitionGroup> partitionGroups = addPartitionGroup(topic, brokers, operator);
         //3. 同步到NameServer
         try {
+            Namespace namespace = topic.getNamespace();
+            Topic oldTopic = findByCode(namespace == null?null:namespace.getCode(),topic.getCode());
+            if (oldTopic != null) {
+                throw new DuplicateKeyException("topic aleady exist");
+            }
             topicNameServerService.addTopic(topic, partitionGroups);
         } catch (Exception e) {
             String errorMsg = "新建主题，同步NameServer失败";

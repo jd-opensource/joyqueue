@@ -262,7 +262,8 @@ public class OpenAPIServiceImpl implements OpenAPIService {
 
     @Override
     public Application syncApplication(Application application) throws Exception{
-        User user=syncService.addOrUpdateUser(new UserInfo(application.getErp()));
+        User user = LocalSession.getSession().getUser();
+        application.setErp(user.getCode());
         ApplicationInfo info = syncService.syncApp(application);
         if (NullUtil.isEmpty(info)||NullUtil.isEmpty(user)) {
             throw new ServiceException(BAD_REQUEST,"sync application failed or illegal erp "+application.getErp());

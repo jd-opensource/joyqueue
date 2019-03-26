@@ -40,7 +40,7 @@ export default {
     return {
       urls: {
         search: '/broker/search',
-        addBroker: '/broker/update'
+        addBroker: '/brokerGroup/updateBroker'
       },
       searchData: {
         brokerGroupId: -1

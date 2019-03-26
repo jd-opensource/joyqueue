@@ -60,6 +60,11 @@ public class SyncServiceImpl implements SyncService {
         if (applicationSupplier == null) {
             return null;
         }
+        Application oldapplication = applicationService.findByCode(application.getCode());
+        if (oldapplication != null) {
+            throw new DuplicateKeyException(String.format("application %s exist",application.getCode()));
+        }
+
         ApplicationInfo info = null;
         if (application.getSource() == 0) {
             info = new ApplicationInfo();
