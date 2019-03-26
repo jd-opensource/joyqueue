@@ -26,15 +26,37 @@ public class StoreFileTest {
     }
 
     @Test
+    public void readFileNotExistTimestamp() {
+        ByteBuffer timeBuffer = ByteBuffer.allocate(8);
+        try (RandomAccessFile raf = new RandomAccessFile(new File(base, "fileNotExist"), "r"); FileChannel fileChannel = raf.getChannel()) {
+            fileChannel.position(0);
+            fileChannel.read(timeBuffer);
+        } catch (Exception e) {
+            logger.error("Error to read timestamp from file: <{}> header, error: <{}>", file.getAbsolutePath(), e.getMessage());
+        } finally {
+            try {
+                timestamp = timeBuffer.getLong(0);
+            } catch (IndexOutOfBoundsException iobe) {
+                logger.error("Error to read timestamp long value from file: <{}> header, error: <{}>", file.getAbsolutePath(), iobe.getMessage());
+            }
+        }
+        logger.info("read timestamp: {}", timestamp);
+    }
+
+    @Test
     public void readTimestamp() {
         ByteBuffer timeBuffer = ByteBuffer.allocate(8);
         try (RandomAccessFile raf = new RandomAccessFile(file, "r"); FileChannel fileChannel = raf.getChannel()) {
             fileChannel.position(0);
             fileChannel.read(timeBuffer);
         } catch (Exception e) {
-
+            logger.error("Error to read timestamp from file: <{}> header, error: <{}>", file.getAbsolutePath(), e.getMessage());
         } finally {
-            timestamp = timeBuffer.getLong(0);
+            try {
+                timestamp = timeBuffer.getLong(0);
+            } catch (IndexOutOfBoundsException iobe) {
+                logger.error("Error to read timestamp long value from file: <{}> header, error: <{}>", file.getAbsolutePath(), iobe.getMessage());
+            }
         }
         logger.info("read timestamp: {}", timestamp);
     }
@@ -50,7 +72,7 @@ public class StoreFileTest {
             fileChannel.write(timeBuffer);
             fileChannel.force(true);
         } catch (Exception e) {
-
+            logger.error("Error to write timestamp from file: <{}> header, error: <{}>", file.getAbsolutePath(), e.getMessage());
         } finally {
             timestamp = creationTime;
         }
