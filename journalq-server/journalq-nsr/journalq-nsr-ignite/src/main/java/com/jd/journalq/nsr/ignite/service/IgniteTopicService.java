@@ -155,6 +155,10 @@ public class IgniteTopicService implements TopicService {
      */
     public void addTopic(Topic topic, List<PartitionGroup> partitionGroups) {
         try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
+            Topic oldTopic = get(topic);
+            if (oldTopic != null) {
+                throw new Exception(String.format("topic:%s is aleady exsit",topic.getName()));
+            }
             this.addOrUpdate(new IgniteTopic(topic));
             //TODO 删除可能比较危险
             TopicName topicName = topic.getName();
