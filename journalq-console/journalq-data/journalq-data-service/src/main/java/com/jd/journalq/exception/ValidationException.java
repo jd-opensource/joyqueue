@@ -7,9 +7,9 @@ import com.jd.journalq.model.exception.BusinessException;
  */
 public class ValidationException extends BusinessException {
 
-    public final static int UNIQUE_EXCEPTION_STATUS = 100;
-    public final static int NOT_FOUND_EXCEPTION_STATUS = 200;
-    public final static int OTHER_EXCEPTION_STATUS = 900;
+    public static final int UNIQUE_EXCEPTION_STATUS = 100;
+    public static final int NOT_FOUND_EXCEPTION_STATUS = 200;
+    public static final int OTHER_EXCEPTION_STATUS = 900;
 
     protected ValidationException() {
     }

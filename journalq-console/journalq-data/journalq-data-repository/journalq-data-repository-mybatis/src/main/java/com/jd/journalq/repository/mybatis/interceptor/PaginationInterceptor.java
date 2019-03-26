@@ -18,7 +18,7 @@ import java.util.Properties;
 @Intercepts({@Signature(type = StatementHandler.class, method = "prepare", args = {Connection.class, Integer.class})})
 public class PaginationInterceptor implements Interceptor {
 
-    private final static Log log = LogFactory.getLog(PaginationInterceptor.class);
+    private static final Log log = LogFactory.getLog(PaginationInterceptor.class);
 
     @Override
     public Object intercept(Invocation invocation) throws Throwable {

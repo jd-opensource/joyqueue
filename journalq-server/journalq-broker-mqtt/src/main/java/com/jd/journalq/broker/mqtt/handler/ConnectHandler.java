@@ -11,7 +11,7 @@ import java.util.concurrent.ExecutorService;
  * @author majun8
  */
 public class ConnectHandler extends Handler implements ExecutorsProvider {
-    private final static Logger LOG = LoggerFactory.getLogger(ConnectHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ConnectHandler.class);
 
     public ConnectHandler() {
 

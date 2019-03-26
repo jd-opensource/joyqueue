@@ -12,7 +12,7 @@ import java.util.Properties;
  * Created by chengzhiliang on 2019/1/26.
  */
 public class RemoteRetryConfig {
-    private final static Logger logger = LoggerFactory.getLogger(RemoteRetryConfig.class);
+    private static final Logger logger = LoggerFactory.getLogger(RemoteRetryConfig.class);
 
     // 远程重试限制的线程数
     private static int remoteRetryLimitThread;

@@ -25,7 +25,7 @@ import java.util.Map;
  * @author majun8
  */
 public class MqttOverWebsocketProtocol implements ProtocolService, BrokerContextAware, ChannelHandlerProvider {
-    private final static Logger logger = LoggerFactory.getLogger(MqttOverWebsocketProtocol.class);
+    private static final Logger logger = LoggerFactory.getLogger(MqttOverWebsocketProtocol.class);
 
     private BrokerContext brokerContext;
 

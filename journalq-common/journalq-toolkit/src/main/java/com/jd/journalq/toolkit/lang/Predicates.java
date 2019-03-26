@@ -318,7 +318,7 @@ public final class Predicates {
             return "Predicates.not(" + predicate + ")";
         }
 
-        private static final long serialVersionUID = 0;
+        private static final long serialVersionUID = 1L;
     }
 
     static final Joiner COMMA_JOINER = Joiner.on(',');
@@ -364,7 +364,7 @@ public final class Predicates {
             return "Predicates.and(" + COMMA_JOINER.join(components) + ")";
         }
 
-        private static final long serialVersionUID = 0;
+        private static final long serialVersionUID = 1L;
     }
 
     /**
@@ -408,7 +408,7 @@ public final class Predicates {
             return "Predicates.or(" + COMMA_JOINER.join(components) + ")";
         }
 
-        private static final long serialVersionUID = 0;
+        private static final long serialVersionUID = 1L;
     }
 
     /**
@@ -445,7 +445,7 @@ public final class Predicates {
             return "Predicates.equalTo(" + target + ")";
         }
 
-        private static final long serialVersionUID = 0;
+        private static final long serialVersionUID = 1L;
     }
 
     /**
@@ -482,7 +482,7 @@ public final class Predicates {
             return "Predicates.instanceOf(" + clazz.getName() + ")";
         }
 
-        private static final long serialVersionUID = 0;
+        private static final long serialVersionUID = 1L;
     }
 
     /**
@@ -519,7 +519,7 @@ public final class Predicates {
             return "Predicates.subtypeOf(" + clazz.getName() + ")";
         }
 
-        private static final long serialVersionUID = 0;
+        private static final long serialVersionUID = 1L;
     }
 
     /**
@@ -562,7 +562,7 @@ public final class Predicates {
             return "Predicates.in(" + target + ")";
         }
 
-        private static final long serialVersionUID = 0;
+        private static final long serialVersionUID = 1L;
     }
 
     /**
@@ -602,7 +602,7 @@ public final class Predicates {
             return p + "(" + f + ")";
         }
 
-        private static final long serialVersionUID = 0;
+        private static final long serialVersionUID = 1L;
     }
 
     /**
@@ -648,7 +648,7 @@ public final class Predicates {
             return "Predicates.contains(" + patternString + ")";
         }
 
-        private static final long serialVersionUID = 0;
+        private static final long serialVersionUID = 1L;
     }
 
     /**
@@ -665,7 +665,7 @@ public final class Predicates {
             return "Predicates.containsPattern(" + pattern.pattern() + ")";
         }
 
-        private static final long serialVersionUID = 0;
+        private static final long serialVersionUID = 1L;
     }
 
     static <T> List<Predicate<? super T>> asList(final Predicate<? super T> first, final Predicate<? super T> second) {

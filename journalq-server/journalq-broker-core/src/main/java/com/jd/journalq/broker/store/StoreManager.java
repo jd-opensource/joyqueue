@@ -21,7 +21,7 @@ import java.util.List;
  * 存储管理器
  */
 public class StoreManager extends Service implements BrokerContextAware, PropertySupplierAware {
-    private final static Logger logger = LoggerFactory.getLogger(StoreManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(StoreManager.class);
 
     private BrokerContext brokerContext;
     private PropertySupplier propertySupplier;

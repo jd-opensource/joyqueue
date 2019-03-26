@@ -33,9 +33,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Created by chengzhiliang on 2018/8/16.
  */
 public class LongPollingManager extends Service {
-    public final static String LONG_POLLING_QUEUE_SIZE = "broker.consume.long_polling_queue_size";
+    public static final String LONG_POLLING_QUEUE_SIZE = "broker.consume.long_polling_queue_size";
     //TODO 设置一个合理的值
-    public final static int MAX_LONG_POLLING_QUEUE_SIZE = 100000;
+    public static final int MAX_LONG_POLLING_QUEUE_SIZE = 100000;
 
     protected static Logger logger = LoggerFactory.getLogger(LongPollingManager.class);
     // 长轮询请求queue

@@ -38,10 +38,10 @@ public class PartitionGroupStoreManagerTest {
 
     private File base = null;
     private File groupBase = null;
-    private final static String topic = "test_topic";
-    private final static int partitionGroup = 3;
-    private final static short [] partitions = new short [] {4,5,6};
-    private final static int [] nodes = new int[] {0};
+    private static final String topic = "test_topic";
+    private static final int partitionGroup = 3;
+    private static final short [] partitions = new short [] {4,5,6};
+    private static final int [] nodes = new int[] {0};
     private PartitionGroupStoreManager store;
     private VirtualThreadExecutor virtualThreadPool;
     private PreloadBufferPool bufferPool;

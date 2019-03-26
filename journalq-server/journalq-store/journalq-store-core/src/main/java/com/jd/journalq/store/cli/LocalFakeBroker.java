@@ -29,10 +29,10 @@ import java.util.stream.Stream;
 public class LocalFakeBroker {
     private static final Logger logger = LoggerFactory.getLogger(LocalFakeBroker.class);
 
-    private final static String TOPIC_PREFIX = "local_broker_";
-    private final static long K = 1024,M = K * K;
-    private final static long G = K * M, T = K * G;
-    private final static Map<String,Long> UNIT_MAP = new HashMap<>(4);
+    private static final String TOPIC_PREFIX = "local_broker_";
+    private static final long K = 1024,M = K * K;
+    private static final long G = K * M, T = K * G;
+    private static final Map<String,Long> UNIT_MAP = new HashMap<>(4);
     static {
         UNIT_MAP.put("k",K);
         UNIT_MAP.put("m",M);

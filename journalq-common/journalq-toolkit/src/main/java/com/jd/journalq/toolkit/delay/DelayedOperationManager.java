@@ -243,7 +243,7 @@ public class DelayedOperationManager<T extends DelayedOperation> {
 
         private Object key;
 
-        public Watchers(Object key) {
+        private Watchers(Object key) {
             this.key = key;
         }
 
@@ -325,11 +325,11 @@ public class DelayedOperationManager<T extends DelayedOperation> {
         private AtomicBoolean isRunning = new AtomicBoolean(true);
         private CountDownLatch shutdownLatch = new CountDownLatch(1);
 
-        public ExpiredOperationReaper(String expirationReaper) {
+        private ExpiredOperationReaper(String expirationReaper) {
             this(expirationReaper, false);
         }
 
-        public ExpiredOperationReaper(String name, boolean isInterruptible) {
+        private ExpiredOperationReaper(String name, boolean isInterruptible) {
             super.setDaemon(false);
             super.setName(name);
             this.name = name;

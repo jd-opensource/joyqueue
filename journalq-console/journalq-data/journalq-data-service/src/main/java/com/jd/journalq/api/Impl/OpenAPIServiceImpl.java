@@ -65,7 +65,7 @@ public class OpenAPIServiceImpl implements OpenAPIService {
     @Autowired
     private  ApplicationUserService  applicationUserService;
     private Random random=new Random();
-    private final static long MINUTES_MS=60*1000;
+    private static final long MINUTES_MS=60*1000;
 
 
 

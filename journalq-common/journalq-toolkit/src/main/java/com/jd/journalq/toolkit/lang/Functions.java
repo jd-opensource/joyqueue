@@ -3,9 +3,6 @@ package com.jd.journalq.toolkit.lang;
 import java.io.Serializable;
 import java.util.Map;
 
-import static com.jd.journalq.toolkit.lang.Preconditions.checkArgument;
-import static com.jd.journalq.toolkit.lang.Preconditions.checkNotNull;
-
 /**
  * Static utility methods pertaining to {@code Function} instances.
  * <p>

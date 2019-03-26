@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
  * @author majun8
  */
 public class ConnectAckHandler extends Handler {
-    private final static Logger logger = LoggerFactory.getLogger(ConnectAckHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(ConnectAckHandler.class);
 
     @Override
     public void handleRequest(Channel client, MqttMessage message) throws Exception {

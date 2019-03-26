@@ -19,8 +19,16 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import static com.jd.journalq.nsr.ignite.model.IgniteBaseModel.SCHEMA;
-import static com.jd.journalq.nsr.ignite.model.IgniteProducerConfig.*;
 import static com.jd.journalq.nsr.ignite.model.IgniteProducerConfig.COLUMN_ID;
+import static com.jd.journalq.nsr.ignite.model.IgniteProducerConfig.COLUMN_NAMESPACE;
+import static com.jd.journalq.nsr.ignite.model.IgniteProducerConfig.COLUMN_TOPIC;
+import static com.jd.journalq.nsr.ignite.model.IgniteProducerConfig.COLUMN_APP;
+import static com.jd.journalq.nsr.ignite.model.IgniteProducerConfig.COLUMN_NEAR_BY;
+import static com.jd.journalq.nsr.ignite.model.IgniteProducerConfig.COLUMN_ARCHIVE;
+import static com.jd.journalq.nsr.ignite.model.IgniteProducerConfig.COLUMN_SINGLE;
+import static com.jd.journalq.nsr.ignite.model.IgniteProducerConfig.COLUMN_WEIGHT;
+import static com.jd.journalq.nsr.ignite.model.IgniteProducerConfig.COLUMN_BLACK_LIST;
+import static com.jd.journalq.nsr.ignite.model.IgniteProducerConfig.COLUMN_TIMEOUT;
 
 public class IgniteProducerConfigDao implements ProducerConfigDao {
     public static final String CACHE_NAME = "producer_config";

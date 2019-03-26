@@ -8,8 +8,8 @@ import com.jd.journalq.toolkit.config.PropertySupplier;
  */
 public class BrokerStoreConfig {
     public static final String path = "store.path";
-    public final static long DEFAULT_MAX_STORE_SIZE = 10L * 1024 * 1024 * 1024;  // 10gb
-    public final static long DEFAULT_MAX_STORE_TIME = 1000 * 60 * 60 * 24 * 7;  // 7days
+    public static final long DEFAULT_MAX_STORE_SIZE = 10L * 1024 * 1024 * 1024;  // 10gb
+    public static final long DEFAULT_MAX_STORE_TIME = 1000 * 60 * 60 * 24 * 7;  // 7days
 
     private PropertySupplier propertySupplier;
 

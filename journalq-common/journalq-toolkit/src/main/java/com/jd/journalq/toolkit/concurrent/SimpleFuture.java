@@ -85,7 +85,7 @@ public class SimpleFuture<T> implements Future<T> {
     private class ResponseHolder<T> {
         private T response;
 
-        public ResponseHolder(T response) {
+        private ResponseHolder(T response) {
             this.response = response;
         }
 

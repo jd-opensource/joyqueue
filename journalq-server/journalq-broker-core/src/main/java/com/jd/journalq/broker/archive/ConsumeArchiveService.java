@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
  * Created by chengzhiliang on 2018/12/4.
  */
 public class ConsumeArchiveService extends Service {
-    private final static Logger logger = LoggerFactory.getLogger(ConsumeArchiveService.class);
+    private static final Logger logger = LoggerFactory.getLogger(ConsumeArchiveService.class);
 
     // 消费归档存日志文件
     private ArchiveMappedFileRepository repository;

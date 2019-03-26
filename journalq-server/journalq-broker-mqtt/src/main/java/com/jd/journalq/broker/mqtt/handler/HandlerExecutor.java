@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
  * @author majun8
  */
 public class HandlerExecutor implements Runnable {
-    private final static Logger LOG = LoggerFactory.getLogger(HandlerExecutor.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HandlerExecutor.class);
 
     private Handler handler;
     private ChannelHandlerContext context;

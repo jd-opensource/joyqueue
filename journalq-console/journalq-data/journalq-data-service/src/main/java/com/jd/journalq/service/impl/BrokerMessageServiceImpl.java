@@ -33,9 +33,9 @@ import java.util.concurrent.TimeUnit;
 @Service("brokerMessageService")
 public class BrokerMessageServiceImpl implements BrokerMessageService {
 
-    private final static Logger logger= LoggerFactory.getLogger(BrokerMessageServiceImpl.class);
-    private final static long TIMEOUT=10000;
-    public final static ObjectMapper mapper = new ObjectMapper();
+    private static final Logger logger= LoggerFactory.getLogger(BrokerMessageServiceImpl.class);
+    private static final long TIMEOUT=10000;
+    public static final ObjectMapper mapper = new ObjectMapper();
     @Resource(type = BrokerMonitorClusterQuery.class)
     private BrokerClusterQuery<Subscribe> brokerClusterQuery;
     @Override

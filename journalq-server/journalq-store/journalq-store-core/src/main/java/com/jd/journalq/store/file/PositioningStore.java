@@ -543,11 +543,11 @@ public class PositioningStore<T> implements Closeable {
     }
 
     public static class Config {
-        public final static int DEFAULT_FILE_HEADER_SIZE = 128;
-        public final static int DEFAULT_FILE_DATA_SIZE = 128 * 1024 * 1024;
-        public final static int DEFAULT_CACHED_PAGE_COUNT = 2;
-        public final static long DEFAULT_CACHE_LIFETIME_MS = 5000L;
-        public final static int DEFAULT_BUFFER_LENGTH = 1024 * 1024;
+        public static final int DEFAULT_FILE_HEADER_SIZE = 128;
+        public static final int DEFAULT_FILE_DATA_SIZE = 128 * 1024 * 1024;
+        public static final int DEFAULT_CACHED_PAGE_COUNT = 2;
+        public static final long DEFAULT_CACHE_LIFETIME_MS = 5000L;
+        public static final int DEFAULT_BUFFER_LENGTH = 1024 * 1024;
 
 
 

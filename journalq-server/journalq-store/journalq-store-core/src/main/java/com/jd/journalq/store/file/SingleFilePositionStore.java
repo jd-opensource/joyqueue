@@ -20,8 +20,8 @@ public class SingleFilePositionStore implements Closeable {
     private final File file;
     private final RandomAccessFile raf;
     private final FileChannel fileChannel;
-    private final static byte RS = 0x1E;
-    private final static ByteBuffer RS_BUFF = (ByteBuffer) ByteBuffer.wrap(new byte [] {RS}).mark();
+    private static final byte RS = 0x1E;
+    private static final ByteBuffer RS_BUFF = (ByteBuffer) ByteBuffer.wrap(new byte [] {RS}).mark();
 
     public SingleFilePositionStore(File file, int fileHeaderSize) throws IOException {
         this.fileHeaderSize = fileHeaderSize;

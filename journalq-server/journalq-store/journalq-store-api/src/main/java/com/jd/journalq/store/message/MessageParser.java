@@ -14,48 +14,48 @@ import java.util.List;
  */
 public class MessageParser {
 
-    public final static int VARIABLE_LENGTH_1 = -1;
-    public final static int VARIABLE_LENGTH_2 = -2;
-    public final static int VARIABLE_LENGTH_4 = -4;
-    public final static int FIXED_LENGTH_1 = 1;
-    public final static int FIXED_LENGTH_2 = 2;
-    public final static int FIXED_LENGTH_4 = 4;
-    public final static int FIXED_LENGTH_8 = 8;
-    public final static int FIXED_LENGTH_16 = 16;
+    public static final int VARIABLE_LENGTH_1 = -1;
+    public static final int VARIABLE_LENGTH_2 = -2;
+    public static final int VARIABLE_LENGTH_4 = -4;
+    public static final int FIXED_LENGTH_1 = 1;
+    public static final int FIXED_LENGTH_2 = 2;
+    public static final int FIXED_LENGTH_4 = 4;
+    public static final int FIXED_LENGTH_8 = 8;
+    public static final int FIXED_LENGTH_16 = 16;
     private static int offset = 0;
     // 第一个变长属性的偏移量
     private static int firstVarOffset = -1;
-    // 第一个变长属性在attributes数组中的索引
+    // 第一个变长属性在attributes数组中的索引IgniteServiceProvider
     private static int firstVarIndex = -1;
-    private final static List<Attribute> attributeList= new LinkedList<>();
+    private static final List<Attribute> attributeList= new LinkedList<>();
 
 
-    public final static int LENGTH = createAttribute("LENGTH",FIXED_LENGTH_4);
+    public static final int LENGTH = createAttribute("LENGTH",FIXED_LENGTH_4);
 
     // 如果消息格式调整，只需变更如下部分
     // 定长属性必须放在变长属性前面
 
-    public final static int PARTITION = createAttribute("PARTITION",FIXED_LENGTH_2);
-    public final static int INDEX = createAttribute("INDEX",FIXED_LENGTH_8);
-    public final static int TERM = createAttribute("TERM",FIXED_LENGTH_4);
-    public final static int MAGIC = createAttribute("MAGIC",FIXED_LENGTH_2);
-    public final static int SYS = createAttribute("SYS",FIXED_LENGTH_2);
-    public final static int PRIORITY = createAttribute("PRIORITY",FIXED_LENGTH_1);
-    public final static int CLIENT_IP = createAttribute("CLIENT_IP",FIXED_LENGTH_16);
-    public final static int CLIENT_TIMESTAMP = createAttribute("CLIENT_TIMESTAMP",FIXED_LENGTH_8);
-    public final static int STORAGE_TIMESTAMP = createAttribute("STORAGE_TIMESTAMP",FIXED_LENGTH_4);
-    public final static int CRC = createAttribute("CRC",FIXED_LENGTH_8);
-    public final static int FLAG = createAttribute("FLAG",FIXED_LENGTH_2);
+    public static final int PARTITION = createAttribute("PARTITION",FIXED_LENGTH_2);
+    public static final int INDEX = createAttribute("INDEX",FIXED_LENGTH_8);
+    public static final int TERM = createAttribute("TERM",FIXED_LENGTH_4);
+    public static final int MAGIC = createAttribute("MAGIC",FIXED_LENGTH_2);
+    public static final int SYS = createAttribute("SYS",FIXED_LENGTH_2);
+    public static final int PRIORITY = createAttribute("PRIORITY",FIXED_LENGTH_1);
+    public static final int CLIENT_IP = createAttribute("CLIENT_IP",FIXED_LENGTH_16);
+    public static final int CLIENT_TIMESTAMP = createAttribute("CLIENT_TIMESTAMP",FIXED_LENGTH_8);
+    public static final int STORAGE_TIMESTAMP = createAttribute("STORAGE_TIMESTAMP",FIXED_LENGTH_4);
+    public static final int CRC = createAttribute("CRC",FIXED_LENGTH_8);
+    public static final int FLAG = createAttribute("FLAG",FIXED_LENGTH_2);
 
-    public final static int BODY = createAttribute("BODY",VARIABLE_LENGTH_4);
-    public final static int BIZ_ID = createAttribute("BIZ_ID",VARIABLE_LENGTH_1);
-    public final static int PROPERTY = createAttribute("PROPERTY",VARIABLE_LENGTH_2);
-    public final static int EXPAND = createAttribute("EXPAND",VARIABLE_LENGTH_4);
-    public final static int APP = createAttribute("APP",VARIABLE_LENGTH_1);
+    public static final int BODY = createAttribute("BODY",VARIABLE_LENGTH_4);
+    public static final int BIZ_ID = createAttribute("BIZ_ID",VARIABLE_LENGTH_1);
+    public static final int PROPERTY = createAttribute("PROPERTY",VARIABLE_LENGTH_2);
+    public static final int EXPAND = createAttribute("EXPAND",VARIABLE_LENGTH_4);
+    public static final int APP = createAttribute("APP",VARIABLE_LENGTH_1);
 
     // 如果消息格式调整，只需变更以上部分
 
-    private final static Attribute [] attributes = attributeList.toArray(new Attribute[0]);
+    private static final Attribute [] attributes = attributeList.toArray(new Attribute[0]);
 
     public static int getFixedAttributesLength(){return firstVarOffset;}
 

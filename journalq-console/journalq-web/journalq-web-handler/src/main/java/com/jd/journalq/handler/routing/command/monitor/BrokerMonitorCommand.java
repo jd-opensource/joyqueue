@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 public class BrokerMonitorCommand implements Command<Response>, Poolable {
-    private final static Logger logger = LoggerFactory.getLogger(BrokerMonitorCommand.class);
+    private static final Logger logger = LoggerFactory.getLogger(BrokerMonitorCommand.class);
 
     @Value
     private BrokerMonitorService brokerMonitorService;
