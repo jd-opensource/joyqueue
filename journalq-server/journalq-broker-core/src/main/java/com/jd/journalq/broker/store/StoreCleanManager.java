@@ -2,6 +2,7 @@ package com.jd.journalq.broker.store;
 
 import com.google.common.collect.Lists;
 import com.jd.journalq.broker.cluster.ClusterManager;
+import com.jd.journalq.broker.config.BrokerStoreConfig;
 import com.jd.journalq.broker.consumer.position.PositionManager;
 import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.domain.TopicConfig;
@@ -29,6 +30,7 @@ public class StoreCleanManager extends Service {
 
     private static final int SCHEDULE_EXECUTOR_THREADS = 16;
     private PropertySupplier propertySupplier;
+    private BrokerStoreConfig brokerStoreConfig;
     private StoreService storeService;
     private ClusterManager clusterManager;
     private PositionManager positionManager;
@@ -38,6 +40,7 @@ public class StoreCleanManager extends Service {
 
     public StoreCleanManager(PropertySupplier propertySupplier, StoreService storeService, ClusterManager clusterManager, PositionManager positionManager) {
         this.propertySupplier = propertySupplier;
+        this.brokerStoreConfig = new BrokerStoreConfig(propertySupplier);
         this.storeService = storeService;
         this.clusterManager = clusterManager;
         this.positionManager = positionManager;
@@ -66,8 +69,8 @@ public class StoreCleanManager extends Service {
     public void start() throws Exception {
         super.start();
         cleanFuture = scheduledExecutorService.scheduleWithFixedDelay(this::clean,
-                ThreadLocalRandom.current().nextLong(500L, 1000L),
-                ThreadLocalRandom.current().nextLong(500L, 1000L),
+                ThreadLocalRandom.current().nextLong(brokerStoreConfig.getStoreCleanScheduleBegin(), brokerStoreConfig.getStoreCleanScheduleEnd()),
+                ThreadLocalRandom.current().nextLong(brokerStoreConfig.getStoreCleanScheduleBegin(), brokerStoreConfig.getStoreCleanScheduleEnd()),
                 TimeUnit.MILLISECONDS);
     }
 
@@ -146,7 +149,8 @@ public class StoreCleanManager extends Service {
                             for (StoreCleaningStrategy cleaningStrategy : storeCleaningStrategies) {
                                 cleaningStrategy.deleteIfNeeded(storeService, topicConfig.getName(), minPartitionAckIndex);
                             }
-                        } catch (IOException e) {
+                            Thread.sleep(brokerStoreConfig.getStorePgCleanIntervalTime());
+                        } catch (IOException | InterruptedException e) {
                             LOG.error("Delete message storage error: <{}>, <{}>", ackIndices, e);
                             e.printStackTrace();
                         }
