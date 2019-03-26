@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
  * @author majun8
  */
 public class DisconnectHandler extends Handler {
-    private final static Logger logger = LoggerFactory.getLogger(DisconnectHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(DisconnectHandler.class);
 
     public DisconnectHandler() {
 

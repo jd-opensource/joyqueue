@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 @Service("httpRestService")
 public class HttpRestServiceImpl implements HttpRestService {
-    private final static Logger logger= LoggerFactory.getLogger(HttpRestServiceImpl.class);
+    private static final Logger logger= LoggerFactory.getLogger(HttpRestServiceImpl.class);
 
     @Autowired
     private BrokerRestUrlMappingService urlMappingService;

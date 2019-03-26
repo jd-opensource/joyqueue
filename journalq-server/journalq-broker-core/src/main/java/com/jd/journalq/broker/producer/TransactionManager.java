@@ -42,7 +42,7 @@ import java.util.concurrent.TimeoutException;
  */
 public class TransactionManager extends Service {
 
-    private final static Logger logger = LoggerFactory.getLogger(TransactionManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(TransactionManager.class);
 
     private ProduceConfig config;
     private StoreService store;

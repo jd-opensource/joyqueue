@@ -24,6 +24,8 @@ import io.openmessaging.manager.ResourceManager;
 import io.openmessaging.message.MessageFactory;
 import io.openmessaging.producer.Producer;
 import io.openmessaging.producer.TransactionStateCheckListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * MessagingAccessPointImpl
@@ -32,6 +34,8 @@ import io.openmessaging.producer.TransactionStateCheckListener;
  * date: 2019/2/18
  */
 public class MessagingAccessPointImpl implements MessagingAccessPoint {
+
+    protected final Logger logger = LoggerFactory.getLogger(MessagingAccessPointImpl.class);
 
     private KeyValue attributes;
 
@@ -63,6 +67,7 @@ public class MessagingAccessPointImpl implements MessagingAccessPoint {
             messageAccessPoint = MessageAccessPointFactory.create(nameServerConfig, transportConfig);
             messageAccessPoint.start();
         } catch (Exception e) {
+            logger.error("create messagingAccessPoint exception", e);
             throw ExceptionConverter.convertRuntimeException(e);
         }
         return messageAccessPoint;
@@ -104,6 +109,6 @@ public class MessagingAccessPointImpl implements MessagingAccessPoint {
 
     @Override
     public String version() {
-        return JMQOMSConsts.VERSION;
+        return JournalQOMSConsts.VERSION;
     }
 }

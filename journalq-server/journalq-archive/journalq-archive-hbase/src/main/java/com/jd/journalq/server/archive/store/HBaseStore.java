@@ -32,7 +32,7 @@ import static com.jd.journalq.server.archive.store.HBaseSerializer.byteArrayToHe
  */
 public class HBaseStore implements ArchiveStore {
 
-    private final static Logger logger = LoggerFactory.getLogger(HBaseStore.class);
+    private static final Logger logger = LoggerFactory.getLogger(HBaseStore.class);
 
     private HBaseClient hBaseClient;
     private HBaseTopicAppMapping topicAppMapping;
@@ -318,7 +318,7 @@ public class HBaseStore implements ArchiveStore {
         }
     }
 
-    private final static byte endFlag = 58; // 结束符
+    private static final byte endFlag = 58; // 结束符
     @Override
     public List<ConsumeLog> scanConsumeLog(String messageId, Integer count) throws JMQException {
         if (hBaseClient == null) {

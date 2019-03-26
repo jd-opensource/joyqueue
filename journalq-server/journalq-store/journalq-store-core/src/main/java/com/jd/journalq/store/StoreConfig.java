@@ -13,12 +13,12 @@ import com.jd.journalq.toolkit.config.PropertySupplier;
  */
 public class StoreConfig {
 
-    public final static int DEFAULT_MESSAGE_FILE_SIZE = 128 * 1024 * 1024;
-    public final static int DEFAULT_INDEX_FILE_SIZE = 512 * 1024;
-    public final static int DEFAULT_THREAD_COUNT = 4;
-    public final static int DEFAULT_PRE_LOAD_BUFFER_CORE_COUNT = 0;
-    public final static int DEFAULT_PRE_LOAD_BUFFER_MAX_COUNT = 10;
-    public final static String STORE_PATH = "/store";
+    public static final int DEFAULT_MESSAGE_FILE_SIZE = 128 * 1024 * 1024;
+    public static final int DEFAULT_INDEX_FILE_SIZE = 512 * 1024;
+    public static final int DEFAULT_THREAD_COUNT = 4;
+    public static final int DEFAULT_PRE_LOAD_BUFFER_CORE_COUNT = 0;
+    public static final int DEFAULT_PRE_LOAD_BUFFER_MAX_COUNT = 10;
+    public static final String STORE_PATH = "/store";
     /**
      * 存储路径
      */

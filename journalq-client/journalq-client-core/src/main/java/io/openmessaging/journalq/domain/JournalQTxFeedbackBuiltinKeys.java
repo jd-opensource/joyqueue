@@ -3,12 +3,12 @@ package io.openmessaging.journalq.domain;
 import io.openmessaging.OMSBuiltinKeys;
 
 /**
- * JMQTxFeedbackBuiltinKeys
+ * JournalQTxFeedbackBuiltinKeys
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2019/2/19
  */
-public interface JMQTxFeedbackBuiltinKeys extends OMSBuiltinKeys {
+public interface JournalQTxFeedbackBuiltinKeys extends OMSBuiltinKeys {
 
     String TIMEOUT = "TX_FEEDBACK_TIMEOUT";
 

@@ -81,6 +81,9 @@ public class TopicMessageConsumerScheduler extends Service implements Runnable {
                 }
                 doSchedule();
             } catch (Exception e) {
+                if (stopped) {
+                    continue;
+                }
                 logger.error("dispatch consumer exception, topic: {}", topic, e);
                 try {
                     Thread.currentThread().sleep(config.getIdleInterval());

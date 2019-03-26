@@ -43,8 +43,8 @@ import java.util.concurrent.TimeUnit;
 @Service("consumeOffsetService")
 //todo 待移走
 public class ConsumeOffsetServiceImpl implements ConsumeOffsetService {
-    private final static Logger logger= LoggerFactory.getLogger(ConsumeOffsetServiceImpl.class);
-    private final static long TIMEOUT=60000;
+    private static final Logger logger= LoggerFactory.getLogger(ConsumeOffsetServiceImpl.class);
+    private static final long TIMEOUT=60000;
 
     @Resource(type = BrokerMonitorClusterQuery.class)
     private BrokerClusterQuery<Subscribe> brokerCluster;

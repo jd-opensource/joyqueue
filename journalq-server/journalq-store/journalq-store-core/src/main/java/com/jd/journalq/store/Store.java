@@ -56,14 +56,14 @@ import java.util.stream.Collectors;
  */
 public class Store extends Service implements StoreService, Closeable, PropertySupplierAware {
 
-    private final static Logger logger = LoggerFactory.getLogger(Store.class);
-    private final static int SCHEDULE_EXECUTOR_THREADS = 16;
+    private static final Logger logger = LoggerFactory.getLogger(Store.class);
+    private static final int SCHEDULE_EXECUTOR_THREADS = 16;
 
 
 
-    private final static String TOPICS_DIR = "topics";
-    private final static String TX_DIR = "tx";
-    private final static String DEL_PREFIX= ".d.";
+    private static final String TOPICS_DIR = "topics";
+    private static final String TX_DIR = "tx";
+    private static final String DEL_PREFIX= ".d.";
     private  StoreConfig config ;
     private  PreloadBufferPool bufferPool;
     /**

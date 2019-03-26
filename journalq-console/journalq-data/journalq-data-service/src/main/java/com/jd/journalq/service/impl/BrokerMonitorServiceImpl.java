@@ -35,7 +35,7 @@ import static com.jd.journalq.util.JSONParser.parse;
 @Service("brokerMonitorService")
 public class BrokerMonitorServiceImpl implements BrokerMonitorService {
     private Logger logger= LoggerFactory.getLogger(BrokerMonitorServiceImpl.class);
-    private final static long TIMEOUT=60000;
+    private static final long TIMEOUT=60000;
 
     @Resource(type = BrokerMonitorClusterQuery.class)
     private BrokerClusterQuery<Subscribe> brokerCluster;

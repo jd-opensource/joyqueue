@@ -3,12 +3,12 @@ package io.openmessaging.journalq.domain;
 import io.openmessaging.OMSBuiltinKeys;
 
 /**
- * JMQProducerBuiltinKeys
+ * JournalQProducerBuiltinKeys
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2019/2/19
  */
-public interface JMQProducerBuiltinKeys extends OMSBuiltinKeys {
+public interface JournalQProducerBuiltinKeys extends OMSBuiltinKeys {
 
     String TIMEOUT = "PRODUCER_TIMEOUT";
 

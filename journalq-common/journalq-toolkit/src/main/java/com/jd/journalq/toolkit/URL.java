@@ -1,6 +1,3 @@
-/**
- *
- */
 package com.jd.journalq.toolkit;
 
 import java.io.Serializable;

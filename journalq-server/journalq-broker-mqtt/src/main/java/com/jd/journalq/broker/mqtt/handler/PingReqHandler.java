@@ -16,7 +16,7 @@ import static io.netty.handler.codec.mqtt.MqttQoS.AT_MOST_ONCE;
  * @author majun8
  */
 public class PingReqHandler extends Handler implements ExecutorsProvider {
-    private final static Logger logger = LoggerFactory.getLogger(PingReqHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(PingReqHandler.class);
 
     @Override
     public void handleRequest(Channel client, MqttMessage message) throws Exception {

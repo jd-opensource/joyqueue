@@ -45,7 +45,7 @@ import java.util.concurrent.TimeoutException;
  */
 public class ProduceManager extends Service implements Produce, BrokerContextAware {
 
-    private final static Logger logger = LoggerFactory.getLogger(ProduceManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(ProduceManager.class);
 
     private ProduceConfig config;
 

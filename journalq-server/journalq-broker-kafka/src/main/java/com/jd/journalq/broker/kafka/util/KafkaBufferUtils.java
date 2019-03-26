@@ -16,7 +16,7 @@ import java.nio.ByteBuffer;
  * Created by zhangkepeng on 16-8-18.
  */
 public class KafkaBufferUtils {
-    private final static Logger logger = LoggerFactory.getLogger(KafkaBufferUtils.class);
+    private static final Logger logger = LoggerFactory.getLogger(KafkaBufferUtils.class);
 
     /**
      * Write the given long value as a 4 byte unsigned integer. Overflow is ignored.

@@ -11,7 +11,7 @@ import java.util.concurrent.ExecutorService;
  * @author majun8
  */
 public class PublishRelHandler extends Handler implements ExecutorsProvider {
-    private final static Logger logger = LoggerFactory.getLogger(PublishRelHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(PublishRelHandler.class);
 
     @Override
     public void handleRequest(Channel client, MqttMessage message) throws Exception {

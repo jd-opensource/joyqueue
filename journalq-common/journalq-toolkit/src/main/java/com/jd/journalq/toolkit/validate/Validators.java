@@ -3,8 +3,13 @@ package com.jd.journalq.toolkit.validate;
 import com.jd.journalq.toolkit.lang.Getter;
 import com.jd.journalq.toolkit.lang.Getters;
 import com.jd.journalq.toolkit.reflect.ReflectException;
-import com.jd.journalq.toolkit.validate.annotation.*;
-import com.jd.journalq.toolkit.validate.annotation.*;
+import com.jd.journalq.toolkit.validate.annotation.NotEmpty;
+import com.jd.journalq.toolkit.validate.annotation.NotNull;
+import com.jd.journalq.toolkit.validate.annotation.Range;
+import com.jd.journalq.toolkit.validate.annotation.Size;
+import com.jd.journalq.toolkit.validate.annotation.Pattern;
+import com.jd.journalq.toolkit.validate.annotation.Valid;
+import com.jd.journalq.toolkit.validate.annotation.DoubleRange;
 
 import javax.xml.bind.ValidationException;
 import java.lang.annotation.Annotation;

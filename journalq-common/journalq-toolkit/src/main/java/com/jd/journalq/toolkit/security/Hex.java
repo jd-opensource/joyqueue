@@ -13,7 +13,7 @@ public abstract class Hex {
      * @param data 字节数组
      * @return 十六进制字符串
      */
-    public final static String encode(final byte[] data) {
+    public static final String encode(final byte[] data) {
         if (data == null || data.length == 0) {
             return "";
         }
@@ -33,7 +33,7 @@ public abstract class Hex {
      * @param data 字节数组
      * @return 十六进制字符串
      */
-    public final static byte[] decode(final String data) {
+    public static final byte[] decode(final String data) {
         if (data == null) {
             return null;
         } else if (data.isEmpty()) {
