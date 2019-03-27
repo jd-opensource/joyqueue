@@ -4,6 +4,7 @@ import com.jd.journalq.model.PageResult;
 import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.exception.ServiceException;
 import com.jd.journalq.model.domain.*;
+import com.jd.journalq.model.exception.DuplicateKeyException;
 import com.jd.journalq.model.query.QConsumer;
 import com.jd.journalq.model.query.QTopic;
 import com.jd.journalq.service.NameServerService;
@@ -40,11 +41,13 @@ public class TopicServiceImpl implements TopicService {
     @Override
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
     public void addWithBrokerGroup(Topic topic, BrokerGroup brokerGroup, List<Broker> brokers, Identity operator) {
-        //1. 保存主题
-//        super.add(topic);
-        //2. 保存主题队列-Broker分组
+        Namespace namespace = topic.getNamespace();
+        Topic oldTopic = findByCode(namespace == null?null:namespace.getCode(),topic.getCode());
+        if (oldTopic != null) {
+            throw new DuplicateKeyException("topic aleady exist");
+        }
+
         List<TopicPartitionGroup> partitionGroups = addPartitionGroup(topic, brokers, operator);
-        //3. 同步到NameServer
         try {
             topicNameServerService.addTopic(topic, partitionGroups);
         } catch (Exception e) {

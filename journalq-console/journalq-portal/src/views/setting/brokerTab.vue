@@ -28,7 +28,7 @@ export default {
     return {
       urls: {
         search: `/broker/search`,
-        removeBroker: `/broker/update`
+        removeBroker: `/brokerGroup/updateBroker`
       },
       searchData: {
         brokerGroupId: this.$route.query.id,
