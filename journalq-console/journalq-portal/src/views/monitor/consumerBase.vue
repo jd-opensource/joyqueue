@@ -48,18 +48,18 @@
                   :type="type" :doSearch="detailDialog.doSearch" :subscribeGroup="detailDialog.subscribeGroup"/>
         </d-tab-pane>
 
-        <d-tab-pane v-if="detailDialog.clientType==1&&$store.getters.isAdmin" label="协调者信息" name="coordinatorInfo" icon="file-text">
+        <d-tab-pane v-if="$store.getters.isAdmin" label="协调者信息" name="coordinatorInfo" icon="file-text">
           <tab-table  ref="coordinatorInfo" :app="detailDialog.app" :topic="detailDialog.topic" :namespace="detailDialog.namespace"
-                      :type="type"  :doSearch="detailDialog.doSearch" :subscribeGroup="detailDialog.subscribeGroup" :searchData="detailDialog"
+                      :type="type"  :doSearch="detailDialog.doSearch" :client-type="detailDialog.clientType"  :subscribeGroup="detailDialog.subscribeGroup" :searchData="detailDialog"
                       :col-data="coordinatorTable.colData"   :search="coordinatorTable.search"/>
         </d-tab-pane>
 
-        <d-tab-pane v-if="detailDialog.clientType==1" label="消费组成员" name="coordinatorGroupMember" icon="file-text">
+        <d-tab-pane v-if="$store.getters.isAdmin" label="消费组成员" name="coordinatorGroupMember" icon="file-text">
           <tab-table  ref="coordinatorGroupMember" :app="detailDialog.app" :topic="detailDialog.topic" :namespace="detailDialog.namespace"
                      :type="type" :client-type="detailDialog.clientType"  :doSearch="detailDialog.doSearch" :subscribeGroup="detailDialog.subscribeGroup" :searchData="detailDialog"
                      :col-data="coordinatorGroupMemberTable.colData" :search="coordinatorGroupMemberTable.search"/>
         </d-tab-pane>
-        <d-tab-pane v-if="detailDialog.clientType==1" label="消费组过期成员" name="coordinatorGroupExpiredMember" icon="file-text">
+        <d-tab-pane v-if="$store.getters.isAdmin" label="消费组过期成员" name="coordinatorGroupExpiredMember" icon="file-text">
           <tab-table ref="coordinatorGroupExpiredMember" :app="detailDialog.app" :topic="detailDialog.topic" :namespace="detailDialog.namespace"
                      :type="type" :client-type="detailDialog.clientType"  :doSearch="detailDialog.doSearch" :subscribeGroup="detailDialog.subscribeGroup" :searchData="detailDialog"
                      :col-data="coordinatorGroupExpiredMemberTable.colData" :search="coordinatorGroupExpiredMemberTable.search"/>
@@ -448,7 +448,10 @@ export default {
           },
           {
             title: '过期时间',
-            key: 'expireTime'
+            key: 'expireTime',
+            formatter (item) {
+              return timeStampToString(item.expireTime)
+            }
           },
           {
             title: '过期次数',
