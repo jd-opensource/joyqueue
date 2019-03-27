@@ -213,7 +213,7 @@
                path="/v1/brokerGroup/findAll" handlers="brokerGroup.findAll render"
                errors="error"/>
         <route inherit="put"
-               path="/v1/brokerGroup/updateBroker/:id" handlers="validateAdmin brokerGroup#updateBroker render"
+               path="/v1/brokerGroup/updateBroker/:id" handlers="validateAdmin brokerGroup.updateBroker render"
                errors="error"/>
 
         <!--partitionGroup 操作-->
