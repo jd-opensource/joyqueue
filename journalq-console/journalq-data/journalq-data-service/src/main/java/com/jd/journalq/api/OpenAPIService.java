@@ -2,10 +2,11 @@ package com.jd.journalq.api;
 
 import com.jd.journalq.model.PageResult;
 import com.jd.journalq.model.Pagination;
-import com.jd.journalq.monitor.PartitionAckMonitorInfo;
-import com.jd.journalq.monitor.PendingMonitorInfo;
 import com.jd.journalq.model.domain.*;
 import com.jd.journalq.model.query.QBrokerGroup;
+import com.jd.journalq.monitor.PartitionAckMonitorInfo;
+import com.jd.journalq.monitor.PartitionLeaderAckMonitorInfo;
+import com.jd.journalq.monitor.PendingMonitorInfo;
 
 import java.util.List;
 
@@ -114,7 +115,7 @@ public interface OpenAPIService {
     /**
      * All partition Offset of the subscribe
      **/
-    List<PartitionAckMonitorInfo> findOffsets(Subscribe subscribe) throws  Exception;
+    List<PartitionLeaderAckMonitorInfo> findOffsets(Subscribe subscribe) throws  Exception;
 
     /**
      *

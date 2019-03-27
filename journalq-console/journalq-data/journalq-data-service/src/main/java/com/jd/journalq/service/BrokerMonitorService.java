@@ -28,21 +28,23 @@ public interface BrokerMonitorService {
 
 
     /**
-     * Find monitor info of a producer or consumer 汇总信息
+     * Find monitor info of a producer or consumer 汇总信息,
+     * for aggregation data -1 indicate incomplete
      * @param subscribe consumer or producer subscribe info
      * @param active   if true , only contain leader partition group of this subscribe on the broker right now,which excluding
      *                 case of  the broker isn't partition group'leader but still remaining monitor info,such as enqueue and dequeun
+     *
      * @return a monitor record
      **/
     BrokerMonitorRecord find(Subscribe subscribe,boolean active);
 
     /**
-     *
+     * @param require  require full broker monitor info,if true
      * @param subscribe consumer or producer subscribe info
      * @return a monitor record list contain statistics info on each broker for topic and app
      * @see
      **/
-    List<BrokerMonitorRecord> findMonitorOnBroker(Subscribe subscribe);
+    List<BrokerMonitorRecord> findMonitorOnBroker(Subscribe subscribe,boolean require);
 
 
     /**
@@ -73,12 +75,15 @@ public interface BrokerMonitorService {
 
     /**
      *
+     * @param require  require full partition group monitor info,if true
+     *
      * @return  app 在某一topic所有 partition group的的监控消费或者生产监控 or null，sorted by partition group no;
      * null 表示当前 该partition group没有监控数据，一般是新建的生产或者消费关系，没有开始生产或者消费
-     * 与findMonitorOnPartitionGroups 不同; 包含出队和积压监控信息汇总信息,for consumer or producer
+     * 与findMonitorOnPartitionGroups 不同; 包含出队和积压监控信息汇总信息,for consumer or producer; if require=true,
+     * any partition group monitor lost will return one record with -1 ,which indicate incomplete
      *
      **/
-    List<BrokerMonitorRecord> findMonitorOnPartitionGroupsForTopicApp(Subscribe subscribe);
+    List<BrokerMonitorRecord> findMonitorOnPartitionGroupsForTopicApp(Subscribe subscribe,boolean require);
 
     /**
      *

@@ -116,6 +116,20 @@ public class LeaderServiceImpl implements LeaderService {
 
     }
 
+
+    @Override
+    public Map<Short, Broker> findPartitionLeaderBrokerDetail(String topic, String namespace) {
+        Map<Short,Broker> partitionBrokerMap=new HashMap<>();
+        List<Map.Entry<PartitionGroup, Broker>> partitionGroupBrokers=findPartitionGroupLeaderBrokerDetail(partitionGroupServerService.findByTopic(topic,namespace));
+        for(Map.Entry<PartitionGroup, Broker> e:partitionGroupBrokers){
+           Set<Short> partitions=e.getKey().getPartitions();
+           for(Short p:partitions) {
+               partitionBrokerMap.put(p,e.getValue());
+           }
+        }
+        return partitionBrokerMap;
+    }
+
     /**
      * @param topicPartitionGroups
      * @return  a pair of partitionGroup,Broker

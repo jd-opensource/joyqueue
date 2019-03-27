@@ -1,16 +1,16 @@
 package com.jd.journalq.handler.routing.command.monitor;
 
-import com.jd.journalq.monitor.PartitionAckMonitorInfo;
+import com.jd.journalq.handler.binder.BodyType;
 import com.jd.journalq.handler.binder.annotation.Body;
 import com.jd.journalq.handler.binder.annotation.GenericValue;
 import com.jd.journalq.handler.binder.annotation.ParamterValue;
 import com.jd.journalq.handler.binder.annotation.Path;
 import com.jd.journalq.handler.error.ErrorCode;
-import com.jd.journalq.service.ConsumeOffsetService;
-import com.jd.journalq.handler.binder.BodyType;
 import com.jd.journalq.model.domain.PartitionOffset;
 import com.jd.journalq.model.domain.ResetOffsetInfo;
 import com.jd.journalq.model.domain.Subscribe;
+import com.jd.journalq.monitor.PartitionLeaderAckMonitorInfo;
+import com.jd.journalq.service.ConsumeOffsetService;
 import com.jd.journalq.util.NullUtil;
 import com.jd.laf.web.vertx.Command;
 import com.jd.laf.web.vertx.pool.Poolable;
@@ -48,15 +48,17 @@ public class ConsumeOffsetCommand implements Command<Response>, Poolable {
     public Response offsetBound(@Body(typeindex = 0,type = BodyType.JSON) Subscribe subscribe, @ParamterValue("location") String location){
         PartitionOffset.Location loc=PartitionOffset.Location.valueOf(location);
         List<PartitionOffset> partitionOffsets=new ArrayList<>();
-        List<PartitionAckMonitorInfo>  partitionAckMonitorInfos=consumeOffsetService.offsets(subscribe);
+        List<PartitionLeaderAckMonitorInfo>  partitionAckMonitorInfos=consumeOffsetService.offsets(subscribe);
         PartitionOffset partitionOffset;
-        for(PartitionAckMonitorInfo p:partitionAckMonitorInfos){
-             partitionOffset=new PartitionOffset();
-             partitionOffset.setPartition(p.getPartition());
-             if(loc== PartitionOffset.Location.MAX){
-                 partitionOffset.setOffset(p.getRightIndex());
-             }else partitionOffset.setOffset(p.getLeftIndex());
-             partitionOffsets.add(partitionOffset);
+        for(PartitionLeaderAckMonitorInfo p:partitionAckMonitorInfos){
+            if(p.isLeader()) {
+                partitionOffset = new PartitionOffset();
+                partitionOffset.setPartition(p.getPartition());
+                if (loc == PartitionOffset.Location.MAX) {
+                    partitionOffset.setOffset(p.getRightIndex());
+                } else partitionOffset.setOffset(p.getLeftIndex());
+                partitionOffsets.add(partitionOffset);
+            }
         }
         boolean result=consumeOffsetService.resetOffset(subscribe, partitionOffsets);
         return result?Responses.success("success"):Responses.error(ErrorCode.ServiceError.getCode(),"reset failed");

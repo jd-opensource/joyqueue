@@ -110,6 +110,10 @@ export default {
             key: 'partition'
           },
           {
+            title: '主',
+            key: 'leader',
+          },
+          {
             title: '最小值',
             key: 'leftIndex'
           },
@@ -120,6 +124,7 @@ export default {
             title: '应答',
             key: 'offset'
           }
+
         ],
         btns: [
           {

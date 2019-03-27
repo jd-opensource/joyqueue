@@ -1,6 +1,6 @@
 package com.jd.journalq.util;
 
-import com.jd.journalq.model.exception.BusinessException;
+import com.jd.journalq.exception.ServiceException;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpStatus;
@@ -13,9 +13,12 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
+
+import static java.net.HttpURLConnection.HTTP_CLIENT_TIMEOUT;
 
 /**
  *  HTTP服务 公共方法
@@ -74,7 +77,7 @@ public class HttpUtil {
         } catch (Exception e) {
             String errorMsg = String.format("error occurred while communicating with  request = %s", request);
             logger.error(errorMsg, e);
-            throw new BusinessException(errorMsg, e);
+            throw new ServiceException(HTTP_CLIENT_TIMEOUT, e.getMessage());
         }
     }
 

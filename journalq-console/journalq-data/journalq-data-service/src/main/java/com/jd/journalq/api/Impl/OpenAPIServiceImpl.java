@@ -2,21 +2,21 @@ package com.jd.journalq.api.Impl;
 
 
 import com.jd.journalq.api.OpenAPIService;
+import com.jd.journalq.convert.CodeConverter;
+import com.jd.journalq.exception.ServiceException;
 import com.jd.journalq.model.PageResult;
 import com.jd.journalq.model.Pagination;
 import com.jd.journalq.model.QPageQuery;
+import com.jd.journalq.model.domain.*;
+import com.jd.journalq.model.query.*;
 import com.jd.journalq.monitor.PartitionAckMonitorInfo;
+import com.jd.journalq.monitor.PartitionLeaderAckMonitorInfo;
 import com.jd.journalq.monitor.PendingMonitorInfo;
-import com.jd.journalq.convert.CodeConverter;
-import com.jd.journalq.exception.ServiceException;
 import com.jd.journalq.service.*;
 import com.jd.journalq.sync.ApplicationInfo;
 import com.jd.journalq.sync.SyncService;
-import com.jd.journalq.sync.UserInfo;
 import com.jd.journalq.util.LocalSession;
 import com.jd.journalq.util.NullUtil;
-import com.jd.journalq.model.domain.*;
-import com.jd.journalq.model.query.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -324,7 +324,7 @@ public class OpenAPIServiceImpl implements OpenAPIService {
     }
 
     @Override
-    public List<PartitionAckMonitorInfo> findOffsets(Subscribe subscribe) {
+    public List<PartitionLeaderAckMonitorInfo> findOffsets(Subscribe subscribe) {
         subscribe.setType(SubscribeType.CONSUMER);
         isLegalSubscribe(subscribe);
         return consumeOffsetService.offsets(subscribe);
