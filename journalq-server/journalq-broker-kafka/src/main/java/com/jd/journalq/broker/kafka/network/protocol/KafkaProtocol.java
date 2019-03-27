@@ -1,20 +1,11 @@
 package com.jd.journalq.broker.kafka.network.protocol;
 
-import com.jd.journalq.broker.kafka.session.KafkaConnectionHandler;
-import com.jd.journalq.broker.kafka.session.KafkaConnectionManager;
 import com.jd.journalq.broker.BrokerContext;
 import com.jd.journalq.broker.BrokerContextAware;
 import com.jd.journalq.broker.coordinator.CoordinatorGroupManager;
 import com.jd.journalq.broker.kafka.KafkaConsts;
 import com.jd.journalq.broker.kafka.KafkaContext;
 import com.jd.journalq.broker.kafka.config.KafkaConfig;
-import com.jd.journalq.broker.kafka.handler.ratelimit.KafkaRateLimitHandlerFactory;
-import com.jd.journalq.broker.kafka.manage.KafkaManageServiceFactory;
-import com.jd.journalq.broker.kafka.util.RateLimiter;
-import com.jd.journalq.network.protocol.ChannelHandlerProvider;
-import com.jd.journalq.network.protocol.ProtocolService;
-import com.jd.journalq.network.transport.codec.CodecFactory;
-import com.jd.journalq.network.transport.command.handler.CommandHandlerFactory;
 import com.jd.journalq.broker.kafka.coordinator.GroupBalanceHandler;
 import com.jd.journalq.broker.kafka.coordinator.GroupBalanceManager;
 import com.jd.journalq.broker.kafka.coordinator.GroupCoordinator;
@@ -22,7 +13,18 @@ import com.jd.journalq.broker.kafka.coordinator.GroupOffsetHandler;
 import com.jd.journalq.broker.kafka.coordinator.GroupOffsetManager;
 import com.jd.journalq.broker.kafka.coordinator.KafkaCoordinator;
 import com.jd.journalq.broker.kafka.coordinator.KafkaCoordinatorGroupManager;
+import com.jd.journalq.broker.kafka.handler.ratelimit.KafkaRateLimitHandlerFactory;
+import com.jd.journalq.broker.kafka.manage.KafkaManageServiceFactory;
 import com.jd.journalq.broker.kafka.network.helper.KafkaProtocolHelper;
+import com.jd.journalq.broker.kafka.session.KafkaConnectionHandler;
+import com.jd.journalq.broker.kafka.session.KafkaConnectionManager;
+import com.jd.journalq.broker.kafka.util.RateLimiter;
+import com.jd.journalq.network.protocol.ChannelHandlerProvider;
+import com.jd.journalq.network.protocol.ExceptionHandlerProvider;
+import com.jd.journalq.network.protocol.ProtocolService;
+import com.jd.journalq.network.transport.codec.CodecFactory;
+import com.jd.journalq.network.transport.command.handler.CommandHandlerFactory;
+import com.jd.journalq.network.transport.command.handler.ExceptionHandler;
 import com.jd.journalq.toolkit.delay.DelayedOperationManager;
 import com.jd.journalq.toolkit.service.Service;
 import io.netty.buffer.ByteBuf;
@@ -38,7 +40,7 @@ import org.slf4j.LoggerFactory;
  * email: gaohaoxiang@jd.com
  * date: 2018/8/21
  */
-public class KafkaProtocol extends Service implements ProtocolService, BrokerContextAware, ChannelHandlerProvider {
+public class KafkaProtocol extends Service implements ProtocolService, BrokerContextAware, ChannelHandlerProvider, ExceptionHandlerProvider {
 
     protected static final Logger logger = LoggerFactory.getLogger(KafkaProtocol.class);
 
@@ -135,6 +137,11 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
                 ch.pipeline().addLast(channelHandler).addLast(connectionHandler);
             }
         };
+    }
+
+    @Override
+    public ExceptionHandler getExceptionHandler() {
+        return new KafkaExceptionHandler();
     }
 
     @Override
