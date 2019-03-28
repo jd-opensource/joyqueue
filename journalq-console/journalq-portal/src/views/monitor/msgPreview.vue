@@ -63,7 +63,7 @@ export default {
             }
           },
           {
-            title: '已被消费',
+            title: '已消费',
             key: 'flag'
           },
           {

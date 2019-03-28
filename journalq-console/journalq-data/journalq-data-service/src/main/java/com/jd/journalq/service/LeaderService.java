@@ -41,6 +41,7 @@ public interface LeaderService {
     Map.Entry<PartitionGroup, Broker> findPartitionGroupLeaderBrokerDetail(String namespace,String topic,int groupNo);
 
 
+
     /***
      *
      *  根据topic id 查找,topic partition 的主broker
@@ -56,6 +57,12 @@ public interface LeaderService {
      **/
     List<Map.Entry<PartitionGroup,Broker>> findPartitionGroupLeaderBrokerDetail(String topic,String namespace);
 
+
+    /**
+     * @return  <PartitionGroup,Broker> kv list,parition group with leader broker detail
+     *
+     **/
+    Map<Short,Broker> findPartitionLeaderBrokerDetail(String topic,String namespace);
 
 
 

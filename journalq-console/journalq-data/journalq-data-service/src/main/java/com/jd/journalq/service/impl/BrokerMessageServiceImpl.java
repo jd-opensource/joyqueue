@@ -74,7 +74,7 @@ public class BrokerMessageServiceImpl implements BrokerMessageService {
                             message.setBusinessId(m.getBusinessId());
                             message.setBody(new String(m.getBody().getBytes(Charset.forName("utf-8"))));
                             message.setAttributes(m.getAttributes());
-                            message.setFlag(false);
+                            message.setFlag(m.isAck());
                             simplifiedBrokeMessages.add(message);
                         }
                     }else{

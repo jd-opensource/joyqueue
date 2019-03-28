@@ -80,7 +80,7 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
     @Path("findOnPartitionGroups")
     public Response findMonitorOnPartitionGroups(@Body(typeindex = 0,type = BodyType.JSON) Subscribe subscribe) {
 
-        List<BrokerMonitorRecord> record=brokerMonitorService.findMonitorOnPartitionGroupsForTopicApp(subscribe);
+        List<BrokerMonitorRecord> record=brokerMonitorService.findMonitorOnPartitionGroupsForTopicApp(subscribe,false);
         return Responses.success(record);
     }
 
@@ -91,7 +91,7 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
     @Path("findOnBroker")
     public Response findMonitorOnBroker(@Body(typeindex = 0,type = BodyType.JSON) Subscribe subscribe) {
 
-        List<BrokerMonitorRecord> record= brokerMonitorService.findMonitorOnBroker(subscribe);
+        List<BrokerMonitorRecord> record= brokerMonitorService.findMonitorOnBroker(subscribe,true);
         return Responses.success(record);
     }
 
@@ -152,7 +152,7 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
      **/
     @Path("findMonitorOnPartitionGroupsForTopicApp")
     public Response findMonitorOnPartitionsGroupsForTopicApp(@Body(typeindex = 0,type = BodyType.JSON) Subscribe subscribe){
-        List<BrokerMonitorRecord> record=brokerMonitorService.findMonitorOnPartitionGroupsForTopicApp(subscribe);
+        List<BrokerMonitorRecord> record=brokerMonitorService.findMonitorOnPartitionGroupsForTopicApp(subscribe,false);
         return Responses.success(record);
     }
 

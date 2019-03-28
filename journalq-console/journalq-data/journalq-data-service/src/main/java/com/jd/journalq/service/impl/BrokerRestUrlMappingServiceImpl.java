@@ -22,9 +22,9 @@ public class BrokerRestUrlMappingServiceImpl implements BrokerRestUrlMappingServ
     private Logger logger= LoggerFactory.getLogger(BrokerRestUrlMappingServiceImpl.class);
 
     /** message preview path  */
-    private static final String pendingByteMessagePath="/manage/topic/%s/app/%s/message/pending?count=%s";
-    private String lastestMessagePath="/manage/topic/%s/app/%s/message/last";
-    private String partitoinMessagePath="/manage/topic/%s/app/%s/partition/%d/message";
+    private static final String pendingByteMessagePath="/manage/topic/%s/app/%s/message/view?count=%s";
+    private static final String  lastestMessagePath="/manage/topic/%s/app/%s/message/last";
+    private static final String partitoinMessagePath="/manage/topic/%s/app/%s/partition/%d/message";
 
     /** monitor path */
     private String appMonitorPath="/monitor/topic/%s/app/%s/%s"; // topic|app|type{producer/consumer}

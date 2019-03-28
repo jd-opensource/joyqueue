@@ -16,7 +16,7 @@
     <typeAliases>
         <package name="com.jd.journalq.model.domain" />
         <package name="com.jd.journalq.model.query" />
-        <package name="com.jd.journalq.common.model" />
+        <package name="com.jd.journalq.model" />
     </typeAliases>
     <plugins>
         <plugin interceptor="com.jd.journalq.repository.mybatis.interceptor.PageStatementInterceptor"/>
