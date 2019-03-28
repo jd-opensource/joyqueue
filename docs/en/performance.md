@@ -25,7 +25,7 @@ A topic with 200 partitions was created,using compression lz4 algorithm if requi
 Experiment run each benchmark case duration 10 minutes,and the result show in the following table.
 
 | case | CPU(%) |Mem(%)| Network I/O(MB/s) | Disk I(MB/s)|QPS|
-| :----:| :----: |:----:|:----:|:----:|
+| :----:| :----: |:----:|:----:|:----:|:----:|
 |1 | 75 |12.22 |363.48/37.82|360.37 |309763|  
 |2 | 76 |12.22 |360.67/37.07|353.79 |308037|   
 |3 | 19 |11.88 |886.11/4.63 |1376.31|32961776|
