@@ -24,11 +24,11 @@ A topic with 200 partitions was created,using compression lz4 algorithm if requi
 ## Result and Conclusion
   Experiment run each benchmark case duration 10 minutes,and the result show in the following table.
 
-  case | CPU(%) |Mem(%)| Network I/O(MB/s) | Disk I(MB/s)|QPS
-  :-:| :-: |:-:|:-:|:-:|
-  1 | 75 |12.22 |363.48/37.82|360.37 |309763  
-  2 | 76 |12.22 |360.67/37.07|353.79 |308037   
-  3 | 19 |11.88 |886.11/4.63 |1376.31|32961776
-  4 | 46 |10.1|686.44/1172.51|1034.93|25018477
+  | case | CPU(%) |Mem(%)| Network I/O(MB/s) | Disk I(MB/s)|QPS|
+  | :-:| :-: |:-:|:-:|:-:|
+  |1 | 75 |12.22 |363.48/37.82|360.37 |309763|  
+  |2 | 76 |12.22 |360.67/37.07|353.79 |308037|   
+  |3 | 19 |11.88 |886.11/4.63 |1376.31|32961776|
+  |4 | 46 |10.1|686.44/1172.51|1034.93|25018477|
 
   The table above shows that compression for single message has little impacts on the producer performance,but will significantly improve the performance when we have a large batch messages,and the large batch messages usually benifit for cpu and disk i/o. JorunalQ can keep high throughputs either on single message or large batch messages scene.
