@@ -60,4 +60,8 @@ public class JMQCoordinatorGroup extends CoordinatorGroup {
     public String getAssignType() {
         return assignType;
     }
+
+    protected void updateExtension() {
+        super.setExtension(String.format("{assignType: %s}", assignType));
+    }
 }
