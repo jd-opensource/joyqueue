@@ -190,6 +190,11 @@ public class KafkaCoordinatorGroup extends CoordinatorGroup {
         preState = state;
         preStateTimestamp = SystemClock.now();
         state = groupState;
+        updateExtension();
+    }
+
+    protected void updateExtension() {
+        super.setExtension(String.format("{state: %s, preState: %s, leader: %s, protocol: %s}", state, preState, leaderId, protocol));
     }
 
     public String selectProtocol() {

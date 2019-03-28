@@ -66,7 +66,7 @@ public class KafkaMessageSerializer extends AbstractKafkaMessageSerializer {
         }  else if (magic == MESSAGE_MAGIC_V2) {
             KafkaMessageV2Serializer.writeMessages(buffer, messages);
         } else if (magic == KafkaBrokerMessage.INVALID_MAGIC) {
-            KafkaMessageV1Serializer.writeMessages(buffer, messages);
+            KafkaMessageV0Serializer.writeMessages(buffer, messages);
         } else {
             throw new UnsupportedOperationException(String.format("writeMessage unsupported magic, magic: %s", magic));
         }
@@ -78,7 +78,6 @@ public class KafkaMessageSerializer extends AbstractKafkaMessageSerializer {
         } else if (message.getMagic() == MESSAGE_MAGIC_V1) {
             KafkaMessageV1Serializer.writeMessage(buffer, message);
         } else if (message.getMagic() == KafkaBrokerMessage.INVALID_MAGIC) {
-            message.setMagic(MESSAGE_MAGIC_V0);
             KafkaMessageV0Serializer.writeMessage(buffer, message);
         } else {
             throw new UnsupportedOperationException(String.format("writeMessage unsupported magic, magic: %s", message.getMagic()));

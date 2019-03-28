@@ -324,10 +324,17 @@ public class OpenAPIServiceImpl implements OpenAPIService {
     }
 
     @Override
-    public List<PartitionLeaderAckMonitorInfo> findOffsets(Subscribe subscribe) {
+    public List<PartitionAckMonitorInfo> findOffsets(Subscribe subscribe) {
+        List<PartitionAckMonitorInfo> partitionAckMonitorInfos=new ArrayList<>();
         subscribe.setType(SubscribeType.CONSUMER);
         isLegalSubscribe(subscribe);
-        return consumeOffsetService.offsets(subscribe);
+        List<PartitionLeaderAckMonitorInfo> partitionLeaderAckMonitorInfos= consumeOffsetService.offsets(subscribe);
+        for(PartitionLeaderAckMonitorInfo p:partitionLeaderAckMonitorInfos){
+            if(p.isLeader()){
+                partitionAckMonitorInfos.add(p);
+            }
+        }
+        return  partitionAckMonitorInfos;
     }
 
     @Override

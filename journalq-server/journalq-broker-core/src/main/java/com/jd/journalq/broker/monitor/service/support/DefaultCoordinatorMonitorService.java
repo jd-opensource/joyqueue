@@ -44,6 +44,7 @@ public class DefaultCoordinatorMonitorService implements CoordinatorMonitorServi
         }
         CoordinatorGroup result = new CoordinatorGroup();
         result.setId(group.getId());
+        result.setExtension(group.getExtension());
         result.setMembers(formatCoordinatorGroupMembers(group, topic));
         result.setExpiredMembersMap(Maps.newHashMap(group.expiredMembersToMap()));
         return result;
