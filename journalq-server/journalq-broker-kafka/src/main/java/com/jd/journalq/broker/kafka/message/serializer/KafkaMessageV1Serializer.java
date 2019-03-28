@@ -53,7 +53,7 @@ public class KafkaMessageV1Serializer extends AbstractKafkaMessageSerializer {
         int startIndex = buffer.writerIndex();
         buffer.writeInt(0); // length
         buffer.writeInt(0); // crc
-        buffer.writeByte(message.getMagic());
+        buffer.writeByte(CURRENT_MAGIC);
         buffer.writeByte(message.getAttribute());
         buffer.writeLong(message.getTimestamp());
 
