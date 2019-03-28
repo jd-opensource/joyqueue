@@ -65,6 +65,7 @@ export default {
       urls: {
         search: `/partitionGroup/search`,
         del: `/partitionGroup/delete`,
+        getBroker:`/broker/get`,
         addPartition: `/partitionGroup/addPartition`,
         removePartition: `/partitionGroup/removePartition`,
         getMonitor: `/monitor`
@@ -87,18 +88,22 @@ export default {
         colData: [
           {
             title: 'ID',
+            width:"10%",
             key: 'id'
           },
           {
             title: '主题',
+            width:"10%",
             key: 'topic.code'
           },
           {
             title: 'group',
+            width:"2%",
             key: 'groupNo'
           },
           {
             title: '选举类型',
+            width:"5%",
             key: 'electType',
             render: (h, params) => {
               let label
@@ -115,22 +120,26 @@ export default {
           },
           {
             title: 'partitions',
+              width:"15%",
             key: 'partitions'
           },
           {
             title: 'leader',
-            key: 'leader'
+              width:"10%",
+            key: 'ip'
           },
           {
             title: '推荐leader',
-              key: 'recLeader'
+              width:"10%",
+            key: 'recLeader'
           },
-          {
-            title: 'isr',
-            key: 'isr'
-          },
+          // {
+          //   title: 'isr',
+          //   key: 'isr'
+          // },
           {
             title: 'term',
+              width:"2%",
             key: 'term'
           }
         ],
@@ -239,8 +248,17 @@ export default {
         this.page.page = data.pagination.page
         this.page.size = data.pagination.size
         this.tableData.rowData = data.data
+        for (var i = 0; i < this.tableData.rowData.length; i++) {
+          this.getBroker(this.tableData.rowData,i);
+        }
         this.showTablePin = false
       })
+    },
+    getBroker(rowData,i) {
+      apiRequest.get(this.urlOrigin.getBroker+"/"+rowData[i].leader).then((data) => {
+        this.tableData.rowData[i].ip = data.data.ip;
+      this.$set(this.tableData.rowData, i, this.tableData.rowData[i])
+      });
     },
     goDetail (item) {
       this.groupDetailDialogData = {groupNo: item.groupNo, topic: this.searchData.topic, namespace: this.searchData.namespace}
