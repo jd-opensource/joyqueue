@@ -32,3 +32,8 @@ A topic with 200 partitions was created,using compression lz4 algorithm if requi
   |4 | 46 |10.1|686.44/1172.51|1034.93|25018477|
 
   The table above shows that compression for single message has little impacts on the producer performance,but will significantly improve the performance when we have a large batch messages,and the large batch messages usually benifit for cpu and disk i/o. JorunalQ can keep high throughputs either on single message or large batch messages scene.
+
+  | Left Aligned | Centered | Right Aligned | Left Aligned | Centered | Right Aligned |
+| :----------- | :------: | ------------: | :----------- | :------: | ------------: |
+| Cell 1       | Cell 2   | Cell 3        | Cell 4       | Cell 5   | Cell 6        |
+| Cell 7       | Cell 8   | Cell 9        | Cell 10      | Cell 11  | Cell 12       | 
