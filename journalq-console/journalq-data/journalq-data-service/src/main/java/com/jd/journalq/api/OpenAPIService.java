@@ -115,7 +115,7 @@ public interface OpenAPIService {
     /**
      * All partition Offset of the subscribe
      **/
-    List<PartitionLeaderAckMonitorInfo> findOffsets(Subscribe subscribe) throws  Exception;
+    List<PartitionAckMonitorInfo> findOffsets(Subscribe subscribe) throws  Exception;
 
     /**
      *
