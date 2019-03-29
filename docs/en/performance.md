@@ -1,4 +1,4 @@
-# Performance benchmark
+# Performance
   JournalQ is a distributed pub/sub messaging system,with highly scalable and low latency.you maybe interested in the performance of JounalQ if you prepare to deploy and use it in production. In this section,a simple benchmark is designed to show JournalQ's produce performance on single instance.
 
 
