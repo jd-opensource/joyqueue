@@ -6,7 +6,6 @@ import com.jd.journalq.network.transport.codec.DefaultDecoder;
 import com.jd.journalq.network.transport.codec.PayloadCodecFactory;
 import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.transport.exception.TransportException;
-
 import io.netty.buffer.ByteBuf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,8 +26,13 @@ public class KafkaDecoder extends DefaultDecoder {
     @Override
     public Object decode(ByteBuf buffer) throws TransportException.CodecException {
         Command command = (Command) super.decode(buffer);
-        if (command != null) {
-            fillHeader((KafkaHeader) command.getHeader(), (KafkaRequestOrResponse) command.getPayload());
+        fillHeader((KafkaHeader) command.getHeader(), (KafkaRequestOrResponse) command.getPayload());
+
+        // TODO 临时代码
+        int readableBytes = buffer.readableBytes();
+        if (readableBytes > 0 && readableBytes < 10) {
+            logger.warn("skip bytes, command: {}, readableBytes: {}", command, readableBytes);
+            buffer.skipBytes(readableBytes);
         }
         return command;
     }

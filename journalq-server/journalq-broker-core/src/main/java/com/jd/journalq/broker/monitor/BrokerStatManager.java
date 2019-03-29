@@ -8,6 +8,7 @@ import com.jd.journalq.broker.monitor.model.BrokerStatPo;
 import com.jd.journalq.broker.monitor.stat.BrokerStat;
 import com.jd.journalq.toolkit.service.Service;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,6 +57,11 @@ public class BrokerStatManager extends Service {
 
             if (logger.isDebugEnabled()) {
                 logger.debug("load broker stat, value: {}, file: {}", stat, statFile);
+            }
+
+            if (StringUtils.isBlank(stat)) {
+                logger.warn("load broker stat error, value: {}, file: {}", stat, statFile);
+                return new BrokerStat(brokerId);
             }
 
             BrokerStatPo brokerStatPo = JSON.parseObject(stat, BrokerStatPo.class);
