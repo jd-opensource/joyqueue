@@ -11,7 +11,7 @@ Key modules of JournalQ are showed in below:
 
 ## Broker Cluster
 
-JournalQ instance is responsible for messages store,produce and consume. In addition,Archive,Retry,HA and full-featured monitor are provided for production ready.
+JournalQ instance is responsible for messages store,produce and consume. In addition,Archive,Retry,HA（elecion and replication）and full-featured monitor are provided for production ready.
 
 Retry module enable consumer to drop or temporarily skip the message and consume it later,e.g.,unexpected message format which can't be recognized by consumer leads consumer stuck.
 JournalQ instance's storage is always limited by disk space,archive module can archive the consumed message to a larger storage,such as HDFS,with clean up strategies,and then you may look up and download a message which is produced a month ago. Monitor module manages realtime monitoring data,such as pending,retry,enqueue, dequeue and connections,which is intutive and helpful to know what happening.HA module consist of election and replication, manages followers and replicates messages to them, and a new leader will be elected among alive followers when current leader crashed,raft-based election algorithm is employed by JournalQ.
