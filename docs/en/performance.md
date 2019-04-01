@@ -1,11 +1,10 @@
 # Performance
-  JournalQ is a distributed pub/sub messaging system,with highly scalable and low latency.you maybe interested in the performance of JounalQ if you prepare to deploy and use it in production. In this section,a simple benchmark is designed to show JournalQ's produce performance on single instance.
-
+  JournalQ is a multi-protocols and distributed pub/sub messaging broker,with high throughput,highly scalable and low latency.you maybe interested in the performance of JounalQ if you prepare to deploy and use it in production. In this section,a simple benchmark is designed to show JournalQ's produce performance on single instance.
 
 ## Set up
 For the tests,hareware requirement show as following:
 
-* Intel(R) Xeon(R) CPU E5-2620 v4 @ 2.10GHz with 8 cores * 2
+* Intel(R) Xeon(R) CPU E5-2620 v4 @ 2.10GHz with 8 cores x 2
 * 32GB x 8 RAM
 * 960GB x 6 SSD  
 * 10 Gigabit Ethernet
@@ -13,7 +12,7 @@ For the tests,hareware requirement show as following:
 
 ## Test case
 
-A topic with 200 partitions was created,using compression lz4 algorithm if required,per message size 1024 byte.Actually,the performance of producer was affected by whether synchronous or asynchronous message you choose, asynchronous message won't blocking the producer, so it allows the producer to continuely produce messages and process result as they want. In addition, message batch size and compression for large message body are important ways to improve the producer performance. we carefully test 4 cases show below:
+A topic with 200 partitions was created,using compression lz4 algorithm if required,per message size 1024 byte.Actually,the performance of producer was affected by whether synchronous or asynchronous message you choose, asynchronous message won't blocking the producer, so it allows the producer to continuely produce messages and process result as they want. In addition, large message batch and compression for large message body are important ways to improve the producer performance. we carefully test 4 cases show below:
 
 * Case 1: sync produce, 1 message
 * Case 2: sync produce, 1 message with compression
@@ -22,7 +21,7 @@ A topic with 200 partitions was created,using compression lz4 algorithm if requi
 
 
 ## Result and Conclusion
-Experiment run each benchmark case duration 10 minutes,and the result show in the following table.
+Experiment run each benchmark case duration 10 minutes,producer threads is experimental,which decide by cpu,network I/O and disk I/O bottleneck. and the result show in the following table.
 
 | case | CPU(%) |Mem(%)| Network I/O(MB/s) | Disk I(MB/s)|QPS|
 | :----:| :----: |:----:|:----:|:----:|:----:|
