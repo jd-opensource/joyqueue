@@ -83,14 +83,17 @@ public class CoordinatorMonitorServiceImpl implements CoordinatorMonitorService 
         return restCoordinatorDetail.getData();
     }
 
-
-    public List<CoordinatorGroupMember> findCoordinatorGroupMember(Subscribe subscribe){
-       List<CoordinatorGroupMember> result= new ArrayList();
+    @Override
+    public CoordinatorGroupMemberExtension findCoordinatorGroupMember(Subscribe subscribe){
+       List<CoordinatorGroupMember> members= new ArrayList();
+        CoordinatorGroupMemberExtension extension=new CoordinatorGroupMemberExtension();
         CoordinatorGroup group=findCoordinatorGroup(subscribe);
         if(!NullUtil.isEmpty(group)&&!NullUtil.isEmpty(group.getMembers())) {
-            result.addAll(group.getMembers().values());
+            members.addAll(group.getMembers().values());
         }
-        return result;
+        extension.setMembers(members);
+        extension.setExtension(group.getExtension());
+        return extension;
     }
 
     @Override

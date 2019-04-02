@@ -55,7 +55,7 @@
         </d-tab-pane>
 
         <d-tab-pane v-if="$store.getters.isAdmin" label="消费组成员" name="coordinatorGroupMember" icon="file-text">
-          <tab-table  ref="coordinatorGroupMember" :app="detailDialog.app" :topic="detailDialog.topic" :namespace="detailDialog.namespace"
+          <tab-coordinator-group ref="coordinatorGroupMember" :app="detailDialog.app" :topic="detailDialog.topic" :namespace="detailDialog.namespace"
                      :type="type" :client-type="detailDialog.clientType"  :doSearch="detailDialog.doSearch" :subscribeGroup="detailDialog.subscribeGroup" :searchData="detailDialog"
                      :col-data="coordinatorGroupMemberTable.colData" :search="coordinatorGroupMemberTable.search"/>
         </d-tab-pane>
@@ -92,6 +92,7 @@ import partition from './partition.vue'
 import clientConnection from './clientConnection.vue'
 import msgPreview from './msgPreview.vue'
 import tabTable from './tabTable'
+import coordinatorGroupMember from './coordinatorGroup.vue'
 import partitionExpand from './partitionExpand'
 import {timeStampToString} from '../../utils/dateTimeUtils'
 import mqttBaseMonitor from '../setting/mqttBaseMonitor'
@@ -112,7 +113,8 @@ export default {
     tabTable,
     partitionExpand,
     mqttBaseMonitor,
-    offset
+    offset,
+    coordinatorGroupMember
   },
   props: {
     keywordTip: {
