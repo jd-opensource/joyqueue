@@ -139,7 +139,7 @@
                 <property name="checkpointThreads" value="4"/>
 
                 <!-- 在检查点同步完成后预写日志历史保留数量 -->
-                <!-- Number of checkpoints to be kept in WAL after checkpoint is unfinished.-->
+                <!-- Number of checkpoints to be kept in WAL after checkpoint is finished.-->
                 <property name="walHistorySize" value="20"/>
                 <!--<property name="walHistorySize" value="2"/>-->
 

@@ -3,9 +3,21 @@ package com.jd.journalq.broker;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.jd.journalq.broker.cluster.ClusterManager;
-import com.jd.journalq.domain.*;
+import com.jd.journalq.domain.AppToken;
+import com.jd.journalq.domain.Broker;
+import com.jd.journalq.domain.ClientType;
+import com.jd.journalq.domain.Consumer;
+import com.jd.journalq.domain.PartitionGroup;
+import com.jd.journalq.domain.Producer;
+import com.jd.journalq.domain.Topic;
+import com.jd.journalq.domain.TopicName;
+import com.jd.journalq.domain.TopicType;
 import com.jd.journalq.network.transport.config.ServerConfig;
+import com.jd.journalq.nsr.MetaManager;
 import com.jd.journalq.nsr.NameService;
+import com.jd.journalq.nsr.service.AppTokenService;
+import com.jd.journalq.nsr.service.ConsumerService;
+import com.jd.journalq.nsr.service.ProducerService;
 import com.jd.journalq.toolkit.retry.RetryPolicy;
 import com.jd.journalq.toolkit.service.Service;
 import com.jd.journalq.toolkit.time.SystemClock;
@@ -14,7 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -29,13 +41,15 @@ public class TempMetadataInitializer extends Service {
 
     public static final String TOPIC = "test_topic";
 
+    public static final String NAMESPACE = "";
+
     public static final int TOPIC_COUNT = 5;
 
     public static final short PARTITION_GROUPS = 10;
 
     public static final short PARTITIONS = 1;
 
-    public static final String APP = "test_app";
+    public static final String[] APP = {"test_app", "test_app.test_app"};
 
     public static final String TOKEN = "test_token";
 
@@ -45,6 +59,8 @@ public class TempMetadataInitializer extends Service {
     private NameService nameService;
     private ServerConfig serverConfig;
     private ClusterManager clusterManager;
+
+    private Broker broker;
 
     public TempMetadataInitializer(BrokerContext brokerContext) throws Exception {
         this.brokerContext = brokerContext;
@@ -57,9 +73,23 @@ public class TempMetadataInitializer extends Service {
         try {
 //            FileUtils.copyFile(new File("/export/Data/jmq/store/stat"), new File("/export/Data/jmq_stat"));
             FileUtils.deleteDirectory(new File("/export/Data/jmq"));
+            FileUtils.deleteDirectory(new File("/export/Data/ignite"));
+
+//            Field consumePositionPathField = ConsumeConfigKey.class.getDeclaredField("CONSUME_POSITION_PATH");
+//            ConsumeConfigKey consumeConfigKey = (ConsumeConfigKey) consumePositionPathField.get(null);
+//            Field positionPathField = consumeConfigKey.getClass().getDeclaredField("value");
+//            positionPathField.setAccessible(true);
+//            positionPathField.set(consumeConfigKey, "/export/Data/jmq/position");
+//
+//            Field metaFileField = ElectionConfigKey.class.getDeclaredField("METADATA_FILE");
+//            ElectionConfigKey electionConfigKey = (ElectionConfigKey) metaFileField.get(null);
+//            Field metaFilePath = electionConfigKey.getClass().getDeclaredField("value");
+//            metaFilePath.setAccessible(true);
+//            metaFilePath.set(electionConfigKey, "/export/Data/jmq/raft_metafile.dat");
+
 //            FileUtils.forceMkdir(new File("/export/Data/jmq/store"));
 //            FileUtils.copyFile(new File("/export/Data/jmq_stat"), new File("/export/Data/jmq/store/stat"));
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -73,109 +103,153 @@ public class TempMetadataInitializer extends Service {
         logger.info("init tables");
 
         logger.info("pre register broker");
-        Broker broker = nameService.register(null, serverConfig.getHost(), serverConfig.getPort());
+        broker = nameService.register(null, serverConfig.getHost(), serverConfig.getPort());
         logger.info("register broker");
 
-        initTopic(broker);
+        initTopic();
+        initToken();
     }
 
-    protected void initTopic(Broker broker) {
+    protected void initTopic() {
+        addTopic(TOPIC);
         for (int i = 0; i < TOPIC_COUNT; i++) {
-            TopicName topicName = TopicName.parse(TOPIC + "_" + i);
+            addTopic(TOPIC + "_" + i);
+        }
+
+//        addTopic("test_broadcast_topic", Topic.Type.BROADCAST);
+//        addTopic("test_nearby_topic");
+//
+//        addTopic("test_consume_1");
+//        addTopic("test_consume_broadcast_1", Topic.Type.BROADCAST);
+//
+//        addTopic("test_produce_1");
+//        addTopic("test_produce_transaction_1");
+//        addTopic("test_produce_broadcast_1", Topic.Type.BROADCAST);
+//
+//        addTopic("test_produce_nearby_1");
+//
+//        addTopic("test_produceconsume_1");
+//        addTopic("test_produceconsume_broadcast_1", Topic.Type.BROADCAST);
+    }
+
+    protected void initToken() {
+        for (String app : APP) {
+            AppToken appToken = new AppToken();
+            appToken.setId(SystemClock.now());
+            appToken.setApp(app);
+            appToken.setToken(TOKEN);
+            appToken.setEffectiveTime(new Date(SystemClock.now() - 1000));
+            appToken.setExpirationTime(new Date(SystemClock.now() + 1000 * 60 * 60 * 24 * 7));
+
+            try {
+                Field metaManagerField = nameService.getClass().getDeclaredField("metaManager");
+                metaManagerField.setAccessible(true);
+                MetaManager metaManager = (MetaManager) metaManagerField.get(nameService);
+
+                Field appTokenServiceField = metaManager.getClass().getDeclaredField("appTokenService");
+                appTokenServiceField.setAccessible(true);
+                AppTokenService appTokenService = (AppTokenService) appTokenServiceField.get(metaManager);
+
+                appTokenService.addOrUpdate(appToken);
+            } catch (Exception e) {
+                logger.error("", e);
+            }
+        }
+    }
+
+    protected void addTopic(String code) {
+        addTopic(code, Topic.Type.TOPIC);
+    }
+
+    protected void addTopic(String code, Topic.Type type) {
+        addTopic(code, type, PARTITIONS);
+    }
+
+    protected void addTopic(String code, Topic.Type type, short partitions) {
+        Topic topic = new Topic();
+        topic.setName(TopicName.parse(code, NAMESPACE));
+        topic.setPartitions(partitions);
+        topic.setType(type);
+        addTopic(topic);
+    }
+
+    protected void addTopic(Topic topic) {
+        TopicName topicName = topic.getName();
+        List<Producer> producers = Lists.newLinkedList();
+        List<Consumer> consumers = Lists.newLinkedList();
+
+        for (String app : APP) {
             Producer producer = new Producer();
-            producer.setProducerPolicy(Producer.ProducerPolicy.Builder.build().nearby(true).archive(true).single(true).
+            producer.setProducerPolicy(Producer.ProducerPolicy.Builder.build().nearby((topicName.getFullName().contains("nearby"))).archive(true).single(true).
                     blackList("127.0.0.1,127.0.0.2").weight("0:1,1:10").timeout(1000 * 11).create());
             producer.setTopic(topicName);
-            producer.setApp(APP);
+            producer.setApp(app);
             producer.setClientType(ClientType.JMQ);
 
             Consumer consumer = new Consumer();
             consumer.setTopic(topicName);
-            consumer.setApp(APP);
+            consumer.setApp(app);
+            consumer.setTopicType(TopicType.TOPIC);
             consumer.setClientType(ClientType.JMQ);
             consumer.setRetryPolicy(new RetryPolicy(1000, 1000, 2, false, 2.0, 0));
-            consumer.setConsumerPolicy(new Consumer.ConsumerPolicy.Builder().nearby(true).paused(false).archive(true).
-                    retry(false).seq(false).ackTimeout(1000 * 11).batchSize((short) 100).concurrent(1).delay(0).errTimes(10).maxPartitionNum(5).blackList("127.0.0.1,127.0.0.3").retryReadProbability(30).create());
+            consumer.setConsumerPolicy(new Consumer.ConsumerPolicy.Builder().nearby((topicName.getFullName().contains("nearby"))).paused(false).archive(true).
+                    retry(false).seq(false).ackTimeout(1000 * 11).batchSize((short) 100).concurrent(1).delay(0).errTimes(10).maxPartitionNum(PARTITION_GROUPS * PARTITIONS).blackList("127.0.0.1,127.0.0.3").retryReadProbability(30).create());
 
-            Topic topic = new Topic();
-            topic.setName(topicName);
-            topic.setPartitions(PARTITIONS);
-            topic.setType(Topic.Type.TOPIC);
+            producers.add(producer);
+            consumers.add(consumer);
+        }
 
-            List<PartitionGroup> partitionGroups = Lists.newLinkedList();
+        List<PartitionGroup> partitionGroups = Lists.newLinkedList();
 
-            for (int j = 0; j < PARTITION_GROUPS; j++) {
-                Set<Short> partitions = Sets.newHashSetWithExpectedSize(PARTITIONS);
-                for (int k = 0; k < PARTITIONS; k++) {
-                    partitions.add((short) ((j * PARTITIONS) + k));
-                }
-
-                PartitionGroup partitionGroup = new PartitionGroup();
-                partitionGroup.setTopic(topicName);
-                partitionGroup.setGroup(j);
-                partitionGroup.setPartitions(partitions);
-                partitionGroup.setReplicas(Sets.newHashSet(broker.getId()));
-                partitionGroup.setIsrs(Sets.newHashSet(broker.getId()));
-                partitionGroup.setLeader(broker.getId());
-                partitionGroups.add(partitionGroup);
+        for (int j = 0; j < PARTITION_GROUPS; j++) {
+            Set<Short> partitions = Sets.newHashSetWithExpectedSize(PARTITIONS);
+            for (int k = 0; k < topic.getPartitions(); k++) {
+                partitions.add((short) ((j * PARTITIONS) + k));
             }
 
-            logger.info("pre add topic, topic: {}", topic.getName().getFullName());
+            PartitionGroup partitionGroup = new PartitionGroup();
+            partitionGroup.setTopic(topicName);
+            partitionGroup.setGroup(j);
+            partitionGroup.setPartitions(partitions);
+            partitionGroup.setReplicas(Sets.newHashSet(broker.getId()));
+            partitionGroup.setIsrs(Sets.newHashSet(broker.getId()));
+            partitionGroup.setLeader(broker.getId());
+            partitionGroups.add(partitionGroup);
+        }
+
+        logger.info("pre add topic, topic: {}", topic.getName().getFullName());
+
+        nameService.addTopic(topic, partitionGroups);
+
+        for (int i = 0; i < producers.size(); i++) {
+            Consumer consumer = consumers.get(i);
+            Producer producer = producers.get(i);
+
             logger.info("pre add producer, topic: {}, app: {}", producer.getTopic(), producer.getApp());
             logger.info("pre add consumer, topic: {}, app: {}", consumer.getTopic(), producer.getApp());
 
-            nameService.addTopic(topic, partitionGroups);
-            //TODO 这里准备做啥
-            //BeanContext.getObject(ProducerService.class).add(producer);
-            //BeanContext.getObject(ConsumerService.class).add(consumer);
+            try {
+                Field metaManagerField = nameService.getClass().getDeclaredField("metaManager");
+                metaManagerField.setAccessible(true);
+                MetaManager metaManager = (MetaManager) metaManagerField.get(nameService);
 
-//            new Thread(() -> {
-//                try {
-//                    Thread.currentThread().sleep(1000 * 30);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//                logger.info("remove consumer, topic: {}", topic);
-//                Subscription subscription = new Subscription();
-//                subscription.setTopic(topicName);
-//                subscription.setApp(APP);
-//                subscription.setType(Subscription.Type.CONSUMPTION);
-//                nameService.unSubscribe(subscription);
-//                logger.info("remove consumer success, topic: {}", topic);
-//            }).start();
+                Field consumerServiceField = metaManager.getClass().getDeclaredField("consumerService");
+                consumerServiceField.setAccessible(true);
+                ConsumerService consumerService = (ConsumerService) consumerServiceField.get(metaManager);
+
+                Field producerServiceField = metaManager.getClass().getDeclaredField("producerService");
+                producerServiceField.setAccessible(true);
+                ProducerService producerService = (ProducerService) producerServiceField.get(metaManager);
+
+                consumerService.add(consumer);
+                producerService.add(producer);
+            } catch (Exception e) {
+                logger.error("", e);
+            }
 
             logger.info("add topic, topic: {}", topic.getName().getFullName());
             logger.info("add producer, topic: {}, app: {}", producer.getTopic(), producer.getApp());
             logger.info("add consumer, topic: {}, app: {}", consumer.getTopic(), consumer.getApp());
-
-//            if (clusterManager.getTopicConfig(topic.getName()) == null) {
-//                throw new RuntimeException("topic init failed, data is not exist");
-//            }
-//
-//            if (!clusterManager.checkWritable(topic.getName(), producer.getApp(), null).isSuccess()) {
-//                throw new RuntimeException("producer init failed, is unwritable");
-//            }
-//
-//            if (!clusterManager.checkReadable(consumer.getTopic(), consumer.getApp(), null).isSuccess()) {
-//                throw new RuntimeException("consumer init failed, is unreadable");
-//            }
         }
-
-        AppToken appToken = new AppToken();
-        appToken.setId(SystemClock.now());
-        appToken.setApp(APP);
-        appToken.setToken(TOKEN);
-        appToken.setEffectiveTime(new Date(SystemClock.now() - 1000));
-        appToken.setExpirationTime(new Date(SystemClock.now() + 1000 * 60 * 60 * 24 * 7));
-        //TODO 这里准备做啥
-       // BeanContext.getObject(AppTokenService.class).addOrUpdate(appToken);
     }
-
-    //TODO delete
-  /*  protected void initTable() {
-        metaManager.getIgnite().execute(IgniteConsumer.cacheCfg, new SqlFieldsQuery("ALTER TABLE igniteConsumer ADD COLUMN (app varchar(100),namespace varchar(100),topic varchar(100));"));
-        metaManager.getIgnite().execute(IgniteConsumerConfig.cacheCfg, new SqlFieldsQuery("ALTER TABLE igniteConsumerConfig ADD COLUMN (app varchar(100),namespace varchar(100),topic varchar(100));"));
-        //metaManager.getIgnite().execute(IgniteProducer.cacheCfg,new SqlFieldsQuery("ALTER TABLE IgniteProducer ADD COLUMN (app varchar(100),namespace varchar(100),topic varchar(100));"));
-        metaManager.getIgnite().execute(IgnitePartitionGroup.cacheCfg, new SqlFieldsQuery("ALTER TABLE ignitepartitiongroup ADD COLUMN (namespace varchar(100),topic varchar(100));"));
-    }*/
 }

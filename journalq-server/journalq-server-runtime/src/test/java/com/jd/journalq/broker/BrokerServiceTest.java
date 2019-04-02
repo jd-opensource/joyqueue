@@ -17,14 +17,19 @@ import com.jd.journalq.broker.monitor.config.BrokerMonitorConfig;
 import com.jd.journalq.broker.network.BrokerServer;
 import com.jd.journalq.broker.network.protocol.ProtocolManager;
 import com.jd.journalq.broker.producer.Produce;
-import com.jd.journalq.broker.retry.BrokerRetryManager;
 import com.jd.journalq.broker.store.StoreManager;
 import com.jd.journalq.domain.Config;
-import com.jd.journalq.security.Authentication;
+import com.jd.journalq.domain.Consumer;
+import com.jd.journalq.domain.Producer;
+import com.jd.journalq.exception.JMQException;
 import com.jd.journalq.nsr.NameService;
+import com.jd.journalq.security.Authentication;
 import com.jd.journalq.server.retry.api.MessageRetry;
+import com.jd.journalq.server.retry.api.RetryPolicyProvider;
+import com.jd.journalq.server.retry.model.RetryMessageModel;
 import com.jd.journalq.store.StoreService;
 import com.jd.journalq.toolkit.config.Property;
+import com.jd.journalq.toolkit.config.PropertySupplier;
 import com.jd.journalq.toolkit.config.PropertySupplierAware;
 import com.jd.journalq.toolkit.lang.Close;
 import com.jd.journalq.toolkit.lang.LifeCycle;
@@ -41,9 +46,8 @@ import java.util.List;
  * Created by chengzhiliang on 2018/9/27.
  */
 public class BrokerServiceTest extends Service {
-
     private static final Logger logger = LoggerFactory.getLogger(BrokerService.class);
-    private static final String NAMESERVICE_NAME = "broker.nameservice.name";
+    private static final String NAMESERVICE_NAME = "nameserver.nsr.name";
     private BrokerConfig brokerConfig;
     private SessionManager sessionManager;
     private BrokerMonitorService brokerMonitorService;
@@ -82,42 +86,43 @@ public class BrokerServiceTest extends Service {
         this.nameService = getNameService(brokerContext, configuration);
         this.nameService.start();
         this.nameService.addListener(contextManager);
-        brokerContext.nameService(nameService);
+        this.brokerContext.nameService(nameService);
 
         // build and start context manager
-        this.contextManager.setConfigProvider(new BrokerServiceTest.ConfigProviderImpl(nameService));
+        this.contextManager = new ContextManager(configuration);
+        this.contextManager.setConfigProvider(new ConfigProviderImpl(nameService));
         this.contextManager.start();
 
         //build broker config
-        BrokerConfig brokerConfig = new BrokerConfig(configuration);
-
+        this.brokerConfig = new BrokerConfig(configuration);
+        this.brokerContext.brokerConfig(brokerConfig);
         //build and cluster manager
         this.clusterManager = new ClusterManager(brokerConfig, nameService, brokerContext);
         this.clusterManager.start();
-        brokerContext.clusterManager(this.clusterManager);
+        this.brokerContext.clusterManager(this.clusterManager);
 
         // build store service
         this.storeService = getStoreService(brokerContext);
-        brokerContext.storeService(this.storeService);
+        this.brokerContext.storeService(this.storeService);
 
         // build session manager
         this.sessionManager = new SessionManager();
-        brokerContext.sessionManager(this.sessionManager);
+        this.brokerContext.sessionManager(this.sessionManager);
 
         // build authentication
         this.authentication = getAuthentication(brokerContext);
-        brokerContext.authentication(this.authentication);
+        this.brokerContext.authentication(this.authentication);
 
         // new AppTokenAuthentication(clusterManager, brokerConfig.getJmqAdmin());
         this.brokerMonitorService = new BrokerMonitorService(clusterManager.getBrokerId(),
                 new BrokerMonitorConfig(configuration, brokerConfig),
                 sessionManager);
-        brokerContext.brokerManageService(this.brokerManageService);
+        this.brokerContext.brokerMonitorService(this.brokerMonitorService);
 
         // new coordinator service
         this.coordinatorService = new CoordinatorService(new CoordinatorConfig(configuration),
                 clusterManager, nameService);
-        brokerContext.coordinnatorService(this.coordinatorService);
+        this.brokerContext.coordinnatorService(this.coordinatorService);
 
         // build produce
         this.produce = getProduce(brokerContext);
@@ -125,11 +130,11 @@ public class BrokerServiceTest extends Service {
 
         // build message retry
         this.retryManager = getMessageRetry(brokerContext);
-        brokerContext.retryManager(retryManager);
+        this.brokerContext.retryManager(retryManager);
 
         // build consume
         this.archiveManager = new ArchiveManager(brokerContext);
-        brokerContext.archiveManager(archiveManager);
+        this.brokerContext.archiveManager(archiveManager);
 
         // build consume
         this.consume = getConsume(brokerContext);
@@ -160,17 +165,21 @@ public class BrokerServiceTest extends Service {
         this.protocolManager = new ProtocolManager(brokerContext);
         //build broker server
         this.brokerServer = new BrokerServer(brokerContext, protocolManager);
-
-
-        short[] partitions = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-        String topic = "jmq@test";
-        if (!storeService.partitionGroupExists(topic, 1)) {
-            storeService.createPartitionGroup(topic, 1, partitions, new int[]{0});
-        } else {
-            storeService.restorePartitionGroup(topic, 1);
-        }
+        //build produce policy
+        this.brokerContext.producerPolicy(buildGlobalProducePolicy(configuration));
+        //build consume policy
+        this.brokerContext.consumerPolicy(buildGlobalConsumePolicy(configuration));
     }
 
+    private Consumer.ConsumerPolicy buildGlobalConsumePolicy(PropertySupplier propertySupplier) {
+        //TODO
+        return new Consumer.ConsumerPolicy();
+    }
+
+    private Producer.ProducerPolicy buildGlobalProducePolicy(PropertySupplier propertySupplier) {
+        //TODO
+        return new Producer.ProducerPolicy();
+    }
 
     @Override
     protected void doStart() throws Exception {
@@ -182,13 +191,14 @@ public class BrokerServiceTest extends Service {
         startIfNecessary(retryManager);
         startIfNecessary(brokerMonitorService);
         startIfNecessary(consume);
-        startIfNecessary(storeService);
+        startIfNecessary(produce);
         //must start after store manager
         startIfNecessary(electionService);
         startIfNecessary(protocolManager);
         startIfNecessary(brokerServer);
         startIfNecessary(coordinatorService);
         startIfNecessary(brokerManageService);
+        new TempMetadataInitializer(brokerContext).start();
         logger.info("brokerServer start ,broker.id[{}],ip[{}],frontPort[{}],backendPort[{}],monitorPort[{}],nameServer port[{}]",
                 brokerConfig.getBrokerId(),
                 clusterManager.getBroker().getIp(),
@@ -207,7 +217,7 @@ public class BrokerServiceTest extends Service {
     private NameService getNameService(BrokerContext brokerContext, Configuration configuration) {
         Property property = configuration.getProperty(NAMESERVICE_NAME);
         NameService nameService = Plugins.NAMESERVICE.get(property == null ? null : property.getString());
-        Preconditions.checkArgument(nameService == null, "nameService not found!");
+        Preconditions.checkArgument(nameService != null, "nameService not found!");
         enrichIfNecessary(nameService, brokerContext);
         return nameService;
     }
@@ -215,41 +225,92 @@ public class BrokerServiceTest extends Service {
 
     private StoreService getStoreService(BrokerContext brokerContext) {
         StoreService storeService = Plugins.STORE.get();
-        Preconditions.checkArgument(storeService == null, "store service not found!");
+        Preconditions.checkArgument(storeService != null, "store service not found!");
         enrichIfNecessary(storeService, brokerContext);
         return storeService;
     }
 
     private Authentication getAuthentication(BrokerContext brokerContext) {
         Authentication authentication = Plugins.AUTHENTICATION.get();
-        Preconditions.checkArgument(authentication == null, "authentication can  not be null");
+        Preconditions.checkArgument(authentication != null, "authentication can  not be null");
         enrichIfNecessary(authentication, brokerContext);
         return authentication;
     }
 
     private Produce getProduce(BrokerContext brokerContext) {
         Produce produce = Plugins.PRODUCE.get();
-        Preconditions.checkArgument(produce == null, "produce can not be null");
+        Preconditions.checkArgument(produce != null, "produce can not be null");
         enrichIfNecessary(produce, brokerContext);
         return produce;
     }
 
     private MessageRetry getMessageRetry(BrokerContext brokerContext) {
-        //TODO 由于要动态调整重试方式，直接new 一个默认实现
-        MessageRetry messageRetry = new BrokerRetryManager(brokerContext);
-        return messageRetry;
+        return new MessageRetry() {
+            @Override
+            public void addRetry(List list) throws JMQException {
+
+            }
+
+            @Override
+            public void retrySuccess(String topic, String app, Object[] messageIds) throws JMQException {
+
+            }
+
+            @Override
+            public void retryError(String topic, String app, Object[] messageIds) throws JMQException {
+
+            }
+
+            @Override
+            public void retryExpire(String topic, String app, Object[] messageIds) throws JMQException {
+
+            }
+
+            @Override
+            public List<RetryMessageModel> getRetry(String topic, String app, short count, long startIndex) throws JMQException {
+                return null;
+            }
+
+            @Override
+            public int countRetry(String topic, String app) throws JMQException {
+                return 0;
+            }
+
+            @Override
+            public void setRetryPolicyProvider(RetryPolicyProvider retryPolicyProvider) {
+
+            }
+
+            @Override
+            public void start() throws Exception {
+
+            }
+
+            @Override
+            public void stop() {
+
+            }
+
+            @Override
+            public boolean isStarted() {
+                return false;
+            }
+        };
+//        //TODO 由于要动态调整重试方式，直接new 一个默认实现
+//        MessageRetry messageRetry = new BrokerRetryManager(brokerContext);
+//        return messageRetry;
     }
 
     private Consume getConsume(BrokerContext brokerContext) {
         Consume consume = Plugins.CONSUME.get();
-        Preconditions.checkArgument(consume == null, "consume can not be null");
+        Preconditions.checkArgument(consume != null, "consume can not be null");
         enrichIfNecessary(consume, brokerContext);
         return consume;
     }
 
     private ElectionService getElectionService(BrokerContext brokerContext) {
         ElectionService electionService = Plugins.ELECTION.get();
-        Preconditions.checkArgument(electionService == null, "election service can not be null");
+        Preconditions.checkArgument(electionService != null, "election service can not be null");
         enrichIfNecessary(electionService, brokerContext);
         return electionService;
     }
@@ -309,5 +370,8 @@ public class BrokerServiceTest extends Service {
         public String getConfig(String group, String key) {
             return nameService.getConfig(group, key);
         }}
+
+
+
 
 }
