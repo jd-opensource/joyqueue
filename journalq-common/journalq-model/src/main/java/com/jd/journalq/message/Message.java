@@ -32,7 +32,7 @@ public class Message implements Serializable {
     protected short partition = -1;
     // 主题
     protected String topic;
-    // 标签
+    // 标签, 如果是批量消息代表批量条数
     protected short flag;
     // 应用
     protected String app;

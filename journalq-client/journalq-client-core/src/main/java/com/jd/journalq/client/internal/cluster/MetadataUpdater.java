@@ -52,7 +52,7 @@ public class MetadataUpdater extends Service {
     @Override
     protected void validate() throws Exception {
         updateThreadPool = new ThreadPoolExecutor(config.getUpdateMetadataThread(), config.getUpdateMetadataThread(), 0L, TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<Runnable>(config.getUpdateMetadataQueueSize()), new NamedThreadFactory("jmq-cluster-updater"));
+                new LinkedBlockingQueue<Runnable>(config.getUpdateMetadataQueueSize()), new NamedThreadFactory("journalq-cluster-updater"));
     }
 
     @Override

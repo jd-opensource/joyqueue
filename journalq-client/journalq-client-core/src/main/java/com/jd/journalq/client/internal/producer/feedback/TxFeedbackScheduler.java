@@ -42,7 +42,7 @@ public class TxFeedbackScheduler extends Service {
     @Override
     protected void validate() throws Exception {
         feedbackDispatcher = new TxFeedbackDispatcher(config, topic, txFeedbackCallback, messageSender, clusterManager);
-        scheduleThreadPool = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory(String.format("jmq-txFeedback-scheduler-%s", topic), true));
+        scheduleThreadPool = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory(String.format("journalq-txFeedback-scheduler-%s", topic), true));
     }
 
     @Override

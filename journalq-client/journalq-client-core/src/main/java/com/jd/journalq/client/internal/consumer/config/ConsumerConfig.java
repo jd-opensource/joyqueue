@@ -1,5 +1,7 @@
 package com.jd.journalq.client.internal.consumer.config;
 
+import com.jd.journalq.client.internal.consumer.support.RoundRobinBrokerLoadBalance;
+
 /**
  * ConsumerConfig
  * author: gaohaoxiang
@@ -9,9 +11,7 @@ package com.jd.journalq.client.internal.consumer.config;
 public class ConsumerConfig {
 
     public static final int NONE_BATCH_SIZE = -1;
-
     public static final long NONE_ACK_TIMEOUT = -1;
-
     public static final int NONE_BROADCAST_INDEX_EXPIRE_TIME = -1;
 
     private String app;
@@ -28,7 +28,7 @@ public class ConsumerConfig {
     private boolean failover = true;
 
     private boolean loadBalance = true;
-    private String loadBalanceType = "roundrobin";
+    private String loadBalanceType = RoundRobinBrokerLoadBalance.NAME;
 
     private String broadcastGroup;
     private String broadcastLocalPath;

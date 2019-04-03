@@ -50,7 +50,7 @@ public class ClientManager extends Service {
     protected void validate() throws Exception {
         clientGroupManager = new ClientGroupManager(transportConfig);
         transportClient = new DefaultTransportClientFactory(new JMQCodec()).create(convertToClientConfig(transportConfig));
-        heartbeatThreadPool = Executors.newScheduledThreadPool(1, new NamedThreadFactory("jmq-client-heartbeat"));
+        heartbeatThreadPool = Executors.newScheduledThreadPool(1, new NamedThreadFactory("journalq-client-heartbeat"));
     }
 
     @Override

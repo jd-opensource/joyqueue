@@ -1,7 +1,7 @@
 package com.jd.journalq.client;
 
 import io.openmessaging.KeyValue;
-import io.openmessaging.journalq.domain.JMQProducerBuiltinKeys;
+import io.openmessaging.journalq.domain.JournalQProducerBuiltinKeys;
 import io.openmessaging.journalq.producer.ExtensionProducer;
 import org.junit.Before;
 
@@ -26,7 +26,7 @@ public class AbstractProducerTest extends AbstractClientTest {
     @Override
     protected KeyValue getAttributes() {
         KeyValue attributes = super.getAttributes();
-        attributes.put(JMQProducerBuiltinKeys.COMPRESS_THRESHOLD, 1);
+        attributes.put(JournalQProducerBuiltinKeys.COMPRESS_THRESHOLD, 1);
         return attributes;
     }
 }

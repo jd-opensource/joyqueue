@@ -1,1 +1,2 @@
 com.jd.journalq.client.internal.common.compress.support.ZlibCompressor
+com.jd.journalq.client.internal.common.compress.support.SnappyCompressor

@@ -3,9 +3,9 @@ package com.jd.journalq.client;
 import io.openmessaging.KeyValue;
 import io.openmessaging.consumer.BatchMessageListener;
 import io.openmessaging.consumer.Consumer;
-import io.openmessaging.journalq.domain.JMQConsumerBuiltinKeys;
-import io.openmessaging.journalq.domain.JMQProducerBuiltinKeys;
-import io.openmessaging.journalq.domain.JMQTxFeedbackBuiltinKeys;
+import io.openmessaging.journalq.domain.JournalQConsumerBuiltinKeys;
+import io.openmessaging.journalq.domain.JournalQProducerBuiltinKeys;
+import io.openmessaging.journalq.domain.JournalQTxFeedbackBuiltinKeys;
 import io.openmessaging.journalq.producer.ExtensionProducer;
 import io.openmessaging.journalq.producer.ExtensionTransactionalResult;
 import io.openmessaging.message.Message;
@@ -46,11 +46,11 @@ public class ProduceConsumeTest1 extends AbstractClientTest {
     @Override
     protected KeyValue getAttributes() {
         KeyValue keyValue = super.getAttributes();
-        keyValue.put(JMQConsumerBuiltinKeys.LONGPOLL_TIMEOUT, -1);
-        keyValue.put(JMQConsumerBuiltinKeys.BROADCAST_LOCAL_PATH, "/export/Data/jmq/broadcast");
-        keyValue.put(JMQProducerBuiltinKeys.TRANSACTION_TIMEOUT, 1000 * 10);
-        keyValue.put(JMQTxFeedbackBuiltinKeys.FETCH_INTERVAL, 1);
-        keyValue.put(JMQTxFeedbackBuiltinKeys.FETCH_SIZE, 10);
+        keyValue.put(JournalQConsumerBuiltinKeys.LONGPOLL_TIMEOUT, -1);
+        keyValue.put(JournalQConsumerBuiltinKeys.BROADCAST_LOCAL_PATH, "/export/Data/jmq/broadcast");
+        keyValue.put(JournalQProducerBuiltinKeys.TRANSACTION_TIMEOUT, 1000 * 10);
+        keyValue.put(JournalQTxFeedbackBuiltinKeys.FETCH_INTERVAL, 1);
+        keyValue.put(JournalQTxFeedbackBuiltinKeys.FETCH_SIZE, 10);
         return keyValue;
     }
 
@@ -75,7 +75,7 @@ public class ProduceConsumeTest1 extends AbstractClientTest {
             Assert.assertEquals("test_body", new String(message.getData()));
 
             SendResult sendResult = producer.send(message);
-            Assert.assertEquals(null, sendResult.messageId());
+            Assert.assertEquals("-1", sendResult.messageId());
             send++;
         }
 
@@ -105,7 +105,7 @@ public class ProduceConsumeTest1 extends AbstractClientTest {
             Assert.assertEquals("test_body", new String(message.getData()));
 
             SendResult sendResult = producer.send(message);
-            Assert.assertEquals(null, sendResult.messageId());
+            Assert.assertEquals("-1", sendResult.messageId());
             send++;
         }
 

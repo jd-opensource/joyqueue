@@ -8,8 +8,10 @@ import com.jd.journalq.client.internal.consumer.domain.ConsumeMessage;
 import com.jd.journalq.client.internal.consumer.domain.FetchMessageData;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.message.BrokerMessage;
+import com.jd.journalq.message.SourceType;
 import com.jd.journalq.network.command.FetchPartitionMessageAckData;
 import com.jd.journalq.network.command.FetchTopicMessageAckData;
+import com.jd.journalq.network.serializer.BatchMessageSerializer;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 
@@ -25,6 +27,8 @@ import java.util.Map;
  * date: 2018/12/7
  */
 public class BrokerMessageConverter {
+
+    private static MessageConvertSupport messageConvertSupport = new MessageConvertSupport();
 
     public static Table<String, Short, FetchMessageData> convert(String app, Table<String, Short, FetchPartitionMessageAckData> topicMessageTable) {
         Table<String, Short, FetchMessageData> result = HashBasedTable.create();
@@ -62,9 +66,28 @@ public class BrokerMessageConverter {
         }
         List<ConsumeMessage> result = Lists.newLinkedList();
         for (BrokerMessage brokerMessage : brokerMessages) {
-            result.add(convert(topic, app, brokerMessage));
+            if (brokerMessage.isBatch()) {
+                List<BrokerMessage> convertedBrokerMessages = convertBatch(topic, app, brokerMessage);
+                if (convertedBrokerMessages != null) {
+                    for (BrokerMessage convertedBrokerMessage : convertedBrokerMessages) {
+                        result.add(convert(topic, app, convertedBrokerMessage));
+                    }
+                }
+            } else {
+                result.add(convert(topic, app, brokerMessage));
+            }
         }
         return result;
+    }
+
+    public static List<BrokerMessage> convertBatch(String topic, String app, BrokerMessage batchBrokerMessage) {
+        if (batchBrokerMessage.getSource() != SourceType.JMQ.getValue()) {
+            return messageConvertSupport.convertBatch(batchBrokerMessage);
+        }
+
+        byte[] body = batchBrokerMessage.getDecompressedBody();
+        batchBrokerMessage.setBody(body);
+        return BatchMessageSerializer.deserialize(batchBrokerMessage);
     }
 
     public static ConsumeMessage convert(String topic, String app, BrokerMessage brokerMessage) {

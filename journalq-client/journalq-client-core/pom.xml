@@ -103,6 +103,7 @@
                                     <!--<include>com.jd.journalq:journalq-network:*</include>-->
                                     <!--<include>com.jd.journalq:journalq-model:*</include>-->
                                     <!--<include>com.jd.journalq:journalq-toolkit:*</include>-->
+                                    <!--<include>com.jd.laf:laf-extension-core:*</include>-->
                                 <!--</includes>-->
                                 <!--<excludes>-->
                                     <!--<exclude>org.slf4j:slf4j-api:*</exclude>-->
@@ -140,6 +141,10 @@
                                 <!--<relocation>-->
                                     <!--<pattern>org.apache</pattern>-->
                                     <!--<shadedPattern>com.jd.journalq.shaded.org.apache</shadedPattern>-->
+                                <!--</relocation>-->
+                                <!--<relocation>-->
+                                    <!--<pattern>com.jd.laf.extension</pattern>-->
+                                    <!--<shadedPattern>com.jd.journalq.shaded.com.jd.laf.extension</shadedPattern>-->
                                 <!--</relocation>-->
                             <!--</relocations>-->
                         <!--</configuration>-->

@@ -169,7 +169,8 @@ public class DefaultMessageSender extends Service implements MessageSender {
 
         for (Map.Entry<String, List<ProduceMessage>> entry : messages.entrySet()) {
             String topic = entry.getKey();
-            ProduceMessageData produceMessageData = MessageSenderConverter.convertToProduceMessageData(topic, app, txId, entry.getValue(), qosLevel, produceTimeout, config.isCompress(), config.getCompressThreshold(), config.getCompressType());
+            ProduceMessageData produceMessageData = MessageSenderConverter.convertToProduceMessageData(topic, app, txId, entry.getValue(), qosLevel, produceTimeout,
+                    config.isCompress(), config.getCompressThreshold(), config.getCompressType(), config.isBatch());
             data.put(topic, produceMessageData);
         }
 
@@ -185,7 +186,8 @@ public class DefaultMessageSender extends Service implements MessageSender {
 
         for (Map.Entry<String, List<ProduceMessage>> entry : messages.entrySet()) {
             String topic = entry.getKey();
-            ProduceMessageData produceMessageData = MessageSenderConverter.convertToProduceMessageData(topic, app, txId, entry.getValue(), qosLevel, produceTimeout, config.isCompress(), config.getCompressThreshold(), config.getCompressType());
+            ProduceMessageData produceMessageData = MessageSenderConverter.convertToProduceMessageData(topic, app, txId, entry.getValue(), qosLevel, produceTimeout,
+                    config.isCompress(), config.getCompressThreshold(), config.getCompressType(), config.isBatch());
             data.put(topic, produceMessageData);
         }
 
@@ -208,7 +210,8 @@ public class DefaultMessageSender extends Service implements MessageSender {
 
         for (Map.Entry<String, List<ProduceMessage>> entry : messages.entrySet()) {
             String topic = entry.getKey();
-            ProduceMessageData produceMessageData = MessageSenderConverter.convertToProduceMessageData(topic, app, txId, entry.getValue(), qosLevel, produceTimeout, config.isCompress(), config.getCompressThreshold(), config.getCompressType());
+            ProduceMessageData produceMessageData = MessageSenderConverter.convertToProduceMessageData(topic, app, txId, entry.getValue(), qosLevel, produceTimeout,
+                    config.isCompress(), config.getCompressThreshold(), config.getCompressType(), config.isBatch());
             data.put(topic, produceMessageData);
         }
 

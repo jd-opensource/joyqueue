@@ -26,13 +26,8 @@ public class KafkaDecoder extends DefaultDecoder {
     @Override
     public Object decode(ByteBuf buffer) throws TransportException.CodecException {
         Command command = (Command) super.decode(buffer);
-        fillHeader((KafkaHeader) command.getHeader(), (KafkaRequestOrResponse) command.getPayload());
-
-        // TODO 临时代码
-        int readableBytes = buffer.readableBytes();
-        if (readableBytes > 0 && readableBytes < 10) {
-            logger.warn("skip bytes, command: {}, readableBytes: {}", command, readableBytes);
-            buffer.skipBytes(readableBytes);
+        if (command != null) {
+            fillHeader((KafkaHeader) command.getHeader(), (KafkaRequestOrResponse) command.getPayload());
         }
         return command;
     }

@@ -2,13 +2,13 @@ package com.jd.journalq.broker.jmq.handler;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.jd.journalq.broker.cluster.ClusterManager;
+import com.jd.journalq.broker.helper.SessionHelper;
 import com.jd.journalq.broker.jmq.JMQCommandHandler;
 import com.jd.journalq.broker.jmq.JMQContext;
 import com.jd.journalq.broker.jmq.JMQContextAware;
 import com.jd.journalq.broker.jmq.config.JMQConfig;
 import com.jd.journalq.broker.jmq.converter.CheckResultConverter;
-import com.jd.journalq.broker.cluster.ClusterManager;
-import com.jd.journalq.broker.helper.SessionHelper;
 import com.jd.journalq.broker.producer.Produce;
 import com.jd.journalq.domain.QosLevel;
 import com.jd.journalq.domain.TopicName;
@@ -30,7 +30,6 @@ import com.jd.journalq.network.transport.command.Type;
 import com.jd.journalq.response.BooleanResponse;
 import com.jd.journalq.store.WriteResult;
 import com.jd.journalq.toolkit.concurrent.EventListener;
-import com.jd.journalq.toolkit.time.SystemClock;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
@@ -83,10 +82,10 @@ public class ProduceMessageHandler implements JMQCommandHandler, Type, JMQContex
 
             // 校验
             try {
-                checkAndFillProduceMessage(connection, produceMessageData);
+                checkAndFillMessage(connection, produceMessageData);
             } catch (JMQException e) {
                 logger.warn("checkMessage error, transport: {}, topic: {}, app: {}", transport, topic, produceMessage.getApp(), e);
-                resultData.put(topic, buildProduceMessageAckData(produceMessageData, JMQCode.valueOf(e.getCode())));
+                resultData.put(topic, buildAck(produceMessageData, JMQCode.valueOf(e.getCode())));
                 latch.countDown();
                 continue;
             }
@@ -94,7 +93,7 @@ public class ProduceMessageHandler implements JMQCommandHandler, Type, JMQContex
             BooleanResponse checkResult = clusterManager.checkWritable(TopicName.parse(topic), produceMessage.getApp(), connection.getHost(), produceMessageData.getMessages().get(0).getPartition());
             if (!checkResult.isSuccess()) {
                 logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport, topic, produceMessage.getApp(), checkResult.getJmqCode());
-                resultData.put(topic, buildProduceMessageAckData(produceMessageData, CheckResultConverter.convertProduceCode(checkResult.getJmqCode())));
+                resultData.put(topic, buildAck(produceMessageData, CheckResultConverter.convertProduceCode(checkResult.getJmqCode())));
                 latch.countDown();
                 continue;
             }
@@ -132,35 +131,19 @@ public class ProduceMessageHandler implements JMQCommandHandler, Type, JMQContex
                 }
                 ProduceMessageAckData produceMessageAckData = new ProduceMessageAckData();
                 produceMessageAckData.setCode(writeResult.getCode());
-                produceMessageAckData.setItem(buildProduceMessageAckItemData(produceMessageData.getMessages(), writeResult));
+                produceMessageAckData.setItem(buildAck(produceMessageData.getMessages(), writeResult));
                 listener.onEvent(produceMessageAckData);
             });
         } catch (JMQException e) {
             logger.error("produceMessage exception, transport: {}, topic: {}, app: {}", connection.getTransport().remoteAddress(), topic, app, e);
-            listener.onEvent(buildProduceMessageAckData(produceMessageData, JMQCode.valueOf(e.getCode())));
+            listener.onEvent(buildAck(produceMessageData, JMQCode.valueOf(e.getCode())));
         } catch (Exception e) {
             logger.error("produceMessage exception, transport: {}, topic: {}, app: {}", connection.getTransport().remoteAddress(), topic, app, e);
-            listener.onEvent(buildProduceMessageAckData(produceMessageData, JMQCode.CN_UNKNOWN_ERROR));
+            listener.onEvent(buildAck(produceMessageData, JMQCode.CN_UNKNOWN_ERROR));
         }
     }
 
-    protected List<ProduceMessageAckItemData> buildProduceMessageAckItemData(List<BrokerMessage> messages, WriteResult writeResult) {
-        List<ProduceMessageAckItemData> item = Lists.newArrayListWithCapacity(messages.size());
-        if (ArrayUtils.isEmpty(writeResult.getIndices())) {
-            for (BrokerMessage message : messages) {
-                item.add(new ProduceMessageAckItemData(message.getPartition(), ProduceMessageAckItemData.INVALID_INDEX, message.getStartTime()));
-            }
-        } else {
-            long now = SystemClock.now();
-            for (int i = 0; i < writeResult.getIndices().length; i++) {
-                BrokerMessage brokerMessage = messages.get(i);
-                item.add(new ProduceMessageAckItemData(brokerMessage.getPartition(), writeResult.getIndices()[i], now));
-            }
-        }
-        return item;
-    }
-
-    protected void checkAndFillProduceMessage(Connection connection, ProduceMessageData produceMessageData) throws JMQException {
+    protected void checkAndFillMessage(Connection connection, ProduceMessageData produceMessageData) throws JMQException {
         if (CollectionUtils.isEmpty(produceMessageData.getMessages())) {
             throw new JMQException(JMQCode.CN_PARAM_ERROR, "messages not empty");
         }
@@ -176,10 +159,49 @@ public class ProduceMessageHandler implements JMQCommandHandler, Type, JMQContex
         }
     }
 
-    protected ProduceMessageAckData buildProduceMessageAckData(ProduceMessageData produceMessageData, JMQCode code) {
-        List<ProduceMessageAckItemData> item = Lists.newArrayListWithCapacity(produceMessageData.getMessages().size());
-        for (int i = 0; i < produceMessageData.getMessages().size(); i++) {
-            item.add(ProduceMessageAckItemData.INVALID_INSTANCE);
+    protected List<ProduceMessageAckItemData> buildAck(List<BrokerMessage> messages, WriteResult writeResult) {
+        BrokerMessage firstMessage = messages.get(0);
+        List<ProduceMessageAckItemData> item = Lists.newLinkedList();
+
+        // 批量消息处理
+        if (firstMessage.isBatch()) {
+            if (ArrayUtils.isEmpty(writeResult.getIndices())) {
+                for (int i = 0; i < firstMessage.getFlag(); i++) {
+                    item.add(new ProduceMessageAckItemData(firstMessage.getPartition(), ProduceMessageAckItemData.INVALID_INDEX, firstMessage.getStartTime()));
+                }
+            } else {
+                for (int i = 0; i < writeResult.getIndices().length; i++) {
+                    item.add(new ProduceMessageAckItemData(firstMessage.getPartition(), writeResult.getIndices()[i], firstMessage.getStartTime()));
+                }
+            }
+        } else {
+            if (ArrayUtils.isEmpty(writeResult.getIndices())) {
+                for (BrokerMessage message : messages) {
+                    item.add(new ProduceMessageAckItemData(message.getPartition(), ProduceMessageAckItemData.INVALID_INDEX, message.getStartTime()));
+                }
+            } else {
+                for (int i = 0; i < writeResult.getIndices().length; i++) {
+                    BrokerMessage message = messages.get(i);
+                    item.add(new ProduceMessageAckItemData(message.getPartition(), writeResult.getIndices()[i], message.getStartTime()));
+                }
+            }
+        }
+        return item;
+    }
+
+    protected ProduceMessageAckData buildAck(ProduceMessageData produceMessageData, JMQCode code) {
+        BrokerMessage firstMessage = produceMessageData.getMessages().get(0);
+        List<ProduceMessageAckItemData> item = Lists.newLinkedList();
+
+        // 批量消息处理
+        if (firstMessage.isBatch()) {
+            for (int i = 0; i < firstMessage.getFlag(); i++) {
+                item.add(ProduceMessageAckItemData.INVALID_INSTANCE);
+            }
+        } else {
+            for (int i = 0; i < produceMessageData.getMessages().size(); i++) {
+                item.add(ProduceMessageAckItemData.INVALID_INSTANCE);
+            }
         }
         return new ProduceMessageAckData(item, code);
     }

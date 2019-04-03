@@ -5,7 +5,7 @@ import io.openmessaging.KeyValue;
 import io.openmessaging.OMS;
 import io.openmessaging.OMSBuiltinKeys;
 import io.openmessaging.exception.OMSRuntimeException;
-import io.openmessaging.journalq.domain.JMQProducerBuiltinKeys;
+import io.openmessaging.journalq.domain.JournalQProducerBuiltinKeys;
 import io.openmessaging.journalq.producer.ExtensionProducer;
 import io.openmessaging.message.Message;
 import org.junit.Assert;
@@ -25,8 +25,8 @@ public class ProducerTest2 extends AbstractProducerTest {
     public void before() {
         KeyValue attributes = getAttributes();
         attributes.put(OMSBuiltinKeys.ACCOUNT_KEY, ACCOUNT_KEY);
-        attributes.put(JMQProducerBuiltinKeys.TRANSACTION_TIMEOUT, 1000 * 10);
-        messagingAccessPoint = OMS.getMessagingAccessPoint(String.format("oms:jmq://%s@%s/%s", ACCOUNT_ID, SERVER, "test_region"), attributes);
+        attributes.put(JournalQProducerBuiltinKeys.TRANSACTION_TIMEOUT, 1000 * 10);
+        messagingAccessPoint = OMS.getMessagingAccessPoint(String.format("oms:journalq://%s@%s/%s", ACCOUNT_ID, SERVER, "test_region"), attributes);
 
         producer = (ExtensionProducer) messagingAccessPoint.createProducer();
         producer.start();

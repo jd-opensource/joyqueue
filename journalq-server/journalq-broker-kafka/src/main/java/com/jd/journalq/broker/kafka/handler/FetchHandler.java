@@ -6,6 +6,7 @@ import com.google.common.collect.Table;
 import com.jd.journalq.broker.buffer.Serializer;
 import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.consumer.Consume;
+import com.jd.journalq.broker.consumer.MessageConvertSupport;
 import com.jd.journalq.broker.consumer.model.PullResult;
 import com.jd.journalq.broker.kafka.KafkaCommandType;
 import com.jd.journalq.broker.kafka.KafkaContext;
@@ -22,6 +23,7 @@ import com.jd.journalq.broker.kafka.model.FetchResponsePartitionData;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.message.BrokerMessage;
+import com.jd.journalq.message.SourceType;
 import com.jd.journalq.network.session.Consumer;
 import com.jd.journalq.network.transport.Transport;
 import com.jd.journalq.network.transport.command.Command;
@@ -49,12 +51,14 @@ public class FetchHandler extends AbstractKafkaCommandHandler implements KafkaCo
     private KafkaConfig config;
     private Consume consume;
     private ClusterManager clusterManager;
+    private MessageConvertSupport messageConvertSupport;
 
     @Override
     public void setKafkaContext(KafkaContext kafkaContext) {
         this.config = kafkaContext.getConfig();
         this.consume = kafkaContext.getBrokerContext().getConsume();
         this.clusterManager = kafkaContext.getBrokerContext().getClusterManager();
+        this.messageConvertSupport = kafkaContext.getBrokerContext().getMessageConvertSupport();
     }
 
     @Override
@@ -115,11 +119,11 @@ public class FetchHandler extends AbstractKafkaCommandHandler implements KafkaCo
 
         // 判断总体长度
         while (currentBytes < maxBytes) {
-            List<ByteBuffer> buffers = null;
+            List<BrokerMessage> messages = null;
             try {
-                buffers = doFetchMessage(consumer, partition, offset, batchSize);
+                messages = doFetchMessage(consumer, partition, offset, batchSize);
 
-                if (CollectionUtils.isEmpty(buffers)) {
+                if (CollectionUtils.isEmpty(messages)) {
                     break;
                 }
 
@@ -127,10 +131,9 @@ public class FetchHandler extends AbstractKafkaCommandHandler implements KafkaCo
                 int currentBatchSize = 0;
 
                 // 消息转换
-                for (ByteBuffer buffer : buffers) {
-                    currentBytes += (buffer.limit() - buffer.position());
-                    BrokerMessage brokerMessage = Serializer.readBrokerMessage(buffer);
-                    KafkaBrokerMessage kafkaBrokerMessage = KafkaMessageConverter.toKafkaBrokerMessage(topic.getFullName(), partition, brokerMessage);
+                for (BrokerMessage message : messages) {
+                    currentBytes += message.getSize();
+                    KafkaBrokerMessage kafkaBrokerMessage = KafkaMessageConverter.toKafkaBrokerMessage(topic.getFullName(), partition, message);
                     kafkaBrokerMessages.add(kafkaBrokerMessage);
 
                     // 如果是批量，跳过批量条数
@@ -164,7 +167,7 @@ public class FetchHandler extends AbstractKafkaCommandHandler implements KafkaCo
         return fetchResponsePartitionData;
     }
 
-    private List<ByteBuffer> doFetchMessage(Consumer consumer, int partition, long offset, int batchSize) throws Exception {
+    private List<BrokerMessage> doFetchMessage(Consumer consumer, int partition, long offset, int batchSize) throws Exception {
         PullResult pullResult = consume.getMessage(consumer, (short) partition, offset, batchSize);
         if (pullResult.size() == 0) {
             return null;
@@ -173,7 +176,12 @@ public class FetchHandler extends AbstractKafkaCommandHandler implements KafkaCo
             logger.warn("fetch message error, consumer: {}, partition: {}, offset: {}, batchSize: {}", consumer, partition, offset, batchSize);
             return null;
         }
-        return pullResult.getBuffers();
+        List<BrokerMessage> brokerMessages = Lists.newArrayListWithCapacity(pullResult.getBuffers().size());
+        for (ByteBuffer buffer : pullResult.getBuffers()) {
+            BrokerMessage brokerMessage = Serializer.readBrokerMessage(buffer);
+            brokerMessages.add(brokerMessage);
+        }
+        return messageConvertSupport.convert(brokerMessages, SourceType.KAFKA.getValue());
     }
 
     @Override

@@ -67,6 +67,7 @@ public class KeyValueConverter {
         producerConfig.setCompress(attributes.getBoolean(JournalQProducerBuiltinKeys.COMPRESS, producerConfig.isCompress()));
         producerConfig.setCompressType(KeyValueHelper.getString(attributes, JournalQProducerBuiltinKeys.COMPRESS_TYPE, producerConfig.getCompressType()));
         producerConfig.setCompressThreshold(KeyValueHelper.getInt(attributes, JournalQProducerBuiltinKeys.COMPRESS_THRESHOLD, producerConfig.getCompressThreshold()));
+        producerConfig.setBatch(attributes.getBoolean(JournalQProducerBuiltinKeys.BATCH, producerConfig.isBatch()));
         producerConfig.setSelectorType(KeyValueHelper.getString(attributes, JournalQProducerBuiltinKeys.SELECTOR_TYPE, producerConfig.getSelectorType()));
         producerConfig.setBusinessIdLengthLimit(KeyValueHelper.getInt(attributes, JournalQProducerBuiltinKeys.BUSINESSID_LENGTH_LIMIT, producerConfig.getBusinessIdLengthLimit()));
         producerConfig.setBodyLengthLimit(KeyValueHelper.getInt(attributes, JournalQProducerBuiltinKeys.BODY_LENGTH_LIMIT, producerConfig.getBodyLengthLimit()));

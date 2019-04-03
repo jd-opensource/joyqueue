@@ -9,6 +9,7 @@ import com.jd.journalq.client.internal.producer.domain.ProduceMessage;
 import com.jd.journalq.message.BrokerMessage;
 import com.jd.journalq.message.Message;
 import com.jd.journalq.message.SourceType;
+import com.jd.journalq.network.serializer.BatchMessageSerializer;
 import com.jd.journalq.toolkit.network.IpUtil;
 import com.jd.journalq.toolkit.time.SystemClock;
 import org.apache.commons.lang3.ArrayUtils;
@@ -32,6 +33,18 @@ public class ProduceMessageConverter {
 
     protected static final Logger logger = LoggerFactory.getLogger(ProduceMessageConverter.class);
 
+    public static List<BrokerMessage> convertToBrokerMessages(String topic, String app, List<ProduceMessage> produceMessages,
+                                                              boolean compress, int compressThreshold, String compressType, boolean batch) {
+        if (produceMessages.size() == 1) {
+            batch = false;
+        }
+        if (batch) {
+            return Lists.newArrayList(convertToBatchBrokerMessage(topic, app, produceMessages, compress, compressThreshold, compressType));
+        } else {
+            return convertToBrokerMessages(topic, app, produceMessages, compress, compressThreshold, compressType);
+        }
+    }
+
     public static List<BrokerMessage> convertToBrokerMessages(String topic, String app, List<ProduceMessage> produceMessages, boolean compress, int compressThreshold, String compressType) {
         List<BrokerMessage> result = Lists.newArrayListWithCapacity(produceMessages.size());
         for (ProduceMessage produceMessage : produceMessages) {
@@ -42,6 +55,39 @@ public class ProduceMessageConverter {
     }
 
     public static BrokerMessage convertToBrokerMessage(String topic, String app, ProduceMessage produceMessage, boolean compress, int compressThreshold, String compressType) {
+        BrokerMessage brokerMessage = convertToBrokerMessage(topic, app, produceMessage);
+        compress(brokerMessage, compress, compressThreshold, compressType);
+        crc(brokerMessage);
+        return brokerMessage;
+    }
+
+    public static BrokerMessage convertToBatchBrokerMessage(String topic, String app, List<ProduceMessage> produceMessages, boolean compress, int compressThreshold, String compressType) {
+        List<BrokerMessage> brokerMessages = Lists.newArrayListWithCapacity(produceMessages.size());
+        for (ProduceMessage produceMessage : produceMessages) {
+            BrokerMessage brokerMessage = convertToBrokerMessage(topic, app, produceMessage);
+            brokerMessages.add(brokerMessage);
+        }
+
+        ProduceMessage firstProduceMessage = produceMessages.get(0);
+        BrokerMessage brokerMessage = new BrokerMessage();
+        brokerMessage.setTopic(topic);
+        brokerMessage.setApp(app);
+        brokerMessage.setPartition(firstProduceMessage.getPartition());
+        brokerMessage.setBody(BatchMessageSerializer.serialize(brokerMessages));
+        brokerMessage.setPriority(firstProduceMessage.getPriority());
+        brokerMessage.setStartTime(SystemClock.now());
+        brokerMessage.setFlag((short) produceMessages.size());
+        brokerMessage.setSource(SourceType.JMQ.getValue());
+        brokerMessage.setClientIp(CLIENT_IP);
+        brokerMessage.setCompressed(false);
+        brokerMessage.setBatch(true);
+
+        compress(brokerMessage, compress, compressThreshold, compressType);
+        crc(brokerMessage);
+        return brokerMessage;
+    }
+
+    public static BrokerMessage convertToBrokerMessage(String topic, String app, ProduceMessage produceMessage) {
         BrokerMessage brokerMessage = new BrokerMessage();
         brokerMessage.setTopic(topic);
         brokerMessage.setApp(app);
@@ -55,9 +101,7 @@ public class ProduceMessageConverter {
         brokerMessage.setSource(SourceType.JMQ.getValue());
         brokerMessage.setClientIp(CLIENT_IP);
         brokerMessage.setCompressed(false);
-
-        compress(brokerMessage, compress, compressThreshold, compressType);
-        crc(brokerMessage);
+        brokerMessage.setBatch(false);
         return brokerMessage;
     }
 
@@ -75,10 +119,9 @@ public class ProduceMessageConverter {
         if (compressThreshold > byteBody.length) {
             return;
         }
-
         Compressor compressor = CompressorManager.getCompressor(compressType);
         try {
-            brokerMessage.setBody(CompressUtils.compress(byteBody, compressor));
+            brokerMessage.setBody(CompressUtils.compress(brokerMessage.getByteBody(), compressor));
         } catch (IOException e) {
             throw new ClientException(e);
         }

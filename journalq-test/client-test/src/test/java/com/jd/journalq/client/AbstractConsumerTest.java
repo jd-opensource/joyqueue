@@ -3,7 +3,7 @@ package com.jd.journalq.client;
 import io.openmessaging.KeyValue;
 import io.openmessaging.OMS;
 import io.openmessaging.journalq.consumer.ExtensionConsumer;
-import io.openmessaging.journalq.domain.JMQConsumerBuiltinKeys;
+import io.openmessaging.journalq.domain.JournalQConsumerBuiltinKeys;
 import org.junit.Before;
 
 /**
@@ -27,8 +27,8 @@ public class AbstractConsumerTest extends AbstractClientTest {
     @Override
     protected KeyValue getAttributes() {
         KeyValue keyValue = OMS.newKeyValue();
-        keyValue.put(JMQConsumerBuiltinKeys.LONGPOLL_TIMEOUT, -1);
-        keyValue.put(JMQConsumerBuiltinKeys.BROADCAST_LOCAL_PATH, "/export/Data/jmq/broadcast");
+        keyValue.put(JournalQConsumerBuiltinKeys.LONGPOLL_TIMEOUT, -1);
+        keyValue.put(JournalQConsumerBuiltinKeys.BROADCAST_LOCAL_PATH, "/export/Data/jmq/broadcast");
         return keyValue;
     }
 }

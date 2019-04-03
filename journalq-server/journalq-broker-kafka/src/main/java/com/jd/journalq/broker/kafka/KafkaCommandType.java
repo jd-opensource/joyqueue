@@ -13,8 +13,7 @@ import java.util.Map;
 public enum KafkaCommandType {
 
     // 发送消息
-    PRODUCE(0, 0, 2), // TODO 先使用旧版本
-//    PRODUCE(0, 0, 7),
+    PRODUCE(0, 0, 7),
 
     // 取消息
     FETCH(1, 2, 6),

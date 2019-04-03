@@ -55,8 +55,8 @@ public class MessageSenderConverter {
     }
 
     public static ProduceMessageData convertToProduceMessageData(String topic, String app, String txId, List<ProduceMessage> messages, QosLevel qosLevel, long timeout,
-                                                                 boolean compress, int compressThreshold, String compressType) {
-        List<BrokerMessage> brokerMessages = ProduceMessageConverter.convertToBrokerMessages(topic, app, messages, compress, compressThreshold, compressType);
+                                                                 boolean compress, int compressThreshold, String compressType, boolean batch) {
+        List<BrokerMessage> brokerMessages = ProduceMessageConverter.convertToBrokerMessages(topic, app, messages, compress, compressThreshold, compressType, batch);
         ProduceMessageData produceMessageData = new ProduceMessageData();
         produceMessageData.setQosLevel(qosLevel);
         produceMessageData.setMessages(brokerMessages);

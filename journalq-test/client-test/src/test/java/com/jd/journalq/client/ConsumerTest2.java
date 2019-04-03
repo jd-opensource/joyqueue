@@ -1,7 +1,7 @@
 package com.jd.journalq.client;
 
 import io.openmessaging.KeyValue;
-import io.openmessaging.journalq.domain.JMQConsumerBuiltinKeys;
+import io.openmessaging.journalq.domain.JournalQConsumerBuiltinKeys;
 
 /**
  * author: gaohaoxiang
@@ -13,7 +13,7 @@ public class ConsumerTest2 extends ConsumerTest1 {
     @Override
     protected KeyValue getAttributes() {
         KeyValue keyValue = super.getAttributes();
-        keyValue.put(JMQConsumerBuiltinKeys.LOADBALANCE, false);
+        keyValue.put(JournalQConsumerBuiltinKeys.LOADBALANCE, false);
         return keyValue;
     }
 }

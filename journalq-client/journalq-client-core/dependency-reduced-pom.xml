@@ -8,6 +8,12 @@
   <modelVersion>4.0.0</modelVersion>
   <artifactId>journalq-client-core</artifactId>
   <build>
+    <resources>
+      <resource>
+        <filtering>true</filtering>
+        <directory>src/main/resources</directory>
+      </resource>
+    </resources>
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -58,6 +64,7 @@
                   <include>com.jd.journalq:journalq-network:*</include>
                   <include>com.jd.journalq:journalq-model:*</include>
                   <include>com.jd.journalq:journalq-toolkit:*</include>
+                  <include>com.jd.laf:laf-extension-core:*</include>
                 </includes>
                 <excludes>
                   <exclude>org.slf4j:slf4j-api:*</exclude>
@@ -96,6 +103,10 @@
                   <pattern>org.apache</pattern>
                   <shadedPattern>com.jd.journalq.shaded.org.apache</shadedPattern>
                 </relocation>
+                <relocation>
+                  <pattern>com.jd.laf.extension</pattern>
+                  <shadedPattern>com.jd.journalq.shaded.com.jd.laf.extension</shadedPattern>
+                </relocation>
               </relocations>
             </configuration>
           </execution>
@@ -129,4 +140,7 @@
       </exclusions>
     </dependency>
   </dependencies>
+  <properties>
+    <openmessaging-api.version>1.0.0-alpha</openmessaging-api.version>
+  </properties>
 </project>

@@ -50,7 +50,7 @@ public class DefaultTransportClient extends TransportClientSupport implements Tr
         this.requestHandler = requestHandler;
         this.responseHandler = responseHandler;
         this.transportEventBus = transportEventBus;
-        this.clearTimer = new Timer("jmq-client-clear-timer");
+        this.clearTimer = new Timer("journalq-client-clear-timer");
 
         // TODO 延迟和调度时间
         this.clearTimer.scheduleAtFixedRate(new TimerTask() {

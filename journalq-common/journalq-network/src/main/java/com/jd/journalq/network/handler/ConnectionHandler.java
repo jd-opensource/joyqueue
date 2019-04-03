@@ -40,15 +40,10 @@ public class ConnectionHandler extends ChannelInboundHandlerAdapter {
 
         }
 
-        if (cause.getMessage().contains("Connection reset by peer")) {
-            logger.error("channel close, address: {}, connection reset by peer", channel.remoteAddress());
-            return;
-        }
-
         if (TransportException.isClosed(cause)) {
-            logger.error("channel exception, address: {}", channel.remoteAddress(), cause);
+            logger.warn("channel close, address: {}, message: {}", channel.remoteAddress(), cause.getMessage());
         } else {
-            logger.error("channel exception, address: {}", channel.remoteAddress());
+            logger.error("channel exception, address: {}", channel.remoteAddress(), cause);
         }
     }
 }

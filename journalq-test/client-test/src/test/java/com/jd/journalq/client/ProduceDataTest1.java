@@ -23,7 +23,7 @@ public class ProduceDataTest1 {
 
         KeyValue attributes = OMS.newKeyValue();
         attributes.put(OMSBuiltinKeys.ACCOUNT_KEY, AbstractClientTest.ACCOUNT_KEY);
-        producer = OMS.getMessagingAccessPoint(String.format("oms:jmq://%s@%s/%s",
+        producer = OMS.getMessagingAccessPoint(String.format("oms:journalq://%s@%s/%s",
                 AbstractClientTest.ACCOUNT_ID, AbstractClientTest.SERVER, AbstractClientTest.REGION), attributes).createProducer();
         producer.start();
     }
@@ -33,7 +33,7 @@ public class ProduceDataTest1 {
             for (int i = 0; i < 100; i++) {
                 Message message = producer.createMessage(topic, "test_body".getBytes());
                 SendResult sendResult = producer.send(message);
-                Assert.assertEquals(null, sendResult.messageId());
+                Assert.assertEquals("-1", sendResult.messageId());
             }
         }
     }

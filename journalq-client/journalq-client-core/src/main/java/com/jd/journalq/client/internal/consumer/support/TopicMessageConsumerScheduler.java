@@ -37,7 +37,7 @@ public class TopicMessageConsumerScheduler extends Service implements Runnable {
 
     @Override
     protected void validate() throws Exception {
-        scheduleThreadPool = Executors.newFixedThreadPool(config.getThread(), new NamedThreadFactory(String.format("jmq-consumer-schedule-%s", topic), true));
+        scheduleThreadPool = Executors.newFixedThreadPool(config.getThread(), new NamedThreadFactory(String.format("journalq-consumer-scheduler-%s", topic), true));
     }
 
     @Override

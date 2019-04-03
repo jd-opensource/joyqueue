@@ -51,7 +51,7 @@ public class KafkaMessageV0Serializer extends AbstractKafkaMessageSerializer {
         buffer.writeInt(0); // length
         buffer.writeInt(0); // crc
         buffer.writeByte(CURRENT_MAGIC);
-        buffer.writeByte(message.getAttribute());
+        buffer.writeByte(0); // attribute
 
         KafkaBufferUtils.writeBytes(message.getKey(), buffer);
         KafkaBufferUtils.writeBytes(message.getValue(), buffer);

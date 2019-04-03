@@ -15,6 +15,7 @@
     <modules>
         <module>journalq-client-core</module>
         <module>journalq-client-samples</module>
+        <module>journalq-client-kafka</module>
     </modules>
 
     <properties>

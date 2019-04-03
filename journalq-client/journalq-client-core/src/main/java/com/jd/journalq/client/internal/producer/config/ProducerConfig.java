@@ -1,5 +1,7 @@
 package com.jd.journalq.client.internal.producer.config;
 
+import com.jd.journalq.client.internal.common.compress.support.SnappyCompressor;
+import com.jd.journalq.client.internal.producer.support.WeightedRoundRobinPartitionSelector;
 import com.jd.journalq.domain.QosLevel;
 import com.jd.journalq.toolkit.retry.RetryPolicy;
 
@@ -23,10 +25,12 @@ public class ProducerConfig {
     private QosLevel qosLevel = QosLevel.RECEIVE;
 
     private boolean compress = true;
-    private String compressType = "zlib";
+    private String compressType = SnappyCompressor.NAME;
     private int compressThreshold = 100;
 
-    private String selectorType = "roundrobin";
+    private boolean batch = true;
+
+    private String selectorType = WeightedRoundRobinPartitionSelector.NAME;
     private int businessIdLengthLimit = 100;
     private int bodyLengthLimit = 1024 * 1024 * 1;
     private int batchBodyLengthLimit = 1024 * 1024 * 4;
@@ -43,6 +47,7 @@ public class ProducerConfig {
         producerConfig.setCompress(compress);
         producerConfig.setCompressType(compressType);
         producerConfig.setCompressThreshold(compressThreshold);
+        producerConfig.setBatch(batch);
         producerConfig.setSelectorType(selectorType);
         producerConfig.setBusinessIdLengthLimit(businessIdLengthLimit);
         producerConfig.setBodyLengthLimit(bodyLengthLimit);
@@ -114,6 +119,14 @@ public class ProducerConfig {
         return compress;
     }
 
+    public void setCompressType(String compressType) {
+        this.compressType = compressType;
+    }
+
+    public String getCompressType() {
+        return compressType;
+    }
+
     public void setCompressThreshold(int compressThreshold) {
         this.compressThreshold = compressThreshold;
     }
@@ -122,12 +135,12 @@ public class ProducerConfig {
         return compressThreshold;
     }
 
-    public void setCompressType(String compressType) {
-        this.compressType = compressType;
+    public void setBatch(boolean batch) {
+        this.batch = batch;
     }
 
-    public String getCompressType() {
-        return compressType;
+    public boolean isBatch() {
+        return batch;
     }
 
     public String getSelectorType() {

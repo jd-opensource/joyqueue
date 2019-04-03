@@ -16,7 +16,7 @@ import java.util.zip.Inflater;
  */
 public class ZlibCompressor implements Compressor {
 
-    public static final String ZLIB = "zlib";
+    public static final String NAME = "zlib";
 
     @Override
     public void compress(byte[] bytes, int offset, int size, OutputStream out) throws IOException {
@@ -57,6 +57,6 @@ public class ZlibCompressor implements Compressor {
 
     @Override
     public String type() {
-        return ZLIB;
+        return NAME;
     }
 }

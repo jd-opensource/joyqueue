@@ -6,8 +6,8 @@ import io.openmessaging.KeyValue;
 import io.openmessaging.extension.QueueMetaData;
 import io.openmessaging.interceptor.Context;
 import io.openmessaging.interceptor.ProducerInterceptor;
-import io.openmessaging.journalq.domain.JMQProducerBuiltinKeys;
-import io.openmessaging.journalq.domain.JMQTxFeedbackBuiltinKeys;
+import io.openmessaging.journalq.domain.JournalQProducerBuiltinKeys;
+import io.openmessaging.journalq.domain.JournalQTxFeedbackBuiltinKeys;
 import io.openmessaging.journalq.producer.ExtensionProducer;
 import io.openmessaging.journalq.producer.ExtensionTransactionalResult;
 import io.openmessaging.message.Message;
@@ -35,9 +35,9 @@ public class ProducerTest1 extends AbstractProducerTest {
     @Override
     protected KeyValue getAttributes() {
         KeyValue keyValue = super.getAttributes();
-        keyValue.put(JMQTxFeedbackBuiltinKeys.FETCH_INTERVAL, 1);
-        keyValue.put(JMQTxFeedbackBuiltinKeys.FETCH_SIZE, 10);
-        keyValue.put(JMQProducerBuiltinKeys.TRANSACTION_TIMEOUT, 1000 * 10);
+        keyValue.put(JournalQTxFeedbackBuiltinKeys.FETCH_INTERVAL, 1);
+        keyValue.put(JournalQTxFeedbackBuiltinKeys.FETCH_SIZE, 10);
+        keyValue.put(JournalQProducerBuiltinKeys.TRANSACTION_TIMEOUT, 1000 * 10);
         return keyValue;
     }
 
@@ -62,7 +62,7 @@ public class ProducerTest1 extends AbstractProducerTest {
             Assert.assertEquals("test_body", new String(message.getData()));
 
             SendResult sendResult = producer.send(message);
-            Assert.assertEquals(null, sendResult.messageId());
+            Assert.assertEquals("-1", sendResult.messageId());
         }
     }
 
@@ -73,7 +73,7 @@ public class ProducerTest1 extends AbstractProducerTest {
         Assert.assertEquals("test_body", new String(message.getData()));
 
         SendResult sendResult = producer.send(message);
-        Assert.assertEquals(null, sendResult.messageId());
+        Assert.assertEquals("-1", sendResult.messageId());
     }
 
     @Test
@@ -83,7 +83,7 @@ public class ProducerTest1 extends AbstractProducerTest {
         Assert.assertEquals("test_body", new String(message.getData()));
 
         SendResult sendResult = producer.sendAsync(message).get();
-        Assert.assertEquals(null, sendResult.messageId());
+        Assert.assertEquals("-1", sendResult.messageId());
     }
 
     @Test
@@ -117,7 +117,7 @@ public class ProducerTest1 extends AbstractProducerTest {
             messages.add(message);
         }
         SendResult sendResult = producer.sendAsync(messages).get();
-        Assert.assertEquals(null, sendResult.messageId());
+        Assert.assertEquals("-1", sendResult.messageId());
     }
 
     @Test

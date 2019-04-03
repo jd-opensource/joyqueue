@@ -50,7 +50,7 @@ public class TopicMessageConsumerDispatcher extends Service {
 
     @Override
     protected void doStart() throws Exception {
-        listenerExecutor = Executors.newSingleThreadExecutor(new NamedThreadFactory(String.format("jmq-consumer-dispatch-%s", topic)));
+        listenerExecutor = Executors.newSingleThreadExecutor(new NamedThreadFactory(String.format("journalq-consumer-dispatcher-%s", topic)));
     }
 
     @Override

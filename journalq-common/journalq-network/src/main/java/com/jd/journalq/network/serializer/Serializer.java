@@ -47,7 +47,7 @@ public class Serializer extends AbstractSerializer {
             4 // size
                     + 2 // partition
                     + 8 // index
-                    + 4
+                    + 4 // term
                     + 2 // magic code
                     + 2 // sys code
                     + 2 // flag
@@ -222,6 +222,26 @@ public class Serializer extends AbstractSerializer {
         }
         if (length > 0) {
             out.writeBytes(value);
+        }
+    }
+
+    public static void write(final byte[] value, final ByteBuffer out, final int lengthSize) {
+        write(value, out, true, lengthSize);
+    }
+
+    public static void write(final byte[] value, final ByteBuffer out, final boolean writeLength, final int lengthSize) {
+        int length = value == null ? 0 : value.length;
+        if (writeLength) {
+            if (lengthSize == 1) {
+                out.put((byte) length);
+            } else if (lengthSize == 2) {
+                out.putShort((short) length);
+            } else {
+                out.putInt(length);
+            }
+        }
+        if (length > 0) {
+            out.put(value);
         }
     }
 
@@ -726,6 +746,22 @@ public class Serializer extends AbstractSerializer {
      */
     public static void write(final String value, final ByteBuf out, final int lengthSize) throws Exception {
         write(value, out, lengthSize, false);
+    }
+
+    public static void write(final String value, final ByteBuffer out, final int lengthSize) {
+        write(value, out, true, lengthSize);
+    }
+
+    public static void write(final String value, final ByteBuffer out, final boolean writeLength, final int lengthSize) {
+        if (out == null) {
+            return;
+        }
+        if (value != null && !value.isEmpty()) {
+            byte[] bytes = getBytes(value, Charsets.UTF_8);
+            write(bytes, out, writeLength, lengthSize);
+        } else {
+            write((byte[]) null, out, writeLength, lengthSize);
+        }
     }
 
     /**
