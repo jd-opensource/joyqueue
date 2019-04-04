@@ -25,6 +25,11 @@ public class KafkaBrokerMessage {
     private short flag;
     private Map<byte[], byte[]> header;
 
+    private boolean isTransaction;
+    private long producerId;
+    private int baseSequence;
+    private short producerEpoch;
+
     public void setSize(int size) {
         this.size = size;
     }
@@ -119,5 +124,37 @@ public class KafkaBrokerMessage {
 
     public Map<byte[], byte[]> getHeader() {
         return header;
+    }
+
+    public boolean isTransaction() {
+        return isTransaction;
+    }
+
+    public void setTransaction(boolean transaction) {
+        isTransaction = transaction;
+    }
+
+    public long getProducerId() {
+        return producerId;
+    }
+
+    public void setProducerId(long producerId) {
+        this.producerId = producerId;
+    }
+
+    public int getBaseSequence() {
+        return baseSequence;
+    }
+
+    public void setBaseSequence(int baseSequence) {
+        this.baseSequence = baseSequence;
+    }
+
+    public short getProducerEpoch() {
+        return producerEpoch;
+    }
+
+    public void setProducerEpoch(short producerEpoch) {
+        this.producerEpoch = producerEpoch;
     }
 }

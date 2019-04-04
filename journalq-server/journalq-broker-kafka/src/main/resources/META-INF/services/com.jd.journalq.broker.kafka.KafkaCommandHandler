@@ -11,3 +11,9 @@ com.jd.journalq.broker.kafka.handler.LeaveGroupHandler
 com.jd.journalq.broker.kafka.handler.SyncGroupHandler
 com.jd.journalq.broker.kafka.handler.DescribeGroupHandler
 com.jd.journalq.broker.kafka.handler.HeartbeatHandler
+
+com.jd.journalq.broker.kafka.handler.AddOffsetsToTxnHandler
+com.jd.journalq.broker.kafka.handler.AddPartitionsToTxnHandler
+com.jd.journalq.broker.kafka.handler.EndTxnHandler
+com.jd.journalq.broker.kafka.handler.InitProducerIdHandler
+com.jd.journalq.broker.kafka.handler.TxnOffsetCommitHandler

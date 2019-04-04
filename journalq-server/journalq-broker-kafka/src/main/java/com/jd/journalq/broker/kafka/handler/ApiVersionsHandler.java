@@ -35,7 +35,7 @@ public class ApiVersionsHandler extends AbstractKafkaCommandHandler {
             }
         }
         APIS = Collections.unmodifiableList(apis);
-        SUPPORTED_RESPONSE = new ApiVersionsResponse(KafkaErrorCode.NONE, APIS);
+        SUPPORTED_RESPONSE = new ApiVersionsResponse(KafkaErrorCode.NONE.getCode(), APIS);
     }
 
     @Override

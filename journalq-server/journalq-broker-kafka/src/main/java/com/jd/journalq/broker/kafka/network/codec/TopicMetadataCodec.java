@@ -109,7 +109,7 @@ public class TopicMetadataCodec implements KafkaPayloadCodec<TopicMetadataRespon
             List<KafkaPartitionMetadata> kafkaPartitionMetadatas = kafkaTopicMetadata.getKafkaPartitionMetadata();
             buffer.writeInt(kafkaPartitionMetadatas.size());
             for (KafkaPartitionMetadata kafkaPartitionMetadata : kafkaPartitionMetadatas) {
-                buffer.writeShort(KafkaErrorCode.NONE);
+                buffer.writeShort(KafkaErrorCode.NONE.getCode());
                 buffer.writeInt(kafkaPartitionMetadata.getPartition());
                 KafkaBroker leaderBroker = kafkaPartitionMetadata.getLeader();
                 if (leaderBroker != null) {

@@ -11,7 +11,7 @@ import java.util.List;
  */
 public class FetchResponsePartitionData {
 
-    private short error = KafkaErrorCode.NONE;
+    private short error = KafkaErrorCode.NONE.getCode();
     private long hw = -1L;
     private List<KafkaBrokerMessage> messages;
     private int bytes;

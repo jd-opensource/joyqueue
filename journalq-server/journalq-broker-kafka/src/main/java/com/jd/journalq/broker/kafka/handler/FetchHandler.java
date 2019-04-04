@@ -76,7 +76,7 @@ public class FetchHandler extends AbstractKafkaCommandHandler implements KafkaCo
                 int partition = partitionEntry.getKey();
 
                 if (currentBytes > maxBytes) {
-                    fetchResponseTable.put(topic.getFullName(), partition, new FetchResponsePartitionData(KafkaErrorCode.NONE, -1, Collections.emptyList()));
+                    fetchResponseTable.put(topic.getFullName(), partition, new FetchResponsePartitionData(KafkaErrorCode.NONE.getCode(), -1, Collections.emptyList()));
                     continue;
                 }
 
@@ -110,7 +110,7 @@ public class FetchHandler extends AbstractKafkaCommandHandler implements KafkaCo
         if (offset < minIndex || offset > maxIndex) {
             logger.warn("fetch message exception, index out of range, transport: {}, consumer: {}, partition: {}, offset: {}, minOffset: {}, maxOffset: {}",
                     transport, consumer, partition, offset, minIndex, maxIndex);
-            return new FetchResponsePartitionData(KafkaErrorCode.OFFSET_OUT_OF_RANGE);
+            return new FetchResponsePartitionData(KafkaErrorCode.OFFSET_OUT_OF_RANGE.getCode());
         }
 
         List<KafkaBrokerMessage> kafkaBrokerMessages = Lists.newLinkedList();
@@ -154,15 +154,15 @@ public class FetchHandler extends AbstractKafkaCommandHandler implements KafkaCo
                 offset += skipOffset;
             } catch (Exception e) {
                 logger.error("fetch message exception, consumer: {}, partition: {}, offset: {}, batchSize: {}", consumer, partition, offset, batchSize, e);
-                short kafkaCode = KafkaErrorCode.kafkaExceptionFor(e);
-                if (kafkaCode == KafkaErrorCode.UNKNOWN) {
-                    kafkaCode = KafkaErrorCode.NONE;
+                short kafkaCode = KafkaErrorCode.exceptionFor(e);
+                if (kafkaCode == KafkaErrorCode.UNKNOWN_SERVER_ERROR.getCode()) {
+                    kafkaCode = KafkaErrorCode.NONE.getCode();
                 }
                 return new FetchResponsePartitionData(kafkaCode, offset, kafkaBrokerMessages);
             }
         }
 
-        FetchResponsePartitionData fetchResponsePartitionData = new FetchResponsePartitionData(KafkaErrorCode.NONE, offset, kafkaBrokerMessages);
+        FetchResponsePartitionData fetchResponsePartitionData = new FetchResponsePartitionData(KafkaErrorCode.NONE.getCode(), offset, kafkaBrokerMessages);
         fetchResponsePartitionData.setBytes(currentBytes);
         return fetchResponsePartitionData;
     }

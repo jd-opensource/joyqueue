@@ -41,10 +41,10 @@ public class DefaultKafkaGroupManageService implements KafkaGroupManageService {
 
         for (KafkaCoordinatorGroupMember groupMemberMetadata : group.getAllMembers()) {
             if (groupMemberMetadata.getAwaitingJoinCallback() != null) {
-                groupMemberMetadata.getAwaitingJoinCallback().sendResponseCallback(GroupJoinGroupResult.buildError(groupMemberMetadata.getId(), KafkaErrorCode.UNKNOWN_MEMBER_ID));
+                groupMemberMetadata.getAwaitingJoinCallback().sendResponseCallback(GroupJoinGroupResult.buildError(groupMemberMetadata.getId(), KafkaErrorCode.UNKNOWN_MEMBER_ID.getCode()));
             }
             if (groupMemberMetadata.getAwaitingSyncCallback() != null) {
-                groupMemberMetadata.getAwaitingSyncCallback().sendResponseCallback(null, KafkaErrorCode.UNKNOWN_MEMBER_ID);
+                groupMemberMetadata.getAwaitingSyncCallback().sendResponseCallback(null, KafkaErrorCode.UNKNOWN_MEMBER_ID.getCode());
             }
         }
 

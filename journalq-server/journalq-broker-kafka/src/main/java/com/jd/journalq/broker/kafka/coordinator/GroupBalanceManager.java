@@ -102,7 +102,7 @@ public class GroupBalanceManager extends Service {
 
         // if any members are awaiting sync, cancel their request and have them rejoin
         if (group.stateIs(GroupState.AWAITINGSYNC)) {
-            resetAndPropagateAssignmentError(group, KafkaErrorCode.REBALANCE_IN_PROGRESS);
+            resetAndPropagateAssignmentError(group, KafkaErrorCode.REBALANCE_IN_PROGRESS.getCode());
         }
 
         int rebalanceTimeout = config.getRebalanceTimeout() != 0 ? config.getRebalanceTimeout() : group.getMaxRebalanceTimeout();
@@ -135,7 +135,7 @@ public class GroupBalanceManager extends Service {
             member.setAssignment(syncGroupAssignment);
             member.setAssignments(topicPartitions);
         }
-        propagateAssignment(group, KafkaErrorCode.NONE);
+        propagateAssignment(group, KafkaErrorCode.NONE.getCode());
     }
 
     public void resetAndPropagateAssignmentError(KafkaCoordinatorGroup group, short errorCode) {

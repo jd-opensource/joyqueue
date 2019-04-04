@@ -47,15 +47,15 @@ public class GroupBalanceHandler extends Service {
                                 Map<String, byte[]> protocols, JoinCallback callback) {
 
         if (!isStarted()) {
-            callback.sendResponseCallback(GroupJoinGroupResult.buildError(memberId, KafkaErrorCode.GROUP_COORDINATOR_NOT_AVAILABLE));
+            callback.sendResponseCallback(GroupJoinGroupResult.buildError(memberId, KafkaErrorCode.COORDINATOR_NOT_AVAILABLE.getCode()));
             return;
         }
         if (!validGroupId(groupId)) {
-            callback.sendResponseCallback(GroupJoinGroupResult.buildError(memberId, KafkaErrorCode.INVALID_GROUP_ID));
+            callback.sendResponseCallback(GroupJoinGroupResult.buildError(memberId, KafkaErrorCode.INVALID_GROUP_ID.getCode()));
             return;
         }
         if (sessionTimeoutMs < config.getSessionMaxTimeout() || sessionTimeoutMs > config.getSessionMinTimeout()) {
-            callback.sendResponseCallback(GroupJoinGroupResult.buildError(memberId, KafkaErrorCode.INVALID_SESSION_TIMEOUT));
+            callback.sendResponseCallback(GroupJoinGroupResult.buildError(memberId, KafkaErrorCode.INVALID_SESSION_TIMEOUT.getCode()));
             return;
         }
 
@@ -66,7 +66,7 @@ public class GroupBalanceHandler extends Service {
         if (group == null) {
             // 没有join的member的memberid为unknown
             if (!memberId.equals(JoinGroupRequest.UNKNOWN_MEMBER_ID)) {
-                callback.sendResponseCallback(GroupJoinGroupResult.buildError(memberId, KafkaErrorCode.UNKNOWN_MEMBER_ID));
+                callback.sendResponseCallback(GroupJoinGroupResult.buildError(memberId, KafkaErrorCode.UNKNOWN_MEMBER_ID.getCode()));
                 return;
             }
             group = groupMetadataManager.getOrCreateGroup(new KafkaCoordinatorGroup(groupId, protocolType));
@@ -83,18 +83,18 @@ public class GroupBalanceHandler extends Service {
         if (!group.stateIs(GroupState.EMPTY) &&
                 (!group.getProtocolType().equals(protocolType) || !group.supportsProtocols(protocols.keySet()))) {
             // if the new member does not support the group protocol, reject it
-            callback.sendResponseCallback(GroupJoinGroupResult.buildError(memberId, KafkaErrorCode.INCONSISTENT_GROUP_PROTOCOL));
+            callback.sendResponseCallback(GroupJoinGroupResult.buildError(memberId, KafkaErrorCode.INCONSISTENT_GROUP_PROTOCOL.getCode()));
             return;
         }
         if (group.stateIs(GroupState.EMPTY) &&
                 (protocols.isEmpty() || protocolType.isEmpty())) {
-            callback.sendResponseCallback(GroupJoinGroupResult.buildError(memberId, KafkaErrorCode.INCONSISTENT_GROUP_PROTOCOL));
+            callback.sendResponseCallback(GroupJoinGroupResult.buildError(memberId, KafkaErrorCode.INCONSISTENT_GROUP_PROTOCOL.getCode()));
             return;
         }
         if (!memberId.equals(JoinGroupRequest.UNKNOWN_MEMBER_ID) && !group.isHasMember(memberId)) {
             // if the member trying to register with a un-recognized id, send the response to let
             // it reset its member id and retry
-            callback.sendResponseCallback(GroupJoinGroupResult.buildError(memberId, KafkaErrorCode.UNKNOWN_MEMBER_ID));
+            callback.sendResponseCallback(GroupJoinGroupResult.buildError(memberId, KafkaErrorCode.UNKNOWN_MEMBER_ID.getCode()));
             return;
         }
 
@@ -104,7 +104,7 @@ public class GroupBalanceHandler extends Service {
                 // from the coordinator metadata; this is likely that the group has migrated to some other
                 // coordinator OR the group is in a transient unstable phase. Let the member retry
                 // joining without the specified member id,
-                callback.sendResponseCallback(GroupJoinGroupResult.buildError(memberId, KafkaErrorCode.UNKNOWN_MEMBER_ID));
+                callback.sendResponseCallback(GroupJoinGroupResult.buildError(memberId, KafkaErrorCode.UNKNOWN_MEMBER_ID.getCode()));
                 break;
             case PREPARINGREBALANCE:
                 if (memberId.equals(JoinGroupRequest.UNKNOWN_MEMBER_ID)) {
@@ -130,7 +130,7 @@ public class GroupBalanceHandler extends Service {
                             members = Collections.emptyMap();
                         }
                         GroupJoinGroupResult groupJoinGroupResult = new GroupJoinGroupResult(members, memberId, group.getGenerationId(),
-                                group.getProtocol(), group.getLeaderId(), KafkaErrorCode.NONE);
+                                group.getProtocol(), group.getLeaderId(), KafkaErrorCode.NONE.getCode());
                         callback.sendResponseCallback(groupJoinGroupResult);
                     } else {
                         // member has changed metadata, so force a rebalance
@@ -154,7 +154,7 @@ public class GroupBalanceHandler extends Service {
                         // for followers with no actual change to their metadata, just return group information
                         // for the current generation which will allow them to issue SyncGroup
                         GroupJoinGroupResult groupJoinGroupResult = new GroupJoinGroupResult(Collections.emptyMap(), memberId, group.getGenerationId(),
-                                group.getProtocol(), group.getLeaderId(), KafkaErrorCode.NONE);
+                                group.getProtocol(), group.getLeaderId(), KafkaErrorCode.NONE.getCode());
                         callback.sendResponseCallback(groupJoinGroupResult);
                     }
                 }
@@ -168,13 +168,13 @@ public class GroupBalanceHandler extends Service {
 
     public void handleSyncGroup(String groupId, int generation, String memberId, Map<String, SyncGroupAssignment> groupAssignment, SyncCallback callback) {
         if (!isStarted()) {
-            callback.sendResponseCallback(null, KafkaErrorCode.GROUP_COORDINATOR_NOT_AVAILABLE);
+            callback.sendResponseCallback(null, KafkaErrorCode.COORDINATOR_NOT_AVAILABLE.getCode());
             return;
         }
 
         KafkaCoordinatorGroup group = groupMetadataManager.getGroup(groupId);
         if (group == null) {
-            callback.sendResponseCallback(null, KafkaErrorCode.UNKNOWN_MEMBER_ID);
+            callback.sendResponseCallback(null, KafkaErrorCode.UNKNOWN_MEMBER_ID.getCode());
             return;
         }
 
@@ -188,21 +188,21 @@ public class GroupBalanceHandler extends Service {
                 group.getId(), memberId, group.getAllMemberIds().size());
 
         if (!group.isHasMember(memberId)) {
-            callback.sendResponseCallback(null, KafkaErrorCode.UNKNOWN_MEMBER_ID);
+            callback.sendResponseCallback(null, KafkaErrorCode.UNKNOWN_MEMBER_ID.getCode());
             return;
         }
         if (generationId != group.getGenerationId()) {
-            callback.sendResponseCallback(null, KafkaErrorCode.ILLEGAL_GENERATION);
+            callback.sendResponseCallback(null, KafkaErrorCode.ILLEGAL_GENERATION.getCode());
             return;
         }
         switch (group.getState()) {
             case DEAD:
             case EMPTY: {
-                callback.sendResponseCallback(null, KafkaErrorCode.UNKNOWN_MEMBER_ID);
+                callback.sendResponseCallback(null, KafkaErrorCode.UNKNOWN_MEMBER_ID.getCode());
                 break;
             }
             case PREPARINGREBALANCE: {
-                callback.sendResponseCallback(null, KafkaErrorCode.REBALANCE_IN_PROGRESS);
+                callback.sendResponseCallback(null, KafkaErrorCode.REBALANCE_IN_PROGRESS.getCode());
                 break;
             }
             case AWAITINGSYNC: {
@@ -236,7 +236,7 @@ public class GroupBalanceHandler extends Service {
             case STABLE: {
                 // if the group is stable, we just return the current assignment
                 KafkaCoordinatorGroupMember member = group.getMember(memberId);
-                callback.sendResponseCallback(member.getAssignment(), KafkaErrorCode.NONE);
+                callback.sendResponseCallback(member.getAssignment(), KafkaErrorCode.NONE.getCode());
                 groupBalanceManager.completeAndScheduleNextHeartbeatExpiration(group, group.getMember(memberId));
                 break;
             }
@@ -245,7 +245,7 @@ public class GroupBalanceHandler extends Service {
 
     public short handleLeaveGroup(String groupId, String memberId) {
         if (!isStarted()) {
-            return KafkaErrorCode.GROUP_COORDINATOR_NOT_AVAILABLE;
+            return KafkaErrorCode.COORDINATOR_NOT_AVAILABLE.getCode();
         }
 
         KafkaCoordinatorGroup group = groupMetadataManager.getGroup(groupId);
@@ -254,30 +254,30 @@ public class GroupBalanceHandler extends Service {
             // from the coordinator metadata; this is likely that the group has migrated to some other
             // coordinator OR the group is in a transient unstable phase. Let the consumer to retry
             // joining without specified consumer id,
-            return KafkaErrorCode.UNKNOWN_MEMBER_ID;
+            return KafkaErrorCode.UNKNOWN_MEMBER_ID.getCode();
         }
 
         logger.info("member leave group, memberId: {}, group: {}, state: {}", memberId, groupId, group.getState());
 
         synchronized (group) {
             if (group.stateIs(GroupState.DEAD) || !group.isHasMember(memberId)) {
-                return KafkaErrorCode.UNKNOWN_MEMBER_ID;
+                return KafkaErrorCode.UNKNOWN_MEMBER_ID.getCode();
             }
             KafkaCoordinatorGroupMember member = group.getMember(memberId);
             groupBalanceManager.removeHeartbeatForLeavingMember(group, member);
             groupBalanceManager.removeMemberAndUpdateGroup(group, member);
-            return KafkaErrorCode.NONE;
+            return KafkaErrorCode.NONE.getCode();
         }
     }
 
     public short handleHeartbeat(String groupId, String memberId, int generationId) {
         if (!isStarted()) {
-            return KafkaErrorCode.GROUP_COORDINATOR_NOT_AVAILABLE;
+            return KafkaErrorCode.COORDINATOR_NOT_AVAILABLE.getCode();
         }
 
         KafkaCoordinatorGroup group = groupMetadataManager.getGroup(groupId);
         if (group == null) {
-            return KafkaErrorCode.UNKNOWN_MEMBER_ID;
+            return KafkaErrorCode.UNKNOWN_MEMBER_ID.getCode();
         }
 
         synchronized (group) {
@@ -293,40 +293,40 @@ public class GroupBalanceHandler extends Service {
                 // from the coordinator metadata; this is likely that the group has migrated to some other
                 // coordinator OR the group is in a transient unstable phase. Let the member retry
                 // joining without the specified member id,
-                return KafkaErrorCode.UNKNOWN_MEMBER_ID;
+                return KafkaErrorCode.UNKNOWN_MEMBER_ID.getCode();
             }
             case AWAITINGSYNC: {
                 if (!group.isHasMember(memberId)) {
-                    return KafkaErrorCode.UNKNOWN_MEMBER_ID;
+                    return KafkaErrorCode.UNKNOWN_MEMBER_ID.getCode();
                 }
-                return KafkaErrorCode.REBALANCE_IN_PROGRESS;
+                return KafkaErrorCode.REBALANCE_IN_PROGRESS.getCode();
             }
             case PREPARINGREBALANCE: {
                 if (!group.isHasMember(memberId)) {
-                    return KafkaErrorCode.UNKNOWN_MEMBER_ID;
+                    return KafkaErrorCode.UNKNOWN_MEMBER_ID.getCode();
                 }
                 if (generationId != group.getGenerationId()) {
-                    return KafkaErrorCode.ILLEGAL_GENERATION;
+                    return KafkaErrorCode.ILLEGAL_GENERATION.getCode();
                 }
                 KafkaCoordinatorGroupMember member = group.getMember(memberId);
                 groupBalanceManager.completeAndScheduleNextHeartbeatExpiration(group, member);
-                return KafkaErrorCode.REBALANCE_IN_PROGRESS;
+                return KafkaErrorCode.REBALANCE_IN_PROGRESS.getCode();
             }
             case STABLE: {
                 if (!group.isHasMember(memberId)) {
-                    return KafkaErrorCode.UNKNOWN_MEMBER_ID;
+                    return KafkaErrorCode.UNKNOWN_MEMBER_ID.getCode();
                 }
                 if (generationId != group.getGenerationId()) {
-                    return KafkaErrorCode.ILLEGAL_GENERATION;
+                    return KafkaErrorCode.ILLEGAL_GENERATION.getCode();
                 }
                 KafkaCoordinatorGroupMember member = group.getMember(memberId);
                 groupBalanceManager.completeAndScheduleNextHeartbeatExpiration(group, member);
-                return KafkaErrorCode.NONE;
+                return KafkaErrorCode.NONE.getCode();
             }
             default: {
                 logger.error("handle heartbeat, invalid group state {} of group {}",
                         group.getState(), group.getId());
-                return KafkaErrorCode.ILLEGAL_GENERATION;
+                return KafkaErrorCode.ILLEGAL_GENERATION.getCode();
             }
         }
     }
@@ -360,7 +360,7 @@ public class GroupBalanceHandler extends Service {
         groupDescribe.setProtocolType(group.getProtocolType());
         groupDescribe.setProtocol(group.getProtocol());
         groupDescribe.setState(group.getState().toString());
-        groupDescribe.setErrCode(KafkaErrorCode.NONE);
+        groupDescribe.setErrCode(KafkaErrorCode.NONE.getCode());
         groupDescribe.setMembers(Lists.newArrayList(group.getAllMembers()));
 
         return groupDescribe;

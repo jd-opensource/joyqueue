@@ -27,6 +27,6 @@ public class JournalqToKafkaMessageConverter extends AbstarctKafkaMessageConvert
 
     @Override
     public Byte type() {
-        return SourceType.KAFKA.JMQ.getValue();
+        return SourceType.JMQ.getValue();
     }
 }

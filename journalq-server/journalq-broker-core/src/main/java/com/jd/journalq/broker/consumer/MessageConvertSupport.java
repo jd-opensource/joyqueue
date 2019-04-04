@@ -60,9 +60,6 @@ public class MessageConvertSupport {
     public BrokerMessage convert(BrokerMessage message, byte target) {
         MessageConverter messageConverter = converterTable.get(message.getSource(), target);
         if (messageConverter == null) {
-            if (message.getSource() != target) {
-                logger.warn("converter not exist, source: {}, target: {}", message.getSource(), target);
-            }
             return null;
         }
         if (logger.isDebugEnabled()) {
@@ -74,9 +71,6 @@ public class MessageConvertSupport {
     public List<BrokerMessage> convertBatch(BrokerMessage message, byte target) {
         MessageConverter messageConverter = converterTable.get(message.getSource(), target);
         if (messageConverter == null) {
-            if (message.getSource() != target) {
-                logger.warn("converter not exist, source: {}, target: {}", message.getSource(), target);
-            }
             return null;
         }
         if (logger.isDebugEnabled()) {

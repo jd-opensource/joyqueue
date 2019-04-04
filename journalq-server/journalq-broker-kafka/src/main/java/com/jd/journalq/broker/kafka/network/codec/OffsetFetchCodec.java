@@ -73,7 +73,7 @@ public class OffsetFetchCodec implements KafkaPayloadCodec<OffsetFetchResponse>,
 
         if (version >= 2) {
             // TODO: error code
-            buffer.writeShort(KafkaErrorCode.NONE);
+            buffer.writeShort(KafkaErrorCode.NONE.getCode());
         }
     }
 

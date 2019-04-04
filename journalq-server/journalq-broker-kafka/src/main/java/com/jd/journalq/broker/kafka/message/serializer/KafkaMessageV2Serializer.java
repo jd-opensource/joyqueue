@@ -117,6 +117,11 @@ public class KafkaMessageV2Serializer extends AbstractKafkaMessageSerializer {
         message.setFlag((short) messageCount);
         message.setCompressionCodecType(compressionCodec.getCode());
 
+        message.setTransaction(isTransactionl(attribute));
+        message.setProducerId(producerId);
+        message.setProducerEpoch(producerEpoch);
+        message.setBaseSequence(baseSequence);
+
         return Lists.newArrayList(message);
     }
 

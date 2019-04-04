@@ -20,15 +20,15 @@ public class CheckResultConverter {
             case FW_TOPIC_NOT_EXIST:
             case FW_PRODUCER_NOT_EXISTS:
             case FW_PUT_MESSAGE_TOPIC_NOT_WRITE: {
-                return KafkaErrorCode.UNKNOWN_TOPIC_OR_PARTITION;
+                return KafkaErrorCode.UNKNOWN_TOPIC_OR_PARTITION.getCode();
             }
             case FW_PRODUCE_MESSAGE_BROKER_NOT_LEADER:
             case FW_TOPIC_NO_PARTITIONGROUP: {
-                return KafkaErrorCode.NOT_LEADER_FOR_PARTITION;
+                return KafkaErrorCode.NOT_LEADER_FOR_PARTITION.getCode();
             }
             default : {
                 logger.warn("unknown produce code {}", code);
-                return KafkaErrorCode.UNKNOWN_TOPIC_OR_PARTITION;
+                return KafkaErrorCode.UNKNOWN_TOPIC_OR_PARTITION.getCode();
             }
         }
     }
@@ -37,19 +37,19 @@ public class CheckResultConverter {
         switch (code) {
             case FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER:
             case FW_TOPIC_NO_PARTITIONGROUP: {
-                return KafkaErrorCode.NOT_LEADER_FOR_PARTITION;
+                return KafkaErrorCode.NOT_LEADER_FOR_PARTITION.getCode();
             }
             case FW_FETCH_TOPIC_MESSAGE_PAUSED:
             case FW_GET_MESSAGE_APP_CLIENT_IP_NOT_READ: {
-                return KafkaErrorCode.NONE;
+                return KafkaErrorCode.NONE.getCode();
             }
             case FW_TOPIC_NOT_EXIST:
             case FW_CONSUMER_NOT_EXISTS: {
-                return KafkaErrorCode.UNKNOWN_TOPIC_OR_PARTITION;
+                return KafkaErrorCode.UNKNOWN_TOPIC_OR_PARTITION.getCode();
             }
             default : {
                 logger.warn("unknown fetch code {}", code);
-                return KafkaErrorCode.UNKNOWN_TOPIC_OR_PARTITION;
+                return KafkaErrorCode.UNKNOWN_TOPIC_OR_PARTITION.getCode();
             }
         }
     }

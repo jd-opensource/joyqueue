@@ -43,13 +43,13 @@ public class GroupOffsetHandler extends Service {
 
     public Table<String, Integer, OffsetMetadataAndError> handleCommitOffsets(String groupId, String memberId, int generationId, Table<String, Integer, OffsetAndMetadata> offsetMetadata) {
         if (!isStarted()) {
-            return buildCommitError(offsetMetadata, KafkaErrorCode.GROUP_COORDINATOR_NOT_AVAILABLE);
+            return buildCommitError(offsetMetadata, KafkaErrorCode.COORDINATOR_NOT_AVAILABLE.getCode());
         }
 
         if (!kafkaCoordinator.isCurrentCoordinator(groupId)) {
             logger.info("group {} coordinator changed", groupId);
             groupMetadataManager.removeGroup(groupId);
-            return buildCommitError(offsetMetadata, KafkaErrorCode.GROUP_COORDINATOR_NOT_AVAILABLE);
+            return buildCommitError(offsetMetadata, KafkaErrorCode.COORDINATOR_NOT_AVAILABLE.getCode());
         }
 
         // 自主分配分区的情况
@@ -68,7 +68,7 @@ public class GroupOffsetHandler extends Service {
             } else {
                 // the group has failed over to this coordinator (which will be handled in KAFKA-2017),
                 // or this is a request coming from an older generation. either way, reject the commit
-                return buildCommitError(offsetMetadata, KafkaErrorCode.ILLEGAL_GENERATION);
+                return buildCommitError(offsetMetadata, KafkaErrorCode.ILLEGAL_GENERATION.getCode());
             }
         }
 
@@ -79,7 +79,7 @@ public class GroupOffsetHandler extends Service {
 
     protected Table<String, Integer, OffsetMetadataAndError> handleCommitOffsets(KafkaCoordinatorGroup group, String groupId, String memberId, int generationId, Table<String, Integer, OffsetAndMetadata> offsetMetadata) {
         if (group.stateIs(GroupState.DEAD) || !group.isHasMember(memberId)) {
-            return buildCommitError(offsetMetadata, KafkaErrorCode.UNKNOWN_MEMBER_ID);
+            return buildCommitError(offsetMetadata, KafkaErrorCode.UNKNOWN_MEMBER_ID.getCode());
         }
         if (group.stateIs(GroupState.EMPTY) && generationId < 0) {
             // The group is only using Kafka to store offsets.
@@ -87,10 +87,10 @@ public class GroupOffsetHandler extends Service {
             return groupOffsetManager.saveOffsets(groupId, offsetMetadata);
         }
         if (group.stateIs(GroupState.AWAITINGSYNC)) {
-            return buildCommitError(offsetMetadata, KafkaErrorCode.REBALANCE_IN_PROGRESS);
+            return buildCommitError(offsetMetadata, KafkaErrorCode.REBALANCE_IN_PROGRESS.getCode());
         }
         if (generationId != group.getGenerationId()) {
-            return buildCommitError(offsetMetadata, KafkaErrorCode.ILLEGAL_GENERATION);
+            return buildCommitError(offsetMetadata, KafkaErrorCode.ILLEGAL_GENERATION.getCode());
         }
         groupBalanceManager.completeAndScheduleNextHeartbeatExpiration(group, group.getMember(memberId));
         return groupOffsetManager.saveOffsets(groupId, offsetMetadata);
@@ -98,7 +98,7 @@ public class GroupOffsetHandler extends Service {
 
     public Table<String, Integer, OffsetMetadataAndError> handleFetchOffsets(String groupId, HashMultimap<String, Integer> topicAndPartitions) {
         if (!isStarted()) {
-            return buildFetchError(topicAndPartitions, KafkaErrorCode.GROUP_COORDINATOR_NOT_AVAILABLE);
+            return buildFetchError(topicAndPartitions, KafkaErrorCode.COORDINATOR_NOT_AVAILABLE.getCode());
         }
         // return offsets blindly regardless the current group state since the group may be using
         // Kafka commit storage without automatic group management

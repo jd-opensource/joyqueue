@@ -45,7 +45,7 @@ public class OffsetCommitHandler extends AbstractKafkaCommandHandler implements 
             for (String topic : result.rowKeySet()) {
                 Map<Integer, OffsetMetadataAndError> errorCodes = result.row(topic);
                 for (Map.Entry<Integer, OffsetMetadataAndError> codeEntry : errorCodes.entrySet()) {
-                    if (codeEntry.getValue().getError() == KafkaErrorCode.NONE) {
+                    if (codeEntry.getValue().getError() == KafkaErrorCode.NONE.getCode()) {
                         logger.debug("offset commit request with correlation id {} from client {} on partition {} offset {}",
                                 offsetCommitRequest.getGroupId(), offsetCommitRequest.getClientId(), topic, codeEntry.getValue());
                     } else {

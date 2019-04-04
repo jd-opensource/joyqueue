@@ -96,10 +96,10 @@ public class TopicMetadataHandler extends AbstractKafkaCommandHandler implements
 
             if (topicConfig != null) {
                 List<KafkaPartitionMetadata> kafkaPartitionMetadata = getPartitionMetadata(topicConfig);
-                KafkaTopicMetadata kafkaTopicMetadata = new KafkaTopicMetadata(topicConfig.getName().getFullName(), kafkaPartitionMetadata, KafkaErrorCode.NONE);
+                KafkaTopicMetadata kafkaTopicMetadata = new KafkaTopicMetadata(topicConfig.getName().getFullName(), kafkaPartitionMetadata, KafkaErrorCode.NONE.getCode());
                 result.add(kafkaTopicMetadata);
             } else {
-                KafkaTopicMetadata kafkaTopicMetadata = new KafkaTopicMetadata(topicName.getFullName(), Collections.emptyList(), KafkaErrorCode.TOPIC_AUTHORIZATION_FAILED);
+                KafkaTopicMetadata kafkaTopicMetadata = new KafkaTopicMetadata(topicName.getFullName(), Collections.emptyList(), KafkaErrorCode.TOPIC_AUTHORIZATION_FAILED.getCode());
                 result.add(kafkaTopicMetadata);
             }
         }
@@ -109,7 +109,7 @@ public class TopicMetadataHandler extends AbstractKafkaCommandHandler implements
     protected List<KafkaPartitionMetadata> getPartitionMetadata(TopicConfig topicConfig) {
         List<KafkaPartitionMetadata> result = Lists.newLinkedList();
         for (Partition partition : topicConfig.fetchPartitionMetadata()) {
-            short errorCode = KafkaErrorCode.NONE;
+            short errorCode = KafkaErrorCode.NONE.getCode();
             KafkaBroker leader = null;
             List<KafkaBroker> replicas = Lists.newLinkedList();
             List<KafkaBroker> isrs = Lists.newLinkedList();
@@ -117,7 +117,7 @@ public class TopicMetadataHandler extends AbstractKafkaCommandHandler implements
             if (partition.getLeader() != null) {
                 leader = new KafkaBroker(partition.getLeader().getId(), partition.getLeader().getIp(), partition.getLeader().getPort());
             } else {
-                errorCode = KafkaErrorCode.LEADER_NOT_AVAILABLE;
+                errorCode = KafkaErrorCode.LEADER_NOT_AVAILABLE.getCode();
             }
 
             for (Broker replica : partition.getReplicas()) {

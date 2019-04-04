@@ -78,7 +78,7 @@ public class ListOffsetsHandler extends AbstractKafkaCommandHandler implements B
         PartitionGroup partitionGroup = clusterManager.getPartitionGroup(topic, (short) partition);
         if (partitionGroup == null) {
             logger.error("list offset error, partitionGroup not exist, topic: {}, partition: {}", topic, partition);
-            return new PartitionOffsetsResponse(KafkaErrorCode.NOT_LEADER_FOR_PARTITION, timestamp, -1);
+            return new PartitionOffsetsResponse(KafkaErrorCode.NOT_LEADER_FOR_PARTITION.getCode(), timestamp, -1);
         }
 
         long offset = 0L;
@@ -93,7 +93,7 @@ public class ListOffsetsHandler extends AbstractKafkaCommandHandler implements B
             offset = partitionGroupStore.getIndex((short) partition, timestamp);
         }
 
-        return new PartitionOffsetsResponse(KafkaErrorCode.NONE, timestamp, offset);
+        return new PartitionOffsetsResponse(KafkaErrorCode.NONE.getCode(), timestamp, offset);
     }
 
     @Override

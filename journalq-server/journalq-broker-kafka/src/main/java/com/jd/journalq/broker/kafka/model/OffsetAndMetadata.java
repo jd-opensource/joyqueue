@@ -13,6 +13,7 @@ public class OffsetAndMetadata {
 
     private long offset;
     private String metadata;
+    private int leaderEpoch;
     private long offsetCommitTime;
 
     public OffsetAndMetadata() {
@@ -26,6 +27,13 @@ public class OffsetAndMetadata {
     public OffsetAndMetadata(long offset, String metadata, long offsetCommitTime) {
         this.offset = offset;
         this.metadata = metadata;
+        this.offsetCommitTime = offsetCommitTime;
+    }
+
+    public OffsetAndMetadata(long offset, String metadata, int leaderEpoch, long offsetCommitTime) {
+        this.offset = offset;
+        this.metadata = metadata;
+        this.leaderEpoch = leaderEpoch;
         this.offsetCommitTime = offsetCommitTime;
     }
 
@@ -44,6 +52,15 @@ public class OffsetAndMetadata {
     public void setMetadata(String metadata) {
         this.metadata = metadata;
     }
+
+    public void setLeaderEpoch(int leaderEpoch) {
+        this.leaderEpoch = leaderEpoch;
+    }
+
+    public int getLeaderEpoch() {
+        return leaderEpoch;
+    }
+
     public long getOffsetCommitTime() {
         return offsetCommitTime;
     }

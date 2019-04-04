@@ -4,7 +4,6 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalNotification;
 import com.jd.journalq.broker.kafka.config.KafkaConfig;
-import com.jd.journalq.broker.kafka.exception.LeaderNotAvailableException;
 import com.jd.journalq.broker.network.support.BrokerTransportClientFactory;
 import com.jd.journalq.domain.Broker;
 import com.jd.journalq.network.transport.Transport;
@@ -67,7 +66,7 @@ public class GroupOffsetSyncSessionManager extends Service {
             });
             return brokerTransport;
         } catch (ExecutionException e) {
-            throw new LeaderNotAvailableException(String.format("create offset sync transport failed, broker: {id: %s, ip: %s, port: %s}",
+            throw new RuntimeException(String.format("create offset sync transport failed, broker: {id: %s, ip: %s, port: %s}",
                     broker.getId(), broker.getIp(), broker.getBackEndPort()), e);
         }
     }

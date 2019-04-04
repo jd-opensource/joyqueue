@@ -95,7 +95,7 @@ public class DelayedJoin extends DelayedOperation {
                 }
 
                 GroupJoinGroupResult groupJoinGroupResult = new GroupJoinGroupResult(members, memberMetadata.getId(), group.getGenerationId(), group.getProtocol(),
-                        group.getLeaderId(), KafkaErrorCode.NONE);
+                        group.getLeaderId(), KafkaErrorCode.NONE.getCode());
                 memberMetadata.getAwaitingJoinCallback().sendResponseCallback(groupJoinGroupResult);
                 memberMetadata.setAwaitingJoinCallback(null);
 

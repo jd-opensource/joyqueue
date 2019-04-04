@@ -109,10 +109,16 @@ public class KafkaCoordinatorGroup extends CoordinatorGroup {
     }
 
     public boolean isHasMember(String memberId) {
+        if (StringUtils.isBlank(memberId)) {
+            return false;
+        }
         return getMembers().containsKey(memberId);
     }
 
     public KafkaCoordinatorGroupMember getMember(String memberId) {
+        if (StringUtils.isBlank(memberId)) {
+            return null;
+        }
         return (KafkaCoordinatorGroupMember) getMembers().get(memberId);
     }
 
@@ -124,7 +130,7 @@ public class KafkaCoordinatorGroup extends CoordinatorGroup {
         if (StringUtils.isBlank(leaderId)) {
             leaderId = member.getId();
         }
-        getMembers().put(member.getId(), member);
+        super.addMember(member);
     }
 
     public void removeMember(String memberId) {

@@ -11,3 +11,9 @@ com.jd.journalq.broker.kafka.network.codec.ListOffsetsCodec
 com.jd.journalq.broker.kafka.network.codec.ProduceCodec
 com.jd.journalq.broker.kafka.network.codec.SyncGroupCodec
 com.jd.journalq.broker.kafka.network.codec.TopicMetadataCodec
+
+com.jd.journalq.broker.kafka.network.codec.AddOffsetsToTxnCodec
+com.jd.journalq.broker.kafka.network.codec.AddPartitionsToTxnCodec
+com.jd.journalq.broker.kafka.network.codec.EndTxnCodec
+com.jd.journalq.broker.kafka.network.codec.InitProducerIdCodec
+com.jd.journalq.broker.kafka.network.codec.TxnOffsetCommitCodec

@@ -58,8 +58,8 @@ public abstract class AbstractKafkaMessageSerializer {
         return attribute & COMPRESSION_CODEC_MASK;
     }
 
-    protected static int isTransactionl(short attribute) {
-        return attribute & TRANSACTIONAL_FLAG_MASK;
+    protected static boolean isTransactionl(short attribute) {
+        return (attribute & TRANSACTIONAL_FLAG_MASK) > 0;
     }
 
     protected static int getTimestampType(short attribute) {

@@ -56,7 +56,7 @@ public class PartitionAssignmentHandler extends Service {
 
         if (member == null) {
             member = new JMQCoordinatorGroupMember(connectionId, group.getId(), connectionId, connectionHost, sessionTimeout);
-            group.getMembers().put(connectionId, member);
+            group.addMember(member);
         } else {
             memberTimeoutDelayedOperationManager.checkAndComplete(memberTimeoutDelayedOperationKey);
         }

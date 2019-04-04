@@ -45,22 +45,22 @@ public class FindCoordinatorHandler extends AbstractKafkaCommandHandler implemen
 
         if (StringUtils.isBlank(groupId)) {
             logger.warn("groupId error, groupId: {}", groupId);
-            return new Command(new FindCoordinatorResponse(KafkaErrorCode.INVALID_GROUP_ID, KafkaBroker.INVALID));
+            return new Command(new FindCoordinatorResponse(KafkaErrorCode.INVALID_GROUP_ID.getCode(), KafkaBroker.INVALID));
         }
 
         if (!clusterManager.hasSubscribe(groupId, Subscription.Type.CONSUMPTION)) {
             logger.warn("find subscribe for group {}, subscribe not exist", groupId);
-            return new Command(new FindCoordinatorResponse(KafkaErrorCode.INVALID_GROUP_ID, KafkaBroker.INVALID));
+            return new Command(new FindCoordinatorResponse(KafkaErrorCode.INVALID_GROUP_ID.getCode(), KafkaBroker.INVALID));
         }
 
         Broker coordinator = groupCoordinator.findCoordinator(groupId);
         if (coordinator == null) {
             logger.error("find coordinator for group {}, coordinator is null", groupId);
-            return new Command(new FindCoordinatorResponse(KafkaErrorCode.NOT_COORDINATOR_FOR_CONSUMER, KafkaBroker.INVALID));
+            return new Command(new FindCoordinatorResponse(KafkaErrorCode.COORDINATOR_NOT_AVAILABLE.getCode(), KafkaBroker.INVALID));
         }
 
         logger.info("find coordinator for group, broker: {id: {}, ip: {}, port: {}}", coordinator.getId(), coordinator.getIp(), coordinator.getPort());
-        FindCoordinatorResponse findCoordinatorResponse = new FindCoordinatorResponse(KafkaErrorCode.NONE, new KafkaBroker(coordinator.getId(), coordinator.getIp(), coordinator.getPort()));
+        FindCoordinatorResponse findCoordinatorResponse = new FindCoordinatorResponse(KafkaErrorCode.NONE.getCode(), new KafkaBroker(coordinator.getId(), coordinator.getIp(), coordinator.getPort()));
         return new Command(findCoordinatorResponse);
     }
 
