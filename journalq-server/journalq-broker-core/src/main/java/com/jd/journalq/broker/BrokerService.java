@@ -6,6 +6,7 @@ import com.jd.journalq.broker.config.BrokerConfig;
 import com.jd.journalq.broker.config.Configuration;
 import com.jd.journalq.broker.config.ContextManager;
 import com.jd.journalq.broker.consumer.Consume;
+import com.jd.journalq.broker.consumer.MessageConvertSupport;
 import com.jd.journalq.broker.coordinator.CoordinatorService;
 import com.jd.journalq.broker.coordinator.config.CoordinatorConfig;
 import com.jd.journalq.broker.election.ElectionService;
@@ -22,8 +23,8 @@ import com.jd.journalq.broker.store.StoreManager;
 import com.jd.journalq.domain.Config;
 import com.jd.journalq.domain.Consumer;
 import com.jd.journalq.domain.Producer;
-import com.jd.journalq.security.Authentication;
 import com.jd.journalq.nsr.NameService;
+import com.jd.journalq.security.Authentication;
 import com.jd.journalq.server.retry.api.MessageRetry;
 import com.jd.journalq.store.StoreService;
 import com.jd.journalq.toolkit.config.Property;
@@ -37,9 +38,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -69,9 +67,9 @@ public class BrokerService extends Service {
     private StoreManager storeManager;
     private NameService nameService;
 
-    private Configuration configuration;
     private CoordinatorService coordinatorService;
     private ArchiveManager archiveManager;
+    private MessageConvertSupport messageConvertSupport;
     private String[] args;
 
     public BrokerService() {
@@ -84,10 +82,8 @@ public class BrokerService extends Service {
     @Override
     protected void validate() throws Exception {
         this.brokerContext = new BrokerContext();
-        if (this.configuration == null) {
-            this.configuration = new Configuration();
-        }
-        parseParams(this.configuration, args);
+        Configuration configuration = new Configuration();
+        parseParams(configuration, args);
 
         ContextManager contextManager = new ContextManager(configuration);
         brokerContext.propertySupplier(configuration);
@@ -134,6 +130,9 @@ public class BrokerService extends Service {
                 clusterManager, nameService);
         this.brokerContext.coordinnatorService(this.coordinatorService);
 
+        this.messageConvertSupport = new MessageConvertSupport();
+        this.brokerContext.messageConvertSupport(this.messageConvertSupport);
+
         // build produce
         this.produce = getProduce(brokerContext);
         this.brokerContext.produce(produce);
@@ -155,7 +154,7 @@ public class BrokerService extends Service {
         this.brokerContext.electionService(electionService);
 
         // manage service
-        this.brokerManageService = new BrokerManageService(new BrokerManageConfig(configuration, brokerConfig),
+        this.brokerManageService = new BrokerManageService(new BrokerManageConfig(configuration,brokerConfig),
                 brokerMonitorService,
                 clusterManager,
                 storeService.getManageService(),
@@ -257,8 +256,8 @@ public class BrokerService extends Service {
         startIfNecessary(retryManager);
         startIfNecessary(brokerMonitorService);
         startIfNecessary(produce);
-        startIfNecessary(archiveManager);
         startIfNecessary(consume);
+        startIfNecessary(storeService);
         //must start after store manager
         startIfNecessary(storeManager);
         startIfNecessary(electionService);
@@ -266,23 +265,7 @@ public class BrokerService extends Service {
         startIfNecessary(brokerServer);
         startIfNecessary(coordinatorService);
         startIfNecessary(brokerManageService);
-        printConfig();
-
-    }
-
-    private void printConfig() {
-        StringBuffer buffer = new StringBuffer("broker start with configuration:").append('\n');
-        if (configuration != null) {
-            List<Property> properties = new ArrayList<>(configuration.getProperties());
-            Collections.sort(properties, Comparator.comparing(Property::getKey));
-            for (Property property : properties) {
-                String value = property.getValue() == null ? "null" : property.getValue().toString();
-                buffer.append('\t').append(property.getKey()).append(": ").append(value).append('\n');
-            }
-        }
-
-        logger.info(buffer.toString());
-        logger.info("broker.id[{}],ip[{}],frontPort[{}],backendPort[{}],monitorPort[{}],nameServer port[{}]",
+        logger.info("brokerServer start ,broker.id[{}],ip[{}],frontPort[{}],backendPort[{}],monitorPort[{}],nameServer port[{}]",
                 brokerConfig.getBrokerId(),
                 clusterManager.getBroker().getIp(),
                 brokerConfig.getFrontendConfig().getPort(),

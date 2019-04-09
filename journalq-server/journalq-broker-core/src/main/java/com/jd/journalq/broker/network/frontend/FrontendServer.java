@@ -34,7 +34,7 @@ public class FrontendServer extends Service {
     public FrontendServer(ServerConfig config, ProtocolManager protocolManager) {
         this.config = config;
         this.protocolManager = protocolManager;
-        this.transportEventBus = new EventBus<>("jmq-frontend-eventBus");
+        this.transportEventBus = new EventBus<>("journalq-frontend-eventBus");
         this.exceptionHandler = new BrokerExceptionHandler();
         this.transportServerFactory = new MultiProtocolTransportServerFactory(protocolManager, transportEventBus, exceptionHandler);
     }
