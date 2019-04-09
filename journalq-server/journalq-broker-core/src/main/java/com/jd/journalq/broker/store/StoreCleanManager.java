@@ -28,13 +28,13 @@ import java.util.concurrent.*;
 public class StoreCleanManager extends Service {
     private static final Logger LOG = LoggerFactory.getLogger(StoreCleanManager.class);
 
-    private static final int SCHEDULE_EXECUTOR_THREADS = 16;
+    private final static int SCHEDULE_EXECUTOR_THREADS = 16;
     private PropertySupplier propertySupplier;
     private BrokerStoreConfig brokerStoreConfig;
     private StoreService storeService;
     private ClusterManager clusterManager;
     private PositionManager positionManager;
-    private List<StoreCleaningStrategy> storeCleaningStrategies;
+    private Map<String, StoreCleaningStrategy> cleaningStrategyMap;
     private final ScheduledExecutorService scheduledExecutorService;
     private ScheduledFuture cleanFuture;
 
@@ -54,10 +54,12 @@ public class StoreCleanManager extends Service {
         Preconditions.checkArgument(storeService != null, "store service can not be null");
         Preconditions.checkArgument(positionManager != null, "position manager can not be null");
 
-        storeCleaningStrategies = initStoreCleaningStrategyList();
-        Preconditions.checkArgument(storeCleaningStrategies.size() != 0, "cleaning strategy can not be null");
+        List<StoreCleaningStrategy> storeCleaningStrategies = initStoreCleaningStrategyList();
+        Preconditions.checkArgument(storeCleaningStrategies.size() != 0, "load cleaning strategy list can not be null");
+        cleaningStrategyMap = new HashMap<>(storeCleaningStrategies.size());
         for (StoreCleaningStrategy cleaningStrategy : storeCleaningStrategies) {
             cleaningStrategy.setSupplier(propertySupplier);
+            cleaningStrategyMap.put(cleaningStrategy.getClass().getSimpleName(), cleaningStrategy);
         }
     }
 
@@ -99,7 +101,7 @@ public class StoreCleanManager extends Service {
     }
 
     private void clean() {
-        Map<TopicConfig, List<TopicPartitionAckIndex>> topicConfigListMap = new HashMap<>();
+        LOG.info("start scheduled StoreCleaningStrategy task use class: <{}>!!!", brokerStoreConfig.getCleanStrategyClass());
         List<TopicConfig> topicConfigs = clusterManager.getTopics();
         if (topicConfigs != null && topicConfigs.size() > 0) {
             topicConfigs.forEach(
@@ -120,6 +122,8 @@ public class StoreCleanManager extends Service {
                                                                 try {
                                                                     minAckIndex = Math.min(minAckIndex, positionManager.getLastMsgAckIndex(topicConfig.getName(), app, partition));
                                                                 } catch (JMQException e) {
+                                                                    //minAckIndex = Long.MAX_VALUE;
+                                                                    LOG.error("Error to get last topic & app offset: <{}>", e);
                                                                     e.printStackTrace();
                                                                 }
                                                             }
@@ -127,32 +131,23 @@ public class StoreCleanManager extends Service {
                                                         ackIndices.add(new TopicPartitionAckIndex(topicConfig.getName(), partition, minAckIndex));
                                                     }
                                             );
-                                            topicConfigListMap.put(topicConfig, ackIndices);
+                                            long minPartitionAckIndex = Long.MAX_VALUE;
+                                            for (TopicPartitionAckIndex partitionAckIndex : ackIndices) {
+                                                minPartitionAckIndex = Math.min(minPartitionAckIndex, partitionAckIndex.getMinAckIndex());
+                                            }
+                                            StoreCleaningStrategy cleaningStrategy = null;
+                                            try {
+                                                cleaningStrategy = cleaningStrategyMap.get(brokerStoreConfig.getCleanStrategyClass());
+                                                if (cleaningStrategy != null) {
+                                                    cleaningStrategy.deleteIfNeeded(storeService.getStore(topicConfig.getName().getFullName(), partitionGroup.getGroup()), minPartitionAckIndex);
+                                                }
+                                            } catch (IOException e) {
+                                                LOG.error("Error to clean store for topic <{}>, partition group <{}>, delete index <{}> on clean class <{}>", topicConfig, partitionGroup.getGroup(), minPartitionAckIndex, cleaningStrategy);
+                                                e.printStackTrace();
+                                            }
                                         }
                                     }
                             );
-                        }
-                    }
-            );
-        }
-
-        // Partition PartitionGroup
-
-        if (!topicConfigListMap.isEmpty()) {
-            topicConfigListMap.forEach(
-                    (topicConfig, ackIndices) -> {
-                        long minPartitionAckIndex = Long.MAX_VALUE;
-                        for (TopicPartitionAckIndex partitionAckIndex : ackIndices) {
-                            minPartitionAckIndex = Math.min(minPartitionAckIndex, partitionAckIndex.getMinAckIndex());
-                        }
-                        try {
-                            for (StoreCleaningStrategy cleaningStrategy : storeCleaningStrategies) {
-                                cleaningStrategy.deleteIfNeeded(storeService, topicConfig.getName(), minPartitionAckIndex);
-                            }
-                            Thread.sleep(brokerStoreConfig.getStorePgCleanIntervalTime());
-                        } catch (IOException | InterruptedException e) {
-                            LOG.error("Delete message storage error: <{}>, <{}>", ackIndices, e);
-                            e.printStackTrace();
                         }
                     }
             );

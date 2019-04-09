@@ -4,6 +4,7 @@ import com.jd.journalq.broker.archive.ArchiveManager;
 import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.config.BrokerConfig;
 import com.jd.journalq.broker.consumer.Consume;
+import com.jd.journalq.broker.consumer.MessageConvertSupport;
 import com.jd.journalq.broker.consumer.position.PositionManager;
 import com.jd.journalq.broker.coordinator.CoordinatorService;
 import com.jd.journalq.broker.election.ElectionService;
@@ -11,12 +12,12 @@ import com.jd.journalq.broker.manage.BrokerManageService;
 import com.jd.journalq.broker.monitor.BrokerMonitor;
 import com.jd.journalq.broker.monitor.BrokerMonitorService;
 import com.jd.journalq.broker.monitor.SessionManager;
+import com.jd.journalq.broker.producer.Produce;
 import com.jd.journalq.domain.Broker;
 import com.jd.journalq.domain.Consumer;
 import com.jd.journalq.domain.Producer;
-import com.jd.journalq.security.Authentication;
 import com.jd.journalq.nsr.NameService;
-import com.jd.journalq.broker.producer.Produce;
+import com.jd.journalq.security.Authentication;
 import com.jd.journalq.server.retry.api.MessageRetry;
 import com.jd.journalq.store.StoreService;
 import com.jd.journalq.toolkit.config.PropertySupplier;
@@ -46,6 +47,7 @@ public class BrokerContext {
     private ArchiveManager archiveManager;
     private Consumer.ConsumerPolicy globalConsumerPolicy;
     private Producer.ProducerPolicy globalproducerPolicy;
+    private MessageConvertSupport messageConvertSupport;
 
     public BrokerContext() {
     }
@@ -145,6 +147,10 @@ public class BrokerContext {
         return globalproducerPolicy;
     }
 
+    public MessageConvertSupport getMessageConvertSupport() {
+        return messageConvertSupport;
+    }
+
     public PropertySupplier getPropertySupplier() {
 
         return propertySupplier;
@@ -242,6 +248,11 @@ public class BrokerContext {
 
     public BrokerContext consumerPolicy(Consumer.ConsumerPolicy consumerPolicy) {
         this.globalConsumerPolicy = consumerPolicy;
+        return this;
+    }
+
+    public BrokerContext messageConvertSupport(MessageConvertSupport messageConvertSupport) {
+        this.messageConvertSupport = messageConvertSupport;
         return this;
     }
 

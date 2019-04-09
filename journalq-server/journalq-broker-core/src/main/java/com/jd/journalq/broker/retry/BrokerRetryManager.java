@@ -88,7 +88,9 @@ public class BrokerRetryManager extends Service implements MessageRetry<Long>, B
 
                 @Override
                 public TransportClient createTransportClient() {
-                    return new BrokerTransportClientFactory().create(new ClientConfig());
+                    ClientConfig clientConfig = new ClientConfig();
+                    clientConfig.setIoThreadName("jmq-retry-io-eventLoop");
+                    return new BrokerTransportClientFactory().create(clientConfig);
                 }
             };
         }

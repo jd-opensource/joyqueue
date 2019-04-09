@@ -1,16 +1,14 @@
 package com.jd.journalq.broker.election;
 
-import com.jd.journalq.broker.buffer.Serializer;
+import com.jd.journalq.broker.config.Configuration;
 import com.jd.journalq.domain.Broker;
 import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.domain.QosLevel;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.message.BrokerMessage;
 import com.jd.journalq.message.SourceType;
-import com.jd.journalq.store.PartitionGroupStore;
-import com.jd.journalq.store.StoreService;
-import com.jd.journalq.store.WriteRequest;
-import com.jd.journalq.store.WriteResult;
+import com.jd.journalq.broker.buffer.Serializer;
+import com.jd.journalq.store.*;
 import com.jd.journalq.store.message.MessageParser;
 import com.jd.journalq.store.replication.ReplicableStore;
 import com.jd.journalq.toolkit.concurrent.EventListener;
@@ -48,7 +46,7 @@ public class RaftLeaderElectionTest {
 
     private Broker[] brokers = new Broker[NODE_NUM];
 
-    private StoreService[] storeServices = null;//new Store[RAFT_ELECTION_NUM];
+    private Store[] storeServices = new Store[RAFT_ELECTION_NUM];
 
     private TopicName topic1 = TopicName.parse("test");
     private int partitionGroup1 = 1;
@@ -58,18 +56,21 @@ public class RaftLeaderElectionTest {
     private ProduceTask produceTask = new ProduceTask(-1);
     private ConsumeTask consumeTask = new ConsumeTask(-1);
 
+    private int maxMessageLength = 1024 * 1024;
+
     @Before
     public void setUp() throws Exception {
         String localIp = IpUtil.getLocalIp();
 
         for (int i = 0; i < RAFT_ELECTION_NUM; i++) {
-            // TODO 临时注释掉
-          //  StoreConfig storeConfig = new StoreConfig(null);
-           // storeConfig.setPath("/Users/zhuduohui/Data/jmq/store" + i);
-           // storeServices[i] = new Store(storeConfig);
+            Configuration conf = new Configuration();
+            StoreConfig storeConfig = new StoreConfig(conf);
+            storeConfig.setPath("/Users/zhuduohui/Data/jmq/store" + i);
+            storeServices[i] = new Store(storeConfig);
+            storeServices[i].start();
 
-            ElectionConfig electionConfig = new ElectionConfigStub(null);
-            electionConfig.setMetadataFile("/Users/zhuduohui/Data/jmq/raft" + i + ".dat");
+            ElectionConfig electionConfig = new ElectionConfig(conf);
+            electionConfig.setElectionMetaPath("/Users/zhuduohui/Data/jmq/raft" + i + ".dat");
             electionConfig.setListenPort("1800" + (i + 1));
 
             electionManager[i] = new ElectionManagerStub(electionConfig, storeServices[i], new ConsumeStub());
@@ -101,9 +102,8 @@ public class RaftLeaderElectionTest {
         }
 
         for (int i = 0; i < RAFT_ELECTION_NUM; i++) {
-            //storeServices[i].removePartitionGroup(topic1, partitionGroup1);
-          //TODO 临时注释掉
-            //  if (storeServices[i] != null) storeServices[i].physicalDelete();
+            if (storeServices[i] != null) storeServices[i].removePartitionGroup(topic1.getFullName(), partitionGroup1);
+            //if (storeServices[i] != null) storeServices[i].physicalDelete();
 
             if (electionManager[i] != null) {
                 leaderElections[i] = electionManager[i].getLeaderElection(topic1, partitionGroup1);
@@ -114,6 +114,16 @@ public class RaftLeaderElectionTest {
         }
 
         //brokerService.stop();
+    }
+
+    private void createElectionManager(List<Broker> allNodes) throws Exception {
+        for (int i = 0; i < RAFT_ELECTION_NUM; i++) {
+            storeServices[i].createPartitionGroup(topic1.getFullName(), partitionGroup1, new short[]{1}, new int[]{1});
+            electionManager[i].onPartitionGroupCreate(PartitionGroup.ElectType.raft,
+                    topic1, partitionGroup1, allNodes, new TreeSet<>(), brokers[i].getId(), -1);
+            leaderElections[i] = electionManager[i].getLeaderElection(topic1, partitionGroup1);
+            electionManager[i].addListener(new ElectionEventListener());
+        }
     }
 
     private int nextNode(int nodeId) {
@@ -130,8 +140,7 @@ public class RaftLeaderElectionTest {
         }
 
         for (int i = 0; i < RAFT_ELECTION_NUM; i++) {
-            // TODO
-           // storeServices[i].createPartitionGroup(topic1.getFullName(), partitionGroup1, new short[]{1}, new int[]{1});
+            storeServices[i].createPartitionGroup(topic1.getFullName(), partitionGroup1, new short[]{1}, new int[]{1});
             electionManager[i].onPartitionGroupCreate(PartitionGroup.ElectType.raft,
                     topic1, partitionGroup1, allNodes, new TreeSet<Integer>(), brokers[i].getId(), -1);
             leaderElections[i] = electionManager[i].getLeaderElection(topic1, partitionGroup1);
@@ -224,13 +233,7 @@ public class RaftLeaderElectionTest {
             allNodes.add(brokers[i]);
         }
 
-        for (int i = 0; i < RAFT_ELECTION_NUM; i++) {
-            storeServices[i].createPartitionGroup(topic1.getFullName(), partitionGroup1, new short[]{1}, new int[]{1});
-            electionManager[i].onPartitionGroupCreate(PartitionGroup.ElectType.raft,
-                    topic1, partitionGroup1, allNodes, new TreeSet<>(), brokers[i].getId(), -1);
-            leaderElections[i] = electionManager[i].getLeaderElection(topic1, partitionGroup1);
-            electionManager[i].addListener(new ElectionEventListener());
-        }
+        createElectionManager(allNodes);
 
         Thread.sleep(5000);
         int leaderId = leaderElections[0].getLeaderId();
@@ -249,8 +252,8 @@ public class RaftLeaderElectionTest {
         produceTask.start();
         consumeTask.start();
 
-        for (int i = 0; i < 10; i++) {
-            Thread.sleep(240000);
+        for (int i = 0; i < 5; i++) {
+            Thread.sleep(24000);
 
             electionManager[leaderId - 1].removeLeaderElection(topic1.getFullName(), partitionGroup1);
             electionManager[leaderId - 1].stop();
@@ -268,7 +271,7 @@ public class RaftLeaderElectionTest {
             produceTask.setLeaderId(leaderId1);
             consumeTask.setLeaderId(leaderId1);
 
-            Thread.sleep(60000);
+            Thread.sleep(12000);
 
             electionManager[leaderId - 1].start();
             electionManager[leaderId - 1].onPartitionGroupCreate(PartitionGroup.ElectType.raft,
@@ -290,15 +293,15 @@ public class RaftLeaderElectionTest {
         long[] messageLength = new long[RAFT_ELECTION_NUM];
         for (int i = 0; i < RAFT_ELECTION_NUM; i++) {
             ReplicableStore rStore = storeServices[i].getReplicableStore(topic1.getFullName(), partitionGroup1);
-            ByteBuffer messages = rStore.readEntryBuffer(0, Integer.MAX_VALUE);
+            ByteBuffer messages = rStore.readEntryBuffer(0, maxMessageLength);
             messageLength[i] += messages.remaining();
             long position = 0;
             while (messages.remaining() > 0) {
                 position += messages.remaining();
-                messages = rStore.readEntryBuffer(position, Integer.MAX_VALUE);
+                if (position >= rStore.rightPosition()) break;
+                messages = rStore.readEntryBuffer(position, maxMessageLength);
                 messageLength[i] += messages.remaining();
             }
-            messageLength[i] += messages.remaining();
 
             logger.info("Store {} message length is {}", i, messageLength[i]);
 
@@ -391,13 +394,7 @@ public class RaftLeaderElectionTest {
             allNodes.add(brokers[i]);
         }
 
-        for (int i = 0; i < RAFT_ELECTION_NUM; i++) {
-            storeServices[i].createPartitionGroup(topic1.getFullName(), partitionGroup1, new short[]{1}, new int[]{1});
-            electionManager[i].onPartitionGroupCreate(PartitionGroup.ElectType.raft,
-                    topic1, partitionGroup1, allNodes, new TreeSet<>(), brokers[i].getId(), -1);
-            leaderElections[i] = electionManager[i].getLeaderElection(topic1, partitionGroup1);
-            electionManager[i].addListener(new ElectionEventListener());
-        }
+        createElectionManager(allNodes);
 
         Thread.sleep(5000);
         int leaderId = leaderElections[0].getLeaderId();
@@ -496,9 +493,73 @@ public class RaftLeaderElectionTest {
 
     }
 
+
+
+    @Test
+    public void testTransferLeader() throws Exception {
+        List<Broker> allNodes = new LinkedList<>();
+        for (int i = 0; i < NODE_NUM; i++) {
+            allNodes.add(brokers[i]);
+        }
+
+        createElectionManager(allNodes);
+
+        produceTask.start();
+        consumeTask.start();
+
+        Thread.sleep(30000);
+        int leaderId = leaderElections[0].getLeaderId();
+        Assert.assertNotEquals(leaderId, -1);
+        logger.info("Leader id is " + leaderId);
+        Assert.assertEquals(leaderId, leaderElections[1].getLeaderId());
+        Assert.assertEquals(leaderId, leaderElections[2].getLeaderId());
+
+        electionManager[leaderId - 1].onLeaderChange(topic1, partitionGroup1, nextNode(leaderId));
+
+        Thread.sleep(30000);
+        int leaderId1 = leaderElections[leaderId - 1].getLeaderId();
+        logger.info("Leader1 id is " + leaderId1);
+        Assert.assertEquals(leaderId1, nextNode(leaderId));
+
+        for (int i = 0; i < RAFT_ELECTION_NUM; i++) {
+            Assert.assertEquals(leaderId1, leaderElections[i].getLeaderId());
+        }
+
+        {
+            electionManager[nextNode(leaderId1) - 1].removeLeaderElection(topic1.getFullName(), partitionGroup1);
+            electionManager[nextNode(leaderId1) - 1].stop();
+            logger.info("Node " + nextNode(leaderId1) + " stop");
+
+            Thread.sleep(10000);
+
+            electionManager[nextNode(leaderId1) - 1].start();
+            electionManager[nextNode(leaderId1) - 1].onPartitionGroupCreate(PartitionGroup.ElectType.raft,
+                    topic1, partitionGroup1, allNodes, new TreeSet<>(), brokers[nextNode(leaderId1) - 1].getId(), -1);
+            leaderElections[nextNode(leaderId1) - 1] = electionManager[nextNode(leaderId1) - 1].getLeaderElection(topic1, partitionGroup1);
+            electionManager[nextNode(leaderId1) - 1].addListener(new ElectionEventListener());
+            Thread.sleep(1000);
+        }
+
+        electionManager[leaderId1 - 1].onLeaderChange(topic1, partitionGroup1, nextNode(leaderId1));
+        Thread.sleep(30000);
+
+        int leaderId2 = leaderElections[leaderId1 - 1].getLeaderId();
+        logger.info("Leader2 id is " + leaderId2);
+        Assert.assertEquals(leaderId2, nextNode(leaderId1));
+
+        for (int i = 0; i < RAFT_ELECTION_NUM; i++) {
+            Assert.assertEquals(leaderId2, leaderElections[i].getLeaderId());
+        }
+
+        Thread.sleep(10000);
+
+        produceTask.stop(true);
+        consumeTask.stop(true);
+    }
+
     private void produceMessage(int leaderId, String topic, int partitionGroup, int messageCount) throws Exception {
 
-        PartitionGroupStore pgStore = storeServices[leaderId].getStore(topic, partitionGroup, QosLevel.PERSISTENCE);
+        PartitionGroupStore pgStore = storeServices[leaderId].getStore(topic, partitionGroup, QosLevel.RECEIVE);
         ReplicableStore replicableStores = storeServices[leaderId].getReplicableStore(topic, partitionGroup);
         if (!replicableStores.serviceStatus()) {
             logger.info("Produce message, store status is {}", replicableStores.serviceStatus());
@@ -514,7 +575,7 @@ public class RaftLeaderElectionTest {
 
             int msgSize = Serializer.sizeOf(brokerMessage);
             ByteBuffer buf = ByteBuffer.allocate(msgSize);
-            Serializer.write(brokerMessage, buf, msgSize);
+            Serializer.serialize(brokerMessage, buf, msgSize);
 
 
             CRC32 crc32 = new CRC32();
@@ -527,15 +588,23 @@ public class RaftLeaderElectionTest {
             Future<WriteResult> writeResultFuture = pgStore.asyncWrite(new WriteRequest((short) 1, buf));
             WriteResult writeResult = writeResultFuture.get(100, TimeUnit.MILLISECONDS);
             if (writeResult != null) {
-                logger.info("Topic {}, Write message to {} return code {}, indexies = {}",
-                        topic, leaderId, writeResult.getCode(), writeResult.getIndices());
+                //logger.info("Topic {}, Write message to {} return code {}, indexies = {}",
+                //        topic, leaderId, writeResult.getCode(), writeResult.getIndices());
             }
         }
     }
 
-    private ByteBuffer consumeMessage(int nodeId, String topic, int messageCount) throws Exception {
+    private ByteBuffer consumeMessage(int nodeId, String topic, long position, int maxMessageLength) throws Exception {
         ReplicableStore replicableStore = storeServices[nodeId].getReplicableStore(topic, partitionGroup1);
-        return replicableStore.readEntryBuffer(0, Integer.MAX_VALUE);
+        if (position >= replicableStore.rightPosition()) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException ignored) {}
+            if (position >= replicableStore.rightPosition()) {
+                return null;
+            }
+        }
+        return replicableStore.readEntryBuffer(position, maxMessageLength);
     }
 
     private class ProduceTask extends Thread {
@@ -561,15 +630,13 @@ public class RaftLeaderElectionTest {
                     if (leaderId != -1) {
                         produceMessage(leaderId - 1, topic1.getFullName(), partitionGroup1, 10);
                     }
-                    Thread.sleep(100);
+                    Thread.sleep(10);
                 } catch (Exception e) {
-                    logger.info("Produce message to {} fail, exception is {}", leaderId, e);
-                    e.printStackTrace();
+                    logger.info("Produce message to {} fail", leaderId, e);
+
                     try {
                         Thread.sleep(1000);
-                    } catch (InterruptedException ie) {
-                        e.printStackTrace();
-                    }
+                    } catch (InterruptedException ignored) {}
                 }
                 if (stop) break;
             }
@@ -580,6 +647,7 @@ public class RaftLeaderElectionTest {
     private class ConsumeTask extends Thread {
         private int leaderId = 0;
         private boolean stop = false;
+        private long position = 0;
 
         ConsumeTask(int leaderId) {
             this.leaderId = leaderId;
@@ -597,17 +665,22 @@ public class RaftLeaderElectionTest {
         public void run() {
             while(true) {
                 try {
-                    ByteBuffer messages = consumeMessage(leaderId - 1, topic1.getFullName(), 10);
-                    logger.info("Consume {} messages from {}", messages.remaining(), leaderId);
+                    if (leaderId != -1) {
+                        ByteBuffer messages = consumeMessage(leaderId - 1, topic1.getFullName(), position, maxMessageLength);
+                        if (messages == null) continue;
+
+                        position += messages.remaining();
+                        //logger.info("Consume {} messages from {}", messages.remaining(), leaderId);
+                    }
+
                     Thread.sleep(100);
+
                 } catch (Exception e) {
-                    logger.info("Consume message fail, exception is {}", e);
-                    e.printStackTrace();
+                    logger.info("Consume message fail", e);
+
                     try {
                         Thread.sleep(5000);
-                    } catch (InterruptedException ie) {
-                        e.printStackTrace();
-                    }
+                    } catch (InterruptedException ignored) {}
                 }
 
                 if (stop) break;
@@ -649,13 +722,11 @@ public class RaftLeaderElectionTest {
                         produceMessage(leaders[i] - 1, topics[i], partitionGroup1, 10);
                         Thread.sleep(100);
                     }catch(Exception e){
-                        logger.info("Produce message to {} fail, exception is {}", leaders[i], e);
-                        e.printStackTrace();
+                        logger.info("Produce message to {} fail", leaders[i], e);
+
                         try {
                             Thread.sleep(1000);
-                        } catch (InterruptedException ie) {
-                            e.printStackTrace();
-                        }
+                        } catch (InterruptedException ignored) {}
                     }
                 }
                 if (stop) break;
@@ -665,8 +736,9 @@ public class RaftLeaderElectionTest {
     }
 
     private class MultiConsumeTask extends Thread {
-        private int[] leaders = new int[TOPIC_NUM];
+        private int[] leaders;
         private boolean stop = false;
+        private long[] positions = new long[TOPIC_NUM];
 
         MultiConsumeTask(int[] leaders) {
             this.leaders = leaders;
@@ -681,17 +753,18 @@ public class RaftLeaderElectionTest {
             while(true) {
                 for (int i = 0; i < TOPIC_NUM; i++) {
                     try {
-                        ByteBuffer messages = consumeMessage(leaders[i] - 1, topics[i], 10);
+                        ByteBuffer messages = consumeMessage(leaders[i] - 1, topics[i], positions[i], maxMessageLength);
+                        if (messages == null) continue;
+
+                        positions[i] += messages.remaining();
                         logger.info("Consume {} messages from {}", messages.remaining(), leaders[i]);
                         Thread.sleep(1000);
                     } catch (Exception e) {
-                        logger.info("Consume message fail, exception is {}", e);
-                        e.printStackTrace();
+                        logger.info("Consume message to {} fail", leaders[i], e);
+
                         try {
                             Thread.sleep(5000);
-                        } catch (InterruptedException ie) {
-                            e.printStackTrace();
-                        }
+                        } catch (InterruptedException ignored) {}
                     }
                 }
                 if (stop) break;

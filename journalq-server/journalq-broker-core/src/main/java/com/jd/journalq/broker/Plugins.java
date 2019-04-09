@@ -1,10 +1,11 @@
 package com.jd.journalq.broker;
 
 import com.jd.journalq.broker.consumer.Consume;
+import com.jd.journalq.broker.consumer.MessageConverter;
 import com.jd.journalq.broker.election.ElectionService;
 import com.jd.journalq.broker.producer.Produce;
-import com.jd.journalq.security.Authentication;
 import com.jd.journalq.nsr.NameService;
+import com.jd.journalq.security.Authentication;
 import com.jd.journalq.server.archive.store.api.ArchiveStore;
 import com.jd.journalq.server.retry.api.MessageRetry;
 import com.jd.journalq.store.StoreService;
@@ -54,6 +55,11 @@ public interface Plugins {
      * 配置文件扩展点
      */
     ExtensionPoint<PropertySupplier, String> PROPERTY = new ExtensionPointLazy<>(PropertySupplier.class, SpiLoader.INSTANCE, null, null);
+
+    /**
+     * 消息转换扩展点
+     */
+    ExtensionPoint<MessageConverter, String> MESSAGE_CONVERTER = new ExtensionPointLazy<>(MessageConverter.class, SpiLoader.INSTANCE, null, null);
 
 
 }

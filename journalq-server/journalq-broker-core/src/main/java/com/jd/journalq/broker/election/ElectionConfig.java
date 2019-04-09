@@ -9,12 +9,45 @@ import com.jd.journalq.toolkit.config.PropertySupplier;
  * date: 2018/8/13
  */
 public class ElectionConfig {
-    public static final String ELECTION_META ="/raft_metafile.dat";
+    public static final String ELECTION_META_PATH ="/election";
     private String electionMetaPath ;
+    private String electionMetaFile;
     private PropertySupplier propertySupplier;
+
+    private int listenPort;
+
+    private String electionMetaPathStub;
 
     public ElectionConfig(PropertySupplier propertySupplier) {
         this.propertySupplier = propertySupplier;
+    }
+
+    public String getMetadataPath() {
+        if (electionMetaPath == null || electionMetaPath.isEmpty()) {
+            synchronized (this) {
+                if (electionMetaPath == null) {
+                    String prefix = "";
+                    if (propertySupplier != null) {
+                        Property property = propertySupplier.getProperty(Property.APPLICATION_DATA_PATH);
+                        prefix = property == null ? prefix : property.getString();
+                    }
+                    electionMetaPath = prefix + ELECTION_META_PATH;
+                }
+
+            }
+        }
+        return electionMetaPath;
+    }
+
+    public String getMetadataFile() {
+        if (electionMetaPathStub != null) {
+            return electionMetaPathStub;
+        }
+		
+        Property property = propertySupplier.getProperty(Property.APPLICATION_DATA_PATH);
+        String prefix = property == null ? "" : property.getString();
+
+        return prefix + PropertySupplier.getValue(propertySupplier, ElectionConfigKey.ELECTION_METADATA);
     }
 
     public int getElectionTimeout() {
@@ -41,25 +74,6 @@ public class ElectionConfig {
         return PropertySupplier.getValue(propertySupplier, ElectionConfigKey.SEND_COMMAND_TIMEOUT);
     }
 
-    public String getMetadataFile() {
-
-
-        if (electionMetaPath == null || electionMetaPath.isEmpty()) {
-            synchronized (this) {
-                if (electionMetaPath == null) {
-                    String prefix = "";
-                    if (propertySupplier != null) {
-                        Property property = propertySupplier.getProperty(Property.APPLICATION_DATA_PATH);
-                        prefix = property == null ? prefix : property.getString();
-                    }
-                    electionMetaPath = prefix + ELECTION_META;
-                }
-
-            }
-        }
-        return electionMetaPath;
-    }
-
     public int getMaxReplicateLength() {
         return PropertySupplier.getValue(propertySupplier, ElectionConfigKey.MAX_BATCH_REPLICATE_SIZE);
     }
@@ -69,7 +83,7 @@ public class ElectionConfig {
     }
 
     public int getListenPort() {
-        return PropertySupplier.getValue(propertySupplier, ElectionConfigKey.LISTEN_PORT);
+        return listenPort;
     }
 
     public int getTransferLeaderTimeout() {
@@ -97,13 +111,11 @@ public class ElectionConfig {
     }
 
 
-    @Deprecated
     public void setListenPort(String port) {
-        //
+        listenPort = Integer.valueOf(port);
     }
 
-    @Deprecated
-    public void setMetadataFile(String metadataFile) {
-        //
+    public void setElectionMetaPath(String electionMetaPath) {
+        this.electionMetaPathStub = electionMetaPath;
     }
 }

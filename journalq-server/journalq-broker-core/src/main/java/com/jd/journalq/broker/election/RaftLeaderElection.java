@@ -21,6 +21,10 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import static com.jd.journalq.broker.election.ElectionEvent.Type.*;
+import static com.jd.journalq.broker.election.ElectionNode.INVALID_NODE_ID;
+import static com.jd.journalq.broker.election.ElectionNode.State.*;
+
 /**
  * author: zhuduohui
  * email: zhuduohui@jd.com
@@ -37,20 +41,19 @@ public class RaftLeaderElection extends LeaderElection  {
 
     private int currentTerm;
     private int votedFor = INVALID_VOTE_FOR;
-    private int transferee = ElectionNode.INVALID_NODE_ID;
+    private int transferee = INVALID_NODE_ID;
 
     private ScheduledExecutorService electionTimerExecutor;
     private ScheduledFuture electionTimerFuture;
-    private ScheduledFuture heartbeatTimerFuture;
     private ScheduledFuture transferLeaderTimerFuture;
     private ExecutorService electionExecutor;
 
-    public RaftLeaderElection(TopicPartitionGroup topicPartitionGroup, ElectionConfig electionConfig,
+    RaftLeaderElection(TopicPartitionGroup topicPartitionGroup, ElectionConfig electionConfig,
                               ElectionManager electionManager, ClusterManager clusterManager,
                               ElectionMetadataManager metadataManager, ReplicableStore replicableStore,
                               ReplicaGroup replicaGroup, ScheduledExecutorService electionTimerExecutor,
                               ExecutorService electionExecutor, EventBus<ElectionEvent> electionEventManager,
-                              int leaderId, int localNodeId, List<DefaultElectionNode> allNodes,
+                              int localNodeId, List<DefaultElectionNode> allNodes,
                               Set<Integer> learners) {
         this.topicPartitionGroup = topicPartitionGroup;
         this.electionConfig = electionConfig;
@@ -62,7 +65,6 @@ public class RaftLeaderElection extends LeaderElection  {
         this.electionTimerExecutor = electionTimerExecutor;
         this.electionExecutor = electionExecutor;
         this.electionEventManager = electionEventManager;
-        //this.leaderId = leaderId;
         this.localNodeId = localNodeId;
         this.learners = learners;
 
@@ -92,7 +94,6 @@ public class RaftLeaderElection extends LeaderElection  {
     @Override
     protected void doStop() {
         cancelElectionTimer();
-        cancelHeartbeatTimer();
         cancelTransferLeaderTimer();
 
         nodeOffline(currentTerm);
@@ -138,7 +139,7 @@ public class RaftLeaderElection extends LeaderElection  {
     private void setAllNodes(List<DefaultElectionNode> allNodes, Set<Integer> learners) {
         allNodes.stream().filter(n -> !learners.contains(n.getNodeId()))
                 .forEach((n) -> {
-                        n.setState(ElectionNode.State.FOLLOWER);
+                        n.setState(FOLLOWER);
                         n.setVoteGranted(false);
                         this.allNodes.put(n.getNodeId(), n);
         });
@@ -157,10 +158,19 @@ public class RaftLeaderElection extends LeaderElection  {
      * 每次重新选举或者成员变更时执行
      */
     private void updateElectionMetadata() {
-        ElectionMetadata metadata = ElectionMetadata.Build.create().electionType(PartitionGroup.ElectType.raft)
-                .allNodes(getAllNodes()).learners(getLearners()).leaderId(leaderId)
-                .localNode(localNodeId).currentTerm(currentTerm).votedFor(votedFor).build();
-        electionMetadataManager.updateElectionMetadata(topicPartitionGroup, metadata);
+        try {
+            ElectionMetadata metadata = ElectionMetadata.Build.create(electionConfig.getMetadataPath(), topicPartitionGroup)
+                    .electionType(PartitionGroup.ElectType.raft)
+                    .allNodes(getAllNodes()).learners(getLearners()).leaderId(leaderId)
+                    .localNode(localNodeId).currentTerm(currentTerm).votedFor(votedFor)
+                    .build();
+            logger.info("Partition group {}/node {} update metadata {}",
+                    topicPartitionGroup, localNode, metadata);
+            electionMetadataManager.updateElectionMetadata(topicPartitionGroup, metadata);
+        } catch (Exception e) {
+            logger.warn("Partition group {}/node {} update election metadata fail",
+                    topicPartitionGroup, localNode, e);
+        }
     }
 
     /**
@@ -194,7 +204,7 @@ public class RaftLeaderElection extends LeaderElection  {
      */
     @Override
     public void setLeaderId(int leaderId) throws Exception {
-        if (leaderId != ElectionNode.INVALID_NODE_ID && this.leaderId != ElectionNode.INVALID_NODE_ID) {
+        if (leaderId != INVALID_NODE_ID && this.leaderId != INVALID_NODE_ID) {
             transferLeadership(leaderId);
         }
     }
@@ -263,7 +273,7 @@ public class RaftLeaderElection extends LeaderElection  {
             return;
         }
 
-        if (state() != ElectionNode.State.FOLLOWER) {
+        if (state() != FOLLOWER) {
             logger.info("Partition group {}/node {} election timeout, state is {}",
                     topicPartitionGroup, localNode, state());
         }
@@ -293,8 +303,6 @@ public class RaftLeaderElection extends LeaderElection  {
             if (node.equals(localNode)) continue;
 
             electionExecutor.submit(() -> {
-                Thread.currentThread().setName("ElectionExecutor-" + Thread.currentThread().getId());
-
                 node.setVoteGranted(false);
                 VoteRequest voteRequest = new VoteRequest(topicPartitionGroup, currentTerm, localNodeId,
                         lastLogTerm, lastLogPos, true);
@@ -320,16 +328,16 @@ public class RaftLeaderElection extends LeaderElection  {
      */
     private void electSelf() {
         currentTerm++;
-        transitionTo(ElectionNode.State.CONDIDATE);
-        leaderId = ElectionNode.INVALID_NODE_ID;
+        transitionTo(CONDIDATE);
+        leaderId = INVALID_NODE_ID;
         votedFor = localNode.getNodeId();
         localNode.setVoteGranted(true);
 
         nodeOffline(currentTerm);
 
         updateElectionMetadata();
-        electionEventManager.add(new ElectionEvent(ElectionEvent.Type.START_ELECTION,
-                currentTerm, ElectionNode.INVALID_NODE_ID, topicPartitionGroup));
+        electionEventManager.add(new ElectionEvent(START_ELECTION,
+                currentTerm, INVALID_NODE_ID, topicPartitionGroup));
 
         int lastLogTerm = getLastLogTerm();
         long lastLogPos = getLastLogPosition();
@@ -338,8 +346,6 @@ public class RaftLeaderElection extends LeaderElection  {
             if (node.equals(localNode)) continue;
 
             electionExecutor.submit(() -> {
-                Thread.currentThread().setName("ElectionExecutor-" + Thread.currentThread().getId());
-
                 node.setVoteGranted(false);
                 VoteRequest voteRequest = new VoteRequest(topicPartitionGroup, currentTerm, localNodeId,
                         lastLogTerm, lastLogPos, false);
@@ -525,7 +531,7 @@ public class RaftLeaderElection extends LeaderElection  {
                     "vote candidateId is {}, vote granted is {}",
                 topicPartitionGroup, localNode, voteResponse.getVoteNodeId(), voteResponse.getTerm(),
                 voteResponse.getCandidateId(), voteResponse.isVoteGranted());
-        if (state() != ElectionNode.State.CONDIDATE) {
+        if (state() != CONDIDATE) {
             logger.warn("Partition group {}/node{} receive vote response, local node state is {}",
                     topicPartitionGroup, localNode, state());
             return;
@@ -576,7 +582,7 @@ public class RaftLeaderElection extends LeaderElection  {
                 topicPartitionGroup, localNode, voteResponse.getVoteNodeId(), voteResponse.getTerm(),
                 voteResponse.getCandidateId(), voteResponse.isVoteGranted());
 
-        if (state() != ElectionNode.State.FOLLOWER) {
+        if (state() != FOLLOWER) {
             logger.info("Partition group {}/node {} receive pre vote response, state is {}",
                     topicPartitionGroup, localNode, state());
             return;
@@ -610,113 +616,11 @@ public class RaftLeaderElection extends LeaderElection  {
     }
 
     /**
-     * 重置心跳定时器
-     */
-    private synchronized void resetHeartbeatTimer() {
-        if (heartbeatTimerFuture != null && !heartbeatTimerFuture.isDone()) {
-            heartbeatTimerFuture.cancel(true);
-            heartbeatTimerFuture = null;
-        }
-        heartbeatTimerFuture = electionTimerExecutor.schedule(() -> startNewHeartbeat(true),
-                electionConfig.getHeartbeatTimeout(), TimeUnit.MILLISECONDS);
-    }
-
-    /**
-     * 开始新一轮心跳，向Follower节点发送心跳命令，重置心跳定时器
-     */
-    private synchronized void startNewHeartbeat(boolean reset) {
-        if (!isStarted()) {
-            throw new IllegalStateException("Start new heartbeat leader, election service not start");
-        }
-
-        if (reset && heartbeatTimerFuture == null) {
-            logger.info("Partition group {}/node {} start new heartbeat, timer future is null",
-                    topicPartitionGroup, localNode);
-            return;
-        }
-
-        AppendEntriesRequest appendEntriesRequest = AppendEntriesRequest.Build.create()
-                .partitionGroup(topicPartitionGroup).term(currentTerm).leader(leaderId).build();
-        for (ElectionNode node : getAllNodes()) {
-            if (node.equals(localNode)) continue;
-            try {
-                electionExecutor.submit(() -> {
-                    Thread.currentThread().setName("ElectionExecutor-" + Thread.currentThread().getId());
-
-                    JMQHeader header = new JMQHeader(Direction.REQUEST, CommandType.RAFT_APPEND_ENTRIES_REQUEST);
-                    Command command = new Command(header, appendEntriesRequest);
-
-                    logger.debug("Partition group {}/node{} send heartbeat request {} to {}",
-                            topicPartitionGroup, localNode, appendEntriesRequest, node.getNodeId());
-                    try {
-                        electionManager.sendCommand(node.getAddress(), command,
-                                electionConfig.getSendCommandTimeout(), new HeartbeatRequestCallback(node));
-                    } catch (Exception e) {
-                        logger.warn("Partition group {}/node{} send heartbeat to {} fail",
-                                topicPartitionGroup, localNode, node, e);
-                    }
-                });
-            } catch (Exception e) {
-                logger.warn("Partition group {}/node {} submit new heartbeat task fail",
-                        topicPartitionGroup, localNode, e);
-            }
-        }
-
-        resetHeartbeatTimer();
-    }
-
-
-    /**
-     * Callback of send heartbeat request command
-     */
-    private class HeartbeatRequestCallback implements CommandCallback {
-        private ElectionNode node;
-
-        HeartbeatRequestCallback(ElectionNode node) {
-            this.node = node;
-        }
-
-        @Override
-        public void onSuccess(Command request, Command responseCommand) {
-            handleHeartbeatResponse(responseCommand, node);
-        }
-
-        @Override
-        public void onException(Command request, Throwable cause) {
-            logger.info("Partition group {}/node {} send heartbeat request to {} failed",
-                    topicPartitionGroup, localNode, node, cause);
-        }
-    }
-
-    /**
-     * 处理心跳响应消息
-     * @param command 心跳响应命令
-     */
-    private synchronized void handleHeartbeatResponse(Command command, ElectionNode remoteNode) {
-        if (command == null) {
-            logger.warn("Partition group {}/node{} receive heartbeat response is null",
-                    topicPartitionGroup, localNode);
-            return;
-        }
-
-        AppendEntriesResponse response = (AppendEntriesResponse)command.getPayload();
-
-        logger.debug("Partition group {}/node{} receive heartbeat response from {}, term is {}",
-                topicPartitionGroup, localNode, remoteNode.getNodeId(), response.getTerm());
-
-        if (response.getTerm() > currentTerm) {
-            logger.info("Partition group{}/node{} receive heartbeat response, " +
-                        "response term {} is greater than current term {}",
-                    topicPartitionGroup, localNode, response.getTerm(), currentTerm);
-            stepDown(response.getTerm());
-        }
-    }
-
-    /**
      * 处理添加记录请求
      * @param request 添加记录请求
      * @return 返回命令
      */
+    @Override
     public synchronized Command handleAppendEntriesRequest(AppendEntriesRequest request) {
         if (!isStarted()) {
             logger.warn("Partition group {}/node{} receive append entries request, election not started",
@@ -748,7 +652,8 @@ public class RaftLeaderElection extends LeaderElection  {
             // as heartbeat
             return new Command(new JMQHeader(Direction.RESPONSE, CommandType.RAFT_APPEND_ENTRIES_RESPONSE),
                                new AppendEntriesResponse.Build().success(true).term(currentTerm)
-                                       .nextPosition(request.getStartPosition()).build());
+                                       .nextPosition(request.getStartPosition())
+                                       .writePosition(replicableStore.rightPosition()).build());
         }
     }
 
@@ -756,11 +661,11 @@ public class RaftLeaderElection extends LeaderElection  {
      * 本地节点成为leader，设置状态，停止投票定时器，发送选举事件，向follower发送心跳
      */
     private synchronized void becomeLeader() {
-        transitionTo(ElectionNode.State.LEADER);
+        transitionTo(LEADER);
         leaderId = localNode.getNodeId();
 
         getAllNodes().forEach(node -> {
-            if (!node.equals(localNode)) node.setState(ElectionNode.State.FOLLOWER);
+            if (!node.equals(localNode)) node.setState(FOLLOWER);
             node.setVoteGranted(false);
         });
 
@@ -770,7 +675,7 @@ public class RaftLeaderElection extends LeaderElection  {
 
             updateElectionMetadata();
             updateMetadata(leaderId, currentTerm);
-            electionEventManager.add(new ElectionEvent(ElectionEvent.Type.LEADER_FOUND,
+            electionEventManager.add(new ElectionEvent(LEADER_FOUND,
                     currentTerm, localNode.getNodeId(), topicPartitionGroup));
 
         } catch (Exception e) {
@@ -779,8 +684,6 @@ public class RaftLeaderElection extends LeaderElection  {
         }
 
         cancelElectionTimer();
-
-        startNewHeartbeat(false);
 
     }
 
@@ -792,16 +695,14 @@ public class RaftLeaderElection extends LeaderElection  {
                     ", term is {}",
                 topicPartitionGroup, localNode, leaderId, term);
 
-        transitionTo(ElectionNode.State.FOLLOWER);
+        transitionTo(FOLLOWER);
         this.leaderId = leaderId;
         this.currentTerm = term;
 
         getAllNodes().forEach((node) -> {
-            node.setState(node.getNodeId() == leaderId ? ElectionNode.State.LEADER : ElectionNode.State.FOLLOWER);
+            node.setState(node.getNodeId() == leaderId ? LEADER : FOLLOWER);
             node.setVoteGranted(false);
         });
-
-        cancelHeartbeatTimer();
 
         replicaGroup.becomeFollower(currentTerm, leaderId);
 
@@ -809,7 +710,7 @@ public class RaftLeaderElection extends LeaderElection  {
 
         updateElectionMetadata();
         updateMetadata(leaderId, currentTerm);
-        electionEventManager.add(new ElectionEvent(ElectionEvent.Type.LEADER_FOUND,
+        electionEventManager.add(new ElectionEvent(LEADER_FOUND,
                 currentTerm, leaderId, topicPartitionGroup));
     }
 
@@ -819,11 +720,11 @@ public class RaftLeaderElection extends LeaderElection  {
                         " with higher term {}",
                     topicPartitionGroup, localNode, requestLeaderId, requestTerm);
             stepDown(requestTerm);
-        } else if (state() != ElectionNode.State.FOLLOWER) {
+        } else if (state() != FOLLOWER) {
             logger.info("Partition group {}/node {} receive heartbeat from leader {}",
                     topicPartitionGroup, localNode, requestLeaderId);
             stepDown(requestTerm);
-        } else if (leaderId == ElectionNode.INVALID_NODE_ID) {
+        } else if (leaderId == INVALID_NODE_ID) {
             logger.info("Partition group {}/node {} receive heartbeat from new leader {}",
                     topicPartitionGroup, localNode, requestLeaderId);
             stepDown(requestTerm);
@@ -832,7 +733,7 @@ public class RaftLeaderElection extends LeaderElection  {
                     topicPartitionGroup, localNode, leaderId);
             leaderId = requestLeaderId;
         }
-        if (leaderId == ElectionNode.INVALID_NODE_ID) {
+        if (leaderId == INVALID_NODE_ID) {
             becomeFollower(requestLeaderId, requestTerm);
         }
     }
@@ -842,12 +743,12 @@ public class RaftLeaderElection extends LeaderElection  {
      * 或者transfer leader到另外的节点
      * @param term 任期
      */
-    private synchronized void stepDown(int term){
+    public synchronized void stepDown(int term){
         logger.info("Partition group {}/node {} step down, term is {}, " +
                     "current term is {}, vote for is {}",
                 topicPartitionGroup, localNode, term, currentTerm, votedFor);
 
-        leaderId = ElectionNode.INVALID_NODE_ID;
+        leaderId = INVALID_NODE_ID;
         if (term > currentTerm) {
             votedFor = INVALID_VOTE_FOR;
             currentTerm = term;
@@ -862,18 +763,18 @@ public class RaftLeaderElection extends LeaderElection  {
                 break;
             case LEADER:
                 updateMetadata(leaderId, currentTerm);
-                cancelHeartbeatTimer();
+                replicaGroup.becomeFollower(currentTerm, leaderId);
                 break;
             default:
                 break;
         }
 
-        if (transferee != ElectionNode.INVALID_NODE_ID) {
-            transferee = ElectionNode.INVALID_NODE_ID;
+        if (transferee != INVALID_NODE_ID) {
+            transferee = INVALID_NODE_ID;
             cancelTransferLeaderTimer();
         }
 
-        transitionTo(ElectionNode.State.FOLLOWER);
+        transitionTo(FOLLOWER);
         resetElectionTimer();
     }
 
@@ -884,16 +785,6 @@ public class RaftLeaderElection extends LeaderElection  {
         if (electionTimerFuture != null && !electionTimerFuture.isDone()) {
             electionTimerFuture.cancel(true);
             electionTimerFuture = null;
-        }
-    }
-
-    /**
-     * Cancel the heartbeat timer
-     */
-    private synchronized void cancelHeartbeatTimer() {
-        if (heartbeatTimerFuture != null && !heartbeatTimerFuture.isDone()) {
-            heartbeatTimerFuture.cancel(true);
-            heartbeatTimerFuture = null;
         }
     }
 
@@ -938,14 +829,14 @@ public class RaftLeaderElection extends LeaderElection  {
         if (transferee == localNodeId) {
             logger.warn("Partition group {} transfer leader to self {}",
                     topicPartitionGroup, localNode);
-            throw new ElectionException("Transfer leader to self");
+            return;
         }
         if (!allNodes.containsKey(transferee)) {
             logger.warn("Partition group {} transfer leader transferee {} is incorrect node",
                     topicPartitionGroup, transferee);
             throw new ElectionException("Transfer leader to incorrection node");
         }
-        if (transferee == ElectionNode.INVALID_NODE_ID) {
+        if (transferee == INVALID_NODE_ID) {
             transferee = replicaGroup.findTheNextCandidate(leaderId);
             if (transferee == -1) {
                 logger.warn("Partition group {}/node {} transfer leader, cannot find candidate",
@@ -953,19 +844,19 @@ public class RaftLeaderElection extends LeaderElection  {
                 throw new ElectionException("Transfer leader cannot find candidate");
             }
         }
-        if (this.transferee != ElectionNode.INVALID_NODE_ID) {
+        if (this.transferee != INVALID_NODE_ID) {
             logger.info("Partition group {} transfer leader, anoter transfer still not finish",
                     topicPartitionGroup);
             throw new ElectionException("Transfer leader, another transfer still in process");
         }
 
-        logger.info("Partition group {} start transfer leader to {}",
-                topicPartitionGroup, transferee);
+        logger.info("Partition group {}/node {} start transfer leader to {}",
+                topicPartitionGroup, localNode, transferee);
         nodeOffline(currentTerm);
 
         replicaGroup.transferLeadershipTo(transferee, getLastLogPosition());
         this.transferee = transferee;
-        transitionTo(ElectionNode.State.TRANSFERRING);
+        transitionTo(TRANSFERRING);
 
         transferLeaderTimerFuture = electionTimerExecutor.schedule(new TransferLeaderTimerCallback(
                 currentTerm), electionConfig.getTransferLeaderTimeout(), TimeUnit.MILLISECONDS);
@@ -1011,9 +902,10 @@ public class RaftLeaderElection extends LeaderElection  {
         cancelTransferLeaderTimer();
         if (term == currentTerm) {
             replicaGroup.stopTransferLeadership();
-            if (state() == ElectionNode.State.TRANSFERRING) {
-                transitionTo(ElectionNode.State.LEADER);
+            if (state() == TRANSFERRING) {
+                transitionTo(LEADER);
                 nodeOnline(currentTerm);
+				transferee = INVALID_NODE_ID;
             }
         }
     }
@@ -1024,7 +916,7 @@ public class RaftLeaderElection extends LeaderElection  {
      * @return 响应命令
      */
     public synchronized Command handleTimeoutNowRequest(TimeoutNowRequest request) {
-        TimeoutNowResponse response = new TimeoutNowResponse(true, 0);
+        TimeoutNowResponse response = new TimeoutNowResponse(true, currentTerm);
 
         do {
             if (request.getTerm() != currentTerm) {
@@ -1033,21 +925,21 @@ public class RaftLeaderElection extends LeaderElection  {
                         topicPartitionGroup, localNode, currentTerm, request.getTerm());
                 if (request.getTerm() > currentTerm) {
                     stepDown(request.getTerm());
-                    response.setTerm(currentTerm);
                 }
                 response.setSuccess(false);
                 break;
             }
-            if (state() != ElectionNode.State.FOLLOWER) {
+            if (state() != FOLLOWER) {
                 logger.info("Partition group {}/node {} receive timeout now request",
                         topicPartitionGroup, localNode);
-                response.setTerm(currentTerm);
                 response.setSuccess(false);
                 break;
             }
 
-            cancelElectionTimer();
-            handleElectionTimeout();
+            response.setTerm(currentTerm + 1);
+
+            resetElectionTimer();
+            electSelf();
 
         } while(false);
 

@@ -26,6 +26,7 @@ import com.jd.journalq.store.StoreService;
 import com.jd.journalq.toolkit.lang.Preconditions;
 import com.jd.journalq.toolkit.network.IpUtil;
 import com.jd.journalq.toolkit.service.Service;
+import com.jd.journalq.toolkit.stat.TPStatUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -62,6 +63,8 @@ class PartitionConsumption extends Service {
     private MessageRetry messageRetry;
     // 消费归档
     private ArchiveManager archiveManager;
+    // 性能监控key
+    private String monitorKey = "Read-Message";
 
     public PartitionConsumption(ClusterManager clusterManager, StoreService storeService, PartitionManager partitionManager,
                                 PositionManager positionManager, MessageRetry messageRetry,
@@ -189,8 +192,13 @@ class PartitionConsumption extends Service {
     protected PullResult getMsgByPartitionAndIndex(Consumer consumer, int group, short partition, long index, int count) throws JMQException, IOException {
         PullResult pullResult = new PullResult(consumer, (short) -1, new ArrayList<>(0));
         try {
+            long startTime = System.nanoTime();
+
             PartitionGroupStore store = storeService.getStore(consumer.getTopic(), group, QosLevel.PERSISTENCE);
             ReadResult readRst = store.read(partition, index, count, Long.MAX_VALUE);
+
+            TPStatUtil.append(monitorKey, startTime, System.nanoTime());
+
             if (readRst.getCode() == JMQCode.SUCCESS) {
                 ByteBuffer[] byteBufferArr = readRst.getMessages();
                 if (byteBufferArr == null) {
@@ -256,7 +264,12 @@ class PartitionConsumption extends Service {
             int partitionGroup = clusterManager.getPartitionGroupId(TopicName.parse(consumer.getTopic()), partition);
             long index = positionManager.getLastMsgAckIndex(TopicName.parse(consumer.getTopic()), consumer.getApp(), partition);
             try {
+                long startTime = System.nanoTime();
+
                 ByteBuffer[] byteBuffers = readMessages(consumer, partitionGroup, partition, index, count);
+
+                TPStatUtil.append(monitorKey, startTime, System.nanoTime());
+
                 if (byteBuffers == null) {
                     // 如果没有拿到消息，则释放占用
                     partitionManager.releasePartition(consumer, partition);
@@ -331,10 +344,10 @@ class PartitionConsumption extends Service {
                 logger.error("read message error, error code[{}]", readRst.getCode());
             }
         } catch (PositionOverflowException overflow) {
-            logger.debug("PositionOverflow,topic:{},partition:{},index:{}", consumer.getTopic(), partition, index);
+            logger.debug("PositionOverflow,topic:{},app:{},partition:{},index:{}", consumer.getTopic(), consumer.getApp(), partition, index);
             throw overflow;
         } catch (PositionUnderflowException underflow) {
-            logger.debug("PositionUnderflow,topic:{},partition:{},index:{}", consumer.getTopic(), partition, index);
+            logger.debug("PositionUnderflow,topic:{},app:{},partition:{},index:{}", consumer.getTopic(), consumer.getApp(), partition, index);
             throw underflow;
         }
         return null;

@@ -73,7 +73,7 @@ public class PositionManagerTest {
     }
 
     @Test
-    public void updateLastMsgAckIndex() {
+    public void updateLastMsgAckIndex() throws JMQException {
         addConsumer();
         boolean b = positionManager.updateLastMsgAckIndex(topic, app, partition, 10);
         Assert.assertEquals(true, b);
@@ -83,7 +83,7 @@ public class PositionManagerTest {
     }
 
     @Test
-    public void updateStartMsgAckIndex() {
+    public void updateStartMsgAckIndex() throws JMQException {
         addConsumer();
         boolean b = positionManager.updateStartMsgAckIndex(topic, app, partition, 10);
         Assert.assertEquals(true, b);

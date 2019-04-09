@@ -21,18 +21,18 @@ public class IntervalTimeStoreCleaningStrategy implements StoreCleaningStrategy 
     }
 
     @Override
-    public long deleteIfNeeded(StoreService storeService, TopicName topicName, long minIndexedPosition) throws IOException {
+    public long deleteIfNeeded(PartitionGroupStore partitionGroupStore, long minIndexedPosition) throws IOException {
         long currentTimestamp = System.currentTimeMillis();
         long targetDeleteTimeline = currentTimestamp - maxIntervalTime;
 
         long totalDeletedSize = 0L;  // 总共删除长度
-        List<PartitionGroupStore> partitionGroupStores = storeService.getStore(topicName.getFullName());
-        if (CollectionUtils.isNotEmpty(partitionGroupStores)) {
-            for (PartitionGroupStore partitionGroupStore : partitionGroupStores) {
-                do {
-                    totalDeletedSize += partitionGroupStore.deleteEarlyMinStoreMessages(targetDeleteTimeline, minIndexedPosition);
-                } while (totalDeletedSize > 0L);
-            }
+        long deletedSize = 0L;
+
+        if (partitionGroupStore != null) {
+            do {
+                deletedSize = partitionGroupStore.deleteEarlyMinStoreMessages(targetDeleteTimeline, minIndexedPosition);
+                totalDeletedSize += deletedSize;
+            } while (deletedSize > 0L);
         }
 
         return totalDeletedSize;

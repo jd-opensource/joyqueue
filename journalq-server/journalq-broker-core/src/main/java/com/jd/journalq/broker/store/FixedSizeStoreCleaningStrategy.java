@@ -21,20 +21,18 @@ public class FixedSizeStoreCleaningStrategy implements StoreCleaningStrategy {
     }
 
     @Override
-    public long deleteIfNeeded(StoreService storeService, TopicName topicName, long minIndexedPosition) throws IOException {
+    public long deleteIfNeeded(PartitionGroupStore partitionGroupStore, long minIndexedPosition) throws IOException {
         long totalDeletedSize = 0L;  // 总共删除长度
-        List<PartitionGroupStore> partitionGroupStores = storeService.getStore(topicName.getFullName());
-        if (CollectionUtils.isNotEmpty(partitionGroupStores)) {
-            for (PartitionGroupStore partitionGroupStore : partitionGroupStores) {
-                long currentTotalStorageSize = partitionGroupStore.getTotalPhysicalStorageSize();
-                if( maxStorageSize < currentTotalStorageSize ) {
-                    long targetDeleteSize = currentTotalStorageSize - maxStorageSize;  // 目标删除长度
 
-                    long lastDeletedSize;  // 上一次删除长度
-                    do {
-                        lastDeletedSize = partitionGroupStore.deleteMinStoreMessages(minIndexedPosition);
-                    } while (lastDeletedSize > 0L && (totalDeletedSize += lastDeletedSize) < targetDeleteSize);
-                }
+        if (partitionGroupStore != null) {
+            long currentTotalStorageSize = partitionGroupStore.getTotalPhysicalStorageSize();
+            if( maxStorageSize < currentTotalStorageSize ) {
+                long targetDeleteSize = currentTotalStorageSize - maxStorageSize;  // 目标删除长度
+
+                long lastDeletedSize;  // 上一次删除长度
+                do {
+                    lastDeletedSize = partitionGroupStore.deleteMinStoreMessages(minIndexedPosition);
+                } while (lastDeletedSize > 0L && (totalDeletedSize += lastDeletedSize) < targetDeleteSize);
             }
         }
 

@@ -12,14 +12,14 @@ public class BrokerMonitorStub extends BrokerMonitor {
 
     @Override
     public void onReplicateMessage(String topic, int partitionGroup, long count, long size, long time) {
-        logger.info("Monitor replicate message of topic {} partition group {}, " +
+        logger.debug("Monitor replicate message of topic {} partition group {}, " +
                 "count is {}, size is {}, time is {}",
                 topic, partitionGroup, count, size, time);
     }
 
     @Override
     public void onAppendReplicateMessage(String topic, int partitionGroup, long count, long size, long time) {
-        logger.info("Monitor append replicate message of topic {} partition group {}, " +
+        logger.debug("Monitor append replicate message of topic {} partition group {}, " +
                 "count is {}, size is {}, time is {}",
                 topic, partitionGroup, count, size, time);
     }
