@@ -10,7 +10,7 @@ public class Application extends BaseModel implements Identifier, Cloneable {
 
     public static final int JONE_SOURCE = 1;
     public static final int JDOS_SOURCE = 2;
-    public static final int SURE_SOURCE = 3;
+    public static final int SURE_SOURCE = 3;//金融
     public static final int OTHER_SOURCE = 0;
 
     //应用代码
@@ -31,6 +31,7 @@ public class Application extends BaseModel implements Identifier, Cloneable {
     //所有者
     private Identity owner;
     private String erp;
+    private String discription;
 
     public String getErp() {
         return erp;
@@ -118,6 +119,13 @@ public class Application extends BaseModel implements Identifier, Cloneable {
         this.owner = owner;
     }
 
+    public String getDiscription() {
+        return discription;
+    }
+
+    public void setDiscription(String discription) {
+        this.discription = discription;
+    }
 
     /**
      * 判断是否是所有者

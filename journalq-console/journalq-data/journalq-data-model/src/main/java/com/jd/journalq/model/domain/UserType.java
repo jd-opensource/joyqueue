@@ -15,5 +15,5 @@ public enum UserType {
     /**
      * 管理员和系统用户
      */
-    ALL
+    ADMIN_USER
 }
