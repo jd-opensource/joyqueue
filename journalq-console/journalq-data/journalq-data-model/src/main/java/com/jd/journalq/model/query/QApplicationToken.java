@@ -15,6 +15,10 @@ public class QApplicationToken extends QKeyword {
     public QApplicationToken() {
     }
 
+    public QApplicationToken(String appCode) {
+        application = new Identity(appCode);
+    }
+
     public QApplicationToken(Identity application, String token) {
         this.application = application;
         this.token = token;

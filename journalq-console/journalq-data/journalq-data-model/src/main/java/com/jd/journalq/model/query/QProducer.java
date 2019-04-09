@@ -19,6 +19,10 @@ public class QProducer extends QKeyword implements QIdentity {
         this.topic = topic;
     }
 
+    public QProducer(Identity app) {
+        this.app = app;
+    }
+
     public Topic getTopic() {
         return topic;
     }
