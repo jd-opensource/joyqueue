@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.jd.journalq.exception.ServiceException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.concurrent.FutureCallback;
@@ -21,8 +22,11 @@ import java.util.concurrent.TimeUnit;
 import static com.jd.journalq.exception.ServiceException.INTERNAL_SERVER_ERROR;
 
 public class AsyncHttpClient {
-    private static final Logger logger= LoggerFactory.getLogger(AsyncHttpClient.class);
-    private static CloseableHttpAsyncClient httpclient = HttpAsyncClients.createDefault();
+    private final static Logger logger= LoggerFactory.getLogger(AsyncHttpClient.class);
+    private static CloseableHttpAsyncClient httpclient = HttpAsyncClients.custom().setDefaultRequestConfig(RequestConfig.custom()
+            .setConnectTimeout(600)
+            .setSocketTimeout(700)
+            .setConnectionRequestTimeout(500).build()).build();
     public static void AsyncRequest(HttpUriRequest request, FutureCallback<HttpResponse> asyncCallBack){
          httpclient.start();
          request.setHeader("Content-Type", "application/json;charset=utf-8");
@@ -88,13 +92,21 @@ public class AsyncHttpClient {
         public CountDownLatch latch;
         private Map<String,String> result;
         private String requestKey;
-        public ConcurrentHttpResponseHandler(CountDownLatch latch, String requestKey, Map<String,String> result){
+        private String url;
+        /**
+         * 开始时间
+         */
+        private long startMs;
+        public ConcurrentHttpResponseHandler(String url,long startMs,CountDownLatch latch, String requestKey, Map<String,String> result){
             this.latch=latch;
             this.result=result;
             this.requestKey=requestKey;
+            this.url = url;
+            this.startMs = startMs;
         }
         @Override
         public void completed(HttpResponse httpResponse) {
+            logger.info("request completed {} time elapsed {} ms ",url,System.currentTimeMillis()-startMs);
             try {
                 int statusCode=httpResponse.getStatusLine().getStatusCode();
                 if (HttpStatus.SC_OK == statusCode) {

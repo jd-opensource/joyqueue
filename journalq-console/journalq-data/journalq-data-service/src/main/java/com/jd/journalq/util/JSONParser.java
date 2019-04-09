@@ -16,7 +16,7 @@ import java.util.List;
  *
  **/
 public class JSONParser {
-    public static final ObjectMapper mapper = new ObjectMapper();
+    public final static ObjectMapper mapper = new ObjectMapper();
 
     public static <T> T parse(String content,Class restClass,Class dataClass) throws IOException {
         JavaType javaType =composite(restClass, dataClass);
