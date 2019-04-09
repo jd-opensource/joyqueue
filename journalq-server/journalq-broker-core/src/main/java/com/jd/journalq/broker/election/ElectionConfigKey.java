@@ -8,10 +8,11 @@ import com.jd.journalq.toolkit.config.PropertyDef;
  * date: 2018/8/13
  */
 public enum ElectionConfigKey implements PropertyDef {
+    ELECTION_METADATA("election.metadata.file", "raft_metafile.dat", Type.STRING),
     ELECTION_TIMEOUT("election.election.timeout", 1000 * 6, Type.INT),
-    EXECUTOR_THREAD_NUM_MIN("election.executor.thread.num.min", 10, Type.INT),
-    EXECUTOR_THREAD_NUM_MAX("election.executor.thread.num.max", 100, Type.INT),
-    TIMER_SCHEDULE_THREAD_NUM("election.timer.schedule.thread.num", 10, Type.INT),
+    EXECUTOR_THREAD_NUM_MIN("election.executor.thread.num.min", 5, Type.INT),
+    EXECUTOR_THREAD_NUM_MAX("election.executor.thread.num.max", 50, Type.INT),
+    TIMER_SCHEDULE_THREAD_NUM("election.timer.schedule.thread.num", 5, Type.INT),
     HEARTBEAT_TIMEOUT("election.heartbeat.timeout", 1000 * 1, Type.INT),
     SEND_COMMAND_TIMEOUT("election.send.command.timeout", 1000 * 5, Type.INT),
     MAX_BATCH_REPLICATE_SIZE("election.max.replicate.length", 1024 * 1024, Type.INT),

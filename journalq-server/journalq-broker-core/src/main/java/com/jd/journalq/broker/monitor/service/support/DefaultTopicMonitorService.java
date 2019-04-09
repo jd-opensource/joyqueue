@@ -10,6 +10,7 @@ import com.jd.journalq.monitor.TopicMonitorInfo;
 import com.jd.journalq.store.StoreManagementService;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * TopicMonitorService
@@ -20,11 +21,9 @@ import java.util.List;
 public class DefaultTopicMonitorService implements TopicMonitorService {
 
     private BrokerStat brokerStat;
-    private StoreManagementService storeManagementService;
 
-    public DefaultTopicMonitorService(BrokerStat brokerStat, StoreManagementService storeManagementService) {
+    public DefaultTopicMonitorService(BrokerStat brokerStat) {
         this.brokerStat = brokerStat;
-        this.storeManagementService = storeManagementService;
     }
 
     @Override
@@ -35,12 +34,11 @@ public class DefaultTopicMonitorService implements TopicMonitorService {
         int index = 0;
         List<TopicMonitorInfo> data = Lists.newArrayListWithCapacity(pageSize);
 
-        for (StoreManagementService.TopicMetric topicMetric : storeManagementService.storeMetrics()) {
+        for (Map.Entry<String, TopicStat> topicStatEntry : brokerStat.getTopicStats().entrySet()) {
             if (index >= startIndex && index < endIndex) {
-                TopicMonitorInfo topicMonitorInfo = getTopicInfoByTopic(topicMetric.getTopic());
-                TopicStat topicStat = brokerStat.getOrCreateTopicStat(topicMonitorInfo.getTopic());
-                data.add(convertTopicMonitorInfo(topicStat));
+                data.add(convertTopicMonitorInfo(topicStatEntry.getValue()));
             }
+            index ++;
         }
         return new Pager<>(page, pageSize, total, data);
     }

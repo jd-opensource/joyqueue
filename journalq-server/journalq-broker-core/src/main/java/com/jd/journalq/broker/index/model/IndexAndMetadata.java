@@ -56,5 +56,14 @@ public class IndexAndMetadata {
     public void setMetadata(String metadata) {
         this.metadata = metadata;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("ConsumePartition{");
+        sb.append("index='").append(index).append('\'');
+        sb.append(", metadata=").append(metadata);
+        sb.append('}');
+        return sb.toString();
+    }
 }
 

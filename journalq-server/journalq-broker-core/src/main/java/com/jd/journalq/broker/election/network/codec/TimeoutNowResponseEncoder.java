@@ -14,8 +14,8 @@ import io.netty.buffer.ByteBuf;
 public class TimeoutNowResponseEncoder implements PayloadEncoder<TimeoutNowResponse>, Type {
     @Override
     public void encode(final TimeoutNowResponse response, ByteBuf buffer) throws Exception {
-        buffer.writeInt(response.getTerm());
         buffer.writeBoolean(response.isSuccess());
+        buffer.writeInt(response.getTerm());
     }
 
     @Override

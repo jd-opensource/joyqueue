@@ -77,11 +77,11 @@ public class BrokerManageServiceManager extends Service {
 
     protected BrokerMonitorService newBrokerMonitorService() {
         BrokerStat brokerStat = brokerMonitor.getBrokerStat();
-        DefaultBrokerMonitorInternalService brokerMonitorInternalService = new DefaultBrokerMonitorInternalService(brokerStat, consume, storeManagementService, nameService, store, electionManager);
+        DefaultBrokerMonitorInternalService brokerMonitorInternalService = new DefaultBrokerMonitorInternalService(brokerStat, consume, storeManagementService, nameService, store, electionManager, clusterManager);
         DefaultConnectionMonitorService connectionMonitorService = new DefaultConnectionMonitorService(brokerStat);
-        DefaultConsumerMonitorService consumerMonitorService = new DefaultConsumerMonitorService(brokerStat, consume, storeManagementService, retryManager);
-        DefaultProducerMonitorService producerMonitorService = new DefaultProducerMonitorService(brokerStat, storeManagementService);
-        DefaultTopicMonitorService topicMonitorService = new DefaultTopicMonitorService(brokerStat, storeManagementService);
+        DefaultConsumerMonitorService consumerMonitorService = new DefaultConsumerMonitorService(brokerStat, consume, storeManagementService, retryManager, clusterManager);
+        DefaultProducerMonitorService producerMonitorService = new DefaultProducerMonitorService(brokerStat, storeManagementService, clusterManager);
+        DefaultTopicMonitorService topicMonitorService = new DefaultTopicMonitorService(brokerStat);
         DefaultPartitionMonitorService partitionMonitorService = new DefaultPartitionMonitorService(brokerStat, storeManagementService);
         DefaultCoordinatorMonitorService coordinatorMonitorService = new DefaultCoordinatorMonitorService(coordinatorService);
         DefaultArchiveMonitorService archiveMonitorService = new DefaultArchiveMonitorService(archiveManager);
@@ -93,7 +93,7 @@ public class BrokerManageServiceManager extends Service {
         ConnectionManageService connectionManageService = new DefaultConnectionManageService(brokerMonitor.getSessionManager());
         DefaultMessageManageService messageManageService = new DefaultMessageManageService(consume, storeManagementService);
         DefaultStoreManageService storeManageService = new DefaultStoreManageService(storeManagementService);
-        DefaultConsumerManageService consumerManageService = new DefaultConsumerManageService(consume, storeManagementService, storeService);
+        DefaultConsumerManageService consumerManageService = new DefaultConsumerManageService(consume, storeManagementService, storeService, clusterManager);
         DefaultCoordinatorManageService coordinatorManageService = new DefaultCoordinatorManageService(coordinatorService);
         DefaultElectionManageService electionManageService = new DefaultElectionManageService(electionManager);
         return new DefaultBrokerManageService(connectionManageService, messageManageService, storeManageService, consumerManageService, coordinatorManageService, electionManageService);

@@ -22,10 +22,6 @@ public class ProduceConfig {
         return PropertySupplier.getValue(propertySupplier, ProducerConfigKey.TRANSACTION_CLEAR_INTERVAL);
     }
 
-    public int getTransactionMaxUncomplete() {
-        return PropertySupplier.getValue(propertySupplier, ProducerConfigKey.TRANSACTION_MAX_UNCOMPLETE);
-    }
-
     public int getTransactionExpireTime() {
         return PropertySupplier.getValue(propertySupplier, ProducerConfigKey.TRANSACTION_EXPIRE_TIME);
     }
@@ -36,5 +32,9 @@ public class ProduceConfig {
 
     public int getBrokerQosLevel() {
         return PropertySupplier.getValue(propertySupplier, ProducerConfigKey.BROKER_QOS_LEVEL);
+    }
+
+    public long getPrintMetricIntervalMs() {
+        return PropertySupplier.getValue(propertySupplier, ProducerConfigKey.PRINT_METRIC_INTERVAL_MS);
     }
 }

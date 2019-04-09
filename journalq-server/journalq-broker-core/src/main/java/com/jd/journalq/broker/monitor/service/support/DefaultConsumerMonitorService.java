@@ -1,6 +1,7 @@
 package com.jd.journalq.broker.monitor.service.support;
 
 import com.google.common.collect.Lists;
+import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.consumer.Consume;
 import com.jd.journalq.broker.monitor.converter.BrokerMonitorConverter;
 import com.jd.journalq.broker.monitor.exception.MonitorException;
@@ -40,12 +41,14 @@ public class DefaultConsumerMonitorService implements ConsumerMonitorService {
     private Consume consume;
     private StoreManagementService storeManagementService;
     private MessageRetry retryManager;
+    private ClusterManager clusterManager;
 
-    public DefaultConsumerMonitorService(BrokerStat brokerStat, Consume consume, StoreManagementService storeManagementService, MessageRetry retryManager) {
+    public DefaultConsumerMonitorService(BrokerStat brokerStat, Consume consume, StoreManagementService storeManagementService, MessageRetry retryManager, ClusterManager clusterManager) {
         this.brokerStat = brokerStat;
         this.consume = consume;
         this.storeManagementService = storeManagementService;
         this.retryManager = retryManager;
+        this.clusterManager = clusterManager;
     }
 
     @Override
@@ -82,6 +85,9 @@ public class DefaultConsumerMonitorService implements ConsumerMonitorService {
         StoreManagementService.TopicMetric topicMetric = storeManagementService.topicMetric(consumerStat.getTopic());
         for (StoreManagementService.PartitionGroupMetric partitionGroupMetric : topicMetric.getPartitionGroupMetrics()) {
             for (StoreManagementService.PartitionMetric partitionMetric : partitionGroupMetric.getPartitionMetrics()) {
+                if (!clusterManager.isLeader(topic, partitionMetric.getPartition())) {
+                    continue;
+                }
                 ConsumerPartitionMonitorInfo consumerPartitionMonitorInfo = convertConsumerPartitionMonitorInfo(consumerStat, partitionMetric.getPartition());
                 result.add(consumerPartitionMonitorInfo);
             }
@@ -103,6 +109,9 @@ public class DefaultConsumerMonitorService implements ConsumerMonitorService {
 
         StoreManagementService.TopicMetric topicMetric = storeManagementService.topicMetric(consumerStat.getTopic());
         for (StoreManagementService.PartitionGroupMetric partitionGroupMetric : topicMetric.getPartitionGroupMetrics()) {
+            if (!clusterManager.isLeader(topic, partitionGroupMetric.getPartitionGroup())) {
+                continue;
+            }
             ConsumerPartitionGroupMonitorInfo consumerPartitionGroupMonitorInfo = convertConsumerPartitionGroupMonitorInfo(consumerStat, partitionGroupMetric.getPartitionGroup());
             result.add(consumerPartitionGroupMonitorInfo);
         }
@@ -192,6 +201,9 @@ public class DefaultConsumerMonitorService implements ConsumerMonitorService {
             StoreManagementService.TopicMetric topicMetric = storeManagementService.topicMetric(consumerStat.getTopic());
             for (StoreManagementService.PartitionGroupMetric partitionGroupMetric : topicMetric.getPartitionGroupMetrics()) {
                 for (StoreManagementService.PartitionMetric partitionMetric : partitionGroupMetric.getPartitionMetrics()) {
+                    if (!clusterManager.isLeader(consumer.getTopic(), partitionMetric.getPartition())) {
+                        continue;
+                    }
                     long ackIndex = consume.getAckIndex(consumer, partitionMetric.getPartition());
                     if (ackIndex < 0) {
                         ackIndex = 0;
@@ -226,4 +238,5 @@ public class DefaultConsumerMonitorService implements ConsumerMonitorService {
 
         return consumerMonitorInfo;
     }
+
 }
