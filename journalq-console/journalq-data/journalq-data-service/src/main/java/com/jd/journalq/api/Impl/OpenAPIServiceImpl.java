@@ -4,10 +4,12 @@ package com.jd.journalq.api.Impl;
 import com.jd.journalq.api.OpenAPIService;
 import com.jd.journalq.convert.CodeConverter;
 import com.jd.journalq.exception.ServiceException;
+import com.jd.journalq.model.ListQuery;
 import com.jd.journalq.model.PageResult;
 import com.jd.journalq.model.Pagination;
 import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.model.domain.*;
+import com.jd.journalq.model.exception.BusinessException;
 import com.jd.journalq.model.query.*;
 import com.jd.journalq.monitor.PartitionAckMonitorInfo;
 import com.jd.journalq.monitor.PartitionLeaderAckMonitorInfo;
@@ -65,7 +67,7 @@ public class OpenAPIServiceImpl implements OpenAPIService {
     @Autowired
     private  ApplicationUserService  applicationUserService;
     private Random random=new Random();
-    private static final long MINUTES_MS=60*1000;
+    private final static long MINUTES_MS=60*1000;
 
 
 
@@ -113,23 +115,23 @@ public class OpenAPIServiceImpl implements OpenAPIService {
         slimTopic.setIps(ips);
         slimTopic.setCode(topic.getCode());
         pubSub.setTopic(slimTopic);
-        List<String> cosumerAppList=new ArrayList<>();
+        List<String> consumerList=new ArrayList<>();
         Identity identity;
         for(Consumer consumer:consumers){
             identity=consumer.getApp();
             if(!NullUtil.isEmpty(identity)) {
-                cosumerAppList.add(String.valueOf(identity.getCode()));
+                consumerList.add(String.valueOf(identity.getCode()));
             }
         }
-        pubSub.setConsumers(appsToApplication(cosumerAppList));
-        List<String> producerAppList=new ArrayList<>();
+        pubSub.setConsumers(appsToApplication(consumerList));
+        List<String> producerList=new ArrayList<>();
         for(Producer producer:producers){
             identity=producer.getApp();
             if(!NullUtil.isEmpty(identity)) {
-                producerAppList.add(String.valueOf(identity.getCode()));
+                producerList.add(String.valueOf(identity.getCode()));
             }
         }
-        pubSub.setProducers(appsToApplication(producerAppList));
+        pubSub.setProducers(appsToApplication(producerList));
         return pubSub;
     }
     @Override
@@ -251,8 +253,8 @@ public class OpenAPIServiceImpl implements OpenAPIService {
 
     @Override
     public boolean unSubscribe(Consumer consumer) throws Exception{
-        Consumer c=consumerService.findByTopicAppGroup(consumer.getNamespace().getCode(),consumer.getTopic().getCode(),
-                consumer.getApp().getCode(),consumer.getSubscribeGroup());
+      Consumer c=consumerService.findByTopicAppGroup(consumer.getNamespace().getCode(),consumer.getTopic().getCode(),
+              consumer.getApp().getCode(),consumer.getSubscribeGroup());
         if(NullUtil.isEmpty(c)) throw new ServiceException(BAD_REQUEST,String.format(" %s haven't subscribe to the topic %s ",
                 CodeConverter.convertApp(new Identity(consumer.getApp().getCode()),consumer.getSubscribeGroup()),CodeConverter.convertTopic(consumer.getNamespace(),consumer.getTopic()).getFullName()));
         // check pending message
@@ -292,35 +294,63 @@ public class OpenAPIServiceImpl implements OpenAPIService {
     public Topic createTopic(Topic topic, QBrokerGroup brokerGroup,Identity operator) throws Exception{
 //        topic.setElectType(PartitionGroup.ElectType.raft);
         List<Broker> brokers=allocateBrokers(topic,brokerGroup);
+        if (brokers.size() == 0 ) {
+            throw new ServiceException(BAD_REQUEST,"select broker is empty");
+        }
+
+        //计算总数
+        topic.setPartitions(topic.getPartitions()* brokers.size());
         topic.setBrokers(brokers);
         topicService.addWithBrokerGroup(topic,topic.getBrokerGroup(),topic.getBrokers(),operator);
         return topicService.findById(topic.getId());
     }
 
+    public void removeTopic(String namespace,String topicCode) throws Exception {
+        Topic topic = topicService.findByCode(namespace,topicCode);
+        if (topic == null) {
+            throw new BusinessException("topic is not exist");
+        }
+        topicService.delete(topic);
+    }
+
     /**
      * Random allocate broker group and broker  for topic
      **/
-    List<Broker> allocateBrokers(Topic topic,QBrokerGroup brokerGroup) throws Exception{
-        List<BrokerGroup> allBrokerGroup= brokerGroupService.findAll(brokerGroup);
+    List<Broker> allocateBrokers(Topic topic,QBrokerGroup qBrokerGroup) throws Exception{
+        //校验分组是否存在
+        qBrokerGroup.setRole(0);//1管理员 0 普通用户
+        List<BrokerGroup> brokerGroupList = brokerGroupService.findByQuery(new ListQuery<>(qBrokerGroup));
+        if (brokerGroupList == null || brokerGroupList.size() ==0) {
+            throw new ServiceException(BAD_REQUEST,"broker group is empty");
+        }
+        BrokerGroup brokerGroup = brokerGroupList.get(0);
+        topic.setBrokerGroup(brokerGroup); // broker group
+
+        QBroker qBroker = new QBroker();
+        qBroker.setGroup(new Identity(brokerGroup.getId(),brokerGroup.getCode()));
+        List<Broker> brokers = brokerService.queryBrokerList(qBroker);
+
+        //如果用户设置broker数量,则校验broker数量是否能满足
+        if (topic.getBrokerNum() !=0 && topic.getBrokerNum() > brokers.size() ) {
+            throw new ServiceException(BAD_REQUEST,"实际可用broker数量小于指定broker数量");
+        }
+        //如果用户没设置broker数量 默认是3个
+        if (topic.getBrokerNum() == 0) {
+            topic.setBrokerNum(3);
+        }
+
         Random random=new Random();
-        List<Broker> brokers;
-        int maxTries=10;
-        do {
-            int index = (int) (random.nextDouble() * allBrokerGroup.size());
-            BrokerGroup b = allBrokerGroup.get(index);
-            QBroker qBroker = new QBroker();
-            qBroker.setBrokerGroupId(b.getId());
-            QPageQuery<QBroker> qBrokerQPageQuery = new QPageQuery<>();
-            qBrokerQPageQuery.setQuery(qBroker);
-            Pagination pagination = new Pagination();
-            pagination.setSize(Integer.MAX_VALUE);
-            qBrokerQPageQuery.setPagination(pagination);
-            PageResult<Broker> brokerPageResult = brokerService.findByQuery(qBrokerQPageQuery);
-            brokers=brokerPageResult.getResult();
-            // to do if brokers too many
-            topic.setBrokerGroup(b); // broker group
-        }while(maxTries-->0&&NullUtil.isEmpty(brokers));
-        return brokers;
+        List<Broker> selectBroker = new ArrayList<>();
+        int startId = random.nextInt(brokers.size());
+        int endId = startId+topic.getBrokerNum();
+        for (int i = startId;i < endId; i++){
+            Broker broker = brokers.get(i%brokers.size());
+            if (selectBroker.contains(broker)) {
+                continue;
+            }
+            selectBroker.add(broker);
+        }
+        return selectBroker;
     }
 
     @Override
