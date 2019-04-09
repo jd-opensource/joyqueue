@@ -28,6 +28,7 @@ public class ApplicationInfo {
     private Identity user;
     //别名或英文名
     private String aliasCode;
+    private String discription;
 
     public long getId() {
         return id;
@@ -107,6 +108,14 @@ public class ApplicationInfo {
 
     public void setAliasCode(String aliasCode) {
         this.aliasCode = aliasCode;
+    }
+
+    public String getDiscription() {
+        return discription;
+    }
+
+    public void setDiscription(String discription) {
+        this.discription = discription;
     }
 
     @Override
