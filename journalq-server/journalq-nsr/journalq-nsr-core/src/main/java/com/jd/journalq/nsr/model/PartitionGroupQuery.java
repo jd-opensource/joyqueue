@@ -16,6 +16,16 @@ public class PartitionGroupQuery implements Query {
      */
     private int group = -1;
 
+    private String keyword;
+
+    public String getKeyword() {
+        return keyword;
+    }
+
+    public void setKeyword(String keyword) {
+        this.keyword = keyword;
+    }
+
     public String getTopic() {
         return topic;
     }

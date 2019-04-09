@@ -164,6 +164,7 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
         partitionGroup.setReplicas(replicaGroups);
         partitionGroup.setLearners(learners);
         partitionGroup.setLeader(leader);
+        partitionGroup.setRecLeader(group.getRecLeader());
         List<Integer> outSyncBrokers = JSONArray.parseArray(
                 postWithLog(UPDATE_PARTITION_GROUP, partitionGroup,OperLog.Type.GROUP.value(),OperLog.OperType.UPDATE.value(),group.getTopic().getCode()),Integer.class);
         return outSyncBrokers;

@@ -1,8 +1,8 @@
 package com.jd.journalq.model.query;
 
-import com.jd.jmq.common.model.QKeyword;
-import com.jd.jmq.model.domain.Namespace;
-import com.jd.jmq.model.domain.Topic;
+import com.jd.journalq.model.QKeyword;
+import com.jd.journalq.model.domain.Namespace;
+import com.jd.journalq.model.domain.Topic;
 
 public class QTopicPartitionGroup extends QKeyword {
     private Topic topic;
