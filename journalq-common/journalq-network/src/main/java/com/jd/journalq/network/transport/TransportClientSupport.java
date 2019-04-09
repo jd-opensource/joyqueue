@@ -63,9 +63,8 @@ public abstract class TransportClientSupport extends Service {
 
 
     protected EventLoopGroup newIoEventGroup() {
-        NamedThreadFactory threadFactory = new NamedThreadFactory("jmq-client-io-loopGroup");
-        // TODO 临时代码
-        int ioThread = Runtime.getRuntime().availableProcessors() * 2;
+        int ioThread = config.getIoThread();
+        NamedThreadFactory threadFactory = new NamedThreadFactory(config.getIoThreadName());
         if (Epoll.isAvailable()) {
             return new EpollEventLoopGroup(ioThread, threadFactory);
         } else {

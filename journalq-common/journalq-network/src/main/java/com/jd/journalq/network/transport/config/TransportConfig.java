@@ -17,8 +17,10 @@ public class TransportConfig {
     private  String host = IpUtil.getLocalIp();
     // 接受请求线程数
     private  int acceptThread = 1;
+    private String acceptThreadName = "accept-eventLoop";
     // io线程数
     private  int ioThread = Runtime.getRuntime().availableProcessors();
+    private String ioThreadName = "io-eventLoop";
     // 通道最大空闲时间(毫秒)
     private  int maxIdleTime = 120 * 1000;
     // 表示是否允许重用Socket所绑定的本地地址
@@ -258,5 +260,21 @@ public class TransportConfig {
 
     public boolean isNonBlockOneway() {
         return nonBlockOneway;
+    }
+
+    public void setAcceptThreadName(String acceptThreadName) {
+        this.acceptThreadName = acceptThreadName;
+    }
+
+    public String getAcceptThreadName() {
+        return acceptThreadName;
+    }
+
+    public void setIoThreadName(String ioThreadName) {
+        this.ioThreadName = ioThreadName;
+    }
+
+    public String getIoThreadName() {
+        return ioThreadName;
     }
 }

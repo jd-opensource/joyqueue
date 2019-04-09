@@ -1,9 +1,5 @@
 package com.jd.journalq.store.replication;
 
-import com.jd.journalq.store.PositionOverflowException;
-import com.jd.journalq.store.PositionUnderflowException;
-import com.jd.journalq.store.ReadException;
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.TimeoutException;
@@ -50,9 +46,7 @@ public interface ReplicableStore {
      * @param position 起始位置，必须是一条日志的开始位置。
      * @param length 返回数据的最大长度。
      * @return 返回若干条日志，以ByteBuffer形式存储，Buffer的position为0，limit为返回数据的总长度。
-     * @throws PositionUnderflowException position < left
-     * @throws PositionOverflowException position >= right
-     * @throws ReadException position is not a log-start-position or other read exception.
+     * @throws com.jd.jmq.store.ReadException position is not a log-start-position or other read exception.
      * @throws IOException 发生IO错误
      */
     ByteBuffer readEntryBuffer(long position, int length) throws IOException;
@@ -64,8 +58,10 @@ public interface ReplicableStore {
      * @param byteBuffer 待写入的ByteBuffer，将position至limit之间的数据写入存储。
      *                   写入完成后， position == limit。
      * @return store.rightPosition()
+     * @throws IOException 发生IO错误
+     * @throws TimeoutException 等待写入超时，需要重试。
      */
-    long appendEntryBuffer(ByteBuffer byteBuffer) throws IOException, TimeoutException, InterruptedException;
+    long appendEntryBuffer(ByteBuffer byteBuffer) throws IOException, TimeoutException;
     /**
      * 计算日志相对于position的位置
      * @param position 当前位置，必须是日志的起始位置

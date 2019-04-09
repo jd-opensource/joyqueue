@@ -23,9 +23,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -38,10 +36,10 @@ public class PartitionGroupStoreManagerTest {
 
     private File base = null;
     private File groupBase = null;
-    private static final String topic = "test_topic";
-    private static final int partitionGroup = 3;
-    private static final short [] partitions = new short [] {4,5,6};
-    private static final int [] nodes = new int[] {0};
+    private final static String topic = "test_topic";
+    private final static int partitionGroup = 3;
+    private final static short [] partitions = new short [] {4,5,6};
+    private final static int [] nodes = new int[] {0};
     private PartitionGroupStoreManager store;
     private VirtualThreadExecutor virtualThreadPool;
     private PreloadBufferPool bufferPool;
@@ -55,6 +53,40 @@ public class PartitionGroupStoreManagerTest {
 
     }
 
+
+    @Test
+    public void indexLengthTest() throws Exception {
+        int count = 1024 * 1024;
+        long timeout = 500000L;
+        long length = 0L;
+
+        for (int i = 0; i < count; i++) {
+            int bodySize = ThreadLocalRandom.current().nextInt(127) + 1;
+            ByteBuffer msg = MessageUtils.build(1, bodySize).get(0);
+            length += msg.remaining();
+            store.asyncWrite(QosLevel.ONE_WAY, null,new WriteRequest(partitions[ThreadLocalRandom.current().nextInt(partitions.length)],msg));
+        }
+        // 等待建索引都完成
+        long t0 = System.currentTimeMillis();
+        while (System.currentTimeMillis() - t0 < timeout && store.rightPosition() < length){
+            Thread.sleep(10L);
+        }
+
+        for (int i = 0; i < partitions.length; i++) {
+
+            for (long j = 0; j < store.getRightIndex(partitions[i]); j++) {
+                ReadResult readResult  = store.read(partitions[i], j, 1, 0);
+                Assert.assertEquals(JMQCode.SUCCESS,readResult.getCode());
+                Assert.assertEquals(1,readResult.getMessages().length);
+                ByteBuffer readBuffer = readResult.getMessages()[0];
+                Assert.assertEquals(readBuffer.getInt(0), readBuffer.remaining());
+                length -= readBuffer.remaining();
+            }
+        }
+
+        Assert.assertEquals(0L, length);
+
+    }
 
     private void writeReadTest(QosLevel qosLevel) throws IOException, InterruptedException {
         int count  =  1024;
@@ -173,6 +205,43 @@ public class PartitionGroupStoreManagerTest {
             ByteBuffer readBuffer = readResult.getMessages()[0];
             Assert.assertEquals(writeBuffer,readBuffer);
         }
+    }
+
+    @Test
+    public void replicationOverflowTest() throws Exception {
+        int repeatCount = 20; // 100 * 10MB = 1GB
+        long index = 0L;
+        List<ByteBuffer> messages = MessageUtils.build(10240,  1024);
+        ByteBuffer replicationMessages = ByteBuffer.allocate(messages.stream().mapToInt(Buffer::remaining).sum());
+
+        for(int i= 0; i< repeatCount;i++) {
+            replicationMessages.clear();
+            for(ByteBuffer byteBuffer: messages) {
+                // 分区
+                MessageParser.setShort(byteBuffer, MessageParser.PARTITION, partitions[0]);
+                // 轮次
+                MessageParser.setInt(byteBuffer, MessageParser.TERM, 0);
+                // 存储时间：与发送时间的差值
+                MessageParser.setInt(byteBuffer, MessageParser.STORAGE_TIMESTAMP,
+                        (int )(SystemClock.now() - MessageParser.getLong(byteBuffer, MessageParser.CLIENT_TIMESTAMP)));
+                // 索引
+                MessageParser.setLong(byteBuffer, MessageParser.INDEX, index++);
+                replicationMessages.put(byteBuffer);
+                byteBuffer.clear();
+            }
+
+            replicationMessages.flip();
+
+            boolean repeat = true;
+            while (repeat)
+                try {
+                    store.appendEntryBuffer(replicationMessages);
+                    repeat = false;
+                } catch (TimeoutException ignored) {}
+            logger.info("Index: {}, {}...", index, Format.formatTraffic(index * 1024));
+        }
+
+
     }
 
     @Test
@@ -367,10 +436,9 @@ public class PartitionGroupStoreManagerTest {
     private void prepareStore() throws Exception {
 
         PartitionGroupStoreSupport.init(groupBase,partitions);
-        PartitionGroupStoreManager.Config config = new PartitionGroupStoreManager.Config();
         if(null == virtualThreadPool) virtualThreadPool = new VirtualThreadExecutor(500, 100,10, 1000,4);
         if(null == bufferPool) {
-            bufferPool = new PreloadBufferPool( 100);
+            bufferPool = new PreloadBufferPool( );
             bufferPool.addPreLoad(128 * 1024 * 1024, 2, 4);
             bufferPool.addPreLoad(10 * 1024 * 1024, 2, 4);
         }
