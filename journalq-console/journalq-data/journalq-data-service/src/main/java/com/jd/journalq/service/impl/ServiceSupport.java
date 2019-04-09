@@ -60,7 +60,7 @@ public abstract class ServiceSupport<M extends BaseModel,R extends Repository<M>
             return repository.add(model);
         } catch (DuplicateKeyException e) {
             // 将DAO异常转换成业务层异常
-            throw new UniqueException("已经存在，请检查数据");
+            throw new UniqueException("已经存在，请检查数据",e);
         }
     }
 

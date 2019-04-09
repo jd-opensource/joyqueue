@@ -30,21 +30,6 @@ public interface ApplicationService extends PageService<Application, QApplicatio
      */
     List<Application> findByCodes(List<String> codes);
 
-//    /**
-//     * 根据代码查找,检索出已删除应用
-//     *
-//     * @param applicationCode
-//     * @return
-//     */
-//    List<Application> findWithDeletedByCode(String applicationCode);
-
-    /**
-     * 查询未订阅的app
-     * @param query
-     * @return
-     */
-    PageResult<Application> findUnsubscribedByQuery(QPageQuery<QApplication> query);
-
     PageResult<TopicUnsubscribedApplication> findTopicUnsubscribedByQuery(QPageQuery<QApplication> query);
 
     PageResult<Application> findSubscribedByQuery(QPageQuery<QApplication> query);
