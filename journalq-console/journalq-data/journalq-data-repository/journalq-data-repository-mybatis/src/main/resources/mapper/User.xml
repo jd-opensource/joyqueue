@@ -151,7 +151,7 @@
     <delete id="deleteAppUser">
         DELETE FROM `application_user`
         WHERE
-        application_id=#{app_id} AND user_id=#{userId}
+        app_id=#{appId} AND user_id=#{userId}
     </delete>
 
     <delete id="deleteAppUserById">

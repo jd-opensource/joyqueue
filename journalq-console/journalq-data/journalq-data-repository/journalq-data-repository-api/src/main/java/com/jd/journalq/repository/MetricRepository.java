@@ -11,4 +11,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface MetricRepository extends PageRepository<Metric, QMetric>, Codeable<Metric> {
 
+    Metric findByAliasCode(String aliasCode);
+
 }
