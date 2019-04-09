@@ -197,7 +197,9 @@ public class PartitionGroup implements Serializable {
         public static ElectType value(String typeName) {
             if(fix.name().equals(typeName.toLowerCase())){
                 return fix;
-            }else return  raft;
+            }else{
+                return  raft;
+            }
         }
         public int type() {
             return type;

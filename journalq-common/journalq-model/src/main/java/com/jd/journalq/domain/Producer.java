@@ -27,22 +27,6 @@ public class Producer extends Subscription {
         return new StringBuilder(topic.getFullName()).append(".").append(app).toString();
     }
 
-    public TopicName getTopic() {
-        return topic;
-    }
-
-    public void setTopic(TopicName topic) {
-        this.topic = topic;
-    }
-
-    public String getApp() {
-        return app;
-    }
-
-    public void setApp(String app) {
-        this.app = app;
-    }
-
     public ClientType getClientType() {
         return clientType;
     }
@@ -181,8 +165,9 @@ public class Producer extends Subscription {
             }
 
             public Builder blackList(String blackList) {
-                if (null != blackList && !"".equals(blackList.trim()))
+                if (null != blackList && !"".equals(blackList.trim())) {
                     this.blackList = new HashSet<String>(Arrays.asList(blackList.trim().split(",")));
+                }
                 return this;
             }
 

@@ -84,8 +84,12 @@ public class Subscription implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o){
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()){
+            return false;
+        }
         Subscription that = (Subscription) o;
         return Objects.equals(topic, that.topic) &&
                 Objects.equals(app, that.app) &&
