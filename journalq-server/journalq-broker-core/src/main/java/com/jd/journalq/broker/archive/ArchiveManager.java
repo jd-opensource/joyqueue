@@ -65,10 +65,12 @@ public class ArchiveManager extends Service {
 
     @Override
     protected void doStart() throws Exception {
-        super.doStart();
-        sendArchiveService.start();
-        consumeArchiveService.start();
-        logger.info("archive manager started.");
+        if(archiveConfig.isStartArchive()) {
+            super.doStart();
+            sendArchiveService.start();
+            consumeArchiveService.start();
+            logger.info("archive manager started.");
+        }
     }
 
     @Override

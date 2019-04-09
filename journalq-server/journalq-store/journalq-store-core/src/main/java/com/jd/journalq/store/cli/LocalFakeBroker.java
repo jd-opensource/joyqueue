@@ -29,10 +29,10 @@ import java.util.stream.Stream;
 public class LocalFakeBroker {
     private static final Logger logger = LoggerFactory.getLogger(LocalFakeBroker.class);
 
-    private static final String TOPIC_PREFIX = "local_broker_";
-    private static final long K = 1024,M = K * K;
-    private static final long G = K * M, T = K * G;
-    private static final Map<String,Long> UNIT_MAP = new HashMap<>(4);
+    private final static String TOPIC_PREFIX = "local_broker_";
+    private final static long K = 1024,M = K * K;
+    private final static long G = K * M, T = K * G;
+    private final static Map<String,Long> UNIT_MAP = new HashMap<>(4);
     static {
         UNIT_MAP.put("k",K);
         UNIT_MAP.put("m",M);
@@ -57,8 +57,7 @@ public class LocalFakeBroker {
     // 每个 partition group 的consumer数量
     private int consumerCount = 1;
     private int producerCount = 1;
-    private boolean enableMetric = false;
-
+    private long metricIntervalMs = 0L;
     private String path = getBasePath();
 
     private Store store;
@@ -92,21 +91,20 @@ public class LocalFakeBroker {
             partitionCount = Integer.parseInt(prop.getProperty("partitionCount",String.valueOf(partitionCount)));
             consumerCount = Integer.parseInt(prop.getProperty("consumerCount",String.valueOf(consumerCount)));
             producerCount = Integer.parseInt(prop.getProperty("producerCount",String.valueOf(producerCount)));
-            enableMetric = Boolean.parseBoolean(prop.getProperty("enableMetric",String.valueOf(enableMetric)));
             batchMessageSize = Short.parseShort(prop.getProperty("batchMessageSize", String.valueOf(batchMessageSize)));
+            this.metricIntervalMs = Long.parseLong(prop.getProperty("printMetricIntervalMs", String.valueOf(storeConfig.getPrintMetricIntervalMs())));
             path = prop.getProperty("path",path);
 
 
             storeConfig.setMessageFileSize((int)parseSize(prop.getProperty("messageFileSize"),storeConfig.getMessageFileSize()));
             storeConfig.setIndexFileSize((int)parseSize(prop.getProperty("indexFileSize"),storeConfig.getIndexFileSize()));
-            storeConfig.setCachedPageCount(Integer.parseInt(prop.getProperty("cachedPageCount", String.valueOf(storeConfig.getCachedPageCount()))));
             storeConfig.setMaxMessageLength((int)parseSize(prop.getProperty("maxMessageLength"),storeConfig.getMaxMessageLength()));
-            storeConfig.setMaxStoreSize(parseSize(prop.getProperty("maxStoreSize"),storeConfig.getMaxStoreSize()));
             storeConfig.setWriteRequestCacheSize((int)parseSize(prop.getProperty("writeRequestCacheSize"),storeConfig.getWriteRequestCacheSize()));
             storeConfig.setFlushIntervalMs(Long.parseLong(prop.getProperty("flushIntervalMs", String.valueOf(storeConfig.getFlushIntervalMs()))));
             storeConfig.setPreLoadBufferCoreCount(Integer.parseInt(prop.getProperty("buffer.coreSize",String.valueOf(storeConfig.getPreLoadBufferCoreCount()))));
             storeConfig.setPreLoadBufferMaxCount(Integer.parseInt(prop.getProperty("buffer.maxSize",String.valueOf(storeConfig.getPreLoadBufferMaxCount()))));
             storeConfig.setMaxDirtySize(parseSize(prop.getProperty("maxDirtySize"), storeConfig.getMaxDirtySize()));
+            storeConfig.setPrintMetricIntervalMs(Long.parseLong(prop.getProperty("printMetricIntervalMs", String.valueOf(storeConfig.getPrintMetricIntervalMs()))));
             storeConfig.setPath(path);
         } catch (IOException ex) {
             logger.warn("Exception: ",ex);
@@ -135,10 +133,10 @@ public class LocalFakeBroker {
 
 
         store = new Store(storeConfig);
-
-        if(enableMetric) {
-            input = new Metric("Produce", producerCount, new String [] { "total"}, new String [] {"traffic"});
-            output = new Metric("Consume", consumerCount * partitionCount, new String [] { "total"}, new String [] {"traffic"});
+        store.start();
+        if(metricIntervalMs > 0) {
+            input = new Metric("Produce", producerCount, new String [] { "total"}, new String[] {"tps"}, new String [] {"traffic"});
+            output = new Metric("Consume", consumerCount * partitionCount, new String [] { "total"}, new String[] {"tps"}, new String [] {"traffic"});
         }
 
         for (int i = 0; i < topicCount; i++) {
@@ -156,7 +154,7 @@ public class LocalFakeBroker {
                 store.getReplicableStore(topic,j).enable();
 
                 for (int k = 0; k < producerCount; k++) {
-                    MetricInstance metricInstance = null;
+                    Metric.MetricInstance metricInstance = null;
                     if(null != input) {
                         metricInstance = input.getMetricInstances().get(k);
                     }
@@ -170,20 +168,10 @@ public class LocalFakeBroker {
                             .build());
                 }
 
-
-
-//                int finalJ = j;
-//                loopThreads.add(LoopThread.builder()
-//                        .name(String.format("ReplicationThread-%s-%d",topic,j))
-//                        .sleepTime(0L,0L)
-//                        .onException(e->logger.warn("Exception:",e))
-//                        .doWork(() -> this.replicate(store.getReplicableStore(topic, finalJ)))
-//                        .build());
-
                 for (int k = 0; k < consumerCount; k++) {
                     for (int i1 = 0; i1 < partitions.length; i1++) {
                         Short partition = partitions[i1];
-                        MetricInstance metricInstance = null;
+                        Metric.MetricInstance metricInstance = null;
                         if (null != output) {
                             metricInstance = output.getMetricInstances().get(k * partitionCount + i1);
                         }
@@ -199,14 +187,10 @@ public class LocalFakeBroker {
             }
         }
 
-        store.start();
-
-
-
-        if(enableMetric) {
+        if(metricIntervalMs > 0) {
 
             loopThreads.add(LoopThread.builder()
-                    .sleepTime(1000, 1000)
+                    .sleepTime(metricIntervalMs, metricIntervalMs)
                     .name("Metric-Thread")
                     .onException(e -> logger.warn("Exception:", e))
                     .doWork(() -> {
@@ -253,13 +237,13 @@ public class LocalFakeBroker {
 
     static class Producer {
         private final PartitionGroupStore store;
-        private WriteRequest[] messages;
-        private final MetricInstance metric;
+        private WriteRequest [] messages;
+        private final Metric.MetricInstance metric;
         private long size;
         private final int batchSize,bodySize;
         private final short partition;
         private final short batchMessageSize;
-        Producer(PartitionGroupStore store, short partition, int batchSize, int bodySize, short batchMessageSize, MetricInstance metric) {
+        Producer(PartitionGroupStore store, short partition, int batchSize, int bodySize, short batchMessageSize, Metric.MetricInstance metric) {
             this.store = store;
             this.metric = metric;
             this.partition = partition;
@@ -301,8 +285,8 @@ public class LocalFakeBroker {
                 if(null != writeResult && JMQCode.SUCCESS == writeResult.getCode()) {
                     if(null != metric) {
                         long t1 = System.nanoTime();
-
-                        metric.addCounter("traffic",size);
+                        metric.addCounter("tps", messages.length);
+                        metric.addTraffic("traffic",size);
                         metric.addLatency("total", t1 - t0);
                     }
                 }else {
@@ -321,7 +305,8 @@ public class LocalFakeBroker {
 
             if(null != metric) {
                 long t1 = System.nanoTime();
-                metric.addCounter("traffic", size);
+                metric.addCounter("tps", messages.length);
+                metric.addTraffic("traffic",size);
                 metric.addLatency("total", t1 - t0);
             }
         }
@@ -335,7 +320,8 @@ public class LocalFakeBroker {
 
             if(null != writeResult && JMQCode.SUCCESS == writeResult.getCode()) {
                 if(null != metric) {
-                    metric.addCounter("traffic",size);
+                    metric.addCounter("tps", messages.length);
+                    metric.addTraffic("traffic",size);
                     metric.addLatency("total", t1 - t0);
                 }
             }else {
@@ -350,10 +336,10 @@ public class LocalFakeBroker {
         private final Short partition;
         private final int batchSize;
         private long index = -1;
-        private final MetricInstance metric;
+        private final Metric.MetricInstance metric;
 
 
-        Consumer(PartitionGroupStore store, Short partition, int batchSize, MetricInstance metric) {
+        Consumer(PartitionGroupStore store, Short partition, int batchSize, Metric.MetricInstance metric) {
             this.store = store;
             this.partition = partition;
             this.batchSize = batchSize;
@@ -388,7 +374,8 @@ public class LocalFakeBroker {
                         long t1 = System.nanoTime();
 
                         if(null != metric) {
-                            metric.addCounter("traffic",input);
+                            metric.addCounter("tps", readResult.getMessages().length);
+                            metric.addTraffic("traffic",input);
                             metric.addLatency("total", t1 - t0);
                         }
                     } else {
@@ -403,127 +390,5 @@ public class LocalFakeBroker {
 
 
 
-    public static class Latency {
-        private List<Long> latencies = Collections.synchronizedList(new LinkedList<>());
-        void add(long latency) {
-            latencies.add(latency);
-        }
-
-        List<Long> getAndReset() {
-            List<Long>  ret = new ArrayList<>(latencies);
-            latencies.clear();
-            return ret;
-        }
-    }
-
-    public static class Counter {
-        private final AtomicLong atomicLong = new AtomicLong(0L);
-
-        void add (long count) {
-            atomicLong.addAndGet(count);
-        }
-
-        long getAndReset() {
-            return atomicLong.getAndSet(0L);
-        }
-    }
-
-
-
-    public static class MetricInstance {
-
-
-        private Map<String, Latency> latencies;
-        private Map<String, Counter> counters;
-
-        MetricInstance(String [] latencyNames, String [] counterNames) {
-            latencies = new HashMap<>(latencyNames.length);
-            Arrays.stream(latencyNames).forEach(name -> latencies.put(name, new Latency()));
-            counters = new HashMap<>(counterNames.length);
-            Arrays.stream(counterNames).forEach(name -> counters.put(name, new Counter()));
-        }
-
-        public void addLatency(String name, long value) {
-            latencies.get(name).add(value);
-        }
-
-        public void addCounter(String name, long value) {
-            counters.get(name).add(value);
-        }
-
-        public List<Long> getAndResetLatencies(String name){
-            return latencies.get(name).getAndReset();
-        }
-
-        public long getAndResetCounter(String name) {
-            return counters.get(name).getAndReset();
-        }
-
-    }
-
-    public static class Metric {
-        private final List<MetricInstance> metricInstances;
-        private final String name;
-        private final String [] latencies, counters;
-        private long resetTime = System.currentTimeMillis();
-
-        public Metric(String name, int instanceCount, String [] latencies, String [] counters) {
-            this.name = name;
-            metricInstances = new ArrayList<>(instanceCount);
-            IntStream.range(0,instanceCount).forEach(i -> metricInstances.add(new MetricInstance(latencies,counters)));
-            this.latencies = latencies;
-            this.counters  = counters;
-        }
-
-        public List<MetricInstance> getMetricInstances() {
-            return metricInstances;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-
-        public void reportAndReset(){
-            long reportTime = System.currentTimeMillis();
-            int intervalMs = (int) (reportTime - resetTime);
-            logger.info("{}：{}", name, Stream.concat(
-                    Arrays.stream(counters)
-                            .map(name -> {
-                                long cps = 0L;
-                                if(intervalMs > 0) {
-                                    cps = metricInstances.stream()
-                                            .mapToLong(instance -> instance.getAndResetCounter(name))
-                                            .sum() * 1000L / intervalMs;
-                                    // 算tp99， tp90
-
-
-                                }
-                                return String.format("%s: %.2f MB/S", name, cps / 1024d / 1024d);
-                            }),
-
-                    Arrays.stream(latencies)
-                            .map(name -> {
-
-                                // 算tp99， tp90
-                                long [] sorted = metricInstances.stream()
-                                        .map(instance ->  instance.getAndResetLatencies(name))
-                                        .flatMap(List::stream)
-                                        .mapToLong(Long::longValue).sorted().toArray();
-                                if(sorted.length > 0) {
-                                    double avg = Arrays.stream(sorted).average().orElse(0D) / 1000000;
-                                    double tp90 = sorted[(int) (sorted.length * 0.90)] / 1000000D;
-                                    double tp99 = sorted[(int) (sorted.length * 0.99)] / 1000000D;
-                                    double max = sorted[sorted.length - 1] / 1000000D;
-                                    return String.format("%s: %.4f/%.4f/%.4f/%.4f ms", name, avg, tp90, tp99, max);
-                                } else {
-                                    return String.format("%s: 0/0/0/0 ms", name);
-                                }
-                            }))
-                    .collect(Collectors.joining(", ")));
-            resetTime = reportTime;
-
-        }
-    }
-
 }
+

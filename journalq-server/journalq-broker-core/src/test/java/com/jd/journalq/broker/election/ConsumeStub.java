@@ -180,5 +180,14 @@ public class ConsumeStub implements Consume {
     @Override
     public long getStartIndex(Consumer consumer, short partition) {return 0L;}
 
+    @Override
+    public long getLastPullTimeByPartition(TopicName topic, String app, short partition) {
+        return 0;
+    }
+
+    @Override
+    public long getLastAckTimeByPartition(TopicName topic, String app, short partition) {
+        return 0;
+    }
 
 }

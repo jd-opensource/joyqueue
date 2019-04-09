@@ -31,6 +31,8 @@ public class AppendEntriesRequest extends JMQPayload {
 
     private boolean match;
 
+    private int entriesTerm;
+
     private ByteBuffer entries;
 
     public TopicPartitionGroup getTopicPartitionGroup() {
@@ -113,6 +115,14 @@ public class AppendEntriesRequest extends JMQPayload {
         this.match = match;
     }
 
+    public int getEntriesTerm() {
+        return entriesTerm;
+    }
+
+    public void setEntriesTerm(int entriesTerm) {
+        this.entriesTerm = entriesTerm;
+    }
+
     public ByteBuffer getEntries() {
         return entries;
     }
@@ -144,6 +154,7 @@ public class AppendEntriesRequest extends JMQPayload {
                 .append(", commitPosition:").append(commitPosition)
                 .append(", leftPosition:").append(leftPosition)
                 .append(", match:").append(match)
+                .append(", entriesTerm:").append(entriesTerm)
                 .append(", entryLength:").append(entries == null ? 0 : entries.remaining())
                 .append("}").toString();
     }
@@ -201,6 +212,11 @@ public class AppendEntriesRequest extends JMQPayload {
 
         public Build prevPosition(long prevPosition) {
             appendEntriesRequest.setPrevPosition(prevPosition);
+            return this;
+        }
+
+        public Build entriesTerm(int entriesTerm) {
+            appendEntriesRequest.setEntriesTerm(entriesTerm);
             return this;
         }
 

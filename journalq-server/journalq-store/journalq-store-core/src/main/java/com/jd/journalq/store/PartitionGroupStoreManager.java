@@ -14,10 +14,11 @@ import com.jd.journalq.store.nsm.VirtualThread;
 import com.jd.journalq.store.nsm.VirtualThreadExecutor;
 import com.jd.journalq.store.replication.ReplicableStore;
 import com.jd.journalq.store.utils.PreloadBufferPool;
-import com.jd.journalq.store.utils.ThreadSafeFormat;
 import com.jd.journalq.toolkit.concurrent.EventListener;
 import com.jd.journalq.toolkit.concurrent.LoopThread;
+import com.jd.journalq.toolkit.format.Format;
 import com.jd.journalq.toolkit.lang.LifeCycle;
+import com.jd.journalq.toolkit.metric.Metric;
 import com.jd.journalq.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,20 +39,20 @@ import java.util.stream.Stream;
  * Date: 2018/8/13
  */
 public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, Closeable {
-    private static final Logger logger = LoggerFactory.getLogger(PartitionGroupStoreManager.class);
+    private final static Logger logger = LoggerFactory.getLogger(PartitionGroupStoreManager.class);
     private final PositioningStore<ByteBuffer> store;
     private final File base;
     private final String topic;
     private final int partitionGroup;
-    private static final long EVENT_TIMEOUT_MILLS = 60 * 1000L;
+    private final static long EVENT_TIMEOUT_MILLS = 60 * 1000L;
     private final CallbackPositioningBelt flushCallbackBelt, commitCallbackBelt;
     private final Map<Short, Partition> partitionMap = new ConcurrentHashMap<>();
     private final Config config;
     private final QosStore [] qosStores =
             {   new QosStore(this, QosLevel.ONE_WAY),
-                new QosStore(this, QosLevel.RECEIVE),
-                new QosStore(this, QosLevel.PERSISTENCE),
-                new QosStore(this, QosLevel.REPLICATION)
+                    new QosStore(this, QosLevel.RECEIVE),
+                    new QosStore(this, QosLevel.PERSISTENCE),
+                    new QosStore(this, QosLevel.REPLICATION)
             };
     private long replicationPosition;
     private long indexPosition;
@@ -63,7 +64,13 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
 
     private final VirtualThread writeVirtualThread = this::writeVT;
     private final VirtualThread callbackVirtualThread = this::callbackVT;
-    private final LoopThread writeLoopThread;
+    private final LoopThread writeLoopThread, flushLoopThread;
+
+    private Metric produceMetrics = null, consumeMetrics = null;
+    private Metric.MetricInstance produceMetric = null, consumeMetric;
+    private final LoopThread metricThread;
+
+
     public PartitionGroupStoreManager(String topic, int partitionGroup, File base, Config config,
                                       PreloadBufferPool bufferPool,
                                       ScheduledExecutorService scheduledExecutorService) {
@@ -102,7 +109,36 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                 .sleepTime(0,0)
                 .onException(e -> logger.warn("Write Exception: ", e))
                 .build();
+        this.flushLoopThread = LoopThread.builder()
+                .name(String.format("FlushThread-%s-%d", topic, partitionGroup))
+                .doWork(this::flush)
+                .sleepTime(config.flushIntervalMs, config.flushIntervalMs)
+                .onException(e -> logger.warn("Flush Exception: ", e))
+                .build();
+        this.metricThread = initMetrics(config);
     }
+
+    private LoopThread initMetrics(Config config) {
+        if(config.printMetricIntervalMs > 0) {
+            produceMetrics = new Metric("WriteMetric-" + topic + "-" + partitionGroup, 1, new String [] {"WriteLatency", "FlushLatency"}, new String [] {"WriteCount", "FlushCount"}, new String [] {"WriteTraffic", "FlushTraffic"});
+            produceMetric = produceMetrics.getMetricInstances().get(0);
+            consumeMetrics = new Metric("ReadMetric-" + topic + "-" + partitionGroup, 1, new String [] {"ReadLatency"}, new String [] {"ReadCount"}, new String [] {"ReadTraffic"});
+            consumeMetric = consumeMetrics.getMetricInstances().get(0);
+
+            return LoopThread.builder()
+                    .sleepTime(config.printMetricIntervalMs, config.printMetricIntervalMs)
+                    .name("Metric-Thread")
+                    .onException(e -> logger.warn("Exception:", e))
+                    .doWork(() -> {
+                        consumeMetrics.reportAndReset();
+                        produceMetrics.reportAndReset();
+                        logger.info("{}-{} WriteCommandCache size: {}, dirty size: {}/{}.", topic, partitionGroup, writeCommandCache.size(), store.right() - store.flushPosition(), config.maxDirtySize);
+                    }).build();
+        } else {
+            return null;
+        }
+    }
+
 
     public void recover() throws IOException {
         logger.info("Recovering message store...");
@@ -150,9 +186,9 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                                     "Index mismatch, store: %s, partition: %d, next index of the partition: %s，index in log: %s, log position: %s, log: \n%s",
                                     this.base, indexItem.getPartition(),
 
-                                    ThreadSafeFormat.formatWithComma(storeIndex),
-                                    ThreadSafeFormat.formatWithComma(indexItem.getIndex()),
-                                    ThreadSafeFormat.formatWithComma(indexPosition),
+                                    Format.formatWithComma(storeIndex),
+                                    Format.formatWithComma(indexItem.getIndex()),
+                                    Format.formatWithComma(indexPosition),
                                     MessageParser.getString(byteBuffer)));
                 }
             } else if (indexItem.getIndex() > storeIndex) {
@@ -161,9 +197,9 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                                 "Index must be continuous, store: %s, partition: %d, next index of the partition: %s，index in log: %s, log position: %s, log: \n%s",
                                 this.base, indexItem.getPartition(),
 
-                                ThreadSafeFormat.formatWithComma(storeIndex),
-                                ThreadSafeFormat.formatWithComma(indexItem.getIndex()),
-                                ThreadSafeFormat.formatWithComma(indexPosition),
+                                Format.formatWithComma(storeIndex),
+                                Format.formatWithComma(indexItem.getIndex()),
+                                Format.formatWithComma(indexPosition),
                                 MessageParser.getString(byteBuffer)));
             }
 
@@ -227,7 +263,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                 if (lastIndexItem == null) throw new ReadException(
                         String.format("Failed to recover index store %s to position %s, batchRead index failed!",
                                 indexStore.base().getAbsolutePath(),
-                                ThreadSafeFormat.formatWithComma(
+                                Format.formatWithComma(
                                         indexStore.right() - IndexItem.STORAGE_SIZE)));
                 // 检查对应的消息是否批消息，如果是批消息检查这一批消息的索引的完整性，如不完整直接截掉这个批消息的已存储的所有索引
                 lastIndexItem = verifyBatchMessage(lastIndexItem, indexStore, store);
@@ -236,12 +272,12 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                 long indexedMessagePosition = lastIndexItem.getOffset() + lastIndexItem.getLength();
 
                 logger.info("Topic: {}, group: {}, partition: {}, maxIndexedMessageOffset: {}.", topic,
-                        partitionGroup, partitionIndex, ThreadSafeFormat.formatWithComma(indexedMessagePosition));
+                        partitionGroup, partitionIndex, Format.formatWithComma(indexedMessagePosition));
 
                 if (indexPosition > indexedMessagePosition) {
                     logger.info("Topic: {}, group: {}, set indexPosition from {} to {}.",
-                            topic, partitionGroup, ThreadSafeFormat.formatWithComma(indexPosition),
-                            ThreadSafeFormat.formatWithComma(indexedMessagePosition));
+                            topic, partitionGroup, Format.formatWithComma(indexPosition),
+                            Format.formatWithComma(indexedMessagePosition));
                     indexPosition = indexedMessagePosition;
                 }
             }
@@ -279,7 +315,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
 
                 if(indexStore.right() < (batchSize + startIndex) * IndexItem.STORAGE_SIZE) {
                     logger.info("Incomplete batch message indices found, roll back index store to {}.",
-                            ThreadSafeFormat.formatWithComma(startIndex * IndexItem.STORAGE_SIZE));
+                            Format.formatWithComma(startIndex * IndexItem.STORAGE_SIZE));
                     indexStore.setRight(startIndex * IndexItem.STORAGE_SIZE);
                     lastIndexItem = indexStore.read(indexStore.right() - IndexItem.STORAGE_SIZE);
                 }
@@ -330,6 +366,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
     }
 
     public ReadResult read(short partition, long index, int count, long maxSize) throws IOException {
+        long t0 = System.nanoTime();
         ReadResult readResult = new ReadResult();
         checkPartition(partition);
         PositioningStore<IndexItem> indexStore = partitionMap.get(partition).store;
@@ -339,25 +376,69 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         readResult.setEop(indexItemList.size() < count);
         List<ByteBuffer> buffers = new ArrayList<>(count);
         IndexItem lastIndexItem = null;
-        for (IndexItem indexItem : indexItemList) {
+        for (int i = 0; i < indexItemList.size(); i++) {
+            IndexItem indexItem = indexItemList.get(i);
             // 如果索引的offset和上一条相同，说明它们是同一批消息，直接跳过即可
-            if(null != lastIndexItem && indexItem.getOffset() == lastIndexItem.getOffset()) {
+            if (null != lastIndexItem && indexItem.getOffset() == lastIndexItem.getOffset()) {
                 continue;
             }
-            ByteBuffer log = store.read(indexItem.getOffset(), indexItem.getLength());
-            if(null != log) {
-                if (maxSize <= 0 || (size += log.remaining()) < maxSize) {
-                    buffers.add(log);
-                } else {
-                    break;
+            try {
+                //FIXME: 偶尔会发生索引长度错误导致读消息抛异常，
+                // 临时解决方案是捕获异常后，再用不传长度的方法试一次。
+                // 另，用带长度的方法读性能更好。
+                ByteBuffer log ;
+                try {
+                    log = store.read(indexItem.getOffset(), indexItem.getLength());
+                    if(MessageParser.getInt(log, MessageParser.LENGTH) != indexItem.getLength()) {
+                        logger.warn("索引中消息长度不正确！index: {} , offset: {}, message length (from index/from message): {}/{}, partition: {}, store: {}.",
+                                Format.formatWithComma(index + i),
+                                Format.formatWithComma(indexItem.getOffset()),
+                                indexItem.getLength(),MessageParser.getInt(log, MessageParser.LENGTH),
+                                partition,
+                                base.getAbsolutePath());
+                        log = store.read(indexItem.getOffset());
+                    }
+                } catch (Throwable t) {
+                    logger.warn("Exception on read, try to read without length! index: {} , offset: {}, message length: {}, partition: {}, store: {}.",
+                            Format.formatWithComma(index + i),
+                            Format.formatWithComma(indexItem.getOffset()),
+                            indexItem.getLength(),
+                            partition,
+                            base.getAbsolutePath(),
+                            t);
+                    log = store.read(indexItem.getOffset());
                 }
-            } else {
-                throw new ReadException(String.format("Read log failed! store: %s, position: %d.", store.base().getAbsolutePath(), indexItem.getOffset()));
+
+                if (null != log) {
+                    if (maxSize <= 0 || (size += log.remaining()) < maxSize) {
+                        buffers.add(log);
+                    } else {
+                        break;
+                    }
+                } else {
+                    throw new ReadException(String.format("Read log failed! store: %s, position: %d.", store.base().getAbsolutePath(), indexItem.getOffset()));
+                }
+                lastIndexItem = indexItem;
+
+            } catch (Throwable t) {
+                logger.warn("Exception on read! index: {} , offset: {}, message length: {}, partition: {}, store: {}.",
+                        Format.formatWithComma(index + i),
+                        Format.formatWithComma(indexItem.getOffset()),
+                        indexItem.getLength(),
+                        partition,
+                        base.getAbsolutePath(),
+                        t);
+                throw t;
             }
-            lastIndexItem = indexItem;
         }
         readResult.setMessages(buffers.toArray(new ByteBuffer[0]));
         readResult.setCode(JMQCode.SUCCESS);
+        if(null != consumeMetric) {
+            consumeMetric.addCounter("ReadCount", buffers.size());
+            consumeMetric.addLatency("ReadLatency", System.nanoTime() - t0);
+            consumeMetric.addTraffic("ReadTraffic", buffers.stream().mapToInt(ByteBuffer::remaining).sum());
+        }
+
         return readResult;
     }
 
@@ -372,7 +453,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         long [] indices = new long [byteBuffers.length];
         try {
             for (int i = 0, byteBuffersLength = byteBuffers.length; i < byteBuffersLength; i++) {
-                ByteBuffer byteBuffer = byteBuffers[i];
+                ByteBuffer byteBuffer = byteBuffers[i].slice();
                 if(byteBuffer.remaining() > config.maxMessageLength) {
                     throw new WriteException(String.format("Message too large! Message length: %d, limit: %d", byteBuffer.remaining(), config.maxMessageLength));
                 }
@@ -384,9 +465,10 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                 MessageParser.setLong(byteBuffer, MessageParser.INDEX, indices[i]);
                 indexItem.setIndex(indices[i]);
 
+                int l = MessageParser.getInt(byteBuffer, MessageParser.LENGTH);
+                long p = position;
                 // 写入消息
                 position = store.append(byteBuffer);
-
                 // 写入索引
 
                 if (BatchMessageParser.isBatch(byteBuffer)) {
@@ -394,8 +476,16 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                     indexItem.setBatchMessage(true);
                     indexItem.setBatchMessageSize(batchSize);
                 }
+                //TODO: 临时增加检查索引长度不正确问题
+                if(indexItem.getLength() != l) {
+                    logger.warn("检测到写入索引长度不正确：" +
+                                    "indexItem.length: {}, length from message: {}, position: {}, topic={}, " +
+                                    "partitionGroup={}, partition={}, index={}.",
+                            indexItem.getLength(), l, p, topic, partitionGroup,
+                            indexItem.getPartition(), indexItem.getIndex());
+                }
                 writeIndex(indexItem, partition.store);
-
+                flushLoopThread.weakup();
             }
         } catch (Throwable t) {
             logger.warn("Write failed, rollback to position: {}, topic={}, partitionGroup={}.", start, topic, partitionGroup, t);
@@ -422,7 +512,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
     private void appendBatchMessageIndices(PositioningStore<IndexItem> indexStore, IndexItem indexItem) throws IOException {
         ByteBuffer indexBuffer = ByteBuffer.allocate(indexItem.getBatchMessageSize() * IndexItem.STORAGE_SIZE);
         for (int j = 0; j < indexItem.getBatchMessageSize(); j++) {
-           indexItem.serializeTo(indexBuffer);
+            indexItem.serializeTo(indexBuffer);
         }
         indexBuffer.flip();
         indexStore.appendByteBuffer(indexBuffer);
@@ -452,14 +542,23 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         WriteCommand writeCommand = null;
         try {
             writeCommand = writeCommandCache.take();
-
+            if(null != produceMetric) {
+                produceMetric.addTraffic("WriteTraffic", Arrays.stream(writeCommand.messages).mapToInt(ByteBuffer::remaining).sum());
+            }
+            long t0 = System.nanoTime();
             if (waitForFlush()) {
                 writeCommand.eventListener.onEvent(new WriteResult(JMQCode.SE_WRITE_TIMEOUT, null));
             } else {
                 long[] indices = write(writeCommand.messages);
                 handleCallback(writeCommand, store.right(), indices);
             }
+            long t1 = System.nanoTime();
+//
+            if(null != produceMetric) {
+                produceMetric.addLatency("WriteLatency", t1 - t0);
+                produceMetric.addCounter("WriteCount", 1);
 
+            }
         } catch (Throwable t) {
             if (null != writeCommand && writeCommand.eventListener != null)
                 writeCommand.eventListener.onEvent(new WriteResult(JMQCode.SE_WRITE_FAILED, null));
@@ -469,11 +568,11 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
 
     private boolean waitForFlush() {
 
-            long t0 = System.currentTimeMillis();
-            while (store.right() - store.flushPosition() >= config.maxDirtySize && System.currentTimeMillis() - t0 <= config.writeTimeoutMs) {
-                Thread.yield();
-            }
-            return System.currentTimeMillis() - t0 > config.writeTimeoutMs;
+        long t0 = System.currentTimeMillis();
+        while (store.right() - store.flushPosition() >= config.maxDirtySize && System.currentTimeMillis() - t0 <= config.writeTimeoutMs) {
+            Thread.yield();
+        }
+        return System.currentTimeMillis() - t0 > config.writeTimeoutMs;
     }
 
 
@@ -503,29 +602,43 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         return ret;
     }
 
-    private void evict () {
-        store.evict();
-        for(Partition p : partitionMap.values()){
-            p.store.evict();
-        }
-    }
 
     private void flush() {
         try {
             boolean flushed;
             do {
-                flushed = store.flush();
-                flushIndices();
+                long t0 = System.nanoTime();
+                long before = store.flushPosition();
+                flushed = store.flush() | flushIndices();
+
+                if(null != produceMetric && flushed) {
+                    long t1 = System.nanoTime();
+                    produceMetric.addTraffic("FlushTraffic", store.flushPosition() - before);
+                    produceMetric.addLatency("FlushLatency", t1 - t0);
+                    produceMetric.addCounter("FlushCount", 1);
+                }
             } while (flushed);
         }catch (IOException e) {
             logger.warn("Exception:",e);
         }
     }
 
-    private void flushIndices() throws IOException {
-        for(Partition partition: partitionMap.values()){
-            partition.store.flush();
+    private boolean flushIndices() {
+        boolean ret = false;
+
+        try {
+            boolean flushed;
+            do {
+                flushed = false;
+                for (Partition partition : partitionMap.values()) {
+                    flushed = partition.store.flush() || flushed;
+                }
+                ret = ret || flushed;
+            } while (flushed);
+        } catch (Exception e) {
+            logger.warn("Exception: ", e);
         }
+        return ret;
     }
 
     private final BlockingQueue<WriteCommand> writeCommandCache;
@@ -577,14 +690,18 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
     }
 
     PositioningStore<IndexItem> indexStore(short partition) {
-        return partitionMap.get(partition).store;
+        if(partitionMap.containsKey(partition)) {
+            return partitionMap.get(partition).store;
+        } else {
+            return null;
+        }
     }
 
-    public PositioningStore<ByteBuffer> messageStore() {
+    PositioningStore<ByteBuffer> messageStore() {
         return store;
     }
 
-    public Set<PositioningStore<IndexItem>> meetPositioningStores() {
+    Set<PositioningStore<IndexItem>> meetPositioningStores() {
         return partitionMap.values().stream().map(p -> p.store).collect(Collectors.toSet());
     }
 
@@ -612,27 +729,21 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         }
     }
 
-    private ScheduledFuture callbackFeature, flushFeature, evictFeature;
+    private ScheduledFuture callbackFeature;
 
     @Override
     public synchronized void start() {
-
+        if(config.printMetricIntervalMs > 0) {
+            metricThread.start();
+        }
         startCallbackThread();
         startFlushThread();
-        startEvictThread();
         started.set(true);
     }
 
-    private void startEvictThread() {
-        evictFeature = scheduledExecutorService.scheduleAtFixedRate(this::evict,
-                ThreadLocalRandom.current().nextLong(500L, 1000L),
-                config.evictIntervalMs, TimeUnit.MILLISECONDS);
-    }
-    private void startFlushThread() {
 
-        flushFeature = scheduledExecutorService.scheduleAtFixedRate(this::flush,
-                ThreadLocalRandom.current().nextLong(500L, 1000L),
-                config.flushIntervalMs, TimeUnit.MILLISECONDS);
+    private void startFlushThread() {
+        flushLoopThread.start();
     }
 
     private void startCallbackThread() {
@@ -671,9 +782,11 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                stopFlushThread(stopTimeout);
+                stopFlushThread();
                 stopCallbackThread(stopTimeout);
-                stopAndWaitScheduledFeature(evictFeature, stopTimeout);
+                if(config.printMetricIntervalMs > 0) {
+                    metricThread.stop();
+                }
             }
         } catch (Throwable t) {
             t.printStackTrace();
@@ -691,8 +804,8 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
             stopAndWaitScheduledFeature(callbackFeature, stopTimeout);
         }
     }
-    private void stopFlushThread(long stopTimeout) throws TimeoutException {
-       stopAndWaitScheduledFeature(flushFeature, stopTimeout);
+    private void stopFlushThread() {
+        flushLoopThread.stop();
     }
 
     private void stopWriteThread() {
@@ -782,8 +895,8 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
     }
 
     @Override
-    public void setRightPosition(long position, long timeout) throws IOException, TimeoutException {
-        stopFlushThread(timeout);
+    public void setRightPosition(long position, long timeout) throws IOException {
+        stopFlushThread();
         try {
             rollback(position);
         } finally {
@@ -843,20 +956,31 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
 
     @Override
     public ByteBuffer readEntryBuffer(long position, int length) throws IOException{
+        long t0 = System.nanoTime();
+        ByteBuffer buffer = store.readByteBuffer(position, length);
+        if(null != consumeMetric) {
+            consumeMetric.addCounter("ReadCount", 1);
+            consumeMetric.addLatency("ReadLatency", System.nanoTime() - t0);
+            consumeMetric.addTraffic("ReadTraffic", buffer.remaining());
+        }
 
-        return store.readByteBuffer(position, length);
+        return buffer;
     }
 
 
     @Override
-    public long appendEntryBuffer(ByteBuffer byteBuffer) throws IOException {
+    public long appendEntryBuffer(ByteBuffer byteBuffer) throws IOException, TimeoutException {
+        long t0 = System.nanoTime();
+        if(waitForFlush()) {
+            throw new TimeoutException("Wait for flush timeout! The broker is too much busy to write data to disks.");
+        }
         long start = store.right();
+        int counter = 0;
+        int size = byteBuffer.remaining();
         try {
-            byteBuffer.mark();
             // 写入消息
-            long position = store.appendByteBuffer(byteBuffer);
+            long position = store.appendByteBuffer(byteBuffer.asReadOnlyBuffer());
 
-            byteBuffer.reset();
             // 写入索引
             while (byteBuffer.hasRemaining()) {
                 IndexItem indexItem = IndexItem.parseMessage(byteBuffer, start + byteBuffer.position());
@@ -868,9 +992,9 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                             String.format(
                                     "Index must be continuous, store: %s, partition: %d, next index of the partition: %s，index in log: %s, log position: %s, log: \n%s",
                                     this.base, indexItem.getPartition(),
-                                    ThreadSafeFormat.formatWithComma(partition.store.right() / IndexItem.STORAGE_SIZE),
-                                    ThreadSafeFormat.formatWithComma(indexItem.getIndex()),
-                                    ThreadSafeFormat.formatWithComma(start + byteBuffer.position()),
+                                    Format.formatWithComma(partition.store.right() / IndexItem.STORAGE_SIZE),
+                                    Format.formatWithComma(indexItem.getIndex()),
+                                    Format.formatWithComma(start + byteBuffer.position()),
                                     MessageParser.getString(byteBuffer)));
                 }
 
@@ -882,7 +1006,17 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
 
                 writeIndex(indexItem, partition.store);
                 byteBuffer.position(byteBuffer.position() + indexItem.getLength());
+                counter ++;
             }
+
+            if(null != produceMetric) {
+                long t1 = System.nanoTime();
+                produceMetric.addTraffic("WriteTraffic", size);
+                produceMetric.addLatency("WriteLatency", t1 - t0);
+                produceMetric.addCounter("WriteCount", counter);
+
+            }
+
             return position;
         } catch (Throwable t) {
             logger.warn("Write failed, rollback to position: {}, topic={}, partitionGroup={}.", start, topic, partitionGroup, t);
@@ -1131,16 +1265,12 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
 
 
     public static class Config {
-        public static final int DEFAULT_MAX_MESSAGE_LENGTH = 4 * 1024 * 1024;
-        public static final long DEFAULT_MAX_STORE_SIZE = 10L * 1024 * 1024 * 1024;
-        public static final long DEFAULT_MAX_STORE_TIME = 1000 * 60 * 60 * 24 * 7;
-        public static final int DEFAULT_WRITE_REQUEST_CACHE_SIZE = 128;
-        public static final long DEFAULT_FLUSH_INTERVAL_MS = 50L;
-        public static final long DEFAULT_EVICT_INTERVAL_MS = 100L;
-        public static final long DEFAULT_WRITE_TIMEOUT_MS = 5000L;
-        public static final long DEFAULT_MAX_DIRTY_SIZE = 10L * 1024 * 1024;
-        public static final int DEFAULT_INDEX_BUFFER_LENGTH = 8196;
-        public static final int DEFAULT_MESSAGE_BUFFER_LENGTH = 2 * DEFAULT_MAX_MESSAGE_LENGTH;
+        public final static int DEFAULT_MAX_MESSAGE_LENGTH = 4 * 1024 * 1024;
+        public final static int DEFAULT_WRITE_REQUEST_CACHE_SIZE = 128;
+        public final static long DEFAULT_FLUSH_INTERVAL_MS = 50L;
+        public final static long DEFAULT_WRITE_TIMEOUT_MS = 3000L;
+        public final static long DEFAULT_MAX_DIRTY_SIZE = 10L * 1024 * 1024;
+        public final static long DEFAULT_PRINT_METRIC_INTERVAL_MS = 0L;
 
         /**
          * 允许脏数据的最大长度，超过这个长度就阻塞写入。
@@ -1156,10 +1286,6 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
          * 最大消息长度
          */
         private final int maxMessageLength;
-        /**
-         * 存储上限，超过上限后，最旧的文件将被删除
-         */
-        private final long maxStoreSize;
 
         /**
          * 写入请求缓存的大小
@@ -1172,34 +1298,30 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         private final long flushIntervalMs;
 
         /**
-         * 定期清理缓存时间间隔(ms)
+         * 打印性能信息的时间间隔
          */
-        private final long evictIntervalMs;
+        private final long printMetricIntervalMs;
 
         private PositioningStore.Config storeConfig;
         private PositioningStore.Config indexStoreConfig;
 
         public Config() {
 
-            this(DEFAULT_MAX_MESSAGE_LENGTH, DEFAULT_MAX_STORE_SIZE,
-                    DEFAULT_WRITE_REQUEST_CACHE_SIZE, DEFAULT_FLUSH_INTERVAL_MS,
-                    DEFAULT_WRITE_TIMEOUT_MS, DEFAULT_MAX_DIRTY_SIZE, DEFAULT_EVICT_INTERVAL_MS,
-                    new PositioningStore.Config(PositioningStore.Config.DEFAULT_FILE_DATA_SIZE, DEFAULT_MESSAGE_BUFFER_LENGTH),
-                    new PositioningStore.Config(PositioningStore.Config.DEFAULT_FILE_DATA_SIZE, DEFAULT_INDEX_BUFFER_LENGTH));
+            this(DEFAULT_MAX_MESSAGE_LENGTH, DEFAULT_WRITE_REQUEST_CACHE_SIZE, DEFAULT_FLUSH_INTERVAL_MS,
+                    DEFAULT_WRITE_TIMEOUT_MS, DEFAULT_MAX_DIRTY_SIZE, DEFAULT_PRINT_METRIC_INTERVAL_MS,
+                    new PositioningStore.Config(PositioningStore.Config.DEFAULT_FILE_DATA_SIZE),
+                    new PositioningStore.Config(PositioningStore.Config.DEFAULT_FILE_DATA_SIZE));
         }
 
-        public Config(int maxMessageLength, long maxStoreSize,
-                      int writeRequestCacheSize, long flushIntervalMs,
-                      long writeTimeoutMs, long maxDirtySize, long evictIntervalMs,
-                      PositioningStore.Config storeConfig,
-                      PositioningStore.Config indexStoreConfig) {
+        public Config(int maxMessageLength, int writeRequestCacheSize, long flushIntervalMs,
+                      long writeTimeoutMs, long maxDirtySize, long printMetricIntervalMs,
+                      PositioningStore.Config storeConfig, PositioningStore.Config indexStoreConfig) {
             this.maxMessageLength = maxMessageLength;
-            this.maxStoreSize = maxStoreSize;
             this.writeRequestCacheSize = writeRequestCacheSize;
             this.flushIntervalMs = flushIntervalMs;
             this.writeTimeoutMs = writeTimeoutMs;
             this.maxDirtySize = maxDirtySize;
-            this.evictIntervalMs = evictIntervalMs;
+            this.printMetricIntervalMs = printMetricIntervalMs;
             this.storeConfig = storeConfig;
             this.indexStoreConfig = indexStoreConfig;
         }

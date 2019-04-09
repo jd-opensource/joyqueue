@@ -47,7 +47,7 @@ public class ReplicateConsumePosRequestHandler implements CommandHandler, Type {
         ReplicateConsumePosResponse response = new ReplicateConsumePosResponse(false);
 
         if (request.getConsumePositions() == null) {
-            logger.warn("Receive consume pos request, consume position is null");
+            logger.info("Receive consume pos request, consume position is null");
             return new Command(header, response);
         }
 

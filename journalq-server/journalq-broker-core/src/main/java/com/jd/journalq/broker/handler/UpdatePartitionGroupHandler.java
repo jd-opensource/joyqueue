@@ -53,7 +53,7 @@ public class UpdatePartitionGroupHandler implements CommandHandler, Type {
         }
         UpdatePartitionGroup request = (UpdatePartitionGroup) command.getPayload();
         PartitionGroup groupNew = request.getPartitionGroup();
-        PartitionGroup groupOld = clusterManager.getPartitionGroupByGroup(groupNew.getTopic(), groupNew.getGroup());
+        PartitionGroup groupOld = clusterManager.getNameService().getTopicConfig(groupNew.getTopic()).fetchPartitionGroupByGroup(groupNew.getGroup());
         try {
             Set<Integer> replicasNew = new TreeSet<>(groupNew.getReplicas());
             Set<Integer> replicasOld = new TreeSet<>(groupOld.getReplicas());

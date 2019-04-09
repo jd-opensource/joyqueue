@@ -54,12 +54,12 @@ public class TransactionStoreManager implements TransactionStore, Closeable {
         File [] files = base.listFiles();
         if(files != null) {
             idSequence.set(
-                Arrays.stream(files)
-                        .filter(File::isDirectory)
-                        .map(File::getName)
-                        .filter(fileName -> fileName.matches("\\d+"))
-                        .mapToInt(Integer::parseInt)
-                        .max().orElse(-1)
+                    Arrays.stream(files)
+                            .filter(File::isDirectory)
+                            .map(File::getName)
+                            .filter(fileName -> fileName.matches("\\d+"))
+                            .mapToInt(Integer::parseInt)
+                            .max().orElse(-1)
             );
             idSequence.incrementAndGet();
         }
@@ -97,7 +97,6 @@ public class TransactionStoreManager implements TransactionStore, Closeable {
             PositioningStore<ByteBuffer> positioningStore = getOrCreate(id);
             positioningStore.append(messages);
             positioningStore.flush();
-            positioningStore.evict();
             writeResult.setCode(JMQCode.SUCCESS);
         } catch (Throwable t) {
             logger.warn("Write transaction file \"{}/{}\" exception: ", base.getAbsoluteFile(), id, t);

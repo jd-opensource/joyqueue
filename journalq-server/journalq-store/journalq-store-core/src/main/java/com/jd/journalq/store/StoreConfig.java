@@ -13,12 +13,14 @@ import com.jd.journalq.toolkit.config.PropertySupplier;
  */
 public class StoreConfig {
 
-    public static final int DEFAULT_MESSAGE_FILE_SIZE = 128 * 1024 * 1024;
-    public static final int DEFAULT_INDEX_FILE_SIZE = 512 * 1024;
-    public static final int DEFAULT_THREAD_COUNT = 4;
-    public static final int DEFAULT_PRE_LOAD_BUFFER_CORE_COUNT = 0;
-    public static final int DEFAULT_PRE_LOAD_BUFFER_MAX_COUNT = 10;
-    public static final String STORE_PATH = "/store";
+    public final static int DEFAULT_MESSAGE_FILE_SIZE = 128 * 1024 * 1024;
+    public final static int DEFAULT_INDEX_FILE_SIZE = 512 * 1024;
+    public final static int DEFAULT_THREAD_COUNT = 4;
+    public final static int DEFAULT_PRE_LOAD_BUFFER_CORE_COUNT = 3;
+    public final static int DEFAULT_PRE_LOAD_BUFFER_MAX_COUNT = 10;
+    public final static long DEFAULT_PRINT_METRIC_INTERVAL_MS = 0;
+
+    public final static String STORE_PATH = "/store";
     /**
      * 存储路径
      */
@@ -46,6 +48,8 @@ public class StoreConfig {
      */
     private int preLoadBufferMaxCount = DEFAULT_PRE_LOAD_BUFFER_MAX_COUNT;
 
+    private long printMetricIntervalMs = DEFAULT_PRINT_METRIC_INTERVAL_MS;
+
     /**
      * 最大消息长度
      */
@@ -65,31 +69,12 @@ public class StoreConfig {
      */
     private long flushIntervalMs = PartitionGroupStoreManager.Config.DEFAULT_FLUSH_INTERVAL_MS;
     /**
-     * 异步刷盘的时间间隔(ms)
-     */
-    private long evictIntervalMs = PartitionGroupStoreManager.Config.DEFAULT_EVICT_INTERVAL_MS;
-    /**
      * 文件头长度
      */
     private int fileHeaderSize = PositioningStore.Config.DEFAULT_FILE_HEADER_SIZE;
-    /**
-     * 最多缓存的页面数量
-     */
-    private int cachedPageCount = PositioningStore.Config.DEFAULT_CACHED_PAGE_COUNT;
-
-    /**
-     * 缓存最长存活时间
-     */
-    private long cacheLifeTimeMs = PositioningStore.Config.DEFAULT_CACHE_LIFETIME_MS;
-
-    /**
-     * 存储上限，超过上限后，最旧的文件将被删除
-     */
-    private long maxStoreSize = PartitionGroupStoreManager.Config.DEFAULT_MAX_STORE_SIZE;  // 10gb
-
-    private long maxStoreTime = PartitionGroupStoreManager.Config.DEFAULT_MAX_STORE_TIME;  // 7days
 
     private long maxDirtySize = PartitionGroupStoreManager.Config.DEFAULT_MAX_DIRTY_SIZE;
+
 
 
     private PropertySupplier propertySupplier;
@@ -169,13 +154,6 @@ public class StoreConfig {
         this.fileHeaderSize = fileHeaderSize;
     }
 
-    public int getCachedPageCount() {
-        return PropertySupplier.getValue(propertySupplier, StoreConfigKey.CACHED_PAGE_COUNT, this.cachedPageCount);
-    }
-
-    public void setCachedPageCount(int cachedPageCount) {
-        this.cachedPageCount = cachedPageCount;
-    }
 
     public long getWriteTimeoutMs() {
         return PropertySupplier.getValue(propertySupplier, StoreConfigKey.WRITE_TIMEOUT, this.writeTimeoutMs);
@@ -183,30 +161,6 @@ public class StoreConfig {
 
     public void setWriteTimeoutMs(long writeTimeoutMs) {
         this.writeTimeoutMs = writeTimeoutMs;
-    }
-
-    public long getCacheLifeTimeMs() {
-        return PropertySupplier.getValue(propertySupplier, StoreConfigKey.CACHE_LIFE_TIME_MS, this.cacheLifeTimeMs);
-    }
-
-    public void setCacheLifeTimeMs(long cacheLifeTimeMs) {
-        this.cacheLifeTimeMs = cacheLifeTimeMs;
-    }
-
-    public long getMaxStoreSize() {
-        return PropertySupplier.getValue(propertySupplier, StoreConfigKey.MAX_STORE_SIZE, this.maxStoreSize);
-    }
-
-    public void setMaxStoreSize(long maxStoreSize) {
-        this.maxStoreSize = maxStoreSize;
-    }
-
-    public long getMaxStoreTime() {
-        return PropertySupplier.getValue(propertySupplier, StoreConfigKey.MAX_STORE_TIME, this.maxStoreTime);
-    }
-
-    public void setMaxStoreTime(long maxStoreTime) {
-        this.maxStoreTime = maxStoreTime;
     }
 
     public int getThreadCount() {
@@ -241,7 +195,13 @@ public class StoreConfig {
         this.maxDirtySize = maxDirtySize;
     }
 
-    public long getEvictIntervalMs() {
-        return PropertySupplier.getValue(propertySupplier, StoreConfigKey.EVECT_INTERVAL_MS,evictIntervalMs);
+
+    public long getPrintMetricIntervalMs() {
+        return PropertySupplier.getValue(propertySupplier, StoreConfigKey.PRINT_METRIC_INTERVAL_MS, printMetricIntervalMs);
+    }
+
+    public void setPrintMetricIntervalMs(long printMetricIntervalMs) {
+        this.printMetricIntervalMs = printMetricIntervalMs;
     }
 }
+

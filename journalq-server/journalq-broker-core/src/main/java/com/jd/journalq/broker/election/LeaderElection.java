@@ -114,4 +114,6 @@ public abstract class LeaderElection extends Service {
      */
     public abstract Command handleAppendEntriesRequest(AppendEntriesRequest request);
 
+	public void stepDown(int term){}
+
 }

@@ -18,8 +18,10 @@ import com.jd.journalq.store.StoreService;
 import com.jd.journalq.store.WriteRequest;
 import com.jd.journalq.store.WriteResult;
 import com.jd.journalq.toolkit.concurrent.EventListener;
+import com.jd.journalq.toolkit.concurrent.LoopThread;
 import com.jd.journalq.toolkit.lang.Close;
 import com.jd.journalq.toolkit.lang.Preconditions;
+import com.jd.journalq.toolkit.metric.Metric;
 import com.jd.journalq.toolkit.service.Service;
 import com.jd.journalq.toolkit.time.SystemClock;
 import org.apache.commons.lang.ArrayUtils;
@@ -59,6 +61,10 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
 
     private BrokerContext brokerContext;
 
+    private Metric metrics = null;
+    private Metric.MetricInstance metric = null;
+    private LoopThread metricThread = null;
+
     public ProduceManager() {
         //do nothing
     }
@@ -74,6 +80,10 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
     protected void doStart() throws Exception {
         super.doStart();
         transactionManager.start();
+        if(null != metricThread) {
+            metricThread.start();
+        }
+
         logger.info("ProduceManager is started.");
     }
 
@@ -104,12 +114,25 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
             clusterManager.start();
         }
         transactionManager = new TransactionManager(config, store, clusterManager, brokerMonitor);
+
+        if(config.getPrintMetricIntervalMs() > 0) {
+            metrics = new Metric("input", 1, new String [] {"callback", "async"},new String[]{"tps"}, new String [] {"traffic"});
+            metric = metrics.getMetricInstances().get(0);
+            metricThread = LoopThread.builder()
+                    .sleepTime(config.getPrintMetricIntervalMs(), config.getPrintMetricIntervalMs())
+                    .name("Metric-Thread")
+                    .onException(e -> logger.warn("Exception:", e))
+                    .doWork(() -> metrics.reportAndReset()).build();
+        }
     }
 
     @Override
     protected void doStop() {
         super.doStop();
         Close.close(transactionManager);
+        if(null != metricThread) {
+            metricThread.stop();
+        }
         logger.info("ProduceManager is stopped.");
     }
 
@@ -193,7 +216,7 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
      */
     private PutResult writeTxMessage(Producer producer, List<BrokerMessage> msgs, String txId, long endTime) throws JMQException {
         ByteBuffer[] byteBuffers = generateRByteBufferList(msgs);
-        Future<WriteResult> writeResultFuture = transactionManager.putMessage(producer, txId, byteBuffers);
+        Future<WriteResult> writeResultFuture = transactionManager.txMessage(producer, txId, byteBuffers);
         WriteResult writeResult = syncWait(writeResultFuture, endTime - SystemClock.now());
         PutResult putResult = new PutResult();
         putResult.addWriteResult(msgs.get(0).getPartition(), writeResult);
@@ -212,7 +235,7 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
     private void writeTxMessageAsync(Producer producer, List<BrokerMessage> msgs, String txId, long endTime, EventListener<WriteResult> eventListener) throws JMQException {
         ByteBuffer[] byteBuffers = generateRByteBufferList(msgs);
         try {
-            WriteResult writeResult = transactionManager.putMessage(producer, txId, byteBuffers).get(endTime, TimeUnit.MILLISECONDS);
+            WriteResult writeResult = transactionManager.txMessage(producer, txId, byteBuffers).get(endTime, TimeUnit.MILLISECONDS);
             eventListener.onEvent(writeResult);
         } catch (Exception e) {
             logger.error("writeTxMessageAsync exception, producer: {}", producer, e);
@@ -263,15 +286,6 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
 
         return putResult;
     }
-
-//    private LocalFakeBroker.Metric input = new LocalFakeBroker.Metric("input", 1, new String [] {"callback", "async"}, new String [] {"traffic"});
-//    private LocalFakeBroker.MetricInstance metric = input.getMetricInstances().get(0);
-//    private LoopThread metricThread = LoopThread.builder()
-//            .sleepTime(1000, 1000)
-//            .name("Metric-Thread")
-//            .onException(e -> logger.warn("Exception:", e))
-//            .doWork(() -> input.reportAndReset()).build();
-
     /**
      * 异步写入消息
      *
@@ -284,6 +298,7 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
      */
     private void writeMessagesAsync(Producer producer, List<BrokerMessage> msgs, QosLevel qosLevel, long endTime, EventListener<WriteResult> eventListener) throws JMQException {
         String topic = producer.getTopic();
+        String app = producer.getApp();
         List<Short> partitions = clusterManager.getMasterPartitionList(TopicName.parse(topic));
         if (partitions == null || partitions.size() == 0) {
             logger.error("no partitions available topic:%s", topic);
@@ -301,47 +316,57 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
             }
             PartitionGroupStore partitionStore = store.getStore(topic, partitionGroup.getGroup(), qosLevel);
             List<WriteRequest> writeRequests = dispatchedMsgs.get(partitionGroup);
-            long startTime = SystemClock.now();
-            int [] sizeArray = writeRequests.stream().map(WriteRequest::getBuffer).mapToInt(ByteBuffer::remaining).toArray();
             // 异步写入磁盘
-//            long t0 = System.nanoTime();
-//            partitionStore.asyncWrite(new MetricEventListener(t0,metric,eventListener), writeRequests.toArray(new WriteRequest[]{}));
-            partitionStore.asyncWrite(event -> {
-                if (brokerMonitor != null) {
-                    for (int i = 0; i < writeRequests.size(); i++) {
-                        WriteRequest writeRequest = writeRequests.get(i);
-                        brokerMonitor.onPutMessage(topic, producer.getApp(), partitionGroup.getGroup(),
-                                writeRequest.getPartition(), 1, sizeArray[i],
-                                SystemClock.now() - startTime);
-                    }
-                }
-                eventListener.onEvent(event);
-            }, writeRequests.toArray(new WriteRequest[]{}));
-//            long t1 = System.nanoTime();
-//
-//            metric.addCounter("traffic", writeRequests.stream().map(WriteRequest::getBuffer).mapToInt(RByteBuffer::remaining).sum());
-//            metric.addLatency("async", t1 - t0);
+            if(null != metric) {
+                long t0 = System.nanoTime();
+                partitionStore.asyncWrite(new MetricEventListener(t0, metric, eventListener, topic, app, partitionGroup.getGroup(), writeRequests), writeRequests.toArray(new WriteRequest[]{}));
 
+                long t1 = System.nanoTime();
+                metric.addCounter("tps", writeRequests.stream().map(WriteRequest::getBuffer).count());
+                metric.addTraffic("traffic", writeRequests.stream().map(WriteRequest::getBuffer).mapToInt(ByteBuffer::remaining).sum());
+                metric.addLatency("async", t1 - t0);
+            } else {
+                long startTime = SystemClock.now();
+                partitionStore.asyncWrite(event -> {
+                    writeRequests.forEach(writeRequest -> {
+                        brokerMonitor.onPutMessage(topic, app, partitionGroup.getGroup(), writeRequest.getPartition(), 1, writeRequest.getBuffer().limit(), SystemClock.now() - startTime);
+                    });
+                    eventListener.onEvent(event);
+                }, writeRequests.toArray(new WriteRequest[]{}));
+            }
         }
     }
 
-//    class MetricEventListener implements EventListener<WriteResult> {
-//        final long t0;
-//        final LocalFakeBroker.MetricInstance metric;
-//        final EventListener<WriteResult> eventListener;
-//
-//        MetricEventListener(long t0, LocalFakeBroker.MetricInstance metric, EventListener<WriteResult> eventListener) {
-//
-//            this.t0 = t0;
-//            this.metric = metric;
-//            this.eventListener = eventListener;
-//        }
-//        @Override
-//        public void onEvent(WriteResult event) {
-//            metric.addLatency("callback",System.nanoTime() - t0);
-//            eventListener.onEvent(event);
-//        }
-//    }
+    class MetricEventListener implements EventListener<WriteResult> {
+        final long t0;
+        final Metric.MetricInstance metric;
+        final EventListener<WriteResult> eventListener;
+        final String topic;
+        final String app;
+        final int partitionGroup;
+        final List<WriteRequest> writeRequests;
+
+        MetricEventListener(long t0, Metric.MetricInstance metric, EventListener<WriteResult> eventListener, String topic, String app, int partitionGroup, List<WriteRequest> writeRequests) {
+
+            this.t0 = t0;
+            this.metric = metric;
+            this.eventListener = eventListener;
+            this.topic = topic;
+            this.app = app;
+            this.partitionGroup = partitionGroup;
+            this.writeRequests = writeRequests;
+        }
+        @Override
+        public void onEvent(WriteResult event) {
+            metric.addLatency("callback",System.nanoTime() - t0);
+            eventListener.onEvent(event);
+
+            writeRequests.forEach(writeRequest -> {
+                brokerMonitor.onPutMessage(topic, app, partitionGroup, writeRequest.getPartition(), 1, writeRequest.getBuffer().limit(), SystemClock.now() - t0/1000000);
+            });
+
+        }
+    }
 
     /**
      * 同步等待
@@ -468,13 +493,14 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
      *
      * @param tx 事务消息命令
      */
-    public TransactionId putTransactionMessage(Producer producer, JournalLog tx) throws JMQException {
+    @Override
+    public void putTransactionMessage(Producer producer, JournalLog tx) throws JMQException {
         if (tx.getType() == JournalLog.TYPE_TX_PREPARE) {
-            return transactionManager.prepare(producer, (BrokerPrepare) tx);
+            transactionManager.txPrepare(producer, (BrokerPrepare) tx);
         } else if (tx.getType() == JournalLog.TYPE_TX_COMMIT) {
-            return transactionManager.commit(producer, (BrokerCommit) tx);
+            transactionManager.txCommit(producer, (BrokerCommit) tx);
         } else if (tx.getType() == JournalLog.TYPE_TX_ROLLBACK) {
-            return transactionManager.rollback(producer, (BrokerRollback) tx);
+            transactionManager.txRollback(producer, (BrokerRollback) tx);
         } else {
             throw new JMQException(JMQCode.CN_COMMAND_UNSUPPORTED);
         }
@@ -482,7 +508,7 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
 
     @Override
     public List<TransactionId> getFeedback(Producer producer, int count) {
-        return transactionManager.getFeedback(producer, count);
+        return transactionManager.txFeedback(producer, count);
     }
 
     @Override

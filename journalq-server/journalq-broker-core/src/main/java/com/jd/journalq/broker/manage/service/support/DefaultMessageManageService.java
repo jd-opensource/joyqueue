@@ -72,8 +72,7 @@ public class DefaultMessageManageService implements MessageManageService {
                     byte[][] bytes = storeManagementService.readMessages(topic, partitionMetric.getPartition(), ackIndex, realCount);
                     if (ArrayUtils.isNotEmpty(bytes)) {
                         for (byte[] message : bytes) {
-                            BrokerMessage brokerMessage = Serializer.readBrokerMessage(ByteBuffer.wrap(message));
-                            result.add(new BrokerMessageInfo(brokerMessage, (ackIndex > brokerMessage.getMsgIndexNo())));
+                            result.add(new BrokerMessageInfo(Serializer.readBrokerMessage(ByteBuffer.wrap(message))));
                         }
                     }
                 }
@@ -87,10 +86,6 @@ public class DefaultMessageManageService implements MessageManageService {
     @Override
     public List<BrokerMessageInfo> getLastMessage(String topic, String app, int count) {
         try {
-            Consumer consumer = new Consumer();
-            consumer.setTopic(topic);
-            consumer.setApp(app);
-
             List<BrokerMessageInfo> result = Lists.newArrayListWithCapacity(count);
             StoreManagementService.TopicMetric topicMetric = storeManagementService.topicMetric(topic);
             for (StoreManagementService.PartitionGroupMetric partitionGroupMetric : topicMetric.getPartitionGroupMetrics()) {
@@ -105,12 +100,10 @@ public class DefaultMessageManageService implements MessageManageService {
                     } else {
                         realIndex = partitionMetric.getRightIndex() - realCount;
                     }
-                    long ackIndex = consume.getAckIndex(consumer, partitionMetric.getPartition());
                     byte[][] bytes = storeManagementService.readMessages(topic, partitionMetric.getPartition(), realIndex, realCount);
                     if (ArrayUtils.isNotEmpty(bytes)) {
                         for (byte[] message : bytes) {
-                            BrokerMessage brokerMessage = Serializer.readBrokerMessage(ByteBuffer.wrap(message));
-                            result.add(new BrokerMessageInfo(brokerMessage, (ackIndex > brokerMessage.getMsgIndexNo())));
+                            result.add(new BrokerMessageInfo(Serializer.readBrokerMessage(ByteBuffer.wrap(message))));
                         }
                     }
                 }

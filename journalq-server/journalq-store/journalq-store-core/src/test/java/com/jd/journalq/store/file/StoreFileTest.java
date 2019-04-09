@@ -1,5 +1,8 @@
 package com.jd.journalq.store.file;
 
+import com.jd.journalq.store.utils.MessageTestUtils;
+import com.jd.journalq.store.utils.PreloadBufferPool;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -24,6 +27,26 @@ public class StoreFileTest {
     public void before() throws Exception {
         prepareBaseDir();
     }
+
+    @Test
+    public void timestampTest() throws IOException {
+        long start = System.currentTimeMillis();
+        StoreFileImpl<ByteBuffer> storeFile = new StoreFileImpl<>(666L, base,128,new StoreMessageSerializer(1024),new PreloadBufferPool(), 1024 * 1024 * 10);
+        long timestamp = storeFile.timestamp();
+        long end = System.currentTimeMillis();
+        Assert.assertTrue( start <= timestamp);
+        Assert.assertTrue( timestamp <= end);
+
+        storeFile.append(MessageTestUtils.createMessage(new byte[10]));
+        storeFile.flush();
+        storeFile.unload();
+
+        storeFile = new StoreFileImpl<>(666L, base,128,new StoreMessageSerializer(1024),new PreloadBufferPool(), 1024 * 1024 * 10);
+
+        Assert.assertEquals(timestamp, storeFile.timestamp());
+
+    }
+
 
     @Test
     public void readFileNotExistTimestamp() {

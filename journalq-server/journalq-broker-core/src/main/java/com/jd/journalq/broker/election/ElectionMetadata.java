@@ -1,7 +1,14 @@
 package com.jd.journalq.broker.election;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
+import com.jd.journalq.toolkit.io.DoubleCopy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -13,7 +20,11 @@ import static com.jd.journalq.domain.PartitionGroup.ElectType;
  * email: zhuduohui@jd.com
  * date: 2018/11/24
  */
-public class ElectionMetadata {
+public class ElectionMetadata extends DoubleCopy {
+    private static Logger logger = LoggerFactory.getLogger(ElectionMetadata.class);
+
+    private int version = 1;
+
     private ElectType electType;
     private Collection<DefaultElectionNode> allNodes;
     private Set<Integer> learners = new HashSet<>();
@@ -22,7 +33,100 @@ public class ElectionMetadata {
     private int votedFor = ElectionNode.INVALID_NODE_ID;
     private int currentTerm = 0;
 
-    public ElectionMetadata() {}
+    private static int MAX_LENGTH = 10 * 1024;
+
+    public ElectionMetadata(File file) throws IOException {
+        super(file, MAX_LENGTH);
+    }
+
+    @Override
+    protected String getName() {
+        return "electionMetadata";
+    }
+
+
+    @Override
+    protected  byte[] serialize() {
+        ByteBuffer byteBuffer = ByteBuffer.allocate(MAX_LENGTH);
+
+        serializeString(byteBuffer, "version:");
+        serializeString(byteBuffer, Integer.valueOf(version).toString());
+
+        serializeString(byteBuffer, "electType:");
+        serializeString(byteBuffer, String.valueOf(electType.type()));
+
+        serializeString(byteBuffer, JSON.toJSONString(allNodes));
+
+        serializeString(byteBuffer, JSON.toJSONString(learners));
+
+        serializeString(byteBuffer, "localNodeId:");
+        serializeString(byteBuffer, Integer.valueOf(localNodeId).toString());
+
+        serializeString(byteBuffer, "leaderId:");
+        serializeString(byteBuffer, Integer.valueOf(leaderId).toString());
+
+        serializeString(byteBuffer, "voteFor:");
+        serializeString(byteBuffer, Integer.valueOf(votedFor).toString());
+
+        serializeString(byteBuffer, "currentTerm:");
+        serializeString(byteBuffer, Integer.valueOf(currentTerm).toString());
+
+        serializeString(byteBuffer, "-end");
+
+        logger.info("Metadata serialize length is {}", byteBuffer.position());
+
+        byte[] bytes = new byte[byteBuffer.position()];
+        byteBuffer.flip();
+        byteBuffer.get(bytes);
+
+        return bytes;
+    }
+
+    private void serializeString(ByteBuffer byteBuffer, String value) {
+        byte[] valueBytes = value.getBytes();
+        byteBuffer.putInt(valueBytes.length);
+        byteBuffer.put(valueBytes);
+    }
+
+    @Override
+    protected void parse(byte [] data) {
+        ByteBuffer byteBuffer = ByteBuffer.wrap(data);
+
+        parseString(byteBuffer); //version
+        version = Integer.valueOf(parseString(byteBuffer));
+
+        parseString(byteBuffer); //electType
+        electType = ElectType.valueOf(Integer.valueOf(parseString(byteBuffer)));
+
+        String allNodesStr = parseString(byteBuffer);
+        allNodes = JSON.parseObject(allNodesStr,
+                new TypeReference<Collection<DefaultElectionNode>>() {
+                });
+
+        String learnersStr = parseString(byteBuffer);
+        learners = JSON.parseObject(learnersStr,
+                new TypeReference<Set<Integer>>() {
+                });
+
+        parseString(byteBuffer); //localNodeId
+        localNodeId = Integer.valueOf(parseString(byteBuffer));
+
+        parseString(byteBuffer); //leaderId
+        leaderId = Integer.valueOf(parseString(byteBuffer));
+
+        parseString(byteBuffer); //voteFor
+        votedFor = Integer.valueOf(parseString(byteBuffer));
+
+        parseString(byteBuffer); //currentTerm
+        currentTerm = Integer.valueOf(parseString(byteBuffer));
+    }
+
+    private String parseString(ByteBuffer byteBuffer) {
+        int length = byteBuffer.getInt();
+        byte[] bytes = new byte[length];
+        byteBuffer.get(bytes);
+        return new String(bytes);
+    }
 
     public ElectType getElectType() {
         return electType;
@@ -93,10 +197,16 @@ public class ElectionMetadata {
     }
 
     public static class Build {
-        private ElectionMetadata metadata = new ElectionMetadata();
+        private ElectionMetadata metadata;
 
-        public static Build create() {
-            return new Build();
+        private Build(String fileName) throws IOException {
+            metadata = new ElectionMetadata(new File(fileName));
+        }
+
+        public static Build create(String path, TopicPartitionGroup topicPartitionGroup) throws IOException {
+            String fileName = path + "/" + topicPartitionGroup.getTopic() + "/" +
+                    topicPartitionGroup.getPartitionGroupId();
+            return new Build(fileName);
         }
 
         public Build electionType(ElectType electType) {

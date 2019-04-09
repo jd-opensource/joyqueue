@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentMap;
  **/
 public class CoordinatorGroup {
     private String id;
+    private String extension;
     private ConcurrentMap<String, CoordinatorGroupMember> members;
     private Map<String, CoordinatorGroupExpiredMember> expiredMembers ;
     private transient Map<String, CoordinatorGroupExpiredMember> expiredMembersMap;
@@ -44,5 +45,13 @@ public class CoordinatorGroup {
 
     public void setExpiredMembersMap(Map<String, CoordinatorGroupExpiredMember> expiredMembersMap) {
         this.expiredMembersMap = expiredMembersMap;
+    }
+
+    public String getExtension() {
+        return extension;
+    }
+
+    public void setExtension(String extension) {
+        this.extension = extension;
     }
 }

@@ -203,6 +203,9 @@ public class ClusterManager extends Service {
      * @return
      */
     public Broker getBrokerById(Integer brokerId) {
+        if(brokerId.equals(getBrokerId())){
+            return broker;
+        }
         return nameService.getBroker(brokerId);
     }
 
@@ -256,8 +259,10 @@ public class ClusterManager extends Service {
      */
     public List<PartitionGroup> getPartitionGroup(TopicName topic) {
         TopicConfig topicConfig = getTopicConfig(topic);
-        if (null == topicConfig) return null;
-        return (List) topicConfig.fetchPartitionGroupByBrokerId(broker.getId());
+        if (null == topicConfig) {
+            return null;
+        }
+        return topicConfig.fetchPartitionGroupByBrokerId(broker.getId());
     }
 
     /**
@@ -268,7 +273,9 @@ public class ClusterManager extends Service {
      */
     public List<PartitionGroup> getTopicPartitionGroups(TopicName topic) {
         TopicConfig topicConfig = getTopicConfig(topic);
-        if (null == topicConfig) return null;
+        if (null == topicConfig) {
+            return null;
+        }
         return topicConfig.fetchTopicPartitionGroupsByBrokerId(broker.getId());
     }
 
@@ -368,7 +375,9 @@ public class ClusterManager extends Service {
      */
     public Consumer.ConsumerPolicy getConsumerPolicy(TopicName topic, String app) throws JMQException {
         Consumer consumer = localCache.getConsumerByTopicAndApp(topic, app);
-        if (null == consumer) throw new JMQException(JMQCode.FW_CONSUMER_NOT_EXISTS);
+        if (null == consumer) {
+            throw new JMQException(JMQCode.FW_CONSUMER_NOT_EXISTS);
+        }
         return getConsumerPolicyOrDefault(consumer);
     }
 
@@ -381,7 +390,9 @@ public class ClusterManager extends Service {
      */
     public Consumer getConsumer(TopicName topic, String app) throws JMQException {
         Consumer consumer = localCache.getConsumerByTopicAndApp(topic, app);
-        if (null == consumer) throw new JMQException(JMQCode.FW_CONSUMER_NOT_EXISTS);
+        if (null == consumer) {
+            throw new JMQException(JMQCode.FW_CONSUMER_NOT_EXISTS);
+        }
         return consumer;
     }
 
@@ -474,7 +485,9 @@ public class ClusterManager extends Service {
      */
     public Producer.ProducerPolicy getProducerPolicy(TopicName topic, String app) throws JMQException {
         Producer producer = localCache.getProducerByTopicAndApp(topic, app);
-        if (null == producer) throw new JMQException(JMQCode.FW_PRODUCER_NOT_EXISTS);
+        if (null == producer) {
+            throw new JMQException(JMQCode.FW_PRODUCER_NOT_EXISTS);
+        }
         return getProducerPolicyOrDefault(producer);
     }
 
@@ -492,6 +505,49 @@ public class ClusterManager extends Service {
             consumer.setConsumerPolicy(brokerContext.getConsumerPolicy());
         }
         return consumer.getConsumerPolicy();
+    }
+
+    public boolean isLeader(String topic) {
+        return isLeader(TopicName.parse(topic));
+    }
+
+    public boolean isLeader(String topic, short partition) {
+        return isLeader(TopicName.parse(topic), partition);
+    }
+
+    public boolean isLeader(String topic, int partitionGroupId) {
+        return isLeader(TopicName.parse(topic), partitionGroupId);
+    }
+
+    public boolean isLeader(TopicName topic) {
+        TopicConfig topicConfig = getTopicConfig(topic);
+        if (topicConfig == null) {
+            return false;
+        }
+        for (Map.Entry<Integer, PartitionGroup> entry : topicConfig.getPartitionGroups().entrySet()) {
+            if (getBrokerId().equals(entry.getValue().getLeader())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean isLeader(TopicName topic, int partitionGroupId) {
+        TopicConfig topicConfig = getTopicConfig(topic);
+        if (topicConfig == null) {
+            return false;
+        }
+        PartitionGroup partitionGroup = topicConfig.fetchPartitionGroupByGroup(partitionGroupId);
+        return (partitionGroup != null && getBrokerId().equals(partitionGroup.getLeader()));
+    }
+
+    public boolean isLeader(TopicName topic, short partition) {
+        TopicConfig topicConfig = getTopicConfig(topic);
+        if (topicConfig == null) {
+            return false;
+        }
+        PartitionGroup partitionGroup = topicConfig.fetchPartitionGroupByPartition(partition);
+        return (partitionGroup != null && getBrokerId().equals(partitionGroup.getLeader()));
     }
 
     /**
@@ -529,7 +585,9 @@ public class ClusterManager extends Service {
             }
         }
         ;
-        if (logger.isDebugEnabled()) logger.debug("checkWritable topicConfig[{}]", topicConfig);
+        if (logger.isDebugEnabled()) {
+            logger.debug("checkWritable topicConfig[{}]", topicConfig);
+        }
         Collection<PartitionGroup> partitionGroups = topicConfig.fetchPartitionGroupByBrokerId(broker.getId());
         if (CollectionUtils.isEmpty(partitionGroups)) {
             // 没有partitionGroup
@@ -560,7 +618,9 @@ public class ClusterManager extends Service {
      */
     public BooleanResponse checkWritable(TopicName topic, String app, String address, short partition) {
         BooleanResponse response = checkWritable(topic, app, address);
-        if (!response.isSuccess()) return response;
+        if (!response.isSuccess()) {
+            return response;
+        }
         TopicConfig topicConfig = getTopicConfig(topic);
         PartitionGroup group = topicConfig.fetchPartitionGroupByPartition(partition);
         if (!group.getLeader().equals(broker.getId())) {
@@ -639,7 +699,9 @@ public class ClusterManager extends Service {
      */
     public BooleanResponse checkReadable(TopicName topic, String app, String address, short partition) {
         BooleanResponse response = checkReadable(topic, app, address);
-        if (!response.isSuccess()) return response;
+        if (!response.isSuccess()) {
+            return response;
+        }
         TopicConfig topicConfig = getTopicConfig(topic);
         PartitionGroup group = topicConfig.fetchPartitionGroupByPartition(partition);
         if (!group.getLeader().equals(broker.getId())) {
@@ -672,15 +734,21 @@ public class ClusterManager extends Service {
 
     public boolean checkArchiveable(TopicName topicName) {
         Map<String, MetaDataLocalCache.CacheProducer> producers = localCache.getTopicProducers(topicName);
-        if (null != producers && producers.size() > 0)
+        if (null != producers && producers.size() > 0) {
             for (Iterator<MetaDataLocalCache.CacheProducer> it = producers.values().iterator(); it.hasNext(); ) {
-                if (getProducerPolicyOrDefault(it.next().getProducer()).getArchive()) return true;
+                if (getProducerPolicyOrDefault(it.next().getProducer()).getArchive()) {
+                    return true;
+                }
             }
+        }
         Map<String, MetaDataLocalCache.CacheConsumer> consumers = localCache.getTopicConsumers(topicName);
-        if (null != consumers && consumers.size() > 0)
+        if (null != consumers && consumers.size() > 0) {
             for (Iterator<MetaDataLocalCache.CacheConsumer> it = consumers.values().iterator(); it.hasNext(); ) {
-                if (getConsumerPolicyOrDefault(it.next().getConsumer()).getArchive()) return true;
+                if (getConsumerPolicyOrDefault(it.next().getConsumer()).getArchive()) {
+                    return true;
+                }
             }
+        }
         return false;
     }
 
@@ -730,7 +798,9 @@ public class ClusterManager extends Service {
     private Integer readBroker() throws Exception {
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(brokerIdFile))) {
             String brokerId = bufferedReader.readLine();
-            if (null != brokerId && !"".equals(brokerId.trim())) return Integer.valueOf(brokerId);
+            if (null != brokerId && !"".equals(brokerId.trim())) {
+                return Integer.valueOf(brokerId);
+            }
             return null;
         }
     }
@@ -782,6 +852,7 @@ public class ClusterManager extends Service {
                 try {
                     logger.info("begin update all topicConfigs");
                     Map<TopicName, TopicConfig> topicConfigNew = nameService.getTopicConfigByBroker(brokerConfig.getBrokerId());
+                    if(logger.isDebugEnabled())logger.debug("allTopicConfigs {}",topicConfigNew);
                     if (null != topicConfigNew && topicConfigNew.size() > 0) {
                         Map<String, TopicConfig> topicConfigOld = topicConfigCache;
                         for (Map.Entry<String, TopicConfig> entry : topicConfigOld.entrySet()) {
@@ -824,7 +895,9 @@ public class ClusterManager extends Service {
 
         protected TopicConfig getTopicConfig(TopicName topic) {
             TopicConfig topicConfig = topicConfigCache.get(topic.getFullName());
-            if (null != topicConfig) return topicConfig;
+            if (null != topicConfig) {
+                return topicConfig;
+            }
             return buildTopicConfigCache(topic);
         }
 
@@ -844,10 +917,12 @@ public class ClusterManager extends Service {
             TopicName topic = topicConfig.getName();
             topicConfigCache.put(topic.getFullName(), topicConfig);
             topicPartitionsCache.put(topic.getFullName(),topicConfig.fetchPartitionByBroker(broker.getId()));
-            if(!consumerCache.containsKey(topic.getFullName()))consumerCache.put(topic.getFullName(),new ConcurrentHashMap<>());
-            if(!producerCache.containsKey(topic.getFullName()))producerCache.put(topic.getFullName(),new ConcurrentHashMap<>());
-//            nameService.getConsumerByTopic(topic).forEach(consumer -> consumerCache.get(topic.getFullName()).put(consumer.getApp(),new CacheConsuemer(consumer)));
-//            nameService.getProducerByTopic(topic).forEach(producer -> producerCache.get(topic.getFullName()).put(producer.getApp(),new CacheProducer(producer)));
+            if(!consumerCache.containsKey(topic.getFullName())){
+                consumerCache.put(topic.getFullName(),new ConcurrentHashMap<>());
+            }
+            if(!producerCache.containsKey(topic.getFullName())){
+                producerCache.put(topic.getFullName(),new ConcurrentHashMap<>());
+            }
             return topicConfig;
         }
 
@@ -873,7 +948,9 @@ public class ClusterManager extends Service {
             }
             CacheConsumer consumer = consumerCache.get(topic.getFullName()).get(app);
             if (null == consumer) {
-                if (topicConfigCache.containsKey(topic.getFullName())) return buildConsumeCache(topic, app);
+                if (topicConfigCache.containsKey(topic.getFullName())) {
+                    return buildConsumeCache(topic, app);
+                }
             }
             return consumer.getConsumer();
         }
@@ -885,15 +962,18 @@ public class ClusterManager extends Service {
             }
             CacheProducer producer = producerCache.get(topic.getFullName()).get(app);
             if (null == producer) {
-                if (topicConfigCache.containsKey(topic.getFullName())) return buildProduceCache(topic, app);
+                if (topicConfigCache.containsKey(topic.getFullName())) {
+                    return buildProduceCache(topic, app);
+                }
             }
             return producer.getProducer();
         }
 
         protected List<Short> getMasterPartitionsByTopic(TopicName topic) {
             List<Short> partitions = topicPartitionsCache.get(topic.getFullName());
-            if (null != partitions)
+            if (null != partitions) {
                 return partitions;
+            }
             TopicConfig topicConfig = getTopicConfig(topic);
             topicPartitionsCache.put(topic.getFullName(), topicConfig.fetchPartitionByBroker(broker.getId()));
             return topicPartitionsCache.get(topic.getFullName());
@@ -969,7 +1049,9 @@ public class ClusterManager extends Service {
             @Override
             public void onEvent(NameServerEvent event) {
                 try {
-                    if (!brokerConfig.getBrokerId().equals(event.getBrokerId())) return;
+                    if (!brokerConfig.getBrokerId().equals(event.getBrokerId())) {
+                        return;
+                    }
                     logger.info("event[{}]", event);
                     /**
                      * 新添topic，通知所有的partitionGroup
@@ -997,6 +1079,7 @@ public class ClusterManager extends Service {
                                     eventBus.add(PartitionGroupEvent.remove(group.getTopic(), group.getGroup()));
                                 }
                                 break;
+                            default:break;
                         }
                     } else if (event.getMetaEvent() instanceof PartitionGroupEvent) {
                         TopicConfig topicConfig = buildTopicConfigCache(((PartitionGroupEvent) event.getMetaEvent()).getTopic());
@@ -1019,6 +1102,7 @@ public class ClusterManager extends Service {
                                 //storeService.removePartitionGroup(group.getTopic(), group.getGroup());
                                 eventBus.add(PartitionGroupEvent.remove(topicConfig.getName(), ((PartitionGroupEvent) event.getMetaEvent()).getPartitionGroup()));
                                 break;
+                            default:break;
                         }
                     } else {
                         switch (event.getMetaEvent().getEventType()) {
@@ -1042,6 +1126,11 @@ public class ClusterManager extends Service {
                                 ProducerEvent removeProducerEvent = (ProducerEvent) event.getMetaEvent();
                                 producerCache.get(removeProducerEvent.getTopic()).remove(removeProducerEvent.getApp());
                                 break;
+                            case UPDATE_BROKER:
+                                BrokerEvent brokerEvent = (BrokerEvent) event.getMetaEvent();
+                                broker.setPermission(brokerEvent.getBroker().getPermission());
+                                break;
+                            default:break;
                         }
                         eventBus.add(event);
                     }
@@ -1102,8 +1191,12 @@ public class ClusterManager extends Service {
     @Override
     protected void doStop() {
         super.doStop();
-        if (eventBus.isStarted()) eventBus.stop();
-        if (localCache.isStarted()) localCache.stop();
+        if (eventBus.isStarted()){
+            eventBus.stop();
+        }
+        if (localCache.isStarted()) {
+            localCache.stop();
+        }
         logger.info("clusterManager is stopped");
     }
 }

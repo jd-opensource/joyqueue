@@ -1,6 +1,7 @@
 package com.jd.journalq.broker.monitor.service.support;
 
 import com.google.common.collect.Lists;
+import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.monitor.converter.BrokerMonitorConverter;
 import com.jd.journalq.broker.monitor.service.ProducerMonitorService;
 import com.jd.journalq.broker.monitor.stat.AppStat;
@@ -28,10 +29,12 @@ public class DefaultProducerMonitorService implements ProducerMonitorService {
 
     private BrokerStat brokerStat;
     private StoreManagementService storeManagementService;
+    private ClusterManager clusterManager;
 
-    public DefaultProducerMonitorService(BrokerStat brokerStat, StoreManagementService storeManagementService) {
+    public DefaultProducerMonitorService(BrokerStat brokerStat, StoreManagementService storeManagementService, ClusterManager clusterManager) {
         this.brokerStat = brokerStat;
         this.storeManagementService = storeManagementService;
+        this.clusterManager = clusterManager;
     }
 
     @Override
@@ -69,6 +72,9 @@ public class DefaultProducerMonitorService implements ProducerMonitorService {
         for (StoreManagementService.PartitionGroupMetric partitionGroupMetric : topicMetric.getPartitionGroupMetrics()) {
             PartitionGroupStat partitionGroupStat = producerStat.getOrCreatePartitionGroupStat(partitionGroupMetric.getPartitionGroup());
             for (StoreManagementService.PartitionMetric partitionMetric : partitionGroupMetric.getPartitionMetrics()) {
+                if (!clusterManager.isLeader(topic, partitionMetric.getPartition())) {
+                    continue;
+                }
                 PartitionStat partitionStat = partitionGroupStat.getOrCreatePartitionStat(partitionMetric.getPartition());
                 ProducerPartitionMonitorInfo producerPartitionMonitorInfo = new ProducerPartitionMonitorInfo();
                 producerPartitionMonitorInfo.setPartition(partitionMetric.getPartition());
@@ -94,6 +100,9 @@ public class DefaultProducerMonitorService implements ProducerMonitorService {
         StoreManagementService.TopicMetric topicMetric = storeManagementService.topicMetric(producerStat.getTopic());
 
         for (StoreManagementService.PartitionGroupMetric partitionGroupMetric : topicMetric.getPartitionGroupMetrics()) {
+            if (!clusterManager.isLeader(topic, partitionGroupMetric.getPartitionGroup())) {
+                continue;
+            }
             result.add(convertProducerPartitionGroupMonitorInfo(producerStat, partitionGroupMetric.getPartitionGroup()));
         }
         return result;

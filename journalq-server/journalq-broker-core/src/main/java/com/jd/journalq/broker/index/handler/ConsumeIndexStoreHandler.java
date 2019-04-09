@@ -6,6 +6,7 @@ import com.jd.journalq.broker.index.command.ConsumeIndexStoreRequest;
 import com.jd.journalq.broker.index.command.ConsumeIndexStoreResponse;
 import com.jd.journalq.domain.QosLevel;
 import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JMQException;
 import com.jd.journalq.network.transport.codec.JMQHeader;
 import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.command.CommandType;
@@ -18,6 +19,8 @@ import com.jd.journalq.network.transport.exception.TransportException;
 import com.jd.journalq.broker.index.model.IndexAndMetadata;
 
 import org.apache.commons.collections.map.HashedMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
@@ -25,6 +28,8 @@ import java.util.Map;
  * Created by zhuduohui on 2018/9/7.
  */
 public class ConsumeIndexStoreHandler implements CommandHandler, Type {
+    private final Logger logger = LoggerFactory.getLogger(ConsumeIndexStoreHandler.class);
+
     private BrokerContext brokerContext;
     private Consume consume;
 
@@ -41,6 +46,9 @@ public class ConsumeIndexStoreHandler implements CommandHandler, Type {
         // offset meta data to store
         // group by topic -> partition -> offset metadata
         Map<String, Map<Integer, IndexAndMetadata>> indexMetadata = request.getIndexMetadata();
+
+        logger.debug("ConsumeIndexStoreRequest info:[{}]", indexMetadata.toString());
+
         // offset meta data store status
         // group by topic -> partition -> return code
         Map<String, Map<Integer, Short>> indexStoreStatus = new HashedMap();
@@ -54,8 +62,13 @@ public class ConsumeIndexStoreHandler implements CommandHandler, Type {
 
             for (int partition : partitionIndexes.keySet()) {
                 // set consume index
-                setConsumeIndex(topic, (short)partition, app, partitionIndexes.get(partition).getIndex());
-                partitionIndexStoreStatus.put(partition, (short) JMQCode.SUCCESS.getCode());
+                int retCode = JMQCode.SUCCESS.getCode();
+                try {
+                    setConsumeIndex(topic, (short) partition, app, partitionIndexes.get(partition).getIndex());
+                } catch (JMQException je) {
+                    retCode = je.getCode();
+                }
+                partitionIndexStoreStatus.put(partition, (short)retCode);
             }
             indexStoreStatus.put(topic, partitionIndexStoreStatus);
         }
@@ -65,7 +78,7 @@ public class ConsumeIndexStoreHandler implements CommandHandler, Type {
         return new Command(header, offsetStoreResponse);
     }
 
-    private void setConsumeIndex(String topic, short partition, String app, long offset) {
+    private void setConsumeIndex(String topic, short partition, String app, long offset) throws JMQException {
         Consumer consumer = new Consumer(topic, app);
         consume.setAckIndex(consumer, partition, offset);
         consume.setStartAckIndex(consumer, partition, -1);

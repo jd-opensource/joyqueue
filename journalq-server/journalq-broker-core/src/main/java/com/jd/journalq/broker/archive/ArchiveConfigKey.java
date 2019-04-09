@@ -11,7 +11,8 @@ public enum ArchiveConfigKey implements PropertyDef {
     WRITE_BATCH_NUM("archive.write.batch.num", 1000, Type.INT),
     READ_BATCH_NUM("archive.read.batch.num", 1000, Type.INT),
     LOG_QUEUE_SIZE("archive.send.log.queue.size", 10000, Type.INT),
-    WRITE_THREAD_NUM("archive.thread.num", 5, Type.INT);
+    WRITE_THREAD_NUM("archive.thread.num", 5, Type.INT),
+    ARCHIVE_SWITCH("archive.switch", true, Type.BOOLEAN);
 
     private String name;
     private Object value;

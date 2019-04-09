@@ -1,5 +1,6 @@
 package com.jd.journalq.broker.monitor.service.support;
 
+import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.consumer.Consume;
 import com.jd.journalq.broker.election.ElectionService;
 import com.jd.journalq.broker.monitor.converter.BrokerMonitorConverter;
@@ -42,14 +43,16 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
     private NameService nameService;
     private StoreService store;
     private ElectionService electionService;
+    private ClusterManager clusterManager;
 
-    public DefaultBrokerMonitorInternalService(BrokerStat brokerStat, Consume consume, StoreManagementService storeManagementService, NameService nameService, StoreService store, ElectionService electionManager) {
+    public DefaultBrokerMonitorInternalService(BrokerStat brokerStat, Consume consume, StoreManagementService storeManagementService, NameService nameService, StoreService store, ElectionService electionManager, ClusterManager clusterManager) {
         this.brokerStat = brokerStat;
         this.consume=consume;
         this.storeManagementService=storeManagementService;
         this.nameService = nameService;
         this.store = store;
         this.electionService = electionManager;
+        this.clusterManager = clusterManager;
     }
 
     @Override
@@ -85,7 +88,7 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
        statExt.setTimeStamp(timeStamp);
        Map<String, TopicPendingStat>  topicPendingStatMap=statExt.getTopicPendingStatMap();
        Map<String, TopicStat>  topicStatMap=brokerStat.getTopicStats();
-       Map<String, ConsumerPendingStat> consumerPendingStatMap;
+       Map<String,ConsumerPendingStat> consumerPendingStatMap;
        Map<Integer,PartitionGroupPendingStat> partitionGroupPendingStatMap;
        Map<Short,Long> partitionPendStatMap;
        TopicPendingStat topicPendingStat;
@@ -119,6 +122,9 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
                          partitionGroupPendingStat.setApp(app);
                          partitionGroupPendingStatMap.put(partitionGroupId,partitionGroupPendingStat);
                         for (StoreManagementService.PartitionMetric partitionMetric : partitionGroupMetric.getPartitionMetrics()) {
+                                if (!clusterManager.isLeader(topicStat.getTopic(), partitionMetric.getPartition())) {
+                                    continue;
+                                }
                                 long ackIndex = consume.getAckIndex(consumer, partitionMetric.getPartition());
                                 if (ackIndex < 0) {
                                     ackIndex = 0;

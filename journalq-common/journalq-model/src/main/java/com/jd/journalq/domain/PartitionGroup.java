@@ -1,11 +1,7 @@
 package com.jd.journalq.domain;
 
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * @author lixiaobin6
@@ -54,6 +50,10 @@ public class PartitionGroup implements Serializable {
      * partition group related brokers
      */
     protected Map<Integer, Broker> brokers;
+    /**
+     * 不需要做数据同步的brokerId
+     */
+    protected List<Integer> outSyncReplicas = new ArrayList<>();
     /**
      * elect type
      */
@@ -230,6 +230,14 @@ public class PartitionGroup implements Serializable {
         return partitionGroup;
     }
 
+    public List<Integer> getOutSyncReplicas() {
+        return outSyncReplicas;
+    }
+
+    public void setOutSyncReplicas(List<Integer> outSyncReplicas) {
+        this.outSyncReplicas = outSyncReplicas;
+    }
+
     @Override
     public String toString() {
         return "PartitionGroup{" +
@@ -245,4 +253,5 @@ public class PartitionGroup implements Serializable {
                 ", electType=" + electType +
                 '}';
     }
+
 }

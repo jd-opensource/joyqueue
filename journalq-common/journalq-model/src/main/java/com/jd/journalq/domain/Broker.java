@@ -14,6 +14,11 @@ import java.util.Objects;
  */
 public class Broker implements Serializable {
     public static final String DEFAULT_RETRY_TYPE="RemoteRetry";
+    public static final String PERMISSION_FULL="FULL";
+    public static final String PERMISSION_READ="READ";
+    public static final String PERMISSION_WRITE="WRITE";
+    public static final String PERMISSION_NONE="NONE";
+    public static final String DEFAULT_PERMISSION=PERMISSION_FULL;
     protected int id;
     /**
      * Broker实例的ip
@@ -33,6 +38,13 @@ public class Broker implements Serializable {
      * 重试类型
      */
     protected String retryType = DEFAULT_RETRY_TYPE;
+
+    /**
+     * 权限
+     * default FULL
+     * @return
+     */
+    protected String permission = DEFAULT_PERMISSION;
 
     public Integer getId() {
         return id;
@@ -76,6 +88,14 @@ public class Broker implements Serializable {
 
     public void setRetryType(String retryType) {
         this.retryType = retryType;
+    }
+
+    public String getPermission() {
+        return permission;
+    }
+
+    public void setPermission(String permission) {
+        this.permission = permission;
     }
 
     /**
@@ -132,3 +152,4 @@ public class Broker implements Serializable {
                 '}';
     }
 }
+

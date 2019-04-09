@@ -67,7 +67,7 @@ public class ConsumeArchiveService extends Service {
         if (archiveStore == null) {
             archiveStore = Plugins.ARCHIVESTORE.get();
         }
-        Preconditions.checkArgument(archiveStore == null, "archive store can not be null.");
+        Preconditions.checkArgument(archiveStore != null, "archive store can not be null.");
 
         this.repository = new ArchiveMappedFileRepository(archiveConfig.getArchivePath());
         this.readByteCounter = new AtomicInteger(0);
@@ -168,6 +168,11 @@ public class ConsumeArchiveService extends Service {
      * @param locations  应答位置信息数组
      */
     public void appendConsumeLog(Connection connection, MessageLocation[] locations) throws JMQException {
+        if (!isStarted()) {
+            // 没有启动消费归档服务，添加消费日志
+            logger.debug("ConsumeArchiveService not be started.");
+            return;
+        }
         List<ConsumeLog> logList = convert(connection, locations);
         logList.stream().forEach(log -> {
             // 序列化
@@ -224,7 +229,7 @@ public class ConsumeArchiveService extends Service {
      *
      * @param buffer
      */
-    public synchronized void appendLog(ByteBuffer buffer) {
+    private synchronized void appendLog(ByteBuffer buffer) {
         repository.append(buffer);
     }
 

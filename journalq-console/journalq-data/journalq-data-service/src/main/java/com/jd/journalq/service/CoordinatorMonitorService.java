@@ -2,7 +2,7 @@ package com.jd.journalq.service;
 
 import com.jd.journalq.domain.CoordinatorGroup;
 import com.jd.journalq.domain.CoordinatorGroupExpiredMember;
-import com.jd.journalq.domain.CoordinatorGroupMember;
+import com.jd.journalq.domain.CoordinatorGroupMemberExtension;
 import com.jd.journalq.model.domain.CoordinatorBroker;
 import com.jd.journalq.model.domain.Subscribe;
 
@@ -37,7 +37,7 @@ public interface CoordinatorMonitorService {
      * @return app  消费组成员列表
      *
      * */
-    List<CoordinatorGroupMember> findCoordinatorGroupMember(Subscribe subscribe);
+    CoordinatorGroupMemberExtension findCoordinatorGroupMember(Subscribe subscribe);
 
 
     /**

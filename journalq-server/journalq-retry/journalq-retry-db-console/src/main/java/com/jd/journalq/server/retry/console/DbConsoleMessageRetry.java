@@ -1,4 +1,4 @@
-package com.jd.journalq.server.retry;
+package com.jd.journalq.server.retry.console;
 
 import com.google.common.collect.Lists;
 import com.jd.journalq.domain.ConsumeRetry;
@@ -63,9 +63,9 @@ public class DbConsoleMessageRetry implements ConsoleMessageRetry<Long> {
         return isStartFlag;
     }
 
-    private static final String GET_BYID = "select * from message_retry where id = ?";
-    private static final String QUERY_SQL = "select * from message_retry where topic = ? and app = ? and status = ? ";
-    private static final String COUNT_SQL = "select count(*) from message_retry where topic = ? and app = ? and status = ? ";
+    private final static String GET_BYID = "select * from message_retry where id = ?";
+    private final static String QUERY_SQL = "select * from message_retry where topic = ? and app = ? and status = ? ";
+    private final static String COUNT_SQL = "select count(*) from message_retry where topic = ? and app = ? and status = ? ";
 
     @Override
     public PageResult<ConsumeRetry> queryConsumeRetryList(RetryQueryCondition retryQueryCondition) throws JMQException {
@@ -225,7 +225,7 @@ public class DbConsoleMessageRetry implements ConsoleMessageRetry<Long> {
     }
 
 
-    private static final String UPDATE_SQL = "update message_retry set status = ?,update_time = ?, update_by = ? where topic = ? and id = ? ";
+    private final static String UPDATE_SQL = "update message_retry set status = ?,update_time = ?, update_by = ? where topic = ? and id = ? ";
 
     @Override
     public void updateStatus(String topic, String app, Long[] messageIds, RetryStatus status, long updateTime, int updateBy) throws Exception {

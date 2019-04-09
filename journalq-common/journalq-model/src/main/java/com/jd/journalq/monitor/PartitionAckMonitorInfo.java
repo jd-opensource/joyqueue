@@ -10,6 +10,8 @@ public class PartitionAckMonitorInfo extends BaseMonitorInfo {
 
     private short partition;
     private long index;
+    private long lastPullTime;
+    private long lastAckTime;
     private long leftIndex;
     private long rightIndex;
 
@@ -17,9 +19,11 @@ public class PartitionAckMonitorInfo extends BaseMonitorInfo {
 
     }
 
-    public PartitionAckMonitorInfo(short partition, long index, long leftIndex, long rightIndex) {
+    public PartitionAckMonitorInfo(short partition, long index, long lastPullTime, long lastAckTime, long leftIndex, long rightIndex) {
         this.partition = partition;
         this.index = index;
+        this.lastPullTime = lastPullTime;
+        this.lastAckTime = lastAckTime;
         this.leftIndex = leftIndex;
         this.rightIndex = rightIndex;
     }
@@ -38,6 +42,22 @@ public class PartitionAckMonitorInfo extends BaseMonitorInfo {
 
     public void setIndex(long index) {
         this.index = index;
+    }
+
+    public long getLastPullTime() {
+        return lastPullTime;
+    }
+
+    public void setLastPullTime(long lastPullTime) {
+        this.lastPullTime = lastPullTime;
+    }
+
+    public long getLastAckTime() {
+        return lastAckTime;
+    }
+
+    public void setLastAckTime(long lastAckTime) {
+        this.lastAckTime = lastAckTime;
     }
 
     public void setLeftIndex(long leftIndex) {

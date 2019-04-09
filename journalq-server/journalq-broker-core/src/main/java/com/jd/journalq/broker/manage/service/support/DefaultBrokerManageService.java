@@ -1,6 +1,7 @@
 package com.jd.journalq.broker.manage.service.support;
 
 import com.jd.journalq.broker.manage.service.*;
+import com.jd.journalq.exception.JMQException;
 import com.jd.journalq.manage.IndexItem;
 import com.jd.journalq.manage.PartitionGroupMetric;
 import com.jd.journalq.manage.PartitionMetric;
@@ -45,12 +46,12 @@ public class DefaultBrokerManageService implements BrokerManageService {
     }
 
     @Override
-    public boolean setAckIndex(String topic, String app, short partition, long index) {
+    public boolean setAckIndex(String topic, String app, short partition, long index) throws JMQException {
         return consumerManageService.setAckIndex(topic, app, partition, index);
     }
 
     @Override
-    public boolean setMaxAckIndex(String topic, String app, short partition) {
+    public boolean setMaxAckIndex(String topic, String app, short partition) throws JMQException {
         return consumerManageService.setMaxAckIndex(topic, app, partition);
     }
 
@@ -65,17 +66,17 @@ public class DefaultBrokerManageService implements BrokerManageService {
     }
 
     @Override
-    public boolean setMaxAckIndexes(String topic, String app) {
+    public boolean setMaxAckIndexes(String topic, String app) throws JMQException {
         return consumerManageService.setMaxAckIndexes(topic, app);
     }
 
     @Override
-    public boolean setAckIndexByTime(String topic, String app, short partition, long timestamp) {
+    public boolean setAckIndexByTime(String topic, String app, short partition, long timestamp) throws JMQException {
         return consumerManageService.setAckIndexByTime(topic, app, partition, timestamp);
     }
 
     @Override
-    public boolean setAckIndexesByTime(String topic, String app, long timestamp) {
+    public boolean setAckIndexesByTime(String topic, String app, long timestamp) throws JMQException {
         return consumerManageService.setAckIndexesByTime(topic, app, timestamp);
     }
 

@@ -10,6 +10,7 @@ import com.jd.journalq.store.message.BatchMessageParser;
 import com.jd.journalq.store.message.MessageParser;
 import com.jd.journalq.store.utils.PreloadBufferPool;
 import com.jd.journalq.store.utils.ThreadSafeFormat;
+import com.jd.journalq.toolkit.format.Format;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -58,11 +59,11 @@ public class PGCheck {
                 Arrays.stream(intPartitions).mapToObj(String::valueOf).collect(Collectors.joining(","))));
 
         if(startPosition >= 0) {
-            System.out.println("Only files after position : " + ThreadSafeFormat.formatWithComma(startPosition) + " will be checked.");
+            System.out.println("Only files after position : " + Format.formatWithComma(startPosition) + " will be checked.");
         } else {
             System.out.println("All files will be checked.");
         }
-        PreloadBufferPool pool = new PreloadBufferPool(1000);
+        PreloadBufferPool pool = new PreloadBufferPool();
         pool.addPreLoad(StoreConfig.DEFAULT_INDEX_FILE_SIZE, 0, 1);
         pool.addPreLoad(StoreConfig.DEFAULT_MESSAGE_FILE_SIZE, 0, 1);
 
@@ -101,13 +102,13 @@ public class PGCheck {
             if(partition.position >= 0 && partition.position + IndexItem.STORAGE_SIZE != indexPosition) {
                 String msg = "Index not continuous:" + "\n" +
                         "Partition: " + logIndex.getPartition() + ", " +
-                        "current index in log: " + ThreadSafeFormat.formatWithComma(logIndex.getIndex()) + ", " +
-                        "last index in log: " + ThreadSafeFormat.formatWithComma(partition.position / IndexItem.STORAGE_SIZE) + ", " +
-                        "log position: " + ThreadSafeFormat.formatWithComma(position) + "\n" +
+                        "current index in log: " + Format.formatWithComma(logIndex.getIndex()) + ", " +
+                        "last index in log: " + Format.formatWithComma(partition.position / IndexItem.STORAGE_SIZE) + ", " +
+                        "log position: " + Format.formatWithComma(position) + "\n" +
                         "Log:" + "\n" +
                         MessageParser.getString(logBuffer);
                 System.out.println(msg);
-                System.out.println("Type \"TRUNCATE\" to rollback store to position " + ThreadSafeFormat.formatWithComma(position) + ", Type other to quit.");
+                System.out.println("Type \"TRUNCATE\" to rollback store to position " + Format.formatWithComma(position) + ", Type other to quit.");
                 String inputStr = scanner.nextLine();
 
                 if("TRUNCATE".equals(inputStr)) {
@@ -133,17 +134,17 @@ public class PGCheck {
                 if(!(logIndex.getOffset() == partitionIndex.getOffset() && length == partitionIndex.getLength())) {
                     String msg = "Incorrect index found:" + "\n" +
                             "Partition: " + logIndex.getPartition() + ", " +
-                            "index in log: " + ThreadSafeFormat.formatWithComma(logIndex.getIndex()) + ", " +
-                            "index position in log : " + ThreadSafeFormat.formatWithComma(indexPosition) + ", " +
-                            "next index position of partition: " + ThreadSafeFormat.formatWithComma(partition.position) + "\n" +
-                            "Log position: " + ThreadSafeFormat.formatWithComma(position) + ", " +
-                            "log position from index: " + ThreadSafeFormat.formatWithComma(partitionIndex.getOffset()) + "\n" +
+                            "index in log: " + Format.formatWithComma(logIndex.getIndex()) + ", " +
+                            "index position in log : " + Format.formatWithComma(indexPosition) + ", " +
+                            "next index position of partition: " + Format.formatWithComma(partition.position) + "\n" +
+                            "Log position: " + Format.formatWithComma(position) + ", " +
+                            "log position from index: " + Format.formatWithComma(partitionIndex.getOffset()) + "\n" +
                             "Log length: " + length + ", " +
                             "log length from index: " + partitionIndex.getLength() + "\n" +
                             "Log:" + "\n" +
                             MessageParser.getString(logBuffer);
                     System.out.println(msg);
-                    System.out.println("Type \"TRUNCATE\" to rollback partition index to " +  ThreadSafeFormat.formatWithComma(logIndex.getIndex()) + ", Type other to quit.");
+                    System.out.println("Type \"TRUNCATE\" to rollback partition index to " +  Format.formatWithComma(logIndex.getIndex()) + ", Type other to quit.");
                     String inputStr = scanner.nextLine();
 
                     if("TRUNCATE".equals(inputStr)) {
@@ -185,7 +186,7 @@ public class PGCheck {
         if("RECOVER".equals(inputStr)) {
             PartitionGroupStoreManager partitionGroupStoreManger = new PartitionGroupStoreManager(
                     "topic", 0,base,new PartitionGroupStoreManager.Config(),
-                    new PreloadBufferPool(1000L),
+                    new PreloadBufferPool(),
                     new ScheduledThreadPoolExecutor(1));
             partitionGroupStoreManger.recover();
             partitionGroupStoreManger.close();

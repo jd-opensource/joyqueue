@@ -119,7 +119,7 @@ public enum JMQCode {
     SE_IO_ERROR(91, "IO异常"),
     SE_INDEX_OVERFLOW(92, "消息序号超过最大值"),
     SE_INDEX_UNDERFLOW(93, "消息序号小于最小值"),
-//    SE_OFFSET_OVERFLOW(92, "偏移量越界"),
+    //    SE_OFFSET_OVERFLOW(92, "偏移量越界"),
 //    SE_MESSAGE_SIZE_EXCEEDED(93, "消息体大小超过最大限制"),
 //    SE_DISK_FULL(94, "磁盘满了"),
 //    SE_CREATE_FILE_ERROR(95, "创建文件失败"),
@@ -129,7 +129,7 @@ public enum JMQCode {
 //    SE_REPLICATION_ERROR(99, "复制不成功"),
 //    SE_ENQUEUE_SLOW(100, "创建队列，入队慢"),
     SE_DISK_FLUSH_SLOW(101, "磁盘刷新慢"),
-//    SE_APPEND_MESSAGE_SLOW(102, "追加消息处理慢"),
+    //    SE_APPEND_MESSAGE_SLOW(102, "追加消息处理慢"),
 //    SE_QUEUE_NOT_EXISTS(103, "消费队列不存在，主题:%s"),
 //    SE_FATAL_ERROR(104, "致命异常"),
 //    SE_PENDING(105, "请求挂起"),
@@ -177,6 +177,7 @@ public enum JMQCode {
     FW_PRODUCE_MESSAGE_BROKER_NOT_LEADER(188, "不是该主题leader"),
     FW_TOPIC_NOT_EXIST(189, "TOPIC不存在"),
     FW_TOPIC_NO_PARTITIONGROUP(190, "TOPIC无可用分组"),
+    FW_PARTITION_BROKER_NOT_LEADER(191, "partition在当前broker上不是leader"),
 
     // 151~160 agent错误，以JA开头
     JA_COMMAND_ERROR(151, "命令执行失败"),
@@ -199,7 +200,8 @@ public enum JMQCode {
 
     //250~259 消费位置
     CONSUME_POSITION_NULL(250, "消费位置空异常"),
-    CONSUME_POSITION_UPDATE_ERROR(251, "消费位置更新异常");
+    CONSUME_POSITION_UPDATE_ERROR(251, "消费位置更新异常"),
+    CONSUME_POSITION_META_DATA_NULL(252, "消费位置元数据匹配异常");
 
 
     private static Map<Integer, JMQCode> codes = new HashMap<Integer, JMQCode>();

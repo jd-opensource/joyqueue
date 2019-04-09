@@ -140,8 +140,12 @@ public interface PropertySupplier {
         if (key == null) {
             throw new IllegalArgumentException("key can not be null");
         }
-        Property property = supplier.getOrCreateProperty(key.getName());
-        Object propertyValue = property.getValue();
+        Object propertyValue = null;
+        if(null != supplier) {
+            Property property = supplier.getOrCreateProperty(key.getName());
+            propertyValue = property.getValue();
+        }
+
         Object defaultValue = key.getValue();
         switch (key.getType()) {
             case BOOLEAN:
