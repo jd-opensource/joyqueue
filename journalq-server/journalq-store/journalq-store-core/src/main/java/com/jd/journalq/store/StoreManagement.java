@@ -195,7 +195,7 @@ public class StoreManagement implements StoreManagementService {
 
         try{
             StoreFile<ByteBuffer> storeFile = new StoreFileImpl<>(0, file, messageFileHeaderSize,
-                    new StoreMessageSerializer(maxMessageSize), bufferPool,  (int) file.length() - messageFileHeaderSize,2048);
+                    new StoreMessageSerializer(maxMessageSize), bufferPool,  (int) file.length() - messageFileHeaderSize);
             List<byte []> messages = new ArrayList<>(count);
             for (int i = 0; i < count; i++) {
                 ByteBuffer byteBuffer = storeFile.read((int) position, -1);

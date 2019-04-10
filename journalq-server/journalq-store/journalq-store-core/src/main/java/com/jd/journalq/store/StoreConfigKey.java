@@ -2,7 +2,6 @@ package com.jd.journalq.store;
 
 import com.jd.journalq.toolkit.config.PropertyDef;
 
-import static com.jd.journalq.store.PartitionGroupStoreManager.Config.DEFAULT_EVICT_INTERVAL_MS;
 import static com.jd.journalq.store.PartitionGroupStoreManager.Config.*;
 import static com.jd.journalq.store.file.PositioningStore.Config.*;
 

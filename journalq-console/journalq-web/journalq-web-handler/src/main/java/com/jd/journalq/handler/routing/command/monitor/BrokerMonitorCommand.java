@@ -305,6 +305,26 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
         }
     }
 
+    /**
+     * 获取详情
+     * @param partitionGroupMonitor
+     * @return
+     */
+    @Path("findPartitionGroupMetric")
+    public Response findPartitionGroupMetric(@Body QPartitionGroupMonitor partitionGroupMonitor){
+        try {
+            if (NullUtil.isEmpty(partitionGroupMonitor.getPartitionGroup()) || NullUtil.isEmpty(partitionGroupMonitor.getSubscribe())) {
+                return Responses.error(ErrorCode.BadRequest.getCode(), "app 和 topic 不能为空");
+            }
+            Subscribe subscribe = partitionGroupMonitor.getSubscribe();
+            int groupNo = partitionGroupMonitor.getPartitionGroup();
+            return Responses.success(brokerMonitorService.findPartitionGroupMetric(subscribe.getNamespace().getCode(),subscribe.getTopic().getCode(),groupNo));
+        } catch (Exception e) {
+            logger.error("query broker monitor info error.", e);
+            return Responses.error(ErrorCode.NoTipError.getCode(), ErrorCode.NoTipError.getStatus(), e.getMessage());
+        }
+    }
+
     @Override
     public void clean() {
         brokerMonitorService = null;

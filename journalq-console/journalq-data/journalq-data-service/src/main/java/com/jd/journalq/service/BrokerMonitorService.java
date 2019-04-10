@@ -1,6 +1,8 @@
 package com.jd.journalq.service;
 
 
+import com.jd.journalq.manage.PartitionGroupMetric;
+import com.jd.journalq.manage.PartitionGroupPosition;
 import com.jd.journalq.monitor.ArchiveMonitorInfo;
 import com.jd.journalq.model.domain.BrokerClient;
 import com.jd.journalq.model.domain.ConnectionMonitorInfoWithIp;
@@ -106,6 +108,14 @@ public interface BrokerMonitorService {
     List<ConnectionMonitorInfoWithIp> findConnectionOnBroker(Subscribe subscribe);
 
 
+    /**
+     * 获取
+     * @param namespace
+     * @param topic
+     * @param groupNo
+     * @return
+     */
+    List<PartitionGroupPosition> findPartitionGroupMetric(String namespace, String topic, Integer groupNo);
 
    /**
     *

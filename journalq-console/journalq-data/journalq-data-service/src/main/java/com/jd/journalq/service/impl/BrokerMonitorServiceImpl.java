@@ -8,6 +8,10 @@ import com.jd.journalq.async.RetrieveProvider;
 import com.jd.journalq.convert.CodeConverter;
 import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.exception.ServiceException;
+import com.jd.journalq.manage.PartitionGroupMetric;
+import com.jd.journalq.manage.PartitionGroupPosition;
+import com.jd.journalq.manage.PartitionMetric;
+import com.jd.journalq.manage.PartitionPosition;
 import com.jd.journalq.model.domain.*;
 import com.jd.journalq.monitor.*;
 import com.jd.journalq.monitor.Client;
@@ -558,6 +562,27 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
         return connectionRecords;
     }
 
+
+    public List<PartitionGroupPosition> findPartitionGroupMetric(String namespace, String topic, Integer groupNo){
+        TopicPartitionGroup topicPartitionGroup = partitionGroupService.findByTopicAndGroup(namespace,topic,groupNo);
+        String path = "partitiongroupIndex";
+        Future<Map<String,String >> resultFuture = null;
+        try {
+            resultFuture = brokerCluster.asyncQueryAllBroker(namespace,topic,groupNo,path,path);
+        } catch (Exception e) {
+            logger.error("asynQuery,error",e);
+        }
+        Map<String/*request key*/, String/*response*/> resultMap= brokerCluster.get(resultFuture,TIMEOUT,TimeUnit.MILLISECONDS);
+        Map<String,PartitionGroupMetric> map = new HashMap();
+        resultMap.forEach( (k,v) -> {
+            RestResponse<PartitionGroupMetric>  restResponse = parse(v,RestResponse.class, PartitionGroupMetric.class,false);
+            map.put(k,restResponse.getData());
+        });
+        return getPartitionGroupInterval(topicPartitionGroup.getLeader(),map);
+    }
+
+
+
     @Override
     public ArchiveMonitorInfo findArchiveState(String ip,int  port) {
         RestResponse<ArchiveMonitorInfo> archiveMonitorRest;
@@ -570,6 +595,40 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
             logger.error("archive monitor",e);
             throw new ServiceException(INTERNAL_SERVER_ERROR, e.getMessage());
         }
+    }
+
+    //计算位移间隔
+    private List<PartitionGroupPosition> getPartitionGroupInterval(Integer masterBroker,Map<String,PartitionGroupMetric> partitionGroupMetricMap){
+        PartitionGroupMetric masterMetric=partitionGroupMetricMap.get(String.valueOf(masterBroker));
+        List<PartitionGroupPosition> positionList = new ArrayList<>();
+        partitionGroupMetricMap.forEach((k,v) ->{
+            PartitionGroupPosition partitionGroupPosition = positionConvert(masterMetric,v);
+            if (masterBroker.equals(v)) {
+                partitionGroupPosition.setMaster(true);
+            }
+            positionList.add(partitionGroupPosition);
+        });
+        return positionList;
+    }
+
+    //格式转换并计算位移差
+    private PartitionGroupPosition positionConvert(PartitionGroupMetric master,PartitionGroupMetric slave) {
+        PartitionGroupPosition partitionGroupPosition = new PartitionGroupPosition();
+        partitionGroupPosition.setRightPosition(slave.getRightPosition());
+        partitionGroupPosition.setPartitionGroup(slave.getPartitionGroup());
+        partitionGroupPosition.setRightPosition(master.getRightPosition()-slave.getRightPosition());
+        List<PartitionPosition> partitionPositions = new ArrayList<>();
+        for(int i=0;i<master.getPartitionMetrics().length;i++ ){
+            PartitionMetric partitionMetric1 = master.getPartitionMetrics()[i];
+            PartitionMetric partitionMetric2 = slave.getPartitionMetrics()[i];
+            PartitionPosition partitionPosition = new PartitionPosition();
+            partitionPosition.setPartition(partitionMetric1.getPartition());
+            partitionPosition.setRightPosition(partitionMetric2.getRightIndex());
+            partitionPosition.setRightPositionInterval(partitionMetric1.getRightIndex()-partitionMetric2.getRightIndex());
+            partitionPositions.add(partitionPosition);
+        }
+        partitionGroupPosition.setPartitionPositionList(partitionPositions);
+        return partitionGroupPosition;
     }
 
     /**

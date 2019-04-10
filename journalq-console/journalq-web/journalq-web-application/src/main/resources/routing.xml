@@ -380,7 +380,9 @@
         <route inherit="post"
                path="/v1/monitor/coordinator/group/expired/member" handlers="brokerMonitor#coordinatorGroupExpiredMember render"
                errors="error"/>
-
+        <route inherit="post"
+               path="/v1/monitor/broker/group/metric" handlers="brokerMonitor#findPartitionGroupMetric render"
+               errors="error"/>
 
         <!--mqtt proxy monitor-->
         <route inherit="get"

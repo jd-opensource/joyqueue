@@ -2,10 +2,12 @@ package com.jd.journalq.async;
 
 
 import com.jd.journalq.domain.PartitionGroup;
-import com.jd.journalq.model.domain.Broker;
-import com.jd.journalq.model.domain.Subscribe;
+import com.jd.journalq.domain.TopicName;
+import com.jd.journalq.model.domain.*;
+import com.jd.journalq.model.query.QPartitionGroupReplica;
 import com.jd.journalq.service.BrokerRestUrlMappingService;
 import com.jd.journalq.service.LeaderService;
+import com.jd.journalq.service.PartitionGroupReplicaService;
 import com.jd.journalq.util.AsyncHttpClient;
 import com.jd.journalq.util.NullUtil;
 import org.apache.http.client.methods.HttpGet;
@@ -13,12 +15,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service("brokerClusterMonitorQuery")
 public class BrokerMonitorClusterQuery implements BrokerClusterQuery<Subscribe> {
@@ -28,6 +32,32 @@ public class BrokerMonitorClusterQuery implements BrokerClusterQuery<Subscribe> 
 
     @Autowired
     private BrokerRestUrlMappingService  urlMappingService;
+
+    @Autowired
+    protected PartitionGroupReplicaService partitionGroupReplicaService;
+
+    public Future<Map<String, String>> asyncQueryAllBroker(String namespace, String topic, Integer groupNo, String path, String logkey) throws Exception {
+        QPartitionGroupReplica qTopicPartitionGroup = new QPartitionGroupReplica();
+        qTopicPartitionGroup.setTopic(new Topic(topic));
+        qTopicPartitionGroup.setNamespace(new Namespace(namespace));
+        qTopicPartitionGroup.setGroupNo(groupNo);
+        List<PartitionGroupReplica> partitionGroupReplicas = partitionGroupReplicaService.findByQuery(qTopicPartitionGroup);
+        List<Broker> brokers = partitionGroupReplicas.stream().map(m->m.getBroker()).collect(Collectors.toList());
+        if (NullUtil.isEmpty(brokers)) {
+            throw  new IllegalStateException("topic leader broker or rest path not found");
+        }
+        Map<String/*request key*/,String/*response*/>  resultMap=new ConcurrentHashMap<>(brokers.size());
+        CountDownLatch latch = new CountDownLatch(brokers.size());
+        String pathTmp = urlMappingService.pathTemplate(path);
+
+        for(Broker b : brokers) {
+            String url = urlMappingService.monitorUrl(b)+String.format(pathTmp,new TopicName(topic,namespace).getFullName(),groupNo);
+            AsyncHttpClient.AsyncRequest(new HttpGet(url), new AsyncHttpClient.ConcurrentHttpResponseHandler(url,System.currentTimeMillis(),latch,String.valueOf(b.getId()),resultMap));
+        }
+        return new DefaultBrokerInfoFuture(latch,resultMap,logkey);
+    }
+
+
 
     @Override
     public Future<Map<String, String>> asyncQueryOnBroker(Subscribe condition, RetrieveProvider<Subscribe> provider, String pathKey, String logKey) {

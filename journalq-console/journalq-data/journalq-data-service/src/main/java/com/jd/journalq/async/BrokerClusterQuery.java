@@ -12,6 +12,18 @@ import java.util.concurrent.TimeUnit;
  **/
 public interface BrokerClusterQuery<C> {
 
+
+
+    /**
+     * 查询所有信息
+     * @param namespace
+     * @param topic
+     * @param groupNo
+     * @param path
+     * @param logkey
+     * @return
+     */
+    Future<Map<String, String>> asyncQueryAllBroker(String namespace,String topic,Integer groupNo, String path,String logkey) throws Exception;
     /**
      * @param condition  查询条件
      * @param provider   provider path and result key

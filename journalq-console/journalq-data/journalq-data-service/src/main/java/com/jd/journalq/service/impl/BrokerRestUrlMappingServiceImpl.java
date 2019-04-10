@@ -41,6 +41,8 @@ public class BrokerRestUrlMappingServiceImpl implements BrokerRestUrlMappingServ
     private String appTopicMonitorProducerPath ="/monitor/topic/%s/app/%s/producer";
 //    /monitor/connections/detail
     private String appConnectionDetailPath = "/monitor/connections/detail";
+    //    /manage/topic/:topic/partitionGroup/:partitionGroup/store/metric
+    private String partitiongroupIndexPath="/manage/topic/%s/partitionGroup/%s/store/metric";
 
     /** offset management*/
     private String appConsumeOffsetMonitorPath="/manage/topic/%s/app/%s/acks"; // topic|app

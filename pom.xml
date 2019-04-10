@@ -1047,7 +1047,7 @@
                         <goals>
                             <goal>check</goal>
                         </goals>
-                        <configuration>
+                        <configuration>BrokerClusterQuery
                             <configLocation>styles/checkstyle.xml</configLocation>
                             <failOnViolation>false</failOnViolation>
                         </configuration>
