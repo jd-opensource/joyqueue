@@ -72,8 +72,8 @@
         <HikariCP.version>2.3.13</HikariCP.version>
         <aspectj.version>1.8.9</aspectj.version>
         <mysql.version>5.1.32</mysql.version>
-        <laf-binding.version>1.0.5</laf-binding.version>
-        <laf-vertx.version>1.0.0-SNAPSHOT</laf-vertx.version>
+        <laf-binding.version>1.0.9-SNAPSHOT</laf-binding.version>
+        <laf-vertx.version>1.0.18-SNAPSHOT</laf-vertx.version>
         <!-- <laf-vertx.version>1.0.17</laf-vertx.version>-->
         <lar-extention.version>1.0.13</lar-extention.version>
         <vertx.version>3.5.1</vertx.version>
@@ -179,6 +179,11 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.jd.laf.binding</groupId>
+                <artifactId>laf-binding-core</artifactId>
+                <version>${laf-binding.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.jd.laf</groupId>
                 <artifactId>laf-extension-core</artifactId>
                 <version>1.0.13</version>
@@ -196,7 +201,7 @@
             <dependency>
                 <groupId>com.jd.laf.web</groupId>
                 <artifactId>laf-vertx-web</artifactId>
-                <version>1.0.5</version>
+                <version>${laf-vertx.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.jd.laf.web</groupId>
@@ -642,6 +647,11 @@
                 <version>${spring.security.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.aspectj</groupId>
+                <artifactId>aspectjrt</artifactId>
+                <version>${aspectj.version}</version>
+            </dependency>
             <!-- excel file -->
             <dependency>
                 <groupId>org.apache.poi</groupId>

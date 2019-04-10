@@ -2,15 +2,9 @@ package com.jd.journalq.handler.routing.command.monitor;
 
 import com.jd.journalq.domain.ClientType;
 import com.jd.journalq.domain.TopicName;
-import com.jd.journalq.handler.binder.BodyType;
 import com.jd.journalq.handler.error.ConfigException;
 import com.jd.journalq.handler.error.ErrorCode;
 import com.jd.journalq.handler.routing.command.NsrCommandSupport;
-import com.jd.journalq.handler.Constants;
-import com.jd.journalq.handler.binder.annotation.Body;
-import com.jd.journalq.handler.binder.annotation.GenericBody;
-import com.jd.journalq.handler.binder.annotation.ParamterValue;
-import com.jd.journalq.handler.binder.annotation.Path;
 import com.jd.journalq.model.domain.*;
 import com.jd.journalq.model.query.QConsumer;
 import com.jd.journalq.service.ApplicationService;
@@ -18,6 +12,9 @@ import com.jd.journalq.service.ConsumerService;
 import com.jd.journalq.service.TopicService;
 import com.jd.journalq.nsr.ConsumerNameServerService;
 import com.jd.laf.binding.annotation.Value;
+import com.jd.laf.web.vertx.annotation.Body;
+import com.jd.laf.web.vertx.annotation.Path;
+import com.jd.laf.web.vertx.annotation.QueryParam;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
 import org.slf4j.Logger;
@@ -25,6 +22,8 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.jd.journalq.handler.Constants.ID;
 
 
 public class ConsumerCommand extends NsrCommandSupport<Consumer, ConsumerService, QConsumer> {
@@ -37,7 +36,7 @@ public class ConsumerCommand extends NsrCommandSupport<Consumer, ConsumerService
     private ConsumerNameServerService consumerNameServerService;
 
     @Path("add")
-    public Response add(@GenericBody(type = GenericBody.BodyType.JSON,typeindex = 0) Consumer consumer) throws Exception {
+    public Response add(@Body Consumer consumer) throws Exception {
         //validate unique
         List<Consumer> consumers = service.findByQuery(new QConsumer(consumer.getTopic().getCode(),
                 consumer.getTopic().getNamespace().getCode(), AppName.parse(consumer.getApp().getCode(), consumer.getSubscribeGroup()).getFullName()));
@@ -49,9 +48,8 @@ public class ConsumerCommand extends NsrCommandSupport<Consumer, ConsumerService
 
     @Override
     @Path("delete")
-    public Response delete(@ParamterValue(Constants.ID) Object id) throws Exception {
-        String consumerId = id.toString();
-        Consumer consumer = service.findById(consumerId);
+    public Response delete(@QueryParam(ID) String id) throws Exception {
+        Consumer consumer = service.findById(id);
         int count = service.delete(consumer);
         if (count <= 0) {
             throw new ConfigException(deleteErrorCode());
@@ -61,7 +59,7 @@ public class ConsumerCommand extends NsrCommandSupport<Consumer, ConsumerService
     }
 
     @Path("configAddOrUpdate")
-    public Response configAddOrUpdate(@Body(typeindex = 0,type = BodyType.JSON) ConsumerConfig config) throws Exception {
+    public Response configAddOrUpdate(@Body ConsumerConfig config) throws Exception {
         if(config!=null){
             Consumer consumer = service.findById(config.getConsumerId());
             consumer.setConfig(config);

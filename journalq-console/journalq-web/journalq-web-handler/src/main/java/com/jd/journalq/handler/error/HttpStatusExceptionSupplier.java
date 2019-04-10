@@ -8,7 +8,8 @@ import io.vertx.ext.web.handler.impl.HttpStatusException;
 import static com.jd.journalq.handler.error.ErrorCode.RuntimeError;
 
 /**
- * Http status异常转换器
+ * Http status exception conversion
+ * Created by chenyanying3 on 18-11-16.
  */
 public class HttpStatusExceptionSupplier implements ErrorSupplier {
     @Override

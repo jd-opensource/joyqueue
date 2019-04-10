@@ -11,6 +11,8 @@ public enum ErrorCode {
 
     RuntimeError(900, HTTP_INTERNAL_ERROR, "运行时异常!"),
 
+    DuplicateError(901, HTTP_INTERNAL_ERROR, "重复key异常!"),
+
     NoTipError(100, HTTP_INTERNAL_ERROR, "不提示异常"),
 
     ValidationError(300, HTTP_INTERNAL_ERROR, "code1,code2|验证不通过"),

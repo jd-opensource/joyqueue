@@ -5,14 +5,17 @@ import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
 import org.springframework.jdbc.BadSqlGrammarException;
 
+import static com.jd.journalq.handler.error.ErrorCode.SQLError;
+
 /**
- * SQL异常转换器
+ * Sql exception conversion
+ * Created by chenyanying3 on 18-11-16.
  */
 public class SQLExceptionSupplier implements ErrorSupplier {
     @Override
     public Response error(final Throwable throwable) {
         BadSqlGrammarException exception = (BadSqlGrammarException) throwable;
-        return Responses.error(ErrorCode.SQLError.getCode(), exception.getSQLException().getErrorCode(), ErrorCode.SQLError.getMessage());
+        return Responses.error(SQLError.getCode(), exception.getSQLException().getErrorCode(), SQLError.getMessage());
     }
 
     @Override

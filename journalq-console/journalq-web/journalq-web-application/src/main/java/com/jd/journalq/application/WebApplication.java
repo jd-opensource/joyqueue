@@ -1,6 +1,5 @@
 package com.jd.journalq.application;
 
-import com.jd.laf.web.springboot.starter.VertxWebAutoConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.PropertySource;
@@ -10,7 +9,7 @@ import java.net.URL;
 /**
  * Created by chenyanying3 on 19-3-3.
  */
-@SpringBootApplication(exclude = VertxWebAutoConfiguration.class)
+@SpringBootApplication
 @PropertySource({"classpath:important.properties"})
 public class WebApplication {
     public static void main(String[] args) {

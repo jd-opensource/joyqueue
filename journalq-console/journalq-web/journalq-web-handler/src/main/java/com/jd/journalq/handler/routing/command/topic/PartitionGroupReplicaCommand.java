@@ -1,12 +1,9 @@
 package com.jd.journalq.handler.routing.command.topic;
 
 import com.google.common.primitives.Ints;
+import com.jd.journalq.handler.annotation.PageQuery;
 import com.jd.journalq.model.PageResult;
 import com.jd.journalq.model.QPageQuery;
-import com.jd.journalq.handler.binder.annotation.GenericBody;
-import com.jd.journalq.handler.binder.annotation.GenericValue;
-import com.jd.journalq.handler.binder.annotation.Page;
-import com.jd.journalq.handler.binder.annotation.Path;
 import com.jd.journalq.handler.error.ConfigException;
 import com.jd.journalq.handler.routing.command.NsrCommandSupport;
 import com.jd.journalq.model.domain.Broker;
@@ -17,6 +14,9 @@ import com.jd.journalq.model.query.QPartitionGroupReplica;
 import com.jd.journalq.service.BrokerService;
 import com.jd.journalq.service.PartitionGroupReplicaService;
 import com.jd.journalq.service.TopicPartitionGroupService;
+import com.jd.laf.binding.annotation.Value;
+import com.jd.laf.web.vertx.annotation.Body;
+import com.jd.laf.web.vertx.annotation.Path;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
 
@@ -27,24 +27,25 @@ import java.util.List;
  * Created by wylixiaobin on 2018-10-19
  */
 public class PartitionGroupReplicaCommand extends NsrCommandSupport<PartitionGroupReplica, PartitionGroupReplicaService, QPartitionGroupReplica> {
-    @GenericValue
+    @Value(nullable = false)
     private BrokerService brokerService;
-    @GenericValue
+    @Value(nullable = false)
     private TopicPartitionGroupService topicPartitionGroupService;
     @Path("searchBrokerToScale")
-    public Response toScaleSearch(@Page(typeindex = 2) QPageQuery<QPartitionGroupReplica> qPageQuery) throws Exception {
+    public Response toScaleSearch(@PageQuery QPageQuery<QPartitionGroupReplica> qPageQuery) throws Exception {
         List<PartitionGroupReplica> list = service.findByQuery(qPageQuery.getQuery());
         QPageQuery<QBroker> brokerQuery = new QPageQuery(qPageQuery.getPagination(),new QBroker());
         if(null!=list && list.size()>0) {
             brokerQuery.getQuery().setNotInBrokerIds(Ints.asList(list.stream().mapToInt(
                     replica -> Long.valueOf(replica.getBrokerId()).intValue()).toArray()));
             brokerQuery.getQuery().setBrokerGroupId(list.get(0).getBroker().getGroup().getId());
+            brokerQuery.getQuery().setKeyword(qPageQuery.getQuery().getKeyword());
         }
         PageResult<Broker> result = brokerService.findByQuery(brokerQuery);
         return Responses.success(result.getPagination(), result.getResult());
     }
     @Path("searchBrokerToAddNew")
-    public Response toAddNewPartitionGroupSearch(@Page(typeindex = 2) QPageQuery<QPartitionGroupReplica> qPageQuery) throws Exception {
+    public Response toAddNewPartitionGroupSearch(@PageQuery QPageQuery<QPartitionGroupReplica> qPageQuery) throws Exception {
         List<PartitionGroupReplica > list = service.findByQuery(qPageQuery.getQuery());
         QPageQuery<QBroker> brokerQuery = new QPageQuery(qPageQuery.getPagination(),new QBroker());
         if(null!=list && list.size()>0 && list.get(0).getBroker() != null) {
@@ -55,7 +56,7 @@ public class PartitionGroupReplicaCommand extends NsrCommandSupport<PartitionGro
     }
     @Override
     @Path("add")
-    public Response add(@GenericBody(type = GenericBody.BodyType.JSON,typeindex = 0)PartitionGroupReplica model) throws Exception {
+    public Response add(@Body PartitionGroupReplica model) throws Exception {
         TopicPartitionGroup group = topicPartitionGroupService.findByTopicAndGroup(model.getNamespace().getCode(),
                 model.getTopic().getCode(),model.getGroupNo());
         if(group.getElectType().equals(TopicPartitionGroup.ElectType.raft.type())) {
@@ -70,7 +71,7 @@ public class PartitionGroupReplicaCommand extends NsrCommandSupport<PartitionGro
     }
 
     @Path("delete")
-    public Response delete(@GenericBody(type = GenericBody.BodyType.JSON,typeindex = 0)PartitionGroupReplica partitionGroupReplica) throws Exception {
+    public Response delete(@Body PartitionGroupReplica partitionGroupReplica) throws Exception {
         PartitionGroupReplica replica = service.findById(partitionGroupReplica.getId());
         int count = service.removeWithNameservice(replica,topicPartitionGroupService.findByTopicAndGroup(
                 replica.getNamespace().getCode(),replica.getTopic().getCode(),replica.getGroupNo()));
@@ -80,7 +81,7 @@ public class PartitionGroupReplicaCommand extends NsrCommandSupport<PartitionGro
         return Responses.success(replica);
     }
     @Path("leader")
-    public Response leaderChange(@GenericBody(type = GenericBody.BodyType.JSON,typeindex = 0) PartitionGroupReplica model) throws Exception {
+    public Response leaderChange(@Body PartitionGroupReplica model) throws Exception {
         TopicPartitionGroup topicPartitionGroup = new TopicPartitionGroup();
         topicPartitionGroup.setTopic(model.getTopic());
         topicPartitionGroup.setNamespace(model.getNamespace());

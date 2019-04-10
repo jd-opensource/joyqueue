@@ -1,15 +1,16 @@
 package com.jd.journalq.handler.routing.validate;
 
-import com.jd.journalq.service.ApplicationService;
-import com.jd.journalq.handler.Constants;
 import com.jd.journalq.handler.error.ConfigException;
 import com.jd.journalq.handler.error.ErrorCode;
-import com.jd.laf.binding.annotation.Value;
 import com.jd.journalq.model.domain.Application;
 import com.jd.journalq.model.domain.Identifier;
+import com.jd.journalq.service.ApplicationService;
+import com.jd.laf.binding.annotation.Value;
 import com.jd.laf.web.vertx.parameter.Parameter;
 import com.jd.laf.web.vertx.parameter.Parameters;
 import io.vertx.ext.web.RoutingContext;
+
+import static com.jd.journalq.handler.Constants.*;
 
 /**
  * 判断请求的应用是否和认证的应用身份一致，避免越权查看其它应用信息
@@ -28,10 +29,10 @@ public class ValidateApplicationHandler extends ValidateHandler {
     @Override
     protected void validate(final RoutingContext context, final Parameters.RequestParameter parameter) {
         Parameter query = parameter.query();
-        String value = query.getString(Constants.APP_ID);
-        value = value == null ? query.getString(Constants.APP_CODE) : value;
-        value = value == null ? query.getString(Constants.ID) : value;
-        Application application = context.get(Constants.APPLICATION);
+        String value = query.getString(APP_ID);
+        value = value == null ? query.getString(APP_CODE) : value;
+        value = value == null ? query.getString(ID) : value;
+        Application application = context.get(APPLICATION);
         if (application != null) {
             //有认证的上下文
             if (application.getCode().equals(value)
@@ -61,6 +62,6 @@ public class ValidateApplicationHandler extends ValidateHandler {
                 throw new ConfigException(ErrorCode.ApplicationNotExists);
             }
         }
-        context.put(Constants.APPLICATION, application);
+        context.put(APPLICATION, application);
     }
 }

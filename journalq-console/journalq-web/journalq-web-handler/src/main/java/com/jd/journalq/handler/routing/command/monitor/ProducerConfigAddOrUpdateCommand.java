@@ -1,6 +1,7 @@
 package com.jd.journalq.handler.routing.command.monitor;
 
-import com.jd.journalq.handler.binder.annotation.Operator;
+
+import com.jd.journalq.handler.annotation.Operator;
 import com.jd.journalq.model.domain.Identity;
 import com.jd.journalq.model.domain.Producer;
 import com.jd.journalq.model.domain.ProducerConfig;
