@@ -255,7 +255,7 @@ public class PositioningStoreTest {
         // 每条消息消息体大小
         int logSize = 12;
 
-        try (PreloadBufferPool bufferPool = new PreloadBufferPool();PositioningStore<ByteBuffer> store = prepareStore(bufferPool)) {
+        try (PreloadBufferPool bufferPool = new PreloadBufferPool(); PositioningStore<ByteBuffer> store = prepareStore(bufferPool)) {
             ByteBuffer buffer = MessageTestUtils.createMessage(new byte[logSize]);
             write(store, maxSize, buffer);
         }

@@ -3,6 +3,7 @@ package com.jd.journalq.broker.mqtt.cluster;
 import com.jd.journalq.broker.consumer.Consume;
 import com.jd.journalq.broker.mqtt.connection.MqttConnection;
 import com.jd.journalq.broker.mqtt.session.MqttSession;
+import com.jd.journalq.exception.JMQException;
 import com.jd.journalq.message.BrokerMessage;
 import com.jd.journalq.network.session.Consumer;
 import com.jd.journalq.broker.BrokerContext;
@@ -171,7 +172,11 @@ public class MqttConsumerManager extends Service {
     }
 
     private void commitAcknowledge(Consumer consumer, short partition, long index) {
-        consume.setAckIndex(consumer, partition, index);
+        try {
+            consume.setAckIndex(consumer, partition, index);
+        } catch (JMQException e) {
+            e.printStackTrace();
+        }
     }
 
     private class ConsumeTask implements Runnable {

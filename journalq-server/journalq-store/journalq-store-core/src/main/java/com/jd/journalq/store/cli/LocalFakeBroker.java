@@ -6,6 +6,7 @@ import com.jd.journalq.store.*;
 import com.jd.journalq.store.message.BatchMessageParser;
 import com.jd.journalq.store.utils.MessageUtils;
 import com.jd.journalq.toolkit.concurrent.LoopThread;
+import com.jd.journalq.toolkit.metric.Metric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
