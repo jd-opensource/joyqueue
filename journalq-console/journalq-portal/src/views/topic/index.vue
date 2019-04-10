@@ -1,20 +1,22 @@
 <template>
   <div>
     <div class="ml20 mt30">
-      <d-input v-model="searchData.keyword" placeholder="请输入英文名" class="left" style="width: 12%">
-      </d-input>
-      <d-select v-model="searchData.type" placeholder="请选择类型" class="left" style="width:12%">
+      <d-select v-model="searchData.type" placeholder="请选择类型" class="left mr5" style="width:13%">
+        <span slot="prepend">主题类型</span>
         <d-option value="-1" >全部</d-option>
         <d-option value="0" >普通主题</d-option>
         <d-option value="1" >广播主题</d-option>
         <d-option value="2" >顺序主题</d-option>
       </d-select>
-      <d-button type="primary" @click="getList">查询<icon name="search" style="margin-left: 5px;"></icon></d-button>
-      <d-button v-if="$store.getters.isAdmin" type="primary" @click="openDialog('addDialog')">添加主题<icon name="plus-circle" style="margin-left: 5px;"></icon></d-button>
+      <d-input v-model="searchData.keyword" placeholder="请输入英文名" class="left mr5" style="width: 15%">
+        <span slot="prepend">关键词</span>
+      </d-input>
+      <d-button type="primary" color="success" @click="getList">查询<icon name="search" style="margin-left: 5px;"></icon></d-button>
+      <d-button v-if="$store.getters.isAdmin" type="primary" class="left ml10" @click="openDialog('addDialog')">添加主题<icon name="plus-circle" style="margin-left: 5px;"></icon></d-button>
     </div>
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
               @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange" @on-view-detail="goDetail"
-              @on-edit="edit" @on-edit-label="editLabel" @on-add-brokerGroup="addBrokerGroup" @on-del="del" @on-hosts="goHostChart">
+              @on-edit="edit" @on-edit-label="editLabel" @on-add-brokerGroup="addBrokerGroup" @on-del="del">
     </my-table>
     <!--添加-->
     <my-dialog :dialog="addDialog" class="add-dialog" @on-dialog-cancel="dialogCancel('addDialog')">
@@ -50,7 +52,7 @@ import myTable from '../../components/common/myTable.vue'
 import myDialog from '../../components/common/myDialog.vue'
 import topicForm from './topicForm.vue'
 import crud from '../../mixins/crud.js'
-import cookie from '../../utils/cookie.js'
+import {baseBtnRender} from '../../utils/common.js'
 
 export default {
   name: 'topic',
@@ -100,19 +102,23 @@ export default {
             title: '类型',
             key: 'type',
             render: (h, params) => {
-              let label
-              switch (params.item.type) {
-                case 0:
-                  label = 'topic'
-                  break
-                case 1:
-                  label = 'broadcast'
-                  break
-                case 2:
-                  label = 'seuqential'
-                  break
-              }
-              return h('label', {}, label)
+              return baseBtnRender(h, params.item.type, [
+                {
+                  value: 0,
+                  txt: 'Normal',
+                  color: 'success'
+                },
+                {
+                  value: 1,
+                  txt: 'Broadcast',
+                  color: 'warning'
+                },
+                {
+                  value: 2,
+                  txt: 'Sequential',
+                  color: 'danger'
+                }
+              ])
             }
           },
           {
@@ -148,10 +154,6 @@ export default {
             txt: '详情',
             method: 'on-view-detail'
           },
-          {
-            txt: '主机监控',
-            method: 'on-hosts'
-          },
           // {
           //   txt: '编辑',
           //   method: 'on-edit'
@@ -166,7 +168,8 @@ export default {
           // },
           {
             txt: '删除',
-            method: 'on-del'
+            method: 'on-del',
+            isAdmin: true
           }
         ]
       },
@@ -205,7 +208,7 @@ export default {
   methods: {
     goDetail (item) {
       this.$router.push({name: `/${this.$i18n.locale}/topic/detail`,
-        query: {id: item.id, code: item.code, namespaceId: item.namespace.id, namespaceCode: item.namespace.code}})
+        query: {id: item.id, code: item.code, namespaceId: item.namespace.id, namespaceCode: item.namespace.code, tab: 'producer'}})
     },
     editLabel (item) {
       this.openDialog('editLabelDialog')
@@ -255,24 +258,27 @@ export default {
     isAdmin (item) {
       return this.$store.getters.isAdmin
     },
-    goHostChart (item) {
-      // 1. get open url and token
-      apiRequest.get(apiUrl['/topic'].getUrl + '/hosts', {}, {}).then((data) => {
-        let url = data.data || ''
-        if (url.indexOf('?') < 0) {
-          url += '?'
-        } else if (!url.endsWith('?')) {
-          url += '&'
-        }
-        url = url + 'var-topic=' + item.code
-        // 2. open
-        let cookieValue = cookie.get(this.$store.getters.cookieName)
-        if (cookieValue == null) {
-          this.$Message.error('cookie获取失败！')
-          return
-        }
-        url = url + '&var-cookie=' + this.$store.getters.cookieName + '=' + cookieValue
-        window.open(url)
+    // 删除
+    del (item, index) {
+      let _this = this
+      this.$Dialog.confirm({
+        title: '提示',
+        content: '删除时会自动删除与该主题关联的分片分组信息，确定要删除吗？'
+      }).then(() => {
+        apiRequest.post(_this.urlOrigin.del, {}, item.id).then((data) => {
+          if (data.code !== this.$store.getters.successCode) {
+            this.$Dialog.error({
+              content: '删除失败'
+            })
+          } else {
+            this.$Message.success('删除成功')
+            if (typeof (_this.afterDel) === 'function') {
+              _this.afterDel(item)
+            }
+            _this.getList()
+          }
+        })
+      }).catch(() => {
       })
     }
   },

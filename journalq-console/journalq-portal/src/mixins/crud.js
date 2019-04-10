@@ -73,7 +73,6 @@ export default {
     },
     // 查询
     getList () {
-      console.log(this.showTablePin)
       this.showTablePin = true
       let data = this.getSearchVal()
       apiRequest.post(this.urlOrigin.search, {}, data).then((data) => {
@@ -189,9 +188,7 @@ export default {
       } else if (data.code === this.$store.getters.validationCode) { // invalid inputs
         let errors = (data.message || '').split('|')
         if (!errors || errors.length < 2) {
-          this.$Dialog.error({
-            content: errorMsg
-          })
+          this.$Message.error(errors || errorMsg)
         } else {
           let error = {}
           errors[0].split(',').forEach(field => {
@@ -204,10 +201,6 @@ export default {
           }
           this.$Message.success('验证不通过: ' + data.message)
         }
-      } else { // other error
-        this.$Dialog.error({
-          content: errorMsg
-        })
       }
     },
     update (url, data, successMsg, errorMsg) {

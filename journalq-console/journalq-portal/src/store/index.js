@@ -23,7 +23,7 @@ const state = {
   responseCode: {
     noTipCode: 100,
     successCode: 200,
-    validationCode: 300,
+    validationCode: 300
   },
   form: {
     placeholder: {
@@ -38,43 +38,13 @@ const state = {
   page: {
     maxSize: 0x7fffffff
   },
-  cookieName: 'sso.jd.com'
-  // yesOrNoOptions:[
-  //   {
-  //     value: true,
-  //     name: "是",
-  //     color: "success"
-  //   },
-  //   {
-  //     value: false,
-  //     name: "否",
-  //     color: "warning"
-  //   }
-  // ],
-  // //客户端类型选项
-  // clientTypeOptions:[
-  //   {
-  //     value: 0,
-  //     name: "jmq",
-  //     color: "success"
-  //   },
-  //   {
-  //     value: 1,
-  //     name: "kafka",
-  //     color: "warning"
-  //   },
-  //   {
-  //     value: 2,
-  //     name: "mqtt",
-  //     color: "danger"
-  //   },
-  //   {
-  //     value: 10,
-  //     name: "others",
-  //     color: "info"
-  //   },
-  // ],
-
+  cookieName: 'sso.jd.com',
+  urls: {
+    performance: [
+      {'ump2.1.1+': 'http://ump.jd.com/performanceReport/initPage.action?queryMap.accessKey=jmq-servers.client.(consumer.)send.[app].[topic]'},
+      {'ump2.1.0-': 'http://ump.jd.com/performanceReport/initPage.action?queryMap.appName=jmq-server&queryMap.appId=5357&queryMap.accessKey=jmq-server.client.send.(consumer.)[app].[topic]&queryMap.analysisFrequency=null&queryMap.departCode=3616&queryMap.groupId='}
+    ]
+  }
 }
 
 const getters = {
@@ -125,13 +95,10 @@ const getters = {
   },
   pattern: state => {
     return state.form.pattern
+  },
+  urls: state => {
+    return state.urls
   }
-  // clientTypeOptions: state => {
-  //   return state.clientTypeOptions
-  // },
-  // yesOrNoOptions: state => {
-  //   return state.yesOrNoOptions
-  // },
 }
 const mutations = {
   setLoginUser (state, data) {

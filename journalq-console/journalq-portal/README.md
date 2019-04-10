@@ -1,4 +1,4 @@
-# jmq-portal
+# journalq-portal
 
 > A Vue.js project
 

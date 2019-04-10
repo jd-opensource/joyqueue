@@ -20,15 +20,15 @@
                 <!--<d-option v-for="item in namespaceList" :value="{id:item.id,code:item.code}" :key="item.id">{{ item.code }}</d-option>-->
               <!--</d-select>-->
             <!--</d-form-item>-->
-            <d-form-item label="队列数量：" prop="partitions">
-              <d-input v-model.number="formData.partitions" style="width: 70%"></d-input>
-            </d-form-item>
             <d-form-item label="主题类型：" prop="type">
-              <d-select v-model="formData.type" :value="0" style="width: 70%">
+              <d-select v-model="formData.type" :value="0" style="width: 70%" @on-change="handlerTypeChange">
                 <d-option :value="0" >普通主题</d-option>
                 <d-option :value="1" >广播主题</d-option>
                 <d-option :value="2" >顺序主题</d-option>
               </d-select>
+            </d-form-item>
+            <d-form-item label="队列数量：" prop="partitions">
+              <d-input v-model.number="formData.partitions" :disabled="partitionsDisabled" style="width: 70%"></d-input>
             </d-form-item>
             <d-form-item label="选举类型：" prop="electType">
               <d-select v-model.number="formData.electType" style="width: 70%">
@@ -44,9 +44,9 @@
                 </d-option>
               </d-select>
             </d-form-item>
-            <d-form-item label="备注：" prop="description">
+            <d-form-item label="申请描述：" prop="description">
               <d-input type="textarea" rows="2" v-model="formData.description"
-                           placeholder="请输入备注说明，例如用途等" style="width: 70%"/>
+                           placeholder="请输入申请描述，例如用途等" style="width: 70%"/>
             </d-form-item>
           </d-form>
         </div>
@@ -121,6 +121,7 @@ export default {
     return {
       current: 0,
       formData: this.data,
+      partitionsDisabled: false,
       namespaceList: [],
       brokerGroupList: [],
       brokerList: [],
@@ -142,6 +143,9 @@ export default {
           ],
           brokerGroup: [
             {required: true, message: '请选择一个分组', trigger: 'change'}
+          ],
+          description: [
+            {required: true, message: '请输入申请描述', trigger: 'change'}
           ]
         },
         rule2: {
@@ -174,6 +178,15 @@ export default {
     },
     choosedBroker (val) {
       this.formData.brokers = val
+    },
+    handlerTypeChange (data) {
+      if (data === 2) {
+        this.partitionsDisabled = true
+        this.formData.partitions = 1
+      } else {
+        this.partitionsDisabled = false
+        this.formData.partitions = 5
+      }
     },
     handlerBrokerGroupChange (data) {
       // this.formData.brokerGroups = [data];

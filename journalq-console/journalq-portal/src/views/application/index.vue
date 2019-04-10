@@ -26,6 +26,7 @@
                         @on-change="change()">
                 <d-option :value="1">JONE</d-option>
                 <d-option :value="2">JDOS</d-option>
+                <d-option :value="3">SURE</d-option>
                 <d-option :value="0">其他来源</d-option>
               </d-select>
             </grid-col>
@@ -114,6 +115,9 @@ export default {
                   break
                 case 2:
                   sourceName = 'JDOS'
+                  break
+                case 3:
+                  sourceName = 'SURE'
                   break
                 default:
                   sourceName = '其他来源'
@@ -222,6 +226,9 @@ export default {
                 case 2:
                   sourceName = 'JDOS'
                   break
+                case 2:
+                  sourceName = 'SURE'
+                  break
                 default:
                   sourceName = '其他来源'
                   break
@@ -244,6 +251,29 @@ export default {
     }
   },
   methods: {
+    // 删除
+    del (item, index) {
+      let _this = this
+      this.$Dialog.confirm({
+        title: '提示',
+        content: '删除时会自动将关联的用户和令牌删除，确定要删除吗？'
+      }).then(() => {
+        apiRequest.delete(_this.urlOrigin.del + '/' + item.id).then((data) => {
+          if (data.code !== this.$store.getters.successCode) {
+            this.$Dialog.error({
+              content: '删除失败'
+            })
+          } else {
+            this.$Message.success('删除成功')
+            if (typeof (_this.afterDel) === 'function') {
+              _this.afterDel(item)
+            }
+            _this.getList()
+          }
+        })
+      }).catch(() => {
+      })
+    },
     change () {
       if (this.syncDialogData.source === 0) {
         this.isOthers = true

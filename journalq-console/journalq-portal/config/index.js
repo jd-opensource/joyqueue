@@ -11,7 +11,7 @@ module.exports = {
     assetsPublicPath: '/',
     proxyTable: {
       '/v1': {
-        target: 'http://dev.jmq.jd.com:10030/',
+        target: 'http://localhost:10030/',
         changeOrigin: true,
         pathRewrite: {
           '^/v1': '/v1'

@@ -24205,6 +24205,7 @@ textarea.dui-input-base {
   display: inline-flex;
   line-height: normal;
   border-collapse: separate;
+  vertical-align: middle;
   /* element */ }
 .dui-date-editor-group-prepend, .dui-date-editor-group-append {
   display: flex;

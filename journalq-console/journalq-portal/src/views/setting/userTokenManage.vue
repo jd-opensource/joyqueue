@@ -22,15 +22,13 @@
 import myTable from '../../components/common/myTable.vue'
 import myDialog from '../../components/common/myDialog.vue'
 import crud from '../../mixins/crud.js'
-import apiToken from '../workflow/apiToken.vue'
 import {timeStampToString} from '../../utils/dateTimeUtils'
 
 export default {
   name: 'userToken',
   components: {
     myTable,
-    myDialog,
-    apiToken
+    myDialog
   },
   mixins: [ crud ],
   data () {
@@ -40,7 +38,7 @@ export default {
       },
       urls: {
         search: '/user/userToken/search',
-        del:'/user/userToken/delete'
+        del: '/user/userToken/delete'
       },
       searchRules: {
       },
@@ -59,7 +57,7 @@ export default {
             title: '过期时间',
             key: 'expireTime',
             formatter (item) {
-              return timeStampToString(item.createTime)
+              return timeStampToString(item.expireTime)
             }
           }
         ],
@@ -82,22 +80,22 @@ export default {
         title: '令牌编辑',
         showFooter: false
       },
-      editData:{
-        code:'',
-        token:'',
-        expireTime:'',
+      editData: {
+        code: '',
+        token: '',
+        expireTime: ''
       }
     }
   },
   methods: {
-    onEdit(item){
-      this.editData=item;
-      this.openDialog('editDialog');
+    onEdit (item) {
+      this.editData = item
+      this.openDialog('editDialog')
     },
     openDialog (dialog) {
-      this[dialog].visible = true;
-      this.addData.code = '';
-    },
+      this[dialog].visible = true
+      this.addData.code = ''
+    }
   },
   mounted () {
     this.getList()

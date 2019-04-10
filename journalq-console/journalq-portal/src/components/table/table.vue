@@ -378,8 +378,6 @@ export default {
     },
     makeObjData () {
       const rowData = {}
-      console.log('data')
-      console.log(this.data)
       this.data.forEach((row, index) => {
         const newRow = deepCopy(row)
 

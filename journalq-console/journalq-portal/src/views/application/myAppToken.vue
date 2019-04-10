@@ -78,11 +78,11 @@ export default {
         rowData: [],
         colData: [
           {
-            title: 'username',
+            title: 'Username',
             key: 'application.code'
           },
           {
-            title: 'password',
+            title: 'Password',
             key: 'token'
           },
           {

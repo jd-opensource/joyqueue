@@ -132,7 +132,8 @@ export default {
         query: {
           topic: this.partitionGroup.topic,
           namespace: this.partitionGroup.namespace,
-          groupNo: this.partitionGroup.groupNo
+          groupNo: this.partitionGroup.groupNo,
+          keyword: this.searchData.keyword
         }
       }
       apiRequest.post(this.urlOrigin.search, {}, data).then((data) => {

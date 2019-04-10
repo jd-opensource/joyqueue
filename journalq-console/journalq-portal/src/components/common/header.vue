@@ -1,7 +1,7 @@
 <template>
   <d-menu mode="horizontal" :theme="theme1" :active-name="activeName" class="left">
     <span class="logo">
-      <img src="../../assets/images/jmq-logo.png"/>
+      <img src="../../assets/images/journalq-logo.png"/>
     </span>
     <div class="left">
       <d-menu-item name="application" icon="home" color="#D98880" :to="`/${ curLang }/application`">
@@ -9,9 +9,6 @@
       </d-menu-item>
       <d-menu-item name="topic" icon="grid" color="#58D68D" :to="`/${ curLang }/topic`">
         {{ langConfig.topic }}
-      </d-menu-item>
-      <d-menu-item name="workflow" icon="user-check" color="#5DADE2" :to="`/${ curLang }/workflow`">
-        {{ langConfig.workflow }}
       </d-menu-item>
       <d-menu-item name="tool" icon="search" color="#F8C471" :to="`/${ curLang }/tool`">
         {{ langConfig.tool }}
@@ -83,7 +80,7 @@ export default {
       if (this.curLang === targetLang) return
       const oldLang = this.curLang
       this.$i18n.locale = targetLang
-      window.localStorage.setItem('jmq-language', targetLang)
+      window.localStorage.setItem('journalq-language', targetLang)
       this.$router.push(this.$route.path.replace(oldLang, targetLang))
     },
     logout () {
