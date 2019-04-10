@@ -1,7 +1,7 @@
 {
-  "name": "@journalq-portal",
+  "name": "journalq-portal",
   "version": "1.0.0-alpha.3",
-  "description" : "JournalQ管理后台",
+  "description": "JournalQ管理后台",
   "author": "yuanchanglong <yuanchanglong@jd.com>",
   "scripts": {
     "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",

@@ -6,7 +6,7 @@ var htmlreplace = require('gulp-html-replace');
 
 
 gulp.task('journalq',function (cb) {
-    runSequence('cleanjmq', 'movejmq')(function () {
+    runSequence('cleanjournalq', 'movejournalq')(function () {
         cb()
         console.log('dataweb编译完毕');
     });
