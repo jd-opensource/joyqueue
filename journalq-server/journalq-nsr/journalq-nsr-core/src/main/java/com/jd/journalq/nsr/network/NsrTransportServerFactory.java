@@ -27,9 +27,6 @@ public class NsrTransportServerFactory extends DefaultTransportServerFactory {
         super(codec, commandHandlerFactory, exceptionHandler, eventBus);
         this.eventEventBus = eventBus;
     }
-    public void addListener(EventListener<TransportEvent> listener){
-        eventEventBus.addListener(listener);
-    }
 
     static class NsrServerCommandHandlerFactory extends NsrCommandHandlerFactory {
 

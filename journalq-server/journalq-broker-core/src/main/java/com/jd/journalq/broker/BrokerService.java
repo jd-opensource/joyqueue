@@ -257,7 +257,6 @@ public class BrokerService extends Service {
         startIfNecessary(brokerMonitorService);
         startIfNecessary(produce);
         startIfNecessary(consume);
-        startIfNecessary(storeService);
         //must start after store manager
         startIfNecessary(storeManager);
         startIfNecessary(electionService);
