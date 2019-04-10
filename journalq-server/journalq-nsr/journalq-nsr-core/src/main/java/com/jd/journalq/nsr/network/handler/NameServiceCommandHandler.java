@@ -253,7 +253,7 @@ public class NameServiceCommandHandler  implements NsrCommandHandler, Types,com.
             Transport transport = nsrClients.get(event.getBrokerId());
             if(null!=transport) {
                 transport.sync(new Command(new JMQHeader(Direction.REQUEST, NsrCommandType.PUSH_NAMESERVER_EVENT), new PushNameServerEvent().event(event)));
-                logger.info("event[{}] send success", event);
+                logger.info("event[{}] send to [{}] success", event,event.getBrokerId());
             }
         }
     }
