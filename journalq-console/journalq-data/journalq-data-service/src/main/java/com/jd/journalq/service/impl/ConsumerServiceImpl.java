@@ -120,7 +120,8 @@ public class ConsumerServiceImpl  implements ConsumerService {
     public Consumer findByTopicAppGroup(String namespace, String topic, String app, String group) {
         try {
             QConsumer qConsumer = new QConsumer();
-            qConsumer.setReferer(app);
+//            qConsumer.setReferer(app);
+            qConsumer.setApp(new Identity(CodeConverter.convertApp(new Identity(app), group)));
             //consumer表没存group
             if (group !=null) {
                 qConsumer.setApp(new Identity(CodeConverter.convertApp(new Identity(app), group)));

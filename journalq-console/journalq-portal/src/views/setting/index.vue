@@ -15,35 +15,17 @@
         <d-menu-item name="config" icon="edit" :size="iconSize" :to="`/${ curLang }/setting/config`"><!--color="#7FB3D5"-->
           <span class="layout-text">{{ langConfig.config }}</span>
         </d-menu-item>
-        <d-menu-item name="hosts" icon="monitor" :size="iconSize" :to="`/${ curLang }/setting/hosts`"><!--color="#E67E22"-->
-          <span class="layout-text">{{ langConfig.hosts }}</span>
-        </d-menu-item>
         <d-menu-item name="brokerGroup" icon="layers" :size="iconSize" :to="`/${ curLang }/setting/brokerGroup`"><!--color="#58D68D"-->
           <span class="layout-text">{{ langConfig.brokerGroup }}</span>
         </d-menu-item>
         <d-menu-item name="broker" icon="cpu" :size="iconSize" :to="`/${ curLang }/setting/broker`"><!--color="#F5B7B1"-->
           <span class="layout-text">{{ langConfig.broker }}</span>
         </d-menu-item>
-        <d-menu-item name="auditRole" icon="user" :size="iconSize" :to="`/${ curLang }/setting/auditRole`"><!--color="#9393FF"-->
-          <span class="layout-text">{{ langConfig.auditRole }}</span>
-        </d-menu-item>
-        <d-menu-item name="auditFlow" icon="sliders" :size="iconSize" :to="`/${ curLang }/setting/auditFlow`"><!--color="#BB8FCE"-->
-          <span class="layout-text">{{ langConfig.auditFlow }}</span>
-        </d-menu-item>
-        <d-menu-item name="task" icon="command" :size="iconSize" :to="`/${ curLang }/setting/task`"><!--color="#9D9D9D"-->
-          <span class="layout-text">{{ langConfig.task }}</span>
-        </d-menu-item>
-        <d-menu-item name="executor" icon="server" :size="iconSize" :to="`/${ curLang }/setting/executor`"><!--color="#ffaad5"-->
-          <span class="layout-text">{{ langConfig.executor }}</span>
-        </d-menu-item>
-        <d-menu-item name="alarm" icon="bell" :size="iconSize" :to="`/${ curLang }/setting/alarm`"><!--color="#CA6F1E"-->
-          <span class="layout-text">{{ langConfig.alarm }}</span>
+        <d-menu-item name="metric" icon="tag" :size="iconSize" :to="`/${ curLang }/setting/metric`">
+          <span class="layout-text">{{ langConfig.metric }}</span>
         </d-menu-item>
         <d-menu-item name="namespace" icon="feather" :size="iconSize" :to="`/${ curLang }/setting/namespace`"><!--color="#73C6B6"-->
           <span class="layout-text">{{ langConfig.namespace }}</span>
-        </d-menu-item>
-        <d-menu-item name="label" icon="tag" :size="iconSize" :to="`/${ curLang }/setting/label`"><!--color="#5DADE2"-->
-          <span class="layout-text">{{ langConfig.label }}</span>
         </d-menu-item>
       </d-menu>
     </layout-sider>

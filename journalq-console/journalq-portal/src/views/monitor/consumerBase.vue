@@ -4,13 +4,22 @@
       <d-input v-model="keyword" :placeholder="keywordTip" class="left mr10" style="width: 10%">
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
-      <d-button type="primary" v-if="$store.getters.isAdmin" @click="openDialog('subscribeDialog')" class="left mr10">订阅<icon name="plus-circle" style="margin-left: 5px;"></icon></d-button>
-      <!--<d-button type="primary" @click="syncConsumer" class="left mr10">同步消费者<icon name="download" style="margin-left: 5px;"></icon></d-button>-->
-      <!--<d-button type="primary" v-if="summaryChartShow" @click="goSummaryChart" class="left mr10">汇总图表<icon name="bar-chart" style="margin-left: 5px;"></icon></d-button>-->
+      <d-button type="primary" v-if="$store.getters.isAdmin" @click="openDialog('subscribeDialog')" class="left mr10">
+        订阅
+        <icon name="plus-circle" style="margin-left: 5px;">
+        </icon>
+      </d-button>
+      <!--<d-button type="primary" v-if="showSummaryChart" @click="goSummaryChart" class="left mr10">-->
+        <!--汇总图表-->
+        <!--<icon name="bar-chart" style="margin-left: 5px;">-->
+        <!--</icon>-->
+      <!--</d-button>-->
     </div>
+
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
               @on-detail-chart="goDetailChart" @on-current-change="handleCurrentChange" @on-detail="openDetailDialog"
-              @on-msg-preview="openMsgPreviewDialog" @on-config="openConfigDialog"/>
+              @on-msg-preview="openMsgPreviewDialog" @on-msg-detail="openMsgDetailDialog" @on-config="openConfigDialog"
+              @on-performance-chart="goPerformanceChart" @on-summary-chart="goSummaryChart"/>
 
     <!--Consumer subscribe dialog-->
     <my-dialog :dialog="subscribeDialog" @on-dialog-cancel="dialogCancel('subscribeDialog')">
@@ -39,8 +48,7 @@
         <d-tab-pane  label="消费位置" name="offsetInfo" icon="file-text">
           <offset  ref="offsetInfo" :app="detailDialog.app" :topic="detailDialog.topic" :namespace="detailDialog.namespace"
                       :type="type"  :doSearch="detailDialog.doSearch" :subscribeGroup="detailDialog.subscribeGroup"
-                      :searchData="detailDialog" :client-type="detailDialog.clientType"
-          />
+                      :searchData="detailDialog" :client-type="detailDialog.clientType"/>
         </d-tab-pane>
 
         <d-tab-pane label="Broker" name="broker" icon="file-text">
@@ -72,6 +80,10 @@
       <msg-preview :app="msgPreviewDialog.app" :topic="msgPreviewDialog.topic" :namespace="msgPreviewDialog.namespace"
                    :type="type" :doSearch="msgPreviewDialog.doSearch" :subscribeGroup="msgPreviewDialog.subscribeGroup"/>
     </my-dialog>
+    <my-dialog :dialog="msgDetailDialog" @on-dialog-cancel="dialogCancel('msgDetailDialog')">
+      <msg-detail :app="msgDetailDialog.app" :topic="msgDetailDialog.topic" :namespace="msgDetailDialog.namespace"
+                   :type="type" :doSearch="msgDetailDialog.doSearch" :subscribeGroup="msgDetailDialog.subscribeGroup"/>
+    </my-dialog>
     <!--Config dialog-->
     <my-dialog :dialog="configDialog" @on-dialog-confirm="configConsumerConfirm" @on-dialog-cancel="dialogCancel('configDialog')">
       <consumer-config-form ref="configForm" :data="configConsumerData"/>
@@ -82,7 +94,6 @@
 
 <script>
 import apiRequest from '../../utils/apiRequest.js'
-import cookie from '../../utils/cookie.js'
 import myTable from '../../components/common/myTable.vue'
 import myDialog from '../../components/common/myDialog.vue'
 import consumerConfigForm from './consumerConfigForm.vue'
@@ -96,12 +107,14 @@ import coordinatorGroupMember from './coordinatorGroup.vue'
 import partitionExpand from './partitionExpand'
 import {timeStampToString} from '../../utils/dateTimeUtils'
 import mqttBaseMonitor from '../setting/mqttBaseMonitor'
-import columnExpand from '../setting/columnExpand'
 import offset from './offset'
+import {getTopicCode, getAppCode} from '../../utils/common.js'
+import MsgDetail from './msgDetail'
 
 export default {
   name: 'consumer-base',
   components: {
+    MsgDetail,
     myTable,
     myDialog,
     subscribe,
@@ -128,10 +141,18 @@ export default {
             txt: '消费详情',
             method: 'on-detail'
           },
-          // {
-          //   txt: '详情图表',
-          //   method: 'on-detail-chart'
-          // },
+          {
+            txt: '详情监控图表',
+            method: 'on-detail-chart'
+          },
+          {
+            txt: '汇总监控图表',
+            method: 'on-summary-chart'
+          },
+          {
+            txt: '性能监控图表',
+            method: 'on-performance-chart'
+          },
           {
             txt: '配置',
             method: 'on-config'
@@ -146,14 +167,16 @@ export default {
           {
             txt: '消息预览',
             method: 'on-msg-preview'
+          },
+          {
+            txt: '消息查询',
+            method: 'on-msg-detail'
           }
-
         ]
       }
     },
     colData: { // 消费者 列表表头
       type: Array
-
     },
     search: {// 查询条件，我的应用：app:{id:0,code:'',namespace:{id:0,code:''}}  ， 主题中心：topic:{id:0,code:'',namespace:{id:0,code:''}}
       type: Object
@@ -228,18 +251,19 @@ export default {
 
         ]
       }
-    },
-    summaryChartShow: {
-      type: Boolean,
-      default: false
     }
+    // showSummaryChart: {
+    //   type: Boolean,
+    //   default: false
+    // }
   },
   data () {
     return {
       urls: {
         search: `/consumer/search`,
         getMonitor: `/monitor/find`,
-        previewMessage: '/monitor/preview/message'
+        previewMessage: '/monitor/preview/message',
+        getUrl: `/grafana/getRedirectUrl`
       },
       showTablePin: false,
       tableData: {
@@ -323,6 +347,26 @@ export default {
           code: ''
         }
       },
+      msgDetailDialog: {
+        visible: false,
+        title: '生产者详情',
+        width: '1000',
+        showFooter: false,
+        doSearch: true,
+        app: {
+          id: 0,
+          code: ''
+        },
+        subscribeGroup: '',
+        topic: {
+          id: '0',
+          code: ''
+        },
+        namespace: {
+          id: '0',
+          code: ''
+        }
+      },
       mqttConnectionsProperties: {
         colData: [
           {
@@ -334,11 +378,13 @@ export default {
             title: '应用',
             key: 'application',
             width: 300
-          }, {
+          },
+          {
             title: 'IP',
             key: 'ipAddress',
             width: 1200
-          }, {
+          },
+          {
             title: '非持久化会话',
             key: 'cleanSession'
             // },{
@@ -350,32 +396,33 @@ export default {
             title: '分组名称',
             // key:'clientGroupName',
             render: (h, params) => {
-              return h(columnExpand, {
-                props: {
-                  col: params.row.clientGroupName
-                }
-              })
+              return h('span', params.row.clientGroupName)
             }
-          }, {
+          },
+          {
             //   title:'服务等级',
             //   key:'willQos'
             // },{
             title: '版本',
             key: 'mqttVersion'
-          }, {
+          },
+          {
             title: '遗嘱标识',
             key: 'willFlag'
-          }, {
+          },
+          {
             title: '存活时间(s)',
             key: 'keepAliveTimeSeconds'
-          }, {
+          },
+          {
             title: '创建时间',
             key: 'createdTime',
             width: 400,
             formatter (item) {
               return timeStampToString(item.createdTime)
             }
-          }, {
+          },
+          {
             title: '操作时间',
             key: 'lastOperateTime',
             width: 400,
@@ -497,6 +544,20 @@ export default {
               ', Topic: ' + this.msgPreviewDialog.topic.code + ']'
       this.openDialog('msgPreviewDialog')
     },
+    openMsgDetailDialog (item) {
+      console.log('item')
+      console.log(item)
+      this.msgDetailDialog.app.id = item.app.id
+      this.msgDetailDialog.app.code = item.app.code
+      this.msgDetailDialog.subscribeGroup = item.subscribeGroup
+      this.msgDetailDialog.topic.id = item.topic.id
+      this.msgDetailDialog.topic.code = item.topic.code
+      this.msgDetailDialog.namespace.id = item.namespace.id
+      this.msgDetailDialog.namespace.code = item.namespace.code
+      this.msgDetailDialog.title = '消息查询 [App: ' + this.msgDetailDialog.app.code +
+        ', Topic: ' + this.msgDetailDialog.topic.code + ']'
+      this.openDialog('msgDetailDialog')
+    },
     openConfigDialog (item) {
       this.configConsumerData = Object.assign({}, item.config)
       this.configConsumerData['consumerId'] = item.id
@@ -522,11 +583,7 @@ export default {
       this[dialog].visible = false
       this.getList()
     },
-    // syncConsumer() {
-    //   //todo 同步消费者
-    // },
-    goSummaryChart () {
-      // 1. get open url and token
+    goSummaryChart (item) {
       apiRequest.get(this.urls.getUrl + '/ct', {}, {}).then((data) => {
         let url = data.data || ''
         if (url.indexOf('?') < 0) {
@@ -534,18 +591,8 @@ export default {
         } else if (!url.endsWith('?')) {
           url += '&'
         }
-        if (this.search.app === undefined || this.search.app.code === undefined) {
-          this.$Message.error('app获取失败！')
-          return
-        }
-        url = url + 'var-app=' + this.search.app.code
-        // 2. open
-        let cookieValue = cookie.get(this.$store.getters.cookieName)
-        if (cookieValue == null) {
-          this.$Message.error('cookie获取失败！')
-          return
-        }
-        url = url + '&var-cookie=' + this.$store.getters.cookieName + '=' + cookieValue
+        url = url + 'var-topic=' + getTopicCode(item.topic, item.topic.namespace) + '&var-app=' +
+          getAppCode(item.app, item.subscribeGroup)
         window.open(url)
       })
     },
@@ -558,16 +605,26 @@ export default {
         } else if (!url.endsWith('?')) {
           url += '&'
         }
-        url = url + 'var-topic=' + item.topic.code + '&var-app=' + item.app.code
+        url = url + 'var-topic=' + getTopicCode(item.topic, item.topic.namespace) + '&var-app=' +
+          getAppCode(item.app, item.subscribeGroup)
         // 2. open
-        let cookieValue = cookie.get(this.$store.getters.cookieName)
-        if (cookieValue == null) {
-          this.$Message.error('cookie获取失败！')
-          return
-        }
-        url = url + '&var-cookie=' + this.$store.getters.cookieName + '=' + cookieValue
+        // let cookieValue = cookie.get(this.$store.getters.cookieName)
+        // if (cookieValue == null) {
+        //   this.$Message.error('cookie获取失败！')
+        //   return
+        // }
+        // url = url + '&var-cookie=' + this.$store.getters.cookieName + '=' + cookieValue
         window.open(url)
       })
+    },
+    goPerformanceChart (item) {
+      for (let key in this.$store.getters.urls.performance) {
+        let ump = this.$store.getters.urls.performance[key]
+        for (var ver in ump) {
+          window.open(ump[ver].replace(/\(consumer\.\)/g, 'consumer.').replace(/\[topic\]/g, getTopicCode(item.topic,
+            item.topic.namespace)).replace(/\[app\]/g, getAppCode(item.app, item.subscribeGroup)))
+        }
+      }
     },
     getMonitor (row, index) {
       let data = {

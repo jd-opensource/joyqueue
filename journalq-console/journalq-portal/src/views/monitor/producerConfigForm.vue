@@ -3,9 +3,9 @@
     <d-form-item label="就近发送：">
       <d-switch v-model="formData.nearBy" ></d-switch>
     </d-form-item>
-    <d-form-item label="单线程发送：">
-      <d-switch v-model="formData.single"></d-switch>
-    </d-form-item>
+    <!--<d-form-item label="单线程发送：">-->
+      <!--<d-switch v-model="formData.single"></d-switch>-->
+    <!--</d-form-item>-->
     <d-form-item label="生产归档:">
       <d-switch v-model="formData.archive"></d-switch>
     </d-form-item>

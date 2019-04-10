@@ -5,7 +5,6 @@ import com.jd.journalq.model.Pagination;
 import com.jd.journalq.model.domain.*;
 import com.jd.journalq.model.query.QBrokerGroup;
 import com.jd.journalq.monitor.PartitionAckMonitorInfo;
-import com.jd.journalq.monitor.PartitionLeaderAckMonitorInfo;
 import com.jd.journalq.monitor.PendingMonitorInfo;
 
 import java.util.List;
@@ -111,6 +110,13 @@ public interface OpenAPIService {
      *
      **/
     Topic  createTopic(Topic topic, QBrokerGroup brokerGroup,Identity operator) throws  Exception;
+
+    /**
+     * delete topic
+     *
+     * @throws Exception
+     */
+    void removeTopic(String namespace,String topicCode) throws Exception;
 
     /**
      * All partition Offset of the subscribe

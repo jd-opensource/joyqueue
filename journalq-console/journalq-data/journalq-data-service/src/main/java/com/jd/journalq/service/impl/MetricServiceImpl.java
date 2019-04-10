@@ -12,4 +12,9 @@ public class MetricServiceImpl extends PageServiceSupport<Metric, QMetric, Metri
     public Metric findByCode(String code) {
         return repository.findByCode(code);
     }
+
+    @Override
+    public Metric findByAliasCode(String aliasCode) {
+        return repository.findByAliasCode(aliasCode);
+    }
 }

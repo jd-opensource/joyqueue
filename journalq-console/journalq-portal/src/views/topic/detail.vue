@@ -4,46 +4,9 @@
       <d-breadcrumb-item :to="{ name: `/${$i18n.locale}/topic` }">主题中心</d-breadcrumb-item>
       <d-breadcrumb-item>{{topic.code}}</d-breadcrumb-item>
     </d-breadcrumb>
-    <!--<div  class="el-breadcrumb mb20">-->
-      <!--<span class="el-breadcrumb__item">-->
-        <!--<span role="link" class="el-breadcrumb__inner is-link" @click="gotoList">-->
-          <!--主题中心-->
-        <!--</span>-->
-        <!--<icon name="chevron-right" class="el-breadcrumb__separator"></icon>-->
-      <!--</span>-->
-      <!--<span class="el-breadcrumb__item" aria-current="page">-->
-          <!--<span role="link" class="el-breadcrumb__inner">{{topic.code}}</span>-->
-      <!--</span>-->
-    <!--</div>-->
     <div class="detail mb20">
       <div class="title">{{topic.code}}</div>
-      <!--<grid-row :gutter="16">-->
-        <!--<grid-col span="8">-->
-          <!--<span>ID:</span>-->
-          <!--<span>{{detail.id}}</span>-->
-        <!--</grid-col>-->
-        <!--&lt;!&ndash;<grid-col span="8">&ndash;&gt;-->
-          <!--&lt;!&ndash;<span>中文名称:</span>&ndash;&gt;-->
-          <!--&lt;!&ndash;<span>{{detail.name}}</span>&ndash;&gt;-->
-        <!--&lt;!&ndash;</grid-col>&ndash;&gt;-->
-        <!--<grid-col span="8">-->
-          <!--<span>英文名称:</span>-->
-          <!--<span>{{detail.code}}</span>-->
-        <!--</grid-col>-->
-        <!--<grid-col span="8">-->
-          <!--<span>类型:</span>-->
-          <!--<span>{{typeStr(detail.type)}}</span>-->
-        <!--</grid-col>-->
-      <!--</grid-row>-->
       <grid-row :gutter="16">
-        <!--<grid-col span="8">-->
-          <!--<span>队列数:</span>-->
-          <!--<span>{{detail.partitions}}</span>-->
-        <!--</grid-col>-->
-        <!--<grid-col span="8">-->
-          <!--<span>归档:</span>-->
-          <!--<span>{{archiveStr(detail.archive)}}</span>-->
-        <!--</grid-col>-->
         <grid-col span="8">
           <span>队列数:</span>
           <span>{{detail.partitions}}</span>
@@ -58,7 +21,7 @@
         </grid-col>
       </grid-row>
     </div>
-    <d-tabs @on-change="handleTabChange">
+    <d-tabs @on-change="handleTabChange" :value="tab">
       <d-tab-pane label="生产者" name="producer" icon="user-plus">
         <producer ref="producer" :search="search"/>
       </d-tab-pane>
@@ -66,7 +29,17 @@
         <consumer ref="consumer" :search="search"/>
       </d-tab-pane>
       <d-tab-pane label="分组信息" name="partitionGroup" icon="folder" v-if="$store.getters.isAdmin">
-        <partitionGroup ref="partitionGroup" @on-partition-group-change="queryTopicDetail"></partitionGroup>
+        <partitionGroup ref="partitionGroup" @on-partition-group-change="queryTopicDetail" :showBrokerChart="true"
+                        :showHostChart="true"/>
+      </d-tab-pane>
+      <d-tab-pane label="Broker" v-if="$store.getters.isAdmin" name="broker" icon="cpu">
+        <broker ref="broker" :topicId="topic.id"/>
+      </d-tab-pane>
+      <d-tab-pane label="重试" name="retry" icon="user-minus">
+        <retry ref="retry" :searchData="retrySearch"/>
+      </d-tab-pane>
+      <d-tab-pane label="归档" name="archive" icon="user-minus">
+        <archive ref="archive" :searchData="archiveSearch"/>
       </d-tab-pane>
     </d-tabs>
   </div>
@@ -78,6 +51,9 @@ import MsgServiceMonitor from './brokerMonitor.vue'
 import Producer from './producer.vue'
 import Consumer from './consumer.vue'
 import PartitionGroup from './partitionGroup.vue'
+import retry from '../tool/retry.vue'
+import archive from '../tool/archive.vue'
+import broker from './broker.vue'
 import crud from '../../mixins/crud.js'
 
 export default {
@@ -86,7 +62,10 @@ export default {
     MsgServiceMonitor,
     Producer,
     Consumer,
-    PartitionGroup
+    PartitionGroup,
+    retry,
+    archive,
+    broker
   },
   mixins: [ crud ],
   data () {
@@ -94,13 +73,14 @@ export default {
       urls: {
         getById: '/topic/getById'
       },
+      tab: '',
       topic: {
         id: '0',
-        code: ''
-      },
-      namespace: {
-        id: '0',
-        code: ''
+        code: '',
+        namespace: {
+          id: '0',
+          code: ''
+        }
       },
       detail: {
         id: '0',
@@ -119,6 +99,36 @@ export default {
       return {
         topic: this.topic
       }
+    },
+    retrySearch () {
+      console.log(this.$route.query.id)
+      return {
+        topic: this.topic.id,
+        app: this.$route.query.app,
+        status: 1,
+        beginTime: '',
+        endTime: ''
+      }
+    },
+    archiveSearch () {
+      return {
+        topic: this.topic.id,
+        businessId: '',
+        beginTime: '',
+        endTime: '',
+        sendTime: '',
+        messageId: '',
+        count: 10
+      }
+    }
+  },
+  watch: {
+    '$route' (to, from) {
+      this.topic.code = to.query.code
+      this.topic.namespace.id = to.query.namespaceId
+      this.topic.namespace.code = to.query.namespaceCode
+      this.tab = to.query.tab || this.tab
+      this.$refs[this.tab].getList()
     }
   },
   methods: {
@@ -141,6 +151,13 @@ export default {
     handleTabChange (data) {
       let name = data.name
       this.$refs[name].getList()
+      if (name === 'retry') {
+        this.$router.push({name: `/${this.$i18n.locale}/topic/detail`,
+          query: {id: this.topic.id, code: this.topic.code, namespaceId: this.topic.namespace.id, namespaceCode: this.topic.namespace.code, tab: name, app: this.$route.query.app || ''}})
+      } else {
+        this.$router.push({name: `/${this.$i18n.locale}/topic/detail`,
+          query: {id: this.topic.id, code: this.topic.code, namespaceId: this.topic.namespace.id, namespaceCode: this.topic.namespace.code, tab: name}})
+      }
     },
     typeStr (type) {
       let label
@@ -164,8 +181,9 @@ export default {
   mounted () {
     this.topic.id = this.$route.query.id
     this.topic.code = this.$route.query.code
-    this.namespace.id = this.$route.query.namespaceId
-    this.namespace.code = this.$route.query.namespaceCode
+    this.topic.namespace.id = this.$route.query.namespaceId
+    this.topic.namespace.code = this.$route.query.namespaceCode
+    this.tab = this.$route.query.tab || 'producer'
     this.queryTopicDetail()
   }
 

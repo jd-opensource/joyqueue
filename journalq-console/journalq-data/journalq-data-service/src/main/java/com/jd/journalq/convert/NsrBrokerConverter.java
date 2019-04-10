@@ -22,6 +22,9 @@ public class NsrBrokerConverter extends Converter<Broker, com.jd.journalq.domain
         if(broker.getDataCenter() != null) {
             nsrBroker.setDataCenter(broker.getDataCenter().getCode());
         }
+        if (broker.getPermission() != null) {
+            nsrBroker.setPermission(broker.getPermission());
+        }
         return nsrBroker;
     }
 
@@ -31,6 +34,7 @@ public class NsrBrokerConverter extends Converter<Broker, com.jd.journalq.domain
         broker.setId(nsrBroker.getId());
         broker.setIp(nsrBroker.getIp());
         broker.setPort(nsrBroker.getPort());
+        broker.setPermission(nsrBroker.getPermission());
 
         broker.setRetryType(nsrBroker.getRetryType());
         if (broker.getDataCenter() != null) {

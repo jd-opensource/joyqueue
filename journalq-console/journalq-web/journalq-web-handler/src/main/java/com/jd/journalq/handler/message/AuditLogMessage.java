@@ -3,7 +3,7 @@ package com.jd.journalq.handler.message;
 import java.util.Date;
 
 /**
- * 审计日志消息
+ * Audit log message
  * Created by chenyanying3 on 19-3-3.
  */
 public class AuditLogMessage {

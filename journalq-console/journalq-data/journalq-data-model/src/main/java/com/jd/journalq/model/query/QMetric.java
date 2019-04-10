@@ -33,16 +33,6 @@ public class QMetric extends QKeyword {
      */
     private String provider;
 
-    private int status;
-
-    public int getStatus() {
-        return status;
-    }
-
-    public void setStatus(int status) {
-        this.status = status;
-    }
-
     public String getCode() {
         return code;
     }

@@ -1,7 +1,7 @@
 // 表单公共方法：表单校验，表单重置
 // 所有表单请覆盖此方法
 
-import {transStringListToObject, deepCopy} from '../utils/assist.js'
+import {deepCopy} from '../utils/assist.js'
 import {getCodeRule, getNameRule} from '../utils/common.js'
 import apiRequest from '../utils/apiRequest.js'
 
@@ -49,7 +49,7 @@ export default {
           if (valid) {
             resolve(this.getFormData())
           } else {
-            reject('验证不通过，请重新填写！')
+            reject(new Error('验证不通过，请重新填写！'))
           }
         })
       })
@@ -81,11 +81,11 @@ export default {
             url = this.urls.edit
           }
           apiRequest.post(url, {}, data).then((data) => {
-            if (data.code == this.$store.getters.successCode) {
+            if (data.code === this.$store.getters.successCode) {
               this.$emit('on-dialog-cancel')
-            } else if (data.code == this.$store.getters.validationCode) { // invalid inputs
+            } else if (data.code === this.$store.getters.validationCode) { // invalid inputs
               let errors = (data.message || '').split('|')
-              if (errors == undefined || errors.length < 2) {
+              if (errors === undefined || errors.length < 2) {
                 this.$Dialog.error({
                   content: '添加申请失败'
                 })

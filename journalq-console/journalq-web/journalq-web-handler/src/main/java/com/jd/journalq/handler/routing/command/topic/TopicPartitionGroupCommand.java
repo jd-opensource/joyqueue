@@ -1,15 +1,14 @@
 package com.jd.journalq.handler.routing.command.topic;
 
-import com.jd.journalq.handler.binder.annotation.Body;
-import com.jd.journalq.handler.binder.annotation.GenericBody;
-import com.jd.journalq.handler.binder.annotation.Path;
+
 import com.jd.journalq.handler.error.ConfigException;
 import com.jd.journalq.handler.routing.command.NsrCommandSupport;
-import com.jd.journalq.handler.binder.BodyType;
 import com.jd.journalq.model.domain.Subscribe;
 import com.jd.journalq.model.domain.TopicPartitionGroup;
 import com.jd.journalq.model.query.QTopicPartitionGroup;
 import com.jd.journalq.service.TopicPartitionGroupService;
+import com.jd.laf.web.vertx.annotation.Body;
+import com.jd.laf.web.vertx.annotation.Path;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
 
@@ -20,21 +19,21 @@ import com.jd.laf.web.vertx.response.Responses;
 public class TopicPartitionGroupCommand extends NsrCommandSupport<TopicPartitionGroup, TopicPartitionGroupService, QTopicPartitionGroup> {
 
     @Path("findByTopic")
-    public Response findByTopic(@Body(type = BodyType.JSON,typeindex = 0) Subscribe subscribe) throws Exception {
+    public Response findByTopic(@Body Subscribe subscribe) throws Exception {
         return Responses.success(service.findByTopic( subscribe.getNamespace(),subscribe.getTopic()));
     }
 
     @Path("addPartition")
-    public Response addPartition(@Body(type = BodyType.JSON,typeindex = 0) TopicPartitionGroup topicPartitionGroup) throws Exception {
+    public Response addPartition(@Body TopicPartitionGroup topicPartitionGroup) throws Exception {
         return Responses.success(service.addPartition(topicPartitionGroup));
     }
     @Path("removePartition")
-    public Response removePartition(@Body(type = BodyType.JSON,typeindex = 0) TopicPartitionGroup topicPartitionGroup) throws Exception {
+    public Response removePartition(@Body TopicPartitionGroup topicPartitionGroup) throws Exception {
         return Responses.success(service.removePartition(topicPartitionGroup));
     }
 
     @Path("delete")
-    public Response delete(@GenericBody(type = GenericBody.BodyType.JSON,typeindex = 0) TopicPartitionGroup model) throws Exception {
+    public Response delete(@Body TopicPartitionGroup model) throws Exception {
         TopicPartitionGroup newModel = service.findById(model.getId());
         if (newModel == null) {
             throw new ConfigException(deleteErrorCode());

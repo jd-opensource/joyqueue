@@ -16,6 +16,7 @@ import com.jd.journalq.nsr.model.ConsumerQuery;
 import com.jd.journalq.nsr.ConsumerNameServerService;
 import com.jd.journalq.nsr.NameServerBase;
 import com.jd.journalq.toolkit.security.EscapeUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -128,9 +129,11 @@ public class ConsumerNameServerServiceImpl extends NameServerBase implements Con
 
     @Override
     public List<String> findAllSubscribeGroups() throws Exception {
-        List<Consumer> consumerList = findByQuery( new QConsumer());
+        //todo 不要查全部consumer
+        List<Consumer> consumerList = findByQuery(new QConsumer());
         if (consumerList != null && consumerList.size() > 0) {
-            return consumerList.stream().map(consumer -> consumer.getSubscribeGroup()).collect(Collectors.toList());
+            return consumerList.stream().map(consumer -> consumer.getSubscribeGroup())
+                    .filter(sg -> StringUtils.isNotBlank(sg)).collect(Collectors.toList());
         }
         return null;
     }

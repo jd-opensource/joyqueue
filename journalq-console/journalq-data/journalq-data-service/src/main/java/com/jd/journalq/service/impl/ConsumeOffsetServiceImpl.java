@@ -266,7 +266,7 @@ public class ConsumeOffsetServiceImpl implements ConsumeOffsetService {
                 }catch (UnsupportedEncodingException e){
                     throw new IllegalStateException(e);
                 }
-                AsyncHttpClient.AsyncRequest(put, new AsyncHttpClient.ConcurrentHttpResponseHandler(latch,String.valueOf(offset.getPartition()),resultMap));
+                AsyncHttpClient.AsyncRequest(put, new AsyncHttpClient.ConcurrentHttpResponseHandler(url,System.currentTimeMillis(),latch,String.valueOf(offset.getPartition()),resultMap));
                 request++;
             }else{
                 logger.info("partition group broker not found!");

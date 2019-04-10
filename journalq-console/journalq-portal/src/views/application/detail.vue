@@ -93,7 +93,9 @@ export default {
   },
   computed: {
     search () {
-      return {app: this.app}
+      return {
+        app: this.app
+      }
     }
   },
   methods: {

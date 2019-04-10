@@ -51,9 +51,13 @@ axios.interceptors.response.use(response => {
   if (response.data.code === 200 || response.data.status === 200) {
     return Promise.resolve(response)
   } else if (response.data.code === 100) {
-    return Promise.reject(response)
+    return Promise.reject(response.data.message || 'Operation failed. No tips.')
+  } else if (response.data.code === 300) {
+    return Promise.resolve(response)
   } else {
-    let err = response.data.message || '执行失败'
+    console.log('err')
+    console.log(response.data)
+    let err = response.data.message || 'Operation failed.'
     VInstance.$Message.error(err)
     return Promise.reject(err)
   }
@@ -80,9 +84,8 @@ export default {
       loading: true
     }).then(response => {
       return response && response.data
-    }).catch(() => {
-      // return Promise.resolve(err);
-      return {}
+    }).catch(err => {
+      return err
     })
   },
   delete (url, params, data) {

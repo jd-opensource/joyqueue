@@ -1,12 +1,15 @@
 package com.jd.journalq.model.domain;
 
+import static com.jd.journalq.model.domain.Consumer.CONSUMER_TYPE;
+import static com.jd.journalq.model.domain.Producer.PRODUCER_TYPE;
+
 /**
  * 订阅类型
  */
 public enum SubscribeType implements EnumItem {
 
-    PRODUCER(Producer.PRODUCER_TYPE, "生产者"),
-    CONSUMER(Consumer.CONSUMER_TYPE, "消费者");
+    PRODUCER(PRODUCER_TYPE, "生产者"),
+    CONSUMER(CONSUMER_TYPE, "消费者");
 
     private int value;
     private String description;

@@ -13,17 +13,17 @@
   </div>
 </template>
 <script>
-  export default {
-    data () {
-      return {
-        theme2: 'light'
-      }
-    },
-    props:{
-      navs:{
-        type:Array,
-        required:true,
-      }
+export default {
+  data () {
+    return {
+      theme2: 'light'
+    }
+  },
+  props: {
+    navs: {
+      type: Array,
+      required: true
     }
   }
+}
 </script>

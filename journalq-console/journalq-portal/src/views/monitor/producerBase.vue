@@ -4,13 +4,19 @@
       <d-input v-model="keyword" :placeholder="keywordTip" class="left mr10" style="width: 10%">
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
-      <d-button type="primary" v-if="$store.getters.isAdmin" @click="openDialog('subscribeDialog')" class="left mr10">订阅<icon name="plus-circle" style="margin-left: 5px;"></icon></d-button>
-      <!--<d-button type="primary" @click="syncProducer" class="left mr10">同步生产者<icon name="download" style="margin-left: 5px;"></icon></d-button>-->
-      <d-button type="primary" v-if="summaryChartShow" @click="goSummaryChart" class="left mr10">汇总图表<icon name="bar-chart" style="margin-left: 5px;"></icon></d-button>
+      <d-button type="primary" v-if="$store.getters.isAdmin" @click="openDialog('subscribeDialog')" class="left mr10">
+        订阅
+        <icon name="plus-circle" style="margin-left: 5px;"/>
+      </d-button>
+      <!--<d-button type="primary" v-if="showSummaryChart" @click="goSummaryChart" class="left mr10">-->
+        <!--汇总图表-->
+        <!--<icon name="bar-chart" style="margin-left: 5px;"/>-->
+      <!--</d-button>-->
     </div>
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
               @on-detail-chart="goDetailChart" @on-current-change="handleCurrentChange" @on-detail="openDetailDialog"
-              @on-config="openConfigDialog" @on-set-produce-weight="openWeightConfigDialog"/>
+              @on-config="openConfigDialog" @on-set-produce-weight="openWeightConfigDialog"
+              @on-summary-chart="goSummaryChart" @on-performance-chart="goPerformanceChart"/>
 
     <!--生产订阅弹出框-->
     <my-dialog :dialog="subscribeDialog" @on-dialog-cancel="dialogCancel('subscribeDialog')">
@@ -60,8 +66,8 @@ import partition from './partition.vue'
 import clientConnection from './clientConnection.vue'
 import ProducerConfigForm from './producerConfigForm.vue'
 import ProducerWeight from './produceWight.vue'
-import cookie from '../../utils/cookie.js'
 import partitionExpand from './partitionExpand'
+import {getTopicCode, getAppCode} from '../../utils/common.js'
 
 export default {
   name: 'producer-base',
@@ -89,8 +95,16 @@ export default {
             method: 'on-detail'
           },
           {
-            txt: '详情图表',
+            txt: '详情监控图表',
             method: 'on-detail-chart'
+          },
+          {
+            txt: '汇总监控图表',
+            method: 'on-summary-chart'
+          },
+          {
+            txt: '性能监控图表',
+            method: 'on-performance-chart'
           },
           {
             txt: '配置',
@@ -178,11 +192,11 @@ export default {
           }
         ]
       }
-    },
-    summaryChartShow: {
-      type: Boolean,
-      default: false
     }
+    // showSummaryChart: {
+    //   type: Boolean,
+    //   default: false
+    // }
   },
   data () {
     return {
@@ -319,30 +333,16 @@ export default {
       }
       this.config(configData, 'produceWeightDialog')
     },
-    // syncProducer() {
-    //   //todo 同步生产者
-    // },
-    goSummaryChart () {
-      // 1. get open url and token
-      apiRequest.get(this.urls.getUrl + '/pt', {}, {}).then((data) => {
+    goSummaryChart (item) {
+      apiRequest.get(this.urls.getUrl + '/ct', {}, {}).then((data) => {
         let url = data.data || ''
         if (url.indexOf('?') < 0) {
           url += '?'
         } else if (!url.endsWith('?')) {
           url += '&'
         }
-        if (this.search.app === undefined || this.search.app.code === undefined) {
-          this.$Message.error('app获取失败！')
-          return
-        }
-        url = url + 'var-app=' + this.search.app.code
-        // 2. open
-        let cookieValue = cookie.get(this.$store.getters.cookieName)
-        if (cookieValue == null) {
-          this.$Message.error('cookie获取失败！')
-          return
-        }
-        url = url + '&var-cookie=' + this.$store.getters.cookieName + '=' + cookieValue
+        url = url + 'var-topic=' + getTopicCode(item.topic, item.topic.namespace) + '&var-app=' +
+          getAppCode(item.app, item.subscribeGroup)
         window.open(url)
       })
     },
@@ -355,16 +355,26 @@ export default {
         } else if (!url.endsWith('?')) {
           url += '&'
         }
-        url = url + 'var-topic=' + item.topic.code + '&var-app=' + item.app.code
+        url = url + 'var-topic=' + getTopicCode(item.topic, item.topic.namespace) + '&var-app=' +
+          getAppCode(item.app, item.subscribeGroup)
         // 2. open
-        let cookieValue = cookie.get(this.$store.getters.cookieName)
-        if (cookieValue == null) {
-          this.$Message.error('cookie获取失败！')
-          return
-        }
-        url = url + '&var-cookie=' + this.$store.getters.cookieName + '=' + cookieValue
+        // let cookieValue = cookie.get(this.$store.getters.cookieName)
+        // if (cookieValue == null) {
+        //   this.$Message.error('cookie获取失败！')
+        //   return
+        // }
+        // url = url + '&var-cookie=' + this.$store.getters.cookieName + '=' + cookieValue
         window.open(url)
       })
+    },
+    goPerformanceChart (item) {
+      for (let key in this.$store.getters.urls.performance) {
+        let ump = this.$store.getters.urls.performance[key]
+        for (var ver in ump) {
+          window.open(ump[ver].replace(/\(consumer\.\)/g, '').replace(/\[topic\]/g, getTopicCode(item.topic,
+            item.topic.namespace)).replace(/\[app\]/g, getAppCode(item.app, item.subscribeGroup)))
+        }
+      }
     },
     getMonitor (row, index) {
       let data = {

@@ -17,6 +17,15 @@ public class QConsumer extends QKeyword implements QIdentity {
 
     public QConsumer() {}
 
+    public QConsumer(Topic topic) {
+        this.topic = topic;
+        this.namespace = topic.getNamespace().getCode();
+    }
+
+    public QConsumer(String referer) {
+        this.referer = referer;
+    }
+
     public QConsumer(String topicCode, String namespaceCode, String appCode) {
         this.topic = new Topic(topicCode);
         this.topic.setNamespace(new Namespace(namespaceCode));

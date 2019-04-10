@@ -45,6 +45,7 @@ public class PartitionGroupServerServiceImpl extends NameServerBase implements P
         if (query != null && query.getQuery() != null) {
             QTopicPartitionGroup queryQuery = query.getQuery();
             partitionGroupQuery = new PartitionGroupQuery(queryQuery.getTopic().getCode(),queryQuery.getNamespace().getCode());
+            partitionGroupQuery.setKeyword(query.getQuery().getKeyword());
         }
         QPageQuery<PartitionGroupQuery> partitionGroupQueryQPageQuery = new QPageQuery<>(query.getPagination(),partitionGroupQuery);
 

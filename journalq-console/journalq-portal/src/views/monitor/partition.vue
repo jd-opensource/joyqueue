@@ -93,6 +93,10 @@ export default {
         // Find by monitor service
         this.page.total = resp.data.length
         let that = this
+        // add subscribe column
+        for (let i = 0; i < that.tableData.rowData.length; i++) {
+          that.tableData.rowData[i].subscribe = payload
+        }
         let requestUrl = this.type === this.$store.getters.producerType ? this.urls.findProducerPartitionGroups : this.urls.findConsumerPartitionGroups
         apiRequest.postBase(requestUrl, {}, payload, false).then((data) => {
           let monitorData = data.data || []

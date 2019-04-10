@@ -1,10 +1,10 @@
 package com.jd.journalq.handler.routing.command.topic;
 
-import com.jd.journalq.handler.binder.annotation.Path;
 import com.jd.journalq.handler.routing.command.NsrCommandSupport;
 import com.jd.journalq.model.domain.Namespace;
 import com.jd.journalq.model.query.QNamespace;
 import com.jd.journalq.service.NamespaceService;
+import com.jd.laf.web.vertx.annotation.Path;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
 

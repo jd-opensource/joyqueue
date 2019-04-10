@@ -5,8 +5,8 @@
         <!--<icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>-->
       </d-input>
 
-      <d-button type="primary" @click="getList">查询<icon name="search" style="margin-left: 5px;"></icon></d-button>
-      <d-button type="primary" @click="openDialog('addDialog')">新建指标<icon name="plus-circle" style="margin-left: 5px;"></icon></d-button>
+      <d-button type="primary" color="success" @click="getList">查询<icon name="search" style="margin-left: 5px;"></icon></d-button>
+      <d-button type="primary" class="left ml10" @click="openDialog('addDialog')">新建指标<icon name="plus-circle" style="margin-left: 5px;"></icon></d-button>
     </div>
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
               @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange" @on-edit="edit" @on-del="del">
@@ -40,8 +40,7 @@ export default {
   data () {
     return {
       searchData: {
-        keyword: '',
-        status:1
+        keyword: ''
       },
       searchRules: {
       },
@@ -55,7 +54,7 @@ export default {
             title: '代码',
             key: 'code'
           }, {
-          title: '别名',
+            title: '别名',
             key: 'aliasCode'
           }, {
             title: '名称',
@@ -64,11 +63,16 @@ export default {
             title: '类型',
             key: 'type',
             formatter (item) {
-              if (item.type === 'ATOMIC') {
-                return '原子'
-              } else {
-                return '聚集'
+              let label
+              switch (item.type) {
+                case 1:
+                  label = '原子'
+                  break
+                case 2:
+                  label = '聚集'
+                  break
               }
+              return label
             }
           },
           {

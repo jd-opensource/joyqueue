@@ -33,7 +33,7 @@ export default {
       id: '0',
       code: ''
     },
-    type: {
+    type: { // 0-producer, 1-consumer
       type: Number,
       default: 0
     },

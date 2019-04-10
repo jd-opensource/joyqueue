@@ -1,10 +1,11 @@
 package com.jd.journalq.model.query;
 
+import com.jd.journalq.model.QKeyword;
 import com.jd.journalq.model.Query;
 import com.jd.journalq.model.domain.Namespace;
 import com.jd.journalq.model.domain.Topic;
 
-public class QPartitionGroupReplica implements Query {
+public class QPartitionGroupReplica  extends QKeyword implements Query {
     private Topic topic;
     private Namespace namespace;
     private int groupNo = -1;

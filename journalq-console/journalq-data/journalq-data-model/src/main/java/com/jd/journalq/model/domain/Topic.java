@@ -65,6 +65,11 @@ public class Topic extends BaseNsrModel {
     private BrokerGroup brokerGroup;
 
     private List<Broker> brokers;
+
+    @Min(0)
+    @Max(20)
+    private int brokerNum ;
+
     /**
      * 副本数量(默认3个，表示主+从，总共3个)
      */
@@ -170,6 +175,14 @@ public class Topic extends BaseNsrModel {
 
     public void setBrokers(List<Broker> brokers) {
         this.brokers = brokers;
+    }
+
+    public int getBrokerNum() {
+        return brokerNum;
+    }
+
+    public void setBrokerNum(int brokerNum) {
+        this.brokerNum = brokerNum;
     }
 
     public Namespace getNamespace() {

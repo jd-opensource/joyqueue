@@ -22,9 +22,9 @@ public class BrokerRestUrlMappingServiceImpl implements BrokerRestUrlMappingServ
     private Logger logger= LoggerFactory.getLogger(BrokerRestUrlMappingServiceImpl.class);
 
     /** message preview path  */
-    private static final String pendingByteMessagePath="/manage/topic/%s/app/%s/message/view?count=%s";
-    private static final String  lastestMessagePath="/manage/topic/%s/app/%s/message/last";
-    private static final String partitoinMessagePath="/manage/topic/%s/app/%s/partition/%d/message";
+    private final static String pendingByteMessagePath="/manage/topic/%s/app/%s/message/pending?count=%s";
+    private String lastestMessagePath="/manage/topic/%s/app/%s/message/last";
+    private String partitoinMessagePath="/manage/topic/%s/app/%s/partition/%d/message";
 
     /** monitor path */
     private String appMonitorPath="/monitor/topic/%s/app/%s/%s"; // topic|app|type{producer/consumer}
@@ -49,6 +49,11 @@ public class BrokerRestUrlMappingServiceImpl implements BrokerRestUrlMappingServ
     private String resetAppPartitionOffsetByTimePath="/manage/topic/%s/app/%s/partition/%s/ackByTime?timestamp=%s";// topic|app|partition,method=put
     private String resetAppTopicOffsetByTimePath="/manage/topic/%s/app/%s/ackByTime?timestamp=%s";// topic|app|partition,method=put
     private String getTopicAppOffsetPath = "/manage/topic/%s/app/%s/timestamp/%s/ackByTime"; ///manage/topic/:topic/app/:app/timestamp/%s/ackByTime,method=get
+//    /manage/topic/:topic/app/:app/partition/:partition/message ?count=&index=
+    private String getPartitionMessageByIndexPath="/manage/topic/%s/app/%s/partition/%s/message?index=%s&count=%s";
+
+//    /manage/topic/:topic/app/:app/partition/:partition/ackByTime
+    private String getTopicAppPartitionIndexByTimePath="/manage/topic/%s/app/%s/partition/%s/ackByTime?timestamp=%s";
     /** topic */
     private String topicPartitionGroupsMonitorPath ="/monitor/topic/%s/app/%s/partitionGroups";
 
@@ -60,7 +65,7 @@ public class BrokerRestUrlMappingServiceImpl implements BrokerRestUrlMappingServ
 
 
     /** archive monitor*/
-    private String archiveMonitorPath="/monitor/archive/";
+    private String archiveMonitorPath="/monitor/archive/info";
 
     /** store **/
     private String topicListPath = "/manage/topic/list";

@@ -21,7 +21,7 @@ export function getI18nOptions (...extendConfigs) {
     navigatorLang = ''
   }
 
-  const userLang = urlLang || window.localStorage.getItem('jmq-language') || navigatorLang || defaultLang
+  const userLang = urlLang || window.localStorage.getItem('journalq-language') || navigatorLang || defaultLang
 
   const messages = {}
   languages.forEach(language => {

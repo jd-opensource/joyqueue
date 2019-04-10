@@ -1,4 +1,4 @@
-package com.jd.journalq.handler.binder.annotation;
+package com.jd.journalq.handler.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -6,9 +6,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 操作人员
+ * operator binder interface
+ * Created by chenyanying3 on 19-3-13.
  */
-@Target(ElementType.FIELD)
+@Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Operator {
 

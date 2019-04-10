@@ -1,7 +1,7 @@
 <template>
   <div>
     <consumer-base ref="consumerBase" :keywordTip="keywordTip" :colData="colData"
-                   :subscribeDialogColData="subscribeDialog.colData" :summaryChartShow="true"
+                   :subscribeDialogColData="subscribeDialog.colData" :showSummaryChart="true"
                    :search="search" :subscribeUrls="subscribeDialog.urls"/>
   </div>
 </template>

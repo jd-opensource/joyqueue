@@ -5,7 +5,8 @@ import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
 
 /**
- * 配置异常转换器
+ * Config exception conversion
+ * Created by chenyanying3 on 18-11-16.
  */
 public class ConfigExceptionSupplier implements ErrorSupplier {
     @Override

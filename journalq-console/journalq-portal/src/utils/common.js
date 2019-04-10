@@ -1,3 +1,6 @@
+import apiRequest from './apiRequest.js'
+import apiUrl from './apiUrl.js'
+
 export function getTopicCode (topic, namespace) {
   let topicCode = (topic || {}).code
   if (topicCode.indexOf('.') >= 0) {
@@ -161,22 +164,22 @@ export function clientTypeOptions () {
     }
   ]
 }
-export function topicTypeOptions() {
+export function topicTypeOptions () {
   return [
     {
       value: 0,
-      txt: "普通主题",
-      color: "success"
+      txt: '普通主题',
+      color: 'success'
     },
     {
       value: 1,
-      txt: "广播主题",
-      color: "warning"
+      txt: '广播主题',
+      color: 'warning'
     },
     {
       value: 2,
-      txt: "顺序主题",
-      color: "danger"
+      txt: '顺序主题',
+      color: 'danger'
     }
   ]
 }
@@ -205,34 +208,44 @@ export function clientTypeSelectRender (h, params, subscribeRef) {
 export function clientTypeBtnRender (h, value) {
   return baseBtnRender(h, value, clientTypeOptions())
 }
-export function topicTypeBtnRender(h, value) {
-  return baseBtnRender(h, value, topicTypeOptions());
+export function topicTypeBtnRender (h, value) {
+  return baseBtnRender(h, value, topicTypeOptions())
 }
 
 export function subscribeGroupAutoCompleteRender (h, params, subscribeRef) {
-  function querySearch (queryString, cb) {
-    var restaurants = [
-      { 'value': '三全鲜食（北新泾店）', 'address': '长宁区新渔路144号' },
-      { 'value': 'Hot honey 首尔炸鸡（仙霞路）', 'address': '上海市长宁区淞虹路661号' },
-      { 'value': '新旺角茶餐厅', 'address': '上海市普陀区真北路988号创邑金沙谷6号楼113' }
-    ]
-    var results = queryString ? restaurants.filter(restaurant => {
-      return (restaurant.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0)
-    }) : restaurants
-    // 调用 callback 返回建议列表的数据
-    cb(results)
+  function querySearch (queryString, callback) {
+    apiRequest.get(apiUrl.common.findSubscribeGroup).then((data) => {
+      if (data.data === undefined || data.data === []) {
+        var emptyResult = [{'value': ''}]
+        callback(emptyResult)
+      }
+      var subscribeGroups = data.data.map(sg => {
+        return {'value': sg}
+      })
+      console.log(subscribeGroups)
+      console.log(queryString)
+      var results = queryString ? subscribeGroups.filter(sg => {
+        return sg.value.toLowerCase().indexOf(queryString.toLowerCase().trim()) === 0
+      }) : subscribeGroups
+      // 调用 callback 返回建议列表的数据
+      console.log(results)
+      callback(results)
+    })
   }
 
   return h('d-autocomplete', {
     props: {
-      value: params.item.code, // subscribeGroup,
+      value: params.item.subscribeGroup,
       placeholder: '请输入订阅分组',
-      // disabled: !params.item['subscribeGroupExist']
       fetchSuggestions: querySearch
     },
     on: {
       select: (item) => {
-        params.item.code = item.value || ''
+        params.item.subscribeGroup = item.value || ''
+        subscribeRef.tableData.rowData[params.index] = params.item
+      },
+      input: (item) => {
+        params.item.subscribeGroup = (item.value || item) || ''
         subscribeRef.tableData.rowData[params.index] = params.item
       }
     }
