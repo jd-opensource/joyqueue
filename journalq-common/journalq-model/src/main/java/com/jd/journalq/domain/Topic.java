@@ -62,9 +62,15 @@ public class Topic implements Serializable {
     @Override
     public boolean equals(Object o) {
 
-        if (this == o) return true;
-        if (o == null || !(o instanceof Topic)) return false;
-        if (name == null || ((Topic) o).getName() == null) return false;
+        if (this == o){
+            return true;
+        }
+        if (o == null || !(o instanceof Topic)){
+            return false;
+        }
+        if (name == null || ((Topic) o).getName() == null){
+            return false;
+        }
 
         return name.equals(((Topic) o).getName());
     }

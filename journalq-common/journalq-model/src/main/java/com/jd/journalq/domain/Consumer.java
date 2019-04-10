@@ -346,8 +346,9 @@ public class Consumer extends Subscription {
             }
 
             public Builder blackList(String blackList) {
-                if (null != blackList && !"".equals(blackList.trim()))
+                if (null != blackList && !"".equals(blackList.trim())) {
                     this.blackList = new HashSet<String>(Arrays.asList(blackList.trim().split(",")));
+                }
                 return this;
             }
 

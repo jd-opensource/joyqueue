@@ -228,12 +228,4 @@ public class NameServiceTest{
         AppToken appToken = nameService.getAppToken("poslp","2e2b2eb5-5c2e-49b0-8589-22aa71ca0c99");
         System.out.println(appToken);
     }
-
-    @Test
-    public void addListener() {
-    }
-
-    @Test
-    public void removeListener() {
-    }
 }

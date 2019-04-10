@@ -75,28 +75,34 @@ public class ConfigDef {
 
     private Object parseType(String name, Object value, ConfigDef.Type type) {
         try {
-            if (value == null) return null;
+            if (value == null){
+                return null;
+            }
             String trimmed = null;
-            if (value instanceof String)
+            if (value instanceof String) {
                 trimmed = ((String) value).trim();
+            }
             switch (type) {
                 case BOOLEAN:
                     if (value instanceof String) {
-                        if (trimmed.equalsIgnoreCase("true"))
+                        if (trimmed.equalsIgnoreCase("true")) {
                             return true;
-                        else if (trimmed.equalsIgnoreCase("false"))
+                        } else if (trimmed.equalsIgnoreCase("false")) {
                             return false;
-                        else
+                        }else {
                             throw new JMQConfigException(name, value, "Expected value to be either true or false");
-                    } else if (value instanceof Boolean)
+                        }
+                    } else if (value instanceof Boolean) {
                         return value;
-                    else
+                    }else {
                         throw new JMQConfigException(name, value, "Expected value to be either true or false");
+                    }
                 case STRING:
-                    if (value instanceof String)
+                    if (value instanceof String) {
                         return trimmed;
-                    else
+                    }else {
                         throw new JMQConfigException(name, value, "Expected value to be a string, but it was a " + value.getClass().getName());
+                    }
                 case INT:
                     if (value instanceof Integer) {
                         return (Integer) value;
@@ -114,21 +120,23 @@ public class ConfigDef {
                         throw new JMQConfigException(name, value, "Expected value to be an number.");
                     }
                 case LONG:
-                    if (value instanceof Integer)
+                    if (value instanceof Integer) {
                         return ((Integer) value).longValue();
-                    if (value instanceof Long)
+                    }else if (value instanceof Long) {
                         return (Long) value;
-                    else if (value instanceof String)
+                    }else if (value instanceof String) {
                         return Long.parseLong(trimmed);
-                    else
+                    }else {
                         throw new JMQConfigException(name, value, "Expected value to be an number.");
+                    }
                 case DOUBLE:
-                    if (value instanceof Number)
+                    if (value instanceof Number) {
                         return ((Number) value).doubleValue();
-                    else if (value instanceof String)
+                    }else if (value instanceof String) {
                         return Double.parseDouble(trimmed);
-                    else
+                    }else {
                         throw new JMQConfigException(name, value, "Expected value to be an number.");
+                    }
                 default:
                     throw new IllegalStateException("Unknown type.");
             }

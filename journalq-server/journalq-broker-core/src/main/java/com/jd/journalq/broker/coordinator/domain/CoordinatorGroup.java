@@ -34,6 +34,11 @@ public class CoordinatorGroup {
         this.id = id;
     }
 
+    public void addMember(CoordinatorGroupMember member) {
+        String host = getHost(member.getConnectionHost());
+        members.put(host, member);
+    }
+
     public void addExpiredMember(CoordinatorGroupMember member) {
         String host = getHost(member.getConnectionHost());
         try {
@@ -63,7 +68,7 @@ public class CoordinatorGroup {
         if (!host.contains(":")) {
             return host;
         }
-        return host.split(":")[0];
+        return host;
     }
 
     public String getId() {

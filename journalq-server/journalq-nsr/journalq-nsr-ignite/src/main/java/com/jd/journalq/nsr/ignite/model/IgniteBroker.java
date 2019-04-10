@@ -17,7 +17,7 @@ public class IgniteBroker extends Broker implements IgniteBaseModel, Binarylizab
     public static final String COLUMN_PORT = "port";
     public static final String COLUMN_DATA_CENTER = "data_center";
     public static final String COLUMN_RETRY_TYPE = "retry_type";
-
+    public static final String COLUMN_PERMISSION = "permission";
 
     public IgniteBroker(Broker broker) {
         this.ip = broker.getIp();
@@ -25,6 +25,7 @@ public class IgniteBroker extends Broker implements IgniteBaseModel, Binarylizab
         this.port = broker.getPort();
         this.dataCenter = broker.getDataCenter();
         this.retryType = broker.getRetryType();
+        this.permission = broker.getPermission();
     }
 
     @Override
@@ -34,6 +35,7 @@ public class IgniteBroker extends Broker implements IgniteBaseModel, Binarylizab
         writer.writeInt(COLUMN_PORT, port);
         writer.writeString(COLUMN_DATA_CENTER, dataCenter);
         writer.writeString(COLUMN_RETRY_TYPE, retryType);
+        writer.writeString(COLUMN_PERMISSION,permission);
     }
 
     @Override
@@ -43,5 +45,6 @@ public class IgniteBroker extends Broker implements IgniteBaseModel, Binarylizab
         this.port = reader.readInt(COLUMN_PORT);
         this.dataCenter = reader.readString(COLUMN_DATA_CENTER);
         this.retryType = reader.readString(COLUMN_RETRY_TYPE);
+        this.permission = reader.readString(COLUMN_PERMISSION);
     }
 }
