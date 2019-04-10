@@ -23,6 +23,10 @@ import java.util.stream.Collectors;
 
 import static com.jd.journalq.model.domain.grafana.GrafanaVariable.DEFAULT_GRAFANA_TARGET_DELIMITER;
 
+/**
+ * Grafana configuration utils
+ * Created by chenyanying3 on 19-3-3.
+ */
 public class GrafanaUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(GrafanaUtils.class);

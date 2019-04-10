@@ -78,7 +78,7 @@ public interface Consume {
      * @param consumer 消费者
      * @param index    消息序号
      */
-    void setAckIndex(Consumer consumer, short partition, long index);
+    void setAckIndex(Consumer consumer, short partition, long index) throws JMQException;
 
     /**
      * 重置指定主题+应用+分区的应答序号（起始订阅位置）
@@ -86,7 +86,7 @@ public interface Consume {
      * @param consumer 消费者
      * @param index    消息序号
      */
-    void setStartAckIndex(Consumer consumer, short partition, long index);
+    void setStartAckIndex(Consumer consumer, short partition, long index) throws JMQException;
 
     /**
      * 获取指定主题+应用+分区的应答序号
@@ -150,6 +150,23 @@ public interface Consume {
      */
     long getMaxIndex(Consumer consumer, short partition);
 
+    /**
+     * 获取最近一次拉取消息时间
+     *
+     * @param topic
+     * @param app
+     * @param partition
+     * @return
+     */
+    long getLastPullTimeByPartition(TopicName topic, String app, short partition);
 
+    /**
+     * 获取最近一次应答消息时间
+     * @param topic
+     * @param app
+     * @param partition
+     * @return
+     */
+    long getLastAckTimeByPartition(TopicName topic, String app, short partition);
 
 }

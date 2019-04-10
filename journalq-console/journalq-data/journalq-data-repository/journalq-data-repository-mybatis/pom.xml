@@ -15,10 +15,6 @@
             <groupId>com.jd.journalq</groupId>
             <artifactId>journalq-data-repository-api</artifactId>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>com.jd.journalq</groupId>-->
-            <!--<artifactId>journalq-data-repository-mybatis-interceptor</artifactId>-->
-        <!--</dependency>-->
     </dependencies>
 
 

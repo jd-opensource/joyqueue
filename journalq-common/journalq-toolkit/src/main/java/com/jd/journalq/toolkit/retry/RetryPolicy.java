@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * 重试策略
  */
 public class RetryPolicy implements Serializable {
+    private static final long serialVersionUID = 1L;
     public static final int EXPIRE_TIME = 1000 * 3600 * 24 * 3;
     public static final int RETRY_DELAY = 1000;
     public static final int MAX_RETRY_DELAY = 1000 * 60 * 5;

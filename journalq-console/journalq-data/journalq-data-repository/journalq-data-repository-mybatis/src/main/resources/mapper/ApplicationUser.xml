@@ -74,6 +74,10 @@
         DELETE FROM application_user WHERE id=#{id}
     </delete>
 
+    <delete id="deleteByAppId" parameterType="long">
+        DELETE FROM application_user WHERE app_id=#{appId}
+    </delete>
+
     <select id="findById" parameterType="long" resultMap="baseResultMap">
         SELECT
           <include refid="baseColumn"/>

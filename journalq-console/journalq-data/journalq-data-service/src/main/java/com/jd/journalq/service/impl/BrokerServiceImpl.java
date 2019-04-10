@@ -117,8 +117,6 @@ public class BrokerServiceImpl implements BrokerService {
     @Override
     public int update(Broker model) {
         try {
-            //增加绑定关系
-            addorUpdateBrokerGroupRelated(model);
             return brokerNameServerService.update(model);
         } catch (Exception e) {
             logger.error("update error",e);
@@ -150,32 +148,6 @@ public class BrokerServiceImpl implements BrokerService {
             }
         }
         return brokerNameServerService.findByQuery(qBroker);
-    }
-
-    /**
-     * 增加绑定关系
-     * @param model
-     */
-    private void addorUpdateBrokerGroupRelated(Broker model){
-        if (model != null && model.getGroup() != null) {
-            BrokerGroupRelated brokerGroupRelated = new BrokerGroupRelated();
-            brokerGroupRelated.setId(model.getId());
-            brokerGroupRelated.setGroup(model.getGroup());
-            try {
-                brokerGroupRelated.setUpdateTime(new Date());
-                brokerGroupRelated.setUpdateBy(new Identity(LocalSession.getSession().getUser()));
-                BrokerGroupRelated oldBrokerGroupRelated = brokerGroupRelatedService.findById(brokerGroupRelated.getId());
-                if (oldBrokerGroupRelated == null) {
-                    brokerGroupRelated.setCreateTime(new Date());
-                    brokerGroupRelated.setCreateBy(new Identity(LocalSession.getSession().getUser()));
-                    brokerGroupRelatedService.add(brokerGroupRelated);
-                } else {
-                    brokerGroupRelatedService.update(brokerGroupRelated);
-                }
-            } catch (Exception e) {
-                logger.error("绑定异常 error",e);
-            }
-        }
     }
 
     /**

@@ -1,18 +1,20 @@
 package com.jd.journalq.handler.binder;
 
-import com.jd.journalq.handler.binder.annotation.Operator;
-import com.jd.journalq.handler.Constants;
-import com.jd.laf.binding.binder.Binder;
-import com.jd.laf.binding.reflect.exception.ReflectionException;
+
+import com.jd.journalq.handler.annotation.Operator;
 import com.jd.journalq.model.domain.Application;
 import com.jd.journalq.model.domain.Identity;
 import com.jd.journalq.model.domain.User;
+import com.jd.laf.binding.binder.Binder;
+import com.jd.laf.binding.reflect.exception.ReflectionException;
 import io.vertx.ext.web.RoutingContext;
 
-import static com.jd.laf.binding.reflect.Reflect.set;
+import static com.jd.journalq.handler.Constants.APPLICATION;
+import static com.jd.journalq.handler.Constants.USER_KEY;
 
 /**
- * 操作人员绑定
+ * operator binder
+ * Created by chenyanying3 on 19-3-13.
  */
 public class OperatorBinder implements Binder {
 
@@ -26,10 +28,10 @@ public class OperatorBinder implements Binder {
             return false;
         }
         RoutingContext ctx = (RoutingContext) obj;
-        Application application = ctx.get(Constants.APPLICATION);
-        User session = ctx.get(Constants.USER_KEY);
+        Application application = ctx.get(APPLICATION);
+        User session = ctx.get(USER_KEY);
         Identity identity = session != null ? new Identity(session) : (application != null ? application.getOwner() : null);
-        return set(context.getTarget(), context.getField(), identity, null, context.getFactory());
+        return context.bind(identity);
     }
 
     @Override

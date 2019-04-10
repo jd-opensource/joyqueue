@@ -7,15 +7,15 @@ import com.jd.journalq.toolkit.network.IpUtil;
  */
 public interface KafkaConfigs {
 
-    final static String GROUP_ID = "test_app";
-    final static String TOPIC = "test_topic_0";
-    final static int TOPIC_COUNT = 2;
-    final static String BOOTSTRAP = IpUtil.getLocalIp() + ":50088";
-    final static String CLIENT_ID = "test_app";
+    static final String GROUP_ID = "test_app";
+    static final String TOPIC = "test_topic_0";
+    static final int TOPIC_COUNT = 2;
+    static final String BOOTSTRAP = IpUtil.getLocalIp() + ":50088";
+    static final String CLIENT_ID = "test_app";
 
-//    final static String GROUP_ID = "zhuduohui";
-//    final static String TOPIC = "test2";
-//    final static int TOPIC_COUNT = 10;
-//    final static String BOOTSTRAP = "192.168.112.92:50088";
-//    final static String CLIENT_ID = "zhuduohui";
+//    static final String GROUP_ID = "zhuduohui";
+//    static final String TOPIC = "test2";
+//    static final int TOPIC_COUNT = 10;
+//    static final String BOOTSTRAP = "192.168.112.92:50088";
+//    static final String CLIENT_ID = "zhuduohui";
 }

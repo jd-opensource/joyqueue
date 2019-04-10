@@ -3,13 +3,14 @@ package com.jd.journalq.handler.routing.validate;
 import com.jd.journalq.exception.ServiceException;
 import com.jd.journalq.handler.error.ConfigException;
 import com.jd.journalq.handler.error.ErrorCode;
-import com.jd.journalq.handler.Constants;
 import com.jd.journalq.model.domain.Application;
 import com.jd.journalq.model.domain.ApplicationToken;
 import com.jd.journalq.service.ApplicationTokenService;
 import com.jd.laf.binding.annotation.Value;
 import com.jd.laf.web.vertx.parameter.Parameters.RequestParameter;
 import io.vertx.ext.web.RoutingContext;
+
+import static com.jd.journalq.handler.Constants.*;
 
 /**
  * 验证是指定应用的令牌
@@ -21,8 +22,8 @@ public class ValidateTokenOfApplicationHandler extends ValidateHandler {
 
     @Override
     protected void validate(final RoutingContext context, final RequestParameter parameter) {
-        Application app = context.get(Constants.APPLICATION);
-        Long appTokenId = parameter.query().getLong(Constants.ID);
+        Application app = context.get(APPLICATION);
+        Long appTokenId = parameter.query().getLong(ID);
         ApplicationToken token = null;
         try {
             token = appTokenId == null ? null : applicationTokenService.findById(appTokenId);
@@ -36,7 +37,7 @@ public class ValidateTokenOfApplicationHandler extends ValidateHandler {
         } else if (!token.getApplication().getCode().equals(app.getCode()) ) {
             throw new ConfigException(ErrorCode.NoPrivilege);
         }
-        context.put(Constants.APP_TOKEN, token);
+        context.put(APP_TOKEN, token);
 
     }
 

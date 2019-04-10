@@ -34,7 +34,7 @@ public interface BrokerMonitorService {
      *                 case of  the broker isn't partition group'leader but still remaining monitor info,such as enqueue and dequeun
      * @return a monitor record
      **/
-    BrokerMonitorRecord find(Subscribe subscribe,boolean active);
+    BrokerMonitorRecord find(Subscribe subscribe, boolean active);
 
     /**
      *
@@ -69,7 +69,7 @@ public interface BrokerMonitorService {
      *
      *
      **/
-    List<BrokerMonitorRecord> findMonitorOnPartition(Subscribe subscribe,int partitionGroup);
+    List<BrokerMonitorRecord> findMonitorOnPartition(Subscribe subscribe, int partitionGroup);
 
     /**
      *
@@ -95,6 +95,7 @@ public interface BrokerMonitorService {
      *  仅是topic 的出入队监控,only for partition group 与app 无关
      *
      **/
+    @Deprecated
     List<BrokerMonitorRecord> findMonitorOnPartitionGroups(Subscribe subscribe);
 
 
@@ -113,7 +114,7 @@ public interface BrokerMonitorService {
     * @return archive state on the broker or null when exception
     *
     **/
-   ArchiveMonitorInfo findArchiveState(String ip,int port);
+   ArchiveMonitorInfo findArchiveState(String ip, int port);
 
 
 

@@ -59,4 +59,8 @@ public class ArchiveConfig {
     public int getWriteThreadNum() {
         return PropertySupplier.getValue(propertySupplier, ArchiveConfigKey.WRITE_THREAD_NUM);
     }
+
+    public boolean isStartArchive() {
+        return PropertySupplier.getValue(propertySupplier, ArchiveConfigKey.ARCHIVE_SWITCH);
+    }
 }

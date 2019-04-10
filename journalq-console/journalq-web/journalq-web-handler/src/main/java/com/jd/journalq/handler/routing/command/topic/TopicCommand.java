@@ -1,11 +1,8 @@
 package com.jd.journalq.handler.routing.command.topic;
 
+import com.jd.journalq.handler.annotation.PageQuery;
 import com.jd.journalq.model.PageResult;
 import com.jd.journalq.model.QPageQuery;
-import com.jd.journalq.handler.binder.annotation.GenericBody;
-import com.jd.journalq.handler.binder.annotation.GenericValue;
-import com.jd.journalq.handler.binder.annotation.Page;
-import com.jd.journalq.handler.binder.annotation.Path;
 import com.jd.journalq.handler.error.ConfigException;
 import com.jd.journalq.handler.error.ErrorCode;
 import com.jd.journalq.handler.routing.command.NsrCommandSupport;
@@ -15,9 +12,11 @@ import com.jd.journalq.model.domain.Topic;
 import com.jd.journalq.model.domain.User;
 import com.jd.journalq.model.query.QBroker;
 import com.jd.journalq.model.query.QTopic;
-import com.jd.journalq.service.BrokerService;
-import com.jd.journalq.service.TopicService;
+import com.jd.journalq.service.*;
 import com.jd.journalq.toolkit.lang.Preconditions;
+import com.jd.laf.binding.annotation.Value;
+import com.jd.laf.web.vertx.annotation.Body;
+import com.jd.laf.web.vertx.annotation.Path;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
 
@@ -28,11 +27,17 @@ import java.util.List;
  * Created by chenyanying3 on 2018-10-18.
  */
 public class TopicCommand extends NsrCommandSupport<Topic, TopicService, QTopic> {
-    @GenericValue
+    @Value(nullable = false)
     protected BrokerService brokerService;
+    @Value(nullable = false)
+    protected TopicPartitionGroupService topicPartitionGroupService;
+    @Value(nullable = false)
+    protected ConsumerService consumerService;
+    @Value(nullable = false)
+    protected ProducerService producerService;
 
     @Path("addWithBrokerGroup")
-    public Response addWithBrokerGroup(@GenericBody(type = GenericBody.BodyType.JSON,typeindex = 0) Topic topic) throws Exception {
+    public Response addWithBrokerGroup(@Body Topic topic) throws Exception {
         //参数校验
         if (topic == null || topic.getBrokerGroup() == null || topic.getBrokers() == null || topic.getBrokers().isEmpty()) {
             new ConfigException(ErrorCode.BadRequest);
@@ -42,8 +47,13 @@ public class TopicCommand extends NsrCommandSupport<Topic, TopicService, QTopic>
         return Responses.success(topic);
     }
 
+    @Path("delete")
+    public Response delete(@Body(type = Body.BodyType.TEXT) String id) throws Exception {
+        return super.delete(id);
+    }
+
     @Path("/api/mqtt/topic/add")
-    public Response addTopic(@GenericBody(type = GenericBody.BodyType.JSON,typeindex = 0) Topic topic) throws Exception {
+    public Response addTopic(@Body Topic topic) throws Exception {
         //参数校验
         if (topic == null || topic.getBrokerGroup() == null) {
             new ConfigException(ErrorCode.BadRequest);
@@ -60,7 +70,7 @@ public class TopicCommand extends NsrCommandSupport<Topic, TopicService, QTopic>
     }
 
     @Path("searchUnsubscribed")
-    public Response searchUnsubscribed(@Page(typeindex = 2) QPageQuery<QTopic> qPageQuery) throws Exception {
+    public Response searchUnsubscribed(@PageQuery QPageQuery<QTopic> qPageQuery) throws Exception {
         QTopic qTopic = qPageQuery.getQuery();
         if (qTopic == null) {
             throw new ConfigException(ErrorCode.BadRequest);
@@ -72,8 +82,9 @@ public class TopicCommand extends NsrCommandSupport<Topic, TopicService, QTopic>
 
         return Responses.success(result.getPagination(), result.getResult());
     }
+
     @Path("getById")
-    public Response getById(@GenericBody(type = GenericBody.BodyType.JSON,typeindex = 0) Topic model) {
+    public Response getById(@Body Topic model) {
         try {
             return Responses.success(service.findById(model.getId()));
         } catch (Exception e) {

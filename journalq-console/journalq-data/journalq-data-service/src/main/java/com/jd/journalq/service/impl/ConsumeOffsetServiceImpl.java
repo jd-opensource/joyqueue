@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.jd.journalq.async.*;
 import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.monitor.PartitionAckMonitorInfo;
+import com.jd.journalq.monitor.PartitionLeaderAckMonitorInfo;
 import com.jd.journalq.monitor.RestResponse;
 import com.jd.journalq.convert.CodeConverter;
 import com.jd.journalq.model.domain.Broker;
@@ -43,8 +44,8 @@ import java.util.concurrent.TimeUnit;
 @Service("consumeOffsetService")
 //todo 待移走
 public class ConsumeOffsetServiceImpl implements ConsumeOffsetService {
-    private final static Logger logger= LoggerFactory.getLogger(ConsumeOffsetServiceImpl.class);
-    private final static long TIMEOUT=60000;
+    private static final Logger logger= LoggerFactory.getLogger(ConsumeOffsetServiceImpl.class);
+    private static final long TIMEOUT=60000;
 
     @Resource(type = BrokerMonitorClusterQuery.class)
     private BrokerClusterQuery<Subscribe> brokerCluster;
@@ -62,10 +63,10 @@ public class ConsumeOffsetServiceImpl implements ConsumeOffsetService {
     private HttpRestService httpRestService;
 
     @Override
-    public List<PartitionAckMonitorInfo> offsets(Subscribe subscribe) {
+    public List<PartitionLeaderAckMonitorInfo> offsets(Subscribe subscribe) {
         this.checkArgument(subscribe);
         List<Broker> brokers=new ArrayList<>();
-        List<PartitionAckMonitorInfo> partitionAckMonitorInfos=new ArrayList<>();
+        List<PartitionLeaderAckMonitorInfo> partitionAckMonitorInfos=new ArrayList<>();
         Future<Map<String,String >> resultFuture=brokerCluster.asyncQueryOnBroker(subscribe, new RetrieveProvider<Subscribe>() {
             @Override
             public String getKey(Broker broker, PartitionGroup partitionGroup,short partition,Subscribe condition) {
@@ -80,14 +81,56 @@ public class ConsumeOffsetServiceImpl implements ConsumeOffsetService {
             }
         },"appConsumeOffsetMonitor","appConsumeOffsetMonitor");
         Map<String/*request key*/, String/*response*/> resultMap= brokerCluster.get(resultFuture,TIMEOUT, TimeUnit.MILLISECONDS);
-        if(resultMap.size()!=brokers.size()) return partitionAckMonitorInfos; //some request failed fail
+        if(resultMap.size()!=brokers.size()) {
+            logger.info("missing broker partition consume offset,ignore");
+            //return partitionAckMonitorInfos; //some request failed fail
+        }
+        return tagLeaderPartitionOffset(resultMap,subscribe);
+    }
+
+
+    /**
+     *
+     *  tag for leader partition consume offset
+     *
+     **/
+    public List<PartitionLeaderAckMonitorInfo> tagLeaderPartitionOffset(Map<String,String> brokerPartitionOffsets,Subscribe subscribe){
+        List<PartitionLeaderAckMonitorInfo> partitionAckMonitorInfos=new ArrayList<>();
+        Map<Short,Broker> partitionBrokers=leaderService.findPartitionLeaderBrokerDetail(subscribe.getTopic().getCode(),subscribe.getNamespace().getCode());
         RestResponse<List<PartitionAckMonitorInfo>> restPartitionAckMonitorResponse;
-        for(String  s:resultMap.values()){
-            restPartitionAckMonitorResponse=JSONParser.parse(s,RestResponse.class,PartitionAckMonitorInfo.class,true);
-            partitionAckMonitorInfos.addAll(restPartitionAckMonitorResponse.getData());
+        for(Map.Entry<String,String>   brokerPartitionOffset:brokerPartitionOffsets.entrySet()){
+            restPartitionAckMonitorResponse=JSONParser.parse(brokerPartitionOffset.getValue(),RestResponse.class,PartitionAckMonitorInfo.class,true);
+            partitionAckMonitorInfos.addAll(tagLeaderPartitionOffset(brokerPartitionOffset.getKey(),restPartitionAckMonitorResponse.getData(),partitionBrokers));
         }
         return partitionAckMonitorInfos;
     }
+
+
+    /**
+     *
+     *
+     * @param broker ip:port
+     *
+     **/
+
+    public List<PartitionLeaderAckMonitorInfo> tagLeaderPartitionOffset(String broker,List<PartitionAckMonitorInfo> partitionAckMonitorInfos,Map<Short,Broker> partitionBrokers){
+        PartitionLeaderAckMonitorInfo partitionLeaderAckMonitorInfo;
+        List<PartitionLeaderAckMonitorInfo> partitionLeaderAckMonitorInfos=new ArrayList<>();
+        for(PartitionAckMonitorInfo p:partitionAckMonitorInfos){
+            partitionLeaderAckMonitorInfo=new PartitionLeaderAckMonitorInfo(p,false);
+            Broker b=partitionBrokers.get(p.getPartition());
+            if(!NullUtil.isEmpty(b)) {
+                String partitionLeaderBrokerKey = b.getIp() + ":" + b.getPort();
+                if (partitionLeaderBrokerKey.equals(broker)) {
+                    partitionLeaderAckMonitorInfo.setLeader(true);
+                }
+                partitionLeaderAckMonitorInfos.add(partitionLeaderAckMonitorInfo);
+            }
+        }
+        return  partitionLeaderAckMonitorInfos;
+    }
+
+
 
     @Override
     public long offset(Subscribe subscribe, short partition) {
@@ -112,6 +155,7 @@ public class ConsumeOffsetServiceImpl implements ConsumeOffsetService {
         List<Broker> brokerList =leaderService.findLeaderBroker(subscribe.getTopic().getCode(),subscribe.getNamespace().getCode());
         if(!NullUtil.isEmpty(brokerList)){
             List<PartitionAckMonitorInfo> partitionAckMonitorInfos = new ArrayList<>();
+            Map<Short,Broker> partitionBrokers=leaderService.findPartitionLeaderBrokerDetail(subscribe.getTopic().getCode(),subscribe.getNamespace().getCode());
             for (Broker broker:brokerList) {
                 String[] args = new String[5];
                 args[0] = broker.getIp();
@@ -122,7 +166,11 @@ public class ConsumeOffsetServiceImpl implements ConsumeOffsetService {
                 String pathKey = "getTopicAppOffset";
                 RestResponse<List<PartitionAckMonitorInfo>> restResponse = httpRestService.get(pathKey, PartitionAckMonitorInfo.class, true, args);
                 if (restResponse.getData() != null) {
-                    partitionAckMonitorInfos.addAll(restResponse.getData());
+                   List<PartitionLeaderAckMonitorInfo>  partitionLeaderAckMonitorInfos=tagLeaderPartitionOffset(broker.getIp()+":"+broker.getPort(),restResponse.getData(),partitionBrokers);
+                   for(PartitionLeaderAckMonitorInfo leaderAckMonitorInfo:partitionLeaderAckMonitorInfos) {
+                       if(leaderAckMonitorInfo.isLeader())
+                            partitionAckMonitorInfos.add(leaderAckMonitorInfo);
+                   }
                 }
             }
             return  partitionAckMonitorInfos;
@@ -218,7 +266,7 @@ public class ConsumeOffsetServiceImpl implements ConsumeOffsetService {
                 }catch (UnsupportedEncodingException e){
                     throw new IllegalStateException(e);
                 }
-                AsyncHttpClient.AsyncRequest(put, new AsyncHttpClient.ConcurrentHttpResponseHandler(latch,String.valueOf(offset.getPartition()),resultMap));
+                AsyncHttpClient.AsyncRequest(put, new AsyncHttpClient.ConcurrentHttpResponseHandler(url,System.currentTimeMillis(),latch,String.valueOf(offset.getPartition()),resultMap));
                 request++;
             }else{
                 logger.info("partition group broker not found!");

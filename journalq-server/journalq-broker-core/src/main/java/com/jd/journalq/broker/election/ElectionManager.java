@@ -26,12 +26,13 @@ import com.jd.journalq.store.StoreService;
 import com.jd.journalq.store.replication.ReplicableStore;
 import com.jd.journalq.toolkit.concurrent.EventBus;
 import com.jd.journalq.toolkit.concurrent.EventListener;
+import com.jd.journalq.toolkit.concurrent.NamedThreadFactory;
 import com.jd.journalq.toolkit.lang.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -72,8 +73,8 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
     public ElectionManager() {
     }
 
-    public ElectionManager(BrokerConfig brokerConfig, ElectionConfig electionConfig, StoreService storeService, Consume consume,
-                           ClusterManager clusterManager, BrokerMonitor brokerMonitor) {
+    public ElectionManager(BrokerConfig brokerConfig, ElectionConfig electionConfig, StoreService storeService,
+                           Consume consume, ClusterManager clusterManager, BrokerMonitor brokerMonitor) {
         this.brokerConfig = brokerConfig;
         this.electionConfig = electionConfig;
         this.clusterManager = clusterManager;
@@ -133,6 +134,7 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
         leaderElections = new ConcurrentHashMap<>();
 
         ClientConfig clientConfig = new ClientConfig();
+        clientConfig.setIoThreadName("jmq-election-io-eventLoop");
         transportClient = new BrokerTransportClientFactory().create(clientConfig);
         transportClient.start();
 
@@ -141,15 +143,16 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
 
         electionTimerExecutor = Executors.newScheduledThreadPool(electionConfig.getTimerScheduleThreadNum());
         electionExecutor = new ThreadPoolExecutor(electionConfig.getExecutorThreadNumMin(), electionConfig.getExecutorThreadNumMax(),
-                60, TimeUnit.SECONDS, new LinkedBlockingDeque<>(electionConfig.getCommandQueueSize()));
-
-        electionMetadataManager = new ElectionMetadataManager(new File(electionConfig.getMetadataFile()));
-        electionMetadataManager.start();
+                60, TimeUnit.SECONDS, new LinkedBlockingDeque<>(electionConfig.getCommandQueueSize()),
+                new NamedThreadFactory("Election-sendCommand"));
 
         replicationManager = new ReplicationManager(electionConfig, storeService, consume, brokerMonitor);
         replicationManager.start();
 
-        electionMetadataManager.restoreLeaderElections(this);
+		Thread.sleep(1000);
+
+        electionMetadataManager = new ElectionMetadataManager(electionConfig.getMetadataFile(), electionConfig.getMetadataPath());
+        electionMetadataManager.recover(this);
 
         logger.info("Election manager started.");
     }
@@ -192,8 +195,9 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
                 .collect(Collectors.toList());
         ReplicaGroup replicaGroup = replicationManager.createReplicaGroup(topic.getFullName(), partitionGroup,
                 allNodes, learners, localBroker, leader, brokerMonitor);
-        createLeaderElection(electType, topic.getFullName(), partitionGroup,
+        LeaderElection leaderElection = createLeaderElection(electType, topic.getFullName(), partitionGroup,
                 allNodes, learners, localBroker, leader, replicaGroup);
+        replicaGroup.setLeaderElection(leaderElection);
 
     }
 
@@ -224,8 +228,9 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
                         .collect(Collectors.toList());
                 ReplicaGroup replicaGroup = replicationManager.createReplicaGroup(topic.getFullName(),
                         partitionGroup, allNodes, learners, localBroker, leader, brokerMonitor);
-                createLeaderElection(electType, topic.getFullName(), partitionGroup, allNodes, learners,
+                LeaderElection leaderElectionNew = createLeaderElection(electType, topic.getFullName(), partitionGroup, allNodes, learners,
                         localBroker, leader, replicaGroup);
+                replicaGroup.setLeaderElection(leaderElectionNew);
                 return;
             }
         }
@@ -233,7 +238,7 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
     }
 
     @Override
-    public void onNodeRemove(TopicName topic, int partitionGroup, int brokerId, int localBroker) throws ElectionException {
+    public void onNodeRemove(TopicName topic, int partitionGroup, int brokerId, int localBroker) {
         logger.info("Remove node {} from election of topic {}, partition group {}",
                 brokerId, topic, partitionGroup);
         if (brokerId == localBroker) {
@@ -246,9 +251,7 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
             logger.warn("Remove node from election of topic {}/partition group {}, " +
                             "leader election is null",
                     topic, partitionGroup);
-            throw new ElectionException(String.format("Remove node from election of topic " +
-                            "%s/partition group %d, leader election is null",
-                    topic, partitionGroup));
+            return;
         }
 
         leaderElection.removeNode(brokerId);
@@ -267,8 +270,9 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
             List<DefaultElectionNode> allNodes = brokers.stream()
                     .map(b -> new DefaultElectionNode(b.getIp() + ":" + b.getBackEndPort(), b.getId()))
                     .collect(Collectors.toList());
-            createLeaderElection(electType, topic.getFullName(), partitionGroup, allNodes, learners,
+            LeaderElection leaderElectionNew = createLeaderElection(electType, topic.getFullName(), partitionGroup, allNodes, learners,
                     localBroker, leader, replicaGroup);
+            replicaGroup.setLeaderElection(leaderElectionNew);
         } catch (Exception e) {
             throw new ElectionException("Create leader election failed", e);
         }
@@ -319,14 +323,15 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
 
         ReplicaGroup replicaGroup = replicationManager.createReplicaGroup(topicPartitionGroup.getTopic(),
                 topicPartitionGroup.getPartitionGroupId(),
-                metadata.getAllNodes().stream().collect(Collectors.toList()),
+                new LinkedList<>(metadata.getAllNodes()),
                 metadata.getLearners(), metadata.getLocalNodeId(),
                 metadata.getLeaderId(), brokerMonitor);
-        createLeaderElection(metadata.getElectType(), topicPartitionGroup.getTopic(),
+        LeaderElection leaderElection = createLeaderElection(metadata.getElectType(), topicPartitionGroup.getTopic(),
                 topicPartitionGroup.getPartitionGroupId(),
-                metadata.getAllNodes().stream().collect(Collectors.toList()),
+                new LinkedList<>(metadata.getAllNodes()),
                 metadata.getLearners(), metadata.getLocalNodeId(),
                 metadata.getLeaderId(), replicaGroup);
+        replicaGroup.setLeaderElection(leaderElection);
     }
 
     /**
@@ -379,7 +384,7 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
         } else if (electType == PartitionGroup.ElectType.raft) {
             leaderElection = new RaftLeaderElection(topicPartitionGroup, electionConfig, this, clusterManager,
                     electionMetadataManager, replicableStore, replicaGroup, electionTimerExecutor,
-                    electionExecutor, electionEventManager, leaderId, localNodeId, allNodes, learners);
+                    electionExecutor, electionEventManager, localNodeId, allNodes, learners);
         } else {
             throw new ElectionException("Incorrect election type {}" + electType);
         }

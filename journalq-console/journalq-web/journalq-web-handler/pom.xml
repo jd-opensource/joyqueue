@@ -67,6 +67,10 @@
             <groupId>com.jd.laf.web</groupId>
             <artifactId>laf-vertx-web-springboot-starter</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.jd.laf.binding</groupId>
+            <artifactId>laf-binding-core</artifactId>
+        </dependency>
     </dependencies>
 
 

@@ -24,12 +24,17 @@ public class BrokerMessageInfo extends BaseMonitorInfo {
     private long bodyCRC;
     private String body;
     private Map<String, String> attributes;
+    private boolean ack;
 
     public BrokerMessageInfo() {
 
     }
 
     public BrokerMessageInfo(BrokerMessage message) {
+        this(message, false);
+    }
+
+    public BrokerMessageInfo(BrokerMessage message, boolean ack) {
         this.msgIndexNo = message.getMsgIndexNo();
         this.storeTime = message.getStoreTime();
         this.startTime = message.getStartTime();
@@ -42,6 +47,7 @@ public class BrokerMessageInfo extends BaseMonitorInfo {
         this.bodyCRC = message.getBodyCRC();
         this.body = message.getText();
         this.attributes = message.getAttributes();
+        this.ack = ack;
     }
 
     public long getMsgIndexNo() {
@@ -138,5 +144,13 @@ public class BrokerMessageInfo extends BaseMonitorInfo {
 
     public void setAttributes(Map<String, String> attributes) {
         this.attributes = attributes;
+    }
+
+    public void setAck(boolean ack) {
+        this.ack = ack;
+    }
+
+    public boolean isAck() {
+        return ack;
     }
 }

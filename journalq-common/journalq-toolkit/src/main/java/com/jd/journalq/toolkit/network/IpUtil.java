@@ -1,6 +1,3 @@
-/**
- *
- */
 package com.jd.journalq.toolkit.network;
 
 import sun.net.util.IPAddressUtil;

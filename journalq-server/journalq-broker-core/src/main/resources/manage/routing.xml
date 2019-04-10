@@ -103,8 +103,11 @@
                handlers="brokerMonitorService.getSendBackLogNum"/>
         <route path="/monitor/archive/consume" inherit="get"
                handlers="brokerMonitorService.getConsumeBacklogNum"/>
+       <route path="/monitor/archive/info" inherit="get"
+            handlers="brokerMonitorService.getArchiveMonitorInfo"/>
 
-        <!-- coordinator -->
+
+     <!-- coordinator -->
         <route path="/monitor/coordinator/group/:groupId/detail" inherit="get"
                handlers="brokerMonitorService.getCoordinator"/>
         <route path="/monitor/coordinator/namespace/:namespace/group/:groupId" inherit="get"
@@ -174,12 +177,12 @@
                handlers="brokerManageService.readPartitionGroupStore"/>
         <route path="/manage/topic/list" inherit="get"
                handlers="brokerManageService.topics"/>
-     <route path="/manage/topic/:topic/partitionGroup/detail" inherit="get"
-            handlers="brokerManageService.partitionGroups"/>
+        <route path="/manage/topic/:topic/partitionGroup/detail" inherit="get"
+               handlers="brokerManageService.partitionGroups"/>
 
 
 
-     <route path="/manage/store/indexes" inherit="get"
+        <route path="/manage/store/indexes" inherit="get"
                handlers="brokerManageService.readIndices"/>
         <route path="/manage/store/file" inherit="get"
                handlers="brokerManageService.readFile"/>
@@ -195,5 +198,9 @@
                handlers="brokerManageService.initCoordinator"/>
         <route path="/manage/coordinator/namespace/:namespace/group/:groupId" inherit="delete"
                handlers="brokerManageService.removeCoordinatorGroup"/>
+
+        <!-- election -->
+        <route path="/manage/election/metadata/restore" inherit="get"
+               handlers="brokerManageService.restoreElectionMetadata"/>
     </routes>
 </vertx>

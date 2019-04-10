@@ -33,4 +33,8 @@ public class ProduceConfig {
     public int getBrokerQosLevel() {
         return PropertySupplier.getValue(propertySupplier, ProducerConfigKey.BROKER_QOS_LEVEL);
     }
+
+    public long getPrintMetricIntervalMs() {
+        return PropertySupplier.getValue(propertySupplier, ProducerConfigKey.PRINT_METRIC_INTERVAL_MS);
+    }
 }

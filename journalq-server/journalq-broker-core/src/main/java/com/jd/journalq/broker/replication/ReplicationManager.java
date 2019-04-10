@@ -19,6 +19,7 @@ import com.jd.journalq.network.transport.support.DefaultTransportAttribute;
 import com.jd.journalq.store.StoreService;
 import com.jd.journalq.store.replication.ReplicableStore;
 import com.jd.journalq.toolkit.concurrent.EventListener;
+import com.jd.journalq.toolkit.concurrent.NamedThreadFactory;
 import com.jd.journalq.toolkit.lang.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import org.slf4j.Logger;
@@ -42,22 +43,20 @@ public class ReplicationManager extends Service {
 
     private StoreService storeService;
     private Consume consume;
-    private BrokerMonitor brokerMonitor;
 
     private TransportClient transportClient;
     private ExecutorService replicateExecutor;
+    private ScheduledExecutorService replicateTimerExecutor;
 
     public ReplicationManager(ElectionConfig electionConfig, StoreService storeService,
                               Consume consume, BrokerMonitor brokerMonitor) {
         Preconditions.checkArgument(electionConfig != null, "election config is null");
         Preconditions.checkArgument(storeService != null, "store service is null");
         Preconditions.checkArgument(consume != null, "consume is null");
-        Preconditions.checkArgument(brokerMonitor != null, "broker monitor is null");
 
         this.electionConfig = electionConfig;
         this.storeService = storeService;
         this.consume = consume;
-        this.brokerMonitor = brokerMonitor;
     }
 
     @Override
@@ -67,6 +66,7 @@ public class ReplicationManager extends Service {
         replicaGroups = new ConcurrentHashMap<>();
 
         ClientConfig clientConfig = new ClientConfig();
+        clientConfig.setIoThreadName("jmq-replication-io-eventLoop");
         transportClient = new BrokerTransportClientFactory().create(clientConfig);
         transportClient.start();
 
@@ -74,7 +74,10 @@ public class ReplicationManager extends Service {
         transportClient.addListener(clientEventListener);
 
         replicateExecutor = new ThreadPoolExecutor(electionConfig.getReplicateThreadNumMin(), electionConfig.getReplicateThreadNumMax(),
-                60, TimeUnit.SECONDS, new LinkedBlockingDeque<>(electionConfig.getCommandQueueSize()));
+                60, TimeUnit.SECONDS, new LinkedBlockingDeque<>(electionConfig.getCommandQueueSize()),
+                new NamedThreadFactory("Replicate-sendCommand"));
+
+         replicateTimerExecutor = Executors.newScheduledThreadPool(electionConfig.getTimerScheduleThreadNum());
     }
 
     @Override
@@ -103,7 +106,7 @@ public class ReplicationManager extends Service {
                     "%d failed, replicable store is null", topic, partitionGroup));
         }
         replicaGroup = new ReplicaGroup(topicPartitionGroup, this, replicableStore, electionConfig,
-                consume, replicateExecutor, brokerMonitor, allNodes, learners, localReplicaId, leaderId);
+                consume, replicateExecutor, replicateTimerExecutor, brokerMonitor, allNodes, learners, localReplicaId, leaderId);
         try {
             replicaGroup.start();
         } catch (Exception e) {

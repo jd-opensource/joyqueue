@@ -2,7 +2,6 @@ package com.jd.journalq.handler.routing.validate;
 
 import com.jd.journalq.handler.error.ConfigException;
 import com.jd.journalq.handler.error.ErrorCode;
-import com.jd.journalq.handler.Constants;
 import com.jd.journalq.model.domain.Application;
 import com.jd.journalq.model.domain.ApplicationToken;
 import com.jd.journalq.service.ApplicationService;
@@ -13,6 +12,9 @@ import com.jd.laf.web.vertx.parameter.Parameters.RequestParameter;
 import io.vertx.ext.web.RoutingContext;
 
 import java.util.Date;
+
+import static com.jd.journalq.handler.Constants.APPLICATION;
+import static com.jd.journalq.handler.Constants.TOKEN;
 
 /**
  * 应用身份认证
@@ -35,8 +37,8 @@ public class ValidateAppTokenHandler extends ValidateHandler {
     protected void validate(final RoutingContext context, final RequestParameter parameter) {
 
         Parameter header = parameter.header();
-        String appCode = header.getString(Constants.APPLICATION);
-        String token = header.getString(Constants.TOKEN);
+        String appCode = header.getString(APPLICATION);
+        String token = header.getString(TOKEN);
 
         if (appCode == null || appCode.isEmpty()) {
             throw new ConfigException(ErrorCode.BadRequest, "请求头没有应用代码");
@@ -48,7 +50,7 @@ public class ValidateAppTokenHandler extends ValidateHandler {
         if (application == null) {
             throw new ConfigException(ErrorCode.ApplicationNotExists);
         }
-        context.put(Constants.APPLICATION, application);
+        context.put(APPLICATION, application);
         ApplicationToken applicationToken = applicationTokenService.findByAppAndToken(String.valueOf(application.getId()), token);
         if (applicationToken == null
                 || !applicationToken.isEffective(new Date())) {

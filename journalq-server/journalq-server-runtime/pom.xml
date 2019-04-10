@@ -20,7 +20,7 @@
         </dependency>
         <dependency>
             <groupId>com.jd.journalq</groupId>
-            <artifactId>journalq-retry-plugins</artifactId>
+            <artifactId>journalq-retry-h2</artifactId>
         </dependency>
         <dependency>
             <groupId>com.jd.journalq</groupId>

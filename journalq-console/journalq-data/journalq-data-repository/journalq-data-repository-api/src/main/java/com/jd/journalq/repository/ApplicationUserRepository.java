@@ -11,4 +11,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ApplicationUserRepository extends PageRepository<ApplicationUser, QApplicationUser> {
     ApplicationUser findByUserApp(ApplicationUser applicationUser);
+    int deleteByAppId(long appId);
 }

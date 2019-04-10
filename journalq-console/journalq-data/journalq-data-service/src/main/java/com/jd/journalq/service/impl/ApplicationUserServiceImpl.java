@@ -21,4 +21,9 @@ public class ApplicationUserServiceImpl extends PageServiceSupport<ApplicationUs
         applicationUser.setUser(new Identity(user));
         return repository.findByUserApp(applicationUser);
     }
+
+    @Override
+    public int deleteByAppId(long appId) {
+        return repository.deleteByAppId(appId);
+    }
 }

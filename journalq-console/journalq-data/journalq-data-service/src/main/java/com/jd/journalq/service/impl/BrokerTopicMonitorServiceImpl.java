@@ -1,5 +1,6 @@
 package com.jd.journalq.service.impl;
 
+import com.jd.journalq.convert.CodeConverter;
 import com.jd.journalq.manage.PartitionGroupMetric;
 import com.jd.journalq.model.PageResult;
 import com.jd.journalq.model.Pagination;
@@ -165,13 +166,13 @@ public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService 
             QConsumer qConsumer = new QConsumer();
             qConsumer.setTopic(new Topic(topic));
             List<Consumer> consumerList =  consumerService.findByQuery(qConsumer);
-            return consumerList.stream().map(consumer -> consumer.getApp().getCode()).collect(Collectors.toList());
+            return consumerList.stream().map(consumer -> CodeConverter.convertApp(consumer.getApp(),consumer.getSubscribeGroup())).collect(Collectors.toList());
 
         } else if (subscribeType == SubscribeType.PRODUCER) {
             QProducer qProducer = new QProducer();
             qProducer.setTopic(new Topic(topic));
             List<Producer> producerList =  producerService.findByQuery(qProducer);
-            return producerList.stream().map(consumer -> consumer.getApp().getCode()).collect(Collectors.toList());
+            return producerList.stream().map(producer -> producer.getApp().getCode()).collect(Collectors.toList());
         }
         return new ArrayList<>();
 

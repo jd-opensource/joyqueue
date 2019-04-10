@@ -1,6 +1,5 @@
 package com.jd.journalq.broker.monitor;
 
-import com.google.common.collect.Sets;
 import com.jd.journalq.network.session.Connection;
 import com.jd.journalq.network.session.Consumer;
 import com.jd.journalq.network.session.Producer;
@@ -8,7 +7,6 @@ import com.jd.journalq.network.transport.Transport;
 import com.jd.journalq.toolkit.concurrent.EventBus;
 import com.jd.journalq.toolkit.concurrent.EventListener;
 import com.jd.journalq.toolkit.service.Service;
-import com.jd.journalq.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,9 +42,6 @@ public class SessionManager extends Service {
     private ConcurrentMap<String, Consumer> consumers = new ConcurrentHashMap<>();
     // 事件管理器
     private EventBus<SessionEvent> eventManager = new EventBus<>();
-
-    private ConcurrentMap<String, Set<String>> consumerIds = new ConcurrentHashMap<>();
-
 
     @Override
     protected void doStart() throws Exception {
@@ -155,57 +150,6 @@ public class SessionManager extends Service {
         connection.getConsumers().clear();
     }
 
-    private void removeConsumerId(Consumer consumer) {
-        Set<String> idMap = consumerIds.get(getConsumerIdKey(consumer.getApp(), consumer.getTopic()));
-        if (idMap != null) {
-            idMap.remove(consumer.getId());
-        }
-    }
-
-    private void addConsumerId(Consumer consumer) {
-        Set<String> idMap = consumerIds.get(getConsumerIdKey(consumer.getApp(), consumer.getTopic()));
-        if (idMap == null) {
-            idMap = Sets.newConcurrentHashSet();
-            Set<String> old = consumerIds.putIfAbsent(getConsumerIdKey(consumer.getApp(), consumer.getTopic()), idMap);
-            if (old != null) {
-                idMap = old;
-            }
-        }
-        idMap.add(consumer.getId());
-    }
-
-    /**
-     * 有效的消费者数
-     *
-     * @param app
-     * @param topic
-     * @param ackTimeout
-     * @return
-     */
-    public int getConsumerSize(String app, String topic, long ackTimeout) {
-        int size = 0;
-        Set<String> idMap = consumerIds.get(getConsumerIdKey(app, topic));
-        if (idMap == null) {
-            return size;
-        }
-        Iterator it = idMap.iterator();
-        while (it.hasNext()) {
-            Consumer consumer = consumers.get(it.next());
-            //没有设置超时时间或者没有超时，认为是可用的consumer
-            if (consumer != null && (consumer.getLastGetMessageTime() == 0
-                    || (consumer.getLastGetMessageTime() + ackTimeout > SystemClock.getInstance().now()))) {
-                size++;
-            }
-        }
-        return size;
-    }
-
-    private String getConsumerIdKey(String app, String topic) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(app).append("~@").append(topic);
-        return sb.toString();
-    }
-
     /**
      * 返回所有连接。
      *
@@ -243,7 +187,6 @@ public class SessionManager extends Service {
         }
 
         if (connection.addConsumer(consumer.getTopic(), consumer.getApp(), consumer.getId()) && consumers.putIfAbsent(consumer.getId(), consumer) == null) {
-            addConsumerId(consumer);
             try {
                 // 成功则同步通知监听器
                 eventManager.inform(new SessionEvent(SessionEventType.AddConsumer, consumer));
@@ -280,7 +223,6 @@ public class SessionManager extends Service {
         }
 
         connection.removeConsumer(consumer.getTopic(), consumer.getApp());
-        removeConsumerId(consumer);
         // 异步通知
         eventManager.add(new SessionEvent(SessionEventType.RemoveConsumer, consumer));
         return true;

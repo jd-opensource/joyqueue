@@ -1,5 +1,6 @@
 package com.jd.journalq.util;
 
+import com.jd.journalq.exception.ServiceException;
 import com.jd.journalq.model.exception.BusinessException;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
@@ -13,6 +14,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
@@ -69,7 +71,9 @@ public class HttpUtil {
             } catch (Throwable e) {
                 logger.warn("logger error.", e);
             }
+            long startMs=System.currentTimeMillis();
             CloseableHttpResponse response = getClient().execute(request);
+            logger.info(String.format("communicating request[%s],time elapsed %d ms.", request.toString(), System.currentTimeMillis()-startMs));
             return response;
         } catch (Exception e) {
             String errorMsg = String.format("error occurred while communicating with  request = %s", request);
@@ -108,7 +112,7 @@ public class HttpUtil {
      * @param request  http request
      * @param response  http response
      * @throws IllegalAccessException when network response http status is not ok or other network exception
-     * @throws java.io.IOException when failed to process response entity
+     * @throws IOException when failed to process response entity
      * process http 请求的返回
      * @return  string body
      **/

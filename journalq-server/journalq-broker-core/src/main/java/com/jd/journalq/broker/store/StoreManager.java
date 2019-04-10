@@ -64,8 +64,8 @@ public class StoreManager extends Service implements BrokerContextAware, Propert
         if (null != replicas) {
             for (Replica replica : replicas) {
                 PartitionGroup group = clusterManager.getPartitionGroupByGroup(replica.getTopic(),replica.getGroup());
-                logger.info("begin restore topic {},group.no {} group {}",replica.getTopic().getFullName(),replica.getGroup(),group);
                 if (group.getReplicas().contains(brokerId)) {
+                    logger.info("begin restore topic {},group.no {} group {}",replica.getTopic().getFullName(),replica.getGroup(),group);
                     storeService.restorePartitionGroup(group.getTopic().getFullName(), group.getGroup());
                     //electionService.onPartitionGroupCreate(group.getElectType(), group.getTopic(), group.getGroup(),
                     //        new ArrayList<>(group.getBrokers().values()), group.getLearners(), brokerId, group.getLeader());

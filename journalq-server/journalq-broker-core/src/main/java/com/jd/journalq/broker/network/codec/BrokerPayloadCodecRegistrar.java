@@ -5,6 +5,12 @@ import com.jd.journalq.broker.index.network.codec.*;
 import com.jd.journalq.network.codec.BooleanAckCodec;
 import com.jd.journalq.network.transport.codec.PayloadCodecFactory;
 import com.jd.journalq.nsr.network.codec.OperatePartitionGroupCodec;
+import com.jd.journalq.server.retry.remote.command.codec.GetRetryAckCodec;
+import com.jd.journalq.server.retry.remote.command.codec.GetRetryCodec;
+import com.jd.journalq.server.retry.remote.command.codec.GetRetryCountAckCodec;
+import com.jd.journalq.server.retry.remote.command.codec.GetRetryCountCodec;
+import com.jd.journalq.server.retry.remote.command.codec.PutRetryCodec;
+import com.jd.journalq.server.retry.remote.command.codec.UpdateRetryCodec;
 
 /**
  * jmq消息体编解码器注册器
@@ -21,12 +27,12 @@ public class BrokerPayloadCodecRegistrar {
         payloadCodecFactory.register(new BooleanAckCodec());
 
         // retry message command codec
-    /*    payloadCodecFactory.register(new GetRetryCodec());
+        payloadCodecFactory.register(new GetRetryCodec());
         payloadCodecFactory.register(new GetRetryAckCodec());
         payloadCodecFactory.register(new GetRetryCountCodec());
         payloadCodecFactory.register(new GetRetryCountAckCodec());
         payloadCodecFactory.register(new PutRetryCodec());
-        payloadCodecFactory.register(new UpdateRetryCodec());*/
+        payloadCodecFactory.register(new UpdateRetryCodec());
 
         // raft election command codec
         payloadCodecFactory.register(new VoteRequestDecoder());

@@ -15,12 +15,16 @@ import com.jd.journalq.model.domain.Subscribe;
 import com.jd.journalq.model.domain.SubscribeType;
 import com.jd.journalq.model.domain.Broker;
 import com.jd.journalq.model.domain.SimplifiedBrokeMessage;
+import com.jd.journalq.other.HttpRestService;
 import com.jd.journalq.service.BrokerMessageService;
+import com.jd.journalq.service.LeaderService;
 import com.jd.journalq.util.NullUtil;
 import com.jd.journalq.util.UrlEncoderUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import javax.annotation.Resource;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -38,6 +42,11 @@ public class BrokerMessageServiceImpl implements BrokerMessageService {
     public final static ObjectMapper mapper = new ObjectMapper();
     @Resource(type = BrokerMonitorClusterQuery.class)
     private BrokerClusterQuery<Subscribe> brokerClusterQuery;
+    @Autowired
+    private LeaderService leaderService;
+    @Autowired(required = false)
+    private HttpRestService httpRestService;
+
     @Override
     public List<SimplifiedBrokeMessage> previewPendingMessage(Subscribe subscribe, int count) {
         List<SimplifiedBrokeMessage> simplifiedBrokeMessages=new ArrayList<>();
@@ -66,15 +75,7 @@ public class BrokerMessageServiceImpl implements BrokerMessageService {
                 if (brokerMessageResponse.getCode()== RestResponseCode.SUCCESS.getCode()) {
                     if(!NullUtil.isEmpty(brokerMessageResponse.getData())){
                         for (BrokerMessageInfo m : brokerMessageResponse.getData()) {
-                            message = new SimplifiedBrokeMessage();
-                            message.setQueryId(response.getKey());
-                            message.setId(m.getPartition() + "-" + m.getMsgIndexNo());
-                            message.setSendTime(m.getStartTime());
-                            message.setStoreTime(m.getStoreTime());
-                            message.setBusinessId(m.getBusinessId());
-                            message.setBody(new String(m.getBody().getBytes(Charset.forName("utf-8"))));
-                            message.setAttributes(m.getAttributes());
-                            message.setFlag(false);
+                            message = BrokerMessageConvert(m);
                             simplifiedBrokeMessages.add(message);
                         }
                     }else{
@@ -97,14 +98,61 @@ public class BrokerMessageServiceImpl implements BrokerMessageService {
     }
 
     @Override
-    public List<SimplifiedBrokeMessage> viewMessage(long topicId,String topic, String app, short partition, long index, int count) {
+    public List<BrokerMessageInfo> viewMessage(Subscribe subscribe,String partition, String index, int count) {
+        Map.Entry<PartitionGroup, Broker> brokerEntry = leaderService.findPartitionLeaderBrokerDetail(subscribe.getNamespace().getCode(),subscribe.getTopic().getCode(),Integer.valueOf(partition));
+        Broker broker = brokerEntry.getValue();
+        String path="getPartitionMessageByIndex";
+        String[] args=new String[7];
+        args[0]=broker.getIp();
+        args[1]=String.valueOf(broker.getMonitorPort());
+        args[2]=CodeConverter.convertTopic(subscribe.getNamespace(),subscribe.getTopic()).getFullName();
+        args[3]=subscribe.getApp().getCode();
+        args[4]=partition;
+        args[5]=index;
+        args[6]=String.valueOf(count);
+        RestResponse<List<BrokerMessageInfo>> restResponse = httpRestService.get(path,BrokerMessageInfo.class,true,args);
+        if (restResponse != null && restResponse.getData() != null) {
+            return restResponse.getData();
+        }
         return null;
     }
 
+    @Override
+    public Long getPartitionIndexByTime(Subscribe subscribe,String partition, String timestamp) {
+        Map.Entry<PartitionGroup, Broker> brokerEntry = leaderService.findPartitionLeaderBrokerDetail(subscribe.getNamespace().getCode(),subscribe.getTopic().getCode(),Integer.valueOf(partition));
+        Broker broker = brokerEntry.getValue();
+        String path="getTopicAppPartitionIndexByTime";
+        String[] args=new String[6];
+        args[0]=broker.getIp();
+        args[1]=String.valueOf(broker.getMonitorPort());
+        args[2]=CodeConverter.convertTopic(subscribe.getNamespace(),subscribe.getTopic()).getFullName();
+        args[3]=subscribe.getApp().getCode();
+        args[4]=partition;
+        args[5]=timestamp;
+        RestResponse<Long> restResponse = httpRestService.get(path,Long.class,false,args);
+        if (restResponse != null && restResponse.getData() != null) {
+            return restResponse.getData();
+        }
+        return null;
+    }
 
 
     @Override
     public SimplifiedBrokeMessage download(String ip, int port, String topic, String app, short partition, long index) {
         return null;
+    }
+
+
+    private SimplifiedBrokeMessage BrokerMessageConvert(BrokerMessageInfo m) {
+        SimplifiedBrokeMessage message = new SimplifiedBrokeMessage();
+//        message.setQueryId(response.getKey());
+        message.setId(m.getPartition() + "-" + m.getMsgIndexNo());
+        message.setSendTime(m.getStartTime());
+        message.setStoreTime(m.getStoreTime());
+        message.setBusinessId(m.getBusinessId());
+        message.setBody(new String(m.getBody().getBytes(Charset.forName("utf-8"))));
+        message.setAttributes(m.getAttributes());
+        message.setFlag(false);
+        return message;
     }
 }

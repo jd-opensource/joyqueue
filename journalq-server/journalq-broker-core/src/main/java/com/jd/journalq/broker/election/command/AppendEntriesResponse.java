@@ -25,6 +25,8 @@ public class AppendEntriesResponse extends JMQPayload {
 
     private int replicaId;
 
+    private int entriesTerm;
+
     public TopicPartitionGroup getTopicPartitionGroup() {
         return topicPartitionGroup;
     }
@@ -73,6 +75,14 @@ public class AppendEntriesResponse extends JMQPayload {
         this.replicaId = replicaId;
     }
 
+    public int getEntriesTerm() {
+        return entriesTerm;
+    }
+
+    public void setEntriesTerm(int entriesTerm) {
+        this.entriesTerm = entriesTerm;
+    }
+
     @Override
     public int type() {
         return CommandType.RAFT_APPEND_ENTRIES_RESPONSE;
@@ -86,6 +96,7 @@ public class AppendEntriesResponse extends JMQPayload {
                 .append(", nextPosition:").append(nextPosition)
                 .append(", writePosition:").append(writePosition)
                 .append(", replicaId:").append(replicaId)
+                .append(", entriesTerm:").append(entriesTerm)
                 .append("}");
         return sb.toString();
     }
@@ -123,6 +134,11 @@ public class AppendEntriesResponse extends JMQPayload {
 
         public Build replicaId(int replicaId) {
             appendEntriesResponse.setReplicaId(replicaId);
+            return this;
+        }
+
+        public Build entriesTerm(int entriesTerm) {
+            appendEntriesResponse.setEntriesTerm(entriesTerm);
             return this;
         }
 

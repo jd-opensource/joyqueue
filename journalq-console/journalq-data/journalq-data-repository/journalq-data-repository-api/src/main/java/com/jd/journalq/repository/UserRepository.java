@@ -58,7 +58,7 @@ public interface UserRepository extends PageRepository<User, QUser> {
      * @param userId * @param appId
      * @return
      */
-    int deleteAppUser(long userId, long appId);
+    int deleteAppUser(@Param("userId") long userId, @Param("appId") long appId);
 
     /**
      * 删除应用用户
@@ -92,7 +92,7 @@ public interface UserRepository extends PageRepository<User, QUser> {
      * @param appId
      * @return
      */
-    boolean belong(@Param("userId")long userId, @Param("appId")long appId);
+    boolean belong(@Param("userId") long userId, @Param("appId") long appId);
 
     /**
      * 根据where查询Sql查找用户

@@ -11,6 +11,11 @@ import javax.validation.constraints.NotNull;
  */
 public class Broker extends BaseModel {
     public static final String DEFAULT_RETRY_TYPE="RemoteRetry";
+    public static final String PERMISSION_FULL="FULL";
+    public static final String PERMISSION_READ="READ";
+    public static final String PERMISSION_WRITE="WRITE";
+    public static final String PERMISSION_NONE="NONE";
+    public static final String DEFAULT_PERMISSION=PERMISSION_FULL;
     /**
      * 数据中心Id
      */
@@ -48,6 +53,8 @@ public class Broker extends BaseModel {
      * Broker实例的描述
      */
     private String description;
+
+    private String permission=DEFAULT_PERMISSION;
 
     public Broker() {
         super();
@@ -149,5 +156,13 @@ public class Broker extends BaseModel {
 
     public void setGroup(Identity group) {
         this.group = group;
+    }
+
+    public String getPermission() {
+        return permission;
+    }
+
+    public void setPermission(String permission) {
+        this.permission = permission;
     }
 }

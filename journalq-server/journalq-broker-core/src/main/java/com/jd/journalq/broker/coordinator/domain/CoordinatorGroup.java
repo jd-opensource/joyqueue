@@ -21,6 +21,7 @@ public class CoordinatorGroup {
 
     private static final int MAX_EXPIRED_MEMBER = 100;
     private String id;
+    private String extension;
     private ConcurrentMap<String, CoordinatorGroupMember> members = Maps.newConcurrentMap();
     private Cache<String, CoordinatorGroupExpiredMember> expiredMembers = CacheBuilder.newBuilder().maximumSize(MAX_EXPIRED_MEMBER).build();
     private Map<String, CoordinatorGroupExpiredMember> expiredMembersMap;
@@ -31,6 +32,11 @@ public class CoordinatorGroup {
 
     public CoordinatorGroup(String id) {
         this.id = id;
+    }
+
+    public void addMember(CoordinatorGroupMember member) {
+        String host = getHost(member.getConnectionHost());
+        members.put(host, member);
     }
 
     public void addExpiredMember(CoordinatorGroupMember member) {
@@ -62,7 +68,7 @@ public class CoordinatorGroup {
         if (!host.contains(":")) {
             return host;
         }
-        return host.split(":")[0];
+        return host;
     }
 
     public String getId() {
@@ -71,6 +77,14 @@ public class CoordinatorGroup {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public void setExtension(String extension) {
+        this.extension = extension;
+    }
+
+    public String getExtension() {
+        return extension;
     }
 
     public ConcurrentMap<String, CoordinatorGroupMember> getMembers() {

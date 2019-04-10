@@ -35,7 +35,8 @@
         a.update_time,
         a.update_by,
         a.`status`,
-        a.`alias_code`
+        a.`alias_code`,
+        a.`discription`
     </sql>
     <insert id="add" parameterType="application" useGeneratedKeys="true" keyProperty="id">
         insert into application
@@ -53,7 +54,8 @@
         update_time,
         update_by,
         `status`,
-        `alias_code`)
+        `alias_code`,
+        `discription`)
         values
         (
         #{code},
@@ -69,7 +71,8 @@
         #{updateTime},
         #{updateBy.id},
         #{status},
-        #{aliasCode}
+        #{aliasCode},
+        #{discription}
         )
     </insert>
 
@@ -81,6 +84,7 @@
           `owner_id`=#{owner.id},
           `owner_code`=#{owner.code},
           `sign`=#{sign},
+          discription=#{discription}
           update_time=#{updateTime},
           update_by=#{updateBy.id}
         WHERE
@@ -106,7 +110,9 @@
         <include refid="baseColumn"/>
         FROM
         application a
-        WHERE a.code = #{code} limit 0,1
+        WHERE a.code = #{code}
+        AND a.status != -1
+        limit 0,1
     </select>
 
     <select id="findByCodes" parameterType="java.util.List" resultMap="baseResultMap">

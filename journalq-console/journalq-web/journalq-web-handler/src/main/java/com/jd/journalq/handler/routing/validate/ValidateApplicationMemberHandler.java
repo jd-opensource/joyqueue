@@ -1,15 +1,17 @@
 package com.jd.journalq.handler.routing.validate;
 
-import com.jd.journalq.service.UserService;
-import com.jd.journalq.handler.Constants;
 import com.jd.journalq.handler.error.ConfigException;
 import com.jd.journalq.handler.error.ErrorCode;
-import com.jd.laf.binding.annotation.Value;
 import com.jd.journalq.model.domain.Application;
 import com.jd.journalq.model.domain.User;
 import com.jd.journalq.model.domain.User.UserRole;
+import com.jd.journalq.service.UserService;
+import com.jd.laf.binding.annotation.Value;
 import com.jd.laf.web.vertx.parameter.Parameters;
 import io.vertx.ext.web.RoutingContext;
+
+import static com.jd.journalq.handler.Constants.APPLICATION;
+import static com.jd.journalq.handler.Constants.USER_KEY;
 
 /**
  * 判断当前用户是否是应用成员
@@ -27,8 +29,8 @@ public class ValidateApplicationMemberHandler extends ValidateHandler {
 
     @Override
     protected void validate(final RoutingContext context, final Parameters.RequestParameter parameter) {
-        Application application = context.get(Constants.APPLICATION);
-        User user = context.get(Constants.USER_KEY);
+        Application application = context.get(APPLICATION);
+        User user = context.get(USER_KEY);
         if (application == null || user == null) {
             throw new ConfigException(ErrorCode.NoPrivilege);
         } else if (application.isOwner(user)) {

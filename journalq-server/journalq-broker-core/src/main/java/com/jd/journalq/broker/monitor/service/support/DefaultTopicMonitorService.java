@@ -7,6 +7,7 @@ import com.jd.journalq.broker.monitor.stat.BrokerStat;
 import com.jd.journalq.broker.monitor.stat.TopicStat;
 import com.jd.journalq.model.Pager;
 import com.jd.journalq.monitor.TopicMonitorInfo;
+import com.jd.journalq.store.StoreManagementService;
 
 import java.util.List;
 import java.util.Map;

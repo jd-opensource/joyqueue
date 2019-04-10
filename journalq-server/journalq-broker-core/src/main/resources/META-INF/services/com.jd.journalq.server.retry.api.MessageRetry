@@ -1,1 +1,1 @@
-com.jd.journalq.server.retry.cache.CacheMessageRetry
+com.jd.journalq.broker.retry.BrokerRetryManager

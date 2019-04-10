@@ -5,6 +5,7 @@ import com.jd.journalq.broker.buffer.Serializer;
 import com.jd.journalq.broker.consumer.Consume;
 import com.jd.journalq.broker.manage.exception.ManageException;
 import com.jd.journalq.broker.manage.service.MessageManageService;
+import com.jd.journalq.message.BrokerMessage;
 import com.jd.journalq.monitor.BrokerMessageInfo;
 import com.jd.journalq.network.session.Consumer;
 import com.jd.journalq.store.StoreManagementService;

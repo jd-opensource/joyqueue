@@ -3,6 +3,8 @@ package com.jd.journalq.store.file;
 import com.jd.journalq.store.PartialLogException;
 import com.jd.journalq.store.ReadException;
 import com.jd.journalq.store.message.MessageParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.util.zip.CRC32;
@@ -12,6 +14,7 @@ import java.util.zip.CRC32;
  * Date: 2018-11-28
  */
 public class StoreMessageSerializer implements LogSerializer<ByteBuffer> {
+    private static final Logger logger = LoggerFactory.getLogger(StoreMessageSerializer.class);
     private final long maxLogLength;
 
     public StoreMessageSerializer(long maxLogLength) {
@@ -90,6 +93,7 @@ public class StoreMessageSerializer implements LogSerializer<ByteBuffer> {
                 }
                 pos += len;
             } else {
+                logger.warn("Invalid length! length from message: {}, message offset: {}", len, pos);
                 throw new ReadException();
             }
         }

@@ -23,6 +23,7 @@ import com.jd.journalq.toolkit.concurrent.EventListener;
 import com.jd.journalq.toolkit.concurrent.LoopThread;
 import com.jd.journalq.toolkit.lang.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
+import com.jd.journalq.toolkit.time.SystemClock;
 import com.jd.laf.extension.ExtensionManager;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -34,6 +35,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * 消费位置管理
@@ -53,6 +56,8 @@ public class PositionManager extends Service {
     private PositionStore<ConsumePartition, Position> positionStore;
     // 补偿消费位置线程（10分钟跑一次）
     private LoopThread thread;
+    // 最近应答时间跟踪器
+    private Map<ConsumePartition, /* 最新应答时间 */ AtomicLong> lastAckTimeTrace = new ConcurrentHashMap<>();
 
     public PositionManager(ClusterManager clusterManager, StoreService storeService, ConsumeConfig consumeConfig) {
         this.clusterManager = clusterManager;
@@ -127,6 +132,14 @@ public class PositionManager extends Service {
         logger.info("PositionManager is stopped.");
     }
 
+    /**
+     * 获取最近一次应答消费位置跟踪器
+     *
+     * @return
+     */
+    public Map<ConsumePartition, AtomicLong> getLastAckTimeTrace() {
+        return lastAckTimeTrace;
+    }
 
     /**
      * 根据主题+应用+分区分组获取消费位置信息
@@ -151,6 +164,7 @@ public class PositionManager extends Service {
                 partitions.stream().forEach(partition ->
                         appList.stream().forEach(element -> {
                             ConsumePartition consumePartition = new ConsumePartition(topic.getFullName(), element, partition);
+                            consumePartition.setPartitionGroup(partitionGroup);
                             Position position = positionStore.get(consumePartition);
                             consumeInfo.put(consumePartition, position);
                         })
@@ -215,22 +229,105 @@ public class PositionManager extends Service {
      * @param index     起始消息序号
      * @return 是否更新成功
      */
-    public boolean updateLastMsgAckIndex(TopicName topic, String app, short partition, long index) {
-        boolean isSuccess = false;
+    public boolean updateLastMsgAckIndex(TopicName topic, String app, short partition, long index) throws JMQException {
+        logger.debug("Update last ack index, topic:{}, app:{}, partition:{}, index:{}", topic, app, partition, index);
+        // 检查索引有效性
+        checkIndex(topic, partition, index);
+        // 标记最近一次更新应答位置时间
+        markLastAckTime(topic, app, partition);
+
         ConsumePartition consumePartition = new ConsumePartition(topic.getFullName(), app, partition);
-        try {
-            Position position = positionStore.get(consumePartition);
-            if (position != null) {
-                position.setAckCurIndex(index);
-                isSuccess = true;
-            } else {
-                logger.error("Position is null, topic:{}, app:{}, partition:{}", topic, app, partition);
-            }
-        } catch (Exception ex) {
-            isSuccess = false;
-            logger.warn("Update ack index error.", ex);
+        Position position = positionStore.get(consumePartition);
+        if (position != null) {
+            position.setAckCurIndex(index);
+        } else {
+            logger.error("Position is null, topic:{}, app:{}, partition:{}, index:{}", topic, app, partition, index);
+            // 补偿逻辑：如果当前broker是指定partition对应partitionGroup的leader，则按照给定index初始化Position，否则不处理
+            addAndUpdatePosition(topic, app, partition, index);
         }
-        return isSuccess;
+        return true;
+    }
+
+    /**
+     * 检查更新的位置是否有效
+     *
+     * @param topic
+     * @param partition
+     * @param index
+     * @throws JMQException
+     */
+    private void checkIndex(TopicName topic, short partition, long index) throws JMQException {
+        Integer partitionGroupId = clusterManager.getPartitionGroupId(topic, partition);
+        if (partitionGroupId == null) {
+            // 元数据获取不到partitionGroup
+            throw new JMQException(JMQCode.CONSUME_POSITION_META_DATA_NULL, String.format("topic:[%s], partition:[%s], index:[%s]", topic, partition, index));
+        }
+
+        PartitionGroupStore store = storeService.getStore(topic.getFullName(), partitionGroupId);
+
+        long leftIndex = store.getLeftIndex(partition);
+        if (index < leftIndex) {
+            throw new JMQException(JMQCode.SE_INDEX_UNDERFLOW , "index less than leftIndex error.");
+        }
+
+        long rightIndex = store.getRightIndex(partition);
+        if (index > rightIndex) {
+            throw new JMQException(JMQCode.SE_INDEX_UNDERFLOW , "index more than rightIndex error.");
+        }
+
+
+    }
+
+    /**
+     * 标记最后一次应答时间
+     * @param topic
+     * @param app
+     * @param partition
+     */
+    private void markLastAckTime(TopicName topic, String app, short partition) {
+        ConsumePartition consumePartition = new ConsumePartition(topic.getFullName(), app, partition);
+        AtomicLong lastAckTime = lastAckTimeTrace.get(consumePartition);
+        if (lastAckTime == null) {
+            lastAckTime = new AtomicLong(SystemClock.now());
+            lastAckTimeTrace.put(consumePartition, lastAckTime);
+        } else {
+            lastAckTime.set(SystemClock.now());
+        }
+    }
+
+    /**
+     * 添加并更新消费位置
+     *
+     * @param topic
+     * @param app
+     * @param partition
+     * @param index
+     */
+    private void addAndUpdatePosition(TopicName topic, String app, short partition, long index) throws JMQException {
+        logger.info("Try to init a position by topic:{}, app:{}, partition:{}, curIndex:{}", topic.getFullName(), app, partition, index);
+
+        if (topic == null || app == null || app.isEmpty()) {
+            return;
+        }
+        checkState();
+        // 从元数据中获取分区分组，如何分区分组不为空，则添加该partition的位置，否则不添加
+        PartitionGroup partitionGroup = clusterManager.getPartitionGroup(topic, partition);
+        if(partitionGroup == null) {
+            logger.error("Fail to add and update partition consume position by topic:[{}], app:[{}], partition:[{}], index:[{}]",
+                    topic.getFullName(), app, partition, index);
+            throw new JMQException(JMQCode.FW_PARTITION_BROKER_NOT_LEADER, "");
+        }
+        ConsumePartition consumePartition = new ConsumePartition(topic.getFullName(), app, partition);
+        consumePartition.setPartitionGroup(partitionGroup.getGroup());
+
+        long currentIndex = Math.max(index, 0);
+        // 为新订阅的应用初始化消费位置对象
+        Position position = new Position(currentIndex, currentIndex, currentIndex, currentIndex);
+        positionStore.putIfAbsent(consumePartition, position);
+
+        logger.info("Success to add and update partition consume position by topic:{}, app:{}, partition:{}, curIndex:{}", topic.getFullName(), app, partition, currentIndex);
+        // 落盘
+        positionStore.forceFlush();
     }
 
     /**
@@ -242,22 +339,18 @@ public class PositionManager extends Service {
      * @param index     起始消息序号
      * @return 是否更新成功
      */
-    public boolean updateStartMsgAckIndex(TopicName topic, String app, short partition, long index) {
-        boolean isSuccess = false;
+    public boolean updateStartMsgAckIndex(TopicName topic, String app, short partition, long index) throws JMQException {
+        logger.debug("Update stater ack index, topic:{}, app:{}, partition:{}, index:{}", topic, app, partition, index);
         ConsumePartition consumePartition = new ConsumePartition(topic.getFullName(), app, partition);
-        try {
-            Position position = positionStore.get(consumePartition);
-            if (position != null) {
-                position.setAckStartIndex(index);
-                isSuccess = true;
-            } else {
-                logger.error("Position is null, topic:{}, app:{}, partition:{}", topic, app, partition);
-            }
-        } catch (Exception ex) {
-            isSuccess = false;
-            logger.warn("Update ack index error.", ex);
+        Position position = positionStore.get(consumePartition);
+        if (position != null) {
+            position.setAckStartIndex(index);
+        } else {
+            logger.error("Position is null, topic:{}, app:{}, partition:{}, index:{}", topic, app, partition, index);
+            // 补偿逻辑：如果当前broker是指定partition对应partitionGroup的leader，则按照给定index初始化Position，否则不处理
+            addAndUpdatePosition(topic, app, partition, index);
         }
-        return isSuccess;
+        return true;
     }
 
     /**
@@ -288,19 +381,17 @@ public class PositionManager extends Service {
      * @return 是否更新成功
      */
     public boolean updateLastMsgPullIndex(TopicName topic, String app, short partition, long index) throws JMQException {
-        boolean isSuccess = true;
+        logger.debug("Update last pull index, topic:{}, app:{}, partition:{}, index:{}", topic, app, partition, index);
         ConsumePartition consumePartition = new ConsumePartition(topic.getFullName(), app, partition);
-        try {
-            Position position = positionStore.get(consumePartition);
-            if (position != null) {
-                position.setPullCurIndex(index);
-            }
-        } catch (Exception ex) {
-            isSuccess = false;
-            logger.warn("Update pull index error.", ex);
-            throw new JMQException(JMQCode.CONSUME_POSITION_UPDATE_ERROR, ex);
+        Position position = positionStore.get(consumePartition);
+        if (position != null) {
+            position.setPullCurIndex(index);
+        } else {
+            logger.error("Position is null, topic:{}, app:{}, partition:{}, index:{}", topic, app, partition, index);
+            // 补偿逻辑：如果当前broker是指定partition对应partitionGroup的leader，则按照给定index初始化Position，否则不处理
+            addAndUpdatePosition(topic, app, partition, index);
         }
-        return isSuccess;
+        return true;
     }
 
 
@@ -353,6 +444,9 @@ public class PositionManager extends Service {
         checkState();
         // 从元数据中获取分组和分区数据，初始化拉取和应答位置
         List<Short> partitionList = clusterManager.getMasterPartitionList(topic);
+
+        logger.debug("add consumer partitionList:[{}]", partitionList.toString());
+
         partitionList.stream().forEach(partition -> {
             ConsumePartition consumePartition = new ConsumePartition(topic.getFullName(), app, partition);
 
@@ -386,6 +480,9 @@ public class PositionManager extends Service {
         checkState();
         // 从元数据中获取分组和分区数据，初始化拉取和应答位置
         List<Short> partitionList = clusterManager.getPartitionList(topic);
+
+        logger.debug("remove consumer partitionList:[{}]", partitionList.toString());
+
         partitionList.stream().forEach(partition -> {
             ConsumePartition consumePartition = new ConsumePartition(topic.getFullName(), app, partition);
             Position remove = positionStore.remove(consumePartition);
@@ -419,6 +516,9 @@ public class PositionManager extends Service {
         PartitionGroup partitionGroupByGroup = clusterManager.getPartitionGroupByGroup(topic, partitionGroup);
         List<String> appList = clusterManager.getAppByTopic(topic);
         Set<Short> partitions = partitionGroupByGroup.getPartitions();
+
+        logger.debug("add partitionGroup appList:[{}], partitions:[{}]", appList.toString(), partitions.toString());
+
         partitions.stream().forEach(partition -> {
             // 获取当前（主题+分区）的最大消息序号
             long currentIndex = getMaxMsgIndex(topic, partition);
@@ -449,6 +549,9 @@ public class PositionManager extends Service {
         PartitionGroup partitionGroupByGroup = clusterManager.getPartitionGroupByGroup(topic, partitionGroup);
         List<String> appList = clusterManager.getAppByTopic(topic);
         Set<Short> partitions = partitionGroupByGroup.getPartitions();
+
+        logger.debug("remove partitionGroup appList:[{}], partitions:[{}]", appList.toString(), partitions.toString());
+
         partitions.stream().forEach(partition -> {
             appList.stream().forEach(app -> {
                 ConsumePartition consumePartition = new ConsumePartition(topic.getFullName(), app, partition);
@@ -471,8 +574,10 @@ public class PositionManager extends Service {
 
             if (((MetaEvent) event).getEventType() == EventType.ADD_CONSUMER) {
                 NameServerEvent nameServerEvent = (NameServerEvent) event;
-                logger.info("listen add consume event.");
                 ConsumerEvent addConsumerEvent = (ConsumerEvent) nameServerEvent.getMetaEvent();
+
+                logger.info("listen add consume event:[{}]", addConsumerEvent.toString());
+
                 addConsumer(addConsumerEvent.getTopic(), addConsumerEvent.getApp());
             }
         }
@@ -487,8 +592,10 @@ public class PositionManager extends Service {
         public void onEvent(Object event) {
             if (((MetaEvent) event).getEventType() == EventType.REMOVE_CONSUMER) {
                 NameServerEvent nameServerEvent = (NameServerEvent) event;
-                logger.info("listen remove consume event.");
                 ConsumerEvent removeConsumerEvent = (ConsumerEvent) nameServerEvent.getMetaEvent();
+
+                logger.info("listen remove consume event:[{}]", removeConsumerEvent.toString());
+
                 removeConsumer(removeConsumerEvent.getTopic(), removeConsumerEvent.getApp());
             }
         }

@@ -1,5 +1,6 @@
 package com.jd.journalq.service;
 
+import com.jd.journalq.model.domain.Broker;
 import com.jd.journalq.model.domain.BrokerGroup;
 import com.jd.journalq.model.query.QBrokerGroup;
 
@@ -15,4 +16,11 @@ public interface BrokerGroupService extends PageService<BrokerGroup, QBrokerGrou
      * @return
      */
     List<BrokerGroup> findAll(QBrokerGroup qBrokerGroup);
+
+
+    /**
+     * 绑定\解绑分组
+     * @param model
+     */
+    void updateBroker(Broker model);
 }

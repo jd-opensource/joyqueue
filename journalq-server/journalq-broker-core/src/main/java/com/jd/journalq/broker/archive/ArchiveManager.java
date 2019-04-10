@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ArchiveManager extends Service {
 
-    private final static Logger logger = LoggerFactory.getLogger(ArchiveManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(ArchiveManager.class);
 
     // 集群管理
     private BrokerContext context;
@@ -65,10 +65,12 @@ public class ArchiveManager extends Service {
 
     @Override
     protected void doStart() throws Exception {
-        super.doStart();
-        sendArchiveService.start();
-        consumeArchiveService.start();
-        logger.info("archive manager started.");
+        if(archiveConfig.isStartArchive()) {
+            super.doStart();
+            sendArchiveService.start();
+            consumeArchiveService.start();
+            logger.info("archive manager started.");
+        }
     }
 
     @Override

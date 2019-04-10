@@ -115,6 +115,7 @@ export default {
                 that.$set(this.tableData.rowData, i, that.tableData.rowData[i])
               }
             }
+            that.tableData.rowData[i].subscribe = payload
           }
         })
       })

@@ -59,7 +59,7 @@ public class FetchProduceFeedbackHandler implements JMQCommandHandler, Type, Bro
 
         BooleanResponse checkResult = clusterManager.checkWritable(TopicName.parse(fetchProduceFeedback.getTopic()), fetchProduceFeedback.getApp(), connection.getHost());
         if (!checkResult.isSuccess()) {
-            logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}", transport, fetchProduceFeedback.getTopic(), fetchProduceFeedback.getApp());
+            logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport, fetchProduceFeedback.getTopic(), fetchProduceFeedback.getApp(), checkResult.getJmqCode());
             return new Command(new FetchProduceFeedbackAck(CheckResultConverter.convertCommonCode(checkResult.getJmqCode())));
         }
 

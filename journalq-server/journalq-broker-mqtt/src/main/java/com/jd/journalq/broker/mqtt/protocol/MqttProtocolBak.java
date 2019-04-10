@@ -19,7 +19,7 @@
 // */
 //@Deprecated
 //public class MqttProtocolBak implements ProtocolService, ChannelHandlerProvider {
-//    private final static Logger logger = LoggerFactory.getLogger(MqttProtocolBak.class);
+//    private static final Logger logger = LoggerFactory.getLogger(MqttProtocolBak.class);
 //
 //    private BrokerContext brokerContext;
 //

@@ -60,6 +60,11 @@ public class SyncServiceImpl implements SyncService {
         if (applicationSupplier == null) {
             return null;
         }
+        Application oldapplication = applicationService.findByCode(application.getCode());
+        if (oldapplication != null) {
+            throw new DuplicateKeyException(String.format("application %s exist",application.getCode()));
+        }
+
         ApplicationInfo info = null;
         if (application.getSource() == 0) {
             info = new ApplicationInfo();
@@ -96,10 +101,14 @@ public class SyncServiceImpl implements SyncService {
         }
         List<UserInfo> members = info.getMembers();
         if (members != null) {
-            for (UserInfo userInfo:members){
-                if (!loadUser(userInfo)) {
+            //按照ERP排序
+            Collections.sort(members, Comparator.comparing(UserInfo::getCode));
+            //加载用户
+            members=new ArrayList<>(members);
+            for (int i = members.size() - 1; i >= 0; i--) {
+                if (!loadUser(members.get(i))) {
                     //不存在
-                    members.remove(userInfo);
+                    members.remove(i);
                 }
             }
             info.setMembers(members);

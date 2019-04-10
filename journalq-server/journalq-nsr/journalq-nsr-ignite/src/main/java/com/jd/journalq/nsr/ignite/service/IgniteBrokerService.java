@@ -32,6 +32,7 @@ public class IgniteBrokerService implements BrokerService {
         return new IgniteBroker(model);
     }
 
+    @Override
     public Broker getByIpAndPort(String brokerIp, Integer brokerPort) {
         BrokerQuery brokerQuery = new BrokerQuery();
         brokerQuery.setIp(brokerIp);

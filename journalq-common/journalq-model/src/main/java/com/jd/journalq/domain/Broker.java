@@ -14,6 +14,11 @@ import java.util.Objects;
  */
 public class Broker implements Serializable {
     public static final String DEFAULT_RETRY_TYPE="RemoteRetry";
+    public static final String PERMISSION_FULL="FULL";
+    public static final String PERMISSION_READ="READ";
+    public static final String PERMISSION_WRITE="WRITE";
+    public static final String PERMISSION_NONE="NONE";
+    public static final String DEFAULT_PERMISSION=PERMISSION_FULL;
     protected int id;
     /**
      * Broker实例的ip
@@ -33,6 +38,13 @@ public class Broker implements Serializable {
      * 重试类型
      */
     protected String retryType = DEFAULT_RETRY_TYPE;
+
+    /**
+     * 权限
+     * default FULL
+     * @return
+     */
+    protected String permission = DEFAULT_PERMISSION;
 
     public Integer getId() {
         return id;
@@ -78,6 +90,14 @@ public class Broker implements Serializable {
         this.retryType = retryType;
     }
 
+    public String getPermission() {
+        return permission;
+    }
+
+    public void setPermission(String permission) {
+        this.permission = permission;
+    }
+
     /**
      * @return 选举，复制都使用这个端口
      */
@@ -108,8 +128,12 @@ public class Broker implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o){
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()){
+            return false;
+        }
         Broker broker = (Broker) o;
         return id == broker.id &&
                 port == broker.port &&
@@ -132,3 +156,4 @@ public class Broker implements Serializable {
                 '}';
     }
 }
+

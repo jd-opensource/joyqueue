@@ -1,7 +1,12 @@
 package com.jd.journalq.toolkit.config;
 
-import com.jd.journalq.toolkit.config.annotation.*;
-import com.jd.journalq.toolkit.config.annotation.*;
+import com.jd.journalq.toolkit.config.annotation.Binding;
+import com.jd.journalq.toolkit.config.annotation.BooleanBinding;
+import com.jd.journalq.toolkit.config.annotation.DateBinding;
+import com.jd.journalq.toolkit.config.annotation.DoubleBinding;
+import com.jd.journalq.toolkit.config.annotation.NumberBinding;
+import com.jd.journalq.toolkit.config.annotation.ObjectBinding;
+import com.jd.journalq.toolkit.config.annotation.StringBinding;
 import com.jd.journalq.toolkit.reflect.ReflectException;
 
 import java.lang.annotation.Annotation;

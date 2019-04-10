@@ -38,25 +38,6 @@ public class TopicConfig extends Topic implements Serializable {
         return config;
     }
 
-    public Set<Short> getPriorityPartitions() {
-        return priorityPartitions;
-    }
-
-    public void setPriorityPartitions(Set<Short> priorityPartitions) {
-        this.priorityPartitions = priorityPartitions;
-    }
-
-
-
-    public short getPartitions() {
-        return partitions;
-    }
-
-    public void setPartitions(short partitions) {
-        this.partitions = partitions;
-    }
-
-
     public Map<Integer,PartitionGroup> getPartitionGroups() {
         return partitionGroups;
     }
@@ -64,7 +45,9 @@ public class TopicConfig extends Topic implements Serializable {
     public List<PartitionGroup> fetchPartitionGroupByBrokerId(int brokerId) {
         List<PartitionGroup> list = new ArrayList<>();
         for(PartitionGroup group : partitionGroups.values()) {
-            if (group.getLeader().equals(brokerId)) list.add(group);
+            if (group.getLeader().equals(brokerId)){
+                list.add(group);
+            }
         }
         return list;
     }
@@ -72,7 +55,9 @@ public class TopicConfig extends Topic implements Serializable {
     public List<PartitionGroup> fetchTopicPartitionGroupsByBrokerId(int brokerId) {
         List<PartitionGroup> list = new ArrayList<>();
         for(PartitionGroup group : partitionGroups.values()) {
-            if (group.getReplicas().contains(brokerId)) list.add(group);
+            if (group.getReplicas().contains(brokerId)){
+                list.add(group);
+            }
         }
         return list;
     }
@@ -102,7 +87,9 @@ public class TopicConfig extends Topic implements Serializable {
 
     public Broker fetchBrokerByPartition(short partition) {
         PartitionGroup group = fetchPartitionGroupByPartition(partition);
-        if (null != group) return group.getBrokers().get(group.getLeader());
+        if (null != group){
+            return group.getBrokers().get(group.getLeader());
+        }
         return null;
     }
 
@@ -112,11 +99,15 @@ public class TopicConfig extends Topic implements Serializable {
                 for (Short partition : group.getPartitions()) {
                     Set<Broker> irs = new HashSet<>(null == group.getIsrs() ? 0 : group.getIsrs().size());
                     Set<Broker> replicas = new HashSet<>(null == group.getReplicas() ? 0 : group.getReplicas().size());
-                    if (null != group.getIsrs()) for (Integer brokerId : group.getIsrs()) {
-                        irs.add(group.getBrokers().get(brokerId));
+                    if (null != group.getIsrs()){
+                        for (Integer brokerId : group.getIsrs()) {
+                            irs.add(group.getBrokers().get(brokerId));
+                        }
                     }
-                    if (null != group.getReplicas()) for (Integer brokerId : group.getReplicas()) {
-                        replicas.add(group.getBrokers().get(brokerId));
+                    if (null != group.getReplicas()){
+                        for (Integer brokerId : group.getReplicas()) {
+                            replicas.add(group.getBrokers().get(brokerId));
+                        }
                     }
                     metadataList.add(new Partition(partition, group.getBrokers().get(group.getLeader()), irs, replicas));
                 }
@@ -154,7 +145,9 @@ public class TopicConfig extends Topic implements Serializable {
     public List<Short> fetchPartitionByBroker(int brokerId) {
         List<Short> partitions = new ArrayList<>();
             for (PartitionGroup group : partitionGroups.values()) {
-                if (group.getLeader().equals(brokerId)) partitions.addAll(group.getPartitions());
+                if (group.getLeader().equals(brokerId)){
+                    partitions.addAll(group.getPartitions());
+                }
             }
         return partitions;
     }

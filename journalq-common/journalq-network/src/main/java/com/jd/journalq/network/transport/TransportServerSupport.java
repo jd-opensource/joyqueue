@@ -29,7 +29,7 @@ public abstract class TransportServerSupport extends Service implements Transpor
 
     protected static final Logger logger = LoggerFactory.getLogger(TransportServerSupport.class);
 
-    private ServerConfig serverConfig;
+    private ServerConfig config;
     private String host;
     private int port;
     private EventLoopGroup acceptEventGroup;
@@ -37,20 +37,20 @@ public abstract class TransportServerSupport extends Service implements Transpor
     private ServerBootstrap serverBootstrap;
     private Channel channel;
 
-    public TransportServerSupport(ServerConfig serverConfig) {
-        this.serverConfig = serverConfig;
-        this.host = serverConfig.getHost();
-        this.port = serverConfig.getPort();
+    public TransportServerSupport(ServerConfig config) {
+        this.config = config;
+        this.host = config.getHost();
+        this.port = config.getPort();
     }
 
-    public TransportServerSupport(ServerConfig serverConfig, String host) {
-        this.serverConfig = serverConfig;
+    public TransportServerSupport(ServerConfig config, String host) {
+        this.config = config;
         this.host = host;
-        this.port = serverConfig.getPort();
+        this.port = config.getPort();
     }
 
-    public TransportServerSupport(ServerConfig serverConfig, String host, int port) {
-        this.serverConfig = serverConfig;
+    public TransportServerSupport(ServerConfig config, String host, int port) {
+        this.config = config;
         this.host = host;
         this.port = port;
     }
@@ -97,14 +97,14 @@ public abstract class TransportServerSupport extends Service implements Transpor
         serverBootstrap.channel(Epoll.isAvailable() ? EpollServerSocketChannel.class : NioServerSocketChannel.class)
                 .group(acceptEventGroup, ioEventGroup)
                 .childHandler(channelHandler)
-                .option(ChannelOption.SO_REUSEADDR, serverConfig.isReuseAddress())
-                .option(ChannelOption.SO_RCVBUF, serverConfig.getSocketBufferSize())
-                .option(ChannelOption.SO_BACKLOG, serverConfig.getBacklog())
+                .option(ChannelOption.SO_REUSEADDR, config.isReuseAddress())
+                .option(ChannelOption.SO_RCVBUF, config.getSocketBufferSize())
+                .option(ChannelOption.SO_BACKLOG, config.getBacklog())
                 .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-                .childOption(ChannelOption.SO_SNDBUF, serverConfig.getSocketBufferSize())
-                .childOption(ChannelOption.TCP_NODELAY, serverConfig.isTcpNoDelay())
-                .childOption(ChannelOption.SO_KEEPALIVE, serverConfig.isKeepAlive())
-                .childOption(ChannelOption.SO_LINGER, serverConfig.getSoLinger())
+                .childOption(ChannelOption.SO_SNDBUF, config.getSocketBufferSize())
+                .childOption(ChannelOption.TCP_NODELAY, config.isTcpNoDelay())
+                .childOption(ChannelOption.SO_KEEPALIVE, config.isKeepAlive())
+                .childOption(ChannelOption.SO_LINGER, config.getSoLinger())
                 .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
         return serverBootstrap;
     }
@@ -116,27 +116,27 @@ public abstract class TransportServerSupport extends Service implements Transpor
     }
 
     protected EventLoopGroup newAcceptEventGroup() {
-        NamedThreadFactory threadFactory = new NamedThreadFactory("jmq-server-accept-loopGroup");
+        NamedThreadFactory threadFactory = new NamedThreadFactory(config.getAcceptThreadName());
         if (Epoll.isAvailable()) {
-            return new EpollEventLoopGroup(serverConfig.getAcceptThread(), threadFactory);
+            return new EpollEventLoopGroup(config.getAcceptThread(), threadFactory);
         } else {
-            return new NioEventLoopGroup(serverConfig.getAcceptThread(), threadFactory);
+            return new NioEventLoopGroup(config.getAcceptThread(), threadFactory);
         }
     }
 
     protected EventLoopGroup newIoEventGroup() {
-        NamedThreadFactory threadFactory = new NamedThreadFactory("jmq-server-io-loopGroup");
+        NamedThreadFactory threadFactory = new NamedThreadFactory(config.getIoThreadName());
         if (Epoll.isAvailable()) {
-            return new EpollEventLoopGroup(serverConfig.getIoThread(), threadFactory);
+            return new EpollEventLoopGroup(config.getIoThread(), threadFactory);
         } else {
-            return new NioEventLoopGroup(serverConfig.getIoThread(), threadFactory);
+            return new NioEventLoopGroup(config.getIoThread(), threadFactory);
         }
     }
 
     protected abstract ChannelHandler newChannelHandlerPipeline();
 
-    public ServerConfig getServerConfig() {
-        return serverConfig;
+    public ServerConfig getConfig() {
+        return config;
     }
 
     public Channel getChannel() {

@@ -37,7 +37,7 @@ public final class Suppliers {
      * @param <T>
      */
     static class ComposeSupplier<F, T> implements Supplier<T>, Serializable {
-        private static final long serialVersionUID = 0;
+        private static final long serialVersionUID = 1L;
 
         final Function<? super F, T> function;
         final Supplier<F> supplier;
@@ -98,7 +98,7 @@ public final class Suppliers {
      * @param <T>
      */
     static class MemoizingSupplier<T> implements Supplier<T>, Serializable {
-        private static final long serialVersionUID = 0;
+        private static final long serialVersionUID = 1L;
 
         final Supplier<T> delegate;
         transient volatile boolean initialized;
@@ -160,7 +160,7 @@ public final class Suppliers {
      * @param <T>
      */
     static class ExpiringMemoizingSupplier<T> implements Supplier<T>, Serializable {
-        private static final long serialVersionUID = 0;
+        private static final long serialVersionUID = 1L;
 
         final Supplier<T> delegate;
         // 改用毫秒，采用时钟墙
@@ -222,7 +222,7 @@ public final class Suppliers {
      * @param <T>
      */
     static class InstanceSupplier<T> implements Supplier<T>, Serializable {
-        private static final long serialVersionUID = 0;
+        private static final long serialVersionUID = 1L;
 
         final T instance;
 
@@ -272,7 +272,7 @@ public final class Suppliers {
      * @param <T>
      */
     static class ThreadSafeSupplier<T> implements Supplier<T>, Serializable {
-        private static final long serialVersionUID = 0;
+        private static final long serialVersionUID = 1L;
 
         final Supplier<T> delegate;
 

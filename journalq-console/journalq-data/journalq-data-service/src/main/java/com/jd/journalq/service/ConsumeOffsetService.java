@@ -1,8 +1,9 @@
 package com.jd.journalq.service;
 
-import com.jd.journalq.monitor.PartitionAckMonitorInfo;
 import com.jd.journalq.model.domain.PartitionOffset;
 import com.jd.journalq.model.domain.Subscribe;
+import com.jd.journalq.monitor.PartitionAckMonitorInfo;
+import com.jd.journalq.monitor.PartitionLeaderAckMonitorInfo;
 
 import java.util.List;
 
@@ -13,7 +14,7 @@ public interface ConsumeOffsetService {
      *
      * @return all partition low ,upper index bound and current ack index
      **/
-    List<PartitionAckMonitorInfo> offsets(Subscribe subscribe);
+    List<PartitionLeaderAckMonitorInfo> offsets(Subscribe subscribe);
 
 
     /**

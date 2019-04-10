@@ -6,11 +6,7 @@ import com.jd.journalq.network.transport.RequestBarrier;
 import com.jd.journalq.network.transport.ResponseFuture;
 import com.jd.journalq.network.transport.TransportAttribute;
 import com.jd.journalq.network.transport.TransportState;
-import com.jd.journalq.network.transport.command.Command;
-import com.jd.journalq.network.transport.command.CommandCallback;
-import com.jd.journalq.network.transport.command.Direction;
-import com.jd.journalq.network.transport.command.Header;
-import com.jd.journalq.network.transport.command.Type;
+import com.jd.journalq.network.transport.command.*;
 import com.jd.journalq.network.transport.config.TransportConfig;
 import com.jd.journalq.network.transport.exception.TransportException;
 import com.jd.journalq.toolkit.network.IpUtil;
@@ -271,6 +267,10 @@ public class DefaultChannelTransport implements ChannelTransport {
                     }
                 }
                 response.getHeader().setRequestId(header.getRequestId());
+
+                if (response.getPayload() instanceof HeaderAware) {
+                    ((HeaderAware) response.getPayload()).setHeader(header);
+                }
 
                 // 判断请求是否要应答
                 if (header.getQosLevel() == QosLevel.ONE_WAY) {

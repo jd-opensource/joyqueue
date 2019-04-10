@@ -6,15 +6,11 @@ import com.jd.laf.web.vertx.response.Response;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
 
-import java.io.IOException;
-import java.io.StringWriter;
-import java.util.List;
-import java.util.Properties;
-
 import static io.vertx.core.http.HttpHeaders.CONTENT_TYPE;
 
 /**
- * Properties渲染
+ * Properties render
+ * Created by chenyanying3 on 18-11-16.
  */
 public class PropertiesRender implements Render {
 

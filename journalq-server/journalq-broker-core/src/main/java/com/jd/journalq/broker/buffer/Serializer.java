@@ -467,6 +467,7 @@ public class Serializer extends AbstractSerializer {
         if (in == null) {
             return null;
         }
+        int startPosition = in.position();
         BrokerMessage message = new BrokerMessage();
 
         // 4个字节的消息长度
@@ -518,6 +519,7 @@ public class Serializer extends AbstractSerializer {
         message.setExtension(readBytes(in, extensionLength));
 
         message.setApp(readString(in));
+        message.setSize(in.position() - startPosition);
 
         return message;
     }

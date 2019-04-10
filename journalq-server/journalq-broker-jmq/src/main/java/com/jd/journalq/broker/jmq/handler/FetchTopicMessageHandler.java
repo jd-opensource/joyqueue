@@ -1,14 +1,14 @@
 package com.jd.journalq.broker.jmq.handler;
 
 import com.google.common.collect.Maps;
-import com.jd.journalq.broker.jmq.JMQCommandHandler;
-import com.jd.journalq.broker.jmq.JMQContext;
-import com.jd.journalq.broker.jmq.JMQContextAware;
-import com.jd.journalq.broker.jmq.converter.CheckResultConverter;
 import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.consumer.Consume;
 import com.jd.journalq.broker.consumer.model.PullResult;
 import com.jd.journalq.broker.helper.SessionHelper;
+import com.jd.journalq.broker.jmq.JMQCommandHandler;
+import com.jd.journalq.broker.jmq.JMQContext;
+import com.jd.journalq.broker.jmq.JMQContextAware;
+import com.jd.journalq.broker.jmq.converter.CheckResultConverter;
 import com.jd.journalq.broker.monitor.SessionManager;
 import com.jd.journalq.broker.polling.LongPolling;
 import com.jd.journalq.broker.polling.LongPollingManager;
@@ -75,7 +75,7 @@ public class FetchTopicMessageHandler implements JMQCommandHandler, Type, JMQCon
             String topic = entry.getKey();
             BooleanResponse checkResult = clusterManager.checkReadable(TopicName.parse(topic), fetchTopicMessage.getApp(), connection.getHost());
             if (!checkResult.isSuccess()) {
-                logger.warn("checkReadable failed, transport: {}, topic: {}, app: {}", transport, topic, fetchTopicMessage.getApp());
+                logger.warn("checkReadable failed, transport: {}, topic: {}, app: {}, code: {}", transport, topic, fetchTopicMessage.getApp(), checkResult.getJmqCode());
                 result.put(topic, new FetchTopicMessageAckData(CheckResultConverter.convertFetchCode(checkResult.getJmqCode())));
                 continue;
             }

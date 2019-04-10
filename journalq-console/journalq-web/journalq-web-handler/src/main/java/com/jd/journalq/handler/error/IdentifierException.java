@@ -1,7 +1,8 @@
 package com.jd.journalq.handler.error;
 
 /**
- * 标识符异常
+ * Identifier exception conversion
+ * Created by chenyanying3 on 18-11-16.
  */
 public class IdentifierException extends ConfigException {
 

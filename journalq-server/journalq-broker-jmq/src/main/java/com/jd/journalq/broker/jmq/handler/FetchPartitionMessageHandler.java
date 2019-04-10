@@ -70,7 +70,7 @@ public class FetchPartitionMessageHandler implements JMQCommandHandler, Type, Br
 
                 BooleanResponse checkResult = clusterManager.checkReadable(TopicName.parse(topic), fetchPartitionMessage.getApp(), connection.getHost(), partition);
                 if (!checkResult.isSuccess()) {
-                    logger.warn("checkReadable failed, transport: {}, topic: {}, app: {}", transport, consumer.getTopic(), consumer.getApp());
+                    logger.warn("checkReadable failed, transport: {}, topic: {}, app: {}, code: {}", transport, consumer.getTopic(), consumer.getApp(), checkResult.getJmqCode());
                     buildFetchPartitionMessageAckData(topic, entry.getValue(), CheckResultConverter.convertFetchCode(checkResult.getJmqCode()), result);
                     continue;
                 }

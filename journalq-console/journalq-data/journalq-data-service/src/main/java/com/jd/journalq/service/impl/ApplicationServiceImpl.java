@@ -4,28 +4,32 @@ import com.jd.journalq.model.ListQuery;
 import com.jd.journalq.exception.ServiceException;
 import com.jd.journalq.exception.ValidationException;
 import com.jd.journalq.model.PageResult;
-import com.jd.journalq.model.domain.Application;
-import com.jd.journalq.model.domain.Consumer;
-import com.jd.journalq.model.domain.Producer;
-import com.jd.journalq.model.domain.TopicUnsubscribedApplication;
+import com.jd.journalq.model.domain.*;
 import com.jd.journalq.model.query.QApplication;
 import com.jd.journalq.model.QPageQuery;
+import com.jd.journalq.model.query.QApplicationToken;
 import com.jd.journalq.model.query.QConsumer;
 import com.jd.journalq.model.query.QProducer;
+import com.jd.journalq.nsr.AppTokenNameServerService;
 import com.jd.journalq.nsr.ConsumerNameServerService;
 import com.jd.journalq.nsr.ProducerNameServerService;
 import com.jd.journalq.repository.ApplicationRepository;
 import com.jd.journalq.service.ApplicationService;
+import com.jd.journalq.service.ApplicationUserService;
+import com.jd.journalq.toolkit.lang.Preconditions;
 import com.jd.journalq.util.NullUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.jd.journalq.exception.ServiceException.BAD_REQUEST;
+import static com.jd.journalq.exception.ServiceException.INTERNAL_SERVER_ERROR;
 import static com.jd.journalq.exception.ValidationException.UNIQUE_EXCEPTION_STATUS;
 
 /**
@@ -39,6 +43,10 @@ public class ApplicationServiceImpl extends PageServiceSupport<Application, QApp
     private ProducerNameServerService producerNameServerService;
     @Autowired
     private ConsumerNameServerService consumerNameServerService;
+    @Autowired
+    private ApplicationUserService applicationUserService;
+    @Autowired
+    private AppTokenNameServerService appTokenNameServerService;
 
     @Override
     public int add(Application app) {
@@ -49,6 +57,34 @@ public class ApplicationServiceImpl extends PageServiceSupport<Application, QApp
         }
         //Add
         return super.add(app);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+    public int delete(final Application app) {
+        try {
+            //validate topic related producers and consumers
+            Preconditions.checkArgument(NullUtil.isEmpty(producerNameServerService.findByQuery(new QProducer(new Identity(app.getId(), app.getCode())))),
+                    String.format("app %s exists related producers", app.getCode()));
+            Preconditions.checkArgument(NullUtil.isEmpty(consumerNameServerService.findByQuery(new QConsumer(app.getCode()))),
+                    String.format("app %s exists related consumers", app.getCode()));
+
+            //delete related app users
+            applicationUserService.deleteByAppId(app.getId());
+            //delete related app tokens
+            List<ApplicationToken> tokens = appTokenNameServerService.findByQuery(new QApplicationToken(app.getCode()));
+            if (NullUtil.isNotEmpty(tokens)) {
+                for (ApplicationToken t : tokens) {
+                    appTokenNameServerService.delete(t);
+                }
+            }
+        } catch (Exception e) {
+            String msg = "delete application error. ";
+            logger.error(msg, e);
+            throw new ServiceException(INTERNAL_SERVER_ERROR, msg, e);
+        }
+        //delete app
+        return super.delete(app);
     }
 
     @Override
@@ -67,29 +103,13 @@ public class ApplicationServiceImpl extends PageServiceSupport<Application, QApp
         ListQuery<QApplication> listQuery = new ListQuery<>();
         listQuery.setQuery(query.getQuery());
         List<Application> applicationList = findByQuery(listQuery);
-        List<String> appList = getSubscribeList(query.getQuery());
-        if (applicationList != null && appList != null) {
-            applicationList = applicationList.stream().filter(application -> appList.contains(application.getCode())).collect(Collectors.toList());
-        }
+//        List<String> appList = getSubscribeList(query.getQuery());
+//        if (applicationList != null && appList != null) {
+//            applicationList = applicationList.stream().filter(application -> appList.contains(application.getCode())).collect(Collectors.toList());
+//        }
         return new PageResult<>(query.getPagination(),applicationList);
     }
     //
-//    @Override
-//    public List<Application> findWithDeletedByCode(final String code) {
-//        if (code == null || code.isEmpty()) {
-//            return null;
-//        }
-//        return repository.findWithDeletedByCode(code);
-//    }
-
-    @Override
-    public PageResult<Application> findUnsubscribedByQuery(QPageQuery<QApplication> query) {
-        if (query == null || query.getQuery() == null) {
-            return PageResult.empty();
-        }
-        query.getQuery().setNoInCodes(getSubscribeList(query.getQuery()));
-        return repository.findUnsubscribedByQuery(query);
-    }
 
     @Override
     public PageResult<TopicUnsubscribedApplication> findTopicUnsubscribedByQuery(QPageQuery<QApplication> query) {
@@ -134,9 +154,10 @@ public class ApplicationServiceImpl extends PageServiceSupport<Application, QApp
                 if (query.getSubscribeType() == Producer.PRODUCER_TYPE) {
                     QProducer qProducer = new QProducer();
 
-                    if (query.getTopic() != null) {
-                        qProducer.setTopic(query.getTopic());
+                    if (query.getTopic() == null ) {
+                        throw new RuntimeException("topic is null");
                     }
+                    qProducer.setTopic(query.getTopic());
                     List<Producer> producerList = producerNameServerService.findByQuery(qProducer);
                     if (producerList == null)return null;
                     noInCodes = producerList.stream().map(producer -> producer.getApp().getCode()).collect(Collectors.toList());

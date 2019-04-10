@@ -1,5 +1,8 @@
 package com.jd.journalq.store.file;
 
+import com.jd.journalq.store.utils.MessageTestUtils;
+import com.jd.journalq.store.utils.PreloadBufferPool;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -26,15 +29,57 @@ public class StoreFileTest {
     }
 
     @Test
+    public void timestampTest() throws IOException {
+        long start = System.currentTimeMillis();
+        StoreFileImpl<ByteBuffer> storeFile = new StoreFileImpl<>(666L, base,128,new StoreMessageSerializer(1024),new PreloadBufferPool(), 1024 * 1024 * 10);
+        long timestamp = storeFile.timestamp();
+        long end = System.currentTimeMillis();
+        Assert.assertTrue( start <= timestamp);
+        Assert.assertTrue( timestamp <= end);
+
+        storeFile.append(MessageTestUtils.createMessage(new byte[10]));
+        storeFile.flush();
+        storeFile.unload();
+
+        storeFile = new StoreFileImpl<>(666L, base,128,new StoreMessageSerializer(1024),new PreloadBufferPool(), 1024 * 1024 * 10);
+
+        Assert.assertEquals(timestamp, storeFile.timestamp());
+
+    }
+
+
+    @Test
+    public void readFileNotExistTimestamp() {
+        ByteBuffer timeBuffer = ByteBuffer.allocate(8);
+        try (RandomAccessFile raf = new RandomAccessFile(new File(base, "fileNotExist"), "r"); FileChannel fileChannel = raf.getChannel()) {
+            fileChannel.position(0);
+            fileChannel.read(timeBuffer);
+        } catch (Exception e) {
+            logger.error("Error to read timestamp from file: <{}> header, error: <{}>", file.getAbsolutePath(), e.getMessage());
+        } finally {
+            try {
+                timestamp = timeBuffer.getLong(0);
+            } catch (IndexOutOfBoundsException iobe) {
+                logger.error("Error to read timestamp long value from file: <{}> header, error: <{}>", file.getAbsolutePath(), iobe.getMessage());
+            }
+        }
+        logger.info("read timestamp: {}", timestamp);
+    }
+
+    @Test
     public void readTimestamp() {
         ByteBuffer timeBuffer = ByteBuffer.allocate(8);
         try (RandomAccessFile raf = new RandomAccessFile(file, "r"); FileChannel fileChannel = raf.getChannel()) {
             fileChannel.position(0);
             fileChannel.read(timeBuffer);
         } catch (Exception e) {
-
+            logger.error("Error to read timestamp from file: <{}> header, error: <{}>", file.getAbsolutePath(), e.getMessage());
         } finally {
-            timestamp = timeBuffer.getLong(0);
+            try {
+                timestamp = timeBuffer.getLong(0);
+            } catch (IndexOutOfBoundsException iobe) {
+                logger.error("Error to read timestamp long value from file: <{}> header, error: <{}>", file.getAbsolutePath(), iobe.getMessage());
+            }
         }
         logger.info("read timestamp: {}", timestamp);
     }
@@ -50,7 +95,7 @@ public class StoreFileTest {
             fileChannel.write(timeBuffer);
             fileChannel.force(true);
         } catch (Exception e) {
-
+            logger.error("Error to write timestamp from file: <{}> header, error: <{}>", file.getAbsolutePath(), e.getMessage());
         } finally {
             timestamp = creationTime;
         }

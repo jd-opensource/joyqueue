@@ -11,6 +11,7 @@ import java.util.concurrent.Future;
 public interface PartitionGroupStore {
 
 
+
     String getTopic();
     int getPartitionGroup();
     Short[] listPartitions();
@@ -46,7 +47,6 @@ public interface PartitionGroupStore {
      * @param writeRequests partition序号和消息
      * @return 以Future形式返回结果
      * @throws NullPointerException eventListener或writeRequests为空时抛出
-     * @throws com.jd.journalq.store.file.WriteException 发生写入错误
      * @see WriteResult
      */
     Future<WriteResult> asyncWrite(WriteRequest... writeRequests);
@@ -56,7 +56,6 @@ public interface PartitionGroupStore {
      * @param eventListener 回调方法
      * @param writeRequests partition序号和消息
      * @throws NullPointerException eventListener或writeRequests为空时抛出
-     * @throws com.jd.journalq.store.file.WriteException 发生写入错误
      * @see WriteResult
      */
     void asyncWrite(EventListener<WriteResult> eventListener, WriteRequest... writeRequests);

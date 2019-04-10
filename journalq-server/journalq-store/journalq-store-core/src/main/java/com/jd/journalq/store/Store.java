@@ -105,7 +105,7 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
             this.scheduledExecutor = Executors.newScheduledThreadPool(SCHEDULE_EXECUTOR_THREADS, new NamedThreadFactory("Store-Scheduled-Executor"));
         }
         if (bufferPool == null){
-            this.bufferPool = new PreloadBufferPool( 50);
+            this.bufferPool = new PreloadBufferPool(config.getPrintMetricIntervalMs());
         }
         this.bufferPool.addPreLoad(config.getIndexFileSize(), config.getPreLoadBufferCoreCount(), config.getPreLoadBufferMaxCount());
         this.bufferPool.addPreLoad(config.getMessageFileSize(), config.getPreLoadBufferCoreCount(), config.getPreLoadBufferMaxCount());
@@ -301,18 +301,17 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
     private PartitionGroupStoreManager.Config getPartitionGroupConfig(StoreConfig config) {
 
         PositioningStore.Config messageConfig = getMessageStoreConfig(config);
-        PositioningStore.Config indexConfig = new PositioningStore.Config(config.getIndexFileSize(), config.getCachedPageCount(),
-                config.getFileHeaderSize(), config.getCacheLifeTimeMs(), PartitionGroupStoreManager.Config.DEFAULT_INDEX_BUFFER_LENGTH);
+        PositioningStore.Config indexConfig = new PositioningStore.Config(config.getIndexFileSize(),
+                config.getFileHeaderSize());
         return new PartitionGroupStoreManager.Config(
-                config.getMaxMessageLength(), config.getMaxStoreSize(),
-                config.getWriteRequestCacheSize(), config.getFlushIntervalMs(),
-                config.getWriteTimeoutMs(), config.getMaxDirtySize(), config.getEvictIntervalMs(),
-                messageConfig,indexConfig);
+                config.getMaxMessageLength(), config.getWriteRequestCacheSize(), config.getFlushIntervalMs(),
+                config.getWriteTimeoutMs(), config.getMaxDirtySize(),
+                config.getPrintMetricIntervalMs(), messageConfig,indexConfig);
     }
 
     private PositioningStore.Config getMessageStoreConfig(StoreConfig config) {
-        return new PositioningStore.Config(config.getMessageFileSize(), config.getCachedPageCount(),
-                config.getFileHeaderSize(), config.getCacheLifeTimeMs(), PartitionGroupStoreManager.Config.DEFAULT_MESSAGE_BUFFER_LENGTH);
+        return new PositioningStore.Config(config.getMessageFileSize(),
+                config.getFileHeaderSize());
     }
 
     /**

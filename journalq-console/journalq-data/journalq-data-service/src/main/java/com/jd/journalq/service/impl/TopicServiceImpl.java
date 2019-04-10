@@ -1,15 +1,19 @@
 package com.jd.journalq.service.impl;
 
+import com.jd.journalq.convert.CodeConverter;
 import com.jd.journalq.model.PageResult;
 import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.exception.ServiceException;
 import com.jd.journalq.model.domain.*;
+import com.jd.journalq.model.exception.DuplicateKeyException;
 import com.jd.journalq.model.query.QConsumer;
+import com.jd.journalq.model.query.QPartitionGroupReplica;
+import com.jd.journalq.model.query.QProducer;
 import com.jd.journalq.model.query.QTopic;
+import com.jd.journalq.nsr.*;
 import com.jd.journalq.service.NameServerService;
 import com.jd.journalq.service.TopicService;
-import com.jd.journalq.nsr.ConsumerNameServerService;
-import com.jd.journalq.nsr.TopicNameServerService;
+import com.jd.journalq.toolkit.lang.Preconditions;
 import com.jd.journalq.util.NullUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -22,6 +26,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.jd.journalq.exception.ServiceException.BAD_REQUEST;
+import static com.jd.journalq.exception.ServiceException.IGNITE_RPC_ERROR;
+import static com.jd.journalq.exception.ServiceException.INTERNAL_SERVER_ERROR;
+
 /**
  * 主题服务实现
  * Created by chenyanying3 on 2018-10-18.
@@ -30,27 +38,32 @@ import java.util.stream.Collectors;
 public class TopicServiceImpl implements TopicService {
     private final Logger logger = LoggerFactory.getLogger(TopicServiceImpl.class);
 
-    // Nameserver接口
-    @Autowired
-    protected NameServerService nameServerService;
     @Autowired
     private TopicNameServerService topicNameServerService;
     @Autowired
     protected ConsumerNameServerService consumerNameServerService;
+    @Autowired
+    protected ProducerNameServerService producerNameServerService;
+    @Autowired
+    protected PartitionGroupServerService partitionGroupServerService;
+    @Autowired
+    protected ReplicaServerService replicaServerService;
+
     @Override
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
     public void addWithBrokerGroup(Topic topic, BrokerGroup brokerGroup, List<Broker> brokers, Identity operator) {
-        //1. 保存主题
-//        super.add(topic);
-        //2. 保存主题队列-Broker分组
+        Namespace namespace = topic.getNamespace();
+        Topic oldTopic = findByCode(namespace == null?null:namespace.getCode(),topic.getCode());
+        if (oldTopic != null) {
+            throw new DuplicateKeyException("topic aleady exist");
+        }
         List<TopicPartitionGroup> partitionGroups = addPartitionGroup(topic, brokers, operator);
-        //3. 同步到NameServer
         try {
             topicNameServerService.addTopic(topic, partitionGroups);
         } catch (Exception e) {
             String errorMsg = "新建主题，同步NameServer失败";
             logger.error(errorMsg, e);
-            throw new ServiceException(ServiceException.INTERNAL_SERVER_ERROR, errorMsg);//回滚
+            throw new ServiceException(INTERNAL_SERVER_ERROR, errorMsg);//回滚
         }
     }
 
@@ -120,7 +133,7 @@ public class TopicServiceImpl implements TopicService {
         }
         if (query.getQuery() == null || query.getQuery().getSubscribeType() == null || query.getQuery().getApp() == null
                 || query.getQuery().getApp().getCode() == null) {
-            throw new ServiceException(ServiceException.BAD_REQUEST, "bad QTopic query argument.");
+            throw new ServiceException(BAD_REQUEST, "bad QTopic query argument.");
         }
 
         PageResult<Topic> topicResult;
@@ -129,7 +142,7 @@ public class TopicServiceImpl implements TopicService {
             try {
                 topicResult = topicNameServerService.findByQuery(query);
             } catch (Exception e) {
-                throw new ServiceException(ServiceException.IGNITE_RPC_ERROR, "query topic by name server error.");
+                throw new ServiceException(IGNITE_RPC_ERROR, "query topic by name server error.");
             }
         } else {
             topicResult = topicNameServerService.findUnsubscribedByQuery(query);
@@ -173,14 +186,46 @@ public class TopicServiceImpl implements TopicService {
     }
 
     @Override
-    @Transactional(readOnly = false)
-    public int delete(Topic model) {
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+    public int delete(Topic model) throws Exception {
+        //validate topic related producers and consumers
+        Preconditions.checkArgument(NullUtil.isEmpty(producerNameServerService.findByQuery(new QProducer(model))),
+                String.format("topic %s exists related producers", CodeConverter.convertTopic(model.getNamespace(), model).getFullName()));
+        Preconditions.checkArgument(NullUtil.isEmpty(consumerNameServerService.findByQuery(new QConsumer(model))),
+                String.format("topic %s exists related consumers", CodeConverter.convertTopic(model.getNamespace(), model).getFullName()));
+        //delete related partition groups
         try {
+            List<TopicPartitionGroup> groups = partitionGroupServerService.findByTopic(model.getCode(), model.getNamespace().getCode());
+            if (NullUtil.isNotEmpty(groups)) {
+                groups.forEach(g -> {
+                    try {
+                        partitionGroupServerService.delete(g);
+                    } catch (Exception e) {
+                        String msg = "delete topic related partition groups error.";
+                        logger.error(msg, e);
+                        throw new ServiceException(INTERNAL_SERVER_ERROR, msg, e);
+                    }
+                });
+            }
+            //delete related partition group replica
+            List<PartitionGroupReplica> replicas = replicaServerService.findByQuery(new QPartitionGroupReplica(model, model.getNamespace()));
+            if (NullUtil.isNotEmpty(replicas)) {
+                replicas.forEach(r -> {
+                    try {
+                        replicaServerService.delete(r);
+                    } catch (Exception e) {
+                        String msg = "delete topic related partition group replicas error.";
+                        logger.error(msg, e);
+                        throw new ServiceException(INTERNAL_SERVER_ERROR, msg, e);
+                    }
+                });
+            }
+            //delete topic
             return topicNameServerService.removeTopic(model);
         } catch (Exception e) {
-            String errorMsg = "移除主题,同步NameServer失败";
+            String errorMsg = "delete topic error.";
             logger.error(errorMsg, e);
-            throw new ServiceException(ServiceException.INTERNAL_SERVER_ERROR, errorMsg);//回滚
+            throw new ServiceException(INTERNAL_SERVER_ERROR, errorMsg, e);//回滚
         }
 
     }

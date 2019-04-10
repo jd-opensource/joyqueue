@@ -21,6 +21,9 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.jd.journalq.exception.ServiceException.IGNITE_RPC_ERROR;
+import static com.jd.journalq.exception.ServiceException.INTERNAL_SERVER_ERROR;
+
 /**
  * topic partition group service implement
  * Created by chenyanying3 on 2018-10-18
@@ -75,7 +78,7 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
             }
         } catch (Exception e) {
             logger.error("exception",e);
-            throw new ServiceException(ServiceException.IGNITE_RPC_ERROR,e.getMessage());
+            throw new ServiceException(IGNITE_RPC_ERROR,e.getMessage());
         }
         return group;
     }
@@ -92,7 +95,7 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
         } catch (Exception e) {
             String errorMsg = "新添加partitionGroup，同步NameServer失败";
             logger.error(errorMsg, e);
-            throw new ServiceException(ServiceException.INTERNAL_SERVER_ERROR, errorMsg);
+            throw new ServiceException(INTERNAL_SERVER_ERROR, errorMsg);
         }
     }
 
@@ -105,7 +108,7 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
             groups = partitionGroupServerService.findByQuery(new QTopicPartitionGroup(new Topic(model.getTopic().getCode())));
         } catch (Exception e) {
             logger.error("partitionGroupServerService.findByQuery",e);
-            throw new ServiceException(ServiceException.IGNITE_RPC_ERROR,e.getMessage());
+            throw new ServiceException(IGNITE_RPC_ERROR,e.getMessage());
         }
         int currentPartitions = topic.getPartitions();
         if (groups != null) {
@@ -124,7 +127,7 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
         } catch (Exception e) {
             String errorMsg = "新添加partitionGroup，同步NameServer失败";
             logger.error(errorMsg, e);
-            throw new ServiceException(ServiceException.INTERNAL_SERVER_ERROR, errorMsg);//回滚
+            throw new ServiceException(INTERNAL_SERVER_ERROR, errorMsg);//回滚
         }
         return 1;
     }
@@ -145,7 +148,7 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
         Set<Integer> partitions = Arrays.stream(topicPartitionGroup.getPartitions().substring(1,topicPartitionGroup.getPartitions().length()-1).split(",")).map(m->Integer.valueOf(m.trim())).collect(Collectors.toSet());
 
         if (model.getPartitionCount()<=0) {
-            throw new ServiceException(ServiceException.INTERNAL_SERVER_ERROR, "数据异常");
+            throw new ServiceException(INTERNAL_SERVER_ERROR, "数据异常");
         }
         for(int i =currentPartitions;i<topic.getPartitions();i++){
             partitions.add(i);
@@ -157,7 +160,7 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
         } catch (Exception e) {
             String errorMsg = "更新partitionGroup，同步NameServer失败";
             logger.error(errorMsg, e);
-            throw new ServiceException(ServiceException.INTERNAL_SERVER_ERROR, errorMsg);//回滚
+            throw new ServiceException(INTERNAL_SERVER_ERROR, errorMsg);//回滚
         }
         return 1;
     }
@@ -178,7 +181,7 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
         Set<Integer> partitions = Arrays.stream(topicPartitionGroup.getPartitions().substring(1,topicPartitionGroup.getPartitions().length()-1).split(",")).map(m->Integer.valueOf(m.trim())).collect(Collectors.toSet());
         //如果缩减数小于，已有partition数，则更改失败
         if (model.getPartitionCount()>= partitions.size()) {
-            throw new ServiceException(ServiceException.INTERNAL_SERVER_ERROR, "数据异常");
+            throw new ServiceException(INTERNAL_SERVER_ERROR, "数据异常");
         }
         for(int i=currentPartitions-1;i>topic.getPartitions()-1;i--){
             partitions.remove(i);
@@ -190,7 +193,7 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
         } catch (Exception e) {
             String errorMsg = "更新partitionGroup，同步NameServer失败";
             logger.error(errorMsg, e);
-            throw new ServiceException(ServiceException.INTERNAL_SERVER_ERROR, errorMsg);//回滚
+            throw new ServiceException(INTERNAL_SERVER_ERROR, errorMsg);//回滚
         }
         return 1;
     }
@@ -230,7 +233,7 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
         } catch (Exception e) {
             String errorMsg = "删除partitionGroup，同步NameServer失败";
             logger.error(errorMsg, e);
-            throw new ServiceException(ServiceException.INTERNAL_SERVER_ERROR, errorMsg);//回滚
+            throw new ServiceException(INTERNAL_SERVER_ERROR, errorMsg);//回滚
         }
         return 1;
     }

@@ -2,6 +2,7 @@ package com.jd.journalq.toolkit.lang;
 
 import java.io.Serializable;
 import java.util.Iterator;
+import java.util.Objects;
 
 import static com.jd.journalq.toolkit.lang.Preconditions.checkNotNull;
 
@@ -269,7 +270,7 @@ public abstract class Converter<A, B> {
             return original + ".reverse()";
         }
 
-        private static final long serialVersionUID = 0L;
+        private static final long serialVersionUID = 1L;
     }
 
     /**
@@ -281,6 +282,11 @@ public abstract class Converter<A, B> {
      */
     public final <C> Converter<A, C> andThen(Converter<B, C> second) {
         return new ComposeConverter<A, B, C>(this, checkNotNull(second));
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(checkNull, reverse);
     }
 
     /**
@@ -344,7 +350,7 @@ public abstract class Converter<A, B> {
             return first + ".andThen(" + second + ")";
         }
 
-        private static final long serialVersionUID = 0L;
+        private static final long serialVersionUID = 1L;
     }
 
     /**
@@ -466,6 +472,6 @@ public abstract class Converter<A, B> {
             return "Converter.identity()";
         }
 
-        private static final long serialVersionUID = 0L;
+        private static final long serialVersionUID = 1L;
     }
 }

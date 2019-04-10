@@ -6,6 +6,7 @@ import com.jd.journalq.broker.config.BrokerConfig;
 import com.jd.journalq.broker.config.Configuration;
 import com.jd.journalq.broker.config.ContextManager;
 import com.jd.journalq.broker.consumer.Consume;
+import com.jd.journalq.broker.consumer.MessageConvertSupport;
 import com.jd.journalq.broker.coordinator.CoordinatorService;
 import com.jd.journalq.broker.coordinator.config.CoordinatorConfig;
 import com.jd.journalq.broker.election.ElectionService;
@@ -22,8 +23,8 @@ import com.jd.journalq.broker.store.StoreManager;
 import com.jd.journalq.domain.Config;
 import com.jd.journalq.domain.Consumer;
 import com.jd.journalq.domain.Producer;
-import com.jd.journalq.security.Authentication;
 import com.jd.journalq.nsr.NameService;
+import com.jd.journalq.security.Authentication;
 import com.jd.journalq.server.retry.api.MessageRetry;
 import com.jd.journalq.store.StoreService;
 import com.jd.journalq.toolkit.config.Property;
@@ -68,6 +69,7 @@ public class BrokerService extends Service {
 
     private CoordinatorService coordinatorService;
     private ArchiveManager archiveManager;
+    private MessageConvertSupport messageConvertSupport;
     private String[] args;
 
     public BrokerService() {
@@ -127,6 +129,9 @@ public class BrokerService extends Service {
         this.coordinatorService = new CoordinatorService(new CoordinatorConfig(configuration),
                 clusterManager, nameService);
         this.brokerContext.coordinnatorService(this.coordinatorService);
+
+        this.messageConvertSupport = new MessageConvertSupport();
+        this.brokerContext.messageConvertSupport(this.messageConvertSupport);
 
         // build produce
         this.produce = getProduce(brokerContext);

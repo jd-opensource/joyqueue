@@ -25,7 +25,7 @@
 // */
 //@Deprecated
 //public class MqttOverWebsocketProtocolBak implements ProtocolService, ChannelHandlerProvider {
-//    private final static Logger logger = LoggerFactory.getLogger(MqttOverWebsocketProtocolBak.class);
+//    private static final Logger logger = LoggerFactory.getLogger(MqttOverWebsocketProtocolBak.class);
 //
 //    private BrokerContext brokerContext;
 //
