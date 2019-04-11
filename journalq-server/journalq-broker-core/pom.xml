@@ -27,7 +27,6 @@
     <artifactId>journalq-broker-core</artifactId>
 
     <properties>
-        <laf-vertx.version>1.0.0-SNAPSHOT</laf-vertx.version>
         <commons-beanutils.version>1.9.3</commons-beanutils.version>
         <hibernate-validator.version>6.0.9.Final</hibernate-validator.version>
     </properties>
