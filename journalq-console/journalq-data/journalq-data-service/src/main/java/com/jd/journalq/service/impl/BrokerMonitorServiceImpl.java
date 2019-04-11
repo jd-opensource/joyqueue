@@ -603,7 +603,7 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
         List<PartitionGroupPosition> positionList = new ArrayList<>();
         partitionGroupMetricMap.forEach((k,v) ->{
             PartitionGroupPosition partitionGroupPosition = positionConvert(masterMetric,v);
-            if (masterBroker.equals(v)) {
+            if (String.valueOf(masterBroker).equals(k)) {
                 partitionGroupPosition.setMaster(true);
             }
             positionList.add(partitionGroupPosition);
