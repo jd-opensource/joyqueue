@@ -37,12 +37,7 @@ public class TransactionHandler extends Service {
     }
 
     public TransactionMetadata initProducer(String clientId, String transactionId, int transactionTimeout) {
-        if (!isStarted()) {
-            throw new CoordinatorTransactionException(KafkaErrorCode.COORDINATOR_NOT_AVAILABLE.getCode());
-        }
-        if (!coordinator.isCurrentTransactionCoordinator(clientId)) {
-            throw new CoordinatorTransactionException(KafkaErrorCode.NOT_COORDINATOR.getCode());
-        }
+        checkCoordinatorState(clientId, transactionId);
 
         TransactionMetadata transactionMetadata = transactionMetadataManager.getTransaction(transactionId);
         if (transactionMetadata == null) {
@@ -54,27 +49,27 @@ public class TransactionHandler extends Service {
         }
     }
 
-    protected TransactionMetadata doInitProducer(TransactionMetadata coordinatorTransactionMetadata) {
-        coordinatorTransactionMetadata.setProducerId(producerIdManager.generateId());
-        coordinatorTransactionMetadata.nextProducerEpoch();
-        return coordinatorTransactionMetadata;
+    protected TransactionMetadata doInitProducer(TransactionMetadata transactionMetadata) {
+        transactionMetadata.transitionStateTo(TransactionState.EMPTY);
+        transactionMetadata.setProducerId(producerIdManager.generateId());
+        transactionMetadata.nextProducerEpoch();
+        return transactionMetadata;
     }
 
     // TODO 状态码处理
     // TODO 事务状态判断
     public Map<String, List<PartitionMetadataAndError>> addPartitionsToTxn(String clientId, String transactionId, long producerId, short producerEpoch, Map<String, List<Integer>> partitions) {
-        if (!isStarted()) {
-            throw new CoordinatorTransactionException(KafkaErrorCode.COORDINATOR_NOT_AVAILABLE.getCode());
-        }
-        if (!coordinator.isCurrentTransactionCoordinator(clientId)) {
-            throw new CoordinatorTransactionException(KafkaErrorCode.NOT_COORDINATOR.getCode());
-        }
+        checkCoordinatorState(clientId, transactionId);
+
         TransactionMetadata transactionMetadata = transactionMetadataManager.getTransaction(transactionId);
-        if (transactionMetadata == null) {
+        if (transactionMetadata == null || transactionMetadata.getProducerId() != producerId) {
             throw new CoordinatorTransactionException(KafkaErrorCode.INVALID_PRODUCER_ID_MAPPING.getCode());
         }
-        if (transactionMetadata.getProducerId() != producerId || transactionMetadata.getProducerEpoch() != producerEpoch) {
+        if (transactionMetadata.getProducerEpoch() != producerEpoch) {
             throw new CoordinatorTransactionException(KafkaErrorCode.INVALID_PRODUCER_EPOCH.getCode());
+        }
+        if (transactionMetadata.getState().equals(TransactionState.PREPARE_ABORT) || transactionMetadata.getState().equals(TransactionState.PREPARE_COMMIT)) {
+            throw new CoordinatorTransactionException(KafkaErrorCode.CONCURRENT_TRANSACTIONS.getCode());
         }
 
         synchronized (transactionMetadata) {
@@ -97,19 +92,17 @@ public class TransactionHandler extends Service {
     }
 
     public boolean endTxn(String clientId, String transactionId, long producerId, short producerEpoch, boolean isCommit) {
-        if (!isStarted()) {
-            throw new CoordinatorTransactionException(KafkaErrorCode.COORDINATOR_NOT_AVAILABLE.getCode());
-        }
-        if (!coordinator.isCurrentTransactionCoordinator(clientId)) {
-            throw new CoordinatorTransactionException(KafkaErrorCode.NOT_COORDINATOR.getCode());
-        }
+        checkCoordinatorState(clientId, transactionId);
 
         TransactionMetadata transactionMetadata = transactionMetadataManager.getTransaction(transactionId);
-        if (transactionMetadata == null) {
+        if (transactionMetadata == null || transactionMetadata.getProducerId() != producerId) {
             throw new CoordinatorTransactionException(KafkaErrorCode.INVALID_PRODUCER_ID_MAPPING.getCode());
         }
-        if (transactionMetadata.getProducerId() != producerId || transactionMetadata.getProducerEpoch() != producerEpoch) {
+        if (transactionMetadata.getProducerEpoch() != producerEpoch) {
             throw new CoordinatorTransactionException(KafkaErrorCode.INVALID_PRODUCER_EPOCH.getCode());
+        }
+        if (transactionMetadata.getState().equals(TransactionState.PREPARE_COMMIT) || transactionMetadata.getState().equals(TransactionState.PREPARE_ABORT)) {
+            throw new CoordinatorTransactionException(KafkaErrorCode.CONCURRENT_TRANSACTIONS.getCode());
         }
 
         synchronized (transactionMetadata) {
@@ -120,9 +113,20 @@ public class TransactionHandler extends Service {
     protected boolean doEndTxn(TransactionMetadata transactionMetadata, boolean isCommit) {
         if (isCommit) {
             transactionMetadata.transitionStateTo(TransactionState.PREPARE_COMMIT);
+            transactionMetadata.transitionStateTo(TransactionState.COMPLETE_COMMIT);
         } else {
             transactionMetadata.transitionStateTo(TransactionState.PREPARE_ABORT);
+            transactionMetadata.transitionStateTo(TransactionState.COMPLETE_ABORT);
         }
         return true;
+    }
+
+    protected void checkCoordinatorState(String clientId, String transactionId) {
+        if (!isStarted()) {
+            throw new CoordinatorTransactionException(KafkaErrorCode.COORDINATOR_NOT_AVAILABLE.getCode());
+        }
+        if (!coordinator.isCurrentTransactionCoordinator(clientId)) {
+            throw new CoordinatorTransactionException(KafkaErrorCode.NOT_COORDINATOR.getCode());
+        }
     }
 }

@@ -69,11 +69,9 @@ public class KafkaMessageV1Serializer extends AbstractKafkaMessageSerializer {
         long crc = KafkaBufferUtils.crc32(bytes, 4 + 4, bytes.length - 4 - 4);
 
         // 写入长度和crc
-        buffer.markWriterIndex();
         buffer.writerIndex(startIndex);
-        buffer.writeInt(length - 4);
-        buffer.writeInt((int) (crc & 0xffffffffL));
-        buffer.resetWriterIndex();
+        buffer.setInt(startIndex, length - 4);
+        buffer.setInt(startIndex + 4, (int) (crc & 0xffffffffL));
     }
 
     public static List<KafkaBrokerMessage> readMessages(ByteBuffer buffer) throws Exception {
