@@ -273,7 +273,7 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
 
 
     @Override
-    public synchronized void restorePartitionGroup(String topic, int partitionGroup) throws Exception {
+    public synchronized void restorePartitionGroup(String topic, int partitionGroup){
 
         PartitionGroupStoreManager partitionGroupStoreManger = partitionGroupStore(topic, partitionGroup);
         if (null == partitionGroupStoreManger) {
@@ -292,8 +292,7 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
     }
 
     @Override
-    public synchronized void createPartitionGroup(String topic, int partitionGroup, short[] partitions, int[] nodes) throws Exception {
-        // TODO: 检查topic名称
+    public synchronized void createPartitionGroup(String topic, int partitionGroup, short[] partitions) {
         if (!storeMap.containsKey(topic + "/" + partitionGroup)) {
             File groupBase = new File(base, getPartitionGroupRelPath(topic, partitionGroup));
             if (groupBase.exists()) delete(groupBase);
@@ -330,17 +329,18 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
 
     @Override
     public PartitionGroupStore getStore(String topic, int partitionGroup, QosLevel writeQosLevel) {
-        return partitionGroupStore(topic, partitionGroup).getQosStore(writeQosLevel);
+        PartitionGroupStoreManager partitionGroupStoreManager = partitionGroupStore(topic, partitionGroup);
+        return partitionGroupStoreManager == null ? null : partitionGroupStoreManager.getQosStore(writeQosLevel);
     }
 
     @Override
     public PartitionGroupStore getStore(String topic, int partitionGroup) {
-        return getStore(topic, partitionGroup, QosLevel.PERSISTENCE);
+        return getStore(topic, partitionGroup, QosLevel.REPLICATION);
     }
 
     @Override
     public List<PartitionGroupStore> getStore(String topic) {
-        return partitionGroupStores(topic).stream().map(p -> p.getQosStore(QosLevel.PERSISTENCE)).collect(Collectors.toList());
+        return partitionGroupStores(topic).stream().map(p -> p.getQosStore(QosLevel.REPLICATION)).collect(Collectors.toList());
     }
 
     @Override

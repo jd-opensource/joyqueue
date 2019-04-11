@@ -171,13 +171,17 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         }
     }
 
-    public void recover() throws IOException {
-        logger.info("Recovering message store...");
-        store.recover();
-        logger.info("Recovering index store...");
-        indexPosition = recoverPartitions();
-        logger.info("Building indices ...");
-        recoverIndices();
+    public void recover() {
+        try {
+            logger.info("Recovering message store...");
+            store.recover();
+            logger.info("Recovering index store...");
+            indexPosition = recoverPartitions();
+            logger.info("Building indices ...");
+            recoverIndices();
+        } catch (IOException e) {
+            throw new StoreInitializeException(e);
+        }
     }
 
     private void recoverIndices() throws IOException {

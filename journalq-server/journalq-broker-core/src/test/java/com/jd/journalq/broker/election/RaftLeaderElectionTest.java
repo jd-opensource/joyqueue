@@ -131,7 +131,7 @@ public class RaftLeaderElectionTest {
 
     private void createElectionManager(List<Broker> allNodes) throws Exception {
         for (int i = 0; i < RAFT_ELECTION_NUM; i++) {
-            storeServices[i].createPartitionGroup(topic1.getFullName(), partitionGroup1, new short[]{1}, new int[]{1});
+            storeServices[i].createPartitionGroup(topic1.getFullName(), partitionGroup1, new short[]{1});
             electionManager[i].onPartitionGroupCreate(PartitionGroup.ElectType.raft,
                     topic1, partitionGroup1, allNodes, new TreeSet<>(), brokers[i].getId(), -1);
             leaderElections[i] = electionManager[i].getLeaderElection(topic1, partitionGroup1);
@@ -153,7 +153,7 @@ public class RaftLeaderElectionTest {
         }
 
         for (int i = 0; i < RAFT_ELECTION_NUM; i++) {
-            storeServices[i].createPartitionGroup(topic1.getFullName(), partitionGroup1, new short[]{1}, new int[]{1});
+            storeServices[i].createPartitionGroup(topic1.getFullName(), partitionGroup1, new short[]{1});
             electionManager[i].onPartitionGroupCreate(PartitionGroup.ElectType.raft,
                     topic1, partitionGroup1, allNodes, new TreeSet<Integer>(), brokers[i].getId(), -1);
             leaderElections[i] = electionManager[i].getLeaderElection(topic1, partitionGroup1);
@@ -214,7 +214,7 @@ public class RaftLeaderElectionTest {
     public void testOneNode() throws Exception {
         List<Broker> allNodes = new LinkedList<>();
         allNodes.add(brokers[0]);
-        storeServices[0].createPartitionGroup(topic1.getFullName(), partitionGroup1, new short[]{1}, new int[]{1});
+        storeServices[0].createPartitionGroup(topic1.getFullName(), partitionGroup1, new short[]{1});
         electionManager[0].onPartitionGroupCreate(PartitionGroup.ElectType.raft,
                 topic1, partitionGroup1, allNodes, new TreeSet<>(), brokers[0].getId(), -1);
         leaderElections[0] = electionManager[0].getLeaderElection(topic1, partitionGroup1);
@@ -338,7 +338,7 @@ public class RaftLeaderElectionTest {
 
         for (int i = 0; i < RAFT_ELECTION_NUM; i++) {
             for (int j = 0; j < TOPIC_NUM; j++) {
-                storeServices[i].createPartitionGroup(topics[j], partitionGroup1, new short[]{1}, new int[]{1});
+                storeServices[i].createPartitionGroup(topics[j], partitionGroup1, new short[]{1});
                 electionManager[i].onPartitionGroupCreate(PartitionGroup.ElectType.raft,
                         TopicName.parse(topics[j]), partitionGroup1, allNodes, new TreeSet<Integer>(), brokers[i].getId(), -1);
                 multiLeaderElections[i][j] = electionManager[i].getLeaderElection(TopicName.parse(topics[j]), partitionGroup1);
@@ -460,7 +460,7 @@ public class RaftLeaderElectionTest {
         }
 
         for (int i = 0; i < RAFT_ELECTION_NUM; i++) {
-            storeServices[i].createPartitionGroup(topic1.getFullName(), partitionGroup1, new short[]{1}, new int[]{1});
+            storeServices[i].createPartitionGroup(topic1.getFullName(), partitionGroup1, new short[]{1});
             electionManager[i].onPartitionGroupCreate(PartitionGroup.ElectType.raft,
                     topic1, partitionGroup1, allNodes, new TreeSet<>(), brokers[i].getId(), -1);
             leaderElections[i] = electionManager[i].getLeaderElection(topic1, partitionGroup1);

@@ -19,18 +19,39 @@ import java.io.IOException;
 import java.util.concurrent.Future;
 
 /**
- * 本地消息数据存储，用于读写消息
+ * Partition group存储，每个Partition group属于唯一的一个Topic，在Topic范围内拥有唯一的序号，包含多个Partition。
  */
 public interface PartitionGroupStore {
-
-
-
+    /**
+     * 获取Topic
+     * @return Topic
+     */
     String getTopic();
+
+    /**
+     * 获取Partition Group 序号
+     * @return Partition Group 序号
+     */
     int getPartitionGroup();
+
+    /**
+     * 列出Partition group下所有的Partition
+     * @return Partition数组
+     */
     Short[] listPartitions();
 
+    /**
+     * 获取当前PartitionGroup占用的磁盘空间大小
+     * @return 当前PartitionGroup占用的磁盘空间大小，单位Byte
+     */
     long getTotalPhysicalStorageSize();
 
+    /**
+     *
+     * @param minIndexedPosition
+     * @return
+     * @throws IOException
+     */
     long deleteMinStoreMessages(long minIndexedPosition) throws IOException;
     long deleteEarlyMinStoreMessages(long targetDeleteTimeline, long minIndexedPosition) throws IOException;
 
