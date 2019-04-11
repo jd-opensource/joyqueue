@@ -15,18 +15,19 @@ import java.util.stream.IntStream;
  * Date: 2018-11-28
  */
 public class MessageTestUtils {
-    public static ByteBuffer createMessage(String body){
+    public static ByteBuffer createMessage(String body) {
         return createMessage(body.getBytes());
     }
-    public static ByteBuffer createMessage(byte [] body){
-        byte [] biz_id = new byte[8];
-        Arrays.fill(biz_id,(byte) 0x25);
-        byte [] property = "This is property!".getBytes(StandardCharsets.UTF_8);
-        byte [] expand = "This is expand!".getBytes(StandardCharsets.UTF_8);
-        byte [] app = new byte[8];
-        Arrays.fill(app,(byte) 0x21);
 
-        byte [][] varAtts = {body, biz_id, property, expand, app};
+    public static ByteBuffer createMessage(byte[] body) {
+        byte[] biz_id = new byte[8];
+        Arrays.fill(biz_id, (byte) 0x25);
+        byte[] property = "This is property!".getBytes(StandardCharsets.UTF_8);
+        byte[] expand = "This is expand!".getBytes(StandardCharsets.UTF_8);
+        byte[] app = new byte[8];
+        Arrays.fill(app, (byte) 0x21);
+
+        byte[][] varAtts = {body, biz_id, property, expand, app};
         ByteBuffer byteBuffer = MessageParser.build(varAtts);
         MessageParser.setLong(byteBuffer, MessageParser.CLIENT_TIMESTAMP, System.currentTimeMillis());
         Crc32 crc32 = new Crc32();
@@ -39,7 +40,7 @@ public class MessageTestUtils {
 
     public static List<ByteBuffer> createMessages(List<String> bodyList) {
 
-        return   bodyList.stream()
+        return bodyList.stream()
                 .map(MessageTestUtils::createMessage)
                 .collect(Collectors.toList());
 

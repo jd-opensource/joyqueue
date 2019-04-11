@@ -26,7 +26,7 @@ public class StoreServiceTest {
     private String topic = "raven_topic";
 
     private int partitionGroup = 6;
-    private short [] partitions = new short[] {4, 5, 6};
+    private short[] partitions = new short[]{4, 5, 6};
     private Store store;
 
     @Before
@@ -42,14 +42,15 @@ public class StoreServiceTest {
 
         store = new Store(config);
         store.start();
-        store.createPartitionGroup(topic,partitionGroup,partitions,new int [] {0});
+        store.createPartitionGroup(topic, partitionGroup, partitions, new int[]{0});
         store.getReplicableStore(topic, partitionGroup).enable();
 
 
     }
+
     @After
     public void destroyStore() {
-        if(null != store) {
+        if (null != store) {
             store.stop();
             store.physicalDelete();
         }
@@ -57,21 +58,21 @@ public class StoreServiceTest {
 
     @Test
     public void performanceTest() throws Exception {
-        PartitionGroupStore partitionGroupStore = store.getStore(topic,partitionGroup,QosLevel.RECEIVE);
+        PartitionGroupStore partitionGroupStore = store.getStore(topic, partitionGroup, QosLevel.RECEIVE);
 
         long count = 1024;
         int batchSize = 1024;
         int bodySize = 1024;
         long t0 = System.currentTimeMillis();
         for (int i = 0; i < count; i++) {
-            ByteBuffer[] messages = MessageUtils.build(batchSize,bodySize).toArray(new ByteBuffer[0]);
+            ByteBuffer[] messages = MessageUtils.build(batchSize, bodySize).toArray(new ByteBuffer[0]);
             short partition = partitions[ThreadLocalRandom.current().nextInt(partitions.length)];
-            Future<WriteResult> future = partitionGroupStore.asyncWrite(Arrays.stream(messages).map(b->new WriteRequest(partition, b)).toArray(WriteRequest[]::new));
+            Future<WriteResult> future = partitionGroupStore.asyncWrite(Arrays.stream(messages).map(b -> new WriteRequest(partition, b)).toArray(WriteRequest[]::new));
             WriteResult writeResult = future.get();
             Assert.assertEquals(JMQCode.SUCCESS, writeResult.getCode());
         }
         long t1 = System.currentTimeMillis();
-        long totalSize = count * batchSize * bodySize / 1024 /1024;
+        long totalSize = count * batchSize * bodySize / 1024 / 1024;
         logger.info("Total write : {} MB, takes {} ms, average {} MBps.", totalSize, t1 - t0, totalSize * 1000 / (t1 - t0));
 
     }
