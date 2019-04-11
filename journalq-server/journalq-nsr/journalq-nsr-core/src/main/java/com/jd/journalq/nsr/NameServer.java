@@ -134,7 +134,6 @@ public class NameServer extends Service implements NameService, PropertySupplier
     public void doStart() throws Exception {
         super.doStart();
         metaManager.addListener(listener);
-        transportServerFactory.addListener(new BrokerTranSportManager());
         this.manageServer.setManager_port(nameServerConfig.getManagerPort());
         manageServer.start();
         ServerConfig serverConfig = nameServerConfig.getServerConfig();
@@ -393,7 +392,6 @@ public class NameServer extends Service implements NameService, PropertySupplier
             broker.setPort(port);
             broker.setDataCenter(getDataCenter(brokerIp).getCode());
             metaManager.addBroker(broker);
-            metaCache.registerBroker.put(brokerId, broker);
         }
         return broker;
     }
@@ -628,27 +626,6 @@ public class NameServer extends Service implements NameService, PropertySupplier
         this.propertySupplier = supplier;
     }
 
-    public class BrokerTranSportManager implements EventListener<TransportEvent> {
-        @Override
-        public void onEvent(TransportEvent event) {
-            Transport transport = event.getTransport();
-            String broker = transport.attr().get("broker.id");
-            if(null==broker){
-                return;
-            }
-            Integer brokerId = Integer.valueOf(broker);
-            switch (event.getType()) {
-                case CONNECT:
-                    metaCache.registerBroker.put(brokerId,getBroker(brokerId));
-                case EXCEPTION:
-                case CLOSE:
-                    metaCache.registerBroker.remove(brokerId);
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
     /**
      * MetaDataListener
      */
@@ -665,9 +642,7 @@ public class NameServer extends Service implements NameService, PropertySupplier
                     logger.info("UPDATE_TOPIC [{}]]", topicConfig1);
                     if (null != topicConfig1) {
                         topicConfig1.fetchAllBrokerIds().forEach(brokerId -> {
-                            if (metaCache.registerBroker.containsKey(brokerId)) {
                                 eventManager.add(new NameServerEvent(event, brokerId));
-                            }
                         });
                     }
                     break;
@@ -677,9 +652,7 @@ public class NameServer extends Service implements NameService, PropertySupplier
                     logger.info("REMOVE_TOPIC [{}]]", topic2);
                     if (null != topicConfig2) {
                         topicConfig2.fetchAllBrokerIds().forEach(brokerId -> {
-                            if (metaCache.registerBroker.containsKey(brokerId)) {
                                 eventManager.add(new NameServerEvent(event, brokerId));
-                            }
                         });
                     }
                     break;
@@ -697,9 +670,7 @@ public class NameServer extends Service implements NameService, PropertySupplier
                         broker3.addAll(topicConfig3Old.fetchAllBrokerIds());
                     }
                     broker3.forEach(brokerId -> {
-                        if (metaCache.registerBroker.containsKey(brokerId)) {
-                            eventManager.add(new NameServerEvent(event, brokerId));
-                        }
+                        eventManager.add(new NameServerEvent(event, brokerId));
                     });
                     break;
                 case REMOVE_PARTITION_GROUP:
@@ -709,9 +680,7 @@ public class NameServer extends Service implements NameService, PropertySupplier
                     logger.info("REMOVE_PARTITION_GROUP [{}]]", topicConfig4);
                     if (null != topicConfig4) {
                         (null == topicConfig4Old ? topicConfig4 : topicConfig4Old).fetchAllBrokerIds().forEach(brokerId -> {
-                            if (metaCache.registerBroker.containsKey(brokerId)) {
                                 eventManager.add(new NameServerEvent(event, brokerId));
-                            }
                         });
                     }
                     break;
@@ -722,9 +691,7 @@ public class NameServer extends Service implements NameService, PropertySupplier
                     logger.info("UPDATE_CONSUMER [{}],brokers[{}]", consumer, metaCache.brokerConfigs);
                     if (metaCache.topicConfigs.containsKey(consumerEvent.getTopic())) {
                         metaCache.topicConfigs.get(consumerEvent.getTopic()).fetchAllBrokerIds().forEach(brokerId -> {
-                            if (metaCache.registerBroker.containsKey(brokerId)) {
                                 eventManager.add(new NameServerEvent(event, brokerId));
-                            }
                         });
                     }
                     break;
@@ -738,9 +705,7 @@ public class NameServer extends Service implements NameService, PropertySupplier
                     }
                     if (null != topicConfig5) {
                         topicConfig5.fetchAllBrokerIds().forEach(brokerId -> {
-                            if (metaCache.registerBroker.containsKey(brokerId)) {
                                 eventManager.add(new NameServerEvent(event, brokerId));
-                            }
                         });
                     }
                     break;
@@ -751,9 +716,7 @@ public class NameServer extends Service implements NameService, PropertySupplier
                     logger.info("UPDATE_PRODUCER [{}],brokers[{}]", producer, metaCache.brokerConfigs);
                     if (metaCache.topicConfigs.containsKey(producerEvent.getTopic())) {
                         metaCache.topicConfigs.get(producerEvent.getTopic()).fetchAllBrokerIds().forEach(brokerId -> {
-                            if (metaCache.registerBroker.containsKey(brokerId)) {
                                 eventManager.add(new NameServerEvent(event, brokerId));
-                            }
                         });
                     }
                     ;
@@ -767,9 +730,7 @@ public class NameServer extends Service implements NameService, PropertySupplier
                     }
                     if (null != topicConfig7) {
                         topicConfig7.fetchAllBrokerIds().forEach(brokerId -> {
-                            if (metaCache.registerBroker.containsKey(brokerId)) {
                                 eventManager.add(new NameServerEvent(event, brokerId));
-                            }
                         });
                     }
                     break;
@@ -831,10 +792,6 @@ public class NameServer extends Service implements NameService, PropertySupplier
          * 数据中心
          */
         private Map<String, DCWrapper> dataCenterMap = new ConcurrentHashMap<>();
-        /**
-         *
-         */
-        private Map<Integer, Broker> registerBroker = new ConcurrentHashMap<>();
 
     }
 

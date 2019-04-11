@@ -1,7 +1,7 @@
 <template>
   <div>
     <producer-base ref="producerBase" :keywordTip="keywordTip" :colData="colData"
-                   :subscribeDialogColData="subscribeDialog.colData" :summaryChartShow="true"
+                   :subscribeDialogColData="subscribeDialog.colData" :showSummaryChart="true"
                    :search="search" :subscribeUrls="subscribeDialog.urls"/>
   </div>
 </template>
@@ -63,13 +63,13 @@ export default {
           title: '限制IP发送',
           key: 'config.blackList'
         },
-        {
-          title: '单线程发送',
-          key: 'config.single',
-          render: (h, params) => {
-            return yesOrNoBtnRender(h, params.item.config === undefined ? undefined : params.item.config.single)
-          }
-        },
+        // {
+        //   title: '单线程发送',
+        //   key: 'config.single',
+        //   render: (h, params) => {
+        //     return yesOrNoBtnRender(h, params.item.config === undefined ? undefined : params.item.config.single)
+        //   }
+        // },
         {
           title: '归档',
           key: 'config.archive',

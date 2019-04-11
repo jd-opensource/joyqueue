@@ -7,7 +7,7 @@
       </d-select>
       <d-input v-model="searchData.identity" placeholder="关联id" class="left mr10" style="width: 10%"></d-input>
       <d-input v-model="searchData.erp" placeholder="用户名" class="left mr10" style="width: 10%"></d-input>
-      <d-button type="primary" @click="getListWithDate">查询</d-button>
+      <d-button type="primary" color="success" @click="getListWithDate">查询</d-button>
     </div>
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
               @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"

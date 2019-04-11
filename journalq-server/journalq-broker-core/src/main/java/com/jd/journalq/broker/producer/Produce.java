@@ -62,7 +62,7 @@ public interface Produce {
      * @param tx       命令类型，包括prepare，commit，rollback
      * @throws JMQException 处理异常。
      */
-    void putTransactionMessage(Producer producer, JournalLog tx) throws JMQException;
+    TransactionId putTransactionMessage(Producer producer, JournalLog tx) throws JMQException;
 
     /**
      * 获取补偿

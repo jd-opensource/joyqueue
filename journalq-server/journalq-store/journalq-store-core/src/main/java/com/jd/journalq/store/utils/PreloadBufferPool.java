@@ -8,6 +8,7 @@ import sun.misc.Cleaner;
 import sun.misc.VM;
 import sun.nio.ch.DirectBuffer;
 
+import java.io.Closeable;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.*;
@@ -20,7 +21,7 @@ import java.util.stream.Collectors;
  * @author liyue25
  * Date: 2018-12-20
  */
-public class PreloadBufferPool {
+public class PreloadBufferPool implements Closeable {
     private static final Logger logger = LoggerFactory.getLogger(PreloadBufferPool.class);
     private Map<Integer,PreLoadCache> bufferCache = new ConcurrentHashMap<>();
     private final LoopThread preloadThread;

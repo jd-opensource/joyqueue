@@ -30,7 +30,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -47,7 +51,7 @@ import java.util.concurrent.TimeoutException;
  */
 public class ProduceManager extends Service implements Produce, BrokerContextAware {
 
-    private static final Logger logger = LoggerFactory.getLogger(ProduceManager.class);
+    private final static Logger logger = LoggerFactory.getLogger(ProduceManager.class);
 
     private ProduceConfig config;
 
@@ -216,7 +220,7 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
      */
     private PutResult writeTxMessage(Producer producer, List<BrokerMessage> msgs, String txId, long endTime) throws JMQException {
         ByteBuffer[] byteBuffers = generateRByteBufferList(msgs);
-        Future<WriteResult> writeResultFuture = transactionManager.txMessage(producer, txId, byteBuffers);
+        Future<WriteResult> writeResultFuture = transactionManager.putMessage(producer, txId, byteBuffers);
         WriteResult writeResult = syncWait(writeResultFuture, endTime - SystemClock.now());
         PutResult putResult = new PutResult();
         putResult.addWriteResult(msgs.get(0).getPartition(), writeResult);
@@ -235,7 +239,7 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
     private void writeTxMessageAsync(Producer producer, List<BrokerMessage> msgs, String txId, long endTime, EventListener<WriteResult> eventListener) throws JMQException {
         ByteBuffer[] byteBuffers = generateRByteBufferList(msgs);
         try {
-            WriteResult writeResult = transactionManager.txMessage(producer, txId, byteBuffers).get(endTime, TimeUnit.MILLISECONDS);
+            WriteResult writeResult = transactionManager.putMessage(producer, txId, byteBuffers).get(endTime, TimeUnit.MILLISECONDS);
             eventListener.onEvent(writeResult);
         } catch (Exception e) {
             logger.error("writeTxMessageAsync exception, producer: {}", producer, e);
@@ -493,14 +497,13 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
      *
      * @param tx 事务消息命令
      */
-    @Override
-    public void putTransactionMessage(Producer producer, JournalLog tx) throws JMQException {
+    public TransactionId putTransactionMessage(Producer producer, JournalLog tx) throws JMQException {
         if (tx.getType() == JournalLog.TYPE_TX_PREPARE) {
-            transactionManager.txPrepare(producer, (BrokerPrepare) tx);
+            return transactionManager.prepare(producer, (BrokerPrepare) tx);
         } else if (tx.getType() == JournalLog.TYPE_TX_COMMIT) {
-            transactionManager.txCommit(producer, (BrokerCommit) tx);
+            return transactionManager.commit(producer, (BrokerCommit) tx);
         } else if (tx.getType() == JournalLog.TYPE_TX_ROLLBACK) {
-            transactionManager.txRollback(producer, (BrokerRollback) tx);
+            return transactionManager.rollback(producer, (BrokerRollback) tx);
         } else {
             throw new JMQException(JMQCode.CN_COMMAND_UNSUPPORTED);
         }
@@ -508,7 +511,7 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
 
     @Override
     public List<TransactionId> getFeedback(Producer producer, int count) {
-        return transactionManager.txFeedback(producer, count);
+        return transactionManager.getFeedback(producer, count);
     }
 
     @Override

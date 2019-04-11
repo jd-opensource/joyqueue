@@ -1,19 +1,19 @@
 <template>
   <div>
     <div class="ml20 mt30">
-      <d-date-picker v-model="times" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" value-format="timestamp" :default-time="['00:00:00', '23:59:59']">
+      <d-date-picker v-model="times" type="daterange" class="left mr5" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" value-format="timestamp" :default-time="['00:00:00', '23:59:59']">
         <span slot="prepend">日期范围</span>
       </d-date-picker>
-      <d-input v-model="searchData.topic" placeholder="队列名" class="left mr10" style="width: 15%">
+      <d-input v-model="searchData.topic" placeholder="队列名" class="left mr5" style="width: 15%">
         <span slot="prepend">队列名</span>
       </d-input>
-      <d-input v-model="searchData.businessId" placeholder="业务ID" class="left mr10" style="width: 15%">
+      <d-input v-model="searchData.businessId" placeholder="业务ID" class="left mr5" style="width: 15%">
         <span slot="prepend">业务ID</span>
       </d-input>
-      <d-button type="primary" @click="getListWithDate(false)">查询</d-button>
-      <d-button type="primary" @click="exportArchive">归档导出</d-button>
-      <d-button type="primary" @click="batchRetry">归档转重试</d-button>
-      <d-button type="primary" @click="toArchiveTask">任务详情</d-button>
+      <d-button type="primary" color="success" @click="getListWithDate(false)">查询</d-button>
+      <d-button type="primary" class="left ml10" @click="exportArchive">归档导出</d-button>
+      <d-button type="primary" class="left ml10" @click="batchRetry">归档转重试</d-button>
+      <d-button type="primary" class="left ml10" @click="toArchiveTask">任务详情</d-button>
     </div>
     <my-table :showPagination="false" :showPin="showTablePin" :data="tableData" :page="page" @on-size-change="handleSizeChange"
               @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
@@ -47,18 +47,26 @@ export default {
     myTable
   },
   mixins: [ crud ],
+  props: {
+    searchData: {
+      type: Object,
+      default: function () {
+        return {
+          topic: '',
+          businessId: '',
+          beginTime: '',
+          endTime: '',
+          sendTime: '',
+          messageId: '',
+          count: 10
+        }
+      }
+    }
+  },
   data () {
     return {
-      searchData: {
-        topic: '',
-        businessId: '',
-        beginTime: '',
-        endTime: '',
-        sendTime: '',
-        messageId: '',
-        count: 10
-      },
-      searchRules: {
+      urls: {
+        search: '/archive/search'
       },
       firstDis: true,
       nextDis: true,
@@ -163,14 +171,12 @@ export default {
       times: []
     }
   },
-
   methods: {
-    toArchiveTask() {
-      console.log("tool/archiveTask");
+    toArchiveTask () {
       this.$router.push({
         name: `/${this.$i18n.locale}/tool/archiveTask`,
         query: {}
-      });
+      })
     },
     getListWithDate (isNext) {
       if (!this.times || this.times.length < 2 || !this.searchData.topic) {
@@ -187,12 +193,12 @@ export default {
         this.searchData.sendTime = oldData[oldData.length - 1].sendTime
         this.firstDis = false
       } else {
-        this.searchData.sendTime = this.searchData.beginTime;
-        this.firstDis = true;
+        this.searchData.sendTime = this.searchData.beginTime
+        this.firstDis = true
       }
       // this.getList();
       apiRequest.post(this.urlOrigin.search, {}, this.searchData).then((data) => {
-        this.tableData.rowData = data.data;
+        this.tableData.rowData = data.data
         // let newData = this.tableData.rowData;
         console.log(this.tableData.rowData.length)
         if (this.tableData.rowData.length < this.searchData.count) {
@@ -219,7 +225,7 @@ export default {
         this.consumeData.rowData = data.data
       })
     },
-    exportArchive(){
+    exportArchive () {
       if (!this.times || this.times.length < 2 || !this.searchData.topic) {
         this.$Dialog.error({
           content: '起始时间,结束时间 topic 都不能为空'
@@ -237,7 +243,7 @@ export default {
         })
       })
     },
-    batchRetry(){
+    batchRetry () {
       if (!this.times || this.times.length < 2 || !this.searchData.topic) {
         this.$Dialog.error({
           content: '起始时间,结束时间 topic 都不能为空'

@@ -2,25 +2,6 @@
   <layout-container>
     <layout-sider class="layout-sider" width="180px">
       <d-menu :active-name="activeName" :theme="theme" width="auto">
-        <div class="layout-logo-left"></div>
-        <d-menu-item name="retry" icon="zap" :size="iconSize" :to="`/${ curLang }/tool/retry`">
-          <span class="layout-text">{{ langConfig.retry }}</span>
-        </d-menu-item>
-        <d-menu-item name="archive" icon="package" :size="iconSize" :to="`/${ curLang }/tool/archive`">
-          <span class="layout-text">{{ langConfig.archive }}</span>
-        </d-menu-item>
-        <d-menu-item name="alarmRule" icon="bell" :size="iconSize" :to="`/${ curLang }/tool/alarmRule`">
-          <span class="layout-text">{{ langConfig.alarmRule }}</span>
-        </d-menu-item>
-        <d-menu-item name="alarmRuleTemplate" icon="target" :size="iconSize" :to="`/${ curLang }/tool/alarmRuleTemplate`">
-          <span class="layout-text">{{ langConfig.alarmRuleTemplate }}</span>
-        </d-menu-item>
-        <d-menu-item name="metric" icon="edit" :size="iconSize" :to="`/${ curLang }/tool/metric`">
-          <span class="layout-text">{{ langConfig.metric }}</span>
-        </d-menu-item>
-        <d-menu-item name="taskHistory" icon="command" :size="iconSize" :to="`/${ curLang }/tool/taskHistory`" v-if="$store.getters.isAdmin">
-          <span class="layout-text">{{ langConfig.taskHistory }}</span>
-        </d-menu-item>
         <d-menu-item name="operateHistory" icon="target" :size="iconSize" :to="`/${ curLang }/tool/operateHistory`" v-if="$store.getters.isAdmin">
           <span class="layout-text">{{ langConfig.operateHistory }}</span>
         </d-menu-item>

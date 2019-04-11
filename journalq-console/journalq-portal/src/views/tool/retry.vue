@@ -1,17 +1,17 @@
 <template>
   <div>
     <div class="ml20 mt30">
-      <d-input v-model="searchData.topic" placeholder="请输入队列名" class="left mr10" style="width: 15%">
+      <d-input v-model="searchData.topic" placeholder="请输入队列名" class="left mr5" style="width: 15%">
         <span slot="prepend">队列名</span>
       </d-input>
-      <d-input v-model="searchData.app" placeholder="请输入消费者" class="left mr10" style="width: 15%">
+      <d-input v-model="searchData.app" placeholder="请输入消费者" class="left mr5" style="width: 15%">
         <span slot="prepend">消费者</span>
       </d-input>
-      <d-select v-model="searchData.status" class="left mr10" style="width:10%">
+      <d-select v-model="searchData.status" class="left mr5" style="width:10%">
         <span slot="prepend">状态</span>
         <d-option v-for="item in statusList" :value="item.key" :key="item.key">{{ item.value }}</d-option>
       </d-select>
-      <d-date-picker class="left mr10"
+      <d-date-picker class="left mr5"
                      v-model="times"
                      type="daterange"
                      range-separator="至"
@@ -21,10 +21,10 @@
                      :default-time="['00:00:00', '23:59:59']">
         <span slot="prepend">发送时间</span>
       </d-date-picker>
-      <d-input v-model="searchData.businessId" placeholder="请输入业务ID" class="left mr10" style="width: 15%">
+      <d-input v-model="searchData.businessId" placeholder="请输入业务ID" class="left mr5" style="width: 15%">
         <span slot="prepend">业务ID</span>
       </d-input>
-      <d-button type="primary" @click="getListWithDate">查询<icon name="search" style="margin-left: 5px;"></icon></d-button>
+      <d-button type="primary" color="success" @click="getListWithDate">查询<icon name="search" style="margin-left: 5px;"></icon></d-button>
     </div>
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
               @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
@@ -45,16 +45,24 @@ export default {
     myTable
   },
   mixins: [ crud ],
+  props: {
+    searchData: {
+      type: Object,
+      default: function () {
+        return {
+          topic: '',
+          app: '',
+          status: 1,
+          beginTime: '',
+          endTime: ''
+        }
+      }
+    }
+  },
   data () {
     return {
-      searchData: {
-        topic: '',
-        app: '',
-        status: 1,
-        beginTime: '',
-        endTime: ''
-      },
-      searchRules: {
+      urls: {
+        search: '/retry/search'
       },
       businessId: '',
       statusList: [
@@ -62,7 +70,6 @@ export default {
         {key: -2, value: '过期'},
         {key: -1, value: '已删除'},
         {key: 0, value: '成功'}
-
       ],
       tableData: {
         rowData: [],

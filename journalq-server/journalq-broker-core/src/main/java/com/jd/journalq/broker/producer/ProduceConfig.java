@@ -22,6 +22,10 @@ public class ProduceConfig {
         return PropertySupplier.getValue(propertySupplier, ProducerConfigKey.TRANSACTION_CLEAR_INTERVAL);
     }
 
+    public int getTransactionMaxUncomplete() {
+        return PropertySupplier.getValue(propertySupplier, ProducerConfigKey.TRANSACTION_MAX_UNCOMPLETE);
+    }
+
     public int getTransactionExpireTime() {
         return PropertySupplier.getValue(propertySupplier, ProducerConfigKey.TRANSACTION_EXPIRE_TIME);
     }

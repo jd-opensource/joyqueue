@@ -8,6 +8,7 @@ import com.jd.journalq.store.utils.BaseDirUtils;
 import com.jd.journalq.store.utils.MessageUtils;
 import com.jd.journalq.store.utils.PreloadBufferPool;
 import com.jd.journalq.toolkit.concurrent.EventFuture;
+import com.jd.journalq.toolkit.format.Format;
 import com.jd.journalq.toolkit.time.SystemClock;
 import org.junit.After;
 import org.junit.Assert;
