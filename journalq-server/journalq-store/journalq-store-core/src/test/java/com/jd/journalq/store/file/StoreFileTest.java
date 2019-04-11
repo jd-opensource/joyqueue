@@ -31,17 +31,17 @@ public class StoreFileTest {
     @Test
     public void timestampTest() throws IOException {
         long start = System.currentTimeMillis();
-        StoreFileImpl<ByteBuffer> storeFile = new StoreFileImpl<>(666L, base,128,new StoreMessageSerializer(1024),new PreloadBufferPool(), 1024 * 1024 * 10);
+        StoreFileImpl<ByteBuffer> storeFile = new StoreFileImpl<>(666L, base, 128, new StoreMessageSerializer(1024), new PreloadBufferPool(), 1024 * 1024 * 10);
         long timestamp = storeFile.timestamp();
         long end = System.currentTimeMillis();
-        Assert.assertTrue( start <= timestamp);
-        Assert.assertTrue( timestamp <= end);
+        Assert.assertTrue(start <= timestamp);
+        Assert.assertTrue(timestamp <= end);
 
         storeFile.append(MessageTestUtils.createMessage(new byte[10]));
         storeFile.flush();
         storeFile.unload();
 
-        storeFile = new StoreFileImpl<>(666L, base,128,new StoreMessageSerializer(1024),new PreloadBufferPool(), 1024 * 1024 * 10);
+        storeFile = new StoreFileImpl<>(666L, base, 128, new StoreMessageSerializer(1024), new PreloadBufferPool(), 1024 * 1024 * 10);
 
         Assert.assertEquals(timestamp, storeFile.timestamp());
 

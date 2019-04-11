@@ -3,9 +3,7 @@ package com.jd.journalq.store.file;
 import com.jd.journalq.store.PositionOverflowException;
 import com.jd.journalq.store.PositionUnderflowException;
 import com.jd.journalq.store.utils.PreloadBufferPool;
-import com.jd.journalq.store.utils.ThreadSafeFormat;
 import com.jd.journalq.toolkit.format.Format;
-import com.jd.journalq.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,13 +11,18 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.NavigableMap;
+import java.util.SortedMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 
 /**
  * 带缓存的、无锁、高性能、多文件、基于位置的、Append Only的日志存储存储。
+ *
  * @author liyue25
  * Date: 2018/8/14
  */
@@ -54,8 +57,9 @@ public class PositioningStore<T> implements Closeable {
     public long right() {
         return writePosition.get();
     }
+
     public long flushPosition() {
-        return flushPosition.get() ;
+        return flushPosition.get();
     }
 
     /**
@@ -91,10 +95,10 @@ public class PositioningStore<T> implements Closeable {
     }
 
     public void clear() {
-        for(StoreFile<T> storeFile :this.storeFileMap.values()) {
-            if(storeFile.hasPage()) storeFile.unload();
+        for (StoreFile<T> storeFile : this.storeFileMap.values()) {
+            if (storeFile.hasPage()) storeFile.unload();
             File file = storeFile.file();
-            if(file.exists() && !file.delete())
+            if (file.exists() && !file.delete())
                 throw new RollBackException(String.format("Can not delete file: %s.", file.getAbsolutePath()));
         }
         this.storeFileMap.clear();
@@ -102,11 +106,11 @@ public class PositioningStore<T> implements Closeable {
 
     private void rollbackFiles(long position) throws IOException {
 
-        if(!storeFileMap.isEmpty()) {
+        if (!storeFileMap.isEmpty()) {
             // position 所在的Page需要截断至position
             Map.Entry<Long, StoreFile<T>> entry = storeFileMap.floorEntry(position);
             StoreFile storeFile = entry.getValue();
-            if(position > storeFile.position()) {
+            if (position > storeFile.position()) {
                 int relPos = (int) (position - storeFile.position());
                 logger.info("Truncate store file {} to relative position {}.", storeFile.file().getAbsolutePath(), relPos);
                 storeFile.rollback(relPos);
@@ -114,7 +118,7 @@ public class PositioningStore<T> implements Closeable {
 
             SortedMap<Long, StoreFile<T>> toBeRemoved = storeFileMap.tailMap(position);
 
-            for(StoreFile sf : toBeRemoved.values()) {
+            for (StoreFile sf : toBeRemoved.values()) {
                 logger.info("Delete store file {}.", sf.file().getAbsolutePath());
                 forceDeleteStoreFile(sf);
             }
@@ -126,9 +130,9 @@ public class PositioningStore<T> implements Closeable {
 
 
     private void resetWriteStoreFile() {
-        if(!storeFileMap.isEmpty()) {
+        if (!storeFileMap.isEmpty()) {
             StoreFile<T> storeFile = storeFileMap.lastEntry().getValue();
-            if(storeFile.position() + fileDataSize > writePosition.get()) {
+            if (storeFile.position() + fileDataSize > writePosition.get()) {
                 writeStoreFile = storeFile;
             }
         }
@@ -137,14 +141,14 @@ public class PositioningStore<T> implements Closeable {
     public void recover() throws IOException {
         recoverFileMap();
 
-        long recoverPosition = this.storeFileMap.isEmpty()? 0L : this.storeFileMap.lastKey() + this.storeFileMap.lastEntry().getValue().fileDataSize();
+        long recoverPosition = this.storeFileMap.isEmpty() ? 0L : this.storeFileMap.lastKey() + this.storeFileMap.lastEntry().getValue().fileDataSize();
         flushPosition.set(recoverPosition);
         writePosition.set(recoverPosition);
-        leftPosition.set(this.storeFileMap.isEmpty()? 0L : this.storeFileMap.firstKey());
+        leftPosition.set(this.storeFileMap.isEmpty() ? 0L : this.storeFileMap.firstKey());
 
-        if(recoverPosition > 0) {
+        if (recoverPosition > 0) {
             long lastLogTail = toLogTail(recoverPosition - 1);
-            if(lastLogTail < 0) {
+            if (lastLogTail < 0) {
                 throw new CorruptedLogException(String.format("Unable to read any valid log. Corrupted log files: %s.", base.getAbsolutePath()));
             }
             if (lastLogTail < recoverPosition) {
@@ -164,7 +168,7 @@ public class PositioningStore<T> implements Closeable {
     private void recoverFileMap() {
         File[] files = base.listFiles(file -> file.isFile() && file.getName().matches("\\d+"));
         long filePosition;
-        if(null != files) {
+        if (null != files) {
             for (File file : files) {
                 filePosition = Long.parseLong(file.getName());
                 storeFileMap.put(filePosition, new StoreFileImpl<>(filePosition, base, fileHeaderSize, serializer, bufferPool, fileDataSize));
@@ -173,10 +177,10 @@ public class PositioningStore<T> implements Closeable {
         }
 
         // 检查文件是否连续完整
-        if(!storeFileMap.isEmpty()) {
+        if (!storeFileMap.isEmpty()) {
             long position = storeFileMap.firstKey();
             for (Map.Entry<Long, StoreFile<T>> fileEntry : storeFileMap.entrySet()) {
-                if(position != fileEntry.getKey()) {
+                if (position != fileEntry.getKey()) {
                     throw new CorruptedLogException(String.format("Files are not continuous! expect: %d, actual file name: %d, store: %s.", position, fileEntry.getKey(), base.getAbsolutePath()));
                 }
                 position += fileEntry.getValue().file().length() - fileHeaderSize;
@@ -187,51 +191,56 @@ public class PositioningStore<T> implements Closeable {
     private long toLogTail(long position) {
         T t = null;
         while (position >= left()) {
-            try{
+            try {
                 t = tryRead(position--);
-            }catch (Throwable ignored) {}
-            if(null != t) return position + 1 + serializer.size(t);
+            } catch (Throwable ignored) {
+            }
+            if (null != t) return position + 1 + serializer.size(t);
         }
-        return  -1L;
+        return -1L;
     }
 
     public long toLogStart(long position) {
 
         T t = null;
         while (position >= left()) {
-            try{
+            try {
                 t = tryRead(position--);
-            }catch (Throwable ignored) {}
-            if(null != t) return position + 1;
+            } catch (Throwable ignored) {
+            }
+            if (null != t) return position + 1;
         }
-        return  -1L;
+        return -1L;
     }
 
     /**
      * 写入一条日志
+     *
      * @param byteBuffer 存放日志的ByteBuffer
      * @return 写入结束位置
      */
-    public long appendByteBuffer(ByteBuffer byteBuffer) throws IOException{
+    public long appendByteBuffer(ByteBuffer byteBuffer) throws IOException {
         if (null == writeStoreFile) writeStoreFile = createStoreFile(writePosition.get());
-        if (fileDataSize - writeStoreFile.writePosition() < byteBuffer.remaining()) writeStoreFile = createStoreFile(writePosition.get());
+        if (fileDataSize - writeStoreFile.writePosition() < byteBuffer.remaining())
+            writeStoreFile = createStoreFile(writePosition.get());
 
         writePosition.getAndAdd(writeStoreFile.appendByteBuffer(byteBuffer));
 
         return writePosition.get();
     }
 
-    public long append(T t) throws IOException{
+    public long append(T t) throws IOException {
         if (null == writeStoreFile) writeStoreFile = createStoreFile(writePosition.get());
-        if (fileDataSize - writeStoreFile.writePosition() < serializer.size(t)) writeStoreFile = createStoreFile(writePosition.get());
+        if (fileDataSize - writeStoreFile.writePosition() < serializer.size(t))
+            writeStoreFile = createStoreFile(writePosition.get());
         writePosition.getAndAdd(writeStoreFile.append(t));
         return writePosition.get();
     }
 
-    public long append(final List<T> ts) throws IOException{
-        if(null == ts || ts.isEmpty()) throw new WriteException("Parameter list is empty!");
+    public long append(final List<T> ts) throws IOException {
+        if (null == ts || ts.isEmpty()) throw new WriteException("Parameter list is empty!");
         long position = 0;
-        for (T t: ts) {
+        for (T t : ts) {
             position = append(t);
         }
         return position;
@@ -271,14 +280,14 @@ public class PositioningStore<T> implements Closeable {
     private StoreFile<T> createStoreFile(long position) {
         StoreFile<T> storeFile = new StoreFileImpl<>(position, base, fileHeaderSize, serializer, bufferPool, fileDataSize);
         StoreFile<T> present;
-        if((present = storeFileMap.putIfAbsent(position, storeFile)) != null){
+        if ((present = storeFileMap.putIfAbsent(position, storeFile)) != null) {
             storeFile = present;
         }
 
         return storeFile;
     }
 
-    public T read(long position) throws IOException{
+    public T read(long position) throws IOException {
         checkReadPosition(position);
         try {
             return tryRead(position);
@@ -288,11 +297,11 @@ public class PositioningStore<T> implements Closeable {
         }
     }
 
-    public T read(long position, int length) throws IOException{
+    public T read(long position, int length) throws IOException {
         checkReadPosition(position);
         try {
             StoreFile<T> storeFile = storeFileMap.floorEntry(position).getValue();
-            int relPosition = (int )(position - storeFile.position());
+            int relPosition = (int) (position - storeFile.position());
             return storeFile.read(relPosition, length);
         } catch (Throwable t) {
             logger.warn("Exception on read position {} of store {}.", position, base.getAbsolutePath(), t);
@@ -300,15 +309,15 @@ public class PositioningStore<T> implements Closeable {
         }
     }
 
-    private T tryRead(long position) throws IOException{
+    private T tryRead(long position) throws IOException {
 
         checkReadPosition(position);
         StoreFile<T> storeFile = storeFileMap.floorEntry(position).getValue();
-        int relPosition = (int )(position - storeFile.position());
+        int relPosition = (int) (position - storeFile.position());
         return storeFile.read(relPosition, -1);
     }
 
-    public List<T> batchRead(long position, int count) throws IOException{
+    public List<T> batchRead(long position, int count) throws IOException {
         checkReadPosition(position);
         List<T> list = new ArrayList<>(count);
         long pointer = position;
@@ -336,13 +345,13 @@ public class PositioningStore<T> implements Closeable {
 
     }
 
-    public ByteBuffer readByteBuffer(long position, int length) throws IOException{
+    public ByteBuffer readByteBuffer(long position, int length) throws IOException {
         checkReadPosition(position);
         try {
             StoreFile storeFile = storeFileMap.floorEntry(position).getValue();
-            int relPosition = (int )(position - storeFile.position());
+            int relPosition = (int) (position - storeFile.position());
             ByteBuffer byteBuffer = storeFile.readByteBuffer(relPosition, length);
-            byteBuffer.limit(byteBuffer.position() +  serializer.trim(byteBuffer, length));
+            byteBuffer.limit(byteBuffer.position() + serializer.trim(byteBuffer, length));
             return byteBuffer;
         } catch (Throwable t) {
             logger.warn("Exception on read position {} of store {}.", position, base.getAbsolutePath(), t);
@@ -351,11 +360,11 @@ public class PositioningStore<T> implements Closeable {
     }
 
 
-    private void checkReadPosition(long position){
+    private void checkReadPosition(long position) {
         long p;
-        if((p = leftPosition.get()) > position) {
+        if ((p = leftPosition.get()) > position) {
             throw new PositionUnderflowException(position, p);
-        } else if(position >= (p = writePosition.get())) {
+        } else if (position >= (p = writePosition.get())) {
             throw new PositionOverflowException(position, p);
         }
 
@@ -402,9 +411,9 @@ public class PositioningStore<T> implements Closeable {
     }
 
     public long physicalDeleteLeftFile() throws IOException {
-        if(storeFileMap.isEmpty()) return 0;
+        if (storeFileMap.isEmpty()) return 0;
         StoreFile storeFile = storeFileMap.firstEntry().getValue();
-        return physicalDeleteTo(storeFile.position() + (storeFile.hasPage() ? storeFile.writePosition(): storeFile.fileDataSize()));
+        return physicalDeleteTo(storeFile.position() + (storeFile.hasPage() ? storeFile.writePosition() : storeFile.fileDataSize()));
     }
 
     /**
@@ -413,7 +422,7 @@ public class PositioningStore<T> implements Closeable {
     private void forceDeleteStoreFile(StoreFile storeFile) throws IOException {
         storeFile.forceUnload();
         File file = storeFile.file();
-        if(file.exists()) {
+        if (file.exists()) {
             if (file.delete()) {
                 logger.debug("File {} deleted.", file.getAbsolutePath());
             } else {
@@ -428,30 +437,31 @@ public class PositioningStore<T> implements Closeable {
      * 向前(offsetCount为负值时)/向后(offsetCount为正值时
      * 偏移offsetCount条日志，返回日志的位置
      * 如果到了左右边界，直接返回左右边界位置。
-     * @param position 给定的绝对位置
+     *
+     * @param position    给定的绝对位置
      * @param offsetCount 偏移日志条数，可以为负值
      */
     public long position(long position, int offsetCount) {
 
         int offset = 0;
         long pos = position;
-        if(pos < left()) {
+        if (pos < left()) {
             pos = left();
-        } else if(pos > right()){
+        } else if (pos > right()) {
             pos = right();
-        } else if(left() < pos && pos < right()){
+        } else if (left() < pos && pos < right()) {
             pos = toLogStart(position);
         }
 
-        if(offsetCount > 0) {
+        if (offsetCount > 0) {
             while (offset < offsetCount && pos < right()) {
                 pos = toLogTail(pos);
-                offset ++;
+                offset++;
             }
         } else if (offsetCount < 0) {
             while (offset > offsetCount && pos > left()) {
                 pos = toLogStart(pos - 1);
-                offset --;
+                offset--;
             }
 
         }
@@ -466,16 +476,16 @@ public class PositioningStore<T> implements Closeable {
 
     @Override
     public void close() {
-        for(StoreFile storeFile : storeFileMap.values()) {
+        for (StoreFile storeFile : storeFileMap.values()) {
             storeFile.unload();
         }
     }
 
-    public byte[] readBytes(long position, int length) throws IOException{
+    public byte[] readBytes(long position, int length) throws IOException {
         checkReadPosition(position);
         StoreFile storeFile = storeFileMap.floorEntry(position).getValue();
-        int relPosition = (int )(position - storeFile.position());
-        return  storeFile.readByteBuffer(relPosition, length).array();
+        int relPosition = (int) (position - storeFile.position());
+        return storeFile.readByteBuffer(relPosition, length).array();
     }
 
     public int fileCount() {
@@ -497,8 +507,8 @@ public class PositioningStore<T> implements Closeable {
     }
 
     public static class Config {
-        public final static int DEFAULT_FILE_HEADER_SIZE = 128;
-        public final static int DEFAULT_FILE_DATA_SIZE = 128 * 1024 * 1024;
+        public static final int DEFAULT_FILE_HEADER_SIZE = 128;
+        public static final int DEFAULT_FILE_DATA_SIZE = 128 * 1024 * 1024;
 
         /**
          * 文件头长度
@@ -509,21 +519,21 @@ public class PositioningStore<T> implements Closeable {
          */
         private final int fileDataSize;
 
-        public Config(){
+        public Config() {
             this(DEFAULT_FILE_DATA_SIZE,
                     DEFAULT_FILE_HEADER_SIZE);
         }
-        public Config(int fileDataSize){
+
+        public Config(int fileDataSize) {
             this(fileDataSize,
                     DEFAULT_FILE_HEADER_SIZE);
         }
 
-        public Config(int fileDataSize, int fileHeaderSize){
+        public Config(int fileDataSize, int fileHeaderSize) {
             this.fileDataSize = fileDataSize;
             this.fileHeaderSize = fileHeaderSize;
         }
     }
-
 
 
 }

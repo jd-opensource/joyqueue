@@ -11,35 +11,38 @@ import java.util.stream.IntStream;
 import java.util.zip.CRC32;
 
 public class MessageUtils {
-    private static byte [] bid = new byte[] {0,0,0,0};
-    private static byte [] prop = new byte[] {0,0,0,0};
-    private static byte [] expand = new byte[] {0,0,0,0};
-    private static byte [] app = new byte[] {0,0,0,0};
-    public static List<ByteBuffer> build(int count, int bodyLength){
-        byte [] body = new byte[bodyLength];
-        return IntStream.range(0, count).mapToObj(i-> {
-            Arrays.fill(body,(byte) (i % Byte.MAX_VALUE));
-            byte [][] varAtts = {body, bid, prop, expand, app};
-            ByteBuffer byteBuffer = MessageParser.build(varAtts);
-            CRC32 crc32 = new CRC32();
-            crc32.update(body);
-            MessageParser.setLong(byteBuffer,MessageParser.CRC,crc32.getValue());
-            return byteBuffer;
-        }).collect(Collectors.toList());
-    }
-    static byte [] b1024;
+    static byte[] b1024;
+    private static byte[] bid = new byte[]{0, 0, 0, 0};
+    private static byte[] prop = new byte[]{0, 0, 0, 0};
+    private static byte[] expand = new byte[]{0, 0, 0, 0};
+    private static byte[] app = new byte[]{0, 0, 0, 0};
+
     static {
-        byte [] body = new byte[1024];
-        byte [][] varAtts = {body, bid, prop, expand, app};
+        byte[] body = new byte[1024];
+        byte[][] varAtts = {body, bid, prop, expand, app};
         ByteBuffer byteBuffer = MessageParser.build(varAtts);
         CRC32 crc32 = new CRC32();
         crc32.update(body);
-        MessageParser.setLong(byteBuffer,MessageParser.CRC,crc32.getValue());
+        MessageParser.setLong(byteBuffer, MessageParser.CRC, crc32.getValue());
         b1024 = byteBuffer.array();
     }
-    public static ByteBuffer [] build1024 (int count){
 
-        return IntStream.range(0, count).parallel().mapToObj(i-> ByteBuffer.wrap(Arrays.copyOf(b1024,b1024.length))).toArray(ByteBuffer[]::new);
+    public static List<ByteBuffer> build(int count, int bodyLength) {
+        byte[] body = new byte[bodyLength];
+        return IntStream.range(0, count).mapToObj(i -> {
+            Arrays.fill(body, (byte) (i % Byte.MAX_VALUE));
+            byte[][] varAtts = {body, bid, prop, expand, app};
+            ByteBuffer byteBuffer = MessageParser.build(varAtts);
+            CRC32 crc32 = new CRC32();
+            crc32.update(body);
+            MessageParser.setLong(byteBuffer, MessageParser.CRC, crc32.getValue());
+            return byteBuffer;
+        }).collect(Collectors.toList());
+    }
+
+    public static ByteBuffer[] build1024(int count) {
+
+        return IntStream.range(0, count).parallel().mapToObj(i -> ByteBuffer.wrap(Arrays.copyOf(b1024, b1024.length))).toArray(ByteBuffer[]::new);
     }
 
     public static ByteBuffer toBatchMessage(ByteBuffer msg, short batchSize) {
@@ -48,12 +51,12 @@ public class MessageUtils {
         return msg;
     }
 
-    public static ByteBuffer build1024(){
-        return ByteBuffer.wrap(Arrays.copyOf(b1024,b1024.length));
+    public static ByteBuffer build1024() {
+        return ByteBuffer.wrap(Arrays.copyOf(b1024, b1024.length));
     }
 
-    public static void main(String [] args) {
-        List<ByteBuffer> buffers = build(1,1024);
+    public static void main(String[] args) {
+        List<ByteBuffer> buffers = build(1, 1024);
         System.out.println(MessageParser.getString(buffers.get(0)));
     }
 }

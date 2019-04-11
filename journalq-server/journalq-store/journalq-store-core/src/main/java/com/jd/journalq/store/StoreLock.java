@@ -11,6 +11,7 @@ import java.nio.channels.FileLock;
 
 /**
  * from: https://gist.github.com/bmchae/1344404 by Burhan Uddin
+ *
  * @author modified by liyue25
  * Date: 2018/10/10
  */
@@ -28,7 +29,7 @@ public class StoreLock {
         // Try to get the lock
         channel = new RandomAccessFile(lockFile, "rw").getChannel();
         lock = channel.tryLock();
-        if(lock == null) {
+        if (lock == null) {
             // File is lock by other application
             channel.close();
             throw new StoreLockedException();
@@ -42,12 +43,12 @@ public class StoreLock {
     private void unlock() {
         // release and delete file lock
         try {
-            if(lock != null) {
+            if (lock != null) {
                 lock.release();
                 channel.close();
                 lockFile.delete();
             }
-        } catch(IOException e) {
+        } catch (IOException e) {
             logger.warn("Unlock file {} failed!", lockFile.getAbsoluteFile());
         }
     }

@@ -16,19 +16,19 @@ import java.nio.channels.FileChannel;
  * Date: 2018/10/11
  */
 public class SingleFilePositionStore implements Closeable {
+    private static final byte RS = 0x1E;
+    private static final ByteBuffer RS_BUFF = (ByteBuffer) ByteBuffer.wrap(new byte[]{RS}).mark();
     private final int fileHeaderSize;
     private final File file;
     private final RandomAccessFile raf;
     private final FileChannel fileChannel;
-    private static final byte RS = 0x1E;
-    private static final ByteBuffer RS_BUFF = (ByteBuffer) ByteBuffer.wrap(new byte [] {RS}).mark();
 
     public SingleFilePositionStore(File file, int fileHeaderSize) throws IOException {
         this.fileHeaderSize = fileHeaderSize;
         this.file = file;
         raf = new RandomAccessFile(file, "rws");
         fileChannel = raf.getChannel();
-        if(fileChannel.position() < fileHeaderSize) fileChannel.position(fileHeaderSize);
+        if (fileChannel.position() < fileHeaderSize) fileChannel.position(fileHeaderSize);
     }
 
     public synchronized void append(RByteBuffer... rByteBuffers) throws IOException {
@@ -42,7 +42,7 @@ public class SingleFilePositionStore implements Closeable {
             fileChannel.force(false);
         } catch (Throwable t) {
             fileChannel.truncate(position);
-            throw  t;
+            throw t;
         }
     }
 
@@ -50,20 +50,21 @@ public class SingleFilePositionStore implements Closeable {
         try {
             fileChannel.write(byteBuffer.getBuffer());
             fileChannel.write((ByteBuffer) RS_BUFF.reset());
-        }finally {
+        } finally {
             if (null != byteBuffer) byteBuffer.close();
         }
     }
 
     /**
      * 读取一条消息
+     *
      * @param position 消息的起始位置
      */
     public RByteBuffer get(long position) throws IOException {
         int length = readMessageLength(position);
         if (length > Integer.BYTES) {
             // 读一条消息
-            RByteBuffer rb = new RByteBuffer(ByteBuffer.allocate(length + 1),null);
+            RByteBuffer rb = new RByteBuffer(ByteBuffer.allocate(length + 1), null);
             int readLength = read(rb.getBuffer(), position);
 
             // 检查读到的消息长度
@@ -89,11 +90,12 @@ public class SingleFilePositionStore implements Closeable {
         }
         return null;
     }
+
     private int readMessageLength(long position) throws IOException {
         ByteBuffer rb = ByteBuffer.allocate(Integer.BYTES);
-            int length = read(rb, position);
-            rb.flip();
-            return length == Integer.BYTES ? rb.getInt() : -1;
+        int length = read(rb, position);
+        rb.flip();
+        return length == Integer.BYTES ? rb.getInt() : -1;
 
     }
 
@@ -106,7 +108,7 @@ public class SingleFilePositionStore implements Closeable {
     }
 
     @Override
-    public synchronized void close(){
+    public synchronized void close() {
         Close.close(fileChannel);
         Close.close(raf);
     }
