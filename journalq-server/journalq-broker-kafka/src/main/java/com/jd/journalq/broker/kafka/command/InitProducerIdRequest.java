@@ -33,4 +33,12 @@ public class InitProducerIdRequest extends KafkaRequestOrResponse {
     public int type() {
         return KafkaCommandType.INIT_PRODUCER_ID.getCode();
     }
+
+    @Override
+    public String toString() {
+        return "InitProducerIdRequest{" +
+                "transactionId='" + transactionId + '\'' +
+                ", transactionTimeout=" + transactionTimeout +
+                '}';
+    }
 }

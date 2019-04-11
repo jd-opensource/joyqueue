@@ -17,11 +17,11 @@ public class JMQCoordinator {
         this.coordinator = coordinator;
     }
 
-    public boolean isCurrentCoordinator(String app) {
-        return coordinator.isCurrentCoordinator(app);
+    public Broker findGroupCoordinator(String app) {
+        return coordinator.findGroupCoordinator(app);
     }
 
-    public Broker findCoordinator(String app) {
-        return coordinator.findCoordinator(app);
+    public boolean isCurrentGroupCoordinator(String app) {
+        return coordinator.isCurrentGroupCoordinator(app);
     }
 }

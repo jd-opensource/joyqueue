@@ -980,7 +980,7 @@ public class ClusterManager extends Service {
                             case ADD_TOPIC:
                                 TopicConfig topicConfig = buildTopicConfigCache(((TopicEvent) event.getMetaEvent()).getTopic());
                                 for (PartitionGroup group : topicConfig.fetchPartitionGroupByBrokerId(brokerConfig.getBrokerId())) {
-                                    //storeService.createPartitionGroup(group.getTopic(), group.getGroup(), group.getPartitions().toArray(new Short[0]),group.getReplicaGroups().stream().mapToInt(replica->(int)replica).toArray());
+                                    //storeService.createPartitionGroup(group.getGroupTopic(), group.getGroup(), group.getPartitions().toArray(new Short[0]),group.getReplicaGroups().stream().mapToInt(replica->(int)replica).toArray());
                                     eventBus.add(PartitionGroupEvent.add(group.getTopic(), group.getGroup()));
                                 }
                                 break;
@@ -993,7 +993,7 @@ public class ClusterManager extends Service {
                                 consumerCache.remove(topicConfigRemove.getName().getFullName());
                                 producerCache.remove(topicConfigRemove.getName().getFullName());
                                 for (PartitionGroup group : topicConfigRemove.fetchPartitionGroupByBrokerId(brokerConfig.getBrokerId())) {
-                                    //storeService.removePartitionGroup(group.getTopic(), group.getGroup());
+                                    //storeService.removePartitionGroup(group.getGroupTopic(), group.getGroup());
                                     eventBus.add(PartitionGroupEvent.remove(group.getTopic(), group.getGroup()));
                                 }
                                 break;
@@ -1004,19 +1004,19 @@ public class ClusterManager extends Service {
                         switch (event.getEventType()) {
                             case ADD_PARTITION_GROUP:
                                 //PartitionGroup新增事件
-                                //storeService.createPartitionGroup(group.getTopic(), group.getGroup(), group.getPartitions().toArray(new Short[0]),group.getReplicaGroups().stream().mapToInt(replica->(int)replica).toArray());
+                                //storeService.createPartitionGroup(group.getGroupTopic(), group.getGroup(), group.getPartitions().toArray(new Short[0]),group.getReplicaGroups().stream().mapToInt(replica->(int)replica).toArray());
                                 eventBus.add(PartitionGroupEvent.add(topicConfig.getName(), group.getGroup()));
                                 break;
                             case UPDATE_PARTITION_GROUP:
                                 // PartitionGroup更新事件,只会通知partitionGroup的leader
-                                //storeService.createOrUpdatePartitionGroup(group.getTopic(), group.getGroup(), (Short[]) group.getPartitions().toArray());
+                                //storeService.createOrUpdatePartitionGroup(group.getGroupTopic(), group.getGroup(), (Short[]) group.getPartitions().toArray());
                                 eventBus.add(PartitionGroupEvent.update(group.getTopic(), group.getGroup()));
                                 break;
                             case REMOVE_PARTITION_GROUP:
                                 /**
                                  * 删除partitionGroup时候通知到所有相关的broker
                                  */
-                                //storeService.removePartitionGroup(group.getTopic(), group.getGroup());
+                                //storeService.removePartitionGroup(group.getGroupTopic(), group.getGroup());
                                 eventBus.add(PartitionGroupEvent.remove(topicConfig.getName(), ((PartitionGroupEvent) event.getMetaEvent()).getPartitionGroup()));
                                 break;
                         }

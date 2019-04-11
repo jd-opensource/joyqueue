@@ -16,7 +16,7 @@ import com.jd.journalq.exception.JMQException;
 import com.jd.journalq.message.BrokerMessage;
 import com.jd.journalq.message.MessageLocation;
 import com.jd.journalq.network.command.BooleanAck;
-import com.jd.journalq.network.command.CommitAck;
+import com.jd.journalq.network.command.CommitAckRequest;
 import com.jd.journalq.network.command.CommitAckAck;
 import com.jd.journalq.network.command.CommitAckData;
 import com.jd.journalq.network.command.JMQCommandType;
@@ -59,20 +59,20 @@ public class CommitAckHandler implements JMQCommandHandler, Type, BrokerContextA
 
     @Override
     public Command handle(Transport transport, Command command) {
-        CommitAck commitAck = (CommitAck) command.getPayload();
+        CommitAckRequest commitAckRequest = (CommitAckRequest) command.getPayload();
         Connection connection = SessionHelper.getConnection(transport);
 
-        if (connection == null || !connection.isAuthorized(commitAck.getApp())) {
+        if (connection == null || !connection.isAuthorized(commitAckRequest.getApp())) {
             logger.warn("connection is not exists, transport: {}", transport);
             return BooleanAck.build(JMQCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
         Table<String, Short, JMQCode> result = HashBasedTable.create();
 
-        for (Map.Entry<String, Map<Short, List<CommitAckData>>> entry : commitAck.getData().rowMap().entrySet()) {
+        for (Map.Entry<String, Map<Short, List<CommitAckData>>> entry : commitAckRequest.getData().rowMap().entrySet()) {
             String topic = entry.getKey();
             for (Map.Entry<Short, List<CommitAckData>> partitionEntry : entry.getValue().entrySet()) {
-                JMQCode ackCode = commitAck(connection, topic, commitAck.getApp(), partitionEntry.getKey(), partitionEntry.getValue());
+                JMQCode ackCode = commitAck(connection, topic, commitAckRequest.getApp(), partitionEntry.getKey(), partitionEntry.getValue());
                 result.put(topic, partitionEntry.getKey(), ackCode);
             }
         }

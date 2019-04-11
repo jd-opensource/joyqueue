@@ -1,7 +1,7 @@
 package com.jd.journalq.broker.jmq.coordinator;
 
-import com.jd.journalq.broker.jmq.coordinator.domain.JMQCoordinatorGroup;
-import com.jd.journalq.broker.jmq.coordinator.domain.JMQCoordinatorGroupMember;
+import com.jd.journalq.broker.jmq.coordinator.domain.GroupMemberMetadata;
+import com.jd.journalq.broker.jmq.coordinator.domain.GroupMetadata;
 
 /**
  * CoordinatorMemberTimeoutCallback
@@ -11,5 +11,5 @@ import com.jd.journalq.broker.jmq.coordinator.domain.JMQCoordinatorGroupMember;
  */
 public interface CoordinatorMemberTimeoutCallback {
 
-    void onCompletion(JMQCoordinatorGroup group, JMQCoordinatorGroupMember member);
+    void onCompletion(GroupMetadata group, GroupMemberMetadata member);
 }

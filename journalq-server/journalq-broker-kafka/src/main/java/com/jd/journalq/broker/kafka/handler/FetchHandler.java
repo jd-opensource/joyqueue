@@ -1,8 +1,7 @@
 package com.jd.journalq.broker.kafka.handler;
 
-import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Table;
+import com.google.common.collect.Maps;
 import com.jd.journalq.broker.buffer.Serializer;
 import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.consumer.Consume;
@@ -19,7 +18,6 @@ import com.jd.journalq.broker.kafka.converter.CheckResultConverter;
 import com.jd.journalq.broker.kafka.helper.KafkaClientHelper;
 import com.jd.journalq.broker.kafka.message.KafkaBrokerMessage;
 import com.jd.journalq.broker.kafka.message.converter.KafkaMessageConverter;
-import com.jd.journalq.broker.kafka.model.FetchResponsePartitionData;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.message.BrokerMessage;
@@ -34,7 +32,6 @@ import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -64,19 +61,23 @@ public class FetchHandler extends AbstractKafkaCommandHandler implements KafkaCo
     @Override
     public Command handle(Transport transport, Command command) {
         FetchRequest fetchRequest = (FetchRequest) command.getPayload();
-        Table<TopicName, Integer, FetchRequest.PartitionFetchInfo> fetchInfoMap = fetchRequest.getRequestInfo();
+        Map<String, List<FetchRequest.PartitionRequest>> partitionRequestMap = fetchRequest.getPartitionRequests();
         String clientId = KafkaClientHelper.parseClient(fetchRequest.getClientId());
         String clientIp = ((InetSocketAddress) transport.remoteAddress()).getHostString();
+//        IsolationLevel isolationLevel = IsolationLevel.valueOf(fetchRequest.getIsolationLevel());
         int maxBytes = fetchRequest.getMaxBytes();
 
-        Table<String, Integer, FetchResponsePartitionData> fetchResponseTable = HashBasedTable.create();
+        Map<String, List<FetchResponse.PartitionResponse>> fetchPartitionResponseMap = Maps.newHashMapWithExpectedSize(partitionRequestMap.size());
         int currentBytes = 0;
-        for (TopicName topic : fetchInfoMap.rowKeySet()) {
-            for (Map.Entry<Integer, FetchRequest.PartitionFetchInfo> partitionEntry : fetchInfoMap.row(topic).entrySet()) {
-                int partition = partitionEntry.getKey();
+        for (Map.Entry<String, List<FetchRequest.PartitionRequest>> entry : partitionRequestMap.entrySet()) {
+            TopicName topic = TopicName.parse(entry.getKey());
+            List<FetchResponse.PartitionResponse> partitionResponses = Lists.newArrayListWithCapacity(entry.getValue().size());
+
+            for (FetchRequest.PartitionRequest partitionRequest : entry.getValue()) {
+                int partition = partitionRequest.getPartition();
 
                 if (currentBytes > maxBytes) {
-                    fetchResponseTable.put(topic.getFullName(), partition, new FetchResponsePartitionData(KafkaErrorCode.NONE.getCode(), -1, Collections.emptyList()));
+                    partitionResponses.add(new FetchResponse.PartitionResponse(partition, KafkaErrorCode.NONE.getCode()));
                     continue;
                 }
 
@@ -84,33 +85,34 @@ public class FetchHandler extends AbstractKafkaCommandHandler implements KafkaCo
                 if (!checkResult.isSuccess()) {
                     logger.warn("checkReadable failed, transport: {}, topic: {}, app: {}, code: {}", transport, topic, clientId, checkResult.getJmqCode());
                     short errorCode = CheckResultConverter.convertFetchCode(checkResult.getJmqCode());
-                    fetchResponseTable.put(topic.getFullName(), partition, new FetchResponsePartitionData(errorCode, -1, Collections.emptyList()));
+                    partitionResponses.add(new FetchResponse.PartitionResponse(partition, errorCode));
                     continue;
                 }
 
-                FetchRequest.PartitionFetchInfo partitionFetchInfo = partitionEntry.getValue();
-                long offset = partitionFetchInfo.getOffset();
-                int partitionMaxBytes = partitionFetchInfo.getMaxBytes();
-                FetchResponsePartitionData fetchDataInfo = fetchMessage(transport, topic, partition, clientId, offset, partitionMaxBytes);
+                long offset = partitionRequest.getOffset();
+                int partitionMaxBytes = partitionRequest.getMaxBytes();
+                FetchResponse.PartitionResponse partitionResponse = fetchMessage(transport, topic, partition, clientId, offset, partitionMaxBytes);
 
-                currentBytes += fetchDataInfo.getBytes();
-                fetchResponseTable.put(topic.getFullName(), partition, fetchDataInfo);
+                currentBytes += partitionResponse.getBytes();
+                partitionResponses.add(partitionResponse);
             }
+
+            fetchPartitionResponseMap.put(entry.getKey(), partitionResponses);
         }
 
         FetchResponse fetchResponse = new FetchResponse();
-        fetchResponse.setFetchResponses(fetchResponseTable);
+        fetchResponse.setPartitionResponses(fetchPartitionResponseMap);
         return new Command(fetchResponse);
     }
 
-    private FetchResponsePartitionData fetchMessage(Transport transport, TopicName topic, int partition, String clientId, long offset, int maxBytes) {
+    private FetchResponse.PartitionResponse fetchMessage(Transport transport, TopicName topic, int partition, String clientId, long offset, int maxBytes) {
         Consumer consumer = new Consumer(clientId, topic.getFullName(), clientId, Consumer.ConsumeType.KAFKA);
         long minIndex = consume.getMinIndex(consumer, (short) partition);
         long maxIndex = consume.getMaxIndex(consumer, (short) partition);
         if (offset < minIndex || offset > maxIndex) {
             logger.warn("fetch message exception, index out of range, transport: {}, consumer: {}, partition: {}, offset: {}, minOffset: {}, maxOffset: {}",
                     transport, consumer, partition, offset, minIndex, maxIndex);
-            return new FetchResponsePartitionData(KafkaErrorCode.OFFSET_OUT_OF_RANGE.getCode());
+            return new FetchResponse.PartitionResponse(partition, KafkaErrorCode.OFFSET_OUT_OF_RANGE.getCode());
         }
 
         List<KafkaBrokerMessage> kafkaBrokerMessages = Lists.newLinkedList();
@@ -158,12 +160,15 @@ public class FetchHandler extends AbstractKafkaCommandHandler implements KafkaCo
                 if (kafkaCode == KafkaErrorCode.UNKNOWN_SERVER_ERROR.getCode()) {
                     kafkaCode = KafkaErrorCode.NONE.getCode();
                 }
-                return new FetchResponsePartitionData(kafkaCode, offset, kafkaBrokerMessages);
+                return new FetchResponse.PartitionResponse(partition, kafkaCode, kafkaBrokerMessages);
             }
         }
 
-        FetchResponsePartitionData fetchResponsePartitionData = new FetchResponsePartitionData(KafkaErrorCode.NONE.getCode(), offset, kafkaBrokerMessages);
+        FetchResponse.PartitionResponse fetchResponsePartitionData = new FetchResponse.PartitionResponse(partition, KafkaErrorCode.NONE.getCode(), kafkaBrokerMessages);
         fetchResponsePartitionData.setBytes(currentBytes);
+        fetchResponsePartitionData.setLogStartOffset(minIndex);
+        fetchResponsePartitionData.setLastStableOffset(maxIndex);
+        fetchResponsePartitionData.setHighWater(maxIndex);
         return fetchResponsePartitionData;
     }
 

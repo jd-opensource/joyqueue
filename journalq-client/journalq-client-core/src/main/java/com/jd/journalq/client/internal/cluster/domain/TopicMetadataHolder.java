@@ -26,8 +26,8 @@ public class TopicMetadataHolder {
         this.code = code;
     }
 
-    public boolean isExpired(long expireTime) {
-        return (SystemClock.now() > (createTime + expireTime));
+    public boolean isExpired(long timeout) {
+        return (SystemClock.now() > (createTime + timeout));
     }
 
     public boolean isExpired() {

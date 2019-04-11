@@ -1,6 +1,6 @@
 package com.jd.journalq.network.codec;
 
-import com.jd.journalq.network.command.AddConnection;
+import com.jd.journalq.network.command.AddConnectionRequest;
 import com.jd.journalq.network.command.JMQCommandType;
 import com.jd.journalq.network.serializer.Serializer;
 import com.jd.journalq.network.session.ClientId;
@@ -16,31 +16,31 @@ import io.netty.buffer.ByteBuf;
  * email: gaohaoxiang@jd.com
  * date: 2018/11/29
  */
-public class AddConnectionCodec implements PayloadCodec<JMQHeader, AddConnection>, Type {
+public class AddConnectionCodec implements PayloadCodec<JMQHeader, AddConnectionRequest>, Type {
 
     @Override
-    public AddConnection decode(JMQHeader header, ByteBuf buffer) throws Exception {
-        AddConnection addConnection = new AddConnection();
+    public AddConnectionRequest decode(JMQHeader header, ByteBuf buffer) throws Exception {
+        AddConnectionRequest addConnectionRequest = new AddConnectionRequest();
         ClientId clientId = new ClientId();
 
-        addConnection.setUsername(Serializer.readString(buffer, Serializer.BYTE_SIZE));
-        addConnection.setPassword(Serializer.readString(buffer, Serializer.BYTE_SIZE));
-        addConnection.setApp(Serializer.readString(buffer, Serializer.BYTE_SIZE));
-        addConnection.setToken(Serializer.readString(buffer, Serializer.BYTE_SIZE));
-        addConnection.setRegion(Serializer.readString(buffer, Serializer.BYTE_SIZE));
-        addConnection.setNamespace(Serializer.readString(buffer, Serializer.BYTE_SIZE));
-        addConnection.setLanguage(Language.valueOf(buffer.readByte()));
+        addConnectionRequest.setUsername(Serializer.readString(buffer, Serializer.BYTE_SIZE));
+        addConnectionRequest.setPassword(Serializer.readString(buffer, Serializer.BYTE_SIZE));
+        addConnectionRequest.setApp(Serializer.readString(buffer, Serializer.BYTE_SIZE));
+        addConnectionRequest.setToken(Serializer.readString(buffer, Serializer.BYTE_SIZE));
+        addConnectionRequest.setRegion(Serializer.readString(buffer, Serializer.BYTE_SIZE));
+        addConnectionRequest.setNamespace(Serializer.readString(buffer, Serializer.BYTE_SIZE));
+        addConnectionRequest.setLanguage(Language.valueOf(buffer.readByte()));
 
         clientId.setVersion(Serializer.readString(buffer, Serializer.BYTE_SIZE));
         clientId.setIp(Serializer.readString(buffer, Serializer.BYTE_SIZE));
         clientId.setTime(buffer.readLong());
         clientId.setSequence(buffer.readLong());
-        addConnection.setClientId(clientId);
-        return addConnection;
+        addConnectionRequest.setClientId(clientId);
+        return addConnectionRequest;
     }
 
     @Override
-    public void encode(AddConnection payload, ByteBuf buffer) throws Exception {
+    public void encode(AddConnectionRequest payload, ByteBuf buffer) throws Exception {
         ClientId clientId = payload.getClientId();
 
         Serializer.write(payload.getUsername(), buffer, Serializer.BYTE_SIZE);

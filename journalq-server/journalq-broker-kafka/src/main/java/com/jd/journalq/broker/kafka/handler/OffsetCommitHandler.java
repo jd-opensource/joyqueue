@@ -8,7 +8,7 @@ import com.jd.journalq.broker.kafka.KafkaContextAware;
 import com.jd.journalq.broker.kafka.KafkaErrorCode;
 import com.jd.journalq.broker.kafka.command.OffsetCommitRequest;
 import com.jd.journalq.broker.kafka.command.OffsetCommitResponse;
-import com.jd.journalq.broker.kafka.coordinator.GroupCoordinator;
+import com.jd.journalq.broker.kafka.coordinator.group.GroupCoordinator;
 import com.jd.journalq.broker.kafka.model.OffsetMetadataAndError;
 import com.jd.journalq.network.transport.Transport;
 import com.jd.journalq.network.transport.command.Command;

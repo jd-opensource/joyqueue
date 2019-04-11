@@ -9,8 +9,8 @@ import com.jd.journalq.broker.consumer.Consume;
 import com.jd.journalq.broker.helper.SessionHelper;
 import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.network.command.BooleanAck;
-import com.jd.journalq.network.command.FetchIndex;
-import com.jd.journalq.network.command.FetchIndexAck;
+import com.jd.journalq.network.command.FetchIndexRequest;
+import com.jd.journalq.network.command.FetchIndexResponse;
 import com.jd.journalq.network.command.FetchIndexAckData;
 import com.jd.journalq.network.command.JMQCommandType;
 import com.jd.journalq.network.session.Connection;
@@ -43,28 +43,28 @@ public class FetchIndexHandler implements JMQCommandHandler, Type, BrokerContext
 
     @Override
     public Command handle(Transport transport, Command command) {
-        FetchIndex fetchIndex = (FetchIndex) command.getPayload();
+        FetchIndexRequest fetchIndexRequest = (FetchIndexRequest) command.getPayload();
         Connection connection = SessionHelper.getConnection(transport);
 
-        if (connection == null || !connection.isAuthorized(fetchIndex.getApp())) {
+        if (connection == null || !connection.isAuthorized(fetchIndexRequest.getApp())) {
             logger.warn("connection is not exists, transport: {}", transport);
             return BooleanAck.build(JMQCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
         Table<String, Short, FetchIndexAckData> result = HashBasedTable.create();
 
-        for (Map.Entry<String, List<Short>> entry : fetchIndex.getPartitions().entrySet()) {
+        for (Map.Entry<String, List<Short>> entry : fetchIndexRequest.getPartitions().entrySet()) {
             String topic = entry.getKey();
-            Consumer consumer = new Consumer(connection.getId(), topic, fetchIndex.getApp(), Consumer.ConsumeType.JMQ);
+            Consumer consumer = new Consumer(connection.getId(), topic, fetchIndexRequest.getApp(), Consumer.ConsumeType.JMQ);
             for (Short partition : entry.getValue()) {
                 FetchIndexAckData fetchIndexAckData = fetchIndex(connection, consumer, partition);
                 result.put(topic, partition, fetchIndexAckData);
             }
         }
 
-        FetchIndexAck fetchIndexAck = new FetchIndexAck();
-        fetchIndexAck.setData(result);
-        return new Command(fetchIndexAck);
+        FetchIndexResponse fetchIndexResponse = new FetchIndexResponse();
+        fetchIndexResponse.setData(result);
+        return new Command(fetchIndexResponse);
     }
 
     protected FetchIndexAckData fetchIndex(Connection connection, Consumer consumer, short partition) {

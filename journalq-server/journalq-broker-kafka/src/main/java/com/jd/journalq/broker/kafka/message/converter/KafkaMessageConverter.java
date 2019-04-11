@@ -37,7 +37,7 @@ public class KafkaMessageConverter {
         KafkaBrokerMessage kafkaBrokerMessage = new KafkaBrokerMessage();
         kafkaBrokerMessage.setOffset(brokerMessage.getMsgIndexNo());
         kafkaBrokerMessage.setKey(StringUtils.isNotBlank(brokerMessage.getBusinessId()) ? brokerMessage.getBusinessId().getBytes(Charsets.UTF_8) : null);
-        kafkaBrokerMessage.setValue(brokerMessage.getDecompressedBody());
+        kafkaBrokerMessage.setValue(brokerMessage.getByteBody());
         kafkaBrokerMessage.setBatch(brokerMessage.isBatch());
         kafkaBrokerMessage.setFlag(brokerMessage.getFlag());
         KafkaMessageSerializer.readExtension(brokerMessage, kafkaBrokerMessage);
@@ -71,6 +71,10 @@ public class KafkaMessageConverter {
         brokerMessage.setSource(SourceType.KAFKA.getValue());
         brokerMessage.setBatch(kafkaBrokerMessage.isBatch());
         brokerMessage.setFlag(kafkaBrokerMessage.getFlag());
+
+        if (kafkaBrokerMessage.isTransaction() && ArrayUtils.isNotEmpty(kafkaBrokerMessage.getKey())) {
+            brokerMessage.setTxId(new String(kafkaBrokerMessage.getKey(), Charsets.UTF_8));
+        }
         KafkaMessageSerializer.writeExtension(brokerMessage, kafkaBrokerMessage);
 
         CRC32 crc32 = new CRC32();

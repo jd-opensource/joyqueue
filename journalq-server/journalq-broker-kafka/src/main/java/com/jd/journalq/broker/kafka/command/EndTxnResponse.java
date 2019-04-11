@@ -12,6 +12,14 @@ public class EndTxnResponse extends KafkaRequestOrResponse {
 
     private short code;
 
+    public EndTxnResponse() {
+
+    }
+
+    public EndTxnResponse(short code) {
+        this.code = code;
+    }
+
     public void setCode(short code) {
         this.code = code;
     }

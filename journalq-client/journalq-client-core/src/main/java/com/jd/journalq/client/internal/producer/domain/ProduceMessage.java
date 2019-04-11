@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.Map;
 
 /**
- * ProduceMessage
+ * ProduceMessageRequest
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/12/10
@@ -147,7 +147,7 @@ public class ProduceMessage implements Serializable {
 
     @Override
     public String toString() {
-        return "ProduceMessage{" +
+        return "ProduceMessageRequest{" +
                 "topic='" + topic + '\'' +
                 ", partition=" + partition +
                 ", partitionKey='" + partitionKey + '\'' +

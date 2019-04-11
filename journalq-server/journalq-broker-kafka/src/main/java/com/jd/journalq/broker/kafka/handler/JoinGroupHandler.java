@@ -2,9 +2,9 @@ package com.jd.journalq.broker.kafka.handler;
 
 import com.google.common.collect.Maps;
 import com.jd.journalq.broker.kafka.KafkaContextAware;
-import com.jd.journalq.broker.kafka.coordinator.GroupCoordinator;
-import com.jd.journalq.broker.kafka.coordinator.callback.JoinCallback;
-import com.jd.journalq.broker.kafka.coordinator.domain.GroupJoinGroupResult;
+import com.jd.journalq.broker.kafka.coordinator.group.GroupCoordinator;
+import com.jd.journalq.broker.kafka.coordinator.group.callback.JoinCallback;
+import com.jd.journalq.broker.kafka.coordinator.group.domain.GroupJoinGroupResult;
 import com.jd.journalq.broker.kafka.KafkaCommandType;
 import com.jd.journalq.broker.kafka.KafkaContext;
 import com.jd.journalq.broker.kafka.command.JoinGroupRequest;

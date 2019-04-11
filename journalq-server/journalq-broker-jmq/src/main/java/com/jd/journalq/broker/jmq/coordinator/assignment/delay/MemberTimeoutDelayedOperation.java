@@ -1,7 +1,7 @@
 package com.jd.journalq.broker.jmq.coordinator.assignment.delay;
 
-import com.jd.journalq.broker.jmq.coordinator.domain.JMQCoordinatorGroup;
-import com.jd.journalq.broker.jmq.coordinator.domain.JMQCoordinatorGroupMember;
+import com.jd.journalq.broker.jmq.coordinator.domain.GroupMemberMetadata;
+import com.jd.journalq.broker.jmq.coordinator.domain.GroupMetadata;
 import com.jd.journalq.toolkit.delay.AbstractDelayedOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,10 +16,10 @@ public class MemberTimeoutDelayedOperation extends AbstractDelayedOperation {
 
     protected static final Logger logger = LoggerFactory.getLogger(MemberTimeoutDelayedOperation.class);
 
-    private JMQCoordinatorGroup group;
-    private JMQCoordinatorGroupMember member;
+    private GroupMetadata group;
+    private GroupMemberMetadata member;
 
-    public MemberTimeoutDelayedOperation(JMQCoordinatorGroup group, JMQCoordinatorGroupMember member, long delayMs) {
+    public MemberTimeoutDelayedOperation(GroupMetadata group, GroupMemberMetadata member, long delayMs) {
         super(delayMs);
         this.group = group;
         this.member = member;

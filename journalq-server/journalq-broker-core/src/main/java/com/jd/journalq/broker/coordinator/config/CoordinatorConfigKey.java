@@ -10,13 +10,24 @@ import com.jd.journalq.toolkit.config.PropertyDef;
 public enum CoordinatorConfigKey implements PropertyDef {
 
     // 协调者主题
-    TOPIC_CODE("topic.code", "__group_coordinators", PropertyDef.Type.STRING),
+    GROUP_TOPIC_CODE("group.topic.code", "__group_coordinators", PropertyDef.Type.STRING),
     // 协调者主题分区
-//    TOPIC_PARTITIONS("topic.partitions", (short) 50, ConfigDef.Type.SHORT),
-    TOPIC_PARTITIONS("topic.partitions", (short) 1, PropertyDef.Type.SHORT),
+    GROUP_TOPIC_PARTITIONS("group.topic.partitions", (short) 1, PropertyDef.Type.SHORT),
+    // 协调者过期时间
+    GROUP_EXPIRE_TIME("group.expire.time", 1000 * 60 * 60 * 1, PropertyDef.Type.INT),
+    // 协调者最多group
+    GROUP_MAX_NUM("group.max.num", 1024 * 10, PropertyDef.Type.INT),
 
-    // 协调者group过期时间
-    GROUP_EXPIRE_TIME("group.expire.time", 1000 * 60 * 60 * 1, PropertyDef.Type.INT);
+    // 事务协调者主题
+    TRANSACTION_TOPIC_CODE("transaction.topic.code", "__transaction_coordinators", PropertyDef.Type.STRING),
+    // 事务协调者主题分区
+    TRANSACTION_TOPIC_PARTITIONS("transaction.topic.partitions", (short) 1, PropertyDef.Type.SHORT),
+    // 事务过期时间
+    TRANSACTION_EXPIRE_TIME("transaction.expire.time", 1000 * 60 * 60 * 1, PropertyDef.Type.INT),
+    // 事务最多
+    TRANSACTION_MAX_NUM("transaction.max.num", 1024 * 10, PropertyDef.Type.INT),
+
+    ;
 
     private String name;
     private Object value;

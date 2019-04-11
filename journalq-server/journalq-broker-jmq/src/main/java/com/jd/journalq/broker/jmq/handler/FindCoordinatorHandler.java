@@ -11,8 +11,8 @@ import com.jd.journalq.domain.Broker;
 import com.jd.journalq.domain.DataCenter;
 import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.network.command.BooleanAck;
-import com.jd.journalq.network.command.FindCoordinator;
-import com.jd.journalq.network.command.FindCoordinatorAck;
+import com.jd.journalq.network.command.FindCoordinatorRequest;
+import com.jd.journalq.network.command.FindCoordinatorResponse;
 import com.jd.journalq.network.command.FindCoordinatorAckData;
 import com.jd.journalq.network.command.JMQCommandType;
 import com.jd.journalq.network.domain.BrokerNode;
@@ -48,23 +48,23 @@ public class FindCoordinatorHandler implements JMQCommandHandler, Type, JMQConte
 
     @Override
     public Command handle(Transport transport, Command command) {
-        FindCoordinator findCoordinator = (FindCoordinator) command.getPayload();
+        FindCoordinatorRequest findCoordinatorRequest = (FindCoordinatorRequest) command.getPayload();
         Connection connection = SessionHelper.getConnection(transport);
 
-        if (connection == null || !connection.isAuthorized(findCoordinator.getApp())) {
+        if (connection == null || !connection.isAuthorized(findCoordinatorRequest.getApp())) {
             logger.warn("connection is not exists, transport: {}", transport);
             return BooleanAck.build(JMQCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
-        Map<String, FindCoordinatorAckData> coordinators = findCoordinators(connection, findCoordinator.getTopics(), findCoordinator.getApp());
+        Map<String, FindCoordinatorAckData> coordinators = findCoordinators(connection, findCoordinatorRequest.getTopics(), findCoordinatorRequest.getApp());
 
-        FindCoordinatorAck findCoordinatorAck = new FindCoordinatorAck();
-        findCoordinatorAck.setCoordinators(coordinators);
-        return new Command(findCoordinatorAck);
+        FindCoordinatorResponse findCoordinatorResponse = new FindCoordinatorResponse();
+        findCoordinatorResponse.setCoordinators(coordinators);
+        return new Command(findCoordinatorResponse);
     }
 
     protected Map<String, FindCoordinatorAckData> findCoordinators(Connection connection, List<String> topics, String app) {
-        Broker coordinatorBroker = coordinator.findCoordinator(app);
+        Broker coordinatorBroker = coordinator.findGroupCoordinator(app);
         JMQCode code = JMQCode.SUCCESS;
         BrokerNode coordinatorNode = null;
 

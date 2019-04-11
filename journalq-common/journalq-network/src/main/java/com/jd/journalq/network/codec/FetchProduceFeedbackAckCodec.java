@@ -2,7 +2,7 @@ package com.jd.journalq.network.codec;
 
 import com.google.common.collect.Lists;
 import com.jd.journalq.exception.JMQCode;
-import com.jd.journalq.network.command.FetchProduceFeedbackAck;
+import com.jd.journalq.network.command.FetchProduceFeedbackResponse;
 import com.jd.journalq.network.command.FetchProduceFeedbackAckData;
 import com.jd.journalq.network.command.JMQCommandType;
 import com.jd.journalq.network.serializer.Serializer;
@@ -19,10 +19,10 @@ import java.util.List;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/19
  */
-public class FetchProduceFeedbackAckCodec implements PayloadCodec<JMQHeader, FetchProduceFeedbackAck>, Type {
+public class FetchProduceFeedbackAckCodec implements PayloadCodec<JMQHeader, FetchProduceFeedbackResponse>, Type {
 
     @Override
-    public FetchProduceFeedbackAck decode(JMQHeader header, ByteBuf buffer) throws Exception {
+    public FetchProduceFeedbackResponse decode(JMQHeader header, ByteBuf buffer) throws Exception {
         short dataSize = buffer.readShort();
         List<FetchProduceFeedbackAckData> data = Lists.newArrayListWithCapacity(dataSize);
         for (int i = 0; i < dataSize; i++) {
@@ -32,14 +32,14 @@ public class FetchProduceFeedbackAckCodec implements PayloadCodec<JMQHeader, Fet
             data.add(new FetchProduceFeedbackAckData(topic, txId, transactionId));
         }
 
-        FetchProduceFeedbackAck fetchProduceFeedbackAck = new FetchProduceFeedbackAck();
-        fetchProduceFeedbackAck.setData(data);
-        fetchProduceFeedbackAck.setCode(JMQCode.valueOf(buffer.readInt()));
-        return fetchProduceFeedbackAck;
+        FetchProduceFeedbackResponse fetchProduceFeedbackResponse = new FetchProduceFeedbackResponse();
+        fetchProduceFeedbackResponse.setData(data);
+        fetchProduceFeedbackResponse.setCode(JMQCode.valueOf(buffer.readInt()));
+        return fetchProduceFeedbackResponse;
     }
 
     @Override
-    public void encode(FetchProduceFeedbackAck payload, ByteBuf buffer) throws Exception {
+    public void encode(FetchProduceFeedbackResponse payload, ByteBuf buffer) throws Exception {
         buffer.writeShort(payload.getData().size());
         for (FetchProduceFeedbackAckData data : payload.getData()) {
             Serializer.write(data.getTopic(), buffer, Serializer.SHORT_SIZE);

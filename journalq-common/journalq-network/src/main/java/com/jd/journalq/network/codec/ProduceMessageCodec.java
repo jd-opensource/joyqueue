@@ -5,7 +5,7 @@ import com.google.common.collect.Maps;
 import com.jd.journalq.domain.QosLevel;
 import com.jd.journalq.message.BrokerMessage;
 import com.jd.journalq.network.command.JMQCommandType;
-import com.jd.journalq.network.command.ProduceMessage;
+import com.jd.journalq.network.command.ProduceMessageRequest;
 import com.jd.journalq.network.command.ProduceMessageData;
 import com.jd.journalq.network.serializer.Serializer;
 import com.jd.journalq.network.transport.codec.JMQHeader;
@@ -22,12 +22,12 @@ import java.util.Map;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/18
  */
-public class ProduceMessageCodec implements PayloadCodec<JMQHeader, ProduceMessage>, Type {
+public class ProduceMessageCodec implements PayloadCodec<JMQHeader, ProduceMessageRequest>, Type {
 
     @Override
-    public ProduceMessage decode(JMQHeader header, ByteBuf buffer) throws Exception {
+    public ProduceMessageRequest decode(JMQHeader header, ByteBuf buffer) throws Exception {
         short dataSize = buffer.readShort();
-        Map<String, ProduceMessageData> data = Maps.newHashMap();
+        Map<String, ProduceMessageData> data = Maps.newHashMapWithExpectedSize(dataSize);
         for (int i = 0; i < dataSize; i++) {
             String topic = Serializer.readString(buffer, Serializer.SHORT_SIZE);
             String txId = Serializer.readString(buffer, Serializer.SHORT_SIZE);
@@ -52,14 +52,14 @@ public class ProduceMessageCodec implements PayloadCodec<JMQHeader, ProduceMessa
             data.put(topic, produceMessageData);
         }
 
-        ProduceMessage produceMessage = new ProduceMessage();
-        produceMessage.setApp(Serializer.readString(buffer, Serializer.SHORT_SIZE));
-        produceMessage.setData(data);
-        return produceMessage;
+        ProduceMessageRequest produceMessageRequest = new ProduceMessageRequest();
+        produceMessageRequest.setApp(Serializer.readString(buffer, Serializer.SHORT_SIZE));
+        produceMessageRequest.setData(data);
+        return produceMessageRequest;
     }
 
     @Override
-    public void encode(ProduceMessage payload, ByteBuf buffer) throws Exception {
+    public void encode(ProduceMessageRequest payload, ByteBuf buffer) throws Exception {
         buffer.writeShort(payload.getData().size());
         for (Map.Entry<String, ProduceMessageData> entry : payload.getData().entrySet()) {
             ProduceMessageData data = entry.getValue();

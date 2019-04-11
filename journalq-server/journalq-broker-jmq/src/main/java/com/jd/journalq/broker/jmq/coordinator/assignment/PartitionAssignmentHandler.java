@@ -2,10 +2,10 @@ package com.jd.journalq.broker.jmq.coordinator.assignment;
 
 import com.google.common.collect.Sets;
 import com.jd.journalq.broker.jmq.config.JMQConfig;
-import com.jd.journalq.broker.jmq.coordinator.JMQCoordinatorGroupManager;
+import com.jd.journalq.broker.jmq.coordinator.GroupMetadataManager;
 import com.jd.journalq.broker.jmq.coordinator.assignment.delay.MemberTimeoutDelayedOperation;
-import com.jd.journalq.broker.jmq.coordinator.domain.JMQCoordinatorGroup;
-import com.jd.journalq.broker.jmq.coordinator.domain.JMQCoordinatorGroupMember;
+import com.jd.journalq.broker.jmq.coordinator.domain.GroupMemberMetadata;
+import com.jd.journalq.broker.jmq.coordinator.domain.GroupMetadata;
 import com.jd.journalq.broker.jmq.coordinator.domain.PartitionAssignment;
 import com.jd.journalq.broker.jmq.exception.JMQException;
 import com.jd.journalq.domain.PartitionGroup;
@@ -30,32 +30,32 @@ public class PartitionAssignmentHandler extends Service {
     protected static final Logger logger = LoggerFactory.getLogger(PartitionAssignmentHandler.class);
 
     private JMQConfig config;
-    private JMQCoordinatorGroupManager coordinatorGroupManager;
+    private GroupMetadataManager coordinatorGroupManager;
 
     private PartitionAssignorResolver partitionAssignorResolver;
     private DelayedOperationManager memberTimeoutDelayedOperationManager;
 
-    public PartitionAssignmentHandler(JMQConfig config, JMQCoordinatorGroupManager coordinatorGroupManager) {
+    public PartitionAssignmentHandler(JMQConfig config, GroupMetadataManager coordinatorGroupManager) {
         this.config = config;
         this.coordinatorGroupManager = coordinatorGroupManager;
     }
 
     public PartitionAssignment assign(String topic, String app, String connectionId, String connectionHost, int sessionTimeout, List<PartitionGroup> partitionGroups) {
-        JMQCoordinatorGroup group = coordinatorGroupManager.getGroup(app);
+        GroupMetadata group = coordinatorGroupManager.getGroup(app);
         if (group == null) {
-            group = coordinatorGroupManager.getOrCreateGroup(new JMQCoordinatorGroup(app));
+            group = coordinatorGroupManager.getOrCreateGroup(new GroupMetadata(app));
         }
         synchronized (group) {
             return doAssign(group, topic, connectionId, connectionHost, sessionTimeout, partitionGroups);
         }
     }
 
-    protected PartitionAssignment doAssign(JMQCoordinatorGroup group, String topic, String connectionId, String connectionHost, int sessionTimeout, List<PartitionGroup> partitionGroups) {
-        JMQCoordinatorGroupMember member = (JMQCoordinatorGroupMember) group.getMembers().get(connectionId);
+    protected PartitionAssignment doAssign(GroupMetadata group, String topic, String connectionId, String connectionHost, int sessionTimeout, List<PartitionGroup> partitionGroups) {
+        GroupMemberMetadata member = (GroupMemberMetadata) group.getMembers().get(connectionId);
         DelayedOperationKey memberTimeoutDelayedOperationKey = new DelayedOperationKey(connectionId);
 
         if (member == null) {
-            member = new JMQCoordinatorGroupMember(connectionId, group.getId(), connectionId, connectionHost, sessionTimeout);
+            member = new GroupMemberMetadata(connectionId, group.getId(), connectionId, connectionHost, sessionTimeout);
             group.addMember(member);
         } else {
             memberTimeoutDelayedOperationManager.checkAndComplete(memberTimeoutDelayedOperationKey);

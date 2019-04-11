@@ -74,7 +74,7 @@ public class MessagePollerInner extends Service {
     public List<ConsumeMessage> fetchTopic(BrokerNode brokerNode, String topic, int batchSize, long timeout, TimeUnit timeoutUnit, ConsumerListener listener) {
         Preconditions.checkArgument(StringUtils.isNotBlank(topic), "topic not blank");
 
-        TopicMetadata topicMetadata = checkTopicMetadata(topic);
+        TopicMetadata topicMetadata = getAndCheckTopicMetadata(topic);
         return fetchTopic(brokerNode, topicMetadata, batchSize, timeout, timeoutUnit, listener);
     }
 
@@ -138,7 +138,7 @@ public class MessagePollerInner extends Service {
     public List<ConsumeMessage> fetchPartition(BrokerNode brokerNode, String topic, short partition, long index, int batchSize, long timeout, TimeUnit timeoutUnit, ConsumerListener listener) {
         Preconditions.checkArgument(StringUtils.isNotBlank(topic), "topic not blank");
 
-        TopicMetadata topicMetadata = checkTopicMetadata(topic);
+        TopicMetadata topicMetadata = getAndCheckTopicMetadata(topic);
         return fetchPartition(brokerNode, topicMetadata, partition, index, batchSize, timeout, timeoutUnit, listener);
     }
 
@@ -208,16 +208,13 @@ public class MessagePollerInner extends Service {
             return fetchMessageData.getMessages();
         }
 
-        // TODO 临时日志
-        logger.warn("fetch message error, topic: {}, code: {}, error: {}", topic, code, code.getMessage());
-
         switch (code) {
             case CN_NO_PERMISSION:
             case CN_SERVICE_NOT_AVAILABLE:
             case FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER: {
                 // 尝试更新元数据
                 logger.warn("fetch message error, no permission, topic: {}", topic);
-                clusterManager.tryUpdateTopicMetadata(topic, app);
+                clusterManager.updateTopicMetadata(topic, app);
                 break;
             }
             case FW_GET_MESSAGE_TOPIC_NOT_READ:
@@ -311,7 +308,7 @@ public class MessagePollerInner extends Service {
         return BrokerAssignmentConverter.convertBrokerAssignments(topicMetadata);
     }
 
-    public TopicMetadata checkTopicMetadata(String topic) {
+    public TopicMetadata getAndCheckTopicMetadata(String topic) {
         TopicMetadata topicMetadata = clusterManager.fetchTopicMetadata(getTopicFullName(topic), getAppFullName());
         if (topicMetadata == null) {
             throw new ConsumerException(String.format("topic %s is not exist", topic), JMQCode.FW_TOPIC_NOT_EXIST.getCode());

@@ -4,7 +4,7 @@ import com.jd.journalq.client.internal.exception.ClientException;
 import com.jd.journalq.client.internal.nameserver.NameServerConfig;
 import com.jd.journalq.client.internal.transport.config.TransportConfig;
 import com.jd.journalq.exception.JMQException;
-import com.jd.journalq.network.command.Heartbeat;
+import com.jd.journalq.network.command.HeartbeatRequest;
 import com.jd.journalq.network.domain.BrokerNode;
 import com.jd.journalq.network.transport.Transport;
 import com.jd.journalq.network.transport.TransportAttribute;
@@ -46,7 +46,7 @@ public class Client extends Service {
     }
 
     public void heartbeat(long timeout) {
-        sync(new JMQCommand(new Heartbeat()), timeout);
+        sync(new JMQCommand(new HeartbeatRequest()), timeout);
     }
 
     public Future<Command> async(Command request, long timeout) {

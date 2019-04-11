@@ -1,7 +1,7 @@
 package com.jd.journalq.network.codec;
 
 import com.google.common.collect.Maps;
-import com.jd.journalq.network.command.AddProducerAck;
+import com.jd.journalq.network.command.AddProducerResponse;
 import com.jd.journalq.network.command.JMQCommandType;
 import com.jd.journalq.network.serializer.Serializer;
 import com.jd.journalq.network.transport.codec.JMQHeader;
@@ -12,15 +12,15 @@ import io.netty.buffer.ByteBuf;
 import java.util.Map;
 
 /**
- * AddProducerAck
+ * AddProducerResponse
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/12/10
  */
-public class AddProducerAckCodec implements PayloadCodec<JMQHeader, AddProducerAck>, Type {
+public class AddProducerAckCodec implements PayloadCodec<JMQHeader, AddProducerResponse>, Type {
 
     @Override
-    public AddProducerAck decode(JMQHeader header, ByteBuf buffer) throws Exception {
+    public AddProducerResponse decode(JMQHeader header, ByteBuf buffer) throws Exception {
         Map<String, String> result = Maps.newHashMap();
         short producerSize = buffer.readShort();
         for (int i = 0; i < producerSize; i++) {
@@ -29,13 +29,13 @@ public class AddProducerAckCodec implements PayloadCodec<JMQHeader, AddProducerA
             result.put(topic, producerId);
         }
 
-        AddProducerAck addProducerAck = new AddProducerAck();
-        addProducerAck.setProducerIds(result);
-        return addProducerAck;
+        AddProducerResponse addProducerResponse = new AddProducerResponse();
+        addProducerResponse.setProducerIds(result);
+        return addProducerResponse;
     }
 
     @Override
-    public void encode(AddProducerAck payload, ByteBuf buffer) throws Exception {
+    public void encode(AddProducerResponse payload, ByteBuf buffer) throws Exception {
         buffer.writeShort(payload.getProducerIds().size());
         for (Map.Entry<String, String> entry : payload.getProducerIds().entrySet()) {
             Serializer.write(entry.getKey(), buffer, Serializer.SHORT_SIZE);

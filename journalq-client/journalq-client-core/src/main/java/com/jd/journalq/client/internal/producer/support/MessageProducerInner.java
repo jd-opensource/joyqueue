@@ -5,6 +5,7 @@ import com.jd.journalq.client.internal.cluster.ClusterManager;
 import com.jd.journalq.client.internal.exception.ClientException;
 import com.jd.journalq.client.internal.metadata.domain.PartitionMetadata;
 import com.jd.journalq.client.internal.metadata.domain.TopicMetadata;
+import com.jd.journalq.client.internal.metadata.exception.MetadataException;
 import com.jd.journalq.client.internal.nameserver.NameServerConfig;
 import com.jd.journalq.client.internal.nameserver.helper.NameServerHelper;
 import com.jd.journalq.client.internal.producer.MessageSender;
@@ -104,7 +105,7 @@ public class MessageProducerInner extends Service {
     }
 
     public List<SendResult> doBatchSend(List<ProduceMessage> messages, String txId, long timeout, TimeUnit timeoutUnit, boolean isOneway, boolean failover, AsyncBatchProduceCallback callback) {
-        TopicMetadata topicMetadata = checkTopicMetadata(messages.get(0).getTopic());
+        TopicMetadata topicMetadata = getAndCheckTopicMetadata(messages.get(0).getTopic());
         List<BrokerNode> brokers = getRegionBrokers(topicMetadata);
         brokers = filterNotAvailableBrokers(brokers);
         List<PartitionMetadata> partitions = getBrokerPartitions(topicMetadata, brokers);
@@ -167,6 +168,11 @@ public class MessageProducerInner extends Service {
             try {
                 result = doBatchSend(partition.getLeader(), topic, app, messages, txId, config.getQosLevel(), produceTimeout, timeout, isOneway, callback);
                 break;
+            } catch (MetadataException e) {
+                lastException = e;
+                retryTimes++;
+                topicMetadata = getAndCheckTopicMetadata(topicMetadata.getTopic());
+                logger.debug("send message exception, topic: {}, app:{} messages: {}", topic, app, messages, e);
             } catch (NeedRetryException e) {
                 lastException = new ProducerException(e.getMessage(), e.getCode(), e.getCause());
                 retryTimes++;
@@ -175,7 +181,7 @@ public class MessageProducerInner extends Service {
                 lastException = e;
                 retryTimes++;
                 logger.debug("send message exception, topic: {}, app:{} messages: {}", topic, app, messages, e);
-            } catch (Exception e) {
+            }catch (Exception e) {
                 logger.error("send message exception, topic: {}, app:{} messages: {}", topic, app, messages, e);
                 new ProducerException(lastException);
             }
@@ -238,17 +244,14 @@ public class MessageProducerInner extends Service {
             return sendBatchResultData.getResult();
         }
 
-        // TODO 临时日志
-        logger.warn("send message error, topic: {}, code: {}, error: {}", topic, code, code.getMessage());
-
         switch (code) {
             case CN_NO_PERMISSION:
             case CN_SERVICE_NOT_AVAILABLE:
             case FW_PRODUCE_MESSAGE_BROKER_NOT_LEADER: {
                 // 尝试更新元数据
                 logger.debug("send message error, no permission, topic: {}", topic);
-                clusterManager.tryUpdateTopicMetadata(topic, app);
-                break;
+                clusterManager.updateTopicMetadata(topic, app);
+                throw new MetadataException(code.getMessage(), code.getCode());
             }
             case FW_PUT_MESSAGE_TOPIC_NOT_WRITE: {
                 logger.debug("send message error, not write, topic: {}", topic);
@@ -266,7 +269,7 @@ public class MessageProducerInner extends Service {
         throw new NeedRetryException(code.getMessage(), code.getCode());
     }
 
-    public TopicMetadata checkTopicMetadata(String topic) {
+    public TopicMetadata getAndCheckTopicMetadata(String topic) {
         TopicMetadata topicMetadata = clusterManager.fetchTopicMetadata(getTopicFullName(topic), config.getApp());
         if (topicMetadata == null) {
             throw new ProducerException(String.format("topic %s is not exist", topic), JMQCode.FW_TOPIC_NOT_EXIST.getCode());
@@ -341,7 +344,11 @@ public class MessageProducerInner extends Service {
         PartitionSelector partitionSelector = partitionSelectorManager.getPartitionSelector(topicMetadata.getTopic(), config.getSelectorType());
         PartitionMetadata partition = ProducerHelper.dispatchPartitions(messages, topicMetadata, partitions, partitionSelector);
         if (partition == null || partition.getLeader() == null) {
-            throw new ProducerException(String.format("partition is not available, topic: %s, messages: %s", topicMetadata.getTopic(), messages), JMQCode.FW_TOPIC_NO_PARTITIONGROUP.getCode());
+            if (partitionBlackList == null) {
+                partitionBlackList = Lists.newArrayList();
+            }
+            partitionBlackList.add(partition);
+            return dispatchPartitions(messages, topicMetadata, partitions, partitionBlackList);
         }
         ProducerHelper.setPartitions(messages, partition.getId());
         return partition;

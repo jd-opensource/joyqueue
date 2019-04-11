@@ -5,7 +5,7 @@ import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.network.transport.command.JMQPayload;
 
 /**
- * CommitAck
+ * CommitAckRequest
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/12/12

@@ -1,7 +1,7 @@
 package com.jd.journalq.network.codec;
 
 import com.google.common.collect.Maps;
-import com.jd.journalq.network.command.FetchTopicMessage;
+import com.jd.journalq.network.command.FetchTopicMessageRequest;
 import com.jd.journalq.network.command.FetchTopicMessageData;
 import com.jd.journalq.network.command.JMQCommandType;
 import com.jd.journalq.network.serializer.Serializer;
@@ -18,14 +18,14 @@ import java.util.Map;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/7
  */
-public class FetchTopicMessageCodec implements PayloadCodec<JMQHeader, FetchTopicMessage>, Type {
+public class FetchTopicMessageCodec implements PayloadCodec<JMQHeader, FetchTopicMessageRequest>, Type {
 
     @Override
-    public FetchTopicMessage decode(JMQHeader header, ByteBuf buffer) throws Exception {
-        FetchTopicMessage fetchTopicMessage = new FetchTopicMessage();
+    public FetchTopicMessageRequest decode(JMQHeader header, ByteBuf buffer) throws Exception {
+        FetchTopicMessageRequest fetchTopicMessageRequest = new FetchTopicMessageRequest();
 
-        Map<String, FetchTopicMessageData> topics = Maps.newHashMap();
         short topicSize = buffer.readShort();
+        Map<String, FetchTopicMessageData> topics = Maps.newHashMapWithExpectedSize(topicSize);
         for (int i = 0; i < topicSize; i++) {
             String topic = Serializer.readString(buffer, Serializer.SHORT_SIZE);
             short count = buffer.readShort();
@@ -34,15 +34,15 @@ public class FetchTopicMessageCodec implements PayloadCodec<JMQHeader, FetchTopi
             topics.put(topic, fetchTopicMessageData);
         }
 
-        fetchTopicMessage.setTopics(topics);
-        fetchTopicMessage.setApp(Serializer.readString(buffer, Serializer.SHORT_SIZE));
-        fetchTopicMessage.setAckTimeout(buffer.readInt());
-        fetchTopicMessage.setLongPollTimeout(buffer.readInt());
-        return fetchTopicMessage;
+        fetchTopicMessageRequest.setTopics(topics);
+        fetchTopicMessageRequest.setApp(Serializer.readString(buffer, Serializer.SHORT_SIZE));
+        fetchTopicMessageRequest.setAckTimeout(buffer.readInt());
+        fetchTopicMessageRequest.setLongPollTimeout(buffer.readInt());
+        return fetchTopicMessageRequest;
     }
 
     @Override
-    public void encode(FetchTopicMessage payload, ByteBuf buffer) throws Exception {
+    public void encode(FetchTopicMessageRequest payload, ByteBuf buffer) throws Exception {
         buffer.writeShort(payload.getTopics().size());
         for (Map.Entry<String, FetchTopicMessageData> entry : payload.getTopics().entrySet()) {
             Serializer.write(entry.getKey(), buffer, Serializer.SHORT_SIZE);

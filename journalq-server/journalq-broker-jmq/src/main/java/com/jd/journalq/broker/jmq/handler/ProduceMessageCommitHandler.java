@@ -13,7 +13,7 @@ import com.jd.journalq.exception.JMQException;
 import com.jd.journalq.message.BrokerCommit;
 import com.jd.journalq.network.command.BooleanAck;
 import com.jd.journalq.network.command.JMQCommandType;
-import com.jd.journalq.network.command.ProduceMessageCommit;
+import com.jd.journalq.network.command.ProduceMessageCommitRequest;
 import com.jd.journalq.network.command.ProduceMessageCommitAck;
 import com.jd.journalq.network.session.Connection;
 import com.jd.journalq.network.session.Producer;
@@ -45,42 +45,42 @@ public class ProduceMessageCommitHandler implements JMQCommandHandler, Type, Bro
 
     @Override
     public Command handle(Transport transport, Command command) {
-        ProduceMessageCommit produceMessageCommit = (ProduceMessageCommit) command.getPayload();
+        ProduceMessageCommitRequest produceMessageCommitRequest = (ProduceMessageCommitRequest) command.getPayload();
         Connection connection = SessionHelper.getConnection(transport);
 
-        if (connection == null || !connection.isAuthorized(produceMessageCommit.getApp())) {
+        if (connection == null || !connection.isAuthorized(produceMessageCommitRequest.getApp())) {
             logger.warn("connection is not exists, transport: {}", transport);
             return BooleanAck.build(JMQCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
-        BooleanResponse checkResult = clusterManager.checkWritable(TopicName.parse(produceMessageCommit.getTopic()), produceMessageCommit.getApp(), connection.getHost());
+        BooleanResponse checkResult = clusterManager.checkWritable(TopicName.parse(produceMessageCommitRequest.getTopic()), produceMessageCommitRequest.getApp(), connection.getHost());
         if (!checkResult.isSuccess()) {
-            logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport, produceMessageCommit.getTopic(), produceMessageCommit.getApp(), checkResult.getJmqCode());
+            logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport, produceMessageCommitRequest.getTopic(), produceMessageCommitRequest.getApp(), checkResult.getJmqCode());
             return new Command(new ProduceMessageCommitAck(CheckResultConverter.convertCommonCode(checkResult.getJmqCode())));
         }
 
-        ProduceMessageCommitAck produceMessageCommitAck = produceMessageCommit(connection, produceMessageCommit);
+        ProduceMessageCommitAck produceMessageCommitAck = produceMessageCommit(connection, produceMessageCommitRequest);
         return new Command(produceMessageCommitAck);
     }
 
-    protected ProduceMessageCommitAck produceMessageCommit(Connection connection, ProduceMessageCommit produceMessageCommit) {
-        Producer producer = new Producer(connection.getId(), produceMessageCommit.getTopic(), produceMessageCommit.getApp(), Producer.ProducerType.JMQ);
+    protected ProduceMessageCommitAck produceMessageCommit(Connection connection, ProduceMessageCommitRequest produceMessageCommitRequest) {
+        Producer producer = new Producer(connection.getId(), produceMessageCommitRequest.getTopic(), produceMessageCommitRequest.getApp(), Producer.ProducerType.JMQ);
 
         BrokerCommit brokerCommit = new BrokerCommit();
-        brokerCommit.setTopic(produceMessageCommit.getTopic());
-        brokerCommit.setApp(produceMessageCommit.getApp());
-        brokerCommit.setTxId(produceMessageCommit.getTxId());
+        brokerCommit.setTopic(produceMessageCommitRequest.getTopic());
+        brokerCommit.setApp(produceMessageCommitRequest.getApp());
+        brokerCommit.setTxId(produceMessageCommitRequest.getTxId());
 
         try {
             produce.putTransactionMessage(producer, brokerCommit);
             return new ProduceMessageCommitAck(JMQCode.SUCCESS);
         } catch (JMQException e) {
             logger.error("produceMessage prepare exception, transport: {}, topic: {}, app: {}",
-                    connection.getTransport().remoteAddress(), produceMessageCommit.getTopic(), produceMessageCommit.getApp(), e);
+                    connection.getTransport().remoteAddress(), produceMessageCommitRequest.getTopic(), produceMessageCommitRequest.getApp(), e);
             return new ProduceMessageCommitAck(JMQCode.valueOf(e.getCode()));
         } catch (Exception e) {
             logger.error("produceMessage prepare exception, transport: {}, topic: {}, app: {}",
-                    connection.getTransport().remoteAddress(), produceMessageCommit.getTopic(), produceMessageCommit.getApp(), e);
+                    connection.getTransport().remoteAddress(), produceMessageCommitRequest.getTopic(), produceMessageCommitRequest.getApp(), e);
             return new ProduceMessageCommitAck(JMQCode.CN_UNKNOWN_ERROR);
         }
     }

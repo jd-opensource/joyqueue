@@ -3,8 +3,8 @@ package com.jd.journalq.client.internal.consumer.transport;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.jd.journalq.network.command.AddConsumer;
-import com.jd.journalq.network.command.RemoveConsumer;
+import com.jd.journalq.network.command.AddConsumerRequest;
+import com.jd.journalq.network.command.RemoveConsumerRequest;
 import com.jd.journalq.network.transport.TransportAttribute;
 import com.jd.journalq.network.transport.command.JMQCommand;
 import org.apache.commons.collections.CollectionUtils;
@@ -104,12 +104,12 @@ public class ConsumerConnectionState {
     }
 
     protected boolean doHandleAddConsumers(List<String> topics, String app) {
-        AddConsumer addConsumer = new AddConsumer();
-        addConsumer.setTopics(topics);
-        addConsumer.setApp(app);
-        addConsumer.setSequence(SEQUENCE.incrementAndGet());
+        AddConsumerRequest addConsumerRequest = new AddConsumerRequest();
+        addConsumerRequest.setTopics(topics);
+        addConsumerRequest.setApp(app);
+        addConsumerRequest.setSequence(SEQUENCE.incrementAndGet());
         try {
-            consumerClient.getClient().sync(new JMQCommand(addConsumer));
+            consumerClient.getClient().sync(new JMQCommand(addConsumerRequest));
             return true;
         } catch (Exception e) {
             logger.warn("add consumer exception, topics: {}, app: {}, error: {}", topics, app, e.getMessage());
@@ -119,11 +119,11 @@ public class ConsumerConnectionState {
     }
 
     protected boolean doHandleRemoveConsumers(List<String> topics, String app) {
-        RemoveConsumer removeConsumer = new RemoveConsumer();
-        removeConsumer.setTopics(topics);
-        removeConsumer.setApp(app);
+        RemoveConsumerRequest removeConsumerRequest = new RemoveConsumerRequest();
+        removeConsumerRequest.setTopics(topics);
+        removeConsumerRequest.setApp(app);
         try {
-            consumerClient.getClient().sync(new JMQCommand(removeConsumer));
+            consumerClient.getClient().sync(new JMQCommand(removeConsumerRequest));
             return true;
         } catch (Exception e) {
             logger.warn("remove consumer exception, topics: {}, app: {}, error: {}", topics, app, e.getMessage());

@@ -11,6 +11,7 @@ public class OffsetAndMetadata {
     public static final long INVALID_OFFSET = -1L;
     public static final String NO_METADATA = "";
 
+    private int partition;
     private long offset;
     private String metadata;
     private int leaderEpoch;
@@ -30,11 +31,26 @@ public class OffsetAndMetadata {
         this.offsetCommitTime = offsetCommitTime;
     }
 
+    public OffsetAndMetadata(int partition, long offset, String metadata, long offsetCommitTime) {
+        this.partition = partition;
+        this.offset = offset;
+        this.metadata = metadata;
+        this.offsetCommitTime = offsetCommitTime;
+    }
+
     public OffsetAndMetadata(long offset, String metadata, int leaderEpoch, long offsetCommitTime) {
         this.offset = offset;
         this.metadata = metadata;
         this.leaderEpoch = leaderEpoch;
         this.offsetCommitTime = offsetCommitTime;
+    }
+
+    public void setPartition(int partition) {
+        this.partition = partition;
+    }
+
+    public int getPartition() {
+        return partition;
     }
 
     public long getOffset() {

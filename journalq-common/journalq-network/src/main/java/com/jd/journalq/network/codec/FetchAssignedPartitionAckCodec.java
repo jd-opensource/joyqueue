@@ -3,7 +3,7 @@ package com.jd.journalq.network.codec;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jd.journalq.exception.JMQCode;
-import com.jd.journalq.network.command.FetchAssignedPartitionAck;
+import com.jd.journalq.network.command.FetchAssignedPartitionResponse;
 import com.jd.journalq.network.command.FetchAssignedPartitionAckData;
 import com.jd.journalq.network.command.JMQCommandType;
 import com.jd.journalq.network.serializer.Serializer;
@@ -21,11 +21,11 @@ import java.util.Map;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/4
  */
-public class FetchAssignedPartitionAckCodec implements PayloadCodec<JMQHeader, FetchAssignedPartitionAck>, Type {
+public class FetchAssignedPartitionAckCodec implements PayloadCodec<JMQHeader, FetchAssignedPartitionResponse>, Type {
 
     @Override
-    public FetchAssignedPartitionAck decode(JMQHeader header, ByteBuf buffer) throws Exception {
-        FetchAssignedPartitionAck fetchAssignedPartitionAck = new FetchAssignedPartitionAck();
+    public FetchAssignedPartitionResponse decode(JMQHeader header, ByteBuf buffer) throws Exception {
+        FetchAssignedPartitionResponse fetchAssignedPartitionResponse = new FetchAssignedPartitionResponse();
         Map<String, FetchAssignedPartitionAckData> topicPartitions = Maps.newHashMap();
 
         short topicSize = buffer.readShort();
@@ -42,12 +42,12 @@ public class FetchAssignedPartitionAckCodec implements PayloadCodec<JMQHeader, F
             topicPartitions.put(topic, new FetchAssignedPartitionAckData(partitions, code));
         }
 
-        fetchAssignedPartitionAck.setTopicPartitions(topicPartitions);
-        return fetchAssignedPartitionAck;
+        fetchAssignedPartitionResponse.setTopicPartitions(topicPartitions);
+        return fetchAssignedPartitionResponse;
     }
 
     @Override
-    public void encode(FetchAssignedPartitionAck payload, ByteBuf buffer) throws Exception {
+    public void encode(FetchAssignedPartitionResponse payload, ByteBuf buffer) throws Exception {
         buffer.writeShort(payload.getTopicPartitions().size());
         for (Map.Entry<String, FetchAssignedPartitionAckData> entry : payload.getTopicPartitions().entrySet()) {
             Serializer.write(entry.getKey(), buffer, Serializer.SHORT_SIZE);

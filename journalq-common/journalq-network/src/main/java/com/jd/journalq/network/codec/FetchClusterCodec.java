@@ -1,7 +1,7 @@
 package com.jd.journalq.network.codec;
 
 import com.google.common.collect.Lists;
-import com.jd.journalq.network.command.FetchCluster;
+import com.jd.journalq.network.command.FetchClusterRequest;
 import com.jd.journalq.network.command.JMQCommandType;
 import com.jd.journalq.network.serializer.Serializer;
 import com.jd.journalq.network.transport.codec.JMQHeader;
@@ -17,11 +17,11 @@ import java.util.List;
  * email: gaohaoxiang@jd.com
  * date: 2018/11/30
  */
-public class FetchClusterCodec implements PayloadCodec<JMQHeader, FetchCluster>, Type {
+public class FetchClusterCodec implements PayloadCodec<JMQHeader, FetchClusterRequest>, Type {
 
     @Override
     public Object decode(JMQHeader header, ByteBuf buffer) throws Exception {
-        FetchCluster fetchCluster = new FetchCluster();
+        FetchClusterRequest fetchClusterRequest = new FetchClusterRequest();
 
         short topicSize = buffer.readShort();
         List<String> topics = Lists.newArrayListWithCapacity(topicSize);
@@ -29,13 +29,13 @@ public class FetchClusterCodec implements PayloadCodec<JMQHeader, FetchCluster>,
             topics.add(Serializer.readString(buffer, Serializer.SHORT_SIZE));
         }
 
-        fetchCluster.setTopics(topics);
-        fetchCluster.setApp(Serializer.readString(buffer, Serializer.SHORT_SIZE));
-        return fetchCluster;
+        fetchClusterRequest.setTopics(topics);
+        fetchClusterRequest.setApp(Serializer.readString(buffer, Serializer.SHORT_SIZE));
+        return fetchClusterRequest;
     }
 
     @Override
-    public void encode(FetchCluster payload, ByteBuf buffer) throws Exception {
+    public void encode(FetchClusterRequest payload, ByteBuf buffer) throws Exception {
         buffer.writeShort(payload.getTopics().size());
         for (String topic : payload.getTopics()) {
             Serializer.write(topic, buffer, Serializer.SHORT_SIZE);

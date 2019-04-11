@@ -1,14 +1,14 @@
 package com.jd.journalq.broker.kafka.network.codec;
 
 import com.google.common.collect.Lists;
-import com.jd.journalq.broker.kafka.coordinator.domain.GroupDescribe;
-import com.jd.journalq.broker.kafka.coordinator.domain.KafkaCoordinatorGroupMember;
-import com.jd.journalq.broker.kafka.message.serializer.KafkaSyncGroupAssignmentSerializer;
-import com.jd.journalq.broker.kafka.network.KafkaPayloadCodec;
 import com.jd.journalq.broker.kafka.KafkaCommandType;
 import com.jd.journalq.broker.kafka.command.DescribeGroupsRequest;
 import com.jd.journalq.broker.kafka.command.DescribeGroupsResponse;
+import com.jd.journalq.broker.kafka.coordinator.group.domain.GroupMemberMetadata;
+import com.jd.journalq.broker.kafka.coordinator.group.domain.GroupDescribe;
+import com.jd.journalq.broker.kafka.message.serializer.KafkaSyncGroupAssignmentSerializer;
 import com.jd.journalq.broker.kafka.network.KafkaHeader;
+import com.jd.journalq.broker.kafka.network.KafkaPayloadCodec;
 import com.jd.journalq.network.serializer.Serializer;
 import com.jd.journalq.network.transport.command.Type;
 import com.jd.journalq.network.transport.exception.TransportException;
@@ -61,7 +61,7 @@ public class DescribeGroupsCodec implements KafkaPayloadCodec<DescribeGroupsResp
                     buffer.writeInt(0);
                 } else {
                     buffer.writeInt(group.getMembers().size());
-                    for (KafkaCoordinatorGroupMember member : group.getMembers()) {
+                    for (GroupMemberMetadata member : group.getMembers()) {
                         try {
                             Serializer.write(member.getId(), buffer, Serializer.SHORT_SIZE);
                             Serializer.write(member.getClientId(), buffer, Serializer.SHORT_SIZE);

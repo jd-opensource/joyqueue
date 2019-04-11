@@ -20,13 +20,13 @@ import com.jd.journalq.client.internal.producer.transport.ProducerClientManager;
 import com.jd.journalq.client.internal.transport.ConnectionState;
 import com.jd.journalq.domain.QosLevel;
 import com.jd.journalq.exception.JMQCode;
-import com.jd.journalq.network.command.FetchProduceFeedbackAck;
-import com.jd.journalq.network.command.ProduceMessageAck;
+import com.jd.journalq.network.command.FetchProduceFeedbackResponse;
+import com.jd.journalq.network.command.ProduceMessagePrepareResponse;
+import com.jd.journalq.network.command.ProduceMessageResponse;
 import com.jd.journalq.network.command.ProduceMessageAckData;
 import com.jd.journalq.network.command.ProduceMessageCommitAck;
 import com.jd.journalq.network.command.ProduceMessageData;
-import com.jd.journalq.network.command.ProduceMessagePrepareAck;
-import com.jd.journalq.network.command.ProduceMessageRollbackAck;
+import com.jd.journalq.network.command.ProduceMessageRollbackResponse;
 import com.jd.journalq.network.command.TxStatus;
 import com.jd.journalq.network.domain.BrokerNode;
 import com.jd.journalq.network.transport.command.Command;
@@ -194,9 +194,9 @@ public class DefaultMessageSender extends Service implements MessageSender {
         ProducerClient client = producerClientManager.getOrCreateClient(brokerNode);
         handleAddProducers(brokerNode, messages.keySet(), app, client);
 
-        ProduceMessageAck produceMessageAck = client.produceMessage(app, data, timeout);
+        ProduceMessageResponse produceMessageResponse = client.produceMessage(app, data, timeout);
         Map<String, SendBatchResultData> result = Maps.newHashMap();
-        for (Map.Entry<String, ProduceMessageAckData> entry : produceMessageAck.getData().entrySet()) {
+        for (Map.Entry<String, ProduceMessageAckData> entry : produceMessageResponse.getData().entrySet()) {
             result.put(entry.getKey(), MessageSenderConverter.convertToBatchResultData(entry.getKey(), app, entry.getValue()));
         }
 
@@ -222,9 +222,9 @@ public class DefaultMessageSender extends Service implements MessageSender {
             client.asyncProduceMessage(app, data, timeout, new CommandCallback() {
                 @Override
                 public void onSuccess(Command request, Command response) {
-                    ProduceMessageAck produceMessageAck = (ProduceMessageAck) response.getPayload();
+                    ProduceMessageResponse produceMessageResponse = (ProduceMessageResponse) response.getPayload();
                     Map<String, SendBatchResultData> produceBatchResultData = Maps.newHashMap();
-                    for (Map.Entry<String, ProduceMessageAckData> entry : produceMessageAck.getData().entrySet()) {
+                    for (Map.Entry<String, ProduceMessageAckData> entry : produceMessageResponse.getData().entrySet()) {
                         produceBatchResultData.put(entry.getKey(), MessageSenderConverter.convertToBatchResultData(entry.getKey(), app, entry.getValue()));
                     }
                     callback.onSuccess(messages, produceBatchResultData);
@@ -263,8 +263,8 @@ public class DefaultMessageSender extends Service implements MessageSender {
         ProducerClient client = producerClientManager.getOrCreateClient(brokerNode);
         handleAddProducers(brokerNode, Lists.newArrayList(topic), app, client);
 
-        ProduceMessagePrepareAck produceMessagePrepareAck = client.produceMessagePrepare(topic, app, sequence, transactionId, transactionTimeout, timeout);
-        return new SendPrepareResult(produceMessagePrepareAck.getTxId(), produceMessagePrepareAck.getCode());
+        ProduceMessagePrepareResponse produceMessagePrepareResponse = client.produceMessagePrepare(topic, app, sequence, transactionId, transactionTimeout, timeout);
+        return new SendPrepareResult(produceMessagePrepareResponse.getTxId(), produceMessagePrepareResponse.getCode());
     }
 
     @Override
@@ -283,8 +283,8 @@ public class DefaultMessageSender extends Service implements MessageSender {
         ProducerClient client = producerClientManager.getOrCreateClient(brokerNode);
         handleAddProducers(brokerNode, Lists.newArrayList(topic), app, client);
 
-        ProduceMessageRollbackAck produceMessageRollbackAck = client.produceMessageRollback(topic, app, txId, timeout);
-        return produceMessageRollbackAck.getCode();
+        ProduceMessageRollbackResponse produceMessageRollbackResponse = client.produceMessageRollback(topic, app, txId, timeout);
+        return produceMessageRollbackResponse.getCode();
     }
 
     @Override
@@ -293,8 +293,8 @@ public class DefaultMessageSender extends Service implements MessageSender {
         ProducerClient client = producerClientManager.getOrCreateClient(brokerNode);
         handleAddProducers(brokerNode, Lists.newArrayList(topic), app, client);
 
-        FetchProduceFeedbackAck fetchProduceFeedbackAck = client.fetchFeedback(topic, app, txStatus, count, longPollTimeout, timeout);
-        return MessageSenderConverter.convertToFetchFeedbackData(topic, app, fetchProduceFeedbackAck);
+        FetchProduceFeedbackResponse fetchProduceFeedbackResponse = client.fetchFeedback(topic, app, txStatus, count, longPollTimeout, timeout);
+        return MessageSenderConverter.convertToFetchFeedbackData(topic, app, fetchProduceFeedbackResponse);
     }
 
     protected void checkState() {

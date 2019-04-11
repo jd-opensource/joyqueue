@@ -15,8 +15,8 @@ import com.jd.journalq.domain.TopicConfig;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.network.command.BooleanAck;
-import com.jd.journalq.network.command.FetchAssignedPartition;
-import com.jd.journalq.network.command.FetchAssignedPartitionAck;
+import com.jd.journalq.network.command.FetchAssignedPartitionRequest;
+import com.jd.journalq.network.command.FetchAssignedPartitionResponse;
 import com.jd.journalq.network.command.FetchAssignedPartitionAckData;
 import com.jd.journalq.network.command.FetchAssignedPartitionData;
 import com.jd.journalq.network.command.JMQCommandType;
@@ -41,6 +41,7 @@ import java.util.Map;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/4
  */
+// TODO 部分逻辑移到partitionAssignmentHandler
 public class FetchAssignedPartitionHandler implements JMQCommandHandler, Type, JMQContextAware {
 
     protected static final Logger logger = LoggerFactory.getLogger(FetchAssignedPartitionHandler.class);
@@ -58,35 +59,35 @@ public class FetchAssignedPartitionHandler implements JMQCommandHandler, Type, J
 
     @Override
     public Command handle(Transport transport, Command command) {
-        FetchAssignedPartition fetchAssignedPartition = (FetchAssignedPartition) command.getPayload();
+        FetchAssignedPartitionRequest fetchAssignedPartitionRequest = (FetchAssignedPartitionRequest) command.getPayload();
         Connection connection = SessionHelper.getConnection(transport);
 
         // 客户端是临时连接，用ip作为唯一标识
         String connectionId = ((InetSocketAddress) transport.remoteAddress()).getHostString();
 
-        if (connection == null || !connection.isAuthorized(fetchAssignedPartition.getApp())) {
+        if (connection == null || !connection.isAuthorized(fetchAssignedPartitionRequest.getApp())) {
             logger.warn("connection is not exists, transport: {}", transport);
             return BooleanAck.build(JMQCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
-        if (!coordinator.isCurrentCoordinator(fetchAssignedPartition.getApp())) {
-            logger.warn("coordinator is not current, app: {}, topics: {}, transport: {}", fetchAssignedPartition.getApp(), fetchAssignedPartition.getData(), transport);
+        if (!coordinator.isCurrentGroupCoordinator(fetchAssignedPartitionRequest.getApp())) {
+            logger.warn("coordinator is not current, app: {}, topics: {}, transport: {}", fetchAssignedPartitionRequest.getApp(), fetchAssignedPartitionRequest.getData(), transport);
             return BooleanAck.build(JMQCode.FW_COORDINATOR_NOT_AVAILABLE.getCode());
         }
 
-        Map<String, FetchAssignedPartitionAckData> topicPartitions = Maps.newHashMapWithExpectedSize(fetchAssignedPartition.getData().size());
-        for (FetchAssignedPartitionData fetchAssignedPartitionData : fetchAssignedPartition.getData()) {
-            FetchAssignedPartitionAckData fetchAssignedPartitionAckData = assignPartition(fetchAssignedPartitionData, fetchAssignedPartition.getApp(), connection.getRegion(), connectionId, connection.getAddressStr());
+        Map<String, FetchAssignedPartitionAckData> topicPartitions = Maps.newHashMapWithExpectedSize(fetchAssignedPartitionRequest.getData().size());
+        for (FetchAssignedPartitionData fetchAssignedPartitionData : fetchAssignedPartitionRequest.getData()) {
+            FetchAssignedPartitionAckData fetchAssignedPartitionAckData = assignPartition(fetchAssignedPartitionData, fetchAssignedPartitionRequest.getApp(), connection.getRegion(), connectionId, connection.getAddressStr());
             if (fetchAssignedPartitionAckData == null) {
-                logger.warn("partitionAssignment is null, topic: {}, app: {}, transport: {}", fetchAssignedPartitionData, fetchAssignedPartition.getApp(), transport);
+                logger.warn("partitionAssignment is null, topic: {}, app: {}, transport: {}", fetchAssignedPartitionData, fetchAssignedPartitionRequest.getApp(), transport);
                 fetchAssignedPartitionAckData = new FetchAssignedPartitionAckData(JMQCode.FW_COORDINATOR_PARTITION_ASSIGNOR_ERROR);
             }
             topicPartitions.put(fetchAssignedPartitionData.getTopic(), fetchAssignedPartitionAckData);
         }
 
-        FetchAssignedPartitionAck fetchAssignedPartitionAck = new FetchAssignedPartitionAck();
-        fetchAssignedPartitionAck.setTopicPartitions(topicPartitions);
-        return new Command(fetchAssignedPartitionAck);
+        FetchAssignedPartitionResponse fetchAssignedPartitionResponse = new FetchAssignedPartitionResponse();
+        fetchAssignedPartitionResponse.setTopicPartitions(topicPartitions);
+        return new Command(fetchAssignedPartitionResponse);
     }
 
     protected FetchAssignedPartitionAckData assignPartition(FetchAssignedPartitionData fetchAssignedPartitionData, String app, String region, String connectionId, String connectionHost) {

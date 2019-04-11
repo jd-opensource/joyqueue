@@ -8,7 +8,7 @@ import com.jd.journalq.broker.monitor.SessionManager;
 import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.network.command.BooleanAck;
 import com.jd.journalq.network.command.JMQCommandType;
-import com.jd.journalq.network.command.RemoveProducer;
+import com.jd.journalq.network.command.RemoveProducerRequest;
 import com.jd.journalq.network.session.Connection;
 import com.jd.journalq.network.transport.Transport;
 import com.jd.journalq.network.transport.command.Command;
@@ -36,16 +36,16 @@ public class RemoveProducerHandler implements JMQCommandHandler, Type, BrokerCon
 
     @Override
     public Command handle(Transport transport, Command command) {
-        RemoveProducer removeProducer = (RemoveProducer) command.getPayload();
+        RemoveProducerRequest removeProducerRequest = (RemoveProducerRequest) command.getPayload();
         Connection connection = SessionHelper.getConnection(transport);
 
-        if (connection == null || !connection.isAuthorized(removeProducer.getApp())) {
+        if (connection == null || !connection.isAuthorized(removeProducerRequest.getApp())) {
             logger.warn("connection is not exists, transport: {}", transport);
             return BooleanAck.build(JMQCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
-        for (String topic : removeProducer.getTopics()) {
-            String producerId = connection.getProducer(topic, removeProducer.getApp());
+        for (String topic : removeProducerRequest.getTopics()) {
+            String producerId = connection.getProducer(topic, removeProducerRequest.getApp());
             if (StringUtils.isBlank(producerId)) {
                 continue;
             }

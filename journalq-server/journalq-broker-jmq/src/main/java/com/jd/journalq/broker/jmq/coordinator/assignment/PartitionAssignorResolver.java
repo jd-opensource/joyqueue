@@ -2,8 +2,8 @@ package com.jd.journalq.broker.jmq.coordinator.assignment;
 
 import com.google.common.collect.Maps;
 import com.jd.journalq.broker.jmq.config.JMQConfig;
-import com.jd.journalq.broker.jmq.coordinator.domain.JMQCoordinatorGroup;
-import com.jd.journalq.broker.jmq.coordinator.domain.JMQCoordinatorGroupMember;
+import com.jd.journalq.broker.jmq.coordinator.domain.GroupMemberMetadata;
+import com.jd.journalq.broker.jmq.coordinator.domain.GroupMetadata;
 import com.jd.journalq.broker.jmq.coordinator.domain.PartitionAssignment;
 import com.jd.journalq.broker.jmq.exception.JMQException;
 import com.jd.journalq.domain.PartitionGroup;
@@ -34,7 +34,7 @@ public class PartitionAssignorResolver {
         this.config = config;
     }
 
-    public PartitionAssignment assign(JMQCoordinatorGroup group, JMQCoordinatorGroupMember member, String topic, List<PartitionGroup> partitionGroups) {
+    public PartitionAssignment assign(GroupMetadata group, GroupMemberMetadata member, String topic, List<PartitionGroup> partitionGroups) {
         String assignType = config.getCoordinatorPartitionAssignType();
         PartitionAssignor partitionAssignor = (StringUtils.isBlank(assignType) ? null : partitionAssignors.get(assignType));
 

@@ -1,7 +1,7 @@
 package com.jd.journalq.network.codec;
 
 import com.google.common.collect.Lists;
-import com.jd.journalq.network.command.AddConsumer;
+import com.jd.journalq.network.command.AddConsumerRequest;
 import com.jd.journalq.network.command.JMQCommandType;
 import com.jd.journalq.network.serializer.Serializer;
 import com.jd.journalq.network.transport.codec.JMQHeader;
@@ -18,11 +18,11 @@ import java.util.List;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/10
  */
-public class AddConsumerCodec implements PayloadCodec<JMQHeader, AddConsumer>, Type {
+public class AddConsumerCodec implements PayloadCodec<JMQHeader, AddConsumerRequest>, Type {
 
     @Override
-    public AddConsumer decode(JMQHeader header, ByteBuf buffer) throws Exception {
-        AddConsumer addConsumer = new AddConsumer();
+    public AddConsumerRequest decode(JMQHeader header, ByteBuf buffer) throws Exception {
+        AddConsumerRequest addConsumerRequest = new AddConsumerRequest();
 
         short topicSize = buffer.readShort();
         List<String> topics = Lists.newArrayListWithCapacity(topicSize);
@@ -30,14 +30,14 @@ public class AddConsumerCodec implements PayloadCodec<JMQHeader, AddConsumer>, T
             topics.add(Serializer.readString(buffer, Serializer.SHORT_SIZE));
         }
 
-        addConsumer.setTopics(topics);
-        addConsumer.setApp(Serializer.readString(buffer, Serializer.SHORT_SIZE));
-        addConsumer.setSequence(buffer.readLong());
-        return addConsumer;
+        addConsumerRequest.setTopics(topics);
+        addConsumerRequest.setApp(Serializer.readString(buffer, Serializer.SHORT_SIZE));
+        addConsumerRequest.setSequence(buffer.readLong());
+        return addConsumerRequest;
     }
 
     @Override
-    public void encode(AddConsumer payload, ByteBuf buffer) throws Exception {
+    public void encode(AddConsumerRequest payload, ByteBuf buffer) throws Exception {
         buffer.writeShort(payload.getTopics().size());
         for (String topic : payload.getTopics()) {
             Serializer.write(topic, buffer, Serializer.SHORT_SIZE);

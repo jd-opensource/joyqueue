@@ -1,0 +1,43 @@
+package com.jd.journalq.broker.kafka.coordinator.transaction;
+
+import com.jd.journalq.broker.kafka.config.KafkaConfig;
+import com.jd.journalq.broker.kafka.coordinator.group.GroupMetadataManager;
+import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionMetadata;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * TransactionMetadataManager
+ * author: gaohaoxiang
+ * email: gaohaoxiang@jd.com
+ * date: 2019/4/10
+ */
+public class TransactionMetadataManager {
+
+    protected static final Logger logger = LoggerFactory.getLogger(GroupMetadataManager.class);
+
+    private KafkaConfig config;
+    private com.jd.journalq.broker.coordinator.transaction.TransactionMetadataManager transactionMetadataManager;
+
+    public TransactionMetadataManager(KafkaConfig config, com.jd.journalq.broker.coordinator.transaction.TransactionMetadataManager transactionMetadataManager) {
+        this.config = config;
+        this.transactionMetadataManager = transactionMetadataManager;
+    }
+
+    public TransactionMetadata getTransaction(String transactionId) {
+        return transactionMetadataManager.getTransaction(transactionId);
+    }
+
+    public TransactionMetadata getOrCreateTransaction(TransactionMetadata transaction) {
+        return transactionMetadataManager.getOrCreateTransaction(transaction);
+    }
+
+    public boolean removeTransaction(TransactionMetadata transaction) {
+        return transactionMetadataManager.removeTransaction(transaction.getId());
+    }
+
+    public boolean removeTransaction(String transactionId) {
+        return transactionMetadataManager.removeTransaction(transactionId);
+    }
+
+}

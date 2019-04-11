@@ -5,8 +5,8 @@ import com.jd.journalq.broker.consumer.model.PullResult;
 import com.jd.journalq.broker.polling.LongPollingCallback;
 import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.exception.JMQException;
-import com.jd.journalq.network.command.FetchTopicMessage;
-import com.jd.journalq.network.command.FetchTopicMessageAck;
+import com.jd.journalq.network.command.FetchTopicMessageRequest;
+import com.jd.journalq.network.command.FetchTopicMessageResponse;
 import com.jd.journalq.network.command.FetchTopicMessageAckData;
 import com.jd.journalq.network.session.Consumer;
 import com.jd.journalq.network.transport.Transport;
@@ -28,12 +28,12 @@ public class FetchTopicMessageLongPollCallback implements LongPollingCallback {
 
     protected static final Logger logger = LoggerFactory.getLogger(FetchTopicMessageLongPollCallback.class);
 
-    private FetchTopicMessage fetchTopicMessage;
+    private FetchTopicMessageRequest fetchTopicMessageRequest;
     private Command request;
     private Transport transport;
 
-    public FetchTopicMessageLongPollCallback(FetchTopicMessage fetchTopicMessage, Command request, Transport transport) {
-        this.fetchTopicMessage = fetchTopicMessage;
+    public FetchTopicMessageLongPollCallback(FetchTopicMessageRequest fetchTopicMessageRequest, Command request, Transport transport) {
+        this.fetchTopicMessageRequest = fetchTopicMessageRequest;
         this.request = request;
         this.transport = transport;
     }
@@ -70,12 +70,12 @@ public class FetchTopicMessageLongPollCallback implements LongPollingCallback {
         transport.acknowledge(request, new Command(buildFetchTopicMessageAck(consumer, fetchTopicMessageAckData)));
     }
 
-    protected FetchTopicMessageAck buildFetchTopicMessageAck(Consumer consumer, FetchTopicMessageAckData data) {
+    protected FetchTopicMessageResponse buildFetchTopicMessageAck(Consumer consumer, FetchTopicMessageAckData data) {
         Map<String, FetchTopicMessageAckData> dataMap = Maps.newHashMap();
         dataMap.put(consumer.getTopic(), data);
 
-        FetchTopicMessageAck fetchTopicMessageAck = new FetchTopicMessageAck();
-        fetchTopicMessageAck.setData(dataMap);
-        return fetchTopicMessageAck;
+        FetchTopicMessageResponse fetchTopicMessageResponse = new FetchTopicMessageResponse();
+        fetchTopicMessageResponse.setData(dataMap);
+        return fetchTopicMessageResponse;
     }
 }

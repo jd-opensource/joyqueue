@@ -5,9 +5,9 @@ import com.google.common.collect.Maps;
 import com.jd.journalq.client.internal.cluster.ClusterClient;
 import com.jd.journalq.client.internal.cluster.ClusterClientManager;
 import com.jd.journalq.exception.JMQCode;
-import com.jd.journalq.network.command.FetchAssignedPartitionAck;
+import com.jd.journalq.network.command.FetchAssignedPartitionResponse;
 import com.jd.journalq.network.command.FetchAssignedPartitionData;
-import com.jd.journalq.network.command.FindCoordinatorAck;
+import com.jd.journalq.network.command.FindCoordinatorResponse;
 import com.jd.journalq.network.command.FindCoordinatorAckData;
 import com.jd.journalq.network.domain.BrokerNode;
 import com.jd.journalq.toolkit.service.Service;
@@ -34,7 +34,7 @@ public class CoordinatorManager extends Service {
         this.clusterClientManager = clusterClientManager;
     }
 
-    public FetchAssignedPartitionAck fetchAssignedPartition(BrokerNode brokerNode, String topic, String app, boolean isNearBy, long sessionTimeout) {
+    public FetchAssignedPartitionResponse fetchAssignedPartition(BrokerNode brokerNode, String topic, String app, boolean isNearBy, long sessionTimeout) {
         ClusterClient client = null;
         try {
             client = clusterClientManager.createClient(brokerNode);
@@ -55,8 +55,8 @@ public class CoordinatorManager extends Service {
     }
 
     public Map<String, BrokerNode> findCoordinators(List<String> topics, String app) {
-        FindCoordinatorAck findCoordinatorAck = clusterClientManager.getOrCreateClient().findCoordinators(topics, app);
-        Map<String, FindCoordinatorAckData> coordinators = findCoordinatorAck.getCoordinators();
+        FindCoordinatorResponse findCoordinatorResponse = clusterClientManager.getOrCreateClient().findCoordinators(topics, app);
+        Map<String, FindCoordinatorAckData> coordinators = findCoordinatorResponse.getCoordinators();
         Map<String, BrokerNode> result = Maps.newHashMap();
 
         for (Map.Entry<String, FindCoordinatorAckData> entry : coordinators.entrySet()) {

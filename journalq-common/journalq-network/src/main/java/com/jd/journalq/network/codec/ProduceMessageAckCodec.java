@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.network.command.JMQCommandType;
-import com.jd.journalq.network.command.ProduceMessageAck;
+import com.jd.journalq.network.command.ProduceMessageResponse;
 import com.jd.journalq.network.command.ProduceMessageAckData;
 import com.jd.journalq.network.command.ProduceMessageAckItemData;
 import com.jd.journalq.network.serializer.Serializer;
@@ -22,10 +22,10 @@ import java.util.Map;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/19
  */
-public class ProduceMessageAckCodec implements PayloadCodec<JMQHeader, ProduceMessageAck>, Type {
+public class ProduceMessageAckCodec implements PayloadCodec<JMQHeader, ProduceMessageResponse>, Type {
 
     @Override
-    public ProduceMessageAck decode(JMQHeader header, ByteBuf buffer) throws Exception {
+    public ProduceMessageResponse decode(JMQHeader header, ByteBuf buffer) throws Exception {
         short dataSize = buffer.readShort();
         Map<String, ProduceMessageAckData> data = Maps.newHashMap();
         for (int i = 0; i < dataSize; i++) {
@@ -43,13 +43,13 @@ public class ProduceMessageAckCodec implements PayloadCodec<JMQHeader, ProduceMe
             data.put(topic, new ProduceMessageAckData(item, code));
         }
 
-        ProduceMessageAck produceMessageAck = new ProduceMessageAck();
-        produceMessageAck.setData(data);
-        return produceMessageAck;
+        ProduceMessageResponse produceMessageResponse = new ProduceMessageResponse();
+        produceMessageResponse.setData(data);
+        return produceMessageResponse;
     }
 
     @Override
-    public void encode(ProduceMessageAck payload, ByteBuf buffer) throws Exception {
+    public void encode(ProduceMessageResponse payload, ByteBuf buffer) throws Exception {
         buffer.writeShort(payload.getData().size());
         for (Map.Entry<String, ProduceMessageAckData> entry : payload.getData().entrySet()) {
             Serializer.write(entry.getKey(), buffer, Serializer.SHORT_SIZE);

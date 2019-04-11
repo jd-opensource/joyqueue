@@ -7,15 +7,16 @@ import com.jd.journalq.broker.kafka.KafkaCommandType;
  * Created by zhangkepeng on 17-2-9.
  */
 public class FindCoordinatorRequest extends KafkaRequestOrResponse {
-    private String groupId;
+
+    private String coordinatorKey;
     private CoordinatorType coordinatorType;
 
-    public String getGroupId() {
-        return groupId;
+    public String getCoordinatorKey() {
+        return coordinatorKey;
     }
 
-    public void setGroupId(String groupId) {
-        this.groupId = groupId;
+    public void setCoordinatorKey(String coordinatorKey) {
+        this.coordinatorKey = coordinatorKey;
     }
 
     public CoordinatorType getCoordinatorType() {
@@ -30,7 +31,7 @@ public class FindCoordinatorRequest extends KafkaRequestOrResponse {
     public String toString() {
         StringBuilder requestStringBuilder = new StringBuilder();
         requestStringBuilder.append("Name: " + this.getClass().getSimpleName());
-        requestStringBuilder.append("; groupId: " + groupId);
+        requestStringBuilder.append("; coordinatorKey: " + coordinatorKey);
         return requestStringBuilder.toString();
     }
 

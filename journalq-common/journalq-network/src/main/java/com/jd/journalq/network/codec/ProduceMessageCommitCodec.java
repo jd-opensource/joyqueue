@@ -1,7 +1,7 @@
 package com.jd.journalq.network.codec;
 
 import com.jd.journalq.network.command.JMQCommandType;
-import com.jd.journalq.network.command.ProduceMessageCommit;
+import com.jd.journalq.network.command.ProduceMessageCommitRequest;
 import com.jd.journalq.network.serializer.Serializer;
 import com.jd.journalq.network.transport.codec.JMQHeader;
 import com.jd.journalq.network.transport.codec.PayloadCodec;
@@ -14,19 +14,19 @@ import io.netty.buffer.ByteBuf;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/19
  */
-public class ProduceMessageCommitCodec implements PayloadCodec<JMQHeader, ProduceMessageCommit>, Type {
+public class ProduceMessageCommitCodec implements PayloadCodec<JMQHeader, ProduceMessageCommitRequest>, Type {
 
     @Override
-    public ProduceMessageCommit decode(JMQHeader header, ByteBuf buffer) throws Exception {
-        ProduceMessageCommit produceMessageCommit = new ProduceMessageCommit();
-        produceMessageCommit.setTopic(Serializer.readString(buffer, Serializer.SHORT_SIZE));
-        produceMessageCommit.setApp(Serializer.readString(buffer, Serializer.SHORT_SIZE));
-        produceMessageCommit.setTxId(Serializer.readString(buffer, Serializer.SHORT_SIZE));
-        return produceMessageCommit;
+    public ProduceMessageCommitRequest decode(JMQHeader header, ByteBuf buffer) throws Exception {
+        ProduceMessageCommitRequest produceMessageCommitRequest = new ProduceMessageCommitRequest();
+        produceMessageCommitRequest.setTopic(Serializer.readString(buffer, Serializer.SHORT_SIZE));
+        produceMessageCommitRequest.setApp(Serializer.readString(buffer, Serializer.SHORT_SIZE));
+        produceMessageCommitRequest.setTxId(Serializer.readString(buffer, Serializer.SHORT_SIZE));
+        return produceMessageCommitRequest;
     }
 
     @Override
-    public void encode(ProduceMessageCommit payload, ByteBuf buffer) throws Exception {
+    public void encode(ProduceMessageCommitRequest payload, ByteBuf buffer) throws Exception {
         Serializer.write(payload.getTopic(), buffer, Serializer.SHORT_SIZE);
         Serializer.write(payload.getApp(), buffer, Serializer.SHORT_SIZE);
         Serializer.write(payload.getTxId(), buffer, Serializer.SHORT_SIZE);

@@ -9,8 +9,8 @@ import com.jd.journalq.broker.helper.SessionHelper;
 import com.jd.journalq.broker.monitor.SessionManager;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.exception.JMQCode;
-import com.jd.journalq.network.command.AddProducer;
-import com.jd.journalq.network.command.AddProducerAck;
+import com.jd.journalq.network.command.AddProducerRequest;
+import com.jd.journalq.network.command.AddProducerResponse;
 import com.jd.journalq.network.command.BooleanAck;
 import com.jd.journalq.network.command.JMQCommandType;
 import com.jd.journalq.network.session.Connection;
@@ -45,33 +45,33 @@ public class AddProducerHandler implements JMQCommandHandler, Type, BrokerContex
 
     @Override
     public Command handle(Transport transport, Command command) {
-        AddProducer addProducer = (AddProducer) command.getPayload();
+        AddProducerRequest addProducerRequest = (AddProducerRequest) command.getPayload();
         Connection connection = SessionHelper.getConnection(transport);
 
-        if (connection == null || !connection.isAuthorized(addProducer.getApp())) {
+        if (connection == null || !connection.isAuthorized(addProducerRequest.getApp())) {
             logger.warn("connection is not exists, transport: {}", transport);
             return BooleanAck.build(JMQCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
         Map<String, String> result = Maps.newHashMap();
 
-        for (String topic : addProducer.getTopics()) {
+        for (String topic : addProducerRequest.getTopics()) {
             TopicName topicName = TopicName.parse(topic);
 
-            BooleanResponse checkResult = clusterManager.checkWritable(topicName, addProducer.getApp(), null);
+            BooleanResponse checkResult = clusterManager.checkWritable(topicName, addProducerRequest.getApp(), null);
             if (!checkResult.isSuccess()) {
-                logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport, topicName, addProducer.getApp(), checkResult.getJmqCode());
+                logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport, topicName, addProducerRequest.getApp(), checkResult.getJmqCode());
                 return BooleanAck.build(JMQCode.CN_NO_PERMISSION);
             }
 
-            Producer producer = buildProducer(connection, topic, addProducer.getApp(), addProducer.getSequence());
+            Producer producer = buildProducer(connection, topic, addProducerRequest.getApp(), addProducerRequest.getSequence());
             sessionManager.addProducer(producer);
             result.put(topic, producer.getId());
         }
 
-        AddProducerAck addProducerAck = new AddProducerAck();
-        addProducerAck.setProducerIds(result);
-        return new Command(addProducerAck);
+        AddProducerResponse addProducerResponse = new AddProducerResponse();
+        addProducerResponse.setProducerIds(result);
+        return new Command(addProducerResponse);
     }
 
     protected Producer buildProducer(Connection connection, String topic, String app, long sequence) {

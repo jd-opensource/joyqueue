@@ -17,8 +17,8 @@ import com.jd.journalq.domain.TopicConfig;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.network.command.BooleanAck;
-import com.jd.journalq.network.command.FetchCluster;
-import com.jd.journalq.network.command.FetchClusterAck;
+import com.jd.journalq.network.command.FetchClusterRequest;
+import com.jd.journalq.network.command.FetchClusterResponse;
 import com.jd.journalq.network.command.JMQCommandType;
 import com.jd.journalq.network.command.Topic;
 import com.jd.journalq.network.command.TopicPartition;
@@ -58,31 +58,31 @@ public class FetchClusterHandler implements JMQCommandHandler, Type, BrokerConte
 
     @Override
     public Command handle(Transport transport, Command command) {
-        FetchCluster fetchCluster = (FetchCluster) command.getPayload();
+        FetchClusterRequest fetchClusterRequest = (FetchClusterRequest) command.getPayload();
         Connection connection = SessionHelper.getConnection(transport);
 
-        if (connection == null || !connection.isAuthorized(fetchCluster.getApp())) {
+        if (connection == null || !connection.isAuthorized(fetchClusterRequest.getApp())) {
             logger.warn("connection is not exists, transport: {}", transport);
             return BooleanAck.build(JMQCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
-        Map<String, Topic> topics = Maps.newHashMapWithExpectedSize(fetchCluster.getTopics().size());
+        Map<String, Topic> topics = Maps.newHashMapWithExpectedSize(fetchClusterRequest.getTopics().size());
         Map<Integer, BrokerNode> brokers = Maps.newHashMap();
 
-        for (String topicId : fetchCluster.getTopics()) {
-            Topic topic = getTopicMetadata(connection, topicId, fetchCluster.getApp(), brokers);
+        for (String topicId : fetchClusterRequest.getTopics()) {
+            Topic topic = getTopicMetadata(connection, topicId, fetchClusterRequest.getApp(), brokers);
             topics.put(topicId, topic);
         }
 
-        FetchClusterAck fetchClusterAck = new FetchClusterAck();
-        fetchClusterAck.setTopics(topics);
-        fetchClusterAck.setBrokers(brokers);
+        FetchClusterResponse fetchClusterResponse = new FetchClusterResponse();
+        fetchClusterResponse.setTopics(topics);
+        fetchClusterResponse.setBrokers(brokers);
 
         // TODO 临时日志
         logger.debug("fetch cluster, address: {}, topics: {}, app: {}, metadata: {}",
-                transport, fetchCluster.getTopics(), fetchCluster.getApp(), JSON.toJSONString(fetchClusterAck));
+                transport, fetchClusterRequest.getTopics(), fetchClusterRequest.getApp(), JSON.toJSONString(fetchClusterResponse));
 
-        return new Command(fetchClusterAck);
+        return new Command(fetchClusterResponse);
     }
 
     protected Topic getTopicMetadata(Connection connection, String topic, String app, Map<Integer, BrokerNode> brokers) {

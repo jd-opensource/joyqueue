@@ -37,9 +37,9 @@ public class TopicMetadataCodec implements KafkaPayloadCodec<TopicMetadataRespon
 //            throw new KafkaException("number of topics has value " + numTopics + " which is invalid");
 //        }
 
-        List<TopicName> topics = Lists.newLinkedList();
+        List<String> topics = Lists.newLinkedList();
         for (int i = 0; i < numTopics; i++) {
-            topics.add(TopicName.parse(Serializer.readString(buffer, Serializer.SHORT_SIZE)));
+            topics.add(Serializer.readString(buffer, Serializer.SHORT_SIZE));
         }
         topicMetadataRequest.setTopics(topics);
         if (header.getVersion() >= 4) {

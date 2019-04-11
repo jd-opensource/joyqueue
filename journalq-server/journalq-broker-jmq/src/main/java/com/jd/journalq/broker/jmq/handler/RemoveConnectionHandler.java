@@ -8,7 +8,7 @@ import com.jd.journalq.broker.monitor.SessionManager;
 import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.network.command.BooleanAck;
 import com.jd.journalq.network.command.JMQCommandType;
-import com.jd.journalq.network.command.RemoveConnection;
+import com.jd.journalq.network.command.RemoveConnectionRequest;
 import com.jd.journalq.network.session.Connection;
 import com.jd.journalq.network.transport.Transport;
 import com.jd.journalq.network.transport.command.Command;
@@ -31,7 +31,7 @@ public class RemoveConnectionHandler implements JMQCommandHandler, Type, BrokerC
 
     @Override
     public Command handle(Transport transport, Command command) {
-        RemoveConnection removeConnection = (RemoveConnection) command.getPayload();
+        RemoveConnectionRequest removeConnectionRequest = (RemoveConnectionRequest) command.getPayload();
         Connection connection = SessionHelper.getConnection(transport);
 
         if (connection == null) {

@@ -2,12 +2,13 @@ package com.jd.journalq.broker.coordinator;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.coordinator.config.CoordinatorConfig;
 import com.jd.journalq.broker.coordinator.domain.CoordinatorDetail;
-import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.domain.Broker;
 import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.domain.TopicConfig;
+import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.toolkit.service.Service;
 import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
@@ -35,16 +36,16 @@ public class CoordinatorResolver extends Service {
         this.clusterManager = clusterManager;
     }
 
-    public Broker resolve(String group) {
-        PartitionGroup coordinatorPartitionGroup = resolvePartitionGroup(group);
+    public Broker findCoordinator(String key, TopicName topic) {
+        PartitionGroup coordinatorPartitionGroup = resolveCoordinatorPartitionGroup(key, topic);
         if (coordinatorPartitionGroup == null) {
             return null;
         }
         return coordinatorPartitionGroup.getLeaderBroker();
     }
 
-    public CoordinatorDetail resolveDetail(String group) {
-        PartitionGroup coordinatorPartitionGroup = resolvePartitionGroup(group);
+    public CoordinatorDetail getCoordinatorDetail(String key, TopicName topic) {
+        PartitionGroup coordinatorPartitionGroup = resolveCoordinatorPartitionGroup(key, topic);
         if (coordinatorPartitionGroup == null) {
             return null;
         }
@@ -57,22 +58,22 @@ public class CoordinatorResolver extends Service {
         return new CoordinatorDetail(coordinatorPartitionGroup.getTopic(), coordinatorPartitionGroup.getGroup(), leader, Lists.newArrayList(brokers.values()));
     }
 
-    protected PartitionGroup resolvePartitionGroup(String group) {
-        TopicConfig coordinatorTopic = clusterManager.getNameService().getTopicConfig(config.getTopic());
+    public PartitionGroup resolveCoordinatorPartitionGroup(String key, TopicName topic) {
+        TopicConfig coordinatorTopic = clusterManager.getNameService().getTopicConfig(topic);
         if (coordinatorTopic == null) {
             return null;
         }
-        return resolvePartitionGroup(group, coordinatorTopic);
+        return resolveCoordinatorPartitionGroup(key, coordinatorTopic);
     }
 
-    protected PartitionGroup resolvePartitionGroup(String group, TopicConfig topicConfig) {
+    public PartitionGroup resolveCoordinatorPartitionGroup(String key, TopicConfig topicConfig) {
         List<PartitionGroup> partitionGroups = null;
         if (topicConfig.getPartitionGroups() instanceof List) {
             partitionGroups = (List) topicConfig.getPartitionGroups();
         } else {
             partitionGroups = Lists.newArrayList(topicConfig.getPartitionGroups().values());
         }
-        short index = (short) Math.abs(group.hashCode() % partitionGroups.size());
+        short index = (short) Math.abs(key.hashCode() % partitionGroups.size());
         return partitionGroups.get(index);
     }
 }

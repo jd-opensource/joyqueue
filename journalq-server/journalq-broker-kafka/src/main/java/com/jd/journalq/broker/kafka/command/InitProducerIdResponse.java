@@ -14,6 +14,20 @@ public class InitProducerIdResponse extends KafkaRequestOrResponse {
     private long producerId;
     private short producerEpoch;
 
+    public InitProducerIdResponse() {
+
+    }
+
+    public InitProducerIdResponse(short code, long producerId, short producerEpoch) {
+        this.code = code;
+        this.producerId = producerId;
+        this.producerEpoch = producerEpoch;
+    }
+
+    public InitProducerIdResponse(short code) {
+        this.code = code;
+    }
+
     public short getCode() {
         return code;
     }

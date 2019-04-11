@@ -174,7 +174,7 @@ public enum KafkaErrorCode {
         Short code = EXCEPTION_TO_CODE_MAPPER.get(exception.getClass());
         if (code == null) {
             logger.warn("unsupported exception mapper, exception: {}", exception.getClass());
-            return UNKNOWN_SERVER_ERROR.getCode();
+            return UNKNOWN_TOPIC_OR_PARTITION.getCode();
         }
         return code;
     }
@@ -183,7 +183,7 @@ public enum KafkaErrorCode {
         Short code = JMQCODE_TO_CODE_MAPPER.get(jmqCode);
         if (code == null) {
             logger.warn("unsupported jmqCode mapper, jmqCode: {}", jmqCode);
-            code = UNKNOWN_SERVER_ERROR.getCode();
+            code = UNKNOWN_TOPIC_OR_PARTITION.getCode();
         }
         return code;
     }

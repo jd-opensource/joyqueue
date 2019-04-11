@@ -1,10 +1,10 @@
 package com.jd.journalq.broker.kafka.manage;
 
+import com.jd.journalq.broker.BrokerContext;
+import com.jd.journalq.broker.kafka.KafkaContext;
 import com.jd.journalq.broker.kafka.manage.support.DefaultKafkaGroupManageService;
 import com.jd.journalq.broker.kafka.manage.support.DefaultKafkaManageService;
 import com.jd.journalq.broker.kafka.manage.support.DefaultKafkaMonitorService;
-import com.jd.journalq.broker.BrokerContext;
-import com.jd.journalq.broker.kafka.KafkaContext;
 
 /**
  * KafkaManageServiceFactory
@@ -31,7 +31,7 @@ public class KafkaManageServiceFactory {
     }
 
     protected KafkaManageService newKafkaManageService(BrokerContext brokerContext, KafkaContext kafkaContext) {
-        DefaultKafkaGroupManageService kafkaGroupManageService = new DefaultKafkaGroupManageService(kafkaContext.getGroupMetadataManager());
+        DefaultKafkaGroupManageService kafkaGroupManageService = new DefaultKafkaGroupManageService(kafkaContext.getGroupCoordinator());
         return new DefaultKafkaManageService(kafkaGroupManageService);
     }
 

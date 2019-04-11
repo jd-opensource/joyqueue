@@ -1,10 +1,10 @@
 package com.jd.journalq.broker.kafka.command;
 
 
-import com.google.common.collect.Table;
 import com.jd.journalq.broker.kafka.KafkaCommandType;
-import com.jd.journalq.broker.kafka.model.IsolationLevel;
-import com.jd.journalq.domain.TopicName;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by zhangkepeng on 16-7-27.
@@ -14,9 +14,8 @@ public class FetchRequest extends KafkaRequestOrResponse {
     private int maxWait;
     private int minBytes;
     private int maxBytes;
-    private IsolationLevel isolationLevel;
-    private Table<TopicName, Integer, PartitionFetchInfo> requestInfo;
-    private int numPartitions;
+    private byte isolationLevel;
+    private Map<String, List<PartitionRequest>> partitionRequests;
 
     public int getMinBytes() {
         return minBytes;
@@ -34,28 +33,20 @@ public class FetchRequest extends KafkaRequestOrResponse {
         this.maxBytes = maxBytes;
     }
 
-    public IsolationLevel getIsolationLevel() {
+    public byte getIsolationLevel() {
         return isolationLevel;
     }
 
-    public void setIsolationLevel(IsolationLevel isolationLevel) {
+    public void setIsolationLevel(byte isolationLevel) {
         this.isolationLevel = isolationLevel;
     }
 
-    public Table<TopicName, Integer, PartitionFetchInfo> getRequestInfo() {
-        return requestInfo;
+    public void setPartitionRequests(Map<String, List<PartitionRequest>> partitionRequests) {
+        this.partitionRequests = partitionRequests;
     }
 
-    public void setRequestInfo(Table<TopicName, Integer, PartitionFetchInfo> requestInfo) {
-        this.requestInfo = requestInfo;
-    }
-
-    public void setNumPartitions(int numPartitions) {
-        this.numPartitions = numPartitions;
-    }
-
-    public int getNumPartitions() {
-        return numPartitions;
+    public Map<String, List<PartitionRequest>> getPartitionRequests() {
+        return partitionRequests;
     }
 
     public int getMaxWait() {
@@ -93,25 +84,31 @@ public class FetchRequest extends KafkaRequestOrResponse {
         return fetchRequest.toString();
     }
 
-    public class PartitionFetchInfo {
+    public static class PartitionRequest {
 
+        private int partition;
         private long offset;
         private long logStartOffset;
         private int maxBytes;
 
-        public PartitionFetchInfo(long offset, int maxBytes) {
-            this.offset = offset;
-            this.maxBytes = maxBytes;
+        public void setPartition(int partition) {
+            this.partition = partition;
         }
 
-        public PartitionFetchInfo(long offset, int maxBytes, long logStartOffset) {
+        public int getPartition() {
+            return partition;
+        }
+
+        public void setOffset(long offset) {
             this.offset = offset;
-            this.maxBytes = maxBytes;
-            this.logStartOffset = logStartOffset;
         }
 
         public long getOffset() {
             return offset;
+        }
+
+        public void setMaxBytes(int maxBytes) {
+            this.maxBytes = maxBytes;
         }
 
         public int getMaxBytes() {

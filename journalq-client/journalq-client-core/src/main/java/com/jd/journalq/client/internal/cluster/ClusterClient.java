@@ -4,13 +4,13 @@ import com.jd.journalq.client.internal.nameserver.NameServerConfig;
 import com.jd.journalq.client.internal.transport.Client;
 import com.jd.journalq.client.internal.transport.ClientState;
 import com.jd.journalq.client.internal.transport.config.TransportConfig;
-import com.jd.journalq.network.command.FetchAssignedPartition;
-import com.jd.journalq.network.command.FetchAssignedPartitionAck;
+import com.jd.journalq.network.command.FetchAssignedPartitionRequest;
+import com.jd.journalq.network.command.FetchAssignedPartitionResponse;
 import com.jd.journalq.network.command.FetchAssignedPartitionData;
-import com.jd.journalq.network.command.FetchCluster;
-import com.jd.journalq.network.command.FetchClusterAck;
-import com.jd.journalq.network.command.FindCoordinator;
-import com.jd.journalq.network.command.FindCoordinatorAck;
+import com.jd.journalq.network.command.FetchClusterRequest;
+import com.jd.journalq.network.command.FetchClusterResponse;
+import com.jd.journalq.network.command.FindCoordinatorRequest;
+import com.jd.journalq.network.command.FindCoordinatorResponse;
 import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.transport.command.JMQCommand;
 
@@ -48,31 +48,31 @@ public class ClusterClient {
         this.nameServerConfig = nameServerConfig;
     }
 
-    public FetchAssignedPartitionAck fetchAssignedPartition(List<FetchAssignedPartitionData> data, String app) {
-        FetchAssignedPartition fetchAssignedPartition = new FetchAssignedPartition();
-        fetchAssignedPartition.setApp(app);
-        fetchAssignedPartition.setData(data);
+    public FetchAssignedPartitionResponse fetchAssignedPartition(List<FetchAssignedPartitionData> data, String app) {
+        FetchAssignedPartitionRequest fetchAssignedPartitionRequest = new FetchAssignedPartitionRequest();
+        fetchAssignedPartitionRequest.setApp(app);
+        fetchAssignedPartitionRequest.setData(data);
 
-        Command response = client.sync(new JMQCommand(fetchAssignedPartition));
-        return (FetchAssignedPartitionAck) response.getPayload();
+        Command response = client.sync(new JMQCommand(fetchAssignedPartitionRequest));
+        return (FetchAssignedPartitionResponse) response.getPayload();
     }
 
-    public FindCoordinatorAck findCoordinators(List<String> topics, String app) {
-        FindCoordinator findCoordinator = new FindCoordinator();
-        findCoordinator.setTopics(topics);
-        findCoordinator.setApp(app);
+    public FindCoordinatorResponse findCoordinators(List<String> topics, String app) {
+        FindCoordinatorRequest findCoordinatorRequest = new FindCoordinatorRequest();
+        findCoordinatorRequest.setTopics(topics);
+        findCoordinatorRequest.setApp(app);
 
-        Command response = client.sync(new JMQCommand(findCoordinator));
-        return (FindCoordinatorAck) response.getPayload();
+        Command response = client.sync(new JMQCommand(findCoordinatorRequest));
+        return (FindCoordinatorResponse) response.getPayload();
     }
 
-    public FetchClusterAck fetchCluster(List<String> topics, String app) {
-        FetchCluster fetchCluster = new FetchCluster();
-        fetchCluster.setTopics(topics);
-        fetchCluster.setApp(app);
+    public FetchClusterResponse fetchCluster(List<String> topics, String app) {
+        FetchClusterRequest fetchClusterRequest = new FetchClusterRequest();
+        fetchClusterRequest.setTopics(topics);
+        fetchClusterRequest.setApp(app);
 
-        Command response = client.sync(new JMQCommand(fetchCluster));
-        return (FetchClusterAck) response.getPayload();
+        Command response = client.sync(new JMQCommand(fetchClusterRequest));
+        return (FetchClusterResponse) response.getPayload();
     }
 
     public Client getClient() {

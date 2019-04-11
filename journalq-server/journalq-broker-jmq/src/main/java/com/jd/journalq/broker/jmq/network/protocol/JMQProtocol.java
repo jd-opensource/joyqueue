@@ -5,8 +5,8 @@ import com.jd.journalq.broker.BrokerContextAware;
 import com.jd.journalq.broker.jmq.JMQConsts;
 import com.jd.journalq.broker.jmq.JMQContext;
 import com.jd.journalq.broker.jmq.config.JMQConfig;
+import com.jd.journalq.broker.jmq.coordinator.GroupMetadataManager;
 import com.jd.journalq.broker.jmq.coordinator.JMQCoordinator;
-import com.jd.journalq.broker.jmq.coordinator.JMQCoordinatorGroupManager;
 import com.jd.journalq.broker.jmq.coordinator.assignment.PartitionAssignmentHandler;
 import com.jd.journalq.broker.jmq.network.protocol.helper.JMQProtocolHelper;
 import com.jd.journalq.broker.polling.LongPollingManager;
@@ -29,7 +29,7 @@ public class JMQProtocol extends Service implements ProtocolService, BrokerConte
 
     private JMQConfig config;
     private JMQCoordinator coordinator;
-    private JMQCoordinatorGroupManager coordinatorGroupManager;
+    private GroupMetadataManager coordinatorGroupManager;
     private PartitionAssignmentHandler partitionAssignmentHandler;
     private LongPollingManager longPollingManager;
     private JMQContext jmqContext;
@@ -39,7 +39,7 @@ public class JMQProtocol extends Service implements ProtocolService, BrokerConte
         this.config = new JMQConfig(brokerContext.getPropertySupplier());
 
         this.coordinator = new JMQCoordinator(brokerContext.getCoordinatorService().getCoordinator());
-        this.coordinatorGroupManager = new JMQCoordinatorGroupManager(config, brokerContext.getCoordinatorService().getOrCreateCoordinatorGroupManager(JMQConsts.COORDINATOR_NAMESPACE));
+        this.coordinatorGroupManager = new GroupMetadataManager(config, brokerContext.getCoordinatorService().getOrCreateGroupMetadataManager(JMQConsts.COORDINATOR_NAMESPACE));
         this.partitionAssignmentHandler = new PartitionAssignmentHandler(config, coordinatorGroupManager);
         this.longPollingManager = new LongPollingManager(brokerContext.getSessionManager(), brokerContext.getClusterManager(), brokerContext.getConsume(),brokerContext.getPropertySupplier());
 

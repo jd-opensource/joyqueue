@@ -2,6 +2,8 @@ package com.jd.journalq.broker.kafka.command;
 
 import com.jd.journalq.broker.kafka.KafkaCommandType;
 
+import java.util.Objects;
+
 /**
  * EndTxnRequest
  * author: gaohaoxiang
@@ -55,6 +57,33 @@ public class EndTxnRequest extends KafkaRequestOrResponse {
 
     public void setTransactionResult(boolean transactionResult) {
         this.transactionResult = transactionResult;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        EndTxnRequest that = (EndTxnRequest) o;
+        return producerId == that.producerId &&
+                producerEpoch == that.producerEpoch &&
+                transactionResult == that.transactionResult &&
+                Objects.equals(transactionId, that.transactionId);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(transactionId, producerId, producerEpoch, transactionResult);
+    }
+
+    @Override
+    public String toString() {
+        return "EndTxnRequest{" +
+                "transactionId='" + transactionId + '\'' +
+                ", producerId=" + producerId +
+                ", producerEpoch=" + producerEpoch +
+                ", transactionResult=" + transactionResult +
+                '}';
     }
 
     @Override

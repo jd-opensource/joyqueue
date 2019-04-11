@@ -12,8 +12,8 @@ import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.exception.JMQException;
 import com.jd.journalq.network.command.BooleanAck;
-import com.jd.journalq.network.command.FetchProduceFeedback;
-import com.jd.journalq.network.command.FetchProduceFeedbackAck;
+import com.jd.journalq.network.command.FetchProduceFeedbackRequest;
+import com.jd.journalq.network.command.FetchProduceFeedbackResponse;
 import com.jd.journalq.network.command.FetchProduceFeedbackAckData;
 import com.jd.journalq.network.command.JMQCommandType;
 import com.jd.journalq.network.session.Connection;
@@ -49,38 +49,38 @@ public class FetchProduceFeedbackHandler implements JMQCommandHandler, Type, Bro
 
     @Override
     public Command handle(Transport transport, Command command) {
-        FetchProduceFeedback fetchProduceFeedback = (FetchProduceFeedback) command.getPayload();
+        FetchProduceFeedbackRequest fetchProduceFeedbackRequest = (FetchProduceFeedbackRequest) command.getPayload();
         Connection connection = SessionHelper.getConnection(transport);
 
-        if (connection == null || !connection.isAuthorized(fetchProduceFeedback.getApp())) {
+        if (connection == null || !connection.isAuthorized(fetchProduceFeedbackRequest.getApp())) {
             logger.warn("connection is not exists, transport: {}", transport);
             return BooleanAck.build(JMQCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
-        BooleanResponse checkResult = clusterManager.checkWritable(TopicName.parse(fetchProduceFeedback.getTopic()), fetchProduceFeedback.getApp(), connection.getHost());
+        BooleanResponse checkResult = clusterManager.checkWritable(TopicName.parse(fetchProduceFeedbackRequest.getTopic()), fetchProduceFeedbackRequest.getApp(), connection.getHost());
         if (!checkResult.isSuccess()) {
-            logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport, fetchProduceFeedback.getTopic(), fetchProduceFeedback.getApp(), checkResult.getJmqCode());
-            return new Command(new FetchProduceFeedbackAck(CheckResultConverter.convertCommonCode(checkResult.getJmqCode())));
+            logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport, fetchProduceFeedbackRequest.getTopic(), fetchProduceFeedbackRequest.getApp(), checkResult.getJmqCode());
+            return new Command(new FetchProduceFeedbackResponse(CheckResultConverter.convertCommonCode(checkResult.getJmqCode())));
         }
 
-        FetchProduceFeedbackAck fetchProduceFeedbackAck = FetchProduceFeedback(connection, fetchProduceFeedback);
-        return new Command(fetchProduceFeedbackAck);
+        FetchProduceFeedbackResponse fetchProduceFeedbackResponse = FetchProduceFeedback(connection, fetchProduceFeedbackRequest);
+        return new Command(fetchProduceFeedbackResponse);
     }
 
-    protected FetchProduceFeedbackAck FetchProduceFeedback(Connection connection, FetchProduceFeedback fetchProduceFeedback) {
-        Producer producer = new Producer(connection.getId(), fetchProduceFeedback.getTopic(), fetchProduceFeedback.getApp(), Producer.ProducerType.JMQ);
+    protected FetchProduceFeedbackResponse FetchProduceFeedback(Connection connection, FetchProduceFeedbackRequest fetchProduceFeedbackRequest) {
+        Producer producer = new Producer(connection.getId(), fetchProduceFeedbackRequest.getTopic(), fetchProduceFeedbackRequest.getApp(), Producer.ProducerType.JMQ);
         try {
-            FetchProduceFeedbackAck fetchProduceFeedbackAck = new FetchProduceFeedbackAck();
-            List<TransactionId> transactionIdList = produce.getFeedback(producer, fetchProduceFeedback.getCount());
-            fetchProduceFeedbackAck.setData(buildFeedbackAckData(transactionIdList));
-            fetchProduceFeedbackAck.setCode(JMQCode.SUCCESS);
-            return fetchProduceFeedbackAck;
+            FetchProduceFeedbackResponse fetchProduceFeedbackResponse = new FetchProduceFeedbackResponse();
+            List<TransactionId> transactionIdList = produce.getFeedback(producer, fetchProduceFeedbackRequest.getCount());
+            fetchProduceFeedbackResponse.setData(buildFeedbackAckData(transactionIdList));
+            fetchProduceFeedbackResponse.setCode(JMQCode.SUCCESS);
+            return fetchProduceFeedbackResponse;
         } catch (JMQException e) {
-            logger.error("fetch feedback exception, transport: {}, topic: {}, app: {}", connection.getTransport().remoteAddress(), fetchProduceFeedback.getTopic(), fetchProduceFeedback.getApp(), e);
-            return new FetchProduceFeedbackAck(JMQCode.valueOf(e.getCode()));
+            logger.error("fetch feedback exception, transport: {}, topic: {}, app: {}", connection.getTransport().remoteAddress(), fetchProduceFeedbackRequest.getTopic(), fetchProduceFeedbackRequest.getApp(), e);
+            return new FetchProduceFeedbackResponse(JMQCode.valueOf(e.getCode()));
         } catch (Exception e) {
-            logger.error("fetch feedback exception, transport: {}, topic: {}, app: {}", connection.getTransport().remoteAddress(), fetchProduceFeedback.getTopic(), fetchProduceFeedback.getApp(), e);
-            return new FetchProduceFeedbackAck(JMQCode.CN_UNKNOWN_ERROR);
+            logger.error("fetch feedback exception, transport: {}, topic: {}, app: {}", connection.getTransport().remoteAddress(), fetchProduceFeedbackRequest.getTopic(), fetchProduceFeedbackRequest.getApp(), e);
+            return new FetchProduceFeedbackResponse(JMQCode.CN_UNKNOWN_ERROR);
         }
     }
 

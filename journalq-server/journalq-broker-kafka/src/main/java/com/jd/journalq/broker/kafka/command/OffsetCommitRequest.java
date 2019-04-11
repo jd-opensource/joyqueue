@@ -13,6 +13,7 @@ public class OffsetCommitRequest extends KafkaRequestOrResponse {
     public static final int DEFAULT_GENERATION_ID = -1;
     public static final String DEFAULT_CONSUMER_ID = "";
     public static final long DEFAULT_TIMESTAMP = -1L;
+
     private String groupId;
     private Table<String, Integer, OffsetAndMetadata> offsetAndMetadata;
     private int groupGenerationId;

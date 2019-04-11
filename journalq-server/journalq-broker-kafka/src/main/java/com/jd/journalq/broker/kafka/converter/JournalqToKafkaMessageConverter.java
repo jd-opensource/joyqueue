@@ -16,6 +16,7 @@ public class JournalqToKafkaMessageConverter extends AbstarctKafkaMessageConvert
 
     @Override
     public BrokerMessage convert(BrokerMessage message) {
+        message.setBody(message.getDecompressedBody());
         return message;
     }
 

@@ -1,7 +1,7 @@
 package com.jd.journalq.network.codec;
 
 import com.google.common.collect.Lists;
-import com.jd.journalq.network.command.FindCoordinator;
+import com.jd.journalq.network.command.FindCoordinatorRequest;
 import com.jd.journalq.network.command.JMQCommandType;
 import com.jd.journalq.network.serializer.Serializer;
 import com.jd.journalq.network.transport.codec.JMQHeader;
@@ -17,11 +17,11 @@ import java.util.List;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/3
  */
-public class FindCoordinatorCodec implements PayloadCodec<JMQHeader, FindCoordinator>, Type {
+public class FindCoordinatorCodec implements PayloadCodec<JMQHeader, FindCoordinatorRequest>, Type {
 
     @Override
-    public FindCoordinator decode(JMQHeader header, ByteBuf buffer) throws Exception {
-        FindCoordinator findCoordinator = new FindCoordinator();
+    public FindCoordinatorRequest decode(JMQHeader header, ByteBuf buffer) throws Exception {
+        FindCoordinatorRequest findCoordinatorRequest = new FindCoordinatorRequest();
 
         short topicSize = buffer.readShort();
         List<String> topics = Lists.newArrayListWithCapacity(topicSize);
@@ -29,13 +29,13 @@ public class FindCoordinatorCodec implements PayloadCodec<JMQHeader, FindCoordin
             topics.add(Serializer.readString(buffer, Serializer.SHORT_SIZE));
         }
 
-        findCoordinator.setTopics(topics);
-        findCoordinator.setApp(Serializer.readString(buffer, Serializer.SHORT_SIZE));
-        return findCoordinator;
+        findCoordinatorRequest.setTopics(topics);
+        findCoordinatorRequest.setApp(Serializer.readString(buffer, Serializer.SHORT_SIZE));
+        return findCoordinatorRequest;
     }
 
     @Override
-    public void encode(FindCoordinator payload, ByteBuf buffer) throws Exception {
+    public void encode(FindCoordinatorRequest payload, ByteBuf buffer) throws Exception {
         buffer.writeShort(payload.getTopics().size());
         for (String topic : payload.getTopics()) {
             Serializer.write(topic, buffer, Serializer.SHORT_SIZE);

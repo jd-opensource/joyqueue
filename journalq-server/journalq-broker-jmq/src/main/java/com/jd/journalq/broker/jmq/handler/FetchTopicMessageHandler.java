@@ -16,8 +16,8 @@ import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.exception.JMQException;
 import com.jd.journalq.network.command.BooleanAck;
-import com.jd.journalq.network.command.FetchTopicMessage;
-import com.jd.journalq.network.command.FetchTopicMessageAck;
+import com.jd.journalq.network.command.FetchTopicMessageRequest;
+import com.jd.journalq.network.command.FetchTopicMessageResponse;
 import com.jd.journalq.network.command.FetchTopicMessageAckData;
 import com.jd.journalq.network.command.FetchTopicMessageData;
 import com.jd.journalq.network.command.JMQCommandType;
@@ -60,27 +60,27 @@ public class FetchTopicMessageHandler implements JMQCommandHandler, Type, JMQCon
 
     @Override
     public Command handle(Transport transport, Command command) {
-        FetchTopicMessage fetchTopicMessage = (FetchTopicMessage) command.getPayload();
+        FetchTopicMessageRequest fetchTopicMessageRequest = (FetchTopicMessageRequest) command.getPayload();
         Connection connection = SessionHelper.getConnection(transport);
 
-        if (connection == null || !connection.isAuthorized(fetchTopicMessage.getApp())) {
+        if (connection == null || !connection.isAuthorized(fetchTopicMessageRequest.getApp())) {
             logger.warn("connection is not exists, transport: {}", transport);
             return BooleanAck.build(JMQCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
-        boolean isNeedLongPoll = fetchTopicMessage.getTopics().size() == 1 && fetchTopicMessage.getLongPollTimeout() > 0;
-        Map<String, FetchTopicMessageAckData> result = Maps.newHashMapWithExpectedSize(fetchTopicMessage.getTopics().size());
+        boolean isNeedLongPoll = fetchTopicMessageRequest.getTopics().size() == 1 && fetchTopicMessageRequest.getLongPollTimeout() > 0;
+        Map<String, FetchTopicMessageAckData> result = Maps.newHashMapWithExpectedSize(fetchTopicMessageRequest.getTopics().size());
 
-        for (Map.Entry<String, FetchTopicMessageData> entry : fetchTopicMessage.getTopics().entrySet()) {
+        for (Map.Entry<String, FetchTopicMessageData> entry : fetchTopicMessageRequest.getTopics().entrySet()) {
             String topic = entry.getKey();
-            BooleanResponse checkResult = clusterManager.checkReadable(TopicName.parse(topic), fetchTopicMessage.getApp(), connection.getHost());
+            BooleanResponse checkResult = clusterManager.checkReadable(TopicName.parse(topic), fetchTopicMessageRequest.getApp(), connection.getHost());
             if (!checkResult.isSuccess()) {
-                logger.warn("checkReadable failed, transport: {}, topic: {}, app: {}, code: {}", transport, topic, fetchTopicMessage.getApp(), checkResult.getJmqCode());
+                logger.warn("checkReadable failed, transport: {}, topic: {}, app: {}, code: {}", transport, topic, fetchTopicMessageRequest.getApp(), checkResult.getJmqCode());
                 result.put(topic, new FetchTopicMessageAckData(CheckResultConverter.convertFetchCode(checkResult.getJmqCode())));
                 continue;
             }
 
-            String consumerId = connection.getConsumer(topic, fetchTopicMessage.getApp());
+            String consumerId = connection.getConsumer(topic, fetchTopicMessageRequest.getApp());
             Consumer consumer = (StringUtils.isBlank(consumerId) ? null : sessionManager.getConsumerById(consumerId));
 
             if (consumer == null) {
@@ -90,11 +90,11 @@ public class FetchTopicMessageHandler implements JMQCommandHandler, Type, JMQCon
             }
 
             FetchTopicMessageData fetchTopicMessageData = entry.getValue();
-            FetchTopicMessageAckData fetchTopicMessageAckData = fetchMessage(transport, consumer, fetchTopicMessageData.getCount(), fetchTopicMessage.getAckTimeout());
+            FetchTopicMessageAckData fetchTopicMessageAckData = fetchMessage(transport, consumer, fetchTopicMessageData.getCount(), fetchTopicMessageRequest.getAckTimeout());
 
             if (isNeedLongPoll && CollectionUtils.isEmpty(fetchTopicMessageAckData.getBuffers()) && clusterManager.isNeedLongPull(consumer.getTopic())) {
-                if (longPollingManager.suspend(new LongPolling(consumer, fetchTopicMessageData.getCount(), fetchTopicMessage.getAckTimeout(),
-                        fetchTopicMessage.getLongPollTimeout(), new FetchTopicMessageLongPollCallback(fetchTopicMessage, command, transport)))) {
+                if (longPollingManager.suspend(new LongPolling(consumer, fetchTopicMessageData.getCount(), fetchTopicMessageRequest.getAckTimeout(),
+                        fetchTopicMessageRequest.getLongPollTimeout(), new FetchTopicMessageLongPollCallback(fetchTopicMessageRequest, command, transport)))) {
                     return null;
                 }
             }
@@ -102,9 +102,9 @@ public class FetchTopicMessageHandler implements JMQCommandHandler, Type, JMQCon
             result.put(topic, fetchTopicMessageAckData);
         }
 
-        FetchTopicMessageAck fetchTopicMessageAck = new FetchTopicMessageAck();
-        fetchTopicMessageAck.setData(result);
-        return new Command(fetchTopicMessageAck);
+        FetchTopicMessageResponse fetchTopicMessageResponse = new FetchTopicMessageResponse();
+        fetchTopicMessageResponse.setData(result);
+        return new Command(fetchTopicMessageResponse);
     }
 
     protected FetchTopicMessageAckData fetchMessage(Transport transport, Consumer consumer, int count, int ackTimeout) {

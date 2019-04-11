@@ -1,7 +1,7 @@
 package com.jd.journalq.broker.kafka.handler;
 
 import com.jd.journalq.broker.kafka.KafkaContextAware;
-import com.jd.journalq.broker.kafka.coordinator.GroupCoordinator;
+import com.jd.journalq.broker.kafka.coordinator.group.GroupCoordinator;
 import com.jd.journalq.broker.kafka.KafkaCommandType;
 import com.jd.journalq.broker.kafka.KafkaContext;
 import com.jd.journalq.broker.kafka.command.HeartbeatRequest;

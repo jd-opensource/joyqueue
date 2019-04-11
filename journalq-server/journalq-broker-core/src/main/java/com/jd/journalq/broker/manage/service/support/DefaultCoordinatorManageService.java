@@ -1,6 +1,6 @@
 package com.jd.journalq.broker.manage.service.support;
 
-import com.jd.journalq.broker.coordinator.CoordinatorGroupManager;
+import com.jd.journalq.broker.coordinator.group.GroupMetadataManager;
 import com.jd.journalq.broker.coordinator.CoordinatorService;
 import com.jd.journalq.broker.manage.service.CoordinatorManageService;
 
@@ -25,7 +25,7 @@ public class DefaultCoordinatorManageService implements CoordinatorManageService
 
     @Override
     public boolean removeCoordinatorGroup(String namespace, String groupId) {
-        CoordinatorGroupManager coordinatorGroupManager = coordinatorService.getOrCreateCoordinatorGroupManager(namespace);
-        return coordinatorGroupManager.removeGroup(groupId);
+        GroupMetadataManager groupMetadataManager = coordinatorService.getOrCreateGroupMetadataManager(namespace);
+        return groupMetadataManager.removeGroup(groupId);
     }
 }

@@ -2,7 +2,7 @@ package com.jd.journalq.network.codec;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
-import com.jd.journalq.network.command.FetchPartitionMessage;
+import com.jd.journalq.network.command.FetchPartitionMessageRequest;
 import com.jd.journalq.network.command.FetchPartitionMessageData;
 import com.jd.journalq.network.command.JMQCommandType;
 import com.jd.journalq.network.serializer.Serializer;
@@ -19,10 +19,10 @@ import java.util.Map;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/13
  */
-public class FetchPartitionMessageCodec implements PayloadCodec<JMQHeader, FetchPartitionMessage>, Type {
+public class FetchPartitionMessageCodec implements PayloadCodec<JMQHeader, FetchPartitionMessageRequest>, Type {
 
     @Override
-    public FetchPartitionMessage decode(JMQHeader header, ByteBuf buffer) throws Exception {
+    public FetchPartitionMessageRequest decode(JMQHeader header, ByteBuf buffer) throws Exception {
         Table<String, Short, FetchPartitionMessageData> partitions = HashBasedTable.create();
         int topicSize = buffer.readShort();
         for (int i = 0; i < topicSize; i++) {
@@ -37,14 +37,14 @@ public class FetchPartitionMessageCodec implements PayloadCodec<JMQHeader, Fetch
             }
         }
 
-        FetchPartitionMessage fetchPartitionMessage = new FetchPartitionMessage();
-        fetchPartitionMessage.setPartitions(partitions);
-        fetchPartitionMessage.setApp(Serializer.readString(buffer, Serializer.SHORT_SIZE));
-        return fetchPartitionMessage;
+        FetchPartitionMessageRequest fetchPartitionMessageRequest = new FetchPartitionMessageRequest();
+        fetchPartitionMessageRequest.setPartitions(partitions);
+        fetchPartitionMessageRequest.setApp(Serializer.readString(buffer, Serializer.SHORT_SIZE));
+        return fetchPartitionMessageRequest;
     }
 
     @Override
-    public void encode(FetchPartitionMessage payload, ByteBuf buffer) throws Exception {
+    public void encode(FetchPartitionMessageRequest payload, ByteBuf buffer) throws Exception {
         buffer.writeShort(payload.getPartitions().rowMap().size());
         for (Map.Entry<String, Map<Short, FetchPartitionMessageData>> topicEntry : payload.getPartitions().rowMap().entrySet()) {
             Serializer.write(topicEntry.getKey(), buffer, Serializer.SHORT_SIZE);

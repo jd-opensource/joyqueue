@@ -7,7 +7,7 @@ import com.jd.journalq.client.internal.metadata.domain.PartitionGroupMetadata;
 import com.jd.journalq.client.internal.metadata.domain.PartitionMetadata;
 import com.jd.journalq.client.internal.metadata.domain.TopicMetadata;
 import com.jd.journalq.exception.JMQCode;
-import com.jd.journalq.network.command.FetchClusterAck;
+import com.jd.journalq.network.command.FetchClusterResponse;
 import com.jd.journalq.network.command.Topic;
 import com.jd.journalq.network.command.TopicPartition;
 import com.jd.journalq.network.command.TopicPartitionGroup;
@@ -26,13 +26,13 @@ import java.util.Map;
  */
 public class ClusterMetadataConverter {
 
-    public static ClusterMetadata convert(FetchClusterAck fetchClusterAck) {
+    public static ClusterMetadata convert(FetchClusterResponse fetchClusterResponse) {
         Map<String, TopicMetadata> topics = Maps.newLinkedHashMap();
-        Map<Integer, BrokerNode> brokers = fetchClusterAck.getBrokers();
+        Map<Integer, BrokerNode> brokers = fetchClusterResponse.getBrokers();
 
-        if (MapUtils.isNotEmpty(fetchClusterAck.getTopics())) {
-            for (Map.Entry<String, Topic> topicEntry : fetchClusterAck.getTopics().entrySet()) {
-                TopicMetadata topicMetadata = convertTopicMetadata(topicEntry.getKey(), topicEntry.getValue(), fetchClusterAck.getBrokers());
+        if (MapUtils.isNotEmpty(fetchClusterResponse.getTopics())) {
+            for (Map.Entry<String, Topic> topicEntry : fetchClusterResponse.getTopics().entrySet()) {
+                TopicMetadata topicMetadata = convertTopicMetadata(topicEntry.getKey(), topicEntry.getValue(), fetchClusterResponse.getBrokers());
                 topics.put(topicEntry.getKey(), topicMetadata);
             }
         }

@@ -66,12 +66,12 @@ public class TopicMetadataHandler extends AbstractKafkaCommandHandler implements
         return KafkaCommandType.METADATA.getCode();
     }
 
-    protected Map<String, TopicConfig> getTopicConfigs(List<TopicName> topics) {
+    protected Map<String, TopicConfig> getTopicConfigs(List<String> topics) {
         Map<String, TopicConfig> result = Maps.newHashMap();
-        for (TopicName topic : topics) {
-            TopicConfig topicConfig = nameService.getTopicConfig(topic);
+        for (String topic : topics) {
+            TopicConfig topicConfig = nameService.getTopicConfig(TopicName.parse(topic));
             if (topicConfig != null) {
-                result.put(topic.getFullName(), topicConfig);
+                result.put(topic, topicConfig);
             }
         }
         return result;
@@ -89,17 +89,17 @@ public class TopicMetadataHandler extends AbstractKafkaCommandHandler implements
         return result;
     }
 
-    protected List<KafkaTopicMetadata> getTopicMetadata(List<TopicName> topics, Map<String, TopicConfig> topicConfigs) {
+    protected List<KafkaTopicMetadata> getTopicMetadata(List<String> topics, Map<String, TopicConfig> topicConfigs) {
         List<KafkaTopicMetadata> result = Lists.newLinkedList();
-        for (TopicName topicName : topics) {
-            TopicConfig topicConfig = topicConfigs.get(topicName.getFullName());
+        for (String topic : topics) {
+            TopicConfig topicConfig = topicConfigs.get(topic);
 
             if (topicConfig != null) {
                 List<KafkaPartitionMetadata> kafkaPartitionMetadata = getPartitionMetadata(topicConfig);
                 KafkaTopicMetadata kafkaTopicMetadata = new KafkaTopicMetadata(topicConfig.getName().getFullName(), kafkaPartitionMetadata, KafkaErrorCode.NONE.getCode());
                 result.add(kafkaTopicMetadata);
             } else {
-                KafkaTopicMetadata kafkaTopicMetadata = new KafkaTopicMetadata(topicName.getFullName(), Collections.emptyList(), KafkaErrorCode.TOPIC_AUTHORIZATION_FAILED.getCode());
+                KafkaTopicMetadata kafkaTopicMetadata = new KafkaTopicMetadata(topic, Collections.emptyList(), KafkaErrorCode.TOPIC_AUTHORIZATION_FAILED.getCode());
                 result.add(kafkaTopicMetadata);
             }
         }

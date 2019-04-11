@@ -9,8 +9,8 @@ import com.jd.journalq.broker.helper.SessionHelper;
 import com.jd.journalq.broker.monitor.SessionManager;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.exception.JMQCode;
-import com.jd.journalq.network.command.AddConsumer;
-import com.jd.journalq.network.command.AddConsumerAck;
+import com.jd.journalq.network.command.AddConsumerRequest;
+import com.jd.journalq.network.command.AddConsumerResponse;
 import com.jd.journalq.network.command.BooleanAck;
 import com.jd.journalq.network.command.JMQCommandType;
 import com.jd.journalq.network.session.Connection;
@@ -45,33 +45,33 @@ public class AddConsumerHandler implements JMQCommandHandler, Type, BrokerContex
 
     @Override
     public Command handle(Transport transport, Command command) {
-        AddConsumer addConsumer = (AddConsumer) command.getPayload();
+        AddConsumerRequest addConsumerRequest = (AddConsumerRequest) command.getPayload();
         Connection connection = SessionHelper.getConnection(transport);
 
-        if (connection == null || !connection.isAuthorized(addConsumer.getApp())) {
+        if (connection == null || !connection.isAuthorized(addConsumerRequest.getApp())) {
             logger.warn("connection is not exists, transport: {}", transport);
             return BooleanAck.build(JMQCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
         Map<String, String> result = Maps.newHashMap();
 
-        for (String topic : addConsumer.getTopics()) {
+        for (String topic : addConsumerRequest.getTopics()) {
             TopicName topicName = TopicName.parse(topic);
 
-            BooleanResponse checkResult = clusterManager.checkReadable(topicName, addConsumer.getApp(), null);
+            BooleanResponse checkResult = clusterManager.checkReadable(topicName, addConsumerRequest.getApp(), null);
             if (!checkResult.isSuccess()) {
-                logger.warn("checkReadable failed, transport: {}, topic: {}, app: {}, code: {}", transport, topicName, addConsumer.getApp(), checkResult.getJmqCode());
+                logger.warn("checkReadable failed, transport: {}, topic: {}, app: {}, code: {}", transport, topicName, addConsumerRequest.getApp(), checkResult.getJmqCode());
                 return BooleanAck.build(JMQCode.CN_NO_PERMISSION);
             }
 
-            Consumer consumer = buildConsumer(connection, topic, addConsumer.getApp(), addConsumer.getSequence());
+            Consumer consumer = buildConsumer(connection, topic, addConsumerRequest.getApp(), addConsumerRequest.getSequence());
             sessionManager.addConsumer(consumer);
             result.put(topic, consumer.getId());
         }
 
-        AddConsumerAck addConsumerAck = new AddConsumerAck();
-        addConsumerAck.setConsumerIds(result);
-        return new Command(addConsumerAck);
+        AddConsumerResponse addConsumerResponse = new AddConsumerResponse();
+        addConsumerResponse.setConsumerIds(result);
+        return new Command(addConsumerResponse);
     }
 
     protected Consumer buildConsumer(Connection connection, String topic, String app, long sequence) {

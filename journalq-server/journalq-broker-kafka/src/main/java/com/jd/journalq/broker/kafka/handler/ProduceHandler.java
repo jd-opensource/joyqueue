@@ -2,20 +2,20 @@ package com.jd.journalq.broker.kafka.handler;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Table;
-import com.jd.journalq.broker.BrokerContext;
-import com.jd.journalq.broker.BrokerContextAware;
 import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.kafka.KafkaAcknowledge;
 import com.jd.journalq.broker.kafka.KafkaCommandType;
+import com.jd.journalq.broker.kafka.KafkaContext;
+import com.jd.journalq.broker.kafka.KafkaContextAware;
 import com.jd.journalq.broker.kafka.KafkaErrorCode;
 import com.jd.journalq.broker.kafka.command.ProduceRequest;
 import com.jd.journalq.broker.kafka.command.ProduceResponse;
 import com.jd.journalq.broker.kafka.converter.CheckResultConverter;
+import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionCoordinator;
 import com.jd.journalq.broker.kafka.helper.KafkaClientHelper;
 import com.jd.journalq.broker.kafka.message.KafkaBrokerMessage;
 import com.jd.journalq.broker.kafka.message.converter.KafkaMessageConverter;
-import com.jd.journalq.broker.kafka.model.ProducePartitionStatus;
+import com.jd.journalq.broker.kafka.model.ProducePartitionGroupRequest;
 import com.jd.journalq.broker.producer.Produce;
 import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.domain.QosLevel;
@@ -45,17 +45,19 @@ import java.util.concurrent.TimeUnit;
  * email: gaohaoxiang@jd.com
  * date: 2018/11/6
  */
-public class ProduceHandler extends AbstractKafkaCommandHandler implements BrokerContextAware {
+public class ProduceHandler extends AbstractKafkaCommandHandler implements KafkaContextAware {
 
     protected static final Logger logger = LoggerFactory.getLogger(ProduceHandler.class);
 
     private Produce produce;
     private ClusterManager clusterManager;
+    private TransactionCoordinator transactionCoordinator;
 
     @Override
-    public void setBrokerContext(BrokerContext brokerContext) {
-        this.produce = brokerContext.getProduce();
-        this.clusterManager = brokerContext.getClusterManager();
+    public void setKafkaContext(KafkaContext kafkaContext) {
+        this.produce = kafkaContext.getBrokerContext().getProduce();
+        this.clusterManager = kafkaContext.getBrokerContext().getClusterManager();
+        this.transactionCoordinator = kafkaContext.getTransactionCoordinator();
     }
 
     @Override
@@ -64,63 +66,57 @@ public class ProduceHandler extends AbstractKafkaCommandHandler implements Broke
         KafkaAcknowledge kafkaAcknowledge = KafkaAcknowledge.valueOf(produceRequest.getRequiredAcks());
         QosLevel qosLevel = KafkaAcknowledge.convertToQosLevel(kafkaAcknowledge);
         String clientId = KafkaClientHelper.parseClient(produceRequest.getClientId());
+        Map<String, List<ProduceRequest.PartitionRequest>> partitionRequestMap = produceRequest.getPartitionRequests();
 
-        Map<String, List<ProducePartitionStatus>> produceResponseStatusMap = Maps.newHashMap();
-        Table<TopicName, Integer, List<KafkaBrokerMessage>> topicPartitionTable = produceRequest.getTopicPartitionMessages();
-        CountDownLatch latch = new CountDownLatch(topicPartitionTable.size());
+        Map<String, List<ProduceResponse.PartitionResponse>> partitionResponseMap = Maps.newHashMapWithExpectedSize(partitionRequestMap.size());
+        CountDownLatch latch = new CountDownLatch(produceRequest.getPartitionNum());
         boolean isNeedAck = !qosLevel.equals(QosLevel.ONE_WAY);
         String clientIp = ((InetSocketAddress) transport.remoteAddress()).getHostString();
         byte[] clientAddress = IpUtil.toByte((InetSocketAddress) transport.remoteAddress());
 
-        for (TopicName topic : topicPartitionTable.rowKeySet()) {
-            Map<Integer, List<Integer>> groupPartitionMapper = Maps.newHashMap();
-            Map<Integer, List<BrokerMessage>> groupMessageMapper = Maps.newHashMap();
-            Map<Integer, List<KafkaBrokerMessage>> partitionMapper = topicPartitionTable.row(topic);
-            List<ProducePartitionStatus> producePartitionStatusList = Lists.newLinkedList();
-            produceResponseStatusMap.put(topic.getFullName(), producePartitionStatusList);
+        for (Map.Entry<String, List<ProduceRequest.PartitionRequest>> entry : partitionRequestMap.entrySet()) {
+            TopicName topicName = TopicName.parse(entry.getKey());
+            Map<Integer, ProducePartitionGroupRequest> partitionGroupRequestMap = Maps.newHashMap();
+            List<ProduceResponse.PartitionResponse> partitionResponses = Lists.newArrayListWithCapacity(entry.getValue().size());
+            partitionResponseMap.put(topicName.getFullName(), partitionResponses);
 
-            Producer producer = new Producer(topic.getFullName(), clientId, Producer.ProducerType.KAFKA);
-            TopicConfig topicConfig = clusterManager.getTopicConfig(topic);
+            Producer producer = new Producer(topicName.getFullName(), clientId, Producer.ProducerType.KAFKA);
+            TopicConfig topicConfig = clusterManager.getTopicConfig(topicName);
 
-            for (Map.Entry<Integer, List<KafkaBrokerMessage>> entry : partitionMapper.entrySet()) {
-                int partition = entry.getKey();
-                BooleanResponse checkResult = clusterManager.checkWritable(topic, clientId, clientIp, (short) partition);
+            for (ProduceRequest.PartitionRequest partitionRequest : entry.getValue()) {
+                int partition = partitionRequest.getPartition();
+                BooleanResponse checkResult = clusterManager.checkWritable(topicName, clientId, clientIp, (short) partition);
+
                 if (!checkResult.isSuccess()) {
-                    logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport, topic, clientId, checkResult.getJmqCode());
+                    logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport, topicName, clientId, checkResult.getJmqCode());
                     short kafkaErrorCode = CheckResultConverter.convertProduceCode(checkResult.getJmqCode());
-                    buildPartitionStatus(partition, null, kafkaErrorCode, entry.getValue(), producePartitionStatusList);
+                    buildPartitionResponse(partition, null, kafkaErrorCode, partitionRequest.getMessages(), partitionResponses);
                     latch.countDown();
                     continue;
                 }
 
                 PartitionGroup partitionGroup = topicConfig.fetchPartitionGroupByPartition((short) partition);
-                List<Integer> partitionList = groupPartitionMapper.get(partitionGroup.getGroup());
-                List<BrokerMessage> partitionMessageList = groupMessageMapper.get(partitionGroup.getGroup());
+                ProducePartitionGroupRequest producePartitionGroupRequest = partitionGroupRequestMap.get(partitionGroup.getGroup());
 
-                if (partitionList == null) {
-                    partitionList = Lists.newLinkedList();
-                    groupPartitionMapper.put(partitionGroup.getGroup(), partitionList);
+                if (producePartitionGroupRequest == null) {
+                    producePartitionGroupRequest = new ProducePartitionGroupRequest(Lists.newLinkedList(), Lists.newLinkedList());
+                    partitionGroupRequestMap.put(partitionGroup.getGroup(), producePartitionGroupRequest);
                 }
 
-                partitionList.add(partition);
+                producePartitionGroupRequest.getPartitions().add(partition);
 
-                if (partitionMessageList == null) {
-                    partitionMessageList = Lists.newLinkedList();
-                    groupMessageMapper.put(partitionGroup.getGroup(), partitionMessageList);
-                }
-
-                for (KafkaBrokerMessage message : entry.getValue()) {
+                for (KafkaBrokerMessage message : partitionRequest.getMessages()) {
                     BrokerMessage brokerMessage = KafkaMessageConverter.toBrokerMessage(producer.getTopic(), partition, producer.getApp(), clientAddress, message);
-                    partitionMessageList.add(brokerMessage);
+                    producePartitionGroupRequest.getMessages().add(brokerMessage);
                 }
             }
 
-            for (Map.Entry<Integer, List<BrokerMessage>> entry : groupMessageMapper.entrySet()) {
-                produceMessage(transport, clientAddress, qosLevel, producer, entry.getValue(), (producePartitionStatus) -> {
-                    synchronized (producePartitionStatusList) {
-                        List<Integer> partitions = groupPartitionMapper.get(entry.getKey());
+            for (Map.Entry<Integer, ProducePartitionGroupRequest> partitionGroupEntry : partitionGroupRequestMap.entrySet()) {
+                produceMessage(transport, clientAddress, qosLevel, producer, partitionGroupEntry.getValue().getMessages(), (produceResponse) -> {
+                    List<Integer> partitions = partitionGroupEntry.getValue().getPartitions();
+                    synchronized (partitionResponses) {
                         for (Integer partition : partitions) {
-                            producePartitionStatusList.add(new ProducePartitionStatus(partition, ProducePartitionStatus.NONE_OFFSET, producePartitionStatus.getErrorCode()));
+                            partitionResponses.add(new ProduceResponse.PartitionResponse(partition, ProduceResponse.PartitionResponse.NONE_OFFSET, produceResponse.getErrorCode()));
                             latch.countDown();
                         }
                     }
@@ -141,27 +137,27 @@ public class ProduceHandler extends AbstractKafkaCommandHandler implements Broke
             logger.error("wait produce exception, transport: {}", transport.remoteAddress(), e);
         }
 
-        ProduceResponse response = new ProduceResponse(produceResponseStatusMap);
+        ProduceResponse response = new ProduceResponse(partitionResponseMap);
         return new Command(response);
     }
 
-    protected void produceMessage(Transport transport, byte[] clientAddress, QosLevel qosLevel, Producer producer, List<BrokerMessage> messages, EventListener<ProducePartitionStatus> listener) {
+    protected void produceMessage(Transport transport, byte[] clientAddress, QosLevel qosLevel, Producer producer, List<BrokerMessage> messages, EventListener<ProduceResponse.PartitionResponse> listener) {
         try {
             produce.putMessageAsync(producer, messages, qosLevel, (writeResult) -> {
                 if (!writeResult.getCode().equals(JMQCode.SUCCESS)) {
                     logger.error("produce message failed, topic: {}, code: {}", producer.getTopic(), writeResult.getCode());
                 }
-                short status = KafkaErrorCode.jmqCodeFor(writeResult.getCode().getCode());
-                listener.onEvent(new ProducePartitionStatus(0, ProducePartitionStatus.NONE_OFFSET, status));
+                short code = KafkaErrorCode.jmqCodeFor(writeResult.getCode().getCode());
+                listener.onEvent(new ProduceResponse.PartitionResponse(0, ProduceResponse.PartitionResponse.NONE_OFFSET, code));
             });
         } catch (Exception e) {
             logger.error("produce message failed, topic: {}", producer.getTopic(), e);
-            short status = KafkaErrorCode.exceptionFor(e);
-            listener.onEvent(new ProducePartitionStatus(0, ProducePartitionStatus.NONE_OFFSET, status));
+            short code = KafkaErrorCode.exceptionFor(e);
+            listener.onEvent(new ProduceResponse.PartitionResponse(0, ProduceResponse.PartitionResponse.NONE_OFFSET, code));
         }
     }
 
-    protected void produceMessage(Transport transport, byte[] clientAddress, QosLevel qosLevel, Producer producer, int partition, List<KafkaBrokerMessage> messages, List<ProducePartitionStatus> producePartitionStatusSet, EventListener<List<ProducePartitionStatus>> listener) {
+    protected void produceMessage(Transport transport, byte[] clientAddress, QosLevel qosLevel, Producer producer, int partition, List<KafkaBrokerMessage> messages, List<ProduceResponse.PartitionResponse> partitionResponses, EventListener<List<ProduceResponse.PartitionResponse>> listener) {
         List<BrokerMessage> brokerMessages = Lists.newLinkedList();
 
         for (KafkaBrokerMessage message : messages) {
@@ -174,30 +170,30 @@ public class ProduceHandler extends AbstractKafkaCommandHandler implements Broke
                 if (!writeResult.getCode().equals(JMQCode.SUCCESS)) {
                     logger.error("produce message failed, topic: {}, partition: {}, code: {}", producer.getTopic(), partition, writeResult.getCode());
                 }
-                short status = KafkaErrorCode.jmqCodeFor(writeResult.getCode().getCode());
-                buildPartitionStatus(partition, writeResult.getIndices(), status, messages, producePartitionStatusSet);
+                short code = KafkaErrorCode.jmqCodeFor(writeResult.getCode().getCode());
+                buildPartitionResponse(partition, writeResult.getIndices(), code, messages, partitionResponses);
                 listener.onEvent(null);
             });
         } catch (Exception e) {
             logger.error("produce message failed, topic: {}, partition: {}", producer.getTopic(), partition, e);
-            short status = KafkaErrorCode.exceptionFor(e);
-            buildPartitionStatus(partition, null, status, messages, producePartitionStatusSet);
+            short code = KafkaErrorCode.exceptionFor(e);
+            buildPartitionResponse(partition, null, code, messages, partitionResponses);
             listener.onEvent(null);
         }
     }
 
-    protected void buildPartitionStatus(int partition, long[] indices, short status, List<KafkaBrokerMessage> messages, List<ProducePartitionStatus> producePartitionStatusList) {
+    protected void buildPartitionResponse(int partition, long[] indices, short code, List<KafkaBrokerMessage> messages, List<ProduceResponse.PartitionResponse> partitionResponses) {
         if (ArrayUtils.isEmpty(indices)) {
             if (messages.get(0).isBatch()) {
-                producePartitionStatusList.add(new ProducePartitionStatus(partition, ProducePartitionStatus.NONE_OFFSET, status));
+                partitionResponses.add(new ProduceResponse.PartitionResponse(partition, ProduceResponse.PartitionResponse.NONE_OFFSET, code));
             } else {
-                producePartitionStatusList.add(new ProducePartitionStatus(partition, ProducePartitionStatus.NONE_OFFSET, status));
+                partitionResponses.add(new ProduceResponse.PartitionResponse(partition, ProduceResponse.PartitionResponse.NONE_OFFSET, code));
             }
         } else {
             if (messages.get(0).isBatch()) {
-                producePartitionStatusList.add(new ProducePartitionStatus(partition, indices[0], status));
+                partitionResponses.add(new ProduceResponse.PartitionResponse(partition, indices[0], code));
             } else {
-                producePartitionStatusList.add(new ProducePartitionStatus(partition, indices[0], status));
+                partitionResponses.add(new ProduceResponse.PartitionResponse(partition, indices[0], code));
             }
         }
     }

@@ -94,18 +94,26 @@ public class ClusterManager extends Service {
     }
 
     public boolean tryUpdateTopicMetadata(String topic, String app) {
-        TopicMetadataHolder topicMetadata = metadataCacheManager.getTopicMetadata(topic, app);
-        if (topicMetadata != null && !topicMetadata.isExpired(config.getTempMetadataInterval())) {
+        TopicMetadataHolder topicMetadataHolder = metadataCacheManager.getTopicMetadata(topic, app);
+        if (topicMetadataHolder != null && !topicMetadataHolder.isExpired(config.getTempMetadataInterval())) {
             return false;
         }
         return metadataUpdater.tryUpdateTopicMetadata(topic, app);
     }
 
     public TopicMetadata updateTopicMetadata(String topic, String app) {
+        TopicMetadataHolder topicMetadataHolder = metadataCacheManager.getTopicMetadata(topic, app);
+        if (topicMetadataHolder != null && !topicMetadataHolder.isExpired(config.getTempMetadataInterval())) {
+            return topicMetadataHolder.getTopicMetadata();
+        }
         return metadataUpdater.updateTopicMetadata(topic, app);
     }
 
-    public Map<String, TopicMetadata> updateTopicMetadata(List<String> topics, String app) {
+    public TopicMetadata forceUpdateTopicMetadata(String topic, String app) {
+        return metadataUpdater.updateTopicMetadata(topic, app);
+    }
+
+    public Map<String, TopicMetadata> forceUpdateTopicMetadata(List<String> topics, String app) {
         return metadataUpdater.updateTopicMetadata(topics, app);
     }
 

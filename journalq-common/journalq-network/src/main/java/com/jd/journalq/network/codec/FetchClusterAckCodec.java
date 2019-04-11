@@ -5,7 +5,7 @@ import com.google.common.collect.Sets;
 import com.jd.journalq.domain.Consumer;
 import com.jd.journalq.domain.Producer;
 import com.jd.journalq.exception.JMQCode;
-import com.jd.journalq.network.command.FetchClusterAck;
+import com.jd.journalq.network.command.FetchClusterResponse;
 import com.jd.journalq.network.command.JMQCommandType;
 import com.jd.journalq.network.command.Topic;
 import com.jd.journalq.network.command.TopicPartition;
@@ -28,13 +28,13 @@ import java.util.Set;
  * email: gaohaoxiang@jd.com
  * date: 2018/11/30
  */
-public class FetchClusterAckCodec implements PayloadCodec<JMQHeader, FetchClusterAck>, Type {
+public class FetchClusterAckCodec implements PayloadCodec<JMQHeader, FetchClusterResponse>, Type {
 
     private static final byte NONE_TOPIC_TYPE = -1;
 
     @Override
-    public FetchClusterAck decode(JMQHeader header, ByteBuf buffer) throws Exception {
-        FetchClusterAck fetchClusterAck = new FetchClusterAck();
+    public FetchClusterResponse decode(JMQHeader header, ByteBuf buffer) throws Exception {
+        FetchClusterResponse fetchClusterResponse = new FetchClusterResponse();
         Map<String, Topic> topics = Maps.newHashMap();
         Map<Integer, BrokerNode> brokers = Maps.newHashMap();
 
@@ -50,9 +50,9 @@ public class FetchClusterAckCodec implements PayloadCodec<JMQHeader, FetchCluste
             brokers.put(brokerNode.getId(), brokerNode);
         }
 
-        fetchClusterAck.setTopics(topics);
-        fetchClusterAck.setBrokers(brokers);
-        return fetchClusterAck;
+        fetchClusterResponse.setTopics(topics);
+        fetchClusterResponse.setBrokers(brokers);
+        return fetchClusterResponse;
     }
 
     protected Topic decodeTopic(ByteBuf buffer) throws Exception {
@@ -148,7 +148,7 @@ public class FetchClusterAckCodec implements PayloadCodec<JMQHeader, FetchCluste
     }
 
     @Override
-    public void encode(FetchClusterAck payload, ByteBuf buffer) throws Exception {
+    public void encode(FetchClusterResponse payload, ByteBuf buffer) throws Exception {
         buffer.writeShort(payload.getTopics().size());
         for (Map.Entry<String, Topic> entry : payload.getTopics().entrySet()) {
             encodeTopic(entry.getValue(), buffer);

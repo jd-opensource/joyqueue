@@ -17,8 +17,8 @@ import com.jd.journalq.exception.JMQException;
 import com.jd.journalq.message.BrokerMessage;
 import com.jd.journalq.network.command.BooleanAck;
 import com.jd.journalq.network.command.JMQCommandType;
-import com.jd.journalq.network.command.ProduceMessage;
-import com.jd.journalq.network.command.ProduceMessageAck;
+import com.jd.journalq.network.command.ProduceMessageRequest;
+import com.jd.journalq.network.command.ProduceMessageResponse;
 import com.jd.journalq.network.command.ProduceMessageAckData;
 import com.jd.journalq.network.command.ProduceMessageAckItemData;
 import com.jd.journalq.network.command.ProduceMessageData;
@@ -63,20 +63,20 @@ public class ProduceMessageHandler implements JMQCommandHandler, Type, JMQContex
 
     @Override
     public Command handle(Transport transport, Command command) {
-        ProduceMessage produceMessage = (ProduceMessage) command.getPayload();
+        ProduceMessageRequest produceMessageRequest = (ProduceMessageRequest) command.getPayload();
         Connection connection = SessionHelper.getConnection(transport);
 
-        if (connection == null || !connection.isAuthorized(produceMessage.getApp())) {
+        if (connection == null || !connection.isAuthorized(produceMessageRequest.getApp())) {
             logger.warn("connection is not exists, transport: {}", transport);
             return BooleanAck.build(JMQCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
         QosLevel qosLevel = command.getHeader().getQosLevel();
         boolean isNeedAck = !qosLevel.equals(QosLevel.ONE_WAY);
-        CountDownLatch latch = new CountDownLatch(produceMessage.getData().size());
+        CountDownLatch latch = new CountDownLatch(produceMessageRequest.getData().size());
         Map<String, ProduceMessageAckData> resultData = Maps.newConcurrentMap();
 
-        for (Map.Entry<String, ProduceMessageData> entry : produceMessage.getData().entrySet()) {
+        for (Map.Entry<String, ProduceMessageData> entry : produceMessageRequest.getData().entrySet()) {
             String topic = entry.getKey();
             ProduceMessageData produceMessageData = entry.getValue();
 
@@ -84,21 +84,21 @@ public class ProduceMessageHandler implements JMQCommandHandler, Type, JMQContex
             try {
                 checkAndFillMessage(connection, produceMessageData);
             } catch (JMQException e) {
-                logger.warn("checkMessage error, transport: {}, topic: {}, app: {}", transport, topic, produceMessage.getApp(), e);
+                logger.warn("checkMessage error, transport: {}, topic: {}, app: {}", transport, topic, produceMessageRequest.getApp(), e);
                 resultData.put(topic, buildAck(produceMessageData, JMQCode.valueOf(e.getCode())));
                 latch.countDown();
                 continue;
             }
 
-            BooleanResponse checkResult = clusterManager.checkWritable(TopicName.parse(topic), produceMessage.getApp(), connection.getHost(), produceMessageData.getMessages().get(0).getPartition());
+            BooleanResponse checkResult = clusterManager.checkWritable(TopicName.parse(topic), produceMessageRequest.getApp(), connection.getHost(), produceMessageData.getMessages().get(0).getPartition());
             if (!checkResult.isSuccess()) {
-                logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport, topic, produceMessage.getApp(), checkResult.getJmqCode());
+                logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport, topic, produceMessageRequest.getApp(), checkResult.getJmqCode());
                 resultData.put(topic, buildAck(produceMessageData, CheckResultConverter.convertProduceCode(checkResult.getJmqCode())));
                 latch.countDown();
                 continue;
             }
 
-            produceMessage(connection, topic, produceMessage.getApp(), produceMessageData, (data) -> {
+            produceMessage(connection, topic, produceMessageRequest.getApp(), produceMessageData, (data) -> {
                 resultData.put(topic, data);
                 latch.countDown();
             });
@@ -111,15 +111,15 @@ public class ProduceMessageHandler implements JMQCommandHandler, Type, JMQContex
         try {
             boolean isDone = latch.await(config.getProduceMaxTimeout(), TimeUnit.MILLISECONDS);
             if (!isDone) {
-                logger.warn("wait produce timeout, transport: {}, topics: {}", transport.remoteAddress(), produceMessage.getData().keySet());
+                logger.warn("wait produce timeout, transport: {}, topics: {}", transport.remoteAddress(), produceMessageRequest.getData().keySet());
             }
         } catch (InterruptedException e) {
             logger.error("wait produce exception, transport: {}", transport.remoteAddress(), e);
         }
 
-        ProduceMessageAck produceMessageAck = new ProduceMessageAck();
-        produceMessageAck.setData(resultData);
-        return new Command(produceMessageAck);
+        ProduceMessageResponse produceMessageResponse = new ProduceMessageResponse();
+        produceMessageResponse.setData(resultData);
+        return new Command(produceMessageResponse);
     }
 
     protected void produceMessage(Connection connection, String topic, String app, ProduceMessageData produceMessageData, EventListener<ProduceMessageAckData> listener) {

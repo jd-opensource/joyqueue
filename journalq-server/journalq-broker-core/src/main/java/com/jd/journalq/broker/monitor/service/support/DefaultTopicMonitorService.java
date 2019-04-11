@@ -29,7 +29,7 @@ public class DefaultTopicMonitorService implements TopicMonitorService {
 
     @Override
     public Pager<TopicMonitorInfo> getTopicInfos(int page, int pageSize) {
-        int total = brokerStat.getTopicStats().size();
+        int total = storeManagementService.storeMetrics().length;
         int startIndex = (page - 1) * pageSize;
         int endIndex = startIndex + pageSize;
         int index = 0;

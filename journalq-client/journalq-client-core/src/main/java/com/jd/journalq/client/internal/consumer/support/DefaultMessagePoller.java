@@ -218,7 +218,7 @@ public class DefaultMessagePoller extends Service implements MessagePoller {
         Preconditions.checkArgument(StringUtils.isNotBlank(topic), "topic not blank");
         Preconditions.checkArgument(timeoutUnit != null, "timeoutUnit not null");
 
-        TopicMetadata topicMetadata = messagePollerInner.checkTopicMetadata(topic);
+        TopicMetadata topicMetadata = messagePollerInner.getAndCheckTopicMetadata(topic);
         PartitionMetadata partitionMetadata = topicMetadata.getPartition(partition);
 
         if (partitionMetadata == null) {
@@ -240,7 +240,7 @@ public class DefaultMessagePoller extends Service implements MessagePoller {
         Preconditions.checkArgument(StringUtils.isNotBlank(topic), "topic not blank");
         Preconditions.checkArgument(timeoutUnit != null, "timeoutUnit not null");
 
-        TopicMetadata topicMetadata = messagePollerInner.checkTopicMetadata(topic);
+        TopicMetadata topicMetadata = messagePollerInner.getAndCheckTopicMetadata(topic);
         BrokerLoadBalance brokerBalance = messagePollerInner.getBrokerLoadBalance(topic);
 
         BrokerAssignments brokerAssignments = fetchBrokerAssignment(topicMetadata);
@@ -286,7 +286,7 @@ public class DefaultMessagePoller extends Service implements MessagePoller {
     public synchronized JMQCode reply(String topic, List<ConsumeReply> replyList) {
         checkState();
         Preconditions.checkArgument(StringUtils.isNotBlank(topic), "topic not blank");
-        TopicMetadata topicMetadata = messagePollerInner.checkTopicMetadata(topic);
+        TopicMetadata topicMetadata = messagePollerInner.getAndCheckTopicMetadata(topic);
 
         if (CollectionUtils.isEmpty(replyList)) {
             throw new IllegalArgumentException(String.format("topic %s reply is empty", topic));

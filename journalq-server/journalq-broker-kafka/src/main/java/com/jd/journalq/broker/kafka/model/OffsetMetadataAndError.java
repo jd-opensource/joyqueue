@@ -10,6 +10,7 @@ public class OffsetMetadataAndError {
 
     public static final OffsetMetadataAndError OFFSET_SYNC_FAIL = new OffsetMetadataAndError(OffsetAndMetadata.INVALID_OFFSET, OffsetAndMetadata.NO_METADATA, KafkaErrorCode.UNKNOWN_TOPIC_OR_PARTITION.getCode());
 
+    private int partition;
     private long offset;
     private String metadata = OffsetAndMetadata.NO_METADATA;
     private short error;
@@ -22,6 +23,23 @@ public class OffsetMetadataAndError {
         this.offset = offset;
         this.metadata = metadata;
         this.error = error;
+    }
+
+    public OffsetMetadataAndError(int partition, long offset, String metadata, short error) {
+        this.partition = partition;
+        this.offset = offset;
+        this.metadata = metadata;
+        this.error = error;
+    }
+
+    public OffsetMetadataAndError(int partition, long offset, short error) {
+        this.partition = partition;
+        this.offset = offset;
+        this.error = error;
+    }
+
+    public int getPartition() {
+        return partition;
     }
 
     public long getOffset() {

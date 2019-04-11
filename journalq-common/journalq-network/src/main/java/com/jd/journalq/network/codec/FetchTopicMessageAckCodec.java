@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.message.BrokerMessage;
-import com.jd.journalq.network.command.FetchTopicMessageAck;
+import com.jd.journalq.network.command.FetchTopicMessageResponse;
 import com.jd.journalq.network.command.FetchTopicMessageAckData;
 import com.jd.journalq.network.command.JMQCommandType;
 import com.jd.journalq.network.serializer.Serializer;
@@ -23,10 +23,10 @@ import java.util.Map;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/7
  */
-public class FetchTopicMessageAckCodec implements PayloadCodec<JMQHeader, FetchTopicMessageAck>, Type {
+public class FetchTopicMessageAckCodec implements PayloadCodec<JMQHeader, FetchTopicMessageResponse>, Type {
 
     @Override
-    public FetchTopicMessageAck decode(JMQHeader header, ByteBuf buffer) throws Exception {
+    public FetchTopicMessageResponse decode(JMQHeader header, ByteBuf buffer) throws Exception {
         Map<String, FetchTopicMessageAckData> result = Maps.newHashMap();
         short topicSize = buffer.readShort();
         for (int i = 0; i < topicSize; i++) {
@@ -41,13 +41,13 @@ public class FetchTopicMessageAckCodec implements PayloadCodec<JMQHeader, FetchT
             result.put(topic, fetchTopicMessageAckData);
         }
 
-        FetchTopicMessageAck fetchTopicMessageAck = new FetchTopicMessageAck();
-        fetchTopicMessageAck.setData(result);
-        return fetchTopicMessageAck;
+        FetchTopicMessageResponse fetchTopicMessageResponse = new FetchTopicMessageResponse();
+        fetchTopicMessageResponse.setData(result);
+        return fetchTopicMessageResponse;
     }
 
     @Override
-    public void encode(FetchTopicMessageAck payload, ByteBuf buffer) throws Exception {
+    public void encode(FetchTopicMessageResponse payload, ByteBuf buffer) throws Exception {
         buffer.writeShort(payload.getData().size());
         for (Map.Entry<String, FetchTopicMessageAckData> entry : payload.getData().entrySet()) {
             FetchTopicMessageAckData fetchTopicMessageAckData = entry.getValue();

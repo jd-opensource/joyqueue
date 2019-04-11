@@ -54,4 +54,14 @@ public class AddPartitionsToTxnRequest extends KafkaRequestOrResponse {
     public int type() {
         return KafkaCommandType.ADD_PARTITIONS_TO_TXN.getCode();
     }
+
+    @Override
+    public String toString() {
+        return "AddPartitionsToTxnRequest{" +
+                "transactionId='" + transactionId + '\'' +
+                ", producerId=" + producerId +
+                ", producerEpoch=" + producerEpoch +
+                ", partitions=" + partitions +
+                '}';
+    }
 }

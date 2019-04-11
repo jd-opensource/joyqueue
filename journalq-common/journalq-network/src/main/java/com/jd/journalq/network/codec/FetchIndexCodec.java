@@ -2,7 +2,7 @@ package com.jd.journalq.network.codec;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.jd.journalq.network.command.FetchIndex;
+import com.jd.journalq.network.command.FetchIndexRequest;
 import com.jd.journalq.network.command.JMQCommandType;
 import com.jd.journalq.network.serializer.Serializer;
 import com.jd.journalq.network.transport.codec.JMQHeader;
@@ -19,10 +19,10 @@ import java.util.Map;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/13
  */
-public class FetchIndexCodec implements PayloadCodec<JMQHeader, FetchIndex>, Type {
+public class FetchIndexCodec implements PayloadCodec<JMQHeader, FetchIndexRequest>, Type {
 
     @Override
-    public FetchIndex decode(JMQHeader header, ByteBuf buffer) throws Exception {
+    public FetchIndexRequest decode(JMQHeader header, ByteBuf buffer) throws Exception {
         Map<String, List<Short>> result = Maps.newHashMap();
         short topicSize = buffer.readShort();
         for (int i = 0; i < topicSize; i++) {
@@ -35,14 +35,14 @@ public class FetchIndexCodec implements PayloadCodec<JMQHeader, FetchIndex>, Typ
             result.put(topic, partitions);
         }
 
-        FetchIndex fetchIndex = new FetchIndex();
-        fetchIndex.setPartitions(result);
-        fetchIndex.setApp(Serializer.readString(buffer, Serializer.SHORT_SIZE));
-        return fetchIndex;
+        FetchIndexRequest fetchIndexRequest = new FetchIndexRequest();
+        fetchIndexRequest.setPartitions(result);
+        fetchIndexRequest.setApp(Serializer.readString(buffer, Serializer.SHORT_SIZE));
+        return fetchIndexRequest;
     }
 
     @Override
-    public void encode(FetchIndex payload, ByteBuf buffer) throws Exception {
+    public void encode(FetchIndexRequest payload, ByteBuf buffer) throws Exception {
         buffer.writeShort(payload.getPartitions().size());
         for (Map.Entry<String, List<Short>> entry : payload.getPartitions().entrySet()) {
             Serializer.write(entry.getKey(), buffer, Serializer.SHORT_SIZE);

@@ -16,7 +16,7 @@ import com.jd.journalq.client.internal.metadata.domain.TopicMetadata;
 import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.network.command.CommitAckAck;
 import com.jd.journalq.network.command.CommitAckData;
-import com.jd.journalq.network.command.FetchIndexAck;
+import com.jd.journalq.network.command.FetchIndexResponse;
 import com.jd.journalq.network.command.FetchIndexAckData;
 import com.jd.journalq.network.domain.BrokerNode;
 import com.jd.journalq.toolkit.service.Service;
@@ -78,9 +78,9 @@ public class DefaultConsumerIndexManager extends Service implements ConsumerInde
         for (Map.Entry<BrokerNode, Map<String, List<Short>>> entry : brokerFetchMap.entrySet()) {
             try {
                 ConsumerClient client = consumerClientManager.getOrCreateClient(entry.getKey());
-                FetchIndexAck fetchIndexAck = client.fetchIndex(entry.getValue(), app, timeout);
+                FetchIndexResponse fetchIndexResponse = client.fetchIndex(entry.getValue(), app, timeout);
 
-                for (Map.Entry<String, Map<Short, FetchIndexAckData>> topicEntry : fetchIndexAck.getData().rowMap().entrySet()) {
+                for (Map.Entry<String, Map<Short, FetchIndexAckData>> topicEntry : fetchIndexResponse.getData().rowMap().entrySet()) {
                     for (Map.Entry<Short, FetchIndexAckData> partitionEntry : topicEntry.getValue().entrySet()) {
                         result.put(topicEntry.getKey(), partitionEntry.getKey(), new FetchIndexData(partitionEntry.getValue().getIndex(), partitionEntry.getValue().getCode()));
                     }

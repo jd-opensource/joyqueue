@@ -18,8 +18,8 @@ import com.jd.journalq.client.internal.consumer.transport.ConsumerClientManager;
 import com.jd.journalq.client.internal.exception.ClientException;
 import com.jd.journalq.client.internal.transport.ConnectionState;
 import com.jd.journalq.exception.JMQCode;
-import com.jd.journalq.network.command.FetchPartitionMessageAck;
-import com.jd.journalq.network.command.FetchTopicMessageAck;
+import com.jd.journalq.network.command.FetchPartitionMessageResponse;
+import com.jd.journalq.network.command.FetchTopicMessageResponse;
 import com.jd.journalq.network.domain.BrokerNode;
 import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.transport.command.CommandCallback;
@@ -134,8 +134,8 @@ public class DefaultMessageFetcher extends Service implements MessageFetcher {
         ConsumerClient client = consumerClientManager.getOrCreateClient(brokerNode);
         handleAddConsumers(brokerNode, topics, app, client);
 
-        FetchTopicMessageAck fetchTopicMessageAck = client.fetchTopicMessage(topics, app, count, timeout, ackTimeout, longPollTimeout);
-        return BrokerMessageConverter.convert(app, fetchTopicMessageAck.getData());
+        FetchTopicMessageResponse fetchTopicMessageResponse = client.fetchTopicMessage(topics, app, count, timeout, ackTimeout, longPollTimeout);
+        return BrokerMessageConverter.convert(app, fetchTopicMessageResponse.getData());
     }
 
     @Override
@@ -148,8 +148,8 @@ public class DefaultMessageFetcher extends Service implements MessageFetcher {
             client.asyncFetchTopicMessage(topics, app, count, timeout, ackTimeout, longPollTimeout, new CommandCallback() {
                 @Override
                 public void onSuccess(Command request, Command response) {
-                    FetchTopicMessageAck fetchTopicMessageAck = (FetchTopicMessageAck) response.getPayload();
-                    Map<String, FetchMessageData> consumeMessages = BrokerMessageConverter.convert(app, fetchTopicMessageAck.getData());
+                    FetchTopicMessageResponse fetchTopicMessageResponse = (FetchTopicMessageResponse) response.getPayload();
+                    Map<String, FetchMessageData> consumeMessages = BrokerMessageConverter.convert(app, fetchTopicMessageResponse.getData());
                     listener.onMessage(consumeMessages);
                 }
 
@@ -169,8 +169,8 @@ public class DefaultMessageFetcher extends Service implements MessageFetcher {
         ConsumerClient client = consumerClientManager.getOrCreateClient(brokerNode);
         handleAddConsumers(brokerNode, partitions.keySet(), app, client);
 
-        FetchPartitionMessageAck fetchPartitionMessageAck = client.fetchPartitionMessage(partitions, app, count, timeout);
-        return BrokerMessageConverter.convert(app, fetchPartitionMessageAck.getData());
+        FetchPartitionMessageResponse fetchPartitionMessageResponse = client.fetchPartitionMessage(partitions, app, count, timeout);
+        return BrokerMessageConverter.convert(app, fetchPartitionMessageResponse.getData());
     }
 
     @Override
@@ -182,8 +182,8 @@ public class DefaultMessageFetcher extends Service implements MessageFetcher {
         client.asyncFetchPartitionMessage(partitions, app, count, timeout, new CommandCallback() {
             @Override
             public void onSuccess(Command request, Command response) {
-                FetchPartitionMessageAck fetchPartitionMessageAck = (FetchPartitionMessageAck) response.getPayload();
-                Table<String, Short, FetchMessageData> fetchMessageDataTable = BrokerMessageConverter.convert(app, fetchPartitionMessageAck.getData());
+                FetchPartitionMessageResponse fetchPartitionMessageResponse = (FetchPartitionMessageResponse) response.getPayload();
+                Table<String, Short, FetchMessageData> fetchMessageDataTable = BrokerMessageConverter.convert(app, fetchPartitionMessageResponse.getData());
                 listener.onMessage(fetchMessageDataTable);
             }
 
@@ -200,8 +200,8 @@ public class DefaultMessageFetcher extends Service implements MessageFetcher {
         ConsumerClient client = consumerClientManager.getOrCreateClient(brokerNode);
         handleAddConsumers(brokerNode, partitions.rowKeySet(), app, client);
 
-        FetchPartitionMessageAck fetchPartitionMessageAck = client.fetchPartitionMessage(partitions, app, count, timeout);
-        return BrokerMessageConverter.convert(app, fetchPartitionMessageAck.getData());
+        FetchPartitionMessageResponse fetchPartitionMessageResponse = client.fetchPartitionMessage(partitions, app, count, timeout);
+        return BrokerMessageConverter.convert(app, fetchPartitionMessageResponse.getData());
     }
 
     @Override
@@ -213,8 +213,8 @@ public class DefaultMessageFetcher extends Service implements MessageFetcher {
         client.asyncFetchPartitionMessage(partitions, app, count, timeout, new CommandCallback() {
             @Override
             public void onSuccess(Command request, Command response) {
-                FetchPartitionMessageAck fetchPartitionMessageAck = (FetchPartitionMessageAck) response.getPayload();
-                Table<String, Short, FetchMessageData> fetchMessageDataTable = BrokerMessageConverter.convert(app, fetchPartitionMessageAck.getData());
+                FetchPartitionMessageResponse fetchPartitionMessageResponse = (FetchPartitionMessageResponse) response.getPayload();
+                Table<String, Short, FetchMessageData> fetchMessageDataTable = BrokerMessageConverter.convert(app, fetchPartitionMessageResponse.getData());
                 listener.onMessage(fetchMessageDataTable);
             }
 

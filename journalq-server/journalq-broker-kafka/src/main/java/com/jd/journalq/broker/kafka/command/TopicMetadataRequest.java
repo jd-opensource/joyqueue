@@ -2,7 +2,6 @@ package com.jd.journalq.broker.kafka.command;
 
 
 import com.jd.journalq.broker.kafka.KafkaCommandType;
-import com.jd.journalq.domain.TopicName;
 
 import java.util.List;
 
@@ -12,7 +11,7 @@ import java.util.List;
 public class TopicMetadataRequest extends KafkaRequestOrResponse {
 
     private boolean allowAutoTopicCreation;
-    private List<TopicName> topics;
+    private List<String> topics;
 
     public boolean isAllowAutoTopicCreation() {
         return allowAutoTopicCreation;
@@ -22,11 +21,11 @@ public class TopicMetadataRequest extends KafkaRequestOrResponse {
         this.allowAutoTopicCreation = allowAutoTopicCreation;
     }
 
-    public void setTopics(List<TopicName> topics) {
+    public void setTopics(List<String> topics) {
         this.topics = topics;
     }
 
-    public List<TopicName> getTopics() {
+    public List<String> getTopics() {
         return topics;
     }
 
@@ -40,7 +39,7 @@ public class TopicMetadataRequest extends KafkaRequestOrResponse {
         StringBuilder topicMetadataRequest = new StringBuilder();
         topicMetadataRequest.append("Name: " + this.getClass().getSimpleName());
         if (topics != null && !topics.isEmpty()) {
-            for (TopicName topic : topics) {
+            for (String topic : topics) {
                 topicMetadataRequest.append("; Topic: " + topic);
             }
         }

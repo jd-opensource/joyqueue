@@ -5,8 +5,8 @@ import com.jd.journalq.broker.jmq.JMQContext;
 import com.jd.journalq.broker.jmq.config.JMQConfig;
 import com.jd.journalq.broker.jmq.coordinator.CoordinatorMemberTimeoutCallback;
 import com.jd.journalq.broker.jmq.coordinator.assignment.PartitionAssignor;
-import com.jd.journalq.broker.jmq.coordinator.domain.JMQCoordinatorGroup;
-import com.jd.journalq.broker.jmq.coordinator.domain.JMQCoordinatorGroupMember;
+import com.jd.journalq.broker.jmq.coordinator.domain.GroupMemberMetadata;
+import com.jd.journalq.broker.jmq.coordinator.domain.GroupMetadata;
 import com.jd.journalq.broker.jmq.coordinator.domain.PartitionAssignment;
 import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.broker.jmq.coordinator.assignment.converter.PartitionAssignmentConverter;
@@ -32,7 +32,7 @@ public class PartitionGroupBalancePartitionAssignor implements PartitionAssignor
     protected static final Logger logger = LoggerFactory.getLogger(PartitionGroupBalancePartitionAssignor.class);
 
     @Override
-    public PartitionAssignment assign(JMQCoordinatorGroup group, JMQCoordinatorGroupMember member, String topic, List<PartitionGroup> partitionGroups) {
+    public PartitionAssignment assign(GroupMetadata group, GroupMemberMetadata member, String topic, List<PartitionGroup> partitionGroups) {
         // TODO 去掉静态
         JMQConfig config = JMQContext.getConfig();
         int minConnections = config.getCoordinatorPartitionAssignMinConnections();
@@ -51,7 +51,7 @@ public class PartitionGroupBalancePartitionAssignor implements PartitionAssignor
         if (member.getTimeoutCallback() == null) {
             member.setTimeoutCallback(new CoordinatorMemberTimeoutCallback() {
                 @Override
-                public void onCompletion(JMQCoordinatorGroup group, JMQCoordinatorGroupMember member) {
+                public void onCompletion(GroupMetadata group, GroupMemberMetadata member) {
                     releaseAllAssigned(group, member);
                 }
             });
@@ -61,7 +61,7 @@ public class PartitionGroupBalancePartitionAssignor implements PartitionAssignor
         return buildPartitionAssignment(member, assignedPartitionGroups);
     }
 
-    protected List<PartitionGroup> doAssign(JMQCoordinatorGroup group, TopicPartitionGroupAssignmentMetadata topicPartitionGroupAssignmentMetadata, List<PartitionGroup> partitionGroups, int minConnections) {
+    protected List<PartitionGroup> doAssign(GroupMetadata group, TopicPartitionGroupAssignmentMetadata topicPartitionGroupAssignmentMetadata, List<PartitionGroup> partitionGroups, int minConnections) {
         // 返回相对空闲的partitionGroup
         List<PartitionGroup> idledPartitionGroups = getIdledPartitionGroups(topicPartitionGroupAssignmentMetadata, partitionGroups, minConnections);
 
@@ -111,23 +111,23 @@ public class PartitionGroupBalancePartitionAssignor implements PartitionAssignor
         return result;
     }
 
-    protected void saveAssignedPartitionGroups(TopicPartitionGroupAssignmentMetadata topicPartitionGroupAssignmentMetadata, JMQCoordinatorGroupMember member, String topic, List<PartitionGroup> assignedPartitionGroups) {
+    protected void saveAssignedPartitionGroups(TopicPartitionGroupAssignmentMetadata topicPartitionGroupAssignmentMetadata, GroupMemberMetadata member, String topic, List<PartitionGroup> assignedPartitionGroups) {
         for (PartitionGroup assignedPartitionGroup : assignedPartitionGroups) {
             assignPartitionGroup(member, topicPartitionGroupAssignmentMetadata, assignedPartitionGroup.getGroup());
         }
     }
 
-    protected PartitionAssignment buildPartitionAssignment(JMQCoordinatorGroupMember member, List<PartitionGroup> assignedPartitionGroups) {
+    protected PartitionAssignment buildPartitionAssignment(GroupMemberMetadata member, List<PartitionGroup> assignedPartitionGroups) {
         return PartitionAssignmentConverter.convert(assignedPartitionGroups);
     }
 
-    protected void releaseAllAssigned(JMQCoordinatorGroup group, JMQCoordinatorGroupMember member) {
+    protected void releaseAllAssigned(GroupMetadata group, GroupMemberMetadata member) {
         for (Map.Entry<String, List<Short>> entry : member.getAssignments().entrySet()) {
             releaseAssigned(group, member, entry.getKey());
         }
     }
 
-    protected void releaseAssigned(JMQCoordinatorGroup group, JMQCoordinatorGroupMember member, String topic) {
+    protected void releaseAssigned(GroupMetadata group, GroupMemberMetadata member, String topic) {
         List<Integer> assignedPartitionGroups = member.getAssignedTopicPartitionGroups(topic);
         if (CollectionUtils.isEmpty(assignedPartitionGroups)) {
             return;
@@ -139,13 +139,13 @@ public class PartitionGroupBalancePartitionAssignor implements PartitionAssignor
         }
     }
 
-    protected void assignPartitionGroup(JMQCoordinatorGroupMember member, TopicPartitionGroupAssignmentMetadata topicPartitionGroupAssignmentMetadata, int partitionGroupId) {
+    protected void assignPartitionGroup(GroupMemberMetadata member, TopicPartitionGroupAssignmentMetadata topicPartitionGroupAssignmentMetadata, int partitionGroupId) {
         PartitionGroupAssignmentMetadata partitionGroupAssignmentMetadata = getOrCreatePartitionGroupAssignMetadata(topicPartitionGroupAssignmentMetadata, partitionGroupId);
         partitionGroupAssignmentMetadata.incrAssigned();
         member.addAssignedPartitionGroups(topicPartitionGroupAssignmentMetadata.getTopic(), partitionGroupId);
     }
 
-    protected void releasePartitionGroupAssign(JMQCoordinatorGroupMember member, TopicPartitionGroupAssignmentMetadata topicPartitionGroupAssignmentMetadata, int partitionGroupId) {
+    protected void releasePartitionGroupAssign(GroupMemberMetadata member, TopicPartitionGroupAssignmentMetadata topicPartitionGroupAssignmentMetadata, int partitionGroupId) {
         PartitionGroupAssignmentMetadata partitionGroupAssignmentMetadata = getOrCreatePartitionGroupAssignMetadata(topicPartitionGroupAssignmentMetadata, partitionGroupId);
         partitionGroupAssignmentMetadata.decrAssigned();
         member.removeAssignedPartitionGroups(topicPartitionGroupAssignmentMetadata.getTopic(), partitionGroupId);
@@ -161,7 +161,7 @@ public class PartitionGroupBalancePartitionAssignor implements PartitionAssignor
         return partitionGroupAssignmentMetadata;
     }
 
-    protected TopicPartitionGroupAssignmentMetadata getOrCreateTopicPartitionGroupAssignMetadata(JMQCoordinatorGroup group, String topic) {
+    protected TopicPartitionGroupAssignmentMetadata getOrCreateTopicPartitionGroupAssignMetadata(GroupMetadata group, String topic) {
         TopicPartitionGroupAssignmentMetadata topicPartitionGroupAssignmentMetadata = (TopicPartitionGroupAssignmentMetadata) group.getAssignContext().get(topic);
         if (topicPartitionGroupAssignmentMetadata == null) {
             topicPartitionGroupAssignmentMetadata = new TopicPartitionGroupAssignmentMetadata();

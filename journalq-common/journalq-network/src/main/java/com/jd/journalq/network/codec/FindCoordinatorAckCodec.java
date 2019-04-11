@@ -2,7 +2,7 @@ package com.jd.journalq.network.codec;
 
 import com.google.common.collect.Maps;
 import com.jd.journalq.exception.JMQCode;
-import com.jd.journalq.network.command.FindCoordinatorAck;
+import com.jd.journalq.network.command.FindCoordinatorResponse;
 import com.jd.journalq.network.command.FindCoordinatorAckData;
 import com.jd.journalq.network.command.JMQCommandType;
 import com.jd.journalq.network.domain.BrokerNode;
@@ -20,13 +20,13 @@ import java.util.Map;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/3
  */
-public class FindCoordinatorAckCodec implements PayloadCodec<JMQHeader, FindCoordinatorAck>, Type {
+public class FindCoordinatorAckCodec implements PayloadCodec<JMQHeader, FindCoordinatorResponse>, Type {
 
     private static final int NONE_BROKER_ID = -1;
 
     @Override
-    public FindCoordinatorAck decode(JMQHeader header, ByteBuf buffer) throws Exception {
-        FindCoordinatorAck findCoordinatorAck = new FindCoordinatorAck();
+    public FindCoordinatorResponse decode(JMQHeader header, ByteBuf buffer) throws Exception {
+        FindCoordinatorResponse findCoordinatorResponse = new FindCoordinatorResponse();
         Map<String, FindCoordinatorAckData> coordinators = Maps.newHashMap();
 
         short topicSize = buffer.readShort();
@@ -49,12 +49,12 @@ public class FindCoordinatorAckCodec implements PayloadCodec<JMQHeader, FindCoor
             coordinators.put(topic, findCoordinatorAckData);
         }
 
-        findCoordinatorAck.setCoordinators(coordinators);
-        return findCoordinatorAck;
+        findCoordinatorResponse.setCoordinators(coordinators);
+        return findCoordinatorResponse;
     }
 
     @Override
-    public void encode(FindCoordinatorAck payload, ByteBuf buffer) throws Exception {
+    public void encode(FindCoordinatorResponse payload, ByteBuf buffer) throws Exception {
         buffer.writeShort(payload.getCoordinators().size());
         for (Map.Entry<String, FindCoordinatorAckData> entry : payload.getCoordinators().entrySet()) {
             String topic = entry.getKey();

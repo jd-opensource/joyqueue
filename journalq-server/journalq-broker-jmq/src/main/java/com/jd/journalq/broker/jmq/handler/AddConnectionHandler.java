@@ -9,8 +9,8 @@ import com.jd.journalq.broker.jmq.JMQCommandHandler;
 import com.jd.journalq.broker.monitor.SessionManager;
 import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.message.SourceType;
-import com.jd.journalq.network.command.AddConnection;
-import com.jd.journalq.network.command.AddConnectionAck;
+import com.jd.journalq.network.command.AddConnectionRequest;
+import com.jd.journalq.network.command.AddConnectionResponse;
 import com.jd.journalq.network.command.BooleanAck;
 import com.jd.journalq.network.command.JMQCommandType;
 import com.jd.journalq.network.session.Connection;
@@ -50,48 +50,48 @@ public class AddConnectionHandler implements JMQCommandHandler, Type, BrokerCont
 
     @Override
     public Command handle(Transport transport, Command command) {
-        AddConnection addConnection = (AddConnection) command.getPayload();
+        AddConnectionRequest addConnectionRequest = (AddConnectionRequest) command.getPayload();
 
-        if (!authentication.auth(addConnection.getApp(), addConnection.getToken()).isSuccess()) {
-            logger.warn("user auth failed, transport: {}, app: {}", transport, addConnection.getApp());
+        if (!authentication.auth(addConnectionRequest.getApp(), addConnectionRequest.getToken()).isSuccess()) {
+            logger.warn("user auth failed, transport: {}, app: {}", transport, addConnectionRequest.getApp());
             return BooleanAck.build(JMQCode.CN_AUTHENTICATION_ERROR.getCode(),
-                    JMQCode.CN_AUTHENTICATION_ERROR.getMessage() + String.format(", app: %s", addConnection.getApp()));
+                    JMQCode.CN_AUTHENTICATION_ERROR.getMessage() + String.format(", app: %s", addConnectionRequest.getApp()));
         }
 
-        Connection connection = buildConnection(transport, addConnection);
+        Connection connection = buildConnection(transport, addConnectionRequest);
         if (sessionManager.addConnection(connection)) {
             // 绑定连接
             SessionHelper.setConnection(transport, connection);
         }
 
-        AddConnectionAck addConnectionAck = new AddConnectionAck();
-        addConnectionAck.setConnectionId(connection.getId());
-        return new Command(addConnectionAck);
+        AddConnectionResponse addConnectionResponse = new AddConnectionResponse();
+        addConnectionResponse.setConnectionId(connection.getId());
+        return new Command(addConnectionResponse);
     }
 
-    protected Connection buildConnection(Transport transport, AddConnection addConnection) {
+    protected Connection buildConnection(Transport transport, AddConnectionRequest addConnectionRequest) {
         Connection connection = new Connection();
         connection.setTransport(transport);
-        connection.setApp(addConnection.getApp());
-        connection.setId(generateConnectionId(transport, addConnection));
-        connection.setRegion(addConnection.getRegion());
-        connection.setNamespace(addConnection.getNamespace());
-        connection.setLanguage(addConnection.getLanguage());
+        connection.setApp(addConnectionRequest.getApp());
+        connection.setId(generateConnectionId(transport, addConnectionRequest));
+        connection.setRegion(addConnectionRequest.getRegion());
+        connection.setNamespace(addConnectionRequest.getNamespace());
+        connection.setLanguage(addConnectionRequest.getLanguage());
         connection.setSource(SourceType.JMQ.name());
         connection.setCreateTime(SystemClock.now());
-        connection.setVersion(addConnection.getClientId().getVersion());
+        connection.setVersion(addConnectionRequest.getClientId().getVersion());
         connection.setAddressStr(IpUtil.toAddress(transport.remoteAddress()));
         connection.setHost(((InetSocketAddress) transport.remoteAddress()).getHostString());
         connection.setAddress(IpUtil.toByte((InetSocketAddress) transport.remoteAddress()));
         connection.setServerAddress(brokerConfig.getFrontendConfig().getHost().getBytes());
-        connection.setSystem(authentication.isAdmin(addConnection.getApp()));
+        connection.setSystem(authentication.isAdmin(addConnectionRequest.getApp()));
         return connection;
     }
 
-    protected String generateConnectionId(Transport transport, AddConnection addConnection) {
+    protected String generateConnectionId(Transport transport, AddConnectionRequest addConnectionRequest) {
         InetSocketAddress inetRemoteAddress = (InetSocketAddress) transport.remoteAddress();
         return String.format("%s-%s_%s-%s-%s",
-                addConnection.getClientId().getVersion(), inetRemoteAddress.getHostString(), inetRemoteAddress.getPort(), SystemClock.now(), addConnection.getClientId().getSequence());
+                addConnectionRequest.getClientId().getVersion(), inetRemoteAddress.getHostString(), inetRemoteAddress.getPort(), SystemClock.now(), addConnectionRequest.getClientId().getSequence());
     }
 
     @Override

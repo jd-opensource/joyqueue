@@ -1,8 +1,8 @@
 package com.jd.journalq.broker.coordinator;
 
+import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.coordinator.config.CoordinatorConfig;
 import com.jd.journalq.broker.coordinator.domain.CoordinatorDetail;
-import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.domain.Broker;
 import com.jd.journalq.domain.TopicName;
 
@@ -26,21 +26,42 @@ public class Coordinator {
         this.coordinatorInitializer = coordinatorInitializer;
     }
 
-    public boolean isCurrentCoordinator(String key) {
-        Broker coordinatorBroker = findCoordinator(key);
+    // group
+
+    public boolean isCurrentGroupCoordinator(String group) {
+        Broker coordinatorBroker = findGroupCoordinator(group);
         return clusterManager.getBroker().equals(coordinatorBroker);
     }
 
-    public Broker findCoordinator(String key) {
-        return coordinatorResolver.resolve(key);
+    public Broker findGroupCoordinator(String group) {
+        return coordinatorResolver.findCoordinator(group, config.getGroupTopic());
     }
 
-    public CoordinatorDetail getCoordinatorDetail(String key) {
-        return coordinatorResolver.resolveDetail(key);
+    public CoordinatorDetail getGroupCoordinatorDetail(String group) {
+        return coordinatorResolver.getCoordinatorDetail(group, config.getGroupTopic());
     }
 
-    public boolean isCoordinatorTopic(TopicName topic) {
-        return config.getTopic().getFullName().equals(topic);
+    public boolean isGroupCoordinatorTopic(TopicName group) {
+        return config.getGroupTopic().getFullName().equals(group);
+    }
+
+    // transaction
+
+    public boolean isCurrentTransactionCoordinator(String key) {
+        Broker coordinatorBroker = findTransactionCoordinator(key);
+        return clusterManager.getBroker().equals(coordinatorBroker);
+    }
+
+    public Broker findTransactionCoordinator(String key) {
+        return coordinatorResolver.findCoordinator(key, config.getGroupTopic());
+    }
+
+    public CoordinatorDetail getTransactionCoordinatorDetail(String key) {
+        return coordinatorResolver.getCoordinatorDetail(key, config.getGroupTopic());
+    }
+
+    public boolean isTransactionCoordinatorTopic(TopicName topic) {
+        return config.getTransactionTopic().getFullName().equals(topic);
     }
 
     public boolean initCoordinator() {

@@ -13,9 +13,6 @@ import org.slf4j.LoggerFactory;
  */
 public class CoordinatorConfig {
 
-    public static final String GROUP_KAFKA_COORDINATOR = "coordinator";
-    public static final String CONFIG_GROUP = GROUP_KAFKA_COORDINATOR;
-
     protected static final Logger logger = LoggerFactory.getLogger(CoordinatorConfig.class);
 
     private PropertySupplier propertySupplier;
@@ -24,15 +21,35 @@ public class CoordinatorConfig {
         this.propertySupplier = propertySupplier;
     }
 
-    public TopicName getTopic() {
-        return TopicName.parse(PropertySupplier.getValue(propertySupplier, CoordinatorConfigKey.TOPIC_CODE));
+    public TopicName getGroupTopic() {
+        return TopicName.parse(PropertySupplier.getValue(propertySupplier, CoordinatorConfigKey.GROUP_TOPIC_CODE));
     }
 
-    public short getTopicPartitions() {
-        return PropertySupplier.getValue(propertySupplier, CoordinatorConfigKey.TOPIC_PARTITIONS);
+    public short getGroupTopicPartitions() {
+        return PropertySupplier.getValue(propertySupplier, CoordinatorConfigKey.GROUP_TOPIC_PARTITIONS);
     }
 
     public int getGroupExpireTime() {
         return PropertySupplier.getValue(propertySupplier, CoordinatorConfigKey.GROUP_EXPIRE_TIME);
+    }
+
+    public int getGroupMaxNum() {
+        return PropertySupplier.getValue(propertySupplier, CoordinatorConfigKey.GROUP_MAX_NUM);
+    }
+
+    public TopicName getTransactionTopic() {
+        return TopicName.parse(PropertySupplier.getValue(propertySupplier, CoordinatorConfigKey.TRANSACTION_TOPIC_CODE));
+    }
+
+    public short getTransactionTopicPartitions() {
+        return PropertySupplier.getValue(propertySupplier, CoordinatorConfigKey.TRANSACTION_TOPIC_PARTITIONS);
+    }
+
+    public int getTransactionExpireTime() {
+        return PropertySupplier.getValue(propertySupplier, CoordinatorConfigKey.TRANSACTION_EXPIRE_TIME);
+    }
+
+    public int getTransactionMaxNum() {
+        return PropertySupplier.getValue(propertySupplier, CoordinatorConfigKey.GROUP_MAX_NUM);
     }
 }

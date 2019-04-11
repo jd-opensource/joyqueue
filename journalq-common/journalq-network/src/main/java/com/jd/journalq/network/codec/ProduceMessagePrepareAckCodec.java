@@ -2,7 +2,7 @@ package com.jd.journalq.network.codec;
 
 import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.network.command.JMQCommandType;
-import com.jd.journalq.network.command.ProduceMessagePrepareAck;
+import com.jd.journalq.network.command.ProduceMessagePrepareResponse;
 import com.jd.journalq.network.serializer.Serializer;
 import com.jd.journalq.network.transport.codec.JMQHeader;
 import com.jd.journalq.network.transport.codec.PayloadCodec;
@@ -15,18 +15,18 @@ import io.netty.buffer.ByteBuf;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/19
  */
-public class ProduceMessagePrepareAckCodec implements PayloadCodec<JMQHeader, ProduceMessagePrepareAck>, Type {
+public class ProduceMessagePrepareAckCodec implements PayloadCodec<JMQHeader, ProduceMessagePrepareResponse>, Type {
 
     @Override
-    public ProduceMessagePrepareAck decode(JMQHeader header, ByteBuf buffer) throws Exception {
-        ProduceMessagePrepareAck produceMessagePrepareAck = new ProduceMessagePrepareAck();
-        produceMessagePrepareAck.setTxId(Serializer.readString(buffer, Serializer.SHORT_SIZE));
-        produceMessagePrepareAck.setCode(JMQCode.valueOf(buffer.readInt()));
-        return produceMessagePrepareAck;
+    public ProduceMessagePrepareResponse decode(JMQHeader header, ByteBuf buffer) throws Exception {
+        ProduceMessagePrepareResponse produceMessagePrepareResponse = new ProduceMessagePrepareResponse();
+        produceMessagePrepareResponse.setTxId(Serializer.readString(buffer, Serializer.SHORT_SIZE));
+        produceMessagePrepareResponse.setCode(JMQCode.valueOf(buffer.readInt()));
+        return produceMessagePrepareResponse;
     }
 
     @Override
-    public void encode(ProduceMessagePrepareAck payload, ByteBuf buffer) throws Exception {
+    public void encode(ProduceMessagePrepareResponse payload, ByteBuf buffer) throws Exception {
         Serializer.write(payload.getTxId(), buffer, Serializer.SHORT_SIZE);
         buffer.writeInt(payload.getCode().getCode());
     }

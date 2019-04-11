@@ -1,6 +1,6 @@
 package com.jd.journalq.network.codec;
 
-import com.jd.journalq.network.command.FetchHealthAck;
+import com.jd.journalq.network.command.FetchHealthResponse;
 import com.jd.journalq.network.command.JMQCommandType;
 import com.jd.journalq.network.transport.codec.JMQHeader;
 import com.jd.journalq.network.transport.codec.PayloadCodec;
@@ -13,18 +13,18 @@ import io.netty.buffer.ByteBuf;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/28
  */
-public class FetchHealthAckCodec implements PayloadCodec<JMQHeader, FetchHealthAck>, Type {
+public class FetchHealthAckCodec implements PayloadCodec<JMQHeader, FetchHealthResponse>, Type {
 
     @Override
     public Object decode(JMQHeader header, ByteBuf buffer) throws Exception {
         double point = buffer.readDouble();
-        FetchHealthAck fetchHealthAck = new FetchHealthAck();
-        fetchHealthAck.setPoint(point);
-        return fetchHealthAck;
+        FetchHealthResponse fetchHealthResponse = new FetchHealthResponse();
+        fetchHealthResponse.setPoint(point);
+        return fetchHealthResponse;
     }
 
     @Override
-    public void encode(FetchHealthAck payload, ByteBuf buffer) throws Exception {
+    public void encode(FetchHealthResponse payload, ByteBuf buffer) throws Exception {
         buffer.writeDouble(payload.getPoint());
     }
 

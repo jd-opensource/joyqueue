@@ -3,7 +3,7 @@ package com.jd.journalq.network.codec;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
-import com.jd.journalq.network.command.CommitAck;
+import com.jd.journalq.network.command.CommitAckRequest;
 import com.jd.journalq.network.command.CommitAckData;
 import com.jd.journalq.network.command.JMQCommandType;
 import com.jd.journalq.network.command.RetryType;
@@ -22,10 +22,10 @@ import java.util.Map;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/12
  */
-public class CommitAckCodec implements PayloadCodec<JMQHeader, CommitAck>, Type {
+public class CommitAckCodec implements PayloadCodec<JMQHeader, CommitAckRequest>, Type {
 
     @Override
-    public CommitAck decode(JMQHeader header, ByteBuf buffer) throws Exception {
+    public CommitAckRequest decode(JMQHeader header, ByteBuf buffer) throws Exception {
         short size = buffer.readShort();
         Table<String, Short, List<CommitAckData>> data = HashBasedTable.create();
 
@@ -47,14 +47,14 @@ public class CommitAckCodec implements PayloadCodec<JMQHeader, CommitAck>, Type 
             }
         }
 
-        CommitAck commitAck = new CommitAck();
-        commitAck.setData(data);
-        commitAck.setApp(Serializer.readString(buffer, Serializer.SHORT_SIZE));
-        return commitAck;
+        CommitAckRequest commitAckRequest = new CommitAckRequest();
+        commitAckRequest.setData(data);
+        commitAckRequest.setApp(Serializer.readString(buffer, Serializer.SHORT_SIZE));
+        return commitAckRequest;
     }
 
     @Override
-    public void encode(CommitAck payload, ByteBuf buffer) throws Exception {
+    public void encode(CommitAckRequest payload, ByteBuf buffer) throws Exception {
         buffer.writeShort(payload.getData().rowMap().size());
         for (Map.Entry<String, Map<Short, List<CommitAckData>>> entry : payload.getData().rowMap().entrySet()) {
             Serializer.write(entry.getKey(), buffer, Serializer.SHORT_SIZE);

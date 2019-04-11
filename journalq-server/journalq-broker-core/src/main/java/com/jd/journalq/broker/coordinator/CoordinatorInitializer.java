@@ -15,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * CoordinatorInitializer
@@ -39,79 +38,49 @@ public class CoordinatorInitializer extends Service {
 
     public boolean init() {
         try {
-            return initTopic();
+            initGroupTopic();
+            initTransactionTopic();
+            return true;
         } catch (Exception e) {
             logger.error("init coordinator exception", e);
             return false;
         }
     }
 
-    public boolean initTopic() {
-        return tempInitTopic();
+    protected boolean initGroupTopic() {
+        return initCoordinatorTopic(config.getGroupTopic(), config.getGroupTopicPartitions());
     }
 
-    protected boolean initTopicInternal() {
-        TopicName coordinatorTopicName = config.getTopic();
-        TopicConfig coordinatorTopic = clusterManager.getNameService().getTopicConfig(coordinatorTopicName);
-        if (coordinatorTopic != null && coordinatorTopic.getPartitions() >= config.getTopicPartitions()) {
-            return false;
-        }
-
-        List<PartitionGroup> partitionGroupList = Lists.newLinkedList();
-        List<Broker> allBrokers = nameService.getAllBrokers();
-        for (int i = 0, len = (Math.min(allBrokers.size(), config.getTopicPartitions())); i < len; i++) {
-            Broker broker = allBrokers.get(i);
-            PartitionGroup partitionGroup = new PartitionGroup();
-            partitionGroup.setTopic(coordinatorTopicName);
-            partitionGroup.setGroup(i);
-            partitionGroup.setLeader(broker.getId());
-            partitionGroup.setPartitions(Sets.newHashSet((short) i));
-            partitionGroup.setReplicas(Sets.newHashSet(allBrokers.stream().map(Broker::getId).collect(Collectors.toList())));
-            partitionGroupList.add(partitionGroup);
-        }
-
-        Topic topic = new Topic();
-        topic.setName(coordinatorTopicName);
-        topic.setPartitions((short) partitionGroupList.size());
-        topic.setType(TopicConfig.Type.TOPIC);
-
-        logger.info("create coordinator topic, topic: {}, partitions: {}", topic.getName().getFullName(), topic.getPartitions());
-
-        nameService.addTopic(topic, partitionGroupList);
-
-        logger.info("create coordinator topic complete");
-        return true;
+    protected boolean initTransactionTopic() {
+        return initCoordinatorTopic(config.getTransactionTopic(), config.getTransactionTopicPartitions());
     }
 
-    protected boolean tempInitTopic() {
-        TopicName coordinatorTopicName = config.getTopic();
-        TopicConfig coordinatorTopic = clusterManager.getNameService().getTopicConfig(coordinatorTopicName);
+    protected boolean initCoordinatorTopic(TopicName topic, int partitions) {
+        TopicConfig coordinatorTopic = nameService.getTopicConfig(topic);
         if (coordinatorTopic != null) {
-            return false;
+            return true;
         }
 
+        Broker currentBroker = clusterManager.getBroker();
         List<PartitionGroup> partitionGroupList = Lists.newLinkedList();
-        for (int i = 0, len = config.getTopicPartitions(); i < len; i++) {
-            Broker broker = clusterManager.getBroker();
+        for (int i = 0; i < partitions; i++) {
             PartitionGroup partitionGroup = new PartitionGroup();
-            partitionGroup.setTopic(coordinatorTopicName);
+            partitionGroup.setTopic(topic);
             partitionGroup.setGroup(i);
-            partitionGroup.setLeader(broker.getId());
+            partitionGroup.setLeader(currentBroker.getId());
             partitionGroup.setPartitions(Sets.newHashSet((short) i));
-            partitionGroup.setReplicas(Sets.newHashSet(broker.getId()));
+            partitionGroup.setReplicas(Sets.newHashSet(currentBroker.getId()));
             partitionGroupList.add(partitionGroup);
         }
 
-        Topic topic = new Topic();
-        topic.setName(coordinatorTopicName);
-        topic.setPartitions((short) partitionGroupList.size());
-        topic.setType(TopicConfig.Type.TOPIC);
+        Topic newTopic = new Topic();
+        newTopic.setName(topic);
+        newTopic.setPartitions((short) partitionGroupList.size());
+        newTopic.setType(TopicConfig.Type.TOPIC);
 
-        logger.info("create coordinator topic, topic: {}, partitions: {}", topic.getName().getFullName(), topic.getPartitions());
+        logger.info("create coordinator topic, topic: {}, partitions: {}", newTopic.getName().getFullName(), newTopic.getPartitions());
 
-        nameService.addTopic(topic, partitionGroupList);
-
-        logger.info("create coordinator topic complete");
+        nameService.addTopic(newTopic, partitionGroupList);
         return true;
     }
 }

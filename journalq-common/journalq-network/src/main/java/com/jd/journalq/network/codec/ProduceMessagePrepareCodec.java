@@ -1,7 +1,7 @@
 package com.jd.journalq.network.codec;
 
 import com.jd.journalq.network.command.JMQCommandType;
-import com.jd.journalq.network.command.ProduceMessagePrepare;
+import com.jd.journalq.network.command.ProduceMessagePrepareRequest;
 import com.jd.journalq.network.serializer.Serializer;
 import com.jd.journalq.network.transport.codec.JMQHeader;
 import com.jd.journalq.network.transport.codec.PayloadCodec;
@@ -14,21 +14,21 @@ import io.netty.buffer.ByteBuf;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/19
  */
-public class ProduceMessagePrepareCodec implements PayloadCodec<JMQHeader, ProduceMessagePrepare>, Type {
+public class ProduceMessagePrepareCodec implements PayloadCodec<JMQHeader, ProduceMessagePrepareRequest>, Type {
 
     @Override
-    public ProduceMessagePrepare decode(JMQHeader header, ByteBuf buffer) throws Exception {
-        ProduceMessagePrepare produceMessagePrepare = new ProduceMessagePrepare();
-        produceMessagePrepare.setTopic(Serializer.readString(buffer, Serializer.SHORT_SIZE));
-        produceMessagePrepare.setApp(Serializer.readString(buffer, Serializer.SHORT_SIZE));
-        produceMessagePrepare.setSequence(buffer.readLong());
-        produceMessagePrepare.setTransactionId(Serializer.readString(buffer, Serializer.SHORT_SIZE));
-        produceMessagePrepare.setTimeout(buffer.readInt());
-        return produceMessagePrepare;
+    public ProduceMessagePrepareRequest decode(JMQHeader header, ByteBuf buffer) throws Exception {
+        ProduceMessagePrepareRequest produceMessagePrepareRequest = new ProduceMessagePrepareRequest();
+        produceMessagePrepareRequest.setTopic(Serializer.readString(buffer, Serializer.SHORT_SIZE));
+        produceMessagePrepareRequest.setApp(Serializer.readString(buffer, Serializer.SHORT_SIZE));
+        produceMessagePrepareRequest.setSequence(buffer.readLong());
+        produceMessagePrepareRequest.setTransactionId(Serializer.readString(buffer, Serializer.SHORT_SIZE));
+        produceMessagePrepareRequest.setTimeout(buffer.readInt());
+        return produceMessagePrepareRequest;
     }
 
     @Override
-    public void encode(ProduceMessagePrepare payload, ByteBuf buffer) throws Exception {
+    public void encode(ProduceMessagePrepareRequest payload, ByteBuf buffer) throws Exception {
         Serializer.write(payload.getTopic(), buffer, Serializer.SHORT_SIZE);
         Serializer.write(payload.getApp(), buffer, Serializer.SHORT_SIZE);
         buffer.writeLong(payload.getSequence());

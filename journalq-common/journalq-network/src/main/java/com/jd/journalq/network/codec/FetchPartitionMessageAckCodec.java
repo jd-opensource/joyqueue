@@ -5,7 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
 import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.message.BrokerMessage;
-import com.jd.journalq.network.command.FetchPartitionMessageAck;
+import com.jd.journalq.network.command.FetchPartitionMessageResponse;
 import com.jd.journalq.network.command.FetchPartitionMessageAckData;
 import com.jd.journalq.network.command.JMQCommandType;
 import com.jd.journalq.network.serializer.Serializer;
@@ -24,10 +24,10 @@ import java.util.Map;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/13
  */
-public class FetchPartitionMessageAckCodec implements PayloadCodec<JMQHeader, FetchPartitionMessageAck>, Type {
+public class FetchPartitionMessageAckCodec implements PayloadCodec<JMQHeader, FetchPartitionMessageResponse>, Type {
 
     @Override
-    public FetchPartitionMessageAck decode(JMQHeader header, ByteBuf buffer) throws Exception {
+    public FetchPartitionMessageResponse decode(JMQHeader header, ByteBuf buffer) throws Exception {
         Table<String, Short, FetchPartitionMessageAckData> data = HashBasedTable.create();
         short topicSize = buffer.readShort();
         for (int i = 0; i < topicSize; i++) {
@@ -46,13 +46,13 @@ public class FetchPartitionMessageAckCodec implements PayloadCodec<JMQHeader, Fe
             }
         }
 
-        FetchPartitionMessageAck fetchPartitionMessageAck = new FetchPartitionMessageAck();
-        fetchPartitionMessageAck.setData(data);
-        return fetchPartitionMessageAck;
+        FetchPartitionMessageResponse fetchPartitionMessageResponse = new FetchPartitionMessageResponse();
+        fetchPartitionMessageResponse.setData(data);
+        return fetchPartitionMessageResponse;
     }
 
     @Override
-    public void encode(FetchPartitionMessageAck payload, ByteBuf buffer) throws Exception {
+    public void encode(FetchPartitionMessageResponse payload, ByteBuf buffer) throws Exception {
         buffer.writeShort(payload.getData().rowMap().size());
         for (Map.Entry<String, Map<Short, FetchPartitionMessageAckData>> topicEntry : payload.getData().rowMap().entrySet()) {
             Serializer.write(topicEntry.getKey(), buffer, Serializer.SHORT_SIZE);

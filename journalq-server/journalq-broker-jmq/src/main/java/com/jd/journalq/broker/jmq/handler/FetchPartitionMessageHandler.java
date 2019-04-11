@@ -14,8 +14,8 @@ import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.exception.JMQException;
 import com.jd.journalq.network.command.BooleanAck;
-import com.jd.journalq.network.command.FetchPartitionMessage;
-import com.jd.journalq.network.command.FetchPartitionMessageAck;
+import com.jd.journalq.network.command.FetchPartitionMessageRequest;
+import com.jd.journalq.network.command.FetchPartitionMessageResponse;
 import com.jd.journalq.network.command.FetchPartitionMessageAckData;
 import com.jd.journalq.network.command.FetchPartitionMessageData;
 import com.jd.journalq.network.command.JMQCommandType;
@@ -52,23 +52,23 @@ public class FetchPartitionMessageHandler implements JMQCommandHandler, Type, Br
 
     @Override
     public Command handle(Transport transport, Command command) {
-        FetchPartitionMessage fetchPartitionMessage = (FetchPartitionMessage) command.getPayload();
+        FetchPartitionMessageRequest fetchPartitionMessageRequest = (FetchPartitionMessageRequest) command.getPayload();
         Connection connection = SessionHelper.getConnection(transport);
 
-        if (connection == null || !connection.isAuthorized(fetchPartitionMessage.getApp())) {
+        if (connection == null || !connection.isAuthorized(fetchPartitionMessageRequest.getApp())) {
             logger.warn("connection is not exists, transport: {}", transport);
             return BooleanAck.build(JMQCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
         Table<String, Short, FetchPartitionMessageAckData> result = HashBasedTable.create();
 
-        for (Map.Entry<String, Map<Short, FetchPartitionMessageData>> entry : fetchPartitionMessage.getPartitions().rowMap().entrySet()) {
+        for (Map.Entry<String, Map<Short, FetchPartitionMessageData>> entry : fetchPartitionMessageRequest.getPartitions().rowMap().entrySet()) {
             String topic = entry.getKey();
-            Consumer consumer = new Consumer(connection.getId(), topic, fetchPartitionMessage.getApp(), Consumer.ConsumeType.JMQ);
+            Consumer consumer = new Consumer(connection.getId(), topic, fetchPartitionMessageRequest.getApp(), Consumer.ConsumeType.JMQ);
             for (Map.Entry<Short, FetchPartitionMessageData> partitionEntry : entry.getValue().entrySet()) {
                 short partition = partitionEntry.getKey();
 
-                BooleanResponse checkResult = clusterManager.checkReadable(TopicName.parse(topic), fetchPartitionMessage.getApp(), connection.getHost(), partition);
+                BooleanResponse checkResult = clusterManager.checkReadable(TopicName.parse(topic), fetchPartitionMessageRequest.getApp(), connection.getHost(), partition);
                 if (!checkResult.isSuccess()) {
                     logger.warn("checkReadable failed, transport: {}, topic: {}, app: {}, code: {}", transport, consumer.getTopic(), consumer.getApp(), checkResult.getJmqCode());
                     buildFetchPartitionMessageAckData(topic, entry.getValue(), CheckResultConverter.convertFetchCode(checkResult.getJmqCode()), result);
@@ -81,9 +81,9 @@ public class FetchPartitionMessageHandler implements JMQCommandHandler, Type, Br
             }
         }
 
-        FetchPartitionMessageAck fetchPartitionMessageAck = new FetchPartitionMessageAck();
-        fetchPartitionMessageAck.setData(result);
-        return new Command(fetchPartitionMessageAck);
+        FetchPartitionMessageResponse fetchPartitionMessageResponse = new FetchPartitionMessageResponse();
+        fetchPartitionMessageResponse.setData(result);
+        return new Command(fetchPartitionMessageResponse);
     }
 
     protected void buildFetchPartitionMessageAckData(String topic, Map<Short, FetchPartitionMessageData> partitionMap, JMQCode code, Table<String, Short, FetchPartitionMessageAckData> result) {
@@ -97,7 +97,7 @@ public class FetchPartitionMessageHandler implements JMQCommandHandler, Type, Br
         FetchPartitionMessageAckData fetchPartitionMessageAckData = new FetchPartitionMessageAckData();
         fetchPartitionMessageAckData.setBuffers(Collections.emptyList());
         try {
-            if (index == FetchPartitionMessage.NONE_INDEX) {
+            if (index == FetchPartitionMessageRequest.NONE_INDEX) {
                 index = consume.getAckIndex(consumer, partition);
             }
             if (index < consume.getMinIndex(consumer, partition) || index > consume.getMaxIndex(consumer, partition)) {

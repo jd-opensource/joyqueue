@@ -2,17 +2,20 @@ package com.jd.journalq.broker.kafka.network.protocol;
 
 import com.jd.journalq.broker.BrokerContext;
 import com.jd.journalq.broker.BrokerContextAware;
-import com.jd.journalq.broker.coordinator.CoordinatorGroupManager;
 import com.jd.journalq.broker.kafka.KafkaConsts;
 import com.jd.journalq.broker.kafka.KafkaContext;
 import com.jd.journalq.broker.kafka.config.KafkaConfig;
-import com.jd.journalq.broker.kafka.coordinator.GroupBalanceHandler;
-import com.jd.journalq.broker.kafka.coordinator.GroupBalanceManager;
-import com.jd.journalq.broker.kafka.coordinator.GroupCoordinator;
-import com.jd.journalq.broker.kafka.coordinator.GroupOffsetHandler;
-import com.jd.journalq.broker.kafka.coordinator.GroupOffsetManager;
-import com.jd.journalq.broker.kafka.coordinator.KafkaCoordinator;
-import com.jd.journalq.broker.kafka.coordinator.KafkaCoordinatorGroupManager;
+import com.jd.journalq.broker.kafka.coordinator.Coordinator;
+import com.jd.journalq.broker.kafka.coordinator.group.GroupBalanceHandler;
+import com.jd.journalq.broker.kafka.coordinator.group.GroupBalanceManager;
+import com.jd.journalq.broker.kafka.coordinator.group.GroupCoordinator;
+import com.jd.journalq.broker.kafka.coordinator.group.GroupMetadataManager;
+import com.jd.journalq.broker.kafka.coordinator.group.GroupOffsetHandler;
+import com.jd.journalq.broker.kafka.coordinator.group.GroupOffsetManager;
+import com.jd.journalq.broker.kafka.coordinator.transaction.ProducerIdManager;
+import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionCoordinator;
+import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionHandler;
+import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionMetadataManager;
 import com.jd.journalq.broker.kafka.handler.ratelimit.KafkaRateLimitHandlerFactory;
 import com.jd.journalq.broker.kafka.manage.KafkaManageServiceFactory;
 import com.jd.journalq.broker.kafka.network.helper.KafkaProtocolHelper;
@@ -45,14 +48,20 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
     protected static final Logger logger = LoggerFactory.getLogger(KafkaProtocol.class);
 
     private KafkaConfig config;
-    private KafkaCoordinator coordinator;
-    private KafkaCoordinatorGroupManager groupMetadataManager;
+    private Coordinator coordinator;
+    private GroupMetadataManager groupMetadataManager;
     private GroupOffsetManager groupOffsetManager;
     private GroupBalanceManager groupBalanceManager;
     private GroupOffsetHandler groupOffsetHandler;
     private GroupBalanceHandler groupBalanceHandler;
     private GroupCoordinator groupCoordinator;
+
+    private ProducerIdManager producerIdManager;
+    private TransactionMetadataManager transactionMetadataManager;
+    private TransactionHandler transactionHandler;
+    private TransactionCoordinator transactionCoordinator;
     private KafkaConnectionManager connectionManager;
+
     private KafkaRateLimitHandlerFactory rateLimitHandlerFactory;
     private KafkaConnectionHandler connectionHandler;
     private KafkaContext kafkaContext;
@@ -60,25 +69,28 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
     @Override
     public void setBrokerContext(BrokerContext brokerContext) {
         this.config = new KafkaConfig(brokerContext.getPropertySupplier());
-        CoordinatorGroupManager coordinatorGroupManager = brokerContext.getCoordinatorService().getOrCreateCoordinatorGroupManager(KafkaConsts.COORDINATOR_NAMESPACE);
+        com.jd.journalq.broker.coordinator.group.GroupMetadataManager groupMetadataManager = brokerContext.getCoordinatorService().getOrCreateGroupMetadataManager(KafkaConsts.COORDINATOR_NAMESPACE);
+        com.jd.journalq.broker.coordinator.transaction.TransactionMetadataManager transactionMetadataManager = brokerContext.getCoordinatorService().getOrCreateTransactionMetadataManager(KafkaConsts.COORDINATOR_NAMESPACE);
 
-        this.groupMetadataManager = new KafkaCoordinatorGroupManager(config, coordinatorGroupManager);
+        this.coordinator = new Coordinator(brokerContext.getCoordinatorService().getCoordinator());
+
+        this.groupMetadataManager = new GroupMetadataManager(config, groupMetadataManager);
         this.groupOffsetManager = new GroupOffsetManager(config, brokerContext.getClusterManager());
-        this.groupBalanceManager = new GroupBalanceManager(config, groupMetadataManager);
+        this.groupBalanceManager = new GroupBalanceManager(config, this.groupMetadataManager);
+        this.groupOffsetHandler = new GroupOffsetHandler(config, coordinator, this.groupMetadataManager, groupBalanceManager, groupOffsetManager);
+        this.groupBalanceHandler = new GroupBalanceHandler(config, this.groupMetadataManager, groupBalanceManager);
+        this.groupCoordinator = new GroupCoordinator(coordinator, groupBalanceHandler, groupOffsetHandler, this.groupMetadataManager);
 
-        this.coordinator = new KafkaCoordinator(brokerContext.getCoordinatorService().getCoordinator());
-        this.groupOffsetHandler = new GroupOffsetHandler(config, this.coordinator, groupMetadataManager, groupBalanceManager, groupOffsetManager);
-        this.groupBalanceHandler = new GroupBalanceHandler(config, groupMetadataManager, groupBalanceManager);
-        this.groupCoordinator = new GroupCoordinator(this.coordinator, groupBalanceHandler, groupOffsetHandler);
+        this.producerIdManager = new ProducerIdManager();
+        this.transactionMetadataManager = new TransactionMetadataManager(config, transactionMetadataManager);
+        this.transactionHandler = new TransactionHandler(this.transactionMetadataManager, coordinator, producerIdManager);
+        this.transactionCoordinator = new TransactionCoordinator(coordinator, this.transactionMetadataManager, this.transactionHandler);
 
         this.connectionManager = new KafkaConnectionManager(brokerContext.getSessionManager());
-
         this.rateLimitHandlerFactory = newRateLimitKafkaHandlerFactory(config);
         this.connectionHandler = new KafkaConnectionHandler(connectionManager);
 
-        this.kafkaContext = new KafkaContext(config, connectionManager, groupMetadataManager,
-                groupOffsetManager, groupBalanceManager, groupOffsetHandler, groupBalanceHandler, groupCoordinator, rateLimitHandlerFactory, brokerContext);
-
+        this.kafkaContext = new KafkaContext(config, groupCoordinator, transactionCoordinator, rateLimitHandlerFactory, brokerContext);
         registerManage(brokerContext, kafkaContext);
     }
 
@@ -101,6 +113,10 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
         groupOffsetHandler.start();
         groupBalanceHandler.start();
         groupCoordinator.start();
+
+        producerIdManager.start();
+        transactionHandler.start();
+        transactionCoordinator.start();
         rateLimitHandlerFactory.start();
     }
 
@@ -111,6 +127,10 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
         groupBalanceManager.stop();
         groupOffsetHandler.stop();
         groupBalanceHandler.stop();
+
+        transactionCoordinator.stop();
+        transactionHandler.stop();
+        producerIdManager.stop();
         rateLimitHandlerFactory.stop();
     }
 

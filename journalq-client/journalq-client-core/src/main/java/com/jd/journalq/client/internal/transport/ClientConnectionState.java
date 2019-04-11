@@ -4,9 +4,9 @@ import com.jd.journalq.client.internal.ClientConsts;
 import com.jd.journalq.client.internal.exception.ClientException;
 import com.jd.journalq.client.internal.nameserver.NameServerConfig;
 import com.jd.journalq.exception.JMQCode;
-import com.jd.journalq.network.command.AddConnection;
-import com.jd.journalq.network.command.AddConnectionAck;
-import com.jd.journalq.network.command.RemoveConnection;
+import com.jd.journalq.network.command.AddConnectionRequest;
+import com.jd.journalq.network.command.AddConnectionResponse;
+import com.jd.journalq.network.command.RemoveConnectionRequest;
 import com.jd.journalq.network.session.ClientId;
 import com.jd.journalq.network.session.Language;
 import com.jd.journalq.network.transport.command.Command;
@@ -61,7 +61,7 @@ public class ClientConnectionState {
     }
 
     protected void doHandleAddConnection() {
-        AddConnection addConnection = new AddConnection();
+        AddConnectionRequest addConnectionRequest = new AddConnectionRequest();
         ClientId clientId = new ClientId();
 
 //        addConnection.setUsername(nameServerConfig.getUsername());
@@ -70,27 +70,27 @@ public class ClientConnectionState {
         // 如果app是app.group类型，那么分割为app
         // TODO group处理
         if (nameServerConfig.getApp().contains(".")) {
-            addConnection.setApp(nameServerConfig.getApp().split("\\.")[0]);
+            addConnectionRequest.setApp(nameServerConfig.getApp().split("\\.")[0]);
         } else {
-            addConnection.setApp(nameServerConfig.getApp());
+            addConnectionRequest.setApp(nameServerConfig.getApp());
         }
-        addConnection.setToken(nameServerConfig.getToken());
-        addConnection.setRegion(nameServerConfig.getRegion());
-        addConnection.setNamespace(nameServerConfig.getNamespace());
-        addConnection.setLanguage(Language.JAVA);
+        addConnectionRequest.setToken(nameServerConfig.getToken());
+        addConnectionRequest.setRegion(nameServerConfig.getRegion());
+        addConnectionRequest.setNamespace(nameServerConfig.getNamespace());
+        addConnectionRequest.setLanguage(Language.JAVA);
         clientId.setVersion(CLIENT_VERSION);
         clientId.setIp(CLIENT_IP);
         clientId.setTime(SystemClock.now());
         clientId.setSequence(SEQUENCE.incrementAndGet());
-        addConnection.setClientId(clientId);
+        addConnectionRequest.setClientId(clientId);
 
         try {
-            Command response = client.sync(new JMQCommand(addConnection));
+            Command response = client.sync(new JMQCommand(addConnectionRequest));
 
-            AddConnectionAck addConnectionAck = (AddConnectionAck) response.getPayload();
+            AddConnectionResponse addConnectionResponse = (AddConnectionResponse) response.getPayload();
             ClientConnectionInfo clientConnectionInfo = new ClientConnectionInfo();
-            clientConnectionInfo.setConnectionId(addConnectionAck.getConnectionId());
-            handleNotification(addConnectionAck);
+            clientConnectionInfo.setConnectionId(addConnectionResponse.getConnectionId());
+            handleNotification(addConnectionResponse);
 
             client.getAttribute().set(CONNECTION_INFO_KEY, clientConnectionInfo);
             client.getAttribute().set(ADDED_CONNECTION_KEY, true);
@@ -101,17 +101,17 @@ public class ClientConnectionState {
                 logger.error("client addConnection error, no permission, please check your app and token", error);
                 throw e;
             } else {
-                logger.error("client addConnection error, app: {}, token: {}, code: {}, error: {}", addConnection.getApp(), addConnection.getToken(), code, error);
+                logger.error("client addConnection error, app: {}, token: {}, code: {}, error: {}", addConnectionRequest.getApp(), addConnectionRequest.getToken(), code, error);
                 throw e;
             }
         }
     }
 
-    protected void handleNotification(AddConnectionAck addConnectionAck) {
-        if (StringUtils.isBlank(addConnectionAck.getNotification())) {
+    protected void handleNotification(AddConnectionResponse addConnectionResponse) {
+        if (StringUtils.isBlank(addConnectionResponse.getNotification())) {
             return;
         }
-        logger.warn("{}", addConnectionAck.getNotification());
+        logger.warn("{}", addConnectionResponse.getNotification());
     }
 
     protected void doHandleDisconnection() {
@@ -120,13 +120,13 @@ public class ClientConnectionState {
             return;
         }
 
-        RemoveConnection removeConnection = new RemoveConnection();
+        RemoveConnectionRequest removeConnectionRequest = new RemoveConnectionRequest();
 
         try {
-            Command response = client.sync(new JMQCommand(removeConnection));
+            Command response = client.sync(new JMQCommand(removeConnectionRequest));
             client.getAttribute().set(DISCONNECTED_KEY, true);
         } catch (Exception e) {
-            logger.debug("client removeConnection error, connection: {}", removeConnection, e);
+            logger.debug("client removeConnection error, connection: {}", removeConnectionRequest, e);
         } finally {
             client.getAttribute().remove(ADDED_CONNECTION_KEY);
             client.getAttribute().remove(CONNECTION_INFO_KEY);

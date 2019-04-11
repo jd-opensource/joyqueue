@@ -1,6 +1,6 @@
 package com.jd.journalq.network.codec;
 
-import com.jd.journalq.network.command.FetchProduceFeedback;
+import com.jd.journalq.network.command.FetchProduceFeedbackRequest;
 import com.jd.journalq.network.command.JMQCommandType;
 import com.jd.journalq.network.command.TxStatus;
 import com.jd.journalq.network.serializer.Serializer;
@@ -15,20 +15,20 @@ import io.netty.buffer.ByteBuf;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/19
  */
-public class FetchProduceFeedbackCodec implements PayloadCodec<JMQHeader, FetchProduceFeedback>, Type {
+public class FetchProduceFeedbackCodec implements PayloadCodec<JMQHeader, FetchProduceFeedbackRequest>, Type {
 
     @Override
-    public FetchProduceFeedback decode(JMQHeader header, ByteBuf buffer) throws Exception {
-        FetchProduceFeedback fetchProduceFeedback = new FetchProduceFeedback();
-        fetchProduceFeedback.setApp(Serializer.readString(buffer, Serializer.SHORT_SIZE));
-        fetchProduceFeedback.setTopic(Serializer.readString(buffer, Serializer.SHORT_SIZE));
-        fetchProduceFeedback.setStatus(TxStatus.valueOf(buffer.readByte()));
-        fetchProduceFeedback.setLongPollTimeout(buffer.readInt());
-        return fetchProduceFeedback;
+    public FetchProduceFeedbackRequest decode(JMQHeader header, ByteBuf buffer) throws Exception {
+        FetchProduceFeedbackRequest fetchProduceFeedbackRequest = new FetchProduceFeedbackRequest();
+        fetchProduceFeedbackRequest.setApp(Serializer.readString(buffer, Serializer.SHORT_SIZE));
+        fetchProduceFeedbackRequest.setTopic(Serializer.readString(buffer, Serializer.SHORT_SIZE));
+        fetchProduceFeedbackRequest.setStatus(TxStatus.valueOf(buffer.readByte()));
+        fetchProduceFeedbackRequest.setLongPollTimeout(buffer.readInt());
+        return fetchProduceFeedbackRequest;
     }
 
     @Override
-    public void encode(FetchProduceFeedback payload, ByteBuf buffer) throws Exception {
+    public void encode(FetchProduceFeedbackRequest payload, ByteBuf buffer) throws Exception {
         Serializer.write(payload.getApp(), buffer, Serializer.SHORT_SIZE);
         Serializer.write(payload.getTopic(), buffer, Serializer.SHORT_SIZE);
         buffer.writeByte(payload.getStatus().getType());

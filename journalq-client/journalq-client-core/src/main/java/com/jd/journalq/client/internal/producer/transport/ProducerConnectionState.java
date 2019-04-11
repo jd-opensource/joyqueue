@@ -3,8 +3,8 @@ package com.jd.journalq.client.internal.producer.transport;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.jd.journalq.network.command.AddProducer;
-import com.jd.journalq.network.command.RemoveProducer;
+import com.jd.journalq.network.command.AddProducerRequest;
+import com.jd.journalq.network.command.RemoveProducerRequest;
 import com.jd.journalq.network.transport.TransportAttribute;
 import com.jd.journalq.network.transport.command.JMQCommand;
 import org.apache.commons.collections.CollectionUtils;
@@ -102,12 +102,12 @@ public class ProducerConnectionState {
     }
 
     protected boolean doHandleAddProducers(List<String> topics, String app) {
-        AddProducer addProducer = new AddProducer();
-        addProducer.setTopics(topics);
-        addProducer.setApp(app);
-        addProducer.setSequence(SEQUENCE.incrementAndGet());
+        AddProducerRequest addProducerRequest = new AddProducerRequest();
+        addProducerRequest.setTopics(topics);
+        addProducerRequest.setApp(app);
+        addProducerRequest.setSequence(SEQUENCE.incrementAndGet());
         try {
-            producerClient.getClient().sync(new JMQCommand(addProducer));
+            producerClient.getClient().sync(new JMQCommand(addProducerRequest));
             return true;
         } catch (Exception e) {
             logger.warn("add producer exception, topics: {}, app: {}, error: {}", topics, app, e.getMessage());
@@ -117,11 +117,11 @@ public class ProducerConnectionState {
     }
 
     protected boolean doHandleRemoveProducers(List<String> topics, String app) {
-        RemoveProducer removeProducer = new RemoveProducer();
-        removeProducer.setTopics(topics);
-        removeProducer.setApp(app);
+        RemoveProducerRequest removeProducerRequest = new RemoveProducerRequest();
+        removeProducerRequest.setTopics(topics);
+        removeProducerRequest.setApp(app);
         try {
-            producerClient.getClient().sync(new JMQCommand(removeProducer));
+            producerClient.getClient().sync(new JMQCommand(removeProducerRequest));
             return true;
         } catch (Exception e) {
             logger.warn("remove producer exception, topics: {}, app: {}, error: {}", topics, app, e.getMessage());

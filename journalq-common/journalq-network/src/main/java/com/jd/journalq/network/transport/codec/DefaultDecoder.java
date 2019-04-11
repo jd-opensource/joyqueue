@@ -34,10 +34,10 @@ public class DefaultDecoder implements Decoder {
             if (!buffer.isReadable(LENGTH_FIELD_LENGTH)) {
                 return null;
             }
-            buffer.markReaderIndex();
+            int readerIndex = buffer.readerIndex();
             int length = readLength(buffer);
             if (buffer.readableBytes() < length) {
-                buffer.resetReaderIndex();
+                buffer.readerIndex(readerIndex);
                 return null;
             }
             return doDecode(buffer);

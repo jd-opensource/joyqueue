@@ -1,7 +1,7 @@
 package com.jd.journalq.broker.kafka.command;
 
 import com.jd.journalq.broker.kafka.KafkaCommandType;
-import com.jd.journalq.broker.kafka.model.OffsetMetadataAndError;
+import com.jd.journalq.broker.kafka.model.PartitionMetadataAndError;
 
 import java.util.List;
 import java.util.Map;
@@ -14,13 +14,13 @@ import java.util.Map;
  */
 public class TxnOffsetCommitResponse extends KafkaRequestOrResponse {
 
-    private Map<String, List<OffsetMetadataAndError>> partitions;
+    private Map<String, List<PartitionMetadataAndError>> partitions;
 
-    public Map<String, List<OffsetMetadataAndError>> getPartitions() {
+    public Map<String, List<PartitionMetadataAndError>> getPartitions() {
         return partitions;
     }
 
-    public void setPartitions(Map<String, List<OffsetMetadataAndError>> partitions) {
+    public void setPartitions(Map<String, List<PartitionMetadataAndError>> partitions) {
         this.partitions = partitions;
     }
 
