@@ -3,6 +3,7 @@ package com.jd.journalq.store.index;
 import com.jd.journalq.store.message.MessageParser;
 
 import java.nio.ByteBuffer;
+import java.util.Objects;
 
 /**
  * 索引记录
@@ -37,6 +38,41 @@ public class IndexItem {
      */
     private short batchMessageSize = 1;
 
+    public IndexItem() {
+    }
+
+    public IndexItem(short partition, long index, int length, long offset) {
+        this.partition = partition;
+        this.index = index;
+        this.length = length;
+        this.offset = offset;
+    }
+
+    public static IndexItem parseMessage(ByteBuffer byteBuffer, long offset) throws BuildIndexFailedException {
+        try {
+            return new IndexItem(MessageParser.getShort(byteBuffer, MessageParser.PARTITION),
+                    MessageParser.getLong(byteBuffer, MessageParser.INDEX),
+                    MessageParser.getInt(byteBuffer, MessageParser.LENGTH),
+                    offset);
+        } catch (IndexOutOfBoundsException e) {
+            throw new BuildIndexFailedException(e);
+        }
+    }
+
+    public static IndexItem from(ByteBuffer byteBuffer, short partition, long index) {
+        IndexItem indexItem = from(byteBuffer);
+        indexItem.setPartition(partition);
+        indexItem.setIndex(index);
+        return indexItem;
+    }
+
+    public static IndexItem from(ByteBuffer byteBuffer) {
+        IndexItem indexItem = new IndexItem();
+        indexItem.setOffset(byteBuffer.getLong());
+        indexItem.setLength(byteBuffer.getInt());
+        return indexItem;
+    }
+
     public short getPartition() {
         return partition;
     }
@@ -69,47 +105,14 @@ public class IndexItem {
         this.length = length;
     }
 
-    public IndexItem() {}
-    public IndexItem(short partition, long index , int length, long offset) {
-        this.partition = partition;
-        this.index = index;
-        this.length = length;
-        this.offset = offset;
-    }
-
-    public static IndexItem parseMessage(ByteBuffer byteBuffer, long offset) throws BuildIndexFailedException {
-        try {
-            return new IndexItem(MessageParser.getShort(byteBuffer,MessageParser.PARTITION),
-                    MessageParser.getLong(byteBuffer,MessageParser.INDEX),
-                    MessageParser.getInt(byteBuffer,MessageParser.LENGTH),
-                    offset);
-        }catch (IndexOutOfBoundsException e) {
-            throw new BuildIndexFailedException(e);
-        }
-    }
-
-    public void serializeTo(ByteBuffer buffer){
+    public void serializeTo(ByteBuffer buffer) {
         buffer.putLong(offset);
         buffer.putInt(length);
     }
 
-    public static IndexItem from(ByteBuffer byteBuffer,short partition, long index){
-        IndexItem indexItem = from(byteBuffer);
-        indexItem.setPartition(partition);
-        indexItem.setIndex(index);
-        return indexItem;
-    }
-
-    public static IndexItem from(ByteBuffer byteBuffer) {
-        IndexItem indexItem = new IndexItem();
-        indexItem.setOffset(byteBuffer.getLong());
-        indexItem.setLength(byteBuffer.getInt());
-        return indexItem;
-    }
-
     @Override
     public boolean equals(Object obj) {
-        if(obj instanceof IndexItem) {
+        if (obj instanceof IndexItem) {
             IndexItem indexItem = (IndexItem) obj;
             return indexItem.getOffset() == getOffset()
                     && indexItem.getIndex() == getIndex()
@@ -117,6 +120,11 @@ public class IndexItem {
                     && indexItem.getPartition() == getPartition();
         }
         return super.equals(obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(offset, index, length, partition);
     }
 
     public boolean isBatchMessage() {

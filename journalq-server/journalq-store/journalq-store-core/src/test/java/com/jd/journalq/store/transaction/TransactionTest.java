@@ -27,11 +27,12 @@ import java.util.concurrent.Future;
 public class TransactionTest {
     private static final Logger logger = LoggerFactory.getLogger(TransactionTest.class);
     private File base = null;
+
     @Test
     public void transactionTest() throws Exception {
         int count = 1024;
         PositioningStore.Config config = new PositioningStore.Config();
-        PreloadBufferPool bufferPool = new PreloadBufferPool( );
+        PreloadBufferPool bufferPool = new PreloadBufferPool();
 
         TransactionStoreManager transactionStoreManager = new TransactionStoreManager(base, config, bufferPool);
         int tId = transactionStoreManager.next();
@@ -60,6 +61,7 @@ public class TransactionTest {
 
         base = null;
     }
+
     @Before
     public void prepareBaseDir() throws IOException {
 

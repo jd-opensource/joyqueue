@@ -12,11 +12,12 @@ import java.util.Locale;
 public class ThreadSafeFormat {
     private static ThreadLocal<SimpleDateFormat> sdfHolder
             = ThreadLocal.withInitial(() -> new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
+
     public static String format(Date date) {
         return sdfHolder.get().format(date);
     }
 
     public static String formatWithComma(long position) {
-        return  NumberFormat.getNumberInstance(Locale.US).format(position);
+        return NumberFormat.getNumberInstance(Locale.US).format(position);
     }
 }

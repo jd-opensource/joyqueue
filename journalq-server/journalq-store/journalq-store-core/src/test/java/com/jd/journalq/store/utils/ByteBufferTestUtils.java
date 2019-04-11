@@ -14,9 +14,9 @@ public class ByteBufferTestUtils {
      * 将多个rbytebuffer拷贝到一个buffer中。
      * 内存拷贝，效率低，只能用于单元测试。
      */
-    public static ByteBuffer concat(List<RByteBuffer> byteBuffers){
+    public static ByteBuffer concat(List<RByteBuffer> byteBuffers) {
         int size = byteBuffers.stream().mapToInt(RByteBuffer::remaining).sum();
-        if(size > 0) {
+        if (size > 0) {
             ByteBuffer buffer = ByteBuffer.allocate(size);
             ByteBuffer[] array = byteBuffers.stream().map(RByteBuffer::getBuffer).toArray(ByteBuffer[]::new);
             ByteBufferUtils.concat(buffer, array);

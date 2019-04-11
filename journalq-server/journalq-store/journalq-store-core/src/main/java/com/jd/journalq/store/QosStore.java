@@ -66,21 +66,22 @@ public class QosStore implements PartitionGroupStore {
         long deletedSize = 0L;
         Set<PositioningStore<IndexItem>> indexStoreSet = store.meetPositioningStores();
         // 依次删除每个索引中最左侧的文件 满足最小消费位置之前的文件块
-        for(PositioningStore<IndexItem> indexStore: indexStoreSet) {
-            if(indexStore.fileCount() > 1 && indexStore.meetMinStoreFile(minIndexedPhysicalPosition)) {
+        for (PositioningStore<IndexItem> indexStore : indexStoreSet) {
+            if (indexStore.fileCount() > 1 && indexStore.meetMinStoreFile(minIndexedPhysicalPosition)) {
                 deletedSize += indexStore.physicalDeleteLeftFile();
             }
         }
 
         // 计算最小索引的消息位置
         long minIndexedMessagePosition = -1L;
-        for(PositioningStore<IndexItem> indexStore: indexStoreSet) {
+        for (PositioningStore<IndexItem> indexStore : indexStoreSet) {
             try {
                 long storeMinMessagePosition = indexStore.read(indexStore.left()).getOffset();
                 if (minIndexedMessagePosition < 0 || minIndexedMessagePosition > storeMinMessagePosition) {
                     minIndexedMessagePosition = storeMinMessagePosition;
                 }
-            }catch (PositionOverflowException ignored) {}
+            } catch (PositionOverflowException ignored) {
+            }
         }
         deletedSize += store.messageStore().physicalDeleteTo(minIndexedMessagePosition);
         return deletedSize;
@@ -96,7 +97,7 @@ public class QosStore implements PartitionGroupStore {
         long deletedSize = 0L;
         Set<PositioningStore<IndexItem>> indexStoreSet = store.meetPositioningStores();
         // 依次删除每个索引中最左侧的文件 满足最小消费位置之前的文件块
-        for(PositioningStore<IndexItem> indexStore: indexStoreSet) {
+        for (PositioningStore<IndexItem> indexStore : indexStoreSet) {
             if (indexStore.fileCount() > 1 && indexStore.isEarly(targetDeleteTimeline, minIndexedPhysicalPosition)) {
                 deletedSize += indexStore.physicalDeleteLeftFile();
             }
@@ -104,13 +105,14 @@ public class QosStore implements PartitionGroupStore {
 
         // 计算最小索引的消息位置
         long minIndexedMessagePosition = -1L;
-        for(PositioningStore<IndexItem> indexStore: indexStoreSet) {
+        for (PositioningStore<IndexItem> indexStore : indexStoreSet) {
             try {
                 long storeMinMessagePosition = indexStore.read(indexStore.left()).getOffset();
                 if (minIndexedMessagePosition < 0 || minIndexedMessagePosition > storeMinMessagePosition) {
                     minIndexedMessagePosition = storeMinMessagePosition;
                 }
-            }catch (PositionOverflowException ignored) {}
+            } catch (PositionOverflowException ignored) {
+            }
         }
         deletedSize += store.messageStore().physicalDeleteTo(minIndexedMessagePosition);
         return deletedSize;
@@ -138,7 +140,7 @@ public class QosStore implements PartitionGroupStore {
     }
 
     @Override
-    public void asyncWrite(EventListener<WriteResult> eventListener,  WriteRequest... writeRequests) {
+    public void asyncWrite(EventListener<WriteResult> eventListener, WriteRequest... writeRequests) {
         store.asyncWrite(this.qosLevel, eventListener, writeRequests);
     }
 

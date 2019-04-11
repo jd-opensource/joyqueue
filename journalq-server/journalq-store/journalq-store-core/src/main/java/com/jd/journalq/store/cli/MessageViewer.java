@@ -14,24 +14,24 @@ import java.nio.ByteBuffer;
  * Date: 2018/10/26
  */
 public class MessageViewer {
-    public static void main(String [] args) throws IOException {
-        if(args.length < 1) {
+    public static void main(String[] args) throws IOException {
+        if (args.length < 1) {
             showUsage();
             return;
         }
 
         File base = new File(args[0]);
-        if(!base.isDirectory()) {
+        if (!base.isDirectory()) {
             System.out.println("Invalid path!");
             return;
         }
         long position = 0L;
         int count = 0;
 
-        if(args.length > 1) {
+        if (args.length > 1) {
             position = Long.parseLong(args[1]);
 
-            if(args.length > 2) {
+            if (args.length > 2) {
                 count = Integer.parseInt(args[2]);
             }
         }
@@ -42,11 +42,11 @@ public class MessageViewer {
                 new PositioningStore.Config();
 
 
-        PreloadBufferPool bufferPool = new PreloadBufferPool( );
-        bufferPool.addPreLoad(PositioningStore.Config.DEFAULT_FILE_DATA_SIZE,1, 1);
+        PreloadBufferPool bufferPool = new PreloadBufferPool();
+        bufferPool.addPreLoad(PositioningStore.Config.DEFAULT_FILE_DATA_SIZE, 1, 1);
 
         PositioningStore<ByteBuffer> store =
-                new PositioningStore<>(base,storeConfig, bufferPool,new StoreMessageSerializer(1024 * 1024));
+                new PositioningStore<>(base, storeConfig, bufferPool, new StoreMessageSerializer(1024 * 1024));
         store.recover();
         long pos = store.position(position, -1 * count);
         int wCount = 2 * count + 1;

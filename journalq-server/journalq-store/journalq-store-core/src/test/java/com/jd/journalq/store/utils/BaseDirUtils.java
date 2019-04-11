@@ -17,8 +17,9 @@ public class BaseDirUtils {
         Assert.assertTrue(tempDirFile.exists() && tempDirFile.isDirectory() && tempDirFile.canWrite());
 
         File base = new File(basePath);
-        if (base.exists()){
-            if(base.isDirectory()) deleteFolder(base); else base.delete();
+        if (base.exists()) {
+            if (base.isDirectory()) deleteFolder(base);
+            else base.delete();
         }
         base.mkdirs();
         return base;
@@ -38,8 +39,9 @@ public class BaseDirUtils {
     }
 
     public static void destroyBaseDir(File base) {
-        if (base.exists()){
-            if(base.isDirectory()) deleteFolder(base); else base.delete();
+        if (base.exists()) {
+            if (base.isDirectory()) deleteFolder(base);
+            else base.delete();
         }
 
     }
@@ -47,9 +49,9 @@ public class BaseDirUtils {
 
     private static void deleteFolder(File folder) {
         File[] files = folder.listFiles();
-        if(files!=null) { //some JVMs return null for empty dirs
-            for(File f: files) {
-                if(f.isDirectory()) {
+        if (files != null) { //some JVMs return null for empty dirs
+            for (File f : files) {
+                if (f.isDirectory()) {
                     deleteFolder(f);
                 } else {
                     f.delete();

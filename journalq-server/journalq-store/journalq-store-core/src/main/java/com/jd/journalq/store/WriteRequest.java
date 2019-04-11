@@ -26,12 +26,12 @@ public class WriteRequest implements Closeable {
         return buffer;
     }
 
+    public void setBuffer(ByteBuffer buffer) {
+        this.buffer = buffer;
+    }
+
     @Override
     public void close() throws IOException {
 
-    }
-
-    public void setBuffer(ByteBuffer buffer) {
-        this.buffer = buffer;
     }
 }
