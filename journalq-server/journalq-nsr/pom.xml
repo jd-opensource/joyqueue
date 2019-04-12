@@ -49,7 +49,7 @@
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-web</artifactId>
-            <version>3.4.2</version>
+            <version>${vertx.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>io.netty</groupId>

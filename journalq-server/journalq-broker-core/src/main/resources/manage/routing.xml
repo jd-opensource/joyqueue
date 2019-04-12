@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <vertx>
     <routes>
-       <!-- <route name="put" type="PUT" route="true" consumers="application/json;charset=UTF-8"
+        <route name="put" type="PUT" route="true" consumers="application/json;charset=UTF-8"
                produces="application/json;charset=UTF-8"/>
         <route name="post" type="POST" route="true" consumers="application/json;charset=UTF-8"
                produces="application/json;charset=UTF-8"/>
         <route name="get" type="GET" route="true" consumers="application/json;charset=UTF-8"
                produces="application/json;charset=UTF-8"/>
         <route name="delete" type="DELETE" route="true" consumers="application/json;charset=UTF-8"
-               produces="application/json;charset=UTF-8"/>-->
+               produces="application/json;charset=UTF-8"/>
         <!-- monitor -->
         <!-- broker -->
         <route path="/monitor/broker" inherit="get"
@@ -68,7 +68,7 @@
         <route path="/monitor/topic/:topic/app/:app/consumer/connections/detail" inherit="get"
                handlers="brokerMonitorService.getConsumerConnectionDetailInfoByTopicAndApp"/>
         <!-- consumer -->
-        <route path="/monitor/topic/:topic/app/:app/consumer" inherit="get"
+        <route path="/monitor/topic/:topic/app/:app/consumer" inherit="get" type="GET"
                handlers="brokerMonitorService.getConsumerInfoByTopicAndApp"/>
         <route path="/monitor/topic/:topic/app/:app/consumer/partitions" inherit="get"
                handlers="brokerMonitorService.getConsumerPartitionInfos"/>
