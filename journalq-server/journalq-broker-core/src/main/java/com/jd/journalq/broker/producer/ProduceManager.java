@@ -5,12 +5,17 @@ import com.jd.journalq.broker.BrokerContextAware;
 import com.jd.journalq.broker.buffer.Serializer;
 import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.monitor.BrokerMonitor;
+import com.jd.journalq.broker.producer.transaction.TransactionManager;
 import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.domain.QosLevel;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.exception.JMQException;
-import com.jd.journalq.message.*;
+import com.jd.journalq.message.BrokerCommit;
+import com.jd.journalq.message.BrokerMessage;
+import com.jd.journalq.message.BrokerPrepare;
+import com.jd.journalq.message.BrokerRollback;
+import com.jd.journalq.message.JournalLog;
 import com.jd.journalq.network.session.Producer;
 import com.jd.journalq.network.session.TransactionId;
 import com.jd.journalq.store.PartitionGroupStore;
@@ -28,7 +33,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -478,6 +487,11 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
         } else {
             throw new JMQException(JMQCode.CN_COMMAND_UNSUPPORTED);
         }
+    }
+
+    @Override
+    public TransactionId getTransaction(Producer producer, String txId) {
+        return transactionManager.getTransaction(producer.getTopic(), producer.getApp(), txId);
     }
 
     @Override

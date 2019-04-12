@@ -17,7 +17,7 @@ public class RemoveProducerRequest extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.REMOVE_PRODUCER.getCode();
+        return JMQCommandType.REMOVE_PRODUCER_REQUEST.getCode();
     }
 
     public void setTopics(List<String> topics) {

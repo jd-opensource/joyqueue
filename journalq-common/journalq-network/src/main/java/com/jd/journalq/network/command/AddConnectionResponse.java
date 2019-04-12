@@ -15,7 +15,7 @@ public class AddConnectionResponse extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.ADD_CONNECTION_ACK.getCode();
+        return JMQCommandType.ADD_CONNECTION_RESPONSE.getCode();
     }
 
     public void setConnectionId(String connectionId) {

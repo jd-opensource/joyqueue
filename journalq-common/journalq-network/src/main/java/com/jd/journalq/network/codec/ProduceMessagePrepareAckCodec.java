@@ -33,6 +33,6 @@ public class ProduceMessagePrepareAckCodec implements PayloadCodec<JMQHeader, Pr
 
     @Override
     public int type() {
-        return JMQCommandType.PRODUCE_MESSAGE_PREPARE_ACK.getCode();
+        return JMQCommandType.PRODUCE_MESSAGE_PREPARE_RESPONSE.getCode();
     }
 }

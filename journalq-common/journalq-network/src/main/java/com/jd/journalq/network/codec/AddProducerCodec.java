@@ -47,6 +47,6 @@ public class AddProducerCodec implements PayloadCodec<JMQHeader, AddProducerRequ
 
     @Override
     public int type() {
-        return JMQCommandType.ADD_PRODUCER.getCode();
+        return JMQCommandType.ADD_PRODUCER_REQUEST.getCode();
     }
 }

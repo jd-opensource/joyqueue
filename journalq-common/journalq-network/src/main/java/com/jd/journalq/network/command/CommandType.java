@@ -67,6 +67,9 @@ public class CommandType {
     //change leader
     public static final int NSR_LEADERCHANAGE_PARTITIONGROUP = 124;
 
-
-
+    // 事务
+    // 事务提交
+    public static final int TRANSACTION_COMMIT_REQUEST = 70;
+    // 事务回滚
+    public static final int TRANSACTION_ROLLBACK_REQUEST = 71;
 }

@@ -30,6 +30,6 @@ public class ProduceMessageRollbackAckCodec implements PayloadCodec<JMQHeader, P
 
     @Override
     public int type() {
-        return JMQCommandType.PRODUCE_MESSAGE_ROLLBACK_ACK.getCode();
+        return JMQCommandType.PRODUCE_MESSAGE_ROLLBACK_RESPONSE.getCode();
     }
 }

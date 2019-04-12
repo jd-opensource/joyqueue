@@ -30,6 +30,6 @@ public class FetchHealthAckCodec implements PayloadCodec<JMQHeader, FetchHealthR
 
     @Override
     public int type() {
-        return JMQCommandType.FETCH_HEALTH_ACK.getCode();
+        return JMQCommandType.FETCH_HEALTH_RESPONSE.getCode();
     }
 }

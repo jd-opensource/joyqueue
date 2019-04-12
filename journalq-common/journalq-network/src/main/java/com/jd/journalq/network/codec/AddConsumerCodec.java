@@ -48,6 +48,6 @@ public class AddConsumerCodec implements PayloadCodec<JMQHeader, AddConsumerRequ
 
     @Override
     public int type() {
-        return JMQCommandType.ADD_CONSUMER.getCode();
+        return JMQCommandType.ADD_CONSUMER_REQUEST.getCode();
     }
 }

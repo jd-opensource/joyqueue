@@ -78,6 +78,6 @@ public class FindCoordinatorAckCodec implements PayloadCodec<JMQHeader, FindCoor
 
     @Override
     public int type() {
-        return JMQCommandType.FIND_COORDINATOR_ACK.getCode();
+        return JMQCommandType.FIND_COORDINATOR_RESPONSE.getCode();
     }
 }

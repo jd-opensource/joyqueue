@@ -15,7 +15,7 @@ import java.util.Properties;
  */
 public class SimpleKafkaProducer {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         Properties props = new Properties();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, KafkaConfigs.BOOTSTRAP);
         props.put(ProducerConfig.CLIENT_ID_CONFIG, KafkaConfigs.CLIENT_ID);
@@ -23,6 +23,6 @@ public class SimpleKafkaProducer {
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         KafkaProducer<String, String> kafkaProducer = new KafkaProducer<>(props);
 
-        kafkaProducer.send(new ProducerRecord<String, String>("test_topic_0", "test"));
+        kafkaProducer.send(new ProducerRecord<String, String>("test_topic_0", "test")).get();
     }
 }

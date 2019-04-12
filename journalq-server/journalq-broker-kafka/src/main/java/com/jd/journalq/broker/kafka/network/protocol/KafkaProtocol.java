@@ -11,11 +11,13 @@ import com.jd.journalq.broker.kafka.coordinator.group.GroupBalanceManager;
 import com.jd.journalq.broker.kafka.coordinator.group.GroupCoordinator;
 import com.jd.journalq.broker.kafka.coordinator.group.GroupMetadataManager;
 import com.jd.journalq.broker.kafka.coordinator.group.GroupOffsetHandler;
-import com.jd.journalq.broker.kafka.coordinator.group.GroupOffsetManager;
+import com.jd.journalq.broker.kafka.coordinator.group.GroupOffsetSynchronizer;
 import com.jd.journalq.broker.kafka.coordinator.transaction.ProducerIdManager;
 import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionCoordinator;
 import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionHandler;
+import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionIdManager;
 import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionMetadataManager;
+import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionSynchronizer;
 import com.jd.journalq.broker.kafka.handler.ratelimit.KafkaRateLimitHandlerFactory;
 import com.jd.journalq.broker.kafka.manage.KafkaManageServiceFactory;
 import com.jd.journalq.broker.kafka.network.helper.KafkaProtocolHelper;
@@ -50,14 +52,16 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
     private KafkaConfig config;
     private Coordinator coordinator;
     private GroupMetadataManager groupMetadataManager;
-    private GroupOffsetManager groupOffsetManager;
+    private GroupOffsetSynchronizer groupOffsetSynchronizer;
     private GroupBalanceManager groupBalanceManager;
     private GroupOffsetHandler groupOffsetHandler;
     private GroupBalanceHandler groupBalanceHandler;
     private GroupCoordinator groupCoordinator;
 
     private ProducerIdManager producerIdManager;
+    private TransactionIdManager transactionIdManager;
     private TransactionMetadataManager transactionMetadataManager;
+    private TransactionSynchronizer transactionSynchronizer;
     private TransactionHandler transactionHandler;
     private TransactionCoordinator transactionCoordinator;
     private KafkaConnectionManager connectionManager;
@@ -75,22 +79,24 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
         this.coordinator = new Coordinator(brokerContext.getCoordinatorService().getCoordinator());
 
         this.groupMetadataManager = new GroupMetadataManager(config, groupMetadataManager);
-        this.groupOffsetManager = new GroupOffsetManager(config, brokerContext.getClusterManager());
+        this.groupOffsetSynchronizer = new GroupOffsetSynchronizer(config, brokerContext.getClusterManager(), coordinator.getSessionManager());
         this.groupBalanceManager = new GroupBalanceManager(config, this.groupMetadataManager);
-        this.groupOffsetHandler = new GroupOffsetHandler(config, coordinator, this.groupMetadataManager, groupBalanceManager, groupOffsetManager);
+        this.groupOffsetHandler = new GroupOffsetHandler(config, coordinator, this.groupMetadataManager, groupBalanceManager, groupOffsetSynchronizer);
         this.groupBalanceHandler = new GroupBalanceHandler(config, this.groupMetadataManager, groupBalanceManager);
         this.groupCoordinator = new GroupCoordinator(coordinator, groupBalanceHandler, groupOffsetHandler, this.groupMetadataManager);
 
         this.producerIdManager = new ProducerIdManager();
+        this.transactionIdManager = new TransactionIdManager();
         this.transactionMetadataManager = new TransactionMetadataManager(config, transactionMetadataManager);
-        this.transactionHandler = new TransactionHandler(this.transactionMetadataManager, coordinator, producerIdManager);
+        this.transactionSynchronizer = new TransactionSynchronizer(config, transactionIdManager, coordinator.getSessionManager());
+        this.transactionHandler = new TransactionHandler(this.transactionMetadataManager, coordinator, producerIdManager, transactionSynchronizer, brokerContext.getNameService());
         this.transactionCoordinator = new TransactionCoordinator(coordinator, this.transactionMetadataManager, this.transactionHandler);
 
         this.connectionManager = new KafkaConnectionManager(brokerContext.getSessionManager());
         this.rateLimitHandlerFactory = newRateLimitKafkaHandlerFactory(config);
         this.connectionHandler = new KafkaConnectionHandler(connectionManager);
 
-        this.kafkaContext = new KafkaContext(config, groupCoordinator, transactionCoordinator, rateLimitHandlerFactory, brokerContext);
+        this.kafkaContext = new KafkaContext(config, groupCoordinator, transactionCoordinator, transactionIdManager, rateLimitHandlerFactory, brokerContext);
         registerManage(brokerContext, kafkaContext);
     }
 
@@ -108,13 +114,13 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
 
     @Override
     public void doStart() throws Exception {
-        groupOffsetManager.start();
+        groupOffsetSynchronizer.start();
         groupBalanceManager.start();
         groupOffsetHandler.start();
         groupBalanceHandler.start();
         groupCoordinator.start();
 
-        producerIdManager.start();
+        transactionSynchronizer.start();
         transactionHandler.start();
         transactionCoordinator.start();
         rateLimitHandlerFactory.start();
@@ -123,14 +129,14 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
     @Override
     protected void doStop() {
         groupCoordinator.stop();
-        groupOffsetManager.stop();
+        groupOffsetSynchronizer.stop();
         groupBalanceManager.stop();
         groupOffsetHandler.stop();
         groupBalanceHandler.stop();
 
         transactionCoordinator.stop();
         transactionHandler.stop();
-        producerIdManager.stop();
+        transactionSynchronizer.stop();
         rateLimitHandlerFactory.stop();
     }
 

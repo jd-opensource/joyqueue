@@ -32,6 +32,6 @@ public class AddConnectionAckCodec implements PayloadCodec<JMQHeader, AddConnect
 
     @Override
     public int type() {
-        return JMQCommandType.ADD_CONNECTION_ACK.getCode();
+        return JMQCommandType.ADD_CONNECTION_RESPONSE.getCode();
     }
 }

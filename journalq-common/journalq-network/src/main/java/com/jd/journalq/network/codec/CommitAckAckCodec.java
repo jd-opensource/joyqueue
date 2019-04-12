@@ -55,6 +55,6 @@ public class CommitAckAckCodec implements PayloadCodec<JMQHeader, CommitAckAck>,
 
     @Override
     public int type() {
-        return JMQCommandType.COMMIT_ACK_ACK.getCode();
+        return JMQCommandType.COMMIT_ACK_RESPONSE.getCode();
     }
 }

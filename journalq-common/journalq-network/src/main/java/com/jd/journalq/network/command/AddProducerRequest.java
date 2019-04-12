@@ -18,7 +18,7 @@ public class AddProducerRequest extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.ADD_PRODUCER.getCode();
+        return JMQCommandType.ADD_PRODUCER_REQUEST.getCode();
     }
 
     public void setTopics(List<String> topics) {

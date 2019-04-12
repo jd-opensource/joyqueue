@@ -18,7 +18,7 @@ public class FetchPartitionMessageRequest extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.FETCH_PARTITION_MESSAGE.getCode();
+        return JMQCommandType.FETCH_PARTITION_MESSAGE_REQUEST.getCode();
     }
 
     public void setPartitions(Table<String, Short, FetchPartitionMessageData> partitions) {

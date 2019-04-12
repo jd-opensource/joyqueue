@@ -34,6 +34,6 @@ public class ProduceMessageCommitCodec implements PayloadCodec<JMQHeader, Produc
 
     @Override
     public int type() {
-        return JMQCommandType.PRODUCE_MESSAGE_COMMIT.getCode();
+        return JMQCommandType.PRODUCE_MESSAGE_COMMIT_REQUEST.getCode();
     }
 }

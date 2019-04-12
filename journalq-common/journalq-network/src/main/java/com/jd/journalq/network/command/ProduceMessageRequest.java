@@ -17,7 +17,7 @@ public class ProduceMessageRequest extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.PRODUCE_MESSAGE.getCode();
+        return JMQCommandType.PRODUCE_MESSAGE_REQUEST.getCode();
     }
 
     public String getApp() {

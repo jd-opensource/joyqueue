@@ -10,22 +10,27 @@ import com.jd.journalq.toolkit.config.PropertyDef;
 public enum CoordinatorConfigKey implements PropertyDef {
 
     // 协调者主题
-    GROUP_TOPIC_CODE("group.topic.code", "__group_coordinators", PropertyDef.Type.STRING),
+    GROUP_TOPIC_CODE("coordinator.group.topic.code", "__group_coordinators", PropertyDef.Type.STRING),
     // 协调者主题分区
-    GROUP_TOPIC_PARTITIONS("group.topic.partitions", (short) 1, PropertyDef.Type.SHORT),
+    GROUP_TOPIC_PARTITIONS("coordinator.group.topic.partitions", (short) 1, PropertyDef.Type.SHORT),
     // 协调者过期时间
-    GROUP_EXPIRE_TIME("group.expire.time", 1000 * 60 * 60 * 1, PropertyDef.Type.INT),
+    GROUP_EXPIRE_TIME("coordinator.group.expire.time", 1000 * 60 * 60 * 1, PropertyDef.Type.INT),
     // 协调者最多group
-    GROUP_MAX_NUM("group.max.num", 1024 * 10, PropertyDef.Type.INT),
+    GROUP_MAX_NUM("coordinator.group.max.num", 1024 * 10, PropertyDef.Type.INT),
 
     // 事务协调者主题
-    TRANSACTION_TOPIC_CODE("transaction.topic.code", "__transaction_coordinators", PropertyDef.Type.STRING),
+    TRANSACTION_TOPIC_CODE("coordinator.transaction.topic.code", "__transaction_coordinators", PropertyDef.Type.STRING),
     // 事务协调者主题分区
-    TRANSACTION_TOPIC_PARTITIONS("transaction.topic.partitions", (short) 1, PropertyDef.Type.SHORT),
+    TRANSACTION_TOPIC_PARTITIONS("coordinator.transaction.topic.partitions", (short) 1, PropertyDef.Type.SHORT),
     // 事务过期时间
-    TRANSACTION_EXPIRE_TIME("transaction.expire.time", 1000 * 60 * 60 * 1, PropertyDef.Type.INT),
+    TRANSACTION_EXPIRE_TIME("coordinator.transaction.expire.time", 1000 * 60 * 60 * 1, PropertyDef.Type.INT),
     // 事务最多
-    TRANSACTION_MAX_NUM("transaction.max.num", 1024 * 10, PropertyDef.Type.INT),
+    TRANSACTION_MAX_NUM("coordinator.transaction.max.num", 1024 * 10, PropertyDef.Type.INT),
+
+    // session同步超时
+    SESSION_SYNC_TIMEOUT("coordinator.session.sync.timeout", 1000 * 3, Type.INT),
+    // session缓存时间
+    SESSION_EXPIRE_TIME("coordinator.session.expire.time", 1000 * 60 * 10, Type.INT),
 
     ;
 

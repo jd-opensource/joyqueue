@@ -45,6 +45,6 @@ public class AddProducerAckCodec implements PayloadCodec<JMQHeader, AddProducerR
 
     @Override
     public int type() {
-        return JMQCommandType.ADD_PRODUCER_ACK.getCode();
+        return JMQCommandType.ADD_PRODUCER_RESPONSE.getCode();
     }
 }

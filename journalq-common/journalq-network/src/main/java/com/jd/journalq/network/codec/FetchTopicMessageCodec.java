@@ -55,6 +55,6 @@ public class FetchTopicMessageCodec implements PayloadCodec<JMQHeader, FetchTopi
 
     @Override
     public int type() {
-        return JMQCommandType.FETCH_TOPIC_MESSAGE.getCode();
+        return JMQCommandType.FETCH_TOPIC_MESSAGE_REQUEST.getCode();
     }
 }

@@ -15,7 +15,7 @@ public class FetchIndexResponse extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.FETCH_INDEX_ACK.getCode();
+        return JMQCommandType.FETCH_INDEX_RESPONSE.getCode();
     }
 
     public void setData(Table<String, Short, FetchIndexAckData> data) {

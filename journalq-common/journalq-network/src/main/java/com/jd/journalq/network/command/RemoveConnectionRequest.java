@@ -12,6 +12,6 @@ public class RemoveConnectionRequest extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.REMOVE_CONNECTION.getCode();
+        return JMQCommandType.REMOVE_CONNECTION_REQUEST.getCode();
     }
 }

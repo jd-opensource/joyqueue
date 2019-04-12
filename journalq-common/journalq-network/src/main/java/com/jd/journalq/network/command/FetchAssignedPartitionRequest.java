@@ -17,7 +17,7 @@ public class FetchAssignedPartitionRequest extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.FETCH_ASSIGNED_PARTITION.getCode();
+        return JMQCommandType.FETCH_ASSIGNED_PARTITION_REQUEST.getCode();
     }
 
     public void setApp(String app) {

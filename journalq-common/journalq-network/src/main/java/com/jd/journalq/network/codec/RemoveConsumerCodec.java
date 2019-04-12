@@ -46,6 +46,6 @@ public class RemoveConsumerCodec implements PayloadCodec<JMQHeader, RemoveConsum
 
     @Override
     public int type() {
-        return JMQCommandType.REMOVE_CONSUMER.getCode();
+        return JMQCommandType.REMOVE_CONSUMER_REQUEST.getCode();
     }
 }

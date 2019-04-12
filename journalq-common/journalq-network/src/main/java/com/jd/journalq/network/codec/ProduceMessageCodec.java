@@ -77,6 +77,6 @@ public class ProduceMessageCodec implements PayloadCodec<JMQHeader, ProduceMessa
 
     @Override
     public int type() {
-        return JMQCommandType.PRODUCE_MESSAGE.getCode();
+        return JMQCommandType.PRODUCE_MESSAGE_REQUEST.getCode();
     }
 }

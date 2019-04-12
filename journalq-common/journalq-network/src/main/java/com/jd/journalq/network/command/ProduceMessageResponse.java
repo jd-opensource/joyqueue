@@ -16,7 +16,7 @@ public class ProduceMessageResponse extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.PRODUCE_MESSAGE_ACK.getCode();
+        return JMQCommandType.PRODUCE_MESSAGE_RESPONSE.getCode();
     }
 
     public void setData(Map<String, ProduceMessageAckData> data) {

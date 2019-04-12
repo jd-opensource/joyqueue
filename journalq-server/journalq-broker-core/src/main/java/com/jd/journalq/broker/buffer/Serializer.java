@@ -112,6 +112,8 @@ public class Serializer extends AbstractSerializer {
         prepare.setTxId(Serializer.readString(in, SHORT_SIZE));
         //2字节事务查询ID
         prepare.setQueryId(Serializer.readString(in, SHORT_SIZE));
+        //source
+        prepare.setSource(in.get());
         return prepare;
     }
 
@@ -133,6 +135,8 @@ public class Serializer extends AbstractSerializer {
         write(prepare.getTxId(), out, SHORT_SIZE);
         //查询标识
         write(prepare.getQueryId(), out, SHORT_SIZE);
+        // source
+        out.put(prepare.getSource());
         // 重写总长度
         int end = out.position();
         int size = end - begin;
@@ -142,8 +146,8 @@ public class Serializer extends AbstractSerializer {
     }
 
     public static int sizeOfBrokerPrepare(BrokerPrepare prepare) throws Exception {
-        // length + magic + type + startTime + topic + app + txId + queryId
-        int length = 4 + 2 + 1 + 8 + 1 + 1 + 2 + 2;
+        // length + magic + type + startTime + topic + app + txId + queryId + source
+        int length = 4 + 2 + 1 + 8 + 1 + 1 + 2 + 2 + 1;
         length += getBytes(prepare.getTopic(), Charsets.UTF_8).length;
         length += getBytes(prepare.getApp(), Charsets.UTF_8).length;
         length += getBytes(prepare.getTxId(), Charsets.UTF_8).length;

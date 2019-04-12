@@ -45,6 +45,6 @@ public class RemoveProducerCodec implements PayloadCodec<JMQHeader, RemoveProduc
 
     @Override
     public int type() {
-        return JMQCommandType.REMOVE_PRODUCER.getCode();
+        return JMQCommandType.REMOVE_PRODUCER_REQUEST.getCode();
     }
 }

@@ -1,5 +1,6 @@
 package com.jd.journalq.broker.kafka.coordinator;
 
+import com.jd.journalq.broker.coordinator.session.CoordinatorSessionManager;
 import com.jd.journalq.domain.Broker;
 
 /**
@@ -30,5 +31,9 @@ public class Coordinator {
 
     public boolean isCurrentTransactionCoordinator(String transactionId) {
         return coordinator.isCurrentTransactionCoordinator(transactionId);
+    }
+
+    public CoordinatorSessionManager getSessionManager() {
+        return coordinator.getSessionManager();
     }
 }

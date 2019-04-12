@@ -28,7 +28,7 @@ public class FetchProduceFeedbackResponse extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.FETCH_PRODUCE_FEEDBACK_ACK.getCode();
+        return JMQCommandType.FETCH_PRODUCE_FEEDBACK_RESPONSE.getCode();
     }
 
     public void setCode(JMQCode code) {

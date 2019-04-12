@@ -16,7 +16,7 @@ public class AddProducerResponse extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.ADD_PRODUCER_ACK.getCode();
+        return JMQCommandType.ADD_PRODUCER_RESPONSE.getCode();
     }
 
     public void setProducerIds(Map<String, String> producerIds) {

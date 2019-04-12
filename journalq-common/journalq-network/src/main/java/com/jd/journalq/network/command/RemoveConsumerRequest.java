@@ -17,7 +17,7 @@ public class RemoveConsumerRequest extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.REMOVE_CONSUMER.getCode();
+        return JMQCommandType.REMOVE_CONSUMER_REQUEST.getCode();
     }
 
     public void setTopics(List<String> topics) {

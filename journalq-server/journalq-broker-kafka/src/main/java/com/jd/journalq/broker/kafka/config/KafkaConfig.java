@@ -52,12 +52,16 @@ public class KafkaConfig {
         return getConfig(KafkaConfigKey.FETCH_BATCH_SIZE);
     }
 
-    public int getCoordinatorOffsetSessionCache() {
-        return getConfig(KafkaConfigKey.COORDINATOR_OFFSET_SESSION_CACHE);
+    public int getOffsetSyncTimeout() {
+        return getConfig(KafkaConfigKey.OFFSET_SYNC_TIMEOUT);
     }
 
-    public int getCoordinatorOffsetSyncTimeout() {
-        return getConfig(KafkaConfigKey.COORDINATOR_OFFSET_SYNC_TIMEOUT);
+    public int getTransactionSyncTimeout() {
+        return getConfig(KafkaConfigKey.TRANSACTION_SYNC_TIMEOUT);
+    }
+
+    public int getTransactionTimeout() {
+        return getConfig(KafkaConfigKey.TRANSACTION_TIMEOUT);
     }
 
     public int getSessionMaxTimeout() {

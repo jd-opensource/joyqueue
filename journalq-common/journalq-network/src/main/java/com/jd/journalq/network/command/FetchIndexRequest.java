@@ -18,7 +18,7 @@ public class FetchIndexRequest extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.FETCH_INDEX.getCode();
+        return JMQCommandType.FETCH_INDEX_REQUEST.getCode();
     }
 
     public void setPartitions(Map<String, List<Short>> partitions) {

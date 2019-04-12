@@ -45,6 +45,6 @@ public class FindCoordinatorCodec implements PayloadCodec<JMQHeader, FindCoordin
 
     @Override
     public int type() {
-        return JMQCommandType.FIND_COORDINATOR.getCode();
+        return JMQCommandType.FIND_COORDINATOR_REQUEST.getCode();
     }
 }

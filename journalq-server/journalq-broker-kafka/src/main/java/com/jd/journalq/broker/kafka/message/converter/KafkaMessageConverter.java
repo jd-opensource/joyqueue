@@ -71,10 +71,6 @@ public class KafkaMessageConverter {
         brokerMessage.setSource(SourceType.KAFKA.getValue());
         brokerMessage.setBatch(kafkaBrokerMessage.isBatch());
         brokerMessage.setFlag(kafkaBrokerMessage.getFlag());
-
-        if (kafkaBrokerMessage.isTransaction() && ArrayUtils.isNotEmpty(kafkaBrokerMessage.getKey())) {
-            brokerMessage.setTxId(new String(kafkaBrokerMessage.getKey(), Charsets.UTF_8));
-        }
         KafkaMessageSerializer.writeExtension(brokerMessage, kafkaBrokerMessage);
 
         CRC32 crc32 = new CRC32();

@@ -18,7 +18,7 @@ public class ProduceMessagePrepareRequest extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.PRODUCE_MESSAGE_PREPARE.getCode();
+        return JMQCommandType.PRODUCE_MESSAGE_PREPARE_REQUEST.getCode();
     }
 
     public void setTopic(String topic) {

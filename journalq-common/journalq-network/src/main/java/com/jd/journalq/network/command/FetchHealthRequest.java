@@ -12,6 +12,6 @@ public class FetchHealthRequest extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.HEARTBEAT.getCode();
+        return JMQCommandType.HEARTBEAT_REQUEST.getCode();
     }
 }

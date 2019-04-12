@@ -17,7 +17,7 @@ public class FindCoordinatorRequest extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.FIND_COORDINATOR.getCode();
+        return JMQCommandType.FIND_COORDINATOR_REQUEST.getCode();
     }
 
     public void setTopics(List<String> topics) {

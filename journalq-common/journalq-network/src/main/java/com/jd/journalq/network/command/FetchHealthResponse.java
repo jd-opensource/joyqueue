@@ -22,7 +22,7 @@ public class FetchHealthResponse extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.FETCH_HEALTH_ACK.getCode();
+        return JMQCommandType.FETCH_HEALTH_RESPONSE.getCode();
     }
 
     public void setPoint(double point) {

@@ -16,7 +16,7 @@ public class FetchTopicMessageResponse extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.FETCH_TOPIC_MESSAGE_ACK.getCode();
+        return JMQCommandType.FETCH_TOPIC_MESSAGE_RESPONSE.getCode();
     }
 
     public void setData(Map<String, FetchTopicMessageAckData> data) {

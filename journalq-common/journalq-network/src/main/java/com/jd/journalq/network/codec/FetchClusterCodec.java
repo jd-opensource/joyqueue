@@ -45,6 +45,6 @@ public class FetchClusterCodec implements PayloadCodec<JMQHeader, FetchClusterRe
 
     @Override
     public int type() {
-        return JMQCommandType.FETCH_CLUSTER.getCode();
+        return JMQCommandType.FETCH_CLUSTER_REQUEST.getCode();
     }
 }

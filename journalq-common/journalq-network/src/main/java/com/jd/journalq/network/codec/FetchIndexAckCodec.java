@@ -60,6 +60,6 @@ public class FetchIndexAckCodec implements PayloadCodec<JMQHeader, FetchIndexRes
 
     @Override
     public int type() {
-        return JMQCommandType.FETCH_INDEX_ACK.getCode();
+        return JMQCommandType.FETCH_INDEX_RESPONSE.getCode();
     }
 }

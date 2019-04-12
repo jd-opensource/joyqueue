@@ -1,20 +1,23 @@
 package com.jd.journalq.broker.network.support;
 
-import com.jd.journalq.broker.handler.PartitionGroupLeaderChangeHandler;
 import com.jd.journalq.broker.BrokerContext;
 import com.jd.journalq.broker.election.handler.AppendEntriesRequestHandler;
 import com.jd.journalq.broker.election.handler.ReplicateConsumePosRequestHandler;
 import com.jd.journalq.broker.election.handler.TimeoutNowRequestHandler;
 import com.jd.journalq.broker.election.handler.VoteRequestHandler;
 import com.jd.journalq.broker.handler.CreatePartitionGroupHandler;
+import com.jd.journalq.broker.handler.PartitionGroupLeaderChangeHandler;
 import com.jd.journalq.broker.handler.RemovePartitionGroupHandler;
 import com.jd.journalq.broker.handler.UpdatePartitionGroupHandler;
 import com.jd.journalq.broker.index.handler.ConsumeIndexQueryHandler;
 import com.jd.journalq.broker.index.handler.ConsumeIndexStoreHandler;
+import com.jd.journalq.broker.producer.transaction.handler.TransactionCommitRequestHandler;
+import com.jd.journalq.broker.producer.transaction.handler.TransactionRollbackRequestHandler;
 import com.jd.journalq.network.command.CommandType;
 import com.jd.journalq.network.transport.command.support.DefaultCommandHandlerFactory;
 import com.jd.journalq.nsr.network.command.NsrCommandType;
 import com.jd.journalq.server.retry.remote.handler.RemoteRetryMessageHandler;
+import com.sun.deploy.security.BrowserKeystore;
 
 /**
  * 服务命令注册器
@@ -49,5 +52,9 @@ public class BrokerCommandHandlerRegistrar {
         commandHandlerFactory.register(NsrCommandType.NSR_UPDATE_PARTITIONGROUP, new UpdatePartitionGroupHandler(brokerContext));
         commandHandlerFactory.register(NsrCommandType.NSR_REMOVE_PARTITIONGROUP, new RemovePartitionGroupHandler(brokerContext));
         commandHandlerFactory.register(NsrCommandType.NSR_LEADERCHANAGE_PARTITIONGROUP, new PartitionGroupLeaderChangeHandler(brokerContext));
+
+        // transaction
+        commandHandlerFactory.register(CommandType.TRANSACTION_COMMIT_REQUEST, new TransactionCommitRequestHandler(brokerContext));
+        commandHandlerFactory.register(CommandType.TRANSACTION_ROLLBACK_REQUEST, new TransactionRollbackRequestHandler(brokerContext));
     }
 }

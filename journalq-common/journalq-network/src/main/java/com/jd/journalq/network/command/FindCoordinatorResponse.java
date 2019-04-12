@@ -16,7 +16,7 @@ public class FindCoordinatorResponse extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.FIND_COORDINATOR_ACK.getCode();
+        return JMQCommandType.FIND_COORDINATOR_RESPONSE.getCode();
     }
 
     public void setCoordinators(Map<String, FindCoordinatorAckData> coordinators) {

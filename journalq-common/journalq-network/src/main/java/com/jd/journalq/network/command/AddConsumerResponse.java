@@ -16,7 +16,7 @@ public class AddConsumerResponse extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.ADD_CONSUMER_ACK.getCode();
+        return JMQCommandType.ADD_CONSUMER_RESPONSE.getCode();
     }
 
     public void setConsumerIds(Map<String, String> consumerIds) {

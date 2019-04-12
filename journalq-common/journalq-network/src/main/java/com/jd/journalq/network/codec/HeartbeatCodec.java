@@ -27,6 +27,6 @@ public class HeartbeatCodec implements PayloadCodec<JMQHeader, HeartbeatRequest>
 
     @Override
     public int type() {
-        return JMQCommandType.HEARTBEAT.getCode();
+        return JMQCommandType.HEARTBEAT_REQUEST.getCode();
     }
 }

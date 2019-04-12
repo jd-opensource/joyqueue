@@ -16,7 +16,7 @@ public class CommitAckAck extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.COMMIT_ACK_ACK.getCode();
+        return JMQCommandType.COMMIT_ACK_RESPONSE.getCode();
     }
 
     public void setResult(Table<String, Short, JMQCode> result) {

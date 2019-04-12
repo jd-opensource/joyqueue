@@ -30,6 +30,6 @@ public class ProduceMessageCommitAckCodec implements PayloadCodec<JMQHeader, Pro
 
     @Override
     public int type() {
-        return JMQCommandType.PRODUCE_MESSAGE_COMMIT_ACK.getCode();
+        return JMQCommandType.PRODUCE_MESSAGE_COMMIT_RESPONSE.getCode();
     }
 }

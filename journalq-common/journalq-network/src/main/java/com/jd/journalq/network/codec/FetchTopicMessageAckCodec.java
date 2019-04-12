@@ -62,6 +62,6 @@ public class FetchTopicMessageAckCodec implements PayloadCodec<JMQHeader, FetchT
 
     @Override
     public int type() {
-        return JMQCommandType.FETCH_TOPIC_MESSAGE_ACK.getCode();
+        return JMQCommandType.FETCH_TOPIC_MESSAGE_RESPONSE.getCode();
     }
 }

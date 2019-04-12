@@ -29,7 +29,7 @@ public class ProduceMessagePrepareResponse extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.PRODUCE_MESSAGE_PREPARE_ACK.getCode();
+        return JMQCommandType.PRODUCE_MESSAGE_PREPARE_RESPONSE.getCode();
     }
 
     public void setCode(JMQCode code) {

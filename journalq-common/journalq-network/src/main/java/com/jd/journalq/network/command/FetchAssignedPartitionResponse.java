@@ -16,7 +16,7 @@ public class FetchAssignedPartitionResponse extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.FETCH_ASSIGNED_PARTITION_ACK.getCode();
+        return JMQCommandType.FETCH_ASSIGNED_PARTITION_RESPONSE.getCode();
     }
 
     public Map<String, FetchAssignedPartitionAckData> getTopicPartitions() {

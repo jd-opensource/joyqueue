@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * ListOffsetsHandler
+ * ListOffsetsResponse
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/11/5

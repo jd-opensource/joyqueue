@@ -17,7 +17,7 @@ public class FetchClusterRequest extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.FETCH_CLUSTER.getCode();
+        return JMQCommandType.FETCH_CLUSTER_REQUEST.getCode();
     }
 
     public void setTopics(List<String> topics) {

@@ -16,7 +16,7 @@ public class ProduceMessageRollbackRequest extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.PRODUCE_MESSAGE_ROLLBACK.getCode();
+        return JMQCommandType.PRODUCE_MESSAGE_ROLLBACK_REQUEST.getCode();
     }
 
     public void setTopic(String topic) {

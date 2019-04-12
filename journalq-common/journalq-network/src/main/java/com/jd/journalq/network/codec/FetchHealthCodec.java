@@ -27,6 +27,6 @@ public class FetchHealthCodec implements PayloadCodec<JMQHeader, FetchHealthRequ
 
     @Override
     public int type() {
-        return JMQCommandType.FETCH_HEALTH.getCode();
+        return JMQCommandType.FETCH_HEALTH_REQUEST.getCode();
     }
 }

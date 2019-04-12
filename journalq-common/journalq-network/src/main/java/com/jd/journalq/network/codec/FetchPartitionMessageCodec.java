@@ -61,6 +61,6 @@ public class FetchPartitionMessageCodec implements PayloadCodec<JMQHeader, Fetch
 
     @Override
     public int type() {
-        return JMQCommandType.FETCH_PARTITION_MESSAGE.getCode();
+        return JMQCommandType.FETCH_PARTITION_MESSAGE_REQUEST.getCode();
     }
 }

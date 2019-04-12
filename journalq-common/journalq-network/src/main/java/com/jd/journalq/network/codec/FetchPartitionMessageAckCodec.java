@@ -71,6 +71,6 @@ public class FetchPartitionMessageAckCodec implements PayloadCodec<JMQHeader, Fe
 
     @Override
     public int type() {
-        return JMQCommandType.FETCH_PARTITION_MESSAGE_ACK.getCode();
+        return JMQCommandType.FETCH_PARTITION_MESSAGE_RESPONSE.getCode();
     }
 }

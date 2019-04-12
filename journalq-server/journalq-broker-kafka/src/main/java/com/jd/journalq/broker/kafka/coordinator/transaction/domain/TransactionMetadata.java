@@ -1,7 +1,9 @@
 package com.jd.journalq.broker.kafka.coordinator.transaction.domain;
 
+import com.google.common.collect.Lists;
 import com.jd.journalq.toolkit.time.SystemClock;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -12,22 +14,54 @@ import java.util.Objects;
  */
 public class TransactionMetadata extends com.jd.journalq.broker.coordinator.transaction.domain.TransactionMetadata {
 
-    private String clientId;
+    private String app;
     private int timeout;
     private long producerId;
     private short producerEpoch = 0;
     private long createTime = SystemClock.now();
     private TransactionState state = TransactionState.EMPTY;
+    private List<TransactionPrepare> prepare;
 
     public TransactionMetadata(String id) {
         super(id);
     }
 
-    public TransactionMetadata(String id, String clientId, long producerId, int timeout) {
+    public TransactionMetadata(String id, String app, long producerId, int timeout, long createTime) {
         super(id);
-        this.clientId = clientId;
+        this.app = app;
         this.timeout = timeout;
         this.producerId = producerId;
+        this.createTime = createTime;
+    }
+
+    public void addPrepare(TransactionPrepare transactionPrepare) {
+        if (prepare == null) {
+            prepare = Lists.newLinkedList();
+        }
+        prepare.add(transactionPrepare);
+    }
+
+    public boolean containsPrepare(String topic, short partition) {
+        return getPrepare(topic, partition) != null;
+    }
+
+    public TransactionPrepare getPrepare(String topic, short partition) {
+        if (prepare == null) {
+            return null;
+        }
+        for (TransactionPrepare transactionPrepare : prepare) {
+            if (transactionPrepare.getTopic().equals(topic) && transactionPrepare.getPartition() == partition) {
+                return transactionPrepare;
+            }
+        }
+        return null;
+    }
+
+    public void clearPrepare() {
+        if (prepare == null) {
+            return;
+        }
+        prepare.clear();
     }
 
     public void transitionStateTo(TransactionState state) {
@@ -42,12 +76,12 @@ public class TransactionMetadata extends com.jd.journalq.broker.coordinator.tran
         return isExpired(timeout);
     }
 
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
+    public void setApp(String app) {
+        this.app = app;
     }
 
-    public String getClientId() {
-        return clientId;
+    public String getApp() {
+        return app;
     }
 
     public void setTimeout(int timeout) {
@@ -94,6 +128,14 @@ public class TransactionMetadata extends com.jd.journalq.broker.coordinator.tran
         return state;
     }
 
+    public void setPrepare(List<TransactionPrepare> prepare) {
+        this.prepare = prepare;
+    }
+
+    public List<TransactionPrepare> getPrepare() {
+        return prepare;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -102,22 +144,24 @@ public class TransactionMetadata extends com.jd.journalq.broker.coordinator.tran
         return timeout == that.timeout &&
                 producerId == that.producerId &&
                 producerEpoch == that.producerEpoch &&
-                Objects.equals(clientId, that.clientId);
+                Objects.equals(app, that.app);
     }
 
     @Override
     public int hashCode() {
-
-        return Objects.hash(clientId, timeout, producerId, producerEpoch);
+        return Objects.hash(app, timeout, producerId, producerEpoch);
     }
 
     @Override
     public String toString() {
         return "TransactionMetadata{" +
-                "clientId='" + clientId + '\'' +
+                "app='" + app + '\'' +
                 ", timeout=" + timeout +
                 ", producerId=" + producerId +
                 ", producerEpoch=" + producerEpoch +
+                ", createTime=" + createTime +
+                ", state=" + state +
+                ", prepare=" + prepare +
                 '}';
     }
 }

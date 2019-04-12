@@ -1,7 +1,5 @@
 package com.jd.journalq.broker.kafka.coordinator.transaction;
 
-import com.jd.journalq.toolkit.service.Service;
-
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -10,7 +8,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * email: gaohaoxiang@jd.com
  * date: 2019/4/11
  */
-public class ProducerIdManager extends Service {
+public class ProducerIdManager {
 
     private final AtomicLong producerIdSeq = new AtomicLong();
 

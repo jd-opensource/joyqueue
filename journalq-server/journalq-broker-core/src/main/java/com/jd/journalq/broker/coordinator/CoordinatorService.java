@@ -4,6 +4,9 @@ import com.google.common.collect.Maps;
 import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.coordinator.config.CoordinatorConfig;
 import com.jd.journalq.broker.coordinator.group.GroupMetadataManager;
+import com.jd.journalq.broker.coordinator.session.CoordinatorSessionManager;
+import com.jd.journalq.broker.coordinator.support.CoordinatorInitializer;
+import com.jd.journalq.broker.coordinator.support.CoordinatorResolver;
 import com.jd.journalq.broker.coordinator.transaction.TransactionMetadataManager;
 import com.jd.journalq.nsr.NameService;
 import com.jd.journalq.toolkit.service.Service;
@@ -24,6 +27,7 @@ public class CoordinatorService extends Service {
 
     private CoordinatorInitializer coordinatorInitializer;
     private CoordinatorResolver coordinatorResolver;
+    private CoordinatorSessionManager coordinatorSessionManager;
     private Coordinator coordinator;
 
     private final ConcurrentMap<String, GroupMetadataManager> groupMetadataManagerMap = Maps.newConcurrentMap();
@@ -35,12 +39,21 @@ public class CoordinatorService extends Service {
         this.nameService = nameService;
         this.coordinatorInitializer = new CoordinatorInitializer(config, clusterManager, nameService);
         this.coordinatorResolver = new CoordinatorResolver(config, clusterManager);
-        this.coordinator = new Coordinator(config, clusterManager, coordinatorResolver, coordinatorInitializer);
+        this.coordinatorSessionManager = new CoordinatorSessionManager(config);
+        this.coordinator = new Coordinator(config, clusterManager, coordinatorResolver, coordinatorInitializer, coordinatorSessionManager);
     }
 
     @Override
     protected void doStart() throws Exception {
         coordinatorInitializer.init();
+        coordinatorSessionManager.start();
+    }
+
+    @Override
+    protected void doStop() {
+        if (coordinatorSessionManager != null) {
+            coordinatorSessionManager.stop();
+        }
     }
 
     public Coordinator getCoordinator() {

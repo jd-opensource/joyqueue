@@ -3,6 +3,9 @@ package com.jd.journalq.broker.coordinator;
 import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.coordinator.config.CoordinatorConfig;
 import com.jd.journalq.broker.coordinator.domain.CoordinatorDetail;
+import com.jd.journalq.broker.coordinator.session.CoordinatorSessionManager;
+import com.jd.journalq.broker.coordinator.support.CoordinatorInitializer;
+import com.jd.journalq.broker.coordinator.support.CoordinatorResolver;
 import com.jd.journalq.domain.Broker;
 import com.jd.journalq.domain.TopicName;
 
@@ -18,12 +21,14 @@ public class Coordinator {
     private ClusterManager clusterManager;
     private CoordinatorResolver coordinatorResolver;
     private CoordinatorInitializer coordinatorInitializer;
+    private CoordinatorSessionManager coordinatorSessionManager;
 
-    public Coordinator(CoordinatorConfig config, ClusterManager clusterManager, CoordinatorResolver coordinatorResolver, CoordinatorInitializer coordinatorInitializer) {
+    public Coordinator(CoordinatorConfig config, ClusterManager clusterManager, CoordinatorResolver coordinatorResolver, CoordinatorInitializer coordinatorInitializer, CoordinatorSessionManager coordinatorSessionManager) {
         this.config = config;
         this.clusterManager = clusterManager;
         this.coordinatorResolver = coordinatorResolver;
         this.coordinatorInitializer = coordinatorInitializer;
+        this.coordinatorSessionManager = coordinatorSessionManager;
     }
 
     // group
@@ -66,5 +71,9 @@ public class Coordinator {
 
     public boolean initCoordinator() {
         return coordinatorInitializer.init();
+    }
+
+    public CoordinatorSessionManager getSessionManager() {
+        return coordinatorSessionManager;
     }
 }

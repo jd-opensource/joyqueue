@@ -51,6 +51,6 @@ public class FetchProduceFeedbackAckCodec implements PayloadCodec<JMQHeader, Fet
 
     @Override
     public int type() {
-        return JMQCommandType.FETCH_PRODUCE_FEEDBACK_ACK.getCode();
+        return JMQCommandType.FETCH_PRODUCE_FEEDBACK_RESPONSE.getCode();
     }
 }

@@ -24,10 +24,14 @@ public enum KafkaConfigKey implements PropertyDef {
     REBALANCE_INITIAL_DELAY("kafka.rebalance.initial.delay", 1000 * 3, Type.INT),
     // rebalance超时时间
     REBALANCE_TIMEOUT("kafka.rebalance.timeout", 1000 * 60, Type.INT),
-    // 协调者offset同步超时
-    COORDINATOR_OFFSET_SYNC_TIMEOUT("kafka.coordinator.offset.sync.timeout", 1000 * 3, Type.INT),
-    // 协调者offset session缓存时间
-    COORDINATOR_OFFSET_SESSION_CACHE("kafka.coordinator.offset.session.cache", 1000 * 60 * 10, Type.INT),
+
+    // offset同步超时
+    OFFSET_SYNC_TIMEOUT("kafka.offset.sync.timeout", 1000 * 3, Type.INT),
+
+    // 事务同步超时
+    TRANSACTION_SYNC_TIMEOUT("kafka.offset.sync.timeout", 1000 * 3, Type.INT),
+    // 事务超时
+    TRANSACTION_TIMEOUT("kafka.transaction.timeout", 1000 * 60 * 30, Type.INT),
 
     // 拉取批量大小
     FETCH_BATCH_SIZE("kafka.fetch.batch.size", 10, Type.INT),

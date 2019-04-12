@@ -18,7 +18,7 @@ public class FetchClusterResponse extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.FETCH_CLUSTER_ACK.getCode();
+        return JMQCommandType.FETCH_CLUSTER_RESPONSE.getCode();
     }
 
     public Map<String, Topic> getTopics() {

@@ -59,6 +59,6 @@ public class AddConnectionCodec implements PayloadCodec<JMQHeader, AddConnection
 
     @Override
     public int type() {
-        return JMQCommandType.ADD_CONNECTION.getCode();
+        return JMQCommandType.ADD_CONNECTION_REQUEST.getCode();
     }
 }

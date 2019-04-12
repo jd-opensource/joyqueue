@@ -23,7 +23,7 @@ public class ProduceMessageCommitAck extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.PRODUCE_MESSAGE_COMMIT_ACK.getCode();
+        return JMQCommandType.PRODUCE_MESSAGE_COMMIT_RESPONSE.getCode();
     }
 
     public void setCode(JMQCode code) {

@@ -18,7 +18,7 @@ public class AddConsumerRequest extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.ADD_CONSUMER.getCode();
+        return JMQCommandType.ADD_CONSUMER_REQUEST.getCode();
     }
 
     public void setTopics(List<String> topics) {

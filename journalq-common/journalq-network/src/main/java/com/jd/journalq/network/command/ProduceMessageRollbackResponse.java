@@ -23,7 +23,7 @@ public class ProduceMessageRollbackResponse extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.PRODUCE_MESSAGE_ROLLBACK_ACK.getCode();
+        return JMQCommandType.PRODUCE_MESSAGE_ROLLBACK_RESPONSE.getCode();
     }
 
     public void setCode(JMQCode code) {
