@@ -16,6 +16,7 @@ package com.jd.journalq.store;
 import com.jd.journalq.toolkit.concurrent.EventListener;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.concurrent.Future;
 
 /**
@@ -47,8 +48,8 @@ public interface PartitionGroupStore {
     long getTotalPhysicalStorageSize();
 
 
-    long deleteMinStoreMessages(long minIndexedPosition) throws IOException;
-    long deleteEarlyMinStoreMessages(long targetDeleteTimeline, long minIndexedPosition) throws IOException;
+    long deleteMinStoreMessages(Map<Short, Long> partitionAckMap) throws IOException;
+    long deleteEarlyMinStoreMessages(long targetDeleteTimeline, Map<Short, Long> partitionAckMap) throws IOException;
 
     /**
      * 获取分区当前的最小索引，用于初始化消费

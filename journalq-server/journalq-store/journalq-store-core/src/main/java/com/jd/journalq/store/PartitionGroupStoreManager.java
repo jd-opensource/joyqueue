@@ -40,12 +40,7 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -735,6 +730,14 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
 
     Set<PositioningStore<IndexItem>> meetPositioningStores() {
         return partitionMap.values().stream().map(p -> p.store).collect(Collectors.toSet());
+    }
+
+    Map<Short, PositioningStore<IndexItem>> transPositioningStores() {
+        Map<Short, PositioningStore<IndexItem>> transPartitionMap = new HashMap<>(partitionMap.size());
+        partitionMap.forEach(
+                (s, m) -> transPartitionMap.put(s, m.store)
+        );
+        return transPartitionMap;
     }
 
     /**
