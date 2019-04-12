@@ -90,7 +90,7 @@ public class ElectionManagerTest {
         allNodes1.add(broker3);
 
         storeService.removePartitionGroup(topic1, partitionGroup1);
-        storeService.createPartitionGroup(topic1, partitionGroup1, new short[]{1}, new int[]{1,2,3});
+        storeService.createPartitionGroup(topic1, partitionGroup1, new short[]{1});
 
         electionManager.onPartitionGroupCreate(PartitionGroup.ElectType.fix, new TopicName(topic1),
                 partitionGroup1, allNodes1, new TreeSet<>(), broker1.getId(), broker1.getId());
@@ -99,7 +99,7 @@ public class ElectionManagerTest {
         Assert.assertEquals(election.getLeaderId(), broker1.getId().longValue());
 
         storeService.removePartitionGroup(topic2, partitionGroup2);
-        storeService.createPartitionGroup(topic2, partitionGroup2, new short[]{1}, new int[]{1,2,3});
+        storeService.createPartitionGroup(topic2, partitionGroup2, new short[]{1});
 
         List<Broker> allNodes2 = new LinkedList<>();
         allNodes2.add(broker1);

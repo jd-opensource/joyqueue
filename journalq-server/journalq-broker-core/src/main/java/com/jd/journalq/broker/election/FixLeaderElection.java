@@ -145,7 +145,7 @@ public class FixLeaderElection extends LeaderElection {
 
         try {
             if (replicableStore.serviceStatus()) {
-                replicableStore.disable(electionConfig.getDisableStoreTimeout());
+                replicableStore.disable();
             }
         } catch (Exception e) {
             logger.info("Partition group {}/node {} disable store fail, exception is {}",
