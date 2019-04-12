@@ -18,24 +18,19 @@ import com.jd.journalq.broker.archive.ArchiveManager;
 import com.jd.journalq.broker.archive.ConsumeArchiveService;
 import com.jd.journalq.broker.buffer.Serializer;
 import com.jd.journalq.broker.cluster.ClusterManager;
+import com.jd.journalq.broker.consumer.filter.FilterCallback;
+import com.jd.journalq.broker.consumer.model.PullResult;
+import com.jd.journalq.broker.consumer.position.PositionManager;
 import com.jd.journalq.domain.Partition;
-import com.jd.journalq.domain.QosLevel;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.exception.JMQException;
 import com.jd.journalq.message.MessageLocation;
 import com.jd.journalq.network.session.Connection;
 import com.jd.journalq.network.session.Consumer;
-import com.jd.journalq.broker.consumer.filter.FilterCallback;
-import com.jd.journalq.broker.consumer.model.PullResult;
-import com.jd.journalq.broker.consumer.position.PositionManager;
 import com.jd.journalq.server.retry.api.MessageRetry;
 import com.jd.journalq.server.retry.model.RetryMessageModel;
-import com.jd.journalq.store.PartitionGroupStore;
-import com.jd.journalq.store.PositionOverflowException;
-import com.jd.journalq.store.PositionUnderflowException;
-import com.jd.journalq.store.ReadResult;
-import com.jd.journalq.store.StoreService;
+import com.jd.journalq.store.*;
 import com.jd.journalq.toolkit.lang.Preconditions;
 import com.jd.journalq.toolkit.network.IpUtil;
 import com.jd.journalq.toolkit.service.Service;
@@ -207,7 +202,7 @@ class PartitionConsumption extends Service {
         try {
             long startTime = System.nanoTime();
 
-            PartitionGroupStore store = storeService.getStore(consumer.getTopic(), group, QosLevel.PERSISTENCE);
+            PartitionGroupStore store = storeService.getStore(consumer.getTopic(), group);
             ReadResult readRst = store.read(partition, index, count, Long.MAX_VALUE);
 
             TPStatUtil.append(monitorKey, startTime, System.nanoTime());

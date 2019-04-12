@@ -20,7 +20,6 @@ import java.nio.ByteBuffer;
 
 /**
  * 读消息结果
- * 替代 com.jd.journalq.server.store.GetResult
  */
 public class ReadResult {
     /**

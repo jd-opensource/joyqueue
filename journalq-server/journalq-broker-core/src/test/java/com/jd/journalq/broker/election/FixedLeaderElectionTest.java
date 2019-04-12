@@ -141,7 +141,7 @@ public class FixedLeaderElectionTest {
         }
 
         for (int i = 0; i < FIX_ELECTION_NUM; i++) {
-            storeServices[i].createPartitionGroup(topic1.getFullName(), partitionGroup1, new short[]{1}, new int[]{1});
+            storeServices[i].createPartitionGroup(topic1.getFullName(), partitionGroup1, new short[]{1});
             electionManager[i].onPartitionGroupCreate(PartitionGroup.ElectType.fix,
                     topic1, partitionGroup1, allNodes, new TreeSet<Integer>(), brokers[i].getId(), 1);
             leaderElections[i] = electionManager[i].getLeaderElection(topic1, partitionGroup1);

@@ -807,7 +807,7 @@ public class RaftLeaderElection extends LeaderElection  {
 
         try {
             if (replicableStore.serviceStatus()) {
-                replicableStore.disable(electionConfig.getDisableStoreTimeout());
+                replicableStore.disable();
             }
             replicableStore.term(term);
         } catch (Exception e) {

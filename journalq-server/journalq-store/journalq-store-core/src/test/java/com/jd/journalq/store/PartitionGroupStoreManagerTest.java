@@ -465,9 +465,9 @@ public class PartitionGroupStoreManagerTest {
         this.store.enable();
     }
 
-    private void destroyStore() throws IOException {
+    private void destroyStore() {
         if (this.store != null) {
-            store.disable(5000L);
+            store.disable();
             store.stop();
             store.close();
             store = null;

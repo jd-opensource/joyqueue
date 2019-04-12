@@ -16,6 +16,7 @@ package com.jd.journalq.store.message;
 import java.nio.ByteBuffer;
 
 /**
+ * 批消息解析器
  * @author liyue25
  * Date: 2019-02-22
  */

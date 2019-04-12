@@ -22,6 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
+ * 消息解析器
  * @author liyue25
  * Date: 2019-01-15
  */

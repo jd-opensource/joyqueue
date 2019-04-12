@@ -644,7 +644,7 @@ public class ReplicaGroup extends Service {
                                     "left position is {}",
                             topicPartitionGroup, localReplicaId, request.getStartPosition(),
                             replicableStore.rightPosition(), request.getLeftPosition());
-                    replicableStore.setRightPosition(request.getStartPosition(), electionConfig.getDisableStoreTimeout());
+                    replicableStore.setRightPosition(request.getStartPosition());
                 }
 
                 long startAppendTime = System.currentTimeMillis();

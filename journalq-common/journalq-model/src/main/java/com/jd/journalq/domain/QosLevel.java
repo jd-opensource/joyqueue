@@ -50,10 +50,8 @@ public enum QosLevel {
                 return RECEIVE;
             case 2:
                 return PERSISTENCE;
-            case 3:
-                return REPLICATION;
             default:
-                return PERSISTENCE;
+                return REPLICATION;
         }
     }
 }
