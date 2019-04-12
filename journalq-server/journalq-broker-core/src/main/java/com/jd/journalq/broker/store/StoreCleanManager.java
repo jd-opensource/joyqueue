@@ -136,7 +136,7 @@ public class StoreCleanManager extends Service {
                                                                     minAckIndex = Math.min(minAckIndex, positionManager.getLastMsgAckIndex(topicConfig.getName(), app, partition));
                                                                 } catch (JMQException e) {
                                                                     //minAckIndex = Long.MAX_VALUE;
-                                                                    LOG.error("Error to get last topic & app offset: <{}>", e);
+                                                                    LOG.error("Error to get last topic {} & app {} offset: <{}>",topicConfig.getName(),app, e);
                                                                     e.printStackTrace();
                                                                 }
                                                             }
@@ -155,7 +155,7 @@ public class StoreCleanManager extends Service {
                                                     cleaningStrategy.deleteIfNeeded(storeService.getStore(topicConfig.getName().getFullName(), partitionGroup.getGroup()), minPartitionAckIndex);
                                                 }
                                             } catch (IOException e) {
-                                                LOG.error("Error to clean store for topic <{}>, partition group <{}>, delete index <{}> on clean class <{}>", topicConfig, partitionGroup.getGroup(), minPartitionAckIndex, cleaningStrategy);
+                                                LOG.error("Error to clean store for topic <{}>, partition group <{}>, delete index <{}> on clean class <{}>", topicConfig, partitionGroup.getGroup(), minPartitionAckIndex, cleaningStrategy,e);
                                                 e.printStackTrace();
                                             }
                                         }
