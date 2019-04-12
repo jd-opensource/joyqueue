@@ -617,8 +617,9 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
         partitionGroupMetricMap.forEach((k,v) ->{
             PartitionGroupPosition partitionGroupPosition = positionConvert(masterMetric,v);
             if (String.valueOf(masterBroker).equals(k)) {
-                partitionGroupPosition.setMaster(true);
+                partitionGroupPosition.setLeader(true);
             }
+            partitionGroupPosition.setBrokerId(k);
             positionList.add(partitionGroupPosition);
         });
         return positionList;
