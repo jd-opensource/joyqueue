@@ -136,7 +136,7 @@ public class StoreCleanManager extends Service {
                                                                     minAckIndex = Math.min(minAckIndex, positionManager.getLastMsgAckIndex(topicConfig.getName(), app, partition));
                                                                 } catch (JMQException e) {
                                                                     //minAckIndex = Long.MAX_VALUE;
-                                                                    LOG.error("Error to get last topic {} & app {} offset: <{}>",topicConfig.getName(),app, e);
+                                                                    LOG.error("Error to get lastMsg ackIndex topic {} & app {} partition {}",topicConfig.getName(),app,partition, e);
                                                                     e.printStackTrace();
                                                                 }
                                                             }
