@@ -1,6 +1,6 @@
 <template>
   <div>
-    <d-table :columns="tableData.colData" :data="tableData.rowData">
+    <d-table :columns="tableData.colData" :data="tableData.rowData" style="height: 400px;overflow-y:auto">
     </d-table>
   </div>
 </template>
@@ -54,12 +54,16 @@ export default {
             key: 'partitionGroup'
           },
           {
+            title: 'brokerId',
+            key: 'brokerId'
+          },
+          {
             title: '位置',
             key: 'rightPosition'
           },
           {
-            title: '是否master',
-            key: 'master'
+            title: '是否leader',
+            key: 'leader'
           },
           {
             title: '位移差距',
@@ -67,10 +71,6 @@ export default {
           }
         ],
         // btns: [
-        //   {
-        //     txt: '指定leader',
-        //     method: 'on-leader'
-        //   }
         // ]
       },
       multipleSelection: []
