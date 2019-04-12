@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.store;
 
 import org.slf4j.Logger;
@@ -11,6 +24,7 @@ import java.nio.channels.FileLock;
 
 /**
  * from: https://gist.github.com/bmchae/1344404 by Burhan Uddin
+ *
  * @author modified by liyue25
  * Date: 2018/10/10
  */
@@ -28,7 +42,7 @@ public class StoreLock {
         // Try to get the lock
         channel = new RandomAccessFile(lockFile, "rw").getChannel();
         lock = channel.tryLock();
-        if(lock == null) {
+        if (lock == null) {
             // File is lock by other application
             channel.close();
             throw new StoreLockedException();
@@ -42,12 +56,12 @@ public class StoreLock {
     private void unlock() {
         // release and delete file lock
         try {
-            if(lock != null) {
+            if (lock != null) {
                 lock.release();
                 channel.close();
                 lockFile.delete();
             }
-        } catch(IOException e) {
+        } catch (IOException e) {
             logger.warn("Unlock file {} failed!", lockFile.getAbsoluteFile());
         }
     }

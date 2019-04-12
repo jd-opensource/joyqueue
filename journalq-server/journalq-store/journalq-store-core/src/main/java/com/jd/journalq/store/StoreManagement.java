@@ -1,10 +1,21 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.store;
 
 import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.store.file.PositioningStore;
 import com.jd.journalq.store.file.StoreFile;
-import com.jd.journalq.store.file.StoreFileImpl;
-import com.jd.journalq.store.file.StoreMessageSerializer;
 import com.jd.journalq.store.index.IndexItem;
 import com.jd.journalq.store.utils.ByteBufferUtils;
 import com.jd.journalq.store.utils.PreloadBufferPool;
@@ -55,7 +66,7 @@ public class StoreManagement implements StoreManagementService {
 
         PartitionGroupMetric partitionGroupMetric = null;
         PartitionGroupStoreManager partitionGroupStoreManger = store.partitionGroupStore(topic, partitionGroup);
-        if(null != partitionGroupStoreManger) {
+        if (null != partitionGroupStoreManger) {
             partitionGroupMetric = new PartitionGroupMetric();
             partitionGroupMetric.setPartitionGroup(partitionGroup);
             partitionGroupMetric.setFlushPosition(partitionGroupStoreManger.flushPosition());
@@ -66,7 +77,7 @@ public class StoreManagement implements StoreManagementService {
 
             partitionGroupMetric.setPartitionMetrics(
                     Arrays.stream(partitionGroupStoreManger.listPartitions())
-                    .map(partition -> getPartitionMetric(partitionGroupStoreManger, partition))
+                            .map(partition -> getPartitionMetric(partitionGroupStoreManger, partition))
                             .filter(Objects::nonNull)
                             .toArray(PartitionMetric[]::new)
             );
@@ -78,7 +89,7 @@ public class StoreManagement implements StoreManagementService {
         PartitionMetric partitionMetric = null;
 
         PositioningStore<IndexItem> indexStore = partitionGroupStoreManger.indexStore(partition);
-        if(null != indexStore) {
+        if (null != indexStore) {
             partitionMetric = new PartitionMetric();
             partitionMetric.setPartition(partition);
 
@@ -100,7 +111,8 @@ public class StoreManagement implements StoreManagementService {
                         .filter(Objects::nonNull)
                         .toArray(PartitionGroupMetric[]::new)
         );
-        return topicMetric;    }
+        return topicMetric;
+    }
 
 
     @Override
@@ -120,7 +132,7 @@ public class StoreManagement implements StoreManagementService {
     @Override
     public File[] listFiles(String path) {
         File dir = new File(path);
-        if(!dir.isAbsolute()) {
+        if (!dir.isAbsolute()) {
             dir = new File(store.base(), path);
         }
 
@@ -149,18 +161,18 @@ public class StoreManagement implements StoreManagementService {
                     .messageStore().batchRead(position, count)
                     .stream()
                     .map(ByteBuffer::array)
-                    .toArray(byte [][]::new);
+                    .toArray(byte[][]::new);
         } catch (Throwable t) {
-            logger.warn("Exception:",t);
+            logger.warn("Exception:", t);
             return null;
         }
     }
 
     private byte[] getBytes(ByteBuffer b) {
-            byte[] bytes = new byte[b.capacity()];
-            ByteBuffer wrappedBuffer = ByteBuffer.wrap(bytes);
-            ByteBufferUtils.copy(b, wrappedBuffer);
-            return bytes;
+        byte[] bytes = new byte[b.capacity()];
+        ByteBuffer wrappedBuffer = ByteBuffer.wrap(bytes);
+        ByteBufferUtils.copy(b, wrappedBuffer);
+        return bytes;
     }
 
     @Override
@@ -169,10 +181,10 @@ public class StoreManagement implements StoreManagementService {
             return store.partitionGroups(topic).stream()
                     .map(g -> store.partitionGroupStore(topic, g))
                     .filter(Objects::nonNull)
-                    .filter(s -> Arrays.stream(s.listPartitions()).anyMatch( p -> p == partition))
+                    .filter(s -> Arrays.stream(s.listPartitions()).anyMatch(p -> p == partition))
                     .map(s -> {
                         try {
-                            return s.read(partition,index,count, Long.MAX_VALUE);
+                            return s.read(partition, index, count, Long.MAX_VALUE);
                         } catch (IOException e) {
                             return null;
                         }
@@ -182,9 +194,9 @@ public class StoreManagement implements StoreManagementService {
                     .map(ReadResult::getMessages)
                     .flatMap(Arrays::stream)
                     .map(this::getBytes)
-                    .toArray(byte [][]::new);
+                    .toArray(byte[][]::new);
         } catch (Throwable t) {
-            logger.warn("Exception:",t);
+            logger.warn("Exception:", t);
             return null;
         }
 
@@ -193,25 +205,24 @@ public class StoreManagement implements StoreManagementService {
     @Override
     public byte[][] readMessages(File file, long position, int count, boolean includeFileHeader) {
 
-        try{
+        try {
             //TODO
             StoreFile<ByteBuffer> storeFile = null;//new StoreFileImpl<>(0, file, messageFileHeaderSize,
-                  //  new StoreMessageSerializer(maxMessageSize), bufferPool,  (int) file.length() - messageFileHeaderSize,2048);
-            List<byte []> messages = new ArrayList<>(count);
+            //  new StoreMessageSerializer(maxMessageSize), bufferPool,  (int) file.length() - messageFileHeaderSize,2048);
+            List<byte[]> messages = new ArrayList<>(count);
             for (int i = 0; i < count; i++) {
                 ByteBuffer byteBuffer = storeFile.read((int) position, -1);
-                if(null != byteBuffer) {
+                if (null != byteBuffer) {
                     position += byteBuffer.remaining() + 1;
                     messages.add(getBytes(byteBuffer));
-                }
-                else break;
+                } else break;
 
             }
             return messages.toArray(new byte[0][]);
 
 
-        }  catch (Throwable t) {
-            logger.warn("Exception:",t);
+        } catch (Throwable t) {
+            logger.warn("Exception:", t);
             return null;
         }
     }
@@ -225,12 +236,12 @@ public class StoreManagement implements StoreManagementService {
      * @param count
      */
     @Override
-    public Long [] readIndices(String topic, short partition, long index, int count) {
+    public Long[] readIndices(String topic, short partition, long index, int count) {
         try {
             return store.partitionGroups(topic).stream()
                     .map(g -> store.partitionGroupStore(topic, g))
                     .filter(Objects::nonNull)
-                    .filter(s -> Arrays.stream(s.listPartitions()).anyMatch( p -> p == partition))
+                    .filter(s -> Arrays.stream(s.listPartitions()).anyMatch(p -> p == partition))
                     .map(s -> s.indexStore(partition))
                     .map(is -> {
                         try {
@@ -246,25 +257,25 @@ public class StoreManagement implements StoreManagementService {
                     .toArray(Long[]::new);
 
         } catch (Throwable t) {
-            logger.warn("Exception:",t);
+            logger.warn("Exception:", t);
             return null;
         }
 
     }
 
     @Override
-    public Long [] readIndices(File file, long position, int count, boolean includeFileHeader) {
+    public Long[] readIndices(File file, long position, int count, boolean includeFileHeader) {
         List<Long> retList = new ArrayList<>(count);
-        try(RandomAccessFile raf = new RandomAccessFile(file, "rw");FileChannel fileChannel = raf.getChannel()) {
-            position += (includeFileHeader? 0: indexFileHeaderSize);
+        try (RandomAccessFile raf = new RandomAccessFile(file, "rw"); FileChannel fileChannel = raf.getChannel()) {
+            position += (includeFileHeader ? 0 : indexFileHeaderSize);
             for (int i = 0; i < count && position + (i + 1) * IndexItem.STORAGE_SIZE <= raf.length(); i++) {
                 ByteBuffer byteBuffer = ByteBuffer.allocate(IndexItem.STORAGE_SIZE);
                 fileChannel.read(byteBuffer);
-                retList.add(IndexItem.parseMessage(byteBuffer,0L).getOffset());
+                retList.add(IndexItem.parseMessage(byteBuffer, 0L).getOffset());
             }
             return retList.toArray(new Long[0]);
         } catch (Throwable t) {
-            logger.warn("Exception:",t);
+            logger.warn("Exception:", t);
             return null;
         }
     }
@@ -278,12 +289,12 @@ public class StoreManagement implements StoreManagementService {
      */
     @Override
     public byte[] readFile(File file, long position, int length) {
-        try(RandomAccessFile raf = new RandomAccessFile(file, "rw")) {
-            byte [] retBytes = new byte[length];
+        try (RandomAccessFile raf = new RandomAccessFile(file, "rw")) {
+            byte[] retBytes = new byte[length];
             raf.read(retBytes);
             return retBytes;
         } catch (Throwable t) {
-            logger.warn("Exception:",t);
+            logger.warn("Exception:", t);
             return null;
         }
     }
@@ -294,7 +305,7 @@ public class StoreManagement implements StoreManagementService {
             PositioningStore<ByteBuffer> messageStore = store.partitionGroupStore(topic, partitionGroup).messageStore();
             return messageStore.readBytes(position, length);
         } catch (Throwable t) {
-            logger.warn("Exception:",t);
+            logger.warn("Exception:", t);
             return null;
         }
     }

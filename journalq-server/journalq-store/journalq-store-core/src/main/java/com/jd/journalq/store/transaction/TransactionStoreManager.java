@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.store.transaction;
 
 import com.jd.journalq.exception.JMQCode;
@@ -13,13 +26,25 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
 /**
  * 管理暂存的未提交的事务消息
+ *
  * @author liyue25
  * Date: 2018/10/10
  */
@@ -31,28 +56,29 @@ public class TransactionStoreManager implements TransactionStore, Closeable {
     private final Map<Integer, PositioningStore<ByteBuffer>> storeMap;
     private final PositioningStore.Config config;
     private final PreloadBufferPool bufferPool;
+
     public TransactionStoreManager(File base, PositioningStore.Config config, PreloadBufferPool bufferPool) {
         this.base = base;
         this.config = config;
-        this.bufferPool  = bufferPool;
+        this.bufferPool = bufferPool;
         idSequence = new AtomicInteger(0);
         loadFiles();
 
-        writeExecutor = new ThreadPoolExecutor(1,1,10L,TimeUnit.SECONDS,
-                new ArrayBlockingQueue<>(1024),new ThreadPoolExecutor.AbortPolicy());
+        writeExecutor = new ThreadPoolExecutor(1, 1, 10L, TimeUnit.SECONDS,
+                new ArrayBlockingQueue<>(1024), new ThreadPoolExecutor.AbortPolicy());
         storeMap = new HashMap<>();
 
     }
 
     private void loadFiles() {
-        if(!base.isDirectory()) {
+        if (!base.isDirectory()) {
             throw new StoreInitializeException(
                     String.format("Init transaction store directory failed! " +
                             "Directory NOT exists: %s!", base.getAbsolutePath()));
         }
 
-        File [] files = base.listFiles();
-        if(files != null) {
+        File[] files = base.listFiles();
+        if (files != null) {
             idSequence.set(
                     Arrays.stream(files)
                             .filter(File::isDirectory)
@@ -63,7 +89,6 @@ public class TransactionStoreManager implements TransactionStore, Closeable {
             );
             idSequence.incrementAndGet();
         }
-
 
 
     }
@@ -77,9 +102,9 @@ public class TransactionStoreManager implements TransactionStore, Closeable {
 
     private PositioningStore<ByteBuffer> getOrCreate(int id) throws IOException {
         synchronized (storeMap) {
-            if(!storeMap.containsKey(id)) {
+            if (!storeMap.containsKey(id)) {
                 File storeBase = new File(base, String.valueOf(id));
-                if(storeBase.exists() || storeBase.mkdir()) {
+                if (storeBase.exists() || storeBase.mkdir()) {
                     PositioningStore<ByteBuffer> store = new PositioningStore<>(storeBase, config, bufferPool, new TransactionMessageSerializer());
                     storeMap.put(id, store);
                     return store;
@@ -91,6 +116,7 @@ public class TransactionStoreManager implements TransactionStore, Closeable {
             }
         }
     }
+
     private WriteResult write(int id, List<ByteBuffer> messages) {
         WriteResult writeResult = new WriteResult();
         try {
@@ -119,8 +145,8 @@ public class TransactionStoreManager implements TransactionStore, Closeable {
     @Override
     public int[] list() {
 
-        File [] files = base.listFiles();
-        if(files != null) {
+        File[] files = base.listFiles();
+        if (files != null) {
 
             return Arrays.stream(files)
                     .map(File::getName)
@@ -136,15 +162,14 @@ public class TransactionStoreManager implements TransactionStore, Closeable {
 
     /**
      * 删除事务
-     *
      */
     @Override
     public boolean remove(int id) {
         synchronized (storeMap) {
             PositioningStore<ByteBuffer> store = storeMap.remove(id);
-            if(null != store) store.close();
+            if (null != store) store.close();
         }
-        File txFile = new File(base,String.valueOf(id));
+        File txFile = new File(base, String.valueOf(id));
         try {
             return deleteFolder(txFile);
         } catch (IOException e) {
@@ -170,7 +195,7 @@ public class TransactionStoreManager implements TransactionStore, Closeable {
      * 获取读取的迭代器
      */
     @Override
-    public Iterator<ByteBuffer> readIterator(int id) throws IOException {
+    public Iterator<ByteBuffer> readIterator(int id) {
         PositioningStore<ByteBuffer> store = get(id);
         return store == null ? null : new ReadIterator(store);
     }
@@ -185,7 +210,6 @@ public class TransactionStoreManager implements TransactionStore, Closeable {
      * to relinquish the underlying resources and to internally
      * <em>mark</em> the {@code Closeable} as closed, prior to throwing
      * the {@code IOException}.
-     *
      */
     @Override
     public void close() {
@@ -195,15 +219,32 @@ public class TransactionStoreManager implements TransactionStore, Closeable {
         while (!writeExecutor.isTerminated() && System.currentTimeMillis() - t0 < timeout) {
             try {
                 Thread.sleep(ThreadLocalRandom.current().nextLong(100));
-            } catch (InterruptedException ignored) {}
+            } catch (InterruptedException ignored) {
+            }
         }
-        if(!writeExecutor.isTerminated()) {
+        if (!writeExecutor.isTerminated()) {
             logger.warn("Failed to shutdown executor!");
         }
 
 
         storeMap.values().forEach(PositioningStore::close);
 
+    }
+
+    private boolean deleteFolder(File folder) throws IOException {
+        File[] files = folder.listFiles();
+        if (files != null) { //some JVMs return null for empty dirs
+            for (File f : files) {
+                if (f.isDirectory()) {
+                    deleteFolder(f);
+                } else {
+                    if (!f.delete()) {
+                        throw new IOException(String.format("Can not delete file: %s", f.getAbsolutePath()));
+                    }
+                }
+            }
+        }
+        return folder.delete();
     }
 
     private class WriteTask implements Callable<WriteResult> {
@@ -225,7 +266,6 @@ public class TransactionStoreManager implements TransactionStore, Closeable {
             return write(id, messages);
         }
     }
-
 
     private class ReadIterator implements Iterator<ByteBuffer> {
 
@@ -256,11 +296,11 @@ public class TransactionStoreManager implements TransactionStore, Closeable {
          *
          * @return the next element in the iteration
          * @throws NoSuchElementException if the iteration has no more elements
-         * @throws ReadException 文件读取异常
+         * @throws ReadException          文件读取异常
          */
         @Override
         public ByteBuffer next() {
-            if(hasNext()) {
+            if (hasNext()) {
                 ByteBuffer buffer;
                 try {
                     buffer = store.read(position);
@@ -274,21 +314,5 @@ public class TransactionStoreManager implements TransactionStore, Closeable {
                 throw new NoSuchElementException();
             }
         }
-    }
-
-    private  boolean deleteFolder(File folder) throws IOException {
-        File[] files = folder.listFiles();
-        if(files!=null) { //some JVMs return null for empty dirs
-            for(File f: files) {
-                if(f.isDirectory()) {
-                    deleteFolder(f);
-                } else {
-                    if(!f.delete()) {
-                        throw new IOException(String.format("Can not delete file: %s", f.getAbsolutePath()));
-                    }
-                }
-            }
-        }
-        return folder.delete();
     }
 }

@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.store;
 
 import com.jd.journalq.store.file.PositioningStore;
@@ -13,14 +26,14 @@ import com.jd.journalq.toolkit.config.PropertySupplier;
  */
 public class StoreConfig {
 
-    public final static int DEFAULT_MESSAGE_FILE_SIZE = 128 * 1024 * 1024;
-    public final static int DEFAULT_INDEX_FILE_SIZE = 512 * 1024;
-    public final static int DEFAULT_THREAD_COUNT = 4;
-    public final static int DEFAULT_PRE_LOAD_BUFFER_CORE_COUNT = 3;
-    public final static int DEFAULT_PRE_LOAD_BUFFER_MAX_COUNT = 10;
-    public final static long DEFAULT_PRINT_METRIC_INTERVAL_MS = 0;
+    public static final int DEFAULT_MESSAGE_FILE_SIZE = 128 * 1024 * 1024;
+    public static final int DEFAULT_INDEX_FILE_SIZE = 512 * 1024;
+    public static final int DEFAULT_THREAD_COUNT = 4;
+    public static final int DEFAULT_PRE_LOAD_BUFFER_CORE_COUNT = 3;
+    public static final int DEFAULT_PRE_LOAD_BUFFER_MAX_COUNT = 10;
+    public static final long DEFAULT_PRINT_METRIC_INTERVAL_MS = 0;
 
-    public final static String STORE_PATH = "/store";
+    public static final String STORE_PATH = "/store";
     /**
      * 存储路径
      */
@@ -74,7 +87,6 @@ public class StoreConfig {
     private int fileHeaderSize = PositioningStore.Config.DEFAULT_FILE_HEADER_SIZE;
 
     private long maxDirtySize = PartitionGroupStoreManager.Config.DEFAULT_MAX_DIRTY_SIZE;
-
 
 
     private PropertySupplier propertySupplier;

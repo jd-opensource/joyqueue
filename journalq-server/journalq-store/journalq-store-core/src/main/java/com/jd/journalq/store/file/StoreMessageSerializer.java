@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.store.file;
 
 import com.jd.journalq.store.PartialLogException;
@@ -21,6 +34,18 @@ public class StoreMessageSerializer implements LogSerializer<ByteBuffer> {
         this.maxLogLength = maxLogLength;
     }
 
+    private static boolean checkCRC(ByteBuffer buffer) {
+        ByteBuffer body = MessageParser.getByteBuffer(buffer, MessageParser.BODY);
+        if (body.remaining() > 0) {
+            CRC32 crc32 = new CRC32();
+            crc32.update(body);
+            long crc = crc32.getValue();
+            return crc == MessageParser.getLong(buffer, MessageParser.CRC);
+        }
+        return false;
+
+    }
+
     private ByteBuffer read(ByteBuffer src) {
 
         ByteBuffer buffer;
@@ -39,22 +64,22 @@ public class StoreMessageSerializer implements LogSerializer<ByteBuffer> {
     public ByteBuffer read(ByteBuffer src, int length) {
         src.mark();
         try {
-            if(length < 0) {
-                return read(src) ;
-            }else {
+            if (length < 0) {
+                return read(src);
+            } else {
                 return readByLength(src, length);
             }
         } catch (Throwable t) {
             src.reset();
-            throw  t;
+            throw t;
         }
     }
 
     private ByteBuffer readByLength(ByteBuffer src, int length) {
         ByteBuffer buffer;
         if (length > Integer.BYTES && length < maxLogLength) {
-            if(src.remaining() < length) throw new PartialLogException();
-            byte [] readBuffer = new byte[length];
+            if (src.remaining() < length) throw new PartialLogException();
+            byte[] readBuffer = new byte[length];
             src.get(readBuffer, 0, length);
             buffer = ByteBuffer.wrap(readBuffer);
             return buffer;
@@ -64,7 +89,8 @@ public class StoreMessageSerializer implements LogSerializer<ByteBuffer> {
 
     /**
      * 从src中读取若干条Log，并返回这些Log的总长度
-     * @param src 存放消息的ByteBuffer，调用此方法不改变src的position、mark和limit
+     *
+     * @param src    存放消息的ByteBuffer，调用此方法不改变src的position、mark和limit
      * @param length 最多读取Log的总长度
      * @return 返回若干条消息，消息的条数不固定，但满足如下全部条件：
      * 1. Log数量不超过count
@@ -78,17 +104,17 @@ public class StoreMessageSerializer implements LogSerializer<ByteBuffer> {
         int pos = 0;
         int lengthOfSrc = sliced.remaining();
         int vRemaining;
-        int term  = - 1;
+        int term = -1;
         while ((vRemaining = lengthOfSrc - pos) > MessageParser.getFixedAttributesLength()
                 && pos < length) {
             int len = sliced.getInt(pos);
             if (len > MessageParser.getFixedAttributesLength() && len < maxLogLength) {
-                if( vRemaining < len) {
+                if (vRemaining < len) {
                     break;
                 }
-                if(term < 0) {
+                if (term < 0) {
                     term = sliced.getInt(pos + MessageParser.TERM);
-                } else if (term != sliced.getInt(pos + MessageParser.TERM)){
+                } else if (term != sliced.getInt(pos + MessageParser.TERM)) {
                     break;
                 }
                 pos += len;
@@ -98,18 +124,6 @@ public class StoreMessageSerializer implements LogSerializer<ByteBuffer> {
             }
         }
         return pos;
-    }
-
-    private static boolean checkCRC(ByteBuffer buffer) {
-        ByteBuffer body = MessageParser.getByteBuffer(buffer,MessageParser.BODY);
-        if (body.remaining() > 0) {
-            CRC32 crc32 = new CRC32();
-            crc32.update(body);
-            long crc = crc32.getValue();
-            return crc == MessageParser.getLong(buffer, MessageParser.CRC);
-        }
-        return false;
-
     }
 
     @Override

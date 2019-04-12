@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.store.file;
 
 import com.jd.journalq.store.utils.BufferHolder;
@@ -22,6 +35,12 @@ import java.util.concurrent.locks.StampedLock;
  */
 public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
     private static final Logger logger = LoggerFactory.getLogger(StoreFileImpl.class);
+    // 缓存页类型
+    // 只读：
+    // MAPPED_BUFFER：mmap映射内存镜像文件；
+    // 读写：
+    // DIRECT_BUFFER: 数据先写入DirectBuffer，异步刷盘到文件，性能最好；
+    private static final int MAPPED_BUFFER = 0, DIRECT_BUFFER = 1, NO_BUFFER = -1;
     // 文件全局位置
     private final long filePosition;
     // 文件头长度
@@ -31,30 +50,22 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
     // buffer读写锁：
     // 访问(包括读和写）buffer时加读锁；
     // 加载、释放buffer时加写锁；
-    private  final StampedLock bufferLock = new StampedLock();
+    private final StampedLock bufferLock = new StampedLock();
+    private final LogSerializer<T> serializer;
+    private final long createTimestamp;
     // 缓存页
     private ByteBuffer pageBuffer = null;
-
-    // 缓存页类型
-    // 只读：
-    // MAPPED_BUFFER：mmap映射内存镜像文件；
-    // 读写：
-    // DIRECT_BUFFER: 数据先写入DirectBuffer，异步刷盘到文件，性能最好；
-    private final static int MAPPED_BUFFER = 0, DIRECT_BUFFER = 1, NO_BUFFER = -1;
     private int bufferType = NO_BUFFER;
-
     private PreloadBufferPool bufferPool;
     private int capacity;
     private long lastAccessTime = System.currentTimeMillis();
-
     // 当前刷盘位置
     private int flushPosition;
     // 当前写入位置
     private int writePosition = 0;
-
-    private final LogSerializer<T> serializer;
     private long timestamp = -1L;
-    private final long createTimestamp;
+    private AtomicBoolean flushGate = new AtomicBoolean(false);
+
 
     public StoreFileImpl(long filePosition, File base, int headerSize, LogSerializer<T> serializer, PreloadBufferPool bufferPool, int maxFileDataLength) {
         this.filePosition = filePosition;
@@ -63,14 +74,13 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
         this.bufferPool = bufferPool;
         this.capacity = maxFileDataLength;
         this.file = new File(base, String.valueOf(filePosition));
-        if(file.exists() && file.length() > headerSize) {
-            this.writePosition = (int)(file.length() - headerSize);
+        if (file.exists() && file.length() > headerSize) {
+            this.writePosition = (int) (file.length() - headerSize);
             this.flushPosition = writePosition;
         }
         createTimestamp = System.currentTimeMillis();
 
     }
-
 
     @Override
     public File file() {
@@ -82,7 +92,7 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
         return filePosition;
     }
 
-    private void loadRoUnsafe() throws IOException{
+    private void loadRoUnsafe() throws IOException {
         if (null != pageBuffer) throw new IOException("Buffer already loaded!");
         ByteBuffer loadBuffer;
         try (RandomAccessFile raf = new RandomAccessFile(file, "r"); FileChannel fileChannel = raf.getChannel()) {
@@ -95,10 +105,10 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
         bufferPool.addMemoryMappedBufferHolder(this);
     }
 
-    private void loadRwUnsafe() throws IOException{
-        if(bufferType == DIRECT_BUFFER ) {
+    private void loadRwUnsafe() throws IOException {
+        if (bufferType == DIRECT_BUFFER) {
             return;
-        } else if(bufferType == MAPPED_BUFFER) {
+        } else if (bufferType == MAPPED_BUFFER) {
             unloadUnsafe();
         }
         ByteBuffer buffer = bufferPool.allocate(capacity, this);
@@ -120,7 +130,6 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
         bufferType = DIRECT_BUFFER;
     }
 
-
     public long timestamp() {
 
         if (timestamp <= 0) {
@@ -131,7 +140,7 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
     }
 
     private long readTimestamp() {
-        if(file.exists() && file.length() > 8) {
+        if (file.exists() && file.length() > 8) {
             ByteBuffer timeBuffer = ByteBuffer.allocate(8);
             try (RandomAccessFile raf = new RandomAccessFile(file, "r"); FileChannel fileChannel = raf.getChannel()) {
                 fileChannel.position(0);
@@ -145,25 +154,25 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
         return createTimestamp;
     }
 
-    private void writeTimestamp(FileChannel fileChannel) throws IOException{
+    private void writeTimestamp(FileChannel fileChannel) throws IOException {
         ByteBuffer timeBuffer = ByteBuffer.allocate(Long.BYTES);
         timestamp = createTimestamp;
         timeBuffer.putLong(timestamp);
         timeBuffer.flip();
-        fileChannel.write(timeBuffer,0L);
+        fileChannel.write(timeBuffer, 0L);
     }
 
     @Override
     public boolean unload() {
         long stamp = bufferLock.writeLock();
         try {
-            if(isClean()) {
+            if (isClean()) {
                 unloadUnsafe();
                 return true;
             } else {
                 return false;
             }
-        }finally {
+        } finally {
             bufferLock.unlockWrite(stamp);
         }
     }
@@ -173,7 +182,7 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
         long stamp = bufferLock.writeLock();
         try {
             unloadUnsafe();
-        }finally {
+        } finally {
             bufferLock.unlockWrite(stamp);
         }
     }
@@ -184,17 +193,17 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
     }
 
     @Override
-    public T read(int position, int length) throws IOException{
+    public T read(int position, int length) throws IOException {
         return read(position, length, serializer);
     }
 
-    public <R> R read(int position, int length, BufferReader<R> bufferReader) throws IOException{
+    public <R> R read(int position, int length, BufferReader<R> bufferReader) throws IOException {
         touch();
         long stamp = bufferLock.readLock();
         try {
             while (!hasPage()) {
                 long ws = bufferLock.tryConvertToWriteLock(stamp);
-                if(ws != 0L) {
+                if (ws != 0L) {
                     // 升级成写锁成功
                     stamp = ws;
                     loadRoUnsafe();
@@ -204,7 +213,7 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
                 }
             }
             long rs = bufferLock.tryConvertToReadLock(stamp);
-            if(rs != 0L) {
+            if (rs != 0L) {
                 stamp = rs;
             }
             ByteBuffer byteBuffer = pageBuffer.asReadOnlyBuffer();
@@ -217,7 +226,7 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
     }
 
     @Override
-    public ByteBuffer readByteBuffer(int position, int length) throws IOException{
+    public ByteBuffer readByteBuffer(int position, int length) throws IOException {
         return read(position, Math.min(length, writePosition - position), (src, len) -> {
             ByteBuffer dest = ByteBuffer.allocate(len);
             if (len < src.remaining()) {
@@ -229,15 +238,14 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
         });
     }
 
-
     @Override
-    public int append(T t) throws IOException{
+    public int append(T t) throws IOException {
         touch();
         long stamp = bufferLock.readLock();
         try {
             while (bufferType != DIRECT_BUFFER) {
                 long ws = bufferLock.tryConvertToWriteLock(stamp);
-                if(ws != 0L) {
+                if (ws != 0L) {
                     // 升级成写锁成功
                     stamp = ws;
                     loadRwUnsafe();
@@ -247,7 +255,7 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
                 }
             }
             long rs = bufferLock.tryConvertToReadLock(stamp);
-            if(rs != 0L) {
+            if (rs != 0L) {
                 stamp = rs;
             }
             return appendToPageBuffer(t, serializer);
@@ -257,23 +265,21 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
     }
 
     // Not thread safe!
-    private  <R> int appendToPageBuffer(R t, BufferAppender<R> bufferAppender) {
+    private <R> int appendToPageBuffer(R t, BufferAppender<R> bufferAppender) {
         pageBuffer.position(writePosition);
         int writeLength = bufferAppender.append(t, pageBuffer);
         writePosition += writeLength;
         return writeLength;
     }
 
-
-
     @Override
-    public int appendByteBuffer(ByteBuffer byteBuffer) throws IOException{
+    public int appendByteBuffer(ByteBuffer byteBuffer) throws IOException {
         touch();
         long stamp = bufferLock.readLock();
         try {
             while (bufferType != DIRECT_BUFFER) {
                 long ws = bufferLock.tryConvertToWriteLock(stamp);
-                if(ws != 0L) {
+                if (ws != 0L) {
                     // 升级成写锁成功
                     stamp = ws;
                     loadRwUnsafe();
@@ -283,7 +289,7 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
                 }
             }
             long rs = bufferLock.tryConvertToReadLock(stamp);
-            if(rs != 0L) {
+            if (rs != 0L) {
                 stamp = rs;
             }
             return appendToPageBuffer(byteBuffer, (src, dest) -> {
@@ -300,8 +306,6 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
         lastAccessTime = System.currentTimeMillis();
     }
 
-    private AtomicBoolean flushGate = new AtomicBoolean(false);
-
     /**
      * 刷盘
      */
@@ -313,7 +317,7 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
             if (writePosition > flushPosition) {
                 if (flushGate.compareAndSet(false, true)) {
                     try (RandomAccessFile raf = new RandomAccessFile(file, "rw"); FileChannel fileChannel = raf.getChannel()) {
-                        if(flushPosition == 0) {
+                        if (flushPosition == 0) {
                             writeTimestamp(fileChannel);
                         }
                         return flushPageBuffer(fileChannel);
@@ -349,17 +353,17 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
     // Not thread safe!
     @Override
     public void rollback(int position) throws IOException {
-        if(position < writePosition) {
+        if (position < writePosition) {
             writePosition = position;
         }
         if (position < flushPosition) {
-            if(flushGate.compareAndSet(false, true)) {
+            if (flushGate.compareAndSet(false, true)) {
                 try {
                     flushPosition = position;
                     try (RandomAccessFile raf = new RandomAccessFile(file, "rw"); FileChannel fileChannel = raf.getChannel()) {
                         fileChannel.truncate(position + headerSize);
                     }
-                }finally {
+                } finally {
                     flushGate.compareAndSet(true, false);
                 }
             } else {
@@ -380,7 +384,7 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
 
     @Override
     public int fileDataSize() {
-        return Math.max((int)file.length() - headerSize, 0);
+        return Math.max((int) file.length() - headerSize, 0);
     }
 
     @Override
@@ -406,7 +410,7 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
         final ByteBuffer direct = pageBuffer;
         pageBuffer = null;
         this.bufferType = NO_BUFFER;
-        if(null != direct) bufferPool.release(direct, this);
+        if (null != direct) bufferPool.release(direct, this);
     }
 
     private void unloadMappedBuffer() {
@@ -414,14 +418,14 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
             final Buffer mapped = pageBuffer;
             pageBuffer = null;
             this.bufferType = NO_BUFFER;
-            if(null != mapped) {
+            if (null != mapped) {
                 Method getCleanerMethod;
                 getCleanerMethod = mapped.getClass().getMethod("cleaner");
                 getCleanerMethod.setAccessible(true);
                 Cleaner cleaner = (Cleaner) getCleanerMethod.invoke(mapped, new Object[0]);
                 cleaner.clean();
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             logger.warn("Release direct buffer exception: ", e);
         }
     }

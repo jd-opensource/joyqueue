@@ -1,2 +1,15 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 webpackJsonp([54],{N59G:function(t,e){},nIoS:function(t,e,a){"use strict";Object.defineProperty(e,"__esModule",{value:!0});var n=a("T0gc"),i=a("95hR"),s=a("1a0f"),o=a("fo4W"),r=a("toiR"),c={name:"archive",components:{MyDialog:o.a,myTable:n.a},mixins:[i.a],data:function(){return{searchData:{topic:"",beginTime:"",endTime:""},searchRules:{},tableData:{rowData:[],colData:[{title:"topic",key:"topic"},{title:"类型",key:"type",formatter:function(t){return 1===t.type?"导出":2===t.type?"重试":void 0}},{title:"参数",key:"params"},{title:"导出条数",key:"count"},{title:"创建时间",key:"create_Time",formatter:function(t){return Object(r.b)(t.createTime)}},{title:"状态",key:"status",formatter:function(t){return 0===t.status?"新建":1===t.status?"正在执行":2===t.status?"异常":3===t.status?"完成":void 0}}],btns:[{txt:"下载消息体",method:"on-download",bindKey:"type",bindVal:1}]},times:[]}},methods:{getListWithDate:function(){this.searchData.beginTime=this.times[0],this.searchData.endTime=this.times[1],this.getList()},download:function(t){var e=this;s.a.get(this.urlOrigin.download+"/"+t.id).then(function(t){e.$Message.success("下载成功")})}},mounted:function(){}},l={render:function(){var t=this,e=t.$createElement,a=t._self._c||e;return a("div",[a("div",{staticClass:"ml20 mt30"},[a("d-date-picker",{attrs:{type:"daterange","range-separator":"至","start-placeholder":"开始日期","end-placeholder":"结束日期","value-format":"timestamp","default-time":["00:00:00","23:59:59"]},model:{value:t.times,callback:function(e){t.times=e},expression:"times"}},[a("span",{attrs:{slot:"prepend"},slot:"prepend"},[t._v("日期范围")])]),t._v(" "),a("d-input",{staticClass:"left mr10",staticStyle:{width:"15%"},attrs:{placeholder:"队列名"},model:{value:t.searchData.topic,callback:function(e){t.$set(t.searchData,"topic",e)},expression:"searchData.topic"}},[a("span",{attrs:{slot:"prepend"},slot:"prepend"},[t._v("队列名")])]),t._v(" "),a("d-button",{attrs:{type:"primary"},on:{click:t.getListWithDate}},[t._v("查询")])],1),t._v(" "),a("my-table",{attrs:{data:t.tableData,showPin:t.showTablePin,page:t.page},on:{"on-size-change":t.handleSizeChange,"on-current-change":t.handleCurrentChange,"on-selection-change":t.handleSelectionChange,"on-del":t.del,"on-download":t.download}})],1)},staticRenderFns:[]};var d=a("VU/8")(c,l,!1,function(t){a("N59G")},"data-v-1de2b02c",null);e.default=d.exports}});
 //# sourceMappingURL=54.f05ab8537ffe8b1fe77a.js.map
