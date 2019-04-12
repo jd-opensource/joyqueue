@@ -216,4 +216,21 @@ public class DefaultBrokerManageService implements BrokerManageService {
     public void restoreElectionMetadata() {
         electionManageService.restoreElectionMetadata();
     }
+
+
+    @Override
+    public String describe() {
+        return electionManageService.describe();
+    }
+
+    @Override
+    public String describe(String topic, int partitionGroup) {
+        return electionManageService.describe(topic, partitionGroup);
+    }
+
+    @Override
+    public void updateTerm(String topic, int partitionGroup, int term) {
+        electionManageService.updateTerm(topic, partitionGroup, term);
+    }
+
 }

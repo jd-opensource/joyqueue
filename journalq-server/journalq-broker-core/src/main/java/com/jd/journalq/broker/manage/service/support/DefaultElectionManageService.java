@@ -27,4 +27,19 @@ public class DefaultElectionManageService implements ElectionManageService {
     public void restoreElectionMetadata() {
         electionService.syncElectionMetadataFromNameService();
     }
+
+    @Override
+    public String describe() {
+        return electionService.describe();
+    }
+
+    @Override
+    public String describe(String topic, int partitionGroup) {
+        return electionService.describe(topic, partitionGroup);
+    }
+
+    @Override
+    public void updateTerm(String topic, int partitionGroup, int term) {
+        electionService.updateTerm(topic, partitionGroup, term);
+    }
 }
