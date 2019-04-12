@@ -174,12 +174,18 @@ public class ReplicaGroup extends Service {
     public void removeNode(int nodeId) {
         cancelHeartbeatTimer(getReplica(nodeId));
 
+        Replica replica = getReplica(nodeId);
+        replicas.remove(replica);
+        replicasWithoutLearners.remove(replica);
+
+        /*
         replicas = replicas.stream()
                 .filter(r -> r.replicaId() != nodeId)
                 .collect(Collectors.toList());
         replicasWithoutLearners = replicasWithoutLearners.stream()
                 .filter(r -> r.replicaId() != nodeId)
                 .collect(Collectors.toList());
+                */
     }
 
     /**
@@ -191,7 +197,7 @@ public class ReplicaGroup extends Service {
         return replicas.stream()
                 .filter(r -> r.replicaId() == replicaId)
                 .findFirst()
-                .orElseThrow(NoSuchElementException::new);
+                .orElse(null);
     }
 
     /**
@@ -211,13 +217,21 @@ public class ReplicaGroup extends Service {
     }
 
     /**
+     * Get lag length of the replica to leader
+     * @param replicaId replica id
+     * @return lag length
+     */
+    public long lagLength(int replicaId) {
+        return replicableStore.rightPosition() - getReplica(replicaId).writePosition();
+    }
+
+    /**
      * Set current replica as leader
      * - Init next position for each replica
      * - Send append entries request to all replicas
      * @param term 任期
      */
     public void becomeLeader(int term, int leaderId) {
-        state = ElectionNode.State.LEADER;
         currentTerm = term;
         this.leaderId = leaderId;
 
@@ -228,6 +242,8 @@ public class ReplicaGroup extends Service {
         });
 
         replicasWithoutLearners.forEach(this::startNewHeartbeat);
+
+        state = ElectionNode.State.LEADER;
 
         logger.info("Partition group {}/node {} become leader, term is {}, writePosition is {}, " +
                     "commit position is {}",
@@ -280,6 +296,12 @@ public class ReplicaGroup extends Service {
                     DelayedCommand command = replicateResponseQueue.take();
                     if (command.replicaId() == localReplicaId) {
                         replicateLocal();
+                        continue;
+                    }
+
+                    if (!replicas.contains(getReplica(command.replicaId()))) {
+                        logger.info("Partition group {}/node {} not contain this node",
+                                topicPartitionGroup, localReplicaId);
                         continue;
                     }
 
@@ -791,14 +813,21 @@ public class ReplicaGroup extends Service {
         @Override
         public void onSuccess(Command request, Command responseCommand) {
             handleHeartbeatResponse(responseCommand, replica);
-            resetHeartbeatTimer(replica);
+            if (replicasWithoutLearners.contains(replica)) {
+                resetHeartbeatTimer(replica);
+            } else {
+                logger.info("Partition group {}/node {} receive heartbeat response from unknown node {}",
+                        topicPartitionGroup, localReplicaId, replica.replicaId());
+            }
         }
 
         @Override
         public void onException(Command request, Throwable cause) {
             logger.info("Partition group {}/node {} send heartbeat request to {} failed",
                     topicPartitionGroup, localReplicaId, replica.replicaId(), cause);
-            resetHeartbeatTimer(replica);
+            if (replicasWithoutLearners.contains(replica)) {
+                resetHeartbeatTimer(replica);
+            }
         }
     }
 
