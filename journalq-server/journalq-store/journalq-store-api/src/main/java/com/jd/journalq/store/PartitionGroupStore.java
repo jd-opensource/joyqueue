@@ -46,12 +46,7 @@ public interface PartitionGroupStore {
      */
     long getTotalPhysicalStorageSize();
 
-    /**
-     *
-     * @param minIndexedPosition
-     * @return
-     * @throws IOException
-     */
+
     long deleteMinStoreMessages(long minIndexedPosition) throws IOException;
     long deleteEarlyMinStoreMessages(long targetDeleteTimeline, long minIndexedPosition) throws IOException;
 
@@ -82,15 +77,17 @@ public interface PartitionGroupStore {
      * @return 以Future形式返回结果
      * @throws NullPointerException eventListener或writeRequests为空时抛出
      * @see WriteResult
+     * @see WriteRequest
      */
     Future<WriteResult> asyncWrite(WriteRequest... writeRequests);
 
     /**
      * 异步写入消息，线程安全，保证ACI，D的保证取决于WriteQosLevel
-     * @param eventListener 回调方法
+     * @param eventListener 回调方法，可以为null，表示不需要回调。
      * @param writeRequests partition序号和消息
-     * @throws NullPointerException eventListener或writeRequests为空时抛出
+     * @throws NullPointerException writeRequests为空时抛出
      * @see WriteResult
+     * @see WriteRequest
      */
     void asyncWrite(EventListener<WriteResult> eventListener, WriteRequest... writeRequests);
 
@@ -100,13 +97,13 @@ public interface PartitionGroupStore {
      * 非阻塞批量读取消息，从指定位置读取消息，如果没有消息立即返回。
      * @param partition partition序号
      * @param index partition内的全局消息序号
-     * @param count 要求读取的消息数量，当count < 1 时，按coKunt = 1处理。
+     * @param count 要求读取的消息数量，当count < 1 时，按count ==1处理。
      * @param maxSize 返回所有消息的长度之和最大值。参数不大于0时，不限制最大长度。
      *                当第一条消息长度大于maxSize时，返回1条消息。
      *                否则返回尽可能多的消息，保证这些消息长度之不超过maxSize。
-     * @return 消息数组
+     * @return 消息数组，不保证返回消息数量一定等于要求数量count。
      * @see ReadResult
-     * 不保证返回消息数量一定等于要求数量count。
+     *
      */
     ReadResult read(short partition, long index, int count, long maxSize) throws IOException;
 

@@ -144,7 +144,7 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
         logger.info("Stopping store {}...", base.getPath());
         System.out.println(String.format("Stopping store %s...", base.getPath()));
         storeMap.values().forEach(p -> {
-            p.disable(5000L);
+            p.disable();
             p.stop();
         });
         if (null != scheduledExecutor && !scheduledExecutor.isTerminated()) {
@@ -376,7 +376,7 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
         logger.info("Stopping store {}...", base.getPath());
         System.out.println(String.format("Stopping store %s...", base.getPath()));
         storeMap.values().forEach(p -> {
-            p.disable(5000L);
+            p.disable();
             p.stop();
         });
         if (null != scheduledExecutor && !scheduledExecutor.isTerminated()) {

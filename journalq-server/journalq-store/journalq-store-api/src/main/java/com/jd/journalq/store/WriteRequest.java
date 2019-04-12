@@ -13,15 +13,13 @@
  */
 package com.jd.journalq.store;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 
 /**
  * @author liyue25
  * Date: 2018/10/18
  */
-public class WriteRequest implements Closeable {
+public class WriteRequest{
     private final short partition;
     private ByteBuffer buffer;
 
@@ -39,10 +37,6 @@ public class WriteRequest implements Closeable {
         return buffer;
     }
 
-    @Override
-    public void close() throws IOException {
-
-    }
 
     public void setBuffer(ByteBuffer buffer) {
         this.buffer = buffer;
