@@ -27,8 +27,8 @@ public class TransactionKafkaProducer {
         KafkaProducer<String, String> kafkaProducer = new KafkaProducer<>(props);
         kafkaProducer.initTransactions();
 
+        kafkaProducer.beginTransaction();
         for (int i = 0; i < 10; i++) {
-            kafkaProducer.beginTransaction();
             for (int j = 0; j < 5; j++) {
                 try {
                     kafkaProducer.send(new ProducerRecord<String, String>("test_topic_0", "test", "test")).get();
@@ -40,7 +40,7 @@ public class TransactionKafkaProducer {
                 System.out.println("send");
                 Thread.currentThread().sleep(1000 * 1);
             }
-            kafkaProducer.commitTransaction();
         }
+        kafkaProducer.commitTransaction();
     }
 }

@@ -41,7 +41,7 @@ public class TransactionHandler extends Service {
 
         TransactionMetadata transactionMetadata = transactionMetadataManager.getTransaction(transactionId);
         if (transactionMetadata == null) {
-            transactionMetadata = transactionMetadataManager.getOrCreateTransaction(new TransactionMetadata(transactionId, clientId, transactionTimeout));
+            transactionMetadata = transactionMetadataManager.getOrCreateTransaction(new TransactionMetadata(transactionId, clientId, producerIdManager.generateId(), transactionTimeout));
         }
 
         synchronized (transactionMetadata) {
@@ -51,7 +51,6 @@ public class TransactionHandler extends Service {
 
     protected TransactionMetadata doInitProducer(TransactionMetadata transactionMetadata) {
         transactionMetadata.transitionStateTo(TransactionState.EMPTY);
-        transactionMetadata.setProducerId(producerIdManager.generateId());
         transactionMetadata.nextProducerEpoch();
         return transactionMetadata;
     }

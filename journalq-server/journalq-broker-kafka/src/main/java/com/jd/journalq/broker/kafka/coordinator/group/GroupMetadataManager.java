@@ -5,6 +5,8 @@ import com.jd.journalq.broker.kafka.coordinator.group.domain.GroupMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+
 /**
  * GroupMetadataManager
  * author: gaohaoxiang
@@ -29,6 +31,10 @@ public class GroupMetadataManager {
 
     public GroupMetadata getOrCreateGroup(GroupMetadata group) {
         return groupMetadataManager.getOrCreateGroup(group);
+    }
+
+    public List<GroupMetadata> getGroups() {
+        return groupMetadataManager.getGroups();
     }
 
     public boolean removeGroup(GroupMetadata group) {

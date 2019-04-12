@@ -23,10 +23,11 @@ public class TransactionMetadata extends com.jd.journalq.broker.coordinator.tran
         super(id);
     }
 
-    public TransactionMetadata(String id, String clientId, int timeout) {
+    public TransactionMetadata(String id, String clientId, long producerId, int timeout) {
         super(id);
         this.clientId = clientId;
         this.timeout = timeout;
+        this.producerId = producerId;
     }
 
     public void transitionStateTo(TransactionState state) {

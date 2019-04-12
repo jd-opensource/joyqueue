@@ -6,6 +6,8 @@ import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionMe
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+
 /**
  * TransactionMetadataManager
  * author: gaohaoxiang
@@ -30,6 +32,10 @@ public class TransactionMetadataManager {
 
     public TransactionMetadata getOrCreateTransaction(TransactionMetadata transaction) {
         return transactionMetadataManager.getOrCreateTransaction(transaction);
+    }
+
+    public List<TransactionMetadata> getTransactions() {
+        return transactionMetadataManager.getTransactions();
     }
 
     public boolean removeTransaction(TransactionMetadata transaction) {
