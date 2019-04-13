@@ -25,7 +25,10 @@ public class BrokerEvent extends MetaEvent {
         super(type);
         this.broker = broker;
     }
-
+    @Override
+    public String getTypeName() {
+        return "com.jd.jmq.common.event.BrokerEvent";
+    }
     public Broker getBroker() {
         return broker;
     }
