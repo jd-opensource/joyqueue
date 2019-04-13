@@ -204,8 +204,8 @@
                handlers="brokerManageService.restoreElectionMetadata"/>
         <route path="/manage/election/metadata/describe" inherit="get"
                handlers="brokerManageService.describe"/>
-        <route path="/manage/election/metadata/describe/topic/:topic/partitionGroup/:partitionGroup" inherit="get"
-               handlers="brokerManageService.describe"/>
+        <route path="/manage/election/metadata/describeTopic/topic/:topic/partitionGroup/:partitionGroup" inherit="get"
+               handlers="brokerManageService.describeTopic"/>
         <route path="/manage/election/metadata/updateTerm/topic/:topic/partitionGroup/:partitionGroup/:term" inherit="get"
                handlers="brokerManageService.updateTerm"/>
     </routes>

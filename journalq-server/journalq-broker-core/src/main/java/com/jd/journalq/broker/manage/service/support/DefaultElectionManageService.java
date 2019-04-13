@@ -34,7 +34,7 @@ public class DefaultElectionManageService implements ElectionManageService {
     }
 
     @Override
-    public String describe(String topic, int partitionGroup) {
+    public String describeTopic(String topic, int partitionGroup) {
         return electionService.describe(topic, partitionGroup);
     }
 

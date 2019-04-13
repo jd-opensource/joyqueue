@@ -18,7 +18,7 @@ public interface ElectionManageService {
 
     String describe();
 
-    String describe(String topic, int partitionGroup);
+    String describeTopic(String topic, int partitionGroup);
 
     void updateTerm(String topic, int partitionGroup, int term);
 }

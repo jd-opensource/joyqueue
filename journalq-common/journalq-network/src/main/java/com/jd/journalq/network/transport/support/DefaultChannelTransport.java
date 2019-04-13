@@ -144,9 +144,12 @@ public class DefaultChannelTransport implements ChannelTransport {
             barrier.put(command.getHeader().getRequestId(), future);
             // 应答回来的时候或超时会自动释放command
             channel.writeAndFlush(command).addListener(new ResponseListener(future, barrier));
-        } catch (TransportException e) {
+
+        } catch (Throwable th) {
+            logger.warn("Default channel transport async fail, command type is {}", command.getHeader().getType(), th);
+            barrier.remove(command.getHeader().getRequestId());
             command.release();
-            throw e;
+            throw th;
         }
     }
 
