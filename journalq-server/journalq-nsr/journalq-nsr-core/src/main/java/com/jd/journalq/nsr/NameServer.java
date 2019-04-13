@@ -417,7 +417,9 @@ public class NameServer extends Service implements NameService, PropertySupplier
             Producer producer = metaManager.getProducer(topic, app);
             if (null != producer) {
                 if (!metaCache.producerConfigs.containsKey(topic)) {
-                    metaCache.producerConfigs.put(topic, new HashMap<>()).put(app, producer);
+                    Map map = new ConcurrentHashMap();
+                    map.put(app,producer);
+                    metaCache.producerConfigs.put(topic,map);
                 } else {
                     metaCache.producerConfigs.get(topic).putIfAbsent(app, producer);
                 }
@@ -435,7 +437,9 @@ public class NameServer extends Service implements NameService, PropertySupplier
             Consumer consumer = metaManager.getConsumer(topic, app);
             if (null != consumer) {
                 if (!metaCache.consumerConfigs.containsKey(topic)) {
-                    metaCache.consumerConfigs.put(topic, new HashMap<>()).put(app, consumer);
+                    Map map = new ConcurrentHashMap();
+                    map.put(app,consumer);
+                    metaCache.consumerConfigs.put(topic,map);
                 } else {
                     metaCache.consumerConfigs.get(topic).putIfAbsent(app, consumer);
                 }
