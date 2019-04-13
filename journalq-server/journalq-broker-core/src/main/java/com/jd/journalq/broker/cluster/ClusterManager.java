@@ -637,7 +637,7 @@ public class ClusterManager extends Service {
         TopicConfig topicConfig = getTopicConfig(topic);
         PartitionGroup group = topicConfig.fetchPartitionGroupByPartition(partition);
         if (!group.getLeader().equals(broker.getId())) {
-            logger.error("topic[{}],app[{}],error[{}]", topic, app, JMQCode.FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER.getMessage());
+            logger.error("topic[{}],app[{}],partition[{}],error[{}]", topic, app,partition,JMQCode.FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER.getMessage());
             return BooleanResponse.failed(JMQCode.FW_PRODUCE_MESSAGE_BROKER_NOT_LEADER);
         }
         return BooleanResponse.success();
@@ -718,7 +718,7 @@ public class ClusterManager extends Service {
         TopicConfig topicConfig = getTopicConfig(topic);
         PartitionGroup group = topicConfig.fetchPartitionGroupByPartition(partition);
         if (!group.getLeader().equals(broker.getId())) {
-            logger.error("topic[{}],app[{}],error[{}]", topic, app, JMQCode.FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER.getMessage());
+            logger.error("topic[{}],app[{}],partition[{}],error[{}]", topic, app,partition, JMQCode.FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER.getMessage());
             return BooleanResponse.failed(JMQCode.FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER);
         }
         return BooleanResponse.success();
