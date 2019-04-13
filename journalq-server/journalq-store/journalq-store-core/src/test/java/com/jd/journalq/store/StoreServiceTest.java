@@ -55,7 +55,7 @@ public class StoreServiceTest {
 
         store = new Store(config);
         store.start();
-        store.createPartitionGroup(topic, partitionGroup, partitions, new int[]{0});
+        store.createPartitionGroup(topic, partitionGroup, partitions);
         store.getReplicableStore(topic, partitionGroup).enable();
 
 

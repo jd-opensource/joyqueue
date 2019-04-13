@@ -29,12 +29,12 @@ gulp.task('journalq',function (cb) {
  下面是子任务
  ----------------------------------------*/
 
-gulp.task('cleanjmq', function (cb) {
+gulp.task('cleanjournalq', function (cb) {
     var targetPath = path.resolve(__dirname, '../journalq-web/journalq-web-webroot/src/main/webroot');
     console.log('清空 /journalq 目录');
     return  del([targetPath+'/**/*'],{force:true});
 });
-gulp.task('movejmq',function () {
+gulp.task('movejournalq',function () {
     console.log('journalq/dist和html到后端目录');
     gulp.src(['./dist/**','!./dist/index.html'])
         .pipe(gulp.dest(path.resolve(__dirname,  '../journalq-web/journalq-web-webroot/src/main/webroot')));

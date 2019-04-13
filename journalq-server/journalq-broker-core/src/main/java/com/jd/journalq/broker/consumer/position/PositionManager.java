@@ -21,13 +21,8 @@ import com.jd.journalq.broker.consumer.model.ConsumePartition;
 import com.jd.journalq.broker.consumer.position.model.Position;
 import com.jd.journalq.domain.Consumer;
 import com.jd.journalq.domain.PartitionGroup;
-import com.jd.journalq.domain.QosLevel;
 import com.jd.journalq.domain.TopicName;
-import com.jd.journalq.event.ConsumerEvent;
-import com.jd.journalq.event.EventType;
-import com.jd.journalq.event.MetaEvent;
-import com.jd.journalq.event.NameServerEvent;
-import com.jd.journalq.event.PartitionGroupEvent;
+import com.jd.journalq.event.*;
 import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.exception.JMQException;
 import com.jd.journalq.store.PartitionGroupStore;
@@ -42,12 +37,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -432,7 +422,7 @@ public class PositionManager extends Service {
      */
     private long getMaxMsgIndex(TopicName topic, short partition) {
         Integer partitionGroupId = clusterManager.getPartitionGroupId(topic, partition);
-        PartitionGroupStore store = storeService.getStore(topic.getFullName(), partitionGroupId, QosLevel.PERSISTENCE);
+        PartitionGroupStore store = storeService.getStore(topic.getFullName(), partitionGroupId);
         long rightIndex = store.getRightIndex(partition);
         return rightIndex;
     }

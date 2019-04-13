@@ -69,9 +69,6 @@ public class KafkaMessageV0Serializer extends AbstractKafkaMessageSerializer {
         KafkaBufferUtils.writeBytes(message.getKey(), buffer);
         KafkaBufferUtils.writeBytes(message.getValue(), buffer);
 
-        buffer.writeInt(message.getValue().length);
-        buffer.writeBytes(message.getValue());
-
         // 计算整个message长度，包括长度本身的字节数
         int length = buffer.writerIndex() - startIndex;
         byte[] bytes = new byte[length];

@@ -14,23 +14,22 @@
 package com.jd.journalq.broker.handler;
 
 import com.alibaba.fastjson.JSON;
-import com.google.common.primitives.Ints;
 import com.google.common.primitives.Shorts;
 import com.jd.journalq.broker.BrokerContext;
 import com.jd.journalq.broker.cluster.ClusterManager;
+import com.jd.journalq.broker.election.ElectionService;
 import com.jd.journalq.domain.Broker;
 import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.exception.JMQException;
-import com.jd.journalq.network.transport.command.handler.CommandHandler;
 import com.jd.journalq.network.command.BooleanAck;
-import com.jd.journalq.nsr.network.command.CreatePartitionGroup;
 import com.jd.journalq.network.transport.Transport;
 import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.transport.command.Type;
+import com.jd.journalq.network.transport.command.handler.CommandHandler;
 import com.jd.journalq.network.transport.exception.TransportException;
+import com.jd.journalq.nsr.network.command.CreatePartitionGroup;
 import com.jd.journalq.nsr.network.command.NsrCommandType;
-import com.jd.journalq.broker.election.ElectionService;
 import com.jd.journalq.store.StoreService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,7 +86,7 @@ public class CreatePartitionGroupHandler implements CommandHandler, Type {
     private void commit(PartitionGroup group) throws Exception {
         if(logger.isDebugEnabled())logger.debug("topic[{}] add partitionGroup[{}]",group.getTopic(),group.getGroup());
         //if (!storeService.partitionGroupExists(group.getTopic(),group.getGroup())) {
-            storeService.createPartitionGroup(group.getTopic().getFullName(), group.getGroup(), Shorts.toArray(group.getPartitions()), Ints.toArray(group.getReplicas()));
+            storeService.createPartitionGroup(group.getTopic().getFullName(), group.getGroup(), Shorts.toArray(group.getPartitions()));
             //}
             Set<Integer> replicas = group.getReplicas();
             List<Broker> list = new ArrayList<>(replicas.size());

@@ -14,23 +14,22 @@
 package com.jd.journalq.broker.handler;
 
 import com.alibaba.fastjson.JSON;
-import com.google.common.primitives.Ints;
 import com.google.common.primitives.Shorts;
 import com.jd.journalq.broker.BrokerContext;
+import com.jd.journalq.broker.cluster.ClusterManager;
+import com.jd.journalq.broker.election.ElectionService;
 import com.jd.journalq.domain.Broker;
 import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.exception.JMQCode;
-import com.jd.journalq.network.transport.command.handler.CommandHandler;
 import com.jd.journalq.network.command.BooleanAck;
-import com.jd.journalq.nsr.network.command.NsrCommandType;
-import com.jd.journalq.nsr.network.command.UpdatePartitionGroup;
 import com.jd.journalq.network.transport.Transport;
 import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.transport.command.Type;
+import com.jd.journalq.network.transport.command.handler.CommandHandler;
 import com.jd.journalq.network.transport.exception.TransportException;
-import com.jd.journalq.broker.cluster.ClusterManager;
-import com.jd.journalq.broker.election.ElectionService;
+import com.jd.journalq.nsr.network.command.NsrCommandType;
+import com.jd.journalq.nsr.network.command.UpdatePartitionGroup;
 import com.jd.journalq.store.StoreService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,7 +96,7 @@ public class UpdatePartitionGroupHandler implements CommandHandler, Type {
         for (Integer brokerId : nodeAdd) {
             if (localBrokerId.equals(brokerId)) {
                 logger.info("topic[{}] add partitionGroup[{}]", topic, groupNew.getGroup());
-                storeService.createPartitionGroup(topic, groupNew.getGroup(), Shorts.toArray(groupNew.getPartitions()), Ints.toArray(groupNew.getReplicas()));
+                storeService.createPartitionGroup(topic, groupNew.getGroup(), Shorts.toArray(groupNew.getPartitions()));
                 electionService.onPartitionGroupCreate(groupNew.getElectType(), topicName, groupNew.getGroup(), brokers, groupNew.getLearners(), clusterManager.getBrokerId(), groupNew.getLeader());
             } else {
                 logger.info("topic[{}] update partitionGroup[{}] add node[{}] ", topic, groupNew.getGroup(), brokerId);
@@ -143,7 +142,7 @@ public class UpdatePartitionGroupHandler implements CommandHandler, Type {
         for (Integer brokerId : nodeRemove) {
             if (localBrokerId.equals(brokerId)) {
                 logger.info("topic[{}] add partitionGroup[{}]", groupNew.getTerm(), groupNew.getGroup());
-                storeService.createPartitionGroup(topic, groupNew.getGroup(), Shorts.toArray(groupNew.getPartitions()), Ints.toArray(groupNew.getReplicas()));
+                storeService.createPartitionGroup(topic, groupNew.getGroup(), Shorts.toArray(groupNew.getPartitions()));
                 electionService.onPartitionGroupCreate(groupNew.getElectType(), topicName, groupNew.getGroup(), brokers, groupNew.getLearners(), clusterManager.getBrokerId(), groupNew.getLeader());
             } else {
                 logger.info("topic[{}] update partitionGroup[{}] add node[{}] ", groupNew.getTerm(), groupNew.getGroup(), brokerId);
