@@ -1145,7 +1145,7 @@ public class ClusterManager extends Service {
                                 break;
                             default:break;
                         }
-                        eventBus.add(event);
+                        eventBus.add(event.getMetaEvent());
                     }
                 } catch (Exception e) {
                     logger.error(String.format("clusterManager event[%s] error", event), e);

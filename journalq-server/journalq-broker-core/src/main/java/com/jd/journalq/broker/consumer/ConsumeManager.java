@@ -587,9 +587,8 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
         @Override
         public void onEvent(Object event) {
             if (((MetaEvent) event).getEventType() == EventType.UPDATE_CONSUMER) {
-                NameServerEvent nameServerEvent = (NameServerEvent) event;
+                ConsumerEvent updateConsumerEvent = (ConsumerEvent) event;
                 logger.info("listen update consume event.");
-                ConsumerEvent updateConsumerEvent = (ConsumerEvent) nameServerEvent.getMetaEvent();
                 try {
                     ConsumerPolicy consumerPolicy = clusterManager.getConsumerPolicy(updateConsumerEvent.getTopic(), updateConsumerEvent.getApp());
                     Integer readRetryProbability = consumerPolicy.getReadRetryProbability();
