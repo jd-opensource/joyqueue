@@ -174,18 +174,12 @@ public class ReplicaGroup extends Service {
     public void removeNode(int nodeId) {
         cancelHeartbeatTimer(getReplica(nodeId));
 
-        Replica replica = getReplica(nodeId);
-        replicas.remove(replica);
-        replicasWithoutLearners.remove(replica);
-
-        /*
         replicas = replicas.stream()
                 .filter(r -> r.replicaId() != nodeId)
                 .collect(Collectors.toList());
         replicasWithoutLearners = replicasWithoutLearners.stream()
                 .filter(r -> r.replicaId() != nodeId)
                 .collect(Collectors.toList());
-                */
     }
 
     /**
