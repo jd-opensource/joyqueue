@@ -78,7 +78,7 @@ public class ApplicationTokenCommand extends NsrCommandSupport<ApplicationToken,
      */
     @Override
     @Path("update")
-    public Response update(@QueryParam(ID) String id, ApplicationToken model) throws Exception {
+    public Response update(@QueryParam(ID) String id,@Body ApplicationToken model) throws Exception {
         model.initializeTime();
         model.setApplication(application.identity());
         return Responses.success(service.update(model));

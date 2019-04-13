@@ -55,11 +55,6 @@ import static com.jd.journalq.handler.util.GrafanaUtils.getResult;
     @Context
     protected RoutingContext context;
 
-    @Path("test")
-    public Response test() throws Exception {
-        return Responses.success();
-    }
-
     @Path("search")
     public List<String> search(@Body GrafanaSearch grafanaSearch) throws Exception {
         //check argument
