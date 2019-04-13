@@ -174,10 +174,8 @@ class FilterMessageSupport {
         @Override
         public void onEvent(Object event) {
             if (((MetaEvent) event).getEventType() == EventType.UPDATE_CONSUMER) {
-                NameServerEvent nameServerEvent = (NameServerEvent) event;
+                ConsumerEvent updateConsumerEvent = (ConsumerEvent) event;
                 logger.info("listen update consume event to update filter pipeline.");
-
-                ConsumerEvent updateConsumerEvent = (ConsumerEvent) nameServerEvent.getMetaEvent();
 
                 // 更新消息过滤管道
                 updateFilterRuleCache(updateConsumerEvent.getTopic(), updateConsumerEvent.getApp());
