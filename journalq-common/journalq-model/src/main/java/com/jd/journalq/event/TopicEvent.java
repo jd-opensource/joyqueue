@@ -21,6 +21,11 @@ public class TopicEvent extends MetaEvent {
     public TopicEvent() {
     }
 
+    @Override
+    public String getTypeName() {
+        return "com.jd.jmq.common.event.TopicEvent";
+    }
+
     private TopicEvent(EventType type, TopicName topic) {
         super(type);
         this.topic = topic;

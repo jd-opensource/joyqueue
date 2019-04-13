@@ -27,7 +27,10 @@ public class ConsumerEvent extends MetaEvent {
         this.topic = topic;
         this.app = app;
     }
-
+    @Override
+    public String getTypeName() {
+        return "com.jd.jmq.common.event.ConsumerEvent";
+    }
     public TopicName getTopic() {
         return topic;
     }

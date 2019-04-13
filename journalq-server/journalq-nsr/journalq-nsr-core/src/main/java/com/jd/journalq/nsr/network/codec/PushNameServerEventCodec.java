@@ -42,7 +42,7 @@ public class PushNameServerEventCodec implements NsrPayloadCodec<PushNameServerE
         NameServerEvent event = payload.getEvent();
         buffer.writeInt(event.getBrokerId());
         Serializer.write(JSON.toJSONString(event.getMetaEvent()),buffer,Serializer.SHORT_SIZE);
-        Serializer.write(event.getMetaEvent().getClass().getTypeName(),buffer);
+        Serializer.write(event.getMetaEvent().getTypeName(),buffer);
     }
 
     @Override
