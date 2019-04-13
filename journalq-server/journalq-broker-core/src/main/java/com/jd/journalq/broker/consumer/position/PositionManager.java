@@ -576,8 +576,8 @@ public class PositionManager extends Service {
         public void onEvent(Object event) {
 
             if (((MetaEvent) event).getEventType() == EventType.ADD_CONSUMER) {
-                NameServerEvent nameServerEvent = (NameServerEvent) event;
-                ConsumerEvent addConsumerEvent = (ConsumerEvent) nameServerEvent.getMetaEvent();
+                ConsumerEvent addConsumerEvent = (ConsumerEvent) event;
+//                ConsumerEvent addConsumerEvent = (ConsumerEvent) nameServerEvent.getMetaEvent();
 
                 logger.info("listen add consume event:[{}]", addConsumerEvent.toString());
 
@@ -594,8 +594,8 @@ public class PositionManager extends Service {
         @Override
         public void onEvent(Object event) {
             if (((MetaEvent) event).getEventType() == EventType.REMOVE_CONSUMER) {
-                NameServerEvent nameServerEvent = (NameServerEvent) event;
-                ConsumerEvent removeConsumerEvent = (ConsumerEvent) nameServerEvent.getMetaEvent();
+                ConsumerEvent removeConsumerEvent = (ConsumerEvent) event;
+                //ConsumerEvent removeConsumerEvent = (ConsumerEvent) nameServerEvent.getMetaEvent();
 
                 logger.info("listen remove consume event:[{}]", removeConsumerEvent.toString());
 
@@ -611,9 +611,10 @@ public class PositionManager extends Service {
 
         @Override
         public void onEvent(Object event) {
+            //todo 增加异常捕捉
             if (((MetaEvent) event).getEventType() == EventType.ADD_PARTITION_GROUP) {
-                NameServerEvent nameServerEvent = (NameServerEvent) event;
-                PartitionGroupEvent partitionGroupEvent = (PartitionGroupEvent) nameServerEvent.getMetaEvent();
+                PartitionGroupEvent partitionGroupEvent = (PartitionGroupEvent) event;
+                //PartitionGroupEvent partitionGroupEvent = (PartitionGroupEvent) nameServerEvent.getMetaEvent();
 
                 logger.info("listen add partition group event:[{}]", partitionGroupEvent.toString());
 
@@ -629,9 +630,10 @@ public class PositionManager extends Service {
 
         @Override
         public void onEvent(Object event) {
+            //todo 移除的时候从clusterManager里面是拿不到partitionGroup的
             if (((MetaEvent) event).getEventType() == EventType.REMOVE_PARTITION_GROUP) {
-                NameServerEvent nameServerEvent = (NameServerEvent) event;
-                PartitionGroupEvent partitionGroupEvent = (PartitionGroupEvent) nameServerEvent.getMetaEvent();
+                PartitionGroupEvent partitionGroupEvent = (PartitionGroupEvent) event;
+                //PartitionGroupEvent partitionGroupEvent = (PartitionGroupEvent) nameServerEvent.getMetaEvent();
 
                 logger.info("listen remove partition group event:[{}]", partitionGroupEvent.toString());
 
@@ -648,16 +650,15 @@ public class PositionManager extends Service {
         @Override
         public void onEvent(Object event) {
             if (((MetaEvent) event).getEventType() == EventType.UPDATE_PARTITION_GROUP) {
-                NameServerEvent nameServerEvent = (NameServerEvent) event;
-                PartitionGroupEvent partitionGroupEvent = (PartitionGroupEvent) nameServerEvent.getMetaEvent();
+                PartitionGroupEvent partitionGroupEvent = (PartitionGroupEvent) event;
+                //PartitionGroupEvent partitionGroupEvent = (PartitionGroupEvent) nameServerEvent.getMetaEvent();
 
                 logger.info("listen update partition group event:[{}]", partitionGroupEvent.toString());
 
                 TopicName topic = partitionGroupEvent.getTopic();
                 int partitionGroup = partitionGroupEvent.getPartitionGroup();
 
-                PartitionGroup partitionGroupByGroup = clusterManager.getPartitionGroupByGroup(topic, partitionGroup);
-                Set<Short> newPartitionSet = partitionGroupByGroup.getPartitions();
+                Set<Short> newPartitionSet = clusterManager.getTopicConfig(topic).fetchAllPartitions();
 
                 Iterator<ConsumePartition> iterator = positionStore.iterator();
                 while (iterator.hasNext()) {
