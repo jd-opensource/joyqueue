@@ -358,7 +358,7 @@ public class ReplicaGroup extends Service {
         try {
             replicateExecutor.submit(() -> {
                 try {
-                    long startTime = System.currentTimeMillis();
+                    long startTimeUs = usTime();
 
                     AppendEntriesRequest request = generateAppendEntriesRequest(replica);
                     if (request == null) {
@@ -369,14 +369,15 @@ public class ReplicaGroup extends Service {
 
                     JMQHeader header = new JMQHeader(Direction.REQUEST, CommandType.RAFT_APPEND_ENTRIES_REQUEST);
 
-                    if (startTime - lastLogTime > electionConfig.getLogInterval()) {
-                        logger.info("Partition group {}/node {} send append entries request {} to node {}",
-                                topicPartitionGroup, leaderId, request, replica.replicaId());
+                    if (System.currentTimeMillis() - lastLogTime > electionConfig.getLogInterval()) {
+                        logger.info("Partition group {}/node {} send append entries request {} to node {}, " +
+                                "read entries elapse {} us",
+                                topicPartitionGroup, leaderId, request, replica.replicaId(), usTime() - startTimeUs);
                     }
 
                     replicationManager.sendCommand(replica.getAddress(), new Command(header, request),
                             electionConfig.getSendCommandTimeout(),
-                            new AppendEntriesRequestCallback(replica, startTime, request.getEntriesLength()));
+                            new AppendEntriesRequestCallback(replica, startTimeUs, request.getEntriesLength()));
 
                 } catch (Throwable t) {
                     logger.warn("Partition group {}/ node {} send append entries to {} fail",
@@ -445,12 +446,12 @@ public class ReplicaGroup extends Service {
      */
     private class AppendEntriesRequestCallback implements CommandCallback {
         private Replica replica;
-        private long startTime;
+        private long startTimeUs;
         private int entriesLength;
 
-        AppendEntriesRequestCallback(Replica replica, long startTime, int entriesLength) {
+        AppendEntriesRequestCallback(Replica replica, long startTimeUs, int entriesLength) {
             this.replica = replica;
-            this.startTime = startTime;
+            this.startTimeUs = startTimeUs;
             this.entriesLength = entriesLength;
         }
 
@@ -462,10 +463,10 @@ public class ReplicaGroup extends Service {
 
                 if (System.currentTimeMillis() - lastLogTime > electionConfig.getLogInterval()) {
                     logger.info("Partition group {}/node {} receive append entries response from {}, " +
-                                    "success is {}, next position is {}, write position is {}, elapse {}",
+                                    "success is {}, next position is {}, write position is {}, elapse {} us",
                             topicPartitionGroup, localReplicaId, replica.replicaId(), appendEntriesResponse.isSuccess(),
                             appendEntriesResponse.getNextPosition(), appendEntriesResponse.getWritePosition(),
-                            System.currentTimeMillis() - startTime);
+                            usTime() - startTimeUs);
                 }
 
                 if (appendEntriesRequest.getTerm() != currentTerm) {
@@ -483,7 +484,7 @@ public class ReplicaGroup extends Service {
                 processAppendEntriesResponse(appendEntriesResponse, replica);
 
                 brokerMonitor.onReplicateMessage(topicPartitionGroup.getTopic(), topicPartitionGroup.getPartitionGroupId(),
-                        1, entriesLength, System.currentTimeMillis() - startTime);
+                        1, entriesLength, usTime() - startTimeUs);
 
             } catch (Exception e) {
                 logger.info("Partition group {}/node {} process append entries reponse fail",
@@ -626,7 +627,6 @@ public class ReplicaGroup extends Service {
     public Command appendEntries(AppendEntriesRequest request) {
         long startPosition = request.getStartPosition();
         long nextPosition = request.getStartPosition();
-        long startTime = SystemClock.now();
         int entriesLength = request.getEntries().remaining();
         boolean success = true;
 
@@ -671,19 +671,19 @@ public class ReplicaGroup extends Service {
                     replicableStore.setRightPosition(request.getStartPosition());
                 }
 
-                long startAppendTime = System.currentTimeMillis();
+                long startTimeUs = usTime();
                 nextPosition = replicableStore.appendEntryBuffer(request.getEntries());
 
-                if (SystemClock.now() - lastLogTime > electionConfig.getLogInterval()) {
+                if (System.currentTimeMillis() - lastLogTime > electionConfig.getLogInterval()) {
                     logger.info("Partition group {}/node {}, append entries from {}, position is {}, entry length is {}, " +
-                                    "commit position is {}, elapse {} ms",
+                                    "commit position is {}, elapse {} us",
                             topicPartitionGroup, localReplicaId, request.getLeaderId(), startPosition,
-                            entriesLength, request.getCommitPosition(), System.currentTimeMillis() - startAppendTime);
-                    lastLogTime = SystemClock.now();
+                            entriesLength, request.getCommitPosition(), usTime() - startTimeUs);
+                    lastLogTime = System.currentTimeMillis();
                 }
 
                 brokerMonitor.onAppendReplicateMessage(topicPartitionGroup.getTopic(), topicPartitionGroup.getPartitionGroupId(),
-                        1, request.getEntriesLength(), SystemClock.now() - startTime);
+                        1, request.getEntriesLength(), usTime() - startTimeUs);
 
                 replicableStore.commit(request.getCommitPosition());
 
@@ -1011,4 +1011,7 @@ public class ReplicaGroup extends Service {
         }
     }
 
+    private long usTime() {
+        return System.nanoTime() / 1000;
+    }
 }

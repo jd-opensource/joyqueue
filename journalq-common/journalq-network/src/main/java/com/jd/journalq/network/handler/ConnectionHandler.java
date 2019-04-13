@@ -61,7 +61,7 @@ public class ConnectionHandler extends ChannelInboundHandlerAdapter {
         if (TransportException.isClosed(cause)) {
             logger.error("channel exception, address: {}", channel.remoteAddress(), cause);
         } else {
-            logger.error("channel exception, address: {}", channel.remoteAddress());
+            logger.error("channel exception, address: {}", channel.remoteAddress(), cause);
         }
     }
 }
