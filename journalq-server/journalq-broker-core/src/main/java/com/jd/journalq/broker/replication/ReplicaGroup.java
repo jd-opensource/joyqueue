@@ -376,7 +376,7 @@ public class ReplicaGroup extends Service {
 
                     replicationManager.sendCommand(replica.getAddress(), new Command(header, request),
                             electionConfig.getSendCommandTimeout(),
-                            new AppendEntriesRequestCallback(replica, startTime));
+                            new AppendEntriesRequestCallback(replica, startTime, request.getEntriesLength()));
 
                 } catch (Throwable t) {
                     logger.warn("Partition group {}/ node {} send append entries to {} fail",
@@ -446,10 +446,12 @@ public class ReplicaGroup extends Service {
     private class AppendEntriesRequestCallback implements CommandCallback {
         private Replica replica;
         private long startTime;
+        private int entriesLength;
 
-        AppendEntriesRequestCallback(Replica replica, long startTime) {
+        AppendEntriesRequestCallback(Replica replica, long startTime, int entriesLength) {
             this.replica = replica;
             this.startTime = startTime;
+            this.entriesLength = entriesLength;
         }
 
         @Override
@@ -481,7 +483,7 @@ public class ReplicaGroup extends Service {
                 processAppendEntriesResponse(appendEntriesResponse, replica);
 
                 brokerMonitor.onReplicateMessage(topicPartitionGroup.getTopic(), topicPartitionGroup.getPartitionGroupId(),
-                        1, appendEntriesRequest.getEntriesLength(), System.currentTimeMillis() - startTime);
+                        1, entriesLength, System.currentTimeMillis() - startTime);
 
             } catch (Exception e) {
                 logger.info("Partition group {}/node {} process append entries reponse fail",

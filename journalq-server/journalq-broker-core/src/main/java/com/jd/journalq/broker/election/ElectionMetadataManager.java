@@ -258,7 +258,7 @@ public class ElectionMetadataManager {
                 .electionType(partitionGroup.getElectType()).leaderId(partitionGroup.getLeader())
                 .learners(partitionGroup.getLearners()).localNode(localBrokerId)
                 .currentTerm(partitionGroup.getTerm()).allNodes(partitionGroup.getBrokers().values().stream()
-                        .map(broker -> new DefaultElectionNode(broker.getAddress(), broker.getId()))
+                        .map(broker -> new DefaultElectionNode(broker.getIp() + ":" + broker.getBackEndPort(), broker.getId()))
                         .collect(Collectors.toList())).build();
     }
 
