@@ -765,7 +765,7 @@ public class ReplicaGroup extends Service {
     /**
      * 开始新一轮心跳，向Follower节点发送心跳命令，重置心跳定时器
      */
-    private synchronized void startNewHeartbeat(Replica replica) {
+    private void startNewHeartbeat(Replica replica) {
         if (!isStarted()) {
             logger.info("Partition group {}/node {} start new heartbeat, replicator not start",
                     topicPartitionGroup, localReplicaId);
@@ -837,7 +837,7 @@ public class ReplicaGroup extends Service {
     /**
      * 重置心跳定时器
      */
-    private synchronized void resetHeartbeatTimer(Replica replica) {
+    private void resetHeartbeatTimer(Replica replica) {
         ScheduledFuture heartbeatTimerFuture = replica.heartbeatTimerFuture();
         if (heartbeatTimerFuture != null && !heartbeatTimerFuture.isDone()) {
             heartbeatTimerFuture.cancel(true);
@@ -850,7 +850,7 @@ public class ReplicaGroup extends Service {
     /**
      * 取消心跳定时器
      */
-    private synchronized void cancelHeartbeatTimer(Replica replica) {
+    private void cancelHeartbeatTimer(Replica replica) {
         ScheduledFuture heartbeatTimerFuture = replica.heartbeatTimerFuture();
         if (heartbeatTimerFuture != null && !heartbeatTimerFuture.isDone()) {
             heartbeatTimerFuture.cancel(true);
@@ -862,7 +862,7 @@ public class ReplicaGroup extends Service {
      * 处理心跳响应消息
      * @param command 心跳响应命令
      */
-    private synchronized void handleHeartbeatResponse(Command command, Replica replica) {
+    private void handleHeartbeatResponse(Command command, Replica replica) {
         if (command == null) {
             logger.warn("Partition group {}/node{} receive heartbeat response is null",
                     topicPartitionGroup, localReplicaId);
