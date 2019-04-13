@@ -74,13 +74,13 @@ public class KafkaMessageSerializer extends AbstractKafkaMessageSerializer {
             // TODO 临时处理，需要根据协议版本决定
             byte magic = message.getMagic();
             if (magic == MESSAGE_MAGIC_V0) {
-                KafkaMessageV0Serializer.writeMessages(buffer, messages);
+                KafkaMessageV0Serializer.writeMessage(buffer, message);
             } else if (magic == MESSAGE_MAGIC_V1) {
-                KafkaMessageV1Serializer.writeMessages(buffer, messages);
+                KafkaMessageV1Serializer.writeMessage(buffer, message);
             }  else if (magic == MESSAGE_MAGIC_V2) {
-                KafkaMessageV2Serializer.writeMessages(buffer, messages);
+                KafkaMessageV2Serializer.writeMessage(buffer, message);
             } else if (magic == KafkaBrokerMessage.INVALID_MAGIC) {
-                KafkaMessageV0Serializer.writeMessages(buffer, messages);
+                KafkaMessageV0Serializer.writeMessage(buffer, message);
             } else {
                 throw new UnsupportedOperationException(String.format("writeMessage unsupported magic, magic: %s", magic));
             }
