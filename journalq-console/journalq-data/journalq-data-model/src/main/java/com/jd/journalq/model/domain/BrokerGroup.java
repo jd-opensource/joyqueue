@@ -22,6 +22,10 @@ public class BrokerGroup extends LabelBaseModel {
     private String name;
     private String description;
 
+    public BrokerGroup(String code) {
+        this.code = code;
+    }
+
     public String getCode() {
         return code;
     }
