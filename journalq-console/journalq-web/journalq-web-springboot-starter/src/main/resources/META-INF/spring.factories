@@ -1,3 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-com.jd.journalq.springboot.starter.ServiceAutoConfigur\
-  ation
+  com.jd.journalq.springboot.starter.ServiceAutoConfiguration

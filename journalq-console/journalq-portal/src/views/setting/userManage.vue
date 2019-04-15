@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="ml20 mt30">
-      <d-input v-model="searchData.keyword" placeholder="请输入erp" class="left mr10" style="width: 20%">
+      <d-input v-model="searchData.keyword" placeholder="请输入英文名" class="left mr10" style="width: 20%">
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
       <d-button type="primary" @click="openDialog('addDialog')">添加用户<icon name="plus-circle" style="margin-left: 5px;"></icon></d-button>
@@ -14,8 +14,9 @@
     <!--添加用户-->
     <my-dialog :dialog="addDialog" @on-dialog-confirm="submit()" @on-dialog-cancel="addCancel()">
       <grid-row class="mb10">
-        <grid-col :span="2" class="label">erp:</grid-col>
-        <grid-col :span="16" class="val">
+        <grid-col :span="3" class="label">英文名:</grid-col>
+        <grid-col :span="1"/>
+        <grid-col :span="14" class="val">
           <d-input v-model="addData.code"></d-input>
         </grid-col>
       </grid-row>
@@ -42,9 +43,11 @@ import apiRequest from '../../utils/apiRequest.js'
 import myTable from '../../components/common/myTable.vue'
 import myDialog from '../../components/common/myDialog.vue'
 import crud from '../../mixins/crud.js'
+import GridCol from "../../components/grid/col";
 export default {
   name: 'application',
   components: {
+    GridCol,
     myTable,
     myDialog
   },
@@ -60,7 +63,7 @@ export default {
         rowData: [],
         colData: [
           {
-            title: 'erp',
+            title: '英文名',
             key: 'code'
           },
           {
@@ -190,7 +193,7 @@ export default {
     },
     submit () {
       if (!this.addData || !this.addData.code) {
-        this.$Message.error('请输入erp')
+        this.$Message.error('请输入英文名')
         return false
       }
       this.addConfirm()

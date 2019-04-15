@@ -5,24 +5,20 @@
 
         <route name="put" type="PUT" route="true"
                consumers="application/json;charset=UTF-8" produces="application/json;charset=UTF-8"
-               handlers="cookie session body getLoginUser"/>
+               handlers="cookie session body AdminLogin getLoginUser"/>
         <route name="post" type="POST" route="true"
                consumers="application/json;charset=UTF-8" produces="application/json;charset=UTF-8"
-               handlers="cookie session body getLoginUser"/>
+               handlers="cookie session body AdminLogin getLoginUser"/>
 
         <route name="postGrafana" type="POST" route="true"
                consumers="application/json;charset=UTF-8" produces="application/json;charset=UTF-8"
-               handlers="cookie session body grafanaLogin getLoginUser"/>
+               handlers="cookie session body AdminLogin getLoginUser"/>
         <route name="get" type="GET" route="true"
                consumers="application/json;charset=UTF-8" produces="application/json;charset=UTF-8"
-               handlers="cookie session getLoginUser"/>
+               handlers="cookie session AdminLogin getLoginUser"/>
         <route name="delete" type="DELETE" route="true"
                consumers="application/json;charset=UTF-8" produces="application/json;charset=UTF-8"
-               handlers="cookie session getLoginUser"/>
-
-        <route name="apiGet" type="GET" route="true"
-               consumers="application/json;charset=UTF-8" produces="application/json;charset=UTF-8"
-               handlers="cookie session "/>
+               handlers="cookie session AdminLogin getLoginUser"/>
 
         <!--application 操作-->
         <route inherit="post"
@@ -96,15 +92,18 @@
         <route inherit="post"
                path="/v1/user/search" handlers="validateAdmin user#search render"
                errors="error"/>
+        <route inherit="post"
+               path="/v1/user/add" handlers="validateAdmin user#add render"
+               errors="error"/>
         <route inherit="put"
                path="/v1/user/update/:id" handlers="validateAdmin user#update render"
+               errors="error"/>
+        <route inherit="delete"
+               path="/v1/user/delete/:id" handlers="validateAdmin user#delete render"
                errors="error"/>
 
         <route inherit="get"
                path="/v1/user/getByCode/:code" handlers="validateAdmin user#getByCode render"
-               errors="error"/>
-        <route inherit="get"
-               path="/v1/user/getByIds/:ids" handlers="validateAdmin user#getByIds render"
                errors="error"/>
 
         <!--配置 操作 -->
@@ -142,30 +141,6 @@
                errors="error"/>
         <route inherit="get"
                path="/v1/dataCenter/findAll" handlers="dataCenter#findAll render"
-               errors="error"/>
-
-        <!--hosts 操作 -->
-        <route inherit="get"
-               path="/v1/hosts/get/:id" handlers="validateAdmin hosts#get render"
-               errors="error"/>
-        <route inherit="post"
-               path="/v1/hosts/search" handlers="validateAdmin hosts#search render"
-               errors="error"/>
-        <route inherit="post"
-               path="/v1/hosts/add" handlers="validateAdmin hosts#add render"
-               errors="error"/>
-        <route inherit="put"
-               path="/v1/hosts/update/:id" handlers="validateAdmin hosts#update render"
-               errors="error"/>
-        <route inherit="delete"
-               path="/v1/hosts/delete/:id" handlers="validateAdmin hosts#delete render"
-               errors="error"/>
-
-        <route inherit="put"
-               path="/v1/hosts/generateBroker/:id" handlers="validateAdmin hosts#generateBroker render"
-               errors="error"/>
-        <route inherit="put"
-               path="/v1/hosts/syncBrokers" handlers="validateAdmin hosts#syncBrokers render"
                errors="error"/>
 
         <!--topic 主题 操作 post-id -->
@@ -210,6 +185,9 @@
                errors="error"/>
         <route inherit="get"
                path="/v1/brokerGroup/findAll" handlers="brokerGroup#findAll render"
+               errors="error"/>
+        <route inherit="put"
+               path="/v1/brokerGroup/updateBroker/:id" handlers="validateAdmin brokerGroup#updateBroker render"
                errors="error"/>
 
         <!--partitionGroup 操作-->
@@ -385,65 +363,65 @@
                errors="error"/>
 
         <!--mqtt proxy monitor-->
-        <route inherit="get"
-               path="/v1/monitor/mqtt/proxy/overview/executor/:id"
-               handlers="validateAdmin  mqttProxyMonitor#state render"
-               errors="error"/>
-        <route inherit="get"
-               path="/v1/monitor/mqtt/proxy/threads/executor/:id/type/:type"
-               handlers="validateAdmin  mqttProxyMonitor#threads render"
-               errors="error"/>
-        <route inherit="post"
-               path="/v1/monitor/mqtt/proxy/thread/clients"
-               handlers="validateAdmin  mqttProxyMonitor#clients render"
-               errors="error"/>
+        <!--<route inherit="get"-->
+               <!--path="/v1/monitor/mqtt/proxy/overview/executor/:id"-->
+               <!--handlers="validateAdmin  mqttProxyMonitor#state render"-->
+               <!--errors="error"/>-->
+        <!--<route inherit="get"-->
+               <!--path="/v1/monitor/mqtt/proxy/threads/executor/:id/type/:type"-->
+               <!--handlers="validateAdmin  mqttProxyMonitor#threads render"-->
+               <!--errors="error"/>-->
+        <!--<route inherit="post"-->
+               <!--path="/v1/monitor/mqtt/proxy/thread/clients"-->
+               <!--handlers="validateAdmin  mqttProxyMonitor#clients render"-->
+               <!--errors="error"/>-->
 
 
-        <route inherit="get"
-               path="/v1/monitor/mqtt/proxy/session/executor/:id/client/:clientId"
-               handlers="validateAdmin  mqttProxyMonitor#session render"
-               errors="error"/>
+        <!--<route inherit="get"-->
+               <!--path="/v1/monitor/mqtt/proxy/session/executor/:id/client/:clientId"-->
+               <!--handlers="validateAdmin  mqttProxyMonitor#session render"-->
+               <!--errors="error"/>-->
 
 
-        <route inherit="post"
-               path="/v1/monitor/mqtt/proxy/sessions/"
-               handlers="validateAdmin  mqttProxyMonitor#sessions render"
-               errors="error"/>
+        <!--<route inherit="post"-->
+               <!--path="/v1/monitor/mqtt/proxy/sessions/"-->
+               <!--handlers="validateAdmin  mqttProxyMonitor#sessions render"-->
+               <!--errors="error"/>-->
 
-        <route inherit="get"
-               path="/v1/monitor/mqtt/proxy/connection/executor/:id/client/:clientId"
-               handlers="validateAdmin  mqttProxyMonitor#connection render"
-               errors="error"/>
-        <route inherit="post"
-               path="/v1/monitor/mqtt/proxy/connection/client"
-               handlers="validateAdmin  mqttProxyMonitor#connectionInProxyCluster render"
-               errors="error"/>
+        <!--<route inherit="get"-->
+               <!--path="/v1/monitor/mqtt/proxy/connection/executor/:id/client/:clientId"-->
+               <!--handlers="validateAdmin  mqttProxyMonitor#connection render"-->
+               <!--errors="error"/>-->
+        <!--<route inherit="post"-->
+               <!--path="/v1/monitor/mqtt/proxy/connection/client"-->
+               <!--handlers="validateAdmin  mqttProxyMonitor#connectionInProxyCluster render"-->
+               <!--errors="error"/>-->
 
-        <route inherit="post"
-               path="/v1/monitor/mqtt/proxy/connections"
-               handlers="validateAdmin  mqttProxyMonitor#connections render"
-               errors="error"/>
+        <!--<route inherit="post"-->
+               <!--path="/v1/monitor/mqtt/proxy/connections"-->
+               <!--handlers="validateAdmin  mqttProxyMonitor#connections render"-->
+               <!--errors="error"/>-->
 
-        <route inherit="put"
-               path="/v1/monitor/mqtt/proxy/closeConnection"
-               handlers="validateAdmin  mqttProxyMonitor#closeConnection render"
-               errors="error"/>
+        <!--<route inherit="put"-->
+               <!--path="/v1/monitor/mqtt/proxy/closeConnection"-->
+               <!--handlers="validateAdmin  mqttProxyMonitor#closeConnection render"-->
+               <!--errors="error"/>-->
 
-        <route inherit="put"
-               path="/v1/monitor/mqtt/proxy/client/debug/:status"
-               handlers="validateAdmin  mqttProxyMonitor#clientDebug render"
-               errors="error"/>
+        <!--<route inherit="put"-->
+               <!--path="/v1/monitor/mqtt/proxy/client/debug/:status"-->
+               <!--handlers="validateAdmin  mqttProxyMonitor#clientDebug render"-->
+               <!--errors="error"/>-->
 
-        <route inherit="put"
-               path="/v1/monitor/mqtt/proxy/thread/debug/:status"
-               handlers="validateAdmin  mqttProxyMonitor#threadDebug render"
-               errors="error"/>
+        <!--<route inherit="put"-->
+               <!--path="/v1/monitor/mqtt/proxy/thread/debug/:status"-->
+               <!--handlers="validateAdmin  mqttProxyMonitor#threadDebug render"-->
+               <!--errors="error"/>-->
 
 
-        <route inherit="post"
-               path="/v1/monitor/mqtt/proxy/publish/"
-               handlers="validateAdmin  mqttProxyMonitor#publish render"
-               errors="error"/>
+        <!--<route inherit="post"-->
+               <!--path="/v1/monitor/mqtt/proxy/publish/"-->
+               <!--handlers="validateAdmin  mqttProxyMonitor#publish render"-->
+               <!--errors="error"/>-->
 
 
         <!--metric -->
@@ -462,73 +440,6 @@
         <route inherit="delete"
                path="/v1/metric/delete/:id" handlers="validateAdmin metric#delete render"
                errors="error"/>
-
-        <!--&lt;!&ndash;chart set &ndash;&gt;-->
-        <!--<route inherit="post"-->
-               <!--path="/v1/chartSet/search" handlers="chartSet#search render"-->
-               <!--errors="error"/>-->
-        <!--<route inherit="get"-->
-               <!--path="/v1/chartSet/get/:id" handlers="validateApplication validateApplicationMember chartSet#get render"-->
-               <!--errors="error"/>-->
-        <!--<route inherit="post"-->
-               <!--path="/v1/chartSet/add" handlers="validateAdmin chartSet#add render"-->
-               <!--errors="error"/>-->
-        <!--<route inherit="put"-->
-               <!--path="/v1/chartSet/update/:id" handlers="validateAdmin chartSet#update render"-->
-               <!--errors="error"/>-->
-        <!--<route inherit="delete"-->
-               <!--path="/v1/chartSet/delete/:id" handlers="validateAdmin chartSet#delete render"-->
-               <!--errors="error"/>-->
-
-        <!--chart -->
-        <!--<route inherit="post"-->
-               <!--path="/v1/chart/search" handlers="chart#search render"-->
-               <!--errors="error"/>-->
-        <!--<route inherit="get"-->
-               <!--path="/v1/chart/get/:id" handlers="validateApplication validateApplicationMember chart#get render"-->
-               <!--errors="error"/>-->
-        <!--<route inherit="post"-->
-               <!--path="/v1/chart/add" handlers="validateAdmin chart#add render"-->
-               <!--errors="error"/>-->
-        <!--<route inherit="put"-->
-               <!--path="/v1/chart/update/:id" handlers="validateAdmin chart#update render"-->
-               <!--errors="error"/>-->
-        <!--<route inherit="delete"-->
-               <!--path="/v1/chart/delete/:id" handlers="validateAdmin chart#delete render"-->
-               <!--errors="error"/>-->
-        <!--chart -->
-        <!--<route inherit="post"-->
-               <!--path="/v1/chartSeries/search" handlers="chartSeries#search render"-->
-               <!--errors="error"/>-->
-        <!--<route inherit="get"-->
-               <!--path="/v1/chartSeries/get/:id" handlers="validateApplication validateApplicationMember chartSeries#get render"-->
-               <!--errors="error"/>-->
-        <!--<route inherit="post"-->
-               <!--path="/v1/chartSeries/add" handlers="validateAdmin chartSeries#add render"-->
-               <!--errors="error"/>-->
-        <!--<route inherit="put"-->
-               <!--path="/v1/chartSeries/update/:id" handlers="validateAdmin chartSeries#update render"-->
-               <!--errors="error"/>-->
-        <!--<route inherit="delete"-->
-               <!--path="/v1/chartSeries/delete/:id" handlers="validateAdmin chartSeries#delete render"-->
-               <!--errors="error"/>-->
-
-        <!--alarm event -->
-        <!--<route inherit="post"-->
-               <!--path="/v1/alarm/search" handlers="alarmEvent#search render"-->
-               <!--errors="error"/>-->
-        <!--<route inherit="get"-->
-               <!--path="/v1/alarm/get/:id" handlers="validateApplication validateApplicationMember alarmEvent#get render"-->
-               <!--errors="error"/>-->
-        <!--<route inherit="post"-->
-               <!--path="/v1/alarm/add" handlers="validateAdmin alarmEvent#add render"-->
-               <!--errors="error"/>-->
-        <!--<route inherit="put"-->
-               <!--path="/v1/alarm/update/:id" handlers="validateAdmin alarmEvent#update render"-->
-               <!--errors="error"/>-->
-        <!--<route inherit="delete"-->
-               <!--path="/v1/alarm/delete/:id" handlers="validateAdmin alarmEvent#delete render"-->
-               <!--errors="error"/>-->
 
         <!--同步操作 -->
         <route inherit="post"
@@ -558,88 +469,6 @@
                path="/v1/broker/findByTopic" handlers="broker#findByTopic render"
                errors="error"/>
 
-        <!--task -->
-        <route inherit="post"
-               path="/v1/task/search" handlers="validateAdmin task#search render"
-               errors="error"/>
-        <route inherit="get"
-               path="/v1/task/get/:id" handlers="validateAdmin task#get render"
-               errors="error"/>
-        <route inherit="post"
-               path="/v1/task/add" handlers="validateAdmin task#add render"
-               errors="error"/>
-        <route inherit="put"
-               path="/v1/task/update/:id" handlers="validateAdmin task#update render"
-               errors="error"/>
-        <route inherit="delete"
-               path="/v1/task/delete/:id" handlers="validateAdmin task#delete render"
-               errors="error"/>
-        <route inherit="put"
-               path="/v1/task/state/:id" handlers="validateAdmin task#state render"
-               errors="error"/>
-
-        <!--alarmType -->
-        <!--<route inherit="post"-->
-               <!--path="/v1/alarmType/search" handlers="validateAdmin alarmType#search render"-->
-               <!--errors="error"/>-->
-        <!--<route inherit="post"-->
-               <!--path="/v1/alarmType/add" handlers="validateAdmin alarmType#add render"-->
-               <!--errors="error"/>-->
-        <!--<route inherit="put"-->
-               <!--path="/v1/alarmType/update/:id" handlers="validateAdmin alarmType#update render"-->
-               <!--errors="error"/>-->
-        <!--<route inherit="delete"-->
-               <!--path="/v1/alarmType/delete/:id" handlers="validateAdmin alarmType#delete render"-->
-               <!--errors="error"/>-->
-
-
-        <!--alarmPolicy -->
-        <!--<route inherit="post"-->
-               <!--path="/v1/alarmRule/search" handlers="validateAdmin alarmRule#search render"-->
-               <!--errors="error"/>-->
-        <!--<route inherit="post"-->
-               <!--path="/v1/alarmRule/add" handlers="validateAdmin alarmRule#add render"-->
-               <!--errors="error"/>-->
-        <!--<route inherit="put"-->
-               <!--path="/v1/alarmRule/update/:id" handlers="validateAdmin alarmRule#update render"-->
-               <!--errors="error"/>-->
-        <!--<route inherit="delete"-->
-               <!--path="/v1/alarmRule/delete/:id" handlers="validateAdmin alarmRule#delete render"-->
-               <!--errors="error"/>-->
-        <!--<route inherit="put"-->
-               <!--path="/v1/alarmRule/state/:id" handlers="validateAdmin alarmRule#state render"-->
-               <!--errors="error"/>-->
-
-        <!--executor -->
-        <!--<route inherit="post"-->
-               <!--path="/v1/executor/search" handlers="validateAdmin executor#search render"-->
-               <!--errors="error"/>-->
-        <!--<route inherit="get"-->
-               <!--path="/v1/executor/get/:id" handlers="validateAdmin executor#get render"-->
-               <!--errors="error"/>-->
-        <!--<route inherit="post"-->
-               <!--path="/v1/executor/add" handlers="validateAdmin executor#add render"-->
-               <!--errors="error"/>-->
-        <!--<route inherit="post"-->
-               <!--path="/v1/executor/batchAdd" handlers="validateAdmin executor#batchAdd render"-->
-               <!--errors="error"/>-->
-        <!--<route inherit="put"-->
-               <!--path="/v1/executor/update/:id" handlers="validateAdmin executor#update render"-->
-               <!--errors="error"/>-->
-
-        <!--<route inherit="put"-->
-               <!--path="/v1/executor/state/:id" handlers="validateAdmin executor#state render"-->
-               <!--errors="error"/>-->
-        <!--<route inherit="put"-->
-               <!--path="/v1/executor/batchState/:status" handlers="validateAdmin executor#batchState render"-->
-               <!--errors="error"/>-->
-        <!--<route inherit="delete"-->
-               <!--path="/v1/executor/delete/:id" handlers="validateAdmin executor#delete render"-->
-               <!--errors="error"/>-->
-        <!--<route inherit="get"-->
-               <!--path="/v1/executor/monitor/:id" handlers="validateAdmin executor#monitor render"-->
-               <!--errors="error"/>-->
-
 
         <!--命名空间 namespace -->
         <route inherit="post"
@@ -661,126 +490,6 @@
                path="/v1/namespace/findAll" handlers="namespace#findAll render"
                errors="error"/>
 
-        <!-- apply-->
-        <route inherit="post"
-               path="/v1/apply/search" handlers="apply#search render"
-               errors="error"/>
-        <route inherit="get"
-               path="/v1/apply/get/:id" handlers="apply#get render"
-               errors="error"/>
-        <route inherit="post"
-               path="/v1/apply/add" handlers="apply#add render"
-               errors="error"/>
-        <route inherit="put"
-               path="/v1/apply/update/:id" handlers="apply#update render"
-               errors="error"/>
-        <route inherit="delete"
-               path="/v1/apply/delete/:id" handlers="apply#delete render"
-               errors="error"/>
-
-        <!-- access apply -->
-        <!--<route inherit="post"-->
-               <!--path="/v1/accessApply/add" handlers="accessApply#add render"-->
-               <!--errors="error"/>-->
-        <route inherit="post"
-               path="/v1/subscribe/producer/apply" handlers="subscribeProducerApply#add render"
-               errors="error"/>
-        <route inherit="post"
-               path="/v1/subscribe/producer/update" handlers="subscribeProducerApply#update render"
-               errors="error"/>
-        <route inherit="post"
-               path="/v1/subscribe/consumer/apply" handlers="subscribeConsumerApply#add render"
-               errors="error"/>
-        <route inherit="post"
-               path="/v1/subscribe/consumer/update" handlers="subscribeConsumerApply#update render"
-               errors="error"/>
-        <route inherit="post"
-               path="/v1/cancel/subscribe/apply" handlers="cancelSubscribeApply#add render"
-               errors="error"/>
-        <route inherit="post"
-               path="/v1/cancel/subscribe/update" handlers="cancelSubscribeApply#update render"
-               errors="error"/>
-
-        <!-- audit-->
-        <route inherit="post"
-               path="/v1/audit/search" handlers="audit#search render"
-               errors="error"/>
-        <route inherit="get"
-               path="/v1/audit/get/:id" handlers="audit#get render"
-               errors="error"/>
-        <route inherit="post"
-               path="/v1/audit/add" handlers="audit#add render"
-               errors="error"/>
-        <route inherit="put"
-               path="/v1/audit/update/:id" handlers="audit#update render"
-               errors="error"/>
-        <route inherit="delete"
-               path="/v1/audit/delete/:id" handlers="audit#delete render"
-               errors="error"/>
-
-        <route inherit="get"
-               path="/v1/audit/findApply/:id" handlers="audit#findApply render"
-               errors="error"/>
-        <route inherit="put"
-               path="/v1/audit/approve/:id" handlers="audit#approve render"
-               errors="error"/>
-        <route inherit="post"
-               path="/v1/audit/reject/:id" handlers="audit#reject render"
-               errors="error"/>
-        <route inherit="put"
-               path="/v1/audit/confirm/:id" handlers="audit#confirm render"
-               errors="error"/>
-        <route inherit="put"
-               path="/v1/audit/execute/:id" handlers="audit#execute render"
-               errors="error"/>
-
-        <!--auditRole -->
-        <route inherit="post"
-               path="/v1/auditRole/search" handlers="validateAdmin auditRole#search render"
-               errors="error"/>
-        <route inherit="post"
-               path="/v1/auditRole/add" handlers="validateAdmin auditRole#add render"
-               errors="error"/>
-        <route inherit="get"
-               path="/v1/auditRole/get/:id" handlers="validateAdmin auditRole#get render"
-               errors="error"/>
-        <route inherit="put"
-               path="/v1/auditRole/update/:id" handlers="validateAdmin auditRole#update render"
-               errors="error"/>
-        <route inherit="delete"
-               path="/v1/auditRole/delete/:id" handlers="validateAdmin auditRole#delete render"
-               errors="error"/>
-        <route inherit="put"
-               path="/v1/auditRole/state/:id" handlers="validateAdmin auditRole#state render"
-               errors="error"/>
-
-        <route inherit="get"
-               path="/v1/auditRole/getByCode/:code" handlers="validateAdmin auditRole#getByCode render"
-               errors="error"/>
-
-        <!--auditFlow -->
-        <route inherit="post"
-               path="/v1/auditFlow/search" handlers="validateAdmin auditFlow#search render"
-               errors="error"/>
-        <route inherit="post"
-               path="/v1/auditFlow/add" handlers="validateAdmin auditFlow#add render"
-               errors="error"/>
-        <route inherit="get"
-               path="/v1/auditFlow/get/:id" handlers="validateAdmin auditFlow#get render"
-               errors="error"/>
-        <route inherit="put"
-               path="/v1/auditFlow/update/:id" handlers="validateAdmin auditFlow#update render"
-               errors="error"/>
-        <route inherit="delete"
-               path="/v1/auditFlow/delete/:id" handlers="validateAdmin auditFlow#delete render"
-               errors="error"/>
-        <route inherit="put"
-               path="/v1/auditFlow/state/:id" handlers="validateAdmin auditFlow#state render"
-               errors="error"/>
-
-        <route inherit="get"
-               path="/v1/auditFlow/getByType/:type" handlers="validateAdmin auditFlow#getByType render"
-               errors="error"/>
 
         <!-- operlog -->
         <route inherit="post"
@@ -807,9 +516,9 @@
         <route inherit="post"
                path="/v1/archive/search" handlers="archive#search render"
                errors="error"/>
-        <route inherit="delete"
-               path="/v1/archive/delete/:id" handlers="archive#delete render"
-               errors="error"/>
+        <!--<route inherit="delete"-->
+               <!--path="/v1/archive/delete/:id" handlers="archive#delete render"-->
+               <!--errors="error"/>-->
         <route inherit="post"
                path="/v1/archive/retry" handlers="archive#retry render"
                errors="error"/>
@@ -818,14 +527,6 @@
                errors="error"/>
         <route inherit="get"
                path="/v1/archive/consume/:id" handlers="archive#consume render"
-               errors="error"/>
-
-
-        <route inherit="put"
-               path="/v1/audit/approve/:id" handlers="audit#approve render"
-               errors="error"/>
-        <route inherit="put"
-               path="/v1/audit/reject/:id" handlers="audit#reject render"
                errors="error"/>
 
         <!--用户登录 登出 -->
@@ -843,19 +544,10 @@
         <route inherit="postGrafana"
                path="/v1/grafana/search" handlers="grafana#search render"
                errors="error"/>
-        <route inherit="postGrafana"
-               path="/v1/grafana/query" handlers="grafana#query render"
-               errors="error"/>
         <route inherit="get"
                path="/v1/grafana/getRedirectUrl/:code" handlers="grafana#getRedirectUrl render"
                errors="error"/>
 
-        <!--open api-->
-
-        <route inherit="apiGet"
-               path="/v1/open/api/topic/info"
-               handlers="cookie session  openAPI#topicInfo"
-               errors="error"/>
 
     </routes>
 

@@ -78,7 +78,7 @@ export default {
           }
         },
         {
-          title: '就近发送',
+          title: '就近机房发送',
           key: 'config.nearBy',
           render: (h, params) => {
             return openOrCloseBtnRender(h, params.item.config === undefined ? undefined : params.item.config.nearBy)

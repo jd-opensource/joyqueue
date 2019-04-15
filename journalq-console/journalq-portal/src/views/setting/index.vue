@@ -6,9 +6,6 @@
         <d-menu-item name="user" icon="users" :size="iconSize" :to="`/${ curLang }/setting/user`"><!--color="#98D358"-->
           <span class="layout-text">{{ langConfig.user }}</span>
         </d-menu-item>
-        <d-menu-item name="userToken" icon="box" :size="iconSize" :to="`/${ curLang }/setting/userToken`"><!--color="#7FB3D5"-->
-          <span class="layout-text">{{ langConfig.userToken}}</span>
-        </d-menu-item>
         <d-menu-item name="dataCenter" icon="radio" :size="iconSize" :to="`/${ curLang }/setting/dataCenter`"><!--color="#FFD306"-->
           <span class="layout-text">{{ langConfig.dataCenter }}</span>
         </d-menu-item>

@@ -32,6 +32,7 @@
         <module>journalq-web-application</module>
         <module>journalq-web-handler</module>
         <module>journalq-web-springboot-starter</module>
+        <!--<module>journalq-web-h2-starter</module>-->
     </modules>
 
 </project>
