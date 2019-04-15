@@ -17,7 +17,7 @@ export default {
   logout: '/logout', // 用户信息
   '/application': {
     search: '/application/search',
-    sync: '/sync/application',
+    add: '/application/add',
     del: '/application/delete'
   },
   '/application/detail': {
@@ -38,7 +38,7 @@ export default {
   },
   '/setting/user': {
     search: '/user/search',
-    add: '/sync/user',
+    add: '/user/add',
     edit: '/user/update'
   },
   '/setting/dataCenter': {

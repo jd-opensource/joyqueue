@@ -44,7 +44,7 @@ public class Application extends BaseModel implements Identifier, Cloneable {
     //所有者
     private Identity owner;
     private String erp;
-    private String discription;
+    private String description;
 
     public String getErp() {
         return erp;
@@ -132,12 +132,12 @@ public class Application extends BaseModel implements Identifier, Cloneable {
         this.owner = owner;
     }
 
-    public String getDiscription() {
-        return discription;
+    public String getDescription() {
+        return description;
     }
 
-    public void setDiscription(String discription) {
-        this.discription = discription;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     /**

@@ -102,7 +102,7 @@
         <maven-compiler-plugin.compilerArgument>-parameters</maven-compiler-plugin.compilerArgument>
         <maven-assembly-plugin.version>3.1.0</maven-assembly-plugin.version>
         <mysql-connector-java.version>5.1.41</mysql-connector-java.version>
-
+        <h2database.version>1.4.195</h2database.version>
         <!-- hbase -->
         <hadoop.version>2.7.6</hadoop.version>
         <hbase.version>1.4.8</hbase.version>
@@ -659,6 +659,11 @@
                 <groupId>org.springframework.security</groupId>
                 <artifactId>spring-security-taglibs</artifactId>
                 <version>${spring.security.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.h2database</groupId>
+                <artifactId>h2</artifactId>
+                <version>${h2database.version}</version>
             </dependency>
 
             <!-- excel file -->

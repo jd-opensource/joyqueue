@@ -94,7 +94,6 @@ public class BrokerServiceImpl implements BrokerService {
                     BrokerGroupRelated brokerRelated = brokerGroupRelatedService.findById(broker.getId());
                     if (brokerRelated != null && brokerRelated.getGroup() != null) {
                         broker.setGroup(brokerRelated.getGroup());
-                        //todo cyy 为什么status要设置为0？
                         broker.setStatus(0);
                     }
                     return broker;

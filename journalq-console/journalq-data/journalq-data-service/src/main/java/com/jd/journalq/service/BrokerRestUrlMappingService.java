@@ -15,7 +15,6 @@ package com.jd.journalq.service;
 
 import com.jd.journalq.model.domain.Broker;
 
-//todo 用BrokerUrlTemplateMappingUtil替代
 public interface BrokerRestUrlMappingService {
 
     /**

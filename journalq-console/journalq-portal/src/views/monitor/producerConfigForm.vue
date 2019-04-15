@@ -1,6 +1,6 @@
 <template>
   <d-form ref="form" :model="formData" :rules="rules" label-width="100px" style="height: 350px; overflow-y:auto; width: 100%; padding-right: 20px">
-    <d-form-item label="就近发送：">
+    <d-form-item label="就近机房发送：">
       <d-switch v-model="formData.nearBy" ></d-switch>
     </d-form-item>
     <!--<d-form-item label="单线程发送：">-->

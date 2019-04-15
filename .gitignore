@@ -2,6 +2,7 @@
 .idea/
 .vertx/
 target
+h2-db-journalq
 .classpath
 .settings
 .project
