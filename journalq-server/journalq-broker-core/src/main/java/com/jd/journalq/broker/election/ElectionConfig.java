@@ -29,6 +29,7 @@ public class ElectionConfig {
 
     private int listenPort;
 
+    private String electionMetaFileStub;
     private String electionMetaPathStub;
 
     public ElectionConfig(PropertySupplier propertySupplier) {
@@ -36,6 +37,10 @@ public class ElectionConfig {
     }
 
     public String getMetadataPath() {
+        if (electionMetaPathStub != null) {
+            return electionMetaPathStub;
+        }
+
         if (electionMetaPath == null || electionMetaPath.isEmpty()) {
             synchronized (this) {
                 if (electionMetaPath == null) {
@@ -53,8 +58,8 @@ public class ElectionConfig {
     }
 
     public String getMetadataFile() {
-        if (electionMetaPathStub != null) {
-            return electionMetaPathStub;
+        if (electionMetaFileStub != null) {
+            return electionMetaFileStub;
         }
 		
         Property property = propertySupplier.getProperty(Property.APPLICATION_DATA_PATH);
@@ -123,6 +128,9 @@ public class ElectionConfig {
         return PropertySupplier.getValue(propertySupplier, ElectionConfigKey.LOG_INTERVAL);
     }
 
+    public long getTransferLeaderMinLag() {
+        return PropertySupplier.getValue(propertySupplier, ElectionConfigKey.TRANSFER_LEADER_MIN_LAG);
+    }
 
     public void setListenPort(String port) {
         listenPort = Integer.valueOf(port);
@@ -130,5 +138,9 @@ public class ElectionConfig {
 
     public void setElectionMetaPath(String electionMetaPath) {
         this.electionMetaPathStub = electionMetaPath;
+    }
+
+    public void setElectionMetaFile(String electionMetaFile) {
+        this.electionMetaFileStub = electionMetaFileStub;
     }
 }

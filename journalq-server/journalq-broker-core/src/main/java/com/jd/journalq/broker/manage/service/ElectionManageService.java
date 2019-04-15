@@ -15,4 +15,10 @@ package com.jd.journalq.broker.manage.service;
 
 public interface ElectionManageService {
     void restoreElectionMetadata();
+
+    String describe();
+
+    String describeTopic(String topic, int partitionGroup);
+
+    void updateTerm(String topic, int partitionGroup, int term);
 }

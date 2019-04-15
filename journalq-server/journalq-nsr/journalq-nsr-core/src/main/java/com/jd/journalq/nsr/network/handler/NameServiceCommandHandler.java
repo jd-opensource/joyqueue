@@ -185,7 +185,9 @@ public class NameServiceCommandHandler  implements NsrCommandHandler, Types,com.
             case NsrCommandType.REGISTER:
                 Register register = (Register) command.getPayload();
                 Broker brokerRegister = nameService.register(register.getBrokerId(),register.getBrokerIp(),register.getPort());
-                if(null!=brokerRegister)fillTransportBrokerId(transport,brokerRegister.getId());
+                if(null!=brokerRegister){
+                    fillTransportBrokerId(transport,brokerRegister.getId());
+                }
                 response = new Command(new RegisterAck().broker(brokerRegister));
                 break;
             case NsrCommandType.SUBSCRIBE:
@@ -235,20 +237,25 @@ public class NameServiceCommandHandler  implements NsrCommandHandler, Types,com.
         }
         attribute.set("broker.id", brokerId);
         nsrClients.put(brokerId,transport);
+        logger.info("{} online",brokerId);
     }
 
     @Override
     public void onEvent(TransportEvent event) {
         Transport transport = event.getTransport();
         Integer brokerId = transport.attr().get("broker.id");
-        if(null==brokerId||0==brokerId)return;
+        if(null==brokerId||0==brokerId){
+            return;
+        }
         switch (event.getType()) {
             case CONNECT:
                     nsrClients.put(brokerId,transport);
+                    logger.info("{} online",brokerId);
                     break;
             case EXCEPTION:
             case CLOSE:
                 nsrClients.remove(Integer.valueOf(brokerId));
+                logger.info("{} offline",brokerId);
                 break;
             default:
                 break;
@@ -262,11 +269,15 @@ public class NameServiceCommandHandler  implements NsrCommandHandler, Types,com.
 
         @Override
         public void onEvent(NameServerEvent event) {
-            logger.info("event[{}]", event);
+            try {
+            logger.info("event[{}]");
             Transport transport = nsrClients.get(event.getBrokerId());
-            if(null!=transport) {
-                transport.sync(new Command(new JMQHeader(Direction.REQUEST, NsrCommandType.PUSH_NAMESERVER_EVENT), new PushNameServerEvent().event(event)));
-                logger.info("event[{}] send to [{}] success", event,event.getBrokerId());
+                if(null!=transport) {
+                    transport.sync(new Command(new JMQHeader(Direction.REQUEST, NsrCommandType.PUSH_NAMESERVER_EVENT), new PushNameServerEvent().event(event)));
+                    logger.info("event[{}] send to [{}] success", event,event.getBrokerId());
+                }
+            }catch (Exception e){
+                logger.error("push event to [{}] error",event.getBrokerId(),e);
             }
         }
     }

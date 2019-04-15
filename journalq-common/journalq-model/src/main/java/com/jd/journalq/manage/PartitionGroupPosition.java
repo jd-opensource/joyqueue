@@ -20,18 +20,23 @@ import java.util.List;
  * Created by wangxiaofei1 on 2019/4/10.
  */
 public class PartitionGroupPosition implements Serializable {
-    private boolean isMaster;
+    private boolean leader;
     private int partitionGroup;
     private long rightPosition;
     private long rightPositionInterval;
     private List<PartitionPosition> partitionPositionList;
+    private String brokerId;
 
-    public boolean isMaster() {
-        return isMaster;
+    public boolean isLeader() {
+        return leader;
     }
 
-    public void setMaster(boolean master) {
-        isMaster = master;
+    public void setLeader(boolean leader) {
+        this.leader = leader;
+    }
+
+    public void setBrokerId(String brokerId) {
+        this.brokerId = brokerId;
     }
 
     public int getPartitionGroup() {

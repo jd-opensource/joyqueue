@@ -21,6 +21,8 @@ import com.jd.journalq.manage.PartitionMetric;
 import com.jd.journalq.manage.TopicMetric;
 import com.jd.journalq.monitor.BrokerMessageInfo;
 import com.jd.journalq.monitor.PartitionAckMonitorInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.List;
@@ -31,6 +33,7 @@ import java.util.List;
  * date: 2018/10/18
  */
 public class DefaultBrokerManageService implements BrokerManageService {
+    private static Logger logger = LoggerFactory.getLogger(DefaultBrokerManageService.class);
 
     private ConnectionManageService connectionManageService;
     private MessageManageService messageManageService;
@@ -216,4 +219,22 @@ public class DefaultBrokerManageService implements BrokerManageService {
     public void restoreElectionMetadata() {
         electionManageService.restoreElectionMetadata();
     }
+
+
+    @Override
+    public String describe() {
+        logger.info("Describe");
+        return electionManageService.describe();
+    }
+
+    @Override
+    public String describeTopic(String topic, int partitionGroup) {
+        return electionManageService.describeTopic(topic, partitionGroup);
+    }
+
+    @Override
+    public void updateTerm(String topic, int partitionGroup, int term) {
+        electionManageService.updateTerm(topic, partitionGroup, term);
+    }
+
 }

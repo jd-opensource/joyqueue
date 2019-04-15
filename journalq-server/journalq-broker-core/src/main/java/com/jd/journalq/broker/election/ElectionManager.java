@@ -45,6 +45,7 @@ import com.jd.journalq.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -348,15 +349,6 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
     }
 
     /**
-     * 从name service恢复选举元数据
-     * 只在出问题后恢复使用，执行命令后需要重启broker
-     */
-    @Override
-    public void syncElectionMetadataFromNameService() {
-        electionMetadataManager.syncElectionMetadataFromNameService(clusterManager);
-    }
-
-    /**
      * 获取LeaderElection数量
      *
      * @return leader election数量
@@ -453,6 +445,38 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
      */
     public void removeListener(EventListener<ElectionEvent> listener) {
         electionEventManager.removeListener(listener);
+    }
+
+
+    @Override
+    public String describe(String topic, int partitionGroup) {
+        return electionMetadataManager.describe(topic, partitionGroup);
+    }
+
+    @Override
+    public String describe() {
+        return electionMetadataManager.describe();
+    }
+
+    /**
+     * 从name service恢复选举元数据
+     *
+     * 只在出问题后恢复使用，执行命令后需要重启broker
+     */
+    @Override
+    public void syncElectionMetadataFromNameService() {
+        electionMetadataManager.syncElectionMetadataFromNameService(clusterManager);
+    }
+
+    /**
+     * 更新term
+     * @param topic topic
+     * @param partitionGroup partition group
+     * @param term 新的term
+     */
+    @Override
+    public void updateTerm(String topic, int partitionGroup, int term) {
+        electionMetadataManager.updateTerm(topic, partitionGroup, term);
     }
 
     /**

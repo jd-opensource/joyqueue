@@ -36,7 +36,10 @@ public class DataCenterEvent extends MetaEvent {
         this.code = code;
         this.url = url;
     }
-
+    @Override
+    public String getTypeName() {
+        return getClass().getTypeName();
+    }
    public static DataCenterEvent add(String region, String code, String url) {
         return new DataCenterEvent(EventType.ADD_DATACENTER, region, code, url);
     }

@@ -45,6 +45,7 @@ public class DefaultDecoder implements Decoder {
     public Object decode(ByteBuf buffer) throws TransportException.CodecException {
         try {
             if (!buffer.isReadable(LENGTH_FIELD_LENGTH)) {
+                logger.info("Default decoder, readable bytes is {}", buffer.readableBytes());
                 return null;
             }
             buffer.markReaderIndex();
@@ -63,6 +64,7 @@ public class DefaultDecoder implements Decoder {
     public Object doDecode(ByteBuf buffer) throws Exception {
         Header header = (Header) headerCodec.decode(buffer);
         if (header == null) {
+            logger.info("Default doDecoder, header is null");
             return null;
         }
 

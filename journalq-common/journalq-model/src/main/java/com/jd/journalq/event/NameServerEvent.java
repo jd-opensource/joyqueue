@@ -31,7 +31,10 @@ public class NameServerEvent extends MetaEvent {
         this.brokerId = brokerId;
         this.metaEvent = event;
     }
-
+    @Override
+    public String getTypeName() {
+        return getClass().getTypeName();
+    }
     public void setBrokerId(Integer brokerId) {
         this.brokerId = brokerId;
     }

@@ -27,7 +27,10 @@ public class ProducerEvent extends MetaEvent {
         this.app = app;
         this.topic = topic;
     }
-
+    @Override
+    public String getTypeName() {
+        return getClass().getTypeName();
+    }
     public TopicName getTopic() {
         return topic;
     }

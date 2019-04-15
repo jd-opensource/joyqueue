@@ -18,7 +18,7 @@
         </d-form-item>
       </d-form>
     </div>
-    <my-table :optional="true" :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
+    <my-table :optional="true" :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange" style="height: 400px;overflow-y:auto"
               @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"/>
     <div class="d-dialog__footer">
       <d-button type="primary" @click.native="addNewPartitionGroup()">确定</d-button>

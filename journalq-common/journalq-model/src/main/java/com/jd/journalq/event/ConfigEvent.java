@@ -27,7 +27,10 @@ public class ConfigEvent extends MetaEvent {
         this.key = key;
         this.value = value;
     }
-
+    @Override
+    public String getTypeName() {
+        return getClass().getTypeName();
+    }
     public void setGroup(String group) {
         this.group = group;
     }

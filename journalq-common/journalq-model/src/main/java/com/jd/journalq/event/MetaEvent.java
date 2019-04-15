@@ -36,6 +36,7 @@ public abstract class MetaEvent implements Serializable {
         this.eventType = eventType;
     }
 
+    public abstract String getTypeName();
     @Override
     public String toString() {
         return "MetaEvent{" +

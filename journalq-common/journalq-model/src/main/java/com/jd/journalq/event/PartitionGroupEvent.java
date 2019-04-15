@@ -28,7 +28,10 @@ public class PartitionGroupEvent extends MetaEvent {
         this.partitionGroup = partitionGroup;
     }
 
-
+    @Override
+    public String getTypeName() {
+        return getClass().getTypeName();
+    }
     public TopicName getTopic() {
         return topic;
     }

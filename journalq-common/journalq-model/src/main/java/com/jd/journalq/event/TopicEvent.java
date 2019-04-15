@@ -21,6 +21,11 @@ public class TopicEvent extends MetaEvent {
     public TopicEvent() {
     }
 
+    @Override
+    public String getTypeName() {
+        return getClass().getTypeName();
+    }
+
     private TopicEvent(EventType type, TopicName topic) {
         super(type);
         this.topic = topic;
