@@ -29,11 +29,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.jd.journalq</groupId>
-            <artifactId>journalq-web-h2-starter</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <version>${h2database.version}</version>
