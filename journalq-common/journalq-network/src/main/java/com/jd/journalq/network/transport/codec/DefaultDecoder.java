@@ -45,7 +45,7 @@ public class DefaultDecoder implements Decoder {
     public Object decode(ByteBuf buffer) throws TransportException.CodecException {
         try {
             if (!buffer.isReadable(LENGTH_FIELD_LENGTH)) {
-                logger.info("Default decoder, readable bytes is {}", buffer.readableBytes());
+                logger.debug("Default decoder, readable bytes is {}", buffer.readableBytes());
                 return null;
             }
             buffer.markReaderIndex();
