@@ -19,7 +19,6 @@ import com.jd.journalq.broker.config.BrokerStoreConfig;
 import com.jd.journalq.broker.consumer.position.PositionManager;
 import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.domain.TopicConfig;
-import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.exception.JMQException;
 import com.jd.journalq.store.StoreService;
 import com.jd.journalq.toolkit.concurrent.NamedThreadFactory;
@@ -126,7 +125,7 @@ public class StoreCleanManager extends Service {
                                         Set<Short> partitions = partitionGroup.getPartitions();
                                         if (CollectionUtils.isNotEmpty(partitions)) {
                                             List<String> appList = clusterManager.getAppByTopic(topicConfig.getName());
-                                            List<TopicPartitionAckIndex> ackIndices = new ArrayList<>(partitions.size());
+                                            Map<Short, Long> partitionAckMap = new HashMap<>(partitions.size());
                                             partitions.forEach(
                                                     partition -> {
                                                         long minAckIndex = Long.MAX_VALUE;
@@ -136,27 +135,21 @@ public class StoreCleanManager extends Service {
                                                                     minAckIndex = Math.min(minAckIndex, positionManager.getLastMsgAckIndex(topicConfig.getName(), app, partition));
                                                                 } catch (JMQException e) {
                                                                     //minAckIndex = Long.MAX_VALUE;
-                                                                    LOG.error("Error to get lastMsg ackIndex topic {} & app {} partition {}",topicConfig.getName(),app,partition, e);
-                                                                    e.printStackTrace();
+                                                                    LOG.error("Error to get last topic & app offset: <{}>", e);
                                                                 }
                                                             }
                                                         }
-                                                        ackIndices.add(new TopicPartitionAckIndex(topicConfig.getName(), partition, minAckIndex));
+                                                        partitionAckMap.put(partition, minAckIndex);
                                                     }
                                             );
-                                            long minPartitionAckIndex = Long.MAX_VALUE;
-                                            for (TopicPartitionAckIndex partitionAckIndex : ackIndices) {
-                                                minPartitionAckIndex = Math.min(minPartitionAckIndex, partitionAckIndex.getMinAckIndex());
-                                            }
                                             StoreCleaningStrategy cleaningStrategy = null;
                                             try {
                                                 cleaningStrategy = cleaningStrategyMap.get(brokerStoreConfig.getCleanStrategyClass());
                                                 if (cleaningStrategy != null) {
-                                                    cleaningStrategy.deleteIfNeeded(storeService.getStore(topicConfig.getName().getFullName(), partitionGroup.getGroup()), minPartitionAckIndex);
+                                                    cleaningStrategy.deleteIfNeeded(storeService.getStore(topicConfig.getName().getFullName(), partitionGroup.getGroup()), partitionAckMap);
                                                 }
                                             } catch (IOException e) {
-                                                LOG.error("Error to clean store for topic <{}>, partition group <{}>, delete index <{}> on clean class <{}>", topicConfig, partitionGroup.getGroup(), minPartitionAckIndex, cleaningStrategy,e);
-                                                e.printStackTrace();
+                                                LOG.error("Error to clean store for topic <{}>, partition group <{}>, delete partitions index <{}> on clean class <{}>, exception: <{}>", topicConfig, partitionGroup.getGroup(), partitionAckMap, cleaningStrategy, e);
                                             }
                                         }
                                     }
@@ -164,51 +157,6 @@ public class StoreCleanManager extends Service {
                         }
                     }
             );
-        }
-    }
-
-    public class TopicPartitionAckIndex {
-        private TopicName topicName;
-        private Short partition;
-        private long minAckIndex;
-
-        public TopicPartitionAckIndex(TopicName topicName, Short partition, long minAckIndex) {
-            this.topicName = topicName;
-            this.partition = partition;
-            this.minAckIndex = minAckIndex;
-        }
-
-        public TopicName getTopicName() {
-            return topicName;
-        }
-
-        public void setTopicName(TopicName topicName) {
-            this.topicName = topicName;
-        }
-
-        public Short getPartition() {
-            return partition;
-        }
-
-        public void setPartition(Short partition) {
-            this.partition = partition;
-        }
-
-        public long getMinAckIndex() {
-            return minAckIndex;
-        }
-
-        public void setMinAckIndex(long minAckIndex) {
-            this.minAckIndex = minAckIndex;
-        }
-
-        @Override
-        public String toString() {
-            return "TopicPartitionAckIndex{" +
-                    "topicName=" + topicName +
-                    ", partition=" + partition +
-                    ", minAckIndex=" + minAckIndex +
-                    '}';
         }
     }
 }

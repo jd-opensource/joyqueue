@@ -14,14 +14,11 @@
 package com.jd.journalq.broker.store;
 
 import com.jd.journalq.broker.config.BrokerStoreConfig;
-import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.store.PartitionGroupStore;
-import com.jd.journalq.store.StoreService;
 import com.jd.journalq.toolkit.config.PropertySupplier;
-import org.apache.commons.collections.CollectionUtils;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Map;
 
 /**
  * @author majun8
@@ -34,7 +31,7 @@ public class FixedSizeStoreCleaningStrategy implements StoreCleaningStrategy {
     }
 
     @Override
-    public long deleteIfNeeded(PartitionGroupStore partitionGroupStore, long minIndexedPosition) throws IOException {
+    public long deleteIfNeeded(PartitionGroupStore partitionGroupStore, Map<Short, Long> partitionAckMap) throws IOException {
         long totalDeletedSize = 0L;  // 总共删除长度
 
         if (partitionGroupStore != null) {
@@ -44,7 +41,7 @@ public class FixedSizeStoreCleaningStrategy implements StoreCleaningStrategy {
 
                 long lastDeletedSize;  // 上一次删除长度
                 do {
-                    lastDeletedSize = partitionGroupStore.deleteMinStoreMessages(minIndexedPosition);
+                    lastDeletedSize = partitionGroupStore.deleteMinStoreMessages(0, partitionAckMap);
                 } while (lastDeletedSize > 0L && (totalDeletedSize += lastDeletedSize) < targetDeleteSize);
             }
         }

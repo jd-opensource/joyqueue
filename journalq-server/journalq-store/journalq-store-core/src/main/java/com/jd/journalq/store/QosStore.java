@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
 
@@ -70,64 +71,42 @@ public class QosStore implements PartitionGroupStore {
     }
 
     @Override
-    public long deleteMinStoreMessages(long minIndexedPosition) throws IOException {
-        long minIndexedPhysicalPosition = minIndexedPosition;
-        if (minIndexedPhysicalPosition != Long.MAX_VALUE) {
-            minIndexedPhysicalPosition = minIndexedPosition * IndexItem.STORAGE_SIZE;
-        }
-
+    public long deleteMinStoreMessages(long targetDeleteTimeline, Map<Short, Long> partitionAckMap) throws IOException {
         long deletedSize = 0L;
-        Set<PositioningStore<IndexItem>> indexStoreSet = store.meetPositioningStores();
-        // 依次删除每个索引中最左侧的文件 满足最小消费位置之前的文件块
-        for (PositioningStore<IndexItem> indexStore : indexStoreSet) {
-            if (indexStore.fileCount() > 1 && indexStore.meetMinStoreFile(minIndexedPhysicalPosition)) {
-                deletedSize += indexStore.physicalDeleteLeftFile();
-            }
-        }
 
-        // 计算最小索引的消息位置
-        long minIndexedMessagePosition = -1L;
-        for (PositioningStore<IndexItem> indexStore : indexStoreSet) {
-            try {
-                long storeMinMessagePosition = indexStore.read(indexStore.left()).getOffset();
-                if (minIndexedMessagePosition < 0 || minIndexedMessagePosition > storeMinMessagePosition) {
-                    minIndexedMessagePosition = storeMinMessagePosition;
+        for (Map.Entry<Short, Long> partition : partitionAckMap.entrySet()) {
+            Short p = partition.getKey();
+            long minPartitionIndex = partition.getValue();
+            PositioningStore<IndexItem> indexStore = store.indexStore(p);
+            if (indexStore != null) {
+                if (minPartitionIndex != Long.MAX_VALUE) {
+                    minPartitionIndex *= IndexItem.STORAGE_SIZE;
                 }
-            } catch (PositionOverflowException ignored) {
-            }
-        }
-        deletedSize += store.messageStore().physicalDeleteTo(minIndexedMessagePosition);
-        return deletedSize;
-    }
-
-    @Override
-    public long deleteEarlyMinStoreMessages(long targetDeleteTimeline, long minIndexedPosition) throws IOException {
-        long minIndexedPhysicalPosition = minIndexedPosition;
-        if (minIndexedPhysicalPosition != Long.MAX_VALUE) {
-            minIndexedPhysicalPosition = minIndexedPosition * IndexItem.STORAGE_SIZE;
-        }
-
-        long deletedSize = 0L;
-        Set<PositioningStore<IndexItem>> indexStoreSet = store.meetPositioningStores();
-        // 依次删除每个索引中最左侧的文件 满足最小消费位置之前的文件块
-        for (PositioningStore<IndexItem> indexStore : indexStoreSet) {
-            if (indexStore.fileCount() > 1 && indexStore.isEarly(targetDeleteTimeline, minIndexedPhysicalPosition)) {
-                deletedSize += indexStore.physicalDeleteLeftFile();
-            }
-        }
-
-        // 计算最小索引的消息位置
-        long minIndexedMessagePosition = -1L;
-        for (PositioningStore<IndexItem> indexStore : indexStoreSet) {
-            try {
-                long storeMinMessagePosition = indexStore.read(indexStore.left()).getOffset();
-                if (minIndexedMessagePosition < 0 || minIndexedMessagePosition > storeMinMessagePosition) {
-                    minIndexedMessagePosition = storeMinMessagePosition;
+                if (targetDeleteTimeline <= 0) {
+                    // 依次删除每个分区p索引中最左侧的文件 满足当前分区p的最小消费位置之前的文件块
+                    if (indexStore.fileCount() > 1 && indexStore.meetMinStoreFile(minPartitionIndex)) {
+                        deletedSize += indexStore.physicalDeleteLeftFile();
+                    }
+                } else {
+                    // 依次删除每个分区p索引中最左侧的文件 满足当前分区p的最小消费位置之前的以及最长时间戳的文件块
+                    if (indexStore.fileCount() > 1 && indexStore.isEarly(targetDeleteTimeline, minPartitionIndex)) {
+                        deletedSize += indexStore.physicalDeleteLeftFile();
+                    }
                 }
-            } catch (PositionOverflowException ignored) {
+
+                // 计算最小索引的消息位置
+                long minIndexedMessagePosition = -1L;
+                try {
+                    long storeMinMessagePosition = indexStore.read(indexStore.left()).getOffset();
+                    if (minIndexedMessagePosition < 0 || minIndexedMessagePosition > storeMinMessagePosition) {
+                        minIndexedMessagePosition = storeMinMessagePosition;
+                    }
+                } catch (PositionOverflowException ignored) {
+                }
+                deletedSize += store.messageStore().physicalDeleteTo(minIndexedMessagePosition);
             }
         }
-        deletedSize += store.messageStore().physicalDeleteTo(minIndexedMessagePosition);
+
         return deletedSize;
     }
 
