@@ -732,14 +732,6 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         return partitionMap.values().stream().map(p -> p.store).collect(Collectors.toSet());
     }
 
-    Map<Short, PositioningStore<IndexItem>> transPositioningStores() {
-        Map<Short, PositioningStore<IndexItem>> transPartitionMap = new HashMap<>(partitionMap.size());
-        partitionMap.forEach(
-                (s, m) -> transPartitionMap.put(s, m.store)
-        );
-        return transPartitionMap;
-    }
-
     /**
      * 重新分区
      */

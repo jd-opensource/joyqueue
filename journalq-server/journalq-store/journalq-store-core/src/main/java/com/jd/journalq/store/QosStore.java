@@ -71,74 +71,42 @@ public class QosStore implements PartitionGroupStore {
     }
 
     @Override
-    public long deleteMinStoreMessages(Map<Short, Long> partitionAckMap) throws IOException {
+    public long deleteMinStoreMessages(long targetDeleteTimeline, Map<Short, Long> partitionAckMap) throws IOException {
         long deletedSize = 0L;
 
-        Map<Short, PositioningStore<IndexItem>> positioningStoreMap = store.transPositioningStores();
-        for (Map.Entry<Short, PositioningStore<IndexItem>> positioningStoreEntry : positioningStoreMap.entrySet()) {
-            Short p = positioningStoreEntry.getKey();
-            PositioningStore<IndexItem> indexStore = positioningStoreEntry.getValue();
+        for (Map.Entry<Short, Long> partition : partitionAckMap.entrySet()) {
+            Short p = partition.getKey();
+            long minPartitionIndex = partition.getValue();
+            PositioningStore<IndexItem> indexStore = store.indexStore(p);
+            if (indexStore != null) {
+                if (minPartitionIndex != Long.MAX_VALUE) {
+                    minPartitionIndex *= IndexItem.STORAGE_SIZE;
+                }
+                if (targetDeleteTimeline <= 0) {
+                    // 依次删除每个分区p索引中最左侧的文件 满足当前分区p的最小消费位置之前的文件块
+                    if (indexStore.fileCount() > 1 && indexStore.meetMinStoreFile(minPartitionIndex)) {
+                        deletedSize += indexStore.physicalDeleteLeftFile();
+                    }
+                } else {
+                    // 依次删除每个分区p索引中最左侧的文件 满足当前分区p的最小消费位置之前的以及最长时间戳的文件块
+                    if (indexStore.fileCount() > 1 && indexStore.isEarly(targetDeleteTimeline, minPartitionIndex)) {
+                        deletedSize += indexStore.physicalDeleteLeftFile();
+                    }
+                }
 
-            if (partitionAckMap.containsKey(p)) {
-                long minIndexedPartition = partitionAckMap.get(p);
-                if (minIndexedPartition != Long.MAX_VALUE) {
-                    minIndexedPartition = minIndexedPartition * IndexItem.STORAGE_SIZE;
+                // 计算最小索引的消息位置
+                long minIndexedMessagePosition = -1L;
+                try {
+                    long storeMinMessagePosition = indexStore.read(indexStore.left()).getOffset();
+                    if (minIndexedMessagePosition < 0 || minIndexedMessagePosition > storeMinMessagePosition) {
+                        minIndexedMessagePosition = storeMinMessagePosition;
+                    }
+                } catch (PositionOverflowException ignored) {
                 }
-                // 依次删除每个分区p索引中最左侧的文件 满足当前分区p的最小消费位置之前的文件块
-                if (indexStore.fileCount() > 1 && indexStore.meetMinStoreFile(minIndexedPartition)) {
-                    deletedSize += indexStore.physicalDeleteLeftFile();
-                }
+                deletedSize += store.messageStore().physicalDeleteTo(minIndexedMessagePosition);
             }
         }
 
-        // 计算最小索引的消息位置
-        long minIndexedMessagePosition = -1L;
-        for (PositioningStore<IndexItem> indexStore : positioningStoreMap.values()) {
-            try {
-                long storeMinMessagePosition = indexStore.read(indexStore.left()).getOffset();
-                if (minIndexedMessagePosition < 0 || minIndexedMessagePosition > storeMinMessagePosition) {
-                    minIndexedMessagePosition = storeMinMessagePosition;
-                }
-            } catch (PositionOverflowException ignored) {
-            }
-        }
-        deletedSize += store.messageStore().physicalDeleteTo(minIndexedMessagePosition);
-        return deletedSize;
-    }
-
-    @Override
-    public long deleteEarlyMinStoreMessages(long targetDeleteTimeline, Map<Short, Long> partitionAckMap) throws IOException {
-        long deletedSize = 0L;
-
-        Map<Short, PositioningStore<IndexItem>> positioningStoreMap = store.transPositioningStores();
-        for (Map.Entry<Short, PositioningStore<IndexItem>> positioningStoreEntry : positioningStoreMap.entrySet()) {
-            Short p = positioningStoreEntry.getKey();
-            PositioningStore<IndexItem> indexStore = positioningStoreEntry.getValue();
-
-            if (partitionAckMap.containsKey(p)) {
-                long minIndexedPartition = partitionAckMap.get(p);
-                if (minIndexedPartition != Long.MAX_VALUE) {
-                    minIndexedPartition = minIndexedPartition * IndexItem.STORAGE_SIZE;
-                }
-                // 依次删除每个分区p索引中最左侧的文件 满足当前分区p的最小消费位置之前的以及最长时间戳的文件块
-                if (indexStore.fileCount() > 1 && indexStore.isEarly(targetDeleteTimeline, minIndexedPartition)) {
-                    deletedSize += indexStore.physicalDeleteLeftFile();
-                }
-            }
-        }
-
-        // 计算最小索引的消息位置
-        long minIndexedMessagePosition = -1L;
-        for (PositioningStore<IndexItem> indexStore : positioningStoreMap.values()) {
-            try {
-                long storeMinMessagePosition = indexStore.read(indexStore.left()).getOffset();
-                if (minIndexedMessagePosition < 0 || minIndexedMessagePosition > storeMinMessagePosition) {
-                    minIndexedMessagePosition = storeMinMessagePosition;
-                }
-            } catch (PositionOverflowException ignored) {
-            }
-        }
-        deletedSize += store.messageStore().physicalDeleteTo(minIndexedMessagePosition);
         return deletedSize;
     }
 

@@ -47,9 +47,7 @@ public interface PartitionGroupStore {
      */
     long getTotalPhysicalStorageSize();
 
-
-    long deleteMinStoreMessages(Map<Short, Long> partitionAckMap) throws IOException;
-    long deleteEarlyMinStoreMessages(long targetDeleteTimeline, Map<Short, Long> partitionAckMap) throws IOException;
+    long deleteMinStoreMessages(long targetDeleteTimeline, Map<Short, Long> partitionAckMap) throws IOException;
 
     /**
      * 获取分区当前的最小索引，用于初始化消费

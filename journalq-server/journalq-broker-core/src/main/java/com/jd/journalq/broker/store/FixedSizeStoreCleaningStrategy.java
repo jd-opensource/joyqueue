@@ -41,7 +41,7 @@ public class FixedSizeStoreCleaningStrategy implements StoreCleaningStrategy {
 
                 long lastDeletedSize;  // 上一次删除长度
                 do {
-                    lastDeletedSize = partitionGroupStore.deleteMinStoreMessages(partitionAckMap);
+                    lastDeletedSize = partitionGroupStore.deleteMinStoreMessages(0, partitionAckMap);
                 } while (lastDeletedSize > 0L && (totalDeletedSize += lastDeletedSize) < targetDeleteSize);
             }
         }

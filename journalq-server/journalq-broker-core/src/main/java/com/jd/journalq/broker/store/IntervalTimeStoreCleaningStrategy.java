@@ -40,7 +40,7 @@ public class IntervalTimeStoreCleaningStrategy implements StoreCleaningStrategy 
 
         if (partitionGroupStore != null) {
             do {
-                deletedSize = partitionGroupStore.deleteEarlyMinStoreMessages(targetDeleteTimeline, partitionAckMap);
+                deletedSize = partitionGroupStore.deleteMinStoreMessages(targetDeleteTimeline, partitionAckMap);
                 totalDeletedSize += deletedSize;
             } while (deletedSize > 0L);
         }
