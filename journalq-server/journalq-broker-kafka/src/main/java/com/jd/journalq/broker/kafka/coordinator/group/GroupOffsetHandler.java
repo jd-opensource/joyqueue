@@ -47,7 +47,7 @@ public class GroupOffsetHandler extends Service {
             return buildCommitError(offsetMetadata, KafkaErrorCode.COORDINATOR_NOT_AVAILABLE.getCode());
         }
 
-        if (!coordinator.isCurrentGroupCoordinator(groupId)) {
+        if (!coordinator.isCurrentGroup(groupId)) {
             logger.info("group {} coordinator changed", groupId);
             groupMetadataManager.removeGroup(groupId);
             return buildCommitError(offsetMetadata, KafkaErrorCode.COORDINATOR_NOT_AVAILABLE.getCode());

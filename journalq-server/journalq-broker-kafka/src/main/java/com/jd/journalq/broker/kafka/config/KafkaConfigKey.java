@@ -1,5 +1,6 @@
 package com.jd.journalq.broker.kafka.config;
 
+import com.jd.journalq.domain.QosLevel;
 import com.jd.journalq.toolkit.config.PropertyDef;
 
 /**
@@ -32,6 +33,10 @@ public enum KafkaConfigKey implements PropertyDef {
     TRANSACTION_SYNC_TIMEOUT("kafka.offset.sync.timeout", 1000 * 3, Type.INT),
     // 事务超时
     TRANSACTION_TIMEOUT("kafka.transaction.timeout", 1000 * 60 * 30, Type.INT),
+    // 事务日志写入超时
+    TRANSACTION_LOG_WRITE_TIMEOUT("kafka.transaction.log.write.timeout", 1000 * 1, Type.INT),
+    // 事务日志写入级别
+    TRANSACTION_LOG_WRITE_QOSLEVEL("kafka.transaction.log.write.qosLevel", QosLevel.REPLICATION.value(), Type.INT),
 
     // 拉取批量大小
     FETCH_BATCH_SIZE("kafka.fetch.batch.size", 10, Type.INT),

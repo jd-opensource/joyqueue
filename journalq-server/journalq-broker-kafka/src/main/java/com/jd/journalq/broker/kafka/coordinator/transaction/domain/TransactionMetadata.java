@@ -39,6 +39,7 @@ public class TransactionMetadata extends com.jd.journalq.broker.coordinator.tran
             prepare = Lists.newLinkedList();
         }
         prepare.add(transactionPrepare);
+        updateExtension();
     }
 
     public boolean containsPrepare(String topic, short partition) {
@@ -62,10 +63,12 @@ public class TransactionMetadata extends com.jd.journalq.broker.coordinator.tran
             return;
         }
         prepare.clear();
+        updateExtension();
     }
 
     public void transitionStateTo(TransactionState state) {
         this.state = state;
+        updateExtension();
     }
 
     public boolean isExpired(long timeout) {
@@ -74,6 +77,16 @@ public class TransactionMetadata extends com.jd.journalq.broker.coordinator.tran
 
     public boolean isExpired() {
         return isExpired(timeout);
+    }
+
+    public void nextProducerEpoch() {
+        this.producerEpoch++;
+        updateExtension();
+    }
+
+    protected void updateExtension() {
+        super.setExtension(String.format("{timeout: '%s', producerId: '%s', producerEpoch: '%s', createTime: '%s', state: '%s', prepare: '%s'}",
+                timeout, producerId, producerEpoch, createTime, state, prepare));
     }
 
     public void setApp(String app) {
@@ -90,10 +103,6 @@ public class TransactionMetadata extends com.jd.journalq.broker.coordinator.tran
 
     public int getTimeout() {
         return timeout;
-    }
-
-    public void nextProducerEpoch() {
-        this.producerEpoch++;
     }
 
     public long getProducerId() {

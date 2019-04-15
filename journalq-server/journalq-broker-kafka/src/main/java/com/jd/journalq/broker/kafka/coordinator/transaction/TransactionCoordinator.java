@@ -28,11 +28,11 @@ public class TransactionCoordinator extends Service {
     }
 
     public Broker findCoordinator(String transactionId) {
-        return coordinator.findTransactionCoordinator(transactionId);
+        return coordinator.findTransaction(transactionId);
     }
 
     public boolean isCurrentCoordinator(String transactionId) {
-        return coordinator.isCurrentTransactionCoordinator(transactionId);
+        return coordinator.isCurrentTransaction(transactionId);
     }
 
     public TransactionMetadata handleInitProducer(String clientId, String transactionId, int transactionTimeout) {

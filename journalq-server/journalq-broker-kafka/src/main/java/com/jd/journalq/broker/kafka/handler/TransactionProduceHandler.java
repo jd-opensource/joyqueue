@@ -44,7 +44,7 @@ public class TransactionProduceHandler {
     public void produceMessage(String transactionalId, long producerId, short producerEpoch, QosLevel qosLevel, Producer producer, List<BrokerMessage> messages,
                                EventListener<ProduceResponse.PartitionResponse> listener) {
         try {
-            TransactionId transaction = maybePrepare(producer, transactionalId, producerId, producerEpoch);
+            TransactionId transaction = tryPrepare(producer, transactionalId, producerId, producerEpoch);
             fillTxId(messages, transaction.getTxId());
 
             produce.putMessageAsync(producer, messages, qosLevel, (writeResult) -> {
@@ -61,7 +61,7 @@ public class TransactionProduceHandler {
         }
     }
 
-    protected TransactionId maybePrepare(Producer producer, String transactionalId, long producerId, short producerEpoch) throws Exception {
+    protected TransactionId tryPrepare(Producer producer, String transactionalId, long producerId, short producerEpoch) throws Exception {
         String txId = transactionIdManager.generateId(producer.getTopic(), producer.getApp(), transactionalId, producerId, producerEpoch);
         TransactionId transaction = produce.getTransaction(producer, txId);
         if (transaction == null) {

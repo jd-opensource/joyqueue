@@ -1,12 +1,12 @@
 package com.jd.journalq.broker.kafka.coordinator.transaction.domain;
 
 /**
- * TransactionPrepare
+ * TransactionMarker
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
- * date: 2019/4/12
+ * date: 2019/4/15
  */
-public class TransactionPrepare {
+public class TransactionMarker {
 
     private String topic;
     private short partition;
@@ -18,14 +18,15 @@ public class TransactionPrepare {
     private String transactionId;
     private long producerId;
     private short producerEpoch;
+    private TransactionState state;
     private int timeout;
     private long createTime;
 
-    public TransactionPrepare() {
+    public TransactionMarker() {
 
     }
 
-    public TransactionPrepare(String topic, short partition, String app, int brokerId, String brokerHost, int brokerPort, String transactionId, long producerId, short producerEpoch, int timeout, long createTime) {
+    public TransactionMarker(String topic, short partition, String app, int brokerId, String brokerHost, int brokerPort, String transactionId, long producerId, short producerEpoch, TransactionState state, int timeout, long createTime) {
         this.topic = topic;
         this.partition = partition;
         this.app = app;
@@ -35,6 +36,7 @@ public class TransactionPrepare {
         this.transactionId = transactionId;
         this.producerId = producerId;
         this.producerEpoch = producerEpoch;
+        this.state = state;
         this.timeout = timeout;
         this.createTime = createTime;
     }
@@ -55,12 +57,12 @@ public class TransactionPrepare {
         this.partition = partition;
     }
 
-    public void setApp(String app) {
-        this.app = app;
-    }
-
     public String getApp() {
         return app;
+    }
+
+    public void setApp(String app) {
+        this.app = app;
     }
 
     public int getBrokerId() {
@@ -87,20 +89,12 @@ public class TransactionPrepare {
         this.brokerPort = brokerPort;
     }
 
-    public int getTimeout() {
-        return timeout;
-    }
-
-    public void setTimeout(int timeout) {
-        this.timeout = timeout;
+    public String getTransactionId() {
+        return transactionId;
     }
 
     public void setTransactionId(String transactionId) {
         this.transactionId = transactionId;
-    }
-
-    public String getTransactionId() {
-        return transactionId;
     }
 
     public long getProducerId() {
@@ -119,28 +113,27 @@ public class TransactionPrepare {
         this.producerEpoch = producerEpoch;
     }
 
+    public TransactionState getState() {
+        return state;
+    }
+
+    public void setState(TransactionState state) {
+        this.state = state;
+    }
+
+    public void setTimeout(int timeout) {
+        this.timeout = timeout;
+    }
+
+    public int getTimeout() {
+        return timeout;
+    }
+
     public long getCreateTime() {
         return createTime;
     }
 
     public void setCreateTime(long createTime) {
         this.createTime = createTime;
-    }
-
-    @Override
-    public String toString() {
-        return "TransactionPrepare{" +
-                "topic='" + topic + '\'' +
-                ", partition=" + partition +
-                ", app='" + app + '\'' +
-                ", brokerId=" + brokerId +
-                ", brokerHost='" + brokerHost + '\'' +
-                ", brokerPort=" + brokerPort +
-                ", transactionId='" + transactionId + '\'' +
-                ", producerId=" + producerId +
-                ", producerEpoch=" + producerEpoch +
-                ", timeout=" + timeout +
-                ", createTime=" + createTime +
-                '}';
     }
 }

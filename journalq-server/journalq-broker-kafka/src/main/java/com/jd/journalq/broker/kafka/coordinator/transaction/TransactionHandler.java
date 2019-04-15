@@ -5,9 +5,11 @@ import com.google.common.collect.Maps;
 import com.jd.journalq.broker.kafka.KafkaErrorCode;
 import com.jd.journalq.broker.kafka.coordinator.Coordinator;
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionMetadata;
+import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionPrepare;
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionState;
 import com.jd.journalq.broker.kafka.coordinator.transaction.exception.TransactionException;
 import com.jd.journalq.broker.kafka.model.PartitionMetadataAndError;
+import com.jd.journalq.domain.Broker;
 import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.domain.TopicConfig;
 import com.jd.journalq.domain.TopicName;
@@ -62,9 +64,26 @@ public class TransactionHandler extends Service {
     }
 
     protected TransactionMetadata doInitProducer(TransactionMetadata transactionMetadata) {
+        // TODO 是否需要？
+        if (transactionMetadata.getState().equals(TransactionState.ONGOING)) {
+            tryAbort(transactionMetadata);
+        }
+
         transactionMetadata.transitionStateTo(TransactionState.EMPTY);
+        transactionMetadata.clearPrepare();
         transactionMetadata.nextProducerEpoch();
         return transactionMetadata;
+    }
+
+    protected void tryAbort(TransactionMetadata transactionMetadata) {
+        try {
+            transactionMetadata.transitionStateTo(TransactionState.PREPARE_ABORT);
+            transactionSynchronizer.prepareAbort(transactionMetadata.getPrepare());
+            transactionSynchronizer.abort(transactionMetadata.getPrepare());
+            transactionMetadata.transitionStateTo(TransactionState.COMPLETE_ABORT);
+        } catch (Exception e) {
+            logger.error("initProducer abort exception, metadata: {}", transactionMetadata, e);
+        }
     }
 
     public Map<String, List<PartitionMetadataAndError>> addPartitionsToTxn(String clientId, String transactionId, long producerId, short producerEpoch, Map<String, List<Integer>> partitions) {
@@ -105,7 +124,7 @@ public class TransactionHandler extends Service {
                 } else {
                     try {
                         if (!transactionMetadata.containsPrepare(topic.getFullName(), (short) partition.intValue())) {
-                            transactionSynchronizer.prepare(transactionMetadata, topic.getFullName(), partition, partitionGroup.getLeaderBroker());
+                            prepare(transactionMetadata, topic, (short) partition.intValue(), partitionGroup);
                         }
                         partitionMetadataAndErrors.add(new PartitionMetadataAndError(partition, KafkaErrorCode.NONE.getCode()));
                     } catch (Exception e) {
@@ -117,6 +136,15 @@ public class TransactionHandler extends Service {
             result.put(entry.getKey(), partitionMetadataAndErrors);
         }
         return result;
+    }
+
+    protected boolean prepare(TransactionMetadata transactionMetadata, TopicName topic, short partition, PartitionGroup partitionGroup) throws Exception {
+        Broker broker = partitionGroup.getLeaderBroker();
+        TransactionPrepare prepare = new TransactionPrepare(topic.getFullName(), partition, transactionMetadata.getApp(), broker.getId(), broker.getIp(), broker.getBackEndPort(),
+                transactionMetadata.getId(), transactionMetadata.getProducerId(), transactionMetadata.getProducerEpoch(), transactionMetadata.getTimeout(), SystemClock.now());
+
+        transactionMetadata.addPrepare(prepare);
+        return transactionSynchronizer.prepare(prepare);
     }
 
     public boolean endTxn(String clientId, String transactionId, long producerId, short producerEpoch, boolean isCommit) {
@@ -145,11 +173,13 @@ public class TransactionHandler extends Service {
         try {
             if (isCommit) {
                 transactionMetadata.transitionStateTo(TransactionState.PREPARE_COMMIT);
-                transactionSynchronizer.commit(transactionMetadata);
+                transactionSynchronizer.prepareCommit(transactionMetadata.getPrepare());
+                transactionSynchronizer.commit(transactionMetadata.getPrepare());
                 transactionMetadata.transitionStateTo(TransactionState.COMPLETE_COMMIT);
             } else {
                 transactionMetadata.transitionStateTo(TransactionState.PREPARE_ABORT);
-                transactionSynchronizer.abort(transactionMetadata);
+                transactionSynchronizer.prepareAbort(transactionMetadata.getPrepare());
+                transactionSynchronizer.abort(transactionMetadata.getPrepare());
                 transactionMetadata.transitionStateTo(TransactionState.COMPLETE_ABORT);
             }
             return true;
@@ -158,6 +188,7 @@ public class TransactionHandler extends Service {
             throw new TransactionException(e, KafkaErrorCode.exceptionFor(e));
         } finally {
             transactionMetadata.transitionStateTo(TransactionState.EMPTY);
+            transactionMetadata.clearPrepare();
         }
     }
 
@@ -165,7 +196,7 @@ public class TransactionHandler extends Service {
         if (!isStarted()) {
             throw new TransactionException(KafkaErrorCode.COORDINATOR_NOT_AVAILABLE.getCode());
         }
-        if (!coordinator.isCurrentTransactionCoordinator(clientId)) {
+        if (!coordinator.isCurrentTransaction(clientId)) {
             throw new TransactionException(KafkaErrorCode.NOT_COORDINATOR.getCode());
         }
     }

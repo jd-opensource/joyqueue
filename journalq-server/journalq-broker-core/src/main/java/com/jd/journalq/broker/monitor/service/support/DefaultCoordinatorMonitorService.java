@@ -29,7 +29,7 @@ public class DefaultCoordinatorMonitorService implements CoordinatorMonitorServi
 
     @Override
     public CoordinatorDetail getCoordinator(String groupId) {
-        return coordinatorService.getCoordinator().getGroupCoordinatorDetail(groupId);
+        return coordinatorService.getCoordinator().getGroupDetail(groupId);
     }
 
     @Override
@@ -71,7 +71,7 @@ public class DefaultCoordinatorMonitorService implements CoordinatorMonitorServi
         for (Map.Entry<String, GroupMemberMetadata> entry : group.getMembers().entrySet()) {
             GroupMemberMetadata sourceMember = entry.getValue();
 
-            if (StringUtils.isNotBlank(topic) && !sourceMember.getAssignments().containsKey(topic)) {
+            if (StringUtils.isNotBlank(topic) && sourceMember.getAssignments() != null && !sourceMember.getAssignments().containsKey(topic)) {
                 continue;
             }
 

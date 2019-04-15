@@ -41,11 +41,11 @@ public class GroupCoordinator extends Service {
     }
 
     public Broker findCoordinator(String groupId) {
-        return coordinator.findGroupCoordinator(groupId);
+        return coordinator.findGroup(groupId);
     }
 
     public boolean isCurrentCoordinator(String groupId) {
-        return coordinator.isCurrentGroupCoordinator(groupId);
+        return coordinator.isCurrentGroup(groupId);
     }
 
     public void handleJoinGroup(String groupId, String memberId, String clientId, String clientHost, int rebalanceTimeoutMs, int sessionTimeoutMs, String protocolType,

@@ -20,6 +20,7 @@ import java.util.concurrent.ExecutionException;
 public class GroupMetadata {
 
     private static final int MAX_EXPIRED_MEMBER = 100;
+
     private String id;
     private String extension;
     private ConcurrentMap<String, GroupMemberMetadata> members = Maps.newConcurrentMap();

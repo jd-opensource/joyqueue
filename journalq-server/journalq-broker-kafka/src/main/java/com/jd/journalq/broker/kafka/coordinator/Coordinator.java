@@ -2,6 +2,8 @@ package com.jd.journalq.broker.kafka.coordinator;
 
 import com.jd.journalq.broker.coordinator.session.CoordinatorSessionManager;
 import com.jd.journalq.domain.Broker;
+import com.jd.journalq.domain.PartitionGroup;
+import com.jd.journalq.domain.TopicName;
 
 /**
  * Coordinator
@@ -17,20 +19,28 @@ public class Coordinator {
         this.coordinator = coordinator;
     }
 
-    public Broker findGroupCoordinator(String groupId) {
-        return coordinator.findGroupCoordinator(groupId);
+    public Broker findGroup(String groupId) {
+        return coordinator.findGroup(groupId);
     }
 
-    public boolean isCurrentGroupCoordinator(String groupId) {
-        return coordinator.isCurrentGroupCoordinator(groupId);
+    public boolean isCurrentGroup(String groupId) {
+        return coordinator.isCurrentGroup(groupId);
     }
 
-    public Broker findTransactionCoordinator(String transactionId) {
-        return coordinator.findTransactionCoordinator(transactionId);
+    public Broker findTransaction(String transactionId) {
+        return coordinator.findTransaction(transactionId);
     }
 
-    public boolean isCurrentTransactionCoordinator(String transactionId) {
-        return coordinator.isCurrentTransactionCoordinator(transactionId);
+    public boolean isCurrentTransaction(String transactionId) {
+        return coordinator.isCurrentTransaction(transactionId);
+    }
+
+    public PartitionGroup getTransactionPartitionGroup(String transactionId) {
+        return coordinator.getTransactionPartitionGroup(transactionId);
+    }
+
+    public TopicName getTransactionTopic() {
+        return coordinator.getTransactionTopic();
     }
 
     public CoordinatorSessionManager getSessionManager() {

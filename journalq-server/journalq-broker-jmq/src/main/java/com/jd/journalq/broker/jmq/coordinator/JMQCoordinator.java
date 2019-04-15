@@ -18,10 +18,10 @@ public class JMQCoordinator {
     }
 
     public Broker findGroupCoordinator(String app) {
-        return coordinator.findGroupCoordinator(app);
+        return coordinator.findGroup(app);
     }
 
     public boolean isCurrentGroupCoordinator(String app) {
-        return coordinator.isCurrentGroupCoordinator(app);
+        return coordinator.isCurrentGroup(app);
     }
 }

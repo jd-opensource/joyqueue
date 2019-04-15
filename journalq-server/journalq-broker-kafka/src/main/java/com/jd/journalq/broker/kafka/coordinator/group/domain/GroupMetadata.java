@@ -199,7 +199,7 @@ public class GroupMetadata extends com.jd.journalq.broker.coordinator.group.doma
     }
 
     protected void updateExtension() {
-        super.setExtension(String.format("{state: %s, preState: %s, leader: %s, protocol: %s}", state, preState, leaderId, protocol));
+        super.setExtension(String.format("{state: '%s', preState: '%s', leader: '%s', generationId: '%s', protocol: '%s'}", state, preState, leaderId, generationId, protocol));
     }
 
     public String selectProtocol() {

@@ -84,7 +84,7 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
                 BooleanResponse checkResult = clusterManager.checkWritable(topicName, clientId, clientIp, (short) partition);
 
                 if (!checkResult.isSuccess()) {
-                    logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport, topicName, clientId, checkResult.getJmqCode());
+                    logger.warn("checkWritable failed, transport: {}, topic: {}, partition: {}, app: {}, code: {}", transport, topicName, partition, clientId, checkResult.getJmqCode());
                     short kafkaErrorCode = CheckResultConverter.convertProduceCode(checkResult.getJmqCode());
                     buildPartitionResponse(partition, null, kafkaErrorCode, partitionRequest.getMessages(), partitionResponses);
                     latch.countDown();

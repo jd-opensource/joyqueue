@@ -7,6 +7,7 @@ import com.jd.journalq.broker.coordinator.session.CoordinatorSessionManager;
 import com.jd.journalq.broker.coordinator.support.CoordinatorInitializer;
 import com.jd.journalq.broker.coordinator.support.CoordinatorResolver;
 import com.jd.journalq.domain.Broker;
+import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.domain.TopicName;
 
 /**
@@ -33,40 +34,48 @@ public class Coordinator {
 
     // group
 
-    public boolean isCurrentGroupCoordinator(String group) {
-        Broker coordinatorBroker = findGroupCoordinator(group);
+    public boolean isCurrentGroup(String group) {
+        Broker coordinatorBroker = findGroup(group);
         return clusterManager.getBroker().equals(coordinatorBroker);
     }
 
-    public Broker findGroupCoordinator(String group) {
+    public Broker findGroup(String group) {
         return coordinatorResolver.findCoordinator(group, config.getGroupTopic());
     }
 
-    public CoordinatorDetail getGroupCoordinatorDetail(String group) {
+    public CoordinatorDetail getGroupDetail(String group) {
         return coordinatorResolver.getCoordinatorDetail(group, config.getGroupTopic());
     }
 
-    public boolean isGroupCoordinatorTopic(TopicName group) {
-        return config.getGroupTopic().getFullName().equals(group);
+    public boolean isGroupTopic(TopicName topic) {
+        return config.getGroupTopic().getFullName().equals(topic.getFullName());
     }
 
     // transaction
 
-    public boolean isCurrentTransactionCoordinator(String key) {
-        Broker coordinatorBroker = findTransactionCoordinator(key);
+    public boolean isCurrentTransaction(String key) {
+        Broker coordinatorBroker = findTransaction(key);
         return clusterManager.getBroker().equals(coordinatorBroker);
     }
 
-    public Broker findTransactionCoordinator(String key) {
-        return coordinatorResolver.findCoordinator(key, config.getGroupTopic());
+    public Broker findTransaction(String key) {
+        return coordinatorResolver.findCoordinator(key, config.getTransactionTopic());
     }
 
-    public CoordinatorDetail getTransactionCoordinatorDetail(String key) {
-        return coordinatorResolver.getCoordinatorDetail(key, config.getGroupTopic());
+    public CoordinatorDetail getTransactionDetail(String key) {
+        return coordinatorResolver.getCoordinatorDetail(key, config.getTransactionTopic());
     }
 
-    public boolean isTransactionCoordinatorTopic(TopicName topic) {
-        return config.getTransactionTopic().getFullName().equals(topic);
+    public boolean isTransactionTopic(TopicName topic) {
+        return config.getTransactionTopic().getFullName().equals(topic.getFullName());
+    }
+
+    public TopicName getTransactionTopic() {
+        return config.getTransactionTopic();
+    }
+
+    public PartitionGroup getTransactionPartitionGroup(String key) {
+        return coordinatorResolver.resolveCoordinatorPartitionGroup(key, config.getTransactionTopic());
     }
 
     public boolean initCoordinator() {

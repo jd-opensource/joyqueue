@@ -1,5 +1,6 @@
 package com.jd.journalq.broker.kafka.config;
 
+import com.jd.journalq.domain.QosLevel;
 import com.jd.journalq.toolkit.config.PropertyDef;
 import com.jd.journalq.toolkit.config.PropertySupplier;
 import org.slf4j.Logger;
@@ -62,6 +63,14 @@ public class KafkaConfig {
 
     public int getTransactionTimeout() {
         return getConfig(KafkaConfigKey.TRANSACTION_TIMEOUT);
+    }
+
+    public int getTransactionLogWriteTimeout() {
+        return getConfig(KafkaConfigKey.TRANSACTION_LOG_WRITE_TIMEOUT);
+    }
+
+    public QosLevel getTransactionLogWriteQosLevel() {
+        return QosLevel.valueOf((int) getConfig(KafkaConfigKey.TRANSACTION_LOG_WRITE_QOSLEVEL));
     }
 
     public int getSessionMaxTimeout() {

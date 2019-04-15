@@ -83,7 +83,7 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
 
                 BooleanResponse checkResult = clusterManager.checkReadable(topic, clientId, clientIp, (short) partition);
                 if (!checkResult.isSuccess()) {
-                    logger.warn("checkReadable failed, transport: {}, topic: {}, app: {}, code: {}", transport, topic, clientId, checkResult.getJmqCode());
+                    logger.warn("checkReadable failed, transport: {}, topic: {}, partition: {}, app: {}, code: {}", transport, topic, partition, clientId, checkResult.getJmqCode());
                     short errorCode = CheckResultConverter.convertFetchCode(checkResult.getJmqCode());
                     partitionResponses.add(new FetchResponse.PartitionResponse(partition, errorCode));
                     continue;
