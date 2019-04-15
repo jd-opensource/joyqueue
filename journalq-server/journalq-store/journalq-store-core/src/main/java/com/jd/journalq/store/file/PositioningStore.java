@@ -25,13 +25,14 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.SortedMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 带缓存的、无锁、高性能、多文件、基于位置的、Append Only的日志存储存储。
@@ -47,11 +48,15 @@ public class PositioningStore<T> implements Closeable {
     private final LogSerializer<T> serializer;
     private final PreloadBufferPool bufferPool;
     private final NavigableMap<Long, StoreFile<T>> storeFileMap = new ConcurrentSkipListMap<>();
+
     private final AtomicLong flushPosition = new AtomicLong(0L);
     private final AtomicLong writePosition = new AtomicLong(0L);
     private final AtomicLong leftPosition = new AtomicLong(0L);
-    // 删除和回滚不能同时操作flushPosition，需要做一下互斥。
-    private final Object flushPositionMutex = new Object();
+
+    private final Lock writeLock = new ReentrantLock();
+    private final Lock flushLock = new ReentrantLock();
+    private final Lock deleteLock = new ReentrantLock();
+
     // 正在写入的
     private StoreFile<T> writeStoreFile = null;
 
@@ -84,15 +89,19 @@ public class PositioningStore<T> implements Closeable {
      */
     public void setRight(long position) throws IOException {
 
-        synchronized (flushPositionMutex) {
-            if (position == right()) return;
-            logger.info("Rollback to position: {}, left: {}, right: {}, flushPosition: {}, store: {}...",
-                    Format.formatWithComma(position),
-                    Format.formatWithComma(leftPosition.get()),
-                    Format.formatWithComma(writePosition.get()),
-                    Format.formatWithComma(flushPosition()),
-                    base.getAbsolutePath());
+        if (position == right()) return;
+        logger.info("Rollback to position: {}, left: {}, right: {}, flushPosition: {}, store: {}...",
+                Format.formatWithComma(position),
+                Format.formatWithComma(leftPosition.get()),
+                Format.formatWithComma(writePosition.get()),
+                Format.formatWithComma(flushPosition()),
+                base.getAbsolutePath());
 
+        try {
+            // 注意锁的顺序必须一致，避免死锁。
+            flushLock.lock();
+            writeLock.lock();
+            deleteLock.lock();
             if (position <= leftPosition.get() || position > right()) {
                 clear();
                 this.leftPosition.set(position);
@@ -104,10 +113,14 @@ public class PositioningStore<T> implements Closeable {
                 if (this.flushPosition.get() > position) this.flushPosition.set(position);
                 resetWriteStoreFile();
             }
+        } finally {
+            deleteLock.unlock();
+            writeLock.unlock();
+            flushLock.unlock();
         }
     }
 
-    public void clear() {
+    private void clear() {
         for (StoreFile<T> storeFile : this.storeFileMap.values()) {
             if (storeFile.hasPage()) storeFile.unload();
             File file = storeFile.file();
@@ -152,26 +165,36 @@ public class PositioningStore<T> implements Closeable {
     }
 
     public void recover() throws IOException {
-        recoverFileMap();
+        try {
+            // 注意锁的顺序必须一致，避免死锁。
+            flushLock.lock();
+            writeLock.lock();
+            deleteLock.lock();
+            recoverFileMap();
 
-        long recoverPosition = this.storeFileMap.isEmpty() ? 0L : this.storeFileMap.lastKey() + this.storeFileMap.lastEntry().getValue().fileDataSize();
-        flushPosition.set(recoverPosition);
-        writePosition.set(recoverPosition);
-        leftPosition.set(this.storeFileMap.isEmpty() ? 0L : this.storeFileMap.firstKey());
+            long recoverPosition = this.storeFileMap.isEmpty() ? 0L : this.storeFileMap.lastKey() + this.storeFileMap.lastEntry().getValue().fileDataSize();
+            flushPosition.set(recoverPosition);
+            writePosition.set(recoverPosition);
+            leftPosition.set(this.storeFileMap.isEmpty() ? 0L : this.storeFileMap.firstKey());
 
-        if (recoverPosition > 0) {
-            long lastLogTail = toLogTail(recoverPosition - 1);
-            if (lastLogTail < 0) {
-                throw new CorruptedLogException(String.format("Unable to read any valid log. Corrupted log files: %s.", base.getAbsolutePath()));
+            if (recoverPosition > 0) {
+                long lastLogTail = toLogTail(recoverPosition - 1);
+                if (lastLogTail < 0) {
+                    throw new CorruptedLogException(String.format("Unable to read any valid log. Corrupted log files: %s.", base.getAbsolutePath()));
+                }
+                if (lastLogTail < recoverPosition) {
+                    rollbackFiles(lastLogTail);
+                    flushPosition.set(lastLogTail);
+                    writePosition.set(lastLogTail);
+
+                }
             }
-            if (lastLogTail < recoverPosition) {
-                rollbackFiles(lastLogTail);
-                flushPosition.set(lastLogTail);
-                writePosition.set(lastLogTail);
-
-            }
+            resetWriteStoreFile();
+        } finally {
+            deleteLock.unlock();
+            writeLock.unlock();
+            flushLock.unlock();
         }
-        resetWriteStoreFile();
         logger.info("Store loaded, left: {}, right: {},  base: {}.",
                 Format.formatWithComma(left()),
                 Format.formatWithComma(right()),
@@ -234,34 +257,47 @@ public class PositioningStore<T> implements Closeable {
      */
     public long appendByteBuffer(ByteBuffer byteBuffer) throws IOException {
         if (null == writeStoreFile) writeStoreFile = createStoreFile(writePosition.get());
-        if (fileDataSize - writeStoreFile.writePosition() < byteBuffer.remaining())
+        if (fileDataSize - writeStoreFile.writePosition() < byteBuffer.remaining()) {
             writeStoreFile = createStoreFile(writePosition.get());
+        }
+        return writePosition.addAndGet(writeStoreFile.appendByteBuffer(byteBuffer));
 
-        writePosition.getAndAdd(writeStoreFile.appendByteBuffer(byteBuffer));
-
-        return writePosition.get();
     }
 
     public long append(T t) throws IOException {
-        if (null == writeStoreFile) writeStoreFile = createStoreFile(writePosition.get());
-        if (fileDataSize - writeStoreFile.writePosition() < serializer.size(t))
-            writeStoreFile = createStoreFile(writePosition.get());
-        writePosition.getAndAdd(writeStoreFile.append(t));
-        return writePosition.get();
+        try {
+            writeLock.lock();
+            if (null == writeStoreFile) writeStoreFile = createStoreFile(writePosition.get());
+            if (fileDataSize - writeStoreFile.writePosition() < serializer.size(t)) {
+                writeStoreFile = createStoreFile(writePosition.get());
+            }
+            return writePosition.addAndGet(writeStoreFile.append(t));
+        } finally {
+            writeLock.unlock();
+        }
     }
 
     public long append(final List<T> ts) throws IOException {
-        if (null == ts || ts.isEmpty()) throw new WriteException("Parameter list is empty!");
-        long position = 0;
-        for (T t : ts) {
-            position = append(t);
+        try {
+            writeLock.lock();
+            if (null == ts || ts.isEmpty()) throw new WriteException("Parameter list is empty!");
+            long position = 0;
+            for (T t : ts) {
+                position = append(t);
+            }
+            return position;
+        } finally {
+            writeLock.unlock();
         }
-        return position;
     }
 
     public boolean flush() throws IOException {
         if (flushPosition.get() < writePosition.get()) {
-            synchronized (flushPositionMutex) {
+            try {
+                flushLock.lock();
+                if (flushPosition.get() < leftPosition.get()) {
+                    flushPosition.set(leftPosition.get());
+                }
                 Map.Entry<Long, StoreFile<T>> entry = storeFileMap.floorEntry(flushPosition.get());
                 if (null == entry) {
                     if (storeFileMap.isEmpty()) {
@@ -284,6 +320,8 @@ public class PositioningStore<T> implements Closeable {
                             writePosition.get(), flushPosition.get(), leftPosition.get(), base.getAbsolutePath()));
                 }
                 return true;
+            } finally {
+                flushLock.unlock();
             }
         }
         return false;
@@ -392,31 +430,34 @@ public class PositioningStore<T> implements Closeable {
      */
     public long physicalDeleteTo(long position) throws IOException {
 
-        synchronized (flushPositionMutex) {
-            if (position > flushPosition.get()) position = flushPosition.get();
 
-            Iterator<Map.Entry<Long, StoreFile<T>>> iterator =
-                    storeFileMap.entrySet().iterator();
-            long deleteSize = 0L;
+        long deleteSize = 0L;
+        Map.Entry<Long, StoreFile<T>> entry;
+        long fileDataSize;
+        StoreFile<T> storeFile;
+        try {
+            deleteLock.lock();
+            while (storeFileMap.size() > 1 &&
+                    (entry = storeFileMap.firstEntry()) != null &&
+                    entry.getKey() +
+                            (fileDataSize =
+                                    (storeFile = entry.getValue()).hasPage() ?
+                                            storeFile.writePosition() :
+                                            storeFile.fileDataSize())
+                            <= position) {
 
-            while (iterator.hasNext()) {
-                Map.Entry<Long, StoreFile<T>> entry = iterator.next();
-                StoreFile<T> storeFile = entry.getValue();
-                long start = entry.getKey();
-                long fileDataSize = storeFile.hasPage() ? storeFile.writePosition() : storeFile.fileDataSize();
-
-                // 至少保留一个文件
-                if (storeFileMap.size() < 2 || start + fileDataSize > position) break;
-                leftPosition.getAndAdd(fileDataSize);
-                if (flushPosition.get() < leftPosition.get()) flushPosition.set(leftPosition.get());
-                iterator.remove();
-                forceDeleteStoreFile(storeFile);
-                deleteSize += fileDataSize;
+                if (storeFileMap.remove(entry.getKey(), storeFile)) {
+                    leftPosition.addAndGet(fileDataSize);
+                    forceDeleteStoreFile(storeFile);
+                    deleteSize += fileDataSize;
+                } else {
+                    break;
+                }
             }
-
-            return deleteSize;
-
+        } finally {
+            deleteLock.unlock();
         }
+        return deleteSize;
     }
 
     public boolean isClean() {
