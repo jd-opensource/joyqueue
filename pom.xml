@@ -1087,35 +1087,35 @@
 <!--            license:check: verify if some files miss license header. This goal is attached to the verify phase if declared in your pom.xml like above.-->
 <!--            license:format: add the license header when missing. If a header is existing, it is updated to the new one.-->
 <!--            license:remove: remove existing license header-->
-            <plugin>
-                <groupId>com.mycila</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <version>3.0</version>
-                <configuration>
-                    <header>${maven.multiModuleProjectDirectory}/HEADER</header>
-                    <excludes>
-                        <exclude>**/README</exclude>
-                        <exclude>src/test/resources/**</exclude>
-                        <exclude>src/main/resources/**</exclude>
-                        <exclude>**/node_modules/**</exclude>
-                        <exclude>**/journalq-portal/**</exclude>
-                        <exclude>**/journalq-web-webroot/**</exclude>
-                        <exclude>**/*.vue</exclude>
-                        <exclude>**/*.js</exclude>
-                        <exclude>**/*.js.map</exclude>
-                        <exclude>**/*.css.map</exclude>
-                        <exclude>**/*.css</exclude>
-                        <exclude>**/index.html</exclude>
-                    </excludes>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+            <!--<plugin>-->
+                <!--<groupId>com.mycila</groupId>-->
+                <!--<artifactId>license-maven-plugin</artifactId>-->
+                <!--<version>3.0</version>-->
+                <!--<configuration>-->
+                    <!--<header>${maven.multiModuleProjectDirectory}/HEADER</header>-->
+                    <!--<excludes>-->
+                        <!--<exclude>**/README</exclude>-->
+                        <!--<exclude>src/test/resources/**</exclude>-->
+                        <!--<exclude>src/main/resources/**</exclude>-->
+                        <!--<exclude>**/node_modules/**</exclude>-->
+                        <!--<exclude>**/journalq-portal/**</exclude>-->
+                        <!--<exclude>**/journalq-web-webroot/**</exclude>-->
+                        <!--<exclude>**/*.vue</exclude>-->
+                        <!--<exclude>**/*.js</exclude>-->
+                        <!--<exclude>**/*.js.map</exclude>-->
+                        <!--<exclude>**/*.css.map</exclude>-->
+                        <!--<exclude>**/*.css</exclude>-->
+                        <!--<exclude>**/index.html</exclude>-->
+                    <!--</excludes>-->
+                <!--</configuration>-->
+                <!--<executions>-->
+                    <!--<execution>-->
+                        <!--<goals>-->
+                            <!--<goal>check</goal>-->
+                        <!--</goals>-->
+                    <!--</execution>-->
+                <!--</executions>-->
+            <!--</plugin>-->
         </plugins>
     </build>
 
