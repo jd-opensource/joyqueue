@@ -549,20 +549,17 @@ public class PositionManager extends Service {
      * @param partitionGroup 分区分组
      */
     private void removePartitionGroup(TopicName topic, int partitionGroup) {
-        PartitionGroup partitionGroupByGroup = clusterManager.getPartitionGroupByGroup(topic, partitionGroup);
-        List<String> appList = clusterManager.getAppByTopic(topic);
-        Set<Short> partitions = partitionGroupByGroup.getPartitions();
+        logger.debug("remove partitionGroup topic:[{}], partitionGroup:[{}]", topic.getFullName(), partitionGroup);
 
-        logger.debug("remove partitionGroup appList:[{}], partitions:[{}]", appList.toString(), partitions.toString());
+        Iterator<ConsumePartition> iterator = positionStore.iterator();
+        while(iterator.hasNext()) {
+            ConsumePartition consumePartition = iterator.next();
+            if (consumePartition != null && consumePartition.getPartitionGroup() == partitionGroup && StringUtils.equals(consumePartition.getTopic(), topic.getFullName())) {
+                iterator.remove();
 
-        partitions.stream().forEach(partition -> {
-            appList.stream().forEach(app -> {
-                ConsumePartition consumePartition = new ConsumePartition(topic.getFullName(), app, partition);
-                Position remove = positionStore.remove(consumePartition);
-
-                logger.info("Remove ConsumePartition by topic:{}, app:{}, partition:{}, curIndex:{}", consumePartition.getTopic(), consumePartition.getApp(), consumePartition.getPartition(), remove.toString());
-            });
-        });
+                logger.info("Remove ConsumePartition by topic:{}, app:{}, partition:{}", consumePartition.getTopic(), consumePartition.getApp(), consumePartition.getPartition());
+            }
+        }
 
         positionStore.forceFlush();
     }
@@ -574,14 +571,16 @@ public class PositionManager extends Service {
 
         @Override
         public void onEvent(Object event) {
+            try {
+                if (((MetaEvent) event).getEventType() == EventType.ADD_CONSUMER) {
+                    ConsumerEvent addConsumerEvent = (ConsumerEvent) event;
 
-            if (((MetaEvent) event).getEventType() == EventType.ADD_CONSUMER) {
-                ConsumerEvent addConsumerEvent = (ConsumerEvent) event;
-//                ConsumerEvent addConsumerEvent = (ConsumerEvent) nameServerEvent.getMetaEvent();
+                    logger.info("listen add consume event:[{}]", addConsumerEvent.toString());
 
-                logger.info("listen add consume event:[{}]", addConsumerEvent.toString());
-
-                addConsumer(addConsumerEvent.getTopic(), addConsumerEvent.getApp());
+                    addConsumer(addConsumerEvent.getTopic(), addConsumerEvent.getApp());
+                }
+            } catch (Exception ex) {
+                logger.error("AddConsumeListener error.", ex);
             }
         }
     }
@@ -593,13 +592,16 @@ public class PositionManager extends Service {
 
         @Override
         public void onEvent(Object event) {
-            if (((MetaEvent) event).getEventType() == EventType.REMOVE_CONSUMER) {
-                ConsumerEvent removeConsumerEvent = (ConsumerEvent) event;
-                //ConsumerEvent removeConsumerEvent = (ConsumerEvent) nameServerEvent.getMetaEvent();
+            try {
+                if (((MetaEvent) event).getEventType() == EventType.REMOVE_CONSUMER) {
+                    ConsumerEvent removeConsumerEvent = (ConsumerEvent) event;
 
-                logger.info("listen remove consume event:[{}]", removeConsumerEvent.toString());
+                    logger.info("listen remove consume event:[{}]", removeConsumerEvent.toString());
 
-                removeConsumer(removeConsumerEvent.getTopic(), removeConsumerEvent.getApp());
+                    removeConsumer(removeConsumerEvent.getTopic(), removeConsumerEvent.getApp());
+                }
+            } catch (Exception ex) {
+                logger.error("RemoveConsumeListener error.", ex);
             }
         }
     }
@@ -611,14 +613,16 @@ public class PositionManager extends Service {
 
         @Override
         public void onEvent(Object event) {
-            //todo 增加异常捕捉
-            if (((MetaEvent) event).getEventType() == EventType.ADD_PARTITION_GROUP) {
-                PartitionGroupEvent partitionGroupEvent = (PartitionGroupEvent) event;
-                //PartitionGroupEvent partitionGroupEvent = (PartitionGroupEvent) nameServerEvent.getMetaEvent();
+            try {
+                if (((MetaEvent) event).getEventType() == EventType.ADD_PARTITION_GROUP) {
+                    PartitionGroupEvent partitionGroupEvent = (PartitionGroupEvent) event;
 
-                logger.info("listen add partition group event:[{}]", partitionGroupEvent.toString());
+                    logger.info("listen add partition group event:[{}]", partitionGroupEvent.toString());
 
-                addPartitionGroup(partitionGroupEvent.getTopic(), partitionGroupEvent.getPartitionGroup());
+                    addPartitionGroup(partitionGroupEvent.getTopic(), partitionGroupEvent.getPartitionGroup());
+                }
+            } catch (Exception ex) {
+                logger.error("AddPartitionGroupListener error.", ex);
             }
         }
     }
@@ -630,15 +634,18 @@ public class PositionManager extends Service {
 
         @Override
         public void onEvent(Object event) {
-            //todo 移除的时候从clusterManager里面是拿不到partitionGroup的
-            if (((MetaEvent) event).getEventType() == EventType.REMOVE_PARTITION_GROUP) {
-                PartitionGroupEvent partitionGroupEvent = (PartitionGroupEvent) event;
-                //PartitionGroupEvent partitionGroupEvent = (PartitionGroupEvent) nameServerEvent.getMetaEvent();
+            try {
+                if (((MetaEvent) event).getEventType() == EventType.REMOVE_PARTITION_GROUP) {
+                    PartitionGroupEvent partitionGroupEvent = (PartitionGroupEvent) event;
 
-                logger.info("listen remove partition group event:[{}]", partitionGroupEvent.toString());
+                    logger.info("listen remove partition group event:[{}]", partitionGroupEvent.toString());
 
-                removePartitionGroup(partitionGroupEvent.getTopic(), partitionGroupEvent.getPartitionGroup());
+                    removePartitionGroup(partitionGroupEvent.getTopic(), partitionGroupEvent.getPartitionGroup());
+                }
+            } catch (Exception ex) {
+                logger.error("RemovePartitionGroupListener error.", ex);
             }
+
         }
     }
 
@@ -649,27 +656,30 @@ public class PositionManager extends Service {
 
         @Override
         public void onEvent(Object event) {
-            if (((MetaEvent) event).getEventType() == EventType.UPDATE_PARTITION_GROUP) {
-                PartitionGroupEvent partitionGroupEvent = (PartitionGroupEvent) event;
-                //PartitionGroupEvent partitionGroupEvent = (PartitionGroupEvent) nameServerEvent.getMetaEvent();
+            try {
+                if (((MetaEvent) event).getEventType() == EventType.UPDATE_PARTITION_GROUP) {
+                    PartitionGroupEvent partitionGroupEvent = (PartitionGroupEvent) event;
 
-                logger.info("listen update partition group event:[{}]", partitionGroupEvent.toString());
+                    logger.info("listen update partition group event:[{}]", partitionGroupEvent.toString());
 
-                TopicName topic = partitionGroupEvent.getTopic();
-                int partitionGroup = partitionGroupEvent.getPartitionGroup();
+                    TopicName topic = partitionGroupEvent.getTopic();
+                    int partitionGroup = partitionGroupEvent.getPartitionGroup();
 
-                Set<Short> newPartitionSet = clusterManager.getTopicConfig(topic).fetchAllPartitions();
+                    Set<Short> newPartitionSet = clusterManager.getTopicConfig(topic).fetchAllPartitions();
 
-                Iterator<ConsumePartition> iterator = positionStore.iterator();
-                while (iterator.hasNext()) {
-                    ConsumePartition next = iterator.next();
-                    if (StringUtils.equals(next.getTopic(), topic.getFullName()) && /* 不在最新分区集合中 */ !newPartitionSet.contains(next.getPartition())) {
-                        // 缓存中的分区位置信息，不在最新的分区集合中，则删除
-                        iterator.remove();
+                    Iterator<ConsumePartition> iterator = positionStore.iterator();
+                    while (iterator.hasNext()) {
+                        ConsumePartition next = iterator.next();
+                        if (StringUtils.equals(next.getTopic(), topic.getFullName()) && /* 不在最新分区集合中 */ !newPartitionSet.contains(next.getPartition())) {
+                            // 缓存中的分区位置信息，不在最新的分区集合中，则删除
+                            iterator.remove();
+                        }
                     }
-                }
 
-                addPartitionGroup(topic, partitionGroup);
+                    addPartitionGroup(topic, partitionGroup);
+                }
+            } catch (Exception ex) {
+                logger.error("UpdatePartitionGroupListener error.", ex);
             }
         }
     }
