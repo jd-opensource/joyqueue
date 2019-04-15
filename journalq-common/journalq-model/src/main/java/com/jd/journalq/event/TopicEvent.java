@@ -23,7 +23,7 @@ public class TopicEvent extends MetaEvent {
 
     @Override
     public String getTypeName() {
-        return "com.jd.jmq.common.event.TopicEvent";
+        return getClass().getTypeName();
     }
 
     private TopicEvent(EventType type, TopicName topic) {

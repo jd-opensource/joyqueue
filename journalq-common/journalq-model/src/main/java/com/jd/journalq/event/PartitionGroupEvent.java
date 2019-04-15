@@ -30,7 +30,7 @@ public class PartitionGroupEvent extends MetaEvent {
 
     @Override
     public String getTypeName() {
-        return "com.jd.jmq.common.event.PartitionGroupEvent";
+        return getClass().getTypeName();
     }
     public TopicName getTopic() {
         return topic;
