@@ -13,17 +13,16 @@
  */
 package com.jd.journalq.broker.store;
 
-import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.store.PartitionGroupStore;
-import com.jd.journalq.store.StoreService;
 import com.jd.journalq.toolkit.config.PropertySupplierAware;
 
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * @author majun8
  */
 public interface StoreCleaningStrategy extends PropertySupplierAware {
 
-    long deleteIfNeeded(PartitionGroupStore partitionGroupStore, long minIndexedPosition) throws IOException;
+    long deleteIfNeeded(PartitionGroupStore partitionGroupStore, Map<Short, Long> partitionAckMap) throws IOException;
 }

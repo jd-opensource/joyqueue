@@ -5,7 +5,7 @@
 
 <configuration>
     <properties>
-        <property name="dialect" value="mysql"/>
+        <property name="dialect" value="h2"/>
     </properties>
     <settings>
         <!-- changes from the defaults -->

@@ -14,14 +14,11 @@
 package com.jd.journalq.broker.store;
 
 import com.jd.journalq.broker.config.BrokerStoreConfig;
-import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.store.PartitionGroupStore;
-import com.jd.journalq.store.StoreService;
 import com.jd.journalq.toolkit.config.PropertySupplier;
-import org.apache.commons.collections.CollectionUtils;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Map;
 
 /**
  * @author majun8
@@ -34,7 +31,7 @@ public class IntervalTimeStoreCleaningStrategy implements StoreCleaningStrategy 
     }
 
     @Override
-    public long deleteIfNeeded(PartitionGroupStore partitionGroupStore, long minIndexedPosition) throws IOException {
+    public long deleteIfNeeded(PartitionGroupStore partitionGroupStore, Map<Short, Long> partitionAckMap) throws IOException {
         long currentTimestamp = System.currentTimeMillis();
         long targetDeleteTimeline = currentTimestamp - maxIntervalTime;
 
@@ -43,7 +40,7 @@ public class IntervalTimeStoreCleaningStrategy implements StoreCleaningStrategy 
 
         if (partitionGroupStore != null) {
             do {
-                deletedSize = partitionGroupStore.deleteEarlyMinStoreMessages(targetDeleteTimeline, minIndexedPosition);
+                deletedSize = partitionGroupStore.deleteMinStoreMessages(targetDeleteTimeline, partitionAckMap);
                 totalDeletedSize += deletedSize;
             } while (deletedSize > 0L);
         }

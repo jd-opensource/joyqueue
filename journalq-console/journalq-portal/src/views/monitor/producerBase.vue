@@ -95,18 +95,6 @@ export default {
             method: 'on-detail'
           },
           {
-            txt: '详情监控图表',
-            method: 'on-detail-chart'
-          },
-          {
-            txt: '汇总监控图表',
-            method: 'on-summary-chart'
-          },
-          {
-            txt: '性能监控图表',
-            method: 'on-performance-chart'
-          },
-          {
             txt: '配置',
             method: 'on-config'
           }

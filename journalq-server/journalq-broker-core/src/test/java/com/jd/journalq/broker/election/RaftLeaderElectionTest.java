@@ -34,10 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.CRC32;
@@ -83,7 +80,8 @@ public class RaftLeaderElectionTest {
             storeServices[i].start();
 
             ElectionConfig electionConfig = new ElectionConfig(conf);
-            electionConfig.setElectionMetaPath("/Users/zhuduohui/Data/jmq/raft" + i + ".dat");
+            electionConfig.setElectionMetaPath("/Users/zhuduohui/Data/jmq/raft" + i);
+            electionConfig.setElectionMetaFile("/Users/zhuduohui/Data/jmq/raft" + i + ".dat");
             electionConfig.setListenPort("1800" + (i + 1));
 
             electionManager[i] = new ElectionManagerStub(electionConfig, storeServices[i], new ConsumeStub());
@@ -131,7 +129,7 @@ public class RaftLeaderElectionTest {
 
     private void createElectionManager(List<Broker> allNodes) throws Exception {
         for (int i = 0; i < RAFT_ELECTION_NUM; i++) {
-            storeServices[i].createPartitionGroup(topic1.getFullName(), partitionGroup1, new short[]{1}, new int[]{1});
+            storeServices[i].createPartitionGroup(topic1.getFullName(), partitionGroup1, new short[]{1});
             electionManager[i].onPartitionGroupCreate(PartitionGroup.ElectType.raft,
                     topic1, partitionGroup1, allNodes, new TreeSet<>(), brokers[i].getId(), -1);
             leaderElections[i] = electionManager[i].getLeaderElection(topic1, partitionGroup1);
@@ -153,7 +151,7 @@ public class RaftLeaderElectionTest {
         }
 
         for (int i = 0; i < RAFT_ELECTION_NUM; i++) {
-            storeServices[i].createPartitionGroup(topic1.getFullName(), partitionGroup1, new short[]{1}, new int[]{1});
+            storeServices[i].createPartitionGroup(topic1.getFullName(), partitionGroup1, new short[]{1});
             electionManager[i].onPartitionGroupCreate(PartitionGroup.ElectType.raft,
                     topic1, partitionGroup1, allNodes, new TreeSet<Integer>(), brokers[i].getId(), -1);
             leaderElections[i] = electionManager[i].getLeaderElection(topic1, partitionGroup1);
@@ -214,7 +212,7 @@ public class RaftLeaderElectionTest {
     public void testOneNode() throws Exception {
         List<Broker> allNodes = new LinkedList<>();
         allNodes.add(brokers[0]);
-        storeServices[0].createPartitionGroup(topic1.getFullName(), partitionGroup1, new short[]{1}, new int[]{1});
+        storeServices[0].createPartitionGroup(topic1.getFullName(), partitionGroup1, new short[]{1});
         electionManager[0].onPartitionGroupCreate(PartitionGroup.ElectType.raft,
                 topic1, partitionGroup1, allNodes, new TreeSet<>(), brokers[0].getId(), -1);
         leaderElections[0] = electionManager[0].getLeaderElection(topic1, partitionGroup1);
@@ -338,7 +336,7 @@ public class RaftLeaderElectionTest {
 
         for (int i = 0; i < RAFT_ELECTION_NUM; i++) {
             for (int j = 0; j < TOPIC_NUM; j++) {
-                storeServices[i].createPartitionGroup(topics[j], partitionGroup1, new short[]{1}, new int[]{1});
+                storeServices[i].createPartitionGroup(topics[j], partitionGroup1, new short[]{1});
                 electionManager[i].onPartitionGroupCreate(PartitionGroup.ElectType.raft,
                         TopicName.parse(topics[j]), partitionGroup1, allNodes, new TreeSet<Integer>(), brokers[i].getId(), -1);
                 multiLeaderElections[i][j] = electionManager[i].getLeaderElection(TopicName.parse(topics[j]), partitionGroup1);
@@ -460,7 +458,7 @@ public class RaftLeaderElectionTest {
         }
 
         for (int i = 0; i < RAFT_ELECTION_NUM; i++) {
-            storeServices[i].createPartitionGroup(topic1.getFullName(), partitionGroup1, new short[]{1}, new int[]{1});
+            storeServices[i].createPartitionGroup(topic1.getFullName(), partitionGroup1, new short[]{1});
             electionManager[i].onPartitionGroupCreate(PartitionGroup.ElectType.raft,
                     topic1, partitionGroup1, allNodes, new TreeSet<>(), brokers[i].getId(), -1);
             leaderElections[i] = electionManager[i].getLeaderElection(topic1, partitionGroup1);
@@ -473,36 +471,74 @@ public class RaftLeaderElectionTest {
         Assert.assertEquals(leaderId, leaderElections[1].getLeaderId());
         Assert.assertEquals(leaderId, leaderElections[2].getLeaderId());
 
+        //删掉leader
+        logger.info("Remove leader node {}", leaderId);
         for (int i = 0; i < RAFT_ELECTION_NUM; i++) {
-            electionManager[i].onNodeRemove(topic1, partitionGroup1, leaderId, brokers[i].getId());
+            if (leaderId == i + 1) {
+                electionManager[i].onPartitionGroupRemove(topic1, partitionGroup1);
+            } else {
+                electionManager[i].onNodeRemove(topic1, partitionGroup1, leaderId, brokers[i].getId());
+            }
         }
 
-        Thread.sleep(30000);
+        Thread.sleep(20000);
+
         int leaderId1 = leaderElections[nextNode(leaderId) - 1].getLeaderId();
         logger.info("Leader1 id is " + leaderId1);
         Assert.assertNotEquals(leaderId1, -1);
+        Collection<DefaultElectionNode> allNodes1 = leaderElections[leaderId1 - 1].getAllNodes();
+        Assert.assertEquals(allNodes1.size(), 2);
 
-        List<Broker> newNodes = new LinkedList<>();
-        for (int i = 0; i < brokers.length; i++) newNodes.add(brokers[i]);
+        //删除leader
+        logger.info("Remove leader node {}", leaderId1);
         for (int i = 0; i < RAFT_ELECTION_NUM; i++) {
-            LeaderElection leaderElection = electionManager[i].getLeaderElection(topic1, partitionGroup1);
-            if (leaderElection == null) {
-                Assert.assertEquals(i, leaderId - 1);
-                electionManager[i].onPartitionGroupCreate(PartitionGroup.ElectType.raft, topic1,
-                        partitionGroup1, newNodes, new HashSet<Integer>(), i + 1, -1);
-                leaderElection = electionManager[i].getLeaderElection(topic1, partitionGroup1);
-            }
-
-            if (leaderElection instanceof FixLeaderElection) {
-                electionManager[i].onNodeAdd(topic1, partitionGroup1, PartitionGroup.ElectType.fix, newNodes,
-                        new HashSet<>(), brokers[leaderId - 1], brokers[i].getId(), leaderId1);
+            if (i + 1 == leaderId) continue;
+            if (leaderId1 == i + 1) {
+                electionManager[i].onPartitionGroupRemove(topic1, partitionGroup1);
             } else {
-                electionManager[i].onNodeAdd(topic1, partitionGroup1, PartitionGroup.ElectType.raft, newNodes,
-                        new HashSet<>(), brokers[leaderId - 1], brokers[i].getId(), leaderId1);
+                electionManager[i].onNodeRemove(topic1, partitionGroup1, leaderId1, brokers[i].getId());
             }
         }
 
-        Thread.sleep(10000);
+        Thread.sleep(20000);
+
+        int i;
+        for (i = 0; i < RAFT_ELECTION_NUM; i++) {
+            if (leaderId != i + 1 && leaderId1 != i + 1) break;
+        }
+
+        logger.info("Remain node is {}", i);
+        int leaderId2 = leaderElections[i].getLeaderId();
+        logger.info("Leader2 id is " + leaderId2);
+        Assert.assertNotEquals(leaderId2, -1);
+        Collection<DefaultElectionNode> allNodes2 = leaderElections[leaderId2 - 1].getAllNodes();
+        Assert.assertEquals(allNodes2.size(), 1);
+
+        List<Broker> allNodesAdd = new LinkedList<>();
+        allNodesAdd.add(brokers[leaderId2 - 1]);
+        allNodesAdd.add(brokers[leaderId1 - 1]);
+
+
+        //Addd node
+        logger.info("Add node {}", leaderId1);
+        electionManager[leaderId2 - 1].onNodeAdd(topic1, partitionGroup1, PartitionGroup.ElectType.raft,
+                allNodesAdd, new TreeSet<>(), brokers[leaderId1 - 1], leaderId1, -1);
+
+        electionManager[leaderId1 - 1].onPartitionGroupCreate(PartitionGroup.ElectType.raft,
+                topic1, partitionGroup1, allNodesAdd, new TreeSet<>(), brokers[leaderId1 - 1].getId(), -1);
+        leaderElections[leaderId1 - 1] = electionManager[i].getLeaderElection(topic1, partitionGroup1);
+
+        Thread.sleep(20000);
+
+        int leaderId3 = leaderElections[leaderId2 - 1].getLeaderId();
+        logger.info("Leader3 id is " + leaderId3);
+        Assert.assertNotEquals(leaderId3, -1);
+        Collection<DefaultElectionNode> allNodes3 = leaderElections[leaderId2 - 1].getAllNodes();
+        Assert.assertEquals(allNodes3.size(), 2);
+        Collection<DefaultElectionNode> allNodes4 = leaderElections[leaderId1 - 1].getAllNodes();
+        Assert.assertEquals(allNodes4.size(), 2);
+
+        Thread.sleep(60000);
 
     }
 

@@ -102,6 +102,12 @@ export default {
       this.$emit('on-choosed-broker', val)
     },
     leader(item) {
+      let brokerIds=[];
+      for (var i=0; i<this.multipleSelection.length; i++) {
+        brokerIds.push(this.multipleSelection[i].brokerId)
+      }
+      item.outSyncReplicas=brokerIds;
+
       let data = item;
       apiRequest.post(this.urls.leader, {}, data).then((data) => {
         if(data.code === 200) {

@@ -5,7 +5,7 @@
       <d-input v-model="formData.key" v-else></d-input>
     </d-form-item>
     <d-form-item label="分组:" placeholser="支持字母大小写、数字、. _ / -,首字母" prop="group" style="width: 60%">
-      <d-input v-model="formData.group"v-if="type==$store.getters.editFormType" disabled></d-input>
+      <d-input v-model="formData.group" v-if="type==$store.getters.editFormType" disabled></d-input>
       <d-input v-model="formData.group" v-else></d-input>
     </d-form-item>
     <d-form-item label="值:" prop="value" style="width: 60%">

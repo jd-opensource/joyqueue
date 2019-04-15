@@ -28,6 +28,7 @@ import com.jd.journalq.toolkit.concurrent.EventBus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
@@ -236,7 +237,18 @@ public class RaftLeaderElection extends LeaderElection  {
      * @return 最后一条log的term
      */
     private int getLastLogTerm() {
-        return replicableStore.term();
+        try {
+            long leftPosition = replicableStore.leftPosition();
+            long rightPosition = replicableStore.rightPosition();
+            if (leftPosition == rightPosition) return -1;
+            long prevPosition = replicableStore.position(rightPosition, -1);
+            return replicableStore.getEntryTerm(prevPosition);
+            //return replicableStore.term();
+        } catch (Exception e) {
+            logger.warn("Partition group {}/node {} get last log term fail",
+                    topicPartitionGroup, localNode, e);
+            return -1;
+        }
     }
 
     /**
@@ -426,6 +438,8 @@ public class RaftLeaderElection extends LeaderElection  {
      * @return 返回的命令
      */
     public synchronized Command handleVoteRequest(VoteRequest voteRequest){
+        boolean voteGranted = false;
+
         if (voteRequest == null) {
             logger.warn("Partition group {}/node{} receive vote request, request is null",
                     topicPartitionGroup, localNode);
@@ -435,16 +449,21 @@ public class RaftLeaderElection extends LeaderElection  {
         if (!isStarted()) {
             logger.warn("Partition group {}/node{} receive vote request, election not started",
                     topicPartitionGroup, localNode);
-            return new Command(new JMQHeader(Direction.RESPONSE, CommandType.RAFT_VOTE_RESPONSE),
-                                new VoteResponse(currentTerm, voteRequest.getCandidateId(), localNodeId, false));
+            return null;
+        }
+
+        if (!allNodes.containsKey(voteRequest.getCandidateId())) {
+            logger.warn("Partition group {}/node{} receive pre vote request from unknown node {}",
+                    topicPartitionGroup, localNode, voteRequest.getCandidateId());
+            return null;
         }
 
         if (currentTerm > voteRequest.getTerm()) {
             logger.info("Partition group {}/node{} receive vote request from {}, currentTerm {} is " +
-                        "great than request term {}",
+                            "great than request term {}",
                     topicPartitionGroup, localNode, voteRequest.getCandidateId(), currentTerm, voteRequest.getTerm());
             return new Command(new JMQHeader(Direction.RESPONSE, CommandType.RAFT_VOTE_RESPONSE),
-                                new VoteResponse(currentTerm, voteRequest.getCandidateId(), localNodeId, false));
+                    new VoteResponse(currentTerm, voteRequest.getCandidateId(), localNodeId, voteGranted));
         }
 
         /*
@@ -452,19 +471,18 @@ public class RaftLeaderElection extends LeaderElection  {
          */
         if (currentTerm < voteRequest.getTerm()) {
             logger.info("Partition group {}/node{} receive vote request from {}, currentTerm {} is " +
-                    "less than request term {}",
+                            "less than request term {}",
                     topicPartitionGroup, localNode, voteRequest.getCandidateId(), currentTerm, voteRequest.getTerm());
             stepDown(voteRequest.getTerm());
         }
 
-        boolean voteGranted = false;
         int lastLogTerm = getLastLogTerm();
         long lastLogPos = getLastLogPosition();
 
         logger.info("Partition group {}/node{} receive vote request from {}, lastLogTerm is {}, lastLogIndex is {}, " +
-                    "request lastLogTerm is {}, request lastLogIndex is {}, voteFor is {}, request candidateId is {}",
+                        "request lastLogTerm is {}, request lastLogIndex is {}, voteFor is {}, request candidateId is {}",
                 topicPartitionGroup, localNode, voteRequest.getCandidateId(), lastLogTerm, lastLogPos,
-                voteRequest.getLastLogTerm(), voteRequest.getLastLogPos(),  votedFor, voteRequest.getCandidateId());
+                voteRequest.getLastLogTerm(), voteRequest.getLastLogPos(), votedFor, voteRequest.getCandidateId());
 
         if (lastLogTerm < voteRequest.getLastLogTerm() ||
                 (lastLogTerm == voteRequest.getLastLogTerm() && lastLogPos <= voteRequest.getLastLogPos())) {
@@ -486,6 +504,8 @@ public class RaftLeaderElection extends LeaderElection  {
      * @return 返回的命令
      */
     public synchronized Command handlePreVoteRequest(VoteRequest voteRequest){
+        boolean voteGranted = false;
+
         if (voteRequest == null) {
             logger.warn("Partition group {}/node{} receive pre vote request, request is null",
                     topicPartitionGroup, localNode);
@@ -495,27 +515,31 @@ public class RaftLeaderElection extends LeaderElection  {
         if (!isStarted()) {
             logger.warn("Partition group {}/node{} receive pre vote request, election not started",
                     topicPartitionGroup, localNode);
-            return new Command(new JMQHeader(Direction.RESPONSE, CommandType.RAFT_VOTE_RESPONSE),
-                    new VoteResponse(currentTerm, voteRequest.getCandidateId(), localNodeId, false));
+            return null;
+        }
+
+        if (!allNodes.containsKey(voteRequest.getCandidateId())) {
+            logger.warn("Partition group {}/node{} receive pre vote request from unknown node {}",
+                    topicPartitionGroup, localNode, voteRequest.getCandidateId());
+            return null;
         }
 
         if (currentTerm > voteRequest.getTerm()) {
             logger.info("Partition group {}/node{} receive pre vote request from {}, currentTerm {} is " +
-                        "great than request term {}",
+                            "great than request term {}",
                     topicPartitionGroup, localNode, voteRequest.getCandidateId(), currentTerm, voteRequest.getTerm());
             return new Command(new JMQHeader(Direction.RESPONSE, CommandType.RAFT_VOTE_RESPONSE),
-                    new VoteResponse(currentTerm, voteRequest.getCandidateId(), localNodeId, false));
+                    new VoteResponse(currentTerm, voteRequest.getCandidateId(), localNodeId, voteGranted));
         }
 
-        boolean voteGranted = false;
         int lastLogTerm = getLastLogTerm();
         long lastLogPos = getLastLogPosition();
 
         logger.info("Partition group {}/node{} receive pre vote request from {}, lastLogTerm is {}, " +
-                    "lastLogIndex is {}, request lastLogTerm is {}, request lastLogIndex is {}, " +
-                    "voteFor is {}, request term is {}",
+                        "lastLogIndex is {}, request lastLogTerm is {}, request lastLogIndex is {}, " +
+                        "voteFor is {}, request term is {}",
                 topicPartitionGroup, localNode, voteRequest.getCandidateId(), lastLogTerm, lastLogPos,
-                voteRequest.getLastLogTerm(), voteRequest.getLastLogPos(),  votedFor, voteRequest.getTerm());
+                voteRequest.getLastLogTerm(), voteRequest.getLastLogPos(), votedFor, voteRequest.getTerm());
 
         if (lastLogTerm < voteRequest.getLastLogTerm() ||
                 (lastLogTerm == voteRequest.getLastLogTerm() && lastLogPos <= voteRequest.getLastLogPos())) {
@@ -523,7 +547,7 @@ public class RaftLeaderElection extends LeaderElection  {
         }
 
         return new Command(new JMQHeader(Direction.RESPONSE, CommandType.RAFT_VOTE_RESPONSE),
-                new VoteResponse(currentTerm, voteRequest.getCandidateId(), localNodeId, voteGranted));
+                           new VoteResponse(currentTerm, voteRequest.getCandidateId(), localNodeId, voteGranted));
     }
 
     /**
@@ -638,13 +662,18 @@ public class RaftLeaderElection extends LeaderElection  {
         if (!isStarted()) {
             logger.warn("Partition group {}/node{} receive append entries request, election not started",
                     topicPartitionGroup, localNode);
-            return new Command(new JMQHeader(Direction.RESPONSE, CommandType.RAFT_APPEND_ENTRIES_RESPONSE),
-                                new AppendEntriesResponse.Build().success(false).nextPosition(request.getStartPosition()).build());
+            return null;
         }
 
         logger.debug("Partition group {}/node {} receive append entries request, currentTerm is {}, " +
                     "request term is {}, leaderId is {}",
                 topicPartitionGroup, localNode, currentTerm, request.getTerm(), request.getLeaderId());
+
+        if (!allNodes.containsKey(request.getLeaderId())) {
+            logger.warn("Partition group {}/node{} receive append entries request from unknown node {}",
+                    topicPartitionGroup, localNode, request.getLeaderId());
+            return null;
+        }
 
         if (request.getTerm() < currentTerm) {
             logger.info("Partition group {}/node {} receive append entries request, current term {} " +
@@ -807,7 +836,7 @@ public class RaftLeaderElection extends LeaderElection  {
 
         try {
             if (replicableStore.serviceStatus()) {
-                replicableStore.disable(electionConfig.getDisableStoreTimeout());
+                replicableStore.disable();
             }
             replicableStore.term(term);
         } catch (Exception e) {

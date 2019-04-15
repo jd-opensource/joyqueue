@@ -29,6 +29,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>${h2database.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.jd.journalq</groupId>
             <artifactId>journalq-token-uuid-starter</artifactId>
             <version>${project.version}</version>
@@ -50,6 +55,12 @@
             <groupId>com.jd.laf.web</groupId>
             <artifactId>laf-vertx-web-springboot-starter</artifactId>
             <version>${laf-vertx.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+            <version>${spring-boot.version}</version>
         </dependency>
 
         <dependency>

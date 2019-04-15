@@ -116,4 +116,26 @@ public interface ElectionService {
      * Sync election meta data from name service
      */
     void syncElectionMetadataFromNameService();
+
+    /**
+     * Describe election metadata of all topics
+     * @return description of election metadata
+     */
+    String describe();
+
+    /**
+     * Describe election metadata of specified topic
+     * @param topic topic to describe
+     * @param partitionGroup partition group to describe
+     * @return description of election metadata
+     */
+    String describe(String topic, int partitionGroup);
+
+    /**
+     * Update term of the metadata
+     * @param topic topic
+     * @param partitionGroup partition group
+     * @param term new term
+     */
+    void updateTerm(String topic, int partitionGroup, int term);
 }

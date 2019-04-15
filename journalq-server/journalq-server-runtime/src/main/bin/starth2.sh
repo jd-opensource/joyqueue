@@ -41,6 +41,6 @@ if [ ! -x "$JAVACMD" ] ; then
   exit 1
 fi
 
-nohup "$JAVACMD" -classpath "$CLASSPATH" -Dbasedir="$BASEDIR" -Dfile.encoding="UTF-8" org.h2.tools.Server -tcp -baseDir ./h2-db-jmq \
+nohup "$JAVACMD" -classpath "$CLASSPATH" -Dbasedir="$BASEDIR" -Dfile.encoding="UTF-8" org.h2.tools.Server -tcp -baseDir ./h2-db-journalq \
 "$@" >/dev/null 2>/dev/null &
 echo $! > h2.pid

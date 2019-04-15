@@ -36,11 +36,6 @@
           "component": "setting/userManage.vue"
         },
         {
-          "path": "userToken",
-          "name": "userToken",
-          "component": "setting/userTokenManage.vue"
-        },
-        {
           "path": "dataCenter",
           "name": "dataCenter",
           "component": "setting/dataCenter.vue"

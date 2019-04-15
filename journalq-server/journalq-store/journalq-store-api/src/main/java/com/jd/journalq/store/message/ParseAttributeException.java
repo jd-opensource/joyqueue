@@ -14,6 +14,7 @@
 package com.jd.journalq.store.message;
 
 /**
+ * 解析消息异常
  * @author liyue25
  * Date: 2019-01-15
  */

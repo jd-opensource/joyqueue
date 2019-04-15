@@ -40,12 +40,7 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -171,13 +166,17 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         }
     }
 
-    public void recover() throws IOException {
-        logger.info("Recovering message store...");
-        store.recover();
-        logger.info("Recovering index store...");
-        indexPosition = recoverPartitions();
-        logger.info("Building indices ...");
-        recoverIndices();
+    public void recover() {
+        try {
+            logger.info("Recovering message store...");
+            store.recover();
+            logger.info("Recovering index store...");
+            indexPosition = recoverPartitions();
+            logger.info("Building indices ...");
+            recoverIndices();
+        } catch (IOException e) {
+            throw new StoreInitializeException(e);
+        }
     }
 
     private void recoverIndices() throws IOException {
@@ -522,7 +521,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         } catch (Throwable t) {
             logger.warn("Write failed, rollback to position: {}, topic={}, partitionGroup={}.", start, topic, partitionGroup, t);
             try {
-                setRightPosition(start, config.writeTimeoutMs);
+                setRightPosition(start);
             } catch (Throwable e) {
                 logger.warn("Rollback failed, rollback to position: {}, topic={}, partitionGroup={}.", start, topic, partitionGroup, e);
             }
@@ -913,7 +912,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
     }
 
     @Override
-    public void disable(long timeoutMs) {
+    public void disable() {
         if (enabled.get()) {
             writeCommandCache.clear();
             stopWriteThread();
@@ -922,7 +921,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
     }
 
     @Override
-    public void setRightPosition(long position, long timeout) throws IOException {
+    public void setRightPosition(long position) throws IOException {
         stopFlushThread();
         try {
             rollback(position);
@@ -1046,7 +1045,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         } catch (Throwable t) {
             logger.warn("Write failed, rollback to position: {}, topic={}, partitionGroup={}.", start, topic, partitionGroup, t);
             try {
-                setRightPosition(start, config.writeTimeoutMs);
+                setRightPosition(start);
             } catch (Throwable e) {
                 logger.warn("Rollback failed, rollback to position: {}, topic={}, partitionGroup={}.", start, topic, partitionGroup, e);
             }

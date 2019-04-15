@@ -26,7 +26,7 @@ public class StoreInitializeException extends RuntimeException {
         super(message);
     }
 
-    StoreInitializeException(String message, Throwable t) {
-        super(message, t);
+    StoreInitializeException(Throwable t) {
+        super(t);
     }
 }

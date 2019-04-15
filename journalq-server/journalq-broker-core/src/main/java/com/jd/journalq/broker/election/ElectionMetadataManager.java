@@ -20,6 +20,7 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.domain.TopicConfig;
+import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.toolkit.io.Files;
 import com.jd.journalq.toolkit.service.Service;
 import org.apache.commons.lang3.StringUtils;
@@ -58,11 +59,15 @@ public class ElectionMetadataManager {
      * @param electionManager election manager
      */
     void recover(ElectionManager electionManager) throws Exception {
-        File file = new File(fileName);
-        if (file.exists()) recoverMetadataOld(file);
-        else recoverMetadata();
+        try {
+            File file = new File(fileName);
+            if (file.exists()) recoverMetadataOld(file);
+            else recoverMetadata();
 
-        restoreLeaderElections(electionManager);
+            restoreLeaderElections(electionManager);
+        } catch (Exception e) {
+            logger.info("Recover election metadata fail", e);
+        }
     }
 
     /**
@@ -114,7 +119,7 @@ public class ElectionMetadataManager {
         for (File topicDir : topicDirs) {
             if (!topicDir.isDirectory()) continue;
 
-            String topic = topicDir.getName();
+            String topic = topicDir.getName().replace('@', '/');
             File[] pgsFiles = topicDir.listFiles();
             if (pgsFiles == null) continue;
 
@@ -190,7 +195,7 @@ public class ElectionMetadataManager {
     synchronized void removeElectionMetadata(TopicPartitionGroup topicPartitionGroup) {
         try {
             metadataMap.remove(topicPartitionGroup);
-            File topicDir = new File(this.path + "/" + topicPartitionGroup.getTopic());
+            File topicDir = new File(this.path + "/" + topicPartitionGroup.getTopic().replace('/', '@'));
             File[] pgFiles = topicDir.listFiles();
             if (pgFiles == null) return;
 
@@ -244,13 +249,20 @@ public class ElectionMetadataManager {
         }
     }
 
+    synchronized String describe() {
+        return JSON.toJSONString(metadataMap);
+    }
+
+    synchronized String describe(String topic, int partitionGroup) {
+        return JSON.toJSONString(metadataMap.get(new TopicPartitionGroup(topic, partitionGroup)));
+    }
 
     private ElectionMetadata generateMetadataFromPartitionGroup(String topic, PartitionGroup partitionGroup, int localBrokerId) throws IOException {
         return ElectionMetadata.Build.create(path, new TopicPartitionGroup(topic, partitionGroup.getGroup()))
                 .electionType(partitionGroup.getElectType()).leaderId(partitionGroup.getLeader())
                 .learners(partitionGroup.getLearners()).localNode(localBrokerId)
                 .currentTerm(partitionGroup.getTerm()).allNodes(partitionGroup.getBrokers().values().stream()
-                        .map(broker -> new DefaultElectionNode(broker.getAddress(), broker.getId()))
+                        .map(broker -> new DefaultElectionNode(broker.getIp() + ":" + broker.getBackEndPort(), broker.getId()))
                         .collect(Collectors.toList())).build();
     }
 
@@ -261,8 +273,8 @@ public class ElectionMetadataManager {
     synchronized void syncElectionMetadataFromNameService(ClusterManager clusterManager) {
         clearElectionMetadata();
 
-        List<TopicConfig> topicConfigs = clusterManager.getTopics();
-        for (TopicConfig topicConfig : topicConfigs) {
+        Map<TopicName, TopicConfig> topicConfigs = clusterManager.getNameService().getTopicConfigByBroker(clusterManager.getBrokerId());
+        for (TopicConfig topicConfig : topicConfigs.values()) {
             topicConfig.getPartitionGroups().values().forEach((pg) -> {
                 try {
                     ElectionMetadata metadata = generateMetadataFromPartitionGroup(topicConfig.getName().getFullName(),
@@ -275,6 +287,18 @@ public class ElectionMetadataManager {
                 }
             });
         }
+    }
+
+    /**
+     * 更新term
+     * @param topic topic
+     * @param partitionGroup partition group
+     * @param term 新的term
+     */
+    synchronized void updateTerm(String topic, int partitionGroup, int term) {
+        ElectionMetadata metadata = metadataMap.get(new TopicPartitionGroup(topic, partitionGroup));
+        metadata.setCurrentTerm(term);
+        metadata.flush();
     }
 
     public void close() {

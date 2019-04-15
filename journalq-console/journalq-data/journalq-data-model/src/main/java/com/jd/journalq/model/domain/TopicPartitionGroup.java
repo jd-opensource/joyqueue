@@ -15,6 +15,8 @@ package com.jd.journalq.model.domain;
 
 import java.beans.Transient;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -34,6 +36,7 @@ public class TopicPartitionGroup implements Serializable {
     private transient Set<Integer> learners;
     private transient Set<Integer> partitionSet = new TreeSet<>();
     private transient Set<Integer> isr;
+    protected List<Integer> outSyncReplicas = new ArrayList<>();
 
     public String getId() {
         return id;
@@ -150,6 +153,14 @@ public class TopicPartitionGroup implements Serializable {
 
     public void setTerm(Integer term) {
         this.term = term;
+    }
+
+    public List<Integer> getOutSyncReplicas() {
+        return outSyncReplicas;
+    }
+
+    public void setOutSyncReplicas(List<Integer> outSyncReplicas) {
+        this.outSyncReplicas = outSyncReplicas;
     }
 
     public enum ElectType{

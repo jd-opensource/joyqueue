@@ -80,6 +80,7 @@ public class ReplicationManager extends Service {
 
         ClientConfig clientConfig = new ClientConfig();
         clientConfig.setIoThreadName("jmq-replication-io-eventLoop");
+        clientConfig.setMaxAsync(1000);
         transportClient = new BrokerTransportClientFactory().create(clientConfig);
         transportClient.start();
 
