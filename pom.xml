@@ -948,7 +948,7 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven-surefire-plugin.version}</version>
                     <configuration>
-                        <skipTests>true</skipTests>
+                        <skipTests>false</skipTests>
                     </configuration>
                 </plugin>
                 <!--<plugin>-->
@@ -1062,7 +1062,7 @@
                         <goals>
                             <goal>check</goal>
                         </goals>
-                        <configuration>BrokerClusterQuery
+                        <configuration>
                             <configLocation>styles/checkstyle.xml</configLocation>
                             <failOnViolation>false</failOnViolation>
                         </configuration>
