@@ -215,6 +215,7 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
     public int leaderChange(TopicPartitionGroup model) throws Exception {
         TopicPartitionGroup topicPartitionGroup = findByTopicAndGroup(model.getNamespace().getCode(),model.getTopic().getCode(),model.getGroupNo());
         topicPartitionGroup.setLeader(model.getLeader());
+        topicPartitionGroup.setOutSyncReplicas(model.getOutSyncReplicas());
         return topicNameServerService.leaderChange(topicPartitionGroup);
     }
 

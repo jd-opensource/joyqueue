@@ -343,6 +343,9 @@ public class OpenAPIServiceImpl implements OpenAPIService {
         qBroker.setGroup(new Identity(brokerGroup.getId(),brokerGroup.getCode()));
         List<Broker> brokers = brokerService.queryBrokerList(qBroker);
 
+        if (brokers.size() == 0 ) {
+            throw new ServiceException(BAD_REQUEST,"select broker is empty");
+        }
         //如果用户设置broker数量,则校验broker数量是否能满足
         if (topic.getBrokerNum() !=0 && topic.getBrokerNum() > brokers.size() ) {
             throw new ServiceException(BAD_REQUEST,"实际可用broker数量小于指定broker数量");
