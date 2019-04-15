@@ -136,7 +136,6 @@ public class StoreCleanManager extends Service {
                                                                 } catch (JMQException e) {
                                                                     //minAckIndex = Long.MAX_VALUE;
                                                                     LOG.error("Error to get last topic & app offset: <{}>", e);
-                                                                    e.printStackTrace();
                                                                 }
                                                             }
                                                         }
