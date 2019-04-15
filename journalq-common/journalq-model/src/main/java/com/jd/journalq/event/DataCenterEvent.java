@@ -38,7 +38,7 @@ public class DataCenterEvent extends MetaEvent {
     }
     @Override
     public String getTypeName() {
-        return "com.jd.jmq.common.event.DataCenterEvent";
+        return getClass().getTypeName();
     }
    public static DataCenterEvent add(String region, String code, String url) {
         return new DataCenterEvent(EventType.ADD_DATACENTER, region, code, url);

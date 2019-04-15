@@ -29,7 +29,7 @@ public class ConfigEvent extends MetaEvent {
     }
     @Override
     public String getTypeName() {
-        return "com.jd.jmq.common.event.ConfigEvent";
+        return getClass().getTypeName();
     }
     public void setGroup(String group) {
         this.group = group;

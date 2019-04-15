@@ -29,7 +29,7 @@ public class ProducerEvent extends MetaEvent {
     }
     @Override
     public String getTypeName() {
-        return "com.jd.jmq.common.event.ProducerEvent";
+        return getClass().getTypeName();
     }
     public TopicName getTopic() {
         return topic;

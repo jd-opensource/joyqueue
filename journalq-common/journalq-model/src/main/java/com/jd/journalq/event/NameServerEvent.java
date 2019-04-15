@@ -33,7 +33,7 @@ public class NameServerEvent extends MetaEvent {
     }
     @Override
     public String getTypeName() {
-        return "com.jd.jmq.common.event.NameServerEvent";
+        return getClass().getTypeName();
     }
     public void setBrokerId(Integer brokerId) {
         this.brokerId = brokerId;
