@@ -26,7 +26,7 @@ public class TopicPartitionGroup {
     public TopicPartitionGroup() {}
 
     public TopicPartitionGroup(String topic, int partitionGroupId) {
-        this.topic = topic.replace('/', '@');
+        this.topic = topic;
         this.partitionGroupId = partitionGroupId;
     }
 

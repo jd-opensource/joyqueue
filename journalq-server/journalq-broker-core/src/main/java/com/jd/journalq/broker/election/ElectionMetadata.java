@@ -217,7 +217,7 @@ public class ElectionMetadata extends DoubleCopy {
         }
 
         public static Build create(String path, TopicPartitionGroup topicPartitionGroup) throws IOException {
-            String fileName = path + "/" + topicPartitionGroup.getTopic() + "/" +
+            String fileName = path + "/" + topicPartitionGroup.getTopic().replace('/', '@') + "/" +
                     topicPartitionGroup.getPartitionGroupId();
             return new Build(fileName);
         }
