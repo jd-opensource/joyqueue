@@ -15,6 +15,9 @@ package com.jd.journalq.model.domain;
 
 import com.jd.journalq.model.domain.nsr.BaseNsrModel;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class PartitionGroupReplica  extends BaseNsrModel implements Comparable<PartitionGroupReplica> {
 
     public static final int ROLE_DYNAMIC = 0;
@@ -32,6 +35,7 @@ public class PartitionGroupReplica  extends BaseNsrModel implements Comparable<P
     private int brokerId;
     private int role = ROLE_DYNAMIC;
     private Broker broker;
+    protected List<Integer> outSyncReplicas = new ArrayList<>();
 
     public Namespace getNamespace() {
         return namespace;
@@ -79,6 +83,14 @@ public class PartitionGroupReplica  extends BaseNsrModel implements Comparable<P
 
     public void setBroker(Broker broker) {
         this.broker = broker;
+    }
+
+    public List<Integer> getOutSyncReplicas() {
+        return outSyncReplicas;
+    }
+
+    public void setOutSyncReplicas(List<Integer> outSyncReplicas) {
+        this.outSyncReplicas = outSyncReplicas;
     }
 
     @Override

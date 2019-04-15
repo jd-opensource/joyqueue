@@ -100,6 +100,7 @@ public class PartitionGroupReplicaCommand extends NsrCommandSupport<PartitionGro
         topicPartitionGroup.setNamespace(model.getNamespace());
         topicPartitionGroup.setLeader(model.getBrokerId());
         topicPartitionGroup.setGroupNo(model.getGroupNo());
+        topicPartitionGroup.setOutSyncReplicas(model.getOutSyncReplicas());
         int count = topicPartitionGroupService.leaderChange(topicPartitionGroup);
         if (count<=0) {
             throw new ConfigException(updateErrorCode());
