@@ -70,6 +70,77 @@ public class RoutingVerticle extends com.jd.laf.web.vertx.RoutingVerticle {
 
 
     @Override
+    public void start() throws Exception {
+        try {
+            //构建配置数据
+            config = inherit(buildConfig(buildBaseConfig(BASE_ROUTING), file));
+
+            //初始化插件
+            register(vertx, env, config);
+
+            router = createRouter(env);
+            //通过配置文件构建路由
+            addRoutes(router, config.getRoutes(), env);
+            //通过路由提供者构建路由
+            if (providers != null) {
+                for (RouteProvider provider : providers) {
+                    addRoutes(router, provider.getRoutes(), env);
+                }
+            }
+            //启动服务
+            startHttpServer();
+            //注册路由变更消息监听器
+            dynamicRoute();
+            logger.info(String.format("success starting routing verticle %d at %s", id, deploymentID()));
+        } catch (Exception e) {
+            logger.error(String.format("failed starting routing verticle %d at %s", id, deploymentID()), e);
+            throw e;
+        }
+    }
+
+    protected VertxConfig buildBaseConfig(String file) throws Exception {
+        if (file == null || file.isEmpty()) {
+            throw new IllegalStateException("file can not be empty.");
+        }
+
+        BufferedReader reader = null;
+        try {
+            InputStream inputStream = VertxConfig.class.getClassLoader().getResourceAsStream(file);
+            reader = new BufferedReader(new InputStreamReader(inputStream));
+            return VertxConfig.Builder.build(reader);
+        } finally {
+            if (reader != null) {
+                reader.close();
+            }
+        }
+    }
+
+    protected VertxConfig buildConfig(VertxConfig baseConfig, String file) throws Exception {
+        if (file == null || file.isEmpty()) {
+            throw new IllegalStateException("file can not be empty.");
+        }
+
+        VertxConfig result = baseConfig;
+        Enumeration<URL> resources = VertxConfig.class.getClassLoader().getResources(file);
+
+        while (resources.hasMoreElements()) {
+            URL resource = resources.nextElement();
+            BufferedReader reader = null;
+            try {
+                InputStream inputStream = resource.openStream();
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+                VertxConfig config = VertxConfig.Builder.build(reader);
+                result.getRoutes().addAll(config.getRoutes());
+            } finally {
+                if (reader != null) {
+                    reader.close();
+                }
+            }
+        }
+
+        return result;
+    }
+    @Override
     protected void buildHandlers(Route route, RouteConfig config, Environment environment) {
         String handler = config.getHandlers().get(0);
         String[] splitsHandler = StringUtils.splitByWholeSeparator(handler, SERVICE_SEPARATOR);
