@@ -149,8 +149,7 @@ public class StoreCleanManager extends Service {
                                                     cleaningStrategy.deleteIfNeeded(storeService.getStore(topicConfig.getName().getFullName(), partitionGroup.getGroup()), partitionAckMap);
                                                 }
                                             } catch (IOException e) {
-                                                LOG.error("Error to clean store for topic <{}>, partition group <{}>, delete partitions index <{}> on clean class <{}>", topicConfig, partitionGroup.getGroup(), partitionAckMap, cleaningStrategy);
-                                                e.printStackTrace();
+                                                LOG.error("Error to clean store for topic <{}>, partition group <{}>, delete partitions index <{}> on clean class <{}>, exception: <{}>", topicConfig, partitionGroup.getGroup(), partitionAckMap, cleaningStrategy, e);
                                             }
                                         }
                                     }
