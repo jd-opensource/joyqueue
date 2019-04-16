@@ -765,8 +765,17 @@ public class ReplicaGroup extends Service {
             return;
         }
 
-        if (state != ElectionNode.State.LEADER && state != ElectionNode.State.TRANSFERRING) return;
-        if (replica.replicaId() == localReplicaId) return;
+        if (state != ElectionNode.State.LEADER && state != ElectionNode.State.TRANSFERRING) {
+            logger.info("Partition group {}/node {} start new heartbeat, state is {}",
+                    topicPartitionGroup, localReplicaId, state);
+            return;
+        }
+
+        if (replica.replicaId() == localReplicaId) {
+            logger.info("Partition group {}/node {} start new heartbeat, replica is local",
+                    topicPartitionGroup, localReplicaId);
+            return;
+        }
 
         AppendEntriesRequest appendEntriesRequest = AppendEntriesRequest.Build.create()
                 .partitionGroup(topicPartitionGroup).term(currentTerm).leader(leaderId).build();
@@ -831,7 +840,7 @@ public class ReplicaGroup extends Service {
      * 重置心跳定时器
      */
     private void resetHeartbeatTimer(Replica replica) {
-        synchronized (replica.heartbeatTimerFuture()) {
+        synchronized (replica) {
             ScheduledFuture heartbeatTimerFuture = replica.heartbeatTimerFuture();
             if (heartbeatTimerFuture != null && !heartbeatTimerFuture.isDone()) {
                 heartbeatTimerFuture.cancel(true);
@@ -846,7 +855,7 @@ public class ReplicaGroup extends Service {
      * 取消心跳定时器
      */
     private void cancelHeartbeatTimer(Replica replica) {
-        synchronized (replica.heartbeatTimerFuture()) {
+        synchronized (replica) {
             ScheduledFuture heartbeatTimerFuture = replica.heartbeatTimerFuture();
             if (heartbeatTimerFuture != null && !heartbeatTimerFuture.isDone()) {
                 heartbeatTimerFuture.cancel(true);
