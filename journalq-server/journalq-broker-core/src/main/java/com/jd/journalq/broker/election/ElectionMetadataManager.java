@@ -119,7 +119,7 @@ public class ElectionMetadataManager {
         for (File topicDir : topicDirs) {
             if (!topicDir.isDirectory()) continue;
 
-            String topic = topicDir.getName().replace('@', '/');
+            String topic = topicDir.getName().replace('@', File.separatorChar);
             File[] pgsFiles = topicDir.listFiles();
             if (pgsFiles == null) continue;
 
@@ -195,7 +195,8 @@ public class ElectionMetadataManager {
     synchronized void removeElectionMetadata(TopicPartitionGroup topicPartitionGroup) {
         try {
             metadataMap.remove(topicPartitionGroup);
-            File topicDir = new File(this.path + "/" + topicPartitionGroup.getTopic().replace('/', '@'));
+            File topicDir = new File(this.path + File.separator + topicPartitionGroup.getTopic()
+                    .replace(File.separatorChar, '@'));
             File[] pgFiles = topicDir.listFiles();
             if (pgFiles == null) return;
 

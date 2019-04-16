@@ -66,7 +66,7 @@ public class ReplicaGroup extends Service {
     private List<Replica> replicas;
     private List<Replica> replicasWithoutLearners;
 
-    private ElectionNode.State state;
+    private volatile ElectionNode.State state;
 
     private int localReplicaId;
     private int leaderId;
@@ -235,9 +235,9 @@ public class ReplicaGroup extends Service {
             r.setMatch(false);
         });
 
-        replicasWithoutLearners.forEach(this::startNewHeartbeat);
-
         state = ElectionNode.State.LEADER;
+
+        replicasWithoutLearners.forEach(this::startNewHeartbeat);
 
         logger.info("Partition group {}/node {} become leader, term is {}, writePosition is {}, " +
                     "commit position is {}",
@@ -572,7 +572,6 @@ public class ReplicaGroup extends Service {
                     topicPartitionGroup, localReplicaId, consumePositions, replica.replicaId());
 
             replicateExecutor.submit(() -> {
-                Thread.currentThread().setName("SendReplicateConsumeMessage-" + Thread.currentThread().getId());
                 try {
                     replicationManager.sendCommand(replica.getAddress(), new Command(header, request),
                             electionConfig.getSendCommandTimeout(), new ReplicateConsumePosRequestCallback(replica));
@@ -766,8 +765,17 @@ public class ReplicaGroup extends Service {
             return;
         }
 
-        if (state != ElectionNode.State.LEADER && state != ElectionNode.State.TRANSFERRING) return;
-        if (replica.replicaId() == localReplicaId) return;
+        if (state != ElectionNode.State.LEADER && state != ElectionNode.State.TRANSFERRING) {
+            logger.info("Partition group {}/node {} start new heartbeat, state is {}",
+                    topicPartitionGroup, localReplicaId, state);
+            return;
+        }
+
+        if (replica.replicaId() == localReplicaId) {
+            logger.info("Partition group {}/node {} start new heartbeat, replica is local",
+                    topicPartitionGroup, localReplicaId);
+            return;
+        }
 
         AppendEntriesRequest appendEntriesRequest = AppendEntriesRequest.Build.create()
                 .partitionGroup(topicPartitionGroup).term(currentTerm).leader(leaderId).build();
@@ -832,23 +840,27 @@ public class ReplicaGroup extends Service {
      * 重置心跳定时器
      */
     private void resetHeartbeatTimer(Replica replica) {
-        ScheduledFuture heartbeatTimerFuture = replica.heartbeatTimerFuture();
-        if (heartbeatTimerFuture != null && !heartbeatTimerFuture.isDone()) {
-            heartbeatTimerFuture.cancel(true);
+        synchronized (replica) {
+            ScheduledFuture heartbeatTimerFuture = replica.heartbeatTimerFuture();
+            if (heartbeatTimerFuture != null && !heartbeatTimerFuture.isDone()) {
+                heartbeatTimerFuture.cancel(true);
+            }
+            heartbeatTimerFuture = replicateTimerExecutor.schedule(() -> startNewHeartbeat(replica),
+                    electionConfig.getHeartbeatTimeout(), TimeUnit.MILLISECONDS);
+            replica.heartbeatTimerFuture(heartbeatTimerFuture);
         }
-        heartbeatTimerFuture = replicateTimerExecutor.schedule(() -> startNewHeartbeat(replica),
-                electionConfig.getHeartbeatTimeout(), TimeUnit.MILLISECONDS);
-        replica.heartbeatTimerFuture(heartbeatTimerFuture);
     }
 
     /**
      * 取消心跳定时器
      */
     private void cancelHeartbeatTimer(Replica replica) {
-        ScheduledFuture heartbeatTimerFuture = replica.heartbeatTimerFuture();
-        if (heartbeatTimerFuture != null && !heartbeatTimerFuture.isDone()) {
-            heartbeatTimerFuture.cancel(true);
-            replica.heartbeatTimerFuture(null);
+        synchronized (replica) {
+            ScheduledFuture heartbeatTimerFuture = replica.heartbeatTimerFuture();
+            if (heartbeatTimerFuture != null && !heartbeatTimerFuture.isDone()) {
+                heartbeatTimerFuture.cancel(true);
+                replica.heartbeatTimerFuture(null);
+            }
         }
     }
 
