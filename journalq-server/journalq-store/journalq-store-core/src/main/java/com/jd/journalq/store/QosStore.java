@@ -108,8 +108,10 @@ public class QosStore implements PartitionGroupStore {
             }
         }
 
-        deletedSize += store.messageStore().physicalDeleteTo(minMessagePosition);
-        logger.info("Delete PositioningStore physical message file, offset position: <{}>", minMessagePosition);
+        if(minMessagePosition >= 0) {
+            deletedSize += store.messageStore().physicalDeleteTo(minMessagePosition);
+            logger.info("Delete PositioningStore physical message file, offset position: <{}>", minMessagePosition);
+        }
 
         return deletedSize;
     }
