@@ -128,7 +128,7 @@ def _main():
     else:
         download = jss.download(resource)
     return 0
-    
+
 #  test cases
 #  python ./jsutil.py --access_key dyOnweqqzPzU3fbx --secret_key mVLGu6a6FVsxFCUEea1l6zoGsgP2okaqIdZ28ju7 --host test.storage.jd.com  -r docker/ucc.md
 #  python ./jsutil.py --access_key dyOnweqqzPzU3fbx --secret_key mVLGu6a6FVsxFCUEea1l6zoGsgP2okaqIdZ28ju7 --host test.storage.jd.com --local_file /export/docs/ucc.md -r docker
