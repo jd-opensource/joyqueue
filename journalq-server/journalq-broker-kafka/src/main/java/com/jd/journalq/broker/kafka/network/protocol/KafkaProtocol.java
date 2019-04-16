@@ -11,7 +11,7 @@ import com.jd.journalq.broker.kafka.coordinator.group.GroupBalanceManager;
 import com.jd.journalq.broker.kafka.coordinator.group.GroupCoordinator;
 import com.jd.journalq.broker.kafka.coordinator.group.GroupMetadataManager;
 import com.jd.journalq.broker.kafka.coordinator.group.GroupOffsetHandler;
-import com.jd.journalq.broker.kafka.coordinator.group.GroupOffsetSynchronizer;
+import com.jd.journalq.broker.kafka.coordinator.group.GroupOffsetManager;
 import com.jd.journalq.broker.kafka.coordinator.transaction.ProducerIdManager;
 import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionCompensator;
 import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionCoordinator;
@@ -54,7 +54,7 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
     private KafkaConfig config;
     private Coordinator coordinator;
     private GroupMetadataManager groupMetadataManager;
-    private GroupOffsetSynchronizer groupOffsetSynchronizer;
+    private GroupOffsetManager groupOffsetManager;
     private GroupBalanceManager groupBalanceManager;
     private GroupOffsetHandler groupOffsetHandler;
     private GroupBalanceHandler groupBalanceHandler;
@@ -76,16 +76,16 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
 
     @Override
     public void setBrokerContext(BrokerContext brokerContext) {
-        this.config = new KafkaConfig(brokerContext.getPropertySupplier());
         com.jd.journalq.broker.coordinator.group.GroupMetadataManager groupMetadataManager = brokerContext.getCoordinatorService().getOrCreateGroupMetadataManager(KafkaConsts.COORDINATOR_NAMESPACE);
         com.jd.journalq.broker.coordinator.transaction.TransactionMetadataManager transactionMetadataManager = brokerContext.getCoordinatorService().getOrCreateTransactionMetadataManager(KafkaConsts.COORDINATOR_NAMESPACE);
 
+        this.config = new KafkaConfig(brokerContext.getPropertySupplier());
         this.coordinator = new Coordinator(brokerContext.getCoordinatorService().getCoordinator());
 
         this.groupMetadataManager = new GroupMetadataManager(config, groupMetadataManager);
-        this.groupOffsetSynchronizer = new GroupOffsetSynchronizer(config, brokerContext.getClusterManager(), coordinator.getSessionManager());
+        this.groupOffsetManager = new GroupOffsetManager(config, brokerContext.getClusterManager(), coordinator.getSessionManager());
         this.groupBalanceManager = new GroupBalanceManager(config, this.groupMetadataManager);
-        this.groupOffsetHandler = new GroupOffsetHandler(config, coordinator, this.groupMetadataManager, groupBalanceManager, groupOffsetSynchronizer);
+        this.groupOffsetHandler = new GroupOffsetHandler(config, coordinator, this.groupMetadataManager, groupBalanceManager, groupOffsetManager);
         this.groupBalanceHandler = new GroupBalanceHandler(config, this.groupMetadataManager, groupBalanceManager);
         this.groupCoordinator = new GroupCoordinator(coordinator, groupBalanceHandler, groupOffsetHandler, this.groupMetadataManager);
 
@@ -120,7 +120,7 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
 
     @Override
     public void doStart() throws Exception {
-        groupOffsetSynchronizer.start();
+        groupOffsetManager.start();
         groupBalanceManager.start();
         groupOffsetHandler.start();
         groupBalanceHandler.start();
@@ -137,7 +137,7 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
     @Override
     protected void doStop() {
         groupCoordinator.stop();
-        groupOffsetSynchronizer.stop();
+        groupOffsetManager.stop();
         groupBalanceManager.stop();
         groupOffsetHandler.stop();
         groupBalanceHandler.stop();

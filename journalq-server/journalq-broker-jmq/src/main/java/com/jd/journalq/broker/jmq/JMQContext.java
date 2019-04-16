@@ -3,7 +3,7 @@ package com.jd.journalq.broker.jmq;
 import com.jd.journalq.broker.jmq.coordinator.assignment.PartitionAssignmentHandler;
 import com.jd.journalq.broker.BrokerContext;
 import com.jd.journalq.broker.jmq.config.JMQConfig;
-import com.jd.journalq.broker.jmq.coordinator.JMQCoordinator;
+import com.jd.journalq.broker.jmq.coordinator.Coordinator;
 import com.jd.journalq.broker.jmq.coordinator.GroupMetadataManager;
 import com.jd.journalq.broker.polling.LongPollingManager;
 
@@ -16,13 +16,13 @@ import com.jd.journalq.broker.polling.LongPollingManager;
 public class JMQContext {
 
     private static JMQConfig config;
-    private JMQCoordinator coordinator;
+    private Coordinator coordinator;
     private GroupMetadataManager coordinatorGroupManager;
     private PartitionAssignmentHandler partitionAssignmentHandler;
     private LongPollingManager longPollingManager;
     private BrokerContext brokerContext;
 
-    public JMQContext(JMQConfig config, JMQCoordinator coordinator, GroupMetadataManager coordinatorGroupManager, PartitionAssignmentHandler partitionAssignmentHandler,
+    public JMQContext(JMQConfig config, Coordinator coordinator, GroupMetadataManager coordinatorGroupManager, PartitionAssignmentHandler partitionAssignmentHandler,
                       LongPollingManager longPollingManager, BrokerContext brokerContext) {
         this.config = config;
         this.coordinator = coordinator;
@@ -36,7 +36,7 @@ public class JMQContext {
         return config;
     }
 
-    public JMQCoordinator getCoordinator() {
+    public Coordinator getCoordinator() {
         return coordinator;
     }
 

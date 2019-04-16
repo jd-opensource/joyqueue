@@ -36,21 +36,21 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 /**
- * GroupOffsetSynchronizer
+ * GroupOffsetManager
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/11/7
  */
 // TODO 优化代码
-public class GroupOffsetSynchronizer extends Service {
+public class GroupOffsetManager extends Service {
 
-    protected static final Logger logger = LoggerFactory.getLogger(GroupOffsetSynchronizer.class);
+    protected static final Logger logger = LoggerFactory.getLogger(GroupOffsetManager.class);
 
     private KafkaConfig config;
     private ClusterManager clusterManager;
     private CoordinatorSessionManager sessionManager;
 
-    public GroupOffsetSynchronizer(KafkaConfig config, ClusterManager clusterManager, CoordinatorSessionManager sessionManager) {
+    public GroupOffsetManager(KafkaConfig config, ClusterManager clusterManager, CoordinatorSessionManager sessionManager) {
         this.config = config;
         this.clusterManager = clusterManager;
         this.sessionManager = sessionManager;

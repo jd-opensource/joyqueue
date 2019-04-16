@@ -32,14 +32,14 @@ public class GroupOffsetHandler extends Service {
     private Coordinator coordinator;
     private GroupMetadataManager groupMetadataManager;
     private GroupBalanceManager groupBalanceManager;
-    private GroupOffsetSynchronizer groupOffsetSynchronizer;
+    private GroupOffsetManager groupOffsetManager;
 
-    public GroupOffsetHandler(KafkaConfig config, Coordinator coordinator, GroupMetadataManager groupMetadataManager, GroupBalanceManager groupBalanceManager, GroupOffsetSynchronizer groupOffsetSynchronizer) {
+    public GroupOffsetHandler(KafkaConfig config, Coordinator coordinator, GroupMetadataManager groupMetadataManager, GroupBalanceManager groupBalanceManager, GroupOffsetManager groupOffsetManager) {
         this.config = config;
         this.coordinator = coordinator;
         this.groupMetadataManager = groupMetadataManager;
         this.groupBalanceManager = groupBalanceManager;
-        this.groupOffsetSynchronizer = groupOffsetSynchronizer;
+        this.groupOffsetManager = groupOffsetManager;
     }
 
     public Table<String, Integer, OffsetMetadataAndError> commitOffsets(String groupId, String memberId, int generationId, Table<String, Integer, OffsetAndMetadata> offsetMetadata) {
@@ -55,7 +55,7 @@ public class GroupOffsetHandler extends Service {
 
         // 自主分配分区的情况
         if (StringUtils.isBlank(memberId)) {
-            return groupOffsetSynchronizer.saveOffsets(groupId, offsetMetadata);
+            return groupOffsetManager.saveOffsets(groupId, offsetMetadata);
         }
 
         GroupMetadata group = groupMetadataManager.getGroup(groupId);
@@ -65,7 +65,7 @@ public class GroupOffsetHandler extends Service {
 
             if (generationId < 0) {
                 // the group is not relying on Kafka for partition management, so allow the commit
-                return groupOffsetSynchronizer.saveOffsets(groupId, offsetMetadata);
+                return groupOffsetManager.saveOffsets(groupId, offsetMetadata);
             } else {
                 // the group has failed over to this coordinator (which will be handled in KAFKA-2017),
                 // or this is a request coming from an older generation. either way, reject the commit
@@ -85,7 +85,7 @@ public class GroupOffsetHandler extends Service {
         if (group.stateIs(GroupState.EMPTY) && generationId < 0) {
             // The group is only using Kafka to store offsets.
             // Also, for transactional offset commits we don't need to validate group membership and the generation.
-            return groupOffsetSynchronizer.saveOffsets(groupId, offsetMetadata);
+            return groupOffsetManager.saveOffsets(groupId, offsetMetadata);
         }
         if (group.stateIs(GroupState.AWAITINGSYNC)) {
             return buildCommitError(offsetMetadata, KafkaErrorCode.REBALANCE_IN_PROGRESS.getCode());
@@ -94,7 +94,7 @@ public class GroupOffsetHandler extends Service {
             return buildCommitError(offsetMetadata, KafkaErrorCode.ILLEGAL_GENERATION.getCode());
         }
         groupBalanceManager.completeAndScheduleNextHeartbeatExpiration(group, group.getMember(memberId));
-        return groupOffsetSynchronizer.saveOffsets(groupId, offsetMetadata);
+        return groupOffsetManager.saveOffsets(groupId, offsetMetadata);
     }
 
     public Table<String, Integer, OffsetMetadataAndError> fetchOffsets(String groupId, HashMultimap<String, Integer> topicAndPartitions) {
@@ -103,7 +103,7 @@ public class GroupOffsetHandler extends Service {
         }
         // return offsets blindly regardless the current group state since the group may be using
         // Kafka commit storage without automatic group management
-        return groupOffsetSynchronizer.getOffsets(groupId, topicAndPartitions);
+        return groupOffsetManager.getOffsets(groupId, topicAndPartitions);
     }
 
     protected Table<String, Integer, OffsetMetadataAndError> buildFetchError(HashMultimap<String, Integer> topicAndPartitions, short errorCode) {

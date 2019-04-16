@@ -5,7 +5,7 @@ import com.google.common.collect.Maps;
 import com.jd.journalq.broker.jmq.JMQCommandHandler;
 import com.jd.journalq.broker.jmq.JMQContext;
 import com.jd.journalq.broker.jmq.JMQContextAware;
-import com.jd.journalq.broker.jmq.coordinator.JMQCoordinator;
+import com.jd.journalq.broker.jmq.coordinator.Coordinator;
 import com.jd.journalq.broker.jmq.coordinator.assignment.PartitionAssignmentHandler;
 import com.jd.journalq.broker.jmq.coordinator.domain.PartitionAssignment;
 import com.jd.journalq.broker.helper.SessionHelper;
@@ -46,7 +46,7 @@ public class FetchAssignedPartitionRequestHandler implements JMQCommandHandler, 
 
     protected static final Logger logger = LoggerFactory.getLogger(FetchAssignedPartitionRequestHandler.class);
 
-    private JMQCoordinator coordinator;
+    private Coordinator coordinator;
     private PartitionAssignmentHandler partitionAssignmentHandler;
     private NameService nameService;
 
@@ -70,7 +70,7 @@ public class FetchAssignedPartitionRequestHandler implements JMQCommandHandler, 
             return BooleanAck.build(JMQCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
-        if (!coordinator.isCurrentGroupCoordinator(fetchAssignedPartitionRequest.getApp())) {
+        if (!coordinator.isCurrentGroup(fetchAssignedPartitionRequest.getApp())) {
             logger.warn("coordinator is not current, app: {}, topics: {}, transport: {}", fetchAssignedPartitionRequest.getApp(), fetchAssignedPartitionRequest.getData(), transport);
             return BooleanAck.build(JMQCode.FW_COORDINATOR_NOT_AVAILABLE.getCode());
         }

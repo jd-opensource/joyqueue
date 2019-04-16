@@ -5,7 +5,7 @@ import com.jd.journalq.broker.jmq.JMQCommandHandler;
 import com.jd.journalq.broker.jmq.JMQContext;
 import com.jd.journalq.broker.jmq.JMQContextAware;
 import com.jd.journalq.broker.jmq.converter.BrokerNodeConverter;
-import com.jd.journalq.broker.jmq.coordinator.JMQCoordinator;
+import com.jd.journalq.broker.jmq.coordinator.Coordinator;
 import com.jd.journalq.broker.helper.SessionHelper;
 import com.jd.journalq.domain.Broker;
 import com.jd.journalq.domain.DataCenter;
@@ -37,7 +37,7 @@ public class FindCoordinatorRequestHandler implements JMQCommandHandler, Type, J
 
     protected static final Logger logger = LoggerFactory.getLogger(FindCoordinatorRequestHandler.class);
 
-    private JMQCoordinator coordinator;
+    private Coordinator coordinator;
     private NameService nameService;
 
     @Override
@@ -64,7 +64,7 @@ public class FindCoordinatorRequestHandler implements JMQCommandHandler, Type, J
     }
 
     protected Map<String, FindCoordinatorAckData> findCoordinators(Connection connection, List<String> topics, String app) {
-        Broker coordinatorBroker = coordinator.findGroupCoordinator(app);
+        Broker coordinatorBroker = coordinator.findGroup(app);
         JMQCode code = JMQCode.SUCCESS;
         BrokerNode coordinatorNode = null;
 

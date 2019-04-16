@@ -1,6 +1,5 @@
 package com.jd.journalq.broker.jmq.coordinator;
 
-import com.jd.journalq.broker.coordinator.Coordinator;
 import com.jd.journalq.domain.Broker;
 
 /**
@@ -9,19 +8,19 @@ import com.jd.journalq.domain.Broker;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/4
  */
-public class JMQCoordinator {
+public class Coordinator {
 
-    private Coordinator coordinator;
+    private com.jd.journalq.broker.coordinator.Coordinator coordinator;
 
-    public JMQCoordinator(Coordinator coordinator) {
+    public Coordinator(com.jd.journalq.broker.coordinator.Coordinator coordinator) {
         this.coordinator = coordinator;
     }
 
-    public Broker findGroupCoordinator(String app) {
+    public Broker findGroup(String app) {
         return coordinator.findGroup(app);
     }
 
-    public boolean isCurrentGroupCoordinator(String app) {
+    public boolean isCurrentGroup(String app) {
         return coordinator.isCurrentGroup(app);
     }
 }
