@@ -74,6 +74,8 @@ public class QosStore implements PartitionGroupStore {
     public long deleteMinStoreMessages(long targetDeleteTimeline, Map<Short, Long> partitionAckMap) throws IOException {
         long deletedSize = 0L;
 
+        // 计算最小索引的消息位置
+        long minMessagePosition = -1L;
         for (Map.Entry<Short, Long> partition : partitionAckMap.entrySet()) {
             Short p = partition.getKey();
             long minPartitionIndex = partition.getValue();
@@ -86,26 +88,28 @@ public class QosStore implements PartitionGroupStore {
                     // 依次删除每个分区p索引中最左侧的文件 满足当前分区p的最小消费位置之前的文件块
                     if (indexStore.fileCount() > 1 && indexStore.meetMinStoreFile(minPartitionIndex)) {
                         deletedSize += indexStore.physicalDeleteLeftFile();
+                        logger.info("Delete PositioningStore physical index file by size, partition: <{}>, offset position: <{}>", p, minPartitionIndex);
                     }
                 } else {
                     // 依次删除每个分区p索引中最左侧的文件 满足当前分区p的最小消费位置之前的以及最长时间戳的文件块
                     if (indexStore.fileCount() > 1 && indexStore.isEarly(targetDeleteTimeline, minPartitionIndex)) {
                         deletedSize += indexStore.physicalDeleteLeftFile();
+                        logger.info("Delete PositioningStore physical index file by time, partition: <{}>, offset position: <{}>", p, minPartitionIndex);
                     }
                 }
 
-                // 计算最小索引的消息位置
-                long minIndexedMessagePosition = -1L;
                 try {
                     long storeMinMessagePosition = indexStore.read(indexStore.left()).getOffset();
-                    if (minIndexedMessagePosition < 0 || minIndexedMessagePosition > storeMinMessagePosition) {
-                        minIndexedMessagePosition = storeMinMessagePosition;
+                    if (minMessagePosition < 0 || minMessagePosition > storeMinMessagePosition) {
+                        minMessagePosition = storeMinMessagePosition;
                     }
                 } catch (PositionOverflowException ignored) {
                 }
-                deletedSize += store.messageStore().physicalDeleteTo(minIndexedMessagePosition);
             }
         }
+
+        deletedSize += store.messageStore().physicalDeleteTo(minMessagePosition);
+        logger.info("Delete PositioningStore physical message file, offset position: <{}>", minMessagePosition);
 
         return deletedSize;
     }
