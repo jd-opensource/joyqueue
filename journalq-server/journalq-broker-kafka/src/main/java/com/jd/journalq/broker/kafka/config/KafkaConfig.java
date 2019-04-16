@@ -57,6 +57,10 @@ public class KafkaConfig {
         return getConfig(KafkaConfigKey.OFFSET_SYNC_TIMEOUT);
     }
 
+    public int getOffsetCacheExpireTime() {
+        return getConfig(KafkaConfigKey.OFFSET_CACHE_EXPIRE_TIME);
+    }
+
     public int getTransactionSyncTimeout() {
         return getConfig(KafkaConfigKey.TRANSACTION_SYNC_TIMEOUT);
     }
@@ -67,6 +71,14 @@ public class KafkaConfig {
 
     public int getTransactionLogWriteTimeout() {
         return getConfig(KafkaConfigKey.TRANSACTION_LOG_WRITE_TIMEOUT);
+    }
+
+    public int getTransactionLogRetries() {
+        return getConfig(KafkaConfigKey.TRANSACTION_LOG_RETRIES);
+    }
+
+    public int getTransactionLogInterval() {
+        return getConfig(KafkaConfigKey.TRANSACTION_LOG_INTERVAL);
     }
 
     public QosLevel getTransactionLogWriteQosLevel() {

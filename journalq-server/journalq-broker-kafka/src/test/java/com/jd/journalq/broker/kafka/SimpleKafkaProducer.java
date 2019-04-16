@@ -23,6 +23,10 @@ public class SimpleKafkaProducer {
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         KafkaProducer<String, String> kafkaProducer = new KafkaProducer<>(props);
 
-        kafkaProducer.send(new ProducerRecord<String, String>("test_topic_0", "test")).get();
+        while (true) {
+            kafkaProducer.send(new ProducerRecord<String, String>("test_topic_0", "test")).get();
+            System.out.println("send");
+            Thread.currentThread().sleep(1000 * 1);
+        }
     }
 }

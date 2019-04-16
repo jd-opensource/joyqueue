@@ -5,9 +5,11 @@ import com.jd.journalq.broker.consumer.Consume;
 import com.jd.journalq.broker.kafka.config.KafkaConfig;
 import com.jd.journalq.broker.kafka.coordinator.Coordinator;
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionMarker;
+import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionOffset;
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionPrepare;
 import com.jd.journalq.broker.producer.Produce;
 import com.jd.journalq.broker.producer.PutResult;
+import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.message.BrokerMessage;
 import com.jd.journalq.network.session.Consumer;
 import com.jd.journalq.network.session.Producer;
@@ -16,7 +18,10 @@ import com.jd.journalq.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * TransactionLog
@@ -57,9 +62,17 @@ public class TransactionLog extends Service {
         return new Producer(TRANSACTION_APP, coordinator.getTransactionTopic().getFullName(), TRANSACTION_APP, Producer.ProducerType.JMQ);
     }
 
-    public boolean writePrepare(TransactionPrepare prepare) throws Exception {
-        byte[] body = TransactionSerializer.serializePrepare(prepare);
-        return write(prepare.getApp(), prepare.getTransactionId(), body);
+    public boolean writeCommitOffset(Map<String, List<TransactionOffset>> partitions) throws Exception {
+        return false;
+    }
+
+    public boolean writePrepare(List<TransactionPrepare> prepareList) throws Exception {
+        List<byte[]> bodyList = Lists.newArrayListWithCapacity(prepareList.size());
+        for (TransactionPrepare prepare : prepareList) {
+            byte[] body = TransactionSerializer.serializePrepare(prepare);
+            bodyList.add(body);
+        }
+        return batchWrite(prepareList.get(0).getApp(), prepareList.get(0).getTransactionId(), bodyList);
     }
 
     public boolean writeMarker(TransactionMarker marker) throws Exception {
@@ -71,13 +84,44 @@ public class TransactionLog extends Service {
         return null;
     }
 
+    protected boolean batchWrite(String app, String transactionId, List<byte[]> bodyList) throws Exception {
+        List<BrokerMessage> messages = Lists.newArrayListWithCapacity(bodyList.size());
+        short partittion = resolvePartition(app, transactionId);
+        for (byte[] body : bodyList) {
+            BrokerMessage message = new BrokerMessage();
+            message.setTopic(coordinator.getTransactionTopic().getFullName());
+            message.setApp(initProducer().getApp());
+            message.setBody(body);
+            message.setClientIp(IpUtil.getLocalIp().getBytes());
+            message.setPartition(partittion);
+        }
+        PutResult putResult = produce.putMessage(producer, messages, config.getTransactionLogWriteQosLevel(), config.getTransactionSyncTimeout());
+        return true;
+    }
+
     protected boolean write(String app, String transactionId, byte[] body) throws Exception {
+        short partittion = resolvePartition(app, transactionId);
         BrokerMessage message = new BrokerMessage();
         message.setTopic(coordinator.getTransactionTopic().getFullName());
         message.setApp(initProducer().getApp());
         message.setBody(body);
         message.setClientIp(IpUtil.getLocalIp().getBytes());
+        message.setPartition(partittion);
         PutResult putResult = produce.putMessage(producer, Lists.newArrayList(message), config.getTransactionLogWriteQosLevel(), config.getTransactionSyncTimeout());
         return true;
+    }
+
+    protected short resolvePartition(String app, String transactionId) {
+        PartitionGroup partitionGroup = coordinator.getTransactionPartitionGroup(app);
+        Set<Short> partitions = partitionGroup.getPartitions();
+        Iterator<Short> iterator = partitions.iterator();
+        if (partitions.size() == 1) {
+            return iterator.next().shortValue();
+        }
+        int index = transactionId.hashCode() % partitions.size();
+        for (int i = 0; i < index; i++) {
+
+        }
+        return 0;
     }
 }

@@ -1,9 +1,11 @@
 package com.jd.journalq.broker.kafka.coordinator.transaction.domain;
 
 import com.google.common.collect.Lists;
+import com.jd.journalq.broker.kafka.model.OffsetAndMetadata;
 import com.jd.journalq.toolkit.time.SystemClock;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -21,6 +23,7 @@ public class TransactionMetadata extends com.jd.journalq.broker.coordinator.tran
     private long createTime = SystemClock.now();
     private TransactionState state = TransactionState.EMPTY;
     private List<TransactionPrepare> prepare;
+    private Map<String, List<OffsetAndMetadata>> offsetAndMetadata;
 
     public TransactionMetadata(String id) {
         super(id);
@@ -39,7 +42,6 @@ public class TransactionMetadata extends com.jd.journalq.broker.coordinator.tran
             prepare = Lists.newLinkedList();
         }
         prepare.add(transactionPrepare);
-        updateExtension();
     }
 
     public boolean containsPrepare(String topic, short partition) {
@@ -63,12 +65,22 @@ public class TransactionMetadata extends com.jd.journalq.broker.coordinator.tran
             return;
         }
         prepare.clear();
-        updateExtension();
+    }
+
+    public void clearOffsetMetadata() {
+        if (offsetAndMetadata == null) {
+            return;
+        }
+        offsetAndMetadata.clear();
+    }
+
+    public void clear() {
+        clearPrepare();
+        clearOffsetMetadata();
     }
 
     public void transitionStateTo(TransactionState state) {
         this.state = state;
-        updateExtension();
     }
 
     public boolean isExpired(long timeout) {
@@ -81,12 +93,12 @@ public class TransactionMetadata extends com.jd.journalq.broker.coordinator.tran
 
     public void nextProducerEpoch() {
         this.producerEpoch++;
-        updateExtension();
     }
 
-    protected void updateExtension() {
-        super.setExtension(String.format("{timeout: '%s', producerId: '%s', producerEpoch: '%s', createTime: '%s', state: '%s', prepare: '%s'}",
-                timeout, producerId, producerEpoch, createTime, state, prepare));
+    @Override
+    public String getExtension() {
+        return String.format("{timeout: '%s', producerId: '%s', producerEpoch: '%s', createTime: '%s', state: '%s', prepare: '%s'}",
+                timeout, producerId, producerEpoch, createTime, state, prepare);
     }
 
     public void setApp(String app) {

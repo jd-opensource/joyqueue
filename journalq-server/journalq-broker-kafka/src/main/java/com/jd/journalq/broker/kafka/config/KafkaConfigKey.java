@@ -28,6 +28,8 @@ public enum KafkaConfigKey implements PropertyDef {
 
     // offset同步超时
     OFFSET_SYNC_TIMEOUT("kafka.offset.sync.timeout", 1000 * 3, Type.INT),
+    // offset缓存过期时间
+    OFFSET_CACHE_EXPIRE_TIME("kafka.offset.expire.time", 1000 * 60 * 10, Type.INT),
 
     // 事务同步超时
     TRANSACTION_SYNC_TIMEOUT("kafka.offset.sync.timeout", 1000 * 3, Type.INT),
@@ -37,6 +39,10 @@ public enum KafkaConfigKey implements PropertyDef {
     TRANSACTION_LOG_WRITE_TIMEOUT("kafka.transaction.log.write.timeout", 1000 * 1, Type.INT),
     // 事务日志写入级别
     TRANSACTION_LOG_WRITE_QOSLEVEL("kafka.transaction.log.write.qosLevel", QosLevel.REPLICATION.value(), Type.INT),
+    // 事务重试次数
+    TRANSACTION_LOG_RETRIES("kafka.transaction.log.reties", 3, Type.INT),
+    // 事务间隔
+    TRANSACTION_LOG_INTERVAL("kafka.transaction.log.interval", 1000 * 60 * 5, Type.INT),
 
     // 拉取批量大小
     FETCH_BATCH_SIZE("kafka.fetch.batch.size", 10, Type.INT),

@@ -2,6 +2,7 @@ package com.jd.journalq.broker.kafka.coordinator.transaction;
 
 import com.jd.journalq.broker.kafka.coordinator.Coordinator;
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionMetadata;
+import com.jd.journalq.broker.kafka.model.OffsetAndMetadata;
 import com.jd.journalq.broker.kafka.model.PartitionMetadataAndError;
 import com.jd.journalq.domain.Broker;
 import com.jd.journalq.toolkit.service.Service;
@@ -20,11 +21,13 @@ public class TransactionCoordinator extends Service {
     private Coordinator coordinator;
     private TransactionMetadataManager transactionMetadataManager;
     private TransactionHandler transactionHandler;
+    private TransactionOffsetHandler transactionOffsetHandler;
 
-    public TransactionCoordinator(Coordinator coordinator, TransactionMetadataManager transactionMetadataManager, TransactionHandler transactionHandler) {
+    public TransactionCoordinator(Coordinator coordinator, TransactionMetadataManager transactionMetadataManager, TransactionHandler transactionHandler, TransactionOffsetHandler transactionOffsetHandler) {
         this.coordinator = coordinator;
         this.transactionMetadataManager = transactionMetadataManager;
         this.transactionHandler = transactionHandler;
+        this.transactionOffsetHandler = transactionOffsetHandler;
     }
 
     public Broker findCoordinator(String transactionId) {
@@ -45,6 +48,14 @@ public class TransactionCoordinator extends Service {
 
     public boolean handleEndTxn(String clientId, String transactionId, long producerId, short producerEpoch, boolean isCommit) {
         return transactionHandler.endTxn(clientId, transactionId, producerId, producerEpoch, isCommit);
+    }
+
+    public boolean handleAddOffsetsToTxn(String clientId, String transactionId, String groupId, long producerId, short producerEpoch) {
+        return transactionOffsetHandler.addOffsetsToTxn(clientId, transactionId, groupId, producerId, producerEpoch);
+    }
+
+    public Map<String, List<PartitionMetadataAndError>> handleCommitOffset(String clientId, String transactionId, String groupId, long producerId, short producerEpoch, Map<String, List<OffsetAndMetadata>> offsetAndMetadata) {
+        return transactionOffsetHandler.commitOffset(clientId, transactionId, groupId, producerId, producerEpoch, offsetAndMetadata);
     }
 
     public TransactionMetadata getTransaction(String transactionId) {

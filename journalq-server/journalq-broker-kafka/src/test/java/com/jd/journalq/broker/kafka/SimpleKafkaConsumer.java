@@ -30,7 +30,7 @@ public class SimpleKafkaConsumer {
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
 
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
-        consumer.subscribe(Arrays.asList("test_topic_0"));
+        consumer.subscribe(Arrays.asList("test_topic_1"));
 //        consumer.subscribe(Arrays.asList("__transaction_state"));
 
         while (true) {

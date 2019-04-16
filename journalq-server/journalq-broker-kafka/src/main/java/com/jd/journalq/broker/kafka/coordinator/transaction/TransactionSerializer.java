@@ -31,12 +31,7 @@ public class TransactionSerializer {
             ;
 
     private static final int MARKER_FIX_LENGTH =
-                    + 2 // topic length
-                    + 2 // partition
                     + 2 // app length
-                    + 4 // brokerId
-                    + 1 // broker host length
-                    + 4 // brokerPort
                     + 2 // transactionId length
                     + 8 // producerId
                     + 2 // producerEpoch
@@ -101,13 +96,7 @@ public class TransactionSerializer {
     public static int sizeOfMarker(TransactionMarker marker) throws Exception {
         int size = MARKER_FIX_LENGTH;
 
-        byte[] bytes = Serializer.getBytes(marker.getTopic(), Charsets.UTF_8);
-        size += bytes == null? 0: bytes.length;
-
-        bytes = Serializer.getBytes(marker.getApp(), Charsets.UTF_8);
-        size += bytes == null? 0: bytes.length;
-
-        bytes = Serializer.getBytes(marker.getBrokerHost(), Charsets.UTF_8);
+        byte[] bytes = Serializer.getBytes(marker.getApp(), Charsets.UTF_8);
         size += bytes == null? 0: bytes.length;
 
         bytes = Serializer.getBytes(marker.getTransactionId(), Charsets.UTF_8);
@@ -120,12 +109,7 @@ public class TransactionSerializer {
         int size = sizeOfMarker(marker);
         ByteBuffer buffer = ByteBuffer.allocate(size);
 
-        Serializer.write(marker.getTopic(), buffer, Serializer.SHORT_SIZE);
-        buffer.putShort(marker.getPartition());
         Serializer.write(marker.getApp(), buffer, Serializer.SHORT_SIZE);
-        buffer.putInt(marker.getBrokerId());
-        Serializer.write(marker.getBrokerHost(), buffer, Serializer.BYTE_SIZE);
-        buffer.putInt(marker.getBrokerPort());
         Serializer.write(marker.getTransactionId(), buffer, Serializer.BYTE_SIZE);
         buffer.putLong(marker.getProducerId());
         buffer.putShort(marker.getProducerEpoch());
@@ -138,12 +122,7 @@ public class TransactionSerializer {
     public static TransactionMarker deserializeMarker(byte[] value) throws Exception {
         ByteBuffer buffer = ByteBuffer.wrap(value);
         TransactionMarker marker = new TransactionMarker();
-        marker.setTopic(Serializer.readString(buffer, Serializer.SHORT_SIZE));
-        marker.setPartition(buffer.getShort());
         marker.setApp(Serializer.readString(buffer, Serializer.SHORT_SIZE));
-        marker.setBrokerId(buffer.getInt());
-        marker.setBrokerHost(Serializer.readString(buffer, Serializer.BYTE_SIZE));
-        marker.setBrokerPort(buffer.getInt());
         marker.setTransactionId(Serializer.readString(buffer, Serializer.SHORT_SIZE));
         marker.setProducerId(buffer.getLong());
         marker.setProducerEpoch(buffer.getShort());

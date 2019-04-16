@@ -84,5 +84,16 @@ public class OffsetAndMetadata {
     public void setOffsetCommitTime(long offsetCommitTime) {
         this.offsetCommitTime = offsetCommitTime;
     }
+
+    @Override
+    public String toString() {
+        return "OffsetAndMetadata{" +
+                "partition=" + partition +
+                ", offset=" + offset +
+                ", metadata='" + metadata + '\'' +
+                ", leaderEpoch=" + leaderEpoch +
+                ", offsetCommitTime=" + offsetCommitTime +
+                '}';
+    }
 }
 

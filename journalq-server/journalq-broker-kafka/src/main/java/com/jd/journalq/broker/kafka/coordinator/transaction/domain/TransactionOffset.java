@@ -1,33 +1,61 @@
 package com.jd.journalq.broker.kafka.coordinator.transaction.domain;
 
 /**
- * TransactionMarker
+ * TransactionOffset
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
- * date: 2019/4/15
+ * date: 2019/4/16
  */
-public class TransactionMarker {
+public class TransactionOffset {
 
+    private String topic;
+    private short partition;
+    private long offset;
     private String app;
     private String transactionId;
     private long producerId;
     private short producerEpoch;
-    private TransactionState state;
     private int timeout;
     private long createTime;
 
-    public TransactionMarker() {
+    public TransactionOffset() {
 
     }
 
-    public TransactionMarker(String app, String transactionId, long producerId, short producerEpoch, TransactionState state, int timeout, long createTime) {
+    public TransactionOffset(String topic, short partition, long offset, String app, String transactionId, long producerId, short producerEpoch, int timeout, long createTime) {
+        this.topic = topic;
+        this.partition = partition;
+        this.offset = offset;
         this.app = app;
         this.transactionId = transactionId;
         this.producerId = producerId;
         this.producerEpoch = producerEpoch;
-        this.state = state;
         this.timeout = timeout;
         this.createTime = createTime;
+    }
+
+    public String getTopic() {
+        return topic;
+    }
+
+    public void setTopic(String topic) {
+        this.topic = topic;
+    }
+
+    public short getPartition() {
+        return partition;
+    }
+
+    public void setPartition(short partition) {
+        this.partition = partition;
+    }
+
+    public long getOffset() {
+        return offset;
+    }
+
+    public void setOffset(long offset) {
+        this.offset = offset;
     }
 
     public String getApp() {
@@ -62,20 +90,12 @@ public class TransactionMarker {
         this.producerEpoch = producerEpoch;
     }
 
-    public TransactionState getState() {
-        return state;
-    }
-
-    public void setState(TransactionState state) {
-        this.state = state;
+    public int getTimeout() {
+        return timeout;
     }
 
     public void setTimeout(int timeout) {
         this.timeout = timeout;
-    }
-
-    public int getTimeout() {
-        return timeout;
     }
 
     public long getCreateTime() {
@@ -88,12 +108,14 @@ public class TransactionMarker {
 
     @Override
     public String toString() {
-        return "TransactionMarker{" +
-                "app='" + app + '\'' +
+        return "TransactionOffset{" +
+                "topic='" + topic + '\'' +
+                ", partition=" + partition +
+                ", offset=" + offset +
+                ", app='" + app + '\'' +
                 ", transactionId='" + transactionId + '\'' +
                 ", producerId=" + producerId +
                 ", producerEpoch=" + producerEpoch +
-                ", state=" + state +
                 ", timeout=" + timeout +
                 ", createTime=" + createTime +
                 '}';

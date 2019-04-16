@@ -16,6 +16,14 @@ public class TxnOffsetCommitResponse extends KafkaRequestOrResponse {
 
     private Map<String, List<PartitionMetadataAndError>> partitions;
 
+    public TxnOffsetCommitResponse() {
+
+    }
+
+    public TxnOffsetCommitResponse(Map<String, List<PartitionMetadataAndError>> partitions) {
+        this.partitions = partitions;
+    }
+
     public Map<String, List<PartitionMetadataAndError>> getPartitions() {
         return partitions;
     }

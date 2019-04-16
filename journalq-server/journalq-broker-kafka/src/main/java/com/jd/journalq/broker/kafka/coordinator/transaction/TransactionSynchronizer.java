@@ -7,6 +7,8 @@ import com.jd.journalq.broker.coordinator.session.CoordinatorSession;
 import com.jd.journalq.broker.coordinator.session.CoordinatorSessionManager;
 import com.jd.journalq.broker.kafka.config.KafkaConfig;
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionMarker;
+import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionMetadata;
+import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionOffset;
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionPrepare;
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionState;
 import com.jd.journalq.broker.producer.transaction.command.TransactionCommitRequest;
@@ -17,10 +19,13 @@ import com.jd.journalq.network.transport.command.CommandCallback;
 import com.jd.journalq.network.transport.command.JMQCommand;
 import com.jd.journalq.toolkit.service.Service;
 import com.jd.journalq.toolkit.time.SystemClock;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -49,15 +54,15 @@ public class TransactionSynchronizer extends Service {
         this.sessionManager = sessionManager;
     }
 
-    public boolean prepare(TransactionPrepare prepare) throws Exception {
-        return transactionLog.writePrepare(prepare);
+    public boolean prepare(TransactionMetadata transactionMetadata, List<TransactionPrepare> prepareList) throws Exception {
+        return transactionLog.writePrepare(prepareList);
     }
 
-    public boolean prepareCommit(List<TransactionPrepare> prepareList) throws Exception {
-        return writeMarker(prepareList.get(0), TransactionState.PREPARE_COMMIT);
+    public boolean prepareCommit(TransactionMetadata transactionMetadata, List<TransactionPrepare> prepareList) throws Exception {
+        return writeMarker(transactionMetadata, TransactionState.PREPARE_COMMIT);
     }
 
-    public boolean commit(List<TransactionPrepare> prepareList) throws Exception {
+    public boolean commit(TransactionMetadata transactionMetadata, List<TransactionPrepare> prepareList) throws Exception {
         prepareList = filterPrepareByBroker(prepareList);
         CountDownLatch latch = new CountDownLatch(prepareList.size());
         boolean[] result = {true};
@@ -89,17 +94,17 @@ public class TransactionSynchronizer extends Service {
         }
 
         if (result[0]) {
-            writeMarker(prepareList.get(0), TransactionState.COMPLETE_COMMIT);
+            writeMarker(transactionMetadata, TransactionState.COMPLETE_COMMIT);
         }
 
         return result[0];
     }
 
-    public boolean prepareAbort(List<TransactionPrepare> prepareList) throws Exception {
-        return writeMarker(prepareList.get(0), TransactionState.PREPARE_ABORT);
+    public boolean prepareAbort(TransactionMetadata transactionMetadata, List<TransactionPrepare> prepareList) throws Exception {
+        return writeMarker(transactionMetadata, TransactionState.PREPARE_ABORT);
     }
 
-    public boolean abort(List<TransactionPrepare> prepareList) throws Exception {
+    public boolean abort(TransactionMetadata transactionMetadata, List<TransactionPrepare> prepareList) throws Exception {
         prepareList = filterPrepareByBroker(prepareList);
         CountDownLatch latch = new CountDownLatch(prepareList.size());
         boolean[] result = {true};
@@ -131,24 +136,30 @@ public class TransactionSynchronizer extends Service {
         }
 
         if (result[0]) {
-            writeMarker(prepareList.get(0), TransactionState.COMPLETE_ABORT);
+            writeMarker(transactionMetadata, TransactionState.COMPLETE_ABORT);
         }
 
         return result[0];
     }
 
-    protected boolean writeMarker(TransactionPrepare prepare, TransactionState state) throws Exception {
-        TransactionMarker marker = convertMarker(prepare, state);
+    public boolean commitOffset(TransactionMetadata transactionMetadata, Map<String, List<TransactionOffset>> partitions) throws Exception {
+        return false;
+    }
+
+    protected boolean writeMarker(TransactionMetadata transactionMetadata, TransactionState transactionState) throws Exception {
+        TransactionMarker marker = convertMarker(transactionMetadata, transactionState);
         return transactionLog.writeMarker(marker);
     }
 
-    protected TransactionMarker convertMarker(TransactionPrepare prepare, TransactionState state) {
-        TransactionMarker marker = new TransactionMarker(prepare.getTopic(), prepare.getPartition(), prepare.getApp(), prepare.getBrokerId(), prepare.getBrokerHost(), prepare.getBrokerPort(),
-                prepare.getTransactionId(), prepare.getProducerId(), prepare.getProducerEpoch(), state, prepare.getTimeout(), SystemClock.now());
+    protected TransactionMarker convertMarker(TransactionMetadata transactionMetadata, TransactionState transactionState) {
+        TransactionMarker marker = new TransactionMarker(transactionMetadata.getApp(), transactionMetadata.getId(), transactionMetadata.getProducerId(), transactionMetadata.getProducerEpoch(), transactionState, transactionMetadata.getTimeout(), SystemClock.now());
         return marker;
     }
 
     protected List<TransactionPrepare> filterPrepareByBroker(List<TransactionPrepare> prepareList) {
+        if (CollectionUtils.isEmpty(prepareList)) {
+            return Collections.emptyList();
+        }
         Table<Integer, String, Boolean> brokerTopicTable = HashBasedTable.create();
         List<TransactionPrepare> result = Lists.newLinkedList();
         for (TransactionPrepare prepare : prepareList) {

@@ -32,7 +32,7 @@ public class TxnOffsetCommitCodec implements KafkaPayloadCodec<TxnOffsetCommitRe
         short producerEpoch = buffer.readShort();
 
         int topicSize = Math.max(buffer.readInt(), 0);
-        Map<String, List<OffsetAndMetadata>> offsetAndMetadatas = Maps.newHashMapWithExpectedSize(topicSize);
+        Map<String, List<OffsetAndMetadata>> partittions = Maps.newHashMapWithExpectedSize(topicSize);
 
         for (int i = 0; i < topicSize; i++) {
             String topic = Serializer.readString(buffer, Serializer.SHORT_SIZE);
@@ -51,7 +51,7 @@ public class TxnOffsetCommitCodec implements KafkaPayloadCodec<TxnOffsetCommitRe
                 offsetAndMetadataList.add(offsetAndMetadata);
             }
 
-            offsetAndMetadatas.put(topic, offsetAndMetadataList);
+            partittions.put(topic, offsetAndMetadataList);
         }
 
         TxnOffsetCommitRequest txnOffsetCommitRequest = new TxnOffsetCommitRequest();
@@ -59,7 +59,7 @@ public class TxnOffsetCommitCodec implements KafkaPayloadCodec<TxnOffsetCommitRe
         txnOffsetCommitRequest.setGroupId(groupId);
         txnOffsetCommitRequest.setProducerId(producerId);
         txnOffsetCommitRequest.setProducerEpoch(producerEpoch);
-        txnOffsetCommitRequest.setOffsetAndMetadata(offsetAndMetadatas);
+        txnOffsetCommitRequest.setPartitions(partittions);
         return txnOffsetCommitRequest;
     }
 

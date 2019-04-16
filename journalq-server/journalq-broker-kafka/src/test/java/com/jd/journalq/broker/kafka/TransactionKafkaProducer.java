@@ -1,13 +1,23 @@
 package com.jd.journalq.broker.kafka;
 
+import com.google.common.collect.Maps;
 import com.jd.journalq.broker.kafka.conf.KafkaConfigs;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 
+import java.util.Arrays;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -18,32 +28,49 @@ import java.util.Properties;
 public class TransactionKafkaProducer {
 
     public static void main(String[] args) throws Exception {
-        Properties props = new Properties();
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, KafkaConfigs.BOOTSTRAP);
-//        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:9092");
-        props.put(ProducerConfig.CLIENT_ID_CONFIG, KafkaConfigs.CLIENT_ID);
-        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        props.put(ProducerConfig.TRANSACTIONAL_ID_CONFIG, KafkaConfigs.TRANSACTION_ID);
-        props.put(ProducerConfig.RETRIES_CONFIG, 10);
-        KafkaProducer<String, String> kafkaProducer = new KafkaProducer<>(props);
+        Properties consumerProperties = new Properties();
+        consumerProperties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, KafkaConfigs.BOOTSTRAP);
+//        consumerProperties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:9092");
+        consumerProperties.put(ConsumerConfig.GROUP_ID_CONFIG, KafkaConfigs.GROUP_ID);
+        consumerProperties.put(ConsumerConfig.CLIENT_ID_CONFIG, KafkaConfigs.GROUP_ID);
+        consumerProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        consumerProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+//        consumerProperties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
+
+        KafkaConsumer<String, String> consumer = new KafkaConsumer<>(consumerProperties);
+        consumer.subscribe(Arrays.asList("test_topic_0"));
+
+        Properties producerProperties = new Properties();
+        producerProperties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, KafkaConfigs.BOOTSTRAP);
+//        producerProperties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:9092");
+        producerProperties.put(ProducerConfig.CLIENT_ID_CONFIG, KafkaConfigs.CLIENT_ID);
+        producerProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        producerProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        producerProperties.put(ProducerConfig.TRANSACTIONAL_ID_CONFIG, KafkaConfigs.TRANSACTION_ID);
+        producerProperties.put(ProducerConfig.RETRIES_CONFIG, 10);
+        KafkaProducer<String, String> kafkaProducer = new KafkaProducer<>(producerProperties);
         kafkaProducer.initTransactions();
 
-        for (int i = 0; i < 10; i++) {
-            kafkaProducer.beginTransaction();
-            for (int j = 0; j < 10; j++) {
-                try {
-                    kafkaProducer.send(new ProducerRecord<String, String>("test_topic_0", RandomStringUtils.random(RandomUtils.nextInt(10, 100)))).get();
-                } catch (Exception e) {
-//                    kafkaProducer.initTransactions();
-                    e.printStackTrace();
-                }
+        while (true) {
+            ConsumerRecords<String, String> records = consumer.poll(1000 * 1);
 
-                System.out.println("send");
-                Thread.currentThread().sleep(1000 * 1);
+            Map<TopicPartition, OffsetAndMetadata> offsetMap = Maps.newHashMap();
+            kafkaProducer.beginTransaction();
+
+            for (ConsumerRecord<String, String> record : records) {
+                System.out.println("record: {}" + record.topic() + "_" + record.partition() + "_" + record.offset());
+                offsetMap.put(new TopicPartition(record.topic(), record.partition()), new OffsetAndMetadata(record.offset(), null));
+
+                for (int j = 0; j < 10; j++) {
+                    kafkaProducer.send(new ProducerRecord<String, String>("test_topic_1", RandomStringUtils.random(RandomUtils.nextInt(10, 100)))).get();
+                }
             }
+
+            kafkaProducer.sendOffsetsToTransaction(offsetMap, KafkaConfigs.GROUP_ID);
             kafkaProducer.commitTransaction();
+
             System.out.println("commit");
+            Thread.currentThread().sleep(1000 *1);
         }
     }
 }

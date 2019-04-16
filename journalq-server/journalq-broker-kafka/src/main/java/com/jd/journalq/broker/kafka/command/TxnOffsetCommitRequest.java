@@ -18,7 +18,7 @@ public class TxnOffsetCommitRequest extends KafkaRequestOrResponse {
     private String groupId;
     private long producerId;
     private short producerEpoch;
-    private Map<String, List<OffsetAndMetadata>> offsetAndMetadata;
+    private Map<String, List<OffsetAndMetadata>> partitions;
 
     public String getTransactionId() {
         return transactionId;
@@ -52,16 +52,27 @@ public class TxnOffsetCommitRequest extends KafkaRequestOrResponse {
         this.producerEpoch = producerEpoch;
     }
 
-    public void setOffsetAndMetadata(Map<String, List<OffsetAndMetadata>> offsetAndMetadata) {
-        this.offsetAndMetadata = offsetAndMetadata;
+    public void setPartitions(Map<String, List<OffsetAndMetadata>> partitions) {
+        this.partitions = partitions;
     }
 
-    public Map<String, List<OffsetAndMetadata>> getOffsetAndMetadata() {
-        return offsetAndMetadata;
+    public Map<String, List<OffsetAndMetadata>> getPartitions() {
+        return partitions;
     }
 
     @Override
     public int type() {
         return KafkaCommandType.TXN_OFFSET_COMMIT.getCode();
+    }
+
+    @Override
+    public String toString() {
+        return "TxnOffsetCommitRequest{" +
+                "transactionId='" + transactionId + '\'' +
+                ", groupId='" + groupId + '\'' +
+                ", producerId=" + producerId +
+                ", producerEpoch=" + producerEpoch +
+                ", partitions=" + partitions +
+                '}';
     }
 }

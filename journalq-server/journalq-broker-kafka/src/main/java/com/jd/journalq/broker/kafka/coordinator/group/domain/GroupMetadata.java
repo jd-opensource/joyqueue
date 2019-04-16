@@ -1,9 +1,12 @@
 package com.jd.journalq.broker.kafka.coordinator.group.domain;
 
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.collect.Table;
 import com.jd.journalq.broker.coordinator.group.domain.GroupMemberMetadata;
+import com.jd.journalq.broker.kafka.model.OffsetAndMetadata;
 import com.jd.journalq.toolkit.time.SystemClock;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -34,6 +37,7 @@ public class GroupMetadata extends com.jd.journalq.broker.coordinator.group.doma
     private boolean newMemberAdded = false;
     private GroupState preState;
     private long preStateTimestamp;
+    private Table<String, Integer, OffsetAndMetadata> offsetCache = HashBasedTable.create();
 
     private static final Map<GroupState, Set<GroupState>> ValidPreviousStates = Maps.newHashMap();
 
@@ -97,6 +101,26 @@ public class GroupMetadata extends com.jd.journalq.broker.coordinator.group.doma
 
     public long getPreStateTimestamp() {
         return preStateTimestamp;
+    }
+
+    public Table<String, Integer, OffsetAndMetadata> getOffsetCache() {
+        return offsetCache;
+    }
+
+    public OffsetAndMetadata getOffsetCache(String topic, int partition) {
+        return offsetCache.get(topic, partition);
+    }
+
+    public void putOffsetCache(String topic, int partition, OffsetAndMetadata offsetAndMetadata) {
+        offsetCache.put(topic, partition, offsetAndMetadata);
+    }
+
+    public OffsetAndMetadata removeOffsetCache(String topic, int partition) {
+        return offsetCache.remove(topic, partition);
+    }
+
+    public void clearOffsetCache() {
+        offsetCache.clear();
     }
 
     public boolean stateIs(GroupState groupState) {

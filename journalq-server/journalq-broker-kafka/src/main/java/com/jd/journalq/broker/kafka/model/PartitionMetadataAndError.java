@@ -9,6 +9,10 @@ public class PartitionMetadataAndError {
     private int partition;
     private short error;
 
+    public PartitionMetadataAndError() {
+
+    }
+
     public PartitionMetadataAndError(int partition, short error) {
         this.partition = partition;
         this.error = error;

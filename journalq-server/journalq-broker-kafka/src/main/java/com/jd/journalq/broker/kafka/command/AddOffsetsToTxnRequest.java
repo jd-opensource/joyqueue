@@ -51,4 +51,14 @@ public class AddOffsetsToTxnRequest extends KafkaRequestOrResponse {
     public int type() {
         return KafkaCommandType.ADD_OFFSETS_TO_TXN.getCode();
     }
+
+    @Override
+    public String toString() {
+        return "AddOffsetsToTxnRequest{" +
+                "transactionId='" + transactionId + '\'' +
+                ", producerId=" + producerId +
+                ", producerEpoch=" + producerEpoch +
+                ", groupId='" + groupId + '\'' +
+                '}';
+    }
 }

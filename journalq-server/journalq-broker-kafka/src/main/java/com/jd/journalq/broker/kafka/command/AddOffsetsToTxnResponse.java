@@ -12,6 +12,14 @@ public class AddOffsetsToTxnResponse extends KafkaRequestOrResponse {
 
     private short code;
 
+    public AddOffsetsToTxnResponse() {
+
+    }
+
+    public AddOffsetsToTxnResponse(short code) {
+        this.code = code;
+    }
+
     public void setCode(short code) {
         this.code = code;
     }

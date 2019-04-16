@@ -17,6 +17,7 @@ import com.jd.journalq.domain.Broker;
 import com.jd.journalq.domain.Subscription;
 import com.jd.journalq.network.transport.Transport;
 import com.jd.journalq.network.transport.command.Command;
+import com.jd.journalq.nsr.NameService;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -34,13 +35,13 @@ public class FindCoordinatorRequestHandler extends AbstractKafkaCommandHandler i
 
     private GroupCoordinator groupCoordinator;
     private TransactionCoordinator transactionCoordinator;
-    private ClusterManager clusterManager;
+    private NameService nameService;
 
     @Override
     public void setKafkaContext(KafkaContext kafkaContext) {
         this.groupCoordinator = kafkaContext.getGroupCoordinator();
         this.transactionCoordinator = kafkaContext.getTransactionCoordinator();
-        this.clusterManager = kafkaContext.getBrokerContext().getClusterManager();
+        this.nameService = kafkaContext.getBrokerContext().getNameService();
     }
 
     @Override
@@ -59,12 +60,16 @@ public class FindCoordinatorRequestHandler extends AbstractKafkaCommandHandler i
 
         Broker coordinator = null;
         if (coordinatorType.equals(CoordinatorType.GROUP)) {
-            if (!clusterManager.hasSubscribe(coordinatorKey, Subscription.Type.CONSUMPTION)) {
+            if (!nameService.hasSubscribe(coordinatorKey, Subscription.Type.CONSUMPTION)) {
                 logger.warn("find subscribe for coordinatorKey {}, subscribe not exist", coordinatorKey);
                 return new Command(new FindCoordinatorResponse(KafkaErrorCode.INVALID_GROUP_ID.getCode(), KafkaBroker.INVALID));
             }
             coordinator = groupCoordinator.findCoordinator(coordinatorKey);
         } else if (coordinatorType.equals(CoordinatorType.TRANSACTION)) {
+            if (!nameService.hasSubscribe(coordinatorKey, Subscription.Type.PRODUCTION)) {
+                logger.warn("find subscribe for coordinatorKey {}, subscribe not exist", coordinatorKey);
+                return new Command(new FindCoordinatorResponse(KafkaErrorCode.INVALID_GROUP_ID.getCode(), KafkaBroker.INVALID));
+            }
             coordinator = transactionCoordinator.findCoordinator(coordinatorKey);
         }
 

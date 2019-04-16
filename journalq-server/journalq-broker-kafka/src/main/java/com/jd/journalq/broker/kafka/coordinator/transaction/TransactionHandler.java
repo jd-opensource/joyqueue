@@ -34,16 +34,16 @@ public class TransactionHandler extends Service {
 
     protected static final Logger logger = LoggerFactory.getLogger(TransactionHandler.class);
 
-    private TransactionMetadataManager transactionMetadataManager;
     private Coordinator coordinator;
+    private TransactionMetadataManager transactionMetadataManager;
     private ProducerIdManager producerIdManager;
     private TransactionSynchronizer transactionSynchronizer;
     private NameService nameService;
 
-    public TransactionHandler(TransactionMetadataManager transactionMetadataManager, Coordinator coordinator, ProducerIdManager producerIdManager,
+    public TransactionHandler(Coordinator coordinator, TransactionMetadataManager transactionMetadataManager, ProducerIdManager producerIdManager,
                               TransactionSynchronizer transactionSynchronizer, NameService nameService) {
-        this.transactionMetadataManager = transactionMetadataManager;
         this.coordinator = coordinator;
+        this.transactionMetadataManager = transactionMetadataManager;
         this.producerIdManager = producerIdManager;
         this.transactionSynchronizer = transactionSynchronizer;
         this.nameService = nameService;
@@ -58,29 +58,32 @@ public class TransactionHandler extends Service {
                     producerIdManager.generateId(), transactionTimeout, SystemClock.now()));
         }
 
+        if (transactionMetadata.getState().equals(TransactionState.PREPARE_ABORT) || transactionMetadata.getState().equals(TransactionState.PREPARE_COMMIT)) {
+            throw new TransactionException(KafkaErrorCode.CONCURRENT_TRANSACTIONS.getCode());
+        }
+
         synchronized (transactionMetadata) {
-            return doInitProducer(transactionMetadata);
+            return doInitProducer(transactionMetadata, transactionTimeout);
         }
     }
 
-    protected TransactionMetadata doInitProducer(TransactionMetadata transactionMetadata) {
+    protected TransactionMetadata doInitProducer(TransactionMetadata transactionMetadata, int transactionTimeout) {
         // TODO 是否需要？
-        if (transactionMetadata.getState().equals(TransactionState.ONGOING)) {
+        if (!transactionMetadata.getState().equals(TransactionState.EMPTY)) {
             tryAbort(transactionMetadata);
         }
 
         transactionMetadata.transitionStateTo(TransactionState.EMPTY);
-        transactionMetadata.clearPrepare();
+        transactionMetadata.clear();
         transactionMetadata.nextProducerEpoch();
+        transactionMetadata.setTimeout(transactionTimeout);
+        transactionMetadata.setCreateTime(SystemClock.now());
         return transactionMetadata;
     }
 
     protected void tryAbort(TransactionMetadata transactionMetadata) {
         try {
-            transactionMetadata.transitionStateTo(TransactionState.PREPARE_ABORT);
-            transactionSynchronizer.prepareAbort(transactionMetadata.getPrepare());
-            transactionSynchronizer.abort(transactionMetadata.getPrepare());
-            transactionMetadata.transitionStateTo(TransactionState.COMPLETE_ABORT);
+            doAbort(transactionMetadata);
         } catch (Exception e) {
             logger.error("initProducer abort exception, metadata: {}", transactionMetadata, e);
         }
@@ -98,6 +101,9 @@ public class TransactionHandler extends Service {
         }
         if (!transactionMetadata.getState().equals(TransactionState.EMPTY) && !transactionMetadata.getState().equals(TransactionState.ONGOING)) {
             throw new TransactionException(KafkaErrorCode.INVALID_TXN_STATE.getCode());
+        }
+        if (transactionMetadata.getState().equals(TransactionState.PREPARE_ABORT) || transactionMetadata.getState().equals(TransactionState.PREPARE_COMMIT)) {
+            throw new TransactionException(KafkaErrorCode.CONCURRENT_TRANSACTIONS.getCode());
         }
 
         synchronized (transactionMetadata) {
@@ -124,7 +130,7 @@ public class TransactionHandler extends Service {
                 } else {
                     try {
                         if (!transactionMetadata.containsPrepare(topic.getFullName(), (short) partition.intValue())) {
-                            prepare(transactionMetadata, topic, (short) partition.intValue(), partitionGroup);
+                            doPrepare(transactionMetadata, topic, (short) partition.intValue(), partitionGroup);
                         }
                         partitionMetadataAndErrors.add(new PartitionMetadataAndError(partition, KafkaErrorCode.NONE.getCode()));
                     } catch (Exception e) {
@@ -138,13 +144,14 @@ public class TransactionHandler extends Service {
         return result;
     }
 
-    protected boolean prepare(TransactionMetadata transactionMetadata, TopicName topic, short partition, PartitionGroup partitionGroup) throws Exception {
+    protected boolean doPrepare(TransactionMetadata transactionMetadata, TopicName topic, short partition, PartitionGroup partitionGroup) throws Exception {
         Broker broker = partitionGroup.getLeaderBroker();
         TransactionPrepare prepare = new TransactionPrepare(topic.getFullName(), partition, transactionMetadata.getApp(), broker.getId(), broker.getIp(), broker.getBackEndPort(),
                 transactionMetadata.getId(), transactionMetadata.getProducerId(), transactionMetadata.getProducerEpoch(), transactionMetadata.getTimeout(), SystemClock.now());
 
         transactionMetadata.addPrepare(prepare);
-        return transactionSynchronizer.prepare(prepare);
+//        return transactionSynchronizer.prepare(transactionMetadata, prepare);
+        return false;
     }
 
     public boolean endTxn(String clientId, String transactionId, long producerId, short producerEpoch, boolean isCommit) {
@@ -157,11 +164,11 @@ public class TransactionHandler extends Service {
         if (transactionMetadata.getProducerEpoch() != producerEpoch) {
             throw new TransactionException(KafkaErrorCode.INVALID_PRODUCER_EPOCH.getCode());
         }
-        if (transactionMetadata.getState().equals(TransactionState.EMPTY)) {
-            throw new TransactionException(KafkaErrorCode.INVALID_TXN_STATE.getCode());
-        }
         if (transactionMetadata.getState().equals(TransactionState.PREPARE_COMMIT) || transactionMetadata.getState().equals(TransactionState.PREPARE_ABORT)) {
             throw new TransactionException(KafkaErrorCode.CONCURRENT_TRANSACTIONS.getCode());
+        }
+        if (transactionMetadata.getState().equals(TransactionState.COMPLETE_ABORT) || transactionMetadata.getState().equals(TransactionState.COMPLETE_COMMIT)) {
+            return true;
         }
 
         synchronized (transactionMetadata) {
@@ -172,15 +179,9 @@ public class TransactionHandler extends Service {
     protected boolean doEndTxn(TransactionMetadata transactionMetadata, boolean isCommit) {
         try {
             if (isCommit) {
-                transactionMetadata.transitionStateTo(TransactionState.PREPARE_COMMIT);
-                transactionSynchronizer.prepareCommit(transactionMetadata.getPrepare());
-                transactionSynchronizer.commit(transactionMetadata.getPrepare());
-                transactionMetadata.transitionStateTo(TransactionState.COMPLETE_COMMIT);
+                doCommit(transactionMetadata);
             } else {
-                transactionMetadata.transitionStateTo(TransactionState.PREPARE_ABORT);
-                transactionSynchronizer.prepareAbort(transactionMetadata.getPrepare());
-                transactionSynchronizer.abort(transactionMetadata.getPrepare());
-                transactionMetadata.transitionStateTo(TransactionState.COMPLETE_ABORT);
+                doAbort(transactionMetadata);
             }
             return true;
         } catch (Exception e) {
@@ -188,8 +189,21 @@ public class TransactionHandler extends Service {
             throw new TransactionException(e, KafkaErrorCode.exceptionFor(e));
         } finally {
             transactionMetadata.transitionStateTo(TransactionState.EMPTY);
-            transactionMetadata.clearPrepare();
         }
+    }
+
+    protected void doCommit(TransactionMetadata transactionMetadata) throws Exception {
+        transactionMetadata.transitionStateTo(TransactionState.PREPARE_COMMIT);
+        transactionSynchronizer.prepareCommit(transactionMetadata, transactionMetadata.getPrepare());
+        transactionSynchronizer.commit(transactionMetadata, transactionMetadata.getPrepare());
+        transactionMetadata.transitionStateTo(TransactionState.COMPLETE_COMMIT);
+    }
+
+    protected void doAbort(TransactionMetadata transactionMetadata) throws Exception {
+        transactionMetadata.transitionStateTo(TransactionState.PREPARE_ABORT);
+        transactionSynchronizer.prepareAbort(transactionMetadata, transactionMetadata.getPrepare());
+        transactionSynchronizer.abort(transactionMetadata, transactionMetadata.getPrepare());
+        transactionMetadata.transitionStateTo(TransactionState.COMPLETE_ABORT);
     }
 
     protected void checkCoordinatorState(String clientId, String transactionId) {

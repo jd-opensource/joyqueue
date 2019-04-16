@@ -19,6 +19,7 @@ import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionHandler;
 import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionIdManager;
 import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionLog;
 import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionMetadataManager;
+import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionOffsetHandler;
 import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionSynchronizer;
 import com.jd.journalq.broker.kafka.handler.ratelimit.KafkaRateLimitHandlerFactory;
 import com.jd.journalq.broker.kafka.manage.KafkaManageServiceFactory;
@@ -67,6 +68,7 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
     private TransactionSynchronizer transactionSynchronizer;
     private TransactionCompensator transactionCompensator;
     private TransactionHandler transactionHandler;
+    private TransactionOffsetHandler transactionOffsetHandler;
     private TransactionCoordinator transactionCoordinator;
     private KafkaConnectionManager connectionManager;
 
@@ -83,7 +85,7 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
         this.coordinator = new Coordinator(brokerContext.getCoordinatorService().getCoordinator());
 
         this.groupMetadataManager = new GroupMetadataManager(config, groupMetadataManager);
-        this.groupOffsetManager = new GroupOffsetManager(config, brokerContext.getClusterManager(), coordinator.getSessionManager());
+        this.groupOffsetManager = new GroupOffsetManager(config, brokerContext.getClusterManager(), this.groupMetadataManager, coordinator.getSessionManager());
         this.groupBalanceManager = new GroupBalanceManager(config, this.groupMetadataManager);
         this.groupOffsetHandler = new GroupOffsetHandler(config, coordinator, this.groupMetadataManager, groupBalanceManager, groupOffsetManager);
         this.groupBalanceHandler = new GroupBalanceHandler(config, this.groupMetadataManager, groupBalanceManager);
@@ -95,8 +97,9 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
         this.transactionLog = new TransactionLog(config, brokerContext.getProduce(), brokerContext.getConsume(), coordinator);
         this.transactionSynchronizer = new TransactionSynchronizer(config, transactionIdManager, transactionLog, coordinator.getSessionManager());
         this.transactionCompensator = new TransactionCompensator(coordinator, transactionLog, transactionSynchronizer);
-        this.transactionHandler = new TransactionHandler(this.transactionMetadataManager, coordinator, producerIdManager, transactionSynchronizer, brokerContext.getNameService());
-        this.transactionCoordinator = new TransactionCoordinator(coordinator, this.transactionMetadataManager, this.transactionHandler);
+        this.transactionHandler = new TransactionHandler(coordinator, this.transactionMetadataManager, producerIdManager, transactionSynchronizer, brokerContext.getNameService());
+        this.transactionOffsetHandler = new TransactionOffsetHandler(coordinator, this.transactionMetadataManager, transactionSynchronizer);
+        this.transactionCoordinator = new TransactionCoordinator(coordinator, this.transactionMetadataManager, transactionHandler, transactionOffsetHandler);
 
         this.connectionManager = new KafkaConnectionManager(brokerContext.getSessionManager());
         this.rateLimitHandlerFactory = newRateLimitKafkaHandlerFactory(config);
@@ -126,10 +129,11 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
         groupBalanceHandler.start();
         groupCoordinator.start();
 
+        transactionCoordinator.start();
         transactionLog.start();
         transactionSynchronizer.start();
         transactionHandler.start();
-        transactionCoordinator.start();
+        transactionOffsetHandler.start();
         transactionCompensator.start();
         rateLimitHandlerFactory.start();
     }
@@ -143,10 +147,11 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
         groupBalanceHandler.stop();
 
         transactionCompensator.stop();
-        transactionCoordinator.stop();
+        transactionOffsetHandler.stop();
         transactionHandler.stop();
         transactionSynchronizer.stop();
         transactionLog.stop();
+        transactionCoordinator.stop();
         rateLimitHandlerFactory.stop();
     }
 
