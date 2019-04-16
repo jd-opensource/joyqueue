@@ -865,7 +865,9 @@ public class ClusterManager extends Service {
                 try {
                     logger.info("begin update all topicConfigs");
                     Map<TopicName, TopicConfig> topicConfigNew = nameService.getTopicConfigByBroker(brokerConfig.getBrokerId());
-                    if(logger.isDebugEnabled())logger.debug("allTopicConfigs {}",topicConfigNew);
+                    if(logger.isDebugEnabled()){
+                        logger.debug("allTopicConfigs {}",topicConfigNew);
+                    }
                     if (null != topicConfigNew && topicConfigNew.size() > 0) {
                         Map<String, TopicConfig> topicConfigOld = topicConfigCache;
                         for (Map.Entry<String, TopicConfig> entry : topicConfigOld.entrySet()) {
@@ -1076,7 +1078,9 @@ public class ClusterManager extends Service {
                                 TopicConfig topicConfig = buildTopicConfigCache(((TopicEvent) event.getMetaEvent()).getTopic());
                                 for (PartitionGroup group : topicConfig.fetchPartitionGroupByBrokerId(brokerConfig.getBrokerId())) {
                                     //storeService.createPartitionGroup(group.getTopic(), group.getGroup(), group.getPartitions().toArray(new Short[0]),group.getReplicaGroups().stream().mapToInt(replica->(int)replica).toArray());
-                                    eventBus.add(PartitionGroupEvent.add(group.getTopic(), group.getGroup()));
+                                    if(group.getReplicas().contains(brokerConfig.getBrokerId())){
+                                        eventBus.add(PartitionGroupEvent.add(group.getTopic(), group.getGroup()));
+                                    }
                                 }
                                 break;
                             case UPDATE_TOPIC:
@@ -1095,18 +1099,25 @@ public class ClusterManager extends Service {
                             default:break;
                         }
                     } else if (event.getMetaEvent() instanceof PartitionGroupEvent) {
+                        PartitionGroup groupOld = getTopicConfig(((PartitionGroupEvent) event.getMetaEvent()).getTopic()).fetchPartitionGroupByGroup(((PartitionGroupEvent) event.getMetaEvent()).getPartitionGroup());
                         TopicConfig topicConfig = buildTopicConfigCache(((PartitionGroupEvent) event.getMetaEvent()).getTopic());
-                        PartitionGroup group = topicConfig.fetchPartitionGroupByGroup(((PartitionGroupEvent) event.getMetaEvent()).getPartitionGroup());
+                        PartitionGroup groupNew = topicConfig.fetchPartitionGroupByGroup(((PartitionGroupEvent) event.getMetaEvent()).getPartitionGroup());
+                        Set<Integer> brokerIds = new HashSet<>();
+                        brokerIds.addAll(groupOld.getReplicas());
+                        brokerIds.addAll(groupNew.getReplicas());
+                        if(!brokerIds.contains(brokerConfig.getBrokerId())){
+                            return;
+                        }
                         switch (event.getEventType()) {
                             case ADD_PARTITION_GROUP:
                                 //PartitionGroup新增事件
                                 //storeService.createPartitionGroup(group.getTopic(), group.getGroup(), group.getPartitions().toArray(new Short[0]),group.getReplicaGroups().stream().mapToInt(replica->(int)replica).toArray());
-                                eventBus.add(PartitionGroupEvent.add(topicConfig.getName(), group.getGroup()));
+                                eventBus.add(PartitionGroupEvent.add(topicConfig.getName(), groupNew.getGroup()));
                                 break;
                             case UPDATE_PARTITION_GROUP:
                                 // PartitionGroup更新事件,只会通知partitionGroup的leader
                                 //storeService.createOrUpdatePartitionGroup(group.getTopic(), group.getGroup(), (Short[]) group.getPartitions().toArray());
-                                eventBus.add(PartitionGroupEvent.update(group.getTopic(), group.getGroup()));
+                                eventBus.add(PartitionGroupEvent.update(groupNew.getTopic(), groupNew.getGroup()));
                                 break;
                             case REMOVE_PARTITION_GROUP:
                                 /**
