@@ -21,3 +21,4 @@ com.jd.journalq.handler.routing.command.retry.RetryCommand
 com.jd.journalq.handler.routing.command.chart.GrafanaCommand
 com.jd.journalq.handler.routing.command.chart.MetricCommand
 com.jd.journalq.handler.routing.command.monitor.ConsumeOffsetCommand
+com.jd.journalq.handler.routing.command.archive.ArchiveCommand

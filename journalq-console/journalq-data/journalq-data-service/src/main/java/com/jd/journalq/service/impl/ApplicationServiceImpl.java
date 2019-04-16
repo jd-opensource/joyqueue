@@ -29,6 +29,7 @@ import com.jd.journalq.nsr.ProducerNameServerService;
 import com.jd.journalq.repository.ApplicationRepository;
 import com.jd.journalq.service.ApplicationService;
 import com.jd.journalq.service.ApplicationUserService;
+import com.jd.journalq.service.UserService;
 import com.jd.journalq.toolkit.lang.Preconditions;
 import com.jd.journalq.util.NullUtil;
 import org.slf4j.Logger;
@@ -60,6 +61,8 @@ public class ApplicationServiceImpl extends PageServiceSupport<Application, QApp
     private ApplicationUserService applicationUserService;
     @Autowired
     private AppTokenNameServerService appTokenNameServerService;
+    @Autowired
+    private UserService userService;
 
     @Override
     public int add(Application app) {
@@ -67,6 +70,13 @@ public class ApplicationServiceImpl extends PageServiceSupport<Application, QApp
         Application apps = findByCode(app.getCode());
         if (NullUtil.isNotEmpty(apps)) {
             throw new ValidationException(UNIQUE_EXCEPTION_STATUS, getUniqueExceptionMessage());
+        }
+        //fill owner_id
+        if (app.getOwner().getId() == null && app.getOwner().getCode() != null) {
+            User user = userService.findByCode(app.getOwner().getCode());
+            if (user != null) {
+                app.getOwner().setId(user.getId());
+            }
         }
         //Add
         return super.add(app);

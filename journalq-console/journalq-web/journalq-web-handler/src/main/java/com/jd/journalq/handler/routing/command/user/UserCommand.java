@@ -22,7 +22,6 @@ import com.jd.journalq.model.domain.Identity;
 import com.jd.journalq.model.domain.User;
 import com.jd.journalq.model.query.QUser;
 import com.jd.journalq.service.UserService;
-import com.jd.journalq.service.UserTokenService;
 import com.jd.laf.binding.annotation.Value;
 import com.jd.laf.web.vertx.annotation.Body;
 import com.jd.laf.web.vertx.annotation.Path;
@@ -30,8 +29,6 @@ import com.jd.laf.web.vertx.annotation.QueryParam;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
 
-
-import java.util.List;
 
 import static com.jd.journalq.handler.Constants.CODE;
 import static com.jd.journalq.handler.Constants.ID;
@@ -45,8 +42,6 @@ public class UserCommand extends CommandSupport<User, UserService, QUser> {
     @Value(USER_KEY)
     protected User operator;
 
-    @Value(nullable = false)
-    private UserTokenService userTokenService;
     @Override
     @Path("add")
     public Response add(@Body User model) throws Exception {

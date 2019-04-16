@@ -59,11 +59,15 @@ public class ElectionMetadataManager {
      * @param electionManager election manager
      */
     void recover(ElectionManager electionManager) throws Exception {
-        File file = new File(fileName);
-        if (file.exists()) recoverMetadataOld(file);
-        else recoverMetadata();
+        try {
+            File file = new File(fileName);
+            if (file.exists()) recoverMetadataOld(file);
+            else recoverMetadata();
 
-        restoreLeaderElections(electionManager);
+            restoreLeaderElections(electionManager);
+        } catch (Exception e) {
+            logger.info("Recover election metadata fail", e);
+        }
     }
 
     /**
@@ -115,7 +119,7 @@ public class ElectionMetadataManager {
         for (File topicDir : topicDirs) {
             if (!topicDir.isDirectory()) continue;
 
-            String topic = topicDir.getName();
+            String topic = topicDir.getName().replace('@', File.separatorChar);
             File[] pgsFiles = topicDir.listFiles();
             if (pgsFiles == null) continue;
 
@@ -191,7 +195,8 @@ public class ElectionMetadataManager {
     synchronized void removeElectionMetadata(TopicPartitionGroup topicPartitionGroup) {
         try {
             metadataMap.remove(topicPartitionGroup);
-            File topicDir = new File(this.path + "/" + topicPartitionGroup.getTopic());
+            File topicDir = new File(this.path + File.separator + topicPartitionGroup.getTopic()
+                    .replace(File.separatorChar, '@'));
             File[] pgFiles = topicDir.listFiles();
             if (pgFiles == null) return;
 

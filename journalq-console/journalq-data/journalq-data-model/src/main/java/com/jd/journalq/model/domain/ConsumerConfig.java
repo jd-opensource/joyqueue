@@ -25,7 +25,7 @@ public class ConsumerConfig extends BaseNsrModel {
     private String consumerId;
 
     /**
-     * 开启就近消费
+     * 开启就近机房消费
      **/
     private boolean nearBy;
 

@@ -19,6 +19,7 @@
         <result property="updateBy.id" column="update_by" jdbcType="BIGINT"/>
         <result property="status" column="status" jdbcType="BIGINT"/>
         <result property="aliasCode" column="alias_code" jdbcType="VARCHAR"/>
+        <result property="description" column="description" jdbcType="VARCHAR"/>
     </resultMap>
     <sql id="baseColumn">
         a.id,
@@ -36,7 +37,7 @@
         a.update_by,
         a.`status`,
         a.`alias_code`,
-        a.`discription`
+        a.`description`
     </sql>
     <insert id="add" parameterType="application" useGeneratedKeys="true" keyProperty="id">
         insert into application
@@ -55,7 +56,7 @@
         update_by,
         `status`,
         `alias_code`,
-        `discription`)
+        `description`)
         values
         (
         #{code},
@@ -72,7 +73,7 @@
         #{updateBy.id},
         #{status},
         #{aliasCode},
-        #{discription}
+        #{description}
         )
     </insert>
 
@@ -84,7 +85,7 @@
           `owner_id`=#{owner.id},
           `owner_code`=#{owner.code},
           `sign`=#{sign},
-          discription=#{discription}
+          description=#{description}
           update_time=#{updateTime},
           update_by=#{updateBy.id}
         WHERE

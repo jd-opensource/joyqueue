@@ -195,6 +195,7 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
         partitionGroup.setTopic(CodeConverter.convertTopic(group.getNamespace(),group.getTopic()));
         partitionGroup.setLeader(group.getLeader());
         partitionGroup.setElectType(PartitionGroup.ElectType.valueOf(group.getElectType().intValue()));
+        partitionGroup.setOutSyncReplicas(group.getOutSyncReplicas());
         String result =  postWithLog(LEADER_CHANGE, partitionGroup,OperLog.Type.TOPIC.value(),OperLog.OperType.UPDATE.value(),group.getTopic().getCode());
         return isSuccess(result);
     }

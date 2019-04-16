@@ -9,7 +9,7 @@
     <d-form-item label="暂停消费:">
       <d-switch v-model="formData.paused"></d-switch>
     </d-form-item>
-    <d-form-item label="就近消费:">
+    <d-form-item label="就近机房消费:">
       <d-switch v-model="formData.nearBy"></d-switch>
     </d-form-item>
     <d-form-item label="延迟消费(ms):" prop="delay" >
