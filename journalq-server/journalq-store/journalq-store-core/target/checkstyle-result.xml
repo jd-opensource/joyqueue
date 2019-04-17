@@ -1,3 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <checkstyle version="6.18">
+<file name="/Users/lining11/work/mycodes/journalQ/journalq-server/journalq-store/journalq-store-core/src/main/java/com/jd/journalq/store/cli/IndexLengthCheck.java">
+<error line="127" severity="error" message="Could not use printStackTrace." source="com.puppycrawl.tools.checkstyle.checks.regexp.RegexpMultilineCheck"/>
+</file>
+<file name="/Users/lining11/work/mycodes/journalQ/journalq-server/journalq-store/journalq-store-core/src/main/java/com/jd/journalq/store/PartitionGroupStoreManager.java">
+<error line="43" severity="error" message="不应使用 &apos;.*&apos; 形式的导入 - java.util.* 。" source="com.puppycrawl.tools.checkstyle.checks.imports.AvoidStarImportCheck"/>
+<error line="808" severity="error" message="Could not use printStackTrace." source="com.puppycrawl.tools.checkstyle.checks.regexp.RegexpMultilineCheck"/>
+<error line="817" severity="error" message="Could not use printStackTrace." source="com.puppycrawl.tools.checkstyle.checks.regexp.RegexpMultilineCheck"/>
+<error line="852" severity="error" message="Could not use printStackTrace." source="com.puppycrawl.tools.checkstyle.checks.regexp.RegexpMultilineCheck"/>
+</file>
+<file name="/Users/lining11/work/mycodes/journalQ/journalq-server/journalq-store/journalq-store-core/src/main/java/com/jd/journalq/store/Store.java">
+<error line="158" severity="error" message="Could not use printStackTrace." source="com.puppycrawl.tools.checkstyle.checks.regexp.RegexpMultilineCheck"/>
+<error line="390" severity="error" message="Could not use printStackTrace." source="com.puppycrawl.tools.checkstyle.checks.regexp.RegexpMultilineCheck"/>
+</file>
+<file name="/Users/lining11/work/mycodes/journalQ/journalq-server/journalq-store/journalq-store-core/src/main/java/com/jd/journalq/store/QosStore.java">
+<error line="26" column="8" severity="error" message="无用导入 - java.util.Set 。" source="com.puppycrawl.tools.checkstyle.checks.imports.UnusedImportsCheck"/>
+</file>
 </checkstyle>
