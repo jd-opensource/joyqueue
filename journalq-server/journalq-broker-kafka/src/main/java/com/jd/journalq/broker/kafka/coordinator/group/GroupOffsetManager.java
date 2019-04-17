@@ -128,13 +128,16 @@ public class GroupOffsetManager extends Service {
         for (String topic : result.rowKeySet()) {
             Map<Integer, OffsetMetadataAndError> partitions = result.row(topic);
             for (Map.Entry<Integer, OffsetMetadataAndError> entry : partitions.entrySet()) {
-                if (entry.getValue().getError() == KafkaErrorCode.NONE.getCode()) {
-                    continue;
-                }
-                OffsetAndMetadata offsetCache = groupMetadata.getOffsetCache(topic, entry.getKey());
-                if (offsetCache != null) {
-                    logger.info("fill error offset, topic: {}, partition: {}, offset: {}", topic, entry.getKey(), offsetCache);
-                    result.put(topic, entry.getKey(), new OffsetMetadataAndError(offsetCache.getPartition(), offsetCache.getOffset(), OffsetAndMetadata.NO_METADATA, KafkaErrorCode.NONE.getCode()));
+                OffsetMetadataAndError offsetMetadataAndError = entry.getValue();
+                if (offsetMetadataAndError.getError() == KafkaErrorCode.NONE.getCode()) {
+                    groupMetadata.putOffsetCache(topic, entry.getKey(),
+                            new OffsetAndMetadata(offsetMetadataAndError.getOffset(), (short) entry.getKey().intValue()));
+                } else {
+                    OffsetAndMetadata offsetCache = groupMetadata.getOffsetCache(topic, entry.getKey());
+                    if (offsetCache != null) {
+                        logger.info("fill error offset, topic: {}, partition: {}, offset: {}", topic, entry.getKey(), offsetCache);
+                        result.put(topic, entry.getKey(), new OffsetMetadataAndError(offsetCache.getPartition(), offsetCache.getOffset(), OffsetAndMetadata.NO_METADATA, KafkaErrorCode.NONE.getCode()));
+                    }
                 }
             }
         }

@@ -20,6 +20,11 @@ public class OffsetAndMetadata {
     public OffsetAndMetadata() {
     }
 
+    public OffsetAndMetadata(long offset, short partition) {
+        this.offset = offset;
+        this.partition = partition;
+    }
+
     public OffsetAndMetadata(long offset, String metadata) {
         this.offset = offset;
         this.metadata = metadata;
