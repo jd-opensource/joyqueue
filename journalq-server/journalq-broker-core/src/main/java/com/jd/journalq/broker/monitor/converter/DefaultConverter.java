@@ -187,9 +187,6 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
             if (value != null && value instanceof PendingStat) {
 
                 PendingStat stat = (PendingStat) value;
-                if (stat == null) {
-                    continue;
-                }
                 appPending.setValue(stat.getPending());
             } else {
                 if (value == null) {
