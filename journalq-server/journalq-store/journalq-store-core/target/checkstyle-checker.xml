@@ -46,6 +46,14 @@
         <property name="message" value="Code snippets longer than 76 characters get cut off when rendered in the docs"/>
     </module>
 
+    <module name="RegexpMultiline">
+        <property name="id" value="PrintStackTrace"/>
+        <property name="format" value="printStackTrace"/>
+        <property name="fileExtensions" value="java"/>
+        <property name="message" value="Could not use printStackTrace."/>
+    </module>
+
+
     <module name="TreeWalker">
         <!-- Its our official line length! See checkstyle_suppressions.xml for the files that don't pass this. For now we
           suppress the check there but enforce it everywhere else. This prevents the list from getting longer even if it is

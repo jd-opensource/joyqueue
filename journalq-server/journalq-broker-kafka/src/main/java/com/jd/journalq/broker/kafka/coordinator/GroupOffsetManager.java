@@ -134,7 +134,7 @@ public class GroupOffsetManager extends Service {
 
         try {
             if (!latch.await(config.getCoordinatorOffsetSyncTimeout(), TimeUnit.MILLISECONDS)) {
-                logger.error("get offset timeout, broker: {}, topic: {}, group: {}", brokerTopicPartitionTable.rowKeySet(), brokerTopicPartitionTable.columnKeySet(), groupId);
+                logger.error("get offset timeout, topic: {}, group: {}", brokerTopicPartitionTable.rowMap(), groupId);
             }
         } catch (InterruptedException e) {
             logger.error("get offset latch await exception, groupId: {}, topicAndPartitions: {}", groupId, topicAndPartitions, e);
@@ -161,7 +161,7 @@ public class GroupOffsetManager extends Service {
                     OffsetAndMetadata offsetCache = groupMetadata.getOffsetCache(topic, entry.getKey());
                     if (offsetCache != null) {
                         logger.info("fill error offset, topic: {}, partition: {}, offset: {}", topic, entry.getKey(), offsetCache);
-                        result.put(topic, entry.getKey(), new OffsetMetadataAndError(offsetCache.getOffset(), OffsetAndMetadata.NO_METADATA, KafkaErrorCode.NONE));
+                        result.put(topic, entry.getKey(), new OffsetMetadataAndError(offsetCache.getOffset(), offsetCache.getMetadata(), KafkaErrorCode.NONE));
                     }
                 }
             }
@@ -175,7 +175,7 @@ public class GroupOffsetManager extends Service {
 
         for (String topic : offsetAndMetadataTable.rowKeySet()) {
             for (Map.Entry<Integer, OffsetAndMetadata> partitionEntry : offsetAndMetadataTable.row(topic).entrySet()) {
-                result.put(topic, partitionEntry.getKey(), OffsetMetadataAndError.OFFSET_SYNC_FAIL);
+                result.put(topic, partitionEntry.getKey(), OffsetMetadataAndError.OFFSET_SYNC_SUCCESS);
             }
         }
 
@@ -205,20 +205,20 @@ public class GroupOffsetManager extends Service {
                     @Override
                     public void onException(Command request, Throwable cause) {
                         logger.error("save offset failed, async transport exception, topic: {}, group: {}, leader: {id: {}, ip: {}, port: {}}",
-                                indexAndMetadataMap.keySet(), groupId, broker.getId(), broker.getIp(), broker.getBackEndPort(), cause);
+                                indexAndMetadataMap, groupId, broker.getId(), broker.getIp(), broker.getBackEndPort(), cause);
                         latch.countDown();
                     }
                 });
             } catch (Throwable t) {
                 logger.error("save offset failed, async transport exception, topic: {}, group: {}, leader: {id: {}, ip: {}, port: {}}",
-                        indexAndMetadataMap.keySet(), groupId, broker.getId(), broker.getIp(), broker.getBackEndPort(), t);
+                        indexAndMetadataMap, groupId, broker.getId(), broker.getIp(), broker.getBackEndPort(), t);
                 latch.countDown();
             }
         }
 
         try {
             if (!latch.await(config.getCoordinatorOffsetSyncTimeout(), TimeUnit.MILLISECONDS)) {
-                logger.error("save offset timeout, broker: {}, topic: {}, group: {}", brokerTopicPartitionTable.rowKeySet(), brokerTopicPartitionTable.columnKeySet(), groupId);
+                logger.error("save offset timeout, topic: {}, group: {}", brokerTopicPartitionTable.rowMap(), groupId);
             }
         } catch (InterruptedException e) {
             logger.error("save offset latch await exception, groupId: {}, topicAndPartitions: {}", groupId, offsetAndMetadataTable, e);
@@ -238,7 +238,7 @@ public class GroupOffsetManager extends Service {
             Map<Integer, OffsetAndMetadata> partitions = offsetAndMetadataTable.row(topic);
             for (Map.Entry<Integer, OffsetAndMetadata> entry : partitions.entrySet()) {
                 OffsetMetadataAndError offsetMetadataAndError = result.get(topic, entry.getKey());
-                if (offsetMetadataAndError != null && offsetMetadataAndError.getError() == KafkaErrorCode.NONE) {
+                if (offsetMetadataAndError != null) {
                     groupMetadata.putOffsetCache(topic, entry.getKey(), entry.getValue());
                 }
             }
