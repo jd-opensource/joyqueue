@@ -40,7 +40,6 @@ import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.transport.command.CommandCallback;
 import com.jd.journalq.network.transport.command.Direction;
 import com.jd.journalq.toolkit.service.Service;
-import org.apache.commons.lang3.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -121,23 +120,26 @@ public class GroupOffsetManager extends Service {
 
                     @Override
                     public void onException(Command request, Throwable cause) {
-                        logger.error("get offset failed, async transport exception, leader: {id: {}, ip: {}, port: {}}",
-                                broker.getId(), broker.getIp(), broker.getBackEndPort(), cause);
+                        logger.error("get offset failed, async transport exception, topic: {}, group: {}, leader: {id: {}, ip: {}, port: {}}",
+                                topicPartitionMap, groupId, broker.getId(), broker.getIp(), broker.getBackEndPort(), cause);
                         latch.countDown();
                     }
                 });
             } catch (Throwable t) {
-                logger.error("get offset failed, async transport exception, leader: {id: {}, ip: {}, port: {}}",
-                        broker.getId(), broker.getIp(), broker.getBackEndPort(), t);
+                logger.error("get offset failed, async transport exception, topic: {}, group: {}, leader: {id: {}, ip: {}, port: {}}",
+                        topicPartitionMap, groupId, broker.getId(), broker.getIp(), broker.getBackEndPort(), t);
                 latch.countDown();
             }
         }
 
         try {
-            latch.await(config.getCoordinatorOffsetSyncTimeout(), TimeUnit.MILLISECONDS);
+            if (!latch.await(config.getCoordinatorOffsetSyncTimeout(), TimeUnit.MILLISECONDS)) {
+                logger.error("get offset timeout, broker: {}, topic: {}, group: {}", brokerTopicPartitionTable.rowKeySet(), brokerTopicPartitionTable.columnKeySet(), groupId);
+            }
         } catch (InterruptedException e) {
             logger.error("get offset latch await exception, groupId: {}, topicAndPartitions: {}", groupId, topicAndPartitions, e);
         }
+
 
         fillErrorOffset(groupId, result);
         return result;
@@ -202,23 +204,26 @@ public class GroupOffsetManager extends Service {
 
                     @Override
                     public void onException(Command request, Throwable cause) {
-                        logger.error("save offset failed, async transport exception, leader: {id: {}, ip: {}, port: {}}",
-                                broker.getId(), broker.getIp(), broker.getBackEndPort(), cause);
+                        logger.error("save offset failed, async transport exception, topic: {}, group: {}, leader: {id: {}, ip: {}, port: {}}",
+                                indexAndMetadataMap.keySet(), groupId, broker.getId(), broker.getIp(), broker.getBackEndPort(), cause);
                         latch.countDown();
                     }
                 });
             } catch (Throwable t) {
-                logger.error("save offset failed, async transport exception, leader: {id: {}, ip: {}, port: {}}",
-                        broker.getId(), broker.getIp(), broker.getBackEndPort(), t);
+                logger.error("save offset failed, async transport exception, topic: {}, group: {}, leader: {id: {}, ip: {}, port: {}}",
+                        indexAndMetadataMap.keySet(), groupId, broker.getId(), broker.getIp(), broker.getBackEndPort(), t);
                 latch.countDown();
             }
         }
 
         try {
-            latch.await(config.getCoordinatorOffsetSyncTimeout(), TimeUnit.MILLISECONDS);
+            if (!latch.await(config.getCoordinatorOffsetSyncTimeout(), TimeUnit.MILLISECONDS)) {
+                logger.error("save offset timeout, broker: {}, topic: {}, group: {}", brokerTopicPartitionTable.rowKeySet(), brokerTopicPartitionTable.columnKeySet(), groupId);
+            }
         } catch (InterruptedException e) {
             logger.error("save offset latch await exception, groupId: {}, topicAndPartitions: {}", groupId, offsetAndMetadataTable, e);
         }
+
 
         fillOffsetCache(groupId, offsetAndMetadataTable, result);
         return result;
