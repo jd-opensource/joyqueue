@@ -183,18 +183,18 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
             if (aps == null) {
                 continue;
             }
-            if (aps.get(key) != null && aps.get(key) instanceof PendingStat) {
+            if (pendingMap.get(key) != null && pendingMap.get(key) instanceof PendingStat) {
 
-                PendingStat stat = (PendingStat) aps.get(key);
+                PendingStat stat = (PendingStat) pendingMap.get(key);
                 if (stat == null) {
                     continue;
                 }
                 appPending.setValue(stat.getPending());
             } else {
-                if (aps.get(key) == null) {
+                if (pendingMap.get(key) == null) {
                     appPending.setValue(0);
                 } else {
-                    appPending.setValue((Double) aps.get(key));
+                    appPending.setValue((Double) pendingMap.get(key));
                 }
             }
             result.add(appPending);
