@@ -27,6 +27,7 @@ import com.jd.journalq.broker.index.model.IndexAndMetadata;
 import com.jd.journalq.broker.index.model.IndexMetadataAndError;
 import com.jd.journalq.broker.kafka.KafkaErrorCode;
 import com.jd.journalq.broker.kafka.config.KafkaConfig;
+import com.jd.journalq.broker.kafka.coordinator.domain.KafkaCoordinatorGroup;
 import com.jd.journalq.broker.kafka.model.OffsetAndMetadata;
 import com.jd.journalq.broker.kafka.model.OffsetMetadataAndError;
 import com.jd.journalq.domain.Broker;
@@ -39,6 +40,7 @@ import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.transport.command.CommandCallback;
 import com.jd.journalq.network.transport.command.Direction;
 import com.jd.journalq.toolkit.service.Service;
+import org.apache.commons.lang3.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,11 +62,13 @@ public class GroupOffsetManager extends Service {
 
     private KafkaConfig config;
     private ClusterManager clusterManager;
+    private KafkaCoordinatorGroupManager coordinatorGroupManager;
     private GroupOffsetSyncSessionManager groupOffsetSyncSessionManager;
 
-    public GroupOffsetManager(KafkaConfig config, ClusterManager clusterManager) {
+    public GroupOffsetManager(KafkaConfig config, ClusterManager clusterManager, KafkaCoordinatorGroupManager coordinatorGroupManager) {
         this.config = config;
         this.clusterManager = clusterManager;
+        this.coordinatorGroupManager = coordinatorGroupManager;
         this.groupOffsetSyncSessionManager = new GroupOffsetSyncSessionManager(config);
     }
 
@@ -135,7 +139,31 @@ public class GroupOffsetManager extends Service {
             logger.error("get offset latch await exception, groupId: {}, topicAndPartitions: {}", groupId, topicAndPartitions, e);
         }
 
+        fillErrorOffset(groupId, result);
         return result;
+    }
+
+    protected void fillErrorOffset(String groupId, Table<String, Integer, OffsetMetadataAndError> result) {
+        KafkaCoordinatorGroup groupMetadata = coordinatorGroupManager.getGroup(groupId);
+        if (groupMetadata == null) {
+            return;
+        }
+        for (String topic : result.rowKeySet()) {
+            Map<Integer, OffsetMetadataAndError> partitions = result.row(topic);
+            for (Map.Entry<Integer, OffsetMetadataAndError> entry : partitions.entrySet()) {
+                OffsetMetadataAndError offsetMetadataAndError = entry.getValue();
+                if (offsetMetadataAndError.getError() == KafkaErrorCode.NONE) {
+                    groupMetadata.putOffsetCache(topic, entry.getKey(),
+                            new OffsetAndMetadata(offsetMetadataAndError.getOffset(), null));
+                } else {
+                    OffsetAndMetadata offsetCache = groupMetadata.getOffsetCache(topic, entry.getKey());
+                    if (offsetCache != null) {
+                        logger.info("fill error offset, topic: {}, partition: {}, offset: {}", topic, entry.getKey(), offsetCache);
+                        result.put(topic, entry.getKey(), new OffsetMetadataAndError(offsetCache.getOffset(), OffsetAndMetadata.NO_METADATA, KafkaErrorCode.NONE));
+                    }
+                }
+            }
+        }
     }
 
     public Table<String, Integer, OffsetMetadataAndError> saveOffsets(String groupId, Table<String /** topic **/, Integer /** partition **/, OffsetAndMetadata> offsetAndMetadataTable) {
@@ -192,7 +220,24 @@ public class GroupOffsetManager extends Service {
             logger.error("save offset latch await exception, groupId: {}, topicAndPartitions: {}", groupId, offsetAndMetadataTable, e);
         }
 
+        fillOffsetCache(groupId, offsetAndMetadataTable, result);
         return result;
+    }
+
+    protected void fillOffsetCache(String groupId, Table<String, Integer, OffsetAndMetadata> offsetAndMetadataTable, Table<String, Integer, OffsetMetadataAndError> result) {
+        KafkaCoordinatorGroup groupMetadata = coordinatorGroupManager.getGroup(groupId);
+        if (groupMetadata == null) {
+            return;
+        }
+        for (String topic : offsetAndMetadataTable.rowKeySet()) {
+            Map<Integer, OffsetAndMetadata> partitions = offsetAndMetadataTable.row(topic);
+            for (Map.Entry<Integer, OffsetAndMetadata> entry : partitions.entrySet()) {
+                OffsetMetadataAndError offsetMetadataAndError = result.get(topic, entry.getKey());
+                if (offsetMetadataAndError != null && offsetMetadataAndError.getError() == KafkaErrorCode.NONE) {
+                    groupMetadata.putOffsetCache(topic, entry.getKey(), entry.getValue());
+                }
+            }
+        }
     }
 
     protected Map<String, Map<Integer, IndexAndMetadata>> buildSaveOffsetParam(Map<String, Set<Integer>> topicAndPartitionMap, Table<String, Integer, OffsetAndMetadata> offsetAndMetadataTable) {
