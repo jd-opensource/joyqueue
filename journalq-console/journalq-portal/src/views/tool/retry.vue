@@ -1,13 +1,13 @@
 <template>
   <div>
     <div class="ml20 mt30">
-      <d-input v-model="searchData.topic" placeholder="请输入队列名" class="left mr5" style="width: 15%">
+      <d-input v-model="search.topic" placeholder="请输入队列名" class="left mr5" style="width: 15%">
         <span slot="prepend">队列名</span>
       </d-input>
-      <d-input v-model="searchData.app" placeholder="请输入消费者" class="left mr5" style="width: 15%">
+      <d-input v-model="search.app" placeholder="请输入消费者" class="left mr5" style="width: 15%">
         <span slot="prepend">消费者</span>
       </d-input>
-      <d-select v-model="searchData.status" class="left mr5" style="width:10%">
+      <d-select v-model="search.status" class="left mr5" style="width:10%">
         <span slot="prepend">状态</span>
         <d-option v-for="item in statusList" :value="item.key" :key="item.key">{{ item.value }}</d-option>
       </d-select>
@@ -21,7 +21,7 @@
                      :default-time="['00:00:00', '23:59:59']">
         <span slot="prepend">发送时间</span>
       </d-date-picker>
-      <d-input v-model="searchData.businessId" placeholder="请输入业务ID" class="left mr5" style="width: 15%">
+      <d-input v-model="search.businessId" placeholder="请输入业务ID" class="left mr5" style="width: 15%">
         <span slot="prepend">业务ID</span>
       </d-input>
       <d-button type="primary" color="success" @click="getListWithDate">查询<icon name="search" style="margin-left: 5px;"></icon></d-button>
@@ -46,7 +46,7 @@ export default {
   },
   mixins: [ crud ],
   props: {
-    searchData: {
+    search: {
       type: Object,
       default: function () {
         return {
@@ -62,7 +62,10 @@ export default {
   data () {
     return {
       urls: {
-        search: '/retry/search'
+        search: '/retry/search',
+        del: '/retry/delete',
+        download: '/retry/download',
+        recovery: '/retry/recovery'
       },
       businessId: '',
       statusList: [
@@ -132,16 +135,12 @@ export default {
   },
   methods: {
     getListWithDate () {
-      // if (this.searchData.app == '' || this.searchData.topic == '') {
-      //   return ;
-      // }
-      console.log(this.times)
-      if (this.times != null && this.times.length == 2) {
-        this.searchData.beginTime = this.times[0]
-        this.searchData.endTime = this.times[1]
+      if (this.times != null && this.times.length === 2) {
+        this.search.beginTime = this.times[0]
+        this.search.endTime = this.times[1]
       } else {
-        this.searchData.beginTime='';
-        this.searchData.endTime = '';
+        this.search.beginTime = ''
+        this.search.endTime = ''
       }
       this.getList()
     },
@@ -158,13 +157,6 @@ export default {
     }
   },
   mounted () {
-    this.searchData.topic = this.$route.query.topic
-    this.searchData.app = this.$route.query.app
-    // if (this.searchData.app == '' || this.searchData.topic == '') {
-    //   return ;
-    // }
-    // this.searchData.beginTime=this.times[0];
-    // this.searchData.endTime=this.times[1];
     this.getList()
   }
 }

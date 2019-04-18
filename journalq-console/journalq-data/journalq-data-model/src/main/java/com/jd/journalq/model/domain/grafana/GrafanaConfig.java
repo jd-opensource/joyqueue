@@ -19,6 +19,12 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 import java.util.List;
 
+/**
+ * Grafana config
+ * author: chenyanying3
+ * email: chenyanying3@jd.com
+ * date: 2019/02/29
+ */
 @JacksonXmlRootElement(localName = "Configuration")
 public class GrafanaConfig {
     public static final String DEFAULT_GRAFANA_CONFIG_DELIMITER = ",";

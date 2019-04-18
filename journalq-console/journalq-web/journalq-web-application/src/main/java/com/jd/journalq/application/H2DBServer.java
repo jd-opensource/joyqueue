@@ -52,10 +52,11 @@ public class H2DBServer {
 
     public void start(String url) {
         try {
+            String baseDir = getBaseDir(url);
             // tcp server 启动
             if (tcpServer == null) {
                 logger.info("begin to create h2 database tcp server...");
-                tcpServer = Server.createTcpServer(new String[]{"-tcp", "-tcpAllowOthers", "-tcpPort", String.valueOf(TCP_PORT), "-baseDir", BASE_DIR}).start();
+                tcpServer = Server.createTcpServer(new String[]{"-tcp", "-tcpAllowOthers", "-tcpPort", getTcpPort(url), "-baseDir", baseDir}).start();
                 logger.info(String.format("h2 database tcp server is started on port %s", TCP_PORT));
             } else if (!tcpServer.isRunning(true)) {
                 logger.info("begin to start h2 database tcp server...");
@@ -67,7 +68,7 @@ public class H2DBServer {
             // web console 启动
             if (webServer == null) {
                 logger.info("begin to create h2 database web server...");
-                webServer = Server.createWebServer(new String[]{"-web", "-webAllowOthers", "-webPort", String.valueOf(WEB_PORT), "-baseDir", BASE_DIR}).start();
+                webServer = Server.createWebServer(new String[]{"-web", "-webAllowOthers", "-webPort", String.valueOf(WEB_PORT), "-baseDir", baseDir}).start();
                 logger.info(String.format("h2 database web server is started on port %s", WEB_PORT));
             } else if (!webServer.isRunning(true)) {
                 logger.info("begin to start h2 database web server...");
@@ -81,14 +82,14 @@ public class H2DBServer {
         }
     }
 
-    //jdbc:h2:tcp://127.0.0.1/./h2-db-journalq
+    //jdbc:h2:tcp://127.0.0.1/./h2-db-journalq;INIT...
     protected String getBaseDir(String url) {
         try {
             String[] strs = url.split("//");
-            return strs[1].substring(strs[1].indexOf("/")+1, strs[1].length());
+            return strs[1].substring(strs[1].indexOf("/")+1, strs[1].length()).split(";")[0];
         } catch (Exception e) {
-            logger.error("can not get base dir from connection url", e);
-            return "";
+//            logger.error("can not get base dir from connection url", e);
+            return BASE_DIR;
         }
     }
 
@@ -97,7 +98,7 @@ public class H2DBServer {
             String[] strs = url.split("//");
             return strs[1].substring(0, strs[1].indexOf("/")).split(":")[1];
         } catch (Exception e) {
-            logger.error("can not get tcp port from connection url", e);
+//            logger.error("can not get tcp port from connection url", e);
             return String.valueOf(DEFAULT_TCP_PORT);
         }
     }

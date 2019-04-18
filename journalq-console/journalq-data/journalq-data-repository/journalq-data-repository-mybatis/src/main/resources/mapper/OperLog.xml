@@ -22,9 +22,10 @@
         id, `type`, `identity`, oper_type, target, create_time, create_by, update_time, update_by, status
     </sql>
 
-    <insert id="add" parameterType="OperLog">
-        insert into oper_log (id, `type`, `identity`, oper_type, target, create_time, create_by, update_time, update_by, status)
-        values (#{id},
+    <insert id="add" parameterType="OperLog" useGeneratedKeys="true" keyProperty="id">
+        insert into oper_log
+        (`type`, `identity`, oper_type, target, create_time, create_by, update_time, update_by, status)
+        values (
                  #{type},
                  #{identity},
                  #{operType},

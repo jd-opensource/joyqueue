@@ -58,10 +58,10 @@ CREATE TABLE IF NOT EXISTS `user` (
   PRIMARY KEY (`id`)
 ) ENGINE = InnoDB CHARSET=utf8;
 
-CREATE TABLE  IF NOT EXISTS `oper_log` (
+CREATE TABLE IF NOT EXISTS `oper_log` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键ID',
   `type` int(11) NOT NULL COMMENT '类型',
-  `identity` bigint(20) NOT NULL COMMENT '操作资源ID',
+  `identity` varchar(64) NOT NULL COMMENT '操作资源ID',
   `oper_type` int(11) NOT NULL COMMENT '操作类型',
   `target` varchar(1500) DEFAULT NULL COMMENT '目标',
   `result` varchar(1024) DEFAULT NULL COMMENT '操作结果，成功或异常信息',
@@ -81,7 +81,6 @@ CREATE TABLE  IF NOT EXISTS `metric` (
   `alias_code` varchar(256) NOT NULL COMMENT '值,唯一',
   `name` varchar(64) NOT NULL COMMENT '名称',
   `type` tinyint(4) NOT NULL COMMENT '类型：0 atomic, 1 aggregator, 10 others(mdc)',
-  `charts` varchar(64) DEFAULT NULL COMMENT '监控图表数组：0 其他，1 生产详情，2 消费详情，3 生产汇总，4 消费汇总，5 主机监控，6 broker监控',
   `source` varchar(128) DEFAULT NULL COMMENT '来源指标code',
   `provider` varchar(128) DEFAULT NULL COMMENT '指标提供方',
   `description` varchar(1000) DEFAULT NULL COMMENT '聚合描述',

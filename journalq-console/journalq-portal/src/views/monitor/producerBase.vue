@@ -67,7 +67,7 @@ import clientConnection from './clientConnection.vue'
 import ProducerConfigForm from './producerConfigForm.vue'
 import ProducerWeight from './produceWight.vue'
 import partitionExpand from './partitionExpand'
-import {getTopicCode, getAppCode} from '../../utils/common.js'
+import {getTopicCode, replaceChartUrl} from '../../utils/common.js'
 
 export default {
   name: 'producer-base',
@@ -98,6 +98,19 @@ export default {
             txt: '配置',
             method: 'on-config'
           }
+          // ,
+          // {
+          //   txt: '详情监控图表',
+          //   method: 'on-detail-chart'
+          // },
+          // {
+          //   txt: '汇总监控图表',
+          //   method: 'on-summary-chart'
+          // },
+          // {
+          //   txt: '性能监控图表',
+          //   method: 'on-performance-chart'
+          // }
         ]
       }
     },
@@ -133,8 +146,6 @@ export default {
             type: 'expand',
             width: 50,
             render: (h, params) => {
-              // console.log(h);
-              console.log('expand:' + params)
               return h(partitionExpand, {
                 props: {
                   row: params.row,
@@ -180,11 +191,10 @@ export default {
           }
         ]
       }
+    },
+    monitorUrls: {// url variable format: [app], [topic], [namespace]
+      type: Object
     }
-    // showSummaryChart: {
-    //   type: Boolean,
-    //   default: false
-    // }
   },
   data () {
     return {
@@ -322,46 +332,56 @@ export default {
       this.config(configData, 'produceWeightDialog')
     },
     goSummaryChart (item) {
-      apiRequest.get(this.urls.getUrl + '/ct', {}, {}).then((data) => {
-        let url = data.data || ''
-        if (url.indexOf('?') < 0) {
-          url += '?'
-        } else if (!url.endsWith('?')) {
-          url += '&'
-        }
-        url = url + 'var-topic=' + getTopicCode(item.topic, item.topic.namespace) + '&var-app=' +
-          getAppCode(item.app, item.subscribeGroup)
-        window.open(url)
-      })
+      if (this.monitorUrls && this.monitorUrls.summary) {
+        window.open(replaceChartUrl(this.monitorUrls.summary, item.topic.namespace.code,
+          item.topic.code, item.app.code))
+      } else {
+        apiRequest.get(this.urls.getUrl + '/pt', {}, {}).then((data) => {
+          let url = data.data || ''
+          if (url.indexOf('?') < 0) {
+            url += '?'
+          } else if (!url.endsWith('?')) {
+            url += '&'
+          }
+          url = url + 'var-topic=' + getTopicCode(item.topic, item.topic.namespace) + '&var-app=' + item.app.code
+          window.open(url)
+        })
+      }
     },
     goDetailChart (item) {
-      // 1. get open url and token
-      apiRequest.get(this.urls.getUrl + '/pd', {}, {}).then((data) => {
-        let url = data.data || ''
-        if (url.indexOf('?') < 0) {
-          url += '?'
-        } else if (!url.endsWith('?')) {
-          url += '&'
-        }
-        url = url + 'var-topic=' + getTopicCode(item.topic, item.topic.namespace) + '&var-app=' +
-          getAppCode(item.app, item.subscribeGroup)
-        // 2. open
-        // let cookieValue = cookie.get(this.$store.getters.cookieName)
-        // if (cookieValue == null) {
-        //   this.$Message.error('cookie获取失败！')
-        //   return
-        // }
-        // url = url + '&var-cookie=' + this.$store.getters.cookieName + '=' + cookieValue
-        window.open(url)
-      })
+      if (this.monitorUrls && this.monitorUrls.detail) {
+        window.open(replaceChartUrl(this.monitorUrls.detail, item.topic.namespace.code,
+          item.topic.code, item.app.code))
+      } else {
+        apiRequest.get(this.urls.getUrl + '/pd', {}, {}).then((data) => {
+          let url = data.data || ''
+          if (url.indexOf('?') < 0) {
+            url += '?'
+          } else if (!url.endsWith('?')) {
+            url += '&'
+          }
+          url = url + 'var-topic=' + getTopicCode(item.topic, item.topic.namespace) + '&var-app=' + item.app.code
+          window.open(url)
+        })
+      }
     },
     goPerformanceChart (item) {
-      for (let key in this.$store.getters.urls.performance) {
-        let ump = this.$store.getters.urls.performance[key]
-        for (var ver in ump) {
-          window.open(ump[ver].replace(/\(consumer\.\)/g, '').replace(/\[topic\]/g, getTopicCode(item.topic,
-            item.topic.namespace)).replace(/\[app\]/g, getAppCode(item.app, item.subscribeGroup)))
-        }
+      if (this.monitorUrls && this.monitorUrls.performance) {
+        window.open(replaceChartUrl(this.monitorUrls.performance, item.topic.namespace.code,
+          item.topic.code, item.app.code))
+      } else {
+        apiRequest.get(this.urls.getUrl + '/pp', {}, {}).then((data) => {
+          if (data.data) {
+            let url = data.data
+            if (url.indexOf('?') < 0) {
+              url += '?'
+            } else if (!url.endsWith('?')) {
+              url += '&'
+            }
+            url = url + 'var-topic=' + getTopicCode(item.topic, item.topic.namespace) + '&var-app=' + item.app.code
+            window.open(url)
+          }
+        })
       }
     },
     getMonitor (row, index) {

@@ -30,4 +30,9 @@ public class BrokerGroupRelatedServiceImpl extends PageServiceSupport<BrokerGrou
     public int updateGroupByGroupId(BrokerGroupRelated brokerGroupRelated) {
         return repository.updateGroupByGroupId(brokerGroupRelated);
     }
+
+    @Override
+    public int deleteByGroupId(long groupId) {
+        return repository.deleteByGroupId(groupId);
+    }
 }

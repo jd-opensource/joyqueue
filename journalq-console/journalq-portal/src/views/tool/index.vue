@@ -2,7 +2,13 @@
   <layout-container>
     <layout-sider class="layout-sider" width="180px">
       <d-menu :active-name="activeName" :theme="theme" width="auto">
-        <d-menu-item name="operateHistory" icon="target" :size="iconSize" :to="`/${ curLang }/tool/operateHistory`" v-if="$store.getters.isAdmin">
+        <d-menu-item name="retry" icon="zap" :size="iconSize" :to="`/${ curLang }/tool/retry`">
+          <span class="layout-text">{{ langConfig.retry }}</span>
+        </d-menu-item>
+        <d-menu-item name="archive" icon="package" :size="iconSize" :to="`/${ curLang }/tool/archive`">
+          <span class="layout-text">{{ langConfig.archive }}</span>
+        </d-menu-item>
+        <d-menu-item name="operateHistory" icon="target" :size="iconSize" :to="`/${ curLang }/tool/operateHistory`">
           <span class="layout-text">{{ langConfig.operateHistory }}</span>
         </d-menu-item>
       </d-menu>
@@ -12,31 +18,8 @@
     </layout-content>
   </layout-container>
 
-  <!--<div class="layout" :class="{'layout-hide-text': spanLeft === spanLeftFold}">
-    <grid-row>
-      <grid-col :span="spanLeft"  :style="style">
-        <div v-on:mouseover="expandMenu" v-on:mouseleave="foldMenu">
-        </div>
-      </grid-col>
-      <grid-col :span="spanRight">
-        <div class="layout-header">
-          <d-button type="borderless" icon="menu" class="toggle-btn" @click="toggleClick"></d-button>
-          <div class="layout-breadcrumb">
-            <d-breadcrumb>
-              <d-breadcrumb-item href="#">{{langHeaderConfig.tool}}</d-breadcrumb-item>
-              <d-breadcrumb-item>{{submenu}}</d-breadcrumb-item>
-            </d-breadcrumb>
-          </div>
-        </div>
-        <div class="layout-content">
-          <router-view></router-view>
-        </div>
-      </grid-col>
-    </grid-row>
-  </div>-->
 </template>
 <script>
-// import compoLang from '../../i18n/components.json'
 import submenu from '../../mixins/submenu.js'
 
 export default {

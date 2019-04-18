@@ -8,7 +8,7 @@
 
 <script>
 import producerBase from '../monitor/producerBase.vue'
-import {getTopicCode, getAppCode, yesOrNoBtnRender, openOrCloseBtnRender, clientTypeSelectRender,
+import {getTopicCode, getAppCode, openOrCloseBtnRender, clientTypeSelectRender,
   clientTypeBtnRender} from '../../utils/common.js'
 
 export default {
@@ -124,7 +124,6 @@ export default {
           ]
         }
       }
-
     }
   },
   methods: {
