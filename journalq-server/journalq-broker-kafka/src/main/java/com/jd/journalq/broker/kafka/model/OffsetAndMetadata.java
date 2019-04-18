@@ -64,5 +64,14 @@ public class OffsetAndMetadata {
     public void setOffsetCommitTime(long offsetCommitTime) {
         this.offsetCommitTime = offsetCommitTime;
     }
+
+    @Override
+    public String toString() {
+        return "OffsetAndMetadata{" +
+                "offset=" + offset +
+                ", metadata='" + metadata + '\'' +
+                ", offsetCommitTime=" + offsetCommitTime +
+                '}';
+    }
 }
 

@@ -16,7 +16,9 @@ package com.jd.journalq.broker.kafka.coordinator;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.jd.journalq.broker.kafka.KafkaErrorCode;
 import com.jd.journalq.broker.kafka.command.SyncGroupAssignment;
+import com.jd.journalq.broker.kafka.config.KafkaConfig;
 import com.jd.journalq.broker.kafka.coordinator.callback.JoinCallback;
 import com.jd.journalq.broker.kafka.coordinator.delay.DelayedHeartbeat;
 import com.jd.journalq.broker.kafka.coordinator.delay.DelayedInitialJoin;
@@ -24,8 +26,6 @@ import com.jd.journalq.broker.kafka.coordinator.delay.DelayedJoin;
 import com.jd.journalq.broker.kafka.coordinator.domain.GroupState;
 import com.jd.journalq.broker.kafka.coordinator.domain.KafkaCoordinatorGroup;
 import com.jd.journalq.broker.kafka.coordinator.domain.KafkaCoordinatorGroupMember;
-import com.jd.journalq.broker.kafka.KafkaErrorCode;
-import com.jd.journalq.broker.kafka.config.KafkaConfig;
 import com.jd.journalq.toolkit.delay.DelayedOperationKey;
 import com.jd.journalq.toolkit.delay.DelayedOperationManager;
 import com.jd.journalq.toolkit.lang.Preconditions;
@@ -212,8 +212,10 @@ public class GroupBalanceManager extends Service {
         }
 
         // reschedule the next heartbeat expiration deadline
+        // TODO 临时处理，在其他分支详细处理
+        long delayTimeout = member.getSessionTimeout() * 3;
         long newHeartbeatDeadline = member.getLatestHeartbeat() + member.getSessionTimeout();
-        DelayedHeartbeat delayedHeartbeat = new DelayedHeartbeat(this, group, member, newHeartbeatDeadline, member.getSessionTimeout());
+        DelayedHeartbeat delayedHeartbeat = new DelayedHeartbeat(this, group, member, newHeartbeatDeadline, delayTimeout);
         heartbeatPurgatory.tryCompleteElseWatch(delayedHeartbeat, Sets.newHashSet(memberKey));
     }
 
