@@ -13,6 +13,7 @@
  */
 import apiRequest from './apiRequest.js'
 import apiUrl from './apiUrl.js'
+import {t} from "../locale";
 
 export function getTopicCode (topic, namespace) {
   let topicCode = (topic || {}).code
@@ -235,13 +236,10 @@ export function subscribeGroupAutoCompleteRender (h, params, subscribeRef) {
       var subscribeGroups = data.data.map(sg => {
         return {'value': sg}
       })
-      console.log(subscribeGroups)
-      console.log(queryString)
       var results = queryString ? subscribeGroups.filter(sg => {
         return sg.value.toLowerCase().indexOf(queryString.toLowerCase().trim()) === 0
       }) : subscribeGroups
       // 调用 callback 返回建议列表的数据
-      console.log(results)
       callback(results)
     })
   }
@@ -263,4 +261,14 @@ export function subscribeGroupAutoCompleteRender (h, params, subscribeRef) {
       }
     }
   })
+}
+
+export function replaceChartUrl (url, namespaceCode, topicCode, appFullName) {
+  if (!url || url === '') {
+    return undefined
+  }
+  if (!namespaceCode) {
+    namespaceCode = 'default'
+  }
+  return url.replace(/\[namespace\]/g, namespaceCode).replace(/\[topic\]/g, topicCode).replace(/\[app\]/g, appFullName)
 }

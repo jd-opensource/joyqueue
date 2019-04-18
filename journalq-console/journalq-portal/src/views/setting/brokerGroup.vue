@@ -14,19 +14,22 @@
     <my-dialog :dialog="addDialog" @on-dialog-confirm="submit()" @on-dialog-cancel="addCancel()">
       <grid-row class="mb10">
         <grid-col :span="4" class="label">编码:</grid-col>
-        <grid-col :span="16" class="val">
+        <grid-col :span="1"/>
+        <grid-col :span="15" class="val">
           <d-input v-model="addData.code"></d-input>
         </grid-col>
       </grid-row>
       <grid-row class="mb10">
         <grid-col :span="4" class="label">名称:</grid-col>
-        <grid-col :span="16" class="val">
+        <grid-col :span="1"/>
+        <grid-col :span="15" class="val">
           <d-input v-model="addData.name"></d-input>
         </grid-col>
       </grid-row>
       <grid-row class="mb10">
         <grid-col :span="4" class="label">仅管理员:</grid-col>
-        <grid-col :span="16" class="val">
+        <grid-col :span="1"/>
+        <grid-col :span="15" class="val">
           <d-radio-group v-model="addData.status">
             <d-radio :label="2">是</d-radio>
             <d-radio :label="1">否</d-radio>
@@ -37,19 +40,22 @@
     <my-dialog :dialog="editDialog" @on-dialog-confirm="editSubmit()" @on-dialog-cancel="editCancel()">
       <grid-row class="mb10">
         <grid-col :span="4" class="label">编码:</grid-col>
-        <grid-col :span="16" class="val">
+        <grid-col :span="1"/>
+        <grid-col :span="15" class="val">
           <d-input v-model="editData.code"></d-input>
         </grid-col>
       </grid-row>
       <grid-row class="mb10">
         <grid-col :span="4" class="label">名称:</grid-col>
-        <grid-col :span="16" class="val">
+        <grid-col :span="1"/>
+        <grid-col :span="15" class="val">
           <d-input v-model="editData.name"></d-input>
         </grid-col>
       </grid-row>
       <grid-row class="mb10">
         <grid-col :span="4" class="label">仅管理员:</grid-col>
-        <grid-col :span="16" class="val">
+        <grid-col :span="1"/>
+        <grid-col :span="15" class="val">
           <d-radio-group v-model="editData.status">
             <d-radio :label="2">是</d-radio>
             <d-radio :label="1">否</d-radio>
@@ -69,6 +75,7 @@ import myTable from '../../components/common/myTable.vue'
 import myDialog from '../../components/common/myDialog.vue'
 import addBroker from './addBroker.vue'
 import crud from '../../mixins/crud.js'
+import apiRequest from '../../utils/apiRequest.js'
 
 export default {
   name: 'application',
@@ -174,7 +181,7 @@ export default {
   computed: {
     curLang () {
       return this.$i18n.locale
-    },
+    }
   },
   methods: {
     openDialog (dialog) {
@@ -221,6 +228,32 @@ export default {
     },
     addBrokerCancel (index, row) {
       this.addBrokerDialog.visible = false
+    },
+    // 删除
+    del (item, index) {
+      let _this = this
+      this.$Dialog.confirm({
+        title: '提示',
+        content: '删除后分组绑定的broker会自动解除绑定，确定还要删除吗？'
+      }).then(() => {
+        if (typeof (_this.beforeDel) === 'function') {
+          _this.beforeDel(item)
+        }
+        apiRequest.delete(_this.urlOrigin.del + '/' + item.id).then((data) => {
+          if (data.code !== this.$store.getters.successCode) {
+            this.$Dialog.error({
+              content: '删除失败'
+            })
+          } else {
+            this.$Message.success('删除成功')
+            if (typeof (_this.afterDel) === 'function') {
+              _this.afterDel(item)
+            }
+            _this.getList()
+          }
+        })
+      }).catch(() => {
+      })
     }
   },
   mounted () {

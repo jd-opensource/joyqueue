@@ -44,7 +44,6 @@ public class ConsumerServiceImpl  implements ConsumerService {
     @Autowired
     private ApplicationService applicationService;
 
-
     @Autowired
     private TopicNameServerService topicNameServerService;
 

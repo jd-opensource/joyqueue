@@ -1,10 +1,10 @@
 <template>
   <d-form  ref="form" :model="formData" :rules="rules"  label-width="100px" style="height: 350px; overflow-y:auto; width: 100%; padding-right: 20px">
     <d-form-item label="代码:" prop="code" :error="error.code" >
-      <d-input  v-model="formData.code" placeholder="如app_slice_pending" style="width: 60%" ></d-input>
+      <d-input  v-model="formData.code" :disabled="type" placeholder="如app_slice_pending" style="width: 60%" ></d-input>
     </d-form-item>
-    <d-form-item label="别名:" prop="aliasCode" :error="error.aliasCode" >
-      <d-input  v-model="formData.aliasCode" placeholder="如backlog" style="width: 60%" ></d-input>
+    <d-form-item label="简称:" prop="aliasCode" :error="error.aliasCode" >
+      <d-input  v-model="formData.aliasCode" :disabled="type" placeholder="如backlog" style="width: 60%" ></d-input>
     </d-form-item>
     <d-form-item label="名称:" prop="name" >
       <d-input  v-model="formData.name" placeholder="如积压"  style="width: 60%"></d-input>

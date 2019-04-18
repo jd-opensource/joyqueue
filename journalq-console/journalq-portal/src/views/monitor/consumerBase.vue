@@ -9,11 +9,6 @@
         <icon name="plus-circle" style="margin-left: 5px;">
         </icon>
       </d-button>
-      <!--<d-button type="primary" v-if="showSummaryChart" @click="goSummaryChart" class="left mr10">-->
-        <!--汇总图表-->
-        <!--<icon name="bar-chart" style="margin-left: 5px;">-->
-        <!--</icon>-->
-      <!--</d-button>-->
     </div>
 
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
@@ -108,7 +103,7 @@ import partitionExpand from './partitionExpand'
 import {timeStampToString} from '../../utils/dateTimeUtils'
 import mqttBaseMonitor from '../setting/mqttBaseMonitor'
 import offset from './offset'
-import {getTopicCode, getAppCode} from '../../utils/common.js'
+import {getTopicCode, getAppCode, replaceChartUrl} from '../../utils/common.js'
 import MsgDetail from './msgDetail'
 
 export default {
@@ -145,6 +140,19 @@ export default {
             txt: '配置',
             method: 'on-config'
           }
+          // ,
+          // {
+          //   txt: '详情监控图表',
+          //   method: 'on-detail-chart'
+          // },
+          // {
+          //   txt: '汇总监控图表',
+          //   method: 'on-summary-chart'
+          // },
+          // {
+          //   txt: '性能监控图表',
+          //   method: 'on-performance-chart'
+          // }
         ]
       }
     },
@@ -184,7 +192,6 @@ export default {
             width: 50,
             render: (h, params) => {
               // console.log(h);
-              console.log(params)
               return h(partitionExpand, {
                 props: {
                   row: params.row,
@@ -193,10 +200,6 @@ export default {
                       title: 'ID',
                       key: 'partitionGroup'
                     },
-                    // {
-                    //   title: '主分片',
-                    //   key: 'ip'
-                    // },
                     {
                       title: '分区',
                       key: 'partition'
@@ -239,11 +242,10 @@ export default {
 
         ]
       }
+    },
+    monitorUrls: {// url variable format: [app], [topic], [namespace]
+      type: Object
     }
-    // showSummaryChart: {
-    //   type: Boolean,
-    //   default: false
-    // }
   },
   data () {
     return {
@@ -506,7 +508,6 @@ export default {
       this[dialog].visible = true
     },
     openDetailDialog (item) {
-      console.log(item)
       this.detailDialog.app.id = item.app.id
       this.detailDialog.app.code = item.app.code
       this.detailDialog.subscribeGroup = item.subscribeGroup
@@ -519,8 +520,6 @@ export default {
       this.openDialog('detailDialog')
     },
     openMsgPreviewDialog (item) {
-      console.log('item')
-      console.log(item)
       this.msgPreviewDialog.app.id = item.app.id
       this.msgPreviewDialog.app.code = item.app.code
       this.msgPreviewDialog.subscribeGroup = item.subscribeGroup
@@ -533,8 +532,6 @@ export default {
       this.openDialog('msgPreviewDialog')
     },
     openMsgDetailDialog (item) {
-      console.log('item')
-      console.log(item)
       this.msgDetailDialog.app.id = item.app.id
       this.msgDetailDialog.app.code = item.app.code
       this.msgDetailDialog.subscribeGroup = item.subscribeGroup
@@ -572,46 +569,63 @@ export default {
       this.getList()
     },
     goSummaryChart (item) {
-      apiRequest.get(this.urls.getUrl + '/ct', {}, {}).then((data) => {
-        let url = data.data || ''
-        if (url.indexOf('?') < 0) {
-          url += '?'
-        } else if (!url.endsWith('?')) {
-          url += '&'
-        }
-        url = url + 'var-topic=' + getTopicCode(item.topic, item.topic.namespace) + '&var-app=' +
-          getAppCode(item.app, item.subscribeGroup)
-        window.open(url)
-      })
+      if (this.monitorUrls && this.monitorUrls.summary) {
+        window.open(replaceChartUrl(this.monitorUrls.summary, item.topic.namespace.code,
+          item.topic.code, getAppCode(item.app, item.subscribeGroup)))
+      } else {
+        apiRequest.get(this.urls.getUrl + '/ct', {}, {}).then((data) => {
+          if (data.data) {
+            let url = data.data
+            if (url.indexOf('?') < 0) {
+              url += '?'
+            } else if (!url.endsWith('?')) {
+              url += '&'
+            }
+            url = url + 'var-topic=' + getTopicCode(item.topic, item.topic.namespace) + '&var-app=' +
+              getAppCode(item.app, item.subscribeGroup)
+            window.open(url)
+          }
+        })
+      }
     },
     goDetailChart (item) {
-      // 1. get open url and token
-      apiRequest.get(this.urls.getUrl + '/cd', {}, {}).then((data) => {
-        let url = data.data || ''
-        if (url.indexOf('?') < 0) {
-          url += '?'
-        } else if (!url.endsWith('?')) {
-          url += '&'
-        }
-        url = url + 'var-topic=' + getTopicCode(item.topic, item.topic.namespace) + '&var-app=' +
-          getAppCode(item.app, item.subscribeGroup)
-        // 2. open
-        // let cookieValue = cookie.get(this.$store.getters.cookieName)
-        // if (cookieValue == null) {
-        //   this.$Message.error('cookie获取失败！')
-        //   return
-        // }
-        // url = url + '&var-cookie=' + this.$store.getters.cookieName + '=' + cookieValue
-        window.open(url)
-      })
+      if (this.monitorUrls && this.monitorUrls.detail) {
+        window.open(replaceChartUrl(this.monitorUrls.detail, item.topic.namespace.code,
+          item.topic.code, getAppCode(item.app, item.subscribeGroup)))
+      } else {
+        apiRequest.get(this.urls.getUrl + '/cd', {}, {}).then((data) => {
+          if (data.data) {
+            let url = data.data
+            if (url.indexOf('?') < 0) {
+              url += '?'
+            } else if (!url.endsWith('?')) {
+              url += '&'
+            }
+            url = url + 'var-topic=' + getTopicCode(item.topic, item.topic.namespace) + '&var-app=' +
+              getAppCode(item.app, item.subscribeGroup)
+            window.open(url)
+          }
+        })
+      }
     },
     goPerformanceChart (item) {
-      for (let key in this.$store.getters.urls.performance) {
-        let ump = this.$store.getters.urls.performance[key]
-        for (var ver in ump) {
-          window.open(ump[ver].replace(/\(consumer\.\)/g, 'consumer.').replace(/\[topic\]/g, getTopicCode(item.topic,
-            item.topic.namespace)).replace(/\[app\]/g, getAppCode(item.app, item.subscribeGroup)))
-        }
+      if (this.monitorUrls && this.monitorUrls.performance) {
+        window.open(replaceChartUrl(this.monitorUrls.performance, item.topic.namespace.code,
+          item.topic.code, getAppCode(item.app, item.subscribeGroup)))
+      } else {
+        apiRequest.get(this.urls.getUrl + '/cp', {}, {}).then((data) => {
+          if (data.data) {
+            let url = data.data
+            if (url.indexOf('?') < 0) {
+              url += '?'
+            } else if (!url.endsWith('?')) {
+              url += '&'
+            }
+            url = url + 'var-topic=' + getTopicCode(item.topic, item.topic.namespace) + '&var-app=' +
+              getAppCode(item.app, item.subscribeGroup)
+            window.open(url)
+          }
+        })
       }
     },
     getMonitor (row, index) {

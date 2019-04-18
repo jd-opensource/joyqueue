@@ -106,7 +106,7 @@
             id=#{id}
     </update>
 
-    <update id="delete" parameterType="BrokerGroupRelated">
+    <delete id="delete" parameterType="BrokerGroupRelated">
         UPDATE
             `broker_group_related`
         SET
@@ -115,6 +115,12 @@
            `update_time`=#{updateTime}
         WHERE
             id=#{id}
-    </update>
+    </delete>
+
+    <delete id="deleteByGroupId" parameterType="long">
+        DELETE FROM `broker_group_related`
+        WHERE
+        group_id=#{group_id}
+    </delete>
 
 </mapper>

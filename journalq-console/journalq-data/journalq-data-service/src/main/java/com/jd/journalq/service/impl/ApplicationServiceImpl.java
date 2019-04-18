@@ -91,7 +91,6 @@ public class ApplicationServiceImpl extends PageServiceSupport<Application, QApp
                     String.format("app %s exists related producers", app.getCode()));
             Preconditions.checkArgument(NullUtil.isEmpty(consumerNameServerService.findByQuery(new QConsumer(app.getCode()))),
                     String.format("app %s exists related consumers", app.getCode()));
-
             //delete related app users
             applicationUserService.deleteByAppId(app.getId());
             //delete related app tokens
@@ -101,6 +100,8 @@ public class ApplicationServiceImpl extends PageServiceSupport<Application, QApp
                     appTokenNameServerService.delete(t);
                 }
             }
+        } catch (IllegalArgumentException e) {
+            throw e;
         } catch (Exception e) {
             String msg = "delete application error. ";
             logger.error(msg, e);

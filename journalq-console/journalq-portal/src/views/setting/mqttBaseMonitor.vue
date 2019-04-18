@@ -59,8 +59,8 @@ export default {
       type: String,
       default: ''
     },
-    threadDebug:'',
-    clientDebug:'',
+    threadDebug: '',
+    clientDebug: '',
     threadsSelect: {
       type: Boolean,
       default: false
@@ -79,7 +79,7 @@ export default {
         search: this.search,
         threads: this.threads,
         close: this.close,
-        threadDebug:this.threadDebug,
+        threadDebug: this.threadDebug,
         clientDebug: this.clientDebug
       },
       searchData: {
@@ -96,16 +96,16 @@ export default {
       threadSelect: this.threadsSelect,
       threadList: [
       ],
-      item:{
-        debug:false,
-        threadId:-1,
-        totalClients:0,
+      item: {
+        debug: false,
+        threadId: -1,
+        totalClients: 0
       },
-      btnHint:{
-        open:'打开调试',
-        close:'关闭调试'
+      btnHint: {
+        open: '打开调试',
+        close: '关闭调试'
       },
-      btn:''
+      btn: ''
     }
   },
   methods: {
@@ -117,32 +117,31 @@ export default {
         this.threadList = data.data
       })
     },
-    onThreadChange(item){
-      this.item= JSON.parse(item.label);
-      this.getList();
+    onThreadChange (item) {
+      this.item = JSON.parse(item.label)
+      this.getList()
     },
-    onThreadDebug(item){
-      console.log(item);
-      let threadStatus=!item.debug;
+    onThreadDebug (item) {
+      let threadStatus = !item.debug
       let _this = this
-      apiRequest.put(this.urls.threadDebug+threadStatus,{},this.searchData).then((data)=>{
-        if (data.code == this.$store.getters.successCode){
+      apiRequest.put(this.urls.threadDebug + threadStatus, {}, this.searchData).then((data) => {
+        if (data.code == this.$store.getters.successCode) {
           this.$Message.success('成功')
-          _this.loadThread();
-        }else{
+          _this.loadThread()
+        } else {
           this.$Message.error('失败')
         }
       })
     },
-    onClientDebug(item){
-      let clientStatus=!item.status;
-      this.searchData.clientId=item.clientId;
+    onClientDebug (item) {
+      let clientStatus = !item.status
+      this.searchData.clientId = item.clientId
       let _this = this
-      apiRequest.put(this.urls.clientDebug+clientStatus,{},this.searchData).then((data)=>{
-        if (data.code == this.$store.getters.successCode){
+      apiRequest.put(this.urls.clientDebug + clientStatus, {}, this.searchData).then((data) => {
+        if (data.code == this.$store.getters.successCode) {
           this.$Message.success('成功')
-          _this.getList();
-        }else{
+          _this.getList()
+        } else {
           this.$Message.error('失败')
         }
       })

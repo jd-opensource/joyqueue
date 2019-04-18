@@ -24,4 +24,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface BrokerGroupRelatedRepository extends PageRepository<BrokerGroupRelated,QBrokerGroupRelated> {
     int updateGroupByGroupId(BrokerGroupRelated brokerGroupRelated);
+    int deleteByGroupId(long groupId);
 }

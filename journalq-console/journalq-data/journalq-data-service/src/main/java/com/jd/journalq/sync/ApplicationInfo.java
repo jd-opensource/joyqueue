@@ -41,7 +41,7 @@ public class ApplicationInfo {
     private Identity user;
     //别名或英文名
     private String aliasCode;
-    private String discription;
+    private String description;
 
     public long getId() {
         return id;
@@ -123,12 +123,12 @@ public class ApplicationInfo {
         this.aliasCode = aliasCode;
     }
 
-    public String getDiscription() {
-        return discription;
+    public String getDescription() {
+        return description;
     }
 
-    public void setDiscription(String discription) {
-        this.discription = discription;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     @Override

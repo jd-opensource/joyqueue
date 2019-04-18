@@ -9,16 +9,16 @@
         <route name="post" type="POST" route="true"
                consumers="application/json;charset=UTF-8" produces="application/json;charset=UTF-8"
                handlers="cookie session body AdminLogin getLoginUser"/>
-
-        <route name="postGrafana" type="POST" route="true"
-               consumers="application/json;charset=UTF-8" produces="application/json;charset=UTF-8"
-               handlers="cookie session body AdminLogin getLoginUser"/>
         <route name="get" type="GET" route="true"
                consumers="application/json;charset=UTF-8" produces="application/json;charset=UTF-8"
                handlers="cookie session AdminLogin getLoginUser"/>
         <route name="delete" type="DELETE" route="true"
                consumers="application/json;charset=UTF-8" produces="application/json;charset=UTF-8"
                handlers="cookie session AdminLogin getLoginUser"/>
+
+        <route name="grafanaPost" type="POST" route="true"
+               consumers="application/json;charset=UTF-8" produces="application/json;charset=UTF-8"
+               handlers="cookie session body"/>
 
         <!--application 操作-->
         <route inherit="post"
@@ -156,8 +156,8 @@
         <route inherit="put"
                path="/v1/topic/update/:id" handlers="validateAdmin topic#update render"
                errors="error"/>
-        <route inherit="delete"
-               path="/v1/topic/delete/:id" handlers="validateAdmin topic#delete render"
+        <route inherit="post"
+               path="/v1/topic/delete" handlers="validateAdmin topic#delete render"
                errors="error"/>
 
         <route inherit="post"
@@ -203,12 +203,19 @@
         <route inherit="put"
                path="/v1/partitionGroup/update/:id" handlers="validateAdmin topicPartitionGroup#update render"
                errors="error"/>
-        <route inherit="delete"
-               path="/v1/partitionGroup/delete/:id" handlers="validateAdmin topicPartitionGroup#delete render"
+        <route inherit="post"
+               path="/v1/partitionGroup/delete" handlers="validateAdmin topicPartitionGroup#delete render"
                errors="error"/>
 
         <route inherit="post"
                path="/v1/partitionGroup/findByTopic" handlers="topicPartitionGroup#findByTopic render"
+               errors="error"/>
+        <route inherit="post"
+               path="/v1/partitionGroup/addPartition" handlers="topicPartitionGroup#addPartition render"
+               errors="error"/>
+
+        <route inherit="post"
+               path="/v1/partitionGroup/removePartition" handlers="topicPartitionGroup#removePartition render"
                errors="error"/>
 
         <!--partitionGroupReplica 操作 post-id -->
@@ -233,6 +240,9 @@
         <route inherit="post"
                path="/v1/partitionGroupReplica/searchBrokerToAddNew" handlers="partitionGroupReplica#searchBrokerToAddNew render"
                errors="error"/>
+        <route inherit="post"
+               path="/v1/partitionGroupReplica/leader" handlers="partitionGroupReplica#leader render"
+               errors="error"/>
 
         <!-- producer post-id -->
         <route inherit="post"
@@ -256,8 +266,8 @@
                path="/v1/producer/update/:id" handlers="producer#update render"
                errors="error"/>
         <route inherit="delete"
-                path="/v1/producer/delete/:id" handlers="producer#delete render"
-                errors="error"/>
+               path="/v1/producer/delete/:id" handlers="producer#delete render"
+               errors="error"/>
 
         <!-- producerConfig -->
         <route inherit="post"
@@ -303,7 +313,7 @@
         <route inherit="post"
                path="/v1/consumer/offset/reset/timestamp/:timestamp" handlers="consumeOffset#resetByTime render"
                errors="error"/>
-        
+
         <route inherit="post"
                path="/v1/consumer/offset/reset/partition/:partition/offset/:offset" handlers="consumeOffset#resetPartition render"
                errors="error"/>
@@ -342,6 +352,9 @@
         <route inherit="post"
                path="/v1/monitor/preview/message" handlers="brokerMonitor#previewMessage render"
                errors="error"/>
+        <route inherit="post"
+               path="/v1/monitor/view/message" handlers="brokerMonitor#viewMessage render"
+               errors="error"/>
 
         <route inherit="post"
                path="/v1/monitor/archive" handlers="brokerMonitor#archiveState render"
@@ -359,70 +372,14 @@
                path="/v1/monitor/coordinator/group/expired/member" handlers="brokerMonitor#coordinatorGroupExpiredMember render"
                errors="error"/>
         <route inherit="post"
-               path="/v1/monitor/broker/group/metric" handlers="brokerMonitor#findPartitionGroupMetric render"
+               path="/v1/monitor/broker/topic/search" handlers="brokerMonitor#brokerMonitor render"
                errors="error"/>
-
-        <!--mqtt proxy monitor-->
-        <!--<route inherit="get"-->
-               <!--path="/v1/monitor/mqtt/proxy/overview/executor/:id"-->
-               <!--handlers="validateAdmin  mqttProxyMonitor#state render"-->
-               <!--errors="error"/>-->
-        <!--<route inherit="get"-->
-               <!--path="/v1/monitor/mqtt/proxy/threads/executor/:id/type/:type"-->
-               <!--handlers="validateAdmin  mqttProxyMonitor#threads render"-->
-               <!--errors="error"/>-->
-        <!--<route inherit="post"-->
-               <!--path="/v1/monitor/mqtt/proxy/thread/clients"-->
-               <!--handlers="validateAdmin  mqttProxyMonitor#clients render"-->
-               <!--errors="error"/>-->
-
-
-        <!--<route inherit="get"-->
-               <!--path="/v1/monitor/mqtt/proxy/session/executor/:id/client/:clientId"-->
-               <!--handlers="validateAdmin  mqttProxyMonitor#session render"-->
-               <!--errors="error"/>-->
-
-
-        <!--<route inherit="post"-->
-               <!--path="/v1/monitor/mqtt/proxy/sessions/"-->
-               <!--handlers="validateAdmin  mqttProxyMonitor#sessions render"-->
-               <!--errors="error"/>-->
-
-        <!--<route inherit="get"-->
-               <!--path="/v1/monitor/mqtt/proxy/connection/executor/:id/client/:clientId"-->
-               <!--handlers="validateAdmin  mqttProxyMonitor#connection render"-->
-               <!--errors="error"/>-->
-        <!--<route inherit="post"-->
-               <!--path="/v1/monitor/mqtt/proxy/connection/client"-->
-               <!--handlers="validateAdmin  mqttProxyMonitor#connectionInProxyCluster render"-->
-               <!--errors="error"/>-->
-
-        <!--<route inherit="post"-->
-               <!--path="/v1/monitor/mqtt/proxy/connections"-->
-               <!--handlers="validateAdmin  mqttProxyMonitor#connections render"-->
-               <!--errors="error"/>-->
-
-        <!--<route inherit="put"-->
-               <!--path="/v1/monitor/mqtt/proxy/closeConnection"-->
-               <!--handlers="validateAdmin  mqttProxyMonitor#closeConnection render"-->
-               <!--errors="error"/>-->
-
-        <!--<route inherit="put"-->
-               <!--path="/v1/monitor/mqtt/proxy/client/debug/:status"-->
-               <!--handlers="validateAdmin  mqttProxyMonitor#clientDebug render"-->
-               <!--errors="error"/>-->
-
-        <!--<route inherit="put"-->
-               <!--path="/v1/monitor/mqtt/proxy/thread/debug/:status"-->
-               <!--handlers="validateAdmin  mqttProxyMonitor#threadDebug render"-->
-               <!--errors="error"/>-->
-
-
-        <!--<route inherit="post"-->
-               <!--path="/v1/monitor/mqtt/proxy/publish/"-->
-               <!--handlers="validateAdmin  mqttProxyMonitor#publish render"-->
-               <!--errors="error"/>-->
-
+        <route inherit="post"
+               path="/v1/monitor/broker/connection/search" handlers="brokerMonitor#brokerConnectionsMonitor render"
+               errors="error"/>
+        <route inherit="post"
+               path="/v1/monitor/broker/partition/search" handlers="brokerMonitor#partitionGroupMonitor render"
+               errors="error"/>
 
         <!--metric -->
         <route inherit="post"
@@ -440,7 +397,9 @@
         <route inherit="delete"
                path="/v1/metric/delete/:id" handlers="validateAdmin metric#delete render"
                errors="error"/>
-
+        <route inherit="get"
+               path="/v1/metric/findAll" handlers="metric#findAll render"
+               errors="error"/>
         <!--同步操作 -->
         <route inherit="post"
                path="/v1/sync/application" handlers="syncApp render"
@@ -462,12 +421,12 @@
         <route inherit="delete"
                path="/v1/broker/delete/:id" handlers="validateAdmin broker#delete render"
                errors="error"/>
-        <!--<route inherit="post"-->
-               <!--path="/v1/broker/getBrokersByBrokerGroupIds" handlers="broker#getBrokersByBrokerGroupIds render"-->
-               <!--errors="error"/>-->
         <route inherit="post"
                path="/v1/broker/findByTopic" handlers="broker#findByTopic render"
                errors="error"/>
+        <!--<route inherit="post"-->
+        <!--path="/v1/broker/getBrokersByBrokerGroupIds" handlers="broker#getBrokersByBrokerGroupIds render"-->
+        <!--errors="error"/>-->
 
 
         <!--命名空间 namespace -->
@@ -517,8 +476,8 @@
                path="/v1/archive/search" handlers="archive#search render"
                errors="error"/>
         <!--<route inherit="delete"-->
-               <!--path="/v1/archive/delete/:id" handlers="archive#delete render"-->
-               <!--errors="error"/>-->
+        <!--path="/v1/archive/delete/:id" handlers="archive#delete render"-->
+        <!--errors="error"/>-->
         <route inherit="post"
                path="/v1/archive/retry" handlers="archive#retry render"
                errors="error"/>
@@ -541,11 +500,11 @@
         <route inherit="get"
                path="/v1/grafana" handlers="grafana#test render"
                errors="error"/>
-        <route inherit="postGrafana"
+        <route inherit="grafanaPost"
                path="/v1/grafana/search" handlers="grafana#search render"
                errors="error"/>
         <route inherit="get"
-               path="/v1/grafana/getRedirectUrl/:code" handlers="grafana#getRedirectUrl render"
+               path="/v1/grafana/getRedirectUrl/:uid" handlers="grafana#getRedirectUrl render"
                errors="error"/>
 
 

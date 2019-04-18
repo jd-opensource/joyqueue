@@ -180,11 +180,5 @@ public abstract class NsrCommandSupport<M, S extends NsrService, Q extends Query
                     + JSON.toJSONString(model) + ")", auditType, type + "(" + model.toString() + ")"));
         }
 
-        //todo url待完善
-//        if (operType != null) {
-//            OperLog.Type type = OperLog.Type.resolve(module);
-//            vertx.eventBus().send(OPER_LOG.value(), new OperLogMessage(operType.value(),
-//                    type==null? -1:type.value(), String.valueOf(model), com.alibaba.fastjson.JSON.toJSONString(model), operator.getId()));
-//        }
     }
 }
