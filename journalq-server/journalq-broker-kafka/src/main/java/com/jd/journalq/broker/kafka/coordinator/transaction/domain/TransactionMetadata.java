@@ -1,9 +1,11 @@
 package com.jd.journalq.broker.kafka.coordinator.transaction.domain;
 
 import com.google.common.collect.Lists;
-import com.jd.journalq.broker.kafka.model.OffsetAndMetadata;
+import com.google.common.collect.Maps;
 import com.jd.journalq.toolkit.time.SystemClock;
+import org.apache.commons.lang3.ObjectUtils;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -23,7 +25,7 @@ public class TransactionMetadata extends com.jd.journalq.broker.coordinator.tran
     private long createTime = SystemClock.now();
     private TransactionState state = TransactionState.EMPTY;
     private List<TransactionPrepare> prepare;
-    private Map<String, List<OffsetAndMetadata>> offsetAndMetadata;
+    private Map<String, List<TransactionOffset>> offsets;
 
     public TransactionMetadata(String id) {
         super(id);
@@ -67,11 +69,32 @@ public class TransactionMetadata extends com.jd.journalq.broker.coordinator.tran
         prepare.clear();
     }
 
+    public void addOffsets(Map<String, List<TransactionOffset>> offsets) {
+        if (this.offsets == null) {
+            this.offsets = Maps.newHashMap();
+        }
+        for (Map.Entry<String, List<TransactionOffset>> entry : offsets.entrySet()) {
+            List<TransactionOffset> topicOffsets = this.offsets.get(entry.getKey());
+            if (topicOffsets == null) {
+                topicOffsets = Lists.newArrayList();
+                this.offsets.put(entry.getKey(), topicOffsets);
+            }
+            topicOffsets.addAll(entry.getValue());
+        }
+    }
+
+    public List<TransactionOffset> getOffests(String topic) {
+        if (offsets == null) {
+            return Collections.emptyList();
+        }
+        return ObjectUtils.defaultIfNull(offsets.get(topic), Collections.emptyList());
+    }
+
     public void clearOffsetMetadata() {
-        if (offsetAndMetadata == null) {
+        if (offsets == null) {
             return;
         }
-        offsetAndMetadata.clear();
+        offsets.clear();
     }
 
     public void clear() {
@@ -155,6 +178,10 @@ public class TransactionMetadata extends com.jd.journalq.broker.coordinator.tran
 
     public List<TransactionPrepare> getPrepare() {
         return prepare;
+    }
+
+    public Map<String, List<TransactionOffset>> getOffsets() {
+        return offsets;
     }
 
     @Override

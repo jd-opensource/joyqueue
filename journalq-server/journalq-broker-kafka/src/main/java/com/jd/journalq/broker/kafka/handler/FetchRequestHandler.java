@@ -156,11 +156,7 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
                 offset += skipOffset;
             } catch (Exception e) {
                 logger.error("fetch message exception, consumer: {}, partition: {}, offset: {}, batchSize: {}", consumer, partition, offset, batchSize, e);
-                short kafkaCode = KafkaErrorCode.exceptionFor(e);
-                if (kafkaCode == KafkaErrorCode.UNKNOWN_SERVER_ERROR.getCode()) {
-                    kafkaCode = KafkaErrorCode.NONE.getCode();
-                }
-                return new FetchResponse.PartitionResponse(partition, kafkaCode, kafkaBrokerMessages);
+                break;
             }
         }
 

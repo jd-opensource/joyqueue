@@ -56,5 +56,15 @@ public class IndexAndMetadata {
     public void setMetadata(String metadata) {
         this.metadata = metadata;
     }
+
+    @Override
+    public String toString() {
+        return "IndexAndMetadata{" +
+                "index=" + index +
+                ", metadata='" + metadata + '\'' +
+                ", indexCacheRetainTime=" + indexCacheRetainTime +
+                ", indexCommitTime=" + indexCommitTime +
+                '}';
+    }
 }
 

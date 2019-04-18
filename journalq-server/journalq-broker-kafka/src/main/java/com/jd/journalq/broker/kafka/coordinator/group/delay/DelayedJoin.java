@@ -50,7 +50,7 @@ public class DelayedJoin extends DelayedOperation {
 
     @Override
     protected void onExpiration() {
-        logger.info("group {} expire join.", group.getId());
+        logger.debug("group {} expire join.", group.getId());
     }
 
     @Override

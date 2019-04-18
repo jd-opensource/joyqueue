@@ -35,7 +35,7 @@ public class TransactionKafkaProducer {
         consumerProperties.put(ConsumerConfig.CLIENT_ID_CONFIG, KafkaConfigs.GROUP_ID);
         consumerProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         consumerProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-//        consumerProperties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
+        consumerProperties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
 
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(consumerProperties);
         consumer.subscribe(Arrays.asList("test_topic_0"));
@@ -52,25 +52,34 @@ public class TransactionKafkaProducer {
         kafkaProducer.initTransactions();
 
         while (true) {
-            ConsumerRecords<String, String> records = consumer.poll(1000 * 1);
+            try {
+                ConsumerRecords<String, String> records = consumer.poll(1000 * 1);
 
-            Map<TopicPartition, OffsetAndMetadata> offsetMap = Maps.newHashMap();
-            kafkaProducer.beginTransaction();
+                Map<TopicPartition, OffsetAndMetadata> offsetMap = Maps.newHashMap();
+                kafkaProducer.beginTransaction();
 
-            for (ConsumerRecord<String, String> record : records) {
-                System.out.println("record: {}" + record.topic() + "_" + record.partition() + "_" + record.offset());
-                offsetMap.put(new TopicPartition(record.topic(), record.partition()), new OffsetAndMetadata(record.offset(), null));
+                for (ConsumerRecord<String, String> record : records) {
+                    System.out.println("record: " + record.topic() + "_" + record.partition() + "_" + record.offset());
+                    offsetMap.put(new TopicPartition(record.topic(), record.partition()), new OffsetAndMetadata(record.offset(), null));
 
-                for (int j = 0; j < 10; j++) {
-                    kafkaProducer.send(new ProducerRecord<String, String>("test_topic_1", RandomStringUtils.random(RandomUtils.nextInt(10, 100)))).get();
+                    for (int j = 0; j < 10; j++) {
+                        kafkaProducer.send(new ProducerRecord<String, String>("test_topic_1", RandomStringUtils.random(RandomUtils.nextInt(10, 100)))).get();
+                    }
                 }
+
+                kafkaProducer.sendOffsetsToTransaction(offsetMap, KafkaConfigs.GROUP_ID);
+                kafkaProducer.commitTransaction();
+
+                System.out.println("commit");
+                Thread.currentThread().sleep(1000 *1);
+            } catch (Exception e) {
+                e.printStackTrace();
+                kafkaProducer.close();
+                kafkaProducer = new KafkaProducer<>(producerProperties);
+                kafkaProducer.initTransactions();
             }
-
-            kafkaProducer.sendOffsetsToTransaction(offsetMap, KafkaConfigs.GROUP_ID);
-            kafkaProducer.commitTransaction();
-
-            System.out.println("commit");
-            Thread.currentThread().sleep(1000 *1);
         }
+
+
     }
 }

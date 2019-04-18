@@ -62,17 +62,18 @@ public class TransactionLog extends Service {
         return new Producer(TRANSACTION_APP, coordinator.getTransactionTopic().getFullName(), TRANSACTION_APP, Producer.ProducerType.JMQ);
     }
 
-    public boolean writeCommitOffset(Map<String, List<TransactionOffset>> partitions) throws Exception {
-        return false;
+    public boolean writeCommitOffsets(String app, String transactionId, Map<String, List<TransactionOffset>> partitions) throws Exception {
+        byte[] body = TransactionSerializer.serializeOffsets(partitions);
+        return write(app, transactionId, body);
     }
 
-    public boolean writePrepare(List<TransactionPrepare> prepareList) throws Exception {
+    public boolean writePrepare(String app, String transactionId, List<TransactionPrepare> prepareList) throws Exception {
         List<byte[]> bodyList = Lists.newArrayListWithCapacity(prepareList.size());
         for (TransactionPrepare prepare : prepareList) {
             byte[] body = TransactionSerializer.serializePrepare(prepare);
             bodyList.add(body);
         }
-        return batchWrite(prepareList.get(0).getApp(), prepareList.get(0).getTransactionId(), bodyList);
+        return batchWrite(app, transactionId, bodyList);
     }
 
     public boolean writeMarker(TransactionMarker marker) throws Exception {
@@ -94,6 +95,7 @@ public class TransactionLog extends Service {
             message.setBody(body);
             message.setClientIp(IpUtil.getLocalIp().getBytes());
             message.setPartition(partittion);
+            messages.add(message);
         }
         PutResult putResult = produce.putMessage(producer, messages, config.getTransactionLogWriteQosLevel(), config.getTransactionSyncTimeout());
         return true;

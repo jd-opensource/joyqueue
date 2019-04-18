@@ -149,9 +149,9 @@ public class TransactionHandler extends Service {
         TransactionPrepare prepare = new TransactionPrepare(topic.getFullName(), partition, transactionMetadata.getApp(), broker.getId(), broker.getIp(), broker.getBackEndPort(),
                 transactionMetadata.getId(), transactionMetadata.getProducerId(), transactionMetadata.getProducerEpoch(), transactionMetadata.getTimeout(), SystemClock.now());
 
+        // TODO 批量优化
         transactionMetadata.addPrepare(prepare);
-//        return transactionSynchronizer.prepare(transactionMetadata, prepare);
-        return false;
+        return transactionSynchronizer.prepare(transactionMetadata, Lists.newArrayList(prepare));
     }
 
     public boolean endTxn(String clientId, String transactionId, long producerId, short producerEpoch, boolean isCommit) {

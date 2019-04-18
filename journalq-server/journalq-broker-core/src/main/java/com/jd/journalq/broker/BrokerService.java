@@ -164,7 +164,6 @@ public class BrokerService extends Service {
                 coordinatorService,
                 archiveManager,
                 nameService,
-                storeService,
                 electionService);
         this.brokerContext.brokerManageService(brokerManageService);
 

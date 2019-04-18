@@ -21,11 +21,4 @@ public class TransactionCompensator extends Service {
         this.transactionSynchronizer = transactionSynchronizer;
     }
 
-    @Override
-    protected void doStart() throws Exception {
-    }
-
-    @Override
-    protected void doStop() {
-    }
 }

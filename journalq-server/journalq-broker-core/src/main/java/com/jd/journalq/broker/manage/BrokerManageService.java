@@ -30,12 +30,12 @@ public class BrokerManageService extends Service {
     private CoordinatorService coordinatorService;
     private ArchiveManager archiveManager;
 
-    public BrokerManageService(BrokerManageConfig config, BrokerMonitorService brokerMonitorService, ClusterManager clusterManager, StoreManagementService storeManagementService, StoreService storeService, Consume consume, MessageRetry retryManager, CoordinatorService coordinatorService, ArchiveManager archiveManager, NameService nameService, StoreService store, ElectionService electionManager) {
+    public BrokerManageService(BrokerManageConfig config, BrokerMonitorService brokerMonitorService, ClusterManager clusterManager, StoreManagementService storeManagementService, StoreService storeService, Consume consume, MessageRetry retryManager, CoordinatorService coordinatorService, ArchiveManager archiveManager, NameService nameService, ElectionService electionManager) {
         this.config = config;
         this.storeService = storeService;
         this.retryManager = retryManager;
         this.coordinatorService = coordinatorService;
-        this.brokerManageServiceManager = new BrokerManageServiceManager(brokerMonitorService.getBrokerMonitor(),clusterManager, storeManagementService, storeService, consume, retryManager, coordinatorService, archiveManager, nameService, store, electionManager);
+        this.brokerManageServiceManager = new BrokerManageServiceManager(brokerMonitorService.getBrokerMonitor(),clusterManager, storeManagementService, storeService, consume, retryManager, coordinatorService, archiveManager, nameService, electionManager);
         this.brokerManageExporter = new BrokerManageExporter(config, brokerManageServiceManager);
     }
 

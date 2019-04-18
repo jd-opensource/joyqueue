@@ -1,7 +1,6 @@
 package com.jd.journalq.broker.kafka.handler;
 
 
-import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.kafka.KafkaCommandType;
 import com.jd.journalq.broker.kafka.KafkaContext;
 import com.jd.journalq.broker.kafka.KafkaContextAware;
@@ -58,6 +57,7 @@ public class FindCoordinatorRequestHandler extends AbstractKafkaCommandHandler i
             return new Command(new FindCoordinatorResponse(KafkaErrorCode.INVALID_GROUP_ID.getCode(), KafkaBroker.INVALID));
         }
 
+        coordinatorKey = KafkaClientHelper.parseClient(coordinatorKey);
         Broker coordinator = null;
         if (coordinatorType.equals(CoordinatorType.GROUP)) {
             if (!nameService.hasSubscribe(coordinatorKey, Subscription.Type.CONSUMPTION)) {

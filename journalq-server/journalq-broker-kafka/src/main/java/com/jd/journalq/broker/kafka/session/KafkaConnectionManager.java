@@ -103,7 +103,8 @@ public class KafkaConnectionManager {
         if (kafkaConnection == null) {
             return;
         }
-        kafkaConnection.setApp(group);
+        String app = KafkaClientHelper.parseClient(kafkaConnection.getClientId());
+        kafkaConnection.setApp(app);
     }
 
     protected String generateProducerId(KafkaConnection kafkaConnection, String topic) {

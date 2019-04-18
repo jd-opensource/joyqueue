@@ -11,8 +11,12 @@ import org.apache.commons.lang3.StringUtils;
 public class KafkaClientHelper {
 
     private static final String SEPARATOR = "-";
+    private static final String[] REPLACE = {"spark-executor-"};
 
     public static String parseClient(String clientId) {
+        for (String replace : REPLACE) {
+            clientId = clientId.replace(replace, "");
+        }
         if (StringUtils.contains(clientId, SEPARATOR)) {
             String[] strings = StringUtils.splitByWholeSeparator(clientId, SEPARATOR);
 //            if (StringUtils.isNumeric(strings[strings.length - 1])) {

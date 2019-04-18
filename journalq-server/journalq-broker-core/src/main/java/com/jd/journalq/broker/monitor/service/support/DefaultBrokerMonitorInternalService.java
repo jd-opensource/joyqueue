@@ -40,15 +40,15 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
     private Consume consume;
     private StoreManagementService storeManagementService;
     private NameService nameService;
-    private StoreService store;
+    private StoreService storeService;
     private ElectionService electionService;
 
-    public DefaultBrokerMonitorInternalService(BrokerStat brokerStat, Consume consume, StoreManagementService storeManagementService, NameService nameService, StoreService store, ElectionService electionManager) {
+    public DefaultBrokerMonitorInternalService(BrokerStat brokerStat, Consume consume, StoreManagementService storeManagementService, NameService nameService, StoreService storeService, ElectionService electionManager) {
         this.brokerStat = brokerStat;
         this.consume=consume;
         this.storeManagementService=storeManagementService;
         this.nameService = nameService;
-        this.store = store;
+        this.storeService = storeService;
         this.electionService = electionManager;
     }
 
@@ -61,7 +61,7 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
         brokerMonitorInfo.setReplication(BrokerMonitorConverter.convertReplicationMonitorInfo(brokerStat.getReplicationStat()));
 
         StoreMonitorInfo storeMonitorInfo = new StoreMonitorInfo();
-        storeMonitorInfo.setStarted(store instanceof Online?((Online) store).isStarted():true);
+        storeMonitorInfo.setStarted(storeService instanceof Online?((Online) storeService).isStarted():true);
 
         NameServerMonitorInfo nameServerMonitorInfo = new NameServerMonitorInfo();
         nameServerMonitorInfo.setStarted(nameService.isStarted());

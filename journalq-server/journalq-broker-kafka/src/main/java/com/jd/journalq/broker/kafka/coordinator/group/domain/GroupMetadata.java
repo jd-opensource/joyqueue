@@ -103,8 +103,8 @@ public class GroupMetadata extends com.jd.journalq.broker.coordinator.group.doma
         return preStateTimestamp;
     }
 
-    public Table<String, Integer, OffsetAndMetadata> getOffsetCache() {
-        return offsetCache;
+    public Map<String, Map<Integer, OffsetAndMetadata>> getOffsetCache() {
+        return offsetCache.rowMap();
     }
 
     public OffsetAndMetadata getOffsetCache(String topic, int partition) {
@@ -219,11 +219,11 @@ public class GroupMetadata extends com.jd.journalq.broker.coordinator.group.doma
         preState = state;
         preStateTimestamp = SystemClock.now();
         state = groupState;
-        updateExtension();
     }
 
-    protected void updateExtension() {
-        super.setExtension(String.format("{state: '%s', preState: '%s', leader: '%s', generationId: '%s', protocol: '%s'}", state, preState, leaderId, generationId, protocol));
+    @Override
+    public String getExtension() {
+        return String.format("{state: '%s', preState: '%s', preStateTimestamp: %s, leader: '%s', generationId: '%s', protocol: '%s'}", state, preState, preStateTimestamp, leaderId, generationId, protocol);
     }
 
     public String selectProtocol() {

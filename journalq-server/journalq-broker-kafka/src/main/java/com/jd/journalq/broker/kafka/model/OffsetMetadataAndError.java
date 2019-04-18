@@ -9,6 +9,7 @@ import com.jd.journalq.broker.kafka.KafkaErrorCode;
 public class OffsetMetadataAndError {
 
     public static final OffsetMetadataAndError OFFSET_SYNC_FAIL = new OffsetMetadataAndError(OffsetAndMetadata.INVALID_OFFSET, OffsetAndMetadata.NO_METADATA, KafkaErrorCode.NOT_LEADER_FOR_PARTITION.getCode());
+    public static final OffsetMetadataAndError OFFSET_SYNC_SUCCESS = new OffsetMetadataAndError(OffsetAndMetadata.INVALID_OFFSET, OffsetAndMetadata.NO_METADATA, KafkaErrorCode.NONE.getCode());
 
     private int partition;
     private long offset;

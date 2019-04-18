@@ -109,7 +109,7 @@ public class FailoverChannelTransport implements ChannelTransport {
             throw new IllegalArgumentException("callback must not be null");
         }
         if (!checkChannel()) {
-            callback.onException(command, TransportException.RequestErrorException.build(IpUtil.toAddress(delegate.getChannel().remoteAddress())));
+            callback.onException(command, TransportException.RequestErrorException.build(IpUtil.toAddress(address)));
             return;
         }
         delegate.async(command, timeout, callback);
