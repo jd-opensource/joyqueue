@@ -21,4 +21,7 @@ public class RollBackException extends RuntimeException {
     public RollBackException(String message) {
         super(message);
     }
+    public RollBackException(Throwable t) {
+        super(t);
+    }
 }
