@@ -208,31 +208,31 @@ public class TopicServiceImpl implements TopicService {
                 String.format("topic %s exists related consumers", CodeConverter.convertTopic(model.getNamespace(), model).getFullName()));
         //delete related partition groups
         try {
-            List<TopicPartitionGroup> groups = partitionGroupServerService.findByTopic(model.getCode(), model.getNamespace().getCode());
-            if (NullUtil.isNotEmpty(groups)) {
-                groups.forEach(g -> {
-                    try {
-                        partitionGroupServerService.delete(g);
-                    } catch (Exception e) {
-                        String msg = "delete topic related partition groups error.";
-                        logger.error(msg, e);
-                        throw new ServiceException(INTERNAL_SERVER_ERROR, msg, e);
-                    }
-                });
-            }
-            //delete related partition group replica
-            List<PartitionGroupReplica> replicas = replicaServerService.findByQuery(new QPartitionGroupReplica(model, model.getNamespace()));
-            if (NullUtil.isNotEmpty(replicas)) {
-                replicas.forEach(r -> {
-                    try {
-                        replicaServerService.delete(r);
-                    } catch (Exception e) {
-                        String msg = "delete topic related partition group replicas error.";
-                        logger.error(msg, e);
-                        throw new ServiceException(INTERNAL_SERVER_ERROR, msg, e);
-                    }
-                });
-            }
+//            List<TopicPartitionGroup> groups = partitionGroupServerService.findByTopic(model.getCode(), model.getNamespace().getCode());
+//            if (NullUtil.isNotEmpty(groups)) {
+//                groups.forEach(g -> {
+//                    try {
+//                        partitionGroupServerService.delete(g);
+//                    } catch (Exception e) {
+//                        String msg = "delete topic related partition groups error.";
+//                        logger.error(msg, e);
+//                        throw new ServiceException(INTERNAL_SERVER_ERROR, msg, e);
+//                    }
+//                });
+//            }
+//            //delete related partition group replica
+//            List<PartitionGroupReplica> replicas = replicaServerService.findByQuery(new QPartitionGroupReplica(model, model.getNamespace()));
+//            if (NullUtil.isNotEmpty(replicas)) {
+//                replicas.forEach(r -> {
+//                    try {
+//                        replicaServerService.delete(r);
+//                    } catch (Exception e) {
+//                        String msg = "delete topic related partition group replicas error.";
+//                        logger.error(msg, e);
+//                        throw new ServiceException(INTERNAL_SERVER_ERROR, msg, e);
+//                    }
+//                });
+//            }
             //delete topic
             return topicNameServerService.removeTopic(model);
         } catch (Exception e) {
