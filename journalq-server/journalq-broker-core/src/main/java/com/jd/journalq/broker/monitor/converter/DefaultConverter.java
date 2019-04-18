@@ -2,9 +2,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -183,18 +183,16 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
             if (aps == null) {
                 continue;
             }
-            if (aps.get(key) != null && aps.get(key) instanceof PendingStat) {
+            Object value = pendingMap.get(key);
+            if (value != null && value instanceof PendingStat) {
 
-                PendingStat stat = (PendingStat) aps.get(key);
-                if (stat == null) {
-                    continue;
-                }
+                PendingStat stat = (PendingStat) value;
                 appPending.setValue(stat.getPending());
             } else {
-                if (aps.get(key) == null) {
+                if (value == null) {
                     appPending.setValue(0);
                 } else {
-                    appPending.setValue((Double) aps.get(key));
+                    appPending.setValue((Double) value);
                 }
             }
             result.add(appPending);
