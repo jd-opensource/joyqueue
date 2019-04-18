@@ -68,7 +68,6 @@ public class TransactionHandler extends Service {
     }
 
     protected TransactionMetadata doInitProducer(TransactionMetadata transactionMetadata, int transactionTimeout) {
-        // TODO 是否需要？
         if (!transactionMetadata.getState().equals(TransactionState.EMPTY)) {
             tryAbort(transactionMetadata);
         }
