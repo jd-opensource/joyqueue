@@ -9,6 +9,7 @@
       <div :class="[prefixCls + '__header']" v-if="height">
         <table>
           <colgroup>
+            <col v-if="optional">
             <col v-for="(column, index) in columnsData" :key="index" :width="setCellWidth(column, index)">
           </colgroup>
           <thead :class="[prefixCls + '__thead']" ref="header">
@@ -49,6 +50,7 @@
       <div :class="[prefixCls + '__body']" :style="bodyStyle">
         <table>
           <colgroup>
+            <col v-if="optional">
             <col v-for="(column, index) in columnsData" :key="index" :width="setCellWidth(column, index)">
           </colgroup>
           <thead :class="[prefixCls + '__thead']" v-if="!height" ref="header">
