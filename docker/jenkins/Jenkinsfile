@@ -14,7 +14,7 @@ pipeline {
                         echo 'Integration Test....'
                         sh 'pwd && ls '
                         sh 'ls '
-                        sh 'cd docker/bin && integrate_test.sh'
+                        sh 'cd docker/bin && ls && integrate_test.sh'
                     }
                 }
 
@@ -28,9 +28,11 @@ pipeline {
           updateGitlabCommitStatus name: 'build', state: 'success'
         }
         always {
+        script {
             def resultIcon = currentBuild.result == 'SUCCESS' ? ':white_check_mark:' : ':anguished:'
             addGitLabMRComment comment: "$resultIcon Jenkins Build $currentBuild.result\n\nResults available at: [Jenkins [$env.JOB_NAME#$env.BUILD_NUMBER]]($env.BUILD_URL)"
             echo 'I will always say Hello again!'
+           }
          }
       }
 
