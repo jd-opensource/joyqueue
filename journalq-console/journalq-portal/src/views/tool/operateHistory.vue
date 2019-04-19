@@ -1,12 +1,20 @@
 <template>
   <div>
     <div class="ml20 mt30">
-      <d-date-picker v-model="times" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" value-format="timestamp" :default-time="['00:00:00', '23:59:59']"></d-date-picker>
-      <d-select v-model="searchData.type"  style="width:200px">
+      <d-date-picker v-model="times" type="daterange" range-separator="至" start-placeholder="开始日期" class="left mr5"
+                     end-placeholder="结束日期" value-format="timestamp" :default-time="['00:00:00', '23:59:59']">
+        <span slot="prepend">日期范围</span>
+      </d-date-picker>
+      <d-select v-model="searchData.type" class="left mr5"  style="width:200px">
+        <span slot="prepend">操作类型</span>
         <d-option v-for="item in typeList" :value="item.key" :key="item.key">{{ item.value }}</d-option>
       </d-select>
-      <d-input v-model="searchData.identity" placeholder="关联id" class="left mr10" style="width: 10%"></d-input>
-      <d-input v-model="searchData.erp" placeholder="用户名" class="left mr10" style="width: 10%"></d-input>
+      <d-input v-model="searchData.identity" class="left mr5" placeholder="关联Id" style="width: 10%">
+        <span slot="prepend">关联Id</span>
+      </d-input>
+      <d-input v-model="searchData.erp" placeholder="用户名" class="left mr5" style="width: 10%">
+        <span slot="prepend">用户名</span>
+      </d-input>
       <d-button type="primary" color="success" @click="getListWithDate">查询</d-button>
     </div>
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"

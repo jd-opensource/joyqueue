@@ -176,7 +176,8 @@ export default {
     getListWithDate (isNext) {
       if (!this.times || this.times.length < 2 || !this.search.topic) {
         this.$Dialog.error({
-          content: '起始时间,结束时间 topic 都不能为空'
+          title: '格式错误',
+          content: '起始时间, 结束时间，主题 都不能为空'
         })
         return false
       }

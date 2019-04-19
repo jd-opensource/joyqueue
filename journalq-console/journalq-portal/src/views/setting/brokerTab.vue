@@ -103,14 +103,21 @@ export default {
     },
     // 从分组移除Broker
     del (item) {
-      let editData = {
-        id: item.id,
-        group: {
-          id: -1
+      let _this = this
+      this.$Dialog.confirm({
+        title: '提示',
+        content: '确定要删除吗？'
+      }).then(() => {
+        let editData = {
+          id: item.id,
+          group: {
+            id: -1
+          }
         }
-      }
-      apiRequest.put(this.urls.removeBroker + '/' + item.id, {}, editData).then((data) => {
-        this.getList()
+        apiRequest.put(_this.urls.removeBroker + '/' + item.id, {}, editData).then((data) => {
+          _this.getList()
+        })
+      }).catch(() => {
       })
     }
   },
