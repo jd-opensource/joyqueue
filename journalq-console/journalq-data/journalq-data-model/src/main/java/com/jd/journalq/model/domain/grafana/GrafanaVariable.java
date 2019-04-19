@@ -15,6 +15,12 @@ package com.jd.journalq.model.domain.grafana;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
+/**
+ * Grafana variable
+ * author: chenyanying3
+ * email: chenyanying3@jd.com
+ * date: 2019/02/29
+ */
 public class GrafanaVariable {
     public static final String DEFAULT_GRAFANA_TARGET_DELIMITER = ":";
     private String name;

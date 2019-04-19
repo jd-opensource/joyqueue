@@ -1103,8 +1103,10 @@ public class ClusterManager extends Service {
                         TopicConfig topicConfig = buildTopicConfigCache(((PartitionGroupEvent) event.getMetaEvent()).getTopic());
                         PartitionGroup groupNew = topicConfig.fetchPartitionGroupByGroup(((PartitionGroupEvent) event.getMetaEvent()).getPartitionGroup());
                         Set<Integer> brokerIds = new HashSet<>();
-                        brokerIds.addAll(groupOld.getReplicas());
-                        brokerIds.addAll(groupNew.getReplicas());
+                        if (groupOld != null)
+                            brokerIds.addAll(groupOld.getReplicas());
+                        if (groupNew != null)
+                            brokerIds.addAll(groupNew.getReplicas());
                         if(!brokerIds.contains(brokerConfig.getBrokerId())){
                             return;
                         }

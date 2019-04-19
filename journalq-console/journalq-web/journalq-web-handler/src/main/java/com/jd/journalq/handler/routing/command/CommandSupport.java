@@ -198,11 +198,6 @@ public abstract class CommandSupport <M extends BaseModel, S extends PageService
                     + model.toString() + ")", auditType, type + "(" + JSON.toJSONString(model) + ")"));
         }
 
-        //todo url待完善
-//        if (operType != null) {
-//            vertx.eventBus().send(OPER_LOG.value(), new OperLogMessage(operType.value(),
-//                    OperLog.Type.resolve(module).value(), String.valueOf(model.getId()), com.alibaba.fastjson.JSON.toJSONString(model), operator.getId()));
-//        }
     }
 
 }

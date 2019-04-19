@@ -195,7 +195,6 @@ export default {
       }
       apiRequest.postBase(this.urlOrigin.archiveMonitor, {}, broker, false).then((data) => {
         data.data = data.data || {}
-        console.log(data.data)
         this.archiveMonitorData = data.data
         this.openDialog('archiveMonitorDialog')
       })

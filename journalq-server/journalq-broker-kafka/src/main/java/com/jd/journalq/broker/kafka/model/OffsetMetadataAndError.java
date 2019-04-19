@@ -30,7 +30,8 @@ public class OffsetMetadataAndError {
     private String metadata = OffsetAndMetadata.NO_METADATA;
     private short error = KafkaErrorCode.NONE;
 
-    public static final OffsetMetadataAndError OFFSET_SYNC_FAIL = new OffsetMetadataAndError(OffsetAndMetadata.INVALID_OFFSET, OffsetAndMetadata.NO_METADATA, KafkaErrorCode.UNKNOWN_TOPIC_OR_PARTITION);
+    public static final OffsetMetadataAndError OFFSET_SYNC_FAIL = new OffsetMetadataAndError(OffsetAndMetadata.INVALID_OFFSET, OffsetAndMetadata.NO_METADATA, KafkaErrorCode.NOT_LEADER_FOR_PARTITION);
+    public static final OffsetMetadataAndError OFFSET_SYNC_SUCCESS = new OffsetMetadataAndError(OffsetAndMetadata.INVALID_OFFSET, OffsetAndMetadata.NO_METADATA, KafkaErrorCode.NONE);
 
     public OffsetMetadataAndError(short error) {
         this.error = error;

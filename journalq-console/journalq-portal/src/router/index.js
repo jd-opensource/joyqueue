@@ -170,14 +170,14 @@ router.beforeEach((to, from, next) => {
           if (loginUserName) { // 其次判断是否有权访问
             goNext(to, from, next, loginUserRole)
           } else {
-            location.href = 'https://ssa.jd.com/sso/login?ReturnUrl=http://mq.jd.com/index'
+            location.href = 'https://ssa.jd.com/sso/login?ReturnUrl' + window.location.href
           }
         })
       } else {
         goNext(to, from, next, loginUserRole)
       }
     } catch (err) {
-      location.href = 'https://ssa.jd.com/sso/login?ReturnUrl=http://mq.jd.com/index'
+      location.href = 'https://ssa.jd.com/sso/login?ReturnUrl' + window.location.href
     }
   }
 })

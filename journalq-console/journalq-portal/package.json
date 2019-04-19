@@ -1,6 +1,6 @@
 {
   "name": "journalq-portal",
-  "version": "1.0.0-alpha.3",
+  "version": "1.0.2",
   "description": "JournalQ管理后台",
   "author": "yuanchanglong <yuanchanglong@jd.com>",
   "scripts": {

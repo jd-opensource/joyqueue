@@ -90,6 +90,8 @@ export default {
           subscribeType: this.type
         }
       }
+      console.log(22)
+      console.log(this.search)
       for (var key in this.search) {
         if (this.search.hasOwnProperty(key)) {
           data.query[key] = this.search[key]
@@ -125,7 +127,6 @@ export default {
       }
       data.clientType = item.clientType
       if (this.type === this.$store.getters.consumerType) {
-        console.log(item.code)
         // if (!item.subscribeGroup) {
         //   this.$Dialog.warning({
         //     content: '请先输入订阅分组！'

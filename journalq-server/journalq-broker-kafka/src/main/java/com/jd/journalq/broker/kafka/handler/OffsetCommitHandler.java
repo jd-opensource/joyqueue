@@ -54,16 +54,17 @@ public class OffsetCommitHandler extends AbstractKafkaCommandHandler implements 
         Table<String, Integer, OffsetMetadataAndError> result = groupCoordinator.handleCommitOffsets(offsetCommitRequest.getGroupId(), offsetCommitRequest.getMemberId(),
                 offsetCommitRequest.getGroupGenerationId(), offsetCommitRequest.getOffsetAndMetadata());
 
+        // TODO 临时日志
         if (logger.isDebugEnabled()) {
             for (String topic : result.rowKeySet()) {
                 Map<Integer, OffsetMetadataAndError> errorCodes = result.row(topic);
                 for (Map.Entry<Integer, OffsetMetadataAndError> codeEntry : errorCodes.entrySet()) {
                     if (codeEntry.getValue().getError() == KafkaErrorCode.NONE) {
-                        logger.debug("offset commit request with correlation id {} from client {} on partition {} offset {}",
-                                offsetCommitRequest.getGroupId(), offsetCommitRequest.getClientId(), topic, codeEntry.getValue());
+                        logger.debug("offset commit request with correlation id {} from client {} on topic {} partition {} offset {}",
+                                offsetCommitRequest.getCorrelationId(), offsetCommitRequest.getGroupId(), topic, codeEntry.getKey(), codeEntry.getValue());
                     } else {
-                        logger.debug("offset commit request with correlation id {} from client {} on partition {} failed due to {}",
-                                offsetCommitRequest.getGroupId(), offsetCommitRequest.getClientId(), topic, codeEntry.getValue());
+                        logger.debug("offset commit request with correlation id {} from client {} on topic {} partition {} failed due to {}",
+                                offsetCommitRequest.getCorrelationId(), offsetCommitRequest.getGroupId(), topic, codeEntry.getKey(), codeEntry.getValue());
                     }
                 }
             }

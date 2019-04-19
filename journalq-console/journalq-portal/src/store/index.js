@@ -53,10 +53,10 @@ const state = {
   },
   cookieName: 'sso.jd.com',
   urls: {
-    performance: [
-      {'ump2.1.1+': 'http://ump.jd.com/performanceReport/initPage.action?queryMap.accessKey=jmq-servers.client.(consumer.)send.[app].[topic]'},
-      {'ump2.1.0-': 'http://ump.jd.com/performanceReport/initPage.action?queryMap.appName=jmq-server&queryMap.appId=5357&queryMap.accessKey=jmq-server.client.send.(consumer.)[app].[topic]&queryMap.analysisFrequency=null&queryMap.departCode=3616&queryMap.groupId='}
-    ]
+    performance: {
+      producer: 'http://ump.jd.com/performanceReport/initPage.action?queryMap.accessKey=producer.send.[namespace].[app].[topic]',
+      consumer: 'http://ump.jd.com/performanceReport/initPage.action?queryMap.accessKey=consumer.consume.[namespace].[app].[topic]'
+    }
   }
 }
 

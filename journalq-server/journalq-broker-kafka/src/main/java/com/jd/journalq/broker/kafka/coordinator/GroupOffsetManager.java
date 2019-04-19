@@ -27,6 +27,7 @@ import com.jd.journalq.broker.index.model.IndexAndMetadata;
 import com.jd.journalq.broker.index.model.IndexMetadataAndError;
 import com.jd.journalq.broker.kafka.KafkaErrorCode;
 import com.jd.journalq.broker.kafka.config.KafkaConfig;
+import com.jd.journalq.broker.kafka.coordinator.domain.KafkaCoordinatorGroup;
 import com.jd.journalq.broker.kafka.model.OffsetAndMetadata;
 import com.jd.journalq.broker.kafka.model.OffsetMetadataAndError;
 import com.jd.journalq.domain.Broker;
@@ -60,11 +61,13 @@ public class GroupOffsetManager extends Service {
 
     private KafkaConfig config;
     private ClusterManager clusterManager;
+    private KafkaCoordinatorGroupManager coordinatorGroupManager;
     private GroupOffsetSyncSessionManager groupOffsetSyncSessionManager;
 
-    public GroupOffsetManager(KafkaConfig config, ClusterManager clusterManager) {
+    public GroupOffsetManager(KafkaConfig config, ClusterManager clusterManager, KafkaCoordinatorGroupManager coordinatorGroupManager) {
         this.config = config;
         this.clusterManager = clusterManager;
+        this.coordinatorGroupManager = coordinatorGroupManager;
         this.groupOffsetSyncSessionManager = new GroupOffsetSyncSessionManager(config);
     }
 
@@ -117,25 +120,52 @@ public class GroupOffsetManager extends Service {
 
                     @Override
                     public void onException(Command request, Throwable cause) {
-                        logger.error("get offset failed, async transport exception, leader: {id: {}, ip: {}, port: {}}",
-                                broker.getId(), broker.getIp(), broker.getBackEndPort(), cause);
+                        logger.error("get offset failed, async transport exception, topic: {}, group: {}, leader: {id: {}, ip: {}, port: {}}",
+                                topicPartitionMap, groupId, broker.getId(), broker.getIp(), broker.getBackEndPort(), cause);
                         latch.countDown();
                     }
                 });
             } catch (Throwable t) {
-                logger.error("get offset failed, async transport exception, leader: {id: {}, ip: {}, port: {}}",
-                        broker.getId(), broker.getIp(), broker.getBackEndPort(), t);
+                logger.error("get offset failed, async transport exception, topic: {}, group: {}, leader: {id: {}, ip: {}, port: {}}",
+                        topicPartitionMap, groupId, broker.getId(), broker.getIp(), broker.getBackEndPort(), t);
                 latch.countDown();
             }
         }
 
         try {
-            latch.await(config.getCoordinatorOffsetSyncTimeout(), TimeUnit.MILLISECONDS);
+            if (!latch.await(config.getCoordinatorOffsetSyncTimeout(), TimeUnit.MILLISECONDS)) {
+                logger.error("get offset timeout, topic: {}, group: {}", brokerTopicPartitionTable.rowMap(), groupId);
+            }
         } catch (InterruptedException e) {
             logger.error("get offset latch await exception, groupId: {}, topicAndPartitions: {}", groupId, topicAndPartitions, e);
         }
 
+
+        fillErrorOffset(groupId, result);
         return result;
+    }
+
+    protected void fillErrorOffset(String groupId, Table<String, Integer, OffsetMetadataAndError> result) {
+        KafkaCoordinatorGroup groupMetadata = coordinatorGroupManager.getGroup(groupId);
+        if (groupMetadata == null) {
+            return;
+        }
+        for (String topic : result.rowKeySet()) {
+            Map<Integer, OffsetMetadataAndError> partitions = result.row(topic);
+            for (Map.Entry<Integer, OffsetMetadataAndError> entry : partitions.entrySet()) {
+                OffsetMetadataAndError offsetMetadataAndError = entry.getValue();
+                if (offsetMetadataAndError.getError() == KafkaErrorCode.NONE) {
+                    groupMetadata.putOffsetCache(topic, entry.getKey(),
+                            new OffsetAndMetadata(offsetMetadataAndError.getOffset(), null));
+                } else {
+                    OffsetAndMetadata offsetCache = groupMetadata.getOffsetCache(topic, entry.getKey());
+                    if (offsetCache != null) {
+                        logger.info("fill error offset, topic: {}, partition: {}, offset: {}", topic, entry.getKey(), offsetCache);
+                        result.put(topic, entry.getKey(), new OffsetMetadataAndError(offsetCache.getOffset(), offsetCache.getMetadata(), KafkaErrorCode.NONE));
+                    }
+                }
+            }
+        }
     }
 
     public Table<String, Integer, OffsetMetadataAndError> saveOffsets(String groupId, Table<String /** topic **/, Integer /** partition **/, OffsetAndMetadata> offsetAndMetadataTable) {
@@ -145,7 +175,7 @@ public class GroupOffsetManager extends Service {
 
         for (String topic : offsetAndMetadataTable.rowKeySet()) {
             for (Map.Entry<Integer, OffsetAndMetadata> partitionEntry : offsetAndMetadataTable.row(topic).entrySet()) {
-                result.put(topic, partitionEntry.getKey(), OffsetMetadataAndError.OFFSET_SYNC_FAIL);
+                result.put(topic, partitionEntry.getKey(), OffsetMetadataAndError.OFFSET_SYNC_SUCCESS);
             }
         }
 
@@ -174,25 +204,45 @@ public class GroupOffsetManager extends Service {
 
                     @Override
                     public void onException(Command request, Throwable cause) {
-                        logger.error("save offset failed, async transport exception, leader: {id: {}, ip: {}, port: {}}",
-                                broker.getId(), broker.getIp(), broker.getBackEndPort(), cause);
+                        logger.error("save offset failed, async transport exception, topic: {}, group: {}, leader: {id: {}, ip: {}, port: {}}",
+                                indexAndMetadataMap, groupId, broker.getId(), broker.getIp(), broker.getBackEndPort(), cause);
                         latch.countDown();
                     }
                 });
             } catch (Throwable t) {
-                logger.error("save offset failed, async transport exception, leader: {id: {}, ip: {}, port: {}}",
-                        broker.getId(), broker.getIp(), broker.getBackEndPort(), t);
+                logger.error("save offset failed, async transport exception, topic: {}, group: {}, leader: {id: {}, ip: {}, port: {}}",
+                        indexAndMetadataMap, groupId, broker.getId(), broker.getIp(), broker.getBackEndPort(), t);
                 latch.countDown();
             }
         }
 
         try {
-            latch.await(config.getCoordinatorOffsetSyncTimeout(), TimeUnit.MILLISECONDS);
+            if (!latch.await(config.getCoordinatorOffsetSyncTimeout(), TimeUnit.MILLISECONDS)) {
+                logger.error("save offset timeout, topic: {}, group: {}", brokerTopicPartitionTable.rowMap(), groupId);
+            }
         } catch (InterruptedException e) {
             logger.error("save offset latch await exception, groupId: {}, topicAndPartitions: {}", groupId, offsetAndMetadataTable, e);
         }
 
+
+        fillOffsetCache(groupId, offsetAndMetadataTable, result);
         return result;
+    }
+
+    protected void fillOffsetCache(String groupId, Table<String, Integer, OffsetAndMetadata> offsetAndMetadataTable, Table<String, Integer, OffsetMetadataAndError> result) {
+        KafkaCoordinatorGroup groupMetadata = coordinatorGroupManager.getGroup(groupId);
+        if (groupMetadata == null) {
+            return;
+        }
+        for (String topic : offsetAndMetadataTable.rowKeySet()) {
+            Map<Integer, OffsetAndMetadata> partitions = offsetAndMetadataTable.row(topic);
+            for (Map.Entry<Integer, OffsetAndMetadata> entry : partitions.entrySet()) {
+                OffsetMetadataAndError offsetMetadataAndError = result.get(topic, entry.getKey());
+                if (offsetMetadataAndError != null) {
+                    groupMetadata.putOffsetCache(topic, entry.getKey(), entry.getValue());
+                }
+            }
+        }
     }
 
     protected Map<String, Map<Integer, IndexAndMetadata>> buildSaveOffsetParam(Map<String, Set<Integer>> topicAndPartitionMap, Table<String, Integer, OffsetAndMetadata> offsetAndMetadataTable) {

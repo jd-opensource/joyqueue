@@ -13,11 +13,13 @@
  */
 package com.jd.journalq.service.impl;
 
+import com.jd.journalq.model.ListQuery;
 import com.jd.journalq.model.domain.Broker;
 import com.jd.journalq.model.domain.BrokerGroup;
 import com.jd.journalq.model.domain.BrokerGroupRelated;
 import com.jd.journalq.model.domain.Identity;
 import com.jd.journalq.model.query.QBrokerGroup;
+import com.jd.journalq.model.query.QBrokerGroupRelated;
 import com.jd.journalq.repository.BrokerGroupRepository;
 import com.jd.journalq.service.BrokerGroupRelatedService;
 import com.jd.journalq.service.BrokerGroupService;
@@ -26,6 +28,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -81,5 +85,11 @@ public class BrokerGroupServiceImpl extends PageServiceSupport<BrokerGroup, QBro
                 logger.error("绑定异常 error",e);
             }
         }
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+    public int delete(final BrokerGroup group) {
+        brokerGroupRelatedService.deleteByGroupId(group.getId());
+        return super.delete(group);
     }
 }

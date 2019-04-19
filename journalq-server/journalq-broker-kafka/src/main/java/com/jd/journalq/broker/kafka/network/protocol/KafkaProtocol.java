@@ -76,7 +76,7 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
         CoordinatorGroupManager coordinatorGroupManager = brokerContext.getCoordinatorService().getOrCreateCoordinatorGroupManager(KafkaConsts.COORDINATOR_NAMESPACE);
 
         this.groupMetadataManager = new KafkaCoordinatorGroupManager(config, coordinatorGroupManager);
-        this.groupOffsetManager = new GroupOffsetManager(config, brokerContext.getClusterManager());
+        this.groupOffsetManager = new GroupOffsetManager(config, brokerContext.getClusterManager(), groupMetadataManager);
         this.groupBalanceManager = new GroupBalanceManager(config, groupMetadataManager);
 
         this.coordinator = new KafkaCoordinator(brokerContext.getCoordinatorService().getCoordinator());
