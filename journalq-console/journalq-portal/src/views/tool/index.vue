@@ -76,7 +76,7 @@ export default {
     display: inline-block;
   }
   .layout-content{
-    padding-top: 20px;
+    padding-top: 10px;
     padding-bottom: 15px;
     overflow: hidden;
     /*background: #ffffff;*/
