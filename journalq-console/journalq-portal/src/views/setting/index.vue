@@ -100,10 +100,10 @@ export default {
     margin-left: 15px;
   }
   .layout-sider {
-    height: 100%;
+    min-height: calc(100vh - 70px);
     background: #fff;
-    padding-bottom: 999em;
-    margin-bottom: -999em;
+    /*padding-bottom: 999em;*/
+    /*margin-bottom: -999em;*/
   }
   .layout-header {
     padding-top: 10px;
@@ -117,12 +117,12 @@ export default {
     display: inline-block;
   }
   .layout-content{
-    padding-top: 20px;
+    padding-top: 10px;
     padding-bottom: 15px;
     overflow: hidden;
     /*background: #ffffff;*/
     border-radius: 4px;
-    height: calc(100% - 50px);
+    min-height: calc(100vh - 70px);
   }
   .layout-hide-text .layout-text {
     display: none;
