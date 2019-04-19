@@ -4,22 +4,22 @@
     <div class="transition-main main-content">
       <router-view></router-view>
     </div>
-    <main-footer></main-footer>
+    <!--<main-footer></main-footer>-->
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
 import mainHeader from './components/common/header.vue'
-import mainFooter from './components/common/footer.vue'
+// import mainFooter from './components/common/footer.vue'
 import cookie from './utils/cookie.js'
 import apiRequest from './utils/apiRequest.js'
 import apiUrl from './utils/apiUrl.js'
 
 export default {
   components: {
-    mainHeader,
-    mainFooter
+    mainHeader
+    // , mainFooter
   },
   computed: {
     ...mapGetters([
