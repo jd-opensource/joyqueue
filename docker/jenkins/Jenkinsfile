@@ -14,9 +14,19 @@ pipeline {
                         echo 'Integration Test....'
                         sh 'pwd && ls '
                         sh 'ls '
+                        sh 'cd docker/bin && integrate_test.sh'
                     }
                 }
 
 
     }
+    post {
+        failure {
+          updateGitlabCommitStatus name: 'build', state: 'failed'
+        }
+        success {
+          updateGitlabCommitStatus name: 'build', state: 'success'
+        }
+      }
+
 }
