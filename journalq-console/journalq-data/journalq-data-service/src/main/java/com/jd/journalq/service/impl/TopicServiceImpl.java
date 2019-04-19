@@ -113,9 +113,6 @@ public class TopicServiceImpl implements TopicService {
                 replica.setNamespace(partitionGroup.getNamespace());
                 replica.setTopic(partitionGroup.getTopic());
                 replica.setBrokerId(Long.valueOf(broker.getId()).intValue());
-                if (start == 0) {
-                    partitionGroup.setRecLeader(Long.valueOf(broker.getId()).intValue());
-                }
                 if(partitionGroup.getElectType().equals(TopicPartitionGroup.ElectType.fix.type())){
                     if(j==0)replica.setRole(PartitionGroupReplica.ROLE_MASTER);
                     else replica.setRole(PartitionGroupReplica.ROLE_DYNAMIC);
@@ -126,6 +123,11 @@ public class TopicServiceImpl implements TopicService {
                 j++;
                 partitionGroup.getReplicaGroups().add(replica);
                 if(j==topic.getReplica())break;
+            }
+        }
+        for(TopicPartitionGroup partitionGroup : partitionGroups){
+            if (partitionGroup.getReplicaGroups().size() > 0) {
+                partitionGroup.setRecLeader(partitionGroup.getReplicaGroups().iterator().next().getBrokerId());
             }
         }
         return partitionGroups;
