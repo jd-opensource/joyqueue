@@ -43,5 +43,9 @@ export default {
   @import "assets/css/reset.css";
   @import "assets/css/common.css";
   @import "assets/css/main.css";
-  .wrapper{padding-bottom: 200px;}
+  .wrapper{
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
 </style>
