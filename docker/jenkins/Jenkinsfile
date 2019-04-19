@@ -1,0 +1,22 @@
+
+pipeline {
+    agent any
+    stages {
+
+        stage('Test') {
+            steps {
+                echo 'Packaging....'
+                sh 'mvn -Dmaven.test.skip=true clean package'
+            }
+        }
+        stage('Integration Test') {
+                    steps {
+                        echo 'Integration Test....'
+                        sh 'pwd '
+                        sh 'ls '
+                    }
+                }
+
+
+    }
+}
