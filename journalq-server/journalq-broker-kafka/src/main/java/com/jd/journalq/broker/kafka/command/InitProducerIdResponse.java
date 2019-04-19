@@ -10,6 +10,9 @@ import com.jd.journalq.broker.kafka.KafkaCommandType;
  */
 public class InitProducerIdResponse extends KafkaRequestOrResponse {
 
+    public static final long NO_PRODUCER_ID = -1L;
+    public static final short NO_PRODUCER_EPOCH = -1;
+
     private short code;
     private long producerId;
     private short producerEpoch;

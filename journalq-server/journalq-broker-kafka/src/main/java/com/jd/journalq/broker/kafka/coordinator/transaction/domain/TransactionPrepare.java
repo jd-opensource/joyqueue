@@ -1,12 +1,14 @@
 package com.jd.journalq.broker.kafka.coordinator.transaction.domain;
 
+import java.util.Objects;
+
 /**
  * TransactionPrepare
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2019/4/12
  */
-public class TransactionPrepare {
+public class TransactionPrepare extends TransactionDomain {
 
     private String topic;
     private short partition;
@@ -125,6 +127,25 @@ public class TransactionPrepare {
 
     public void setCreateTime(long createTime) {
         this.createTime = createTime;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TransactionPrepare that = (TransactionPrepare) o;
+        return partition == that.partition &&
+                producerId == that.producerId &&
+                producerEpoch == that.producerEpoch &&
+                Objects.equals(topic, that.topic) &&
+                Objects.equals(app, that.app) &&
+                Objects.equals(transactionId, that.transactionId);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(topic, partition, app, transactionId, producerId, producerEpoch);
     }
 
     @Override

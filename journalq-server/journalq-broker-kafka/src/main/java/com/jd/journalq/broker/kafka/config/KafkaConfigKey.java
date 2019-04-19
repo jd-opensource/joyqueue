@@ -43,6 +43,8 @@ public enum KafkaConfigKey implements PropertyDef {
     TRANSACTION_LOG_RETRIES("kafka.transaction.log.reties", 3, Type.INT),
     // 事务间隔
     TRANSACTION_LOG_INTERVAL("kafka.transaction.log.interval", 1000 * 60 * 5, Type.INT),
+    // 事务扫描大小
+    TRANSACTION_LOG_SCAN_SIZE("kafka.transaction.log.scan.size", 1000, Type.INT),
 
     // 拉取批量大小
     FETCH_BATCH_SIZE("kafka.fetch.batch.size", 10, Type.INT),
@@ -62,7 +64,7 @@ public enum KafkaConfigKey implements PropertyDef {
     private Object value;
     private Type type;
 
-     KafkaConfigKey(String name, Object value, Type type) {
+    KafkaConfigKey(String name, Object value, Type type) {
         this.name = name;
         this.value = value;
         this.type = type;

@@ -2,6 +2,7 @@ package com.jd.journalq.broker.kafka.coordinator.transaction;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.jd.journalq.broker.kafka.KafkaErrorCode;
 import com.jd.journalq.broker.kafka.coordinator.Coordinator;
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionMetadata;
@@ -12,12 +13,14 @@ import com.jd.journalq.broker.kafka.model.OffsetAndMetadata;
 import com.jd.journalq.broker.kafka.model.PartitionMetadataAndError;
 import com.jd.journalq.toolkit.service.Service;
 import com.jd.journalq.toolkit.time.SystemClock;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * TransactionOffsetHandler
@@ -58,7 +61,7 @@ public class TransactionOffsetHandler extends Service {
         return true;
     }
 
-    public Map<String, List<PartitionMetadataAndError>> commitOffset(String clientId, String transactionId, String groupId, long producerId, short producerEpoch, Map<String, List<OffsetAndMetadata>> offsetAndMetadata) {
+    public Map<String, List<PartitionMetadataAndError>> commitOffset(String clientId, String transactionId, String groupId, long producerId, short producerEpoch, Map<String, List<OffsetAndMetadata>> offsetts) {
         checkCoordinatorState(clientId, transactionId);
 
         TransactionMetadata transactionMetadata = transactionMetadataManager.getTransaction(transactionId);
@@ -73,36 +76,34 @@ public class TransactionOffsetHandler extends Service {
         }
 
         synchronized (transactionMetadata) {
-            return doCommitOffset(transactionMetadata, offsetAndMetadata);
+            return doCommitOffset(transactionMetadata, offsetts);
         }
     }
 
-    protected Map<String, List<PartitionMetadataAndError>> doCommitOffset(TransactionMetadata transactionMetadata, Map<String, List<OffsetAndMetadata>> partitions) {
-        Map<String, List<TransactionOffset>> offsetPartitions = Maps.newHashMapWithExpectedSize(partitions.size());
+    protected Map<String, List<PartitionMetadataAndError>> doCommitOffset(TransactionMetadata transactionMetadata, Map<String, List<OffsetAndMetadata>> offsets) {
+        Set<TransactionOffset> transactionOffsets = Sets.newHashSet();
         long now = SystemClock.now();
 
-        for (Map.Entry<String, List<OffsetAndMetadata>> entry : partitions.entrySet()) {
-            List<TransactionOffset> offsets = Lists.newArrayListWithCapacity(entry.getValue().size());
+        for (Map.Entry<String, List<OffsetAndMetadata>> entry : offsets.entrySet()) {
             for (OffsetAndMetadata offsetAndMetadata : entry.getValue()) {
-                offsets.add(new TransactionOffset(entry.getKey(), (short) offsetAndMetadata.getPartition(), offsetAndMetadata.getOffset(), transactionMetadata.getApp(),
+                transactionOffsets.add(new TransactionOffset(entry.getKey(), (short) offsetAndMetadata.getPartition(), offsetAndMetadata.getOffset(), transactionMetadata.getApp(),
                         transactionMetadata.getId(), transactionMetadata.getProducerId(), transactionMetadata.getProducerEpoch(), transactionMetadata.getTimeout(), now));
             }
-            offsetPartitions.put(entry.getKey(), offsets);
         }
 
         try {
-            transactionMetadata.addOffsets(offsetPartitions);
-            transactionSynchronizer.commitOffset(transactionMetadata, offsetPartitions);
-            return buildPartitionMetadataAndError(partitions, KafkaErrorCode.NONE.getCode());
+            transactionMetadata.addOffsets(transactionOffsets);
+            transactionSynchronizer.commitOffset(transactionMetadata, transactionOffsets);
+            return buildPartitionMetadataAndError(offsets, KafkaErrorCode.NONE.getCode());
         } catch (Exception e) {
-            logger.error("commitOffset exception, metadata: {}, offsets: {}", transactionMetadata, partitions, e);
+            logger.error("commitOffset exception, metadata: {}, offsets: {}", transactionMetadata, offsets, e);
             throw new TransactionException(e, KafkaErrorCode.exceptionFor(e));
         }
     }
 
-    protected Map<String, List<PartitionMetadataAndError>> buildPartitionMetadataAndError(Map<String, List<OffsetAndMetadata>> partitions, short code) {
-        Map<String, List<PartitionMetadataAndError>> result = Maps.newHashMapWithExpectedSize(partitions.size());
-        for (Map.Entry<String, List<OffsetAndMetadata>> entry : partitions.entrySet()) {
+    protected Map<String, List<PartitionMetadataAndError>> buildPartitionMetadataAndError(Map<String, List<OffsetAndMetadata>> offsets, short code) {
+        Map<String, List<PartitionMetadataAndError>> result = Maps.newHashMapWithExpectedSize(offsets.size());
+        for (Map.Entry<String, List<OffsetAndMetadata>> entry : offsets.entrySet()) {
             List<PartitionMetadataAndError> partitionMetadataAndErrors = Lists.newArrayListWithCapacity(entry.getValue().size());
             for (OffsetAndMetadata offsetAndMetadata : entry.getValue()) {
                 partitionMetadataAndErrors.add(new PartitionMetadataAndError(offsetAndMetadata.getPartition(), code));

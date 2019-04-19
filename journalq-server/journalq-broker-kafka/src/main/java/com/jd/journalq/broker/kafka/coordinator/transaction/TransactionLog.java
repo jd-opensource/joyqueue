@@ -1,24 +1,28 @@
 package com.jd.journalq.broker.kafka.coordinator.transaction;
 
 import com.google.common.collect.Lists;
+import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.consumer.Consume;
+import com.jd.journalq.broker.consumer.model.PullResult;
 import com.jd.journalq.broker.kafka.config.KafkaConfig;
 import com.jd.journalq.broker.kafka.coordinator.Coordinator;
-import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionMarker;
-import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionOffset;
-import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionPrepare;
+import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionDomain;
 import com.jd.journalq.broker.producer.Produce;
 import com.jd.journalq.broker.producer.PutResult;
 import com.jd.journalq.domain.PartitionGroup;
+import com.jd.journalq.domain.TopicConfig;
+import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.message.BrokerMessage;
 import com.jd.journalq.network.session.Consumer;
 import com.jd.journalq.network.session.Producer;
 import com.jd.journalq.toolkit.network.IpUtil;
 import com.jd.journalq.toolkit.service.Service;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Iterator;
+import java.nio.ByteBuffer;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,6 +35,7 @@ import java.util.Set;
  */
 // TODO 异常处理
 // TODO 补充日志
+// TODO 分区处理
 public class TransactionLog extends Service {
 
     private static final String TRANSACTION_APP = "_TRANSACTION_LOG_";
@@ -41,17 +46,25 @@ public class TransactionLog extends Service {
     private Produce produce;
     private Consume consume;
     private Coordinator coordinator;
+    private ClusterManager clusterManager;
 
-    private final Consumer consumer;
-    private final Producer producer;
+    private Consumer consumer;
+    private Producer producer;
+    private short partition = 0;
 
-    public TransactionLog(KafkaConfig config, Produce produce, Consume consume, Coordinator coordinator) {
+    public TransactionLog(KafkaConfig config, Produce produce, Consume consume, Coordinator coordinator, ClusterManager clusterManager) {
         this.config = config;
         this.produce = produce;
         this.consume = consume;
         this.coordinator = coordinator;
+        this.clusterManager = clusterManager;
+    }
+
+    @Override
+    protected void validate() throws Exception {
         this.consumer = initConsumer();
         this.producer = initProducer();
+//        this.partition = resolvePartition();
     }
 
     protected Consumer initConsumer() {
@@ -62,39 +75,79 @@ public class TransactionLog extends Service {
         return new Producer(TRANSACTION_APP, coordinator.getTransactionTopic().getFullName(), TRANSACTION_APP, Producer.ProducerType.JMQ);
     }
 
-    public boolean writeCommitOffsets(String app, String transactionId, Map<String, List<TransactionOffset>> partitions) throws Exception {
-        byte[] body = TransactionSerializer.serializeOffsets(partitions);
+    protected short resolvePartition() {
+        TopicConfig topicConfig = coordinator.getTransactionTopicConfig();
+        for (Map.Entry<Integer, PartitionGroup> entry : topicConfig.getPartitionGroups().entrySet()) {
+            PartitionGroup partitionGroup = entry.getValue();
+            if (partitionGroup.getLeaderBroker() == null) {
+                continue;
+            }
+            if (partitionGroup.getLeaderBroker().getId().equals(clusterManager.getBrokerId())) {
+                return partitionGroup.getPartitions().iterator().next();
+            }
+        }
+        return -1;
+    }
+
+    public boolean write(String app, String transactionId, TransactionDomain transactionDomain) throws Exception {
+        byte[] body = TransactionSerializer.serialize(transactionDomain);
         return write(app, transactionId, body);
     }
 
-    public boolean writePrepare(String app, String transactionId, List<TransactionPrepare> prepareList) throws Exception {
-        List<byte[]> bodyList = Lists.newArrayListWithCapacity(prepareList.size());
-        for (TransactionPrepare prepare : prepareList) {
-            byte[] body = TransactionSerializer.serializePrepare(prepare);
+    public boolean batchWrite(String app, String transactionId, Set<? extends TransactionDomain> transactionDomains) throws Exception {
+        List<byte[]> bodyList = Lists.newArrayListWithCapacity(transactionDomains.size());
+        for (TransactionDomain transactionDomain : transactionDomains) {
+            byte[] body = TransactionSerializer.serialize(transactionDomain);
             bodyList.add(body);
         }
         return batchWrite(app, transactionId, bodyList);
     }
 
-    public boolean writeMarker(TransactionMarker marker) throws Exception {
-        byte[] body = TransactionSerializer.serializeMarker(marker);
-        return write(marker.getApp(), marker.getTransactionId(), body);
+    public long getIndex() {
+        return consume.getAckIndex(consumer, partition);
     }
 
-    protected List<byte[]> read(short partition, long index, int count) throws Exception {
-        return null;
+    public List<TransactionDomain> read(long index, int count) throws Exception {
+        List<ByteBuffer> buffers = doRead(partition, index, count);
+        if (CollectionUtils.isEmpty(buffers)) {
+            return Collections.emptyList();
+        }
+
+        List<TransactionDomain> result = Lists.newArrayListWithCapacity(buffers.size());
+        for (ByteBuffer buffer : buffers) {
+            TransactionDomain transactionDomain = TransactionSerializer.deserialize(buffer);
+            result.add(transactionDomain);
+        }
+
+        return result;
+    }
+
+    public void saveIndex(long index) throws Exception {
+        doSaveIndex(partition, index);
+    }
+
+    protected void doSaveIndex(short partition, long index) throws Exception {
+        consume.setAckIndex(consumer, partition, index);
+    }
+
+    protected List<ByteBuffer> doRead(short partition, long index, int count) throws Exception {
+        PullResult pullResult = consume.getMessage(consumer, partition, index, count);
+        if (!pullResult.getJmqCode().equals(JMQCode.SUCCESS)) {
+            logger.error("read transaction log exception, partition: {}, index: {}, count: {}", partition, index, count, pullResult.getJmqCode());
+            return Collections.emptyList();
+        }
+        return pullResult.getBuffers();
     }
 
     protected boolean batchWrite(String app, String transactionId, List<byte[]> bodyList) throws Exception {
         List<BrokerMessage> messages = Lists.newArrayListWithCapacity(bodyList.size());
-        short partittion = resolvePartition(app, transactionId);
         for (byte[] body : bodyList) {
             BrokerMessage message = new BrokerMessage();
             message.setTopic(coordinator.getTransactionTopic().getFullName());
             message.setApp(initProducer().getApp());
             message.setBody(body);
             message.setClientIp(IpUtil.getLocalIp().getBytes());
-            message.setPartition(partittion);
+            message.setPartition(partition);
             messages.add(message);
         }
         PutResult putResult = produce.putMessage(producer, messages, config.getTransactionLogWriteQosLevel(), config.getTransactionSyncTimeout());
@@ -102,28 +155,17 @@ public class TransactionLog extends Service {
     }
 
     protected boolean write(String app, String transactionId, byte[] body) throws Exception {
-        short partittion = resolvePartition(app, transactionId);
         BrokerMessage message = new BrokerMessage();
         message.setTopic(coordinator.getTransactionTopic().getFullName());
         message.setApp(initProducer().getApp());
         message.setBody(body);
         message.setClientIp(IpUtil.getLocalIp().getBytes());
-        message.setPartition(partittion);
+        message.setPartition(partition);
         PutResult putResult = produce.putMessage(producer, Lists.newArrayList(message), config.getTransactionLogWriteQosLevel(), config.getTransactionSyncTimeout());
         return true;
     }
 
     protected short resolvePartition(String app, String transactionId) {
-        PartitionGroup partitionGroup = coordinator.getTransactionPartitionGroup(app);
-        Set<Short> partitions = partitionGroup.getPartitions();
-        Iterator<Short> iterator = partitions.iterator();
-        if (partitions.size() == 1) {
-            return iterator.next().shortValue();
-        }
-        int index = transactionId.hashCode() % partitions.size();
-        for (int i = 0; i < index; i++) {
-
-        }
-        return 0;
+        return partition;
     }
 }

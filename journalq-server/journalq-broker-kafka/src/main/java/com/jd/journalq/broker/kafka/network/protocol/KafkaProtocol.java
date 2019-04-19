@@ -94,9 +94,9 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
         this.producerIdManager = new ProducerIdManager();
         this.transactionIdManager = new TransactionIdManager();
         this.transactionMetadataManager = new TransactionMetadataManager(config, transactionMetadataManager);
-        this.transactionLog = new TransactionLog(config, brokerContext.getProduce(), brokerContext.getConsume(), coordinator);
+        this.transactionLog = new TransactionLog(config, brokerContext.getProduce(), brokerContext.getConsume(), coordinator, brokerContext.getClusterManager());
         this.transactionSynchronizer = new TransactionSynchronizer(config, transactionIdManager, transactionLog, coordinator.getSessionManager(), brokerContext.getNameService());
-        this.transactionCompensator = new TransactionCompensator(coordinator, transactionLog, transactionSynchronizer);
+        this.transactionCompensator = new TransactionCompensator(config, coordinator, transactionLog, transactionSynchronizer);
         this.transactionHandler = new TransactionHandler(coordinator, this.transactionMetadataManager, producerIdManager, transactionSynchronizer, brokerContext.getNameService());
         this.transactionOffsetHandler = new TransactionOffsetHandler(coordinator, this.transactionMetadataManager, transactionSynchronizer);
         this.transactionCoordinator = new TransactionCoordinator(coordinator, this.transactionMetadataManager, transactionHandler, transactionOffsetHandler);

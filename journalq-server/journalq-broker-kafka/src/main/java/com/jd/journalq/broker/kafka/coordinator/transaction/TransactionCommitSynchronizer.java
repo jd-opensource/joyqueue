@@ -26,12 +26,12 @@ import com.jd.journalq.network.transport.command.JMQCommand;
 import com.jd.journalq.nsr.NameService;
 import com.jd.journalq.toolkit.service.Service;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -58,11 +58,11 @@ public class TransactionCommitSynchronizer extends Service {
         this.nameService = nameService;
     }
 
-    public boolean commit(TransactionMetadata transactionMetadata, List<TransactionPrepare> prepareList, Map<String, List<TransactionOffset>> offsets) throws Exception {
+    public boolean commit(TransactionMetadata transactionMetadata, Set<TransactionPrepare> prepareList, Set<TransactionOffset> offsets) throws Exception {
         return commitPrepare(transactionMetadata, prepareList) && commitOffsets(transactionMetadata, offsets);
     }
 
-    public boolean commitPrepare(TransactionMetadata transactionMetadata, List<TransactionPrepare> prepareList) throws Exception {
+    public boolean commitPrepare(TransactionMetadata transactionMetadata, Set<TransactionPrepare> prepareList) throws Exception {
         if (CollectionUtils.isEmpty(prepareList)) {
             return true;
         }
@@ -101,16 +101,16 @@ public class TransactionCommitSynchronizer extends Service {
         return result[0];
     }
 
-    public boolean commitOffsets(TransactionMetadata transactionMetadata, Map<String, List<TransactionOffset>> offsets) throws Exception {
-        if (MapUtils.isEmpty(offsets)) {
+    public boolean commitOffsets(TransactionMetadata transactionMetadata, Set<TransactionOffset> offsets) throws Exception {
+        if (CollectionUtils.isEmpty(offsets)) {
             return true;
         }
 
-        Map<Broker, Map<String, List<TransactionOffset>>> brokerMap = splitOffsetsByBroker(offsets);
-        CountDownLatch latch = new CountDownLatch(brokerMap.size());
+        Map<Broker, List<TransactionOffset>> brokerOffsetMap = splitOffsetsByBroker(offsets);
+        CountDownLatch latch = new CountDownLatch(brokerOffsetMap.size());
         boolean[] result = {true};
 
-        for (Map.Entry<Broker, Map<String, List<TransactionOffset>>> entry : brokerMap.entrySet()) {
+        for (Map.Entry<Broker, List<TransactionOffset>> entry : brokerOffsetMap.entrySet()) {
             Broker broker = entry.getKey();
             Map<String, Map<Integer, IndexAndMetadata>> saveOffsetParam = buildSaveOffsetParam(entry.getValue());
 
@@ -155,53 +155,43 @@ public class TransactionCommitSynchronizer extends Service {
         return result[0];
     }
 
-    protected Map<String, Map<Integer, IndexAndMetadata>> buildSaveOffsetParam(Map<String, List<TransactionOffset>> offsets) {
+    protected Map<String, Map<Integer, IndexAndMetadata>> buildSaveOffsetParam(List<TransactionOffset> offsets) {
         Map<String, Map<Integer, IndexAndMetadata>> result = Maps.newHashMap();
-        for (Map.Entry<String, List<TransactionOffset>> entry : offsets.entrySet()) {
-            String topic = entry.getKey();
-            for (TransactionOffset offset : entry.getValue()) {
-                Map<Integer, IndexAndMetadata> partitionMetadataMap = result.get(topic);
-                if (partitionMetadataMap == null) {
-                    partitionMetadataMap = Maps.newHashMap();
-                    result.put(topic, partitionMetadataMap);
-                }
-                IndexAndMetadata indexAndMetadata = new IndexAndMetadata(offset.getOffset(), null);
-                partitionMetadataMap.put((int) offset.getPartition(), indexAndMetadata);
+        for (TransactionOffset offset : offsets) {
+            String topic = offset.getTopic();
+            Map<Integer, IndexAndMetadata> partitionMetadataMap = result.get(topic);
+            if (partitionMetadataMap == null) {
+                partitionMetadataMap = Maps.newHashMap();
+                result.put(topic, partitionMetadataMap);
             }
+            IndexAndMetadata indexAndMetadata = new IndexAndMetadata(offset.getOffset(), null);
+            partitionMetadataMap.put((int) offset.getPartition(), indexAndMetadata);
         }
         return result;
     }
 
-    protected Map<Broker, Map<String, List<TransactionOffset>>> splitOffsetsByBroker(Map<String, List<TransactionOffset>> offsets) {
-        Map<Broker, Map<String, List<TransactionOffset>>> result = Maps.newHashMap();
+    protected Map<Broker, List<TransactionOffset>> splitOffsetsByBroker(Set<TransactionOffset> offsets) {
+        Map<Broker, List<TransactionOffset>> result = Maps.newHashMap();
 
-        for (Map.Entry<String, List<TransactionOffset>> entry : offsets.entrySet()) {
-            TopicConfig topic = nameService.getTopicConfig(TopicName.parse(entry.getKey()));
+        for (TransactionOffset offset : offsets) {
+            TopicConfig topic = nameService.getTopicConfig(TopicName.parse(offset.getTopic()));
             if (topic == null) {
                 continue;
             }
-            for (TransactionOffset offset : entry.getValue()) {
-                PartitionGroup partitionGroup = topic.fetchPartitionGroupByPartition(offset.getPartition());
-                if (partitionGroup == null) {
-                    continue;
-                }
-                Broker broker = partitionGroup.getLeaderBroker();
-                if (broker == null) {
-                    continue;
-                }
-                Map<String, List<TransactionOffset>> topicOffsets = result.get(broker);
-                if (topicOffsets == null) {
-                    topicOffsets = Maps.newHashMap();
-                    result.put(broker, topicOffsets);
-                }
-                List<TransactionOffset> partitionOffsets = topicOffsets.get(entry.getKey());
-                if (partitionOffsets == null) {
-                    partitionOffsets = Lists.newArrayList();
-                    topicOffsets.put(entry.getKey(), partitionOffsets);
-                }
-
-                partitionOffsets.add(offset);
+            PartitionGroup partitionGroup = topic.fetchPartitionGroupByPartition(offset.getPartition());
+            if (partitionGroup == null) {
+                continue;
             }
+            Broker broker = partitionGroup.getLeaderBroker();
+            if (broker == null) {
+                continue;
+            }
+            List<TransactionOffset> brokerOffsets = result.get(broker);
+            if (brokerOffsets == null) {
+                brokerOffsets = Lists.newLinkedList();
+                result.put(broker, brokerOffsets);
+            }
+            brokerOffsets.add(offset);
         }
         return result;
     }

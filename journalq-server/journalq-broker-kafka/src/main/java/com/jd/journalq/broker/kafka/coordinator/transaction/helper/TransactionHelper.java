@@ -1,13 +1,13 @@
 package com.jd.journalq.broker.kafka.coordinator.transaction.helper;
 
 import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionPrepare;
 import org.apache.commons.collections.CollectionUtils;
 
 import java.util.Collections;
-import java.util.List;
+import java.util.Set;
 
 /**
  * TransactionHelper
@@ -17,12 +17,12 @@ import java.util.List;
  */
 public class TransactionHelper {
 
-    public static List<TransactionPrepare> filterPrepareByBroker(List<TransactionPrepare> prepareList) {
+    public static Set<TransactionPrepare> filterPrepareByBroker(Set<TransactionPrepare> prepareList) {
         if (CollectionUtils.isEmpty(prepareList)) {
-            return Collections.emptyList();
+            return Collections.emptySet();
         }
         Table<Integer, String, Boolean> brokerTopicTable = HashBasedTable.create();
-        List<TransactionPrepare> result = Lists.newLinkedList();
+        Set<TransactionPrepare> result = Sets.newHashSet();
         for (TransactionPrepare prepare : prepareList) {
             if (brokerTopicTable.contains(prepare.getBrokerId(), prepare.getTopic())) {
                 continue;

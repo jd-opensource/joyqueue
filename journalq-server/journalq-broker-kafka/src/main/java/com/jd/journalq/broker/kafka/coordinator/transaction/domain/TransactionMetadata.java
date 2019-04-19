@@ -1,14 +1,10 @@
 package com.jd.journalq.broker.kafka.coordinator.transaction.domain;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.jd.journalq.toolkit.time.SystemClock;
-import org.apache.commons.lang3.ObjectUtils;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * TransactionMetadata
@@ -24,8 +20,12 @@ public class TransactionMetadata extends com.jd.journalq.broker.coordinator.tran
     private short producerEpoch = 0;
     private long createTime = SystemClock.now();
     private TransactionState state = TransactionState.EMPTY;
-    private List<TransactionPrepare> prepare;
-    private Map<String, List<TransactionOffset>> offsets;
+    private Set<TransactionPrepare> prepare;
+    private Set<TransactionOffset> offsets;
+
+    public TransactionMetadata() {
+
+    }
 
     public TransactionMetadata(String id) {
         super(id);
@@ -41,9 +41,16 @@ public class TransactionMetadata extends com.jd.journalq.broker.coordinator.tran
 
     public void addPrepare(TransactionPrepare transactionPrepare) {
         if (prepare == null) {
-            prepare = Lists.newLinkedList();
+            prepare = Sets.newHashSet();
         }
         prepare.add(transactionPrepare);
+    }
+
+    public void addPrepare(Set<TransactionPrepare> transactionPrepare) {
+        if (prepare == null) {
+            prepare = Sets.newHashSet();
+        }
+        prepare.addAll(transactionPrepare);
     }
 
     public boolean containsPrepare(String topic, short partition) {
@@ -69,28 +76,39 @@ public class TransactionMetadata extends com.jd.journalq.broker.coordinator.tran
         prepare.clear();
     }
 
-    public void addOffsets(Map<String, List<TransactionOffset>> offsets) {
+    public void addOffsets(Set<TransactionOffset> offsets) {
         if (this.offsets == null) {
-            this.offsets = Maps.newHashMap();
+            this.offsets = Sets.newHashSet();
         }
-        for (Map.Entry<String, List<TransactionOffset>> entry : offsets.entrySet()) {
-            List<TransactionOffset> topicOffsets = this.offsets.get(entry.getKey());
-            if (topicOffsets == null) {
-                topicOffsets = Lists.newArrayList();
-                this.offsets.put(entry.getKey(), topicOffsets);
-            }
-            topicOffsets.addAll(entry.getValue());
-        }
+        this.offsets.remove(offsets);
+        this.offsets.addAll(offsets);
     }
 
-    public List<TransactionOffset> getOffests(String topic) {
+    public void addOffset(TransactionOffset offset) {
+        if (this.offsets == null) {
+            this.offsets = Sets.newHashSet();
+        }
+        this.offsets.remove(offset);
+        this.offsets.add(offset);
+    }
+
+    public boolean containsOffset(String topic, short partition) {
+        return getOffest(topic, partition) != null;
+    }
+
+    public TransactionOffset getOffest(String topic, short partition) {
         if (offsets == null) {
-            return Collections.emptyList();
+            return null;
         }
-        return ObjectUtils.defaultIfNull(offsets.get(topic), Collections.emptyList());
+        for (TransactionOffset offset : offsets) {
+            if (offset.getTopic().equals(topic) && offset.getPartition() == partition) {
+                return offset;
+            }
+        }
+        return null;
     }
 
-    public void clearOffsetMetadata() {
+    public void clearOffsets() {
         if (offsets == null) {
             return;
         }
@@ -99,7 +117,7 @@ public class TransactionMetadata extends com.jd.journalq.broker.coordinator.tran
 
     public void clear() {
         clearPrepare();
-        clearOffsetMetadata();
+        clearOffsets();
     }
 
     public void transitionStateTo(TransactionState state) {
@@ -172,15 +190,19 @@ public class TransactionMetadata extends com.jd.journalq.broker.coordinator.tran
         return state;
     }
 
-    public void setPrepare(List<TransactionPrepare> prepare) {
+    public void setPrepare(Set<TransactionPrepare> prepare) {
         this.prepare = prepare;
     }
 
-    public List<TransactionPrepare> getPrepare() {
+    public Set<TransactionPrepare> getPrepare() {
         return prepare;
     }
 
-    public Map<String, List<TransactionOffset>> getOffsets() {
+    public void setOffsets(Set<TransactionOffset> offsets) {
+        this.offsets = offsets;
+    }
+
+    public Set<TransactionOffset> getOffsets() {
         return offsets;
     }
 

@@ -45,10 +45,10 @@ public class InitProducerIdRequestHandler implements KafkaCommandHandler, Type, 
             response = new InitProducerIdResponse(KafkaErrorCode.NONE.getCode(), transactionMetadata.getProducerId(), transactionMetadata.getProducerEpoch());
         } catch (TransactionException e) {
             logger.warn("init producerId exception, code: {}, message: {}, request: {}", e.getCode(), e.getMessage(), initProducerIdRequest, e);
-            response = new InitProducerIdResponse((short) e.getCode());
+            response = new InitProducerIdResponse((short) e.getCode(), InitProducerIdResponse.NO_PRODUCER_ID, InitProducerIdResponse.NO_PRODUCER_EPOCH);
         } catch (Exception e) {
             logger.error("init producerId exception, request: {}", initProducerIdRequest, e);
-            response = new InitProducerIdResponse(KafkaErrorCode.exceptionFor(e));
+            response = new InitProducerIdResponse(KafkaErrorCode.exceptionFor(e), InitProducerIdResponse.NO_PRODUCER_ID, InitProducerIdResponse.NO_PRODUCER_EPOCH);
         }
 
         return new Command(response);

@@ -1,7 +1,6 @@
 package com.jd.journalq.broker.kafka.coordinator.transaction;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionDomain;
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionMarker;
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionOffset;
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionPrepare;
@@ -10,8 +9,6 @@ import com.jd.journalq.network.serializer.Serializer;
 import com.jd.journalq.toolkit.lang.Charsets;
 
 import java.nio.ByteBuffer;
-import java.util.List;
-import java.util.Map;
 
 /**
  * TransactionSerializer
@@ -20,6 +17,20 @@ import java.util.Map;
  * date: 2019/4/15
  */
 public class TransactionSerializer {
+
+    private static final int MAGIC = 0xCAFEBABE;
+    private static final byte VERSION_V0 = 0;
+    private static final byte CURRENT_VERSION = VERSION_V0;
+
+    private static final byte PREPARE_TYPE = 0;
+    private static final byte MARKER_TYPE = 1;
+    private static final byte OFFSET_TYPE = 2;
+
+    private static final int HEADER_FIX_LENGTH =
+                    + 4 // magic
+                    + 1 // version
+                    + 1 // type
+            ;
 
     private static final int PREPARE_FIX_LENGTH =
                     + 2 // topic length
@@ -57,7 +68,7 @@ public class TransactionSerializer {
                     + 8 // createTime
             ;
 
-    public static int sizeOfPrepare(TransactionPrepare prepare) throws Exception {
+    protected static int sizeOfPrepare(TransactionPrepare prepare) throws Exception {
         int size = PREPARE_FIX_LENGTH;
 
         byte[] bytes = Serializer.getBytes(prepare.getTopic(), Charsets.UTF_8);
@@ -75,10 +86,7 @@ public class TransactionSerializer {
         return size;
     }
 
-    public static byte[] serializePrepare(TransactionPrepare prepare) throws Exception {
-        int size = sizeOfPrepare(prepare);
-        ByteBuffer buffer = ByteBuffer.allocate(size);
-
+    protected static byte[] serializePrepare(ByteBuffer buffer, TransactionPrepare prepare) throws Exception {
         Serializer.write(prepare.getTopic(), buffer, Serializer.SHORT_SIZE);
         buffer.putShort(prepare.getPartition());
         Serializer.write(prepare.getApp(), buffer, Serializer.SHORT_SIZE);
@@ -93,8 +101,7 @@ public class TransactionSerializer {
         return buffer.array();
     }
 
-    public static TransactionPrepare deserializePrepare(byte[] value) throws Exception {
-        ByteBuffer buffer = ByteBuffer.wrap(value);
+    protected static TransactionPrepare deserializePrepare(ByteBuffer buffer) throws Exception {
         TransactionPrepare prepare = new TransactionPrepare();
         prepare.setTopic(Serializer.readString(buffer, Serializer.SHORT_SIZE));
         prepare.setPartition(buffer.getShort());
@@ -110,7 +117,7 @@ public class TransactionSerializer {
         return prepare;
     }
 
-    public static int sizeOfMarker(TransactionMarker marker) throws Exception {
+    protected static int sizeOfMarker(TransactionMarker marker) throws Exception {
         int size = MARKER_FIX_LENGTH;
 
         byte[] bytes = Serializer.getBytes(marker.getApp(), Charsets.UTF_8);
@@ -122,10 +129,7 @@ public class TransactionSerializer {
         return size;
     }
 
-    public static byte[] serializeMarker(TransactionMarker marker) throws Exception {
-        int size = sizeOfMarker(marker);
-        ByteBuffer buffer = ByteBuffer.allocate(size);
-
+    protected static byte[] serializeMarker(ByteBuffer buffer, TransactionMarker marker) throws Exception {
         Serializer.write(marker.getApp(), buffer, Serializer.SHORT_SIZE);
         Serializer.write(marker.getTransactionId(), buffer, Serializer.BYTE_SIZE);
         buffer.putLong(marker.getProducerId());
@@ -136,8 +140,7 @@ public class TransactionSerializer {
         return buffer.array();
     }
 
-    public static TransactionMarker deserializeMarker(byte[] value) throws Exception {
-        ByteBuffer buffer = ByteBuffer.wrap(value);
+    protected static TransactionMarker deserializeMarker(ByteBuffer buffer) throws Exception {
         TransactionMarker marker = new TransactionMarker();
         marker.setApp(Serializer.readString(buffer, Serializer.SHORT_SIZE));
         marker.setTransactionId(Serializer.readString(buffer, Serializer.SHORT_SIZE));
@@ -149,82 +152,135 @@ public class TransactionSerializer {
         return marker;
     }
 
-    public static int sizeOfOffsets(Map<String, List<TransactionOffset>> offsets) throws Exception {
-        int size = 0;
-        size += Serializer.INT_SIZE;
-        for (Map.Entry<String, List<TransactionOffset>> entry : offsets.entrySet()) {
-            size += Serializer.INT_SIZE;
-            size += Serializer.SHORT_SIZE;
-            byte[] bytes = Serializer.getBytes(entry.getKey(), Charsets.UTF_8);
-            size += bytes == null? 0: bytes.length;
+    protected static int sizeOfOffset(TransactionOffset offset) throws Exception {
+        int size = OFFSET_FIX_LENGTH;
 
-            for (TransactionOffset offset : entry.getValue()) {
-                size += OFFSET_FIX_LENGTH;
+        byte[] bytes = Serializer.getBytes(offset.getTopic(), Charsets.UTF_8);
+        size += bytes == null? 0: bytes.length;
 
-                bytes = Serializer.getBytes(offset.getTopic(), Charsets.UTF_8);
-                size += bytes == null? 0: bytes.length;
+        bytes = Serializer.getBytes(offset.getApp(), Charsets.UTF_8);
+        size += bytes == null? 0: bytes.length;
 
-                bytes = Serializer.getBytes(offset.getApp(), Charsets.UTF_8);
-                size += bytes == null? 0: bytes.length;
-
-                bytes = Serializer.getBytes(offset.getTransactionId(), Charsets.UTF_8);
-                size += bytes == null? 0: bytes.length;
-            }
-        }
+        bytes = Serializer.getBytes(offset.getTransactionId(), Charsets.UTF_8);
+        size += bytes == null? 0: bytes.length;
         return size;
     }
 
-    public static byte[] serializeOffsets(Map<String, List<TransactionOffset>> offsets) throws Exception {
-        int size = sizeOfOffsets(offsets);
-        ByteBuffer buffer = ByteBuffer.allocate(size);
+    protected static byte[] serializeOffset(ByteBuffer buffer, TransactionOffset offset) throws Exception {
+        Serializer.write(offset.getTopic(), buffer, Serializer.SHORT_SIZE);
+        buffer.putShort(offset.getPartition());
+        buffer.putLong(offset.getOffset());
+        Serializer.write(offset.getApp(), buffer, Serializer.SHORT_SIZE);
+        Serializer.write(offset.getTransactionId(), buffer, Serializer.SHORT_SIZE);
+        buffer.putLong(offset.getProducerId());
+        buffer.putShort(offset.getProducerEpoch());
+        buffer.putInt(offset.getTimeout());
+        buffer.putLong(offset.getCreateTime());
+        return buffer.array();
+    }
 
-        buffer.putInt(offsets.size());
-        for (Map.Entry<String, List<TransactionOffset>> entry : offsets.entrySet()) {
-            Serializer.write(entry.getKey(), buffer, Serializer.SHORT_SIZE);
-            buffer.putInt(entry.getValue().size());
+    protected static TransactionOffset deserializeOffset(ByteBuffer buffer) throws Exception {
+        TransactionOffset transactionOffset = new TransactionOffset();
+        transactionOffset.setTopic(Serializer.readString(buffer, Serializer.SHORT_SIZE));
+        transactionOffset.setPartition(buffer.getShort());
+        transactionOffset.setOffset(buffer.getLong());
+        transactionOffset.setApp(Serializer.readString(buffer, Serializer.SHORT_SIZE));
+        transactionOffset.setTransactionId(Serializer.readString(buffer, Serializer.SHORT_SIZE));
+        transactionOffset.setProducerId(buffer.getLong());
+        transactionOffset.setProducerEpoch(buffer.getShort());
+        transactionOffset.setTimeout(buffer.getInt());
+        transactionOffset.setCreateTime(buffer.getLong());
+        return transactionOffset;
+    }
 
-            for (TransactionOffset offset : entry.getValue()) {
-                Serializer.write(offset.getTopic(), buffer, Serializer.SHORT_SIZE);
-                buffer.putShort(offset.getPartition());
-                buffer.putLong(offset.getOffset());
-                Serializer.write(offset.getApp(), buffer, Serializer.SHORT_SIZE);
-                Serializer.write(offset.getTransactionId(), buffer, Serializer.SHORT_SIZE);
-                buffer.putLong(offset.getProducerId());
-                buffer.putShort(offset.getProducerEpoch());
-                buffer.putInt(offset.getTimeout());
-                buffer.putLong(offset.getCreateTime());
-            }
+    public static byte[] serialize(TransactionDomain transactionDomain) throws Exception {
+        ByteBuffer buffer = null;
+        if (transactionDomain instanceof TransactionPrepare) {
+            int size = sizeOfPrepare((TransactionPrepare) transactionDomain) + HEADER_FIX_LENGTH;
+            buffer = ByteBuffer.allocate(size);
+            serializeHeader(buffer, transactionDomain);
+            serializePrepare(buffer, (TransactionPrepare) transactionDomain);
+        } else if (transactionDomain instanceof TransactionMarker) {
+            int size = sizeOfMarker((TransactionMarker) transactionDomain) + HEADER_FIX_LENGTH;
+            buffer = ByteBuffer.allocate(size);
+            serializeHeader(buffer, transactionDomain);
+            serializeMarker(buffer, (TransactionMarker) transactionDomain);
+        } else if (transactionDomain instanceof TransactionOffset) {
+            int size = sizeOfOffset((TransactionOffset) transactionDomain) + HEADER_FIX_LENGTH;
+            buffer = ByteBuffer.allocate(size);
+            serializeHeader(buffer, transactionDomain);
+            serializeOffset(buffer, (TransactionOffset) transactionDomain);
+        } else {
+            throw new UnsupportedOperationException(String.format("unsupported transaction, type: %s", transactionDomain.getClass()));
         }
         return buffer.array();
     }
 
-    public static Map<String, List<TransactionOffset>> deserializeOffsets(byte[] value) throws Exception {
-        ByteBuffer buffer = ByteBuffer.wrap(value);
-        int size = buffer.getInt();
-        Map<String, List<TransactionOffset>> result = Maps.newHashMapWithExpectedSize(size);
+    public static TransactionDomain deserialize(ByteBuffer buffer) throws Exception {
+        TransactionHeader header = deserializeHeader(buffer);
+        switch (header.getType()) {
+            case PREPARE_TYPE:
+                return deserializePrepare(buffer);
+            case MARKER_TYPE:
+                return deserializeMarker(buffer);
+            case OFFSET_TYPE:
+                return deserializeOffset(buffer);
+            default:
+                throw new UnsupportedOperationException(String.format("unsupported transaction, type: %s", header.getType()));
+        }
+    }
 
-        for (int i = 0; i < size; i++) {
-            String topic = Serializer.readString(buffer, Serializer.SHORT_SIZE);
-            int partitionSize = buffer.getInt();
-            List<TransactionOffset> partitionOffsets = Lists.newArrayListWithCapacity(partitionSize);
-
-            for (int j = 0; j < partitionSize; j++) {
-                TransactionOffset transactionOffset = new TransactionOffset();
-                transactionOffset.setTopic(Serializer.readString(buffer, Serializer.SHORT_SIZE));
-                transactionOffset.setPartition(buffer.getShort());
-                transactionOffset.setOffset(buffer.getLong());
-                transactionOffset.setApp(Serializer.readString(buffer, Serializer.SHORT_SIZE));
-                transactionOffset.setTransactionId(Serializer.readString(buffer, Serializer.SHORT_SIZE));
-                transactionOffset.setProducerId(buffer.getLong());
-                transactionOffset.setProducerEpoch(buffer.getShort());
-                transactionOffset.setTimeout(buffer.getInt());
-                transactionOffset.setCreateTime(buffer.getLong());
-                partitionOffsets.add(transactionOffset);
-            }
-
-            result.put(topic, partitionOffsets);
+    protected static void serializeHeader(ByteBuffer buffer, TransactionDomain transactionDomain) throws Exception {
+        byte type = -1;
+        if (transactionDomain instanceof TransactionPrepare) {
+            type = PREPARE_TYPE;
+        } else if (transactionDomain instanceof TransactionMarker) {
+            type = MARKER_TYPE;
+        } else if (transactionDomain instanceof TransactionOffset) {
+            type = OFFSET_TYPE;
+        } else {
+            throw new UnsupportedOperationException(String.format("unsupported transaction, type: %s", transactionDomain.getClass()));
         }
 
-        return result;
+        buffer.putInt(MAGIC);
+        buffer.put(CURRENT_VERSION);
+        buffer.put(type);
+    }
+
+    protected static TransactionHeader deserializeHeader(ByteBuffer buffer) {
+        int magic = buffer.getInt();
+        byte version = buffer.get();
+        byte type = buffer.get();
+        return new TransactionHeader(version, type);
+    }
+
+    private static class TransactionHeader {
+        private byte type;
+        private byte version;
+
+        TransactionHeader() {
+
+        }
+
+        TransactionHeader(byte type, byte version) {
+            this.type = type;
+            this.version = version;
+        }
+
+        public byte getType() {
+            return type;
+        }
+
+        public void setType(byte type) {
+            this.type = type;
+        }
+
+        public byte getVersion() {
+            return version;
+        }
+
+        public void setVersion(byte version) {
+            this.version = version;
+        }
     }
 }

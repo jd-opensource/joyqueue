@@ -6,7 +6,7 @@ package com.jd.journalq.broker.kafka.coordinator.transaction.domain;
  * email: gaohaoxiang@jd.com
  * date: 2019/4/15
  */
-public class TransactionMarker {
+public class TransactionMarker extends TransactionDomain {
 
     private String app;
     private String transactionId;

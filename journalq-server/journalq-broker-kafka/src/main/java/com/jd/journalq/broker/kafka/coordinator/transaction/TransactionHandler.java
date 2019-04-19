@@ -2,6 +2,7 @@ package com.jd.journalq.broker.kafka.coordinator.transaction;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.jd.journalq.broker.kafka.KafkaErrorCode;
 import com.jd.journalq.broker.kafka.coordinator.Coordinator;
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionMetadata;
@@ -68,10 +69,6 @@ public class TransactionHandler extends Service {
     }
 
     protected TransactionMetadata doInitProducer(TransactionMetadata transactionMetadata, int transactionTimeout) {
-        if (!transactionMetadata.getState().equals(TransactionState.EMPTY)) {
-            tryAbort(transactionMetadata);
-        }
-
         transactionMetadata.transitionStateTo(TransactionState.EMPTY);
         transactionMetadata.clear();
         transactionMetadata.nextProducerEpoch();
@@ -150,7 +147,7 @@ public class TransactionHandler extends Service {
 
         // TODO 批量优化
         transactionMetadata.addPrepare(prepare);
-        return transactionSynchronizer.prepare(transactionMetadata, Lists.newArrayList(prepare));
+        return transactionSynchronizer.prepare(transactionMetadata, Sets.newHashSet(prepare));
     }
 
     public boolean endTxn(String clientId, String transactionId, long producerId, short producerEpoch, boolean isCommit) {
@@ -186,8 +183,6 @@ public class TransactionHandler extends Service {
         } catch (Exception e) {
             logger.error("endTxn exception, metadata: {}, isCommit: {}", transactionMetadata, isCommit, e);
             throw new TransactionException(e, KafkaErrorCode.exceptionFor(e));
-        } finally {
-            transactionMetadata.transitionStateTo(TransactionState.EMPTY);
         }
     }
 

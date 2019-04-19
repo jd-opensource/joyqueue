@@ -56,7 +56,7 @@ public class TransactionManager extends Service {
     private ClusterManager clusterManager;
     private BrokerMonitor brokerMonitor;
 
-    private UnCompleteTransactionManager unCompleteTransactionManager;
+    private UnCompletedTransactionManager unCompletedTransactionManager;
     private TransactionRecover transactionRecover;
     private TransactionCleaner transactionCleaner;
 
@@ -68,7 +68,7 @@ public class TransactionManager extends Service {
     }
 
     public TransactionId prepare(Producer producer, BrokerPrepare prepare) throws JMQException {
-        if (unCompleteTransactionManager.getTransactionCount(producer.getTopic(), producer.getApp()) > config.getTransactionMaxUncomplete()) {
+        if (unCompletedTransactionManager.getTransactionCount(producer.getTopic(), producer.getApp()) > config.getTransactionMaxUncomplete()) {
             logger.warn("too many transactions, topic: {}, app: {}. txId: {}", prepare.getTopic(), prepare.getApp(), prepare.getTxId());
             throw new JMQException(JMQCode.FW_TRANSACTION_LIMIT);
         }
@@ -83,7 +83,7 @@ public class TransactionManager extends Service {
         TransactionId transactionId = generateTransactionId(prepare, storeId);
 
         try {
-            unCompleteTransactionManager.putTransaction(transactionId);
+            unCompletedTransactionManager.putTransaction(transactionId);
 
             ByteBuffer buffer = ByteBuffer.allocate(Serializer.sizeOfBrokerPrepare(prepare));
             Serializer.writeBrokerPrepare(prepare, buffer);
@@ -94,7 +94,7 @@ public class TransactionManager extends Service {
         } catch (Exception e) {
             try {
                 transactionStore.remove(storeId);
-                unCompleteTransactionManager.removeTransaction(transactionId);
+                unCompletedTransactionManager.removeTransaction(transactionId);
             } catch (Exception ex) {
                 logger.error("clear prepare exception, topic: {}, app: {}. txId: {}", prepare.getTopic(), prepare.getApp(), prepare.getTxId(), ex);
             }
@@ -122,7 +122,7 @@ public class TransactionManager extends Service {
             throw new JMQException(JMQCode.CN_TRANSACTION_NOT_EXISTS);
         }
 
-        TransactionId transactionId = unCompleteTransactionManager.getTransaction(commit.getTopic(), commit.getApp(), commit.getTxId());
+        TransactionId transactionId = unCompletedTransactionManager.getTransaction(commit.getTopic(), commit.getApp(), commit.getTxId());
         if (transactionId == null) {
             logger.error("The current tx is not in txManager, topic: {}, app: {}, txId: {}", commit.getTxId(), commit.getApp(), commit.getTxId());
             throw new JMQException(JMQCode.CN_TRANSACTION_NOT_EXISTS);
@@ -173,7 +173,7 @@ public class TransactionManager extends Service {
                 throw new JMQException(JMQCode.SE_IO_ERROR);
             }
 
-            unCompleteTransactionManager.removeTransaction(transactionId);
+            unCompletedTransactionManager.removeTransaction(transactionId);
         } catch (Exception e) {
             logger.error("write transaction message exception, topic: {}, app: {}, txId: {}", commit.getTopic(), commit.getApp(), commit.getTxId(), e);
             if (e instanceof JMQException) {
@@ -215,14 +215,14 @@ public class TransactionManager extends Service {
             throw new JMQException(JMQCode.CN_TRANSACTION_NOT_EXISTS);
         }
 
-        TransactionId transactionId = unCompleteTransactionManager.getTransaction(rollback.getTopic(), rollback.getApp(), rollback.getTxId());
+        TransactionId transactionId = unCompletedTransactionManager.getTransaction(rollback.getTopic(), rollback.getApp(), rollback.getTxId());
         if (transactionId == null) {
             logger.warn("transaction not exist, topic: {}, id: {}", producer.getTopic(), rollback.getTxId());
             throw new JMQException(JMQCode.CN_TRANSACTION_NOT_EXISTS);
         }
 
         transactionStore.remove(transactionId.getStoreId());
-        unCompleteTransactionManager.removeTransaction(transactionId);
+        unCompletedTransactionManager.removeTransaction(transactionId);
         return transactionId;
     }
 
@@ -233,7 +233,7 @@ public class TransactionManager extends Service {
             throw new JMQException(JMQCode.CN_UNKNOWN_ERROR);
         }
 
-        TransactionId transactionId = unCompleteTransactionManager.getTransaction(producer.getTopic(), producer.getApp(), txId);
+        TransactionId transactionId = unCompletedTransactionManager.getTransaction(producer.getTopic(), producer.getApp(), txId);
         if (transactionId == null) {
             logger.error("The current tx is not in txManager! txId:{}...", txId);
             throw new JMQException(JMQCode.CN_TRANSACTION_NOT_EXISTS);
@@ -243,18 +243,18 @@ public class TransactionManager extends Service {
     }
 
     public TransactionId getTransaction(String topic, String app, String txId) {
-        return unCompleteTransactionManager.getTransaction(topic, app, txId);
+        return unCompletedTransactionManager.getTransaction(topic, app, txId);
     }
 
     public List<TransactionId> getFeedback(Producer producer, int count) {
-        return unCompleteTransactionManager.getFeedback(producer, count);
+        return unCompletedTransactionManager.getFeedback(producer, count);
     }
 
     @Override
     protected void validate() throws Exception {
-        unCompleteTransactionManager = new UnCompleteTransactionManager(config);
-        transactionRecover = new TransactionRecover(config, unCompleteTransactionManager, store);
-        transactionCleaner = new TransactionCleaner(config, unCompleteTransactionManager, store);
+        unCompletedTransactionManager = new UnCompletedTransactionManager(config);
+        transactionRecover = new TransactionRecover(config, unCompletedTransactionManager, store);
+        transactionCleaner = new TransactionCleaner(config, unCompletedTransactionManager, store);
     }
 
     @Override

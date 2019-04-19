@@ -13,8 +13,7 @@ import com.jd.journalq.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 /**
  * TransactionSynchronizer
@@ -67,15 +66,15 @@ public class TransactionSynchronizer extends Service {
         }
     }
 
-    public boolean prepare(TransactionMetadata transactionMetadata, List<TransactionPrepare> prepareList) throws Exception {
-        return transactionLog.writePrepare(transactionMetadata.getApp(), transactionMetadata.getId(), prepareList);
+    public boolean prepare(TransactionMetadata transactionMetadata, Set<TransactionPrepare> prepareList) throws Exception {
+        return transactionLog.batchWrite(transactionMetadata.getApp(), transactionMetadata.getId(), prepareList);
     }
 
-    public boolean prepareCommit(TransactionMetadata transactionMetadata, List<TransactionPrepare> prepareList) throws Exception {
+    public boolean prepareCommit(TransactionMetadata transactionMetadata, Set<TransactionPrepare> prepareList) throws Exception {
         return writeMarker(transactionMetadata, TransactionState.PREPARE_COMMIT);
     }
 
-    public boolean commit(TransactionMetadata transactionMetadata, List<TransactionPrepare> prepareList) throws Exception {
+    public boolean commit(TransactionMetadata transactionMetadata, Set<TransactionPrepare> prepareList) throws Exception {
         boolean isSuccess = transactionCommitSynchronizer.commit(transactionMetadata, prepareList, transactionMetadata.getOffsets());
         if (isSuccess) {
             writeMarker(transactionMetadata, TransactionState.COMPLETE_COMMIT);
@@ -83,11 +82,11 @@ public class TransactionSynchronizer extends Service {
         return isSuccess;
     }
 
-    public boolean prepareAbort(TransactionMetadata transactionMetadata, List<TransactionPrepare> prepareList) throws Exception {
+    public boolean prepareAbort(TransactionMetadata transactionMetadata, Set<TransactionPrepare> prepareList) throws Exception {
         return writeMarker(transactionMetadata, TransactionState.PREPARE_ABORT);
     }
 
-    public boolean abort(TransactionMetadata transactionMetadata, List<TransactionPrepare> prepareList) throws Exception {
+    public boolean abort(TransactionMetadata transactionMetadata, Set<TransactionPrepare> prepareList) throws Exception {
         boolean isSuccess = transactionAbortSynchronizer.abort(transactionMetadata, prepareList);
         if (isSuccess) {
             writeMarker(transactionMetadata, TransactionState.COMPLETE_ABORT);
@@ -95,13 +94,13 @@ public class TransactionSynchronizer extends Service {
         return isSuccess;
     }
 
-    public boolean commitOffset(TransactionMetadata transactionMetadata, Map<String, List<TransactionOffset>> partitions) throws Exception {
-        return transactionLog.writeCommitOffsets(transactionMetadata.getApp(), transactionMetadata.getId(), partitions);
+    public boolean commitOffset(TransactionMetadata transactionMetadata, Set<TransactionOffset> offsets) throws Exception {
+        return transactionLog.batchWrite(transactionMetadata.getApp(), transactionMetadata.getId(), offsets);
     }
 
     protected boolean writeMarker(TransactionMetadata transactionMetadata, TransactionState transactionState) throws Exception {
         TransactionMarker marker = convertMarker(transactionMetadata, transactionState);
-        return transactionLog.writeMarker(marker);
+        return transactionLog.write(transactionMetadata.getApp(), transactionMetadata.getId(), marker);
     }
 
     protected TransactionMarker convertMarker(TransactionMetadata transactionMetadata, TransactionState transactionState) {

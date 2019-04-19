@@ -3,6 +3,7 @@ package com.jd.journalq.broker.kafka.coordinator;
 import com.jd.journalq.broker.coordinator.session.CoordinatorSessionManager;
 import com.jd.journalq.domain.Broker;
 import com.jd.journalq.domain.PartitionGroup;
+import com.jd.journalq.domain.TopicConfig;
 import com.jd.journalq.domain.TopicName;
 
 /**
@@ -33,6 +34,10 @@ public class Coordinator {
 
     public boolean isCurrentTransaction(String transactionId) {
         return coordinator.isCurrentTransaction(transactionId);
+    }
+
+    public TopicConfig getTransactionTopicConfig() {
+        return coordinator.getTransactionTopicConfig();
     }
 
     public PartitionGroup getTransactionPartitionGroup(String transactionId) {

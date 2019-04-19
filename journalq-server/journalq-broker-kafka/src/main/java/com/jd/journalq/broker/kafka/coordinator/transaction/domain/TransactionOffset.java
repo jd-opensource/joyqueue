@@ -1,12 +1,14 @@
 package com.jd.journalq.broker.kafka.coordinator.transaction.domain;
 
+import java.util.Objects;
+
 /**
  * TransactionOffset
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2019/4/16
  */
-public class TransactionOffset {
+public class TransactionOffset extends TransactionDomain {
 
     private String topic;
     private short partition;
@@ -104,6 +106,24 @@ public class TransactionOffset {
 
     public void setCreateTime(long createTime) {
         this.createTime = createTime;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TransactionOffset that = (TransactionOffset) o;
+        return partition == that.partition &&
+                producerId == that.producerId &&
+                producerEpoch == that.producerEpoch &&
+                Objects.equals(topic, that.topic) &&
+                Objects.equals(transactionId, that.transactionId);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(topic, partition, transactionId, producerId, producerEpoch);
     }
 
     @Override

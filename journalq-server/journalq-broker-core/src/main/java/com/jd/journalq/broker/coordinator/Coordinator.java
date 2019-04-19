@@ -8,6 +8,7 @@ import com.jd.journalq.broker.coordinator.support.CoordinatorInitializer;
 import com.jd.journalq.broker.coordinator.support.CoordinatorResolver;
 import com.jd.journalq.domain.Broker;
 import com.jd.journalq.domain.PartitionGroup;
+import com.jd.journalq.domain.TopicConfig;
 import com.jd.journalq.domain.TopicName;
 
 /**
@@ -72,6 +73,10 @@ public class Coordinator {
 
     public TopicName getTransactionTopic() {
         return config.getTransactionTopic();
+    }
+
+    public TopicConfig getTransactionTopicConfig() {
+        return clusterManager.getNameService().getTopicConfig(config.getTransactionTopic());
     }
 
     public PartitionGroup getTransactionPartitionGroup(String key) {

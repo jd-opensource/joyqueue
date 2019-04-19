@@ -30,7 +30,6 @@ public class TransactionKafkaProducer {
     public static void main(String[] args) throws Exception {
         Properties consumerProperties = new Properties();
         consumerProperties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, KafkaConfigs.BOOTSTRAP);
-//        consumerProperties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:9092");
         consumerProperties.put(ConsumerConfig.GROUP_ID_CONFIG, KafkaConfigs.GROUP_ID);
         consumerProperties.put(ConsumerConfig.CLIENT_ID_CONFIG, KafkaConfigs.GROUP_ID);
         consumerProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
@@ -42,12 +41,12 @@ public class TransactionKafkaProducer {
 
         Properties producerProperties = new Properties();
         producerProperties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, KafkaConfigs.BOOTSTRAP);
-//        producerProperties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:9092");
         producerProperties.put(ProducerConfig.CLIENT_ID_CONFIG, KafkaConfigs.CLIENT_ID);
         producerProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         producerProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         producerProperties.put(ProducerConfig.TRANSACTIONAL_ID_CONFIG, KafkaConfigs.TRANSACTION_ID);
         producerProperties.put(ProducerConfig.RETRIES_CONFIG, 10);
+        producerProperties.put(ProducerConfig.TRANSACTION_TIMEOUT_CONFIG, 1000 * 5);
         KafkaProducer<String, String> kafkaProducer = new KafkaProducer<>(producerProperties);
         kafkaProducer.initTransactions();
 
@@ -79,7 +78,5 @@ public class TransactionKafkaProducer {
                 kafkaProducer.initTransactions();
             }
         }
-
-
     }
 }

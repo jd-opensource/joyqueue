@@ -30,14 +30,14 @@ public class TransactionCleaner extends Service implements Runnable {
     protected static final Logger logger = LoggerFactory.getLogger(TransactionCleaner.class);
 
     private ProduceConfig config;
-    private UnCompleteTransactionManager unCompleteTransactionManager;
+    private UnCompletedTransactionManager unCompletedTransactionManager;
     private StoreService store;
 
     private ScheduledExecutorService clearThreadPool;
 
-    public TransactionCleaner(ProduceConfig config, UnCompleteTransactionManager unCompleteTransactionManager, StoreService store) {
+    public TransactionCleaner(ProduceConfig config, UnCompletedTransactionManager unCompletedTransactionManager, StoreService store) {
         this.config = config;
-        this.unCompleteTransactionManager = unCompleteTransactionManager;
+        this.unCompletedTransactionManager = unCompletedTransactionManager;
         this.store = store;
     }
 
@@ -61,7 +61,7 @@ public class TransactionCleaner extends Service implements Runnable {
     @Override
     public void run() {
         List<TransactionId> expiredTransactions = Lists.newLinkedList();
-        ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<String, TransactionId>>> appTransactions = unCompleteTransactionManager.getTransactions();
+        ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<String, TransactionId>>> appTransactions = unCompletedTransactionManager.getTransactions();
         for (Map.Entry<String, ConcurrentMap<String, ConcurrentMap<String, TransactionId>>> appEntry : appTransactions.entrySet()) {
             for (Map.Entry<String, ConcurrentMap<String, TransactionId>> topicEntry : appEntry.getValue().entrySet()) {
                 ConcurrentMap<String, TransactionId> transactions = topicEntry.getValue();
@@ -101,7 +101,7 @@ public class TransactionCleaner extends Service implements Runnable {
                 return;
             }
             transactionStore.remove(transactionId.getStoreId());
-            unCompleteTransactionManager.removeTransaction(transactionId.getTopic(), transactionId.getApp(), transactionId.getTxId());
+            unCompletedTransactionManager.removeTransaction(transactionId.getTopic(), transactionId.getApp(), transactionId.getTxId());
             logger.info("clear expired transaction, topic: {}, app : {}, txId: {}, storeId: {}", transactionId.getTopic(), transactionId.getApp(), transactionId.getTxId(), transactionId.getStoreId());
         } catch (Exception e) {
             logger.error("clear expired transaction exception, topic: {}, app : {}, txId: {}, storeId: {}", transactionId.getTopic(), transactionId.getApp(), transactionId.getTxId(), transactionId.getStoreId(), e);

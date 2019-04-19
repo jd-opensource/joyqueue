@@ -22,7 +22,6 @@ public class SimpleKafkaConsumer {
     public static void main(String[] args) {
         Properties props = new Properties();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, KafkaConfigs.BOOTSTRAP);
-//        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:9092");
         props.put(ConsumerConfig.GROUP_ID_CONFIG, KafkaConfigs.GROUP_ID);
         props.put(ConsumerConfig.CLIENT_ID_CONFIG, KafkaConfigs.GROUP_ID);
         props.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, IsolationLevel.READ_COMMITTED.toString().toLowerCase(Locale.ROOT));
@@ -30,8 +29,7 @@ public class SimpleKafkaConsumer {
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
 
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
-        consumer.subscribe(Arrays.asList("test_topic_1"));
-//        consumer.subscribe(Arrays.asList("__transaction_state"));
+        consumer.subscribe(Arrays.asList("test_topic_0"));
 
         while (true) {
 //            ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(1000 * 1));

@@ -12,18 +12,18 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * UnCompleteTransactionManager
+ * UnCompletedTransactionManager
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2019/1/2
  */
-public class UnCompleteTransactionManager {
+public class UnCompletedTransactionManager {
 
     private ProduceConfig config;
 
     private ConcurrentMap<String /** app **/, ConcurrentMap<String /** topic **/, ConcurrentMap<String /** txId **/, TransactionId>>> unCompleteTransaction = Maps.newConcurrentMap();
 
-    public UnCompleteTransactionManager(ProduceConfig config) {
+    public UnCompletedTransactionManager(ProduceConfig config) {
         this.config = config;
     }
 

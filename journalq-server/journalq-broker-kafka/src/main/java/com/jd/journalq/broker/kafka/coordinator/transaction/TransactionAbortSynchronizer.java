@@ -15,7 +15,7 @@ import com.jd.journalq.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -40,7 +40,7 @@ public class TransactionAbortSynchronizer extends Service {
         this.transactionIdManager = transactionIdManager;
     }
 
-    public boolean abort(TransactionMetadata transactionMetadata, List<TransactionPrepare> prepareList) throws Exception {
+    public boolean abort(TransactionMetadata transactionMetadata, Set<TransactionPrepare> prepareList) throws Exception {
         prepareList = TransactionHelper.filterPrepareByBroker(prepareList);
         CountDownLatch latch = new CountDownLatch(prepareList.size());
         boolean[] result = {true};

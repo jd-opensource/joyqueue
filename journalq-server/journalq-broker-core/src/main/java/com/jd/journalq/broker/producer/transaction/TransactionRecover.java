@@ -25,12 +25,12 @@ public class TransactionRecover {
     protected static final Logger logger = LoggerFactory.getLogger(TransactionRecover.class);
 
     private ProduceConfig config;
-    private UnCompleteTransactionManager unCompleteTransactionManager;
+    private UnCompletedTransactionManager unCompletedTransactionManager;
     private StoreService store;
 
-    public TransactionRecover(ProduceConfig config, UnCompleteTransactionManager unCompleteTransactionManager, StoreService store) {
+    public TransactionRecover(ProduceConfig config, UnCompletedTransactionManager unCompletedTransactionManager, StoreService store) {
         this.config = config;
-        this.unCompleteTransactionManager = unCompleteTransactionManager;
+        this.unCompletedTransactionManager = unCompletedTransactionManager;
         this.store = store;
     }
 
@@ -68,7 +68,7 @@ public class TransactionRecover {
                     isExpired = true;
                     logger.info("recover transaction is expired, topic: {}, app: {}, txId: {}", brokerPrepare.getTopic(), brokerPrepare.getApp(), brokerPrepare.getTxId());
                 } else {
-                    unCompleteTransactionManager.putTransaction(transactionId);
+                    unCompletedTransactionManager.putTransaction(transactionId);
                     logger.info("recover transaction, topic: {}, app: {}, txId: {}", brokerPrepare.getTopic(), brokerPrepare.getApp(), brokerPrepare.getTxId());
                 }
             }

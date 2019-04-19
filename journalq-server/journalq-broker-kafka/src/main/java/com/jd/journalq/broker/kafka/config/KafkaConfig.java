@@ -81,6 +81,10 @@ public class KafkaConfig {
         return getConfig(KafkaConfigKey.TRANSACTION_LOG_INTERVAL);
     }
 
+    public int getTransactionLogScanSize() {
+        return getConfig(KafkaConfigKey.TRANSACTION_LOG_SCAN_SIZE);
+    }
+
     public QosLevel getTransactionLogWriteQosLevel() {
         return QosLevel.valueOf((int) getConfig(KafkaConfigKey.TRANSACTION_LOG_WRITE_QOSLEVEL));
     }

@@ -8,10 +8,10 @@ import com.jd.journalq.broker.kafka.command.SyncGroupAssignment;
 import com.jd.journalq.broker.kafka.config.KafkaConfig;
 import com.jd.journalq.broker.kafka.coordinator.group.callback.JoinCallback;
 import com.jd.journalq.broker.kafka.coordinator.group.callback.SyncCallback;
-import com.jd.journalq.broker.kafka.coordinator.group.domain.GroupMemberMetadata;
-import com.jd.journalq.broker.kafka.coordinator.group.domain.GroupMetadata;
 import com.jd.journalq.broker.kafka.coordinator.group.domain.GroupDescribe;
 import com.jd.journalq.broker.kafka.coordinator.group.domain.GroupJoinGroupResult;
+import com.jd.journalq.broker.kafka.coordinator.group.domain.GroupMemberMetadata;
+import com.jd.journalq.broker.kafka.coordinator.group.domain.GroupMetadata;
 import com.jd.journalq.broker.kafka.coordinator.group.domain.GroupState;
 import com.jd.journalq.toolkit.service.Service;
 import org.apache.commons.lang3.StringUtils;
@@ -266,6 +266,7 @@ public class GroupBalanceHandler extends Service {
             GroupMemberMetadata member = group.getMember(memberId);
             groupBalanceManager.removeHeartbeatForLeavingMember(group, member);
             groupBalanceManager.removeMemberAndUpdateGroup(group, member);
+            group.addExpiredMember(member);
             return KafkaErrorCode.NONE.getCode();
         }
     }
