@@ -15,4 +15,4 @@ master 上线分支
 
 开发新功能流程：
 1. 以4.1.0-SNAPSHOT 为基础，本地创建分支，开发；
-1. 提merge request 到 4.1.0
+1. 提merge request 到 4.1.0-SNAPSHOT
