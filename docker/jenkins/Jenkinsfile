@@ -31,7 +31,7 @@ pipeline {
         script {
             def resultIcon = currentBuild.result == 'SUCCESS' ? ':white_check_mark:' : ':anguished:'
             addGitLabMRComment comment: "$resultIcon Jenkins Build $currentBuild.result\n\nResults available at: [Jenkins [$env.JOB_NAME#$env.BUILD_NUMBER]]($env.BUILD_URL)"
-            echo 'xx and I will always say Hello again!'
+            echo 'I will always say Hello again!'
            }
          }
       }
