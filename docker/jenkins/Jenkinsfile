@@ -6,7 +6,7 @@ pipeline {
         stage('Test') {
             steps {
                 echo 'Packaging....'
-                # sh 'mvn -Dmaven.test.skip=true clean package'
+                // sh 'mvn -Dmaven.test.skip=true clean package'
             }
         }
         stage('Integration Test') {
