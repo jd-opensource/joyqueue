@@ -13,8 +13,10 @@ pipeline {
                     steps {
                         echo 'Integration Test....'
                         sh 'pwd  '
-                        sh 'cd docker/bin && ls -l '
-                        sh './integrate_test.sh'
+                        dir('docker/bin'){
+                            sh ' pwd && ls -l'
+                            sh './integrate_test.sh'
+                        }
                     }
                 }
 
