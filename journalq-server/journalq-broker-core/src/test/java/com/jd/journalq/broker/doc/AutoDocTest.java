@@ -10,8 +10,6 @@ import com.jd.journalq.toolkit.doc.vertx.RoutingParser;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,7 +21,6 @@ import java.util.Map;
 import java.util.Properties;
 
 public class AutoDocTest {
-    private static final Logger logger= LoggerFactory.getLogger(AutoDocTest.class);
     @Test
     @Ignore
     public void autoDocTest() throws Exception {
@@ -38,11 +35,10 @@ public class AutoDocTest {
         pkgNames.add(pkgNameB);
         routes.add(routPath);
         String current=System.getProperty("user.dir");
-        logger.info(current);
         AutoDoc autoDoc=new AutoDoc(new File(current+"/../../docs/cn/manage_monitor_auto_doc.md"),routes,pkgNames);
         autoDoc.write(new MarkdownAPIDocFormat(), RoutingParser.class,new AutoTestAPIDoc(parse(defaultProperties),host));
         for(Param m:autoDoc.getParamKeys()){
-            logger.info(JSON.toJSONString(m));
+            System.out.println(JSON.toJSONString(m));
         }
         autoDoc.close();
     }
@@ -71,13 +67,12 @@ public class AutoDocTest {
         Map<String,Class> classMap=parser.packageScan();
         for(Map.Entry<String,Class> e:classMap.entrySet()){
             Method[] method=e.getValue().getDeclaredMethods();
-            logger.info(e.getValue().toString()+" methods:");
+            System.out.println(e.getValue().toString()+" methods:");
             for(Method m:method){
                 m.getName();
-                // m.isDefault()
                 Class[] classes=  m.getParameterTypes();
                 for(Class c:classes){
-                    logger.info(c.getSimpleName());
+                    System.out.println(c.getSimpleName());
                 }
             }
 
