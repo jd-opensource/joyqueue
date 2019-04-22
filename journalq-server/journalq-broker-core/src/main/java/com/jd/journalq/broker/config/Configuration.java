@@ -13,28 +13,22 @@
  */
 package com.jd.journalq.broker.config;
 
-import com.jd.journalq.event.ConfigEvent;
-import com.jd.journalq.event.NameServerEvent;
-import com.jd.journalq.toolkit.concurrent.EventListener;
 import com.jd.journalq.toolkit.config.Property;
 import com.jd.journalq.toolkit.config.PropertySupplier;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.InputStream;
 import java.util.*;
 
 /**
  * 配置集
  * Created by yangyang115 on 18-7-23.
  */
-public class Configuration implements PropertySupplier, EventListener<NameServerEvent> {
-    private static final int DEFAULT_CONFIGURATION_PRIORITY = 1;
-    private static final long DEFAULT_CONFIGURATION_VERSION = 1;
-    private static final String DEFAULT_CONFIGURATION_NAME = "_BROKER_CONFIG_";
-    private static final String CONFIGURATION_VERSION = "_CONFIGURATION_VERSION_";
-    private static final String DEFAULT_CONFIG_PATH = "laf-jmq.properties";
-
-    protected Map<String, Property> properties;
+public class Configuration implements PropertySupplier {
+    protected static final Logger logger = LoggerFactory.getLogger(Configuration.class);
+    protected static final int DEFAULT_CONFIGURATION_PRIORITY = 1;
+    protected static final long DEFAULT_CONFIGURATION_VERSION = 1;
+    protected static final String DEFAULT_CONFIGURATION_NAME = "_BROKER_CONFIG_";
 
     //名称
     protected String name = DEFAULT_CONFIGURATION_NAME;
@@ -42,27 +36,22 @@ public class Configuration implements PropertySupplier, EventListener<NameServer
     protected long version = DEFAULT_CONFIGURATION_VERSION;
     //优先级
     protected int priority = DEFAULT_CONFIGURATION_PRIORITY;
-   /* // name service
-    protected NameService nameService;
-*/
+    protected Map<String, Property> properties =new HashMap<>();
 
-    public Configuration() throws Exception {
-        properties = new HashMap<>();
-        //初始化配置
-        loadDefaultConfiguration();
+
+
+    public Configuration() {
     }
 
     public Configuration(String name, Collection<Property> properties, long version, int priority) {
         this.name = name;
         this.version = version;
         this.priority = priority;
-        this.properties = new HashMap<String, Property>(properties == null ? 0 : properties.size());
         addProperties(properties);
     }
 
     public Configuration(String name, Map<?, ?> properties, long version, int priority) {
         this.name = name;
-        this.properties = new HashMap<String, Property>(properties == null ? 0 : properties.size());
         this.version = version;
         this.priority = priority;
         if (properties != null) {
@@ -78,7 +67,6 @@ public class Configuration implements PropertySupplier, EventListener<NameServer
         this.name = name;
         this.version = version;
         this.priority = priority;
-        this.properties = new HashMap<String, Property>(0);
     }
 
     public Configuration(String name, List<Configuration> configurations, long version) {
@@ -99,7 +87,6 @@ public class Configuration implements PropertySupplier, EventListener<NameServer
                 }
             }
         }
-        this.properties = new HashMap<String, Property>(items.size());
         addProperties(items);
     }
 
@@ -340,38 +327,5 @@ public class Configuration implements PropertySupplier, EventListener<NameServer
                 ", name='" + name + '\'' +
                 ", version=" + version +
                 '}';
-    }
-
-    private void loadDefaultConfiguration() throws Exception {
-        InputStream in = getClass().getClassLoader().getResourceAsStream(DEFAULT_CONFIG_PATH);
-        Preconditions.checkArgument(in != null, "config file not found.path:" + DEFAULT_CONFIG_PATH);
-        Properties properties = new Properties();
-        properties.load(in);
-        String text = (String) properties.remove(CONFIGURATION_VERSION);
-        long dataVersion = DEFAULT_CONFIGURATION_VERSION;
-        if (text != null && !text.isEmpty()) {
-            try {
-                dataVersion = Long.parseLong(text);
-            } catch (NumberFormatException e) {
-            }
-        }
-        List<Property> propertyList = new ArrayList<>(properties.size());
-        String key;
-        String value;
-        for (Map.Entry<Object, Object> entry : properties.entrySet()) {
-            key = entry.getKey().toString();
-            value = entry.getValue().toString();
-            propertyList.add(new Property(DEFAULT_CONFIGURATION_NAME, key, value, dataVersion, DEFAULT_CONFIGURATION_PRIORITY));
-        }
-        addProperties(propertyList);
-    }
-
-
-    @Override
-    public void onEvent(NameServerEvent event) {
-        if (event.getMetaEvent() instanceof ConfigEvent) {
-            ConfigEvent metaEvent = (ConfigEvent) event.getMetaEvent();
-            addProperty(metaEvent.getKey(), metaEvent.getValue());
-        }
     }
 }

@@ -44,6 +44,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import static com.jd.journalq.event.NameServerEvent.BROKER_ID_ALL_BROKER;
+
 /**
  * 1.启动nameServer
  * 2.器动管理端的http接口
@@ -536,6 +538,7 @@ public class NameServer extends Service implements NameService, PropertySupplier
 
     @Override
     public void addListener(EventListener<NameServerEvent> listener) {
+        //TODO 是否需要全量更新一下
         eventManager.addListener(listener);
     }
 
@@ -768,11 +771,11 @@ public class NameServer extends Service implements NameService, PropertySupplier
                 case UPDATE_CONFIG:
                     ConfigEvent configEvent = (ConfigEvent) event;
                     logger.info("UPDATE_CONFIG [{}]", configEvent);
-                    eventManager.add(new NameServerEvent(event, null));
+                    eventManager.add(new NameServerEvent(event, BROKER_ID_ALL_BROKER));
                     break;
                 case REMOVE_CONFIG:
                     logger.info("REMOVE_DATACENTER [{}]", event);
-                    eventManager.add(new NameServerEvent(event, null));
+                    eventManager.add(new NameServerEvent(event, BROKER_ID_ALL_BROKER));
                     break;
                 case UPDATE_BROKER:
                     logger.info("UPDATE_BROKER [{}]", event);
