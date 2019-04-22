@@ -56,6 +56,14 @@ public interface UserService extends PageService<User, QUser> {
     List<User> findByAppId(long appId);
 
     /**
+     * 根据应用Code查找
+     *
+     * @param appCode
+     * @return
+     */
+    List<User> findByAppCode(String appCode);
+
+    /**
      * 添加应用用户
      *
      * @param appUser

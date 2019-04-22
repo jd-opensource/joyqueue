@@ -1,7 +1,9 @@
 <template>
   <div>
     <div class="ml20">
-      <d-date-picker v-model="times" type="daterange" class="left mr5 mt10" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" value-format="timestamp" :default-time="['00:00:00', '23:59:59']">
+      <d-date-picker v-model="times" type="daterange" class="left mr5 mt10" range-separator="至"
+                     start-placeholder="开始日期" end-placeholder="结束日期" value-format="timestamp"
+                     :default-time="['00:00:00', '23:59:59']"  style="width:370px">
         <span slot="prepend">日期范围</span>
       </d-date-picker>
       <d-input v-model="search.topic" placeholder="队列名" class="left mr5 mt10" style="width: 213px">
