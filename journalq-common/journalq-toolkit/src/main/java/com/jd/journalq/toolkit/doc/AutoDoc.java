@@ -82,9 +82,7 @@ public class AutoDoc {
                      HeuristicAutoTest<APIDoc> tester) throws Exception{
         serviceMethodRouteDocs=new HashMap<>(8);
         Map<String,PackageDocScanParser> servicePackageMap=new HashMap(8);
-//        routingParserClass.isMemberClass()
         Constructor<? extends MultiHandlerMetaParser<APIDoc>> routingParserConstructor=routingParserClass.getConstructor(String.class);
-       // Constructor<MetaParser<JavadocComment>> packageParserConstructor=pkgScannerClass.getConstructor(String.class);
         for(String r:routes){
             MultiHandlerMetaParser<APIDoc> routingParser=routingParserConstructor.newInstance(r);
             serviceMethodRouteDocs.putAll(routingParser.parse());

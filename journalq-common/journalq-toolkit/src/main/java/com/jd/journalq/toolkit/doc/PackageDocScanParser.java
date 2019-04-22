@@ -244,6 +244,10 @@ public class PackageDocScanParser implements MetaParser<JavadocComment> {
     }
 
 
+    /**
+     * Traverse class interface
+     *
+     **/
     private void traverse(Class clazz,Map<String,Class> interfaces){
         if(clazz.isInterface()){
             Class[] classes=clazz.getInterfaces();

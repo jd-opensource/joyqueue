@@ -38,7 +38,6 @@ public class ClassUtil {
 
     public static String getSrcPath(String clazzName){
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-//
         String path = clazzName.replace('.', '/');
         if(!path.endsWith("class")){
             path+=".class";
