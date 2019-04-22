@@ -38,7 +38,7 @@ public class TransactionSerializer {
                     + 2 // app length
                     + 4 // brokerId
                     + 1 // broker host length
-                    + 4 // brokerPort
+                    + 4 // broker port
                     + 2 // transactionId length
                     + 8 // producerId
                     + 2 // producerEpoch
@@ -86,19 +86,18 @@ public class TransactionSerializer {
         return size;
     }
 
-    protected static byte[] serializePrepare(ByteBuffer buffer, TransactionPrepare prepare) throws Exception {
+    protected static void serializePrepare(ByteBuffer buffer, TransactionPrepare prepare) throws Exception {
         Serializer.write(prepare.getTopic(), buffer, Serializer.SHORT_SIZE);
         buffer.putShort(prepare.getPartition());
         Serializer.write(prepare.getApp(), buffer, Serializer.SHORT_SIZE);
         buffer.putInt(prepare.getBrokerId());
         Serializer.write(prepare.getBrokerHost(), buffer, Serializer.BYTE_SIZE);
         buffer.putInt(prepare.getBrokerPort());
-        Serializer.write(prepare.getTransactionId(), buffer, Serializer.BYTE_SIZE);
+        Serializer.write(prepare.getTransactionId(), buffer, Serializer.SHORT_SIZE);
         buffer.putLong(prepare.getProducerId());
         buffer.putShort(prepare.getProducerEpoch());
         buffer.putInt(prepare.getTimeout());
         buffer.putLong(prepare.getCreateTime());
-        return buffer.array();
     }
 
     protected static TransactionPrepare deserializePrepare(ByteBuffer buffer) throws Exception {
@@ -129,7 +128,7 @@ public class TransactionSerializer {
         return size;
     }
 
-    protected static byte[] serializeMarker(ByteBuffer buffer, TransactionMarker marker) throws Exception {
+    protected static void serializeMarker(ByteBuffer buffer, TransactionMarker marker) throws Exception {
         Serializer.write(marker.getApp(), buffer, Serializer.SHORT_SIZE);
         Serializer.write(marker.getTransactionId(), buffer, Serializer.BYTE_SIZE);
         buffer.putLong(marker.getProducerId());
@@ -137,13 +136,12 @@ public class TransactionSerializer {
         buffer.put((byte) marker.getState().getValue());
         buffer.putInt(marker.getTimeout());
         buffer.putLong(marker.getCreateTime());
-        return buffer.array();
     }
 
     protected static TransactionMarker deserializeMarker(ByteBuffer buffer) throws Exception {
         TransactionMarker marker = new TransactionMarker();
         marker.setApp(Serializer.readString(buffer, Serializer.SHORT_SIZE));
-        marker.setTransactionId(Serializer.readString(buffer, Serializer.SHORT_SIZE));
+        marker.setTransactionId(Serializer.readString(buffer, Serializer.BYTE_SIZE));
         marker.setProducerId(buffer.getLong());
         marker.setProducerEpoch(buffer.getShort());
         marker.setState(TransactionState.valueOf(buffer.get()));
@@ -166,7 +164,7 @@ public class TransactionSerializer {
         return size;
     }
 
-    protected static byte[] serializeOffset(ByteBuffer buffer, TransactionOffset offset) throws Exception {
+    protected static void serializeOffset(ByteBuffer buffer, TransactionOffset offset) throws Exception {
         Serializer.write(offset.getTopic(), buffer, Serializer.SHORT_SIZE);
         buffer.putShort(offset.getPartition());
         buffer.putLong(offset.getOffset());
@@ -176,7 +174,6 @@ public class TransactionSerializer {
         buffer.putShort(offset.getProducerEpoch());
         buffer.putInt(offset.getTimeout());
         buffer.putLong(offset.getCreateTime());
-        return buffer.array();
     }
 
     protected static TransactionOffset deserializeOffset(ByteBuffer buffer) throws Exception {
@@ -255,23 +252,15 @@ public class TransactionSerializer {
     }
 
     private static class TransactionHeader {
-        private byte type;
         private byte version;
+        private byte type;
 
         TransactionHeader() {
 
         }
 
-        TransactionHeader(byte type, byte version) {
-            this.type = type;
+        TransactionHeader(byte version, byte type) {
             this.version = version;
-        }
-
-        public byte getType() {
-            return type;
-        }
-
-        public void setType(byte type) {
             this.type = type;
         }
 
@@ -281,6 +270,14 @@ public class TransactionSerializer {
 
         public void setVersion(byte version) {
             this.version = version;
+        }
+
+        public byte getType() {
+            return type;
+        }
+
+        public void setType(byte type) {
+            this.type = type;
         }
     }
 }

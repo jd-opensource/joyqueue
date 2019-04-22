@@ -13,7 +13,6 @@ import com.jd.journalq.broker.kafka.model.OffsetAndMetadata;
 import com.jd.journalq.broker.kafka.model.PartitionMetadataAndError;
 import com.jd.journalq.toolkit.service.Service;
 import com.jd.journalq.toolkit.time.SystemClock;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +57,11 @@ public class TransactionOffsetHandler extends Service {
         if (transactionMetadata.getState().equals(TransactionState.PREPARE_ABORT) || transactionMetadata.getState().equals(TransactionState.PREPARE_COMMIT)) {
             throw new TransactionException(KafkaErrorCode.CONCURRENT_TRANSACTIONS.getCode());
         }
+        if (transactionMetadata.isExpired()) {
+            throw new TransactionException(KafkaErrorCode.INVALID_TRANSACTION_TIMEOUT.getCode());
+        }
+
+        transactionMetadata.updateLastTime();
         return true;
     }
 
@@ -74,6 +78,9 @@ public class TransactionOffsetHandler extends Service {
         if (transactionMetadata.getState().equals(TransactionState.PREPARE_ABORT) || transactionMetadata.getState().equals(TransactionState.PREPARE_COMMIT)) {
             throw new TransactionException(KafkaErrorCode.CONCURRENT_TRANSACTIONS.getCode());
         }
+        if (transactionMetadata.isExpired()) {
+            throw new TransactionException(KafkaErrorCode.INVALID_TRANSACTION_TIMEOUT.getCode());
+        }
 
         synchronized (transactionMetadata) {
             return doCommitOffset(transactionMetadata, offsetts);
@@ -81,6 +88,8 @@ public class TransactionOffsetHandler extends Service {
     }
 
     protected Map<String, List<PartitionMetadataAndError>> doCommitOffset(TransactionMetadata transactionMetadata, Map<String, List<OffsetAndMetadata>> offsets) {
+        transactionMetadata.updateLastTime();
+
         Set<TransactionOffset> transactionOffsets = Sets.newHashSet();
         long now = SystemClock.now();
 
@@ -97,7 +106,7 @@ public class TransactionOffsetHandler extends Service {
             return buildPartitionMetadataAndError(offsets, KafkaErrorCode.NONE.getCode());
         } catch (Exception e) {
             logger.error("commitOffset exception, metadata: {}, offsets: {}", transactionMetadata, offsets, e);
-            throw new TransactionException(e, KafkaErrorCode.exceptionFor(e));
+            throw new TransactionException(e, KafkaErrorCode.COORDINATOR_NOT_AVAILABLE.getCode());
         }
     }
 

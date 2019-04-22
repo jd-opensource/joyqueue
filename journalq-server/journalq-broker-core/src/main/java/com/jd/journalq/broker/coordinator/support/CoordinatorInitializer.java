@@ -5,7 +5,9 @@ import com.google.common.collect.Sets;
 import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.coordinator.config.CoordinatorConfig;
 import com.jd.journalq.domain.Broker;
+import com.jd.journalq.domain.ClientType;
 import com.jd.journalq.domain.PartitionGroup;
+import com.jd.journalq.domain.Subscription;
 import com.jd.journalq.domain.Topic;
 import com.jd.journalq.domain.TopicConfig;
 import com.jd.journalq.domain.TopicName;
@@ -52,7 +54,18 @@ public class CoordinatorInitializer extends Service {
     }
 
     protected boolean initTransactionTopic() {
-        return initCoordinatorTopic(config.getTransactionTopic(), config.getTransactionTopicPartitions());
+        return initCoordinatorTopic(config.getTransactionTopic(), config.getTransactionTopicPartitions())
+                && initCoordinatorSubscribe(config.getTransactionTopic(), config.getTransactionLogApp());
+    }
+
+    protected boolean initCoordinatorSubscribe(TopicName topic, String app) {
+        if (nameService.getConsumerByTopicAndApp(topic, app) == null) {
+            nameService.subscribe(new Subscription(topic, app, Subscription.Type.CONSUMPTION), ClientType.JMQ);
+        }
+        if (nameService.getProducerByTopicAndApp(topic, app) == null) {
+            nameService.subscribe(new Subscription(topic, app, Subscription.Type.PRODUCTION), ClientType.JMQ);
+        }
+        return true;
     }
 
     protected boolean initCoordinatorTopic(TopicName topic, int partitions) {

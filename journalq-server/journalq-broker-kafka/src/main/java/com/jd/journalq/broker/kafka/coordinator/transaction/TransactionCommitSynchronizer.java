@@ -25,7 +25,6 @@ import com.jd.journalq.network.transport.command.Direction;
 import com.jd.journalq.network.transport.command.JMQCommand;
 import com.jd.journalq.nsr.NameService;
 import com.jd.journalq.toolkit.service.Service;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,15 +57,7 @@ public class TransactionCommitSynchronizer extends Service {
         this.nameService = nameService;
     }
 
-    public boolean commit(TransactionMetadata transactionMetadata, Set<TransactionPrepare> prepareList, Set<TransactionOffset> offsets) throws Exception {
-        return commitPrepare(transactionMetadata, prepareList) && commitOffsets(transactionMetadata, offsets);
-    }
-
     public boolean commitPrepare(TransactionMetadata transactionMetadata, Set<TransactionPrepare> prepareList) throws Exception {
-        if (CollectionUtils.isEmpty(prepareList)) {
-            return true;
-        }
-
         prepareList = TransactionHelper.filterPrepareByBroker(prepareList);
         CountDownLatch latch = new CountDownLatch(prepareList.size());
         boolean[] result = {true};
@@ -102,10 +93,6 @@ public class TransactionCommitSynchronizer extends Service {
     }
 
     public boolean commitOffsets(TransactionMetadata transactionMetadata, Set<TransactionOffset> offsets) throws Exception {
-        if (CollectionUtils.isEmpty(offsets)) {
-            return true;
-        }
-
         Map<Broker, List<TransactionOffset>> brokerOffsetMap = splitOffsetsByBroker(offsets);
         CountDownLatch latch = new CountDownLatch(brokerOffsetMap.size());
         boolean[] result = {true};

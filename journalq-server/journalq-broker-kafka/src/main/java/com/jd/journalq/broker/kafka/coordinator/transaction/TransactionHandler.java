@@ -69,17 +69,23 @@ public class TransactionHandler extends Service {
     }
 
     protected TransactionMetadata doInitProducer(TransactionMetadata transactionMetadata, int transactionTimeout) {
+        if (!transactionMetadata.getState().equals(TransactionState.EMPTY)) {
+            tryAbort(transactionMetadata);
+        }
         transactionMetadata.transitionStateTo(TransactionState.EMPTY);
         transactionMetadata.clear();
         transactionMetadata.nextProducerEpoch();
         transactionMetadata.setTimeout(transactionTimeout);
         transactionMetadata.setCreateTime(SystemClock.now());
+        transactionMetadata.updateLastTime();
         return transactionMetadata;
     }
 
     protected void tryAbort(TransactionMetadata transactionMetadata) {
         try {
             doAbort(transactionMetadata);
+            transactionMetadata.clearPrepare();
+            transactionMetadata.clearOffsets();
         } catch (Exception e) {
             logger.error("initProducer abort exception, metadata: {}", transactionMetadata, e);
         }
@@ -101,6 +107,9 @@ public class TransactionHandler extends Service {
         if (transactionMetadata.getState().equals(TransactionState.PREPARE_ABORT) || transactionMetadata.getState().equals(TransactionState.PREPARE_COMMIT)) {
             throw new TransactionException(KafkaErrorCode.CONCURRENT_TRANSACTIONS.getCode());
         }
+        if (transactionMetadata.isExpired()) {
+            throw new TransactionException(KafkaErrorCode.INVALID_TRANSACTION_TIMEOUT.getCode());
+        }
 
         synchronized (transactionMetadata) {
             return doAddPartitionsToTxn(transactionMetadata, partitions);
@@ -109,6 +118,7 @@ public class TransactionHandler extends Service {
 
     protected Map<String, List<PartitionMetadataAndError>> doAddPartitionsToTxn(TransactionMetadata transactionMetadata, Map<String, List<Integer>> partitions) {
         transactionMetadata.transitionStateTo(TransactionState.ONGOING);
+        transactionMetadata.updateLastTime();
 
         Map<String, List<PartitionMetadataAndError>> result = Maps.newHashMapWithExpectedSize(partitions.size());
         for (Map.Entry<String, List<Integer>> entry : partitions.entrySet()) {
@@ -131,7 +141,7 @@ public class TransactionHandler extends Service {
                         partitionMetadataAndErrors.add(new PartitionMetadataAndError(partition, KafkaErrorCode.NONE.getCode()));
                     } catch (Exception e) {
                         logger.error("transaction prepare exception, metadata:{}", transactionMetadata, e);
-                        partitionMetadataAndErrors.add(new PartitionMetadataAndError(partition, KafkaErrorCode.exceptionFor(e)));
+                        partitionMetadataAndErrors.add(new PartitionMetadataAndError(partition, KafkaErrorCode.COORDINATOR_NOT_AVAILABLE.getCode()));
                     }
                 }
             }
@@ -163,6 +173,9 @@ public class TransactionHandler extends Service {
         if (transactionMetadata.getState().equals(TransactionState.PREPARE_COMMIT) || transactionMetadata.getState().equals(TransactionState.PREPARE_ABORT)) {
             throw new TransactionException(KafkaErrorCode.CONCURRENT_TRANSACTIONS.getCode());
         }
+        if (transactionMetadata.isExpired()) {
+            throw new TransactionException(KafkaErrorCode.INVALID_TRANSACTION_TIMEOUT.getCode());
+        }
         if (transactionMetadata.getState().equals(TransactionState.COMPLETE_ABORT) || transactionMetadata.getState().equals(TransactionState.COMPLETE_COMMIT)) {
             return true;
         }
@@ -182,14 +195,17 @@ public class TransactionHandler extends Service {
             return true;
         } catch (Exception e) {
             logger.error("endTxn exception, metadata: {}, isCommit: {}", transactionMetadata, isCommit, e);
-            throw new TransactionException(e, KafkaErrorCode.exceptionFor(e));
+            throw new TransactionException(e, KafkaErrorCode.COORDINATOR_NOT_AVAILABLE.getCode());
+        } finally {
+            transactionMetadata.transitionStateTo(TransactionState.EMPTY);
+            transactionMetadata.clear();
         }
     }
 
     protected void doCommit(TransactionMetadata transactionMetadata) throws Exception {
         transactionMetadata.transitionStateTo(TransactionState.PREPARE_COMMIT);
         transactionSynchronizer.prepareCommit(transactionMetadata, transactionMetadata.getPrepare());
-        transactionSynchronizer.commit(transactionMetadata, transactionMetadata.getPrepare());
+        transactionSynchronizer.commit(transactionMetadata, transactionMetadata.getPrepare(), transactionMetadata.getOffsets());
         transactionMetadata.transitionStateTo(TransactionState.COMPLETE_COMMIT);
     }
 

@@ -45,6 +45,10 @@ public class CoordinatorConfig {
         return PropertySupplier.getValue(propertySupplier, CoordinatorConfigKey.TRANSACTION_TOPIC_PARTITIONS);
     }
 
+    public String getTransactionLogApp() {
+        return PropertySupplier.getValue(propertySupplier, CoordinatorConfigKey.TRANSACTION_LOG_APP);
+    }
+
     public int getTransactionExpireTime() {
         return PropertySupplier.getValue(propertySupplier, CoordinatorConfigKey.TRANSACTION_EXPIRE_TIME);
     }

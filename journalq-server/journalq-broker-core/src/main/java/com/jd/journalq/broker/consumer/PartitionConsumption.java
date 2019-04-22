@@ -5,6 +5,9 @@ import com.jd.journalq.broker.archive.ArchiveManager;
 import com.jd.journalq.broker.archive.ConsumeArchiveService;
 import com.jd.journalq.broker.buffer.Serializer;
 import com.jd.journalq.broker.cluster.ClusterManager;
+import com.jd.journalq.broker.consumer.filter.FilterCallback;
+import com.jd.journalq.broker.consumer.model.PullResult;
+import com.jd.journalq.broker.consumer.position.PositionManager;
 import com.jd.journalq.domain.Partition;
 import com.jd.journalq.domain.QosLevel;
 import com.jd.journalq.domain.TopicName;
@@ -13,9 +16,6 @@ import com.jd.journalq.exception.JMQException;
 import com.jd.journalq.message.MessageLocation;
 import com.jd.journalq.network.session.Connection;
 import com.jd.journalq.network.session.Consumer;
-import com.jd.journalq.broker.consumer.filter.FilterCallback;
-import com.jd.journalq.broker.consumer.model.PullResult;
-import com.jd.journalq.broker.consumer.position.PositionManager;
 import com.jd.journalq.server.retry.api.MessageRetry;
 import com.jd.journalq.server.retry.model.RetryMessageModel;
 import com.jd.journalq.store.PartitionGroupStore;
@@ -199,7 +199,9 @@ class PartitionConsumption extends Service {
                 }
 
                 List<ByteBuffer> byteBuffers = Lists.newArrayList(byteBufferArr);
-                if (StringUtils.isNotEmpty(consumer.getApp())) {
+                if (StringUtils.isNotEmpty(consumer.getApp()) &&
+                        (!consumer.getType().equals(Consumer.ConsumeType.INTERNAL) && !consumer.getType().equals(Consumer.ConsumeType.KAFKA))) {
+
                     com.jd.journalq.domain.Consumer consumerConfig = clusterManager.getConsumer(TopicName.parse(consumer.getTopic()), consumer.getApp());
 
                     // 过滤消息

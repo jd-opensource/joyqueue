@@ -1,6 +1,7 @@
 package com.jd.journalq.broker.kafka.coordinator.transaction;
 
 import com.google.common.collect.Lists;
+import com.jd.journalq.broker.buffer.Serializer;
 import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.consumer.Consume;
 import com.jd.journalq.broker.consumer.model.PullResult;
@@ -38,8 +39,6 @@ import java.util.Set;
 // TODO 分区处理
 public class TransactionLog extends Service {
 
-    private static final String TRANSACTION_APP = "_TRANSACTION_LOG_";
-
     protected static final Logger logger = LoggerFactory.getLogger(TransactionLog.class);
 
     private KafkaConfig config;
@@ -68,11 +67,11 @@ public class TransactionLog extends Service {
     }
 
     protected Consumer initConsumer() {
-        return new Consumer(TRANSACTION_APP, coordinator.getTransactionTopic().getFullName(), TRANSACTION_APP, Consumer.ConsumeType.JMQ);
+        return new Consumer(config.getTransactionLogApp(), coordinator.getTransactionTopic().getFullName(), config.getTransactionLogApp(), Consumer.ConsumeType.INTERNAL);
     }
 
     protected Producer initProducer() {
-        return new Producer(TRANSACTION_APP, coordinator.getTransactionTopic().getFullName(), TRANSACTION_APP, Producer.ProducerType.JMQ);
+        return new Producer(config.getTransactionLogApp(), coordinator.getTransactionTopic().getFullName(), config.getTransactionLogApp(), Producer.ProducerType.INTERNAL);
     }
 
     protected short resolvePartition() {
@@ -104,7 +103,11 @@ public class TransactionLog extends Service {
     }
 
     public long getIndex() {
-        return consume.getAckIndex(consumer, partition);
+        long ackIndex = consume.getAckIndex(consumer, partition);
+        if (ackIndex < 0) {
+            ackIndex = 0;
+        }
+        return ackIndex;
     }
 
     public List<TransactionDomain> read(long index, int count) throws Exception {
@@ -136,7 +139,12 @@ public class TransactionLog extends Service {
             logger.error("read transaction log exception, partition: {}, index: {}, count: {}", partition, index, count, pullResult.getJmqCode());
             return Collections.emptyList();
         }
-        return pullResult.getBuffers();
+        List<ByteBuffer> buffers = Lists.newArrayListWithCapacity(pullResult.getBuffers().size());
+        for (ByteBuffer buffer : pullResult.getBuffers()) {
+            BrokerMessage brokerMessage = Serializer.readBrokerMessage(buffer);
+            buffers.add(brokerMessage.getBody());
+        }
+        return buffers;
     }
 
     protected boolean batchWrite(String app, String transactionId, List<byte[]> bodyList) throws Exception {

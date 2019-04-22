@@ -81,6 +81,10 @@ public class KafkaConfig {
         return getConfig(KafkaConfigKey.TRANSACTION_LOG_INTERVAL);
     }
 
+    public String getTransactionLogApp() {
+        return getConfig(KafkaConfigKey.TRANSACTION_LOG_APP);
+    }
+
     public int getTransactionLogScanSize() {
         return getConfig(KafkaConfigKey.TRANSACTION_LOG_SCAN_SIZE);
     }

@@ -11,7 +11,6 @@ public class UnCompletedTransaction extends TransactionMetadata {
     private long startIndex;
     private long endIndex;
     private int reties = 0;
-    private boolean expire = false;
 
     public void setStartIndex(long startIndex) {
         this.startIndex = startIndex;
@@ -39,14 +38,5 @@ public class UnCompletedTransaction extends TransactionMetadata {
 
     public int getReties() {
         return reties;
-    }
-
-    public void setExpire(boolean expire) {
-        this.expire = expire;
-    }
-
-    @Override
-    public boolean isExpired() {
-        return super.isExpired();
     }
 }

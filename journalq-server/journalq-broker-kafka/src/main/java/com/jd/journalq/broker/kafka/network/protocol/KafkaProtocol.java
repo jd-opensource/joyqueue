@@ -13,7 +13,6 @@ import com.jd.journalq.broker.kafka.coordinator.group.GroupMetadataManager;
 import com.jd.journalq.broker.kafka.coordinator.group.GroupOffsetHandler;
 import com.jd.journalq.broker.kafka.coordinator.group.GroupOffsetManager;
 import com.jd.journalq.broker.kafka.coordinator.transaction.ProducerIdManager;
-import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionCompensator;
 import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionCoordinator;
 import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionHandler;
 import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionIdManager;
@@ -21,6 +20,8 @@ import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionLog;
 import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionMetadataManager;
 import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionOffsetHandler;
 import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionSynchronizer;
+import com.jd.journalq.broker.kafka.coordinator.transaction.completion.TransactionCompletionHandler;
+import com.jd.journalq.broker.kafka.coordinator.transaction.completion.TransactionCompletionScheduler;
 import com.jd.journalq.broker.kafka.handler.ratelimit.KafkaRateLimitHandlerFactory;
 import com.jd.journalq.broker.kafka.manage.KafkaManageServiceFactory;
 import com.jd.journalq.broker.kafka.network.helper.KafkaProtocolHelper;
@@ -66,7 +67,8 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
     private TransactionMetadataManager transactionMetadataManager;
     private TransactionLog transactionLog;
     private TransactionSynchronizer transactionSynchronizer;
-    private TransactionCompensator transactionCompensator;
+    private TransactionCompletionHandler transactionCompletionHandler;
+    private TransactionCompletionScheduler transactionCompletionScheduler;
     private TransactionHandler transactionHandler;
     private TransactionOffsetHandler transactionOffsetHandler;
     private TransactionCoordinator transactionCoordinator;
@@ -96,7 +98,8 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
         this.transactionMetadataManager = new TransactionMetadataManager(config, transactionMetadataManager);
         this.transactionLog = new TransactionLog(config, brokerContext.getProduce(), brokerContext.getConsume(), coordinator, brokerContext.getClusterManager());
         this.transactionSynchronizer = new TransactionSynchronizer(config, transactionIdManager, transactionLog, coordinator.getSessionManager(), brokerContext.getNameService());
-        this.transactionCompensator = new TransactionCompensator(config, coordinator, transactionLog, transactionSynchronizer);
+        this.transactionCompletionHandler = new TransactionCompletionHandler(config, coordinator, transactionLog, transactionSynchronizer);
+        this.transactionCompletionScheduler = new TransactionCompletionScheduler(config, transactionCompletionHandler);
         this.transactionHandler = new TransactionHandler(coordinator, this.transactionMetadataManager, producerIdManager, transactionSynchronizer, brokerContext.getNameService());
         this.transactionOffsetHandler = new TransactionOffsetHandler(coordinator, this.transactionMetadataManager, transactionSynchronizer);
         this.transactionCoordinator = new TransactionCoordinator(coordinator, this.transactionMetadataManager, transactionHandler, transactionOffsetHandler);
@@ -134,7 +137,7 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
         transactionSynchronizer.start();
         transactionHandler.start();
         transactionOffsetHandler.start();
-        transactionCompensator.start();
+        transactionCompletionScheduler.start();
         rateLimitHandlerFactory.start();
     }
 
@@ -146,7 +149,7 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
         groupOffsetHandler.stop();
         groupBalanceHandler.stop();
 
-        transactionCompensator.stop();
+        transactionCompletionScheduler.stop();
         transactionOffsetHandler.stop();
         transactionHandler.stop();
         transactionSynchronizer.stop();

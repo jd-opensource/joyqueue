@@ -18,7 +18,8 @@ public class TransactionMetadata extends com.jd.journalq.broker.coordinator.tran
     private int timeout;
     private long producerId;
     private short producerEpoch = 0;
-    private long createTime = SystemClock.now();
+    private long createTime;
+    private long lastTime;
     private TransactionState state = TransactionState.EMPTY;
     private Set<TransactionPrepare> prepare;
     private Set<TransactionOffset> offsets;
@@ -37,6 +38,7 @@ public class TransactionMetadata extends com.jd.journalq.broker.coordinator.tran
         this.timeout = timeout;
         this.producerId = producerId;
         this.createTime = createTime;
+        this.lastTime = createTime;
     }
 
     public void addPrepare(TransactionPrepare transactionPrepare) {
@@ -120,12 +122,20 @@ public class TransactionMetadata extends com.jd.journalq.broker.coordinator.tran
         clearOffsets();
     }
 
+    public void updateLastTime() {
+        this.lastTime = SystemClock.now();
+    }
+
     public void transitionStateTo(TransactionState state) {
         this.state = state;
     }
 
     public boolean isExpired(long timeout) {
-        return (SystemClock.now() > (createTime + timeout));
+        return isExpired(SystemClock.now(), timeout);
+    }
+
+    public boolean isExpired(long base, long timeout) {
+        return (base > (lastTime + timeout));
     }
 
     public boolean isExpired() {
@@ -134,6 +144,14 @@ public class TransactionMetadata extends com.jd.journalq.broker.coordinator.tran
 
     public void nextProducerEpoch() {
         this.producerEpoch++;
+    }
+
+    public boolean isCompleted() {
+        return state.equals(TransactionState.COMPLETE_ABORT) || state.equals(TransactionState.COMPLETE_COMMIT);
+    }
+
+    public boolean isPrepared() {
+        return state.equals(TransactionState.PREPARE_ABORT) || state.equals(TransactionState.PREPARE_COMMIT);
     }
 
     @Override
@@ -180,6 +198,14 @@ public class TransactionMetadata extends com.jd.journalq.broker.coordinator.tran
 
     public long getCreateTime() {
         return createTime;
+    }
+
+    public void setLastTime(long lastTime) {
+        this.lastTime = lastTime;
+    }
+
+    public long getLastTime() {
+        return lastTime;
     }
 
     public void setState(TransactionState state) {
@@ -230,8 +256,10 @@ public class TransactionMetadata extends com.jd.journalq.broker.coordinator.tran
                 ", producerId=" + producerId +
                 ", producerEpoch=" + producerEpoch +
                 ", createTime=" + createTime +
+                ", lastTime=" + lastTime +
                 ", state=" + state +
                 ", prepare=" + prepare +
+                ", offsets=" + offsets +
                 '}';
     }
 }

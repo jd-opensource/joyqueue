@@ -22,6 +22,8 @@ public enum CoordinatorConfigKey implements PropertyDef {
     TRANSACTION_TOPIC_CODE("coordinator.transaction.topic.code", "__transaction_coordinators", PropertyDef.Type.STRING),
     // 事务协调者主题分区
     TRANSACTION_TOPIC_PARTITIONS("coordinator.transaction.topic.partitions", (short) 1, PropertyDef.Type.SHORT),
+    // 事务日志app
+    TRANSACTION_LOG_APP("coordinator.transaction.log.app", "__transaction_log", PropertyDef.Type.STRING),
     // 事务过期时间
     TRANSACTION_EXPIRE_TIME("coordinator.transaction.expire.time", 1000 * 60 * 60 * 1, PropertyDef.Type.INT),
     // 事务最多

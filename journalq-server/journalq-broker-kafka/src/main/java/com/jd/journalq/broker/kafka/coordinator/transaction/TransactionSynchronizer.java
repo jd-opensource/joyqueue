@@ -10,6 +10,7 @@ import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionSt
 import com.jd.journalq.nsr.NameService;
 import com.jd.journalq.toolkit.service.Service;
 import com.jd.journalq.toolkit.time.SystemClock;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,8 +75,14 @@ public class TransactionSynchronizer extends Service {
         return writeMarker(transactionMetadata, TransactionState.PREPARE_COMMIT);
     }
 
-    public boolean commit(TransactionMetadata transactionMetadata, Set<TransactionPrepare> prepareList) throws Exception {
-        boolean isSuccess = transactionCommitSynchronizer.commit(transactionMetadata, prepareList, transactionMetadata.getOffsets());
+    public boolean commit(TransactionMetadata transactionMetadata, Set<TransactionPrepare> prepareList, Set<TransactionOffset> offsets) throws Exception {
+        boolean isSuccess = true;
+        if (CollectionUtils.isNotEmpty(prepareList)) {
+            isSuccess = transactionCommitSynchronizer.commitPrepare(transactionMetadata, prepareList);
+        }
+        if (CollectionUtils.isNotEmpty(offsets)) {
+            isSuccess = transactionCommitSynchronizer.commitOffsets(transactionMetadata, offsets);
+        }
         if (isSuccess) {
             writeMarker(transactionMetadata, TransactionState.COMPLETE_COMMIT);
         }
