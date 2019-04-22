@@ -1,6 +1,7 @@
 <template>
   <div>
-      <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
+      <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
+                @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
                 @on-edit="edit">
       </my-table>
   </div>

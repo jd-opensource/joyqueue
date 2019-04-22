@@ -1,6 +1,7 @@
 <template>
   <div>
-    <consumer-base ref="consumerBase" :keywordTip="keywordTip" :colData="colData" :subscribeDialogColData="subscribeDialog.colData"
+    <consumer-base ref="consumerBase" :keywordTip="keywordTip" :colData="colData"
+                   :subscribeDialogColData="subscribeDialog.colData"
                    :search="search" :subscribeUrls="subscribeDialog.urls" />
   </div>
 </template>

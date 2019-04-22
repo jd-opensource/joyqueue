@@ -937,12 +937,6 @@ body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, code, form, fiel
   margin: 0;
   padding: 0; }
 
-.wrapper {
-  position: relative;
-  padding-bottom: 230px;
-  min-height: 100%;
-  background-color: #F8FAFF; }
-
 /* Reset fonts for relevant elements */
 button, input, select, textarea {
   font-family: inherit;

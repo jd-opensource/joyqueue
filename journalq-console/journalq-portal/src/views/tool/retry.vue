@@ -7,7 +7,7 @@
       <d-input v-model="search.app" placeholder="请输入消费者" class="left mr5 mt10" style="width: 213px">
         <span slot="prepend">消费者</span>
       </d-input>
-      <d-select v-model="search.status" class="left mr5 mt10" style="width: 142px">
+      <d-select v-model="search.status" class="left mr5 mt10" style="width: 143px">
         <span slot="prepend">状态</span>
         <d-option v-for="item in statusList" :value="item.key" :key="item.key">{{ item.value }}</d-option>
       </d-select>
@@ -18,7 +18,7 @@
                      start-placeholder="开始日期"
                      end-placeholder="结束日期"
                      value-format="timestamp"
-                     :default-time="['00:00:00', '23:59:59']">
+                     :default-time="['00:00:00', '23:59:59']"  style="width:370px">
         <span slot="prepend">发送时间</span>
       </d-date-picker>
       <d-input v-model="search.businessId" placeholder="请输入业务ID" class="left mr5 mt10" style="width: 213px">
