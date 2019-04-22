@@ -193,6 +193,7 @@ public class NameServer extends Service implements NameService, PropertySupplier
 
     @Override
     public TopicConfig subscribe(Subscription subscription, ClientType clientType) {
+        //TODO 考虑下这个
         if (subscription.getType() == Subscription.Type.CONSUMPTION) {
             TopicName topic = subscription.getTopic();
             String app = subscription.getApp();

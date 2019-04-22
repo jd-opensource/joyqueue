@@ -13,20 +13,10 @@
  */
 package com.jd.journalq.broker.test.kafka.producer;
 
-import com.jd.journalq.broker.test.kafka.common.KafkaConfigs;
 import com.jd.journalq.broker.test.kafka.common.ProducerTestCommon;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.time.Duration;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 
 public class ProducerTest  extends ProducerTestCommon {
     @Before

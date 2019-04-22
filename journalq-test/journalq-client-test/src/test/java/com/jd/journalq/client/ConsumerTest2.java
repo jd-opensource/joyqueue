@@ -14,32 +14,17 @@
 package com.jd.journalq.client;
 
 import io.openmessaging.KeyValue;
-import io.openmessaging.journalq.domain.JMQProducerBuiltinKeys;
-import io.openmessaging.journalq.producer.ExtensionProducer;
-import org.junit.Before;
 
 /**
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2019/3/12
  */
-public class AbstractProducerTest extends AbstractClientTest {
-
-    public ExtensionProducer producer;
-
-    @Override
-    @Before
-    public void before() {
-        super.before();
-
-        producer = (ExtensionProducer) messagingAccessPoint.createProducer();
-        producer.start();
-    }
+public class ConsumerTest2 extends ConsumerTest1 {
 
     @Override
     protected KeyValue getAttributes() {
-        KeyValue attributes = super.getAttributes();
-        attributes.put(JMQProducerBuiltinKeys.COMPRESS_THRESHOLD, 1);
-        return attributes;
+        KeyValue keyValue = super.getAttributes();
+        return keyValue;
     }
 }

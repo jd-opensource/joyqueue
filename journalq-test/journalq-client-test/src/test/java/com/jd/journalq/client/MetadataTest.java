@@ -16,7 +16,7 @@ package com.jd.journalq.client;
 import com.jd.journalq.client.internal.metadata.domain.TopicMetadata;
 import io.openmessaging.KeyValue;
 import io.openmessaging.extension.QueueMetaData;
-import io.openmessaging.journalq.domain.JMQNameServerBuiltinKeys;
+import io.openmessaging.journalq.domain.JournalQNameServerBuiltinKeys;
 import io.openmessaging.journalq.extension.QueueMetaDataAdapter;
 import org.junit.Assert;
 import org.junit.Test;
@@ -35,7 +35,7 @@ public class MetadataTest extends AbstractProducerTest {
     @Override
     protected KeyValue getAttributes() {
         KeyValue attributes = super.getAttributes();
-        attributes.put(JMQNameServerBuiltinKeys.METADATA_UPDATE_INTERVAL, 1000 * 5);
+        attributes.put(JournalQNameServerBuiltinKeys.METADATA_UPDATE_INTERVAL, 1000 * 5);
         return attributes;
     }
 
