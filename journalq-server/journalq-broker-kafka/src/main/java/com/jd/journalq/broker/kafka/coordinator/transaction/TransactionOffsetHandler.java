@@ -28,7 +28,6 @@ import java.util.Set;
  * date: 2019/4/16
  */
 // TODO 补充日志
-// TODO 异常处理
 public class TransactionOffsetHandler extends Service {
 
     protected static final Logger logger = LoggerFactory.getLogger(TransactionOffsetHandler.class);
@@ -54,11 +53,11 @@ public class TransactionOffsetHandler extends Service {
         if (transactionMetadata.getProducerEpoch() != producerEpoch) {
             throw new TransactionException(KafkaErrorCode.INVALID_PRODUCER_EPOCH.getCode());
         }
-        if (transactionMetadata.getState().equals(TransactionState.PREPARE_ABORT) || transactionMetadata.getState().equals(TransactionState.PREPARE_COMMIT)) {
-            throw new TransactionException(KafkaErrorCode.CONCURRENT_TRANSACTIONS.getCode());
-        }
         if (transactionMetadata.isExpired()) {
             throw new TransactionException(KafkaErrorCode.INVALID_TRANSACTION_TIMEOUT.getCode());
+        }
+        if (transactionMetadata.isPrepared()) {
+            throw new TransactionException(KafkaErrorCode.CONCURRENT_TRANSACTIONS.getCode());
         }
 
         transactionMetadata.updateLastTime();
@@ -75,11 +74,11 @@ public class TransactionOffsetHandler extends Service {
         if (transactionMetadata.getProducerEpoch() != producerEpoch) {
             throw new TransactionException(KafkaErrorCode.INVALID_PRODUCER_EPOCH.getCode());
         }
-        if (transactionMetadata.getState().equals(TransactionState.PREPARE_ABORT) || transactionMetadata.getState().equals(TransactionState.PREPARE_COMMIT)) {
-            throw new TransactionException(KafkaErrorCode.CONCURRENT_TRANSACTIONS.getCode());
-        }
         if (transactionMetadata.isExpired()) {
             throw new TransactionException(KafkaErrorCode.INVALID_TRANSACTION_TIMEOUT.getCode());
+        }
+        if (transactionMetadata.isPrepared()) {
+            throw new TransactionException(KafkaErrorCode.CONCURRENT_TRANSACTIONS.getCode());
         }
 
         synchronized (transactionMetadata) {
