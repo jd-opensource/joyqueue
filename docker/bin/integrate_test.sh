@@ -1,5 +1,6 @@
 #!/bin/sh
 
-echo "jenkins-oceanblue"
 echo "integrate begin"
+sleep 60
+echo "finish test"
 exit 1

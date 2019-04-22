@@ -15,6 +15,7 @@ pipeline {
                         sh 'pwd  '
                         dir('docker/bin'){
                             sh ' pwd && ls -l && git branch && git log'
+                            updateGitlabCommitStatus name: 'build', state: 'running'
                             sh './integrate_test.sh'
                         }
                     }
