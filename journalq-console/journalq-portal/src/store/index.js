@@ -53,10 +53,6 @@ const state = {
   },
   cookieName: 'sso.jd.com',
   urls: {
-    performance: {
-      producer: 'http://ump.jd.com/performanceReport/initPage.action?queryMap.accessKey=producer.send.[namespace].[app].[topic]',
-      consumer: 'http://ump.jd.com/performanceReport/initPage.action?queryMap.accessKey=consumer.consume.[namespace].[app].[topic]'
-    }
   }
 }
 
