@@ -13,7 +13,7 @@
  */
 package com.jd.journalq.client.internal.transport.config;
 
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 
 /**
  * TransportConfigChecker

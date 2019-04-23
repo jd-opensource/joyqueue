@@ -10,24 +10,27 @@ import com.github.javaparser.javadoc.description.JavadocDescription;
 import com.github.javaparser.javadoc.description.JavadocDescriptionElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.lang.reflect.Constructor;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
- *
- *  Auto doc for routing file and it's related service interface
- *
+ * Auto doc for routing file and it's related service interface
  **/
 public class AutoDoc {
-    private Logger logger= LoggerFactory.getLogger(AutoDoc.class);
+    private Logger logger = LoggerFactory.getLogger(AutoDoc.class);
     /**
      * routing file path
-     *
      **/
     private List<String> routes;
 
@@ -40,20 +43,20 @@ public class AutoDoc {
     private RandomAccessFile rFile;
     private FileChannel channel;
     private ByteBuffer buffer;
-    private Map<String/*service name*/, Map<String /*method name*/,JavadocComment>> serviceMethodDocs;
-    public AutoDoc(File out,List<String> routes, List<String> pkgNames){
-        this.out=out;
-        this.routes=routes;
-        this.pkgNames=pkgNames;
+    private Map<String/*service name*/, Map<String /*method name*/, JavadocComment>> serviceMethodDocs;
+
+    public AutoDoc(File out, List<String> routes, List<String> pkgNames) {
+        this.out = out;
+        this.routes = routes;
+        this.pkgNames = pkgNames;
         initDocFile();
     }
 
 
     /**
      * init doc file and buffer
-     *
      **/
-    private void initDocFile(){
+    private void initDocFile() {
         try {
             if (!out.exists()) {
                 //file.
@@ -62,114 +65,110 @@ public class AutoDoc {
                     logger.info("create file:" + out.getName());
                 }
             }
-            rFile=new RandomAccessFile(out,"rw");
+            rFile = new RandomAccessFile(out, "rw");
             rFile.setLength(0); //clear
-            channel=rFile.getChannel();
-            buffer=ByteBuffer.allocateDirect(8*4096);
-        }catch (IOException e){
-             logger.info("init doc file error",e);
+            channel = rFile.getChannel();
+            buffer = ByteBuffer.allocateDirect(8 * 4096);
+        } catch (IOException e) {
+            logger.info("init doc file error", e);
         }
     }
 
     /**
-     *
      * Scan servers and routing file and auto generate doc for them
      *
-     * @param apiDocFormat  api doc formatter
-     *
+     * @param apiDocFormat api doc formatter
      **/
-    public void write(Format<APIDoc> apiDocFormat, Class<? extends MultiHandlerMetaParser<APIDoc>>  routingParserClass ,
-                     HeuristicAutoTest<APIDoc> tester) throws Exception{
-        serviceMethodRouteDocs=new HashMap<>(8);
-        Map<String,PackageDocScanParser> servicePackageMap=new HashMap(8);
-        Constructor<? extends MultiHandlerMetaParser<APIDoc>> routingParserConstructor=routingParserClass.getConstructor(String.class);
-        for(String r:routes){
-            MultiHandlerMetaParser<APIDoc> routingParser=routingParserConstructor.newInstance(r);
+    public void write(Format<APIDoc> apiDocFormat, Class<? extends MultiHandlerMetaParser<APIDoc>> routingParserClass,
+                      HeuristicAutoTest<APIDoc> tester) throws Exception {
+        serviceMethodRouteDocs = new HashMap<>(8);
+        Map<String, PackageDocScanParser> servicePackageMap = new HashMap(8);
+        Constructor<? extends MultiHandlerMetaParser<APIDoc>> routingParserConstructor = routingParserClass.getConstructor(String.class);
+        for (String r : routes) {
+            MultiHandlerMetaParser<APIDoc> routingParser = routingParserConstructor.newInstance(r);
             serviceMethodRouteDocs.putAll(routingParser.parse());
         }
-        serviceMethodDocs=new HashMap(8);
-        for(String pkgName:pkgNames){
-            PackageDocScanParser pkgScanner=new PackageDocScanParser(pkgName);
-            Map<String, Map<String,JavadocComment>> pkgServiceMethodDocs=pkgScanner.parse();
+        serviceMethodDocs = new HashMap(8);
+        for (String pkgName : pkgNames) {
+            PackageDocScanParser pkgScanner = new PackageDocScanParser(pkgName);
+            Map<String, Map<String, JavadocComment>> pkgServiceMethodDocs = pkgScanner.parse();
             serviceMethodDocs.putAll(pkgServiceMethodDocs);
-            for(String service:pkgServiceMethodDocs.keySet()){
-                servicePackageMap.put(service,pkgScanner);
+            for (String service : pkgServiceMethodDocs.keySet()) {
+                servicePackageMap.put(service, pkgScanner);
             }
         }
-        StringBuilder methodDesBuilder=new StringBuilder();
-        for(Map.Entry<String,Map<String,APIDoc>> serviceEntry:serviceMethodRouteDocs.entrySet()) {
-            String serviceName=serviceEntry.getKey();
-            String upperServiceName=Character.toUpperCase(serviceName.charAt(0))+serviceName.substring(1);
-            for(Map.Entry<String,APIDoc> apiDocEntry:serviceEntry.getValue().entrySet()){
-                String methodName=apiDocEntry.getKey();
-                APIDoc doc=apiDocEntry.getValue();
-                if(doc!=null){
+        StringBuilder methodDesBuilder = new StringBuilder();
+        for (Map.Entry<String, Map<String, APIDoc>> serviceEntry : serviceMethodRouteDocs.entrySet()) {
+            String serviceName = serviceEntry.getKey();
+            String upperServiceName = Character.toUpperCase(serviceName.charAt(0)) + serviceName.substring(1);
+            for (Map.Entry<String, APIDoc> apiDocEntry : serviceEntry.getValue().entrySet()) {
+                String methodName = apiDocEntry.getKey();
+                APIDoc doc = apiDocEntry.getValue();
+                if (doc != null) {
                     doc.setService(upperServiceName);
                     doc.setMethod(methodName);
-                  Map<String,JavadocComment> javadocCommentMap=  serviceMethodDocs.get(upperServiceName);
-                  if(javadocCommentMap!=null){
-                     JavadocComment comment= javadocCommentMap.get(methodName);
-                     if(comment!=null){
-                         fillParamDoc(doc,comment,methodDesBuilder);
-                     }
-                  }
+                    Map<String, JavadocComment> javadocCommentMap = serviceMethodDocs.get(upperServiceName);
+                    if (javadocCommentMap != null) {
+                        JavadocComment comment = javadocCommentMap.get(methodName);
+                        if (comment != null) {
+                            fillParamDoc(doc, comment, methodDesBuilder);
+                        }
+                    }
                 }
             }
         }
         // test
-        for(Map<String,APIDoc> methodDoc:serviceMethodRouteDocs.values()){
-              for(APIDoc doc:methodDoc.values()){
-                  try {
-                      PackageDocScanParser serviceDocParser=servicePackageMap.get(doc.getService());
-                      if(serviceDocParser!=null){
-                          List<Class> paramClasses = serviceDocParser.getNonRawParams(doc.getService(), doc.getMethod());
-                          if (paramClasses == null) {
-                              TestCase result = tester.test(paramClasses, doc);
-                              doc.setiDemo(result.getRequest());
-                              doc.setoDemo(result.getResponse());
-                          }
-                      }
-                  }catch (Exception e){
-                      logger.info("test error",e);
-                  }
-              }
+        for (Map<String, APIDoc> methodDoc : serviceMethodRouteDocs.values()) {
+            for (APIDoc doc : methodDoc.values()) {
+                try {
+                    PackageDocScanParser serviceDocParser = servicePackageMap.get(doc.getService());
+                    if (serviceDocParser != null) {
+                        List<Class> paramClasses = serviceDocParser.getNonRawParams(doc.getService(), doc.getMethod());
+                        if (paramClasses == null) {
+                            TestCase result = tester.test(paramClasses, doc);
+                            doc.setiDemo(result.getRequest());
+                            doc.setoDemo(result.getResponse());
+                        }
+                    }
+                } catch (Exception e) {
+                    logger.info("test error", e);
+                }
+            }
         }
-        writeFile(serviceMethodRouteDocs,apiDocFormat);
+        writeFile(serviceMethodRouteDocs, apiDocFormat);
     }
 
 
-
     /**
-     *  doc map write to destination file
-     *
+     * doc map write to destination file
      **/
-    private void writeFile(Map<String, Map<String, APIDoc>> apiDocs,Format<APIDoc> format){
+    private void writeFile(Map<String, Map<String, APIDoc>> apiDocs, Format<APIDoc> format) {
         try {
-            Long sequenceId=0L;
-            for(Map.Entry<String,Map<String,APIDoc>> e:apiDocs.entrySet()){
-                for(Map.Entry<String,APIDoc> apiDocEntry:e.getValue().entrySet()){
-                    APIDoc doc=apiDocEntry.getValue();
+            Long sequenceId = 0L;
+            for (Map.Entry<String, Map<String, APIDoc>> e : apiDocs.entrySet()) {
+                for (Map.Entry<String, APIDoc> apiDocEntry : e.getValue().entrySet()) {
+                    APIDoc doc = apiDocEntry.getValue();
                     sequenceId++;
-                    bufferWrite(format.format(sequenceId.toString(),doc));
+                    bufferWrite(format.format(sequenceId.toString(), doc));
                 }
             }
 
-        }catch (IOException e){
-            logger.info("io exception",e);
+        } catch (IOException e) {
+            logger.info("io exception", e);
         }
 
 
     }
 
     /**
-     *  get all param type
+     * get all param type
      **/
-    public Set<Param> getParamKeys(){
-        Set<Param> params=new HashSet<>();
-        for(Map.Entry<String,Map<String,APIDoc>> e:serviceMethodRouteDocs.entrySet()){
-            for(Map.Entry<String,APIDoc> apiDocEntry:e.getValue().entrySet()){
-                APIDoc doc=apiDocEntry.getValue();
-                if(doc.getParams()!=null) {
+    public Set<Param> getParamKeys() {
+        Set<Param> params = new HashSet<>();
+        for (Map.Entry<String, Map<String, APIDoc>> e : serviceMethodRouteDocs.entrySet()) {
+            for (Map.Entry<String, APIDoc> apiDocEntry : e.getValue().entrySet()) {
+                APIDoc doc = apiDocEntry.getValue();
+                if (doc.getParams() != null) {
                     params.addAll(doc.getParams());
                 }
             }
@@ -181,34 +180,34 @@ public class AutoDoc {
     /**
      *
      **/
-    private synchronized void bufferWrite(String docContent) throws IOException{
-       byte[] bytes= docContent.getBytes();
-       if(buffer.remaining()>bytes.length){
-           buffer.put(bytes);
-       }else{
-           int byteLen=bytes.length;
-           int offset=0;
-           do {
-               int len = buffer.remaining();
-               buffer.put(bytes, offset, Math.min(len,byteLen));
-               buffer.flip();
-               while (buffer.hasRemaining()) {
-                   channel.write(buffer);
-               }
-               buffer.flip();
-               offset+=len;
-               byteLen-=len;
-           }while(byteLen>0);
-       }
+    private synchronized void bufferWrite(String docContent) throws IOException {
+        byte[] bytes = docContent.getBytes();
+        if (buffer.remaining() > bytes.length) {
+            buffer.put(bytes);
+        } else {
+            int byteLen = bytes.length;
+            int offset = 0;
+            do {
+                int len = buffer.remaining();
+                buffer.put(bytes, offset, Math.min(len, byteLen));
+                buffer.flip();
+                while (buffer.hasRemaining()) {
+                    channel.write(buffer);
+                }
+                buffer.flip();
+                offset += len;
+                byteLen -= len;
+            } while (byteLen > 0);
+        }
     }
 
 
     /**
      *
      **/
-    public synchronized void close() throws IOException{
+    public synchronized void close() throws IOException {
         buffer.flip();
-        while(buffer.hasRemaining()) {
+        while (buffer.hasRemaining()) {
             channel.write(buffer);
         }
         channel.close();
@@ -216,40 +215,39 @@ public class AutoDoc {
     }
 
     /**
-     *
      * Write the method parameters and it's doc to target api doc
      *
-     * @param doc  target doc
-     * @param comment  parameters and method doc
-     *
+     * @param doc     target doc
+     * @param comment parameters and method doc
      **/
-    private void fillParamDoc(APIDoc doc,JavadocComment comment,StringBuilder methodDesBuilder){
-        Javadoc javadoc= comment.parse();
-        toString(javadoc.getDescription(),methodDesBuilder);
-        doc.setDesc(methodDesBuilder.toString());methodDesBuilder.setLength(0);
-        List<JavadocBlockTag> tags=javadoc.getBlockTags();
-        if( comment.getCommentedNode().isPresent()){
-            Node node=  comment.getCommentedNode().get();
-            if(node instanceof MethodDeclaration){
-                MethodDeclaration method=(MethodDeclaration) node;
-                for(Parameter p:method.getParameters()){
-                    String type=p.getType().asString();
-                    String name=p.getName().asString();
-                    List<Param> params= doc.getParams();
-                    Param param=new Param();
+    private void fillParamDoc(APIDoc doc, JavadocComment comment, StringBuilder methodDesBuilder) {
+        Javadoc javadoc = comment.parse();
+        toString(javadoc.getDescription(), methodDesBuilder);
+        doc.setDesc(methodDesBuilder.toString());
+        methodDesBuilder.setLength(0);
+        List<JavadocBlockTag> tags = javadoc.getBlockTags();
+        if (comment.getCommentedNode().isPresent()) {
+            Node node = comment.getCommentedNode().get();
+            if (node instanceof MethodDeclaration) {
+                MethodDeclaration method = (MethodDeclaration) node;
+                for (Parameter p : method.getParameters()) {
+                    String type = p.getType().asString();
+                    String name = p.getName().asString();
+                    List<Param> params = doc.getParams();
+                    Param param = new Param();
                     param.setName(name);
                     param.setType(type);
-                    for(JavadocBlockTag t: tags){
-                        if(t.getName().isPresent()) {
+                    for (JavadocBlockTag t : tags) {
+                        if (t.getName().isPresent()) {
                             if (name.endsWith(t.getName().get())) {
-                                toString(t.getContent(),methodDesBuilder);
+                                toString(t.getContent(), methodDesBuilder);
                                 param.setComment(methodDesBuilder.toString());
                                 methodDesBuilder.setLength(0);
                             }
                         }
                     }
-                    if(params==null){
-                        params=new ArrayList<>();
+                    if (params == null) {
+                        params = new ArrayList<>();
                         doc.setParams(params);
                     }
                     params.add(param);
@@ -260,19 +258,17 @@ public class AutoDoc {
 
 
     /**
-     *
-     *  JavadocDescription toString
-     *
+     * JavadocDescription toString
      **/
-    private void toString(JavadocDescription description,StringBuilder content){
-        for(JavadocDescriptionElement e:description.getElements()){
+    private void toString(JavadocDescription description, StringBuilder content) {
+        for (JavadocDescriptionElement e : description.getElements()) {
             content.append(e.toText()).append(",");
         }
-        if(content.length()>0){
-            content.deleteCharAt(content.length()-1);
+        if (content.length() > 0) {
+            content.deleteCharAt(content.length() - 1);
         }
     }
 
 
-    }
+}
 

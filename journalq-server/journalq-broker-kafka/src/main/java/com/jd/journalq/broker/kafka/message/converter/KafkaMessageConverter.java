@@ -18,7 +18,7 @@ import com.jd.journalq.broker.kafka.message.KafkaBrokerMessage;
 import com.jd.journalq.broker.kafka.message.KafkaMessageSerializer;
 import com.jd.journalq.message.BrokerMessage;
 import com.jd.journalq.message.SourceType;
-import com.jd.journalq.toolkit.lang.Charsets;
+import com.google.common.base.Charsets;
 import com.jd.journalq.toolkit.network.IpUtil;
 import com.jd.journalq.toolkit.time.SystemClock;
 import org.apache.commons.lang3.ArrayUtils;

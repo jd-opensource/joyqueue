@@ -36,7 +36,7 @@ import com.jd.journalq.nsr.ProducerNameServerService;
 import com.jd.journalq.nsr.ReplicaServerService;
 import com.jd.journalq.nsr.TopicNameServerService;
 import com.jd.journalq.service.TopicService;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.util.NullUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

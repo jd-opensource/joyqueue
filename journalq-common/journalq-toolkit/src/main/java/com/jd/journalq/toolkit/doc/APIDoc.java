@@ -4,9 +4,7 @@ package com.jd.journalq.toolkit.doc;
 import java.util.List;
 
 /**
- *
  * api doc description
- *
  **/
 public class APIDoc {
     private String id;

@@ -4,7 +4,7 @@ import java.util.List;
 
 public interface HeuristicAutoTest<T> {
     /**
-     *  test t
+     * test t
      **/
     TestCase test(List<Class> paramClasses, T t) throws Exception;
 }

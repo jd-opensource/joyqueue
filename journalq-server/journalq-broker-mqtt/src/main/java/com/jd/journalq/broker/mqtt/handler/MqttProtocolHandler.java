@@ -29,7 +29,7 @@ import com.jd.journalq.broker.mqtt.util.NettyAttrManager;
 import com.jd.journalq.domain.AppToken;
 import com.jd.journalq.network.session.Producer;
 import com.jd.journalq.nsr.NameService;
-import com.jd.journalq.toolkit.lang.Strings;
+import com.google.common.base.Strings;
 import com.jd.journalq.toolkit.network.IpUtil;
 import com.jd.journalq.toolkit.service.Service;
 import io.netty.channel.Channel;

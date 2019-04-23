@@ -15,7 +15,7 @@ package com.jd.journalq.registry.provider;
 
 import com.jd.journalq.toolkit.URL;
 import com.jd.journalq.toolkit.network.http.Get;
-import com.jd.journalq.toolkit.lang.Charsets;
+import com.google.common.base.Charsets;
 import com.jd.journalq.toolkit.retry.Retry;
 import com.jd.journalq.toolkit.retry.RetryPolicy;
 

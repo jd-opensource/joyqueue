@@ -16,7 +16,7 @@ package com.jd.journalq.network.command;
 import com.jd.journalq.network.transport.command.Payload;
 import com.jd.journalq.network.transport.command.Types;
 
-import com.jd.journalq.toolkit.lang.Objects;
+import com.google.common.base.Objects;
 
 /**
  * @author wylixiaobin

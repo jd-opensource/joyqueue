@@ -24,7 +24,7 @@ import com.jd.journalq.model.query.QArchive;
 import com.jd.journalq.server.archive.store.model.SendLog;
 import com.jd.journalq.service.ArchiveService;
 import com.jd.journalq.service.RetryService;
-import com.jd.journalq.toolkit.lang.Strings;
+import com.google.common.base.Strings;
 import com.jd.laf.binding.annotation.Value;
 import com.jd.laf.web.vertx.Command;
 import com.jd.laf.web.vertx.annotation.Body;

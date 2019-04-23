@@ -25,7 +25,7 @@ import com.jd.journalq.network.transport.command.Type;
 import com.jd.journalq.network.transport.command.handler.CommandHandler;
 import com.jd.journalq.network.transport.Transport;
 import com.jd.journalq.network.transport.exception.TransportException;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

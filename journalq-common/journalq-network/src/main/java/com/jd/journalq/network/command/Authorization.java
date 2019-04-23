@@ -15,9 +15,9 @@ package com.jd.journalq.network.command;
 
 import com.jd.journalq.network.session.Language;
 import com.jd.journalq.network.transport.command.JMQPayload;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 
-import com.jd.journalq.toolkit.lang.Objects;
+import com.google.common.base.Objects;
 
 /**
  * 添加连接

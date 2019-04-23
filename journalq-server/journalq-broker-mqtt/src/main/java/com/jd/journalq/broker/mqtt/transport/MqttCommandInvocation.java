@@ -22,7 +22,7 @@ import com.jd.journalq.broker.mqtt.handler.Handler;
 import com.jd.journalq.broker.mqtt.handler.HandlerExecutor;
 import com.jd.journalq.broker.mqtt.handler.MqttHandlerDispatcher;
 import com.jd.journalq.broker.mqtt.util.NettyAttrManager;
-import com.jd.journalq.toolkit.lang.Strings;
+import com.google.common.base.Strings;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;

@@ -18,7 +18,7 @@ import com.jd.journalq.registry.listener.ClusterEvent;
 import com.jd.journalq.registry.listener.ClusterListener;
 import com.jd.journalq.registry.util.Path;
 import com.jd.journalq.registry.zookeeper.ZKClient;
-import com.jd.journalq.toolkit.lang.Charsets;
+import com.google.common.base.Charsets;
 import com.jd.journalq.registry.listener.Observer;
 import org.apache.zookeeper.CreateMode;
 import org.slf4j.Logger;

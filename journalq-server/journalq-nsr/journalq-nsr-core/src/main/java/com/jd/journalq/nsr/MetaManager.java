@@ -37,7 +37,7 @@ import com.jd.journalq.nsr.service.PartitionGroupReplicaService;
 import com.jd.journalq.nsr.service.PartitionGroupService;
 import com.jd.journalq.nsr.service.ProducerService;
 import com.jd.journalq.nsr.service.TopicService;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -13,11 +13,7 @@
  */
 package com.jd.journalq.toolkit.config;
 
-import com.jd.journalq.toolkit.config.annotation.DateBinding;
-import com.jd.journalq.toolkit.config.annotation.BooleanBinding;
-import com.jd.journalq.toolkit.config.annotation.DoubleBinding;
-import com.jd.journalq.toolkit.config.annotation.NumberBinding;
-import com.jd.journalq.toolkit.config.annotation.StringBinding;
+import com.jd.journalq.toolkit.config.annotation.*;
 import org.junit.Assert;
 import org.junit.Test;
 

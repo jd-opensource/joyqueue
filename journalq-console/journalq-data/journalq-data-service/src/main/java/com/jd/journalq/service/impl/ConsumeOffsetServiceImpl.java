@@ -32,7 +32,7 @@ import com.jd.journalq.service.BrokerRestUrlMappingService;
 import com.jd.journalq.service.ConsumeOffsetService;
 import com.jd.journalq.service.LeaderService;
 import com.jd.journalq.service.TopicPartitionGroupService;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.util.AsyncHttpClient;
 import com.jd.journalq.util.JSONParser;
 import com.jd.journalq.util.NullUtil;

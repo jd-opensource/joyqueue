@@ -124,7 +124,6 @@ public class IndexLengthCheck {
                             }
                         } catch (Throwable t) {
                             System.out.println("Exception! offset: " + offset);
-                            t.printStackTrace();
                             System.out.println("Partition file: " + indexFile.file().getAbsolutePath());
                             IndexItem indexItem = indexFile.read(offset, IndexItem.STORAGE_SIZE);
                             System.out.println(String.format("Index : %d, length: %d, offset: %d",

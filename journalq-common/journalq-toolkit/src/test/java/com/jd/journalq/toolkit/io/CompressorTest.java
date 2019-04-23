@@ -13,7 +13,7 @@
  */
 package com.jd.journalq.toolkit.io;
 
-import com.jd.journalq.toolkit.lang.Charsets;
+import com.google.common.base.Charsets;
 import org.junit.Assert;
 import org.junit.Test;
 

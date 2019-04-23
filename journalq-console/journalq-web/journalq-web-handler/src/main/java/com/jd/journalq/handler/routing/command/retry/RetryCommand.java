@@ -33,7 +33,7 @@ import com.jd.journalq.model.query.QRetry;
 import com.jd.journalq.service.ApplicationUserService;
 import com.jd.journalq.service.ConsumerService;
 import com.jd.journalq.service.RetryService;
-import com.jd.journalq.toolkit.lang.Strings;
+import com.google.common.base.Strings;
 import com.jd.journalq.util.LocalSession;
 import com.jd.journalq.util.serializer.Serializer;
 import com.jd.laf.binding.annotation.Value;
