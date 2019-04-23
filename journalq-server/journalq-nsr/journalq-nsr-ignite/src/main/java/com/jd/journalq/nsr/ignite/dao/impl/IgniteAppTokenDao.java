@@ -28,9 +28,16 @@ import org.apache.ignite.cache.QueryIndex;
 import org.apache.ignite.cache.query.SqlQuery;
 import org.apache.ignite.configuration.CacheConfiguration;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
 
-import static com.jd.journalq.nsr.ignite.model.IgniteAppToken.*;
+import static com.jd.journalq.nsr.ignite.model.IgniteAppToken.COLUMN_ID;
+import static com.jd.journalq.nsr.ignite.model.IgniteAppToken.COLUMN_APP;
+import static com.jd.journalq.nsr.ignite.model.IgniteAppToken.COLUMN_TOKEN;
+import static com.jd.journalq.nsr.ignite.model.IgniteAppToken.COLUMN_EFFECTIVE_TIME;
+import static com.jd.journalq.nsr.ignite.model.IgniteAppToken.COLUMN_EXPIRATION_TIME;
 
 public class IgniteAppTokenDao implements AppTokenDao {
 

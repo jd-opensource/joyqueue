@@ -31,7 +31,7 @@ public enum KafkaCompressionCodec {
     private int code;
     private String name;
 
-    private KafkaCompressionCodec(int code, String name) {
+    KafkaCompressionCodec(int code, String name) {
         this.code = code;
         this.name = name;
     }

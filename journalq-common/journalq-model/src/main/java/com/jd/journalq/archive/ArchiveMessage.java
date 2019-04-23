@@ -28,12 +28,12 @@ public interface ArchiveMessage {
      *
      * @return 归档时间
      */
-    public Date getArchiveTime();
+     Date getArchiveTime();
 
     /**
      * 返回消息类型
      *
      * @return 消息类型
      */
-    public String getTopic();
+     String getTopic();
 }

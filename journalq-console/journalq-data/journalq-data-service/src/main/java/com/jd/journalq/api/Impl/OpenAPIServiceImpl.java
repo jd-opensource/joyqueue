@@ -2,9 +2,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,13 +21,46 @@ import com.jd.journalq.model.ListQuery;
 import com.jd.journalq.model.PageResult;
 import com.jd.journalq.model.Pagination;
 import com.jd.journalq.model.QPageQuery;
-import com.jd.journalq.model.domain.*;
+import com.jd.journalq.model.domain.Application;
+import com.jd.journalq.model.domain.ApplicationToken;
+import com.jd.journalq.model.domain.ApplicationUser;
+import com.jd.journalq.model.domain.BaseModel;
+import com.jd.journalq.model.domain.Broker;
+import com.jd.journalq.model.domain.BrokerGroup;
+import com.jd.journalq.model.domain.BrokerMonitorRecord;
+import com.jd.journalq.model.domain.Consumer;
+import com.jd.journalq.model.domain.Identity;
+import com.jd.journalq.model.domain.Namespace;
+import com.jd.journalq.model.domain.PartitionOffset;
+import com.jd.journalq.model.domain.Producer;
+import com.jd.journalq.model.domain.SlimApplication;
+import com.jd.journalq.model.domain.SlimTopic;
+import com.jd.journalq.model.domain.Subscribe;
+import com.jd.journalq.model.domain.SubscribeType;
+import com.jd.journalq.model.domain.Topic;
+import com.jd.journalq.model.domain.TopicPubSub;
+import com.jd.journalq.model.domain.User;
 import com.jd.journalq.model.exception.BusinessException;
-import com.jd.journalq.model.query.*;
+import com.jd.journalq.model.query.QApplicationToken;
+import com.jd.journalq.model.query.QBroker;
+import com.jd.journalq.model.query.QBrokerGroup;
+import com.jd.journalq.model.query.QConsumer;
+import com.jd.journalq.model.query.QProducer;
+import com.jd.journalq.model.query.QTopic;
 import com.jd.journalq.monitor.PartitionAckMonitorInfo;
 import com.jd.journalq.monitor.PartitionLeaderAckMonitorInfo;
 import com.jd.journalq.monitor.PendingMonitorInfo;
-import com.jd.journalq.service.*;
+import com.jd.journalq.service.ApplicationService;
+import com.jd.journalq.service.ApplicationTokenService;
+import com.jd.journalq.service.ApplicationUserService;
+import com.jd.journalq.service.BrokerGroupService;
+import com.jd.journalq.service.BrokerMonitorService;
+import com.jd.journalq.service.BrokerService;
+import com.jd.journalq.service.ConsumeOffsetService;
+import com.jd.journalq.service.ConsumerService;
+import com.jd.journalq.service.LeaderService;
+import com.jd.journalq.service.ProducerService;
+import com.jd.journalq.service.TopicService;
 import com.jd.journalq.sync.ApplicationInfo;
 import com.jd.journalq.sync.SyncService;
 import com.jd.journalq.util.LocalSession;
@@ -76,27 +109,25 @@ public class OpenAPIServiceImpl implements OpenAPIService {
     private LeaderService leaderService;
 
     @Autowired
-    private  ApplicationTokenService  applicationTokenService;
+    private ApplicationTokenService applicationTokenService;
     @Autowired
-    private  ApplicationUserService  applicationUserService;
-    private Random random=new Random();
-    private final static long MINUTES_MS=60*1000;
-
-
+    private ApplicationUserService applicationUserService;
+    private Random random = new Random();
+    private static final long MINUTES_MS = 60 * 1000;
 
 
     @Override
-    public PageResult<TopicPubSub> findTopicPubSubInfo(Pagination pagination) throws Exception{
-        QPageQuery<QTopic> qPageQuery=new QPageQuery();
+    public PageResult<TopicPubSub> findTopicPubSubInfo(Pagination pagination) throws Exception {
+        QPageQuery<QTopic> qPageQuery = new QPageQuery();
         qPageQuery.setQuery(new QTopic()); //empty
         qPageQuery.setPagination(pagination);
-        PageResult<Topic> topicPageResult=topicService.findByQuery(qPageQuery);
-        List<Topic>  topics= topicPageResult.getResult();
-        List<TopicPubSub> pubSubs=new ArrayList(topics.size());
-        for(Topic topic:topics){
+        PageResult<Topic> topicPageResult = topicService.findByQuery(qPageQuery);
+        List<Topic> topics = topicPageResult.getResult();
+        List<TopicPubSub> pubSubs = new ArrayList(topics.size());
+        for (Topic topic : topics) {
             pubSubs.add(findTopicPubsub(topic));
         }
-        PageResult<TopicPubSub> topicPubSubPageResult=new PageResult<>();
+        PageResult<TopicPubSub> topicPubSubPageResult = new PageResult<>();
         topicPubSubPageResult.setPagination(topicPageResult.getPagination());
         topicPubSubPageResult.setResult(pubSubs);
         return topicPubSubPageResult;
@@ -104,59 +135,61 @@ public class OpenAPIServiceImpl implements OpenAPIService {
 
 
     /**
-     * @return  topic pub/sub info
+     * @return topic pub/sub info
      **/
-    TopicPubSub findTopicPubsub(Topic topic) throws Exception{
-        QConsumer qConsumer=new QConsumer();
-        QProducer qProducer=new QProducer();
+    TopicPubSub findTopicPubsub(Topic topic) throws Exception {
+        QConsumer qConsumer = new QConsumer();
+        QProducer qProducer = new QProducer();
         qConsumer.setTopic(topic);
         qProducer.setTopic(topic);
-        List<Consumer> consumers=consumerService.findByQuery(qConsumer);
-        List<Producer> producers=producerService.findByQuery(qProducer);
-        TopicPubSub pubSub=new TopicPubSub();
+        List<Consumer> consumers = consumerService.findByQuery(qConsumer);
+        List<Producer> producers = producerService.findByQuery(qProducer);
+        TopicPubSub pubSub = new TopicPubSub();
 
-        List<String> ips=new ArrayList<>();
-        List<Broker> brokers=leaderService.findLeaderBroker(topic.getCode(),topic.getNamespace().getCode());
-        if(!NullUtil.isEmpty(brokers)){
+        List<String> ips = new ArrayList<>();
+        List<Broker> brokers = leaderService.findLeaderBroker(topic.getCode(), topic.getNamespace().getCode());
+        if (!NullUtil.isEmpty(brokers)) {
             String iport;
-            for(Broker b:brokers){
-                iport=b.getIp()+":"+b.getPort();
+            for (Broker b : brokers) {
+                iport = b.getIp() + ":" + b.getPort();
                 ips.add(iport);
             }
         }
-        SlimTopic slimTopic=new SlimTopic();
+        SlimTopic slimTopic = new SlimTopic();
         slimTopic.setIps(ips);
         slimTopic.setCode(topic.getCode());
         pubSub.setTopic(slimTopic);
-        List<String> consumerList=new ArrayList<>();
+        List<String> consumerList = new ArrayList<>();
         Identity identity;
-        for(Consumer consumer:consumers){
-            identity=consumer.getApp();
-            if(!NullUtil.isEmpty(identity)) {
+        for (Consumer consumer : consumers) {
+            identity = consumer.getApp();
+            if (!NullUtil.isEmpty(identity)) {
                 consumerList.add(String.valueOf(identity.getCode()));
             }
         }
         pubSub.setConsumers(appsToApplication(consumerList));
-        List<String> producerList=new ArrayList<>();
-        for(Producer producer:producers){
-            identity=producer.getApp();
-            if(!NullUtil.isEmpty(identity)) {
+        List<String> producerList = new ArrayList<>();
+        for (Producer producer : producers) {
+            identity = producer.getApp();
+            if (!NullUtil.isEmpty(identity)) {
                 producerList.add(String.valueOf(identity.getCode()));
             }
         }
         pubSub.setProducers(appsToApplication(producerList));
         return pubSub;
     }
+
     @Override
-    public TopicPubSub findTopicPubSubInfo(String topic, String namespace) throws Exception{
-        Topic topiC=new Topic();
+    public TopicPubSub findTopicPubSubInfo(String topic, String namespace) throws Exception {
+        Topic topiC = new Topic();
         topiC.setCode(topic);
         topiC.setNamespace(new Namespace());
         topiC.getNamespace().setCode(namespace);
         return findTopicPubsub(topiC);
     }
+
     @Override
-    public List<Consumer>  queryConsumerTopicByApp(String app) throws Exception {
+    public List<Consumer> queryConsumerTopicByApp(String app) throws Exception {
         QConsumer qConsumer = new QConsumer();
         qConsumer.setReferer(app);
         return consumerService.findByQuery(qConsumer);
@@ -164,100 +197,101 @@ public class OpenAPIServiceImpl implements OpenAPIService {
 
     @Override
     public List<Consumer> findConsumers(String topic, String namespace) throws Exception {
-        Topic topiC=new Topic(topic);
+        Topic topiC = new Topic(topic);
         topiC.setNamespace(new Namespace(namespace));
-        QConsumer qConsumer=new QConsumer();
+        QConsumer qConsumer = new QConsumer();
         qConsumer.setNamespace(namespace);
         qConsumer.setTopic(topiC);
-        List<Consumer> consumers=consumerService.findByQuery(qConsumer);
+        List<Consumer> consumers = consumerService.findByQuery(qConsumer);
         return consumers;
     }
 
     @Override
-    public List<Producer> findProducers(String topic, String namespace) throws Exception{
-        Topic topiC=new Topic(topic);
+    public List<Producer> findProducers(String topic, String namespace) throws Exception {
+        Topic topiC = new Topic(topic);
         topiC.setNamespace(new Namespace(namespace));
-        QProducer qProducer=new QProducer();
+        QProducer qProducer = new QProducer();
         qProducer.setTopic(topiC);
-        List<Producer> producers=producerService.findByQuery(qProducer);
+        List<Producer> producers = producerService.findByQuery(qProducer);
         return producers;
     }
 
     @Override
     public Producer publish(Producer producer) throws Exception {
-        Topic topic=  topicService.findByCode(producer.getNamespace().getCode()  ,producer.getTopic().getCode());
-        Application application=applicationService.findByCode(producer.getApp().getCode());
-        if(NullUtil.isEmpty(topic)||NullUtil.isEmpty(application)){
-            throw new ServiceException(BAD_REQUEST,String.format("topic %s or app %s not exist!",producer.getTopic().getCode(),producer.getApp().getCode()));
+        Topic topic = topicService.findByCode(producer.getNamespace().getCode(), producer.getTopic().getCode());
+        Application application = applicationService.findByCode(producer.getApp().getCode());
+        if (NullUtil.isEmpty(topic) || NullUtil.isEmpty(application)) {
+            throw new ServiceException(BAD_REQUEST, String.format("topic %s or app %s not exist!", producer.getTopic().getCode(), producer.getApp().getCode()));
         }
         producer.setTopic(topic);
         producer.setApp(new Identity(producer.getApp().getCode()));
         producerService.add(producer);
-        return producerService.findByTopicAppGroup(producer.getNamespace().getCode(),producer.getTopic().getCode(),producer.getApp().getCode());
+        return producerService.findByTopicAppGroup(producer.getNamespace().getCode(), producer.getTopic().getCode(), producer.getApp().getCode());
     }
 
     @Override
-    public Consumer subscribe(Consumer consumer) throws Exception{
-        Topic topic=  topicService.findByCode(consumer.getNamespace().getCode()  ,consumer.getTopic().getCode());
-        Application application=applicationService.findByCode(consumer.getApp().getCode());
-        if(NullUtil.isEmpty(topic)||NullUtil.isEmpty(application)){
-            throw new ServiceException(BAD_REQUEST,String.format("topic %s or app %s not exist!",consumer.getTopic().getCode(),consumer.getApp().getCode()));
+    public Consumer subscribe(Consumer consumer) throws Exception {
+        Topic topic = topicService.findByCode(consumer.getNamespace().getCode(), consumer.getTopic().getCode());
+        Application application = applicationService.findByCode(consumer.getApp().getCode());
+        if (NullUtil.isEmpty(topic) || NullUtil.isEmpty(application)) {
+            throw new ServiceException(BAD_REQUEST, String.format("topic %s or app %s not exist!", consumer.getTopic().getCode(), consumer.getApp().getCode()));
         }
         consumer.setTopic(topic);
         consumer.setNamespace(consumer.getNamespace());
         consumer.setApp(consumer.getApp());
         consumerService.add(consumer);
-        return consumerService.findByTopicAppGroup(consumer.getNamespace().getCode(),consumer.getTopic().getCode(),consumer.getApp().getCode(),consumer.getSubscribeGroup());
+        return consumerService.findByTopicAppGroup(consumer.getNamespace().getCode(), consumer.getTopic().getCode(), consumer.getApp().getCode(), consumer.getSubscribeGroup());
     }
 
     @Override
-    public boolean unPublish(Producer producer) throws Exception{
-        List<Producer> producers= findProducers(producer.getTopic().getCode(),producer.getNamespace().getCode());
-        List<Consumer> consumers= findConsumers(producer.getTopic().getCode(),producer.getNamespace().getCode());
-        if(NullUtil.isEmpty(producers)||(producers.size()==1&&consumers.size()>0)){
-            throw new ServiceException(BAD_REQUEST,String.format("no subscribe or please unSubscribe all the consumers of topic %s before cancel publish",
+    public boolean unPublish(Producer producer) throws Exception {
+        List<Producer> producers = findProducers(producer.getTopic().getCode(), producer.getNamespace().getCode());
+        List<Consumer> consumers = findConsumers(producer.getTopic().getCode(), producer.getNamespace().getCode());
+        if (NullUtil.isEmpty(producers) || (producers.size() == 1 && consumers.size() > 0)) {
+            throw new ServiceException(BAD_REQUEST, String.format("no subscribe or please unSubscribe all the consumers of topic %s before cancel publish",
                     producer.getTopic().getCode()));
         }
-        Producer p=findProducer(producers,producer.getApp().getCode());
-        if(NullUtil.isEmpty(p)) throw new ServiceException(BAD_REQUEST,String.format(" %s haven't publish to the topic %s ",
-                producer.getApp().getCode(),CodeConverter.convertTopic(producer.getNamespace(),producer.getTopic()).getFullName()));
+        Producer p = findProducer(producers, producer.getApp().getCode());
+        if (NullUtil.isEmpty(p))
+            throw new ServiceException(BAD_REQUEST, String.format(" %s haven't publish to the topic %s ",
+                    producer.getApp().getCode(), CodeConverter.convertTopic(producer.getNamespace(), producer.getTopic()).getFullName()));
 
-        return producerService.delete(p)>0?true:false;
+        return producerService.delete(p) > 0 ? true : false;
     }
 
     @Override
-    public Consumer uniqueSubscribe(Consumer consumer) throws Exception{
-        String namespace = consumer.getNamespace()==null?null:consumer.getNamespace().getCode();
-        Topic topic=  topicService.findByCode(namespace,consumer.getTopic().getCode());
-        Application application=applicationService.findByCode(consumer.getApp().getCode());
-        if(NullUtil.isEmpty(topic)||NullUtil.isEmpty(application)){
-            throw new ServiceException(BAD_REQUEST,String.format("topic %s or app %s not exist!",consumer.getTopic().getCode(),consumer.getApp().getCode()));
+    public Consumer uniqueSubscribe(Consumer consumer) throws Exception {
+        String namespace = consumer.getNamespace() == null ? null : consumer.getNamespace().getCode();
+        Topic topic = topicService.findByCode(namespace, consumer.getTopic().getCode());
+        Application application = applicationService.findByCode(consumer.getApp().getCode());
+        if (NullUtil.isEmpty(topic) || NullUtil.isEmpty(application)) {
+            throw new ServiceException(BAD_REQUEST, String.format("topic %s or app %s not exist!", consumer.getTopic().getCode(), consumer.getApp().getCode()));
         }
         User user = LocalSession.getSession().getUser();
-        ApplicationUser applicationUser = applicationUserService.findByUserApp(user.getCode(),consumer.getApp().getCode());
+        ApplicationUser applicationUser = applicationUserService.findByUserApp(user.getCode(), consumer.getApp().getCode());
         if (NullUtil.isEmpty(applicationUser)) {
-            throw new ServiceException(BAD_REQUEST,String.format("user %s app %s no permission!",user.getCode(),consumer.getApp().getCode()));
+            throw new ServiceException(BAD_REQUEST, String.format("user %s app %s no permission!", user.getCode(), consumer.getApp().getCode()));
         }
-        Consumer exist = consumerService.findByTopicAppGroup(namespace,consumer.getTopic().getCode(),consumer.getApp().getCode(),consumer.getSubscribeGroup());
+        Consumer exist = consumerService.findByTopicAppGroup(namespace, consumer.getTopic().getCode(), consumer.getApp().getCode(), consumer.getSubscribeGroup());
         if (NullUtil.isNotEmpty(exist) && NullUtil.isNotEmpty(exist.getSubscribeGroup())) {
             return exist;
         }
-        int group=random.nextInt((int)MINUTES_MS);
+        int group = random.nextInt((int) MINUTES_MS);
         consumer.setSubscribeGroup(String.valueOf(group));
         consumer.setTopic(topic);
         consumer.setNamespace(consumer.getNamespace());
         consumer.setApp(consumer.getApp());
         consumerService.add(consumer);
-        return consumerService.findByTopicAppGroup(namespace,consumer.getTopic().getCode(),consumer.getApp().getCode(),consumer.getSubscribeGroup());
+        return consumerService.findByTopicAppGroup(namespace, consumer.getTopic().getCode(), consumer.getApp().getCode(), consumer.getSubscribeGroup());
     }
 
     /**
      *  find the app producer
      *
      **/
-    Producer findProducer(List<Producer> producers,String app){
-        for(Producer p:producers){
-            if(p.getApp().getCode().equals(app)){
+    Producer findProducer(List<Producer> producers, String app) {
+        for (Producer p : producers) {
+            if (p.getApp().getCode().equals(app)) {
                 return p;
             }
         }
@@ -265,23 +299,25 @@ public class OpenAPIServiceImpl implements OpenAPIService {
     }
 
     @Override
-    public boolean unSubscribe(Consumer consumer) throws Exception{
-      Consumer c=consumerService.findByTopicAppGroup(consumer.getNamespace().getCode(),consumer.getTopic().getCode(),
-              consumer.getApp().getCode(),consumer.getSubscribeGroup());
-        if(NullUtil.isEmpty(c)) throw new ServiceException(BAD_REQUEST,String.format(" %s haven't subscribe to the topic %s ",
-                CodeConverter.convertApp(new Identity(consumer.getApp().getCode()),consumer.getSubscribeGroup()),CodeConverter.convertTopic(consumer.getNamespace(),consumer.getTopic()).getFullName()));
+    public boolean unSubscribe(Consumer consumer) throws Exception {
+        Consumer c = consumerService.findByTopicAppGroup(consumer.getNamespace().getCode(), consumer.getTopic().getCode(),
+                consumer.getApp().getCode(), consumer.getSubscribeGroup());
+        if (NullUtil.isEmpty(c))
+            throw new ServiceException(BAD_REQUEST, String.format(" %s haven't subscribe to the topic %s ",
+                    CodeConverter.convertApp(new Identity(consumer.getApp().getCode()), consumer.getSubscribeGroup()),
+                    CodeConverter.convertTopic(consumer.getNamespace(), consumer.getTopic()).getFullName()));
         // check pending message
 
-        return consumerService.delete(c)>0?true:false;
+        return consumerService.delete(c) > 0 ? true : false;
     }
 
     @Override
-    public Application syncApplication(Application application) throws Exception{
+    public Application syncApplication(Application application) throws Exception {
         User user = LocalSession.getSession().getUser();
         application.setErp(user.getCode());
         ApplicationInfo info = syncService.syncApp(application);
-        if (NullUtil.isEmpty(info)||NullUtil.isEmpty(user)) {
-            throw new ServiceException(BAD_REQUEST,"sync application failed or illegal erp "+application.getErp());
+        if (NullUtil.isEmpty(info) || NullUtil.isEmpty(user)) {
+            throw new ServiceException(BAD_REQUEST, "sync application failed or illegal erp " + application.getErp());
         }
         info.setUser(new Identity(user));
         syncService.addOrUpdateApp(info);
@@ -290,36 +326,36 @@ public class OpenAPIServiceImpl implements OpenAPIService {
 
     @Override
     public boolean delApplication(Application application) throws Exception {
-        QConsumer qconsumer=new QConsumer();
-        QProducer qProducer=new QProducer();
-        Identity app=new Identity();
+        QConsumer qconsumer = new QConsumer();
+        QProducer qProducer = new QProducer();
+        Identity app = new Identity();
         app.setId(application.getId());
         app.setCode(application.getCode());
         qconsumer.setApp(app);
         qProducer.setApp(app);
-        if(!NullUtil.isEmpty(consumerService.findByQuery(qconsumer))||!NullUtil.isEmpty(producerService.findByQuery(qProducer)))
-            throw new ServiceException(BAD_REQUEST,"please unSubscribe/Publish  all  topics you have !");
-        application=applicationService.findByCode(application.getCode());
-        return applicationService.delete(application)>0?true:false;
+        if (!NullUtil.isEmpty(consumerService.findByQuery(qconsumer)) || !NullUtil.isEmpty(producerService.findByQuery(qProducer)))
+            throw new ServiceException(BAD_REQUEST, "please unSubscribe/Publish  all  topics you have !");
+        application = applicationService.findByCode(application.getCode());
+        return applicationService.delete(application) > 0 ? true : false;
     }
 
     @Override
-    public Topic createTopic(Topic topic, QBrokerGroup brokerGroup,Identity operator) throws Exception{
+    public Topic createTopic(Topic topic, QBrokerGroup brokerGroup, Identity operator) throws Exception {
 //        topic.setElectType(PartitionGroup.ElectType.raft);
-        List<Broker> brokers=allocateBrokers(topic,brokerGroup);
-        if (brokers.size() == 0 ) {
-            throw new ServiceException(BAD_REQUEST,"select broker is empty");
+        List<Broker> brokers = allocateBrokers(topic, brokerGroup);
+        if (brokers.size() == 0) {
+            throw new ServiceException(BAD_REQUEST, "select broker is empty");
         }
 
         //计算总数
-        topic.setPartitions(topic.getPartitions()* brokers.size());
+        topic.setPartitions(topic.getPartitions() * brokers.size());
         topic.setBrokers(brokers);
-        topicService.addWithBrokerGroup(topic,topic.getBrokerGroup(),topic.getBrokers(),operator);
+        topicService.addWithBrokerGroup(topic, topic.getBrokerGroup(), topic.getBrokers(), operator);
         return topicService.findById(topic.getId());
     }
 
-    public void removeTopic(String namespace,String topicCode) throws Exception {
-        Topic topic = topicService.findByCode(namespace,topicCode);
+    public void removeTopic(String namespace, String topicCode) throws Exception {
+        Topic topic = topicService.findByCode(namespace, topicCode);
         if (topic == null) {
             throw new BusinessException("topic is not exist");
         }
@@ -329,38 +365,38 @@ public class OpenAPIServiceImpl implements OpenAPIService {
     /**
      * Random allocate broker group and broker  for topic
      **/
-    List<Broker> allocateBrokers(Topic topic,QBrokerGroup qBrokerGroup) throws Exception{
+    List<Broker> allocateBrokers(Topic topic, QBrokerGroup qBrokerGroup) throws Exception {
         //校验分组是否存在
         qBrokerGroup.setRole(0);//1管理员 0 普通用户
         List<BrokerGroup> brokerGroupList = brokerGroupService.findByQuery(new ListQuery<>(qBrokerGroup));
-        if (brokerGroupList == null || brokerGroupList.size() ==0) {
-            throw new ServiceException(BAD_REQUEST,"broker group is empty");
+        if (brokerGroupList == null || brokerGroupList.size() == 0) {
+            throw new ServiceException(BAD_REQUEST, "broker group is empty");
         }
         BrokerGroup brokerGroup = brokerGroupList.get(0);
         topic.setBrokerGroup(brokerGroup); // broker group
 
         QBroker qBroker = new QBroker();
-        qBroker.setGroup(new Identity(brokerGroup.getId(),brokerGroup.getCode()));
+        qBroker.setGroup(new Identity(brokerGroup.getId(), brokerGroup.getCode()));
         List<Broker> brokers = brokerService.queryBrokerList(qBroker);
 
-        if (brokers.size() == 0 ) {
-            throw new ServiceException(BAD_REQUEST,"select broker is empty");
+        if (brokers.size() == 0) {
+            throw new ServiceException(BAD_REQUEST, "select broker is empty");
         }
         //如果用户设置broker数量,则校验broker数量是否能满足
-        if (topic.getBrokerNum() !=0 && topic.getBrokerNum() > brokers.size() ) {
-            throw new ServiceException(BAD_REQUEST,"实际可用broker数量小于指定broker数量");
+        if (topic.getBrokerNum() != 0 && topic.getBrokerNum() > brokers.size()) {
+            throw new ServiceException(BAD_REQUEST, "实际可用broker数量小于指定broker数量");
         }
         //如果用户没设置broker数量 默认是3个
         if (topic.getBrokerNum() == 0) {
             topic.setBrokerNum(3);
         }
 
-        Random random=new Random();
+        Random random = new Random();
         List<Broker> selectBroker = new ArrayList<>();
         int startId = random.nextInt(brokers.size());
-        int endId = startId+topic.getBrokerNum();
-        for (int i = startId;i < endId; i++){
-            Broker broker = brokers.get(i%brokers.size());
+        int endId = startId + topic.getBrokerNum();
+        for (int i = startId; i < endId; i++) {
+            Broker broker = brokers.get(i % brokers.size());
             if (selectBroker.contains(broker)) {
                 continue;
             }
@@ -371,58 +407,58 @@ public class OpenAPIServiceImpl implements OpenAPIService {
 
     @Override
     public List<PartitionAckMonitorInfo> findOffsets(Subscribe subscribe) {
-        List<PartitionAckMonitorInfo> partitionAckMonitorInfos=new ArrayList<>();
+        List<PartitionAckMonitorInfo> partitionAckMonitorInfos = new ArrayList<>();
         subscribe.setType(SubscribeType.CONSUMER);
         isLegalSubscribe(subscribe);
-        List<PartitionLeaderAckMonitorInfo> partitionLeaderAckMonitorInfos= consumeOffsetService.offsets(subscribe);
-        for(PartitionLeaderAckMonitorInfo p:partitionLeaderAckMonitorInfos){
-            if(p.isLeader()){
+        List<PartitionLeaderAckMonitorInfo> partitionLeaderAckMonitorInfos = consumeOffsetService.offsets(subscribe);
+        for (PartitionLeaderAckMonitorInfo p : partitionLeaderAckMonitorInfos) {
+            if (p.isLeader()) {
                 partitionAckMonitorInfos.add(p);
             }
         }
-        return  partitionAckMonitorInfos;
+        return partitionAckMonitorInfos;
     }
 
     @Override
     public boolean resetOffset(Subscribe subscribe, short partition, long offset) {
         subscribe.setType(SubscribeType.CONSUMER);
         isLegalSubscribe(subscribe);
-        return consumeOffsetService.resetOffset(subscribe,partition,offset);
+        return consumeOffsetService.resetOffset(subscribe, partition, offset);
     }
 
     @Override
     public List<PartitionAckMonitorInfo> timeOffset(Subscribe subscribe, long timeMs) {
-        return consumeOffsetService.timeOffset(subscribe,timeMs);
+        return consumeOffsetService.timeOffset(subscribe, timeMs);
     }
 
     @Override
     public boolean resetOffset(Subscribe subscribe, long timeMs) {
         subscribe.setType(SubscribeType.CONSUMER);
         isLegalSubscribe(subscribe);
-        return consumeOffsetService.resetOffset(subscribe,timeMs);
+        return consumeOffsetService.resetOffset(subscribe, timeMs);
     }
 
     @Override
     public boolean resetOffset(Subscribe subscribe, List<PartitionOffset> offsets) {
         subscribe.setType(SubscribeType.CONSUMER);
         isLegalSubscribe(subscribe);
-        return consumeOffsetService.resetOffset(subscribe,offsets);
+        return consumeOffsetService.resetOffset(subscribe, offsets);
     }
 
     @Override
     public PendingMonitorInfo pending(Subscribe subscribe) {
         subscribe.setType(SubscribeType.CONSUMER);
         isLegalSubscribe(subscribe);
-        BrokerMonitorRecord record= brokerMonitorService.find(subscribe,true);
-        if(NullUtil.isEmpty(record)||NullUtil.isEmpty(record.getPending())){
-            throw new ServiceException(INTERNAL_SERVER_ERROR,"data not found");
+        BrokerMonitorRecord record = brokerMonitorService.find(subscribe, true);
+        if (NullUtil.isEmpty(record) || NullUtil.isEmpty(record.getPending())) {
+            throw new ServiceException(INTERNAL_SERVER_ERROR, "data not found");
         }
         return record.getPending();
     }
 
     @Override
-    public int queryPartitionByTopic(String namespaceCode,String topicCode) throws Exception {
-        Topic topic = topicService.findByCode(namespaceCode,topicCode);
+    public int queryPartitionByTopic(String namespaceCode, String topicCode) throws Exception {
+        Topic topic = topicService.findByCode(namespaceCode, topicCode);
         return topic.getPartitions();
     }
 
@@ -432,13 +468,13 @@ public class OpenAPIServiceImpl implements OpenAPIService {
      * @param apps  can't be null
      *
      **/
-    List<SlimApplication> appsToApplication(List<String> apps){
-        if(NullUtil.isEmpty(apps)) return null;
-        List<Application> applications= applicationService.findByCodes(apps);
-        List<SlimApplication>  slimApplications=new ArrayList<>();
+    List<SlimApplication> appsToApplication(List<String> apps) {
+        if (NullUtil.isEmpty(apps)) return null;
+        List<Application> applications = applicationService.findByCodes(apps);
+        List<SlimApplication> slimApplications = new ArrayList<>();
         SlimApplication slimApplication;
-        for(Application a:applications){
-            slimApplication=new SlimApplication();
+        for (Application a : applications) {
+            slimApplication = new SlimApplication();
             slimApplication.setCode(a.getCode());
             slimApplication.setOwner(a.getOwner());
             slimApplication.setDepartment(a.getDepartment());
@@ -450,27 +486,27 @@ public class OpenAPIServiceImpl implements OpenAPIService {
 
     @Override
     public List<ApplicationToken> add(ApplicationToken token) {
-        String app=token.getApplication().getCode();
-        Application application= applicationService.findByCode(app);
-        if(NullUtil.isEmpty(application)||application.getStatus()==BaseModel.DELETED){
-            throw  new ServiceException(BAD_REQUEST,"app not exist");
+        String app = token.getApplication().getCode();
+        Application application = applicationService.findByCode(app);
+        if (NullUtil.isEmpty(application) || application.getStatus() == BaseModel.DELETED) {
+            throw new ServiceException(BAD_REQUEST, "app not exist");
         }
         token.setApplication(new Identity(application));
         try {
             applicationTokenService.add(token);
             return tokens(app);
-        }catch (Exception e){
-            throw new ServiceException(INTERNAL_SERVER_ERROR,e.getMessage());
+        } catch (Exception e) {
+            throw new ServiceException(INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
     @Override
     public List<ApplicationToken> tokens(String app) {
-        QApplicationToken qApplicationToken=new QApplicationToken(new Identity(app),null);
+        QApplicationToken qApplicationToken = new QApplicationToken(new Identity(app), null);
         try {
-            return  applicationTokenService.findByQuery(qApplicationToken);
-        }catch (Exception e){
-            throw new ServiceException(INTERNAL_SERVER_ERROR,e.getMessage());
+            return applicationTokenService.findByQuery(qApplicationToken);
+        } catch (Exception e) {
+            throw new ServiceException(INTERNAL_SERVER_ERROR, e.getMessage());
         }
 
     }
@@ -479,30 +515,25 @@ public class OpenAPIServiceImpl implements OpenAPIService {
      *
      *  Check the subscription legal or not
      *
-     *  @return  true if exist
+     *  @return true if exist
      *
      **/
-    private boolean isLegalSubscribe(Subscribe subscribe){
-        if(subscribe.getType()==SubscribeType.CONSUMER) {
+    private boolean isLegalSubscribe(Subscribe subscribe) {
+        if (subscribe.getType() == SubscribeType.CONSUMER) {
             Consumer c = consumerService.findByTopicAppGroup(subscribe.getNamespace().getCode(), subscribe.getTopic().getCode(),
                     subscribe.getApp().getCode(), subscribe.getSubscribeGroup());
             if (NullUtil.isEmpty(c))
                 throw new ServiceException(BAD_REQUEST, String.format(" %s haven't subscribe the topic %s ",
                         CodeConverter.convertApp(subscribe.getApp(), subscribe.getSubscribeGroup()), CodeConverter.convertTopic(subscribe.getNamespace(), subscribe.getTopic()).getFullName()));
-        }else{
-            Producer producer=producerService.findByTopicAppGroup(subscribe.getNamespace().getCode(), subscribe.getTopic().getCode(),subscribe.getApp().getCode());
-            if(NullUtil.isEmpty(producer)){
+        } else {
+            Producer producer = producerService.findByTopicAppGroup(subscribe.getNamespace().getCode(), subscribe.getTopic().getCode(), subscribe.getApp().getCode());
+            if (NullUtil.isEmpty(producer)) {
                 throw new ServiceException(BAD_REQUEST, String.format(" %s haven't publish the topic %s ",
                         subscribe.getApp().getCode(), CodeConverter.convertTopic(subscribe.getNamespace(), subscribe.getTopic()).getFullName()));
             }
         }
         return true;
     }
-
-
-
-
-
 
 
 }

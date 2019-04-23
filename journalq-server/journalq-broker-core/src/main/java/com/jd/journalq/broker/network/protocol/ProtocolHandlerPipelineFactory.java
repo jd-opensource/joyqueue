@@ -24,5 +24,5 @@ import io.netty.channel.ChannelHandler;
  */
 public interface ProtocolHandlerPipelineFactory {
 
-    public ChannelHandler createPipeline(Protocol protocol);
+    ChannelHandler createPipeline(Protocol protocol);
 }

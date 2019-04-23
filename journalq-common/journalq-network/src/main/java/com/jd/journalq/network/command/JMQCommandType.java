@@ -97,7 +97,7 @@ public enum JMQCommandType {
 
     private byte code;
 
-    private JMQCommandType(int code) {
+    JMQCommandType(int code) {
         this.code = (byte) code;
     }
 

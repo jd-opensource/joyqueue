@@ -45,7 +45,8 @@ public interface MessageSender extends LifeCycle {
 
     void sendAsync(BrokerNode brokerNode, String topic, String app, String txId, ProduceMessage message, QosLevel qosLevel, long produceTimeout, long timeout, AsyncSendCallback callback);
 
-    void batchSendAsync(BrokerNode brokerNode, String topic, String app, String txId, List<ProduceMessage> messages, QosLevel qosLevel, long produceTimeout, long timeout, AsyncBatchSendCallback callback);
+    void batchSendAsync(BrokerNode brokerNode, String topic, String app, String txId, List<ProduceMessage> messages,
+                        QosLevel qosLevel, long produceTimeout, long timeout, AsyncBatchSendCallback callback);
 
     Future<SendBatchResultData> batchSendAsync(BrokerNode brokerNode, String topic, String app, String txId, List<ProduceMessage> messages, QosLevel qosLevel, long produceTimeout, long timeout);
 
@@ -59,9 +60,11 @@ public interface MessageSender extends LifeCycle {
     // batch
     Map<String, SendBatchResultData> batchSend(BrokerNode brokerNode, String app, String txId, Map<String, List<ProduceMessage>> messages, QosLevel qosLevel, long produceTimeout, long timeout);
 
-    void batchSendAsync(BrokerNode brokerNode, String app, String txId, Map<String, List<ProduceMessage>> messages, QosLevel qosLevel, long produceTimeout, long timeout, AsyncMultiBatchSendCallback callback);
+    void batchSendAsync(BrokerNode brokerNode, String app, String txId, Map<String, List<ProduceMessage>> messages,
+                        QosLevel qosLevel, long produceTimeout, long timeout, AsyncMultiBatchSendCallback callback);
 
-    Future<Map<String, SendBatchResultData>> batchSendAsync(BrokerNode brokerNode, String app, String txId, Map<String, List<ProduceMessage>> messages, QosLevel qosLevel, long produceTimeout, long timeout);
+    Future<Map<String, SendBatchResultData>> batchSendAsync(BrokerNode brokerNode, String app, String txId,
+                                                            Map<String, List<ProduceMessage>> messages, QosLevel qosLevel, long produceTimeout, long timeout);
 
     // transaction
     SendPrepareResult prepare(BrokerNode brokerNode, String topic, String app, String transactionId, long sequence, long transactionTimeout, long timeout);

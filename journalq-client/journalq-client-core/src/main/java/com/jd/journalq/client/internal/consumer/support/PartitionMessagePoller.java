@@ -67,7 +67,8 @@ public class PartitionMessagePoller extends Service implements MessagePoller {
     private ConsumerIndexManager consumerIndexManager;
     private MessagePollerInner messagePollerInner;
 
-    public PartitionMessagePoller(ConsumerConfig config, NameServerConfig nameServerConfig, ClusterManager clusterManager, ConsumerClientManager consumerClientManager, ConsumerIndexManager consumerIndexManager) {
+    public PartitionMessagePoller(ConsumerConfig config, NameServerConfig nameServerConfig, ClusterManager clusterManager,
+                                  ConsumerClientManager consumerClientManager, ConsumerIndexManager consumerIndexManager) {
         Preconditions.checkArgument(config != null, "consumer not null");
         Preconditions.checkArgument(nameServerConfig != null, "nameServer not null");
         Preconditions.checkArgument(clusterManager != null, "clusterManager not null");
@@ -279,7 +280,8 @@ public class PartitionMessagePoller extends Service implements MessagePoller {
         return doPollPartitionInternal(brokerNode, topic, partition, indexData.getIndex(), batchSize, timeout, timeoutUnit, listener);
     }
 
-    protected List<ConsumeMessage> doPollPartitionInternal(BrokerNode brokerNode, String topic, short partition, long index, int batchSize, long timeout, TimeUnit timeoutUnit, ConsumerListener listener) {
+    protected List<ConsumeMessage> doPollPartitionInternal(BrokerNode brokerNode, String topic, short partition, long index,
+                                                           int batchSize, long timeout, TimeUnit timeoutUnit, ConsumerListener listener) {
         try {
             return messagePollerInner.fetchPartition(brokerNode, topic, partition, index, batchSize, timeout, timeoutUnit, listener);
         } catch (ConsumerException e) {

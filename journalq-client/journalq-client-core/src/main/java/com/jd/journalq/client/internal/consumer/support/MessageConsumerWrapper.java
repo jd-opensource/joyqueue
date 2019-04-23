@@ -47,7 +47,8 @@ public class MessageConsumerWrapper extends Service implements MessageConsumer {
     private ConsumerClientManager consumerClientManager;
     private MessageConsumer delegate;
 
-    public MessageConsumerWrapper(ConsumerConfig consumerConfig, NameServerConfig nameServerConfig, ClusterManager clusterManager, ClusterClientManager clusterClientManager, ConsumerClientManager consumerClientManager, MessageConsumer delegate) {
+    public MessageConsumerWrapper(ConsumerConfig consumerConfig, NameServerConfig nameServerConfig, ClusterManager clusterManager,
+                                  ClusterClientManager clusterClientManager, ConsumerClientManager consumerClientManager, MessageConsumer delegate) {
         this.consumerConfig = consumerConfig;
         this.nameServerConfig = nameServerConfig;
         this.clusterManager = clusterManager;

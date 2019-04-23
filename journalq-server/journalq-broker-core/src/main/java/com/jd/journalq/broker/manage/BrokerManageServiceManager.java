@@ -68,7 +68,12 @@ public class BrokerManageServiceManager extends Service {
     private StoreService store;
     private ElectionService electionManager;
 
-    public BrokerManageServiceManager(BrokerMonitor brokerMonitor, ClusterManager clusterManager, StoreManagementService storeManagementService, StoreService storeService, Consume consume, MessageRetry messageRetry, CoordinatorService coordinatorService, ArchiveManager archiveManager, NameService nameService, StoreService store, ElectionService electionManager) {
+    public BrokerManageServiceManager(BrokerMonitor brokerMonitor, ClusterManager clusterManager,
+                                      StoreManagementService storeManagementService,
+                                      StoreService storeService, Consume consume,
+                                      MessageRetry messageRetry, CoordinatorService coordinatorService,
+                                      ArchiveManager archiveManager, NameService nameService,
+                                      StoreService store, ElectionService electionManager) {
         this.brokerMonitor = brokerMonitor;
         this.clusterManager = clusterManager;
         this.storeManagementService = storeManagementService;
@@ -90,7 +95,10 @@ public class BrokerManageServiceManager extends Service {
 
     protected BrokerMonitorService newBrokerMonitorService() {
         BrokerStat brokerStat = brokerMonitor.getBrokerStat();
-        DefaultBrokerMonitorInternalService brokerMonitorInternalService = new DefaultBrokerMonitorInternalService(brokerStat, consume, storeManagementService, nameService, store, electionManager, clusterManager);
+        DefaultBrokerMonitorInternalService brokerMonitorInternalService = new DefaultBrokerMonitorInternalService(brokerStat, consume,
+                storeManagementService, nameService,
+                store, electionManager,
+                clusterManager);
         DefaultConnectionMonitorService connectionMonitorService = new DefaultConnectionMonitorService(brokerStat);
         DefaultConsumerMonitorService consumerMonitorService = new DefaultConsumerMonitorService(brokerStat, consume, storeManagementService, retryManager, clusterManager);
         DefaultProducerMonitorService producerMonitorService = new DefaultProducerMonitorService(brokerStat, storeManagementService, clusterManager);
@@ -99,7 +107,11 @@ public class BrokerManageServiceManager extends Service {
         DefaultCoordinatorMonitorService coordinatorMonitorService = new DefaultCoordinatorMonitorService(coordinatorService);
         DefaultArchiveMonitorService archiveMonitorService = new DefaultArchiveMonitorService(archiveManager);
         DefaultMetadataMonitorService metadataMonitorService = new DefaultMetadataMonitorService(clusterManager);
-        return new DefaultBrokerMonitorService(brokerMonitorInternalService, connectionMonitorService, consumerMonitorService, producerMonitorService, topicMonitorService, partitionMonitorService, coordinatorMonitorService, archiveMonitorService, metadataMonitorService);
+        return new DefaultBrokerMonitorService(brokerMonitorInternalService, connectionMonitorService,
+                consumerMonitorService, producerMonitorService,
+                topicMonitorService, partitionMonitorService,
+                coordinatorMonitorService, archiveMonitorService,
+                metadataMonitorService);
     }
 
     protected BrokerManageService newBrokerManageService() {

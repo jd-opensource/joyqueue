@@ -2,9 +2,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,8 +31,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author majun8
@@ -40,7 +48,7 @@ import java.util.concurrent.*;
 public class StoreCleanManager extends Service {
     private static final Logger LOG = LoggerFactory.getLogger(StoreCleanManager.class);
 
-    private final static int SCHEDULE_EXECUTOR_THREADS = 16;
+    private static final int SCHEDULE_EXECUTOR_THREADS = 16;
     private PropertySupplier propertySupplier;
     private BrokerStoreConfig brokerStoreConfig;
     private StoreService storeService;
@@ -108,7 +116,7 @@ public class StoreCleanManager extends Service {
                 }
             }
         } catch (Throwable t) {
-            t.printStackTrace();
+            LOG.error(t.getMessage(), t);
         }
     }
 
@@ -135,7 +143,8 @@ public class StoreCleanManager extends Service {
                                                                     minAckIndex = Math.min(minAckIndex, positionManager.getLastMsgAckIndex(topicConfig.getName(), app, partition));
                                                                 } catch (JMQException e) {
                                                                     //minAckIndex = Long.MAX_VALUE;
-                                                                    LOG.error("Error to get last topic & app offset, topic <{}>, app <{}>, partitionGroup <{}>, partition <{}>, error: <{}>", topicConfig.getName(), app, partitionGroup.getGroup(), partition, e);
+                                                                    LOG.error("Error to get last topic & app offset, topic <{}>, app <{}>, partitionGroup <{}>, partition <{}>, error: <{}>",
+                                                                            topicConfig.getName(), app, partitionGroup.getGroup(), partition, e);
                                                                 }
                                                             }
                                                         }
@@ -146,11 +155,13 @@ public class StoreCleanManager extends Service {
                                             try {
                                                 cleaningStrategy = cleaningStrategyMap.get(brokerStoreConfig.getCleanStrategyClass());
                                                 if (cleaningStrategy != null) {
-                                                    LOG.info("Begin store clean topic: <{}>, partition group: <{}>, partition ack map: <{}>", topicConfig.getName().getFullName(), partitionGroup.getGroup(), partitionAckMap);
+                                                    LOG.info("Begin store clean topic: <{}>, partition group: <{}>, partition ack map: <{}>",
+                                                            topicConfig.getName().getFullName(), partitionGroup.getGroup(), partitionAckMap);
                                                     cleaningStrategy.deleteIfNeeded(storeService.getStore(topicConfig.getName().getFullName(), partitionGroup.getGroup()), partitionAckMap);
                                                 }
                                             } catch (IOException e) {
-                                                LOG.error("Error to clean store for topic <{}>, partition group <{}>, delete partitions index <{}> on clean class <{}>, exception: <{}>", topicConfig, partitionGroup.getGroup(), partitionAckMap, cleaningStrategy, e);
+                                                LOG.error("Error to clean store for topic <{}>, partition group <{}>, delete partitions index <{}> on clean class <{}>, exception: <{}>",
+                                                        topicConfig, partitionGroup.getGroup(), partitionAckMap, cleaningStrategy, e);
                                             }
                                         }
                                     }

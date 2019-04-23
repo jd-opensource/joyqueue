@@ -68,7 +68,8 @@ public class PartitionGroupServerServiceImpl extends NameServerBase implements P
         if (partitionGroupPageResult == null || partitionGroupPageResult.getResult() == null) {
             return PageResult.empty();
         }
-        return new PageResult<>(partitionGroupPageResult.getPagination(), partitionGroupPageResult.getResult().stream().map(partitionGroup -> nsrPartitionGroupConverter.revert(partitionGroup)).collect(Collectors.toList()));
+        return new PageResult<>(partitionGroupPageResult.getPagination(),
+                partitionGroupPageResult.getResult().stream().map(partitionGroup -> nsrPartitionGroupConverter.revert(partitionGroup)).collect(Collectors.toList()));
 
     }
 

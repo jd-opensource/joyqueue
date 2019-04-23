@@ -119,7 +119,7 @@ public class FlagFilter implements MessageFilter {
         List<ByteBuffer> validList; // 有效队列
         List<ByteBuffer> inValidList; // 无效队列
 
-        public FilterResult(List<ByteBuffer> validList, List<ByteBuffer> inValidList) {
+        FilterResult(List<ByteBuffer> validList, List<ByteBuffer> inValidList) {
             this.validList = validList;
             this.inValidList = inValidList;
         }

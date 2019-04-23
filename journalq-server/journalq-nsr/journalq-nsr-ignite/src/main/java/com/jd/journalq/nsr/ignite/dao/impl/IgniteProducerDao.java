@@ -32,7 +32,11 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import static com.jd.journalq.nsr.ignite.model.IgniteProducer.*;
+import static com.jd.journalq.nsr.ignite.model.IgniteProducer.COLUMN_ID;
+import static com.jd.journalq.nsr.ignite.model.IgniteProducer.COLUMN_NAMESPACE;
+import static com.jd.journalq.nsr.ignite.model.IgniteProducer.COLUMN_TOPIC;
+import static com.jd.journalq.nsr.ignite.model.IgniteProducer.COLUMN_APP;
+import static com.jd.journalq.nsr.ignite.model.IgniteProducer.COLUMN_CLIENT_TYPE;
 
 public class IgniteProducerDao implements ProducerDao {
     public static final String CACHE_NAME = "producer";

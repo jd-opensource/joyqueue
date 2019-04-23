@@ -24,7 +24,10 @@ import io.vertx.ext.web.RoutingContext;
 
 import javax.validation.constraints.NotNull;
 
-import static com.jd.journalq.handler.Constants.*;
+import static com.jd.journalq.handler.Constants.APPLICATION;
+import static com.jd.journalq.handler.Constants.APP_USER_ID;
+import static com.jd.journalq.handler.Constants.APP_USER;
+import static com.jd.journalq.handler.Constants.USER_ID;
 
 /**
  * 验证是指定应用的成员

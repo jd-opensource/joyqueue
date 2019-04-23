@@ -139,7 +139,8 @@ public class NameServerBase {
         try {
             int statusCode = response.getStatusLine().getStatusCode();
             if (HttpStatus.SC_OK != statusCode) {
-                String message = String.format("monitorUrl [%s],reuqest[%s] error code [%s],response[%s]",request.getURI().toString(),request.toString(),statusCode, EntityUtils.toString(response.getEntity()));
+                String message = String.format("monitorUrl [%s],reuqest[%s] error code [%s],response[%s]",
+                        request.getURI().toString(),request.toString(),statusCode, EntityUtils.toString(response.getEntity()));
                 throw new Exception(message);
             }
             String result =  EntityUtils.toString(response.getEntity());

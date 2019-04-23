@@ -26,7 +26,7 @@ public interface CoordinatorManageService {
      *
      * @return
      */
-    public boolean initCoordinator();
+    boolean initCoordinator();
 
     /**
      * 移除协调者组
@@ -35,5 +35,5 @@ public interface CoordinatorManageService {
      * @param groupId
      * @return
      */
-    public boolean removeCoordinatorGroup(String namespace, String groupId);
+    boolean removeCoordinatorGroup(String namespace, String groupId);
 }

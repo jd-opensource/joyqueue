@@ -13,13 +13,11 @@
  */
 package com.jd.journalq.service.impl;
 
-import com.jd.journalq.model.ListQuery;
 import com.jd.journalq.model.domain.Broker;
 import com.jd.journalq.model.domain.BrokerGroup;
 import com.jd.journalq.model.domain.BrokerGroupRelated;
 import com.jd.journalq.model.domain.Identity;
 import com.jd.journalq.model.query.QBrokerGroup;
-import com.jd.journalq.model.query.QBrokerGroupRelated;
 import com.jd.journalq.repository.BrokerGroupRepository;
 import com.jd.journalq.service.BrokerGroupRelatedService;
 import com.jd.journalq.service.BrokerGroupService;

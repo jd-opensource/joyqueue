@@ -20,7 +20,12 @@ package com.jd.journalq.registry.memory;
 import com.jd.journalq.registry.util.Path;
 import com.jd.journalq.toolkit.concurrent.EventBus;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+import java.util.Stack;
 import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.atomic.AtomicLong;

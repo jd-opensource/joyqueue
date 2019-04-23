@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit;
 import static com.jd.journalq.exception.ServiceException.INTERNAL_SERVER_ERROR;
 
 public class AsyncHttpClient {
-    private final static Logger logger= LoggerFactory.getLogger(AsyncHttpClient.class);
+    private static final Logger logger= LoggerFactory.getLogger(AsyncHttpClient.class);
     private static CloseableHttpAsyncClient httpclient = HttpAsyncClients.custom().setDefaultRequestConfig(RequestConfig.custom()
             .setConnectTimeout(600)
             .setSocketTimeout(700)

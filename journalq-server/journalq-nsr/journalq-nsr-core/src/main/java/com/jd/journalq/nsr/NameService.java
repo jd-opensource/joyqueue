@@ -13,7 +13,19 @@
  */
 package com.jd.journalq.nsr;
 
-import com.jd.journalq.domain.*;
+import com.jd.journalq.domain.AppToken;
+import com.jd.journalq.domain.Broker;
+import com.jd.journalq.domain.ClientType;
+import com.jd.journalq.domain.Config;
+import com.jd.journalq.domain.Consumer;
+import com.jd.journalq.domain.DataCenter;
+import com.jd.journalq.domain.PartitionGroup;
+import com.jd.journalq.domain.Producer;
+import com.jd.journalq.domain.Replica;
+import com.jd.journalq.domain.Subscription;
+import com.jd.journalq.domain.Topic;
+import com.jd.journalq.domain.TopicConfig;
+import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.event.NameServerEvent;
 import com.jd.journalq.toolkit.concurrent.EventListener;
 import com.jd.journalq.toolkit.lang.LifeCycle;
@@ -210,7 +222,7 @@ public interface NameService extends LifeCycle {
         Consumer(2);
         private int type;
 
-        private Subscribe(int type) {
+        Subscribe(int type) {
             this.type = type;
         }
 

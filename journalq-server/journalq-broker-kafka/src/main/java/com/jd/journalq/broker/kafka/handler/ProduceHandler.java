@@ -174,31 +174,6 @@ public class ProduceHandler extends AbstractKafkaCommandHandler implements Broke
         }
     }
 
-    protected void produceMessage(Transport transport, byte[] clientAddress, QosLevel qosLevel, Producer producer, int partition, List<KafkaBrokerMessage> messages, List<ProducePartitionStatus> producePartitionStatusSet, EventListener<List<ProducePartitionStatus>> listener) {
-        List<BrokerMessage> brokerMessages = Lists.newLinkedList();
-
-        for (KafkaBrokerMessage message : messages) {
-            BrokerMessage brokerMessage = KafkaMessageConverter.toBrokerMessage(producer.getTopic(), partition, producer.getApp(), clientAddress, message);
-            brokerMessages.add(brokerMessage);
-        }
-
-        try {
-            produce.putMessageAsync(producer, brokerMessages, qosLevel, (writeResult) -> {
-                if (!writeResult.getCode().equals(JMQCode.SUCCESS)) {
-                    logger.error("produce message failed, topic: {}, partition: {}, code: {}", producer.getTopic(), partition, writeResult.getCode());
-                }
-                short status = KafkaErrorCode.jmqCodeFor(writeResult.getCode().getCode());
-                buildPartitionStatus(partition, writeResult.getIndices(), status, messages, producePartitionStatusSet);
-                listener.onEvent(null);
-            });
-        } catch (Exception e) {
-            logger.error("produce message failed, topic: {}, partition: {}", producer.getTopic(), partition, e);
-            short status = KafkaErrorCode.exceptionFor(e);
-            buildPartitionStatus(partition, null, status, messages, producePartitionStatusSet);
-            listener.onEvent(null);
-        }
-    }
-
     protected void buildPartitionStatus(int partition, long[] indices, short status, List<KafkaBrokerMessage> messages, List<ProducePartitionStatus> producePartitionStatusList) {
         if (ArrayUtils.isEmpty(indices)) {
             if (messages.get(0).isBatch()) {

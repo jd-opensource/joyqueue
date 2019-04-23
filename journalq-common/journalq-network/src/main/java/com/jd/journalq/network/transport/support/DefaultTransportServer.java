@@ -45,7 +45,9 @@ public class DefaultTransportServer extends TransportServerSupport {
     private ResponseHandler responseHandler;
     private EventBus<TransportEvent> transportEventBus;
 
-    public DefaultTransportServer(ServerConfig serverConfig, String host, int port, Codec codec, RequestBarrier requestBarrier, RequestHandler requestHandler, ResponseHandler responseHandler, EventBus<TransportEvent> transportEventBus) {
+    public DefaultTransportServer(ServerConfig serverConfig, String host, int port, Codec codec,
+                                  RequestBarrier requestBarrier, RequestHandler requestHandler,
+                                  ResponseHandler responseHandler, EventBus<TransportEvent> transportEventBus) {
         super(serverConfig, host, port);
         this.codec = codec;
         this.requestBarrier = requestBarrier;

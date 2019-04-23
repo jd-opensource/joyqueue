@@ -14,7 +14,11 @@
 package com.jd.journalq.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.jd.journalq.async.*;
+import com.jd.journalq.async.BrokerClusterQuery;
+import com.jd.journalq.async.BrokerMonitorClusterQuery;
+import com.jd.journalq.async.DefaultBrokerInfoFuture;
+import com.jd.journalq.async.RetrieveProvider;
+import com.jd.journalq.async.UpdateProvider;
 import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.monitor.PartitionAckMonitorInfo;
 import com.jd.journalq.monitor.PartitionLeaderAckMonitorInfo;
@@ -43,7 +47,11 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.io.UnsupportedEncodingException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;

@@ -52,7 +52,8 @@ public class BatchConsumerInvoker implements ConsumerInvoker {
     private List<BatchMessageListener> listeners;
     private ExecutorService listenerExecutor;
 
-    public BatchConsumerInvoker(ConsumerConfig config, TopicMetadata topicMetadata, Consumer.ConsumerPolicy consumerPolicy, List<ConsumeMessage> messages, List<BatchMessageListener> listeners, ExecutorService listenerExecutor) {
+    public BatchConsumerInvoker(ConsumerConfig config, TopicMetadata topicMetadata, Consumer.ConsumerPolicy consumerPolicy,
+                                List<ConsumeMessage> messages, List<BatchMessageListener> listeners, ExecutorService listenerExecutor) {
         this.config = config;
         this.topicMetadata = topicMetadata;
         this.consumerPolicy = consumerPolicy;

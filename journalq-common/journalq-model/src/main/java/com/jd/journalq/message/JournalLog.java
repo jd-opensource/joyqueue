@@ -15,7 +15,7 @@ package com.jd.journalq.message;
 
 
 /**
- *
+ * 日志接口
  */
 public interface JournalLog {
     //日志类型

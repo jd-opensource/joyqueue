@@ -71,7 +71,10 @@ public class MessageSenderWrapper extends Service implements MessageSender {
     }
 
     @Override
-    public Future<SendBatchResultData> batchSendAsync(BrokerNode brokerNode, String topic, String app, String txId, List<ProduceMessage> messages, QosLevel qosLevel, long produceTimeout, long timeout) {
+    public Future<SendBatchResultData> batchSendAsync(BrokerNode brokerNode, String topic,
+                                                      String app, String txId,
+                                                      List<ProduceMessage> messages, QosLevel qosLevel,
+                                                      long produceTimeout, long timeout) {
         return delegate.batchSendAsync(brokerNode, topic, app, txId, messages, qosLevel, produceTimeout, timeout);
     }
 
@@ -91,27 +94,43 @@ public class MessageSenderWrapper extends Service implements MessageSender {
     }
 
     @Override
-    public void batchSendOneway(BrokerNode brokerNode, String topic, String app, String txId, List<ProduceMessage> messages, QosLevel qosLevel, long produceTimeout, long timeout) {
+    public void batchSendOneway(BrokerNode brokerNode, String topic,
+                                String app, String txId,
+                                List<ProduceMessage> messages, QosLevel qosLevel,
+                                long produceTimeout, long timeout) {
         delegate.batchSendOneway(brokerNode, topic, app, txId, messages, qosLevel, produceTimeout, timeout);
     }
 
     @Override
-    public void batchSendAsync(BrokerNode brokerNode, String topic, String app, String txId, List<ProduceMessage> messages, QosLevel qosLevel, long produceTimeout, long timeout, AsyncBatchSendCallback callback) {
+    public void batchSendAsync(BrokerNode brokerNode, String topic,
+                               String app, String txId,
+                               List<ProduceMessage> messages, QosLevel qosLevel,
+                               long produceTimeout, long timeout,
+                               AsyncBatchSendCallback callback) {
         delegate.batchSendAsync(brokerNode, topic, app, txId, messages, qosLevel, produceTimeout, timeout, callback);
     }
 
     @Override
-    public Map<String, SendBatchResultData> batchSend(BrokerNode brokerNode, String app, String txId, Map<String, List<ProduceMessage>> messages, QosLevel qosLevel, long produceTimeout, long timeout) {
+    public Map<String, SendBatchResultData> batchSend(BrokerNode brokerNode, String app,
+                                                      String txId, Map<String, List<ProduceMessage>> messages,
+                                                      QosLevel qosLevel, long produceTimeout,
+                                                      long timeout) {
         return delegate.batchSend(brokerNode, app, txId, messages, qosLevel, produceTimeout, timeout);
     }
 
     @Override
-    public void batchSendAsync(BrokerNode brokerNode, String app, String txId, Map<String, List<ProduceMessage>> messages, QosLevel qosLevel, long produceTimeout, long timeout, AsyncMultiBatchSendCallback callback) {
+    public void batchSendAsync(BrokerNode brokerNode, String app,
+                               String txId, Map<String, List<ProduceMessage>> messages,
+                               QosLevel qosLevel, long produceTimeout,
+                               long timeout, AsyncMultiBatchSendCallback callback) {
         delegate.batchSendAsync(brokerNode, app, txId, messages, qosLevel, produceTimeout, timeout, callback);
     }
 
     @Override
-    public Future<Map<String, SendBatchResultData>> batchSendAsync(BrokerNode brokerNode, String app, String txId, Map<String, List<ProduceMessage>> messages, QosLevel qosLevel, long produceTimeout, long timeout) {
+    public Future<Map<String, SendBatchResultData>> batchSendAsync(BrokerNode brokerNode, String app,
+                                                                   String txId, Map<String, List<ProduceMessage>> messages,
+                                                                   QosLevel qosLevel, long produceTimeout,
+                                                                   long timeout) {
         return delegate.batchSendAsync(brokerNode, app, txId, messages, qosLevel, produceTimeout, timeout);
     }
 

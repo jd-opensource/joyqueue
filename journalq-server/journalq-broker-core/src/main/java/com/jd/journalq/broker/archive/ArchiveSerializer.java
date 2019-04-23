@@ -128,11 +128,11 @@ public class ArchiveSerializer {
         private final ConcurrentMap<Integer, Queue<ByteBuffer>> heapBuffers = new ConcurrentHashMap<>();
         private final int factor;
 
-        public ByteBufferPool() {
+        ByteBufferPool() {
             this(1024);
         }
 
-        public ByteBufferPool(int factor) {
+        ByteBufferPool(int factor) {
             this.factor = factor;
         }
 

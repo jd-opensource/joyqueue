@@ -343,7 +343,7 @@ public class BrokerService extends Service {
     private class ConfigProviderImpl implements ConfigurationManager.ConfigProvider {
         private NameService nameService;
 
-        public ConfigProviderImpl(NameService nameService) {
+        ConfigProviderImpl(NameService nameService) {
             this.nameService = nameService;
         }
 

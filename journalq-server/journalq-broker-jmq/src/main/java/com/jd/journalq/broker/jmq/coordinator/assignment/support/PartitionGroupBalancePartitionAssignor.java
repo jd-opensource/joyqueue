@@ -124,7 +124,11 @@ public class PartitionGroupBalancePartitionAssignor implements PartitionAssignor
         return result;
     }
 
-    protected void saveAssignedPartitionGroups(TopicPartitionGroupAssignmentMetadata topicPartitionGroupAssignmentMetadata, JMQCoordinatorGroupMember member, String topic, List<PartitionGroup> assignedPartitionGroups) {
+    //TODO topic 没有用？
+    protected void saveAssignedPartitionGroups(TopicPartitionGroupAssignmentMetadata topicPartitionGroupAssignmentMetadata,
+                                               JMQCoordinatorGroupMember member,
+                                               String topic,
+                                               List<PartitionGroup> assignedPartitionGroups) {
         for (PartitionGroup assignedPartitionGroup : assignedPartitionGroups) {
             assignPartitionGroup(member, topicPartitionGroupAssignmentMetadata, assignedPartitionGroup.getGroup());
         }

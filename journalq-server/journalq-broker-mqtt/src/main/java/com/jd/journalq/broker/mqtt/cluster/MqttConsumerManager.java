@@ -188,7 +188,7 @@ public class MqttConsumerManager extends Service {
         try {
             consume.setAckIndex(consumer, partition, index);
         } catch (JMQException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
         }
     }
 
@@ -198,7 +198,7 @@ public class MqttConsumerManager extends Service {
 
         private ConcurrentMap<String, MqttSession> clientConsumeMap = new ConcurrentHashMap<>();
 
-        public ConsumeTask(String name) {
+        ConsumeTask(String name) {
             this.name = this.name + name;
         }
 
@@ -245,12 +245,12 @@ public class MqttConsumerManager extends Service {
                                                                                     qos
                                                                             );
                                                                         } catch (Exception e) {
-                                                                            e.printStackTrace();
+                                                                            LOG.error(e.getMessage(), e);
                                                                         }
                                                                     }
                                                             );
                                                         } catch (Exception e) {
-                                                            e.printStackTrace();
+                                                            LOG.error(e.getMessage(), e);
                                                         }
                                                     }
                                                 }
@@ -263,19 +263,16 @@ public class MqttConsumerManager extends Service {
                             Thread.sleep(800);
                         } catch (InterruptedException e) {
                             LOG.warn("mqtt consumer manager thread: <{}> interrupted, exception: {}", name, e.getMessage());
-                            //e.printStackTrace();
                         }
                     } else {
                         try {
                             Thread.sleep(2000);
                         } catch (InterruptedException e) {
                             LOG.warn("mqtt consumer manager thread: <{}> interrupted, exception: {}", name, e.getMessage());
-                            //e.printStackTrace();
                         }
                     }
                 } catch (Exception e) {
                     LOG.error("Thread: <{}>, mqtt consume client message consume error, topic: <{}>, cause: <{}>", name, e.getMessage());
-                    e.printStackTrace();
                 }
             }
             LOG.info("mqtt consumer manager thread: <{}> stop.", name);

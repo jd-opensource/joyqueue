@@ -33,7 +33,7 @@ public enum TxStatus {
 
     private byte type;
 
-    private TxStatus(int type) {
+    TxStatus(int type) {
         this.type = (byte) type;
     }
 

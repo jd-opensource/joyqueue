@@ -456,7 +456,7 @@ public class ProduceArchiveService extends Service {
         private final Short partition;
         private AtomicLong readIndex; // 读序号
 
-        public SendArchiveItem(String topic, Short partition) {
+        SendArchiveItem(String topic, Short partition) {
             this.topic = topic;
             this.partition = partition;
         }
@@ -484,6 +484,10 @@ public class ProduceArchiveService extends Service {
             return partition;
         }
 
+        @Override
+        public int hashCode() {
+            return super.hashCode();
+        }
 
         @Override
         public boolean equals(Object obj) {
@@ -549,7 +553,7 @@ public class ProduceArchiveService extends Service {
                     Long index = archiveStore.getPosition(item.topic, item.partition);
                     if (index == null) {
                         // 从头拉起
-                        index = 0l;
+                        index = 0L;
                     }
                     item.setReadIndex(index);
                     cpList.add(item);

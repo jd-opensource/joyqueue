@@ -80,7 +80,6 @@ public class RetryServiceImpl implements RetryService {
         try {
             consoleMessageRetry.addRetry(retryMessageModels);
         } catch (JMQException e) {
-            e.printStackTrace();
             throw new RuntimeException("add retry error",e);
         }
     }

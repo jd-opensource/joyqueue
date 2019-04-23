@@ -71,7 +71,8 @@ public class DefaultMessagePoller extends Service implements MessagePoller {
     private MessagePollerInner messagePollerInner;
     private BrokerAssignmentsHolder brokerAssignmentCache;
 
-    public DefaultMessagePoller(ConsumerConfig config, NameServerConfig nameServerConfig, ClusterManager clusterManager, ClusterClientManager clusterClientManager, ConsumerClientManager consumerClientManager) {
+    public DefaultMessagePoller(ConsumerConfig config, NameServerConfig nameServerConfig, ClusterManager clusterManager,
+                                ClusterClientManager clusterClientManager, ConsumerClientManager consumerClientManager) {
         Preconditions.checkArgument(config != null, "consumer can not be null");
         Preconditions.checkArgument(nameServerConfig != null, "nameServer can not be null");
         Preconditions.checkArgument(clusterManager != null, "clusterManager can not be null");

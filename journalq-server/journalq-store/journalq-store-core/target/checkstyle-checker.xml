@@ -108,23 +108,5 @@
         <!-- Checks that all java files have a package declaration and that it
           lines up with the directory structure. -->
         <module name="PackageDeclaration"/>
-
-        <!-- We don't use Java's builtin serialization and we suppress all warning
-          about it. The flip side of that coin is that we shouldn't _try_ to use
-          it. We can't outright ban it with ForbiddenApis because it complain about
-          every we reference a class that implements Serializable like String or
-          Exception.
-          -->
-        <module name="RegexpSinglelineJava">
-            <property name="format" value="serialVersionUID" />
-            <property name="message" value="Do not declare serialVersionUID." />
-            <property name="ignoreComments" value="true" />
-        </module>
-        <module name="RegexpSinglelineJava">
-            <property name="format" value="java\.io\.Serializable" />
-            <property name="message" value="References java.io.Serializable." />
-            <property name="ignoreComments" value="true" />
-        </module>
-        <!-- end Orwellian suppression of Serializable -->
     </module>
 </module>

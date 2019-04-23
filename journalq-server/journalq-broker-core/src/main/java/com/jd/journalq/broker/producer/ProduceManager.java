@@ -23,7 +23,11 @@ import com.jd.journalq.domain.QosLevel;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.exception.JMQException;
-import com.jd.journalq.message.*;
+import com.jd.journalq.message.BrokerCommit;
+import com.jd.journalq.message.BrokerMessage;
+import com.jd.journalq.message.BrokerPrepare;
+import com.jd.journalq.message.BrokerRollback;
+import com.jd.journalq.message.JournalLog;
 import com.jd.journalq.network.session.Producer;
 import com.jd.journalq.network.session.TransactionId;
 import com.jd.journalq.store.PartitionGroupStore;
@@ -64,7 +68,7 @@ import java.util.concurrent.TimeoutException;
  */
 public class ProduceManager extends Service implements Produce, BrokerContextAware {
 
-    private final static Logger logger = LoggerFactory.getLogger(ProduceManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(ProduceManager.class);
 
     private ProduceConfig config;
 

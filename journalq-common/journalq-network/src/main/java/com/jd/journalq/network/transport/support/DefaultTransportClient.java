@@ -56,7 +56,9 @@ public class DefaultTransportClient extends TransportClientSupport implements Tr
     private EventBus<TransportEvent> transportEventBus;
     private Timer clearTimer;
 
-    public DefaultTransportClient(ClientConfig config, Codec codec, final RequestBarrier requestBarrier, RequestHandler requestHandler, ResponseHandler responseHandler, EventBus<TransportEvent> transportEventBus) {
+    public DefaultTransportClient(ClientConfig config, Codec codec, final RequestBarrier requestBarrier,
+                                  RequestHandler requestHandler, ResponseHandler responseHandler,
+                                  EventBus<TransportEvent> transportEventBus) {
         super(config);
         this.codec = codec;
         this.requestBarrier = requestBarrier;

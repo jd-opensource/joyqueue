@@ -33,7 +33,10 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import static com.jd.journalq.nsr.ignite.model.IgniteConfig.*;
+import static com.jd.journalq.nsr.ignite.model.IgniteConfig.COLUMN_ID;
+import static com.jd.journalq.nsr.ignite.model.IgniteConfig.COLUMN_CFG_KEY;
+import static com.jd.journalq.nsr.ignite.model.IgniteConfig.COLUMN_CFG_VALUE;
+import static com.jd.journalq.nsr.ignite.model.IgniteConfig.COLUMN_CFG_GROUP;
 
 public class IgniteConfigDao implements ConfigDao {
     public static final String CACHE_NAME = "config";

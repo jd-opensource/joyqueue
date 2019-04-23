@@ -30,7 +30,11 @@ import com.jd.journalq.network.session.Connection;
 import com.jd.journalq.network.session.Consumer;
 import com.jd.journalq.server.retry.api.MessageRetry;
 import com.jd.journalq.server.retry.model.RetryMessageModel;
-import com.jd.journalq.store.*;
+import com.jd.journalq.store.PartitionGroupStore;
+import com.jd.journalq.store.PositionOverflowException;
+import com.jd.journalq.store.PositionUnderflowException;
+import com.jd.journalq.store.ReadResult;
+import com.jd.journalq.store.StoreService;
 import com.jd.journalq.toolkit.lang.Preconditions;
 import com.jd.journalq.toolkit.network.IpUtil;
 import com.jd.journalq.toolkit.service.Service;
@@ -74,7 +78,7 @@ class PartitionConsumption extends Service {
     // 性能监控key
     private String monitorKey = "Read-Message";
 
-    public PartitionConsumption(ClusterManager clusterManager, StoreService storeService, PartitionManager partitionManager,
+    PartitionConsumption(ClusterManager clusterManager, StoreService storeService, PartitionManager partitionManager,
                                 PositionManager positionManager, MessageRetry messageRetry,
                                 FilterMessageSupport filterMessageSupport, ArchiveManager archiveManager) {
         this.clusterManager = clusterManager;
@@ -117,7 +121,7 @@ class PartitionConsumption extends Service {
 
         if (partitionManager.isRetry(consumer)) {
             // 消费待重试的消息
-            List<RetryMessageModel> retryMsgList = messageRetry.getRetry(consumer.getTopic(), consumer.getApp(), (short) 1, 0l);
+            List<RetryMessageModel> retryMsgList = messageRetry.getRetry(consumer.getTopic(), consumer.getApp(), (short) 1, 0L);
             if (CollectionUtils.isNotEmpty(retryMsgList) && retryMsgList.size() > 0) {
                 pullResult = brokerMessage2PullResult(consumer, retryMsgList);
                 // 读到重试消息，增加下次读到重试队列的概率（优先处理重试消息）
@@ -319,7 +323,7 @@ class PartitionConsumption extends Service {
 
         private Consumer consumer;
 
-        public FilterCallbackImpl(Consumer consumer) {
+        FilterCallbackImpl(Consumer consumer) {
             this.consumer = consumer;
         }
 

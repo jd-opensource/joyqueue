@@ -28,7 +28,6 @@ import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.event.ConsumerEvent;
 import com.jd.journalq.event.EventType;
 import com.jd.journalq.event.MetaEvent;
-import com.jd.journalq.event.NameServerEvent;
 import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.exception.JMQException;
 import com.jd.journalq.message.MessageLocation;

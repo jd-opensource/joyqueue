@@ -37,7 +37,8 @@ public class ConsumerInvocation {
     private ConsumerInterceptorManager consumerInterceptorManager;
     private ConsumerInvoker consumerInvoker;
 
-    public ConsumerInvocation(ConsumerConfig config, String topic, NameServerConfig nameServerConfig, List<ConsumeMessage> messages, ConsumerInterceptorManager consumerInterceptorManager, ConsumerInvoker consumerInvoker) {
+    public ConsumerInvocation(ConsumerConfig config, String topic, NameServerConfig nameServerConfig, List<ConsumeMessage> messages,
+                              ConsumerInterceptorManager consumerInterceptorManager, ConsumerInvoker consumerInvoker) {
         this.config = config;
         this.topic = topic;
         this.nameServerConfig = nameServerConfig;

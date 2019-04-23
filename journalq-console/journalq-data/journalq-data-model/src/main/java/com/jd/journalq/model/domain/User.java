@@ -13,7 +13,6 @@
  */
 package com.jd.journalq.model.domain;
 
-import java.util.Date;
 
 /**
  * Created by yangyang36 on 2018/9/12.

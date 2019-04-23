@@ -1671,7 +1671,7 @@ public abstract class CharMatcher {
 
         final char[] chars;
 
-        public AnyOf(CharSequence chars) {
+        AnyOf(CharSequence chars) {
             this.chars = chars.toString().toCharArray();
             Arrays.sort(this.chars);
         }

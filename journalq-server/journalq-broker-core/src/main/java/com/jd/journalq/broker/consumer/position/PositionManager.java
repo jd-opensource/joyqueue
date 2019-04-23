@@ -22,7 +22,10 @@ import com.jd.journalq.broker.consumer.position.model.Position;
 import com.jd.journalq.domain.Consumer;
 import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.domain.TopicName;
-import com.jd.journalq.event.*;
+import com.jd.journalq.event.ConsumerEvent;
+import com.jd.journalq.event.EventType;
+import com.jd.journalq.event.MetaEvent;
+import com.jd.journalq.event.PartitionGroupEvent;
 import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.exception.JMQException;
 import com.jd.journalq.store.PartitionGroupStore;
@@ -37,7 +40,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -490,7 +498,8 @@ public class PositionManager extends Service {
             ConsumePartition consumePartition = new ConsumePartition(topic.getFullName(), app, partition);
             Position remove = positionStore.remove(consumePartition);
 
-            logger.info("Remove ConsumePartition by topic:{}, app:{}, partition:{}, curIndex:{}", consumePartition.getTopic(), consumePartition.getApp(), consumePartition.getPartition(), remove.toString());
+            logger.info("Remove ConsumePartition by topic:{}, app:{}, partition:{}, curIndex:{}",
+                    consumePartition.getTopic(), consumePartition.getApp(), consumePartition.getPartition(), remove.toString());
         });
         // 落盘
         positionStore.forceFlush();

@@ -57,11 +57,13 @@ public class TopicMessageConsumer extends Service {
     private TopicMessageConsumerScheduler messageConsumerScheduler;
     private MessageListenerManager messageListenerManager = new MessageListenerManager();
 
-    public TopicMessageConsumer(String topic, ConsumerConfig config, NameServerConfig nameServerConfig, ClusterManager clusterManager, ClusterClientManager clusterClientManager, ConsumerClientManager consumerClientManager) {
+    public TopicMessageConsumer(String topic, ConsumerConfig config, NameServerConfig nameServerConfig, ClusterManager clusterManager,
+                                ClusterClientManager clusterClientManager, ConsumerClientManager consumerClientManager) {
         this(topic, config, nameServerConfig, clusterManager, clusterClientManager, consumerClientManager, new ConsumerInterceptorManager());
     }
 
-    public TopicMessageConsumer(String topic, ConsumerConfig config, NameServerConfig nameServerConfig, ClusterManager clusterManager, ClusterClientManager clusterClientManager, ConsumerClientManager consumerClientManager, ConsumerInterceptorManager consumerInterceptorManager) {
+    public TopicMessageConsumer(String topic, ConsumerConfig config, NameServerConfig nameServerConfig, ClusterManager clusterManager,
+                                ClusterClientManager clusterClientManager, ConsumerClientManager consumerClientManager, ConsumerInterceptorManager consumerInterceptorManager) {
         this.topic = topic;
         this.config = config;
         this.nameServerConfig = nameServerConfig;

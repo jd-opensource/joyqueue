@@ -21,8 +21,13 @@ import com.jd.journalq.message.BrokerMessage;
 import com.jd.journalq.model.PageResult;
 import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.handler.util.RetryUtils;
-import com.jd.journalq.handler.Constants;
-import com.jd.journalq.model.domain.*;
+import com.jd.journalq.model.domain.ApplicationUser;
+import com.jd.journalq.model.domain.BaseModel;
+import com.jd.journalq.model.domain.Consumer;
+import com.jd.journalq.model.domain.Identity;
+import com.jd.journalq.model.domain.Retry;
+import com.jd.journalq.model.domain.Topic;
+import com.jd.journalq.model.domain.User;
 import com.jd.journalq.model.query.QConsumer;
 import com.jd.journalq.model.query.QRetry;
 import com.jd.journalq.service.ApplicationUserService;
@@ -182,7 +187,6 @@ public class RetryCommand implements Command<Response>, Poolable {
         try {
             consumerList = consumerService.findByQuery(qConsumer);
         } catch (Exception e) {
-            e.printStackTrace();
         }
         if (consumerList != null && consumerList.size() > 0) {
             return true;
