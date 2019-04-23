@@ -14,7 +14,7 @@
 package com.jd.journalq.network.codec;
 
 import com.jd.journalq.network.command.AddConnectionAck;
-import com.jd.journalq.network.command.JMQCommandType;
+import com.jd.journalq.network.command.JournalqCommandType;
 import com.jd.journalq.network.serializer.Serializer;
 import com.jd.journalq.network.transport.codec.JMQHeader;
 import com.jd.journalq.network.transport.codec.PayloadCodec;
@@ -45,6 +45,6 @@ public class AddConnectionAckCodec implements PayloadCodec<JMQHeader, AddConnect
 
     @Override
     public int type() {
-        return JMQCommandType.ADD_CONNECTION_ACK.getCode();
+        return JournalqCommandType.ADD_CONNECTION_ACK.getCode();
     }
 }

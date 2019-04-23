@@ -22,7 +22,7 @@ import com.jd.journalq.client.internal.producer.domain.SendBatchResultData;
 import com.jd.journalq.client.internal.producer.domain.SendPrepareResult;
 import com.jd.journalq.client.internal.producer.domain.SendResultData;
 import com.jd.journalq.domain.QosLevel;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.command.TxStatus;
 import com.jd.journalq.network.domain.BrokerNode;
 import com.jd.journalq.toolkit.lang.LifeCycle;
@@ -69,9 +69,9 @@ public interface MessageSender extends LifeCycle {
     // transaction
     SendPrepareResult prepare(BrokerNode brokerNode, String topic, String app, String transactionId, long sequence, long transactionTimeout, long timeout);
 
-    JMQCode commit(BrokerNode brokerNode, String topic, String app, String txId, long timeout);
+    JournalqCode commit(BrokerNode brokerNode, String topic, String app, String txId, long timeout);
 
-    JMQCode rollback(BrokerNode brokerNode, String topic, String app, String txId, long timeout);
+    JournalqCode rollback(BrokerNode brokerNode, String topic, String app, String txId, long timeout);
 
     FetchFeedbackData fetchFeedback(BrokerNode brokerNode, String topic, String app, TxStatus txStatus, int count, long longPollTimeout, long timeout);
 }

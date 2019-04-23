@@ -30,7 +30,7 @@ public class FindCoordinator extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.FIND_COORDINATOR.getCode();
+        return JournalqCommandType.FIND_COORDINATOR.getCode();
     }
 
     public void setTopics(List<String> topics) {

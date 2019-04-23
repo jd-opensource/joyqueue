@@ -32,7 +32,7 @@ public class FetchTopicMessage extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.FETCH_TOPIC_MESSAGE.getCode();
+        return JournalqCommandType.FETCH_TOPIC_MESSAGE.getCode();
     }
 
     public void setTopics(Map<String, FetchTopicMessageData> topics) {

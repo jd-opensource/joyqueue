@@ -22,7 +22,7 @@ import com.jd.journalq.broker.mqtt.connection.MqttConnection;
 import com.jd.journalq.broker.mqtt.session.MqttSession;
 import com.jd.journalq.broker.producer.Produce;
 import com.jd.journalq.domain.QosLevel;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.message.BrokerMessage;
 import com.jd.journalq.network.session.Consumer;
 import com.jd.journalq.network.session.Producer;
@@ -62,7 +62,7 @@ public class MessagePublisher {
         this.connectionManager = connectionManager;
     }
 
-    public void publishMessage(Producer producer, Channel client, MqttPublishMessage publishMessage) throws JMQException {
+    public void publishMessage(Producer producer, Channel client, MqttPublishMessage publishMessage) throws JournalqException {
         final MqttQoS qos = publishMessage.fixedHeader().qosLevel();
         final int packageID = publishMessage.variableHeader().packetId();
 

@@ -16,7 +16,7 @@ package com.jd.journalq.client.internal.metadata.domain;
 import com.jd.journalq.domain.Consumer;
 import com.jd.journalq.domain.Producer;
 import com.jd.journalq.domain.Topic;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.domain.BrokerNode;
 
 import java.io.Serializable;
@@ -35,7 +35,7 @@ public class TopicMetadata implements Serializable {
     private Producer.ProducerPolicy producerPolicy;
     private Consumer.ConsumerPolicy consumerPolicy;
     private Topic.Type type;
-    private JMQCode code;
+    private JournalqCode code;
 
     private List<PartitionGroupMetadata> partitionGroups;
     private List<PartitionMetadata> partitions;
@@ -56,14 +56,14 @@ public class TopicMetadata implements Serializable {
 
     }
 
-    public TopicMetadata(JMQCode code) {
+    public TopicMetadata(JournalqCode code) {
         this.code = code;
     }
 
     public TopicMetadata(String topic, Producer.ProducerPolicy producerPolicy, Consumer.ConsumerPolicy consumerPolicy, Topic.Type type, List<PartitionGroupMetadata> partitionGroups,
                          List<PartitionMetadata> partitions, Map<Short, PartitionMetadata> partitionMap, Map<Integer, PartitionGroupMetadata> partitionGroupMap, List<BrokerNode> brokers,
                          List<BrokerNode> nearbyBrokers, Map<Integer, BrokerNode> brokerMap, Map<Integer, List<PartitionMetadata>> brokerPartitions,
-                         Map<Integer, List<PartitionGroupMetadata>> brokerPartitionGroups, JMQCode code) {
+                         Map<Integer, List<PartitionGroupMetadata>> brokerPartitionGroups, JournalqCode code) {
         this.topic = topic;
         this.producerPolicy = producerPolicy;
         this.consumerPolicy = consumerPolicy;
@@ -157,7 +157,7 @@ public class TopicMetadata implements Serializable {
         return partitionMap.get(partition);
     }
 
-    public JMQCode getCode() {
+    public JournalqCode getCode() {
         return code;
     }
 

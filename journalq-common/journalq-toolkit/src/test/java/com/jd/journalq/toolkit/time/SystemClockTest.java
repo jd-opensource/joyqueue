@@ -33,11 +33,11 @@ public class SystemClockTest {
         for (int i = 0; i < 100; i++) {
             futureList.add(executor.submit(() -> {
                 try{
-                    long time = System.currentTimeMillis();
+                    long time = SystemClock.now();
                     for (long j = 0; j < 100000000l; j++) {
-                        System.currentTimeMillis();
+                        SystemClock.now();
                     }
-                    return System.currentTimeMillis() - time;
+                    return SystemClock.now() - time;
                 }finally {
                     latch.countDown();
 

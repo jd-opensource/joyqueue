@@ -39,16 +39,16 @@ $ mvn install -DskipTests
 ## Step 2: Launch JournalQ server with default config
 
 ```bash
-$ cd distribution/jmq-server/bin
+$ cd distribution/journalq-server/bin
 $ ./start.sh
 ```
 Now,we will check whether JorunalQ and Naming Server started normally or not. Both startup logs and **netstat** port listen state can be used to validate.
 
 If you see logs as following,which indicate broker/election/monitoring/naming/ service started and listening on 50088/50089/50090/50091 port:
 ```
-[11:06:21:241] [main] [INFO] - com.jd.jmq.broker.manage.exporter.BrokerManageExportServer.doStart(BrokerManageExportServer.java:57) - broker manage server is started, host: 10.0.17.78, port: 50090
-[11:06:21:242] [main] [INFO] - com.jd.jmq.broker.BrokerService.doStart(BrokerService.java:263) - brokerServer start ,broker.id[1553137579],ip[10.0.17.78],frontPort[50088],backendPort[50089],monitorPort[50090],nameServer port[50091]
-[11:06:21:243] [main] [INFO] - com.jd.jmq.broker.JMQLauncher.main(JMQLauncher.java:32) - >>>
+[11:06:21:241] [main] [INFO] - com.jd.journalq.broker.manage.exporter.BrokerManageExportServer.doStart(BrokerManageExportServer.java:57) - broker manage server is started, host: 10.0.17.78, port: 50090
+[11:06:21:242] [main] [INFO] - com.jd.journalq.broker.BrokerService.doStart(BrokerService.java:263) - brokerServer start ,broker.id[1553137579],ip[10.0.17.78],frontPort[50088],backendPort[50089],monitorPort[50090],nameServer port[50091]
+[11:06:21:243] [main] [INFO] - com.jd.journalq.broker.JournalqLauncher.main(JournalqLauncher.java:32) - >>>
 >>>       _   __  __    ____  
 >>>      | | |  \/  |  / __ \
 >>>      | | | \  / | | |  | |
@@ -56,7 +56,7 @@ If you see logs as following,which indicate broker/election/monitoring/naming/ s
 >>> | |__| | | |  | | | |__| |
 >>> \______/ |_|  |_| \__\__\/
 >>>                           
-[11:06:21:243] [main] [INFO] - com.jd.jmq.broker.JMQLauncher.main(JMQLauncher.java:41) - JMQLauncher is started
+[11:06:21:243] [main] [INFO] - com.jd.journalq.broker.JournalqLauncher.main(JournalqLauncher.java:41) - JournalqLauncher is started
 ```
 
 ## Step 3: Create topic and pub/sub relationship
@@ -102,8 +102,8 @@ success
 
 ```
 <dependency>
-    <groupId>com.jd.jmq</groupId>
-    <artifactId>jmq-client-core</artifactId>
+    <groupId>com.jd.journalq</groupId>
+    <artifactId>journalq-client-core</artifactId>
     <version>4.0.0-SNAPSHOT</version>
 </dependency>
 ```
@@ -115,7 +115,7 @@ public static void main(String[] args) {
         KeyValue keyValue = OMS.newKeyValue();
         keyValue.put(JMQBuiltinKeys.ACCOUNT_KEY, "test_token");
 
-        MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint(String.format("oms:jmq://test_app@%s:50088/UNKNOWN", IpUtil.getLocalIp()), keyValue);
+        MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint(String.format("oms:journalq://test_app@%s:50088/UNKNOWN", IpUtil.getLocalIp()), keyValue);
 
         Producer producer = messagingAccessPoint.createProducer();
         producer.start();
@@ -145,7 +145,7 @@ public static void main(String[] args) throws Exception {
         KeyValue keyValue = OMS.newKeyValue();
         keyValue.put(JMQBuiltinKeys.ACCOUNT_KEY, "test_token");
 
-        MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint(String.format("oms:jmq://test_app@%s:50088/UNKNOWN", IpUtil.getLocalIp()), keyValue);
+        MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint(String.format("oms:journalq://test_app@%s:50088/UNKNOWN", IpUtil.getLocalIp()), keyValue);
 
         Consumer consumer = messagingAccessPoint.createConsumer();
         consumer.start();
@@ -180,8 +180,8 @@ public static void main(String[] args) throws Exception {
 
 ```
 <dependency>
-    <groupId>com.jd.jmq</groupId>
-    <artifactId>jmq-client-core</artifactId>
+    <groupId>com.jd.journalq</groupId>
+    <artifactId>journalq-client-core</artifactId>
     <version>4.0.0-SNAPSHOT</version>
 </dependency>
 <dependency>
@@ -201,11 +201,11 @@ public static void main(String[] args) throws Exception {
         http://www.springframework.org/schema/beans/spring-beans.xsd
         http://openmessaging.io/schema
 	    http://openmessaging.io/schema/oms.xsd">
-    <oms:access-point url="oms:jmq://test_app@localhost:50088/UNKNOWN">
+    <oms:access-point url="oms:journalq://test_app@localhost:50088/UNKNOWN">
         <oms:attribute key="ACCOUNT_KEY" value="test_token"></oms:attribute>
     </oms:access-point>
     <oms:producer id="producer1"></oms:producer>
-    <oms:consumer queueName="test_topic" listener="com.jd.jmq.client.samples.spring.MessageListener1"></oms:consumer>
+    <oms:consumer queueName="test_topic" listener="com.jd.journalq.client.samples.spring.MessageListener1"></oms:consumer>
 </beans>
 ```
 ### Step 5.3: Produce example
@@ -233,8 +233,8 @@ Once the topic you have subscribe has new arriving messages,you consumer which c
 ### Step 6.1: Import maven dependency
 ```
 <dependency>
-    <groupId>com.jd.jmq</groupId>
-    <artifactId>jmq-client-core</artifactId>
+    <groupId>com.jd.journalq</groupId>
+    <artifactId>journalq-client-core</artifactId>
     <version>4.0.0-SNAPSHOT</version>
 </dependency>
 <dependency>
@@ -256,7 +256,7 @@ Once the topic you have subscribe has new arriving messages,you consumer which c
 ### Step 6.2: Spring boot application.properties
 ```
 spring.oms.enable=true
-spring.oms.url=oms:jmq://test_app@10.37.129.2:50088/UNKNOWN
+spring.oms.url=oms:journalq://test_app@10.37.129.2:50088/UNKNOWN
 spring.oms.attributes[ACCOUNT_KEY]=test_token
 
 spring.oms.consumer.enable=true
@@ -269,7 +269,7 @@ spring.oms.interceptor.enable=true
 
 ```java
 @SpringBootApplication
-@ComponentScan("com.jd.jmq.client.samples.springboot")
+@ComponentScan("com.jd.journalq.client.samples.springboot")
 public class SpringBootMain {
 
   protected static final Logger logger = LoggerFactory.getLogger(SpringBootMain.class);
@@ -292,7 +292,7 @@ public class SpringBootMain {
 
 
 ```java
-package com.jd.jmq.client.samples.springboot;
+package com.jd.journalq.client.samples.springboot;
 
 @Component
 public class MessageListener1 {

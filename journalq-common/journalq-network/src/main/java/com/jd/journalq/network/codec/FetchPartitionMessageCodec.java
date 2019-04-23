@@ -17,7 +17,7 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.jd.journalq.network.command.FetchPartitionMessage;
 import com.jd.journalq.network.command.FetchPartitionMessageData;
-import com.jd.journalq.network.command.JMQCommandType;
+import com.jd.journalq.network.command.JournalqCommandType;
 import com.jd.journalq.network.serializer.Serializer;
 import com.jd.journalq.network.transport.codec.JMQHeader;
 import com.jd.journalq.network.transport.codec.PayloadCodec;
@@ -74,6 +74,6 @@ public class FetchPartitionMessageCodec implements PayloadCodec<JMQHeader, Fetch
 
     @Override
     public int type() {
-        return JMQCommandType.FETCH_PARTITION_MESSAGE.getCode();
+        return JournalqCommandType.FETCH_PARTITION_MESSAGE.getCode();
     }
 }

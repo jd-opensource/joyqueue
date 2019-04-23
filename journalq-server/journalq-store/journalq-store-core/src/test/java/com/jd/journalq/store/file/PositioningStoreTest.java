@@ -19,6 +19,7 @@ import com.jd.journalq.store.nsm.VirtualThreadExecutor;
 import com.jd.journalq.store.utils.BaseDirUtils;
 import com.jd.journalq.store.utils.MessageTestUtils;
 import com.jd.journalq.store.utils.PreloadBufferPool;
+import com.jd.journalq.toolkit.time.SystemClock;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -329,14 +330,14 @@ public class PositioningStoreTest {
         long spendTimeMs;
         long mbps;
 
-        start = System.currentTimeMillis();
+        start = SystemClock.now();
         position = 0;
         while (position < maxSize) {
 
             ByteBuffer byteBuffer = store.readByteBuffer(position, batchSize);
             position += byteBuffer.remaining();
         }
-        t = System.currentTimeMillis();
+        t = SystemClock.now();
         spendTimeMs = t - start;
         mbps = maxSize * 1000 / spendTimeMs / 1024 / 1024;
 
@@ -352,12 +353,12 @@ public class PositioningStoreTest {
 
         long position = 0;
 
-        start = System.currentTimeMillis();
+        start = SystemClock.now();
         while (position < maxSize) {
             position += store.read(position, msgSize).remaining();
         }
 
-        t = System.currentTimeMillis();
+        t = SystemClock.now();
         spendTimeMs = t - start;
         mbps = maxSize * 1000 / spendTimeMs / 1024 / 1024;
 
@@ -370,11 +371,11 @@ public class PositioningStoreTest {
         VirtualThreadExecutor virtualThreadPool = new VirtualThreadExecutor(5000, 200, 10, 1000, 2);
         virtualThreadPool.start(store::flush, 100, "flush");
         Thread.sleep(1000);
-        long start = System.currentTimeMillis();
+        long start = SystemClock.now();
         while (size < maxSize) {
             size = store.append(message.slice());
         }
-        long t = System.currentTimeMillis();
+        long t = SystemClock.now();
         long spendTimeMs = t - start;
         long mbps = size * 1000 / spendTimeMs / 1024 / 1024;
 
@@ -383,7 +384,7 @@ public class PositioningStoreTest {
         while (store.flushPosition() < store.right()) {
             Thread.sleep(10);
         }
-        t = System.currentTimeMillis();
+        t = SystemClock.now();
         spendTimeMs = t - start;
         mbps = size * 1000 / spendTimeMs / 1024 / 1024;
 

@@ -20,7 +20,7 @@ import com.jd.journalq.broker.manage.service.CoordinatorManageService;
 import com.jd.journalq.broker.manage.service.ElectionManageService;
 import com.jd.journalq.broker.manage.service.MessageManageService;
 import com.jd.journalq.broker.manage.service.StoreManageService;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.manage.IndexItem;
 import com.jd.journalq.manage.PartitionGroupMetric;
 import com.jd.journalq.manage.PartitionMetric;
@@ -70,12 +70,12 @@ public class DefaultBrokerManageService implements BrokerManageService {
     }
 
     @Override
-    public boolean setAckIndex(String topic, String app, short partition, long index) throws JMQException {
+    public boolean setAckIndex(String topic, String app, short partition, long index) throws JournalqException {
         return consumerManageService.setAckIndex(topic, app, partition, index);
     }
 
     @Override
-    public boolean setMaxAckIndex(String topic, String app, short partition) throws JMQException {
+    public boolean setMaxAckIndex(String topic, String app, short partition) throws JournalqException {
         return consumerManageService.setMaxAckIndex(topic, app, partition);
     }
 
@@ -90,17 +90,17 @@ public class DefaultBrokerManageService implements BrokerManageService {
     }
 
     @Override
-    public boolean setMaxAckIndexes(String topic, String app) throws JMQException {
+    public boolean setMaxAckIndexes(String topic, String app) throws JournalqException {
         return consumerManageService.setMaxAckIndexes(topic, app);
     }
 
     @Override
-    public boolean setAckIndexByTime(String topic, String app, short partition, long timestamp) throws JMQException {
+    public boolean setAckIndexByTime(String topic, String app, short partition, long timestamp) throws JournalqException {
         return consumerManageService.setAckIndexByTime(topic, app, partition, timestamp);
     }
 
     @Override
-    public boolean setAckIndexesByTime(String topic, String app, long timestamp) throws JMQException {
+    public boolean setAckIndexesByTime(String topic, String app, long timestamp) throws JournalqException {
         return consumerManageService.setAckIndexesByTime(topic, app, timestamp);
     }
 

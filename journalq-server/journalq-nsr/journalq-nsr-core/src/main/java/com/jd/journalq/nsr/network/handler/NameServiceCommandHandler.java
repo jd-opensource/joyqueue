@@ -23,7 +23,7 @@ import com.jd.journalq.domain.Subscription;
 import com.jd.journalq.domain.TopicConfig;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.event.NameServerEvent;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.command.Authorization;
 import com.jd.journalq.network.command.BooleanAck;
 import com.jd.journalq.network.command.GetTopics;
@@ -267,7 +267,7 @@ public class NameServiceCommandHandler implements NsrCommandHandler, Types, com.
                 AppToken appTokenforAuth = nameService.getAppToken(authorization.getApp(), authorization.getToken());
                 response = ((null != appTokenforAuth) && appTokenforAuth.getEffectiveTime().before(now) && appTokenforAuth.getExpirationTime().after(now)) ?
                         BooleanAck.build() :
-                        BooleanAck.build(JMQCode.CN_AUTHENTICATION_ERROR);
+                        BooleanAck.build(JournalqCode.CN_AUTHENTICATION_ERROR);
                 break;
             case NsrCommandType.CONNECT:
                 Integer brokerId = ((NsrConnection) command.getPayload()).getBrokerId();
@@ -275,7 +275,7 @@ public class NameServiceCommandHandler implements NsrCommandHandler, Types, com.
                 response = BooleanAck.build();
                 break;
             default:
-                response = BooleanAck.build(JMQCode.CN_UNKNOWN_ERROR, "unRecognize command ");
+                response = BooleanAck.build(JournalqCode.CN_UNKNOWN_ERROR, "unRecognize command ");
                 break;
         }
         return response;

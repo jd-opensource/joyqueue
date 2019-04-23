@@ -20,11 +20,11 @@ import com.jd.journalq.toolkit.network.IpUtil;
  */
 public interface KafkaConfigs {
 
-    static final String GROUP_ID = "jmq";
+    static final String GROUP_ID = "journalq";
     static final String TOPIC = "ldq_test";
     static final int TOPIC_COUNT = 2;
     static final String BOOTSTRAP = IpUtil.getLocalIp() + ":50088";
-    static final String CLIENT_ID = "jmq";
+    static final String CLIENT_ID = "journalq";
 
 
 //    static final String GROUP_ID = "zhuduohui";

@@ -30,7 +30,7 @@ import com.jd.journalq.client.internal.consumer.transport.ConsumerClientGroup;
 import com.jd.journalq.client.internal.consumer.transport.ConsumerClientManager;
 import com.jd.journalq.client.internal.exception.ClientException;
 import com.jd.journalq.client.internal.transport.ConnectionState;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.command.FetchPartitionMessageAck;
 import com.jd.journalq.network.command.FetchTopicMessageAck;
 import com.jd.journalq.network.domain.BrokerNode;
@@ -241,7 +241,7 @@ public class DefaultMessageFetcher extends Service implements MessageFetcher {
 
     protected void checkState() {
         if (!isStarted()) {
-            throw new ClientException("fetcher is not started", JMQCode.CN_SERVICE_NOT_AVAILABLE.getCode());
+            throw new ClientException("fetcher is not started", JournalqCode.CN_SERVICE_NOT_AVAILABLE.getCode());
         }
     }
 

@@ -14,6 +14,7 @@
 package com.jd.journalq.toolkit.metric;
 
 import com.jd.journalq.toolkit.format.Format;
+import com.jd.journalq.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +34,7 @@ public class Metric {
     private final List<MetricInstance> metricInstances;
     private final String name;
     private final String[] latencies, counters, traffics;
-    private long resetTime = System.currentTimeMillis();
+    private long resetTime = SystemClock.now();
     private static final Logger logger = LoggerFactory.getLogger(Metric.class);
 
     public Metric(String name, int instanceCount, String[] latencies, String[] counters, String[] traffics) {
@@ -55,7 +56,7 @@ public class Metric {
 
 
     public void reportAndReset() {
-        long reportTime = System.currentTimeMillis();
+        long reportTime = SystemClock.now();
         int intervalMs = (int) (reportTime - resetTime);
         logger.info(System.lineSeparator() + "{}：{}", name, Stream.of(
                 Arrays.stream(counters)

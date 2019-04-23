@@ -365,7 +365,7 @@ public class ReplicaGroup extends Service {
 
                     JMQHeader header = new JMQHeader(Direction.REQUEST, CommandType.RAFT_APPEND_ENTRIES_REQUEST);
 
-                    if (System.currentTimeMillis() - lastLogTime > electionConfig.getLogInterval()) {
+                    if (SystemClock.now() - lastLogTime > electionConfig.getLogInterval()) {
                         logger.info("Partition group {}/node {} send append entries request {} to node {}, " +
                                 "read entries elapse {} us",
                                 topicPartitionGroup, leaderId, request, replica.replicaId(), usTime() - startTimeUs);
@@ -457,7 +457,7 @@ public class ReplicaGroup extends Service {
                 AppendEntriesRequest appendEntriesRequest = (AppendEntriesRequest)request.getPayload();
                 AppendEntriesResponse appendEntriesResponse = (AppendEntriesResponse)response.getPayload();
 
-                if (System.currentTimeMillis() - lastLogTime > electionConfig.getLogInterval()) {
+                if (SystemClock.now() - lastLogTime > electionConfig.getLogInterval()) {
                     logger.info("Partition group {}/node {} receive append entries response from {}, " +
                                     "success is {}, next position is {}, write position is {}, elapse {} us",
                             topicPartitionGroup, localReplicaId, replica.replicaId(), appendEntriesResponse.isSuccess(),
@@ -515,7 +515,7 @@ public class ReplicaGroup extends Service {
      * @param response 写入记录响应
      */
     private synchronized void processAppendEntriesResponse(AppendEntriesResponse response, Replica replica) {
-        replica.lastAppendSuccessTime(System.currentTimeMillis());
+        replica.lastAppendSuccessTime(SystemClock.now());
 
         if (!response.isSuccess()) {
             if (response.getNextPosition() == -1L) replica.nextPosition(getPrevPosition(replica.nextPosition()));
@@ -552,7 +552,7 @@ public class ReplicaGroup extends Service {
      * @param replica 副本
      */
     private void maybeReplicateConsumePos(Replica replica) {
-        long now = System.currentTimeMillis();
+        long now = SystemClock.now();
         if (now - replica.lastReplicateConsumePosTime() < electionConfig.getReplicateConsumePosInterval()) {
             return;
         }
@@ -669,12 +669,12 @@ public class ReplicaGroup extends Service {
                 long startTimeUs = usTime();
                 nextPosition = replicableStore.appendEntryBuffer(request.getEntries());
 
-                if (System.currentTimeMillis() - lastLogTime > electionConfig.getLogInterval()) {
+                if (SystemClock.now() - lastLogTime > electionConfig.getLogInterval()) {
                     logger.info("Partition group {}/node {}, append entries from {}, position is {}, entry length is {}, " +
                                     "commit position is {}, elapse {} us",
                             topicPartitionGroup, localReplicaId, request.getLeaderId(), startPosition,
                             entriesLength, request.getCommitPosition(), usTime() - startTimeUs);
-                    lastLogTime = System.currentTimeMillis();
+                    lastLogTime = SystemClock.now();
                 }
 
                 brokerMonitor.onAppendReplicateMessage(topicPartitionGroup.getTopic(), topicPartitionGroup.getPartitionGroupId(),
@@ -879,7 +879,7 @@ public class ReplicaGroup extends Service {
 
         AppendEntriesResponse response = (AppendEntriesResponse)command.getPayload();
 
-        replica.lastAppendSuccessTime(System.currentTimeMillis());
+        replica.lastAppendSuccessTime(SystemClock.now());
 
         logger.debug("Partition group {}/node{} receive heartbeat response from {}, term is {}",
                 topicPartitionGroup, localReplicaId, replica.replicaId(), response.getTerm());

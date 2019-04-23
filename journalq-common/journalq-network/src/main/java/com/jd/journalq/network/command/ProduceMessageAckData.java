@@ -13,7 +13,7 @@
  */
 package com.jd.journalq.network.command;
 
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 
 import java.util.List;
 
@@ -26,13 +26,13 @@ import java.util.List;
 public class ProduceMessageAckData {
 
     private List<ProduceMessageAckItemData> item;
-    private JMQCode code;
+    private JournalqCode code;
 
     public ProduceMessageAckData() {
 
     }
 
-    public ProduceMessageAckData(List<ProduceMessageAckItemData> item, JMQCode code) {
+    public ProduceMessageAckData(List<ProduceMessageAckItemData> item, JournalqCode code) {
         this.item = item;
         this.code = code;
     }
@@ -45,11 +45,11 @@ public class ProduceMessageAckData {
         return item;
     }
 
-    public void setCode(JMQCode code) {
+    public void setCode(JournalqCode code) {
         this.code = code;
     }
 
-    public JMQCode getCode() {
+    public JournalqCode getCode() {
         return code;
     }
 }

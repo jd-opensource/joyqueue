@@ -14,7 +14,7 @@
 #
 
 
-MAIN_CLASS="com.jd.jmq.store.cli.MessageViewer"
+MAIN_CLASS="com.jd.journalq.store.cli.MessageViewer"
 
 APP_HOME="$( cd "$(dirname "$0")" ; cd .. ; pwd -P )"
 

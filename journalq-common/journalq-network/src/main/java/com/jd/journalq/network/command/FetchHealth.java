@@ -25,6 +25,6 @@ public class FetchHealth extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.HEARTBEAT.getCode();
+        return JournalqCommandType.HEARTBEAT.getCode();
     }
 }

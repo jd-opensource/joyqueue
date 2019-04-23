@@ -20,7 +20,7 @@ import com.jd.journalq.broker.consumer.Consume;
 import com.jd.journalq.broker.consumer.model.PullResult;
 import com.jd.journalq.domain.TopicConfig;
 import com.jd.journalq.domain.TopicName;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.message.BrokerMessage;
 import com.jd.journalq.network.session.Consumer;
 import com.jd.journalq.server.archive.store.api.ArchiveStore;
@@ -169,7 +169,7 @@ public class ProduceArchiveService extends Service {
     /**
      * 更新归档项
      */
-    private void updateArchiveItem() throws JMQException {
+    private void updateArchiveItem() throws JournalqException {
         List<SendArchiveItem> list = new ArrayList<>();
 
         List<TopicConfig> topics = clusterManager.getTopics();
@@ -296,7 +296,7 @@ public class ProduceArchiveService extends Service {
      * 写入数据
      *
      * @throws InterruptedException
-     * @throws JMQException
+     * @throws JournalqException
      */
     private void write2Store() throws InterruptedException {
         List<SendLog> sendLogs = new ArrayList<>(batchNum);
@@ -316,7 +316,7 @@ public class ProduceArchiveService extends Service {
                     logger.debug("Write sendLogs size:{} to archive store.", sendLogs.size());
                     // 写入计数（用于归档位置）
                     writeCounter(sendLogs);
-                } catch (JMQException e) {
+                } catch (JournalqException e) {
                     // 写入存储失败
                     hasStoreError.set(true);
                     // 回滚读取位置
@@ -538,7 +538,7 @@ public class ProduceArchiveService extends Service {
          *
          * @param newItemList
          */
-        public void addAndUpdate(List<SendArchiveItem> newItemList) throws JMQException {
+        public void addAndUpdate(List<SendArchiveItem> newItemList) throws JournalqException {
             // 删除当前失效的归档项
             cpList.stream().forEach(item -> {
                 // 最新的归档项列表不包含这个项，则删除该项

@@ -1,10 +1,10 @@
 /*
 Navicat MySQL Data Transfer
 
-Source Server         : jmq3
+Source Server         : journalq3
 Source Server Version : 50550
 Source Host           : 192.168.212.66:3306
-Source Database       : jmq
+Source Database       : journalq
 
 Target Server Type    : MYSQL
 Target Server Version : 50550

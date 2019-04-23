@@ -33,6 +33,7 @@ import com.jd.journalq.service.ConsumeOffsetService;
 import com.jd.journalq.service.LeaderService;
 import com.jd.journalq.service.TopicPartitionGroupService;
 import com.google.common.base.Preconditions;
+import com.jd.journalq.toolkit.time.SystemClock;
 import com.jd.journalq.util.AsyncHttpClient;
 import com.jd.journalq.util.JSONParser;
 import com.jd.journalq.util.NullUtil;
@@ -287,7 +288,7 @@ public class ConsumeOffsetServiceImpl implements ConsumeOffsetService {
                 }catch (UnsupportedEncodingException e){
                     throw new IllegalStateException(e);
                 }
-                AsyncHttpClient.AsyncRequest(put, new AsyncHttpClient.ConcurrentHttpResponseHandler(url,System.currentTimeMillis(),latch,String.valueOf(offset.getPartition()),resultMap));
+                AsyncHttpClient.AsyncRequest(put, new AsyncHttpClient.ConcurrentHttpResponseHandler(url, SystemClock.now(),latch,String.valueOf(offset.getPartition()),resultMap));
                 request++;
             }else{
                 logger.info("partition group broker not found!");

@@ -13,6 +13,7 @@
  */
 package com.jd.journalq.broker.test.kafka.common;
 
+import com.jd.journalq.toolkit.time.SystemClock;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -371,7 +372,7 @@ public class ProducerTestCommon {
         TopicPartition topicPartition = new TopicPartition(KafkaConfigs.TOPIC, partition);
 
         Map<TopicPartition, Long> timestampsToSearch = new HashMap<>();
-        timestampsToSearch.put(topicPartition, System.currentTimeMillis() - 9 * 1000);
+        timestampsToSearch.put(topicPartition, SystemClock.now() - 9 * 1000);
         Map<TopicPartition, OffsetAndTimestamp> offsetAndTimestamps = consumer.offsetsForTimes(timestampsToSearch);
 
         for (TopicPartition tp : offsetAndTimestamps.keySet()) {

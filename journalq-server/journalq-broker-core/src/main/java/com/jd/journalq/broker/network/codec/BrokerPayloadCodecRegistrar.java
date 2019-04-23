@@ -48,7 +48,7 @@ import com.jd.journalq.server.retry.remote.command.codec.PutRetryCodec;
 import com.jd.journalq.server.retry.remote.command.codec.UpdateRetryCodec;
 
 /**
- * jmq消息体编解码器注册器
+ * journalq消息体编解码器注册器
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/21

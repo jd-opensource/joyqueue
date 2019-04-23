@@ -14,8 +14,8 @@
 package com.jd.journalq.broker;
 
 import com.jd.journalq.broker.buffer.Serializer;
-import com.jd.journalq.exception.JMQCode;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqCode;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.message.BrokerMessage;
 import com.jd.journalq.toolkit.network.IpUtil;
 
@@ -37,14 +37,14 @@ public class Test {
 
     }
 
-    public static ByteBuffer convertBrokerMessage2RByteBuffer(BrokerMessage brokerMessage) throws JMQException {
+    public static ByteBuffer convertBrokerMessage2RByteBuffer(BrokerMessage brokerMessage) throws JournalqException {
         int msgSize = Serializer.sizeOf(brokerMessage);
         // todo bufferPool有问题，暂时直接创建
         ByteBuffer allocate = ByteBuffer.allocate(msgSize);
         try {
             Serializer.write(brokerMessage, allocate, msgSize);
         } catch (Exception e) {
-            throw new JMQException(JMQCode.SE_SERIALIZER_ERROR,e);
+            throw new JournalqException(JournalqCode.SE_SERIALIZER_ERROR,e);
         }
         return allocate;
     }

@@ -15,7 +15,6 @@ package com.jd.journalq.toolkit.time;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -46,13 +45,10 @@ public class SystemClock {
     public SystemClock(long precision) {
         this.precision = precision;
         now = new AtomicLong(System.currentTimeMillis());
-        scheduler = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
-            @Override
-            public Thread newThread(Runnable runnable) {
-                Thread thread = new Thread(runnable, "SystemClock");
-                thread.setDaemon(true);
-                return thread;
-            }
+        scheduler = Executors.newSingleThreadScheduledExecutor(runnable -> {
+            Thread thread = new Thread(runnable, "SystemClock");
+            thread.setDaemon(true);
+            return thread;
         });
         scheduler.scheduleAtFixedRate(new Timer(now), precision, precision, TimeUnit.MILLISECONDS);
     }

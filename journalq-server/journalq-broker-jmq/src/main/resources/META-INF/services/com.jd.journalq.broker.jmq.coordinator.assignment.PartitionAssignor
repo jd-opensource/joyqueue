@@ -1,2 +1,0 @@
-com.jd.journalq.broker.jmq.coordinator.assignment.support.NonePartitionAssignor
-com.jd.journalq.broker.jmq.coordinator.assignment.support.PartitionGroupBalancePartitionAssignor

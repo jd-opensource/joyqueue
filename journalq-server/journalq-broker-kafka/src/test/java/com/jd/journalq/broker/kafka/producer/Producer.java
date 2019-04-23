@@ -14,6 +14,7 @@
 package com.jd.journalq.broker.kafka.producer;
 
 import com.jd.journalq.broker.kafka.conf.KafkaConfigs;
+import com.jd.journalq.toolkit.time.SystemClock;
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -62,7 +63,7 @@ public class Producer extends Thread {
         int messageNo = 1;
         while (messageNo <= 100) {
             String messageStr = "Message_" + messageNo + "_" + System.nanoTime();
-            long startTime = System.currentTimeMillis();
+            long startTime = SystemClock.now();
             if (isAsync) { // Send asynchronously
                 producer.send(new ProducerRecord<String, String>(topic,
                         messageNo+"",
@@ -106,7 +107,7 @@ class DemoCallBack implements Callback {
      * @param exception The exception thrown during processing of this record. Null if no error occurred.
      */
     public void onCompletion(RecordMetadata metadata, Exception exception) {
-        long elapsedTime = System.currentTimeMillis() - startTime;
+        long elapsedTime = SystemClock.now() - startTime;
         if (metadata != null) {
             System.out.println(
                     "message(" + key + ", " + message + ") sent to partition(" + metadata.partition() +

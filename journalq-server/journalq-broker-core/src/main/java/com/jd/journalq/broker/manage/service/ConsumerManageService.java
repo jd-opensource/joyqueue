@@ -13,7 +13,7 @@
  */
 package com.jd.journalq.broker.manage.service;
 
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.monitor.PartitionAckMonitorInfo;
 
 import java.util.List;
@@ -35,7 +35,7 @@ public interface ConsumerManageService {
      * @param index
      * @return
      */
-    boolean setAckIndex(String topic, String app, short partition, long index) throws JMQException;
+    boolean setAckIndex(String topic, String app, short partition, long index) throws JournalqException;
 
     /**
      * 设置最大ack索引
@@ -44,7 +44,7 @@ public interface ConsumerManageService {
      * @param app
      * @return
      */
-    boolean setMaxAckIndex(String topic, String app, short partition) throws JMQException;
+    boolean setMaxAckIndex(String topic, String app, short partition) throws JournalqException;
 
     /**
      * 返回最大ack索引
@@ -71,7 +71,7 @@ public interface ConsumerManageService {
      * @param app
      * @return
      */
-    boolean setMaxAckIndexes(String topic, String app) throws JMQException;
+    boolean setMaxAckIndexes(String topic, String app) throws JournalqException;
 
     /**
      * 根据时间设置ack
@@ -82,7 +82,7 @@ public interface ConsumerManageService {
      * @param timestamp
      * @return
      */
-    boolean setAckIndexByTime(String topic, String app, short partition, long timestamp) throws JMQException;
+    boolean setAckIndexByTime(String topic, String app, short partition, long timestamp) throws JournalqException;
 
     /**
      * 根据时间返回ack
@@ -113,5 +113,5 @@ public interface ConsumerManageService {
      * @param timestamp
      * @return
      */
-    boolean setAckIndexesByTime(String topic, String app, long timestamp) throws JMQException;
+    boolean setAckIndexesByTime(String topic, String app, long timestamp) throws JournalqException;
 }

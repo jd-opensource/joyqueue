@@ -20,7 +20,7 @@ import java.io.Serializable;
  * 下午2:54 2018/8/16
  */
 public interface IgniteBaseModel extends Serializable {
-    String SCHEMA = "jmq";
+    String SCHEMA = "journalq";
     String SPLICE = ".";
     String SEPARATOR_SPLIT = "\\.";
 

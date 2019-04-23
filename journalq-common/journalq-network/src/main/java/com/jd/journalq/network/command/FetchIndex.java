@@ -31,7 +31,7 @@ public class FetchIndex extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.FETCH_INDEX.getCode();
+        return JournalqCommandType.FETCH_INDEX.getCode();
     }
 
     public void setPartitions(Map<String, List<Short>> partitions) {

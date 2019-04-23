@@ -52,6 +52,12 @@
         <property name="fileExtensions" value="java"/>
         <property name="message" value="Could not use printStackTrace."/>
     </module>
+ <module name="RegexpMultiline">
+        <property name="id" value="systemclock"/>
+        <property name="format" value="System\.currentTimeMillis"/>
+        <property name="fileExtensions" value="java"/>
+        <property name="message" value="Please use SystemClock.now() instead."/>
+    </module>
 
 
     <module name="TreeWalker">

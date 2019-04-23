@@ -15,6 +15,7 @@ package com.jd.journalq.broker.kafka;
 
 import com.jd.journalq.broker.kafka.conf.KafkaConfigs;
 import com.jd.journalq.broker.kafka.producer.Producer;
+import com.jd.journalq.toolkit.time.SystemClock;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
 /**
@@ -36,7 +37,7 @@ public class KafkaProduceTest {
         System.out.println("kafka producer is started");
 
         for (int i = 0; i < 10000; i++) {
-            long startTime = System.currentTimeMillis();
+            long startTime = SystemClock.now();
             //        for (int i = 0; i < 10000 * 10 * 10; i++) {
             for (int j = 0; j < 10000; j++) {
                 try {
@@ -52,7 +53,7 @@ public class KafkaProduceTest {
             }
             Thread.sleep(1000);
 
-            System.out.println(System.currentTimeMillis() - startTime);
+            System.out.println(SystemClock.now() - startTime);
         }
 
         System.in.read();

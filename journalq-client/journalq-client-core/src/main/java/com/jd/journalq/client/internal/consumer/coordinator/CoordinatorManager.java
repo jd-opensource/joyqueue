@@ -17,7 +17,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jd.journalq.client.internal.cluster.ClusterClient;
 import com.jd.journalq.client.internal.cluster.ClusterClientManager;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.command.FetchAssignedPartitionAck;
 import com.jd.journalq.network.command.FetchAssignedPartitionData;
 import com.jd.journalq.network.command.FindCoordinatorAck;
@@ -75,7 +75,7 @@ public class CoordinatorManager extends Service {
         for (Map.Entry<String, FindCoordinatorAckData> entry : coordinators.entrySet()) {
             String topic = entry.getKey();
             FindCoordinatorAckData findCoordinatorAckData = entry.getValue();
-            if (!findCoordinatorAckData.getCode().equals(JMQCode.SUCCESS)) {
+            if (!findCoordinatorAckData.getCode().equals(JournalqCode.SUCCESS)) {
                 logger.error("find coordinator error, topic: {}, error: {}", topic, findCoordinatorAckData.getCode().getMessage());
             }
 

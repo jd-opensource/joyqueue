@@ -14,7 +14,7 @@
 package com.jd.journalq.domain;
 
 public enum ClientType {
-    JMQ((byte) 0, "jmq"),
+    JMQ((byte) 0, "journalq"),
 
     KAFKA((byte) 1, "kafka"),
 

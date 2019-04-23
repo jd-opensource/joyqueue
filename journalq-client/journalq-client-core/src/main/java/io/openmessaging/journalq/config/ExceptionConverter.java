@@ -14,7 +14,7 @@
 package io.openmessaging.journalq.config;
 
 import com.jd.journalq.client.internal.exception.ClientException;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.transport.exception.TransportException;
 import io.openmessaging.exception.OMSDestinationException;
 import io.openmessaging.exception.OMSMessageFormatException;
@@ -34,19 +34,19 @@ public class ExceptionConverter {
         if (cause instanceof OMSRuntimeException) {
             throw (OMSRuntimeException) cause;
         } else if (cause instanceof IllegalArgumentException) {
-            return new OMSRuntimeException(JMQCode.CN_PARAM_ERROR.getCode(), cause.getMessage(), cause);
+            return new OMSRuntimeException(JournalqCode.CN_PARAM_ERROR.getCode(), cause.getMessage(), cause);
         } else if (cause instanceof ClientException) {
             ClientException clientException = (ClientException) cause;
             if (clientException.getCause() instanceof TransportException.RequestTimeoutException) {
-                throw new OMSTimeOutException(JMQCode.CN_REQUEST_TIMEOUT.getCode(), clientException.getMessage(), cause);
+                throw new OMSTimeOutException(JournalqCode.CN_REQUEST_TIMEOUT.getCode(), clientException.getMessage(), cause);
             }
-            JMQCode jmqCode = JMQCode.valueOf(clientException.getCode());
-            if (jmqCode.equals(JMQCode.FW_TOPIC_NOT_EXIST) || jmqCode.equals(JMQCode.FW_PRODUCER_NOT_EXISTS)) {
-                throw new OMSSecurityException(jmqCode.getCode(), clientException.getMessage(), cause);
+            JournalqCode journalqCode = JournalqCode.valueOf(clientException.getCode());
+            if (journalqCode.equals(JournalqCode.FW_TOPIC_NOT_EXIST) || journalqCode.equals(JournalqCode.FW_PRODUCER_NOT_EXISTS)) {
+                throw new OMSSecurityException(journalqCode.getCode(), clientException.getMessage(), cause);
             }
             return new OMSRuntimeException(((ClientException) cause).getCode(), cause.getMessage(), cause);
         } else {
-            return new OMSRuntimeException(JMQCode.CN_UNKNOWN_ERROR.getCode(), JMQCode.CN_UNKNOWN_ERROR.getMessage(), cause);
+            return new OMSRuntimeException(JournalqCode.CN_UNKNOWN_ERROR.getCode(), JournalqCode.CN_UNKNOWN_ERROR.getMessage(), cause);
         }
     }
 
@@ -54,17 +54,17 @@ public class ExceptionConverter {
         if (cause instanceof ClientException) {
             ClientException clientException = (ClientException) cause;
             if (clientException.getCause() instanceof TransportException.RequestTimeoutException) {
-                throw new OMSTimeOutException(JMQCode.CN_REQUEST_TIMEOUT.getCode(), clientException.getMessage(), cause);
+                throw new OMSTimeOutException(JournalqCode.CN_REQUEST_TIMEOUT.getCode(), clientException.getMessage(), cause);
             }
-            JMQCode jmqCode = JMQCode.valueOf(clientException.getCode());
-            if (jmqCode.equals(JMQCode.FW_TOPIC_NOT_EXIST) || jmqCode.equals(JMQCode.FW_PRODUCER_NOT_EXISTS)) {
-                throw new OMSSecurityException(jmqCode.getCode(), clientException.getMessage(), cause);
+            JournalqCode journalqCode = JournalqCode.valueOf(clientException.getCode());
+            if (journalqCode.equals(JournalqCode.FW_TOPIC_NOT_EXIST) || journalqCode.equals(JournalqCode.FW_PRODUCER_NOT_EXISTS)) {
+                throw new OMSSecurityException(journalqCode.getCode(), clientException.getMessage(), cause);
             }
-            if (jmqCode.equals(JMQCode.CN_PARAM_ERROR)) {
-                throw new OMSMessageFormatException(jmqCode.getCode(), clientException.getMessage(), cause);
+            if (journalqCode.equals(JournalqCode.CN_PARAM_ERROR)) {
+                throw new OMSMessageFormatException(journalqCode.getCode(), clientException.getMessage(), cause);
             }
-            if (jmqCode.equals(JMQCode.CN_SERVICE_NOT_AVAILABLE)) {
-                throw new OMSDestinationException(jmqCode.getCode(), clientException.getMessage(), cause);
+            if (journalqCode.equals(JournalqCode.CN_SERVICE_NOT_AVAILABLE)) {
+                throw new OMSDestinationException(journalqCode.getCode(), clientException.getMessage(), cause);
             }
             return new OMSRuntimeException(clientException.getCode(), clientException.getMessage(), cause);
         } else {
@@ -76,14 +76,14 @@ public class ExceptionConverter {
         if (cause instanceof ClientException) {
             ClientException clientException = (ClientException) cause;
             if (clientException.getCause() instanceof TransportException.RequestTimeoutException) {
-                throw new OMSTimeOutException(JMQCode.CN_REQUEST_TIMEOUT.getCode(), clientException.getMessage(), cause);
+                throw new OMSTimeOutException(JournalqCode.CN_REQUEST_TIMEOUT.getCode(), clientException.getMessage(), cause);
             }
-            JMQCode jmqCode = JMQCode.valueOf(clientException.getCode());
-            if (jmqCode.equals(JMQCode.FW_TOPIC_NOT_EXIST) || jmqCode.equals(JMQCode.FW_CONSUMER_NOT_EXISTS)) {
-                throw new OMSSecurityException(jmqCode.getCode(), clientException.getMessage(), cause);
+            JournalqCode journalqCode = JournalqCode.valueOf(clientException.getCode());
+            if (journalqCode.equals(JournalqCode.FW_TOPIC_NOT_EXIST) || journalqCode.equals(JournalqCode.FW_CONSUMER_NOT_EXISTS)) {
+                throw new OMSSecurityException(journalqCode.getCode(), clientException.getMessage(), cause);
             }
-            if (jmqCode.equals(JMQCode.CN_SERVICE_NOT_AVAILABLE)) {
-                throw new OMSDestinationException(jmqCode.getCode(), clientException.getMessage(), cause);
+            if (journalqCode.equals(JournalqCode.CN_SERVICE_NOT_AVAILABLE)) {
+                throw new OMSDestinationException(journalqCode.getCode(), clientException.getMessage(), cause);
             }
             return new OMSRuntimeException(((ClientException) cause).getCode(), cause.getMessage(), cause);
         } else {

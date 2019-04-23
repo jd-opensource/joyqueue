@@ -60,7 +60,7 @@ public class ProduceConsumeTest1 extends AbstractClientTest {
     protected KeyValue getAttributes() {
         KeyValue keyValue = super.getAttributes();
         keyValue.put(JournalQConsumerBuiltinKeys.LONGPOLL_TIMEOUT, -1);
-        keyValue.put(JournalQConsumerBuiltinKeys.BROADCAST_LOCAL_PATH, "/export/Data/jmq/broadcast");
+        keyValue.put(JournalQConsumerBuiltinKeys.BROADCAST_LOCAL_PATH, "/export/Data/journalq/broadcast");
         keyValue.put(JournalQProducerBuiltinKeys.TRANSACTION_TIMEOUT, 1000 * 10);
         keyValue.put(JournalQTxFeedbackBuiltinKeys.FETCH_INTERVAL, 1);
         keyValue.put(JournalQTxFeedbackBuiltinKeys.FETCH_SIZE, 10);

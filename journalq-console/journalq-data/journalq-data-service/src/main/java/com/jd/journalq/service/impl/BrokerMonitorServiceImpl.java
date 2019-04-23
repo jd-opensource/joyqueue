@@ -497,7 +497,7 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
     }
 
     /**
-     * jmq client producer may not have enquence
+     * journalq client producer may not have enquence
      *
      **/
     @Override

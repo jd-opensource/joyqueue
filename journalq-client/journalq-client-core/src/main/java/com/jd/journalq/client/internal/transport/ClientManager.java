@@ -18,10 +18,10 @@ import com.jd.journalq.client.internal.nameserver.NameServerConfig;
 import com.jd.journalq.client.internal.nameserver.NameServerConfigChecker;
 import com.jd.journalq.client.internal.transport.config.TransportConfig;
 import com.jd.journalq.client.internal.transport.config.TransportConfigChecker;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.domain.BrokerNode;
 import com.jd.journalq.network.transport.TransportClient;
-import com.jd.journalq.network.transport.codec.support.JMQCodec;
+import com.jd.journalq.network.transport.codec.support.JournalqCodec;
 import com.jd.journalq.network.transport.config.ClientConfig;
 import com.jd.journalq.network.transport.support.DefaultTransportClientFactory;
 import com.jd.journalq.toolkit.concurrent.NamedThreadFactory;
@@ -62,8 +62,8 @@ public class ClientManager extends Service {
     @Override
     protected void validate() throws Exception {
         clientGroupManager = new ClientGroupManager(transportConfig);
-        transportClient = new DefaultTransportClientFactory(new JMQCodec()).create(convertToClientConfig(transportConfig));
-        heartbeatThreadPool = Executors.newScheduledThreadPool(1, new NamedThreadFactory("jmq-client-heartbeat"));
+        transportClient = new DefaultTransportClientFactory(new JournalqCodec()).create(convertToClientConfig(transportConfig));
+        heartbeatThreadPool = Executors.newScheduledThreadPool(1, new NamedThreadFactory("journalqclient-heartbeat"));
     }
 
     @Override
@@ -165,7 +165,7 @@ public class ClientManager extends Service {
 
     protected void checkState() {
         if (!isStarted()) {
-            throw new ClientException("clientManager is not started", JMQCode.CN_SERVICE_NOT_AVAILABLE.getCode());
+            throw new ClientException("clientManager is not started", JournalqCode.CN_SERVICE_NOT_AVAILABLE.getCode());
         }
     }
 

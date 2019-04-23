@@ -20,7 +20,7 @@ import com.jd.journalq.network.transport.exception.TransportException;
 import io.netty.buffer.ByteBuf;
 
 /**
- * jmq协议头编解码器
+ * journalq协议头编解码器
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/21

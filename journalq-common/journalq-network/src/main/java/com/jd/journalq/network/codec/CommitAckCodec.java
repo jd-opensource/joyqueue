@@ -18,7 +18,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
 import com.jd.journalq.network.command.CommitAck;
 import com.jd.journalq.network.command.CommitAckData;
-import com.jd.journalq.network.command.JMQCommandType;
+import com.jd.journalq.network.command.JournalqCommandType;
 import com.jd.journalq.network.command.RetryType;
 import com.jd.journalq.network.serializer.Serializer;
 import com.jd.journalq.network.transport.codec.JMQHeader;
@@ -87,6 +87,6 @@ public class CommitAckCodec implements PayloadCodec<JMQHeader, CommitAck>, Type 
 
     @Override
     public int type() {
-        return JMQCommandType.COMMIT_ACK.getCode();
+        return JournalqCommandType.COMMIT_ACK.getCode();
     }
 }

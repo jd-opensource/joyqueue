@@ -32,8 +32,8 @@ import com.jd.journalq.event.NameServerEvent;
 import com.jd.journalq.event.PartitionGroupEvent;
 import com.jd.journalq.event.ProducerEvent;
 import com.jd.journalq.event.TopicEvent;
-import com.jd.journalq.exception.JMQCode;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqCode;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.response.BooleanResponse;
 import com.jd.journalq.nsr.NameService;
 import com.jd.journalq.toolkit.concurrent.EventBus;
@@ -151,7 +151,7 @@ public class ClusterManager extends Service {
         // brokerId
         if (broker == null) {
             logger.error("brokerId[{}] [{}:{}] 注册失败", brokerId, localIp, port);
-            throw new JMQException(JMQCode.CN_SERVICE_NOT_AVAILABLE);
+            throw new JournalqException(JournalqCode.CN_SERVICE_NOT_AVAILABLE);
         }
         brokerConfig.setBroker(broker);
         writeBroker(broker.getId());
@@ -419,10 +419,10 @@ public class ClusterManager extends Service {
      * @param app
      * @return
      */
-    public Consumer.ConsumerPolicy getConsumerPolicy(TopicName topic, String app) throws JMQException {
+    public Consumer.ConsumerPolicy getConsumerPolicy(TopicName topic, String app) throws JournalqException {
         Consumer consumer = localCache.getConsumerByTopicAndApp(topic, app);
         if (null == consumer) {
-            throw new JMQException(JMQCode.FW_CONSUMER_NOT_EXISTS);
+            throw new JournalqException(JournalqCode.FW_CONSUMER_NOT_EXISTS);
         }
         return getConsumerPolicyOrDefault(consumer);
     }
@@ -434,10 +434,10 @@ public class ClusterManager extends Service {
      * @param app
      * @return
      */
-    public Consumer getConsumer(TopicName topic, String app) throws JMQException {
+    public Consumer getConsumer(TopicName topic, String app) throws JournalqException {
         Consumer consumer = localCache.getConsumerByTopicAndApp(topic, app);
         if (null == consumer) {
-            throw new JMQException(JMQCode.FW_CONSUMER_NOT_EXISTS);
+            throw new JournalqException(JournalqCode.FW_CONSUMER_NOT_EXISTS);
         }
         return consumer;
     }
@@ -479,7 +479,7 @@ public class ClusterManager extends Service {
      * @param app   应用
      * @return
      */
-    public boolean isNeedNearby(TopicName topic, String app) throws JMQException {
+    public boolean isNeedNearby(TopicName topic, String app) throws JournalqException {
         return getConsumerPolicy(topic, app).getNearby();
     }
 
@@ -490,7 +490,7 @@ public class ClusterManager extends Service {
      * @return 是否需要延迟消费
      * @Param app
      */
-    public boolean isNeedDelay(TopicName topic, String app) throws JMQException {
+    public boolean isNeedDelay(TopicName topic, String app) throws JournalqException {
         return getConsumerPolicy(topic, app).getDelay() > 0;
     }
 
@@ -517,7 +517,7 @@ public class ClusterManager extends Service {
      * @param app   应用
      * @return
      */
-    public int getAckTimeout(TopicName topic, String app) throws JMQException {
+    public int getAckTimeout(TopicName topic, String app) throws JournalqException {
         return getConsumerPolicy(topic, app).getAckTimeout();
     }
 
@@ -529,10 +529,10 @@ public class ClusterManager extends Service {
      * @param app
      * @return
      */
-    public Producer.ProducerPolicy getProducerPolicy(TopicName topic, String app) throws JMQException {
+    public Producer.ProducerPolicy getProducerPolicy(TopicName topic, String app) throws JournalqException {
         Producer producer = localCache.getProducerByTopicAndApp(topic, app);
         if (null == producer) {
-            throw new JMQException(JMQCode.FW_PRODUCER_NOT_EXISTS);
+            throw new JournalqException(JournalqCode.FW_PRODUCER_NOT_EXISTS);
         }
         return getProducerPolicyOrDefault(producer);
     }
@@ -613,21 +613,21 @@ public class ClusterManager extends Service {
         if (topicConfig == null) {
             // 没有主题配置
             logger.error("topic[{}] app[{}] cant't be write on broker [{}],has no topicConfig", topic, app, broker.getId() + "[" + broker.getIp() + ":" + broker.getPort() + "]");
-            return BooleanResponse.failed(JMQCode.FW_TOPIC_NOT_EXIST);
+            return BooleanResponse.failed(JournalqCode.FW_TOPIC_NOT_EXIST);
         }
         Producer.ProducerPolicy producerPolicy = null;
         try {
             producerPolicy = getProducerPolicy(topic, app);
-        } catch (JMQException e) {
+        } catch (JournalqException e) {
             logger.error("topic[{}],app[{}],error[{}]", topic, app, e.getMessage());
-            return BooleanResponse.failed(JMQCode.valueOf(e.getCode()));
+            return BooleanResponse.failed(JournalqCode.valueOf(e.getCode()));
         }
         Set<String> blackList = producerPolicy != null ? producerPolicy.getBlackList() : null;
         if (blackList != null) {
             if (blackList.stream().anyMatch(ip -> ip.equals(address))) {
                 // 是否在生产黑名单内
                 logger.error("topic[{}] app[{}] cant't be write on broker [] in blacklist", topic, app, broker.getId() + "[" + broker.getIp() + ":" + broker.getPort() + "]");
-                return BooleanResponse.failed(JMQCode.FW_PUT_MESSAGE_TOPIC_NOT_WRITE);
+                return BooleanResponse.failed(JournalqCode.FW_PUT_MESSAGE_TOPIC_NOT_WRITE);
             }
         }
         ;
@@ -638,11 +638,11 @@ public class ClusterManager extends Service {
         if (CollectionUtils.isEmpty(partitionGroups)) {
             // 没有partitionGroup
             logger.error("topic[{}] app[{}] cant't be write on broker [{}] has no partitionGroups", topic, app, broker.getId() + "[" + broker.getIp() + ":" + broker.getPort() + "]");
-            return BooleanResponse.failed(JMQCode.FW_PRODUCE_MESSAGE_BROKER_NOT_LEADER);
+            return BooleanResponse.failed(JournalqCode.FW_PRODUCE_MESSAGE_BROKER_NOT_LEADER);
         }
         if (partitionGroups.stream().noneMatch(partitionGroup -> partitionGroup.getLeader().equals(broker.getId()))) {
             logger.error("topic[{}] cant't be write on broker [] ", topic, app, broker.getId() + "[" + broker.getIp() + ":" + broker.getPort() + "]");
-            return BooleanResponse.failed(JMQCode.FW_PRODUCE_MESSAGE_BROKER_NOT_LEADER);
+            return BooleanResponse.failed(JournalqCode.FW_PRODUCE_MESSAGE_BROKER_NOT_LEADER);
         }
         ;
         return BooleanResponse.success();
@@ -670,8 +670,8 @@ public class ClusterManager extends Service {
         TopicConfig topicConfig = getTopicConfig(topic);
         PartitionGroup group = topicConfig.fetchPartitionGroupByPartition(partition);
         if (!group.getLeader().equals(broker.getId())) {
-            logger.error("topic[{}],app[{}],partition[{}],error[{}]", topic, app,partition,JMQCode.FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER.getMessage());
-            return BooleanResponse.failed(JMQCode.FW_PRODUCE_MESSAGE_BROKER_NOT_LEADER);
+            logger.error("topic[{}],app[{}],partition[{}],error[{}]", topic, app,partition,JournalqCode.FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER.getMessage());
+            return BooleanResponse.failed(JournalqCode.FW_PRODUCE_MESSAGE_BROKER_NOT_LEADER);
         }
         return BooleanResponse.success();
     }
@@ -693,38 +693,38 @@ public class ClusterManager extends Service {
         TopicConfig topicConfig = getTopicConfig(topic);
         if (topicConfig == null) {
             // 没有主题配置
-            return BooleanResponse.failed(JMQCode.FW_TOPIC_NOT_EXIST);
+            return BooleanResponse.failed(JournalqCode.FW_TOPIC_NOT_EXIST);
         }
         Consumer.ConsumerPolicy consumerPolicy = null;
         try {
             consumerPolicy = getConsumerPolicy(topic, app);
-        } catch (JMQException e) {
+        } catch (JournalqException e) {
             logger.error("topic[{}],app[{}],error[{}]", topic, app, e.getMessage());
-            return BooleanResponse.failed(JMQCode.valueOf(e.getCode()));
+            return BooleanResponse.failed(JournalqCode.valueOf(e.getCode()));
         }
         Boolean paused = consumerPolicy.getPaused();
         if (paused) {
             // 暂停消费
-            return BooleanResponse.failed(JMQCode.FW_FETCH_TOPIC_MESSAGE_PAUSED);
+            return BooleanResponse.failed(JournalqCode.FW_FETCH_TOPIC_MESSAGE_PAUSED);
         }
         Set<String> blackList = consumerPolicy.getBlackList();
         if (blackList != null) {
             // 是否在消费黑名单内
             if (blackList.stream().anyMatch(ip -> ip.equals(address))) {
-                return BooleanResponse.failed(JMQCode.FW_GET_MESSAGE_APP_CLIENT_IP_NOT_READ);
+                return BooleanResponse.failed(JournalqCode.FW_GET_MESSAGE_APP_CLIENT_IP_NOT_READ);
             }
             ;
         }
         Collection<PartitionGroup> partitionGroups = topicConfig.fetchPartitionGroupByBrokerId(broker.getId());
         if (CollectionUtils.isEmpty(partitionGroups)) {
             // 没有partitionGroup
-            logger.error("topic[{}],app[{}],error[{}]", topic, app, JMQCode.FW_TOPIC_NO_PARTITIONGROUP.getMessage());
-            return BooleanResponse.failed(JMQCode.FW_TOPIC_NO_PARTITIONGROUP);
+            logger.error("topic[{}],app[{}],error[{}]", topic, app, JournalqCode.FW_TOPIC_NO_PARTITIONGROUP.getMessage());
+            return BooleanResponse.failed(JournalqCode.FW_TOPIC_NO_PARTITIONGROUP);
         }
         // 当前主题在该broker上有角色是master的分区组
         if (partitionGroups.stream().noneMatch(partitionGroup -> partitionGroup.getLeader().equals(broker.getId()))) {
-            logger.error("topic[{}],app[{}],error[{}]", topic, app, JMQCode.FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER.getMessage());
-            return BooleanResponse.failed(JMQCode.FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER);
+            logger.error("topic[{}],app[{}],error[{}]", topic, app, JournalqCode.FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER.getMessage());
+            return BooleanResponse.failed(JournalqCode.FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER);
         }
         ;
         return BooleanResponse.success();
@@ -751,8 +751,8 @@ public class ClusterManager extends Service {
         TopicConfig topicConfig = getTopicConfig(topic);
         PartitionGroup group = topicConfig.fetchPartitionGroupByPartition(partition);
         if (!group.getLeader().equals(broker.getId())) {
-            logger.error("topic[{}],app[{}],partition[{}],error[{}]", topic, app,partition, JMQCode.FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER.getMessage());
-            return BooleanResponse.failed(JMQCode.FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER);
+            logger.error("topic[{}],app[{}],partition[{}],error[{}]", topic, app,partition, JournalqCode.FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER.getMessage());
+            return BooleanResponse.failed(JournalqCode.FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER);
         }
         return BooleanResponse.success();
     }

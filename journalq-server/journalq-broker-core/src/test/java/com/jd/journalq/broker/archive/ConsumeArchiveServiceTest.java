@@ -14,6 +14,7 @@
 package com.jd.journalq.broker.archive;
 
 import com.jd.journalq.server.archive.store.model.ConsumeLog;
+import com.jd.journalq.toolkit.time.SystemClock;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -39,7 +40,7 @@ public class ConsumeArchiveServiceTest {
             consumeLog.setBrokerId(i);
             consumeLog.setBytesMessageId(new byte[16]);
             consumeLog.setClientIp(new byte[16]);
-            consumeLog.setConsumeTime(System.currentTimeMillis());
+            consumeLog.setConsumeTime(SystemClock.now());
             consumeLog.setApp(appArr[i % 3]);
             ByteBuffer buffer = ArchiveSerializer.write(consumeLog);
             archiveMappedFileRepository.append(buffer);
@@ -65,7 +66,7 @@ public class ConsumeArchiveServiceTest {
             consumeLog.setBrokerId(i);
             consumeLog.setBytesMessageId(new byte[16]);
             consumeLog.setClientIp(new byte[16]);
-            consumeLog.setConsumeTime(System.currentTimeMillis());
+            consumeLog.setConsumeTime(SystemClock.now());
             consumeLog.setApp(appArr[i % 3]);
             ByteBuffer buffer = ArchiveSerializer.write(consumeLog);
             archiveMappedFileRepository.append(buffer);
@@ -78,7 +79,7 @@ public class ConsumeArchiveServiceTest {
             consumeLog.setBrokerId(i);
             consumeLog.setBytesMessageId(new byte[16]);
             consumeLog.setClientIp(new byte[16]);
-            consumeLog.setConsumeTime(System.currentTimeMillis());
+            consumeLog.setConsumeTime(SystemClock.now());
             consumeLog.setApp(appArr[i % 3]);
             ByteBuffer buffer = ArchiveSerializer.write(consumeLog);
             archiveMappedFileRepository.append(buffer);

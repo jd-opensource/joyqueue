@@ -33,7 +33,7 @@ public class GetTopics implements Payload, Types {
     private int subscribeType = 1;
     @Override
     public int[] types() {
-        return new int[]{CommandType.GET_TOPICS,JMQCommandType.MQTT_GET_TOPICS.getCode()};
+        return new int[]{CommandType.GET_TOPICS,JournalqCommandType.MQTT_GET_TOPICS.getCode()};
     }
 
     public String getApp() {

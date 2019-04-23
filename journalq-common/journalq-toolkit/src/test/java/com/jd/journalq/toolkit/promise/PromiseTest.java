@@ -13,6 +13,7 @@
  */
 package com.jd.journalq.toolkit.promise;
 
+import com.jd.journalq.toolkit.time.SystemClock;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -120,11 +121,11 @@ public class PromiseTest {
 //        ExecutorService  executorService = Executors.newFixedThreadPool(8);
 //        ExecutorService  executorService = Executors.newSingleThreadExecutor();
         counter = 0;
-        t = System.currentTimeMillis();
+        t = SystemClock.now();
         for (int i = 0; i <1024 * 1024 * 1024; i++) {
 //            int c = counter++;
 //            if(c % (1024 * 1024) == 0) {
-//                long t1 = System.currentTimeMillis();
+//                long t1 = SystemClock.now();
 //                if(t1 > t) {
 //                    System.out.println("QPS: " + (1024 * 1024 * 1000 / (t1 - t)));
 //                    t = t1;
@@ -134,7 +135,7 @@ public class PromiseTest {
 
             Promise.promise(executorService,() -> counter++).then(executorService1,c->{
                 if(c % (1024 * 1024) == 0) {
-                    long t1 = System.currentTimeMillis();
+                    long t1 = SystemClock.now();
                     if(t1 > t) {
                         System.out.println("QPS: " + (1024 * 1024 * 1000 / (t1 - t)));
                         t = t1;
@@ -145,7 +146,7 @@ public class PromiseTest {
 //            executorService.submit(() -> {
 //                int c = counter++;
 //                if(c % (1024 * 1024) == 0) {
-//                    long t1 = System.currentTimeMillis();
+//                    long t1 = SystemClock.now();
 //                    if(t1 > t) {
 //                        System.out.println("QPS: " + (1024 * 1024 * 1000 / (t1 - t)));
 //                        t = t1;

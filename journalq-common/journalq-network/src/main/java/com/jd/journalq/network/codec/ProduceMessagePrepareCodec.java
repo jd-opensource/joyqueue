@@ -13,7 +13,7 @@
  */
 package com.jd.journalq.network.codec;
 
-import com.jd.journalq.network.command.JMQCommandType;
+import com.jd.journalq.network.command.JournalqCommandType;
 import com.jd.journalq.network.command.ProduceMessagePrepare;
 import com.jd.journalq.network.serializer.Serializer;
 import com.jd.journalq.network.transport.codec.JMQHeader;
@@ -51,6 +51,6 @@ public class ProduceMessagePrepareCodec implements PayloadCodec<JMQHeader, Produ
 
     @Override
     public int type() {
-        return JMQCommandType.PRODUCE_MESSAGE_PREPARE.getCode();
+        return JournalqCommandType.PRODUCE_MESSAGE_PREPARE.getCode();
     }
 }

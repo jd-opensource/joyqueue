@@ -32,7 +32,7 @@ public class BrokerConfig implements PropertySupplierAware {
     public static final String BROKER_FRONTEND_SERVER_CONFIG_PREFIX = "broker.frontend-server.";
     public static final String BROKER_BACKEND_SERVER_CONFIG_PREFIX = "broker.backend-server.";
     public static final String BROKER_ID_FILE_NAME = "broker.id";
-    public static final String ADMIN_USER = "broker.jmq.admin";
+    public static final String ADMIN_USER = "broker.journalq.admin";
     public static final int INVALID_BROKER_ID = -1;
 
     /**

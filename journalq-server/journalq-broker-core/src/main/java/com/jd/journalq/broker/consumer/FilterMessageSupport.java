@@ -23,8 +23,8 @@ import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.event.ConsumerEvent;
 import com.jd.journalq.event.EventType;
 import com.jd.journalq.event.MetaEvent;
-import com.jd.journalq.exception.JMQCode;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqCode;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.toolkit.concurrent.EventListener;
 import com.jd.journalq.toolkit.security.Hex;
 import com.jd.journalq.toolkit.security.Md5;
@@ -69,9 +69,9 @@ class FilterMessageSupport {
      * @param byteBuffers    消息缓存集合
      * @param filterCallback 过滤回调函数，用于处理被过滤消息的应答问题
      * @return
-     * @throws JMQException
+     * @throws JournalqException
      */
-    public List<ByteBuffer> filter(Consumer consumer, List<ByteBuffer> byteBuffers, FilterCallback filterCallback) throws JMQException {
+    public List<ByteBuffer> filter(Consumer consumer, List<ByteBuffer> byteBuffers, FilterCallback filterCallback) throws JournalqException {
         FilterPipeline<MessageFilter> filterPipeline = filterRuleCache.get(consumer.getId());
         if (filterPipeline == null) {
             filterPipeline = createFilterPipeline(consumer.getConsumerPolicy());
@@ -86,9 +86,9 @@ class FilterMessageSupport {
      *
      * @param consumerPolicy 用户消费策略
      * @return 消息过滤管道
-     * @throws JMQException
+     * @throws JournalqException
      */
-    private FilterPipeline<MessageFilter> createFilterPipeline(Consumer.ConsumerPolicy consumerPolicy) throws JMQException {
+    private FilterPipeline<MessageFilter> createFilterPipeline(Consumer.ConsumerPolicy consumerPolicy) throws JournalqException {
         Map<String, String> filterRule = consumerPolicy.getFilters();
         String pipelineId = generatePipelineId(filterRule);
         FilterPipeline<MessageFilter> filterPipeline = new FilterPipeline<>(pipelineId);
@@ -112,9 +112,9 @@ class FilterMessageSupport {
      *
      * @param filterRule 过滤规则
      * @return 管道编号
-     * @throws JMQException
+     * @throws JournalqException
      */
-    private String generatePipelineId(Map<String, String> filterRule) throws JMQException {
+    private String generatePipelineId(Map<String, String> filterRule) throws JournalqException {
         if (MapUtils.isEmpty(filterRule)) {
             return null;
         }
@@ -124,7 +124,7 @@ class FilterMessageSupport {
             return Hex.encode(encrypt);
         } catch (Exception e) {
             logger.error("generate filter pipeline error.", e);
-            throw new JMQException(e, JMQCode.CN_UNKNOWN_ERROR.getCode());
+            throw new JournalqException(e, JournalqCode.CN_UNKNOWN_ERROR.getCode());
         }
     }
 

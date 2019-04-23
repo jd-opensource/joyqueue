@@ -14,7 +14,7 @@
 package com.jd.journalq.network.codec;
 
 import com.jd.journalq.network.command.FetchHealth;
-import com.jd.journalq.network.command.JMQCommandType;
+import com.jd.journalq.network.command.JournalqCommandType;
 import com.jd.journalq.network.transport.codec.JMQHeader;
 import com.jd.journalq.network.transport.codec.PayloadCodec;
 import com.jd.journalq.network.transport.command.Type;
@@ -40,6 +40,6 @@ public class FetchHealthCodec implements PayloadCodec<JMQHeader, FetchHealth>, T
 
     @Override
     public int type() {
-        return JMQCommandType.FETCH_HEALTH.getCode();
+        return JournalqCommandType.FETCH_HEALTH.getCode();
     }
 }

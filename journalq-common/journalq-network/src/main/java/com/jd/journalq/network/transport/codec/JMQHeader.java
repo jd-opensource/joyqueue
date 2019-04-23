@@ -14,7 +14,7 @@
 package com.jd.journalq.network.transport.codec;
 
 import com.jd.journalq.domain.QosLevel;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.transport.command.Direction;
 import com.jd.journalq.network.transport.command.Header;
 import com.jd.journalq.toolkit.time.SystemClock;
@@ -22,7 +22,7 @@ import com.jd.journalq.toolkit.time.SystemClock;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * jmq协议头
+ * journalq协议头
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/21
@@ -51,7 +51,7 @@ public class JMQHeader implements Header {
 
     // 响应部分
     // 状态码
-    private short status = (short) JMQCode.SUCCESS.getCode();
+    private short status = (short) JournalqCode.SUCCESS.getCode();
     // 错误信息
     private String error;
 

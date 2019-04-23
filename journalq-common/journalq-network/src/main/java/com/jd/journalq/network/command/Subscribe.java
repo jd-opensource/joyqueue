@@ -31,7 +31,7 @@ public class Subscribe extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.MQTT_SUBSCRIBE.getCode();
+        return JournalqCommandType.MQTT_SUBSCRIBE.getCode();
     }
 
     public List<Subscription> getSubscriptions() {

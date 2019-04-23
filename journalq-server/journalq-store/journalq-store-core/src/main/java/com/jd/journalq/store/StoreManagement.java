@@ -13,7 +13,7 @@
  */
 package com.jd.journalq.store;
 
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.store.file.PositioningStore;
 import com.jd.journalq.store.file.StoreFile;
 import com.jd.journalq.store.index.IndexItem;
@@ -190,7 +190,7 @@ public class StoreManagement implements StoreManagementService {
                         }
                     })
                     .filter(Objects::nonNull)
-                    .filter(r -> r.getCode() == JMQCode.SUCCESS)
+                    .filter(r -> r.getCode() == JournalqCode.SUCCESS)
                     .map(ReadResult::getMessages)
                     .flatMap(Arrays::stream)
                     .map(this::getBytes)
