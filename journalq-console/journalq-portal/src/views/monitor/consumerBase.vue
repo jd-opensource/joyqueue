@@ -58,7 +58,7 @@
         </d-tab-pane>
 
         <d-tab-pane v-if="$store.getters.isAdmin" label="消费组成员" name="coordinatorGroupMember" icon="file-text">
-          <tab-coordinator-group ref="coordinatorGroupMember" :app="detailDialog.app" :topic="detailDialog.topic" :namespace="detailDialog.namespace"
+          <coordinator-group-member ref="coordinatorGroupMember" :app="detailDialog.app" :topic="detailDialog.topic" :namespace="detailDialog.namespace"
                      :type="type" :client-type="detailDialog.clientType"  :doSearch="detailDialog.doSearch" :subscribeGroup="detailDialog.subscribeGroup" :searchData="detailDialog"
                      :col-data="coordinatorGroupMemberTable.colData" :search="coordinatorGroupMemberTable.search"/>
         </d-tab-pane>
