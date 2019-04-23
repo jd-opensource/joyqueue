@@ -34,7 +34,7 @@ public class SimpleKafkaConsumer {
             ConsumerRecords<String, String> records = consumer.poll(1000 * 1);
             for (ConsumerRecord<String, String> record : records) {
 //                System.out.println(String.format("record, key: %s, value: %s, offset: %s, timestamp: %s", record.key(), record.value(), record.offset(), record.timestamp()));
-                System.out.println(String.format("record, key: %s, value: %s, offset: %s, timestamp: %s", record.key(), record.value(), record.offset()));
+                System.out.println(String.format("record, key: %s, value: %s, offset: %s", record.key(), record.value(), record.offset()));
             }
         }
     }

@@ -22,24 +22,24 @@ public abstract class AbstractKafkaMessageSerializer {
     public static final byte MESSAGE_MAGIC_V1 = 1;
     public static final byte MESSAGE_MAGIC_V2 = 2;
     public static final byte MESSAGE_CURRENT_MAGIC = MESSAGE_MAGIC_V2;
+    public static final byte INVALID_EXTENSION_MAGIC = -1;
 
-    protected static final byte INVALID_EXTENSION_MAGIC = -1;
-    protected static final int EXTENSION_MAGIC_OFFSET = 0;
-    protected static final int EXTENSION_TIMESTAMP_OFFSET = EXTENSION_MAGIC_OFFSET + 1;
-    protected static final int EXTENSION_ATTRIBUTE_OFFSET = EXTENSION_TIMESTAMP_OFFSET + 8;
+    public static final int EXTENSION_MAGIC_OFFSET = 0;
+    public static final int EXTENSION_TIMESTAMP_OFFSET = EXTENSION_MAGIC_OFFSET + 1;
+    public static final int EXTENSION_ATTRIBUTE_OFFSET = EXTENSION_TIMESTAMP_OFFSET + 8;
 
     // v0, v1: offset + size + crc
     // v2:     offset + size + partitionLeaderEpoch
-    protected static final int OFFSET_OFFSET = 0;
-    protected static final int SIZE_OFFSET = OFFSET_OFFSET + 8;
-    protected static final int CRC_OFFSET = SIZE_OFFSET + 4;
-    protected static final int MAGIC_OFFSET = CRC_OFFSET + 4;
-    protected static final int ATTRIBUTE_OFFSET = MAGIC_OFFSET + 1;
+    public static final int OFFSET_OFFSET = 0;
+    public static final int SIZE_OFFSET = OFFSET_OFFSET + 8;
+    public static final int CRC_OFFSET = SIZE_OFFSET + 4;
+    public static final int MAGIC_OFFSET = CRC_OFFSET + 4;
+    public static final int ATTRIBUTE_OFFSET = MAGIC_OFFSET + 1;
 
-    protected static final byte COMPRESSION_CODEC_MASK = 0x07;
-    protected static final byte TRANSACTIONAL_FLAG_MASK = 0x10;
-    protected static final byte CONTROL_FLAG_MASK = 0x20;
-    protected static final byte TIMESTAMP_TYPE_MASK = 0x08;
+    public static final byte COMPRESSION_CODEC_MASK = 0x07;
+    public static final byte TRANSACTIONAL_FLAG_MASK = 0x10;
+    public static final byte CONTROL_FLAG_MASK = 0x20;
+    public static final byte TIMESTAMP_TYPE_MASK = 0x08;
 
     protected static final int DECOMPRESS_BUFFER_SIZE = 1024;
 
