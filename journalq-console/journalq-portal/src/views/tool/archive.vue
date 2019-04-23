@@ -1,16 +1,18 @@
 <template>
   <div>
-    <div class="ml20 mt30">
-      <d-date-picker v-model="times" type="daterange" class="left mr5" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" value-format="timestamp" :default-time="['00:00:00', '23:59:59']">
+    <div class="ml20">
+      <d-date-picker v-model="times" type="daterange" class="left mr5 mt10" range-separator="至"
+                     start-placeholder="开始日期" end-placeholder="结束日期" value-format="timestamp"
+                     :default-time="['00:00:00', '23:59:59']"  style="width:370px">
         <span slot="prepend">日期范围</span>
       </d-date-picker>
-      <d-input v-model="search.topic" placeholder="队列名" class="left mr5" style="width: 15%">
+      <d-input v-model="search.topic" placeholder="队列名" class="left mr5 mt10" style="width: 213px">
         <span slot="prepend">队列名</span>
       </d-input>
-      <d-input v-model="search.businessId" placeholder="业务ID" class="left mr5" style="width: 15%">
+      <d-input v-model="search.businessId" placeholder="业务ID" class="left mr5 mt10" style="width: 213px">
         <span slot="prepend">业务ID</span>
       </d-input>
-      <d-button type="primary" color="success" @click="getListWithDate(false)">查询</d-button>
+      <d-button class="left mr5 mt10" type="primary" color="success" @click="getListWithDate(false)">查询</d-button>
       <slot name="extendBtn"></slot>
     </div>
     <my-table :showPagination="false" :showPin="showTablePin" :data="tableData" :page="page" @on-size-change="handleSizeChange"

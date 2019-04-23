@@ -19,7 +19,7 @@ package com.jd.journalq.event;
  * Created by chengzhiliang on 2018/8/31.
  */
 public class NameServerEvent extends MetaEvent {
-
+    public static final Integer BROKER_ID_ALL_BROKER = -1;
     protected Integer brokerId;
     protected MetaEvent metaEvent;
 

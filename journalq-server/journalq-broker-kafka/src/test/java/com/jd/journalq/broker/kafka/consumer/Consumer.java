@@ -55,7 +55,7 @@ public class Consumer {
     }
 
     public void doWork() {
-        ConsumerRecords<String, String> records = consumer.poll(100);
+        ConsumerRecords<String, String> records = consumer.poll(1000);
         for (ConsumerRecord<String, String> record : records) {
             System.out.println("Received message: (" + record.key() + ", " + record.value() + ") at partition "
                     + record.partition() + " at offset " + record.offset() + ", timestamp: " + record.timestamp());

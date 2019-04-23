@@ -395,9 +395,12 @@ public class ThinNameService extends Service implements NameService, PropertySup
             throw exception;
         }
     }
+
     private Command registerToNsr() throws TransportException {
-        if(null==broker)return null;
-        Command request = new Command(new JMQHeader(Direction.REQUEST, NsrCommandType.CONNECT),new NsrConnection().brokerId(broker.getId()));
+        if (null == broker) {
+            return null;
+        }
+        Command request = new Command(new JMQHeader(Direction.REQUEST, NsrCommandType.CONNECT), new NsrConnection().brokerId(broker.getId()));
         try {
             return clientTransport.getOrCreateTransport().sync(request);
         } catch (TransportException exception) {

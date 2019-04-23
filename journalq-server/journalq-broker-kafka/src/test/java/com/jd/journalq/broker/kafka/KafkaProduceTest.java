@@ -40,7 +40,8 @@ public class KafkaProduceTest {
             //        for (int i = 0; i < 10000 * 10 * 10; i++) {
             for (int j = 0; j < 10000; j++) {
                 try {
-                  producer.sendAsync(new ProducerRecord(KafkaConfigs.TOPIC, "TEST", value));
+                    Thread.sleep(1);
+                    producer.sendAsync(new ProducerRecord(KafkaConfigs.TOPIC, "TEST", value));
 //                  RecordMetadata record = producer.send(new ProducerRecord(KafkaConfigs.TOPIC, 1, (long) i, "test_" + j, "test_" + j));
 //                    RecordMetadata record = producer.send(new ProducerRecord(KafkaConfigs.TOPIC + "_" + (j % KafkaConfigs.TOPIC_COUNT),"test_" + j, "test_" + j));
 //                    System.out.println(String.format("sendResult, topic: %s, partition: %s, offset: %s, index : %s", record.topic(), record.partition(), record.offset(), i));
@@ -49,6 +50,7 @@ public class KafkaProduceTest {
                     e.printStackTrace();
                 }
             }
+            Thread.sleep(1000);
 
             System.out.println(System.currentTimeMillis() - startTime);
         }

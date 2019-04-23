@@ -69,6 +69,11 @@ public class UserServiceImpl extends PageServiceSupport<User, QUser,UserReposito
     }
 
     @Override
+    public List<User> findByAppCode(final String appCode) {
+        return repository.findByAppCode(appCode);
+    }
+
+    @Override
     public int deleteAppUser(final long userId, final long appId) {
         return repository.deleteAppUser(userId, appId);
     }
