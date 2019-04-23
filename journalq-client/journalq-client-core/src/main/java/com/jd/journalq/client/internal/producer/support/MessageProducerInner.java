@@ -46,7 +46,7 @@ import com.jd.journalq.domain.Producer;
 import com.jd.journalq.domain.QosLevel;
 import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.network.domain.BrokerNode;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.retry.RetryPolicy;
 import com.jd.journalq.toolkit.service.Service;
 import org.apache.commons.collections.CollectionUtils;

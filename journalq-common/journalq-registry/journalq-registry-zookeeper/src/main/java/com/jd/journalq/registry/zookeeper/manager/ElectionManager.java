@@ -16,7 +16,7 @@ package com.jd.journalq.registry.zookeeper.manager;
 import com.jd.journalq.toolkit.concurrent.EventListener;
 import com.jd.journalq.registry.util.Path;
 import com.jd.journalq.registry.zookeeper.ZKClient;
-import com.jd.journalq.toolkit.lang.Charsets;
+import com.google.common.base.Charsets;
 import com.jd.journalq.toolkit.network.IpUtil;
 import com.jd.journalq.toolkit.os.Systems;
 import org.apache.zookeeper.CreateMode;

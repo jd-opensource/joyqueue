@@ -24,7 +24,7 @@ import com.jd.journalq.security.Authentication;
 
 import com.jd.journalq.security.PasswordEncoder;
 import com.jd.journalq.security.UserDetails;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.time.SystemClock;
 import org.apache.commons.lang3.StringUtils;
 

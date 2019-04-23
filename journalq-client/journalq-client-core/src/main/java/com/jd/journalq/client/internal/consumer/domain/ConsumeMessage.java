@@ -14,7 +14,7 @@
 package com.jd.journalq.client.internal.consumer.domain;
 
 import com.jd.journalq.domain.TopicName;
-import com.jd.journalq.toolkit.lang.Objects;
+import com.google.common.base.Objects;
 
 import java.io.Serializable;
 import java.util.Collections;

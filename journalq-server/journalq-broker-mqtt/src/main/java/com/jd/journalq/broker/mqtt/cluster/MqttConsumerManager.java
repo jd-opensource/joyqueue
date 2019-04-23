@@ -25,7 +25,7 @@ import com.jd.journalq.broker.mqtt.subscriptions.MqttSubscription;
 import com.jd.journalq.broker.mqtt.util.PollSelector;
 import com.jd.journalq.broker.mqtt.util.Selector;
 import com.jd.journalq.toolkit.concurrent.NamedThreadFactory;
-import com.jd.journalq.toolkit.lang.Strings;
+import com.google.common.base.Strings;
 import com.jd.journalq.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

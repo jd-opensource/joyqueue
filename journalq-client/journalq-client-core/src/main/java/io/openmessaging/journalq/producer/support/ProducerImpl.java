@@ -18,7 +18,7 @@ import com.jd.journalq.client.internal.producer.MessageProducer;
 import com.jd.journalq.client.internal.producer.callback.AsyncBatchProduceCallback;
 import com.jd.journalq.client.internal.producer.callback.AsyncProduceCallback;
 import com.jd.journalq.client.internal.producer.domain.ProduceMessage;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import io.openmessaging.Future;
 import io.openmessaging.exception.OMSRuntimeException;
 import io.openmessaging.extension.Extension;

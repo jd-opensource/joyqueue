@@ -23,7 +23,7 @@ import com.jd.journalq.network.session.Joint;
 import com.jd.journalq.broker.consumer.model.PullResult;
 import com.jd.journalq.toolkit.concurrent.NamedThreadFactory;
 import com.jd.journalq.toolkit.config.PropertySupplier;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import com.jd.journalq.toolkit.service.ServiceThread;
 import com.jd.journalq.toolkit.time.SystemClock;

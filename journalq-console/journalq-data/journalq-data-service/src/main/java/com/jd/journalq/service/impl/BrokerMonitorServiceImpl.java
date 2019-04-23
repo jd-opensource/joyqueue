@@ -53,7 +53,7 @@ import com.jd.journalq.service.BrokerMonitorService;
 import com.jd.journalq.service.BrokerRestUrlMappingService;
 import com.jd.journalq.service.LeaderService;
 import com.jd.journalq.service.TopicPartitionGroupService;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.util.HttpUtil;
 import com.jd.journalq.util.NullUtil;
 import com.jd.journalq.util.UrlEncoderUtil;

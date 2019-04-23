@@ -33,7 +33,7 @@ import com.jd.journalq.store.WriteRequest;
 import com.jd.journalq.store.WriteResult;
 import com.jd.journalq.store.message.MessageParser;
 import com.jd.journalq.store.transaction.TransactionStore;
-import com.jd.journalq.toolkit.lang.Strings;
+import com.google.common.base.Strings;
 import com.jd.journalq.toolkit.service.Service;
 import com.jd.journalq.toolkit.time.SystemClock;
 import org.slf4j.Logger;

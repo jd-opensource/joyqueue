@@ -15,8 +15,8 @@ package com.jd.journalq.network.command;
 
 import com.jd.journalq.domain.Subscription;
 import com.jd.journalq.network.transport.command.JMQPayload;
-import com.jd.journalq.toolkit.lang.Objects;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 
 import java.util.List;
 

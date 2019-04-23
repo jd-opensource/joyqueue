@@ -41,7 +41,7 @@ import com.jd.journalq.store.PartitionGroupStore;
 import com.jd.journalq.store.StoreService;
 import com.jd.journalq.toolkit.concurrent.EventListener;
 import com.jd.journalq.toolkit.lang.Close;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import com.jd.journalq.toolkit.time.SystemClock;
 import org.apache.commons.collections.CollectionUtils;

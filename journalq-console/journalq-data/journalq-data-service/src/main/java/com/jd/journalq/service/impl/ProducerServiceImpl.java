@@ -27,7 +27,7 @@ import com.jd.journalq.service.ApplicationService;
 import com.jd.journalq.service.ProducerService;
 import com.jd.journalq.nsr.ProducerNameServerService;
 import com.jd.journalq.nsr.TopicNameServerService;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.util.LocalSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

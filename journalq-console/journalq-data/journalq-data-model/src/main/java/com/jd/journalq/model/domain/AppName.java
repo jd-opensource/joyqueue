@@ -14,7 +14,7 @@
 package com.jd.journalq.model.domain;
 
 import com.google.common.collect.Maps;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Objects;

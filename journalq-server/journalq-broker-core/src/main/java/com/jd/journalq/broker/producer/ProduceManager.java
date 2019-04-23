@@ -37,7 +37,7 @@ import com.jd.journalq.store.WriteResult;
 import com.jd.journalq.toolkit.concurrent.EventListener;
 import com.jd.journalq.toolkit.concurrent.LoopThread;
 import com.jd.journalq.toolkit.lang.Close;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.metric.Metric;
 import com.jd.journalq.toolkit.service.Service;
 import com.jd.journalq.toolkit.time.SystemClock;

@@ -36,7 +36,7 @@ import com.jd.journalq.repository.ApplicationRepository;
 import com.jd.journalq.service.ApplicationService;
 import com.jd.journalq.service.ApplicationUserService;
 import com.jd.journalq.service.UserService;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.util.NullUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -31,7 +31,7 @@ import com.jd.journalq.model.domain.Identity;
 import com.jd.journalq.model.domain.OperLog;
 import com.jd.journalq.model.domain.User;
 import com.jd.journalq.service.PageService;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.laf.binding.annotation.Value;
 import com.jd.laf.web.vertx.Command;
 import com.jd.laf.web.vertx.annotation.Body;

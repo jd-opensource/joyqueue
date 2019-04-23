@@ -15,7 +15,7 @@ package com.jd.journalq.toolkit.serialize;
 
 import com.jd.journalq.toolkit.io.Compressors;
 import com.jd.journalq.toolkit.io.Zip;
-import com.jd.journalq.toolkit.lang.Charsets;
+import com.google.common.base.Charsets;
 
 import java.io.IOException;
 import java.io.StringReader;

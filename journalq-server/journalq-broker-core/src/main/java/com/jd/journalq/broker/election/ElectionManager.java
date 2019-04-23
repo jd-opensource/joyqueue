@@ -40,7 +40,7 @@ import com.jd.journalq.store.replication.ReplicableStore;
 import com.jd.journalq.toolkit.concurrent.EventBus;
 import com.jd.journalq.toolkit.concurrent.EventListener;
 import com.jd.journalq.toolkit.concurrent.NamedThreadFactory;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

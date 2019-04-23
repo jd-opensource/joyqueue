@@ -39,7 +39,7 @@ import com.jd.journalq.client.internal.transport.ClientState;
 import com.jd.journalq.domain.Consumer;
 import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.network.domain.BrokerNode;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;

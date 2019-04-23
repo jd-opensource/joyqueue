@@ -20,7 +20,7 @@ import com.jd.journalq.registry.zookeeper.ZKClient;
 import com.jd.journalq.toolkit.concurrent.EventBus;
 import com.jd.journalq.toolkit.concurrent.EventListener;
 import com.jd.journalq.toolkit.concurrent.Locks;
-import com.jd.journalq.toolkit.lang.Charsets;
+import com.google.common.base.Charsets;
 import com.jd.journalq.toolkit.network.IpUtil;
 import com.jd.journalq.toolkit.os.Systems;
 import com.jd.journalq.toolkit.service.Service;

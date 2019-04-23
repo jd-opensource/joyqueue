@@ -36,7 +36,7 @@ import com.jd.journalq.network.command.FetchTopicMessageAck;
 import com.jd.journalq.network.domain.BrokerNode;
 import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.transport.command.CommandCallback;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

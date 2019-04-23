@@ -1,7 +1,7 @@
 package com.jd.journalq.toolkit.doc;
 
 /**
- *  Unique entry for service and method of api
+ * Unique entry for service and method of api
  **/
 public class DocEntry {
     private String group;

@@ -30,7 +30,7 @@ import com.jd.journalq.service.ConsumerService;
 import com.jd.journalq.service.ProducerService;
 import com.jd.journalq.service.TopicPartitionGroupService;
 import com.jd.journalq.service.TopicService;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.laf.binding.annotation.Value;
 import com.jd.laf.web.vertx.annotation.Body;
 import com.jd.laf.web.vertx.annotation.Path;

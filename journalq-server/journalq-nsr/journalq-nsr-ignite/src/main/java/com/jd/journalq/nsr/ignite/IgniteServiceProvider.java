@@ -72,7 +72,7 @@ import com.jd.journalq.nsr.ignite.service.IgniteNamespaceService;
 import com.jd.journalq.toolkit.config.Property;
 import com.jd.journalq.toolkit.config.PropertySupplier;
 import com.jd.journalq.toolkit.config.PropertySupplierAware;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.cache.CacheAtomicityMode;

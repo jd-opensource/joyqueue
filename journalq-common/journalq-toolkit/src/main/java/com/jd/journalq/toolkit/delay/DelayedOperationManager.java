@@ -14,7 +14,7 @@
 package com.jd.journalq.toolkit.delay;
 
 import com.jd.journalq.toolkit.concurrent.NamedThreadFactory;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 
 import java.util.Collection;
 import java.util.Iterator;

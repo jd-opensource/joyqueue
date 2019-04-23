@@ -31,7 +31,7 @@ import com.jd.journalq.client.internal.producer.interceptor.ProducerInterceptorM
 import com.jd.journalq.client.internal.producer.transport.ProducerClientManager;
 import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.toolkit.concurrent.SimpleFuture;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

@@ -49,7 +49,7 @@ import com.jd.journalq.toolkit.config.PropertySupplier;
 import com.jd.journalq.toolkit.config.PropertySupplierAware;
 import com.jd.journalq.toolkit.lang.Close;
 import com.jd.journalq.toolkit.lang.LifeCycle;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import com.jd.laf.extension.ExtensionPoint;
 import com.jd.laf.extension.ExtensionPointLazy;
