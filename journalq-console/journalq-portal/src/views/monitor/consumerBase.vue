@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="ml20 mt30">
-      <d-input v-model="keyword" :placeholder="keywordTip" class="left mr10" style="width:213px">
+      <d-input v-model="keyword" :placeholder="keywordTip" class="left mr10" style="width: 10%">
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
       <d-button type="primary" v-if="$store.getters.isAdmin" @click="openDialog('subscribeDialog')" class="left mr10">
@@ -58,7 +58,7 @@
         </d-tab-pane>
 
         <d-tab-pane v-if="$store.getters.isAdmin" label="消费组成员" name="coordinatorGroupMember" icon="file-text">
-          <coordinator-group-member ref="coordinatorGroupMember" :app="detailDialog.app" :topic="detailDialog.topic" :namespace="detailDialog.namespace"
+          <tab-coordinator-group ref="coordinatorGroupMember" :app="detailDialog.app" :topic="detailDialog.topic" :namespace="detailDialog.namespace"
                      :type="type" :client-type="detailDialog.clientType"  :doSearch="detailDialog.doSearch" :subscribeGroup="detailDialog.subscribeGroup" :searchData="detailDialog"
                      :col-data="coordinatorGroupMemberTable.colData" :search="coordinatorGroupMemberTable.search"/>
         </d-tab-pane>
