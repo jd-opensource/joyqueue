@@ -21,6 +21,7 @@ public class SimpleKafkaProducer {
         props.put(ProducerConfig.CLIENT_ID_CONFIG, KafkaConfigs.CLIENT_ID);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        props.put(ProducerConfig.COMPRESSION_TYPE_CONFIG, "snappy");
         KafkaProducer<String, String> kafkaProducer = new KafkaProducer<>(props);
 
         while (true) {

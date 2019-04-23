@@ -91,10 +91,14 @@ public class BrokerMessageConverter {
     }
 
     public static ConsumeMessage convert(String topic, String app, BrokerMessage brokerMessage) {
-        byte[] body = brokerMessage.getDecompressedBody();
-        ConsumeMessage consumeMessage = new ConsumeMessage(TopicName.parse(topic), app, brokerMessage.getPartition(), brokerMessage.getMsgIndexNo(),
-                brokerMessage.getTxId(), brokerMessage.getBusinessId(), new String(body, Charset.forName("UTF-8")), body, brokerMessage.getFlag(), brokerMessage.getPriority(),
-                brokerMessage.getStartTime(), brokerMessage.getSource(), brokerMessage.getAttributes());
+        BrokerMessage convertedMessage = messageConvertSupport.convert(brokerMessage);
+        if (convertedMessage == null) {
+            convertedMessage = brokerMessage;
+        }
+        byte[] body = convertedMessage.getDecompressedBody();
+        ConsumeMessage consumeMessage = new ConsumeMessage(TopicName.parse(topic), app, convertedMessage.getPartition(), convertedMessage.getMsgIndexNo(),
+                convertedMessage.getTxId(), convertedMessage.getBusinessId(), new String(body, Charset.forName("UTF-8")), body, convertedMessage.getFlag(), convertedMessage.getPriority(),
+                convertedMessage.getStartTime(), convertedMessage.getSource(), convertedMessage.getAttributes());
         return consumeMessage;
     }
 }

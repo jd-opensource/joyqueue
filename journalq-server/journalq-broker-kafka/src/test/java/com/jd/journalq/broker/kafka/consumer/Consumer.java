@@ -44,8 +44,12 @@ public class Consumer {
     public void doWork() {
         ConsumerRecords<String, String> records = consumer.poll(100);
         for (ConsumerRecord<String, String> record : records) {
+//            System.out.println("Received message: (" + record.key() + ", " + record.value() + ") at partition "
+//                    + record.partition() + " at offset " + record.offset() + ", timestamp: " + record.timestamp());
+
             System.out.println("Received message: (" + record.key() + ", " + record.value() + ") at partition "
-                    + record.partition() + " at offset " + record.offset() + ", timestamp: " + record.timestamp());
+                    + record.partition() + " at offset " + record.offset());
+
 
 //            try {
 //                Thread.currentThread().sleep(100 * 1);

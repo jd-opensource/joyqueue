@@ -16,7 +16,7 @@ public enum KafkaCompressionCodec {
     private int code;
     private String name;
 
-    private KafkaCompressionCodec(int code, String name) {
+    KafkaCompressionCodec(int code, String name) {
         this.code = code;
         this.name = name;
     }
@@ -26,9 +26,9 @@ public enum KafkaCompressionCodec {
     }
 
     public static KafkaCompressionCodec valueOf(int codec) {
-        for (KafkaCompressionCodec compressionCodec : KafkaCompressionCodec.values()) {
-            if (compressionCodec.getCode() == codec) {
-                return compressionCodec;
+        for (KafkaCompressionCodec kafkaCompressionCodec : KafkaCompressionCodec.values()) {
+            if (kafkaCompressionCodec.getCode() == codec) {
+                return kafkaCompressionCodec;
             }
         }
         throw new RuntimeException(String.format("%s is an unknown compression codec", codec));

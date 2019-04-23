@@ -17,7 +17,6 @@ import com.jd.journalq.network.command.CommandType;
 import com.jd.journalq.network.transport.command.support.DefaultCommandHandlerFactory;
 import com.jd.journalq.nsr.network.command.NsrCommandType;
 import com.jd.journalq.server.retry.remote.handler.RemoteRetryMessageHandler;
-import com.sun.deploy.security.BrowserKeystore;
 
 /**
  * 服务命令注册器

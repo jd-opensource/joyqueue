@@ -12,10 +12,12 @@ import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionOf
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionPrepare;
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionState;
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.UnCompletedTransaction;
+import com.jd.journalq.toolkit.service.Service;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -26,10 +28,9 @@ import java.util.Map;
  * email: gaohaoxiang@jd.com
  * date: 2019/4/19
  */
-// TODO 临时代码
 // TODO 补充日志
 // TODO 协调者变化处理
-public class TransactionCompletionHandler {
+public class TransactionCompletionHandler extends Service {
 
     protected static final Logger logger = LoggerFactory.getLogger(TransactionCompletionHandler.class);
 
@@ -39,54 +40,79 @@ public class TransactionCompletionHandler {
     private TransactionSynchronizer transactionSynchronizer;
 
     private final Map<String, UnCompletedTransaction> unCompletedTransactionMap = Maps.newLinkedHashMap();
-    private final List<UnCompletedTransaction> unCompletedTransactionList = Lists.newArrayListWithCapacity(config.getTransactionLogScanSize());
+    private final List<UnCompletedTransaction> retryUnCompletedTransactionList = Lists.newLinkedList();
+    private Map<Long, UnCompletedTransaction> unCompletedTransactionSortedMap;
     private long lastTime = 0;
     private long startIndex = 0;
     private long currentIndex = 0;
-    private long commitedIndex = 0;
+    private long committedIndex = 0;
 
     public TransactionCompletionHandler(KafkaConfig config, Coordinator coordinator, TransactionLog transactionLog, TransactionSynchronizer transactionSynchronizer) {
         this.config = config;
         this.coordinator = coordinator;
         this.transactionLog = transactionLog;
         this.transactionSynchronizer = transactionSynchronizer;
+    }
+
+    @Override
+    protected void validate() throws Exception {
         this.currentIndex = transactionLog.getIndex();
         this.startIndex = currentIndex;
-        this.commitedIndex = currentIndex;
+        this.committedIndex = currentIndex;
+        this.unCompletedTransactionSortedMap = Maps.newLinkedHashMapWithExpectedSize(config.getTransactionLogScanSize());
     }
 
     public void handle() {
         try {
-            List<TransactionDomain> transactionDomains = transactionLog.read(currentIndex, config.getTransactionLogScanSize());
-            if (CollectionUtils.isEmpty(transactionDomains)) {
-                return;
-            }
-
-            for (int i = 0; i < transactionDomains.size(); i++) {
-                long currentIndex = this.currentIndex + i;
-                TransactionDomain transactionDomain = transactionDomains.get(i);
-                UnCompletedTransaction unCompletedTransaction = null;
-
-                if (transactionDomain instanceof TransactionPrepare) {
-                    unCompletedTransaction = handlePrepare((TransactionPrepare) transactionDomain, currentIndex);
-                } else if (transactionDomain instanceof TransactionOffset) {
-                    unCompletedTransaction = handleOffset((TransactionOffset) transactionDomain, currentIndex);
-                } else if (transactionDomain instanceof TransactionMarker) {
-                    unCompletedTransaction = handleMarker((TransactionMarker) transactionDomain, currentIndex);
-                } else {
-                    logger.warn("unsupported transaction domain, type: {}", transactionDomain);
+            if (CollectionUtils.isNotEmpty(retryUnCompletedTransactionList)) {
+                handleRetryTransactions();
+            } else {
+                List<TransactionDomain> transactionDomains = readTransactions();
+                if (CollectionUtils.isNotEmpty(transactionDomains)) {
+                    transactionDomains = prepareTransactionDomains(transactionDomains);
+                    handleUnCompleteTransactions(transactionDomains);
                 }
-
-                if (unCompletedTransaction != null) {
-                    lastTime = unCompletedTransaction.getCreateTime();
-                }
-                unCompletedTransactionList.add(unCompletedTransaction);
+                handleCommitIndex();
             }
-
-            checkUnCompleteTransactions(transactionDomains);
         } catch (Exception e) {
             logger.error("transaction compensate exception", e);
         }
+    }
+
+    protected List<TransactionDomain> readTransactions() throws Exception {
+        List<TransactionDomain> transactionDomains = transactionLog.read(currentIndex, config.getTransactionLogScanSize());
+        if (CollectionUtils.isEmpty(transactionDomains)) {
+            return Collections.emptyList();
+        }
+        return transactionDomains;
+    }
+
+    protected List<TransactionDomain> prepareTransactionDomains(List<TransactionDomain> transactionDomains) {
+        List<TransactionDomain> result = Lists.newLinkedList();
+        for (int i = 0; i < transactionDomains.size(); i++) {
+            long currentIndex = this.currentIndex + i;
+            TransactionDomain transactionDomain = transactionDomains.get(i);
+            UnCompletedTransaction unCompletedTransaction = null;
+
+            if (transactionDomain instanceof TransactionPrepare) {
+                unCompletedTransaction = handlePrepare((TransactionPrepare) transactionDomain, currentIndex);
+            } else if (transactionDomain instanceof TransactionOffset) {
+                unCompletedTransaction = handleOffset((TransactionOffset) transactionDomain, currentIndex);
+            } else if (transactionDomain instanceof TransactionMarker) {
+                unCompletedTransaction = handleMarker((TransactionMarker) transactionDomain, currentIndex);
+            } else {
+                logger.warn("unsupported transaction domain, type: {}", transactionDomain);
+            }
+
+            if (unCompletedTransaction == null) {
+                break;
+            }
+
+            lastTime = unCompletedTransaction.getCreateTime();
+            unCompletedTransactionSortedMap.put(currentIndex, unCompletedTransaction);
+            result.add(transactionDomain);
+        }
+        return result;
     }
 
     protected UnCompletedTransaction handlePrepare(TransactionPrepare transactionPrepare, long index) {
@@ -104,7 +130,7 @@ public class TransactionCompletionHandler {
             unCompletedTransactionMap.put(key, unCompletedTransaction);
         }
         if (unCompletedTransaction.isCompleted()) {
-            return unCompletedTransaction;
+            return null;
         }
 
         unCompletedTransaction.setLastTime(transactionPrepare.getCreateTime());
@@ -121,7 +147,7 @@ public class TransactionCompletionHandler {
             return null;
         }
         if (unCompletedTransaction.isCompleted()) {
-            return unCompletedTransaction;
+            return null;
         }
 
         unCompletedTransaction.setEndIndex(index);
@@ -137,7 +163,7 @@ public class TransactionCompletionHandler {
             return null;
         }
         if (unCompletedTransaction.isCompleted()) {
-            return unCompletedTransaction;
+            return null;
         }
 
         unCompletedTransaction.setEndIndex(index);
@@ -146,93 +172,124 @@ public class TransactionCompletionHandler {
         return unCompletedTransaction;
     }
 
-    protected void checkUnCompleteTransactions(List<TransactionDomain> transactionDomains) {
-        long commitIndex = -1;
-        boolean isNeedRetry = false;
-
-        for (int i = (int) (this.currentIndex - this.startIndex); i < unCompletedTransactionList.size(); i++) {
-            long currentIndex = this.startIndex + i;
-            UnCompletedTransaction unCompletedTransaction = unCompletedTransactionList.get(i);
-            boolean isCompleted = false;
+    protected void handleUnCompleteTransactions(List<TransactionDomain> transactionDomains) {
+        for (int i = 0; i < transactionDomains.size(); i++) {
+            long currentIndex = this.currentIndex + i;
+            UnCompletedTransaction unCompletedTransaction = unCompletedTransactionSortedMap.get(currentIndex);
+            if (unCompletedTransaction == null) {
+                continue;
+            }
 
             if (unCompletedTransaction.isCompleted()) {
-                // 正常事务提交
-                if (currentIndex == unCompletedTransaction.getEndIndex()) {
-                    isCompleted = true;
-                }
+                // 正常提交
             } else if (unCompletedTransaction.isExpired(lastTime, unCompletedTransaction.getTimeout())) {
-
-                // prepare事务补偿
+                // prepare补偿
                 if (unCompletedTransaction.isPrepared()) {
-                    if (unCompletedTransaction.getState().equals(TransactionState.PREPARE_ABORT)) {
-                        if (!tryAbort(unCompletedTransaction)) {
-                            isNeedRetry = true;
-                            unCompletedTransaction.incrReties();
-                        }
-                    } else if (unCompletedTransaction.getState().equals(TransactionState.PREPARE_COMMIT)) {
-                        if (!tryCommit(unCompletedTransaction)) {
-                            isNeedRetry = true;
-                            unCompletedTransaction.incrReties();
-                        }
-                    }
-
-                    if (unCompletedTransaction.getReties() == config.getTransactionLogRetries()) {
-                        logger.warn("transaction retry failed, metadata: {}", unCompletedTransaction);
-                        unCompletedTransaction.setState(TransactionState.DEAD);
-                    }
+                    retryUnCompletedTransactionList.add(unCompletedTransaction);
                 } else {
-                    // 跳过超时事务
-                    continue;
+                    // 跳过超时
+                    logger.info("事务超时, txId: {}, index: {}", unCompletedTransaction.getId(), currentIndex);
+                    unCompletedTransaction.transitionStateTo(TransactionState.DEAD);
                 }
             }
-
-            if (isCompleted && (commitIndex == -1 || commitIndex == commitIndex)) {
-                commitIndex = currentIndex + 1;
-            }
-
-            logger.info("currentIndex: {}, isCompleted: {}", currentIndex, isCompleted);
-        }
-
-        // 如果需要重试，不做处理
-        if (isNeedRetry) {
-            logger.info("retry");
-            return;
+            logger.info("currentIndex: {}, isCompleted: {}, state: {}", currentIndex, unCompletedTransaction.isCompleted(), unCompletedTransaction.getState());
         }
 
         currentIndex += transactionDomains.size();
         logger.info("右移到 {}", currentIndex);
+    }
 
-        // 判断index是否右移
-        if (commitIndex != -1) {
-            boolean isCommit = true;
-            for (int i = 0; i < commitIndex - this.startIndex; i++) {
-                UnCompletedTransaction unCompletedTransaction = unCompletedTransactionList.get(i);
-                if (unCompletedTransaction != null && !unCompletedTransaction.isCompleted()) {
-                    isCommit = false;
-                    break;
+    protected void handleCommitIndex() {
+        long commitIndex = -1;
+
+        for (Map.Entry<Long, UnCompletedTransaction> entry : unCompletedTransactionSortedMap.entrySet()) {
+            long currentIndex = entry.getKey();
+            UnCompletedTransaction unCompletedTransaction = entry.getValue();
+            if (unCompletedTransaction == null) {
+                continue;
+            }
+            if (!unCompletedTransaction.isCompleted()) {
+                break;
+            }
+
+            if (currentIndex == unCompletedTransaction.getEndIndex()) {
+                boolean isCommit = true;
+                for (long j = Math.max((int) commitIndex, committedIndex); j < unCompletedTransaction.getEndIndex(); j++) {
+                    UnCompletedTransaction checkUnCompletedTransaction = unCompletedTransactionSortedMap.get(j);
+                    if (checkUnCompletedTransaction == null) {
+                        continue;
+                    }
+                    if (!checkUnCompletedTransaction.isCompleted()) {
+                        isCommit = false;
+                        break;
+                    }
+                }
+
+                if (isCommit) {
+                    commitIndex = currentIndex + 1;
+                }
+            }
+        }
+
+        if (commitIndex < 0) {
+            return;
+        }
+
+        try {
+            transactionLog.saveIndex(commitIndex);
+        } catch (Exception e) {
+            logger.error("commit index exception", e);
+        }
+
+        logger.info("提交index {}", commitIndex);
+        logger.info("准备移除, commitIndex: {}, committedIndex: {}", commitIndex, committedIndex);
+
+        for (long i = committedIndex; i < commitIndex; i++) {
+            logger.info("移除index {}", i);
+            UnCompletedTransaction unCompletedTransaction = unCompletedTransactionSortedMap.remove(i);
+            if (unCompletedTransaction != null) {
+                logger.info("移除txId {}", generateKey(unCompletedTransaction.getApp(), unCompletedTransaction.getId(),
+                        unCompletedTransaction.getProducerId(), unCompletedTransaction.getProducerEpoch()));
+
+                unCompletedTransactionMap.remove(generateKey(unCompletedTransaction.getApp(), unCompletedTransaction.getId(),
+                        unCompletedTransaction.getProducerId(), unCompletedTransaction.getProducerEpoch()));
+            }
+        }
+
+        logger.info("完成移除, sortedMapSize: {}, mapSize: {}", unCompletedTransactionSortedMap.size(), unCompletedTransactionMap.size());
+
+        this.committedIndex = commitIndex;
+
+        logger.info("提交index {}", commitIndex);
+    }
+
+    protected void handleRetryTransactions() {
+        Iterator<UnCompletedTransaction> iterator = retryUnCompletedTransactionList.iterator();
+        while (iterator.hasNext()) {
+            UnCompletedTransaction unCompletedTransaction = iterator.next();
+            if (unCompletedTransaction.getState().equals(TransactionState.PREPARE_ABORT)) {
+                if (tryAbort(unCompletedTransaction)) {
+                    unCompletedTransaction.transitionStateTo(TransactionState.COMPLETE_ABORT);
+                } else {
+                    unCompletedTransaction.incrReties();
+                }
+            } else if (unCompletedTransaction.getState().equals(TransactionState.PREPARE_COMMIT)) {
+                if (tryCommit(unCompletedTransaction)) {
+                    unCompletedTransaction.transitionStateTo(TransactionState.COMPLETE_COMMIT);
+                } else {
+                    unCompletedTransaction.incrReties();
                 }
             }
 
-            if (isCommit) {
-                try {
-                    transactionLog.saveIndex(commitIndex);
-                } catch (Exception e) {
-                    logger.error("commit index exception", e);
-                }
-
-                Iterator<UnCompletedTransaction> iterator = unCompletedTransactionList.iterator();
-                for (int i = 0; i < commitIndex - this.startIndex; i++) {
-                    UnCompletedTransaction unCompletedTransaction = iterator.next();
-                    if (unCompletedTransaction != null) {
-                        unCompletedTransactionMap.remove(generateKey(unCompletedTransaction.getApp(), unCompletedTransaction.getId(),
-                                unCompletedTransaction.getProducerId(), unCompletedTransaction.getProducerEpoch()));
-                    }
+            if (unCompletedTransaction.isCompleted()) {
+                logger.info("transaction retry success, metadata: {}", unCompletedTransaction);
+                iterator.remove();
+            } else {
+                if (unCompletedTransaction.getReties() == config.getTransactionLogRetries()) {
+                    logger.warn("transaction retry failed, metadata: {}", unCompletedTransaction);
+                    unCompletedTransaction.transitionStateTo(TransactionState.DEAD);
                     iterator.remove();
                 }
-
-                this.startIndex = commitIndex;
-                this.commitedIndex = commitIndex;
-                logger.info("提交index {}", commitIndex);
             }
         }
     }

@@ -137,6 +137,7 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
         transactionSynchronizer.start();
         transactionHandler.start();
         transactionOffsetHandler.start();
+        transactionCompletionHandler.start();
         transactionCompletionScheduler.start();
         rateLimitHandlerFactory.start();
     }
@@ -150,6 +151,7 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
         groupBalanceHandler.stop();
 
         transactionCompletionScheduler.stop();
+        transactionCompletionHandler.stop();
         transactionOffsetHandler.stop();
         transactionHandler.stop();
         transactionSynchronizer.stop();

@@ -147,7 +147,7 @@ public class TransactionMetadata extends com.jd.journalq.broker.coordinator.tran
     }
 
     public boolean isCompleted() {
-        return state.equals(TransactionState.COMPLETE_ABORT) || state.equals(TransactionState.COMPLETE_COMMIT);
+        return state.equals(TransactionState.COMPLETE_ABORT) || state.equals(TransactionState.COMPLETE_COMMIT) || state.equals(TransactionState.DEAD);
     }
 
     public boolean isPrepared() {

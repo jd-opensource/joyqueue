@@ -20,7 +20,6 @@ public class KafkaBrokerMessage {
     private byte[] key;
     private byte[] value;
     private long offset;
-    private int compressionCodecType;
     private boolean batch;
     private short flag;
     private Map<byte[], byte[]> header;
@@ -92,14 +91,6 @@ public class KafkaBrokerMessage {
 
     public void setOffset(long offset) {
         this.offset = offset;
-    }
-
-    public void setCompressionCodecType(int compressionCodecType) {
-        this.compressionCodecType = compressionCodecType;
-    }
-
-    public int getCompressionCodecType() {
-        return compressionCodecType;
     }
 
     public void setBatch(boolean batch) {

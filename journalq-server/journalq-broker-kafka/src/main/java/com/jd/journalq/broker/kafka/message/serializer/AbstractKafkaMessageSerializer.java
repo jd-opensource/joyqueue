@@ -3,6 +3,7 @@ package com.jd.journalq.broker.kafka.message.serializer;
 import com.jd.journalq.broker.kafka.message.compressor.KafkaCompressionCodec;
 import com.jd.journalq.broker.kafka.message.compressor.KafkaCompressionCodecFactory;
 import com.jd.journalq.broker.kafka.message.compressor.stream.ByteBufferInputStream;
+import com.jd.journalq.broker.kafka.util.KafkaBufferUtils;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.ByteArrayOutputStream;
@@ -24,12 +25,15 @@ public abstract class AbstractKafkaMessageSerializer {
 
     protected static final byte INVALID_EXTENSION_MAGIC = -1;
     protected static final int EXTENSION_MAGIC_OFFSET = 0;
-    protected static final int EXTENSION_CONTENT_OFFSET = EXTENSION_MAGIC_OFFSET + 1;
-    protected static final int EXTENSION_ATTRIBUTE_OFFSET = EXTENSION_CONTENT_OFFSET + 8;
+    protected static final int EXTENSION_TIMESTAMP_OFFSET = EXTENSION_MAGIC_OFFSET + 1;
+    protected static final int EXTENSION_ATTRIBUTE_OFFSET = EXTENSION_TIMESTAMP_OFFSET + 8;
 
     // v0, v1: offset + size + crc
     // v2:     offset + size + partitionLeaderEpoch
-    protected static final int MAGIC_OFFSET = 8 + 4 + 4;
+    protected static final int OFFSET_OFFSET = 0;
+    protected static final int SIZE_OFFSET = OFFSET_OFFSET + 8;
+    protected static final int CRC_OFFSET = SIZE_OFFSET + 4;
+    protected static final int MAGIC_OFFSET = CRC_OFFSET + 4;
     protected static final int ATTRIBUTE_OFFSET = MAGIC_OFFSET + 1;
 
     protected static final byte COMPRESSION_CODEC_MASK = 0x07;
@@ -39,35 +43,50 @@ public abstract class AbstractKafkaMessageSerializer {
 
     protected static final int DECOMPRESS_BUFFER_SIZE = 1024;
 
-    protected static byte getExtensionMagic(byte[] extension) {
+    public static byte getExtensionMagic(byte[] extension) {
         if (ArrayUtils.isEmpty(extension)) {
             return INVALID_EXTENSION_MAGIC;
         }
         return extension[EXTENSION_MAGIC_OFFSET];
     }
 
-    protected static void writeExtensionMagic(byte[] extension, byte magic) {
+    public static void writeExtensionMagic(byte[] extension, byte magic) {
         extension[EXTENSION_MAGIC_OFFSET] = magic;
     }
 
-    protected static void setExtensionMagic(byte[] extension, byte magic) {
-        ArrayUtils.add(extension, 0, magic);
+    public static void writeExtensionTimestamp(byte[] extension, long timestamp) {
+        KafkaBufferUtils.writeUnsignedLongLE(extension, EXTENSION_TIMESTAMP_OFFSET, timestamp);
     }
 
-    protected static int getCompressionCodecType(short attribute) {
+    public static void writeExtensionAttribute(byte[] extension, short attribute) {
+        KafkaBufferUtils.writeUnsignedLongLE(extension, EXTENSION_ATTRIBUTE_OFFSET, attribute);
+    }
+
+    public static byte readExtensionMagic(byte[] extension) {
+        return extension[EXTENSION_MAGIC_OFFSET];
+    }
+
+    public static long readExtensionTimestamp(byte[] extension) {
+        return KafkaBufferUtils.readUnsignedLongLE(extension, EXTENSION_TIMESTAMP_OFFSET);
+    }
+
+    public static short readExtensionAttribute(byte[] extension) {
+        return (short) KafkaBufferUtils.readUnsignedLongLE(extension, EXTENSION_ATTRIBUTE_OFFSET);
+    }
+
+    public static int getCompressionCodecType(short attribute) {
         return attribute & COMPRESSION_CODEC_MASK;
     }
 
-    protected static boolean isTransactionl(short attribute) {
+    public static boolean isTransactionl(short attribute) {
         return (attribute & TRANSACTIONAL_FLAG_MASK) > 0;
     }
 
-    protected static int getTimestampType(short attribute) {
+    public static int getTimestampType(short attribute) {
         return attribute & TIMESTAMP_TYPE_MASK;
     }
 
-    // TODO 优化，不需要buffer
-    protected static ByteBuffer decompress(KafkaCompressionCodec compressionCodec, ByteBuffer buffer, byte messageMagic) throws Exception {
+    public static byte[] decompress(KafkaCompressionCodec compressionCodec, ByteBuffer buffer, byte messageMagic) throws Exception {
         byte[] intermediateBuffer = new byte[DECOMPRESS_BUFFER_SIZE];
         ByteBufferInputStream sourceInputStream = new ByteBufferInputStream(buffer);
         InputStream inputStream = KafkaCompressionCodecFactory.apply(compressionCodec, sourceInputStream, messageMagic);
@@ -80,7 +99,10 @@ public abstract class AbstractKafkaMessageSerializer {
         } finally {
             inputStream.close();
         }
+        return outputStream.toByteArray();
+    }
 
-        return ByteBuffer.wrap(outputStream.toByteArray());
+    public static ByteBuffer decompressBuffer(KafkaCompressionCodec compressionCodec, ByteBuffer buffer, byte messageMagic) throws Exception {
+        return ByteBuffer.wrap(decompress(compressionCodec, buffer, messageMagic));
     }
 }

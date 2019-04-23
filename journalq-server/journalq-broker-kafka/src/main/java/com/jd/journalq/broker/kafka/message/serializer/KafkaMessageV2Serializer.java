@@ -22,27 +22,31 @@ import java.util.Map;
  */
 public class KafkaMessageV2Serializer extends AbstractKafkaMessageSerializer {
 
-    // magic
-    private static final int EXTENSION_LENGTH = 1 + 8 + 8;
+    private static final int EXTENSION_V0_LENGTH = 1; // magic
+    private static final int EXTENSION_V1_LENGTH = 1 + 8 + 8; // magic + timestamp + attribute
+    private static final int CURRENT_EXTENSION_LENGTH = EXTENSION_V1_LENGTH;
 
     private static final byte CURRENT_MAGIC = MESSAGE_MAGIC_V2;
 
     public static void writeExtension(BrokerMessage brokerMessage, KafkaBrokerMessage kafkaBrokerMessage) {
-        byte[] extension = new byte[EXTENSION_LENGTH];
+        byte[] extension = new byte[CURRENT_EXTENSION_LENGTH];
         writeExtensionMagic(extension, CURRENT_MAGIC);
-        KafkaBufferUtils.writeUnsignedLongLE(extension, EXTENSION_CONTENT_OFFSET, kafkaBrokerMessage.getTimestamp());
-        KafkaBufferUtils.writeUnsignedLongLE(extension, EXTENSION_ATTRIBUTE_OFFSET, kafkaBrokerMessage.getAttribute());
+        writeExtensionTimestamp(extension, kafkaBrokerMessage.getTimestamp());
+        writeExtensionAttribute(extension, kafkaBrokerMessage.getAttribute());
         brokerMessage.setExtension(extension);
     }
 
     public static void readExtension(BrokerMessage brokerMessage, KafkaBrokerMessage kafkaBrokerMessage) {
         byte[] extension = brokerMessage.getExtension();
-        if (ArrayUtils.isEmpty(extension) || extension.length != EXTENSION_LENGTH) {
+        if (ArrayUtils.isEmpty(extension)) {
             return;
         }
+
         kafkaBrokerMessage.setMagic(CURRENT_MAGIC);
-        kafkaBrokerMessage.setTimestamp(KafkaBufferUtils.readUnsignedLongLE(extension, EXTENSION_CONTENT_OFFSET));
-        kafkaBrokerMessage.setAttribute((short) KafkaBufferUtils.readUnsignedLongLE(extension, EXTENSION_ATTRIBUTE_OFFSET));
+        if (extension.length == EXTENSION_V1_LENGTH) {
+            kafkaBrokerMessage.setTimestamp(readExtensionTimestamp(extension));
+            kafkaBrokerMessage.setAttribute(readExtensionAttribute(extension));
+        }
     }
 
     public static void writeMessages(ByteBuf buffer, List<KafkaBrokerMessage> messages) throws Exception {
@@ -106,8 +110,9 @@ public class KafkaMessageV2Serializer extends AbstractKafkaMessageSerializer {
         byte[] value = new byte[buffer.remaining()];
         buffer.get(value);
 
-        KafkaCompressionCodec compressionCodec = KafkaCompressionCodec.valueOf(getCompressionCodecType(attribute));
+//        KafkaCompressionCodec compressionCodec = KafkaCompressionCodec.valueOf(getCompressionCodecType(attribute));
         KafkaBrokerMessage message = new KafkaBrokerMessage();
+        message.setMagic(magic);
         message.setAttribute(attribute);
         message.setTimestamp(firstTimestamp);
         message.setOffset(baseOffset);
@@ -115,7 +120,7 @@ public class KafkaMessageV2Serializer extends AbstractKafkaMessageSerializer {
         message.setBatch(true);
         message.setMagic(CURRENT_MAGIC);
         message.setFlag((short) messageCount);
-        message.setCompressionCodecType(compressionCodec.getCode());
+        message.setCrc(crc);
 
         message.setTransaction(isTransactionl(attribute));
         message.setProducerId(producerId);
@@ -123,6 +128,53 @@ public class KafkaMessageV2Serializer extends AbstractKafkaMessageSerializer {
         message.setBaseSequence(baseSequence);
 
         return Lists.newArrayList(message);
+    }
+
+    public static List<KafkaBrokerMessage> readMessages(KafkaBrokerMessage message) throws Exception {
+        short attribute = message.getAttribute();
+        KafkaCompressionCodec compressionType = KafkaCompressionCodec.valueOf(getCompressionCodecType(attribute));
+        byte[] body = message.getValue();
+
+        if (!compressionType.equals(KafkaCompressionCodec.NoCompressionCodec)) {
+            body = decompress(compressionType, ByteBuffer.wrap(body), CURRENT_MAGIC);
+        }
+
+        ByteBuffer bodyBuffer = ByteBuffer.wrap(body);
+        List<KafkaBrokerMessage> result = Lists.newArrayListWithCapacity(message.getFlag());
+
+        for (int i = 0; i < message.getFlag(); i++) {
+            KafkaBrokerMessage brokerMessage = readMessage(message, bodyBuffer);
+            result.add(brokerMessage);
+        }
+        return result;
+    }
+
+    protected static KafkaBrokerMessage readMessage(KafkaBrokerMessage message, ByteBuffer buffer) throws Exception {
+        KafkaBrokerMessage result = new KafkaBrokerMessage();
+        result.setSize(KafkaBufferUtils.readVarint(buffer));
+        buffer.get(); // attribute
+        long timestamp = KafkaBufferUtils.readVarlong(buffer); // timestamp
+        result.setOffset(KafkaBufferUtils.readVarint(buffer) + message.getOffset());
+
+        byte[] businessId = KafkaBufferUtils.readVarBytes(buffer);
+        result.setKey((ArrayUtils.isEmpty(businessId) ? null : businessId));
+        result.setValue(KafkaBufferUtils.readVarBytes(buffer));
+        result.setTimestamp(timestamp + message.getTimestamp());
+
+        result.setAttribute((short) 0);
+        result.setFlag(message.getFlag());
+        result.setBatch(true);
+
+        int headerCount = KafkaBufferUtils.readVarint(buffer);
+        if (headerCount != 0) {
+            Map<byte[], byte[]> headers = Maps.newHashMap();
+            for (int i = 0; i < headerCount; i++) {
+                headers.put(KafkaBufferUtils.readVarBytes(buffer), KafkaBufferUtils.readVarBytes(buffer));
+            }
+            result.setHeader(headers);
+        }
+
+        return result;
     }
 
     public static KafkaBrokerMessage readMessage(long baseOffset, long firstTimestamp, ByteBuffer buffer) throws Exception {
@@ -136,7 +188,6 @@ public class KafkaMessageV2Serializer extends AbstractKafkaMessageSerializer {
         message.setBatch(true);
         message.setMagic(CURRENT_MAGIC);
         message.setCrc(0);
-        message.setCompressionCodecType(KafkaCompressionCodec.NoCompressionCodec.getCode());
 
         int headerCount = KafkaBufferUtils.readVarint(buffer);
         if (headerCount != 0) {
