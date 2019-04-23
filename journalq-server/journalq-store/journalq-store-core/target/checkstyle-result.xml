@@ -1,6 +1,3 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <checkstyle version="6.18">
-<file name="/Users/lindeqiang/Workspace/Source/github/journalQ/journalq-server/journalq-store/journalq-store-core/src/main/java/com/jd/journalq/store/cli/IndexLengthCheck.java">
-<error line="127" severity="error" message="Could not use printStackTrace." source="com.puppycrawl.tools.checkstyle.checks.regexp.RegexpMultilineCheck"/>
-</file>
 </checkstyle>

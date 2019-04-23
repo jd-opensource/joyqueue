@@ -37,7 +37,7 @@ import com.jd.journalq.client.internal.trace.TraceCaller;
 import com.jd.journalq.client.internal.trace.TraceType;
 import com.jd.journalq.client.internal.transport.ClientState;
 import com.jd.journalq.domain.Consumer;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.domain.BrokerNode;
 import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
@@ -215,11 +215,11 @@ public class MessagePollerInner extends Service {
 
     protected List<ConsumeMessage> handleFetchMessageData(String topic, String app, FetchMessageData fetchMessageData) {
         if (fetchMessageData == null) {
-            throw new ConsumerException(JMQCode.CN_UNKNOWN_ERROR.getMessage(), JMQCode.CN_UNKNOWN_ERROR.getCode());
+            throw new ConsumerException(JournalqCode.CN_UNKNOWN_ERROR.getMessage(), JournalqCode.CN_UNKNOWN_ERROR.getCode());
         }
 
-        JMQCode code = fetchMessageData.getCode();
-        if (code.equals(JMQCode.SUCCESS)) {
+        JournalqCode code = fetchMessageData.getCode();
+        if (code.equals(JournalqCode.SUCCESS)) {
             return fetchMessageData.getMessages();
         }
 
@@ -329,10 +329,10 @@ public class MessagePollerInner extends Service {
     public TopicMetadata checkTopicMetadata(String topic) {
         TopicMetadata topicMetadata = clusterManager.fetchTopicMetadata(getTopicFullName(topic), getAppFullName());
         if (topicMetadata == null) {
-            throw new ConsumerException(String.format("topic %s is not exist", topic), JMQCode.FW_TOPIC_NOT_EXIST.getCode());
+            throw new ConsumerException(String.format("topic %s is not exist", topic), JournalqCode.FW_TOPIC_NOT_EXIST.getCode());
         }
         if (topicMetadata.getConsumerPolicy() == null) {
-            throw new ConsumerException(String.format("topic %s consumer %s is not exist", topic, nameServerConfig.getApp()), JMQCode.FW_CONSUMER_NOT_EXISTS.getCode());
+            throw new ConsumerException(String.format("topic %s consumer %s is not exist", topic, nameServerConfig.getApp()), JournalqCode.FW_CONSUMER_NOT_EXISTS.getCode());
         }
         return topicMetadata;
     }

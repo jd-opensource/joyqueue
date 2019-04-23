@@ -14,7 +14,7 @@
 package com.jd.journalq.store;
 
 import com.jd.journalq.domain.QosLevel;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.store.file.PositioningStore;
 import com.jd.journalq.store.file.RollBackException;
 import com.jd.journalq.store.file.StoreMessageSerializer;
@@ -377,7 +377,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         if (null != p) {
             // 重命名目录
             File partitionBase = new File(base, "index" + File.separator + partition);
-            if (!partitionBase.renameTo(new File(partitionBase.getParent(), partitionBase.getName() + ".d." + System.currentTimeMillis()))) {
+            if (!partitionBase.renameTo(new File(partitionBase.getParent(), partitionBase.getName() + ".d." + SystemClock.now()))) {
                 logger.warn("Rename directory {} failed!", partitionBase.getAbsolutePath());
             }
         }
@@ -468,7 +468,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
             }
         }
         readResult.setMessages(buffers.toArray(new ByteBuffer[0]));
-        readResult.setCode(JMQCode.SUCCESS);
+        readResult.setCode(JournalqCode.SUCCESS);
         if (null != consumeMetric) {
             consumeMetric.addCounter("ReadCount", buffers.size());
             consumeMetric.addLatency("ReadLatency", System.nanoTime() - t0);
@@ -560,7 +560,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         if (null != (writeCommand = writeCommandCache.poll())) {
             try {
                 if (waitForFlush()) {
-                    writeCommand.eventListener.onEvent(new WriteResult(JMQCode.SE_WRITE_TIMEOUT, null));
+                    writeCommand.eventListener.onEvent(new WriteResult(JournalqCode.SE_WRITE_TIMEOUT, null));
                 } else {
                     long[] indices = write(writeCommand.messages);
                     handleCallback(writeCommand, store.right(), indices);
@@ -568,7 +568,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                 ret = true;
             } catch (Throwable t) {
                 if (writeCommand.eventListener != null)
-                    writeCommand.eventListener.onEvent(new WriteResult(JMQCode.SE_WRITE_FAILED, null));
+                    writeCommand.eventListener.onEvent(new WriteResult(JournalqCode.SE_WRITE_FAILED, null));
             }
         }
         return ret;
@@ -583,7 +583,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
             }
             long t0 = System.nanoTime();
             if (waitForFlush()) {
-                writeCommand.eventListener.onEvent(new WriteResult(JMQCode.SE_WRITE_TIMEOUT, null));
+                writeCommand.eventListener.onEvent(new WriteResult(JournalqCode.SE_WRITE_TIMEOUT, null));
             } else {
                 long[] indices = write(writeCommand.messages);
                 handleCallback(writeCommand, store.right(), indices);
@@ -597,18 +597,18 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
             }
         } catch (Throwable t) {
             if (null != writeCommand && writeCommand.eventListener != null)
-                writeCommand.eventListener.onEvent(new WriteResult(JMQCode.SE_WRITE_FAILED, null));
+                writeCommand.eventListener.onEvent(new WriteResult(JournalqCode.SE_WRITE_FAILED, null));
             throw t;
         }
     }
 
     private boolean waitForFlush() {
 
-        long t0 = System.currentTimeMillis();
-        while (store.right() - store.flushPosition() >= config.maxDirtySize && System.currentTimeMillis() - t0 <= config.writeTimeoutMs) {
+        long t0 = SystemClock.now();
+        while (store.right() - store.flushPosition() >= config.maxDirtySize && SystemClock.now() - t0 <= config.writeTimeoutMs) {
             Thread.yield();
         }
-        return System.currentTimeMillis() - t0 > config.writeTimeoutMs;
+        return SystemClock.now() - t0 > config.writeTimeoutMs;
     }
 
     private void handleCallback(WriteCommand writeCommand, long position, long[] indices) {
@@ -709,11 +709,11 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         } catch (InterruptedException e) {
             logger.warn("Exception: ", e);
             if (eventListener != null)
-                eventListener.onEvent(new WriteResult(JMQCode.SE_WRITE_FAILED, null));
+                eventListener.onEvent(new WriteResult(JournalqCode.SE_WRITE_FAILED, null));
         }
 
         if (qosLevel == QosLevel.RECEIVE && null != eventListener) {
-            eventListener.onEvent(new WriteResult(JMQCode.SUCCESS, null));
+            eventListener.onEvent(new WriteResult(JournalqCode.SUCCESS, null));
         }
     }
 
@@ -803,9 +803,9 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
             if (started.compareAndSet(true, false)) {
                 long stopTimeout = 5000L;
                 System.out.println("Waiting for flush finished...");
-                long t0 = System.currentTimeMillis();
+                long t0 = SystemClock.now();
                 try {
-                    while (System.currentTimeMillis() - t0 < stopTimeout &&
+                    while (SystemClock.now() - t0 < stopTimeout &&
                             !isAllStoreClean()) {
                         Thread.sleep(50);
                     }
@@ -859,9 +859,9 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
 
     private void stopAndWaitScheduledFeature(ScheduledFuture scheduledFuture, long timeout) throws TimeoutException {
         if (scheduledFuture != null) {
-            long t0 = System.currentTimeMillis();
+            long t0 = SystemClock.now();
             while (!scheduledFuture.isDone()) {
-                if (System.currentTimeMillis() - t0 > timeout) {
+                if (SystemClock.now() - t0 > timeout) {
                     throw new TimeoutException("Wait for async job timeout!");
                 }
                 scheduledFuture.cancel(true);
@@ -1201,7 +1201,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
             this.listener = listener;
             this.indices = indices;
             this.qosLevel = qosLevel;
-            this.timestamp = System.currentTimeMillis();
+            this.timestamp = SystemClock.now();
         }
     }
 
@@ -1341,12 +1341,12 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
             try {
                 while (getFirst().position <= position) {
                     Callback callback = removeFirst();
-                    callback.listener.onEvent(new WriteResult(JMQCode.SUCCESS, callback.indices));
+                    callback.listener.onEvent(new WriteResult(JournalqCode.SUCCESS, callback.indices));
                 }
-                long deadline = System.currentTimeMillis() - EVENT_TIMEOUT_MILLS;
+                long deadline = SystemClock.now() - EVENT_TIMEOUT_MILLS;
                 while (getFirst().timestamp < deadline) {
                     Callback callback = removeFirst();
-                    callback.listener.onEvent(new WriteResult(JMQCode.SE_WRITE_TIMEOUT, null));
+                    callback.listener.onEvent(new WriteResult(JournalqCode.SE_WRITE_TIMEOUT, null));
                 }
             } catch (NoSuchElementException ignored) {
             }
@@ -1355,7 +1355,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         void put(Callback callback) {
             addLast(callback);
             if (callback.position <= callbackPosition.get() && remove(callback)) {
-                callback.listener.onEvent(new WriteResult(JMQCode.SUCCESS, callback.indices));
+                callback.listener.onEvent(new WriteResult(JournalqCode.SUCCESS, callback.indices));
             }
         }
     }

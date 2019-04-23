@@ -28,7 +28,7 @@ public class AddConnectionAck extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.ADD_CONNECTION_ACK.getCode();
+        return JournalqCommandType.ADD_CONNECTION_ACK.getCode();
     }
 
     public void setConnectionId(String connectionId) {

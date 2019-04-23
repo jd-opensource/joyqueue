@@ -19,7 +19,7 @@ import com.jd.journalq.broker.election.ElectionService;
 import com.jd.journalq.broker.election.LeaderElection;
 import com.jd.journalq.broker.election.command.AppendEntriesRequest;
 import com.jd.journalq.broker.election.command.AppendEntriesResponse;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.transport.codec.JMQHeader;
 import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.command.CommandType;
@@ -62,7 +62,7 @@ public class AppendEntriesRequestHandler implements CommandHandler, Type {
         if (request == null) {
             logger.warn("Receive append entries request from {}, request is null", transport.remoteAddress());
             throw new TransportException("Append entries request payload is null",
-                    JMQCode.CT_MESSAGE_BODY_NULL.getCode());
+                    JournalqCode.CT_MESSAGE_BODY_NULL.getCode());
         }
 
         try {

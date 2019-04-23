@@ -46,7 +46,7 @@ public class HBaseClient implements LifeCycle {
 
     public Connection conn = null;
 
-    private final String nameSpace = "jmq4";
+    private final String nameSpace = "journalq";
 
     private String hBaseConfigPath = "hBase-client-config.xml";
 

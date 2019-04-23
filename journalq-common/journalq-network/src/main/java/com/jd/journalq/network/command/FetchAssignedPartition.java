@@ -30,7 +30,7 @@ public class FetchAssignedPartition extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.FETCH_ASSIGNED_PARTITION.getCode();
+        return JournalqCommandType.FETCH_ASSIGNED_PARTITION.getCode();
     }
 
     public void setApp(String app) {

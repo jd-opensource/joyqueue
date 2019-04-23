@@ -43,10 +43,10 @@ public class BrokerServer extends Service {
         ServerConfig backendConfig = brokerContext.getBrokerConfig().getBackendConfig();
         SessionManager sessionManager = brokerContext.getSessionManager();
 
-        frontendConfig.setAcceptThreadName("jmq-frontend-accept-eventLoop");
-        frontendConfig.setIoThreadName("jmq-frontend-io-eventLoop");
-        backendConfig.setAcceptThreadName("jmq-backend-accept-eventLoop");
-        backendConfig.setIoThreadName("jmq-backend-io-eventLoop");
+        frontendConfig.setAcceptThreadName("journalq-frontend-accept-eventLoop");
+        frontendConfig.setIoThreadName("journalq-frontend-io-eventLoop");
+        backendConfig.setAcceptThreadName("journalq-backend-accept-eventLoop");
+        backendConfig.setIoThreadName("journalq-backend-io-eventLoop");
 
         this.transportListener = new BrokerTransportListener(sessionManager);
         this.frontendServer = new FrontendServer(frontendConfig, protocolManager);

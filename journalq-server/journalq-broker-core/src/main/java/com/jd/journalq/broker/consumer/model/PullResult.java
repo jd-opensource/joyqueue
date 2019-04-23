@@ -13,7 +13,7 @@
  */
 package com.jd.journalq.broker.consumer.model;
 
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.session.Consumer;
 
 import java.nio.ByteBuffer;
@@ -32,7 +32,7 @@ public class PullResult {
     // 数据
     private List<ByteBuffer> buffers;
     // 状态码
-    private JMQCode jmqCode = JMQCode.SUCCESS;
+    private JournalqCode journalqCode = JournalqCode.SUCCESS;
 
     public PullResult(final Consumer consumer, final short partition, final List<ByteBuffer> buffers) {
         this.topic = consumer.getTopic();
@@ -71,12 +71,12 @@ public class PullResult {
         this.buffers = buffers;
     }
 
-    public JMQCode getJmqCode() {
-        return jmqCode;
+    public JournalqCode getJournalqCode() {
+        return journalqCode;
     }
 
-    public void setJmqCode(JMQCode jmqCode) {
-        this.jmqCode = jmqCode;
+    public void setJmqCode(JournalqCode journalqCode) {
+        this.journalqCode = journalqCode;
     }
 
     /**

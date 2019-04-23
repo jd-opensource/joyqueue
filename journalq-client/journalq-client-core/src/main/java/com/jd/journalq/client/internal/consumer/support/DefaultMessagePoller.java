@@ -34,7 +34,7 @@ import com.jd.journalq.client.internal.consumer.transport.ConsumerClientManager;
 import com.jd.journalq.client.internal.metadata.domain.PartitionMetadata;
 import com.jd.journalq.client.internal.metadata.domain.TopicMetadata;
 import com.jd.journalq.client.internal.nameserver.NameServerConfig;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import com.jd.journalq.toolkit.time.SystemClock;
@@ -236,11 +236,11 @@ public class DefaultMessagePoller extends Service implements MessagePoller {
         PartitionMetadata partitionMetadata = topicMetadata.getPartition(partition);
 
         if (partitionMetadata == null) {
-            throw new ConsumerException(String.format("partition not exist, topic: %s, partition: %s", topic, partition), JMQCode.FW_TOPIC_NO_PARTITIONGROUP.getCode());
+            throw new ConsumerException(String.format("partition not exist, topic: %s, partition: %s", topic, partition), JournalqCode.FW_TOPIC_NO_PARTITIONGROUP.getCode());
         }
 
         if (partitionMetadata.getLeader() == null) {
-            throw new ConsumerException(String.format("partition not available, topic: %s, partition: %s", topic, partition), JMQCode.FW_TOPIC_NO_PARTITIONGROUP.getCode());
+            throw new ConsumerException(String.format("partition not available, topic: %s, partition: %s", topic, partition), JournalqCode.FW_TOPIC_NO_PARTITIONGROUP.getCode());
         }
 
         if (batchSize == CUSTOM_BATCH_SIZE) {
@@ -297,7 +297,7 @@ public class DefaultMessagePoller extends Service implements MessagePoller {
     }
 
     @Override
-    public synchronized JMQCode reply(String topic, List<ConsumeReply> replyList) {
+    public synchronized JournalqCode reply(String topic, List<ConsumeReply> replyList) {
         checkState();
         Preconditions.checkArgument(StringUtils.isNotBlank(topic), "topic not blank");
         TopicMetadata topicMetadata = messagePollerInner.checkTopicMetadata(topic);
@@ -306,8 +306,8 @@ public class DefaultMessagePoller extends Service implements MessagePoller {
             throw new IllegalArgumentException(String.format("topic %s reply is empty", topic));
         }
 
-        JMQCode result = consumerIndexManager.commitReply(topicMetadata.getTopic(), replyList, messagePollerInner.getAppFullName(), config.getTimeout());
-        if (!result.equals(JMQCode.SUCCESS)) {
+        JournalqCode result = consumerIndexManager.commitReply(topicMetadata.getTopic(), replyList, messagePollerInner.getAppFullName(), config.getTimeout());
+        if (!result.equals(JournalqCode.SUCCESS)) {
             // TODO 临时日志
             logger.warn("commit ack error, topic : {}, code: {}, error: {}", topic, result.getCode(), result.getMessage());
         }
@@ -315,7 +315,7 @@ public class DefaultMessagePoller extends Service implements MessagePoller {
     }
 
     @Override
-    public JMQCode replyOnce(String topic, ConsumeReply reply) {
+    public JournalqCode replyOnce(String topic, ConsumeReply reply) {
         return reply(topic, Lists.newArrayList(reply));
     }
 
@@ -330,7 +330,7 @@ public class DefaultMessagePoller extends Service implements MessagePoller {
 
     protected void checkState() {
         if (!isStarted()) {
-            throw new ConsumerException("consumer is not started", JMQCode.CN_SERVICE_NOT_AVAILABLE.getCode());
+            throw new ConsumerException("consumer is not started", JournalqCode.CN_SERVICE_NOT_AVAILABLE.getCode());
         }
     }
 }

@@ -41,7 +41,7 @@ public class AbstractConsumerTest extends AbstractClientTest {
     protected KeyValue getAttributes() {
         KeyValue keyValue = OMS.newKeyValue();
         keyValue.put(JournalQConsumerBuiltinKeys.LONGPOLL_TIMEOUT, -1);
-        keyValue.put(JournalQConsumerBuiltinKeys.BROADCAST_LOCAL_PATH, "/export/Data/jmq/broadcast");
+        keyValue.put(JournalQConsumerBuiltinKeys.BROADCAST_LOCAL_PATH, "/export/Data/journalq/broadcast");
         return keyValue;
     }
 }

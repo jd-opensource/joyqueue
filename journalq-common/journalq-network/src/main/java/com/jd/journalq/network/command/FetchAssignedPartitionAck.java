@@ -29,7 +29,7 @@ public class FetchAssignedPartitionAck extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.FETCH_ASSIGNED_PARTITION_ACK.getCode();
+        return JournalqCommandType.FETCH_ASSIGNED_PARTITION_ACK.getCode();
     }
 
     public Map<String, FetchAssignedPartitionAckData> getTopicPartitions() {

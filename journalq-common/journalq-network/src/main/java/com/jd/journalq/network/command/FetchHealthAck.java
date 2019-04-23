@@ -35,7 +35,7 @@ public class FetchHealthAck extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.FETCH_HEALTH_ACK.getCode();
+        return JournalqCommandType.FETCH_HEALTH_ACK.getCode();
     }
 
     public void setPoint(double point) {

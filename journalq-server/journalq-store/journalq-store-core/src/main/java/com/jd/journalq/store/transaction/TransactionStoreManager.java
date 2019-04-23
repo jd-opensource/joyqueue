@@ -13,12 +13,13 @@
  */
 package com.jd.journalq.store.transaction;
 
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.store.ReadException;
 import com.jd.journalq.store.StoreInitializeException;
 import com.jd.journalq.store.WriteResult;
 import com.jd.journalq.store.file.PositioningStore;
 import com.jd.journalq.store.utils.PreloadBufferPool;
+import com.jd.journalq.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -123,10 +124,10 @@ public class TransactionStoreManager implements TransactionStore, Closeable {
             PositioningStore<ByteBuffer> positioningStore = getOrCreate(id);
             positioningStore.append(messages);
             positioningStore.flush();
-            writeResult.setCode(JMQCode.SUCCESS);
+            writeResult.setCode(JournalqCode.SUCCESS);
         } catch (Throwable t) {
             logger.warn("Write transaction file \"{}/{}\" exception: ", base.getAbsoluteFile(), id, t);
-            writeResult.setCode(JMQCode.CN_TRANSACTION_EXECUTE_ERROR);
+            writeResult.setCode(JournalqCode.CN_TRANSACTION_EXECUTE_ERROR);
         }
         return writeResult;
     }
@@ -213,10 +214,10 @@ public class TransactionStoreManager implements TransactionStore, Closeable {
      */
     @Override
     public void close() {
-        long timeout = 5000, t0 = System.currentTimeMillis();
+        long timeout = 5000, t0 = SystemClock.now();
         writeExecutor.shutdown();
 
-        while (!writeExecutor.isTerminated() && System.currentTimeMillis() - t0 < timeout) {
+        while (!writeExecutor.isTerminated() && SystemClock.now() - t0 < timeout) {
             try {
                 Thread.sleep(ThreadLocalRandom.current().nextLong(100));
             } catch (InterruptedException ignored) {

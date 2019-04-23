@@ -26,7 +26,7 @@ import com.jd.journalq.client.internal.consumer.interceptor.ConsumerInterceptor;
 import com.jd.journalq.client.internal.consumer.transport.ConsumerClientManager;
 import com.jd.journalq.client.internal.metadata.domain.TopicMetadata;
 import com.jd.journalq.client.internal.nameserver.NameServerConfig;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.toolkit.service.Service;
 
 import java.util.List;
@@ -231,12 +231,12 @@ public class MessageConsumerWrapper extends Service implements MessageConsumer {
     }
 
     @Override
-    public JMQCode reply(List<ConsumeReply> replyList) {
+    public JournalqCode reply(List<ConsumeReply> replyList) {
         return delegate.reply(replyList);
     }
 
     @Override
-    public JMQCode replyOnce(ConsumeReply reply) {
+    public JournalqCode replyOnce(ConsumeReply reply) {
         return delegate.replyOnce(reply);
     }
 

@@ -14,7 +14,7 @@
 package com.jd.journalq.store;
 
 import com.jd.journalq.domain.QosLevel;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.store.message.MessageParser;
 import com.jd.journalq.store.nsm.VirtualThreadExecutor;
 import com.jd.journalq.store.utils.BaseDirUtils;
@@ -80,8 +80,8 @@ public class PartitionGroupStoreManagerTest {
             store.asyncWrite(QosLevel.ONE_WAY, null, new WriteRequest(partitions[ThreadLocalRandom.current().nextInt(partitions.length)], msg));
         }
         // 等待建索引都完成
-        long t0 = System.currentTimeMillis();
-        while (System.currentTimeMillis() - t0 < timeout && store.rightPosition() < length) {
+        long t0 = SystemClock.now();
+        while (SystemClock.now() - t0 < timeout && store.rightPosition() < length) {
             Thread.sleep(10L);
         }
 
@@ -89,7 +89,7 @@ public class PartitionGroupStoreManagerTest {
 
             for (long j = 0; j < store.getRightIndex(partitions[i]); j++) {
                 ReadResult readResult = store.read(partitions[i], j, 1, 0);
-                Assert.assertEquals(JMQCode.SUCCESS, readResult.getCode());
+                Assert.assertEquals(JournalqCode.SUCCESS, readResult.getCode());
                 Assert.assertEquals(1, readResult.getMessages().length);
                 ByteBuffer readBuffer = readResult.getMessages()[0];
                 Assert.assertEquals(readBuffer.getInt(0), readBuffer.remaining());
@@ -115,8 +115,8 @@ public class PartitionGroupStoreManagerTest {
 
 
         // 等待建索引都完成
-        long t0 = System.currentTimeMillis();
-        while (System.currentTimeMillis() - t0 < timeout && store.indexPosition() < length) {
+        long t0 = SystemClock.now();
+        while (SystemClock.now() - t0 < timeout && store.indexPosition() < length) {
             Thread.sleep(10L);
         }
 
@@ -125,7 +125,7 @@ public class PartitionGroupStoreManagerTest {
             writeBuffer.clear();
 
             ReadResult readResult = store.read(partition, i, 1, 0);
-            Assert.assertEquals(JMQCode.SUCCESS, readResult.getCode());
+            Assert.assertEquals(JournalqCode.SUCCESS, readResult.getCode());
             Assert.assertEquals(1, readResult.getMessages().length);
             ByteBuffer readBuffer = readResult.getMessages()[0];
             Assert.assertEquals(writeBuffer, readBuffer);
@@ -150,8 +150,8 @@ public class PartitionGroupStoreManagerTest {
 
 
         // 等待建索引都完成
-        long t0 = System.currentTimeMillis();
-        while (System.currentTimeMillis() - t0 < timeout && store.indexPosition() < length) {
+        long t0 = SystemClock.now();
+        while (SystemClock.now() - t0 < timeout && store.indexPosition() < length) {
             Thread.sleep(10L);
         }
 
@@ -161,7 +161,7 @@ public class PartitionGroupStoreManagerTest {
             for (int j = 0; j < batchSize; j++) {
                 long index = i * batchSize + j;
                 ReadResult readResult = store.read(partition, index, 1, 0);
-                Assert.assertEquals(JMQCode.SUCCESS, readResult.getCode());
+                Assert.assertEquals(JournalqCode.SUCCESS, readResult.getCode());
                 Assert.assertEquals(1, readResult.getMessages().length);
                 ByteBuffer readBuffer = readResult.getMessages()[0];
                 writeBuffer.clear();
@@ -200,7 +200,7 @@ public class PartitionGroupStoreManagerTest {
 
         replicationThread.interrupt();
         // 验证结果
-        Assert.assertEquals(JMQCode.SUCCESS, writeResult.getCode());
+        Assert.assertEquals(JournalqCode.SUCCESS, writeResult.getCode());
         Assert.assertEquals(count, writeResult.getIndices().length);
 
         while (store.indexPosition() < store.rightPosition()) {
@@ -213,7 +213,7 @@ public class PartitionGroupStoreManagerTest {
             writeBuffer.clear();
 
             ReadResult readResult = store.read(partition, i, 1, 0);
-            Assert.assertEquals(JMQCode.SUCCESS, readResult.getCode());
+            Assert.assertEquals(JournalqCode.SUCCESS, readResult.getCode());
             Assert.assertEquals(1, readResult.getMessages().length);
             ByteBuffer readBuffer = readResult.getMessages()[0];
             Assert.assertEquals(writeBuffer, readBuffer);
@@ -280,7 +280,7 @@ public class PartitionGroupStoreManagerTest {
         Future<WriteResult> future = qosStore.asyncWrite(messages.stream().map(b -> new WriteRequest(partition, b)).toArray(WriteRequest[]::new));
         // 等待写入完成
         WriteResult writeResult = future.get();
-        Assert.assertEquals(JMQCode.SUCCESS, writeResult.getCode());
+        Assert.assertEquals(JournalqCode.SUCCESS, writeResult.getCode());
         Assert.assertEquals(size, store.rightPosition());
         // 2. 模拟LEADER读取消息
         List<ByteBuffer> readTermBuffers = new LinkedList<>();
@@ -322,7 +322,7 @@ public class PartitionGroupStoreManagerTest {
             writeBuffer.clear();
 
             ReadResult readResult = store.read(partition, i, 1, 0);
-            Assert.assertEquals(JMQCode.SUCCESS, readResult.getCode());
+            Assert.assertEquals(JournalqCode.SUCCESS, readResult.getCode());
             Assert.assertEquals(1, readResult.getMessages().length);
             ByteBuffer readBuffer = readResult.getMessages()[0];
             Assert.assertEquals(writeBuffer, readBuffer);
@@ -335,7 +335,7 @@ public class PartitionGroupStoreManagerTest {
     public void getIndexTest() throws InterruptedException, IOException {
         long timeout = 500000L;
         List<ByteBuffer> msgs = MessageUtils.build(20, 255);
-        long startTime = System.currentTimeMillis();
+        long startTime = SystemClock.now();
         short partition = partitions[0];
         final EventFuture<WriteResult> future = new EventFuture<>();
 
@@ -354,8 +354,8 @@ public class PartitionGroupStoreManagerTest {
 
 
         // 等待建索引都完成
-        long t0 = System.currentTimeMillis();
-        while (System.currentTimeMillis() - t0 < timeout && store.getRightIndex(partition) < 20) {
+        long t0 = SystemClock.now();
+        while (SystemClock.now() - t0 < timeout && store.getRightIndex(partition) < 20) {
             Thread.sleep(10L);
         }
 

@@ -60,6 +60,7 @@ import com.jd.journalq.toolkit.lang.Close;
 import com.jd.journalq.toolkit.lang.LifeCycle;
 import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
+import com.jd.journalq.toolkit.time.SystemClock;
 import com.jd.laf.extension.ExtensionPoint;
 import com.jd.laf.extension.ExtensionPointLazy;
 import com.jd.laf.extension.SpiLoader;
@@ -188,8 +189,8 @@ public class NameServer extends Service implements NameService, PropertySupplier
         this.manageServer.setManager_port(nameServerConfig.getManagerPort());
         manageServer.start();
         ServerConfig serverConfig = nameServerConfig.getServerConfig();
-        serverConfig.setAcceptThreadName("jmq-nameserver-accept-eventLoop");
-        serverConfig.setIoThreadName("jmq-nameserver-io-eventLoop");
+        serverConfig.setAcceptThreadName("journalqnameserver-accept-eventLoop");
+        serverConfig.setIoThreadName("journalqnameserver-io-eventLoop");
         this.transportServer = transportServerFactory.bind(serverConfig, serverConfig.getHost(), serverConfig.getPort());
         this.transportServer.start();
         logger.info("nameServer is started");
@@ -420,7 +421,7 @@ public class NameServer extends Service implements NameService, PropertySupplier
             broker = metaManager.getBrokerByIpAndPort(brokerIp, port);
             if (null == broker) {
                 //TODO broker ID 生成逻辑不严谨，重复几率大
-                brokerId = Integer.parseInt(String.valueOf(System.currentTimeMillis() / 1000));
+                brokerId = Integer.parseInt(String.valueOf(SystemClock.now() / 1000));
                 broker = new Broker();
                 broker.setId(brokerId);
                 broker.setIp(brokerIp);

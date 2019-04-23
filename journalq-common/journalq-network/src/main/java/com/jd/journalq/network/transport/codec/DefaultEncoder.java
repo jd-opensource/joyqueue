@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * jmq编码
+ * journalq编码
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/21

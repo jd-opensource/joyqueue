@@ -140,7 +140,7 @@ public class PackageDocScanParser implements MetaParser<JavadocComment> {
 
     /**
      * java.lang.String
-     * com.jd.jmq.info
+     * com.jd.journalq.info
      **/
     public boolean isPrimitiveType(Class clazz) {
         String name = clazz.getCanonicalName();

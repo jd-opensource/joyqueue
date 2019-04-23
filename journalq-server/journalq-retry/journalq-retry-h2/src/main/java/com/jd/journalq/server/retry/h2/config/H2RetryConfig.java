@@ -13,7 +13,7 @@
  */
 package com.jd.journalq.server.retry.h2.config;
 
-import com.jd.journalq.exception.JMQConfigException;
+import com.jd.journalq.exception.JournalqConfigException;
 import com.jd.journalq.datasource.DataSourceConfig;
 import com.jd.journalq.toolkit.retry.RetryPolicy;
 import org.slf4j.Logger;
@@ -66,14 +66,14 @@ public class H2RetryConfig {
     // 写据源配置
     private static DataSourceConfig dsConfig;
     // 配置路径加名称
-    private static final String configFile = "laf-jmq.properties";
+    private static final String configFile = "journalq.properties";
 
     // 初始化数据源配置
     static {
         Properties properties = new Properties();
         InputStream inputStream = H2RetryConfig.class.getClassLoader().getResourceAsStream(configFile);
         if (null == inputStream) {
-            throw new JMQConfigException("cannot load laf.properties.");
+            throw new JournalqConfigException("cannot load laf.properties.");
         }
         try {
             properties.load(inputStream);
@@ -95,7 +95,7 @@ public class H2RetryConfig {
 
             dsConfig = writeDataSource;
         } catch (IOException e) {
-            throw new JMQConfigException("load and parse config error.", e);
+            throw new JournalqConfigException("load and parse config error.", e);
         }
 
         logger.info("Success init DbRetryConfig.");

@@ -23,7 +23,7 @@ import com.jd.journalq.client.internal.producer.domain.SendPrepareResult;
 import com.jd.journalq.client.internal.producer.domain.SendResultData;
 import com.jd.journalq.client.internal.producer.transport.ProducerClientManager;
 import com.jd.journalq.domain.QosLevel;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.command.TxStatus;
 import com.jd.journalq.network.domain.BrokerNode;
 import com.jd.journalq.toolkit.service.Service;
@@ -140,12 +140,12 @@ public class MessageSenderWrapper extends Service implements MessageSender {
     }
 
     @Override
-    public JMQCode commit(BrokerNode brokerNode, String topic, String app, String txId, long timeout) {
+    public JournalqCode commit(BrokerNode brokerNode, String topic, String app, String txId, long timeout) {
         return delegate.commit(brokerNode, topic, app, txId, timeout);
     }
 
     @Override
-    public JMQCode rollback(BrokerNode brokerNode, String topic, String app, String txId, long timeout) {
+    public JournalqCode rollback(BrokerNode brokerNode, String topic, String app, String txId, long timeout) {
         return delegate.rollback(brokerNode, topic, app, txId, timeout);
     }
 

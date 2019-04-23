@@ -15,6 +15,7 @@ package com.jd.journalq.service.impl;
 
 
 import com.alibaba.fastjson.JSON;
+import com.jd.journalq.toolkit.time.SystemClock;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -26,7 +27,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class TimeLogAspectImpl {
     private static final Logger logger= LoggerFactory.getLogger(TimeLogAspectImpl.class);
-//    @Around("execution(* com.jd.journalq.service.BrokerMonitorService.*(..))&&execution(* com.jd.jmq.nsr.*.*(..))")
+//    @Around("execution(* com.jd.journalq.service.BrokerMonitorService.*(..))&&execution(* com.jd.journalq.nsr.*.*(..))")
 
     @Around("execution(* com.jd.journalq.service.BrokerMonitorService.*(..))")
     public Object around(ProceedingJoinPoint joinPoint){
@@ -35,11 +36,11 @@ public class TimeLogAspectImpl {
        String className= joinPoint.getSignature().getDeclaringType().getSimpleName();
        String methodName=joinPoint.getSignature().getName();
        log.append(className).append(":").append(methodName).append(";");
-       long startTimeMs=System.currentTimeMillis();
+       long startTimeMs= SystemClock.now();
        try {
            Object result=  joinPoint.proceed();
            log.append("time elapsed:");
-           log.append(System.currentTimeMillis()-startTimeMs);
+           log.append(SystemClock.now()-startTimeMs);
            log.append(" ms;");
            for(Object o:args){
                log.append(JSON.toJSONString(o)).append(";");

@@ -13,7 +13,7 @@
  */
 package com.jd.journalq.network.transport.command;
 
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -74,7 +74,7 @@ public class Command {
     }
 
     public boolean isSuccess() {
-        return (header.getStatus() == JMQCode.SUCCESS.getCode());
+        return (header.getStatus() == JournalqCode.SUCCESS.getCode());
     }
 
     public void release() {

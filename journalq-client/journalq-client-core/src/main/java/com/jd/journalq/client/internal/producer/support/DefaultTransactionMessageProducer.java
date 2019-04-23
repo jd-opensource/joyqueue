@@ -27,7 +27,7 @@ import com.jd.journalq.client.internal.producer.domain.SendPrepareResult;
 import com.jd.journalq.client.internal.producer.domain.SendResult;
 import com.jd.journalq.client.internal.producer.exception.ProducerException;
 import com.jd.journalq.client.internal.producer.helper.ProducerHelper;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.domain.BrokerNode;
 import com.google.common.base.Preconditions;
 import org.apache.commons.collections.CollectionUtils;
@@ -60,8 +60,8 @@ public class DefaultTransactionMessageProducer implements TransactionMessageProd
 
     private PartitionMetadata transactionPartition;
     private SendPrepareResult prepare;
-    private JMQCode commit;
-    private JMQCode rollback;
+    private JournalqCode commit;
+    private JournalqCode rollback;
 
     public DefaultTransactionMessageProducer(String transactionId, long timeout, TimeUnit timeoutUnit, long sequence, ProducerConfig config,
                                              NameServerConfig nameServerConfig, ClusterManager clusterManager, MessageSender messageSender, MessageProducerInner messageProducerInner) {
@@ -87,8 +87,8 @@ public class DefaultTransactionMessageProducer implements TransactionMessageProd
         checkPrepare();
         checkState();
 
-        JMQCode commit = messageSender.commit(transactionPartition.getLeader(), transactionPartition.getTopic(), config.getApp(), prepare.getTxId(), config.getTimeout());
-        if (!commit.equals(JMQCode.SUCCESS)) {
+        JournalqCode commit = messageSender.commit(transactionPartition.getLeader(), transactionPartition.getTopic(), config.getApp(), prepare.getTxId(), config.getTimeout());
+        if (!commit.equals(JournalqCode.SUCCESS)) {
             throw new ProducerException(commit.getMessage(), commit.getCode());
         }
         this.commit = commit;
@@ -99,8 +99,8 @@ public class DefaultTransactionMessageProducer implements TransactionMessageProd
         checkPrepare();
         checkState();
 
-        JMQCode rollback = messageSender.rollback(transactionPartition.getLeader(), transactionPartition.getTopic(), config.getApp(), prepare.getTxId(), config.getTimeout());
-        if (!rollback.equals(JMQCode.SUCCESS)) {
+        JournalqCode rollback = messageSender.rollback(transactionPartition.getLeader(), transactionPartition.getTopic(), config.getApp(), prepare.getTxId(), config.getTimeout());
+        if (!rollback.equals(JournalqCode.SUCCESS)) {
             throw new ProducerException(rollback.getMessage(), rollback.getCode());
         }
         this.rollback = rollback;
@@ -155,7 +155,7 @@ public class DefaultTransactionMessageProducer implements TransactionMessageProd
         SendPrepareResult sendPrepareResult = messageSender.prepare(partition.getLeader(), partition.getTopic(), config.getApp(),
                 transactionId, sequence, timeoutUnit.toMillis(timeout), config.getTimeout());
 
-        if (!sendPrepareResult.getCode().equals(JMQCode.SUCCESS)) {
+        if (!sendPrepareResult.getCode().equals(JournalqCode.SUCCESS)) {
             throw new ProducerException(sendPrepareResult.getCode().getMessage(), sendPrepareResult.getCode().getCode());
         }
         return sendPrepareResult;
@@ -163,13 +163,13 @@ public class DefaultTransactionMessageProducer implements TransactionMessageProd
 
     protected void checkPrepare() {
         if (prepare == null) {
-            throw new ProducerException("transaction is not beginning", JMQCode.FW_TRANSACTION_EXISTS.getCode());
+            throw new ProducerException("transaction is not beginning", JournalqCode.FW_TRANSACTION_EXISTS.getCode());
         }
     }
 
     protected void checkState() {
         if (commit != null || rollback != null) {
-            throw new ProducerException("transaction is not beginning", JMQCode.FW_TRANSACTION_EXISTS.getCode());
+            throw new ProducerException("transaction is not beginning", JournalqCode.FW_TRANSACTION_EXISTS.getCode());
         }
     }
 }

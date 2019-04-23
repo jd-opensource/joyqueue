@@ -13,6 +13,8 @@
  */
 package com.jd.journalq.toolkit.delay;
 
+import com.jd.journalq.toolkit.time.SystemClock;
+
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class DelayedOperation extends TimerTask {
@@ -21,7 +23,7 @@ public abstract class DelayedOperation extends TimerTask {
 
     public DelayedOperation(long delayMs) {
         // 不加当前时间导致 TimerTask 很快就触发
-        this.delayMs = delayMs + System.currentTimeMillis();
+        this.delayMs = delayMs + SystemClock.now();
     }
 
     /*

@@ -31,7 +31,7 @@ public class AddProducer extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.ADD_PRODUCER.getCode();
+        return JournalqCommandType.ADD_PRODUCER.getCode();
     }
 
     public void setTopics(List<String> topics) {

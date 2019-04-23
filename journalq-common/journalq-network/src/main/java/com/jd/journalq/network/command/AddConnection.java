@@ -36,7 +36,7 @@ public class AddConnection extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.ADD_CONNECTION.getCode();
+        return JournalqCommandType.ADD_CONNECTION.getCode();
     }
 
     public String getUsername() {

@@ -31,7 +31,7 @@ public class FetchClusterAck extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.FETCH_CLUSTER_ACK.getCode();
+        return JournalqCommandType.FETCH_CLUSTER_ACK.getCode();
     }
 
     public Map<String, Topic> getTopics() {

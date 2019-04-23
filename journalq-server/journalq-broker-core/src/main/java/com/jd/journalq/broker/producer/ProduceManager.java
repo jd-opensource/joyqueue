@@ -21,8 +21,8 @@ import com.jd.journalq.broker.monitor.BrokerMonitor;
 import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.domain.QosLevel;
 import com.jd.journalq.domain.TopicName;
-import com.jd.journalq.exception.JMQCode;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqCode;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.message.BrokerCommit;
 import com.jd.journalq.message.BrokerMessage;
 import com.jd.journalq.message.BrokerPrepare;
@@ -165,13 +165,13 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
      * @author lining11
      * Date: 2018/8/17
      */
-    public PutResult putMessage(Producer producer, List<BrokerMessage> msgs, QosLevel qosLevel) throws JMQException {
+    public PutResult putMessage(Producer producer, List<BrokerMessage> msgs, QosLevel qosLevel) throws JournalqException {
         // 超时时间
         int timeout = clusterManager.getProducerPolicy(TopicName.parse(producer.getTopic()), producer.getApp()).getTimeOut();
         return putMessage(producer, msgs, qosLevel, timeout);
     }
 
-    public PutResult putMessage(Producer producer, List<BrokerMessage> msgs, QosLevel qosLevel, int timeout) throws JMQException {
+    public PutResult putMessage(Producer producer, List<BrokerMessage> msgs, QosLevel qosLevel, int timeout) throws JournalqException {
         // 开始写入时间
         long startWritePoint = SystemClock.now();
         // 超时时间点
@@ -198,14 +198,14 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
      * @param msgs     要写入的消息，如果是事务消息，则该批次的消息，必须都在同一个事务内，具有相同的txId
      * @param qosLevel 服务水平
      * @return
-     * @throws JMQException
+     * @throws JournalqException
      */
-    public void putMessageAsync(Producer producer, List<BrokerMessage> msgs, QosLevel qosLevel, EventListener<WriteResult> eventListener) throws JMQException {
+    public void putMessageAsync(Producer producer, List<BrokerMessage> msgs, QosLevel qosLevel, EventListener<WriteResult> eventListener) throws JournalqException {
         putMessageAsync(producer, msgs, qosLevel, clusterManager.getProducerPolicy(TopicName.parse(producer.getTopic()), producer.getApp()).getTimeOut(), eventListener);
     }
 
     @Override
-    public void putMessageAsync(Producer producer, List<BrokerMessage> msgs, QosLevel qosLevel, int timeout, EventListener<WriteResult> eventListener) throws JMQException {
+    public void putMessageAsync(Producer producer, List<BrokerMessage> msgs, QosLevel qosLevel, int timeout, EventListener<WriteResult> eventListener) throws JournalqException {
         // 开始写入时间
         long startWritePoint = SystemClock.now();
         // 超时时间点
@@ -233,9 +233,9 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
      * @param txId
      * @param endTime
      * @return
-     * @throws JMQException
+     * @throws JournalqException
      */
-    private PutResult writeTxMessage(Producer producer, List<BrokerMessage> msgs, String txId, long endTime) throws JMQException {
+    private PutResult writeTxMessage(Producer producer, List<BrokerMessage> msgs, String txId, long endTime) throws JournalqException {
         ByteBuffer[] byteBuffers = generateRByteBufferList(msgs);
         Future<WriteResult> writeResultFuture = transactionManager.putMessage(producer, txId, byteBuffers);
         WriteResult writeResult = syncWait(writeResultFuture, endTime - SystemClock.now());
@@ -251,16 +251,16 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
      * @param txId
      * @param endTime
      * @return
-     * @throws JMQException
+     * @throws JournalqException
      */
-    private void writeTxMessageAsync(Producer producer, List<BrokerMessage> msgs, String txId, long endTime, EventListener<WriteResult> eventListener) throws JMQException {
+    private void writeTxMessageAsync(Producer producer, List<BrokerMessage> msgs, String txId, long endTime, EventListener<WriteResult> eventListener) throws JournalqException {
         ByteBuffer[] byteBuffers = generateRByteBufferList(msgs);
         try {
             WriteResult writeResult = transactionManager.putMessage(producer, txId, byteBuffers).get(endTime, TimeUnit.MILLISECONDS);
             eventListener.onEvent(writeResult);
         } catch (Exception e) {
             logger.error("writeTxMessageAsync exception, producer: {}", producer, e);
-            eventListener.onEvent(new WriteResult(JMQCode.CN_UNKNOWN_ERROR, ArrayUtils.EMPTY_LONG_ARRAY));
+            eventListener.onEvent(new WriteResult(JournalqCode.CN_UNKNOWN_ERROR, ArrayUtils.EMPTY_LONG_ARRAY));
         }
     }
 
@@ -272,15 +272,15 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
      * @param qosLevel
      * @param endTime
      * @return
-     * @throws JMQException
+     * @throws JournalqException
      */
-    private PutResult writeMessages(Producer producer, List<BrokerMessage> msgs, QosLevel qosLevel, long endTime) throws JMQException {
+    private PutResult writeMessages(Producer producer, List<BrokerMessage> msgs, QosLevel qosLevel, long endTime) throws JournalqException {
         PutResult putResult = new PutResult();
         String topic = producer.getTopic();
         List<Short> partitions = clusterManager.getMasterPartitionList(TopicName.parse(topic));
         if (partitions == null || partitions.size() == 0) {
             logger.error("no partitions available topic:%s", topic);
-            throw new JMQException(JMQCode.CN_NO_PERMISSION);
+            throw new JournalqException(JournalqCode.CN_NO_PERMISSION);
         }
         long startTime = SystemClock.now();
         // 分配消息对于的分区分组
@@ -315,15 +315,15 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
      * @param qosLevel
      * @param endTime
      * @return
-     * @throws JMQException
+     * @throws JournalqException
      */
-    private void writeMessagesAsync(Producer producer, List<BrokerMessage> msgs, QosLevel qosLevel, long endTime, EventListener<WriteResult> eventListener) throws JMQException {
+    private void writeMessagesAsync(Producer producer, List<BrokerMessage> msgs, QosLevel qosLevel, long endTime, EventListener<WriteResult> eventListener) throws JournalqException {
         String topic = producer.getTopic();
         String app = producer.getApp();
         List<Short> partitions = clusterManager.getMasterPartitionList(TopicName.parse(topic));
         if (partitions == null || partitions.size() == 0) {
             logger.error("no partitions available topic:%s", topic);
-            throw new JMQException(JMQCode.CN_NO_PERMISSION);
+            throw new JournalqException(JournalqCode.CN_NO_PERMISSION);
         }
         // 分配消息对于的分区分组
         Map<PartitionGroup, List<WriteRequest>> dispatchedMsgs = dispatchPartition(msgs, partitions);
@@ -395,16 +395,16 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
      * @param writeResultFuture
      * @param timeout
      * @return
-     * @throws JMQException
+     * @throws JournalqException
      */
-    private WriteResult syncWait(Future<WriteResult> writeResultFuture, long timeout) throws JMQException {
+    private WriteResult syncWait(Future<WriteResult> writeResultFuture, long timeout) throws JournalqException {
         try {
             return writeResultFuture.get(timeout, TimeUnit.MILLISECONDS);
         } catch (InterruptedException | ExecutionException e) {
             logger.error("Write message error", e);
-            throw new JMQException(JMQCode.CN_THREAD_INTERRUPTED);
+            throw new JournalqException(JournalqCode.CN_THREAD_INTERRUPTED);
         } catch (TimeoutException e) {
-            throw new JMQException(JMQCode.SE_WRITE_TIMEOUT);
+            throw new JournalqException(JournalqCode.SE_WRITE_TIMEOUT);
         }
     }
 
@@ -414,9 +414,9 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
      * @param messageList
      * @param partitionList
      * @return
-     * @throws JMQException
+     * @throws JournalqException
      */
-    private Map<PartitionGroup, List<WriteRequest>> dispatchPartition(List<BrokerMessage> messageList, List<Short> partitionList) throws JMQException {
+    private Map<PartitionGroup, List<WriteRequest>> dispatchPartition(List<BrokerMessage> messageList, List<Short> partitionList) throws JournalqException {
         // 随机指定一个写入分区
         int index = (int) Math.floor(Math.random() * partitionList.size());
         short partition = partitionList.get(index);
@@ -477,9 +477,9 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
      *
      * @param brokerMessage
      * @return
-     * @throws JMQException
+     * @throws JournalqException
      */
-    private ByteBuffer convertBrokerMessage2RByteBuffer(BrokerMessage brokerMessage) throws JMQException {
+    private ByteBuffer convertBrokerMessage2RByteBuffer(BrokerMessage brokerMessage) throws JournalqException {
         int msgSize = Serializer.sizeOf(brokerMessage);
         // todo bufferPool有问题，暂时直接创建
         ByteBuffer allocate = ByteBuffer.allocate(msgSize);
@@ -487,7 +487,7 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
             Serializer.write(brokerMessage, allocate, msgSize);
         } catch (Exception e) {
             logger.error("Serialize message error! topic:{},app:{}", brokerMessage.getTopic(), brokerMessage.getApp(), e);
-            throw new JMQException(JMQCode.SE_SERIALIZER_ERROR);
+            throw new JournalqException(JournalqCode.SE_SERIALIZER_ERROR);
         }
         return allocate;
     }
@@ -495,9 +495,9 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
     /**
      * @param msgs
      * @return
-     * @throws JMQException
+     * @throws JournalqException
      */
-    private ByteBuffer[] generateRByteBufferList(List<BrokerMessage> msgs) throws JMQException {
+    private ByteBuffer[] generateRByteBufferList(List<BrokerMessage> msgs) throws JournalqException {
         int size = msgs.size();
         ByteBuffer[] byteBuffers = new ByteBuffer[size];
         for (int i = 0; i < size; i++) {
@@ -514,7 +514,7 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
      *
      * @param tx 事务消息命令
      */
-    public TransactionId putTransactionMessage(Producer producer, JournalLog tx) throws JMQException {
+    public TransactionId putTransactionMessage(Producer producer, JournalLog tx) throws JournalqException {
         if (tx.getType() == JournalLog.TYPE_TX_PREPARE) {
             return transactionManager.prepare(producer, (BrokerPrepare) tx);
         } else if (tx.getType() == JournalLog.TYPE_TX_COMMIT) {
@@ -522,7 +522,7 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
         } else if (tx.getType() == JournalLog.TYPE_TX_ROLLBACK) {
             return transactionManager.rollback(producer, (BrokerRollback) tx);
         } else {
-            throw new JMQException(JMQCode.CN_COMMAND_UNSUPPORTED);
+            throw new JournalqException(JournalqCode.CN_COMMAND_UNSUPPORTED);
         }
     }
 

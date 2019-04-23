@@ -19,12 +19,13 @@ import com.jd.journalq.broker.config.BrokerStoreConfig;
 import com.jd.journalq.broker.consumer.position.PositionManager;
 import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.domain.TopicConfig;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.store.StoreService;
 import com.jd.journalq.toolkit.concurrent.NamedThreadFactory;
 import com.jd.journalq.toolkit.config.PropertySupplier;
 import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
+import com.jd.journalq.toolkit.time.SystemClock;
 import com.jd.laf.extension.ExtensionManager;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
@@ -102,9 +103,9 @@ public class StoreCleanManager extends Service {
         try {
             long stopTimeout = 5000L;
             if (cleanFuture != null) {
-                long t0 = System.currentTimeMillis();
+                long t0 = SystemClock.now();
                 while (!cleanFuture.isDone()) {
-                    if (System.currentTimeMillis() - t0 > stopTimeout) {
+                    if (SystemClock.now() - t0 > stopTimeout) {
                         throw new TimeoutException("Wait for async store clean job timeout!");
                     }
                     cleanFuture.cancel(true);
@@ -141,7 +142,7 @@ public class StoreCleanManager extends Service {
                                                             for (String app : appList) {
                                                                 try {
                                                                     minAckIndex = Math.min(minAckIndex, positionManager.getLastMsgAckIndex(topicConfig.getName(), app, partition));
-                                                                } catch (JMQException e) {
+                                                                } catch (JournalqException e) {
                                                                     //minAckIndex = Long.MAX_VALUE;
                                                                     LOG.error("Error to get last topic & app offset, topic <{}>, app <{}>, partitionGroup <{}>, partition <{}>, error: <{}>",
                                                                             topicConfig.getName(), app, partitionGroup.getGroup(), partition, e);

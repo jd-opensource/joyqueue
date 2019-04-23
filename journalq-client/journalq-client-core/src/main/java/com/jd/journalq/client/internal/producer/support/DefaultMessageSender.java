@@ -32,7 +32,7 @@ import com.jd.journalq.client.internal.producer.transport.ProducerClientGroup;
 import com.jd.journalq.client.internal.producer.transport.ProducerClientManager;
 import com.jd.journalq.client.internal.transport.ConnectionState;
 import com.jd.journalq.domain.QosLevel;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.command.FetchProduceFeedbackAck;
 import com.jd.journalq.network.command.ProduceMessageAck;
 import com.jd.journalq.network.command.ProduceMessageAckData;
@@ -309,7 +309,7 @@ public class DefaultMessageSender extends Service implements MessageSender {
     }
 
     @Override
-    public JMQCode commit(BrokerNode brokerNode, String topic, String app, String txId, long timeout) {
+    public JournalqCode commit(BrokerNode brokerNode, String topic, String app, String txId, long timeout) {
         checkState();
         ProducerClient client = producerClientManager.getOrCreateClient(brokerNode);
         handleAddProducers(brokerNode, Lists.newArrayList(topic), app, client);
@@ -319,7 +319,7 @@ public class DefaultMessageSender extends Service implements MessageSender {
     }
 
     @Override
-    public JMQCode rollback(BrokerNode brokerNode, String topic, String app, String txId, long timeout) {
+    public JournalqCode rollback(BrokerNode brokerNode, String topic, String app, String txId, long timeout) {
         checkState();
         ProducerClient client = producerClientManager.getOrCreateClient(brokerNode);
         handleAddProducers(brokerNode, Lists.newArrayList(topic), app, client);
@@ -340,7 +340,7 @@ public class DefaultMessageSender extends Service implements MessageSender {
 
     protected void checkState() {
         if (!isStarted()) {
-            throw new ClientException("sender is not started", JMQCode.CN_SERVICE_NOT_AVAILABLE.getCode());
+            throw new ClientException("sender is not started", JournalqCode.CN_SERVICE_NOT_AVAILABLE.getCode());
         }
     }
 

@@ -14,10 +14,10 @@
 package com.jd.journalq.network.codec;
 
 import com.google.common.collect.Maps;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.command.FindCoordinatorAck;
 import com.jd.journalq.network.command.FindCoordinatorAckData;
-import com.jd.journalq.network.command.JMQCommandType;
+import com.jd.journalq.network.command.JournalqCommandType;
 import com.jd.journalq.network.domain.BrokerNode;
 import com.jd.journalq.network.serializer.Serializer;
 import com.jd.journalq.network.transport.codec.JMQHeader;
@@ -57,7 +57,7 @@ public class FindCoordinatorAckCodec implements PayloadCodec<JMQHeader, FindCoor
                 node.setWeight(buffer.readInt());
             }
 
-            JMQCode code = JMQCode.valueOf(buffer.readInt());
+            JournalqCode code = JournalqCode.valueOf(buffer.readInt());
             FindCoordinatorAckData findCoordinatorAckData = new FindCoordinatorAckData(node, code);
             coordinators.put(topic, findCoordinatorAckData);
         }
@@ -91,6 +91,6 @@ public class FindCoordinatorAckCodec implements PayloadCodec<JMQHeader, FindCoor
 
     @Override
     public int type() {
-        return JMQCommandType.FIND_COORDINATOR_ACK.getCode();
+        return JournalqCommandType.FIND_COORDINATOR_ACK.getCode();
     }
 }

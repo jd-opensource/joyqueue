@@ -15,6 +15,7 @@ package com.jd.journalq.store.utils;
 
 import com.jd.journalq.toolkit.concurrent.LoopThread;
 import com.jd.journalq.toolkit.format.Format;
+import com.jd.journalq.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sun.misc.Cleaner;
@@ -140,12 +141,12 @@ public class PreloadBufferPool implements Closeable {
     private void evict() {
         // 先清除过期的
         for (BufferHolder holder : directBufferHolders) {
-            if (System.currentTimeMillis() - holder.lastAccessTime() > cacheLifetimeMs) {
+            if (SystemClock.now() - holder.lastAccessTime() > cacheLifetimeMs) {
                 holder.evict();
             }
         }
 
-        mMapBufferHolders.removeIf(holder -> System.currentTimeMillis() - holder.lastAccessTime() > cacheLifetimeMs && holder.evict());
+        mMapBufferHolders.removeIf(holder -> SystemClock.now() - holder.lastAccessTime() > cacheLifetimeMs && holder.evict());
 
 
         // 清理超过maxCount的缓存页

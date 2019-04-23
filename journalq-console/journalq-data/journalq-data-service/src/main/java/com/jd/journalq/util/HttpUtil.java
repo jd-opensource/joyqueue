@@ -14,6 +14,7 @@
 package com.jd.journalq.util;
 
 import com.jd.journalq.model.exception.BusinessException;
+import com.jd.journalq.toolkit.time.SystemClock;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpStatus;
@@ -88,9 +89,9 @@ public class HttpUtil {
             } catch (Throwable e) {
                 logger.warn("logger error.", e);
             }
-            long startMs = System.currentTimeMillis();
+            long startMs = SystemClock.now();
             CloseableHttpResponse response = getClient().execute(request);
-            logger.info(String.format("communicating request[%s],time elapsed %d ms.", request.toString(), System.currentTimeMillis() - startMs));
+            logger.info(String.format("communicating request[%s],time elapsed %d ms.", request.toString(), SystemClock.now() - startMs));
             return response;
         } catch (Exception e) {
             String errorMsg = String.format("error occurred while communicating with  request = %s", request);

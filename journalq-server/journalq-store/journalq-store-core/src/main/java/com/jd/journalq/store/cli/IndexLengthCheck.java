@@ -42,7 +42,7 @@ public class IndexLengthCheck {
 
     public static void main(String[] args) throws IOException {
 
-        String topicBase = "/export/Data/jmq/store/topics";
+        String topicBase = "/export/Data/journalq/store/topics";
 
         if (args.length < 1) {
             showUsage();

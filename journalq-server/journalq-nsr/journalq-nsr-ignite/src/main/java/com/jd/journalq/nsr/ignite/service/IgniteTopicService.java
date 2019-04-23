@@ -24,7 +24,7 @@ import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.event.MetaEvent;
 import com.jd.journalq.event.PartitionGroupEvent;
 import com.jd.journalq.event.TopicEvent;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.model.PageResult;
 import com.jd.journalq.model.Pagination;
 import com.jd.journalq.model.QPageQuery;
@@ -35,7 +35,7 @@ import com.jd.journalq.network.transport.Transport;
 import com.jd.journalq.network.transport.TransportClient;
 import com.jd.journalq.network.transport.codec.JMQHeader;
 import com.jd.journalq.network.transport.codec.PayloadCodecFactory;
-import com.jd.journalq.network.transport.codec.support.JMQCodec;
+import com.jd.journalq.network.transport.codec.support.JournalqCodec;
 import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.transport.command.Direction;
 import com.jd.journalq.network.transport.config.ClientConfig;
@@ -107,7 +107,7 @@ public class IgniteTopicService implements TopicService {
             PayloadCodecFactory payloadCodecFactory = new PayloadCodecFactory();
             payloadCodecFactory.register(new OperatePartitionGroupCodec());
             payloadCodecFactory.register(new NullPayloadCodec());
-            JMQCodec codec = new JMQCodec(payloadCodecFactory);
+            JournalqCodec codec = new JournalqCodec(payloadCodecFactory);
             this.transportClient = new DefaultTransportClientFactory(codec).create(new ClientConfig());
             transportClient.start();
         }
@@ -208,7 +208,7 @@ public class IgniteTopicService implements TopicService {
                         response = transport.sync(command);
                         logger.info("createPartitionGroup topic[{}] partitionGroup[{}] [{}:{}] request[{}] response [{}]",
                                 topicName.getFullName(), group.getGroup(), broker.getIp(), broker.getBackEndPort(), command.getPayload(), response.getPayload());
-                        if (JMQCode.SUCCESS.getCode() != response.getHeader().getStatus()) {
+                        if (JournalqCode.SUCCESS.getCode() != response.getHeader().getStatus()) {
                             throw new Exception(String.format("add topic [%s] error[%s]", topicName.getFullName(), response));
                         }
                     } catch (Exception e) {
@@ -282,7 +282,7 @@ public class IgniteTopicService implements TopicService {
                                     broker.getBackEndPort()));
                             response = transport.sync(command);
                             logger.info("remove partitionGroup request[{}] response [{}]", command, response);
-                            if (JMQCode.SUCCESS.getCode() != ((JMQHeader) response.getHeader()).getStatus()) {
+                            if (JournalqCode.SUCCESS.getCode() != ((JMQHeader) response.getHeader()).getStatus()) {
                                 throw new Exception(String.format("remove topic [%s] error ", topicName.getFullName(), response.getPayload()));
                             }
                         } catch (Exception ignore) {
@@ -336,7 +336,7 @@ public class IgniteTopicService implements TopicService {
                     command = new Command(new JMQHeader(Direction.REQUEST, CommandType.NSR_CREATE_PARTITIONGROUP), new CreatePartitionGroup(group));
                     response = transport.sync(command);
                     logger.info("create partitionGroup request[{}] response [{}]", command, response);
-                    if (JMQCode.SUCCESS.getCode() != ((JMQHeader) response.getHeader()).getStatus()) {
+                    if (JournalqCode.SUCCESS.getCode() != ((JMQHeader) response.getHeader()).getStatus()) {
                         throw new Exception(String.format("add topic [{}] error ", group.getTopic(), response));
                     }
                 } catch (Exception e) {
@@ -409,7 +409,7 @@ public class IgniteTopicService implements TopicService {
                             broker.getBackEndPort()));
                     response = transport.sync(command);
                         logger.info("remove partitionGroup request[{}] response [{}]", command.getPayload(), response.getPayload());
-                    if (JMQCode.SUCCESS.getCode() != ((JMQHeader) response.getHeader()).getStatus()) {
+                    if (JournalqCode.SUCCESS.getCode() != ((JMQHeader) response.getHeader()).getStatus()) {
                         throw new Exception(String.format("remove topic [{}] error ", group.getTopic(), response.getPayload()));
                     }
                 } catch (Exception e) {
@@ -452,7 +452,7 @@ public class IgniteTopicService implements TopicService {
                         broker.getBackEndPort()));
                 response = transport.sync(command);
                 logger.info("leaderChange partitionGroup request[{}] response [{}]", command.getPayload(), response.getPayload());
-                if (JMQCode.SUCCESS.getCode() != ((JMQHeader) response.getHeader()).getStatus()) {
+                if (JournalqCode.SUCCESS.getCode() != ((JMQHeader) response.getHeader()).getStatus()) {
                     throw new Exception(String.format("leaderChange  [{}] error [{}]", group));
                 }
             }  finally {
@@ -547,7 +547,7 @@ public class IgniteTopicService implements TopicService {
                             response = transport.sync(command.getValue());
                             logger.info("update partitionGroup broker[{}] request[{}] response [{}]",
                                     broker.getIp() + ":" + broker.getPort(), command.getValue().getPayload(), response.getHeader().getStatus());
-                            if (JMQCode.SUCCESS.getCode() != response.getHeader().getStatus()) {
+                            if (JournalqCode.SUCCESS.getCode() != response.getHeader().getStatus()) {
                                 throw new Exception(String.format("update partitionGroup broker[%s] request[%s] response [%s]r ",
                                         broker.getIp() + ":" + broker.getBackEndPort(), group.getTopic(), response.getPayload()));
                             }

@@ -61,7 +61,7 @@ public class ConsumerLocalIndexStore extends Service {
     protected void validate() throws Exception {
         persistFile = initPersistPathFile(persistPath);
         indexTable = doRead(persistFile);
-        persistTimer = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("jmq-consumer-local-index-persist"));
+        persistTimer = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("journalqconsumer-local-index-persist"));
     }
 
     @Override

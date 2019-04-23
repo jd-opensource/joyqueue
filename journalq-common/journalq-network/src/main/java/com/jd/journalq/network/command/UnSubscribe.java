@@ -30,7 +30,7 @@ public class UnSubscribe extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.MQTT_UNSUBSCRIBE.getCode();
+        return JournalqCommandType.MQTT_UNSUBSCRIBE.getCode();
     }
 
     public List<Subscription> getSubscriptions() {

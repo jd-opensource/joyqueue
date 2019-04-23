@@ -153,7 +153,7 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
         leaderElections = new ConcurrentHashMap<>();
 
         ClientConfig clientConfig = new ClientConfig();
-        clientConfig.setIoThreadName("jmq-election-io-eventLoop");
+        clientConfig.setIoThreadName("journalqelection-io-eventLoop");
         transportClient = new BrokerTransportClientFactory().create(clientConfig);
         transportClient.start();
 

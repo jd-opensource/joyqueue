@@ -13,8 +13,8 @@
  */
 package com.jd.journalq.network.codec;
 
-import com.jd.journalq.exception.JMQCode;
-import com.jd.journalq.network.command.JMQCommandType;
+import com.jd.journalq.exception.JournalqCode;
+import com.jd.journalq.network.command.JournalqCommandType;
 import com.jd.journalq.network.command.ProduceMessagePrepareAck;
 import com.jd.journalq.network.serializer.Serializer;
 import com.jd.journalq.network.transport.codec.JMQHeader;
@@ -34,7 +34,7 @@ public class ProduceMessagePrepareAckCodec implements PayloadCodec<JMQHeader, Pr
     public ProduceMessagePrepareAck decode(JMQHeader header, ByteBuf buffer) throws Exception {
         ProduceMessagePrepareAck produceMessagePrepareAck = new ProduceMessagePrepareAck();
         produceMessagePrepareAck.setTxId(Serializer.readString(buffer, Serializer.SHORT_SIZE));
-        produceMessagePrepareAck.setCode(JMQCode.valueOf(buffer.readInt()));
+        produceMessagePrepareAck.setCode(JournalqCode.valueOf(buffer.readInt()));
         return produceMessagePrepareAck;
     }
 
@@ -46,6 +46,6 @@ public class ProduceMessagePrepareAckCodec implements PayloadCodec<JMQHeader, Pr
 
     @Override
     public int type() {
-        return JMQCommandType.PRODUCE_MESSAGE_PREPARE_ACK.getCode();
+        return JournalqCommandType.PRODUCE_MESSAGE_PREPARE_ACK.getCode();
     }
 }

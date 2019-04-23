@@ -16,7 +16,7 @@ package com.jd.journalq.network.codec;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jd.journalq.network.command.FetchIndex;
-import com.jd.journalq.network.command.JMQCommandType;
+import com.jd.journalq.network.command.JournalqCommandType;
 import com.jd.journalq.network.serializer.Serializer;
 import com.jd.journalq.network.transport.codec.JMQHeader;
 import com.jd.journalq.network.transport.codec.PayloadCodec;
@@ -69,6 +69,6 @@ public class FetchIndexCodec implements PayloadCodec<JMQHeader, FetchIndex>, Typ
 
     @Override
     public int type() {
-        return JMQCommandType.FETCH_INDEX.getCode();
+        return JournalqCommandType.FETCH_INDEX.getCode();
     }
 }

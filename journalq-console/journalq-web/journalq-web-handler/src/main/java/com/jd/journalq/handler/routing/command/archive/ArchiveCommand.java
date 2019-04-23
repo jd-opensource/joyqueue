@@ -15,7 +15,7 @@ package com.jd.journalq.handler.routing.command.archive;
 
 import com.jd.journalq.server.retry.model.RetryMessageModel;
 import com.jd.journalq.util.serializer.Serializer;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.handler.Constants;
 import com.jd.journalq.message.BrokerMessage;
 import com.jd.journalq.model.domain.Archive;
@@ -128,7 +128,7 @@ public class ArchiveCommand implements Command<Response>, Poolable {
             HttpServerResponse response = request.response();
             byte[] data = sendLog.getMessageBody();
             if (data.length == 0) {
-                throw new JMQException("消息内容为空",HTTP_BAD_REQUEST);
+                throw new JournalqException("消息内容为空",HTTP_BAD_REQUEST);
             }
             String fileName = sendLog.getMessageId() +".txt";
             response.reset();

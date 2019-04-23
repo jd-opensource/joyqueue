@@ -13,7 +13,7 @@
  */
 package com.jd.journalq.broker.consumer.filter;
 
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -31,9 +31,9 @@ public interface MessageFilter {
      * @param byteBufferList 消息字节缓存集合
      * @param filterCallback 消息过滤后的回调
      * @return
-     * @throws JMQException
+     * @throws JournalqException
      */
-    List<ByteBuffer> filter(List<ByteBuffer> byteBufferList, FilterCallback filterCallback) throws JMQException;
+    List<ByteBuffer> filter(List<ByteBuffer> byteBufferList, FilterCallback filterCallback) throws JournalqException;
 
     /**
      * 设置过滤规则

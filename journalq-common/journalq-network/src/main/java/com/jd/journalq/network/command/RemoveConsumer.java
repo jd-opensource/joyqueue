@@ -30,7 +30,7 @@ public class RemoveConsumer extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.REMOVE_CONSUMER.getCode();
+        return JournalqCommandType.REMOVE_CONSUMER.getCode();
     }
 
     public void setTopics(List<String> topics) {

@@ -15,9 +15,9 @@ package com.jd.journalq.network.codec;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.command.CommitAckAck;
-import com.jd.journalq.network.command.JMQCommandType;
+import com.jd.journalq.network.command.JournalqCommandType;
 import com.jd.journalq.network.serializer.Serializer;
 import com.jd.journalq.network.transport.codec.JMQHeader;
 import com.jd.journalq.network.transport.codec.PayloadCodec;
@@ -37,14 +37,14 @@ public class CommitAckAckCodec implements PayloadCodec<JMQHeader, CommitAckAck>,
     @Override
     public CommitAckAck decode(JMQHeader header, ByteBuf buffer) throws Exception {
         short size = buffer.readShort();
-        Table<String, Short, JMQCode> result = HashBasedTable.create();
+        Table<String, Short, JournalqCode> result = HashBasedTable.create();
 
         for (int i = 0; i < size; i++) {
             String topic = Serializer.readString(buffer, Serializer.SHORT_SIZE);
             short partitionSize = buffer.readShort();
             for (int j = 0; j < partitionSize; j++) {
                 short partition = buffer.readShort();
-                result.put(topic, partition, JMQCode.valueOf(buffer.readInt()));
+                result.put(topic, partition, JournalqCode.valueOf(buffer.readInt()));
             }
         }
 
@@ -56,10 +56,10 @@ public class CommitAckAckCodec implements PayloadCodec<JMQHeader, CommitAckAck>,
     @Override
     public void encode(CommitAckAck payload, ByteBuf buffer) throws Exception {
         buffer.writeShort(payload.getResult().size());
-        for (Map.Entry<String, Map<Short, JMQCode>> entry : payload.getResult().rowMap().entrySet()) {
+        for (Map.Entry<String, Map<Short, JournalqCode>> entry : payload.getResult().rowMap().entrySet()) {
             Serializer.write(entry.getKey(), buffer, Serializer.SHORT_SIZE);
             buffer.writeShort(entry.getValue().size());
-            for (Map.Entry<Short, JMQCode> partitionEntry : entry.getValue().entrySet()) {
+            for (Map.Entry<Short, JournalqCode> partitionEntry : entry.getValue().entrySet()) {
                 buffer.writeShort(partitionEntry.getKey());
                 buffer.writeInt(partitionEntry.getValue().getCode());
             }
@@ -68,6 +68,6 @@ public class CommitAckAckCodec implements PayloadCodec<JMQHeader, CommitAckAck>,
 
     @Override
     public int type() {
-        return JMQCommandType.COMMIT_ACK_ACK.getCode();
+        return JournalqCommandType.COMMIT_ACK_ACK.getCode();
     }
 }

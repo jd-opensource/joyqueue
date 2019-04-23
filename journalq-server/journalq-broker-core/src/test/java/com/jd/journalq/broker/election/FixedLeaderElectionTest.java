@@ -75,11 +75,11 @@ public class FixedLeaderElectionTest {
 
         for (int i = 0; i < FIX_ELECTION_NUM; i++) {
             StoreConfig storeConfig = new StoreConfig(null);
-            storeConfig.setPath("/export/jmq/store" + i);
+            storeConfig.setPath("/export/journalq/store" + i);
             storeServices[i] = new Store(storeConfig);
 
             ElectionConfig electionConfig = new ElectionConfigStub(null,null);
-            electionConfig.setMetadataFile("/export/jmq/raft" + i + ".dat");
+            electionConfig.setMetadataFile("/export/journalq/raft" + i + ".dat");
             electionConfig.setListenPort("1800" + (i + 1));
 
             //clusterManagers[i] = new ClusterManager();

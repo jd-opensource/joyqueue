@@ -212,10 +212,10 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
 
 
     private void fillRecord(MonitorRecord record, long time) {
-        record.setService("jmq-broker");
+        record.setService("journalq-broker");
         record.setEndpoint("agent.collect");
         record.setCategory("Other");
-        record.setProvider("jmq4");
+        record.setProvider("journalq");
         record.setTimestamp(time);
     }
 

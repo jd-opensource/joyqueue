@@ -22,7 +22,7 @@ import com.jd.journalq.client.internal.consumer.config.ConsumerConfig;
 import com.jd.journalq.client.internal.consumer.domain.ConsumeReply;
 import com.jd.journalq.client.internal.consumer.domain.FetchIndexData;
 import com.jd.journalq.client.internal.consumer.domain.LocalIndexData;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.toolkit.service.Service;
 import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
@@ -70,24 +70,24 @@ public class LocalConsumerIndexManager extends Service implements ConsumerIndexM
     }
 
     @Override
-    public JMQCode resetIndex(String topic, String app, short partition, long timeout) {
+    public JournalqCode resetIndex(String topic, String app, short partition, long timeout) {
         FetchIndexData fetchIndexData = delegate.fetchIndex(topic, app, partition, timeout);
-        if (!fetchIndexData.getCode().equals(JMQCode.SUCCESS)) {
+        if (!fetchIndexData.getCode().equals(JournalqCode.SUCCESS)) {
             logger.error("resetIndex error, topic: {}, partition: {}, error: {}", topic, partition, fetchIndexData.getCode());
             return fetchIndexData.getCode();
         }
         consumerIndexStore.saveIndex(topic, app, partition, fetchIndexData.getIndex());
-        return JMQCode.SUCCESS;
+        return JournalqCode.SUCCESS;
     }
 
     @Override
     public FetchIndexData fetchIndex(String topic, String app, short partition, long timeout) {
         LocalIndexData localIndexData = consumerIndexStore.fetchIndex(topic, app, partition);
         if (localIndexData != null && !isExpired(localIndexData)) {
-            return new FetchIndexData(localIndexData.getIndex(), JMQCode.SUCCESS);
+            return new FetchIndexData(localIndexData.getIndex(), JournalqCode.SUCCESS);
         } else {
             FetchIndexData fetchIndexData = delegate.fetchIndex(topic, app, partition, timeout);
-            if (!fetchIndexData.getCode().equals(JMQCode.SUCCESS)) {
+            if (!fetchIndexData.getCode().equals(JournalqCode.SUCCESS)) {
                 logger.error("batchFetch index error, topic: {}, partition: {}, error: {}", topic, partition, fetchIndexData.getCode());
             } else {
                 consumerIndexStore.saveIndex(topic, app, partition, fetchIndexData.getIndex());
@@ -97,11 +97,11 @@ public class LocalConsumerIndexManager extends Service implements ConsumerIndexM
     }
 
     @Override
-    public JMQCode commitReply(String topic, List<ConsumeReply> replyList, String app, long timeout) {
+    public JournalqCode commitReply(String topic, List<ConsumeReply> replyList, String app, long timeout) {
         for (ConsumeReply reply : replyList) {
             consumerIndexStore.saveIndex(topic, app, reply.getPartition(), reply.getIndex() + 1);
         }
-        return JMQCode.SUCCESS;
+        return JournalqCode.SUCCESS;
     }
 
     @Override
@@ -124,7 +124,7 @@ public class LocalConsumerIndexManager extends Service implements ConsumerIndexM
                     }
                     partitions.add(partition);
                 } else {
-                    result.put(topic, partition, new FetchIndexData(localIndexData.getIndex(), JMQCode.SUCCESS));
+                    result.put(topic, partition, new FetchIndexData(localIndexData.getIndex(), JournalqCode.SUCCESS));
                 }
             }
         }
@@ -135,7 +135,7 @@ public class LocalConsumerIndexManager extends Service implements ConsumerIndexM
                 String topic = topicEntry.getKey();
                 for (Short partition : topicEntry.getValue()) {
                     FetchIndexData fetchIndexData = fetchIndexTable.get(topic, partition);
-                    if (!fetchIndexData.getCode().equals(JMQCode.SUCCESS)) {
+                    if (!fetchIndexData.getCode().equals(JournalqCode.SUCCESS)) {
                         logger.error("batchFetch index error, topic: {}, partition: {}, error: {}", topic, partition, fetchIndexData.getCode());
                     } else {
                         consumerIndexStore.saveIndex(topic, app, partition, fetchIndexData.getIndex());
@@ -149,8 +149,8 @@ public class LocalConsumerIndexManager extends Service implements ConsumerIndexM
     }
 
     @Override
-    public Map<String, JMQCode> batchCommitReply(Map<String, List<ConsumeReply>> replyMap, String app, long timeout) {
-        Map<String, JMQCode> result = Maps.newHashMap();
+    public Map<String, JournalqCode> batchCommitReply(Map<String, List<ConsumeReply>> replyMap, String app, long timeout) {
+        Map<String, JournalqCode> result = Maps.newHashMap();
         for (Map.Entry<String, List<ConsumeReply>> entry : replyMap.entrySet()) {
             String topic = entry.getKey();
             for (ConsumeReply consumeReply : entry.getValue()) {

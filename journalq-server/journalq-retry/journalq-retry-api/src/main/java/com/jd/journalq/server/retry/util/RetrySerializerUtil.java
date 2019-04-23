@@ -14,6 +14,7 @@
 package com.jd.journalq.server.retry.util;
 
 import com.jd.journalq.server.retry.model.RetryMessageModel;
+import com.jd.journalq.toolkit.time.SystemClock;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
@@ -182,7 +183,7 @@ public class RetrySerializerUtil {
         retry.setIndex(100L);
         retry.setBrokerMessage(new byte[168]);
         retry.setException(new byte[16]);
-        retry.setSendTime(System.currentTimeMillis());
+        retry.setSendTime(SystemClock.now());
 
         ByteBuffer serialize = serialize(retry);
         serialize.flip();

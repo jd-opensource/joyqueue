@@ -15,11 +15,11 @@ package com.jd.journalq.network.codec;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.message.BrokerMessage;
 import com.jd.journalq.network.command.FetchTopicMessageAck;
 import com.jd.journalq.network.command.FetchTopicMessageAckData;
-import com.jd.journalq.network.command.JMQCommandType;
+import com.jd.journalq.network.command.JournalqCommandType;
 import com.jd.journalq.network.serializer.Serializer;
 import com.jd.journalq.network.transport.codec.JMQHeader;
 import com.jd.journalq.network.transport.codec.PayloadCodec;
@@ -49,7 +49,7 @@ public class FetchTopicMessageAckCodec implements PayloadCodec<JMQHeader, FetchT
             for (int j = 0; j < messageSize; j++) {
                 messages.add(Serializer.readBrokerMessage(buffer));
             }
-            JMQCode code = JMQCode.valueOf(buffer.readInt());
+            JournalqCode code = JournalqCode.valueOf(buffer.readInt());
             FetchTopicMessageAckData fetchTopicMessageAckData = new FetchTopicMessageAckData(messages, code);
             result.put(topic, fetchTopicMessageAckData);
         }
@@ -75,6 +75,6 @@ public class FetchTopicMessageAckCodec implements PayloadCodec<JMQHeader, FetchT
 
     @Override
     public int type() {
-        return JMQCommandType.FETCH_TOPIC_MESSAGE_ACK.getCode();
+        return JournalqCommandType.FETCH_TOPIC_MESSAGE_ACK.getCode();
     }
 }

@@ -15,6 +15,7 @@ package com.jd.journalq.util;
 
 import com.alibaba.fastjson.JSON;
 import com.jd.journalq.exception.ServiceException;
+import com.jd.journalq.toolkit.time.SystemClock;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.config.RequestConfig;
@@ -119,7 +120,7 @@ public class AsyncHttpClient {
         }
         @Override
         public void completed(HttpResponse httpResponse) {
-            logger.info("request completed {} time elapsed {} ms ",url,System.currentTimeMillis()-startMs);
+            logger.info("request completed {} time elapsed {} ms ",url, SystemClock.now()-startMs);
             try {
                 int statusCode=httpResponse.getStatusLine().getStatusCode();
                 if (HttpStatus.SC_OK == statusCode) {
