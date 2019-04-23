@@ -62,7 +62,8 @@ public class DefaultMessageConsumer extends Service implements MessageConsumer {
     private TopicMessageConsumer topicMessageConsumer;
     private ConsumerInterceptorManager consumerInterceptorManager = new ConsumerInterceptorManager();
 
-    public DefaultMessageConsumer(ConsumerConfig config, NameServerConfig nameServerConfig, ClusterManager clusterManager, ClusterClientManager clusterClientManager, ConsumerClientManager consumerClientManager) {
+    public DefaultMessageConsumer(ConsumerConfig config, NameServerConfig nameServerConfig, ClusterManager clusterManager,
+                                  ClusterClientManager clusterClientManager, ConsumerClientManager consumerClientManager) {
         Preconditions.checkArgument(config != null, "config not null");
         Preconditions.checkArgument(nameServerConfig != null, "nameserver not null");
         Preconditions.checkArgument(clusterManager != null, "clusterManager not null");

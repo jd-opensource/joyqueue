@@ -23,7 +23,6 @@ import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.event.ConsumerEvent;
 import com.jd.journalq.event.EventType;
 import com.jd.journalq.event.MetaEvent;
-import com.jd.journalq.event.NameServerEvent;
 import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.exception.JMQException;
 import com.jd.journalq.toolkit.concurrent.EventListener;
@@ -55,7 +54,7 @@ class FilterMessageSupport {
     // 用户的消息过滤管道缓存
     private ConcurrentMap</* consumerId */String, /* 过滤管道 */FilterPipeline<MessageFilter>> filterRuleCache = new ConcurrentHashMap<>();
 
-    public FilterMessageSupport(ClusterManager clusterManager) {
+    FilterMessageSupport(ClusterManager clusterManager) {
         this.clusterManager = clusterManager;
 
         // 添加消费者信息更新事件

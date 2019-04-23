@@ -13,10 +13,24 @@
  */
 package com.jd.journalq.nsr.network.handler;
 
-import com.jd.journalq.domain.*;
+import com.jd.journalq.domain.AppToken;
+import com.jd.journalq.domain.Broker;
+import com.jd.journalq.domain.Consumer;
+import com.jd.journalq.domain.DataCenter;
+import com.jd.journalq.domain.Producer;
+import com.jd.journalq.domain.Replica;
+import com.jd.journalq.domain.Subscription;
+import com.jd.journalq.domain.TopicConfig;
+import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.event.NameServerEvent;
 import com.jd.journalq.exception.JMQCode;
-import com.jd.journalq.network.command.*;
+import com.jd.journalq.network.command.Authorization;
+import com.jd.journalq.network.command.BooleanAck;
+import com.jd.journalq.network.command.GetTopics;
+import com.jd.journalq.network.command.GetTopicsAck;
+import com.jd.journalq.network.command.Subscribe;
+import com.jd.journalq.network.command.SubscribeAck;
+import com.jd.journalq.network.command.UnSubscribe;
 import com.jd.journalq.network.event.TransportEvent;
 import com.jd.journalq.network.transport.Transport;
 import com.jd.journalq.network.transport.TransportAttribute;
@@ -29,13 +43,55 @@ import com.jd.journalq.network.transport.support.DefaultTransportAttribute;
 import com.jd.journalq.nsr.NameService;
 import com.jd.journalq.nsr.message.MessageListener;
 import com.jd.journalq.nsr.network.NsrCommandHandler;
-import com.jd.journalq.nsr.network.command.*;
+import com.jd.journalq.nsr.network.command.AddTopic;
+import com.jd.journalq.nsr.network.command.GetAllBrokersAck;
+import com.jd.journalq.nsr.network.command.GetAllConfigsAck;
+import com.jd.journalq.nsr.network.command.GetAllTopicsAck;
+import com.jd.journalq.nsr.network.command.GetAppToken;
+import com.jd.journalq.nsr.network.command.GetAppTokenAck;
+import com.jd.journalq.nsr.network.command.GetBroker;
+import com.jd.journalq.nsr.network.command.GetBrokerAck;
+import com.jd.journalq.nsr.network.command.GetBrokerByRetryType;
+import com.jd.journalq.nsr.network.command.GetBrokerByRetryTypeAck;
+import com.jd.journalq.nsr.network.command.GetConfig;
+import com.jd.journalq.nsr.network.command.GetConfigAck;
+import com.jd.journalq.nsr.network.command.GetConsumerByTopic;
+import com.jd.journalq.nsr.network.command.GetConsumerByTopicAck;
+import com.jd.journalq.nsr.network.command.GetConsumerByTopicAndApp;
+import com.jd.journalq.nsr.network.command.GetConsumerByTopicAndAppAck;
+import com.jd.journalq.nsr.network.command.GetDataCenter;
+import com.jd.journalq.nsr.network.command.GetDataCenterAck;
+import com.jd.journalq.nsr.network.command.GetProducerByTopic;
+import com.jd.journalq.nsr.network.command.GetProducerByTopicAck;
+import com.jd.journalq.nsr.network.command.GetProducerByTopicAndApp;
+import com.jd.journalq.nsr.network.command.GetProducerByTopicAndAppAck;
+import com.jd.journalq.nsr.network.command.GetReplicaByBroker;
+import com.jd.journalq.nsr.network.command.GetReplicaByBrokerAck;
+import com.jd.journalq.nsr.network.command.GetTopicConfig;
+import com.jd.journalq.nsr.network.command.GetTopicConfigAck;
+import com.jd.journalq.nsr.network.command.GetTopicConfigByApp;
+import com.jd.journalq.nsr.network.command.GetTopicConfigByAppAck;
+import com.jd.journalq.nsr.network.command.GetTopicConfigByBroker;
+import com.jd.journalq.nsr.network.command.GetTopicConfigByBrokerAck;
+import com.jd.journalq.nsr.network.command.HasSubscribe;
+import com.jd.journalq.nsr.network.command.HasSubscribeAck;
+import com.jd.journalq.nsr.network.command.LeaderReport;
+import com.jd.journalq.nsr.network.command.LeaderReportAck;
+import com.jd.journalq.nsr.network.command.NsrCommandType;
+import com.jd.journalq.nsr.network.command.NsrConnection;
+import com.jd.journalq.nsr.network.command.PushNameServerEvent;
+import com.jd.journalq.nsr.network.command.Register;
+import com.jd.journalq.nsr.network.command.RegisterAck;
 import com.jd.journalq.toolkit.concurrent.EventListener;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -174,7 +230,8 @@ public class NameServiceCommandHandler implements NsrCommandHandler, Types, com.
                 } else {
                     topicNames = nameService.getTopics(getTopics.getApp(), Subscription.Type.valueOf((byte) getTopics.getSubscribeType()));
                 }
-                response = new Command(new JMQHeader(Direction.RESPONSE, command.getHeader().getType() == NsrCommandType.MQTT_GET_TOPICS ? NsrCommandType.MQTT_GET_TOPICS_ACK : NsrCommandType.GET_TOPICS_ACK), new GetTopicsAck().topics(topicNames));
+                response = new Command(new JMQHeader(Direction.RESPONSE, command.getHeader().getType() == NsrCommandType.MQTT_GET_TOPICS ? NsrCommandType.MQTT_GET_TOPICS_ACK : NsrCommandType.GET_TOPICS_ACK),
+                        new GetTopicsAck().topics(topicNames));
                 break;
             case NsrCommandType.HAS_SUBSCRIBE:
                 HasSubscribe hasSubscribe = (HasSubscribe) command.getPayload();
@@ -207,7 +264,9 @@ public class NameServiceCommandHandler implements NsrCommandHandler, Types, com.
                 Authorization authorization = (Authorization) command.getPayload();
                 Date now = Calendar.getInstance().getTime();
                 AppToken appTokenforAuth = nameService.getAppToken(authorization.getApp(), authorization.getToken());
-                response = null != appTokenforAuth && appTokenforAuth.getEffectiveTime().before(now) && appTokenforAuth.getExpirationTime().after(now) ? BooleanAck.build() : BooleanAck.build(JMQCode.CN_AUTHENTICATION_ERROR);
+                response = ((null != appTokenforAuth) && appTokenforAuth.getEffectiveTime().before(now) && appTokenforAuth.getExpirationTime().after(now)) ?
+                        BooleanAck.build() :
+                        BooleanAck.build(JMQCode.CN_AUTHENTICATION_ERROR);
                 break;
             case NsrCommandType.CONNECT:
                 Integer brokerId = ((NsrConnection) command.getPayload()).getBrokerId();

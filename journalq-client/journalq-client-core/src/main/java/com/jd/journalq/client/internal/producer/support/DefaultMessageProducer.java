@@ -239,7 +239,11 @@ public class DefaultMessageProducer extends Service implements MessageProducer {
     public TransactionMessageProducer beginTransaction(String transactionId, long timeout, TimeUnit timeoutUnit) {
         checkState();
         Preconditions.checkArgument(StringUtils.isNotBlank(transactionId), "transactionId not blank");
-        return new DefaultTransactionMessageProducer(transactionId, timeout, timeoutUnit, transactionSequence.getAndIncrement(), config, nameServerConfig, clusterManager, messageSender, messageProducerInner);
+        return new DefaultTransactionMessageProducer(transactionId, timeout,
+                timeoutUnit, transactionSequence.getAndIncrement(),
+                config, nameServerConfig,
+                clusterManager, messageSender,
+                messageProducerInner);
     }
 
     @Override

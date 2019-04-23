@@ -99,7 +99,7 @@ class ConcurrentConsumption extends Service {
     // 消费归档服务
     private ArchiveManager archiveManager;
 
-    public ConcurrentConsumption(ClusterManager clusterManager, StoreService storeService, PartitionManager partitionManager,
+    ConcurrentConsumption(ClusterManager clusterManager, StoreService storeService, PartitionManager partitionManager,
                                  MessageRetry messageRetry, PositionManager positionManager,
                                  FilterMessageSupport filterMessageSupport, ArchiveManager archiveManager) {
         this.clusterManager = clusterManager;
@@ -447,7 +447,7 @@ class ConcurrentConsumption extends Service {
 
         private Consumer consumer;
 
-        public FilterCallbackImpl(Consumer consumer) {
+        FilterCallbackImpl(Consumer consumer) {
             this.consumer = consumer;
         }
 
@@ -766,7 +766,7 @@ class ConcurrentConsumption extends Service {
         // 结束序号
         private long endIndex;
 
-        public PartitionSegment(String topic, String app, short partition, long startIndex, long endIndex) {
+        PartitionSegment(String topic, String app, short partition, long startIndex, long endIndex) {
             this.topic = topic;
             this.app = app;
             this.partition = partition;

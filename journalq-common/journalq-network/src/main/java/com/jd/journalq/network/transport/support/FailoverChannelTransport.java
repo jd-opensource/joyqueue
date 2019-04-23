@@ -52,7 +52,9 @@ public class FailoverChannelTransport implements ChannelTransport {
     private EventBus<TransportEvent> transportEventBus;
     private volatile long lastReconnect;
 
-    public FailoverChannelTransport(ChannelTransport delegate, SocketAddress address, long connectionTimeout, TransportClient transportClient, TransportConfig config, EventBus<TransportEvent> transportEventBus) {
+    public FailoverChannelTransport(ChannelTransport delegate, SocketAddress address, long connectionTimeout,
+                                    TransportClient transportClient, TransportConfig config,
+                                    EventBus<TransportEvent> transportEventBus) {
         this.delegate = delegate;
         this.address = address;
         this.connectionTimeout = connectionTimeout;

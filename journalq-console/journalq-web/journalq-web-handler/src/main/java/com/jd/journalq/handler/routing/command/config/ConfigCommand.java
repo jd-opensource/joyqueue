@@ -16,7 +16,6 @@ package com.jd.journalq.handler.routing.command.config;
 import com.jd.journalq.handler.annotation.PageQuery;
 import com.jd.journalq.handler.error.ConfigException;
 import com.jd.journalq.handler.routing.command.NsrCommandSupport;
-import com.jd.journalq.handler.Constants;
 import com.jd.journalq.model.domain.Config;
 import com.jd.journalq.model.query.QConfig;
 import com.jd.journalq.model.QPageQuery;

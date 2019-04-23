@@ -78,7 +78,9 @@ public class MessageProducerInner extends Service {
         this(config, nameServerConfig, messageSender, clusterManager, producerClientManager, new ProducerInterceptorManager());
     }
 
-    public MessageProducerInner(ProducerConfig config, NameServerConfig nameServerConfig, MessageSender messageSender, ClusterManager clusterManager, ProducerClientManager producerClientManager, ProducerInterceptorManager producerInterceptorManager) {
+    public MessageProducerInner(ProducerConfig config, NameServerConfig nameServerConfig,
+                                MessageSender messageSender, ClusterManager clusterManager,
+                                ProducerClientManager producerClientManager, ProducerInterceptorManager producerInterceptorManager) {
         this.config = config;
         this.nameServerConfig = nameServerConfig;
         this.messageSender = messageSender;

@@ -13,10 +13,28 @@
  */
 package com.jd.journalq.nsr;
 
-import com.jd.journalq.domain.*;
-import com.jd.journalq.event.*;
-import com.jd.journalq.network.event.TransportEvent;
-import com.jd.journalq.network.transport.Transport;
+import com.jd.journalq.domain.AppToken;
+import com.jd.journalq.domain.Broker;
+import com.jd.journalq.domain.ClientType;
+import com.jd.journalq.domain.Config;
+import com.jd.journalq.domain.Consumer;
+import com.jd.journalq.domain.DataCenter;
+import com.jd.journalq.domain.PartitionGroup;
+import com.jd.journalq.domain.Producer;
+import com.jd.journalq.domain.Replica;
+import com.jd.journalq.domain.Subscription;
+import com.jd.journalq.domain.Topic;
+import com.jd.journalq.domain.TopicConfig;
+import com.jd.journalq.domain.TopicName;
+import com.jd.journalq.event.BrokerEvent;
+import com.jd.journalq.event.ConfigEvent;
+import com.jd.journalq.event.ConsumerEvent;
+import com.jd.journalq.event.DataCenterEvent;
+import com.jd.journalq.event.MetaEvent;
+import com.jd.journalq.event.NameServerEvent;
+import com.jd.journalq.event.PartitionGroupEvent;
+import com.jd.journalq.event.ProducerEvent;
+import com.jd.journalq.event.TopicEvent;
 import com.jd.journalq.network.transport.TransportServer;
 import com.jd.journalq.network.transport.config.ServerConfig;
 import com.jd.journalq.nsr.config.NameServerConfig;
@@ -40,7 +58,16 @@ import com.jd.laf.extension.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -837,7 +864,9 @@ public class NameServer extends Service implements NameService, PropertySupplier
         Preconditions.checkArgument(namespaceService != null, "namespace service can not be null");
         Preconditions.checkArgument(partitionGroupReplicaService != null, "replica service can not be null");
         Preconditions.checkArgument(partitionGroupService != null, "partitionGroup service can not be null");
-        return new ManageServer(topicService, producerService, consumerService, brokerService, configService, appTokenService, dataCenterService, namespaceService, partitionGroupService, partitionGroupReplicaService);
+        return new ManageServer(topicService, producerService, consumerService,
+                brokerService, configService, appTokenService, dataCenterService,
+                namespaceService, partitionGroupService, partitionGroupReplicaService);
 
     }
 
@@ -854,7 +883,9 @@ public class NameServer extends Service implements NameService, PropertySupplier
         Messenger messenger = serviceProvider.getService(Messenger.class);
         DataCenterService dataCenterService = serviceProvider.getService(DataCenterService.class);
 
-        return new MetaManager(messenger, configService, topicService, brokerService, consumerService, producerService, partitionGroupService, partitionGroupReplicaService, appTokenService, dataCenterService);
+        return new MetaManager(messenger, configService, topicService, brokerService,
+                consumerService, producerService, partitionGroupService,
+                partitionGroupReplicaService, appTokenService, dataCenterService);
 
     }
 }

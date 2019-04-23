@@ -104,19 +104,23 @@ public class TransactionCleaner extends Service implements Runnable {
         try {
             TransactionStore transactionStore = store.getTransactionStore(transactionId.getTopic());
             if (transactionStore == null) {
-                logger.error("clear expired transaction error, store not exist, topic: {}, app : {}, txId: {}, storeId: {}", transactionId.getTopic(), transactionId.getApp(), transactionId.getTxId(), transactionId.getStoreId());
+                logger.error("clear expired transaction error, store not exist, topic: {}, app : {}, txId: {}, storeId: {}",
+                        transactionId.getTopic(), transactionId.getApp(), transactionId.getTxId(), transactionId.getStoreId());
                 return;
             }
             Iterator<ByteBuffer> rByteBufferIterator = transactionStore.readIterator(transactionId.getStoreId());
             if (rByteBufferIterator == null) {
-                logger.error("clear expired transaction error, store iterator not exist, topic: {}, app : {}, txId: {}, storeId: {}", transactionId.getTopic(), transactionId.getApp(), transactionId.getTxId(), transactionId.getStoreId());
+                logger.error("clear expired transaction error, store iterator not exist, topic: {}, app : {}, txId: {}, storeId: {}",
+                        transactionId.getTopic(), transactionId.getApp(), transactionId.getTxId(), transactionId.getStoreId());
                 return;
             }
             transactionStore.remove(transactionId.getStoreId());
             unCompleteTransactionManager.removeTransaction(transactionId.getTopic(), transactionId.getApp(), transactionId.getTxId());
-            logger.info("clear expired transaction, topic: {}, app : {}, txId: {}, storeId: {}", transactionId.getTopic(), transactionId.getApp(), transactionId.getTxId(), transactionId.getStoreId());
+            logger.info("clear expired transaction, topic: {}, app : {}, txId: {}, storeId: {}",
+                    transactionId.getTopic(), transactionId.getApp(), transactionId.getTxId(), transactionId.getStoreId());
         } catch (Exception e) {
-            logger.error("clear expired transaction exception, topic: {}, app : {}, txId: {}, storeId: {}", transactionId.getTopic(), transactionId.getApp(), transactionId.getTxId(), transactionId.getStoreId(), e);
+            logger.error("clear expired transaction exception, topic: {}, app : {}, txId: {}, storeId: {}",
+                    transactionId.getTopic(), transactionId.getApp(), transactionId.getTxId(), transactionId.getStoreId(), e);
         }
     }
 }

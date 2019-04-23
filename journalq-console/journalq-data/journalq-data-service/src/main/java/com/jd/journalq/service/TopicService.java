@@ -15,7 +15,11 @@ package com.jd.journalq.service;
 
 import com.jd.journalq.model.PageResult;
 import com.jd.journalq.model.QPageQuery;
-import com.jd.journalq.model.domain.*;
+import com.jd.journalq.model.domain.AppUnsubscribedTopic;
+import com.jd.journalq.model.domain.Broker;
+import com.jd.journalq.model.domain.BrokerGroup;
+import com.jd.journalq.model.domain.Identity;
+import com.jd.journalq.model.domain.Topic;
 import com.jd.journalq.model.query.QTopic;
 import com.jd.journalq.nsr.NsrService;
 

@@ -52,7 +52,8 @@ public class TopicMessageConsumerDispatcher extends Service {
     private ConsumerInterceptorManager consumerInterceptorManager;
     private ExecutorService listenerExecutor;
 
-    public TopicMessageConsumerDispatcher(String topic, ConsumerConfig config, NameServerConfig nameServerConfig, MessagePoller messagePoller, MessageListenerManager messageListenerManager, ConsumerInterceptorManager consumerInterceptorManager) {
+    public TopicMessageConsumerDispatcher(String topic, ConsumerConfig config, NameServerConfig nameServerConfig,
+                                          MessagePoller messagePoller, MessageListenerManager messageListenerManager, ConsumerInterceptorManager consumerInterceptorManager) {
         this.topic = topic;
         this.config = config;
         this.nameServerConfig = nameServerConfig;
@@ -111,7 +112,8 @@ public class TopicMessageConsumerDispatcher extends Service {
         }
     }
 
-    protected List<ConsumeReply> doBatchDispatch(TopicMetadata topicMetadata, final Consumer.ConsumerPolicy consumerPolicy, final List<ConsumeMessage> messages, final List<BatchMessageListener> listeners) {
+    protected List<ConsumeReply> doBatchDispatch(TopicMetadata topicMetadata, final Consumer.ConsumerPolicy consumerPolicy,
+                                                 final List<ConsumeMessage> messages, final List<BatchMessageListener> listeners) {
         return new ConsumerInvocation(config, topic, nameServerConfig, messages, consumerInterceptorManager,
                 new BatchConsumerInvoker(config, topicMetadata, consumerPolicy, messages, listeners, listenerExecutor)).invoke();
     }

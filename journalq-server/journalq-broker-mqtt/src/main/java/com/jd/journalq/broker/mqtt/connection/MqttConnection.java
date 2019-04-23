@@ -41,7 +41,11 @@ public class MqttConnection extends Connection {
     private long createdTime;
     private long lastOperateTime;
 
-    public MqttConnection(String clientId, String username, String password, boolean cleanSession, int version, boolean isWillRetain, int willQos, boolean isWillFlag, int keepAliveTimeSeconds, Channel client) {
+    public MqttConnection(String clientId, String username,
+                          String password, boolean cleanSession,
+                          int version, boolean isWillRetain,
+                          int willQos, boolean isWillFlag,
+                          int keepAliveTimeSeconds, Channel client) {
         this.clientId = clientId;
         setId(clientId);
         this.username = username;

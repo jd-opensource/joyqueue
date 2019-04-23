@@ -19,13 +19,9 @@ import com.jd.laf.web.vertx.Environment;
 import com.jd.laf.web.vertx.RouteProvider;
 import com.jd.laf.web.vertx.config.RouteConfig;
 import com.jd.laf.web.vertx.config.VertxConfig;
-import com.jd.laf.web.vertx.message.RouteMessage;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.ext.web.Route;
-import io.vertx.ext.web.Router;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedReader;
@@ -35,7 +31,6 @@ import java.net.URL;
 import java.util.Enumeration;
 import java.util.Map;
 
-import static com.jd.laf.web.vertx.config.VertxConfig.Builder.build;
 import static com.jd.laf.web.vertx.config.VertxConfig.Builder.inherit;
 
 /**

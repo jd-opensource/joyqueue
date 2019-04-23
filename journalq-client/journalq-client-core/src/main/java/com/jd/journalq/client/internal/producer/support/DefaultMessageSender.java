@@ -101,7 +101,11 @@ public class DefaultMessageSender extends Service implements MessageSender {
     }
 
     @Override
-    public void sendAsync(BrokerNode brokerNode, String topic, String app, String txId, final ProduceMessage message, QosLevel qosLevel, long produceTimeout, long timeout, final AsyncSendCallback callback) {
+    public void sendAsync(BrokerNode brokerNode, String topic,
+                          String app, String txId,
+                          final ProduceMessage message, QosLevel qosLevel,
+                          long produceTimeout, long timeout,
+                          final AsyncSendCallback callback) {
         List<ProduceMessage> messages = Lists.newArrayList(message);
         batchSendAsync(brokerNode, topic, app, txId, messages, qosLevel, produceTimeout, timeout, new AsyncBatchSendCallback() {
             @Override
@@ -122,7 +126,11 @@ public class DefaultMessageSender extends Service implements MessageSender {
     }
 
     @Override
-    public void batchSendAsync(BrokerNode brokerNode, final String topic, String app, String txId, List<ProduceMessage> messages, QosLevel qosLevel, long produceTimeout, long timeout, final AsyncBatchSendCallback callback) {
+    public void batchSendAsync(BrokerNode brokerNode, final String topic,
+                               String app, String txId,
+                               List<ProduceMessage> messages, QosLevel qosLevel,
+                               long produceTimeout, long timeout,
+                               final AsyncBatchSendCallback callback) {
         Map<String, List<ProduceMessage>> messageMap = Maps.newHashMapWithExpectedSize(1);
         messageMap.put(topic, messages);
 
@@ -141,7 +149,10 @@ public class DefaultMessageSender extends Service implements MessageSender {
     }
 
     @Override
-    public Future<SendBatchResultData> batchSendAsync(BrokerNode brokerNode, final String topic, String app, String txId, List<ProduceMessage> messages, QosLevel qosLevel, long produceTimeout, long timeout) {
+    public Future<SendBatchResultData> batchSendAsync(BrokerNode brokerNode, final String topic,
+                                                      String app, String txId,
+                                                      List<ProduceMessage> messages, QosLevel qosLevel,
+                                                      long produceTimeout, long timeout) {
         final SimpleFuture<SendBatchResultData> future = new SimpleFuture<SendBatchResultData>();
         Map<String, List<ProduceMessage>> messageMap = Maps.newHashMapWithExpectedSize(1);
         messageMap.put(topic, messages);
@@ -182,7 +193,11 @@ public class DefaultMessageSender extends Service implements MessageSender {
 
         for (Map.Entry<String, List<ProduceMessage>> entry : messages.entrySet()) {
             String topic = entry.getKey();
-            ProduceMessageData produceMessageData = MessageSenderConverter.convertToProduceMessageData(topic, app, txId, entry.getValue(), qosLevel, produceTimeout, config.isCompress(), config.getCompressThreshold(), config.getCompressType());
+            ProduceMessageData produceMessageData = MessageSenderConverter.convertToProduceMessageData(topic, app,
+                    txId, entry.getValue(),
+                    qosLevel, produceTimeout,
+                    config.isCompress(), config.getCompressThreshold(),
+                    config.getCompressType());
             data.put(topic, produceMessageData);
         }
 
@@ -192,13 +207,20 @@ public class DefaultMessageSender extends Service implements MessageSender {
     }
 
     @Override
-    public Map<String, SendBatchResultData> batchSend(BrokerNode brokerNode, String app, String txId, Map<String, List<ProduceMessage>> messages, QosLevel qosLevel, long produceTimeout, long timeout) {
+    public Map<String, SendBatchResultData> batchSend(BrokerNode brokerNode, String app,
+                                                      String txId, Map<String, List<ProduceMessage>> messages,
+                                                      QosLevel qosLevel, long produceTimeout,
+                                                      long timeout) {
         checkState();
         Map<String, ProduceMessageData> data = Maps.newHashMap();
 
         for (Map.Entry<String, List<ProduceMessage>> entry : messages.entrySet()) {
             String topic = entry.getKey();
-            ProduceMessageData produceMessageData = MessageSenderConverter.convertToProduceMessageData(topic, app, txId, entry.getValue(), qosLevel, produceTimeout, config.isCompress(), config.getCompressThreshold(), config.getCompressType());
+            ProduceMessageData produceMessageData = MessageSenderConverter.convertToProduceMessageData(topic, app,
+                    txId, entry.getValue(),
+                    qosLevel, produceTimeout,
+                    config.isCompress(), config.getCompressThreshold(),
+                    config.getCompressType());
             data.put(topic, produceMessageData);
         }
 
@@ -215,13 +237,20 @@ public class DefaultMessageSender extends Service implements MessageSender {
     }
 
     @Override
-    public void batchSendAsync(BrokerNode brokerNode, final String app, String txId, final Map<String, List<ProduceMessage>> messages, QosLevel qosLevel, long produceTimeout, long timeout, final AsyncMultiBatchSendCallback callback) {
+    public void batchSendAsync(BrokerNode brokerNode, final String app,
+                               String txId, final Map<String, List<ProduceMessage>> messages,
+                               QosLevel qosLevel, long produceTimeout,
+                               long timeout, final AsyncMultiBatchSendCallback callback) {
         checkState();
         Map<String, ProduceMessageData> data = Maps.newHashMap();
 
         for (Map.Entry<String, List<ProduceMessage>> entry : messages.entrySet()) {
             String topic = entry.getKey();
-            ProduceMessageData produceMessageData = MessageSenderConverter.convertToProduceMessageData(topic, app, txId, entry.getValue(), qosLevel, produceTimeout, config.isCompress(), config.getCompressThreshold(), config.getCompressType());
+            ProduceMessageData produceMessageData = MessageSenderConverter.convertToProduceMessageData(topic, app,
+                    txId, entry.getValue(),
+                    qosLevel, produceTimeout,
+                    config.isCompress(), config.getCompressThreshold(),
+                    config.getCompressType());
             data.put(topic, produceMessageData);
         }
 
@@ -251,7 +280,9 @@ public class DefaultMessageSender extends Service implements MessageSender {
     }
 
     @Override
-    public Future<Map<String, SendBatchResultData>> batchSendAsync(BrokerNode brokerNode, String app, String txId, Map<String, List<ProduceMessage>> messages, QosLevel qosLevel, long produceTimeout, long timeout) {
+    public Future<Map<String, SendBatchResultData>> batchSendAsync(BrokerNode brokerNode, String app,
+                                                                   String txId, Map<String, List<ProduceMessage>> messages,
+                                                                   QosLevel qosLevel, long produceTimeout, long timeout) {
         final SimpleFuture<Map<String, SendBatchResultData>> future = new SimpleFuture<Map<String, SendBatchResultData>>();
         batchSendAsync(brokerNode, app, txId, messages, qosLevel, produceTimeout, timeout, new AsyncMultiBatchSendCallback() {
             @Override

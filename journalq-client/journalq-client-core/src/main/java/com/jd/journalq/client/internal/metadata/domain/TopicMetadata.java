@@ -62,7 +62,8 @@ public class TopicMetadata implements Serializable {
 
     public TopicMetadata(String topic, Producer.ProducerPolicy producerPolicy, Consumer.ConsumerPolicy consumerPolicy, Topic.Type type, List<PartitionGroupMetadata> partitionGroups,
                          List<PartitionMetadata> partitions, Map<Short, PartitionMetadata> partitionMap, Map<Integer, PartitionGroupMetadata> partitionGroupMap, List<BrokerNode> brokers,
-                         List<BrokerNode> nearbyBrokers, Map<Integer, BrokerNode> brokerMap, Map<Integer, List<PartitionMetadata>> brokerPartitions, Map<Integer, List<PartitionGroupMetadata>> brokerPartitionGroups, JMQCode code) {
+                         List<BrokerNode> nearbyBrokers, Map<Integer, BrokerNode> brokerMap, Map<Integer, List<PartitionMetadata>> brokerPartitions,
+                         Map<Integer, List<PartitionGroupMetadata>> brokerPartitionGroups, JMQCode code) {
         this.topic = topic;
         this.producerPolicy = producerPolicy;
         this.consumerPolicy = consumerPolicy;
@@ -89,7 +90,8 @@ public class TopicMetadata implements Serializable {
         Consumer.ConsumerPolicy newConsumerPolicy = null;
 
         if (producerPolicy != null) {
-            newProducerPolicy = new Producer.ProducerPolicy(producerPolicy.getNearby(), producerPolicy.isSingle(), producerPolicy.getArchive(), producerPolicy.getWeight(), producerPolicy.getBlackList(), producerPolicy.getTimeOut());
+            newProducerPolicy = new Producer.ProducerPolicy(producerPolicy.getNearby(), producerPolicy.isSingle(), producerPolicy.getArchive(),
+                    producerPolicy.getWeight(), producerPolicy.getBlackList(), producerPolicy.getTimeOut());
         }
 
         if (consumerPolicy != null) {

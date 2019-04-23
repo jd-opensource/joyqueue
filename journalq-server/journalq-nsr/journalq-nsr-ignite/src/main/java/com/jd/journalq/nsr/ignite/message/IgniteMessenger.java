@@ -70,7 +70,7 @@ public class IgniteMessenger implements Messenger<MetaEvent> {
     static class IgniteTableListener implements IgniteBiPredicate<UUID, CacheEvent>{
         private static Logger logger = LoggerFactory.getLogger(IgniteTableListener.class);
         private MessageListener listener;
-        public IgniteTableListener(MessageListener listener){
+        IgniteTableListener(MessageListener listener){
             this.listener = listener;
         }
         @Override
@@ -98,7 +98,7 @@ public class IgniteMessenger implements Messenger<MetaEvent> {
     static class IgniteTopicListener implements IgniteBiPredicate<UUID, String>{
         private static Logger logger = LoggerFactory.getLogger(IgniteTopicListener.class);
         private MessageListener listener;
-        public IgniteTopicListener(MessageListener listener){
+        IgniteTopicListener(MessageListener listener){
             this.listener = listener;
         }
         @Override

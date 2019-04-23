@@ -124,7 +124,8 @@ public class DefaultMessageFetcher extends Service implements MessageFetcher {
     }
 
     @Override
-    public void fetchPartitionAsync(BrokerNode brokerNode, final String topic, final String app, final short partition, final long index, int count, long timeout, final PartitionFetchListener listener) {
+    public void fetchPartitionAsync(BrokerNode brokerNode, final String topic, final String app, final short partition,
+                                    final long index, int count, long timeout, final PartitionFetchListener listener) {
         Table<String, Short, Long> partitionTable = HashBasedTable.create();
         partitionTable.put(topic, partition, index);
         batchFetchPartitionsAsync(brokerNode, partitionTable, app, count, timeout, new BatchPartitionFetchListener() {

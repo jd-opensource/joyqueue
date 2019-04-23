@@ -63,7 +63,8 @@ public class DefaultTransactionMessageProducer implements TransactionMessageProd
     private JMQCode commit;
     private JMQCode rollback;
 
-    public DefaultTransactionMessageProducer(String transactionId, long timeout, TimeUnit timeoutUnit, long sequence, ProducerConfig config, NameServerConfig nameServerConfig, ClusterManager clusterManager, MessageSender messageSender, MessageProducerInner messageProducerInner) {
+    public DefaultTransactionMessageProducer(String transactionId, long timeout, TimeUnit timeoutUnit, long sequence, ProducerConfig config,
+                                             NameServerConfig nameServerConfig, ClusterManager clusterManager, MessageSender messageSender, MessageProducerInner messageProducerInner) {
         Preconditions.checkArgument(config != null, "config not null");
         Preconditions.checkArgument(timeoutUnit != null, "timeoutUnit not null");
         Preconditions.checkArgument(nameServerConfig != null, "nameServer not null");
@@ -151,7 +152,9 @@ public class DefaultTransactionMessageProducer implements TransactionMessageProd
     }
 
     protected SendPrepareResult doPrepare(PartitionMetadata partition) {
-        SendPrepareResult sendPrepareResult = messageSender.prepare(partition.getLeader(), partition.getTopic(), config.getApp(), transactionId, sequence, timeoutUnit.toMillis(timeout), config.getTimeout());
+        SendPrepareResult sendPrepareResult = messageSender.prepare(partition.getLeader(), partition.getTopic(), config.getApp(),
+                transactionId, sequence, timeoutUnit.toMillis(timeout), config.getTimeout());
+
         if (!sendPrepareResult.getCode().equals(JMQCode.SUCCESS)) {
             throw new ProducerException(sendPrepareResult.getCode().getMessage(), sendPrepareResult.getCode().getCode());
         }

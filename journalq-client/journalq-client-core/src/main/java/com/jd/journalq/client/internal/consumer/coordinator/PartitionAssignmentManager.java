@@ -91,7 +91,8 @@ public class PartitionAssignmentManager extends Service {
                 return null;
             }
 
-            FetchAssignedPartitionAck fetchAssignedPartitionAck = coordinatorManager.fetchAssignedPartition(coordinator, topicMetadata.getTopic(), app, topicMetadata.getConsumerPolicy().getNearby(), sessionTimeout);
+            FetchAssignedPartitionAck fetchAssignedPartitionAck =
+                    coordinatorManager.fetchAssignedPartition(coordinator, topicMetadata.getTopic(), app, topicMetadata.getConsumerPolicy().getNearby(), sessionTimeout);
             FetchAssignedPartitionAckData fetchAssignedPartitionAckData = fetchAssignedPartitionAck.getTopicPartitions().get(topicMetadata.getTopic());
 
             if (fetchAssignedPartitionAckData == null) {

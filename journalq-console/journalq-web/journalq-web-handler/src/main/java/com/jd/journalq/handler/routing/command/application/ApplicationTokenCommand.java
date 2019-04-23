@@ -31,7 +31,9 @@ import com.jd.laf.web.vertx.annotation.QueryParam;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
 
-import static com.jd.journalq.handler.Constants.*;
+import static com.jd.journalq.handler.Constants.APPLICATION;
+import static com.jd.journalq.handler.Constants.APP_ID;
+import static com.jd.journalq.handler.Constants.ID;
 
 /**
  * Created by wangxiaofei1 on 2018/10/23.

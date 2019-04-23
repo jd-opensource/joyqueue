@@ -76,7 +76,7 @@ public class BitArray {
             throw new IndexOutOfBoundsException();
         }
         if (!get(index)) {
-            bytes.writeLong(offset(index), bytes.readLong(offset(index)) | (1l << position(index)));
+            bytes.writeLong(offset(index), bytes.readLong(offset(index)) | (1L << position(index)));
             count++;
             return true;
         }
@@ -93,7 +93,7 @@ public class BitArray {
         if (index < 0 || index >= size) {
             throw new IndexOutOfBoundsException();
         }
-        return (bytes.readLong(offset(index)) & (1l << (position(index)))) != 0;
+        return (bytes.readLong(offset(index)) & (1L << (position(index)))) != 0;
     }
 
     /**

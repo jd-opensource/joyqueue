@@ -15,7 +15,12 @@ package com.jd.journalq.nsr.ignite.service;
 
 
 import com.google.inject.Inject;
-import com.jd.journalq.domain.*;
+import com.jd.journalq.domain.Broker;
+import com.jd.journalq.domain.Consumer;
+import com.jd.journalq.domain.PartitionGroup;
+import com.jd.journalq.domain.Producer;
+import com.jd.journalq.domain.Topic;
+import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.event.MetaEvent;
 import com.jd.journalq.event.PartitionGroupEvent;
 import com.jd.journalq.event.TopicEvent;
@@ -49,7 +54,12 @@ import com.jd.journalq.nsr.network.command.CreatePartitionGroup;
 import com.jd.journalq.nsr.network.command.OperatePartitionGroup;
 import com.jd.journalq.nsr.network.command.RemovePartitionGroup;
 import com.jd.journalq.nsr.network.command.UpdatePartitionGroup;
-import com.jd.journalq.nsr.service.*;
+import com.jd.journalq.nsr.service.BrokerService;
+import com.jd.journalq.nsr.service.ConsumerService;
+import com.jd.journalq.nsr.service.PartitionGroupReplicaService;
+import com.jd.journalq.nsr.service.PartitionGroupService;
+import com.jd.journalq.nsr.service.ProducerService;
+import com.jd.journalq.nsr.service.TopicService;
 import com.jd.journalq.toolkit.lang.Pair;
 import org.apache.ignite.Ignition;
 import org.apache.ignite.transactions.Transaction;
@@ -59,7 +69,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 /**
@@ -186,12 +201,14 @@ public class IgniteTopicService implements TopicService {
                     Command command = new Command(new JMQHeader(Direction.REQUEST, CommandType.NSR_CREATE_PARTITIONGROUP), new CreatePartitionGroup(group));
                     Command response = null;
                     try {
-                        logger.info("begin createPartitionGroup topic[{}] partitionGroup[{}] [{}:{}] request[{}]", topicName.getFullName(), group.getGroup(), broker.getIp(), broker.getBackEndPort(), command.getPayload());
+                        logger.info("begin createPartitionGroup topic[{}] partitionGroup[{}] [{}:{}] request[{}]",
+                                topicName.getFullName(), group.getGroup(), broker.getIp(), broker.getBackEndPort(), command.getPayload());
                         transport = transportClient.createTransport(new InetSocketAddress(broker.getIp(),
                                 broker.getBackEndPort()));
                         response = transport.sync(command);
-                        logger.info("createPartitionGroup topic[{}] partitionGroup[{}] [{}:{}] request[{}] response [{}]", topicName.getFullName(), group.getGroup(), broker.getIp(), broker.getBackEndPort(), command.getPayload(), response.getPayload());
-                        if (JMQCode.SUCCESS.getCode() != ((JMQHeader) response.getHeader()).getStatus()) {
+                        logger.info("createPartitionGroup topic[{}] partitionGroup[{}] [{}:{}] request[{}] response [{}]",
+                                topicName.getFullName(), group.getGroup(), broker.getIp(), broker.getBackEndPort(), command.getPayload(), response.getPayload());
+                        if (JMQCode.SUCCESS.getCode() != response.getHeader().getStatus()) {
                             throw new Exception(String.format("add topic [%s] error[%s]", topicName.getFullName(), response));
                         }
                     } catch (Exception e) {
@@ -527,18 +544,22 @@ public class IgniteTopicService implements TopicService {
                             transport = transportClient.createTransport(new InetSocketAddress(broker.getIp(),
                                     broker.getBackEndPort()));
                             response = transport.sync(command.getValue());
-                                logger.info("update partitionGroup broker[{}] request[{}] response [{}]", broker.getIp() + ":" + broker.getPort(), command.getValue().getPayload(), ((JMQHeader) response.getHeader()).getStatus());
-                            if (JMQCode.SUCCESS.getCode() != ((JMQHeader) response.getHeader()).getStatus()) {
-                                throw new Exception(String.format("update partitionGroup broker[%s] request[%s] response [%s]r ", broker.getIp() + ":" + broker.getBackEndPort(), group.getTopic(), response.getPayload()));
+                            logger.info("update partitionGroup broker[{}] request[{}] response [{}]",
+                                    broker.getIp() + ":" + broker.getPort(), command.getValue().getPayload(), response.getHeader().getStatus());
+                            if (JMQCode.SUCCESS.getCode() != response.getHeader().getStatus()) {
+                                throw new Exception(String.format("update partitionGroup broker[%s] request[%s] response [%s]r ",
+                                        broker.getIp() + ":" + broker.getBackEndPort(), group.getTopic(), response.getPayload()));
                             }
                             updateCount++;
                             if (groupNew.getReplicas().contains(brokerId)) {
                                 partitionGroupReplicaService.addOrUpdate(new IgnitePartitionGroupReplica(group.getTopic(), brokerId, group.getGroup()));
                             }
                         } catch (Exception ignore) {
-                            logger.error(String.format("update partitionGroup error broker[%s] request[%s] response [%s]", broker.getIp() + ":" + broker.getBackEndPort(), command.getValue().getPayload(), response), ignore);
+                            logger.error(String.format("update partitionGroup error broker[%s] request[%s] response [%s]",
+                                    broker.getIp() + ":" + broker.getBackEndPort(), command.getValue().getPayload(), response),
+                                    ignore);
                         } finally {
-                            if (null != transport){
+                            if (null != transport) {
                                 transport.stop();
                             }
                         }

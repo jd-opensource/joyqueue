@@ -39,7 +39,11 @@ import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.security.GeneralSecurityException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -278,7 +282,7 @@ public class ConsumeArchiveService extends Service {
         // 单个归档文件的大小
         private final long pageSize = 1024 * 1024 * 16; // 16M
 
-        public ArchiveMappedFileRepository(String baseDir) {
+        ArchiveMappedFileRepository(String baseDir) {
             this.baseDir = baseDir;
             recover();
         }
@@ -375,7 +379,7 @@ public class ConsumeArchiveService extends Service {
                 rFileChannel = rRaf.getChannel();
                 rMap = rFileChannel.map(FileChannel.MapMode.READ_ONLY, 0, pageSize);
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error(e.getMessage(), e);
             }
         }
 

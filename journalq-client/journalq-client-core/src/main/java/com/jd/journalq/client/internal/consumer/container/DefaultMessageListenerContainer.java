@@ -51,7 +51,8 @@ public class DefaultMessageListenerContainer extends Service implements MessageL
     private ConsumerClientManager consumerClientManager;
     private Map<String, TopicMessageConsumer> topicConsumerMap = Maps.newHashMap();
 
-    public DefaultMessageListenerContainer(ConsumerConfig config, NameServerConfig nameServerConfig, ClusterManager clusterManager, ClusterClientManager clusterClientManager, ConsumerClientManager consumerClientManager) {
+    public DefaultMessageListenerContainer(ConsumerConfig config, NameServerConfig nameServerConfig, ClusterManager clusterManager,
+                                           ClusterClientManager clusterClientManager, ConsumerClientManager consumerClientManager) {
         Preconditions.checkArgument(config != null, "consumer not null");
         Preconditions.checkArgument(nameServerConfig != null, "nameserver not null");
         Preconditions.checkArgument(clusterManager != null, "clusterManager not null");

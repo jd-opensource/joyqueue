@@ -236,7 +236,8 @@ public class LocalFileStore implements PositionStore<ConsumePartition, Position>
             consumeBills.entrySet().stream().forEach(entry -> {
                 Joint key = entry.getKey();
                 entry.getValue().stream().forEach(val ->
-                        consumePositionCache.putIfAbsent(new ConsumePartition(key.getTopic(), key.getApp(), val.getPartition()), new Position(val.getAckStartIndex(), val.getAckCurIndex(), val.getPullStartIndex(), val.getPullCurIndex()))
+                        consumePositionCache.putIfAbsent(new ConsumePartition(key.getTopic(), key.getApp(), val.getPartition()),
+                                new Position(val.getAckStartIndex(), val.getAckCurIndex(), val.getPullStartIndex(), val.getPullCurIndex()))
                 );
             });
         }

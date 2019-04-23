@@ -40,7 +40,12 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -805,7 +810,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                         Thread.sleep(50);
                     }
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    logger.error(e.getMessage(), e);
                 }
                 stopFlushThread();
                 stopCallbackThread(stopTimeout);
@@ -814,7 +819,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                 }
             }
         } catch (Throwable t) {
-            t.printStackTrace();
+           logger.error(t.getMessage(),t);
         }
     }
 
@@ -849,7 +854,6 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
             this.virtualThreadPool.stop(flushVirtualThread);
         } catch (InterruptedException e) {
             logger.warn("Exception: ", e);
-            e.printStackTrace();
         }
     }
 

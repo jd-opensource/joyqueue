@@ -23,7 +23,9 @@ import com.jd.journalq.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
 import org.apache.commons.collections.map.HashedMap;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by zhuduohui on 2018/9/7.

@@ -44,7 +44,8 @@ public class MessagePollerWrapper extends Service implements MessagePoller {
     private ConsumerClientManager consumerClientManager;
     private MessagePoller delegate;
 
-    public MessagePollerWrapper(ConsumerConfig consumerConfig, NameServerConfig nameServerConfig, ClusterManager clusterManager, ClusterClientManager clusterClientManager, ConsumerClientManager consumerClientManager, MessagePoller delegate) {
+    public MessagePollerWrapper(ConsumerConfig consumerConfig, NameServerConfig nameServerConfig, ClusterManager clusterManager,
+                                ClusterClientManager clusterClientManager, ConsumerClientManager consumerClientManager, MessagePoller delegate) {
         this.consumerConfig = consumerConfig;
         this.nameServerConfig = nameServerConfig;
         this.clusterManager = clusterManager;

@@ -19,7 +19,8 @@ import com.jd.journalq.toolkit.network.IpUtil;
 import com.jd.journalq.toolkit.time.SystemClock;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
-import io.netty.handler.codec.mqtt.*;
+import io.netty.handler.codec.mqtt.MqttPublishMessage;
+import io.netty.handler.codec.mqtt.MqttQoS;
 
 import java.util.zip.CRC32;
 

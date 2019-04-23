@@ -13,7 +13,13 @@
  */
 package com.jd.journalq.broker.manage.service.support;
 
-import com.jd.journalq.broker.manage.service.*;
+import com.jd.journalq.broker.manage.service.BrokerManageService;
+import com.jd.journalq.broker.manage.service.ConnectionManageService;
+import com.jd.journalq.broker.manage.service.ConsumerManageService;
+import com.jd.journalq.broker.manage.service.CoordinatorManageService;
+import com.jd.journalq.broker.manage.service.ElectionManageService;
+import com.jd.journalq.broker.manage.service.MessageManageService;
+import com.jd.journalq.broker.manage.service.StoreManageService;
 import com.jd.journalq.exception.JMQException;
 import com.jd.journalq.manage.IndexItem;
 import com.jd.journalq.manage.PartitionGroupMetric;
@@ -42,7 +48,9 @@ public class DefaultBrokerManageService implements BrokerManageService {
     private CoordinatorManageService coordinatorManageService;
     private ElectionManageService electionManageService;
 
-    public DefaultBrokerManageService(ConnectionManageService connectionManageService, MessageManageService messageManageService, StoreManageService storeManageService, ConsumerManageService consumerManageService, CoordinatorManageService coordinatorManageService, ElectionManageService electionManageService) {
+    public DefaultBrokerManageService(ConnectionManageService connectionManageService, MessageManageService messageManageService,
+                                      StoreManageService storeManageService, ConsumerManageService consumerManageService,
+                                      CoordinatorManageService coordinatorManageService, ElectionManageService electionManageService) {
         this.connectionManageService = connectionManageService;
         this.messageManageService = messageManageService;
         this.storeManageService = storeManageService;

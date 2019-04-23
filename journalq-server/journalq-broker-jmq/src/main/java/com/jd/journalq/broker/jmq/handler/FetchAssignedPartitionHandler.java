@@ -89,7 +89,11 @@ public class FetchAssignedPartitionHandler implements JMQCommandHandler, Type, J
 
         Map<String, FetchAssignedPartitionAckData> topicPartitions = Maps.newHashMapWithExpectedSize(fetchAssignedPartition.getData().size());
         for (FetchAssignedPartitionData fetchAssignedPartitionData : fetchAssignedPartition.getData()) {
-            FetchAssignedPartitionAckData fetchAssignedPartitionAckData = assignPartition(fetchAssignedPartitionData, fetchAssignedPartition.getApp(), connection.getRegion(), connectionId, connection.getAddressStr());
+            FetchAssignedPartitionAckData fetchAssignedPartitionAckData = assignPartition(fetchAssignedPartitionData,
+                    fetchAssignedPartition.getApp(),
+                    connection.getRegion(),
+                    connectionId,
+                    connection.getAddressStr());
             if (fetchAssignedPartitionAckData == null) {
                 logger.warn("partitionAssignment is null, topic: {}, app: {}, transport: {}", fetchAssignedPartitionData, fetchAssignedPartition.getApp(), transport);
                 fetchAssignedPartitionAckData = new FetchAssignedPartitionAckData(JMQCode.FW_COORDINATOR_PARTITION_ASSIGNOR_ERROR);
@@ -118,7 +122,9 @@ public class FetchAssignedPartitionHandler implements JMQCommandHandler, Type, J
             return new FetchAssignedPartitionAckData(JMQCode.FW_COORDINATOR_PARTITION_ASSIGNOR_NO_PARTITIONS);
         }
 
-        PartitionAssignment partitionAssignment = partitionAssignmentHandler.assign(fetchAssignedPartitionData.getTopic(), app, connectionId, connectionHost, fetchAssignedPartitionData.getSessionTimeout(), topicPartitionGroups);
+        PartitionAssignment partitionAssignment = partitionAssignmentHandler.assign(fetchAssignedPartitionData.getTopic(), app,
+                connectionId, connectionHost,
+                fetchAssignedPartitionData.getSessionTimeout(), topicPartitionGroups);
         return new FetchAssignedPartitionAckData(partitionAssignment.getPartitions(), JMQCode.SUCCESS);
     }
 

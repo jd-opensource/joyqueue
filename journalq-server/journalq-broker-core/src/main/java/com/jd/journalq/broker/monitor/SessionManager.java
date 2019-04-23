@@ -438,7 +438,7 @@ public class SessionManager extends Service {
     /**
      * 事件类型
      */
-    public static enum SessionEventType {
+    public enum SessionEventType {
         /**
          * 增加连接
          */

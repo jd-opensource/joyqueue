@@ -21,11 +21,6 @@ import com.jd.journalq.broker.kafka.KafkaErrorCode;
  */
 public class OffsetMetadataAndError {
 
-    private static final OffsetMetadataAndError noOffset = new OffsetMetadataAndError(OffsetAndMetadata.INVALID_OFFSET, OffsetAndMetadata.NO_METADATA, KafkaErrorCode.NONE);
-    private static final OffsetMetadataAndError offsetsLoading = new OffsetMetadataAndError(OffsetAndMetadata.INVALID_OFFSET, OffsetAndMetadata.NO_METADATA, KafkaErrorCode.OFFSETS_LOAD_IN_PROGRESS);
-    private static final OffsetMetadataAndError notOffsetManagerForGroup = new OffsetMetadataAndError(OffsetAndMetadata.INVALID_OFFSET, OffsetAndMetadata.NO_METADATA, KafkaErrorCode.NOT_COORDINATOR_FOR_CONSUMER);
-    private static final OffsetMetadataAndError unknownTopicOrPartition = new OffsetMetadataAndError(OffsetAndMetadata.INVALID_OFFSET, OffsetAndMetadata.NO_METADATA, KafkaErrorCode.UNKNOWN_TOPIC_OR_PARTITION);
-
     private long offset;
     private String metadata = OffsetAndMetadata.NO_METADATA;
     private short error = KafkaErrorCode.NONE;

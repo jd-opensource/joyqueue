@@ -78,7 +78,7 @@ public class PureJavaCrc32C {
         crc = localCrc;
     }
 
-    final public void update(int b) {
+    public final void update(int b) {
         crc = (crc >>> 8) ^ T[T8_0_START + ((crc ^ b) & 0xff)];
     }
 

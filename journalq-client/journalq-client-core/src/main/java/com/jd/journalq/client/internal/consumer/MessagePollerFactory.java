@@ -89,7 +89,8 @@ public class MessagePollerFactory {
         return new BroadcastMessagePoller(consumerConfig, nameServerConfig, clusterManager, consumerClientManager);
     }
 
-    public static MessagePoller createPartitionPoller(ConsumerConfig consumerConfig, NameServerConfig nameServerConfig, ClusterManager clusterManager, ConsumerClientManager consumerClientManager, ConsumerIndexManager consumerIndexManager) {
+    public static MessagePoller createPartitionPoller(ConsumerConfig consumerConfig, NameServerConfig nameServerConfig,
+                                                      ClusterManager clusterManager, ConsumerClientManager consumerClientManager, ConsumerIndexManager consumerIndexManager) {
         return new PartitionMessagePoller(consumerConfig, nameServerConfig, clusterManager, consumerClientManager, consumerIndexManager);
     }
 }

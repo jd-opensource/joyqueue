@@ -206,7 +206,7 @@ public final class Functions {
         private final Function<B, C> g;
         private final Function<A, ? extends B> f;
 
-        public ComposeFunction(final Function<B, C> g, final Function<A, ? extends B> f) {
+        ComposeFunction(final Function<B, C> g, final Function<A, ? extends B> f) {
             this.g = Preconditions.checkNotNull(g);
             this.f = Preconditions.checkNotNull(f);
         }
@@ -311,8 +311,8 @@ public final class Functions {
      */
     static class ConstantFunction<E> implements Function<Object, E>, Serializable {
         private final E value;
-
-        public ConstantFunction(final E value) {
+        private static final long serialVersionUID = 0L;
+        ConstantFunction(final E value) {
             this.value = value;
         }
 
@@ -340,6 +340,6 @@ public final class Functions {
             return "Functions.constant(" + value + ")";
         }
 
-        private static final long serialVersionUID = 0;
+
     }
 }

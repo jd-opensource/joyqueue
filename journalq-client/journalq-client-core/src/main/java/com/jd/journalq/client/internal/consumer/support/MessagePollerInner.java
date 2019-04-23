@@ -155,7 +155,8 @@ public class MessagePollerInner extends Service {
         return fetchPartition(brokerNode, topicMetadata, partition, index, batchSize, timeout, timeoutUnit, listener);
     }
 
-    public List<ConsumeMessage> fetchPartition(BrokerNode brokerNode, TopicMetadata topicMetadata, short partition, long index, int batchSize, long timeout, TimeUnit timeoutUnit, ConsumerListener listener) {
+    public List<ConsumeMessage> fetchPartition(BrokerNode brokerNode, TopicMetadata topicMetadata, short partition, long index,
+                                               int batchSize, long timeout, TimeUnit timeoutUnit, ConsumerListener listener) {
         Preconditions.checkArgument(topicMetadata != null, "topicMetadata not null");
         Preconditions.checkArgument(timeoutUnit != null, "timeoutUnit not null");
 
@@ -174,7 +175,8 @@ public class MessagePollerInner extends Service {
         }
     }
 
-    protected List<ConsumeMessage> doFetchPartition(BrokerNode brokerNode, TopicMetadata topicMetadata, final short partition, long index, int batchSize, long timeout, TimeUnit timeoutUnit, final ConsumerListener listener) {
+    protected List<ConsumeMessage> doFetchPartition(BrokerNode brokerNode, TopicMetadata topicMetadata, final short partition,
+                                                    long index, int batchSize, long timeout, TimeUnit timeoutUnit, final ConsumerListener listener) {
         timeout = timeoutUnit.toMillis(timeout);
         final String topic = topicMetadata.getTopic();
         final String app = getAppFullName();

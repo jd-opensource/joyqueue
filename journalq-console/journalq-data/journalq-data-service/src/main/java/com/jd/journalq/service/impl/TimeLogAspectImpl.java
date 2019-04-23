@@ -25,7 +25,7 @@ import org.springframework.stereotype.Component;
 @Aspect
 @Component
 public class TimeLogAspectImpl {
-    private final static Logger logger= LoggerFactory.getLogger(TimeLogAspectImpl.class);
+    private static final Logger logger= LoggerFactory.getLogger(TimeLogAspectImpl.class);
 //    @Around("execution(* com.jd.journalq.service.BrokerMonitorService.*(..))&&execution(* com.jd.jmq.nsr.*.*(..))")
 
     @Around("execution(* com.jd.journalq.service.BrokerMonitorService.*(..))")

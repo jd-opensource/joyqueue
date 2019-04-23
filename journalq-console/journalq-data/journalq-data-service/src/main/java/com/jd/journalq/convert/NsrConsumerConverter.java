@@ -16,7 +16,12 @@ package com.jd.journalq.convert;
 import com.jd.journalq.domain.ClientType;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.domain.TopicType;
-import com.jd.journalq.model.domain.*;
+import com.jd.journalq.model.domain.AppName;
+import com.jd.journalq.model.domain.Consumer;
+import com.jd.journalq.model.domain.ConsumerConfig;
+import com.jd.journalq.model.domain.Identity;
+import com.jd.journalq.model.domain.Namespace;
+import com.jd.journalq.model.domain.Topic;
 import com.jd.journalq.toolkit.retry.RetryPolicy;
 import org.apache.commons.lang3.StringUtils;
 

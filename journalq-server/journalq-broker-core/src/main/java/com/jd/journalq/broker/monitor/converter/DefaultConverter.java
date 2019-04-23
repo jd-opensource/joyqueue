@@ -14,7 +14,14 @@
 package com.jd.journalq.broker.monitor.converter;
 
 import com.jd.journalq.broker.monitor.PendingStat;
-import com.jd.journalq.broker.monitor.stat.*;
+import com.jd.journalq.broker.monitor.stat.AppStat;
+import com.jd.journalq.broker.monitor.stat.BrokerStat;
+import com.jd.journalq.broker.monitor.stat.BrokerStatExt;
+import com.jd.journalq.broker.monitor.stat.DeQueueStat;
+import com.jd.journalq.broker.monitor.stat.EnQueueStat;
+import com.jd.journalq.broker.monitor.stat.PartitionGroupStat;
+import com.jd.journalq.broker.monitor.stat.TopicPendingStat;
+import com.jd.journalq.broker.monitor.stat.TopicStat;
 import com.jd.journalq.model.MonitorRecord;
 import com.jd.journalq.toolkit.time.SystemClock;
 import org.slf4j.Logger;
@@ -379,7 +386,10 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
 
             enQueue.topic(tsKey);
 
-            String[] enQueueMetrics = {TOPIC_SLICE_ENQUEUE, TOPIC_SLICE_ENQUEUE_SIZE, TOPIC_SLICE_ENQUEUE_MAX, TOPIC_SLICE_ENQUEUE_AVG, TOPIC_SLICE_ENQUEUE_MIN, TOPIC_SLICE_ENQUEUE_TP99, TOPIC_SLICE_ENQUEUE_TP90};
+            String[] enQueueMetrics = {TOPIC_SLICE_ENQUEUE, TOPIC_SLICE_ENQUEUE_SIZE,
+                    TOPIC_SLICE_ENQUEUE_MAX, TOPIC_SLICE_ENQUEUE_AVG,
+                    TOPIC_SLICE_ENQUEUE_MIN, TOPIC_SLICE_ENQUEUE_TP99,
+                    TOPIC_SLICE_ENQUEUE_TP90};
 
             List<MonitorRecord> enQueueRecords = buildEmptyRecords(enQueue, enQueueMetrics);
 
@@ -394,7 +404,10 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
                 records.addAll(enQueueRecords);
             }
 
-            String[] deQueueMetrics = {TOPIC_SLICE_DEQUEUE, TOPIC_SLICE_DEQUEUE_SIZE, TOPIC_SLICE_DEQUEUE_MAX, TOPIC_SLICE_DEQUEUE_AVG, TOPIC_SLICE_DEQUEUE_MIN, TOPIC_SLICE_DEQUEUE_TP99, TOPIC_SLICE_DEQUEUE_TP90};
+            String[] deQueueMetrics = {TOPIC_SLICE_DEQUEUE, TOPIC_SLICE_DEQUEUE_SIZE,
+                    TOPIC_SLICE_DEQUEUE_MAX, TOPIC_SLICE_DEQUEUE_AVG,
+                    TOPIC_SLICE_DEQUEUE_MIN, TOPIC_SLICE_DEQUEUE_TP99,
+                    TOPIC_SLICE_DEQUEUE_TP90};
             List<MonitorRecord> deQueueRecords = buildEmptyRecords(enQueue, deQueueMetrics);
 
             if (deQueueRecords != null && deQueueRecords.size() == deQueueMetrics.length) {

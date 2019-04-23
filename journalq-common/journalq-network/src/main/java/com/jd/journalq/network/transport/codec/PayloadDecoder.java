@@ -24,5 +24,5 @@ import io.netty.buffer.ByteBuf;
  */
 public interface PayloadDecoder<H extends Header> {
 
-    public Object decode(H header, ByteBuf buffer) throws Exception;
+    Object decode(H header, ByteBuf buffer) throws Exception;
 }

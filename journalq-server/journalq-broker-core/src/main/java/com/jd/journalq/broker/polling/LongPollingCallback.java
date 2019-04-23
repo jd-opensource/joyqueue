@@ -24,9 +24,9 @@ import com.jd.journalq.network.transport.exception.TransportException;
  */
 public interface LongPollingCallback {
 
-    public void onSuccess(Consumer consumer, PullResult pullResult) throws TransportException;
+    void onSuccess(Consumer consumer, PullResult pullResult) throws TransportException;
 
-    public void onExpire(Consumer consumer) throws TransportException;
+    void onExpire(Consumer consumer) throws TransportException;
 
-    public void onException(Consumer consumer, Throwable throwable) throws TransportException;
+    void onException(Consumer consumer, Throwable throwable) throws TransportException;
 }

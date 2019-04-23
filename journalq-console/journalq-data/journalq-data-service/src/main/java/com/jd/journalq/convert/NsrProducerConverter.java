@@ -14,7 +14,11 @@
 package com.jd.journalq.convert;
 
 import com.jd.journalq.domain.ClientType;
-import com.jd.journalq.model.domain.*;
+import com.jd.journalq.model.domain.Identity;
+import com.jd.journalq.model.domain.Namespace;
+import com.jd.journalq.model.domain.Producer;
+import com.jd.journalq.model.domain.ProducerConfig;
+import com.jd.journalq.model.domain.Topic;
 import com.jd.journalq.util.NullUtil;
 import org.apache.commons.lang3.StringUtils;
 

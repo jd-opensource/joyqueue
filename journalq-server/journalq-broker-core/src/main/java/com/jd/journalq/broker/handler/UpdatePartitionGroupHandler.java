@@ -34,7 +34,11 @@ import com.jd.journalq.store.StoreService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * @author wylixiaobin
@@ -72,7 +76,8 @@ public class UpdatePartitionGroupHandler implements CommandHandler, Type {
             replicasNew.removeAll(groupOld.getReplicas());
             replicasOld.removeAll(groupNew.getReplicas());
             Integer localBrokerId = clusterManager.getBrokerId();
-            logger.info("begin updatePartitionGroup topic[{}] from [{}] to [{}] addNode[{}] removeNode[{}] localNode[{}]", groupNew.getTopic(), JSON.toJSONString(groupOld), JSON.toJSONString(groupNew), Arrays.toString(replicasNew.toArray()), Arrays.toString(replicasOld.toArray()));
+            logger.info("begin updatePartitionGroup topic[{}] from [{}] to [{}] addNode[{}] removeNode[{}] localNode[{}]",
+                    groupNew.getTopic(), JSON.toJSONString(groupOld), JSON.toJSONString(groupNew), Arrays.toString(replicasNew.toArray()), Arrays.toString(replicasOld.toArray()));
             if (!request.isRollback()) {
                 commit(groupNew, groupOld, replicasNew, replicasOld, localBrokerId);
             } else {
@@ -100,7 +105,9 @@ public class UpdatePartitionGroupHandler implements CommandHandler, Type {
                 electionService.onPartitionGroupCreate(groupNew.getElectType(), topicName, groupNew.getGroup(), brokers, groupNew.getLearners(), clusterManager.getBrokerId(), groupNew.getLeader());
             } else {
                 logger.info("topic[{}] update partitionGroup[{}] add node[{}] ", topic, groupNew.getGroup(), brokerId);
-                electionService.onNodeAdd(topicName, groupNew.getGroup(), groupNew.getElectType(), brokers, groupNew.getLearners(), clusterManager.getBrokerById(brokerId), localBrokerId, groupNew.getLeader());
+                electionService.onNodeAdd(topicName, groupNew.getGroup(), groupNew.getElectType(),
+                        brokers, groupNew.getLearners(), clusterManager.getBrokerById(brokerId),
+                        localBrokerId, groupNew.getLeader());
                 storeService.rePartition(topic, groupNew.getGroup(), groupNew.getPartitions().toArray(new Short[groupNew.getPartitions().size()]));
             }
         }
@@ -146,7 +153,9 @@ public class UpdatePartitionGroupHandler implements CommandHandler, Type {
                 electionService.onPartitionGroupCreate(groupNew.getElectType(), topicName, groupNew.getGroup(), brokers, groupNew.getLearners(), clusterManager.getBrokerId(), groupNew.getLeader());
             } else {
                 logger.info("topic[{}] update partitionGroup[{}] add node[{}] ", groupNew.getTerm(), groupNew.getGroup(), brokerId);
-                electionService.onNodeAdd(topicName, groupNew.getGroup(), groupNew.getElectType(), brokers, groupNew.getLearners(), clusterManager.getBrokerById(brokerId), localBrokerId, groupNew.getLeader());
+                electionService.onNodeAdd(topicName, groupNew.getGroup(), groupNew.getElectType(),
+                        brokers, groupNew.getLearners(), clusterManager.getBrokerById(brokerId),
+                        localBrokerId, groupNew.getLeader());
                 storeService.rePartition(groupOld.getTopic().getFullName(), groupOld.getGroup(), groupOld.getPartitions().toArray(new Short[groupOld.getPartitions().size()]));
             }
         }

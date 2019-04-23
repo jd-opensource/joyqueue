@@ -24,5 +24,5 @@ import io.netty.buffer.ByteBuf;
  */
 public interface PayloadEncoder<T extends Payload> {
 
-    public void encode(T payload, ByteBuf buffer) throws Exception;
+    void encode(T payload, ByteBuf buffer) throws Exception;
 }

@@ -155,7 +155,6 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
                 scheduledExecutor.awaitTermination(5, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
                 logger.warn("Exception: ", e);
-                e.printStackTrace();
             }
             if (!scheduledExecutor.isTerminated()) scheduledExecutor.shutdownNow();
         }
@@ -387,7 +386,6 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
                 scheduledExecutor.awaitTermination(5, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
                 logger.warn("Exception: ", e);
-                e.printStackTrace();
             }
             if (!scheduledExecutor.isTerminated()) scheduledExecutor.shutdownNow();
         }

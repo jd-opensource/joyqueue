@@ -15,8 +15,23 @@ package com.jd.journalq.broker.cluster;
 
 import com.jd.journalq.broker.BrokerContext;
 import com.jd.journalq.broker.config.BrokerConfig;
-import com.jd.journalq.domain.*;
-import com.jd.journalq.event.*;
+import com.jd.journalq.domain.AppToken;
+import com.jd.journalq.domain.Broker;
+import com.jd.journalq.domain.Consumer;
+import com.jd.journalq.domain.DataCenter;
+import com.jd.journalq.domain.PartitionGroup;
+import com.jd.journalq.domain.Producer;
+import com.jd.journalq.domain.Subscription;
+import com.jd.journalq.domain.TopicConfig;
+import com.jd.journalq.domain.TopicName;
+import com.jd.journalq.event.BrokerEvent;
+import com.jd.journalq.event.ConsumerEvent;
+import com.jd.journalq.event.EventType;
+import com.jd.journalq.event.MetaEvent;
+import com.jd.journalq.event.NameServerEvent;
+import com.jd.journalq.event.PartitionGroupEvent;
+import com.jd.journalq.event.ProducerEvent;
+import com.jd.journalq.event.TopicEvent;
 import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.exception.JMQException;
 import com.jd.journalq.response.BooleanResponse;
@@ -32,9 +47,27 @@ import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
-import java.util.*;
-import java.util.concurrent.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -841,7 +874,7 @@ public class ClusterManager extends Service {
         private ScheduledExecutorService timerUpdateAllExecutor;
         private long cacheTime = 60 * 1000;
 
-        public MetaDataLocalCache(NameService nameService) {
+        MetaDataLocalCache(NameService nameService) {
             this.nameService = nameService;
             nameService.addListener(new MetaDataListener());
         }
@@ -1077,7 +1110,8 @@ public class ClusterManager extends Service {
                             case ADD_TOPIC:
                                 TopicConfig topicConfig = buildTopicConfigCache(((TopicEvent) event.getMetaEvent()).getTopic());
                                 for (PartitionGroup group : topicConfig.fetchPartitionGroupByBrokerId(brokerConfig.getBrokerId())) {
-                                    //storeService.createPartitionGroup(group.getTopic(), group.getGroup(), group.getPartitions().toArray(new Short[0]),group.getReplicaGroups().stream().mapToInt(replica->(int)replica).toArray());
+                                    //storeService.createPartitionGroup(group.getTopic(), group.getGroup(), group.getPartitions().toArray(new Short[0]),
+                                    // group.getReplicaGroups().stream().mapToInt(replica->(int)replica).toArray());
                                     if(group.getReplicas().contains(brokerConfig.getBrokerId())){
                                         eventBus.add(PartitionGroupEvent.add(group.getTopic(), group.getGroup()));
                                     }
@@ -1099,7 +1133,8 @@ public class ClusterManager extends Service {
                             default:break;
                         }
                     } else if (event.getMetaEvent() instanceof PartitionGroupEvent) {
-                        PartitionGroup groupOld = getTopicConfig(((PartitionGroupEvent) event.getMetaEvent()).getTopic()).fetchPartitionGroupByGroup(((PartitionGroupEvent) event.getMetaEvent()).getPartitionGroup());
+                        PartitionGroup groupOld = getTopicConfig(((PartitionGroupEvent) event.getMetaEvent()).getTopic()).
+                                fetchPartitionGroupByGroup(((PartitionGroupEvent) event.getMetaEvent()).getPartitionGroup());
                         TopicConfig topicConfig = buildTopicConfigCache(((PartitionGroupEvent) event.getMetaEvent()).getTopic());
                         PartitionGroup groupNew = topicConfig.fetchPartitionGroupByGroup(((PartitionGroupEvent) event.getMetaEvent()).getPartitionGroup());
                         Set<Integer> brokerIds = new HashSet<>();
@@ -1107,13 +1142,14 @@ public class ClusterManager extends Service {
                             brokerIds.addAll(groupOld.getReplicas());
                         if (groupNew != null)
                             brokerIds.addAll(groupNew.getReplicas());
-                        if(!brokerIds.contains(brokerConfig.getBrokerId())){
+                        if (!brokerIds.contains(brokerConfig.getBrokerId())) {
                             return;
                         }
                         switch (event.getEventType()) {
                             case ADD_PARTITION_GROUP:
                                 //PartitionGroup新增事件
-                                //storeService.createPartitionGroup(group.getTopic(), group.getGroup(), group.getPartitions().toArray(new Short[0]),group.getReplicaGroups().stream().mapToInt(replica->(int)replica).toArray());
+                                //storeService.createPartitionGroup(group.getTopic(), group.getGroup(), group.getPartitions().toArray(new Short[0]),
+                                // group.getReplicaGroups().stream().mapToInt(replica->(int)replica).toArray());
                                 eventBus.add(PartitionGroupEvent.add(topicConfig.getName(), groupNew.getGroup()));
                                 break;
                             case UPDATE_PARTITION_GROUP:
@@ -1128,7 +1164,8 @@ public class ClusterManager extends Service {
                                 //storeService.removePartitionGroup(group.getTopic(), group.getGroup());
                                 eventBus.add(PartitionGroupEvent.remove(topicConfig.getName(), ((PartitionGroupEvent) event.getMetaEvent()).getPartitionGroup()));
                                 break;
-                            default:break;
+                            default:
+                                break;
                         }
                     } else {
                         switch (event.getMetaEvent().getEventType()) {
@@ -1171,12 +1208,12 @@ public class ClusterManager extends Service {
             private long expireTime;
 
 
-            public CacheConsumer(Consumer consumer) {
+            CacheConsumer(Consumer consumer) {
                 this.consumer = consumer;
                 this.expireTime = SystemClock.now() + cacheTime;
             }
 
-            public CacheConsumer(Consumer consumer, long expireTime) {
+            CacheConsumer(Consumer consumer, long expireTime) {
                 this.consumer = consumer;
                 this.expireTime = expireTime;
             }
@@ -1194,12 +1231,12 @@ public class ClusterManager extends Service {
             private Producer producer;
             private long expireTime;
 
-            public CacheProducer(Producer producer) {
+            CacheProducer(Producer producer) {
                 this.producer = producer;
                 this.expireTime = SystemClock.now() + cacheTime;
             }
 
-            public CacheProducer(Producer producer, long expireTime) {
+            CacheProducer(Producer producer, long expireTime) {
                 this.producer = producer;
                 this.expireTime = expireTime;
             }

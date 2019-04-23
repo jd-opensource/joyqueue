@@ -20,5 +20,5 @@ import java.util.concurrent.ExecutorService;
  */
 public interface ExecutorsProvider {
 
-    public ExecutorService getExecutorService();
+    ExecutorService getExecutorService();
 }
