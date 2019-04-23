@@ -90,7 +90,8 @@ public class BrokerMonitorClusterQuery implements BrokerClusterQuery<Subscribe> 
             //monitorUrl+ path with parameter
             url = urlMappingService.monitorUrl(b) + path;
             logger.info(String.format("start sync request,%s", url));
-            AsyncHttpClient.AsyncRequest(new HttpGet(url), new AsyncHttpClient.ConcurrentHttpResponseHandler(url, System.currentTimeMillis(), latch, provider.getKey(b, null, (short) -1, condition), resultMap));
+            AsyncHttpClient.AsyncRequest(new HttpGet(url), new AsyncHttpClient.ConcurrentHttpResponseHandler(url,
+                    System.currentTimeMillis(), latch, provider.getKey(b, null, (short) -1, condition), resultMap));
         }
         return new DefaultBrokerInfoFuture(latch, resultMap, logKey);
     }
@@ -180,7 +181,8 @@ public class BrokerMonitorClusterQuery implements BrokerClusterQuery<Subscribe> 
             //monitorUrl+ path with parameter
             url = urlMappingService.monitorUrl(partitionGroupBrokerEntry.getValue()) + provider.getPath(pathTemplate, partitionGroupBrokerEntry.getKey(), (short) -1, condition);
             logger.info(String.format("start sync request on partition group,%s", url));
-            AsyncHttpClient.AsyncRequest(new HttpGet(url), new AsyncHttpClient.ConcurrentHttpResponseHandler(url, System.currentTimeMillis(), latch, provider.getKey(partitionGroupBrokerEntry.getValue(),
+            AsyncHttpClient.AsyncRequest(new HttpGet(url), new AsyncHttpClient.ConcurrentHttpResponseHandler(url,
+                    System.currentTimeMillis(), latch, provider.getKey(partitionGroupBrokerEntry.getValue(),
                     partitionGroupBrokerEntry.getKey(), (short) -1, condition), resultMap));
         }
         return new DefaultBrokerInfoFuture(latch, resultMap, logKey);

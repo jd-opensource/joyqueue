@@ -230,7 +230,8 @@ public class NameServiceCommandHandler implements NsrCommandHandler, Types, com.
                 } else {
                     topicNames = nameService.getTopics(getTopics.getApp(), Subscription.Type.valueOf((byte) getTopics.getSubscribeType()));
                 }
-                response = new Command(new JMQHeader(Direction.RESPONSE, command.getHeader().getType() == NsrCommandType.MQTT_GET_TOPICS ? NsrCommandType.MQTT_GET_TOPICS_ACK : NsrCommandType.GET_TOPICS_ACK),
+                response = new Command(new JMQHeader(Direction.RESPONSE,
+                        command.getHeader().getType() == NsrCommandType.MQTT_GET_TOPICS ? NsrCommandType.MQTT_GET_TOPICS_ACK : NsrCommandType.GET_TOPICS_ACK),
                         new GetTopicsAck().topics(topicNames));
                 break;
             case NsrCommandType.HAS_SUBSCRIBE:

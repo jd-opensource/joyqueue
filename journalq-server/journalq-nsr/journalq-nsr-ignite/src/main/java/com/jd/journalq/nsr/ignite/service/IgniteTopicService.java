@@ -522,7 +522,8 @@ public class IgniteTopicService implements TopicService {
                 groupToUpdae = groupToUpdae.clone();
                 groupToUpdae.getReplicas().remove(brokerId);
                 brokerAddToRemove = new TreeSet<>(brokerAddToRemove);
-                commands.add(new Pair<>(new TreeSet<>(brokerAddToRemove), new Command(new JMQHeader(Direction.REQUEST, CommandType.NSR_UPDATE_PARTITIONGROUP), new UpdatePartitionGroup(groupToUpdae))));
+                commands.add(new Pair<>(new TreeSet<>(brokerAddToRemove),
+                        new Command(new JMQHeader(Direction.REQUEST, CommandType.NSR_UPDATE_PARTITIONGROUP), new UpdatePartitionGroup(groupToUpdae))));
                 brokerAddToRemove.remove(brokerId);
             }
             if(null==groupToUpdae.getReplicas()||groupToUpdae.getReplicas().size()<1){

@@ -17,7 +17,6 @@ import com.jd.journalq.broker.buffer.Serializer;
 import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.exception.JMQException;
 import com.jd.journalq.message.BrokerMessage;
-import com.jd.journalq.store.file.StoreMessageSerializer;
 import com.jd.journalq.toolkit.network.IpUtil;
 
 import java.nio.ByteBuffer;
