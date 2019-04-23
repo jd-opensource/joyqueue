@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="ml20 mt30">
-      <d-input v-model="keyword" :placeholder="keywordTip" class="left mr10" style="width:213px">
+      <d-input v-model="keyword" :placeholder="keywordTip" class="left mr10" style="width: 10%">
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
       <d-button type="primary" v-if="$store.getters.isAdmin" @click="openDialog('subscribeDialog')" class="left mr10">
