@@ -65,6 +65,8 @@ import com.jd.journalq.sync.ApplicationInfo;
 import com.jd.journalq.sync.SyncService;
 import com.jd.journalq.util.LocalSession;
 import com.jd.journalq.util.NullUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -77,7 +79,7 @@ import static com.jd.journalq.exception.ServiceException.INTERNAL_SERVER_ERROR;
 
 @Service("openAPIService")
 public class OpenAPIServiceImpl implements OpenAPIService {
-
+    private final Logger logger = LoggerFactory.getLogger(OpenAPIServiceImpl.class);
     @Autowired
     private TopicService topicService;
 
@@ -125,7 +127,11 @@ public class OpenAPIServiceImpl implements OpenAPIService {
         List<Topic> topics = topicPageResult.getResult();
         List<TopicPubSub> pubSubs = new ArrayList(topics.size());
         for (Topic topic : topics) {
-            pubSubs.add(findTopicPubsub(topic));
+            try {
+                pubSubs.add(findTopicPubsub(topic));
+            }catch(Exception e){
+                logger.error(String.format("Find Topic PubSub Info, topic:%s", topic.getName()), e);
+            }
         }
         PageResult<TopicPubSub> topicPubSubPageResult = new PageResult<>();
         topicPubSubPageResult.setPagination(topicPageResult.getPagination());
