@@ -13,6 +13,6 @@ public class ProducerIdManager {
     private final AtomicLong producerIdSeq = new AtomicLong();
 
     public long generateId() {
-        return producerIdSeq.incrementAndGet();
+        return producerIdSeq.getAndIncrement();
     }
 }

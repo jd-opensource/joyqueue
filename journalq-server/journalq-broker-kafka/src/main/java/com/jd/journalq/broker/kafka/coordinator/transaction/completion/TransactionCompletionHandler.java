@@ -64,16 +64,9 @@ public class TransactionCompletionHandler extends Service {
 
     public void handle() {
         try {
-            if (CollectionUtils.isNotEmpty(retryUnCompletedTransactionList)) {
-                handleRetryTransactions();
-            } else {
-                List<TransactionDomain> transactionDomains = readTransactions();
-                if (CollectionUtils.isNotEmpty(transactionDomains)) {
-                    transactionDomains = prepareTransactionDomains(transactionDomains);
-                    handleUnCompleteTransactions(transactionDomains);
-                }
-                handleCommitIndex();
-            }
+            handleRetryTransactions();
+            handleUnCompleteTransactions();
+            commitUnCompleteTransactionIndex();
         } catch (Exception e) {
             logger.error("transaction compensate exception", e);
         }
@@ -172,6 +165,15 @@ public class TransactionCompletionHandler extends Service {
         return unCompletedTransaction;
     }
 
+    protected void handleUnCompleteTransactions() throws Exception {
+        List<TransactionDomain> transactionDomains = readTransactions();
+        if (CollectionUtils.isEmpty(transactionDomains)) {
+            return;
+        }
+        transactionDomains = prepareTransactionDomains(transactionDomains);
+        handleUnCompleteTransactions(transactionDomains);
+    }
+
     protected void handleUnCompleteTransactions(List<TransactionDomain> transactionDomains) {
         for (int i = 0; i < transactionDomains.size(); i++) {
             long currentIndex = this.currentIndex + i;
@@ -199,7 +201,7 @@ public class TransactionCompletionHandler extends Service {
         logger.info("右移到 {}", currentIndex);
     }
 
-    protected void handleCommitIndex() {
+    protected void commitUnCompleteTransactionIndex() {
         long commitIndex = -1;
 
         for (Map.Entry<Long, UnCompletedTransaction> entry : unCompletedTransactionSortedMap.entrySet()) {

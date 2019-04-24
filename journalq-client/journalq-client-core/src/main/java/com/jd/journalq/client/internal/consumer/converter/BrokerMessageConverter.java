@@ -12,10 +12,10 @@ import com.jd.journalq.message.SourceType;
 import com.jd.journalq.network.command.FetchPartitionMessageAckData;
 import com.jd.journalq.network.command.FetchTopicMessageAckData;
 import com.jd.journalq.network.serializer.BatchMessageSerializer;
+import com.jd.journalq.toolkit.lang.Charsets;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 
-import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -74,7 +74,11 @@ public class BrokerMessageConverter {
                     }
                 }
             } else {
-                result.add(convert(topic, app, brokerMessage));
+                BrokerMessage convertedMessage = messageConvertSupport.convert(brokerMessage);
+                if (convertedMessage == null) {
+                    convertedMessage = brokerMessage;
+                }
+                result.add(convert(topic, app, convertedMessage));
             }
         }
         return result;
@@ -84,21 +88,16 @@ public class BrokerMessageConverter {
         if (batchBrokerMessage.getSource() != SourceType.JMQ.getValue()) {
             return messageConvertSupport.convertBatch(batchBrokerMessage);
         }
-
         byte[] body = batchBrokerMessage.getDecompressedBody();
         batchBrokerMessage.setBody(body);
         return BatchMessageSerializer.deserialize(batchBrokerMessage);
     }
 
     public static ConsumeMessage convert(String topic, String app, BrokerMessage brokerMessage) {
-        BrokerMessage convertedMessage = messageConvertSupport.convert(brokerMessage);
-        if (convertedMessage == null) {
-            convertedMessage = brokerMessage;
-        }
-        byte[] body = convertedMessage.getDecompressedBody();
-        ConsumeMessage consumeMessage = new ConsumeMessage(TopicName.parse(topic), app, convertedMessage.getPartition(), convertedMessage.getMsgIndexNo(),
-                convertedMessage.getTxId(), convertedMessage.getBusinessId(), new String(body, Charset.forName("UTF-8")), body, convertedMessage.getFlag(), convertedMessage.getPriority(),
-                convertedMessage.getStartTime(), convertedMessage.getSource(), convertedMessage.getAttributes());
+        byte[] body = brokerMessage.getDecompressedBody();
+        ConsumeMessage consumeMessage = new ConsumeMessage(TopicName.parse(topic), app, brokerMessage.getPartition(), brokerMessage.getMsgIndexNo(),
+                brokerMessage.getTxId(), brokerMessage.getBusinessId(), new String(body, Charsets.UTF_8), body, brokerMessage.getFlag(), brokerMessage.getPriority(),
+                brokerMessage.getStartTime(), brokerMessage.getSource(), brokerMessage.getAttributes());
         return consumeMessage;
     }
 }

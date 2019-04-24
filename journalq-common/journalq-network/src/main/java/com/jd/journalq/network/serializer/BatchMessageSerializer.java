@@ -102,12 +102,12 @@ public class BatchMessageSerializer {
             message.setMsgIndexNo(brokerMessage.getMsgIndexNo() + i);
 
             message.setBody(body);
-            message.setBusinessId(ArrayUtils.isEmpty(businessId) ? null : new String(businessId));
+            message.setBusinessId(ArrayUtils.isEmpty(businessId) ? null : new String(businessId, Charsets.UTF_8));
             message.setPriority(priority);
             message.setFlag(flag);
             message.setSize(size);
             try {
-                message.setAttributes(ArrayUtils.isEmpty(attributes) ? null : Serializer.toStringMap(new String(attributes)));
+                message.setAttributes(ArrayUtils.isEmpty(attributes) ? null : Serializer.toStringMap(new String(attributes, Charsets.UTF_8)));
             } catch (IOException e) {
                 logger.debug("", e);
             }

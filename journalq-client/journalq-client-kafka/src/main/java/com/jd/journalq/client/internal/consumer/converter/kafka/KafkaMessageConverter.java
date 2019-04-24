@@ -36,12 +36,12 @@ public class KafkaMessageConverter implements MessageConverter {
     private static final byte MESSAGE_CURRENT_MAGIC = MESSAGE_MAGIC_V2;
 
     private static final int EXTENSION_V0_LENGTH = 1; // magic
-    private static final int EXTENSION_V1_LENGTH = 1 + 8 + 8; // magic + timestamp + attribute + keyLength + valueLength
-    private static final int CURRENT_EXTENSION_LENGTH = EXTENSION_V1_LENGTH;
+    private static final int EXTENSION_V1_LENGTH = 1 + 8 + 8; // magic + timestamp + attribute
+    private static final int EXTENSION_CURRENT_LENGTH = EXTENSION_V1_LENGTH;
 
     private static final int EXTENSION_BATCH_V0_LENGTH = 1; // magic
     private static final int EXTENSION_BATCH_V1_LENGTH = 1 + 8 + 8; // magic + timestamp + attribute
-    private static final int CURRENT_BATCH_EXTENSION_LENGTH = EXTENSION_BATCH_V1_LENGTH;
+    private static final int EXTENSION_CURRENT_BATCH_LENGTH = EXTENSION_BATCH_V1_LENGTH;
 
     private static final int EXTENSION_MAGIC_OFFSET = 0;
     private static final int EXTENSION_TIMESTAMP_OFFSET = EXTENSION_MAGIC_OFFSET + 1;
@@ -54,7 +54,7 @@ public class KafkaMessageConverter implements MessageConverter {
     @Override
     public BrokerMessage convert(BrokerMessage message) {
         byte[] extension = message.getExtension();
-        if (ArrayUtils.isEmpty(extension) || extension.length != CURRENT_EXTENSION_LENGTH) {
+        if (ArrayUtils.isEmpty(extension) || extension.length != EXTENSION_CURRENT_LENGTH) {
             return message;
         }
 
@@ -93,14 +93,14 @@ public class KafkaMessageConverter implements MessageConverter {
         ByteBuffer buffer = ByteBuffer.wrap(body);
 
         for (int i = 0; i < message.getFlag(); i++) {
-            result.add(doConvertBatch(message, buffer, i));
+            result.add(doConvertBatch(message, buffer));
         }
         return result;
     }
 
     protected byte[] tryDecompress(BrokerMessage message) {
         byte[] extension = message.getExtension();
-        if (ArrayUtils.isEmpty(extension) || extension.length != CURRENT_BATCH_EXTENSION_LENGTH) {
+        if (ArrayUtils.isEmpty(extension) || extension.length != EXTENSION_CURRENT_BATCH_LENGTH) {
             return message.getByteBody();
         }
 
@@ -138,7 +138,7 @@ public class KafkaMessageConverter implements MessageConverter {
         }
     }
 
-    protected BrokerMessage doConvertBatch(BrokerMessage message, ByteBuffer buffer, int index) {
+    protected BrokerMessage doConvertBatch(BrokerMessage message, ByteBuffer buffer) {
         BrokerMessage result = new BrokerMessage();
         result.setSize(KafkaBufferUtils.readVarint(buffer));
         buffer.get(); // attribute
@@ -149,7 +149,6 @@ public class KafkaMessageConverter implements MessageConverter {
         result.setBusinessId((ArrayUtils.isEmpty(businessId) ? null : new String(businessId, Charsets.UTF_8)));
         result.setBody(KafkaBufferUtils.readVarBytes(buffer));
 
-        result.setMsgIndexNo(message.getMsgIndexNo() + index);
         result.setPartition(message.getPartition());
         result.setAttributes(message.getAttributes());
         result.setStartTime(message.getStartTime());
