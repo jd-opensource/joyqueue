@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.broker.election;
 
 import com.jd.journalq.broker.monitor.BrokerMonitor;
@@ -12,14 +25,14 @@ public class BrokerMonitorStub extends BrokerMonitor {
 
     @Override
     public void onReplicateMessage(String topic, int partitionGroup, long count, long size, long time) {
-        logger.info("Monitor replicate message of topic {} partition group {}, " +
+        logger.debug("Monitor replicate message of topic {} partition group {}, " +
                 "count is {}, size is {}, time is {}",
                 topic, partitionGroup, count, size, time);
     }
 
     @Override
     public void onAppendReplicateMessage(String topic, int partitionGroup, long count, long size, long time) {
-        logger.info("Monitor append replicate message of topic {} partition group {}, " +
+        logger.debug("Monitor append replicate message of topic {} partition group {}, " +
                 "count is {}, size is {}, time is {}",
                 topic, partitionGroup, count, size, time);
     }

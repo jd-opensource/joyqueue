@@ -1,5 +1,6 @@
 package com.jd.journalq.client.internal.consumer.converter.kafka;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jd.journalq.client.internal.consumer.converter.MessageConverter;
@@ -9,7 +10,6 @@ import com.jd.journalq.client.internal.consumer.converter.kafka.compressor.strea
 import com.jd.journalq.client.internal.exception.ClientException;
 import com.jd.journalq.message.BrokerMessage;
 import com.jd.journalq.message.SourceType;
-import com.jd.journalq.toolkit.lang.Charsets;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

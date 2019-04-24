@@ -1,15 +1,38 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.service.impl;
 
+import com.jd.journalq.convert.CodeConverter;
 import com.jd.journalq.manage.PartitionGroupMetric;
 import com.jd.journalq.model.PageResult;
 import com.jd.journalq.model.Pagination;
 import com.jd.journalq.model.QPageQuery;
-import com.jd.journalq.model.domain.*;
+import com.jd.journalq.model.domain.Broker;
+import com.jd.journalq.model.domain.BrokerTopicMonitor;
+import com.jd.journalq.model.domain.BrokerTopicMonitorRecord;
+import com.jd.journalq.model.domain.Consumer;
+import com.jd.journalq.model.domain.Producer;
+import com.jd.journalq.model.domain.SubscribeType;
+import com.jd.journalq.model.domain.Topic;
 import com.jd.journalq.model.query.QConsumer;
 import com.jd.journalq.model.query.QMonitor;
 import com.jd.journalq.model.query.QProducer;
-import com.jd.journalq.monitor.*;
 import com.jd.journalq.monitor.Client;
+import com.jd.journalq.monitor.ConnectionMonitorDetailInfo;
+import com.jd.journalq.monitor.ConsumerMonitorInfo;
+import com.jd.journalq.monitor.ProducerMonitorInfo;
+import com.jd.journalq.monitor.RestResponse;
 import com.jd.journalq.other.HttpRestService;
 import com.jd.journalq.service.BrokerService;
 import com.jd.journalq.service.BrokerTopicMonitorService;
@@ -62,7 +85,6 @@ public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService 
             pageResult.setPagination(pagination);
             pageResult.setResult(brokerTopicMonitorList);
         } catch (Exception e) {
-            e.printStackTrace();
         }
         return pageResult;
     }
@@ -93,7 +115,6 @@ public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService 
                 pageResult.setResult(clients.subList(pagination.getStart(),toIndex));
             }
         } catch (Exception e) {
-            e.printStackTrace();
         }
         return pageResult;
 
@@ -132,7 +153,6 @@ public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService 
             pageResult.setPagination(pagination);
             pageResult.setResult(brokerTopicMonitors);
         } catch (Exception e) {
-            e.printStackTrace();
         }
         return pageResult;
     }
@@ -165,13 +185,13 @@ public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService 
             QConsumer qConsumer = new QConsumer();
             qConsumer.setTopic(new Topic(topic));
             List<Consumer> consumerList =  consumerService.findByQuery(qConsumer);
-            return consumerList.stream().map(consumer -> consumer.getApp().getCode()).collect(Collectors.toList());
+            return consumerList.stream().map(consumer -> CodeConverter.convertApp(consumer.getApp(),consumer.getSubscribeGroup())).collect(Collectors.toList());
 
         } else if (subscribeType == SubscribeType.PRODUCER) {
             QProducer qProducer = new QProducer();
             qProducer.setTopic(new Topic(topic));
             List<Producer> producerList =  producerService.findByQuery(qProducer);
-            return producerList.stream().map(consumer -> consumer.getApp().getCode()).collect(Collectors.toList());
+            return producerList.stream().map(producer -> producer.getApp().getCode()).collect(Collectors.toList());
         }
         return new ArrayList<>();
 

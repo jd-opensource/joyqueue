@@ -113,11 +113,17 @@ export default {
       this.$emit('on-choosed-broker', val)
     },
     del (item) {
-      var data = item
       let _this = this
-      apiRequest.post(this.urls.del, {}, data).then((data) => {
-        this.$Message.success('删除成功')
-        _this.$emit('on-partition-group-change')
+      this.$Dialog.confirm({
+        title: '提示',
+        content: '确定要删除吗？'
+      }).then(() => {
+        var data = item
+        apiRequest.post(this.urls.del, {}, data).then((data) => {
+          _this.$Message.success('删除成功')
+          _this.getList()
+          _this.$emit('on-partition-group-change')
+        })
       })
     },
     // 查询
@@ -132,7 +138,8 @@ export default {
         query: {
           topic: this.partitionGroup.topic,
           namespace: this.partitionGroup.namespace,
-          groupNo: this.partitionGroup.groupNo
+          groupNo: this.partitionGroup.groupNo,
+          keyword: this.searchData.keyword
         }
       }
       apiRequest.post(this.urlOrigin.search, {}, data).then((data) => {

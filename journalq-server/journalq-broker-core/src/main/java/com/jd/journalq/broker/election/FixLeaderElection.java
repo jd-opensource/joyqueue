@@ -1,10 +1,23 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.broker.election;
 
 import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.election.command.AppendEntriesRequest;
 import com.jd.journalq.broker.election.command.AppendEntriesResponse;
 import com.jd.journalq.broker.replication.ReplicaGroup;
-import com.jd.journalq.network.transport.codec.JMQHeader;
+import com.jd.journalq.network.transport.codec.JournalqHeader;
 import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.network.command.CommandType;
 import com.jd.journalq.network.transport.command.Command;
@@ -15,6 +28,7 @@ import com.jd.journalq.toolkit.concurrent.EventBus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -57,9 +71,7 @@ public class FixLeaderElection extends LeaderElection {
             becomeFollower();
         }
 
-        ElectionMetadata metadata = ElectionMetadata.Build.create().electionType(PartitionGroup.ElectType.fix)
-                .allNodes(allNodes).leaderId(leaderId).localNode(localNodeId).build();
-        electionMetadataManager.updateElectionMetadata(topicPartitionGroup, metadata);
+        updateElectionMetadata();
 
         electionEventManager.add(new ElectionEvent(ElectionEvent.Type.LEADER_FOUND, 0,
                 leaderId, topicPartitionGroup));
@@ -82,7 +94,7 @@ public class FixLeaderElection extends LeaderElection {
     }
 
     @Override
-    public void setLeaderId(int leaderId) {
+    public void setLeaderId(int leaderId) throws IOException {
         if (leaderId != this.leaderId && this.leaderId != ElectionNode.INVALID_NODE_ID) {
 
             if (leaderId == localNodeId) {
@@ -91,14 +103,27 @@ public class FixLeaderElection extends LeaderElection {
                 becomeFollower();
             }
 
-            ElectionMetadata metadata = ElectionMetadata.Build.create().electionType(PartitionGroup.ElectType.fix)
-                    .allNodes(allNodes).leaderId(leaderId).localNode(localNodeId).build();
-            electionMetadataManager.updateElectionMetadata(topicPartitionGroup, metadata);
+            updateElectionMetadata();
 
             electionEventManager.add(new ElectionEvent(ElectionEvent.Type.LEADER_FOUND, 0,
                     leaderId, topicPartitionGroup));
         } else {
             this.leaderId = leaderId;
+        }
+    }
+
+    /**
+     * 更新选举元数据
+     */
+    private void updateElectionMetadata() {
+        try {
+            ElectionMetadata metadata = ElectionMetadata.Build.create(electionConfig.getMetadataPath(), topicPartitionGroup)
+                    .electionType(PartitionGroup.ElectType.fix)
+                    .allNodes(allNodes).leaderId(leaderId).localNode(localNodeId).build();
+            electionMetadataManager.updateElectionMetadata(topicPartitionGroup, metadata);
+        } catch (Exception e) {
+            logger.warn("Partition group {}/node {} update election metadata fail",
+                    topicPartitionGroup, localNodeId, e);
         }
     }
 
@@ -120,7 +145,7 @@ public class FixLeaderElection extends LeaderElection {
 
         try {
             if (replicableStore.serviceStatus()) {
-                replicableStore.disable(electionConfig.getDisableStoreTimeout());
+                replicableStore.disable();
             }
         } catch (Exception e) {
             logger.info("Partition group {}/node {} disable store fail, exception is {}",
@@ -128,11 +153,12 @@ public class FixLeaderElection extends LeaderElection {
         }
     }
 
+    @Override
     public Command handleAppendEntriesRequest(AppendEntriesRequest request) {
         if (!isStarted()) {
             logger.warn("Partition group{}/node{} receive append entries request, election not started",
                     topicPartitionGroup, localNodeId);
-            return new Command(new JMQHeader(Direction.RESPONSE, CommandType.RAFT_APPEND_ENTRIES_RESPONSE),
+            return new Command(new JournalqHeader(Direction.RESPONSE, CommandType.RAFT_APPEND_ENTRIES_RESPONSE),
                     new AppendEntriesResponse.Build().success(false).build());
         }
 

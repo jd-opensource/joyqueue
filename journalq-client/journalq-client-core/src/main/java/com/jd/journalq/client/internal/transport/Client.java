@@ -1,9 +1,22 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.client.internal.transport;
 
 import com.jd.journalq.client.internal.exception.ClientException;
 import com.jd.journalq.client.internal.nameserver.NameServerConfig;
 import com.jd.journalq.client.internal.transport.config.TransportConfig;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.network.command.HeartbeatRequest;
 import com.jd.journalq.network.domain.BrokerNode;
 import com.jd.journalq.network.transport.Transport;
@@ -11,7 +24,7 @@ import com.jd.journalq.network.transport.TransportAttribute;
 import com.jd.journalq.network.transport.TransportClient;
 import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.transport.command.CommandCallback;
-import com.jd.journalq.network.transport.command.JMQCommand;
+import com.jd.journalq.network.transport.command.JournalqCommand;
 import com.jd.journalq.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +59,7 @@ public class Client extends Service {
     }
 
     public void heartbeat(long timeout) {
-        sync(new JMQCommand(new HeartbeatRequest()), timeout);
+        sync(new JournalqCommand(new HeartbeatRequest()), timeout);
     }
 
     public Future<Command> async(Command request, long timeout) {
@@ -71,7 +84,7 @@ public class Client extends Service {
                     if (response.isSuccess()) {
                         callback.onSuccess(request, response);
                     } else {
-                        callback.onException(request, new JMQException(response.getHeader().getError(), response.getHeader().getStatus()));
+                        callback.onException(request, new JournalqException(response.getHeader().getError(), response.getHeader().getStatus()));
                     }
                 }
 

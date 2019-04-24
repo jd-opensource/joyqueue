@@ -1,3 +1,17 @@
+--
+-- Licensed under the Apache License, Version 2.0 (the "License");
+-- you may not use this file except in compliance with the License.
+-- You may obtain a copy of the License at
+--
+--     http://www.apache.org/licenses/LICENSE-2.0
+--
+-- Unless required by applicable law or agreed to in writing, software
+-- distributed under the License is distributed on an "AS IS" BASIS,
+-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-- See the License for the specific language governing permissions and
+-- limitations under the License.
+--
+
 
 
 -- 导出  表 laf_config.application 结构
@@ -233,7 +247,7 @@ CREATE TABLE `consumer` (
   `app_id` bigint(20) NOT NULL COMMENT '应用 id',
   `app_code` varchar(128) NOT NULL COMMENT '应用 代码',
   `subscribe_group` varchar(64) NOT NULL COMMENT '订阅分组',
-  `client_type` tinyint(4) DEFAULT NULL COMMENT '客户端类型, 0:jmq, 1:kafka, 2:mqtt, 10:others',
+  `client_type` tinyint(4) DEFAULT NULL COMMENT '客户端类型, 0:journalq, 1:kafka, 2:mqtt, 10:others',
   `create_by` bigint(11) NOT NULL DEFAULT '0' COMMENT '创建人',
   `update_time` datetime NOT NULL COMMENT '更新时间',
   `update_by` bigint(11) NOT NULL DEFAULT '0' COMMENT '修改人',
@@ -549,7 +563,6 @@ CREATE TABLE `metric` (
   `alias_code` varchar(256) NOT NULL COMMENT '值,唯一',
   `name` varchar(64) NOT NULL COMMENT '名称',
   `type` tinyint(4) NOT NULL COMMENT '类型：0 atomic, 1 aggregator, 10 others(mdc)',
---   `charts` varchar(64) DEFAULT NULL COMMENT '监控图表数组：0 其他，1 生产详情，2 消费详情，3 生产汇总，4 消费汇总，5 主机监控，6 broker监控',
   `source` varchar(128) DEFAULT NULL COMMENT '来源指标code',
   `provider` varchar(128) DEFAULT NULL COMMENT '指标提供方',
   `description` varchar(1000) DEFAULT NULL COMMENT '聚合描述',

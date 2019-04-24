@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.broker.kafka.coordinator.group;
 
 import com.google.common.collect.Lists;
@@ -15,7 +28,7 @@ import com.jd.journalq.broker.kafka.coordinator.group.domain.GroupMetadata;
 import com.jd.journalq.broker.kafka.coordinator.group.domain.GroupState;
 import com.jd.journalq.toolkit.delay.DelayedOperationKey;
 import com.jd.journalq.toolkit.delay.DelayedOperationManager;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import com.jd.journalq.toolkit.time.SystemClock;
 import org.slf4j.Logger;
@@ -204,9 +217,10 @@ public class GroupBalanceManager extends Service {
         }
 
         // reschedule the next heartbeat expiration deadline
-        // TODO 临时处理
+        // TODO 临时处理，在其他分支详细处理
+        long delayTimeout = member.getSessionTimeout() * 3;
         long newHeartbeatDeadline = member.getLatestHeartbeat() + member.getSessionTimeout();
-        DelayedHeartbeat delayedHeartbeat = new DelayedHeartbeat(this, group, member, newHeartbeatDeadline, member.getSessionTimeout());
+        DelayedHeartbeat delayedHeartbeat = new DelayedHeartbeat(this, group, member, newHeartbeatDeadline, delayTimeout);
         heartbeatPurgatory.tryCompleteElseWatch(delayedHeartbeat, Sets.newHashSet(memberKey));
     }
 

@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.client.internal.consumer.support;
 
 import com.jd.journalq.client.internal.cluster.ClusterClientManager;
@@ -16,7 +29,7 @@ import com.jd.journalq.client.internal.nameserver.NameServerConfig;
 import com.jd.journalq.client.internal.nameserver.helper.NameServerHelper;
 import com.jd.journalq.domain.Topic;
 import com.jd.journalq.domain.TopicName;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,11 +57,13 @@ public class TopicMessageConsumer extends Service {
     private TopicMessageConsumerScheduler messageConsumerScheduler;
     private MessageListenerManager messageListenerManager = new MessageListenerManager();
 
-    public TopicMessageConsumer(String topic, ConsumerConfig config, NameServerConfig nameServerConfig, ClusterManager clusterManager, ClusterClientManager clusterClientManager, ConsumerClientManager consumerClientManager) {
+    public TopicMessageConsumer(String topic, ConsumerConfig config, NameServerConfig nameServerConfig, ClusterManager clusterManager,
+                                ClusterClientManager clusterClientManager, ConsumerClientManager consumerClientManager) {
         this(topic, config, nameServerConfig, clusterManager, clusterClientManager, consumerClientManager, new ConsumerInterceptorManager());
     }
 
-    public TopicMessageConsumer(String topic, ConsumerConfig config, NameServerConfig nameServerConfig, ClusterManager clusterManager, ClusterClientManager clusterClientManager, ConsumerClientManager consumerClientManager, ConsumerInterceptorManager consumerInterceptorManager) {
+    public TopicMessageConsumer(String topic, ConsumerConfig config, NameServerConfig nameServerConfig, ClusterManager clusterManager,
+                                ClusterClientManager clusterClientManager, ConsumerClientManager consumerClientManager, ConsumerInterceptorManager consumerInterceptorManager) {
         this.topic = topic;
         this.config = config;
         this.nameServerConfig = nameServerConfig;
@@ -106,7 +121,7 @@ public class TopicMessageConsumer extends Service {
         TopicMetadata topicMetadata = clusterManager.fetchTopicMetadata(topicName.getFullName(), config.getApp());
 
         if (topicMetadata == null || topicMetadata.getConsumerPolicy() == null) {
-            throw new ConsumerException(String.format("topic %s is not exist", topic), JMQCode.FW_TOPIC_NOT_EXIST.getCode());
+            throw new ConsumerException(String.format("topic %s is not exist", topic), JournalqCode.FW_TOPIC_NOT_EXIST.getCode());
         }
 
         if (topicMetadata.getType().equals(Topic.Type.BROADCAST)) {

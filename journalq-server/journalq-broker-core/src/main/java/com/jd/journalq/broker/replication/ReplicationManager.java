@@ -1,5 +1,19 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.broker.replication;
 
+import com.google.common.base.Preconditions;
 import com.jd.journalq.broker.consumer.Consume;
 import com.jd.journalq.broker.election.DefaultElectionNode;
 import com.jd.journalq.broker.election.ElectionConfig;
@@ -19,14 +33,20 @@ import com.jd.journalq.network.transport.support.DefaultTransportAttribute;
 import com.jd.journalq.store.StoreService;
 import com.jd.journalq.store.replication.ReplicableStore;
 import com.jd.journalq.toolkit.concurrent.EventListener;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.jd.journalq.toolkit.concurrent.NamedThreadFactory;
 import com.jd.journalq.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * author: zhuduohui
@@ -42,22 +62,20 @@ public class ReplicationManager extends Service {
 
     private StoreService storeService;
     private Consume consume;
-    private BrokerMonitor brokerMonitor;
 
     private TransportClient transportClient;
     private ExecutorService replicateExecutor;
+    private ScheduledExecutorService replicateTimerExecutor;
 
     public ReplicationManager(ElectionConfig electionConfig, StoreService storeService,
                               Consume consume, BrokerMonitor brokerMonitor) {
         Preconditions.checkArgument(electionConfig != null, "election config is null");
         Preconditions.checkArgument(storeService != null, "store service is null");
         Preconditions.checkArgument(consume != null, "consume is null");
-        Preconditions.checkArgument(brokerMonitor != null, "broker monitor is null");
 
         this.electionConfig = electionConfig;
         this.storeService = storeService;
         this.consume = consume;
-        this.brokerMonitor = brokerMonitor;
     }
 
     @Override
@@ -67,6 +85,8 @@ public class ReplicationManager extends Service {
         replicaGroups = new ConcurrentHashMap<>();
 
         ClientConfig clientConfig = new ClientConfig();
+        clientConfig.setIoThreadName("journalqreplication-io-eventLoop");
+        clientConfig.setMaxAsync(1000);
         transportClient = new BrokerTransportClientFactory().create(clientConfig);
         transportClient.start();
 
@@ -74,7 +94,10 @@ public class ReplicationManager extends Service {
         transportClient.addListener(clientEventListener);
 
         replicateExecutor = new ThreadPoolExecutor(electionConfig.getReplicateThreadNumMin(), electionConfig.getReplicateThreadNumMax(),
-                60, TimeUnit.SECONDS, new LinkedBlockingDeque<>(electionConfig.getCommandQueueSize()));
+                60, TimeUnit.SECONDS, new LinkedBlockingDeque<>(electionConfig.getCommandQueueSize()),
+                new NamedThreadFactory("Replicate-sendCommand"));
+
+         replicateTimerExecutor = Executors.newScheduledThreadPool(electionConfig.getTimerScheduleThreadNum());
     }
 
     @Override
@@ -103,7 +126,7 @@ public class ReplicationManager extends Service {
                     "%d failed, replicable store is null", topic, partitionGroup));
         }
         replicaGroup = new ReplicaGroup(topicPartitionGroup, this, replicableStore, electionConfig,
-                consume, replicateExecutor, brokerMonitor, allNodes, learners, localReplicaId, leaderId);
+                consume, replicateExecutor, replicateTimerExecutor, brokerMonitor, allNodes, learners, localReplicaId, leaderId);
         try {
             replicaGroup.start();
         } catch (Exception e) {

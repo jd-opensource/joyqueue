@@ -1,14 +1,27 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.broker.manage.exporter.vertx;
 
 import com.google.common.collect.Maps;
 import com.jd.journalq.toolkit.util.ASMUtils;
 import com.jd.laf.web.vertx.Environment;
+import com.jd.laf.web.vertx.RouteProvider;
 import com.jd.laf.web.vertx.config.RouteConfig;
 import com.jd.laf.web.vertx.config.VertxConfig;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.ext.web.Route;
-import io.vertx.ext.web.Router;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedReader;
@@ -38,6 +51,8 @@ public class RoutingVerticle extends com.jd.laf.web.vertx.RoutingVerticle {
 
     public RoutingVerticle(Environment env, HttpServerOptions httpOptions) {
         super(env, httpOptions, ROUTING);
+        Vertx vertx = Vertx.vertx();
+        init(vertx, vertx.getOrCreateContext());
     }
 
     public void registerServices(Map<String, Object> serviceMap) {
@@ -48,40 +63,34 @@ public class RoutingVerticle extends com.jd.laf.web.vertx.RoutingVerticle {
         serviceMap.put(key, service);
     }
 
+
     @Override
     public void start() throws Exception {
         try {
-            init(Vertx.vertx(), null);
-
             //构建配置数据
-            VertxConfig baseConfig = buildBaseConfig(BASE_ROUTING);
-            config = inherit(buildConfig(baseConfig, file));
+            config = inherit(buildConfig(buildBaseConfig(BASE_ROUTING), file));
 
-            Router router = createRouter(env);
-            //构建业务处理链
-            buildHandlers(router, config, env);
-            //构建消息处理链
-            buildConsumers(config);
-            //启动服务
-            httpServer = vertx.createHttpServer(httpOptions);
-            httpServer.requestHandler(router::accept).listen(event -> {
-                if (event.succeeded()) {
-                    logger.info(String.format("success starting http server on port %d", httpServer.actualPort()));
-                } else {
-                    logger.error(String.format("failed starting http server on port %d",
-                            httpServer.actualPort()), event.cause());
+            //初始化插件
+            register(vertx, env, config);
+
+            router = createRouter(env);
+            //通过配置文件构建路由
+            addRoutes(router, config.getRoutes(), env);
+            //通过路由提供者构建路由
+            if (providers != null) {
+                for (RouteProvider provider : providers) {
+                    addRoutes(router, provider.getRoutes(), env);
                 }
-            });
-            logger.info(String.format("success starting routing verticle"));
+            }
+            //启动服务
+            startHttpServer();
+            //注册路由变更消息监听器
+            dynamicRoute();
+            logger.info(String.format("success starting routing verticle %d at %s", id, deploymentID()));
         } catch (Exception e) {
-            logger.error(String.format("failed starting routing verticle"), e);
+            logger.error(String.format("failed starting routing verticle %d at %s", id, deploymentID()), e);
             throw e;
         }
-    }
-
-    @Override
-    public void stop() throws Exception {
-        httpServer.close();
     }
 
     protected VertxConfig buildBaseConfig(String file) throws Exception {
@@ -126,7 +135,6 @@ public class RoutingVerticle extends com.jd.laf.web.vertx.RoutingVerticle {
 
         return result;
     }
-
     @Override
     protected void buildHandlers(Route route, RouteConfig config, Environment environment) {
         String handler = config.getHandlers().get(0);

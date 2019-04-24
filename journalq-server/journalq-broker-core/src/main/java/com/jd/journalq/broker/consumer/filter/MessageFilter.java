@@ -1,6 +1,19 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.broker.consumer.filter;
 
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -18,9 +31,9 @@ public interface MessageFilter {
      * @param byteBufferList 消息字节缓存集合
      * @param filterCallback 消息过滤后的回调
      * @return
-     * @throws JMQException
+     * @throws JournalqException
      */
-    List<ByteBuffer> filter(List<ByteBuffer> byteBufferList, FilterCallback filterCallback) throws JMQException;
+    List<ByteBuffer> filter(List<ByteBuffer> byteBufferList, FilterCallback filterCallback) throws JournalqException;
 
     /**
      * 设置过滤规则

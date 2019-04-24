@@ -4,13 +4,19 @@
       <d-input v-model="keyword" :placeholder="keywordTip" class="left mr10" style="width: 10%">
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
-      <d-button type="primary" v-if="$store.getters.isAdmin" @click="openDialog('subscribeDialog')" class="left mr10">订阅<icon name="plus-circle" style="margin-left: 5px;"></icon></d-button>
-      <!--<d-button type="primary" @click="syncProducer" class="left mr10">同步生产者<icon name="download" style="margin-left: 5px;"></icon></d-button>-->
-      <d-button type="primary" v-if="summaryChartShow" @click="goSummaryChart" class="left mr10">汇总图表<icon name="bar-chart" style="margin-left: 5px;"></icon></d-button>
+      <d-button type="primary" v-if="$store.getters.isAdmin" @click="openDialog('subscribeDialog')" class="left mr10">
+        订阅
+        <icon name="plus-circle" style="margin-left: 5px;"/>
+      </d-button>
+      <!--<d-button type="primary" v-if="showSummaryChart" @click="goSummaryChart" class="left mr10">-->
+        <!--汇总图表-->
+        <!--<icon name="bar-chart" style="margin-left: 5px;"/>-->
+      <!--</d-button>-->
     </div>
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
               @on-detail-chart="goDetailChart" @on-current-change="handleCurrentChange" @on-detail="openDetailDialog"
-              @on-config="openConfigDialog" @on-set-produce-weight="openWeightConfigDialog"/>
+              @on-config="openConfigDialog" @on-set-produce-weight="openWeightConfigDialog"
+              @on-summary-chart="goSummaryChart" @on-performance-chart="goPerformanceChart"/>
 
     <!--生产订阅弹出框-->
     <my-dialog :dialog="subscribeDialog" @on-dialog-cancel="dialogCancel('subscribeDialog')">
@@ -60,8 +66,8 @@ import partition from './partition.vue'
 import clientConnection from './clientConnection.vue'
 import ProducerConfigForm from './producerConfigForm.vue'
 import ProducerWeight from './produceWight.vue'
-import cookie from '../../utils/cookie.js'
 import partitionExpand from './partitionExpand'
+import {getTopicCode, replaceChartUrl} from '../../utils/common.js'
 
 export default {
   name: 'producer-base',
@@ -89,13 +95,22 @@ export default {
             method: 'on-detail'
           },
           {
-            txt: '详情图表',
-            method: 'on-detail-chart'
-          },
-          {
             txt: '配置',
             method: 'on-config'
           }
+          // ,
+          // {
+          //   txt: '详情监控图表',
+          //   method: 'on-detail-chart'
+          // },
+          // {
+          //   txt: '汇总监控图表',
+          //   method: 'on-summary-chart'
+          // },
+          // {
+          //   txt: '性能监控图表',
+          //   method: 'on-performance-chart'
+          // }
         ]
       }
     },
@@ -131,8 +146,6 @@ export default {
             type: 'expand',
             width: 50,
             render: (h, params) => {
-              // console.log(h);
-              console.log('expand:' + params)
               return h(partitionExpand, {
                 props: {
                   row: params.row,
@@ -179,9 +192,8 @@ export default {
         ]
       }
     },
-    summaryChartShow: {
-      type: Boolean,
-      default: false
+    monitorUrls: {// url variable format: [app], [topic], [namespace]
+      type: Object
     }
   },
   data () {
@@ -319,52 +331,58 @@ export default {
       }
       this.config(configData, 'produceWeightDialog')
     },
-    // syncProducer() {
-    //   //todo 同步生产者
-    // },
-    goSummaryChart () {
-      // 1. get open url and token
-      apiRequest.get(this.urls.getUrl + '/pt', {}, {}).then((data) => {
-        let url = data.data || ''
-        if (url.indexOf('?') < 0) {
-          url += '?'
-        } else if (!url.endsWith('?')) {
-          url += '&'
-        }
-        if (this.search.app === undefined || this.search.app.code === undefined) {
-          this.$Message.error('app获取失败！')
-          return
-        }
-        url = url + 'var-app=' + this.search.app.code
-        // 2. open
-        let cookieValue = cookie.get(this.$store.getters.cookieName)
-        if (cookieValue == null) {
-          this.$Message.error('cookie获取失败！')
-          return
-        }
-        url = url + '&var-cookie=' + this.$store.getters.cookieName + '=' + cookieValue
-        window.open(url)
-      })
+    goSummaryChart (item) {
+      if (this.monitorUrls && this.monitorUrls.summary) {
+        window.open(replaceChartUrl(this.monitorUrls.summary, item.topic.namespace.code,
+          item.topic.code, item.app.code))
+      } else {
+        apiRequest.get(this.urls.getUrl + '/pt', {}, {}).then((data) => {
+          let url = data.data || ''
+          if (url.indexOf('?') < 0) {
+            url += '?'
+          } else if (!url.endsWith('?')) {
+            url += '&'
+          }
+          url = url + 'var-topic=' + getTopicCode(item.topic, item.topic.namespace) + '&var-app=' + item.app.code
+          window.open(url)
+        })
+      }
     },
     goDetailChart (item) {
-      // 1. get open url and token
-      apiRequest.get(this.urls.getUrl + '/pd', {}, {}).then((data) => {
-        let url = data.data || ''
-        if (url.indexOf('?') < 0) {
-          url += '?'
-        } else if (!url.endsWith('?')) {
-          url += '&'
-        }
-        url = url + 'var-topic=' + item.topic.code + '&var-app=' + item.app.code
-        // 2. open
-        let cookieValue = cookie.get(this.$store.getters.cookieName)
-        if (cookieValue == null) {
-          this.$Message.error('cookie获取失败！')
-          return
-        }
-        url = url + '&var-cookie=' + this.$store.getters.cookieName + '=' + cookieValue
-        window.open(url)
-      })
+      if (this.monitorUrls && this.monitorUrls.detail) {
+        window.open(replaceChartUrl(this.monitorUrls.detail, item.topic.namespace.code,
+          item.topic.code, item.app.code))
+      } else {
+        apiRequest.get(this.urls.getUrl + '/pd', {}, {}).then((data) => {
+          let url = data.data || ''
+          if (url.indexOf('?') < 0) {
+            url += '?'
+          } else if (!url.endsWith('?')) {
+            url += '&'
+          }
+          url = url + 'var-topic=' + getTopicCode(item.topic, item.topic.namespace) + '&var-app=' + item.app.code
+          window.open(url)
+        })
+      }
+    },
+    goPerformanceChart (item) {
+      if (this.monitorUrls && this.monitorUrls.performance) {
+        window.open(replaceChartUrl(this.monitorUrls.performance, item.topic.namespace.code,
+          item.topic.code, item.app.code))
+      } else {
+        apiRequest.get(this.urls.getUrl + '/pp', {}, {}).then((data) => {
+          if (data.data) {
+            let url = data.data
+            if (url.indexOf('?') < 0) {
+              url += '?'
+            } else if (!url.endsWith('?')) {
+              url += '&'
+            }
+            url = url + 'var-topic=' + getTopicCode(item.topic, item.topic.namespace) + '&var-app=' + item.app.code
+            window.open(url)
+          }
+        })
+      }
     },
     getMonitor (row, index) {
       let data = {

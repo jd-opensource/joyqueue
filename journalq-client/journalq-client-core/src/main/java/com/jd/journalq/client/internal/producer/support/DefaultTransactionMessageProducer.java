@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.client.internal.producer.support;
 
 import com.google.common.collect.Lists;
@@ -14,9 +27,9 @@ import com.jd.journalq.client.internal.producer.domain.SendPrepareResult;
 import com.jd.journalq.client.internal.producer.domain.SendResult;
 import com.jd.journalq.client.internal.producer.exception.ProducerException;
 import com.jd.journalq.client.internal.producer.helper.ProducerHelper;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.domain.BrokerNode;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,10 +60,11 @@ public class DefaultTransactionMessageProducer implements TransactionMessageProd
 
     private PartitionMetadata transactionPartition;
     private SendPrepareResult prepare;
-    private JMQCode commit;
-    private JMQCode rollback;
+    private JournalqCode commit;
+    private JournalqCode rollback;
 
-    public DefaultTransactionMessageProducer(String transactionId, long timeout, TimeUnit timeoutUnit, long sequence, ProducerConfig config, NameServerConfig nameServerConfig, ClusterManager clusterManager, MessageSender messageSender, MessageProducerInner messageProducerInner) {
+    public DefaultTransactionMessageProducer(String transactionId, long timeout, TimeUnit timeoutUnit, long sequence, ProducerConfig config,
+                                             NameServerConfig nameServerConfig, ClusterManager clusterManager, MessageSender messageSender, MessageProducerInner messageProducerInner) {
         Preconditions.checkArgument(config != null, "config not null");
         Preconditions.checkArgument(timeoutUnit != null, "timeoutUnit not null");
         Preconditions.checkArgument(nameServerConfig != null, "nameServer not null");
@@ -73,8 +87,8 @@ public class DefaultTransactionMessageProducer implements TransactionMessageProd
         checkPrepare();
         checkState();
 
-        JMQCode commit = messageSender.commit(transactionPartition.getLeader(), transactionPartition.getTopic(), config.getApp(), prepare.getTxId(), config.getTimeout());
-        if (!commit.equals(JMQCode.SUCCESS)) {
+        JournalqCode commit = messageSender.commit(transactionPartition.getLeader(), transactionPartition.getTopic(), config.getApp(), prepare.getTxId(), config.getTimeout());
+        if (!commit.equals(JournalqCode.SUCCESS)) {
             throw new ProducerException(commit.getMessage(), commit.getCode());
         }
         this.commit = commit;
@@ -85,8 +99,8 @@ public class DefaultTransactionMessageProducer implements TransactionMessageProd
         checkPrepare();
         checkState();
 
-        JMQCode rollback = messageSender.rollback(transactionPartition.getLeader(), transactionPartition.getTopic(), config.getApp(), prepare.getTxId(), config.getTimeout());
-        if (!rollback.equals(JMQCode.SUCCESS)) {
+        JournalqCode rollback = messageSender.rollback(transactionPartition.getLeader(), transactionPartition.getTopic(), config.getApp(), prepare.getTxId(), config.getTimeout());
+        if (!rollback.equals(JournalqCode.SUCCESS)) {
             throw new ProducerException(rollback.getMessage(), rollback.getCode());
         }
         this.rollback = rollback;
@@ -138,8 +152,10 @@ public class DefaultTransactionMessageProducer implements TransactionMessageProd
     }
 
     protected SendPrepareResult doPrepare(PartitionMetadata partition) {
-        SendPrepareResult sendPrepareResult = messageSender.prepare(partition.getLeader(), partition.getTopic(), config.getApp(), transactionId, sequence, timeoutUnit.toMillis(timeout), config.getTimeout());
-        if (!sendPrepareResult.getCode().equals(JMQCode.SUCCESS)) {
+        SendPrepareResult sendPrepareResult = messageSender.prepare(partition.getLeader(), partition.getTopic(), config.getApp(),
+                transactionId, sequence, timeoutUnit.toMillis(timeout), config.getTimeout());
+
+        if (!sendPrepareResult.getCode().equals(JournalqCode.SUCCESS)) {
             throw new ProducerException(sendPrepareResult.getCode().getMessage(), sendPrepareResult.getCode().getCode());
         }
         return sendPrepareResult;
@@ -147,13 +163,13 @@ public class DefaultTransactionMessageProducer implements TransactionMessageProd
 
     protected void checkPrepare() {
         if (prepare == null) {
-            throw new ProducerException("transaction is not beginning", JMQCode.FW_TRANSACTION_EXISTS.getCode());
+            throw new ProducerException("transaction is not beginning", JournalqCode.FW_TRANSACTION_EXISTS.getCode());
         }
     }
 
     protected void checkState() {
         if (commit != null || rollback != null) {
-            throw new ProducerException("transaction is not beginning", JMQCode.FW_TRANSACTION_EXISTS.getCode());
+            throw new ProducerException("transaction is not beginning", JournalqCode.FW_TRANSACTION_EXISTS.getCode());
         }
     }
 }

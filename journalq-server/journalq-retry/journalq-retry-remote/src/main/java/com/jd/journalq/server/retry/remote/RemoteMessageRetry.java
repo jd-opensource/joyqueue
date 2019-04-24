@@ -1,11 +1,24 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.server.retry.remote;
 
-import com.jd.journalq.exception.JMQCode;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqCode;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.network.command.CommandType;
 import com.jd.journalq.network.transport.Transport;
 import com.jd.journalq.network.transport.TransportClient;
-import com.jd.journalq.network.transport.codec.JMQHeader;
+import com.jd.journalq.network.transport.codec.JournalqHeader;
 import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.transport.command.Direction;
 import com.jd.journalq.server.retry.api.MessageRetry;
@@ -85,9 +98,9 @@ public class RemoteMessageRetry implements MessageRetry<Long> {
         logger.info("remote retry manager is stopped");
     }
 
-    protected void checkStarted() throws JMQException {
+    protected void checkStarted() throws JournalqException {
         if (!isStarted()) {
-            throw new JMQException(JMQCode.CN_SERVICE_NOT_AVAILABLE);
+            throw new JournalqException(JournalqCode.CN_SERVICE_NOT_AVAILABLE);
         }
     }
 
@@ -97,41 +110,41 @@ public class RemoteMessageRetry implements MessageRetry<Long> {
     }
 
     @Override
-    public void addRetry(List<RetryMessageModel> retryMessageModelList) throws JMQException {
+    public void addRetry(List<RetryMessageModel> retryMessageModelList) throws JournalqException {
         if (CollectionUtils.isEmpty(retryMessageModelList)) {
             return;
         }
         checkStarted();
 
         PutRetry putRetryPayload = new PutRetry(retryMessageModelList);
-        Command putRetryCommand = new Command(new JMQHeader(Direction.REQUEST, CommandType.PUT_RETRY), putRetryPayload);
+        Command putRetryCommand = new Command(new JournalqHeader(Direction.REQUEST, CommandType.PUT_RETRY), putRetryPayload);
         Command sync = sync(putRetryCommand);
-        if (sync.getHeader().getStatus() != JMQCode.SUCCESS.getCode()) {
-            throw new JMQException(JMQCode.RETRY_ADD, "");
+        if (sync.getHeader().getStatus() != JournalqCode.SUCCESS.getCode()) {
+            throw new JournalqException(JournalqCode.RETRY_ADD, "");
         }
     }
 
     @Override
-    public void retrySuccess(final String topic, final String app, final Long[] messageIds) throws JMQException {
+    public void retrySuccess(final String topic, final String app, final Long[] messageIds) throws JournalqException {
         checkStarted();
         remoteUpdateRetry(topic, app, messageIds, UpdateRetry.SUCCESS);
     }
 
     @Override
-    public void retryError(final String topic, final String app, final Long[] messageIds) throws JMQException {
+    public void retryError(final String topic, final String app, final Long[] messageIds) throws JournalqException {
         checkStarted();
         remoteUpdateRetry(topic, app, messageIds, UpdateRetry.FAILED);
     }
 
     @Override
-    public void retryExpire(final String topic, final String app, final Long[] messageIds) throws JMQException {
+    public void retryExpire(final String topic, final String app, final Long[] messageIds) throws JournalqException {
         checkStarted();
         remoteUpdateRetry(topic, app, messageIds, UpdateRetry.EXPIRED);
     }
 
     @Override
     public List<RetryMessageModel> getRetry(final String topic, final String app, short count, long startIndex) throws
-            JMQException {
+            JournalqException {
         checkStarted();
         checkSemaphore();
 
@@ -143,11 +156,11 @@ public class RemoteMessageRetry implements MessageRetry<Long> {
                 }
 
                 GetRetry payload = new GetRetry().topic(topic).app(app).count(count).startId(startIndex);
-                Command getRetryCommand = new Command(new JMQHeader(Direction.REQUEST, CommandType.GET_RETRY), payload);
+                Command getRetryCommand = new Command(new JournalqHeader(Direction.REQUEST, CommandType.GET_RETRY), payload);
 
                 Command ack = sync(getRetryCommand);
-                if (ack.getHeader().getStatus() != JMQCode.SUCCESS.getCode()) {
-                    throw new JMQException(JMQCode.RETRY_GET, "");
+                if (ack.getHeader().getStatus() != JournalqCode.SUCCESS.getCode()) {
+                    throw new JournalqException(JournalqCode.RETRY_GET, "");
                 }
 
 
@@ -160,7 +173,7 @@ public class RemoteMessageRetry implements MessageRetry<Long> {
                 }
             } catch (Exception e) {
                 logger.error("--getRetry error--" + topic + "--" + app, e);
-//                throw new JMQException(JMQCode.CN_REQUEST_ERROR, e); 远程重试失败，不抛异常，仅记录日志
+//                throw new JournalqException(JournalqCode.CN_REQUEST_ERROR, e); 远程重试失败，不抛异常，仅记录日志
             } finally {
                 if (semaphore != null) {
                     semaphore.release();
@@ -176,7 +189,7 @@ public class RemoteMessageRetry implements MessageRetry<Long> {
     }
 
     @Override
-    public int countRetry(final String topic, final String app) throws JMQException {
+    public int countRetry(final String topic, final String app) throws JournalqException {
         checkStarted();
 
         if (topic == null || topic.trim().isEmpty() || app == null || app.trim().isEmpty()) {
@@ -185,11 +198,11 @@ public class RemoteMessageRetry implements MessageRetry<Long> {
 
         GetRetryCount getRetryCountPayload = new GetRetryCount().topic(topic).app(app);
         Command getRetryCountCommand = new Command(
-                new JMQHeader(Direction.REQUEST, CommandType.GET_RETRY_COUNT), getRetryCountPayload);
+                new JournalqHeader(Direction.REQUEST, CommandType.GET_RETRY_COUNT), getRetryCountPayload);
         Command ack = sync(getRetryCountCommand);
 
-        if (ack.getHeader().getStatus() != JMQCode.SUCCESS.getCode()) {
-            throw new JMQException(JMQCode.RETRY_COUNT, "");
+        if (ack.getHeader().getStatus() != JournalqCode.SUCCESS.getCode()) {
+            throw new JournalqException(JournalqCode.RETRY_COUNT, "");
         }
 
         GetRetryCountAck payload = (GetRetryCountAck) ack.getPayload();
@@ -203,18 +216,18 @@ public class RemoteMessageRetry implements MessageRetry<Long> {
      * @param app      应用
      * @param messages 消息数组
      * @param type     重试类型
-     * @throws JMQException
+     * @throws JournalqException
      */
     protected void remoteUpdateRetry(final String topic, final String app, final Long[] messages,
-                                     final byte type) throws JMQException {
+                                     final byte type) throws JournalqException {
 
-        JMQHeader header = new JMQHeader(Direction.REQUEST, CommandType.UPDATE_RETRY);
+        JournalqHeader header = new JournalqHeader(Direction.REQUEST, CommandType.UPDATE_RETRY);
         UpdateRetry updateRetryPayload = new UpdateRetry().topic(topic).app(app).messages(messages).updateType(type);
         Command updateRetryCommand = new Command(header, updateRetryPayload);
 
         Command sync = sync(updateRetryCommand);
-        if (sync.getHeader().getStatus() != JMQCode.SUCCESS.getCode()) {
-            throw new JMQException(JMQCode.RETRY_UPDATE, "");
+        if (sync.getHeader().getStatus() != JournalqCode.SUCCESS.getCode()) {
+            throw new JournalqException(JournalqCode.RETRY_UPDATE, "");
         }
 
     }
@@ -225,9 +238,9 @@ public class RemoteMessageRetry implements MessageRetry<Long> {
      *
      * @param request
      * @return
-     * @throws JMQException
+     * @throws JournalqException
      */
-    protected Command sync(final Command request) throws JMQException {
+    protected Command sync(final Command request) throws JournalqException {
         Transport transport = transports.get();
         return transport.sync(request);
     }
@@ -340,9 +353,9 @@ public class RemoteMessageRetry implements MessageRetry<Long> {
          *
          * @return 远程连接通道
          */
-        public Transport get() throws JMQException {
+        public Transport get() throws JournalqException {
             if (transportList.size() == 0) {
-                throw new JMQException("Have no transport error.", JMQCode.FW_CONNECTION_NOT_EXISTS.getCode());
+                throw new JournalqException("Have no transport error.", JournalqCode.FW_CONNECTION_NOT_EXISTS.getCode());
             }
             if (balanceType == BalanceType.ROLL) {
                 // 轮询策略

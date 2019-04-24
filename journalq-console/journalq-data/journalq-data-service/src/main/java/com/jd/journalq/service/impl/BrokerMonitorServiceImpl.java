@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.service.impl;
 
 
@@ -8,31 +21,63 @@ import com.jd.journalq.async.RetrieveProvider;
 import com.jd.journalq.convert.CodeConverter;
 import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.exception.ServiceException;
-import com.jd.journalq.model.domain.*;
-import com.jd.journalq.monitor.*;
+import com.jd.journalq.manage.PartitionGroupMetric;
+import com.jd.journalq.manage.PartitionGroupPosition;
+import com.jd.journalq.manage.PartitionMetric;
+import com.jd.journalq.manage.PartitionPosition;
+import com.jd.journalq.model.domain.Broker;
+import com.jd.journalq.model.domain.BrokerClient;
+import com.jd.journalq.model.domain.BrokerMonitorRecord;
+import com.jd.journalq.model.domain.ConnectionMonitorInfoWithIp;
+import com.jd.journalq.model.domain.Subscribe;
+import com.jd.journalq.model.domain.SubscribeType;
+import com.jd.journalq.model.domain.TopicPartitionGroup;
+import com.jd.journalq.monitor.ArchiveMonitorInfo;
 import com.jd.journalq.monitor.Client;
+import com.jd.journalq.monitor.ConnectionMonitorDetailInfo;
+import com.jd.journalq.monitor.ConnectionMonitorInfo;
+import com.jd.journalq.monitor.ConsumerMonitorInfo;
+import com.jd.journalq.monitor.ConsumerPartitionGroupMonitorInfo;
+import com.jd.journalq.monitor.ConsumerPartitionMonitorInfo;
+import com.jd.journalq.monitor.DeQueueMonitorInfo;
+import com.jd.journalq.monitor.EnQueueMonitorInfo;
+import com.jd.journalq.monitor.PartitionGroupMonitorInfo;
+import com.jd.journalq.monitor.PendingMonitorInfo;
+import com.jd.journalq.monitor.ProducerMonitorInfo;
+import com.jd.journalq.monitor.ProducerPartitionGroupMonitorInfo;
+import com.jd.journalq.monitor.ProducerPartitionMonitorInfo;
+import com.jd.journalq.monitor.RestResponse;
+import com.jd.journalq.monitor.RetryMonitorInfo;
 import com.jd.journalq.other.HttpRestService;
 import com.jd.journalq.service.BrokerMonitorService;
+import com.jd.journalq.service.BrokerRestUrlMappingService;
 import com.jd.journalq.service.LeaderService;
 import com.jd.journalq.service.TopicPartitionGroupService;
-import com.jd.journalq.toolkit.lang.Preconditions;
-import com.jd.journalq.util.BrokerUrlTemplateMappingUtil;
-import com.jd.journalq.util.JSONParser;
+import com.google.common.base.Preconditions;
+import com.jd.journalq.util.HttpUtil;
 import com.jd.journalq.util.NullUtil;
 import com.jd.journalq.util.UrlEncoderUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import static com.jd.journalq.exception.ServiceException.INTERNAL_SERVER_ERROR;
 import static com.jd.journalq.model.domain.Consumer.CONSUMER_TYPE;
 import static com.jd.journalq.model.domain.Producer.PRODUCER_TYPE;
+import static com.jd.journalq.util.JSONParser.parse;
 
 @Service("brokerMonitorService")
 public class BrokerMonitorServiceImpl implements BrokerMonitorService {
@@ -50,8 +95,10 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
     @Autowired(required = false)
     private HttpRestService httpRestService;
 
+    @Autowired
+    private BrokerRestUrlMappingService urlMappingService;
     @Override
-    public List<BrokerMonitorRecord> findMonitorOnBroker(Subscribe subscribe,boolean require) {
+    public List<BrokerMonitorRecord> findMonitorOnBroker(Subscribe subscribe) {
         this.checkArgument(subscribe);
         List<BrokerMonitorRecord> monitorRecords=new ArrayList<>();
         List<Broker> brokers=new ArrayList<>();
@@ -70,11 +117,8 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
         },"appMonitor" ,"monitor on broker");
         Map<String/*request key*/, String/*response*/> resultMap= brokerCluster.get(resultFuture,TIMEOUT,TimeUnit.MILLISECONDS);
         if(resultMap.size()!=brokers.size()) {
-            logger.info("missing some of monitor on broker");
-            if(require) {
-                monitorRecords.add(fillIncompleteBrokerMonitor());
-                return monitorRecords;
-            }
+            logger.info("missing some of monitor on broker ,ignore!");
+            return monitorRecords;
         }
          BrokerMonitorRecord record;
          ProducerMonitorInfo producerMonitorInfo;
@@ -87,27 +131,29 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
             for(Broker b:brokers){
                 hostWithPort=b.getIp()+":"+b.getPort();
                 r= resultMap.get(hostWithPort);
-                if(!NullUtil.isEmpty(r)) {
-                    record = new BrokerMonitorRecord();
-                    record.setIp(hostWithPort);
-                    switch (subscribe.getType().value()) {
-                        case CONSUMER_TYPE:
-                            restConsumeMonitor = JSONParser.parse(r, RestResponse.class, ConsumerMonitorInfo.class, false);
-                            consumerMonitorInfo = restConsumeMonitor.getData();
-                            record.setConnections(consumerMonitorInfo.getConnections());
-                            record.setRetry(consumerMonitorInfo.getRetry());
-                            record.setDeQuence(consumerMonitorInfo.getDeQueue());
-                            record.setPending(consumerMonitorInfo.getPending());
-                            break;
-                        case PRODUCER_TYPE:
-                            restProducerMonitor = JSONParser.parse(r, RestResponse.class, ProducerMonitorInfo.class, false);
-                            producerMonitorInfo = restProducerMonitor.getData();
-                            record.setConnections(producerMonitorInfo.getConnections());
-                            record.setEnQuence(producerMonitorInfo.getEnQueue());
-                            break;
-                    }
-                    monitorRecords.add(record);
+                if(NullUtil.isEmpty(r)){
+                    logger.info(String.format("ignore %s monitor on broker %s ",JSON.toJSON(subscribe),b.getIp()));
+                    continue;
                 }
+                record= new BrokerMonitorRecord();
+                record.setIp(hostWithPort);
+                 switch (subscribe.getType().value()) {
+                     case CONSUMER_TYPE:
+                         restConsumeMonitor=parse(r,RestResponse.class, ConsumerMonitorInfo.class,false);
+                         consumerMonitorInfo = restConsumeMonitor.getData();
+                         record.setConnections(consumerMonitorInfo.getConnections());
+                         record.setRetry(consumerMonitorInfo.getRetry());
+                         record.setDeQuence(consumerMonitorInfo.getDeQueue());
+                         record.setPending( consumerMonitorInfo.getPending());
+                         break;
+                     case PRODUCER_TYPE:
+                         restProducerMonitor=parse(r,RestResponse.class, ProducerMonitorInfo.class,false);
+                         producerMonitorInfo = restProducerMonitor.getData();
+                         record.setConnections(producerMonitorInfo.getConnections());
+                         record.setEnQuence(producerMonitorInfo.getEnQueue());
+                         break;
+                 }
+                monitorRecords.add(record);
              }
          }catch (Exception e){
              logger.info("broker asyncQueryOnBroker occurs parse exception.", e);
@@ -119,12 +165,14 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
     @Override
     public BrokerMonitorRecord find(Subscribe subscribe, boolean active) {
         if(active){
-          List<BrokerMonitorRecord>  brokerMonitorRecords= findMonitorOnPartitionGroupsForTopicApp(subscribe,true); //
+          List<BrokerMonitorRecord>  brokerMonitorRecords= findMonitorOnPartitionGroupsForTopicApp(subscribe); //
           BrokerMonitorRecord brokerMonitorRecord=merge(subscribe,brokerMonitorRecords);  // not contain connection and retry info
           if(!NullUtil.isEmpty(brokerMonitorRecord)) {
-              BrokerMonitorRecord retryAndConnectionInfo = find(subscribe);                            // optimize
-              brokerMonitorRecord.setRetry(retryAndConnectionInfo.getRetry());                         // upset
-              brokerMonitorRecord.setConnections(retryAndConnectionInfo.getConnections());
+              BrokerMonitorRecord retryAndConnectionInfo = ((BrokerMonitorService)AopContext.currentProxy()).find(subscribe);// optimize
+              if(!NullUtil.isEmpty(retryAndConnectionInfo)) {
+                  brokerMonitorRecord.setRetry(retryAndConnectionInfo.getRetry());                         // upset
+                  brokerMonitorRecord.setConnections(retryAndConnectionInfo.getConnections());
+              }
           }
           return brokerMonitorRecord;
         }else{
@@ -139,7 +187,7 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
      */
     public BrokerMonitorRecord find(Subscribe subscribe){
         this.checkArgument(subscribe);
-        List<BrokerMonitorRecord> monitorRecords = findMonitorOnBroker(subscribe,true);
+        List<BrokerMonitorRecord> monitorRecords = findMonitorOnBroker(subscribe);
         return  merge(subscribe,monitorRecords);
     }
 
@@ -199,7 +247,7 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
         RestResponse<ConnectionMonitorDetailInfo> restConnectionMonitorDetail;
         try {
             for (Map.Entry<String,String> connectionsMonitor : resultMap.entrySet()) {
-                restConnectionMonitorDetail = JSONParser.parse(connectionsMonitor.getValue(),RestResponse.class ,ConnectionMonitorDetailInfo.class,false);
+                restConnectionMonitorDetail =parse(connectionsMonitor.getValue(),RestResponse.class ,ConnectionMonitorDetailInfo.class,false);
                 clients.addAll(convert(connectionsMonitor.getKey(),restConnectionMonitorDetail.getData().getClients()));
             }
         }catch (Exception e){
@@ -251,8 +299,10 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
         },"appPartitionMonitor" ,"partitions on broker");
         Map<String/*request key*/, String/*response*/> resultMap= brokerCluster.get(resultFuture,TIMEOUT,TimeUnit.MILLISECONDS);
         /*任一请求失败*/
-        if(resultMap.size()!=brokers.size()) {return monitorRecords=new ArrayList<>();}
-        BrokerMonitorRecord record;
+        if(resultMap.size()!=brokers.size()) {
+            logger.info("ignore some broker partitions");
+        }
+
         RestResponse<List<ConsumerPartitionMonitorInfo>> restConsumePartitionMonitor;
         RestResponse<List<ProducerPartitionMonitorInfo>> restProducePartitionMonitor;
         try {
@@ -261,14 +311,18 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
             for(Broker b:brokers){
                 hostWithPort=b.getIp()+":"+b.getPort();
                 r= resultMap.get(hostWithPort);
+                if(NullUtil.isEmpty(r)){
+                    logger.info(String.format("ignore %s partitions on broker %s ",JSON.toJSON(subscribe),b.getIp()));
+                    continue;
+                }
                 switch (subscribe.getType().value()) {
                     case CONSUMER_TYPE:
-                        restConsumePartitionMonitor= JSONParser.parse(r,RestResponse.class,ConsumerPartitionMonitorInfo.class,true);
+                        restConsumePartitionMonitor=parse(r,RestResponse.class,ConsumerPartitionMonitorInfo.class,true);
                         List<ConsumerPartitionMonitorInfo> consumerPartitionMonitors= restConsumePartitionMonitor.getData();
                         monitorRecords=transferConsumerPartition(consumerPartitionMonitors,hostWithPort);
                         break;
                     case PRODUCER_TYPE:
-                        restProducePartitionMonitor= JSONParser.parse(r,RestResponse.class,ProducerPartitionMonitorInfo.class,true);
+                        restProducePartitionMonitor=parse(r,RestResponse.class,ProducerPartitionMonitorInfo.class,true);
                         List<ProducerPartitionMonitorInfo> producerPartitionMonitors= restProducePartitionMonitor.getData();
                         monitorRecords=transferProducerPartition(producerPartitionMonitors,hostWithPort);
                         break;
@@ -376,7 +430,7 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
     }
 
     @Override
-    public List<BrokerMonitorRecord> findMonitorOnPartitionGroupsForTopicApp(Subscribe subscribe,boolean require) {
+    public List<BrokerMonitorRecord> findMonitorOnPartitionGroupsForTopicApp(Subscribe subscribe) {
         List<BrokerMonitorRecord> monitorRecords=new ArrayList<>();
         List<Map.Entry<PartitionGroup,Broker>> partitionGroupBroker=new ArrayList<>();
         Future<Map<String,String >> resultFuture= brokerCluster.asyncQueryOnPartitionGroup(subscribe, new RetrieveProvider<Subscribe>() {
@@ -395,12 +449,7 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
         Map<String/*request key*/, String/*response*/> resultMap= brokerCluster.get(resultFuture,TIMEOUT,TimeUnit.MILLISECONDS);
         /*任一请求失败*/
         if(resultMap.size()!=partitionGroupBroker.size()) {
-            logger.info("missing some of partition group on broker !");
-            if(require){
-                //require  complete  partition group  monitor data, -1 mean imcomplete
-                monitorRecords.add(fillIncompleteBrokerMonitor());
-                return monitorRecords;
-            }
+            logger.info("missing some of partition group on broker ,ignore!");
             //return monitorRecords;
         }
         RestResponse<ConsumerPartitionGroupMonitorInfo> restConsumePartitionGroupMonitor;
@@ -416,27 +465,29 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
                 partitionGroup=String.valueOf(partitionGroupBrokerEntry.getKey().getGroup());
                 broker=partitionGroupBrokerEntry.getValue();
                 partitionGroupResult=resultMap.get(partitionGroup);
-                if(!NullUtil.isEmpty(partitionGroupResult)) {
-                    monitorRecord = new BrokerMonitorRecord();
-                    monitorRecord.setIp(broker.getIp() + ":" + broker.getPort());
-                    switch (subscribe.getType().value()) {
-                        case CONSUMER_TYPE:
-                            restConsumePartitionGroupMonitor = JSONParser.parse(partitionGroupResult, RestResponse.class, ConsumerPartitionGroupMonitorInfo.class, false);
-                            consumePartitionGroupMonitorInfo = restConsumePartitionGroupMonitor.getData();
-                            // for detail use
-                            monitorRecord.setPartitionGroup(consumePartitionGroupMonitorInfo.getPartitionGroupId());
-                            monitorRecord.setDeQuence(consumePartitionGroupMonitorInfo.getDeQueue());
-                            monitorRecord.setPending(consumePartitionGroupMonitorInfo.getPending());
-                            break;
-                        case PRODUCER_TYPE:
-                            restProducerPartitionGroupMonitor = JSONParser.parse(partitionGroupResult, RestResponse.class, ProducerPartitionGroupMonitorInfo.class, false);
-                            producerPartitionGroupMonitorInfo = restProducerPartitionGroupMonitor.getData();
-                            monitorRecord.setPartitionGroup(producerPartitionGroupMonitorInfo.getPartitionGroupId());
-                            monitorRecord.setEnQuence(producerPartitionGroupMonitorInfo.getEnQueue());
-                            break;
-                    }
-                    monitorRecords.add(monitorRecord);
+                if(NullUtil.isEmpty(partitionGroupResult)){
+                    logger.info(String.format("ignore %s partition group %s",JSON.toJSON(subscribe),partitionGroup));
+                    continue;
                 }
+                monitorRecord = new BrokerMonitorRecord();
+                monitorRecord.setIp(broker.getIp() + ":" + broker.getPort());
+                switch (subscribe.getType().value()) {
+                    case CONSUMER_TYPE:
+                        restConsumePartitionGroupMonitor = parse(partitionGroupResult, RestResponse.class, ConsumerPartitionGroupMonitorInfo.class, false);
+                        consumePartitionGroupMonitorInfo = restConsumePartitionGroupMonitor.getData();
+                    // for detail use
+                        monitorRecord.setPartitionGroup(consumePartitionGroupMonitorInfo.getPartitionGroupId());
+                        monitorRecord.setDeQuence(consumePartitionGroupMonitorInfo.getDeQueue());
+                        monitorRecord.setPending(consumePartitionGroupMonitorInfo.getPending());
+                    break;
+                    case PRODUCER_TYPE:
+                        restProducerPartitionGroupMonitor = parse(partitionGroupResult, RestResponse.class,ProducerPartitionGroupMonitorInfo.class, false);
+                        producerPartitionGroupMonitorInfo = restProducerPartitionGroupMonitor.getData();
+                        monitorRecord.setPartitionGroup(producerPartitionGroupMonitorInfo.getPartitionGroupId());
+                        monitorRecord.setEnQuence(producerPartitionGroupMonitorInfo.getEnQueue());
+                        break;
+                }
+                monitorRecords.add(monitorRecord);
             }
         }catch (Exception e){
             logger.info("broker asyncQueryOnBroker occurs parse exception.", e);
@@ -446,7 +497,7 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
     }
 
     /**
-     * jmq client producer may not have enquence
+     * journalq client producer may not have enquence
      *
      **/
     @Override
@@ -480,7 +531,11 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
             for(Broker b:brokers){
                 ipWithPort=b.getIp()+":"+b.getPort();
                 r= resultMap.get(ipWithPort);
-                restPartitionGroupsMonitor= JSONParser.parse(r,RestResponse.class,PartitionGroupMonitorInfo.class,true);
+                if(NullUtil.isEmpty(r)){
+                    logger.info(String.format("ignore %s partition group on broker %s",JSON.toJSON(subscribe),b.getIp()));
+                    continue;
+                }
+                restPartitionGroupsMonitor=parse(r,RestResponse.class,PartitionGroupMonitorInfo.class,true);
                 List<PartitionGroupMonitorInfo> producerPartitionGroupMonitors= restPartitionGroupsMonitor.getData();
                 for(PartitionGroupMonitorInfo p:producerPartitionGroupMonitors) {
                             record= new BrokerMonitorRecord();
@@ -527,7 +582,11 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
             for(Broker b:brokers){
                 hostWithPort=b.getIp()+":"+b.getPort();
                 r= resultMap.get(hostWithPort);
-                restAppConnectionMonitor = JSONParser.parse(r, RestResponse.class, ConnectionMonitorInfo.class,false);
+                if(NullUtil.isEmpty(r)){
+                    logger.info(String.format("ignore %s broker %s connection",JSON.toJSON(subscribe),b.getIp()));
+                     continue;
+                }
+                restAppConnectionMonitor = parse(r, RestResponse.class, ConnectionMonitorInfo.class,false);
                     con=restAppConnectionMonitor.getData();
                     connectionMonitorInfoWithIp=new ConnectionMonitorInfoWithIp();
                     connectionMonitorInfoWithIp.setIp(hostWithPort);
@@ -544,19 +603,74 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
         return connectionRecords;
     }
 
+
+    public List<PartitionGroupPosition> findPartitionGroupMetric(String namespace, String topic, Integer groupNo){
+        TopicPartitionGroup topicPartitionGroup = partitionGroupService.findByTopicAndGroup(namespace,topic,groupNo);
+        String path = "partitiongroupIndex";
+        Future<Map<String,String >> resultFuture = null;
+        try {
+            resultFuture = brokerCluster.asyncQueryAllBroker(namespace,topic,groupNo,path,path);
+        } catch (Exception e) {
+            logger.error("asynQuery,error",e);
+        }
+        Map<String/*request key*/, String/*response*/> resultMap= brokerCluster.get(resultFuture,TIMEOUT,TimeUnit.MILLISECONDS);
+        Map<String,PartitionGroupMetric> map = new HashMap();
+        resultMap.forEach( (k,v) -> {
+            RestResponse<PartitionGroupMetric>  restResponse = parse(v,RestResponse.class, PartitionGroupMetric.class,false);
+            map.put(k,restResponse.getData());
+        });
+        return getPartitionGroupInterval(topicPartitionGroup.getLeader(),map);
+    }
+
+
+
     @Override
-    public ArchiveMonitorInfo findArchiveState(String ip, int  port) {
+    public ArchiveMonitorInfo findArchiveState(String ip,int  port) {
         RestResponse<ArchiveMonitorInfo> archiveMonitorRest;
         try{
-            String url = String.format(BrokerUrlTemplateMappingUtil.getFullUrlTemplate("archiveMonitor"), ip, String.valueOf(port));
-//            String body=HttpUtil.get(monitorUrl);
-//            archiveMonitorRest=JSONParser.parse(body,RestResponse.class,ArchiveMonitorInfo.class,false );
-//            return archiveMonitorRest.getData();
-            return new ArchiveMonitorInfo();
+            String url = String.format(urlMappingService.urlTemplate("archiveMonitor"), ip, String.valueOf(port));
+            String body= HttpUtil.get(url);
+            archiveMonitorRest= parse(body,RestResponse.class,ArchiveMonitorInfo.class,false );
+            return archiveMonitorRest.getData();
         }catch (Exception e){
             logger.error("archive monitor",e);
             throw new ServiceException(INTERNAL_SERVER_ERROR, e.getMessage());
         }
+    }
+
+    //计算位移间隔
+    private List<PartitionGroupPosition> getPartitionGroupInterval(Integer masterBroker,Map<String,PartitionGroupMetric> partitionGroupMetricMap){
+        PartitionGroupMetric masterMetric=partitionGroupMetricMap.get(String.valueOf(masterBroker));
+        List<PartitionGroupPosition> positionList = new ArrayList<>();
+        partitionGroupMetricMap.forEach((k,v) ->{
+            PartitionGroupPosition partitionGroupPosition = positionConvert(masterMetric,v);
+            if (String.valueOf(masterBroker).equals(k)) {
+                partitionGroupPosition.setLeader(true);
+            }
+            partitionGroupPosition.setBrokerId(k);
+            positionList.add(partitionGroupPosition);
+        });
+        return positionList;
+    }
+
+    //格式转换并计算位移差
+    private PartitionGroupPosition positionConvert(PartitionGroupMetric master,PartitionGroupMetric slave) {
+        PartitionGroupPosition partitionGroupPosition = new PartitionGroupPosition();
+        partitionGroupPosition.setRightPosition(slave.getRightPosition());
+        partitionGroupPosition.setPartitionGroup(slave.getPartitionGroup());
+        partitionGroupPosition.setRightPosition(master.getRightPosition()-slave.getRightPosition());
+        List<PartitionPosition> partitionPositions = new ArrayList<>();
+        for(int i=0;i<master.getPartitionMetrics().length;i++ ){
+            PartitionMetric partitionMetric1 = master.getPartitionMetrics()[i];
+            PartitionMetric partitionMetric2 = slave.getPartitionMetrics()[i];
+            PartitionPosition partitionPosition = new PartitionPosition();
+            partitionPosition.setPartition(partitionMetric1.getPartition());
+            partitionPosition.setRightPosition(partitionMetric2.getRightIndex());
+            partitionPosition.setRightPositionInterval(partitionMetric1.getRightIndex()-partitionMetric2.getRightIndex());
+            partitionPositions.add(partitionPosition);
+        }
+        partitionGroupPosition.setPartitionPositionList(partitionPositions);
+        return partitionGroupPosition;
     }
 
     /**
@@ -564,7 +678,7 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
      * add @param from to @param to
      *
      */
-    public RetryMonitorInfo add(RetryMonitorInfo to, RetryMonitorInfo from){
+    public RetryMonitorInfo add(RetryMonitorInfo to,RetryMonitorInfo from){
         if(!NullUtil.isEmpty(to)&&!NullUtil.isEmpty(from)) {
             to.setSuccess(to.getSuccess() + from.getSuccess());
             to.setCount(to.getCount() + from.getCount());
@@ -577,7 +691,7 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
     }
 
 
-    public PendingMonitorInfo add(PendingMonitorInfo to, PendingMonitorInfo from){
+    public PendingMonitorInfo add(PendingMonitorInfo to,PendingMonitorInfo from){
         if(!NullUtil.isEmpty(to)&&!NullUtil.isEmpty(from)) {
             to.setCount(to.getCount()+from.getCount());
         }else{

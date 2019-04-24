@@ -1,26 +1,47 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.broker.store;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.config.BrokerStoreConfig;
 import com.jd.journalq.broker.consumer.position.PositionManager;
 import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.domain.TopicConfig;
-import com.jd.journalq.domain.TopicName;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.store.StoreService;
 import com.jd.journalq.toolkit.concurrent.NamedThreadFactory;
 import com.jd.journalq.toolkit.config.PropertySupplier;
-import com.jd.journalq.toolkit.lang.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
+import com.jd.journalq.toolkit.time.SystemClock;
 import com.jd.laf.extension.ExtensionManager;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author majun8
@@ -34,7 +55,7 @@ public class StoreCleanManager extends Service {
     private StoreService storeService;
     private ClusterManager clusterManager;
     private PositionManager positionManager;
-    private List<StoreCleaningStrategy> storeCleaningStrategies;
+    private Map<String, StoreCleaningStrategy> cleaningStrategyMap;
     private final ScheduledExecutorService scheduledExecutorService;
     private ScheduledFuture cleanFuture;
 
@@ -54,10 +75,12 @@ public class StoreCleanManager extends Service {
         Preconditions.checkArgument(storeService != null, "store service can not be null");
         Preconditions.checkArgument(positionManager != null, "position manager can not be null");
 
-        storeCleaningStrategies = initStoreCleaningStrategyList();
-        Preconditions.checkArgument(storeCleaningStrategies.size() != 0, "cleaning strategy can not be null");
+        List<StoreCleaningStrategy> storeCleaningStrategies = initStoreCleaningStrategyList();
+        Preconditions.checkArgument(storeCleaningStrategies.size() != 0, "load cleaning strategy list can not be null");
+        cleaningStrategyMap = new HashMap<>(storeCleaningStrategies.size());
         for (StoreCleaningStrategy cleaningStrategy : storeCleaningStrategies) {
             cleaningStrategy.setSupplier(propertySupplier);
+            cleaningStrategyMap.put(cleaningStrategy.getClass().getSimpleName(), cleaningStrategy);
         }
     }
 
@@ -80,9 +103,9 @@ public class StoreCleanManager extends Service {
         try {
             long stopTimeout = 5000L;
             if (cleanFuture != null) {
-                long t0 = System.currentTimeMillis();
+                long t0 = SystemClock.now();
                 while (!cleanFuture.isDone()) {
-                    if (System.currentTimeMillis() - t0 > stopTimeout) {
+                    if (SystemClock.now() - t0 > stopTimeout) {
                         throw new TimeoutException("Wait for async store clean job timeout!");
                     }
                     cleanFuture.cancel(true);
@@ -94,12 +117,12 @@ public class StoreCleanManager extends Service {
                 }
             }
         } catch (Throwable t) {
-            t.printStackTrace();
+            LOG.error(t.getMessage(), t);
         }
     }
 
     private void clean() {
-        Map<TopicConfig, List<TopicPartitionAckIndex>> topicConfigListMap = new HashMap<>();
+        LOG.info("start scheduled StoreCleaningStrategy task use class: <{}>!!!", brokerStoreConfig.getCleanStrategyClass());
         List<TopicConfig> topicConfigs = clusterManager.getTopics();
         if (topicConfigs != null && topicConfigs.size() > 0) {
             topicConfigs.forEach(
@@ -111,7 +134,7 @@ public class StoreCleanManager extends Service {
                                         Set<Short> partitions = partitionGroup.getPartitions();
                                         if (CollectionUtils.isNotEmpty(partitions)) {
                                             List<String> appList = clusterManager.getAppByTopic(topicConfig.getName());
-                                            List<TopicPartitionAckIndex> ackIndices = new ArrayList<>(partitions.size());
+                                            Map<Short, Long> partitionAckMap = new HashMap<>(partitions.size());
                                             partitions.forEach(
                                                     partition -> {
                                                         long minAckIndex = Long.MAX_VALUE;
@@ -119,88 +142,34 @@ public class StoreCleanManager extends Service {
                                                             for (String app : appList) {
                                                                 try {
                                                                     minAckIndex = Math.min(minAckIndex, positionManager.getLastMsgAckIndex(topicConfig.getName(), app, partition));
-                                                                } catch (JMQException e) {
-                                                                    e.printStackTrace();
+                                                                } catch (JournalqException e) {
+                                                                    //minAckIndex = Long.MAX_VALUE;
+                                                                    LOG.error("Error to get last topic & app offset, topic <{}>, app <{}>, partitionGroup <{}>, partition <{}>, error: <{}>",
+                                                                            topicConfig.getName(), app, partitionGroup.getGroup(), partition, e);
                                                                 }
                                                             }
                                                         }
-                                                        ackIndices.add(new TopicPartitionAckIndex(topicConfig.getName(), partition, minAckIndex));
+                                                        partitionAckMap.put(partition, minAckIndex);
                                                     }
                                             );
-                                            topicConfigListMap.put(topicConfig, ackIndices);
+                                            StoreCleaningStrategy cleaningStrategy = null;
+                                            try {
+                                                cleaningStrategy = cleaningStrategyMap.get(brokerStoreConfig.getCleanStrategyClass());
+                                                if (cleaningStrategy != null) {
+                                                    LOG.info("Begin store clean topic: <{}>, partition group: <{}>, partition ack map: <{}>",
+                                                            topicConfig.getName().getFullName(), partitionGroup.getGroup(), partitionAckMap);
+                                                    cleaningStrategy.deleteIfNeeded(storeService.getStore(topicConfig.getName().getFullName(), partitionGroup.getGroup()), partitionAckMap);
+                                                }
+                                            } catch (IOException e) {
+                                                LOG.error("Error to clean store for topic <{}>, partition group <{}>, delete partitions index <{}> on clean class <{}>, exception: <{}>",
+                                                        topicConfig, partitionGroup.getGroup(), partitionAckMap, cleaningStrategy, e);
+                                            }
                                         }
                                     }
                             );
                         }
                     }
             );
-        }
-
-        // Partition PartitionGroup
-
-        if (!topicConfigListMap.isEmpty()) {
-            topicConfigListMap.forEach(
-                    (topicConfig, ackIndices) -> {
-                        long minPartitionAckIndex = Long.MAX_VALUE;
-                        for (TopicPartitionAckIndex partitionAckIndex : ackIndices) {
-                            minPartitionAckIndex = Math.min(minPartitionAckIndex, partitionAckIndex.getMinAckIndex());
-                        }
-                        try {
-                            for (StoreCleaningStrategy cleaningStrategy : storeCleaningStrategies) {
-                                cleaningStrategy.deleteIfNeeded(storeService, topicConfig.getName(), minPartitionAckIndex);
-                            }
-                            Thread.sleep(brokerStoreConfig.getStorePgCleanIntervalTime());
-                        } catch (IOException | InterruptedException e) {
-                            LOG.error("Delete message storage error: <{}>, <{}>", ackIndices, e);
-                            e.printStackTrace();
-                        }
-                    }
-            );
-        }
-    }
-
-    public class TopicPartitionAckIndex {
-        private TopicName topicName;
-        private Short partition;
-        private long minAckIndex;
-
-        public TopicPartitionAckIndex(TopicName topicName, Short partition, long minAckIndex) {
-            this.topicName = topicName;
-            this.partition = partition;
-            this.minAckIndex = minAckIndex;
-        }
-
-        public TopicName getTopicName() {
-            return topicName;
-        }
-
-        public void setTopicName(TopicName topicName) {
-            this.topicName = topicName;
-        }
-
-        public Short getPartition() {
-            return partition;
-        }
-
-        public void setPartition(Short partition) {
-            this.partition = partition;
-        }
-
-        public long getMinAckIndex() {
-            return minAckIndex;
-        }
-
-        public void setMinAckIndex(long minAckIndex) {
-            this.minAckIndex = minAckIndex;
-        }
-
-        @Override
-        public String toString() {
-            return "TopicPartitionAckIndex{" +
-                    "topicName=" + topicName +
-                    ", partition=" + partition +
-                    ", minAckIndex=" + minAckIndex +
-                    '}';
         }
     }
 }

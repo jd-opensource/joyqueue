@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.jd.journalq.exception.ServiceException;
 import com.jd.journalq.model.domain.Application;
 import com.jd.journalq.model.domain.ApplicationUser;
+import com.jd.journalq.model.domain.BaseModel;
 import com.jd.journalq.model.domain.Identity;
 import com.jd.journalq.model.domain.User;
 import com.jd.journalq.model.domain.User.UserStatus;
@@ -20,7 +21,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import static com.jd.journalq.exception.ServiceException.INTERNAL_SERVER_ERROR;
 
@@ -60,13 +68,21 @@ public class SyncServiceImpl implements SyncService {
         if (applicationSupplier == null) {
             return null;
         }
-        Application oldapplication = applicationService.findByCode(application.getCode());
-        if (oldapplication != null) {
-            throw new DuplicateKeyException(String.format("application %s exist",application.getCode()));
+
+        Application oldApp = applicationService.findByCode(application.getCode());
+        if (oldApp != null && oldApp.getStatus() != -1) {
+            if(oldApp.getSource() == Application.JMQ2_SOURCE){
+                throw new DuplicateKeyException(String.format("application %s has synced!",application.getCode()));
+            }else{
+                throw new Exception(String.format("[%s] app both exist in %s and %s!",
+                        application.getCode(),
+                        Application.SourceType.valueOf(oldApp.getSource()),
+                        Application.SourceType.valueOf(application.getSource())));
+            }
         }
 
-        ApplicationInfo info = null;
-        if (application.getSource() == 0) {
+        ApplicationInfo info;
+        if (application.getSource() == Application.OTHER_SOURCE) {
             info = new ApplicationInfo();
             //这个值为空
             application.setAliasCode(null);
@@ -75,7 +91,8 @@ public class SyncServiceImpl implements SyncService {
             info.setAliasCode(application.getCode());
             info.setSystem(application.getCode());
             info.setSource(Application.OTHER_SOURCE);
-            if (!NullUtil.isEmpty(application.getOwner())&&StringUtils.isNotEmpty(application.getOwner().getCode())) {
+            info.setDescription(application.getDescription());
+            if (!NullUtil.isEmpty(application.getOwner()) && StringUtils.isNotEmpty(application.getOwner().getCode())) {
                 info.setOwner(new UserInfo(application.getOwner().getCode()));
             } else {
                 info.setOwner(new UserInfo(application.getErp()));
@@ -83,6 +100,26 @@ public class SyncServiceImpl implements SyncService {
             UserInfo userInfo = new UserInfo();
             userInfo.setCode(application.getErp());
             info.setMembers(Arrays.asList(userInfo));
+        } else if(application.getSource() == Application.JMQ2_SOURCE){
+            info = new ApplicationInfo();
+            //这个值为空
+            application.setAliasCode(null);
+            info.setCode(application.getCode());
+            info.setName(application.getCode());
+            info.setAliasCode(application.getCode());
+            info.setSystem(application.getCode());
+            info.setSource(Application.JMQ2_SOURCE);
+            info.setDescription(application.getDescription());
+            if (!NullUtil.isEmpty(application.getOwner()) && StringUtils.isNotEmpty(application.getOwner().getCode())) {
+                info.setOwner(new UserInfo(application.getOwner().getCode()));
+            } else {
+                info.setOwner(new UserInfo(application.getErp()));
+            }
+            List<UserInfo> members = new LinkedList<>();
+            for (String member : application.getMembers()) {
+                members.add(new UserInfo(member));
+            }
+            info.setMembers(members);
         } else {
             info = applicationSupplier.findByCode(application.getAliasCode(), application.getSource());
             logger.info("sync info:{}", JSON.toJSONString(info));
@@ -113,7 +150,6 @@ public class SyncServiceImpl implements SyncService {
             }
             info.setMembers(members);
         }
-
         return info;
     }
 
@@ -156,6 +192,8 @@ public class SyncServiceImpl implements SyncService {
         target.setSource(info.getSource());
         target.setSystem(info.getSystem());
         target.setSign(sign);
+        target.setDescription(info.getDescription());
+        target.setStatus(BaseModel.Status.ENABLE.value());
         //保存负责人和成员
         UserInfo owner = info.getOwner();
         if (owner != null) {
@@ -238,6 +276,7 @@ public class SyncServiceImpl implements SyncService {
             userService.update(user);
         } else {
             user = info.toUser();
+            user.setStatus(User.ENABLED);
             userService.add(user);
         }
         return user;
@@ -325,7 +364,7 @@ public class SyncServiceImpl implements SyncService {
         //检查用户
         if (info.getMembers() != null) {
             for (UserInfo member : info.getMembers()) {
-                if (member != null) {
+                if (member != null && member.hashCode() != info.getOwner().hashCode()) {
                     addAppUser(member, application);
                 }
             }

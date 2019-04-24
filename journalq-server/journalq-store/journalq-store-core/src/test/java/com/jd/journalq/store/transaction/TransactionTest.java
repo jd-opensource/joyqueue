@@ -1,6 +1,19 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.store.transaction;
 
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.store.WriteResult;
 import com.jd.journalq.store.file.PositioningStore;
 import com.jd.journalq.store.utils.BaseDirUtils;
@@ -27,11 +40,12 @@ import java.util.concurrent.Future;
 public class TransactionTest {
     private static final Logger logger = LoggerFactory.getLogger(TransactionTest.class);
     private File base = null;
+
     @Test
     public void transactionTest() throws Exception {
         int count = 1024;
         PositioningStore.Config config = new PositioningStore.Config();
-        PreloadBufferPool bufferPool = new PreloadBufferPool( 100);
+        PreloadBufferPool bufferPool = new PreloadBufferPool();
 
         TransactionStoreManager transactionStoreManager = new TransactionStoreManager(base, config, bufferPool);
         int tId = transactionStoreManager.next();
@@ -39,7 +53,7 @@ public class TransactionTest {
         List<ByteBuffer> messages = MessageTestUtils.createMessages(bodyList);
         Future<WriteResult> future = transactionStoreManager.asyncWrite(tId, messages.stream().map(ByteBuffer::slice).toArray(ByteBuffer[]::new));
         WriteResult writeResult = future.get();
-        Assert.assertEquals(JMQCode.SUCCESS, writeResult.getCode());
+        Assert.assertEquals(JournalqCode.SUCCESS, writeResult.getCode());
 
         Iterator<ByteBuffer> iterator = transactionStoreManager.readIterator(tId);
         int i = 0;
@@ -60,6 +74,7 @@ public class TransactionTest {
 
         base = null;
     }
+
     @Before
     public void prepareBaseDir() throws IOException {
 

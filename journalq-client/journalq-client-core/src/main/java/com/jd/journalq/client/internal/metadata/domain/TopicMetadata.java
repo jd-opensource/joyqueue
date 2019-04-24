@@ -1,9 +1,22 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.client.internal.metadata.domain;
 
 import com.jd.journalq.domain.Consumer;
 import com.jd.journalq.domain.Producer;
 import com.jd.journalq.domain.Topic;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.domain.BrokerNode;
 
 import java.io.Serializable;
@@ -22,7 +35,7 @@ public class TopicMetadata implements Serializable {
     private Producer.ProducerPolicy producerPolicy;
     private Consumer.ConsumerPolicy consumerPolicy;
     private Topic.Type type;
-    private JMQCode code;
+    private JournalqCode code;
 
     private List<PartitionGroupMetadata> partitionGroups;
     private List<PartitionMetadata> partitions;
@@ -43,13 +56,14 @@ public class TopicMetadata implements Serializable {
 
     }
 
-    public TopicMetadata(JMQCode code) {
+    public TopicMetadata(JournalqCode code) {
         this.code = code;
     }
 
     public TopicMetadata(String topic, Producer.ProducerPolicy producerPolicy, Consumer.ConsumerPolicy consumerPolicy, Topic.Type type, List<PartitionGroupMetadata> partitionGroups,
                          List<PartitionMetadata> partitions, Map<Short, PartitionMetadata> partitionMap, Map<Integer, PartitionGroupMetadata> partitionGroupMap, List<BrokerNode> brokers,
-                         List<BrokerNode> nearbyBrokers, Map<Integer, BrokerNode> brokerMap, Map<Integer, List<PartitionMetadata>> brokerPartitions, Map<Integer, List<PartitionGroupMetadata>> brokerPartitionGroups, JMQCode code) {
+                         List<BrokerNode> nearbyBrokers, Map<Integer, BrokerNode> brokerMap, Map<Integer, List<PartitionMetadata>> brokerPartitions,
+                         Map<Integer, List<PartitionGroupMetadata>> brokerPartitionGroups, JournalqCode code) {
         this.topic = topic;
         this.producerPolicy = producerPolicy;
         this.consumerPolicy = consumerPolicy;
@@ -76,7 +90,8 @@ public class TopicMetadata implements Serializable {
         Consumer.ConsumerPolicy newConsumerPolicy = null;
 
         if (producerPolicy != null) {
-            newProducerPolicy = new Producer.ProducerPolicy(producerPolicy.getNearby(), producerPolicy.isSingle(), producerPolicy.getArchive(), producerPolicy.getWeight(), producerPolicy.getBlackList(), producerPolicy.getTimeOut());
+            newProducerPolicy = new Producer.ProducerPolicy(producerPolicy.getNearby(), producerPolicy.isSingle(), producerPolicy.getArchive(),
+                    producerPolicy.getWeight(), producerPolicy.getBlackList(), producerPolicy.getTimeOut());
         }
 
         if (consumerPolicy != null) {
@@ -142,7 +157,7 @@ public class TopicMetadata implements Serializable {
         return partitionMap.get(partition);
     }
 
-    public JMQCode getCode() {
+    public JournalqCode getCode() {
         return code;
     }
 

@@ -4,10 +4,10 @@
               @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange" @on-set-offset="showResetOffset"/>
     <label >共：{{page.total}} 条记录</label>
     <grid-row type="flex" justify="end" >
-      <grid-col span="4" >
+      <grid-col span="4">
         <d-button type="primary" v-if="$store.getters.isAdmin" @click="showResetOffset(undefined)" class="left mr10">按时间重置</d-button>
       </grid-col>
-      <grid-col span="4" >
+      <grid-col span="4">
         <d-button type="primary" v-if="$store.getters.isAdmin" @click="setBound('MIN')" class="left mr10">全量最小</d-button>
       </grid-col>
       <grid-col span="4" offset="2">
@@ -33,13 +33,13 @@
           </d-date-picker>
         </d-form-item>
         <d-form-item label="最小值："  v-if="partitionInfo.isPartition">
-          <d-input   v-model.number="partitionInfo.partition.leftIndex" style="width: 60%" disabled/>
+          <d-input v-model.number="partitionInfo.partition.leftIndex" style="width: 60%" disabled/>
         </d-form-item>
         <d-form-item label="最大值："  v-if="partitionInfo.isPartition">
-          <d-input   v-model.number="partitionInfo.partition.rightIndex" style="width: 60%" disabled/>
+          <d-input v-model.number="partitionInfo.partition.rightIndex" style="width: 60%" disabled/>
         </d-form-item>
         <d-form-item label="重置位置："  v-if="partitionInfo.isPartition" >
-          <d-input   v-model.number="partitionInfo.offset" style="width: 60%"/>
+          <d-input v-model.number="partitionInfo.offset" style="width: 60%"/>
         </d-form-item>
       </d-form>
     </my-dialog>
@@ -52,6 +52,8 @@ import apiRequest from '../../utils/apiRequest.js'
 import crud from '../../mixins/crud.js'
 import myDialog from '../../components/common/myDialog.vue'
 import {getTopicCode, getAppCode} from '../../utils/common.js'
+import {timeStampToString} from '../../utils/dateTimeUtils'
+
 export default {
   name: 'offset',
   components: {myDialog, MyTable},
@@ -120,7 +122,22 @@ export default {
           {
             title: '最大值',
             key: 'rightIndex'
-          }, {
+          },
+          {
+            title: '最后拉取时间',
+            key: 'lastPullTime',
+            formatter (item) {
+              return timeStampToString(item.lastPullTime)
+            }
+          },
+          {
+            title: '最后应答时间',
+            key: 'lastAckTime',
+            formatter (item) {
+              return timeStampToString(item.lastAckTime)
+            }
+          },
+          {
             title: '应答',
             key: 'offset'
           }
@@ -163,23 +180,27 @@ export default {
       this[dialog].visible = false
     },
     setBound (location) {
-      let data = this.getSubscribe()
-      apiRequest.postBase(this.urls.boundReset + location, {}, data, false).then((data) => {
-        data.data = data.data
-        if (data.data === 'success') {
-          this.$Message.success('重置成功')
-          this.getList()
-        } else {
-          this.$Message.error('重置失败')
-        }
+      let _this = this
+      this.$Dialog.confirm({
+        title: '提示',
+        content: '确定将所有分区消费位置设成最' + (location === 'MIN' ? '小' : '大') + '值吗？'
+      }).then(() => {
+        let data = _this.getSubscribe()
+        apiRequest.postBase(_this.urls.boundReset + location, {}, data, false).then((data) => {
+          data.data = data.data
+          if (data.data === 'success') {
+            _this.$Message.success('重置成功')
+            _this.getList()
+          } else {
+            _this.$Message.error('重置失败')
+          }
+        })
       })
     },
     showResetOffset (item) {
       this.partitionInfo.subscribe = this.getSubscribe()
       this.partitionInfo.topic = getTopicCode(this.partitionInfo.subscribe.topic, this.partitionInfo.subscribe.namespace)
       this.partitionInfo.app = getAppCode(this.partitionInfo.subscribe.app, this.partitionInfo.subscribe.subscribeGroup)
-      console.log(this.partitionInfo)
-      console.log(item)
       if (!item) {
         this.partitionInfo.isPartition = false
       } else {

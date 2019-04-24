@@ -7,10 +7,10 @@ import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionMe
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionPrepare;
 import com.jd.journalq.broker.kafka.coordinator.transaction.helper.TransactionHelper;
 import com.jd.journalq.broker.producer.transaction.command.TransactionRollbackRequest;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.transport.command.CommandCallback;
-import com.jd.journalq.network.transport.command.JMQCommand;
+import com.jd.journalq.network.transport.command.JournalqCommand;
 import com.jd.journalq.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,11 +49,11 @@ public class TransactionAbortSynchronizer extends Service {
             CoordinatorSession session = sessionManager.getOrCreateSession(prepare.getBrokerId(), prepare.getBrokerHost(), prepare.getBrokerPort());
             String txId = transactionIdManager.generateId(prepare.getTopic(), prepare.getApp(), prepare.getTransactionId(), prepare.getProducerId(), prepare.getProducerEpoch());
             TransactionRollbackRequest transactionRollbackRequest = new TransactionRollbackRequest(prepare.getTopic(), prepare.getApp(), txId);
-            session.async(new JMQCommand(transactionRollbackRequest), new CommandCallback() {
+            session.async(new JournalqCommand(transactionRollbackRequest), new CommandCallback() {
                 @Override
                 public void onSuccess(Command request, Command response) {
-                    if (response.getHeader().getStatus() != JMQCode.SUCCESS.getCode() &&
-                            response.getHeader().getStatus() != JMQCode.CN_TRANSACTION_NOT_EXISTS.getCode()) {
+                    if (response.getHeader().getStatus() != JournalqCode.SUCCESS.getCode() &&
+                            response.getHeader().getStatus() != JournalqCode.CN_TRANSACTION_NOT_EXISTS.getCode()) {
                         result[0] = false;
                     }
                     latch.countDown();

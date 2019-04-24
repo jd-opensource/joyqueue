@@ -1,8 +1,22 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.broker.election.command;
 
 import com.jd.journalq.broker.election.TopicPartitionGroup;
 import com.jd.journalq.network.command.CommandType;
-import com.jd.journalq.network.transport.command.JMQPayload;
+import com.jd.journalq.network.transport.command.JournalqPayload;
+import com.jd.journalq.network.transport.command.Releasable;
 
 import java.nio.ByteBuffer;
 
@@ -11,7 +25,7 @@ import java.nio.ByteBuffer;
  * email: zhuduohui@jd.com
  * date: 2018/8/15
  */
-public class AppendEntriesRequest extends JMQPayload {
+public class AppendEntriesRequest extends JournalqPayload implements Releasable {
     private TopicPartitionGroup topicPartitionGroup;
 
     private int term;
@@ -30,6 +44,8 @@ public class AppendEntriesRequest extends JMQPayload {
     private long leftPosition;
 
     private boolean match;
+
+    private int entriesTerm;
 
     private ByteBuffer entries;
 
@@ -113,6 +129,14 @@ public class AppendEntriesRequest extends JMQPayload {
         this.match = match;
     }
 
+    public int getEntriesTerm() {
+        return entriesTerm;
+    }
+
+    public void setEntriesTerm(int entriesTerm) {
+        this.entriesTerm = entriesTerm;
+    }
+
     public ByteBuffer getEntries() {
         return entries;
     }
@@ -144,8 +168,16 @@ public class AppendEntriesRequest extends JMQPayload {
                 .append(", commitPosition:").append(commitPosition)
                 .append(", leftPosition:").append(leftPosition)
                 .append(", match:").append(match)
+                .append(", entriesTerm:").append(entriesTerm)
                 .append(", entryLength:").append(entries == null ? 0 : entries.remaining())
                 .append("}").toString();
+    }
+
+    @Override
+    public void release() {
+        if (entries != null) {
+            entries = null;
+        }
     }
 
     public static class Build {
@@ -201,6 +233,11 @@ public class AppendEntriesRequest extends JMQPayload {
 
         public Build prevPosition(long prevPosition) {
             appendEntriesRequest.setPrevPosition(prevPosition);
+            return this;
+        }
+
+        public Build entriesTerm(int entriesTerm) {
+            appendEntriesRequest.setEntriesTerm(entriesTerm);
             return this;
         }
 

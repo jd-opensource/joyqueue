@@ -1,8 +1,8 @@
 package com.jd.journalq.network.serializer;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.jd.journalq.message.BrokerMessage;
-import com.jd.journalq.toolkit.lang.Charsets;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

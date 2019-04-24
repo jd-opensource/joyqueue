@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.broker.kafka.handler;
 
 import com.google.common.collect.Lists;
@@ -19,7 +32,7 @@ import com.jd.journalq.broker.kafka.helper.KafkaClientHelper;
 import com.jd.journalq.broker.kafka.message.KafkaBrokerMessage;
 import com.jd.journalq.broker.kafka.message.converter.KafkaMessageConverter;
 import com.jd.journalq.domain.TopicName;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.message.BrokerMessage;
 import com.jd.journalq.message.SourceType;
 import com.jd.journalq.network.session.Consumer;
@@ -83,8 +96,8 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
 
                 BooleanResponse checkResult = clusterManager.checkReadable(topic, clientId, clientIp, (short) partition);
                 if (!checkResult.isSuccess()) {
-                    logger.warn("checkReadable failed, transport: {}, topic: {}, partition: {}, app: {}, code: {}", transport, topic, partition, clientId, checkResult.getJmqCode());
-                    short errorCode = CheckResultConverter.convertFetchCode(checkResult.getJmqCode());
+                    logger.warn("checkReadable failed, transport: {}, topic: {}, partition: {}, app: {}, code: {}", transport, topic, partition, clientId, checkResult.getJournalqCode());
+                    short errorCode = CheckResultConverter.convertFetchCode(checkResult.getJournalqCode());
                     partitionResponses.add(new FetchResponse.PartitionResponse(partition, errorCode));
                     continue;
                 }
@@ -173,7 +186,7 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
         if (pullResult.size() == 0) {
             return null;
         }
-        if (pullResult.getJmqCode() != JMQCode.SUCCESS) {
+        if (pullResult.getJournalqCode() != JournalqCode.SUCCESS) {
             logger.warn("fetch message error, consumer: {}, partition: {}, offset: {}, batchSize: {}", consumer, partition, offset, batchSize);
             return null;
         }

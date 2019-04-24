@@ -1,7 +1,21 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.broker.mqtt.connection;
 
 import com.jd.journalq.network.session.Connection;
 import com.jd.journalq.toolkit.network.IpUtil;
+import com.jd.journalq.toolkit.time.SystemClock;
 import io.netty.channel.Channel;
 
 import java.util.Arrays;
@@ -28,7 +42,11 @@ public class MqttConnection extends Connection {
     private long createdTime;
     private long lastOperateTime;
 
-    public MqttConnection(String clientId, String username, String password, boolean cleanSession, int version, boolean isWillRetain, int willQos, boolean isWillFlag, int keepAliveTimeSeconds, Channel client) {
+    public MqttConnection(String clientId, String username,
+                          String password, boolean cleanSession,
+                          int version, boolean isWillRetain,
+                          int willQos, boolean isWillFlag,
+                          int keepAliveTimeSeconds, Channel client) {
         this.clientId = clientId;
         setId(clientId);
         this.username = username;
@@ -42,7 +60,7 @@ public class MqttConnection extends Connection {
         this.isWillFlag = isWillFlag;
         this.keepAliveTimeSeconds = keepAliveTimeSeconds;
         this.channel = client;
-        this.createdTime = System.currentTimeMillis();
+        this.createdTime = SystemClock.now();
     }
 
     public String getApplication() {

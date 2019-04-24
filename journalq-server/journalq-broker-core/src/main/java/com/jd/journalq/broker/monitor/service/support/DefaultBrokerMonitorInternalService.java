@@ -1,5 +1,19 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.broker.monitor.service.support;
 
+import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.consumer.Consume;
 import com.jd.journalq.broker.election.ElectionService;
 import com.jd.journalq.broker.monitor.converter.BrokerMonitorConverter;
@@ -42,14 +56,19 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
     private NameService nameService;
     private StoreService storeService;
     private ElectionService electionService;
+    private ClusterManager clusterManager;
 
-    public DefaultBrokerMonitorInternalService(BrokerStat brokerStat, Consume consume, StoreManagementService storeManagementService, NameService nameService, StoreService storeService, ElectionService electionManager) {
+    public DefaultBrokerMonitorInternalService(BrokerStat brokerStat, Consume consume,
+                                               StoreManagementService storeManagementService,
+                                               NameService nameService, StoreService storeService, ElectionService electionManager,
+                                               ClusterManager clusterManager) {
         this.brokerStat = brokerStat;
         this.consume=consume;
         this.storeManagementService=storeManagementService;
         this.nameService = nameService;
         this.storeService = storeService;
         this.electionService = electionManager;
+        this.clusterManager = clusterManager;
     }
 
     @Override
@@ -85,7 +104,7 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
        statExt.setTimeStamp(timeStamp);
        Map<String, TopicPendingStat>  topicPendingStatMap=statExt.getTopicPendingStatMap();
        Map<String, TopicStat>  topicStatMap=brokerStat.getTopicStats();
-       Map<String, ConsumerPendingStat> consumerPendingStatMap;
+       Map<String,ConsumerPendingStat> consumerPendingStatMap;
        Map<Integer,PartitionGroupPendingStat> partitionGroupPendingStatMap;
        Map<Short,Long> partitionPendStatMap;
        TopicPendingStat topicPendingStat;
@@ -119,6 +138,9 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
                          partitionGroupPendingStat.setApp(app);
                          partitionGroupPendingStatMap.put(partitionGroupId,partitionGroupPendingStat);
                         for (StoreManagementService.PartitionMetric partitionMetric : partitionGroupMetric.getPartitionMetrics()) {
+                                if (!clusterManager.isLeader(topicStat.getTopic(), partitionMetric.getPartition())) {
+                                    continue;
+                                }
                                 long ackIndex = consume.getAckIndex(consumer, partitionMetric.getPartition());
                                 if (ackIndex < 0) {
                                     ackIndex = 0;

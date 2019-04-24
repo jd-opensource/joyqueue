@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.client.internal.consumer.support;
 
 import com.jd.journalq.client.internal.cluster.ClusterClientManager;
@@ -18,8 +31,8 @@ import com.jd.journalq.client.internal.exception.ClientException;
 import com.jd.journalq.client.internal.metadata.domain.TopicMetadata;
 import com.jd.journalq.client.internal.nameserver.NameServerConfig;
 import com.jd.journalq.client.internal.nameserver.helper.NameServerHelper;
-import com.jd.journalq.exception.JMQCode;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.jd.journalq.exception.JournalqCode;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -49,7 +62,8 @@ public class DefaultMessageConsumer extends Service implements MessageConsumer {
     private TopicMessageConsumer topicMessageConsumer;
     private ConsumerInterceptorManager consumerInterceptorManager = new ConsumerInterceptorManager();
 
-    public DefaultMessageConsumer(ConsumerConfig config, NameServerConfig nameServerConfig, ClusterManager clusterManager, ClusterClientManager clusterClientManager, ConsumerClientManager consumerClientManager) {
+    public DefaultMessageConsumer(ConsumerConfig config, NameServerConfig nameServerConfig, ClusterManager clusterManager,
+                                  ClusterClientManager clusterClientManager, ConsumerClientManager consumerClientManager) {
         Preconditions.checkArgument(config != null, "config not null");
         Preconditions.checkArgument(nameServerConfig != null, "nameserver not null");
         Preconditions.checkArgument(clusterManager != null, "clusterManager not null");
@@ -141,7 +155,7 @@ public class DefaultMessageConsumer extends Service implements MessageConsumer {
             throw new ConsumerException(e.getMessage(), e.getCode(), e);
         } catch (Exception e) {
             logger.debug("newTopicMessageConsumer exception, topic: {}", topic, e);
-            throw new ConsumerException(JMQCode.CN_UNKNOWN_ERROR.getMessage(), JMQCode.CN_UNKNOWN_ERROR.getCode(), e);
+            throw new ConsumerException(JournalqCode.CN_UNKNOWN_ERROR.getMessage(), JournalqCode.CN_UNKNOWN_ERROR.getCode(), e);
         }
         return topicMessageConsumer;
     }
@@ -308,7 +322,7 @@ public class DefaultMessageConsumer extends Service implements MessageConsumer {
     }
 
     @Override
-    public JMQCode reply(List<ConsumeReply> replyList) {
+    public JournalqCode reply(List<ConsumeReply> replyList) {
         Preconditions.checkArgument(CollectionUtils.isNotEmpty(replyList), "replyList can not be null");
 
         checkState();
@@ -317,7 +331,7 @@ public class DefaultMessageConsumer extends Service implements MessageConsumer {
     }
 
     @Override
-    public JMQCode replyOnce(ConsumeReply reply) {
+    public JournalqCode replyOnce(ConsumeReply reply) {
         Preconditions.checkArgument(reply != null, "replyList can not be null");
 
         checkState();
@@ -336,19 +350,19 @@ public class DefaultMessageConsumer extends Service implements MessageConsumer {
 
     protected void checkState() {
         if (!isStarted()) {
-            throw new ConsumerException("consumer is not started", JMQCode.CN_SERVICE_NOT_AVAILABLE.getCode());
+            throw new ConsumerException("consumer is not started", JournalqCode.CN_SERVICE_NOT_AVAILABLE.getCode());
         }
     }
 
     protected void checkSubscribe() {
         if (StringUtils.isBlank(subscribeTopic)) {
-            throw new ConsumerException("consumer not subscribe topic", JMQCode.CN_SERVICE_NOT_AVAILABLE.getCode());
+            throw new ConsumerException("consumer not subscribe topic", JournalqCode.CN_SERVICE_NOT_AVAILABLE.getCode());
         }
     }
 
     protected void checkUnsubscribe() {
         if (StringUtils.isNotBlank(subscribeTopic)) {
-            throw new ConsumerException("consumer is subscribed topic", JMQCode.CN_SERVICE_NOT_AVAILABLE.getCode());
+            throw new ConsumerException("consumer is subscribed topic", JournalqCode.CN_SERVICE_NOT_AVAILABLE.getCode());
         }
     }
 }

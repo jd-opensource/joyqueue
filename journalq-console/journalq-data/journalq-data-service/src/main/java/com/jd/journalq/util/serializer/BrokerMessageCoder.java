@@ -1,13 +1,26 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.util.serializer;
 
 import com.jd.journalq.message.JournalLog;
 import com.jd.journalq.message.BrokerMessage;
 import com.jd.journalq.message.Message;
-import com.jd.journalq.network.serializer.JMQMapTools;
+import com.jd.journalq.network.serializer.JournalqMapTools;
 import com.jd.journalq.toolkit.io.Compressors;
 import com.jd.journalq.toolkit.io.Zip;
 import com.jd.journalq.toolkit.io.ZipUtil;
-import com.jd.journalq.toolkit.lang.Charsets;
+import com.google.common.base.Charsets;
 import com.jd.journalq.toolkit.serialize.AbstractSerializer;
 import io.netty.buffer.ByteBuf;
 import java.io.UnsupportedEncodingException;
@@ -633,7 +646,7 @@ public class BrokerMessageCoder extends AbstractSerializer {
      */
     @Deprecated
     public static <K, V> void write(final Map<K, V> hashMap, ByteBuf out) throws Exception {
-        JMQMapTools.write(hashMap, out);
+        JournalqMapTools.write(hashMap, out);
     }
 
 

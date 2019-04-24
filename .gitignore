@@ -2,6 +2,7 @@
 .idea/
 .vertx/
 target
+h2-db-journalq
 .classpath
 .settings
 .project
@@ -16,3 +17,5 @@ target
 
 .version.properties
 filter.properties
+.factorypath
+journalq-console/journalq-web/journalq-web-webroot/src/main/webroot/

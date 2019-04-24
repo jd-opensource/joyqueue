@@ -1,8 +1,25 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.toolkit.concurrent;
 
 import com.jd.journalq.toolkit.lang.LifeCycle;
+import com.jd.journalq.toolkit.time.SystemClock;
 
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 一个后台线程，实现类似：
@@ -16,11 +33,13 @@ public abstract class LoopThread implements Runnable,LifeCycle{
     private String name;
     protected long minSleep = 50L,maxSleep = 500L;
     private boolean daemon;
+    private final Lock wakeupLock = new ReentrantLock();
+    private final java.util.concurrent.locks.Condition wakeupCondition = wakeupLock.newCondition();
 
     /**
      * 每次循环需要执行的代码。
      */
-    abstract void doWork() throws Exception;
+    abstract void doWork() throws Throwable;
 
     public String getName() {
         return name;
@@ -78,14 +97,15 @@ public abstract class LoopThread implements Runnable,LifeCycle{
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
 
-            long t0 = System.currentTimeMillis();
+            long t0 = SystemClock.now();
             try {
+                wakeupLock.lock();
                 if(condition()) doWork();
-                long t1 = System.currentTimeMillis();
+                long t1 = SystemClock.now();
 
                 // 为了避免空转CPU高，如果执行时间过短，等一会儿再进行下一次循环
                 if (t1 - t0 < minSleep) {
-                    Thread.sleep(minSleep < maxSleep ? ThreadLocalRandom.current().nextLong(minSleep, maxSleep): minSleep);
+                    wakeupCondition.await(minSleep < maxSleep ? ThreadLocalRandom.current().nextLong(minSleep, maxSleep): minSleep, TimeUnit.MILLISECONDS);
                 }
             } catch (InterruptedException i) {
                 Thread.currentThread().interrupt();
@@ -93,10 +113,24 @@ public abstract class LoopThread implements Runnable,LifeCycle{
                 if (!handleException(t)) {
                     break;
                 }
+            } finally {
+                wakeupLock.unlock();
             }
         }
     }
 
+    /**
+     * 唤醒任务如果任务在Sleep
+     */
+    public synchronized void weakup() {
+        if(wakeupLock.tryLock()) {
+            try {
+                wakeupCondition.signal();
+            } finally {
+                wakeupLock.unlock();
+            }
+        }
+    }
 
     /**
      * 处理doWork()捕获的异常
@@ -111,7 +145,7 @@ public abstract class LoopThread implements Runnable,LifeCycle{
     }
 
     public interface  Worker {
-        void doWork() throws Exception;
+        void doWork() throws Throwable;
     }
 
     public interface ExceptionHandler {
@@ -174,7 +208,7 @@ public abstract class LoopThread implements Runnable,LifeCycle{
         public LoopThread build(){
             LoopThread loopThread = new LoopThread() {
                 @Override
-                void doWork() throws Exception{
+                void doWork() throws Throwable{
                     worker.doWork();
                 }
 

@@ -1,7 +1,7 @@
 package com.jd.journalq.broker.producer.transaction.command;
 
 import com.jd.journalq.network.command.CommandType;
-import com.jd.journalq.network.transport.command.JMQPayload;
+import com.jd.journalq.network.transport.command.JournalqPayload;
 
 /**
  * TransactionCommitRequest
@@ -9,7 +9,7 @@ import com.jd.journalq.network.transport.command.JMQPayload;
  * email: gaohaoxiang@jd.com
  * date: 2019/4/12
  */
-public class TransactionCommitRequest extends JMQPayload {
+public class TransactionCommitRequest extends JournalqPayload {
 
     private String topic;
     private String app;

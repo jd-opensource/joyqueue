@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.service.impl;
 
 import com.alibaba.fastjson.JSON;
@@ -5,14 +18,18 @@ import com.jd.journalq.model.ListQuery;
 import com.jd.journalq.model.PageResult;
 import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.convert.CodeConverter;
-import com.jd.journalq.model.domain.*;
+import com.jd.journalq.model.domain.Application;
+import com.jd.journalq.model.domain.Consumer;
+import com.jd.journalq.model.domain.Identity;
+import com.jd.journalq.model.domain.Topic;
+import com.jd.journalq.model.domain.User;
 import com.jd.journalq.model.query.QApplication;
 import com.jd.journalq.model.query.QConsumer;
 import com.jd.journalq.service.ApplicationService;
 import com.jd.journalq.service.ConsumerService;
 import com.jd.journalq.nsr.ConsumerNameServerService;
 import com.jd.journalq.nsr.TopicNameServerService;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.util.LocalSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +47,6 @@ public class ConsumerServiceImpl  implements ConsumerService {
 
     @Autowired
     private ApplicationService applicationService;
-
 
     @Autowired
     private TopicNameServerService topicNameServerService;
@@ -120,7 +136,8 @@ public class ConsumerServiceImpl  implements ConsumerService {
     public Consumer findByTopicAppGroup(String namespace, String topic, String app, String group) {
         try {
             QConsumer qConsumer = new QConsumer();
-            qConsumer.setReferer(app);
+//            qConsumer.setReferer(app);
+            qConsumer.setApp(new Identity(CodeConverter.convertApp(new Identity(app), group)));
             //consumer表没存group
             if (group !=null) {
                 qConsumer.setApp(new Identity(CodeConverter.convertApp(new Identity(app), group)));

@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.model.domain;
 
 import com.jd.journalq.model.domain.nsr.BaseNsrModel;
@@ -65,6 +78,11 @@ public class Topic extends BaseNsrModel {
     private BrokerGroup brokerGroup;
 
     private List<Broker> brokers;
+
+    @Min(0)
+    @Max(20)
+    private int brokerNum ;
+
     /**
      * 副本数量(默认3个，表示主+从，总共3个)
      */
@@ -170,6 +188,14 @@ public class Topic extends BaseNsrModel {
 
     public void setBrokers(List<Broker> brokers) {
         this.brokers = brokers;
+    }
+
+    public int getBrokerNum() {
+        return brokerNum;
+    }
+
+    public void setBrokerNum(int brokerNum) {
+        this.brokerNum = brokerNum;
     }
 
     public Namespace getNamespace() {

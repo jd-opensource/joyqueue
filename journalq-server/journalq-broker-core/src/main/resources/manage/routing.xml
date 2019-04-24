@@ -1,14 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <vertx>
     <routes>
-       <!-- <route name="put" type="PUT" route="true" consumers="application/json;charset=UTF-8"
-               produces="application/json;charset=UTF-8"/>
-        <route name="post" type="POST" route="true" consumers="application/json;charset=UTF-8"
-               produces="application/json;charset=UTF-8"/>
-        <route name="get" type="GET" route="true" consumers="application/json;charset=UTF-8"
-               produces="application/json;charset=UTF-8"/>
-        <route name="delete" type="DELETE" route="true" consumers="application/json;charset=UTF-8"
-               produces="application/json;charset=UTF-8"/>-->
         <!-- monitor -->
         <!-- broker -->
         <route path="/monitor/broker" inherit="get"
@@ -68,7 +60,7 @@
         <route path="/monitor/topic/:topic/app/:app/consumer/connections/detail" inherit="get"
                handlers="brokerMonitorService.getConsumerConnectionDetailInfoByTopicAndApp"/>
         <!-- consumer -->
-        <route path="/monitor/topic/:topic/app/:app/consumer" inherit="get"
+        <route path="/monitor/topic/:topic/app/:app/consumer" inherit="get" type="GET"
                handlers="brokerMonitorService.getConsumerInfoByTopicAndApp"/>
         <route path="/monitor/topic/:topic/app/:app/consumer/partitions" inherit="get"
                handlers="brokerMonitorService.getConsumerPartitionInfos"/>
@@ -103,8 +95,11 @@
                handlers="brokerMonitorService.getSendBackLogNum"/>
         <route path="/monitor/archive/consume" inherit="get"
                handlers="brokerMonitorService.getConsumeBacklogNum"/>
+       <route path="/monitor/archive/info" inherit="get"
+            handlers="brokerMonitorService.getArchiveMonitorInfo"/>
 
-        <!-- coordinator -->
+
+     <!-- coordinator -->
         <route path="/monitor/coordinator/group/:groupId/detail" inherit="get"
                handlers="brokerMonitorService.getCoordinator"/>
         <route path="/monitor/coordinator/namespace/:namespace/group/:groupId" inherit="get"
@@ -174,12 +169,12 @@
                handlers="brokerManageService.readPartitionGroupStore"/>
         <route path="/manage/topic/list" inherit="get"
                handlers="brokerManageService.topics"/>
-     <route path="/manage/topic/:topic/partitionGroup/detail" inherit="get"
-            handlers="brokerManageService.partitionGroups"/>
+        <route path="/manage/topic/:topic/partitionGroup/detail" inherit="get"
+               handlers="brokerManageService.partitionGroups"/>
 
 
 
-     <route path="/manage/store/indexes" inherit="get"
+        <route path="/manage/store/indexes" inherit="get"
                handlers="brokerManageService.readIndices"/>
         <route path="/manage/store/file" inherit="get"
                handlers="brokerManageService.readFile"/>
@@ -195,5 +190,15 @@
                handlers="brokerManageService.initCoordinator"/>
         <route path="/manage/coordinator/namespace/:namespace/group/:groupId" inherit="delete"
                handlers="brokerManageService.removeCoordinatorGroup"/>
+
+        <!-- election -->
+        <route path="/manage/election/metadata/restore" inherit="get"
+               handlers="brokerManageService.restoreElectionMetadata"/>
+        <route path="/manage/election/metadata/describe" inherit="get"
+               handlers="brokerManageService.describe"/>
+        <route path="/manage/election/metadata/describeTopic/topic/:topic/partitionGroup/:partitionGroup" inherit="get"
+               handlers="brokerManageService.describeTopic"/>
+        <route path="/manage/election/metadata/updateTerm/topic/:topic/partitionGroup/:partitionGroup/:term" inherit="get"
+               handlers="brokerManageService.updateTerm"/>
     </routes>
 </vertx>

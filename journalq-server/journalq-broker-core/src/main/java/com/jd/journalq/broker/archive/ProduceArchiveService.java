@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.broker.archive;
 
 import com.jd.journalq.broker.Plugins;
@@ -7,7 +20,7 @@ import com.jd.journalq.broker.consumer.Consume;
 import com.jd.journalq.broker.consumer.model.PullResult;
 import com.jd.journalq.domain.TopicConfig;
 import com.jd.journalq.domain.TopicName;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.message.BrokerMessage;
 import com.jd.journalq.network.session.Consumer;
 import com.jd.journalq.server.archive.store.api.ArchiveStore;
@@ -15,7 +28,7 @@ import com.jd.journalq.server.archive.store.model.AchivePosition;
 import com.jd.journalq.server.archive.store.model.SendLog;
 import com.jd.journalq.toolkit.concurrent.LoopThread;
 import com.jd.journalq.toolkit.lang.Close;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import com.jd.journalq.toolkit.time.SystemClock;
 import org.apache.commons.lang3.StringUtils;
@@ -156,7 +169,7 @@ public class ProduceArchiveService extends Service {
     /**
      * 更新归档项
      */
-    private void updateArchiveItem() throws JMQException {
+    private void updateArchiveItem() throws JournalqException {
         List<SendArchiveItem> list = new ArrayList<>();
 
         List<TopicConfig> topics = clusterManager.getTopics();
@@ -283,7 +296,7 @@ public class ProduceArchiveService extends Service {
      * 写入数据
      *
      * @throws InterruptedException
-     * @throws JMQException
+     * @throws JournalqException
      */
     private void write2Store() throws InterruptedException {
         List<SendLog> sendLogs = new ArrayList<>(batchNum);
@@ -303,7 +316,7 @@ public class ProduceArchiveService extends Service {
                     logger.debug("Write sendLogs size:{} to archive store.", sendLogs.size());
                     // 写入计数（用于归档位置）
                     writeCounter(sendLogs);
-                } catch (JMQException e) {
+                } catch (JournalqException e) {
                     // 写入存储失败
                     hasStoreError.set(true);
                     // 回滚读取位置
@@ -443,7 +456,7 @@ public class ProduceArchiveService extends Service {
         private final Short partition;
         private AtomicLong readIndex; // 读序号
 
-        public SendArchiveItem(String topic, Short partition) {
+        SendArchiveItem(String topic, Short partition) {
             this.topic = topic;
             this.partition = partition;
         }
@@ -471,6 +484,10 @@ public class ProduceArchiveService extends Service {
             return partition;
         }
 
+        @Override
+        public int hashCode() {
+            return super.hashCode();
+        }
 
         @Override
         public boolean equals(Object obj) {
@@ -521,7 +538,7 @@ public class ProduceArchiveService extends Service {
          *
          * @param newItemList
          */
-        public void addAndUpdate(List<SendArchiveItem> newItemList) throws JMQException {
+        public void addAndUpdate(List<SendArchiveItem> newItemList) throws JournalqException {
             // 删除当前失效的归档项
             cpList.stream().forEach(item -> {
                 // 最新的归档项列表不包含这个项，则删除该项
@@ -536,7 +553,7 @@ public class ProduceArchiveService extends Service {
                     Long index = archiveStore.getPosition(item.topic, item.partition);
                     if (index == null) {
                         // 从头拉起
-                        index = 0l;
+                        index = 0L;
                     }
                     item.setReadIndex(index);
                     cpList.add(item);

@@ -1,6 +1,21 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.broker.replication;
 
 import com.jd.journalq.broker.election.TopicPartitionGroup;
+
+import java.util.concurrent.ScheduledFuture;
 
 
 /**
@@ -30,10 +45,11 @@ public class Replica {
     // if the log of this replica match with with leader
     private boolean match = false;
 
-    private long lastReplicateMessageTime;
+    private long lastAppendSuccessTime;
 
     private long lastReplicateConsumePosTime;
 
+    private ScheduledFuture heartbeatTimerFuture;
 
     Replica(int replicaId, String address) {
         this.replicaId = replicaId;
@@ -109,12 +125,20 @@ public class Replica {
         return lastReplicateConsumePosTime;
     }
 
-    void lastReplicateMessageTime(long lastReplicateMessageTime) {
-        this.lastReplicateMessageTime = lastReplicateMessageTime;
+    void lastAppendSuccessTime(long lastAppendSuccessTime) {
+        this.lastAppendSuccessTime = lastAppendSuccessTime;
     }
 
-    long lastReplicateMessageTime() {
-        return lastReplicateMessageTime;
+    long lastAppendSuccessTime() {
+        return lastAppendSuccessTime;
+    }
+
+    void heartbeatTimerFuture(ScheduledFuture future) {
+        this.heartbeatTimerFuture = future;
+    }
+
+    ScheduledFuture heartbeatTimerFuture() {
+        return heartbeatTimerFuture;
     }
 
     @Override
@@ -125,8 +149,9 @@ public class Replica {
                 .append(", commitPosition:").append(commitPosition)
                 .append(", nextPosition:").append(nextPosition)
                 .append(", match:").append(match)
-                .append(", lastReplicateMessageTime:").append(lastReplicateMessageTime)
+                .append(", lastAppendSuccessTime:").append(lastAppendSuccessTime)
                 .append(", lastReplicateConsumePosTime:").append(lastReplicateConsumePosTime).toString();
 
     }
- }
+
+}

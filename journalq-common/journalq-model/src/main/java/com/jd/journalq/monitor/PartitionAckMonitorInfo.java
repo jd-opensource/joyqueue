@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.monitor;
 
 /**
@@ -10,6 +23,8 @@ public class PartitionAckMonitorInfo extends BaseMonitorInfo {
 
     private short partition;
     private long index;
+    private long lastPullTime;
+    private long lastAckTime;
     private long leftIndex;
     private long rightIndex;
 
@@ -17,9 +32,11 @@ public class PartitionAckMonitorInfo extends BaseMonitorInfo {
 
     }
 
-    public PartitionAckMonitorInfo(short partition, long index, long leftIndex, long rightIndex) {
+    public PartitionAckMonitorInfo(short partition, long index, long lastPullTime, long lastAckTime, long leftIndex, long rightIndex) {
         this.partition = partition;
         this.index = index;
+        this.lastPullTime = lastPullTime;
+        this.lastAckTime = lastAckTime;
         this.leftIndex = leftIndex;
         this.rightIndex = rightIndex;
     }
@@ -38,6 +55,22 @@ public class PartitionAckMonitorInfo extends BaseMonitorInfo {
 
     public void setIndex(long index) {
         this.index = index;
+    }
+
+    public long getLastPullTime() {
+        return lastPullTime;
+    }
+
+    public void setLastPullTime(long lastPullTime) {
+        this.lastPullTime = lastPullTime;
+    }
+
+    public long getLastAckTime() {
+        return lastAckTime;
+    }
+
+    public void setLastAckTime(long lastAckTime) {
+        this.lastAckTime = lastAckTime;
     }
 
     public void setLeftIndex(long leftIndex) {

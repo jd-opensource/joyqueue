@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.client.internal.consumer.transport;
 
 import com.google.common.collect.Lists;
@@ -6,7 +19,7 @@ import com.google.common.collect.Sets;
 import com.jd.journalq.network.command.AddConsumerRequest;
 import com.jd.journalq.network.command.RemoveConsumerRequest;
 import com.jd.journalq.network.transport.TransportAttribute;
-import com.jd.journalq.network.transport.command.JMQCommand;
+import com.jd.journalq.network.transport.command.JournalqCommand;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
@@ -109,7 +122,7 @@ public class ConsumerConnectionState {
         addConsumerRequest.setApp(app);
         addConsumerRequest.setSequence(SEQUENCE.incrementAndGet());
         try {
-            consumerClient.getClient().sync(new JMQCommand(addConsumerRequest));
+            consumerClient.getClient().sync(new JournalqCommand(addConsumerRequest));
             return true;
         } catch (Exception e) {
             logger.warn("add consumer exception, topics: {}, app: {}, error: {}", topics, app, e.getMessage());
@@ -123,7 +136,7 @@ public class ConsumerConnectionState {
         removeConsumerRequest.setTopics(topics);
         removeConsumerRequest.setApp(app);
         try {
-            consumerClient.getClient().sync(new JMQCommand(removeConsumerRequest));
+            consumerClient.getClient().sync(new JournalqCommand(removeConsumerRequest));
             return true;
         } catch (Exception e) {
             logger.warn("remove consumer exception, topics: {}, app: {}, error: {}", topics, app, e.getMessage());

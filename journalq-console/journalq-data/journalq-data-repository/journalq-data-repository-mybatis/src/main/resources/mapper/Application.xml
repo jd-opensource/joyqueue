@@ -19,6 +19,7 @@
         <result property="updateBy.id" column="update_by" jdbcType="BIGINT"/>
         <result property="status" column="status" jdbcType="BIGINT"/>
         <result property="aliasCode" column="alias_code" jdbcType="VARCHAR"/>
+        <result property="description" column="description" jdbcType="VARCHAR"/>
     </resultMap>
     <sql id="baseColumn">
         a.id,
@@ -35,7 +36,8 @@
         a.update_time,
         a.update_by,
         a.`status`,
-        a.`alias_code`
+        a.`alias_code`,
+        a.`description`
     </sql>
     <insert id="add" parameterType="application" useGeneratedKeys="true" keyProperty="id">
         insert into application
@@ -53,7 +55,8 @@
         update_time,
         update_by,
         `status`,
-        `alias_code`)
+        `alias_code`,
+        `description`)
         values
         (
         #{code},
@@ -69,7 +72,8 @@
         #{updateTime},
         #{updateBy.id},
         #{status},
-        #{aliasCode}
+        #{aliasCode},
+        #{description}
         )
     </insert>
 
@@ -81,6 +85,7 @@
           `owner_id`=#{owner.id},
           `owner_code`=#{owner.code},
           `sign`=#{sign},
+          description=#{description}
           update_time=#{updateTime},
           update_by=#{updateBy.id}
         WHERE
@@ -106,7 +111,9 @@
         <include refid="baseColumn"/>
         FROM
         application a
-        WHERE a.code = #{code} limit 0,1
+        WHERE a.code = #{code}
+        AND a.status != -1
+        limit 0,1
     </select>
 
     <select id="findByCodes" parameterType="java.util.List" resultMap="baseResultMap">

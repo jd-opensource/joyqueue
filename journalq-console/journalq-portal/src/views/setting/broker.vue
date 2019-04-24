@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="ml20 mt30">
-      <d-input v-model="searchData.keyword" placeholder="请输入ID/分组编码/IP" class="left mr10" style="width: 20%">
+      <d-input v-model="searchData.keyword" placeholder="请输入ID/分组编码/IP" class="left mr10" style="width:213px">
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
     </div>
@@ -26,7 +26,23 @@
       <grid-row class="mb10">
         <grid-col :span="8" class="label">重试方式:</grid-col>
         <grid-col :span="16" class="val">
-          <d-input v-model="editData.retryType" disabled></d-input>
+          <d-select v-model="editData.retryType" style="width:40%" >
+            <d-option v-for="item in retryTypeList" :key="item.key" :value="item.key">{{item.value}}</d-option>
+              <!--<d-option :value="DB">DB</d-option>-->
+              <!--<d-option :value="RemoteRetry">RemoteRetry</d-option>-->
+          </d-select>
+        </grid-col>
+      </grid-row>
+      <grid-row class="mb10">
+        <grid-col :span="8" class="label">权限:</grid-col>
+        <grid-col :span="16" class="val">
+          <d-select v-model="editData.permission" style="width:40%" >
+            <d-option v-for="item in permissionList" :key="item.key" :value="item.key">{{item.value}}</d-option>
+            <!--<d-option :value="FULL">FULL</d-option>-->
+            <!--<d-option :value="1">READ</d-option>-->
+            <!--<d-option :value="2">WRITE</d-option>-->
+            <!--<d-option :value="3">NONE</d-option>-->
+          </d-select>
         </grid-col>
       </grid-row>
       <!--<grid-row class="mb10">-->
@@ -59,7 +75,7 @@ import apiRequest from '../../utils/apiRequest.js'
 import myTable from '../../components/common/myTable.vue'
 import myDialog from '../../components/common/myDialog.vue'
 import crud from '../../mixins/crud.js'
-import BrokerMonitor from "./brokerMonitor";
+import BrokerMonitor from './brokerMonitor'
 
 export default {
   name: 'application',
@@ -108,6 +124,10 @@ export default {
           {
             title: '重试方式',
             key: 'retryType'
+          },
+          {
+            title: '权限',
+            key: 'permission'
           }
           // {
           //   title:'描述',
@@ -124,17 +144,17 @@ export default {
             txt: '归档监控',
             method: 'on-archiveMonitor'
           },
-          {
-            txt: '删除',
-            method: 'on-del'
-          },
+          // {
+          //   txt: '删除',
+          //   method: 'on-del'
+          // },
           {
             txt: '详情',
             method: 'on-detail'
           }
         ]
       },
-      brokerId:'',
+      brokerId: '',
       multipleSelection: [],
       editDialog: {
         visible: false,
@@ -151,9 +171,19 @@ export default {
         visible: false,
         title: 'broker详情',
         showFooter: false,
-        width:'1100px'
+        width: '1100px'
       },
-      monitorDetailData:{},
+      retryTypeList: [
+        {key: 'DB', value: 'DB'},
+        {key: 'RemoteRetry', value: 'RemoteRetry'}
+      ],
+      permissionList: [
+        {key: 'FULL', value: 'FULL'},
+        {key: 'READ', value: 'READ'},
+        {key: 'WRITE', value: 'WRITE'},
+        {key: 'NONE', value: 'NONE'}
+      ],
+      monitorDetailData: {},
       editData: {}
     }
   },
@@ -165,14 +195,13 @@ export default {
       }
       apiRequest.postBase(this.urlOrigin.archiveMonitor, {}, broker, false).then((data) => {
         data.data = data.data || {}
-        console.log(data.data)
         this.archiveMonitorData = data.data
         this.openDialog('archiveMonitorDialog')
       })
     },
-    detail(item) {
-      this.brokerId = item.id;
-      this.monitorDetailDialog.visible=true;
+    detail (item) {
+      this.brokerId = item.id
+      this.monitorDetailDialog.visible = true
     },
     beforeEdit () {
       return new Promise((resolve, reject) => {
@@ -183,7 +212,8 @@ export default {
           port: this.editData.port,
           // dataCenter: this.editData['dataCenter'].id,
           retryType: this.editData.retryType,
-          description: this.editData.description
+          permission: this.editData.permission
+          // description: this.editData.description
         })
       })
     }

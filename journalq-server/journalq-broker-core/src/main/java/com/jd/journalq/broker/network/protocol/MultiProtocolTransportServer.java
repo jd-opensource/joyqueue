@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.broker.network.protocol;
 
 import com.google.common.collect.Lists;
@@ -32,7 +45,10 @@ public class MultiProtocolTransportServer extends Service implements TransportSe
     private TransportServer protocolServiceServer;
     private List<ProtocolContext> protocolServers;
 
-    public MultiProtocolTransportServer(ServerConfig serverConfig, String host, int port, ProtocolManager protocolManager, MultiProtocolHandlerPipelineFactory multiProtocolHandlerPipelineFactory, ProtocolHandlerPipelineFactory protocolHandlerPipelineFactory) {
+    public MultiProtocolTransportServer(ServerConfig serverConfig, String host,
+                                        int port, ProtocolManager protocolManager,
+                                        MultiProtocolHandlerPipelineFactory multiProtocolHandlerPipelineFactory,
+                                        ProtocolHandlerPipelineFactory protocolHandlerPipelineFactory) {
         this.serverConfig = serverConfig;
         this.host = host;
         this.port = port;
@@ -87,7 +103,8 @@ public class MultiProtocolTransportServer extends Service implements TransportSe
         List<ProtocolContext> result = Lists.newArrayList();
         for (ProtocolServer protocolServer : protocolManager.getProtocolServers()) {
             ServerConfig protocolServerConfig = protocolServer.createServerConfig(serverConfig);
-            TransportServer transportServer = new ChannelTransportServer(protocolHandlerPipelineFactory.createPipeline(protocolServer), protocolServerConfig, protocolServerConfig.getHost(), protocolServerConfig.getPort());
+            TransportServer transportServer = new ChannelTransportServer(protocolHandlerPipelineFactory.createPipeline(protocolServer),
+                    protocolServerConfig, protocolServerConfig.getHost(), protocolServerConfig.getPort());
             result.add(new ProtocolContext(protocolServer, transportServer));
         }
         return result;

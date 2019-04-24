@@ -1,7 +1,24 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.domain;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * 生产者
@@ -25,22 +42,6 @@ public class Producer extends Subscription {
 
     public String getId() {
         return new StringBuilder(topic.getFullName()).append(".").append(app).toString();
-    }
-
-    public TopicName getTopic() {
-        return topic;
-    }
-
-    public void setTopic(TopicName topic) {
-        this.topic = topic;
-    }
-
-    public String getApp() {
-        return app;
-    }
-
-    public void setApp(String app) {
-        this.app = app;
     }
 
     public ClientType getClientType() {
@@ -181,8 +182,9 @@ public class Producer extends Subscription {
             }
 
             public Builder blackList(String blackList) {
-                if (null != blackList && !"".equals(blackList.trim()))
+                if (null != blackList && !"".equals(blackList.trim())) {
                     this.blackList = new HashSet<String>(Arrays.asList(blackList.trim().split(",")));
+                }
                 return this;
             }
 

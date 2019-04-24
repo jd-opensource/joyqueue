@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.client.internal.consumer.support;
 
 import com.jd.journalq.client.internal.cluster.ClusterClientManager;
@@ -10,7 +23,7 @@ import com.jd.journalq.client.internal.consumer.domain.ConsumeReply;
 import com.jd.journalq.client.internal.consumer.transport.ConsumerClientManager;
 import com.jd.journalq.client.internal.metadata.domain.TopicMetadata;
 import com.jd.journalq.client.internal.nameserver.NameServerConfig;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.toolkit.service.Service;
 
 import java.util.List;
@@ -31,7 +44,8 @@ public class MessagePollerWrapper extends Service implements MessagePoller {
     private ConsumerClientManager consumerClientManager;
     private MessagePoller delegate;
 
-    public MessagePollerWrapper(ConsumerConfig consumerConfig, NameServerConfig nameServerConfig, ClusterManager clusterManager, ClusterClientManager clusterClientManager, ConsumerClientManager consumerClientManager, MessagePoller delegate) {
+    public MessagePollerWrapper(ConsumerConfig consumerConfig, NameServerConfig nameServerConfig, ClusterManager clusterManager,
+                                ClusterClientManager clusterClientManager, ConsumerClientManager consumerClientManager, MessagePoller delegate) {
         this.consumerConfig = consumerConfig;
         this.nameServerConfig = nameServerConfig;
         this.clusterManager = clusterManager;
@@ -159,12 +173,12 @@ public class MessagePollerWrapper extends Service implements MessagePoller {
     }
 
     @Override
-    public JMQCode reply(String topic, List<ConsumeReply> replyList) {
+    public JournalqCode reply(String topic, List<ConsumeReply> replyList) {
         return delegate.reply(topic, replyList);
     }
 
     @Override
-    public JMQCode replyOnce(String topic, ConsumeReply reply) {
+    public JournalqCode replyOnce(String topic, ConsumeReply reply) {
         return delegate.replyOnce(topic, reply);
     }
 

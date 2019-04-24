@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.broker.consumer;
 
 import com.alibaba.fastjson.JSON;
@@ -10,9 +23,8 @@ import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.event.ConsumerEvent;
 import com.jd.journalq.event.EventType;
 import com.jd.journalq.event.MetaEvent;
-import com.jd.journalq.event.NameServerEvent;
-import com.jd.journalq.exception.JMQCode;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqCode;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.toolkit.concurrent.EventListener;
 import com.jd.journalq.toolkit.security.Hex;
 import com.jd.journalq.toolkit.security.Md5;
@@ -42,7 +54,7 @@ class FilterMessageSupport {
     // 用户的消息过滤管道缓存
     private ConcurrentMap</* consumerId */String, /* 过滤管道 */FilterPipeline<MessageFilter>> filterRuleCache = new ConcurrentHashMap<>();
 
-    public FilterMessageSupport(ClusterManager clusterManager) {
+    FilterMessageSupport(ClusterManager clusterManager) {
         this.clusterManager = clusterManager;
 
         // 添加消费者信息更新事件
@@ -57,9 +69,9 @@ class FilterMessageSupport {
      * @param byteBuffers    消息缓存集合
      * @param filterCallback 过滤回调函数，用于处理被过滤消息的应答问题
      * @return
-     * @throws JMQException
+     * @throws JournalqException
      */
-    public List<ByteBuffer> filter(Consumer consumer, List<ByteBuffer> byteBuffers, FilterCallback filterCallback) throws JMQException {
+    public List<ByteBuffer> filter(Consumer consumer, List<ByteBuffer> byteBuffers, FilterCallback filterCallback) throws JournalqException {
         FilterPipeline<MessageFilter> filterPipeline = filterRuleCache.get(consumer.getId());
         if (filterPipeline == null) {
             filterPipeline = createFilterPipeline(consumer.getConsumerPolicy());
@@ -74,9 +86,9 @@ class FilterMessageSupport {
      *
      * @param consumerPolicy 用户消费策略
      * @return 消息过滤管道
-     * @throws JMQException
+     * @throws JournalqException
      */
-    private FilterPipeline<MessageFilter> createFilterPipeline(Consumer.ConsumerPolicy consumerPolicy) throws JMQException {
+    private FilterPipeline<MessageFilter> createFilterPipeline(Consumer.ConsumerPolicy consumerPolicy) throws JournalqException {
         Map<String, String> filterRule = consumerPolicy.getFilters();
         String pipelineId = generatePipelineId(filterRule);
         FilterPipeline<MessageFilter> filterPipeline = new FilterPipeline<>(pipelineId);
@@ -100,9 +112,9 @@ class FilterMessageSupport {
      *
      * @param filterRule 过滤规则
      * @return 管道编号
-     * @throws JMQException
+     * @throws JournalqException
      */
-    private String generatePipelineId(Map<String, String> filterRule) throws JMQException {
+    private String generatePipelineId(Map<String, String> filterRule) throws JournalqException {
         if (MapUtils.isEmpty(filterRule)) {
             return null;
         }
@@ -112,7 +124,7 @@ class FilterMessageSupport {
             return Hex.encode(encrypt);
         } catch (Exception e) {
             logger.error("generate filter pipeline error.", e);
-            throw new JMQException(e, JMQCode.CN_UNKNOWN_ERROR.getCode());
+            throw new JournalqException(e, JournalqCode.CN_UNKNOWN_ERROR.getCode());
         }
     }
 
@@ -161,10 +173,8 @@ class FilterMessageSupport {
         @Override
         public void onEvent(Object event) {
             if (((MetaEvent) event).getEventType() == EventType.UPDATE_CONSUMER) {
-                NameServerEvent nameServerEvent = (NameServerEvent) event;
+                ConsumerEvent updateConsumerEvent = (ConsumerEvent) event;
                 logger.info("listen update consume event to update filter pipeline.");
-
-                ConsumerEvent updateConsumerEvent = (ConsumerEvent) nameServerEvent.getMetaEvent();
 
                 // 更新消息过滤管道
                 updateFilterRuleCache(updateConsumerEvent.getTopic(), updateConsumerEvent.getApp());

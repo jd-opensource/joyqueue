@@ -1,7 +1,20 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.broker.election.command;
 
 import com.jd.journalq.broker.election.TopicPartitionGroup;
-import com.jd.journalq.network.transport.command.JMQPayload;
+import com.jd.journalq.network.transport.command.JournalqPayload;
 import com.jd.journalq.network.command.CommandType;
 
 /**
@@ -9,7 +22,7 @@ import com.jd.journalq.network.command.CommandType;
  * email: zhuduohui@jd.com
  * date: 2018/8/15
  */
-public class AppendEntriesResponse extends JMQPayload {
+public class AppendEntriesResponse extends JournalqPayload {
     private TopicPartitionGroup topicPartitionGroup;
     private int term;
 
@@ -24,6 +37,8 @@ public class AppendEntriesResponse extends JMQPayload {
     private long writePosition;
 
     private int replicaId;
+
+    private int entriesTerm;
 
     public TopicPartitionGroup getTopicPartitionGroup() {
         return topicPartitionGroup;
@@ -73,6 +88,14 @@ public class AppendEntriesResponse extends JMQPayload {
         this.replicaId = replicaId;
     }
 
+    public int getEntriesTerm() {
+        return entriesTerm;
+    }
+
+    public void setEntriesTerm(int entriesTerm) {
+        this.entriesTerm = entriesTerm;
+    }
+
     @Override
     public int type() {
         return CommandType.RAFT_APPEND_ENTRIES_RESPONSE;
@@ -86,6 +109,7 @@ public class AppendEntriesResponse extends JMQPayload {
                 .append(", nextPosition:").append(nextPosition)
                 .append(", writePosition:").append(writePosition)
                 .append(", replicaId:").append(replicaId)
+                .append(", entriesTerm:").append(entriesTerm)
                 .append("}");
         return sb.toString();
     }
@@ -123,6 +147,11 @@ public class AppendEntriesResponse extends JMQPayload {
 
         public Build replicaId(int replicaId) {
             appendEntriesResponse.setReplicaId(replicaId);
+            return this;
+        }
+
+        public Build entriesTerm(int entriesTerm) {
+            appendEntriesResponse.setEntriesTerm(entriesTerm);
             return this;
         }
 

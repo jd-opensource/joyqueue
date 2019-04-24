@@ -13,7 +13,8 @@
     <my-dialog :dialog="addDialog" @on-dialog-confirm="addConfirm()" @on-dialog-cancel="addCancel()">
         <grid-row class="mb10">
           <grid-col :span="4" class="label">生效范围:</grid-col>
-          <grid-col :span="20" class="val">
+          <grid-col :span="1"></grid-col>
+          <grid-col :span="16" class="val">
             <d-date-picker
               v-model="addData.timeList"
               value-format="timestamp"
@@ -29,11 +30,13 @@
     <my-dialog :dialog="editDialog" @on-dialog-confirm="editConfirm()" @on-dialog-cancel="editCancel()">
         <grid-row class="mb10">
           <grid-col :span="4" class="label">token:</grid-col>
-          <grid-col :span="20" class="val"><d-input v-model="editData.token" class="change-line-400" placeholder="请输入" disabled/></grid-col>
+          <grid-col :span="1"/>
+          <grid-col :span="16" class="val"><d-input v-model="editData.token" class="change-line-400" placeholder="请输入" disabled/></grid-col>
         </grid-row>
         <grid-row class="mb10">
           <grid-col :span="4" class="label">生效范围:</grid-col>
-          <grid-col :span="20" class="val">
+          <grid-col :span="1"/>
+          <grid-col :span="16" class="val">
             <d-date-picker
               v-model="editData.timeList"
               value-format="timestamp"
@@ -78,11 +81,11 @@ export default {
         rowData: [],
         colData: [
           {
-            title: 'username',
+            title: 'Username',
             key: 'application.code'
           },
           {
-            title: 'password',
+            title: 'Password',
             key: 'token'
           },
           {

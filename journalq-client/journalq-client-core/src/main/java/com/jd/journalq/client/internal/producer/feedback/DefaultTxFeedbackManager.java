@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.client.internal.producer.feedback;
 
 import com.google.common.collect.Maps;
@@ -10,8 +23,8 @@ import com.jd.journalq.client.internal.producer.TxFeedbackManager;
 import com.jd.journalq.client.internal.producer.callback.TxFeedbackCallback;
 import com.jd.journalq.client.internal.producer.exception.ProducerException;
 import com.jd.journalq.client.internal.producer.feedback.config.TxFeedbackConfig;
-import com.jd.journalq.exception.JMQCode;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.jd.journalq.exception.JournalqCode;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -88,7 +101,7 @@ public class DefaultTxFeedbackManager extends Service implements TxFeedbackManag
                 txFeedbackScheduler.start();
             } catch (Exception e) {
                 logger.error("start feedback callback exception, topic: {}, app: {}", topic, config.getApp(), e);
-                throw new ProducerException("start feedback callback exception", JMQCode.CN_UNKNOWN_ERROR.getCode());
+                throw new ProducerException("start feedback callback exception", JournalqCode.CN_UNKNOWN_ERROR.getCode());
             }
         }
 
@@ -115,10 +128,10 @@ public class DefaultTxFeedbackManager extends Service implements TxFeedbackManag
     protected TopicMetadata checkTopicMetadata(String topic) {
         TopicMetadata topicMetadata = clusterManager.fetchTopicMetadata(getTopicFullName(topic), config.getApp());
         if (topicMetadata == null) {
-            throw new ProducerException(String.format("topic %s is not exist", topic), JMQCode.FW_TOPIC_NOT_EXIST.getCode());
+            throw new ProducerException(String.format("topic %s is not exist", topic), JournalqCode.FW_TOPIC_NOT_EXIST.getCode());
         }
         if (topicMetadata.getProducerPolicy() == null) {
-            throw new ProducerException(String.format("topic %s producer %s is not exist", topic, config.getApp()), JMQCode.FW_PRODUCER_NOT_EXISTS.getCode());
+            throw new ProducerException(String.format("topic %s producer %s is not exist", topic, config.getApp()), JournalqCode.FW_PRODUCER_NOT_EXISTS.getCode());
         }
         return topicMetadata;
     }

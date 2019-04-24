@@ -1,6 +1,19 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.network.command;
 
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.domain.BrokerNode;
 
 /**
@@ -12,17 +25,17 @@ import com.jd.journalq.network.domain.BrokerNode;
 public class FindCoordinatorAckData {
 
     private BrokerNode node;
-    private JMQCode code;
+    private JournalqCode code;
 
     public FindCoordinatorAckData() {
 
     }
 
-    public FindCoordinatorAckData(JMQCode code) {
+    public FindCoordinatorAckData(JournalqCode code) {
         this.code = code;
     }
 
-    public FindCoordinatorAckData(BrokerNode node, JMQCode code) {
+    public FindCoordinatorAckData(BrokerNode node, JournalqCode code) {
         this.node = node;
         this.code = code;
     }
@@ -35,11 +48,11 @@ public class FindCoordinatorAckData {
         this.node = node;
     }
 
-    public JMQCode getCode() {
+    public JournalqCode getCode() {
         return code;
     }
 
-    public void setCode(JMQCode code) {
+    public void setCode(JournalqCode code) {
         this.code = code;
     }
 }

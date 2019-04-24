@@ -101,14 +101,20 @@ export default {
       this.multipleSelection = val
       this.$emit('on-choosed-broker', val)
     },
-    leader(item) {
-      let data = item;
+    leader (item) {
+      let brokerIds = []
+      for (var i = 0; i < this.multipleSelection.length; i++) {
+        brokerIds.push(this.multipleSelection[i].brokerId)
+      }
+      item.outSyncReplicas = brokerIds
+
+      let data = item
       apiRequest.post(this.urls.leader, {}, data).then((data) => {
-        if(data.code === 200) {
-          this.$Message.success('更新成功');
-          this.getList();
+        if (data.code === 200) {
+          this.$Message.success('更新成功')
+          this.getList()
         } else {
-          this.$Message.error('更新失败');
+          this.$Message.error('更新失败')
         }
       })
     },

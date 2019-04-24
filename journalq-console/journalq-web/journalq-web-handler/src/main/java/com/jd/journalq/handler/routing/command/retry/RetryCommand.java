@@ -1,28 +1,47 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.handler.routing.command.retry;
 
 import com.jd.journalq.domain.ConsumeRetry;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
+import com.jd.journalq.handler.annotation.Operator;
+import com.jd.journalq.handler.annotation.PageQuery;
 import com.jd.journalq.message.BrokerMessage;
 import com.jd.journalq.model.PageResult;
 import com.jd.journalq.model.QPageQuery;
-import com.jd.journalq.handler.binder.annotation.Operator;
-import com.jd.journalq.handler.binder.annotation.Page;
-import com.jd.journalq.handler.binder.annotation.ParamterValue;
-import com.jd.journalq.handler.binder.annotation.Path;
 import com.jd.journalq.handler.util.RetryUtils;
-import com.jd.journalq.handler.Constants;
-import com.jd.journalq.model.domain.*;
+import com.jd.journalq.model.domain.ApplicationUser;
+import com.jd.journalq.model.domain.BaseModel;
+import com.jd.journalq.model.domain.Consumer;
+import com.jd.journalq.model.domain.Identity;
+import com.jd.journalq.model.domain.Retry;
+import com.jd.journalq.model.domain.Topic;
+import com.jd.journalq.model.domain.User;
 import com.jd.journalq.model.query.QConsumer;
 import com.jd.journalq.model.query.QRetry;
 import com.jd.journalq.service.ApplicationUserService;
 import com.jd.journalq.service.ConsumerService;
 import com.jd.journalq.service.RetryService;
-import com.jd.journalq.toolkit.lang.Strings;
+import com.google.common.base.Strings;
+import com.jd.journalq.toolkit.time.SystemClock;
 import com.jd.journalq.util.LocalSession;
 import com.jd.journalq.util.serializer.Serializer;
 import com.jd.laf.binding.annotation.Value;
 import com.jd.laf.web.vertx.Command;
 import com.jd.laf.web.vertx.annotation.CRequest;
+import com.jd.laf.web.vertx.annotation.Path;
+import com.jd.laf.web.vertx.annotation.QueryParam;
 import com.jd.laf.web.vertx.pool.Poolable;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
@@ -37,6 +56,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import static com.jd.journalq.handler.Constants.ID;
+import static com.jd.journalq.handler.Constants.IDS;
 import static com.jd.laf.web.vertx.response.Response.HTTP_BAD_REQUEST;
 import static com.jd.laf.web.vertx.response.Response.HTTP_INTERNAL_ERROR;
 
@@ -61,7 +82,7 @@ public class RetryCommand implements Command<Response>, Poolable {
     private ApplicationUserService applicationUserService;
 
     @Path("search")
-    public Response pageQuery(@Page(typeindex = 0) QPageQuery<QRetry> qPageQuery) throws Exception {
+    public Response pageQuery(@PageQuery QPageQuery<QRetry> qPageQuery) throws Exception {
         if (qPageQuery == null || qPageQuery.getQuery() == null || Strings.isNullOrEmpty(qPageQuery.getQuery().getTopic()) || Strings.isNullOrEmpty(qPageQuery.getQuery().getApp())) {
             return Responses.error(HTTP_BAD_REQUEST,"app,topic,status 不能为空");
         }
@@ -76,15 +97,15 @@ public class RetryCommand implements Command<Response>, Poolable {
      * @throws Exception
      */
     @Path("recovery")
-    public Response recovery(@ParamterValue(Constants.ID) Object id) throws Exception {
-        ConsumeRetry retry = retryService.getDataById(Long.valueOf(String.valueOf(id)));
+    public Response recovery(@QueryParam(ID) Long id) throws Exception {
+        ConsumeRetry retry = retryService.getDataById(id);
         if (retry != null && (retry.getStatus() == Retry.StatusEnum.RETRY_DELETE.getValue() ||
                 retry.getStatus() == Retry.StatusEnum.RETRY_OUTOFDATE.getValue()) ||
                 retry.getStatus() == Retry.StatusEnum.RETRY_SUCCESS.getValue()) {
             retry.setExpireTime(RetryUtils.getExpireTime().getTime());
             retry.setRetryTime(RetryUtils.getNextRetryTime(new Date(), 0).getTime());
             retry.setRetryCount((short) 0);
-            retry.setUpdateTime(System.currentTimeMillis());
+            retry.setUpdateTime(SystemClock.now());
             retryService.recover(retry);
             return  Responses.success("恢复成功");
         }
@@ -98,13 +119,13 @@ public class RetryCommand implements Command<Response>, Poolable {
      * @throws Exception
      */
     @Path("download")
-    public void download(@ParamterValue(Constants.ID) Object id) throws Exception {
-        ConsumeRetry retry = retryService.getDataById(Long.valueOf(String.valueOf(id)));
+    public void download(@QueryParam(ID) Long id) throws Exception {
+        ConsumeRetry retry = retryService.getDataById(id);
         if (retry != null) {
             HttpServerResponse response = request.response();
             byte[] data = retry.getData();
             if (data.length == 0) {
-                throw new JMQException("消息内容为空",HTTP_BAD_REQUEST);
+                throw new JournalqException("消息内容为空",HTTP_BAD_REQUEST);
             }
             String fileName = retry.getId() +".txt";
             response.reset();
@@ -122,11 +143,11 @@ public class RetryCommand implements Command<Response>, Poolable {
     }
 
     @Path("delete")
-    public Response delete(@ParamterValue(Constants.ID) Object id) throws Exception {
-        ConsumeRetry retry = retryService.getDataById(Long.valueOf(String.valueOf(id)));
+    public Response delete(@QueryParam(ID) Long id) throws Exception {
+        ConsumeRetry retry = retryService.getDataById(id);
         retry.setStatus((short) BaseModel.DELETED);
         retry.setUpdateBy(operator.getId().intValue());
-        retry.setUpdateTime(System.currentTimeMillis());
+        retry.setUpdateTime(SystemClock.now());
         retryService.delete(retry);
         return Responses.success();
     }
@@ -137,10 +158,10 @@ public class RetryCommand implements Command<Response>, Poolable {
      * @throws Exception
      */
     @Path("batchDelete")
-    public Response batchDelete(@ParamterValue(Constants.IDS) Object ids) throws Exception {
-        List<String> idList= Arrays.asList(String.valueOf(ids).split(","));
+    public Response batchDelete(@QueryParam(IDS) String ids) throws Exception {
+        List<String> idList= Arrays.asList(ids.split(","));
         for (String id : idList) {
-            delete(id);
+            delete(Long.valueOf(id));
         }
         return Responses.success();
     }
@@ -151,15 +172,15 @@ public class RetryCommand implements Command<Response>, Poolable {
      * @throws Exception
      */
     @Path("batchRecovery")
-    public Response batchRecovery(@ParamterValue(Constants.IDS) Object ids) throws Exception {
-        List<String> idList= Arrays.asList(String.valueOf(ids).split(","));
+    public Response batchRecovery(@QueryParam(IDS) String ids) throws Exception {
+        List<String> idList= Arrays.asList(ids.split(","));
         for (String id : idList) {
-            recovery(id);
+            recovery(Long.valueOf(id));
         }
         return Responses.success();
     }
 
-    private boolean hasSubscribe(String topic,String app) {
+    private boolean hasSubscribe(String topic, String app) {
         QConsumer qConsumer =  new QConsumer();
         qConsumer.setApp(new Identity(app));
         qConsumer.setTopic(new Topic(topic));
@@ -167,7 +188,6 @@ public class RetryCommand implements Command<Response>, Poolable {
         try {
             consumerList = consumerService.findByQuery(qConsumer);
         } catch (Exception e) {
-            e.printStackTrace();
         }
         if (consumerList != null && consumerList.size() > 0) {
             return true;

@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.service.impl;
 
 import com.jd.journalq.model.PageResult;
@@ -18,8 +31,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
+
+import static com.jd.journalq.exception.ServiceException.IGNITE_RPC_ERROR;
+import static com.jd.journalq.exception.ServiceException.INTERNAL_SERVER_ERROR;
 
 /**
  * topic partition group service implement
@@ -38,20 +58,6 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
     @Autowired
     private ReplicaServerService replicaServerService;
 
-//    @Override
-//    public TopicPartitionGroup findById(long id) {
-//        TopicPartitionGroup group = super.findById(id);
-//        QPartitionGroupReplica qTopicPartitionGroup = new QPartitionGroupReplica();
-//        qTopicPartitionGroup.setTopic(group.getTopic());
-//        qTopicPartitionGroup.setNamespace(group.getNamespace());
-//        qTopicPartitionGroup.setGroupNo(group.getGroupNo());
-//        try {
-//            group.setReplicaGroups(new TreeSet<>(replicaServerService.findByQuery(qTopicPartitionGroup)));
-//        } catch (Exception e) {
-//            throw new ServiceException(IGNITE_RPC_ERROR,e.getMessage());
-//        }
-//        return group;
-//    }
 
     @Override
     public TopicPartitionGroup findByTopicAndGroup(String namespace, String topic, Integer groupNo) {
@@ -75,7 +81,7 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
             }
         } catch (Exception e) {
             logger.error("exception",e);
-            throw new ServiceException(ServiceException.IGNITE_RPC_ERROR,e.getMessage());
+            throw new ServiceException(IGNITE_RPC_ERROR,e.getMessage());
         }
         return group;
     }
@@ -92,7 +98,7 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
         } catch (Exception e) {
             String errorMsg = "新添加partitionGroup，同步NameServer失败";
             logger.error(errorMsg, e);
-            throw new ServiceException(ServiceException.INTERNAL_SERVER_ERROR, errorMsg);
+            throw new ServiceException(INTERNAL_SERVER_ERROR, errorMsg);
         }
     }
 
@@ -105,7 +111,7 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
             groups = partitionGroupServerService.findByQuery(new QTopicPartitionGroup(new Topic(model.getTopic().getCode())));
         } catch (Exception e) {
             logger.error("partitionGroupServerService.findByQuery",e);
-            throw new ServiceException(ServiceException.IGNITE_RPC_ERROR,e.getMessage());
+            throw new ServiceException(IGNITE_RPC_ERROR,e.getMessage());
         }
         int currentPartitions = topic.getPartitions();
         if (groups != null) {
@@ -124,7 +130,7 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
         } catch (Exception e) {
             String errorMsg = "新添加partitionGroup，同步NameServer失败";
             logger.error(errorMsg, e);
-            throw new ServiceException(ServiceException.INTERNAL_SERVER_ERROR, errorMsg);//回滚
+            throw new ServiceException(INTERNAL_SERVER_ERROR, errorMsg);//回滚
         }
         return 1;
     }
@@ -142,10 +148,11 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
 
         int currentPartitions = topic.getPartitions();
         topic.setPartitions(topic.getPartitions()+Integer.valueOf(model.getPartitionCount()));
-        Set<Integer> partitions = Arrays.stream(topicPartitionGroup.getPartitions().substring(1,topicPartitionGroup.getPartitions().length()-1).split(",")).map(m->Integer.valueOf(m.trim())).collect(Collectors.toSet());
+        Set<Integer> partitions = Arrays.stream(topicPartitionGroup.getPartitions().substring(1,topicPartitionGroup.getPartitions().length()-1).split(",")).
+                map(m->Integer.valueOf(m.trim())).collect(Collectors.toSet());
 
         if (model.getPartitionCount()<=0) {
-            throw new ServiceException(ServiceException.INTERNAL_SERVER_ERROR, "数据异常");
+            throw new ServiceException(INTERNAL_SERVER_ERROR, "数据异常");
         }
         for(int i =currentPartitions;i<topic.getPartitions();i++){
             partitions.add(i);
@@ -157,7 +164,7 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
         } catch (Exception e) {
             String errorMsg = "更新partitionGroup，同步NameServer失败";
             logger.error(errorMsg, e);
-            throw new ServiceException(ServiceException.INTERNAL_SERVER_ERROR, errorMsg);//回滚
+            throw new ServiceException(INTERNAL_SERVER_ERROR, errorMsg);//回滚
         }
         return 1;
     }
@@ -175,10 +182,11 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
 
         int currentPartitions = topic.getPartitions();
         topic.setPartitions(topic.getPartitions()-Integer.valueOf(model.getPartitionCount()));
-        Set<Integer> partitions = Arrays.stream(topicPartitionGroup.getPartitions().substring(1,topicPartitionGroup.getPartitions().length()-1).split(",")).map(m->Integer.valueOf(m.trim())).collect(Collectors.toSet());
+        Set<Integer> partitions = Arrays.stream(topicPartitionGroup.getPartitions().substring(1,topicPartitionGroup.getPartitions().length()-1).split(",")).
+                map(m->Integer.valueOf(m.trim())).collect(Collectors.toSet());
         //如果缩减数小于，已有partition数，则更改失败
         if (model.getPartitionCount()>= partitions.size()) {
-            throw new ServiceException(ServiceException.INTERNAL_SERVER_ERROR, "数据异常");
+            throw new ServiceException(INTERNAL_SERVER_ERROR, "数据异常");
         }
         for(int i=currentPartitions-1;i>topic.getPartitions()-1;i--){
             partitions.remove(i);
@@ -190,7 +198,7 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
         } catch (Exception e) {
             String errorMsg = "更新partitionGroup，同步NameServer失败";
             logger.error(errorMsg, e);
-            throw new ServiceException(ServiceException.INTERNAL_SERVER_ERROR, errorMsg);//回滚
+            throw new ServiceException(INTERNAL_SERVER_ERROR, errorMsg);//回滚
         }
         return 1;
     }
@@ -199,6 +207,7 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
     public int leaderChange(TopicPartitionGroup model) throws Exception {
         TopicPartitionGroup topicPartitionGroup = findByTopicAndGroup(model.getNamespace().getCode(),model.getTopic().getCode(),model.getGroupNo());
         topicPartitionGroup.setLeader(model.getLeader());
+        topicPartitionGroup.setOutSyncReplicas(model.getOutSyncReplicas());
         return topicNameServerService.leaderChange(topicPartitionGroup);
     }
 
@@ -230,7 +239,7 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
         } catch (Exception e) {
             String errorMsg = "删除partitionGroup，同步NameServer失败";
             logger.error(errorMsg, e);
-            throw new ServiceException(ServiceException.INTERNAL_SERVER_ERROR, errorMsg);//回滚
+            throw new ServiceException(INTERNAL_SERVER_ERROR, errorMsg);//回滚
         }
         return 1;
     }

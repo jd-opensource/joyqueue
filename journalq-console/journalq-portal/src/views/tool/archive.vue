@@ -1,19 +1,19 @@
 <template>
   <div>
-    <div class="ml20 mt30">
-      <d-date-picker v-model="times" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" value-format="timestamp" :default-time="['00:00:00', '23:59:59']">
+    <div class="ml20">
+      <d-date-picker v-model="times" type="daterange" class="left mr5 mt10" range-separator="至"
+                     start-placeholder="开始日期" end-placeholder="结束日期" value-format="timestamp"
+                     :default-time="['00:00:00', '23:59:59']"  style="width:370px">
         <span slot="prepend">日期范围</span>
       </d-date-picker>
-      <d-input v-model="searchData.topic" placeholder="队列名" class="left mr10" style="width: 15%">
+      <d-input v-model="search.topic" placeholder="队列名" class="left mr5 mt10" style="width: 213px">
         <span slot="prepend">队列名</span>
       </d-input>
-      <d-input v-model="searchData.businessId" placeholder="业务ID" class="left mr10" style="width: 15%">
+      <d-input v-model="search.businessId" placeholder="业务ID" class="left mr5 mt10" style="width: 213px">
         <span slot="prepend">业务ID</span>
       </d-input>
-      <d-button type="primary" @click="getListWithDate(false)">查询</d-button>
-      <d-button type="primary" @click="exportArchive">归档导出</d-button>
-      <d-button type="primary" @click="batchRetry">归档转重试</d-button>
-      <d-button type="primary" @click="toArchiveTask">任务详情</d-button>
+      <d-button class="left mr5 mt10" type="primary" color="success" @click="getListWithDate(false)">查询</d-button>
+      <slot name="extendBtn"></slot>
     </div>
     <my-table :showPagination="false" :showPin="showTablePin" :data="tableData" :page="page" @on-size-change="handleSizeChange"
               @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
@@ -47,18 +47,48 @@ export default {
     myTable
   },
   mixins: [ crud ],
+  props: {
+    search: {
+      type: Object,
+      default: function () {
+        return {
+          topic: '',
+          businessId: '',
+          beginTime: '',
+          endTime: '',
+          sendTime: '',
+          messageId: '',
+          count: 10
+        }
+      }
+    },
+    btns: {
+      type: Array,
+      default: function () {
+        return [
+          {
+            txt: '下载消息体',
+            method: 'on-download'
+          },
+          {
+            txt: '归档转重试',
+            method: 'on-retry'
+          },
+          {
+            txt: '查看消费',
+            method: 'on-consume'
+          }
+        ]
+      }
+    }
+  },
   data () {
     return {
-      searchData: {
-        topic: '',
-        businessId: '',
-        beginTime: '',
-        endTime: '',
-        sendTime: '',
-        messageId: '',
-        count: 10
-      },
-      searchRules: {
+      urls: {
+        search: '/archive/search',
+        consume: '/archive/consume',
+        download: '/archive/download',
+        retry: '/archive/retry'
       },
       firstDis: true,
       nextDis: true,
@@ -138,64 +168,36 @@ export default {
             key: 'topic'
           }
         ],
-        // 表格操作，如果需要根据特定值隐藏显示， 设置bindKey对应的属性名和bindVal对应的属性值
-        btns: [
-          {
-            txt: '下载消息体',
-            method: 'on-download'
-          },
-          {
-            txt: '归档转重试',
-            method: 'on-retry'
-          },
-          {
-            txt: '查看消费',
-            method: 'on-consume'
-          }
-        ]
+        btns: this.btns
       },
       multipleSelection: [],
-      addDialog: {
-        visible: false,
-        title: '新建任务',
-        showFooter: false
-      },
       times: []
     }
   },
-
   methods: {
-    toArchiveTask() {
-      console.log("tool/archiveTask");
-      this.$router.push({
-        name: `/${this.$i18n.locale}/tool/archiveTask`,
-        query: {}
-      });
-    },
     getListWithDate (isNext) {
-      if (!this.times || this.times.length < 2 || !this.searchData.topic) {
+      if (!this.times || this.times.length < 2 || !this.search.topic) {
         this.$Dialog.error({
-          content: '起始时间,结束时间 topic 都不能为空'
+          title: '格式错误',
+          content: '起始时间, 结束时间，主题 都不能为空'
         })
         return false
       }
       this.firstDis = true
       let oldData = this.tableData.rowData
-      this.searchData.beginTime = this.times[0]
-      this.searchData.endTime = this.times[1]
+      this.search.beginTime = this.times[0]
+      this.search.endTime = this.times[1]
       if (isNext) {
-        this.searchData.sendTime = oldData[oldData.length - 1].sendTime
+        this.search.sendTime = oldData[oldData.length - 1].sendTime
         this.firstDis = false
       } else {
-        this.searchData.sendTime = this.searchData.beginTime;
-        this.firstDis = true;
+        this.search.sendTime = this.search.beginTime
+        this.firstDis = true
       }
       // this.getList();
-      apiRequest.post(this.urlOrigin.search, {}, this.searchData).then((data) => {
-        this.tableData.rowData = data.data;
-        // let newData = this.tableData.rowData;
-        console.log(this.tableData.rowData.length)
-        if (this.tableData.rowData.length < this.searchData.count) {
+      apiRequest.post(this.urlOrigin.search, {}, this.search).then((data) => {
+        this.tableData.rowData = data.data
+        if (this.tableData.rowData.length < this.search.count) {
           this.nextDis = true
         } else {
           this.nextDis = false
@@ -218,49 +220,10 @@ export default {
       apiRequest.get(this.urlOrigin.consume + '/' + item.messageId).then((data) => {
         this.consumeData.rowData = data.data
       })
-    },
-    exportArchive(){
-      if (!this.times || this.times.length < 2 || !this.searchData.topic) {
-        this.$Dialog.error({
-          content: '起始时间,结束时间 topic 都不能为空'
-        })
-        return false
-      }
-      this.searchData.beginTime = this.times[0]
-      this.searchData.endTime = this.times[1]
-      this.$Dialog.confirm({
-        title: '提示',
-        content: '确定按查询条件批量导出归档消息吗？'
-      }).then(() => {
-        apiRequest.post(this.urlOrigin.export, {}, this.searchData).then(data => {
-          this.$Message.success('操作成功')
-        })
-      })
-    },
-    batchRetry(){
-      if (!this.times || this.times.length < 2 || !this.searchData.topic) {
-        this.$Dialog.error({
-          content: '起始时间,结束时间 topic 都不能为空'
-        })
-        return false
-      }
-      this.searchData.beginTime = this.times[0]
-      this.searchData.endTime = this.times[1]
-      this.$Dialog.confirm({
-        title: '提示',
-        content: '确定按查询条件批量重试消费消息吗？'
-      }).then(() => {
-        apiRequest.post(this.urlOrigin.batchRetry, {}, this.searchData).then(data => {
-          this.$Message.success('操作成功')
-        })
-      })
     }
   },
   mounted () {
-    // this.searchData.beginTime=this.times[0];
-    // this.searchData.endTime=this.times[1];
-    //
-    // this.getList();
+
   }
 }
 </script>

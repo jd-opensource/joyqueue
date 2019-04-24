@@ -1,9 +1,28 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.domain;
 
 import com.google.common.collect.Maps;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author lixiaobin6
@@ -38,25 +57,6 @@ public class TopicConfig extends Topic implements Serializable {
         return config;
     }
 
-    public Set<Short> getPriorityPartitions() {
-        return priorityPartitions;
-    }
-
-    public void setPriorityPartitions(Set<Short> priorityPartitions) {
-        this.priorityPartitions = priorityPartitions;
-    }
-
-
-
-    public short getPartitions() {
-        return partitions;
-    }
-
-    public void setPartitions(short partitions) {
-        this.partitions = partitions;
-    }
-
-
     public Map<Integer,PartitionGroup> getPartitionGroups() {
         return partitionGroups;
     }
@@ -64,7 +64,9 @@ public class TopicConfig extends Topic implements Serializable {
     public List<PartitionGroup> fetchPartitionGroupByBrokerId(int brokerId) {
         List<PartitionGroup> list = new ArrayList<>();
         for(PartitionGroup group : partitionGroups.values()) {
-            if (group.getLeader().equals(brokerId)) list.add(group);
+            if (group.getLeader().equals(brokerId)){
+                list.add(group);
+            }
         }
         return list;
     }
@@ -72,7 +74,9 @@ public class TopicConfig extends Topic implements Serializable {
     public List<PartitionGroup> fetchTopicPartitionGroupsByBrokerId(int brokerId) {
         List<PartitionGroup> list = new ArrayList<>();
         for(PartitionGroup group : partitionGroups.values()) {
-            if (group.getReplicas().contains(brokerId)) list.add(group);
+            if (group.getReplicas().contains(brokerId)){
+                list.add(group);
+            }
         }
         return list;
     }
@@ -102,7 +106,9 @@ public class TopicConfig extends Topic implements Serializable {
 
     public Broker fetchBrokerByPartition(short partition) {
         PartitionGroup group = fetchPartitionGroupByPartition(partition);
-        if (null != group) return group.getBrokers().get(group.getLeader());
+        if (null != group){
+            return group.getBrokers().get(group.getLeader());
+        }
         return null;
     }
 
@@ -112,11 +118,15 @@ public class TopicConfig extends Topic implements Serializable {
                 for (Short partition : group.getPartitions()) {
                     Set<Broker> irs = new HashSet<>(null == group.getIsrs() ? 0 : group.getIsrs().size());
                     Set<Broker> replicas = new HashSet<>(null == group.getReplicas() ? 0 : group.getReplicas().size());
-                    if (null != group.getIsrs()) for (Integer brokerId : group.getIsrs()) {
-                        irs.add(group.getBrokers().get(brokerId));
+                    if (null != group.getIsrs()){
+                        for (Integer brokerId : group.getIsrs()) {
+                            irs.add(group.getBrokers().get(brokerId));
+                        }
                     }
-                    if (null != group.getReplicas()) for (Integer brokerId : group.getReplicas()) {
-                        replicas.add(group.getBrokers().get(brokerId));
+                    if (null != group.getReplicas()){
+                        for (Integer brokerId : group.getReplicas()) {
+                            replicas.add(group.getBrokers().get(brokerId));
+                        }
                     }
                     metadataList.add(new Partition(partition, group.getBrokers().get(group.getLeader()), irs, replicas));
                 }
@@ -154,7 +164,9 @@ public class TopicConfig extends Topic implements Serializable {
     public List<Short> fetchPartitionByBroker(int brokerId) {
         List<Short> partitions = new ArrayList<>();
             for (PartitionGroup group : partitionGroups.values()) {
-                if (group.getLeader().equals(brokerId)) partitions.addAll(group.getPartitions());
+                if (group.getLeader().equals(brokerId)){
+                    partitions.addAll(group.getPartitions());
+                }
             }
         return partitions;
     }

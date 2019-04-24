@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.client.internal.cluster;
 
 import com.google.common.collect.Maps;
@@ -6,7 +19,7 @@ import com.jd.journalq.client.internal.metadata.MetadataManager;
 import com.jd.journalq.client.internal.metadata.domain.ClusterMetadata;
 import com.jd.journalq.client.internal.metadata.domain.TopicMetadata;
 import com.jd.journalq.client.internal.nameserver.NameServerConfig;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.toolkit.concurrent.NamedThreadFactory;
 import com.jd.journalq.toolkit.service.Service;
 import com.jd.journalq.toolkit.time.SystemClock;
@@ -100,7 +113,7 @@ public class MetadataUpdater extends Service {
         try {
             TopicMetadata topicMetadata = metadataManager.fetchMetadata(topic, app);
             metadataCacheManager.putTopicMetadata(topic, app, topicMetadata);
-            if (topicMetadata.getCode().equals(JMQCode.SUCCESS)) {
+            if (topicMetadata.getCode().equals(JournalqCode.SUCCESS)) {
                 return topicMetadata;
             }
             return null;
@@ -108,7 +121,7 @@ public class MetadataUpdater extends Service {
             logger.error("update topic metadata exception, topic: {}, app: {}", topic, app, e);
 
             if (metadataCacheManager.getTopicMetadata(topic, app) == null) {
-                metadataCacheManager.putTopicMetadata(topic, app, new TopicMetadata(JMQCode.CN_SERVICE_NOT_AVAILABLE));
+                metadataCacheManager.putTopicMetadata(topic, app, new TopicMetadata(JournalqCode.CN_SERVICE_NOT_AVAILABLE));
             }
             return null;
         }
@@ -123,7 +136,7 @@ public class MetadataUpdater extends Service {
             for (String topic : topics) {
                 TopicMetadata topicMetadata = clusterMetadata.getTopic(topic);
                 metadataCacheManager.putTopicMetadata(topic, app, topicMetadata);
-                if (topicMetadata.getCode().equals(JMQCode.SUCCESS)) {
+                if (topicMetadata.getCode().equals(JournalqCode.SUCCESS)) {
                     result.put(topic, topicMetadata);
                 }
             }
@@ -132,7 +145,7 @@ public class MetadataUpdater extends Service {
 
             for (String topic : topics) {
                 if (metadataCacheManager.getTopicMetadata(topic, app) == null) {
-                    metadataCacheManager.putTopicMetadata(topic, app, new TopicMetadata(JMQCode.CN_SERVICE_NOT_AVAILABLE));
+                    metadataCacheManager.putTopicMetadata(topic, app, new TopicMetadata(JournalqCode.CN_SERVICE_NOT_AVAILABLE));
                 }
             }
         }

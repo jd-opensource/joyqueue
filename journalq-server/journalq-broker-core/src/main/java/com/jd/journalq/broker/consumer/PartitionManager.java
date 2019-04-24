@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.broker.consumer;
 
 import com.jd.journalq.broker.cluster.ClusterManager;
@@ -6,7 +19,7 @@ import com.jd.journalq.broker.consumer.model.OwnerShip;
 import com.jd.journalq.broker.retry.RetryProbability;
 import com.jd.journalq.domain.Consumer.ConsumerPolicy;
 import com.jd.journalq.domain.TopicName;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.network.session.Consumer;
 import com.jd.journalq.toolkit.time.SystemClock;
 import org.apache.commons.collections.CollectionUtils;
@@ -161,7 +174,7 @@ public class PartitionManager {
      * @param consumer 消费者信息
      * @return
      */
-    public boolean needPause(Consumer consumer) throws JMQException {
+    public boolean needPause(Consumer consumer) throws JournalqException {
         ConsumerPolicy consumerPolicy = clusterManager.getConsumerPolicy(TopicName.parse(consumer.getTopic()), consumer.getApp());
         // 允许连续出错的限制
         int thresholdVal = consumerPolicy.getErrTimes();
@@ -376,7 +389,7 @@ public class PartitionManager {
             try {
                 ConsumerPolicy consumerPolicy = clusterManager.getConsumerPolicy(TopicName.parse(topic), app);
                 maxPartitionNum = consumerPolicy.getMaxPartitionNum();
-            } catch (JMQException e) {
+            } catch (JournalqException e) {
                 logger.error(e.getMessage(), e);
             }
 

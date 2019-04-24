@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="ml20 mt30">
-      <d-input v-model="searchData.keyword" placeholder="请输入代码/值" class="left mr10" style="width: 20%">
+      <d-input v-model="searchData.keyword" placeholder="请输入代码/值" class="left mr10" style="width:213px">
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
       <d-button type="primary" @click="openDialog('addDialog')">新建 Namespace<icon name="plus-circle" style="margin-left: 5px;"></icon></d-button>
@@ -13,14 +13,16 @@
     <!--新建namespace-->
     <my-dialog :dialog="addDialog" @on-dialog-confirm="addConfirm()" @on-dialog-cancel="addCancel()">
         <grid-row class="mb10">
-          <grid-col :span="8" class="label">代码:</grid-col>
-          <grid-col :span="16" class="val">
+          <grid-col :span="3" class="label">代码:</grid-col>
+          <grid-col :span="1"/>
+          <grid-col :span="14" class="val">
             <d-input v-model="addData.code"></d-input>
           </grid-col>
         </grid-row>
         <grid-row class="mb10">
-          <grid-col :span="8" class="label">名称:</grid-col>
-          <grid-col :span="16" class="val">
+          <grid-col :span="3" class="label">名称:</grid-col>
+          <grid-col :span="1"/>
+          <grid-col :span="14" class="val">
             <d-input v-model="addData.name"></d-input>
           </grid-col>
         </grid-row>
@@ -28,14 +30,16 @@
     <!--编辑namespace-->
     <my-dialog :dialog="editDialog" @on-dialog-confirm="editConfirm()" @on-dialog-cancel="editCancel()">
       <grid-row class="mb10">
-        <grid-col :span="8" class="label">代码:</grid-col>
-        <grid-col :span="16" class="val">
+        <grid-col :span="5" class="label">代码:</grid-col>
+        <grid-col :span="1"/>
+        <grid-col :span="14" class="val">
           <d-input v-model="editData.code" disabled></d-input>
         </grid-col>
       </grid-row>
       <grid-row class="mb10">
-        <grid-col :span="8" class="label">名称:</grid-col>
-        <grid-col :span="16" class="val">
+        <grid-col :span="5" class="label">名称:</grid-col>
+        <grid-col :span="1"/>
+        <grid-col :span="14" class="val">
           <d-input v-model="editData.name"></d-input>
         </grid-col>
       </grid-row>
@@ -112,11 +116,13 @@ export default {
       this.addData.name = ''
     },
     beforeEdit () {
-      return {
-        id: this.editData.id,
-        code: this.editData.code,
-        name: this.editData.name
-      }
+      return new Promise((resolve, reject) => {
+        resolve({
+          id: this.editData.id,
+          code: this.editData.code,
+          name: this.editData.name
+        })
+      })
     }
   },
   mounted () {

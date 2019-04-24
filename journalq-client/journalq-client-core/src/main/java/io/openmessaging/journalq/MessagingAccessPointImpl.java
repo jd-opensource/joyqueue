@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.openmessaging.journalq;
 
 import com.jd.journalq.client.internal.MessageAccessPoint;
@@ -9,7 +22,7 @@ import com.jd.journalq.client.internal.producer.MessageProducer;
 import com.jd.journalq.client.internal.producer.config.ProducerConfig;
 import com.jd.journalq.client.internal.producer.feedback.config.TxFeedbackConfig;
 import com.jd.journalq.client.internal.transport.config.TransportConfig;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import io.openmessaging.KeyValue;
 import io.openmessaging.MessagingAccessPoint;
 import io.openmessaging.consumer.Consumer;
@@ -94,7 +107,7 @@ public class MessagingAccessPointImpl implements MessagingAccessPoint {
 
     @Override
     public ResourceManager resourceManager() {
-        throw new OMSUnsupportException(JMQCode.CN_COMMAND_UNSUPPORTED.getCode(), "resourceManager is not supported");
+        throw new OMSUnsupportException(JournalqCode.CN_COMMAND_UNSUPPORTED.getCode(), "resourceManager is not supported");
     }
 
     @Override

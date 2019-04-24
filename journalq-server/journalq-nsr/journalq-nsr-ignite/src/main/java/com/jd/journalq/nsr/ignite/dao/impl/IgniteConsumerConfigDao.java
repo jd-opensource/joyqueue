@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.nsr.ignite.dao.impl;
 
 import com.jd.journalq.model.PageResult;
@@ -19,7 +32,25 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import static com.jd.journalq.nsr.ignite.model.IgniteBaseModel.SCHEMA;
-import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.*;
+import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.COLUMN_NAMESPACE;
+import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.COLUMN_TOPIC;
+import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.COLUMN_APP;
+import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.COLUMN_NEAR_BY;
+import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.COLUMN_ARCHIVE;
+import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.COLUMN_RETRY;
+import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.COLUMN_CONCURRENT;
+import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.COLUMN_ACK_TIMEOUT;
+import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.COLUMN_BATCH_SIZE;
+import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.COLUMN_BLACK_LIST;
+import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.COLUMN_DELAY;
+import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.COLUMN_MAX_RETRYS;
+import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.COLUMN_MAX_RETRY_DELAY;
+import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.COLUMN_RETRY_DELAY;
+import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.COLUMN_EXPIRE_TIME;
+import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.COLUMN_PAUSED;
+import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.COLUMN_ERROR_TIMES;
+import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.COLUMN_MAX_PARTITION_NUM;
+import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.COLUMN_RETRY_READ_PROBABILITY;
 import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.COLUMN_ID;
 
 public class IgniteConsumerConfigDao implements ConsumerConfigDao {

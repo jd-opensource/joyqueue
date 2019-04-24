@@ -1,6 +1,19 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.broker.consumer;
 
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.message.BrokerMessage;
 import org.junit.Assert;
 import org.junit.Test;
@@ -16,7 +29,7 @@ import java.util.regex.Pattern;
 public class FilterMessageSupportTest1 {
 
     @Test
-    public void doFilterTestAckAndReturn() throws JMQException {
+    public void doFilterTestAckAndReturn() throws JournalqException {
         List<BrokerMessage> messages = new ArrayList<>();
         BrokerMessage brokerMessage1 = new BrokerMessage();
         brokerMessage1.setFlag((short) 1);
@@ -44,7 +57,7 @@ public class FilterMessageSupportTest1 {
 
 
     @Test
-    public void doFilterTestAckAndReturnByFalse() throws JMQException {
+    public void doFilterTestAckAndReturnByFalse() throws JournalqException {
         List<BrokerMessage> messages = new ArrayList<>();
         BrokerMessage brokerMessage1 = new BrokerMessage();
         brokerMessage1.setFlag((short) 1);
@@ -71,7 +84,7 @@ public class FilterMessageSupportTest1 {
     }
 
     @Test
-    public void doFilterTestNoAckAndReturn() throws JMQException {
+    public void doFilterTestNoAckAndReturn() throws JournalqException {
         List<BrokerMessage> messages = new ArrayList<>();
         BrokerMessage brokerMessage1 = new BrokerMessage();
         brokerMessage1.setFlag((short) 1);
@@ -98,7 +111,7 @@ public class FilterMessageSupportTest1 {
     }
 
     @Test
-    public void doFilterTestNoAckAndReturnByFalse() throws JMQException {
+    public void doFilterTestNoAckAndReturnByFalse() throws JournalqException {
         List<BrokerMessage> messages = new ArrayList<>();
         BrokerMessage brokerMessage1 = new BrokerMessage();
         brokerMessage1.setFlag((short) 1);
@@ -125,7 +138,7 @@ public class FilterMessageSupportTest1 {
     }
 
     @Test
-    public void doFilterTestAllReturn() throws JMQException {
+    public void doFilterTestAllReturn() throws JournalqException {
         List<BrokerMessage> messages = new ArrayList<>();
         BrokerMessage brokerMessage1 = new BrokerMessage();
         brokerMessage1.setFlag((short) 1);
@@ -153,7 +166,7 @@ public class FilterMessageSupportTest1 {
     }
 
     @Test
-    public void doFilterTestAllAck() throws JMQException {
+    public void doFilterTestAllAck() throws JournalqException {
         List<BrokerMessage> messages = new ArrayList<>();
         BrokerMessage brokerMessage1 = new BrokerMessage();
         brokerMessage1.setFlag((short) 1);
@@ -193,7 +206,7 @@ public class FilterMessageSupportTest1 {
      * @param pattern
      * @return
      */
-    private FilterResult doFilter(List<BrokerMessage> messages, String pattern) throws JMQException {
+    private FilterResult doFilter(List<BrokerMessage> messages, String pattern) throws JournalqException {
         List<BrokerMessage> validList = new ArrayList<>(); // 有效队列
         List<BrokerMessage> inValidList = null; // 无效队列
         boolean /* 有效到无效 */ valid2InvalidFlag = false,

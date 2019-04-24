@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.broker.kafka.handler;
 
 
@@ -41,16 +54,17 @@ public class OffsetCommitRequestHandler extends AbstractKafkaCommandHandler impl
         Table<String, Integer, OffsetMetadataAndError> result = groupCoordinator.handleCommitOffsets(offsetCommitRequest.getGroupId(), offsetCommitRequest.getMemberId(),
                 offsetCommitRequest.getGroupGenerationId(), offsetCommitRequest.getOffsetAndMetadata());
 
+        // TODO 临时日志
         if (logger.isDebugEnabled()) {
             for (String topic : result.rowKeySet()) {
                 Map<Integer, OffsetMetadataAndError> errorCodes = result.row(topic);
                 for (Map.Entry<Integer, OffsetMetadataAndError> codeEntry : errorCodes.entrySet()) {
                     if (codeEntry.getValue().getError() == KafkaErrorCode.NONE.getCode()) {
-                        logger.debug("offset commit request with correlation id {} from client {} on partition {} offset {}",
-                                offsetCommitRequest.getGroupId(), offsetCommitRequest.getClientId(), topic, codeEntry.getValue());
+                        logger.debug("offset commit request with correlation id {} from client {} on topic {} partition {} offset {}",
+                                offsetCommitRequest.getCorrelationId(), offsetCommitRequest.getGroupId(), topic, codeEntry.getKey(), codeEntry.getValue());
                     } else {
-                        logger.debug("offset commit request with correlation id {} from client {} on partition {} failed due to {}",
-                                offsetCommitRequest.getGroupId(), offsetCommitRequest.getClientId(), topic, codeEntry.getValue());
+                        logger.debug("offset commit request with correlation id {} from client {} on topic {} partition {} failed due to {}",
+                                offsetCommitRequest.getCorrelationId(), offsetCommitRequest.getGroupId(), topic, codeEntry.getKey(), codeEntry.getValue());
                     }
                 }
             }

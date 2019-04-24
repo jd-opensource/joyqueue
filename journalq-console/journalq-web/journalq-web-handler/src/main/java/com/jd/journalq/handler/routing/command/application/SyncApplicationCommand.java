@@ -1,14 +1,27 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.handler.routing.command.application;
 
-import com.jd.journalq.sync.ApplicationInfo;
-import com.jd.journalq.sync.SyncService;
-import com.jd.journalq.handler.Constants;
+
 import com.jd.journalq.handler.error.ConfigException;
 import com.jd.journalq.handler.error.ErrorCode;
-import com.jd.laf.binding.annotation.Value;
 import com.jd.journalq.model.domain.Application;
 import com.jd.journalq.model.domain.Identity;
 import com.jd.journalq.model.domain.User;
+import com.jd.journalq.sync.ApplicationInfo;
+import com.jd.journalq.sync.SyncService;
+import com.jd.laf.binding.annotation.Value;
 import com.jd.laf.web.vertx.Command;
 import com.jd.laf.web.vertx.annotation.Body;
 import com.jd.laf.web.vertx.annotation.CVertx;
@@ -19,6 +32,7 @@ import io.vertx.core.Vertx;
 
 import javax.validation.constraints.NotNull;
 
+import static com.jd.journalq.handler.Constants.USER_KEY;
 import static com.jd.laf.web.vertx.annotation.Body.BodyType.JSON;
 
 /**
@@ -34,7 +48,7 @@ public class SyncApplicationCommand implements Command<Response>, Poolable {
     @Body(type = JSON)
     @NotNull
     protected Application application;
-    @Value(Constants.USER_KEY)
+    @Value(USER_KEY)
     protected User session;
     @CVertx
     private Vertx vertx;

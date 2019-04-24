@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.client.internal.consumer.transport;
 
 import com.google.common.collect.HashBasedTable;
@@ -6,7 +19,7 @@ import com.google.common.collect.Table;
 import com.jd.journalq.client.internal.transport.Client;
 import com.jd.journalq.client.internal.transport.ClientState;
 import com.jd.journalq.network.command.CommitAckRequest;
-import com.jd.journalq.network.command.CommitAckAck;
+import com.jd.journalq.network.command.CommitAckResponse;
 import com.jd.journalq.network.command.CommitAckData;
 import com.jd.journalq.network.command.FetchIndexRequest;
 import com.jd.journalq.network.command.FetchIndexResponse;
@@ -19,7 +32,7 @@ import com.jd.journalq.network.command.FetchTopicMessageData;
 import com.jd.journalq.network.transport.TransportAttribute;
 import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.transport.command.CommandCallback;
-import com.jd.journalq.network.transport.command.JMQCommand;
+import com.jd.journalq.network.transport.command.JournalqCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,47 +77,47 @@ public class ConsumerClient {
         FetchIndexRequest fetchIndexRequest = new FetchIndexRequest();
         fetchIndexRequest.setPartitions(partitions);
         fetchIndexRequest.setApp(app);
-        return (FetchIndexResponse) client.sync(new JMQCommand(fetchIndexRequest), timeout).getPayload();
+        return (FetchIndexResponse) client.sync(new JournalqCommand(fetchIndexRequest), timeout).getPayload();
     }
 
-    public CommitAckAck commitAck(Table<String, Short, List<CommitAckData>> data, String app, long timeout) {
+    public CommitAckResponse commitAck(Table<String, Short, List<CommitAckData>> data, String app, long timeout) {
         CommitAckRequest commitAckRequest = new CommitAckRequest();
         commitAckRequest.setData(data);
         commitAckRequest.setApp(app);
-        return (CommitAckAck) client.sync(new JMQCommand(commitAckRequest), timeout).getPayload();
+        return (CommitAckResponse) client.sync(new JournalqCommand(commitAckRequest), timeout).getPayload();
     }
 
     public void asyncFetchTopicMessage(List<String> topics, String app, int count, long timeout, long ackTimeout, long longPollTimeout, CommandCallback callback) {
         FetchTopicMessageRequest fetchTopicMessageRequest = buildFetchTopicMessageCommand(topics, app, count, ackTimeout, longPollTimeout);
-        client.async(new JMQCommand(fetchTopicMessageRequest), timeout, callback);
+        client.async(new JournalqCommand(fetchTopicMessageRequest), timeout, callback);
     }
 
     public FetchTopicMessageResponse fetchTopicMessage(List<String> topics, String app, int count, long timeout, long ackTimeout, long longPollTimeout) {
         FetchTopicMessageRequest fetchTopicMessageRequest = buildFetchTopicMessageCommand(topics, app, count, ackTimeout, longPollTimeout);
-        Command response = client.sync(new JMQCommand(fetchTopicMessageRequest), timeout);
+        Command response = client.sync(new JournalqCommand(fetchTopicMessageRequest), timeout);
         return (FetchTopicMessageResponse) response.getPayload();
     }
 
     public FetchPartitionMessageResponse fetchPartitionMessage(Map<String, Short> partitions, String app, int count, long timeout) {
         FetchPartitionMessageRequest fetchPartitionMessageRequest = buildPartitionTopicMessageCommand(partitions, app, count);
-        Command response = client.sync(new JMQCommand(fetchPartitionMessageRequest), timeout);
+        Command response = client.sync(new JournalqCommand(fetchPartitionMessageRequest), timeout);
         return (FetchPartitionMessageResponse) response.getPayload();
     }
 
     public void asyncFetchPartitionMessage(Map<String, Short> partitions, String app, int count, long timeout, CommandCallback callback) {
         FetchPartitionMessageRequest fetchPartitionMessageRequest = buildPartitionTopicMessageCommand(partitions, app, count);
-        client.async(new JMQCommand(fetchPartitionMessageRequest), timeout, callback);
+        client.async(new JournalqCommand(fetchPartitionMessageRequest), timeout, callback);
     }
 
     public FetchPartitionMessageResponse fetchPartitionMessage(Table<String, Short, Long> partitions, String app, int count, long timeout) {
         FetchPartitionMessageRequest fetchPartitionMessageRequest = buildPartitionTopicMessageCommand(partitions, app, count);
-        Command response = client.sync(new JMQCommand(fetchPartitionMessageRequest), timeout);
+        Command response = client.sync(new JournalqCommand(fetchPartitionMessageRequest), timeout);
         return (FetchPartitionMessageResponse) response.getPayload();
     }
 
     public void asyncFetchPartitionMessage(Table<String, Short, Long> partitions, String app, int count, long timeout, CommandCallback callback) {
         FetchPartitionMessageRequest fetchPartitionMessageRequest = buildPartitionTopicMessageCommand(partitions, app, count);
-        client.async(new JMQCommand(fetchPartitionMessageRequest), timeout, callback);
+        client.async(new JournalqCommand(fetchPartitionMessageRequest), timeout, callback);
     }
 
     public void addConsumers(Collection<String> topics, String app) {

@@ -1,12 +1,12 @@
 package com.jd.journalq.broker.kafka.coordinator.transaction;
 
+import com.google.common.base.Charsets;
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionDomain;
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionMarker;
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionOffset;
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionPrepare;
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionState;
 import com.jd.journalq.network.serializer.Serializer;
-import com.jd.journalq.toolkit.lang.Charsets;
 
 import java.nio.ByteBuffer;
 

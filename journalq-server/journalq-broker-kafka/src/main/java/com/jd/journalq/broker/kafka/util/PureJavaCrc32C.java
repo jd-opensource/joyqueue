@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.broker.kafka.util;
 
 public class PureJavaCrc32C {
@@ -65,7 +78,7 @@ public class PureJavaCrc32C {
         crc = localCrc;
     }
 
-    final public void update(int b) {
+    public final void update(int b) {
         crc = (crc >>> 8) ^ T[T8_0_START + ((crc ^ b) & 0xff)];
     }
 

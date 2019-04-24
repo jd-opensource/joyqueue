@@ -1,19 +1,33 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.handler.routing.command.broker;
 
 import com.jd.journalq.exception.ValidationException;
-import com.jd.journalq.handler.Constants;
-import com.jd.journalq.handler.binder.BodyType;
-import com.jd.journalq.handler.binder.annotation.Body;
-import com.jd.journalq.handler.binder.annotation.ParamterValue;
-import com.jd.journalq.handler.binder.annotation.Path;
 import com.jd.journalq.handler.error.ErrorCode;
 import com.jd.journalq.handler.routing.command.CommandSupport;
 import com.jd.journalq.model.domain.Broker;
 import com.jd.journalq.model.domain.BrokerGroup;
 import com.jd.journalq.model.query.QBrokerGroup;
 import com.jd.journalq.service.BrokerGroupService;
+import com.jd.laf.web.vertx.annotation.Body;
+import com.jd.laf.web.vertx.annotation.Path;
+import com.jd.laf.web.vertx.annotation.QueryParam;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
+
+import static com.jd.journalq.handler.Constants.ID;
+
 
 /**
  * 分组 处理器
@@ -29,7 +43,7 @@ public class BrokerGroupCommand extends CommandSupport<BrokerGroup, BrokerGroupS
     }
 
     @Path("updateBroker")
-    public Response updateBroker(@ParamterValue(Constants.ID)Object id, @Body(typeindex = 0,type = BodyType.JSON)  Broker model) throws Exception {
+    public Response updateBroker(@QueryParam(ID) String id, @Body Broker model) throws Exception {
         try {
             service.updateBroker(model);
         } catch (ValidationException e) {

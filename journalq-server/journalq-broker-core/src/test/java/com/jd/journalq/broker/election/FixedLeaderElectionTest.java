@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.broker.election;
 
 import com.jd.journalq.broker.consumer.Consume;
@@ -62,11 +75,11 @@ public class FixedLeaderElectionTest {
 
         for (int i = 0; i < FIX_ELECTION_NUM; i++) {
             StoreConfig storeConfig = new StoreConfig(null);
-            storeConfig.setPath("/export/jmq/store" + i);
+            storeConfig.setPath("/export/journalq/store" + i);
             storeServices[i] = new Store(storeConfig);
 
             ElectionConfig electionConfig = new ElectionConfigStub(null,null);
-            electionConfig.setMetadataFile("/export/jmq/raft" + i + ".dat");
+            electionConfig.setMetadataFile("/export/journalq/raft" + i + ".dat");
             electionConfig.setListenPort("1800" + (i + 1));
 
             //clusterManagers[i] = new ClusterManager();
@@ -128,7 +141,7 @@ public class FixedLeaderElectionTest {
         }
 
         for (int i = 0; i < FIX_ELECTION_NUM; i++) {
-            storeServices[i].createPartitionGroup(topic1.getFullName(), partitionGroup1, new short[]{1}, new int[]{1});
+            storeServices[i].createPartitionGroup(topic1.getFullName(), partitionGroup1, new short[]{1});
             electionManager[i].onPartitionGroupCreate(PartitionGroup.ElectType.fix,
                     topic1, partitionGroup1, allNodes, new TreeSet<Integer>(), brokers[i].getId(), 1);
             leaderElections[i] = electionManager[i].getLeaderElection(topic1, partitionGroup1);

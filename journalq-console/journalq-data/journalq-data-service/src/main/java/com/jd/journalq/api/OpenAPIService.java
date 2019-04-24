@@ -1,11 +1,31 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.api;
 
 import com.jd.journalq.model.PageResult;
 import com.jd.journalq.model.Pagination;
-import com.jd.journalq.model.domain.*;
+import com.jd.journalq.model.domain.Application;
+import com.jd.journalq.model.domain.ApplicationToken;
+import com.jd.journalq.model.domain.Consumer;
+import com.jd.journalq.model.domain.Identity;
+import com.jd.journalq.model.domain.PartitionOffset;
+import com.jd.journalq.model.domain.Producer;
+import com.jd.journalq.model.domain.Subscribe;
+import com.jd.journalq.model.domain.Topic;
+import com.jd.journalq.model.domain.TopicPubSub;
 import com.jd.journalq.model.query.QBrokerGroup;
 import com.jd.journalq.monitor.PartitionAckMonitorInfo;
-import com.jd.journalq.monitor.PartitionLeaderAckMonitorInfo;
 import com.jd.journalq.monitor.PendingMonitorInfo;
 
 import java.util.List;
@@ -33,7 +53,7 @@ public interface OpenAPIService {
      * @param  namespace  topic namespace  code
      *
      **/
-    TopicPubSub        findTopicPubSubInfo(String topic,String namespace) throws Exception;
+    TopicPubSub findTopicPubSubInfo(String topic, String namespace) throws Exception;
 
     /**
      * get topiclist
@@ -42,25 +62,25 @@ public interface OpenAPIService {
      * @throws Exception
      */
 
-    List<Consumer>  queryConsumerTopicByApp(String app) throws Exception;
+    List<Consumer> queryConsumerTopicByApp(String app) throws Exception;
 
     /**
      *
      * @param  topic  topic code
      * @param  namespace  topic namespace  code
-     * @return  all consumers of the topic
+     * @return all consumers of the topic
      *
      **/
-    List<Consumer>     findConsumers(String topic,String namespace) throws Exception;
+    List<Consumer> findConsumers(String topic, String namespace) throws Exception;
 
     /**
      *
      * @param  topic  topic code
      * @param  namespace  topic namespace  code
-     * @return  all producers of the topic
+     * @return all producers of the topic
      *
      **/
-    List<Producer>     findProducers(String topic,String namespace) throws Exception;
+    List<Producer> findProducers(String topic, String namespace) throws Exception;
 
 
     /**
@@ -68,7 +88,7 @@ public interface OpenAPIService {
      * Add a producer(app) to the topic, producer should contain topic and app code, client type
      *
      **/
-    Producer   publish(Producer producer) throws Exception;
+    Producer publish(Producer producer) throws Exception;
 
     /**
      *
@@ -106,26 +126,34 @@ public interface OpenAPIService {
      *
      **/
     boolean delApplication(Application application) throws Exception;
+
     /**
      *  Create Topic
      *
      **/
-    Topic  createTopic(Topic topic, QBrokerGroup brokerGroup,Identity operator) throws  Exception;
+    Topic createTopic(Topic topic, QBrokerGroup brokerGroup, Identity operator) throws Exception;
+
+    /**
+     * delete topic
+     *
+     * @throws Exception
+     */
+    void removeTopic(String namespace, String topicCode) throws Exception;
 
     /**
      * All partition Offset of the subscribe
      **/
-    List<PartitionAckMonitorInfo> findOffsets(Subscribe subscribe) throws  Exception;
+    List<PartitionAckMonitorInfo> findOffsets(Subscribe subscribe) throws Exception;
 
     /**
      *
      * Reset partition offset of the @Subscribe
      *
      **/
-    boolean resetOffset(Subscribe subscribe,short partition,long offset) throws Exception;
+    boolean resetOffset(Subscribe subscribe, short partition, long offset) throws Exception;
 
     /**
-     * @return  partition message  offset  of @code timeMs
+     * @return partition message  offset  of @code timeMs
      **/
     List<PartitionAckMonitorInfo> timeOffset(Subscribe subscribe, long timeMs);
 
@@ -141,7 +169,7 @@ public interface OpenAPIService {
      * Reset all partition  of the @Subscribe by time
      *
      **/
-    boolean resetOffset(Subscribe subscribe,long timeMs) throws Exception;
+    boolean resetOffset(Subscribe subscribe, long timeMs) throws Exception;
 
     /**
      *
@@ -155,7 +183,7 @@ public interface OpenAPIService {
      * How many partition
      *
      **/
-    int queryPartitionByTopic(String namespaceCode,String topicCode) throws Exception;
+    int queryPartitionByTopic(String namespaceCode, String topicCode) throws Exception;
 
 
     /**
@@ -163,7 +191,7 @@ public interface OpenAPIService {
      *  Add a token for app
      *
      **/
-    List<ApplicationToken>  add(ApplicationToken token);
+    List<ApplicationToken> add(ApplicationToken token);
 
 
     /**
@@ -171,8 +199,7 @@ public interface OpenAPIService {
      * Look up app tokens
      *
      **/
-    List<ApplicationToken>  tokens(String  app);
-
+    List<ApplicationToken> tokens(String app);
 
 
 }

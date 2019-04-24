@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.broker.kafka.coordinator.group;
 
 import com.google.common.collect.HashBasedTable;
@@ -23,7 +36,7 @@ import com.jd.journalq.domain.Broker;
 import com.jd.journalq.domain.TopicConfig;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.network.command.CommandType;
-import com.jd.journalq.network.transport.codec.JMQHeader;
+import com.jd.journalq.network.transport.codec.JournalqHeader;
 import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.transport.command.CommandCallback;
 import com.jd.journalq.network.transport.command.Direction;
@@ -76,7 +89,7 @@ public class GroupOffsetManager extends Service {
             try {
                 CoordinatorSession session = sessionManager.getOrCreateSession(broker);
                 ConsumeIndexQueryRequest indexQueryRequest = new ConsumeIndexQueryRequest(groupId, topicPartitionMap);
-                JMQHeader header = new JMQHeader(Direction.REQUEST, CommandType.CONSUME_INDEX_QUERY_REQUEST);
+                JournalqHeader header = new JournalqHeader(Direction.REQUEST, CommandType.CONSUME_INDEX_QUERY_REQUEST);
                 Command request = new Command(header, indexQueryRequest);
 
                 session.async(request, new CommandCallback() {
@@ -88,7 +101,7 @@ public class GroupOffsetManager extends Service {
                             for (Map.Entry<Integer, IndexMetadataAndError> partitionEntry : topicEntry.getValue().entrySet()) {
                                 IndexMetadataAndError indexMetadataAndError = partitionEntry.getValue();
                                 result.put(topic, partitionEntry.getKey(),
-                                        new OffsetMetadataAndError(indexMetadataAndError.getIndex(), indexMetadataAndError.getMetadata(), KafkaErrorCode.jmqCodeFor(indexMetadataAndError.getError())));
+                                        new OffsetMetadataAndError(indexMetadataAndError.getIndex(), indexMetadataAndError.getMetadata(), KafkaErrorCode.journalqCodeFor(indexMetadataAndError.getError())));
                             }
                         }
                         latch.countDown();
@@ -160,7 +173,7 @@ public class GroupOffsetManager extends Service {
             try {
                 CoordinatorSession session = sessionManager.getOrCreateSession(broker);
                 ConsumeIndexStoreRequest indexStoreRequest = new ConsumeIndexStoreRequest(groupId, indexAndMetadataMap);
-                JMQHeader header = new JMQHeader(Direction.REQUEST, CommandType.CONSUME_INDEX_STORE_REQUEST);
+                JournalqHeader header = new JournalqHeader(Direction.REQUEST, CommandType.CONSUME_INDEX_STORE_REQUEST);
                 Command request = new Command(header, indexStoreRequest);
 
                 session.async(request, new CommandCallback() {
@@ -171,7 +184,7 @@ public class GroupOffsetManager extends Service {
                             String topic = topicEntry.getKey();
                             for (Map.Entry<Integer, Short> partitionEntry : topicEntry.getValue().entrySet()) {
                                 result.put(topic, partitionEntry.getKey(),
-                                        new OffsetMetadataAndError(OffsetAndMetadata.INVALID_OFFSET, OffsetAndMetadata.NO_METADATA, KafkaErrorCode.jmqCodeFor(partitionEntry.getValue())));
+                                        new OffsetMetadataAndError(OffsetAndMetadata.INVALID_OFFSET, OffsetAndMetadata.NO_METADATA, KafkaErrorCode.journalqCodeFor(partitionEntry.getValue())));
                             }
                         }
                         latch.countDown();

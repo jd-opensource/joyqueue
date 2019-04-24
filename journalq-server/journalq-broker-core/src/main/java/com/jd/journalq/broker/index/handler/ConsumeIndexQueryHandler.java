@@ -1,11 +1,24 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.broker.index.handler;
 
 import com.jd.journalq.broker.consumer.Consume;
 import com.jd.journalq.broker.BrokerContext;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.domain.QosLevel;
 import com.jd.journalq.network.command.CommandType;
-import com.jd.journalq.network.transport.codec.JMQHeader;
+import com.jd.journalq.network.transport.codec.JournalqHeader;
 import com.jd.journalq.network.transport.command.handler.CommandHandler;
 import com.jd.journalq.network.session.Consumer;
 import com.jd.journalq.network.transport.Transport;
@@ -47,13 +60,13 @@ public class ConsumeIndexQueryHandler implements CommandHandler, Type {
             Map<Integer, IndexMetadataAndError> partitionIndexes = new HashedMap();
             for (int partition : partitions) {
                 long index = getConsumerIndex(topic, (short)partition, app);
-                IndexMetadataAndError indexMetadataAndError = new IndexMetadataAndError(index, "", (short)JMQCode.SUCCESS.getCode());
+                IndexMetadataAndError indexMetadataAndError = new IndexMetadataAndError(index, "", (short)JournalqCode.SUCCESS.getCode());
                 partitionIndexes.put(partition, indexMetadataAndError);
             }
             topicPartitionIndex.put(topic, partitionIndexes);
         }
         ConsumeIndexQueryResponse response = new ConsumeIndexQueryResponse(topicPartitionIndex);
-        JMQHeader header = new JMQHeader(Direction.RESPONSE, QosLevel.ONE_WAY, CommandType.CONSUME_INDEX_QUERY_RESPONSE);
+        JournalqHeader header = new JournalqHeader(Direction.RESPONSE, QosLevel.ONE_WAY, CommandType.CONSUME_INDEX_QUERY_RESPONSE);
         return new Command(header, response);
     }
 

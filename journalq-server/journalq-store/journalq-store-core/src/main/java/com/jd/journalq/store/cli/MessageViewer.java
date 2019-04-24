@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.store.cli;
 
 import com.jd.journalq.store.file.PositioningStore;
@@ -14,24 +27,24 @@ import java.nio.ByteBuffer;
  * Date: 2018/10/26
  */
 public class MessageViewer {
-    public static void main(String [] args) throws IOException {
-        if(args.length < 1) {
+    public static void main(String[] args) throws IOException {
+        if (args.length < 1) {
             showUsage();
             return;
         }
 
         File base = new File(args[0]);
-        if(!base.isDirectory()) {
+        if (!base.isDirectory()) {
             System.out.println("Invalid path!");
             return;
         }
         long position = 0L;
         int count = 0;
 
-        if(args.length > 1) {
+        if (args.length > 1) {
             position = Long.parseLong(args[1]);
 
-            if(args.length > 2) {
+            if (args.length > 2) {
                 count = Integer.parseInt(args[2]);
             }
         }
@@ -42,11 +55,11 @@ public class MessageViewer {
                 new PositioningStore.Config();
 
 
-        PreloadBufferPool bufferPool = new PreloadBufferPool( 100);
-        bufferPool.addPreLoad(PositioningStore.Config.DEFAULT_FILE_DATA_SIZE,1, 1);
+        PreloadBufferPool bufferPool = new PreloadBufferPool();
+        bufferPool.addPreLoad(PositioningStore.Config.DEFAULT_FILE_DATA_SIZE, 1, 1);
 
         PositioningStore<ByteBuffer> store =
-                new PositioningStore<>(base,storeConfig, bufferPool,new StoreMessageSerializer(1024 * 1024));
+                new PositioningStore<>(base, storeConfig, bufferPool, new StoreMessageSerializer(1024 * 1024));
         store.recover();
         long pos = store.position(position, -1 * count);
         int wCount = 2 * count + 1;

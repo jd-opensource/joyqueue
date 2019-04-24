@@ -1,10 +1,26 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.store;
 
 import com.jd.journalq.toolkit.config.PropertyDef;
 
-import static com.jd.journalq.store.PartitionGroupStoreManager.Config.DEFAULT_EVICT_INTERVAL_MS;
-import static com.jd.journalq.store.PartitionGroupStoreManager.Config.*;
-import static com.jd.journalq.store.file.PositioningStore.Config.*;
+import static com.jd.journalq.store.PartitionGroupStoreManager.Config.DEFAULT_FLUSH_INTERVAL_MS;
+import static com.jd.journalq.store.PartitionGroupStoreManager.Config.DEFAULT_MAX_DIRTY_SIZE;
+import static com.jd.journalq.store.PartitionGroupStoreManager.Config.DEFAULT_MAX_MESSAGE_LENGTH;
+import static com.jd.journalq.store.PartitionGroupStoreManager.Config.DEFAULT_WRITE_REQUEST_CACHE_SIZE;
+import static com.jd.journalq.store.PartitionGroupStoreManager.Config.DEFAULT_WRITE_TIMEOUT_MS;
+import static com.jd.journalq.store.file.PositioningStore.Config.DEFAULT_FILE_HEADER_SIZE;
 
 /**
  * 存储配置
@@ -17,23 +33,23 @@ public enum StoreConfigKey implements PropertyDef {
     /**
      * 消息文件大小 128M
      */
-    MESSAGE_FILE_SIZE("store.message.file.size", 128 * 1024 * 1024, Type.INT),
+    MESSAGE_FILE_SIZE("store.message.file.size", StoreConfig.DEFAULT_MESSAGE_FILE_SIZE, Type.INT),
     /**
      * 索引文件大小 1M
      */
-    INDEX_FILE_SIZE("store.index.file.size", 512 * 1024, Type.INT),
+    INDEX_FILE_SIZE("store.index.file.size", StoreConfig.DEFAULT_INDEX_FILE_SIZE, Type.INT),
     /**
      * 虚拟线程执行器的线程数量
      */
-    THREAD_COUNT("store.thread.count", 4, Type.INT),
+    THREAD_COUNT("store.thread.count", StoreConfig.DEFAULT_THREAD_COUNT, Type.INT),
     /**
      * 预加载DirectBuffer的核心数量
      */
-    PRELOAD_BUFFER_CORE_COUNT("store.preload.buffer.core.count", 0, Type.INT),
+    PRELOAD_BUFFER_CORE_COUNT("store.preload.buffer.core.count", StoreConfig.DEFAULT_PRE_LOAD_BUFFER_CORE_COUNT, Type.INT),
     /**
      * 预加载DirectBuffer的最大数量
      */
-    PRELOAD_BUFFER_MAX_COUNT("store.preload.buffer.max.count", 10, Type.INT),
+    PRELOAD_BUFFER_MAX_COUNT("store.preload.buffer.max.count", StoreConfig.DEFAULT_PRE_LOAD_BUFFER_MAX_COUNT, Type.INT),
     /**
      * 最大消息长度
      */
@@ -54,22 +70,10 @@ public enum StoreConfigKey implements PropertyDef {
      * 文件头长度
      */
     FILE_HEADER_SIZE("store.file.header.size", DEFAULT_FILE_HEADER_SIZE, Type.INT),
-    /**
-     * 最多缓存的页面数量
-     */
-    CACHED_PAGE_COUNT("store.cached.page.count", DEFAULT_CACHED_PAGE_COUNT, Type.INT),
-    /**
-     * 缓存最长存活时间
-     */
-    CACHE_LIFE_TIME_MS("store.cache.life.time", DEFAULT_CACHE_LIFETIME_MS, Type.LONG),
-    /**
-     * 存储上限，超过上限后，最旧的文件将被删除
-     */
-    MAX_STORE_SIZE("store.max.store.size", DEFAULT_MAX_STORE_SIZE, Type.LONG),
-    MAX_STORE_TIME("store.max.store.time", DEFAULT_MAX_STORE_TIME, Type.LONG),
+
     MAX_DIRTY_SIZE("store.max.dirty.size", DEFAULT_MAX_DIRTY_SIZE, Type.LONG),
 
-    EVECT_INTERVAL_MS("store.evict.interval",DEFAULT_EVICT_INTERVAL_MS,Type.LONG);
+    PRINT_METRIC_INTERVAL_MS("print.metric.interval", StoreConfig.DEFAULT_PRINT_METRIC_INTERVAL_MS, Type.LONG);
 
 
     private String name;
@@ -98,3 +102,4 @@ public enum StoreConfigKey implements PropertyDef {
         return type;
     }
 }
+

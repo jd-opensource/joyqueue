@@ -1,12 +1,34 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.broker.manage.service.support;
 
-import com.jd.journalq.broker.manage.service.*;
+import com.jd.journalq.broker.manage.service.BrokerManageService;
+import com.jd.journalq.broker.manage.service.ConnectionManageService;
+import com.jd.journalq.broker.manage.service.ConsumerManageService;
+import com.jd.journalq.broker.manage.service.CoordinatorManageService;
+import com.jd.journalq.broker.manage.service.ElectionManageService;
+import com.jd.journalq.broker.manage.service.MessageManageService;
+import com.jd.journalq.broker.manage.service.StoreManageService;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.manage.IndexItem;
 import com.jd.journalq.manage.PartitionGroupMetric;
 import com.jd.journalq.manage.PartitionMetric;
 import com.jd.journalq.manage.TopicMetric;
 import com.jd.journalq.monitor.BrokerMessageInfo;
 import com.jd.journalq.monitor.PartitionAckMonitorInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.List;
@@ -17,6 +39,7 @@ import java.util.List;
  * date: 2018/10/18
  */
 public class DefaultBrokerManageService implements BrokerManageService {
+    private static Logger logger = LoggerFactory.getLogger(DefaultBrokerManageService.class);
 
     private ConnectionManageService connectionManageService;
     private MessageManageService messageManageService;
@@ -25,7 +48,9 @@ public class DefaultBrokerManageService implements BrokerManageService {
     private CoordinatorManageService coordinatorManageService;
     private ElectionManageService electionManageService;
 
-    public DefaultBrokerManageService(ConnectionManageService connectionManageService, MessageManageService messageManageService, StoreManageService storeManageService, ConsumerManageService consumerManageService, CoordinatorManageService coordinatorManageService, ElectionManageService electionManageService) {
+    public DefaultBrokerManageService(ConnectionManageService connectionManageService, MessageManageService messageManageService,
+                                      StoreManageService storeManageService, ConsumerManageService consumerManageService,
+                                      CoordinatorManageService coordinatorManageService, ElectionManageService electionManageService) {
         this.connectionManageService = connectionManageService;
         this.messageManageService = messageManageService;
         this.storeManageService = storeManageService;
@@ -45,12 +70,12 @@ public class DefaultBrokerManageService implements BrokerManageService {
     }
 
     @Override
-    public boolean setAckIndex(String topic, String app, short partition, long index) {
+    public boolean setAckIndex(String topic, String app, short partition, long index) throws JournalqException {
         return consumerManageService.setAckIndex(topic, app, partition, index);
     }
 
     @Override
-    public boolean setMaxAckIndex(String topic, String app, short partition) {
+    public boolean setMaxAckIndex(String topic, String app, short partition) throws JournalqException {
         return consumerManageService.setMaxAckIndex(topic, app, partition);
     }
 
@@ -65,17 +90,17 @@ public class DefaultBrokerManageService implements BrokerManageService {
     }
 
     @Override
-    public boolean setMaxAckIndexes(String topic, String app) {
+    public boolean setMaxAckIndexes(String topic, String app) throws JournalqException {
         return consumerManageService.setMaxAckIndexes(topic, app);
     }
 
     @Override
-    public boolean setAckIndexByTime(String topic, String app, short partition, long timestamp) {
+    public boolean setAckIndexByTime(String topic, String app, short partition, long timestamp) throws JournalqException {
         return consumerManageService.setAckIndexByTime(topic, app, partition, timestamp);
     }
 
     @Override
-    public boolean setAckIndexesByTime(String topic, String app, long timestamp) {
+    public boolean setAckIndexesByTime(String topic, String app, long timestamp) throws JournalqException {
         return consumerManageService.setAckIndexesByTime(topic, app, timestamp);
     }
 
@@ -202,4 +227,22 @@ public class DefaultBrokerManageService implements BrokerManageService {
     public void restoreElectionMetadata() {
         electionManageService.restoreElectionMetadata();
     }
+
+
+    @Override
+    public String describe() {
+        logger.info("Describe");
+        return electionManageService.describe();
+    }
+
+    @Override
+    public String describeTopic(String topic, int partitionGroup) {
+        return electionManageService.describeTopic(topic, partitionGroup);
+    }
+
+    @Override
+    public void updateTerm(String topic, int partitionGroup, int term) {
+        electionManageService.updateTerm(topic, partitionGroup, term);
+    }
+
 }

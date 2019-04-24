@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.client.internal.consumer.support;
 
 import com.jd.journalq.client.internal.consumer.BatchMessageListener;
@@ -39,7 +52,8 @@ public class TopicMessageConsumerDispatcher extends Service {
     private ConsumerInterceptorManager consumerInterceptorManager;
     private ExecutorService listenerExecutor;
 
-    public TopicMessageConsumerDispatcher(String topic, ConsumerConfig config, NameServerConfig nameServerConfig, MessagePoller messagePoller, MessageListenerManager messageListenerManager, ConsumerInterceptorManager consumerInterceptorManager) {
+    public TopicMessageConsumerDispatcher(String topic, ConsumerConfig config, NameServerConfig nameServerConfig,
+                                          MessagePoller messagePoller, MessageListenerManager messageListenerManager, ConsumerInterceptorManager consumerInterceptorManager) {
         this.topic = topic;
         this.config = config;
         this.nameServerConfig = nameServerConfig;
@@ -98,7 +112,8 @@ public class TopicMessageConsumerDispatcher extends Service {
         }
     }
 
-    protected List<ConsumeReply> doBatchDispatch(TopicMetadata topicMetadata, final Consumer.ConsumerPolicy consumerPolicy, final List<ConsumeMessage> messages, final List<BatchMessageListener> listeners) {
+    protected List<ConsumeReply> doBatchDispatch(TopicMetadata topicMetadata, Consumer.ConsumerPolicy consumerPolicy,
+                                                 List<ConsumeMessage> messages, List<BatchMessageListener> listeners) {
         return new ConsumerInvocation(config, topic, nameServerConfig, messages, consumerInterceptorManager,
                 new BatchConsumerInvoker(config, topicMetadata, consumerPolicy, messages, listeners, listenerExecutor)).invoke();
     }

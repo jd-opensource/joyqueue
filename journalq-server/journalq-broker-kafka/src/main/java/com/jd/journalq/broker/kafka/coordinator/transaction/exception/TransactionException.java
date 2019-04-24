@@ -1,7 +1,7 @@
 package com.jd.journalq.broker.kafka.coordinator.transaction.exception;
 
 import com.jd.journalq.broker.kafka.coordinator.exception.CoordinatorException;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 
 /**
  * TransactionException
@@ -22,12 +22,12 @@ public class TransactionException extends CoordinatorException {
         this.code = code;
     }
 
-    public TransactionException(JMQCode code, Object... args) {
+    public TransactionException(JournalqCode code, Object... args) {
         super(code.getMessage(args));
         this.code = code.getCode();
     }
 
-    public TransactionException(JMQCode code, Throwable cause, Object... args) {
+    public TransactionException(JournalqCode code, Throwable cause, Object... args) {
         super(code.getMessage(args), cause);
         this.code = code.getCode();
     }

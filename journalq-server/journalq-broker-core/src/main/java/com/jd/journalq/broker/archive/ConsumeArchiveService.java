@@ -1,15 +1,28 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.broker.archive;
 
 import com.jd.journalq.broker.Plugins;
 import com.jd.journalq.broker.cluster.ClusterManager;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.message.MessageLocation;
 import com.jd.journalq.network.session.Connection;
 import com.jd.journalq.server.archive.store.api.ArchiveStore;
 import com.jd.journalq.server.archive.store.model.ConsumeLog;
 import com.jd.journalq.toolkit.concurrent.LoopThread;
 import com.jd.journalq.toolkit.lang.Close;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.security.Md5;
 import com.jd.journalq.toolkit.service.Service;
 import com.jd.journalq.toolkit.time.SystemClock;
@@ -26,7 +39,11 @@ import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.security.GeneralSecurityException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -67,7 +84,7 @@ public class ConsumeArchiveService extends Service {
         if (archiveStore == null) {
             archiveStore = Plugins.ARCHIVESTORE.get();
         }
-        Preconditions.checkArgument(archiveStore == null, "archive store can not be null.");
+        Preconditions.checkArgument(archiveStore != null, "archive store can not be null.");
 
         this.repository = new ArchiveMappedFileRepository(archiveConfig.getArchivePath());
         this.readByteCounter = new AtomicInteger(0);
@@ -113,7 +130,7 @@ public class ConsumeArchiveService extends Service {
     /**
      * 读本地文件写归档存储服务
      */
-    private void readAndWrite() throws JMQException, InterruptedException {
+    private void readAndWrite() throws JournalqException, InterruptedException {
         // 读信息，一次读指定条数
         List<ConsumeLog> list = readConsumeLog(archiveConfig.getReadBatchNum());
         if (list.size() > 0) {
@@ -167,7 +184,12 @@ public class ConsumeArchiveService extends Service {
      * @param connection 客户端连接信息
      * @param locations  应答位置信息数组
      */
-    public void appendConsumeLog(Connection connection, MessageLocation[] locations) throws JMQException {
+    public void appendConsumeLog(Connection connection, MessageLocation[] locations) throws JournalqException {
+        if (!isStarted()) {
+            // 没有启动消费归档服务，添加消费日志
+            logger.debug("ConsumeArchiveService not be started.");
+            return;
+        }
         List<ConsumeLog> logList = convert(connection, locations);
         logList.stream().forEach(log -> {
             // 序列化
@@ -184,7 +206,7 @@ public class ConsumeArchiveService extends Service {
      * @param locations  应答位置信息数组
      * @return
      */
-    private List<ConsumeLog> convert(Connection connection, MessageLocation[] locations) throws JMQException {
+    private List<ConsumeLog> convert(Connection connection, MessageLocation[] locations) throws JournalqException {
         List<ConsumeLog> list = new LinkedList<>();
         for (MessageLocation location : locations) {
             ConsumeLog log = new ConsumeLog();
@@ -224,7 +246,7 @@ public class ConsumeArchiveService extends Service {
      *
      * @param buffer
      */
-    public synchronized void appendLog(ByteBuffer buffer) {
+    private synchronized void appendLog(ByteBuffer buffer) {
         repository.append(buffer);
     }
 
@@ -260,7 +282,7 @@ public class ConsumeArchiveService extends Service {
         // 单个归档文件的大小
         private final long pageSize = 1024 * 1024 * 16; // 16M
 
-        public ArchiveMappedFileRepository(String baseDir) {
+        ArchiveMappedFileRepository(String baseDir) {
             this.baseDir = baseDir;
             recover();
         }
@@ -357,7 +379,7 @@ public class ConsumeArchiveService extends Service {
                 rFileChannel = rRaf.getChannel();
                 rMap = rFileChannel.map(FileChannel.MapMode.READ_ONLY, 0, pageSize);
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error(e.getMessage(), e);
             }
         }
 

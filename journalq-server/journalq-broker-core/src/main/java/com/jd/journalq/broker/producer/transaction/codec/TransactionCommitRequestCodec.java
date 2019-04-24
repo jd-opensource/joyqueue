@@ -3,7 +3,7 @@ package com.jd.journalq.broker.producer.transaction.codec;
 import com.jd.journalq.broker.producer.transaction.command.TransactionCommitRequest;
 import com.jd.journalq.network.command.CommandType;
 import com.jd.journalq.network.serializer.Serializer;
-import com.jd.journalq.network.transport.codec.JMQHeader;
+import com.jd.journalq.network.transport.codec.JournalqHeader;
 import com.jd.journalq.network.transport.codec.PayloadCodec;
 import com.jd.journalq.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
@@ -14,10 +14,10 @@ import io.netty.buffer.ByteBuf;
  * email: gaohaoxiang@jd.com
  * date: 2019/4/12
  */
-public class TransactionCommitRequestCodec implements PayloadCodec<JMQHeader, TransactionCommitRequest>, Type {
+public class TransactionCommitRequestCodec implements PayloadCodec<JournalqHeader, TransactionCommitRequest>, Type {
 
     @Override
-    public TransactionCommitRequest decode(JMQHeader header, ByteBuf buffer) throws Exception {
+    public TransactionCommitRequest decode(JournalqHeader header, ByteBuf buffer) throws Exception {
         TransactionCommitRequest transactionCommitRequest = new TransactionCommitRequest();
         transactionCommitRequest.setTopic(Serializer.readString(buffer, Serializer.SHORT_SIZE));
         transactionCommitRequest.setApp(Serializer.readString(buffer, Serializer.SHORT_SIZE));

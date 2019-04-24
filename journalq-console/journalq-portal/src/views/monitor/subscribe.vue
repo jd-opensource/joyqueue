@@ -15,6 +15,7 @@
 import apiRequest from '../../utils/apiRequest.js'
 import myTable from '../../components/common/myTable.vue'
 import crud from '../../mixins/crud.js'
+import apiUrl from '../../utils/apiUrl.js'
 
 export default {
   name: 'subscribe',
@@ -89,6 +90,8 @@ export default {
           subscribeType: this.type
         }
       }
+      console.log(22)
+      console.log(this.search)
       for (var key in this.search) {
         if (this.search.hasOwnProperty(key)) {
           data.query[key] = this.search[key]
@@ -103,7 +106,10 @@ export default {
         this.page.total = data.pagination.totalRecord
         this.page.page = data.pagination.page
         this.page.size = data.pagination.size
-        this.tableData.rowData = data.data
+        this.tableData.rowData = data.data.map(d => {
+          d['subscribeGroup'] = ''
+          return d
+        })
         this.showTablePin = false
       })
     },
@@ -120,20 +126,20 @@ export default {
         return
       }
       data.clientType = item.clientType
-      if (this.type === this.$store.getters.consumerType && item['subscribeGroupExist']) {
-        console.log(item.code)
-        if (!item.subscribeGroup) {
-          this.$Dialog.warning({
-            content: '请先输入订阅分组！'
-          })
-          return
-        } else if (!item.subscribeGroup.match(this.$store.getters.pattern.subscribeGroup)) {
+      if (this.type === this.$store.getters.consumerType) {
+        // if (!item.subscribeGroup) {
+        //   this.$Dialog.warning({
+        //     content: '请先输入订阅分组！'
+        //   })
+        //   return
+        // }
+        if (item.subscribeGroup && !item.subscribeGroup.match(this.$store.getters.pattern.subscribeGroup)) {
           this.$Dialog.warning({
             content: '订阅分组格式不匹配！支持格式：' + this.$store.getters.placeholder.subscribeGroup
           })
           return
         }
-        data.subscribeGroup = item.subscribeGroup
+        data.subscribeGroup = item.subscribeGroup || ''
       }
       for (var key in this.search) {
         if (this.search.hasOwnProperty(key)) {
@@ -170,7 +176,7 @@ export default {
       })
     },
     getSubscribeGroups () {
-      apiRequest.get(this.urls.findSubscribeGroup).then((data) => {
+      apiRequest.get(apiUrl.common.findSubscribeGroup).then((data) => {
         this.subscribeGroupList = data.data || []
       })
     },

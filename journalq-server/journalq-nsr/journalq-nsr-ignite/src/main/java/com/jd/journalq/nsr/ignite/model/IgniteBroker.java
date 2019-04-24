@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.nsr.ignite.model;
 
 
@@ -17,7 +30,7 @@ public class IgniteBroker extends Broker implements IgniteBaseModel, Binarylizab
     public static final String COLUMN_PORT = "port";
     public static final String COLUMN_DATA_CENTER = "data_center";
     public static final String COLUMN_RETRY_TYPE = "retry_type";
-
+    public static final String COLUMN_PERMISSION = "permission";
 
     public IgniteBroker(Broker broker) {
         this.ip = broker.getIp();
@@ -25,6 +38,7 @@ public class IgniteBroker extends Broker implements IgniteBaseModel, Binarylizab
         this.port = broker.getPort();
         this.dataCenter = broker.getDataCenter();
         this.retryType = broker.getRetryType();
+        this.permission = broker.getPermission();
     }
 
     @Override
@@ -34,6 +48,7 @@ public class IgniteBroker extends Broker implements IgniteBaseModel, Binarylizab
         writer.writeInt(COLUMN_PORT, port);
         writer.writeString(COLUMN_DATA_CENTER, dataCenter);
         writer.writeString(COLUMN_RETRY_TYPE, retryType);
+        writer.writeString(COLUMN_PERMISSION,permission);
     }
 
     @Override
@@ -43,5 +58,6 @@ public class IgniteBroker extends Broker implements IgniteBaseModel, Binarylizab
         this.port = reader.readInt(COLUMN_PORT);
         this.dataCenter = reader.readString(COLUMN_DATA_CENTER);
         this.retryType = reader.readString(COLUMN_RETRY_TYPE);
+        this.permission = reader.readString(COLUMN_PERMISSION);
     }
 }

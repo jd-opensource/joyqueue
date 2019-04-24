@@ -1,22 +1,43 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.handler.routing.command;
 
+import com.alibaba.fastjson.JSON;
 import com.jd.journalq.exception.ValidationException;
-import com.jd.journalq.handler.binder.annotation.*;
+import com.jd.journalq.handler.annotation.GenericValue;
+import com.jd.journalq.handler.annotation.Operator;
+import com.jd.journalq.handler.annotation.PageQuery;
 import com.jd.journalq.handler.error.ConfigException;
 import com.jd.journalq.handler.error.ErrorCode;
 import com.jd.journalq.handler.message.AuditLogMessage;
-import com.jd.journalq.handler.Constants;
-import com.jd.journalq.handler.message.MessageType;
-import com.jd.journalq.model.*;
+import com.jd.journalq.model.PageResult;
+import com.jd.journalq.model.QKeyword;
+import com.jd.journalq.model.QOperator;
+import com.jd.journalq.model.QPageQuery;
+import com.jd.journalq.model.Query;
 import com.jd.journalq.model.domain.BaseModel;
 import com.jd.journalq.model.domain.Identity;
 import com.jd.journalq.model.domain.OperLog;
 import com.jd.journalq.model.domain.User;
 import com.jd.journalq.service.PageService;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.laf.binding.annotation.Value;
 import com.jd.laf.web.vertx.Command;
+import com.jd.laf.web.vertx.annotation.Body;
 import com.jd.laf.web.vertx.annotation.CVertx;
+import com.jd.laf.web.vertx.annotation.Path;
+import com.jd.laf.web.vertx.annotation.QueryParam;
 import com.jd.laf.web.vertx.pool.Poolable;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
@@ -24,6 +45,10 @@ import io.vertx.core.Vertx;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Date;
+
+import static com.jd.journalq.handler.Constants.ID;
+import static com.jd.journalq.handler.Constants.USER_KEY;
+import static com.jd.journalq.handler.message.MessageType.AUDIT_LOG;
 
 
 /** 公共接口
@@ -34,14 +59,12 @@ public abstract class CommandSupport <M extends BaseModel, S extends PageService
 
     @GenericValue
     protected S service;
-    @Value(Constants.USER_KEY)
+    @Value(USER_KEY)
     protected User session;
     @Operator
     protected Identity operator;
     @CVertx
     protected Vertx vertx;
-
-    private String module;
 
     @Override
     public Response execute() throws Exception {
@@ -56,7 +79,7 @@ public abstract class CommandSupport <M extends BaseModel, S extends PageService
     }
 
     @Path("search")
-    public Response pageQuery(@Page(typeindex = 2) QPageQuery<Q> qPageQuery) throws Exception {
+    public Response pageQuery(@PageQuery QPageQuery<Q> qPageQuery) throws Exception {
         Preconditions.checkArgument(qPageQuery!=null, "Illegal args.");
         if(qPageQuery.getQuery() != null) {
             if (qPageQuery.getQuery() instanceof QOperator) {
@@ -79,7 +102,7 @@ public abstract class CommandSupport <M extends BaseModel, S extends PageService
     }
 
     @Path("add")
-    public Response add(@GenericBody(type = GenericBody.BodyType.JSON,typeindex = 0) M model) throws Exception {
+    public Response add(@Body M model) throws Exception {
         model.setCreateBy(new Identity(session));
         model.setCreateTime(new Date());
         model.setUpdateBy(model.getCreateBy());
@@ -98,8 +121,8 @@ public abstract class CommandSupport <M extends BaseModel, S extends PageService
     }
 
     @Path("delete")
-    public Response delete(@ParamterValue(Constants.ID) Object id) throws Exception {
-        M newModel = (M) service.findById(Long.valueOf(id.toString()));
+    public Response delete(@QueryParam(ID) Long id) throws Exception {
+        M newModel = (M) service.findById(id);
         newModel.setStatus(BaseModel.DELETED);
         newModel.setUpdateBy(operator);
         newModel.setUpdateTime(new Date());
@@ -112,8 +135,8 @@ public abstract class CommandSupport <M extends BaseModel, S extends PageService
     }
 
     @Path("get")
-    public Response get(@ParamterValue(Constants.ID) Object id) throws Exception {
-        M model = (M) service.findById(Long.valueOf(id.toString()));
+    public Response get(@QueryParam(ID) Long id) throws Exception {
+        M model = (M) service.findById(id);
         if (model == null) {
             throw new ConfigException(getErrorCode());
         }
@@ -121,7 +144,7 @@ public abstract class CommandSupport <M extends BaseModel, S extends PageService
     }
 
     @Path("update")
-    public Response update(@ParamterValue(Constants.ID)Object id, @GenericBody(type = GenericBody.BodyType.JSON,typeindex = 0) M model) throws Exception {
+    public Response update(@QueryParam(ID) Long id, @Body M model) throws Exception {
         model.setUpdateBy(operator);
         model.setUpdateTime(new Date());
 
@@ -142,7 +165,7 @@ public abstract class CommandSupport <M extends BaseModel, S extends PageService
     }
 
     @Path("state")
-    public Response updateStatus(@ParamterValue(Constants.ID)Object id, @GenericBody(type = GenericBody.BodyType.JSON,typeindex = 0) M model) throws Exception {
+    public Response updateStatus(@QueryParam(ID) Long id, @Body M model) throws Exception {
         model.setUpdateBy(operator);
         model.setUpdateTime(new Date());
         int count = service.updateStatus(model);
@@ -150,12 +173,6 @@ public abstract class CommandSupport <M extends BaseModel, S extends PageService
             throw new ConfigException(updateErrorCode());
         }
         return Responses.success(model);
-    }
-
-    protected String getModule() {
-        //module默认值与type相同
-        module = this.type();
-        return module;
     }
 
     public ErrorCode addErrorCode() {
@@ -180,15 +197,11 @@ public abstract class CommandSupport <M extends BaseModel, S extends PageService
         }
 
         if (auditType != null) {
-            vertx.eventBus().send(MessageType.AUDIT_LOG.value(), new AuditLogMessage(operator.getCode(), this.module + "("
-                    + model.toString() + ")", auditType, this.module + "(" + com.alibaba.fastjson.JSON.toJSONString(model) + ")"));
+            String type = type();
+            vertx.eventBus().send(AUDIT_LOG.value(), new AuditLogMessage(operator.getCode(), type + "("
+                    + model.toString() + ")", auditType, type + "(" + JSON.toJSONString(model) + ")"));
         }
 
-        //todo url待完善
-//        if (operType != null) {
-//            vertx.eventBus().send(OPER_LOG.value(), new OperLogMessage(operType.value(),
-//                    OperLog.Type.resolve(module).value(), String.valueOf(model.getId()), com.alibaba.fastjson.JSON.toJSONString(model), operator.getId()));
-//        }
     }
 
 }

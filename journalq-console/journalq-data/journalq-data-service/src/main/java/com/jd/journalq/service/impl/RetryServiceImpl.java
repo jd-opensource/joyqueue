@@ -1,7 +1,20 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.service.impl;
 
 import com.jd.journalq.domain.ConsumeRetry;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.model.PageResult;
 import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.model.query.QRetry;
@@ -30,7 +43,7 @@ public class RetryServiceImpl implements RetryService {
 
 
     @Override
-    public PageResult<ConsumeRetry> findByQuery(QPageQuery<QRetry> qPageQuery) throws JMQException {
+    public PageResult<ConsumeRetry> findByQuery(QPageQuery<QRetry> qPageQuery) throws JournalqException {
         RetryQueryCondition queryCondition = new RetryQueryCondition();
         if (qPageQuery != null) {
             QRetry qRetry = qPageQuery.getQuery();
@@ -56,7 +69,7 @@ public class RetryServiceImpl implements RetryService {
     }
 
     @Override
-    public ConsumeRetry getDataById(Long id) throws JMQException {
+    public ConsumeRetry getDataById(Long id) throws JournalqException {
         return consoleMessageRetry.getConsumeRetryById(id);
     }
 
@@ -66,8 +79,7 @@ public class RetryServiceImpl implements RetryService {
         retryMessageModels.add(retryMessageModel);
         try {
             consoleMessageRetry.addRetry(retryMessageModels);
-        } catch (JMQException e) {
-            e.printStackTrace();
+        } catch (JournalqException e) {
             throw new RuntimeException("add retry error",e);
         }
     }

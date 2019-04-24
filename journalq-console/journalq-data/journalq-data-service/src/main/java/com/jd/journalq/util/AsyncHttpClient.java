@@ -1,9 +1,24 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.util;
 
 import com.alibaba.fastjson.JSON;
 import com.jd.journalq.exception.ServiceException;
+import com.jd.journalq.toolkit.time.SystemClock;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.concurrent.FutureCallback;
@@ -22,7 +37,10 @@ import static com.jd.journalq.exception.ServiceException.INTERNAL_SERVER_ERROR;
 
 public class AsyncHttpClient {
     private static final Logger logger= LoggerFactory.getLogger(AsyncHttpClient.class);
-    private static CloseableHttpAsyncClient httpclient = HttpAsyncClients.createDefault();
+    private static CloseableHttpAsyncClient httpclient = HttpAsyncClients.custom().setDefaultRequestConfig(RequestConfig.custom()
+            .setConnectTimeout(600)
+            .setSocketTimeout(700)
+            .setConnectionRequestTimeout(500).build()).build();
     public static void AsyncRequest(HttpUriRequest request, FutureCallback<HttpResponse> asyncCallBack){
          httpclient.start();
          request.setHeader("Content-Type", "application/json;charset=utf-8");
@@ -88,13 +106,21 @@ public class AsyncHttpClient {
         public CountDownLatch latch;
         private Map<String,String> result;
         private String requestKey;
-        public ConcurrentHttpResponseHandler(CountDownLatch latch, String requestKey, Map<String,String> result){
+        private String url;
+        /**
+         * 开始时间
+         */
+        private long startMs;
+        public ConcurrentHttpResponseHandler(String url,long startMs,CountDownLatch latch, String requestKey, Map<String,String> result){
             this.latch=latch;
             this.result=result;
             this.requestKey=requestKey;
+            this.url = url;
+            this.startMs = startMs;
         }
         @Override
         public void completed(HttpResponse httpResponse) {
+            logger.info("request completed {} time elapsed {} ms ",url, SystemClock.now()-startMs);
             try {
                 int statusCode=httpResponse.getStatusLine().getStatusCode();
                 if (HttpStatus.SC_OK == statusCode) {

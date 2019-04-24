@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.client.internal.producer;
 
 import com.jd.journalq.client.internal.producer.callback.AsyncBatchSendCallback;
@@ -10,7 +23,7 @@ import com.jd.journalq.client.internal.producer.domain.SendPrepareResult;
 import com.jd.journalq.client.internal.producer.domain.SendResultData;
 import com.jd.journalq.client.internal.producer.transport.ProducerClientManager;
 import com.jd.journalq.domain.QosLevel;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.command.TxStatus;
 import com.jd.journalq.network.domain.BrokerNode;
 import com.jd.journalq.toolkit.service.Service;
@@ -58,7 +71,10 @@ public class MessageSenderWrapper extends Service implements MessageSender {
     }
 
     @Override
-    public Future<SendBatchResultData> batchSendAsync(BrokerNode brokerNode, String topic, String app, String txId, List<ProduceMessage> messages, QosLevel qosLevel, long produceTimeout, long timeout) {
+    public Future<SendBatchResultData> batchSendAsync(BrokerNode brokerNode, String topic,
+                                                      String app, String txId,
+                                                      List<ProduceMessage> messages, QosLevel qosLevel,
+                                                      long produceTimeout, long timeout) {
         return delegate.batchSendAsync(brokerNode, topic, app, txId, messages, qosLevel, produceTimeout, timeout);
     }
 
@@ -78,27 +94,43 @@ public class MessageSenderWrapper extends Service implements MessageSender {
     }
 
     @Override
-    public void batchSendOneway(BrokerNode brokerNode, String topic, String app, String txId, List<ProduceMessage> messages, QosLevel qosLevel, long produceTimeout, long timeout) {
+    public void batchSendOneway(BrokerNode brokerNode, String topic,
+                                String app, String txId,
+                                List<ProduceMessage> messages, QosLevel qosLevel,
+                                long produceTimeout, long timeout) {
         delegate.batchSendOneway(brokerNode, topic, app, txId, messages, qosLevel, produceTimeout, timeout);
     }
 
     @Override
-    public void batchSendAsync(BrokerNode brokerNode, String topic, String app, String txId, List<ProduceMessage> messages, QosLevel qosLevel, long produceTimeout, long timeout, AsyncBatchSendCallback callback) {
+    public void batchSendAsync(BrokerNode brokerNode, String topic,
+                               String app, String txId,
+                               List<ProduceMessage> messages, QosLevel qosLevel,
+                               long produceTimeout, long timeout,
+                               AsyncBatchSendCallback callback) {
         delegate.batchSendAsync(brokerNode, topic, app, txId, messages, qosLevel, produceTimeout, timeout, callback);
     }
 
     @Override
-    public Map<String, SendBatchResultData> batchSend(BrokerNode brokerNode, String app, String txId, Map<String, List<ProduceMessage>> messages, QosLevel qosLevel, long produceTimeout, long timeout) {
+    public Map<String, SendBatchResultData> batchSend(BrokerNode brokerNode, String app,
+                                                      String txId, Map<String, List<ProduceMessage>> messages,
+                                                      QosLevel qosLevel, long produceTimeout,
+                                                      long timeout) {
         return delegate.batchSend(brokerNode, app, txId, messages, qosLevel, produceTimeout, timeout);
     }
 
     @Override
-    public void batchSendAsync(BrokerNode brokerNode, String app, String txId, Map<String, List<ProduceMessage>> messages, QosLevel qosLevel, long produceTimeout, long timeout, AsyncMultiBatchSendCallback callback) {
+    public void batchSendAsync(BrokerNode brokerNode, String app,
+                               String txId, Map<String, List<ProduceMessage>> messages,
+                               QosLevel qosLevel, long produceTimeout,
+                               long timeout, AsyncMultiBatchSendCallback callback) {
         delegate.batchSendAsync(brokerNode, app, txId, messages, qosLevel, produceTimeout, timeout, callback);
     }
 
     @Override
-    public Future<Map<String, SendBatchResultData>> batchSendAsync(BrokerNode brokerNode, String app, String txId, Map<String, List<ProduceMessage>> messages, QosLevel qosLevel, long produceTimeout, long timeout) {
+    public Future<Map<String, SendBatchResultData>> batchSendAsync(BrokerNode brokerNode, String app,
+                                                                   String txId, Map<String, List<ProduceMessage>> messages,
+                                                                   QosLevel qosLevel, long produceTimeout,
+                                                                   long timeout) {
         return delegate.batchSendAsync(brokerNode, app, txId, messages, qosLevel, produceTimeout, timeout);
     }
 
@@ -108,12 +140,12 @@ public class MessageSenderWrapper extends Service implements MessageSender {
     }
 
     @Override
-    public JMQCode commit(BrokerNode brokerNode, String topic, String app, String txId, long timeout) {
+    public JournalqCode commit(BrokerNode brokerNode, String topic, String app, String txId, long timeout) {
         return delegate.commit(brokerNode, topic, app, txId, timeout);
     }
 
     @Override
-    public JMQCode rollback(BrokerNode brokerNode, String topic, String app, String txId, long timeout) {
+    public JournalqCode rollback(BrokerNode brokerNode, String topic, String app, String txId, long timeout) {
         return delegate.rollback(brokerNode, topic, app, txId, timeout);
     }
 

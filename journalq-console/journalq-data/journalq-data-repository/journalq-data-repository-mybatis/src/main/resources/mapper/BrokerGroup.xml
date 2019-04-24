@@ -71,7 +71,8 @@
             code=#{code},
             `name`=#{name},
             update_time=#{updateTime},
-            update_by=#{updateBy.id}
+            update_by=#{updateBy.id},
+            status=#{status}
         WHERE
             id=#{id}
             AND status !=-1
@@ -95,10 +96,10 @@
             <if test="query.keyword!=null and query.keyword!=''">
                 (code LIKE CONCAT('%', #{query.keyword}, '%') OR  name LIKE CONCAT('%', #{query.keyword}, '%'))
             </if>
---             普通用户
             <if test="query.role == 0">
-                and status = 1;
+                and status = 1
             </if>
+            <if test="query.code !=null "> and code=#{query.code}</if>
             AND status!=-1
         </trim>
     </sql>

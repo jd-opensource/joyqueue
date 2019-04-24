@@ -1,12 +1,34 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.registry.memory;
 
 import com.jd.journalq.registry.PathData;
-import com.jd.journalq.registry.listener.*;
+import com.jd.journalq.registry.listener.ChildrenChangeListener;
+import com.jd.journalq.registry.listener.ChildrenDataListener;
+import com.jd.journalq.registry.listener.ChildrenEvent;
+import com.jd.journalq.registry.listener.ChildrenListener;
+import com.jd.journalq.registry.listener.ClusterEvent;
+import com.jd.journalq.registry.listener.ClusterListener;
+import com.jd.journalq.registry.listener.ConnectionListener;
+import com.jd.journalq.registry.listener.LeaderEvent;
+import com.jd.journalq.registry.listener.LeaderListener;
+import com.jd.journalq.registry.listener.PathEvent;
+import com.jd.journalq.registry.listener.PathListener;
 import com.jd.journalq.toolkit.URL;
 import com.jd.journalq.toolkit.concurrent.EventListener;
 import com.jd.journalq.registry.Registry;
 import com.jd.journalq.registry.RegistryException;
-import com.jd.journalq.registry.listener.*;
 import com.jd.journalq.registry.util.Path;
 import com.jd.journalq.toolkit.concurrent.EventBus;
 import com.jd.journalq.toolkit.service.Service;

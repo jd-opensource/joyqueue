@@ -1,9 +1,25 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.service.impl;
 
 import com.jd.journalq.model.ListQuery;
 import com.jd.journalq.model.PageResult;
 import com.jd.journalq.model.QPageQuery;
-import com.jd.journalq.model.domain.*;
+import com.jd.journalq.model.domain.Broker;
+import com.jd.journalq.model.domain.BrokerGroupRelated;
+import com.jd.journalq.model.domain.PartitionGroupReplica;
+import com.jd.journalq.model.domain.Topic;
 import com.jd.journalq.model.query.QBroker;
 import com.jd.journalq.model.query.QBrokerGroupRelated;
 import com.jd.journalq.model.query.QPartitionGroupReplica;
@@ -11,14 +27,16 @@ import com.jd.journalq.nsr.BrokerNameServerService;
 import com.jd.journalq.service.BrokerGroupRelatedService;
 import com.jd.journalq.service.BrokerService;
 import com.jd.journalq.service.PartitionGroupReplicaService;
-import com.jd.journalq.util.LocalSession;
 import com.jd.journalq.util.NullUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
@@ -81,7 +99,6 @@ public class BrokerServiceImpl implements BrokerService {
                     BrokerGroupRelated brokerRelated = brokerGroupRelatedService.findById(broker.getId());
                     if (brokerRelated != null && brokerRelated.getGroup() != null) {
                         broker.setGroup(brokerRelated.getGroup());
-                        //todo cyy 为什么status要设置为0？
                         broker.setStatus(0);
                     }
                     return broker;

@@ -1,16 +1,29 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.client.internal.transport;
 
 import com.jd.journalq.client.internal.ClientConsts;
 import com.jd.journalq.client.internal.exception.ClientException;
 import com.jd.journalq.client.internal.nameserver.NameServerConfig;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.command.AddConnectionRequest;
 import com.jd.journalq.network.command.AddConnectionResponse;
 import com.jd.journalq.network.command.RemoveConnectionRequest;
 import com.jd.journalq.network.session.ClientId;
 import com.jd.journalq.network.session.Language;
 import com.jd.journalq.network.transport.command.Command;
-import com.jd.journalq.network.transport.command.JMQCommand;
+import com.jd.journalq.network.transport.command.JournalqCommand;
 import com.jd.journalq.toolkit.network.IpUtil;
 import com.jd.journalq.toolkit.time.SystemClock;
 import org.apache.commons.lang3.StringUtils;
@@ -85,7 +98,7 @@ public class ClientConnectionState {
         addConnectionRequest.setClientId(clientId);
 
         try {
-            Command response = client.sync(new JMQCommand(addConnectionRequest));
+            Command response = client.sync(new JournalqCommand(addConnectionRequest));
 
             AddConnectionResponse addConnectionResponse = (AddConnectionResponse) response.getPayload();
             ClientConnectionInfo clientConnectionInfo = new ClientConnectionInfo();
@@ -97,7 +110,7 @@ public class ClientConnectionState {
         } catch (ClientException e) {
             int code = e.getCode();
             String error = e.getMessage();
-            if (code == JMQCode.CN_AUTHENTICATION_ERROR.getCode()) {
+            if (code == JournalqCode.CN_AUTHENTICATION_ERROR.getCode()) {
                 logger.error("client addConnection error, no permission, please check your app and token", error);
                 throw e;
             } else {
@@ -123,7 +136,7 @@ public class ClientConnectionState {
         RemoveConnectionRequest removeConnectionRequest = new RemoveConnectionRequest();
 
         try {
-            Command response = client.sync(new JMQCommand(removeConnectionRequest));
+            Command response = client.sync(new JournalqCommand(removeConnectionRequest));
             client.getAttribute().set(DISCONNECTED_KEY, true);
         } catch (Exception e) {
             logger.debug("client removeConnection error, connection: {}", removeConnectionRequest, e);

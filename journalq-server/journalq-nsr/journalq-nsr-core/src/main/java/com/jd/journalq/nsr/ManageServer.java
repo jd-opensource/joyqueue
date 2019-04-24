@@ -1,14 +1,54 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.nsr;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
-import com.jd.journalq.domain.*;
+import com.jd.journalq.domain.AppToken;
+import com.jd.journalq.domain.Broker;
+import com.jd.journalq.domain.Config;
+import com.jd.journalq.domain.Consumer;
+import com.jd.journalq.domain.DataCenter;
+import com.jd.journalq.domain.Namespace;
+import com.jd.journalq.domain.PartitionGroup;
+import com.jd.journalq.domain.Producer;
+import com.jd.journalq.domain.Replica;
+import com.jd.journalq.domain.Topic;
 import com.jd.journalq.model.PageResult;
 import com.jd.journalq.model.QPageQuery;
-import com.jd.journalq.nsr.model.*;
-import com.jd.journalq.nsr.service.*;
+import com.jd.journalq.nsr.model.AppTokenQuery;
+import com.jd.journalq.nsr.model.BrokerQuery;
+import com.jd.journalq.nsr.model.ConfigQuery;
+import com.jd.journalq.nsr.model.ConsumerQuery;
+import com.jd.journalq.nsr.model.DataCenterQuery;
+import com.jd.journalq.nsr.model.NamespaceQuery;
+import com.jd.journalq.nsr.model.PartitionGroupQuery;
+import com.jd.journalq.nsr.model.ProducerQuery;
+import com.jd.journalq.nsr.model.ReplicaQuery;
+import com.jd.journalq.nsr.model.TopicQuery;
+import com.jd.journalq.nsr.service.AppTokenService;
+import com.jd.journalq.nsr.service.BrokerService;
+import com.jd.journalq.nsr.service.ConfigService;
+import com.jd.journalq.nsr.service.ConsumerService;
+import com.jd.journalq.nsr.service.DataCenterService;
+import com.jd.journalq.nsr.service.NamespaceService;
+import com.jd.journalq.nsr.service.PartitionGroupReplicaService;
+import com.jd.journalq.nsr.service.PartitionGroupService;
+import com.jd.journalq.nsr.service.ProducerService;
+import com.jd.journalq.nsr.service.TopicService;
 import com.jd.journalq.toolkit.service.Service;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
@@ -172,10 +212,11 @@ public class ManageServer extends Service {
             }
         });
         router.post("/topic/updatePartitionGroup").handler(routingContext -> {
-            try{
-            routingContext.response().putHeader(CONTENT_TYPE, APPLICATION_JSON).end(JSONArray.toJSONString(topicService.updatePartitionGroup(JSONObject.parseObject(routingContext.getBodyAsString(), PartitionGroup.class))));
-            }catch (Exception e){
-                logger.error("topic updatePartitionGroup error,request[{}]",routingContext.getBodyAsString(),e);
+            try {
+                routingContext.response().putHeader(CONTENT_TYPE, APPLICATION_JSON).
+                        end(JSONArray.toJSONString(topicService.updatePartitionGroup(JSONObject.parseObject(routingContext.getBodyAsString(), PartitionGroup.class))));
+            } catch (Exception e) {
+                logger.error("topic updatePartitionGroup error,request[{}]", routingContext.getBodyAsString(), e);
                 routingContext.fail(e);
             }
         });
@@ -189,11 +230,12 @@ public class ManageServer extends Service {
             }
         });
         router.post("/topic/getPartitionGroup").handler(routingContext -> {
-            try{
+            try {
                 JSONObject json = JSONObject.parseObject(routingContext.getBodyAsString());
-                routingContext.response().putHeader(CONTENT_TYPE, APPLICATION_JSON).end(JSONArray.toJSONString(topicService.getPartitionGroup(json.getString("namespace"), json.getString("topic"), json.getJSONArray("groups").toArray())));
-            }catch (Exception e){
-                logger.error("topic getPartitionGroup error,request[{}]",routingContext.getBodyAsString(),e);
+                routingContext.response().putHeader(CONTENT_TYPE, APPLICATION_JSON).
+                        end(JSONArray.toJSONString(topicService.getPartitionGroup(json.getString("namespace"), json.getString("topic"), json.getJSONArray("groups").toArray())));
+            } catch (Exception e) {
+                logger.error("topic getPartitionGroup error,request[{}]", routingContext.getBodyAsString(), e);
                 routingContext.fail(e);
             }
         });
@@ -236,7 +278,8 @@ public class ManageServer extends Service {
         });
         router.post("/producer/list").handler(routingContext -> {
             try{
-            routingContext.response().putHeader(CONTENT_TYPE, APPLICATION_JSON).end(JSONArray.toJSONString(producerService.getProducerByClientType(JSONObject.parseObject(routingContext.getBodyAsString()).getByte("client_type"))));
+            routingContext.response().putHeader(CONTENT_TYPE, APPLICATION_JSON).
+                    end(JSONArray.toJSONString(producerService.getProducerByClientType(JSONObject.parseObject(routingContext.getBodyAsString()).getByte("client_type"))));
             }catch (Exception e){
                 logger.error("producer list error",e);
                 routingContext.fail(e);
@@ -244,7 +287,8 @@ public class ManageServer extends Service {
         });
         router.post("/producer/getList").handler(routingContext -> {
             try{
-                routingContext.response().putHeader(CONTENT_TYPE, APPLICATION_JSON).end(JSONArray.toJSONString(producerService.list(JSON.parseObject(routingContext.getBodyAsString(), ProducerQuery.class))));
+                routingContext.response().putHeader(CONTENT_TYPE, APPLICATION_JSON).
+                        end(JSONArray.toJSONString(producerService.list(JSON.parseObject(routingContext.getBodyAsString(), ProducerQuery.class))));
             }catch (Exception e){
                 logger.error("producer getlist error request[{}]",routingContext.getBodyAsString(),e);
                 routingContext.fail(e);
@@ -301,7 +345,8 @@ public class ManageServer extends Service {
         });
         router.post("/consumer/list").handler(routingContext -> {
             try{
-                routingContext.response().putHeader(CONTENT_TYPE, APPLICATION_JSON).end(JSONArray.toJSONString(consumerService.getConsumerByClientType(JSONObject.parseObject(routingContext.getBodyAsString()).getByte("client_type"))));
+                routingContext.response().putHeader(CONTENT_TYPE, APPLICATION_JSON).
+                        end(JSONArray.toJSONString(consumerService.getConsumerByClientType(JSONObject.parseObject(routingContext.getBodyAsString()).getByte("client_type"))));
             }catch (Exception e){
                 logger.error("consumer list error request[{}]",routingContext.getBodyAsString(),e);
                 routingContext.fail(e);
@@ -309,7 +354,8 @@ public class ManageServer extends Service {
         });
         router.post("/consumer/getList").handler(routingContext -> {
             try{
-                routingContext.response().putHeader(CONTENT_TYPE, APPLICATION_JSON).end(JSONArray.toJSONString(consumerService.list(JSON.parseObject(routingContext.getBodyAsString(), ConsumerQuery.class))));
+                routingContext.response().putHeader(CONTENT_TYPE, APPLICATION_JSON).
+                        end(JSONArray.toJSONString(consumerService.list(JSON.parseObject(routingContext.getBodyAsString(), ConsumerQuery.class))));
             }catch (Exception e){
                 logger.error("consumer list error request[{}]",routingContext.getBodyAsString(),e);
                 routingContext.fail(e);

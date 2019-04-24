@@ -1,12 +1,22 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.handler.routing.command.application;
 
-import com.jd.journalq.handler.binder.annotation.GenericBody;
-import com.jd.journalq.handler.binder.annotation.Page;
-import com.jd.journalq.handler.binder.annotation.Path;
+import com.jd.journalq.handler.annotation.PageQuery;
 import com.jd.journalq.handler.error.ConfigException;
 import com.jd.journalq.handler.error.ErrorCode;
 import com.jd.journalq.handler.routing.command.CommandSupport;
-import com.jd.journalq.handler.Constants;
 import com.jd.journalq.model.domain.Application;
 import com.jd.journalq.model.domain.ApplicationUser;
 import com.jd.journalq.model.domain.Identity;
@@ -15,26 +25,32 @@ import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.model.query.QUser;
 import com.jd.journalq.service.UserService;
 import com.jd.journalq.sync.SyncService;
+import com.jd.laf.web.vertx.annotation.Body;
 import com.jd.laf.binding.annotation.Value;
+import com.jd.laf.web.vertx.annotation.Path;
 import com.jd.laf.web.vertx.annotation.QueryParam;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
+
+import static com.jd.journalq.handler.Constants.APPLICATION;
+import static com.jd.journalq.handler.Constants.APP_ID;
+
 
 /**
  * Created by wangxiaofei1 on 2018/10/23.
  */
 public class ApplicationUserCommand extends CommandSupport<ApplicationUser, UserService, QUser> {
-    @QueryParam(Constants.APP_ID)
+    @QueryParam(APP_ID)
     protected Long appId;//应用id
     @Value(nullable = false)
     protected UserService userService;
     @Value(nullable = false)
     protected SyncService syncService;
-    @Value(Constants.APPLICATION)
+    @Value(APPLICATION)
     protected Application application;
 
     @Path("add")
-    public Response add(@GenericBody(type = GenericBody.BodyType.JSON,typeindex = 0) ApplicationUser applicationUser) throws Exception {
+    public Response add(@Body ApplicationUser applicationUser) throws Exception {
         //1. 参数检查
         if (applicationUser.getUser() == null) {
             throw new ConfigException(ErrorCode.BadRequest, "没有传入User参数!");
@@ -68,7 +84,7 @@ public class ApplicationUserCommand extends CommandSupport<ApplicationUser, User
 
     @Override
     @Path("search")
-    public Response pageQuery(@Page(typeindex = 2)QPageQuery<QUser> qPageQuery) throws Exception {
+    public Response pageQuery(@PageQuery QPageQuery<QUser> qPageQuery) throws Exception {
         if (qPageQuery.getQuery()== null) {
             QUser qUser = new QUser();
             qUser.setAppId(appId);

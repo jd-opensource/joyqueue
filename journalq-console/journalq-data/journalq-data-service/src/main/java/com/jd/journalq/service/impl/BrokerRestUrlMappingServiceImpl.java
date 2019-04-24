@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.service.impl;
 
 import com.jd.journalq.model.domain.Broker;
@@ -22,9 +35,9 @@ public class BrokerRestUrlMappingServiceImpl implements BrokerRestUrlMappingServ
     private Logger logger= LoggerFactory.getLogger(BrokerRestUrlMappingServiceImpl.class);
 
     /** message preview path  */
-    private static final String pendingByteMessagePath="/manage/topic/%s/app/%s/message/view?count=%s";
-    private static final String  lastestMessagePath="/manage/topic/%s/app/%s/message/last";
-    private static final String partitoinMessagePath="/manage/topic/%s/app/%s/partition/%d/message";
+    private static final String pendingByteMessagePath="/manage/topic/%s/app/%s/message/pending?count=%s";
+    private String lastestMessagePath="/manage/topic/%s/app/%s/message/last";
+    private String partitoinMessagePath="/manage/topic/%s/app/%s/partition/%d/message";
 
     /** monitor path */
     private String appMonitorPath="/monitor/topic/%s/app/%s/%s"; // topic|app|type{producer/consumer}
@@ -41,6 +54,8 @@ public class BrokerRestUrlMappingServiceImpl implements BrokerRestUrlMappingServ
     private String appTopicMonitorProducerPath ="/monitor/topic/%s/app/%s/producer";
 //    /monitor/connections/detail
     private String appConnectionDetailPath = "/monitor/connections/detail";
+    //    /manage/topic/:topic/partitionGroup/:partitionGroup/store/metric
+    private String partitiongroupIndexPath="/manage/topic/%s/partitionGroup/%s/store/metric";
 
     /** offset management*/
     private String appConsumeOffsetMonitorPath="/manage/topic/%s/app/%s/acks"; // topic|app
@@ -49,6 +64,11 @@ public class BrokerRestUrlMappingServiceImpl implements BrokerRestUrlMappingServ
     private String resetAppPartitionOffsetByTimePath="/manage/topic/%s/app/%s/partition/%s/ackByTime?timestamp=%s";// topic|app|partition,method=put
     private String resetAppTopicOffsetByTimePath="/manage/topic/%s/app/%s/ackByTime?timestamp=%s";// topic|app|partition,method=put
     private String getTopicAppOffsetPath = "/manage/topic/%s/app/%s/timestamp/%s/ackByTime"; ///manage/topic/:topic/app/:app/timestamp/%s/ackByTime,method=get
+//    /manage/topic/:topic/app/:app/partition/:partition/message ?count=&index=
+    private String getPartitionMessageByIndexPath="/manage/topic/%s/app/%s/partition/%s/message?index=%s&count=%s";
+
+//    /manage/topic/:topic/app/:app/partition/:partition/ackByTime
+    private String getTopicAppPartitionIndexByTimePath="/manage/topic/%s/app/%s/partition/%s/ackByTime?timestamp=%s";
     /** topic */
     private String topicPartitionGroupsMonitorPath ="/monitor/topic/%s/app/%s/partitionGroups";
 
@@ -60,7 +80,7 @@ public class BrokerRestUrlMappingServiceImpl implements BrokerRestUrlMappingServ
 
 
     /** archive monitor*/
-    private String archiveMonitorPath="/monitor/archive/";
+    private String archiveMonitorPath="/monitor/archive/info";
 
     /** store **/
     private String topicListPath = "/manage/topic/list";

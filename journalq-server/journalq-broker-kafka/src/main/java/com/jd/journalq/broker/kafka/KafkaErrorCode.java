@@ -1,8 +1,21 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.broker.kafka;
 
 import com.google.common.collect.Maps;
-import com.jd.journalq.exception.JMQCode;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqCode;
+import com.jd.journalq.exception.JournalqException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,21 +30,21 @@ import java.util.Map;
 public enum KafkaErrorCode {
 
     UNKNOWN_SERVER_ERROR(-1),
-    NONE(0, JMQCode.SUCCESS),
+    NONE(0, JournalqCode.SUCCESS),
     OFFSET_OUT_OF_RANGE(1),
     CORRUPT_MESSAGE(2,
-            JMQCode.CN_CHECKSUM_ERROR, JMQCode.CT_MESSAGE_BODY_NULL),
+            JournalqCode.CN_CHECKSUM_ERROR, JournalqCode.CT_MESSAGE_BODY_NULL),
     UNKNOWN_TOPIC_OR_PARTITION(3,
-            JMQCode.CN_NO_PERMISSION, JMQCode.CN_AUTHENTICATION_ERROR),
+            JournalqCode.CN_NO_PERMISSION, JournalqCode.CN_AUTHENTICATION_ERROR),
     INVALID_FETCH_SIZE(4),
     LEADER_NOT_AVAILABLE(5),
-    NOT_LEADER_FOR_PARTITION(6, JMQCode.CT_NO_CLUSTER),
+    NOT_LEADER_FOR_PARTITION(6, JournalqCode.CT_NO_CLUSTER),
     REQUEST_TIMED_OUT(7,
-            JMQCode.CN_REQUEST_TIMEOUT, JMQCode.CN_REQUEST_ERROR, JMQCode.CN_REQUEST_EXCESSIVE, JMQCode.CN_THREAD_INTERRUPTED, JMQCode.CN_THREAD_EXECUTOR_BUSY),
+            JournalqCode.CN_REQUEST_TIMEOUT, JournalqCode.CN_REQUEST_ERROR, JournalqCode.CN_REQUEST_EXCESSIVE, JournalqCode.CN_THREAD_INTERRUPTED, JournalqCode.CN_THREAD_EXECUTOR_BUSY),
     BROKER_NOT_AVAILABLE(8,
-            JMQCode.CN_SERVICE_NOT_AVAILABLE, JMQCode.CN_CONNECTION_ERROR, JMQCode.CN_CONNECTION_TIMEOUT),
+            JournalqCode.CN_SERVICE_NOT_AVAILABLE, JournalqCode.CN_CONNECTION_ERROR, JournalqCode.CN_CONNECTION_TIMEOUT),
     REPLICA_NOT_AVAILABLE(9,
-            JMQCode.CY_REPLICATE_TIMEOUT, JMQCode.CY_REPLICATE_ERROR, JMQCode.CY_REPLICATE_ENQUEUE_TIMEOUT),
+            JournalqCode.CY_REPLICATE_TIMEOUT, JournalqCode.CY_REPLICATE_ERROR, JournalqCode.CY_REPLICATE_ENQUEUE_TIMEOUT),
     MESSAGE_TOO_LARGE(10),
     STALE_CONTROLLER_EPOCH(11),
     OFFSET_METADATA_TOO_LARGE(12),
@@ -103,16 +116,16 @@ public enum KafkaErrorCode {
 
     protected static final Logger logger = LoggerFactory.getLogger(KafkaErrorCode.class);
 
-    private static final Map<Integer, Short> JMQCODE_TO_CODE_MAPPER = Maps.newHashMap();
+    private static final Map<Integer, Short> JOURNALQ_CODE_TO_CODE_MAPPER = Maps.newHashMap();
     private static final Map<Class<?>, Short> EXCEPTION_TO_CODE_MAPPER = Maps.newHashMap();
 
     static {
         for (KafkaErrorCode errorCode : KafkaErrorCode.values()) {
-            if (errorCode.getJmqCodes() == null) {
+            if (errorCode.getJournalqCodes() == null) {
                 continue;
             }
-            for (JMQCode jmqCode : errorCode.getJmqCodes()) {
-                JMQCODE_TO_CODE_MAPPER.put(jmqCode.getCode(), errorCode.getCode());
+            for (JournalqCode JournalqCode : errorCode.getJournalqCodes()) {
+                JOURNALQ_CODE_TO_CODE_MAPPER.put(JournalqCode.getCode(), errorCode.getCode());
             }
         }
 
@@ -127,7 +140,7 @@ public enum KafkaErrorCode {
     }
 
     private int code;
-    private JMQCode[] jmqCodes;
+    private JournalqCode[] JournalqCodes;
     private Throwable[] exception;
 
     KafkaErrorCode(int code) {
@@ -139,14 +152,14 @@ public enum KafkaErrorCode {
         this.exception = exception;
     }
 
-    KafkaErrorCode(int code, JMQCode... jmqCodes) {
+    KafkaErrorCode(int code, JournalqCode... JournalqCodes) {
         this.code = code;
-        this.jmqCodes = jmqCodes;
+        this.JournalqCodes = JournalqCodes;
     }
 
-    KafkaErrorCode(int code, Throwable[] exception, JMQCode[] jmqCodes) {
+    KafkaErrorCode(int code, Throwable[] exception, JournalqCode[] JournalqCodes) {
         this.code = code;
-        this.jmqCodes = jmqCodes;
+        this.JournalqCodes = JournalqCodes;
         this.exception = exception;
     }
 
@@ -154,8 +167,8 @@ public enum KafkaErrorCode {
         return (short) code;
     }
 
-    public JMQCode[] getJmqCodes() {
-        return jmqCodes;
+    public JournalqCode[] getJournalqCodes() {
+        return JournalqCodes;
     }
 
     public Throwable[] getException() {
@@ -163,8 +176,8 @@ public enum KafkaErrorCode {
     }
 
     public static short exceptionFor(Throwable exception) {
-        if (exception instanceof JMQException) {
-            return jmqCodeFor(((JMQException) exception).getCode());
+        if (exception instanceof JournalqException) {
+            return journalqCodeFor(((JournalqException) exception).getCode());
         } else {
             return kafkaExceptionFor(exception);
         }
@@ -179,10 +192,10 @@ public enum KafkaErrorCode {
         return code;
     }
 
-    public static short jmqCodeFor(int jmqCode) {
-        Short code = JMQCODE_TO_CODE_MAPPER.get(jmqCode);
+    public static short journalqCodeFor(int journalqCode) {
+        Short code = JOURNALQ_CODE_TO_CODE_MAPPER.get(journalqCode);
         if (code == null) {
-            logger.warn("unsupported jmqCode mapper, jmqCode: {}", jmqCode);
+            logger.warn("unsupported JournalqCode mapper, journalqCode: {}", journalqCode);
             code = UNKNOWN_SERVER_ERROR.getCode();
         }
         return code;

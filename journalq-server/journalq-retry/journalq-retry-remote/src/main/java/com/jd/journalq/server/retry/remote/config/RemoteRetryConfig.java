@@ -1,6 +1,19 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.server.retry.remote.config;
 
-import com.jd.journalq.exception.JMQConfigException;
+import com.jd.journalq.exception.JournalqConfigException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +33,7 @@ public class RemoteRetryConfig {
     private static int remoteRetryUpdateInterval;
 
     // 配置文件路径
-    private static final String configFile = "laf-jmq.properties";
+    private static final String configFile = "journalq.properties";
 
 
     // 初始化数据源配置
@@ -28,7 +41,7 @@ public class RemoteRetryConfig {
         Properties properties = new Properties();
         InputStream inputStream = RemoteRetryConfig.class.getClassLoader().getResourceAsStream(configFile);
         if (null == inputStream) {
-            throw new JMQConfigException("cannot load laf-jmq.properties.");
+            throw new JournalqConfigException(String.format("cannot load %s.", configFile));
         }
         try {
             properties.load(inputStream);
@@ -36,7 +49,7 @@ public class RemoteRetryConfig {
             remoteRetryLimitThread = Integer.parseInt(properties.getProperty(Enum.REMOTE_RETRY_LIMIT_THREADS.name, Enum.REMOTE_RETRY_LIMIT_THREADS.value));
             remoteRetryUpdateInterval = Integer.parseInt(properties.getProperty(Enum.REMOTE_RETRY_UPDATE_INTERVAL.name, Enum.REMOTE_RETRY_UPDATE_INTERVAL.value));
         } catch (IOException e) {
-            throw new JMQConfigException("load and parse config error.", e);
+            throw new JournalqConfigException("load and parse config error.", e);
         }
 
         logger.info("success init RemoteRetryConfig.");

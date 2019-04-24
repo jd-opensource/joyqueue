@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.client.internal.producer.support;
 
 import com.google.common.collect.Lists;
@@ -19,12 +32,12 @@ import com.jd.journalq.client.internal.producer.transport.ProducerClientGroup;
 import com.jd.journalq.client.internal.producer.transport.ProducerClientManager;
 import com.jd.journalq.client.internal.transport.ConnectionState;
 import com.jd.journalq.domain.QosLevel;
-import com.jd.journalq.exception.JMQCode;
 import com.jd.journalq.network.command.FetchProduceFeedbackResponse;
 import com.jd.journalq.network.command.ProduceMessagePrepareResponse;
 import com.jd.journalq.network.command.ProduceMessageResponse;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.command.ProduceMessageAckData;
-import com.jd.journalq.network.command.ProduceMessageCommitAck;
+import com.jd.journalq.network.command.ProduceMessageCommitResponse;
 import com.jd.journalq.network.command.ProduceMessageData;
 import com.jd.journalq.network.command.ProduceMessageRollbackResponse;
 import com.jd.journalq.network.command.TxStatus;
@@ -32,7 +45,7 @@ import com.jd.journalq.network.domain.BrokerNode;
 import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.transport.command.CommandCallback;
 import com.jd.journalq.toolkit.concurrent.SimpleFuture;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
@@ -88,7 +101,11 @@ public class DefaultMessageSender extends Service implements MessageSender {
     }
 
     @Override
-    public void sendAsync(BrokerNode brokerNode, String topic, String app, String txId, final ProduceMessage message, QosLevel qosLevel, long produceTimeout, long timeout, final AsyncSendCallback callback) {
+    public void sendAsync(BrokerNode brokerNode, String topic,
+                          String app, String txId,
+                          final ProduceMessage message, QosLevel qosLevel,
+                          long produceTimeout, long timeout,
+                          final AsyncSendCallback callback) {
         List<ProduceMessage> messages = Lists.newArrayList(message);
         batchSendAsync(brokerNode, topic, app, txId, messages, qosLevel, produceTimeout, timeout, new AsyncBatchSendCallback() {
             @Override
@@ -109,7 +126,11 @@ public class DefaultMessageSender extends Service implements MessageSender {
     }
 
     @Override
-    public void batchSendAsync(BrokerNode brokerNode, final String topic, String app, String txId, List<ProduceMessage> messages, QosLevel qosLevel, long produceTimeout, long timeout, final AsyncBatchSendCallback callback) {
+    public void batchSendAsync(BrokerNode brokerNode, final String topic,
+                               String app, String txId,
+                               List<ProduceMessage> messages, QosLevel qosLevel,
+                               long produceTimeout, long timeout,
+                               final AsyncBatchSendCallback callback) {
         Map<String, List<ProduceMessage>> messageMap = Maps.newHashMapWithExpectedSize(1);
         messageMap.put(topic, messages);
 
@@ -128,7 +149,10 @@ public class DefaultMessageSender extends Service implements MessageSender {
     }
 
     @Override
-    public Future<SendBatchResultData> batchSendAsync(BrokerNode brokerNode, final String topic, String app, String txId, List<ProduceMessage> messages, QosLevel qosLevel, long produceTimeout, long timeout) {
+    public Future<SendBatchResultData> batchSendAsync(BrokerNode brokerNode, final String topic,
+                                                      String app, String txId,
+                                                      List<ProduceMessage> messages, QosLevel qosLevel,
+                                                      long produceTimeout, long timeout) {
         final SimpleFuture<SendBatchResultData> future = new SimpleFuture<SendBatchResultData>();
         Map<String, List<ProduceMessage>> messageMap = Maps.newHashMapWithExpectedSize(1);
         messageMap.put(topic, messages);
@@ -180,7 +204,10 @@ public class DefaultMessageSender extends Service implements MessageSender {
     }
 
     @Override
-    public Map<String, SendBatchResultData> batchSend(BrokerNode brokerNode, String app, String txId, Map<String, List<ProduceMessage>> messages, QosLevel qosLevel, long produceTimeout, long timeout) {
+    public Map<String, SendBatchResultData> batchSend(BrokerNode brokerNode, String app,
+                                                      String txId, Map<String, List<ProduceMessage>> messages,
+                                                      QosLevel qosLevel, long produceTimeout,
+                                                      long timeout) {
         checkState();
         Map<String, ProduceMessageData> data = Maps.newHashMap();
 
@@ -204,7 +231,10 @@ public class DefaultMessageSender extends Service implements MessageSender {
     }
 
     @Override
-    public void batchSendAsync(BrokerNode brokerNode, final String app, String txId, final Map<String, List<ProduceMessage>> messages, QosLevel qosLevel, long produceTimeout, long timeout, final AsyncMultiBatchSendCallback callback) {
+    public void batchSendAsync(BrokerNode brokerNode, final String app,
+                               String txId, final Map<String, List<ProduceMessage>> messages,
+                               QosLevel qosLevel, long produceTimeout,
+                               long timeout, final AsyncMultiBatchSendCallback callback) {
         checkState();
         Map<String, ProduceMessageData> data = Maps.newHashMap();
 
@@ -241,7 +271,9 @@ public class DefaultMessageSender extends Service implements MessageSender {
     }
 
     @Override
-    public Future<Map<String, SendBatchResultData>> batchSendAsync(BrokerNode brokerNode, String app, String txId, Map<String, List<ProduceMessage>> messages, QosLevel qosLevel, long produceTimeout, long timeout) {
+    public Future<Map<String, SendBatchResultData>> batchSendAsync(BrokerNode brokerNode, String app,
+                                                                   String txId, Map<String, List<ProduceMessage>> messages,
+                                                                   QosLevel qosLevel, long produceTimeout, long timeout) {
         final SimpleFuture<Map<String, SendBatchResultData>> future = new SimpleFuture<Map<String, SendBatchResultData>>();
         batchSendAsync(brokerNode, app, txId, messages, qosLevel, produceTimeout, timeout, new AsyncMultiBatchSendCallback() {
             @Override
@@ -268,17 +300,17 @@ public class DefaultMessageSender extends Service implements MessageSender {
     }
 
     @Override
-    public JMQCode commit(BrokerNode brokerNode, String topic, String app, String txId, long timeout) {
+    public JournalqCode commit(BrokerNode brokerNode, String topic, String app, String txId, long timeout) {
         checkState();
         ProducerClient client = producerClientManager.getOrCreateClient(brokerNode);
         handleAddProducers(brokerNode, Lists.newArrayList(topic), app, client);
 
-        ProduceMessageCommitAck produceMessageCommitAck = client.produceMessageCommit(topic, app, txId, timeout);
-        return produceMessageCommitAck.getCode();
+        ProduceMessageCommitResponse produceMessageCommitResponse = client.produceMessageCommit(topic, app, txId, timeout);
+        return produceMessageCommitResponse.getCode();
     }
 
     @Override
-    public JMQCode rollback(BrokerNode brokerNode, String topic, String app, String txId, long timeout) {
+    public JournalqCode rollback(BrokerNode brokerNode, String topic, String app, String txId, long timeout) {
         checkState();
         ProducerClient client = producerClientManager.getOrCreateClient(brokerNode);
         handleAddProducers(brokerNode, Lists.newArrayList(topic), app, client);
@@ -299,7 +331,7 @@ public class DefaultMessageSender extends Service implements MessageSender {
 
     protected void checkState() {
         if (!isStarted()) {
-            throw new ClientException("sender is not started", JMQCode.CN_SERVICE_NOT_AVAILABLE.getCode());
+            throw new ClientException("sender is not started", JournalqCode.CN_SERVICE_NOT_AVAILABLE.getCode());
         }
     }
 

@@ -1,8 +1,22 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.service;
 
 
 import com.jd.journalq.model.domain.SimplifiedBrokeMessage;
 import com.jd.journalq.model.domain.Subscribe;
+import com.jd.journalq.monitor.BrokerMessageInfo;
 
 import java.util.List;
 
@@ -35,17 +49,14 @@ public interface BrokerMessageService {
 
 
     /**
-     * 预览最新的消息
-     * @param topic  消息主题
-     * @param app    消息应用
      * @param partition 分区id
      * @param index     消息索引,第几条消息0～
      * @param count 获取的消息条数
      *
      **/
-    List<SimplifiedBrokeMessage> viewMessage(long topicId,String topic,String app,short partition,long index,int count);
+    List<BrokerMessageInfo> viewMessage(Subscribe subscribe, String partition, String index, int count);
 
-
+    Long getPartitionIndexByTime(Subscribe subscribe,String partition, String timestamp);
     /**
      *  下载消息
      *  @param indexOffset  第几条消息

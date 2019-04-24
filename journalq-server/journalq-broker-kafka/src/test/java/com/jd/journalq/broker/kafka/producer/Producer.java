@@ -1,6 +1,20 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.broker.kafka.producer;
 
 import com.jd.journalq.broker.kafka.conf.KafkaConfigs;
+import com.jd.journalq.toolkit.time.SystemClock;
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -49,7 +63,7 @@ public class Producer extends Thread {
         int messageNo = 1;
         while (messageNo <= 100) {
             String messageStr = "Message_" + messageNo + "_" + System.nanoTime();
-            long startTime = System.currentTimeMillis();
+            long startTime = SystemClock.now();
             if (isAsync) { // Send asynchronously
                 producer.send(new ProducerRecord<String, String>(topic,
                         messageNo+"",
@@ -93,7 +107,7 @@ class DemoCallBack implements Callback {
      * @param exception The exception thrown during processing of this record. Null if no error occurred.
      */
     public void onCompletion(RecordMetadata metadata, Exception exception) {
-        long elapsedTime = System.currentTimeMillis() - startTime;
+        long elapsedTime = SystemClock.now() - startTime;
         if (metadata != null) {
             System.out.println(
                     "message(" + key + ", " + message + ") sent to partition(" + metadata.partition() +

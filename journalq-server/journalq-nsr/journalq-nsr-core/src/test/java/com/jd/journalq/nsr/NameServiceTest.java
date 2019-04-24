@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.nsr;
 
 import com.jd.journalq.domain.*;
@@ -37,7 +50,7 @@ public class NameServiceTest{
 
     @Test
     public void subscribe() throws InterruptedException {
-        String app = "jmq";
+        String app = "jm";
         String topic = "__group_coordinators";
         nameService.subscribe(new Subscription(TopicName.parse(topic),app, Subscription.Type.CONSUMPTION), ClientType.JMQ);
         nameService.subscribe(new Subscription(TopicName.parse(topic),app, Subscription.Type.CONSUMPTION), ClientType.JMQ);
@@ -47,7 +60,7 @@ public class NameServiceTest{
 
     @Test
     public void unSubscribe() {
-        String app = "jmq";
+        String app = "journalq";
         String topic = "__group_coordinators";
         nameService.unSubscribe(new Subscription(TopicName.parse(topic),app, Subscription.Type.CONSUMPTION));
         nameService.unSubscribe(new Subscription(TopicName.parse(topic),app, Subscription.Type.CONSUMPTION));
@@ -57,7 +70,7 @@ public class NameServiceTest{
 
     @Test
     public void hasSubscribe() {
-        String app = "jmq2";
+        String app = "journalq2";
         String topic = "__group_coordinators";
         boolean have = nameService.hasSubscribe(app,Subscription.Type.CONSUMPTION);
          have = nameService.hasSubscribe(app,Subscription.Type.CONSUMPTION);
@@ -123,7 +136,7 @@ public class NameServiceTest{
 
     @Test
     public void getTopics() {
-        String app = "jmq";
+        String app = "journalq";
         String topic = "__group_coordinators";
         Set<String> topicConfigs = nameService.getTopics(app,Subscription.Type.PRODUCTION);
         topicConfigs = nameService.getTopics(app,Subscription.Type.PRODUCTION);
@@ -148,7 +161,7 @@ public class NameServiceTest{
 
     @Test
     public void getProducerByTopicAndApp() {
-        String app = "jmq";
+        String app = "journalq";
         String topic = "__group_coordinators";
         Producer producer = nameService.getProducerByTopicAndApp(TopicName.parse(topic),app);
         producer = nameService.getProducerByTopicAndApp(TopicName.parse(topic),app);
@@ -165,7 +178,7 @@ public class NameServiceTest{
 
     @Test
     public void getTopicConfigByApp() {
-        String app = "jmq";
+        String app = "journalq";
         Map<TopicName,TopicConfig> topicConfigs = nameService.getTopicConfigByApp(app,Subscription.Type.CONSUMPTION);
         topicConfigs = nameService.getTopicConfigByApp(app,Subscription.Type.CONSUMPTION);
         System.out.println(topicConfigs);
@@ -227,13 +240,5 @@ public class NameServiceTest{
     public void getAppToken() {
         AppToken appToken = nameService.getAppToken("poslp","2e2b2eb5-5c2e-49b0-8589-22aa71ca0c99");
         System.out.println(appToken);
-    }
-
-    @Test
-    public void addListener() {
-    }
-
-    @Test
-    public void removeListener() {
     }
 }

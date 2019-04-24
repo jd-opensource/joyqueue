@@ -3,8 +3,8 @@ package com.jd.journalq.broker.producer.transaction.handler;
 import com.jd.journalq.broker.BrokerContext;
 import com.jd.journalq.broker.producer.Produce;
 import com.jd.journalq.broker.producer.transaction.command.TransactionRollbackRequest;
-import com.jd.journalq.exception.JMQCode;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqCode;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.message.BrokerRollback;
 import com.jd.journalq.network.command.BooleanAck;
 import com.jd.journalq.network.command.CommandType;
@@ -45,12 +45,12 @@ public class TransactionRollbackRequestHandler implements CommandHandler, Type {
         try {
             produce.putTransactionMessage(producer, brokerRollback);
             return BooleanAck.build();
-        } catch (JMQException e) {
+        } catch (JournalqException e) {
             logger.error("rollback transaction exception, topic: {}, app: {}", transactionRollbackRequest.getTopic(), transactionRollbackRequest.getApp(), e);
             return BooleanAck.build(e.getCode());
         } catch (Exception e) {
             logger.error("rollback transaction exception, topic: {}, app: {}", transactionRollbackRequest.getTopic(), transactionRollbackRequest.getApp(), e);
-            return BooleanAck.build(JMQCode.CN_UNKNOWN_ERROR);
+            return BooleanAck.build(JournalqCode.CN_UNKNOWN_ERROR);
         }
     }
 

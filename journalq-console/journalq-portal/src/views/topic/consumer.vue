@@ -1,14 +1,15 @@
 <template>
   <div>
-    <consumer-base ref="consumerBase" :keywordTip="keywordTip" :colData="colData" :subscribeDialogColData="subscribeDialog.colData"
-                   :search="search" :subscribeUrls="subscribeDialog.urls"/>
+    <consumer-base ref="consumerBase" :keywordTip="keywordTip" :colData="colData"
+                   :subscribeDialogColData="subscribeDialog.colData"
+                   :search="search" :subscribeUrls="subscribeDialog.urls" />
   </div>
 </template>
 
 <script>
-  import consumerBase from '../monitor/consumerBase.vue';
-  import {getTopicCode,getAppCode,yesOrNoBtnRender,openOrCloseBtnRender,clientTypeSelectRender,
-    clientTypeBtnRender,topicTypeBtnRender,baseBtnRender,subscribeGroupAutoCompleteRender} from '../../utils/common.js';
+import consumerBase from '../monitor/consumerBase.vue'
+import {getTopicCode, getAppCode, openOrCloseBtnRender, clientTypeSelectRender,
+  clientTypeBtnRender, topicTypeBtnRender, baseBtnRender, subscribeGroupAutoCompleteRender} from '../../utils/common.js'
 
 export default {
   name: 'consumer',
@@ -38,10 +39,6 @@ export default {
             return getTopicCode(row.topic, row.namespace)
           }
         },
-        // {
-        //   title:'负责人',
-        //   key: 'owner.code'
-        // },
         {
           title: '连接数',
           key: 'connections'
@@ -66,18 +63,25 @@ export default {
               on: {
                 click: () => {
                   this.$router.push({
-                    name: `/${this.$i18n.locale}/tool/retry`,
-                    query: {topic: params.item.topic.code, app: params.item.app.code}})
+                    name: `/${this.$i18n.locale}/topic/detail`,
+                    query: {id: params.item.topic.code,
+                      code: params.item.topic.code,
+                      namespaceId: params.item.topic.namespace.id,
+                      namespaceCode: params.item.topic.namespace.code,
+                      tab: 'retry',
+                      app: getAppCode(params.item.app, params.item.subscribeGroup)
+                    }
+                  })
                 }
               }
             }, params.item.retry === undefined ? 0 : params.item.retry.count)
           }
         },
         {
-          title:'消息类型',
+          title: '消息类型',
           key: 'topicType',
           render: (h, params) => {
-            return topicTypeBtnRender(h, params.item.topicType);
+            return topicTypeBtnRender(h, params.item.topicType)
           }
         },
         {
@@ -142,12 +146,7 @@ export default {
             width: '25%'
           },
           {
-            title: '应用名称',
-            key: 'name',
-            width: '25%'
-          },
-          {
-            title: '分组',
+            title: '订阅分组',
             key: 'subscribeGroup',
             width: '25%',
             render: (h, params) => {
@@ -168,31 +167,10 @@ export default {
           search: `/application/unsubscribed/search`
         }
       },
-      // 生产详情
+      // 消费详情
       detailDialog: {
         partition: {
-          colData: [
-            // {
-            //   title: 'ID',
-            //   key: 'groupNo'
-            // },
-            // {
-            //   title: '主分片',
-            //   key: 'ip'
-            // },
-            // {
-            //   title: '分片',
-            //   key: 'partitions'
-            // },
-            // {
-            //   title:'积压数',
-            //   key: 'pending.count'
-            // },
-            // {
-            //   title: '出队数',
-            //   key: 'deQuence.count'
-            // }
-          ]
+          colData: []
         }
       }
     }

@@ -12,7 +12,7 @@ import com.jd.journalq.broker.producer.Produce;
 import com.jd.journalq.broker.producer.PutResult;
 import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.domain.TopicConfig;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.message.BrokerMessage;
 import com.jd.journalq.network.session.Consumer;
 import com.jd.journalq.network.session.Producer;
@@ -135,8 +135,8 @@ public class TransactionLog extends Service {
 
     protected List<ByteBuffer> doRead(short partition, long index, int count) throws Exception {
         PullResult pullResult = consume.getMessage(consumer, partition, index, count);
-        if (!pullResult.getJmqCode().equals(JMQCode.SUCCESS)) {
-            logger.error("read transaction log exception, partition: {}, index: {}, count: {}", partition, index, count, pullResult.getJmqCode());
+        if (!pullResult.getJournalqCode().equals(JournalqCode.SUCCESS)) {
+            logger.error("read transaction log exception, partition: {}, index: {}, count: {}", partition, index, count, pullResult.getJournalqCode());
             return Collections.emptyList();
         }
         List<ByteBuffer> buffers = Lists.newArrayListWithCapacity(pullResult.getBuffers().size());

@@ -1,14 +1,28 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.handler.routing.command.monitor;
 
 import com.jd.journalq.domain.ClientType;
 import com.jd.journalq.domain.TopicName;
-import com.jd.journalq.handler.binder.annotation.GenericValue;
-import com.jd.journalq.handler.binder.annotation.ParamterValue;
-import com.jd.journalq.handler.binder.annotation.Path;
 import com.jd.journalq.handler.error.ConfigException;
 import com.jd.journalq.handler.routing.command.NsrCommandSupport;
-import com.jd.journalq.handler.Constants;
-import com.jd.journalq.model.domain.*;
+import com.jd.journalq.model.domain.Application;
+import com.jd.journalq.model.domain.PartitionGroupWeight;
+import com.jd.journalq.model.domain.Producer;
+import com.jd.journalq.model.domain.ProducerConfig;
+import com.jd.journalq.model.domain.Topic;
+import com.jd.journalq.model.domain.TopicPartitionGroup;
 import com.jd.journalq.model.query.QProducer;
 import com.jd.journalq.service.ApplicationService;
 import com.jd.journalq.service.ProducerService;
@@ -16,6 +30,9 @@ import com.jd.journalq.service.TopicPartitionGroupService;
 import com.jd.journalq.service.TopicService;
 import com.jd.journalq.nsr.ProducerNameServerService;
 import com.jd.journalq.util.NullUtil;
+import com.jd.laf.binding.annotation.Value;
+import com.jd.laf.web.vertx.annotation.Path;
+import com.jd.laf.web.vertx.annotation.QueryParam;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
 import org.slf4j.Logger;
@@ -26,24 +43,25 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.jd.journalq.handler.Constants.ID;
+
 
 public class ProducerCommand extends NsrCommandSupport<Producer, ProducerService, QProducer> {
     private final Logger logger = LoggerFactory.getLogger(ProducerCommand.class);
 
-    @GenericValue
+    @Value(nullable = false)
     private ApplicationService applicationService;
-    @GenericValue
+    @Value(nullable = false)
     private TopicService topicService;
-
-    @GenericValue
+    @Value(nullable = false)
     private TopicPartitionGroupService topicPartitionGroupService;
-    @GenericValue
+    @Value(nullable = false)
     protected ProducerNameServerService producerNameServerService;
+
     @Override
     @Path("delete")
-    public Response delete(@ParamterValue(Constants.ID)Object id) throws Exception {
-        String producerId = id.toString();
-        Producer producer = service.findById(producerId);
+    public Response delete(@QueryParam(ID) String id) throws Exception {
+        Producer producer = service.findById(id);
         int count = service.delete(producer);
         if (count <= 0) {
             throw new ConfigException(deleteErrorCode());
@@ -52,9 +70,8 @@ public class ProducerCommand extends NsrCommandSupport<Producer, ProducerService
     }
 
     @Path("weight")
-    public Response findPartitionGroupWeight(@ParamterValue(Constants.ID)Object id) throws Exception {
-        String producerId = id.toString();
-        Producer producer = service.findById(producerId);
+    public Response findPartitionGroupWeight(@QueryParam(ID) String id) throws Exception {
+        Producer producer = service.findById(id);
         List<PartitionGroupWeight> currentWeights=new ArrayList<>();
         if(!NullUtil.isEmpty(producer)) {
           ProducerConfig producerConfig=  producer.getConfig();
@@ -85,7 +102,7 @@ public class ProducerCommand extends NsrCommandSupport<Producer, ProducerService
         int failCount = 0;
         List<Producer> producerList = producerNameServerService.syncProducer(ClientType.MQTT.value());
         Map<String,Topic> topicMap = new HashMap<>();
-        Map<String, Application> appMap = new HashMap<>();
+        Map<String,Application> appMap = new HashMap<>();
         for(Producer producer : producerList){
             try {
                 Topic topic = topicMap.get(producer.getNamespace().getCode() +TopicName.TOPIC_SEPARATOR+ producer.getTopic().getCode());

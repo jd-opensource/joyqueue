@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.client.internal.producer.transport;
 
 import com.google.common.collect.Lists;
@@ -6,7 +19,7 @@ import com.google.common.collect.Sets;
 import com.jd.journalq.network.command.AddProducerRequest;
 import com.jd.journalq.network.command.RemoveProducerRequest;
 import com.jd.journalq.network.transport.TransportAttribute;
-import com.jd.journalq.network.transport.command.JMQCommand;
+import com.jd.journalq.network.transport.command.JournalqCommand;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
@@ -107,7 +120,7 @@ public class ProducerConnectionState {
         addProducerRequest.setApp(app);
         addProducerRequest.setSequence(SEQUENCE.incrementAndGet());
         try {
-            producerClient.getClient().sync(new JMQCommand(addProducerRequest));
+            producerClient.getClient().sync(new JournalqCommand(addProducerRequest));
             return true;
         } catch (Exception e) {
             logger.warn("add producer exception, topics: {}, app: {}, error: {}", topics, app, e.getMessage());
@@ -121,7 +134,7 @@ public class ProducerConnectionState {
         removeProducerRequest.setTopics(topics);
         removeProducerRequest.setApp(app);
         try {
-            producerClient.getClient().sync(new JMQCommand(removeProducerRequest));
+            producerClient.getClient().sync(new JournalqCommand(removeProducerRequest));
             return true;
         } catch (Exception e) {
             logger.warn("remove producer exception, topics: {}, app: {}, error: {}", topics, app, e.getMessage());

@@ -8,38 +8,23 @@
       "setting": "系统管理",
       "logout": "退出"
     },
-    "workflow": {
-      "apiToken":"API令牌",
-      "apply": "我的申请",
-      "audit": "待我审批"
-    },
     "tool": {
       "retry": "重试查询",
       "archive": "归档查询",
-      "alarmRule": "报警规则",
-      "alarmRuleTemplate": "默认报警规则",
-      "metric": "指标管理",
-      "taskHistory": "历史任务查询",
       "operateHistory": "操作历史查询"
     },
     "setting": {
       "user": "用户管理",
-      "userToken": "令牌管理",
       "dataCenter": "数据中心管理",
       "config": "配置管理",
-      "hosts": "主机管理",
       "brokerGroup": "分组管理",
-      "broker": "broker管理",
-      "auditRole": "审批角色管理",
-      "auditFlow": "审批流管理",
-      "task": "任务管理",
-      "executor": "服务执行器",
-      "namespace": "命名空间管理",
-      "label": "标签管理"
+      "broker": "Broker管理",
+      "metric": "指标管理",
+      "namespace": "命名空间管理"
     },
     "footer": {
-      "copyright": "Copyright@2018-2020 JD.COM 京东版权所有 Power by",
-      "department": "商城技术架构部"
+      "copyright": "Copyright@2019 JD.COM 京东版权所有 Power by",
+      "department": "数据技术架构部"
     }
   },
   "en-US" : {
@@ -51,37 +36,21 @@
       "setting": "Setting",
       "logout": "Sign Out"
     },
-    "workflow": {
-      "apiToken":"API Token",
-      "apply": "My Apply",
-      "audit": "Pending Audit"
-    },
     "tool": {
       "retry": "Retry Query",
-      "archive": "Archive Query",
-      "alarmRule": "Alarm Rule",
-      "alarmRuleTemplate": "Alarm Rule Default",
-      "metric": "Alarm Metric",
-      "taskHistory": "Task History",
-      "operateHistory": "Operation History"
+      "archive": "Archive Query"
     },
     "setting": {
       "user": "User Manage",
-      "userToken": "User Token",
       "dataCenter": "Data Center Manage",
       "config": "Config Manage",
-      "hosts": "Host Manage",
       "brokerGroup": "Broker Group Manage",
       "broker": "Broker Manage",
-      "auditRole": "Audit Role Manage",
-      "auditFlow": "Audit Flow Manage",
-      "task": "Task Manage",
-      "executor": "Service Executor",
-      "namespace": "Namespace Manage",
-      "label": "Label Manage"
+      "metric": "Alarm Metric",
+      "namespace": "Namespace Manage"
     },
     "footer": {
-      "copyright": "Copyright@2016-2020 JD.COM All Rights Reserved Power by",
+      "copyright": "Copyright@2019 JD.COM All Rights Reserved Power by",
       "department": " Tech Infrastructure Group"
     }
   }

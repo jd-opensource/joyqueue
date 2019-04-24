@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.client.internal.consumer.support;
 
 import com.jd.journalq.client.internal.cluster.ClusterClientManager;
@@ -13,7 +26,7 @@ import com.jd.journalq.client.internal.consumer.interceptor.ConsumerInterceptor;
 import com.jd.journalq.client.internal.consumer.transport.ConsumerClientManager;
 import com.jd.journalq.client.internal.metadata.domain.TopicMetadata;
 import com.jd.journalq.client.internal.nameserver.NameServerConfig;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.toolkit.service.Service;
 
 import java.util.List;
@@ -34,7 +47,8 @@ public class MessageConsumerWrapper extends Service implements MessageConsumer {
     private ConsumerClientManager consumerClientManager;
     private MessageConsumer delegate;
 
-    public MessageConsumerWrapper(ConsumerConfig consumerConfig, NameServerConfig nameServerConfig, ClusterManager clusterManager, ClusterClientManager clusterClientManager, ConsumerClientManager consumerClientManager, MessageConsumer delegate) {
+    public MessageConsumerWrapper(ConsumerConfig consumerConfig, NameServerConfig nameServerConfig, ClusterManager clusterManager,
+                                  ClusterClientManager clusterClientManager, ConsumerClientManager consumerClientManager, MessageConsumer delegate) {
         this.consumerConfig = consumerConfig;
         this.nameServerConfig = nameServerConfig;
         this.clusterManager = clusterManager;
@@ -217,12 +231,12 @@ public class MessageConsumerWrapper extends Service implements MessageConsumer {
     }
 
     @Override
-    public JMQCode reply(List<ConsumeReply> replyList) {
+    public JournalqCode reply(List<ConsumeReply> replyList) {
         return delegate.reply(replyList);
     }
 
     @Override
-    public JMQCode replyOnce(ConsumeReply reply) {
+    public JournalqCode replyOnce(ConsumeReply reply) {
         return delegate.replyOnce(reply);
     }
 

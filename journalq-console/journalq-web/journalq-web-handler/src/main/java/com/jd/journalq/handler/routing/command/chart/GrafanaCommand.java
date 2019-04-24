@@ -1,20 +1,32 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.handler.routing.command.chart;
 
 import com.jd.journalq.exception.ServiceException;
 import com.jd.journalq.handler.Constants;
-import com.jd.journalq.handler.binder.BodyType;
-import com.jd.journalq.handler.binder.annotation.Body;
-import com.jd.journalq.handler.binder.annotation.ParamterValue;
-import com.jd.journalq.handler.binder.annotation.Path;
 import com.jd.journalq.handler.util.GrafanaUtils;
 import com.jd.journalq.model.domain.grafana.GrafanaSearch;
 import com.jd.journalq.model.domain.grafana.GrafanaVariable;
 import com.jd.journalq.model.domain.grafana.GrafanaVariableParameter;
 import com.jd.journalq.model.domain.grafana.GrafanaVariableResult;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.util.NullUtil;
 import com.jd.laf.web.vertx.Command;
+import com.jd.laf.web.vertx.annotation.Body;
 import com.jd.laf.web.vertx.annotation.Context;
+import com.jd.laf.web.vertx.annotation.Path;
+import com.jd.laf.web.vertx.annotation.QueryParam;
 import com.jd.laf.web.vertx.pool.Poolable;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
@@ -33,13 +45,15 @@ import java.util.stream.Collectors;
 import static com.jd.journalq.exception.ServiceException.INTERNAL_SERVER_ERROR;
 import static com.jd.journalq.handler.util.GrafanaUtils.getResult;
 
-public class GrafanaCommand implements Command<Response>, Poolable {
+/**
+ * Grafana command handler collection
+ * Created by chenyanying3 on 18-11-16.
+ */public class GrafanaCommand implements Command<Response>, Poolable {
 
     private static final Logger logger = LoggerFactory.getLogger(GrafanaCommand.class);
 
     @Context
     protected RoutingContext context;
-    private String module;
 
     @Path("test")
     public Response test() throws Exception {
@@ -47,7 +61,7 @@ public class GrafanaCommand implements Command<Response>, Poolable {
     }
 
     @Path("search")
-    public List<String> search(@Body(typeindex = 0, type = BodyType.JSON) GrafanaSearch grafanaSearch) throws Exception {
+    public List<String> search(@Body GrafanaSearch grafanaSearch) throws Exception {
         //check argument
         Preconditions.checkArgument(grafanaSearch != null && StringUtils.isNotBlank(grafanaSearch.getTarget()),
                 "illegal args at grafana search target.");
@@ -92,15 +106,9 @@ public class GrafanaCommand implements Command<Response>, Poolable {
     }
 
     @Path("getRedirectUrl")
-    public Response getRedirectUrl(@ParamterValue(Constants.UID) Object uid) throws Exception {
+    public Response getRedirectUrl(@QueryParam(Constants.UID) Object uid) throws Exception {
         Preconditions.checkArgument(uid != null, "invalid arguments, uid can not be null.");
         return Responses.success(GrafanaUtils.getUrls().get(uid));
-    }
-
-    protected String getModule() {
-        //module默认值与type相同
-        module = this.type();
-        return module;
     }
 
     @Override

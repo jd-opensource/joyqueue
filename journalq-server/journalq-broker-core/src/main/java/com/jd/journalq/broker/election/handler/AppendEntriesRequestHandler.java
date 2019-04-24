@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.broker.election.handler;
 
 import com.jd.journalq.broker.BrokerContext;
@@ -6,8 +19,8 @@ import com.jd.journalq.broker.election.ElectionService;
 import com.jd.journalq.broker.election.LeaderElection;
 import com.jd.journalq.broker.election.command.AppendEntriesRequest;
 import com.jd.journalq.broker.election.command.AppendEntriesResponse;
-import com.jd.journalq.exception.JMQCode;
-import com.jd.journalq.network.transport.codec.JMQHeader;
+import com.jd.journalq.exception.JournalqCode;
+import com.jd.journalq.network.transport.codec.JournalqHeader;
 import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.command.CommandType;
 import com.jd.journalq.network.transport.command.Direction;
@@ -15,7 +28,7 @@ import com.jd.journalq.network.transport.command.Type;
 import com.jd.journalq.network.transport.command.handler.CommandHandler;
 import com.jd.journalq.network.transport.Transport;
 import com.jd.journalq.network.transport.exception.TransportException;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +62,7 @@ public class AppendEntriesRequestHandler implements CommandHandler, Type {
         if (request == null) {
             logger.warn("Receive append entries request from {}, request is null", transport.remoteAddress());
             throw new TransportException("Append entries request payload is null",
-                    JMQCode.CT_MESSAGE_BODY_NULL.getCode());
+                    JournalqCode.CT_MESSAGE_BODY_NULL.getCode());
         }
 
         try {
@@ -58,7 +71,7 @@ public class AppendEntriesRequestHandler implements CommandHandler, Type {
             if (leaderElection == null) {
                 logger.warn("Handle append entries request of topic {} partition group {} election is null",
                         request.getTopic(), request.getPartitionGroup());
-                return new Command(new JMQHeader(Direction.RESPONSE, CommandType.RAFT_APPEND_ENTRIES_RESPONSE),
+                return new Command(new JournalqHeader(Direction.RESPONSE, CommandType.RAFT_APPEND_ENTRIES_RESPONSE),
                         new AppendEntriesResponse.Build().success(false).nextPosition(-1L).build());
             }
 
@@ -67,7 +80,7 @@ public class AppendEntriesRequestHandler implements CommandHandler, Type {
         } catch (Exception e) {
             logger.warn("Handle append entries request of topic {} partition group {} fail",
                     request.getTopic(), request.getPartitionGroup(), e);
-            return new Command(new JMQHeader(Direction.RESPONSE, CommandType.RAFT_APPEND_ENTRIES_RESPONSE),
+            return new Command(new JournalqHeader(Direction.RESPONSE, CommandType.RAFT_APPEND_ENTRIES_RESPONSE),
                                new AppendEntriesResponse.Build().success(false).nextPosition(-1L).build());
         }
 

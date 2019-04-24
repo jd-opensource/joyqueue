@@ -1,7 +1,7 @@
 package com.jd.journalq.broker.producer.transaction.command;
 
 import com.jd.journalq.network.command.CommandType;
-import com.jd.journalq.network.transport.command.JMQPayload;
+import com.jd.journalq.network.transport.command.JournalqPayload;
 
 /**
  * TransactionRollbackRequest
@@ -9,7 +9,7 @@ import com.jd.journalq.network.transport.command.JMQPayload;
  * email: gaohaoxiang@jd.com
  * date: 2019/4/12
  */
-public class TransactionRollbackRequest extends JMQPayload {
+public class TransactionRollbackRequest extends JournalqPayload {
 
     private String topic;
     private String app;

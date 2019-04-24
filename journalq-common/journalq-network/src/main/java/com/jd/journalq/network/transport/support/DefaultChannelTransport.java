@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.network.transport.support;
 
 import com.jd.journalq.domain.QosLevel;
@@ -10,6 +23,7 @@ import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.transport.command.CommandCallback;
 import com.jd.journalq.network.transport.command.Direction;
 import com.jd.journalq.network.transport.command.Header;
+import com.jd.journalq.network.transport.command.HeaderAware;
 import com.jd.journalq.network.transport.command.Type;
 import com.jd.journalq.network.transport.config.TransportConfig;
 import com.jd.journalq.network.transport.exception.TransportException;
@@ -135,9 +149,12 @@ public class DefaultChannelTransport implements ChannelTransport {
             barrier.put(command.getHeader().getRequestId(), future);
             // 应答回来的时候或超时会自动释放command
             channel.writeAndFlush(command).addListener(new ResponseListener(future, barrier));
-        } catch (TransportException e) {
+
+        } catch (Throwable th) {
+            logger.warn("Default channel transport async fail, command type is {}", command.getHeader().getType(), th);
+            barrier.remove(command.getHeader().getRequestId());
             command.release();
-            throw e;
+            throw th;
         }
     }
 
@@ -272,6 +289,10 @@ public class DefaultChannelTransport implements ChannelTransport {
                 }
                 response.getHeader().setRequestId(header.getRequestId());
 
+                if (response.getPayload() instanceof HeaderAware) {
+                    ((HeaderAware) response.getPayload()).setHeader(header);
+                }
+
                 // 判断请求是否要应答
                 if (header.getQosLevel() == QosLevel.ONE_WAY) {
                     // 不用应答，释放资源
@@ -330,7 +351,7 @@ public class DefaultChannelTransport implements ChannelTransport {
     /**
      * 异步请求监听器
      */
-    protected static abstract class FutureListener implements ChannelFutureListener {
+    protected  abstract static class FutureListener implements ChannelFutureListener {
 
         protected static final Logger logger = LoggerFactory.getLogger(FutureListener.class);
 

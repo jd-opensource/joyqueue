@@ -1,6 +1,7 @@
 package com.jd.journalq.model.domain;
 
 import javax.validation.constraints.Pattern;
+import java.util.List;
 
 /**
  * Created by yangyang115 on 18-7-26.
@@ -10,7 +11,8 @@ public class Application extends BaseModel implements Identifier, Cloneable {
 
     public static final int JONE_SOURCE = 1;
     public static final int JDOS_SOURCE = 2;
-    public static final int SURE_SOURCE = 3;
+    public static final int SURE_SOURCE = 3;//金融
+    public static final int JMQ2_SOURCE = 4;
     public static final int OTHER_SOURCE = 0;
 
     //应用代码
@@ -31,6 +33,8 @@ public class Application extends BaseModel implements Identifier, Cloneable {
     //所有者
     private Identity owner;
     private String erp;
+    private String description;
+    private List<String> members;
 
     public String getErp() {
         return erp;
@@ -118,6 +122,22 @@ public class Application extends BaseModel implements Identifier, Cloneable {
         this.owner = owner;
     }
 
+    public String getDescription() {
+        if (description == null) return "-";
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public List<String> getMembers() {
+        return members;
+    }
+
+    public void setMembers(List<String> members) {
+        this.members = members;
+    }
 
     /**
      * 判断是否是所有者
@@ -145,6 +165,8 @@ public class Application extends BaseModel implements Identifier, Cloneable {
 
         JONE(JONE_SOURCE, "JONE"),
         JDOS(JDOS_SOURCE, "JDOS"),
+        SURE(SURE_SOURCE, "JDOS"),
+        JMQ2(JMQ2_SOURCE, "JMQ2"),
         OTHER(OTHER_SOURCE, "其他录入");
 
         private int value;
@@ -171,6 +193,10 @@ public class Application extends BaseModel implements Identifier, Cloneable {
                     return JONE;
                 case 2:
                     return JDOS;
+                case 3:
+                    return SURE;
+                case 4:
+                    return JMQ2;
                 default:
                     return OTHER;
             }

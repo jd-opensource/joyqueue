@@ -1,9 +1,22 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.broker.cluster;
 
 import com.alibaba.fastjson.JSON;
 import com.jd.journalq.domain.TopicConfig;
 import com.jd.journalq.domain.TopicName;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.toolkit.network.IpUtil;
 import org.junit.After;
 import org.junit.Before;
@@ -57,7 +70,7 @@ public class ClusterManagerTest {
 
     @Test
     public void getBrokerByPartition() {
-        TopicName topic = TopicName.parse("jmq@test");
+        TopicName topic = TopicName.parse("journalq@Test");
         short partitionId = 1;
         clusterManager.getTopics().forEach(topicConfig -> {
             topicConfig.getPartitionGroups().values().forEach(
@@ -73,7 +86,7 @@ public class ClusterManagerTest {
 
     @Test
     public void getPartitionGroupByGroup() {
-        TopicName topic = TopicName.parse("jmq@test");
+        TopicName topic = TopicName.parse("journalq@Test");
         short groupId = 1;
         clusterManager.getTopics().forEach(topicConfig -> {
             topicConfig.getPartitionGroups().values().forEach(
@@ -87,7 +100,7 @@ public class ClusterManagerTest {
 
     @Test
     public void getTopicConfig() {
-        TopicName topic = TopicName.parse("jmq@test");
+        TopicName topic = TopicName.parse("journalq@Test");
         clusterManager.getTopics().forEach(topicConfig -> {
             logger.info("getTopics[{}]",JSON.toJSONString(clusterManager.getTopicConfig(topicConfig.getName())));
         });
@@ -102,7 +115,7 @@ public class ClusterManagerTest {
 
     @Test
     public void getPartitionGroup() {
-        TopicName topic = TopicName.parse("jmq@test");
+        TopicName topic = TopicName.parse("journalq@Test");
         clusterManager.getTopics().forEach(topicConfig -> {
             logger.info("topic[{}] ,getPartitionGroup[{}]",topicConfig.getName(),JSON.toJSONString(clusterManager.getPartitionGroup(topicConfig.getName())));
         });
@@ -111,8 +124,8 @@ public class ClusterManagerTest {
 
     @Test
     public void getPartitionGroupId() {
-        String app = "jmq";
-        TopicName topic = TopicName.parse("jmq@test");
+        String app = "journalq";
+        TopicName topic = TopicName.parse("journalq@Test");
         short partitionNum = 1;
         clusterManager.getTopics().forEach(topicConfig -> {
                     topicConfig.getPartitionGroups().values().forEach(group -> {
@@ -126,8 +139,8 @@ public class ClusterManagerTest {
 
     @Test
     public void getReplicaGroup() {
-        String app = "jmq";
-        TopicName topic = TopicName.parse("jmq@test");
+        String app = "journalq";
+        TopicName topic = TopicName.parse("journalq@Test");
         clusterManager.getTopics().forEach(topicConfig -> {
             logger.info("topic[{}] app[{}] ,getReplicaGroup[{}]",topicConfig.getName(),app,JSON.toJSONString(clusterManager.getReplicaGroup(topicConfig.getName())));
         });
@@ -136,9 +149,9 @@ public class ClusterManagerTest {
 
     @Test
     public void getPartitionList() {
-        String app = "jmq";
+        String app = "journalq";
         String ip = IpUtil.getLocalIp();
-        TopicName topic = TopicName.parse("jmq@test");
+        TopicName topic = TopicName.parse("journalq@Test");
         clusterManager.getTopics().forEach(topicConfig -> {
             logger.info("topic[{}] app[{}] ,getPartitionList[{}]",topicConfig.getName(),app,JSON.toJSONString(clusterManager.getPartitionList(topicConfig.getName())));
         });
@@ -147,9 +160,9 @@ public class ClusterManagerTest {
 
     @Test
     public void getMasterPartitionList() {
-        String app = "jmq";
+        String app = "journalq";
         String ip = IpUtil.getLocalIp();
-        TopicName topic = TopicName.parse("jmq@test");
+        TopicName topic = TopicName.parse("journalq@Test");
         clusterManager.getTopics().forEach(topicConfig -> {
             logger.info("topic[{}] app[{}] ,getMasterPartitionList[{}]",topicConfig.getName(),app,JSON.toJSONString(clusterManager.getMasterPartitionList(topicConfig.getName())));
         });
@@ -158,9 +171,9 @@ public class ClusterManagerTest {
 
     @Test
     public void getPriorityPartitionList() {
-        String app = "jmq";
+        String app = "journalq";
         String ip = IpUtil.getLocalIp();
-        TopicName topic = TopicName.parse("jmq@test");
+        TopicName topic = TopicName.parse("journalq@Test");
         clusterManager.getTopics().forEach(topicConfig -> {
             logger.info("topic[{}] app[{}] ,getPriorityPartitionList[{}]",topicConfig.getName(),app,JSON.toJSONString(clusterManager.getPriorityPartitionList(topicConfig.getName())));
         });
@@ -168,10 +181,10 @@ public class ClusterManagerTest {
     }
 
     @Test
-    public void getConsumerPolicy() throws JMQException {
-        String app = "jmq";
+    public void getConsumerPolicy() throws JournalqException {
+        String app = "journalq";
         String ip = IpUtil.getLocalIp();
-        TopicName topic = TopicName.parse("jmq@test");
+        TopicName topic = TopicName.parse("journalq@Test");
         for (TopicConfig topicConfig : clusterManager.getTopics()) {
             logger.info("topic[{}] app[{}] ,getConsumerPolicy[{}]", topicConfig.getName(), app, JSON.toJSONString(clusterManager.getConsumerPolicy(topicConfig.getName(), app)));
         }
@@ -179,10 +192,10 @@ public class ClusterManagerTest {
     }
 
     @Test
-    public void isNeedNearby() throws JMQException {
-        String app = "jmq";
+    public void isNeedNearby() throws JournalqException {
+        String app = "journalq";
         String ip = IpUtil.getLocalIp();
-        TopicName topic = TopicName.parse("jmq@test");
+        TopicName topic = TopicName.parse("journalq@Test");
         for (TopicConfig topicConfig : clusterManager.getTopics()) {
             logger.info("topic[{}] app[{}] ,isNeedNearby[{}]", topicConfig.getName(), app, clusterManager.isNeedNearby(topicConfig.getName(), app));
         }
@@ -190,10 +203,10 @@ public class ClusterManagerTest {
     }
 
     @Test
-    public void getAckTimeout() throws JMQException {
-        String app = "jmq";
+    public void getAckTimeout() throws JournalqException {
+        String app = "journalq";
         String ip = IpUtil.getLocalIp();
-        TopicName topic = TopicName.parse("jmq@test");
+        TopicName topic = TopicName.parse("journalq@Test");
         for (TopicConfig topicConfig : clusterManager.getTopics()) {
             logger.info("topic[{}] app[{}] ,getAckTimeout[{}]", topicConfig.getName(), app, clusterManager.getAckTimeout(topicConfig.getName(), app));
         }
@@ -205,10 +218,10 @@ public class ClusterManagerTest {
     }
 
     @Test
-    public void checkWritable() throws JMQException {
-        String app = "jmq";
+    public void checkWritable() throws JournalqException {
+        String app = "journalq";
         String ip = clusterManager.getBroker().getIp();
-        TopicName topic = TopicName.parse("jmq@test");
+        TopicName topic = TopicName.parse("journalq@Test");
         for (TopicConfig topicConfig : clusterManager.getTopics()) {
             logger.info("topic[{}] app[{}] ip [{}],checkWritable[{}]", topicConfig.getName(), app, ip, clusterManager.checkWritable(topicConfig.getName(), app, IpUtil.getLocalIp()));
         }
@@ -217,9 +230,9 @@ public class ClusterManagerTest {
 
     @Test
     public void checkReadable() {
-        String app = "jmq";
+        String app = "journalq";
         String ip = clusterManager.getBroker().getIp();
-        String topic = "jmq@test";
+        String topic = "journalq@Test";
         clusterManager.getTopics().forEach(topicConfig -> {
             logger.info("topic[{}] app[{}] ip [{}],checkReadable[{}]",topicConfig.getName(),app,ip,clusterManager.checkReadable(topicConfig.getName(),app,IpUtil.getLocalIp()));
         });

@@ -1,7 +1,20 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.server.archive.store;
 
-import com.jd.journalq.exception.JMQCode;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqCode;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.hbase.HBaseClient;
 import com.jd.journalq.server.archive.store.api.ArchiveStore;
 import com.jd.journalq.server.archive.store.model.AchivePosition;
@@ -84,7 +97,7 @@ public class HBaseStore implements ArchiveStore {
     }
 
     @Override
-    public void putConsumeLog(List<ConsumeLog> consumeLogList) throws JMQException {
+    public void putConsumeLog(List<ConsumeLog> consumeLogList) throws JournalqException {
         List<Pair<byte[], byte[]>> logList = new LinkedList<>();
         try {
             for (ConsumeLog consumeLog : consumeLogList) {
@@ -99,12 +112,12 @@ public class HBaseStore implements ArchiveStore {
 
             hBaseClient.put(consumeLogTable, cf, col, logList);
         } catch (IOException e) {
-            throw new JMQException(JMQCode.SE_IO_ERROR, e);
+            throw new JournalqException(JournalqCode.SE_IO_ERROR, e);
         }
     }
 
     @Override
-    public void putSendLog(List<SendLog> sendLogList) throws JMQException {
+    public void putSendLog(List<SendLog> sendLogList) throws JournalqException {
         try {
             List<Pair<byte[], byte[]>> logList = new LinkedList<>();
             for (SendLog log : sendLogList) {
@@ -122,12 +135,12 @@ public class HBaseStore implements ArchiveStore {
             // 写HBASE
             hBaseClient.put(sendLogTable, cf, col, logList);
         } catch (Exception e) {
-            throw new JMQException(JMQCode.SE_IO_ERROR, e);
+            throw new JournalqException(JournalqCode.SE_IO_ERROR, e);
         }
     }
 
     @Override
-    public void putPosition(AchivePosition achivePosition) throws JMQException {
+    public void putPosition(AchivePosition achivePosition) throws JournalqException {
         try {
             String topic = achivePosition.getTopic();
             short partition = achivePosition.getPartition();
@@ -136,12 +149,12 @@ public class HBaseStore implements ArchiveStore {
 
             hBaseClient.put(positionTable, cf, col, rowKey, value);
         } catch (IOException e) {
-            throw new JMQException(JMQCode.SE_IO_ERROR, e);
+            throw new JournalqException(JournalqCode.SE_IO_ERROR, e);
         }
     }
 
     @Override
-    public Long getPosition(String topic, short partition) throws JMQException {
+    public Long getPosition(String topic, short partition) throws JournalqException {
         try {
             byte[] rowKey = Bytes.toBytes(topic + ":" + partition);
             byte[] bytes = hBaseClient.get(positionTable, cf, col, rowKey);
@@ -151,7 +164,7 @@ public class HBaseStore implements ArchiveStore {
                 return null;
             }
         } catch (IOException e) {
-            throw new JMQException(JMQCode.SE_IO_ERROR, e);
+            throw new JournalqException(JournalqCode.SE_IO_ERROR, e);
         }
     }
 
@@ -160,13 +173,13 @@ public class HBaseStore implements ArchiveStore {
      *
      * @param query
      * @return
-     * @throws JMQException
+     * @throws JournalqException
      */
     @Override
-    public List<SendLog> scanSendLog(Query query) throws JMQException {
+    public List<SendLog> scanSendLog(Query query) throws JournalqException {
         if (hBaseClient == null) {
             logger.error("hBaseClient is null,archive no service");
-            throw new JMQException(JMQCode.CN_SERVICE_NOT_AVAILABLE, "hBaseClient is null");
+            throw new JournalqException(JournalqCode.CN_SERVICE_NOT_AVAILABLE, "hBaseClient is null");
         }
         List<SendLog> logList = new LinkedList<>();
         // 查询发送日志（rowkey=topicId+sendTime+businessId）
@@ -186,7 +199,7 @@ public class HBaseStore implements ArchiveStore {
                 logList.add(log);
             }
         } catch (Exception e) {
-            throw new JMQException(JMQCode.SE_IO_ERROR, e);
+            throw new JournalqException(JournalqCode.SE_IO_ERROR, e);
         }
 
         return logList;
@@ -233,9 +246,9 @@ public class HBaseStore implements ArchiveStore {
      * @param query
      * @return
      * @throws GeneralSecurityException
-     * @throws JMQException
+     * @throws JournalqException
      */
-    private HBaseClient.ScanParameters buildScanParameters(Query query) throws GeneralSecurityException, JMQException {
+    private HBaseClient.ScanParameters buildScanParameters(Query query) throws GeneralSecurityException, JournalqException {
         QueryCondition queryCondition = query.getQueryCondition();
 
         HBaseClient.ScanParameters scanParameters = new HBaseClient.ScanParameters();
@@ -255,9 +268,9 @@ public class HBaseStore implements ArchiveStore {
      * @param rowKey
      * @return
      * @throws GeneralSecurityException
-     * @throws JMQException
+     * @throws JournalqException
      */
-    private byte[] createRowKey(QueryCondition.RowKey rowKey) throws GeneralSecurityException, JMQException {
+    private byte[] createRowKey(QueryCondition.RowKey rowKey) throws GeneralSecurityException, JournalqException {
         // 4 + 8 + 16 + 16
         ByteBuffer allocate = ByteBuffer.allocate(44);
 
@@ -284,7 +297,7 @@ public class HBaseStore implements ArchiveStore {
     }
 
     @Override
-    public SendLog getOneSendLog(Query query) throws JMQException {
+    public SendLog getOneSendLog(Query query) throws JournalqException {
         QueryCondition queryCondition = query.getQueryCondition();
         QueryCondition.RowKey rowKey = queryCondition.getRowKey();
 
@@ -314,16 +327,16 @@ public class HBaseStore implements ArchiveStore {
 
             return log;
         } catch (Exception e) {
-            throw new JMQException(JMQCode.SE_IO_ERROR, e);
+            throw new JournalqException(JournalqCode.SE_IO_ERROR, e);
         }
     }
 
     private static final byte endFlag = 58; // 结束符
     @Override
-    public List<ConsumeLog> scanConsumeLog(String messageId, Integer count) throws JMQException {
+    public List<ConsumeLog> scanConsumeLog(String messageId, Integer count) throws JournalqException {
         if (hBaseClient == null) {
             logger.error("hBaseClient is null,archive no service");
-            throw new JMQException(JMQCode.CN_SERVICE_NOT_AVAILABLE, "hBaseClient is null");
+            throw new JournalqException(JournalqCode.CN_SERVICE_NOT_AVAILABLE, "hBaseClient is null");
         }
         // 查询消费日志(rowkey=messageId+appId)
         List<ConsumeLog> logList = new LinkedList<>();
@@ -361,7 +374,7 @@ public class HBaseStore implements ArchiveStore {
             }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
-            throw new JMQException(JMQCode.SE_IO_ERROR, e);
+            throw new JournalqException(JournalqCode.SE_IO_ERROR, e);
         }
 
         return logList;

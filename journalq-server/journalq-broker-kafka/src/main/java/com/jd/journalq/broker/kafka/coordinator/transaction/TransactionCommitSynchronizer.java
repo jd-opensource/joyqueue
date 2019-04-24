@@ -16,13 +16,13 @@ import com.jd.journalq.domain.Broker;
 import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.domain.TopicConfig;
 import com.jd.journalq.domain.TopicName;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.command.CommandType;
-import com.jd.journalq.network.transport.codec.JMQHeader;
+import com.jd.journalq.network.transport.codec.JournalqHeader;
 import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.transport.command.CommandCallback;
 import com.jd.journalq.network.transport.command.Direction;
-import com.jd.journalq.network.transport.command.JMQCommand;
+import com.jd.journalq.network.transport.command.JournalqCommand;
 import com.jd.journalq.nsr.NameService;
 import com.jd.journalq.toolkit.service.Service;
 import org.slf4j.Logger;
@@ -66,11 +66,11 @@ public class TransactionCommitSynchronizer extends Service {
             CoordinatorSession session = sessionManager.getOrCreateSession(prepare.getBrokerId(), prepare.getBrokerHost(), prepare.getBrokerPort());
             String txId = transactionIdManager.generateId(prepare.getTopic(), prepare.getApp(), prepare.getTransactionId(), prepare.getProducerId(), prepare.getProducerEpoch());
             TransactionCommitRequest transactionCommitRequest = new TransactionCommitRequest(prepare.getTopic(), prepare.getApp(), txId);
-            session.async(new JMQCommand(transactionCommitRequest), new CommandCallback() {
+            session.async(new JournalqCommand(transactionCommitRequest), new CommandCallback() {
                 @Override
                 public void onSuccess(Command request, Command response) {
-                    if (response.getHeader().getStatus() != JMQCode.SUCCESS.getCode() &&
-                            response.getHeader().getStatus() != JMQCode.CN_TRANSACTION_NOT_EXISTS.getCode()) {
+                    if (response.getHeader().getStatus() != JournalqCode.SUCCESS.getCode() &&
+                            response.getHeader().getStatus() != JournalqCode.CN_TRANSACTION_NOT_EXISTS.getCode()) {
                         result[0] = false;
                     }
                     latch.countDown();
@@ -104,7 +104,7 @@ public class TransactionCommitSynchronizer extends Service {
             try {
                 CoordinatorSession session = sessionManager.getOrCreateSession(broker);
                 ConsumeIndexStoreRequest indexStoreRequest = new ConsumeIndexStoreRequest(transactionMetadata.getApp(), saveOffsetParam);
-                JMQHeader header = new JMQHeader(Direction.REQUEST, CommandType.CONSUME_INDEX_STORE_REQUEST);
+                JournalqHeader header = new JournalqHeader(Direction.REQUEST, CommandType.CONSUME_INDEX_STORE_REQUEST);
                 Command request = new Command(header, indexStoreRequest);
 
                 session.async(request, new CommandCallback() {

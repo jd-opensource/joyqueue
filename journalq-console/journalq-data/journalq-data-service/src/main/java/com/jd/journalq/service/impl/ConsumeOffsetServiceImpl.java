@@ -1,7 +1,24 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.jd.journalq.async.*;
+import com.jd.journalq.async.BrokerClusterQuery;
+import com.jd.journalq.async.BrokerMonitorClusterQuery;
+import com.jd.journalq.async.DefaultBrokerInfoFuture;
+import com.jd.journalq.async.RetrieveProvider;
+import com.jd.journalq.async.UpdateProvider;
 import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.monitor.PartitionAckMonitorInfo;
 import com.jd.journalq.monitor.PartitionLeaderAckMonitorInfo;
@@ -15,7 +32,8 @@ import com.jd.journalq.service.BrokerRestUrlMappingService;
 import com.jd.journalq.service.ConsumeOffsetService;
 import com.jd.journalq.service.LeaderService;
 import com.jd.journalq.service.TopicPartitionGroupService;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
+import com.jd.journalq.toolkit.time.SystemClock;
 import com.jd.journalq.util.AsyncHttpClient;
 import com.jd.journalq.util.JSONParser;
 import com.jd.journalq.util.NullUtil;
@@ -30,7 +48,11 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.io.UnsupportedEncodingException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
@@ -266,7 +288,7 @@ public class ConsumeOffsetServiceImpl implements ConsumeOffsetService {
                 }catch (UnsupportedEncodingException e){
                     throw new IllegalStateException(e);
                 }
-                AsyncHttpClient.AsyncRequest(put, new AsyncHttpClient.ConcurrentHttpResponseHandler(latch,String.valueOf(offset.getPartition()),resultMap));
+                AsyncHttpClient.AsyncRequest(put, new AsyncHttpClient.ConcurrentHttpResponseHandler(url, SystemClock.now(),latch,String.valueOf(offset.getPartition()),resultMap));
                 request++;
             }else{
                 logger.info("partition group broker not found!");

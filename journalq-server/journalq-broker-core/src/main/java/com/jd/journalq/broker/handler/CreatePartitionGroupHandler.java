@@ -1,23 +1,35 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.broker.handler;
 
 import com.alibaba.fastjson.JSON;
-import com.google.common.primitives.Ints;
 import com.google.common.primitives.Shorts;
 import com.jd.journalq.broker.BrokerContext;
 import com.jd.journalq.broker.cluster.ClusterManager;
+import com.jd.journalq.broker.election.ElectionService;
 import com.jd.journalq.domain.Broker;
 import com.jd.journalq.domain.PartitionGroup;
-import com.jd.journalq.exception.JMQCode;
-import com.jd.journalq.exception.JMQException;
-import com.jd.journalq.network.transport.command.handler.CommandHandler;
+import com.jd.journalq.exception.JournalqCode;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.network.command.BooleanAck;
-import com.jd.journalq.nsr.network.command.CreatePartitionGroup;
 import com.jd.journalq.network.transport.Transport;
 import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.transport.command.Type;
+import com.jd.journalq.network.transport.command.handler.CommandHandler;
 import com.jd.journalq.network.transport.exception.TransportException;
+import com.jd.journalq.nsr.network.command.CreatePartitionGroup;
 import com.jd.journalq.nsr.network.command.NsrCommandType;
-import com.jd.journalq.broker.election.ElectionService;
 import com.jd.journalq.store.StoreService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,19 +74,19 @@ public class CreatePartitionGroupHandler implements CommandHandler, Type {
                 rollback(group);
             }
             return BooleanAck.build();
-        }catch (JMQException e) {
+        }catch (JournalqException e) {
             logger.error(String.format("CreatePartitionGroupHandler request command[%s] error",request),e);
             return BooleanAck.build(e.getCode(),e.getMessage());
         } catch (Exception e) {
             logger.error(String.format("CreatePartitionGroupHandler request command[%s] error",request),e);
-            return BooleanAck.build(JMQCode.CN_UNKNOWN_ERROR,e.getMessage());
+            return BooleanAck.build(JournalqCode.CN_UNKNOWN_ERROR,e.getMessage());
         }
     }
 
     private void commit(PartitionGroup group) throws Exception {
         if(logger.isDebugEnabled())logger.debug("topic[{}] add partitionGroup[{}]",group.getTopic(),group.getGroup());
         //if (!storeService.partitionGroupExists(group.getTopic(),group.getGroup())) {
-            storeService.createPartitionGroup(group.getTopic().getFullName(), group.getGroup(), Shorts.toArray(group.getPartitions()), Ints.toArray(group.getReplicas()));
+            storeService.createPartitionGroup(group.getTopic().getFullName(), group.getGroup(), Shorts.toArray(group.getPartitions()));
             //}
             Set<Integer> replicas = group.getReplicas();
             List<Broker> list = new ArrayList<>(replicas.size());

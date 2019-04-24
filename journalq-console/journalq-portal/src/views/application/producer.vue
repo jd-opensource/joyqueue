@@ -1,14 +1,14 @@
 <template>
   <div>
     <producer-base ref="producerBase" :keywordTip="keywordTip" :colData="colData"
-                   :subscribeDialogColData="subscribeDialog.colData" :summaryChartShow="true"
+                   :subscribeDialogColData="subscribeDialog.colData" :showSummaryChart="true"
                    :search="search" :subscribeUrls="subscribeDialog.urls"/>
   </div>
 </template>
 
 <script>
 import producerBase from '../monitor/producerBase.vue'
-import {getTopicCode, getAppCode, yesOrNoBtnRender, openOrCloseBtnRender, clientTypeSelectRender,
+import {getTopicCode, getAppCode, openOrCloseBtnRender, clientTypeSelectRender,
   clientTypeBtnRender} from '../../utils/common.js'
 
 export default {
@@ -63,13 +63,13 @@ export default {
           title: '限制IP发送',
           key: 'config.blackList'
         },
-        {
-          title: '单线程发送',
-          key: 'config.single',
-          render: (h, params) => {
-            return yesOrNoBtnRender(h, params.item.config === undefined ? undefined : params.item.config.single)
-          }
-        },
+        // {
+        //   title: '单线程发送',
+        //   key: 'config.single',
+        //   render: (h, params) => {
+        //     return yesOrNoBtnRender(h, params.item.config === undefined ? undefined : params.item.config.single)
+        //   }
+        // },
         {
           title: '归档',
           key: 'config.archive',
@@ -78,7 +78,7 @@ export default {
           }
         },
         {
-          title: '就近发送',
+          title: '就近机房发送',
           key: 'config.nearBy',
           render: (h, params) => {
             return openOrCloseBtnRender(h, params.item.config === undefined ? undefined : params.item.config.nearBy)
@@ -124,7 +124,6 @@ export default {
           ]
         }
       }
-
     }
   },
   methods: {

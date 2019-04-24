@@ -1,5 +1,19 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.toolkit.promise;
 
+import com.jd.journalq.toolkit.time.SystemClock;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -107,11 +121,11 @@ public class PromiseTest {
 //        ExecutorService  executorService = Executors.newFixedThreadPool(8);
 //        ExecutorService  executorService = Executors.newSingleThreadExecutor();
         counter = 0;
-        t = System.currentTimeMillis();
+        t = SystemClock.now();
         for (int i = 0; i <1024 * 1024 * 1024; i++) {
 //            int c = counter++;
 //            if(c % (1024 * 1024) == 0) {
-//                long t1 = System.currentTimeMillis();
+//                long t1 = SystemClock.now();
 //                if(t1 > t) {
 //                    System.out.println("QPS: " + (1024 * 1024 * 1000 / (t1 - t)));
 //                    t = t1;
@@ -121,7 +135,7 @@ public class PromiseTest {
 
             Promise.promise(executorService,() -> counter++).then(executorService1,c->{
                 if(c % (1024 * 1024) == 0) {
-                    long t1 = System.currentTimeMillis();
+                    long t1 = SystemClock.now();
                     if(t1 > t) {
                         System.out.println("QPS: " + (1024 * 1024 * 1000 / (t1 - t)));
                         t = t1;
@@ -132,7 +146,7 @@ public class PromiseTest {
 //            executorService.submit(() -> {
 //                int c = counter++;
 //                if(c % (1024 * 1024) == 0) {
-//                    long t1 = System.currentTimeMillis();
+//                    long t1 = SystemClock.now();
 //                    if(t1 > t) {
 //                        System.out.println("QPS: " + (1024 * 1024 * 1000 / (t1 - t)));
 //                        t = t1;

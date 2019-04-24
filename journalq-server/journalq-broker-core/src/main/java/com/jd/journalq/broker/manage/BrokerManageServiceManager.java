@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.broker.manage;
 
 import com.jd.journalq.broker.archive.ArchiveManager;
@@ -54,7 +67,11 @@ public class BrokerManageServiceManager extends Service {
     private NameService nameService;
     private ElectionService electionManager;
 
-    public BrokerManageServiceManager(BrokerMonitor brokerMonitor, ClusterManager clusterManager, StoreManagementService storeManagementService, StoreService storeService, Consume consume, MessageRetry messageRetry, CoordinatorService coordinatorService, ArchiveManager archiveManager, NameService nameService, ElectionService electionManager) {
+    public BrokerManageServiceManager(BrokerMonitor brokerMonitor, ClusterManager clusterManager,
+                                      StoreManagementService storeManagementService,
+                                      StoreService storeService, Consume consume,
+                                      MessageRetry messageRetry, CoordinatorService coordinatorService,
+                                      ArchiveManager archiveManager, NameService nameService, ElectionService electionManager) {
         this.brokerMonitor = brokerMonitor;
         this.clusterManager = clusterManager;
         this.storeManagementService = storeManagementService;
@@ -75,23 +92,28 @@ public class BrokerManageServiceManager extends Service {
 
     protected BrokerMonitorService newBrokerMonitorService() {
         BrokerStat brokerStat = brokerMonitor.getBrokerStat();
-        DefaultBrokerMonitorInternalService brokerMonitorInternalService = new DefaultBrokerMonitorInternalService(brokerStat, consume, storeManagementService, nameService, storeService, electionManager);
+        DefaultBrokerMonitorInternalService brokerMonitorInternalService = new DefaultBrokerMonitorInternalService(brokerStat, consume,
+                storeManagementService, nameService, storeService, electionManager, clusterManager);
         DefaultConnectionMonitorService connectionMonitorService = new DefaultConnectionMonitorService(brokerStat);
-        DefaultConsumerMonitorService consumerMonitorService = new DefaultConsumerMonitorService(brokerStat, consume, storeManagementService, retryManager);
-        DefaultProducerMonitorService producerMonitorService = new DefaultProducerMonitorService(brokerStat, storeManagementService);
-        DefaultTopicMonitorService topicMonitorService = new DefaultTopicMonitorService(brokerStat, storeManagementService);
+        DefaultConsumerMonitorService consumerMonitorService = new DefaultConsumerMonitorService(brokerStat, consume, storeManagementService, retryManager, clusterManager);
+        DefaultProducerMonitorService producerMonitorService = new DefaultProducerMonitorService(brokerStat, storeManagementService, clusterManager);
+        DefaultTopicMonitorService topicMonitorService = new DefaultTopicMonitorService(brokerStat,storeManagementService);
         DefaultPartitionMonitorService partitionMonitorService = new DefaultPartitionMonitorService(brokerStat, storeManagementService);
         DefaultCoordinatorMonitorService coordinatorMonitorService = new DefaultCoordinatorMonitorService(coordinatorService);
         DefaultArchiveMonitorService archiveMonitorService = new DefaultArchiveMonitorService(archiveManager);
         DefaultMetadataMonitorService metadataMonitorService = new DefaultMetadataMonitorService(clusterManager);
-        return new DefaultBrokerMonitorService(brokerMonitorInternalService, connectionMonitorService, consumerMonitorService, producerMonitorService, topicMonitorService, partitionMonitorService, coordinatorMonitorService, archiveMonitorService, metadataMonitorService);
+        return new DefaultBrokerMonitorService(brokerMonitorInternalService, connectionMonitorService,
+                consumerMonitorService, producerMonitorService,
+                topicMonitorService, partitionMonitorService,
+                coordinatorMonitorService, archiveMonitorService,
+                metadataMonitorService);
     }
 
     protected BrokerManageService newBrokerManageService() {
         ConnectionManageService connectionManageService = new DefaultConnectionManageService(brokerMonitor.getSessionManager());
         DefaultMessageManageService messageManageService = new DefaultMessageManageService(consume, storeManagementService);
         DefaultStoreManageService storeManageService = new DefaultStoreManageService(storeManagementService);
-        DefaultConsumerManageService consumerManageService = new DefaultConsumerManageService(consume, storeManagementService, storeService);
+        DefaultConsumerManageService consumerManageService = new DefaultConsumerManageService(consume, storeManagementService, storeService, clusterManager);
         DefaultCoordinatorManageService coordinatorManageService = new DefaultCoordinatorManageService(coordinatorService);
         DefaultElectionManageService electionManageService = new DefaultElectionManageService(electionManager);
         return new DefaultBrokerManageService(connectionManageService, messageManageService, storeManageService, consumerManageService, coordinatorManageService, electionManageService);

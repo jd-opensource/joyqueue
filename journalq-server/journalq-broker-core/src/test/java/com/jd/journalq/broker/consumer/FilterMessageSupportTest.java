@@ -1,9 +1,22 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.broker.consumer;
 
 import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.consumer.filter.FilterCallback;
 import com.jd.journalq.domain.Consumer;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 import org.assertj.core.util.Maps;
 import org.junit.Assert;
 import org.junit.Before;
@@ -33,7 +46,7 @@ public class FilterMessageSupportTest {
     }
 
     @Test
-    public void filter() throws JMQException {
+    public void filter() throws JournalqException {
         // Consumer consumer, List<ByteBuffer> byteBuffers, FilterCallback filterCallback
         List<ByteBuffer> byteBufferList = new LinkedList<>();
         for (int i = 0; i < 10; i++) {
@@ -47,7 +60,7 @@ public class FilterMessageSupportTest {
 
         List<ByteBuffer> filter = filterMessageSupport.filter(consumer, byteBufferList, new FilterCallback() {
             @Override
-            public void callback(List<ByteBuffer> list) throws JMQException {
+            public void callback(List<ByteBuffer> list) throws JournalqException {
                 // nothing to do;
                 Assert.assertEquals(1, list.size());
             }

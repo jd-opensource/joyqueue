@@ -1,8 +1,4 @@
-/*
- * Copyright (C) 2011 the original author or authors.
- * See the notice.md file distributed with this work for additional
- * information regarding copyright ownership.
- *
+/**
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +14,7 @@
 package com.jd.journalq.toolkit.io.snappy;
 
 import com.jd.journalq.toolkit.io.Files;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.security.Crc32C;
 
 import java.io.EOFException;

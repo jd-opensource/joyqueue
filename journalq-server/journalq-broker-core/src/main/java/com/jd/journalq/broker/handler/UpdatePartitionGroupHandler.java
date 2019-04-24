@@ -1,28 +1,44 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.broker.handler;
 
 import com.alibaba.fastjson.JSON;
-import com.google.common.primitives.Ints;
 import com.google.common.primitives.Shorts;
 import com.jd.journalq.broker.BrokerContext;
+import com.jd.journalq.broker.cluster.ClusterManager;
+import com.jd.journalq.broker.election.ElectionService;
 import com.jd.journalq.domain.Broker;
 import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.domain.TopicName;
-import com.jd.journalq.exception.JMQCode;
-import com.jd.journalq.network.transport.command.handler.CommandHandler;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.command.BooleanAck;
-import com.jd.journalq.nsr.network.command.NsrCommandType;
-import com.jd.journalq.nsr.network.command.UpdatePartitionGroup;
 import com.jd.journalq.network.transport.Transport;
 import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.transport.command.Type;
+import com.jd.journalq.network.transport.command.handler.CommandHandler;
 import com.jd.journalq.network.transport.exception.TransportException;
-import com.jd.journalq.broker.cluster.ClusterManager;
-import com.jd.journalq.broker.election.ElectionService;
+import com.jd.journalq.nsr.network.command.NsrCommandType;
+import com.jd.journalq.nsr.network.command.UpdatePartitionGroup;
 import com.jd.journalq.store.StoreService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * @author wylixiaobin
@@ -53,14 +69,15 @@ public class UpdatePartitionGroupHandler implements CommandHandler, Type {
         }
         UpdatePartitionGroup request = (UpdatePartitionGroup) command.getPayload();
         PartitionGroup groupNew = request.getPartitionGroup();
-        PartitionGroup groupOld = clusterManager.getPartitionGroupByGroup(groupNew.getTopic(), groupNew.getGroup());
+        PartitionGroup groupOld = clusterManager.getNameService().getTopicConfig(groupNew.getTopic()).fetchPartitionGroupByGroup(groupNew.getGroup());
         try {
             Set<Integer> replicasNew = new TreeSet<>(groupNew.getReplicas());
             Set<Integer> replicasOld = new TreeSet<>(groupOld.getReplicas());
             replicasNew.removeAll(groupOld.getReplicas());
             replicasOld.removeAll(groupNew.getReplicas());
             Integer localBrokerId = clusterManager.getBrokerId();
-            logger.info("begin updatePartitionGroup topic[{}] from [{}] to [{}] addNode[{}] removeNode[{}] localNode[{}]", groupNew.getTopic(), JSON.toJSONString(groupOld), JSON.toJSONString(groupNew), Arrays.toString(replicasNew.toArray()), Arrays.toString(replicasOld.toArray()));
+            logger.info("begin updatePartitionGroup topic[{}] from [{}] to [{}] addNode[{}] removeNode[{}] localNode[{}]",
+                    groupNew.getTopic(), JSON.toJSONString(groupOld), JSON.toJSONString(groupNew), Arrays.toString(replicasNew.toArray()), Arrays.toString(replicasOld.toArray()));
             if (!request.isRollback()) {
                 commit(groupNew, groupOld, replicasNew, replicasOld, localBrokerId);
             } else {
@@ -69,7 +86,7 @@ public class UpdatePartitionGroupHandler implements CommandHandler, Type {
             return BooleanAck.build();
         } catch (Exception e) {
             logger.error(String.format("UpdatePartitionGroupHandler request command[%s] error", command.getPayload()), e);
-            return BooleanAck.build(JMQCode.CN_UNKNOWN_ERROR, e.getMessage());
+            return BooleanAck.build(JournalqCode.CN_UNKNOWN_ERROR, e.getMessage());
         }
     }
 
@@ -84,11 +101,13 @@ public class UpdatePartitionGroupHandler implements CommandHandler, Type {
         for (Integer brokerId : nodeAdd) {
             if (localBrokerId.equals(brokerId)) {
                 logger.info("topic[{}] add partitionGroup[{}]", topic, groupNew.getGroup());
-                storeService.createPartitionGroup(topic, groupNew.getGroup(), Shorts.toArray(groupNew.getPartitions()), Ints.toArray(groupNew.getReplicas()));
+                storeService.createPartitionGroup(topic, groupNew.getGroup(), Shorts.toArray(groupNew.getPartitions()));
                 electionService.onPartitionGroupCreate(groupNew.getElectType(), topicName, groupNew.getGroup(), brokers, groupNew.getLearners(), clusterManager.getBrokerId(), groupNew.getLeader());
             } else {
                 logger.info("topic[{}] update partitionGroup[{}] add node[{}] ", topic, groupNew.getGroup(), brokerId);
-                electionService.onNodeAdd(topicName, groupNew.getGroup(), groupNew.getElectType(), brokers, groupNew.getLearners(), clusterManager.getBrokerById(brokerId), localBrokerId, groupNew.getLeader());
+                electionService.onNodeAdd(topicName, groupNew.getGroup(), groupNew.getElectType(),
+                        brokers, groupNew.getLearners(), clusterManager.getBrokerById(brokerId),
+                        localBrokerId, groupNew.getLeader());
                 storeService.rePartition(topic, groupNew.getGroup(), groupNew.getPartitions().toArray(new Short[groupNew.getPartitions().size()]));
             }
         }
@@ -130,11 +149,13 @@ public class UpdatePartitionGroupHandler implements CommandHandler, Type {
         for (Integer brokerId : nodeRemove) {
             if (localBrokerId.equals(brokerId)) {
                 logger.info("topic[{}] add partitionGroup[{}]", groupNew.getTerm(), groupNew.getGroup());
-                storeService.createPartitionGroup(topic, groupNew.getGroup(), Shorts.toArray(groupNew.getPartitions()), Ints.toArray(groupNew.getReplicas()));
+                storeService.createPartitionGroup(topic, groupNew.getGroup(), Shorts.toArray(groupNew.getPartitions()));
                 electionService.onPartitionGroupCreate(groupNew.getElectType(), topicName, groupNew.getGroup(), brokers, groupNew.getLearners(), clusterManager.getBrokerId(), groupNew.getLeader());
             } else {
                 logger.info("topic[{}] update partitionGroup[{}] add node[{}] ", groupNew.getTerm(), groupNew.getGroup(), brokerId);
-                electionService.onNodeAdd(topicName, groupNew.getGroup(), groupNew.getElectType(), brokers, groupNew.getLearners(), clusterManager.getBrokerById(brokerId), localBrokerId, groupNew.getLeader());
+                electionService.onNodeAdd(topicName, groupNew.getGroup(), groupNew.getElectType(),
+                        brokers, groupNew.getLearners(), clusterManager.getBrokerById(brokerId),
+                        localBrokerId, groupNew.getLeader());
                 storeService.rePartition(groupOld.getTopic().getFullName(), groupOld.getGroup(), groupOld.getPartitions().toArray(new Short[groupOld.getPartitions().size()]));
             }
         }

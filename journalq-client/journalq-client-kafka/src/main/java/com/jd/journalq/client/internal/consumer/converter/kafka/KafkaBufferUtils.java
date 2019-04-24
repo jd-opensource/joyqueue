@@ -1,6 +1,6 @@
 package com.jd.journalq.client.internal.consumer.converter.kafka;
 
-import com.jd.journalq.toolkit.lang.Charsets;
+import com.google.common.base.Charsets;
 import com.jd.journalq.toolkit.security.Crc32;
 import io.netty.buffer.ByteBuf;
 import org.apache.commons.lang3.ArrayUtils;

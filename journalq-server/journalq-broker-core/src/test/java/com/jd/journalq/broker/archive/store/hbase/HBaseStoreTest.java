@@ -1,8 +1,21 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.broker.archive.store.hbase;
 
 import com.google.common.collect.Lists;
 import com.jd.journalq.broker.buffer.Serializer;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.hbase.HBaseClient;
 import com.jd.journalq.message.BrokerMessage;
 import com.jd.journalq.server.archive.store.HBaseSerializer;
@@ -13,6 +26,7 @@ import com.jd.journalq.server.archive.store.model.SendLog;
 import com.jd.journalq.toolkit.lang.Pair;
 import com.jd.journalq.toolkit.network.IpUtil;
 import com.jd.journalq.toolkit.security.Md5;
+import com.jd.journalq.toolkit.time.SystemClock;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.Before;
@@ -48,7 +62,7 @@ public class HBaseStoreTest {
     }
 
     @Test
-    public void putMessages() throws JMQException {
+    public void putMessages() throws JournalqException {
         hBaseStore.putSendLog(getSendList(1));
     }
 
@@ -88,7 +102,7 @@ public class HBaseStoreTest {
     }
 
     @Test
-    public void putConsumeLogs() throws GeneralSecurityException, JMQException {
+    public void putConsumeLogs() throws GeneralSecurityException, JournalqException {
         List<ConsumeLog> consumeList = getConsumeList(1);
         hBaseStore.putConsumeLog(consumeList);
     }
@@ -114,7 +128,7 @@ public class HBaseStoreTest {
             consumeLog.setAppId(3);
             consumeLog.setBrokerId(Integer.MAX_VALUE);
             consumeLog.setClientIp(IpUtil.toByte((new InetSocketAddress(50088))));
-            consumeLog.setConsumeTime(System.currentTimeMillis());
+            consumeLog.setConsumeTime(SystemClock.now());
 
             consumeLogs.add(consumeLog);
         }
@@ -177,7 +191,7 @@ public class HBaseStoreTest {
     }
 
     @Test
-    public void readPosition() throws JMQException {
+    public void readPosition() throws JournalqException {
         for (int i = 0; i < 3; i++) {
             Long position = hBaseStore.getPosition("default.topic_test", (short) i);
             System.out.println(position);

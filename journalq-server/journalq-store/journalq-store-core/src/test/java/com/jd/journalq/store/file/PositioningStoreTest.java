@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.store.file;
 
 import com.jd.journalq.store.index.IndexItem;
@@ -6,6 +19,7 @@ import com.jd.journalq.store.nsm.VirtualThreadExecutor;
 import com.jd.journalq.store.utils.BaseDirUtils;
 import com.jd.journalq.store.utils.MessageTestUtils;
 import com.jd.journalq.store.utils.PreloadBufferPool;
+import com.jd.journalq.toolkit.time.SystemClock;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -39,12 +53,12 @@ public class PositioningStoreTest {
 
     @Test
     public void messageWriteReadTest() throws IOException, TimeoutException, InterruptedException {
-        VirtualThreadExecutor virtualThreadPool = new VirtualThreadExecutor(500, 100,10, 1000,4);
-        PreloadBufferPool bufferPool = new PreloadBufferPool( 100);
-        bufferPool.addPreLoad(PositioningStore.Config.DEFAULT_FILE_DATA_SIZE,1, 1);
+        VirtualThreadExecutor virtualThreadPool = new VirtualThreadExecutor(500, 100, 10, 1000, 4);
+        PreloadBufferPool bufferPool = new PreloadBufferPool();
+        bufferPool.addPreLoad(PositioningStore.Config.DEFAULT_FILE_DATA_SIZE, 1, 1);
 
         PositioningStore<ByteBuffer> store =
-                new PositioningStore<>(logBase,new PositioningStore.Config(),
+                new PositioningStore<>(logBase, new PositioningStore.Config(),
                         bufferPool,
                         new StoreMessageSerializer(1024 * 1024));
         store.recover();
@@ -61,12 +75,15 @@ public class PositioningStoreTest {
 
         List<ByteBuffer> readLogs = store.batchRead(start, writeMessages.size());
         List<String> readBodyList = MessageTestUtils.getBodies(readLogs);
-        Assert.assertEquals(bodyList,readBodyList);
+        Assert.assertEquals(bodyList, readBodyList);
+        store.close();
         virtualThreadPool.stop();
+        bufferPool.close();
     }
+
     // recover
     @Test
-    public void messageRecoverTest() throws IOException, TimeoutException, InterruptedException {
+    public void messageRecoverTest() throws IOException {
         int count = 10000;
         String writeMessage = "Hello, world!";
         List<String> bodyList = MessageTestUtils.createBodyList(writeMessage, count);
@@ -74,17 +91,15 @@ public class PositioningStoreTest {
         long length = writeMessages.stream().mapToLong(ByteBuffer::remaining).sum();
         int fileDataSize = 128 * 1024;
         int cachedPageCount = (int) (length / fileDataSize) + 1;
-        PositioningStore.Config config =  new PositioningStore.Config(fileDataSize, cachedPageCount,
-                PositioningStore.Config.DEFAULT_FILE_HEADER_SIZE,
-                PositioningStore.Config.DEFAULT_CACHE_LIFETIME_MS,
-                PositioningStore.Config.DEFAULT_BUFFER_LENGTH);
-        VirtualThreadExecutor virtualThreadPool = new VirtualThreadExecutor(500, 100,10, 1000,4);
-        PreloadBufferPool bufferPool = new PreloadBufferPool( 100);
-        bufferPool.addPreLoad(fileDataSize,1, 1);
+        PositioningStore.Config config = new PositioningStore.Config(fileDataSize,
+                PositioningStore.Config.DEFAULT_FILE_HEADER_SIZE);
+        VirtualThreadExecutor virtualThreadPool = new VirtualThreadExecutor(500, 100, 10, 1000, 4);
+        PreloadBufferPool bufferPool = new PreloadBufferPool();
+        bufferPool.addPreLoad(fileDataSize, 1, 1);
 
         StoreMessageSerializer factory = new StoreMessageSerializer(1024 * 1024);
         PositioningStore<ByteBuffer> store =
-                new PositioningStore<>(logBase,config,
+                new PositioningStore<>(logBase, config,
                         bufferPool,
                         new StoreMessageSerializer(1024));
         store.recover();
@@ -93,15 +108,19 @@ public class PositioningStoreTest {
         Assert.assertEquals(length + start, writePosition);
         Assert.assertEquals(writePosition, store.right());
 
-        store.flush();
+        while (store.flush()) {
+            Thread.yield();
+        }
         store.close();
         store =
-                new PositioningStore<>(logBase,config, bufferPool, factory);
+                new PositioningStore<>(logBase, config, bufferPool, factory);
         store.recover();
 
         List<ByteBuffer> readLogs = store.batchRead(start, writeMessages.size());
         List<String> readBodyList = MessageTestUtils.getBodies(readLogs);
-        Assert.assertEquals(bodyList,readBodyList);
+        Assert.assertEquals(bodyList, readBodyList);
+        store.close();
+        bufferPool.close();
         virtualThreadPool.stop();
 
     }
@@ -110,11 +129,11 @@ public class PositioningStoreTest {
 
     @Test
     public void messageSetRightTest() throws IOException, InterruptedException, TimeoutException {
-        VirtualThreadExecutor virtualThreadPool = new VirtualThreadExecutor(500, 100,10, 1000,4);
-        PreloadBufferPool bufferPool = new PreloadBufferPool( 100);
-        bufferPool.addPreLoad(PositioningStore.Config.DEFAULT_FILE_DATA_SIZE,1, 1);
+        VirtualThreadExecutor virtualThreadPool = new VirtualThreadExecutor(500, 100, 10, 1000, 4);
+        PreloadBufferPool bufferPool = new PreloadBufferPool();
+        bufferPool.addPreLoad(PositioningStore.Config.DEFAULT_FILE_DATA_SIZE, 1, 1);
         PositioningStore<ByteBuffer> store =
-                new PositioningStore<>(logBase,new PositioningStore.Config(),
+                new PositioningStore<>(logBase, new PositioningStore.Config(),
                         bufferPool,
                         new StoreMessageSerializer(1024 * 1024));
         store.recover();
@@ -130,9 +149,9 @@ public class PositioningStoreTest {
         Assert.assertEquals(writePosition, store.right());
 
 
-        long position = IntStream.range(0,7).mapToObj(writeMessages::get).mapToInt(ByteBuffer::capacity).sum();
+        long position = IntStream.range(0, 7).mapToObj(writeMessages::get).mapToInt(ByteBuffer::capacity).sum();
         store.setRight(position);
-        Assert.assertEquals(position,store.right());
+        Assert.assertEquals(position, store.right());
 
         bodyList.remove(9);
         bodyList.remove(8);
@@ -140,33 +159,38 @@ public class PositioningStoreTest {
 
         List<ByteBuffer> readLogs = store.batchRead(start, bodyList.size());
         List<String> readBodyList = MessageTestUtils.getBodies(readLogs);
-        Assert.assertEquals(bodyList,readBodyList);
+        Assert.assertEquals(bodyList, readBodyList);
 
-        store.flush();
+        while (store.flush()) {
+            Thread.yield();
+        }
 
         bodyList.remove(6);
-        position = IntStream.range(0,6).mapToObj(writeMessages::get).mapToInt(ByteBuffer::capacity).sum();
+        position = IntStream.range(0, 6).mapToObj(writeMessages::get).mapToInt(ByteBuffer::capacity).sum();
 
         store.setRight(position);
 
 
         readLogs = store.batchRead(start, bodyList.size());
         readBodyList = MessageTestUtils.getBodies(readLogs);
-        Assert.assertEquals(bodyList,readBodyList);
+        Assert.assertEquals(bodyList, readBodyList);
 
         position += 1;
         store.setRight(position);
-        Assert.assertEquals(position,store.right());
+        Assert.assertEquals(position, store.right());
+        store.close();
+        bufferPool.close();
         virtualThreadPool.stop();
 
     }
+
     @Test
     public void indexWriteReadTest() throws IOException, InterruptedException, TimeoutException {
-        VirtualThreadExecutor virtualThreadPool = new VirtualThreadExecutor(500, 100,10, 1000,4);
-        PreloadBufferPool bufferPool = new PreloadBufferPool( 100);
-        bufferPool.addPreLoad(PositioningStore.Config.DEFAULT_FILE_DATA_SIZE,1, 1);
+        VirtualThreadExecutor virtualThreadPool = new VirtualThreadExecutor(500, 100, 10, 1000, 4);
+        PreloadBufferPool bufferPool = new PreloadBufferPool();
+        bufferPool.addPreLoad(PositioningStore.Config.DEFAULT_FILE_DATA_SIZE, 1, 1);
         PositioningStore<IndexItem> store =
-                new PositioningStore<>(logBase,new PositioningStore.Config(),
+                new PositioningStore<>(logBase, new PositioningStore.Config(),
                         bufferPool,
                         new IndexSerializer());
         store.recover();
@@ -174,7 +198,7 @@ public class PositioningStoreTest {
         short partition = 3;
 
         List<IndexItem> indexItems = IntStream.range(0, count)
-                .mapToObj(i-> new IndexItem(partition,i,666,888))
+                .mapToObj(i -> new IndexItem(partition, i, 666, 888))
                 .collect(Collectors.toList());
 
         long start = store.right();
@@ -185,22 +209,24 @@ public class PositioningStoreTest {
         Assert.assertEquals(writePosition, store.right());
 
         List<IndexItem> readLogs = store.batchRead(start, indexItems.size());
-        IntStream.range(0,count).forEach(i -> {
+        IntStream.range(0, count).forEach(i -> {
             Assert.assertEquals(indexItems.get(i).getOffset(), readLogs.get(i).getOffset());
             Assert.assertEquals(indexItems.get(i).getLength(), readLogs.get(i).getLength());
         });
+        store.close();
         virtualThreadPool.stop();
 
     }
+
     // recover
     @Test
     public void indexRecoverTest() throws IOException, InterruptedException, TimeoutException {
-        PositioningStore.Config config =  new PositioningStore.Config(128);
-        VirtualThreadExecutor virtualThreadPool = new VirtualThreadExecutor(500, 100,10, 1000,4);
-        PreloadBufferPool bufferPool = new PreloadBufferPool( 100);
-        bufferPool.addPreLoad(PositioningStore.Config.DEFAULT_FILE_DATA_SIZE,1, 1);
+        PositioningStore.Config config = new PositioningStore.Config(128);
+        VirtualThreadExecutor virtualThreadPool = new VirtualThreadExecutor(500, 100, 10, 1000, 4);
+        PreloadBufferPool bufferPool = new PreloadBufferPool();
+        bufferPool.addPreLoad(PositioningStore.Config.DEFAULT_FILE_DATA_SIZE, 1, 1);
         PositioningStore<IndexItem> store =
-                new PositioningStore<>(logBase,new PositioningStore.Config(),
+                new PositioningStore<>(logBase, new PositioningStore.Config(),
                         bufferPool,
                         new IndexSerializer());
         store.recover();
@@ -208,7 +234,7 @@ public class PositioningStoreTest {
         short partition = 3;
 
         List<IndexItem> indexItems = IntStream.range(0, count)
-                .mapToObj(i-> new IndexItem(partition,i,666,888))
+                .mapToObj(i -> new IndexItem(partition, i, 666, 888))
                 .collect(Collectors.toList());
 
         long start = store.right();
@@ -218,20 +244,23 @@ public class PositioningStoreTest {
         Assert.assertEquals(length + start, writePosition);
         Assert.assertEquals(writePosition, store.right());
 
-        store.flush();
+        while (store.flush()) {
+            Thread.yield();
+        }
         store.close();
         store =
-                new PositioningStore<>(logBase,config,bufferPool, new IndexSerializer());
+                new PositioningStore<>(logBase, config, bufferPool, new IndexSerializer());
         store.recover();
         List<IndexItem> readLogs = store.batchRead(start, indexItems.size());
-        IntStream.range(0,count).forEach(i -> {
+        IntStream.range(0, count).forEach(i -> {
             Assert.assertEquals(indexItems.get(i).getOffset(), readLogs.get(i).getOffset());
             Assert.assertEquals(indexItems.get(i).getLength(), readLogs.get(i).getLength());
         });
 
+        store.close();
+        bufferPool.close();
         virtualThreadPool.stop();
     }
-
 
 
     // -XX:MaxDirectMemorySize=12g
@@ -242,7 +271,7 @@ public class PositioningStoreTest {
         // 每条消息消息体大小
         int logSize = 12;
 
-        try (PositioningStore<ByteBuffer> store = prepareStore()) {
+        try (PreloadBufferPool bufferPool = new PreloadBufferPool(); PositioningStore<ByteBuffer> store = prepareStore(bufferPool)) {
             ByteBuffer buffer = MessageTestUtils.createMessage(new byte[logSize]);
             write(store, maxSize, buffer);
         }
@@ -255,7 +284,7 @@ public class PositioningStoreTest {
         // 每条消息消息体大小
         int logSize = 1024;
 
-        try (PositioningStore<ByteBuffer> store = prepareStore()) {
+        try (PreloadBufferPool bufferPool = new PreloadBufferPool(); PositioningStore<ByteBuffer> store = prepareStore(bufferPool)) {
             ByteBuffer buffer = MessageTestUtils.createMessage(new byte[logSize]);
             final int msgSize = buffer.remaining();
             long writeSize = write(store, maxSize, buffer);
@@ -273,41 +302,42 @@ public class PositioningStoreTest {
         int batchSize = 10 * 1024;
 
 
-        try (PositioningStore<ByteBuffer> store = prepareStore()) {
+        try (PreloadBufferPool bufferPool = new PreloadBufferPool(); PositioningStore<ByteBuffer> store = prepareStore(bufferPool)) {
             ByteBuffer buffer = MessageTestUtils.createMessage(new byte[logSize]);
             long writeSize = write(store, maxSize, buffer);
             readByteBuffer(store, batchSize, writeSize);
         }
     }
 
-    private PositioningStore<ByteBuffer> prepareStore() throws IOException {
+    private PositioningStore<ByteBuffer> prepareStore(PreloadBufferPool bufferPool) throws IOException {
         StoreMessageSerializer storeMessageSerializer = new StoreMessageSerializer(2 * 1024);
 
-        PreloadBufferPool bufferPool = new PreloadBufferPool( 100);
-        bufferPool.addPreLoad(PositioningStore.Config.DEFAULT_FILE_DATA_SIZE,2, 5);
+
+        bufferPool.addPreLoad(PositioningStore.Config.DEFAULT_FILE_DATA_SIZE, 2, 5);
         PositioningStore<ByteBuffer> store =
-                new PositioningStore<>(logBase,new PositioningStore.Config(),
+                new PositioningStore<>(logBase, new PositioningStore.Config(),
                         bufferPool,
                         storeMessageSerializer);
         store.recover();
         return store;
     }
 
-    private void readByteBuffer(PositioningStore<ByteBuffer> store, int batchSize, long maxSize) throws IOException{
+
+    private void readByteBuffer(PositioningStore<ByteBuffer> store, int batchSize, long maxSize) throws IOException {
         long start;
         long position;
         long t;
         long spendTimeMs;
         long mbps;
 
-        start = System.currentTimeMillis();
+        start = SystemClock.now();
         position = 0;
         while (position < maxSize) {
 
             ByteBuffer byteBuffer = store.readByteBuffer(position, batchSize);
             position += byteBuffer.remaining();
         }
-        t = System.currentTimeMillis();
+        t = SystemClock.now();
         spendTimeMs = t - start;
         mbps = maxSize * 1000 / spendTimeMs / 1024 / 1024;
 
@@ -315,7 +345,7 @@ public class PositioningStoreTest {
         Assert.assertEquals(maxSize, position);
     }
 
-    private void read(PositioningStore<ByteBuffer> store, int msgSize, long maxSize) throws IOException{
+    private void read(PositioningStore<ByteBuffer> store, int msgSize, long maxSize) throws IOException {
         long start;
         long t;
         long spendTimeMs;
@@ -323,12 +353,12 @@ public class PositioningStoreTest {
 
         long position = 0;
 
-        start = System.currentTimeMillis();
+        start = SystemClock.now();
         while (position < maxSize) {
             position += store.read(position, msgSize).remaining();
         }
 
-        t = System.currentTimeMillis();
+        t = SystemClock.now();
         spendTimeMs = t - start;
         mbps = maxSize * 1000 / spendTimeMs / 1024 / 1024;
 
@@ -338,23 +368,23 @@ public class PositioningStoreTest {
 
     private long write(PositioningStore<ByteBuffer> store, long maxSize, ByteBuffer message) throws InterruptedException, IOException {
         long size = 0;
-        VirtualThreadExecutor virtualThreadPool = new VirtualThreadExecutor(5000, 200,10, 1000,2);
+        VirtualThreadExecutor virtualThreadPool = new VirtualThreadExecutor(5000, 200, 10, 1000, 2);
         virtualThreadPool.start(store::flush, 100, "flush");
         Thread.sleep(1000);
-        long start = System.currentTimeMillis();
+        long start = SystemClock.now();
         while (size < maxSize) {
             size = store.append(message.slice());
         }
-        long t = System.currentTimeMillis();
+        long t = SystemClock.now();
         long spendTimeMs = t - start;
         long mbps = size * 1000 / spendTimeMs / 1024 / 1024;
 
-        logger.info("Final write size: {}, write performance: {} MBps.",size, mbps);
+        logger.info("Final write size: {}, write performance: {} MBps.", size, mbps);
 
         while (store.flushPosition() < store.right()) {
             Thread.sleep(10);
         }
-        t = System.currentTimeMillis();
+        t = SystemClock.now();
         spendTimeMs = t - start;
         mbps = size * 1000 / spendTimeMs / 1024 / 1024;
 
@@ -366,13 +396,13 @@ public class PositioningStoreTest {
 
     // position
     @Test
-    public void positionTest() throws Exception{
+    public void positionTest() throws Exception {
         PositioningStore.Config config = new PositioningStore.Config();
-        VirtualThreadExecutor virtualThreadPool = new VirtualThreadExecutor(500, 100,10, 1000,4);
-        PreloadBufferPool bufferPool = new PreloadBufferPool( 100);
-        bufferPool.addPreLoad(PositioningStore.Config.DEFAULT_FILE_DATA_SIZE,1, 1);
+        VirtualThreadExecutor virtualThreadPool = new VirtualThreadExecutor(500, 100, 10, 1000, 4);
+        PreloadBufferPool bufferPool = new PreloadBufferPool();
+        bufferPool.addPreLoad(PositioningStore.Config.DEFAULT_FILE_DATA_SIZE, 1, 1);
         PositioningStore<ByteBuffer> store =
-                new PositioningStore<>(logBase,new PositioningStore.Config(),
+                new PositioningStore<>(logBase, new PositioningStore.Config(),
                         bufferPool,
                         new StoreMessageSerializer(1024 * 1024));
         store.recover();
@@ -383,7 +413,7 @@ public class PositioningStoreTest {
 
         long writePosition = store.append(writeMessages);
 
-        long position = store.position(writePosition,3);
+        long position = store.position(writePosition, 3);
         Assert.assertEquals(writePosition, position);
 
         position = store.position(position, -1);

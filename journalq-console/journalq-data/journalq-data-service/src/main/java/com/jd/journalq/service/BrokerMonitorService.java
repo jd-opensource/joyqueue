@@ -1,6 +1,20 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.service;
 
 
+import com.jd.journalq.manage.PartitionGroupPosition;
 import com.jd.journalq.monitor.ArchiveMonitorInfo;
 import com.jd.journalq.model.domain.BrokerClient;
 import com.jd.journalq.model.domain.ConnectionMonitorInfoWithIp;
@@ -28,23 +42,21 @@ public interface BrokerMonitorService {
 
 
     /**
-     * Find monitor info of a producer or consumer 汇总信息,
-     * for aggregation data -1 indicate incomplete
+     * Find monitor info of a producer or consumer 汇总信息
      * @param subscribe consumer or producer subscribe info
      * @param active   if true , only contain leader partition group of this subscribe on the broker right now,which excluding
      *                 case of  the broker isn't partition group'leader but still remaining monitor info,such as enqueue and dequeun
-     *
      * @return a monitor record
      **/
-    BrokerMonitorRecord find(Subscribe subscribe,boolean active);
+    BrokerMonitorRecord find(Subscribe subscribe, boolean active);
 
     /**
-     * @param require  require full broker monitor info,if true
+     *
      * @param subscribe consumer or producer subscribe info
      * @return a monitor record list contain statistics info on each broker for topic and app
      * @see
      **/
-    List<BrokerMonitorRecord> findMonitorOnBroker(Subscribe subscribe,boolean require);
+    List<BrokerMonitorRecord> findMonitorOnBroker(Subscribe subscribe);
 
 
     /**
@@ -71,19 +83,16 @@ public interface BrokerMonitorService {
      *
      *
      **/
-    List<BrokerMonitorRecord> findMonitorOnPartition(Subscribe subscribe,int partitionGroup);
+    List<BrokerMonitorRecord> findMonitorOnPartition(Subscribe subscribe, int partitionGroup);
 
     /**
      *
-     * @param require  require full partition group monitor info,if true
-     *
      * @return  app 在某一topic所有 partition group的的监控消费或者生产监控 or null，sorted by partition group no;
      * null 表示当前 该partition group没有监控数据，一般是新建的生产或者消费关系，没有开始生产或者消费
-     * 与findMonitorOnPartitionGroups 不同; 包含出队和积压监控信息汇总信息,for consumer or producer; if require=true,
-     * any partition group monitor lost will return one record with -1 ,which indicate incomplete
+     * 与findMonitorOnPartitionGroups 不同; 包含出队和积压监控信息汇总信息,for consumer or producer
      *
      **/
-    List<BrokerMonitorRecord> findMonitorOnPartitionGroupsForTopicApp(Subscribe subscribe,boolean require);
+    List<BrokerMonitorRecord> findMonitorOnPartitionGroupsForTopicApp(Subscribe subscribe);
 
     /**
      *
@@ -100,6 +109,7 @@ public interface BrokerMonitorService {
      *  仅是topic 的出入队监控,only for partition group 与app 无关
      *
      **/
+    @Deprecated
     List<BrokerMonitorRecord> findMonitorOnPartitionGroups(Subscribe subscribe);
 
 
@@ -110,6 +120,14 @@ public interface BrokerMonitorService {
     List<ConnectionMonitorInfoWithIp> findConnectionOnBroker(Subscribe subscribe);
 
 
+    /**
+     * 获取
+     * @param namespace
+     * @param topic
+     * @param groupNo
+     * @return
+     */
+    List<PartitionGroupPosition> findPartitionGroupMetric(String namespace, String topic, Integer groupNo);
 
    /**
     *
@@ -118,7 +136,7 @@ public interface BrokerMonitorService {
     * @return archive state on the broker or null when exception
     *
     **/
-   ArchiveMonitorInfo findArchiveState(String ip,int port);
+   ArchiveMonitorInfo findArchiveState(String ip, int port);
 
 
 

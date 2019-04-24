@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.client.internal.consumer.support;
 
 import com.google.common.collect.HashBasedTable;
@@ -13,8 +26,8 @@ import com.jd.journalq.client.internal.consumer.transport.ConsumerClientManager;
 import com.jd.journalq.client.internal.exception.ClientException;
 import com.jd.journalq.client.internal.metadata.domain.PartitionMetadata;
 import com.jd.journalq.client.internal.metadata.domain.TopicMetadata;
-import com.jd.journalq.exception.JMQCode;
-import com.jd.journalq.network.command.CommitAckAck;
+import com.jd.journalq.exception.JournalqCode;
+import com.jd.journalq.network.command.CommitAckResponse;
 import com.jd.journalq.network.command.CommitAckData;
 import com.jd.journalq.network.command.FetchIndexResponse;
 import com.jd.journalq.network.command.FetchIndexAckData;
@@ -47,8 +60,8 @@ public class DefaultConsumerIndexManager extends Service implements ConsumerInde
     }
 
     @Override
-    public JMQCode resetIndex(String topic, String app, short partition, long timeout) {
-        return JMQCode.SUCCESS;
+    public JournalqCode resetIndex(String topic, String app, short partition, long timeout) {
+        return JournalqCode.SUCCESS;
     }
 
     @Override
@@ -60,10 +73,10 @@ public class DefaultConsumerIndexManager extends Service implements ConsumerInde
     }
 
     @Override
-    public JMQCode commitReply(String topic, List<ConsumeReply> replyList, String app, long timeout) {
+    public JournalqCode commitReply(String topic, List<ConsumeReply> replyList, String app, long timeout) {
         Map<String, List<ConsumeReply>> topicMap = Maps.newHashMap();
         topicMap.put(topic, replyList);
-        Map<String, JMQCode> batchCommitReplyResult = batchCommitReply(topicMap, app, timeout);
+        Map<String, JournalqCode> batchCommitReplyResult = batchCommitReply(topicMap, app, timeout);
         return batchCommitReplyResult.get(topic);
     }
 
@@ -89,7 +102,7 @@ public class DefaultConsumerIndexManager extends Service implements ConsumerInde
                 logger.error("fetchIndex exception, fetchMap: {}, app: {}", entry.getValue(), app, e);
                 for (Map.Entry<String, List<Short>> topicEntry : entry.getValue().entrySet()) {
                     for (Short partition : topicEntry.getValue()) {
-                        result.put(topicEntry.getKey(), partition, new FetchIndexData(JMQCode.valueOf(e.getCode())));
+                        result.put(topicEntry.getKey(), partition, new FetchIndexData(JournalqCode.valueOf(e.getCode())));
                     }
                 }
             }
@@ -100,7 +113,7 @@ public class DefaultConsumerIndexManager extends Service implements ConsumerInde
                 if (result.contains(entry.getKey(), partition)) {
                     continue;
                 }
-                result.put(entry.getKey(), partition, new FetchIndexData(JMQCode.CN_UNKNOWN_ERROR));
+                result.put(entry.getKey(), partition, new FetchIndexData(JournalqCode.CN_UNKNOWN_ERROR));
             }
         }
 
@@ -108,23 +121,23 @@ public class DefaultConsumerIndexManager extends Service implements ConsumerInde
     }
 
     @Override
-    public Map<String, JMQCode> batchCommitReply(Map<String, List<ConsumeReply>> replyMap, String app, long timeout) {
-        Map<String, JMQCode> result = Maps.newHashMap();
+    public Map<String, JournalqCode> batchCommitReply(Map<String, List<ConsumeReply>> replyMap, String app, long timeout) {
+        Map<String, JournalqCode> result = Maps.newHashMap();
         Map<BrokerNode, Table<String, Short, List<CommitAckData>>> brokerCommitMap = buildCommitAckParams(replyMap, app);
         for (Map.Entry<BrokerNode, Table<String, Short, List<CommitAckData>>> entry : brokerCommitMap.entrySet()) {
             try {
                 ConsumerClient client = consumerClientManager.getOrCreateClient(entry.getKey());
-                CommitAckAck commitAckAck = client.commitAck(entry.getValue(), app, timeout);
+                CommitAckResponse commitAckResponse = client.commitAck(entry.getValue(), app, timeout);
 
-                for (Map.Entry<String, Map<Short, JMQCode>> resultEntry : commitAckAck.getResult().rowMap().entrySet()) {
-                    for (Map.Entry<Short, JMQCode> ackEntry : resultEntry.getValue().entrySet()) {
+                for (Map.Entry<String, Map<Short, JournalqCode>> resultEntry : commitAckResponse.getResult().rowMap().entrySet()) {
+                    for (Map.Entry<Short, JournalqCode> ackEntry : resultEntry.getValue().entrySet()) {
                         result.put(resultEntry.getKey(), ackEntry.getValue());
                     }
                 }
             } catch (ClientException e) {
                 logger.error("commit ack exception, commitMap: {}, app: {}", entry.getValue(), app, e);
                 for (Map.Entry<String, Map<Short, List<CommitAckData>>> topicEntry : entry.getValue().rowMap().entrySet()) {
-                    result.put(topicEntry.getKey(), JMQCode.valueOf(e.getCode()));
+                    result.put(topicEntry.getKey(), JournalqCode.valueOf(e.getCode()));
                 }
             }
         }
@@ -132,7 +145,7 @@ public class DefaultConsumerIndexManager extends Service implements ConsumerInde
             if (result.containsKey(entry.getKey())) {
                 continue;
             }
-            result.put(entry.getKey(), JMQCode.CN_UNKNOWN_ERROR);
+            result.put(entry.getKey(), JournalqCode.CN_UNKNOWN_ERROR);
         }
         return result;
     }

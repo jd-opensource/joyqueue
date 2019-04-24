@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.nsr.impl;
 
 import com.alibaba.fastjson.JSON;
@@ -12,6 +25,7 @@ import com.jd.journalq.model.query.QApplicationToken;
 import com.jd.journalq.nsr.model.AppTokenQuery;
 import com.jd.journalq.nsr.AppTokenNameServerService;
 import com.jd.journalq.nsr.NameServerBase;
+import com.jd.journalq.toolkit.time.SystemClock;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -41,7 +55,7 @@ public class AppTokenNameServerServiceImpl extends NameServerBase implements App
 
     @Override
     public int add(ApplicationToken applicationToken) throws Exception {
-        Long id = Long.valueOf(String.valueOf(applicationToken.getApplication().getId())+ String.valueOf(System.currentTimeMillis()/1000));
+        Long id = Long.valueOf(String.valueOf(applicationToken.getApplication().getId())+ String.valueOf(SystemClock.now()/1000));
         applicationToken.setId(id);
         AppToken appToken = nsrAppTokenConverter.revert(applicationToken);
         String result = postWithLog(ADD_TOKEN, appToken,OperLog.Type.APP_TOKEN.value(),OperLog.OperType.ADD.value(),appToken.getApp());

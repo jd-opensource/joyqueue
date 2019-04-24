@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.client.internal.consumer.support;
 
 import com.google.common.collect.Lists;
@@ -20,9 +33,9 @@ import com.jd.journalq.client.internal.consumer.transport.ConsumerClientManager;
 import com.jd.journalq.client.internal.metadata.domain.PartitionMetadata;
 import com.jd.journalq.client.internal.metadata.domain.TopicMetadata;
 import com.jd.journalq.client.internal.nameserver.NameServerConfig;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.domain.BrokerNode;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -54,7 +67,8 @@ public class PartitionMessagePoller extends Service implements MessagePoller {
     private ConsumerIndexManager consumerIndexManager;
     private MessagePollerInner messagePollerInner;
 
-    public PartitionMessagePoller(ConsumerConfig config, NameServerConfig nameServerConfig, ClusterManager clusterManager, ConsumerClientManager consumerClientManager, ConsumerIndexManager consumerIndexManager) {
+    public PartitionMessagePoller(ConsumerConfig config, NameServerConfig nameServerConfig, ClusterManager clusterManager,
+                                  ConsumerClientManager consumerClientManager, ConsumerIndexManager consumerIndexManager) {
         Preconditions.checkArgument(config != null, "consumer not null");
         Preconditions.checkArgument(nameServerConfig != null, "nameServer not null");
         Preconditions.checkArgument(clusterManager != null, "clusterManager not null");
@@ -212,11 +226,11 @@ public class PartitionMessagePoller extends Service implements MessagePoller {
         PartitionMetadata partitionMetadata = topicMetadata.getPartition(partition);
 
         if (partitionMetadata == null) {
-            throw new ConsumerException(String.format("partition not exist, topic: %s, partition: %s", topic, partition), JMQCode.FW_TOPIC_NO_PARTITIONGROUP.getCode());
+            throw new ConsumerException(String.format("partition not exist, topic: %s, partition: %s", topic, partition), JournalqCode.FW_TOPIC_NO_PARTITIONGROUP.getCode());
         }
 
         if (partitionMetadata.getLeader() == null) {
-            throw new ConsumerException(String.format("partition not available, topic: %s, partition: %s", topic, partition), JMQCode.FW_TOPIC_NO_PARTITIONGROUP.getCode());
+            throw new ConsumerException(String.format("partition not available, topic: %s, partition: %s", topic, partition), JournalqCode.FW_TOPIC_NO_PARTITIONGROUP.getCode());
         }
 
         if (batchSize == CUSTOM_BATCH_SIZE) {
@@ -258,7 +272,7 @@ public class PartitionMessagePoller extends Service implements MessagePoller {
 
     protected List<ConsumeMessage> doPollPartitionInternal(BrokerNode brokerNode, String topic, short partition, int batchSize, long timeout, TimeUnit timeoutUnit, ConsumerListener listener) {
         FetchIndexData indexData = consumerIndexManager.fetchIndex(topic, messagePollerInner.getAppFullName(), partition, config.getTimeout());
-        if (!indexData.getCode().equals(JMQCode.SUCCESS)) {
+        if (!indexData.getCode().equals(JournalqCode.SUCCESS)) {
             logger.error("fetch index error, topic: {}, partition: {}, app: {}, error:{}", topic, partition, messagePollerInner.getAppFullName(), indexData.getCode().getMessage());
             return messagePollerInner.buildPollEmptyResult(listener);
         }
@@ -266,11 +280,12 @@ public class PartitionMessagePoller extends Service implements MessagePoller {
         return doPollPartitionInternal(brokerNode, topic, partition, indexData.getIndex(), batchSize, timeout, timeoutUnit, listener);
     }
 
-    protected List<ConsumeMessage> doPollPartitionInternal(BrokerNode brokerNode, String topic, short partition, long index, int batchSize, long timeout, TimeUnit timeoutUnit, ConsumerListener listener) {
+    protected List<ConsumeMessage> doPollPartitionInternal(BrokerNode brokerNode, String topic, short partition, long index,
+                                                           int batchSize, long timeout, TimeUnit timeoutUnit, ConsumerListener listener) {
         try {
             return messagePollerInner.fetchPartition(brokerNode, topic, partition, index, batchSize, timeout, timeoutUnit, listener);
         } catch (ConsumerException e) {
-            if (e.getCode() == JMQCode.FW_FETCH_MESSAGE_INDEX_OUT_OF_RANGE.getCode()) {
+            if (e.getCode() == JournalqCode.FW_FETCH_MESSAGE_INDEX_OUT_OF_RANGE.getCode()) {
                 consumerIndexManager.resetIndex(topic, config.getApp(), partition, config.getTimeout());
                 return messagePollerInner.buildPollEmptyResult(listener);
             }
@@ -290,7 +305,7 @@ public class PartitionMessagePoller extends Service implements MessagePoller {
     }
 
     @Override
-    public synchronized JMQCode reply(String topic, List<ConsumeReply> replyList) {
+    public synchronized JournalqCode reply(String topic, List<ConsumeReply> replyList) {
         checkState();
         Preconditions.checkArgument(StringUtils.isNotBlank(topic), "topic not blank");
 
@@ -300,8 +315,8 @@ public class PartitionMessagePoller extends Service implements MessagePoller {
             throw new IllegalArgumentException(String.format("topic %s reply is empty", topic));
         }
 
-        JMQCode result = consumerIndexManager.commitReply(topicMetadata.getTopic(), replyList, messagePollerInner.getAppFullName(), config.getTimeout());
-        if (!result.equals(JMQCode.SUCCESS)) {
+        JournalqCode result = consumerIndexManager.commitReply(topicMetadata.getTopic(), replyList, messagePollerInner.getAppFullName(), config.getTimeout());
+        if (!result.equals(JournalqCode.SUCCESS)) {
             // TODO 临时日志
             logger.warn("commit ack error, topic : {}, code: {}, error: {}", topic, result.getCode(), result.getMessage());
         }
@@ -309,7 +324,7 @@ public class PartitionMessagePoller extends Service implements MessagePoller {
     }
 
     @Override
-    public JMQCode replyOnce(String topic, ConsumeReply reply) {
+    public JournalqCode replyOnce(String topic, ConsumeReply reply) {
         return reply(topic, Lists.newArrayList(reply));
     }
 
@@ -324,7 +339,7 @@ public class PartitionMessagePoller extends Service implements MessagePoller {
 
     protected void checkState() {
         if (!isStarted()) {
-            throw new ConsumerException("consumer is not started", JMQCode.CN_SERVICE_NOT_AVAILABLE.getCode());
+            throw new ConsumerException("consumer is not started", JournalqCode.CN_SERVICE_NOT_AVAILABLE.getCode());
         }
     }
 }

@@ -1,7 +1,24 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.broker.mqtt.handler;
 
 import com.jd.journalq.broker.BrokerContext;
-import com.jd.journalq.broker.mqtt.cluster.*;
+import com.jd.journalq.broker.mqtt.cluster.MqttConnectionManager;
+import com.jd.journalq.broker.mqtt.cluster.MqttConsumerManager;
+import com.jd.journalq.broker.mqtt.cluster.MqttProducerManager;
+import com.jd.journalq.broker.mqtt.cluster.MqttSessionManager;
+import com.jd.journalq.broker.mqtt.cluster.MqttSubscriptionManager;
 import com.jd.journalq.broker.mqtt.connection.MqttConnection;
 import com.jd.journalq.broker.mqtt.message.WillMessage;
 import com.jd.journalq.broker.mqtt.publish.MessagePublisher;
@@ -12,18 +29,40 @@ import com.jd.journalq.broker.mqtt.util.NettyAttrManager;
 import com.jd.journalq.domain.AppToken;
 import com.jd.journalq.network.session.Producer;
 import com.jd.journalq.nsr.NameService;
-import com.jd.journalq.toolkit.lang.Strings;
+import com.google.common.base.Strings;
 import com.jd.journalq.toolkit.network.IpUtil;
 import com.jd.journalq.toolkit.service.Service;
 import io.netty.channel.Channel;
-import io.netty.handler.codec.mqtt.*;
+import io.netty.handler.codec.mqtt.MqttConnAckMessage;
+import io.netty.handler.codec.mqtt.MqttConnAckVariableHeader;
+import io.netty.handler.codec.mqtt.MqttConnectMessage;
+import io.netty.handler.codec.mqtt.MqttConnectReturnCode;
+import io.netty.handler.codec.mqtt.MqttFixedHeader;
+import io.netty.handler.codec.mqtt.MqttMessage;
+import io.netty.handler.codec.mqtt.MqttMessageFactory;
+import io.netty.handler.codec.mqtt.MqttMessageIdVariableHeader;
+import io.netty.handler.codec.mqtt.MqttMessageType;
+import io.netty.handler.codec.mqtt.MqttPubAckMessage;
+import io.netty.handler.codec.mqtt.MqttPublishMessage;
+import io.netty.handler.codec.mqtt.MqttQoS;
+import io.netty.handler.codec.mqtt.MqttSubAckMessage;
+import io.netty.handler.codec.mqtt.MqttSubAckPayload;
+import io.netty.handler.codec.mqtt.MqttSubscribeMessage;
+import io.netty.handler.codec.mqtt.MqttTopicSubscription;
+import io.netty.handler.codec.mqtt.MqttUnsubscribeMessage;
+import io.netty.handler.codec.mqtt.MqttVersion;
 import io.netty.handler.timeout.IdleStateHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -327,7 +366,6 @@ public class MqttProtocolHandler extends Service {
                 }
             } catch (Exception e) {
                 LOG.error("subscribe is error!");
-                e.printStackTrace();
                 if (resultCodes.size() < topicSubscribes.size()) {
                     int minus = topicSubscribes.size() - resultCodes.size();
                     for (; minus > 0; minus--) {
@@ -399,7 +437,6 @@ public class MqttProtocolHandler extends Service {
             } catch (Exception e) {
                 // ignore
                 LOG.error("unSubscribe is error!");
-                e.printStackTrace();
             }
         }
         sendUnSubAck(client, packageId, qoS);

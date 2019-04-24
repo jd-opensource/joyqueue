@@ -21,32 +21,6 @@
       "component": "topic/detail.vue"
     },
     {
-      "name": "workflow",
-      "path": "/workflow",
-      "redirect": "/workflow/apply",
-      "component": "workflow/index.vue",
-      "children": [
-        {
-          "path":"/",
-          "redirect": "/workflow/apply"
-        },
-        {
-          "path": "apply",
-          "name": "apply",
-          "component": "workflow/myApply.vue"
-        },
-        {
-          "path": "audit",
-          "name": "audit",
-          "component": "workflow/myAudit.vue"
-        },{
-          "path": "apiToken",
-          "name": "apiToken",
-          "component":"workflow/apiToken.vue"
-        }
-      ]
-    },
-    {
       "name": "setting",
       "path": "/setting",
       "redirect": "/setting/user",
@@ -62,11 +36,6 @@
           "component": "setting/userManage.vue"
         },
         {
-          "path": "userToken",
-          "name": "userToken",
-          "component": "setting/userTokenManage.vue"
-        },
-        {
           "path": "dataCenter",
           "name": "dataCenter",
           "component": "setting/dataCenter.vue"
@@ -75,11 +44,6 @@
           "path": "config",
           "name": "config",
           "component": "setting/config.vue"
-        },
-        {
-          "path": "hosts",
-          "name": "hosts",
-          "component": "setting/hosts.vue"
         },
         {
           "path": "brokerGroup",
@@ -97,39 +61,14 @@
           "component": "setting/broker.vue"
         },
         {
-          "path": "auditRole",
-          "name": "auditRole",
-          "component": "setting/auditRole.vue"
-        },
-        {
-          "path": "auditFlow",
-          "name": "auditFlow",
-          "component": "setting/auditFlow.vue"
-        },
-        {
-          "path": "task",
-          "name": "task",
-          "component": "setting/task.vue"
-        },
-        {
-          "path": "executor",
-          "name": "executor",
-          "component": "setting/executor.vue"
-        },
-        {
-          "path": "alarm",
-          "name": "alarm",
-          "component": "setting/alarmRuleTemplate.vue"
+          "path": "metric",
+          "name": "metric",
+          "component": "setting/metric.vue"
         },
         {
           "path": "namespace",
           "name": "namespace",
           "component": "setting/namespace.vue"
-        },
-        {
-          "path": "label",
-          "name": "label",
-          "component": "setting/label.vue"
         }
       ]
     },
@@ -154,34 +93,9 @@
           "component": "tool/archive.vue"
         },
         {
-          "path": "archiveTask",
-          "name": "archiveTask",
-          "component": "tool/archiveTask.vue"
-        },
-        {
-          "path": "taskHistory",
-          "name": "taskHistory",
-          "component": "tool/taskHistory.vue"
-        },
-        {
           "path": "operateHistory",
           "name": "operateHistory",
           "component": "tool/operateHistory.vue"
-        },
-        {
-          "path": "alarmRule",
-          "name": "alarmRule",
-          "component": "tool/alarmRule.vue"
-        },
-        {
-          "path": "alarmRuleTemplate",
-          "name": "alarmRuleTemplate",
-          "component": "tool/alarmRuleTemplate.vue"
-        },
-        {
-          "path": "metric",
-          "name": "metric",
-          "component": "tool/metric.vue"
         }
       ]
     }
@@ -208,33 +122,6 @@
       "component": "topic/detail.vue"
     },
     {
-      "name": "workflow",
-      "path": "/workflow",
-      "redirect": "/workflow/apply",
-      "component": "workflow/index.vue",
-      "children": [
-        {
-          "path":"/",
-          "redirect": "/workflow/apply"
-        },
-        {
-          "path": "apply",
-          "name": "apply",
-          "component": "workflow/myApply.vue"
-        },
-        {
-          "path": "audit",
-          "name": "audit",
-          "component": "workflow/myAudit.vue"
-        },
-        {
-          "path": "apiToken",
-          "name": "apiToken",
-          "component":"workflow/apiToken.vue"
-        }
-      ]
-    },
-    {
       "name": "setting",
       "path": "/setting",
       "redirect": "/setting/user",
@@ -260,11 +147,6 @@
           "component": "setting/config.vue"
         },
         {
-          "path": "hosts",
-          "name": "hosts",
-          "component": "setting/hosts.vue"
-        },
-        {
           "path": "brokerGroup",
           "name": "brokerGroup",
           "component": "setting/brokerGroup.vue"
@@ -280,39 +162,14 @@
           "component": "setting/broker.vue"
         },
         {
-          "path": "auditRole",
-          "name": "auditRole",
-          "component": "setting/auditRole.vue"
-        },
-        {
-          "path": "auditFlow",
-          "name": "auditFlow",
-          "component": "setting/auditFlow.vue"
-        },
-        {
-          "path": "task",
-          "name": "task",
-          "component": "setting/task.vue"
-        },
-        {
-          "path": "executor",
-          "name": "executor",
-          "component": "setting/executor.vue"
-        },
-        {
-          "path": "alarm",
-          "name": "alarm",
-          "component": "setting/alarmRuleTemplate.vue"
+          "path": "metric",
+          "name": "metric",
+          "component": "setting/metric.vue"
         },
         {
           "path": "namespace",
           "name": "namespace",
           "component": "setting/namespace.vue"
-        },
-        {
-          "path": "label",
-          "name": "label",
-          "component": "setting/label.vue"
         }
       ]
     },
@@ -337,34 +194,9 @@
           "component": "tool/archive.vue"
         },
         {
-          "path": "archiveTask",
-          "name": "archiveTask",
-          "component": "tool/archiveTask.vue"
-        },
-        {
-          "path":"taskHistory",
-          "name": "taskHistory",
-          "component": "tool/taskHistory.vue"
-        },
-        {
           "path":"operateHistory",
           "name": "operateHistory",
           "component": "tool/operateHistory.vue"
-        },
-        {
-          "path":"alarmRule",
-          "name": "alarmRule",
-          "component": "tool/alarmRule.vue"
-        },
-        {
-          "path": "alarmRuleTemplate",
-          "name": "alarmRuleTemplate",
-          "component": "tool/alarmRuleTemplate.vue"
-        },
-        {
-          "path": "metric",
-          "name": "metric",
-          "component": "tool/metric.vue"
         }
       ]
     }

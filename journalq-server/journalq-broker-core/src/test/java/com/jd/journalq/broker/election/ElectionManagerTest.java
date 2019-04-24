@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.broker.election;
 
 import com.jd.journalq.broker.BrokerContext;
@@ -77,7 +90,7 @@ public class ElectionManagerTest {
         allNodes1.add(broker3);
 
         storeService.removePartitionGroup(topic1, partitionGroup1);
-        storeService.createPartitionGroup(topic1, partitionGroup1, new short[]{1}, new int[]{1,2,3});
+        storeService.createPartitionGroup(topic1, partitionGroup1, new short[]{1});
 
         electionManager.onPartitionGroupCreate(PartitionGroup.ElectType.fix, new TopicName(topic1),
                 partitionGroup1, allNodes1, new TreeSet<>(), broker1.getId(), broker1.getId());
@@ -86,7 +99,7 @@ public class ElectionManagerTest {
         Assert.assertEquals(election.getLeaderId(), broker1.getId().longValue());
 
         storeService.removePartitionGroup(topic2, partitionGroup2);
-        storeService.createPartitionGroup(topic2, partitionGroup2, new short[]{1}, new int[]{1,2,3});
+        storeService.createPartitionGroup(topic2, partitionGroup2, new short[]{1});
 
         List<Broker> allNodes2 = new LinkedList<>();
         allNodes2.add(broker1);

@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.client.internal.producer.feedback;
 
 import com.jd.journalq.client.internal.cluster.ClusterManager;
@@ -9,7 +22,7 @@ import com.jd.journalq.client.internal.producer.domain.FetchFeedbackData;
 import com.jd.journalq.client.internal.producer.domain.TransactionStatus;
 import com.jd.journalq.client.internal.producer.feedback.config.TxFeedbackConfig;
 import com.jd.journalq.domain.TopicName;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.command.TxStatus;
 import com.jd.journalq.network.domain.BrokerNode;
 import org.apache.commons.collections.CollectionUtils;
@@ -56,7 +69,7 @@ public class TxFeedbackDispatcher {
         FetchFeedbackData fetchFeedbackData = null;
         try {
             fetchFeedbackData = messageSender.fetchFeedback(brokerNode, topic, config.getApp(), TxStatus.UNKNOWN, config.getFetchSize(), config.getLongPollTimeout(), config.getTimeout());
-            if (!fetchFeedbackData.getCode().equals(JMQCode.SUCCESS)) {
+            if (!fetchFeedbackData.getCode().equals(JournalqCode.SUCCESS)) {
                 logger.error("fetch feedback error, topic: {}, error: {}", topic, fetchFeedbackData.getCode().getMessage());
                 return;
             }

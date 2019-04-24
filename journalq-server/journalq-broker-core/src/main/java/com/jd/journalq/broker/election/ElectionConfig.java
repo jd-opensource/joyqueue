@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.broker.election;
 
 import com.jd.journalq.toolkit.config.Property;
@@ -9,12 +22,50 @@ import com.jd.journalq.toolkit.config.PropertySupplier;
  * date: 2018/8/13
  */
 public class ElectionConfig {
-    public static final String ELECTION_META ="/raft_metafile.dat";
+    public static final String ELECTION_META_PATH ="/election";
     private String electionMetaPath ;
+    private String electionMetaFile;
     private PropertySupplier propertySupplier;
+
+    private int listenPort;
+
+    private String electionMetaFileStub;
+    private String electionMetaPathStub;
 
     public ElectionConfig(PropertySupplier propertySupplier) {
         this.propertySupplier = propertySupplier;
+    }
+
+    public String getMetadataPath() {
+        if (electionMetaPathStub != null) {
+            return electionMetaPathStub;
+        }
+
+        if (electionMetaPath == null || electionMetaPath.isEmpty()) {
+            synchronized (this) {
+                if (electionMetaPath == null) {
+                    String prefix = "";
+                    if (propertySupplier != null) {
+                        Property property = propertySupplier.getProperty(Property.APPLICATION_DATA_PATH);
+                        prefix = property == null ? prefix : property.getString();
+                    }
+                    electionMetaPath = prefix + ELECTION_META_PATH;
+                }
+
+            }
+        }
+        return electionMetaPath;
+    }
+
+    public String getMetadataFile() {
+        if (electionMetaFileStub != null) {
+            return electionMetaFileStub;
+        }
+		
+        Property property = propertySupplier.getProperty(Property.APPLICATION_DATA_PATH);
+        String prefix = property == null ? "" : property.getString();
+
+        return prefix + PropertySupplier.getValue(propertySupplier, ElectionConfigKey.ELECTION_METADATA);
     }
 
     public int getElectionTimeout() {
@@ -41,25 +92,6 @@ public class ElectionConfig {
         return PropertySupplier.getValue(propertySupplier, ElectionConfigKey.SEND_COMMAND_TIMEOUT);
     }
 
-    public String getMetadataFile() {
-
-
-        if (electionMetaPath == null || electionMetaPath.isEmpty()) {
-            synchronized (this) {
-                if (electionMetaPath == null) {
-                    String prefix = "";
-                    if (propertySupplier != null) {
-                        Property property = propertySupplier.getProperty(Property.APPLICATION_DATA_PATH);
-                        prefix = property == null ? prefix : property.getString();
-                    }
-                    electionMetaPath = prefix + ELECTION_META;
-                }
-
-            }
-        }
-        return electionMetaPath;
-    }
-
     public int getMaxReplicateLength() {
         return PropertySupplier.getValue(propertySupplier, ElectionConfigKey.MAX_BATCH_REPLICATE_SIZE);
     }
@@ -69,7 +101,7 @@ public class ElectionConfig {
     }
 
     public int getListenPort() {
-        return PropertySupplier.getValue(propertySupplier, ElectionConfigKey.LISTEN_PORT);
+        return listenPort;
     }
 
     public int getTransferLeaderTimeout() {
@@ -96,14 +128,19 @@ public class ElectionConfig {
         return PropertySupplier.getValue(propertySupplier, ElectionConfigKey.LOG_INTERVAL);
     }
 
-
-    @Deprecated
-    public void setListenPort(String port) {
-        //
+    public long getTransferLeaderMinLag() {
+        return PropertySupplier.getValue(propertySupplier, ElectionConfigKey.TRANSFER_LEADER_MIN_LAG);
     }
 
-    @Deprecated
-    public void setMetadataFile(String metadataFile) {
-        //
+    public void setListenPort(String port) {
+        listenPort = Integer.valueOf(port);
+    }
+
+    public void setElectionMetaPath(String electionMetaPath) {
+        this.electionMetaPathStub = electionMetaPath;
+    }
+
+    public void setElectionMetaFile(String electionMetaFile) {
+        this.electionMetaFileStub = electionMetaFileStub;
     }
 }

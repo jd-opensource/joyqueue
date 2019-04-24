@@ -1,23 +1,41 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.nsr.ignite.service;
 
 
 import com.google.inject.Inject;
-import com.jd.journalq.domain.*;
+import com.jd.journalq.domain.Broker;
+import com.jd.journalq.domain.Consumer;
+import com.jd.journalq.domain.PartitionGroup;
+import com.jd.journalq.domain.Producer;
+import com.jd.journalq.domain.Topic;
+import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.event.MetaEvent;
 import com.jd.journalq.event.PartitionGroupEvent;
 import com.jd.journalq.event.TopicEvent;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.model.PageResult;
 import com.jd.journalq.model.Pagination;
 import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.network.codec.NullPayloadCodec;
+import com.jd.journalq.network.transport.codec.JournalqHeader;
 import com.jd.journalq.nsr.network.codec.OperatePartitionGroupCodec;
 import com.jd.journalq.network.command.CommandType;
 import com.jd.journalq.network.transport.Transport;
 import com.jd.journalq.network.transport.TransportClient;
-import com.jd.journalq.network.transport.codec.JMQHeader;
 import com.jd.journalq.network.transport.codec.PayloadCodecFactory;
-import com.jd.journalq.network.transport.codec.support.JMQCodec;
+import com.jd.journalq.network.transport.codec.support.JournalqCodec;
 import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.transport.command.Direction;
 import com.jd.journalq.network.transport.config.ClientConfig;
@@ -36,7 +54,12 @@ import com.jd.journalq.nsr.network.command.CreatePartitionGroup;
 import com.jd.journalq.nsr.network.command.OperatePartitionGroup;
 import com.jd.journalq.nsr.network.command.RemovePartitionGroup;
 import com.jd.journalq.nsr.network.command.UpdatePartitionGroup;
-import com.jd.journalq.nsr.service.*;
+import com.jd.journalq.nsr.service.BrokerService;
+import com.jd.journalq.nsr.service.ConsumerService;
+import com.jd.journalq.nsr.service.PartitionGroupReplicaService;
+import com.jd.journalq.nsr.service.PartitionGroupService;
+import com.jd.journalq.nsr.service.ProducerService;
+import com.jd.journalq.nsr.service.TopicService;
 import com.jd.journalq.toolkit.lang.Pair;
 import org.apache.ignite.Ignition;
 import org.apache.ignite.transactions.Transaction;
@@ -46,7 +69,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 /**
@@ -79,12 +107,12 @@ public class IgniteTopicService implements TopicService {
             PayloadCodecFactory payloadCodecFactory = new PayloadCodecFactory();
             payloadCodecFactory.register(new OperatePartitionGroupCodec());
             payloadCodecFactory.register(new NullPayloadCodec());
-            JMQCodec codec = new JMQCodec(payloadCodecFactory);
+            JournalqCodec codec = new JournalqCodec(payloadCodecFactory);
             this.transportClient = new DefaultTransportClientFactory(codec).create(new ClientConfig());
             transportClient.start();
         }
     }
-
+    @Override
     public Topic getTopicByCode(String namespace, String topic) {
         return getById(IgniteTopic.getId(namespace, topic));
     }
@@ -153,6 +181,7 @@ public class IgniteTopicService implements TopicService {
      * @param topic topic
      * @return
      */
+    @Override
     public void addTopic(Topic topic, List<PartitionGroup> partitionGroups) {
         try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
             Topic oldTopic = get(topic);
@@ -169,16 +198,19 @@ public class IgniteTopicService implements TopicService {
                     Broker broker = (Broker) brokerService.getById(brokerId);
                     partitionGroupReplicaService.addOrUpdate(new IgnitePartitionGroupReplica(topicName, brokerId, group.getGroup()));
                     Transport transport = null;
-                    Command command = new Command(new JMQHeader(Direction.REQUEST, CommandType.NSR_CREATE_PARTITIONGROUP), new CreatePartitionGroup(group));
+                    Command command = new Command(new JournalqHeader(Direction.REQUEST, CommandType.NSR_CREATE_PARTITIONGROUP), new CreatePartitionGroup(group));
                     Command response = null;
                     try {
-                        logger.info("begin createPartitionGroup topic[{}] partitionGroup[{}] [{}:{}] request[{}]", topicName.getFullName(), group.getGroup(), broker.getIp(), broker.getBackEndPort(), command.getPayload());
+                        logger.info("begin createPartitionGroup topic[{}] partitionGroup[{}] [{}:{}] request[{}]",
+                                topicName.getFullName(), group.getGroup(), broker.getIp(), broker.getBackEndPort(), command.getPayload());
                         transport = transportClient.createTransport(new InetSocketAddress(broker.getIp(),
                                 broker.getBackEndPort()));
                         response = transport.sync(command);
-                        logger.info("createPartitionGroup topic[{}] partitionGroup[{}] [{}:{}] request[{}] response [{}]", topicName.getFullName(), group.getGroup(), broker.getIp(), broker.getBackEndPort(), command.getPayload(), response.getPayload());
-                        if (JMQCode.SUCCESS.getCode() != ((JMQHeader) response.getHeader()).getStatus())
+                        logger.info("createPartitionGroup topic[{}] partitionGroup[{}] [{}:{}] request[{}] response [{}]",
+                                topicName.getFullName(), group.getGroup(), broker.getIp(), broker.getBackEndPort(), command.getPayload(), response.getPayload());
+                        if (JournalqCode.SUCCESS.getCode() != response.getHeader().getStatus()) {
                             throw new Exception(String.format("add topic [%s] error[%s]", topicName.getFullName(), response));
+                        }
                     } catch (Exception e) {
                         logger.error("createPartitionGroup error request[{}] response [{}],rollback", command.getPayload(), response, e);
                         throw new Exception(String.format("add topic [%s] error ", topicName.getFullName()), e);
@@ -200,7 +232,7 @@ public class IgniteTopicService implements TopicService {
             for (PartitionGroup group : partitionGroups) {
                 for (Integer brokerId : group.getReplicas()) {
                     Broker broker = (Broker) brokerService.getById(brokerId);
-                    Command command = new Command(new JMQHeader(Direction.REQUEST, CommandType.NSR_CREATE_PARTITIONGROUP), new CreatePartitionGroup(group, true));
+                    Command command = new Command(new JournalqHeader(Direction.REQUEST, CommandType.NSR_CREATE_PARTITIONGROUP), new CreatePartitionGroup(group, true));
                     Transport transport = null;
                     Command response = null;
                     try {
@@ -211,7 +243,9 @@ public class IgniteTopicService implements TopicService {
                     } catch (TransportException ignore) {
                         logger.error("remove partitionGroup error request[{}] response [{}]", command.getPayload(), response, ignore);
                     } finally {
-                        if (null != transport) transport.stop();
+                        if (null != transport){
+                            transport.stop();
+                        }
                     }
                 }
             }
@@ -228,30 +262,36 @@ public class IgniteTopicService implements TopicService {
      * @param topic topic
      * @return
      */
+    @Override
     public void removeTopic(Topic topic) {
         TopicName topicName = topic.getName();
         try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
             List<PartitionGroup> partitionGroups = partitionGroupService.getByTopic(topicName);
             this.deleteById(topicName.getFullName());
             partitionGroupReplicaService.deleteByTopic(topicName);
-            if (null != partitionGroups) for (PartitionGroup group : partitionGroups) {
-                partitionGroupService.deleteById(((IgnitePartitionGroup) group).getId());
-                for (Integer brokerId : group.getReplicas()) {
-                    Broker broker = (Broker) brokerService.getById(brokerId);
-                    Transport transport = null;
-                    Command command = new Command(new JMQHeader(Direction.REQUEST, CommandType.NSR_REMOVE_PARTITIONGROUP), new RemovePartitionGroup(group));
-                    Command response = null;
-                    try {
-                        transport = transportClient.createTransport(new InetSocketAddress(broker.getIp(),
-                                broker.getBackEndPort()));
-                        response = transport.sync(command);
-                        logger.info("remove partitionGroup request[{}] response [{}]", command, response);
-                        if (JMQCode.SUCCESS.getCode() != ((JMQHeader) response.getHeader()).getStatus())
-                            throw new Exception(String.format("remove topic [%s] error ", topicName.getFullName(), response.getPayload()));
-                    } catch (Exception ignore) {
-                        logger.error("remove partitionGroup error request[{}] response [{}]", command, response, ignore);
-                    } finally {
-                        if (null != transport) transport.stop();
+            if (null != partitionGroups){
+                for (PartitionGroup group : partitionGroups) {
+                    partitionGroupService.deleteById(((IgnitePartitionGroup) group).getId());
+                    for (Integer brokerId : group.getReplicas()) {
+                        Broker broker = (Broker) brokerService.getById(brokerId);
+                        Transport transport = null;
+                        Command command = new Command(new JournalqHeader(Direction.REQUEST, CommandType.NSR_REMOVE_PARTITIONGROUP), new RemovePartitionGroup(group));
+                        Command response = null;
+                        try {
+                            transport = transportClient.createTransport(new InetSocketAddress(broker.getIp(),
+                                    broker.getBackEndPort()));
+                            response = transport.sync(command);
+                            logger.info("remove partitionGroup request[{}] response [{}]", command, response);
+                            if (JournalqCode.SUCCESS.getCode() != ((JournalqHeader) response.getHeader()).getStatus()) {
+                                throw new Exception(String.format("remove topic [%s] error ", topicName.getFullName(), response.getPayload()));
+                            }
+                        } catch (Exception ignore) {
+                            logger.error("remove partitionGroup error request[{}] response [{}]", command, response, ignore);
+                        } finally {
+                            if (null != transport){
+                                transport.stop();
+                            }
+                        }
                     }
                 }
             }
@@ -273,6 +313,7 @@ public class IgniteTopicService implements TopicService {
      * @param group
      * @return
      */
+    @Override
     public void addPartitionGroup(PartitionGroup group) {
         Command command = null;
         Transport transport = null;
@@ -292,16 +333,19 @@ public class IgniteTopicService implements TopicService {
                 try {
                     transport = transportClient.createTransport(new InetSocketAddress(broker.getIp(),
                             broker.getBackEndPort()));
-                    command = new Command(new JMQHeader(Direction.REQUEST, CommandType.NSR_CREATE_PARTITIONGROUP), new CreatePartitionGroup(group));
+                    command = new Command(new JournalqHeader(Direction.REQUEST, CommandType.NSR_CREATE_PARTITIONGROUP), new CreatePartitionGroup(group));
                     response = transport.sync(command);
                     logger.info("create partitionGroup request[{}] response [{}]", command, response);
-                    if (JMQCode.SUCCESS.getCode() != ((JMQHeader) response.getHeader()).getStatus())
+                    if (JournalqCode.SUCCESS.getCode() != ((JournalqHeader) response.getHeader()).getStatus()) {
                         throw new Exception(String.format("add topic [{}] error ", group.getTopic(), response));
+                    }
                 } catch (Exception e) {
                     logger.error("create partitionGroup error request[{}] response [{}]", command, response, e);
                     throw new Exception(String.format("add topic [{}] error ", group.getTopic(), e));
                 } finally {
-                    if (null != transport) transport.stop();
+                    if (null != transport){
+                        transport.stop();
+                    }
                 }
             }
             tx.commit();
@@ -313,13 +357,15 @@ public class IgniteTopicService implements TopicService {
                 try {
                     transport = transportClient.createTransport(new InetSocketAddress(broker.getIp(),
                             broker.getBackEndPort()));
-                    command = new Command(new JMQHeader(Direction.REQUEST, CommandType.NSR_CREATE_PARTITIONGROUP), new CreatePartitionGroup(group, true));
+                    command = new Command(new JournalqHeader(Direction.REQUEST, CommandType.NSR_CREATE_PARTITIONGROUP), new CreatePartitionGroup(group, true));
                     response = transport.sync(command);
                     logger.info("remove partitionGroup request[{}] response [{}]", command, response);
                 } catch (TransportException ignore) {
                     logger.error("remove partitionGroup error request[{}] response [{}]", command, response, ignore);
                 } finally {
-                    if (null != transport) transport.stop();
+                    if (null != transport){
+                        transport.stop();
+                    }
                 }
             }
             throw new RuntimeException("add topic error", e);
@@ -335,6 +381,7 @@ public class IgniteTopicService implements TopicService {
      * @param group
      * @return
      */
+    @Override
     public void removePartitionGroup(PartitionGroup group) {
         Command command = null;
         Transport transport = null;
@@ -355,19 +402,22 @@ public class IgniteTopicService implements TopicService {
             partitionGroupService.deleteById(topicName.getFullName() + IgniteBaseModel.SPLICE + group.getGroup());
             for (Integer brokerId : group.getReplicas()) {
                 Broker broker = brokerService.getById(brokerId);
-                command = new Command(new JMQHeader(Direction.REQUEST, CommandType.NSR_REMOVE_PARTITIONGROUP), new RemovePartitionGroup(group));
+                command = new Command(new JournalqHeader(Direction.REQUEST, CommandType.NSR_REMOVE_PARTITIONGROUP), new RemovePartitionGroup(group));
                 Command response = null;
                 try {
                     transport = transportClient.createTransport(new InetSocketAddress(broker.getIp(),
                             broker.getBackEndPort()));
                     response = transport.sync(command);
                         logger.info("remove partitionGroup request[{}] response [{}]", command.getPayload(), response.getPayload());
-                    if (JMQCode.SUCCESS.getCode() != ((JMQHeader) response.getHeader()).getStatus())
+                    if (JournalqCode.SUCCESS.getCode() != ((JournalqHeader) response.getHeader()).getStatus()) {
                         throw new Exception(String.format("remove topic [{}] error ", group.getTopic(), response.getPayload()));
+                    }
                 } catch (Exception e) {
                     logger.error("remove partitionGroup error request[{}] response [{}]", command, response, e);
                 } finally {
-                    if (null != transport) transport.stop();
+                    if (null != transport){
+                        transport.stop();
+                    }
                 }
             }
             tx.commit();
@@ -376,6 +426,7 @@ public class IgniteTopicService implements TopicService {
             throw new RuntimeException("add topic error", e);
         }
     }
+    @Override
     public void leaderChange(PartitionGroup group) {
         Command command = null;
         Transport transport = null;
@@ -394,17 +445,20 @@ public class IgniteTopicService implements TopicService {
             }
             Broker broker = brokerService.getById(group.getLeader());
             group.setLeader(leader);
-            command = new Command(new JMQHeader(Direction.REQUEST, CommandType.NSR_LEADERCHANAGE_PARTITIONGROUP), new UpdatePartitionGroup(group));
+            command = new Command(new JournalqHeader(Direction.REQUEST, CommandType.NSR_LEADERCHANAGE_PARTITIONGROUP), new UpdatePartitionGroup(group));
             Command response = null;
             try {
                 transport = transportClient.createTransport(new InetSocketAddress(broker.getIp(),
                         broker.getBackEndPort()));
                 response = transport.sync(command);
                 logger.info("leaderChange partitionGroup request[{}] response [{}]", command.getPayload(), response.getPayload());
-                if (JMQCode.SUCCESS.getCode() != ((JMQHeader) response.getHeader()).getStatus())
+                if (JournalqCode.SUCCESS.getCode() != ((JournalqHeader) response.getHeader()).getStatus()) {
                     throw new Exception(String.format("leaderChange  [{}] error [{}]", group));
+                }
             }  finally {
-                if (null != transport) transport.stop();
+                if (null != transport){
+                    transport.stop();
+                }
             }
         } catch (Exception e) {
             throw new RuntimeException("leaderChange partitionGroup error", e);
@@ -435,10 +489,6 @@ public class IgniteTopicService implements TopicService {
         List<Pair<Set<Integer>, Command>> rollbackCommands = new ArrayList<>();
         try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
             final PartitionGroup groupOld = partitionGroupService.getById(group.getTopic().getFullName() + IgniteBaseModel.SPLICE + group.getGroup());
-            if(null==group.getReplicas()||group.getReplicas().size()<1){
-                group.setLeader(-1);
-                group.setTerm(0);
-            }
             final PartitionGroup groupNew = group;
             groupNew.setLeader(groupOld.getLeader());
             groupNew.setIsrs(groupOld.getIsrs());
@@ -452,7 +502,7 @@ public class IgniteTopicService implements TopicService {
                 addOrUpdate(topic);
 
                 groupToUpdae.setPartitions(groupNew.getPartitions());
-                commands.add(new Pair(groupOld.getReplicas(), new Command(new JMQHeader(Direction.REQUEST, CommandType.NSR_UPDATE_PARTITIONGROUP), new UpdatePartitionGroup(groupToUpdae))));
+                commands.add(new Pair(groupOld.getReplicas(), new Command(new JournalqHeader(Direction.REQUEST, CommandType.NSR_UPDATE_PARTITIONGROUP), new UpdatePartitionGroup(groupToUpdae))));
             } else {
                 commands.add(null);
             }
@@ -465,15 +515,20 @@ public class IgniteTopicService implements TopicService {
             for (Integer brokerId : replicasAdd) {
                 groupToUpdae = groupToUpdae.clone();
                 groupToUpdae.getReplicas().add(brokerId);
-                commands.add(new Pair<>(brokerAddToNotice, new Command(new JMQHeader(Direction.REQUEST, CommandType.NSR_UPDATE_PARTITIONGROUP), new UpdatePartitionGroup(groupToUpdae))));
+                commands.add(new Pair<>(brokerAddToNotice, new Command(new JournalqHeader(Direction.REQUEST, CommandType.NSR_UPDATE_PARTITIONGROUP), new UpdatePartitionGroup(groupToUpdae))));
             }
             Set<Integer> brokerAddToRemove = new TreeSet<>(brokerAddToNotice);
             for (Integer brokerId : replicasRemove) {
                 groupToUpdae = groupToUpdae.clone();
                 groupToUpdae.getReplicas().remove(brokerId);
                 brokerAddToRemove = new TreeSet<>(brokerAddToRemove);
-                commands.add(new Pair<>(new TreeSet<>(brokerAddToRemove), new Command(new JMQHeader(Direction.REQUEST, CommandType.NSR_UPDATE_PARTITIONGROUP), new UpdatePartitionGroup(groupToUpdae))));
+                commands.add(new Pair<>(new TreeSet<>(brokerAddToRemove),
+                        new Command(new JournalqHeader(Direction.REQUEST, CommandType.NSR_UPDATE_PARTITIONGROUP), new UpdatePartitionGroup(groupToUpdae))));
                 brokerAddToRemove.remove(brokerId);
+            }
+            if(null==groupToUpdae.getReplicas()||groupToUpdae.getReplicas().size()<1){
+                group.setLeader(-1);
+                group.setTerm(0);
             }
             for (int i = 0; i < commands.size(); i++) {
                 Pair<Set<Integer>, Command> command = commands.get(i);
@@ -482,32 +537,42 @@ public class IgniteTopicService implements TopicService {
                 Command response = null;
                 if (null != command) {
                     for (Integer brokerId : command.getKey()) {
+                        if(group.getOutSyncReplicas().contains(brokerId)){
+                            continue;
+                        }
                         Broker broker = brokerService.getById(brokerId);
                         try {
                             transport = transportClient.createTransport(new InetSocketAddress(broker.getIp(),
                                     broker.getBackEndPort()));
                             response = transport.sync(command.getValue());
-                                logger.info("update partitionGroup broker[{}] request[{}] response [{}]", broker.getIp() + ":" + broker.getPort(), command.getValue().getPayload(), ((JMQHeader) response.getHeader()).getStatus());
-                            if (JMQCode.SUCCESS.getCode() != ((JMQHeader) response.getHeader()).getStatus()) {
-                                throw new Exception(String.format("update partitionGroup broker[%s] request[%s] response [%s]r ", broker.getIp() + ":" + broker.getBackEndPort(), group.getTopic(), response.getPayload()));
+                            logger.info("update partitionGroup broker[{}] request[{}] response [{}]",
+                                    broker.getIp() + ":" + broker.getPort(), command.getValue().getPayload(), response.getHeader().getStatus());
+                            if (JournalqCode.SUCCESS.getCode() != response.getHeader().getStatus()) {
+                                throw new Exception(String.format("update partitionGroup broker[%s] request[%s] response [%s]r ",
+                                        broker.getIp() + ":" + broker.getBackEndPort(), group.getTopic(), response.getPayload()));
                             }
                             updateCount++;
                             if (groupNew.getReplicas().contains(brokerId)) {
                                 partitionGroupReplicaService.addOrUpdate(new IgnitePartitionGroupReplica(group.getTopic(), brokerId, group.getGroup()));
                             }
                         } catch (Exception ignore) {
-                            logger.error(String.format("update partitionGroup error broker[%s] request[%s] response [%s]", broker.getIp() + ":" + broker.getBackEndPort(), command.getValue().getPayload(), response), ignore);
+                            logger.error(String.format("update partitionGroup error broker[%s] request[%s] response [%s]",
+                                    broker.getIp() + ":" + broker.getBackEndPort(), command.getValue().getPayload(), response),
+                                    ignore);
                         } finally {
-                            if (null != transport) transport.stop();
+                            if (null != transport) {
+                                transport.stop();
+                            }
                         }
                     }
                     rollbackCommands.add(command);
                     if (updateCount != command.getKey().size()) {
                         //第0个命令是repartitions命令,必须是全部成功
-                        if (i == 0)
+                        if (i == 0) {
                             throw new Exception(String.format("rePartitionGroup error topic[%s], rollback", group.getTopic()));
-                        else
+                        }else {
                             throw new Exception(String.format("upPartitionGroup error topic[%s], rollback", group.getTopic()));
+                        }
                     }
                 }
             }
@@ -529,13 +594,14 @@ public class IgniteTopicService implements TopicService {
                             transport = transportClient.createTransport(new InetSocketAddress(broker.getIp(),
                                     broker.getBackEndPort()));
                             response = transport.sync(command.getValue());
-                            if (logger.isDebugEnabled())
-                                logger.debug("remove partitionGroup request[{}] response [{}]", command, response);
+                            logger.info("remove partitionGroup request[{}] response [{}]", command, response);
                         }
                     } catch (Exception ignore) {
                         logger.error("update partitionGroup error request[{}] response [{}]", command, response, ignore);
                     } finally {
-                        if (null != transport) transport.stop();
+                        if (null != transport){
+                            transport.stop();
+                        }
                     }
                 }
             }
@@ -556,11 +622,14 @@ public class IgniteTopicService implements TopicService {
      *
      * @return
      */
+    @Override
     public List<PartitionGroup> getPartitionGroup(String namespace, String topic, Object[] groups) {
         List<PartitionGroup> list = new ArrayList<>();
         for (Object group : groups) {
             PartitionGroup partitionGroup = partitionGroupService.findByTopicAndGroup(new TopicName(topic, namespace), Integer.parseInt(group.toString()));
-            if (null != partitionGroup) list.add(partitionGroup);
+            if (null != partitionGroup){
+                list.add(partitionGroup);
+            }
         }
         return list;
     }

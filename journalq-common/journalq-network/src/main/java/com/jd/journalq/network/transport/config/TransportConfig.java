@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.network.transport.config;
 
 import com.jd.journalq.toolkit.network.IpUtil;
@@ -17,8 +30,10 @@ public class TransportConfig {
     private  String host = IpUtil.getLocalIp();
     // 接受请求线程数
     private  int acceptThread = 1;
+    private String acceptThreadName = "accept-eventLoop";
     // io线程数
     private  int ioThread = Runtime.getRuntime().availableProcessors();
+    private String ioThreadName = "io-eventLoop";
     // 通道最大空闲时间(毫秒)
     private  int maxIdleTime = 120 * 1000;
     // 表示是否允许重用Socket所绑定的本地地址
@@ -258,5 +273,21 @@ public class TransportConfig {
 
     public boolean isNonBlockOneway() {
         return nonBlockOneway;
+    }
+
+    public void setAcceptThreadName(String acceptThreadName) {
+        this.acceptThreadName = acceptThreadName;
+    }
+
+    public String getAcceptThreadName() {
+        return acceptThreadName;
+    }
+
+    public void setIoThreadName(String ioThreadName) {
+        this.ioThreadName = ioThreadName;
+    }
+
+    public String getIoThreadName() {
+        return ioThreadName;
     }
 }

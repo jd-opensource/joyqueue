@@ -1,10 +1,23 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.broker.consumer;
 
 import com.jd.journalq.broker.consumer.model.PullResult;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.network.session.Connection;
 import com.jd.journalq.network.session.Consumer;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.message.MessageLocation;
 
 /**
@@ -19,9 +32,9 @@ public interface Consume {
      * @param count      获取消息条数
      * @param ackTimeout 占用partition的超时时间，单位毫秒
      * @return
-     * @throws JMQException
+     * @throws JournalqException
      */
-    PullResult getMessage(Consumer consumer, int count, int ackTimeout) throws JMQException;
+    PullResult getMessage(Consumer consumer, int count, int ackTimeout) throws JournalqException;
 
     /**
      * 指定分区、消息序号、获取消息条数获取消息
@@ -31,9 +44,9 @@ public interface Consume {
      * @param index     默认值-1
      * @param count     获取消息条数
      * @return
-     * @throws JMQException
+     * @throws JournalqException
      */
-    PullResult getMessage(Consumer consumer, short partition, long index, int count) throws JMQException;
+    PullResult getMessage(Consumer consumer, short partition, long index, int count) throws JournalqException;
 
     /**
      * 应答消息，不包含重试消息
@@ -42,9 +55,9 @@ public interface Consume {
      * @param consumer     消费者
      * @param isSuccessAck 是否正常确认
      * @return 是否成功
-     * @throws JMQException
+     * @throws JournalqException
      */
-    boolean acknowledge(MessageLocation[] locations, Consumer consumer, Connection connection, boolean isSuccessAck) throws JMQException;
+    boolean acknowledge(MessageLocation[] locations, Consumer consumer, Connection connection, boolean isSuccessAck) throws JournalqException;
 
 
     /**
@@ -61,7 +74,7 @@ public interface Consume {
      * @param consumer 消费者
      * @param index    消息序号
      */
-    void setPullIndex(Consumer consumer, short partition, long index) throws JMQException;
+    void setPullIndex(Consumer consumer, short partition, long index) throws JournalqException;
 
     /**
      * 获取指定主题+应用+分区的拉取序号
@@ -78,7 +91,7 @@ public interface Consume {
      * @param consumer 消费者
      * @param index    消息序号
      */
-    void setAckIndex(Consumer consumer, short partition, long index);
+    void setAckIndex(Consumer consumer, short partition, long index) throws JournalqException;
 
     /**
      * 重置指定主题+应用+分区的应答序号（起始订阅位置）
@@ -86,7 +99,7 @@ public interface Consume {
      * @param consumer 消费者
      * @param index    消息序号
      */
-    void setStartAckIndex(Consumer consumer, short partition, long index);
+    void setStartAckIndex(Consumer consumer, short partition, long index) throws JournalqException;
 
     /**
      * 获取指定主题+应用+分区的应答序号
@@ -113,7 +126,7 @@ public interface Consume {
      * @param app   应用
      * @return
      */
-    boolean resetPullIndex(String topic, String app) throws JMQException;
+    boolean resetPullIndex(String topic, String app) throws JournalqException;
 
     /**
      * 保存消息位置
@@ -150,6 +163,23 @@ public interface Consume {
      */
     long getMaxIndex(Consumer consumer, short partition);
 
+    /**
+     * 获取最近一次拉取消息时间
+     *
+     * @param topic
+     * @param app
+     * @param partition
+     * @return
+     */
+    long getLastPullTimeByPartition(TopicName topic, String app, short partition);
 
+    /**
+     * 获取最近一次应答消息时间
+     * @param topic
+     * @param app
+     * @param partition
+     * @return
+     */
+    long getLastAckTimeByPartition(TopicName topic, String app, short partition);
 
 }

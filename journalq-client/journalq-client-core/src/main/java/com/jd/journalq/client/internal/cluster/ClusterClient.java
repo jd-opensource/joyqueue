@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.client.internal.cluster;
 
 import com.jd.journalq.client.internal.nameserver.NameServerConfig;
@@ -12,7 +25,7 @@ import com.jd.journalq.network.command.FetchClusterResponse;
 import com.jd.journalq.network.command.FindCoordinatorRequest;
 import com.jd.journalq.network.command.FindCoordinatorResponse;
 import com.jd.journalq.network.transport.command.Command;
-import com.jd.journalq.network.transport.command.JMQCommand;
+import com.jd.journalq.network.transport.command.JournalqCommand;
 
 import java.util.List;
 
@@ -53,7 +66,7 @@ public class ClusterClient {
         fetchAssignedPartitionRequest.setApp(app);
         fetchAssignedPartitionRequest.setData(data);
 
-        Command response = client.sync(new JMQCommand(fetchAssignedPartitionRequest));
+        Command response = client.sync(new JournalqCommand(fetchAssignedPartitionRequest));
         return (FetchAssignedPartitionResponse) response.getPayload();
     }
 
@@ -62,7 +75,7 @@ public class ClusterClient {
         findCoordinatorRequest.setTopics(topics);
         findCoordinatorRequest.setApp(app);
 
-        Command response = client.sync(new JMQCommand(findCoordinatorRequest));
+        Command response = client.sync(new JournalqCommand(findCoordinatorRequest));
         return (FindCoordinatorResponse) response.getPayload();
     }
 
@@ -71,7 +84,7 @@ public class ClusterClient {
         fetchClusterRequest.setTopics(topics);
         fetchClusterRequest.setApp(app);
 
-        Command response = client.sync(new JMQCommand(fetchClusterRequest));
+        Command response = client.sync(new JournalqCommand(fetchClusterRequest));
         return (FetchClusterResponse) response.getPayload();
     }
 

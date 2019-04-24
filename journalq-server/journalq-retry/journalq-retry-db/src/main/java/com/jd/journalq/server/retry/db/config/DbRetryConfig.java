@@ -1,6 +1,19 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.server.retry.db.config;
 
-import com.jd.journalq.exception.JMQConfigException;
+import com.jd.journalq.exception.JournalqConfigException;
 import com.jd.journalq.datasource.DataSourceConfig;
 import com.jd.journalq.toolkit.retry.RetryPolicy;
 import org.slf4j.Logger;
@@ -53,14 +66,14 @@ public class DbRetryConfig {
     // 写据源配置
     private static DataSourceConfig dsConfig;
     // 配置路径加名称
-    private static final String configFile = "laf-jmq.properties";
+    private static final String configFile = "journalq.properties";
 
     // 初始化数据源配置
     static {
         Properties properties = new Properties();
         InputStream inputStream = DbRetryConfig.class.getClassLoader().getResourceAsStream(configFile);
         if (null == inputStream) {
-            throw new JMQConfigException("cannot load laf.properties.");
+            throw new JournalqConfigException("cannot load laf.properties.");
         }
         try {
             properties.load(inputStream);
@@ -82,7 +95,7 @@ public class DbRetryConfig {
 
             dsConfig = writeDataSource;
         } catch (IOException e) {
-            throw new JMQConfigException("load and parse config error.", e);
+            throw new JournalqConfigException("load and parse config error.", e);
         }
 
         logger.info("Success init DbRetryConfig.");

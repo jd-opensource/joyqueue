@@ -1,7 +1,6 @@
 package com.jd.journalq.broker.coordinator.session;
 
 import com.jd.journalq.broker.coordinator.config.CoordinatorConfig;
-import com.jd.journalq.domain.Broker;
 import com.jd.journalq.network.transport.Transport;
 import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.transport.command.CommandCallback;

@@ -151,7 +151,7 @@
     <delete id="deleteAppUser">
         DELETE FROM `application_user`
         WHERE
-        application_id=#{app_id} AND user_id=#{userId}
+        app_id=#{appId} AND user_id=#{userId}
     </delete>
 
     <delete id="deleteAppUserById">
@@ -172,6 +172,14 @@
         FROM
         application_user au INNER JOIN `user` u ON au.user_id=u.id
         WHERE au.app_id=#{id}
+    </select>
+
+    <select id="findByAppCode" parameterType="String" resultMap="baseResultMap">
+        SELECT
+        <include refid="baseColumn"/>
+        FROM
+        application_user au INNER JOIN `user` u ON au.user_id=u.id
+        WHERE au.app_code=#{appCode}
     </select>
 
     <select id="findAppUserById" parameterType="long" resultMap="appUserMap">

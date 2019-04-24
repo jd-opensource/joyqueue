@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.broker.kafka.coordinator.group.domain;
 
 import com.google.common.collect.HashBasedTable;
@@ -5,7 +18,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
-import com.jd.journalq.broker.coordinator.group.domain.GroupMemberMetadata;
 import com.jd.journalq.broker.kafka.model.OffsetAndMetadata;
 import com.jd.journalq.toolkit.time.SystemClock;
 import org.apache.commons.collections.CollectionUtils;
@@ -174,8 +186,8 @@ public class GroupMetadata extends com.jd.journalq.broker.coordinator.group.doma
 
     public List<com.jd.journalq.broker.kafka.coordinator.group.domain.GroupMemberMetadata> getNotYetRejoinedMembers() {
         List<com.jd.journalq.broker.kafka.coordinator.group.domain.GroupMemberMetadata> result = Lists.newLinkedList();
-        for (Map.Entry<String, GroupMemberMetadata> entry : getMembers().entrySet()) {
-            com.jd.journalq.broker.kafka.coordinator.group.domain.GroupMemberMetadata member = (com.jd.journalq.broker.kafka.coordinator.group.domain.GroupMemberMetadata) entry.getValue();
+        for (Map.Entry<String, com.jd.journalq.broker.coordinator.group.domain.GroupMemberMetadata> entry : getMembers().entrySet()) {
+            GroupMemberMetadata member = (GroupMemberMetadata) entry.getValue();
             if (member.getAwaitingJoinCallback() == null) {
                 result.add(member);
             }
@@ -188,13 +200,13 @@ public class GroupMetadata extends com.jd.journalq.broker.coordinator.group.doma
     }
 
     public List<com.jd.journalq.broker.kafka.coordinator.group.domain.GroupMemberMetadata> getAllMembers() {
-        ConcurrentMap<String, GroupMemberMetadata> members = getMembers();
+        ConcurrentMap<String, com.jd.journalq.broker.coordinator.group.domain.GroupMemberMetadata> members = getMembers();
         if (MapUtils.isEmpty(members)) {
             return Collections.emptyList();
         }
         List<com.jd.journalq.broker.kafka.coordinator.group.domain.GroupMemberMetadata> result = Lists.newArrayListWithExpectedSize(members.size());
-        for (Map.Entry<String, GroupMemberMetadata> entry : members.entrySet()) {
-            result.add((com.jd.journalq.broker.kafka.coordinator.group.domain.GroupMemberMetadata) entry.getValue());
+        for (Map.Entry<String, com.jd.journalq.broker.coordinator.group.domain.GroupMemberMetadata> entry : members.entrySet()) {
+            result.add((GroupMemberMetadata) entry.getValue());
         }
         return result;
     }
@@ -204,8 +216,8 @@ public class GroupMetadata extends com.jd.journalq.broker.coordinator.group.doma
             return 0;
         }
         int result = 0;
-        for (Map.Entry<String, GroupMemberMetadata> entry : getMembers().entrySet()) {
-            result = Math.max(((com.jd.journalq.broker.kafka.coordinator.group.domain.GroupMemberMetadata) entry.getValue()).getRebalanceTimeoutMs(), result);
+        for (Map.Entry<String, com.jd.journalq.broker.coordinator.group.domain.GroupMemberMetadata> entry : getMembers().entrySet()) {
+            result = Math.max(((GroupMemberMetadata) entry.getValue()).getRebalanceTimeoutMs(), result);
         }
         return result;
     }
@@ -223,7 +235,8 @@ public class GroupMetadata extends com.jd.journalq.broker.coordinator.group.doma
 
     @Override
     public String getExtension() {
-        return String.format("{state: '%s', preState: '%s', preStateTimestamp: %s, leader: '%s', generationId: '%s', protocol: '%s'}", state, preState, preStateTimestamp, leaderId, generationId, protocol);
+        return String.format("{state: '%s', preState: '%s', preStateTimestamp: %s, leader: '%s', generationId: '%s', protocol: '%s'}",
+                state, preState, preStateTimestamp, leaderId, generationId, protocol);
     }
 
     public String selectProtocol() {
@@ -306,9 +319,9 @@ public class GroupMetadata extends com.jd.journalq.broker.coordinator.group.doma
             throw new IllegalStateException("Cannot obtain member metadata for group in state " + state.toString());
         }
         Map<String, byte[]> memeberMeta = Maps.newHashMap();
-        Iterator<Map.Entry<String, GroupMemberMetadata>> iterator = getMembers().entrySet().iterator();
+        Iterator<Map.Entry<String, com.jd.journalq.broker.coordinator.group.domain.GroupMemberMetadata>> iterator = getMembers().entrySet().iterator();
         while (iterator.hasNext()) {
-            Map.Entry<String, GroupMemberMetadata> entry = iterator.next();
+            Map.Entry<String, com.jd.journalq.broker.coordinator.group.domain.GroupMemberMetadata> entry = iterator.next();
             String memberId = entry.getKey();
             com.jd.journalq.broker.kafka.coordinator.group.domain.GroupMemberMetadata memberMetadata = (com.jd.journalq.broker.kafka.coordinator.group.domain.GroupMemberMetadata) entry.getValue();
             byte[] metadata = memberMetadata.metadata(protocol);

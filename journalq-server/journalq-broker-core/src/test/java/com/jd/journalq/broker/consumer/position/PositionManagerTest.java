@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.broker.consumer.position;
 
 import com.google.common.collect.Lists;
@@ -7,7 +20,7 @@ import com.jd.journalq.broker.consumer.ConsumeConfig;
 import com.jd.journalq.broker.consumer.position.model.Position;
 import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.domain.TopicName;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.store.PartitionGroupStore;
 import com.jd.journalq.store.StoreService;
 import org.junit.Assert;
@@ -66,14 +79,14 @@ public class PositionManagerTest {
 
 
     @Test
-    public void getLastMsgAckIndex() throws JMQException {
+    public void getLastMsgAckIndex() throws JournalqException {
         addConsumer();
         long lastMsgAckIndex = positionManager.getLastMsgAckIndex(new TopicName("topic"), "app", partition);
         Assert.assertEquals(0, lastMsgAckIndex);
     }
 
     @Test
-    public void updateLastMsgAckIndex() {
+    public void updateLastMsgAckIndex() throws JournalqException {
         addConsumer();
         boolean b = positionManager.updateLastMsgAckIndex(topic, app, partition, 10);
         Assert.assertEquals(true, b);
@@ -83,7 +96,7 @@ public class PositionManagerTest {
     }
 
     @Test
-    public void updateStartMsgAckIndex() {
+    public void updateStartMsgAckIndex() throws JournalqException {
         addConsumer();
         boolean b = positionManager.updateStartMsgAckIndex(topic, app, partition, 10);
         Assert.assertEquals(true, b);
@@ -93,14 +106,14 @@ public class PositionManagerTest {
     }
 
     @Test
-    public void getLastMsgPullIndex() throws JMQException {
+    public void getLastMsgPullIndex() throws JournalqException {
         addConsumer();
         long lastMsgAckIndex = positionManager.getLastMsgAckIndex(topic, app, partition);
         Assert.assertEquals(0, lastMsgAckIndex);
     }
 
     @Test
-    public void updateLastMsgPullIndex() throws JMQException {
+    public void updateLastMsgPullIndex() throws JournalqException {
         addConsumer();
         boolean b = positionManager.updateLastMsgPullIndex(topic, app, partition, 10);
         Assert.assertEquals(true, b);
@@ -110,7 +123,7 @@ public class PositionManagerTest {
     }
 
     @Test
-    public void increaseMsgPullIndex() throws JMQException {
+    public void increaseMsgPullIndex() throws JournalqException {
         addConsumer();
         boolean b = positionManager.increaseMsgPullIndex(topic, app, partition, 10);
         Assert.assertEquals(true, b);

@@ -7,7 +7,7 @@ import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionCoordinat
 import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionIdManager;
 import com.jd.journalq.broker.producer.Produce;
 import com.jd.journalq.domain.QosLevel;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.message.BrokerMessage;
 import com.jd.journalq.message.BrokerPrepare;
 import com.jd.journalq.message.SourceType;
@@ -48,10 +48,10 @@ public class TransactionProduceHandler {
             fillTxId(messages, transaction.getTxId());
 
             produce.putMessageAsync(producer, messages, qosLevel, (writeResult) -> {
-                if (!writeResult.getCode().equals(JMQCode.SUCCESS)) {
+                if (!writeResult.getCode().equals(JournalqCode.SUCCESS)) {
                     logger.error("produce message failed, topic: {}, code: {}", producer.getTopic(), writeResult.getCode());
                 }
-                short code = KafkaErrorCode.jmqCodeFor(writeResult.getCode().getCode());
+                short code = KafkaErrorCode.journalqCodeFor(writeResult.getCode().getCode());
                 listener.onEvent(new ProduceResponse.PartitionResponse(0, ProduceResponse.PartitionResponse.NONE_OFFSET, code));
             });
         } catch (Exception e) {
