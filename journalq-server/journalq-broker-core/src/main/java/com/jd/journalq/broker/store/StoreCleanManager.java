@@ -172,8 +172,8 @@ public class StoreCleanManager extends Service {
                         }
                 );
             }
-        } catch (Exception e) {
-            LOG.error("Error on clean store for broker, exception: {}", e);
+        } catch (Throwable t) {
+            LOG.error("Error on clean store for broker, exception: {}", t);
         }
     }
 }
