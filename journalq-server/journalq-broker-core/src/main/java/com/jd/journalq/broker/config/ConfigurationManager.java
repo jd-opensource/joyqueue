@@ -146,8 +146,7 @@ public class ConfigurationManager extends Service implements EventListener<NameS
     private void doUpdateProperty(Config... configs) {
         if (configs != null) {
             for (Config config : configs) {
-                logger.info("received config [{}]", config);
-                logger.info("corresponding property is [{}]", configuration.getProperty(config.getKey()) != null ? configuration.getProperty(config.getKey()) : "null");
+                logger.info("received config [{}], corresponding property is [{}]", config,configuration.getProperty(config.getKey()) != null ? configuration.getProperty(config.getKey()) : "null");
                 configuration.addProperty(config.getKey(), config.getValue());
             }
         }
