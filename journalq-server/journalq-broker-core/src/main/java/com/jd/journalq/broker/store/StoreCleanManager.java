@@ -123,53 +123,57 @@ public class StoreCleanManager extends Service {
 
     private void clean() {
         LOG.info("start scheduled StoreCleaningStrategy task use class: <{}>!!!", brokerStoreConfig.getCleanStrategyClass());
-        List<TopicConfig> topicConfigs = clusterManager.getTopics();
-        if (topicConfigs != null && topicConfigs.size() > 0) {
-            topicConfigs.forEach(
-                    topicConfig -> {
-                        List<PartitionGroup> partitionGroups = clusterManager.getTopicPartitionGroups(topicConfig.getName());
-                        if (CollectionUtils.isNotEmpty(partitionGroups)) {
-                            partitionGroups.forEach(
-                                    partitionGroup -> {
-                                        Set<Short> partitions = partitionGroup.getPartitions();
-                                        if (CollectionUtils.isNotEmpty(partitions)) {
-                                            List<String> appList = clusterManager.getAppByTopic(topicConfig.getName());
-                                            Map<Short, Long> partitionAckMap = new HashMap<>(partitions.size());
-                                            partitions.forEach(
-                                                    partition -> {
-                                                        long minAckIndex = Long.MAX_VALUE;
-                                                        if (CollectionUtils.isNotEmpty(appList)) {
-                                                            for (String app : appList) {
-                                                                try {
-                                                                    minAckIndex = Math.min(minAckIndex, positionManager.getLastMsgAckIndex(topicConfig.getName(), app, partition));
-                                                                } catch (JournalqException e) {
-                                                                    //minAckIndex = Long.MAX_VALUE;
-                                                                    LOG.error("Error to get last topic & app offset, topic <{}>, app <{}>, partitionGroup <{}>, partition <{}>, error: <{}>",
-                                                                            topicConfig.getName(), app, partitionGroup.getGroup(), partition, e);
+        try {
+            List<TopicConfig> topicConfigs = clusterManager.getTopics();
+            if (topicConfigs != null && topicConfigs.size() > 0) {
+                topicConfigs.forEach(
+                        topicConfig -> {
+                            List<PartitionGroup> partitionGroups = clusterManager.getTopicPartitionGroups(topicConfig.getName());
+                            if (CollectionUtils.isNotEmpty(partitionGroups)) {
+                                partitionGroups.forEach(
+                                        partitionGroup -> {
+                                            Set<Short> partitions = partitionGroup.getPartitions();
+                                            if (CollectionUtils.isNotEmpty(partitions)) {
+                                                List<String> appList = clusterManager.getAppByTopic(topicConfig.getName());
+                                                Map<Short, Long> partitionAckMap = new HashMap<>(partitions.size());
+                                                partitions.forEach(
+                                                        partition -> {
+                                                            long minAckIndex = Long.MAX_VALUE;
+                                                            if (CollectionUtils.isNotEmpty(appList)) {
+                                                                for (String app : appList) {
+                                                                    try {
+                                                                        minAckIndex = Math.min(minAckIndex, positionManager.getLastMsgAckIndex(topicConfig.getName(), app, partition));
+                                                                    } catch (JournalqException e) {
+                                                                        //minAckIndex = Long.MAX_VALUE;
+                                                                        LOG.error("Error to get last topic & app offset, topic <{}>, app <{}>, partitionGroup <{}>, partition <{}>, error: <{}>",
+                                                                                topicConfig.getName(), app, partitionGroup.getGroup(), partition, e);
+                                                                    }
                                                                 }
                                                             }
+                                                            partitionAckMap.put(partition, minAckIndex);
                                                         }
-                                                        partitionAckMap.put(partition, minAckIndex);
+                                                );
+                                                StoreCleaningStrategy cleaningStrategy = null;
+                                                try {
+                                                    cleaningStrategy = cleaningStrategyMap.get(brokerStoreConfig.getCleanStrategyClass());
+                                                    if (cleaningStrategy != null) {
+                                                        LOG.info("Begin store clean topic: <{}>, partition group: <{}>, partition ack map: <{}>",
+                                                                topicConfig.getName().getFullName(), partitionGroup.getGroup(), partitionAckMap);
+                                                        cleaningStrategy.deleteIfNeeded(storeService.getStore(topicConfig.getName().getFullName(), partitionGroup.getGroup()), partitionAckMap);
                                                     }
-                                            );
-                                            StoreCleaningStrategy cleaningStrategy = null;
-                                            try {
-                                                cleaningStrategy = cleaningStrategyMap.get(brokerStoreConfig.getCleanStrategyClass());
-                                                if (cleaningStrategy != null) {
-                                                    LOG.info("Begin store clean topic: <{}>, partition group: <{}>, partition ack map: <{}>",
-                                                            topicConfig.getName().getFullName(), partitionGroup.getGroup(), partitionAckMap);
-                                                    cleaningStrategy.deleteIfNeeded(storeService.getStore(topicConfig.getName().getFullName(), partitionGroup.getGroup()), partitionAckMap);
+                                                } catch (IOException e) {
+                                                    LOG.error("Error to clean store for topic <{}>, partition group <{}>, delete partitions index <{}> on clean class <{}>, exception: <{}>",
+                                                            topicConfig, partitionGroup.getGroup(), partitionAckMap, cleaningStrategy, e);
                                                 }
-                                            } catch (IOException e) {
-                                                LOG.error("Error to clean store for topic <{}>, partition group <{}>, delete partitions index <{}> on clean class <{}>, exception: <{}>",
-                                                        topicConfig, partitionGroup.getGroup(), partitionAckMap, cleaningStrategy, e);
                                             }
                                         }
-                                    }
-                            );
+                                );
+                            }
                         }
-                    }
-            );
+                );
+            }
+        } catch (Exception e) {
+            LOG.error("Error on clean store for broker, exception: {}", e);
         }
     }
 }
