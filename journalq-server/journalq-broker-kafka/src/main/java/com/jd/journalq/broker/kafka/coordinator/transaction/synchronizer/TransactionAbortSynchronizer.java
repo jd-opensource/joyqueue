@@ -1,9 +1,10 @@
-package com.jd.journalq.broker.kafka.coordinator.transaction;
+package com.jd.journalq.broker.kafka.coordinator.transaction.synchronizer;
 
 import com.google.common.collect.Lists;
 import com.jd.journalq.broker.coordinator.session.CoordinatorSession;
 import com.jd.journalq.broker.coordinator.session.CoordinatorSessionManager;
 import com.jd.journalq.broker.kafka.config.KafkaConfig;
+import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionIdManager;
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionMetadata;
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionPrepare;
 import com.jd.journalq.broker.kafka.coordinator.transaction.helper.TransactionHelper;
@@ -66,9 +67,8 @@ public class TransactionAbortSynchronizer extends Service {
                 public void onSuccess(Command request, Command response) {
                     if (response.getHeader().getStatus() != JournalqCode.SUCCESS.getCode() &&
                             response.getHeader().getStatus() != JournalqCode.CN_TRANSACTION_NOT_EXISTS.getCode()) {
-                        result[0] = false;
-                    } else {
                         logger.error("abort transaction error, broker: {}, request: {}", broker, transactionRollbackRequest);
+                        result[0] = false;
                     }
 
                     latch.countDown();

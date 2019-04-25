@@ -113,20 +113,20 @@ public class TempMetadataInitializer extends Service {
             addTopic(TOPIC + "_" + i);
         }
 
-        addTopic("test_broadcast_topic", Topic.Type.BROADCAST);
-        addTopic("test_nearby_topic");
-
-        addTopic("test_consume_1");
-        addTopic("test_consume_broadcast_1", Topic.Type.BROADCAST);
-
-        addTopic("test_produce_1");
-        addTopic("test_produce_transaction_1");
-        addTopic("test_produce_broadcast_1", Topic.Type.BROADCAST);
-
-        addTopic("test_produce_nearby_1");
-
-        addTopic("test_produceconsume_1");
-        addTopic("test_produceconsume_broadcast_1", Topic.Type.BROADCAST);
+//        addTopic("test_broadcast_topic", Topic.Type.BROADCAST);
+//        addTopic("test_nearby_topic");
+//
+//        addTopic("test_consume_1");
+//        addTopic("test_consume_broadcast_1", Topic.Type.BROADCAST);
+//
+//        addTopic("test_produce_1");
+//        addTopic("test_produce_transaction_1");
+//        addTopic("test_produce_broadcast_1", Topic.Type.BROADCAST);
+//
+//        addTopic("test_produce_nearby_1");
+//
+//        addTopic("test_produceconsume_1");
+//        addTopic("test_produceconsume_broadcast_1", Topic.Type.BROADCAST);
     }
 
     protected void initToken() {

@@ -50,7 +50,7 @@ public class AddPartitionsToTxnRequestHandler implements KafkaCommandHandler, Ty
                     addPartitionsToTxnRequest.getProducerId(), addPartitionsToTxnRequest.getProducerEpoch(), addPartitionsToTxnRequest.getPartitions());
             response = new AddPartitionsToTxnResponse(errors);
         } catch (TransactionException e) {
-            logger.warn("add partitions to txn exception, code: {}, message: {}, request: {}", e.getCode(), e.getMessage(), addPartitionsToTxnRequest, e);
+            logger.warn("add partitions to txn exception, code: {}, message: {}, request: {}, code: {}", e.getCode(), e.getMessage(), addPartitionsToTxnRequest, e.getCode());
             response = new AddPartitionsToTxnResponse(buildPartitionError(e.getCode(), addPartitionsToTxnRequest.getPartitions()));
         } catch (Exception e) {
             logger.error("add partitions to txn exception, request: {}", addPartitionsToTxnRequest, e);

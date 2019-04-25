@@ -1,7 +1,9 @@
-package com.jd.journalq.broker.kafka.coordinator.transaction;
+package com.jd.journalq.broker.kafka.coordinator.transaction.synchronizer;
 
 import com.jd.journalq.broker.coordinator.session.CoordinatorSessionManager;
 import com.jd.journalq.broker.kafka.config.KafkaConfig;
+import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionIdManager;
+import com.jd.journalq.broker.kafka.coordinator.transaction.log.TransactionLog;
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionMarker;
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionMetadata;
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionOffset;
@@ -22,8 +24,6 @@ import java.util.Set;
  * email: gaohaoxiang@jd.com
  * date: 2019/4/12
  */
-// TODO 补充日志
-// TODO 事务日志写入失败处理
 public class TransactionSynchronizer extends Service {
 
     protected static final Logger logger = LoggerFactory.getLogger(TransactionSynchronizer.class);
@@ -67,20 +67,20 @@ public class TransactionSynchronizer extends Service {
         }
     }
 
-    public boolean prepare(TransactionMetadata transactionMetadata, Set<TransactionPrepare> prepareList) throws Exception {
-        return transactionLog.batchWrite(transactionMetadata.getApp(), transactionMetadata.getId(), prepareList);
+    public boolean prepare(TransactionMetadata transactionMetadata, Set<TransactionPrepare> prepare) throws Exception {
+        return transactionLog.batchWrite(transactionMetadata.getApp(), transactionMetadata.getId(), prepare);
     }
 
-    public boolean prepareCommit(TransactionMetadata transactionMetadata, Set<TransactionPrepare> prepareList) throws Exception {
+    public boolean prepareCommit(TransactionMetadata transactionMetadata, Set<TransactionPrepare> prepare) throws Exception {
         return writeMarker(transactionMetadata, TransactionState.PREPARE_COMMIT);
     }
 
-    public boolean commit(TransactionMetadata transactionMetadata, Set<TransactionPrepare> prepareList, Set<TransactionOffset> offsets) throws Exception {
+    public boolean commit(TransactionMetadata transactionMetadata, Set<TransactionPrepare> prepare, Set<TransactionOffset> offsets) throws Exception {
         boolean isSuccess = true;
-        if (CollectionUtils.isNotEmpty(prepareList)) {
-            isSuccess = transactionCommitSynchronizer.commitPrepare(transactionMetadata, prepareList);
+        if (CollectionUtils.isNotEmpty(prepare)) {
+            isSuccess = transactionCommitSynchronizer.commitPrepare(transactionMetadata, prepare);
         }
-        if (CollectionUtils.isNotEmpty(offsets)) {
+        if (isSuccess && CollectionUtils.isNotEmpty(offsets)) {
             isSuccess = transactionCommitSynchronizer.commitOffsets(transactionMetadata, offsets);
         }
         if (isSuccess) {
@@ -89,16 +89,13 @@ public class TransactionSynchronizer extends Service {
         return isSuccess;
     }
 
-    public boolean prepareAbort(TransactionMetadata transactionMetadata, Set<TransactionPrepare> prepareList) throws Exception {
+    public boolean prepareAbort(TransactionMetadata transactionMetadata, Set<TransactionPrepare> prepare) throws Exception {
         return writeMarker(transactionMetadata, TransactionState.PREPARE_ABORT);
     }
 
-    public boolean abort(TransactionMetadata transactionMetadata, Set<TransactionPrepare> prepareList) throws Exception {
-        boolean isSuccess = transactionAbortSynchronizer.abort(transactionMetadata, prepareList);
-        if (isSuccess) {
-            writeMarker(transactionMetadata, TransactionState.COMPLETE_ABORT);
-        }
-        return isSuccess;
+    public boolean abort(TransactionMetadata transactionMetadata, Set<TransactionPrepare> prepare) throws Exception {
+        return transactionAbortSynchronizer.abort(transactionMetadata, prepare) &&
+                writeMarker(transactionMetadata, TransactionState.COMPLETE_ABORT);
     }
 
     public boolean commitOffset(TransactionMetadata transactionMetadata, Set<TransactionOffset> offsets) throws Exception {

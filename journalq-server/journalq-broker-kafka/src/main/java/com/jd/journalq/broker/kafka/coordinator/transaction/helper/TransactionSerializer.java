@@ -1,4 +1,4 @@
-package com.jd.journalq.broker.kafka.coordinator.transaction;
+package com.jd.journalq.broker.kafka.coordinator.transaction.helper;
 
 import com.google.common.base.Charsets;
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionDomain;

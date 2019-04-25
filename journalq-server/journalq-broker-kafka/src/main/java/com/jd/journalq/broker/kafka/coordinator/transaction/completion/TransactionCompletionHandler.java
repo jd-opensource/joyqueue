@@ -1,26 +1,19 @@
 package com.jd.journalq.broker.kafka.coordinator.transaction.completion;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.jd.journalq.broker.kafka.config.KafkaConfig;
 import com.jd.journalq.broker.kafka.coordinator.Coordinator;
-import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionLog;
-import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionSynchronizer;
-import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionDomain;
-import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionMarker;
-import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionOffset;
-import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionPrepare;
-import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionState;
-import com.jd.journalq.broker.kafka.coordinator.transaction.domain.UnCompletedTransaction;
+import com.jd.journalq.broker.kafka.coordinator.transaction.log.TransactionLog;
+import com.jd.journalq.broker.kafka.coordinator.transaction.log.TransactionLogSegment;
+import com.jd.journalq.broker.kafka.coordinator.transaction.synchronizer.TransactionSynchronizer;
 import com.jd.journalq.toolkit.service.Service;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * TransactionCompletionHandler
@@ -28,8 +21,6 @@ import java.util.Map;
  * email: gaohaoxiang@jd.com
  * date: 2019/4/19
  */
-// TODO 补充日志
-// TODO 协调者变化处理
 public class TransactionCompletionHandler extends Service {
 
     protected static final Logger logger = LoggerFactory.getLogger(TransactionCompletionHandler.class);
@@ -39,13 +30,7 @@ public class TransactionCompletionHandler extends Service {
     private TransactionLog transactionLog;
     private TransactionSynchronizer transactionSynchronizer;
 
-    private final Map<String, UnCompletedTransaction> unCompletedTransactionMap = Maps.newLinkedHashMap();
-    private final List<UnCompletedTransaction> retryUnCompletedTransactionList = Lists.newLinkedList();
-    private Map<Long, UnCompletedTransaction> unCompletedTransactionSortedMap;
-    private long lastTime = 0;
-    private long startIndex = 0;
-    private long currentIndex = 0;
-    private long committedIndex = 0;
+    private Map<Short, TransactionSegmentCompletionHandler> handlerMap = Maps.newHashMap();
 
     public TransactionCompletionHandler(KafkaConfig config, Coordinator coordinator, TransactionLog transactionLog, TransactionSynchronizer transactionSynchronizer) {
         this.config = config;
@@ -54,264 +39,35 @@ public class TransactionCompletionHandler extends Service {
         this.transactionSynchronizer = transactionSynchronizer;
     }
 
-    @Override
-    protected void validate() throws Exception {
-        this.currentIndex = transactionLog.getIndex();
-        this.startIndex = currentIndex;
-        this.committedIndex = currentIndex;
-        this.unCompletedTransactionSortedMap = Maps.newLinkedHashMapWithExpectedSize(config.getTransactionLogScanSize());
-    }
-
     public void handle() {
         try {
-            handleRetryTransactions();
-            handleUnCompleteTransactions();
-            commitUnCompleteTransactionIndex();
+            Set<Short> partitions = Sets.newHashSet(transactionLog.getPartitions());
+
+            Iterator<Map.Entry<Short, TransactionSegmentCompletionHandler>> handlerIterator = handlerMap.entrySet().iterator();
+            while (handlerIterator.hasNext()) {
+                Map.Entry<Short, TransactionSegmentCompletionHandler> entry = handlerIterator.next();
+                if (!partitions.contains(entry.getKey())) {
+                    handlerIterator.remove();
+                    transactionLog.removeSegment(entry.getKey());
+                }
+            }
+
+            for (Short partition : partitions) {
+                if (handlerMap.containsKey(partition)) {
+                    continue;
+                }
+                TransactionLogSegment transactionLogSegment = transactionLog.getSegment(partition);
+                if (transactionLogSegment == null) {
+                    continue;
+                }
+                handlerMap.put(partition, new TransactionSegmentCompletionHandler(config, coordinator, transactionLogSegment, transactionSynchronizer));
+            }
+
+            for (Map.Entry<Short, TransactionSegmentCompletionHandler> entry : handlerMap.entrySet()) {
+                entry.getValue().handle();
+            }
         } catch (Exception e) {
             logger.error("transaction compensate exception", e);
         }
-    }
-
-    protected List<TransactionDomain> readTransactions() throws Exception {
-        List<TransactionDomain> transactionDomains = transactionLog.read(currentIndex, config.getTransactionLogScanSize());
-        if (CollectionUtils.isEmpty(transactionDomains)) {
-            return Collections.emptyList();
-        }
-        return transactionDomains;
-    }
-
-    protected List<TransactionDomain> prepareTransactionDomains(List<TransactionDomain> transactionDomains) {
-        List<TransactionDomain> result = Lists.newLinkedList();
-        for (int i = 0; i < transactionDomains.size(); i++) {
-            long currentIndex = this.currentIndex + i;
-            TransactionDomain transactionDomain = transactionDomains.get(i);
-            UnCompletedTransaction unCompletedTransaction = null;
-
-            if (transactionDomain instanceof TransactionPrepare) {
-                unCompletedTransaction = handlePrepare((TransactionPrepare) transactionDomain, currentIndex);
-            } else if (transactionDomain instanceof TransactionOffset) {
-                unCompletedTransaction = handleOffset((TransactionOffset) transactionDomain, currentIndex);
-            } else if (transactionDomain instanceof TransactionMarker) {
-                unCompletedTransaction = handleMarker((TransactionMarker) transactionDomain, currentIndex);
-            } else {
-                logger.warn("unsupported transaction domain, type: {}", transactionDomain);
-            }
-
-            if (unCompletedTransaction == null) {
-                break;
-            }
-
-            lastTime = unCompletedTransaction.getCreateTime();
-            unCompletedTransactionSortedMap.put(currentIndex, unCompletedTransaction);
-            result.add(transactionDomain);
-        }
-        return result;
-    }
-
-    protected UnCompletedTransaction handlePrepare(TransactionPrepare transactionPrepare, long index) {
-        String key = generateKey(transactionPrepare.getApp(), transactionPrepare.getTransactionId(), transactionPrepare.getProducerId(), transactionPrepare.getProducerEpoch());
-        UnCompletedTransaction unCompletedTransaction = unCompletedTransactionMap.get(key);
-        if (unCompletedTransaction == null) {
-            unCompletedTransaction = new UnCompletedTransaction();
-            unCompletedTransaction.setStartIndex(index);
-            unCompletedTransaction.setId(transactionPrepare.getTransactionId());
-            unCompletedTransaction.setApp(transactionPrepare.getApp());
-            unCompletedTransaction.setProducerId(transactionPrepare.getProducerId());
-            unCompletedTransaction.setProducerEpoch(transactionPrepare.getProducerEpoch());
-            unCompletedTransaction.setTimeout(transactionPrepare.getTimeout());
-            unCompletedTransaction.setCreateTime(transactionPrepare.getCreateTime());
-            unCompletedTransactionMap.put(key, unCompletedTransaction);
-        }
-        if (unCompletedTransaction.isCompleted()) {
-            return null;
-        }
-
-        unCompletedTransaction.setLastTime(transactionPrepare.getCreateTime());
-        unCompletedTransaction.setEndIndex(index);
-        unCompletedTransaction.addPrepare(transactionPrepare);
-        unCompletedTransaction.setState(TransactionState.ONGOING);
-        return unCompletedTransaction;
-    }
-
-    protected UnCompletedTransaction handleOffset(TransactionOffset transactionOffset, long index) {
-        String key = generateKey(transactionOffset.getApp(), transactionOffset.getTransactionId(), transactionOffset.getProducerId(), transactionOffset.getProducerEpoch());
-        UnCompletedTransaction unCompletedTransaction = unCompletedTransactionMap.get(key);
-        if (unCompletedTransaction == null) {
-            return null;
-        }
-        if (unCompletedTransaction.isCompleted()) {
-            return null;
-        }
-
-        unCompletedTransaction.setEndIndex(index);
-        unCompletedTransaction.addOffset(transactionOffset);
-        unCompletedTransaction.setLastTime(transactionOffset.getCreateTime());
-        return unCompletedTransaction;
-    }
-
-    protected UnCompletedTransaction handleMarker(TransactionMarker transactionMarker, long index) {
-        String key = generateKey(transactionMarker.getApp(), transactionMarker.getTransactionId(), transactionMarker.getProducerId(), transactionMarker.getProducerEpoch());
-        UnCompletedTransaction unCompletedTransaction = unCompletedTransactionMap.get(key);
-        if (unCompletedTransaction == null) {
-            return null;
-        }
-        if (unCompletedTransaction.isCompleted()) {
-            return null;
-        }
-
-        unCompletedTransaction.setEndIndex(index);
-        unCompletedTransaction.setState(transactionMarker.getState());
-        unCompletedTransaction.setLastTime(transactionMarker.getCreateTime());
-        return unCompletedTransaction;
-    }
-
-    protected void handleUnCompleteTransactions() throws Exception {
-        List<TransactionDomain> transactionDomains = readTransactions();
-        if (CollectionUtils.isEmpty(transactionDomains)) {
-            return;
-        }
-        transactionDomains = prepareTransactionDomains(transactionDomains);
-        handleUnCompleteTransactions(transactionDomains);
-    }
-
-    protected void handleUnCompleteTransactions(List<TransactionDomain> transactionDomains) {
-        for (int i = 0; i < transactionDomains.size(); i++) {
-            long currentIndex = this.currentIndex + i;
-            UnCompletedTransaction unCompletedTransaction = unCompletedTransactionSortedMap.get(currentIndex);
-            if (unCompletedTransaction == null) {
-                continue;
-            }
-            if (unCompletedTransaction.isExpired(lastTime, unCompletedTransaction.getTimeout())) {
-                // prepare补偿
-                if (unCompletedTransaction.isPrepared()) {
-                    retryUnCompletedTransactionList.add(unCompletedTransaction);
-                } else {
-                    // 跳过超时
-                    logger.info("事务超时, txId: {}, index: {}", unCompletedTransaction.getId(), currentIndex);
-                    unCompletedTransaction.transitionStateTo(TransactionState.DEAD);
-                }
-            }
-            logger.info("currentIndex: {}, isCompleted: {}, state: {}", currentIndex, unCompletedTransaction.isCompleted(), unCompletedTransaction.getState());
-        }
-
-        currentIndex += transactionDomains.size();
-        logger.info("右移到 {}", currentIndex);
-    }
-
-    protected void commitUnCompleteTransactionIndex() {
-        long commitIndex = -1;
-
-        for (Map.Entry<Long, UnCompletedTransaction> entry : unCompletedTransactionSortedMap.entrySet()) {
-            long currentIndex = entry.getKey();
-            UnCompletedTransaction unCompletedTransaction = entry.getValue();
-            if (unCompletedTransaction == null) {
-                continue;
-            }
-            if (!unCompletedTransaction.isCompleted()) {
-                break;
-            }
-
-            if (currentIndex == unCompletedTransaction.getEndIndex()) {
-                boolean isCommit = true;
-                for (long j = Math.max((int) commitIndex, committedIndex); j < unCompletedTransaction.getEndIndex(); j++) {
-                    UnCompletedTransaction checkUnCompletedTransaction = unCompletedTransactionSortedMap.get(j);
-                    if (checkUnCompletedTransaction == null) {
-                        continue;
-                    }
-                    if (!checkUnCompletedTransaction.isCompleted()) {
-                        isCommit = false;
-                        break;
-                    }
-                }
-
-                if (isCommit) {
-                    commitIndex = currentIndex + 1;
-                }
-            }
-        }
-
-        if (commitIndex < 0) {
-            return;
-        }
-
-        try {
-            transactionLog.saveIndex(commitIndex);
-        } catch (Exception e) {
-            logger.error("commit index exception", e);
-        }
-
-        logger.info("提交index {}", commitIndex);
-        logger.info("准备移除, commitIndex: {}, committedIndex: {}", commitIndex, committedIndex);
-
-        for (long i = committedIndex; i < commitIndex; i++) {
-            logger.info("移除index {}", i);
-            UnCompletedTransaction unCompletedTransaction = unCompletedTransactionSortedMap.remove(i);
-            if (unCompletedTransaction != null) {
-                logger.info("移除txId {}", generateKey(unCompletedTransaction.getApp(), unCompletedTransaction.getId(),
-                        unCompletedTransaction.getProducerId(), unCompletedTransaction.getProducerEpoch()));
-
-                unCompletedTransactionMap.remove(generateKey(unCompletedTransaction.getApp(), unCompletedTransaction.getId(),
-                        unCompletedTransaction.getProducerId(), unCompletedTransaction.getProducerEpoch()));
-            }
-        }
-
-        logger.info("完成移除, sortedMapSize: {}, mapSize: {}", unCompletedTransactionSortedMap.size(), unCompletedTransactionMap.size());
-
-        this.committedIndex = commitIndex;
-
-        logger.info("提交index {}", commitIndex);
-    }
-
-    protected void handleRetryTransactions() {
-        Iterator<UnCompletedTransaction> iterator = retryUnCompletedTransactionList.iterator();
-        while (iterator.hasNext()) {
-            UnCompletedTransaction unCompletedTransaction = iterator.next();
-            if (unCompletedTransaction.getState().equals(TransactionState.PREPARE_ABORT)) {
-                if (tryAbort(unCompletedTransaction)) {
-                    unCompletedTransaction.transitionStateTo(TransactionState.COMPLETE_ABORT);
-                } else {
-                    unCompletedTransaction.incrReties();
-                }
-            } else if (unCompletedTransaction.getState().equals(TransactionState.PREPARE_COMMIT)) {
-                if (tryCommit(unCompletedTransaction)) {
-                    unCompletedTransaction.transitionStateTo(TransactionState.COMPLETE_COMMIT);
-                } else {
-                    unCompletedTransaction.incrReties();
-                }
-            }
-
-            if (unCompletedTransaction.isCompleted()) {
-                logger.info("transaction retry success, metadata: {}", unCompletedTransaction);
-                iterator.remove();
-            } else {
-                if (unCompletedTransaction.getReties() == config.getTransactionLogRetries()) {
-                    logger.warn("transaction retry failed, metadata: {}", unCompletedTransaction);
-                    unCompletedTransaction.transitionStateTo(TransactionState.DEAD);
-                    iterator.remove();
-                }
-            }
-        }
-    }
-
-    protected boolean tryAbort(UnCompletedTransaction unCompletedTransaction) {
-        try {
-            return transactionSynchronizer.abort(unCompletedTransaction, unCompletedTransaction.getPrepare());
-        } catch (Exception e) {
-            logger.error("tryAbort exception, metadata: {}", unCompletedTransaction);
-            return true;
-        }
-    }
-
-    protected boolean tryCommit(UnCompletedTransaction unCompletedTransaction) {
-        try {
-            return transactionSynchronizer.commit(unCompletedTransaction, unCompletedTransaction.getPrepare(), unCompletedTransaction.getOffsets());
-        } catch (Exception e) {
-            logger.error("tryCommit exception, metadata: {}", unCompletedTransaction);
-            return false;
-        }
-    }
-
-    protected String generateKey(String app, String transactionId, long producerId, short producerEpoch) {
-        return String.format("%s_%s_%s_%s", app, transactionId, producerId, producerEpoch);
     }
 }

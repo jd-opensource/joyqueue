@@ -9,20 +9,25 @@ import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionMe
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionPrepare;
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionState;
 import com.jd.journalq.broker.kafka.coordinator.transaction.exception.TransactionException;
+import com.jd.journalq.broker.kafka.coordinator.transaction.synchronizer.TransactionSynchronizer;
 import com.jd.journalq.broker.kafka.model.PartitionMetadataAndError;
 import com.jd.journalq.domain.Broker;
 import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.domain.TopicConfig;
 import com.jd.journalq.domain.TopicName;
+import com.jd.journalq.exception.JournalqCode;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.nsr.NameService;
 import com.jd.journalq.toolkit.service.Service;
 import com.jd.journalq.toolkit.time.SystemClock;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * TransactionHandler
@@ -30,7 +35,6 @@ import java.util.Map;
  * email: gaohaoxiang@jd.com
  * date: 2019/4/10
  */
-// TODO 补充日志
 public class TransactionHandler extends Service {
 
     protected static final Logger logger = LoggerFactory.getLogger(TransactionHandler.class);
@@ -84,8 +88,7 @@ public class TransactionHandler extends Service {
     protected void tryAbort(TransactionMetadata transactionMetadata) {
         try {
             doAbort(transactionMetadata);
-            transactionMetadata.clearPrepare();
-            transactionMetadata.clearOffsets();
+            transactionMetadata.clear();
         } catch (Exception e) {
             logger.error("initProducer abort exception, metadata: {}", transactionMetadata, e);
         }
@@ -120,9 +123,13 @@ public class TransactionHandler extends Service {
         transactionMetadata.transitionStateTo(TransactionState.ONGOING);
         transactionMetadata.updateLastTime();
 
+        Set<TransactionPrepare> prepareSet = Sets.newHashSet();
+
         Map<String, List<PartitionMetadataAndError>> result = Maps.newHashMapWithExpectedSize(partitions.size());
         for (Map.Entry<String, List<Integer>> entry : partitions.entrySet()) {
             List<PartitionMetadataAndError> partitionMetadataAndErrors = Lists.newArrayListWithCapacity(entry.getValue().size());
+            result.put(entry.getKey(), partitionMetadataAndErrors);
+
             TopicName topic = TopicName.parse(entry.getKey());
             TopicConfig topicConfig = nameService.getTopicConfig(topic);
 
@@ -134,30 +141,31 @@ public class TransactionHandler extends Service {
                 if (partitionGroup == null || partitionGroup.getLeaderBroker() == null) {
                     partitionMetadataAndErrors.add(new PartitionMetadataAndError(partition, KafkaErrorCode.UNKNOWN_TOPIC_OR_PARTITION.getCode()));
                 } else {
-                    try {
-                        if (!transactionMetadata.containsPrepare(topic.getFullName(), (short) partition.intValue())) {
-                            doPrepare(transactionMetadata, topic, (short) partition.intValue(), partitionGroup);
-                        }
-                        partitionMetadataAndErrors.add(new PartitionMetadataAndError(partition, KafkaErrorCode.NONE.getCode()));
-                    } catch (Exception e) {
-                        logger.error("transaction prepare exception, metadata:{}", transactionMetadata, e);
-                        partitionMetadataAndErrors.add(new PartitionMetadataAndError(partition, KafkaErrorCode.COORDINATOR_NOT_AVAILABLE.getCode()));
-                    }
+                    Broker broker = partitionGroup.getLeaderBroker();
+                    TransactionPrepare prepare = new TransactionPrepare(topic.getFullName(), (short) partition.intValue(), transactionMetadata.getApp(), broker.getId(), broker.getIp(), broker.getPort(),
+                            transactionMetadata.getId(), transactionMetadata.getProducerId(), transactionMetadata.getProducerEpoch(), transactionMetadata.getTimeout(), SystemClock.now());
+                    prepareSet.add(prepare);
                 }
             }
-            result.put(entry.getKey(), partitionMetadataAndErrors);
         }
+
+        if (CollectionUtils.isNotEmpty(prepareSet)) {
+            try {
+                transactionSynchronizer.prepare(transactionMetadata, prepareSet);
+                transactionMetadata.addPrepare(prepareSet);
+
+                for (TransactionPrepare transactionPrepare : prepareSet) {
+                    result.get(transactionPrepare.getTopic()).add(new PartitionMetadataAndError(transactionPrepare.getPartition(), KafkaErrorCode.NONE.getCode()));
+                }
+            } catch (Exception e) {
+                logger.error("transaction prepare exception, metadata:{}, prepare: {}", transactionMetadata, prepareSet, e);
+                for (TransactionPrepare transactionPrepare : prepareSet) {
+                    result.get(transactionPrepare.getTopic()).add(new PartitionMetadataAndError(transactionPrepare.getPartition(), KafkaErrorCode.COORDINATOR_NOT_AVAILABLE.getCode()));
+                }
+            }
+        }
+
         return result;
-    }
-
-    protected boolean doPrepare(TransactionMetadata transactionMetadata, TopicName topic, short partition, PartitionGroup partitionGroup) throws Exception {
-        Broker broker = partitionGroup.getLeaderBroker();
-        TransactionPrepare prepare = new TransactionPrepare(topic.getFullName(), partition, transactionMetadata.getApp(), broker.getId(), broker.getIp(), broker.getBackEndPort(),
-                transactionMetadata.getId(), transactionMetadata.getProducerId(), transactionMetadata.getProducerEpoch(), transactionMetadata.getTimeout(), SystemClock.now());
-
-        // TODO 批量优化
-        transactionMetadata.addPrepare(prepare);
-        return transactionSynchronizer.prepare(transactionMetadata, Sets.newHashSet(prepare));
     }
 
     public boolean endTxn(String clientId, String transactionId, long producerId, short producerEpoch, boolean isCommit) {
@@ -189,27 +197,35 @@ public class TransactionHandler extends Service {
             } else {
                 doAbort(transactionMetadata);
             }
+
+            transactionMetadata.transitionStateTo(TransactionState.EMPTY);
+            transactionMetadata.clear();
             return true;
         } catch (Exception e) {
             logger.error("endTxn exception, metadata: {}, isCommit: {}", transactionMetadata, isCommit, e);
             throw new TransactionException(e, KafkaErrorCode.COORDINATOR_NOT_AVAILABLE.getCode());
-        } finally {
-            transactionMetadata.transitionStateTo(TransactionState.EMPTY);
-            transactionMetadata.clear();
         }
     }
 
     protected void doCommit(TransactionMetadata transactionMetadata) throws Exception {
+        if (!transactionSynchronizer.prepareCommit(transactionMetadata, transactionMetadata.getPrepare())) {
+            throw new JournalqException(String.format("prepare commit transaction failed, metadata: %s", transactionMetadata), JournalqCode.CN_UNKNOWN_ERROR.getCode());
+        }
         transactionMetadata.transitionStateTo(TransactionState.PREPARE_COMMIT);
-        transactionSynchronizer.prepareCommit(transactionMetadata, transactionMetadata.getPrepare());
-        transactionSynchronizer.commit(transactionMetadata, transactionMetadata.getPrepare(), transactionMetadata.getOffsets());
+        if (!transactionSynchronizer.commit(transactionMetadata, transactionMetadata.getPrepare(), transactionMetadata.getOffsets())) {
+            throw new JournalqException(String.format("commit transaction failed, metadata: %s", transactionMetadata), JournalqCode.CN_UNKNOWN_ERROR.getCode());
+        }
         transactionMetadata.transitionStateTo(TransactionState.COMPLETE_COMMIT);
     }
 
     protected void doAbort(TransactionMetadata transactionMetadata) throws Exception {
+        if (!transactionSynchronizer.prepareAbort(transactionMetadata, transactionMetadata.getPrepare())) {
+            throw new JournalqException(String.format("prepare abort transaction failed, metadata: %s", transactionMetadata), JournalqCode.CN_UNKNOWN_ERROR.getCode());
+        }
         transactionMetadata.transitionStateTo(TransactionState.PREPARE_ABORT);
-        transactionSynchronizer.prepareAbort(transactionMetadata, transactionMetadata.getPrepare());
-        transactionSynchronizer.abort(transactionMetadata, transactionMetadata.getPrepare());
+        if (!transactionSynchronizer.abort(transactionMetadata, transactionMetadata.getPrepare())) {
+            throw new JournalqException(String.format("abort transaction failed, metadata: %s", transactionMetadata), JournalqCode.CN_UNKNOWN_ERROR.getCode());
+        }
         transactionMetadata.transitionStateTo(TransactionState.COMPLETE_ABORT);
     }
 

@@ -51,7 +51,7 @@ public class TxnOffsetCommitRequestHandler implements KafkaCommandHandler, Type,
                     txnOffsetCommitRequest.getProducerId(), txnOffsetCommitRequest.getProducerEpoch(), txnOffsetCommitRequest.getPartitions());
             response = new TxnOffsetCommitResponse(errors);
         } catch (TransactionException e) {
-            logger.warn("commit offset to txn exception, code: {}, message: {}, request: {}", e.getCode(), e.getMessage(), txnOffsetCommitRequest, e);
+            logger.warn("commit offset to txn exception, code: {}, message: {}, request: {}, code: {}", e.getCode(), e.getMessage(), txnOffsetCommitRequest, e.getCode());
             response = new TxnOffsetCommitResponse(buildPartitionError(e.getCode(), txnOffsetCommitRequest.getPartitions()));
         } catch (Exception e) {
             logger.error("commit offset to txn exception, request: {}", txnOffsetCommitRequest, e);

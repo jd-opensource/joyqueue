@@ -44,7 +44,7 @@ public class EndTxnRequestHandler implements KafkaCommandHandler, Type, KafkaCon
                     endTxnRequest.getProducerId(), endTxnRequest.getProducerEpoch(), endTxnRequest.isCommit());
             response = new EndTxnResponse(KafkaErrorCode.NONE.getCode());
         } catch (TransactionException e) {
-            logger.warn("endTxn exception, code: {}, message: {}, request: {}", e.getCode(), e.getMessage(), endTxnRequest, e);
+            logger.warn("endTxn exception, message: {}, request: {}, code: {}", e.getMessage(), endTxnRequest, e.getCode());
             response = new EndTxnResponse((short) e.getCode());
         } catch (Exception e) {
             logger.error("endTxn exception, request: {}", endTxnRequest, e);

@@ -25,7 +25,7 @@ public enum CoordinatorConfigKey implements PropertyDef {
     // 协调者主题
     GROUP_TOPIC_CODE("coordinator.group.topic.code", "__group_coordinators", Type.STRING),
     // 协调者主题分区
-    GROUP_TOPIC_PARTITIONS("coordinator.group.topic.partitions", (short) 1, Type.SHORT),
+    GROUP_TOPIC_PARTITIONS("coordinator.group.topic.partitions", (short) 10, Type.SHORT),
     // 协调者过期时间
     GROUP_EXPIRE_TIME("coordinator.group.expire.time", 1000 * 60 * 60 * 1, Type.INT),
     // 协调者最多group
@@ -34,7 +34,7 @@ public enum CoordinatorConfigKey implements PropertyDef {
     // 事务协调者主题
     TRANSACTION_TOPIC_CODE("coordinator.transaction.topic.code", "__transaction_coordinators", Type.STRING),
     // 事务协调者主题分区
-    TRANSACTION_TOPIC_PARTITIONS("coordinator.transaction.topic.partitions", (short) 1, Type.SHORT),
+    TRANSACTION_TOPIC_PARTITIONS("coordinator.transaction.topic.partitions", (short) 10, Type.SHORT),
     // 事务日志app
     TRANSACTION_LOG_APP("coordinator.transaction.log.app", "__transaction_log", Type.STRING),
     // 事务过期时间
