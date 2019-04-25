@@ -4,9 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.beust.jcommander.*;
 import com.jd.journalq.domain.*;
-import com.jd.journalq.nsr.impl.ProducerNameServerServiceImpl;
 import com.jd.journalq.nsr.utils.AsyncHttpClient;
-import com.jd.journalq.toolkit.retry.RetryPolicy;
 
 import java.util.*;
 import java.util.concurrent.Future;
@@ -19,9 +17,8 @@ public class TopicAdmin {
     static class TopicArg implements CommandArgs{
         @Parameter(names = {"-h", "--help"}, description = "Help message", help = true)
         public boolean help;
-
-        @Parameter(names = { "--host" }, description = "Topic naming address", required = false)
-        public String host="localhost:50091";
+        @Parameter(names = { "--host" }, description = "Naming address", required = false)
+        public String host="http://localhost:50091";
         @Parameter(names = { "-c", "--code" }, description = "Topic code", required = true)
         public String code;
 
@@ -42,6 +39,8 @@ public class TopicAdmin {
         @Parameter(names = { "-b", "--brokers" }, description = "Topic optional brokers id", required = false)
         public List<Integer> brokers=new ArrayList<>();
    }
+
+
 
     /**
      *  Subscription args
@@ -65,8 +64,8 @@ public class TopicAdmin {
     static class PubSubArg implements CommandArgs{
         @Parameter(names = {"-h", "--help"}, description = "Help message", help = true)
         public boolean help;
-        @Parameter(names = { "--host" }, description = "Topic naming address", required = false)
-        public String host="localhost:50091";
+        @Parameter(names = { "--host" }, description = " Naming address", required = false)
+        public String host="http://localhost:50091";
         @ParametersDelegate
         SubscribeArg subscribe=new SubscribeArg();
         @Parameter(names = {  "--client" }, description = "client type: 0 jmq,1 kafka,2 mqtt,other  ", required = false)
@@ -77,11 +76,12 @@ public class TopicAdmin {
     @Parameter(names = {"-h", "--help"}, description = "Help message", help = true)
     public boolean help;
 
+    //192.168.73.147 1543486432  1543486547 "-b" ,"1543486432","-b","1543486547"
+    // local 1556178070
+    //String[] argV={"add", "-c", "test_topic_bh_6" ,"--host","http://localhost:50091", "-b" ,"1556178070"};
+    //String[] argV={"publish", "--topic", "test_topic_bh_6" ,"--app","test_app","--type","1","--host","http://localhost:50091"};
+
     public static void main(String[] args){
-        //192.168.73.147 1543486432  1543486547 "-b" ,"1543486432","-b","1543486547"
-        // local 1556178070
-        //String[] argV={"add", "-c", "test_topic_bh_6" ,"--host","http://localhost:50091", "-b" ,"1556178070"};
-        String[] argV={"publish", "--topic", "test_topic_bh_6" ,"--app","test_app","--type","1","--host","http://localhost:50091"};
         final TopicArg topicArg=new TopicArg();
         final PubSubArg pubSubArg=new PubSubArg();
         TopicAdmin topicAdmin=new TopicAdmin();
@@ -92,13 +92,12 @@ public class TopicAdmin {
         JCommander jc =JCommander.newBuilder()
                 .addObject(topicAdmin)
                 .addCommand(CommandType.add.name(),topicArg)
-                .addCommand(CommandType.update.name(),topicArg)
                 .addCommand(CommandType.publish.name(),pubSubArg)
                 .addCommand(CommandType.subscribe.name(),pubSubArg)
                 .build();
         jc.setProgramName("topic");
         try {
-            jc.parse(argV);
+            jc.parse(args);
         } catch (ParameterException e) {
             System.err.println(e.getMessage());
             jc.usage();
@@ -128,20 +127,11 @@ public class TopicAdmin {
     }
 
 
+
     /**
-     * Show command usage
+     *  Process  commands
+     *
      **/
-    static void commandHelp(JCommander jc){
-        CommandType cmd=CommandType.type(jc.getParsedCommand());
-        if(cmd==CommandType.undef){
-            //System.err.println(jc);
-            jc.usage();
-        }else{
-            jc.getCommands().get(cmd.name()).usage();
-        }
-    }
-
-
     private static  void process(CommandType type,CommandArgs arguments,JCommander jCommander) throws Exception{
        switch (type){
            case add:
@@ -233,7 +223,7 @@ public class TopicAdmin {
     }
 
     /**
-     * Publish to a topic
+     *  Subscribe to a topic
      *
      **/
     private static String subscribe(CommandArgs commandArgs,JCommander jCommander) throws Exception{

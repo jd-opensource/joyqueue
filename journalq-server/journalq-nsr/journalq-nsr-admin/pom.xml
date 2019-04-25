@@ -29,7 +29,7 @@
         </dependency>
         <dependency>
             <groupId>com.jd.journalq</groupId>
-            <artifactId>journalq-data-service</artifactId>
+            <artifactId>journalq-nsr-core</artifactId>
         </dependency>
     </dependencies>
     <build>

@@ -5,48 +5,51 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.Parameters;
-import com.jd.journalq.domain.AppToken;
 import com.jd.journalq.domain.Broker;
 import com.jd.journalq.nsr.model.BrokerQuery;
 import com.jd.journalq.nsr.utils.AsyncHttpClient;
-import com.jd.journalq.toolkit.security.Md5;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-public class AppAdmin {
+public class BrokerAdmin {
 
-
-    @Parameters(separators = "=", commandDescription = "Generate a token for App")
-    static class TokenArg implements CommandArgs{
-        private final static Long MONTH_MS=86400000L;
+    @Parameters(separators = "=", commandDescription = "Topic arguments")
+    static class ListArg implements CommandArgs{
         @Parameter(names = {"-h", "--help"}, description = "Help message", help = true)
         public boolean help;
+
         @Parameter(names = { "--host" }, description = "Naming address", required = false)
         public String host="http://localhost:50091";
-        @Parameter(names = { "-a", "--app" }, description = "Topic code", required = true)
-        public String app;
 
-        @Parameter(names = { "-s", "--start" }, description = "When to be effective", required = false)
-        public Long start=System.currentTimeMillis();
+        @Parameter(names = { "-i", "--id" }, description = "broker id", required = false)
+        public int id;
 
-        @Parameter(names = { "-e", "--expire" }, description = "Expire time", required = false)
-        public Long expire=System.currentTimeMillis()+MONTH_MS*12;
+        @Parameter(names = { "--ip" }, description = "broker ip", required = false)
+        public String ip;
+
+        @Parameter(names = { "--key" }, description = "broker query keyword ", required = false)
+        public String key;
+        @Parameter(names = { "-b", "--brokers" }, description = "brokers id list", required = false)
+        public List<Long> brokers=new ArrayList<>();
     }
 
     @Parameter(names = {"-h", "--help"}, description = "Help message", help = true)
     public boolean help;
 
     public static void main(String[] args){
-        final TokenArg tokenArg=new TokenArg();
-        String[] argv={"token","--host","http://localhost:50091","-a","test_app"};
-        AppAdmin appAdmin=new AppAdmin();
+        final ListArg listArg=new ListArg();
+        String[] argv={"list","--host","http://localhost:50091"};
+        final TopicAdmin.PubSubArg pubSubArg=new TopicAdmin.PubSubArg();
+        BrokerAdmin brokerAdmin=new BrokerAdmin();
         Map<String,CommandArgs> argsMap=new HashMap(8);
-                                argsMap.put(CommandType.token.name(),tokenArg);
+                                argsMap.put(CommandType.list.name(),listArg);
         JCommander jc =JCommander.newBuilder()
-                .addObject(appAdmin)
-                .addCommand(CommandType.token.name(),tokenArg)
+                .addObject(brokerAdmin)
+                .addCommand(CommandType.list.name(),listArg)
                 .build();
         jc.setProgramName("broker");
         try {
@@ -56,12 +59,12 @@ public class AppAdmin {
             jc.usage();
             System.exit(-1);
         }
-        if (appAdmin.help) {
+        if (brokerAdmin.help) {
             jc.usage();
             System.exit(-1);
         }
         // command help
-        if(tokenArg.help){
+        if(listArg.help||pubSubArg.help){
             jc.getCommands().get(jc.getParsedCommand()).usage();
             System.exit(-1);
         }
@@ -85,8 +88,8 @@ public class AppAdmin {
      **/
     private static  void process(CommandType type, CommandArgs arguments, JCommander jCommander) throws Exception{
         switch (type){
-            case token:
-                token(arguments,jCommander);
+            case list:
+                list(arguments,jCommander);
                 break;
             default:
                 jCommander.usage();
@@ -100,30 +103,32 @@ public class AppAdmin {
      *  Topic add process
      *
      **/
-    private static String token(CommandArgs commandArgs,JCommander jCommander) throws Exception{
-        TokenArg arguments=null;
-        if(commandArgs instanceof TokenArg){
-            arguments=(TokenArg)commandArgs;
+    private static List<Broker> list(CommandArgs commandArgs,JCommander jCommander) throws Exception{
+        ListArg arguments=null;
+        if(commandArgs instanceof ListArg){
+            arguments=(ListArg)commandArgs;
         }else{
             throw new IllegalArgumentException("bad args");
         }
-        AppToken token=new AppToken();
-        token.setId(System.currentTimeMillis());
-        token.setApp(arguments.app);
-        token.setEffectiveTime(new Date(arguments.start));
-        token.setExpirationTime(new Date(arguments.expire));
-        token.setToken(UUID.randomUUID().toString().replaceAll("-" , ""));
-        Future<String> futureResult=AsyncHttpClient.post(arguments.host,"/apptoken/add",JSON.toJSONString(token),String.class);
+        BrokerQuery brokerQuery=new BrokerQuery();
+        brokerQuery.setIp(arguments.ip);
+        brokerQuery.setBrokerId(arguments.id);
+        brokerQuery.setBrokerList(arguments.brokers);
+        brokerQuery.setKeyword(arguments.key);
+        Future<String> futureResult=AsyncHttpClient.post(arguments.host,"/broker/list",JSON.toJSONString(brokerQuery),String.class);
         String result=futureResult.get(AdminConfig.TIMEOUT_MS,TimeUnit.MILLISECONDS);
-        if(result!=null&&result.equals("success")){
-            result=token.getToken();
+        List<Broker> brokers=null;
+        if(result!=null){
+            brokers =JSON.parseArray(result,Broker.class);
         }
-        System.out.println(result);
-        return result;
+        if(brokers!=null){
+            System.out.println(result);
+        }
+        return brokers;
     }
 
     enum CommandType{
-        token,undef;
+        list,undef;
         public static CommandType type(String name){
             for(CommandType c: values()){
                 if(c.name().equals(name))
