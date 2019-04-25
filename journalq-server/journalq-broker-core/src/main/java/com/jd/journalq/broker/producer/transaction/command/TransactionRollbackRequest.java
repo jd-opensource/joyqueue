@@ -3,6 +3,8 @@ package com.jd.journalq.broker.producer.transaction.command;
 import com.jd.journalq.network.command.CommandType;
 import com.jd.journalq.network.transport.command.JournalqPayload;
 
+import java.util.List;
+
 /**
  * TransactionRollbackRequest
  * author: gaohaoxiang
@@ -13,16 +15,16 @@ public class TransactionRollbackRequest extends JournalqPayload {
 
     private String topic;
     private String app;
-    private String txId;
+    private List<String> txIds;
 
     public TransactionRollbackRequest() {
 
     }
 
-    public TransactionRollbackRequest(String topic, String app, String txId) {
+    public TransactionRollbackRequest(String topic, String app, List<String> txIds) {
         this.topic = topic;
         this.app = app;
-        this.txId = txId;
+        this.txIds = txIds;
     }
 
     public String getTopic() {
@@ -41,16 +43,25 @@ public class TransactionRollbackRequest extends JournalqPayload {
         this.app = app;
     }
 
-    public String getTxId() {
-        return txId;
+    public void setTxIds(List<String> txIds) {
+        this.txIds = txIds;
     }
 
-    public void setTxId(String txId) {
-        this.txId = txId;
+    public List<String> getTxIds() {
+        return txIds;
     }
 
     @Override
     public int type() {
         return CommandType.TRANSACTION_ROLLBACK_REQUEST;
+    }
+
+    @Override
+    public String toString() {
+        return "TransactionRollbackRequest{" +
+                "topic='" + topic + '\'' +
+                ", app='" + app + '\'' +
+                ", txIds=" + txIds +
+                '}';
     }
 }

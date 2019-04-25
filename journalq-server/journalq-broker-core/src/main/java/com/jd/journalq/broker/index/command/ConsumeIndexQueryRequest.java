@@ -13,20 +13,20 @@
  */
 package com.jd.journalq.broker.index.command;
 
-import com.jd.journalq.network.transport.command.JournalqPayload;
 import com.jd.journalq.network.command.CommandType;
+import com.jd.journalq.network.transport.command.JournalqPayload;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by zhuduohui on 2018/9/7.
  */
 public class ConsumeIndexQueryRequest extends JournalqPayload {
     private String app;
-    private Map<String, Set<Integer>> topicPartitions;
+    private Map<String, List<Integer>> topicPartitions;
 
-    public ConsumeIndexQueryRequest(String app, Map<String, Set<Integer>> topicPartitions) {
+    public ConsumeIndexQueryRequest(String app, Map<String, List<Integer>> topicPartitions) {
         this.app = app;
         this.topicPartitions = topicPartitions;
     }
@@ -35,7 +35,7 @@ public class ConsumeIndexQueryRequest extends JournalqPayload {
         return app;
     }
 
-    public Map<String, Set<Integer>> getTopicPartitions() {
+    public Map<String, List<Integer>> getTopicPartitions() {
         return topicPartitions;
     }
 

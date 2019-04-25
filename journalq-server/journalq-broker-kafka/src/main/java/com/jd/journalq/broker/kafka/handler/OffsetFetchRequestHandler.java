@@ -13,19 +13,20 @@
  */
 package com.jd.journalq.broker.kafka.handler;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Table;
-import com.jd.journalq.broker.kafka.KafkaContextAware;
-import com.jd.journalq.broker.kafka.coordinator.group.GroupCoordinator;
 import com.jd.journalq.broker.kafka.KafkaCommandType;
 import com.jd.journalq.broker.kafka.KafkaContext;
+import com.jd.journalq.broker.kafka.KafkaContextAware;
 import com.jd.journalq.broker.kafka.command.OffsetFetchRequest;
 import com.jd.journalq.broker.kafka.command.OffsetFetchResponse;
+import com.jd.journalq.broker.kafka.coordinator.group.GroupCoordinator;
 import com.jd.journalq.broker.kafka.model.OffsetMetadataAndError;
 import com.jd.journalq.network.transport.Transport;
 import com.jd.journalq.network.transport.command.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * OffsetFetchRequestHandler
@@ -48,12 +49,12 @@ public class OffsetFetchRequestHandler extends AbstractKafkaCommandHandler imple
     public Command handle(Transport transport, Command command) {
         OffsetFetchRequest offsetFetchRequest = (OffsetFetchRequest) command.getPayload();
         String groupId = offsetFetchRequest.getGroupId();
-        HashMultimap<String, Integer> topicAndPartitions = offsetFetchRequest.getTopicAndPartitions();
-        Table<String, Integer, OffsetMetadataAndError> topicPartitionOffsetMetadataMap = groupCoordinator.handleFetchOffsets(groupId, topicAndPartitions);
+        Map<String, List<Integer>> topicAndPartitions = offsetFetchRequest.getTopicAndPartitions();
+        Map<String, List<OffsetMetadataAndError>> result = groupCoordinator.handleFetchOffsets(groupId, topicAndPartitions);
 
         // TODO 临时日志
-        logger.info("fetch offset, request: {}, response: {}", offsetFetchRequest, topicPartitionOffsetMetadataMap);
-        OffsetFetchResponse offsetFetchResponse = new OffsetFetchResponse(topicPartitionOffsetMetadataMap);
+        logger.info("fetch offset, request: {}, response: {}", offsetFetchRequest, result);
+        OffsetFetchResponse offsetFetchResponse = new OffsetFetchResponse(result);
         return new Command(offsetFetchResponse);
     }
 

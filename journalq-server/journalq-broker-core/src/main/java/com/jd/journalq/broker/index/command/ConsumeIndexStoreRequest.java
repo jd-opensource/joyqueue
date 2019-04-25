@@ -43,4 +43,12 @@ public class ConsumeIndexStoreRequest extends JournalqPayload {
     public int type() {
         return CommandType.CONSUME_INDEX_STORE_REQUEST;
     }
+
+    @Override
+    public String toString() {
+        return "ConsumeIndexStoreRequest{" +
+                "app='" + app + '\'' +
+                ", indexMetadata=" + indexMetadata +
+                '}';
+    }
 }

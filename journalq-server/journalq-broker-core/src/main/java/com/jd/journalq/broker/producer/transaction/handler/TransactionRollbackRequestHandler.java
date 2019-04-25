@@ -36,22 +36,26 @@ public class TransactionRollbackRequestHandler implements CommandHandler, Type {
     public Command handle(Transport transport, Command command) {
         TransactionRollbackRequest transactionRollbackRequest = (TransactionRollbackRequest) command.getPayload();
         Producer producer = new Producer(transactionRollbackRequest.getTopic(), transactionRollbackRequest.getTopic(), transactionRollbackRequest.getApp(), Producer.ProducerType.JMQ);
+        int code = JournalqCode.SUCCESS.getCode();
 
-        BrokerRollback brokerRollback = new BrokerRollback();
-        brokerRollback.setTopic(transactionRollbackRequest.getTopic());
-        brokerRollback.setApp(transactionRollbackRequest.getApp());
-        brokerRollback.setTxId(transactionRollbackRequest.getTxId());
+        for (String txId : transactionRollbackRequest.getTxIds()) {
+            BrokerRollback brokerRollback = new BrokerRollback();
+            brokerRollback.setTopic(transactionRollbackRequest.getTopic());
+            brokerRollback.setApp(transactionRollbackRequest.getApp());
+            brokerRollback.setTxId(txId);
 
-        try {
-            produce.putTransactionMessage(producer, brokerRollback);
-            return BooleanAck.build();
-        } catch (JournalqException e) {
-            logger.error("rollback transaction exception, topic: {}, app: {}", transactionRollbackRequest.getTopic(), transactionRollbackRequest.getApp(), e);
-            return BooleanAck.build(e.getCode());
-        } catch (Exception e) {
-            logger.error("rollback transaction exception, topic: {}, app: {}", transactionRollbackRequest.getTopic(), transactionRollbackRequest.getApp(), e);
-            return BooleanAck.build(JournalqCode.CN_UNKNOWN_ERROR);
+            try {
+                produce.putTransactionMessage(producer, brokerRollback);
+            } catch (JournalqException e) {
+                logger.error("rollback transaction exception, topic: {}, app: {}", transactionRollbackRequest.getTopic(), transactionRollbackRequest.getApp(), e);
+                code = e.getCode();
+            } catch (Exception e) {
+                logger.error("rollback transaction exception, topic: {}, app: {}", transactionRollbackRequest.getTopic(), transactionRollbackRequest.getApp(), e);
+                code = JournalqCode.CN_UNKNOWN_ERROR.getCode();
+            }
         }
+
+        return BooleanAck.build(code);
     }
 
     @Override

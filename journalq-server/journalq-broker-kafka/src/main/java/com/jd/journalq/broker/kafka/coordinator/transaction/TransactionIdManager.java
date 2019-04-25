@@ -8,7 +8,7 @@ package com.jd.journalq.broker.kafka.coordinator.transaction;
  */
 public class TransactionIdManager {
 
-    public String generateId(String topic, String app, String transactionId, long producerId, short producerEpoch) {
-        return String.format("%s_%s_%s_%s_%s", topic, app, transactionId, producerId, producerEpoch);
+    public String generateId(String topic, int partition, String app, String transactionId, long producerId, short producerEpoch) {
+        return String.format("%s_%s_%s_%s_%s_%s", topic, partition, app, transactionId, producerId, producerEpoch);
     }
 }

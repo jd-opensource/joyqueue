@@ -95,16 +95,19 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
                 ProducePartitionGroupRequest producePartitionGroupRequest = partitionGroupRequestMap.get(partitionGroup.getGroup());
 
                 if (producePartitionGroupRequest == null) {
-                    producePartitionGroupRequest = new ProducePartitionGroupRequest(Lists.newLinkedList(), Lists.newLinkedList());
+                    producePartitionGroupRequest = new ProducePartitionGroupRequest(Lists.newLinkedList(), Lists.newLinkedList(), Maps.newHashMap());
                     partitionGroupRequestMap.put(partitionGroup.getGroup(), producePartitionGroupRequest);
                 }
 
-                producePartitionGroupRequest.getPartitions().add(partition);
-
+                List<BrokerMessage> brokerMessages = Lists.newLinkedList();
                 for (KafkaBrokerMessage message : partitionRequest.getMessages()) {
                     BrokerMessage brokerMessage = KafkaMessageConverter.toBrokerMessage(producer.getTopic(), partition, producer.getApp(), clientAddress, message);
-                    producePartitionGroupRequest.getMessages().add(brokerMessage);
+                    brokerMessages.add(brokerMessage);
                 }
+
+                producePartitionGroupRequest.getPartitions().add(partition);
+                producePartitionGroupRequest.getMessages().addAll(brokerMessages);
+                producePartitionGroupRequest.getMessageMap().put(partitionRequest.getPartition(), brokerMessages);
             }
 
             for (Map.Entry<Integer, ProducePartitionGroupRequest> partitionGroupEntry : partitionGroupRequestMap.entrySet()) {
@@ -123,9 +126,9 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
 
                 if (produceRequest.isTransaction()) {
                     transactionProduceHandler.produceMessage(produceRequest.getTransactionalId(), produceRequest.getProducerId(), produceRequest.getProducerEpoch(),
-                            qosLevel, producer, partitionGroupEntry.getValue().getMessages(), listener);
+                            qosLevel, producer, partitionGroupEntry.getValue(), listener);
                 } else {
-                    produceHandler.produceMessage(qosLevel, producer, partitionGroupEntry.getValue().getMessages(), listener);
+                    produceHandler.produceMessage(qosLevel, producer, partitionGroupEntry.getValue(), listener);
                 }
             }
         }

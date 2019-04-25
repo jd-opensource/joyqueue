@@ -5,11 +5,13 @@ import com.jd.journalq.broker.kafka.command.ProduceResponse;
 import com.jd.journalq.broker.kafka.config.KafkaConfig;
 import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionCoordinator;
 import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionIdManager;
+import com.jd.journalq.broker.kafka.model.ProducePartitionGroupRequest;
 import com.jd.journalq.broker.producer.Produce;
 import com.jd.journalq.domain.QosLevel;
 import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.message.BrokerMessage;
 import com.jd.journalq.message.BrokerPrepare;
+import com.jd.journalq.message.BrokerRollback;
 import com.jd.journalq.message.SourceType;
 import com.jd.journalq.network.session.Producer;
 import com.jd.journalq.network.session.TransactionId;
@@ -18,6 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * TransactionProduceHandler
@@ -41,28 +45,46 @@ public class TransactionProduceHandler {
         this.transactionIdManager = transactionIdManager;
     }
 
-    public void produceMessage(String transactionalId, long producerId, short producerEpoch, QosLevel qosLevel, Producer producer, List<BrokerMessage> messages,
+    public void produceMessage(String transactionalId, long producerId, short producerEpoch, QosLevel qosLevel, Producer producer, ProducePartitionGroupRequest partitionGroupRequest,
                                EventListener<ProduceResponse.PartitionResponse> listener) {
-        try {
-            TransactionId transaction = tryPrepare(producer, transactionalId, producerId, producerEpoch);
-            fillTxId(messages, transaction.getTxId());
 
-            produce.putMessageAsync(producer, messages, qosLevel, (writeResult) -> {
-                if (!writeResult.getCode().equals(JournalqCode.SUCCESS)) {
-                    logger.error("produce message failed, topic: {}, code: {}", producer.getTopic(), writeResult.getCode());
-                }
-                short code = KafkaErrorCode.journalqCodeFor(writeResult.getCode().getCode());
-                listener.onEvent(new ProduceResponse.PartitionResponse(0, ProduceResponse.PartitionResponse.NONE_OFFSET, code));
-            });
-        } catch (Exception e) {
-            logger.error("produce message failed, topic: {}", producer.getTopic(), e);
-            short code = KafkaErrorCode.exceptionFor(e);
-            listener.onEvent(new ProduceResponse.PartitionResponse(0, ProduceResponse.PartitionResponse.NONE_OFFSET, code));
+        short[] code = {KafkaErrorCode.NONE.getCode()};
+        CountDownLatch latch = new CountDownLatch(partitionGroupRequest.getMessageMap().size());
+        for (Map.Entry<Integer, List<BrokerMessage>> entry : partitionGroupRequest.getMessageMap().entrySet()) {
+            try {
+                int partition = entry.getKey();
+                List<BrokerMessage> messages = entry.getValue();
+                String txId = generateTxId(producer, partition, transactionalId, producerId, producerEpoch);
+                TransactionId transaction = tryPrepare(producer, txId);
+                fillTxId(messages, transaction.getTxId());
+
+                produce.putMessageAsync(producer, messages, qosLevel, (writeResult) -> {
+                    if (!writeResult.getCode().equals(JournalqCode.SUCCESS)) {
+                        logger.error("produce message failed, topic: {}, code: {}", producer.getTopic(), writeResult.getCode());
+                    }
+                    code[0] = KafkaErrorCode.journalqCodeFor(writeResult.getCode().getCode());
+                    latch.countDown();
+                });
+            } catch (Exception e) {
+                logger.error("produce message failed, topic: {}", producer.getTopic(), e);
+                code[0] = KafkaErrorCode.exceptionFor(e);
+                latch.countDown();
+            }
         }
+
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            logger.error("produce message failed, topic: {}", producer.getTopic(), e);
+        }
+        listener.onEvent(new ProduceResponse.PartitionResponse(ProduceResponse.PartitionResponse.NONE_OFFSET, code[0]));
     }
 
-    protected TransactionId tryPrepare(Producer producer, String transactionalId, long producerId, short producerEpoch) throws Exception {
-        String txId = transactionIdManager.generateId(producer.getTopic(), producer.getApp(), transactionalId, producerId, producerEpoch);
+    protected String generateTxId(Producer producer, int partition, String transactionalId, long producerId, short producerEpoch) {
+        return transactionIdManager.generateId(producer.getTopic(), partition, producer.getApp(), transactionalId, producerId, producerEpoch);
+    }
+
+    protected TransactionId tryPrepare(Producer producer, String txId) throws Exception {
         TransactionId transaction = produce.getTransaction(producer, txId);
         if (transaction == null) {
             transaction = prepare(producer, txId);
@@ -78,6 +100,14 @@ public class TransactionProduceHandler {
         brokerPrepare.setTimeout(config.getTransactionTimeout());
         brokerPrepare.setSource(SourceType.KAFKA.getValue());
         return produce.putTransactionMessage(producer, brokerPrepare);
+    }
+
+    protected TransactionId rollback(Producer producer, String txId) throws Exception {
+        BrokerRollback brokerRollback = new BrokerRollback();
+        brokerRollback.setTopic(producer.getTopic());
+        brokerRollback.setApp(producer.getApp());
+        brokerRollback.setTxId(txId);
+        return produce.putTransactionMessage(producer, brokerRollback);
     }
 
     protected void fillTxId(List<BrokerMessage> messages, String txId) {

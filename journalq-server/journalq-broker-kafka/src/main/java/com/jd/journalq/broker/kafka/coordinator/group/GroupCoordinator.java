@@ -1,13 +1,11 @@
 package com.jd.journalq.broker.kafka.coordinator.group;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Table;
 import com.jd.journalq.broker.kafka.command.SyncGroupAssignment;
 import com.jd.journalq.broker.kafka.coordinator.Coordinator;
 import com.jd.journalq.broker.kafka.coordinator.group.callback.JoinCallback;
 import com.jd.journalq.broker.kafka.coordinator.group.callback.SyncCallback;
-import com.jd.journalq.broker.kafka.coordinator.group.domain.GroupMetadata;
 import com.jd.journalq.broker.kafka.coordinator.group.domain.GroupDescribe;
+import com.jd.journalq.broker.kafka.coordinator.group.domain.GroupMetadata;
 import com.jd.journalq.broker.kafka.model.OffsetAndMetadata;
 import com.jd.journalq.broker.kafka.model.OffsetMetadataAndError;
 import com.jd.journalq.domain.Broker;
@@ -65,11 +63,11 @@ public class GroupCoordinator extends Service {
         return groupBalanceHandler.describeGroups(groupIds);
     }
 
-    public Table<String, Integer, OffsetMetadataAndError> handleCommitOffsets(String groupId, String memberId, int generationId, Table<String, Integer, OffsetAndMetadata> offsetMetadata) {
-        return groupOffsetHandler.commitOffsets(groupId, memberId, generationId, offsetMetadata);
+    public Map<String, List<OffsetMetadataAndError>> handleCommitOffsets(String groupId, String memberId, int generationId, Map<String, List<OffsetAndMetadata>> offsets) {
+        return groupOffsetHandler.commitOffsets(groupId, memberId, generationId, offsets);
     }
 
-    public Table<String, Integer, OffsetMetadataAndError> handleFetchOffsets(String groupId, HashMultimap<String, Integer> topicAndPartitions) {
+    public Map<String, List<OffsetMetadataAndError>> handleFetchOffsets(String groupId, Map<String, List<Integer>> topicAndPartitions) {
         return groupOffsetHandler.fetchOffsets(groupId, topicAndPartitions);
     }
 

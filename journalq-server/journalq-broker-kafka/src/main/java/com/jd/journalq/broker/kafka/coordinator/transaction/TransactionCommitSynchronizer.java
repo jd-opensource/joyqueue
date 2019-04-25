@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import com.jd.journalq.broker.coordinator.session.CoordinatorSession;
 import com.jd.journalq.broker.coordinator.session.CoordinatorSessionManager;
 import com.jd.journalq.broker.index.command.ConsumeIndexStoreRequest;
+import com.jd.journalq.broker.index.command.ConsumeIndexStoreResponse;
 import com.jd.journalq.broker.index.model.IndexAndMetadata;
 import com.jd.journalq.broker.kafka.config.KafkaConfig;
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionMetadata;
@@ -40,7 +41,6 @@ import java.util.concurrent.TimeUnit;
  * email: gaohaoxiang@jd.com
  * date: 2019/4/18
  */
-// TODO 补充日志
 public class TransactionCommitSynchronizer extends Service {
 
     protected static final Logger logger = LoggerFactory.getLogger(TransactionCommitSynchronizer.class);
@@ -58,26 +58,38 @@ public class TransactionCommitSynchronizer extends Service {
     }
 
     public boolean commitPrepare(TransactionMetadata transactionMetadata, Set<TransactionPrepare> prepareList) throws Exception {
-        prepareList = TransactionHelper.filterPrepareByBroker(prepareList);
+        Map<Broker, List<TransactionPrepare>> brokerPrepareMap = TransactionHelper.splitPrepareByBroker(prepareList);
         CountDownLatch latch = new CountDownLatch(prepareList.size());
         boolean[] result = {true};
 
-        for (TransactionPrepare prepare : prepareList) {
-            CoordinatorSession session = sessionManager.getOrCreateSession(prepare.getBrokerId(), prepare.getBrokerHost(), prepare.getBrokerPort());
-            String txId = transactionIdManager.generateId(prepare.getTopic(), prepare.getApp(), prepare.getTransactionId(), prepare.getProducerId(), prepare.getProducerEpoch());
-            TransactionCommitRequest transactionCommitRequest = new TransactionCommitRequest(prepare.getTopic(), prepare.getApp(), txId);
+        for (Map.Entry<Broker, List<TransactionPrepare>> entry : brokerPrepareMap.entrySet()) {
+            Broker broker = entry.getKey();
+            List<TransactionPrepare> brokerPrepareList = entry.getValue();
+            TransactionPrepare brokerPrepare = brokerPrepareList.get(0);
+            List<String> txIds = Lists.newLinkedList();
+
+            for (TransactionPrepare prepare : brokerPrepareList) {
+                String txId = transactionIdManager.generateId(prepare.getTopic(), prepare.getPartition(), prepare.getApp(), prepare.getTransactionId(), prepare.getProducerId(), prepare.getProducerEpoch());
+                txIds.add(txId);
+            }
+
+            CoordinatorSession session = sessionManager.getOrCreateSession(broker);
+            TransactionCommitRequest transactionCommitRequest = new TransactionCommitRequest(brokerPrepare.getTopic(), brokerPrepare.getApp(), txIds);
             session.async(new JournalqCommand(transactionCommitRequest), new CommandCallback() {
                 @Override
                 public void onSuccess(Command request, Command response) {
                     if (response.getHeader().getStatus() != JournalqCode.SUCCESS.getCode() &&
                             response.getHeader().getStatus() != JournalqCode.CN_TRANSACTION_NOT_EXISTS.getCode()) {
                         result[0] = false;
+                    } else {
+                        logger.error("commit transaction error, broker: {}, request: {}", broker, transactionCommitRequest);
                     }
                     latch.countDown();
                 }
 
                 @Override
                 public void onException(Command request, Throwable cause) {
+                    logger.error("commit transaction error, broker: {}, request: {}", broker, transactionCommitRequest, cause);
                     result[0] = false;
                     latch.countDown();
                 }
@@ -104,25 +116,28 @@ public class TransactionCommitSynchronizer extends Service {
             try {
                 CoordinatorSession session = sessionManager.getOrCreateSession(broker);
                 ConsumeIndexStoreRequest indexStoreRequest = new ConsumeIndexStoreRequest(transactionMetadata.getApp(), saveOffsetParam);
-                JournalqHeader header = new JournalqHeader(Direction.REQUEST, CommandType.CONSUME_INDEX_STORE_REQUEST);
-                Command request = new Command(header, indexStoreRequest);
+                Command request = new JournalqCommand(indexStoreRequest);
 
                 session.async(request, new CommandCallback() {
                     @Override
                     public void onSuccess(Command request, Command response) {
-//                        ConsumeIndexStoreResponse payload = (ConsumeIndexStoreResponse) response.getPayload();
-//                        for (Map.Entry<String, Map<Integer, Short>> topicEntry : payload.getIndexStoreStatus().entrySet()) {
-//                            String topic = topicEntry.getKey();
-//                            for (Map.Entry<Integer, Short> partitionEntry : topicEntry.getValue().entrySet()) {
-//                            }
-//                        }
+                        ConsumeIndexStoreResponse payload = (ConsumeIndexStoreResponse) response.getPayload();
+                        for (Map.Entry<String, Map<Integer, Short>> topicEntry : payload.getIndexStoreStatus().entrySet()) {
+                            String topic = topicEntry.getKey();
+                            for (Map.Entry<Integer, Short> partitionEntry : topicEntry.getValue().entrySet()) {
+                                if (partitionEntry.getValue() != JournalqCode.SUCCESS.getCode()) {
+                                    logger.error("commit transaction offset error, broker: {}, topic: {}, partition: {}, code: {}",
+                                            broker, topic, partitionEntry.getKey(), JournalqCode.valueOf(partitionEntry.getValue()));
+                                }
+                            }
+                        }
                         latch.countDown();
                     }
 
                     @Override
                     public void onException(Command request, Throwable cause) {
-                        logger.error("sync offset failed, async transport exception, topic: {}, group: {}, leader: {id: {}, ip: {}, port: {}}",
-                                saveOffsetParam, transactionMetadata.getApp(), broker.getId(), broker.getIp(), broker.getBackEndPort(), cause);
+                        logger.error("commit transaction offset failed, async transport exception, broker: {}, topic: {}, group: {}",
+                                broker, saveOffsetParam, transactionMetadata.getApp(), cause);
                         result[0] = false;
                         latch.countDown();
                     }

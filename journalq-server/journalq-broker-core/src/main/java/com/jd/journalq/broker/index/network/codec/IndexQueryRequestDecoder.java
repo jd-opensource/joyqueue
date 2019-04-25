@@ -14,18 +14,17 @@
 package com.jd.journalq.broker.index.network.codec;
 
 import com.jd.journalq.broker.index.command.ConsumeIndexQueryRequest;
-import com.jd.journalq.network.transport.codec.JournalqHeader;
-import com.jd.journalq.network.transport.codec.PayloadDecoder;
 import com.jd.journalq.network.command.CommandType;
 import com.jd.journalq.network.serializer.Serializer;
+import com.jd.journalq.network.transport.codec.JournalqHeader;
+import com.jd.journalq.network.transport.codec.PayloadDecoder;
 import com.jd.journalq.network.transport.command.Type;
-
 import io.netty.buffer.ByteBuf;
 import org.apache.commons.collections.map.HashedMap;
 
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by zhuduohui on 2018/9/7.
@@ -34,12 +33,12 @@ public class IndexQueryRequestDecoder implements PayloadDecoder<JournalqHeader>,
 
     @Override
     public Object decode(JournalqHeader header, ByteBuf buffer) throws Exception {
-        Map<String, Set<Integer>> indexTopicPartitions = new HashedMap();
+        Map<String, List<Integer>> indexTopicPartitions = new HashedMap();
         String groupId = Serializer.readString(buffer, Serializer.SHORT_SIZE);
         int topics = buffer.readInt();
         for (int i = 0; i < topics; i++) {
             String topic = Serializer.readString(buffer, Serializer.SHORT_SIZE);
-            Set<Integer> partitions = new HashSet<>();
+            List<Integer> partitions = new ArrayList<>();
             int partitionNum = buffer.readInt();
             for (int j = 0; j < partitionNum; j++) {
                 partitions.add(buffer.readInt());

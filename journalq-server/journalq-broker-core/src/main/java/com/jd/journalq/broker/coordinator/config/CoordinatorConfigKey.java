@@ -39,7 +39,7 @@ public enum CoordinatorConfigKey implements PropertyDef {
     TRANSACTION_LOG_APP("coordinator.transaction.log.app", "__transaction_log", Type.STRING),
     // 事务过期时间
     TRANSACTION_EXPIRE_TIME("coordinator.transaction.expire.time", 1000 * 60 * 60 * 1, Type.INT),
-    // 事务最多
+    // 最多事务数
     TRANSACTION_MAX_NUM("coordinator.transaction.max.num", 1024 * 10, Type.INT),
 
     // session同步超时

@@ -195,7 +195,7 @@ public enum KafkaErrorCode {
     public static short journalqCodeFor(int journalqCode) {
         Short code = JOURNALQ_CODE_TO_CODE_MAPPER.get(journalqCode);
         if (code == null) {
-            logger.warn("unsupported JournalqCode mapper, journalqCode: {}", journalqCode);
+            logger.warn("unsupported code mapper, code: {}", JournalqCode.valueOf(journalqCode));
             code = UNKNOWN_SERVER_ERROR.getCode();
         }
         return code;

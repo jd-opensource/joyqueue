@@ -21,15 +21,17 @@ import com.jd.journalq.broker.kafka.KafkaErrorCode;
  */
 public class OffsetMetadataAndError {
 
-    public static final OffsetMetadataAndError OFFSET_SYNC_FAIL = new OffsetMetadataAndError(OffsetAndMetadata.INVALID_OFFSET, OffsetAndMetadata.NO_METADATA, KafkaErrorCode.NOT_LEADER_FOR_PARTITION.getCode());
-    public static final OffsetMetadataAndError OFFSET_SYNC_SUCCESS = new OffsetMetadataAndError(OffsetAndMetadata.INVALID_OFFSET, OffsetAndMetadata.NO_METADATA, KafkaErrorCode.NONE.getCode());
-
     private int partition;
     private long offset;
     private String metadata = OffsetAndMetadata.NO_METADATA;
     private short error;
 
     public OffsetMetadataAndError(short error) {
+        this.error = error;
+    }
+
+    public OffsetMetadataAndError(int partition, short error) {
+        this.partition = partition;
         this.error = error;
     }
 

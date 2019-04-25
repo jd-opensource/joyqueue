@@ -3,6 +3,7 @@ package com.jd.journalq.broker.kafka.model;
 import com.jd.journalq.message.BrokerMessage;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * ProducePartitionGroupRequest
@@ -14,14 +15,16 @@ public class ProducePartitionGroupRequest {
 
     private List<Integer> partitions;
     private List<BrokerMessage> messages;
+    private Map<Integer, List<BrokerMessage>> messageMap;
 
     public ProducePartitionGroupRequest() {
 
     }
 
-    public ProducePartitionGroupRequest(List<Integer> partitions, List<BrokerMessage> messages) {
+    public ProducePartitionGroupRequest(List<Integer> partitions, List<BrokerMessage> messages, Map<Integer, List<BrokerMessage>> messageMap) {
         this.partitions = partitions;
         this.messages = messages;
+        this.messageMap = messageMap;
     }
 
     public void setPartitions(List<Integer> partitions) {
@@ -38,5 +41,13 @@ public class ProducePartitionGroupRequest {
 
     public List<BrokerMessage> getMessages() {
         return messages;
+    }
+
+    public void setMessageMap(Map<Integer, List<BrokerMessage>> messageMap) {
+        this.messageMap = messageMap;
+    }
+
+    public Map<Integer, List<BrokerMessage>> getMessageMap() {
+        return messageMap;
     }
 }

@@ -181,10 +181,7 @@ public class TransactionCompletionHandler extends Service {
             if (unCompletedTransaction == null) {
                 continue;
             }
-
-            if (unCompletedTransaction.isCompleted()) {
-                // 正常提交
-            } else if (unCompletedTransaction.isExpired(lastTime, unCompletedTransaction.getTimeout())) {
+            if (unCompletedTransaction.isExpired(lastTime, unCompletedTransaction.getTimeout())) {
                 // prepare补偿
                 if (unCompletedTransaction.isPrepared()) {
                     retryUnCompletedTransactionList.add(unCompletedTransaction);

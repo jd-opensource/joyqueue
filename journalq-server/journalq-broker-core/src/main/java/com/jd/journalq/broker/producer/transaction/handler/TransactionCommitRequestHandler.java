@@ -36,22 +36,26 @@ public class TransactionCommitRequestHandler implements CommandHandler, Type {
     public Command handle(Transport transport, Command command) {
         TransactionCommitRequest transactionCommitRequest = (TransactionCommitRequest) command.getPayload();
         Producer producer = new Producer(transactionCommitRequest.getTopic(), transactionCommitRequest.getTopic(), transactionCommitRequest.getApp(), Producer.ProducerType.JMQ);
+        int code = JournalqCode.SUCCESS.getCode();
 
-        BrokerCommit brokerCommit = new BrokerCommit();
-        brokerCommit.setTopic(transactionCommitRequest.getTopic());
-        brokerCommit.setApp(transactionCommitRequest.getApp());
-        brokerCommit.setTxId(transactionCommitRequest.getTxId());
+        for (String txId : transactionCommitRequest.getTxIds()) {
+            BrokerCommit brokerCommit = new BrokerCommit();
+            brokerCommit.setTopic(transactionCommitRequest.getTopic());
+            brokerCommit.setApp(transactionCommitRequest.getApp());
+            brokerCommit.setTxId(txId);
 
-        try {
-            produce.putTransactionMessage(producer, brokerCommit);
-            return BooleanAck.build();
-        } catch (JournalqException e) {
-            logger.error("commit transaction exception, topic: {}, app: {}", transactionCommitRequest.getTopic(), transactionCommitRequest.getApp(), e);
-            return BooleanAck.build(e.getCode());
-        } catch (Exception e) {
-            logger.error("commit transaction exception, topic: {}, app: {}", transactionCommitRequest.getTopic(), transactionCommitRequest.getApp(), e);
-            return BooleanAck.build(JournalqCode.CN_UNKNOWN_ERROR);
+            try {
+                produce.putTransactionMessage(producer, brokerCommit);
+            } catch (JournalqException e) {
+                logger.error("commit transaction exception, topic: {}, app: {}", transactionCommitRequest.getTopic(), transactionCommitRequest.getApp(), e);
+                code = e.getCode();
+            } catch (Exception e) {
+                logger.error("commit transaction exception, topic: {}, app: {}", transactionCommitRequest.getTopic(), transactionCommitRequest.getApp(), e);
+                code = JournalqCode.CN_UNKNOWN_ERROR.getCode();
+            }
         }
+
+        return BooleanAck.build(code);
     }
 
     @Override

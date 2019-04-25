@@ -14,7 +14,6 @@
 package com.jd.journalq.broker.kafka.handler;
 
 
-import com.google.common.collect.Table;
 import com.jd.journalq.broker.kafka.KafkaCommandType;
 import com.jd.journalq.broker.kafka.KafkaContext;
 import com.jd.journalq.broker.kafka.KafkaContextAware;
@@ -28,6 +27,7 @@ import com.jd.journalq.network.transport.command.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -51,22 +51,22 @@ public class OffsetCommitRequestHandler extends AbstractKafkaCommandHandler impl
     public Command handle(Transport transport, Command command) {
         OffsetCommitRequest offsetCommitRequest = (OffsetCommitRequest) command.getPayload();
 
-        Table<String, Integer, OffsetMetadataAndError> result = groupCoordinator.handleCommitOffsets(offsetCommitRequest.getGroupId(), offsetCommitRequest.getMemberId(),
-                offsetCommitRequest.getGroupGenerationId(), offsetCommitRequest.getOffsetAndMetadata());
+        Map<String, List<OffsetMetadataAndError>> result = groupCoordinator.handleCommitOffsets(offsetCommitRequest.getGroupId(), offsetCommitRequest.getMemberId(),
+                offsetCommitRequest.getGroupGenerationId(), offsetCommitRequest.getOffsets());
 
         // TODO 临时日志
         if (logger.isDebugEnabled()) {
-            for (String topic : result.rowKeySet()) {
-                Map<Integer, OffsetMetadataAndError> errorCodes = result.row(topic);
-                for (Map.Entry<Integer, OffsetMetadataAndError> codeEntry : errorCodes.entrySet()) {
-                    if (codeEntry.getValue().getError() == KafkaErrorCode.NONE.getCode()) {
+            for (Map.Entry<String, List<OffsetMetadataAndError>> entry : result.entrySet()) {
+                for (OffsetMetadataAndError offset : entry.getValue()) {
+                    if (offset.getError() == KafkaErrorCode.NONE.getCode()) {
                         logger.debug("offset commit request with correlation id {} from client {} on topic {} partition {} offset {}",
-                                offsetCommitRequest.getCorrelationId(), offsetCommitRequest.getGroupId(), topic, codeEntry.getKey(), codeEntry.getValue());
+                                offsetCommitRequest.getCorrelationId(), offsetCommitRequest.getGroupId(), entry.getKey(), offset.getPartition(), offset.getOffset());
                     } else {
                         logger.debug("offset commit request with correlation id {} from client {} on topic {} partition {} failed due to {}",
-                                offsetCommitRequest.getCorrelationId(), offsetCommitRequest.getGroupId(), topic, codeEntry.getKey(), codeEntry.getValue());
+                                offsetCommitRequest.getCorrelationId(), offsetCommitRequest.getGroupId(), entry.getKey(), offset.getPartition(), offset.getOffset());
                     }
                 }
+
             }
         }
 

@@ -1,12 +1,14 @@
 package com.jd.journalq.broker.kafka.coordinator.transaction.helper;
 
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Sets;
-import com.google.common.collect.Table;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionPrepare;
+import com.jd.journalq.domain.Broker;
 import org.apache.commons.collections.CollectionUtils;
 
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -17,18 +19,24 @@ import java.util.Set;
  */
 public class TransactionHelper {
 
-    public static Set<TransactionPrepare> filterPrepareByBroker(Set<TransactionPrepare> prepareList) {
+    public static Map<Broker, List<TransactionPrepare>> splitPrepareByBroker(Set<TransactionPrepare> prepareList) {
         if (CollectionUtils.isEmpty(prepareList)) {
-            return Collections.emptySet();
+            return Collections.emptyMap();
         }
-        Table<Integer, String, Boolean> brokerTopicTable = HashBasedTable.create();
-        Set<TransactionPrepare> result = Sets.newHashSet();
+        Map<Broker, List<TransactionPrepare>> result = Maps.newHashMapWithExpectedSize(prepareList.size());
         for (TransactionPrepare prepare : prepareList) {
-            if (brokerTopicTable.contains(prepare.getBrokerId(), prepare.getTopic())) {
-                continue;
+            Broker broker = new Broker();
+            broker.setId(prepare.getBrokerId());
+            broker.setIp(prepare.getBrokerHost());
+            broker.setPort(prepare.getBrokerPort());
+
+            List<TransactionPrepare> brokerPrepareList = result.get(broker);
+            if (brokerPrepareList == null) {
+                brokerPrepareList = Lists.newLinkedList();
+                result.put(broker, brokerPrepareList);
             }
-            brokerTopicTable.put(prepare.getBrokerId(), prepare.getTopic(), true);
-            result.add(prepare);
+
+            brokerPrepareList.add(prepare);
         }
         return result;
     }

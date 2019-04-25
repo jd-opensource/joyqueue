@@ -60,9 +60,9 @@ public class ProduceResponse extends KafkaRequestOrResponse {
             this.errorCode = errorCode;
         }
 
-        public PartitionResponse(short errorCode, long offset) {
-            this.errorCode = errorCode;
+        public PartitionResponse(long offset, short errorCode) {
             this.offset = offset;
+            this.errorCode = errorCode;
         }
 
         public PartitionResponse(int partition, long offset, short errorCode) {
