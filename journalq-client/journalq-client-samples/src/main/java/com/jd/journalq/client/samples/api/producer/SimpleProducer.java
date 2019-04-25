@@ -40,6 +40,7 @@ public class SimpleProducer {
         producer.start();
 
         Message message = producer.createMessage("test_topic_0", "body".getBytes());
+
         SendResult sendResult = producer.send(message);
         System.out.println(String.format("messageId: %s", sendResult.messageId()));
     }

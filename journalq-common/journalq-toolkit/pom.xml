@@ -69,6 +69,7 @@
             <artifactId>asm</artifactId>
             <version>${asm.version}</version>
         </dependency>
+        
     </dependencies>
 
     <build>
