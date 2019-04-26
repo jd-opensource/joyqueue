@@ -12,6 +12,7 @@ public class TransactionMarker extends TransactionDomain {
     private String transactionId;
     private long producerId;
     private short producerEpoch;
+    private short epoch;
     private TransactionState state;
     private int timeout;
     private long createTime;
@@ -20,11 +21,12 @@ public class TransactionMarker extends TransactionDomain {
 
     }
 
-    public TransactionMarker(String app, String transactionId, long producerId, short producerEpoch, TransactionState state, int timeout, long createTime) {
+    public TransactionMarker(String app, String transactionId, long producerId, short producerEpoch, short epoch, TransactionState state, int timeout, long createTime) {
         this.app = app;
         this.transactionId = transactionId;
         this.producerId = producerId;
         this.producerEpoch = producerEpoch;
+        this.epoch = epoch;
         this.state = state;
         this.timeout = timeout;
         this.createTime = createTime;
@@ -60,6 +62,14 @@ public class TransactionMarker extends TransactionDomain {
 
     public void setProducerEpoch(short producerEpoch) {
         this.producerEpoch = producerEpoch;
+    }
+
+    public void setEpoch(short epoch) {
+        this.epoch = epoch;
+    }
+
+    public short getEpoch() {
+        return epoch;
     }
 
     public TransactionState getState() {

@@ -73,15 +73,15 @@ public class TransactionHandler extends Service {
     }
 
     protected TransactionMetadata doInitProducer(TransactionMetadata transactionMetadata, int transactionTimeout) {
-        if (!transactionMetadata.getState().equals(TransactionState.EMPTY)) {
+        if (!transactionMetadata.isCompleted()) {
             tryAbort(transactionMetadata);
         }
-        transactionMetadata.transitionStateTo(TransactionState.EMPTY);
         transactionMetadata.clear();
         transactionMetadata.nextProducerEpoch();
+        transactionMetadata.nextEpoch();
         transactionMetadata.setTimeout(transactionTimeout);
-        transactionMetadata.setCreateTime(SystemClock.now());
         transactionMetadata.updateLastTime();
+        transactionMetadata.transitionStateTo(TransactionState.EMPTY);
         return transactionMetadata;
     }
 
@@ -105,14 +105,11 @@ public class TransactionHandler extends Service {
             throw new TransactionException(KafkaErrorCode.INVALID_PRODUCER_EPOCH.getCode());
         }
         if (transactionMetadata.isExpired()) {
-            throw new TransactionException(KafkaErrorCode.INVALID_TRANSACTION_TIMEOUT.getCode());
+            throw new TransactionException(KafkaErrorCode.INVALID_PRODUCER_EPOCH.getCode());
         }
-        if (!transactionMetadata.getState().equals(TransactionState.EMPTY) && !transactionMetadata.getState().equals(TransactionState.ONGOING)) {
-            throw new TransactionException(KafkaErrorCode.INVALID_TXN_STATE.getCode());
-        }
-        if (transactionMetadata.isPrepared()) {
-            throw new TransactionException(KafkaErrorCode.CONCURRENT_TRANSACTIONS.getCode());
-        }
+//        if (transactionMetadata.isPrepared()) {
+//            throw new TransactionException(KafkaErrorCode.CONCURRENT_TRANSACTIONS.getCode());
+//        }
 
         synchronized (transactionMetadata) {
             return doAddPartitionsToTxn(transactionMetadata, partitions);
@@ -138,12 +135,14 @@ public class TransactionHandler extends Service {
                 if (topicConfig != null) {
                     partitionGroup = topicConfig.fetchPartitionGroupByPartition((short) partition.intValue());
                 }
-                if (partitionGroup == null || partitionGroup.getLeaderBroker() == null) {
+                if (partitionGroup == null) {
                     partitionMetadataAndErrors.add(new PartitionMetadataAndError(partition, KafkaErrorCode.UNKNOWN_TOPIC_OR_PARTITION.getCode()));
+                } else if (partitionGroup.getLeaderBroker() == null) {
+                    partitionMetadataAndErrors.add(new PartitionMetadataAndError(partition, KafkaErrorCode.NOT_LEADER_FOR_PARTITION.getCode()));
                 } else {
                     Broker broker = partitionGroup.getLeaderBroker();
                     TransactionPrepare prepare = new TransactionPrepare(topic.getFullName(), (short) partition.intValue(), transactionMetadata.getApp(), broker.getId(), broker.getIp(), broker.getPort(),
-                            transactionMetadata.getId(), transactionMetadata.getProducerId(), transactionMetadata.getProducerEpoch(), transactionMetadata.getTimeout(), SystemClock.now());
+                            transactionMetadata.getId(), transactionMetadata.getProducerId(), transactionMetadata.getProducerEpoch(), transactionMetadata.getEpoch(), transactionMetadata.getTimeout(), SystemClock.now());
                     prepareSet.add(prepare);
                 }
             }
@@ -179,11 +178,11 @@ public class TransactionHandler extends Service {
             throw new TransactionException(KafkaErrorCode.INVALID_PRODUCER_EPOCH.getCode());
         }
         if (transactionMetadata.isExpired()) {
-            throw new TransactionException(KafkaErrorCode.INVALID_TRANSACTION_TIMEOUT.getCode());
+            throw new TransactionException(KafkaErrorCode.INVALID_PRODUCER_EPOCH.getCode());
         }
-        if (transactionMetadata.isPrepared()) {
-            throw new TransactionException(KafkaErrorCode.CONCURRENT_TRANSACTIONS.getCode());
-        }
+//        if (transactionMetadata.isPrepared()) {
+//            throw new TransactionException(KafkaErrorCode.CONCURRENT_TRANSACTIONS.getCode());
+//        }
 
         synchronized (transactionMetadata) {
             return doEndTxn(transactionMetadata, isCommit);
@@ -191,15 +190,14 @@ public class TransactionHandler extends Service {
     }
 
     protected boolean doEndTxn(TransactionMetadata transactionMetadata, boolean isCommit) {
+        transactionMetadata.updateLastTime();
+
         try {
             if (isCommit) {
                 doCommit(transactionMetadata);
             } else {
                 doAbort(transactionMetadata);
             }
-
-            transactionMetadata.transitionStateTo(TransactionState.EMPTY);
-            transactionMetadata.clear();
             return true;
         } catch (Exception e) {
             logger.error("endTxn exception, metadata: {}, isCommit: {}", transactionMetadata, isCommit, e);

@@ -42,6 +42,7 @@ public class TransactionSerializer {
                     + 2 // transactionId length
                     + 8 // producerId
                     + 2 // producerEpoch
+                    + 2 // epoch
                     + 4 // timeout
                     + 8 // createTime
             ;
@@ -51,6 +52,7 @@ public class TransactionSerializer {
                     + 2 // transactionId length
                     + 8 // producerId
                     + 2 // producerEpoch
+                    + 2 // epoch
                     + 4 // timeout
                     + 1 // state
                     + 8 // createTime
@@ -64,6 +66,7 @@ public class TransactionSerializer {
                     + 2 // transactionId length
                     + 8 // producerId
                     + 2 // producerEpoch
+                    + 2 // epoch
                     + 4 // timeout
                     + 8 // createTime
             ;
@@ -96,6 +99,7 @@ public class TransactionSerializer {
         Serializer.write(prepare.getTransactionId(), buffer, Serializer.SHORT_SIZE);
         buffer.putLong(prepare.getProducerId());
         buffer.putShort(prepare.getProducerEpoch());
+        buffer.putShort(prepare.getEpoch());
         buffer.putInt(prepare.getTimeout());
         buffer.putLong(prepare.getCreateTime());
     }
@@ -111,6 +115,7 @@ public class TransactionSerializer {
         prepare.setTransactionId(Serializer.readString(buffer, Serializer.SHORT_SIZE));
         prepare.setProducerId(buffer.getLong());
         prepare.setProducerEpoch(buffer.getShort());
+        prepare.setEpoch(buffer.getShort());
         prepare.setTimeout(buffer.getInt());
         prepare.setCreateTime(buffer.getLong());
         return prepare;
@@ -133,6 +138,7 @@ public class TransactionSerializer {
         Serializer.write(marker.getTransactionId(), buffer, Serializer.BYTE_SIZE);
         buffer.putLong(marker.getProducerId());
         buffer.putShort(marker.getProducerEpoch());
+        buffer.putShort(marker.getEpoch());
         buffer.put((byte) marker.getState().getValue());
         buffer.putInt(marker.getTimeout());
         buffer.putLong(marker.getCreateTime());
@@ -144,6 +150,7 @@ public class TransactionSerializer {
         marker.setTransactionId(Serializer.readString(buffer, Serializer.BYTE_SIZE));
         marker.setProducerId(buffer.getLong());
         marker.setProducerEpoch(buffer.getShort());
+        marker.setEpoch(buffer.getShort());
         marker.setState(TransactionState.valueOf(buffer.get()));
         marker.setTimeout(buffer.getInt());
         marker.setCreateTime(buffer.getLong());
@@ -172,6 +179,7 @@ public class TransactionSerializer {
         Serializer.write(offset.getTransactionId(), buffer, Serializer.SHORT_SIZE);
         buffer.putLong(offset.getProducerId());
         buffer.putShort(offset.getProducerEpoch());
+        buffer.putShort(offset.getEpoch());
         buffer.putInt(offset.getTimeout());
         buffer.putLong(offset.getCreateTime());
     }
@@ -185,6 +193,7 @@ public class TransactionSerializer {
         transactionOffset.setTransactionId(Serializer.readString(buffer, Serializer.SHORT_SIZE));
         transactionOffset.setProducerId(buffer.getLong());
         transactionOffset.setProducerEpoch(buffer.getShort());
+        transactionOffset.setEpoch(buffer.getShort());
         transactionOffset.setTimeout(buffer.getInt());
         transactionOffset.setCreateTime(buffer.getLong());
         return transactionOffset;

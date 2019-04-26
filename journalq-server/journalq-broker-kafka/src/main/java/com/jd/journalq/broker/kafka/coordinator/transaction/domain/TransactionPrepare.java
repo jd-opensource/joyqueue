@@ -20,6 +20,7 @@ public class TransactionPrepare extends TransactionDomain {
     private String transactionId;
     private long producerId;
     private short producerEpoch;
+    private short epoch;
     private int timeout;
     private long createTime;
 
@@ -28,7 +29,7 @@ public class TransactionPrepare extends TransactionDomain {
     }
 
     public TransactionPrepare(String topic, short partition, String app, int brokerId, String brokerHost, int brokerPort, String transactionId,
-                              long producerId, short producerEpoch, int timeout, long createTime) {
+                              long producerId, short producerEpoch, short epoch, int timeout, long createTime) {
         this.topic = topic;
         this.partition = partition;
         this.app = app;
@@ -38,6 +39,7 @@ public class TransactionPrepare extends TransactionDomain {
         this.transactionId = transactionId;
         this.producerId = producerId;
         this.producerEpoch = producerEpoch;
+        this.epoch = epoch;
         this.timeout = timeout;
         this.createTime = createTime;
     }
@@ -96,6 +98,14 @@ public class TransactionPrepare extends TransactionDomain {
 
     public void setTimeout(int timeout) {
         this.timeout = timeout;
+    }
+
+    public void setEpoch(short epoch) {
+        this.epoch = epoch;
+    }
+
+    public short getEpoch() {
+        return epoch;
     }
 
     public void setTransactionId(String transactionId) {

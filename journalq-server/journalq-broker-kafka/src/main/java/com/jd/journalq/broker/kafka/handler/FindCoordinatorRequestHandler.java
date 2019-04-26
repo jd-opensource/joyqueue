@@ -49,26 +49,26 @@ public class FindCoordinatorRequestHandler extends AbstractKafkaCommandHandler i
         CoordinatorType coordinatorType = ObjectUtils.defaultIfNull(findCoordinatorRequest.getCoordinatorType(), CoordinatorType.GROUP);
         String coordinatorKey = findCoordinatorRequest.getCoordinatorKey();
         if (coordinatorType.equals(CoordinatorType.TRANSACTION)) {
-            coordinatorKey = KafkaClientHelper.parseClient(findCoordinatorRequest.getClientId());
+            coordinatorKey = findCoordinatorRequest.getClientId();
         }
+        coordinatorKey = KafkaClientHelper.parseClient(coordinatorKey);
 
         if (StringUtils.isBlank(coordinatorKey)) {
             logger.warn("coordinatorKey error, coordinatorKey: {}", coordinatorKey);
             return new Command(new FindCoordinatorResponse(KafkaErrorCode.INVALID_GROUP_ID.getCode(), KafkaBroker.INVALID));
         }
 
-        coordinatorKey = KafkaClientHelper.parseClient(coordinatorKey);
         Broker coordinator = null;
         if (coordinatorType.equals(CoordinatorType.GROUP)) {
             if (!nameService.hasSubscribe(coordinatorKey, Subscription.Type.CONSUMPTION)) {
                 logger.warn("find subscribe for coordinatorKey {}, subscribe not exist", coordinatorKey);
-                return new Command(new FindCoordinatorResponse(KafkaErrorCode.INVALID_GROUP_ID.getCode(), KafkaBroker.INVALID));
+                return new Command(new FindCoordinatorResponse(KafkaErrorCode.GROUP_AUTHORIZATION_FAILED.getCode(), KafkaBroker.INVALID));
             }
             coordinator = groupCoordinator.findCoordinator(coordinatorKey);
         } else if (coordinatorType.equals(CoordinatorType.TRANSACTION)) {
             if (!nameService.hasSubscribe(coordinatorKey, Subscription.Type.PRODUCTION)) {
                 logger.warn("find subscribe for coordinatorKey {}, subscribe not exist", coordinatorKey);
-                return new Command(new FindCoordinatorResponse(KafkaErrorCode.INVALID_GROUP_ID.getCode(), KafkaBroker.INVALID));
+                return new Command(new FindCoordinatorResponse(KafkaErrorCode.TRANSACTIONAL_ID_AUTHORIZATION_FAILED.getCode(), KafkaBroker.INVALID));
             }
             coordinator = transactionCoordinator.findCoordinator(coordinatorKey);
         }

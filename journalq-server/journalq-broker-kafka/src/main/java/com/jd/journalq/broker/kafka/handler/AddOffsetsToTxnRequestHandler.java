@@ -43,7 +43,7 @@ public class AddOffsetsToTxnRequestHandler implements KafkaCommandHandler, Type,
             boolean isSuccess = transactionCoordinator.handleAddOffsetsToTxn(clientId, addOffsetsToTxnRequest.getTransactionId(), addOffsetsToTxnRequest.getGroupId(), addOffsetsToTxnRequest.getProducerId(), addOffsetsToTxnRequest.getProducerEpoch());
             response = new AddOffsetsToTxnResponse(KafkaErrorCode.NONE.getCode());
         } catch (TransactionException e) {
-            logger.warn("add offsets to txn exception, code: {}, message: {}, request: {}, code: {}", e.getCode(), e.getMessage(), addOffsetsToTxnRequest, e.getCode());
+            logger.warn("add offsets to txn exception, code: {}, message: {}, request: {}", e.getCode(), e.getMessage(), addOffsetsToTxnRequest);
             response = new AddOffsetsToTxnResponse((short) e.getCode());
         } catch (Exception e) {
             logger.error("add offsets to txn exception, request: {}", addOffsetsToTxnRequest, e);

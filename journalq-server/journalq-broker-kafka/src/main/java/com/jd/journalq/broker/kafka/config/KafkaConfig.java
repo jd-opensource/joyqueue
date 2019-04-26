@@ -130,6 +130,10 @@ public class KafkaConfig {
         return getConfig(KafkaConfigKey.REBALANCE_TIMEOUT);
     }
 
+    public int getRebalanceHeartbeatOverflow() {
+        return getConfig(KafkaConfigKey.REBALANCE_HEARTBEAT_OVERFLOW);
+    }
+
     protected <T> T getConfig(String key, PropertyDef.Type type, Object defaultValue) {
         return PropertySupplier.getValue(this.propertySupplier, key, type, defaultValue);
     }

@@ -47,10 +47,16 @@ public class TransactionRollbackRequestHandler implements CommandHandler, Type {
             try {
                 produce.putTransactionMessage(producer, brokerRollback);
             } catch (JournalqException e) {
-                logger.error("rollback transaction exception, topic: {}, app: {}", transactionRollbackRequest.getTopic(), transactionRollbackRequest.getApp(), e);
-                code = e.getCode();
+                if (e.getCode() == JournalqCode.CN_TRANSACTION_NOT_EXISTS.getCode()) {
+                    logger.error("rollback transaction error, transaction not exists, topic: {}, app: {}, txId: {}", transactionRollbackRequest.getTopic(), transactionRollbackRequest.getApp(), txId);
+                } else {
+                    logger.error("rollback transaction exception, topic: {}, app: {}, txId: {}", transactionRollbackRequest.getTopic(), transactionRollbackRequest.getApp(), txId, e);
+                }
+                if (e.getCode() != JournalqCode.SUCCESS.getCode()) {
+                    code = e.getCode();
+                }
             } catch (Exception e) {
-                logger.error("rollback transaction exception, topic: {}, app: {}", transactionRollbackRequest.getTopic(), transactionRollbackRequest.getApp(), e);
+                logger.error("rollback transaction exception, topic: {}, app: {}, txId: {}", transactionRollbackRequest.getTopic(), transactionRollbackRequest.getApp(), txId, e);
                 code = JournalqCode.CN_UNKNOWN_ERROR.getCode();
             }
         }

@@ -17,6 +17,7 @@ public class TransactionOffset extends TransactionDomain {
     private String transactionId;
     private long producerId;
     private short producerEpoch;
+    private short epoch;
     private int timeout;
     private long createTime;
 
@@ -24,7 +25,7 @@ public class TransactionOffset extends TransactionDomain {
 
     }
 
-    public TransactionOffset(String topic, short partition, long offset, String app, String transactionId, long producerId, short producerEpoch, int timeout, long createTime) {
+    public TransactionOffset(String topic, short partition, long offset, String app, String transactionId, long producerId, short producerEpoch, short epoch, int timeout, long createTime) {
         this.topic = topic;
         this.partition = partition;
         this.offset = offset;
@@ -32,6 +33,7 @@ public class TransactionOffset extends TransactionDomain {
         this.transactionId = transactionId;
         this.producerId = producerId;
         this.producerEpoch = producerEpoch;
+        this.epoch = epoch;
         this.timeout = timeout;
         this.createTime = createTime;
     }
@@ -90,6 +92,14 @@ public class TransactionOffset extends TransactionDomain {
 
     public void setProducerEpoch(short producerEpoch) {
         this.producerEpoch = producerEpoch;
+    }
+
+    public void setEpoch(short epoch) {
+        this.epoch = epoch;
+    }
+
+    public short getEpoch() {
+        return epoch;
     }
 
     public int getTimeout() {

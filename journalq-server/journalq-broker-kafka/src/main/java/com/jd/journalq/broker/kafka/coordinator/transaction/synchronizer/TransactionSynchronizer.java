@@ -3,12 +3,12 @@ package com.jd.journalq.broker.kafka.coordinator.transaction.synchronizer;
 import com.jd.journalq.broker.coordinator.session.CoordinatorSessionManager;
 import com.jd.journalq.broker.kafka.config.KafkaConfig;
 import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionIdManager;
-import com.jd.journalq.broker.kafka.coordinator.transaction.log.TransactionLog;
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionMarker;
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionMetadata;
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionOffset;
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionPrepare;
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionState;
+import com.jd.journalq.broker.kafka.coordinator.transaction.log.TransactionLog;
 import com.jd.journalq.nsr.NameService;
 import com.jd.journalq.toolkit.service.Service;
 import com.jd.journalq.toolkit.time.SystemClock;
@@ -76,15 +76,19 @@ public class TransactionSynchronizer extends Service {
     }
 
     public boolean commit(TransactionMetadata transactionMetadata, Set<TransactionPrepare> prepare, Set<TransactionOffset> offsets) throws Exception {
+        if (!tryCommit(transactionMetadata, prepare, offsets)) {
+            return false;
+        }
+        return writeMarker(transactionMetadata, TransactionState.COMPLETE_COMMIT);
+    }
+
+    public boolean tryCommit(TransactionMetadata transactionMetadata, Set<TransactionPrepare> prepare, Set<TransactionOffset> offsets) throws Exception {
         boolean isSuccess = true;
         if (CollectionUtils.isNotEmpty(prepare)) {
             isSuccess = transactionCommitSynchronizer.commitPrepare(transactionMetadata, prepare);
         }
         if (isSuccess && CollectionUtils.isNotEmpty(offsets)) {
             isSuccess = transactionCommitSynchronizer.commitOffsets(transactionMetadata, offsets);
-        }
-        if (isSuccess) {
-            writeMarker(transactionMetadata, TransactionState.COMPLETE_COMMIT);
         }
         return isSuccess;
     }
@@ -94,8 +98,11 @@ public class TransactionSynchronizer extends Service {
     }
 
     public boolean abort(TransactionMetadata transactionMetadata, Set<TransactionPrepare> prepare) throws Exception {
-        return transactionAbortSynchronizer.abort(transactionMetadata, prepare) &&
-                writeMarker(transactionMetadata, TransactionState.COMPLETE_ABORT);
+        return tryAbort(transactionMetadata, prepare) && writeMarker(transactionMetadata, TransactionState.COMPLETE_ABORT);
+    }
+
+    public boolean tryAbort(TransactionMetadata transactionMetadata, Set<TransactionPrepare> prepare) throws Exception {
+        return transactionAbortSynchronizer.abort(transactionMetadata, prepare);
     }
 
     public boolean commitOffset(TransactionMetadata transactionMetadata, Set<TransactionOffset> offsets) throws Exception {
@@ -109,6 +116,6 @@ public class TransactionSynchronizer extends Service {
 
     protected TransactionMarker convertMarker(TransactionMetadata transactionMetadata, TransactionState transactionState) {
         return new TransactionMarker(transactionMetadata.getApp(), transactionMetadata.getId(), transactionMetadata.getProducerId(),
-                transactionMetadata.getProducerEpoch(), transactionState, transactionMetadata.getTimeout(), SystemClock.now());
+                transactionMetadata.getProducerEpoch(), transactionMetadata.getEpoch(), transactionState, transactionMetadata.getTimeout(), SystemClock.now());
     }
 }

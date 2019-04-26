@@ -217,8 +217,7 @@ public class GroupBalanceManager extends Service {
         }
 
         // reschedule the next heartbeat expiration deadline
-        // TODO 临时处理，在其他分支详细处理
-        long delayTimeout = member.getSessionTimeout() * 3;
+        long delayTimeout = member.getSessionTimeout() * config.getRebalanceHeartbeatOverflow();
         long newHeartbeatDeadline = member.getLatestHeartbeat() + member.getSessionTimeout();
         DelayedHeartbeat delayedHeartbeat = new DelayedHeartbeat(this, group, member, newHeartbeatDeadline, delayTimeout);
         heartbeatPurgatory.tryCompleteElseWatch(delayedHeartbeat, Sets.newHashSet(memberKey));

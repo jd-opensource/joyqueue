@@ -38,6 +38,8 @@ public enum KafkaConfigKey implements PropertyDef {
     REBALANCE_INITIAL_DELAY("kafka.rebalance.initial.delay", 1000 * 3, Type.INT),
     // rebalance超时时间
     REBALANCE_TIMEOUT("kafka.rebalance.timeout", 1000 * 60, Type.INT),
+    // rebalance心跳溢出
+    REBALANCE_HEARTBEAT_OVERFLOW("kafka.rebalance.heartbeat.overflow", 3, Type.INT),
 
     // offset同步超时
     OFFSET_SYNC_TIMEOUT("kafka.offset.sync.timeout", 1000 * 3, Type.INT),
@@ -55,8 +57,7 @@ public enum KafkaConfigKey implements PropertyDef {
     // 事务重试次数
     TRANSACTION_LOG_RETRIES("kafka.transaction.log.reties", 3, Type.INT),
     // 事务间隔
-    // TODO 间隔时间
-    TRANSACTION_LOG_INTERVAL("kafka.transaction.log.interval", 1000 * 30, Type.INT),
+    TRANSACTION_LOG_INTERVAL("kafka.transaction.log.interval", 1000 * 60 * 1, Type.INT),
     // 事务扫描大小
     TRANSACTION_LOG_SCAN_SIZE("kafka.transaction.log.scan.size", 1000, Type.INT),
     // 事务日志app

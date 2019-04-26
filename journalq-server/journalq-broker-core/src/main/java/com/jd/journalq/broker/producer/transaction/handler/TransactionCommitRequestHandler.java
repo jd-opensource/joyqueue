@@ -47,10 +47,16 @@ public class TransactionCommitRequestHandler implements CommandHandler, Type {
             try {
                 produce.putTransactionMessage(producer, brokerCommit);
             } catch (JournalqException e) {
-                logger.error("commit transaction exception, topic: {}, app: {}", transactionCommitRequest.getTopic(), transactionCommitRequest.getApp(), e);
-                code = e.getCode();
+                if (e.getCode() == JournalqCode.CN_TRANSACTION_NOT_EXISTS.getCode()) {
+                    logger.error("commit transaction error, transaction not exists, topic: {}, app: {}, txId: {}", transactionCommitRequest.getTopic(), transactionCommitRequest.getApp(), txId);
+                } else {
+                    logger.error("commit transaction exception, topic: {}, app: {}, txId: {}", transactionCommitRequest.getTopic(), transactionCommitRequest.getApp(), txId, e);
+                }
+                if (e.getCode() != JournalqCode.SUCCESS.getCode()) {
+                    code = e.getCode();
+                }
             } catch (Exception e) {
-                logger.error("commit transaction exception, topic: {}, app: {}", transactionCommitRequest.getTopic(), transactionCommitRequest.getApp(), e);
+                logger.error("commit transaction exception, topic: {}, app: {}, txId: {}", transactionCommitRequest.getTopic(), transactionCommitRequest.getApp(), txId, e);
                 code = JournalqCode.CN_UNKNOWN_ERROR.getCode();
             }
         }

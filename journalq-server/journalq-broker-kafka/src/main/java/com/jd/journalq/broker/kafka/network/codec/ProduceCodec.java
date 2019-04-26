@@ -66,7 +66,6 @@ public class ProduceCodec implements KafkaPayloadCodec<ProduceResponse>, Type {
                 byte[] bytes = new byte[messageSetSize];
                 buffer.readBytes(bytes);
 
-                // TODO buffer优化，不需要buffer
                 List<KafkaBrokerMessage> messages = KafkaMessageSerializer.readMessages(ByteBuffer.wrap(bytes));
                 if (!produceRequest.isTransaction()) {
                     for (KafkaBrokerMessage message : messages) {

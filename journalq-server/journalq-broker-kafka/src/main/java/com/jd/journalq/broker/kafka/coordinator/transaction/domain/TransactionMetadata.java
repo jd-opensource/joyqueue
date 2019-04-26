@@ -18,6 +18,7 @@ public class TransactionMetadata extends com.jd.journalq.broker.coordinator.tran
     private int timeout;
     private long producerId;
     private short producerEpoch = 0;
+    private short epoch = 0;
     private long createTime;
     private long lastTime;
     private TransactionState state = TransactionState.EMPTY;
@@ -146,6 +147,10 @@ public class TransactionMetadata extends com.jd.journalq.broker.coordinator.tran
         this.producerEpoch++;
     }
 
+    public void nextEpoch() {
+        this.epoch++;
+    }
+
     public boolean isCompleted() {
         return state.equals(TransactionState.COMPLETE_ABORT) || state.equals(TransactionState.COMPLETE_COMMIT) || state.equals(TransactionState.DEAD);
     }
@@ -190,6 +195,14 @@ public class TransactionMetadata extends com.jd.journalq.broker.coordinator.tran
 
     public void setProducerEpoch(short producerEpoch) {
         this.producerEpoch = producerEpoch;
+    }
+
+    public void setEpoch(short epoch) {
+        this.epoch = epoch;
+    }
+
+    public short getEpoch() {
+        return epoch;
     }
 
     public void setCreateTime(long createTime) {

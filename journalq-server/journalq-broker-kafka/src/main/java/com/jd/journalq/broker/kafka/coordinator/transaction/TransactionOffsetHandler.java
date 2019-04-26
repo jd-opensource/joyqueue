@@ -13,6 +13,7 @@ import com.jd.journalq.broker.kafka.model.OffsetAndMetadata;
 import com.jd.journalq.broker.kafka.model.PartitionMetadataAndError;
 import com.jd.journalq.toolkit.service.Service;
 import com.jd.journalq.toolkit.time.SystemClock;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +28,6 @@ import java.util.Set;
  * email: gaohaoxiang@jd.com
  * date: 2019/4/16
  */
-// TODO 补充日志
 public class TransactionOffsetHandler extends Service {
 
     protected static final Logger logger = LoggerFactory.getLogger(TransactionOffsetHandler.class);
@@ -42,7 +42,6 @@ public class TransactionOffsetHandler extends Service {
         this.transactionSynchronizer = transactionSynchronizer;
     }
 
-    // 什么都不做，真正提交时处理
     public boolean addOffsetsToTxn(String clientId, String transactionId, String groupId, long producerId, short producerEpoch) {
         checkCoordinatorState(clientId, transactionId);
 
@@ -53,12 +52,9 @@ public class TransactionOffsetHandler extends Service {
         if (transactionMetadata.getProducerEpoch() != producerEpoch) {
             throw new TransactionException(KafkaErrorCode.INVALID_PRODUCER_EPOCH.getCode());
         }
-        if (transactionMetadata.isExpired()) {
-            throw new TransactionException(KafkaErrorCode.INVALID_TRANSACTION_TIMEOUT.getCode());
-        }
-        if (transactionMetadata.isPrepared()) {
-            throw new TransactionException(KafkaErrorCode.CONCURRENT_TRANSACTIONS.getCode());
-        }
+//        if (transactionMetadata.isPrepared()) {
+//            throw new TransactionException(KafkaErrorCode.CONCURRENT_TRANSACTIONS.getCode());
+//        }
 
         transactionMetadata.updateLastTime();
         return true;
@@ -74,12 +70,9 @@ public class TransactionOffsetHandler extends Service {
         if (transactionMetadata.getProducerEpoch() != producerEpoch) {
             throw new TransactionException(KafkaErrorCode.INVALID_PRODUCER_EPOCH.getCode());
         }
-        if (transactionMetadata.isExpired()) {
-            throw new TransactionException(KafkaErrorCode.INVALID_TRANSACTION_TIMEOUT.getCode());
-        }
-        if (transactionMetadata.isPrepared()) {
-            throw new TransactionException(KafkaErrorCode.CONCURRENT_TRANSACTIONS.getCode());
-        }
+//        if (transactionMetadata.isPrepared()) {
+//            throw new TransactionException(KafkaErrorCode.CONCURRENT_TRANSACTIONS.getCode());
+//        }
 
         synchronized (transactionMetadata) {
             return doCommitOffset(transactionMetadata, offsetts);
@@ -90,18 +83,19 @@ public class TransactionOffsetHandler extends Service {
         transactionMetadata.updateLastTime();
 
         Set<TransactionOffset> transactionOffsets = Sets.newHashSet();
-        long now = SystemClock.now();
 
         for (Map.Entry<String, List<OffsetAndMetadata>> entry : offsets.entrySet()) {
             for (OffsetAndMetadata offsetAndMetadata : entry.getValue()) {
                 transactionOffsets.add(new TransactionOffset(entry.getKey(), (short) offsetAndMetadata.getPartition(), offsetAndMetadata.getOffset(), transactionMetadata.getApp(),
-                        transactionMetadata.getId(), transactionMetadata.getProducerId(), transactionMetadata.getProducerEpoch(), transactionMetadata.getTimeout(), now));
+                        transactionMetadata.getId(), transactionMetadata.getProducerId(), transactionMetadata.getProducerEpoch(), transactionMetadata.getEpoch(), transactionMetadata.getTimeout(), SystemClock.now()));
             }
         }
 
         try {
-            transactionMetadata.addOffsets(transactionOffsets);
-            transactionSynchronizer.commitOffset(transactionMetadata, transactionOffsets);
+            if (CollectionUtils.isNotEmpty(transactionOffsets)) {
+                transactionMetadata.addOffsets(transactionOffsets);
+                transactionSynchronizer.commitOffset(transactionMetadata, transactionOffsets);
+            }
             return buildPartitionMetadataAndError(offsets, KafkaErrorCode.NONE.getCode());
         } catch (Exception e) {
             logger.error("commitOffset exception, metadata: {}, offsets: {}", transactionMetadata, offsets, e);

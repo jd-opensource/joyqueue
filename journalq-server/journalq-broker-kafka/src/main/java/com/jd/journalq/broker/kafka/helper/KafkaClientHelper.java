@@ -27,6 +27,9 @@ public class KafkaClientHelper {
     private static final String[] REPLACE = {"spark-executor-"};
 
     public static String parseClient(String clientId) {
+        if (StringUtils.isBlank(clientId)) {
+            return clientId;
+        }
         for (String replace : REPLACE) {
             clientId = clientId.replace(replace, "");
         }

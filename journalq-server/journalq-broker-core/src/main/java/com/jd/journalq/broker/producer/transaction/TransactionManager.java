@@ -1,5 +1,6 @@
 package com.jd.journalq.broker.producer.transaction;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jd.journalq.broker.buffer.Serializer;
@@ -22,11 +23,9 @@ import com.jd.journalq.store.WriteRequest;
 import com.jd.journalq.store.WriteResult;
 import com.jd.journalq.store.message.MessageParser;
 import com.jd.journalq.store.transaction.TransactionStore;
-import com.google.common.base.Strings;
 import com.jd.journalq.toolkit.service.Service;
 import com.jd.journalq.toolkit.time.SystemClock;
 import org.apache.commons.lang3.StringUtils;
-import org.jcodings.exception.JCodingsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -125,7 +124,7 @@ public class TransactionManager extends Service {
 
         TransactionId transactionId = unCompletedTransactionManager.getTransaction(commit.getTopic(), commit.getApp(), commit.getTxId());
         if (transactionId == null) {
-            logger.error("The current tx is not in txManager, topic: {}, app: {}, txId: {}", commit.getTxId(), commit.getApp(), commit.getTxId());
+            logger.debug("The current tx is not in txManager, topic: {}, app: {}, txId: {}", commit.getTxId(), commit.getApp(), commit.getTxId());
             throw new JournalqException(JournalqCode.CN_TRANSACTION_NOT_EXISTS);
         }
 
@@ -218,7 +217,7 @@ public class TransactionManager extends Service {
 
         TransactionId transactionId = unCompletedTransactionManager.getTransaction(rollback.getTopic(), rollback.getApp(), rollback.getTxId());
         if (transactionId == null) {
-            logger.warn("transaction not exist, topic: {}, id: {}", producer.getTopic(), rollback.getTxId());
+            logger.debug("transaction not exist, topic: {}, id: {}", producer.getTopic(), rollback.getTxId());
             throw new JournalqException(JournalqCode.CN_TRANSACTION_NOT_EXISTS);
         }
 
@@ -236,7 +235,7 @@ public class TransactionManager extends Service {
 
         TransactionId transactionId = unCompletedTransactionManager.getTransaction(producer.getTopic(), producer.getApp(), txId);
         if (transactionId == null) {
-            logger.error("The current tx is not in txManager! txId:{}...", txId);
+            logger.debug("The current tx is not in txManager! txId:{}...", txId);
             throw new JournalqException(JournalqCode.CN_TRANSACTION_NOT_EXISTS);
         }
 
