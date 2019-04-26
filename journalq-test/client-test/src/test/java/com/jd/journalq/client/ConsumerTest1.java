@@ -71,7 +71,7 @@ public class ConsumerTest1 extends AbstractConsumerTest {
         });
         Assert.assertEquals(true, consumer.isBindQueue());
 
-        Thread.currentThread().sleep(1000 * 5);
+        Thread.currentThread().sleep(1000 * 10);
 
         consumer.suspend();
         Assert.assertEquals(true, consumer.isSuspended());
@@ -135,7 +135,7 @@ public class ConsumerTest1 extends AbstractConsumerTest {
             }
         });
 
-        Thread.currentThread().sleep(1000 * 5);
+        Thread.currentThread().sleep(1000 * 10);
     }
 
     @Test

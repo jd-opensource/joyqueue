@@ -8,6 +8,7 @@ import com.jd.journalq.broker.config.BrokerConfig;
 import com.jd.journalq.broker.helper.SessionHelper;
 import com.jd.journalq.broker.protocol.JournalqCommandHandler;
 import com.jd.journalq.broker.protocol.converter.BrokerNodeConverter;
+import com.jd.journalq.broker.protocol.converter.PolicyConverter;
 import com.jd.journalq.domain.Broker;
 import com.jd.journalq.domain.Consumer;
 import com.jd.journalq.domain.DataCenter;
@@ -15,6 +16,7 @@ import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.domain.Producer;
 import com.jd.journalq.domain.TopicConfig;
 import com.jd.journalq.domain.TopicName;
+import com.jd.journalq.domain.TopicType;
 import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.command.BooleanAck;
 import com.jd.journalq.network.command.FetchClusterRequest;
@@ -91,6 +93,7 @@ public class FetchClusterRequestHandler implements JournalqCommandHandler, Type,
 
         Topic result = new Topic();
         result.setTopic(topic);
+        result.setType(TopicType.TOPIC);
 
         if (topicConfig == null) {
             logger.warn("topic not exist, topic: {}, app: {}", topic, app);
@@ -109,24 +112,23 @@ public class FetchClusterRequestHandler implements JournalqCommandHandler, Type,
 
         if (producer != null) {
             if (producer.getProducerPolicy() == null) {
-                result.setProducerPolicy(brokerContext.getProducerPolicy());
+                result.setProducerPolicy(PolicyConverter.convertProducer(brokerContext.getProducerPolicy()));
             } else {
-                result.setProducerPolicy(producer.getProducerPolicy());
+                result.setProducerPolicy(PolicyConverter.convertProducer(producer.getProducerPolicy()));
             }
         }
 
-        //TODO
         if (consumer != null) {
             if (consumer.getConsumerPolicy() == null) {
-                result.setConsumerPolicy(brokerContext.getConsumerPolicy());
+                result.setConsumerPolicy(PolicyConverter.convertConsumer(brokerContext.getConsumerPolicy()));
             } else {
-                result.setConsumerPolicy(consumer.getConsumerPolicy());
+                result.setConsumerPolicy(PolicyConverter.convertConsumer(consumer.getConsumerPolicy()));
             }
+            result.setType(consumer.getTopicType());
         }
 
         result.setCode(JournalqCode.SUCCESS);
         result.setPartitionGroups(convertTopicPartitionGroups(connection, topicConfig.getPartitionGroups().values(), brokers));
-        result.setType(topicConfig.getType());
         return result;
     }
 

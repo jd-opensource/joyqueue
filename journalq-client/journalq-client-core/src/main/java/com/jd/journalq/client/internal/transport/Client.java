@@ -142,11 +142,9 @@ public class Client extends Service {
         switch (transport.state()) {
             case CONNECTED: {
                 return ClientState.CONNECTED;
-            }
-            case DISCONNECTED: {
+            } case DISCONNECTED: {
                 return ClientState.DISCONNECTED;
-            }
-            default: {
+            } default: {
                 throw new IllegalArgumentException(String.format("unknown state, %s", transport.state()));
             }
         }

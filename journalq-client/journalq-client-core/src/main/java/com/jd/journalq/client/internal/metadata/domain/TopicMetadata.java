@@ -13,9 +13,9 @@
  */
 package com.jd.journalq.client.internal.metadata.domain;
 
-import com.jd.journalq.domain.Consumer;
-import com.jd.journalq.domain.Producer;
-import com.jd.journalq.domain.Topic;
+import com.jd.journalq.domain.ConsumerPolicy;
+import com.jd.journalq.domain.ProducerPolicy;
+import com.jd.journalq.domain.TopicType;
 import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.domain.BrokerNode;
 
@@ -32,9 +32,9 @@ import java.util.Map;
 public class TopicMetadata implements Serializable {
 
     private String topic;
-    private Producer.ProducerPolicy producerPolicy;
-    private Consumer.ConsumerPolicy consumerPolicy;
-    private Topic.Type type;
+    private ProducerPolicy producerPolicy;
+    private ConsumerPolicy consumerPolicy;
+    private TopicType type;
     private JournalqCode code;
 
     private List<PartitionGroupMetadata> partitionGroups;
@@ -60,7 +60,7 @@ public class TopicMetadata implements Serializable {
         this.code = code;
     }
 
-    public TopicMetadata(String topic, Producer.ProducerPolicy producerPolicy, Consumer.ConsumerPolicy consumerPolicy, Topic.Type type, List<PartitionGroupMetadata> partitionGroups,
+    public TopicMetadata(String topic, ProducerPolicy producerPolicy, ConsumerPolicy consumerPolicy, TopicType type, List<PartitionGroupMetadata> partitionGroups,
                          List<PartitionMetadata> partitions, Map<Short, PartitionMetadata> partitionMap, Map<Integer, PartitionGroupMetadata> partitionGroupMap, List<BrokerNode> brokers,
                          List<BrokerNode> nearbyBrokers, Map<Integer, BrokerNode> brokerMap, Map<Integer, List<PartitionMetadata>> brokerPartitions,
                          Map<Integer, List<PartitionGroupMetadata>> brokerPartitionGroups, JournalqCode code) {
@@ -86,16 +86,16 @@ public class TopicMetadata implements Serializable {
             return unmodifiableTopicMetadata;
         }
 
-        Producer.ProducerPolicy newProducerPolicy = null;
-        Consumer.ConsumerPolicy newConsumerPolicy = null;
+        ProducerPolicy newProducerPolicy = null;
+        ConsumerPolicy newConsumerPolicy = null;
 
         if (producerPolicy != null) {
-            newProducerPolicy = new Producer.ProducerPolicy(producerPolicy.getNearby(), producerPolicy.isSingle(), producerPolicy.getArchive(),
+            newProducerPolicy = new ProducerPolicy(producerPolicy.getNearby(), producerPolicy.getSingle(), producerPolicy.getArchive(),
                     producerPolicy.getWeight(), producerPolicy.getBlackList(), producerPolicy.getTimeOut());
         }
 
         if (consumerPolicy != null) {
-            newConsumerPolicy = new Consumer.ConsumerPolicy(consumerPolicy.getNearby(), consumerPolicy.getPaused(), consumerPolicy.getArchive(), consumerPolicy.getRetry(), consumerPolicy.getSeq(),
+            newConsumerPolicy = new ConsumerPolicy(consumerPolicy.getNearby(), consumerPolicy.getPaused(), consumerPolicy.getArchive(), consumerPolicy.getRetry(), consumerPolicy.getSeq(),
                     consumerPolicy.getAckTimeout(), consumerPolicy.getBatchSize(), consumerPolicy.getConcurrent(), consumerPolicy.getDelay(),
                     consumerPolicy.getBlackList(), consumerPolicy.getErrTimes(), consumerPolicy.getMaxPartitionNum(), consumerPolicy.getReadRetryProbability(),null);
         }
@@ -109,15 +109,15 @@ public class TopicMetadata implements Serializable {
         return topic;
     }
 
-    public Producer.ProducerPolicy getProducerPolicy() {
+    public ProducerPolicy getProducerPolicy() {
         return producerPolicy;
     }
 
-    public Consumer.ConsumerPolicy getConsumerPolicy() {
+    public ConsumerPolicy getConsumerPolicy() {
         return consumerPolicy;
     }
 
-    public Topic.Type getType() {
+    public TopicType getType() {
         return type;
     }
 

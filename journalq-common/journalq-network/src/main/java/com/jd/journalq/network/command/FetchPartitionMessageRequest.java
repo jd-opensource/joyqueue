@@ -31,7 +31,7 @@ public class FetchPartitionMessageRequest extends JournalqPayload {
 
     @Override
     public int type() {
-        return JournalqCommandType.FETCH_PARTITION_MESSAGE_RESPONSE.getCode();
+        return JournalqCommandType.FETCH_PARTITION_MESSAGE_REQUEST.getCode();
     }
 
     public void setPartitions(Table<String, Short, FetchPartitionMessageData> partitions) {

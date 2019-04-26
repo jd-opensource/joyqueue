@@ -99,7 +99,7 @@ public class ProducerConnectionState {
             if (doHandleRemoveProducers(removeTopics, app)) {
                 topicSet.removeAll(removeTopics);
             }
-        } catch (Exception e) {
+        } finally {
             producerLock.writeLock().unlock();
         }
     }

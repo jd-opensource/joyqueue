@@ -13,6 +13,7 @@
  */
 package com.jd.journalq.client.internal.producer.support;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.jd.journalq.client.internal.cluster.ClusterManager;
 import com.jd.journalq.client.internal.exception.ClientException;
@@ -43,11 +44,10 @@ import com.jd.journalq.client.internal.producer.interceptor.ProducerInvoker;
 import com.jd.journalq.client.internal.producer.transport.ProducerClient;
 import com.jd.journalq.client.internal.producer.transport.ProducerClientManager;
 import com.jd.journalq.client.internal.transport.ClientState;
-import com.jd.journalq.domain.Producer;
+import com.jd.journalq.domain.ProducerPolicy;
 import com.jd.journalq.domain.QosLevel;
 import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.domain.BrokerNode;
-import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.retry.RetryPolicy;
 import com.jd.journalq.toolkit.service.Service;
 import org.apache.commons.collections.CollectionUtils;
@@ -157,7 +157,7 @@ public class MessageProducerInner extends Service {
                                                    String txId, long timeout, TimeUnit timeoutUnit, boolean isOneway, boolean failover, AsyncBatchProduceCallback callback) {
 
         List<PartitionMetadata> partitionBlackList = null;
-        Producer.ProducerPolicy producerPolicy = topicMetadata.getProducerPolicy();
+        ProducerPolicy producerPolicy = topicMetadata.getProducerPolicy();
 
         String topic = topicMetadata.getTopic();
         String app = config.getApp();

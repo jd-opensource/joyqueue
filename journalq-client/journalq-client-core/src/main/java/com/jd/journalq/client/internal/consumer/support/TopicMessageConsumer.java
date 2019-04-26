@@ -29,6 +29,7 @@ import com.jd.journalq.client.internal.nameserver.NameServerConfig;
 import com.jd.journalq.client.internal.nameserver.helper.NameServerHelper;
 import com.jd.journalq.domain.Topic;
 import com.jd.journalq.domain.TopicName;
+import com.jd.journalq.domain.TopicType;
 import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.toolkit.service.Service;
 import org.slf4j.Logger;
@@ -124,7 +125,7 @@ public class TopicMessageConsumer extends Service {
             throw new ConsumerException(String.format("topic %s is not exist", topic), JournalqCode.FW_TOPIC_NOT_EXIST.getCode());
         }
 
-        if (topicMetadata.getType().equals(Topic.Type.BROADCAST)) {
+        if (topicMetadata.getType().equals(TopicType.BROADCAST)) {
             return MessagePollerFactory.createBroadcastPoller(config, nameServerConfig, clusterManager, consumerClientManager);
         } else {
             return MessagePollerFactory.create(config, nameServerConfig, clusterManager, clusterClientManager, consumerClientManager);

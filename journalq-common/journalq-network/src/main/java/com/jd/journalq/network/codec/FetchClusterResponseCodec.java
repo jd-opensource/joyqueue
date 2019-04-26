@@ -15,8 +15,9 @@ package com.jd.journalq.network.codec;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.jd.journalq.domain.Consumer;
-import com.jd.journalq.domain.Producer;
+import com.jd.journalq.domain.ConsumerPolicy;
+import com.jd.journalq.domain.ProducerPolicy;
+import com.jd.journalq.domain.TopicType;
 import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.command.FetchClusterResponse;
 import com.jd.journalq.network.command.JournalqCommandType;
@@ -92,7 +93,7 @@ public class FetchClusterResponseCodec implements PayloadCodec<JournalqHeader, F
             }
 
             int timeout = buffer.readInt();
-            topic.setProducerPolicy(new Producer.ProducerPolicy(isNearBy, isSingle, isArchive, weight, blackList, timeout));
+            topic.setProducerPolicy(new ProducerPolicy(isNearBy, isSingle, isArchive, weight, blackList, timeout));
         }
 
         boolean isExistConsumerPolicy = buffer.readBoolean();
@@ -104,8 +105,7 @@ public class FetchClusterResponseCodec implements PayloadCodec<JournalqHeader, F
             boolean isSeq = buffer.readBoolean();
             int ackTimeout = buffer.readInt();
             short batchSize = buffer.readShort();
-            boolean isCurrent = buffer.readBoolean();
-            int concurrent = buffer.readInt();
+            int isCurrent = buffer.readInt();
             int delay = buffer.readInt();
 
             short blackListSize = buffer.readShort();
@@ -117,13 +117,13 @@ public class FetchClusterResponseCodec implements PayloadCodec<JournalqHeader, F
             int errTimes = buffer.readInt();
             int maxPartitionNum = buffer.readInt();
             int readRetryProbability = buffer.readInt();
-            topic.setConsumerPolicy(new Consumer.ConsumerPolicy(isNearby, isPaused, isArchive, isRetry, isSeq,
-                    ackTimeout, batchSize, concurrent, delay, blackList, errTimes, maxPartitionNum, readRetryProbability,null));
+            topic.setConsumerPolicy(new ConsumerPolicy(isNearby, isPaused, isArchive, isRetry, isSeq,
+                    ackTimeout, batchSize, isCurrent, delay, blackList, errTimes, maxPartitionNum, readRetryProbability,null));
         }
 
         byte topicType = buffer.readByte();
         if (topicType != NONE_TOPIC_TYPE) {
-            topic.setType(com.jd.journalq.domain.Topic.Type.TOPIC.valueOf(topicType));
+            topic.setType(TopicType.valueOf(topicType));
         }
 
         Map<Integer, TopicPartitionGroup> partitionGroups = Maps.newHashMap();
@@ -174,8 +174,8 @@ public class FetchClusterResponseCodec implements PayloadCodec<JournalqHeader, F
     }
 
     protected void encodeTopic(Topic topic, ByteBuf buffer) throws Exception {
-        Producer.ProducerPolicy producerPolicy = topic.getProducerPolicy();
-        Consumer.ConsumerPolicy consumerPolicy = topic.getConsumerPolicy();
+        ProducerPolicy producerPolicy = topic.getProducerPolicy();
+        ConsumerPolicy consumerPolicy = topic.getConsumerPolicy();
         Serializer.write(topic.getTopic(), buffer, Serializer.SHORT_SIZE);
 
         if (producerPolicy == null) {
@@ -183,7 +183,7 @@ public class FetchClusterResponseCodec implements PayloadCodec<JournalqHeader, F
         } else {
             buffer.writeBoolean(true);
             buffer.writeBoolean(producerPolicy.getNearby());
-            buffer.writeBoolean(producerPolicy.isSingle());
+            buffer.writeBoolean(producerPolicy.getSingle());
             buffer.writeBoolean(producerPolicy.getArchive());
 
             if (MapUtils.isEmpty(producerPolicy.getWeight())) {
@@ -219,8 +219,7 @@ public class FetchClusterResponseCodec implements PayloadCodec<JournalqHeader, F
             buffer.writeBoolean(consumerPolicy.getSeq());
             buffer.writeInt(consumerPolicy.getAckTimeout());
             buffer.writeShort(consumerPolicy.getBatchSize());
-            buffer.writeBoolean(consumerPolicy.isConcurrent());
-            buffer.writeInt(consumerPolicy.getConcurrentPrefetchSize());
+            buffer.writeInt(consumerPolicy.getConcurrent());
             buffer.writeInt(consumerPolicy.getDelay());
 
             if (CollectionUtils.isEmpty(consumerPolicy.getBlackList())) {

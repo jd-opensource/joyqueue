@@ -13,6 +13,7 @@
  */
 package com.jd.journalq.client.internal.consumer.support;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.jd.journalq.client.internal.cluster.ClusterManager;
 import com.jd.journalq.client.internal.consumer.BrokerLoadBalance;
@@ -36,10 +37,9 @@ import com.jd.journalq.client.internal.trace.TraceBuilder;
 import com.jd.journalq.client.internal.trace.TraceCaller;
 import com.jd.journalq.client.internal.trace.TraceType;
 import com.jd.journalq.client.internal.transport.ClientState;
-import com.jd.journalq.domain.Consumer;
+import com.jd.journalq.domain.ConsumerPolicy;
 import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.domain.BrokerNode;
-import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -110,7 +110,7 @@ public class MessagePollerInner extends Service {
     }
 
     protected List<ConsumeMessage> doFetchTopic(BrokerNode brokerNode, TopicMetadata topicMetadata, int batchSize, long timeout, TimeUnit timeoutUnit, final ConsumerListener listener) {
-        Consumer.ConsumerPolicy consumerPolicy = topicMetadata.getConsumerPolicy();
+        ConsumerPolicy consumerPolicy = topicMetadata.getConsumerPolicy();
         timeout = timeoutUnit.toMillis(timeout);
         final String topic = topicMetadata.getTopic();
         final String app = getAppFullName();

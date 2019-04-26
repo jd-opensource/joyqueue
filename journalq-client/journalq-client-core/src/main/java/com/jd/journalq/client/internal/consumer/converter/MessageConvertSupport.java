@@ -60,7 +60,6 @@ public class MessageConvertSupport {
     public BrokerMessage convert(BrokerMessage message) {
         MessageConverter messageConverter = converterMap.get(message.getSource());
         if (messageConverter == null) {
-            logger.warn("converter not exist, source: {}", message.getSource());
             return null;
         }
         if (logger.isDebugEnabled()) {
@@ -72,7 +71,6 @@ public class MessageConvertSupport {
     public List<BrokerMessage> convertBatch(BrokerMessage message) {
         MessageConverter messageConverter = converterMap.get(message.getSource());
         if (messageConverter == null) {
-            logger.warn("converter not exist, source: {}", message.getSource());
             return null;
         }
         if (logger.isDebugEnabled()) {

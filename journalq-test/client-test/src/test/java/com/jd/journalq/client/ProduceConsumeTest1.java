@@ -92,7 +92,7 @@ public class ProduceConsumeTest1 extends AbstractClientTest {
             send++;
         }
 
-        Thread.currentThread().sleep(1000 * 5);
+        Thread.currentThread().sleep(1000 * 30);
 
         Assert.assertEquals(send, received[0]);
     }
@@ -122,7 +122,7 @@ public class ProduceConsumeTest1 extends AbstractClientTest {
             send++;
         }
 
-        Thread.currentThread().sleep(1000 * 5);
+        Thread.currentThread().sleep(1000 * 30);
 
         Assert.assertEquals(send, received[0]);
     }
@@ -167,7 +167,7 @@ public class ProduceConsumeTest1 extends AbstractClientTest {
             send++;
         }
 
-        Thread.currentThread().sleep(1000 * 20);
+        Thread.currentThread().sleep(1000 * 30);
 
         Assert.assertEquals(send, check[0]);
         Assert.assertEquals(check[0], consume[0]);
