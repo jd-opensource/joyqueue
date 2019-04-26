@@ -1,13 +1,16 @@
-package com.jd.journalq.nsr;
+package com.jd.journalq.nsr.admin;
 
 import com.alibaba.fastjson.JSON;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
-import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.Parameters;
 import com.jd.journalq.domain.Broker;
+import com.jd.journalq.nsr.AdminConfig;
+import com.jd.journalq.nsr.CommandArgs;
 import com.jd.journalq.nsr.model.BrokerQuery;
 import com.jd.journalq.nsr.utils.AsyncHttpClient;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,13 +18,10 @@ import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-public class BrokerAdmin {
+public class BrokerAdmin extends AbstractAdmin {
 
-    @Parameters(separators = "=", commandDescription = "Topic arguments")
-    static class ListArg implements CommandArgs{
-        @Parameter(names = {"-h", "--help"}, description = "Help message", help = true)
-        public boolean help;
-
+    @Parameters(separators = "=", commandDescription = "List broker arguments")
+    public static class ListArg extends CommandArgs {
         @Parameter(names = { "--host" }, description = "Naming address", required = false)
         public String host="http://localhost:50091";
 
@@ -37,56 +37,27 @@ public class BrokerAdmin {
         public List<Long> brokers=new ArrayList<>();
     }
 
-    @Parameter(names = {"-h", "--help"}, description = "Help message", help = true)
-    public boolean help;
-
     public static void main(String[] args){
         final ListArg listArg=new ListArg();
-        String[] argv={"list","--host","http://localhost:50091"};
-        final TopicAdmin.PubSubArg pubSubArg=new TopicAdmin.PubSubArg();
+        //String[] argv={"list","--host","http://localhost:50091"};
         BrokerAdmin brokerAdmin=new BrokerAdmin();
         Map<String,CommandArgs> argsMap=new HashMap(8);
-                                argsMap.put(CommandType.list.name(),listArg);
+                                argsMap.put(Command.list.name(),listArg);
         JCommander jc =JCommander.newBuilder()
                 .addObject(brokerAdmin)
-                .addCommand(CommandType.list.name(),listArg)
+                .addCommand(Command.list.name(),listArg)
                 .build();
         jc.setProgramName("broker");
-        try {
-            jc.parse(argv);
-        } catch (ParameterException e) {
-            System.err.println(e.getMessage());
-            jc.usage();
-            System.exit(-1);
-        }
-        if (brokerAdmin.help) {
-            jc.usage();
-            System.exit(-1);
-        }
-        // command help
-        if(listArg.help||pubSubArg.help){
-            jc.getCommands().get(jc.getParsedCommand()).usage();
-            System.exit(-1);
-        }
-        try{
-            String command=jc.getParsedCommand();
-            process(CommandType.type(jc.getParsedCommand()),argsMap.get(command), jc);
-        }catch (Exception e){
-            System.err.println(e.getMessage());
-            System.exit(-1);
-        }
-        try {
-            AsyncHttpClient.close();
-        }catch (Exception e){
-            System.out.print(e);
-        }
+        brokerAdmin.execute(jc,args,argsMap);
     }
+
 
     /**
      *  Process  commands
      *
      **/
-    private static  void process(CommandType type, CommandArgs arguments, JCommander jCommander) throws Exception{
+    public  void process(String command, CommandArgs arguments, JCommander jCommander) throws Exception{
+        Command type=Command.type(command);
         switch (type){
             case list:
                 list(arguments,jCommander);
@@ -98,12 +69,11 @@ public class BrokerAdmin {
         }
     }
 
-
     /**
-     *  Topic add process
+     *  List available brokers
      *
      **/
-    private static List<Broker> list(CommandArgs commandArgs,JCommander jCommander) throws Exception{
+    public  List<Broker> list(CommandArgs commandArgs,JCommander jCommander) throws Exception{
         ListArg arguments=null;
         if(commandArgs instanceof ListArg){
             arguments=(ListArg)commandArgs;
@@ -126,11 +96,15 @@ public class BrokerAdmin {
         }
         return brokers;
     }
+    @Override
+    public void close() throws IOException {
+        AsyncHttpClient.close();
+    }
 
-    enum CommandType{
+    enum Command{
         list,undef;
-        public static CommandType type(String name){
-            for(CommandType c: values()){
+        public static Command type(String name){
+            for(Command c: values()){
                 if(c.name().equals(name))
                     return c;
             }

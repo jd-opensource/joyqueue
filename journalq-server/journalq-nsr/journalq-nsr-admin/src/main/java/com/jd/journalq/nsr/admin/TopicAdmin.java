@@ -1,24 +1,23 @@
-package com.jd.journalq.nsr;
+package com.jd.journalq.nsr.admin;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.beust.jcommander.*;
 import com.jd.journalq.domain.*;
+import com.jd.journalq.nsr.AdminConfig;
+import com.jd.journalq.nsr.CommandArgs;
 import com.jd.journalq.nsr.utils.AsyncHttpClient;
-
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-public class TopicAdmin {
+public class TopicAdmin extends AbstractAdmin {
 
     @Parameters(separators = "=", commandDescription = "Topic arguments")
-    static class TopicArg implements CommandArgs{
-        @Parameter(names = {"-h", "--help"}, description = "Help message", help = true)
-        public boolean help;
-        @Parameter(names = { "--host" }, description = "Naming address", required = false)
-        public String host="http://localhost:50091";
+    public static class TopicArg extends CommandArgs {
+
         @Parameter(names = { "-c", "--code" }, description = "Topic code", required = true)
         public String code;
 
@@ -40,13 +39,11 @@ public class TopicAdmin {
         public List<Integer> brokers=new ArrayList<>();
    }
 
-
-
     /**
      *  Subscription args
      *
      **/
-    static class SubscribeArg {
+    public static class SubscribeArg {
         @Parameter(names = { "-c", "--topic" }, description = "Topic code", required = true)
         public String topic;
 
@@ -61,24 +58,18 @@ public class TopicAdmin {
     }
 
     @Parameters(separators = "=", commandDescription = "Publish or subscribe args")
-    static class PubSubArg implements CommandArgs{
-        @Parameter(names = {"-h", "--help"}, description = "Help message", help = true)
-        public boolean help;
+    public static class PubSubArg extends CommandArgs{
         @Parameter(names = { "--host" }, description = " Naming address", required = false)
         public String host="http://localhost:50091";
         @ParametersDelegate
-        SubscribeArg subscribe=new SubscribeArg();
+        public SubscribeArg subscribe=new SubscribeArg();
         @Parameter(names = {  "--client" }, description = "client type: 0 jmq,1 kafka,2 mqtt,other  ", required = false)
         public Integer client=0;
 
     }
-
-    @Parameter(names = {"-h", "--help"}, description = "Help message", help = true)
-    public boolean help;
-
     //192.168.73.147 1543486432  1543486547 "-b" ,"1543486432","-b","1543486547"
     // local 1556178070
-    //String[] argV={"add", "-c", "test_topic_bh_6" ,"--host","http://localhost:50091", "-b" ,"1556178070"};
+    String[] argV={"add", "-c", "test_topic_bh_6" ,"--host","http://localhost:50091", "-b" ,"1556178070"};
     //String[] argV={"publish", "--topic", "test_topic_bh_6" ,"--app","test_app","--type","1","--host","http://localhost:50091"};
 
     public static void main(String[] args){
@@ -86,66 +77,48 @@ public class TopicAdmin {
         final PubSubArg pubSubArg=new PubSubArg();
         TopicAdmin topicAdmin=new TopicAdmin();
         Map<String,CommandArgs> argsMap=new HashMap(8);
-                                argsMap.put(CommandType.add.name(),topicArg);
-                                argsMap.put(CommandType.publish.name(),pubSubArg);
-                                argsMap.put(CommandType.subscribe.name(),pubSubArg);
+                                argsMap.put(Command.add.name(),topicArg);
+                                argsMap.put(Command.publish.name(),pubSubArg);
+                                argsMap.put(Command.subscribe.name(),pubSubArg);
         JCommander jc =JCommander.newBuilder()
                 .addObject(topicAdmin)
-                .addCommand(CommandType.add.name(),topicArg)
-                .addCommand(CommandType.publish.name(),pubSubArg)
-                .addCommand(CommandType.subscribe.name(),pubSubArg)
+                .addCommand(Command.add.name(),topicArg)
+                .addCommand(Command.delete.name(),topicAdmin)
+                .addCommand(Command.publish.name(),pubSubArg)
+                .addCommand(Command.unpublish.name(),pubSubArg)
+                .addCommand(Command.subscribe.name(),pubSubArg)
+                .addCommand(Command.unsubscribe.name(),pubSubArg)
                 .build();
         jc.setProgramName("topic");
-        try {
-            jc.parse(args);
-        } catch (ParameterException e) {
-            System.err.println(e.getMessage());
-            jc.usage();
-            System.exit(-1);
-        }
-        if (topicAdmin.help) {
-            jc.usage();
-            System.exit(-1);
-        }
-        // command help
-        if(topicArg.help||pubSubArg.help){
-            jc.getCommands().get(jc.getParsedCommand()).usage();
-            System.exit(-1);
-        }
-        try {
-            String cmdName=jc.getParsedCommand();
-            process(CommandType.type(jc.getParsedCommand()),argsMap.get(cmdName), jc);
-        }catch (Exception e){
-            System.err.println(e.getMessage());
-            System.exit(-1);
-        }
-        try {
-            AsyncHttpClient.close();
-        }catch (Exception e){
-            System.out.print(e);
-        }
+        topicAdmin.execute(jc,args,argsMap);
     }
-
-
 
     /**
      *  Process  commands
      *
      **/
-    private static  void process(CommandType type,CommandArgs arguments,JCommander jCommander) throws Exception{
+    public void process(String command,CommandArgs arguments,JCommander jCommander) throws Exception{
+       Command type=Command.type(command);
        switch (type){
            case add:
-               add(arguments,jCommander);
+               add((TopicArg) arguments,jCommander);
                break;
            case delete:
+               delete((TopicArg) arguments,jCommander);
                break;
            case update:
                break;
            case publish:
-               publish(arguments,jCommander);
+               publish((PubSubArg)arguments,jCommander);
+               break;
+           case unpublish:
+               unPublish((PubSubArg)arguments,jCommander);
                break;
            case subscribe:
-               subscribe(arguments,jCommander);
+               subscribe((PubSubArg)arguments,jCommander);
+               break;
+           case unsubscribe:
+               unSubscribe((PubSubArg)arguments,jCommander);
                break;
            default:
                jCommander.usage();
@@ -154,20 +127,12 @@ public class TopicAdmin {
        }
     }
 
-
-
     /**
      *  Topic add process
      *
      **/
-    private static String add(CommandArgs commandArgs,JCommander jCommander) throws Exception{
-        List<PartitionGroup> partitionGroups=null;
-        TopicArg arguments=null;
-        if(commandArgs instanceof TopicArg){
-            arguments=(TopicArg)commandArgs;
-        }else{
-            throw new IllegalArgumentException("bad args");
-        }
+    public  String add(TopicArg arguments,JCommander jCommander) throws Exception{
+        List<PartitionGroup> partitionGroups;
         Topic topic=new Topic();
         topic.setType(Topic.Type.valueOf(arguments.type.byteValue()));
         topic.setName(new TopicName(arguments.code,arguments.namespace));
@@ -198,18 +163,26 @@ public class TopicAdmin {
         return result;
     }
 
+    /**
+     *  Topic delete
+     *
+     **/
+    public  String delete(TopicArg arguments,JCommander jCommander) throws Exception{
+        List<PartitionGroup> partitionGroups;
+        Topic topic=new Topic();
+        topic.setName(new TopicName(arguments.code,arguments.namespace));
+        Future<String> futureResult=AsyncHttpClient.post(arguments.host,"/topic/remove",JSON.toJSONString(topic),String.class);
+        String result=futureResult.get(AdminConfig.TIMEOUT_MS,TimeUnit.MILLISECONDS);
+        System.out.println(result);
+        return result;
+    }
+
 
     /**
      * Publish to a topic
      *
      **/
-    private static String publish(CommandArgs commandArgs,JCommander jCommander) throws Exception{
-        PubSubArg pubSubArg=null;
-        if(commandArgs instanceof PubSubArg){
-            pubSubArg=(PubSubArg)commandArgs;
-        }else{
-            throw new IllegalArgumentException("bad args");
-        }
+    public  String publish(PubSubArg pubSubArg,JCommander jCommander) throws Exception{
         Producer producer=new Producer();
         producer.setApp(pubSubArg.subscribe.app);
         producer.setTopic(new TopicName(pubSubArg.subscribe.topic,pubSubArg.subscribe.namespace));
@@ -223,16 +196,26 @@ public class TopicAdmin {
     }
 
     /**
+     * Unpublish to a topic
+     *
+     **/
+    public  String unPublish(PubSubArg pubSubArg,JCommander jCommander) throws Exception{
+        Producer producer=new Producer();
+        producer.setApp(pubSubArg.subscribe.app);
+        producer.setTopic(new TopicName(pubSubArg.subscribe.topic,pubSubArg.subscribe.namespace));
+        Future<String> futureResult=AsyncHttpClient.post(pubSubArg.host,"/producer/remove",JSON.toJSONString(producer),String.class);
+        String result=futureResult.get(AdminConfig.TIMEOUT_MS,TimeUnit.MILLISECONDS);
+        System.out.println(result);
+        return result;
+    }
+
+
+
+    /**
      *  Subscribe to a topic
      *
      **/
-    private static String subscribe(CommandArgs commandArgs,JCommander jCommander) throws Exception{
-        PubSubArg pubSubArg=null;
-        if(commandArgs instanceof PubSubArg){
-            pubSubArg=(PubSubArg)commandArgs;
-        }else{
-            throw new IllegalArgumentException("bad args");
-        }
+    public  String subscribe(PubSubArg pubSubArg,JCommander jCommander) throws Exception{
         Consumer consumer=new Consumer();
         consumer.setApp(pubSubArg.subscribe.app);
         consumer.setTopic(new TopicName(pubSubArg.subscribe.topic,pubSubArg.subscribe.namespace));
@@ -245,11 +228,30 @@ public class TopicAdmin {
         return result;
     }
 
+    /**
+     *  Subscribe to a topic
+     *
+     **/
+    public  String unSubscribe(PubSubArg pubSubArg,JCommander jCommander) throws Exception{
+        Consumer consumer=new Consumer();
+        consumer.setApp(pubSubArg.subscribe.app);
+        consumer.setTopic(new TopicName(pubSubArg.subscribe.topic,pubSubArg.subscribe.namespace));
+        String consumerJson=JSON.toJSONString(consumer);
+        Future<String> futureResult=AsyncHttpClient.post(pubSubArg.host,"/consumer/remove",consumerJson,String.class);
+        String result=futureResult.get(AdminConfig.TIMEOUT_MS,TimeUnit.MILLISECONDS);
+        System.out.println(result);
+        return result;
+    }
 
-    enum CommandType{
-       add,delete,update,publish,subscribe,undef;
-       public static CommandType type(String name){
-           for(CommandType c: values()){
+    @Override
+    public void close() throws IOException {
+        AsyncHttpClient.close();
+    }
+
+    enum Command{
+       add,delete,update,publish,unpublish,subscribe,unsubscribe,undef;
+       public static Command type(String name){
+           for(Command c: values()){
                if(c.name().equals(name))
                    return c;
            }

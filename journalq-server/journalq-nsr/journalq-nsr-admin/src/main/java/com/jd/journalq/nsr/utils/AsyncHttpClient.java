@@ -1,7 +1,6 @@
 package com.jd.journalq.nsr.utils;
 
 import com.alibaba.fastjson.JSON;
-import com.jd.journalq.toolkit.config.Postman;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.config.RequestConfig;
@@ -81,11 +80,9 @@ public class AsyncHttpClient {
         return asyncRequest(get,clazz);
     }
 
-
-
     /**
      *
-     * Future
+     * Future simple implement
      *
      **/
     static class BasicFuture<T>  implements Future<T>,FutureCallback<T>{
@@ -152,7 +149,9 @@ public class AsyncHttpClient {
     }
 
     public static void close() throws IOException {
-        httpclient.close();
+        if(httpclient.isRunning()) {
+            httpclient.close();
+        }
     }
 
 
