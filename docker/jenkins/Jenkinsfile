@@ -12,7 +12,7 @@ pipeline {
         stage('Integration Test') {
                     steps {
                         echo 'Integration Test....'
-                        sh 'pwd  '
+                        sh 'pwd && ls -l '
                         dir('docker/bin'){
                             sh ' pwd && ls -l && git branch && git log'
                             updateGitlabCommitStatus name: 'build', state: 'running'
