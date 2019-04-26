@@ -14,7 +14,7 @@
 package com.jd.journalq.client.internal.common.compress;
 
 import com.jd.journalq.client.internal.Plugins;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
 
 /**

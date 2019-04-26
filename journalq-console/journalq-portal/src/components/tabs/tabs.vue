@@ -204,7 +204,7 @@ export default {
     scrollToActiveTab () {
       if (!this.scrollable || !this.$refs.navScroll) return
 
-      const activeTab = this.$el.querySelector(`${Config.clsPrefix}tabs-nav__item--active`)
+      const activeTab = this.$el.querySelector(`.${Config.clsPrefix}tabs-nav__item--active`)
       const navScroll = this.$refs.navScroll
 
       const activeTabBounds = activeTab.getBoundingClientRect()

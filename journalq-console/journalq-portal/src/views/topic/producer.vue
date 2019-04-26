@@ -1,6 +1,7 @@
 <template>
   <div>
-    <producer-base ref="producerBase" :keywordTip="keywordTip" :colData="colData" :subscribeDialogColData="subscribeDialog.colData"
+    <producer-base ref="producerBase" :keywordTip="keywordTip" :colData="colData"
+                   :subscribeDialogColData="subscribeDialog.colData"
                     :search="search" :subscribeUrls="subscribeDialog.urls"/>
   </div>
 </template>

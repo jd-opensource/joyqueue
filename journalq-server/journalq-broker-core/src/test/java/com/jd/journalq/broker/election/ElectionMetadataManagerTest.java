@@ -29,8 +29,8 @@ import java.util.Set;
  * Created by zhuduohui on 2018/8/27.
  */
 public class ElectionMetadataManagerTest {
-    private String metadataFile = "/Users/zhuduohui/jmq/raft_metadata.dat";
-    private String metadataPath = "/Users/zhuduohui/jmq/election";
+    private String metadataFile = "/Users/zhuduohui/journalq/raft_metadata.dat";
+    private String metadataPath = "/Users/zhuduohui/journalq/election";
     private ElectionMetadataManager electionMetadataManager;
     private int localNodeId = 1;
     private List<DefaultElectionNode> allNodes = new LinkedList<>();

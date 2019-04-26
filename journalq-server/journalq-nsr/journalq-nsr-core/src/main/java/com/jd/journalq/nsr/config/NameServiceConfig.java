@@ -16,7 +16,7 @@ package com.jd.journalq.nsr.config;
 import com.jd.journalq.network.transport.config.ClientConfig;
 import com.jd.journalq.network.transport.config.TransportConfigSupport;
 import com.jd.journalq.toolkit.config.PropertySupplier;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 
 public class NameServiceConfig {
     private ClientConfig clientConfig;

@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="ml20 mt30">
-      <d-input v-model="searchData.keyword" placeholder="请输入ID/分组编码/IP" class="left mr10" style="width: 20%">
+      <d-input v-model="searchData.keyword" placeholder="请输入ID/分组编码/IP" class="left mr10" style="width:213px">
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
     </div>
@@ -195,7 +195,6 @@ export default {
       }
       apiRequest.postBase(this.urlOrigin.archiveMonitor, {}, broker, false).then((data) => {
         data.data = data.data || {}
-        console.log(data.data)
         this.archiveMonitorData = data.data
         this.openDialog('archiveMonitorDialog')
       })

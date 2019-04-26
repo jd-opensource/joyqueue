@@ -46,7 +46,9 @@ public class GroupOffsetHandler extends Service {
     private GroupBalanceManager groupBalanceManager;
     private GroupOffsetManager groupOffsetManager;
 
-    public GroupOffsetHandler(KafkaConfig config, KafkaCoordinator kafkaCoordinator, KafkaCoordinatorGroupManager groupMetadataManager, GroupBalanceManager groupBalanceManager, GroupOffsetManager groupOffsetManager) {
+    public GroupOffsetHandler(KafkaConfig config, KafkaCoordinator kafkaCoordinator,
+                              KafkaCoordinatorGroupManager groupMetadataManager,
+                              GroupBalanceManager groupBalanceManager, GroupOffsetManager groupOffsetManager) {
         this.config = config;
         this.kafkaCoordinator = kafkaCoordinator;
         this.groupMetadataManager = groupMetadataManager;
@@ -90,7 +92,9 @@ public class GroupOffsetHandler extends Service {
         }
     }
 
-    protected Table<String, Integer, OffsetMetadataAndError> handleCommitOffsets(KafkaCoordinatorGroup group, String groupId, String memberId, int generationId, Table<String, Integer, OffsetAndMetadata> offsetMetadata) {
+    protected Table<String, Integer, OffsetMetadataAndError> handleCommitOffsets(KafkaCoordinatorGroup group, String groupId,
+                                                                                 String memberId, int generationId,
+                                                                                 Table<String, Integer, OffsetAndMetadata> offsetMetadata) {
         if (group.stateIs(GroupState.DEAD) || !group.isHasMember(memberId)) {
             return buildCommitError(offsetMetadata, KafkaErrorCode.UNKNOWN_MEMBER_ID);
         }

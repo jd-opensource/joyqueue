@@ -18,7 +18,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>jmq</artifactId>
+        <artifactId>journalq</artifactId>
         <groupId>com.jd.journalq</groupId>
         <version>4.0.0-SNAPSHOT</version>
     </parent>
@@ -26,11 +26,40 @@
 
     <artifactId>journalq-test</artifactId>
     <packaging>pom</packaging>
+
     <modules>
         <module>kafka-test</module>
         <module>journalq-client-test</module>
-        <module>h2-test</module>
     </modules>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <filtering>true</filtering>
+            </testResource>
+        </testResources>
+        <defaultGoal>package</defaultGoal>
+
+
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.2.1</version>
+                <configuration>
+                    <skipSource>true</skipSource>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 
 </project>

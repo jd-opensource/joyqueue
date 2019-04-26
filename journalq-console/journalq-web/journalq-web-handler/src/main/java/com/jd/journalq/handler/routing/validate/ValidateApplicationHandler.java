@@ -23,7 +23,10 @@ import com.jd.laf.web.vertx.parameter.Parameter;
 import com.jd.laf.web.vertx.parameter.Parameters;
 import io.vertx.ext.web.RoutingContext;
 
-import static com.jd.journalq.handler.Constants.*;
+import static com.jd.journalq.handler.Constants.APP_ID;
+import static com.jd.journalq.handler.Constants.APP_CODE;
+import static com.jd.journalq.handler.Constants.ID;
+import static com.jd.journalq.handler.Constants.APPLICATION;
 
 /**
  * 判断请求的应用是否和认证的应用身份一致，避免越权查看其它应用信息

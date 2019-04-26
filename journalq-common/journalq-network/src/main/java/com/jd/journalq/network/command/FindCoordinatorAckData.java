@@ -13,7 +13,7 @@
  */
 package com.jd.journalq.network.command;
 
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.domain.BrokerNode;
 
 /**
@@ -25,17 +25,17 @@ import com.jd.journalq.network.domain.BrokerNode;
 public class FindCoordinatorAckData {
 
     private BrokerNode node;
-    private JMQCode code;
+    private JournalqCode code;
 
     public FindCoordinatorAckData() {
 
     }
 
-    public FindCoordinatorAckData(JMQCode code) {
+    public FindCoordinatorAckData(JournalqCode code) {
         this.code = code;
     }
 
-    public FindCoordinatorAckData(BrokerNode node, JMQCode code) {
+    public FindCoordinatorAckData(BrokerNode node, JournalqCode code) {
         this.node = node;
         this.code = code;
     }
@@ -48,11 +48,11 @@ public class FindCoordinatorAckData {
         this.node = node;
     }
 
-    public JMQCode getCode() {
+    public JournalqCode getCode() {
         return code;
     }
 
-    public void setCode(JMQCode code) {
+    public void setCode(JournalqCode code) {
         this.code = code;
     }
 }

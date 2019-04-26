@@ -17,7 +17,7 @@ import com.jd.journalq.toolkit.io.Compressors;
 import com.jd.journalq.toolkit.lang.Close;
 import com.jd.journalq.registry.RegistryException;
 import com.jd.journalq.toolkit.io.Zlib;
-import com.jd.journalq.toolkit.lang.Charsets;
+import com.google.common.base.Charsets;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;

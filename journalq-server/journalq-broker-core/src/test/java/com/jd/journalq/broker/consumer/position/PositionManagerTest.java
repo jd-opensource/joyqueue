@@ -20,7 +20,7 @@ import com.jd.journalq.broker.consumer.ConsumeConfig;
 import com.jd.journalq.broker.consumer.position.model.Position;
 import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.domain.TopicName;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.store.PartitionGroupStore;
 import com.jd.journalq.store.StoreService;
 import org.junit.Assert;
@@ -79,14 +79,14 @@ public class PositionManagerTest {
 
 
     @Test
-    public void getLastMsgAckIndex() throws JMQException {
+    public void getLastMsgAckIndex() throws JournalqException {
         addConsumer();
         long lastMsgAckIndex = positionManager.getLastMsgAckIndex(new TopicName("topic"), "app", partition);
         Assert.assertEquals(0, lastMsgAckIndex);
     }
 
     @Test
-    public void updateLastMsgAckIndex() throws JMQException {
+    public void updateLastMsgAckIndex() throws JournalqException {
         addConsumer();
         boolean b = positionManager.updateLastMsgAckIndex(topic, app, partition, 10);
         Assert.assertEquals(true, b);
@@ -96,7 +96,7 @@ public class PositionManagerTest {
     }
 
     @Test
-    public void updateStartMsgAckIndex() throws JMQException {
+    public void updateStartMsgAckIndex() throws JournalqException {
         addConsumer();
         boolean b = positionManager.updateStartMsgAckIndex(topic, app, partition, 10);
         Assert.assertEquals(true, b);
@@ -106,14 +106,14 @@ public class PositionManagerTest {
     }
 
     @Test
-    public void getLastMsgPullIndex() throws JMQException {
+    public void getLastMsgPullIndex() throws JournalqException {
         addConsumer();
         long lastMsgAckIndex = positionManager.getLastMsgAckIndex(topic, app, partition);
         Assert.assertEquals(0, lastMsgAckIndex);
     }
 
     @Test
-    public void updateLastMsgPullIndex() throws JMQException {
+    public void updateLastMsgPullIndex() throws JournalqException {
         addConsumer();
         boolean b = positionManager.updateLastMsgPullIndex(topic, app, partition, 10);
         Assert.assertEquals(true, b);
@@ -123,7 +123,7 @@ public class PositionManagerTest {
     }
 
     @Test
-    public void increaseMsgPullIndex() throws JMQException {
+    public void increaseMsgPullIndex() throws JournalqException {
         addConsumer();
         boolean b = positionManager.increaseMsgPullIndex(topic, app, partition, 10);
         Assert.assertEquals(true, b);

@@ -14,7 +14,6 @@
 package com.jd.journalq.service;
 
 
-import com.jd.journalq.manage.PartitionGroupMetric;
 import com.jd.journalq.manage.PartitionGroupPosition;
 import com.jd.journalq.monitor.ArchiveMonitorInfo;
 import com.jd.journalq.model.domain.BrokerClient;

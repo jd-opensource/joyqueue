@@ -14,7 +14,7 @@
 package com.jd.journalq.service;
 
 import com.jd.journalq.model.query.QArchive;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.server.archive.store.api.ArchiveStore;
 import com.jd.journalq.server.archive.store.model.ConsumeLog;
 import com.jd.journalq.server.archive.store.model.SendLog;
@@ -33,20 +33,20 @@ public interface ArchiveService {
      * @param qArchive
      * @return
      */
-    List<SendLog> findByQuery(QArchive qArchive) throws JMQException;
+    List<SendLog> findByQuery(QArchive qArchive) throws JournalqException;
 
     /**
      * 按id查询归档
      * @param messageId
      * @return
      */
-    SendLog findSendLog(String topic, Long time, String businessId, String messageId) throws JMQException;
+    SendLog findSendLog(String topic, Long time, String businessId, String messageId) throws JournalqException;
 
     /**
      * 获取消费详情
      * @param messageId
      * @return
-     * @throws JMQException
+     * @throws JournalqException
      */
-    List<ConsumeLog> findConsumeLog(String messageId, Integer count) throws JMQException;
+    List<ConsumeLog> findConsumeLog(String messageId, Integer count) throws JournalqException;
 }

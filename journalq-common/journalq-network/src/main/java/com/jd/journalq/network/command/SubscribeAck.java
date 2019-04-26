@@ -32,7 +32,7 @@ public class SubscribeAck extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.MQTT_SUBSCRIBE_ACK.getCode();
+        return JournalqCommandType.MQTT_SUBSCRIBE_ACK.getCode();
     }
 
 

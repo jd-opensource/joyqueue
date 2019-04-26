@@ -14,7 +14,7 @@
 package io.openmessaging.journalq.extension;
 
 import com.jd.journalq.client.internal.metadata.domain.TopicMetadata;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import io.openmessaging.extension.Extension;
 import io.openmessaging.extension.QueueMetaData;
 import io.openmessaging.journalq.config.ExceptionConverter;

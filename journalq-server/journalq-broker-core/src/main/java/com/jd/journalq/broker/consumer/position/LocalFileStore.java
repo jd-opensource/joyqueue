@@ -21,9 +21,9 @@ import com.jd.journalq.broker.consumer.position.model.Position;
 import com.jd.journalq.network.session.Joint;
 import com.jd.journalq.toolkit.concurrent.LoopThread;
 import com.jd.journalq.toolkit.io.Files;
-import com.jd.journalq.toolkit.lang.Charsets;
+import com.google.common.base.Charsets;
 import com.jd.journalq.toolkit.lang.Close;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -236,7 +236,8 @@ public class LocalFileStore implements PositionStore<ConsumePartition, Position>
             consumeBills.entrySet().stream().forEach(entry -> {
                 Joint key = entry.getKey();
                 entry.getValue().stream().forEach(val ->
-                        consumePositionCache.putIfAbsent(new ConsumePartition(key.getTopic(), key.getApp(), val.getPartition()), new Position(val.getAckStartIndex(), val.getAckCurIndex(), val.getPullStartIndex(), val.getPullCurIndex()))
+                        consumePositionCache.putIfAbsent(new ConsumePartition(key.getTopic(), key.getApp(), val.getPartition()),
+                                new Position(val.getAckStartIndex(), val.getAckCurIndex(), val.getPullStartIndex(), val.getPullCurIndex()))
                 );
             });
         }

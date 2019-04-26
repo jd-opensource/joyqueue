@@ -214,6 +214,8 @@ export default {
           }
           this.$Message.success('验证不通过: ' + data.message)
         }
+      } else {
+        this.$Message.success(errorMsg + ': ' + data.message)
       }
     },
     update (url, data, successMsg, errorMsg) {

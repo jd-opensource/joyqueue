@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="ml20 mt30">
-      <d-input v-model="searchData.keyword" placeholder="请输入ID/分组编码/IP" class="left mr10" style="width: 10%">
+      <d-input v-model="searchData.keyword" placeholder="请输入ID/分组编码/IP" class="left mr10" style="width:213px">
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
       <!--<d-button type="primary" @click="remove">移除<icon name="minus-circle" style="margin-left: 5px;"></icon></d-button>-->
@@ -103,14 +103,21 @@ export default {
     },
     // 从分组移除Broker
     del (item) {
-      let editData = {
-        id: item.id,
-        group: {
-          id: -1
+      let _this = this
+      this.$Dialog.confirm({
+        title: '提示',
+        content: '确定要删除吗？'
+      }).then(() => {
+        let editData = {
+          id: item.id,
+          group: {
+            id: -1
+          }
         }
-      }
-      apiRequest.put(this.urls.removeBroker + '/' + item.id, {}, editData).then((data) => {
-        this.getList()
+        apiRequest.put(_this.urls.removeBroker + '/' + item.id, {}, editData).then((data) => {
+          _this.getList()
+        })
+      }).catch(() => {
       })
     }
   },

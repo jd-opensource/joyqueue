@@ -13,6 +13,7 @@
  */
 package com.jd.journalq.store.nsm;
 
+import com.jd.journalq.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -130,9 +131,9 @@ public class VirtualThreadExecutor {
 
     private void wait(Thread thread) {
         logger.info("Stopping thread {}...", thread.getName());
-        long t0 = System.currentTimeMillis();
+        long t0 = SystemClock.now();
         long timeout = 1000L;
-        while (System.currentTimeMillis() - t0 < timeout && thread.isAlive()) {
+        while (SystemClock.now() - t0 < timeout && thread.isAlive()) {
             try {
                 Thread.sleep(10);
             } catch (InterruptedException ignored) {
@@ -149,8 +150,8 @@ public class VirtualThreadExecutor {
         private final VirtualThread virtualThread;
         private final long minDelayMs;
         private final String name;
-        private volatile long startTime = System.currentTimeMillis();
-        private volatile long lastRunTime = System.currentTimeMillis(); // 上一次有效运行的结束时间
+        private volatile long startTime = SystemClock.now();
+        private volatile long lastRunTime = SystemClock.now(); // 上一次有效运行的结束时间
         private volatile long delay = 0;
 
         private DelayCommand(VirtualThread virtualThread, String name) {
@@ -166,7 +167,7 @@ public class VirtualThreadExecutor {
 
         @Override
         public long getDelay(TimeUnit unit) {
-            long diff = startTime - System.currentTimeMillis();
+            long diff = startTime - SystemClock.now();
             return unit.convert(diff, TimeUnit.MILLISECONDS);
         }
 
@@ -196,9 +197,9 @@ public class VirtualThreadExecutor {
                     if (toBeRemoved.remove(cmd.virtualThread)) {
                         continue;
                     }
-                    long start = System.currentTimeMillis();
+                    long start = SystemClock.now();
                     dryRun = true;
-                    while (maxUseTime + start > System.currentTimeMillis()) {
+                    while (maxUseTime + start > SystemClock.now()) {
                         if (cmd.virtualThread.run()) {
                             if (dryRun) dryRun = false;
                         } else {
@@ -213,7 +214,7 @@ public class VirtualThreadExecutor {
                     logger.warn("Exception on {} :", cmd == null ? "" : cmd.name, e);
                 }
                 if (null != cmd) {
-                    long now = System.currentTimeMillis();
+                    long now = SystemClock.now();
                     if (dryRun) {
                         if (keepAliveTimeMs + cmd.lastRunTime <= now) {
                             if (cmd.delay < maxIntervalMs) {

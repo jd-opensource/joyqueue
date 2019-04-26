@@ -25,6 +25,7 @@ import com.jd.journalq.model.query.QApplicationToken;
 import com.jd.journalq.nsr.model.AppTokenQuery;
 import com.jd.journalq.nsr.AppTokenNameServerService;
 import com.jd.journalq.nsr.NameServerBase;
+import com.jd.journalq.toolkit.time.SystemClock;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -54,7 +55,7 @@ public class AppTokenNameServerServiceImpl extends NameServerBase implements App
 
     @Override
     public int add(ApplicationToken applicationToken) throws Exception {
-        Long id = Long.valueOf(String.valueOf(applicationToken.getApplication().getId())+ String.valueOf(System.currentTimeMillis()/1000));
+        Long id = Long.valueOf(String.valueOf(applicationToken.getApplication().getId())+ String.valueOf(SystemClock.now()/1000));
         applicationToken.setId(id);
         AppToken appToken = nsrAppTokenConverter.revert(applicationToken);
         String result = postWithLog(ADD_TOKEN, appToken,OperLog.Type.APP_TOKEN.value(),OperLog.OperType.ADD.value(),appToken.getApp());

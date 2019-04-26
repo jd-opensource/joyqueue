@@ -114,7 +114,7 @@ public class FutureAdapter<V> implements Future<V> {
 
         private V value;
 
-        public FutureValueHolder(V value) {
+        FutureValueHolder(V value) {
             this.value = value;
         }
 

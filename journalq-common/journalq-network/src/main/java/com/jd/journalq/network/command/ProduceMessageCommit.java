@@ -29,7 +29,7 @@ public class ProduceMessageCommit extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.PRODUCE_MESSAGE_COMMIT.getCode();
+        return JournalqCommandType.PRODUCE_MESSAGE_COMMIT.getCode();
     }
 
     public void setTopic(String topic) {

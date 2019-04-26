@@ -13,7 +13,7 @@
  */
 package com.jd.journalq.store;
 
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 
 import java.nio.ByteBuffer;
 
@@ -25,7 +25,7 @@ public class ReadResult {
     /**
      * 状态码
      */
-    private JMQCode code;
+    private JournalqCode code;
 
     /**
      * 消息数组
@@ -37,11 +37,11 @@ public class ReadResult {
      */
     private boolean eop;
 
-    public JMQCode getCode() {
+    public JournalqCode getCode() {
         return code;
     }
 
-    public void setCode(JMQCode code) {
+    public void setCode(JournalqCode code) {
         this.code = code;
     }
 

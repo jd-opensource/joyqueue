@@ -32,11 +32,11 @@ public enum TraceType {
     private int type;
     private boolean enable;
 
-    private TraceType(int type) {
+    TraceType(int type) {
         this(type, true);
     }
 
-    private TraceType(int type, boolean enable) {
+    TraceType(int type, boolean enable) {
         this.type = type;
         this.enable = enable;
     }

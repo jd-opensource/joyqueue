@@ -32,7 +32,25 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import static com.jd.journalq.nsr.ignite.model.IgniteBaseModel.SCHEMA;
-import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.*;
+import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.COLUMN_NAMESPACE;
+import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.COLUMN_TOPIC;
+import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.COLUMN_APP;
+import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.COLUMN_NEAR_BY;
+import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.COLUMN_ARCHIVE;
+import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.COLUMN_RETRY;
+import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.COLUMN_CONCURRENT;
+import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.COLUMN_ACK_TIMEOUT;
+import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.COLUMN_BATCH_SIZE;
+import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.COLUMN_BLACK_LIST;
+import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.COLUMN_DELAY;
+import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.COLUMN_MAX_RETRYS;
+import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.COLUMN_MAX_RETRY_DELAY;
+import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.COLUMN_RETRY_DELAY;
+import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.COLUMN_EXPIRE_TIME;
+import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.COLUMN_PAUSED;
+import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.COLUMN_ERROR_TIMES;
+import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.COLUMN_MAX_PARTITION_NUM;
+import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.COLUMN_RETRY_READ_PROBABILITY;
 import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.COLUMN_ID;
 
 public class IgniteConsumerConfigDao implements ConsumerConfigDao {

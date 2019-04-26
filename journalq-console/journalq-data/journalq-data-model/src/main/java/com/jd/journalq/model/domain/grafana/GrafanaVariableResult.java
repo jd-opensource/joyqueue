@@ -13,6 +13,12 @@
  */
 package com.jd.journalq.model.domain.grafana;
 
+/**
+ * Grafana variable result
+ * author: chenyanying3
+ * email: chenyanying3@jd.com
+ * date: 2019/02/29
+ */
 public class GrafanaVariableResult {
 
     private String type;

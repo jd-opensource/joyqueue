@@ -26,6 +26,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -81,5 +83,11 @@ public class BrokerGroupServiceImpl extends PageServiceSupport<BrokerGroup, QBro
                 logger.error("绑定异常 error",e);
             }
         }
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+    public int delete(final BrokerGroup group) {
+        brokerGroupRelatedService.deleteByGroupId(group.getId());
+        return super.delete(group);
     }
 }

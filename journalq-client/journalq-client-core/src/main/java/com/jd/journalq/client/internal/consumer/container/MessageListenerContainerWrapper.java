@@ -37,7 +37,8 @@ public class MessageListenerContainerWrapper extends Service implements MessageL
     private ConsumerClientManager consumerClientManager;
     private MessageListenerContainer delegate;
 
-    public MessageListenerContainerWrapper(ConsumerConfig config, NameServerConfig nameServerConfig, ClusterManager clusterManager, ClusterClientManager clusterClientManager, ConsumerClientManager consumerClientManager, MessageListenerContainer delegate) {
+    public MessageListenerContainerWrapper(ConsumerConfig config, NameServerConfig nameServerConfig, ClusterManager clusterManager,
+                                           ClusterClientManager clusterClientManager, ConsumerClientManager consumerClientManager, MessageListenerContainer delegate) {
         this.config = config;
         this.nameServerConfig = nameServerConfig;
         this.clusterManager = clusterManager;

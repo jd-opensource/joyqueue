@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="ml20 mt30">
-      <d-input v-model="searchData.name" placeholder="请输入" class="left mr10" style="width: 10%">
+      <d-input v-model="searchData.name" placeholder="请输入" class="left mr10" style="width:213px">
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
       <d-button type="primary" @click="openDialog('addDialog')">添加<icon name="plus-circle" style="margin-left: 5px;"></icon></d-button>
@@ -13,8 +13,9 @@
     <!--添加用户-->
     <my-dialog :dialog="addDialog" @on-dialog-confirm="addConfirm()" @on-dialog-cancel="addCancel()">
         <grid-row class="mb10">
-          <grid-col :span="8" class="label">erp:</grid-col>
-          <grid-col :span="16" class="val">
+          <grid-col :span="3" class="label">英文名:</grid-col>
+          <grid-col :span="1"/>
+          <grid-col :span="14" class="val">
             <d-input v-model="addData.user.code"></d-input>
           </grid-col>
         </grid-row>

@@ -15,8 +15,8 @@ package com.jd.journalq.server.retry.console;
 
 import com.google.common.collect.Lists;
 import com.jd.journalq.domain.ConsumeRetry;
-import com.jd.journalq.exception.JMQCode;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqCode;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.model.PageResult;
 import com.jd.journalq.model.Pagination;
 import com.jd.journalq.server.retry.api.ConsoleMessageRetry;
@@ -76,12 +76,12 @@ public class DbConsoleMessageRetry implements ConsoleMessageRetry<Long> {
         return isStartFlag;
     }
 
-    private final static String GET_BYID = "select * from message_retry where id = ?";
-    private final static String QUERY_SQL = "select * from message_retry where topic = ? and app = ? and status = ? ";
-    private final static String COUNT_SQL = "select count(*) from message_retry where topic = ? and app = ? and status = ? ";
+    private static final String GET_BYID = "select * from message_retry where id = ?";
+    private static final String QUERY_SQL = "select * from message_retry where topic = ? and app = ? and status = ? ";
+    private static final String COUNT_SQL = "select count(*) from message_retry where topic = ? and app = ? and status = ? ";
 
     @Override
-    public PageResult<ConsumeRetry> queryConsumeRetryList(RetryQueryCondition retryQueryCondition) throws JMQException {
+    public PageResult<ConsumeRetry> queryConsumeRetryList(RetryQueryCondition retryQueryCondition) throws JournalqException {
 
         String queryDataSql = addCondition(retryQueryCondition, QUERY_SQL, true);
         PageResult<ConsumeRetry> pageResult = new PageResult<>();
@@ -128,11 +128,11 @@ public class DbConsoleMessageRetry implements ConsoleMessageRetry<Long> {
 
             return pageResult;
         } catch (Exception e) {
-            throw new JMQException(ToStringBuilder.reflectionToString(retryQueryCondition), e, JMQCode.CN_DB_ERROR.getCode());
+            throw new JournalqException(ToStringBuilder.reflectionToString(retryQueryCondition), e, JournalqCode.CN_DB_ERROR.getCode());
         }
     }
     @Override
-    public ConsumeRetry getConsumeRetryById(Long id) throws JMQException {
+    public ConsumeRetry getConsumeRetryById(Long id) throws JournalqException {
 
         try {
             ConsumeRetry consumeRetry = DaoUtil.queryObject(dataSource, GET_BYID, new DaoUtil.QueryCallback<ConsumeRetry>() {
@@ -168,7 +168,7 @@ public class DbConsoleMessageRetry implements ConsoleMessageRetry<Long> {
             });
             return consumeRetry;
         } catch (Exception e) {
-            throw new JMQException(ToStringBuilder.reflectionToString(id),e,JMQCode.CN_DB_ERROR.getCode());
+            throw new JournalqException(ToStringBuilder.reflectionToString(id),e,JournalqCode.CN_DB_ERROR.getCode());
         }
     }
     /**
@@ -238,7 +238,7 @@ public class DbConsoleMessageRetry implements ConsoleMessageRetry<Long> {
     }
 
 
-    private final static String UPDATE_SQL = "update message_retry set status = ?,update_time = ?, update_by = ? where topic = ? and id = ? ";
+    private static final String UPDATE_SQL = "update message_retry set status = ?,update_time = ?, update_by = ? where topic = ? and id = ? ";
 
     @Override
     public void updateStatus(String topic, String app, Long[] messageIds, RetryStatus status, long updateTime, int updateBy) throws Exception {
@@ -257,33 +257,33 @@ public class DbConsoleMessageRetry implements ConsoleMessageRetry<Long> {
     }
 
     @Override
-    public void addRetry(List<RetryMessageModel> retryMessageModelList) throws JMQException {
+    public void addRetry(List<RetryMessageModel> retryMessageModelList) throws JournalqException {
         dbMessageRetry.addRetry(retryMessageModelList);
     }
 
     @Override
-    public void retrySuccess(String topic, String app, Long[] messageIds) throws JMQException {
+    public void retrySuccess(String topic, String app, Long[] messageIds) throws JournalqException {
         dbMessageRetry.retrySuccess(topic, app, messageIds);
     }
 
     @Override
-    public void retryError(String topic, String app, Long[] messageIds) throws JMQException {
+    public void retryError(String topic, String app, Long[] messageIds) throws JournalqException {
         dbMessageRetry.retryError(topic, app, messageIds);
     }
 
     @Override
-    public void retryExpire(String topic, String app, Long[] messageIds) throws JMQException {
+    public void retryExpire(String topic, String app, Long[] messageIds) throws JournalqException {
         dbMessageRetry.retryExpire(topic, app, messageIds);
     }
 
     @Override
-    public List<RetryMessageModel> getRetry(String topic, String app, short count, long startIndex) throws JMQException {
+    public List<RetryMessageModel> getRetry(String topic, String app, short count, long startIndex) throws JournalqException {
         // 该方法会操作缓存和数据库，管理端调用会影响broker
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public int countRetry(String topic, String app) throws JMQException {
+    public int countRetry(String topic, String app) throws JournalqException {
         return dbMessageRetry.countRetry(topic, app);
     }
 

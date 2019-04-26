@@ -13,7 +13,7 @@
  */
 package com.jd.journalq.toolkit.security;
 
-import com.jd.journalq.toolkit.lang.Charsets;
+import com.google.common.base.Charsets;
 
 import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;

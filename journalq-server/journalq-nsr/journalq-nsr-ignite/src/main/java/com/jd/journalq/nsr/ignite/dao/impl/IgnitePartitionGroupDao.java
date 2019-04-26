@@ -32,7 +32,18 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import static com.jd.journalq.nsr.ignite.model.IgniteBaseModel.SCHEMA;
-import static com.jd.journalq.nsr.ignite.model.IgnitePartitionGroup.*;
+import static com.jd.journalq.nsr.ignite.model.IgnitePartitionGroup.COLUMN_ID;
+import static com.jd.journalq.nsr.ignite.model.IgnitePartitionGroup.COLUMN_NAMESPACE;
+import static com.jd.journalq.nsr.ignite.model.IgnitePartitionGroup.COLUMN_TOPIC;
+import static com.jd.journalq.nsr.ignite.model.IgnitePartitionGroup.COLUMN_GROUP;
+import static com.jd.journalq.nsr.ignite.model.IgnitePartitionGroup.COLUMN_LEADER;
+import static com.jd.journalq.nsr.ignite.model.IgnitePartitionGroup.COLUMN_ISR;
+import static com.jd.journalq.nsr.ignite.model.IgnitePartitionGroup.COLUMN_TERM;
+import static com.jd.journalq.nsr.ignite.model.IgnitePartitionGroup.COLUMN_PARTITIONS;
+import static com.jd.journalq.nsr.ignite.model.IgnitePartitionGroup.COLUMN_LEARNERS;
+import static com.jd.journalq.nsr.ignite.model.IgnitePartitionGroup.COLUMN_REPLICAS;
+import static com.jd.journalq.nsr.ignite.model.IgnitePartitionGroup.COLUMN_OUT_SYNC_REPLICAS;
+import static com.jd.journalq.nsr.ignite.model.IgnitePartitionGroup.COLUMN_ELECT_TYPE;
 
 public class IgnitePartitionGroupDao implements PartitionGroupDao {
     public static final String CACHE_NAME = "partition_group";

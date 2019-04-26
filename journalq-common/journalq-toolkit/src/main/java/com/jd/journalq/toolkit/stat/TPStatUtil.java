@@ -29,7 +29,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * Created by chengzhiliang on 2019/3/25.
  */
 public class TPStatUtil {
-    private final static Logger logger = LoggerFactory.getLogger(TPStatUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(TPStatUtil.class);
 
     private static Map<String, Queue<Double>> monitorMap = new ConcurrentHashMap<>();
 

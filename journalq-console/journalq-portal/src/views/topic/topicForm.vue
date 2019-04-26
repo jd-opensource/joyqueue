@@ -98,7 +98,7 @@ export default {
           partitions: 5,
           // brokerGroups: [],
           brokerGroup: {
-            id: 0,
+            id: -1,
             code: '',
             name: ''
           },
@@ -189,7 +189,6 @@ export default {
       }
     },
     handlerBrokerGroupChange (data) {
-      // this.formData.brokerGroups = [data];
       this.$refs.brokers.getListByGroup(data)
     },
     getNamespaces () {

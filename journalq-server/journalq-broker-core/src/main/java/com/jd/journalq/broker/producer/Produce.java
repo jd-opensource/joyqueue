@@ -14,7 +14,7 @@
 package com.jd.journalq.broker.producer;
 
 import com.jd.journalq.domain.QosLevel;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.message.BrokerMessage;
 import com.jd.journalq.message.JournalLog;
 import com.jd.journalq.network.session.Producer;
@@ -42,10 +42,10 @@ public interface Produce {
      * Date: 2018/8/17
      */
     PutResult putMessage(Producer producer, List<BrokerMessage> msgs,
-                         QosLevel qosLevel) throws JMQException;
+                         QosLevel qosLevel) throws JournalqException;
 
     PutResult putMessage(Producer producer, List<BrokerMessage> msgs,
-                         QosLevel qosLevel, int timeout) throws JMQException;
+                         QosLevel qosLevel, int timeout) throws JournalqException;
 
     /**
      * 异步写入
@@ -53,10 +53,10 @@ public interface Produce {
      * @param producer    session 中生产者
      * @param msgs        要写入的消息，如果是事务消息，则该批次的消息，必须都在同一个事务内，具有相同的txId
      * @param qosLevel    服务水平
-     * @throws JMQException
+     * @throws JournalqException
      */
     void putMessageAsync(Producer producer, List<BrokerMessage> msgs,
-                         QosLevel qosLevel, EventListener<WriteResult> eventListener) throws JMQException;
+                         QosLevel qosLevel, EventListener<WriteResult> eventListener) throws JournalqException;
 
     /**
      * 异步写入
@@ -65,24 +65,24 @@ public interface Produce {
      * @param msgs        要写入的消息，如果是事务消息，则该批次的消息，必须都在同一个事务内，具有相同的txId
      * @param qosLevel    服务水平
      * @param timeout
-     * @throws JMQException
+     * @throws JournalqException
      */
     void putMessageAsync(Producer producer, List<BrokerMessage> msgs,
-                         QosLevel qosLevel, int timeout, EventListener<WriteResult> eventListener) throws JMQException;
+                         QosLevel qosLevel, int timeout, EventListener<WriteResult> eventListener) throws JournalqException;
 
     /**
      * @param producer 会话相关的producer，用来存储当前会话
      * @param tx       命令类型，包括prepare，commit，rollback
-     * @throws JMQException 处理异常。
+     * @throws JournalqException 处理异常。
      */
-    TransactionId putTransactionMessage(Producer producer, JournalLog tx) throws JMQException;
+    TransactionId putTransactionMessage(Producer producer, JournalLog tx) throws JournalqException;
 
     /**
      * 获取补偿
      * @param producer
      * @param count
      * @return
-     * @throws JMQException
+     * @throws JournalqException
      */
-    List<TransactionId> getFeedback(Producer producer, int count) throws JMQException;
+    List<TransactionId> getFeedback(Producer producer, int count) throws JournalqException;
 }

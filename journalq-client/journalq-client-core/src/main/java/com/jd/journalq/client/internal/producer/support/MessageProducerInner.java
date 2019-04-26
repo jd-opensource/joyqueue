@@ -44,9 +44,9 @@ import com.jd.journalq.client.internal.producer.transport.ProducerClientManager;
 import com.jd.journalq.client.internal.transport.ClientState;
 import com.jd.journalq.domain.Producer;
 import com.jd.journalq.domain.QosLevel;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.domain.BrokerNode;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.retry.RetryPolicy;
 import com.jd.journalq.toolkit.service.Service;
 import org.apache.commons.collections.CollectionUtils;
@@ -78,7 +78,9 @@ public class MessageProducerInner extends Service {
         this(config, nameServerConfig, messageSender, clusterManager, producerClientManager, new ProducerInterceptorManager());
     }
 
-    public MessageProducerInner(ProducerConfig config, NameServerConfig nameServerConfig, MessageSender messageSender, ClusterManager clusterManager, ProducerClientManager producerClientManager, ProducerInterceptorManager producerInterceptorManager) {
+    public MessageProducerInner(ProducerConfig config, NameServerConfig nameServerConfig,
+                                MessageSender messageSender, ClusterManager clusterManager,
+                                ProducerClientManager producerClientManager, ProducerInterceptorManager producerInterceptorManager) {
         this.config = config;
         this.nameServerConfig = nameServerConfig;
         this.messageSender = messageSender;
@@ -138,7 +140,7 @@ public class MessageProducerInner extends Service {
 
                 @Override
                 public List<SendResult> reject(ProduceContext context) {
-                    throw new ProducerException("reject send", JMQCode.CN_UNKNOWN_ERROR.getCode());
+                    throw new ProducerException("reject send", JournalqCode.CN_UNKNOWN_ERROR.getCode());
                 }
             }).invoke();
         } catch (Exception e) {
@@ -225,7 +227,7 @@ public class MessageProducerInner extends Service {
             messageSender.batchSendAsync(brokerNode, topic, app, txId, messages, qosLevel, produceTimeout, timeout, new AsyncBatchSendCallback() {
                 @Override
                 public void onSuccess(List<ProduceMessage> messages, SendBatchResultData result) {
-                    if (result.getCode().equals(JMQCode.SUCCESS)) {
+                    if (result.getCode().equals(JournalqCode.SUCCESS)) {
                         callback.onSuccess(messages, result.getResult());
                     } else {
                         callback.onException(messages, new ProducerException(result.getCode().getMessage(), result.getCode().getCode()));
@@ -243,11 +245,11 @@ public class MessageProducerInner extends Service {
 
     protected List<SendResult> handleSendBatchResultData(String topic, String app, SendBatchResultData sendBatchResultData) {
         if (sendBatchResultData == null) {
-            throw new ProducerException(JMQCode.CN_UNKNOWN_ERROR.getMessage(), JMQCode.CN_UNKNOWN_ERROR.getCode());
+            throw new ProducerException(JournalqCode.CN_UNKNOWN_ERROR.getMessage(), JournalqCode.CN_UNKNOWN_ERROR.getCode());
         }
 
-        JMQCode code = sendBatchResultData.getCode();
-        if (code.equals(JMQCode.SUCCESS)) {
+        JournalqCode code = sendBatchResultData.getCode();
+        if (code.equals(JournalqCode.SUCCESS)) {
             return sendBatchResultData.getResult();
         }
 
@@ -282,10 +284,10 @@ public class MessageProducerInner extends Service {
     public TopicMetadata checkTopicMetadata(String topic) {
         TopicMetadata topicMetadata = clusterManager.fetchTopicMetadata(getTopicFullName(topic), config.getApp());
         if (topicMetadata == null) {
-            throw new ProducerException(String.format("topic %s is not exist", topic), JMQCode.FW_TOPIC_NOT_EXIST.getCode());
+            throw new ProducerException(String.format("topic %s is not exist", topic), JournalqCode.FW_TOPIC_NOT_EXIST.getCode());
         }
         if (topicMetadata.getProducerPolicy() == null) {
-            throw new ProducerException(String.format("topic %s producer %s is not exist", topic, nameServerConfig.getApp()), JMQCode.FW_PRODUCER_NOT_EXISTS.getCode());
+            throw new ProducerException(String.format("topic %s producer %s is not exist", topic, nameServerConfig.getApp()), JournalqCode.FW_PRODUCER_NOT_EXISTS.getCode());
         }
         return topicMetadata;
     }
@@ -343,18 +345,18 @@ public class MessageProducerInner extends Service {
 
     public PartitionMetadata dispatchPartitions(List<ProduceMessage> messages, TopicMetadata topicMetadata, List<PartitionMetadata> partitions, List<PartitionMetadata> partitionBlackList) {
         if (CollectionUtils.isEmpty(partitions)) {
-            throw new ProducerException(String.format("no partitions available, topic: %s, messages: %s", topicMetadata.getTopic(), messages), JMQCode.FW_TOPIC_NO_PARTITIONGROUP.getCode());
+            throw new ProducerException(String.format("no partitions available, topic: %s, messages: %s", topicMetadata.getTopic(), messages), JournalqCode.FW_TOPIC_NO_PARTITIONGROUP.getCode());
         }
         if (partitionBlackList != null) {
             partitions = ProducerHelper.filterBlackList(partitions, partitionBlackList);
         }
         if (CollectionUtils.isEmpty(partitions)) {
-            throw new ProducerException(String.format("no partitions available, topic: %s, messages: %s", topicMetadata.getTopic(), messages), JMQCode.FW_TOPIC_NO_PARTITIONGROUP.getCode());
+            throw new ProducerException(String.format("no partitions available, topic: %s, messages: %s", topicMetadata.getTopic(), messages), JournalqCode.FW_TOPIC_NO_PARTITIONGROUP.getCode());
         }
         PartitionSelector partitionSelector = partitionSelectorManager.getPartitionSelector(topicMetadata.getTopic(), config.getSelectorType());
         PartitionMetadata partition = ProducerHelper.dispatchPartitions(messages, topicMetadata, partitions, partitionSelector);
         if (partition == null || partition.getLeader() == null) {
-            throw new ProducerException(String.format("partition is not available, topic: %s, messages: %s", topicMetadata.getTopic(), messages), JMQCode.FW_TOPIC_NO_PARTITIONGROUP.getCode());
+            throw new ProducerException(String.format("partition is not available, topic: %s, messages: %s", topicMetadata.getTopic(), messages), JournalqCode.FW_TOPIC_NO_PARTITIONGROUP.getCode());
         }
         ProducerHelper.setPartitions(messages, partition.getId());
         return partition;

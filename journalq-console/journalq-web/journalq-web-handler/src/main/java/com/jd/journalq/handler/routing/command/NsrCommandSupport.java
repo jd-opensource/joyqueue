@@ -21,12 +21,16 @@ import com.jd.journalq.handler.annotation.PageQuery;
 import com.jd.journalq.handler.error.ConfigException;
 import com.jd.journalq.handler.error.ErrorCode;
 import com.jd.journalq.handler.message.AuditLogMessage;
-import com.jd.journalq.model.*;
+import com.jd.journalq.model.PageResult;
+import com.jd.journalq.model.QKeyword;
+import com.jd.journalq.model.QOperator;
+import com.jd.journalq.model.QPageQuery;
+import com.jd.journalq.model.Query;
 import com.jd.journalq.model.domain.Identity;
 import com.jd.journalq.model.domain.OperLog;
 import com.jd.journalq.model.domain.User;
 import com.jd.journalq.nsr.NsrService;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.laf.binding.annotation.Value;
 import com.jd.laf.web.vertx.Command;
 import com.jd.laf.web.vertx.annotation.Body;
@@ -180,11 +184,5 @@ public abstract class NsrCommandSupport<M, S extends NsrService, Q extends Query
                     + JSON.toJSONString(model) + ")", auditType, type + "(" + model.toString() + ")"));
         }
 
-        //todo url待完善
-//        if (operType != null) {
-//            OperLog.Type type = OperLog.Type.resolve(module);
-//            vertx.eventBus().send(OPER_LOG.value(), new OperLogMessage(operType.value(),
-//                    type==null? -1:type.value(), String.valueOf(model), com.alibaba.fastjson.JSON.toJSONString(model), operator.getId()));
-//        }
     }
 }

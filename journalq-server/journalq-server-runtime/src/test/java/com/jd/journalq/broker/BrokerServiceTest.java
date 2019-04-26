@@ -17,7 +17,7 @@ import com.jd.journalq.broker.archive.ArchiveManager;
 import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.config.BrokerConfig;
 import com.jd.journalq.broker.config.Configuration;
-import com.jd.journalq.broker.config.ContextManager;
+import com.jd.journalq.broker.config.ConfigurationManager;
 import com.jd.journalq.broker.consumer.Consume;
 import com.jd.journalq.broker.coordinator.CoordinatorService;
 import com.jd.journalq.broker.coordinator.config.CoordinatorConfig;
@@ -34,7 +34,7 @@ import com.jd.journalq.broker.store.StoreManager;
 import com.jd.journalq.domain.Config;
 import com.jd.journalq.domain.Consumer;
 import com.jd.journalq.domain.Producer;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.nsr.NameService;
 import com.jd.journalq.security.Authentication;
 import com.jd.journalq.server.retry.api.MessageRetry;
@@ -46,7 +46,7 @@ import com.jd.journalq.toolkit.config.PropertySupplier;
 import com.jd.journalq.toolkit.config.PropertySupplierAware;
 import com.jd.journalq.toolkit.lang.Close;
 import com.jd.journalq.toolkit.lang.LifeCycle;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,12 +75,12 @@ public class BrokerServiceTest extends Service {
     private ElectionService electionService;
     private MessageRetry retryManager;
     private BrokerContext brokerContext;
-    private ContextManager contextManager;
     private StoreManager storeManager;
     private NameService nameService;
 
     private CoordinatorService coordinatorService;
     private ArchiveManager archiveManager;
+    private ConfigurationManager configurationManager;
     private String[] args;
 
     @Override
@@ -89,22 +89,20 @@ public class BrokerServiceTest extends Service {
 
 
         this.brokerContext = new BrokerContext();
-        Configuration configuration = new Configuration();
-        parseParams(configuration, args);
+        this.configurationManager = new ConfigurationManager(args);
+        configurationManager.start();
+        Configuration configuration = configurationManager.getConfiguration();
 
-        ContextManager contextManager = new ContextManager(configuration);
         brokerContext.propertySupplier(configuration);
 
         //start name service first
         this.nameService = getNameService(brokerContext, configuration);
         this.nameService.start();
-        this.nameService.addListener(contextManager);
         this.brokerContext.nameService(nameService);
 
         // build and start context manager
-        this.contextManager = new ContextManager(configuration);
-        this.contextManager.setConfigProvider(new ConfigProviderImpl(nameService));
-        this.contextManager.start();
+        this.nameService.addListener(configurationManager);
+        this.configurationManager.setConfigProvider(new BrokerServiceTest.ConfigProviderImpl(nameService));
 
         //build broker config
         this.brokerConfig = new BrokerConfig(configuration);
@@ -197,7 +195,7 @@ public class BrokerServiceTest extends Service {
     @Override
     protected void doStart() throws Exception {
         startIfNecessary(this.nameService);
-        startIfNecessary(contextManager);
+        startIfNecessary(configurationManager);
         startIfNecessary(clusterManager);
         startIfNecessary(storeService);
         startIfNecessary(sessionManager);
@@ -260,32 +258,32 @@ public class BrokerServiceTest extends Service {
     private MessageRetry getMessageRetry(BrokerContext brokerContext) {
         return new MessageRetry() {
             @Override
-            public void addRetry(List list) throws JMQException {
+            public void addRetry(List list) throws JournalqException {
 
             }
 
             @Override
-            public void retrySuccess(String topic, String app, Object[] messageIds) throws JMQException {
+            public void retrySuccess(String topic, String app, Object[] messageIds) throws JournalqException {
 
             }
 
             @Override
-            public void retryError(String topic, String app, Object[] messageIds) throws JMQException {
+            public void retryError(String topic, String app, Object[] messageIds) throws JournalqException {
 
             }
 
             @Override
-            public void retryExpire(String topic, String app, Object[] messageIds) throws JMQException {
+            public void retryExpire(String topic, String app, Object[] messageIds) throws JournalqException {
 
             }
 
             @Override
-            public List<RetryMessageModel> getRetry(String topic, String app, short count, long startIndex) throws JMQException {
+            public List<RetryMessageModel> getRetry(String topic, String app, short count, long startIndex) throws JournalqException {
                 return null;
             }
 
             @Override
-            public int countRetry(String topic, String app) throws JMQException {
+            public int countRetry(String topic, String app) throws JournalqException {
                 return 0;
             }
 
@@ -367,7 +365,7 @@ public class BrokerServiceTest extends Service {
     }
 
 
-    private class ConfigProviderImpl implements ContextManager.ConfigProvider {
+    private class ConfigProviderImpl implements ConfigurationManager.ConfigProvider {
         private NameService nameService;
 
         public ConfigProviderImpl(NameService nameService) {

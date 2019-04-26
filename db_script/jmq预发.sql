@@ -12,7 +12,7 @@
 -- limitations under the License.
 --
 
-#laf_jmq 预发最新脚本
+#journalq 预发最新脚本
 #alarm_event
 #alarm_policy
 #alarm_type

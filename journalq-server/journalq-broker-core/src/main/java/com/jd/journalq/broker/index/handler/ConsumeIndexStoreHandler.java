@@ -18,8 +18,8 @@ import com.jd.journalq.broker.BrokerContext;
 import com.jd.journalq.broker.index.command.ConsumeIndexStoreRequest;
 import com.jd.journalq.broker.index.command.ConsumeIndexStoreResponse;
 import com.jd.journalq.domain.QosLevel;
-import com.jd.journalq.exception.JMQCode;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqCode;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.network.transport.codec.JMQHeader;
 import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.command.CommandType;
@@ -75,10 +75,10 @@ public class ConsumeIndexStoreHandler implements CommandHandler, Type {
 
             for (int partition : partitionIndexes.keySet()) {
                 // set consume index
-                int retCode = JMQCode.SUCCESS.getCode();
+                int retCode = JournalqCode.SUCCESS.getCode();
                 try {
                     setConsumeIndex(topic, (short) partition, app, partitionIndexes.get(partition).getIndex());
-                } catch (JMQException je) {
+                } catch (JournalqException je) {
                     retCode = je.getCode();
                 }
                 partitionIndexStoreStatus.put(partition, (short)retCode);
@@ -91,7 +91,7 @@ public class ConsumeIndexStoreHandler implements CommandHandler, Type {
         return new Command(header, offsetStoreResponse);
     }
 
-    private void setConsumeIndex(String topic, short partition, String app, long offset) throws JMQException {
+    private void setConsumeIndex(String topic, short partition, String app, long offset) throws JournalqException {
         Consumer consumer = new Consumer(topic, app);
         consume.setAckIndex(consumer, partition, offset);
         consume.setStartAckIndex(consumer, partition, -1);

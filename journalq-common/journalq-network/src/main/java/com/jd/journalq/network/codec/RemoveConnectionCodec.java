@@ -13,7 +13,7 @@
  */
 package com.jd.journalq.network.codec;
 
-import com.jd.journalq.network.command.JMQCommandType;
+import com.jd.journalq.network.command.JournalqCommandType;
 import com.jd.journalq.network.command.RemoveConnection;
 import com.jd.journalq.network.transport.codec.JMQHeader;
 import com.jd.journalq.network.transport.codec.PayloadCodec;
@@ -39,6 +39,6 @@ public class RemoveConnectionCodec implements PayloadCodec<JMQHeader, RemoveConn
 
     @Override
     public int type() {
-        return JMQCommandType.REMOVE_CONNECTION.getCode();
+        return JournalqCommandType.REMOVE_CONNECTION.getCode();
     }
 }

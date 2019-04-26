@@ -32,7 +32,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import static com.jd.journalq.nsr.ignite.model.IgniteBaseModel.SCHEMA;
-import static com.jd.journalq.nsr.ignite.model.IgnitePartitionGroupReplica.*;
+import static com.jd.journalq.nsr.ignite.model.IgnitePartitionGroupReplica.COLUMN_TOPIC;
+import static com.jd.journalq.nsr.ignite.model.IgnitePartitionGroupReplica.COLUMN_NAMESPACE;
+import static com.jd.journalq.nsr.ignite.model.IgnitePartitionGroupReplica.COLUMN_BROKER_ID;
 import static com.jd.journalq.nsr.ignite.model.IgnitePartitionGroupReplica.COLUMN_GROUP_NO;
 import static com.jd.journalq.nsr.ignite.model.IgnitePartitionGroupReplica.COLUMN_ID;
 

@@ -16,7 +16,7 @@ package com.jd.journalq.broker.election;
 import com.jd.journalq.broker.consumer.Consume;
 import com.jd.journalq.broker.consumer.model.PullResult;
 import com.jd.journalq.domain.TopicName;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.message.MessageLocation;
 import com.jd.journalq.network.session.Connection;
 import com.jd.journalq.network.session.Consumer;
@@ -34,9 +34,9 @@ public class ConsumeStub implements Consume {
      * @param count      获取消息条数
      * @param ackTimeout 占用partition的超时时间，单位毫秒
      * @return
-     * @throws JMQException
+     * @throws JournalqException
      */
-    public PullResult getMessage(Consumer consumer, int count, int ackTimeout) throws JMQException{
+    public PullResult getMessage(Consumer consumer, int count, int ackTimeout) throws JournalqException{
         return null;
     }
 
@@ -48,9 +48,9 @@ public class ConsumeStub implements Consume {
      * @param index     默认值-1
      * @param count     获取消息条数
      * @return
-     * @throws JMQException
+     * @throws JournalqException
      */
-    public PullResult getMessage(Consumer consumer, short partition, long index, int count) throws JMQException {
+    public PullResult getMessage(Consumer consumer, short partition, long index, int count) throws JournalqException {
         return null;
     }
 
@@ -61,9 +61,9 @@ public class ConsumeStub implements Consume {
      * @param consumer     消费者
      * @param isSuccessAck 是否正常确认
      * @return 是否成功
-     * @throws JMQException
+     * @throws JournalqException
      */
-    public boolean acknowledge(MessageLocation[] locations, Consumer consumer, Connection connection, boolean isSuccessAck) throws JMQException {
+    public boolean acknowledge(MessageLocation[] locations, Consumer consumer, Connection connection, boolean isSuccessAck) throws JournalqException {
         return true;
     }
 

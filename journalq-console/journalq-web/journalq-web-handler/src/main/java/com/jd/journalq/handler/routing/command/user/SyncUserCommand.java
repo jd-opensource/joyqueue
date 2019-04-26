@@ -17,7 +17,6 @@ import com.jd.journalq.model.domain.Identity;
 import com.jd.journalq.model.domain.User;
 import com.jd.journalq.sync.SyncService;
 import com.jd.journalq.sync.UserInfo;
-import com.jd.journalq.handler.Constants;
 import com.jd.laf.binding.annotation.Value;
 import com.jd.laf.web.vertx.Command;
 import com.jd.laf.web.vertx.annotation.Body;

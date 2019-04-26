@@ -22,4 +22,5 @@ import com.jd.journalq.model.query.QBrokerGroupRelated;
  */
 public interface BrokerGroupRelatedService extends PageService<BrokerGroupRelated, QBrokerGroupRelated> {
     int updateGroupByGroupId(BrokerGroupRelated brokerGroupRelated);
+    int deleteByGroupId(long groupId);
 }

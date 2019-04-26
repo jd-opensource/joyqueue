@@ -17,7 +17,13 @@ import com.jd.journalq.model.ListQuery;
 import com.jd.journalq.exception.ServiceException;
 import com.jd.journalq.exception.ValidationException;
 import com.jd.journalq.model.PageResult;
-import com.jd.journalq.model.domain.*;
+import com.jd.journalq.model.domain.Application;
+import com.jd.journalq.model.domain.ApplicationToken;
+import com.jd.journalq.model.domain.Consumer;
+import com.jd.journalq.model.domain.Identity;
+import com.jd.journalq.model.domain.Producer;
+import com.jd.journalq.model.domain.TopicUnsubscribedApplication;
+import com.jd.journalq.model.domain.User;
 import com.jd.journalq.model.query.QApplication;
 import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.model.query.QApplicationToken;
@@ -30,7 +36,7 @@ import com.jd.journalq.repository.ApplicationRepository;
 import com.jd.journalq.service.ApplicationService;
 import com.jd.journalq.service.ApplicationUserService;
 import com.jd.journalq.service.UserService;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.util.NullUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,7 +97,6 @@ public class ApplicationServiceImpl extends PageServiceSupport<Application, QApp
                     String.format("app %s exists related producers", app.getCode()));
             Preconditions.checkArgument(NullUtil.isEmpty(consumerNameServerService.findByQuery(new QConsumer(app.getCode()))),
                     String.format("app %s exists related consumers", app.getCode()));
-
             //delete related app users
             applicationUserService.deleteByAppId(app.getId());
             //delete related app tokens
@@ -101,6 +106,8 @@ public class ApplicationServiceImpl extends PageServiceSupport<Application, QApp
                     appTokenNameServerService.delete(t);
                 }
             }
+        } catch (IllegalArgumentException e) {
+            throw e;
         } catch (Exception e) {
             String msg = "delete application error. ";
             logger.error(msg, e);

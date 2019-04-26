@@ -99,9 +99,9 @@ export default {
     float:left;
   }
   .logo img{
-    width:110px;
-    padding-top:10px;
-    padding-left: 10px;
+    width:130px;
+    padding-top:16px;
+    padding-left: 15px;
   }
   .dui-menu.dui-menu-dark.dui-menu-horizontal .left > .dui-menu-item.dui-menu-item-active {
     color: #67A2F9;

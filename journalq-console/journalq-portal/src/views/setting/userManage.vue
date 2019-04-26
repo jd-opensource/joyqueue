@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="ml20 mt30">
-      <d-input v-model="searchData.keyword" placeholder="请输入英文名" class="left mr10" style="width: 20%">
+      <d-input v-model="searchData.keyword" placeholder="请输入英文名" class="left mr10" style="width:213px">
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
       <d-button type="primary" @click="openDialog('addDialog')">添加用户<icon name="plus-circle" style="margin-left: 5px;"></icon></d-button>
@@ -24,12 +24,14 @@
     <!--角色修改-->
     <my-dialog :dialog="editDialog" @on-dialog-confirm="editConfirm()" @on-dialog-cancel="editCancel()">
       <grid-row class="mb10">
-        <grid-col :span="8" class="label">英文名：</grid-col>
-        <grid-col :span="16" class="val">{{editData.code}}</grid-col>
+        <grid-col :span="5" class="label">英文名：</grid-col>
+        <grid-col :span="1"/>
+        <grid-col :span="14" class="val">{{editData.code}}</grid-col>
       </grid-row>
       <grid-row class="mb10">
-        <grid-col :span="8" class="label">角色：</grid-col>
-        <grid-col :span="16" class="val">
+        <grid-col :span="5" class="label">角色：</grid-col>
+        <grid-col :span="1"/>
+        <grid-col :span="14" class="val">
           <d-radio v-model="editData.role" name="radio" :label="1">管理员</d-radio>
           <d-radio v-model="editData.role" name="radio" :label="0">用户</d-radio>
         </grid-col>
@@ -43,7 +45,7 @@ import apiRequest from '../../utils/apiRequest.js'
 import myTable from '../../components/common/myTable.vue'
 import myDialog from '../../components/common/myDialog.vue'
 import crud from '../../mixins/crud.js'
-import GridCol from "../../components/grid/col";
+import GridCol from '../../components/grid/col'
 export default {
   name: 'application',
   components: {

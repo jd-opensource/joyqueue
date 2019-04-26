@@ -13,7 +13,7 @@
  */
 package com.jd.journalq.client.internal.producer.domain;
 
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 
 /**
  * SendResultData
@@ -24,7 +24,7 @@ import com.jd.journalq.exception.JMQCode;
 public class SendResultData {
 
     private SendResult result;
-    private JMQCode code;
+    private JournalqCode code;
 
     public SendResult getResult() {
         return result;
@@ -34,11 +34,11 @@ public class SendResultData {
         this.result = result;
     }
 
-    public JMQCode getCode() {
+    public JournalqCode getCode() {
         return code;
     }
 
-    public void setCode(JMQCode code) {
+    public void setCode(JournalqCode code) {
         this.code = code;
     }
 }

@@ -41,14 +41,14 @@ public class BaseDirUtils {
     public static File prepareBaseDir() throws IOException {
         String property = "java.io.tmpdir";
         String tempDir = System.getProperty(property);
-        return prepareBaseDir(tempDir + File.separator + "jmq-data");
+        return prepareBaseDir(tempDir + File.separator + "journalqdata");
     }
 
     public static void destroyBaseDir() {
         String property = "java.io.tmpdir";
         String tempDir = System.getProperty(property);
 
-        destroyBaseDir(new File(tempDir + File.separator + "jmq-data"));
+        destroyBaseDir(new File(tempDir + File.separator + "journalqdata"));
     }
 
     public static void destroyBaseDir(File base) {

@@ -18,6 +18,12 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
 import java.util.List;
 
+/**
+ * Grafana variable query model
+ * author: chenyanying3
+ * email: chenyanying3@jd.com
+ * date: 2019/02/29
+ */
 public class GrafanaVariableQuery {
     private String model;
     @JacksonXmlElementWrapper(localName = "parameters")

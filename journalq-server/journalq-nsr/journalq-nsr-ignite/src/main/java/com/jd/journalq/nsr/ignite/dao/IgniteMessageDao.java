@@ -26,7 +26,9 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 
 import static com.jd.journalq.nsr.ignite.model.IgniteBaseModel.SCHEMA;
-import static com.jd.journalq.nsr.ignite.model.IgniteMessage.*;
+import static com.jd.journalq.nsr.ignite.model.IgniteMessage.COLUMN_CONTENT;
+import static com.jd.journalq.nsr.ignite.model.IgniteMessage.COLUMN_TYPE;
+import static com.jd.journalq.nsr.ignite.model.IgniteMessage.COLUMN_MESSAGE_ID;
 
 public class IgniteMessageDao extends IgniteDao {
     public static CacheConfiguration<String, IgniteMessage> cacheCfg;

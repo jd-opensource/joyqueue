@@ -15,7 +15,7 @@ package com.jd.journalq.util;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,9 +30,9 @@ import java.util.regex.Pattern;
 public class ObjectUtil {
     private static final Logger logger = LoggerFactory.getLogger(ObjectUtil.class);
 
-    public final static String WHERE_SQL_VARIABLE_REGEX = "#\\{[a-zA-Z]+[a-zA-Z0-9\\.]*[a-zA-Z0-9]+\\}";
-    public final static String WHERE_SQL_VARIABLE_REGEX_PREFIX = "#\\{";
-    public final static String WHERE_SQL_VARIABLE_REGEX_SUFFIX = "\\}";
+    public static final String WHERE_SQL_VARIABLE_REGEX = "#\\{[a-zA-Z]+[a-zA-Z0-9\\.]*[a-zA-Z0-9]+\\}";
+    public static final String WHERE_SQL_VARIABLE_REGEX_PREFIX = "#\\{";
+    public static final String WHERE_SQL_VARIABLE_REGEX_SUFFIX = "\\}";
 
     public static Map<String, Object> flatMap(Object obj) {
         Preconditions.checkArgument(obj != null, "invalid arg.");

@@ -1,6 +1,7 @@
 <template>
   <div>
-    <consumer-base ref="consumerBase" :keywordTip="keywordTip" :colData="colData" :subscribeDialogColData="subscribeDialog.colData"
+    <consumer-base ref="consumerBase" :keywordTip="keywordTip" :colData="colData"
+                   :subscribeDialogColData="subscribeDialog.colData"
                    :search="search" :subscribeUrls="subscribeDialog.urls" />
   </div>
 </template>
@@ -61,10 +62,6 @@ export default {
               },
               on: {
                 click: () => {
-                //   this.$router.push({
-                //     name: `/${this.$i18n.locale}/tool/retry`,
-                //     query: {topic: params.item.topic.code, app: params.item.app.code}})
-                // }
                   this.$router.push({
                     name: `/${this.$i18n.locale}/topic/detail`,
                     query: {id: params.item.topic.code,

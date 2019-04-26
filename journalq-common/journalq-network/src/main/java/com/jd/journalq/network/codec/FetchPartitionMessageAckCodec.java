@@ -16,11 +16,11 @@ package com.jd.journalq.network.codec;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.message.BrokerMessage;
 import com.jd.journalq.network.command.FetchPartitionMessageAck;
 import com.jd.journalq.network.command.FetchPartitionMessageAckData;
-import com.jd.journalq.network.command.JMQCommandType;
+import com.jd.journalq.network.command.JournalqCommandType;
 import com.jd.journalq.network.serializer.Serializer;
 import com.jd.journalq.network.transport.codec.JMQHeader;
 import com.jd.journalq.network.transport.codec.PayloadCodec;
@@ -53,7 +53,7 @@ public class FetchPartitionMessageAckCodec implements PayloadCodec<JMQHeader, Fe
                 for (int k = 0; k < messageSize; k++) {
                     messages.add(Serializer.readBrokerMessage(buffer));
                 }
-                JMQCode code = JMQCode.valueOf(buffer.readInt());
+                JournalqCode code = JournalqCode.valueOf(buffer.readInt());
                 FetchPartitionMessageAckData fetchPartitionMessageAckData = new FetchPartitionMessageAckData(messages, code);
                 data.put(topic, partition, fetchPartitionMessageAckData);
             }
@@ -84,6 +84,6 @@ public class FetchPartitionMessageAckCodec implements PayloadCodec<JMQHeader, Fe
 
     @Override
     public int type() {
-        return JMQCommandType.FETCH_PARTITION_MESSAGE_ACK.getCode();
+        return JournalqCommandType.FETCH_PARTITION_MESSAGE_ACK.getCode();
     }
 }

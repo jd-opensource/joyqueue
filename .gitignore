@@ -17,3 +17,5 @@ h2-db-journalq
 
 .version.properties
 filter.properties
+.factorypath
+journalq-console/journalq-web/journalq-web-webroot/src/main/webroot/

@@ -31,7 +31,7 @@ public class CommitAck extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.COMMIT_ACK.getCode();
+        return JournalqCommandType.COMMIT_ACK.getCode();
     }
 
     public void setData(Table<String, Short, List<CommitAckData>> data) {

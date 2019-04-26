@@ -9,7 +9,7 @@
 <script>
 import consumerBase from '../monitor/consumerBase.vue'
 import {getTopicCode, getAppCode, openOrCloseBtnRender, clientTypeSelectRender,
-  clientTypeBtnRender,topicTypeBtnRender, baseBtnRender, subscribeGroupAutoCompleteRender} from '../../utils/common.js'
+  clientTypeBtnRender, topicTypeBtnRender, baseBtnRender, subscribeGroupAutoCompleteRender} from '../../utils/common.js'
 
 export default {
   name: 'consumer',
@@ -57,28 +57,13 @@ export default {
         },
         {
           title: '重试数',
-          key: 'retry.count',
-          render: (h, params) => {
-            return h('label', {
-              style: {
-                cursor: 'pointer',
-                color: '#3366FF'
-              },
-              on: {
-                click: () => {
-                  this.$router.push({
-                  name: `/${this.$i18n.locale}/tool/retry`,
-                  query: {topic: params.item.topic.code, app: params.item.app.code}})
-                }
-              }
-            }, params.item.retry === undefined ? 0 : params.item.retry.count)
-          }
+          key: 'retry.count'
         },
         {
-          title:'消息类型',
+          title: '消息类型',
           key: 'topicType',
           render: (h, params) => {
-            return topicTypeBtnRender(h, params.item.topicType);
+            return topicTypeBtnRender(h, params.item.topicType)
           }
         },
         {
@@ -165,6 +150,10 @@ export default {
           colData: []
         }
       }
+      // ,
+      // monitorUrls: {
+      //   performance: this.$store.getters.urls.performance.consumer
+      // }
     }
   },
   methods: {

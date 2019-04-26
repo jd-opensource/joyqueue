@@ -13,7 +13,7 @@
  */
 package com.jd.journalq.broker.consumer.filter;
 
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -25,5 +25,5 @@ import java.util.List;
  */
 public interface FilterCallback {
 
-    void callback(List<ByteBuffer> list) throws JMQException;
+    void callback(List<ByteBuffer> list) throws JournalqException;
 }

@@ -14,7 +14,6 @@
 package com.jd.journalq.network.codec;
 
 import com.jd.journalq.domain.TopicConfig;
-import com.jd.journalq.network.command.*;
 import com.jd.journalq.network.command.CommandType;
 import com.jd.journalq.network.command.SubscribeAck;
 import com.jd.journalq.network.serializer.Serializer;

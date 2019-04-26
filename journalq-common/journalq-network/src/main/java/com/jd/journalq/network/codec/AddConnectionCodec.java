@@ -14,7 +14,7 @@
 package com.jd.journalq.network.codec;
 
 import com.jd.journalq.network.command.AddConnection;
-import com.jd.journalq.network.command.JMQCommandType;
+import com.jd.journalq.network.command.JournalqCommandType;
 import com.jd.journalq.network.serializer.Serializer;
 import com.jd.journalq.network.session.ClientId;
 import com.jd.journalq.network.session.Language;
@@ -72,6 +72,6 @@ public class AddConnectionCodec implements PayloadCodec<JMQHeader, AddConnection
 
     @Override
     public int type() {
-        return JMQCommandType.ADD_CONNECTION.getCode();
+        return JournalqCommandType.ADD_CONNECTION.getCode();
     }
 }

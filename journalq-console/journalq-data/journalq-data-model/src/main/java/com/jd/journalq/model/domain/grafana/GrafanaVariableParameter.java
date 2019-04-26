@@ -15,6 +15,12 @@ package com.jd.journalq.model.domain.grafana;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
+/**
+ * Grafana variable parameter
+ * author: chenyanying3
+ * email: chenyanying3@jd.com
+ * date: 2019/02/29
+ */
 public class GrafanaVariableParameter {
     private String name;
     @JacksonXmlProperty(localName = "target_index")

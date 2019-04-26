@@ -30,13 +30,13 @@ import com.jd.journalq.client.internal.consumer.transport.ConsumerClientGroup;
 import com.jd.journalq.client.internal.consumer.transport.ConsumerClientManager;
 import com.jd.journalq.client.internal.exception.ClientException;
 import com.jd.journalq.client.internal.transport.ConnectionState;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.command.FetchPartitionMessageAck;
 import com.jd.journalq.network.command.FetchTopicMessageAck;
 import com.jd.journalq.network.domain.BrokerNode;
 import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.transport.command.CommandCallback;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -124,7 +124,8 @@ public class DefaultMessageFetcher extends Service implements MessageFetcher {
     }
 
     @Override
-    public void fetchPartitionAsync(BrokerNode brokerNode, final String topic, final String app, final short partition, final long index, int count, long timeout, final PartitionFetchListener listener) {
+    public void fetchPartitionAsync(BrokerNode brokerNode, final String topic, final String app, final short partition,
+                                    final long index, int count, long timeout, final PartitionFetchListener listener) {
         Table<String, Short, Long> partitionTable = HashBasedTable.create();
         partitionTable.put(topic, partition, index);
         batchFetchPartitionsAsync(brokerNode, partitionTable, app, count, timeout, new BatchPartitionFetchListener() {
@@ -240,7 +241,7 @@ public class DefaultMessageFetcher extends Service implements MessageFetcher {
 
     protected void checkState() {
         if (!isStarted()) {
-            throw new ClientException("fetcher is not started", JMQCode.CN_SERVICE_NOT_AVAILABLE.getCode());
+            throw new ClientException("fetcher is not started", JournalqCode.CN_SERVICE_NOT_AVAILABLE.getCode());
         }
     }
 

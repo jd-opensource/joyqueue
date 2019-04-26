@@ -22,7 +22,7 @@ import com.jd.journalq.broker.mqtt.connection.MqttConnection;
 import com.jd.journalq.broker.mqtt.session.MqttSession;
 import com.jd.journalq.broker.producer.Produce;
 import com.jd.journalq.domain.QosLevel;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.message.BrokerMessage;
 import com.jd.journalq.network.session.Consumer;
 import com.jd.journalq.network.session.Producer;
@@ -30,7 +30,14 @@ import com.jd.journalq.broker.mqtt.util.MqttMessageSerializer;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
-import io.netty.handler.codec.mqtt.*;
+import io.netty.handler.codec.mqtt.MqttFixedHeader;
+import io.netty.handler.codec.mqtt.MqttMessage;
+import io.netty.handler.codec.mqtt.MqttMessageFactory;
+import io.netty.handler.codec.mqtt.MqttMessageIdVariableHeader;
+import io.netty.handler.codec.mqtt.MqttMessageType;
+import io.netty.handler.codec.mqtt.MqttPublishMessage;
+import io.netty.handler.codec.mqtt.MqttPublishVariableHeader;
+import io.netty.handler.codec.mqtt.MqttQoS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +62,7 @@ public class MessagePublisher {
         this.connectionManager = connectionManager;
     }
 
-    public void publishMessage(Producer producer, Channel client, MqttPublishMessage publishMessage) throws JMQException {
+    public void publishMessage(Producer producer, Channel client, MqttPublishMessage publishMessage) throws JournalqException {
         final MqttQoS qos = publishMessage.fixedHeader().qosLevel();
         final int packageID = publishMessage.variableHeader().packetId();
 

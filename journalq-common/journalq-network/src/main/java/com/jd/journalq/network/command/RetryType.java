@@ -33,7 +33,7 @@ public enum RetryType {
 
     private byte type;
 
-    private RetryType(int type) {
+    RetryType(int type) {
         this.type = (byte) type;
     }
 
