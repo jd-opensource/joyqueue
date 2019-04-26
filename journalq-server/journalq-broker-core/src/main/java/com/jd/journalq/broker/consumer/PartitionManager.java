@@ -368,6 +368,19 @@ public class PartitionManager {
         }
 
         /**
+         * 清零消费者的占用次数
+         *
+         * @param clientId
+         */
+        private void clearOccupyTimes(String clientId) {
+            Counter counter = occupyCounter.get(clientId);
+            if (counter == null) {
+                return;
+            }
+            occupyCounter.remove(clientId);
+        }
+
+        /**
          * 一个客户端占用的分区数
          *
          * @param clientId
@@ -528,8 +541,12 @@ public class PartitionManager {
                 // 判断是否同一个消费者
                 if (ownerShip != null && StringUtils.equals(ownerShip.getOwner(), clientId)) {
                     logger.info("remove occupy by topic:[{}], app:[{}], partition:[{}]", consumer.getTopic(), consumer.getApp(), partition);
-
+                    // 解除占用
                     ownerShipCache.remove(consumePartition);
+                    // 清零该消费者的占用次数
+                    counterService.clearOccupyTimes(clientId);
+                    // 清零该消费者的出错次数
+                    counterService.clearErrTimes(consumer);
                 }
             });
 
