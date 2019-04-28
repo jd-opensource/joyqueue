@@ -2,9 +2,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,14 +14,21 @@
 package com.jd.journalq.broker.monitor;
 
 import com.google.common.collect.Lists;
+import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.monitor.config.BrokerMonitorConfig;
 import com.jd.journalq.broker.monitor.stat.AppStat;
 import com.jd.journalq.broker.monitor.stat.BrokerStat;
 import com.jd.journalq.broker.monitor.stat.ConsumerStat;
 import com.jd.journalq.broker.monitor.stat.PartitionGroupStat;
+import com.jd.journalq.broker.monitor.stat.PartitionStat;
 import com.jd.journalq.broker.monitor.stat.ProducerStat;
 import com.jd.journalq.broker.monitor.stat.ReplicationStat;
 import com.jd.journalq.broker.monitor.stat.TopicStat;
+import com.jd.journalq.domain.PartitionGroup;
+import com.jd.journalq.event.ConsumerEvent;
+import com.jd.journalq.event.MetaEvent;
+import com.jd.journalq.event.PartitionGroupEvent;
+import com.jd.journalq.event.TopicEvent;
 import com.jd.journalq.monitor.Client;
 import com.jd.journalq.network.session.Connection;
 import com.jd.journalq.network.session.Consumer;
@@ -35,6 +42,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.util.List;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -53,6 +61,8 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
     private BrokerMonitorConfig config;
     private SessionManager sessionManager;
     private BrokerStatManager brokerStatManager;
+    // 集群管理
+    private ClusterManager clusterManager;
 
     // 统计基础汇总信息
     private BrokerStat brokerStat;
@@ -62,10 +72,11 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
 
     }
 
-    public BrokerMonitor(BrokerMonitorConfig config, SessionManager sessionManager, BrokerStatManager brokerStatManager) {
+    public BrokerMonitor(BrokerMonitorConfig config, SessionManager sessionManager, BrokerStatManager brokerStatManager, ClusterManager clusterManager) {
         this.config = config;
         this.sessionManager = sessionManager;
         this.brokerStatManager = brokerStatManager;
+        this.clusterManager = clusterManager;
     }
 
     @Override
@@ -78,6 +89,8 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
     protected void doStart() throws Exception {
         brokerStat = brokerStatManager.getBrokerStat();
         sessionManager.addListener(this);
+
+        clusterManager.addListener(new MonitorMateDataListener());
     }
 
     @Override
@@ -370,5 +383,125 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
 
     public SessionManager getSessionManager() {
         return sessionManager;
+    }
+
+    /**
+     * 元数据监听
+     */
+    class MonitorMateDataListener implements EventListener {
+        @Override
+        public void onEvent(Object event) {
+            MetaEvent metaEvent = (MetaEvent) event;
+            switch (metaEvent.getEventType()) {
+                case REMOVE_CONSUMER:
+                    removeConsume(metaEvent);
+                    break;
+                case REMOVE_TOPIC:
+                    removeTopic(metaEvent);
+                    break;
+                case REMOVE_PARTITION_GROUP:
+                    removePartitionGroup(metaEvent);
+                    break;
+                case UPDATE_PARTITION_GROUP:
+                    updatePartitionGroup(metaEvent);
+                    break;
+            }
+        }
+
+        private void removeConsume(MetaEvent metaEvent) {
+            try {
+                logger.info("listen remove_consume_event:[{}]", metaEvent);
+
+                ConsumerEvent removeConsumerEvent = (ConsumerEvent) metaEvent;
+                String topic = removeConsumerEvent.getTopic().getFullName();
+                String app = removeConsumerEvent.getApp();
+                if (brokerStat != null) {
+                    TopicStat topicStat = brokerStat.getTopicStats().get(topic);
+                    ConcurrentMap<String, AppStat> appStats = topicStat.getAppStats();
+                    AppStat remove = appStats.remove(app);
+
+                    if (remove != null) {
+                        logger.info("success to unsubscribe app:[{}] from topic:[{}].", app, topic);
+                    } else {
+                        logger.info("have no subscribe app:[{}] from topic:[{}].", app, topic);
+                    }
+                }
+            } catch (Throwable th) {
+                logger.error("listen remove_consume_event error.", th);
+            }
+        }
+
+        private void removeTopic(MetaEvent metaEvent) {
+            try {
+                logger.info("listen remove_topic_event:[{}]", metaEvent);
+
+                TopicEvent removeTopicEvent = (TopicEvent) metaEvent;
+                String topic = removeTopicEvent.getTopic().getFullName();
+                if (brokerStat != null) {
+                    TopicStat remove = brokerStat.getTopicStats().remove(topic);
+                    if (remove != null) {
+                        logger.info("success to remove topic:[{}].", topic);
+                    } else {
+                        logger.info("have no topic:[{}].", topic);
+                    }
+                }
+            } catch (Throwable th) {
+                logger.error("listen remove_topic_event error.", th);
+            }
+        }
+
+        private void removePartitionGroup(MetaEvent metaEvent) {
+            try {
+                logger.info("listen remove_partitionGroup_event:[{}]", metaEvent);
+
+                PartitionGroupEvent removePartitionGroupEvent = (PartitionGroupEvent) metaEvent;
+                String topic = removePartitionGroupEvent.getTopic().getFullName();
+                if (brokerStat != null) {
+                    TopicStat topicStat = brokerStat.getTopicStats().get(topic);
+                    ConcurrentMap<Integer, PartitionGroupStat> partitionGroupStatMap = topicStat.getPartitionGroupStatMap();
+                    PartitionGroupStat remove = partitionGroupStatMap.remove(removePartitionGroupEvent.getPartitionGroup());
+                    if (remove != null) {
+                        logger.info("success to remove partitionGroup :[{}] from topic:[{}]", removePartitionGroupEvent.getPartitionGroup(), topic);
+                    } else {
+                        logger.info("have no partitionGroup:[{}] from topic:[{}].", removePartitionGroupEvent.getPartitionGroup(), topic);
+                    }
+                }
+            } catch (Throwable th) {
+                logger.error("listen remove_partitionGroup_event error.", th);
+            }
+        }
+
+        private void updatePartitionGroup(MetaEvent metaEvent) {
+            // 只处理更新里面的删除partition情况
+            try {
+                logger.info("listen remove_partitionGroup_event:[{}]", metaEvent);
+
+                PartitionGroupEvent updatePartitionGroupEvent = (PartitionGroupEvent) metaEvent;
+                String topic = updatePartitionGroupEvent.getTopic().getFullName();
+                if (brokerStat != null) {
+                    TopicStat topicStat = brokerStat.getTopicStats().get(topic);
+                    ConcurrentMap<Integer, PartitionGroupStat> partitionGroupStatMap = topicStat.getPartitionGroupStatMap();
+                    PartitionGroupStat partitionGroupStat = partitionGroupStatMap.get(updatePartitionGroupEvent.getPartitionGroup());
+
+                    Integer partitionGroupId = updatePartitionGroupEvent.getPartitionGroup();
+                    PartitionGroup partitionGroupByGroup = clusterManager.getPartitionGroupByGroup(updatePartitionGroupEvent.getTopic(), partitionGroupId);
+
+                    ConcurrentMap<Short /** partition **/, PartitionStat> partitionStatMap = partitionGroupStat.getPartitionStatMap();
+                    partitionStatMap.keySet().stream().forEach(partition -> {
+                        if(!partitionGroupByGroup.getPartitions().contains(partition)) {
+                            PartitionStat remove = partitionStatMap.remove(partition);
+                            if (remove != null) {
+                                logger.info("success to remove partition :[{}] from topic:[{}], partitionGroup:[{}]", updatePartitionGroupEvent.getPartitionGroup(), topic, partitionGroupId);
+                            } else {
+                                logger.info("have no partitionGroup:[{}] from topic:[{}], partitionGroup:[{}].", updatePartitionGroupEvent.getPartitionGroup(), topic, partitionGroupId);
+                            }
+                        }
+                    });
+                }
+            } catch (Throwable th) {
+                logger.error("listen update_partitionGroup_event error.", th);
+            }
+        }
+
     }
 }
