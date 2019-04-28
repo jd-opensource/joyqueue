@@ -23,7 +23,7 @@ public class OwnerShip {
     private String owner;
     // 占用过期事件
     private volatile long expireTime;
-
+    // 创建时间
     private long createTime;
 
     /**
