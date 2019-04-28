@@ -1,4 +1,5 @@
 
+
 # 快速启动
 
 需要安装 Maven 和 Java 环境来启动 JournalQ
@@ -17,7 +18,7 @@ $ mvn install -DskipTests
 ## 第2步：以默认配置启动JournalQ
 
 ```bash
-$ cd distribution/jmq-server/bin
+$ cd distribution/journalq-server/bin
 $ ./start.sh
 ```
 
@@ -25,9 +26,9 @@ $ ./start.sh
 如果你能在日志中看到如下的日志，表明broker/选举/监控/命名服务已经正常启动，并监听在50088/50089/50090/50091端口上。
 
 ```
-[11:06:21:241] [main] [INFO] - com.jd.jmq.broker.manage.exporter.BrokerManageExportServer.doStart(BrokerManageExportServer.java:57) - broker manage server is started, host: 10.0.17.78, port: 50090
-[11:06:21:242] [main] [INFO] - com.jd.jmq.broker.BrokerService.doStart(BrokerService.java:263) - brokerServer start ,broker.id[1553137579],ip[10.0.17.78],frontPort[50088],backendPort[50089],monitorPort[50090],nameServer port[50091]
-[11:06:21:243] [main] [INFO] - com.jd.jmq.broker.JMQLauncher.main(JMQLauncher.java:32) - >>>
+[11:06:21:241] [main] [INFO] - com.jd.journalq.broker.manage.exporter.BrokerManageExportServer.doStart(BrokerManageExportServer.java:57) - broker manage server is started, host: 10.0.17.78, port: 50090
+[11:06:21:242] [main] [INFO] - com.jd.journalq.broker.BrokerService.doStart(BrokerService.java:263) - brokerServer start ,broker.id[1553137579],ip[10.0.17.78],frontPort[50088],backendPort[50089],monitorPort[50090],nameServer port[50091]
+[11:06:21:243] [main] [INFO] - com.jd.journalq.broker.JournalqLauncher.main(JournalqLauncher.java:32) - >>>
 >>>       _   __  __    ____  
 >>>      | | |  \/  |  / __ \
 >>>      | | | \  / | | |  | |
@@ -35,7 +36,7 @@ $ ./start.sh
 >>> | |__| | | |  | | | |__| |
 >>> \______/ |_|  |_| \__\__\/
 >>>                           
-[11:06:21:243] [main] [INFO] - com.jd.jmq.broker.JMQLauncher.main(JMQLauncher.java:41) - JMQLauncher is started
+[11:06:21:243] [main] [INFO] - com.jd.journalq.broker.JournalqLauncher.main(JournalqLauncher.java:41) - JournalqLauncher is started
 ```
 ## 第3步：创建发布和订阅关系
 在开始生产和消费之前，需要先创建主题、生产和消费者应用以及对应的令牌，令牌用于认证应用的合法性。假设创建主题test_topic, 生产和消费应用都是同一个应用test_app，并且令牌为test_token。
@@ -48,8 +49,8 @@ JournalQ 提供Java、Spring 以及Spring Boot三种客户端使用形式。
 
 ```
 <dependency>
-    <groupId>com.jd.jmq</groupId>
-    <artifactId>jmq-client-core</artifactId>
+    <groupId>com.jd.journalq</groupId>
+    <artifactId>journalq-client-core</artifactId>
     <version>4.0.0-SNAPSHOT</version>
 </dependency>
 ```
@@ -61,7 +62,7 @@ public static void main(String[] args) {
         KeyValue keyValue = OMS.newKeyValue();
         keyValue.put(JMQBuiltinKeys.ACCOUNT_KEY, "test_token");
 
-        MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint(String.format("oms:jmq://test_app@%s:50088/UNKNOWN", IpUtil.getLocalIp()), keyValue);
+        MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint(String.format("oms:journalq://test_app@%s:50088/UNKNOWN", IpUtil.getLocalIp()), keyValue);
 
         Producer producer = messagingAccessPoint.createProducer();
         producer.start();
@@ -91,7 +92,7 @@ public static void main(String[] args) throws Exception {
         KeyValue keyValue = OMS.newKeyValue();
         keyValue.put(JMQBuiltinKeys.ACCOUNT_KEY, "test_token");
 
-        MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint(String.format("oms:jmq://test_app@%s:50088/UNKNOWN", IpUtil.getLocalIp()), keyValue);
+        MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint(String.format("oms:journalq://test_app@%s:50088/UNKNOWN", IpUtil.getLocalIp()), keyValue);
 
         Consumer consumer = messagingAccessPoint.createConsumer();
         consumer.start();
@@ -126,8 +127,8 @@ public static void main(String[] args) throws Exception {
 
 ```
 <dependency>
-    <groupId>com.jd.jmq</groupId>
-    <artifactId>jmq-client-core</artifactId>
+    <groupId>com.jd.journalq</groupId>
+    <artifactId>journalq-client-core</artifactId>
     <version>4.0.0-SNAPSHOT</version>
 </dependency>
 <dependency>
@@ -148,11 +149,11 @@ public static void main(String[] args) throws Exception {
         http://www.springframework.org/schema/beans/spring-beans.xsd
         http://openmessaging.io/schema
 	    http://openmessaging.io/schema/oms.xsd">
-    <oms:access-point url="oms:jmq://test_app@localhost:50088/UNKNOWN">
+    <oms:access-point url="oms:journalq://test_app@localhost:50088/UNKNOWN">
         <oms:attribute key="ACCOUNT_KEY" value="test_token"></oms:attribute>
     </oms:access-point>
     <oms:producer id="producer"></oms:producer>
-    <oms:consumer queueName="test_topic" listener="com.jd.jmq.client.samples.spring.MessageListener"></oms:consumer>
+    <oms:consumer queueName="test_topic" listener="com.jd.journalq.client.samples.spring.MessageListener"></oms:consumer>
 </beans>
 ```
 
@@ -185,8 +186,8 @@ protected static final Logger logger = LoggerFactory.getLogger(SpringMain.class)
 
 ```
 <dependency>
-    <groupId>com.jd.jmq</groupId>
-    <artifactId>jmq-client-core</artifactId>
+    <groupId>com.jd.journalq</groupId>
+    <artifactId>journalq-client-core</artifactId>
     <version>4.0.0-SNAPSHOT</version>
 </dependency>
 <dependency>
@@ -210,7 +211,7 @@ protected static final Logger logger = LoggerFactory.getLogger(SpringMain.class)
 
 ```
 spring.oms.enable=true
-spring.oms.url=oms:jmq://test_app@10.37.129.2:50088/UNKNOWN
+spring.oms.url=oms:journalq://test_app@10.37.129.2:50088/UNKNOWN
 spring.oms.attributes[ACCOUNT_KEY]=test_token
 
 spring.oms.consumer.enable=true
@@ -222,7 +223,7 @@ spring.oms.interceptor.enable=true
 
 ```java
 @SpringBootApplication
-@ComponentScan("com.jd.jmq.client.samples.springboot")
+@ComponentScan("com.jd.journalq.client.samples.springboot")
 public class SpringBootMain {
 
   protected static final Logger logger = LoggerFactory.getLogger(SpringBootMain.class);
@@ -248,7 +249,7 @@ public class SpringBootMain {
 
 
 ```java
-package com.jd.jmq.client.samples.springboot;
+package com.jd.journalq.client.samples.springboot;
 
 @Component
 public class MessageListener1 {

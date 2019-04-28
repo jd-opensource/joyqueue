@@ -34,7 +34,7 @@ import com.jd.journalq.broker.store.StoreManager;
 import com.jd.journalq.domain.Config;
 import com.jd.journalq.domain.Consumer;
 import com.jd.journalq.domain.Producer;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.nsr.NameService;
 import com.jd.journalq.security.Authentication;
 import com.jd.journalq.server.retry.api.MessageRetry;
@@ -46,7 +46,7 @@ import com.jd.journalq.toolkit.config.PropertySupplier;
 import com.jd.journalq.toolkit.config.PropertySupplierAware;
 import com.jd.journalq.toolkit.lang.Close;
 import com.jd.journalq.toolkit.lang.LifeCycle;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -258,32 +258,32 @@ public class BrokerServiceTest extends Service {
     private MessageRetry getMessageRetry(BrokerContext brokerContext) {
         return new MessageRetry() {
             @Override
-            public void addRetry(List list) throws JMQException {
+            public void addRetry(List list) throws JournalqException {
 
             }
 
             @Override
-            public void retrySuccess(String topic, String app, Object[] messageIds) throws JMQException {
+            public void retrySuccess(String topic, String app, Object[] messageIds) throws JournalqException {
 
             }
 
             @Override
-            public void retryError(String topic, String app, Object[] messageIds) throws JMQException {
+            public void retryError(String topic, String app, Object[] messageIds) throws JournalqException {
 
             }
 
             @Override
-            public void retryExpire(String topic, String app, Object[] messageIds) throws JMQException {
+            public void retryExpire(String topic, String app, Object[] messageIds) throws JournalqException {
 
             }
 
             @Override
-            public List<RetryMessageModel> getRetry(String topic, String app, short count, long startIndex) throws JMQException {
+            public List<RetryMessageModel> getRetry(String topic, String app, short count, long startIndex) throws JournalqException {
                 return null;
             }
 
             @Override
-            public int countRetry(String topic, String app) throws JMQException {
+            public int countRetry(String topic, String app) throws JournalqException {
                 return 0;
             }
 

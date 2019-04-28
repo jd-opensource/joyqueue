@@ -13,7 +13,7 @@
  */
 package com.jd.journalq.network.command;
 
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 
 /**
  * FetchIndexAckData
@@ -24,13 +24,13 @@ import com.jd.journalq.exception.JMQCode;
 public class FetchIndexAckData {
 
     private long index;
-    private JMQCode code;
+    private JournalqCode code;
 
     public FetchIndexAckData() {
 
     }
 
-    public FetchIndexAckData(long index, JMQCode code) {
+    public FetchIndexAckData(long index, JournalqCode code) {
         this.index = index;
         this.code = code;
     }
@@ -43,11 +43,11 @@ public class FetchIndexAckData {
         this.index = index;
     }
 
-    public JMQCode getCode() {
+    public JournalqCode getCode() {
         return code;
     }
 
-    public void setCode(JMQCode code) {
+    public void setCode(JournalqCode code) {
         this.code = code;
     }
 }

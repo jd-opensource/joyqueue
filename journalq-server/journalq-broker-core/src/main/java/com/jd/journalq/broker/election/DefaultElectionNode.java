@@ -83,12 +83,18 @@ public class DefaultElectionNode implements ElectionNode {
         this.voteGranted = voteGranted;
     }
 
+    @Override
     public boolean equals(ElectionNode node) {
         return nodeId == node.getNodeId();
     }
 
     public boolean equals(Broker broker) {
         return this.nodeId == broker.getId();
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
     }
 
     @Override

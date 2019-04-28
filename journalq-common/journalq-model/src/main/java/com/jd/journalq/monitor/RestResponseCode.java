@@ -30,11 +30,11 @@ public enum RestResponseCode {
     private int code;
     private String message;
 
-    private RestResponseCode(int code) {
+    RestResponseCode(int code) {
         this.code = code;
     }
 
-    private RestResponseCode(int code, String message) {
+    RestResponseCode(int code, String message) {
         this.code = code;
         this.message = message;
     }

@@ -30,7 +30,7 @@ public class ProduceMessage extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.PRODUCE_MESSAGE.getCode();
+        return JournalqCommandType.PRODUCE_MESSAGE.getCode();
     }
 
     public String getApp() {

@@ -105,6 +105,6 @@ public class ResponseHandler {
     }
 
     protected ExecutorService newAsyncExecutorService() {
-        return Executors.newFixedThreadPool(config.getCallbackThreads(), new NamedThreadFactory("jmq-async-callback"));
+        return Executors.newFixedThreadPool(config.getCallbackThreads(), new NamedThreadFactory("journalqasync-callback"));
     }
 }

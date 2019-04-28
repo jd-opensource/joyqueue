@@ -22,7 +22,7 @@ import com.jd.journalq.client.internal.producer.MessageProducer;
 import com.jd.journalq.client.internal.producer.config.ProducerConfig;
 import com.jd.journalq.client.internal.producer.feedback.config.TxFeedbackConfig;
 import com.jd.journalq.client.internal.transport.config.TransportConfig;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import io.openmessaging.KeyValue;
 import io.openmessaging.MessagingAccessPoint;
 import io.openmessaging.consumer.Consumer;
@@ -107,7 +107,7 @@ public class MessagingAccessPointImpl implements MessagingAccessPoint {
 
     @Override
     public ResourceManager resourceManager() {
-        throw new OMSUnsupportException(JMQCode.CN_COMMAND_UNSUPPORTED.getCode(), "resourceManager is not supported");
+        throw new OMSUnsupportException(JournalqCode.CN_COMMAND_UNSUPPORTED.getCode(), "resourceManager is not supported");
     }
 
     @Override

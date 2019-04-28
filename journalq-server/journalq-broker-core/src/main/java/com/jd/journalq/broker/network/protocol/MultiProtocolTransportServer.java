@@ -45,7 +45,10 @@ public class MultiProtocolTransportServer extends Service implements TransportSe
     private TransportServer protocolServiceServer;
     private List<ProtocolContext> protocolServers;
 
-    public MultiProtocolTransportServer(ServerConfig serverConfig, String host, int port, ProtocolManager protocolManager, MultiProtocolHandlerPipelineFactory multiProtocolHandlerPipelineFactory, ProtocolHandlerPipelineFactory protocolHandlerPipelineFactory) {
+    public MultiProtocolTransportServer(ServerConfig serverConfig, String host,
+                                        int port, ProtocolManager protocolManager,
+                                        MultiProtocolHandlerPipelineFactory multiProtocolHandlerPipelineFactory,
+                                        ProtocolHandlerPipelineFactory protocolHandlerPipelineFactory) {
         this.serverConfig = serverConfig;
         this.host = host;
         this.port = port;
@@ -100,7 +103,8 @@ public class MultiProtocolTransportServer extends Service implements TransportSe
         List<ProtocolContext> result = Lists.newArrayList();
         for (ProtocolServer protocolServer : protocolManager.getProtocolServers()) {
             ServerConfig protocolServerConfig = protocolServer.createServerConfig(serverConfig);
-            TransportServer transportServer = new ChannelTransportServer(protocolHandlerPipelineFactory.createPipeline(protocolServer), protocolServerConfig, protocolServerConfig.getHost(), protocolServerConfig.getPort());
+            TransportServer transportServer = new ChannelTransportServer(protocolHandlerPipelineFactory.createPipeline(protocolServer),
+                    protocolServerConfig, protocolServerConfig.getHost(), protocolServerConfig.getPort());
             result.add(new ProtocolContext(protocolServer, transportServer));
         }
         return result;

@@ -14,10 +14,11 @@
 package com.jd.journalq.server.retry.h2;
 
 import com.jd.journalq.domain.TopicName;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.server.retry.api.RetryPolicyProvider;
 import com.jd.journalq.server.retry.model.RetryMessageModel;
 import com.jd.journalq.toolkit.retry.RetryPolicy;
+import com.jd.journalq.toolkit.time.SystemClock;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.junit.Before;
 import org.junit.Rule;
@@ -44,7 +45,7 @@ public class H2MessageRetryTest {
 
         dbMessageRetry.setRetryPolicyProvider(new RetryPolicyProvider() {
             @Override
-            public RetryPolicy getPolicy(TopicName topic, String app) throws JMQException {
+            public RetryPolicy getPolicy(TopicName topic, String app) throws JournalqException {
                 return new RetryPolicy();
             }
         });
@@ -82,7 +83,7 @@ public class H2MessageRetryTest {
 
 
     @Test
-    public void addRetry() throws JMQException {
+    public void addRetry() throws JournalqException {
         List<RetryMessageModel> retryMessageModelList = new ArrayList<>();
 
         RetryMessageModel retry = new RetryMessageModel();
@@ -93,7 +94,7 @@ public class H2MessageRetryTest {
         retry.setIndex(100l);
         retry.setBrokerMessage(new byte[168]);
         retry.setException(new byte[16]);
-        retry.setSendTime(System.currentTimeMillis());
+        retry.setSendTime(SystemClock.now());
 
         retryMessageModelList.add(retry);
 
@@ -102,7 +103,7 @@ public class H2MessageRetryTest {
 
 
     @Test
-    public void retrySuccess() throws JMQException {
+    public void retrySuccess() throws JournalqException {
         String topic = "topic";
         String app = "app";
         Long[] messageIds = {1l};
@@ -110,7 +111,7 @@ public class H2MessageRetryTest {
     }
 
     @Test
-    public void retryError() throws JMQException {
+    public void retryError() throws JournalqException {
         String topic = "topic";
         String app = "app";
         Long[] messageIds = {1l};
@@ -118,7 +119,7 @@ public class H2MessageRetryTest {
     }
 
     @Test
-    public void retryExpire() throws JMQException {
+    public void retryExpire() throws JournalqException {
         String topic = "topic";
         String app = "app";
         Long[] messageIds = {1l};
@@ -127,7 +128,7 @@ public class H2MessageRetryTest {
     }
 
     @Test
-    public void getRetry() throws JMQException {
+    public void getRetry() throws JournalqException {
         String topic = "topic";
         String app = "app";
         short count = 10;
@@ -139,7 +140,7 @@ public class H2MessageRetryTest {
     }
 
     @Test
-    public void countRetry() throws JMQException {
+    public void countRetry() throws JournalqException {
         String topic = "topic";
         String app = "app";
         int count = dbMessageRetry.countRetry(topic, app);

@@ -13,7 +13,7 @@
  */
 package com.jd.journalq.network.command;
 
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 
 /**
  * CommitAckData
@@ -23,21 +23,21 @@ import com.jd.journalq.exception.JMQCode;
  */
 public class CommitAckResult {
 
-    private JMQCode code;
+    private JournalqCode code;
 
     public CommitAckResult() {
 
     }
 
-    public CommitAckResult(JMQCode code) {
+    public CommitAckResult(JournalqCode code) {
         this.code = code;
     }
 
-    public void setCode(JMQCode code) {
+    public void setCode(JournalqCode code) {
         this.code = code;
     }
 
-    public JMQCode getCode() {
+    public JournalqCode getCode() {
         return code;
     }
 }

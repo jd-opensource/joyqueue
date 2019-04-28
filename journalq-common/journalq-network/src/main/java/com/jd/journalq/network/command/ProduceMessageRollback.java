@@ -29,7 +29,7 @@ public class ProduceMessageRollback extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.PRODUCE_MESSAGE_ROLLBACK.getCode();
+        return JournalqCommandType.PRODUCE_MESSAGE_ROLLBACK.getCode();
     }
 
     public void setTopic(String topic) {

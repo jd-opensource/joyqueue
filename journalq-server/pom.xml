@@ -28,7 +28,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>journalq-broker-core</module>
-        <module>journalq-broker-jmq</module>
+        <module>journalq-broker-journalq</module>
         <module>journalq-broker-kafka</module>
         <module>journalq-broker-mqtt</module>
         <module>journalq-broker-monitor-pth</module>

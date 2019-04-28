@@ -158,7 +158,7 @@ export function clientTypeOptions () {
   return [
     {
       value: 0,
-      txt: 'jmq',
+      txt: 'journalq',
       color: 'success'
     },
     {

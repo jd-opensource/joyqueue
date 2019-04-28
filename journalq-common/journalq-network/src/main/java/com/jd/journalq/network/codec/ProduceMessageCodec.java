@@ -17,7 +17,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jd.journalq.domain.QosLevel;
 import com.jd.journalq.message.BrokerMessage;
-import com.jd.journalq.network.command.JMQCommandType;
+import com.jd.journalq.network.command.JournalqCommandType;
 import com.jd.journalq.network.command.ProduceMessage;
 import com.jd.journalq.network.command.ProduceMessageData;
 import com.jd.journalq.network.serializer.Serializer;
@@ -90,6 +90,6 @@ public class ProduceMessageCodec implements PayloadCodec<JMQHeader, ProduceMessa
 
     @Override
     public int type() {
-        return JMQCommandType.PRODUCE_MESSAGE.getCode();
+        return JournalqCommandType.PRODUCE_MESSAGE.getCode();
     }
 }

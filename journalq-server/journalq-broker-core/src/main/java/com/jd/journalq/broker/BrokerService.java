@@ -45,12 +45,15 @@ import com.jd.journalq.toolkit.config.PropertySupplier;
 import com.jd.journalq.toolkit.config.PropertySupplierAware;
 import com.jd.journalq.toolkit.lang.Close;
 import com.jd.journalq.toolkit.lang.LifeCycle;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -271,7 +274,23 @@ public class BrokerService extends Service {
         startIfNecessary(brokerServer);
         startIfNecessary(coordinatorService);
         startIfNecessary(brokerManageService);
-        logger.info("brokerServer start ,broker.id[{}],ip[{}],frontPort[{}],backendPort[{}],monitorPort[{}],nameServer port[{}]",
+        printConfig();
+    }
+
+
+    private void printConfig() {
+        StringBuffer buffer = new StringBuffer("broker start with configuration:").append('\n');
+        if (configurationManager != null && configurationManager.getConfiguration() != null) {
+            List<Property> properties = new ArrayList<>(configurationManager.getConfiguration().getProperties());
+            Collections.sort(properties, Comparator.comparing(Property::getKey));
+            for (Property property : properties) {
+                String value = property.getValue() == null ? "null" : property.getValue().toString();
+                buffer.append('\t').append(property.getKey()).append(": ").append(value).append('\n');
+            }
+        }
+
+        logger.info(buffer.toString());
+        logger.info("broker.id[{}],ip[{}],frontPort[{}],backendPort[{}],monitorPort[{}],nameServer port[{}]",
                 brokerConfig.getBrokerId(),
                 clusterManager.getBroker().getIp(),
                 brokerConfig.getFrontendConfig().getPort(),
@@ -340,10 +359,12 @@ public class BrokerService extends Service {
     }
 
 
+
+
     private class ConfigProviderImpl implements ConfigurationManager.ConfigProvider {
         private NameService nameService;
 
-        public ConfigProviderImpl(NameService nameService) {
+        ConfigProviderImpl(NameService nameService) {
             this.nameService = nameService;
         }
 

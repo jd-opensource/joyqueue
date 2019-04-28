@@ -14,7 +14,7 @@
 package com.jd.journalq.service.impl;
 
 import com.jd.journalq.model.query.QArchive;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.server.archive.store.QueryCondition;
 import com.jd.journalq.server.archive.store.api.ArchiveStore;
 import com.jd.journalq.server.archive.store.model.ConsumeLog;
@@ -43,14 +43,14 @@ public class ArchiveServiceImpl implements ArchiveService {
     }
 
     @Override
-    public List<SendLog> findByQuery(QArchive qPageQuery) throws JMQException {
+    public List<SendLog> findByQuery(QArchive qPageQuery) throws JournalqException {
         QueryCondition queryCondition = conditionConvert(qPageQuery);
         List<SendLog> sendLogs = archiveStore.scanSendLog(queryCondition);
         return sendLogs;
     }
 
     @Override
-    public SendLog findSendLog(String topic,Long time,String businessId,String messageId) throws JMQException {
+    public SendLog findSendLog(String topic,Long time,String businessId,String messageId) throws JournalqException {
         QueryCondition queryCondition = new QueryCondition();
         QueryCondition.RowKey startRow = new QueryCondition.RowKey();
         startRow.setBusinessId(businessId);
@@ -63,7 +63,7 @@ public class ArchiveServiceImpl implements ArchiveService {
     }
 
     @Override
-    public List<ConsumeLog> findConsumeLog(String messageId, Integer count) throws JMQException {
+    public List<ConsumeLog> findConsumeLog(String messageId, Integer count) throws JournalqException {
         return archiveStore.scanConsumeLog(messageId,count);
     }
 

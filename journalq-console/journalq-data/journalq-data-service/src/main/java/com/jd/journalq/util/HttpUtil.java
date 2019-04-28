@@ -2,9 +2,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -13,13 +13,17 @@
  */
 package com.jd.journalq.util;
 
-import com.jd.journalq.exception.ServiceException;
 import com.jd.journalq.model.exception.BusinessException;
+import com.jd.journalq.toolkit.time.SystemClock;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.*;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -49,6 +53,7 @@ public class HttpUtil {
      */
     private static PoolingHttpClientConnectionManager clientConnManager;
     private static RequestConfig requestConfig;
+
     static {
         clientConnManager = new PoolingHttpClientConnectionManager(DEFAULT_HTTP_CONN_TIME_TO_LIVE, TimeUnit.SECONDS);
         clientConnManager.setMaxTotal(DEFAULT_HTTP_CONN_MAX_TOTAL);
@@ -84,9 +89,9 @@ public class HttpUtil {
             } catch (Throwable e) {
                 logger.warn("logger error.", e);
             }
-            long startMs=System.currentTimeMillis();
+            long startMs = SystemClock.now();
             CloseableHttpResponse response = getClient().execute(request);
-            logger.info(String.format("communicating request[%s],time elapsed %d ms.", request.toString(), System.currentTimeMillis()-startMs));
+            logger.info(String.format("communicating request[%s],time elapsed %d ms.", request.toString(), SystemClock.now() - startMs));
             return response;
         } catch (Exception e) {
             String errorMsg = String.format("error occurred while communicating with  request = %s", request);
@@ -98,26 +103,24 @@ public class HttpUtil {
     /**
      * @param url request monitorUrl
      * @throws Exception when request network failed or response http status is not ok
-     * @return  string
+     * @return string
      **/
     public static String get(String url) throws Exception {
-        HttpGet get=new HttpGet(url);
-        return processResponse(executeRequest(get),get);
+        HttpGet get = new HttpGet(url);
+        return processResponse(executeRequest(get), get);
     }
 
 
     /**
      * @param url request monitorUrl
      * @throws Exception when request network failed or response http status is not ok
-     * @return  string
+     * @return string
      **/
-    public static String put(String url,String content) throws Exception {
-        HttpPut put=new HttpPut(url);
+    public static String put(String url, String content) throws Exception {
+        HttpPut put = new HttpPut(url);
         put.setEntity(new StringEntity(content));
-        return processResponse(executeRequest(put),put);
+        return processResponse(executeRequest(put), put);
     }
-
-
 
 
     /**
@@ -127,17 +130,18 @@ public class HttpUtil {
      * @throws IllegalAccessException when network response http status is not ok or other network exception
      * @throws IOException when failed to process response entity
      * process http 请求的返回
-     * @return  string body
+     * @return string body
      **/
     private static String processResponse(CloseableHttpResponse response, HttpUriRequest request) throws IllegalStateException, IOException {
         try {
             int statusCode = response.getStatusLine().getStatusCode();
             if (HttpStatus.SC_OK != statusCode) {
-                String message = String.format("monitorUrl [%s],reuqest[%s] error code [%s],response[%s]",request.getURI().toString(),request.toString(),statusCode, EntityUtils.toString(response.getEntity()));
+                String message = String.format("monitorUrl [%s],reuqest[%s] error code [%s],response[%s]",
+                        request.getURI().toString(), request.toString(), statusCode, EntityUtils.toString(response.getEntity()));
                 throw new IllegalStateException(message);
             }
-            String result =  EntityUtils.toString(response.getEntity());
-            logger.info("request[{}] response[{}]",request.toString(),result);
+            String result = EntityUtils.toString(response.getEntity());
+            logger.info("request[{}] response[{}]", request.toString(), result);
             return result;
         } finally {
             response.close();

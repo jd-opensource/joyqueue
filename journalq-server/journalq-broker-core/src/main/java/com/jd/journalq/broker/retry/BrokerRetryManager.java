@@ -22,7 +22,7 @@ import com.jd.journalq.domain.Consumer;
 import com.jd.journalq.event.BrokerEvent;
 import com.jd.journalq.event.EventType;
 import com.jd.journalq.event.MetaEvent;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.network.transport.TransportClient;
 import com.jd.journalq.network.transport.config.ClientConfig;
 import com.jd.journalq.nsr.NameService;
@@ -102,7 +102,7 @@ public class BrokerRetryManager extends Service implements MessageRetry<Long>, B
                 @Override
                 public TransportClient createTransportClient() {
                     ClientConfig clientConfig = new ClientConfig();
-                    clientConfig.setIoThreadName("jmq-retry-io-eventLoop");
+                    clientConfig.setIoThreadName("journalqretry-io-eventLoop");
                     return new BrokerTransportClientFactory().create(clientConfig);
                 }
             };
@@ -125,32 +125,32 @@ public class BrokerRetryManager extends Service implements MessageRetry<Long>, B
 
 
     @Override
-    public void addRetry(List<RetryMessageModel> retryMessageModelList) throws JMQException {
+    public void addRetry(List<RetryMessageModel> retryMessageModelList) throws JournalqException {
         delegate.addRetry(retryMessageModelList);
     }
 
     @Override
-    public void retrySuccess(String topic, String app, Long[] messageIds) throws JMQException {
+    public void retrySuccess(String topic, String app, Long[] messageIds) throws JournalqException {
         delegate.retrySuccess(topic, app, messageIds);
     }
 
     @Override
-    public void retryError(String topic, String app, Long[] messageIds) throws JMQException {
+    public void retryError(String topic, String app, Long[] messageIds) throws JournalqException {
         delegate.retryError(topic, app, messageIds);
     }
 
     @Override
-    public void retryExpire(String topic, String app, Long[] messageIds) throws JMQException {
+    public void retryExpire(String topic, String app, Long[] messageIds) throws JournalqException {
         delegate.retryExpire(topic, app, messageIds);
     }
 
     @Override
-    public List<RetryMessageModel> getRetry(String topic, String app, short count, long startId) throws JMQException {
+    public List<RetryMessageModel> getRetry(String topic, String app, short count, long startId) throws JournalqException {
         return delegate.getRetry(topic, app, count, startId);
     }
 
     @Override
-    public int countRetry(String topic, String app) throws JMQException {
+    public int countRetry(String topic, String app) throws JournalqException {
         return delegate.countRetry(topic, app);
     }
 

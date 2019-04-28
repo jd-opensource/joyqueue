@@ -16,7 +16,7 @@ package com.jd.journalq.broker.mqtt.cluster;
 import com.jd.journalq.broker.consumer.Consume;
 import com.jd.journalq.broker.mqtt.connection.MqttConnection;
 import com.jd.journalq.broker.mqtt.session.MqttSession;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.message.BrokerMessage;
 import com.jd.journalq.network.session.Consumer;
 import com.jd.journalq.broker.BrokerContext;
@@ -25,7 +25,7 @@ import com.jd.journalq.broker.mqtt.subscriptions.MqttSubscription;
 import com.jd.journalq.broker.mqtt.util.PollSelector;
 import com.jd.journalq.broker.mqtt.util.Selector;
 import com.jd.journalq.toolkit.concurrent.NamedThreadFactory;
-import com.jd.journalq.toolkit.lang.Strings;
+import com.google.common.base.Strings;
 import com.jd.journalq.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -187,8 +187,8 @@ public class MqttConsumerManager extends Service {
     private void commitAcknowledge(Consumer consumer, short partition, long index) {
         try {
             consume.setAckIndex(consumer, partition, index);
-        } catch (JMQException e) {
-            e.printStackTrace();
+        } catch (JournalqException e) {
+            LOG.error(e.getMessage(), e);
         }
     }
 
@@ -198,7 +198,7 @@ public class MqttConsumerManager extends Service {
 
         private ConcurrentMap<String, MqttSession> clientConsumeMap = new ConcurrentHashMap<>();
 
-        public ConsumeTask(String name) {
+        ConsumeTask(String name) {
             this.name = this.name + name;
         }
 
@@ -245,12 +245,12 @@ public class MqttConsumerManager extends Service {
                                                                                     qos
                                                                             );
                                                                         } catch (Exception e) {
-                                                                            e.printStackTrace();
+                                                                            LOG.error(e.getMessage(), e);
                                                                         }
                                                                     }
                                                             );
                                                         } catch (Exception e) {
-                                                            e.printStackTrace();
+                                                            LOG.error(e.getMessage(), e);
                                                         }
                                                     }
                                                 }
@@ -263,19 +263,16 @@ public class MqttConsumerManager extends Service {
                             Thread.sleep(800);
                         } catch (InterruptedException e) {
                             LOG.warn("mqtt consumer manager thread: <{}> interrupted, exception: {}", name, e.getMessage());
-                            //e.printStackTrace();
                         }
                     } else {
                         try {
                             Thread.sleep(2000);
                         } catch (InterruptedException e) {
                             LOG.warn("mqtt consumer manager thread: <{}> interrupted, exception: {}", name, e.getMessage());
-                            //e.printStackTrace();
                         }
                     }
                 } catch (Exception e) {
                     LOG.error("Thread: <{}>, mqtt consume client message consume error, topic: <{}>, cause: <{}>", name, e.getMessage());
-                    e.printStackTrace();
                 }
             }
             LOG.info("mqtt consumer manager thread: <{}> stop.", name);

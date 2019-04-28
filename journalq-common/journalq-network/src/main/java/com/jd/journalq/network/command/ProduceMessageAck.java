@@ -29,7 +29,7 @@ public class ProduceMessageAck extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.PRODUCE_MESSAGE_ACK.getCode();
+        return JournalqCommandType.PRODUCE_MESSAGE_ACK.getCode();
     }
 
     public void setData(Map<String, ProduceMessageAckData> data) {

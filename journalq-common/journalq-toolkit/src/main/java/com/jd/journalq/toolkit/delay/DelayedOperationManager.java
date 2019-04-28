@@ -14,7 +14,7 @@
 package com.jd.journalq.toolkit.delay;
 
 import com.jd.journalq.toolkit.concurrent.NamedThreadFactory;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -55,7 +55,7 @@ public class DelayedOperationManager<T extends DelayedOperation> {
     public DelayedOperationManager(final String purgatoryName, int purgeInterval, boolean reaperEnable) {
         this.taskExecutor = Executors.newFixedThreadPool(1, new ThreadFactory() {
             public Thread newThread(Runnable r) {
-                NamedThreadFactory threadFactory = new NamedThreadFactory("jmq-delayed-operation-executor-" + purgatoryName);
+                NamedThreadFactory threadFactory = new NamedThreadFactory("journalqdelayed-operation-executor-" + purgatoryName);
                 Thread thread = threadFactory.newThread(r);
                 return thread;
             }

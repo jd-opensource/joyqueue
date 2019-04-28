@@ -20,11 +20,11 @@ import com.jd.journalq.toolkit.config.PropertySupplier;
  * @author majun8
  */
 public class BrokerStoreConfig {
-    public final static String DEFAULT_CLEAN_STRATEGY_CLASS = "FixedSizeStoreCleaningStrategy";
-    public final static long DEFAULT_MAX_STORE_SIZE = 10L * 1024 * 1024 * 1024;  // 10gb
-    public final static long DEFAULT_MAX_STORE_TIME = 1000 * 60 * 60 * 24 * 7;  // 7days
-    public final static long DEFAULT_STORE_CLEAN_SCHEDULE_BEGIN = 30 * 1000;
-    public final static long DEFAULT_STORE_CLEAN_SCHEDULE_END = 60 * 1000;
+    public static final String DEFAULT_CLEAN_STRATEGY_CLASS = "FixedSizeStoreCleaningStrategy";
+    public static final long DEFAULT_MAX_STORE_SIZE = 10L * 1024 * 1024 * 1024;  // 10gb
+    public static final long DEFAULT_MAX_STORE_TIME = 1000 * 60 * 60 * 24 * 7;  // 7days
+    public static final long DEFAULT_STORE_CLEAN_SCHEDULE_BEGIN = 30 * 1000;
+    public static final long DEFAULT_STORE_CLEAN_SCHEDULE_END = 60 * 1000;
 
     private PropertySupplier propertySupplier;
 

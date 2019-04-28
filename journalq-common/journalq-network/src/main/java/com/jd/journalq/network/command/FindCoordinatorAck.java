@@ -29,7 +29,7 @@ public class FindCoordinatorAck extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.FIND_COORDINATOR_ACK.getCode();
+        return JournalqCommandType.FIND_COORDINATOR_ACK.getCode();
     }
 
     public void setCoordinators(Map<String, FindCoordinatorAckData> coordinators) {

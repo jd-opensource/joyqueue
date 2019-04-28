@@ -16,7 +16,7 @@ package com.jd.journalq.network.command;
 import com.jd.journalq.network.transport.command.Payload;
 import com.jd.journalq.network.transport.command.Types;
 
-import com.jd.journalq.toolkit.lang.Objects;
+import com.google.common.base.Objects;
 
 /**
  * @author wylixiaobin
@@ -33,7 +33,7 @@ public class GetTopics implements Payload, Types {
     private int subscribeType = 1;
     @Override
     public int[] types() {
-        return new int[]{CommandType.GET_TOPICS,JMQCommandType.MQTT_GET_TOPICS.getCode()};
+        return new int[]{CommandType.GET_TOPICS,JournalqCommandType.MQTT_GET_TOPICS.getCode()};
     }
 
     public String getApp() {

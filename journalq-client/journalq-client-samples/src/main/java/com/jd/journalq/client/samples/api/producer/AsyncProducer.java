@@ -37,7 +37,7 @@ public class AsyncProducer {
         keyValue.put(JournalQBuiltinKeys.ACCOUNT_KEY, "test_token");
         keyValue.put(JournalQProducerBuiltinKeys.TRANSACTION_TIMEOUT, 1000 * 10);
 
-        MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint(String.format("oms:jmq://test_app@%s:50088/UNKNOWN", IpUtil.getLocalIp()), keyValue);
+        MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint(String.format("oms:journalq://test_app@%s:50088/UNKNOWN", IpUtil.getLocalIp()), keyValue);
 
         Producer producer = messagingAccessPoint.createProducer();
         producer.start();

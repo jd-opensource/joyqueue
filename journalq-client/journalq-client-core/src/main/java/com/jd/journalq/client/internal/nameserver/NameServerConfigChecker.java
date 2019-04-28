@@ -13,7 +13,7 @@
  */
 package com.jd.journalq.client.internal.nameserver;
 
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
 
 /**

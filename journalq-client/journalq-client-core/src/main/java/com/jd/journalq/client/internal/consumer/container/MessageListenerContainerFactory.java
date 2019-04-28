@@ -72,7 +72,8 @@ public class MessageListenerContainerFactory {
         return new MessageListenerContainerWrapper(consumerConfig, nameServerConfig, clusterManager, clusterClientManager, null, messageConsumerContainer);
     }
 
-    public static MessageListenerContainer create(ConsumerConfig consumerConfig, NameServerConfig nameServerConfig, ClusterClientManager clusterClientManager, ConsumerClientManager consumerClientManager) {
+    public static MessageListenerContainer create(ConsumerConfig consumerConfig, NameServerConfig nameServerConfig,
+                                                  ClusterClientManager clusterClientManager, ConsumerClientManager consumerClientManager) {
         ClusterManager clusterManager = ClusterManagerFactory.create(nameServerConfig, clusterClientManager);
         DefaultMessageListenerContainer messageConsumerContainer = new DefaultMessageListenerContainer(consumerConfig, nameServerConfig, clusterManager, clusterClientManager, consumerClientManager);
         return new MessageListenerContainerWrapper(consumerConfig, nameServerConfig, clusterManager, null, null, messageConsumerContainer);

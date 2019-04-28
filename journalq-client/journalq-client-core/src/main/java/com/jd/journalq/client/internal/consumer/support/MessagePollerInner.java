@@ -37,9 +37,9 @@ import com.jd.journalq.client.internal.trace.TraceCaller;
 import com.jd.journalq.client.internal.trace.TraceType;
 import com.jd.journalq.client.internal.transport.ClientState;
 import com.jd.journalq.domain.Consumer;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.domain.BrokerNode;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -155,7 +155,8 @@ public class MessagePollerInner extends Service {
         return fetchPartition(brokerNode, topicMetadata, partition, index, batchSize, timeout, timeoutUnit, listener);
     }
 
-    public List<ConsumeMessage> fetchPartition(BrokerNode brokerNode, TopicMetadata topicMetadata, short partition, long index, int batchSize, long timeout, TimeUnit timeoutUnit, ConsumerListener listener) {
+    public List<ConsumeMessage> fetchPartition(BrokerNode brokerNode, TopicMetadata topicMetadata, short partition, long index,
+                                               int batchSize, long timeout, TimeUnit timeoutUnit, ConsumerListener listener) {
         Preconditions.checkArgument(topicMetadata != null, "topicMetadata not null");
         Preconditions.checkArgument(timeoutUnit != null, "timeoutUnit not null");
 
@@ -174,7 +175,8 @@ public class MessagePollerInner extends Service {
         }
     }
 
-    protected List<ConsumeMessage> doFetchPartition(BrokerNode brokerNode, TopicMetadata topicMetadata, final short partition, long index, int batchSize, long timeout, TimeUnit timeoutUnit, final ConsumerListener listener) {
+    protected List<ConsumeMessage> doFetchPartition(BrokerNode brokerNode, TopicMetadata topicMetadata, final short partition,
+                                                    long index, int batchSize, long timeout, TimeUnit timeoutUnit, final ConsumerListener listener) {
         timeout = timeoutUnit.toMillis(timeout);
         final String topic = topicMetadata.getTopic();
         final String app = getAppFullName();
@@ -213,11 +215,11 @@ public class MessagePollerInner extends Service {
 
     protected List<ConsumeMessage> handleFetchMessageData(String topic, String app, FetchMessageData fetchMessageData) {
         if (fetchMessageData == null) {
-            throw new ConsumerException(JMQCode.CN_UNKNOWN_ERROR.getMessage(), JMQCode.CN_UNKNOWN_ERROR.getCode());
+            throw new ConsumerException(JournalqCode.CN_UNKNOWN_ERROR.getMessage(), JournalqCode.CN_UNKNOWN_ERROR.getCode());
         }
 
-        JMQCode code = fetchMessageData.getCode();
-        if (code.equals(JMQCode.SUCCESS)) {
+        JournalqCode code = fetchMessageData.getCode();
+        if (code.equals(JournalqCode.SUCCESS)) {
             return fetchMessageData.getMessages();
         }
 
@@ -327,10 +329,10 @@ public class MessagePollerInner extends Service {
     public TopicMetadata checkTopicMetadata(String topic) {
         TopicMetadata topicMetadata = clusterManager.fetchTopicMetadata(getTopicFullName(topic), getAppFullName());
         if (topicMetadata == null) {
-            throw new ConsumerException(String.format("topic %s is not exist", topic), JMQCode.FW_TOPIC_NOT_EXIST.getCode());
+            throw new ConsumerException(String.format("topic %s is not exist", topic), JournalqCode.FW_TOPIC_NOT_EXIST.getCode());
         }
         if (topicMetadata.getConsumerPolicy() == null) {
-            throw new ConsumerException(String.format("topic %s consumer %s is not exist", topic, nameServerConfig.getApp()), JMQCode.FW_CONSUMER_NOT_EXISTS.getCode());
+            throw new ConsumerException(String.format("topic %s consumer %s is not exist", topic, nameServerConfig.getApp()), JournalqCode.FW_CONSUMER_NOT_EXISTS.getCode());
         }
         return topicMetadata;
     }

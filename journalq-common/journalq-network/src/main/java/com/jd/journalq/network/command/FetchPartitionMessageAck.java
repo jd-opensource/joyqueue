@@ -28,7 +28,7 @@ public class FetchPartitionMessageAck extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.FETCH_PARTITION_MESSAGE_ACK.getCode();
+        return JournalqCommandType.FETCH_PARTITION_MESSAGE_ACK.getCode();
     }
 
     public Table<String, Short, FetchPartitionMessageAckData> getData() {

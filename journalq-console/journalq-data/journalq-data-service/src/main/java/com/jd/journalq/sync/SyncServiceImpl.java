@@ -2,7 +2,11 @@ package com.jd.journalq.sync;
 
 import com.alibaba.fastjson.JSON;
 import com.jd.journalq.exception.ServiceException;
-import com.jd.journalq.model.domain.*;
+import com.jd.journalq.model.domain.Application;
+import com.jd.journalq.model.domain.ApplicationUser;
+import com.jd.journalq.model.domain.BaseModel;
+import com.jd.journalq.model.domain.Identity;
+import com.jd.journalq.model.domain.User;
 import com.jd.journalq.model.domain.User.UserStatus;
 import com.jd.journalq.service.ApplicationService;
 import com.jd.journalq.service.UserService;
@@ -17,7 +21,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import static com.jd.journalq.exception.ServiceException.INTERNAL_SERVER_ERROR;
 

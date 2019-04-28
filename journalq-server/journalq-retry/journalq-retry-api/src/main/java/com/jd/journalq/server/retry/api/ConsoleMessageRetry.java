@@ -14,7 +14,7 @@
 package com.jd.journalq.server.retry.api;
 
 import com.jd.journalq.domain.ConsumeRetry;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.model.PageResult;
 import com.jd.journalq.server.retry.model.RetryQueryCondition;
 import com.jd.journalq.server.retry.model.RetryStatus;
@@ -24,9 +24,9 @@ import com.jd.journalq.server.retry.model.RetryStatus;
  */
 public interface ConsoleMessageRetry<T> extends MessageRetry<T> {
 
-    PageResult<ConsumeRetry> queryConsumeRetryList(RetryQueryCondition retryQueryCondition) throws JMQException;
+    PageResult<ConsumeRetry> queryConsumeRetryList(RetryQueryCondition retryQueryCondition) throws JournalqException;
 
-    ConsumeRetry getConsumeRetryById(Long id) throws JMQException;
+    ConsumeRetry getConsumeRetryById(Long id) throws JournalqException;
 
     void updateStatus(String topic, String app, T[] messageId, RetryStatus status, long updateTime, int updateBy) throws Exception;
 

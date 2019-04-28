@@ -16,7 +16,7 @@
 
 BASEDIR=`dirname $0`/..
 BASEDIR=`(cd "$BASEDIR"; pwd)`
-CONFIG_FILE="$BASEDIR/conf/laf-jmq.properties"
+CONFIG_FILE="$BASEDIR/conf/journalq.properties"
 JAVA_HOME=`grep -ios 'JAVA_HOME=.*$' ${CONFIG_FILE} | cut -d '=' -f 2`
 # If a specific java binary isn't specified search for the standard 'java' binary
 if [ -z "$JAVACMD" ] ; then

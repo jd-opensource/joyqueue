@@ -15,7 +15,12 @@ package com.jd.journalq.broker.election;
 
 import com.alibaba.fastjson.JSON;
 import com.jd.journalq.broker.cluster.ClusterManager;
-import com.jd.journalq.broker.election.command.*;
+import com.jd.journalq.broker.election.command.AppendEntriesRequest;
+import com.jd.journalq.broker.election.command.AppendEntriesResponse;
+import com.jd.journalq.broker.election.command.TimeoutNowRequest;
+import com.jd.journalq.broker.election.command.TimeoutNowResponse;
+import com.jd.journalq.broker.election.command.VoteRequest;
+import com.jd.journalq.broker.election.command.VoteResponse;
 import com.jd.journalq.broker.replication.ReplicaGroup;
 import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.network.command.CommandType;
@@ -28,16 +33,24 @@ import com.jd.journalq.toolkit.concurrent.EventBus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import static com.jd.journalq.broker.election.ElectionEvent.Type.*;
+import static com.jd.journalq.broker.election.ElectionEvent.Type.LEADER_FOUND;
+import static com.jd.journalq.broker.election.ElectionEvent.Type.START_ELECTION;
 import static com.jd.journalq.broker.election.ElectionNode.INVALID_NODE_ID;
-import static com.jd.journalq.broker.election.ElectionNode.State.*;
+import static com.jd.journalq.broker.election.ElectionNode.State.CONDIDATE;
+import static com.jd.journalq.broker.election.ElectionNode.State.FOLLOWER;
+import static com.jd.journalq.broker.election.ElectionNode.State.LEADER;
+import static com.jd.journalq.broker.election.ElectionNode.State.TRANSFERRING;
 
 /**
  * author: zhuduohui

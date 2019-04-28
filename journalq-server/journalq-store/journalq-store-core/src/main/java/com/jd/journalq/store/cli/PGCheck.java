@@ -23,6 +23,7 @@ import com.jd.journalq.store.message.BatchMessageParser;
 import com.jd.journalq.store.message.MessageParser;
 import com.jd.journalq.store.utils.PreloadBufferPool;
 import com.jd.journalq.toolkit.format.Format;
+import com.jd.journalq.toolkit.time.SystemClock;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -99,7 +100,7 @@ public class PGCheck {
         File indexBase = new File(base, "index");
         Map<Short, Partition> partitionMap = new HashMap<>();
         int progress = 0;
-        long start = System.currentTimeMillis();
+        long start = SystemClock.now();
         for (short p : partitions) {
             File partitionBase = new File(indexBase, String.valueOf(p));
             checkFiles(partitionBase, -1);
@@ -196,7 +197,7 @@ public class PGCheck {
             int p = (int) (100 * (position - logStore.left()) / (logStore.right() - logStore.left()));
             if (progress < p) {
                 progress = p;
-                long passed = System.currentTimeMillis() - start;
+                long passed = SystemClock.now() - start;
                 long remaining = passed / progress * (100 - progress);
                 System.out.println(progress + "%, " + formatDuration(Duration.ofMillis(remaining)));
             }

@@ -29,7 +29,7 @@ public interface PartitionGroupReplicaService extends NsrService<PartitionGroupR
      * @param partitionGroup
      * @return
      */
-    public int addWithNameservice(PartitionGroupReplica replica, TopicPartitionGroup partitionGroup);
+    int addWithNameservice(PartitionGroupReplica replica, TopicPartitionGroup partitionGroup);
 
     /**
      * 锁容
@@ -37,5 +37,5 @@ public interface PartitionGroupReplicaService extends NsrService<PartitionGroupR
      * @param partitionGroup
      * @return
      */
-    public int removeWithNameservice(PartitionGroupReplica replica, TopicPartitionGroup partitionGroup);
+    int removeWithNameservice(PartitionGroupReplica replica, TopicPartitionGroup partitionGroup);
 }

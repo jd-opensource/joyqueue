@@ -14,11 +14,12 @@
 package com.jd.journalq.model.util;
 
 import org.apache.commons.lang3.StringUtils;
-import sun.reflect.generics.tree.Tree;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Collections;
+import java.util.Set;
+import java.util.TreeSet;
 
 @SuppressWarnings("ALL")
 public class DataConvertUtil {

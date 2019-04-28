@@ -20,7 +20,7 @@ import com.jd.journalq.message.Message;
 import com.jd.journalq.toolkit.io.Compressors;
 import com.jd.journalq.toolkit.io.Zip;
 import com.jd.journalq.toolkit.io.ZipUtil;
-import com.jd.journalq.toolkit.lang.Charsets;
+import com.google.common.base.Charsets;
 import com.jd.journalq.toolkit.serialize.AbstractSerializer;
 import com.jd.journalq.toolkit.time.SystemClock;
 import io.netty.buffer.ByteBuf;

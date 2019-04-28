@@ -14,6 +14,7 @@
 package com.jd.journalq.toolkit.concurrent;
 
 import com.jd.journalq.toolkit.lang.LifeCycle;
+import com.jd.journalq.toolkit.time.SystemClock;
 
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
@@ -96,11 +97,11 @@ public abstract class LoopThread implements Runnable,LifeCycle{
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
 
-            long t0 = System.currentTimeMillis();
+            long t0 = SystemClock.now();
             try {
                 wakeupLock.lock();
                 if(condition()) doWork();
-                long t1 = System.currentTimeMillis();
+                long t1 = SystemClock.now();
 
                 // 为了避免空转CPU高，如果执行时间过短，等一会儿再进行下一次循环
                 if (t1 - t0 < minSleep) {

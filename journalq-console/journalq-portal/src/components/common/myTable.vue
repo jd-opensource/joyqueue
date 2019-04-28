@@ -182,7 +182,12 @@ export default {
               },
               on: {
                 click: () => {
-                  this.$emit(btn.method, params.item, params.index)
+                  // this.$emit(btn.method, params.item, params.index)
+                  if (typeof btn.method === 'function') {
+                    btn.method.call(this, params.item, params.index)
+                  } else {
+                    this.$emit(btn.method, params.item, params.index)
+                  }
                 }
               }
             }, btn.txt))
@@ -198,7 +203,12 @@ export default {
             items.push(h('DDropdownItem', {
               nativeOn: {
                 click: () => {
-                  this.$emit(operate.method, params.item, params.index)
+                  // this.$emit(operate.method, params.item, params.index)
+                  if (typeof operate.method === 'function') {
+                    operate.method.call(this, params.item, params.index)
+                  } else {
+                    this.$emit(operate.method, params.item, params.index)
+                  }
                 }
               }
             }, operate.txt))

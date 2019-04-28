@@ -13,20 +13,20 @@
  */
 package com.jd.journalq.broker.election;
 
-import com.jd.journalq.exception.JMQCode;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqCode;
+import com.jd.journalq.exception.JournalqException;
 
 /**
  * author: zhuduohui
  * email: zhuduohui@jd.com
  * date: 2018/9/29
  */
-public class ElectionException extends JMQException {
+public class ElectionException extends JournalqException {
     public ElectionException(String message) {
-        super(message, JMQCode.FW_ELECTION_ERROR.getCode());
+        super(message, JournalqCode.FW_ELECTION_ERROR.getCode());
     }
 
     public ElectionException(String message, Throwable cause) {
-        super(message, cause, JMQCode.FW_ELECTION_ERROR.getCode());
+        super(message, cause, JournalqCode.FW_ELECTION_ERROR.getCode());
     }
 }

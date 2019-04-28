@@ -20,7 +20,7 @@ import com.jd.journalq.model.domain.grafana.GrafanaSearch;
 import com.jd.journalq.model.domain.grafana.GrafanaVariable;
 import com.jd.journalq.model.domain.grafana.GrafanaVariableParameter;
 import com.jd.journalq.model.domain.grafana.GrafanaVariableResult;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.util.NullUtil;
 import com.jd.laf.web.vertx.Command;
 import com.jd.laf.web.vertx.annotation.Body;

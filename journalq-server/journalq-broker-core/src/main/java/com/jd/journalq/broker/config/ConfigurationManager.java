@@ -20,7 +20,7 @@ import com.jd.journalq.toolkit.concurrent.EventBus;
 import com.jd.journalq.toolkit.concurrent.EventListener;
 import com.jd.journalq.toolkit.config.Property;
 import com.jd.journalq.toolkit.lang.Close;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +40,7 @@ import static com.jd.journalq.broker.config.Configuration.DEFAULT_CONFIGURATION_
 public class ConfigurationManager extends Service implements EventListener<NameServerEvent> {
     private static final String DEFAULT_CONFIGURATION_NAME = "_BROKER_CONFIG_";
     private static final String CONFIGURATION_VERSION = "_CONFIGURATION_VERSION_";
-    private static final String DEFAULT_CONFIG_PATH = "laf-jmq.properties";
+    private static final String DEFAULT_CONFIG_PATH = "journalq.properties";
 
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationManager.class);
@@ -146,8 +146,7 @@ public class ConfigurationManager extends Service implements EventListener<NameS
     private void doUpdateProperty(Config... configs) {
         if (configs != null) {
             for (Config config : configs) {
-                logger.info("received config [{}]", config);
-                logger.info("corresponding property is [{}]", configuration.getProperty(config.getKey()) != null ? configuration.getProperty(config.getKey()) : "null");
+                logger.info("received config [{}], corresponding property is [{}]", config,configuration.getProperty(config.getKey()) != null ? configuration.getProperty(config.getKey()) : "null");
                 configuration.addProperty(config.getKey(), config.getValue());
             }
         }

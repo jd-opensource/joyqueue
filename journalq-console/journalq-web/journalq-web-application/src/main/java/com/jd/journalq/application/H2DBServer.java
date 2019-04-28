@@ -13,14 +13,11 @@
  */
 package com.jd.journalq.application;
 
-import org.apache.commons.lang3.StringUtils;
 import org.h2.tools.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
-import java.util.Map;
 
 import static org.h2.engine.Constants.DEFAULT_HTTP_PORT;
 import static org.h2.engine.Constants.DEFAULT_TCP_PORT;

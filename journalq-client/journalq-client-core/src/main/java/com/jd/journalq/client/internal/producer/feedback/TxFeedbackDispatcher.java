@@ -22,7 +22,7 @@ import com.jd.journalq.client.internal.producer.domain.FetchFeedbackData;
 import com.jd.journalq.client.internal.producer.domain.TransactionStatus;
 import com.jd.journalq.client.internal.producer.feedback.config.TxFeedbackConfig;
 import com.jd.journalq.domain.TopicName;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.command.TxStatus;
 import com.jd.journalq.network.domain.BrokerNode;
 import org.apache.commons.collections.CollectionUtils;
@@ -69,7 +69,7 @@ public class TxFeedbackDispatcher {
         FetchFeedbackData fetchFeedbackData = null;
         try {
             fetchFeedbackData = messageSender.fetchFeedback(brokerNode, topic, config.getApp(), TxStatus.UNKNOWN, config.getFetchSize(), config.getLongPollTimeout(), config.getTimeout());
-            if (!fetchFeedbackData.getCode().equals(JMQCode.SUCCESS)) {
+            if (!fetchFeedbackData.getCode().equals(JournalqCode.SUCCESS)) {
                 logger.error("fetch feedback error, topic: {}, error: {}", topic, fetchFeedbackData.getCode().getMessage());
                 return;
             }

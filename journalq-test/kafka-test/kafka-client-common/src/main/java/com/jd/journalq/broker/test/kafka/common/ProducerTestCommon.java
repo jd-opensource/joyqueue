@@ -13,7 +13,12 @@
  */
 package com.jd.journalq.broker.test.kafka.common;
 
-import org.apache.kafka.clients.consumer.*;
+import com.jd.journalq.toolkit.time.SystemClock;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.consumer.OffsetAndTimestamp;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -24,7 +29,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 
 public class ProducerTestCommon {
@@ -104,7 +114,7 @@ public class ProducerTestCommon {
                         partition, keys == null ? null : keys[i], values[i]);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
             Assert.fail();
         }
     }
@@ -164,7 +174,7 @@ public class ProducerTestCommon {
             Thread.sleep(2000); //wait commit offset finished
             return consumeRecords;
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
             Assert.fail();
             return consumeRecords;
         }
@@ -362,7 +372,7 @@ public class ProducerTestCommon {
         TopicPartition topicPartition = new TopicPartition(KafkaConfigs.TOPIC, partition);
 
         Map<TopicPartition, Long> timestampsToSearch = new HashMap<>();
-        timestampsToSearch.put(topicPartition, System.currentTimeMillis() - 9 * 1000);
+        timestampsToSearch.put(topicPartition, SystemClock.now() - 9 * 1000);
         Map<TopicPartition, OffsetAndTimestamp> offsetAndTimestamps = consumer.offsetsForTimes(timestampsToSearch);
 
         for (TopicPartition tp : offsetAndTimestamps.keySet()) {
@@ -465,7 +475,7 @@ public class ProducerTestCommon {
                 Assert.assertTrue(length <= maxBytes);
 
             } catch (Throwable t) {
-                t.printStackTrace();
+                logger.error(t.getMessage(), t);
                 Assert.fail();
             }
         }

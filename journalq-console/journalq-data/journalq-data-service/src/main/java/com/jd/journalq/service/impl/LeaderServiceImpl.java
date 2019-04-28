@@ -53,6 +53,8 @@ public class LeaderServiceImpl implements LeaderService {
     public List<PartitionGroup> findPartitionGroupLeaderBroker(String topic,String namespace) {
         try {
             List<TopicPartitionGroup> topicPartitionGroups = partitionGroupServerService.findByTopic(topic,namespace);
+            if(null == topicPartitionGroups){ throw new IllegalArgumentException("topic partition group is null");}
+            if( topicPartitionGroups.isEmpty()){ return Collections.EMPTY_LIST;}
             return findPartitionGroupLeaderBroker(topicPartitionGroups);
         }catch (Exception e){
             throw new ServiceException(INTERNAL_SERVER_ERROR, e.getMessage());
@@ -100,8 +102,9 @@ public class LeaderServiceImpl implements LeaderService {
     @Override
     public List<Broker> findLeaderBroker(String topic,String namespace) {
         List<PartitionGroup> partitionGroups = findPartitionGroupLeaderBroker(topic,namespace);
+        if(null == partitionGroups){return null;}
         if (NullUtil.isEmpty(partitionGroups)) {
-            return null;
+            return Collections.EMPTY_LIST;
         }
         /**
          *

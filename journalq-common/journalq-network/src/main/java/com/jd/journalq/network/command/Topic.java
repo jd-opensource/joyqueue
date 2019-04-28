@@ -15,7 +15,7 @@ package com.jd.journalq.network.command;
 
 import com.jd.journalq.domain.Consumer;
 import com.jd.journalq.domain.Producer;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -33,7 +33,7 @@ public class Topic implements Serializable {
     private Consumer.ConsumerPolicy consumerPolicy;
     private com.jd.journalq.domain.Topic.Type type;
     private Map<Integer, TopicPartitionGroup> partitionGroups;
-    private JMQCode code;
+    private JournalqCode code;
 
     public void setTopic(String topic) {
         this.topic = topic;
@@ -75,11 +75,11 @@ public class Topic implements Serializable {
         this.partitionGroups = partitionGroups;
     }
 
-    public void setCode(JMQCode code) {
+    public void setCode(JournalqCode code) {
         this.code = code;
     }
 
-    public JMQCode getCode() {
+    public JournalqCode getCode() {
         return code;
     }
 }

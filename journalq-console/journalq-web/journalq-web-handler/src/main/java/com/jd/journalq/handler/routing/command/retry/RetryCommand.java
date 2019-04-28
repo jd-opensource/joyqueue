@@ -14,21 +14,27 @@
 package com.jd.journalq.handler.routing.command.retry;
 
 import com.jd.journalq.domain.ConsumeRetry;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.handler.annotation.Operator;
 import com.jd.journalq.handler.annotation.PageQuery;
 import com.jd.journalq.message.BrokerMessage;
 import com.jd.journalq.model.PageResult;
 import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.handler.util.RetryUtils;
-import com.jd.journalq.handler.Constants;
-import com.jd.journalq.model.domain.*;
+import com.jd.journalq.model.domain.ApplicationUser;
+import com.jd.journalq.model.domain.BaseModel;
+import com.jd.journalq.model.domain.Consumer;
+import com.jd.journalq.model.domain.Identity;
+import com.jd.journalq.model.domain.Retry;
+import com.jd.journalq.model.domain.Topic;
+import com.jd.journalq.model.domain.User;
 import com.jd.journalq.model.query.QConsumer;
 import com.jd.journalq.model.query.QRetry;
 import com.jd.journalq.service.ApplicationUserService;
 import com.jd.journalq.service.ConsumerService;
 import com.jd.journalq.service.RetryService;
-import com.jd.journalq.toolkit.lang.Strings;
+import com.google.common.base.Strings;
+import com.jd.journalq.toolkit.time.SystemClock;
 import com.jd.journalq.util.LocalSession;
 import com.jd.journalq.util.serializer.Serializer;
 import com.jd.laf.binding.annotation.Value;
@@ -99,7 +105,7 @@ public class RetryCommand implements Command<Response>, Poolable {
             retry.setExpireTime(RetryUtils.getExpireTime().getTime());
             retry.setRetryTime(RetryUtils.getNextRetryTime(new Date(), 0).getTime());
             retry.setRetryCount((short) 0);
-            retry.setUpdateTime(System.currentTimeMillis());
+            retry.setUpdateTime(SystemClock.now());
             retryService.recover(retry);
             return  Responses.success("恢复成功");
         }
@@ -119,7 +125,7 @@ public class RetryCommand implements Command<Response>, Poolable {
             HttpServerResponse response = request.response();
             byte[] data = retry.getData();
             if (data.length == 0) {
-                throw new JMQException("消息内容为空",HTTP_BAD_REQUEST);
+                throw new JournalqException("消息内容为空",HTTP_BAD_REQUEST);
             }
             String fileName = retry.getId() +".txt";
             response.reset();
@@ -141,7 +147,7 @@ public class RetryCommand implements Command<Response>, Poolable {
         ConsumeRetry retry = retryService.getDataById(id);
         retry.setStatus((short) BaseModel.DELETED);
         retry.setUpdateBy(operator.getId().intValue());
-        retry.setUpdateTime(System.currentTimeMillis());
+        retry.setUpdateTime(SystemClock.now());
         retryService.delete(retry);
         return Responses.success();
     }
@@ -182,7 +188,6 @@ public class RetryCommand implements Command<Response>, Poolable {
         try {
             consumerList = consumerService.findByQuery(qConsumer);
         } catch (Exception e) {
-            e.printStackTrace();
         }
         if (consumerList != null && consumerList.size() > 0) {
             return true;

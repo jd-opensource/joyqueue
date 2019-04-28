@@ -13,7 +13,7 @@
  */
 package com.jd.journalq.client;
 
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import io.openmessaging.KeyValue;
 import io.openmessaging.OMS;
 import io.openmessaging.OMSBuiltinKeys;
@@ -39,7 +39,7 @@ public class ProducerTest2 extends AbstractProducerTest {
         KeyValue attributes = getAttributes();
         attributes.put(OMSBuiltinKeys.ACCOUNT_KEY, ACCOUNT_KEY);
         attributes.put(JournalQProducerBuiltinKeys.TRANSACTION_TIMEOUT, 1000 * 10);
-        messagingAccessPoint = OMS.getMessagingAccessPoint(String.format("oms:jmq://%s@%s/%s", ACCOUNT_ID, SERVER, "test_region"), attributes);
+        messagingAccessPoint = OMS.getMessagingAccessPoint(String.format("oms:journalq://%s@%s/%s", ACCOUNT_ID, SERVER, "test_region"), attributes);
 
         producer = (ExtensionProducer) messagingAccessPoint.createProducer();
         producer.start();
@@ -54,7 +54,7 @@ public class ProducerTest2 extends AbstractProducerTest {
         try {
             producer.send(message);
         } catch (OMSRuntimeException e) {
-            Assert.assertEquals(e.getErrorCode(), JMQCode.FW_TOPIC_NO_PARTITIONGROUP.getCode());
+            Assert.assertEquals(e.getErrorCode(), JournalqCode.FW_TOPIC_NO_PARTITIONGROUP.getCode());
         }
     }
 }

@@ -30,7 +30,7 @@ public class FetchCluster extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.FETCH_CLUSTER.getCode();
+        return JournalqCommandType.FETCH_CLUSTER.getCode();
     }
 
     public void setTopics(List<String> topics) {

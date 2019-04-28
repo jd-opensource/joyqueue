@@ -17,9 +17,9 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.jd.journalq.domain.Consumer;
 import com.jd.journalq.domain.Producer;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.command.FetchClusterAck;
-import com.jd.journalq.network.command.JMQCommandType;
+import com.jd.journalq.network.command.JournalqCommandType;
 import com.jd.journalq.network.command.Topic;
 import com.jd.journalq.network.command.TopicPartition;
 import com.jd.journalq.network.command.TopicPartitionGroup;
@@ -145,7 +145,7 @@ public class FetchClusterAckCodec implements PayloadCodec<JMQHeader, FetchCluste
         }
 
         topic.setPartitionGroups(partitionGroups);
-        topic.setCode(JMQCode.valueOf(buffer.readInt()));
+        topic.setCode(JournalqCode.valueOf(buffer.readInt()));
         return topic;
     }
 
@@ -273,6 +273,6 @@ public class FetchClusterAckCodec implements PayloadCodec<JMQHeader, FetchCluste
 
     @Override
     public int type() {
-        return JMQCommandType.FETCH_CLUSTER_ACK.getCode();
+        return JournalqCommandType.FETCH_CLUSTER_ACK.getCode();
     }
 }

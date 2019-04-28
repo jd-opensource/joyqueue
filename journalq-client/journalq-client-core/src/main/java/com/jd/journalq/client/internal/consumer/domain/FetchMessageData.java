@@ -13,7 +13,7 @@
  */
 package com.jd.journalq.client.internal.consumer.domain;
 
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 
 import java.util.Collections;
 import java.util.List;
@@ -27,17 +27,17 @@ import java.util.List;
 public class FetchMessageData {
 
     private List<ConsumeMessage> messages;
-    private JMQCode code;
+    private JournalqCode code;
 
     public FetchMessageData() {
     }
 
-    public FetchMessageData(JMQCode code) {
+    public FetchMessageData(JournalqCode code) {
         this.messages = Collections.emptyList();
         this.code = code;
     }
 
-    public FetchMessageData(List<ConsumeMessage> messages, JMQCode code) {
+    public FetchMessageData(List<ConsumeMessage> messages, JournalqCode code) {
         this.messages = messages;
         this.code = code;
     }
@@ -50,11 +50,11 @@ public class FetchMessageData {
         this.messages = messages;
     }
 
-    public JMQCode getCode() {
+    public JournalqCode getCode() {
         return code;
     }
 
-    public void setCode(JMQCode code) {
+    public void setCode(JournalqCode code) {
         this.code = code;
     }
 }

@@ -24,6 +24,7 @@ import com.jd.journalq.toolkit.config.PropertySupplier;
 import com.jd.journalq.toolkit.config.PropertySupplierAware;
 import com.jd.journalq.toolkit.lang.Close;
 import com.jd.journalq.toolkit.service.Service;
+import com.jd.journalq.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -155,7 +156,6 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
                 scheduledExecutor.awaitTermination(5, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
                 logger.warn("Exception: ", e);
-                e.printStackTrace();
             }
             if (!scheduledExecutor.isTerminated()) scheduledExecutor.shutdownNow();
         }
@@ -323,7 +323,7 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
      * 并不真正删除，只是重命名
      */
     private boolean delete(File file) {
-        File renamed = new File(file.getParent(), DEL_PREFIX + System.currentTimeMillis() + "." + file.getName());
+        File renamed = new File(file.getParent(), DEL_PREFIX + SystemClock.now() + "." + file.getName());
         return file.renameTo(renamed);
     }
 
@@ -387,7 +387,6 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
                 scheduledExecutor.awaitTermination(5, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
                 logger.warn("Exception: ", e);
-                e.printStackTrace();
             }
             if (!scheduledExecutor.isTerminated()) scheduledExecutor.shutdownNow();
         }

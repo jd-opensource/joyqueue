@@ -13,7 +13,7 @@
  */
 package com.jd.journalq.client.internal.cluster;
 
-import com.jd.journalq.toolkit.lang.Objects;
+import com.google.common.base.Objects;
 
 import java.util.List;
 

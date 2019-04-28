@@ -26,7 +26,7 @@ public class NsrCommandType {
     // nameservice.leaderReport
     public static final int LEADER_REPORT = 6;
     public static final int LEADER_REPORT_ACK = -6;
-    //nameservice.subscribe 100 and -100 兼容mqtt通过jmq4 client 请求
+    //nameservice.subscribe 100 and -100 兼容mqtt通过journalq client 请求
     public static final int SUBSCRIBE = 100;
     public static final int SUBSCRIBE_ACK = -100;
     //nameservice.unsubscribe 101

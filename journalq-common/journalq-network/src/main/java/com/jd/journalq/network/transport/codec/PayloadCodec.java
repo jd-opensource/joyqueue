@@ -17,7 +17,7 @@ import com.jd.journalq.network.transport.command.Header;
 import com.jd.journalq.network.transport.command.Payload;
 
 /**
- * jmq消息体编解码器
+ * journalq消息体编解码器
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/21

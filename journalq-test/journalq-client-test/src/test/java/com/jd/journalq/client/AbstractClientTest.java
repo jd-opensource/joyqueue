@@ -45,7 +45,7 @@ public class AbstractClientTest {
     public void before() {
         KeyValue attributes = getAttributes();
         attributes.put(OMSBuiltinKeys.ACCOUNT_KEY, ACCOUNT_KEY);
-        messagingAccessPoint = OMS.getMessagingAccessPoint(String.format("oms:jmq://%s@%s/%s", ACCOUNT_ID, SERVER, REGION), attributes);
+        messagingAccessPoint = OMS.getMessagingAccessPoint(String.format("oms:journalq://%s@%s/%s", ACCOUNT_ID, SERVER, REGION), attributes);
     }
 
     protected KeyValue getAttributes() {

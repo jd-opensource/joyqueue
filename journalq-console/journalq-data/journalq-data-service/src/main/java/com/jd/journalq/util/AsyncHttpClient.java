@@ -15,6 +15,7 @@ package com.jd.journalq.util;
 
 import com.alibaba.fastjson.JSON;
 import com.jd.journalq.exception.ServiceException;
+import com.jd.journalq.toolkit.time.SystemClock;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.config.RequestConfig;
@@ -35,7 +36,7 @@ import java.util.concurrent.TimeUnit;
 import static com.jd.journalq.exception.ServiceException.INTERNAL_SERVER_ERROR;
 
 public class AsyncHttpClient {
-    private final static Logger logger= LoggerFactory.getLogger(AsyncHttpClient.class);
+    private static final Logger logger= LoggerFactory.getLogger(AsyncHttpClient.class);
     private static CloseableHttpAsyncClient httpclient = HttpAsyncClients.custom().setDefaultRequestConfig(RequestConfig.custom()
             .setConnectTimeout(600)
             .setSocketTimeout(700)
@@ -119,7 +120,7 @@ public class AsyncHttpClient {
         }
         @Override
         public void completed(HttpResponse httpResponse) {
-            logger.info("request completed {} time elapsed {} ms ",url,System.currentTimeMillis()-startMs);
+            logger.info("request completed {} time elapsed {} ms ",url, SystemClock.now()-startMs);
             try {
                 int statusCode=httpResponse.getStatusLine().getStatusCode();
                 if (HttpStatus.SC_OK == statusCode) {

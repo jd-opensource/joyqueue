@@ -14,7 +14,9 @@
 package com.jd.journalq.broker.mqtt.handler;
 
 import io.netty.channel.Channel;
-import io.netty.handler.codec.mqtt.*;
+import io.netty.handler.codec.mqtt.MqttMessage;
+import io.netty.handler.codec.mqtt.MqttMessageType;
+import io.netty.handler.codec.mqtt.MqttSubscribeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

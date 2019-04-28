@@ -15,8 +15,8 @@ package com.jd.journalq.broker.kafka;
 
 import com.google.common.collect.Maps;
 import com.jd.journalq.broker.kafka.exception.LeaderNotAvailableException;
-import com.jd.journalq.exception.JMQCode;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqCode;
+import com.jd.journalq.exception.JournalqException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,26 +71,26 @@ public final class KafkaErrorCode {
         KAFKA_EXCEPTION_TO_CODE_MAPPER.put(LeaderNotAvailableException.class, NOT_LEADER_FOR_PARTITION);
 
         // JMQ错误映射
-        JMQCODE_TO_CODE_MAPPER.put(JMQCode.SUCCESS.getCode(), NONE);
-        JMQCODE_TO_CODE_MAPPER.put(JMQCode.CN_NO_PERMISSION.getCode(), UNKNOWN_TOPIC_OR_PARTITION);
-        JMQCODE_TO_CODE_MAPPER.put(JMQCode.CN_AUTHENTICATION_ERROR.getCode(), UNKNOWN_TOPIC_OR_PARTITION);
-        JMQCODE_TO_CODE_MAPPER.put(JMQCode.CN_SERVICE_NOT_AVAILABLE.getCode(), NOT_LEADER_FOR_PARTITION);
-        JMQCODE_TO_CODE_MAPPER.put(JMQCode.CN_CHECKSUM_ERROR.getCode(), INVALID_MESSAGE);
-        JMQCODE_TO_CODE_MAPPER.put(JMQCode.CN_CONNECTION_ERROR.getCode(), BROKER_NOT_AVAILABLE);
-        JMQCODE_TO_CODE_MAPPER.put(JMQCode.CN_CONNECTION_TIMEOUT.getCode(), BROKER_NOT_AVAILABLE);
-        JMQCODE_TO_CODE_MAPPER.put(JMQCode.CN_REQUEST_TIMEOUT.getCode(), REQUEST_TIMEOUT);
-        JMQCODE_TO_CODE_MAPPER.put(JMQCode.CN_REQUEST_ERROR.getCode(), REQUEST_TIMEOUT);
-        JMQCODE_TO_CODE_MAPPER.put(JMQCode.CN_REQUEST_EXCESSIVE.getCode(), REQUEST_TIMEOUT);
-        JMQCODE_TO_CODE_MAPPER.put(JMQCode.CN_THREAD_INTERRUPTED.getCode(), REQUEST_TIMEOUT);
-        JMQCODE_TO_CODE_MAPPER.put(JMQCode.CN_THREAD_EXECUTOR_BUSY.getCode(), REQUEST_TIMEOUT);
-        JMQCODE_TO_CODE_MAPPER.put(JMQCode.CT_NO_CLUSTER.getCode(), NOT_LEADER_FOR_PARTITION);
-        JMQCODE_TO_CODE_MAPPER.put(JMQCode.CT_MESSAGE_BODY_NULL.getCode(), INVALID_MESSAGE);
-        JMQCODE_TO_CODE_MAPPER.put(JMQCode.CY_REPLICATE_TIMEOUT.getCode(), REPLICA_NOT_AVAILABLE);
+        JMQCODE_TO_CODE_MAPPER.put(JournalqCode.SUCCESS.getCode(), NONE);
+        JMQCODE_TO_CODE_MAPPER.put(JournalqCode.CN_NO_PERMISSION.getCode(), UNKNOWN_TOPIC_OR_PARTITION);
+        JMQCODE_TO_CODE_MAPPER.put(JournalqCode.CN_AUTHENTICATION_ERROR.getCode(), UNKNOWN_TOPIC_OR_PARTITION);
+        JMQCODE_TO_CODE_MAPPER.put(JournalqCode.CN_SERVICE_NOT_AVAILABLE.getCode(), NOT_LEADER_FOR_PARTITION);
+        JMQCODE_TO_CODE_MAPPER.put(JournalqCode.CN_CHECKSUM_ERROR.getCode(), INVALID_MESSAGE);
+        JMQCODE_TO_CODE_MAPPER.put(JournalqCode.CN_CONNECTION_ERROR.getCode(), BROKER_NOT_AVAILABLE);
+        JMQCODE_TO_CODE_MAPPER.put(JournalqCode.CN_CONNECTION_TIMEOUT.getCode(), BROKER_NOT_AVAILABLE);
+        JMQCODE_TO_CODE_MAPPER.put(JournalqCode.CN_REQUEST_TIMEOUT.getCode(), REQUEST_TIMEOUT);
+        JMQCODE_TO_CODE_MAPPER.put(JournalqCode.CN_REQUEST_ERROR.getCode(), REQUEST_TIMEOUT);
+        JMQCODE_TO_CODE_MAPPER.put(JournalqCode.CN_REQUEST_EXCESSIVE.getCode(), REQUEST_TIMEOUT);
+        JMQCODE_TO_CODE_MAPPER.put(JournalqCode.CN_THREAD_INTERRUPTED.getCode(), REQUEST_TIMEOUT);
+        JMQCODE_TO_CODE_MAPPER.put(JournalqCode.CN_THREAD_EXECUTOR_BUSY.getCode(), REQUEST_TIMEOUT);
+        JMQCODE_TO_CODE_MAPPER.put(JournalqCode.CT_NO_CLUSTER.getCode(), NOT_LEADER_FOR_PARTITION);
+        JMQCODE_TO_CODE_MAPPER.put(JournalqCode.CT_MESSAGE_BODY_NULL.getCode(), INVALID_MESSAGE);
+        JMQCODE_TO_CODE_MAPPER.put(JournalqCode.CY_REPLICATE_TIMEOUT.getCode(), REPLICA_NOT_AVAILABLE);
     }
 
     public static short exceptionFor(Throwable exception) {
-        if (exception instanceof JMQException) {
-            return jmqCodeFor(((JMQException) exception).getCode());
+        if (exception instanceof JournalqException) {
+            return journalqCodeFor(((JournalqException) exception).getCode());
         } else {
             return kafkaExceptionFor(exception);
         }
@@ -105,10 +105,10 @@ public final class KafkaErrorCode {
         return code;
     }
 
-    public static short jmqCodeFor(int jmqCode) {
-        Short code = JMQCODE_TO_CODE_MAPPER.get(jmqCode);
+    public static short journalqCodeFor(int journalqCode) {
+        Short code = JMQCODE_TO_CODE_MAPPER.get(journalqCode);
         if (code == null) {
-            logger.warn("unsupported jmqCode mapper, jmqCode: {}", jmqCode);
+            logger.warn("unsupported journalqCode mapper, journalqCode: {}", journalqCode);
             code = UNKNOWN;
         }
         return code;

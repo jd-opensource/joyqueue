@@ -18,7 +18,7 @@ import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.consumer.Consume;
 import com.jd.journalq.broker.manage.service.ConsumerManageService;
 import com.jd.journalq.domain.TopicName;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.monitor.PartitionAckMonitorInfo;
 import com.jd.journalq.network.session.Consumer;
 import com.jd.journalq.store.PartitionGroupStore;
@@ -49,7 +49,7 @@ public class DefaultConsumerManageService implements ConsumerManageService {
     }
 
     @Override
-    public boolean setAckIndex(String topic, String app, short partition, long index) throws JMQException {
+    public boolean setAckIndex(String topic, String app, short partition, long index) throws JournalqException {
         Consumer consumer = new Consumer();
         consumer.setTopic(topic);
         consumer.setApp(app);
@@ -58,7 +58,7 @@ public class DefaultConsumerManageService implements ConsumerManageService {
     }
 
     @Override
-    public boolean setMaxAckIndex(String topic, String app, short partition) throws JMQException {
+    public boolean setMaxAckIndex(String topic, String app, short partition) throws JournalqException {
         StoreManagementService.PartitionMetric partitionMetric = storeManagementService.partitionMetric(topic, partition);
         Consumer consumer = new Consumer();
         consumer.setTopic(topic);
@@ -98,7 +98,7 @@ public class DefaultConsumerManageService implements ConsumerManageService {
     }
 
     @Override
-    public boolean setMaxAckIndexes(String topic, String app) throws JMQException {
+    public boolean setMaxAckIndexes(String topic, String app) throws JournalqException {
         StoreManagementService.TopicMetric topicMetric = storeManagementService.topicMetric(topic);
         Consumer consumer = new Consumer();
         consumer.setTopic(topic);
@@ -112,7 +112,7 @@ public class DefaultConsumerManageService implements ConsumerManageService {
     }
 
     @Override
-    public boolean setAckIndexByTime(String topic, String app, short partition, long timestamp) throws JMQException {
+    public boolean setAckIndexByTime(String topic, String app, short partition, long timestamp) throws JournalqException {
         StoreManagementService.TopicMetric topicMetric = storeManagementService.topicMetric(topic);
         for (StoreManagementService.PartitionGroupMetric partitionGroupMetric : topicMetric.getPartitionGroupMetrics()) {
             for (StoreManagementService.PartitionMetric partitionMetric : partitionGroupMetric.getPartitionMetrics()) {
@@ -125,7 +125,7 @@ public class DefaultConsumerManageService implements ConsumerManageService {
     }
 
     @Override
-    public boolean setAckIndexesByTime(String topic, String app, long timestamp) throws JMQException {
+    public boolean setAckIndexesByTime(String topic, String app, long timestamp) throws JournalqException {
         StoreManagementService.TopicMetric topicMetric = storeManagementService.topicMetric(topic);
         for (StoreManagementService.PartitionGroupMetric partitionGroupMetric : topicMetric.getPartitionGroupMetrics()) {
             for (StoreManagementService.PartitionMetric partitionMetric : partitionGroupMetric.getPartitionMetrics()) {
@@ -164,7 +164,7 @@ public class DefaultConsumerManageService implements ConsumerManageService {
         }
         return partitionAckMonitorInfos;
     }
-    protected boolean setPartitionAckIndexByTime(String topic, String app, int partitionGroup, short partition, long timestamp) throws JMQException {
+    protected boolean setPartitionAckIndexByTime(String topic, String app, int partitionGroup, short partition, long timestamp) throws JournalqException {
         PartitionGroupStore store = storeService.getStore(topic, partitionGroup);
         long index = store.getIndex(partition, timestamp);
         if (index < 0) {

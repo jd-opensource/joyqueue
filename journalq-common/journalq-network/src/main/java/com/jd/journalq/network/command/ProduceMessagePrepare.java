@@ -31,7 +31,7 @@ public class ProduceMessagePrepare extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.PRODUCE_MESSAGE_PREPARE.getCode();
+        return JournalqCommandType.PRODUCE_MESSAGE_PREPARE.getCode();
     }
 
     public void setTopic(String topic) {

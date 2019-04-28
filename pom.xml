@@ -52,7 +52,6 @@
         <cglib.version>2.2</cglib.version>
         <javax.inject.version>1</javax.inject.version>
         <aopalliance.version>1.0</aopalliance.version>
-        <jmq.version>4.0.0-SNAPSHOT</jmq.version>
         <guava.version>21.0</guava.version>
         <joda-time.version>2.3</joda-time.version>
         <resteasy.version>3.0.6.Final</resteasy.version>
@@ -67,7 +66,6 @@
         <poi.version>3.9</poi.version>
         <jxls.version>1.0</jxls.version>
         <activation.version>1.1</activation.version>
-        <jmq.client.json>1.2.9</jmq.client.json>
 
         <snappy-java.version>1.1.2.6</snappy-java.version>
         <lz4.version>1.3.0</lz4.version>
@@ -234,7 +232,7 @@
             </dependency>
             <dependency>
                 <groupId>com.jd.journalq</groupId>
-                <artifactId>journalq-broker-jmq</artifactId>
+                <artifactId>journalq-broker-journalq</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -246,21 +244,6 @@
                 <groupId>com.jd.journalq</groupId>
                 <artifactId>journalq-broker-mqtt</artifactId>
                 <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.jd.journalq</groupId>
-                <artifactId>journalq-task-api</artifactId>
-                <version>4.0.0-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>com.jd.journalq</groupId>
-                <artifactId>journalq-task-core</artifactId>
-                <version>4.0.0-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>com.jd.journalq</groupId>
-                <artifactId>journalq-management</artifactId>
-                <version>4.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.jd.journalq</groupId>
@@ -744,11 +727,6 @@
             </dependency>
 
             <dependency>
-                <groupId>com.jd.journalq</groupId>
-                <artifactId>journalq-client-json</artifactId>
-                <version>${jmq.client.json}</version>
-            </dependency>
-            <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
                 <version>${junit.version}</version>
@@ -894,6 +872,7 @@
                     <version>${maven-source-plugin.version}</version>
                     <configuration>
                         <attach>true</attach>
+                        <skipSource>true</skipSource>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -1008,10 +987,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
             </plugin>
-            <!--<plugin>-->
-                <!--<groupId>org.apache.maven.plugins</groupId>-->
-                <!--<artifactId>maven-source-plugin</artifactId>-->
-            <!--</plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
@@ -1030,21 +1005,7 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>2.1</version>
-                <configuration>
-                    <attach>true</attach>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+
 <!--            license:check: verify if some files miss license header. This goal is attached to the verify phase if declared in your pom.xml like above.-->
 <!--            license:format: add the license header when missing. If a header is existing, it is updated to the new one.-->
 <!--            license:remove: remove existing license header-->

@@ -25,8 +25,8 @@ import com.jd.journalq.client.internal.consumer.exception.ConsumerException;
 import com.jd.journalq.client.internal.consumer.support.TopicMessageConsumer;
 import com.jd.journalq.client.internal.consumer.transport.ConsumerClientManager;
 import com.jd.journalq.client.internal.nameserver.NameServerConfig;
-import com.jd.journalq.exception.JMQCode;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.jd.journalq.exception.JournalqCode;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -51,7 +51,8 @@ public class DefaultMessageListenerContainer extends Service implements MessageL
     private ConsumerClientManager consumerClientManager;
     private Map<String, TopicMessageConsumer> topicConsumerMap = Maps.newHashMap();
 
-    public DefaultMessageListenerContainer(ConsumerConfig config, NameServerConfig nameServerConfig, ClusterManager clusterManager, ClusterClientManager clusterClientManager, ConsumerClientManager consumerClientManager) {
+    public DefaultMessageListenerContainer(ConsumerConfig config, NameServerConfig nameServerConfig, ClusterManager clusterManager,
+                                           ClusterClientManager clusterClientManager, ConsumerClientManager consumerClientManager) {
         Preconditions.checkArgument(config != null, "consumer not null");
         Preconditions.checkArgument(nameServerConfig != null, "nameserver not null");
         Preconditions.checkArgument(clusterManager != null, "clusterManager not null");
@@ -106,7 +107,7 @@ public class DefaultMessageListenerContainer extends Service implements MessageL
                     topicMessageConsumer.start();
                 } catch (Exception e) {
                     logger.error("start topic message consumer exception, topic : {}", topic, e);
-                    throw new ConsumerException("start message consumer exception", JMQCode.CN_SERVICE_NOT_AVAILABLE.getCode());
+                    throw new ConsumerException("start message consumer exception", JournalqCode.CN_SERVICE_NOT_AVAILABLE.getCode());
                 }
             }
         }

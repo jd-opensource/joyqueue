@@ -14,7 +14,7 @@
 package com.jd.journalq.network.codec;
 
 import com.google.common.collect.Lists;
-import com.jd.journalq.network.command.JMQCommandType;
+import com.jd.journalq.network.command.JournalqCommandType;
 import com.jd.journalq.network.command.RemoveProducer;
 import com.jd.journalq.network.serializer.Serializer;
 import com.jd.journalq.network.transport.codec.JMQHeader;
@@ -58,6 +58,6 @@ public class RemoveProducerCodec implements PayloadCodec<JMQHeader, RemoveProduc
 
     @Override
     public int type() {
-        return JMQCommandType.REMOVE_PRODUCER.getCode();
+        return JournalqCommandType.REMOVE_PRODUCER.getCode();
     }
 }

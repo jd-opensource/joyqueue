@@ -13,8 +13,9 @@
  */
 package com.jd.journalq.server.retry.db;
 
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.server.retry.model.RetryMessageModel;
+import com.jd.journalq.toolkit.time.SystemClock;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,7 +37,7 @@ public class DBMessageRetryTest {
 
 
     @Test
-    public void addRetry() throws JMQException {
+    public void addRetry() throws JournalqException {
         List<RetryMessageModel> retryMessageModelList = new ArrayList<>();
 
         RetryMessageModel retry = new RetryMessageModel();
@@ -47,7 +48,7 @@ public class DBMessageRetryTest {
         retry.setIndex(100l);
         retry.setBrokerMessage(new byte[168]);
         retry.setException(new byte[16]);
-        retry.setSendTime(System.currentTimeMillis());
+        retry.setSendTime(SystemClock.now());
 
         retryMessageModelList.add(retry);
 
@@ -56,7 +57,7 @@ public class DBMessageRetryTest {
 
 
     @Test
-    public void retrySuccess() throws JMQException {
+    public void retrySuccess() throws JournalqException {
         String topic = "topic";
         String app = "app";
         Long[] messageIds = {1l};
@@ -64,7 +65,7 @@ public class DBMessageRetryTest {
     }
 
     @Test
-    public void retryError() throws JMQException {
+    public void retryError() throws JournalqException {
         String topic = "topic";
         String app = "app";
         Long[] messageIds = {1l};
@@ -72,7 +73,7 @@ public class DBMessageRetryTest {
     }
 
     @Test
-    public void retryExpire() throws JMQException {
+    public void retryExpire() throws JournalqException {
         String topic = "topic";
         String app = "app";
         Long[] messageIds = {1l};
@@ -81,7 +82,7 @@ public class DBMessageRetryTest {
     }
 
     @Test
-    public void getRetry() throws JMQException {
+    public void getRetry() throws JournalqException {
         String topic = "topic";
         String app = "app";
         short count = 10;
@@ -93,7 +94,7 @@ public class DBMessageRetryTest {
     }
 
     @Test
-    public void countRetry() throws JMQException {
+    public void countRetry() throws JournalqException {
         String topic = "topic";
         String app = "app";
         int count = dbMessageRetry.countRetry(topic, app);

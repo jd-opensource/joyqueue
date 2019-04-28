@@ -13,17 +13,44 @@
  */
 package com.jd.journalq.nsr;
 
-import com.jd.journalq.domain.*;
-import com.jd.journalq.event.*;
-import com.jd.journalq.network.event.TransportEvent;
-import com.jd.journalq.network.transport.Transport;
+import com.jd.journalq.domain.AppToken;
+import com.jd.journalq.domain.Broker;
+import com.jd.journalq.domain.ClientType;
+import com.jd.journalq.domain.Config;
+import com.jd.journalq.domain.Consumer;
+import com.jd.journalq.domain.DataCenter;
+import com.jd.journalq.domain.PartitionGroup;
+import com.jd.journalq.domain.Producer;
+import com.jd.journalq.domain.Replica;
+import com.jd.journalq.domain.Subscription;
+import com.jd.journalq.domain.Topic;
+import com.jd.journalq.domain.TopicConfig;
+import com.jd.journalq.domain.TopicName;
+import com.jd.journalq.event.BrokerEvent;
+import com.jd.journalq.event.ConfigEvent;
+import com.jd.journalq.event.ConsumerEvent;
+import com.jd.journalq.event.DataCenterEvent;
+import com.jd.journalq.event.MetaEvent;
+import com.jd.journalq.event.NameServerEvent;
+import com.jd.journalq.event.PartitionGroupEvent;
+import com.jd.journalq.event.ProducerEvent;
+import com.jd.journalq.event.TopicEvent;
 import com.jd.journalq.network.transport.TransportServer;
 import com.jd.journalq.network.transport.config.ServerConfig;
 import com.jd.journalq.nsr.config.NameServerConfig;
 import com.jd.journalq.nsr.message.MessageListener;
 import com.jd.journalq.nsr.message.Messenger;
 import com.jd.journalq.nsr.network.NsrTransportServerFactory;
-import com.jd.journalq.nsr.service.*;
+import com.jd.journalq.nsr.service.AppTokenService;
+import com.jd.journalq.nsr.service.BrokerService;
+import com.jd.journalq.nsr.service.ConfigService;
+import com.jd.journalq.nsr.service.ConsumerService;
+import com.jd.journalq.nsr.service.DataCenterService;
+import com.jd.journalq.nsr.service.NamespaceService;
+import com.jd.journalq.nsr.service.PartitionGroupReplicaService;
+import com.jd.journalq.nsr.service.PartitionGroupService;
+import com.jd.journalq.nsr.service.ProducerService;
+import com.jd.journalq.nsr.service.TopicService;
 import com.jd.journalq.nsr.util.DCWrapper;
 import com.jd.journalq.toolkit.concurrent.EventBus;
 import com.jd.journalq.toolkit.concurrent.EventListener;
@@ -31,8 +58,9 @@ import com.jd.journalq.toolkit.config.PropertySupplier;
 import com.jd.journalq.toolkit.config.PropertySupplierAware;
 import com.jd.journalq.toolkit.lang.Close;
 import com.jd.journalq.toolkit.lang.LifeCycle;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
+import com.jd.journalq.toolkit.time.SystemClock;
 import com.jd.laf.extension.ExtensionPoint;
 import com.jd.laf.extension.ExtensionPointLazy;
 import com.jd.laf.extension.SpiLoader;
@@ -40,7 +68,16 @@ import com.jd.laf.extension.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -152,8 +189,8 @@ public class NameServer extends Service implements NameService, PropertySupplier
         this.manageServer.setManager_port(nameServerConfig.getManagerPort());
         manageServer.start();
         ServerConfig serverConfig = nameServerConfig.getServerConfig();
-        serverConfig.setAcceptThreadName("jmq-nameserver-accept-eventLoop");
-        serverConfig.setIoThreadName("jmq-nameserver-io-eventLoop");
+        serverConfig.setAcceptThreadName("journalqnameserver-accept-eventLoop");
+        serverConfig.setIoThreadName("journalqnameserver-io-eventLoop");
         this.transportServer = transportServerFactory.bind(serverConfig, serverConfig.getHost(), serverConfig.getPort());
         this.transportServer.start();
         logger.info("nameServer is started");
@@ -384,7 +421,7 @@ public class NameServer extends Service implements NameService, PropertySupplier
             broker = metaManager.getBrokerByIpAndPort(brokerIp, port);
             if (null == broker) {
                 //TODO broker ID 生成逻辑不严谨，重复几率大
-                brokerId = Integer.parseInt(String.valueOf(System.currentTimeMillis() / 1000));
+                brokerId = Integer.parseInt(String.valueOf(SystemClock.now() / 1000));
                 broker = new Broker();
                 broker.setId(brokerId);
                 broker.setIp(brokerIp);
@@ -837,7 +874,9 @@ public class NameServer extends Service implements NameService, PropertySupplier
         Preconditions.checkArgument(namespaceService != null, "namespace service can not be null");
         Preconditions.checkArgument(partitionGroupReplicaService != null, "replica service can not be null");
         Preconditions.checkArgument(partitionGroupService != null, "partitionGroup service can not be null");
-        return new ManageServer(topicService, producerService, consumerService, brokerService, configService, appTokenService, dataCenterService, namespaceService, partitionGroupService, partitionGroupReplicaService);
+        return new ManageServer(topicService, producerService, consumerService,
+                brokerService, configService, appTokenService, dataCenterService,
+                namespaceService, partitionGroupService, partitionGroupReplicaService);
 
     }
 
@@ -854,7 +893,9 @@ public class NameServer extends Service implements NameService, PropertySupplier
         Messenger messenger = serviceProvider.getService(Messenger.class);
         DataCenterService dataCenterService = serviceProvider.getService(DataCenterService.class);
 
-        return new MetaManager(messenger, configService, topicService, brokerService, consumerService, producerService, partitionGroupService, partitionGroupReplicaService, appTokenService, dataCenterService);
+        return new MetaManager(messenger, configService, topicService, brokerService,
+                consumerService, producerService, partitionGroupService,
+                partitionGroupReplicaService, appTokenService, dataCenterService);
 
     }
 }
