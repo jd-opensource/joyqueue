@@ -34,15 +34,15 @@ public class AsyncProducer {
 
     public static void main(String[] args) throws Exception {
         KeyValue keyValue = OMS.newKeyValue();
-        keyValue.put(JournalQBuiltinKeys.ACCOUNT_KEY, "test_token");
+        keyValue.put(JournalQBuiltinKeys.ACCOUNT_KEY, "41fc8cae0b474198b682551ec3326d89");
         keyValue.put(JournalQProducerBuiltinKeys.TRANSACTION_TIMEOUT, 1000 * 10);
 
-        MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint(String.format("oms:journalq://test_app@%s:50088/UNKNOWN", IpUtil.getLocalIp()), keyValue);
+        MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint(String.format("oms:journalq://test@%s:50088/UNKNOWN", IpUtil.getLocalIp()), keyValue);
 
         Producer producer = messagingAccessPoint.createProducer();
         producer.start();
 
-        Message message = producer.createMessage("test_topic_0", "body".getBytes());
+        Message message = producer.createMessage("test-topic-hJPD3C4-0000", "body".getBytes());
         Future<SendResult> future = producer.sendAsync(message);
         System.out.println(future.get().messageId());
 
