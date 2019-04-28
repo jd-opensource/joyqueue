@@ -129,7 +129,11 @@ public class PositioningStore<T> implements Closeable {
     private void clear() {
         try {
             while (!storeFileMap.isEmpty()) {
-                forceDeleteStoreFile(storeFileMap.remove(storeFileMap.firstKey()));
+                StoreFile<T> storeFile = storeFileMap.remove(storeFileMap.firstKey());
+                forceDeleteStoreFile(storeFile);
+                if(storeFile == writeStoreFile) {
+                    writeStoreFile = null;
+                }
             }
         } catch (IOException e) {
             throw new RollBackException(e);
@@ -150,7 +154,11 @@ public class PositioningStore<T> implements Closeable {
 
             SortedMap<Long, StoreFile<T>> toBeRemoved = storeFileMap.tailMap(position);
             while (!toBeRemoved.isEmpty()) {
-                forceDeleteStoreFile(toBeRemoved.remove(toBeRemoved.firstKey()));
+                StoreFile<T> removedStoreFile = toBeRemoved.remove(toBeRemoved.firstKey());
+                forceDeleteStoreFile(removedStoreFile);
+                if(writeStoreFile == removedStoreFile) {
+                    writeStoreFile = null;
+                }
             }
         }
 
@@ -477,6 +485,9 @@ public class PositioningStore<T> implements Closeable {
                 if (storeFileMap.remove(entry.getKey(), storeFile)) {
                     leftPosition.addAndGet(fileDataSize);
                     forceDeleteStoreFile(storeFile);
+                    if(writeStoreFile == storeFile) {
+                        writeStoreFile = null;
+                    }
                     deleteSize += fileDataSize;
                 } else {
                     break;
