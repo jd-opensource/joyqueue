@@ -156,6 +156,11 @@ public class UserInfo implements Identifier {
         return result;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
+    }
+
     /**
      * 赋值信息
      *

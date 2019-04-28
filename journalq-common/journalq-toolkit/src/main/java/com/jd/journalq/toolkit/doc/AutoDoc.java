@@ -177,9 +177,6 @@ public class AutoDoc {
     }
 
 
-    /**
-     *
-     **/
     private synchronized void bufferWrite(String docContent) throws IOException {
         byte[] bytes = docContent.getBytes();
         if (buffer.remaining() > bytes.length) {
@@ -202,9 +199,6 @@ public class AutoDoc {
     }
 
 
-    /**
-     *
-     **/
     public synchronized void close() throws IOException {
         buffer.flip();
         while (buffer.hasRemaining()) {

@@ -17,7 +17,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-
+//CHECKSTYLE.OFF: RegexpMultiline
 /**
  * {@link SystemClock} is a optimized substitute of {@link System.currentTimeMillis()} for avoiding config switch
  * overload.
@@ -41,7 +41,7 @@ public class SystemClock {
     public SystemClock() {
         this(1L);
     }
-
+    //CHECKSTYLE:OFF
     public SystemClock(long precision) {
         this.precision = precision;
         now = new AtomicLong(System.currentTimeMillis());
@@ -52,6 +52,7 @@ public class SystemClock {
         });
         scheduler.scheduleAtFixedRate(new Timer(now), precision, precision, TimeUnit.MILLISECONDS);
     }
+    //CHECKSTYLE:ON
 
     public long getTime() {
         return now.get();
@@ -84,3 +85,4 @@ public class SystemClock {
         }
     }
 }
+//CHECKSTYLE.ON: RegexpMultiline

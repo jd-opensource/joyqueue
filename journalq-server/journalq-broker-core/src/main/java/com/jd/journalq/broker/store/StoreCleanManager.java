@@ -13,17 +13,16 @@
  */
 package com.jd.journalq.broker.store;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.config.BrokerStoreConfig;
 import com.jd.journalq.broker.consumer.position.PositionManager;
 import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.domain.TopicConfig;
-import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.store.StoreService;
 import com.jd.journalq.toolkit.concurrent.NamedThreadFactory;
 import com.jd.journalq.toolkit.config.PropertySupplier;
-import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import com.jd.journalq.toolkit.time.SystemClock;
 import com.jd.laf.extension.ExtensionManager;

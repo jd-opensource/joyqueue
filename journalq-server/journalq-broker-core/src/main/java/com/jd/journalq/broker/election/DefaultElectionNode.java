@@ -93,11 +93,6 @@ public class DefaultElectionNode implements ElectionNode {
     }
 
     @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
-
-    @Override
     public String toString() {
         return new StringBuilder("DefaultElectionNode:{")
                 .append("state:").append(state)
