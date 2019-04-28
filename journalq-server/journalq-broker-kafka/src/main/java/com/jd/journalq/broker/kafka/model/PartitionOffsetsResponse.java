@@ -14,7 +14,6 @@
 package com.jd.journalq.broker.kafka.model;
 
 
-import java.util.Set;
 
 /**
  * Created by zhangkepeng on 16-8-4.

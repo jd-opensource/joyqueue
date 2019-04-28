@@ -13,7 +13,7 @@
  */
 package com.jd.journalq.network.command;
 
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.transport.codec.JMQHeader;
 import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.transport.command.Direction;
@@ -39,7 +39,7 @@ public class BooleanAck extends JMQPayload {
      * @return 布尔应答
      */
     public static Command build() {
-        return build(JMQCode.SUCCESS);
+        return build(JournalqCode.SUCCESS);
     }
 
     /**
@@ -49,7 +49,7 @@ public class BooleanAck extends JMQPayload {
      * @param args
      * @return
      */
-    public static Command build(final JMQCode code, Object... args) {
+    public static Command build(final JournalqCode code, Object... args) {
         return build(code.getCode(), code.getMessage(args));
     }
 
@@ -73,7 +73,7 @@ public class BooleanAck extends JMQPayload {
     public static Command build(final int code, final String message) {
         JMQHeader header = new JMQHeader(Direction.RESPONSE, CommandType.BOOLEAN_ACK);
         header.setStatus((short) code);
-        header.setError(code == JMQCode.SUCCESS.getCode() ? null : (StringUtils.isBlank(message) ? JMQCode.valueOf(code).getMessage() : message));
+        header.setError(code == JournalqCode.SUCCESS.getCode() ? null : (StringUtils.isBlank(message) ? JournalqCode.valueOf(code).getMessage() : message));
         return new Command(header, null);
     }
 }

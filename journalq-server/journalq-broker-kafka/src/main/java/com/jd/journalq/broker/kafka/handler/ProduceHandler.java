@@ -34,7 +34,7 @@ import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.domain.QosLevel;
 import com.jd.journalq.domain.TopicConfig;
 import com.jd.journalq.domain.TopicName;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.message.BrokerMessage;
 import com.jd.journalq.network.session.Producer;
 import com.jd.journalq.network.transport.Transport;
@@ -99,8 +99,8 @@ public class ProduceHandler extends AbstractKafkaCommandHandler implements Broke
                 int partition = entry.getKey();
                 BooleanResponse checkResult = clusterManager.checkWritable(topic, clientId, clientIp, (short) partition);
                 if (!checkResult.isSuccess()) {
-                    logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport, topic, clientId, checkResult.getJmqCode());
-                    short kafkaErrorCode = CheckResultConverter.convertProduceCode(checkResult.getJmqCode());
+                    logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport, topic, clientId, checkResult.getJournalqCode());
+                    short kafkaErrorCode = CheckResultConverter.convertProduceCode(checkResult.getJournalqCode());
                     buildPartitionStatus(partition, null, kafkaErrorCode, entry.getValue(), producePartitionStatusList);
                     latch.countDown();
                     continue;
@@ -161,41 +161,16 @@ public class ProduceHandler extends AbstractKafkaCommandHandler implements Broke
     protected void produceMessage(Transport transport, byte[] clientAddress, QosLevel qosLevel, Producer producer, List<BrokerMessage> messages, EventListener<ProducePartitionStatus> listener) {
         try {
             produce.putMessageAsync(producer, messages, qosLevel, (writeResult) -> {
-                if (!writeResult.getCode().equals(JMQCode.SUCCESS)) {
+                if (!writeResult.getCode().equals(JournalqCode.SUCCESS)) {
                     logger.error("produce message failed, topic: {}, code: {}", producer.getTopic(), writeResult.getCode());
                 }
-                short status = KafkaErrorCode.jmqCodeFor(writeResult.getCode().getCode());
+                short status = KafkaErrorCode.journalqCodeFor(writeResult.getCode().getCode());
                 listener.onEvent(new ProducePartitionStatus(0, ProducePartitionStatus.NONE_OFFSET, status));
             });
         } catch (Exception e) {
             logger.error("produce message failed, topic: {}", producer.getTopic(), e);
             short status = KafkaErrorCode.exceptionFor(e);
             listener.onEvent(new ProducePartitionStatus(0, ProducePartitionStatus.NONE_OFFSET, status));
-        }
-    }
-
-    protected void produceMessage(Transport transport, byte[] clientAddress, QosLevel qosLevel, Producer producer, int partition, List<KafkaBrokerMessage> messages, List<ProducePartitionStatus> producePartitionStatusSet, EventListener<List<ProducePartitionStatus>> listener) {
-        List<BrokerMessage> brokerMessages = Lists.newLinkedList();
-
-        for (KafkaBrokerMessage message : messages) {
-            BrokerMessage brokerMessage = KafkaMessageConverter.toBrokerMessage(producer.getTopic(), partition, producer.getApp(), clientAddress, message);
-            brokerMessages.add(brokerMessage);
-        }
-
-        try {
-            produce.putMessageAsync(producer, brokerMessages, qosLevel, (writeResult) -> {
-                if (!writeResult.getCode().equals(JMQCode.SUCCESS)) {
-                    logger.error("produce message failed, topic: {}, partition: {}, code: {}", producer.getTopic(), partition, writeResult.getCode());
-                }
-                short status = KafkaErrorCode.jmqCodeFor(writeResult.getCode().getCode());
-                buildPartitionStatus(partition, writeResult.getIndices(), status, messages, producePartitionStatusSet);
-                listener.onEvent(null);
-            });
-        } catch (Exception e) {
-            logger.error("produce message failed, topic: {}, partition: {}", producer.getTopic(), partition, e);
-            short status = KafkaErrorCode.exceptionFor(e);
-            buildPartitionStatus(partition, null, status, messages, producePartitionStatusSet);
-            listener.onEvent(null);
         }
     }
 

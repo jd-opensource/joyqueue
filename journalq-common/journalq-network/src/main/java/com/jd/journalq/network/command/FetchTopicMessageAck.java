@@ -29,7 +29,7 @@ public class FetchTopicMessageAck extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.FETCH_TOPIC_MESSAGE_ACK.getCode();
+        return JournalqCommandType.FETCH_TOPIC_MESSAGE_ACK.getCode();
     }
 
     public void setData(Map<String, FetchTopicMessageAckData> data) {

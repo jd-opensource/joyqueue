@@ -16,7 +16,7 @@ package com.jd.journalq.client.internal.transport;
 import com.jd.journalq.client.internal.exception.ClientException;
 import com.jd.journalq.client.internal.nameserver.NameServerConfig;
 import com.jd.journalq.client.internal.transport.config.TransportConfig;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.network.command.Heartbeat;
 import com.jd.journalq.network.domain.BrokerNode;
 import com.jd.journalq.network.transport.Transport;
@@ -84,7 +84,7 @@ public class Client extends Service {
                     if (response.isSuccess()) {
                         callback.onSuccess(request, response);
                     } else {
-                        callback.onException(request, new JMQException(response.getHeader().getError(), response.getHeader().getStatus()));
+                        callback.onException(request, new JournalqException(response.getHeader().getError(), response.getHeader().getStatus()));
                     }
                 }
 

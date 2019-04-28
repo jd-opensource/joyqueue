@@ -13,7 +13,7 @@
  */
 package io.openmessaging.journalq.support;
 
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.toolkit.service.Service;
 import io.openmessaging.ServiceLifeState;
 import io.openmessaging.ServiceLifecycle;
@@ -63,7 +63,7 @@ public abstract class AbstractServiceLifecycle extends Service implements Servic
             case STOPPED:
                 return ServiceLifeState.STOPPED;
             default:
-                throw new OMSRuntimeException(JMQCode.CN_UNKNOWN_ERROR.getCode(),
+                throw new OMSRuntimeException(JournalqCode.CN_UNKNOWN_ERROR.getCode(),
                         String.format("service state error, current: %s", serviceState));
         }
     }

@@ -13,7 +13,7 @@
  */
 package com.jd.journalq.toolkit.io.snappy;
 
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.security.Crc32C;
 
 import java.io.IOException;
@@ -162,7 +162,7 @@ public final class SnappyFramedOutputStream extends OutputStream {
     }
 
     @Override
-    public final void flush() throws IOException {
+    public void flush() throws IOException {
         if (closed) {
             throw new IOException("Stream is closed");
         }
@@ -171,7 +171,7 @@ public final class SnappyFramedOutputStream extends OutputStream {
     }
 
     @Override
-    public final void close() throws IOException {
+    public void close() throws IOException {
         if (closed) {
             return;
         }

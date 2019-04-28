@@ -2,9 +2,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -37,18 +37,18 @@ import java.util.List;
 
 public class ConsumeOffsetCommand implements Command<Response>, Poolable {
 
-    private final static Logger logger = LoggerFactory.getLogger(ConsumeOffsetCommand.class);
+    private static final Logger logger = LoggerFactory.getLogger(ConsumeOffsetCommand.class);
 
     @Value(nullable = false)
     private ConsumeOffsetService consumeOffsetService;
 
     @Override
     public Response execute() throws Exception {
-        throw  new UnsupportedOperationException("unsupported");
+        throw new UnsupportedOperationException("unsupported");
     }
 
     @Path("offsets")
-    public Response offsets(@Body Subscribe subscribe){
+    public Response offsets(@Body Subscribe subscribe) {
         try {
             return Responses.success(consumeOffsetService.offsets(subscribe));
         } catch (Exception e) {
@@ -58,17 +58,16 @@ public class ConsumeOffsetCommand implements Command<Response>, Poolable {
     }
 
     /**
-     *
-     *
+     * offset
      */
     @Path("resetBound")
-    public Response offsetBound(@Body Subscribe subscribe, @QueryParam("location") String location){
-        PartitionOffset.Location loc=PartitionOffset.Location.valueOf(location);
-        List<PartitionOffset> partitionOffsets=new ArrayList<>();
-        List<PartitionLeaderAckMonitorInfo>  partitionAckMonitorInfos=consumeOffsetService.offsets(subscribe);
+    public Response offsetBound(@Body Subscribe subscribe, @QueryParam("location") String location) {
+        PartitionOffset.Location loc = PartitionOffset.Location.valueOf(location);
+        List<PartitionOffset> partitionOffsets = new ArrayList<>();
+        List<PartitionLeaderAckMonitorInfo> partitionAckMonitorInfos = consumeOffsetService.offsets(subscribe);
         PartitionOffset partitionOffset;
-        for(PartitionLeaderAckMonitorInfo p:partitionAckMonitorInfos){
-            if(p.isLeader()) {
+        for (PartitionLeaderAckMonitorInfo p : partitionAckMonitorInfos) {
+            if (p.isLeader()) {
                 partitionOffset = new PartitionOffset();
                 partitionOffset.setPartition(p.getPartition());
                 if (loc == PartitionOffset.Location.MAX) {
@@ -77,16 +76,15 @@ public class ConsumeOffsetCommand implements Command<Response>, Poolable {
                 partitionOffsets.add(partitionOffset);
             }
         }
-        boolean result=consumeOffsetService.resetOffset(subscribe, partitionOffsets);
-        return result?Responses.success("success"):Responses.error(ErrorCode.ServiceError.getCode(),"reset failed");
+        boolean result = consumeOffsetService.resetOffset(subscribe, partitionOffsets);
+        return result ? Responses.success("success") : Responses.error(ErrorCode.ServiceError.getCode(), "reset failed");
     }
 
     /**
-     *
-     *
+     * Reset partition offset by timestamp
      */
     @Path("resetByTime")
-    public Response resetByTime(@Body Subscribe subscribe,@QueryParam("timestamp") String timestamp){
+    public Response resetByTime(@Body Subscribe subscribe, @QueryParam("timestamp") String timestamp) {
         try {
             Long time = Long.valueOf(timestamp);
             boolean result = consumeOffsetService.resetOffset(subscribe, time);
@@ -99,10 +97,9 @@ public class ConsumeOffsetCommand implements Command<Response>, Poolable {
 
     /**
      * Reset partition offset for @code subscribe
-     *
      */
     @Path("resetPartition")
-    public Response resetPartition(@Body Subscribe subscribe,@QueryParam("partition") String partition,@QueryParam("offset") String offset){
+    public Response resetPartition(@Body Subscribe subscribe, @QueryParam("partition") String partition, @QueryParam("offset") String offset) {
         try {
             if (NullUtil.isEmpty(partition) || NullUtil.isEmpty(offset)) {
                 return Responses.error(ErrorCode.BadRequest.getCode(), "partition and offset can't be null");
@@ -118,12 +115,10 @@ public class ConsumeOffsetCommand implements Command<Response>, Poolable {
 
 
     /**
-     *
      * Reset  offsets for @code subscribe
-     *
      */
     @Path("reset")
-    public Response resetOffsets(@Body ResetOffsetInfo offsetInfo){
+    public Response resetOffsets(@Body ResetOffsetInfo offsetInfo) {
         try {
             boolean result = consumeOffsetService.resetOffset(offsetInfo.getSubscribe(), offsetInfo.getPartitionOffsets());
             return result ? Responses.success("success") : Responses.error(ErrorCode.ServiceError.getCode(), "reset failed");

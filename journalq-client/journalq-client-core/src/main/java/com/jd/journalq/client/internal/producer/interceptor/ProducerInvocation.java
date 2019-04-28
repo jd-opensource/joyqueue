@@ -38,7 +38,8 @@ public class ProducerInvocation {
     private ProducerInterceptorManager producerInterceptorManager;
     private ProducerInvoker producerInvoker;
 
-    public ProducerInvocation(ProducerConfig config, NameServerConfig nameServerConfig, TopicMetadata topicMetadata, List<ProduceMessage> messages, ProducerInterceptorManager producerInterceptorManager, ProducerInvoker producerInvoker) {
+    public ProducerInvocation(ProducerConfig config, NameServerConfig nameServerConfig, TopicMetadata topicMetadata,
+                              List<ProduceMessage> messages, ProducerInterceptorManager producerInterceptorManager, ProducerInvoker producerInvoker) {
         this.config = config;
         this.nameServerConfig = nameServerConfig;
         this.topicMetadata = topicMetadata;

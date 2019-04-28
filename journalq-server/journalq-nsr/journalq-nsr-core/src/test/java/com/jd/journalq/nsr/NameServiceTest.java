@@ -50,7 +50,7 @@ public class NameServiceTest{
 
     @Test
     public void subscribe() throws InterruptedException {
-        String app = "jmq";
+        String app = "jm";
         String topic = "__group_coordinators";
         nameService.subscribe(new Subscription(TopicName.parse(topic),app, Subscription.Type.CONSUMPTION), ClientType.JMQ);
         nameService.subscribe(new Subscription(TopicName.parse(topic),app, Subscription.Type.CONSUMPTION), ClientType.JMQ);
@@ -60,7 +60,7 @@ public class NameServiceTest{
 
     @Test
     public void unSubscribe() {
-        String app = "jmq";
+        String app = "journalq";
         String topic = "__group_coordinators";
         nameService.unSubscribe(new Subscription(TopicName.parse(topic),app, Subscription.Type.CONSUMPTION));
         nameService.unSubscribe(new Subscription(TopicName.parse(topic),app, Subscription.Type.CONSUMPTION));
@@ -70,7 +70,7 @@ public class NameServiceTest{
 
     @Test
     public void hasSubscribe() {
-        String app = "jmq2";
+        String app = "journalq2";
         String topic = "__group_coordinators";
         boolean have = nameService.hasSubscribe(app,Subscription.Type.CONSUMPTION);
          have = nameService.hasSubscribe(app,Subscription.Type.CONSUMPTION);
@@ -136,7 +136,7 @@ public class NameServiceTest{
 
     @Test
     public void getTopics() {
-        String app = "jmq";
+        String app = "journalq";
         String topic = "__group_coordinators";
         Set<String> topicConfigs = nameService.getTopics(app,Subscription.Type.PRODUCTION);
         topicConfigs = nameService.getTopics(app,Subscription.Type.PRODUCTION);
@@ -161,7 +161,7 @@ public class NameServiceTest{
 
     @Test
     public void getProducerByTopicAndApp() {
-        String app = "jmq";
+        String app = "journalq";
         String topic = "__group_coordinators";
         Producer producer = nameService.getProducerByTopicAndApp(TopicName.parse(topic),app);
         producer = nameService.getProducerByTopicAndApp(TopicName.parse(topic),app);
@@ -178,7 +178,7 @@ public class NameServiceTest{
 
     @Test
     public void getTopicConfigByApp() {
-        String app = "jmq";
+        String app = "journalq";
         Map<TopicName,TopicConfig> topicConfigs = nameService.getTopicConfigByApp(app,Subscription.Type.CONSUMPTION);
         topicConfigs = nameService.getTopicConfigByApp(app,Subscription.Type.CONSUMPTION);
         System.out.println(topicConfigs);

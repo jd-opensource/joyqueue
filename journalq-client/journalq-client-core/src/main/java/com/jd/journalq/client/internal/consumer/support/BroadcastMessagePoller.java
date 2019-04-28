@@ -22,8 +22,8 @@ import com.jd.journalq.client.internal.consumer.domain.ConsumeReply;
 import com.jd.journalq.client.internal.consumer.transport.ConsumerClientManager;
 import com.jd.journalq.client.internal.metadata.domain.TopicMetadata;
 import com.jd.journalq.client.internal.nameserver.NameServerConfig;
-import com.jd.journalq.exception.JMQCode;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.jd.journalq.exception.JournalqCode;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import org.apache.commons.lang3.StringUtils;
 
@@ -166,12 +166,12 @@ public class BroadcastMessagePoller extends Service implements MessagePoller {
     }
 
     @Override
-    public JMQCode reply(String topic, List<ConsumeReply> replyList) {
+    public JournalqCode reply(String topic, List<ConsumeReply> replyList) {
         return delegate.reply(topic, replyList);
     }
 
     @Override
-    public JMQCode replyOnce(String topic, ConsumeReply reply) {
+    public JournalqCode replyOnce(String topic, ConsumeReply reply) {
         return delegate.replyOnce(topic, reply);
     }
 

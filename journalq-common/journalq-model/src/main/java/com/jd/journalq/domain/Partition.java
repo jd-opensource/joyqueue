@@ -13,7 +13,7 @@
  */
 package com.jd.journalq.domain;
 
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 
 import java.io.Serializable;
 import java.util.Set;

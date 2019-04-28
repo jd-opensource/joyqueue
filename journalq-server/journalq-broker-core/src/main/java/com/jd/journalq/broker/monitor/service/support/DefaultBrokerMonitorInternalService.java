@@ -58,7 +58,10 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
     private ElectionService electionService;
     private ClusterManager clusterManager;
 
-    public DefaultBrokerMonitorInternalService(BrokerStat brokerStat, Consume consume, StoreManagementService storeManagementService, NameService nameService, StoreService store, ElectionService electionManager, ClusterManager clusterManager) {
+    public DefaultBrokerMonitorInternalService(BrokerStat brokerStat, Consume consume,
+                                               StoreManagementService storeManagementService,
+                                               NameService nameService, StoreService store,
+                                               ElectionService electionManager, ClusterManager clusterManager) {
         this.brokerStat = brokerStat;
         this.consume=consume;
         this.storeManagementService=storeManagementService;

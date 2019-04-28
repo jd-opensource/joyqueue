@@ -16,7 +16,7 @@ package com.jd.journalq.nsr.network;
 import com.jd.journalq.network.transport.codec.Codec;
 import com.jd.journalq.network.transport.codec.CodecFactory;
 import com.jd.journalq.network.transport.codec.PayloadCodecFactory;
-import com.jd.journalq.network.transport.codec.support.JMQCodec;
+import com.jd.journalq.network.transport.codec.support.JournalqCodec;
 import com.jd.journalq.nsr.NsrPlugins;
 
 /**
@@ -34,6 +34,6 @@ public class NsrCodecFactory implements CodecFactory {
     public Codec getCodec() {
         PayloadCodecFactory payloadCodecFactory = new PayloadCodecFactory();
         NsrPlugins.nsrPayloadCodecPlugins.extensions().forEach(nsrPayloadCodec -> payloadCodecFactory.register(nsrPayloadCodec));
-        return new JMQCodec(payloadCodecFactory);
+        return new JournalqCodec(payloadCodecFactory);
     }
 }

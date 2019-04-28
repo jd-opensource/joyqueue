@@ -33,7 +33,7 @@ import com.jd.journalq.broker.kafka.message.KafkaBrokerMessage;
 import com.jd.journalq.broker.kafka.message.converter.KafkaMessageConverter;
 import com.jd.journalq.broker.kafka.model.FetchResponsePartitionData;
 import com.jd.journalq.domain.TopicName;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.message.BrokerMessage;
 import com.jd.journalq.network.session.Consumer;
 import com.jd.journalq.network.transport.Transport;
@@ -91,8 +91,8 @@ public class FetchHandler extends AbstractKafkaCommandHandler implements KafkaCo
 
                 BooleanResponse checkResult = clusterManager.checkReadable(topic, clientId, clientIp, (short) partition);
                 if (!checkResult.isSuccess()) {
-                    logger.warn("checkReadable failed, transport: {}, topic: {}, app: {}, code: {}", transport, topic, clientId, checkResult.getJmqCode());
-                    short errorCode = CheckResultConverter.convertFetchCode(checkResult.getJmqCode());
+                    logger.warn("checkReadable failed, transport: {}, topic: {}, app: {}, code: {}", transport, topic, clientId, checkResult.getJournalqCode());
+                    short errorCode = CheckResultConverter.convertFetchCode(checkResult.getJournalqCode());
                     fetchResponseTable.put(topic.getFullName(), partition, new FetchResponsePartitionData(errorCode, -1, Collections.emptyList()));
                     continue;
                 }
@@ -182,7 +182,7 @@ public class FetchHandler extends AbstractKafkaCommandHandler implements KafkaCo
         if (pullResult.size() == 0) {
             return null;
         }
-        if (pullResult.getJmqCode() != JMQCode.SUCCESS) {
+        if (pullResult.getJournalqCode() != JournalqCode.SUCCESS) {
             logger.warn("fetch message error, consumer: {}, partition: {}, offset: {}, batchSize: {}", consumer, partition, offset, batchSize);
             return null;
         }

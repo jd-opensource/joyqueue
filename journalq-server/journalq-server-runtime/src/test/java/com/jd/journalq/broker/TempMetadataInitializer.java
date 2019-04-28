@@ -84,24 +84,8 @@ public class TempMetadataInitializer extends Service {
 
     public static void prepare() {
         try {
-//            FileUtils.copyFile(new File("/export/Data/jmq/store/stat"), new File("/export/Data/jmq_stat"));
-            FileUtils.deleteDirectory(new File("/export/Data/jmq"));
+            FileUtils.deleteDirectory(new File("/export/Data/journalq"));
             FileUtils.deleteDirectory(new File("/export/Data/ignite"));
-
-//            Field consumePositionPathField = ConsumeConfigKey.class.getDeclaredField("CONSUME_POSITION_PATH");
-//            ConsumeConfigKey consumeConfigKey = (ConsumeConfigKey) consumePositionPathField.get(null);
-//            Field positionPathField = consumeConfigKey.getClass().getDeclaredField("value");
-//            positionPathField.setAccessible(true);
-//            positionPathField.set(consumeConfigKey, "/export/Data/jmq/position");
-//
-//            Field metaFileField = ElectionConfigKey.class.getDeclaredField("METADATA_FILE");
-//            ElectionConfigKey electionConfigKey = (ElectionConfigKey) metaFileField.get(null);
-//            Field metaFilePath = electionConfigKey.getClass().getDeclaredField("value");
-//            metaFilePath.setAccessible(true);
-//            metaFilePath.set(electionConfigKey, "/export/Data/jmq/raft_metafile.dat");
-
-//            FileUtils.forceMkdir(new File("/export/Data/jmq/store"));
-//            FileUtils.copyFile(new File("/export/Data/jmq_stat"), new File("/export/Data/jmq/store/stat"));
         } catch (Exception e) {
             e.printStackTrace();
         }

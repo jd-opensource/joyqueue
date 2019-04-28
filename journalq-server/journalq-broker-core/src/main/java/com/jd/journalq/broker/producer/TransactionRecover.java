@@ -74,7 +74,8 @@ public class TransactionRecover {
             } else {
                 ByteBuffer byteBuffer = readIterator.next();
                 BrokerPrepare brokerPrepare = Serializer.readBrokerPrepare(byteBuffer);
-                TransactionId transactionId = new TransactionId(brokerPrepare.getTopic(), brokerPrepare.getApp(), brokerPrepare.getTxId(), brokerPrepare.getQueryId(), storeId, brokerPrepare.getTimeout(), brokerPrepare.getStartTime());
+                TransactionId transactionId = new TransactionId(brokerPrepare.getTopic(), brokerPrepare.getApp(), brokerPrepare.getTxId(),
+                        brokerPrepare.getQueryId(), storeId, brokerPrepare.getTimeout(), brokerPrepare.getStartTime());
 
                 if (transactionId.isExpired(config.getTransactionExpireTime())) {
                     isExpired = true;

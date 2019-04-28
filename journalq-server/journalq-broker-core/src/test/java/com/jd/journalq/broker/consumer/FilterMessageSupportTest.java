@@ -16,7 +16,7 @@ package com.jd.journalq.broker.consumer;
 import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.consumer.filter.FilterCallback;
 import com.jd.journalq.domain.Consumer;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 import org.assertj.core.util.Maps;
 import org.junit.Assert;
 import org.junit.Before;
@@ -46,7 +46,7 @@ public class FilterMessageSupportTest {
     }
 
     @Test
-    public void filter() throws JMQException {
+    public void filter() throws JournalqException {
         // Consumer consumer, List<ByteBuffer> byteBuffers, FilterCallback filterCallback
         List<ByteBuffer> byteBufferList = new LinkedList<>();
         for (int i = 0; i < 10; i++) {
@@ -60,7 +60,7 @@ public class FilterMessageSupportTest {
 
         List<ByteBuffer> filter = filterMessageSupport.filter(consumer, byteBufferList, new FilterCallback() {
             @Override
-            public void callback(List<ByteBuffer> list) throws JMQException {
+            public void callback(List<ByteBuffer> list) throws JournalqException {
                 // nothing to do;
                 Assert.assertEquals(1, list.size());
             }

@@ -30,7 +30,7 @@
     </my-dialog>
     <!--移除节点-->
     <my-dialog :dialog="groupMergeDialog" @on-dialog-confirm="groupMergeConfirm()" @on-dialog-cancel="groupMergeCancel()"  >
-      <group-merge :data="groupMergeDialogData"  ></group-merge>
+      <group-merge :data="groupMergeDialogData"></group-merge>
     </my-dialog>
     <!--主从同步-->
     <my-dialog :dialog="positionDialog" @on-dialog-confirm="positionConfirm()" @on-dialog-cancel="positionCancel()">
@@ -406,9 +406,16 @@ export default {
       this.removePartitionDialog.visible = false
     },
     del (item) {
-      var data = item
-      apiRequest.post(this.urls.del, {}, data).then(() => {
-        this.getList()
+      let _this = this
+      this.$Dialog.confirm({
+        title: '提示',
+        content: '确定要删除吗？'
+      }).then(() => {
+        var data = item
+        apiRequest.post(_this.urls.del, {}, data).then(() => {
+          _this.getList()
+        })
+      }).catch(() => {
       })
     },
     topicUpdate () {

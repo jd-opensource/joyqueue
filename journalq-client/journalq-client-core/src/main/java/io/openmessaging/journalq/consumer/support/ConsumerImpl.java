@@ -17,7 +17,7 @@ import com.jd.journalq.client.internal.consumer.MessageConsumer;
 import com.jd.journalq.client.internal.consumer.domain.ConsumeMessage;
 import com.jd.journalq.client.internal.consumer.domain.ConsumeReply;
 import com.jd.journalq.network.command.RetryType;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import io.openmessaging.consumer.BatchMessageListener;
 import io.openmessaging.consumer.MessageListener;
 import io.openmessaging.consumer.MessageReceipt;

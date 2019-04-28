@@ -13,7 +13,7 @@
  */
 package com.jd.journalq.store;
 
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 
 /**
  * 写消息结果
@@ -22,11 +22,11 @@ public class WriteResult {
     private long [] metrics;
 
     public WriteResult() {}
-    public WriteResult(JMQCode code, long [] indices) {
+    public WriteResult(JournalqCode code, long [] indices) {
         this. code = code;
         this.indices = indices;
     }
-    public WriteResult(JMQCode code, long [] indices, long [] metrics) {
+    public WriteResult(JournalqCode code, long [] indices, long [] metrics) {
         this. code = code;
         this.indices = indices;
         this.metrics = metrics;
@@ -34,18 +34,18 @@ public class WriteResult {
     /**
      * 状态码
      */
-    private JMQCode code;
+    private JournalqCode code;
 
     /**
      * 写入消息的在partition中的序号
      */
     private long [] indices;
 
-    public JMQCode getCode() {
+    public JournalqCode getCode() {
         return code;
     }
 
-    public void setCode(JMQCode code) {
+    public void setCode(JournalqCode code) {
         this.code = code;
     }
 

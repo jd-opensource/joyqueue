@@ -16,6 +16,7 @@ package com.jd.journalq.broker.store;
 import com.jd.journalq.broker.config.BrokerStoreConfig;
 import com.jd.journalq.store.PartitionGroupStore;
 import com.jd.journalq.toolkit.config.PropertySupplier;
+import com.jd.journalq.toolkit.time.SystemClock;
 
 import java.io.IOException;
 import java.util.Map;
@@ -32,7 +33,7 @@ public class IntervalTimeStoreCleaningStrategy implements StoreCleaningStrategy 
 
     @Override
     public long deleteIfNeeded(PartitionGroupStore partitionGroupStore, Map<Short, Long> partitionAckMap) throws IOException {
-        long currentTimestamp = System.currentTimeMillis();
+        long currentTimestamp = SystemClock.now();
         long targetDeleteTimeline = currentTimestamp - maxIntervalTime;
 
         long totalDeletedSize = 0L;  // 总共删除长度

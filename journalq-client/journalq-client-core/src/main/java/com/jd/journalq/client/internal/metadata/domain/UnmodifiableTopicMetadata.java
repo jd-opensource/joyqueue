@@ -16,7 +16,7 @@ package com.jd.journalq.client.internal.metadata.domain;
 import com.jd.journalq.domain.Consumer;
 import com.jd.journalq.domain.Producer;
 import com.jd.journalq.domain.Topic;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.domain.BrokerNode;
 
 import java.util.Collections;
@@ -34,8 +34,10 @@ public class UnmodifiableTopicMetadata extends TopicMetadata {
 
     public UnmodifiableTopicMetadata(String topic, Producer.ProducerPolicy producerPolicy, Consumer.ConsumerPolicy consumerPolicy, Topic.Type type, List<PartitionGroupMetadata> partitionGroups,
                                      List<PartitionMetadata> partitions, Map<Short, PartitionMetadata> partitionMap, Map<Integer, PartitionGroupMetadata> partitionGroupMap, List<BrokerNode> brokers,
-                                     List<BrokerNode> nearbyBrokers, Map<Integer, BrokerNode> brokerMap, Map<Integer, List<PartitionMetadata>> brokerPartitions, Map<Integer, List<PartitionGroupMetadata>> brokerPartitionGroups, JMQCode code) {
-        super(topic, producerPolicy, consumerPolicy, type, partitionGroups, partitions, partitionMap, partitionGroupMap, brokers, nearbyBrokers, brokerMap, brokerPartitions, brokerPartitionGroups, code);
+                                     List<BrokerNode> nearbyBrokers, Map<Integer, BrokerNode> brokerMap, Map<Integer, List<PartitionMetadata>> brokerPartitions,
+                                     Map<Integer, List<PartitionGroupMetadata>> brokerPartitionGroups, JournalqCode code) {
+        super(topic, producerPolicy, consumerPolicy, type, partitionGroups, partitions, partitionMap, partitionGroupMap,
+                brokers, nearbyBrokers, brokerMap, brokerPartitions, brokerPartitionGroups, code);
     }
 
     @Override

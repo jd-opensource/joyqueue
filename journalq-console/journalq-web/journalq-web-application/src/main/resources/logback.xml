@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration debug="false">
-    <property name="log_file" value="/export/Logs/laf_jmq/laf_jmq" />
+    <property name="log_file" value="/export/Logs/journalq" />
     <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
         <!-- reset all previous level configurations of all j.u.l. loggers -->
         <resetJUL>true</resetJUL>

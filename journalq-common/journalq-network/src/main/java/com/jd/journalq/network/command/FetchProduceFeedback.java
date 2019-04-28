@@ -31,7 +31,7 @@ public class FetchProduceFeedback extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.FETCH_PRODUCE_FEEDBACK.getCode();
+        return JournalqCommandType.FETCH_PRODUCE_FEEDBACK.getCode();
     }
 
     public String getApp() {

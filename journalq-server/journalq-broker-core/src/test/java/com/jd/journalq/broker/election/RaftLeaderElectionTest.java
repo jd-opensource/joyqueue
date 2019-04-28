@@ -75,13 +75,13 @@ public class RaftLeaderElectionTest {
         for (int i = 0; i < RAFT_ELECTION_NUM; i++) {
             Configuration conf = new Configuration();
             StoreConfig storeConfig = new StoreConfig(conf);
-            storeConfig.setPath("/Users/zhuduohui/Data/jmq/store" + i);
+            storeConfig.setPath("/Users/zhuduohui/Data/journalq/store" + i);
             storeServices[i] = new Store(storeConfig);
             storeServices[i].start();
 
             ElectionConfig electionConfig = new ElectionConfig(conf);
-            electionConfig.setElectionMetaPath("/Users/zhuduohui/Data/jmq/raft" + i);
-            electionConfig.setElectionMetaFile("/Users/zhuduohui/Data/jmq/raft" + i + ".dat");
+            electionConfig.setElectionMetaPath("/Users/zhuduohui/Data/journalq/raft" + i);
+            electionConfig.setElectionMetaFile("/Users/zhuduohui/Data/journalq/raft" + i + ".dat");
             electionConfig.setListenPort("1800" + (i + 1));
 
             electionManager[i] = new ElectionManagerStub(electionConfig, storeServices[i], new ConsumeStub());

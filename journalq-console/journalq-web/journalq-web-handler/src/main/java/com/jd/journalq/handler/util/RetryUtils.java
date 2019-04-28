@@ -13,6 +13,8 @@
  */
 package com.jd.journalq.handler.util;
 
+import com.jd.journalq.toolkit.time.SystemClock;
+
 import java.util.Date;
 
 public class RetryUtils {
@@ -31,7 +33,7 @@ public class RetryUtils {
 	 * @return
 	 */
 	public static Date getExpireTime() {
-		long now = System.currentTimeMillis();
+		long now = SystemClock.now();
 		long time = now + EXPIRETIME;
 		return new Date(time);
 	}

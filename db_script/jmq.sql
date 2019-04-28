@@ -247,7 +247,7 @@ CREATE TABLE `consumer` (
   `app_id` bigint(20) NOT NULL COMMENT '应用 id',
   `app_code` varchar(128) NOT NULL COMMENT '应用 代码',
   `subscribe_group` varchar(64) NOT NULL COMMENT '订阅分组',
-  `client_type` tinyint(4) DEFAULT NULL COMMENT '客户端类型, 0:jmq, 1:kafka, 2:mqtt, 10:others',
+  `client_type` tinyint(4) DEFAULT NULL COMMENT '客户端类型, 0:journalq, 1:kafka, 2:mqtt, 10:others',
   `create_by` bigint(11) NOT NULL DEFAULT '0' COMMENT '创建人',
   `update_time` datetime NOT NULL COMMENT '更新时间',
   `update_by` bigint(11) NOT NULL DEFAULT '0' COMMENT '修改人',

@@ -13,15 +13,15 @@
  */
 // The Vue build version to load with the `import` command
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
+import './assets/css/dui.css'
+import './assets/css/iconfont.css'
+import './assets/css/iconfont.js'
 import Promise from 'es6-promise'
 import Vue from 'vue'
 import store from './store'
 import router from './router'
 import App from './App'
 import DUI from './components'
-import './assets/css/dui.css'
-import './assets/css/iconfont.css'
-import './assets/css/iconfont.js'
 
 import i18n from './i18n'
 

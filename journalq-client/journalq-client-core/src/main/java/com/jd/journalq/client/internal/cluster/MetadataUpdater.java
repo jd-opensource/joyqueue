@@ -19,7 +19,7 @@ import com.jd.journalq.client.internal.metadata.MetadataManager;
 import com.jd.journalq.client.internal.metadata.domain.ClusterMetadata;
 import com.jd.journalq.client.internal.metadata.domain.TopicMetadata;
 import com.jd.journalq.client.internal.nameserver.NameServerConfig;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.toolkit.concurrent.NamedThreadFactory;
 import com.jd.journalq.toolkit.service.Service;
 import com.jd.journalq.toolkit.time.SystemClock;
@@ -65,7 +65,7 @@ public class MetadataUpdater extends Service {
     @Override
     protected void validate() throws Exception {
         updateThreadPool = new ThreadPoolExecutor(config.getUpdateMetadataThread(), config.getUpdateMetadataThread(), 0L, TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<Runnable>(config.getUpdateMetadataQueueSize()), new NamedThreadFactory("jmq-cluster-updater"));
+                new LinkedBlockingQueue<Runnable>(config.getUpdateMetadataQueueSize()), new NamedThreadFactory("journalqcluster-updater"));
     }
 
     @Override
@@ -113,7 +113,7 @@ public class MetadataUpdater extends Service {
         try {
             TopicMetadata topicMetadata = metadataManager.fetchMetadata(topic, app);
             metadataCacheManager.putTopicMetadata(topic, app, topicMetadata);
-            if (topicMetadata.getCode().equals(JMQCode.SUCCESS)) {
+            if (topicMetadata.getCode().equals(JournalqCode.SUCCESS)) {
                 return topicMetadata;
             }
             return null;
@@ -121,7 +121,7 @@ public class MetadataUpdater extends Service {
             logger.error("update topic metadata exception, topic: {}, app: {}", topic, app, e);
 
             if (metadataCacheManager.getTopicMetadata(topic, app) == null) {
-                metadataCacheManager.putTopicMetadata(topic, app, new TopicMetadata(JMQCode.CN_SERVICE_NOT_AVAILABLE));
+                metadataCacheManager.putTopicMetadata(topic, app, new TopicMetadata(JournalqCode.CN_SERVICE_NOT_AVAILABLE));
             }
             return null;
         }
@@ -136,7 +136,7 @@ public class MetadataUpdater extends Service {
             for (String topic : topics) {
                 TopicMetadata topicMetadata = clusterMetadata.getTopic(topic);
                 metadataCacheManager.putTopicMetadata(topic, app, topicMetadata);
-                if (topicMetadata.getCode().equals(JMQCode.SUCCESS)) {
+                if (topicMetadata.getCode().equals(JournalqCode.SUCCESS)) {
                     result.put(topic, topicMetadata);
                 }
             }
@@ -145,7 +145,7 @@ public class MetadataUpdater extends Service {
 
             for (String topic : topics) {
                 if (metadataCacheManager.getTopicMetadata(topic, app) == null) {
-                    metadataCacheManager.putTopicMetadata(topic, app, new TopicMetadata(JMQCode.CN_SERVICE_NOT_AVAILABLE));
+                    metadataCacheManager.putTopicMetadata(topic, app, new TopicMetadata(JournalqCode.CN_SERVICE_NOT_AVAILABLE));
                 }
             }
         }

@@ -17,7 +17,7 @@ import com.jd.journalq.broker.archive.ArchiveManager;
 import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.config.BrokerConfig;
 import com.jd.journalq.broker.config.Configuration;
-import com.jd.journalq.broker.config.ContextManager;
+import com.jd.journalq.broker.config.ConfigurationManager;
 import com.jd.journalq.broker.consumer.Consume;
 import com.jd.journalq.broker.consumer.MessageConvertSupport;
 import com.jd.journalq.broker.coordinator.CoordinatorService;
@@ -45,12 +45,15 @@ import com.jd.journalq.toolkit.config.PropertySupplier;
 import com.jd.journalq.toolkit.config.PropertySupplierAware;
 import com.jd.journalq.toolkit.lang.Close;
 import com.jd.journalq.toolkit.lang.LifeCycle;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -76,7 +79,7 @@ public class BrokerService extends Service {
     private ElectionService electionService;
     private MessageRetry retryManager;
     private BrokerContext brokerContext;
-    private ContextManager contextManager;
+    private ConfigurationManager configurationManager;
     private StoreManager storeManager;
     private NameService nameService;
 
@@ -95,22 +98,20 @@ public class BrokerService extends Service {
     @Override
     protected void validate() throws Exception {
         this.brokerContext = new BrokerContext();
-        Configuration configuration = new Configuration();
-        parseParams(configuration, args);
+        this.configurationManager = new ConfigurationManager(args);
+        configurationManager.start();
+        Configuration configuration = configurationManager.getConfiguration();
 
-        ContextManager contextManager = new ContextManager(configuration);
         brokerContext.propertySupplier(configuration);
 
         //start name service first
         this.nameService = getNameService(brokerContext, configuration);
         this.nameService.start();
-        this.nameService.addListener(contextManager);
         this.brokerContext.nameService(nameService);
 
         // build and start context manager
-        this.contextManager = new ContextManager(configuration);
-        this.contextManager.setConfigProvider(new ConfigProviderImpl(nameService));
-        this.contextManager.start();
+        this.nameService.addListener(configurationManager);
+        this.configurationManager.setConfigProvider(new ConfigProviderImpl(nameService));
 
         //build broker config
         this.brokerConfig = new BrokerConfig(configuration);
@@ -195,9 +196,6 @@ public class BrokerService extends Service {
 
     }
 
-    public void parseParams(Configuration configuration, String[] args) {
-        //TODO 解析参数
-    }
 
     private NameService getNameService(BrokerContext brokerContext, Configuration configuration) {
         Property property = configuration.getProperty(NAMESERVICE_NAME);
@@ -262,7 +260,6 @@ public class BrokerService extends Service {
     @Override
     protected void doStart() throws Exception {
         startIfNecessary(nameService);
-        startIfNecessary(contextManager);
         startIfNecessary(clusterManager);
         startIfNecessary(storeService);
         startIfNecessary(sessionManager);
@@ -277,7 +274,23 @@ public class BrokerService extends Service {
         startIfNecessary(brokerServer);
         startIfNecessary(coordinatorService);
         startIfNecessary(brokerManageService);
-        logger.info("brokerServer start ,broker.id[{}],ip[{}],frontPort[{}],backendPort[{}],monitorPort[{}],nameServer port[{}]",
+        printConfig();
+    }
+
+
+    private void printConfig() {
+        StringBuffer buffer = new StringBuffer("broker start with configuration:").append('\n');
+        if (configurationManager != null && configurationManager.getConfiguration() != null) {
+            List<Property> properties = new ArrayList<>(configurationManager.getConfiguration().getProperties());
+            Collections.sort(properties, Comparator.comparing(Property::getKey));
+            for (Property property : properties) {
+                String value = property.getValue() == null ? "null" : property.getValue().toString();
+                buffer.append('\t').append(property.getKey()).append(": ").append(value).append('\n');
+            }
+        }
+
+        logger.info(buffer.toString());
+        logger.info("broker.id[{}],ip[{}],frontPort[{}],backendPort[{}],monitorPort[{}],nameServer port[{}]",
                 brokerConfig.getBrokerId(),
                 clusterManager.getBroker().getIp(),
                 brokerConfig.getFrontendConfig().getPort(),
@@ -298,7 +311,7 @@ public class BrokerService extends Service {
         destroy(clusterManager);
         destroy(storeManager);
         destroy(storeService);
-        destroy(contextManager);
+        destroy(configurationManager);
         destroy(retryManager);
         destroy(archiveManager);
         destroy(brokerMonitorService);
@@ -346,10 +359,12 @@ public class BrokerService extends Service {
     }
 
 
-    private class ConfigProviderImpl implements ContextManager.ConfigProvider {
+
+
+    private class ConfigProviderImpl implements ConfigurationManager.ConfigProvider {
         private NameService nameService;
 
-        public ConfigProviderImpl(NameService nameService) {
+        ConfigProviderImpl(NameService nameService) {
             this.nameService = nameService;
         }
 

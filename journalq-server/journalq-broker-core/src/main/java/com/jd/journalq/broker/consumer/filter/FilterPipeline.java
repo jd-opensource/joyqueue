@@ -13,7 +13,7 @@
  */
 package com.jd.journalq.broker.consumer.filter;
 
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 
 import java.nio.ByteBuffer;
 import java.util.Iterator;
@@ -57,9 +57,9 @@ public class FilterPipeline<T extends MessageFilter> {
      *
      * @param byteBuffers
      * @return
-     * @throws JMQException
+     * @throws JournalqException
      */
-    public List<ByteBuffer> execute(List<ByteBuffer> byteBuffers, FilterCallback filterCallback) throws JMQException {
+    public List<ByteBuffer> execute(List<ByteBuffer> byteBuffers, FilterCallback filterCallback) throws JournalqException {
         if (hasFilter) {
             Iterator<T> iterator = pipeline.iterator();
             while (iterator.hasNext()) {

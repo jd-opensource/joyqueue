@@ -21,5 +21,5 @@ package com.jd.journalq.network.transport.codec;
  */
 public interface CodecFactory {
 
-    public Codec getCodec();
+    Codec getCodec();
 }

@@ -33,7 +33,7 @@ public interface CoordinatorMonitorService {
      * @param groupId
      * @return
      */
-    public CoordinatorDetail getCoordinator(String groupId);
+    CoordinatorDetail getCoordinator(String groupId);
 
     /**
      * 获得协调者组
@@ -44,7 +44,7 @@ public interface CoordinatorMonitorService {
      * @param isFormat
      * @return
      */
-    public CoordinatorGroup getCoordinatorGroup(String namespace, String groupId, String topic, boolean isFormat);
+    CoordinatorGroup getCoordinatorGroup(String namespace, String groupId, String topic, boolean isFormat);
 
     /**
      * 获得协调者组成员
@@ -55,5 +55,5 @@ public interface CoordinatorMonitorService {
      * @param isFormat
      * @return
      */
-    public Map<String, CoordinatorGroupMember> getCoordinatorGroupMembers(String namespace, String groupId, String topic, boolean isFormat);
+    Map<String, CoordinatorGroupMember> getCoordinatorGroupMembers(String namespace, String groupId, String topic, boolean isFormat);
 }

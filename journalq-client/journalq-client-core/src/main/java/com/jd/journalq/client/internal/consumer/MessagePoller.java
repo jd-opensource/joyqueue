@@ -17,7 +17,7 @@ import com.jd.journalq.client.internal.consumer.callback.ConsumerListener;
 import com.jd.journalq.client.internal.consumer.domain.ConsumeMessage;
 import com.jd.journalq.client.internal.consumer.domain.ConsumeReply;
 import com.jd.journalq.client.internal.metadata.domain.TopicMetadata;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.toolkit.lang.LifeCycle;
 
 import java.util.List;
@@ -70,9 +70,9 @@ public interface MessagePoller extends LifeCycle {
     void pollPartitionAsync(String topic, short partition, long index, long timeout, TimeUnit timeoutUnit, ConsumerListener listener);
 
     // reply
-    JMQCode reply(String topic, List<ConsumeReply> replyList);
+    JournalqCode reply(String topic, List<ConsumeReply> replyList);
 
-    JMQCode replyOnce(String topic, ConsumeReply reply);
+    JournalqCode replyOnce(String topic, ConsumeReply reply);
 
     // metadata
     TopicMetadata getTopicMetadata(String topic);

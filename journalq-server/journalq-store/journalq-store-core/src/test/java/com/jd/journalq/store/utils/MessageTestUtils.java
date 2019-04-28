@@ -15,6 +15,7 @@ package com.jd.journalq.store.utils;
 
 import com.jd.journalq.store.message.MessageParser;
 import com.jd.journalq.toolkit.security.Crc32;
+import com.jd.journalq.toolkit.time.SystemClock;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -42,7 +43,7 @@ public class MessageTestUtils {
 
         byte[][] varAtts = {body, biz_id, property, expand, app};
         ByteBuffer byteBuffer = MessageParser.build(varAtts);
-        MessageParser.setLong(byteBuffer, MessageParser.CLIENT_TIMESTAMP, System.currentTimeMillis());
+        MessageParser.setLong(byteBuffer, MessageParser.CLIENT_TIMESTAMP, SystemClock.now());
         Crc32 crc32 = new Crc32();
         crc32.update(body);
         MessageParser.setLong(byteBuffer, MessageParser.CRC, crc32.getValue());

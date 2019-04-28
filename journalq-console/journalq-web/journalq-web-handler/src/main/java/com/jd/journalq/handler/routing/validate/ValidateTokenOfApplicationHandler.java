@@ -23,7 +23,9 @@ import com.jd.laf.binding.annotation.Value;
 import com.jd.laf.web.vertx.parameter.Parameters.RequestParameter;
 import io.vertx.ext.web.RoutingContext;
 
-import static com.jd.journalq.handler.Constants.*;
+import static com.jd.journalq.handler.Constants.APPLICATION;
+import static com.jd.journalq.handler.Constants.ID;
+import static com.jd.journalq.handler.Constants.APP_TOKEN;
 
 /**
  * 验证是指定应用的令牌

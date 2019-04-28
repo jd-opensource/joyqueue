@@ -14,7 +14,7 @@
 package com.jd.journalq.network.command;
 
 import com.google.common.collect.Table;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.transport.command.JMQPayload;
 
 /**
@@ -25,18 +25,18 @@ import com.jd.journalq.network.transport.command.JMQPayload;
  */
 public class CommitAckAck extends JMQPayload {
 
-    private Table<String, Short, JMQCode> result;
+    private Table<String, Short, JournalqCode> result;
 
     @Override
     public int type() {
-        return JMQCommandType.COMMIT_ACK_ACK.getCode();
+        return JournalqCommandType.COMMIT_ACK_ACK.getCode();
     }
 
-    public void setResult(Table<String, Short, JMQCode> result) {
+    public void setResult(Table<String, Short, JournalqCode> result) {
         this.result = result;
     }
 
-    public Table<String, Short, JMQCode> getResult() {
+    public Table<String, Short, JournalqCode> getResult() {
         return result;
     }
 }

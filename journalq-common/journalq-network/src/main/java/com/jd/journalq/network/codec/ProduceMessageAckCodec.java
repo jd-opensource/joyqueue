@@ -15,8 +15,8 @@ package com.jd.journalq.network.codec;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.jd.journalq.exception.JMQCode;
-import com.jd.journalq.network.command.JMQCommandType;
+import com.jd.journalq.exception.JournalqCode;
+import com.jd.journalq.network.command.JournalqCommandType;
 import com.jd.journalq.network.command.ProduceMessageAck;
 import com.jd.journalq.network.command.ProduceMessageAckData;
 import com.jd.journalq.network.command.ProduceMessageAckItemData;
@@ -43,7 +43,7 @@ public class ProduceMessageAckCodec implements PayloadCodec<JMQHeader, ProduceMe
         Map<String, ProduceMessageAckData> data = Maps.newHashMap();
         for (int i = 0; i < dataSize; i++) {
             String topic = Serializer.readString(buffer, Serializer.SHORT_SIZE);
-            JMQCode code = JMQCode.valueOf(buffer.readInt());
+            JournalqCode code = JournalqCode.valueOf(buffer.readInt());
             short itemSize = buffer.readShort();
             List<ProduceMessageAckItemData> item = Lists.newArrayListWithCapacity(itemSize);
 
@@ -78,6 +78,6 @@ public class ProduceMessageAckCodec implements PayloadCodec<JMQHeader, ProduceMe
 
     @Override
     public int type() {
-        return JMQCommandType.PRODUCE_MESSAGE_ACK.getCode();
+        return JournalqCommandType.PRODUCE_MESSAGE_ACK.getCode();
     }
 }

@@ -13,31 +13,31 @@
  */
 package com.jd.journalq.response;
 
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 
 /**
  * @author wylixiaobin
  * Date: 2019/1/3
  */
 public class BooleanResponse implements Response{
-    private JMQCode jmqCode;
-    public BooleanResponse(JMQCode code){
-        this.jmqCode = code;
+    private JournalqCode journalqCode;
+    public BooleanResponse(JournalqCode code){
+        this.journalqCode = code;
     }
     public static BooleanResponse success(){
-        return new BooleanResponse(JMQCode.SUCCESS);
+        return new BooleanResponse(JournalqCode.SUCCESS);
     }
 
-    public static BooleanResponse failed(JMQCode jmqCode){
-        return new BooleanResponse(jmqCode);
+    public static BooleanResponse failed(JournalqCode journalqCode){
+        return new BooleanResponse(journalqCode);
     }
 
-    public JMQCode getJmqCode() {
-        return jmqCode;
+    public JournalqCode getJournalqCode() {
+        return journalqCode;
     }
 
     @Override
     public boolean isSuccess(){
-        return jmqCode == JMQCode.SUCCESS;
+        return journalqCode == JournalqCode.SUCCESS;
     }
 }

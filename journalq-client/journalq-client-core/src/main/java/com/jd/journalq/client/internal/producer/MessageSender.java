@@ -22,7 +22,7 @@ import com.jd.journalq.client.internal.producer.domain.SendBatchResultData;
 import com.jd.journalq.client.internal.producer.domain.SendPrepareResult;
 import com.jd.journalq.client.internal.producer.domain.SendResultData;
 import com.jd.journalq.domain.QosLevel;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.command.TxStatus;
 import com.jd.journalq.network.domain.BrokerNode;
 import com.jd.journalq.toolkit.lang.LifeCycle;
@@ -45,7 +45,8 @@ public interface MessageSender extends LifeCycle {
 
     void sendAsync(BrokerNode brokerNode, String topic, String app, String txId, ProduceMessage message, QosLevel qosLevel, long produceTimeout, long timeout, AsyncSendCallback callback);
 
-    void batchSendAsync(BrokerNode brokerNode, String topic, String app, String txId, List<ProduceMessage> messages, QosLevel qosLevel, long produceTimeout, long timeout, AsyncBatchSendCallback callback);
+    void batchSendAsync(BrokerNode brokerNode, String topic, String app, String txId, List<ProduceMessage> messages,
+                        QosLevel qosLevel, long produceTimeout, long timeout, AsyncBatchSendCallback callback);
 
     Future<SendBatchResultData> batchSendAsync(BrokerNode brokerNode, String topic, String app, String txId, List<ProduceMessage> messages, QosLevel qosLevel, long produceTimeout, long timeout);
 
@@ -59,16 +60,18 @@ public interface MessageSender extends LifeCycle {
     // batch
     Map<String, SendBatchResultData> batchSend(BrokerNode brokerNode, String app, String txId, Map<String, List<ProduceMessage>> messages, QosLevel qosLevel, long produceTimeout, long timeout);
 
-    void batchSendAsync(BrokerNode brokerNode, String app, String txId, Map<String, List<ProduceMessage>> messages, QosLevel qosLevel, long produceTimeout, long timeout, AsyncMultiBatchSendCallback callback);
+    void batchSendAsync(BrokerNode brokerNode, String app, String txId, Map<String, List<ProduceMessage>> messages,
+                        QosLevel qosLevel, long produceTimeout, long timeout, AsyncMultiBatchSendCallback callback);
 
-    Future<Map<String, SendBatchResultData>> batchSendAsync(BrokerNode brokerNode, String app, String txId, Map<String, List<ProduceMessage>> messages, QosLevel qosLevel, long produceTimeout, long timeout);
+    Future<Map<String, SendBatchResultData>> batchSendAsync(BrokerNode brokerNode, String app, String txId,
+                                                            Map<String, List<ProduceMessage>> messages, QosLevel qosLevel, long produceTimeout, long timeout);
 
     // transaction
     SendPrepareResult prepare(BrokerNode brokerNode, String topic, String app, String transactionId, long sequence, long transactionTimeout, long timeout);
 
-    JMQCode commit(BrokerNode brokerNode, String topic, String app, String txId, long timeout);
+    JournalqCode commit(BrokerNode brokerNode, String topic, String app, String txId, long timeout);
 
-    JMQCode rollback(BrokerNode brokerNode, String topic, String app, String txId, long timeout);
+    JournalqCode rollback(BrokerNode brokerNode, String topic, String app, String txId, long timeout);
 
     FetchFeedbackData fetchFeedback(BrokerNode brokerNode, String topic, String app, TxStatus txStatus, int count, long longPollTimeout, long timeout);
 }

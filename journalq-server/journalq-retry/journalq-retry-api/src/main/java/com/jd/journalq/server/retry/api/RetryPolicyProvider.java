@@ -14,7 +14,7 @@
 package com.jd.journalq.server.retry.api;
 
 import com.jd.journalq.domain.TopicName;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.toolkit.retry.RetryPolicy;
 
 /**
@@ -30,7 +30,7 @@ public interface RetryPolicyProvider {
      * @param topic 主题
      * @param app 应用
      * @return
-     * @throws JMQException
+     * @throws JournalqException
      */
-    RetryPolicy getPolicy(TopicName topic, String app) throws JMQException;
+    RetryPolicy getPolicy(TopicName topic, String app) throws JournalqException;
 }

@@ -13,8 +13,8 @@
  */
 package com.jd.journalq.security.impl;
 
-import com.jd.journalq.exception.JMQCode;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqCode;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.response.BooleanResponse;
 import com.jd.journalq.security.Authentication;
 import com.jd.journalq.security.PasswordEncoder;
@@ -84,7 +84,7 @@ public class DefaultAuthentication implements Authentication {
      * @param user
      * @return
      */
-    public static String createPassword(final String user) throws JMQException {
+    public static String createPassword(final String user) throws JournalqException {
         try {
             // 构造用户名，不足32位则右填充‘0’
             StringBuilder builder = new StringBuilder(32).append(user == null ? "" : user);
@@ -109,12 +109,12 @@ public class DefaultAuthentication implements Authentication {
             source = builder.toString();
             return source;
         } catch (Exception e) {
-            throw new JMQException(JMQCode.CN_AUTHENTICATION_ERROR);
+            throw new JournalqException(JournalqCode.CN_AUTHENTICATION_ERROR);
         }
 
     }
     @Override
-    public UserDetails getUser(final String user) throws JMQException {
+    public UserDetails getUser(final String user) throws JournalqException {
         boolean admin = false;
         String password;
         if (adminUser != null && adminUser.equalsIgnoreCase(user)) {

@@ -2,9 +2,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -13,39 +13,97 @@
  */
 package com.jd.journalq.nsr.network.handler;
 
-import com.jd.journalq.domain.*;
+import com.jd.journalq.domain.AppToken;
+import com.jd.journalq.domain.Broker;
+import com.jd.journalq.domain.Consumer;
+import com.jd.journalq.domain.DataCenter;
+import com.jd.journalq.domain.Producer;
+import com.jd.journalq.domain.Replica;
+import com.jd.journalq.domain.Subscription;
+import com.jd.journalq.domain.TopicConfig;
+import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.event.NameServerEvent;
-import com.jd.journalq.exception.JMQCode;
-import com.jd.journalq.network.command.*;
+import com.jd.journalq.exception.JournalqCode;
+import com.jd.journalq.network.command.Authorization;
+import com.jd.journalq.network.command.BooleanAck;
+import com.jd.journalq.network.command.GetTopics;
+import com.jd.journalq.network.command.GetTopicsAck;
+import com.jd.journalq.network.command.Subscribe;
+import com.jd.journalq.network.command.SubscribeAck;
+import com.jd.journalq.network.command.UnSubscribe;
 import com.jd.journalq.network.event.TransportEvent;
 import com.jd.journalq.network.transport.Transport;
 import com.jd.journalq.network.transport.TransportAttribute;
 import com.jd.journalq.network.transport.codec.JMQHeader;
 import com.jd.journalq.network.transport.command.Command;
+import com.jd.journalq.network.transport.command.CommandCallback;
 import com.jd.journalq.network.transport.command.Direction;
 import com.jd.journalq.network.transport.command.Types;
 import com.jd.journalq.network.transport.support.DefaultTransportAttribute;
 import com.jd.journalq.nsr.NameService;
 import com.jd.journalq.nsr.message.MessageListener;
 import com.jd.journalq.nsr.network.NsrCommandHandler;
-import com.jd.journalq.nsr.network.command.*;
+import com.jd.journalq.nsr.network.command.AddTopic;
+import com.jd.journalq.nsr.network.command.GetAllBrokersAck;
+import com.jd.journalq.nsr.network.command.GetAllConfigsAck;
+import com.jd.journalq.nsr.network.command.GetAllTopicsAck;
+import com.jd.journalq.nsr.network.command.GetAppToken;
+import com.jd.journalq.nsr.network.command.GetAppTokenAck;
+import com.jd.journalq.nsr.network.command.GetBroker;
+import com.jd.journalq.nsr.network.command.GetBrokerAck;
+import com.jd.journalq.nsr.network.command.GetBrokerByRetryType;
+import com.jd.journalq.nsr.network.command.GetBrokerByRetryTypeAck;
+import com.jd.journalq.nsr.network.command.GetConfig;
+import com.jd.journalq.nsr.network.command.GetConfigAck;
+import com.jd.journalq.nsr.network.command.GetConsumerByTopic;
+import com.jd.journalq.nsr.network.command.GetConsumerByTopicAck;
+import com.jd.journalq.nsr.network.command.GetConsumerByTopicAndApp;
+import com.jd.journalq.nsr.network.command.GetConsumerByTopicAndAppAck;
+import com.jd.journalq.nsr.network.command.GetDataCenter;
+import com.jd.journalq.nsr.network.command.GetDataCenterAck;
+import com.jd.journalq.nsr.network.command.GetProducerByTopic;
+import com.jd.journalq.nsr.network.command.GetProducerByTopicAck;
+import com.jd.journalq.nsr.network.command.GetProducerByTopicAndApp;
+import com.jd.journalq.nsr.network.command.GetProducerByTopicAndAppAck;
+import com.jd.journalq.nsr.network.command.GetReplicaByBroker;
+import com.jd.journalq.nsr.network.command.GetReplicaByBrokerAck;
+import com.jd.journalq.nsr.network.command.GetTopicConfig;
+import com.jd.journalq.nsr.network.command.GetTopicConfigAck;
+import com.jd.journalq.nsr.network.command.GetTopicConfigByApp;
+import com.jd.journalq.nsr.network.command.GetTopicConfigByAppAck;
+import com.jd.journalq.nsr.network.command.GetTopicConfigByBroker;
+import com.jd.journalq.nsr.network.command.GetTopicConfigByBrokerAck;
+import com.jd.journalq.nsr.network.command.HasSubscribe;
+import com.jd.journalq.nsr.network.command.HasSubscribeAck;
+import com.jd.journalq.nsr.network.command.LeaderReport;
+import com.jd.journalq.nsr.network.command.LeaderReportAck;
+import com.jd.journalq.nsr.network.command.NsrCommandType;
+import com.jd.journalq.nsr.network.command.NsrConnection;
+import com.jd.journalq.nsr.network.command.PushNameServerEvent;
+import com.jd.journalq.nsr.network.command.Register;
+import com.jd.journalq.nsr.network.command.RegisterAck;
 import com.jd.journalq.toolkit.concurrent.EventListener;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author wylixiaobin
  * Date: 2019/3/14
  */
-public class NameServiceCommandHandler  implements NsrCommandHandler, Types,com.jd.laf.extension.Type<String>,EventListener<TransportEvent> {
+public class NameServiceCommandHandler implements NsrCommandHandler, Types, com.jd.laf.extension.Type<String>, EventListener<TransportEvent> {
     private static final Logger logger = LoggerFactory.getLogger(NameServiceCommandHandler.class);
 
     private NameService nameService;
     private final Map<Integer, Transport> nsrClients = new ConcurrentHashMap<>();
+
     @Override
     public int[] types() {
         return new int[]{
@@ -78,14 +136,15 @@ public class NameServiceCommandHandler  implements NsrCommandHandler, Types,com.
                 NsrCommandType.CONNECT
         };
     }
+
     @Override
     public Command handle(Transport transport, Command command) {
         Command response = null;
-        switch (command.getHeader().getType()){
+        switch (command.getHeader().getType()) {
             case NsrCommandType
                     .ADD_TOPIC:
                 AddTopic addTopic = (AddTopic) command.getPayload();
-                nameService.addTopic(addTopic.getTopic(),addTopic.getPartitionGroups());
+                nameService.addTopic(addTopic.getTopic(), addTopic.getPartitionGroups());
                 response = BooleanAck.build();
                 break;
             case NsrCommandType.GET_ALL_BROKERS:
@@ -99,7 +158,7 @@ public class NameServiceCommandHandler  implements NsrCommandHandler, Types,com.
                 break;
             case NsrCommandType.GET_APP_TOKEN:
                 GetAppToken getAppToken = (GetAppToken) command.getPayload();
-                AppToken appToken = nameService.getAppToken(getAppToken.getApp(),getAppToken.getToken());
+                AppToken appToken = nameService.getAppToken(getAppToken.getApp(), getAppToken.getToken());
                 response = new Command(new GetAppTokenAck().appToken(appToken));
                 break;
             case NsrCommandType.GET_BROKER_BY_RETRYTYPE:
@@ -114,7 +173,7 @@ public class NameServiceCommandHandler  implements NsrCommandHandler, Types,com.
                 break;
             case NsrCommandType.GET_CONFIG:
                 GetConfig getConfig = (GetConfig) command.getPayload();
-                String value = nameService.getConfig(getConfig.getGroup(),getConfig.getKey());
+                String value = nameService.getConfig(getConfig.getGroup(), getConfig.getKey());
                 response = new Command(new GetConfigAck().value(value));
                 break;
             case NsrCommandType.GET_CONSUMER_BY_TOPIC_AND_APP:
@@ -149,12 +208,12 @@ public class NameServiceCommandHandler  implements NsrCommandHandler, Types,com.
                 break;
             case NsrCommandType.GET_TOPICCONFIGS_BY_APP:
                 GetTopicConfigByApp getTopicConfigByApp = (GetTopicConfigByApp) command.getPayload();
-                Map<TopicName, TopicConfig> topicConfigs = nameService.getTopicConfigByApp(getTopicConfigByApp.getApp(),getTopicConfigByApp.getSubscribe());
+                Map<TopicName, TopicConfig> topicConfigs = nameService.getTopicConfigByApp(getTopicConfigByApp.getApp(), getTopicConfigByApp.getSubscribe());
                 response = new Command(new GetTopicConfigByAppAck().topicConfigs(topicConfigs));
                 break;
             case NsrCommandType.GET_TOPICCONFIGS_BY_BROKER:
                 GetTopicConfigByBroker getTopicConfigByBroker = (GetTopicConfigByBroker) command.getPayload();
-                Map<TopicName,TopicConfig> topicConfigByBroker = nameService.getTopicConfigByBroker(getTopicConfigByBroker.getBrokerId());
+                Map<TopicName, TopicConfig> topicConfigByBroker = nameService.getTopicConfigByBroker(getTopicConfigByBroker.getBrokerId());
                 response = new Command(new GetTopicConfigByBrokerAck().topicConfigs(topicConfigByBroker));
                 break;
             case NsrCommandType.GET_TOPICCONFIG:
@@ -166,16 +225,18 @@ public class NameServiceCommandHandler  implements NsrCommandHandler, Types,com.
             case NsrCommandType.MQTT_GET_TOPICS:
                 GetTopics getTopics = (GetTopics) command.getPayload();
                 Set<String> topicNames = null;
-                if(StringUtils.isBlank(getTopics.getApp())){
+                if (StringUtils.isBlank(getTopics.getApp())) {
                     topicNames = nameService.getAllTopics();
-                }else {
-                    topicNames = nameService.getTopics(getTopics.getApp(), Subscription.Type.valueOf((byte)getTopics.getSubscribeType()));
+                } else {
+                    topicNames = nameService.getTopics(getTopics.getApp(), Subscription.Type.valueOf((byte) getTopics.getSubscribeType()));
                 }
-                response = new Command(new JMQHeader(Direction.RESPONSE,command.getHeader().getType()==NsrCommandType.MQTT_GET_TOPICS?NsrCommandType.MQTT_GET_TOPICS_ACK:NsrCommandType.GET_TOPICS_ACK),new GetTopicsAck().topics(topicNames));
+                response = new Command(new JMQHeader(Direction.RESPONSE,
+                        command.getHeader().getType() == NsrCommandType.MQTT_GET_TOPICS ? NsrCommandType.MQTT_GET_TOPICS_ACK : NsrCommandType.GET_TOPICS_ACK),
+                        new GetTopicsAck().topics(topicNames));
                 break;
             case NsrCommandType.HAS_SUBSCRIBE:
                 HasSubscribe hasSubscribe = (HasSubscribe) command.getPayload();
-                response = new Command(new HasSubscribeAck().have(nameService.hasSubscribe(hasSubscribe.getApp(),hasSubscribe.getSubscribe())));
+                response = new Command(new HasSubscribeAck().have(nameService.hasSubscribe(hasSubscribe.getApp(), hasSubscribe.getSubscribe())));
                 break;
             case NsrCommandType.LEADER_REPORT:
                 LeaderReport leaderReport = (LeaderReport) command.getPayload();
@@ -184,9 +245,9 @@ public class NameServiceCommandHandler  implements NsrCommandHandler, Types,com.
                 break;
             case NsrCommandType.REGISTER:
                 Register register = (Register) command.getPayload();
-                Broker brokerRegister = nameService.register(register.getBrokerId(),register.getBrokerIp(),register.getPort());
-                if(null!=brokerRegister){
-                    fillTransportBrokerId(transport,brokerRegister.getId());
+                Broker brokerRegister = nameService.register(register.getBrokerId(), register.getBrokerIp(), register.getPort());
+                if (null != brokerRegister) {
+                    fillTransportBrokerId(transport, brokerRegister.getId());
                 }
                 response = new Command(new RegisterAck().broker(brokerRegister));
                 break;
@@ -203,16 +264,18 @@ public class NameServiceCommandHandler  implements NsrCommandHandler, Types,com.
             case NsrCommandType.AUTHORIZATION:
                 Authorization authorization = (Authorization) command.getPayload();
                 Date now = Calendar.getInstance().getTime();
-                AppToken appTokenforAuth = nameService.getAppToken(authorization.getApp(),authorization.getToken());
-                response = null!=appTokenforAuth&&appTokenforAuth.getEffectiveTime().before(now)&&appTokenforAuth.getExpirationTime().after(now)?BooleanAck.build():BooleanAck.build(JMQCode.CN_AUTHENTICATION_ERROR);
+                AppToken appTokenforAuth = nameService.getAppToken(authorization.getApp(), authorization.getToken());
+                response = ((null != appTokenforAuth) && appTokenforAuth.getEffectiveTime().before(now) && appTokenforAuth.getExpirationTime().after(now)) ?
+                        BooleanAck.build() :
+                        BooleanAck.build(JournalqCode.CN_AUTHENTICATION_ERROR);
                 break;
             case NsrCommandType.CONNECT:
-                Integer brokerId = ((NsrConnection)command.getPayload()).getBrokerId();
-                fillTransportBrokerId(transport,brokerId);
+                Integer brokerId = ((NsrConnection) command.getPayload()).getBrokerId();
+                fillTransportBrokerId(transport, brokerId);
                 response = BooleanAck.build();
                 break;
             default:
-                response = BooleanAck.build(JMQCode.CN_UNKNOWN_ERROR,"unRecognize command ");
+                response = BooleanAck.build(JournalqCode.CN_UNKNOWN_ERROR, "unRecognize command ");
                 break;
         }
         return response;
@@ -236,31 +299,32 @@ public class NameServiceCommandHandler  implements NsrCommandHandler, Types,com.
             transport.attr(attribute);
         }
         attribute.set("broker.id", brokerId);
-        nsrClients.put(brokerId,transport);
-        logger.info("{} online",brokerId);
+        nsrClients.put(brokerId, transport);
+        logger.info("{} online", brokerId);
     }
 
     @Override
     public void onEvent(TransportEvent event) {
         Transport transport = event.getTransport();
         Integer brokerId = transport.attr().get("broker.id");
-        if(null==brokerId||0==brokerId){
+        if (null == brokerId || 0 == brokerId) {
             return;
         }
         switch (event.getType()) {
             case CONNECT:
-                    nsrClients.put(brokerId,transport);
-                    logger.info("{} online",brokerId);
-                    break;
+                nsrClients.put(brokerId, transport);
+                logger.info("{} online", brokerId);
+                break;
             case EXCEPTION:
             case CLOSE:
                 nsrClients.remove(Integer.valueOf(brokerId));
-                logger.info("{} offline",brokerId);
+                logger.info("{} offline", brokerId);
                 break;
             default:
                 break;
         }
     }
+
     /**
      * MetaDataListener
      */
@@ -270,14 +334,47 @@ public class NameServiceCommandHandler  implements NsrCommandHandler, Types,com.
         @Override
         public void onEvent(NameServerEvent event) {
             try {
-            logger.info("event[{}]");
-            Transport transport = nsrClients.get(event.getBrokerId());
-                if(null!=transport) {
-                    transport.sync(new Command(new JMQHeader(Direction.REQUEST, NsrCommandType.PUSH_NAMESERVER_EVENT), new PushNameServerEvent().event(event)));
-                    logger.info("event[{}] send to [{}] success", event,event.getBrokerId());
+                logger.info("will publish event [{}]", event);
+                if (event == null || event.getBrokerId() == null) {
+                    logger.warn("broker is null.");
+                } else if (nsrClients == null || nsrClients.isEmpty()) {
+                    logger.warn("nsr client is null.");
+                } else {
+                    Integer brokerId = event.getBrokerId();
+                    if (event.getBrokerId() == NameServerEvent.BROKER_ID_ALL_BROKER) {
+                        sendEvent(event, nsrClients.values().toArray(new Transport[nsrClients.size()]));
+                    } else {
+                        Transport transport = nsrClients.get(brokerId);
+                        if (transport != null) {
+                            sendEvent(event, transport);
+                        } else {
+                            logger.warn("transport is null.brokerId[{}]", brokerId);
+                        }
+                    }
                 }
-            }catch (Exception e){
-                logger.error("push event to [{}] error",event.getBrokerId(),e);
+            } catch (Exception e) {
+                logger.error("push event to [{}] error", event.getBrokerId(), e);
+            }
+        }
+
+
+        private void sendEvent(NameServerEvent event, Transport... transports) {
+            if (transports == null) {
+                return;
+            }
+
+            for (Transport transport : transports) {
+                transport.async(new Command(new JMQHeader(Direction.REQUEST, NsrCommandType.PUSH_NAMESERVER_EVENT), new PushNameServerEvent().event(event)), new CommandCallback() {
+                    @Override
+                    public void onSuccess(Command request, Command response) {
+                        logger.info("event[{}] send to [{}] success", event, event.getBrokerId());
+                    }
+
+                    @Override
+                    public void onException(Command request, Throwable cause) {
+                        logger.info("event[{}] send to [{}] failure.", event, event.getBrokerId());
+                    }
+                });
             }
         }
     }

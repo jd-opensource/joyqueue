@@ -14,7 +14,7 @@
 package com.jd.journalq.network.codec;
 
 import com.jd.journalq.network.command.FetchProduceFeedback;
-import com.jd.journalq.network.command.JMQCommandType;
+import com.jd.journalq.network.command.JournalqCommandType;
 import com.jd.journalq.network.command.TxStatus;
 import com.jd.journalq.network.serializer.Serializer;
 import com.jd.journalq.network.transport.codec.JMQHeader;
@@ -50,6 +50,6 @@ public class FetchProduceFeedbackCodec implements PayloadCodec<JMQHeader, FetchP
 
     @Override
     public int type() {
-        return JMQCommandType.FETCH_PRODUCE_FEEDBACK.getCode();
+        return JournalqCommandType.FETCH_PRODUCE_FEEDBACK.getCode();
     }
 }
