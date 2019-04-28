@@ -417,6 +417,10 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
                 String app = removeConsumerEvent.getApp();
                 if (brokerStat != null) {
                     TopicStat topicStat = brokerStat.getTopicStats().get(topic);
+                    if (topicStat == null) {
+                        return;
+                    }
+
                     ConcurrentMap<String, AppStat> appStats = topicStat.getAppStats();
                     AppStat remove = appStats.remove(app);
 
@@ -458,6 +462,10 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
                 String topic = removePartitionGroupEvent.getTopic().getFullName();
                 if (brokerStat != null) {
                     TopicStat topicStat = brokerStat.getTopicStats().get(topic);
+                    if (topicStat == null) {
+                        return;
+                    }
+
                     ConcurrentMap<Integer, PartitionGroupStat> partitionGroupStatMap = topicStat.getPartitionGroupStatMap();
                     PartitionGroupStat remove = partitionGroupStatMap.remove(removePartitionGroupEvent.getPartitionGroup());
                     if (remove != null) {
@@ -480,8 +488,15 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
                 String topic = updatePartitionGroupEvent.getTopic().getFullName();
                 if (brokerStat != null) {
                     TopicStat topicStat = brokerStat.getTopicStats().get(topic);
+                    if (topicStat == null) {
+                        return;
+                    }
+
                     ConcurrentMap<Integer, PartitionGroupStat> partitionGroupStatMap = topicStat.getPartitionGroupStatMap();
                     PartitionGroupStat partitionGroupStat = partitionGroupStatMap.get(updatePartitionGroupEvent.getPartitionGroup());
+                    if (partitionGroupStat == null) {
+                        return;
+                    }
 
                     Integer partitionGroupId = updatePartitionGroupEvent.getPartitionGroup();
                     PartitionGroup partitionGroupByGroup = clusterManager.getPartitionGroupByGroup(updatePartitionGroupEvent.getTopic(), partitionGroupId);
