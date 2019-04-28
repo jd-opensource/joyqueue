@@ -104,6 +104,7 @@ public class PositioningStore<T> implements Closeable {
             deleteLock.lock();
             if (position <= left() || position > right()) {
                 clear();
+                writeStoreFile = null;
                 this.leftPosition.set(position);
                 this.rightPosition.set(position);
                 this.flushPosition.set(position);
