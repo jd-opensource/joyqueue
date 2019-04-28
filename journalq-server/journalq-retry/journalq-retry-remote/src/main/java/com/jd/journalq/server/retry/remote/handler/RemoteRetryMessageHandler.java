@@ -54,6 +54,8 @@ public class RemoteRetryMessageHandler implements CommandHandler {
 
     @Override
     public Command handle(Transport transport, Command command) throws TransportException {
+        logger.debug("Receive command:[{}]", command);
+
         try {
             switch (command.getHeader().getType()) {
                 case CommandType.PUT_RETRY:
@@ -78,6 +80,8 @@ public class RemoteRetryMessageHandler implements CommandHandler {
     }
 
     private Command execute(PutRetry putRetry) throws JournalqException {
+        logger.debug("add retry message:[{}]", putRetry);
+
         List<RetryMessageModel> messages = putRetry.getMessages();
         messageRetry.addRetry(messages);
 
@@ -85,6 +89,8 @@ public class RemoteRetryMessageHandler implements CommandHandler {
     }
 
     private Command execute(GetRetry getRetry) throws JournalqException {
+        logger.debug("get retry message by condition:[{}]", getRetry);
+
         List<RetryMessageModel> retryMessageModelList = messageRetry.getRetry(getRetry.getTopic(), getRetry.getApp(), getRetry.getCount(), getRetry.getStartId());
 
         GetRetryAck payload = new GetRetryAck();
@@ -98,6 +104,8 @@ public class RemoteRetryMessageHandler implements CommandHandler {
     }
 
     private Command execute(UpdateRetry updateRetry) throws JournalqException {
+        logger.debug("update retry by condition:[{}]", updateRetry);
+
         int updateType = updateRetry.getUpdateType();
         if (UpdateRetry.SUCCESS == updateType) {
             messageRetry.retrySuccess(updateRetry.getTopic(), updateRetry.getApp(), updateRetry.getMessages());
@@ -111,6 +119,8 @@ public class RemoteRetryMessageHandler implements CommandHandler {
     }
 
     private Command execute(GetRetryCount getRetryCount) throws JournalqException {
+        logger.debug("get retry count by condition:[{}]", getRetryCount);
+
         int retryCount = messageRetry.countRetry(getRetryCount.getTopic(), getRetryCount.getApp());
         GetRetryCountAck getRetryCountAckPayload = new GetRetryCountAck();
         getRetryCountAckPayload.setTopic(getRetryCount.getTopic());
