@@ -65,7 +65,7 @@
     </my-dialog>
     <!--添加broker-->
     <my-dialog :dialog="addBrokerDialog" @on-dialog-cancel="addBrokerCancel()">
-      <add-broker :group="group" :data="brokerData" ref="broker"></add-broker>
+      <add-broker :group="group" :data="brokerData" ref="broker" :urls="brokerUrls" :colData="brokerColData"></add-broker>
     </my-dialog>
   </div>
 </template>
@@ -78,13 +78,46 @@ import crud from '../../mixins/crud.js'
 import apiRequest from '../../utils/apiRequest.js'
 
 export default {
-  name: 'application',
+  name: 'broker-group',
   components: {
     myTable,
     myDialog,
     addBroker
   },
   mixins: [ crud ],
+  props: {
+    brokerUrls: {
+      type: Object,
+      default () {
+        return {
+          search: '/broker/search'
+        }
+      }
+    },
+    brokerColData: {
+      type: Object,
+      default () {
+        return [
+          {
+            title: '分组',
+            key: 'group.code'
+          },
+          {
+            title: 'ID',
+            key: 'id'
+          },
+          {
+            title: 'IP',
+            key: 'ip'
+          },
+          {
+            title: '端口',
+            key: 'port'
+          }
+        ]
+      }
+    }
+  },
   data () {
     return {
       group: {
@@ -93,8 +126,6 @@ export default {
       },
       searchData: {
         keyword: ''
-      },
-      searchRules: {
       },
       tableData: {
         rowData: [],

@@ -167,7 +167,7 @@ export default {
               }
             }
 
-            if (btn.isAdmin && !store.getters.isAdmin) { // 登录用户权限控制,admin:1,user:0
+            if (btn.isAdmin && !this.$store.getters.isAdmin) { // 登录用户权限控制,admin:1,user:0
               continue
             }
 

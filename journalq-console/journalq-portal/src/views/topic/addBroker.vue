@@ -8,7 +8,6 @@
     <my-table :optional="true" :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
               @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange">
     </my-table>
-
   </div>
 </template>
 
@@ -28,38 +27,24 @@ export default {
       default () {
         return {}
       }
+    },
+    urls: {
+      type: Object
+    },
+    colData: {
+      type: Object
     }
   },
   mixins: [ crud ],
   data () {
     return {
-      urls: {
-        search: '/broker/search'
-      },
       searchData: {
         keyword: '',
         brokerGroupIds: []
       },
       tableData: {
         rowData: [{}],
-        colData: [
-          {
-            title: '分组',
-            key: 'group.code'
-          },
-          {
-            title: 'ID',
-            key: 'id'
-          },
-          {
-            title: 'IP',
-            key: 'ip'
-          },
-          {
-            title: '端口',
-            key: 'port'
-          }
-        ]
+        colData: this.colData
       },
       multipleSelection: []
     }
