@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.nsr.admin;
 
 import com.alibaba.fastjson.JSON;
@@ -8,15 +21,20 @@ import com.jd.journalq.domain.AppToken;
 import com.jd.journalq.nsr.AdminConfig;
 import com.jd.journalq.nsr.CommandArgs;
 import com.jd.journalq.nsr.utils.AsyncHttpClient;
+import com.jd.journalq.toolkit.time.SystemClock;
+
 import java.io.IOException;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 public class AppAdmin extends AbstractAdmin {
     @Parameters(separators = "=", commandDescription = "Generate a token for App")
     public static class TokenArg extends CommandArgs {
-        private final static Long MONTH_MS=86400000L;
+        private  static final Long MONTH_MS=86400000L;
         @Parameter(names = { "--host" }, description = "Naming address", required = false)
         public String host="http://localhost:50091";
 
@@ -24,10 +42,10 @@ public class AppAdmin extends AbstractAdmin {
         public String app;
 
         @Parameter(names = { "-s", "--start" }, description = "When to be effective,default now", required = false)
-        public Long start=System.currentTimeMillis();
+        public Long start=SystemClock.now();
 
         @Parameter(names = { "-e", "--expire" }, description = "Expire time, default expire after 1 year ", required = false)
-        public Long expire=System.currentTimeMillis()+MONTH_MS*12;
+        public Long expire=SystemClock.now()+MONTH_MS*12;
     }
 
     public static void main(String[] args){
@@ -71,7 +89,7 @@ public class AppAdmin extends AbstractAdmin {
      **/
     public  String token(TokenArg arguments,JCommander jCommander) throws Exception{
         AppToken token=new AppToken();
-        token.setId(System.currentTimeMillis());
+        token.setId(SystemClock.now());
         token.setApp(arguments.app);
         token.setEffectiveTime(new Date(arguments.start));
         token.setExpirationTime(new Date(arguments.expire));
