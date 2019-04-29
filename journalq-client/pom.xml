@@ -26,6 +26,8 @@
 
     <artifactId>journalq-client</artifactId>
     <packaging>pom</packaging>
+    <name>JournalQ - Client</name>
+    <description>Client SDK and Samples</description>
 
     <modules>
         <module>journalq-client-core</module>

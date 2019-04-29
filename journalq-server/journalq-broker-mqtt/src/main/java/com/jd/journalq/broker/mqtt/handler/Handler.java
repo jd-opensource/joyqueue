@@ -25,7 +25,7 @@ public abstract class Handler {
     protected MqttProtocolHandler mqttProtocolHandler;
     protected MqttContext mqttContext;
 
-    public abstract void handleRequest(final Channel client, final MqttMessage message) throws Exception;
+    public abstract void handleRequest(Channel client, MqttMessage message) throws Exception;
     public abstract MqttMessageType type();
 
     public void setMqttContext(MqttContext mqttContext) {

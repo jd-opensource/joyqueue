@@ -28,7 +28,6 @@ import com.jd.journalq.domain.Topic;
 import com.jd.journalq.domain.TopicConfig;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.event.NameServerEvent;
-import com.jd.journalq.network.command.CommandType;
 import com.jd.journalq.network.command.GetTopics;
 import com.jd.journalq.network.command.GetTopicsAck;
 import com.jd.journalq.network.command.SubscribeAck;
@@ -162,7 +161,7 @@ public class ThinNameService extends Service implements NameService, PropertySup
 
     @Override
     public void unSubscribe(List<Subscription> subscriptions) {
-        Command request = new Command(new JMQHeader(Direction.REQUEST, CommandType.UNSUBSCRIBE), new UnSubscribe().subscriptions(subscriptions));
+        Command request = new Command(new JMQHeader(Direction.REQUEST, NsrCommandType.UN_SUBSCRIBE), new UnSubscribe().subscriptions(subscriptions));
         Command response = send(request);
         if (!response.isSuccess()) {
             logger.error("unSubscribe error request {},response {}", request, response);
@@ -445,7 +444,7 @@ public class ThinNameService extends Service implements NameService, PropertySup
 
     private Command send(Command request) throws TransportException {
         try {
-            return clientTransport.getOrCreateTransport().sync(request);
+            return clientTransport.getOrCreateTransport().sync(request,10000);
         } catch (TransportException exception) {
             logger.error("rmoteNameService error request {}", request);
             throw exception;

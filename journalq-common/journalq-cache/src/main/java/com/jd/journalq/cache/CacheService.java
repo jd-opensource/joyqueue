@@ -300,7 +300,7 @@ public interface CacheService {
      * @param value
      * @return 被移除的个数
      */
-    Long lrem(String key, final long count, String value);
+    Long lrem(String key, long count, String value);
 
     /**
      * 移除并返回集合中的一个随机元素
