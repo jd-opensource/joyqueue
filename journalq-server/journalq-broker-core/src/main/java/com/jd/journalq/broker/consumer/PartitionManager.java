@@ -16,13 +16,16 @@ package com.jd.journalq.broker.consumer;
 import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.consumer.model.ConsumePartition;
 import com.jd.journalq.broker.consumer.model.OwnerShip;
+import com.jd.journalq.broker.monitor.SessionManager;
 import com.jd.journalq.broker.retry.RetryProbability;
 import com.jd.journalq.domain.Consumer.ConsumerPolicy;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.network.session.Consumer;
+import com.jd.journalq.toolkit.concurrent.EventListener;
 import com.jd.journalq.toolkit.time.SystemClock;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +50,8 @@ public class PartitionManager {
 
     // 集群管理器
     private ClusterManager clusterManager;
+    // 会话管理
+    private SessionManager sessionManager;
     // 分区->消费者
     private ConcurrentMap<ConsumePartition, OwnerShip> ownerShipCache = new ConcurrentHashMap<>();
     // 随机数字，用于选择重试队列
@@ -58,8 +63,12 @@ public class PartitionManager {
     // 计数服务
     private CounterService counterService = new CounterService();
 
-    public PartitionManager(ClusterManager clusterManager) {
+    public PartitionManager(ClusterManager clusterManager, SessionManager sessionManager) {
         this.clusterManager = clusterManager;
+        this.sessionManager = sessionManager;
+
+        // 添加会话断开后移除分区占用事件监听
+        sessionManager.addListener(new RemoveOccupyListener());
     }
 
     /**
@@ -294,7 +303,7 @@ public class PartitionManager {
         if (partitionGroupId != null) {
             return partitionGroupId;
         } else {
-            throw new IllegalArgumentException("Cannot find partitionGroup by topic:["+ topic + "],partition:[" + partition +"]");
+            throw new IllegalArgumentException("Cannot find partitionGroup by topic:[" + topic + "],partition:[" + partition + "]");
         }
     }
 
@@ -356,6 +365,19 @@ public class PartitionManager {
                 return;
             }
             counter.decrease();
+        }
+
+        /**
+         * 清零消费者的占用次数
+         *
+         * @param clientId
+         */
+        private void clearOccupyTimes(String clientId) {
+            Counter counter = occupyCounter.get(clientId);
+            if (counter == null) {
+                return;
+            }
+            occupyCounter.remove(clientId);
         }
 
         /**
@@ -487,6 +509,46 @@ public class PartitionManager {
             int getTimes() {
                 return times.get();
             }
+
+        }
+    }
+
+    /**
+     * 监听回话断开时间，并移除被回话占用的分区占用
+     */
+    class RemoveOccupyListener implements EventListener<SessionManager.SessionEvent> {
+
+        @Override
+        public void onEvent(SessionManager.SessionEvent event) {
+            if (event.getType() == SessionManager.SessionEventType.RemoveConsumer) {
+                logger.info("Listen SessionManager.SessionEventType.RemoveConsumer, Event:[{}]", event);
+
+                Consumer consumer = event.getConsumer();
+                removeOccupyByConsumer(consumer);
+            }
+        }
+
+        /**
+         * 移除占用
+         */
+        private void removeOccupyByConsumer(Consumer consumer) {
+            List<Short> masterPartitionList = clusterManager.getMasterPartitionList(TopicName.parse(consumer.getTopic()));
+            final String clientId = consumer.getId();
+            masterPartitionList.stream().forEach(partition -> {
+                ConsumePartition consumePartition = new ConsumePartition(consumer.getTopic(), consumer.getApp(), partition);
+                OwnerShip ownerShip = ownerShipCache.get(consumePartition);
+
+                // 判断是否同一个消费者
+                if (ownerShip != null && StringUtils.equals(ownerShip.getOwner(), clientId)) {
+                    logger.info("remove occupy by topic:[{}], app:[{}], partition:[{}]", consumer.getTopic(), consumer.getApp(), partition);
+                    // 解除占用
+                    ownerShipCache.remove(consumePartition);
+                    // 清零该消费者的占用次数
+                    counterService.clearOccupyTimes(clientId);
+                    // 清零该消费者的出错次数
+                    counterService.clearErrTimes(consumer);
+                }
+            });
 
         }
     }

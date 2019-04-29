@@ -35,14 +35,14 @@ public abstract class Converter<S, T> {
      * @param s
      * @return
      */
-    protected abstract T forward(final S s);
+    protected abstract T forward(S s);
 
     /**
      * Backward converter, T->S
      * @param t
      * @return
      */
-    protected abstract S backward(final T t);
+    protected abstract S backward(T t);
 
     /**
      * Convert S->T

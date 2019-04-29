@@ -151,7 +151,7 @@ public abstract class WorkerService extends Service {
      * @param context 上下文
      * @throws Exception
      */
-    protected abstract void execute(final Context context) throws Exception;
+    protected abstract void execute(Context context) throws Exception;
 
     /**
      * 执行器

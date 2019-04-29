@@ -13,6 +13,7 @@
  */
 package com.jd.journalq.broker.monitor;
 
+import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.monitor.config.BrokerMonitorConfig;
 import com.jd.journalq.toolkit.service.Service;
 
@@ -30,11 +31,11 @@ public class BrokerMonitorService extends Service {
     private BrokerStatManager brokerStatManager;
     private BrokerStatSaveScheduler brokerStatSaveScheduler;
 
-    public BrokerMonitorService(Integer brokerId, BrokerMonitorConfig config, SessionManager sessionManager) {
+    public BrokerMonitorService(Integer brokerId, BrokerMonitorConfig config, SessionManager sessionManager, ClusterManager clusterManager) {
         this.config = config;
         this.sessionManager = sessionManager;
         this.brokerStatManager = new BrokerStatManager(brokerId, config);
-        this.brokerMonitor = new BrokerMonitor(config, sessionManager, brokerStatManager);
+        this.brokerMonitor = new BrokerMonitor(config, sessionManager, brokerStatManager, clusterManager);
         this.brokerStatSaveScheduler = new BrokerStatSaveScheduler(config, brokerStatManager);
     }
 
