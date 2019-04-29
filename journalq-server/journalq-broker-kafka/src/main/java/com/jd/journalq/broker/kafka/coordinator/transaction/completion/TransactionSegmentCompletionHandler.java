@@ -238,7 +238,7 @@ public class TransactionSegmentCompletionHandler {
             }
         }
 
-        logger.debug("remove transaction cache complete, sortedMapSize: {}, mapSize: {}", unCompletedTransactionSortedMap.size(), unCompletedTransactionMap.size());
+        logger.info("remove transaction cache complete, sortedMapSize: {}, mapSize: {}", unCompletedTransactionSortedMap.size(), unCompletedTransactionMap.size());
 
         this.committedIndex = commitIndex;
     }
@@ -272,6 +272,7 @@ public class TransactionSegmentCompletionHandler {
 
     protected void handleTimeoutTransaction(UnCompletedTransaction unCompletedTransaction) {
         logger.warn("transaction timeout, txId: {}, metadata: {}", unCompletedTransaction.getId(), unCompletedTransaction);
+        tryAbort(unCompletedTransaction);
         unCompletedTransaction.transitionStateTo(TransactionState.DEAD);
     }
 

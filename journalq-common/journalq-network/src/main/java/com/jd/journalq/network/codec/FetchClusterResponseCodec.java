@@ -105,7 +105,8 @@ public class FetchClusterResponseCodec implements PayloadCodec<JournalqHeader, F
             boolean isSeq = buffer.readBoolean();
             int ackTimeout = buffer.readInt();
             short batchSize = buffer.readShort();
-            int isCurrent = buffer.readInt();
+            boolean isCurrent = buffer.readBoolean(); // 已删除字段
+            int concurrent = buffer.readInt();
             int delay = buffer.readInt();
 
             short blackListSize = buffer.readShort();
@@ -118,7 +119,7 @@ public class FetchClusterResponseCodec implements PayloadCodec<JournalqHeader, F
             int maxPartitionNum = buffer.readInt();
             int readRetryProbability = buffer.readInt();
             topic.setConsumerPolicy(new ConsumerPolicy(isNearby, isPaused, isArchive, isRetry, isSeq,
-                    ackTimeout, batchSize, isCurrent, delay, blackList, errTimes, maxPartitionNum, readRetryProbability,null));
+                    ackTimeout, batchSize, concurrent, delay, blackList, errTimes, maxPartitionNum, readRetryProbability,null));
         }
 
         byte topicType = buffer.readByte();
@@ -219,6 +220,7 @@ public class FetchClusterResponseCodec implements PayloadCodec<JournalqHeader, F
             buffer.writeBoolean(consumerPolicy.getSeq());
             buffer.writeInt(consumerPolicy.getAckTimeout());
             buffer.writeShort(consumerPolicy.getBatchSize());
+            buffer.writeBoolean(false); // 已删除字段
             buffer.writeInt(consumerPolicy.getConcurrent());
             buffer.writeInt(consumerPolicy.getDelay());
 

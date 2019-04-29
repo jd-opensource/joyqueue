@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.List;
+import java.util.zip.CRC32;
 
 /**
  * TransactionLogSegment
@@ -30,6 +31,8 @@ import java.util.List;
 public class TransactionLogSegment {
 
     protected static final Logger logger = LoggerFactory.getLogger(TransactionLogSegment.class);
+
+    private final byte[] LOCAL_IP = IpUtil.getLocalIp().getBytes();
 
     private KafkaConfig config;
     private String topic;
@@ -92,12 +95,7 @@ public class TransactionLogSegment {
     public boolean batchWrite(String app, String transactionId, List<byte[]> bodyList) throws Exception {
         List<BrokerMessage> messages = Lists.newArrayListWithCapacity(bodyList.size());
         for (byte[] body : bodyList) {
-            BrokerMessage message = new BrokerMessage();
-            message.setTopic(topic);
-            message.setApp(producer.getApp());
-            message.setBody(body);
-            message.setClientIp(IpUtil.getLocalIp().getBytes());
-            message.setPartition(partition);
+            BrokerMessage message = convertMessage(body);
             messages.add(message);
         }
         produce.putMessage(producer, messages, config.getTransactionLogWriteQosLevel(), config.getTransactionSyncTimeout());
@@ -105,14 +103,23 @@ public class TransactionLogSegment {
     }
 
     public boolean write(String app, String transactionId, byte[] body) throws Exception {
+        BrokerMessage message = convertMessage(body);
+        produce.putMessage(producer, Lists.newArrayList(message), config.getTransactionLogWriteQosLevel(), config.getTransactionSyncTimeout());
+        return true;
+    }
+
+    protected BrokerMessage convertMessage(byte[] body) {
         BrokerMessage message = new BrokerMessage();
         message.setTopic(topic);
         message.setApp(producer.getApp());
         message.setBody(body);
-        message.setClientIp(IpUtil.getLocalIp().getBytes());
+        message.setClientIp(LOCAL_IP);
         message.setPartition(partition);
-        produce.putMessage(producer, Lists.newArrayList(message), config.getTransactionLogWriteQosLevel(), config.getTransactionSyncTimeout());
-        return true;
+
+        CRC32 crc32 = new CRC32();
+        crc32.update(body);
+        message.setBodyCRC(crc32.getValue());
+        return message;
     }
 
     public short getPartition() {

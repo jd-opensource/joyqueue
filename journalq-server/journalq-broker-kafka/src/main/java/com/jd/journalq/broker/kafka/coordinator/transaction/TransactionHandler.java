@@ -198,6 +198,10 @@ public class TransactionHandler extends Service {
             } else {
                 doAbort(transactionMetadata);
             }
+
+            transactionMetadata.clear();
+            transactionMetadata.nextEpoch();
+            transactionMetadata.transitionStateTo(TransactionState.EMPTY);
             return true;
         } catch (Exception e) {
             logger.error("endTxn exception, metadata: {}, isCommit: {}", transactionMetadata, isCommit, e);
