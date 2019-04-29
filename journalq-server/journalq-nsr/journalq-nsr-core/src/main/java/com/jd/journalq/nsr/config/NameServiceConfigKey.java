@@ -16,7 +16,7 @@ package com.jd.journalq.nsr.config;
 import com.jd.journalq.toolkit.config.PropertyDef;
 
 public enum NameServiceConfigKey implements PropertyDef {
-    NAMESERVER_ADDRESS("nameservice.serverAddress", "local", Type.STRING);
+    NAMESERVER_ADDRESS("nameservice.serverAddress", "127.0.0.1:50091", Type.STRING);
     public static final String NAMESERVICE_KEY_PREFIX ="nameservice.";
 
     private String name;
