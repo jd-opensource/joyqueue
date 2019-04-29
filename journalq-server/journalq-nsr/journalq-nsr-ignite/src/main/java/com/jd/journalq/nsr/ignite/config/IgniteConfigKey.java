@@ -21,7 +21,7 @@ public enum IgniteConfigKey implements PropertyDef {
      **/
     CLIENT_MODE("nameserver.ignite.clientMode", false, Type.BOOLEAN),
     PEER_CLASS_LOADING_ENABLED("nameserver.ignite.peerClassLoadingEnabled", true, Type.BOOLEAN),
-    DEPLOYMENT_MODE("nameserver.ignite.deploymentMode", "SHARD", Type.STRING),
+    DEPLOYMENT_MODE("nameserver.ignite.deploymentMode", "SHARED", Type.STRING),
     PEER_CLASS_LOADING_MISSED_RESOURCE_CACHE_SIZE("nameserver.ignite.peerClassLoadingMissedResourcesCacheSize", 0, Type.INT),
     NETWORK_TIMEOUT("nameserver.ignite.networkTimeout", 10000, Type.LONG),
     PUBLIC_THREAD_POOL_SIZE("nameserver.ignite.publicThreadPoolSize", 32, Type.INT),

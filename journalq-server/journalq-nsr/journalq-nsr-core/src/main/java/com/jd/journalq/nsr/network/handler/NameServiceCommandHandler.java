@@ -261,8 +261,10 @@ public class NameServiceCommandHandler implements NsrCommandHandler, Types, com.
                 Broker brokerRegister = nameService.register(register.getBrokerId(), register.getBrokerIp(), register.getPort());
                 if (null != brokerRegister) {
                     fillTransportBrokerId(transport, brokerRegister.getId());
+                    response = new Command(new RegisterAck().broker(brokerRegister));
+                } else {
+                    response = BooleanAck.build(JournalqCode.NSR_REGISTER_ERR_BROKER_NOT_EXIST);
                 }
-                response = new Command(new RegisterAck().broker(brokerRegister));
                 break;
             case NsrCommandType.SUBSCRIBE:
                 Subscribe subscribe = (Subscribe) command.getPayload();

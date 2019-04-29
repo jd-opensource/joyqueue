@@ -214,7 +214,9 @@ public enum JournalqCode {
     //250~259 消费位置
     CONSUME_POSITION_NULL(250, "消费位置空异常"),
     CONSUME_POSITION_UPDATE_ERROR(251, "消费位置更新异常"),
-    CONSUME_POSITION_META_DATA_NULL(252, "消费位置元数据匹配异常");
+    CONSUME_POSITION_META_DATA_NULL(252, "消费位置元数据匹配异常"),
+
+    NSR_REGISTER_ERR_BROKER_NOT_EXIST(260,"BROKER 不存在");
 
 
     private static Map<Integer, JournalqCode> codes = new HashMap<Integer, JournalqCode>();
