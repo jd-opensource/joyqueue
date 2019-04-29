@@ -13,6 +13,8 @@
  */
 package com.jd.journalq.server.retry.model;
 
+import java.util.Arrays;
+
 /**
  * 重试消息
  *
@@ -99,5 +101,19 @@ public class RetryMessageModel {
 
     public void setSendTime(long sendTime) {
         this.sendTime = sendTime;
+    }
+
+    @Override
+    public String toString() {
+        return "RetryMessageModel{" +
+                "businessId='" + businessId + '\'' +
+                ", topic='" + topic + '\'' +
+                ", app='" + app + '\'' +
+                ", partition=" + partition +
+                ", index=" + index +
+                ", brokerMessage=" + Arrays.toString(brokerMessage) +
+                ", exception=" + Arrays.toString(exception) +
+                ", sendTime=" + sendTime +
+                '}';
     }
 }

@@ -211,6 +211,8 @@ public class DBMessageRetry implements MessageRetry<Long> {
                         }
                     });
         } catch (Exception e) {
+            logger.error("insertConsumeRetry error.", e);
+
             throw new JournalqException(JournalqCode.CN_DB_ERROR.getMessage() + ",topic:" + topic + ",app:" + app, e,
                     JournalqCode.CN_DB_ERROR.getCode());
         }
@@ -276,6 +278,8 @@ public class DBMessageRetry implements MessageRetry<Long> {
                 statement.setLong(2, target);
             });
         } catch (Exception e) {
+            logger.error("retrySuccess error.", e);
+
             throw new JournalqException(JournalqCode.CN_DB_ERROR, e);
         }
     }
@@ -327,6 +331,8 @@ public class DBMessageRetry implements MessageRetry<Long> {
                 } catch (SQLException ignored) {
                 }
             }
+            logger.error("retryError error.", e);
+
             throw new JournalqException(JournalqCode.CN_DB_ERROR, e);
         } finally {
             Close.close(connection, statement, null);
@@ -397,6 +403,8 @@ public class DBMessageRetry implements MessageRetry<Long> {
                 statement.setLong(2, target);
             });
         } catch (Exception e) {
+            logger.error("retryExpire error", e);
+
             throw new JournalqException(JournalqCode.CN_DB_ERROR, e);
         }
     }
@@ -437,6 +445,8 @@ public class DBMessageRetry implements MessageRetry<Long> {
             });
             return list;
         } catch (Exception e) {
+            logger.error("getRetry error.", e);
+
             throw new JournalqException(String.format("%s topic:%s,app:%s,count:%d", JournalqCode.CN_DB_ERROR.getMessage(), topic, app, count), e, JournalqCode.CN_DB_ERROR.getCode());
         }
     }
@@ -462,6 +472,8 @@ public class DBMessageRetry implements MessageRetry<Long> {
             });
             return count;
         } catch (Exception e) {
+            logger.error("countRetry error.", e);
+
             throw new JournalqException(JournalqCode.CN_DB_ERROR, e);
         } finally {
             if (logger.isDebugEnabled()) {
@@ -501,6 +513,8 @@ public class DBMessageRetry implements MessageRetry<Long> {
             });
             return retryMessageModel;
         } catch (Exception e) {
+            logger.error("getMessageById error", e);
+
             throw new JournalqException(String.format("%s topic:%s,app:%s,id:%d", JournalqCode.CN_DB_ERROR.getMessage(), topic, app, id), e, JournalqCode.CN_DB_ERROR.getCode());
         }
     }
