@@ -40,7 +40,7 @@
         <dependency>
             <groupId>com.jd.journalq</groupId>
             <artifactId>journalq-server-runtime</artifactId>
-            <version>${project.version}</version>
+            <version>${project.parent.version}</version>
             <type>tar.gz</type>
             <scope>provided</scope>
         </dependency>
@@ -61,6 +61,7 @@
                                 <goals>
                                     <goal>build</goal>
                                 </goals>
+
                             </execution>
                             <execution>
                                 <id>add-no-repo-and-version</id>
@@ -88,8 +89,9 @@
                             <pullNewerImage>false</pullNewerImage>
                             <tag>${project.version}</tag>
                             <buildArgs>
-                                <BENCHMARK_TARBALL>target/package-${project.version}.tar.gz</BENCHMARK_TARBALL>
+                                <JOURNALQ_TARBALL>target/journalq-server-runtime-${project.version}.tar.gz</JOURNALQ_TARBALL>
                             </buildArgs>
+                            <noCache>true</noCache>
                         </configuration>
                     </plugin>
                     <plugin>
