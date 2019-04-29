@@ -13,9 +13,11 @@
  */
 package com.jd.journalq.store.file;
 
+import com.jd.journalq.store.utils.BaseDirUtils;
 import com.jd.journalq.store.utils.MessageTestUtils;
 import com.jd.journalq.store.utils.PreloadBufferPool;
 import com.jd.journalq.toolkit.time.SystemClock;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,12 +44,19 @@ public class StoreFileTest {
         prepareBaseDir();
     }
 
+    @After
+    public void after() throws Exception {
+        destroyBaseDir();
+    }
+
     @Test
     public void timestampTest() throws IOException {
         long start = SystemClock.now();
         StoreFileImpl<ByteBuffer> storeFile = new StoreFileImpl<>(666L, base, 128, new StoreMessageSerializer(1024), new PreloadBufferPool(), 1024 * 1024 * 10);
         long timestamp = storeFile.timestamp();
+//        long timestamp = SystemClock.now();
         long end = SystemClock.now();
+        logger.info("Start: {}, timestamp: {}", start, timestamp);
         Assert.assertTrue(start <= timestamp);
         Assert.assertTrue(timestamp <= end);
 
@@ -126,4 +135,11 @@ public class StoreFileTest {
         logger.info("Base directory: {}.", base.getCanonicalPath());
         file = new File(base, "329369803896");
     }
+
+
+    private void destroyBaseDir() {
+        BaseDirUtils.destroyBaseDir(base);
+        base = null;
+    }
+
 }

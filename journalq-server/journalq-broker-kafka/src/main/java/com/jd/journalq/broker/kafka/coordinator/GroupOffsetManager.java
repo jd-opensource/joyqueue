@@ -112,7 +112,9 @@ public class GroupOffsetManager extends Service {
                             for (Map.Entry<Integer, IndexMetadataAndError> partitionEntry : topicEntry.getValue().entrySet()) {
                                 IndexMetadataAndError indexMetadataAndError = partitionEntry.getValue();
                                 result.put(topic, partitionEntry.getKey(),
-                                        new OffsetMetadataAndError(indexMetadataAndError.getIndex(), indexMetadataAndError.getMetadata(), KafkaErrorCode.journalqCodeFor(indexMetadataAndError.getError())));
+                                        new OffsetMetadataAndError(indexMetadataAndError.getIndex(),
+                                                indexMetadataAndError.getMetadata(),
+                                                KafkaErrorCode.journalqCodeFor(indexMetadataAndError.getError())));
                             }
                         }
                         latch.countDown();
