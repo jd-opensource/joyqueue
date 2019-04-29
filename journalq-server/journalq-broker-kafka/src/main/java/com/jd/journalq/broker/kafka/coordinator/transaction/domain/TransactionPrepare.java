@@ -171,6 +171,7 @@ public class TransactionPrepare extends TransactionDomain {
                 ", transactionId='" + transactionId + '\'' +
                 ", producerId=" + producerId +
                 ", producerEpoch=" + producerEpoch +
+                ", epoch=" + epoch +
                 ", timeout=" + timeout +
                 ", createTime=" + createTime +
                 '}';

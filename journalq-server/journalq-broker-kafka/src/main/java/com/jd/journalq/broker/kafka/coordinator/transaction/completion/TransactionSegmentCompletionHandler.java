@@ -71,6 +71,11 @@ public class TransactionSegmentCompletionHandler {
     }
 
     protected List<TransactionDomain> prepareTransactionDomains(List<TransactionDomain> transactionDomains) {
+        if (CollectionUtils.isEmpty(transactionDomains)) {
+            lastTime = SystemClock.now();
+            return Collections.emptyList();
+        }
+
         List<TransactionDomain> result = Lists.newLinkedList();
         for (int i = 0; i < transactionDomains.size(); i++) {
             long currentIndex = this.currentIndex + i;
@@ -145,14 +150,11 @@ public class TransactionSegmentCompletionHandler {
 
     protected void handleUnCompleteTransactions() throws Exception {
         List<TransactionDomain> transactionDomains = readTransactions();
-        if (CollectionUtils.isNotEmpty(transactionDomains)) {
-            transactionDomains = prepareTransactionDomains(transactionDomains);
-        }
+        prepareTransactionDomains(transactionDomains);
         handleUnCompleteTransactions(transactionDomains);
     }
 
     protected void handleUnCompleteTransactions(List<TransactionDomain> transactionDomains) {
-        long lastTime = Math.max(this.lastTime, SystemClock.now());
         for (Map.Entry<Long, UnCompletedTransaction> entry : unCompletedTransactionSortedMap.entrySet()) {
             long currentIndex = entry.getKey();
             UnCompletedTransaction unCompletedTransaction = entry.getValue();
@@ -163,7 +165,7 @@ public class TransactionSegmentCompletionHandler {
             if (unCompletedTransaction == null || unCompletedTransaction.isCompleted()) {
                 continue;
             }
-            if (unCompletedTransaction.isExpired(lastTime, unCompletedTransaction.getTimeout())) {
+            if (unCompletedTransaction.isExpired(this.lastTime, unCompletedTransaction.getTimeout())) {
                 if (unCompletedTransaction.isPrepared()) {
                     handleRetryTransaction(unCompletedTransaction);
                 } else {

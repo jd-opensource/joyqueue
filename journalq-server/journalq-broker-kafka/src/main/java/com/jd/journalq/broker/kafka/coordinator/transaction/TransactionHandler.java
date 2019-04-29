@@ -214,8 +214,10 @@ public class TransactionHandler extends Service {
             throw new JournalqException(String.format("prepare commit transaction failed, metadata: %s", transactionMetadata), JournalqCode.CN_UNKNOWN_ERROR.getCode());
         }
         transactionMetadata.transitionStateTo(TransactionState.PREPARE_COMMIT);
-        if (!transactionSynchronizer.commit(transactionMetadata, transactionMetadata.getPrepare(), transactionMetadata.getOffsets())) {
-            throw new JournalqException(String.format("commit transaction failed, metadata: %s", transactionMetadata), JournalqCode.CN_UNKNOWN_ERROR.getCode());
+        try {
+            transactionSynchronizer.commit(transactionMetadata, transactionMetadata.getPrepare(), transactionMetadata.getOffsets());
+        } catch (Exception e) {
+            logger.info("commit transaction failed, metadata: {}", transactionMetadata, e);
         }
         transactionMetadata.transitionStateTo(TransactionState.COMPLETE_COMMIT);
     }
@@ -225,8 +227,10 @@ public class TransactionHandler extends Service {
             throw new JournalqException(String.format("prepare abort transaction failed, metadata: %s", transactionMetadata), JournalqCode.CN_UNKNOWN_ERROR.getCode());
         }
         transactionMetadata.transitionStateTo(TransactionState.PREPARE_ABORT);
-        if (!transactionSynchronizer.abort(transactionMetadata, transactionMetadata.getPrepare())) {
-            throw new JournalqException(String.format("abort transaction failed, metadata: %s", transactionMetadata), JournalqCode.CN_UNKNOWN_ERROR.getCode());
+        try {
+            transactionSynchronizer.abort(transactionMetadata, transactionMetadata.getPrepare());
+        } catch (Exception e) {
+            logger.info("abort transaction failed, metadata: {}", transactionMetadata, e);
         }
         transactionMetadata.transitionStateTo(TransactionState.COMPLETE_ABORT);
     }

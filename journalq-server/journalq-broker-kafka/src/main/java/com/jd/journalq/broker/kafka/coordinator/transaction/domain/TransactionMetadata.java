@@ -268,6 +268,7 @@ public class TransactionMetadata extends com.jd.journalq.broker.coordinator.tran
                 ", timeout=" + timeout +
                 ", producerId=" + producerId +
                 ", producerEpoch=" + producerEpoch +
+                ", epoch=" + epoch +
                 ", createTime=" + createTime +
                 ", lastTime=" + lastTime +
                 ", state=" + state +

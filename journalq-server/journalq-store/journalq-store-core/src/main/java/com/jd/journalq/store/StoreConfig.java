@@ -27,7 +27,6 @@ import com.jd.journalq.toolkit.config.PropertySupplier;
 public class StoreConfig {
 
     public static final int DEFAULT_MESSAGE_FILE_SIZE = 128 * 1024 * 1024;
-//    public static final int DEFAULT_MESSAGE_FILE_SIZE = 1024 * 1024 * 12;
     public static final int DEFAULT_INDEX_FILE_SIZE = 512 * 1024;
     public static final int DEFAULT_THREAD_COUNT = 4;
     public static final int DEFAULT_PRE_LOAD_BUFFER_CORE_COUNT = 3;
