@@ -15,6 +15,8 @@ package com.jd.journalq.broker.election;
 
 import com.jd.journalq.domain.Broker;
 
+import java.util.Objects;
+
 /**
  * author: zhuduohui
  * email: zhuduohui@jd.com
@@ -100,5 +102,22 @@ public class DefaultElectionNode implements ElectionNode {
                 .append(", nodeId:").append(nodeId)
                 .append(", voteGranted:").append(voteGranted)
                 .append("}").toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DefaultElectionNode that = (DefaultElectionNode) o;
+        return priority == that.priority &&
+                nodeId == that.nodeId &&
+                voteGranted == that.voteGranted &&
+                state == that.state &&
+                address.equals(that.address);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(state, priority, address, nodeId, voteGranted);
     }
 }
