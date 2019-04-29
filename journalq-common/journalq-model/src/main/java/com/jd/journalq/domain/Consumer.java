@@ -290,7 +290,7 @@ public class Consumer extends Subscription {
             //出错次数
             private Integer errTimes = 3;
             //一个连接最多占用的分区数
-            private Integer maxPartitionNum = 3;
+            private Integer maxPartitionNum = Integer.MAX_VALUE;
             //黑名单
             private Set<String> blackList;
             //读取到重试队列比例(0~100)

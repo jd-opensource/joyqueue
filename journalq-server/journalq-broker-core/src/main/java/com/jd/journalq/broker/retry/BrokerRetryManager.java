@@ -32,6 +32,7 @@ import com.jd.journalq.server.retry.model.RetryMessageModel;
 import com.jd.journalq.server.retry.remote.RemoteMessageRetry;
 import com.jd.journalq.server.retry.remote.RemoteRetryProvider;
 import com.jd.journalq.toolkit.concurrent.EventListener;
+import com.jd.journalq.toolkit.retry.RetryPolicy;
 import com.jd.journalq.toolkit.service.Service;
 import com.jd.laf.extension.ExtensionManager;
 import org.slf4j.Logger;
@@ -79,6 +80,15 @@ public class BrokerRetryManager extends Service implements MessageRetry<Long>, B
         if (retryPolicyProvider == null) {
             retryPolicyProvider = (topic, app) -> {
                 Consumer consumerByTopicAndApp = nameService.getConsumerByTopicAndApp(topic, app);
+                if (consumerByTopicAndApp == null) {
+                    logger.debug("nameService.getConsumerByTopicAndApp is null by topic:[{}], app:[{}]", topic, app);
+                    return new RetryPolicy();
+                }
+                RetryPolicy retryPolicy = consumerByTopicAndApp.getRetryPolicy();
+                if (retryPolicy == null) {
+                    logger.debug("consumerByTopicAndApp.getRetryPolicy() is null by topic:[{}], app:[{}]", topic, app);
+                    return new RetryPolicy();
+                }
                 return consumerByTopicAndApp.getRetryPolicy();
             };
         }

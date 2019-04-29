@@ -141,6 +141,8 @@ public class LongPollingManager extends Service {
      * @return 成功标示
      */
     public boolean suspend(LongPolling longPolling) {
+        logger.debug("longPolling info:[{}], longPollingQueueSize:[{}]", longPolling, longPollingQueue.size());
+
         Consumer consumer = longPolling.getConsumer();
         if (consumer == null || longPolling.getLongPollingTimeout() == 0 || !isStarted()) {
             return false;
