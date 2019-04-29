@@ -45,11 +45,5 @@
             <artifactId>jackson-dataformat-xml</artifactId>
             <version>RELEASE</version>
         </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.dataformat</groupId>
-            <artifactId>jackson-dataformat-xml</artifactId>
-            <version>RELEASE</version>
-        </dependency>
-
     </dependencies>
 </project>

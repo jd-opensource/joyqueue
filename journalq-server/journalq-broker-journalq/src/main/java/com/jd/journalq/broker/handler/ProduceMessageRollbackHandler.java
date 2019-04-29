@@ -68,7 +68,8 @@ public class ProduceMessageRollbackHandler implements JournalqCommandHandler, Ty
 
         BooleanResponse checkResult = clusterManager.checkWritable(TopicName.parse(produceMessageRollback.getTopic()), produceMessageRollback.getApp(), connection.getHost());
         if (!checkResult.isSuccess()) {
-            logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport, produceMessageRollback.getTopic(), produceMessageRollback.getApp(), checkResult.getJournalqCode());
+            logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}",
+                    transport, produceMessageRollback.getTopic(), produceMessageRollback.getApp(), checkResult.getJournalqCode());
             return new Command(new ProduceMessageRollbackAck(CheckResultConverter.convertCommonCode(checkResult.getJournalqCode())));
         }
 

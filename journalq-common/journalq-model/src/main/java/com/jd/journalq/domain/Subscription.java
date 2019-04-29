@@ -83,7 +83,7 @@ public class Subscription implements Serializable {
             return value;
         }
 
-        public static final Type valueOf(byte value) {
+        public static Type valueOf(byte value) {
             for (Type type : Type.values()) {
                 if (value == type.value) {
                     return type;

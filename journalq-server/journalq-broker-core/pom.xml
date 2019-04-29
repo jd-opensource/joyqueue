@@ -66,10 +66,6 @@
             <artifactId>journalq-retry-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.jd.journalq</groupId>
-            <artifactId>journalq-retry-remote</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.jd.laf.web</groupId>
             <artifactId>laf-vertx-web</artifactId>
             <version>${laf-vertx.version}</version>

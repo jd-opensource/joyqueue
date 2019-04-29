@@ -35,7 +35,7 @@ public interface TransportClient extends LifeCycle {
      * @return 通道
      * @throws TransportException
      */
-    Transport createTransport(final String address) throws TransportException;
+    Transport createTransport(String address) throws TransportException;
 
     /**
      * 创建连接，阻塞直到成功或失败
@@ -45,7 +45,7 @@ public interface TransportClient extends LifeCycle {
      * @return 通道
      * @throws TransportException
      */
-    Transport createTransport(final String address, final long connectionTimeout) throws TransportException;
+    Transport createTransport(String address, long connectionTimeout) throws TransportException;
 
     /**
      * 创建连接，阻塞直到成功或失败
@@ -54,7 +54,7 @@ public interface TransportClient extends LifeCycle {
      * @return 通道
      * @throws TransportException
      */
-    Transport createTransport(final SocketAddress address) throws TransportException;
+    Transport createTransport(SocketAddress address) throws TransportException;
 
     /**
      * 创建连接
@@ -64,7 +64,7 @@ public interface TransportClient extends LifeCycle {
      * @return 通道
      * @throws TransportException
      */
-    Transport createTransport(final SocketAddress address, final long connectionTimeout) throws TransportException;
+    Transport createTransport(SocketAddress address, long connectionTimeout) throws TransportException;
 
     /**
      * 添加监听器
