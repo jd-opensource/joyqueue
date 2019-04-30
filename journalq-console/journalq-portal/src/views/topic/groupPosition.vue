@@ -9,13 +9,13 @@
 import apiRequest from '../../utils/apiRequest.js'
 import myTable from '../../components/common/myTable.vue'
 import crud from '../../mixins/crud.js'
-import PositionExpand from './positionExpand'
+import PositionExpand from "./positionExpand";
 
 export default {
   name: 'group-position',
   components: {
     PositionExpand,
-    myTable
+    myTable,
   },
   props: {
     data: {
@@ -30,7 +30,7 @@ export default {
     return {
       partitionGroup: {},
       urls: {
-        search: '/monitor/broker/group/metric'
+        search: '/monitor/broker/group/metric',
       },
       searchData: {
         keyword: ''
@@ -42,10 +42,11 @@ export default {
             type: 'expand',
             width: 50,
             render: (h, params) => {
+              console.log(params)
               return h(PositionExpand, {
-                props: {
-                  rowData: params.row.partitionPositionList
-                }})
+              props: {
+                rowData: params.row.partitionPositionList,
+              }})
             }
           },
           {
@@ -68,7 +69,7 @@ export default {
             title: '位移差距',
             key: 'rightPositionInterval'
           }
-        ]
+        ],
         // btns: [
         // ]
       },
@@ -80,14 +81,14 @@ export default {
       this.multipleSelection = val
       this.$emit('on-choosed-broker', val)
     },
-    leader (item) {
-      let data = item
+    leader(item) {
+      let data = item;
       apiRequest.post(this.urls.leader, {}, data).then((data) => {
-        if (data.code === 200) {
-          this.$Message.success('更新成功')
-          this.getList()
+        if(data.code === 200) {
+          this.$Message.success('更新成功');
+          this.getList();
         } else {
-          this.$Message.error('更新失败')
+          this.$Message.error('更新失败');
         }
       })
     },
@@ -99,7 +100,7 @@ export default {
         groupNo: this.partitionGroup.groupNo,
         subscribe: {
           topic: this.partitionGroup.topic,
-          namespace: this.partitionGroup.namespace
+          namespace: this.partitionGroup.namespace,
         }
       }
       apiRequest.post(this.urlOrigin.search, {}, data).then((data) => {

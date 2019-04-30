@@ -16,12 +16,12 @@
     </div>
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
               @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange" @on-view-detail="goDetail"
-              @on-edit="edit" @on-edit-label="editLabel" @on-add-brokerGroup="addBrokerGroup" @on-del="del">
+              @on-add-brokerGroup="addBrokerGroup" @on-del="del">
     </my-table>
     <!--添加-->
-    <my-dialog :dialog="addDialog" class="add-dialog" @on-dialog-cancel="dialogCancel('addDialog')">
+    <my-dialog :dialog="addDialog" class="add-dialog" @on-dialog-cancel="dialogCancel('addDialog')" :styles="{top: '40px'}">
       <topic-form @on-dialog-cancel="dialogCancel('addDialog')" :type="$store.getters.addFormType"
-                  :brokerUrls="addBrokerUrls" :brokerColData="addBrokerColData"/>
+                  :addBrokerUrls="addBrokerUrls" :addBrokerColData="addBrokerColData"/>
     </my-dialog>
     <!--编辑-->
     <!--<my-dialog :dialog="editDialog" @on-dialog-confirm="editConfirm()" @on-dialog-cancel="dialogCancel('editDialog')">-->
@@ -72,7 +72,7 @@ export default {
       }
     },
     addBrokerColData: {
-      type: Object,
+      type: Array,
       default () {
         return [
           {
@@ -209,7 +209,7 @@ export default {
       addDialog: {
         visible: false,
         title: '添加主题',
-        width: 700,
+        width: 800,
         showFooter: false
       },
       addData: {},

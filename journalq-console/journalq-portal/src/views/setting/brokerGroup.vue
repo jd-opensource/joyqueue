@@ -65,7 +65,7 @@
     </my-dialog>
     <!--添加broker-->
     <my-dialog :dialog="addBrokerDialog" @on-dialog-cancel="addBrokerCancel()">
-      <add-broker :group="group" :data="brokerData" ref="broker" :urls="brokerUrls" :colData="brokerColData"></add-broker>
+      <add-broker :group="group" :data="brokerData" ref="broker" :urls="addBrokerUrls" :colData="addBrokerColData"></add-broker>
     </my-dialog>
   </div>
 </template>
@@ -86,7 +86,7 @@ export default {
   },
   mixins: [ crud ],
   props: {
-    brokerUrls: {
+    addBrokerUrls: {
       type: Object,
       default () {
         return {
@@ -94,8 +94,8 @@ export default {
         }
       }
     },
-    brokerColData: {
-      type: Object,
+    addBrokerColData: {
+      type: Array,
       default () {
         return [
           {
@@ -158,7 +158,7 @@ export default {
         // 表格操作，如果需要根据特定值隐藏显示， 设置bindKey对应的属性名和bindVal对应的属性值
         btns: [
           {
-            txt: '查看详情',
+            txt: '详情',
             method: 'on-detail'
           },
           {
@@ -221,7 +221,8 @@ export default {
       this.addData.name = ''
     },
     goDetail (item) {
-      this.$router.push({name: `/${this.curLang}/setting/brokerGroup/detail`, query: {id: item.id, code: item.code, name: item.name}})
+      this.$router.push({name: `/${this.curLang}/setting/brokerGroup/detail`,
+        query: {id: item.id, code: item.code, name: item.name}})
     },
     addBroker (item, index) {
       this.group = {

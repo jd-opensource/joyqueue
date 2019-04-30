@@ -32,7 +32,7 @@ export default {
       type: Object
     },
     colData: {
-      type: Object
+      type: Array
     }
   },
   mixins: [ crud ],
@@ -58,6 +58,8 @@ export default {
       this.getListByGroupAndbrokers(brokerGroupId, undefined)
     },
     getListByGroupAndbrokers (brokerGroupId, brokers) {
+      console.log(11)
+      console.log(this.urls)
       let query = {}
       if (brokerGroupId === undefined || brokerGroupId === 0) {
         this.searchData.brokerGroupIds = []
@@ -79,7 +81,7 @@ export default {
         },
         query: query
       }
-      apiRequest.post(this.urlOrigin.search, {}, data).then((data) => {
+      apiRequest.post(this.urls.search, {}, data).then((data) => {
         if (data === '') {
           return
         }

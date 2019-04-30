@@ -88,8 +88,16 @@ export default {
   },
   mixins: [crud],
   props: {
+    searchData: {
+      type: Object,
+      default: function () {
+        return {
+          keyword: ''
+        }
+      }
+    },
     urls: {
-      type: Array,
+      type: Object,
       default: function () {
         return {
           search: '/broker/search',
@@ -152,9 +160,6 @@ export default {
   },
   data () {
     return {
-      searchData: {
-        keyword: ''
-      },
       tableData: {
         rowData: [],
         colData: this.colData,
@@ -177,7 +182,7 @@ export default {
         visible: false,
         title: 'broker详情',
         showFooter: false,
-        width: '1100px'
+        width: '1200px'
       },
       retryTypeList: [
         {key: 'DB', value: 'DB'},

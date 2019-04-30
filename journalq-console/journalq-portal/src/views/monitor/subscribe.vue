@@ -90,6 +90,7 @@ export default {
           subscribeType: this.type
         }
       }
+
       for (var key in this.search) {
         if (this.search.hasOwnProperty(key)) {
           data.query[key] = this.search[key]
