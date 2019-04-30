@@ -63,7 +63,6 @@ public class BrokerGroupServiceImpl extends PageServiceSupport<BrokerGroup, QBro
      * 增加绑定关系
      * @param model
      */
-    @Override
     public void updateBroker(Broker model){
         if (model != null && model.getGroup() != null) {
             BrokerGroupRelated brokerGroupRelated = new BrokerGroupRelated();

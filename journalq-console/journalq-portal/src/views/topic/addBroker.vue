@@ -8,6 +8,7 @@
     <my-table :optional="true" :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
               @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange">
     </my-table>
+
   </div>
 </template>
 
@@ -27,24 +28,38 @@ export default {
       default () {
         return {}
       }
-    },
-    urls: {
-      type: Object
-    },
-    colData: {
-      type: Array
     }
   },
   mixins: [ crud ],
   data () {
     return {
+      urls: {
+        search: '/broker/search'
+      },
       searchData: {
         keyword: '',
         brokerGroupIds: []
       },
       tableData: {
         rowData: [{}],
-        colData: this.colData
+        colData: [
+          {
+            title: '分组',
+            key: 'group.code'
+          },
+          {
+            title: 'ID',
+            key: 'id'
+          },
+          {
+            title: 'IP',
+            key: 'ip'
+          },
+          {
+            title: '端口',
+            key: 'port'
+          }
+        ]
       },
       multipleSelection: []
     }
@@ -58,8 +73,6 @@ export default {
       this.getListByGroupAndbrokers(brokerGroupId, undefined)
     },
     getListByGroupAndbrokers (brokerGroupId, brokers) {
-      console.log(11)
-      console.log(this.urls)
       let query = {}
       if (brokerGroupId === undefined || brokerGroupId === 0) {
         this.searchData.brokerGroupIds = []
@@ -81,7 +94,7 @@ export default {
         },
         query: query
       }
-      apiRequest.post(this.urls.search, {}, data).then((data) => {
+      apiRequest.post(this.urlOrigin.search, {}, data).then((data) => {
         if (data === '') {
           return
         }

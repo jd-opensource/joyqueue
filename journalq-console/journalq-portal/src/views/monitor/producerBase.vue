@@ -220,7 +220,7 @@ export default {
       subscribeDialog: {
         visible: false,
         title: '添加生产者',
-        width: '850',
+        width: '700',
         showFooter: false,
         doSearch: false,
         colData: this.subscribeDialogColData.map((element) => Object.assign({}, element)), // 订阅框 列表表头,

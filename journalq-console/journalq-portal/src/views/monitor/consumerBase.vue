@@ -11,10 +11,10 @@
       </d-button>
     </div>
 
-    <my-table :data="tableData" :showPin="showTablePin" :page="page"
+    <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
               @on-detail-chart="goDetailChart" @on-current-change="handleCurrentChange" @on-detail="openDetailDialog"
               @on-msg-preview="openMsgPreviewDialog" @on-msg-detail="openMsgDetailDialog" @on-config="openConfigDialog"
-              @on-performance-chart="goPerformanceChart" @on-summary-chart="goSummaryChart" @on-size-change="handleSizeChange"/>
+              @on-performance-chart="goPerformanceChart" @on-summary-chart="goSummaryChart"/>
 
     <!--Consumer subscribe dialog-->
     <my-dialog :dialog="subscribeDialog" @on-dialog-cancel="dialogCancel('subscribeDialog')">
@@ -272,7 +272,7 @@ export default {
       subscribeDialog: {
         visible: false,
         title: '添加消费者',
-        width: '950',
+        width: '900',
         showFooter: false,
         doSearch: false,
         colData: this.subscribeDialogColData, // 订阅框 列表表头,

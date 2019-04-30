@@ -58,6 +58,10 @@ public class Topic extends BaseNsrModel {
      */
     private boolean archive = false;
     /**
+     * 消息类型描述
+     */
+    private String description;
+    /**
      * 类型 0:topic,1:sequential,2:broadcast,
      */
     private int type;
@@ -143,6 +147,14 @@ public class Topic extends BaseNsrModel {
 
     public void setElectType(int electType) {
         this.electType = electType;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public int getType() {
