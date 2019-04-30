@@ -8,7 +8,7 @@
     #fafafa; min-height: 200px; text-align: left; padding: 20px 30px 40px 50px;">
       <div class="step1" v-show="current===0">
         <div class="stepForm1">
-          <d-form ref="form1" :model="formData" :rules="rules.rule1" label-width="110px" style="height: 420px; overflow-y:auto; width: 100%">
+          <d-form ref="form1" :model="formData" :rules="rules.rule1" label-width="110px" style="height: 350px; overflow-y:auto; width: 100%">
             <d-form-item label="主题英文名：" :error="error.code" prop="code">
               <d-input v-model="formData.code" placeholder="仅支持英文字母大小写、数字、-、_和/" style="width: 70%"></d-input>
             </d-form-item>
@@ -56,9 +56,8 @@
       </div>
       <div class="step2" v-show="current===1">
         <div class="stepForm2">
-          <d-form ref="form" :model="formData" :rules="rules.rule2" label-width="100px" style="overflow-y:auto; height:420px">
-            <add-broker ref="brokers" :model="formData.brokers" @on-choosed-broker="choosedBroker"
-                        :data="formData" :urls="addBrokerUrls" :colData="addBrokerColData"/>
+          <d-form ref="form" :model="formData" :rules="rules.rule2" label-width="100px" style="overflow-y:auto; height:350px">
+            <add-broker ref="brokers" :model="formData.brokers" @on-choosed-broker="choosedBroker" :data="formData"/>
           </d-form>
         </div>
         <div class="step-actions" style="text-align: center">
@@ -108,12 +107,6 @@ export default {
           brokers: []
         }
       }
-    },
-    addBrokerUrls: {
-      type: Object
-    },
-    addBrokerColData: {
-      type: Array
     }
   },
   data () {
@@ -196,8 +189,6 @@ export default {
       }
     },
     handlerBrokerGroupChange (data) {
-      console.log(22)
-      console.log(data)
       this.$refs.brokers.getListByGroup(data)
     },
     getNamespaces () {

@@ -2,7 +2,6 @@
   <div>
     <div class="ml20 mt30">
       <d-input v-model="searchData.keyword" placeholder="请输入代码/名称/来源" class="left mr10" style="width:213px">
-        <span slot="prepend">关键词</span>
         <!--<icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>-->
       </d-input>
 

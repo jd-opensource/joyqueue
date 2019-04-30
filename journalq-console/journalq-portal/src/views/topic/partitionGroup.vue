@@ -5,7 +5,7 @@
         扩容
         <icon name="plus-circle" style="margin-left: 5px;"/>
       </d-button>
-      <slot name="extendBtn"></slot>
+      <slot name="extendBtns"></slot>
       <d-button type="primary" v-if="showBrokerChart" @click="goBrokerChart" class="left mr10">
         Broker监控
         <icon name="bar-chart" style="margin-left: 5px;"/>
