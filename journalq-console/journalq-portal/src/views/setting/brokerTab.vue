@@ -1,7 +1,8 @@
 <template>
   <div>
     <div class="ml20 mt30">
-      <d-input v-model="searchData.keyword" placeholder="请输入ID/分组编码/IP" class="left mr10" style="width:213px">
+      <d-input v-model="searchData.keyword" placeholder="请输入ID/分组编码/IP" class="left mr10" style="width:300px">
+        <span slot="prepend">关键词</span>
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
       <!--<d-button type="primary" @click="remove">移除<icon name="minus-circle" style="margin-left: 5px;"></icon></d-button>-->
