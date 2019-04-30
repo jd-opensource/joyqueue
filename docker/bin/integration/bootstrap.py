@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-
-#! python27
+# !/usr/bin/env python3
 
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,11 +14,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
+import os
+from workflow import Workflow
+from configuration import Configuration
 
 
 def bootstrap():
-    print 'started';
+    config_file = os.path.dirname(__file__)+'/bootstrap.conf'
+    configuration = Configuration(config_file)
+    workflow = Workflow(configuration)
+    workflow.run()
 
 
 if __name__ == '__main__':
