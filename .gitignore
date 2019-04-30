@@ -1,7 +1,7 @@
 *.iml
 .idea/
 .vertx/
-target
+target/
 h2-db-journalq
 .classpath
 .settings

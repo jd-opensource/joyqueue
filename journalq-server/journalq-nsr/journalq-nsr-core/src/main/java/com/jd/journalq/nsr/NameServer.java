@@ -235,7 +235,8 @@ public class NameServer extends Service implements NameService, PropertySupplier
             TopicName topic = subscription.getTopic();
             String app = subscription.getApp();
             TopicConfig topicConfig = getTopicConfig(topic);
-            if (null == topicConfig){
+            if (null == topicConfig) {
+                logger.warn("topic [{}] may be not exists.", topic);
                 return null;
             }
             Map<String, Consumer> consumerConfigMap = metaCache.consumerConfigs.get(topic);
@@ -446,6 +447,7 @@ public class NameServer extends Service implements NameService, PropertySupplier
             broker.setDataCenter(getDataCenter(brokerIp).getCode());
             metaManager.addBroker(broker);
         }
+
         return broker;
     }
 

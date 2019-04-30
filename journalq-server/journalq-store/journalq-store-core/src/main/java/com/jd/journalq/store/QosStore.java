@@ -85,13 +85,13 @@ public class QosStore implements PartitionGroupStore {
                 }
                 if (targetDeleteTimeline <= 0) {
                     // 依次删除每个分区p索引中最左侧的文件 满足当前分区p的最小消费位置之前的文件块
-                    if (indexStore.fileCount() > 1 && indexStore.meetMinStoreFile(minPartitionIndex)) {
+                    if (indexStore.fileCount() > 1 && indexStore.meetMinStoreFile(minPartitionIndex) > 1) {
                         deletedSize += indexStore.physicalDeleteLeftFile();
                         logger.info("Delete PositioningStore physical index file by size, partition: <{}>, offset position: <{}>", p, minPartitionIndex);
                     }
                 } else {
                     // 依次删除每个分区p索引中最左侧的文件 满足当前分区p的最小消费位置之前的以及最长时间戳的文件块
-                    if (indexStore.fileCount() > 1 && indexStore.isEarly(targetDeleteTimeline, minPartitionIndex)) {
+                    if (indexStore.fileCount() > 1 && indexStore.meetMinStoreFile(minPartitionIndex) > 1 && indexStore.isEarly(targetDeleteTimeline, minPartitionIndex)) {
                         deletedSize += indexStore.physicalDeleteLeftFile();
                         logger.info("Delete PositioningStore physical index file by time, partition: <{}>, offset position: <{}>", p, minPartitionIndex);
                     }

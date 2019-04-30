@@ -588,8 +588,8 @@ public class PositioningStore<T> implements Closeable {
         return storeFileMap.size();
     }
 
-    public boolean meetMinStoreFile(long minIndexedPhysicalPosition) {
-        return storeFileMap.headMap(minIndexedPhysicalPosition).size() > 0;
+    public int meetMinStoreFile(long minIndexedPhysicalPosition) {
+        return storeFileMap.headMap(minIndexedPhysicalPosition).size();
     }
 
     public boolean isEarly(long timestamp, long minIndexedPhysicalPosition) {

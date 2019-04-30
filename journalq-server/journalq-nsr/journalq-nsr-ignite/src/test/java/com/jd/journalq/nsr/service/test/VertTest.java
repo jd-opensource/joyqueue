@@ -23,16 +23,16 @@ import io.vertx.ext.web.Router;
  * Date: 2018/9/20
  */
 public class VertTest {
-    public static void main(String[] args){
+    public static void main(String[] args) {
         Vertx vertx = Vertx.vertx();
         HttpServer server = vertx.createHttpServer();
         Router router = Router.router(vertx);
-        router.get("/aa").handler(routingContext -> {
+        router.get("/hello").handler(routingContext -> {
             HttpServerRequest request = routingContext.request();
             System.out.println(request.params().toString());
             routingContext.response().end("helloworld");
         });
-        server.requestHandler(request->router.accept(request)).listen(8080);
+        server.requestHandler(request -> router.accept(request)).listen(8080);
         server.close();
     }
 }
