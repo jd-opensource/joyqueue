@@ -65,7 +65,7 @@
     </my-dialog>
     <!--添加broker-->
     <my-dialog :dialog="addBrokerDialog" @on-dialog-cancel="addBrokerCancel()">
-      <add-broker :group="group" :data="brokerData" ref="broker" :urls="addBrokerUrls" :colData="addBrokerColData"></add-broker>
+      <add-broker ref="broker" :urls="addBrokerUrls" :colData="addBrokerColData" :btns="addBrokerBtns"></add-broker>
     </my-dialog>
   </div>
 </template>
@@ -73,7 +73,7 @@
 <script>
 import myTable from '../../components/common/myTable.vue'
 import myDialog from '../../components/common/myDialog.vue'
-import addBroker from './addBroker.vue'
+import addBroker from '../topic/addBroker.vue'
 import crud from '../../mixins/crud.js'
 import apiRequest from '../../utils/apiRequest.js'
 
@@ -90,7 +90,8 @@ export default {
       type: Object,
       default () {
         return {
-          search: '/broker/search'
+          search: '/broker/search',
+          addBroker: '/brokerGroup/updateBroker'
         }
       }
     },
@@ -98,10 +99,6 @@ export default {
       type: Array,
       default () {
         return [
-          {
-            title: '分组',
-            key: 'group.code'
-          },
           {
             title: 'ID',
             key: 'id'
@@ -113,6 +110,37 @@ export default {
           {
             title: '端口',
             key: 'port'
+          },
+          {
+            title: '分组',
+            key: 'group.code'
+          }
+        ]
+      }
+    },
+    addBrokerBtns: {
+      type: Array,
+      default () {
+        return [
+          {
+            txt: '添加',
+            method: function (item) {
+              let that = this.$parent
+              let parmas = {
+                id: item.id,
+                group: that.$parent.$parent.$parent.group
+              }
+              that.$Dialog.confirm({
+                title: '提示',
+                content: '确定要添加吗？'
+              }).then(() => {
+                apiRequest.put(that.urls.addBroker + '/' + item.id, null, parmas).then((data) => {
+                  that.getList()
+                })
+              })
+            },
+            bindKey: 'status',
+            bindVal: 1
           }
         ]
       }
@@ -231,7 +259,7 @@ export default {
       }
       this.addBrokerDialog.visible = true
       this.$nextTick(() => {
-        this.$refs.broker.getList()
+        this.$refs.broker.getList(item.id)
       })
     },
     submit () {

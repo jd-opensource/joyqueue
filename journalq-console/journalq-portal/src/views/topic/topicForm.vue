@@ -58,7 +58,8 @@
         <div class="stepForm2">
           <d-form ref="form" :model="formData" :rules="rules.rule2" label-width="100px" style="overflow-y:auto; height:420px">
             <add-broker ref="brokers" :model="formData.brokers" @on-choosed-broker="choosedBroker"
-                        :data="formData" :urls="addBrokerUrls" :colData="addBrokerColData"/>
+                        :urls="addBrokerUrls" :colData="addBrokerColData">
+            </add-broker>
           </d-form>
         </div>
         <div class="step-actions" style="text-align: center">
@@ -196,8 +197,6 @@ export default {
       }
     },
     handlerBrokerGroupChange (data) {
-      console.log(22)
-      console.log(data)
       this.$refs.brokers.getListByGroup(data)
     },
     getNamespaces () {

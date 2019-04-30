@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="ml20 mt10">
-      <d-input v-model="searchData.keyword" placeholder="请输入要查询的IP/ID" class="left" style="width: 60%">
+      <d-input v-model="searchData.keyword" placeholder="请输入要查询的IP/ID/标签" class="left" style="width: 60%">
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
     </div>
@@ -22,16 +22,19 @@ export default {
     myTable
   },
   props: {
-    data: {
-      type: Object,
-      default () {
-        return {}
-      }
-    },
+    // data: {
+    //   type: Object,
+    //   default () {
+    //     return {}
+    //   }
+    // },
     urls: {
       type: Object
     },
     colData: {
+      type: Array
+    },
+    btns: {
       type: Array
     }
   },
@@ -44,7 +47,8 @@ export default {
       },
       tableData: {
         rowData: [{}],
-        colData: this.colData
+        colData: this.colData,
+        btns: this.btns
       },
       multipleSelection: []
     }
@@ -58,10 +62,8 @@ export default {
       this.getListByGroupAndbrokers(brokerGroupId, undefined)
     },
     getListByGroupAndbrokers (brokerGroupId, brokers) {
-      console.log(11)
-      console.log(this.urls)
       let query = {}
-      if (brokerGroupId === undefined || brokerGroupId === 0) {
+      if (!brokerGroupId) {
         this.searchData.brokerGroupIds = []
         query = {
           keyword: this.searchData.keyword
@@ -95,7 +97,7 @@ export default {
         this.tableData.rowData = data.data
         this.tableData.rowData.forEach(element => {
           element['isChecked'] = false
-          if (brokers !== undefined && brokers.length > 0) {
+          if (brokers && brokers.length > 0) {
             for (var broker of brokers) {
               if (broker.id === element.id) {
                 element['isChecked'] = true
@@ -108,8 +110,6 @@ export default {
     }
   },
   mounted () {
-    // this.searchData.brokerGroupIds = this.data.brokerGroups.join(',')
-    // this.getList();
   }
 }
 </script>
