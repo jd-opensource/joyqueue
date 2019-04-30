@@ -118,7 +118,7 @@ public class TopicServiceImpl implements TopicService {
                     replica.setRole(PartitionGroupReplica.ROLE_DYNAMIC);
                 }
                 partitionGroup.getReplicaGroups().add(replica);
-                if ((j-k)==(topic.getReplica()-1))break;
+                if ((j-k)==brokers.size())break;
             }
             partitionGroup.setRecLeader(Integer.valueOf(String.valueOf(brokers.get(k).getId())));
         }
