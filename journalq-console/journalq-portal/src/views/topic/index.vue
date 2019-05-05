@@ -63,6 +63,22 @@ export default {
   },
   mixins: [ crud ],
   props: {
+    btns: {
+      type: Array,
+      default () {
+        return [
+          {
+            txt: '详情',
+            method: 'on-view-detail'
+          },
+          {
+            txt: '删除',
+            method: 'on-del',
+            isAdmin: true
+          }
+        ]
+      }
+    },
     addBrokerUrls: {
       type: Object,
       default () {
@@ -173,38 +189,8 @@ export default {
               }, txt)
             }
           }
-          // {
-          //   title:'标签',
-          //   key: 'labels'
-          // },
-          // {
-          //   title:'备注',
-          //   key: 'description'
-          // },
         ],
-        btns: [
-          {
-            txt: '详情',
-            method: 'on-view-detail'
-          },
-          // {
-          //   txt: '编辑',
-          //   method: 'on-edit'
-          // },
-          // {
-          //   txt: '编辑标签',
-          //   method: 'on-edit-label'
-          // },
-          // {
-          //   txt: '添加分组',
-          //   method: 'on-add-brokerGroup'
-          // },
-          {
-            txt: '删除',
-            method: 'on-del',
-            isAdmin: true
-          }
-        ]
+        btns: this.btns
       },
       addDialog: {
         visible: false,
