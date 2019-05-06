@@ -84,7 +84,7 @@ public class ManageServer extends Service {
     private NamespaceService namespaceService;
     private PartitionGroupService partitionGroupService;
     private PartitionGroupReplicaService partitionGroupReplicaService;
-    private int manager_port = 0;
+    private int managerPort = 0;
     public ManageServer(TopicService topicService,
                         ProducerService producerService,
                         ConsumerService consumerService,
@@ -107,8 +107,8 @@ public class ManageServer extends Service {
         this.partitionGroupReplicaService = partitionGroupReplicaService;
     }
 
-    public void setManager_port(int manager_port) {
-        this.manager_port = manager_port;
+    public void setManagerPort(int managerPort) {
+        this.managerPort = managerPort;
     }
 
     @Override
@@ -791,7 +791,7 @@ public class ManageServer extends Service {
             }
         });
 
-        server.requestHandler(request -> router.accept(request)).listen(manager_port);
+        server.requestHandler(request -> router.accept(request)).listen(managerPort);
     }
 
     @Override
