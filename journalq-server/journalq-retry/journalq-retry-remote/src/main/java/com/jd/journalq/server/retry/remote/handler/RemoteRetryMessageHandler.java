@@ -31,6 +31,7 @@ import com.jd.journalq.server.retry.remote.command.GetRetryCount;
 import com.jd.journalq.server.retry.remote.command.GetRetryCountAck;
 import com.jd.journalq.server.retry.remote.command.PutRetry;
 import com.jd.journalq.server.retry.remote.command.UpdateRetry;
+import com.jd.journalq.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,6 +57,8 @@ public class RemoteRetryMessageHandler implements CommandHandler {
     public Command handle(Transport transport, Command command) throws TransportException {
         logger.debug("Receive command:[{}]", command);
 
+        long startTime = SystemClock.now();
+
         try {
             switch (command.getHeader().getType()) {
                 case CommandType.PUT_RETRY:
@@ -76,6 +79,12 @@ public class RemoteRetryMessageHandler implements CommandHandler {
         } catch (Exception e) {
             logger.error("Message retry exception, transport: {}", transport, e);
             return BooleanAck.build(JournalqCode.CN_UNKNOWN_ERROR.getCode(), JournalqCode.CN_UNKNOWN_ERROR.getMessage());
+        }finally {
+            long endTime = SystemClock.now();
+
+            if (endTime - startTime > 100) {
+                logger.info("handle retry more than 100ms, Command:[{}]", command);
+            }
         }
     }
 

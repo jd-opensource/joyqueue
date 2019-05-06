@@ -382,10 +382,6 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
         //选择消费策略
         switch (choiceConsumeStrategy(consumerPolicy)) {
             case DEFAULT:
-                synchronized (lock) {
-                    isSuccess = partitionConsumption.acknowledge(locations, consumer, isSuccessAck);
-                }
-                break;
             case SEQUENCE:
                 synchronized (lock) {
                     isSuccess = partitionConsumption.acknowledge(locations, consumer, isSuccessAck);
