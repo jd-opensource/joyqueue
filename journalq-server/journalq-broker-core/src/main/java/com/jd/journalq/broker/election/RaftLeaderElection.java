@@ -798,6 +798,7 @@ public class RaftLeaderElection extends LeaderElection  {
      * 或者transfer leader到另外的节点
      * @param term 任期
      */
+    @Override
     public synchronized void stepDown(int term){
         logger.info("Partition group {}/node {} step down, term is {}, " +
                     "current term is {}, vote for is {}",

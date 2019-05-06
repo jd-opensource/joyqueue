@@ -69,8 +69,8 @@
             <property name="ignorePattern" value="^ *\* *https?://[^ ]+$"/>
         </module>
 
-        <module name="AvoidStarImport" />
-
+     <!--   <module name="AvoidStarImport" />
+-->
         <!-- Unused imports are forbidden -->
         <module name="UnusedImports" />
 
