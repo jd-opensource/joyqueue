@@ -34,10 +34,11 @@ import java.util.concurrent.TimeoutException;
 
 
 public class AsyncHttpClient {
-    private static CloseableHttpAsyncClient httpclient = HttpAsyncClients.custom().setDefaultRequestConfig(RequestConfig.custom()
-            .setConnectTimeout(600)
-            .setSocketTimeout(700)
-            .setConnectionRequestTimeout(500).build()).build();
+    private static CloseableHttpAsyncClient httpclient = HttpAsyncClients.custom()
+                                                        .setDefaultRequestConfig(RequestConfig.custom()
+                                                        .setConnectTimeout(600)
+                                                        .setSocketTimeout(700)
+                                                        .setConnectionRequestTimeout(500).build()).build();
     static {
         httpclient.start();
     }
