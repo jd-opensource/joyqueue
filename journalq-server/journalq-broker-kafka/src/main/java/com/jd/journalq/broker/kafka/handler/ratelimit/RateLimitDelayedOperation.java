@@ -47,16 +47,11 @@ public class RateLimitDelayedOperation extends AbstractDelayedOperation {
     }
 
     @Override
-    protected boolean tryComplete() {
-        return false;
-    }
-
-    @Override
     protected void onComplete() {
         try {
             if (response != null) {
                 if (response.getPayload() instanceof KafkaRequestOrResponse) {
-                    ((KafkaRequestOrResponse) response.getPayload()).setThrottleTimeMs((int) dealyMs);
+                    ((KafkaRequestOrResponse) response.getPayload()).setThrottleTimeMs(dealyMs);
                 }
                 transport.acknowledge(request, response);
             }

@@ -56,8 +56,8 @@ public class GroupBalanceManager extends Service {
     public GroupBalanceManager(KafkaConfig config, GroupMetadataManager groupMetadataManager) {
         this.config = config;
         this.groupMetadataManager = groupMetadataManager;
-        this.joinPurgatory = new DelayedOperationManager<>("kafkaRebalance");
-        this.heartbeatPurgatory = new DelayedOperationManager<>("kafkaHeartbeat");
+        this.joinPurgatory = new DelayedOperationManager<>("kafka-rebalance");
+        this.heartbeatPurgatory = new DelayedOperationManager<>("kafka-heartbeat");
     }
 
     @Override

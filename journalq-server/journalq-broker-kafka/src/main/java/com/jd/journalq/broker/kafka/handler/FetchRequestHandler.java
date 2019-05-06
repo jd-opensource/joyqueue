@@ -15,6 +15,7 @@ package com.jd.journalq.broker.kafka.handler;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.jd.journalq.broker.buffer.Serializer;
 import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.consumer.Consume;
@@ -42,6 +43,10 @@ import com.jd.journalq.network.session.Consumer;
 import com.jd.journalq.network.transport.Transport;
 import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.response.BooleanResponse;
+import com.jd.journalq.toolkit.delay.AbstractDelayedOperation;
+import com.jd.journalq.toolkit.delay.DelayedOperation;
+import com.jd.journalq.toolkit.delay.DelayedOperationKey;
+import com.jd.journalq.toolkit.delay.DelayedOperationManager;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,6 +71,7 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
     private ClusterManager clusterManager;
     private MessageConvertSupport messageConvertSupport;
     private SessionManager sessionManager;
+    private DelayedOperationManager<DelayedOperation> waitPurgatory;
 
     @Override
     public void setKafkaContext(KafkaContext kafkaContext) {
@@ -74,6 +80,8 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
         this.clusterManager = kafkaContext.getBrokerContext().getClusterManager();
         this.messageConvertSupport = kafkaContext.getBrokerContext().getMessageConvertSupport();
         this.sessionManager = kafkaContext.getBrokerContext().getSessionManager();
+        this.waitPurgatory = new DelayedOperationManager<>("kafka-fetch-wait");
+        this.waitPurgatory.start();
     }
 
     @Override
@@ -120,7 +128,20 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
 
         FetchResponse fetchResponse = new FetchResponse();
         fetchResponse.setPartitionResponses(fetchPartitionResponseMap);
-        return new Command(fetchResponse);
+        Command response = new Command(fetchResponse);
+
+        // 如果当前拉取消息量小于最大限制，那么延迟响应
+        if (maxBytes > currentBytes) {
+            waitPurgatory.tryCompleteElseWatch(new AbstractDelayedOperation(fetchRequest.getMaxWait()) {
+                @Override
+                protected void onComplete() {
+                    transport.acknowledge(command, response);
+                }
+            }, Sets.newHashSet(new DelayedOperationKey()));
+            return null;
+        }
+
+        return response;
     }
 
     private FetchResponse.PartitionResponse fetchMessage(Transport transport, TopicName topic, int partition, String clientId, long offset, int maxBytes) {
