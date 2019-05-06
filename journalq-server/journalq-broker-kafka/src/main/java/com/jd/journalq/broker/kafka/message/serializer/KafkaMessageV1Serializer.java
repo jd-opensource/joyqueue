@@ -21,7 +21,6 @@ import com.jd.journalq.message.BrokerMessage;
 import io.netty.buffer.ByteBuf;
 import org.apache.commons.lang3.ArrayUtils;
 
-import javax.xml.crypto.dsig.keyinfo.KeyValue;
 import java.nio.ByteBuffer;
 import java.util.List;
 
@@ -54,8 +53,9 @@ public class KafkaMessageV1Serializer extends AbstractKafkaMessageSerializer {
             return;
         }
 
-        kafkaBrokerMessage.setMagic(CURRENT_MAGIC);
-        if (extension.length == EXTENSION_V1_LENGTH) {
+        if (extension.length == EXTENSION_V0_LENGTH) {
+            kafkaBrokerMessage.setTimestamp(readExtensionTimestamp(extension));
+        } else if (extension.length == EXTENSION_V1_LENGTH) {
             kafkaBrokerMessage.setTimestamp(readExtensionTimestamp(extension));
             kafkaBrokerMessage.setAttribute(readExtensionAttribute(extension));
         }

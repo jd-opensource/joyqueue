@@ -22,7 +22,6 @@ import io.netty.buffer.ByteBuf;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -53,7 +52,6 @@ public class KafkaMessageV0Serializer extends AbstractKafkaMessageSerializer {
             return;
         }
 
-        kafkaBrokerMessage.setMagic(CURRENT_MAGIC);
         if (extension.length == EXTENSION_V1_LENGTH) {
             kafkaBrokerMessage.setAttribute(readExtensionAttribute(extension));
         }

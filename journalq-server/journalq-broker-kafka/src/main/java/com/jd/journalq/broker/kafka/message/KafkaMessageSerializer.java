@@ -51,6 +51,7 @@ public class KafkaMessageSerializer extends AbstractKafkaMessageSerializer {
         }
 
         byte magic = getExtensionMagic(brokerMessage.getExtension());
+        kafkaBrokerMessage.setMagic(magic);
         if (magic == INVALID_EXTENSION_MAGIC) {
             return;
         }

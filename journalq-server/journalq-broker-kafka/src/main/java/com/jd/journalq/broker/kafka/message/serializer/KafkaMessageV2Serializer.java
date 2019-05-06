@@ -55,7 +55,6 @@ public class KafkaMessageV2Serializer extends AbstractKafkaMessageSerializer {
             return;
         }
 
-        kafkaBrokerMessage.setMagic(CURRENT_MAGIC);
         if (extension.length == EXTENSION_V1_LENGTH) {
             kafkaBrokerMessage.setTimestamp(readExtensionTimestamp(extension));
             kafkaBrokerMessage.setAttribute(readExtensionAttribute(extension));

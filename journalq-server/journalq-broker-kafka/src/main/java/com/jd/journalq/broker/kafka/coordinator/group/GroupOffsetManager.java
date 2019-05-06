@@ -83,24 +83,29 @@ public class GroupOffsetManager extends Service {
                 session.async(request, new CommandCallback() {
                     @Override
                     public void onSuccess(Command request, Command response) {
-                        ConsumeIndexQueryResponse payload = (ConsumeIndexQueryResponse) response.getPayload();
-                        for (Map.Entry<String, Map<Integer, IndexMetadataAndError>> topicEntry : payload.getTopicPartitionIndex().entrySet()) {
-                            String topic = topicEntry.getKey();
-                            List<OffsetMetadataAndError> partitions = Lists.newArrayListWithCapacity(topicEntry.getValue().size());
-                            result.put(topic, partitions);
+                        synchronized (result) {
+                            ConsumeIndexQueryResponse payload = (ConsumeIndexQueryResponse) response.getPayload();
+                            for (Map.Entry<String, Map<Integer, IndexMetadataAndError>> topicEntry : payload.getTopicPartitionIndex().entrySet()) {
+                                String topic = topicEntry.getKey();
+                                List<OffsetMetadataAndError> partitions = result.get(topic);
+                                if (partitions == null) {
+                                    partitions = Lists.newLinkedList();
+                                    result.put(topic, partitions);
+                                }
 
-                            for (Map.Entry<Integer, IndexMetadataAndError> partitionEntry : topicEntry.getValue().entrySet()) {
-                                IndexMetadataAndError indexMetadataAndError = partitionEntry.getValue();
-                                partitions.add(new OffsetMetadataAndError(partitionEntry.getKey(), indexMetadataAndError.getIndex(), indexMetadataAndError.getMetadata(),
-                                        KafkaErrorCode.journalqCodeFor(indexMetadataAndError.getError())));
+                                for (Map.Entry<Integer, IndexMetadataAndError> partitionEntry : topicEntry.getValue().entrySet()) {
+                                    IndexMetadataAndError indexMetadataAndError = partitionEntry.getValue();
+                                    partitions.add(new OffsetMetadataAndError(partitionEntry.getKey(), indexMetadataAndError.getIndex(), indexMetadataAndError.getMetadata(),
+                                            KafkaErrorCode.journalqCodeFor(indexMetadataAndError.getError())));
 
-                                if (partitionEntry.getValue().getError() != JournalqCode.SUCCESS.getCode()) {
-                                    logger.error("get offset error, broker: {}, topic: {}, partition: {}, group: {},code: {}",
-                                            broker, topic, partitionEntry.getKey(), groupId, JournalqCode.valueOf(partitionEntry.getValue().getError()));
+                                    if (partitionEntry.getValue().getError() != JournalqCode.SUCCESS.getCode()) {
+                                        logger.error("get offset error, broker: {}, topic: {}, partition: {}, group: {},code: {}",
+                                                broker, topic, partitionEntry.getKey(), groupId, JournalqCode.valueOf(partitionEntry.getValue().getError()));
+                                    }
                                 }
                             }
+                            latch.countDown();
                         }
-                        latch.countDown();
                     }
 
                     @Override
@@ -108,17 +113,22 @@ public class GroupOffsetManager extends Service {
                         logger.error("get offset failed, async transport exception, broker: {}, request: {}, group: {}",
                                 broker, indexQueryRequest, groupId, cause);
 
-                        for (Map.Entry<String, List<Integer>> topicEntry : indexQueryRequest.getTopicPartitions().entrySet()) {
-                            String topic = topicEntry.getKey();
-                            List<OffsetMetadataAndError> partitions = Lists.newArrayListWithCapacity(topicEntry.getValue().size());
-                            result.put(topic, partitions);
+                        synchronized (result) {
+                            for (Map.Entry<String, List<Integer>> topicEntry : indexQueryRequest.getTopicPartitions().entrySet()) {
+                                String topic = topicEntry.getKey();
+                                List<OffsetMetadataAndError> partitions = result.get(topic);
+                                if (partitions == null) {
+                                    partitions = Lists.newLinkedList();
+                                    result.put(topic, partitions);
+                                }
 
-                            for (Integer partition : topicEntry.getValue()) {
-                                partitions.add(new OffsetMetadataAndError(partition, OffsetAndMetadata.INVALID_OFFSET, OffsetAndMetadata.NO_METADATA,
-                                        KafkaErrorCode.NOT_LEADER_FOR_PARTITION.getCode()));
+                                for (Integer partition : topicEntry.getValue()) {
+                                    partitions.add(new OffsetMetadataAndError(partition, OffsetAndMetadata.INVALID_OFFSET, OffsetAndMetadata.NO_METADATA,
+                                            KafkaErrorCode.NOT_LEADER_FOR_PARTITION.getCode()));
+                                }
                             }
+                            latch.countDown();
                         }
-                        latch.countDown();
                     }
                 });
             } catch (Throwable cause) {
@@ -180,23 +190,28 @@ public class GroupOffsetManager extends Service {
                 session.async(request, new CommandCallback() {
                     @Override
                     public void onSuccess(Command request, Command response) {
-                        ConsumeIndexStoreResponse payload = (ConsumeIndexStoreResponse) response.getPayload();
-                        for (Map.Entry<String, Map<Integer, Short>> topicEntry : payload.getIndexStoreStatus().entrySet()) {
-                            String topic = topicEntry.getKey();
-                            List<OffsetMetadataAndError> partitions = Lists.newArrayListWithCapacity(topicEntry.getValue().size());
-                            result.put(topic, partitions);
+                        synchronized (result) {
+                            ConsumeIndexStoreResponse payload = (ConsumeIndexStoreResponse) response.getPayload();
+                            for (Map.Entry<String, Map<Integer, Short>> topicEntry : payload.getIndexStoreStatus().entrySet()) {
+                                String topic = topicEntry.getKey();
+                                List<OffsetMetadataAndError> partitions = result.get(topic);
+                                if (partitions == null) {
+                                    partitions = Lists.newLinkedList();
+                                    result.put(topic, partitions);
+                                }
 
-                            for (Map.Entry<Integer, Short> partitionEntry : topicEntry.getValue().entrySet()) {
-                                partitions.add(new OffsetMetadataAndError(partitionEntry.getKey(), OffsetAndMetadata.INVALID_OFFSET, OffsetAndMetadata.NO_METADATA,
-                                        KafkaErrorCode.journalqCodeFor(partitionEntry.getValue())));
+                                for (Map.Entry<Integer, Short> partitionEntry : topicEntry.getValue().entrySet()) {
+                                    partitions.add(new OffsetMetadataAndError(partitionEntry.getKey(), OffsetAndMetadata.INVALID_OFFSET, OffsetAndMetadata.NO_METADATA,
+                                            KafkaErrorCode.journalqCodeFor(partitionEntry.getValue())));
 
-                                if (partitionEntry.getValue() != JournalqCode.SUCCESS.getCode()) {
-                                    logger.error("save offset failed, broker: {}, topic: {}, partition: {}, group: {}, code: {}",
-                                            broker, topic, partitionEntry.getKey(), groupId, JournalqCode.valueOf(partitionEntry.getValue()));
+                                    if (partitionEntry.getValue() != JournalqCode.SUCCESS.getCode()) {
+                                        logger.error("save offset failed, broker: {}, topic: {}, partition: {}, group: {}, code: {}",
+                                                broker, topic, partitionEntry.getKey(), groupId, JournalqCode.valueOf(partitionEntry.getValue()));
+                                    }
                                 }
                             }
+                            latch.countDown();
                         }
-                        latch.countDown();
                     }
 
                     @Override
@@ -204,17 +219,22 @@ public class GroupOffsetManager extends Service {
                         logger.error("save offset failed, async transport exception, broker: {}, request: {}, group: {}",
                                 broker, indexStoreRequest, groupId, cause);
 
-                        for (Map.Entry<String, Map<Integer, IndexAndMetadata>> topicEntry : indexStoreRequest.getIndexMetadata().entrySet()) {
-                            String topic = topicEntry.getKey();
-                            List<OffsetMetadataAndError> partitions = Lists.newArrayListWithCapacity(topicEntry.getValue().size());
-                            result.put(topic, partitions);
+                        synchronized (result) {
+                            for (Map.Entry<String, Map<Integer, IndexAndMetadata>> topicEntry : indexStoreRequest.getIndexMetadata().entrySet()) {
+                                String topic = topicEntry.getKey();
+                                List<OffsetMetadataAndError> partitions = result.get(topic);
+                                if (partitions == null) {
+                                    partitions = Lists.newLinkedList();
+                                    result.put(topic, partitions);
+                                }
 
-                            for (Map.Entry<Integer, IndexAndMetadata> partitionEntry : topicEntry.getValue().entrySet()) {
-                                partitions.add(new OffsetMetadataAndError(partitionEntry.getKey(), OffsetAndMetadata.INVALID_OFFSET,
-                                        OffsetAndMetadata.NO_METADATA, KafkaErrorCode.NONE.getCode()));
+                                for (Map.Entry<Integer, IndexAndMetadata> partitionEntry : topicEntry.getValue().entrySet()) {
+                                    partitions.add(new OffsetMetadataAndError(partitionEntry.getKey(), OffsetAndMetadata.INVALID_OFFSET,
+                                            OffsetAndMetadata.NO_METADATA, KafkaErrorCode.NONE.getCode()));
+                                }
                             }
+                            latch.countDown();
                         }
-                        latch.countDown();
                     }
                 });
             } catch (Throwable cause) {
