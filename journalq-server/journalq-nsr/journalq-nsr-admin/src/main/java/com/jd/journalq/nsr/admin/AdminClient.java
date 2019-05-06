@@ -15,7 +15,6 @@ package com.jd.journalq.nsr.admin;
 
 import com.jd.journalq.domain.Broker;
 import com.jd.journalq.nsr.NsrAdmin;
-import com.jd.journalq.nsr.utils.AsyncHttpClient;
 import java.io.IOException;
 import java.util.List;
 
@@ -77,6 +76,6 @@ public class AdminClient implements NsrAdmin {
 
     @Override
     public void close() throws IOException {
-        AsyncHttpClient.close();
+
     }
 }
