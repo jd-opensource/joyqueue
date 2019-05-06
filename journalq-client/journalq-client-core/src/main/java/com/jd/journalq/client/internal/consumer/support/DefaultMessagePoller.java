@@ -13,6 +13,7 @@
  */
 package com.jd.journalq.client.internal.consumer.support;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.jd.journalq.client.internal.cluster.ClusterClientManager;
 import com.jd.journalq.client.internal.cluster.ClusterManager;
@@ -35,7 +36,6 @@ import com.jd.journalq.client.internal.metadata.domain.PartitionMetadata;
 import com.jd.journalq.client.internal.metadata.domain.TopicMetadata;
 import com.jd.journalq.client.internal.nameserver.NameServerConfig;
 import com.jd.journalq.exception.JournalqCode;
-import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import com.jd.journalq.toolkit.time.SystemClock;
 import org.apache.commons.collections.CollectionUtils;
@@ -291,8 +291,12 @@ public class DefaultMessagePoller extends Service implements MessagePoller {
         } else {
             brokerAssignments = messagePollerInner.buildAllBrokerAssignments(topicMetadata);
         }
+
         brokerAssignments = messagePollerInner.filterRegionBrokers(topicMetadata, brokerAssignments);
-        brokerAssignmentCache = new BrokerAssignmentsHolder(brokerAssignments, SystemClock.now());
+
+        if (topicMetadata.isAllAvailable()) {
+            brokerAssignmentCache = new BrokerAssignmentsHolder(brokerAssignments, SystemClock.now());
+        }
         return brokerAssignments;
     }
 

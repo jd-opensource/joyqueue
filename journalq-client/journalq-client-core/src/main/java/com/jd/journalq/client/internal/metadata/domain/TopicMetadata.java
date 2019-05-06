@@ -49,6 +49,8 @@ public class TopicMetadata implements Serializable {
     private Map<Integer, List<PartitionMetadata>> brokerPartitions;
     private Map<Integer, List<PartitionGroupMetadata>> brokerPartitionGroups;
 
+    private boolean allAvailable = false;
+
     @Deprecated
     private TopicMetadata unmodifiableTopicMetadata;
 
@@ -63,7 +65,7 @@ public class TopicMetadata implements Serializable {
     public TopicMetadata(String topic, ProducerPolicy producerPolicy, ConsumerPolicy consumerPolicy, TopicType type, List<PartitionGroupMetadata> partitionGroups,
                          List<PartitionMetadata> partitions, Map<Short, PartitionMetadata> partitionMap, Map<Integer, PartitionGroupMetadata> partitionGroupMap, List<BrokerNode> brokers,
                          List<BrokerNode> nearbyBrokers, Map<Integer, BrokerNode> brokerMap, Map<Integer, List<PartitionMetadata>> brokerPartitions,
-                         Map<Integer, List<PartitionGroupMetadata>> brokerPartitionGroups, JournalqCode code) {
+                         Map<Integer, List<PartitionGroupMetadata>> brokerPartitionGroups, boolean allAvailable, JournalqCode code) {
         this.topic = topic;
         this.producerPolicy = producerPolicy;
         this.consumerPolicy = consumerPolicy;
@@ -77,6 +79,7 @@ public class TopicMetadata implements Serializable {
         this.brokerMap = brokerMap;
         this.brokerPartitions = brokerPartitions;
         this.brokerPartitionGroups = brokerPartitionGroups;
+        this.allAvailable = allAvailable;
         this.code = code;
     }
 
@@ -101,7 +104,7 @@ public class TopicMetadata implements Serializable {
         }
 
         unmodifiableTopicMetadata = new UnmodifiableTopicMetadata(topic, newProducerPolicy, newConsumerPolicy, type, partitionGroups, partitions, partitionMap, partitionGroupMap, brokers,
-                nearbyBrokers, brokerMap, brokerPartitions, brokerPartitionGroups, code);
+                nearbyBrokers, brokerMap, brokerPartitions, brokerPartitionGroups, allAvailable, code);
         return unmodifiableTopicMetadata;
     }
 
@@ -155,6 +158,10 @@ public class TopicMetadata implements Serializable {
 
     public PartitionMetadata getPartition(short partition) {
         return partitionMap.get(partition);
+    }
+
+    public boolean isAllAvailable() {
+        return allAvailable;
     }
 
     public JournalqCode getCode() {

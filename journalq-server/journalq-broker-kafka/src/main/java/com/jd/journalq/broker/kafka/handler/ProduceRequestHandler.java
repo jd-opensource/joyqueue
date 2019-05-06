@@ -3,6 +3,7 @@ package com.jd.journalq.broker.kafka.handler;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jd.journalq.broker.cluster.ClusterManager;
+import com.jd.journalq.broker.helper.SessionHelper;
 import com.jd.journalq.broker.kafka.KafkaAcknowledge;
 import com.jd.journalq.broker.kafka.KafkaCommandType;
 import com.jd.journalq.broker.kafka.KafkaContext;
@@ -14,11 +15,13 @@ import com.jd.journalq.broker.kafka.helper.KafkaClientHelper;
 import com.jd.journalq.broker.kafka.message.KafkaBrokerMessage;
 import com.jd.journalq.broker.kafka.message.converter.KafkaMessageConverter;
 import com.jd.journalq.broker.kafka.model.ProducePartitionGroupRequest;
+import com.jd.journalq.broker.monitor.SessionManager;
 import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.domain.QosLevel;
 import com.jd.journalq.domain.TopicConfig;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.message.BrokerMessage;
+import com.jd.journalq.network.session.Connection;
 import com.jd.journalq.network.session.Producer;
 import com.jd.journalq.network.transport.Transport;
 import com.jd.journalq.network.transport.command.Command;
@@ -48,12 +51,14 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
     private ClusterManager clusterManager;
     private ProduceHandler produceHandler;
     private TransactionProduceHandler transactionProduceHandler;
+    private SessionManager sessionManager;
 
     @Override
     public void setKafkaContext(KafkaContext kafkaContext) {
         this.clusterManager = kafkaContext.getBrokerContext().getClusterManager();
         this.produceHandler = new ProduceHandler(kafkaContext.getBrokerContext().getProduce());
         this.transactionProduceHandler = new TransactionProduceHandler(kafkaContext.getConfig(), kafkaContext.getBrokerContext().getProduce(), kafkaContext.getTransactionCoordinator(), kafkaContext.getTransactionIdManager());
+        this.sessionManager = kafkaContext.getBrokerContext().getSessionManager();
     }
 
     @Override
@@ -69,6 +74,7 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
         boolean isNeedAck = !qosLevel.equals(QosLevel.ONE_WAY);
         String clientIp = ((InetSocketAddress) transport.remoteAddress()).getHostString();
         byte[] clientAddress = IpUtil.toByte((InetSocketAddress) transport.remoteAddress());
+        Connection connection = SessionHelper.getConnection(transport);
 
         for (Map.Entry<String, List<ProduceRequest.PartitionRequest>> entry : partitionRequestMap.entrySet()) {
             TopicName topicName = TopicName.parse(entry.getKey());
@@ -76,7 +82,8 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
             List<ProduceResponse.PartitionResponse> partitionResponses = Lists.newArrayListWithCapacity(entry.getValue().size());
             partitionResponseMap.put(topicName.getFullName(), partitionResponses);
 
-            Producer producer = new Producer(topicName.getFullName(), clientId, Producer.ProducerType.KAFKA);
+            String producerId = connection.getProducer(topicName.getFullName(), clientId);
+            Producer producer = sessionManager.getProducerById(producerId);
             TopicConfig topicConfig = clusterManager.getTopicConfig(topicName);
 
             for (ProduceRequest.PartitionRequest partitionRequest : entry.getValue()) {

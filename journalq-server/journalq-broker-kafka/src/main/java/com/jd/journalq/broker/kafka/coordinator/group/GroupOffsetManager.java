@@ -95,8 +95,8 @@ public class GroupOffsetManager extends Service {
                                         KafkaErrorCode.journalqCodeFor(indexMetadataAndError.getError())));
 
                                 if (partitionEntry.getValue().getError() != JournalqCode.SUCCESS.getCode()) {
-                                    logger.error("get offset error, broker: {}, topic: {}, partition: {}, code: {}",
-                                            broker, topic, partitionEntry.getKey(), JournalqCode.valueOf(partitionEntry.getValue().getError()));
+                                    logger.error("get offset error, broker: {}, topic: {}, partition: {}, group: {},code: {}",
+                                            broker, topic, partitionEntry.getKey(), groupId, JournalqCode.valueOf(partitionEntry.getValue().getError()));
                                 }
                             }
                         }
@@ -133,7 +133,7 @@ public class GroupOffsetManager extends Service {
                 logger.error("get offset timeout, partitions: {}, group: {}", topicAndPartitions, groupId);
             }
         } catch (InterruptedException e) {
-            logger.error("get offset latch await exception, groupId: {}, partitions: {}", groupId, topicAndPartitions, e);
+            logger.error("get offset latch await exception, group: {}, partitions: {}", groupId, topicAndPartitions, e);
         }
 
         fillErrorOffset(groupId, result);
@@ -154,15 +154,10 @@ public class GroupOffsetManager extends Service {
                 } else {
                     OffsetAndMetadata offsetCache = groupMetadata.getOffsetCache(topic, offsetMetadataAndError.getPartition());
                     if (offsetCache != null) {
-                        logger.info("fill error offset, topic: {}, partition: {}, offset: {}", topic, entry.getKey(), offsetCache);
-
-                        List<OffsetMetadataAndError> offsetMetadataAndErrors = result.get(topic);
-                        if (offsetMetadataAndErrors == null) {
-                            offsetMetadataAndErrors = Lists.newLinkedList();
-                            result.put(topic, offsetMetadataAndErrors);
-                        }
-
-                        offsetMetadataAndErrors.add(new OffsetMetadataAndError(offsetCache.getPartition(), offsetCache.getOffset(), OffsetAndMetadata.NO_METADATA, KafkaErrorCode.NONE.getCode()));
+                        logger.info("fill error offset, topic: {}, partition: {}, group: {}, offset: {}", topic, entry.getKey(), groupId, offsetCache);
+                        offsetMetadataAndError.setOffset(offsetCache.getOffset());
+                        offsetMetadataAndError.setMetadata(offsetCache.getMetadata());
+                        offsetMetadataAndError.setError(KafkaErrorCode.NONE.getCode());
                     }
                 }
             }
@@ -196,8 +191,8 @@ public class GroupOffsetManager extends Service {
                                         KafkaErrorCode.journalqCodeFor(partitionEntry.getValue())));
 
                                 if (partitionEntry.getValue() != JournalqCode.SUCCESS.getCode()) {
-                                    logger.error("save offset failed, broker: {}, topic: {}, partition: {}, code: {}",
-                                            broker, topic, partitionEntry.getKey(), JournalqCode.valueOf(partitionEntry.getValue()));
+                                    logger.error("save offset failed, broker: {}, topic: {}, partition: {}, group: {}, code: {}",
+                                            broker, topic, partitionEntry.getKey(), groupId, JournalqCode.valueOf(partitionEntry.getValue()));
                                 }
                             }
                         }
@@ -234,7 +229,7 @@ public class GroupOffsetManager extends Service {
                 logger.error("save offset timeout, offsets: {}, group: {}", brokerTopicPartitionMap, groupId);
             }
         } catch (InterruptedException e) {
-            logger.error("save offset latch await exception, groupId: {}, offsets: {}", groupId, offsets, e);
+            logger.error("save offset latch await exception, group: {}, offsets: {}", groupId, offsets, e);
         }
 
         fillOffsetCache(groupId, offsets);

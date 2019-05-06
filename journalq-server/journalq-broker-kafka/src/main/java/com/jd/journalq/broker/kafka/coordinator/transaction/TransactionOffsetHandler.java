@@ -52,9 +52,9 @@ public class TransactionOffsetHandler extends Service {
         if (transactionMetadata.getProducerEpoch() != producerEpoch) {
             throw new TransactionException(KafkaErrorCode.INVALID_PRODUCER_EPOCH.getCode());
         }
-//        if (transactionMetadata.isPrepared()) {
-//            throw new TransactionException(KafkaErrorCode.CONCURRENT_TRANSACTIONS.getCode());
-//        }
+        if (transactionMetadata.isPrepared()) {
+            throw new TransactionException(KafkaErrorCode.CONCURRENT_TRANSACTIONS.getCode());
+        }
 
         transactionMetadata.updateLastTime();
         return true;
@@ -70,9 +70,9 @@ public class TransactionOffsetHandler extends Service {
         if (transactionMetadata.getProducerEpoch() != producerEpoch) {
             throw new TransactionException(KafkaErrorCode.INVALID_PRODUCER_EPOCH.getCode());
         }
-//        if (transactionMetadata.isPrepared()) {
-//            throw new TransactionException(KafkaErrorCode.CONCURRENT_TRANSACTIONS.getCode());
-//        }
+        if (transactionMetadata.isPrepared()) {
+            throw new TransactionException(KafkaErrorCode.CONCURRENT_TRANSACTIONS.getCode());
+        }
 
         synchronized (transactionMetadata) {
             return doCommitOffset(transactionMetadata, offsetts);

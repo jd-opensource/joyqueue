@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.jd.journalq.broker.kafka.config.KafkaConfig;
 import com.jd.journalq.broker.kafka.coordinator.Coordinator;
+import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionMetadataManager;
 import com.jd.journalq.broker.kafka.coordinator.transaction.log.TransactionLog;
 import com.jd.journalq.broker.kafka.coordinator.transaction.log.TransactionLogSegment;
 import com.jd.journalq.broker.kafka.coordinator.transaction.synchronizer.TransactionSynchronizer;
@@ -27,14 +28,16 @@ public class TransactionCompletionHandler extends Service {
 
     private KafkaConfig config;
     private Coordinator coordinator;
+    private TransactionMetadataManager transactionMetadataManager;
     private TransactionLog transactionLog;
     private TransactionSynchronizer transactionSynchronizer;
 
     private Map<Short, TransactionSegmentCompletionHandler> handlerMap = Maps.newHashMap();
 
-    public TransactionCompletionHandler(KafkaConfig config, Coordinator coordinator, TransactionLog transactionLog, TransactionSynchronizer transactionSynchronizer) {
+    public TransactionCompletionHandler(KafkaConfig config, Coordinator coordinator, TransactionMetadataManager transactionMetadataManager, TransactionLog transactionLog, TransactionSynchronizer transactionSynchronizer) {
         this.config = config;
         this.coordinator = coordinator;
+        this.transactionMetadataManager = transactionMetadataManager;
         this.transactionLog = transactionLog;
         this.transactionSynchronizer = transactionSynchronizer;
     }
@@ -60,7 +63,7 @@ public class TransactionCompletionHandler extends Service {
                 if (transactionLogSegment == null) {
                     continue;
                 }
-                handlerMap.put(partition, new TransactionSegmentCompletionHandler(config, coordinator, transactionLogSegment, transactionSynchronizer));
+                handlerMap.put(partition, new TransactionSegmentCompletionHandler(config, coordinator, transactionMetadataManager, transactionLogSegment, transactionSynchronizer));
             }
 
             for (Map.Entry<Short, TransactionSegmentCompletionHandler> entry : handlerMap.entrySet()) {

@@ -29,19 +29,19 @@ import com.jd.journalq.broker.kafka.coordinator.transaction.ProducerIdManager;
 import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionCoordinator;
 import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionHandler;
 import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionIdManager;
-import com.jd.journalq.broker.kafka.coordinator.transaction.log.TransactionLog;
 import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionMetadataManager;
 import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionOffsetHandler;
-import com.jd.journalq.broker.kafka.coordinator.transaction.synchronizer.TransactionSynchronizer;
 import com.jd.journalq.broker.kafka.coordinator.transaction.completion.TransactionCompletionHandler;
 import com.jd.journalq.broker.kafka.coordinator.transaction.completion.TransactionCompletionScheduler;
+import com.jd.journalq.broker.kafka.coordinator.transaction.log.TransactionLog;
+import com.jd.journalq.broker.kafka.coordinator.transaction.synchronizer.TransactionSynchronizer;
 import com.jd.journalq.broker.kafka.handler.ratelimit.KafkaRateLimitHandlerFactory;
 import com.jd.journalq.broker.kafka.manage.KafkaManageServiceFactory;
 import com.jd.journalq.broker.kafka.network.helper.KafkaProtocolHelper;
 import com.jd.journalq.broker.kafka.session.KafkaConnectionHandler;
 import com.jd.journalq.broker.kafka.session.KafkaConnectionManager;
 import com.jd.journalq.broker.kafka.util.RateLimiter;
-import com.jd.journalq.network.protocol.ChannelHandlerProvider;
+import com.jd.journalq.network.protocol.CommandHandlerProvider;
 import com.jd.journalq.network.protocol.ExceptionHandlerProvider;
 import com.jd.journalq.network.protocol.ProtocolService;
 import com.jd.journalq.network.transport.codec.CodecFactory;
@@ -62,7 +62,7 @@ import org.slf4j.LoggerFactory;
  * email: gaohaoxiang@jd.com
  * date: 2018/8/21
  */
-public class KafkaProtocol extends Service implements ProtocolService, BrokerContextAware, ChannelHandlerProvider, ExceptionHandlerProvider {
+public class KafkaProtocol extends Service implements ProtocolService, BrokerContextAware, CommandHandlerProvider, ExceptionHandlerProvider {
 
     protected static final Logger logger = LoggerFactory.getLogger(KafkaProtocol.class);
 
@@ -111,7 +111,7 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
         this.transactionMetadataManager = new TransactionMetadataManager(config, transactionMetadataManager);
         this.transactionLog = new TransactionLog(config, brokerContext.getProduce(), brokerContext.getConsume(), coordinator, brokerContext.getClusterManager());
         this.transactionSynchronizer = new TransactionSynchronizer(config, transactionIdManager, transactionLog, coordinator.getSessionManager(), brokerContext.getNameService());
-        this.transactionCompletionHandler = new TransactionCompletionHandler(config, coordinator, transactionLog, transactionSynchronizer);
+        this.transactionCompletionHandler = new TransactionCompletionHandler(config, coordinator, this.transactionMetadataManager, transactionLog, transactionSynchronizer);
         this.transactionCompletionScheduler = new TransactionCompletionScheduler(config, transactionCompletionHandler);
         this.transactionHandler = new TransactionHandler(coordinator, this.transactionMetadataManager, producerIdManager, transactionSynchronizer, brokerContext.getNameService());
         this.transactionOffsetHandler = new TransactionOffsetHandler(coordinator, this.transactionMetadataManager, transactionSynchronizer);
@@ -189,11 +189,13 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
     }
 
     @Override
-    public ChannelHandler getChannelHandler(ChannelHandler channelHandler) {
+    public ChannelHandler getCommandHandler(ChannelHandler channelHandler) {
         return new ChannelInitializer<Channel>() {
             @Override
             protected void initChannel(Channel ch) throws Exception {
-                ch.pipeline().addLast(channelHandler).addLast(connectionHandler);
+                ch.pipeline()
+                        .addLast(connectionHandler)
+                        .addLast(channelHandler);
             }
         };
     }

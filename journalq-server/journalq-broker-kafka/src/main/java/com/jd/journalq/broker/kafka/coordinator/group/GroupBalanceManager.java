@@ -13,6 +13,7 @@
  */
 package com.jd.journalq.broker.kafka.coordinator.group;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -28,7 +29,6 @@ import com.jd.journalq.broker.kafka.coordinator.group.domain.GroupMetadata;
 import com.jd.journalq.broker.kafka.coordinator.group.domain.GroupState;
 import com.jd.journalq.toolkit.delay.DelayedOperationKey;
 import com.jd.journalq.toolkit.delay.DelayedOperationManager;
-import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import com.jd.journalq.toolkit.time.SystemClock;
 import org.slf4j.Logger;
@@ -173,6 +173,7 @@ public class GroupBalanceManager extends Service {
             }
             member.getAwaitingSyncCallback().sendResponseCallback(member.getAssignment(), errorCode);
             member.setAwaitingSyncCallback(null);
+
             // reset the session timeout for members after propagating the member's assignment.
             // This is because if any member's session expired while we were still awaiting either
             // the leader sync group or the storage callback, its expiration will be ignored and no

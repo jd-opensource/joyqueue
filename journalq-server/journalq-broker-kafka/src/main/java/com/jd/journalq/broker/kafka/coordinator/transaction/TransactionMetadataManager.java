@@ -26,6 +26,10 @@ public class TransactionMetadataManager {
         this.transactionMetadataManager = transactionMetadataManager;
     }
 
+    public TransactionMetadata tryGetTransaction(String transactionId) {
+        return transactionMetadataManager.tryGetTransaction(transactionId);
+    }
+
     public TransactionMetadata getTransaction(String transactionId) {
         return transactionMetadataManager.getTransaction(transactionId);
     }

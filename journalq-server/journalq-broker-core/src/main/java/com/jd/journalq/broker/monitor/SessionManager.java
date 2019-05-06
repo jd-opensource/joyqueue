@@ -94,7 +94,7 @@ public class SessionManager extends Service {
             return false;
         }
         if (connections.putIfAbsent(connection.getId(), connection) == null) {
-            eventManager.add(new SessionEvent(SessionEventType.AddConnection, connection));
+            eventManager.inform(new SessionEvent(SessionEventType.AddConnection, connection));
             if (logger.isDebugEnabled()) {
                 logger.debug("add connection :" + connection.getId());
             }

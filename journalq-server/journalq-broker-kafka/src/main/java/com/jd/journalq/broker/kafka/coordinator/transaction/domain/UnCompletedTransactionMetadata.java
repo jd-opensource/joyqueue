@@ -1,12 +1,12 @@
 package com.jd.journalq.broker.kafka.coordinator.transaction.domain;
 
 /**
- * UnCompletedTransaction
+ * UnCompletedTransactionMetadata
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2019/4/19
  */
-public class UnCompletedTransaction extends TransactionMetadata {
+public class UnCompletedTransactionMetadata extends TransactionMetadata {
 
     private long startIndex;
     private long endIndex;

@@ -4,12 +4,14 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jd.journalq.broker.kafka.config.KafkaConfig;
 import com.jd.journalq.broker.kafka.coordinator.Coordinator;
+import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionMetadataManager;
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionDomain;
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionMarker;
+import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionMetadata;
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionOffset;
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionPrepare;
 import com.jd.journalq.broker.kafka.coordinator.transaction.domain.TransactionState;
-import com.jd.journalq.broker.kafka.coordinator.transaction.domain.UnCompletedTransaction;
+import com.jd.journalq.broker.kafka.coordinator.transaction.domain.UnCompletedTransactionMetadata;
 import com.jd.journalq.broker.kafka.coordinator.transaction.log.TransactionLogSegment;
 import com.jd.journalq.broker.kafka.coordinator.transaction.synchronizer.TransactionSynchronizer;
 import com.jd.journalq.toolkit.time.SystemClock;
@@ -33,19 +35,21 @@ public class TransactionSegmentCompletionHandler {
 
     private KafkaConfig config;
     private Coordinator coordinator;
+    private TransactionMetadataManager transactionMetadataManager;
     private TransactionLogSegment transactionLogSegment;
     private TransactionSynchronizer transactionSynchronizer;
 
-    private final Map<String, UnCompletedTransaction> unCompletedTransactionMap = Maps.newLinkedHashMap();
-    private final Map<Long, UnCompletedTransaction> unCompletedTransactionSortedMap = Maps.newLinkedHashMap();
+    private final Map<String, UnCompletedTransactionMetadata> unCompletedTransactionMap = Maps.newLinkedHashMap();
+    private final Map<Long, UnCompletedTransactionMetadata> unCompletedTransactionSortedMap = Maps.newLinkedHashMap();
     private long lastTime = 0;
     private long startIndex = 0;
     private long currentIndex = 0;
     private long committedIndex = 0;
 
-    public TransactionSegmentCompletionHandler(KafkaConfig config, Coordinator coordinator, TransactionLogSegment transactionLogSegment, TransactionSynchronizer transactionSynchronizer) {
+    public TransactionSegmentCompletionHandler(KafkaConfig config, Coordinator coordinator, TransactionMetadataManager transactionMetadataManager, TransactionLogSegment transactionLogSegment, TransactionSynchronizer transactionSynchronizer) {
         this.config = config;
         this.coordinator = coordinator;
+        this.transactionMetadataManager = transactionMetadataManager;
         this.transactionLogSegment = transactionLogSegment;
         this.transactionSynchronizer = transactionSynchronizer;
         this.currentIndex = transactionLogSegment.getIndex();
@@ -80,7 +84,7 @@ public class TransactionSegmentCompletionHandler {
         for (int i = 0; i < transactionDomains.size(); i++) {
             long currentIndex = this.currentIndex + i;
             TransactionDomain transactionDomain = transactionDomains.get(i);
-            UnCompletedTransaction unCompletedTransaction = null;
+            UnCompletedTransactionMetadata unCompletedTransaction = null;
 
             if (transactionDomain instanceof TransactionPrepare) {
                 unCompletedTransaction = handlePrepare((TransactionPrepare) transactionDomain, currentIndex);
@@ -102,11 +106,11 @@ public class TransactionSegmentCompletionHandler {
         return result;
     }
 
-    protected UnCompletedTransaction handlePrepare(TransactionPrepare transactionPrepare, long index) {
+    protected UnCompletedTransactionMetadata handlePrepare(TransactionPrepare transactionPrepare, long index) {
         String key = generateKey(transactionPrepare.getApp(), transactionPrepare.getTransactionId(), transactionPrepare.getProducerId(), transactionPrepare.getProducerEpoch(), transactionPrepare.getEpoch());
-        UnCompletedTransaction unCompletedTransaction = unCompletedTransactionMap.get(key);
+        UnCompletedTransactionMetadata unCompletedTransaction = unCompletedTransactionMap.get(key);
         if (unCompletedTransaction == null) {
-            unCompletedTransaction = new UnCompletedTransaction();
+            unCompletedTransaction = new UnCompletedTransactionMetadata();
             unCompletedTransaction.setId(transactionPrepare.getTransactionId());
             unCompletedTransaction.setStartIndex(index);
             unCompletedTransaction.setApp(transactionPrepare.getApp());
@@ -124,9 +128,9 @@ public class TransactionSegmentCompletionHandler {
         return unCompletedTransaction;
     }
 
-    protected UnCompletedTransaction handleOffset(TransactionOffset transactionOffset, long index) {
+    protected UnCompletedTransactionMetadata handleOffset(TransactionOffset transactionOffset, long index) {
         String key = generateKey(transactionOffset.getApp(), transactionOffset.getTransactionId(), transactionOffset.getProducerId(), transactionOffset.getProducerEpoch(), transactionOffset.getEpoch());
-        UnCompletedTransaction unCompletedTransaction = unCompletedTransactionMap.get(key);
+        UnCompletedTransactionMetadata unCompletedTransaction = unCompletedTransactionMap.get(key);
         if (unCompletedTransaction == null) {
             return null;
         }
@@ -136,10 +140,10 @@ public class TransactionSegmentCompletionHandler {
         return unCompletedTransaction;
     }
 
-    protected UnCompletedTransaction handleMarker(TransactionMarker transactionMarker, long index) {
+    protected UnCompletedTransactionMetadata handleMarker(TransactionMarker transactionMarker, long index) {
         String key = generateKey(transactionMarker.getApp(), transactionMarker.getTransactionId(), transactionMarker.getProducerId(), transactionMarker.getProducerEpoch(), transactionMarker.getEpoch());
-        UnCompletedTransaction unCompletedTransaction = unCompletedTransactionMap.get(key);
-        if (unCompletedTransaction == null) {
+        UnCompletedTransactionMetadata unCompletedTransaction = unCompletedTransactionMap.get(key);
+        if (unCompletedTransaction == null || unCompletedTransaction.getState().equals(transactionMarker.getState())) {
             return null;
         }
         unCompletedTransaction.setEndIndex(index);
@@ -155,9 +159,9 @@ public class TransactionSegmentCompletionHandler {
     }
 
     protected void handleUnCompleteTransactions(List<TransactionDomain> transactionDomains) {
-        for (Map.Entry<Long, UnCompletedTransaction> entry : unCompletedTransactionSortedMap.entrySet()) {
+        for (Map.Entry<Long, UnCompletedTransactionMetadata> entry : unCompletedTransactionSortedMap.entrySet()) {
             long currentIndex = entry.getKey();
-            UnCompletedTransaction unCompletedTransaction = entry.getValue();
+            UnCompletedTransactionMetadata unCompletedTransaction = entry.getValue();
             if (unCompletedTransaction != null) {
                 logger.debug("read transaction, currentIndex: {}, isCompleted: {}, epoch: {}, state: {}, metadata: {}",
                         currentIndex, unCompletedTransaction.isCompleted(), unCompletedTransaction.getProducerEpoch(), unCompletedTransaction.getState(), unCompletedTransaction);
@@ -166,11 +170,13 @@ public class TransactionSegmentCompletionHandler {
                 continue;
             }
             if (unCompletedTransaction.isExpired(this.lastTime, unCompletedTransaction.getTimeout())) {
-                if (unCompletedTransaction.isPrepared()) {
-                    handleRetryTransaction(unCompletedTransaction);
-                } else {
-                    handleTimeoutTransaction(unCompletedTransaction);
-                }
+//                if (unCompletedTransaction.isPrepared()) {
+//                    handleRetryTransaction(unCompletedTransaction);
+//                } else {
+//                    handleTimeoutTransaction(unCompletedTransaction);
+//                }
+
+                handleTimeoutTransaction(unCompletedTransaction);
             }
         }
 
@@ -183,9 +189,9 @@ public class TransactionSegmentCompletionHandler {
     protected void commitUnCompleteTransactionIndex() {
         long commitIndex = -1;
 
-        for (Map.Entry<Long, UnCompletedTransaction> entry : unCompletedTransactionSortedMap.entrySet()) {
+        for (Map.Entry<Long, UnCompletedTransactionMetadata> entry : unCompletedTransactionSortedMap.entrySet()) {
             long currentIndex = entry.getKey();
-            UnCompletedTransaction unCompletedTransaction = entry.getValue();
+            UnCompletedTransactionMetadata unCompletedTransaction = entry.getValue();
             if (unCompletedTransaction == null) {
                 continue;
             }
@@ -198,7 +204,7 @@ public class TransactionSegmentCompletionHandler {
 
             boolean isCommit = true;
             for (long j = Math.max((int) commitIndex, committedIndex); j < unCompletedTransaction.getEndIndex(); j++) {
-                UnCompletedTransaction checkUnCompletedTransaction = unCompletedTransactionSortedMap.get(j);
+                UnCompletedTransactionMetadata checkUnCompletedTransaction = unCompletedTransactionSortedMap.get(j);
                 if (checkUnCompletedTransaction == null) {
                     continue;
                 }
@@ -230,7 +236,7 @@ public class TransactionSegmentCompletionHandler {
 
         for (long i = committedIndex; i < commitIndex; i++) {
             logger.debug("remove transaction cache {}", i);
-            UnCompletedTransaction unCompletedTransaction = unCompletedTransactionSortedMap.remove(i);
+            UnCompletedTransactionMetadata unCompletedTransaction = unCompletedTransactionSortedMap.remove(i);
             if (unCompletedTransaction != null) {
                 logger.debug("remove transaction cache, txId: {}", generateKey(unCompletedTransaction.getApp(), unCompletedTransaction.getId(),
                         unCompletedTransaction.getProducerId(), unCompletedTransaction.getProducerEpoch(), unCompletedTransaction.getEpoch()));
@@ -245,7 +251,7 @@ public class TransactionSegmentCompletionHandler {
         this.committedIndex = commitIndex;
     }
 
-    protected void handleRetryTransaction(UnCompletedTransaction unCompletedTransaction) {
+    protected void handleRetryTransaction(UnCompletedTransactionMetadata unCompletedTransaction) {
         logger.debug("retry transaction, txId: {}, metadata: {}", unCompletedTransaction.getId(), unCompletedTransaction);
 
         if (unCompletedTransaction.getState().equals(TransactionState.PREPARE_COMMIT)) {
@@ -270,15 +276,25 @@ public class TransactionSegmentCompletionHandler {
                 unCompletedTransaction.transitionStateTo(TransactionState.DEAD);
             }
         }
+        syncTransactionState(unCompletedTransaction);
     }
 
-    protected void handleTimeoutTransaction(UnCompletedTransaction unCompletedTransaction) {
+    protected void handleTimeoutTransaction(UnCompletedTransactionMetadata unCompletedTransaction) {
         logger.warn("transaction timeout, txId: {}, metadata: {}", unCompletedTransaction.getId(), unCompletedTransaction);
         tryAbort(unCompletedTransaction);
         unCompletedTransaction.transitionStateTo(TransactionState.DEAD);
+        syncTransactionState(unCompletedTransaction);
     }
 
-    protected boolean tryAbort(UnCompletedTransaction unCompletedTransaction) {
+    protected void syncTransactionState(UnCompletedTransactionMetadata unCompletedTransaction) {
+        TransactionMetadata transaction = transactionMetadataManager.tryGetTransaction(unCompletedTransaction.getId());
+        if (transaction == null) {
+            return;
+        }
+        transaction.setState(unCompletedTransaction.getState());
+    }
+
+    protected boolean tryAbort(UnCompletedTransactionMetadata unCompletedTransaction) {
         try {
             return transactionSynchronizer.tryAbort(unCompletedTransaction, unCompletedTransaction.getPrepare());
         } catch (Exception e) {
@@ -287,7 +303,7 @@ public class TransactionSegmentCompletionHandler {
         }
     }
 
-    protected boolean tryCommit(UnCompletedTransaction unCompletedTransaction) {
+    protected boolean tryCommit(UnCompletedTransactionMetadata unCompletedTransaction) {
         try {
             return transactionSynchronizer.tryCommit(unCompletedTransaction, unCompletedTransaction.getPrepare(), unCompletedTransaction.getOffsets());
         } catch (Exception e) {

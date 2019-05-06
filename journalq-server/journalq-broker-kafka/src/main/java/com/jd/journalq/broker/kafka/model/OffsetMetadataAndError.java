@@ -13,9 +13,6 @@
  */
 package com.jd.journalq.broker.kafka.model;
 
-
-import com.jd.journalq.broker.kafka.KafkaErrorCode;
-
 /**
  * Created by zhangkepeng on 16-8-4.
  */
@@ -68,6 +65,18 @@ public class OffsetMetadataAndError {
 
     public short getError() {
         return error;
+    }
+
+    public void setOffset(long offset) {
+        this.offset = offset;
+    }
+
+    public void setMetadata(String metadata) {
+        this.metadata = metadata;
+    }
+
+    public void setError(short error) {
+        this.error = error;
     }
 
     @Override

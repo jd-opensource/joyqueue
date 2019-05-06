@@ -20,6 +20,7 @@ import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.consumer.Consume;
 import com.jd.journalq.broker.consumer.MessageConvertSupport;
 import com.jd.journalq.broker.consumer.model.PullResult;
+import com.jd.journalq.broker.helper.SessionHelper;
 import com.jd.journalq.broker.kafka.KafkaCommandType;
 import com.jd.journalq.broker.kafka.KafkaContext;
 import com.jd.journalq.broker.kafka.KafkaContextAware;
@@ -31,10 +32,12 @@ import com.jd.journalq.broker.kafka.converter.CheckResultConverter;
 import com.jd.journalq.broker.kafka.helper.KafkaClientHelper;
 import com.jd.journalq.broker.kafka.message.KafkaBrokerMessage;
 import com.jd.journalq.broker.kafka.message.converter.KafkaMessageConverter;
+import com.jd.journalq.broker.monitor.SessionManager;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.message.BrokerMessage;
 import com.jd.journalq.message.SourceType;
+import com.jd.journalq.network.session.Connection;
 import com.jd.journalq.network.session.Consumer;
 import com.jd.journalq.network.transport.Transport;
 import com.jd.journalq.network.transport.command.Command;
@@ -62,6 +65,7 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
     private Consume consume;
     private ClusterManager clusterManager;
     private MessageConvertSupport messageConvertSupport;
+    private SessionManager sessionManager;
 
     @Override
     public void setKafkaContext(KafkaContext kafkaContext) {
@@ -69,6 +73,7 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
         this.consume = kafkaContext.getBrokerContext().getConsume();
         this.clusterManager = kafkaContext.getBrokerContext().getClusterManager();
         this.messageConvertSupport = kafkaContext.getBrokerContext().getMessageConvertSupport();
+        this.sessionManager = kafkaContext.getBrokerContext().getSessionManager();
     }
 
     @Override
@@ -119,9 +124,12 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
     }
 
     private FetchResponse.PartitionResponse fetchMessage(Transport transport, TopicName topic, int partition, String clientId, long offset, int maxBytes) {
-        Consumer consumer = new Consumer(clientId, topic.getFullName(), clientId, Consumer.ConsumeType.KAFKA);
+        Connection connection = SessionHelper.getConnection(transport);
+        String consumerId = connection.getConsumer(topic.getFullName(), clientId);
+        Consumer consumer = sessionManager.getConsumerById(consumerId);
         long minIndex = consume.getMinIndex(consumer, (short) partition);
         long maxIndex = consume.getMaxIndex(consumer, (short) partition);
+
         if (offset < minIndex || offset > maxIndex) {
             logger.warn("fetch message exception, index out of range, transport: {}, consumer: {}, partition: {}, offset: {}, minOffset: {}, maxOffset: {}",
                     transport, consumer, partition, offset, minIndex, maxIndex);

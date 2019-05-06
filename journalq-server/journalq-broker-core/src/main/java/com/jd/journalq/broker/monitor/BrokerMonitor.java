@@ -319,8 +319,6 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
         if (!brokerStat.getConnectionStat().addConnection(client)) {
             return;
         }
-
-        connection.setAddedMonitor(true);
     }
 
     @Override

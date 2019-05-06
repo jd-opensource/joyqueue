@@ -63,19 +63,12 @@ public class TransactionHandler extends Service {
                     producerIdManager.generateId(), transactionTimeout, SystemClock.now()));
         }
 
-        if (transactionMetadata.isPrepared()) {
-            throw new TransactionException(KafkaErrorCode.CONCURRENT_TRANSACTIONS.getCode());
-        }
-
         synchronized (transactionMetadata) {
             return doInitProducer(transactionMetadata, transactionTimeout);
         }
     }
 
     protected TransactionMetadata doInitProducer(TransactionMetadata transactionMetadata, int transactionTimeout) {
-        if (!transactionMetadata.isCompleted()) {
-            tryAbort(transactionMetadata);
-        }
         transactionMetadata.clear();
         transactionMetadata.nextProducerEpoch();
         transactionMetadata.nextEpoch();
@@ -83,15 +76,6 @@ public class TransactionHandler extends Service {
         transactionMetadata.updateLastTime();
         transactionMetadata.transitionStateTo(TransactionState.EMPTY);
         return transactionMetadata;
-    }
-
-    protected void tryAbort(TransactionMetadata transactionMetadata) {
-        try {
-            doAbort(transactionMetadata);
-            transactionMetadata.clear();
-        } catch (Exception e) {
-            logger.error("initProducer abort exception, metadata: {}", transactionMetadata, e);
-        }
     }
 
     public Map<String, List<PartitionMetadataAndError>> addPartitionsToTxn(String clientId, String transactionId, long producerId, short producerEpoch, Map<String, List<Integer>> partitions) {
@@ -107,9 +91,9 @@ public class TransactionHandler extends Service {
         if (transactionMetadata.isExpired()) {
             throw new TransactionException(KafkaErrorCode.INVALID_PRODUCER_EPOCH.getCode());
         }
-//        if (transactionMetadata.isPrepared()) {
-//            throw new TransactionException(KafkaErrorCode.CONCURRENT_TRANSACTIONS.getCode());
-//        }
+        if (transactionMetadata.isPrepared()) {
+            throw new TransactionException(KafkaErrorCode.CONCURRENT_TRANSACTIONS.getCode());
+        }
 
         synchronized (transactionMetadata) {
             return doAddPartitionsToTxn(transactionMetadata, partitions);
@@ -180,9 +164,9 @@ public class TransactionHandler extends Service {
         if (transactionMetadata.isExpired()) {
             throw new TransactionException(KafkaErrorCode.INVALID_PRODUCER_EPOCH.getCode());
         }
-//        if (transactionMetadata.isPrepared()) {
-//            throw new TransactionException(KafkaErrorCode.CONCURRENT_TRANSACTIONS.getCode());
-//        }
+        if (transactionMetadata.isCompleted()) {
+            throw new TransactionException(KafkaErrorCode.INVALID_PRODUCER_EPOCH.getCode());
+        }
 
         synchronized (transactionMetadata) {
             return doEndTxn(transactionMetadata, isCommit);
@@ -190,8 +174,6 @@ public class TransactionHandler extends Service {
     }
 
     protected boolean doEndTxn(TransactionMetadata transactionMetadata, boolean isCommit) {
-        transactionMetadata.updateLastTime();
-
         try {
             if (isCommit) {
                 doCommit(transactionMetadata);
@@ -201,7 +183,6 @@ public class TransactionHandler extends Service {
 
             transactionMetadata.clear();
             transactionMetadata.nextEpoch();
-            transactionMetadata.transitionStateTo(TransactionState.EMPTY);
             return true;
         } catch (Exception e) {
             logger.error("endTxn exception, metadata: {}, isCommit: {}", transactionMetadata, isCommit, e);
@@ -210,27 +191,29 @@ public class TransactionHandler extends Service {
     }
 
     protected void doCommit(TransactionMetadata transactionMetadata) throws Exception {
-        if (!transactionSynchronizer.prepareCommit(transactionMetadata, transactionMetadata.getPrepare())) {
-            throw new JournalqException(String.format("prepare commit transaction failed, metadata: %s", transactionMetadata), JournalqCode.CN_UNKNOWN_ERROR.getCode());
+        if (!transactionMetadata.getState().equals(TransactionState.PREPARE_COMMIT)) {
+            if (!transactionSynchronizer.prepareCommit(transactionMetadata, transactionMetadata.getPrepare())) {
+                throw new JournalqException(String.format("prepare commit transaction failed, metadata: %s", transactionMetadata), JournalqCode.CN_UNKNOWN_ERROR.getCode());
+            }
+            transactionMetadata.transitionStateTo(TransactionState.PREPARE_COMMIT);
         }
-        transactionMetadata.transitionStateTo(TransactionState.PREPARE_COMMIT);
-        try {
-            transactionSynchronizer.commit(transactionMetadata, transactionMetadata.getPrepare(), transactionMetadata.getOffsets());
-        } catch (Exception e) {
-            logger.info("commit transaction failed, metadata: {}", transactionMetadata, e);
+
+        if (!transactionSynchronizer.commit(transactionMetadata, transactionMetadata.getPrepare(), transactionMetadata.getOffsets())) {
+            throw new JournalqException(String.format("commit transaction failed, metadata: %s", transactionMetadata), JournalqCode.CN_UNKNOWN_ERROR.getCode());
         }
         transactionMetadata.transitionStateTo(TransactionState.COMPLETE_COMMIT);
     }
 
     protected void doAbort(TransactionMetadata transactionMetadata) throws Exception {
-        if (!transactionSynchronizer.prepareAbort(transactionMetadata, transactionMetadata.getPrepare())) {
-            throw new JournalqException(String.format("prepare abort transaction failed, metadata: %s", transactionMetadata), JournalqCode.CN_UNKNOWN_ERROR.getCode());
+        if (!transactionMetadata.getState().equals(TransactionState.PREPARE_ABORT)) {
+            if (!transactionSynchronizer.prepareAbort(transactionMetadata, transactionMetadata.getPrepare())) {
+                throw new JournalqException(String.format("prepare abort transaction failed, metadata: %s", transactionMetadata), JournalqCode.CN_UNKNOWN_ERROR.getCode());
+            }
+            transactionMetadata.transitionStateTo(TransactionState.PREPARE_ABORT);
         }
-        transactionMetadata.transitionStateTo(TransactionState.PREPARE_ABORT);
-        try {
-            transactionSynchronizer.abort(transactionMetadata, transactionMetadata.getPrepare());
-        } catch (Exception e) {
-            logger.info("abort transaction failed, metadata: {}", transactionMetadata, e);
+
+        if (!transactionSynchronizer.abort(transactionMetadata, transactionMetadata.getPrepare())) {
+            throw new JournalqException(String.format("abort transaction failed, metadata: %s", transactionMetadata), JournalqCode.CN_UNKNOWN_ERROR.getCode());
         }
         transactionMetadata.transitionStateTo(TransactionState.COMPLETE_ABORT);
     }

@@ -15,6 +15,7 @@ package com.jd.journalq.broker.network.protocol.support;
 
 import com.jd.journalq.network.event.TransportEventHandler;
 import com.jd.journalq.network.handler.ConnectionHandler;
+import com.jd.journalq.network.protocol.CommandHandlerProvider;
 import com.jd.journalq.network.protocol.Protocol;
 import com.jd.journalq.network.transport.codec.Codec;
 import com.jd.journalq.network.transport.codec.CodecFactory;
@@ -25,6 +26,7 @@ import com.jd.journalq.network.transport.handler.CommandInvocation;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelPipeline;
 
 /**
  * 协议处理器管道
@@ -61,12 +63,18 @@ public class DefaultProtocolHandlerPipeline extends ChannelInitializer {
             throw new IllegalArgumentException(String.format("codec is null, protocol: %s", protocol.type()));
         }
 
-        channel.pipeline()
-                .addLast(new NettyDecoder(codec))
+        ChannelPipeline pipeline = channel.pipeline();
+        pipeline.addLast(new NettyDecoder(codec))
                 .addLast(new NettyEncoder(codec))
                 .addLast(connectionHandler)
-                .addLast(transportEventHandler)
-                .addLast(commandInvocation);
+                .addLast(transportEventHandler);
+
+        if (protocol instanceof CommandHandlerProvider) {
+            ChannelHandler customHandler = ((CommandHandlerProvider) protocol).getCommandHandler(commandInvocation);
+            pipeline.addLast(customHandler);
+        } else {
+            pipeline.addLast(commandInvocation);
+        }
     }
 
     protected CommandInvocation newCommandInvocation() {

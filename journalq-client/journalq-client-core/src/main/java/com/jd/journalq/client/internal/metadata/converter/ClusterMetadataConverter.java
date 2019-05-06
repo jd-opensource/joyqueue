@@ -19,8 +19,8 @@ import com.jd.journalq.client.internal.metadata.domain.ClusterMetadata;
 import com.jd.journalq.client.internal.metadata.domain.PartitionGroupMetadata;
 import com.jd.journalq.client.internal.metadata.domain.PartitionMetadata;
 import com.jd.journalq.client.internal.metadata.domain.TopicMetadata;
-import com.jd.journalq.network.command.FetchClusterResponse;
 import com.jd.journalq.exception.JournalqCode;
+import com.jd.journalq.network.command.FetchClusterResponse;
 import com.jd.journalq.network.command.Topic;
 import com.jd.journalq.network.command.TopicPartition;
 import com.jd.journalq.network.command.TopicPartitionGroup;
@@ -66,6 +66,7 @@ public class ClusterMetadataConverter {
         List<BrokerNode> nearbyBrokers = Lists.newArrayList();
         Map<Integer, List<PartitionMetadata>> brokerPartitions = Maps.newHashMap();
         Map<Integer, List<PartitionGroupMetadata>> brokerPartitionGroups = Maps.newHashMap();
+        boolean allAvailable = true;
 
         for (Map.Entry<Integer, BrokerNode> entry : brokerMap.entrySet()) {
             BrokerNode brokerNode = entry.getValue();
@@ -80,7 +81,9 @@ public class ClusterMetadataConverter {
             partitionGroups.add(partitionGroupMetadata);
             partitionGroupMap.put(entry.getKey(), partitionGroupMetadata);
 
-            if (partitionGroupMetadata.getLeader() != null) {
+            if (partitionGroupMetadata.getLeader() == null) {
+                allAvailable = false;
+            } else {
                 List<PartitionGroupMetadata> brokerPartitionGroupList = brokerPartitionGroups.get(partitionGroupMetadata.getLeader().getId());
                 if (brokerPartitionGroupList == null) {
                     brokerPartitionGroupList = Lists.newArrayList();
@@ -121,7 +124,7 @@ public class ClusterMetadataConverter {
         }
 
         return new TopicMetadata(code, topic.getProducerPolicy(), topic.getConsumerPolicy(), topic.getType(), partitionGroups, partitions, partitionMap, partitionGroupMap, brokers,
-                nearbyBrokers, brokerMap, brokerPartitions, brokerPartitionGroups, topic.getCode());
+                nearbyBrokers, brokerMap, brokerPartitions, brokerPartitionGroups, allAvailable, topic.getCode());
     }
 
     public static PartitionGroupMetadata convertPartitionGroupMetadata(String topic, TopicPartitionGroup partitionGroup, Map<Integer, BrokerNode> brokers) {

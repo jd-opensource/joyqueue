@@ -11,25 +11,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jd.journalq.broker.kafka.session;
+package com.jd.journalq.network.protocol;
 
-import com.jd.journalq.network.transport.Transport;
+import io.netty.channel.ChannelHandler;
 
 /**
- * KafkaConnectionHelper
+ * CommandHandlerProvider
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
- * date: 2018/11/9
+ * date: 2018/8/16
  */
-public class KafkaConnectionHelper {
+public interface CommandHandlerProvider {
 
-    private static final String CONNECTION_ATTR_KEY = "_KAFKA_CONNECTION_";
-
-    public static void setConnection(Transport transport, KafkaConnection connection) {
-        transport.attr().set(CONNECTION_ATTR_KEY, connection);
-    }
-
-    public static KafkaConnection getConnection(Transport transport) {
-        return (KafkaConnection) transport.attr().get(CONNECTION_ATTR_KEY);
-    }
+    ChannelHandler getCommandHandler(ChannelHandler channelHandler);
 }

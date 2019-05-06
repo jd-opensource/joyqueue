@@ -37,6 +37,10 @@ public class TransactionMetadataManager {
                 .build();
     }
 
+    public <T extends TransactionMetadata> T tryGetTransaction(String transactionId) {
+        return (T) transactionCache.asMap().get(transactionId);
+    }
+
     public <T extends TransactionMetadata> T getTransaction(String transactionId) {
         return (T) transactionCache.getIfPresent(transactionId);
     }

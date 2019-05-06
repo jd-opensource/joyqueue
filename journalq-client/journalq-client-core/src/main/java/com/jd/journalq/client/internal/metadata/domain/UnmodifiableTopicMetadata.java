@@ -35,9 +35,9 @@ public class UnmodifiableTopicMetadata extends TopicMetadata {
     public UnmodifiableTopicMetadata(String topic, ProducerPolicy producerPolicy, ConsumerPolicy consumerPolicy, TopicType type, List<PartitionGroupMetadata> partitionGroups,
                                      List<PartitionMetadata> partitions, Map<Short, PartitionMetadata> partitionMap, Map<Integer, PartitionGroupMetadata> partitionGroupMap, List<BrokerNode> brokers,
                                      List<BrokerNode> nearbyBrokers, Map<Integer, BrokerNode> brokerMap, Map<Integer, List<PartitionMetadata>> brokerPartitions,
-                                     Map<Integer, List<PartitionGroupMetadata>> brokerPartitionGroups, JournalqCode code) {
+                                     Map<Integer, List<PartitionGroupMetadata>> brokerPartitionGroups, boolean allAvailable, JournalqCode code) {
         super(topic, producerPolicy, consumerPolicy, type, partitionGroups, partitions, partitionMap, partitionGroupMap,
-                brokers, nearbyBrokers, brokerMap, brokerPartitions, brokerPartitionGroups, code);
+                brokers, nearbyBrokers, brokerMap, brokerPartitions, brokerPartitionGroups, allAvailable, code);
     }
 
     @Override
