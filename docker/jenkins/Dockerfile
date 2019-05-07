@@ -44,7 +44,7 @@ RUN apt-get update \
        python3-wheel \
        build-essential \
     && rm -rf /var/lib/apt/lists/* \
-    && ln -nsf /usr/bin/python3.7 /usr/bin/python
+    && ln -nsf /usr/bin/python"${ver}" /usr/bin/python
 
 
 ENV DEBIAN_FRONTEND teletype
