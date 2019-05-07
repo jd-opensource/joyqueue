@@ -21,8 +21,8 @@
               @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
               @on-consume="consume" @on-download="download" @on-retry="retry">
     </my-table>
-    <div style="float: right">
-      <d-button type="primary" v-if="!firstDis" @click="getList">首页</d-button>
+    <div style="text-align: right; margin-right: 50px">
+      <d-button type="primary" v-if="!firstDis" @click="getList" class="left mr10">首页</d-button>
       <d-button color="info" disabled v-else>首页</d-button>
 
       <d-button type="primary" v-if="!nextDis" @click="getNext">下一页</d-button>

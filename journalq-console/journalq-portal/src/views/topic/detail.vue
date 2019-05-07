@@ -14,10 +14,10 @@
       <d-tab-pane label="Broker" v-if="$store.getters.isAdmin" name="broker" icon="cpu">
         <broker ref="broker" :topicId="this.$route.query.id"/>
       </d-tab-pane>
-      <d-tab-pane label="重试" name="retry" icon="user-minus">
+      <d-tab-pane label="重试" name="retry" icon="zap">
         <retry ref="retry" :search="retrySearch"/>
       </d-tab-pane>
-      <d-tab-pane label="归档" name="archive" icon="user-minus">
+      <d-tab-pane label="归档" name="archive" icon="package">
         <archive ref="archive" :search="archiveSearch"/>
       </d-tab-pane>
     </template>
