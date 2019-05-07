@@ -101,7 +101,7 @@ class Workflow:
         script = """
             cd {home}
             # empty dir
-            if [[ "$(ls -A {home})" ]] 
+            if [[ "$(ls -A {home})" ]]; then 
                 rm -r *
             else
                 echo 'is clean {home}'
