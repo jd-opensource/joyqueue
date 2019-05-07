@@ -19,7 +19,7 @@ pipeline {
         stage('Test') {
             steps {
                 echo 'Packaging....'
-                 sh 'mvn -P artifactory,docker install'
+                 sh 'mvn -P docker install'
             }
         }
         stage('Integration Test') {
