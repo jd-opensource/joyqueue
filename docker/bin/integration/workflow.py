@@ -100,8 +100,12 @@ class Workflow:
             path.mkdir(parents=True)
         script = """
             cd {home}
-            # empty dir 
-            rm -r *  
+            # empty dir
+            if [[ "$(ls -A {home})" ]] 
+                rm -r *
+            else
+                echo 'is clean {home}'
+            fi      
             git clone {repo}
             cd {repo_name}
             git checkout journalq_b
