@@ -61,4 +61,15 @@ public class MqttSubscriptionInfo extends BaseMonitorInfo {
         result = 31 * result + (topic != null ? topic.hashCode() : 0);
         return result;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MqttSubscriptionInfo that = (MqttSubscriptionInfo) o;
+        return qos == that.qos &&
+                size == that.size &&
+                topic.equals(that.topic) &&
+                clientId.equals(that.clientId);
+    }
 }

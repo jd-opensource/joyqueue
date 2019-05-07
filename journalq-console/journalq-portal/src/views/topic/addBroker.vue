@@ -1,14 +1,13 @@
 <template>
   <div>
     <div class="ml20 mt10">
-      <d-input v-model="searchData.keyword" placeholder="请输入要查询的IP/ID" class="left" style="width: 60%">
+      <d-input v-model="searchData.keyword" placeholder="请输入要查询的IP/ID/标签" class="left" style="width: 60%">
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
     </div>
     <my-table :optional="true" :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
               @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange">
     </my-table>
-
   </div>
 </template>
 
@@ -23,43 +22,33 @@ export default {
     myTable
   },
   props: {
-    data: {
-      type: Object,
-      default () {
-        return {}
-      }
+    // data: {
+    //   type: Object,
+    //   default () {
+    //     return {}
+    //   }
+    // },
+    urls: {
+      type: Object
+    },
+    colData: {
+      type: Array
+    },
+    btns: {
+      type: Array
     }
   },
   mixins: [ crud ],
   data () {
     return {
-      urls: {
-        search: '/broker/search'
-      },
       searchData: {
         keyword: '',
         brokerGroupIds: []
       },
       tableData: {
         rowData: [{}],
-        colData: [
-          {
-            title: '分组',
-            key: 'group.code'
-          },
-          {
-            title: 'ID',
-            key: 'id'
-          },
-          {
-            title: 'IP',
-            key: 'ip'
-          },
-          {
-            title: '端口',
-            key: 'port'
-          }
-        ]
+        colData: this.colData,
+        btns: this.btns
       },
       multipleSelection: []
     }
@@ -74,7 +63,7 @@ export default {
     },
     getListByGroupAndbrokers (brokerGroupId, brokers) {
       let query = {}
-      if (brokerGroupId === undefined || brokerGroupId === 0) {
+      if (!brokerGroupId) {
         this.searchData.brokerGroupIds = []
         query = {
           keyword: this.searchData.keyword
@@ -94,7 +83,7 @@ export default {
         },
         query: query
       }
-      apiRequest.post(this.urlOrigin.search, {}, data).then((data) => {
+      apiRequest.post(this.urls.search, {}, data).then((data) => {
         if (data === '') {
           return
         }
@@ -108,7 +97,7 @@ export default {
         this.tableData.rowData = data.data
         this.tableData.rowData.forEach(element => {
           element['isChecked'] = false
-          if (brokers !== undefined && brokers.length > 0) {
+          if (brokers && brokers.length > 0) {
             for (var broker of brokers) {
               if (broker.id === element.id) {
                 element['isChecked'] = true
@@ -121,8 +110,6 @@ export default {
     }
   },
   mounted () {
-    // this.searchData.brokerGroupIds = this.data.brokerGroups.join(',')
-    // this.getList();
   }
 }
 </script>

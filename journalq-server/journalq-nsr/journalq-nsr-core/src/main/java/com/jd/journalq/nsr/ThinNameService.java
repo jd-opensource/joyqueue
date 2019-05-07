@@ -28,7 +28,6 @@ import com.jd.journalq.domain.Topic;
 import com.jd.journalq.domain.TopicConfig;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.event.NameServerEvent;
-import com.jd.journalq.network.command.CommandType;
 import com.jd.journalq.network.command.GetTopics;
 import com.jd.journalq.network.command.GetTopicsAck;
 import com.jd.journalq.network.command.SubscribeAck;
@@ -98,6 +97,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -115,7 +115,7 @@ public class ThinNameService extends Service implements NameService, PropertySup
     /**
      * 事件管理器
      */
-    protected EventBus<NameServerEvent> eventBus = new EventBus<>("THIN_NAMESERVICE_ENENT_BUSS");
+    protected EventBus<NameServerEvent> eventBus = new EventBus<>("BROKER_THIN_NAMESERVICE_ENENT_BUS");
 
 
     public ThinNameService() {
@@ -162,7 +162,7 @@ public class ThinNameService extends Service implements NameService, PropertySup
 
     @Override
     public void unSubscribe(List<Subscription> subscriptions) {
-        Command request = new Command(new JMQHeader(Direction.REQUEST, CommandType.UNSUBSCRIBE), new UnSubscribe().subscriptions(subscriptions));
+        Command request = new Command(new JMQHeader(Direction.REQUEST, NsrCommandType.UN_SUBSCRIBE), new UnSubscribe().subscriptions(subscriptions));
         Command response = send(request);
         if (!response.isSuccess()) {
             logger.error("unSubscribe error request {},response {}", request, response);
@@ -368,7 +368,9 @@ public class ThinNameService extends Service implements NameService, PropertySup
             throw new RuntimeException(String.format("getConsumerByTopic error request {},response {}", request, response));
         }
         List<Consumer> topicConsumes = ((GetConsumerByTopicAck) response.getPayload()).getConsumers();
-        if (null != topicConsumes) consumers.addAll(topicConsumes);
+        if (null != topicConsumes) {
+            consumers.addAll(topicConsumes);
+        }
         return consumers;
     }
 
@@ -382,7 +384,9 @@ public class ThinNameService extends Service implements NameService, PropertySup
             throw new RuntimeException(String.format("getProducerByTopic error request {},response {}", request, response));
         }
         List<Producer> topicProducers = ((GetProducerByTopicAck) response.getPayload()).getProducers();
-        if (null != topicProducers) producers.addAll(topicProducers);
+        if (null != topicProducers) {
+            producers.addAll(topicProducers);
+        }
         return producers;
     }
 
@@ -413,11 +417,6 @@ public class ThinNameService extends Service implements NameService, PropertySup
         eventBus.addListener(listener);
     }
 
-    //TODO delete
-    public void addNameServerEvent(NameServerEvent event) {
-        eventBus.add(event);
-    }
-
     @Override
     public void removeListener(EventListener<NameServerEvent> listener) {
         eventBus.removeListener(listener);
@@ -445,9 +444,9 @@ public class ThinNameService extends Service implements NameService, PropertySup
 
     private Command send(Command request) throws TransportException {
         try {
-            return clientTransport.getOrCreateTransport().sync(request);
+            return clientTransport.getOrCreateTransport().sync(request,10000);
         } catch (TransportException exception) {
-            logger.error("rmoteNameService error request {}", request);
+            logger.error("send command to nameServer error request {}", request);
             throw exception;
         }
     }
@@ -457,12 +456,7 @@ public class ThinNameService extends Service implements NameService, PropertySup
             return null;
         }
         Command request = new Command(new JMQHeader(Direction.REQUEST, NsrCommandType.CONNECT), new NsrConnection().brokerId(broker.getId()));
-        try {
-            return clientTransport.getOrCreateTransport().sync(request);
-        } catch (TransportException exception) {
-            logger.error("rmoteNameService error request {}", request);
-            throw exception;
-        }
+        return send(request);
     }
 
     @Override
@@ -477,11 +471,11 @@ public class ThinNameService extends Service implements NameService, PropertySup
 
 
     private class ClientTransport implements EventListener<TransportEvent>, LifeCycle {
-        private boolean started = false;
+        private AtomicBoolean started = new AtomicBoolean(false);
         private TransportClient transportClient;
         protected final AtomicReference<Transport> transports = new AtomicReference<>();
 
-        ClientTransport(NameServiceConfig config,NameService nameService) {
+        ClientTransport(NameServiceConfig config, NameService nameService) {
             this.transportClient = new NsrTransportClientFactory(nameService).create(config.getClientConfig());
             this.transportClient.addListener(this);
         }
@@ -498,7 +492,7 @@ public class ThinNameService extends Service implements NameService, PropertySup
                 case CLOSE:
                     transports.set(null);
                     transport.stop();
-                    logger.info("RemoteNameService transport of {} closed", transport.toString());
+                    logger.info("transport connect to nameServer closed. [{}] ", transport.toString());
                     break;
                 default:
                     break;
@@ -514,8 +508,8 @@ public class ThinNameService extends Service implements NameService, PropertySup
                         transport = transportClient.createTransport(nameServiceConfig.getNamserverAddress());
                         transports.set(transport);
                     }
-                    logger.info("RemoteNameService  create transport of {}", nameServiceConfig.getNamserverAddress());
-                    }
+                    logger.info("create transport connect to nameServer [{}]", nameServiceConfig.getNamserverAddress());
+                }
             }
             return transport;
         }
@@ -523,19 +517,20 @@ public class ThinNameService extends Service implements NameService, PropertySup
 
         @Override
         public void start() throws Exception {
-            this.transportClient.start();
-            started = true;
+            if (started.compareAndSet(false, true)) {
+                this.transportClient.start();
+            }
         }
 
         @Override
         public void stop() {
+            started.set(false);
             this.transportClient.stop();
-            started = false;
         }
 
         @Override
         public boolean isStarted() {
-            return started;
+            return started.get();
         }
     }
 

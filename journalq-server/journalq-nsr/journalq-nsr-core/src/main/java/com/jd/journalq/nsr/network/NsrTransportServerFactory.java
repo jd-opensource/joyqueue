@@ -26,23 +26,24 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author wylixiaobin
- * Date: 2019/1/27
+ * @date 2019/1/27
+ * <p>
+ * name server factory
  */
 public class NsrTransportServerFactory extends DefaultTransportServerFactory {
     private static NsrCommandHandlerFactory nsrCommandHandlerFactory = new NsrServerCommandHandlerFactory();
-    protected static EventBus<TransportEvent> eventEventBus = new EventBus<>();
-    public NsrTransportServerFactory(NameService nameService){
-        this(NsrCodecFactory.getInstance(),nsrCommandHandlerFactory,new NsrExceptionHandler(),eventEventBus);
+    protected static EventBus<TransportEvent> eventBus = new EventBus<>();
+
+    public NsrTransportServerFactory(NameService nameService) {
+        this(NsrCodecFactory.getInstance(), nsrCommandHandlerFactory, new NsrExceptionHandler(), eventBus);
         nsrCommandHandlerFactory.register(nameService);
     }
 
     public NsrTransportServerFactory(Codec codec, CommandHandlerFactory commandHandlerFactory, ExceptionHandler exceptionHandler, EventBus<TransportEvent> eventBus) {
         super(codec, commandHandlerFactory, exceptionHandler, eventBus);
-        this.eventEventBus = eventBus;
     }
 
     static class NsrServerCommandHandlerFactory extends NsrCommandHandlerFactory {
-
         protected static final Logger logger = LoggerFactory.getLogger(NsrCommandHandlerFactory.class);
 
         @Override
@@ -52,8 +53,8 @@ public class NsrTransportServerFactory extends DefaultTransportServerFactory {
 
         @Override
         public void doWithHandler(NsrCommandHandler nsrCommandHandler) {
-            if(nsrCommandHandler instanceof EventListener){
-                eventEventBus.addListener((EventListener<TransportEvent>) nsrCommandHandler);
+            if (nsrCommandHandler instanceof EventListener) {
+                eventBus.addListener((EventListener<TransportEvent>) nsrCommandHandler);
             }
         }
     }

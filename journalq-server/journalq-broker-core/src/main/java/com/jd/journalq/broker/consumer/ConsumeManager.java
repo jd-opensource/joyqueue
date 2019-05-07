@@ -22,6 +22,7 @@ import com.jd.journalq.broker.consumer.model.ConsumePartition;
 import com.jd.journalq.broker.consumer.model.OwnerShip;
 import com.jd.journalq.broker.consumer.model.PullResult;
 import com.jd.journalq.broker.monitor.BrokerMonitor;
+import com.jd.journalq.broker.monitor.SessionManager;
 import com.jd.journalq.domain.Consumer.ConsumerPolicy;
 import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.domain.TopicName;
@@ -95,6 +96,8 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
     private BrokerContext brokerContext;
     // 消费配置
     private ConsumeConfig consumeConfig;
+    // 会话管理
+    private SessionManager sessionManager;
     // 最近拉取/应答时间跟踪器
     private Map<ConsumePartition, /* 最新拉取时间 */ AtomicLong> lastPullTimeTrace = new ConcurrentHashMap<>();
 
@@ -137,6 +140,10 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
             storeService = brokerContext.getStoreService();
         }
 
+        if (sessionManager == null && brokerContext != null) {
+            sessionManager = brokerContext.getSessionManager();
+        }
+
         Preconditions.checkArgument(clusterManager != null, "cluster manager can not be null.");
         Preconditions.checkArgument(storeService != null, "cluster manager can not be null.");
         if (brokerMonitor == null) {
@@ -149,11 +156,11 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
             logger.warn("archive manager is null.");
         }
         this.filterMessageSupport = new FilterMessageSupport(clusterManager);
-        this.partitionManager = new PartitionManager(clusterManager);
+        this.partitionManager = new PartitionManager(clusterManager, sessionManager);
         this.positionManager = new PositionManager(clusterManager, storeService, consumeConfig);
         this.brokerContext.positionManager(positionManager);
         this.partitionConsumption = new PartitionConsumption(clusterManager, storeService, partitionManager, positionManager, messageRetry, filterMessageSupport, archiveManager);
-        this.concurrentConsumption = new ConcurrentConsumption(clusterManager, storeService, partitionManager, messageRetry, positionManager, filterMessageSupport, archiveManager);
+        this.concurrentConsumption = new ConcurrentConsumption(clusterManager, storeService, partitionManager, messageRetry, positionManager, filterMessageSupport, archiveManager, sessionManager);
     }
 
     @Override
@@ -375,10 +382,6 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
         //选择消费策略
         switch (choiceConsumeStrategy(consumerPolicy)) {
             case DEFAULT:
-                synchronized (lock) {
-                    isSuccess = partitionConsumption.acknowledge(locations, consumer, isSuccessAck);
-                }
-                break;
             case SEQUENCE:
                 synchronized (lock) {
                     isSuccess = partitionConsumption.acknowledge(locations, consumer, isSuccessAck);

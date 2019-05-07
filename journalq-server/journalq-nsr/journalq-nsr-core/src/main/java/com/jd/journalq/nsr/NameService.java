@@ -35,7 +35,10 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * name service interface
+ *
  * @author lixiaobin6
+ * @date 2018/9/4
  */
 public interface NameService extends LifeCycle {
 
@@ -205,40 +208,43 @@ public interface NameService extends LifeCycle {
      */
     List<Consumer> getConsumerByTopic(TopicName topic);
 
+    /**
+     * get producer
+     * @param topic
+     * @return
+     */
     List<Producer> getProducerByTopic(TopicName topic);
 
+    /**
+     * get replica
+     * @param brokerId
+     * @return
+     */
     List<Replica> getReplicaByBroker(Integer brokerId);
 
+    /**
+     * get app token
+     * @param app
+     * @param token
+     * @return
+     */
     AppToken getAppToken(String app, String token);
 
+    /**
+     * add listener
+     * @param listener
+     */
     void addListener(EventListener<NameServerEvent> listener);
 
+    /**
+     * remove listener
+     * @param listener
+     */
     void removeListener(EventListener<NameServerEvent> listener);
 
+    /**
+     * add event
+     * @param event
+     */
     void addEvent(NameServerEvent event);
-
-    enum Subscribe {
-        Produce(1),
-        Consumer(2);
-        private int type;
-
-        Subscribe(int type) {
-            this.type = type;
-        }
-
-        public static Subscribe valueOf(int type) {
-            switch (type) {
-                case 1:
-                    return Produce;
-                case 2:
-                    return Consumer;
-                default:
-                    return null;
-            }
-        }
-
-        public int type() {
-            return type;
-        }
-    }
 }

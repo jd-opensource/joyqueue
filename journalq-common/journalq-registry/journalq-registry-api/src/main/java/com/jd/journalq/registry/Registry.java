@@ -92,7 +92,7 @@ public interface Registry extends Type, LifeCycle, UrlAware {
      * @param path 路径
      * @return 锁
      */
-    Lock createLock(final String path);
+    Lock createLock(String path);
 
     /**
      * 更新节点的值

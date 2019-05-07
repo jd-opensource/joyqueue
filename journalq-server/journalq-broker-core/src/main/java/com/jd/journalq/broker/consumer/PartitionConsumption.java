@@ -48,6 +48,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -117,6 +118,8 @@ class PartitionConsumption extends Service {
      * @return 读取的消息
      */
     protected PullResult getMessage(Consumer consumer, int count, long ackTimeout, long accessTimes) throws JournalqException {
+        logger.debug("getMessage by topic:[{}], app:[{}], count:[{}], ackTimeout:[{}]", consumer.getTopic(), consumer.getApp(), count, ackTimeout);
+
         PullResult pullResult = new PullResult(consumer, (short) -1, new ArrayList<>(0));
 
         if (partitionManager.isRetry(consumer)) {
@@ -270,6 +273,8 @@ class PartitionConsumption extends Service {
      * @return 读取的消息
      */
     protected PullResult getMessage4Sequence(Consumer consumer, short partition, int count, long ackTimeout) throws JournalqException {
+        logger.debug("getMessage4Sequence by topic:[{}], app:[{}], partition:[{}], count:[{}], ackTimeout:[{}]", consumer.getTopic(), consumer.getApp(), partition, count, ackTimeout);
+
         // 初始化默认
         PullResult pullResult = new PullResult(consumer, (short) -1, new ArrayList<>(0));
         if (partitionManager.tryOccupyPartition(consumer, partition, ackTimeout)) {
@@ -443,6 +448,8 @@ class PartitionConsumption extends Service {
         short partition = locations[0].getPartition();
         // 重试应答
         if (partition == Partition.RETRY_PARTITION_ID) {
+            logger.debug("retry ack by topic:[{}], app:[{}], locations:[{}]", topic, app, Arrays.toString(locations));
+
             return retryAck(topic, app, locations, isSuccessAck);
         }
         long[] indexArr = AcknowledgeSupport.sortMsgLocation(locations);
@@ -456,6 +463,8 @@ class PartitionConsumption extends Service {
                 isSuccess = positionManager.updateLastMsgAckIndex(TopicName.parse(topic), app, partition, updateMsgAckIndex);
             } else if (lastMsgAckIndex >= indexArr[1]) {
                 isSuccess = true;
+            } else {
+                logger.error("ack index is not continue.");
             }
         } else {
             throw new JournalqException(JournalqCode.FW_CONSUMER_ACK_FAIL, "序号不连续或有重复");

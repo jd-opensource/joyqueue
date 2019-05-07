@@ -1,0 +1,52 @@
+/*
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+pipeline {
+    agent any
+    stages {
+
+        stage('Test') {
+            steps {
+                echo 'Packaging....'
+                 sh 'mvn clean package'
+            }
+        }
+        stage('Integration Test') {
+                    steps {
+                        echo 'Integration Test....'
+                        sh 'pwd '
+                        dir('docker/bin'){
+                            sh ' pwd && ls -l && git branch && git log'
+                            updateGitlabCommitStatus name: 'build', state: 'running'
+                            sh './integrate_test.sh'
+                        }
+                    }
+        }
+    }
+    post {
+        failure {
+          updateGitlabCommitStatus name: 'build', state: 'failed'
+        }
+        success {
+          updateGitlabCommitStatus name: 'build', state: 'success'
+        }
+        always {
+        script {
+            def resultIcon = currentBuild.result == 'SUCCESS' ? ':white_check_mark:' : ':anguished:'
+            addGitLabMRComment comment: "$resultIcon Jenkins Build $currentBuild.result\n\nResults available at: [Jenkins [$env.JOB_NAME#$env.BUILD_NUMBER]]($env.BUILD_URL)"
+            echo 'I will always say Hello again!'
+           }
+         }
+      }
+
+}

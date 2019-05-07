@@ -52,17 +52,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
@@ -130,11 +120,10 @@ public class ClusterManager extends Service {
     protected void doStart() throws Exception {
         super.doStart();
         localCache.start();
-        //TODO 刚到这里是否合适
-        register();
         eventBus.start();
-        localCache.initCache();
         eventBus.addListener(event -> listenEvent(event));
+        register();
+        localCache.initCache();
         logger.info("clusterManager is started");
     }
 
@@ -258,18 +247,6 @@ public class ClusterManager extends Service {
     /**
      * 根据主题+分区查询对应的主master
      *
-     * @param topic     主题
-     * @param partition 分区
-     * @return
-     */
-    public Broker getBrokerByPartition(TopicName topic, short partition) {
-        TopicConfig topicConfig = localCache.getTopicConfig(topic);
-        return topicConfig.fetchBrokerByPartition(partition);
-    }
-
-    /**
-     * 根据主题+分区查询对应的主master
-     *
      * @param topic 主题
      * @param group group
      * @return
@@ -376,13 +353,16 @@ public class ClusterManager extends Service {
     /**
      * 获取该topic对应的所有partition
      *
-     *
      * @param topic
      * @return
      */
     public List<Short> getPartitionList(TopicName topic) {
         TopicConfig config = getTopicConfig(topic);
-        return new ArrayList<>(config.fetchAllPartitions());
+        if (config != null) {
+            return new ArrayList<>(config.fetchAllPartitions());
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     /**
@@ -409,7 +389,7 @@ public class ClusterManager extends Service {
                 return new ArrayList<>(priorityPartitions);
             }
         }
-        return new ArrayList<>(0);
+        return Collections.emptyList();
     }
 
     /**
@@ -472,27 +452,6 @@ public class ClusterManager extends Service {
         return getProducerPolicyOrDefault(producer);
     }
 
-    /**
-     * 是否开启就近消费
-     *
-     * @param topic 主题
-     * @param app   应用
-     * @return
-     */
-    public boolean isNeedNearby(TopicName topic, String app) throws JournalqException {
-        return getConsumerPolicy(topic, app).getNearby();
-    }
-
-    /**
-     * 判断是否配置延迟消费
-     *
-     * @param topic
-     * @return 是否需要延迟消费
-     * @Param app
-     */
-    public boolean isNeedDelay(TopicName topic, String app) throws JournalqException {
-        return getConsumerPolicy(topic, app).getDelay() > 0;
-    }
 
     /**
      * 是否需要长轮询
@@ -508,17 +467,6 @@ public class ClusterManager extends Service {
         // 顺序消息不支持长轮询
         TopicConfig config = localCache.getTopicConfigCache().get(topic);
         return !(config != null && config.checkSequential());
-    }
-
-    /**
-     * 获取应答超时时间
-     *
-     * @param topic 主题
-     * @param app   应用
-     * @return
-     */
-    public int getAckTimeout(TopicName topic, String app) throws JournalqException {
-        return getConsumerPolicy(topic, app).getAckTimeout();
     }
 
 
@@ -553,30 +501,14 @@ public class ClusterManager extends Service {
         return consumer.getConsumerPolicy();
     }
 
-    public boolean isLeader(String topic) {
-        return isLeader(TopicName.parse(topic));
-    }
-
     public boolean isLeader(String topic, short partition) {
         return isLeader(TopicName.parse(topic), partition);
     }
 
-    public boolean isLeader(String topic, int partitionGroupId) {
-        return isLeader(TopicName.parse(topic), partitionGroupId);
+    public boolean isLeader(String topic, int partitionGroup) {
+        return isLeader(TopicName.parse(topic), partitionGroup);
     }
 
-    public boolean isLeader(TopicName topic) {
-        TopicConfig topicConfig = getTopicConfig(topic);
-        if (topicConfig == null) {
-            return false;
-        }
-        for (Map.Entry<Integer, PartitionGroup> entry : topicConfig.getPartitionGroups().entrySet()) {
-            if (getBrokerId().equals(entry.getValue().getLeader())) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     public boolean isLeader(TopicName topic, int partitionGroupId) {
         TopicConfig topicConfig = getTopicConfig(topic);
@@ -630,7 +562,6 @@ public class ClusterManager extends Service {
                 return BooleanResponse.failed(JournalqCode.FW_PUT_MESSAGE_TOPIC_NOT_WRITE);
             }
         }
-        ;
         if (logger.isDebugEnabled()) {
             logger.debug("checkWritable topicConfig[{}]", topicConfig);
         }
@@ -644,7 +575,6 @@ public class ClusterManager extends Service {
             logger.error("topic[{}] cant't be write on broker [] ", topic, app, broker.getId() + "[" + broker.getIp() + ":" + broker.getPort() + "]");
             return BooleanResponse.failed(JournalqCode.FW_PRODUCE_MESSAGE_BROKER_NOT_LEADER);
         }
-        ;
         return BooleanResponse.success();
     }
 
@@ -713,7 +643,6 @@ public class ClusterManager extends Service {
             if (blackList.stream().anyMatch(ip -> ip.equals(address))) {
                 return BooleanResponse.failed(JournalqCode.FW_GET_MESSAGE_APP_CLIENT_IP_NOT_READ);
             }
-            ;
         }
         Collection<PartitionGroup> partitionGroups = topicConfig.fetchPartitionGroupByBrokerId(broker.getId());
         if (CollectionUtils.isEmpty(partitionGroups)) {
@@ -726,7 +655,6 @@ public class ClusterManager extends Service {
             logger.error("topic[{}],app[{}],error[{}]", topic, app, JournalqCode.FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER.getMessage());
             return BooleanResponse.failed(JournalqCode.FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER);
         }
-        ;
         return BooleanResponse.success();
     }
 
@@ -1138,10 +1066,12 @@ public class ClusterManager extends Service {
                         TopicConfig topicConfig = buildTopicConfigCache(((PartitionGroupEvent) event.getMetaEvent()).getTopic());
                         PartitionGroup groupNew = topicConfig.fetchPartitionGroupByGroup(((PartitionGroupEvent) event.getMetaEvent()).getPartitionGroup());
                         Set<Integer> brokerIds = new HashSet<>();
-                        if (groupOld != null)
+                        if (groupOld != null) {
                             brokerIds.addAll(groupOld.getReplicas());
-                        if (groupNew != null)
+                        }
+                        if (groupNew != null) {
                             brokerIds.addAll(groupNew.getReplicas());
+                        }
                         if (!brokerIds.contains(brokerConfig.getBrokerId())) {
                             return;
                         }

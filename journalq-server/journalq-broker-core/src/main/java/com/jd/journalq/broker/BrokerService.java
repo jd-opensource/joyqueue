@@ -136,7 +136,8 @@ public class BrokerService extends Service {
         // new AppTokenAuthentication(clusterManager, brokerConfig.getJmqAdmin());
         this.brokerMonitorService = new BrokerMonitorService(clusterManager.getBrokerId(),
                 new BrokerMonitorConfig(configuration, brokerConfig),
-                sessionManager);
+                sessionManager,
+                clusterManager);
         this.brokerContext.brokerMonitorService(this.brokerMonitorService);
 
         // new coordinator service

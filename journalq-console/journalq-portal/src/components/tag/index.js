@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,17 +11,5 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jd.journalq.toolkit.promise;
-
-/**
- * @author liyue25
- * Date: 2018/10/30
- */
-public interface OutputResolveFunction<R> extends InputOutputResolveFunction<Void, R> {
-    R resolve0() throws Exception;
-
-    @Override
-    default R resolve(Void nil) throws Exception {
-        return resolve0();
-    }
-}
+import Tag from './tag.vue';
+export default Tag;

@@ -45,4 +45,12 @@ public class PutRetry extends JMQPayload {
     public void setMessages(List<RetryMessageModel> messages) {
         this.messages = messages;
     }
+
+    @Override
+    public String toString() {
+        return "PutRetry{" +
+                "messages=" + messages +
+                '}';
+    }
+
 }
