@@ -109,7 +109,7 @@ class Workflow:
             git clone {repo}
             cd {repo_name}
             git checkout journalq_b
-            mvn -P artifactory,docker install 
+            mvn -P docker install 
         """.format(home=self.workspace.home, repo=self.task.pressure_repo,
                    repo_name=self.task.pressure_repo_name).rstrip()
         code, outs, _ = self.__run_local_script(script)
@@ -226,11 +226,13 @@ class Workflow:
                 error_code=FAILED_TO_PREPARE_MQ_DOCKER)
 
     def __start_mq_cluster_workers(self):
+        self.mq_tag = str(time.time()).replace('.', '_')
         # local can't be one of worker
         for h in self.workspace.cluster_hosts:
             self.__invoke_mq_worker(h)
 
     def __check_mq_cluster_state(self):
+
         for h in self.workspace.cluster_hosts:
             code, outs, _ = self.__check_mq_stat(h)
             if code != 0:
@@ -254,7 +256,7 @@ class Workflow:
 
     def __check_mq_stat(self, host, max_attempts=10, sleep=5):
         script = """
-                containerId=$(docker ps -a|grep {docker_namespace}/{repo_name}|grep '50088'|awk '{{print $1}}')
+                containerId=$(docker ps -a|grep {docker_namespace}/{repo_name}|grep {tag}|awk '{{print $1}}')
                 if [[ -z $containerId ]]; then
                     echo 'docker container {repo_name} no exist,something wrong'
                     exit 1
@@ -281,12 +283,13 @@ class Workflow:
                    repo_name=self.task.mq_repo_name,
                    mq_home=self.task.mq_home,
                    max_attempts=max_attempts,
-                   sleep=sleep).rstrip()
+                   sleep=sleep,
+                   tag=self.mq_tag).rstrip()
         return self.__run_remote_script(host, script)
 
     def __mq_container_id(self,host):
         script = """
-                containerId=$(docker ps -a|grep {docker_namespace}/{repo_name}|grep '50088'|awk '{{print $1}}')
+                containerId=$(docker ps -a|grep {docker_namespace}/{repo_name}|grep {tag}|awk '{{print $1}}')
                 if [[ -z $containerId ]]; then
                     echo 'docker container {repo_name} no exist,something wrong'
                     exit 1
@@ -294,7 +297,10 @@ class Workflow:
                     containerId=$(echo "$containerId"|sed ':a;N;$!ba;s/\\n/ /g') 
                     echo "$containerId" 
                 fi
-        """.format(docker_namespace=self.task.mq_docker_namespace, repo_name=self.task.mq_repo_name, mq_home=self.task.mq_home).rstrip()
+        """.format(docker_namespace=self.task.mq_docker_namespace,
+                   repo_name=self.task.mq_repo_name,
+                   mq_home=self.task.mq_home,
+                   tag=self.mq_tag).rstrip()
         return self.__run_remote_script(host, script)
 
     def __invoke_mq_worker(self, host):
@@ -304,8 +310,11 @@ class Workflow:
                 else
                     echo '{mq_home} is clean'  
                 fi
-                docker run -v {mq_home}:{mq_home} -p 50088:50088 -p 50089:50089 -p 50090:50090 -p 50091:50091 -d {mq_docker_namespace}/{mq_docker_name} bin/startmq_docker.sh
-        """.format(mq_home=self.task.mq_home, mq_docker_namespace=self.task.mq_docker_namespace, mq_docker_name=self.task.mq_repo_name).rstrip()
+                docker run --network host --name {tag} -v {mq_home}:{mq_home} -p 50088:50088 -p 50089:50089 -p 50090:50090 -p 50091:50091 -d {mq_docker_namespace}/{mq_docker_name} bin/startmq_docker.sh
+        """.format(mq_home=self.task.mq_home,
+                   mq_docker_namespace=self.task.mq_docker_namespace,
+                   mq_docker_name=self.task.mq_repo_name,
+                   tag=self.mq_tag).rstrip()
         code, outs, _ = self.__run_remote_script(host, script)
         if code != 0:
             raise WorkflowError(
@@ -321,7 +330,7 @@ class Workflow:
     def __shutdown_cleanup_mq_worker_script(self):
         script = """
                 docker system prune -f 
-                containerId=$(docker ps -a|grep {docker_namespace}/{repo_name}|grep '50088'|awk '{{print $1}}')
+                containerId=$(docker ps -a|grep {docker_namespace}/{repo_name}|grep {tag}|awk '{{print $1}}')
                 if [[ -z $containerId ]]; then
                     echo 'docker container {repo_name} no exist'
                 else
@@ -343,7 +352,10 @@ class Workflow:
                 else
                    echo  {mq_home} not exist    
                 fi    
-            """.format(docker_namespace=self.task.mq_docker_namespace,repo_name=self.task.mq_repo_name, mq_home=self.task.mq_home).rstrip()
+            """.format(docker_namespace=self.task.mq_docker_namespace,
+                       repo_name=self.task.mq_repo_name,
+                       mq_home=self.task.mq_home,
+                       tag=self.mq_tag).rstrip()
         return script
 
     def __cleanup_local_docker(self):
