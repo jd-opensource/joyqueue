@@ -637,7 +637,7 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
             PartitionMetric partitionMetric1 = master.getPartitionMetrics()[i];
             PartitionMetric partitionMetric2 = slave.getPartitionMetrics()[i];
             PartitionPosition partitionPosition = new PartitionPosition();
-            partitionPosition.setPartition(partitionMetric1.getPartition());
+            partitionPosition.setPartition(partitionMetric2.getPartition());
             partitionPosition.setRightPosition(partitionMetric2.getRightIndex());
             partitionPosition.setRightPositionInterval(partitionMetric1.getRightIndex()-partitionMetric2.getRightIndex());
             partitionPositions.add(partitionPosition);
