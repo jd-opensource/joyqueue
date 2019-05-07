@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-
-=======
 /*
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,7 +19,7 @@ pipeline {
         stage('Test') {
             steps {
                 echo 'Packaging....'
-                 sh 'mvn clean install'
+                 sh 'mvn -P artifactory,docker install'
             }
         }
         stage('Integration Test') {
