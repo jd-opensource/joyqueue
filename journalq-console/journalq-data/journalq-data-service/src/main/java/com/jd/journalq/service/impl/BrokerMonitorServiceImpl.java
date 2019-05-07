@@ -621,6 +621,7 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
             }
             partitionGroupPosition.setBrokerId(k);
             positionList.add(partitionGroupPosition);
+            logger.info("getPartitionGroupInterval brokerid:{},partitionGroupPosition:{}",k,JSON.toJSONString(partitionGroupPosition));
         });
         return positionList;
     }
