@@ -104,7 +104,7 @@ class Workflow:
             if [[ "$(ls -A {home})" ]]; then 
                 rm -r *
             else
-                echo 'is clean {home}'
+                echo '{home} is clean'
             fi      
             git clone {repo}
             cd {repo_name}
