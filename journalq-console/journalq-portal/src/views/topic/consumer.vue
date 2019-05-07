@@ -1,6 +1,6 @@
 <template>
   <div>
-    <consumer-base ref="consumerBase" :keywordTip="keywordTip" :colData="colData"
+    <consumer-base ref="consumerBase" :keywordTip="keywordTip" :keywordName="keywordName" :colData="colData"
                    :subscribeDialogColData="subscribeDialog.colData"
                    :search="search" :subscribeUrls="subscribeDialog.urls" />
   </div>
@@ -24,6 +24,7 @@ export default {
   data () {
     return {
       keywordTip: '请输入应用',
+      keywordName: '应用',
       colData: [
         {
           title: '应用',
@@ -85,7 +86,7 @@ export default {
           }
         },
         {
-          title: '限制IP消费',
+          title: '禁止IP消费',
           key: 'config.blackList',
           formatter (item) {
             return item.config === undefined ? '' : item.config.blackList

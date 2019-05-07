@@ -1,7 +1,8 @@
 <template>
   <div>
     <div class="ml20 mt30">
-      <d-input v-model="keyword" :placeholder="keywordTip" class="left mr10" style="width: 10%">
+      <d-input v-model="keyword" :placeholder="keywordTip" class="left mr10" style="width: 213px" @on-enter="getList">
+        <span slot="prepend">{{keywordName}}</span>
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
       <d-button type="primary" v-if="$store.getters.isAdmin" @click="openDialog('subscribeDialog')" class="left mr10">
@@ -21,6 +22,7 @@
     <!--生产订阅弹出框-->
     <my-dialog :dialog="subscribeDialog" @on-dialog-cancel="dialogCancel('subscribeDialog')">
       <subscribe ref="subscribe" :search="search" :type="type" :colData="subscribeDialog.colData"
+                 :keywordName="keywordName"
                  :searchUrl="subscribeDialog.urls.search" :addUrl="subscribeDialog.urls.add"
                  :doSearch="subscribeDialog.doSearch" @on-refresh="getList"/>
     </my-dialog>
@@ -84,6 +86,9 @@ export default {
   },
   props: {
     keywordTip: {
+      type: String
+    },
+    keywordName: {
       type: String
     },
     btns: {

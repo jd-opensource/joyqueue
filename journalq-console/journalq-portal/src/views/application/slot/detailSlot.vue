@@ -60,7 +60,7 @@ export default {
       this.app.id = to.query.id
       this.app.code = to.query.code
       this.tab = to.query.tab || this.tab
-      this.$refs[this.tab].getList()
+      // this.$refs[this.tab].getList()
     }
   },
   methods: {

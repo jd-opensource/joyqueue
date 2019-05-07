@@ -3,13 +3,15 @@
     <div class="ml20">
       <d-date-picker v-model="times" type="daterange" class="left mr5 mt10" range-separator="至"
                      start-placeholder="开始日期" end-placeholder="结束日期" value-format="timestamp"
-                     :default-time="['00:00:00', '23:59:59']"  style="width:370px">
+                     :default-time="['00:00:00', '23:59:59']"  style="width:370px" @on-enter="getListWithDate(false)">
         <span slot="prepend">日期范围</span>
       </d-date-picker>
-      <d-input v-model="search.topic" placeholder="队列名" class="left mr5 mt10" style="width: 213px">
+      <d-input v-model="search.topic" placeholder="队列名" class="left mr5 mt10" style="width: 213px"
+               @on-enter="getListWithDate(false)">
         <span slot="prepend">队列名</span>
       </d-input>
-      <d-input v-model="search.businessId" placeholder="业务ID" class="left mr5 mt10" style="width: 213px">
+      <d-input v-model="search.businessId" placeholder="业务ID" class="left mr5 mt10" style="width: 213px"
+               @on-enter="getListWithDate(false)">
         <span slot="prepend">业务ID</span>
       </d-input>
       <d-button class="left mr5 mt10" type="primary" color="success" @click="getListWithDate(false)">查询</d-button>
@@ -197,7 +199,7 @@ export default {
       // this.getList();
       apiRequest.post(this.urlOrigin.search, {}, this.search).then((data) => {
         this.tableData.rowData = data.data
-        if (this.tableData.rowData.length < this.search.count) {
+        if (this.tableData.rowData && this.tableData.rowData.length < this.search.count) {
           this.nextDis = true
         } else {
           this.nextDis = false

@@ -1,13 +1,24 @@
 <template>
   <div>
       <div class="ml20 mt30">
-        <d-input v-model="searchData.partition" placeholder="请输入partition" class="left mr5" style="width: 20%">
+        <d-input v-model="searchData.partition" placeholder="请输入partition" class="left mr5"
+                 style="width: 213px" @on-enter="getList">
           <span slot="prepend">分区</span>
         </d-input>
-        <d-input v-model="searchData.timestamp" placeholder="请输入时间戳" class="left mr5" style="width: 20%">
-          <span slot="prepend">时间戳</span>
-        </d-input>
-      <d-input v-model="searchData.index" placeholder="请输入位点" class="left mr5" style="width: 20%">
+        <!--<d-input v-model="searchData.timestamp" placeholder="请输入时间戳" class="left mr5"-->
+                 <!--style="width: 213px" @on-enter="getList">-->
+          <!--<span slot="prepend">时间戳</span>-->
+        <!--</d-input>-->
+      <d-date-picker
+        v-model="searchData.timestamp"
+        type="datetime"
+        placeholder="选择日期时间"
+        value-format="timestamp"
+        @on-enter="getList">
+        <span slot="prepend">开始时间</span>
+      </d-date-picker>
+      <d-input v-model="searchData.index" placeholder="请输入位点" class="left mr5"
+               style="width: 213px" @on-enter="getList">
         <span slot="prepend">位点</span>
       </d-input>
         <d-button type="primary" color="success" @click="getList">查询<icon name="search" style="margin-left: 5px;"></icon></d-button>
@@ -120,6 +131,14 @@ export default {
   },
   methods: {
     getList () {
+      if (!this.searchData.partition) {
+        this.$Message.error('验证不通过: 分区必填')
+        return
+      }
+      if (!this.searchData.timestamp && !this.searchData.index) {
+        this.$Message.error('验证不通过: 开始时间或位点至少填写一项')
+        return
+      }
       this.showTablePin = true
       let data = {
         topic: {

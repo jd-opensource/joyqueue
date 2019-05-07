@@ -1,7 +1,7 @@
 <template>
   <div>
-    <producer-base ref="producerBase" :keywordTip="keywordTip" :colData="colData"
-                   :subscribeDialogColData="subscribeDialog.colData" :showSummaryChart="true"
+    <producer-base ref="producerBase" :keywordTip="keywordTip" :keywordName="keywordName" :colData="colData"
+                   :subscribeDialogColData="subscribeDialog.colData" :showSummaryChart="true"  @on-enter="getList"
                    :search="search" :subscribeUrls="subscribeDialog.urls"/>
   </div>
 </template>
@@ -24,6 +24,7 @@ export default {
   data () {
     return {
       keywordTip: '请输入主题',
+      keywordName: '主题',
       colData: [
         // {
         //   title: 'ID',
