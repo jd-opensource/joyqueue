@@ -142,9 +142,9 @@ export default {
             }
           },
           {
-            title: '副本数',
-            width: '2%',
-            key: 'replicas.size'
+            title: '副本',
+            width: '20%',
+            key: 'replicas'
           },
           {
             title: '当前leader',
