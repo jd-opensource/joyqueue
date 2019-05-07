@@ -2,14 +2,14 @@
   <div>
     <div class="ml20">
       <d-input v-model="search.topic" placeholder="请输入队列名" class="left mr5 mt10"
-               style="width: 213px" @on-enter="getListWithDate">
+               style="width: 213px" @on-enter="getList">
         <span slot="prepend">队列名</span>
       </d-input>
       <d-input v-model="search.app" placeholder="请输入消费者" class="left mr5 mt10"
-               style="width: 213px"  @on-enter="getListWithDate">
+               style="width: 213px"  @on-enter="getList">
         <span slot="prepend">消费者</span>
       </d-input>
-      <d-select v-model="search.status" class="left mr5 mt10" style="width: 143px" @on-change="getListWithDate">
+      <d-select v-model="search.status" class="left mr5 mt10" style="width: 143px" @on-change="getList">
         <span slot="prepend">状态</span>
         <d-option v-for="item in statusList" :value="item.key" :key="item.key">{{ item.value }}</d-option>
       </d-select>
@@ -25,10 +25,10 @@
         <span slot="prepend">发送时间</span>
       </d-date-picker>
       <d-input v-model="search.businessId" placeholder="请输入业务ID" class="left mr5 mt10"
-               style="width: 213px" @on-enter="getListWithDate">
+               style="width: 213px" @on-enter="getList">
         <span slot="prepend">业务ID</span>
       </d-input>
-      <d-button class="left mr5 mt10" type="primary" color="success" @click="getListWithDate">
+      <d-button class="left mr5 mt10" type="primary" color="success" @click="getList">
         查询
         <icon name="search" style="margin-left: 5px;">
         </icon>
@@ -142,15 +142,15 @@ export default {
     }
   },
   methods: {
-    getListWithDate () {
-      if (this.times != null && this.times.length === 2) {
-        this.search.beginTime = this.times[0]
-        this.search.endTime = this.times[1]
+    beforeSearch (obj) {
+      if (this.times && this.times.length === 2) {
+        obj.query.beginTime = this.times[0]
+        obj.query.endTime = this.times[1]
       } else {
-        this.search.beginTime = ''
-        this.search.endTime = ''
+        obj.query.beginTime = ''
+        obj.query.endTime = ''
       }
-      this.getList()
+      return obj
     },
     download (item) {
       apiRequest.get(this.urlOrigin.download + '/' + item.id).then()
@@ -160,7 +160,7 @@ export default {
         this.$Dialog.success({
           content: '恢复成功'
         })
-        this.getListWithDate()
+        this.getList()
       })
     }
   },

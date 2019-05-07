@@ -130,7 +130,7 @@ export default {
           }
           // ,
           //   {
-          //   txt: '查看详情',
+          //   txt: '详情',
           //   method: 'on-detail'
           // }
         ]

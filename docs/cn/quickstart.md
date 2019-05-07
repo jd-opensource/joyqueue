@@ -38,14 +38,44 @@ $ ./start.sh
 >>>                           
 [11:06:21:243] [main] [INFO] - com.jd.journalq.broker.JournalqLauncher.main(JournalqLauncher.java:41) - JournalqLauncher is started
 ```
-## 第3步：创建发布和订阅关系
-在开始生产和消费之前，需要先创建主题、生产和消费者应用以及对应的令牌，令牌用于认证应用的合法性。假设创建主题test_topic, 生产和消费应用都是同一个应用test_app，并且令牌为test_token。
 
-## 第4步：生产和消费示例
+## 第3步：以默认配置启动JournalQ管理端
+
+```bash
+$ cd distribution/journalq-console/bin
+$ ./start.sh
+```
+
+管理端元数据依托命名服务，默认连接本地命名服务。如有调整，请修改journalq-console/conf/important.properties中nameserver.host参数配置。
+现在可以通过启动日志和网络端口监听情况，判断管理端服务是否正常启动。如果你能在日志中看到如下日志，表明管理端服务已经正常启动，并监听在10030端口上。
+
+```
+12:00:00.000 [routing-5] INFO  com.jd.laf.web.vertx.RoutingVerticle - success starting routing verticle 1 at 3f3a1221-6f00-44e5-b495-68048ed9909b
+12:00:00.000 [routing-3] INFO  com.jd.laf.web.vertx.RoutingVerticle - success starting routing verticle 2 at 3f3a1221-6f00-44e5-b495-68048ed9909b
+12:00:00.000 [routing-4] INFO  com.jd.laf.web.vertx.RoutingVerticle - success starting routing verticle 6 at 3f3a1221-6f00-44e5-b495-68048ed9909b
+12:00:00.000 [routing-2] INFO  com.jd.laf.web.vertx.RoutingVerticle - success starting routing verticle 5 at 3f3a1221-6f00-44e5-b495-68048ed9909b
+12:00:00.000 [routing-1] INFO  com.jd.laf.web.vertx.RoutingVerticle - success starting routing verticle 3 at 3f3a1221-6f00-44e5-b495-68048ed9909b
+12:00:00.001 [routing-0] INFO  com.jd.laf.web.vertx.RoutingVerticle - success starting routing verticle 4 at 3f3a1221-6f00-44e5-b495-68048ed9909b
+12:00:00.010 [vert.x-eventloop-thread-1] INFO  com.jd.laf.web.vertx.spring.SpringVertx - success deploying verticle com.jd.laf.web.vertx.spring.VerticleMeta@2616eb6a with deployment id 3f3a1221-6f00-44e5-b495-68048ed9909b
+12:00:00.011 [main] INFO  com.jd.laf.web.vertx.spring.SpringVertx - success starting Vert.x
+12:00:00.021 [main] INFO  com.jd.journalq.application.WebApplication - Started WebApplication in 20.462 seconds (JVM running for 22.553)
+12:00:00.030 [routing-6] INFO  com.jd.laf.web.vertx.RoutingVerticle - success binding http listener 4 on port 10030
+12:00:00.031 [routing-9] INFO  com.jd.laf.web.vertx.RoutingVerticle - success binding http listener 1 on port 10030
+12:00:00.032 [routing-8] INFO  com.jd.laf.web.vertx.RoutingVerticle - success binding http listener 2 on port 10030
+12:00:00.033 [routing-10] INFO  com.jd.laf.web.vertx.RoutingVerticle - success binding http listener 3 on port 10030
+12:00:00.033 [routing-7] INFO  com.jd.laf.web.vertx.RoutingVerticle - success binding http listener 5 on port 10030
+12:00:00.034 [routing-11] INFO  com.jd.laf.web.vertx.RoutingVerticle - success binding http listener 6 on port 10030
+```
+服务启动后，可以通过浏览器访问管理端，默认访问地址为: http://localhost:5000
+
+## 第4步：创建发布和订阅关系
+在开始生产和消费之前，需要先在管理端创建主题、生产和消费者应用以及对应的令牌，令牌用于认证应用的合法性。假设创建主题test_topic, 生产和消费应用都是同一个应用test_app，并且令牌为test_token。
+
+## 第5步：生产和消费示例
 
 JournalQ 提供Java、Spring 以及Spring Boot三种客户端使用形式。
 
-### 第4.1步：引入Maven 依赖
+### 第5.1步：引入Maven 依赖
 
 ```
 <dependency>
@@ -55,7 +85,7 @@ JournalQ 提供Java、Spring 以及Spring Boot三种客户端使用形式。
 </dependency>
 ```
 
-### 第4.2 生产示例
+### 第5.2 生产示例
 
 ```java
 public static void main(String[] args) {
@@ -85,7 +115,7 @@ public static void main(String[] args) {
     }
 ```
 
-### 第4.3步：消费示例
+### 第5.3步：消费示例
 
 ```java
 public static void main(String[] args) throws Exception {
@@ -121,9 +151,9 @@ public static void main(String[] args) throws Exception {
     }
 ```
 
-## 第5步：Spring 方式生产和消费示例
+## 第6步：Spring 方式生产和消费示例
 
-### 第5.1步：引入Maven 依赖
+### 第6.1步：引入Maven 依赖
 
 ```
 <dependency>
@@ -139,7 +169,7 @@ public static void main(String[] args) throws Exception {
 
 ```
 
-### 第5.2步：Spring-JournalQ.xml 配置
+### 第6.2步：Spring-JournalQ.xml 配置
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -158,7 +188,7 @@ public static void main(String[] args) throws Exception {
 ```
 
 
-### 第5.3步：生产示例
+### 第6.3步：生产示例
 
 ```java
 protected static final Logger logger = LoggerFactory.getLogger(SpringMain.class);
@@ -175,14 +205,14 @@ protected static final Logger logger = LoggerFactory.getLogger(SpringMain.class)
 }
 ```   
 
-### 第5.4步：消费示例
+### 第6.4步：消费示例
  Spring-JournalQ.xml 中的MessageListener 需要像【第4.3步：消费示例】一样实现 onReceived 方法。
 
 
 
-## 第6步：Spring-boot 生产和消费示例
+## 第7步：Spring-boot 生产和消费示例
 
-### 第6.1步：引入Maven 依赖
+### 第7.1步：引入Maven 依赖
 
 ```
 <dependency>
@@ -207,7 +237,7 @@ protected static final Logger logger = LoggerFactory.getLogger(SpringMain.class)
 </dependency>   
 ```
 
-### 第6.2步：Spring-boot application.properties配置
+### 第7.2步：Spring-boot application.properties配置
 
 ```
 spring.oms.enable=true
@@ -219,7 +249,7 @@ spring.oms.producer.enable=true
 spring.oms.interceptor.enable=true
 
 ```
-### 第6.3步：生产示例
+### 第7.3步：生产示例
 
 ```java
 @SpringBootApplication
@@ -243,7 +273,7 @@ public class SpringBootMain {
 }
 ```  
 
-### 第6.4步：消费示例
+### 第7.4步：消费示例
 
  JounalQ 定义了OMSMessageListener 注解，用于标识一个消费者。
 

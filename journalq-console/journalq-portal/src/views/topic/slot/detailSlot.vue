@@ -69,8 +69,7 @@ export default {
       this.topic.namespace.code = to.query.namespaceCode
       this.app = to.query.app
       this.tab = to.query.tab || this.tab
-      console.log(12)
-      this.$refs[this.tab].getList()
+      // this.$refs[this.tab].getList()
     }
   },
   methods: {
@@ -92,7 +91,7 @@ export default {
     },
     handleTabChange (data) {
       let name = data.name
-      // this.$refs[name].getList()
+      this.$refs[name].getList()
       if (name === 'retry') {
         this.$router.push({name: `/${this.$i18n.locale}/topic/detail`,
           query: {id: this.topic.id, code: this.topic.code, namespaceId: this.topic.namespace.id, namespaceCode: this.topic.namespace.code, tab: name, app: this.$route.query.app || ''}})
