@@ -16,8 +16,8 @@
 
 
 echo "integrate begin" $(date "+%Y%m%d-%H%M%S")
-echo "pwd"
-python ./bootstrap.py /home
+pwd
+python ./integration/bootstrap.py /home
 echo "finish test" $(date "+%Y%m%d-%H%M%S")
 
 exit 0
