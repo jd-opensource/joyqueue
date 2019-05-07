@@ -127,9 +127,9 @@ class Workflow:
 
     def __collect_data_from_pressure_worker(self):
         script = """
-            dockerId=$(docker ps -a|grep {repo_name}|grep {label_name}|awk '{{print $1}}')
-            if [[ -n $dockerId ]]; then
-                docker cp  $dockerId:/benchmark {home}
+            containerId=$(docker ps -a|grep {repo_name}|grep {label_name}|awk '{{print $1}}')
+            if [[ -n $containerId ]]; then
+                docker cp  $containerId:/benchmark {home}
             else 
                 echo '{repo_name} docker not found,failed to collect pressure result'
                 exit 1    
@@ -266,13 +266,18 @@ class Workflow:
                            exit 0
                         elif [[ $ATTEMPTS -eq $MAX_ATTEMPTS ]]; then
                             echo "mq instance not started after $ATTEMPTS attempts."
+                            docker cp $containerId:logs/debug.log {workspace_home}
                             exit 1
                         fi   
                         ATTEMPTS=$((ATTEMPTS+1))
                         sleep {sleep} 
                     done  
                 fi
-        """.format(docker_namespace=self.task.mq_docker_namespace, repo_name=self.task.mq_repo_name, mq_home=self.task.mq_home,max_attempts=max_attempts,sleep=sleep).rstrip()
+        """.format(workspace_home=self.workspace.home,docker_namespace=self.task.mq_docker_namespace,
+                   repo_name=self.task.mq_repo_name,
+                   mq_home=self.task.mq_home,
+                   max_attempts=max_attempts,
+                   sleep=sleep).rstrip()
         return self.__run_remote_script(host, script)
 
     def __mq_container_id(self,host):
@@ -303,7 +308,13 @@ class Workflow:
                 'Failed to invoke mq docker {} on {}'.format(self.task.mq_repo_name, host),
                 error_code=FAILED_TO_INVOKE_MQ_DOCKER)
 
-    def __shutdown_and_cleanup_mq_worker(self, host):
+    def __shutdown_and_cleanup_remote_mq_worker(self, host):
+        script = self.__shutdown_cleanup_mq_worker_script()
+        code, outs, _ = self.__run_remote_script(host, script)
+        if code != 0:
+            self.logger.error("failed to stop {} mq worker".format(host))
+
+    def __shutdown_cleanup_mq_worker_script(self):
         script = """
                 docker system prune -f 
                 containerId=$(docker ps -a|grep {docker_namespace}/{repo_name}|grep '50088'|awk '{{print $1}}')
@@ -313,13 +324,13 @@ class Workflow:
                     echo "{repo_name} container:"
                     echo $containerId
                     docker stop $containerId
-                    docker rm  $containerId
+                    docker rm -f  $containerId
                 fi
                 imageId=$(docker images |grep {repo_name}|awk '{{print $3}}'|uniq)
                 if [[ -z $imageId ]]; then
                     echo 'docker image {repo_name} no exist'
                 else
-                    echo $imageId
+                    echo "{repo_name} images id: $imageId"
                     docker rmi -f $imageId
                 fi
                 if [[ -d {mq_home} ]]; then
@@ -328,12 +339,13 @@ class Workflow:
                 else
                    echo  {mq_home} not exist    
                 fi    
-        """.format(docker_namespace=self.task.mq_docker_namespace,repo_name=self.task.mq_repo_name, mq_home=self.task.mq_home).rstrip()
-        self.__run_remote_script(host, script)
+            """.format(docker_namespace=self.task.mq_docker_namespace,repo_name=self.task.mq_repo_name, mq_home=self.task.mq_home).rstrip()
+        return script
 
     def __cleanup_local_docker(self):
+        # script = self.__shutdown_cleanup_mq_worker_script()
         script = """
-                docker system prune -f
+                # docker system prune -f
                 mq_image_id=$(docker images |grep {mq_repo_name}|awk '{{print $3}}'|uniq)
                 if [[ -n $mq_image_id ]]; then
                     docker rmi -f $mq_image_id
@@ -397,7 +409,7 @@ class Workflow:
 
     def __shutdown_and_cleanup_mq_cluster_workers(self):
         for h in self.workspace.cluster_hosts:
-            self.__shutdown_and_cleanup_mq_worker(h)
+            self.__shutdown_and_cleanup_remote_mq_worker(h)
 
     def __run_script(self, bash, script):
         self.logger.debug('Script to execute:\n%s\n', script)
@@ -418,7 +430,6 @@ class Workflow:
 
     def __run_remote_script(self, remote, script):
         passwd = self.__parse_password(self.ssh_passwd_file)
-        self.logger.debug('Remote Script to execute:\n%s\n', script)
         ssh_pass = """ sshpass -p {}""".format(passwd).rstrip()
         ssh = 'ssh {}@{} -p {}'.format(self.ssh_user, remote,self.ssh_port)
         # if password exist
@@ -440,6 +451,7 @@ class Workflow:
         return fh.readline()
 
     def __cleanup(self):
+        self.logger.info('>>> start to clean up workspace.')
         self.__shutdown_and_cleanup_mq_cluster_workers()
         self.__cleanup_local_docker()
         self.__cleanup_workspace()
