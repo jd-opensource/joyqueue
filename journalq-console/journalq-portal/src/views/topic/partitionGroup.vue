@@ -144,7 +144,7 @@ export default {
           {
             title: '副本数',
             width: '2%',
-            key: 'replicas'
+            key: 'replicas.size'
           },
           {
             title: '当前leader',
