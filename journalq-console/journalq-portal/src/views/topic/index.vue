@@ -1,14 +1,14 @@
 <template>
   <div>
     <div class="ml20 mt30">
-      <d-select v-model="searchData.type" placeholder="请选择类型" class="left mr5" style="width:13%">
+      <d-select v-model="searchData.type" placeholder="请选择类型" class="left mr5" style="width:213px">
         <span slot="prepend">主题类型</span>
         <d-option value="-1" >全部</d-option>
         <d-option value="0" >普通主题</d-option>
         <d-option value="1" >广播主题</d-option>
         <d-option value="2" >顺序主题</d-option>
       </d-select>
-      <d-input v-model="searchData.keyword" placeholder="请输入英文名" class="left mr5" style="width: 15%">
+      <d-input v-model="searchData.keyword" placeholder="请输入英文名" class="left mr5" style="width:213px">
         <span slot="prepend">关键词</span>
       </d-input>
       <d-button type="primary" color="success" @click="getList">查询<icon name="search" style="margin-left: 5px;"></icon></d-button>
@@ -16,28 +16,29 @@
     </div>
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
               @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange" @on-view-detail="goDetail"
-              @on-edit="edit" @on-edit-label="editLabel" @on-add-brokerGroup="addBrokerGroup" @on-del="del">
+              @on-add-brokerGroup="addBrokerGroup" @on-del="del">
     </my-table>
     <!--添加-->
-    <my-dialog :dialog="addDialog" class="add-dialog" @on-dialog-cancel="dialogCancel('addDialog')">
-      <topic-form @on-dialog-cancel="dialogCancel('addDialog')" :type="$store.getters.addFormType"/>
+    <my-dialog :dialog="addDialog" class="add-dialog" @on-dialog-cancel="dialogCancel('addDialog')" :styles="{top: '40px'}">
+      <topic-form @on-dialog-cancel="dialogCancel('addDialog')" :type="$store.getters.addFormType"
+                  :addBrokerUrls="addBrokerUrls" :addBrokerColData="addBrokerColData"/>
     </my-dialog>
     <!--编辑-->
     <!--<my-dialog :dialog="editDialog" @on-dialog-confirm="editConfirm()" @on-dialog-cancel="dialogCancel('editDialog')">-->
       <!--<topic-form :data="editData" @on-dialog-cancel="dialogCancel('editDialog')"/>-->
     <!--</my-dialog>-->
     <!--编辑标签-->
-    <my-dialog :dialog="editLabelDialog" @on-dialog-confirm="editLabelConfirm()" @on-dialog-cancel="editLabelCancel()">
-        <grid-row class="mb10">
-          <grid-col :span="4" class="label">业务分组:</grid-col>
-          <grid-col :span="20" class="val">
-            <d-select v-model="editLabelData.bs" class="left">
-              <d-option value="sc">商城</d-option>
-              <d-option value="jr">金融</d-option>
-            </d-select>
-          </grid-col>
-        </grid-row>
-    </my-dialog>
+    <!--<my-dialog :dialog="editLabelDialog" @on-dialog-confirm="editLabelConfirm()" @on-dialog-cancel="editLabelCancel()">-->
+        <!--<grid-row class="mb10">-->
+          <!--<grid-col :span="4" class="label">业务分组:</grid-col>-->
+          <!--<grid-col :span="20" class="val">-->
+            <!--<d-select v-model="editLabelData.bs" class="left">-->
+              <!--<d-option value="sc">商城</d-option>-->
+              <!--<d-option value="jr">金融</d-option>-->
+            <!--</d-select>-->
+          <!--</grid-col>-->
+        <!--</grid-row>-->
+    <!--</my-dialog>-->
     <!--添加分组-->
     <my-dialog :dialog="addBrokerGroupDialog" @on-dialog-confirm="addBrokerGroupConfirm()" @on-dialog-cancel="addBrokerGroupCancel()">
       <add-brokerGroup :data="addBrokerGroupData" @on-choosed-brokerGroup="choosedBrokerGroup"></add-brokerGroup>
@@ -47,7 +48,6 @@
 
 <script>
 import apiRequest from '../../utils/apiRequest.js'
-import apiUrl from '../../utils/apiUrl.js'
 import myTable from '../../components/common/myTable.vue'
 import myDialog from '../../components/common/myDialog.vue'
 import topicForm from './topicForm.vue'
@@ -62,6 +62,55 @@ export default {
     topicForm
   },
   mixins: [ crud ],
+  props: {
+    btns: {
+      type: Array,
+      default () {
+        return [
+          {
+            txt: '详情',
+            method: 'on-view-detail'
+          },
+          {
+            txt: '删除',
+            method: 'on-del',
+            isAdmin: true
+          }
+        ]
+      }
+    },
+    addBrokerUrls: {
+      type: Object,
+      default () {
+        return {
+          search: '/broker/search'
+        }
+      }
+    },
+    addBrokerColData: {
+      type: Array,
+      default () {
+        return [
+          {
+            title: '分组',
+            key: 'group.code'
+          },
+          {
+            title: 'ID',
+            key: 'id'
+          },
+          {
+            title: 'IP',
+            key: 'ip'
+          },
+          {
+            title: '端口',
+            key: 'port'
+          }
+        ]
+      }
+    }
+  },
   data () {
     return {
       searchData: {
@@ -140,60 +189,30 @@ export default {
               }, txt)
             }
           }
-          // {
-          //   title:'标签',
-          //   key: 'labels'
-          // },
-          // {
-          //   title:'备注',
-          //   key: 'description'
-          // },
         ],
-        btns: [
-          {
-            txt: '详情',
-            method: 'on-view-detail'
-          },
-          // {
-          //   txt: '编辑',
-          //   method: 'on-edit'
-          // },
-          // {
-          //   txt: '编辑标签',
-          //   method: 'on-edit-label'
-          // },
-          // {
-          //   txt: '添加分组',
-          //   method: 'on-add-brokerGroup'
-          // },
-          {
-            txt: '删除',
-            method: 'on-del',
-            isAdmin: true
-          }
-        ]
+        btns: this.btns
       },
       addDialog: {
         visible: false,
         title: '添加主题',
-        width: 700,
+        width: 800,
         showFooter: false
       },
       addData: {},
-      editDialog: {
-        visible: false,
-        title: '编辑主题',
-        width: 700,
-        showFooter: true
-      },
-      editData: {},
-      editLabelDialog: {
-        visible: false,
-        title: '编辑主题标签',
-        width: 700,
-        showFooter: true
-      },
-      editLabelData: {},
+      // editDialog: {
+      //   visible: false,
+      //   title: '编辑主题',
+      //   width: 700,
+      //   showFooter: true
+      // },
+      // editData: {},
+      // editLabelDialog: {
+      //   visible: false,
+      //   title: '编辑主题标签',
+      //   width: 700,
+      //   showFooter: true
+      // },
+      // editLabelData: {},
       addBrokerGroupDialog: {
         visible: false,
         title: '添加分组',
@@ -210,30 +229,30 @@ export default {
       this.$router.push({name: `/${this.$i18n.locale}/topic/detail`,
         query: {id: item.id, code: item.code, namespaceId: item.namespace.id, namespaceCode: item.namespace.code, tab: 'producer'}})
     },
-    editLabel (item) {
-      this.openDialog('editLabelDialog')
-      apiRequest.get(apiUrl['/topic'].editLabelData + '/' + item.id).then((data) => {
-
-      })
-      this.editLabelData = item
-    },
-    editLabelConfirm () {
-      let data = {
-        id: this.editLabelData.id,
-        bs: this.editLabelData.bs,
-        labels: [{'bs': this.editLabelData.bs}]
-      }
-      apiRequest.post(this.urlOrigin.editLabel, {}, data).then((data) => {
-        this.editLabelDialog.visible = false
-        this.$Dialog.success({
-          content: '修改成功'
-        })
-        this.getList()
-      })
-    },
-    editLabelCancel () {
-      this.editLabelDialog.visible = false
-    },
+    // editLabel (item) {
+    //   this.openDialog('editLabelDialog')
+    //   apiRequest.get(apiUrl['/topic'].editLabelData + '/' + item.id).then((data) => {
+    //
+    //   })
+    //   this.editLabelData = item
+    // },
+    // editLabelConfirm () {
+    //   let data = {
+    //     id: this.editLabelData.id,
+    //     bs: this.editLabelData.bs,
+    //     labels: [{'bs': this.editLabelData.bs}]
+    //   }
+    //   apiRequest.post(this.urlOrigin.editLabel, {}, data).then((data) => {
+    //     this.editLabelDialog.visible = false
+    //     this.$Dialog.success({
+    //       content: '修改成功'
+    //     })
+    //     this.getList()
+    //   })
+    // },
+    // editLabelCancel () {
+    //   this.editLabelDialog.visible = false
+    // },
     addBrokerGroup (item) {
       this.openDialog('addBrokerGroupDialog')
       this.addBrokerGroupData = item

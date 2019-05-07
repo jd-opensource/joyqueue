@@ -1,9 +1,11 @@
 <template>
   <div>
     <div class="ml20 mt30">
-      <d-input v-model="searchData.keyword" placeholder="请输入ID/分组编码/IP" class="left mr10" style="width: 20%">
+      <d-input v-model="searchData.keyword" placeholder="请输入ID/分组编码/IP" class="left mr10" style="width:300px">
+        <span slot="prepend">关键词</span>
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
+      <slot name="extendBtn"></slot>
     </div>
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
               @on-edit="edit" @on-del="del" @on-detail="detail" @on-archiveMonitor="archiveMonitor">
@@ -28,8 +30,8 @@
         <grid-col :span="16" class="val">
           <d-select v-model="editData.retryType" style="width:40%" >
             <d-option v-for="item in retryTypeList" :key="item.key" :value="item.key">{{item.value}}</d-option>
-              <!--<d-option :value="DB">DB</d-option>-->
-              <!--<d-option :value="RemoteRetry">RemoteRetry</d-option>-->
+            <!--<d-option :value="DB">DB</d-option>-->
+            <!--<d-option :value="RemoteRetry">RemoteRetry</d-option>-->
           </d-select>
         </grid-col>
       </grid-row>
@@ -46,10 +48,10 @@
         </grid-col>
       </grid-row>
       <!--<grid-row class="mb10">-->
-        <!--<grid-col :span="8" class="label">描述:</grid-col>-->
-        <!--<grid-col :span="16" class="val">-->
-          <!--<d-input v-model="editData.description"></d-input>-->
-        <!--</grid-col>-->
+      <!--<grid-col :span="8" class="label">描述:</grid-col>-->
+      <!--<grid-col :span="16" class="val">-->
+      <!--<d-input v-model="editData.description"></d-input>-->
+      <!--</grid-col>-->
       <!--</grid-row>-->
     </my-dialog>
     <my-dialog :dialog="archiveMonitorDialog">
@@ -84,23 +86,50 @@ export default {
     myTable,
     myDialog
   },
-  mixins: [ crud ],
-  data () {
-    return {
-      urls: {
-        search: '/broker/search',
-        del: '/broker/delete',
-        edit: '/broker/update',
-        archiveMonitor: '/monitor/archive'
-      },
-      searchData: {
-        keyword: ''
-      },
-      searchRules: {
-      },
-      tableData: {
-        rowData: [],
-        colData: [
+  mixins: [crud],
+  props: {
+    searchData: {
+      type: Object,
+      default: function () {
+        return {
+          keyword: ''
+        }
+      }
+    },
+    urls: {
+      type: Object,
+      default: function () {
+        return {
+          search: '/broker/search',
+          del: '/broker/delete',
+          edit: '/broker/update',
+          archiveMonitor: '/monitor/archive'
+        }
+      }
+    },
+    btns: {
+      type: Array,
+      default: function () {
+        return [
+          {
+            txt: '编辑',
+            method: 'on-edit'
+          },
+          {
+            txt: '归档监控',
+            method: 'on-archiveMonitor'
+          },
+          {
+            txt: '详情',
+            method: 'on-detail'
+          }
+        ]
+      }
+    },
+    colData: {
+      type: Array,
+      default: function () {
+        return [
           {
             title: 'ID',
             key: 'id'
@@ -117,10 +146,6 @@ export default {
             title: '端口',
             key: 'port'
           },
-          // {
-          //   title:'数据中心',
-          //   key: 'dataCenter.id'
-          // },
           {
             title: '重试方式',
             key: 'retryType'
@@ -129,30 +154,16 @@ export default {
             title: '权限',
             key: 'permission'
           }
-          // {
-          //   title:'描述',
-          //   key: 'description'
-          // }
-        ],
-        // 表格操作，如果需要根据特定值隐藏显示， 设置bindKey对应的属性名和bindVal对应的属性值
-        btns: [
-          {
-            txt: '编辑',
-            method: 'on-edit'
-          },
-          {
-            txt: '归档监控',
-            method: 'on-archiveMonitor'
-          },
-          // {
-          //   txt: '删除',
-          //   method: 'on-del'
-          // },
-          {
-            txt: '详情',
-            method: 'on-detail'
-          }
         ]
+      }
+    }
+  },
+  data () {
+    return {
+      tableData: {
+        rowData: [],
+        colData: this.colData,
+        btns: this.btns
       },
       brokerId: '',
       multipleSelection: [],
@@ -171,7 +182,7 @@ export default {
         visible: false,
         title: 'broker详情',
         showFooter: false,
-        width: '1100px'
+        width: '1200px'
       },
       retryTypeList: [
         {key: 'DB', value: 'DB'},

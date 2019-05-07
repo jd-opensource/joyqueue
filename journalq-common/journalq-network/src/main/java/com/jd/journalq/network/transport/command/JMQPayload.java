@@ -16,7 +16,7 @@ package com.jd.journalq.network.transport.command;
 import com.jd.journalq.network.transport.codec.JMQHeader;
 
 /**
- * jmq消息体
+ * journalq消息体
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/21

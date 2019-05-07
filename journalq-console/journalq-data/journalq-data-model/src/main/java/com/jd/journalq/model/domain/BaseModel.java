@@ -133,7 +133,7 @@ public class BaseModel implements Serializable, Cloneable {
      * @param <M>
      * @param <T>
      */
-    public static abstract class Builder<M extends BaseModel, T> {
+    public abstract class Builder<M extends BaseModel, T> {
         protected M model;
 
         public Builder() {

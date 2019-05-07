@@ -31,7 +31,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import static com.jd.journalq.exception.ServiceException.IGNITE_RPC_ERROR;
@@ -54,20 +58,6 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
     @Autowired
     private ReplicaServerService replicaServerService;
 
-//    @Override
-//    public TopicPartitionGroup findById(long id) {
-//        TopicPartitionGroup group = super.findById(id);
-//        QPartitionGroupReplica qTopicPartitionGroup = new QPartitionGroupReplica();
-//        qTopicPartitionGroup.setTopic(group.getTopic());
-//        qTopicPartitionGroup.setNamespace(group.getNamespace());
-//        qTopicPartitionGroup.setGroupNo(group.getGroupNo());
-//        try {
-//            group.setReplicaGroups(new TreeSet<>(replicaServerService.findByQuery(qTopicPartitionGroup)));
-//        } catch (Exception e) {
-//            throw new ServiceException(IGNITE_RPC_ERROR,e.getMessage());
-//        }
-//        return group;
-//    }
 
     @Override
     public TopicPartitionGroup findByTopicAndGroup(String namespace, String topic, Integer groupNo) {
@@ -158,7 +148,8 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
 
         int currentPartitions = topic.getPartitions();
         topic.setPartitions(topic.getPartitions()+Integer.valueOf(model.getPartitionCount()));
-        Set<Integer> partitions = Arrays.stream(topicPartitionGroup.getPartitions().substring(1,topicPartitionGroup.getPartitions().length()-1).split(",")).map(m->Integer.valueOf(m.trim())).collect(Collectors.toSet());
+        Set<Integer> partitions = Arrays.stream(topicPartitionGroup.getPartitions().substring(1,topicPartitionGroup.getPartitions().length()-1).split(",")).
+                map(m->Integer.valueOf(m.trim())).collect(Collectors.toSet());
 
         if (model.getPartitionCount()<=0) {
             throw new ServiceException(INTERNAL_SERVER_ERROR, "数据异常");
@@ -191,7 +182,8 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
 
         int currentPartitions = topic.getPartitions();
         topic.setPartitions(topic.getPartitions()-Integer.valueOf(model.getPartitionCount()));
-        Set<Integer> partitions = Arrays.stream(topicPartitionGroup.getPartitions().substring(1,topicPartitionGroup.getPartitions().length()-1).split(",")).map(m->Integer.valueOf(m.trim())).collect(Collectors.toSet());
+        Set<Integer> partitions = Arrays.stream(topicPartitionGroup.getPartitions().substring(1,topicPartitionGroup.getPartitions().length()-1).split(",")).
+                map(m->Integer.valueOf(m.trim())).collect(Collectors.toSet());
         //如果缩减数小于，已有partition数，则更改失败
         if (model.getPartitionCount()>= partitions.size()) {
             throw new ServiceException(INTERNAL_SERVER_ERROR, "数据异常");

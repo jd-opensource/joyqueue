@@ -13,7 +13,7 @@
  */
 package com.jd.journalq.network.command;
 
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 
 import java.util.Collections;
 import java.util.List;
@@ -27,18 +27,18 @@ import java.util.List;
 public class FetchAssignedPartitionAckData {
 
     private List<Short> partitions;
-    private JMQCode code;
+    private JournalqCode code;
 
     public FetchAssignedPartitionAckData() {
 
     }
 
-    public FetchAssignedPartitionAckData(JMQCode code) {
+    public FetchAssignedPartitionAckData(JournalqCode code) {
         this.partitions = Collections.emptyList();
         this.code = code;
     }
 
-    public FetchAssignedPartitionAckData(List<Short> partitions, JMQCode code) {
+    public FetchAssignedPartitionAckData(List<Short> partitions, JournalqCode code) {
         this.partitions = partitions;
         this.code = code;
     }
@@ -51,11 +51,11 @@ public class FetchAssignedPartitionAckData {
         return partitions;
     }
 
-    public void setCode(JMQCode code) {
+    public void setCode(JournalqCode code) {
         this.code = code;
     }
 
-    public JMQCode getCode() {
+    public JournalqCode getCode() {
         return code;
     }
 }

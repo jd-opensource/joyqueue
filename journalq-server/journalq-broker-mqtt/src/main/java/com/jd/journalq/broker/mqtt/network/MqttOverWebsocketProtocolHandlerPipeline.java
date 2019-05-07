@@ -76,7 +76,6 @@ public class MqttOverWebsocketProtocolHandlerPipeline extends ChannelInitializer
         try {
             mqttHandlerDispatcher.start();
         } catch (Exception e) {
-            e.printStackTrace();
         }
         return mqttHandlerDispatcher;
     }

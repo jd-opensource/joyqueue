@@ -11,28 +11,51 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.toolkit.metric;
+
 import com.jd.journalq.toolkit.format.Format;
+import com.jd.journalq.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
 public class Metric {
     private final List<MetricInstance> metricInstances;
     private final String name;
-    private final String [] latencies, counters, traffics;
-    private long resetTime = System.currentTimeMillis();
+    private final String[] latencies, counters, traffics;
+    private long resetTime = SystemClock.now();
     private static final Logger logger = LoggerFactory.getLogger(Metric.class);
-    public Metric(String name, int instanceCount, String [] latencies, String [] counters, String [] traffics) {
+
+    public Metric(String name, int instanceCount, String[] latencies, String[] counters, String[] traffics) {
         this.name = name;
         metricInstances = new ArrayList<>(instanceCount);
-        IntStream.range(0,instanceCount).forEach(i -> metricInstances.add(new MetricInstance(latencies, counters, traffics)));
+        IntStream.range(0, instanceCount).forEach(i -> metricInstances.add(new MetricInstance(latencies, counters, traffics)));
         this.latencies = latencies;
-        this.counters  = counters;
+        this.counters = counters;
         this.traffics = traffics;
     }
 
@@ -45,14 +68,14 @@ public class Metric {
     }
 
 
-    public void reportAndReset(){
-        long reportTime = System.currentTimeMillis();
+    public void reportAndReset() {
+        long reportTime = SystemClock.now();
         int intervalMs = (int) (reportTime - resetTime);
         logger.info(System.lineSeparator() + "{}：{}", name, Stream.of(
                 Arrays.stream(counters)
                         .map(name -> {
                             long cps = 0L;
-                            if(intervalMs > 0) {
+                            if (intervalMs > 0) {
                                 cps = metricInstances.stream()
                                         .mapToLong(instance -> instance.getAndResetCounter(name))
                                         .sum() * 1000L / intervalMs;
@@ -63,7 +86,7 @@ public class Metric {
                 Arrays.stream(traffics)
                         .map(name -> {
                             long cps = 0L;
-                            if(intervalMs > 0) {
+                            if (intervalMs > 0) {
                                 cps = metricInstances.stream()
                                         .mapToLong(instance -> instance.getAndResetTraffic(name))
                                         .sum() * 1000L / intervalMs;
@@ -75,11 +98,11 @@ public class Metric {
                         .map(name -> {
 
                             // 算tp99， tp90
-                            long [] sorted = metricInstances.stream()
-                                    .map(instance ->  instance.getAndResetLatencies(name))
+                            long[] sorted = metricInstances.stream()
+                                    .map(instance -> instance.getAndResetLatencies(name))
                                     .flatMap(List::stream)
                                     .mapToLong(Long::longValue).sorted().toArray();
-                            if(sorted.length > 0) {
+                            if (sorted.length > 0) {
                                 double avg = Arrays.stream(sorted).average().orElse(0D) / 1000000;
                                 double tp90 = sorted[(int) (sorted.length * 0.90)] / 1000000D;
                                 double tp99 = sorted[(int) (sorted.length * 0.99)] / 1000000D;
@@ -97,12 +120,13 @@ public class Metric {
 
     public static class Latency {
         private List<Long> latencies = Collections.synchronizedList(new LinkedList<>());
+
         void add(long latency) {
             latencies.add(latency);
         }
 
         List<Long> getAndReset() {
-            List<Long>  ret = new ArrayList<>(latencies);
+            List<Long> ret = new ArrayList<>(latencies);
             latencies.clear();
             return ret;
         }
@@ -111,7 +135,7 @@ public class Metric {
     public static class Counter {
         private final AtomicLong atomicLong = new AtomicLong(0L);
 
-        void add (long count) {
+        void add(long count) {
             atomicLong.addAndGet(count);
         }
 
@@ -124,7 +148,7 @@ public class Metric {
     public static class Traffic {
         private final AtomicLong atomicLong = new AtomicLong(0L);
 
-        void add (long count) {
+        void add(long count) {
             atomicLong.addAndGet(count);
         }
 
@@ -134,7 +158,6 @@ public class Metric {
     }
 
 
-
     public static class MetricInstance {
 
 
@@ -142,7 +165,7 @@ public class Metric {
         private Map<String, Counter> counters;
         private Map<String, Traffic> traffics;
 
-        MetricInstance(String [] latencyNames, String [] counterNames, String [] trafficNames) {
+        MetricInstance(String[] latencyNames, String[] counterNames, String[] trafficNames) {
             latencies = new HashMap<>(latencyNames.length);
             Arrays.stream(latencyNames).forEach(name -> latencies.put(name, new Latency()));
             counters = new HashMap<>(counterNames.length);
@@ -163,13 +186,14 @@ public class Metric {
             traffics.get(name).add(value);
         }
 
-        public List<Long> getAndResetLatencies(String name){
+        public List<Long> getAndResetLatencies(String name) {
             return latencies.get(name).getAndReset();
         }
 
         public long getAndResetCounter(String name) {
             return counters.get(name).getAndReset();
         }
+
         public long getAndResetTraffic(String name) {
             return traffics.get(name).getAndReset();
         }

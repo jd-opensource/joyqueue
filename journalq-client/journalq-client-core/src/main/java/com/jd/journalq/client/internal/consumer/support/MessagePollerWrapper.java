@@ -23,7 +23,7 @@ import com.jd.journalq.client.internal.consumer.domain.ConsumeReply;
 import com.jd.journalq.client.internal.consumer.transport.ConsumerClientManager;
 import com.jd.journalq.client.internal.metadata.domain.TopicMetadata;
 import com.jd.journalq.client.internal.nameserver.NameServerConfig;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.toolkit.service.Service;
 
 import java.util.List;
@@ -44,7 +44,8 @@ public class MessagePollerWrapper extends Service implements MessagePoller {
     private ConsumerClientManager consumerClientManager;
     private MessagePoller delegate;
 
-    public MessagePollerWrapper(ConsumerConfig consumerConfig, NameServerConfig nameServerConfig, ClusterManager clusterManager, ClusterClientManager clusterClientManager, ConsumerClientManager consumerClientManager, MessagePoller delegate) {
+    public MessagePollerWrapper(ConsumerConfig consumerConfig, NameServerConfig nameServerConfig, ClusterManager clusterManager,
+                                ClusterClientManager clusterClientManager, ConsumerClientManager consumerClientManager, MessagePoller delegate) {
         this.consumerConfig = consumerConfig;
         this.nameServerConfig = nameServerConfig;
         this.clusterManager = clusterManager;
@@ -172,12 +173,12 @@ public class MessagePollerWrapper extends Service implements MessagePoller {
     }
 
     @Override
-    public JMQCode reply(String topic, List<ConsumeReply> replyList) {
+    public JournalqCode reply(String topic, List<ConsumeReply> replyList) {
         return delegate.reply(topic, replyList);
     }
 
     @Override
-    public JMQCode replyOnce(String topic, ConsumeReply reply) {
+    public JournalqCode replyOnce(String topic, ConsumeReply reply) {
         return delegate.replyOnce(topic, reply);
     }
 

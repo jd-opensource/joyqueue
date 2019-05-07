@@ -16,7 +16,7 @@ package com.jd.journalq.client.internal.producer.checker;
 import com.jd.journalq.client.internal.producer.config.ProducerConfig;
 import com.jd.journalq.client.internal.producer.domain.ProduceMessage;
 import com.jd.journalq.client.internal.producer.exception.ProducerException;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -78,6 +78,6 @@ public class ProduceMessageChecker {
     }
 
     protected static void throwCheckException(String message) {
-        throw new ProducerException(message, JMQCode.CN_PARAM_ERROR.getCode());
+        throw new ProducerException(message, JournalqCode.CN_PARAM_ERROR.getCode());
     }
 }

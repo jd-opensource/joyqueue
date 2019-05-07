@@ -21,7 +21,7 @@ var htmlreplace = require('gulp-html-replace');
 gulp.task('journalq',function (cb) {
     runSequence('cleanjournalq', 'movejournalq')(function () {
         cb()
-        console.log('dataweb编译完毕');
+        console.log('journalq编译完毕');
     });
 });
 

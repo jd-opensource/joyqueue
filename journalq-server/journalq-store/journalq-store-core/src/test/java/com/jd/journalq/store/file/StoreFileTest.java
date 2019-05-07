@@ -13,8 +13,11 @@
  */
 package com.jd.journalq.store.file;
 
+import com.jd.journalq.store.utils.BaseDirUtils;
 import com.jd.journalq.store.utils.MessageTestUtils;
 import com.jd.journalq.store.utils.PreloadBufferPool;
+import com.jd.journalq.toolkit.time.SystemClock;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,12 +44,19 @@ public class StoreFileTest {
         prepareBaseDir();
     }
 
+    @After
+    public void after() throws Exception {
+        destroyBaseDir();
+    }
+
     @Test
     public void timestampTest() throws IOException {
-        long start = System.currentTimeMillis();
+        long start = SystemClock.now();
         StoreFileImpl<ByteBuffer> storeFile = new StoreFileImpl<>(666L, base, 128, new StoreMessageSerializer(1024), new PreloadBufferPool(), 1024 * 1024 * 10);
         long timestamp = storeFile.timestamp();
-        long end = System.currentTimeMillis();
+//        long timestamp = SystemClock.now();
+        long end = SystemClock.now();
+        logger.info("Start: {}, timestamp: {}", start, timestamp);
         Assert.assertTrue(start <= timestamp);
         Assert.assertTrue(timestamp <= end);
 
@@ -100,7 +110,7 @@ public class StoreFileTest {
     @Test
     public void writeTimestamp() {
         ByteBuffer timeBuffer = ByteBuffer.allocate(8);
-        long creationTime = System.currentTimeMillis();
+        long creationTime = SystemClock.now();
         timeBuffer.putLong(0, creationTime);
         //timeBuffer.flip();
         try (RandomAccessFile raf = new RandomAccessFile(file, "rw"); FileChannel fileChannel = raf.getChannel()) {
@@ -118,11 +128,18 @@ public class StoreFileTest {
     private void prepareBaseDir() throws IOException {
         String property = "java.io.tmpdir";
         String tempDir = System.getProperty(property);
-        base = new File(tempDir + File.separator + "jmq-data");
+        base = new File(tempDir + File.separator + "journalq-data");
         if (!base.exists()) {
             base.mkdirs();
         }
         logger.info("Base directory: {}.", base.getCanonicalPath());
         file = new File(base, "329369803896");
     }
+
+
+    private void destroyBaseDir() {
+        BaseDirUtils.destroyBaseDir(base);
+        base = null;
+    }
+
 }

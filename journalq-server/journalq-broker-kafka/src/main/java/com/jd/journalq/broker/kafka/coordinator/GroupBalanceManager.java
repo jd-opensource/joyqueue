@@ -28,7 +28,7 @@ import com.jd.journalq.broker.kafka.coordinator.domain.KafkaCoordinatorGroup;
 import com.jd.journalq.broker.kafka.coordinator.domain.KafkaCoordinatorGroupMember;
 import com.jd.journalq.toolkit.delay.DelayedOperationKey;
 import com.jd.journalq.toolkit.delay.DelayedOperationManager;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import com.jd.journalq.toolkit.time.SystemClock;
 import org.slf4j.Logger;

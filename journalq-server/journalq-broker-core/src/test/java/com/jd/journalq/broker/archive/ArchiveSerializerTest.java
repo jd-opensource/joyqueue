@@ -14,6 +14,7 @@
 package com.jd.journalq.broker.archive;
 
 import com.jd.journalq.server.archive.store.model.ConsumeLog;
+import com.jd.journalq.toolkit.time.SystemClock;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.junit.Test;
 
@@ -32,7 +33,7 @@ public class ArchiveSerializerTest {
         consumeLog.setBrokerId(1);
         consumeLog.setClientIp(new byte[16]);
         consumeLog.setBytesMessageId(new byte[16]);
-        consumeLog.setConsumeTime(System.currentTimeMillis());
+        consumeLog.setConsumeTime(SystemClock.now());
 
         System.out.println(ToStringBuilder.reflectionToString(consumeLog));
 
@@ -47,7 +48,7 @@ public class ArchiveSerializerTest {
         consumeLog.setBrokerId(1);
         consumeLog.setClientIp(new byte[16]);
         consumeLog.setBytesMessageId(new byte[16]);
-        consumeLog.setConsumeTime(System.currentTimeMillis());
+        consumeLog.setConsumeTime(SystemClock.now());
         System.out.println(ToStringBuilder.reflectionToString(consumeLog));
 
         ByteBuffer write = ArchiveSerializer.write(consumeLog);

@@ -26,12 +26,12 @@ public interface KafkaGroupManageService {
      * @param groupId
      * @return
      */
-    public boolean removeGroup(String groupId);
+    boolean removeGroup(String groupId);
 
     /**
      * 重平衡group
      * @param groupId
      * @return
      */
-    public boolean rebalanceGroup(String groupId);
+    boolean rebalanceGroup(String groupId);
 }

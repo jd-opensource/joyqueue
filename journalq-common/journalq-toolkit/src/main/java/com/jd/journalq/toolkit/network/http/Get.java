@@ -14,7 +14,7 @@
 package com.jd.journalq.toolkit.network.http;
 
 import com.jd.journalq.toolkit.URL;
-import com.jd.journalq.toolkit.lang.Charsets;
+import com.google.common.base.Charsets;
 
 import java.io.BufferedReader;
 import java.io.IOException;

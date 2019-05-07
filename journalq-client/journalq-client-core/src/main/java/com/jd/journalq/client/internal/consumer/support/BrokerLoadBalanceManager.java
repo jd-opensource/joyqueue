@@ -15,7 +15,7 @@ package com.jd.journalq.client.internal.consumer.support;
 
 import com.google.common.collect.Maps;
 import com.jd.journalq.client.internal.consumer.BrokerLoadBalance;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.client.internal.Plugins;
 
 import java.util.concurrent.ConcurrentMap;

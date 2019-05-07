@@ -13,11 +13,16 @@
  */
 package com.jd.journalq.registry;
 
-import com.jd.journalq.registry.listener.*;
+import com.jd.journalq.registry.listener.ChildrenChangeListener;
+import com.jd.journalq.registry.listener.ChildrenDataListener;
+import com.jd.journalq.registry.listener.ChildrenListener;
+import com.jd.journalq.registry.listener.ClusterListener;
+import com.jd.journalq.registry.listener.ConnectionListener;
+import com.jd.journalq.registry.listener.LeaderListener;
+import com.jd.journalq.registry.listener.PathListener;
 import com.jd.journalq.toolkit.URL;
 import com.jd.journalq.toolkit.UrlAware;
 import com.jd.journalq.toolkit.lang.LifeCycle;
-import com.jd.journalq.registry.listener.*;
 import com.jd.laf.extension.Type;
 
 import java.util.List;
@@ -87,7 +92,7 @@ public interface Registry extends Type, LifeCycle, UrlAware {
      * @param path 路径
      * @return 锁
      */
-    Lock createLock(final String path);
+    Lock createLock(String path);
 
     /**
      * 更新节点的值

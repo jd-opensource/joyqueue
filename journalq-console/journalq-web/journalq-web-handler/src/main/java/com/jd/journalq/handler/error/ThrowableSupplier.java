@@ -25,7 +25,10 @@ import org.springframework.dao.DuplicateKeyException;
 
 import java.lang.reflect.InvocationTargetException;
 
-import static com.jd.journalq.handler.error.ErrorCode.*;
+import static com.jd.journalq.handler.error.ErrorCode.BadRequest;
+import static com.jd.journalq.handler.error.ErrorCode.DuplicateError;
+import static com.jd.journalq.handler.error.ErrorCode.RuntimeError;
+import static com.jd.journalq.handler.error.ErrorCode.ServiceError;
 
 /**
  * Other error or exception conversion

@@ -17,10 +17,15 @@ import com.jd.journalq.domain.Broker;
 import com.jd.journalq.handler.annotation.PageQuery;
 import com.jd.journalq.model.PageResult;
 import com.jd.journalq.model.QPageQuery;
+import com.jd.journalq.model.domain.BrokerClient;
+import com.jd.journalq.model.domain.BrokerMonitorRecord;
+import com.jd.journalq.model.domain.BrokerTopicMonitor;
+import com.jd.journalq.model.domain.ConnectionMonitorInfoWithIp;
+import com.jd.journalq.model.domain.SimplifiedBrokeMessage;
+import com.jd.journalq.model.domain.Subscribe;
 import com.jd.journalq.monitor.BrokerMessageInfo;
 import com.jd.journalq.monitor.Client;
 import com.jd.journalq.handler.error.ErrorCode;
-import com.jd.journalq.model.domain.*;
 import com.jd.journalq.model.query.QMonitor;
 import com.jd.journalq.model.query.QPartitionGroupMonitor;
 import com.jd.journalq.service.BrokerMessageService;
@@ -43,7 +48,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 public class BrokerMonitorCommand implements Command<Response>, Poolable {
-    private final static Logger logger = LoggerFactory.getLogger(BrokerMonitorCommand.class);
+    private static final Logger logger = LoggerFactory.getLogger(BrokerMonitorCommand.class);
 
     @Value
     private BrokerMonitorService brokerMonitorService;

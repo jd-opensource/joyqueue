@@ -15,7 +15,7 @@ package com.jd.journalq.broker.index.handler;
 
 import com.jd.journalq.broker.consumer.Consume;
 import com.jd.journalq.broker.BrokerContext;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.domain.QosLevel;
 import com.jd.journalq.network.command.CommandType;
 import com.jd.journalq.network.transport.codec.JMQHeader;
@@ -60,7 +60,7 @@ public class ConsumeIndexQueryHandler implements CommandHandler, Type {
             Map<Integer, IndexMetadataAndError> partitionIndexes = new HashedMap();
             for (int partition : partitions) {
                 long index = getConsumerIndex(topic, (short)partition, app);
-                IndexMetadataAndError indexMetadataAndError = new IndexMetadataAndError(index, "", (short)JMQCode.SUCCESS.getCode());
+                IndexMetadataAndError indexMetadataAndError = new IndexMetadataAndError(index, "", (short)JournalqCode.SUCCESS.getCode());
                 partitionIndexes.put(partition, indexMetadataAndError);
             }
             topicPartitionIndex.put(topic, partitionIndexes);

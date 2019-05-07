@@ -29,9 +29,9 @@ import com.jd.journalq.client.internal.producer.exception.ProducerException;
 import com.jd.journalq.client.internal.producer.interceptor.ProducerInterceptor;
 import com.jd.journalq.client.internal.producer.interceptor.ProducerInterceptorManager;
 import com.jd.journalq.client.internal.producer.transport.ProducerClientManager;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.toolkit.concurrent.SimpleFuture;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -239,7 +239,11 @@ public class DefaultMessageProducer extends Service implements MessageProducer {
     public TransactionMessageProducer beginTransaction(String transactionId, long timeout, TimeUnit timeoutUnit) {
         checkState();
         Preconditions.checkArgument(StringUtils.isNotBlank(transactionId), "transactionId not blank");
-        return new DefaultTransactionMessageProducer(transactionId, timeout, timeoutUnit, transactionSequence.getAndIncrement(), config, nameServerConfig, clusterManager, messageSender, messageProducerInner);
+        return new DefaultTransactionMessageProducer(transactionId, timeout,
+                timeoutUnit, transactionSequence.getAndIncrement(),
+                config, nameServerConfig,
+                clusterManager, messageSender,
+                messageProducerInner);
     }
 
     @Override
@@ -267,7 +271,7 @@ public class DefaultMessageProducer extends Service implements MessageProducer {
 
     protected void checkState() {
         if (!isStarted()) {
-            throw new ProducerException("producer is not started", JMQCode.CN_SERVICE_NOT_AVAILABLE.getCode());
+            throw new ProducerException("producer is not started", JournalqCode.CN_SERVICE_NOT_AVAILABLE.getCode());
         }
     }
 }

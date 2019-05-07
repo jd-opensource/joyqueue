@@ -14,7 +14,7 @@
 package com.jd.journalq.broker.kafka.converter;
 
 import com.jd.journalq.broker.kafka.KafkaErrorCode;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +28,7 @@ public class CheckResultConverter {
 
     protected static final Logger logger = LoggerFactory.getLogger(CheckResultConverter.class);
 
-    public static short convertProduceCode(JMQCode code) {
+    public static short convertProduceCode(JournalqCode code) {
         switch (code) {
             case FW_TOPIC_NOT_EXIST:
             case FW_PRODUCER_NOT_EXISTS:
@@ -46,7 +46,7 @@ public class CheckResultConverter {
         }
     }
 
-    public static short convertFetchCode(JMQCode code) {
+    public static short convertFetchCode(JournalqCode code) {
         switch (code) {
             case FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER:
             case FW_TOPIC_NO_PARTITIONGROUP: {

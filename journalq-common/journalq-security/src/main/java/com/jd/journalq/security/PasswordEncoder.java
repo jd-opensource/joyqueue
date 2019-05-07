@@ -13,12 +13,12 @@
  */
 package com.jd.journalq.security;
 
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 
 /**
  * @author majun8
  */
 public interface PasswordEncoder {
 
-    String encode(String password) throws JMQException;
+    String encode(String password) throws JournalqException;
 }

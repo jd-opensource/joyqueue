@@ -21,7 +21,7 @@ import com.jd.journalq.client.internal.consumer.coordinator.domain.BrokerAssignm
 import com.jd.journalq.client.internal.consumer.coordinator.domain.PartitionAssignment;
 import com.jd.journalq.client.internal.metadata.domain.PartitionMetadata;
 import com.jd.journalq.client.internal.metadata.domain.TopicMetadata;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.command.FetchAssignedPartitionAck;
 import com.jd.journalq.network.command.FetchAssignedPartitionAckData;
 import com.jd.journalq.network.domain.BrokerNode;
@@ -91,13 +91,14 @@ public class PartitionAssignmentManager extends Service {
                 return null;
             }
 
-            FetchAssignedPartitionAck fetchAssignedPartitionAck = coordinatorManager.fetchAssignedPartition(coordinator, topicMetadata.getTopic(), app, topicMetadata.getConsumerPolicy().getNearby(), sessionTimeout);
+            FetchAssignedPartitionAck fetchAssignedPartitionAck =
+                    coordinatorManager.fetchAssignedPartition(coordinator, topicMetadata.getTopic(), app, topicMetadata.getConsumerPolicy().getNearby(), sessionTimeout);
             FetchAssignedPartitionAckData fetchAssignedPartitionAckData = fetchAssignedPartitionAck.getTopicPartitions().get(topicMetadata.getTopic());
 
             if (fetchAssignedPartitionAckData == null) {
                 logger.warn("fetch partition assignment error, no partitions, topic: {}, app: {}", topicMetadata.getTopic(), app);
                 return null;
-            } else if (!fetchAssignedPartitionAckData.getCode().equals(JMQCode.SUCCESS)) {
+            } else if (!fetchAssignedPartitionAckData.getCode().equals(JournalqCode.SUCCESS)) {
                 logger.warn("fetch partition assignment error, topic: {}, app: {}, error: {}", topicMetadata.getTopic(), app, fetchAssignedPartitionAckData.getCode().getMessage());
                 return null;
             }

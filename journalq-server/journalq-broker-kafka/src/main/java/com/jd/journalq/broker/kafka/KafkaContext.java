@@ -43,8 +43,11 @@ public class KafkaContext {
     private KafkaRateLimitHandlerFactory rateLimitHandlerFactory;
     private BrokerContext brokerContext;
 
-    public KafkaContext(KafkaConfig config, KafkaConnectionManager connectionManager, KafkaCoordinatorGroupManager groupMetadataManager, GroupOffsetManager groupOffsetManager, GroupBalanceManager groupBalanceManager,
-                        GroupOffsetHandler groupOffsetHandler, GroupBalanceHandler groupBalanceHandler, GroupCoordinator groupCoordinator, KafkaRateLimitHandlerFactory rateLimitHandlerFactory, BrokerContext brokerContext) {
+    public KafkaContext(KafkaConfig config, KafkaConnectionManager connectionManager,
+                        KafkaCoordinatorGroupManager groupMetadataManager, GroupOffsetManager groupOffsetManager,
+                        GroupBalanceManager groupBalanceManager, GroupOffsetHandler groupOffsetHandler,
+                        GroupBalanceHandler groupBalanceHandler, GroupCoordinator groupCoordinator,
+                        KafkaRateLimitHandlerFactory rateLimitHandlerFactory, BrokerContext brokerContext) {
         this.config = config;
         this.connectionManager = connectionManager;
         this.groupMetadataManager = groupMetadataManager;

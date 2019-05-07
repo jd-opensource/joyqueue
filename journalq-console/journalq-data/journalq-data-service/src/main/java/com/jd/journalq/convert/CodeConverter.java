@@ -18,7 +18,7 @@ import com.jd.journalq.model.domain.AppName;
 import com.jd.journalq.model.domain.Identity;
 import com.jd.journalq.model.domain.Namespace;
 import com.jd.journalq.model.domain.Topic;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
 
 /**

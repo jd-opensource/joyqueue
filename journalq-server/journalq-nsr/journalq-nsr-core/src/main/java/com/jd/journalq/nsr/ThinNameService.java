@@ -14,9 +14,20 @@
 package com.jd.journalq.nsr;
 
 import com.google.common.collect.Lists;
-import com.jd.journalq.domain.*;
+import com.jd.journalq.domain.AppToken;
+import com.jd.journalq.domain.Broker;
+import com.jd.journalq.domain.ClientType;
+import com.jd.journalq.domain.Config;
+import com.jd.journalq.domain.Consumer;
+import com.jd.journalq.domain.DataCenter;
+import com.jd.journalq.domain.PartitionGroup;
+import com.jd.journalq.domain.Producer;
+import com.jd.journalq.domain.Replica;
+import com.jd.journalq.domain.Subscription;
+import com.jd.journalq.domain.Topic;
+import com.jd.journalq.domain.TopicConfig;
+import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.event.NameServerEvent;
-import com.jd.journalq.network.command.CommandType;
 import com.jd.journalq.network.command.GetTopics;
 import com.jd.journalq.network.command.GetTopicsAck;
 import com.jd.journalq.network.command.SubscribeAck;
@@ -30,7 +41,46 @@ import com.jd.journalq.network.transport.command.Direction;
 import com.jd.journalq.network.transport.exception.TransportException;
 import com.jd.journalq.nsr.config.NameServiceConfig;
 import com.jd.journalq.nsr.network.NsrTransportClientFactory;
-import com.jd.journalq.nsr.network.command.*;
+import com.jd.journalq.nsr.network.command.AddTopic;
+import com.jd.journalq.nsr.network.command.GetAllBrokers;
+import com.jd.journalq.nsr.network.command.GetAllBrokersAck;
+import com.jd.journalq.nsr.network.command.GetAllConfigs;
+import com.jd.journalq.nsr.network.command.GetAllConfigsAck;
+import com.jd.journalq.nsr.network.command.GetAllTopics;
+import com.jd.journalq.nsr.network.command.GetAllTopicsAck;
+import com.jd.journalq.nsr.network.command.GetAppToken;
+import com.jd.journalq.nsr.network.command.GetAppTokenAck;
+import com.jd.journalq.nsr.network.command.GetBroker;
+import com.jd.journalq.nsr.network.command.GetBrokerAck;
+import com.jd.journalq.nsr.network.command.GetBrokerByRetryType;
+import com.jd.journalq.nsr.network.command.GetBrokerByRetryTypeAck;
+import com.jd.journalq.nsr.network.command.GetConfig;
+import com.jd.journalq.nsr.network.command.GetConfigAck;
+import com.jd.journalq.nsr.network.command.GetConsumerByTopic;
+import com.jd.journalq.nsr.network.command.GetConsumerByTopicAck;
+import com.jd.journalq.nsr.network.command.GetConsumerByTopicAndApp;
+import com.jd.journalq.nsr.network.command.GetConsumerByTopicAndAppAck;
+import com.jd.journalq.nsr.network.command.GetDataCenter;
+import com.jd.journalq.nsr.network.command.GetDataCenterAck;
+import com.jd.journalq.nsr.network.command.GetProducerByTopic;
+import com.jd.journalq.nsr.network.command.GetProducerByTopicAck;
+import com.jd.journalq.nsr.network.command.GetProducerByTopicAndApp;
+import com.jd.journalq.nsr.network.command.GetProducerByTopicAndAppAck;
+import com.jd.journalq.nsr.network.command.GetReplicaByBroker;
+import com.jd.journalq.nsr.network.command.GetReplicaByBrokerAck;
+import com.jd.journalq.nsr.network.command.GetTopicConfig;
+import com.jd.journalq.nsr.network.command.GetTopicConfigAck;
+import com.jd.journalq.nsr.network.command.GetTopicConfigByApp;
+import com.jd.journalq.nsr.network.command.GetTopicConfigByAppAck;
+import com.jd.journalq.nsr.network.command.GetTopicConfigByBroker;
+import com.jd.journalq.nsr.network.command.GetTopicConfigByBrokerAck;
+import com.jd.journalq.nsr.network.command.HasSubscribe;
+import com.jd.journalq.nsr.network.command.HasSubscribeAck;
+import com.jd.journalq.nsr.network.command.LeaderReport;
+import com.jd.journalq.nsr.network.command.NsrCommandType;
+import com.jd.journalq.nsr.network.command.NsrConnection;
+import com.jd.journalq.nsr.network.command.Register;
+import com.jd.journalq.nsr.network.command.RegisterAck;
 import com.jd.journalq.toolkit.concurrent.EventBus;
 import com.jd.journalq.toolkit.concurrent.EventListener;
 import com.jd.journalq.toolkit.config.PropertySupplier;
@@ -43,7 +93,11 @@ import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -61,10 +115,11 @@ public class ThinNameService extends Service implements NameService, PropertySup
     /**
      * 事件管理器
      */
-    protected EventBus<NameServerEvent> eventBus = new EventBus<>("THIN_NAMESERVICE_ENENT_BUSS");
+    protected EventBus<NameServerEvent> eventBus = new EventBus<>("BROKER_THIN_NAMESERVICE_ENENT_BUS");
 
 
     public ThinNameService() {
+        //do nothing
     }
 
     public ThinNameService(NameServiceConfig nameServiceConfig) {
@@ -107,7 +162,7 @@ public class ThinNameService extends Service implements NameService, PropertySup
 
     @Override
     public void unSubscribe(List<Subscription> subscriptions) {
-        Command request = new Command(new JMQHeader(Direction.REQUEST, CommandType.UNSUBSCRIBE), new UnSubscribe().subscriptions(subscriptions));
+        Command request = new Command(new JMQHeader(Direction.REQUEST, NsrCommandType.UN_SUBSCRIBE), new UnSubscribe().subscriptions(subscriptions));
         Command response = send(request);
         if (!response.isSuccess()) {
             logger.error("unSubscribe error request {},response {}", request, response);
@@ -128,7 +183,8 @@ public class ThinNameService extends Service implements NameService, PropertySup
 
     @Override
     public void leaderReport(TopicName topic, int partitionGroup, int leaderBrokerId, Set<Integer> isrId, int termId) {
-        Command request = new Command(new JMQHeader(Direction.REQUEST, NsrCommandType.LEADER_REPORT), new LeaderReport().topic(topic).partitionGroup(partitionGroup).leaderBrokerId(leaderBrokerId).isrId(isrId).termId(termId));
+        Command request = new Command(new JMQHeader(Direction.REQUEST, NsrCommandType.LEADER_REPORT),
+                new LeaderReport().topic(topic).partitionGroup(partitionGroup).leaderBrokerId(leaderBrokerId).isrId(isrId).termId(termId));
         Command response = send(request);
         if (!response.isSuccess()) {
             logger.error("leaderReport error request {},response {}", request, response);
@@ -312,7 +368,9 @@ public class ThinNameService extends Service implements NameService, PropertySup
             throw new RuntimeException(String.format("getConsumerByTopic error request {},response {}", request, response));
         }
         List<Consumer> topicConsumes = ((GetConsumerByTopicAck) response.getPayload()).getConsumers();
-        if (null != topicConsumes) consumers.addAll(topicConsumes);
+        if (null != topicConsumes) {
+            consumers.addAll(topicConsumes);
+        }
         return consumers;
     }
 
@@ -326,7 +384,9 @@ public class ThinNameService extends Service implements NameService, PropertySup
             throw new RuntimeException(String.format("getProducerByTopic error request {},response {}", request, response));
         }
         List<Producer> topicProducers = ((GetProducerByTopicAck) response.getPayload()).getProducers();
-        if (null != topicProducers) producers.addAll(topicProducers);
+        if (null != topicProducers) {
+            producers.addAll(topicProducers);
+        }
         return producers;
     }
 
@@ -357,11 +417,6 @@ public class ThinNameService extends Service implements NameService, PropertySup
         eventBus.addListener(listener);
     }
 
-    //TODO delete
-    public void addNameServerEvent(NameServerEvent event) {
-        eventBus.add(event);
-    }
-
     @Override
     public void removeListener(EventListener<NameServerEvent> listener) {
         eventBus.removeListener(listener);
@@ -389,21 +444,19 @@ public class ThinNameService extends Service implements NameService, PropertySup
 
     private Command send(Command request) throws TransportException {
         try {
-            return clientTransport.getOrCreateTransport().sync(request);
+            return clientTransport.getOrCreateTransport().sync(request,10000);
         } catch (TransportException exception) {
-            logger.error("rmoteNameService error request {}", request);
+            logger.error("send command to nameServer error request {}", request);
             throw exception;
         }
     }
+
     private Command registerToNsr() throws TransportException {
-        if(null==broker)return null;
-        Command request = new Command(new JMQHeader(Direction.REQUEST, NsrCommandType.CONNECT),new NsrConnection().brokerId(broker.getId()));
-        try {
-            return clientTransport.getOrCreateTransport().sync(request);
-        } catch (TransportException exception) {
-            logger.error("rmoteNameService error request {}", request);
-            throw exception;
+        if (null == broker) {
+            return null;
         }
+        Command request = new Command(new JMQHeader(Direction.REQUEST, NsrCommandType.CONNECT), new NsrConnection().brokerId(broker.getId()));
+        return send(request);
     }
 
     @Override
@@ -418,11 +471,11 @@ public class ThinNameService extends Service implements NameService, PropertySup
 
 
     private class ClientTransport implements EventListener<TransportEvent>, LifeCycle {
-        private boolean started = false;
+        private AtomicBoolean started = new AtomicBoolean(false);
         private TransportClient transportClient;
         protected final AtomicReference<Transport> transports = new AtomicReference<>();
 
-        public ClientTransport(NameServiceConfig config,NameService nameService) {
+        ClientTransport(NameServiceConfig config, NameService nameService) {
             this.transportClient = new NsrTransportClientFactory(nameService).create(config.getClientConfig());
             this.transportClient.addListener(this);
         }
@@ -439,7 +492,7 @@ public class ThinNameService extends Service implements NameService, PropertySup
                 case CLOSE:
                     transports.set(null);
                     transport.stop();
-                    logger.info("RemoteNameService transport of {} closed", transport.toString());
+                    logger.info("transport connect to nameServer closed. [{}] ", transport.toString());
                     break;
                 default:
                     break;
@@ -455,8 +508,8 @@ public class ThinNameService extends Service implements NameService, PropertySup
                         transport = transportClient.createTransport(nameServiceConfig.getNamserverAddress());
                         transports.set(transport);
                     }
-                    logger.info("RemoteNameService  create transport of {}", nameServiceConfig.getNamserverAddress());
-                    }
+                    logger.info("create transport connect to nameServer [{}]", nameServiceConfig.getNamserverAddress());
+                }
             }
             return transport;
         }
@@ -464,19 +517,20 @@ public class ThinNameService extends Service implements NameService, PropertySup
 
         @Override
         public void start() throws Exception {
-            this.transportClient.start();
-            started = true;
+            if (started.compareAndSet(false, true)) {
+                this.transportClient.start();
+            }
         }
 
         @Override
         public void stop() {
+            started.set(false);
             this.transportClient.stop();
-            started = false;
         }
 
         @Override
         public boolean isStarted() {
-            return started;
+            return started.get();
         }
     }
 

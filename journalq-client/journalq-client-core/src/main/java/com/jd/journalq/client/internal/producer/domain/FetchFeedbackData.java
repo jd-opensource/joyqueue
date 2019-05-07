@@ -13,7 +13,7 @@
  */
 package com.jd.journalq.client.internal.producer.domain;
 
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 
 import java.util.List;
 
@@ -26,7 +26,7 @@ import java.util.List;
 public class FetchFeedbackData {
 
     private List<FeedbackData> data;
-    private JMQCode code;
+    private JournalqCode code;
 
     public List<FeedbackData> getData() {
         return data;
@@ -36,11 +36,11 @@ public class FetchFeedbackData {
         this.data = data;
     }
 
-    public JMQCode getCode() {
+    public JournalqCode getCode() {
         return code;
     }
 
-    public void setCode(JMQCode code) {
+    public void setCode(JournalqCode code) {
         this.code = code;
     }
 }

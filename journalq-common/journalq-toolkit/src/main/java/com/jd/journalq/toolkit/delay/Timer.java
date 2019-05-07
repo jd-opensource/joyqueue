@@ -13,7 +13,7 @@
  */
 package com.jd.journalq.toolkit.delay;
 
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.time.SystemClock;
 
 import java.util.concurrent.DelayQueue;

@@ -40,7 +40,7 @@ import com.jd.journalq.client.internal.producer.transport.ProducerClientManager;
 import com.jd.journalq.client.internal.producer.transport.ProducerClientManagerFactory;
 import com.jd.journalq.client.internal.transport.config.TransportConfig;
 import com.jd.journalq.client.internal.transport.config.TransportConfigChecker;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import org.apache.commons.lang3.StringUtils;
 

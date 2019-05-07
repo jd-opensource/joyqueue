@@ -1,6 +1,4 @@
 
-
--- 导出  表 laf_config.application 结构
 CREATE TABLE IF NOT EXISTS `application` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键自增id',
   `code` varchar(128) NOT NULL COMMENT '应用 代码',
@@ -21,8 +19,6 @@ CREATE TABLE IF NOT EXISTS `application` (
   PRIMARY KEY (`id`)
 ) ENGINE = InnoDB CHARSET=utf8;
 
-
--- 导出  表 laf_config.application_user 结构
 CREATE TABLE IF NOT EXISTS `application_user` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增id',
   `app_id` bigint(20) NOT NULL COMMENT '应用id',
@@ -39,7 +35,6 @@ CREATE TABLE IF NOT EXISTS `application_user` (
   PRIMARY KEY (`id`)
 ) ENGINE = InnoDB CHARSET=utf8;
 
--- 导出  表 laf_config.user 结构
 CREATE TABLE IF NOT EXISTS `user` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `code` varchar(64) NOT NULL COMMENT '用户英文名',
@@ -74,7 +69,6 @@ CREATE TABLE IF NOT EXISTS `oper_log` (
   PRIMARY KEY (`id`)
 ) ENGINE = InnoDB CHARSET=utf8;
 
-
 CREATE TABLE  IF NOT EXISTS `metric` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键',
   `code` varchar(128) NOT NULL COMMENT '代码',
@@ -91,26 +85,6 @@ CREATE TABLE  IF NOT EXISTS `metric` (
   `status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '状态：-1 删除，0 禁用，1 启用',
   PRIMARY KEY (`id`)
 ) ENGINE = InnoDB CHARSET=utf8;
-
-CREATE TABLE IF NOT EXISTS `message_retry` (
-	`id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
-	`message_id` varchar(50) NOT NULL COMMENT '消息编号',
-	`business_id` varchar(100) DEFAULT NULL COMMENT '业务编号',
-	`topic` varchar(100) NOT NULL COMMENT '主题',
-	`app` varchar(100) NOT NULL COMMENT '应用',
-	`send_time` datetime NOT NULL COMMENT '发送时间',
-	`expire_time` datetime NOT NULL COMMENT '过期时间',
-	`retry_time` datetime NOT NULL COMMENT '重试时间',
-	`retry_count` int(10) NOT NULL DEFAULT '0' COMMENT '重试次数',
-	`data` mediumblob NOT NULL COMMENT '消息体',
-	`exception` blob COMMENT '异常信息',
-	`create_time` datetime NOT NULL COMMENT '创建时间',
-	`create_by` int(10) NOT NULL DEFAULT '0' COMMENT '创建人',
-	`update_time` datetime NOT NULL COMMENT '更新时间',
-	`update_by` int(10) NOT NULL DEFAULT '0' COMMENT '更新人',
-	`status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '状态,0:成功,1:失败,-2:过期',
-	PRIMARY KEY (`id`)
-) ENGINE = InnoDB AUTO_INCREMENT = 0 CHARSET = utf8;
 
 CREATE TABLE IF NOT EXISTS `broker_group` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
@@ -138,6 +112,25 @@ CREATE TABLE IF NOT EXISTS `broker_group_related` (
   PRIMARY KEY (`id`)
 ) ENGINE = InnoDB CHARSET=utf8;
 
+CREATE TABLE IF NOT EXISTS `message_retry` (
+	`id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+	`message_id` varchar(50) NOT NULL COMMENT '消息编号',
+	`business_id` varchar(100) DEFAULT NULL COMMENT '业务编号',
+	`topic` varchar(100) NOT NULL COMMENT '主题',
+	`app` varchar(100) NOT NULL COMMENT '应用',
+	`send_time` datetime NOT NULL COMMENT '发送时间',
+	`expire_time` datetime NOT NULL COMMENT '过期时间',
+	`retry_time` datetime NOT NULL COMMENT '重试时间',
+	`retry_count` int(10) NOT NULL DEFAULT '0' COMMENT '重试次数',
+	`data` mediumblob NOT NULL COMMENT '消息体',
+	`exception` blob COMMENT '异常信息',
+	`create_time` datetime NOT NULL COMMENT '创建时间',
+	`create_by` int(10) NOT NULL DEFAULT '0' COMMENT '创建人',
+	`update_time` datetime NOT NULL COMMENT '更新时间',
+	`update_by` int(10) NOT NULL DEFAULT '0' COMMENT '更新人',
+	`status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '状态,0:成功,1:失败,-2:过期',
+	PRIMARY KEY (`id`)
+) ENGINE = InnoDB AUTO_INCREMENT = 0 CHARSET = utf8;
 
 -- init default admin USER
 MERGE INTO `user`

@@ -14,9 +14,10 @@
 package com.jd.journalq.store;
 
 import com.jd.journalq.domain.QosLevel;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.store.utils.BaseDirUtils;
 import com.jd.journalq.store.utils.MessageUtils;
+import com.jd.journalq.toolkit.time.SystemClock;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -76,15 +77,15 @@ public class StoreServiceTest {
         long count = 1024;
         int batchSize = 1024;
         int bodySize = 1024;
-        long t0 = System.currentTimeMillis();
+        long t0 = SystemClock.now();
         for (int i = 0; i < count; i++) {
             ByteBuffer[] messages = MessageUtils.build(batchSize, bodySize).toArray(new ByteBuffer[0]);
             short partition = partitions[ThreadLocalRandom.current().nextInt(partitions.length)];
             Future<WriteResult> future = partitionGroupStore.asyncWrite(Arrays.stream(messages).map(b -> new WriteRequest(partition, b)).toArray(WriteRequest[]::new));
             WriteResult writeResult = future.get();
-            Assert.assertEquals(JMQCode.SUCCESS, writeResult.getCode());
+            Assert.assertEquals(JournalqCode.SUCCESS, writeResult.getCode());
         }
-        long t1 = System.currentTimeMillis();
+        long t1 = SystemClock.now();
         long totalSize = count * batchSize * bodySize / 1024 / 1024;
         logger.info("Total write : {} MB, takes {} ms, average {} MBps.", totalSize, t1 - t0, totalSize * 1000 / (t1 - t0));
 

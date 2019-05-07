@@ -13,7 +13,7 @@
  */
 package com.jd.journalq.client.internal.consumer.domain;
 
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 
 /**
  * FetchIndexData
@@ -24,17 +24,17 @@ import com.jd.journalq.exception.JMQCode;
 public class FetchIndexData {
 
     private long index;
-    private JMQCode code;
+    private JournalqCode code;
 
     public FetchIndexData() {
 
     }
 
-    public FetchIndexData(JMQCode code) {
+    public FetchIndexData(JournalqCode code) {
         this.code = code;
     }
 
-    public FetchIndexData(long index, JMQCode code) {
+    public FetchIndexData(long index, JournalqCode code) {
         this.index = index;
         this.code = code;
     }
@@ -47,11 +47,11 @@ public class FetchIndexData {
         this.index = index;
     }
 
-    public JMQCode getCode() {
+    public JournalqCode getCode() {
         return code;
     }
 
-    public void setCode(JMQCode code) {
+    public void setCode(JournalqCode code) {
         this.code = code;
     }
 }

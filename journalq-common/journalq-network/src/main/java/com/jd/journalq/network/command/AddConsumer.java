@@ -31,7 +31,7 @@ public class AddConsumer extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.ADD_CONSUMER.getCode();
+        return JournalqCommandType.ADD_CONSUMER.getCode();
     }
 
     public void setTopics(List<String> topics) {

@@ -13,8 +13,8 @@
  */
 package com.jd.journalq.server.retry.remote.handler;
 
-import com.jd.journalq.exception.JMQCode;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqCode;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.network.command.BooleanAck;
 import com.jd.journalq.network.command.CommandType;
 import com.jd.journalq.network.transport.Transport;
@@ -31,6 +31,7 @@ import com.jd.journalq.server.retry.remote.command.GetRetryCount;
 import com.jd.journalq.server.retry.remote.command.GetRetryCountAck;
 import com.jd.journalq.server.retry.remote.command.PutRetry;
 import com.jd.journalq.server.retry.remote.command.UpdateRetry;
+import com.jd.journalq.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,6 +55,10 @@ public class RemoteRetryMessageHandler implements CommandHandler {
 
     @Override
     public Command handle(Transport transport, Command command) throws TransportException {
+        logger.debug("Receive command:[{}]", command);
+
+        long startTime = SystemClock.now();
+
         try {
             switch (command.getHeader().getType()) {
                 case CommandType.PUT_RETRY:
@@ -65,26 +70,36 @@ public class RemoteRetryMessageHandler implements CommandHandler {
                 case CommandType.GET_RETRY_COUNT:
                     return execute((GetRetryCount) command.getPayload());
                 default:
-                    throw new JMQException(JMQCode.CN_COMMAND_UNSUPPORTED.getMessage(command.getHeader().getType()),
-                            JMQCode.CN_COMMAND_UNSUPPORTED.getCode());
+                    throw new JournalqException(JournalqCode.CN_COMMAND_UNSUPPORTED.getMessage(command.getHeader().getType()),
+                            JournalqCode.CN_COMMAND_UNSUPPORTED.getCode());
             }
-        } catch (JMQException e) {
+        } catch (JournalqException e) {
             logger.error("Message retry exception, transport: {}", transport, e);
             return BooleanAck.build(e.getCode(), e.getMessage());
         } catch (Exception e) {
             logger.error("Message retry exception, transport: {}", transport, e);
-            return BooleanAck.build(JMQCode.CN_UNKNOWN_ERROR.getCode(), JMQCode.CN_UNKNOWN_ERROR.getMessage());
+            return BooleanAck.build(JournalqCode.CN_UNKNOWN_ERROR.getCode(), JournalqCode.CN_UNKNOWN_ERROR.getMessage());
+        }finally {
+            long endTime = SystemClock.now();
+
+            if (endTime - startTime > 100) {
+                logger.info("handle retry more than 100ms, Command:[{}]", command);
+            }
         }
     }
 
-    private Command execute(PutRetry putRetry) throws JMQException {
+    private Command execute(PutRetry putRetry) throws JournalqException {
+        logger.debug("add retry message:[{}]", putRetry);
+
         List<RetryMessageModel> messages = putRetry.getMessages();
         messageRetry.addRetry(messages);
 
         return BooleanAck.build();
     }
 
-    private Command execute(GetRetry getRetry) throws JMQException {
+    private Command execute(GetRetry getRetry) throws JournalqException {
+        logger.debug("get retry message by condition:[{}]", getRetry);
+
         List<RetryMessageModel> retryMessageModelList = messageRetry.getRetry(getRetry.getTopic(), getRetry.getApp(), getRetry.getCount(), getRetry.getStartId());
 
         GetRetryAck payload = new GetRetryAck();
@@ -97,7 +112,9 @@ public class RemoteRetryMessageHandler implements CommandHandler {
         return command;
     }
 
-    private Command execute(UpdateRetry updateRetry) throws JMQException {
+    private Command execute(UpdateRetry updateRetry) throws JournalqException {
+        logger.debug("update retry by condition:[{}]", updateRetry);
+
         int updateType = updateRetry.getUpdateType();
         if (UpdateRetry.SUCCESS == updateType) {
             messageRetry.retrySuccess(updateRetry.getTopic(), updateRetry.getApp(), updateRetry.getMessages());
@@ -110,7 +127,9 @@ public class RemoteRetryMessageHandler implements CommandHandler {
         return BooleanAck.build();
     }
 
-    private Command execute(GetRetryCount getRetryCount) throws JMQException {
+    private Command execute(GetRetryCount getRetryCount) throws JournalqException {
+        logger.debug("get retry count by condition:[{}]", getRetryCount);
+
         int retryCount = messageRetry.countRetry(getRetryCount.getTopic(), getRetryCount.getApp());
         GetRetryCountAck getRetryCountAckPayload = new GetRetryCountAck();
         getRetryCountAckPayload.setTopic(getRetryCount.getTopic());

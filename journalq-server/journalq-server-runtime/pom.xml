@@ -47,7 +47,7 @@
         </dependency>
         <dependency>
             <groupId>com.jd.journalq</groupId>
-            <artifactId>journalq-broker-jmq</artifactId>
+            <artifactId>journalq-broker-journalq</artifactId>
         </dependency>
         <dependency>
             <groupId>com.jd.journalq</groupId>

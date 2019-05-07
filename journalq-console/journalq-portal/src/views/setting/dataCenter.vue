@@ -1,7 +1,8 @@
 <template>
   <div>
     <div class="ml20 mt30">
-      <d-input v-model="searchData.code" placeholder="请输入编码" class="left mr10" style="width: 20%">
+      <d-input v-model="searchData.code" placeholder="请输入编码" class="left mr10" style="width:213px">
+        <span slot="prepend">编码</span>
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
       <d-button type="primary" @click="openDialog('addDialog')">新建数据中心<icon name="plus-circle" style="margin-left: 5px;"></icon></d-button>

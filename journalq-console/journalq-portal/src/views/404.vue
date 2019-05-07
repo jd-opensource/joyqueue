@@ -9,7 +9,7 @@
       </div>
       <div class="bullshit">
         <div class="bullshit__oops">OOPS!</div>
-        <div class="bullshit__info">版权所有<a class="link-type" href="https://tig.jd.com/" target='_blank'>商城技术架构部</a></div>
+        <div class="bullshit__info">版权所有<a class="link-type" href="https://tig.jd.com/" target='_blank'>技术架构部</a></div>
         <div class="bullshit__headline">{{ message }}</div>
         <div class="bullshit__info">请检查您输入的网址或者页面接口是否正确</div>
         <!--<a href="/" class="bullshit__return-home">返回首页</a>-->

@@ -52,7 +52,8 @@ public class OnceConsumerInvoker implements ConsumerInvoker {
     private List<MessageListener> listeners;
     private ExecutorService listenerExecutor;
 
-    public OnceConsumerInvoker(ConsumerConfig config, TopicMetadata topicMetadata, Consumer.ConsumerPolicy consumerPolicy, List<ConsumeMessage> messages, List<MessageListener> listeners, ExecutorService listenerExecutor) {
+    public OnceConsumerInvoker(ConsumerConfig config, TopicMetadata topicMetadata, Consumer.ConsumerPolicy consumerPolicy,
+                               List<ConsumeMessage> messages, List<MessageListener> listeners, ExecutorService listenerExecutor) {
         this.config = config;
         this.topicMetadata = topicMetadata;
         this.consumerPolicy = consumerPolicy;

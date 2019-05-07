@@ -13,7 +13,7 @@
  */
 package com.jd.journalq.security;
 
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.response.BooleanResponse;
 
 /**
@@ -22,7 +22,7 @@ import com.jd.journalq.response.BooleanResponse;
 public interface Authentication {
 
     @Deprecated
-    UserDetails getUser(String user) throws JMQException;
+    UserDetails getUser(String user) throws JournalqException;
 
     @Deprecated
     PasswordEncoder getPasswordEncode();

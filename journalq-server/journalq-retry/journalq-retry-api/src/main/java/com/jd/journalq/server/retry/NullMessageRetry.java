@@ -13,7 +13,7 @@
  */
 package com.jd.journalq.server.retry;
 
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.server.retry.api.MessageRetry;
 import com.jd.journalq.server.retry.api.RetryPolicyProvider;
 import com.jd.journalq.server.retry.model.RetryMessageModel;
@@ -40,32 +40,32 @@ public class NullMessageRetry implements MessageRetry<Long> {
     }
 
     @Override
-    public void addRetry(List<RetryMessageModel> retryMessageModelList) throws JMQException {
+    public void addRetry(List<RetryMessageModel> retryMessageModelList) throws JournalqException {
 
     }
 
     @Override
-    public void retrySuccess(String topic, String app, Long[] messageIds) throws JMQException {
+    public void retrySuccess(String topic, String app, Long[] messageIds) throws JournalqException {
 
     }
 
     @Override
-    public void retryError(String topic, String app, Long[] messageIds) throws JMQException {
+    public void retryError(String topic, String app, Long[] messageIds) throws JournalqException {
 
     }
 
     @Override
-    public void retryExpire(String topic, String app, Long[] messageIds) throws JMQException {
+    public void retryExpire(String topic, String app, Long[] messageIds) throws JournalqException {
 
     }
 
     @Override
-    public List<RetryMessageModel> getRetry(String topic, String app, short count, long startIndex) throws JMQException {
+    public List<RetryMessageModel> getRetry(String topic, String app, short count, long startIndex) throws JournalqException {
         return null;
     }
 
     @Override
-    public int countRetry(String topic, String app) throws JMQException {
+    public int countRetry(String topic, String app) throws JournalqException {
         return 0;
     }
 

@@ -14,7 +14,7 @@
 package com.jd.journalq.client.internal.cluster.domain;
 
 import com.jd.journalq.client.internal.metadata.domain.TopicMetadata;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.toolkit.time.SystemClock;
 
 /**
@@ -29,9 +29,9 @@ public class TopicMetadataHolder {
     private TopicMetadata topicMetadata;
     private long createTime;
     private long expireTime;
-    private JMQCode code;
+    private JournalqCode code;
 
-    public TopicMetadataHolder(String topic, TopicMetadata topicMetadata, long createTime, long expireTime, JMQCode code) {
+    public TopicMetadataHolder(String topic, TopicMetadata topicMetadata, long createTime, long expireTime, JournalqCode code) {
         this.topic = topic;
         this.topicMetadata = topicMetadata;
         this.createTime = createTime;
@@ -55,7 +55,7 @@ public class TopicMetadataHolder {
         return topicMetadata;
     }
 
-    public JMQCode getCode() {
+    public JournalqCode getCode() {
         return code;
     }
 }

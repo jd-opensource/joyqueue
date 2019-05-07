@@ -17,13 +17,13 @@ import com.jd.journalq.broker.consumer.Consume;
 import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.monitor.SessionManager;
 import com.jd.journalq.domain.TopicName;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.session.Consumer;
 import com.jd.journalq.network.session.Joint;
 import com.jd.journalq.broker.consumer.model.PullResult;
 import com.jd.journalq.toolkit.concurrent.NamedThreadFactory;
 import com.jd.journalq.toolkit.config.PropertySupplier;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import com.jd.journalq.toolkit.service.ServiceThread;
 import com.jd.journalq.toolkit.time.SystemClock;
@@ -141,6 +141,8 @@ public class LongPollingManager extends Service {
      * @return 成功标示
      */
     public boolean suspend(LongPolling longPolling) {
+        logger.debug("longPolling info:[{}], longPollingQueueSize:[{}]", longPolling, longPollingQueue.size());
+
         Consumer consumer = longPolling.getConsumer();
         if (consumer == null || longPolling.getLongPollingTimeout() == 0 || !isStarted()) {
             return false;
@@ -245,8 +247,8 @@ public class LongPollingManager extends Service {
                     longPollingQueue.offer(longPolling);
                 }
 
-                if (!pullResult.getJmqCode().equals(JMQCode.SUCCESS)) {
-                    logger.error("getMessage error, code: {}, consumer: {}", pullResult.getJmqCode(), consumer);
+                if (!pullResult.getJournalqCode().equals(JournalqCode.SUCCESS)) {
+                    logger.error("getMessage error, code: {}, consumer: {}", pullResult.getJournalqCode(), consumer);
                 }
             } catch (Throwable th) {
                 try {

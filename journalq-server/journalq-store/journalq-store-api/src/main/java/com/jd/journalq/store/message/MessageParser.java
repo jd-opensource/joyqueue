@@ -13,6 +13,8 @@
  */
 package com.jd.journalq.store.message;
 
+import com.jd.journalq.toolkit.time.SystemClock;
+
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
@@ -386,7 +388,7 @@ public class MessageParser {
         byte [][] varAtts = {body, biz_id, property, expand, app};
         ByteBuffer byteBuffer = build(varAtts);
 
-        setLong(byteBuffer,CLIENT_TIMESTAMP, System.currentTimeMillis());
+        setLong(byteBuffer,CLIENT_TIMESTAMP, SystemClock.now());
         setLong(byteBuffer, INDEX, 23L);
         setByte(byteBuffer, PRIORITY, (byte) 0x06);
         setShort(byteBuffer, PARTITION, (short) 26);

@@ -13,7 +13,7 @@
  */
 package com.jd.journalq.toolkit.io.snappy;
 
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.os.Systems;
 
 final class SnappyDecompressor {

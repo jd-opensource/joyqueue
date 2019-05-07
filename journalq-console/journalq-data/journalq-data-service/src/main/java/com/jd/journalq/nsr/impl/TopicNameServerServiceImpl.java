@@ -24,7 +24,11 @@ import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.convert.CodeConverter;
 import com.jd.journalq.convert.NsrTopicConverter;
 import com.jd.journalq.exception.ServiceException;
-import com.jd.journalq.model.domain.*;
+import com.jd.journalq.model.domain.OperLog;
+import com.jd.journalq.model.domain.PartitionGroupMaster;
+import com.jd.journalq.model.domain.PartitionGroupReplica;
+import com.jd.journalq.model.domain.Topic;
+import com.jd.journalq.model.domain.TopicPartitionGroup;
 import com.jd.journalq.model.query.QTopic;
 import com.jd.journalq.nsr.model.TopicQuery;
 import com.jd.journalq.nsr.NameServerBase;
@@ -32,7 +36,11 @@ import com.jd.journalq.nsr.TopicNameServerService;
 import com.jd.journalq.util.NullUtil;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import static com.jd.journalq.exception.ServiceException.IGNITE_RPC_ERROR;

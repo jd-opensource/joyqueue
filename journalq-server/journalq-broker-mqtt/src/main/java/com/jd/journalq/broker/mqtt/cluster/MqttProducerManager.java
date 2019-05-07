@@ -15,7 +15,7 @@ package com.jd.journalq.broker.mqtt.cluster;
 
 import com.jd.journalq.broker.mqtt.connection.MqttConnection;
 import com.jd.journalq.network.session.Producer;
-import com.jd.journalq.toolkit.lang.Strings;
+import com.google.common.base.Strings;
 import com.jd.journalq.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

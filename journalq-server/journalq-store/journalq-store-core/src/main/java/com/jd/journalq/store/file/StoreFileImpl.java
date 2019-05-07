@@ -15,6 +15,7 @@ package com.jd.journalq.store.file;
 
 import com.jd.journalq.store.utils.BufferHolder;
 import com.jd.journalq.store.utils.PreloadBufferPool;
+import com.jd.journalq.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sun.misc.Cleaner;
@@ -58,7 +59,7 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
     private int bufferType = NO_BUFFER;
     private PreloadBufferPool bufferPool;
     private int capacity;
-    private long lastAccessTime = System.currentTimeMillis();
+    private long lastAccessTime = SystemClock.now();
     // 当前刷盘位置
     private int flushPosition;
     // 当前写入位置
@@ -78,7 +79,7 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
             this.writePosition = (int) (file.length() - headerSize);
             this.flushPosition = writePosition;
         }
-        createTimestamp = System.currentTimeMillis();
+        createTimestamp = SystemClock.now();
 
     }
 
@@ -303,7 +304,7 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
     }
 
     private void touch() {
-        lastAccessTime = System.currentTimeMillis();
+        lastAccessTime = SystemClock.now();
     }
 
     /**

@@ -58,7 +58,7 @@ public interface Service<M extends BaseModel> {
      * @param model
      * @return
      */
-    int delete(final M model);
+    int delete(M model);
 
     /**
      * 更新状态

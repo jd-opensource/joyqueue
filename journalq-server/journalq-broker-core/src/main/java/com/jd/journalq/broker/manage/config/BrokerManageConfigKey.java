@@ -31,7 +31,7 @@ public enum BrokerManageConfigKey implements PropertyDef {
     private Object value;
     private PropertyDef.Type type;
 
-    private BrokerManageConfigKey(String name, Object value, PropertyDef.Type type) {
+    BrokerManageConfigKey(String name, Object value, PropertyDef.Type type) {
         this.name = name;
         this.value = value;
         this.type = type;

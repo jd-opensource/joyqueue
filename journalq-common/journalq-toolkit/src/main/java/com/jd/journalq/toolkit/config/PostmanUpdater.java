@@ -170,7 +170,7 @@ public abstract class PostmanUpdater extends Service implements Postman {
      * @param group 分组
      * @return 上下文
      */
-    protected abstract Context update(final String group);
+    protected abstract Context update(String group);
 
     /**
      * 通知监听器

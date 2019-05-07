@@ -16,8 +16,8 @@ package com.jd.journalq.server.retry.db;
 import com.jd.journalq.domain.ConsumeRetry;
 import com.jd.journalq.domain.Partition;
 import com.jd.journalq.domain.TopicName;
-import com.jd.journalq.exception.JMQCode;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqCode;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.datasource.DataSourceFactory;
 import com.jd.journalq.server.retry.api.MessageRetry;
 import com.jd.journalq.server.retry.api.RetryPolicyProvider;
@@ -114,7 +114,7 @@ public class DBMessageRetry implements MessageRetry<Long> {
     }
 
     @Override
-    public void addRetry(List<RetryMessageModel> retryMessageModelList) throws JMQException {
+    public void addRetry(List<RetryMessageModel> retryMessageModelList) throws JournalqException {
         List<ConsumeRetry> consumeRetries = generateConsumeRetry(retryMessageModelList);
         insertConsumeRetry(consumeRetries);
 
@@ -126,7 +126,7 @@ public class DBMessageRetry implements MessageRetry<Long> {
      * @param retryMessageModelList
      * @return
      */
-    public List<ConsumeRetry> generateConsumeRetry(List<RetryMessageModel> retryMessageModelList) throws JMQException {
+    public List<ConsumeRetry> generateConsumeRetry(List<RetryMessageModel> retryMessageModelList) throws JournalqException {
         List<ConsumeRetry> resultList = new LinkedList<>();
         for (RetryMessageModel retryMessageModel : retryMessageModelList) {
             ConsumeRetry consumeRetry = new ConsumeRetry();
@@ -158,9 +158,9 @@ public class DBMessageRetry implements MessageRetry<Long> {
      *
      * @param messages
      * @return
-     * @throws JMQException
+     * @throws JournalqException
      */
-    public Map<Long, ConsumeRetry> insertConsumeRetry(List<ConsumeRetry> messages) throws JMQException {
+    public Map<Long, ConsumeRetry> insertConsumeRetry(List<ConsumeRetry> messages) throws JournalqException {
         final Map<Long, ConsumeRetry> dbIdConsumeRetryMap = new HashMap<>();
 
         String topic = messages.get(0).getTopic();
@@ -211,8 +211,10 @@ public class DBMessageRetry implements MessageRetry<Long> {
                         }
                     });
         } catch (Exception e) {
-            throw new JMQException(JMQCode.CN_DB_ERROR.getMessage() + ",topic:" + topic + ",app:" + app, e,
-                    JMQCode.CN_DB_ERROR.getCode());
+            logger.error("insertConsumeRetry error.", e);
+
+            throw new JournalqException(JournalqCode.CN_DB_ERROR.getMessage() + ",topic:" + topic + ",app:" + app, e,
+                    JournalqCode.CN_DB_ERROR.getCode());
         }
         return dbIdConsumeRetryMap;
     }
@@ -254,7 +256,7 @@ public class DBMessageRetry implements MessageRetry<Long> {
     }
 
     @Override
-    public void retrySuccess(String topic, String app, Long[] messageIds) throws JMQException {
+    public void retrySuccess(String topic, String app, Long[] messageIds) throws JournalqException {
         if (topic == null || topic.isEmpty() || app == null || app
                 .isEmpty() || messageIds == null || messageIds.length == 0) {
             return;
@@ -276,12 +278,14 @@ public class DBMessageRetry implements MessageRetry<Long> {
                 statement.setLong(2, target);
             });
         } catch (Exception e) {
-            throw new JMQException(JMQCode.CN_DB_ERROR, e);
+            logger.error("retrySuccess error.", e);
+
+            throw new JournalqException(JournalqCode.CN_DB_ERROR, e);
         }
     }
 
     @Override
-    public void retryError(String topic, String app, Long[] messageIds) throws JMQException {
+    public void retryError(String topic, String app, Long[] messageIds) throws JournalqException {
         if (topic == null || topic.isEmpty() || app == null || app
                 .isEmpty() || messageIds == null || messageIds.length == 0) {
             return;
@@ -327,7 +331,9 @@ public class DBMessageRetry implements MessageRetry<Long> {
                 } catch (SQLException ignored) {
                 }
             }
-            throw new JMQException(JMQCode.CN_DB_ERROR, e);
+            logger.error("retryError error.", e);
+
+            throw new JournalqException(JournalqCode.CN_DB_ERROR, e);
         } finally {
             Close.close(connection, statement, null);
         }
@@ -339,9 +345,9 @@ public class DBMessageRetry implements MessageRetry<Long> {
      * @param id
      * @param topic
      * @return
-     * @throws JMQException
+     * @throws JournalqException
      */
-    protected Long getNextRetryTime(long id, String topic) throws JMQException {
+    protected Long getNextRetryTime(long id, String topic) throws JournalqException {
         Connection connection = null;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
@@ -367,7 +373,7 @@ public class DBMessageRetry implements MessageRetry<Long> {
                 nextRetryTime = DbRetryConfig.getRetryPolicy().getTime(SystemClock.now(), retryCount, startTime);
             }
         } catch (Exception e) {
-            throw new JMQException(JMQCode.CN_DB_ERROR, e);
+            throw new JournalqException(JournalqCode.CN_DB_ERROR, e);
         } finally {
             Close.close(connection, statement, resultSet);
         }
@@ -376,7 +382,7 @@ public class DBMessageRetry implements MessageRetry<Long> {
     }
 
     @Override
-    public void retryExpire(String topic, String app, Long[] messageIds) throws JMQException {
+    public void retryExpire(String topic, String app, Long[] messageIds) throws JournalqException {
         if (topic == null || topic.isEmpty() || app == null || app
                 .isEmpty() || messageIds == null || messageIds.length == 0) {
             return;
@@ -397,13 +403,15 @@ public class DBMessageRetry implements MessageRetry<Long> {
                 statement.setLong(2, target);
             });
         } catch (Exception e) {
-            throw new JMQException(JMQCode.CN_DB_ERROR, e);
+            logger.error("retryExpire error", e);
+
+            throw new JournalqException(JournalqCode.CN_DB_ERROR, e);
         }
     }
 
     @Override
     public List<RetryMessageModel> getRetry(final String topic, final String app, final short count,
-                                            final long startIndex) throws JMQException {
+                                            final long startIndex) throws JournalqException {
         if (topic == null || topic.isEmpty() || app == null || app.isEmpty() || count <= 0) {
             return new ArrayList<>(0);
         }
@@ -437,12 +445,14 @@ public class DBMessageRetry implements MessageRetry<Long> {
             });
             return list;
         } catch (Exception e) {
-            throw new JMQException(String.format("%s topic:%s,app:%s,count:%d", JMQCode.CN_DB_ERROR.getMessage(), topic, app, count), e, JMQCode.CN_DB_ERROR.getCode());
+            logger.error("getRetry error.", e);
+
+            throw new JournalqException(String.format("%s topic:%s,app:%s,count:%d", JournalqCode.CN_DB_ERROR.getMessage(), topic, app, count), e, JournalqCode.CN_DB_ERROR.getCode());
         }
     }
 
     @Override
-    public int countRetry(final String topic, final String app) throws JMQException {
+    public int countRetry(final String topic, final String app) throws JournalqException {
         if (topic == null || topic.isEmpty() || app == null || app.isEmpty()) {
             return 0;
         }
@@ -462,7 +472,9 @@ public class DBMessageRetry implements MessageRetry<Long> {
             });
             return count;
         } catch (Exception e) {
-            throw new JMQException(JMQCode.CN_DB_ERROR, e);
+            logger.error("countRetry error.", e);
+
+            throw new JournalqException(JournalqCode.CN_DB_ERROR, e);
         } finally {
             if (logger.isDebugEnabled()) {
                 long end = SystemClock.now();
@@ -471,7 +483,7 @@ public class DBMessageRetry implements MessageRetry<Long> {
         }
     }
 
-    public RetryMessageModel getMessageById(final String topic, final String app, final long id) throws JMQException {
+    public RetryMessageModel getMessageById(final String topic, final String app, final long id) throws JournalqException {
         final long nowTime = SystemClock.now();
         try {
             RetryMessageModel retryMessageModel = DaoUtil.queryObject(dataSource, GET_SQL, new DaoUtil.QueryCallback<RetryMessageModel>() {
@@ -501,7 +513,9 @@ public class DBMessageRetry implements MessageRetry<Long> {
             });
             return retryMessageModel;
         } catch (Exception e) {
-            throw new JMQException(String.format("%s topic:%s,app:%s,id:%d", JMQCode.CN_DB_ERROR.getMessage(), topic, app, id), e, JMQCode.CN_DB_ERROR.getCode());
+            logger.error("getMessageById error", e);
+
+            throw new JournalqException(String.format("%s topic:%s,app:%s,id:%d", JournalqCode.CN_DB_ERROR.getMessage(), topic, app, id), e, JournalqCode.CN_DB_ERROR.getCode());
         }
     }
 
@@ -513,9 +527,9 @@ public class DBMessageRetry implements MessageRetry<Long> {
      * @param app
      * @param count
      * @return
-     * @throws JMQException
+     * @throws JournalqException
      */
-    public List<long[]> queryIdAndRetryTime(final String topic, final String app, final int count) throws JMQException {
+    public List<long[]> queryIdAndRetryTime(final String topic, final String app, final int count) throws JournalqException {
         try {
             List<long[]> dbIds = DaoUtil.queryList(dataSource, QUERY_ID_RETRY_TIME_SQL, new DaoUtil.QueryCallback<long[]>() {
 
@@ -537,7 +551,7 @@ public class DBMessageRetry implements MessageRetry<Long> {
             });
             return dbIds;
         } catch (Exception e) {
-            throw new JMQException(String.format("%s topic:%s,app:%s,count:%d", JMQCode.CN_DB_ERROR.getMessage(), topic, app, count), e, JMQCode.CN_DB_ERROR.getCode());
+            throw new JournalqException(String.format("%s topic:%s,app:%s,count:%d", JournalqCode.CN_DB_ERROR.getMessage(), topic, app, count), e, JournalqCode.CN_DB_ERROR.getCode());
         }
     }
 

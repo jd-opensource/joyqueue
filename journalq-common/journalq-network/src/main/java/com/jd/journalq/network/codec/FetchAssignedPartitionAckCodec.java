@@ -15,10 +15,10 @@ package com.jd.journalq.network.codec;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.command.FetchAssignedPartitionAck;
 import com.jd.journalq.network.command.FetchAssignedPartitionAckData;
-import com.jd.journalq.network.command.JMQCommandType;
+import com.jd.journalq.network.command.JournalqCommandType;
 import com.jd.journalq.network.serializer.Serializer;
 import com.jd.journalq.network.transport.codec.JMQHeader;
 import com.jd.journalq.network.transport.codec.PayloadCodec;
@@ -51,7 +51,7 @@ public class FetchAssignedPartitionAckCodec implements PayloadCodec<JMQHeader, F
                 partitions.add(buffer.readShort());
             }
 
-            JMQCode code = JMQCode.valueOf(buffer.readInt());
+            JournalqCode code = JournalqCode.valueOf(buffer.readInt());
             topicPartitions.put(topic, new FetchAssignedPartitionAckData(partitions, code));
         }
 
@@ -75,6 +75,6 @@ public class FetchAssignedPartitionAckCodec implements PayloadCodec<JMQHeader, F
 
     @Override
     public int type() {
-        return JMQCommandType.FETCH_ASSIGNED_PARTITION_ACK.getCode();
+        return JournalqCommandType.FETCH_ASSIGNED_PARTITION_ACK.getCode();
     }
 }

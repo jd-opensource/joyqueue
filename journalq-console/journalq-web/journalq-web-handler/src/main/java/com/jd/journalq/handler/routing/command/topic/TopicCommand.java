@@ -25,8 +25,12 @@ import com.jd.journalq.model.domain.Topic;
 import com.jd.journalq.model.domain.User;
 import com.jd.journalq.model.query.QBroker;
 import com.jd.journalq.model.query.QTopic;
-import com.jd.journalq.service.*;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.jd.journalq.service.BrokerService;
+import com.jd.journalq.service.ConsumerService;
+import com.jd.journalq.service.ProducerService;
+import com.jd.journalq.service.TopicPartitionGroupService;
+import com.jd.journalq.service.TopicService;
+import com.google.common.base.Preconditions;
 import com.jd.laf.binding.annotation.Value;
 import com.jd.laf.web.vertx.annotation.Body;
 import com.jd.laf.web.vertx.annotation.Path;
@@ -101,7 +105,6 @@ public class TopicCommand extends NsrCommandSupport<Topic, TopicService, QTopic>
         try {
             return Responses.success(service.findById(model.getId()));
         } catch (Exception e) {
-            e.printStackTrace();
             return Responses.error(e);
         }
     }

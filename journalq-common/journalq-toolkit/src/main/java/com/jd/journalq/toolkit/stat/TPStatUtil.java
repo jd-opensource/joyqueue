@@ -29,7 +29,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * Created by chengzhiliang on 2019/3/25.
  */
 public class TPStatUtil {
-    private final static Logger logger = LoggerFactory.getLogger(TPStatUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(TPStatUtil.class);
 
     private static Map<String, Queue<Double>> monitorMap = new ConcurrentHashMap<>();
 
@@ -86,19 +86,16 @@ public class TPStatUtil {
         double tp90 = tempArr[(int) (count * 0.90d)]; // tp90
 
         StringBuilder report = new StringBuilder();
-        report.append(System.getProperty("line.separator"));
-        report.append("----------------------------------");
-        report.append(System.getProperty("line.separator"));
         report.append("statType:" + monitorKey);
-        report.append(System.getProperty("line.separator"));
+        report.append(", ");
         report.append("avg:" + average);
-        report.append(System.getProperty("line.separator"));
+        report.append(", ");
         report.append("count:" + count);
-        report.append(System.getProperty("line.separator"));
+        report.append(", ");
         report.append("max:" + max);
-        report.append(System.getProperty("line.separator"));
+        report.append(", ");
         report.append("tp99:" + tp99);
-        report.append(System.getProperty("line.separator"));
+        report.append(", ");
         report.append("tp90:" + tp90);
 
         logger.info(report.toString());

@@ -14,8 +14,8 @@
 package com.jd.journalq.broker.consumer.filter;
 
 import com.jd.journalq.broker.buffer.Serializer;
-import com.jd.journalq.exception.JMQCode;
-import com.jd.journalq.exception.JMQException;
+import com.jd.journalq.exception.JournalqCode;
+import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.message.BrokerMessage;
 import com.jd.laf.extension.Extension;
 import org.slf4j.Logger;
@@ -48,7 +48,7 @@ public class FlagFilter implements MessageFilter {
     }
 
     @Override
-    public List<ByteBuffer> filter(List<ByteBuffer> byteBufferList, FilterCallback filterCallback) throws JMQException {
+    public List<ByteBuffer> filter(List<ByteBuffer> byteBufferList, FilterCallback filterCallback) throws JournalqException {
         FilterResult filterResult = doFilter(byteBufferList, pattern);
         List<ByteBuffer> inValidList = filterResult.getInValidList();
 
@@ -70,7 +70,7 @@ public class FlagFilter implements MessageFilter {
      * @param pattern
      * @return
      */
-    private FilterResult doFilter(List<ByteBuffer> messages, Pattern pattern) throws JMQException {
+    private FilterResult doFilter(List<ByteBuffer> messages, Pattern pattern) throws JournalqException {
         List<ByteBuffer> validList = new ArrayList<>(); // 有效队列
         List<ByteBuffer> inValidList = null; // 无效队列
         boolean /* 有效到无效 */ valid2InvalidFlag = false,
@@ -84,7 +84,7 @@ public class FlagFilter implements MessageFilter {
                 flag = Serializer.readFlag(buffer);
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
-                throw new JMQException(JMQCode.SE_SERIALIZER_ERROR, e);
+                throw new JournalqException(JournalqCode.SE_SERIALIZER_ERROR, e);
             }
 
             // 是否匹配
@@ -119,7 +119,7 @@ public class FlagFilter implements MessageFilter {
         List<ByteBuffer> validList; // 有效队列
         List<ByteBuffer> inValidList; // 无效队列
 
-        public FilterResult(List<ByteBuffer> validList, List<ByteBuffer> inValidList) {
+        FilterResult(List<ByteBuffer> validList, List<ByteBuffer> inValidList) {
             this.validList = validList;
             this.inValidList = inValidList;
         }

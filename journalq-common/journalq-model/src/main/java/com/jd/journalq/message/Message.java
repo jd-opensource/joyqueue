@@ -524,7 +524,7 @@ public class Message implements Serializable {
 
         private int type;
 
-        private CompressionType(int type) {
+        CompressionType(int type) {
             this.type = type;
         }
 

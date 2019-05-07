@@ -19,7 +19,7 @@ import com.jd.journalq.client.internal.metadata.domain.ClusterMetadata;
 import com.jd.journalq.client.internal.metadata.domain.PartitionGroupMetadata;
 import com.jd.journalq.client.internal.metadata.domain.PartitionMetadata;
 import com.jd.journalq.client.internal.metadata.domain.TopicMetadata;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.command.FetchClusterAck;
 import com.jd.journalq.network.command.Topic;
 import com.jd.journalq.network.command.TopicPartition;
@@ -54,7 +54,7 @@ public class ClusterMetadataConverter {
     }
 
     public static TopicMetadata convertTopicMetadata(String code, Topic topic, Map<Integer, BrokerNode> brokerMap) {
-        if (!topic.getCode().equals(JMQCode.SUCCESS)) {
+        if (!topic.getCode().equals(JournalqCode.SUCCESS)) {
             return new TopicMetadata(topic.getCode());
         }
 

@@ -68,7 +68,8 @@ public class PartitionGroupServerServiceImpl extends NameServerBase implements P
         if (partitionGroupPageResult == null || partitionGroupPageResult.getResult() == null) {
             return PageResult.empty();
         }
-        return new PageResult<>(partitionGroupPageResult.getPagination(), partitionGroupPageResult.getResult().stream().map(partitionGroup -> nsrPartitionGroupConverter.revert(partitionGroup)).collect(Collectors.toList()));
+        return new PageResult<>(partitionGroupPageResult.getPagination(),
+                partitionGroupPageResult.getResult().stream().map(partitionGroup -> nsrPartitionGroupConverter.revert(partitionGroup)).collect(Collectors.toList()));
 
     }
 
@@ -110,7 +111,7 @@ public class PartitionGroupServerServiceImpl extends NameServerBase implements P
         }
         String result = post(LIST_PARTITIONGROUP,partitionGroupQuery);
         List<PartitionGroup> replicas = JSON.parseArray(result,PartitionGroup.class);
-        if (replicas == null || replicas.size() <=0) {
+        if (replicas == null ) {
             return null;
         }
         return replicas.stream().map(partitionGroup -> nsrPartitionGroupConverter.revert(partitionGroup)).collect(Collectors.toList());

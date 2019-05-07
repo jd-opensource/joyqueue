@@ -11,6 +11,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.util;
 
 import com.fasterxml.jackson.databind.JavaType;
@@ -24,20 +37,20 @@ import java.util.List;
 
 /**
  * @author wangjin
- * @time  2018-12-03
- * @mail  wangjin18@jd.com
+ * @time 2018-12-03
+ * @mail wangjin18@jd.com
  *
  **/
 public class JSONParser {
-    public final static ObjectMapper mapper = new ObjectMapper();
+    public static final ObjectMapper mapper = new ObjectMapper();
 
-    public static <T> T parse(String content,Class restClass,Class dataClass) throws IOException {
-        JavaType javaType =composite(restClass, dataClass);
+    public static <T> T parse(String content, Class restClass, Class dataClass) throws IOException {
+        JavaType javaType = composite(restClass, dataClass);
         return mapper.readValue(content, javaType);
     }
 
-    public static <T> T parseList(String content,Class restClass,Class dataClass) throws IOException {
-        JavaType javaType =compositeList(restClass, dataClass);
+    public static <T> T parseList(String content, Class restClass, Class dataClass) throws IOException {
+        JavaType javaType = compositeList(restClass, dataClass);
         return mapper.readValue(content, javaType);
     }
 
@@ -46,48 +59,41 @@ public class JSONParser {
      *  composite class a and b to a Java Type
      *
      **/
-    public  static JavaType composite(Class a,Class b ){
+    public static JavaType composite(Class a, Class b) {
         return mapper.getTypeFactory().constructParametricType(a, b);
     }
 
 
     /**
      *
-     *
+     *composite list
      **/
-    private static JavaType compositeList(Class a,Class listClass ){
-        JavaType listType = mapper.getTypeFactory().constructParametricType(List.class,listClass);
-        return mapper.getTypeFactory().constructParametricType(a,listType);
+    private static JavaType compositeList(Class a, Class listClass) {
+        JavaType listType = mapper.getTypeFactory().constructParametricType(List.class, listClass);
+        return mapper.getTypeFactory().constructParametricType(a, listType);
     }
-
 
 
     /**
      * @param list true indicate body is a list<dataClass> or
-     * @return  response
+     * @return response
      * @throws ServiceException when response not success
      **/
-    public static <T> RestResponse<T> parse(String content, Class restResponse, Class dataClass, boolean list){
-        RestResponse<T> response=null;
+    public static <T> RestResponse<T> parse(String content, Class restResponse, Class dataClass, boolean list) {
+        RestResponse<T> response = null;
         try {
-            if(list){
-                response=JSONParser.parseList(content, restResponse, dataClass);
-            }else {
+            if (list) {
+                response = JSONParser.parseList(content, restResponse, dataClass);
+            } else {
                 response = JSONParser.parse(content, restResponse, dataClass);
             }
-            if(response.getCode()!= RestResponseCode.SUCCESS.getCode()){
-                throw  new ServiceException(response.getCode(),response.getMessage()) ;
+            if (response.getCode() != RestResponseCode.SUCCESS.getCode()) {
+                throw new ServiceException(response.getCode(), response.getMessage());
             }
-        }catch (IOException e){
-            e.printStackTrace();
+        } catch (IOException e) {
         }
-        return  response;
+        return response;
     }
-
-
-
-
-
 
 
 }

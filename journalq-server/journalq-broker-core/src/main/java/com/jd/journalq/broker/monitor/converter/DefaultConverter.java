@@ -2,6 +2,19 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
  * <p>
@@ -14,7 +27,14 @@
 package com.jd.journalq.broker.monitor.converter;
 
 import com.jd.journalq.broker.monitor.PendingStat;
-import com.jd.journalq.broker.monitor.stat.*;
+import com.jd.journalq.broker.monitor.stat.AppStat;
+import com.jd.journalq.broker.monitor.stat.BrokerStat;
+import com.jd.journalq.broker.monitor.stat.BrokerStatExt;
+import com.jd.journalq.broker.monitor.stat.DeQueueStat;
+import com.jd.journalq.broker.monitor.stat.EnQueueStat;
+import com.jd.journalq.broker.monitor.stat.PartitionGroupStat;
+import com.jd.journalq.broker.monitor.stat.TopicPendingStat;
+import com.jd.journalq.broker.monitor.stat.TopicStat;
 import com.jd.journalq.model.MonitorRecord;
 import com.jd.journalq.toolkit.time.SystemClock;
 import org.slf4j.Logger;
@@ -205,10 +225,10 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
 
 
     private void fillRecord(MonitorRecord record, long time) {
-        record.setService("jmq-broker");
+        record.setService("journalq-broker");
         record.setEndpoint("agent.collect");
         record.setCategory("Other");
-        record.setProvider("jmq4");
+        record.setProvider("journalq");
         record.setTimestamp(time);
     }
 
@@ -379,7 +399,10 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
 
             enQueue.topic(tsKey);
 
-            String[] enQueueMetrics = {TOPIC_SLICE_ENQUEUE, TOPIC_SLICE_ENQUEUE_SIZE, TOPIC_SLICE_ENQUEUE_MAX, TOPIC_SLICE_ENQUEUE_AVG, TOPIC_SLICE_ENQUEUE_MIN, TOPIC_SLICE_ENQUEUE_TP99, TOPIC_SLICE_ENQUEUE_TP90};
+            String[] enQueueMetrics = {TOPIC_SLICE_ENQUEUE, TOPIC_SLICE_ENQUEUE_SIZE,
+                    TOPIC_SLICE_ENQUEUE_MAX, TOPIC_SLICE_ENQUEUE_AVG,
+                    TOPIC_SLICE_ENQUEUE_MIN, TOPIC_SLICE_ENQUEUE_TP99,
+                    TOPIC_SLICE_ENQUEUE_TP90};
 
             List<MonitorRecord> enQueueRecords = buildEmptyRecords(enQueue, enQueueMetrics);
 
@@ -394,7 +417,10 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
                 records.addAll(enQueueRecords);
             }
 
-            String[] deQueueMetrics = {TOPIC_SLICE_DEQUEUE, TOPIC_SLICE_DEQUEUE_SIZE, TOPIC_SLICE_DEQUEUE_MAX, TOPIC_SLICE_DEQUEUE_AVG, TOPIC_SLICE_DEQUEUE_MIN, TOPIC_SLICE_DEQUEUE_TP99, TOPIC_SLICE_DEQUEUE_TP90};
+            String[] deQueueMetrics = {TOPIC_SLICE_DEQUEUE, TOPIC_SLICE_DEQUEUE_SIZE,
+                    TOPIC_SLICE_DEQUEUE_MAX, TOPIC_SLICE_DEQUEUE_AVG,
+                    TOPIC_SLICE_DEQUEUE_MIN, TOPIC_SLICE_DEQUEUE_TP99,
+                    TOPIC_SLICE_DEQUEUE_TP90};
             List<MonitorRecord> deQueueRecords = buildEmptyRecords(enQueue, deQueueMetrics);
 
             if (deQueueRecords != null && deQueueRecords.size() == deQueueMetrics.length) {

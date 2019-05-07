@@ -16,7 +16,7 @@ package com.jd.journalq.client.internal.transport;
 import com.jd.journalq.client.internal.ClientConsts;
 import com.jd.journalq.client.internal.exception.ClientException;
 import com.jd.journalq.client.internal.nameserver.NameServerConfig;
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.command.AddConnection;
 import com.jd.journalq.network.command.AddConnectionAck;
 import com.jd.journalq.network.command.RemoveConnection;
@@ -110,7 +110,7 @@ public class ClientConnectionState {
         } catch (ClientException e) {
             int code = e.getCode();
             String error = e.getMessage();
-            if (code == JMQCode.CN_AUTHENTICATION_ERROR.getCode()) {
+            if (code == JournalqCode.CN_AUTHENTICATION_ERROR.getCode()) {
                 logger.error("client addConnection error, no permission, please check your app and token", error);
                 throw e;
             } else {

@@ -14,7 +14,7 @@
 package com.jd.journalq.client.internal.consumer.domain;
 
 import com.jd.journalq.domain.TopicName;
-import com.jd.journalq.toolkit.lang.Objects;
+import com.google.common.base.Objects;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -46,7 +46,8 @@ public class ConsumeMessage implements Serializable {
 
     }
 
-    public ConsumeMessage(TopicName topic, String app, short partition, long index, String txId, String businessId, String body, byte[] bodyBytes, short flag, byte priority, long startTime, byte source, Map<String, String> attributes) {
+    public ConsumeMessage(TopicName topic, String app, short partition, long index, String txId,
+                          String businessId, String body, byte[] bodyBytes, short flag, byte priority, long startTime, byte source, Map<String, String> attributes) {
         this.topic = topic;
         this.app = app;
         this.partition = partition;

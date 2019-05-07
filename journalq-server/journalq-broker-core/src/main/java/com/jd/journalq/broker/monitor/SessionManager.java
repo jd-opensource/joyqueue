@@ -438,7 +438,7 @@ public class SessionManager extends Service {
     /**
      * 事件类型
      */
-    public static enum SessionEventType {
+    public enum SessionEventType {
         /**
          * 增加连接
          */
@@ -523,6 +523,16 @@ public class SessionManager extends Service {
 
         public void setProducer(Producer producer) {
             this.producer = producer;
+        }
+
+        @Override
+        public String toString() {
+            return "SessionEvent{" +
+                    "type=" + type +
+                    ", connection=" + connection +
+                    ", consumer=" + consumer +
+                    ", producer=" + producer +
+                    '}';
         }
     }
 

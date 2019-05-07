@@ -1,8 +1,6 @@
 <template>
   <div class="table">
-    <d-table
-      class="tablePadding"
-      style="word-wrap:break-word;word-break:break-all;"
+    <d-table class="tablePadding"
       :optional="optional"
       :columns="ColOpData"
       :data="rowData"
@@ -15,6 +13,7 @@
         width="55">
       </d-table-column>
     </d-table>
+    <div class="blank" :style="blankStyle"></div>
     <d-pagination  class="right mr20"
       v-if="showPagination"
       show-total show-sizer show-quickjump
@@ -167,7 +166,7 @@ export default {
               }
             }
 
-            if (btn.isAdmin && !store.getters.isAdmin) { // 登录用户权限控制,admin:1,user:0
+            if (btn.isAdmin && !this.$store.getters.isAdmin) { // 登录用户权限控制,admin:1,user:0
               continue
             }
 
@@ -182,7 +181,12 @@ export default {
               },
               on: {
                 click: () => {
-                  this.$emit(btn.method, params.item, params.index)
+                  // this.$emit(btn.method, params.item, params.index)
+                  if (typeof btn.method === 'function') {
+                    btn.method.call(this, params.item, params.index)
+                  } else {
+                    this.$emit(btn.method, params.item, params.index)
+                  }
                 }
               }
             }, btn.txt))
@@ -198,7 +202,12 @@ export default {
             items.push(h('DDropdownItem', {
               nativeOn: {
                 click: () => {
-                  this.$emit(operate.method, params.item, params.index)
+                  // this.$emit(operate.method, params.item, params.index)
+                  if (typeof operate.method === 'function') {
+                    operate.method.call(this, params.item, params.index)
+                  } else {
+                    this.$emit(operate.method, params.item, params.index)
+                  }
                 }
               }
             }, operate.txt))
@@ -235,6 +244,14 @@ export default {
         }
       })
       return colOpData
+    },
+    blankStyle() {
+      if (!this.data.operates || this.data.operates===[]) {
+        return { 'margin-top': `20px` }
+      } else {
+        let height = 20* this.data.operates.length
+        return { 'margin-top': `${height}px` }
+      }
     }
   },
   methods: {
@@ -273,12 +290,20 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
   .table{
     position: relative;
     padding-bottom: 30px;
+
+    & .tablePadding{
+      padding:20px;
+      word-wrap:break-word;
+      word-break:break-all
+    }
+    & .blank{
+      display: block;
+    }
   }
-  .tablePadding{
-    padding:20px;
-  }
+
+
 </style>

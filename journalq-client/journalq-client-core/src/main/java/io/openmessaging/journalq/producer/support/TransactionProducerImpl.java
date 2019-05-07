@@ -17,7 +17,7 @@ import com.google.common.collect.Sets;
 import com.jd.journalq.client.internal.MessageAccessPoint;
 import com.jd.journalq.client.internal.producer.MessageProducer;
 import com.jd.journalq.client.internal.producer.feedback.config.TxFeedbackConfig;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import io.openmessaging.Future;
 import io.openmessaging.ServiceLifeState;
 import io.openmessaging.extension.Extension;

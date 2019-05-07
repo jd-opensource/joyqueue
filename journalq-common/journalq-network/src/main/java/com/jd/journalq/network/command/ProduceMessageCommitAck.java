@@ -13,7 +13,7 @@
  */
 package com.jd.journalq.network.command;
 
-import com.jd.journalq.exception.JMQCode;
+import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.transport.command.JMQPayload;
 
 /**
@@ -24,26 +24,26 @@ import com.jd.journalq.network.transport.command.JMQPayload;
  */
 public class ProduceMessageCommitAck extends JMQPayload {
 
-    private JMQCode code;
+    private JournalqCode code;
 
     public ProduceMessageCommitAck() {
 
     }
 
-    public ProduceMessageCommitAck(JMQCode code) {
+    public ProduceMessageCommitAck(JournalqCode code) {
         this.code = code;
     }
 
     @Override
     public int type() {
-        return JMQCommandType.PRODUCE_MESSAGE_COMMIT_ACK.getCode();
+        return JournalqCommandType.PRODUCE_MESSAGE_COMMIT_ACK.getCode();
     }
 
-    public void setCode(JMQCode code) {
+    public void setCode(JournalqCode code) {
         this.code = code;
     }
 
-    public JMQCode getCode() {
+    public JournalqCode getCode() {
         return code;
     }
 }

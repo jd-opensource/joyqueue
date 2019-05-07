@@ -17,7 +17,7 @@ import com.google.common.collect.Lists;
 import com.jd.journalq.client.internal.producer.MessageProducer;
 import com.jd.journalq.client.internal.producer.TransactionMessageProducer;
 import com.jd.journalq.client.internal.producer.domain.ProduceMessage;
-import com.jd.journalq.toolkit.lang.Preconditions;
+import com.google.common.base.Preconditions;
 import io.openmessaging.journalq.config.ExceptionConverter;
 import io.openmessaging.journalq.producer.ExtensionTransactionalResult;
 import io.openmessaging.journalq.producer.message.MessageAdapter;

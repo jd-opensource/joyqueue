@@ -25,16 +25,38 @@ import com.jd.journalq.manage.PartitionGroupMetric;
 import com.jd.journalq.manage.PartitionGroupPosition;
 import com.jd.journalq.manage.PartitionMetric;
 import com.jd.journalq.manage.PartitionPosition;
-import com.jd.journalq.model.domain.*;
-import com.jd.journalq.monitor.*;
+import com.jd.journalq.model.domain.Broker;
+import com.jd.journalq.model.domain.BrokerClient;
+import com.jd.journalq.model.domain.BrokerMonitorRecord;
+import com.jd.journalq.model.domain.ConnectionMonitorInfoWithIp;
+import com.jd.journalq.model.domain.Subscribe;
+import com.jd.journalq.model.domain.SubscribeType;
+import com.jd.journalq.model.domain.TopicPartitionGroup;
+import com.jd.journalq.monitor.ArchiveMonitorInfo;
 import com.jd.journalq.monitor.Client;
+import com.jd.journalq.monitor.ConnectionMonitorDetailInfo;
+import com.jd.journalq.monitor.ConnectionMonitorInfo;
+import com.jd.journalq.monitor.ConsumerMonitorInfo;
+import com.jd.journalq.monitor.ConsumerPartitionGroupMonitorInfo;
+import com.jd.journalq.monitor.ConsumerPartitionMonitorInfo;
+import com.jd.journalq.monitor.DeQueueMonitorInfo;
+import com.jd.journalq.monitor.EnQueueMonitorInfo;
+import com.jd.journalq.monitor.PartitionGroupMonitorInfo;
+import com.jd.journalq.monitor.PendingMonitorInfo;
+import com.jd.journalq.monitor.ProducerMonitorInfo;
+import com.jd.journalq.monitor.ProducerPartitionGroupMonitorInfo;
+import com.jd.journalq.monitor.ProducerPartitionMonitorInfo;
+import com.jd.journalq.monitor.RestResponse;
+import com.jd.journalq.monitor.RetryMonitorInfo;
 import com.jd.journalq.other.HttpRestService;
 import com.jd.journalq.service.BrokerMonitorService;
 import com.jd.journalq.service.BrokerRestUrlMappingService;
 import com.jd.journalq.service.LeaderService;
 import com.jd.journalq.service.TopicPartitionGroupService;
-import com.jd.journalq.toolkit.lang.Preconditions;
-import com.jd.journalq.util.*;
+import com.google.common.base.Preconditions;
+import com.jd.journalq.util.HttpUtil;
+import com.jd.journalq.util.NullUtil;
+import com.jd.journalq.util.UrlEncoderUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.AopContext;
@@ -42,7 +64,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -54,7 +82,7 @@ import static com.jd.journalq.util.JSONParser.parse;
 @Service("brokerMonitorService")
 public class BrokerMonitorServiceImpl implements BrokerMonitorService {
     private Logger logger= LoggerFactory.getLogger(BrokerMonitorServiceImpl.class);
-    private final static long TIMEOUT=60000;
+    private static final long TIMEOUT=60000;
 
     @Resource(type = BrokerMonitorClusterQuery.class)
     private BrokerClusterQuery<Subscribe> brokerCluster;
@@ -469,7 +497,7 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
     }
 
     /**
-     * jmq client producer may not have enquence
+     * journalq client producer may not have enquence
      *
      **/
     @Override

@@ -29,7 +29,7 @@ public class AddProducerAck extends JMQPayload {
 
     @Override
     public int type() {
-        return JMQCommandType.ADD_PRODUCER_ACK.getCode();
+        return JournalqCommandType.ADD_PRODUCER_ACK.getCode();
     }
 
     public void setProducerIds(Map<String, String> producerIds) {
