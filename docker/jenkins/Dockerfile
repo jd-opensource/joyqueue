@@ -29,7 +29,7 @@ RUN java -version && ls -l /usr/bin/java
 ARG ver=3.5
 
 RUN apt-get update && apt-get install -y \
-    software-properties-common
+    software-properties-common  sshpass
 
 RUN apt-get update \
     && apt-get dist-upgrade -y \

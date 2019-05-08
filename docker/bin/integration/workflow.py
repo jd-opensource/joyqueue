@@ -45,6 +45,7 @@ class Workflow:
         self.ssh_port = config.get_value('Port', 'SSH')
         self.mode = config.get_value('Mode')
         self.pwd = os.path.dirname(__file__)
+        self.mq_tag = str(time.time()).replace('.', '_')
         self.running_mq_containers = {}
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.DEBUG)
@@ -226,7 +227,6 @@ class Workflow:
                 error_code=FAILED_TO_PREPARE_MQ_DOCKER)
 
     def __start_mq_cluster_workers(self):
-        self.mq_tag = str(time.time()).replace('.', '_')
         # local can't be one of worker
         for h in self.workspace.cluster_hosts:
             self.__invoke_mq_worker(h)
@@ -310,7 +310,7 @@ class Workflow:
                 else
                     echo '{mq_home} is clean'  
                 fi
-                docker run --network host --name {tag} -v {mq_home}:{mq_home} -p 50088:50088 -p 50089:50089 -p 50090:50090 -p 50091:50091 -d {mq_docker_namespace}/{mq_docker_name} bin/startmq_docker.sh
+                docker run --network host --name {tag} --label cluster={tag} -v {mq_home}:{mq_home} -p 50088:50088 -p 50089:50089 -p 50090:50090 -p 50091:50091 -d {mq_docker_namespace}/{mq_docker_name} bin/startmq_docker.sh
         """.format(mq_home=self.task.mq_home,
                    mq_docker_namespace=self.task.mq_docker_namespace,
                    mq_docker_name=self.task.mq_repo_name,
@@ -324,20 +324,22 @@ class Workflow:
     def __shutdown_and_cleanup_remote_mq_worker(self, host):
         script = self.__shutdown_cleanup_mq_worker_script()
         code, outs, _ = self.__run_remote_script(host, script)
+        MAX = 5
         if code != 0:
             self.logger.error("failed to stop {} mq worker".format(host))
 
     def __shutdown_cleanup_mq_worker_script(self):
         script = """
-                docker system prune -f 
                 containerId=$(docker ps -a|grep {docker_namespace}/{repo_name}|grep {tag}|awk '{{print $1}}')
                 if [[ -z $containerId ]]; then
                     echo 'docker container {repo_name} no exist'
                 else
-                    echo "{repo_name} container:"
-                    echo $containerId
+                    echo "{repo_name} container:$containerId"
                     docker stop $containerId
-                    docker rm -f  $containerId
+                    docker rm -f $containerId
+                    echo 'try again'
+                    docker stop $containerId
+                    docker rm -f $containerId
                 fi
                 imageId=$(docker images |grep {repo_name}|awk '{{print $3}}'|uniq)
                 if [[ -z $imageId ]]; then
