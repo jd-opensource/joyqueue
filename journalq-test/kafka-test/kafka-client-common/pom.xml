@@ -20,7 +20,7 @@
     <parent>
         <artifactId>kafka-test</artifactId>
         <groupId>com.jd.journalq</groupId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
