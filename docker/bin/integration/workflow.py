@@ -205,7 +205,7 @@ class Workflow:
                                            self.task.mq_docker_namespace, self.task.mq_repo_name, 'latest')
 
     def __local_scp(self, file, remote, target_dir):
-        passwd = self.__cat_password(self.ssh_passwd_file)
+        passwd = self.__parse_password(self.ssh_passwd_file)
         ssh_pass = """ sshpass -p {}""".format(passwd).rstrip()
         scp = """ scp -P {} {} {}@{}:{} """.format(self.ssh_port,file, self.ssh_user, remote, target_dir)
         if passwd is not None:
