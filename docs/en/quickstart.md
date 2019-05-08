@@ -104,7 +104,7 @@ success
 <dependency>
     <groupId>com.jd.journalq</groupId>
     <artifactId>journalq-client-core</artifactId>
-    <version>4.0.0-SNAPSHOT</version>
+    <version>4.0.1</version>
 </dependency>
 ```
 
@@ -182,7 +182,7 @@ public static void main(String[] args) throws Exception {
 <dependency>
     <groupId>com.jd.journalq</groupId>
     <artifactId>journalq-client-core</artifactId>
-    <version>4.0.0-SNAPSHOT</version>
+    <version>4.0.1</version>
 </dependency>
 <dependency>
     <groupId>io.openmessaging</groupId>
@@ -235,7 +235,7 @@ Once the topic you have subscribe has new arriving messages,you consumer which c
 <dependency>
     <groupId>com.jd.journalq</groupId>
     <artifactId>journalq-client-core</artifactId>
-    <version>4.0.0-SNAPSHOT</version>
+    <version>4.0.1</version>
 </dependency>
 <dependency>
    <groupId>io.openmessaging</groupId>

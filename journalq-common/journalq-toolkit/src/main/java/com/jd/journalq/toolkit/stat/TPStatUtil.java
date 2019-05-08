@@ -86,19 +86,16 @@ public class TPStatUtil {
         double tp90 = tempArr[(int) (count * 0.90d)]; // tp90
 
         StringBuilder report = new StringBuilder();
-        report.append(System.getProperty("line.separator"));
-        report.append("----------------------------------");
-        report.append(System.getProperty("line.separator"));
         report.append("statType:" + monitorKey);
-        report.append(System.getProperty("line.separator"));
+        report.append(", ");
         report.append("avg:" + average);
-        report.append(System.getProperty("line.separator"));
+        report.append(", ");
         report.append("count:" + count);
-        report.append(System.getProperty("line.separator"));
+        report.append(", ");
         report.append("max:" + max);
-        report.append(System.getProperty("line.separator"));
+        report.append(", ");
         report.append("tp99:" + tp99);
-        report.append(System.getProperty("line.separator"));
+        report.append(", ");
         report.append("tp90:" + tp90);
 
         logger.info(report.toString());

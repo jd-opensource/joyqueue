@@ -20,7 +20,7 @@
     <parent>
         <artifactId>journalq</artifactId>
         <groupId>com.jd.journalq</groupId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -36,7 +36,7 @@
 
     <properties>
         <openmessaging-api.version>1.0.0-alpha</openmessaging-api.version>
-        <journalq-client.version>4.0.0-SNAPSHOT</journalq-client.version>
+        <journalq-client.version>4.0.1</journalq-client.version>
     </properties>
 
     <dependencyManagement>

@@ -27,7 +27,7 @@
             <if test="updateTime != null">update_time = #{updateTime},</if>
             <if test="status != null">status = #{status},</if>
         </set>
-        WHERE id = #{id} AND status > 0
+        WHERE id = #{id}
     </update>
 
     <update id="updateGroupByGroupId" parameterType="BrokerGroupRelated">

@@ -37,6 +37,7 @@ import Loading from './loading'
 import Switch from './switch'
 import Spin from './spin'
 import Notification from './notification'
+import Tag from './tag'
 
 const components = [
   Row,
@@ -82,7 +83,8 @@ const components = [
   Loading,
   Switch,
   Spin,
-  Notification
+  Notification,
+  Tag
 ]
 
 const install = function (Vue, opts = {}) {
@@ -163,5 +165,6 @@ export default {
   Loading,
   Switch,
   Spin,
-  Notification
+  Notification,
+  Tag
 }

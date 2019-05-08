@@ -4,17 +4,6 @@
       <d-breadcrumb-item :to="{ name: `/${$i18n.locale}/setting/brokerGroup` }">分组管理</d-breadcrumb-item>
       <d-breadcrumb-item>{{brokerGroup.name}}</d-breadcrumb-item>
     </d-breadcrumb>
-    <!--<div  class="el-breadcrumb mb20">
-      <span class="el-breadcrumb__item">
-        <span role="link" class="el-breadcrumb__inner is-link" @click="gotoList">
-          分组管理
-        </span>
-        <icon name="chevron-right" class="el-breadcrumb__separator"></icon>
-      </span>
-      <span class="el-breadcrumb__item" aria-current="page">
-          <span role="link" class="el-breadcrumb__inner">{{brokerGroup.name}}</span>
-      </span>
-    </div>-->
     <div class="detail mb20">
       <div class="title">{{brokerGroup.name}}</div>
       <grid-row :gutter="16">
@@ -34,7 +23,8 @@
     </div>
     <d-tabs>
       <d-tab-pane label="Broker" name="name2" icon="file-text">
-      <broker-tab></broker-tab>
+      <broker ref="broker" :searchData="brokerSearchData" :urls="brokerUrls" :colData="brokerColData"
+              :btns="brokerBtns"></broker>
       </d-tab-pane>
     </d-tabs>
   </div>
@@ -42,12 +32,13 @@
 
 <script>
 import crud from '../../mixins/crud.js'
-import BrokerTab from './brokerTab.vue'
+import apiRequest from '../../utils/apiRequest.js'
+import Broker from './broker.vue'
 
 export default {
   name: 'brokerGroupDetail',
   components: {
-    BrokerTab
+    Broker
   },
   mixins: [ crud ],
   data () {
@@ -56,7 +47,63 @@ export default {
         id: 0,
         code: '',
         name: ''
-      }
+      },
+      brokerSearchData: {
+        brokerGroupId: this.$route.query.id,
+        keyword: ''
+      },
+      brokerUrls: {
+        search: `/broker/search`,
+        removeBroker: `/brokerGroup/updateBroker`
+      },
+      brokerBtns: [
+        {
+          txt: '移除',
+          method: function (item) {
+            let that = this.$parent
+            that.$Dialog.confirm({
+              title: '提示',
+              content: '确定要移除吗？'
+            }).then(() => {
+              let editData = {
+                id: item.id,
+                group: {
+                  id: -1
+                }
+              }
+              apiRequest.put(that.urls.removeBroker + '/' + item.id, {}, editData).then((data) => {
+                that.getList()
+              })
+            })
+          }
+        }
+      ],
+      brokerColData: [
+        {
+          title: 'ID',
+          key: 'id'
+        },
+        {
+          title: 'IP',
+          key: 'ip'
+        },
+        {
+          title: '端口',
+          key: 'port'
+        },
+        {
+          title: '数据中心',
+          key: 'dataCenter.id'
+        },
+        {
+          title: '重试方式',
+          key: 'retryType'
+        },
+        {
+          title: '描述',
+          key: 'description'
+        }
+      ]
     }
   },
   methods: {
