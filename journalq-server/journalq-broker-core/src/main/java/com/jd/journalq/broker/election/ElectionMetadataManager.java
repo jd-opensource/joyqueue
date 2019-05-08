@@ -274,17 +274,19 @@ public class ElectionMetadataManager {
 
         Map<TopicName, TopicConfig> topicConfigs = clusterManager.getNameService().getTopicConfigByBroker(clusterManager.getBrokerId());
         for (TopicConfig topicConfig : topicConfigs.values()) {
-            topicConfig.getPartitionGroups().values().forEach((pg) -> {
-                try {
-                    ElectionMetadata metadata = generateMetadataFromPartitionGroup(topicConfig.getName().getFullName(),
-                            pg, clusterManager.getBrokerId());
-                    updateElectionMetadata(new TopicPartitionGroup(topicConfig.getName().getFullName(),
-                            pg.getGroup()), metadata);
-                } catch (Exception e) {
-                    logger.info("Sync election metadata of topic {} pg {} from name service fail",
-                            pg.getTopic(), pg.getGroup(), e);
-                }
-            });
+            topicConfig.getPartitionGroups().values().stream()
+                    .filter((pg) -> pg.getReplicas().contains(clusterManager.getBrokerId()))
+                    .forEach((pg) -> {
+                        try {
+                            ElectionMetadata metadata = generateMetadataFromPartitionGroup(topicConfig.getName().getFullName(),
+                                    pg, clusterManager.getBrokerId());
+                            updateElectionMetadata(new TopicPartitionGroup(topicConfig.getName().getFullName(),
+                                    pg.getGroup()), metadata);
+                        } catch (Exception e) {
+                            logger.info("Sync election metadata of topic {} pg {} from name service fail",
+                                    pg.getTopic(), pg.getGroup(), e);
+                        }
+                    });
         }
     }
 
