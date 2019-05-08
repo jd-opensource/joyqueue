@@ -29,7 +29,7 @@ pipeline {
                         dir('docker/bin'){
                             sh ' pwd && ls -l && git branch '
                             updateGitlabCommitStatus name: 'build', state: 'running'
-                            sh './integrate_test.sh'
+                            sh './integrate_test.sh -s /home -b $(pwd)/integration/benchmark'
                         }
                     }
         }

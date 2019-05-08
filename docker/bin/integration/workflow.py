@@ -35,9 +35,10 @@ ONLINE_MODE = 'online'
 
 class Workflow:
 
-    def __init__(self, config, result_dir):
+    def __init__(self, config):
         self.config = config
-        self.result_dir = result_dir
+        self.score_dir = config.get_argv().score_file
+        self.benchmark_config = config.get_argv().benchmark_config
         self.task = Task(config)
         self.workspace = Workspace(config)
         self.ssh_user = config.get_value('User', 'SSH')
@@ -84,10 +85,10 @@ class Workflow:
 
     def __save_result(self, result):
         try:
-            path = Path(self.result_dir)
+            path = Path(self.score_dir)
             if not path.exists():
                 path.mkdir(parents=True)
-            filename = '{}/{}'.format(self.result_dir, self.workspace.result_file)
+            filename = '{}/{}'.format(self.score_dir, self.workspace.result_file)
             fh = open(filename, mode='w')
             fh.write(str(result))
         except IOError:
@@ -110,14 +111,32 @@ class Workflow:
             git clone {repo}
             cd {repo_name}
             git checkout journalq_b
+            if [[ "$(ls -A {benchmark})" ]]; then 
+                cp -r {benchmark}/* ./
+            else
+                echo 'use default benchmark config'
+            fi
             mvn -P docker install 
-        """.format(home=self.workspace.home, repo=self.task.pressure_repo,
-                   repo_name=self.task.pressure_repo_name).rstrip()
+        """.format(home=self.workspace.home,
+                   repo=self.task.pressure_repo,
+                   repo_name=self.task.pressure_repo_name,
+                   benchmark=self.benchmark_config).rstrip()
         code, outs, _ = self.__run_local_script(script)
         if code != 0:
             raise WorkflowError(
                 'Failed to prepare pressure docker {}'.format(self.task.pressure_repo),
                 error_code=FAILED_TO_PREPARE_PRESSURE)
+
+    def __config_pressure_worker(self):
+        if self.benchmark_config is not None:
+            script = """
+            if [[ "$(ls -A {benchmark})" ]]; then 
+                scp 
+            else
+                echo 'use default benchmark config'
+            fi      
+        """.format(benchmark=self.benchmark_config, repo=self.task.pressure_repo,
+                   repo_name=self.task.pressure_repo_name).rstrip()
 
     def __start_pressure_worker(self, driver_name='journalq'):
         script = """

@@ -29,18 +29,33 @@
 # limitations under the License.
 #
 import os
-import sys
+import argparse
 from workflow import Workflow
 from configuration import Configuration
 
 
 def bootstrap():
-    result_path = sys.argv
     config_file = os.path.dirname(__file__)+'/bootstrap.conf'
-    configuration = Configuration(config_file)
+    argv = init_config()
+    configuration = Configuration(config_file, argv)
     # configuration.set_value('ResultDir', result_path[1])
-    workflow = Workflow(configuration,result_path[1])
+    workflow = Workflow(configuration)
     workflow.run()
+
+
+def init_config():
+    parser = argparse.ArgumentParser(
+        description='Fetch journalq benchmark ,then deploy and run.')
+    parser.add_argument(
+        '-s',
+        '--score_file',
+        help='score file result path',
+        default='./')
+    parser.add_argument(
+        '-b',
+        '--benchmark_config',
+        help='benchmark config file root path')
+    return parser.parse_args()
 
 
 if __name__ == '__main__':
