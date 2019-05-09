@@ -16,7 +16,7 @@ pipeline {
     agent any
      environment {
             integrate_result_home = "/home"
-            integrate_result=""
+            integrate_result=" "
         }
     stages {
         stage('Test') {
@@ -31,9 +31,8 @@ pipeline {
                 dir('docker/bin'){
                     sh ' pwd && git branch '
                     updateGitlabCommitStatus name: 'build', state: 'running'
-                   //  sh './integrate_test.sh -s ${integrate_result_home} -b $(pwd)/integration/benchmark'
+                    // sh './integrate_test.sh -s ${integrate_result_home} -b $(pwd)/integration/benchmark'
                 }
-                echo "${env.integrate_result_home}"
                 script{
                     def json_file = "${env.integrate_result_home}/score.json"
                     def exists = fileExists json_file
