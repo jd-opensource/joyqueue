@@ -86,7 +86,7 @@ public class GroupOffsetManager extends Service {
     public Table<String, Integer, OffsetMetadataAndError> getOffsets(String groupId, HashMultimap<String /** topic **/, Integer /** partition **/> topicAndPartitions) {
         Table<Broker, String, Set<Integer>> brokerTopicPartitionTable = splitPartitionByBroker(topicAndPartitions);
         Table<String, Integer, OffsetMetadataAndError> result = HashBasedTable.create();
-        CountDownLatch latch = new CountDownLatch(brokerTopicPartitionTable.size());
+        CountDownLatch latch = new CountDownLatch(brokerTopicPartitionTable.rowKeySet().size());
 
         for (String topic : topicAndPartitions.keys()) {
             for (int partition : topicAndPartitions.get(topic)) {
@@ -173,7 +173,7 @@ public class GroupOffsetManager extends Service {
     public Table<String, Integer, OffsetMetadataAndError> saveOffsets(String groupId, Table<String /** topic **/, Integer /** partition **/, OffsetAndMetadata> offsetAndMetadataTable) {
         Table<Broker, String, Set<Integer>> brokerTopicPartitionTable = splitPartitionByBroker(offsetAndMetadataTable);
         Table<String, Integer, OffsetMetadataAndError> result = HashBasedTable.create();
-        CountDownLatch latch = new CountDownLatch(brokerTopicPartitionTable.size());
+        CountDownLatch latch = new CountDownLatch(brokerTopicPartitionTable.rowKeySet().size());
 
         for (String topic : offsetAndMetadataTable.rowKeySet()) {
             for (Map.Entry<Integer, OffsetAndMetadata> partitionEntry : offsetAndMetadataTable.row(topic).entrySet()) {
