@@ -185,13 +185,12 @@ public class RaftLeaderElection extends LeaderElection  {
      * 每次重新选举或者成员变更时执行
      */
     private void updateElectionMetadata() {
-        try {
-            ElectionMetadata metadata = ElectionMetadata.Build.create(electionConfig.getMetadataPath(), topicPartitionGroup)
-                    .electionType(PartitionGroup.ElectType.raft)
-                    .allNodes(getAllNodes()).learners(getLearners()).leaderId(leaderId)
-                    .localNode(localNodeId).currentTerm(currentTerm).votedFor(votedFor)
-                    .build();
-            logger.info("Partition group {}/node {} update metadata {}",
+        try (ElectionMetadata metadata = ElectionMetadata.Build.create(electionConfig.getMetadataPath(), topicPartitionGroup)
+                .electionType(PartitionGroup.ElectType.raft)
+                .allNodes(getAllNodes()).learners(getLearners()).leaderId(leaderId)
+                .localNode(localNodeId).currentTerm(currentTerm).votedFor(votedFor)
+                .build()) {
+            logger.info("Partition group {}/node {} update metadata of {}",
                     topicPartitionGroup, localNode, metadata);
             electionMetadataManager.updateElectionMetadata(topicPartitionGroup, metadata);
         } catch (Exception e) {

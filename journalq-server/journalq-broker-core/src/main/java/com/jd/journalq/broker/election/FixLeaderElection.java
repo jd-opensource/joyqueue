@@ -116,10 +116,9 @@ public class FixLeaderElection extends LeaderElection {
      * 更新选举元数据
      */
     private void updateElectionMetadata() {
-        try {
-            ElectionMetadata metadata = ElectionMetadata.Build.create(electionConfig.getMetadataPath(), topicPartitionGroup)
-                    .electionType(PartitionGroup.ElectType.fix)
-                    .allNodes(allNodes).leaderId(leaderId).localNode(localNodeId).build();
+        try (ElectionMetadata metadata = ElectionMetadata.Build.create(electionConfig.getMetadataPath(), topicPartitionGroup)
+                .electionType(PartitionGroup.ElectType.fix)
+                .allNodes(allNodes).leaderId(leaderId).localNode(localNodeId).build()) {
             electionMetadataManager.updateElectionMetadata(topicPartitionGroup, metadata);
         } catch (Exception e) {
             logger.warn("Partition group {}/node {} update election metadata fail",
