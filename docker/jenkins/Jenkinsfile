@@ -32,17 +32,13 @@ pipeline {
                     updateGitlabCommitStatus name: 'build', state: 'running'
                    //  sh './integrate_test.sh -s ${integrate_result_home} -b $(pwd)/integration/benchmark'
                 }
-                sh 'printenv'
                 echo "${env.integrate_result_home}"
                 script{
-                    sh 'printenv'
                     def json_file = "${env.integrate_result_home}/score.json"
                     def exists = fileExists json_file
                     def integrate_result=""
                     if(exists){
                         integrate_result = readFile json_file
-                        echo ${integrate_result}
-                        echo ${json_file}
                         sh 'rm ${json_file}'
                     }else {
                         echo 'score file not exist'
