@@ -16,7 +16,6 @@ pipeline {
     agent any
      environment {
             integrate_result_home = "/home"
-            integrate_result=""
         }
     stages {
         stage('Test') {
@@ -34,10 +33,12 @@ pipeline {
                    //  sh './integrate_test.sh -s ${integrate_result_home} -b $(pwd)/integration/benchmark'
                 }
                 script {
+                        echo $integrate_result_home
                         def json_file = "${integrate_result_home}/score.json"
                         def exists = fileExists json_file
+                        def integrate_result=""
                         if(exists){
-                            env.integrate_result = readFile json_file
+                            integrate_result = readFile json_file
                             echo ${integrate_result}
                             echo ${json_file}
                             sh 'rm ${json_file}'
@@ -45,7 +46,7 @@ pipeline {
                             echo 'score file not exist'
                          }
                         def resultIcon = currentBuild.result == 'SUCCESS' ? ':white_check_mark:' : ':anguished:'
-                        addGitLabMRComment comment: "$resultIcon Jenkins Build $currentBuild.result\n\nResults available at: [Jenkins [$env.JOB_NAME#$env.BUILD_NUMBER]]($env.BUILD_URL) \n ${env.integrate_result}"
+                        addGitLabMRComment comment: "$resultIcon Jenkins Build $currentBuild.result\n\nResults available at: [Jenkins [$env.JOB_NAME#$env.BUILD_NUMBER]]($env.BUILD_URL) \n ${integrate_result}"
 
                        }
             }
