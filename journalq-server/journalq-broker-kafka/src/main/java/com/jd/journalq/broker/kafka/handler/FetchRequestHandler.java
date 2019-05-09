@@ -131,7 +131,8 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
         Command response = new Command(fetchResponse);
 
         // 如果当前拉取消息量小于最大限制，那么延迟响应
-        if (maxBytes > currentBytes && fetchRequest.getMaxWait() > 0) {
+        if (fetchRequest.getMaxWait() > currentBytes && fetchRequest.getMaxWait() > 0) {
+//        if (fetchRequest.getMinBytes() > currentBytes && fetchRequest.getMaxWait() > 0) {
             waitPurgatory.tryCompleteElseWatch(new AbstractDelayedOperation(fetchRequest.getMaxWait()) {
                 @Override
                 protected void onComplete() {

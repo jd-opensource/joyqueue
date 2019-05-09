@@ -16,9 +16,13 @@ package com.jd.journalq.broker.kafka.session;
 import com.jd.journalq.broker.kafka.command.FetchRequest;
 import com.jd.journalq.broker.kafka.command.FindCoordinatorRequest;
 import com.jd.journalq.broker.kafka.command.ProduceRequest;
+import com.jd.journalq.broker.kafka.command.TopicMetadataRequest;
 import com.jd.journalq.network.transport.ChannelTransport;
+import com.jd.journalq.network.transport.RequestBarrier;
 import com.jd.journalq.network.transport.TransportHelper;
 import com.jd.journalq.network.transport.command.Command;
+import com.jd.journalq.network.transport.command.support.DefaultCommandDispatcher;
+import com.jd.journalq.network.transport.handler.CommandInvocation;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
@@ -55,7 +59,6 @@ public class KafkaConnectionHandler extends ChannelDuplexHandler {
     }
 
     protected void connectionStatistic(ChannelHandlerContext ctx, Command command) {
-        KafkaConnectionManager kafkaConnectionManager = this.kafkaConnectionManager;
         Channel channel = ctx.channel();
         Object payload = command.getPayload();
         ChannelTransport transport = TransportHelper.getTransport(channel);

@@ -130,10 +130,7 @@ public class FetchCodec implements KafkaPayloadCodec<FetchResponse>, Type {
                 KafkaMessageSerializer.writeMessages(buffer, partitionResponse.getMessages(), payload.getVersion());
 
                 int length = buffer.writerIndex() - startIndex - 4;
-                buffer.markWriterIndex();
-                buffer.writerIndex(startIndex);
-                buffer.writeInt(length);
-                buffer.resetWriterIndex();
+                buffer.setInt(startIndex, length);
             }
         }
     }

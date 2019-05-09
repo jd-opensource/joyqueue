@@ -147,10 +147,10 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
         try {
             boolean isDone = latch.await(produceRequest.getAckTimeoutMs(), TimeUnit.MILLISECONDS);
             if (!isDone) {
-                logger.warn("wait produce timeout, transport: {}", transport.remoteAddress());
+                logger.warn("wait produce timeout, transport: {}, app: {}, topics: {}", transport.remoteAddress(), clientId, produceRequest.getPartitionRequests().keySet());
             }
         } catch (InterruptedException e) {
-            logger.error("wait produce exception, transport: {}", transport.remoteAddress(), e);
+            logger.error("wait produce exception, transport: {}, app: {}, topics: {}", transport.remoteAddress(), clientId, produceRequest.getPartitionRequests().keySet(), e);
         }
 
         ProduceResponse response = new ProduceResponse(partitionResponseMap);

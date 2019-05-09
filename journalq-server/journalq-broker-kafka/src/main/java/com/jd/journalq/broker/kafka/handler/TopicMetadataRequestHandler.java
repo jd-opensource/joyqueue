@@ -60,9 +60,16 @@ public class TopicMetadataRequestHandler extends AbstractKafkaCommandHandler imp
     @Override
     public Command handle(Transport transport, Command command) {
         TopicMetadataRequest topicMetadataRequest = (TopicMetadataRequest) command.getPayload();
-        Map<String, TopicConfig> topicConfigs = getTopicConfigs(topicMetadataRequest.getTopics());
-        List<KafkaBroker> brokers = getTopicBrokers(topicConfigs);
-        List<KafkaTopicMetadata> topicMetadata = getTopicMetadata(topicMetadataRequest.getTopics(), topicConfigs);
+        List<KafkaBroker> brokers = null;
+        List<KafkaTopicMetadata> topicMetadata = null;
+
+        if (CollectionUtils.isEmpty(topicMetadataRequest.getTopics())) {
+            brokers = convertBroker(nameService.getAllBrokers());
+        } else {
+            Map<String, TopicConfig> topicConfigs = getTopicConfigs(topicMetadataRequest.getTopics());
+            brokers = getTopicBrokers(topicConfigs);
+            topicMetadata = getTopicMetadata(topicMetadataRequest.getTopics(), topicConfigs);
+        }
 
         // TODO 临时日志
         if (CollectionUtils.isEmpty(topicMetadata) || logger.isDebugEnabled()) {
@@ -100,6 +107,18 @@ public class TopicMetadataRequestHandler extends AbstractKafkaCommandHandler imp
             }
         }
         return result;
+    }
+
+    protected List<KafkaBroker> convertBroker(List<Broker> brokers) {
+        List<KafkaBroker> result = Lists.newArrayListWithCapacity(brokers.size());
+        for (Broker broker : brokers) {
+            result.add((convertBroker(broker)));
+        }
+        return result;
+    }
+
+    protected KafkaBroker convertBroker(Broker broker) {
+        return new KafkaBroker(broker.getId(), broker.getIp(), broker.getPort());
     }
 
     protected List<KafkaTopicMetadata> getTopicMetadata(List<String> topics, Map<String, TopicConfig> topicConfigs) {

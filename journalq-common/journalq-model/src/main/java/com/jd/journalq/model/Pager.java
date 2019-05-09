@@ -38,9 +38,11 @@ public class Pager<T> implements Serializable {
         this.pageSize = pageSize;
         this.total = total;
         this.data = data;
-        this.pages = total / pageSize;
-        if (total % pageSize != 0) {
-            this.pages++;
+        if (total != 0) {
+            this.pages = total / pageSize;
+            if (total % pageSize != 0) {
+                this.pages++;
+            }
         }
     }
 

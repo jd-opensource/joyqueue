@@ -30,19 +30,19 @@ import io.netty.channel.ChannelHandler;
  */
 public class DefaultProtocolHandlerPipelineFactory implements ProtocolHandlerPipelineFactory {
 
-    private CommandDispatcherFactory commandHandlerFilterFactory;
+    private CommandDispatcherFactory commandDispatcherFactory;
     private TransportEventHandler transportEventHandler;
     private ConnectionHandler connectionHandler;
 
-    public DefaultProtocolHandlerPipelineFactory(CommandDispatcherFactory commandHandlerFilterFactory, TransportEventHandler transportEventHandler, ConnectionHandler connectionHandler) {
-        this.commandHandlerFilterFactory = commandHandlerFilterFactory;
+    public DefaultProtocolHandlerPipelineFactory(CommandDispatcherFactory commandDispatcherFactory, TransportEventHandler transportEventHandler, ConnectionHandler connectionHandler) {
+        this.commandDispatcherFactory = commandDispatcherFactory;
         this.transportEventHandler = transportEventHandler;
         this.connectionHandler = connectionHandler;
     }
 
     @Override
     public ChannelHandler createPipeline(Protocol protocol) {
-        CommandDispatcher commandDispatcher = commandHandlerFilterFactory.getCommandDispatcher(protocol);
+        CommandDispatcher commandDispatcher = commandDispatcherFactory.getCommandDispatcher(protocol);
         ChannelHandler handlerPipeline = new DefaultProtocolHandlerPipeline(protocol, commandDispatcher, transportEventHandler, connectionHandler);
 
         if (protocol instanceof ChannelHandlerProvider) {

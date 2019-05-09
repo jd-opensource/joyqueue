@@ -40,6 +40,7 @@ import com.jd.journalq.broker.kafka.manage.KafkaManageServiceFactory;
 import com.jd.journalq.broker.kafka.network.helper.KafkaProtocolHelper;
 import com.jd.journalq.broker.kafka.session.KafkaConnectionHandler;
 import com.jd.journalq.broker.kafka.session.KafkaConnectionManager;
+import com.jd.journalq.broker.kafka.session.KafkaTransportHandler;
 import com.jd.journalq.broker.kafka.util.RateLimiter;
 import com.jd.journalq.network.protocol.CommandHandlerProvider;
 import com.jd.journalq.network.protocol.ExceptionHandlerProvider;
@@ -89,6 +90,7 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
 
     private KafkaRateLimitHandlerFactory rateLimitHandlerFactory;
     private KafkaConnectionHandler connectionHandler;
+    private KafkaTransportHandler transportHandler;
     private KafkaContext kafkaContext;
 
     @Override
@@ -120,6 +122,7 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
         this.connectionManager = new KafkaConnectionManager(brokerContext.getSessionManager());
         this.rateLimitHandlerFactory = newRateLimitKafkaHandlerFactory(config);
         this.connectionHandler = new KafkaConnectionHandler(connectionManager);
+        this.transportHandler = new KafkaTransportHandler();
 
         this.kafkaContext = new KafkaContext(config, groupCoordinator, transactionCoordinator, transactionIdManager, rateLimitHandlerFactory, brokerContext);
         registerManage(brokerContext, kafkaContext);
@@ -194,6 +197,7 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
             @Override
             protected void initChannel(Channel ch) throws Exception {
                 ch.pipeline()
+                        .addLast(transportHandler)
                         .addLast(connectionHandler)
                         .addLast(channelHandler);
             }

@@ -38,7 +38,10 @@ import org.slf4j.LoggerFactory;
 import java.net.SocketAddress;
 import java.nio.channels.ClosedChannelException;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * 默认通信
@@ -309,9 +312,16 @@ public class DefaultChannelTransport implements ChannelTransport {
             }
         }
 
-        channel.writeAndFlush(response)
-                .addListener(new CallbackListener(request, response, callback))
-                .addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
+        try {
+            channel.writeAndFlush(response)
+                    .addListener(new CallbackListener(request, response, callback))
+                    .addListener(ChannelFutureListener.CLOSE_ON_FAILURE)
+                    .get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

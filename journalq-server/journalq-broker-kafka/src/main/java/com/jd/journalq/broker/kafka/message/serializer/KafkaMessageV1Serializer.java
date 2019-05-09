@@ -109,12 +109,9 @@ public class KafkaMessageV1Serializer extends AbstractKafkaMessageSerializer {
         byte magic = buffer.get();
         byte attribute = buffer.get();
         long timestamp = buffer.getLong();
-        int keyLength = Math.max(buffer.getInt(), 0);
-        int valueLength = Math.max(buffer.getInt(), 0);
+        byte[] key = KafkaBufferUtils.readBytes(buffer);
+        byte[] value = KafkaBufferUtils.readBytes(buffer);
         KafkaCompressionCodec compressionCodec = KafkaCompressionCodec.valueOf(getCompressionCodecType(attribute));
-
-        byte[] body = new byte[keyLength + valueLength];
-        buffer.get(body);
 
         KafkaBrokerMessage message = new KafkaBrokerMessage();
         message.setOffset(offset);
@@ -125,18 +122,10 @@ public class KafkaMessageV1Serializer extends AbstractKafkaMessageSerializer {
         message.setTimestamp(timestamp);
 
         if (compressionCodec.equals(KafkaCompressionCodec.NoCompressionCodec)) {
-            if (keyLength != 0) {
-                byte[] key = new byte[keyLength];
-                System.arraycopy(body, 0, key, 0, keyLength);
-                message.setKey(key);
-            }
-            if (valueLength != 0) {
-                byte[] value = new byte[valueLength];
-                System.arraycopy(body, keyLength, value, 0, valueLength);
-                message.setValue(value);
-            }
+            message.setKey(key);
+            message.setValue(value);
         } else {
-            message.setValue(body);
+            message.setValue(value);
         }
         return message;
     }

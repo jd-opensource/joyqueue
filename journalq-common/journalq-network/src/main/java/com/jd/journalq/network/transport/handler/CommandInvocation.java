@@ -41,4 +41,8 @@ public class CommandInvocation extends SimpleChannelInboundHandler<Command> {
             ctx.fireChannelRead(command);
         }
     }
+
+    public CommandDispatcher getCommandDispatcher() {
+        return commandDispatcher;
+    }
 }
