@@ -14,10 +14,17 @@
 # limitations under the License.
 #
 
-
-echo "integrate begin" $(date "+%Y%m%d-%H%M%S")
 # start to test
 python3 ./integration/bootstrap.py $*
-echo "finish test" $(date "+%Y%m%d-%H%M%S")
-exit 0
+while getopts "s:" opt; do
+  case $opt in
+    s) score=$OPTARG;;
+  esac
+done
+echo $score
+if [[ -f $score/score.json ]];then
+    exit 0
+else
+    exit 1
+fi
 
