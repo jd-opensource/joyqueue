@@ -49,7 +49,7 @@ pipeline {
                     def exists = fileExists json_file
                     if(exists){
                         env.integrate_result = readFile json_file
-                        new File(json_file).delete()
+                        sh 'rm ${json_file}'
                     }else {
                         echo 'score file not exist'
                      }
