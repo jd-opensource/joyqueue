@@ -82,12 +82,13 @@ public class ElectionMetadataManager {
                     });
             for (TopicPartitionGroup topicPartitionGroup : oldMetadataMap.keySet()) {
                 ElectionMetadataOld metadataOld = oldMetadataMap.get(topicPartitionGroup);
-                ElectionMetadata metadata = ElectionMetadata.Build.create(path, topicPartitionGroup)
+                try (ElectionMetadata metadata = ElectionMetadata.Build.create(path, topicPartitionGroup)
                         .allNodes(metadataOld.getAllNodes()).currentTerm(metadataOld.getCurrentTerm())
                         .localNode(metadataOld.getLocalNodeId()).learners(metadataOld.getLearners())
                         .leaderId(metadataOld.getLeaderId()).electionType(metadataOld.getElectType())
-                        .votedFor(metadataOld.getVotedFor()).build();
-                updateElectionMetadata(topicPartitionGroup, metadata);
+                        .votedFor(metadataOld.getVotedFor()).build()) {
+                    updateElectionMetadata(topicPartitionGroup, metadata);
+                }
             }
         }
         boolean ret = file.delete();
@@ -128,8 +129,7 @@ public class ElectionMetadataManager {
                     continue;
                 }
                 TopicPartitionGroup partitionGroup = new TopicPartitionGroup(topic, Integer.valueOf(filePg.getName()));
-                try {
-                    ElectionMetadata metadata = ElectionMetadata.Build.create(this.path, partitionGroup).build();
+                try (ElectionMetadata metadata = ElectionMetadata.Build.create(this.path, partitionGroup).build()) {
                     metadata.recover();
                     metadataMap.put(partitionGroup, metadata);
                 } catch (Exception e) {
@@ -277,9 +277,8 @@ public class ElectionMetadataManager {
             topicConfig.getPartitionGroups().values().stream()
                     .filter((pg) -> pg.getReplicas().contains(clusterManager.getBrokerId()))
                     .forEach((pg) -> {
-                        try {
-                            ElectionMetadata metadata = generateMetadataFromPartitionGroup(topicConfig.getName().getFullName(),
-                                    pg, clusterManager.getBrokerId());
+                        try (ElectionMetadata metadata = generateMetadataFromPartitionGroup(topicConfig.getName().getFullName(),
+                                    pg, clusterManager.getBrokerId())) {
                             updateElectionMetadata(new TopicPartitionGroup(topicConfig.getName().getFullName(),
                                     pg.getGroup()), metadata);
                         } catch (Exception e) {
