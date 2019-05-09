@@ -33,20 +33,21 @@ pipeline {
                    //  sh './integrate_test.sh -s ${integrate_result_home} -b $(pwd)/integration/benchmark'
                 }
                 echo $integrate_result_home
-                def json_file = "${integrate_result_home}/score.json"
-                def exists = fileExists json_file
-                def integrate_result=""
-                if(exists){
-                    integrate_result = readFile json_file
-                    echo ${integrate_result}
-                    echo ${json_file}
-                    sh 'rm ${json_file}'
-                }else {
-                    echo 'score file not exist'
-                 }
-                def resultIcon = currentBuild.result == 'SUCCESS' ? ':white_check_mark:' : ':anguished:'
-                addGitLabMRComment comment: "$resultIcon Jenkins Build $currentBuild.result\n\nResults available at: [Jenkins [$env.JOB_NAME#$env.BUILD_NUMBER]]($env.BUILD_URL) \n ${integrate_result}"
-
+                script{
+                    def json_file = "${integrate_result_home}/score.json"
+                    def exists = fileExists json_file
+                    def integrate_result=""
+                    if(exists){
+                        integrate_result = readFile json_file
+                        echo ${integrate_result}
+                        echo ${json_file}
+                        sh 'rm ${json_file}'
+                    }else {
+                        echo 'score file not exist'
+                     }
+                    def resultIcon = currentBuild.result == 'SUCCESS' ? ':white_check_mark:' : ':anguished:'
+                    addGitLabMRComment comment: "$resultIcon Jenkins Build $currentBuild.result\n\nResults available at: [Jenkins [$env.JOB_NAME#$env.BUILD_NUMBER]]($env.BUILD_URL) \n ${integrate_result}"
+                }
             }
         }
     }
