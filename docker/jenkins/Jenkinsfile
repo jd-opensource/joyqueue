@@ -16,6 +16,7 @@ pipeline {
     agent any
      environment {
             integrate_result_home = "/home"
+            integrate_result=""
         }
     stages {
         stage('Test') {
@@ -36,16 +37,13 @@ pipeline {
                 script{
                     def json_file = "${env.integrate_result_home}/score.json"
                     def exists = fileExists json_file
-                    def integrate_result=""
                     if(exists){
                         echo "${json_file}"
-                        integrate_result = readFile json_file
+                        env.integrate_result = readFile json_file
                         sh "rm ${json_file}"
                     }else {
                         echo 'score file not exist'
                      }
-                    def resultIcon = currentBuild.result == 'SUCCESS' ? ':white_check_mark:' : ':anguished:'
-                    addGitLabMRComment comment: "$resultIcon Jenkins Build $currentBuild.result\n\nResults available at: [Jenkins [$env.JOB_NAME#$env.BUILD_NUMBER]]($env.BUILD_URL) \n ${integrate_result}"
                 }
             }
         }
@@ -59,6 +57,9 @@ pipeline {
             }
             always {
                 script{
+                    echo "${env.integrate_result}"
+                    def resultIcon = currentBuild.result == 'SUCCESS' ? ':white_check_mark:' : ':anguished:'
+                    addGitLabMRComment comment: "$resultIcon Jenkins Build $currentBuild.result\n\nResults available at: [Jenkins [$env.JOB_NAME#$env.BUILD_NUMBER]]($env.BUILD_URL) \n\n $env.integrate_result"
                     echo 'I will always say Hello again!'
                 }
              }
