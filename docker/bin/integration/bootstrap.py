@@ -45,12 +45,12 @@ def bootstrap():
 
 def init_config():
     parser = argparse.ArgumentParser(
-        description='Fetch journalq benchmark ,then deploy and run.')
+        description='Fetch journalq benchmark, then deploy and run.')
     parser.add_argument(
         '-s',
         '--score_file',
         help='score file result path',
-        default='./')
+        required=True)
     parser.add_argument(
         '-b',
         '--benchmark_config',
