@@ -33,10 +33,10 @@ pipeline {
                    //  sh './integrate_test.sh -s ${integrate_result_home} -b $(pwd)/integration/benchmark'
                 }
                 sh 'printenv'
-                echo $integrate_result_home
+                echo ${env.integrate_result_home}
                 script{
                     sh 'printenv'
-                    def json_file = "${integrate_result_home}/score.json"
+                    def json_file = "${env.integrate_result_home}/score.json"
                     def exists = fileExists json_file
                     def integrate_result=""
                     if(exists){
