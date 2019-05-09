@@ -49,7 +49,7 @@ pipeline {
                     def exists = fileExists json_file
                     if(exists){
                         env.integrate_result = readFile json_file
-                        println $env.integrate_result
+                        println ${env.integrate_result}
                         println ${json_file}
                         sh 'rm ${json_file}'
                     }else {
