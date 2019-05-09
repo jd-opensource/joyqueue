@@ -24,7 +24,6 @@ pipeline {
         }
         stage('Integration Test') {
                     steps {
-                        echo 'Integration Test....'
                         dir('docker/bin'){
                             sh ' pwd && git branch '
                             updateGitlabCommitStatus name: 'build', state: 'running'
