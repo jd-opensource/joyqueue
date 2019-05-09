@@ -48,7 +48,7 @@ public class KafkaTransportHandler extends ChannelDuplexHandler {
             TransportHelper.setTransport(channel, transport);
         }
 
-//        ((KafkaChannelTransport) transport).acquire();
+        ((KafkaChannelTransport) transport).acquire();
         super.channelRead(ctx, msg);
     }
 }

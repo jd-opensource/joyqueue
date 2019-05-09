@@ -16,29 +16,36 @@ package com.jd.journalq.broker.kafka.handler;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.jd.journalq.broker.BrokerContext;
 import com.jd.journalq.broker.BrokerContextAware;
 import com.jd.journalq.broker.kafka.KafkaCommandType;
 import com.jd.journalq.broker.kafka.KafkaErrorCode;
 import com.jd.journalq.broker.kafka.command.TopicMetadataRequest;
 import com.jd.journalq.broker.kafka.command.TopicMetadataResponse;
+import com.jd.journalq.broker.kafka.helper.KafkaClientHelper;
 import com.jd.journalq.broker.kafka.model.KafkaBroker;
 import com.jd.journalq.broker.kafka.model.KafkaPartitionMetadata;
 import com.jd.journalq.broker.kafka.model.KafkaTopicMetadata;
 import com.jd.journalq.domain.Broker;
 import com.jd.journalq.domain.Partition;
+import com.jd.journalq.domain.Subscription;
 import com.jd.journalq.domain.TopicConfig;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.network.transport.Transport;
 import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.nsr.NameService;
+import com.jd.journalq.nsr.ignite.model.IgniteBaseModel;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * TopicMetadataRequestHandler
@@ -60,16 +67,17 @@ public class TopicMetadataRequestHandler extends AbstractKafkaCommandHandler imp
     @Override
     public Command handle(Transport transport, Command command) {
         TopicMetadataRequest topicMetadataRequest = (TopicMetadataRequest) command.getPayload();
-        List<KafkaBroker> brokers = null;
-        List<KafkaTopicMetadata> topicMetadata = null;
+        String clientId = KafkaClientHelper.parseClient(topicMetadataRequest.getClientId());
 
-        if (CollectionUtils.isEmpty(topicMetadataRequest.getTopics())) {
-            brokers = convertBroker(nameService.getAllBrokers());
+        Map<String, TopicConfig> topicConfigs = null;
+        if (CollectionUtils.isEmpty(topicMetadataRequest.getTopics()) && StringUtils.isNotBlank(clientId)) {
+            topicConfigs = getAllTopicConfigs(clientId);
         } else {
-            Map<String, TopicConfig> topicConfigs = getTopicConfigs(topicMetadataRequest.getTopics());
-            brokers = getTopicBrokers(topicConfigs);
-            topicMetadata = getTopicMetadata(topicMetadataRequest.getTopics(), topicConfigs);
+            topicConfigs = getTopicConfigs(topicMetadataRequest.getTopics());
         }
+
+        List<KafkaBroker> brokers = getTopicBrokers(topicConfigs);
+        List<KafkaTopicMetadata> topicMetadata = getTopicMetadata(topicMetadataRequest.getTopics(), topicConfigs);
 
         // TODO 临时日志
         if (CollectionUtils.isEmpty(topicMetadata) || logger.isDebugEnabled()) {
@@ -86,6 +94,27 @@ public class TopicMetadataRequestHandler extends AbstractKafkaCommandHandler imp
         return KafkaCommandType.METADATA.getCode();
     }
 
+    protected Map<String, TopicConfig> getAllTopicConfigs(String clientId) {
+        String[] appGroup = clientId.split(IgniteBaseModel.SEPARATOR_SPLIT);
+        Map<TopicName, TopicConfig> consumers = nameService.getTopicConfigByApp(clientId, Subscription.Type.CONSUMPTION);
+        Map<TopicName, TopicConfig> producers = nameService.getTopicConfigByApp(appGroup[0], Subscription.Type.PRODUCTION);
+
+        Map<String, TopicConfig> result = Maps.newHashMap();
+
+        if (MapUtils.isNotEmpty(consumers)) {
+            for (Map.Entry<TopicName, TopicConfig> entry : consumers.entrySet()) {
+                result.put(entry.getKey().getFullName(), entry.getValue());
+            }
+        }
+        if (MapUtils.isNotEmpty(producers)) {
+            for (Map.Entry<TopicName, TopicConfig> entry : producers.entrySet()) {
+                result.put(entry.getKey().getFullName(), entry.getValue());
+            }
+        }
+
+        return result;
+    }
+
     protected Map<String, TopicConfig> getTopicConfigs(List<String> topics) {
         Map<String, TopicConfig> result = Maps.newHashMap();
         for (String topic : topics) {
@@ -98,7 +127,7 @@ public class TopicMetadataRequestHandler extends AbstractKafkaCommandHandler imp
     }
 
     protected List<KafkaBroker> getTopicBrokers(Map<String, TopicConfig> topicConfigs) {
-        List<KafkaBroker> result = Lists.newLinkedList();
+        Set<KafkaBroker> result = Sets.newHashSet();
         for (Map.Entry<String, TopicConfig> topicEntry : topicConfigs.entrySet()) {
             for (Map.Entry<Integer, Broker> entry : topicEntry.getValue().fetchAllBroker().entrySet()) {
                 Broker broker = entry.getValue();
@@ -106,33 +135,30 @@ public class TopicMetadataRequestHandler extends AbstractKafkaCommandHandler imp
                 result.add(kafkaBroker);
             }
         }
-        return result;
-    }
-
-    protected List<KafkaBroker> convertBroker(List<Broker> brokers) {
-        List<KafkaBroker> result = Lists.newArrayListWithCapacity(brokers.size());
-        for (Broker broker : brokers) {
-            result.add((convertBroker(broker)));
-        }
-        return result;
-    }
-
-    protected KafkaBroker convertBroker(Broker broker) {
-        return new KafkaBroker(broker.getId(), broker.getIp(), broker.getPort());
+        return Lists.newArrayList(result);
     }
 
     protected List<KafkaTopicMetadata> getTopicMetadata(List<String> topics, Map<String, TopicConfig> topicConfigs) {
         List<KafkaTopicMetadata> result = Lists.newLinkedList();
-        for (String topic : topics) {
-            TopicConfig topicConfig = topicConfigs.get(topic);
 
-            if (topicConfig != null) {
-                List<KafkaPartitionMetadata> kafkaPartitionMetadata = getPartitionMetadata(topicConfig);
-                KafkaTopicMetadata kafkaTopicMetadata = new KafkaTopicMetadata(topicConfig.getName().getFullName(), kafkaPartitionMetadata, KafkaErrorCode.NONE.getCode());
+        if (CollectionUtils.isEmpty(topics)) {
+            for (Map.Entry<String, TopicConfig> entry : topicConfigs.entrySet()) {
+                List<KafkaPartitionMetadata> kafkaPartitionMetadata = getPartitionMetadata(entry.getValue());
+                KafkaTopicMetadata kafkaTopicMetadata = new KafkaTopicMetadata(entry.getKey(), kafkaPartitionMetadata, KafkaErrorCode.NONE.getCode());
                 result.add(kafkaTopicMetadata);
-            } else {
-                KafkaTopicMetadata kafkaTopicMetadata = new KafkaTopicMetadata(topic, Collections.emptyList(), KafkaErrorCode.TOPIC_AUTHORIZATION_FAILED.getCode());
-                result.add(kafkaTopicMetadata);
+            }
+        } else {
+            for (String topic : topics) {
+                TopicConfig topicConfig = topicConfigs.get(topic);
+
+                if (topicConfig != null) {
+                    List<KafkaPartitionMetadata> kafkaPartitionMetadata = getPartitionMetadata(topicConfig);
+                    KafkaTopicMetadata kafkaTopicMetadata = new KafkaTopicMetadata(topic, kafkaPartitionMetadata, KafkaErrorCode.NONE.getCode());
+                    result.add(kafkaTopicMetadata);
+                } else {
+                    KafkaTopicMetadata kafkaTopicMetadata = new KafkaTopicMetadata(topic, Collections.emptyList(), KafkaErrorCode.TOPIC_AUTHORIZATION_FAILED.getCode());
+                    result.add(kafkaTopicMetadata);
+                }
             }
         }
         return result;

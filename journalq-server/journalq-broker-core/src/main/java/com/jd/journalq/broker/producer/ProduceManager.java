@@ -13,6 +13,7 @@
  */
 package com.jd.journalq.broker.producer;
 
+import com.google.common.base.Preconditions;
 import com.jd.journalq.broker.BrokerContext;
 import com.jd.journalq.broker.BrokerContextAware;
 import com.jd.journalq.broker.buffer.Serializer;
@@ -38,7 +39,6 @@ import com.jd.journalq.store.WriteResult;
 import com.jd.journalq.toolkit.concurrent.EventListener;
 import com.jd.journalq.toolkit.concurrent.LoopThread;
 import com.jd.journalq.toolkit.lang.Close;
-import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.metric.Metric;
 import com.jd.journalq.toolkit.service.Service;
 import com.jd.journalq.toolkit.time.SystemClock;
@@ -298,12 +298,7 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
             // 同步等待写入完成
             WriteResult writeResult = syncWait(writeResultFuture, endTime - SystemClock.now());
             // 构造写入结果
-            writeRequests.forEach(writeRequest -> {
-                putResult.addWriteResult(writeRequest.getPartition(), writeResult);
-                if (brokerMonitor != null) {
-                    brokerMonitor.onPutMessage(topic, producer.getApp(), partitionGroup.getGroup(), writeRequest.getPartition(), 1, writeRequest.getBuffer().limit(), SystemClock.now() - startTime);
-                }
-            });
+            onPutMessage(topic, producer.getApp(), partitionGroup.getGroup(), startTime, writeRequests);
         }
 
         return putResult;
@@ -338,6 +333,9 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
             }
             PartitionGroupStore partitionStore = store.getStore(topic, partitionGroup.getGroup(), qosLevel);
             List<WriteRequest> writeRequests = dispatchedMsgs.get(partitionGroup);
+
+            long startTime = SystemClock.now();
+
             // 异步写入磁盘
             if(null != metric) {
                 long t0 = System.nanoTime();
@@ -348,14 +346,23 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
                 metric.addTraffic("traffic", writeRequests.stream().map(WriteRequest::getBuffer).mapToInt(ByteBuffer::remaining).sum());
                 metric.addLatency("async", t1 - t0);
             } else {
-                long startTime = SystemClock.now();
                 partitionStore.asyncWrite(event -> {
-                    writeRequests.forEach(writeRequest -> {
-                        brokerMonitor.onPutMessage(topic, app, partitionGroup.getGroup(), writeRequest.getPartition(), 1, writeRequest.getBuffer().limit(), SystemClock.now() - startTime);
-                    });
+                    onPutMessage(topic, producer.getApp(), partitionGroup.getGroup(), startTime, writeRequests);
                     eventListener.onEvent(event);
                 }, writeRequests.toArray(new WriteRequest[]{}));
             }
+
+            if (qosLevel.equals(QosLevel.ONE_WAY)) {
+                onPutMessage(topic, app, partitionGroup.getGroup(), startTime, writeRequests);
+            }
+
+        }
+    }
+
+    protected void onPutMessage(String topic, String app, int partitionGroup, long startTime, List<WriteRequest> writeRequests) {
+        long now = SystemClock.now();
+        for (WriteRequest writeRequest : writeRequests) {
+            brokerMonitor.onPutMessage(topic, app, partitionGroup, writeRequest.getPartition(), writeRequest.getBatchSize(), writeRequest.getBuffer().limit(), now - startTime);
         }
     }
 
@@ -381,12 +388,8 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
         @Override
         public void onEvent(WriteResult event) {
             metric.addLatency("callback",System.nanoTime() - t0);
+            onPutMessage(topic, app, partitionGroup, t0/1000000, writeRequests);
             eventListener.onEvent(event);
-
-            writeRequests.forEach(writeRequest -> {
-                brokerMonitor.onPutMessage(topic, app, partitionGroup, writeRequest.getPartition(), 1, writeRequest.getBuffer().limit(), SystemClock.now() - t0/1000000);
-            });
-
         }
     }
 
@@ -436,7 +439,11 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
                 writeRequestList = new ArrayList<>();
                 resultMap.put(writePartitionGroup, writeRequestList);
             }
-            writeRequestList.add(new WriteRequest(writePartition, convertBrokerMessage2RByteBuffer(msg)));
+            int batchCount = 1;
+            if (msg.isBatch()) {
+                batchCount = msg.getFlag();
+            }
+            writeRequestList.add(new WriteRequest(writePartition, convertBrokerMessage2RByteBuffer(msg), batchCount));
         }
 
         return resultMap;

@@ -150,7 +150,7 @@ public class TransactionManager extends Service {
                         writeRequests = Lists.newLinkedList();
                         writeRequestMap.put(partitionGroup.getGroup(), writeRequests);
                     }
-                    writeRequests.add(new WriteRequest(currentPartition, byteBuffer));
+                    writeRequests.add(new WriteRequest(currentPartition, byteBuffer, 1));
                     messageSize += byteBuffer.limit();
                 }
                 index++;
