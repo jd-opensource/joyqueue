@@ -33,6 +33,21 @@ pipeline {
                     updateGitlabCommitStatus name: 'build', state: 'running'
                    //  sh './integrate_test.sh -s ${integrate_result_home} -b $(pwd)/integration/benchmark'
                 }
+                script {
+                        def json_file = "${integrate_result_home}/score.json"
+                        def exists = fileExists json_file
+                        if(exists){
+                            env.integrate_result = readFile json_file
+                            echo ${integrate_result}
+                            echo ${json_file}
+                            sh 'rm ${json_file}'
+                        }else {
+                            echo 'score file not exist'
+                         }
+                        def resultIcon = currentBuild.result == 'SUCCESS' ? ':white_check_mark:' : ':anguished:'
+                        addGitLabMRComment comment: "$resultIcon Jenkins Build $currentBuild.result\n\nResults available at: [Jenkins [$env.JOB_NAME#$env.BUILD_NUMBER]]($env.BUILD_URL) \n ${env.integrate_result}"
+
+                       }
             }
         }
     }
@@ -44,21 +59,9 @@ pipeline {
               updateGitlabCommitStatus name: 'build', state: 'success'
             }
             always {
-                script {
-                    def json_file = "${env.integrate_result_home}/score.json"
-                    def exists = fileExists json_file
-                    if(exists){
-                        env.integrate_result = readFile json_file
-                        println ${env.integrate_result}
-                        println ${json_file}
-                        sh 'rm ${json_file}'
-                    }else {
-                        echo 'score file not exist'
-                     }
-                    def resultIcon = currentBuild.result == 'SUCCESS' ? ':white_check_mark:' : ':anguished:'
-                    addGitLabMRComment comment: "$resultIcon Jenkins Build $currentBuild.result\n\nResults available at: [Jenkins [$env.JOB_NAME#$env.BUILD_NUMBER]]($env.BUILD_URL) \n ${env.integrate_result}"
+                script{
                     echo 'I will always say Hello again!'
-                   }
+                }
              }
       }
 
