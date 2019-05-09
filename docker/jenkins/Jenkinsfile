@@ -47,7 +47,6 @@ pipeline {
                 script {
                     def json_file = "${env.integrate_result_home}/score.json"
                     def exists = fileExists json_file
-                    def resultIcon
                     if(exists){
                         env.integrate_result = readFile json_file
                         new File(json_file).delete()
