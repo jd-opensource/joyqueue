@@ -17,7 +17,6 @@ pipeline {
     agent any
     environment {
             integrate_result_home = "/home"
-
     }
     stages {
         stage('Test') {
