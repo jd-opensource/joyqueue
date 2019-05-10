@@ -265,7 +265,7 @@ class Workflow:
             self.pressure_container_name = self.task.pressure_repo_name + str(time.time()).replace('.', '_')
         return self.pressure_container_name
 
-    def __check_mq_stat(self, host, max_attempts=10, sleep=5):
+    def __check_mq_stat(self, host, max_attempts=20, sleep=5):
         script = """
                 containerId=$(docker ps -a|grep {docker_namespace}/{repo_name}|grep {tag}|awk '{{print $1}}')
                 if [[ -z $containerId ]]; then
