@@ -14,10 +14,10 @@ limitations under the License.
 
 pipeline {
     agent any
-     environment {
+    environment {
             integrate_result_home = "/home"
             integrate_result=" "
-        }
+    }
     stages {
         stage('Test') {
             steps {
@@ -39,7 +39,8 @@ pipeline {
                     if(exists){
                         echo "${json_file}"
                         env.integrate_result = readFile json_file
-                        echo "{env.integrate_result}"
+                        echo "${env.integrate_result}"
+                        sh 'printenv'
                         // sh "rm ${json_file}"
                     }else {
                         echo 'score file not exist'
