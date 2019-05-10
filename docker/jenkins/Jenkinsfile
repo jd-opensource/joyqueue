@@ -23,7 +23,7 @@ pipeline {
         stage('Test') {
             steps {
                 echo 'Packaging....'
-                // sh 'mvn -P docker install'
+                sh 'mvn -P docker install'
             }
         }
         stage('Integration Test') {
@@ -32,7 +32,7 @@ pipeline {
                 dir('docker/bin'){
                     sh ' pwd && git branch '
                     updateGitlabCommitStatus name: 'build', state: 'running'
-                    // sh './integrate_test.sh -s ${integrate_result_home} -b $(pwd)/integration/benchmark'
+                    sh './integrate_test.sh -s ${integrate_result_home} -b $(pwd)/integration/benchmark'
                 }
                 script{
                     def json_file = "${env.integrate_result_home}/score.json"
@@ -40,9 +40,7 @@ pipeline {
                     if(exists){
                         echo "${json_file}"
                         integrate_result = readFile json_file
-                        echo "${integrate_result}"
-                        sh 'printenv'
-                        // sh "rm ${json_file}"
+                        sh "rm ${json_file}"
                     }else {
                         echo 'score file not exist'
                      }
@@ -59,7 +57,6 @@ pipeline {
             }
             always {
                 script{
-                    sh 'printenv'
                     echo "${integrate_result}"
                     def resultIcon = currentBuild.result == 'SUCCESS' ? ':white_check_mark:' : ':anguished:'
                     def performance = currentBuild.result == 'SUCCESS' ? "${integrate_result}" : ' '
