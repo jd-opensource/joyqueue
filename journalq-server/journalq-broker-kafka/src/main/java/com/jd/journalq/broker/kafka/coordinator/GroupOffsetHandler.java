@@ -87,9 +87,7 @@ public class GroupOffsetHandler extends Service {
             }
         }
 
-        synchronized (group) {
-            return handleCommitOffsets(group, groupId, memberId, generationId, offsetMetadata);
-        }
+        return handleCommitOffsets(group, groupId, memberId, generationId, offsetMetadata);
     }
 
     protected Table<String, Integer, OffsetMetadataAndError> handleCommitOffsets(KafkaCoordinatorGroup group, String groupId,
