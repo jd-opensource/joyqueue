@@ -22,7 +22,7 @@ while getopts "s:" opt; do
   esac
 done
 echo $score
-if [[ -f $score/score.json ]];then
+if [[ -e $score/score.json ]];then
     exit 0
 else
     exit 1

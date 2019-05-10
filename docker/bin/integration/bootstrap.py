@@ -30,9 +30,10 @@
 #
 import os
 import argparse
+import json
 from workflow import Workflow
 from configuration import Configuration
-
+from pathlib import Path
 
 def bootstrap():
     config_file = os.path.dirname(__file__)+'/bootstrap.conf'
@@ -58,5 +59,19 @@ def init_config():
     return parser.parse_args()
 
 
+def collect_data():
+    results_dir = '{}'.format('/export/docker/workspace')
+    path = Path(results_dir)
+    if not path.exists():
+        return 'benchmark result not exist'
+    files = os.listdir(results_dir)
+    for name in files:
+        if name.endswith('.json'):
+            fh = open('{}/{}'.format(results_dir, name), 'r')
+            score = fh.read()
+            print(score)
+
+
 if __name__ == '__main__':
     bootstrap()
+    collect_data()

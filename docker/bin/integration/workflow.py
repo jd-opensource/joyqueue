@@ -20,6 +20,7 @@ import os
 import datetime
 import logging
 import time
+import json
 from shlex import split
 import random
 from model.task import Task
@@ -62,19 +63,9 @@ class Workflow:
             self.__start_pressure_worker()
             self.__collect_data_from_pressure_worker()
             # self.__mock_crash_recovery()
-            result = {
-                'status': 0,
-                'is_valid': 1,
-                'message': 'Success',
-                'data': self.__collect_data()
-            }
+            result = self.__collect_data()
             self.logger.info('Workflow successful!')
         except WorkflowError as err:
-            result = {
-                'status': err.error_code,
-                'is_valid': 1,
-                'message': err.message,
-            }
             self.logger.error('Failed to execute workflow.')
         finally:
             self.__cleanup()
@@ -158,7 +149,7 @@ class Workflow:
                 echo '{repo_name} docker not found,failed to collect pressure result'
                 exit 1    
             fi
-        """.format(repo_name=self.task.pressure_repo_name,label_name=self.pressure_container_name ,home=self.workspace.home)
+        """.format(repo_name=self.task.pressure_repo_name, label_name=self.pressure_container_name ,home=self.workspace.home)
         self.__run_local_script(script)
 
     def __collect_data(self, sub_dir='benchmark'):
@@ -168,13 +159,14 @@ class Workflow:
         if not path.exists():
             return 'benchmark result not exist'
         files = os.listdir(results_dir)
+        scores = "Openmessaging benchmark:\n\n"
         for name in files:
             if name.endswith('.json'):
                 fh = open('{}/{}'.format(results_dir, name), 'r')
-                return fh.read()
-        raise WorkflowError(
-            'Failed to read result file {}'.format(self.task.pressure_repo),
-            error_code=FAILED_TO_PREPARE_PRESSURE)
+                score = fh.read()
+                jsonScore = json.loads(score)
+                scores += self.__format_perf(jsonScore)
+        return scores
 
     def __list_workloads(self):
         workloads_dir = "{}/{}/workloads".format(self.workspace.home, self.task.pressure_repo_name)
@@ -480,12 +472,45 @@ class Workflow:
     def __lock_local_workspace(self):
         self.logger.info('>>> Lock local workspace.')
 
+
     def __parse_password(self, filename):
         file = Path(filename)
         if not file.exists():
             return None
         fh = open(filename, 'r')
         return fh.readline()
+
+    def __format_perf(self, performance):
+        p = performance
+        table_name = p['driver'] + p['workload']+'\n\n'
+        pub = p['publishRate']
+        con = p['consumeRate']
+        pub_latencyMax = p['publishLatencyMax']
+        pub_latencyAvg = p['publishLatencyAvg']
+        pub_latency50pct = p['publishLatency50pct']
+        pub_latency75pct = p['publishLatency75pct']
+        pub_latency95pct = p['publishLatency95pct']
+        pub_latency99pct = p['publishLatency99pct']
+        pub_latency999pct = p['publishLatency999pct']
+        pub_latency9999pct = p['publishLatency9999pct']
+        header = ['Pub rate(msg/s)', 'Cons rate(msg/s)', 'Tpmax(ms)', 'Tpavg(ms)', 'Tp50(ms)', 'Tp75(ms)', 'Tp99(ms)', 'Tp999(ms)', 'Tp999(ms)']
+        rows = []
+        for i in range(len(p['publishRate'])):
+            row = [int(pub[i]), int(con[i]), pub_latencyMax[i], pub_latencyAvg[i], pub_latency50pct[i], pub_latency75pct[i],
+                   pub_latency95pct[i], pub_latency99pct[i], pub_latency999pct[i], pub_latency9999pct[i]]
+            rows.append(row)
+        return self.__markdown_table(table_name, header, rows)
+
+    def __markdown_table(self, table_name, header, rows):
+        table = table_name
+        table += '|'+'|'.join(header)+'|\n'
+        align = '|'
+        for i in header:
+            align += ':---:|'
+        table += align+'\n'
+        for row in rows:
+            table += '|'+'|'.join(map(str, row))+'|\n'
+        return table
 
     def __cleanup(self):
         self.logger.info('>>> start to clean up workspace.')
