@@ -238,6 +238,7 @@ public class NameServiceCommandHandler implements NsrCommandHandler, Types, com.
                 break;
             case NsrCommandType.LEADER_REPORT:
                 LeaderReport leaderReport = (LeaderReport) command.getPayload();
+                logger.info("Name service receive leader report command {} from {}", leaderReport, transport.remoteAddress());
                 nameService.leaderReport(leaderReport.getTopic(), leaderReport.getPartitionGroup(), leaderReport.getLeaderBrokerId(), leaderReport.getIsrId(), leaderReport.getTermId());
                 response = new Command(new LeaderReportAck());
                 break;
