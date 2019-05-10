@@ -16,7 +16,7 @@
 
 # start to test
 python3 ./integration/bootstrap.py $*
-while getopts "s:" opt; do
+while getopts "s:b::" opt; do
   case $opt in
     s) score=$OPTARG;;
   esac
