@@ -15,14 +15,13 @@
 #
 
 # start to test
-python3 ./integration/bootstrap.py $*
+# python3 ./integration/bootstrap.py $*
 while getopts "s:b::" opt; do
   case $opt in
     s) score=$OPTARG;;
   esac
 done
-echo $score
-if [[ -e $score/score.json ]];then
+if [ -e $score/score.json ];then
     exit 0
 else
     exit 1

@@ -58,7 +58,7 @@ pipeline {
                 script{
                     echo "${env.integrate_result}"
                     def resultIcon = currentBuild.result == 'SUCCESS' ? ':white_check_mark:' : ':anguished:'
-                    def performance = currentBuild.result == 'SUCCESS'? "${env.integrate_result}" : 'haha'
+                    def performance = currentBuild.result == 'SUCCESS'? "${env.integrate_result}" : ' '
                     addGitLabMRComment comment: "$resultIcon Jenkins Build $currentBuild.result\n\nResults available at: [Jenkins [$env.JOB_NAME#$env.BUILD_NUMBER]]($env.BUILD_URL) \n\n ${performance} "
                     echo 'I will always say Hello again!'
                 }
