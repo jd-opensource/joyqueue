@@ -482,7 +482,7 @@ class Workflow:
 
     def __format_perf(self, performance):
         p = performance
-        table_name = p['driver'] + p['workload']+'\n\n'
+        table_name = p['driver'] + ' ' + p['workload']+'\n\n'
         pub = p['publishRate']
         con = p['consumeRate']
         pub_latencyMax = p['publishLatencyMax']
@@ -493,11 +493,11 @@ class Workflow:
         pub_latency99pct = p['publishLatency99pct']
         pub_latency999pct = p['publishLatency999pct']
         pub_latency9999pct = p['publishLatency9999pct']
-        header = ['Pub rate(msg/s)', 'Cons rate(msg/s)', 'Tpmax(ms)', 'Tpavg(ms)', 'Tp50(ms)', 'Tp75(ms)', 'Tp99(ms)', 'Tp999(ms)', 'Tp999(ms)']
+        header = ['Pub rate(msg/s)', 'Cons rate(msg/s)',  'Tp50(ms)', 'Tp75(ms)', 'Tp99(ms)', 'Tp999(ms)', 'Tp9999(ms)', 'Tpavg(ms)', 'Tpmax(ms)']
         rows = []
         for i in range(len(p['publishRate'])):
-            row = [int(pub[i]), int(con[i]), pub_latencyMax[i], pub_latencyAvg[i], pub_latency50pct[i], pub_latency75pct[i],
-                   pub_latency95pct[i], pub_latency99pct[i], pub_latency999pct[i], pub_latency9999pct[i]]
+            row = [int(pub[i]), int(con[i]), pub_latency50pct[i], pub_latency75pct[i],
+                   pub_latency95pct[i], pub_latency99pct[i], pub_latency999pct[i], pub_latency9999pct[i], pub_latencyAvg[i], pub_latencyMax[i]]
             rows.append(row)
         return self.__markdown_table(table_name, header, rows)
 
