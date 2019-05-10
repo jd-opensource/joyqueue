@@ -31,8 +31,8 @@ import com.jd.journalq.event.NameServerEvent;
 import com.jd.journalq.network.command.GetTopics;
 import com.jd.journalq.network.command.GetTopicsAck;
 import com.jd.journalq.network.command.SubscribeAck;
-import com.jd.journalq.network.event.TransportEvent;
 import com.jd.journalq.network.command.UnSubscribe;
+import com.jd.journalq.network.event.TransportEvent;
 import com.jd.journalq.network.transport.Transport;
 import com.jd.journalq.network.transport.TransportClient;
 import com.jd.journalq.network.transport.codec.JMQHeader;
@@ -88,6 +88,7 @@ import com.jd.journalq.toolkit.config.PropertySupplierAware;
 import com.jd.journalq.toolkit.lang.Close;
 import com.jd.journalq.toolkit.lang.LifeCycle;
 import com.jd.journalq.toolkit.service.Service;
+import com.jd.journalq.toolkit.time.SystemClock;
 import com.jd.laf.extension.Type;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
@@ -443,11 +444,18 @@ public class ThinNameService extends Service implements NameService, PropertySup
     }
 
     private Command send(Command request) throws TransportException {
+        // TODO 临时监控
+        long startTime = SystemClock.now();
         try {
             return clientTransport.getOrCreateTransport().sync(request,10000);
         } catch (TransportException exception) {
             logger.error("send command to nameServer error request {}", request);
             throw exception;
+        } finally {
+            long time = SystemClock.now() - startTime;
+            if (time > 1000 * 1) {
+                logger.warn("thinNameService timeout, request: {}, time: {}", request, time);
+            }
         }
     }
 
