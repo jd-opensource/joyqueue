@@ -17,6 +17,6 @@ driverClass: io.openmessage.benchmark.driver.journalq.JournalQBenchmarkDriver
 
 # JournalQ client-specific configuration
 clusterName: DefaultCluster
-namesrvAddr: 172.17.0.1:50088
-adminAddr: http://172.17.0.1:50091
+namesrvAddr: 172.28.123.123:50088
+adminAddr: http://172.28.123.123:50091
 
