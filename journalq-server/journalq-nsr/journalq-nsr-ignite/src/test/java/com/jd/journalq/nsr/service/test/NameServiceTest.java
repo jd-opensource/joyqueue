@@ -52,6 +52,10 @@ public class NameServiceTest {
         properties.put("nameserver.transport.server.port", nameServerPort);
         properties.put("nameserver.nameserver.transport.ioThreads", "8");
         properties.put("nameservice.serverAddress", IpUtil.getLocalIp() + ":" + nameServerPort);
+        properties.put("nameserver.ignite.discoverySpi.localPort", "48500");
+        properties.put("nameserver.ignite.discoverySpi.localPortRange", "20");
+
+        properties.put("nameserver.ignite.discoverySpi.ipFinder.address", IpUtil.getLocalIp() + ":" + "48500..48520");
 
         NameServiceConfig nameServiceConfig = new NameServiceConfig(new PropertySupplier.MapSupplier(properties));
 
