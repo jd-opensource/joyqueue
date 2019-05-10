@@ -35,7 +35,7 @@ import java.util.*;
 public class NameServiceTest {
     private static NameService nameService;
     private static NameServer nameServer;
-    private static File dataRoot = new File(System.getProperty("user.home") + "/journalq/nsr_temp");
+    private static File dataRoot = new File(System.getProperty("java.io.tmpdir") + "/journalq/nsr_temp");
 
     @BeforeClass
     public static void init() throws Exception {
@@ -44,6 +44,7 @@ public class NameServiceTest {
 
         Random random = new Random();
         int nameServerPort = random.nextInt(1024) + 5000;
+        Files.deleteDirectory(dataRoot);
         Files.createDirectory(dataRoot);
         properties.put("application.data.path", dataRoot);
         properties.put("nameserver.ignite.storage.defaultDataRegion.name", "test");
