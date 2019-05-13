@@ -34,7 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -43,6 +42,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.jd.journalq.broker.election.ElectionEvent.Type.LEADER_FOUND;
 import static com.jd.journalq.broker.election.ElectionEvent.Type.START_ELECTION;
@@ -62,7 +62,7 @@ public class RaftLeaderElection extends LeaderElection  {
 
     private static Logger logger = LoggerFactory.getLogger(RaftLeaderElection.class);
 
-    private Map<Integer, DefaultElectionNode> allNodes = new HashMap<>();
+    private Map<Integer, DefaultElectionNode> allNodes = new ConcurrentHashMap<>();
     private ElectionNode localNode;
     private Set<Integer> learners;
 
@@ -112,6 +112,9 @@ public class RaftLeaderElection extends LeaderElection  {
         }
 
         resetElectionTimer();
+
+        electionTimerExecutor.scheduleAtFixedRate(this::reportLeadership,
+                60, 60, TimeUnit.SECONDS);
 
         logger.info("Raft leader election of {}, local node {}, all node {} started, " +
                     "term is {}, vote for is {}",
@@ -1000,5 +1003,14 @@ public class RaftLeaderElection extends LeaderElection  {
 
         JMQHeader header = new JMQHeader(Direction.RESPONSE, CommandType.RAFT_TIMEOUT_NOW_RESPONSE);
         return new Command(header, response);
+    }
+
+    /**
+     * Report leader ship to name server
+     */
+    private void reportLeadership() {
+        if (electionConfig.enableRebalanceLeader() && isLeader()) {
+            updateMetadata(localNodeId, currentTerm);
+        }
     }
 }
