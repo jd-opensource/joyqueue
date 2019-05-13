@@ -20,7 +20,7 @@
     <parent>
         <artifactId>journalq-archive</artifactId>
         <groupId>com.jd.journalq</groupId>
-        <version>4.0.1</version>
+        <version>4.0.2</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -30,12 +30,12 @@
         <dependency>
             <groupId>com.jd.journalq</groupId>
             <artifactId>journalq-archive-api</artifactId>
-            <version>4.0.1</version>
+            <version>4.0.2</version>
         </dependency>
         <dependency>
             <groupId>com.jd.journalq</groupId>
             <artifactId>journalq-hbase</artifactId>
-            <version>4.0.1</version>
+            <version>4.0.2</version>
         </dependency>
     </dependencies>
 
