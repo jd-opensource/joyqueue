@@ -316,11 +316,16 @@ public class RaftLeaderElection extends LeaderElection  {
         if (state() != FOLLOWER) {
             logger.info("Partition group {}/node {} election timeout, state is {}",
                     topicPartitionGroup, localNode, state());
+			if (state() == LEADER) {
+				return;
+			}
         }
 
         logger.info("Partition group {}/node {} election timeout, current term is {}.",
                 topicPartitionGroup, localNode, currentTerm);
 
+		leaderId = INVALID_NODE_ID;
+		
         try {
             preVote();
         } catch (Throwable t) {
@@ -726,6 +731,8 @@ public class RaftLeaderElection extends LeaderElection  {
             node.setVoteGranted(false);
         });
 
+		cancelElectionTimer();
+
         try {
             replicaGroup.becomeLeader(currentTerm, leaderId);
             nodeOnline(currentTerm);
@@ -739,9 +746,7 @@ public class RaftLeaderElection extends LeaderElection  {
             logger.warn("Partition group {}/node {} as leader fail",
                     topicPartitionGroup, localNode, e);
         }
-
-        cancelElectionTimer();
-
+        
     }
 
     /**
