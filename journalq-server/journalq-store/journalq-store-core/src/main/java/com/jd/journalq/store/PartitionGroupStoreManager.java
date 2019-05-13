@@ -15,6 +15,7 @@ package com.jd.journalq.store;
 
 import com.jd.journalq.domain.QosLevel;
 import com.jd.journalq.exception.JournalqCode;
+import com.jd.journalq.store.file.DiskFullException;
 import com.jd.journalq.store.file.PositioningStore;
 import com.jd.journalq.store.file.RollBackException;
 import com.jd.journalq.store.file.StoreMessageSerializer;
@@ -595,6 +596,10 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                 produceMetric.addCounter("WriteCount", 1);
 
             }
+        } catch (DiskFullException e) {
+            if (null != writeCommand && writeCommand.eventListener != null)
+                writeCommand.eventListener.onEvent(new WriteResult(JournalqCode.SE_DISK_FULL, null));
+            throw e;
         } catch (Throwable t) {
             if (null != writeCommand && writeCommand.eventListener != null)
                 writeCommand.eventListener.onEvent(new WriteResult(JournalqCode.SE_WRITE_FAILED, null));

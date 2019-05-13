@@ -37,7 +37,9 @@ public enum ElectionConfigKey implements PropertyDef {
     REPLICATE_THREAD_NUM_MAX("election.replicate.thread.num.max", 100, Type.INT),
     COMMAND_QUEUE_SIZE("election.command.queue.size", 1024, Type.INT),
     LOG_INTERVAL("election.log.interval", 3000, Type.INT),
-    TRANSFER_LEADER_MIN_LAG("election.transfer.leader.min.lag", 10 * 1024 * 1024, Type.LONG);
+    TRANSFER_LEADER_MIN_LAG("election.transfer.leader.min.lag", 10 * 1024 * 1024, Type.LONG),
+    ENABLE_REBALANCE_LEADER("election.rebalance.leader.enable", false, Type.BOOLEAN),
+    MAX_REBALANCE_INTERVAL("election.max.rebalance.interval", 60 * 60 * 1000, Type.INT);
 
     private String name;
     private Object value;
