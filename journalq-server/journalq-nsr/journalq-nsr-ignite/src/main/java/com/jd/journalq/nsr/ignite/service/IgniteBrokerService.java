@@ -16,12 +16,17 @@ package com.jd.journalq.nsr.ignite.service;
 
 import com.google.inject.Inject;
 import com.jd.journalq.domain.Broker;
+import com.jd.journalq.event.BrokerEvent;
+import com.jd.journalq.event.MetaEvent;
 import com.jd.journalq.model.PageResult;
 import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.nsr.ignite.dao.BrokerDao;
 import com.jd.journalq.nsr.ignite.model.IgniteBroker;
+import com.jd.journalq.nsr.message.Messenger;
 import com.jd.journalq.nsr.model.BrokerQuery;
 import com.jd.journalq.nsr.service.BrokerService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,7 +38,12 @@ import java.util.stream.Collectors;
  * 下午3:11 2018/8/13
  */
 public class IgniteBrokerService implements BrokerService {
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
+
     private BrokerDao brokerDao;
+
+    @Inject
+    protected Messenger messenger;
 
     @Inject
     public IgniteBrokerService(BrokerDao brokerDao) {
@@ -89,6 +99,16 @@ public class IgniteBrokerService implements BrokerService {
     @Override
     public void addOrUpdate(Broker broker) {
         brokerDao.addOrUpdate(toIgniteModel(broker));
+        publishEvent(BrokerEvent.event(broker));
+    }
+
+    public void publishEvent(MetaEvent event) {
+        try {
+            logger.info("publishEvent {}", event);
+            messenger.publish(event);
+        } catch (Exception ignored) {
+            logger.warn("pulish event failure {}", event);
+        }
     }
 
     @Override
