@@ -97,7 +97,7 @@ export default {
       // 1. 查询数据库里的数据
       this.showTablePin = true
       let data = {
-        groupNo: this.partitionGroup.groupNo,
+        partitionGroup: this.partitionGroup.groupNo,
         subscribe: {
           topic: this.partitionGroup.topic,
           namespace: this.partitionGroup.namespace,
