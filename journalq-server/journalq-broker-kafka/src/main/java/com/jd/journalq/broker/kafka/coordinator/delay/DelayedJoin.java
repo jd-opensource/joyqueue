@@ -13,13 +13,13 @@
  */
 package com.jd.journalq.broker.kafka.coordinator.delay;
 
+import com.jd.journalq.broker.kafka.KafkaErrorCode;
+import com.jd.journalq.broker.kafka.coordinator.GroupBalanceManager;
 import com.jd.journalq.broker.kafka.coordinator.KafkaCoordinatorGroupManager;
 import com.jd.journalq.broker.kafka.coordinator.domain.GroupJoinGroupResult;
 import com.jd.journalq.broker.kafka.coordinator.domain.GroupState;
 import com.jd.journalq.broker.kafka.coordinator.domain.KafkaCoordinatorGroup;
 import com.jd.journalq.broker.kafka.coordinator.domain.KafkaCoordinatorGroupMember;
-import com.jd.journalq.broker.kafka.KafkaErrorCode;
-import com.jd.journalq.broker.kafka.coordinator.GroupBalanceManager;
 import com.jd.journalq.toolkit.delay.DelayedOperation;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
@@ -84,14 +84,6 @@ public class DelayedJoin extends DelayedOperation {
                 logger.info("group {} complete join, member {} not join.", group.getId(), memberMetadata.getId());
                 group.removeMember(memberMetadata.getId());
             }
-        }
-
-        // 如果member为空，那么移除group
-        if (group.isMemberEmpty()) {
-            logger.info("group {} generation {} is dead and removed", group.getId(), group.getGenerationId());
-            group.transitionStateTo(GroupState.DEAD);
-            groupMetadataManager.removeGroup(group);
-            return;
         }
 
         // join成功

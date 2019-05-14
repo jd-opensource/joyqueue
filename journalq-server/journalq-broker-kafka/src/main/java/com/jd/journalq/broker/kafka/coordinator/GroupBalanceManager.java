@@ -13,6 +13,7 @@
  */
 package com.jd.journalq.broker.kafka.coordinator;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -28,7 +29,6 @@ import com.jd.journalq.broker.kafka.coordinator.domain.KafkaCoordinatorGroup;
 import com.jd.journalq.broker.kafka.coordinator.domain.KafkaCoordinatorGroupMember;
 import com.jd.journalq.toolkit.delay.DelayedOperationKey;
 import com.jd.journalq.toolkit.delay.DelayedOperationManager;
-import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import com.jd.journalq.toolkit.time.SystemClock;
 import org.slf4j.Logger;
@@ -176,6 +176,22 @@ public class GroupBalanceManager extends Service {
         }
     }
 
+    public void removeHeartbeatExpiredMemberAndUpdateGroup(KafkaCoordinatorGroup group, KafkaCoordinatorGroupMember member) {
+        logger.info("member {} in group {} has failed, group state is {}, member count is {}",
+                member.getId(), group.getId(), group.getState(), group.getAllMemberIds().size());
+
+        group.removeMember(member.getId());
+        switch (group.getState()) {
+            case DEAD:
+            case EMPTY:
+                break;
+            case STABLE:
+            case AWAITINGSYNC:
+                maybePrepareRebalance(group);
+                break;
+        }
+    }
+
     public void removeMemberAndUpdateGroup(KafkaCoordinatorGroup group, KafkaCoordinatorGroupMember member) {
         logger.info("member {} in group {} has failed, group state is {}, member count is {}",
                 member.getId(), group.getId(), group.getState(), group.getAllMemberIds().size());
@@ -213,9 +229,8 @@ public class GroupBalanceManager extends Service {
 
         // reschedule the next heartbeat expiration deadline
         // TODO 临时处理，在其他分支详细处理
-        long delayTimeout = member.getSessionTimeout() * 3;
         long newHeartbeatDeadline = member.getLatestHeartbeat() + member.getSessionTimeout();
-        DelayedHeartbeat delayedHeartbeat = new DelayedHeartbeat(this, group, member, newHeartbeatDeadline, delayTimeout);
+        DelayedHeartbeat delayedHeartbeat = new DelayedHeartbeat(this, group, member, newHeartbeatDeadline, member.getSessionTimeout());
         heartbeatPurgatory.tryCompleteElseWatch(delayedHeartbeat, Sets.newHashSet(memberKey));
     }
 

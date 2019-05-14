@@ -62,7 +62,7 @@ public class DelayedHeartbeat extends DelayedOperation {
                     group.getId(), member.getId(), member.getAwaitingJoinCallback(), member.getAwaitingSyncCallback());
 
             if (!groupBalanceManager.shouldKeepMemberAlive(member, heartbeatDeadline)) {
-                groupBalanceManager.removeMemberAndUpdateGroup(group, member);
+                groupBalanceManager.removeHeartbeatExpiredMemberAndUpdateGroup(group, member);
                 group.addExpiredMember(member);
             }
         }
