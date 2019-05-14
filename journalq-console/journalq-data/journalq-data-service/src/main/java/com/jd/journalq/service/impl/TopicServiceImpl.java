@@ -13,30 +13,18 @@
  */
 package com.jd.journalq.service.impl;
 
+import com.google.common.base.Preconditions;
 import com.jd.journalq.convert.CodeConverter;
+import com.jd.journalq.exception.ServiceException;
 import com.jd.journalq.model.PageResult;
 import com.jd.journalq.model.QPageQuery;
-import com.jd.journalq.exception.ServiceException;
-import com.jd.journalq.model.domain.AppUnsubscribedTopic;
-import com.jd.journalq.model.domain.Broker;
-import com.jd.journalq.model.domain.BrokerGroup;
-import com.jd.journalq.model.domain.Consumer;
-import com.jd.journalq.model.domain.Identity;
-import com.jd.journalq.model.domain.Namespace;
-import com.jd.journalq.model.domain.PartitionGroupReplica;
-import com.jd.journalq.model.domain.Topic;
-import com.jd.journalq.model.domain.TopicPartitionGroup;
+import com.jd.journalq.model.domain.*;
 import com.jd.journalq.model.exception.DuplicateKeyException;
 import com.jd.journalq.model.query.QConsumer;
 import com.jd.journalq.model.query.QProducer;
 import com.jd.journalq.model.query.QTopic;
-import com.jd.journalq.nsr.ConsumerNameServerService;
-import com.jd.journalq.nsr.PartitionGroupServerService;
-import com.jd.journalq.nsr.ProducerNameServerService;
-import com.jd.journalq.nsr.ReplicaServerService;
-import com.jd.journalq.nsr.TopicNameServerService;
+import com.jd.journalq.nsr.*;
 import com.jd.journalq.service.TopicService;
-import com.google.common.base.Preconditions;
 import com.jd.journalq.util.NullUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -51,9 +39,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.jd.journalq.exception.ServiceException.BAD_REQUEST;
-import static com.jd.journalq.exception.ServiceException.IGNITE_RPC_ERROR;
-import static com.jd.journalq.exception.ServiceException.INTERNAL_SERVER_ERROR;
+import static com.jd.journalq.exception.ServiceException.*;
 
 /**
  * 主题服务实现
@@ -115,30 +101,26 @@ public class TopicServiceImpl implements TopicService {
                 index=0;
             }
         }
-        int start = 0;
-        one:for(TopicPartitionGroup partitionGroup : partitionGroups){
-            int j = 0;
-            two:for(;start<brokers.size();start++){
-                Broker broker = brokers.get(start);
+
+        for(int k=0; k<partitionGroups.size();k++){
+            TopicPartitionGroup partitionGroup = partitionGroups.get(k);
+            for(int j=k;j<topic.getReplica()+k;j++){
+                Broker broker = brokers.get(j%brokers.size());
                 PartitionGroupReplica replica = new PartitionGroupReplica();
                 replica.setGroupNo(partitionGroup.getGroupNo());
                 replica.setNamespace(partitionGroup.getNamespace());
                 replica.setTopic(partitionGroup.getTopic());
                 replica.setBrokerId(Long.valueOf(broker.getId()).intValue());
-                if (start == 0) {
-                    partitionGroup.setRecLeader(Long.valueOf(broker.getId()).intValue());
-                }
                 if(partitionGroup.getElectType().equals(TopicPartitionGroup.ElectType.fix.type())){
                     if(j==0)replica.setRole(PartitionGroupReplica.ROLE_MASTER);
                     else replica.setRole(PartitionGroupReplica.ROLE_DYNAMIC);
                 }else{
                     replica.setRole(PartitionGroupReplica.ROLE_DYNAMIC);
                 }
-                if(start==brokers.size()-1)start=0;
-                j++;
                 partitionGroup.getReplicaGroups().add(replica);
-                if(j==topic.getReplica())break;
+                if ((j-k)==brokers.size())break;
             }
+            partitionGroup.setRecLeader(Integer.valueOf(String.valueOf(brokers.get(k).getId())));
         }
         return partitionGroups;
     }

@@ -275,6 +275,7 @@ public class BrokerService extends Service {
         startIfNecessary(brokerServer);
         startIfNecessary(coordinatorService);
         startIfNecessary(brokerManageService);
+        startIfNecessary(archiveManager);
         printConfig();
     }
 

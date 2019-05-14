@@ -13,11 +13,12 @@
  */
 package com.jd.journalq.toolkit.delay;
 
-import com.jd.journalq.toolkit.concurrent.NamedThreadFactory;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import com.jd.journalq.toolkit.concurrent.NamedThreadFactory;
 
-import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -28,20 +29,18 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class DelayedOperationManager<T extends DelayedOperation> {
 
     private Timer timeoutTimer;
     private String purgatoryName;
     private int purgeInterval = 1000;
+    private int watchers = 512;
 
     private ExecutorService taskExecutor;
 
-    private ConcurrentMap<Object, Watchers> watchersForKey = new ConcurrentHashMap<Object, Watchers>();
-    private ReentrantReadWriteLock removeWatchersLock = new ReentrantReadWriteLock();
-    private ReentrantReadWriteLock.ReadLock readLock = removeWatchersLock.readLock();
-    private ReentrantReadWriteLock.WriteLock writeLock = removeWatchersLock.writeLock();
+    private List<WatchersList> watchersList;
     // the number of estimated total operations in the purgatory
     private AtomicInteger estimatedTotalOperations = new AtomicInteger(0);
 
@@ -55,7 +54,7 @@ public class DelayedOperationManager<T extends DelayedOperation> {
     public DelayedOperationManager(final String purgatoryName, int purgeInterval, boolean reaperEnable) {
         this.taskExecutor = Executors.newFixedThreadPool(1, new ThreadFactory() {
             public Thread newThread(Runnable r) {
-                NamedThreadFactory threadFactory = new NamedThreadFactory("journalqdelayed-operation-executor-" + purgatoryName);
+                NamedThreadFactory threadFactory = new NamedThreadFactory("journalq-delayed-operation-executor-" + purgatoryName);
                 Thread thread = threadFactory.newThread(r);
                 return thread;
             }
@@ -63,6 +62,7 @@ public class DelayedOperationManager<T extends DelayedOperation> {
         this.purgatoryName = purgatoryName;
         this.timeoutTimer = new Timer(this.taskExecutor);
         this.purgeInterval = purgeInterval;
+        this.watchersList = initWatchersList();
     }
 
     /**
@@ -83,6 +83,18 @@ public class DelayedOperationManager<T extends DelayedOperation> {
         if (taskExecutor != null) {
             taskExecutor.shutdown();
         }
+    }
+
+    protected List<WatchersList> initWatchersList() {
+        List<WatchersList> watchersList = Lists.newArrayListWithCapacity(watchers);
+        for (int i = 0; i < watchers; i++) {
+            watchersList.add(new WatchersList());
+        }
+        return watchersList;
+    }
+
+    protected WatchersList selectWatchersList(Object key) {
+        return watchersList.get(Math.abs(key.hashCode() % watchersList.size()));
     }
 
     /**
@@ -110,11 +122,9 @@ public class DelayedOperationManager<T extends DelayedOperation> {
         // operation is unnecessarily added for watch. However, this is a less severe issue since the
         // expire reaper will clean it up periodically.
 
-        synchronized (operation) {
-            boolean isCompletedByMe = operation.safeTryComplete();
-            if (isCompletedByMe) {
-                return true;
-            }
+        boolean isCompletedByMe = operation.tryComplete();
+        if (isCompletedByMe) {
+            return true;
         }
 
         boolean watchCreated = false;
@@ -131,7 +141,7 @@ public class DelayedOperationManager<T extends DelayedOperation> {
         }
 
         synchronized (operation) {
-            boolean isCompletedByMe = operation.safeTryComplete();
+            isCompletedByMe = operation.safeTryComplete();
             if (isCompletedByMe) {
                 return true;
             }
@@ -156,11 +166,12 @@ public class DelayedOperationManager<T extends DelayedOperation> {
      */
     public int checkAndComplete(Object key) {
         Watchers watchers = null;
-        readLock.lock();
+        WatchersList watchersList = selectWatchersList(key);
+        watchersList.lock();
         try {
-            watchers = watchersForKey.get(key);
+            watchers = watchersList.getWatchers(key);
         } finally {
-            readLock.unlock();
+            watchersList.unlock();
         }
         if (watchers == null) {
             return 0;
@@ -176,33 +187,25 @@ public class DelayedOperationManager<T extends DelayedOperation> {
         return timeoutTimer.size();
     }
 
-    private Collection<Watchers> allWatchers() {
-        readLock.lock();
-        try {
-            return watchersForKey.values();
-        } finally {
-            readLock.unlock();
-        }
-    }
-
     /*
      * Return the watch list of the given key, note that we need to
      * grab the removeWatchersLock to avoid the operation being added to a removed watcher list
      */
     private void watchForOperation(Object key, T operation) {
-        readLock.lock();
+        WatchersList watchersList = selectWatchersList(key);
+        watchersList.lock();
         try {
-            Watchers watcher = watchersForKey.get(key);
+            Watchers watcher = watchersList.getWatchers(key);
             if (watcher == null) {
                 watcher = new Watchers(key);
-                Watchers oldWatcher = watchersForKey.putIfAbsent(key, watcher);
+                Watchers oldWatcher = watchersList.putIfAbsentWatchers(key, watcher);
                 if (oldWatcher != null) {
                     watcher = oldWatcher;
                 }
             }
             watcher.watch(operation);
         } finally {
-            readLock.unlock();
+            watchersList.unlock();
         }
     }
 
@@ -210,18 +213,19 @@ public class DelayedOperationManager<T extends DelayedOperation> {
      * Remove the key from watcher lists if its list is empty
      */
     private void removeKeyIfEmpty(Object key, Watchers watchers) {
-        writeLock.lock();
+        WatchersList watchersList = selectWatchersList(key);
+        watchersList.lock();
         try {
             // if the current key is no longer correlated to the watchers to remove, skip
-            if (watchersForKey.get(key) == null || !watchersForKey.get(key).equals(watchers)) {
+            if (watchersList.getWatchers(key) == null || !watchersList.getWatchers(key).equals(watchers)) {
                 return;
             }
 
             if (watchers != null && watchers.isEmpty()) {
-                watchersForKey.remove(key);
+                watchersList.removeWatchers(key);
             }
         } finally {
-            writeLock.unlock();
+            watchersList.unlock();
         }
     }
 
@@ -238,14 +242,45 @@ public class DelayedOperationManager<T extends DelayedOperation> {
             estimatedTotalOperations.getAndSet(delayed());
 //            logger.debug("Begin purging watch lists");
 
-            Collection<Watchers> allWatchers = allWatchers();
             int sum = 0;
-            for (Watchers watchers : allWatchers) {
-                sum += watchers.purgeCompleted();
+            for (WatchersList watcherList : watchersList) {
+                for (Watchers watchers : watcherList.allWatchers()) {
+                    sum += watchers.purgeCompleted();
+                }
             }
 //            if (logger.isDebugEnabled()) {
 //                logger.debug(String.format("Purged %d elements from watch lists.", sum));
 //            }
+        }
+    }
+
+    private class WatchersList {
+
+        private ReentrantLock lock = new ReentrantLock();
+        private ConcurrentMap<Object, Watchers> watchersForKey = new ConcurrentHashMap<Object, Watchers>();
+
+        public void lock() {
+            lock.lock();
+        }
+
+        public void unlock() {
+            lock.unlock();
+        }
+
+        public Watchers getWatchers(Object key) {
+            return watchersForKey.get(key);
+        }
+
+        public Watchers removeWatchers(Object key) {
+            return watchersForKey.remove(key);
+        }
+
+        public Watchers putIfAbsentWatchers(Object key, Watchers watchers) {
+            return watchersForKey.putIfAbsent(key, watchers);
+        }
+
+        public List<Watchers> allWatchers() {
+            return Lists.newArrayList(watchersForKey.values());
         }
     }
 
@@ -268,33 +303,27 @@ public class DelayedOperationManager<T extends DelayedOperation> {
         }
 
         private boolean isEmpty() {
-            synchronized (operations) {
-                return operations.isEmpty();
-            }
+            return operations.isEmpty();
         }
 
         // add the element to watch
         private void watch(T t) {
-            synchronized (operations) {
-                operations.add(t);
-            }
+            operations.add(t);
         }
 
         // traverse the list and try to complete some watched elements
         private int tryCompleteWatched() {
             int completed = 0;
 
-            synchronized (operations) {
-                Iterator<T> iter = operations.iterator();
-                while (iter.hasNext()) {
-                    T curr = iter.next();
-                    if (curr.isCompleted()) {
-                        // another thread has completed this operation, just remove it
-                        iter.remove();
-                    } else if (curr.safeTryComplete()) {
-                        iter.remove();
-                        completed += 1;
-                    }
+            Iterator<T> iter = operations.iterator();
+            while (iter.hasNext()) {
+                T curr = iter.next();
+                if (curr.isCompleted()) {
+                    // another thread has completed this operation, just remove it
+                    iter.remove();
+                } else if (curr.safeTryComplete()) {
+                    iter.remove();
+                    completed += 1;
                 }
             }
 
@@ -308,14 +337,12 @@ public class DelayedOperationManager<T extends DelayedOperation> {
         // traverse the list and purge elements that are already completed by others
         private int purgeCompleted() {
             int purged = 0;
-            synchronized (operations) {
-                Iterator<T> iter = operations.iterator();
-                while (iter.hasNext()) {
-                    T curr = iter.next();
-                    if (curr.isCompleted()) {
-                        iter.remove();
-                        purged += 1;
-                    }
+            Iterator<T> iter = operations.iterator();
+            while (iter.hasNext()) {
+                T curr = iter.next();
+                if (curr.isCompleted()) {
+                    iter.remove();
+                    purged += 1;
                 }
             }
 
