@@ -619,7 +619,8 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
             RestResponse<PartitionGroupMetric>  restResponse = parse(v,RestResponse.class, PartitionGroupMetric.class,false);
             map.put(k,restResponse.getData());
         });
-        return getPartitionGroupInterval(topicPartitionGroup.getLeader(),map);
+        String requestKey = String.valueOf(topicPartitionGroup.getLeader())+"_"+groupNo;
+        return getPartitionGroupInterval(requestKey,map);
     }
 
 
@@ -639,12 +640,12 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
     }
 
     //计算位移间隔
-    private List<PartitionGroupPosition> getPartitionGroupInterval(Integer masterBroker,Map<String,PartitionGroupMetric> partitionGroupMetricMap){
-        PartitionGroupMetric masterMetric=partitionGroupMetricMap.get(String.valueOf(masterBroker));
+    private List<PartitionGroupPosition> getPartitionGroupInterval(String leaderBroker,Map<String,PartitionGroupMetric> partitionGroupMetricMap){
+        PartitionGroupMetric masterMetric=partitionGroupMetricMap.get(leaderBroker);
         List<PartitionGroupPosition> positionList = new ArrayList<>();
         partitionGroupMetricMap.forEach((k,v) ->{
             PartitionGroupPosition partitionGroupPosition = positionConvert(masterMetric,v);
-            if (String.valueOf(masterBroker).equals(k)) {
+            if (leaderBroker.equals(k)) {
                 partitionGroupPosition.setLeader(true);
             }
             partitionGroupPosition.setBrokerId(k);
