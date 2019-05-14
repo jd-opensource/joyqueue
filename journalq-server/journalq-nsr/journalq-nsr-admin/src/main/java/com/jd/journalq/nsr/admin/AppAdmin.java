@@ -32,6 +32,11 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 public class AppAdmin extends AbstractAdmin {
+    private AsyncHttpClient httpClient;
+
+    public AppAdmin(){
+        this.httpClient=new AsyncHttpClient();
+    }
     @Parameters(separators = "=", commandDescription = "Generate a token for App")
     public static class TokenArg extends CommandArgs {
         private  static final Long MONTH_MS=86400000L;
@@ -80,7 +85,7 @@ public class AppAdmin extends AbstractAdmin {
 
     @Override
     public void close() throws IOException {
-        AsyncHttpClient.close();
+        httpClient.close();
     }
 
     /**
@@ -94,7 +99,7 @@ public class AppAdmin extends AbstractAdmin {
         token.setEffectiveTime(new Date(arguments.start));
         token.setExpirationTime(new Date(arguments.expire));
         token.setToken(UUID.randomUUID().toString().replaceAll("-" , ""));
-        Future<String> futureResult=AsyncHttpClient.post(arguments.host,"/apptoken/add",JSON.toJSONString(token),String.class);
+        Future<String> futureResult=httpClient.post(arguments.host,"/apptoken/add",JSON.toJSONString(token),String.class);
         String result=futureResult.get(AdminConfig.TIMEOUT_MS,TimeUnit.MILLISECONDS);
         if(result!=null&&result.equals("success")){
             result=token.getToken();

@@ -33,6 +33,10 @@ import java.util.concurrent.TimeUnit;
 
 public class BrokerAdmin extends AbstractAdmin {
 
+    private AsyncHttpClient httpClient;
+    public BrokerAdmin(){
+        this.httpClient=new AsyncHttpClient();
+    }
     @Parameters(separators = "=", commandDescription = "List broker arguments")
     public static class ListArg extends CommandArgs {
         @Parameter(names = { "--host" }, description = "Naming address", required = false)
@@ -98,7 +102,7 @@ public class BrokerAdmin extends AbstractAdmin {
         brokerQuery.setBrokerId(arguments.id);
         brokerQuery.setBrokerList(arguments.brokers);
         brokerQuery.setKeyword(arguments.key);
-        Future<String> futureResult=AsyncHttpClient.post(arguments.host,"/broker/list",JSON.toJSONString(brokerQuery),String.class);
+        Future<String> futureResult=httpClient.post(arguments.host,"/broker/list",JSON.toJSONString(brokerQuery),String.class);
         String result=futureResult.get(AdminConfig.TIMEOUT_MS,TimeUnit.MILLISECONDS);
         List<Broker> brokers=null;
         if(result!=null){
@@ -111,7 +115,7 @@ public class BrokerAdmin extends AbstractAdmin {
     }
     @Override
     public void close() throws IOException {
-        AsyncHttpClient.close();
+        httpClient.close();
     }
 
     enum Command{

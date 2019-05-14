@@ -76,6 +76,8 @@ public class AdminClient implements NsrAdmin {
 
     @Override
     public void close() throws IOException {
-
+        appAdmin.close();
+        topicAdmin.close();
+        topicAdmin.close();
     }
 }

@@ -44,6 +44,10 @@ import java.util.stream.Collectors;
 
 public class TopicAdmin extends AbstractAdmin {
 
+    private AsyncHttpClient httpClient;
+    public TopicAdmin(){
+        this.httpClient=new AsyncHttpClient();
+    }
     @Parameters(separators = "=", commandDescription = "Topic arguments")
     public static class TopicArg extends CommandArgs {
 
@@ -186,7 +190,7 @@ public class TopicAdmin extends AbstractAdmin {
         JSONObject request = new JSONObject();
         request.put("topic",JSON.toJSONString(topic));
         request.put("partitionGroups",JSON.toJSONString(partitionGroups));
-        Future<String> futureResult=AsyncHttpClient.post(arguments.host,"/topic/add",request.toJSONString(),String.class);
+        Future<String> futureResult=httpClient.post(arguments.host,"/topic/add",request.toJSONString(),String.class);
         String result=futureResult.get(AdminConfig.TIMEOUT_MS,TimeUnit.MILLISECONDS);
         System.out.println(result);
         return result;
@@ -200,7 +204,7 @@ public class TopicAdmin extends AbstractAdmin {
         List<PartitionGroup> partitionGroups;
         Topic topic=new Topic();
         topic.setName(new TopicName(arguments.code,arguments.namespace));
-        Future<String> futureResult=AsyncHttpClient.post(arguments.host,"/topic/remove",JSON.toJSONString(topic),String.class);
+        Future<String> futureResult=httpClient.post(arguments.host,"/topic/remove",JSON.toJSONString(topic),String.class);
         String result=futureResult.get(AdminConfig.TIMEOUT_MS,TimeUnit.MILLISECONDS);
         System.out.println(result);
         return result;
@@ -218,7 +222,7 @@ public class TopicAdmin extends AbstractAdmin {
         producer.setType(Subscription.Type.valueOf(pubSubArg.subscribe.type.byteValue()));
         producer.setClientType(ClientType.valueOf(pubSubArg.client));
         producer.setProducerPolicy(new Producer.ProducerPolicy());
-        Future<String> futureResult=AsyncHttpClient.post(pubSubArg.host,"/producer/add",JSON.toJSONString(producer),String.class);
+        Future<String> futureResult=httpClient.post(pubSubArg.host,"/producer/add",JSON.toJSONString(producer),String.class);
         String result=futureResult.get(AdminConfig.TIMEOUT_MS,TimeUnit.MILLISECONDS);
         System.out.println(result);
         return result;
@@ -232,7 +236,7 @@ public class TopicAdmin extends AbstractAdmin {
         Producer producer=new Producer();
         producer.setApp(pubSubArg.subscribe.app);
         producer.setTopic(new TopicName(pubSubArg.subscribe.topic,pubSubArg.subscribe.namespace));
-        Future<String> futureResult=AsyncHttpClient.post(pubSubArg.host,"/producer/remove",JSON.toJSONString(producer),String.class);
+        Future<String> futureResult=httpClient.post(pubSubArg.host,"/producer/remove",JSON.toJSONString(producer),String.class);
         String result=futureResult.get(AdminConfig.TIMEOUT_MS,TimeUnit.MILLISECONDS);
         System.out.println(result);
         return result;
@@ -251,7 +255,7 @@ public class TopicAdmin extends AbstractAdmin {
         consumer.setType(Subscription.Type.valueOf(pubSubArg.subscribe.type.byteValue()));
         consumer.setClientType(ClientType.valueOf(pubSubArg.client));
         String consumerJson=JSON.toJSONString(consumer);
-        Future<String> futureResult=AsyncHttpClient.post(pubSubArg.host,"/consumer/add",consumerJson,String.class);
+        Future<String> futureResult=httpClient.post(pubSubArg.host,"/consumer/add",consumerJson,String.class);
         String result=futureResult.get(AdminConfig.TIMEOUT_MS,TimeUnit.MILLISECONDS);
         System.out.println(result);
         return result;
@@ -266,7 +270,7 @@ public class TopicAdmin extends AbstractAdmin {
         consumer.setApp(pubSubArg.subscribe.app);
         consumer.setTopic(new TopicName(pubSubArg.subscribe.topic,pubSubArg.subscribe.namespace));
         String consumerJson=JSON.toJSONString(consumer);
-        Future<String> futureResult=AsyncHttpClient.post(pubSubArg.host,"/consumer/remove",consumerJson,String.class);
+        Future<String> futureResult=httpClient.post(pubSubArg.host,"/consumer/remove",consumerJson,String.class);
         String result=futureResult.get(AdminConfig.TIMEOUT_MS,TimeUnit.MILLISECONDS);
         System.out.println(result);
         return result;
@@ -274,7 +278,7 @@ public class TopicAdmin extends AbstractAdmin {
 
     @Override
     public void close() throws IOException {
-        AsyncHttpClient.close();
+        httpClient.close();
     }
 
     enum Command{

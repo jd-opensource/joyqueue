@@ -34,15 +34,19 @@ import java.util.concurrent.TimeoutException;
 
 
 public class AsyncHttpClient {
-    private static CloseableHttpAsyncClient httpclient = HttpAsyncClients.custom()
-                                                        .setDefaultRequestConfig(RequestConfig.custom()
-                                                        .setConnectTimeout(600)
-                                                        .setSocketTimeout(700)
-                                                        .setConnectionRequestTimeout(500).build()).build();
-    static {
+    private  CloseableHttpAsyncClient httpclient;
+
+    public AsyncHttpClient(){
+        httpclient= HttpAsyncClients
+                    .custom()
+                    .setDefaultRequestConfig(RequestConfig.custom()
+                    .setConnectTimeout(600)
+                    .setSocketTimeout(700)
+                    .setConnectionRequestTimeout(500).build()).build();
         httpclient.start();
     }
-    private static <T> Future<T> asyncRequest(HttpUriRequest request, Class<T> clazz){
+
+    private  <T> Future<T> asyncRequest(HttpUriRequest request, Class<T> clazz){
         request.setHeader("Content-Type", "application/json;charset=utf-8");
         BasicFuture<T> futureResult=new BasicFuture();
         httpclient.execute(request, new FutureCallback<HttpResponse>() {
@@ -83,7 +87,7 @@ public class AsyncHttpClient {
      * Http post
      *
      **/
-    public static <T> Future<T> post(String host,String path,String body,Class<T> clazz) throws Exception{
+    public  <T> Future<T> post(String host,String path,String body,Class<T> clazz) throws Exception{
         HttpPost post=new HttpPost(host+path);
         post.setEntity(new StringEntity(body));
         return asyncRequest(post,clazz);
@@ -94,7 +98,7 @@ public class AsyncHttpClient {
      *
      *
      **/
-    public static <T> Future<T> get(String host,String path,String body,Class<T> clazz) throws Exception{
+    public  <T> Future<T> get(String host,String path,String body,Class<T> clazz) throws Exception{
         HttpGet get=new HttpGet(host+path);
         return asyncRequest(get,clazz);
     }
@@ -167,7 +171,7 @@ public class AsyncHttpClient {
         }
     }
 
-    public static void close() throws IOException {
+    public  void close() throws IOException {
         if(httpclient.isRunning()) {
             httpclient.close();
         }
