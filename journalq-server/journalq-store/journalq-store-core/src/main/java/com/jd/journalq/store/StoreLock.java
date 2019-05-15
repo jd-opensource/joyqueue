@@ -41,19 +41,17 @@ public class StoreLock {
     public void lock() throws IOException {
         // Try to get the lock
         channel = new RandomAccessFile(lockFile, "rw").getChannel();
+
         lock = channel.tryLock();
         if (lock == null) {
             // File is lock by other application
             channel.close();
             throw new StoreLockedException();
         }
-        // Add shutdown hook to release lock when application shutdown
-
-        Runtime.getRuntime().addShutdownHook(new Thread(this::unlock));
 
     }
 
-    private void unlock() {
+    public void unlock() {
         // release and delete file lock
         try {
             if (lock != null) {

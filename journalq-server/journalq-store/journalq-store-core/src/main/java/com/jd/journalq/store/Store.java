@@ -126,11 +126,12 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
     @Override
     protected void doStart() throws Exception {
         super.doStart();
+
         logger.info("Starting store {}...", base.getPath());
+
         for (PartitionGroupStoreManager manger : storeMap.values()) {
             if (!manger.isStarted()) manger.start();
         }
-
 
         started.set(true);
         logger.info("Store started.");
@@ -140,30 +141,18 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
     protected void doStop() {
         super.doStop();
 
-        Close.close(scheduledExecutor);
-
         logger.info("Stopping store {}...", base.getPath());
-        System.out.println(String.format("Stopping store %s...", base.getPath()));
+
         storeMap.values().forEach(p -> {
             p.disable();
             p.stop();
         });
-        if (null != scheduledExecutor && !scheduledExecutor.isTerminated()) {
-            System.out.println("Shutting down executor...");
-            logger.info("Shutting down executor...");
-            scheduledExecutor.shutdown();
-            try {
-                scheduledExecutor.awaitTermination(5, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                logger.warn("Exception: ", e);
-            }
-            if (!scheduledExecutor.isTerminated()) scheduledExecutor.shutdownNow();
-        }
-        logger.info("Executor stopped.");
-        System.out.println("Executor stopped.");
-        started.set(false);
-        logger.info("Store stopped.");
-        System.out.println("Store stopped.");
+
+        Close.close(scheduledExecutor);
+
+        storeLock.unlock();
+
+        logger.info("Store {} stopped.", base.getPath());
     }
 
     public void checkOrCreateBase() {
@@ -368,39 +357,6 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
     public StoreManagementService getManageService() {
 
         return new StoreManagement(128, 128, config.getMaxMessageLength(), bufferPool, this);
-    }
-
-
-    @Override
-    public synchronized void stop() {
-        logger.info("Stopping store {}...", base.getPath());
-        System.out.println(String.format("Stopping store %s...", base.getPath()));
-        storeMap.values().forEach(p -> {
-            p.disable();
-            p.stop();
-        });
-        if (null != scheduledExecutor && !scheduledExecutor.isTerminated()) {
-            System.out.println("Shutting down executor...");
-            logger.info("Shutting down executor...");
-            scheduledExecutor.shutdown();
-            try {
-                scheduledExecutor.awaitTermination(5, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                logger.warn("Exception: ", e);
-            }
-            if (!scheduledExecutor.isTerminated()) scheduledExecutor.shutdownNow();
-        }
-        logger.info("Executor stopped.");
-        System.out.println("Executor stopped.");
-        started.set(false);
-        logger.info("Store stopped.");
-        System.out.println("Store stopped.");
-    }
-
-
-    @Override
-    public boolean isStarted() {
-        return started.get();
     }
 
     private String getPartitionGroupRelPath(String topic, int partitionGroup) {
