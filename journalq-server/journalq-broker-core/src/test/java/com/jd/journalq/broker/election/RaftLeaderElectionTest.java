@@ -39,7 +39,6 @@ import java.util.TreeSet;
 /**
  * Created by zhuduohui on 2018/8/27.
  */
-// FIXME: 单元测试未通过
 public class RaftLeaderElectionTest {
     private static Logger logger = LoggerFactory.getLogger(RaftLeaderElectionTest.class);
 
