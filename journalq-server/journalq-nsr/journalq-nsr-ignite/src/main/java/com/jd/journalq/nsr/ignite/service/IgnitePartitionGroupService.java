@@ -13,6 +13,7 @@
  */
 package com.jd.journalq.nsr.ignite.service;
 
+import com.alibaba.fastjson.JSON;
 import com.google.inject.Inject;
 import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.domain.TopicName;
@@ -22,6 +23,8 @@ import com.jd.journalq.nsr.ignite.dao.PartitionGroupDao;
 import com.jd.journalq.nsr.ignite.model.IgnitePartitionGroup;
 import com.jd.journalq.nsr.model.PartitionGroupQuery;
 import com.jd.journalq.nsr.service.PartitionGroupService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +34,8 @@ import java.util.List;
  * Date: 2018/9/4
  */
 public class IgnitePartitionGroupService implements PartitionGroupService {
+    private static Logger logger = LoggerFactory.getLogger(IgnitePartitionGroupService.class);
+
     private PartitionGroupDao partitionGroupDao;
 
     @Inject
@@ -65,6 +70,7 @@ public class IgnitePartitionGroupService implements PartitionGroupService {
 
     @Override
     public void addOrUpdate(PartitionGroup partitionGroup) {
+        logger.info("partitiongroup addorUpdate partitionGroup:{}", JSON.toJSONString(partitionGroup));
         partitionGroupDao.addOrUpdate(toIgniteModel(partitionGroup));
     }
 

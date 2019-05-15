@@ -401,8 +401,15 @@ public class MetaManager extends Service {
      * @param partitionGroup
      */
     public void updatePartitionGroup(PartitionGroup partitionGroup) {
-        partitionGroupService.addOrUpdate(partitionGroup);
-        metaMessenger.publish(PartitionGroupEvent.update(partitionGroup.getTopic(), partitionGroup.getGroup()));
+        PartitionGroup group = partitionGroupService.get(partitionGroup);
+        if (group != null){
+            group.setIsrs(partitionGroup.getIsrs());
+            group.setLeader(partitionGroup.getLeader());
+            group.setTerm(partitionGroup.getTerm());
+            partitionGroupService.addOrUpdate(group);
+            metaMessenger.publish(PartitionGroupEvent.update(partitionGroup.getTopic(), partitionGroup.getGroup()));
+        }
+
     }
 
     /**
