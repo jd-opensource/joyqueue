@@ -522,7 +522,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                             indexItem.getPartition(), indexItem.getIndex());
                 }
                 writeIndex(indexItem, partition.store);
-                flushLoopThread.weakup();
+                flushLoopThread.wakeup();
             }
         } catch (Throwable t) {
             logger.warn("Write failed, rollback to position: {}, topic={}, partitionGroup={}.", start, topic, partitionGroup, t);
