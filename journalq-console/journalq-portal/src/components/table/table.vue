@@ -551,7 +551,8 @@ export default {
       }
       const status = !data.isExpanded
       this.objData[index].isExpanded = status
-      this.$emit('on-expand', JSON.parse(JSON.stringify(this.cloneData[index])), status)
+      let copyData = deepCopy(this.data)
+      this.$emit('on-expand', JSON.parse(JSON.stringify(copyData[index])), status)
     },
     expandCls (index) {
       return [

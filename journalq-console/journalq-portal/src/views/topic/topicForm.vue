@@ -94,7 +94,7 @@ export default {
           name: '',
           type: 0,
           namespace: {
-            id: '0',
+            id: '',
             code: ''
           },
           partitions: 5,

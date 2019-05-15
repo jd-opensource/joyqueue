@@ -21,7 +21,7 @@
         </grid-col>
       </grid-row>
     </div>
-    <d-tabs  @on-change="handleTabChange" :value="tab">
+    <d-tabs @on-change="handleTabChange" :value="tab" @on-tab-remove="removeTab">
       <!--tabs由于没有单独的路由名称，所以在调用table时，需要在data中自定义urls-->
       <slot name="tabs"></slot>
     </d-tabs>
@@ -64,7 +64,7 @@ export default {
     }
   },
   methods: {
-    getDetail (id) {
+    getDetail () {
       apiRequest.get(this.urlOrigin.detail + '/' + this.app.id, {}).then((data) => {
         this.detail = data.data || {}
       })
@@ -72,23 +72,43 @@ export default {
     gotoList () {
       this.$router.push({name: `/${this.$i18n.locale}/application`})
     },
-    queryAppDetail () {
-      // 获取我的应用详情页
-      this.getDetail(this.app.id)
-    },
     handleTabChange (data) {
       let name = data.name
+      if (name === 'producerDetail') {
+        this.$router.push({
+          name: `/${this.$i18n.locale}/application/detail`,
+          query: {
+            id: this.app.id,
+            code: this.app.code,
+            app: this.app.code,
+            topic: this.$route.query.topic || '',
+            namespace: this.$route.query.namespace || '',
+            subscribeGroup: this.$route.query.subscribeGroup || '',
+            subTab: this.$route.query.subTab || 'partitioin',
+            tab: name
+          }
+        })
+      } else {
+        this.$router.push({
+          name: `/${this.$i18n.locale}/application/detail`,
+          query: {
+            id: this.app.id,
+            code: this.app.code,
+            tab: name
+          }
+        })
+      }
       this.$refs[name].getList()
-      this.$router.push({
-        name: `/${this.$i18n.locale}/application/detail`,
-        query: { id: this.app.id, code: this.app.code, tab: name }})
+    },
+    removeTab (data) {
+      //todo
     }
   },
   mounted () {
     this.app.id = this.$route.query.id
     this.app.code = this.$route.query.code
     this.tab = this.$route.query.tab || 'producer'
-    this.queryAppDetail()
+    this.getDetail()
   }
 
 }

@@ -72,11 +72,11 @@ export default {
     },
     subscribeGroup: '',
     topic: {
-      id: '0',
+      id: '',
       code: ''
     },
     namespace: {
-      id: '0',
+      id: '',
       code: ''
     },
     type: {

@@ -58,6 +58,7 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
 
     @Value
     CoordinatorMonitorService coordinatorMonitorService;
+
     @Value
     private BrokerTopicMonitorService brokerTopicMonitorService;
 

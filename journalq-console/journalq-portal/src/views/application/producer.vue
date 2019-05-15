@@ -2,7 +2,7 @@
   <div>
     <producer-base ref="producerBase" :keywordTip="keywordTip" :keywordName="keywordName" :colData="colData"
                    :subscribeDialogColData="subscribeDialog.colData" :showSummaryChart="true"  @on-enter="getList"
-                   :search="search" :subscribeUrls="subscribeDialog.urls"/>
+                   :search="search" :subscribeUrls="subscribeDialog.urls" @on-detail="handleDetail"/>
   </div>
 </template>
 
@@ -116,20 +116,15 @@ export default {
           add: `/producer/add`,
           search: `/topic/unsubscribed/search`
         }
-      },
-      // 生产详情
-      detailDialog: {
-        partition: {
-          colData: [
-
-          ]
-        }
       }
     }
   },
   methods: {
     getList () {
       this.$refs.producerBase.getList()
+    },
+    handleDetail (item) {
+      this.$emit('on-detail', item)
     }
   }
 }

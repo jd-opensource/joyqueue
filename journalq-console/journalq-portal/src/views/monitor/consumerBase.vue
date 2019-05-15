@@ -95,13 +95,13 @@ import myTable from '../../components/common/myTable.vue'
 import myDialog from '../../components/common/myDialog.vue'
 import consumerConfigForm from './consumerConfigForm.vue'
 import subscribe from './subscribe.vue'
-import broker from './broker.vue'
-import partition from './partition.vue'
-import clientConnection from './clientConnection.vue'
+import broker from './detail/broker.vue'
+import partition from './detail/partition.vue'
+import clientConnection from './detail/clientConnection.vue'
 import msgPreview from './msgPreview.vue'
 import tabTable from './tabTable'
 import coordinatorGroupMember from './coordinatorGroup.vue'
-import partitionExpand from './partitionExpand'
+import partitionExpand from './detail/partitionExpand'
 import {timeStampToString} from '../../utils/dateTimeUtils'
 import mqttBaseMonitor from '../setting/mqttBaseMonitor'
 import offset from './offset'
@@ -299,11 +299,11 @@ export default {
         },
         subscribeGroup: '',
         topic: {
-          id: '0',
+          id: '',
           code: ''
         },
         namespace: {
-          id: '0',
+          id: '',
           code: ''
         },
         partition: {
@@ -334,11 +334,11 @@ export default {
         },
         subscribeGroup: '',
         topic: {
-          id: '0',
+          id: '',
           code: ''
         },
         namespace: {
-          id: '0',
+          id: '',
           code: ''
         }
       },
@@ -354,11 +354,11 @@ export default {
         },
         subscribeGroup: '',
         topic: {
-          id: '0',
+          id: '',
           code: ''
         },
         namespace: {
-          id: '0',
+          id: '',
           code: ''
         }
       },

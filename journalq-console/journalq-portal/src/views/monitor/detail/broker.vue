@@ -7,9 +7,9 @@
 </template>
 
 <script>
-import MyTable from '../../components/common/myTable'
-import crud from '../../mixins/crud.js'
-import apiRequest from '../../utils/apiRequest.js'
+import MyTable from '../../../components/common/myTable'
+import crud from '../../../mixins/crud.js'
+import apiRequest from '../../../utils/apiRequest.js'
 
 export default {
   name: 'broker',
@@ -20,22 +20,26 @@ export default {
       type: Boolean,
       default: false
     },
-    app: {
-      id: 0,
-      code: ''
-    },
-    subscribeGroup: '',
-    topic: {
-      id: '0',
-      code: ''
-    },
-    namespace: {
-      id: '0',
-      code: ''
-    },
-    type: { // 0-producer, 1-consumer
-      type: Number,
-      default: 0
+    search: {
+      type: Object,
+      default: function () {
+        return {
+          subscribeGroup: '',
+          topic: {
+            id: '',
+            code: ''
+          },
+          namespace: {
+            id: '',
+            code: ''
+          },
+          app: {
+            id: '',
+            code: ''
+          },
+          type: 0
+        }
+      }
     },
     colData: {
       type: Array,
@@ -78,23 +82,7 @@ export default {
   methods: {
     getList () {
       this.showTablePin = true
-      let data = {
-        topic: {
-          id: this.topic.id,
-          code: this.topic.code
-        },
-        namespace: {
-          id: this.namespace.id,
-          code: this.namespace.code
-        },
-        app: {
-          id: this.app.id,
-          code: this.app.code
-        },
-        subscribeGroup: this.subscribeGroup || '',
-        type: this.type
-      }
-      apiRequest.postBase(this.urls.getMonitor, {}, data, false).then((data) => {
+      apiRequest.postBase(this.urls.getMonitor, {}, this.search, false).then((data) => {
         data.data = data.data || []
         this.tableData.rowData = data.data
         this.page.total = data.data.length
@@ -103,6 +91,7 @@ export default {
     }
   }
 }
+
 </script>
 
 <style scoped>
