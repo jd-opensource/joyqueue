@@ -73,7 +73,7 @@ public class DbRetryConfig {
         Properties properties = new Properties();
         InputStream inputStream = DbRetryConfig.class.getClassLoader().getResourceAsStream(configFile);
         if (null == inputStream) {
-            throw new JournalqConfigException("cannot load laf.properties.");
+            throw new JournalqConfigException("cannot load journalq.properties.");
         }
         try {
             properties.load(inputStream);
