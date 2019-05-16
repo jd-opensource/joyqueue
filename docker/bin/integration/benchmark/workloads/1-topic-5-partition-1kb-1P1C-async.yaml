@@ -12,11 +12,17 @@
 # limitations under the License.
 #
 
-name: JournalQ
-driverClass: io.openmessaging.benchmark.driver.journalq.JournalQBenchmarkDriver
+name: 1 topic / 5 partition / 1Kb / 1P1C async
 
-# JournalQ client-specific configuration
-clusterName: DefaultCluster
-namesrvAddr: 172.17.0.1:50088
-adminAddr: http://172.17.0.1:50091
-
+topics: 1
+partitionsPerTopic: 5
+keyDistributor: "NO_KEY"
+messageSize: 1024
+payloadFile: "payload/payload-1Kb.data"
+subscriptionsPerTopic: 1
+consumerPerSubscription: 1
+syncProducer: false
+producersPerTopic: 1
+producerRate: 50000
+consumerBacklogSizeGB: 0
+testDurationMinutes: 1

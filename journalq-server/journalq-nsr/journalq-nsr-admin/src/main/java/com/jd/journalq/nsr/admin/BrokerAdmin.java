@@ -39,8 +39,6 @@ public class BrokerAdmin extends AbstractAdmin {
     }
     @Parameters(separators = "=", commandDescription = "List broker arguments")
     public static class ListArg extends CommandArgs {
-        @Parameter(names = { "--host" }, description = "Naming address", required = false)
-        public String host="http://localhost:50091";
 
         @Parameter(names = { "-i", "--id" }, description = "broker id", required = false)
         public int id;

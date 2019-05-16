@@ -12,11 +12,25 @@
 # limitations under the License.
 #
 
-name: JournalQ
-driverClass: io.openmessaging.benchmark.driver.journalq.JournalQBenchmarkDriver
 
-# JournalQ client-specific configuration
-clusterName: DefaultCluster
-namesrvAddr: 172.17.0.1:50088
-adminAddr: http://172.17.0.1:50091
+name: JournalQ Kafka
+driverClass: io.openmessaging.benchmark.driver.kafka.JournalQKafkaBenchmarkDriver
 
+# Kafka client-specific configuration
+replicationFactor: 3
+
+topicConfig: |
+  min.insync.replicas=2
+
+commonConfig: |
+  bootstrap.servers=172.17.0.1:50088
+  naming.servers=http://172.17.0.1:50091
+
+producerConfig: |
+  acks=all
+  linger.ms=1
+  batch.size=131072
+
+consumerConfig: |
+  auto.offset.reset=earliest
+  enable.auto.commit=false

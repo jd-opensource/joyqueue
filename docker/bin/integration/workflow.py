@@ -54,6 +54,7 @@ class Workflow:
 
     def run(self):
         start = time.time()
+        result = 'unknown'
         try:
             # self.__lock_local_workspace()
             self.__prepare_pressure_worker()
@@ -76,6 +77,8 @@ class Workflow:
 
     def __save_result(self, result):
         try:
+            if result == 'unknown':
+                return None
             path = Path(self.score_dir)
             if not path.exists():
                 path.mkdir(parents=True)
@@ -131,9 +134,12 @@ class Workflow:
 
     def __start_pressure_worker(self, driver_name='journalq'):
         script = """
-                    docker run --name {} {}/{} bin/benchmark -d driver-{}/{}.yaml  workloads/{}
-                 """.format(self.__pressure_container_name(), self.task.pressure_docker_namespace,
-                            self.task.pressure_repo_name,driver_name, driver_name, self.__list_workloads())
+                    docker run --name {} {}/{} bin/benchmark -d {}  {}
+                 """.format(self.__pressure_container_name(),
+                            self.task.pressure_docker_namespace,
+                            self.task.pressure_repo_name,
+                            self.__list_drivers(),
+                            self.__list_workloads())
         code, outs, _ = self.__run_local_script(script)
         if code != 0:
             raise WorkflowError(
@@ -169,10 +175,19 @@ class Workflow:
         return scores
 
     def __list_workloads(self):
-        workloads_dir = "{}/{}/workloads".format(self.workspace.home, self.task.pressure_repo_name)
+        workloads_dir = "{}/workloads".format(self.benchmark_config)
         files = os.listdir(workloads_dir)
         self.logger.info(' workloads/'.join(files))
-        return ' workloads/'.join(files)
+        return ' workloads/'+' workloads/'.join(files)
+
+    def __list_drivers(self):
+        drivers = []
+        drivers_dir = "{}/".format(self.benchmark_config)
+        files = os.listdir(drivers_dir)
+        for file in files:
+            if file.startswith('driver'):
+                drivers.append((file+'/')+(','+file+'/').join(os.listdir( drivers_dir + '/'+file)))
+        return ','.join(drivers)
 
     def __prepare_mq_worker(self):
         if self.mode != ONLINE_MODE:

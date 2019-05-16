@@ -119,7 +119,7 @@ class PartitionConsumption extends Service {
     protected PullResult getMessage(Consumer consumer, int count, long ackTimeout, long accessTimes) throws JournalqException {
         PullResult pullResult = new PullResult(consumer, (short) -1, new ArrayList<>(0));
 
-        if (partitionManager.isRetry(consumer)) {
+        if (false && partitionManager.isRetry(consumer)) {
             // 消费待重试的消息
             List<RetryMessageModel> retryMsgList = messageRetry.getRetry(consumer.getTopic(), consumer.getApp(), (short) 1, 0L);
             if (CollectionUtils.isNotEmpty(retryMsgList) && retryMsgList.size() > 0) {
