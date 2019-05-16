@@ -1172,7 +1172,7 @@ public class RaftLeaderElection extends LeaderElection  {
     private int getRecommendLeader() {
         TopicConfig topicConfig = clusterManager.getNameService().getTopicConfig(
                 TopicName.parse(topicPartitionGroup.getTopic()));
-        PartitionGroup pg = topicConfig.getPartitionGroups().get(topicPartitionGroup.partitionGroupId);
+        PartitionGroup pg = topicConfig.getPartitionGroups().get(topicPartitionGroup.getPartitionGroupId());
         return pg.getRecLeader();
     }
 
@@ -1211,9 +1211,10 @@ public class RaftLeaderElection extends LeaderElection  {
         }
 
         logger.info("Partition group {}/node {} rebalance leader, recommend leader is {}, lag length is {} " +
-                        "last rebalance time is {}",
+                        "last rebalance time is {}, enable is {}",
                 topicPartitionGroup, localNode, recommendLeader,
-                replicaGroup.lagLength(recommendLeader), lastRebalanceTime);
+                replicaGroup.lagLength(recommendLeader), lastRebalanceTime,
+                electionConfig.enableRebalanceLeader());
 
         if (shouldRebalanceLeader(recommendLeader)) {
             try {

@@ -20,6 +20,7 @@ import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.store.*;
 import com.jd.journalq.store.replication.ReplicableStore;
 import com.jd.journalq.toolkit.concurrent.EventListener;
+import com.jd.journalq.toolkit.io.Files;
 import com.jd.journalq.toolkit.network.IpUtil;
 import org.junit.After;
 import org.junit.Assert;
@@ -56,6 +57,8 @@ public class FixedLeaderElectionTest {
 
     private ProduceTask produceTask = new ProduceTask(storeServices[leaderId], topic1, partitionGroup1);
     private ConsumeTask consumeTask = new ConsumeTask(storeServices[leaderId], topic1, partitionGroup1);
+
+    private short[] partitions = new short[]{0, 1, 2, 3, 4};
 
     private String getStoreDir() {
         String property = "java.io.tmpdir";
@@ -120,10 +123,8 @@ public class FixedLeaderElectionTest {
             }
         }
 
-        File file = new File(getStoreDir());
-        file.delete();
-        file = new File(getElectionDir());
-        file.delete();
+        Files.deleteDirectory(new File(getStoreDir()));
+        Files.deleteDirectory(new File(getElectionDir()));
     }
 
     private int nextNode(int nodeId) {
@@ -141,7 +142,7 @@ public class FixedLeaderElectionTest {
         }
 
         for (int i = 0; i < FIX_ELECTION_NUM; i++) {
-            storeServices[i].createPartitionGroup(topic1.getFullName(), partitionGroup1, new short[]{1});
+            storeServices[i].createPartitionGroup(topic1.getFullName(), partitionGroup1, partitions);
             electionManager[i].onPartitionGroupCreate(PartitionGroup.ElectType.fix,
                     topic1, partitionGroup1, allNodes, new TreeSet<>(), brokers[i].getId(), leaderId);
             leaderElections[i] = electionManager[i].getLeaderElection(topic1, partitionGroup1);

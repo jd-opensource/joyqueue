@@ -153,6 +153,6 @@ public class ElectionConfig {
     }
 
     public void setElectionMetaFile(String electionMetaFile) {
-        this.electionMetaFileStub = electionMetaFileStub;
+        this.electionMetaFileStub = electionMetaFile;
     }
 }

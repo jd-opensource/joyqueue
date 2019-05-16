@@ -40,6 +40,9 @@ public class ProduceTask extends Thread {
     private TopicName topicName;
     private int partitionGroup;
 
+    private int PARTITION_NUM = 5;
+    private int currentPartition;
+
     public ProduceTask(StoreService storeService, TopicName topicName, int partitionGroup) {
         this.storeService = storeService;
         this.topicName = topicName;
@@ -48,7 +51,7 @@ public class ProduceTask extends Thread {
 
     private void produceMessage(String topic, int partitionGroup, int messageCount) throws Exception {
 
-        PartitionGroupStore pgStore = storeService.getStore(topic, partitionGroup, QosLevel.REPLICATION);
+        PartitionGroupStore pgStore = storeService.getStore(topic, partitionGroup, QosLevel.RECEIVE);
         ReplicableStore replicableStores = storeService.getReplicableStore(topic, partitionGroup);
         if (!replicableStores.serviceStatus()) {
             logger.info("Produce message, store status is {}", replicableStores.serviceStatus());
@@ -61,7 +64,7 @@ public class ProduceTask extends Thread {
             BrokerMessage brokerMessage = new BrokerMessage();
             brokerMessage.setSource(SourceType.JMQ2.getValue());
             brokerMessage.setClientIp("10.1.1.1".getBytes());
-            brokerMessage.setBody(("Test_" + i).getBytes());
+            brokerMessage.setBody(("Test_abcdefghigklmnopqrstuvwxyz" + i).getBytes());
 
             int msgSize = Serializer.sizeOf(brokerMessage);
             ByteBuffer buf = ByteBuffer.allocate(msgSize);
@@ -71,11 +74,10 @@ public class ProduceTask extends Thread {
             CRC32 crc32 = new CRC32();
             crc32.update(MessageParser.getByteBuffer(buf,MessageParser.BODY));
             MessageParser.setLong(buf,MessageParser.CRC,crc32.getValue());
-            //List<RByteBuffer> partitionedBuf = new ArrayList<>();
-            //partitionedBuf.add(buf);
 
             //logger.info("Topic {}, will write message to {}", topic, leaderId);
-            Future<WriteResult> writeResultFuture = pgStore.asyncWrite(new WriteRequest((short) 1, buf));
+            int partition = currentPartition >= PARTITION_NUM - 1 ? 0 : currentPartition++;
+            Future<WriteResult> writeResultFuture = pgStore.asyncWrite(new WriteRequest((short) partition, buf));
             WriteResult writeResult = writeResultFuture.get(100, TimeUnit.MILLISECONDS);
             if (writeResult != null) {
                 //logger.info("Topic {}, Write message to {} return code {}, indexies = {}",

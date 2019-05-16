@@ -20,11 +20,13 @@ import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.store.Store;
 import com.jd.journalq.store.StoreConfig;
 import com.jd.journalq.store.StoreService;
+import com.jd.journalq.toolkit.io.Files;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeSet;
@@ -45,9 +47,11 @@ public class ElectionManagerTest {
     private String topic2 = "test1";
     private int partitionGroup2 = 2;
 
+    private short[] partitions = new short[]{0, 1, 2, 3, 4};
+
+
     public ElectionManagerTest() throws Exception {
     }
-
 
     private String getStoreDir() {
         String property = "java.io.tmpdir";
@@ -65,6 +69,7 @@ public class ElectionManagerTest {
         StoreConfig storeConfig = new StoreConfig(conf);
         storeConfig.setPath(getStoreDir());
         storeService = new Store(storeConfig);
+        ((Store) storeService).start();
 
         ElectionConfig electionConfig = new ElectionConfig(conf);
         electionConfig.setElectionMetaPath(getElectionDir());
@@ -92,6 +97,11 @@ public class ElectionManagerTest {
     public void tearDown() {
         storeService.removePartitionGroup(topic1, partitionGroup1);
         storeService.removePartitionGroup(topic2, partitionGroup2);
+        ((Store)storeService).stop();
+        electionManager.stop();
+
+        Files.deleteDirectory(new File(getStoreDir()));
+        Files.deleteDirectory(new File(getElectionDir()));
     }
 
     @Test
@@ -104,7 +114,7 @@ public class ElectionManagerTest {
         allNodes1.add(broker3);
 
         storeService.removePartitionGroup(topic1, partitionGroup1);
-        storeService.createPartitionGroup(topic1, partitionGroup1, new short[]{1});
+        storeService.createPartitionGroup(topic1, partitionGroup1, partitions);
 
         electionManager.onPartitionGroupCreate(PartitionGroup.ElectType.fix, new TopicName(topic1),
                 partitionGroup1, allNodes1, new TreeSet<>(), broker1.getId(), broker1.getId());
@@ -113,7 +123,7 @@ public class ElectionManagerTest {
         Assert.assertEquals(election.getLeaderId(), broker1.getId().longValue());
 
         storeService.removePartitionGroup(topic2, partitionGroup2);
-        storeService.createPartitionGroup(topic2, partitionGroup2, new short[]{1});
+        storeService.createPartitionGroup(topic2, partitionGroup2, partitions);
 
         List<Broker> allNodes2 = new LinkedList<>();
         allNodes2.add(broker1);

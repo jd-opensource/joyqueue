@@ -176,7 +176,7 @@ public class ReplicaGroup extends Service {
      * @param nodeId 要删除的节点Id
      */
     public void removeNode(int nodeId) {
-        cancelHeartbeatTimer(getReplica(nodeId));
+        //cancelHeartbeatTimer(getReplica(nodeId));
 
         replicas = replicas.stream()
                 .filter(r -> r.replicaId() != nodeId)
@@ -243,9 +243,10 @@ public class ReplicaGroup extends Service {
 
         //replicasWithoutLearners.forEach(this::startNewHeartbeat);
 
-        logger.info("Partition group {}/node {} become leader, term is {}, writePosition is {}, " +
-                    "commit position is {}",
-                topicPartitionGroup, leaderId, term, writePosition, replicableStore.commitPosition());
+        logger.info("Partition group {}/node {} become leader, term is {}, left position is {}, " +
+                "writePosition is {}, commit position is {}",
+                topicPartitionGroup, leaderId, term, replicableStore.leftPosition(),
+                writePosition, replicableStore.commitPosition());
 
     }
 
@@ -256,14 +257,15 @@ public class ReplicaGroup extends Service {
      */
     public void becomeFollower(int term, int leaderId) {
         logger.info("Partition group {}/node {} become follower, term is {}, leader is {}, " +
-                    "write position is {}, commit position is {}",
-                topicPartitionGroup, localReplicaId, term, leaderId, replicableStore.rightPosition(),
-                replicableStore.commitPosition());
+                    "left position is {} ,write position is {}, commit position is {}",
+                topicPartitionGroup, localReplicaId, term, leaderId, replicableStore.leftPosition(),
+                replicableStore.rightPosition(), replicableStore.commitPosition());
+
         state = FOLLOWER;
         currentTerm = term;
         this.leaderId = leaderId;
 
-        replicasWithoutLearners.forEach(this::cancelHeartbeatTimer);
+        //replicasWithoutLearners.forEach(this::cancelHeartbeatTimer);
 
     }
 
@@ -369,9 +371,11 @@ public class ReplicaGroup extends Service {
 
                     JMQHeader header = new JMQHeader(Direction.REQUEST, CommandType.RAFT_APPEND_ENTRIES_REQUEST);
 
-                    logger.debug("Partition group {}/node {} send append entries request {} to node {}, " +
-                            "read entries elapse {} us",
-                            topicPartitionGroup, leaderId, request, replica.replicaId(), usTime() - startTimeUs);
+                    if (!replica.isMatch() || logger.isDebugEnabled()) {
+                        logger.info("Partition group {}/node {} send append entries request {} to node {}, " +
+                                        "read entries elapse {} us",
+                                topicPartitionGroup, leaderId, request, replica.replicaId(), usTime() - startTimeUs);
+                    }
 
                     replicationManager.sendCommand(replica.getAddress(), new Command(header, request),
                             electionConfig.getSendCommandTimeout(),
@@ -554,7 +558,7 @@ public class ReplicaGroup extends Service {
         long commitPosition = replicasWithoutLearners.get(replicasWithoutLearners.size() / 2).writePosition();
         replicableStore.commit(commitPosition);
 
-        replicasWithoutLearners.forEach(r -> logger.debug("Partition group {}/node {}", topicPartitionGroup, r));
+        replicas.forEach(r -> logger.debug("Partition group {}/node {}", topicPartitionGroup, r));
         logger.debug("Partition group {}/node {} commit position is {}",
                 topicPartitionGroup, localReplicaId, replicableStore.commitPosition());
     }

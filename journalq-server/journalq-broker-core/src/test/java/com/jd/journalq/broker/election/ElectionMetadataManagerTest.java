@@ -13,7 +13,12 @@
  */
 package com.jd.journalq.broker.election;
 
+import com.jd.journalq.broker.config.Configuration;
 import com.jd.journalq.domain.PartitionGroup;
+import com.jd.journalq.store.Store;
+import com.jd.journalq.store.StoreConfig;
+import com.jd.journalq.store.StoreService;
+import com.jd.journalq.toolkit.io.Files;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -39,6 +44,13 @@ public class ElectionMetadataManagerTest {
     private TopicPartitionGroup fixTopic = new TopicPartitionGroup("fix", 1);
     private TopicPartitionGroup raftTopic = new TopicPartitionGroup("test/raft", 2);
     private ElectionManager electionManager;
+    private StoreService storeService;
+
+
+    private String getStoreDir() {
+        String property = "java.io.tmpdir";
+        return System.getProperty(property) + "store";
+    }
 
     private String getElectionDir() {
         String property = "java.io.tmpdir";
@@ -46,7 +58,7 @@ public class ElectionMetadataManagerTest {
     }
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         File file = new File(metadataFile);
         file.delete();
 
@@ -56,15 +68,29 @@ public class ElectionMetadataManagerTest {
         learners.add(1);
         learners.add(2);
 
-        electionManager = new ElectionManager();
+        Configuration conf = new Configuration();
+        StoreConfig storeConfig = new StoreConfig(conf);
+        storeConfig.setPath(getStoreDir());
+        storeService = new Store(storeConfig);
+        ((Store) storeService).start();
+
+        ElectionConfig electionConfig = new ElectionConfig(conf);
+        electionConfig.setElectionMetaPath(getElectionDir());
+        electionConfig.setElectionMetaFile(getElectionDir() + ".dat");
+        electionConfig.setListenPort("18000");
+
+        electionManager = new ElectionManagerStub(electionConfig, storeService, new ConsumeStub());
+        electionManager.start();
     }
 
     @After
     public void teardown() {
-        File file = new File(metadataFile);
-        file.delete();
-        file = new File(metadataPath);
-        file.delete();
+        ((Store)storeService).stop();
+        electionManager.stop();
+
+        Files.deleteDirectory(new File(metadataPath));
+        Files.deleteDirectory(new File(getStoreDir()));
+        new File(metadataFile).delete();
     }
 
     @Test

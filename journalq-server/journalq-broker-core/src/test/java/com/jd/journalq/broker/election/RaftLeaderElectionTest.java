@@ -20,6 +20,7 @@ import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.store.*;
 import com.jd.journalq.store.replication.ReplicableStore;
 import com.jd.journalq.toolkit.concurrent.EventListener;
+import com.jd.journalq.toolkit.io.Files;
 import com.jd.journalq.toolkit.network.IpUtil;
 import org.junit.After;
 import org.junit.Assert;
@@ -59,9 +60,10 @@ public class RaftLeaderElectionTest {
     private String[] topics = new String[TOPIC_NUM];
 
 
-    private ProduceTask produceTask = new ProduceTask(storeServices[0], topic1, partitionGroup1);
-    private ConsumeTask consumeTask = new ConsumeTask(storeServices[0], topic1, partitionGroup1);
+    private ProduceTask produceTask;
+    private ConsumeTask consumeTask;
 
+    private short[] partitions = new short[]{0, 1, 2, 3, 4};
 
     private String getStoreDir() {
         String property = "java.io.tmpdir";
@@ -110,13 +112,6 @@ public class RaftLeaderElectionTest {
 
     @After
     public void tearDown() {
-        if (produceTask.isAlive()) {
-            produceTask.interrupt();
-        }
-        if (consumeTask.isAlive()) {
-            consumeTask.interrupt();
-        }
-
         for (int i = 0; i < RAFT_ELECTION_NUM; i++) {
             if (storeServices[i] != null) {
                 storeServices[i].removePartitionGroup(topic1.getFullName(), partitionGroup1);
@@ -129,17 +124,16 @@ public class RaftLeaderElectionTest {
                 electionManager[i].onPartitionGroupRemove(topic1, partitionGroup1);
                 electionManager[i].stop();
             }
+
+            Files.deleteDirectory(new File(getStoreDir() + i));
+            Files.deleteDirectory(new File(getElectionDir() + i));
         }
 
-        File file = new File(getStoreDir());
-        file.delete();
-        file = new File(getElectionDir());
-        file.delete();
     }
 
     private void createElectionManager(List<Broker> allNodes) throws Exception {
         for (int i = 0; i < RAFT_ELECTION_NUM; i++) {
-            storeServices[i].createPartitionGroup(topic1.getFullName(), partitionGroup1, new short[]{1});
+            storeServices[i].createPartitionGroup(topic1.getFullName(), partitionGroup1, partitions);
             electionManager[i].onPartitionGroupCreate(PartitionGroup.ElectType.raft,
                     topic1, partitionGroup1, allNodes, new TreeSet<>(), brokers[i].getId(), -1);
             leaderElections[i] = electionManager[i].getLeaderElection(topic1, partitionGroup1);
@@ -161,7 +155,7 @@ public class RaftLeaderElectionTest {
         }
 
         for (int i = 0; i < RAFT_ELECTION_NUM; i++) {
-            storeServices[i].createPartitionGroup(topic1.getFullName(), partitionGroup1, new short[]{1});
+            storeServices[i].createPartitionGroup(topic1.getFullName(), partitionGroup1, partitions);
             electionManager[i].onPartitionGroupCreate(PartitionGroup.ElectType.raft,
                     topic1, partitionGroup1, allNodes, new TreeSet<Integer>(), brokers[i].getId(), -1);
             leaderElections[i] = electionManager[i].getLeaderElection(topic1, partitionGroup1);
@@ -222,7 +216,7 @@ public class RaftLeaderElectionTest {
     public void testOneNode() throws Exception {
         List<Broker> allNodes = new LinkedList<>();
         allNodes.add(brokers[0]);
-        storeServices[0].createPartitionGroup(topic1.getFullName(), partitionGroup1, new short[]{1});
+        storeServices[0].createPartitionGroup(topic1.getFullName(), partitionGroup1, partitions);
         electionManager[0].onPartitionGroupCreate(PartitionGroup.ElectType.raft,
                 topic1, partitionGroup1, allNodes, new TreeSet<>(), brokers[0].getId(), -1);
         leaderElections[0] = electionManager[0].getLeaderElection(topic1, partitionGroup1);
@@ -236,7 +230,9 @@ public class RaftLeaderElectionTest {
         }
         Assert.assertEquals(leaderId, 1);
 
+        produceTask = new ProduceTask(storeServices[leaderId - 1], topic1, partitionGroup1);
         produceTask.start();
+        consumeTask = new ConsumeTask(storeServices[leaderId - 1], topic1, partitionGroup1);
         consumeTask.start();
 
         Thread.sleep(10000);
@@ -271,7 +267,9 @@ public class RaftLeaderElectionTest {
         Assert.assertEquals(leaderId, leaderElections[1].getLeaderId());
         Assert.assertEquals(leaderId, leaderElections[2].getLeaderId());
 
+        produceTask = new ProduceTask(storeServices[leaderId - 1], topic1, partitionGroup1);
         produceTask.start();
+        consumeTask = new ConsumeTask(storeServices[leaderId - 1], topic1, partitionGroup1);
         consumeTask.start();
 
         for (int i = 0; i < 3; i++) {
@@ -336,7 +334,6 @@ public class RaftLeaderElectionTest {
 
     }
 
-
     @Test
     public void testMultiTopic() throws Exception{
 
@@ -347,7 +344,7 @@ public class RaftLeaderElectionTest {
 
         for (int i = 0; i < RAFT_ELECTION_NUM; i++) {
             for (int j = 0; j < TOPIC_NUM; j++) {
-                storeServices[i].createPartitionGroup(topics[j], partitionGroup1, new short[]{1});
+                storeServices[i].createPartitionGroup(topics[j], partitionGroup1, partitions);
                 electionManager[i].onPartitionGroupCreate(PartitionGroup.ElectType.raft,
                         TopicName.parse(topics[j]), partitionGroup1, allNodes, new TreeSet<Integer>(), brokers[i].getId(), -1);
                 multiLeaderElections[i][j] = electionManager[i].getLeaderElection(TopicName.parse(topics[j]), partitionGroup1);
@@ -438,7 +435,9 @@ public class RaftLeaderElectionTest {
         Assert.assertEquals(leaderId, leaderElections[1].getLeaderId());
         Assert.assertEquals(leaderId, leaderElections[2].getLeaderId());
 
+        produceTask = new ProduceTask(storeServices[leaderId - 1], topic1, partitionGroup1);
         produceTask.start();
+        consumeTask = new ConsumeTask(storeServices[leaderId - 1], topic1, partitionGroup1);
         consumeTask.start();
 
         Thread.sleep(10000);
@@ -478,7 +477,7 @@ public class RaftLeaderElectionTest {
         }
 
         for (int i = 0; i < RAFT_ELECTION_NUM; i++) {
-            storeServices[i].createPartitionGroup(topic1.getFullName(), partitionGroup1, new short[]{1});
+            storeServices[i].createPartitionGroup(topic1.getFullName(), partitionGroup1, partitions);
             electionManager[i].onPartitionGroupCreate(PartitionGroup.ElectType.raft,
                     topic1, partitionGroup1, allNodes, new TreeSet<>(), brokers[i].getId(), -1);
             leaderElections[i] = electionManager[i].getLeaderElection(topic1, partitionGroup1);
