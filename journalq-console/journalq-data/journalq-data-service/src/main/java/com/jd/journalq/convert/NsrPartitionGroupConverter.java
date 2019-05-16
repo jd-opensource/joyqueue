@@ -65,6 +65,7 @@ public class NsrPartitionGroupConverter extends Converter<TopicPartitionGroup,Pa
         if (partitionGroup.getPartitions() != null) {
             topicPartitionGroup.setPartitions(Arrays.toString(partitionGroup.getPartitions().toArray()));
         }
+        topicPartitionGroup.setReplicas(partitionGroup.getReplicas());
         topicPartitionGroup.setRecLeader(partitionGroup.getRecLeader());
         topicPartitionGroup.setLearners(partitionGroup.getLearners());
         topicPartitionGroup.setTerm(partitionGroup.getTerm());

@@ -36,6 +36,7 @@ public class TopicPartitionGroup implements Serializable {
     private transient Set<Integer> learners;
     private transient Set<Integer> partitionSet = new TreeSet<>();
     private transient Set<Integer> isr;
+    private transient Set<Integer> replicas;
     protected List<Integer> outSyncReplicas = new ArrayList<>();
 
     public String getId() {
@@ -153,6 +154,14 @@ public class TopicPartitionGroup implements Serializable {
 
     public void setTerm(Integer term) {
         this.term = term;
+    }
+
+    public Set<Integer> getReplicas() {
+        return replicas;
+    }
+
+    public void setReplicas(Set<Integer> replicas) {
+        this.replicas = replicas;
     }
 
     public List<Integer> getOutSyncReplicas() {
