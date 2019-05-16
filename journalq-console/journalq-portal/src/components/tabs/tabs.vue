@@ -32,6 +32,7 @@
                       }
                     ]"
                    v-for="(item, index) in navList" :key="index"
+                   v-show="item.visible"
                    @click="setNavByIndex(index)">
                 <!-- S icon -->
                 <Icon v-if="item.icon"
@@ -160,7 +161,7 @@ export default {
       const navList = this.navList
       for (let i = 0, len = navList.length; i < len; i++) {
         const item = navList[i]
-        if (item.name === this.activeKey) {
+        if (item.visible && item.name === this.activeKey) {
           return i
         }
       }
@@ -285,7 +286,8 @@ export default {
           name: item.currentName || index,
           disabled: item.disabled,
           icon: item.icon,
-          closable: item.isClosable
+          closable: item.isClosable,
+          visible: item.visible
         })
 
         if (!item.currentName) {
@@ -315,8 +317,8 @@ export default {
     switchTabsWithNoAnimated () {
       const tabs = this.getTabs()
 
-      tabs.forEach(item => {
-        item.show = (item.currentName === this.activeKey)
+      tabs.forEach((item, index) => {
+        item.show = (item.currentName === this.activeKey) || (index === this.activeIndex)
       })
     },
     updateHandle () {
