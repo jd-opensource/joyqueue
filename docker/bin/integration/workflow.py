@@ -21,6 +21,7 @@ import datetime
 import logging
 import time
 import json
+import fcntl
 from shlex import split
 import random
 from model.task import Task
@@ -50,13 +51,14 @@ class Workflow:
         self.mq_tag = str(time.time()).replace('.', '_')
         self.running_mq_containers = {}
         self.logger = logging.getLogger(__name__)
+        self.lockfile = open('{}/_filelock'.format(self.workspace.home), 'w')
         self.logger.setLevel(logging.DEBUG)
 
     def run(self):
         start = time.time()
         result = 'unknown'
         try:
-            # self.__lock_local_workspace()
+            self.__lock_local_workspace()
             self.__prepare_pressure_worker()
             self.__prepare_mq_worker()
             self.__start_mq_cluster_workers()
@@ -489,8 +491,12 @@ class Workflow:
         return self.__run_script(bash, script)
 
     def __lock_local_workspace(self):
-        self.logger.info('>>> Lock local workspace.')
-
+        self.logger.info('>>> Try lock local workspace.')
+        try:
+            fcntl.flock(self.lockfile.fileno(), fcntl.LOCK_EX)
+            self.logger.info('>>> Get local workspace lock successful!.')
+        except IOError as err:
+            self.logger.info('>>> Lock local workspace .', err)
 
     def __parse_password(self, filename):
         file = Path(filename)
@@ -540,7 +546,7 @@ class Workflow:
 
     def __unlock_local_task_home(self):
         self.logger.info('>>> Unlock local workspace.')
-
+        fcntl.lockf(self.lockfile.fileno(), fcntl.LOCK_UN)
 
 class WorkflowError(Exception):
 
