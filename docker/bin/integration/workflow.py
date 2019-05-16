@@ -111,6 +111,8 @@ class Workflow:
             else
                 echo 'use default benchmark config'
             fi
+            # license format 
+            mvn com.mycila:license-maven-plugin:3.0:format -f pom.xml
             mvn -P docker install 
         """.format(home=self.workspace.home,
                    repo=self.task.pressure_repo,
