@@ -100,10 +100,11 @@ class Workflow:
         script = """
             cd {home}
             # empty dir
-            if [[ "$(ls -A {home})" ]]; then 
-                rm -r *
+            if [[ $(ls -A {home}) && -d {home}/{repo_name} ]]; then 
+                rm -r {home}/{repo_name}
             else
                 echo '{home} is clean'
+                ls -l 
             fi      
             git clone {repo}
             cd {repo_name}
