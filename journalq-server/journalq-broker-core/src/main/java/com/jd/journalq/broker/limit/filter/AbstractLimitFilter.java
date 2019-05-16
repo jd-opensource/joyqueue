@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * LimitFilter
+ * AbstractLimitFilter
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2019/5/16

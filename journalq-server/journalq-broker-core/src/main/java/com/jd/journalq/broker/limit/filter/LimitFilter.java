@@ -36,8 +36,8 @@ public class LimitFilter extends AbstractLimitFilter implements BrokerContextAwa
     }
 
     @Override
-    protected boolean limitIfNeeded(String topic, String app, String trafficType, Traffic traffic) {
-        RateLimiter rateLimiter = rateLimiterManager.getRateLimiter(topic, app, trafficType);
+    protected boolean limitIfNeeded(String topic, String app, String type, Traffic traffic) {
+        RateLimiter rateLimiter = rateLimiterManager.getRateLimiter(topic, app, type);
         return !rateLimiter.tryAcquireTps() || !rateLimiter.tryAcquireTraffic(traffic.getTraffic(topic));
     }
 
@@ -46,8 +46,8 @@ public class LimitFilter extends AbstractLimitFilter implements BrokerContextAwa
         int delay = getDelay(transport, request, response);
         LimitContext limitContext = new LimitContext(transport, request, response, delay);
 
-        if (logger.isInfoEnabled()) {
-            logger.info("traffic limit, transport: {}, request: {}, response: {}, delay: {}", transport, request, response, delay);
+        if (logger.isDebugEnabled()) {
+            logger.debug("traffic limit, transport: {}, request: {}, response: {}, delay: {}", transport, request, response, delay);
         }
         return limitRejectedStrategy.execute(limitContext);
     }
