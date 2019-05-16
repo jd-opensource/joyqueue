@@ -23,6 +23,7 @@ import com.jd.journalq.toolkit.time.SystemClock;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +41,7 @@ import java.util.stream.IntStream;
  * @author liyue25
  * Date: 2018-11-28
  */
+@Ignore
 public class PositioningStoreTest {
     private static final Logger logger = LoggerFactory.getLogger(PositioningStoreTest.class);
     private File base = null;
