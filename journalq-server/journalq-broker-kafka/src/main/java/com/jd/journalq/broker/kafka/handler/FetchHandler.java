@@ -32,6 +32,7 @@ import com.jd.journalq.broker.kafka.helper.KafkaClientHelper;
 import com.jd.journalq.broker.kafka.message.KafkaBrokerMessage;
 import com.jd.journalq.broker.kafka.message.converter.KafkaMessageConverter;
 import com.jd.journalq.broker.kafka.model.FetchResponsePartitionData;
+import com.jd.journalq.broker.network.traffic.Traffic;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.message.BrokerMessage;
@@ -77,6 +78,7 @@ public class FetchHandler extends AbstractKafkaCommandHandler implements KafkaCo
         String clientId = KafkaClientHelper.parseClient(fetchRequest.getClientId());
         String clientIp = ((InetSocketAddress) transport.remoteAddress()).getHostString();
         int maxBytes = fetchRequest.getMaxBytes();
+        Traffic traffic = new Traffic(clientId);
 
         Table<String, Integer, FetchResponsePartitionData> fetchResponseTable = HashBasedTable.create();
         int currentBytes = 0;
@@ -104,11 +106,11 @@ public class FetchHandler extends AbstractKafkaCommandHandler implements KafkaCo
 
                 currentBytes += fetchDataInfo.getBytes();
                 fetchResponseTable.put(topic.getFullName(), partition, fetchDataInfo);
+                traffic.record(topic.getFullName(), fetchDataInfo.getBytes());
             }
         }
 
-        FetchResponse fetchResponse = new FetchResponse();
-        fetchResponse.setFetchResponses(fetchResponseTable);
+        FetchResponse fetchResponse = new FetchResponse(traffic, fetchResponseTable);
         return new Command(fetchResponse);
     }
 
@@ -127,7 +129,7 @@ public class FetchHandler extends AbstractKafkaCommandHandler implements KafkaCo
         int currentBytes = 0;
 
         // 判断总体长度
-        while (currentBytes < maxBytes) {
+        while (currentBytes < maxBytes && offset < maxIndex) {
             List<ByteBuffer> buffers = null;
             try {
                 buffers = doFetchMessage(consumer, partition, offset, batchSize);
@@ -179,11 +181,11 @@ public class FetchHandler extends AbstractKafkaCommandHandler implements KafkaCo
 
     private List<ByteBuffer> doFetchMessage(Consumer consumer, int partition, long offset, int batchSize) throws Exception {
         PullResult pullResult = consume.getMessage(consumer, (short) partition, offset, batchSize);
-        if (pullResult.size() == 0) {
+        if (pullResult.getJournalqCode() != JournalqCode.SUCCESS) {
+            logger.warn("fetch message error, consumer: {}, partition: {}, offset: {}, batchSize: {}, code: {}", consumer, partition, offset, batchSize, pullResult.getJournalqCode());
             return null;
         }
-        if (pullResult.getJournalqCode() != JournalqCode.SUCCESS) {
-            logger.warn("fetch message error, consumer: {}, partition: {}, offset: {}, batchSize: {}", consumer, partition, offset, batchSize);
+        if (pullResult.size() == 0) {
             return null;
         }
         return pullResult.getBuffers();

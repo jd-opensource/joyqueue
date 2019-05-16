@@ -176,22 +176,6 @@ public class GroupBalanceManager extends Service {
         }
     }
 
-    public void removeHeartbeatExpiredMemberAndUpdateGroup(KafkaCoordinatorGroup group, KafkaCoordinatorGroupMember member) {
-        logger.info("member {} in group {} has failed, group state is {}, member count is {}",
-                member.getId(), group.getId(), group.getState(), group.getAllMemberIds().size());
-
-        group.removeMember(member.getId());
-        switch (group.getState()) {
-            case DEAD:
-            case EMPTY:
-                break;
-            case STABLE:
-            case AWAITINGSYNC:
-                maybePrepareRebalance(group);
-                break;
-        }
-    }
-
     public void removeMemberAndUpdateGroup(KafkaCoordinatorGroup group, KafkaCoordinatorGroupMember member) {
         logger.info("member {} in group {} has failed, group state is {}, member count is {}",
                 member.getId(), group.getId(), group.getState(), group.getAllMemberIds().size());

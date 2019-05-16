@@ -66,17 +66,11 @@ public class KafkaCommandHandlerFactory extends DefaultCommandHandlerFactory {
 
     @Override
     public void register(CommandHandler commandHandler) {
-        if (commandHandler instanceof AbstractKafkaCommandHandler) {
-            commandHandler = kafkaContext.getRateLimitHandlerFactory().create((AbstractKafkaCommandHandler) commandHandler);
-        }
         super.register(commandHandler);
     }
 
     @Override
     public void register(int type, CommandHandler commandHandler) {
-        if (commandHandler instanceof AbstractKafkaCommandHandler) {
-            commandHandler = kafkaContext.getRateLimitHandlerFactory().create((AbstractKafkaCommandHandler) commandHandler);
-        }
         super.register(type, commandHandler);
     }
 }

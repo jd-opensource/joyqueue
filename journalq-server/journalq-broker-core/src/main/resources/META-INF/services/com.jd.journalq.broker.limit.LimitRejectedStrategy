@@ -1,0 +1,3 @@
+com.jd.journalq.broker.limit.support.BlockLimitRejectedStrategy
+com.jd.journalq.broker.limit.support.DelayLimitRejectedStrategy
+com.jd.journalq.broker.limit.support.ExceptionLimitRejectedStrategy

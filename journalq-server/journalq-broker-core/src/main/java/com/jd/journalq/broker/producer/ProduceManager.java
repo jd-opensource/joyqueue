@@ -332,7 +332,7 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
             }
             PartitionGroupStore partitionStore = store.getStore(topic, partitionGroup.getGroup(), qosLevel);
             List<WriteRequest> writeRequests = dispatchedMsgs.get(partitionGroup);
-            long startTime = System.nanoTime();
+            long startTime = SystemClock.now();
 
             // 异步写入磁盘
             if(null != metric) {

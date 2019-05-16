@@ -14,15 +14,17 @@
 package com.jd.journalq.broker.handler;
 
 import com.google.common.collect.Maps;
-import com.jd.journalq.broker.cluster.ClusterManager;
-import com.jd.journalq.broker.consumer.Consume;
-import com.jd.journalq.broker.consumer.model.PullResult;
-import com.jd.journalq.broker.helper.SessionHelper;
 import com.jd.journalq.broker.JournalqCommandHandler;
 import com.jd.journalq.broker.JournalqContext;
 import com.jd.journalq.broker.JournalqContextAware;
+import com.jd.journalq.broker.cluster.ClusterManager;
+import com.jd.journalq.broker.command.FetchTopicMessageAck;
+import com.jd.journalq.broker.consumer.Consume;
+import com.jd.journalq.broker.consumer.model.PullResult;
 import com.jd.journalq.broker.converter.CheckResultConverter;
+import com.jd.journalq.broker.helper.SessionHelper;
 import com.jd.journalq.broker.monitor.SessionManager;
+import com.jd.journalq.broker.network.traffic.Traffic;
 import com.jd.journalq.broker.polling.LongPolling;
 import com.jd.journalq.broker.polling.LongPollingManager;
 import com.jd.journalq.domain.TopicName;
@@ -30,7 +32,6 @@ import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.network.command.BooleanAck;
 import com.jd.journalq.network.command.FetchTopicMessage;
-import com.jd.journalq.network.command.FetchTopicMessageAck;
 import com.jd.journalq.network.command.FetchTopicMessageAckData;
 import com.jd.journalq.network.command.FetchTopicMessageData;
 import com.jd.journalq.network.command.JournalqCommandType;
@@ -83,6 +84,7 @@ public class FetchTopicMessageHandler implements JournalqCommandHandler, Type, J
 
         boolean isNeedLongPoll = fetchTopicMessage.getTopics().size() == 1 && fetchTopicMessage.getLongPollTimeout() > 0;
         Map<String, FetchTopicMessageAckData> result = Maps.newHashMapWithExpectedSize(fetchTopicMessage.getTopics().size());
+        Traffic traffic = new Traffic(fetchTopicMessage.getApp());
 
         for (Map.Entry<String, FetchTopicMessageData> entry : fetchTopicMessage.getTopics().entrySet()) {
             String topic = entry.getKey();
@@ -112,10 +114,12 @@ public class FetchTopicMessageHandler implements JournalqCommandHandler, Type, J
                 }
             }
 
+            traffic.record(topic, fetchTopicMessageAckData.getSize());
             result.put(topic, fetchTopicMessageAckData);
         }
 
         FetchTopicMessageAck fetchTopicMessageAck = new FetchTopicMessageAck();
+        fetchTopicMessageAck.setTraffic(traffic);
         fetchTopicMessageAck.setData(result);
         return new Command(fetchTopicMessageAck);
     }

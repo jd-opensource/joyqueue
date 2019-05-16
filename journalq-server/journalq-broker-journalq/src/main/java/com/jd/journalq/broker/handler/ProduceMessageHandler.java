@@ -18,10 +18,12 @@ import com.google.common.collect.Maps;
 import com.jd.journalq.broker.JournalqCommandHandler;
 import com.jd.journalq.broker.JournalqContext;
 import com.jd.journalq.broker.JournalqContextAware;
-import com.jd.journalq.broker.converter.CheckResultConverter;
-import com.jd.journalq.broker.config.JournalqConfig;
 import com.jd.journalq.broker.cluster.ClusterManager;
+import com.jd.journalq.broker.command.ProduceMessageAck;
+import com.jd.journalq.broker.config.JournalqConfig;
+import com.jd.journalq.broker.converter.CheckResultConverter;
 import com.jd.journalq.broker.helper.SessionHelper;
+import com.jd.journalq.broker.network.traffic.Traffic;
 import com.jd.journalq.broker.producer.Produce;
 import com.jd.journalq.domain.QosLevel;
 import com.jd.journalq.domain.TopicName;
@@ -31,7 +33,6 @@ import com.jd.journalq.message.BrokerMessage;
 import com.jd.journalq.network.command.BooleanAck;
 import com.jd.journalq.network.command.JournalqCommandType;
 import com.jd.journalq.network.command.ProduceMessage;
-import com.jd.journalq.network.command.ProduceMessageAck;
 import com.jd.journalq.network.command.ProduceMessageAckData;
 import com.jd.journalq.network.command.ProduceMessageAckItemData;
 import com.jd.journalq.network.command.ProduceMessageData;
@@ -89,6 +90,7 @@ public class ProduceMessageHandler implements JournalqCommandHandler, Type, Jour
         boolean isNeedAck = !qosLevel.equals(QosLevel.ONE_WAY);
         CountDownLatch latch = new CountDownLatch(produceMessage.getData().size());
         Map<String, ProduceMessageAckData> resultData = Maps.newConcurrentMap();
+        Traffic traffic = new Traffic(produceMessage.getApp());
 
         for (Map.Entry<String, ProduceMessageData> entry : produceMessage.getData().entrySet()) {
             String topic = entry.getKey();
@@ -114,6 +116,7 @@ public class ProduceMessageHandler implements JournalqCommandHandler, Type, Jour
 
             produceMessage(connection, topic, produceMessage.getApp(), produceMessageData, (data) -> {
                 resultData.put(topic, data);
+                traffic.record(topic, produceMessageData.getSize());
                 latch.countDown();
             });
         }
@@ -132,6 +135,7 @@ public class ProduceMessageHandler implements JournalqCommandHandler, Type, Jour
         }
 
         ProduceMessageAck produceMessageAck = new ProduceMessageAck();
+        produceMessageAck.setTraffic(traffic);
         produceMessageAck.setData(resultData);
         return new Command(produceMessageAck);
     }

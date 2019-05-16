@@ -29,6 +29,7 @@ import com.jd.journalq.broker.kafka.helper.KafkaClientHelper;
 import com.jd.journalq.broker.kafka.message.KafkaBrokerMessage;
 import com.jd.journalq.broker.kafka.message.converter.KafkaMessageConverter;
 import com.jd.journalq.broker.kafka.model.ProducePartitionStatus;
+import com.jd.journalq.broker.network.traffic.Traffic;
 import com.jd.journalq.broker.producer.Produce;
 import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.domain.QosLevel;
@@ -77,6 +78,7 @@ public class ProduceHandler extends AbstractKafkaCommandHandler implements Broke
         KafkaAcknowledge kafkaAcknowledge = KafkaAcknowledge.valueOf(produceRequest.getRequiredAcks());
         QosLevel qosLevel = KafkaAcknowledge.convertToQosLevel(kafkaAcknowledge);
         String clientId = KafkaClientHelper.parseClient(produceRequest.getClientId());
+        Traffic traffic = new Traffic(clientId);
 
         Map<String, List<ProducePartitionStatus>> produceResponseStatusMap = Maps.newHashMap();
         Table<TopicName, Integer, List<KafkaBrokerMessage>> topicPartitionTable = produceRequest.getTopicPartitionMessages();
@@ -125,6 +127,7 @@ public class ProduceHandler extends AbstractKafkaCommandHandler implements Broke
                 for (KafkaBrokerMessage message : entry.getValue()) {
                     BrokerMessage brokerMessage = KafkaMessageConverter.toBrokerMessage(producer.getTopic(), partition, producer.getApp(), clientAddress, message);
                     partitionMessageList.add(brokerMessage);
+                    traffic.record(topic.getFullName(), brokerMessage.getSize());
                 }
             }
 
@@ -154,7 +157,7 @@ public class ProduceHandler extends AbstractKafkaCommandHandler implements Broke
             logger.error("wait produce exception, transport: {}", transport.remoteAddress(), e);
         }
 
-        ProduceResponse response = new ProduceResponse(produceResponseStatusMap);
+        ProduceResponse response = new ProduceResponse(traffic, produceResponseStatusMap);
         return new Command(response);
     }
 

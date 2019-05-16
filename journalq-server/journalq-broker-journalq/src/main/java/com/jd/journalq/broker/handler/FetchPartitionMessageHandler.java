@@ -15,20 +15,21 @@ package com.jd.journalq.broker.handler;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
-import com.jd.journalq.broker.JournalqCommandHandler;
-import com.jd.journalq.broker.converter.CheckResultConverter;
 import com.jd.journalq.broker.BrokerContext;
 import com.jd.journalq.broker.BrokerContextAware;
+import com.jd.journalq.broker.JournalqCommandHandler;
 import com.jd.journalq.broker.cluster.ClusterManager;
+import com.jd.journalq.broker.command.FetchPartitionMessageAck;
 import com.jd.journalq.broker.consumer.Consume;
 import com.jd.journalq.broker.consumer.model.PullResult;
+import com.jd.journalq.broker.converter.CheckResultConverter;
 import com.jd.journalq.broker.helper.SessionHelper;
+import com.jd.journalq.broker.network.traffic.Traffic;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.network.command.BooleanAck;
 import com.jd.journalq.network.command.FetchPartitionMessage;
-import com.jd.journalq.network.command.FetchPartitionMessageAck;
 import com.jd.journalq.network.command.FetchPartitionMessageAckData;
 import com.jd.journalq.network.command.FetchPartitionMessageData;
 import com.jd.journalq.network.command.JournalqCommandType;
@@ -74,6 +75,7 @@ public class FetchPartitionMessageHandler implements JournalqCommandHandler, Typ
         }
 
         Table<String, Short, FetchPartitionMessageAckData> result = HashBasedTable.create();
+        Traffic traffic = new Traffic(fetchPartitionMessage.getApp());
 
         for (Map.Entry<String, Map<Short, FetchPartitionMessageData>> entry : fetchPartitionMessage.getPartitions().rowMap().entrySet()) {
             String topic = entry.getKey();
@@ -91,10 +93,12 @@ public class FetchPartitionMessageHandler implements JournalqCommandHandler, Typ
                 FetchPartitionMessageData fetchPartitionMessageData = partitionEntry.getValue();
                 FetchPartitionMessageAckData fetchPartitionMessageAckData = fetchMessage(transport, consumer, partition, fetchPartitionMessageData.getIndex(), fetchPartitionMessageData.getCount());
                 result.put(topic, partitionEntry.getKey(), fetchPartitionMessageAckData);
+                traffic.record(topic, fetchPartitionMessageAckData.getSize());
             }
         }
 
         FetchPartitionMessageAck fetchPartitionMessageAck = new FetchPartitionMessageAck();
+        fetchPartitionMessageAck.setTraffic(traffic);
         fetchPartitionMessageAck.setData(result);
         return new Command(fetchPartitionMessageAck);
     }

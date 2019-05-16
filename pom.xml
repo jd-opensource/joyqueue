@@ -881,9 +881,8 @@
                     </configuration>
                 </plugin>
                 <!--<plugin>-->
-                <!--<groupId>org.apache.maven.plugins</groupId>-->
-                <!--<artifactId>maven-deploy-plugin</artifactId>-->
-                <!--<version>${maven-deploy-plugin.version}</version>-->
+                    <!--<groupId>org.apache.maven.plugins</groupId>-->
+                    <!--<artifactId>maven-deploy-plugin</artifactId>-->
                 <!--</plugin>-->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -1056,6 +1055,11 @@
             <name>JD maven2 repository-snapshots</name>
             <url>http://artifactory.jd.com/libs-snapshots-local</url>
         </snapshotRepository>
+        <repository>
+            <id>releases</id>
+            <name>JD maven2 repository-snapshots</name>
+            <url>http://artifactory.jd.com/libs-releases-local</url>
+        </repository>
     </distributionManagement>
 
     <modules>
