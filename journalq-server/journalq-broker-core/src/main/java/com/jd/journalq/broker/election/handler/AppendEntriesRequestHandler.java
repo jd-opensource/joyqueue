@@ -56,14 +56,14 @@ public class AppendEntriesRequestHandler implements CommandHandler, Type {
 
     @Override
     public Command handle(Transport transport, Command command) throws TransportException {
-        logger.debug("Receive append entries request from {}", transport.remoteAddress());
-
         AppendEntriesRequest request = (AppendEntriesRequest) command.getPayload();
         if (request == null) {
             logger.warn("Receive append entries request from {}, request is null", transport.remoteAddress());
             throw new TransportException("Append entries request payload is null",
                     JournalqCode.CT_MESSAGE_BODY_NULL.getCode());
         }
+
+        logger.debug("Receive append entries request {} from {}", request, transport.remoteAddress());
 
         try {
             LeaderElection leaderElection = electionManager.getLeaderElection(request.getTopic(),

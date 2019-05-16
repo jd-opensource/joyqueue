@@ -22,4 +22,6 @@
 <suppressions>
     <suppress checks="RegexpMultiline"
               files="SystemClock.java"/>
+    <suppress checks="RegexpMultiline"
+              files="Exceptions.java"/>
 </suppressions>

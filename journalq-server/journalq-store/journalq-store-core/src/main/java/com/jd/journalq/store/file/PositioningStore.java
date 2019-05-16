@@ -341,10 +341,13 @@ public class PositioningStore<T> implements Closeable {
 
 
     private StoreFile<T> createStoreFile(long position) {
+
         StoreFile<T> storeFile = new StoreFileImpl<>(position, base, fileHeaderSize, serializer, bufferPool, fileDataSize);
         StoreFile<T> present;
         if ((present = storeFileMap.putIfAbsent(position, storeFile)) != null) {
             storeFile = present;
+        } else {
+            checkDiskFreeSpace(base, fileDataSize + fileHeaderSize);
         }
         logger.info("Store file created, leftPosition: {}, rightPosition: {}, flushPosition: {}, base: {}.",
                 Format.formatWithComma(left()),
@@ -353,6 +356,12 @@ public class PositioningStore<T> implements Closeable {
                 base.getAbsolutePath()
                 );
         return storeFile;
+    }
+
+    private void checkDiskFreeSpace(File file, long fileSize) {
+        if(file.getFreeSpace() < fileSize) {
+            throw new DiskFullException(file);
+        }
     }
 
     public T read(long position) throws IOException {
@@ -588,8 +597,8 @@ public class PositioningStore<T> implements Closeable {
         return storeFileMap.size();
     }
 
-    public boolean meetMinStoreFile(long minIndexedPhysicalPosition) {
-        return storeFileMap.headMap(minIndexedPhysicalPosition).size() > 0;
+    public int meetMinStoreFile(long minIndexedPhysicalPosition) {
+        return storeFileMap.headMap(minIndexedPhysicalPosition).size();
     }
 
     public boolean isEarly(long timestamp, long minIndexedPhysicalPosition) {

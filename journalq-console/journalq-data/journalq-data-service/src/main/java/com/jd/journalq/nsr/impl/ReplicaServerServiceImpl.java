@@ -113,8 +113,8 @@ public class ReplicaServerServiceImpl extends NameServerBase implements ReplicaS
             return replicas.stream().map(replica -> nsrReplicaConverter.revert(replica)).collect(Collectors.toList());
         } catch (Exception e) {
             logger.error("LIST_REPLICA error",e);
+            throw new RuntimeException("LIST_REPLICA error",e);
         }
-        return null;
     }
 
     @Override

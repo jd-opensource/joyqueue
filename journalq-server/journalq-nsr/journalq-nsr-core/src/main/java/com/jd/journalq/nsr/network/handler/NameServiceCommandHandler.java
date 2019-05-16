@@ -11,19 +11,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/**
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.jd.journalq.nsr.network.handler;
 
 import com.jd.journalq.domain.AppToken;
@@ -120,8 +107,7 @@ public class NameServiceCommandHandler implements NsrCommandHandler, Types, com.
     @Override
     public int[] types() {
         return new int[]{
-                NsrCommandType
-                        .ADD_TOPIC,
+                NsrCommandType.ADD_TOPIC,
                 NsrCommandType.GET_ALL_BROKERS,
                 NsrCommandType.GET_ALL_CONFIG,
                 NsrCommandType.GET_ALL_TOPICS,
@@ -154,8 +140,7 @@ public class NameServiceCommandHandler implements NsrCommandHandler, Types, com.
     public Command handle(Transport transport, Command command) {
         Command response = null;
         switch (command.getHeader().getType()) {
-            case NsrCommandType
-                    .ADD_TOPIC:
+            case NsrCommandType.ADD_TOPIC:
                 AddTopic addTopic = (AddTopic) command.getPayload();
                 nameService.addTopic(addTopic.getTopic(), addTopic.getPartitionGroups());
                 response = BooleanAck.build();
@@ -253,6 +238,7 @@ public class NameServiceCommandHandler implements NsrCommandHandler, Types, com.
                 break;
             case NsrCommandType.LEADER_REPORT:
                 LeaderReport leaderReport = (LeaderReport) command.getPayload();
+                logger.info("Name service receive leader report command {} from {}", leaderReport, transport.remoteAddress());
                 nameService.leaderReport(leaderReport.getTopic(), leaderReport.getPartitionGroup(), leaderReport.getLeaderBrokerId(), leaderReport.getIsrId(), leaderReport.getTermId());
                 response = new Command(new LeaderReportAck());
                 break;
@@ -261,8 +247,10 @@ public class NameServiceCommandHandler implements NsrCommandHandler, Types, com.
                 Broker brokerRegister = nameService.register(register.getBrokerId(), register.getBrokerIp(), register.getPort());
                 if (null != brokerRegister) {
                     fillTransportBrokerId(transport, brokerRegister.getId());
+                    response = new Command(new RegisterAck().broker(brokerRegister));
+                } else {
+                    response = BooleanAck.build(JournalqCode.NSR_REGISTER_ERR_BROKER_NOT_EXIST);
                 }
-                response = new Command(new RegisterAck().broker(brokerRegister));
                 break;
             case NsrCommandType.SUBSCRIBE:
                 Subscribe subscribe = (Subscribe) command.getPayload();

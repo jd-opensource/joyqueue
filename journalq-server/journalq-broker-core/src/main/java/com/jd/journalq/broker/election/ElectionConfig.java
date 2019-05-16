@@ -132,6 +132,14 @@ public class ElectionConfig {
         return PropertySupplier.getValue(propertySupplier, ElectionConfigKey.TRANSFER_LEADER_MIN_LAG);
     }
 
+    public boolean enableRebalanceLeader() {
+        return PropertySupplier.getValue(propertySupplier, ElectionConfigKey.ENABLE_REBALANCE_LEADER);
+    }
+
+    public int getMaxRebalanceLeaderInterval() {
+        return PropertySupplier.getValue(propertySupplier, ElectionConfigKey.MAX_REBALANCE_INTERVAL);
+    }
+
     public void setListenPort(String port) {
         listenPort = Integer.valueOf(port);
     }

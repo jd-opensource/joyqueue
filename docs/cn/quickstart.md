@@ -51,7 +51,7 @@ JournalQ 提供Java、Spring 以及Spring Boot三种客户端使用形式。
 <dependency>
     <groupId>com.jd.journalq</groupId>
     <artifactId>journalq-client-core</artifactId>
-    <version>4.0.0-SNAPSHOT</version>
+    <version>4.0.2</version>
 </dependency>
 ```
 
@@ -129,7 +129,7 @@ public static void main(String[] args) throws Exception {
 <dependency>
     <groupId>com.jd.journalq</groupId>
     <artifactId>journalq-client-core</artifactId>
-    <version>4.0.0-SNAPSHOT</version>
+    <version>4.0.2</version>
 </dependency>
 <dependency>
     <groupId>io.openmessaging</groupId>
@@ -188,7 +188,7 @@ protected static final Logger logger = LoggerFactory.getLogger(SpringMain.class)
 <dependency>
     <groupId>com.jd.journalq</groupId>
     <artifactId>journalq-client-core</artifactId>
-    <version>4.0.0-SNAPSHOT</version>
+    <version>4.0.2</version>
 </dependency>
 <dependency>
    <groupId>io.openmessaging</groupId>
