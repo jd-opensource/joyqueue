@@ -158,14 +158,20 @@ export default {
       return this.prevable || this.nextable
     },
     activeIndex () {
+      let firstVisibleIndex = -1
       const navList = this.navList
       for (let i = 0, len = navList.length; i < len; i++) {
         const item = navList[i]
-        if (item.visible && item.name === this.activeKey) {
-          return i
+        if (item.visible) {
+          if (firstVisibleIndex < 0) {
+            firstVisibleIndex = i
+          }
+          if (item.name === this.activeKey) {
+            return i
+          }
         }
       }
-      return 0
+      return firstVisibleIndex
     },
     tabsBodyTranslateStyle () {
       const activeIndex = this.activeIndex
@@ -294,7 +300,8 @@ export default {
           item.currentName = index
         }
 
-        if (index === 0 && !this.activeKey) {
+        // 取第一个可见的pane
+        if (item.visible && !this.activeKey) {
           this.activeKey = item.currentName || index
         }
 
