@@ -46,7 +46,6 @@ import java.util.stream.IntStream;
  * @author liyue25
  * Date: 2018/8/30
  */
-@Ignore
 public class PartitionGroupStoreManagerTest {
     private static final Logger logger = LoggerFactory.getLogger(PartitionGroupStoreManagerTest.class);
     private static final String topic = "test_topic";
