@@ -75,6 +75,7 @@ class Workflow:
         self.__save_result(result)
         self.logger.info('Time used: %s', datetime.timedelta(seconds=(end - start)))
 
+
     def __save_result(self, result):
         try:
             if result == 'unknown':
@@ -188,6 +189,7 @@ class Workflow:
             if file.startswith('driver'):
                 drivers.append((file+'/')+(','+file+'/').join(os.listdir( drivers_dir + '/'+file)))
         return ','.join(drivers)
+
 
     def __prepare_mq_worker(self):
         if self.mode != ONLINE_MODE:

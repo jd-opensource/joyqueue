@@ -79,5 +79,6 @@ public class AdminClient implements NsrAdmin {
         appAdmin.close();
         topicAdmin.close();
         topicAdmin.close();
+
     }
 }

@@ -35,7 +35,6 @@ import java.util.concurrent.TimeoutException;
 
 public class AsyncHttpClient {
     private  CloseableHttpAsyncClient httpclient;
-
     public AsyncHttpClient(){
         httpclient= HttpAsyncClients
                     .custom()
