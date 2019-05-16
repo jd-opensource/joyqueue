@@ -51,7 +51,7 @@ class Workflow:
         self.mq_tag = str(time.time()).replace('.', '_')
         self.running_mq_containers = {}
         self.logger = logging.getLogger(__name__)
-        self.lockfile = open('{}/_filelock'.format(self.workspace.home), 'w')
+        self.lockfile = self.__lockfile()
         self.logger.setLevel(logging.DEBUG)
 
     def run(self):
@@ -125,6 +125,12 @@ class Workflow:
             raise WorkflowError(
                 'Failed to prepare pressure docker {}'.format(self.task.pressure_repo),
                 error_code=FAILED_TO_PREPARE_PRESSURE)
+
+    def __lockfile(self):
+        path = Path(self.workspace.home)
+        if not path.exists():
+            path.mkdir(parents=True)
+        return open('{}/_filelock'.format(self.workspace.home), 'w')
 
     def __config_pressure_worker(self):
         if self.benchmark_config is not None:
