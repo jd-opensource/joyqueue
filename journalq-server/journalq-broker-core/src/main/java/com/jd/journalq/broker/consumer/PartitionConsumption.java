@@ -122,7 +122,7 @@ class PartitionConsumption extends Service {
 
         PullResult pullResult = new PullResult(consumer, (short) -1, new ArrayList<>(0));
 
-        if (false && partitionManager.isRetry(consumer)) {
+        if (partitionManager.isRetry(consumer)) {
             // 消费待重试的消息
             List<RetryMessageModel> retryMsgList = messageRetry.getRetry(consumer.getTopic(), consumer.getApp(), (short) 1, 0L);
             if (CollectionUtils.isNotEmpty(retryMsgList) && retryMsgList.size() > 0) {

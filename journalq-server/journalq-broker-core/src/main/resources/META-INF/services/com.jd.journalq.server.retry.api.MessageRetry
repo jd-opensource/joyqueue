@@ -1,4 +1,0 @@
-com.jd.journalq.server.retry.NullMessageRetry
-com.jd.journalq.server.retry.remote.RemoteMessageRetry
-com.jd.journalq.server.retry.db.DBMessageRetry
-com.jd.journalq.server.retry.h2.H2MessageRetry
