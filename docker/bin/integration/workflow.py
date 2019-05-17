@@ -525,7 +525,7 @@ class Workflow:
         pub_latency99pct = p['publishLatency99pct']
         pub_latency999pct = p['publishLatency999pct']
         pub_latency9999pct = p['publishLatency9999pct']
-        header = ['Pub rate(msg/s)', 'Cons rate(msg/s)',  'Tp50(ms)', 'Tp75(ms)', 'Tp99(ms)', 'Tp999(ms)', 'Tp9999(ms)', 'Tpavg(ms)', 'Tpmax(ms)']
+        header = ['Pub rate(msg/s)', 'Cons rate(msg/s)',  'Tp50(ms)', 'Tp75(ms)', 'Tp95(ms)', 'Tp99(ms)', 'Tp999(ms)', 'Tp9999(ms)', 'Tpavg(ms)', 'Tpmax(ms)']
         rows = []
         for i in range(len(p['publishRate'])):
             row = [int(pub[i]), int(con[i]), pub_latency50pct[i], pub_latency75pct[i],
