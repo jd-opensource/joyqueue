@@ -8,8 +8,10 @@ package com.jd.journalq.broker.network.traffic;
  */
 public interface ProduceTrafficPayload extends TrafficPayload, TrafficType {
 
+    public static final String TYPE = "produce";
+
     @Override
     default String getTrafficType() {
-        return "produce";
+        return TYPE;
     }
 }

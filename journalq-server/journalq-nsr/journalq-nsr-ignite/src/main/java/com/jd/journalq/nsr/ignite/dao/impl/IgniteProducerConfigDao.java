@@ -32,6 +32,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import static com.jd.journalq.nsr.ignite.model.IgniteBaseModel.SCHEMA;
+import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.COLUMN_LIMIT_TPS;
+import static com.jd.journalq.nsr.ignite.model.IgniteConsumerConfig.COLUMN_LIMIT_TRAFFIC;
 import static com.jd.journalq.nsr.ignite.model.IgniteProducerConfig.COLUMN_ID;
 import static com.jd.journalq.nsr.ignite.model.IgniteProducerConfig.COLUMN_NAMESPACE;
 import static com.jd.journalq.nsr.ignite.model.IgniteProducerConfig.COLUMN_TOPIC;
@@ -68,6 +70,8 @@ public class IgniteProducerConfigDao implements ProducerConfigDao {
         fields.put(COLUMN_WEIGHT, String.class.getName());
         fields.put(COLUMN_BLACK_LIST, String.class.getName());
         fields.put(COLUMN_TIMEOUT, Integer.class.getName());
+        fields.put(COLUMN_LIMIT_TPS, Integer.class.getName());
+        fields.put(COLUMN_LIMIT_TRAFFIC, Integer.class.getName());
         queryEntity.setFields(fields);
         queryEntity.setTableName(CACHE_NAME);
         queryEntity.setIndexes(Arrays.asList(new QueryIndex(COLUMN_ID)));

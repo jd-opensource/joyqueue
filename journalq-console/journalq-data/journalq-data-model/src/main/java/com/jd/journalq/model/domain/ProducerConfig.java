@@ -45,6 +45,10 @@ public class ProducerConfig extends BaseNsrModel {
 
     private String blackList;
 
+    private Integer limitTps;
+
+    private Integer limitTraffic;
+
     public String getProducerId() {
         return producerId;
     }
@@ -93,6 +97,21 @@ public class ProducerConfig extends BaseNsrModel {
         this.blackList = blackList;
     }
 
+    public void setLimitTps(Integer limitTps) {
+        this.limitTps = limitTps;
+    }
+
+    public Integer getLimitTps() {
+        return limitTps;
+    }
+
+    public void setLimitTraffic(Integer limitTraffic) {
+        this.limitTraffic = limitTraffic;
+    }
+
+    public Integer getLimitTraffic() {
+        return limitTraffic;
+    }
 
     /**
      * 获取权重

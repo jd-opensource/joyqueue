@@ -37,7 +37,7 @@ public abstract class AbstractLimitFilter implements ProtocolCommandHandlerFilte
             return response;
         }
 
-        if (!(limitIfNeeded((TrafficType) trafficPayload, trafficPayload.getTraffic()))) {
+        if (!limitIfNeeded((TrafficType) trafficPayload, trafficPayload.getTraffic())) {
             return response;
         }
 

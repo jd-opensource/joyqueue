@@ -6,25 +6,11 @@ package com.jd.journalq.broker.limit;
  * email: gaohaoxiang@jd.com
  * date: 2019/5/16
  */
-public class RateLimiter {
+public interface RateLimiter {
 
-    private com.google.common.util.concurrent.RateLimiter tpsRateLimiter;
-    private com.google.common.util.concurrent.RateLimiter trafficRateLimiter;
+    boolean tryAcquireTps();
 
-    public RateLimiter(int tps, int traffic) {
-        this.tpsRateLimiter = com.google.common.util.concurrent.RateLimiter.create(tps);
-        this.trafficRateLimiter = com.google.common.util.concurrent.RateLimiter.create(traffic);
-    }
+    boolean tryAcquireTps(int tps);
 
-    public boolean tryAcquireTps() {
-        return tryAcquireTps(1);
-    }
-
-    public boolean tryAcquireTps(int tps) {
-        return tpsRateLimiter.tryAcquire(tps);
-    }
-
-    public boolean tryAcquireTraffic(int traffic) {
-        return trafficRateLimiter.tryAcquire(traffic);
-    }
+    boolean tryAcquireTraffic(int traffic);
 }

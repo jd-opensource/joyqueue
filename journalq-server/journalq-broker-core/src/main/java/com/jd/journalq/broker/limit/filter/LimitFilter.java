@@ -5,10 +5,11 @@ import com.jd.journalq.broker.BrokerContextAware;
 import com.jd.journalq.broker.Plugins;
 import com.jd.journalq.broker.helper.AwareHelper;
 import com.jd.journalq.broker.limit.LimitRejectedStrategy;
+import com.jd.journalq.broker.limit.RateLimitManager;
 import com.jd.journalq.broker.limit.RateLimiter;
-import com.jd.journalq.broker.limit.RateLimiterManager;
 import com.jd.journalq.broker.limit.config.LimitConfig;
 import com.jd.journalq.broker.limit.domain.LimitContext;
+import com.jd.journalq.broker.limit.support.DefaultRateLimiterManager;
 import com.jd.journalq.broker.network.traffic.Traffic;
 import com.jd.journalq.network.transport.Transport;
 import com.jd.journalq.network.transport.command.Command;
@@ -27,7 +28,7 @@ public class LimitFilter extends AbstractLimitFilter implements BrokerContextAwa
     protected static final Logger logger = LoggerFactory.getLogger(LimitFilter.class);
 
     private LimitConfig config;
-    private RateLimiterManager rateLimiterManager;
+    private RateLimitManager rateLimiterManager;
     private LimitRejectedStrategy limitRejectedStrategy;
 
     @Override
@@ -38,6 +39,9 @@ public class LimitFilter extends AbstractLimitFilter implements BrokerContextAwa
     @Override
     protected boolean limitIfNeeded(String topic, String app, String type, Traffic traffic) {
         RateLimiter rateLimiter = rateLimiterManager.getRateLimiter(topic, app, type);
+        if (rateLimiter == null) {
+            return false;
+        }
         return !rateLimiter.tryAcquireTps() || !rateLimiter.tryAcquireTraffic(traffic.getTraffic(topic));
     }
 
@@ -55,8 +59,7 @@ public class LimitFilter extends AbstractLimitFilter implements BrokerContextAwa
     protected int getDelay(Transport transport, Command request, Command response) {
         int delay = config.getDelay();
         if (delay == LimitConfig.DELAY_DYNAMIC) {
-            long now = SystemClock.now();
-            int dynamicDelay = (int) (1000 - (now % 1000));
+            int dynamicDelay = (int) (1000 - (SystemClock.now() % 1000));
             delay = Math.min(dynamicDelay, config.getMaxDelay());
         }
         return delay;
@@ -65,7 +68,7 @@ public class LimitFilter extends AbstractLimitFilter implements BrokerContextAwa
     @Override
     public void setBrokerContext(BrokerContext brokerContext) {
         this.config = new LimitConfig(brokerContext.getPropertySupplier());
-        this.rateLimiterManager = new RateLimiterManager(brokerContext);
+        this.rateLimiterManager = new DefaultRateLimiterManager(brokerContext);
         this.limitRejectedStrategy = AwareHelper.enrichIfNecessary(Plugins.LIMIT_REJECTED_STRATEGY.get(config.getRejectedStrategy()), brokerContext);
     }
 }
