@@ -182,7 +182,7 @@ public class TempMetadataInitializer extends Service {
             producer.setTopic(topicName);
             producer.setApp(app);
             producer.setClientType(ClientType.JMQ);
-//            producer.setLimitPolicy(new Producer.ProducerLimitPolicy(1000 * 10, 1024 * 1024 * 5));
+//            producer.setLimitPolicy(new Producer.ProducerLimitPolicy(1000 * 1, 1024 * 1024 * 5));
 
             Consumer consumer = new Consumer();
             consumer.setTopic(topicName);
@@ -192,7 +192,7 @@ public class TempMetadataInitializer extends Service {
             consumer.setRetryPolicy(new RetryPolicy(1000, 1000, 2, false, 2.0, 0));
             consumer.setConsumerPolicy(new Consumer.ConsumerPolicy.Builder().nearby((topicName.getFullName().contains("nearby"))).paused(false).archive(true).
                     retry(false).seq(false).ackTimeout(1000 * 11).batchSize((short) 100).concurrent(1).delay(0).errTimes(10).maxPartitionNum(PARTITION_GROUPS * PARTITIONS).blackList("127.0.0.1,127.0.0.3").retryReadProbability(30).create());
-//            consumer.setLimitPolicy(new Consumer.ConsumerLimitPolicy(1000 * 10, 1024 * 1024 * 10));
+//            consumer.setLimitPolicy(new Consumer.ConsumerLimitPolicy(1000 * 1, 1024 * 1024 * 10));
 
             producers.add(producer);
             consumers.add(consumer);

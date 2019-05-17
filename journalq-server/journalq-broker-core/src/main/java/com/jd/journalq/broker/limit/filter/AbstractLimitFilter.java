@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.jd.journalq.broker.limit.filter;
 
 import com.jd.journalq.broker.network.protocol.ProtocolCommandHandlerFilter;
@@ -24,11 +37,23 @@ public abstract class AbstractLimitFilter implements ProtocolCommandHandlerFilte
     @Override
     public Command invoke(CommandHandlerInvocation invocation) throws TransportException {
         Command response = invocation.invoke();
-        if (!isEnable() || response == null || !(response.getPayload() instanceof TrafficPayload)) {
+        Command request = invocation.getRequest();
+
+        if (!isEnable()) {
             return response;
         }
 
-        TrafficPayload trafficPayload = (TrafficPayload) response.getPayload();
+        TrafficPayload trafficPayload = null;
+        if (response != null && response.getPayload() instanceof TrafficPayload) {
+            trafficPayload = (TrafficPayload) response.getPayload();
+        } else if (request != null && request.getPayload() instanceof TrafficPayload) {
+            trafficPayload = (TrafficPayload) request.getPayload();
+        }
+
+        if (trafficPayload == null) {
+            return response;
+        }
+
         return maybeLimit(invocation.getTransport(), invocation.getRequest(), response, trafficPayload);
     }
 
