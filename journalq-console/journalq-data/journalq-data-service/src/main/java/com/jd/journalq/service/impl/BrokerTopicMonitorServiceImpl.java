@@ -28,6 +28,7 @@ import com.jd.journalq.model.domain.Topic;
 import com.jd.journalq.model.query.QConsumer;
 import com.jd.journalq.model.query.QMonitor;
 import com.jd.journalq.model.query.QProducer;
+import com.jd.journalq.monitor.BrokerMonitorInfo;
 import com.jd.journalq.monitor.Client;
 import com.jd.journalq.monitor.ConnectionMonitorDetailInfo;
 import com.jd.journalq.monitor.ConsumerMonitorInfo;
@@ -38,6 +39,8 @@ import com.jd.journalq.service.BrokerService;
 import com.jd.journalq.service.BrokerTopicMonitorService;
 import com.jd.journalq.service.ConsumerService;
 import com.jd.journalq.service.ProducerService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -50,6 +53,7 @@ import java.util.stream.Collectors;
  */
 @Service("brokerTopicMonitorService")
 public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService {
+    public static final Logger logger = LoggerFactory.getLogger(BrokerTopicMonitorServiceImpl.class);
     @Autowired
     private HttpRestService httpRestService;
     @Autowired
@@ -85,6 +89,7 @@ public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService 
             pageResult.setPagination(pagination);
             pageResult.setResult(brokerTopicMonitorList);
         } catch (Exception e) {
+            logger.error("queryTopicsPartitionMointor exception",e);
         }
         return pageResult;
     }
@@ -115,6 +120,7 @@ public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService 
                 pageResult.setResult(clients.subList(pagination.getStart(),toIndex));
             }
         } catch (Exception e) {
+            logger.error("queryClientConnectionDetail exception",e);
         }
         return pageResult;
 
@@ -153,8 +159,24 @@ public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService 
             pageResult.setPagination(pagination);
             pageResult.setResult(brokerTopicMonitors);
         } catch (Exception e) {
+            logger.error("queryTopicsMointor exception",e);
         }
         return pageResult;
+    }
+
+    /**
+     * 查询broker详情
+     * @param brokerId
+     * @return
+     */
+    public BrokerMonitorInfo findBrokerMonitor(Long brokerId){
+        try {
+            Broker broker = brokerService.findById(brokerId);
+            return queryBrokerMonitor(broker);
+        } catch (Exception e) {
+            logger.error("findBrokerMonitor exception",e);
+        }
+        return null;
     }
 
     private BrokerTopicMonitor getMonitorByAppAndTopic(String topic,List<String> appList,Broker broker,SubscribeType type) throws Exception {
@@ -260,16 +282,33 @@ public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService 
         }
         return null;
     }
+
     /**
      * 查询topicList
      * @return
      */
-    public List<String> queryTopicList(Broker  broker) throws Exception {
+    private List<String> queryTopicList(Broker  broker) throws Exception {
         String path="topicList";
         String[] args=new String[2];
         args[0]=broker.getIp();
         args[1]=String.valueOf(broker.getMonitorPort());
         RestResponse<List<String>> restResponse = httpRestService.get(path,String.class,true,args);
+        if (restResponse != null && restResponse.getData() != null) {
+            return restResponse.getData();
+        }
+        return null;
+    }
+
+    /**
+     * 查询broker监控
+     * @return
+     */
+    private BrokerMonitorInfo queryBrokerMonitor(Broker  broker) throws Exception {
+        String path="brokerMonitor";
+        String[] args=new String[2];
+        args[0]=broker.getIp();
+        args[1]=String.valueOf(broker.getMonitorPort());
+        RestResponse<BrokerMonitorInfo> restResponse = httpRestService.get(path,BrokerMonitorInfo.class,false,args);
         if (restResponse != null && restResponse.getData() != null) {
             return restResponse.getData();
         }

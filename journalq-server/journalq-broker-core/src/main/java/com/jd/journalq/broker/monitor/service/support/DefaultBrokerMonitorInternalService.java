@@ -81,6 +81,8 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
 
         StoreMonitorInfo storeMonitorInfo = new StoreMonitorInfo();
         storeMonitorInfo.setStarted(store instanceof Online?((Online) store).isStarted():true);
+        storeMonitorInfo.setFreeSpace(storeManagementService.freeSpace());
+        storeMonitorInfo.setTotalSpace(storeManagementService.totalSpace());
 
         NameServerMonitorInfo nameServerMonitorInfo = new NameServerMonitorInfo();
         nameServerMonitorInfo.setStarted(nameService.isStarted());

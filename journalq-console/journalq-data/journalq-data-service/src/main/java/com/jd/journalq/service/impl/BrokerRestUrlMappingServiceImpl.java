@@ -85,6 +85,9 @@ public class BrokerRestUrlMappingServiceImpl implements BrokerRestUrlMappingServ
     /** store **/
     private String topicListPath = "/manage/topic/list";
 
+    /** broker **/
+    private String brokerMonitorPath = "/monitor/broker";
+
 
     /** proxy monitor */
     private String mqttProxySummaryMonitorPath="/monitor/mqtt/proxy/summary";
