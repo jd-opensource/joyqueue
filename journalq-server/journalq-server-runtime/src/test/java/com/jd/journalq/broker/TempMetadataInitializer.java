@@ -183,6 +183,7 @@ public class TempMetadataInitializer extends Service {
             producer.setApp(app);
             producer.setClientType(ClientType.JMQ);
 //            producer.setLimitPolicy(new Producer.ProducerLimitPolicy(1000 * 1, 1024 * 1024 * 5));
+//            producer.setLimitPolicy(new Producer.ProducerLimitPolicy(1000 * 1, 1024 * 10));
 
             Consumer consumer = new Consumer();
             consumer.setTopic(topicName);

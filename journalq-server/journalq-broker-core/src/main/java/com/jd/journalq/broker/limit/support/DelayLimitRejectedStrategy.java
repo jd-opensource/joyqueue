@@ -29,21 +29,21 @@ import com.jd.journalq.toolkit.delay.DelayedOperationManager;
  */
 public class DelayLimitRejectedStrategy implements LimitRejectedStrategy {
 
-    private DelayedOperationManager delayedOperationManager;
+    private DelayedOperationManager delayPurgatory;
 
     public DelayLimitRejectedStrategy() {
-        this.delayedOperationManager = new DelayedOperationManager("journalq-limit-delayed");
-        this.delayedOperationManager.start();
+        this.delayPurgatory = new DelayedOperationManager("journalq-limit-delayed");
+        this.delayPurgatory.start();
     }
 
     @Override
     public Command execute(LimitContext context) {
-        delayedOperationManager.tryCompleteElseWatch(new AbstractDelayedOperation(context.getDelay()) {
+        delayPurgatory.tryCompleteElseWatch(new AbstractDelayedOperation(context.getDelay()) {
             @Override
             protected void onComplete() {
                 context.getTransport().acknowledge(context.getRequest(), context.getResponse());
             }
-        }, Sets.newHashSet(new DelayedOperationKey(context.getTransport().toString())));
+        }, Sets.newHashSet(new DelayedOperationKey()));
         return null;
     }
 

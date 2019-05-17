@@ -25,9 +25,11 @@ import java.util.List;
 public class FetchResponsePartitionData {
 
     private short error = KafkaErrorCode.NONE;
-    private long hw = -1L;
     private List<KafkaBrokerMessage> messages;
     private int bytes;
+    private long highWater = -1L;
+    private long lastStableOffset = -1L;
+    private long logStartOffset = -1L;
 
     public FetchResponsePartitionData() {
 
@@ -37,9 +39,14 @@ public class FetchResponsePartitionData {
         this.error = error;
     }
 
-    public FetchResponsePartitionData(short error, long hw, List<KafkaBrokerMessage> messages) {
+    public FetchResponsePartitionData(short error, List<KafkaBrokerMessage> messages) {
         this.error = error;
-        this.hw = hw;
+        this.messages = messages;
+    }
+
+    public FetchResponsePartitionData(short error, long highWater, List<KafkaBrokerMessage> messages) {
+        this.error = error;
+        this.highWater = highWater;
         this.messages = messages;
     }
 
@@ -49,14 +56,6 @@ public class FetchResponsePartitionData {
 
     public void setError(short error) {
         this.error = error;
-    }
-
-    public long getHw() {
-        return hw;
-    }
-
-    public void setHw(long hw) {
-        this.hw = hw;
     }
 
     public void setMessages(List<KafkaBrokerMessage> messages) {
@@ -73,6 +72,30 @@ public class FetchResponsePartitionData {
 
     public int getBytes() {
         return bytes;
+    }
+
+    public long getHighWater() {
+        return highWater;
+    }
+
+    public void setHighWater(long highWater) {
+        this.highWater = highWater;
+    }
+
+    public long getLastStableOffset() {
+        return lastStableOffset;
+    }
+
+    public void setLastStableOffset(long lastStableOffset) {
+        this.lastStableOffset = lastStableOffset;
+    }
+
+    public long getLogStartOffset() {
+        return logStartOffset;
+    }
+
+    public void setLogStartOffset(long logStartOffset) {
+        this.logStartOffset = logStartOffset;
     }
 }
 

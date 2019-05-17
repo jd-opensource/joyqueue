@@ -15,6 +15,7 @@ package com.jd.journalq.broker.kafka.handler;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.jd.journalq.broker.buffer.Serializer;
 import com.jd.journalq.broker.cluster.ClusterManager;
@@ -40,6 +41,10 @@ import com.jd.journalq.network.session.Consumer;
 import com.jd.journalq.network.transport.Transport;
 import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.response.BooleanResponse;
+import com.jd.journalq.toolkit.delay.AbstractDelayedOperation;
+import com.jd.journalq.toolkit.delay.DelayedOperation;
+import com.jd.journalq.toolkit.delay.DelayedOperationKey;
+import com.jd.journalq.toolkit.delay.DelayedOperationManager;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,12 +68,15 @@ public class FetchHandler extends AbstractKafkaCommandHandler implements KafkaCo
     private KafkaConfig config;
     private Consume consume;
     private ClusterManager clusterManager;
+    private DelayedOperationManager<DelayedOperation> delayPurgatory;
 
     @Override
     public void setKafkaContext(KafkaContext kafkaContext) {
         this.config = kafkaContext.getConfig();
         this.consume = kafkaContext.getBrokerContext().getConsume();
         this.clusterManager = kafkaContext.getBrokerContext().getClusterManager();
+        this.delayPurgatory = new DelayedOperationManager<>("kafka-fetch-delay");
+        this.delayPurgatory.start();
     }
 
     @Override
@@ -87,7 +95,7 @@ public class FetchHandler extends AbstractKafkaCommandHandler implements KafkaCo
                 int partition = partitionEntry.getKey();
 
                 if (currentBytes > maxBytes) {
-                    fetchResponseTable.put(topic.getFullName(), partition, new FetchResponsePartitionData(KafkaErrorCode.NONE, -1, Collections.emptyList()));
+                    fetchResponseTable.put(topic.getFullName(), partition, new FetchResponsePartitionData(KafkaErrorCode.NONE, Collections.emptyList()));
                     continue;
                 }
 
@@ -95,7 +103,7 @@ public class FetchHandler extends AbstractKafkaCommandHandler implements KafkaCo
                 if (!checkResult.isSuccess()) {
                     logger.warn("checkReadable failed, transport: {}, topic: {}, app: {}, code: {}", transport, topic, clientId, checkResult.getJournalqCode());
                     short errorCode = CheckResultConverter.convertFetchCode(checkResult.getJournalqCode());
-                    fetchResponseTable.put(topic.getFullName(), partition, new FetchResponsePartitionData(errorCode, -1, Collections.emptyList()));
+                    fetchResponseTable.put(topic.getFullName(), partition, new FetchResponsePartitionData(errorCode, Collections.emptyList()));
                     continue;
                 }
 
@@ -111,7 +119,20 @@ public class FetchHandler extends AbstractKafkaCommandHandler implements KafkaCo
         }
 
         FetchResponse fetchResponse = new FetchResponse(traffic, fetchResponseTable);
-        return new Command(fetchResponse);
+        Command response = new Command(fetchResponse);
+
+        // 如果当前拉取消息量小于最小限制，那么延迟响应
+        if (fetchRequest.getMinBytes() > currentBytes && fetchRequest.getMaxWait() > 0) {
+            delayPurgatory.tryCompleteElseWatch(new AbstractDelayedOperation(fetchRequest.getMaxWait()) {
+                @Override
+                protected void onComplete() {
+                    transport.acknowledge(command, response);
+                }
+            }, Sets.newHashSet(new DelayedOperationKey()));
+            return null;
+        }
+
+        return response;
     }
 
     private FetchResponsePartitionData fetchMessage(Transport transport, TopicName topic, int partition, String clientId, long offset, int maxBytes) {
@@ -176,6 +197,9 @@ public class FetchHandler extends AbstractKafkaCommandHandler implements KafkaCo
 
         FetchResponsePartitionData fetchResponsePartitionData = new FetchResponsePartitionData(KafkaErrorCode.NONE, offset, kafkaBrokerMessages);
         fetchResponsePartitionData.setBytes(currentBytes);
+        fetchResponsePartitionData.setLogStartOffset(minIndex);
+        fetchResponsePartitionData.setLastStableOffset(maxIndex);
+        fetchResponsePartitionData.setHighWater(maxIndex);
         return fetchResponsePartitionData;
     }
 
