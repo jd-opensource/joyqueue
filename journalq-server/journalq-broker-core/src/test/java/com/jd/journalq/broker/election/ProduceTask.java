@@ -92,6 +92,9 @@ public class ProduceTask extends Thread {
 
     public void stop(boolean b) {
         this.stop = true;
+        while (isAlive()) {
+            interrupt();
+        }
     }
 
     @Override

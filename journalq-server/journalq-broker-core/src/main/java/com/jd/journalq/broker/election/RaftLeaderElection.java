@@ -134,6 +134,7 @@ public class RaftLeaderElection extends LeaderElection  {
     @Override
     protected void doStop() {
         cancelElectionTimer();
+        cancelHeartbeatTimer();
         cancelTransferLeaderTimer();
 
         nodeOffline(currentTerm);
@@ -848,6 +849,16 @@ public class RaftLeaderElection extends LeaderElection  {
                             "response term {} is greater than current term {}",
                     topicPartitionGroup, localNode, response.getTerm(), currentTerm);
             stepDown(response.getTerm());
+        }
+    }
+
+    /**
+     * 重置心跳定时器
+     */
+    private synchronized void cancelHeartbeatTimer() {
+        if (heartbeatTimerFuture != null && !heartbeatTimerFuture.isDone()) {
+            heartbeatTimerFuture.cancel(true);
+            heartbeatTimerFuture = null;
         }
     }
 

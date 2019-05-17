@@ -142,7 +142,12 @@ public class ReplicaGroup extends Service {
 
     @Override
     public void doStop() {
-        replicateThread.interrupt();
+        while (replicateThread.isAlive()) {
+            replicateThread.interrupt();
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException ignored) {}
+        }
         //replicasWithoutLearners.forEach(this::cancelHeartbeatTimer);
         super.doStop();
     }
