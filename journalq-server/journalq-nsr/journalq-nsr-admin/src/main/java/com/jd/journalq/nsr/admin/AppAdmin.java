@@ -40,10 +40,8 @@ public class AppAdmin extends AbstractAdmin {
     @Parameters(separators = "=", commandDescription = "Generate a token for App")
     public static class TokenArg extends CommandArgs {
         private  static final Long MONTH_MS=86400000L;
-        @Parameter(names = { "--host" }, description = "Naming address", required = false)
-        public String host="http://localhost:50091";
 
-        @Parameter(names = { "-a", "--app" }, description = "Topic code", required = true)
+        @Parameter(names = { "-a", "--app" }, description = "App code", required = true)
         public String app;
 
         @Parameter(names = { "-s", "--start" }, description = "When to be effective,default now", required = false)
@@ -55,7 +53,7 @@ public class AppAdmin extends AbstractAdmin {
 
     public static void main(String[] args){
         final TokenArg tokenArg=new TokenArg();
-        //String[] argv={"token","--host","http://localhost:50091","-a","test_app"};
+        String[] argv={"token","--host","http://localhost:50091","-a","test_app"};
         AppAdmin appAdmin=new AppAdmin();
         Map<String,CommandArgs> argsMap=new HashMap(8);
                                 argsMap.put(Command.token.name(),tokenArg);
@@ -64,7 +62,7 @@ public class AppAdmin extends AbstractAdmin {
                 .addCommand(Command.token.name(),tokenArg)
                 .build();
         jc.setProgramName("broker");
-        appAdmin.execute(jc,args,argsMap);
+        appAdmin.execute(jc,argv,argsMap);
     }
 
 

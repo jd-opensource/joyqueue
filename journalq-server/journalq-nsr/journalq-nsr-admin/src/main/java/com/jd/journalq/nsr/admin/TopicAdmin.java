@@ -86,14 +86,12 @@ public class TopicAdmin extends AbstractAdmin {
         @Parameter(names = { "-n", "--namespace" }, description = "Topic namespace", required = false)
         public String namespace="";
 
-        @Parameter(names = { "-t", "--type" }, description = "Topic type:1 produce,2 consume", required = true)
+        @Parameter(names = { "-t", "--type" }, description = "Topic type:1 produce,2 consume", required = false)
         public Integer type;
     }
 
     @Parameters(separators = "=", commandDescription = "Publish or subscribe args")
     public static class PubSubArg extends CommandArgs{
-        @Parameter(names = { "--host" }, description = " Naming address", required = false)
-        public String host="http://localhost:50091";
         @ParametersDelegate
         public SubscribeArg subscribe=new SubscribeArg();
         @Parameter(names = {  "--client" }, description = "client type: 0 jmq,1 kafka,2 mqtt,other  ", required = false)
