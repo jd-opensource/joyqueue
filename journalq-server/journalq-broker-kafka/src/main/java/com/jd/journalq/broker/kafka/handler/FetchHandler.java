@@ -75,7 +75,7 @@ public class FetchHandler extends AbstractKafkaCommandHandler implements KafkaCo
         this.config = kafkaContext.getConfig();
         this.consume = kafkaContext.getBrokerContext().getConsume();
         this.clusterManager = kafkaContext.getBrokerContext().getClusterManager();
-        this.delayPurgatory = new DelayedOperationManager<>("kafka-fetch-delay");
+        this.delayPurgatory = new DelayedOperationManager<>("kafka-fetch-delayed");
         this.delayPurgatory.start();
     }
 
