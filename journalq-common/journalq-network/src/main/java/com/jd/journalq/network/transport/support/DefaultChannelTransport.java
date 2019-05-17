@@ -309,6 +309,12 @@ public class DefaultChannelTransport implements ChannelTransport {
             }
         }
 
+        channel.eventLoop().execute(() -> {
+            doAcknowledge(request, response, callback);
+        });
+    }
+
+    protected void doAcknowledge(Command request, Command response, CommandCallback callback) throws TransportException {
         channel.writeAndFlush(response)
                 .addListener(new CallbackListener(request, response, callback))
                 .addListener(ChannelFutureListener.CLOSE_ON_FAILURE);

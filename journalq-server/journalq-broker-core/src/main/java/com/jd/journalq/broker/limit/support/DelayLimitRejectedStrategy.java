@@ -43,7 +43,7 @@ public class DelayLimitRejectedStrategy implements LimitRejectedStrategy {
             protected void onComplete() {
                 context.getTransport().acknowledge(context.getRequest(), context.getResponse());
             }
-        }, Sets.newHashSet(new DelayedOperationKey("limit_" + context.getTransport().toString())));
+        }, Sets.newHashSet(new DelayedOperationKey(context.getTransport().toString())));
         return null;
     }
 

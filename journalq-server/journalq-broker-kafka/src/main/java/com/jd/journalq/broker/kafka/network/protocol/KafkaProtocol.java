@@ -30,7 +30,8 @@ import com.jd.journalq.broker.kafka.manage.KafkaManageServiceFactory;
 import com.jd.journalq.broker.kafka.network.helper.KafkaProtocolHelper;
 import com.jd.journalq.broker.kafka.session.KafkaConnectionHandler;
 import com.jd.journalq.broker.kafka.session.KafkaConnectionManager;
-import com.jd.journalq.network.protocol.ChannelHandlerProvider;
+import com.jd.journalq.broker.kafka.session.KafkaTransportHandler;
+import com.jd.journalq.network.protocol.CommandHandlerProvider;
 import com.jd.journalq.network.protocol.ExceptionHandlerProvider;
 import com.jd.journalq.network.protocol.ProtocolService;
 import com.jd.journalq.network.transport.codec.CodecFactory;
@@ -50,7 +51,7 @@ import org.slf4j.LoggerFactory;
  * email: gaohaoxiang@jd.com
  * date: 2018/8/21
  */
-public class KafkaProtocol extends Service implements ProtocolService, BrokerContextAware, ChannelHandlerProvider, ExceptionHandlerProvider {
+public class KafkaProtocol extends Service implements ProtocolService, BrokerContextAware, CommandHandlerProvider, ExceptionHandlerProvider {
 
     protected static final Logger logger = LoggerFactory.getLogger(KafkaProtocol.class);
 
@@ -64,6 +65,7 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
     private GroupCoordinator groupCoordinator;
     private KafkaConnectionManager connectionManager;
     private KafkaConnectionHandler connectionHandler;
+    private KafkaTransportHandler transportHandler;
     private KafkaContext kafkaContext;
 
     @Override
@@ -83,6 +85,7 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
         this.connectionManager = new KafkaConnectionManager(brokerContext.getSessionManager());
 
         this.connectionHandler = new KafkaConnectionHandler(connectionManager);
+        this.transportHandler = new KafkaTransportHandler();
 
         this.kafkaContext = new KafkaContext(config, connectionManager, groupMetadataManager,
                 groupOffsetManager, groupBalanceManager, groupOffsetHandler, groupBalanceHandler, groupCoordinator, brokerContext);
@@ -130,11 +133,14 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
     }
 
     @Override
-    public ChannelHandler getChannelHandler(ChannelHandler channelHandler) {
+    public ChannelHandler getCommandHandler(ChannelHandler channelHandler) {
         return new ChannelInitializer<Channel>() {
             @Override
             protected void initChannel(Channel ch) throws Exception {
-                ch.pipeline().addLast(channelHandler).addLast(connectionHandler);
+                ch.pipeline()
+                        .addLast(transportHandler)
+                        .addLast(connectionHandler)
+                        .addLast(channelHandler);
             }
         };
     }

@@ -43,6 +43,9 @@ public class DefaultRateLimiter implements RateLimiter {
 
     @Override
     public boolean tryAcquireTraffic(int traffic) {
+        if (traffic == 0) {
+            return true;
+        }
         return trafficRateLimiter.tryAcquire(traffic);
     }
 }
