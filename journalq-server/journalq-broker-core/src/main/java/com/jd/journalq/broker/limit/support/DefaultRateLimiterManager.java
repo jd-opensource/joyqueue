@@ -67,7 +67,7 @@ public class DefaultRateLimiterManager extends AbstractRateLimiterManager implem
             return null;
         }
 
-        if (tps == null && traffic == null) {
+        if ((tps == null && traffic == null) || (tps <= 0 && traffic <= 0)) {
             return null;
         }
 
