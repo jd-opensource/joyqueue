@@ -888,8 +888,6 @@ public class RaftLeaderElection extends LeaderElection  {
             node.setVoteGranted(false);
         });
 
-		cancelElectionTimer();
-
         startNewHeartbeat();
 
         try {
@@ -900,7 +898,7 @@ public class RaftLeaderElection extends LeaderElection  {
             updateMetadata(leaderId, currentTerm);
             electionEventManager.add(new ElectionEvent(LEADER_FOUND,
                     currentTerm, localNode.getNodeId(), topicPartitionGroup));
-
+            cancelElectionTimer();
         } catch (Exception e) {
             logger.warn("Partition group {}/node {} as leader fail",
                     topicPartitionGroup, localNode, e);
@@ -933,6 +931,8 @@ public class RaftLeaderElection extends LeaderElection  {
         updateMetadata(leaderId, currentTerm);
         electionEventManager.add(new ElectionEvent(LEADER_FOUND,
                 currentTerm, leaderId, topicPartitionGroup));
+
+        cancelHeartbeatTimer();
     }
 
     private void checkStepDown(int requestTerm, int requestLeaderId) {
@@ -986,6 +986,7 @@ public class RaftLeaderElection extends LeaderElection  {
             case LEADER:
                 updateMetadata(leaderId, currentTerm);
                 replicaGroup.becomeFollower(currentTerm, leaderId);
+                cancelHeartbeatTimer();
                 break;
             default:
                 break;
