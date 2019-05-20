@@ -1,5 +1,3 @@
-#!/bin/sh
-
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,17 +12,17 @@
 # limitations under the License.
 #
 
-# start to test
+name: 1 topic / 5 partition / 1Kb / 10P1C sync
 
-python3 ./integration/bootstrap.py $*
-while getopts "s:b::" opt; do
-  case $opt in
-    s) score=$OPTARG;;
-  esac
-done
-if [ -e $score/score.json ];then
-    exit 0
-else
-    exit 1
-fi
-
+topics: 1
+partitionsPerTopic: 5
+keyDistributor: "NO_KEY"
+messageSize: 1024
+payloadFile: "payload/payload-1Kb.data"
+subscriptionsPerTopic: 1
+consumerPerSubscription: 1
+syncProducer: true
+producersPerTopic: 10
+producerRate: 50000
+consumerBacklogSizeGB: 0
+testDurationMinutes: 1

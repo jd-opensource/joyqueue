@@ -1,5 +1,3 @@
-#!/bin/sh
-
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,17 +12,14 @@
 # limitations under the License.
 #
 
-# start to test
 
-python3 ./integration/bootstrap.py $*
-while getopts "s:b::" opt; do
-  case $opt in
-    s) score=$OPTARG;;
-  esac
-done
-if [ -e $score/score.json ];then
-    exit 0
-else
-    exit 1
-fi
+class Workspace:
 
+    def __init__(self, config):
+        self.__parse_cluster(config)
+        self.home = config.get_value('Home', 'Workspace')
+        self.user = config.get_value('User', 'Workspace')
+        self.result_file = config.get_value('ResultFile', 'Workspace')
+
+    def __parse_cluster(self, config):
+        self.cluster_hosts = config.get_value('Cluster', 'Workspace').split(',')

@@ -54,3 +54,4 @@ nohup "$JAVACMD"\
   com.jd.journalq.broker.JournalqLauncher \
   "$@" >/dev/null 2>/dev/null &
 echo $! > journalq.pid
+tail -f /dev/null

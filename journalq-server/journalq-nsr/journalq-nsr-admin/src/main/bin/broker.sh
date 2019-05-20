@@ -1,5 +1,4 @@
-#!/bin/sh
-
+#!/bin/bash
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,17 +13,20 @@
 # limitations under the License.
 #
 
-# start to test
 
-python3 ./integration/bootstrap.py $*
-while getopts "s:b::" opt; do
-  case $opt in
-    s) score=$OPTARG;;
-  esac
-done
-if [ -e $score/score.json ];then
-    exit 0
+
+if [ -d "./lib" ]; then
+        CLASSPATH=$CLASSPATH:lib/*
 else
-    exit 1
+    BASEDIR=`dirname $0`/../../..
+    BASEDIR=`(cd "$BASEDIR"; pwd)`
+    echo 'module dir:'$BASEDIR
+    CLASSPATH=$BASEDIR/target/classes:`cat $BASEDIR/target/classpath.txt`
 fi
+
+JVM_MEM="-Xms4G -Xmx4G -XX:+UseG1GC"
+JVM_GC_LOG=" -XX:+PrintGCDetails -XX:+PrintGCApplicationStoppedTime  -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=5 -XX:GCLogFileSize=64m  -Xloggc:/dev/shm/benchmark-client-gc_%p.log"
+
+java -cp $CLASSPATH $JVM_MEM com.jd.journalq.nsr.admin.BrokerAdmin $*
+
 

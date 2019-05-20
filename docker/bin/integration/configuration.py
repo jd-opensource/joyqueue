@@ -1,5 +1,3 @@
-#!/bin/sh
-
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,17 +12,24 @@
 # limitations under the License.
 #
 
-# start to test
+import configparser;
+import os
 
-python3 ./integration/bootstrap.py $*
-while getopts "s:b::" opt; do
-  case $opt in
-    s) score=$OPTARG;;
-  esac
-done
-if [ -e $score/score.json ];then
-    exit 0
-else
-    exit 1
-fi
+DEFAULT_SECTION = 'Default'
+
+
+class Configuration:
+    def __init__(self,config_file, argv):
+        self.config = configparser.ConfigParser()
+        self.config.read(config_file);
+        self.argv = argv
+
+    def get_value(self, key, section=DEFAULT_SECTION):
+        return self.config.get(section, key);
+
+    def set_value(self, key, value, section=DEFAULT_SECTION):
+        self.config.set(self,section, key, value)
+
+    def get_argv(self):
+        return self.argv
 

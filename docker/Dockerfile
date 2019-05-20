@@ -1,5 +1,3 @@
-#!/bin/sh
-
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,17 +12,11 @@
 # limitations under the License.
 #
 
-# start to test
+FROM openjdk:8-jdk
 
-python3 ./integration/bootstrap.py $*
-while getopts "s:b::" opt; do
-  case $opt in
-    s) score=$OPTARG;;
-  esac
-done
-if [ -e $score/score.json ];then
-    exit 0
-else
-    exit 1
-fi
+ARG JOURNALQ_TARBALL
+
+ADD ${JOURNALQ_TARBALL} /journalq-server-runtime
+
+WORKDIR /journalq-server-runtime
 
