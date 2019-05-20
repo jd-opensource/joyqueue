@@ -54,6 +54,10 @@ public class ReplicateConsumePosRequestHandler implements CommandHandler, Type {
 
     @Override
     public Command handle(Transport transport, Command command) throws TransportException {
+        if (!(command.getPayload() instanceof ReplicateConsumePosRequest)) {
+            throw new IllegalArgumentException();
+        }
+
         ReplicateConsumePosRequest request = (ReplicateConsumePosRequest)command.getPayload();
         boolean success;
         JMQHeader header = new JMQHeader(Direction.RESPONSE, CommandType.REPLICATE_CONSUME_POS_RESPONSE);

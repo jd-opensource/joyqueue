@@ -34,6 +34,7 @@ import com.jd.journalq.store.replication.ReplicableStore;
 import com.jd.journalq.toolkit.concurrent.EventListener;
 import com.jd.journalq.toolkit.concurrent.NamedThreadFactory;
 import com.google.common.base.Preconditions;
+import com.jd.journalq.toolkit.lang.Close;
 import com.jd.journalq.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,8 +103,8 @@ public class ReplicationManager extends Service {
 
     @Override
     public void doStop() {
-        transportClient.stop();
-        replicateExecutor.shutdown();
+        Close.close(transportClient);
+        Close.close(replicateExecutor);
 
         super.doStop();
     }
