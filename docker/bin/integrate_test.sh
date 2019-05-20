@@ -1,4 +1,5 @@
 #!/bin/sh
+
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,9 +14,17 @@
 # limitations under the License.
 #
 
+# start to test
 
-echo "integrate begin" $(date "+%Y%m%d-%H%M%S")
-echo "pwd"
-sleep 300
-echo "finish test" $(date "+%Y%m%d-%H%M%S")
-exit 0
+python3 ./integration/bootstrap.py $*
+while getopts "s:b::" opt; do
+  case $opt in
+    s) score=$OPTARG;;
+  esac
+done
+if [ -e $score/score.json ];then
+    exit 0
+else
+    exit 1
+fi
+

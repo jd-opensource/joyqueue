@@ -83,7 +83,9 @@ public class BrokerMonitorClusterQuery implements BrokerClusterQuery<Subscribe> 
 
         for (Broker b : brokers) {
             String url = urlMappingService.monitorUrl(b) + String.format(pathTmp, new TopicName(topic, namespace).getFullName(), groupNo);
-            AsyncHttpClient.AsyncRequest(new HttpGet(url), new AsyncHttpClient.ConcurrentHttpResponseHandler(url, SystemClock.now(), latch, String.valueOf(b.getId()), resultMap));
+
+            String requestKey = String.valueOf(b.getId())+"_"+groupNo;
+            AsyncHttpClient.AsyncRequest(new HttpGet(url), new AsyncHttpClient.ConcurrentHttpResponseHandler(url, SystemClock.now(), latch, requestKey, resultMap));
         }
         return new DefaultBrokerInfoFuture(latch, resultMap, logkey);
     }

@@ -27,4 +27,11 @@ public class PositionUnderflowException extends ReadException {
         this.left = left;
     }
 
+    public long getPosition() {
+        return position;
+    }
+
+    public long getLeft() {
+        return left;
+    }
 }

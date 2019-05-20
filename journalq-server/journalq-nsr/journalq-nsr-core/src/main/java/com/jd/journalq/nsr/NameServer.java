@@ -334,17 +334,12 @@ public class NameServer extends Service implements NameService, PropertySupplier
 
     @Override
     public TopicConfig getTopicConfig(TopicName topic) {
-        //直接先查询，查不到再缓存的数据？
-        TopicConfig topicConfig = null;
-        try {
-            topicConfig = reloadTopicConfig(topic);
-        } catch (Exception e) {
+        TopicConfig topicConfig = metaCache.topicConfigs.get(topic);
+        if (null != topicConfig) {
+            return topicConfig;
+        } else {
+            return reloadTopicConfig(topic);
         }
-
-        if (null == topicConfig) {
-            topicConfig = metaCache.topicConfigs.get(topic);
-        }
-        return topicConfig;
     }
 
     @Override

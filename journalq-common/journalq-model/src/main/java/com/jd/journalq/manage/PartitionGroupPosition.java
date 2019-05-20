@@ -39,6 +39,10 @@ public class PartitionGroupPosition implements Serializable {
         this.brokerId = brokerId;
     }
 
+    public String getBrokerId() {
+        return brokerId;
+    }
+
     public int getPartitionGroup() {
         return partitionGroup;
     }
