@@ -36,18 +36,18 @@ public abstract class AbstractLimitFilter implements ProtocolCommandHandlerFilte
 
     @Override
     public Command invoke(CommandHandlerInvocation invocation) throws TransportException {
+        Object request = invocation.getRequest().getPayload();
         Command response = invocation.invoke();
-        Command request = invocation.getRequest();
 
-        if (!isEnable()) {
+        if (response == null) {
             return response;
         }
 
         TrafficPayload trafficPayload = null;
         if (response != null && response.getPayload() instanceof TrafficPayload) {
             trafficPayload = (TrafficPayload) response.getPayload();
-        } else if (request != null && request.getPayload() instanceof TrafficPayload) {
-            trafficPayload = (TrafficPayload) request.getPayload();
+        } else if (request != null && request instanceof TrafficPayload) {
+            trafficPayload = (TrafficPayload) request;
         }
 
         if (trafficPayload == null) {
@@ -80,8 +80,6 @@ public abstract class AbstractLimitFilter implements ProtocolCommandHandlerFilte
         }
         return false;
     }
-
-    protected abstract boolean isEnable();
 
     protected abstract boolean limitIfNeeded(String topic, String app, String trafficType, Traffic traffic);
 

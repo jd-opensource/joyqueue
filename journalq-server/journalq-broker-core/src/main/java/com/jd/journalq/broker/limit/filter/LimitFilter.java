@@ -26,6 +26,8 @@ import com.jd.journalq.broker.limit.support.DefaultRateLimiterManager;
 import com.jd.journalq.broker.network.traffic.Traffic;
 import com.jd.journalq.network.transport.Transport;
 import com.jd.journalq.network.transport.command.Command;
+import com.jd.journalq.network.transport.command.handler.filter.CommandHandlerInvocation;
+import com.jd.journalq.network.transport.exception.TransportException;
 import com.jd.journalq.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,8 +47,11 @@ public class LimitFilter extends AbstractLimitFilter implements BrokerContextAwa
     private LimitRejectedStrategy limitRejectedStrategy;
 
     @Override
-    protected boolean isEnable() {
-        return config.isEnable();
+    public Command invoke(CommandHandlerInvocation invocation) throws TransportException {
+        if (!config.isEnable()) {
+            return invocation.invoke();
+        }
+        return super.invoke(invocation);
     }
 
     @Override
