@@ -31,7 +31,7 @@ public class KafkaClientHelper {
             return clientId;
         }
         for (String replace : REPLACE) {
-            clientId = clientId.replace(replace, "");
+            clientId = StringUtils.replace(clientId, replace, "");
         }
         if (StringUtils.contains(clientId, SEPARATOR)) {
             String[] strings = StringUtils.splitByWholeSeparator(clientId, SEPARATOR);

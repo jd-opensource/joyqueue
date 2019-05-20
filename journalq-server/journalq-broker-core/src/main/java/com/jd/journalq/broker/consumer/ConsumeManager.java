@@ -196,7 +196,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
         Preconditions.checkArgument(consumer != null, "消费者信息不能为空");
 
         // 监控开始时间
-        long startTime = SystemClock.now();
+        long startTime = System.nanoTime();
 
         ConsumerPolicy consumerPolicy = clusterManager.getConsumerPolicy(TopicName.parse(consumer.getTopic()), consumer.getApp());
         if (count <= 0) {
@@ -334,8 +334,8 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
         Integer group = partitionManager.getGroupByPartition(TopicName.parse(consumer.getTopic()), partition);
         Preconditions.checkArgument(group != null && group >= 0, "找不到主题[" + consumer.getTopic() + "]" + ",分区[" + partition + "]的分区组");
 
-        long startTime = SystemClock.now();
         try {
+            long startTime = System.nanoTime();
             PullResult pullResult = partitionConsumption.getMsgByPartitionAndIndex(consumer, group, partition, index, count);
             // 监控逻辑
             monitor(pullResult, startTime, consumer, group);
@@ -360,11 +360,12 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
      */
     private void monitor(PullResult pullResult, long startTime, Consumer consumer, int partitionGroup) {
         if (pullResult != null && CollectionUtils.isNotEmpty(pullResult.getBuffers())) {
+            long now = System.nanoTime();
             int messageSize = 0;
             for (ByteBuffer buffer : pullResult.getBuffers()) {
                 messageSize += (buffer.limit() - buffer.position());
             }
-            brokerMonitor.onGetMessage(consumer.getTopic(), consumer.getApp(), partitionGroup, pullResult.getPartition(), pullResult.getBuffers().size(), messageSize, (SystemClock.now() - startTime));
+            brokerMonitor.onGetMessage(consumer.getTopic(), consumer.getApp(), partitionGroup, pullResult.getPartition(), pullResult.getBuffers().size(), messageSize, (now - startTime) / 1000000);
         }
     }
 

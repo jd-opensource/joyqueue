@@ -29,7 +29,7 @@ public interface ReplicationMonitor {
      * @param size
      * @param time
      */
-    void onReplicateMessage(String topic, int partitionGroup, long count, long size, long time);
+    void onReplicateMessage(String topic, int partitionGroup, long count, long size, double time);
 
     /**
      * 写入复制消息
@@ -39,5 +39,5 @@ public interface ReplicationMonitor {
      * @param size
      * @param time
      */
-    void onAppendReplicateMessage(String topic, int partitionGroup, long count, long size, long time);
+    void onAppendReplicateMessage(String topic, int partitionGroup, long count, long size, double time);
 }
