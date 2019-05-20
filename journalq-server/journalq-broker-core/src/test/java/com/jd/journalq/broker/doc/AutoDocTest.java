@@ -33,9 +33,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+@Ignore
 public class AutoDocTest {
     @Test
-    @Ignore
     public void autoDocTest() throws Exception {
         String pkgName = "com.jd.journalq.broker.manage.service";
         String pkgNameB="com.jd.journalq.broker.monitor.service";

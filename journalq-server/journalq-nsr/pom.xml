@@ -27,6 +27,7 @@
     <artifactId>journalq-nsr</artifactId>
     <packaging>pom</packaging>
     <modules>
+        <module>journalq-nsr-admin</module>
         <module>journalq-nsr-core</module>
         <module>journalq-nsr-ignite</module>
     </modules>

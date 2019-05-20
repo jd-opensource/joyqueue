@@ -731,7 +731,7 @@ public class RaftLeaderElection extends LeaderElection  {
             node.setVoteGranted(false);
         });
 
-		cancelElectionTimer();
+
 
         try {
             replicaGroup.becomeLeader(currentTerm, leaderId);
@@ -741,7 +741,7 @@ public class RaftLeaderElection extends LeaderElection  {
             updateMetadata(leaderId, currentTerm);
             electionEventManager.add(new ElectionEvent(LEADER_FOUND,
                     currentTerm, localNode.getNodeId(), topicPartitionGroup));
-
+            cancelElectionTimer();
         } catch (Exception e) {
             logger.warn("Partition group {}/node {} as leader fail",
                     topicPartitionGroup, localNode, e);

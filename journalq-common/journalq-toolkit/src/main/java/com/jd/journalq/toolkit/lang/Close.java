@@ -220,8 +220,16 @@ public class Close {
      * @param executor 线程池
      */
     public static Close close(final ExecutorService executor) {
-        if (executor != null) {
-            executor.shutdownNow();
+        if (null != executor && !executor.isTerminated()) {
+            executor.shutdown();
+
+            try {
+                executor.awaitTermination(5, TimeUnit.SECONDS);
+            } catch (InterruptedException ignored) {}
+
+            if (!executor.isTerminated()) {
+                executor.shutdownNow();
+            }
         }
         return instance;
     }

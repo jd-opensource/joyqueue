@@ -82,7 +82,7 @@ public class MessageHeaderAdapter implements Header {
 
     @Override
     public long getBornTimestamp() {
-        return 0;
+        return message.getStartTime();
     }
 
     @Override
