@@ -68,7 +68,7 @@ public class TopicServiceImpl implements TopicService {
         if (oldTopic != null) {
             throw new DuplicateKeyException("topic aleady exist");
         }
-        List<TopicPartitionGroup> partitionGroups = addPartitionGroup(topic, brokers, operator);
+        List<TopicPartitionGroup> partitionGroups = addPartitionGroup(topic, brokers);
         try {
             topicNameServerService.addTopic(topic, partitionGroups);
         } catch (Exception e) {
@@ -78,9 +78,16 @@ public class TopicServiceImpl implements TopicService {
         }
     }
 
-    private List<TopicPartitionGroup> addPartitionGroup(Topic topic, List<Broker> brokers, Identity operator) {
-        List<TopicPartitionGroup> partitionGroups = new ArrayList<>(brokers.size());
-        for(int i =0;i<brokers.size();i++){
+    private List<TopicPartitionGroup> addPartitionGroup(Topic topic, List<Broker> brokers) {
+        //partitionGrouop 默认是broker数
+        //当partition小于broker数时,partitiongroup应该为partitiongroup数,保证每个partitiongroup都能有partition
+        int partitionGroupNum  = brokers.size();
+        if (topic.getPartitions() < brokers.size()) {
+            partitionGroupNum = topic.getPartitions();
+        }
+        List<TopicPartitionGroup> partitionGroups = new ArrayList<>(partitionGroupNum);
+        //创建partitiongroup
+        for(int i =0;i<partitionGroupNum;i++){
             TopicPartitionGroup partitionGroup = new TopicPartitionGroup();
             partitionGroup.setNamespace(topic.getNamespace());
             partitionGroup.setTopic(topic);
@@ -88,20 +95,22 @@ public class TopicServiceImpl implements TopicService {
             partitionGroup.setElectType(TopicPartitionGroup.ElectType.valueOf(topic.getElectType()).type());
             partitionGroups.add(partitionGroup);
         }
+
+        //每个paritiongroup分配 parition
         int groupstart = 0;
         int index = 0;
-        int step = topic.getPartitions()/brokers.size();
+        int step = topic.getPartitions()/partitionGroupNum;
         for(int i =0;i<topic.getPartitions();i++){
             TopicPartitionGroup partitionGroup = partitionGroups.get(groupstart);
             partitionGroup.addPartition(i);
             partitionGroup.setPartitions(Arrays.toString(partitionGroup.getPartitionSet().toArray()));
             index++;
-            if(index==step&&groupstart<brokers.size()-1){
+            if(index==step&&groupstart<partitionGroupNum-1){
                 groupstart++;
                 index=0;
             }
         }
-
+        //每个paritiongroup分配broker及指定推荐leader
         for(int k=0; k<partitionGroups.size();k++){
             TopicPartitionGroup partitionGroup = partitionGroups.get(k);
             for(int j=k;j<topic.getReplica()+k;j++){
