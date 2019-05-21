@@ -183,9 +183,13 @@ public class RaftLeaderElectionTest {
             electionManager[leaderId - 1].stop();
             logger.info("Node " + leaderId + " stop");
 
+            Thread.sleep(10000);
+
             int leaderIdNew = getLeader(leaderElections[nextNode(leaderId) - 1], 10);
             Assert.assertNotEquals(leaderIdNew, -1);
             logger.info("leaderIdNew id is " + leaderIdNew);
+
+            Thread.sleep(1000);
 
             for (int j = 0; j < NODE_NUM; j++) {
                 if (j != leaderId - 1) {
@@ -479,6 +483,8 @@ public class RaftLeaderElectionTest {
                 electionManager[i].onNodeRemove(topic1, partitionGroup1, leaderId, brokers[i].getId());
             }
         }
+
+        Thread.sleep(10000);
 
         int leaderId1 = getLeader(leaderElections[nextNode(leaderId) - 1], 10);
         logger.info("Leader1 id is " + leaderId1);
