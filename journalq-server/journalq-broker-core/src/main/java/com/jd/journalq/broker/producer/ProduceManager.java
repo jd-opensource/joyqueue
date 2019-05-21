@@ -282,6 +282,7 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
             logger.error("no partitions available topic:%s", topic);
             throw new JournalqException(JournalqCode.CN_NO_PERMISSION);
         }
+        long startTime = SystemClock.now();
         // 分配消息对于的分区分组
         Map<PartitionGroup, List<WriteRequest>> dispatchedMsgs = dispatchPartition(msgs, partitions);
         // 分区分组集合
@@ -296,7 +297,9 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
             // 同步等待写入完成
             WriteResult writeResult = syncWait(writeResultFuture, endTime - SystemClock.now());
             // 构造写入结果
-            onPutMessage(topic, producer.getApp(), partitionGroup.getGroup(), System.nanoTime(), writeRequests);
+            onPutMessage(topic, producer.getApp(), partitionGroup.getGroup(), startTime, writeRequests);
+
+            putResult.addWriteResult((short) partitionGroup.getGroup(), writeResult);
         }
 
         return putResult;
@@ -331,13 +334,14 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
             }
             PartitionGroupStore partitionStore = store.getStore(topic, partitionGroup.getGroup(), qosLevel);
             List<WriteRequest> writeRequests = dispatchedMsgs.get(partitionGroup);
-            long startTime = System.nanoTime();
+            long startTime = SystemClock.now();
 
             // 异步写入磁盘
             if(null != metric) {
                 long t0 = System.nanoTime();
 
-                partitionStore.asyncWrite(new MetricEventListener(t0, metric, eventListener, topic, app, partitionGroup.getGroup(), writeRequests), writeRequests.toArray(new WriteRequest[]{}));
+                partitionStore.asyncWrite(new MetricEventListener(t0, startTime, metric, eventListener, topic, app, partitionGroup.getGroup(), writeRequests),
+                        writeRequests.toArray(new WriteRequest[]{}));
 
                 long t1 = System.nanoTime();
                 metric.addCounter("tps", writeRequests.stream().map(WriteRequest::getBuffer).count());
@@ -357,14 +361,15 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
     }
 
     protected void onPutMessage(String topic, String app, int partitionGroup, long startTime, List<WriteRequest> writeRequests) {
-        long now = System.nanoTime();
+        long now = SystemClock.now();
         writeRequests.forEach(writeRequest -> {
-            brokerMonitor.onPutMessage(topic, app, partitionGroup, writeRequest.getPartition(), 1, writeRequest.getBuffer().limit(), (now - startTime) / 1000000);
+            brokerMonitor.onPutMessage(topic, app, partitionGroup, writeRequest.getPartition(), 1, writeRequest.getBuffer().limit(), now - startTime);
         });
     }
 
     class MetricEventListener implements EventListener<WriteResult> {
         final long t0;
+        final long startTime;
         final Metric.MetricInstance metric;
         final EventListener<WriteResult> eventListener;
         final String topic;
@@ -372,9 +377,11 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
         final int partitionGroup;
         final List<WriteRequest> writeRequests;
 
-        MetricEventListener(long t0, Metric.MetricInstance metric, EventListener<WriteResult> eventListener, String topic, String app, int partitionGroup, List<WriteRequest> writeRequests) {
+        MetricEventListener(long t0, long startTime, Metric.MetricInstance metric, EventListener<WriteResult> eventListener, String topic, String app,
+                            int partitionGroup, List<WriteRequest> writeRequests) {
 
             this.t0 = t0;
+            this.startTime = startTime;
             this.metric = metric;
             this.eventListener = eventListener;
             this.topic = topic;
@@ -385,7 +392,7 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
         @Override
         public void onEvent(WriteResult event) {
             metric.addLatency("callback",System.nanoTime() - t0);
-            onPutMessage(topic, app, partitionGroup, t0, writeRequests);
+            onPutMessage(topic, app, partitionGroup, startTime, writeRequests);
             eventListener.onEvent(event);
         }
     }

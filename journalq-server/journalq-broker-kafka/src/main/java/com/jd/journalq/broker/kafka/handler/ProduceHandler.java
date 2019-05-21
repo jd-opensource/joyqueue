@@ -31,6 +31,7 @@ import com.jd.journalq.broker.kafka.message.converter.KafkaMessageConverter;
 import com.jd.journalq.broker.kafka.model.ProducePartitionStatus;
 import com.jd.journalq.broker.network.traffic.Traffic;
 import com.jd.journalq.broker.producer.Produce;
+import com.jd.journalq.broker.producer.ProduceConfig;
 import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.domain.QosLevel;
 import com.jd.journalq.domain.TopicConfig;
@@ -43,6 +44,7 @@ import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.response.BooleanResponse;
 import com.jd.journalq.toolkit.concurrent.EventListener;
 import com.jd.journalq.toolkit.network.IpUtil;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,11 +66,13 @@ public class ProduceHandler extends AbstractKafkaCommandHandler implements Broke
     protected static final Logger logger = LoggerFactory.getLogger(ProduceHandler.class);
 
     private Produce produce;
+    private ProduceConfig produceConfig;
     private ClusterManager clusterManager;
 
     @Override
     public void setBrokerContext(BrokerContext brokerContext) {
         this.produce = brokerContext.getProduce();
+        this.produceConfig = new ProduceConfig(brokerContext.getPropertySupplier());
         this.clusterManager = brokerContext.getClusterManager();
     }
 
@@ -126,6 +130,7 @@ public class ProduceHandler extends AbstractKafkaCommandHandler implements Broke
 
                 for (KafkaBrokerMessage message : entry.getValue()) {
                     BrokerMessage brokerMessage = KafkaMessageConverter.toBrokerMessage(producer.getTopic(), partition, producer.getApp(), clientAddress, message);
+                    checkAndFillMessage(brokerMessage);
                     partitionMessageList.add(brokerMessage);
                     traffic.record(topic.getFullName(), brokerMessage.getSize());
                 }
@@ -174,6 +179,12 @@ public class ProduceHandler extends AbstractKafkaCommandHandler implements Broke
             logger.error("produce message failed, topic: {}", producer.getTopic(), e);
             short status = KafkaErrorCode.exceptionFor(e);
             listener.onEvent(new ProducePartitionStatus(0, ProducePartitionStatus.NONE_OFFSET, status));
+        }
+    }
+
+    protected void checkAndFillMessage(BrokerMessage message) {
+        if (StringUtils.length(message.getBusinessId()) > produceConfig.getBusinessIdLength()) {
+            message.setBusinessId(message.getBusinessId().substring(0, produceConfig.getBusinessIdLength()));
         }
     }
 

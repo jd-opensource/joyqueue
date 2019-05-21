@@ -13,6 +13,7 @@
  */
 package com.jd.journalq.broker.consumer;
 
+import com.google.common.base.Preconditions;
 import com.jd.journalq.broker.BrokerContext;
 import com.jd.journalq.broker.BrokerContextAware;
 import com.jd.journalq.broker.archive.ArchiveManager;
@@ -21,6 +22,8 @@ import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.consumer.model.ConsumePartition;
 import com.jd.journalq.broker.consumer.model.OwnerShip;
 import com.jd.journalq.broker.consumer.model.PullResult;
+import com.jd.journalq.broker.consumer.position.PositionManager;
+import com.jd.journalq.broker.consumer.position.model.Position;
 import com.jd.journalq.broker.monitor.BrokerMonitor;
 import com.jd.journalq.broker.monitor.SessionManager;
 import com.jd.journalq.domain.Consumer.ConsumerPolicy;
@@ -35,14 +38,11 @@ import com.jd.journalq.message.MessageLocation;
 import com.jd.journalq.network.session.Connection;
 import com.jd.journalq.network.session.Consumer;
 import com.jd.journalq.network.session.Joint;
-import com.jd.journalq.broker.consumer.position.PositionManager;
-import com.jd.journalq.broker.consumer.position.model.Position;
 import com.jd.journalq.server.retry.api.MessageRetry;
 import com.jd.journalq.store.PartitionGroupStore;
 import com.jd.journalq.store.StoreService;
 import com.jd.journalq.toolkit.concurrent.EventListener;
 import com.jd.journalq.toolkit.lang.Close;
-import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import com.jd.journalq.toolkit.time.SystemClock;
 import org.apache.commons.collections.CollectionUtils;
@@ -196,7 +196,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
         Preconditions.checkArgument(consumer != null, "消费者信息不能为空");
 
         // 监控开始时间
-        long startTime = System.nanoTime();
+        long startTime = SystemClock.now();
 
         ConsumerPolicy consumerPolicy = clusterManager.getConsumerPolicy(TopicName.parse(consumer.getTopic()), consumer.getApp());
         if (count <= 0) {
@@ -335,7 +335,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
         Preconditions.checkArgument(group != null && group >= 0, "找不到主题[" + consumer.getTopic() + "]" + ",分区[" + partition + "]的分区组");
 
         try {
-            long startTime = System.nanoTime();
+            long startTime = SystemClock.now();
             PullResult pullResult = partitionConsumption.getMsgByPartitionAndIndex(consumer, group, partition, index, count);
             // 监控逻辑
             monitor(pullResult, startTime, consumer, group);
@@ -360,12 +360,12 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
      */
     private void monitor(PullResult pullResult, long startTime, Consumer consumer, int partitionGroup) {
         if (pullResult != null && CollectionUtils.isNotEmpty(pullResult.getBuffers())) {
-            long now = System.nanoTime();
+            long now = SystemClock.now();
             int messageSize = 0;
             for (ByteBuffer buffer : pullResult.getBuffers()) {
                 messageSize += (buffer.limit() - buffer.position());
             }
-            brokerMonitor.onGetMessage(consumer.getTopic(), consumer.getApp(), partitionGroup, pullResult.getPartition(), pullResult.getBuffers().size(), messageSize, (now - startTime) / 1000000);
+            brokerMonitor.onGetMessage(consumer.getTopic(), consumer.getApp(), partitionGroup, pullResult.getPartition(), pullResult.getBuffers().size(), messageSize, now - startTime);
         }
     }
 

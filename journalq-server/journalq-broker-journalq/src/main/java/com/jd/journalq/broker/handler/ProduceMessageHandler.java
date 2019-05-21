@@ -25,6 +25,7 @@ import com.jd.journalq.broker.converter.CheckResultConverter;
 import com.jd.journalq.broker.helper.SessionHelper;
 import com.jd.journalq.broker.network.traffic.Traffic;
 import com.jd.journalq.broker.producer.Produce;
+import com.jd.journalq.broker.producer.ProduceConfig;
 import com.jd.journalq.domain.QosLevel;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.exception.JournalqCode;
@@ -46,6 +47,7 @@ import com.jd.journalq.store.WriteResult;
 import com.jd.journalq.toolkit.concurrent.EventListener;
 import com.jd.journalq.toolkit.time.SystemClock;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,12 +68,14 @@ public class ProduceMessageHandler implements JournalqCommandHandler, Type, Jour
     protected static final Logger logger = LoggerFactory.getLogger(ProduceMessageHandler.class);
 
     private JournalqConfig config;
+    private ProduceConfig produceConfig;
     private Produce produce;
     private ClusterManager clusterManager;
 
     @Override
     public void setJmqContext(JournalqContext journalqContext) {
         this.config = journalqContext.getConfig();
+        this.produceConfig = new ProduceConfig(journalqContext.getBrokerContext().getPropertySupplier());
         this.produce = journalqContext.getBrokerContext().getProduce();
         this.clusterManager= journalqContext.getBrokerContext().getClusterManager();
     }
@@ -187,6 +191,9 @@ public class ProduceMessageHandler implements JournalqCommandHandler, Type, Jour
         for (BrokerMessage brokerMessage : produceMessageData.getMessages()) {
             if (brokerMessage.getPartition() != partition) {
                 throw new JournalqException(JournalqCode.CN_PARAM_ERROR, "the put message command has multi partition");
+            }
+            if (StringUtils.length(brokerMessage.getBusinessId()) > produceConfig.getBusinessIdLength()) {
+                throw new JournalqException(JournalqCode.CN_PARAM_ERROR, "message businessId out of rage");
             }
             brokerMessage.setClientIp(address);
             brokerMessage.setTxId(txId);
