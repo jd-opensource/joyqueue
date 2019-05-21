@@ -30,6 +30,7 @@ import com.jd.journalq.domain.Topic;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.nsr.AdminConfig;
 import com.jd.journalq.nsr.CommandArgs;
+import com.jd.journalq.nsr.model.PartitionGroupQuery;
 import com.jd.journalq.nsr.utils.AsyncHttpClient;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -72,6 +73,13 @@ public class TopicAdmin extends AbstractAdmin {
         public List<Integer> brokers=new ArrayList<>();
    }
 
+
+   public static class PartitionGroupArg extends CommandArgs{
+       @Parameter(names = { "-c", "--topic" }, description = "Topic code", required = true)
+       public String topic;
+       @Parameter(names = { "-n", "--namespace" }, description = "Topic namespace", required = false)
+       public String namespace="";
+   }
     /**
      *  Subscription args
      *
@@ -106,6 +114,7 @@ public class TopicAdmin extends AbstractAdmin {
     public static void main(String[] args){
         final TopicArg topicArg=new TopicArg();
         final PubSubArg pubSubArg=new PubSubArg();
+        final PartitionGroupArg partitionGroupArg=new PartitionGroupArg();
         TopicAdmin topicAdmin=new TopicAdmin();
         Map<String,CommandArgs> argsMap=new HashMap(8);
                                 argsMap.put(Command.add.name(),topicArg);
@@ -119,6 +128,7 @@ public class TopicAdmin extends AbstractAdmin {
                 .addCommand(Command.unpublish.name(),pubSubArg)
                 .addCommand(Command.subscribe.name(),pubSubArg)
                 .addCommand(Command.unsubscribe.name(),pubSubArg)
+                .addCommand(Command.partitiongroup.name(),partitionGroupArg)
                 .build();
         jc.setProgramName("topic");
         topicAdmin.execute(jc,args,argsMap);
@@ -151,6 +161,9 @@ public class TopicAdmin extends AbstractAdmin {
            case unsubscribe:
                unSubscribe((PubSubArg)arguments,jCommander);
                break;
+           case partitiongroup:
+               partitionGroups((PartitionGroupArg)arguments,jCommander);
+               break;
            default:
                jCommander.usage();
                System.exit(-1);
@@ -158,6 +171,20 @@ public class TopicAdmin extends AbstractAdmin {
        }
     }
 
+    /**
+     *
+     *  Topic partition group
+     *
+     **/
+    public String partitionGroups(PartitionGroupArg args,JCommander jCommander) throws Exception{
+        PartitionGroupQuery query=new PartitionGroupQuery();
+        query.setTopic(args.topic);
+        query.setNamespace(args.namespace);
+        Future<String> futureResult=httpClient.post(args.host,"/partitiongroup/list",JSON.toJSONString(query),String.class);
+        String result=futureResult.get(AdminConfig.TIMEOUT_MS,TimeUnit.MILLISECONDS);
+        System.out.println(result);
+        return result;
+    }
     /**
      *  Topic add process
      *
@@ -280,7 +307,7 @@ public class TopicAdmin extends AbstractAdmin {
     }
 
     enum Command{
-       add,delete,update,publish,unpublish,subscribe,unsubscribe,undef;
+       add,delete,update,publish,unpublish,subscribe,unsubscribe,partitiongroup,undef;
        public static Command type(String name){
            for(Command c: values()){
                if(c.name().equals(name))

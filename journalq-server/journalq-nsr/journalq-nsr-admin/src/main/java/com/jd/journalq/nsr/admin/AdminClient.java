@@ -75,6 +75,12 @@ public class AdminClient implements NsrAdmin {
     }
 
     @Override
+    public String partitionGroup(TopicAdmin.PartitionGroupArg partitionGroupArg) throws Exception {
+        partitionGroupArg.host=host;
+        return topicAdmin.partitionGroups(partitionGroupArg,null);
+    }
+
+    @Override
     public void close() throws IOException {
         appAdmin.close();
         topicAdmin.close();

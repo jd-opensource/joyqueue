@@ -14,7 +14,9 @@
 package com.jd.journalq.nsr.admin;
 
 
+import com.alibaba.fastjson.JSON;
 import com.jd.journalq.domain.Broker;
+import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.domain.Subscription;
 import org.junit.*;
 import org.junit.runners.MethodSorters;
@@ -40,6 +42,17 @@ public class AdminClientTest {
         Assert.assertNotEquals(null,brokers);
         topicArg.brokers=brokers.stream().map(broker -> broker.getId()).collect(Collectors.toList());
         client.createTopic(topicArg);
+    }
+
+
+    @Test
+    public void partitionGroup() throws Exception{
+        TopicAdmin.PartitionGroupArg arg=new TopicAdmin.PartitionGroupArg();
+        arg.topic=topic;
+        String partitionGroups=client.partitionGroup(arg);
+        List<PartitionGroup> partitionGroupList=JSON.parseArray(partitionGroups,PartitionGroup.class);
+        Assert.assertNotEquals(null,partitionGroupList);
+        System.out.println(partitionGroupList);
     }
 
     @Test

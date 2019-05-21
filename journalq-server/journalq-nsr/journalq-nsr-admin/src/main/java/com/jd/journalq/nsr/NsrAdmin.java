@@ -31,6 +31,7 @@ public interface NsrAdmin extends Closeable {
     String createTopic(TopicAdmin.TopicArg topicArg) throws Exception;
     String delTopic(TopicAdmin.TopicArg topicArg) throws Exception;
     String token(AppAdmin.TokenArg tokenArg) throws Exception;
+    String partitionGroup(TopicAdmin.PartitionGroupArg partitionGroupArg) throws Exception;
     List<Broker> listBroker(BrokerAdmin.ListArg listArg) throws Exception;
 
 }
