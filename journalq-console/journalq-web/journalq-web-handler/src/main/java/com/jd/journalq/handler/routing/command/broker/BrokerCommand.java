@@ -25,8 +25,6 @@ import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
 import org.apache.commons.net.telnet.TelnetClient;
 
-import java.io.IOException;
-
 import static com.jd.journalq.handler.Constants.ID;
 
 /**
@@ -71,11 +69,5 @@ public class BrokerCommand extends NsrCommandSupport<Broker,BrokerService,QBroke
             return Responses.error(500,"未存活");
         }
         return Responses.success();
-    }
-
-    public static void main(String[] args) {
-        Long i = 250685575168l;
-        System.out.println(i>>30);
-
     }
 }
