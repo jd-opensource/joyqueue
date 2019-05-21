@@ -47,15 +47,29 @@ public class AppendEntriesRequestHandler implements CommandHandler, Type {
         Preconditions.checkArgument(brokerContext != null, "broker context is null");
         Preconditions.checkArgument(brokerContext.getElectionService() != null, "election service is null");
 
+        if (!(brokerContext.getElectionService() instanceof ElectionManager)) {
+            logger.info("Append entries request handler, election service {} not election manager",
+                    brokerContext.getElectionService());
+            throw new IllegalArgumentException();
+        }
         this.electionManager = (ElectionManager)brokerContext.getElectionService();
     }
 
     public AppendEntriesRequestHandler(ElectionService electionService) {
+        if (!(electionService instanceof ElectionManager)) {
+            logger.info("Append entries request handler, election service {} not election manager",
+                    electionService);
+            throw new IllegalArgumentException();
+        }
         this.electionManager = (ElectionManager)electionService;
     }
 
     @Override
     public Command handle(Transport transport, Command command) throws TransportException {
+        if (!(command.getPayload() instanceof  AppendEntriesRequest)) {
+            throw new IllegalArgumentException();
+        }
+
         AppendEntriesRequest request = (AppendEntriesRequest) command.getPayload();
         if (request == null) {
             logger.warn("Receive append entries request from {}, request is null", transport.remoteAddress());

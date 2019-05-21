@@ -12,3 +12,17 @@
 # limitations under the License.
 #
 
+name: 1 topic / 5 partition / 1Kb / 10P1C async
+
+topics: 1
+partitionsPerTopic: 5
+keyDistributor: "NO_KEY"
+messageSize: 1024
+payloadFile: "payload/payload-1Kb.data"
+subscriptionsPerTopic: 1
+consumerPerSubscription: 1
+syncProducer: false
+producersPerTopic: 10
+producerRate: 50000
+consumerBacklogSizeGB: 0
+testDurationMinutes: 1
