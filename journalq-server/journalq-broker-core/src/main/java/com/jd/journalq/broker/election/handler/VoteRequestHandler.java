@@ -38,10 +38,16 @@ public class VoteRequestHandler implements CommandHandler, Type {
     private ElectionManager electionManager;
 
     public VoteRequestHandler(BrokerContext brokerContext) {
+        if (!(brokerContext.getElectionService() instanceof ElectionManager)) {
+            throw new IllegalArgumentException();
+        }
         this.electionManager = (ElectionManager)brokerContext.getElectionService();
     }
 
     public VoteRequestHandler(ElectionService electionService) {
+        if (!(electionService instanceof ElectionManager)) {
+            throw new IllegalArgumentException();
+        }
         this.electionManager = (ElectionManager)electionService;
     }
 
@@ -50,10 +56,15 @@ public class VoteRequestHandler implements CommandHandler, Type {
         return CommandType.RAFT_VOTE_REQUEST;
     }
 
+    @Override
     public Command handle(Transport transport, Command command) throws TransportException{
         if (command == null) {
             logger.error("Receive vote request command is null");
             return null;
+        }
+
+        if (!(command.getPayload() instanceof VoteRequest)) {
+            throw new IllegalArgumentException();
         }
 
         VoteRequest voteRequest = (VoteRequest)command.getPayload();
