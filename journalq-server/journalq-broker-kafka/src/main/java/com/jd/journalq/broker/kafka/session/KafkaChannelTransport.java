@@ -91,13 +91,14 @@ public class KafkaChannelTransport implements ChannelTransport {
 
     @Override
     public void acknowledge(Command request, Command response) throws TransportException {
-        delegate.acknowledge(request, response);
-        release();
+        acknowledge(request, response, null);
     }
 
     @Override
     public void acknowledge(Command request, Command response, CommandCallback callback) throws TransportException {
-        delegate.acknowledge(request, response, callback);
+        delegate.getChannel().eventLoop().execute(() -> {
+            delegate.acknowledge(request, response, callback);
+        });
         release();
     }
 
