@@ -82,6 +82,8 @@ public class PartitionManager {
      */
     public boolean tryOccupyPartition(Consumer consumer, short partition, long occupyTimeout) {
         ConsumePartition consumePartition = new ConsumePartition(consumer.getTopic(), consumer.getApp(), partition);
+        consumePartition.setConnectionId(consumer.getConnectionId());
+
         // 用消费者ID作为消费者唯一标示
         String clientId = consumer.getId();
         long expire = occupyTimeout + SystemClock.now();
@@ -105,6 +107,9 @@ public class PartitionManager {
                     isSuccess = coverOccupy(consumePartition, previous, ownerShip);
                     // 由于过期，属于异常，所以记录上一个过期的消费者一次异常
                     increaseSerialErr(previous);
+
+                    // 日志记录下占用过期分区和连接信息
+                    logger.debug("expire occupy partition:[{}], connectionId:[{}]", consumePartition, consumer.getConnectionId());
                 }
             } else {
                 // 分区没有被占用，占用当前分区
@@ -239,7 +244,13 @@ public class PartitionManager {
      *
      * @return 是否重试
      */
-    protected boolean isRetry(Consumer consumer) {
+    protected boolean isRetry(Consumer consumer) throws JournalqException {
+        Boolean retry = clusterManager.getConsumer(TopicName.parse(consumer.getTopic()), consumer.getApp()).getConsumerPolicy().getRetry();
+        if (!retry.booleanValue()) {
+            logger.debug("retry enable is false.");
+            return false;
+        }
+
         int val = random.nextInt(100);
         // 重试管理中获取从重试分区消费的概率
         int rate = retryProbability.getProbability(consumer.getJoint());

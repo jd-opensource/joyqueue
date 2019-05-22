@@ -22,11 +22,11 @@ import com.jd.journalq.toolkit.config.PropertyDef;
  */
 public enum ElectionConfigKey implements PropertyDef {
     ELECTION_METADATA("election.metadata.file", "raft_metafile.dat", Type.STRING),
-    ELECTION_TIMEOUT("election.election.timeout", 1000 * 6, Type.INT),
+    ELECTION_TIMEOUT("election.election.timeout", 1000 * 5, Type.INT),
     EXECUTOR_THREAD_NUM_MIN("election.executor.thread.num.min", 5, Type.INT),
     EXECUTOR_THREAD_NUM_MAX("election.executor.thread.num.max", 50, Type.INT),
     TIMER_SCHEDULE_THREAD_NUM("election.timer.schedule.thread.num", 5, Type.INT),
-    HEARTBEAT_TIMEOUT("election.heartbeat.timeout", 1000 * 1, Type.INT),
+    HEARTBEAT_TIMEOUT("election.heartbeat.timeout", 1000, Type.INT),
     SEND_COMMAND_TIMEOUT("election.send.command.timeout", 1000 * 5, Type.INT),
     MAX_BATCH_REPLICATE_SIZE("election.max.replicate.length", 1024 * 1024, Type.INT),
     DISABLE_STORE_TIMEOUT("election.disable.store.timeout", 1000 * 5, Type.INT),
@@ -38,8 +38,9 @@ public enum ElectionConfigKey implements PropertyDef {
     COMMAND_QUEUE_SIZE("election.command.queue.size", 1024, Type.INT),
     LOG_INTERVAL("election.log.interval", 3000, Type.INT),
     TRANSFER_LEADER_MIN_LAG("election.transfer.leader.min.lag", 10 * 1024 * 1024, Type.LONG),
-    ENABLE_REBALANCE_LEADER("election.rebalance.leader.enable", false, Type.BOOLEAN),
-    MAX_REBALANCE_INTERVAL("election.max.rebalance.interval", 60 * 60 * 1000, Type.INT);
+    ENABLE_REBALANCE_LEADER("election.enable.rebalance.leader", false, Type.BOOLEAN),
+    MIN_REBALANCE_INTERVAL("election.min.rebalance.interval", 60 * 60 * 1000, Type.INT),
+    ENABLE_REPORT_LEADER_PERIODICALLY("election.enable.report.leader.periodically", false, Type.BOOLEAN);
 
     private String name;
     private Object value;
