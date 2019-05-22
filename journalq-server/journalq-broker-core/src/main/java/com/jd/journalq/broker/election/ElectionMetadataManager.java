@@ -59,8 +59,12 @@ public class ElectionMetadataManager {
     void recover(ElectionManager electionManager) throws Exception {
         try {
             File file = new File(fileName);
-            if (file.exists()) recoverMetadataOld(file);
-            else recoverMetadata();
+            if (file.exists()) {
+                recoverMetadataOld(file);
+            }
+            else {
+                recoverMetadata();
+            }
 
             restoreLeaderElections(electionManager);
         } catch (Exception e) {
@@ -113,14 +117,20 @@ public class ElectionMetadataManager {
         }
 
         File[] topicDirs = root.listFiles();
-        if (topicDirs == null) return;
+        if (topicDirs == null) {
+            return;
+        }
 
         for (File topicDir : topicDirs) {
-            if (!topicDir.isDirectory()) continue;
+            if (!topicDir.isDirectory()) {
+                continue;
+            }
 
             String topic = topicDir.getName().replace('@', File.separatorChar);
             File[] pgsFiles = topicDir.listFiles();
-            if (pgsFiles == null) continue;
+            if (pgsFiles == null) {
+                continue;
+            }
 
             for (File filePg : pgsFiles) {
                 if (!StringUtils.isNumeric(filePg.getName())) {
@@ -142,10 +152,11 @@ public class ElectionMetadataManager {
     @Deprecated
     private static Object readConfigFile(File file, Class objClass, Object defValue) throws IOException {
         if (file == null || !file.exists()) {
-            if (defValue == null)
+            if (defValue == null) {
                 throw new IOException("file is null or not exists");
-            else
+            } else {
                 return defValue;
+            }
         }
 
         byte[] buf;
@@ -196,7 +207,10 @@ public class ElectionMetadataManager {
             File topicDir = new File(this.path + File.separator + topicPartitionGroup.getTopic()
                     .replace(File.separatorChar, '@'));
             File[] pgFiles = topicDir.listFiles();
-            if (pgFiles == null) return;
+            if (pgFiles == null) {
+                logger.info("Remove election metadata of {} no file", topicPartitionGroup);
+                return;
+            }
 
             for (File pgFile : pgFiles) {
                 if (Integer.valueOf(pgFile.getName()) == topicPartitionGroup.getPartitionGroupId()) {

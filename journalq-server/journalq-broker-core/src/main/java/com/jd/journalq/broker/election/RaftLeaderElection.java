@@ -23,6 +23,8 @@ import com.jd.journalq.broker.election.command.VoteRequest;
 import com.jd.journalq.broker.election.command.VoteResponse;
 import com.jd.journalq.broker.replication.ReplicaGroup;
 import com.jd.journalq.domain.PartitionGroup;
+import com.jd.journalq.domain.TopicConfig;
+import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.network.command.CommandType;
 import com.jd.journalq.network.transport.codec.JMQHeader;
 import com.jd.journalq.network.transport.command.Command;
@@ -30,6 +32,8 @@ import com.jd.journalq.network.transport.command.CommandCallback;
 import com.jd.journalq.network.transport.command.Direction;
 import com.jd.journalq.store.replication.ReplicableStore;
 import com.jd.journalq.toolkit.concurrent.EventBus;
+
+import com.jd.journalq.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,8 +76,11 @@ public class RaftLeaderElection extends LeaderElection  {
 
     private ScheduledExecutorService electionTimerExecutor;
     private ScheduledFuture electionTimerFuture;
+    private ScheduledFuture heartbeatTimerFuture;
     private ScheduledFuture transferLeaderTimerFuture;
     private ExecutorService electionExecutor;
+
+    private long lastRebalanceTime;
 
     RaftLeaderElection(TopicPartitionGroup topicPartitionGroup, ElectionConfig electionConfig,
                               ElectionManager electionManager, ClusterManager clusterManager,
@@ -113,6 +120,9 @@ public class RaftLeaderElection extends LeaderElection  {
 
         resetElectionTimer();
 
+        electionTimerExecutor.scheduleAtFixedRate(this::rebalanceLeader,
+                60, 60, TimeUnit.SECONDS);
+
         electionTimerExecutor.scheduleAtFixedRate(this::reportLeadership,
                 60, 60, TimeUnit.SECONDS);
 
@@ -124,6 +134,7 @@ public class RaftLeaderElection extends LeaderElection  {
     @Override
     protected void doStop() {
         cancelElectionTimer();
+        cancelHeartbeatTimer();
         cancelTransferLeaderTimer();
 
         nodeOffline(currentTerm);
@@ -255,10 +266,14 @@ public class RaftLeaderElection extends LeaderElection  {
         try {
             long leftPosition = replicableStore.leftPosition();
             long rightPosition = replicableStore.rightPosition();
-            if (leftPosition == rightPosition) return -1;
+            if (leftPosition == rightPosition) {
+                logger.info("Partition group {}/node get last log term left position {} " +
+                        "equals right position", topicPartitionGroup, localNode, leftPosition);
+                return -1;
+            }
             long prevPosition = replicableStore.position(rightPosition, -1);
             return replicableStore.getEntryTerm(prevPosition);
-            //return replicableStore.term();
+
         } catch (Exception e) {
             logger.warn("Partition group {}/node {} get last log term fail",
                     topicPartitionGroup, localNode, e);
@@ -288,8 +303,8 @@ public class RaftLeaderElection extends LeaderElection  {
 
     private int getElectionTimeoutMs() {
         Random random = new Random();
-        return electionConfig.getElectionTimeout() * 2 / 3
-                + random.nextInt(electionConfig.getElectionTimeout());
+        return electionConfig.getElectionTimeout() + random.nextInt(electionConfig.getElectionTimeout());
+
     }
 
     /**
@@ -345,7 +360,9 @@ public class RaftLeaderElection extends LeaderElection  {
         long lastLogPos = getLastLogPosition();
 
         for (ElectionNode node : getAllNodes()) {
-            if (node.equals(localNode)) continue;
+            if (node.equals(localNode)) {
+                continue;
+            }
 
             electionExecutor.submit(() -> {
                 node.setVoteGranted(false);
@@ -388,7 +405,9 @@ public class RaftLeaderElection extends LeaderElection  {
         long lastLogPos = getLastLogPosition();
 
         for (ElectionNode node : getAllNodes()) {
-            if (node.equals(localNode)) continue;
+            if (node.equals(localNode)) {
+                continue;
+            }
 
             electionExecutor.submit(() -> {
                 node.setVoteGranted(false);
@@ -425,6 +444,10 @@ public class RaftLeaderElection extends LeaderElection  {
 
         @Override
         public void onSuccess(Command request, Command responseCommand) {
+            if (!(request.getPayload() instanceof VoteRequest)) {
+                return;
+            }
+
             VoteRequest voteRequest = (VoteRequest)request.getPayload();
             if (currentTerm != term) {
                 logger.info("Partition group {}/node {} receive vote response from {}, " +
@@ -582,6 +605,11 @@ public class RaftLeaderElection extends LeaderElection  {
             return;
         }
 
+        if (!(command.getPayload() instanceof VoteResponse)) {
+            logger.info("Partition group {}/node{} receive vote response object type error",
+                    topicPartitionGroup, localNode);
+            return;
+        }
         VoteResponse voteResponse = (VoteResponse)command.getPayload();
 
         logger.info("Partition group {}/node{} receive vote response from {}, term is {}, " +
@@ -607,10 +635,13 @@ public class RaftLeaderElection extends LeaderElection  {
         for (ElectionNode node : getAllNodes()) {
             logger.info("Partition group {}/node {} voteGranted is {}",
                     topicPartitionGroup, node, node.isVoteGranted());
-            if (node.isVoteGranted()) voteGranted++;
+            if (node.isVoteGranted()) {
+                voteGranted++;
+            }
         }
 
-        logger.info("Partition group {}/node {} receive {} votes", topicPartitionGroup, localNode, voteGranted);
+        logger.info("Partition group {}/node {} receive {} votes",
+                topicPartitionGroup, localNode, voteGranted);
 
         // if granted quorum, become leader
         if (voteGranted > (getAllNodes().size()) / 2) {
@@ -632,6 +663,11 @@ public class RaftLeaderElection extends LeaderElection  {
             return;
         }
 
+        if (!(command.getPayload() instanceof VoteResponse)) {
+            logger.info("Partition group {}/node{} receive pre vote response object type error",
+                    topicPartitionGroup, localNode);
+            return;
+        }
         VoteResponse voteResponse = (VoteResponse)command.getPayload();
 
         logger.info("Partition group {}/node{} receive pre vote response from {}, term is {}, " +
@@ -658,7 +694,9 @@ public class RaftLeaderElection extends LeaderElection  {
         for (ElectionNode node : getAllNodes()) {
             logger.info("Partition group {}/node {} pre vote voteGranted is {}",
                     topicPartitionGroup, node, node.isVoteGranted());
-            if (node.isVoteGranted()) voteGranted++;
+            if (node.isVoteGranted()) {
+                voteGranted++;
+            }
         }
 
         logger.info("Partition group {}/node {} receive {} pre votes",
@@ -720,6 +758,123 @@ public class RaftLeaderElection extends LeaderElection  {
     }
 
     /**
+     * 开始新一轮心跳，向Follower节点发送心跳命令，重置心跳定时器
+     */
+    private synchronized void startNewHeartbeat() {
+        if (!isStarted()) {
+            throw new IllegalStateException("Start new heartbeat leader, election service not start");
+        }
+
+        if (!isLeader() && state() != TRANSFERRING) {
+            logger.info("Partition group {}/node {} start new heartbeat, state is {}",
+                    topicPartitionGroup, localNode, state());
+            return;
+        }
+
+        AppendEntriesRequest appendEntriesRequest = AppendEntriesRequest.Build.create()
+                .partitionGroup(topicPartitionGroup).term(currentTerm).leader(leaderId).build();
+        for (ElectionNode node : getAllNodes()) {
+            if (node.equals(localNode)) {
+                continue;
+            }
+            try {
+                electionExecutor.submit(() -> {
+                    JMQHeader header = new JMQHeader(Direction.REQUEST, CommandType.RAFT_APPEND_ENTRIES_REQUEST);
+                    Command command = new Command(header, appendEntriesRequest);
+
+                    logger.debug("Partition group {}/node{} send heartbeat request {} to {}",
+                            topicPartitionGroup, localNode, appendEntriesRequest, node.getNodeId());
+                    try {
+                        electionManager.sendCommand(node.getAddress(), command,
+                                electionConfig.getSendCommandTimeout(), new HeartbeatRequestCallback(node));
+                    } catch (Exception e) {
+                        logger.warn("Partition group {}/node{} send heartbeat to {} fail",
+                                topicPartitionGroup, localNode, node, e);
+                    }
+                });
+            } catch (Exception e) {
+                logger.warn("Partition group {}/node {} submit new heartbeat task fail",
+                        topicPartitionGroup, localNode, e);
+            }
+        }
+
+        resetHeartbeatTimer();
+    }
+
+
+    /**
+     * Callback of send heartbeat request command
+     */
+    private class HeartbeatRequestCallback implements CommandCallback {
+        private ElectionNode node;
+
+        HeartbeatRequestCallback(ElectionNode node) {
+            this.node = node;
+        }
+
+        @Override
+        public void onSuccess(Command request, Command responseCommand) {
+            handleHeartbeatResponse(responseCommand, node);
+        }
+
+        @Override
+        public void onException(Command request, Throwable cause) {
+            logger.info("Partition group {}/node {} send heartbeat request to {} failed",
+                    topicPartitionGroup, localNode, node, cause);
+        }
+    }
+
+    /**
+     * 处理心跳响应消息
+     * @param command 心跳响应命令
+     */
+    private synchronized void handleHeartbeatResponse(Command command, ElectionNode node) {
+        if (command == null) {
+            logger.warn("Partition group {}/node{} receive heartbeat response is null",
+                    topicPartitionGroup, localNode);
+            return;
+        }
+
+        if (!(command.getPayload() instanceof AppendEntriesResponse)) {
+            logger.info("Partition group {}/node{} receive append entries response object type error",
+                    topicPartitionGroup, localNode);
+            return;
+        }
+        AppendEntriesResponse response = (AppendEntriesResponse)command.getPayload();
+        logger.debug("Partition group {}/node{} receive heartbeat response from {}, term is {}",
+                topicPartitionGroup, localNode, node.getNodeId(), response.getTerm());
+
+        if (response.getTerm() > currentTerm) {
+            logger.info("Partition group{}/node{} receive heartbeat response, " +
+                            "response term {} is greater than current term {}",
+                    topicPartitionGroup, localNode, response.getTerm(), currentTerm);
+            stepDown(response.getTerm());
+        }
+    }
+
+    /**
+     * 重置心跳定时器
+     */
+    private synchronized void cancelHeartbeatTimer() {
+        if (heartbeatTimerFuture != null && !heartbeatTimerFuture.isDone()) {
+            heartbeatTimerFuture.cancel(true);
+            heartbeatTimerFuture = null;
+        }
+    }
+
+    /**
+     * 重置心跳定时器
+     */
+    private synchronized void resetHeartbeatTimer() {
+        if (heartbeatTimerFuture != null && !heartbeatTimerFuture.isDone()) {
+            heartbeatTimerFuture.cancel(true);
+            heartbeatTimerFuture = null;
+        }
+        heartbeatTimerFuture = electionTimerExecutor.schedule(this::startNewHeartbeat,
+                electionConfig.getHeartbeatTimeout(), TimeUnit.MILLISECONDS);
+    }
+
+    /**
      * 本地节点成为leader，设置状态，停止投票定时器，发送选举事件，向follower发送心跳
      */
     private synchronized void becomeLeader() {
@@ -727,11 +882,13 @@ public class RaftLeaderElection extends LeaderElection  {
         leaderId = localNode.getNodeId();
 
         getAllNodes().forEach(node -> {
-            if (!node.equals(localNode)) node.setState(FOLLOWER);
+            if (!node.equals(localNode)) {
+                node.setState(FOLLOWER);
+            }
             node.setVoteGranted(false);
         });
 
-		cancelElectionTimer();
+        startNewHeartbeat();
 
         try {
             replicaGroup.becomeLeader(currentTerm, leaderId);
@@ -741,7 +898,7 @@ public class RaftLeaderElection extends LeaderElection  {
             updateMetadata(leaderId, currentTerm);
             electionEventManager.add(new ElectionEvent(LEADER_FOUND,
                     currentTerm, localNode.getNodeId(), topicPartitionGroup));
-
+            cancelElectionTimer();
         } catch (Exception e) {
             logger.warn("Partition group {}/node {} as leader fail",
                     topicPartitionGroup, localNode, e);
@@ -774,6 +931,8 @@ public class RaftLeaderElection extends LeaderElection  {
         updateMetadata(leaderId, currentTerm);
         electionEventManager.add(new ElectionEvent(LEADER_FOUND,
                 currentTerm, leaderId, topicPartitionGroup));
+
+        cancelHeartbeatTimer();
     }
 
     private void checkStepDown(int requestTerm, int requestLeaderId) {
@@ -827,6 +986,7 @@ public class RaftLeaderElection extends LeaderElection  {
             case LEADER:
                 updateMetadata(leaderId, currentTerm);
                 replicaGroup.becomeFollower(currentTerm, leaderId);
+                cancelHeartbeatTimer();
                 break;
             default:
                 break;
@@ -981,6 +1141,7 @@ public class RaftLeaderElection extends LeaderElection  {
     public synchronized Command handleTimeoutNowRequest(TimeoutNowRequest request) {
         TimeoutNowResponse response = new TimeoutNowResponse(true, currentTerm);
 
+        //noinspection ConstantConditions
         do {
             if (request.getTerm() != currentTerm) {
                 logger.info("Partition group {}/node {} receive timeout now request, current term {}" +
@@ -1014,8 +1175,73 @@ public class RaftLeaderElection extends LeaderElection  {
      * Report leader ship to name server
      */
     private void reportLeadership() {
-        if (electionConfig.enableRebalanceLeader() && isLeader()) {
+        if (electionConfig.enableReportLeaderPeriodically() && isLeader()) {
             updateMetadata(localNodeId, currentTerm);
         }
     }
+
+
+    private int getRecommendLeader() {
+        TopicConfig topicConfig = clusterManager.getNameService().getTopicConfig(
+                TopicName.parse(topicPartitionGroup.getTopic()));
+        PartitionGroup pg = topicConfig.getPartitionGroups().get(topicPartitionGroup.getPartitionGroupId());
+        return pg.getRecLeader();
+    }
+
+    private boolean shouldRebalanceLeader(int recommendLeader) {
+        if (!electionConfig.enableRebalanceLeader()) {
+            return false;
+        }
+        if (!isLeader()) {
+            return false;
+        }
+        if (localNodeId == recommendLeader || recommendLeader == INVALID_NODE_ID ||
+                !allNodes.containsKey(recommendLeader)) {
+            return false;
+        }
+        if (replicaGroup.lagLength(recommendLeader) > electionConfig.getTransferLeaderMinLag()) {
+            return false;
+        }
+
+        if (SystemClock.now() - lastRebalanceTime < electionConfig.getMinRebalanceLeaderInterval()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Rebalance leader if needed
+     */
+    private void rebalanceLeader() {
+        int recommendLeader = getRecommendLeader();
+
+        if (recommendLeader == INVALID_NODE_ID) {
+            logger.info("Partition group {}/node {} rebalance leader, recommend leader is -1",
+                    topicPartitionGroup, localNode);
+            return;
+        }
+
+        logger.info("Partition group {}/node {} rebalance leader, recommend leader is {}, lag length is {} " +
+                        "last rebalance time is {}, enable is {}",
+                topicPartitionGroup, localNode, recommendLeader,
+                replicaGroup.lagLength(recommendLeader), lastRebalanceTime,
+                electionConfig.enableRebalanceLeader());
+
+        if (shouldRebalanceLeader(recommendLeader)) {
+            try {
+                logger.info("Partition group {}/node {} transfer leadership to {}",
+                        topicPartitionGroup, localNode, recommendLeader);
+
+                transferLeadership(recommendLeader);
+
+                lastRebalanceTime = SystemClock.now();
+
+            } catch (Exception e) {
+                logger.info("Partition group {}/node {} transfer leadership fail",
+                        topicPartitionGroup, localNode, e);
+            }
+        }
+    }
+
 }
