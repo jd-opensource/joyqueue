@@ -49,7 +49,12 @@ public class TopicPartitionGroup {
 
     @Override
     public boolean equals(Object object) {
+        if (!(object instanceof TopicPartitionGroup)) {
+            return false;
+        }
+
         TopicPartitionGroup topicPartitionGroup = (TopicPartitionGroup)object;
+
         return topic.equals(topicPartitionGroup.getTopic()) &&
                 partitionGroupId == topicPartitionGroup.getPartitionGroupId();
     }
