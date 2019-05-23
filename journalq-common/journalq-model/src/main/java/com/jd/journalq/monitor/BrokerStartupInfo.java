@@ -8,6 +8,7 @@ import java.io.Serializable;
 public class BrokerStartupInfo implements Serializable {
     private long startupTime;
     private String revision;
+    private String commitDate;
 
 
     public long getStartupTime() {
@@ -24,5 +25,13 @@ public class BrokerStartupInfo implements Serializable {
 
     public void setRevision(String revision) {
         this.revision = revision;
+    }
+
+    public String getCommitDate() {
+        return commitDate;
+    }
+
+    public void setCommitDate(String commitDate) {
+        this.commitDate = commitDate;
     }
 }

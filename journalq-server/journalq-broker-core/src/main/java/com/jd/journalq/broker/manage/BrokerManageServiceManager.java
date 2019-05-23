@@ -28,10 +28,10 @@ import com.jd.journalq.broker.manage.service.support.DefaultElectionManageServic
 import com.jd.journalq.broker.manage.service.support.DefaultMessageManageService;
 import com.jd.journalq.broker.manage.service.support.DefaultStoreManageService;
 import com.jd.journalq.broker.monitor.BrokerMonitor;
-import com.jd.journalq.broker.monitor.BrokerStartupInfo;
 import com.jd.journalq.broker.monitor.service.BrokerMonitorService;
 import com.jd.journalq.broker.monitor.service.support.*;
 import com.jd.journalq.broker.monitor.stat.BrokerStat;
+import com.jd.journalq.monitor.BrokerStartupInfo;
 import com.jd.journalq.nsr.NameService;
 import com.jd.journalq.server.retry.api.MessageRetry;
 import com.jd.journalq.store.StoreManagementService;
@@ -126,16 +126,20 @@ public class BrokerManageServiceManager extends Service {
         brokerStartupInfo.setStartupTime(new Date().getTime());
 
         String revision = null;
+        String commitDate = null;
         try (InputStream propFile = BrokerManageServiceManager.class.getClassLoader().getResourceAsStream(".version.properties")) {
             if (propFile != null) {
                 Properties properties = new Properties();
                 properties.load(propFile);
                 String propRevision = properties.getProperty("git.commit.id.abbrev");
-                revision = propRevision != null ? propRevision :"UNKNOWN";
+                String propCommitDate = properties.getProperty("git.commit.time");
+                revision = propRevision != null ? propRevision : "UNKNOWN";
+                commitDate = propCommitDate != null ? propCommitDate : "UNKNOWN";
             }
         } catch (Throwable t) {
 
         }
+        brokerStartupInfo.setCommitDate(commitDate);
         brokerStartupInfo.setRevision(revision);
         return brokerStartupInfo;
     }
