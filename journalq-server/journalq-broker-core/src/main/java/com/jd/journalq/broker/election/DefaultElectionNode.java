@@ -106,9 +106,19 @@ public class DefaultElectionNode implements ElectionNode {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        if (!(o instanceof DefaultElectionNode)) {
+            return false;
+        }
+
         DefaultElectionNode that = (DefaultElectionNode) o;
+
         return priority == that.priority &&
                 nodeId == that.nodeId &&
                 voteGranted == that.voteGranted &&

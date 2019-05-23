@@ -1078,6 +1078,7 @@
         <!-- FIXME: 单元测试未通过 -->
         <!--        <module>journalq-test</module>-->
         <module>journalq-openmessaging</module>
+        <module>docker</module>
     </modules>
 
 </project>

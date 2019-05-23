@@ -244,7 +244,13 @@ public class PartitionManager {
      *
      * @return 是否重试
      */
-    protected boolean isRetry(Consumer consumer) {
+    protected boolean isRetry(Consumer consumer) throws JournalqException {
+        Boolean retry = clusterManager.getConsumer(TopicName.parse(consumer.getTopic()), consumer.getApp()).getConsumerPolicy().getRetry();
+        if (!retry.booleanValue()) {
+            logger.debug("retry enable is false.");
+            return false;
+        }
+
         int val = random.nextInt(100);
         // 重试管理中获取从重试分区消费的概率
         int rate = retryProbability.getProbability(consumer.getJoint());

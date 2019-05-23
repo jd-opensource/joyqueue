@@ -286,7 +286,9 @@ export default {
         this.page.size = data.pagination.size
         this.tableData.rowData = data.data
         for (var i = 0; i < this.tableData.rowData.length; i++) {
-          this.getBroker(this.tableData.rowData, i)
+          if (this.tableData.rowData[i].leader > 0) {
+            this.getBroker(this.tableData.rowData, i)
+          }
         }
         this.showTablePin = false
       })

@@ -38,15 +38,26 @@ public class TimeoutNowRequestHandler implements CommandHandler, Type {
         Preconditions.checkArgument(brokerContext != null, "broker context is null");
         Preconditions.checkArgument(brokerContext.getElectionService() != null, "election manager is null");
 
+        if (!(brokerContext.getElectionService() instanceof ElectionManager)) {
+            throw new IllegalArgumentException();
+        }
+
         electionManager = (ElectionManager)brokerContext.getElectionService();
     }
 
     public TimeoutNowRequestHandler(ElectionService electionService) {
+        if (!(electionService instanceof ElectionManager)) {
+            throw new IllegalArgumentException();
+        }
         electionManager = (ElectionManager)electionService;
     }
 
     @Override
     public Command handle(Transport transport, Command command) throws TransportException {
+        if (!(command.getPayload() instanceof TimeoutNowRequest)) {
+            throw new IllegalArgumentException();
+        }
+
         TimeoutNowRequest request = (TimeoutNowRequest)command.getPayload();
 
         RaftLeaderElection leaderElection = (RaftLeaderElection)electionManager.getLeaderElection(request.getTopic(),
