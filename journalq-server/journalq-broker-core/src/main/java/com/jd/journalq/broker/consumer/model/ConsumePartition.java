@@ -29,6 +29,8 @@ public class ConsumePartition implements Cloneable{
     private short partition;
     // 分区分组
     private int partitionGroup;
+    // 连接唯一标示
+    private String connectionId;
 
     public ConsumePartition(){}
 
@@ -73,6 +75,14 @@ public class ConsumePartition implements Cloneable{
 
     public void setPartitionGroup(int partitionGroup) {
         this.partitionGroup = partitionGroup;
+    }
+
+    public String getConnectionId() {
+        return connectionId;
+    }
+
+    public void setConnectionId(String connectionId) {
+        this.connectionId = connectionId;
     }
 
     @Override

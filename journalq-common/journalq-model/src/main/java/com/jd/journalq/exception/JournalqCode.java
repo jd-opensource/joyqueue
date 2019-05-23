@@ -134,7 +134,7 @@ public enum JournalqCode {
     SE_INDEX_UNDERFLOW(93, "消息序号小于最小值"),
     //    SE_OFFSET_OVERFLOW(92, "偏移量越界"),
 //    SE_MESSAGE_SIZE_EXCEEDED(93, "消息体大小超过最大限制"),
-//    SE_DISK_FULL(94, "磁盘满了"),
+    SE_DISK_FULL(94, "磁盘满了"),
 //    SE_CREATE_FILE_ERROR(95, "创建文件失败"),
 //    SE_FLUSH_TIMEOUT(96, "刷盘超时"),
 //    SE_INVALID_JOURNAL(97, "无效日志数据，文件:%d 位置:%d"),

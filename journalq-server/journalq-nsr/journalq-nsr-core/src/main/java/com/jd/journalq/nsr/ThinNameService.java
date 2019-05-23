@@ -31,12 +31,13 @@ import com.jd.journalq.event.NameServerEvent;
 import com.jd.journalq.network.command.GetTopics;
 import com.jd.journalq.network.command.GetTopicsAck;
 import com.jd.journalq.network.command.SubscribeAck;
-import com.jd.journalq.network.event.TransportEvent;
 import com.jd.journalq.network.command.UnSubscribe;
+import com.jd.journalq.network.event.TransportEvent;
 import com.jd.journalq.network.transport.Transport;
 import com.jd.journalq.network.transport.TransportClient;
 import com.jd.journalq.network.transport.codec.JMQHeader;
 import com.jd.journalq.network.transport.command.Command;
+import com.jd.journalq.network.transport.command.CommandCallback;
 import com.jd.journalq.network.transport.command.Direction;
 import com.jd.journalq.network.transport.exception.TransportException;
 import com.jd.journalq.nsr.config.NameServiceConfig;
@@ -88,6 +89,7 @@ import com.jd.journalq.toolkit.config.PropertySupplierAware;
 import com.jd.journalq.toolkit.lang.Close;
 import com.jd.journalq.toolkit.lang.LifeCycle;
 import com.jd.journalq.toolkit.service.Service;
+import com.jd.journalq.toolkit.time.SystemClock;
 import com.jd.laf.extension.Type;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
@@ -185,11 +187,19 @@ public class ThinNameService extends Service implements NameService, PropertySup
     public void leaderReport(TopicName topic, int partitionGroup, int leaderBrokerId, Set<Integer> isrId, int termId) {
         Command request = new Command(new JMQHeader(Direction.REQUEST, NsrCommandType.LEADER_REPORT),
                 new LeaderReport().topic(topic).partitionGroup(partitionGroup).leaderBrokerId(leaderBrokerId).isrId(isrId).termId(termId));
-        Command response = send(request);
-        if (!response.isSuccess()) {
-            logger.error("leaderReport error request {},response {}", request, response);
-            throw new RuntimeException(String.format("leaderReport error request {},response {}", request, response));
-        }
+        sendAsync(request, new CommandCallback() {
+            @Override
+            public void onSuccess(Command request, Command response) {
+                logger.info("Report leader of topic {} partition group {} to nameserver success",
+                        topic, partitionGroup);
+            }
+
+            @Override
+            public void onException(Command request, Throwable cause) {
+                logger.info("Report leader of topic {} partition group {} to nameserver fail",
+                        topic, partitionGroup, cause);
+            }
+        });
     }
 
     @Override
@@ -443,8 +453,24 @@ public class ThinNameService extends Service implements NameService, PropertySup
     }
 
     private Command send(Command request) throws TransportException {
+        // TODO 临时监控
+        long startTime = SystemClock.now();
         try {
             return clientTransport.getOrCreateTransport().sync(request,10000);
+        } catch (TransportException exception) {
+            logger.error("send command to nameServer error request {}", request);
+            throw exception;
+        } finally {
+            long time = SystemClock.now() - startTime;
+            if (time > 1000 * 1) {
+                logger.warn("thinNameService timeout, request: {}, time: {}", request, time);
+            }
+        }
+    }
+
+    private void sendAsync(Command request, CommandCallback callback) throws TransportException {
+        try {
+            clientTransport.getOrCreateTransport().async(request,10000, callback);
         } catch (TransportException exception) {
             logger.error("send command to nameServer error request {}", request);
             throw exception;

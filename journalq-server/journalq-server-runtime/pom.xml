@@ -20,7 +20,7 @@
     <parent>
         <artifactId>journalq-server</artifactId>
         <groupId>com.jd.journalq</groupId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.2</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -147,14 +147,7 @@
                         </exclusions>
                     </dependency>
                 </dependencies>
-                <configuration>
-                    <!-- not appendOne assembly id in release file name -->
-                    <finalName>journalq-server</finalName>
-                    <appendAssemblyId>false</appendAssemblyId>
-                    <descriptors>
-                        <descriptor>src/main/assemble/package.xml</descriptor>
-                    </descriptors>
-                </configuration>
+
                 <executions>
                     <execution>
                         <id>make-assembly</id>
@@ -162,6 +155,29 @@
                         <goals>
                             <goal>single</goal>
                         </goals>
+                        <configuration>
+                            <!-- not appendOne assembly id in release file name -->
+                            <finalName>journalq-server</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <descriptors>
+                                <descriptor>src/main/assemble/package.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>bin-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <!-- not appendOne assembly id in release file name -->
+                            <finalName>journalq-server-runtime-${project.version}</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <descriptors>
+                                <descriptor>src/main/assemble/bin.xml</descriptor>
+                            </descriptors>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

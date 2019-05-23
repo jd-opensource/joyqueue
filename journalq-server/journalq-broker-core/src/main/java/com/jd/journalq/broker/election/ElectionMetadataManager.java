@@ -59,8 +59,12 @@ public class ElectionMetadataManager {
     void recover(ElectionManager electionManager) throws Exception {
         try {
             File file = new File(fileName);
-            if (file.exists()) recoverMetadataOld(file);
-            else recoverMetadata();
+            if (file.exists()) {
+                recoverMetadataOld(file);
+            }
+            else {
+                recoverMetadata();
+            }
 
             restoreLeaderElections(electionManager);
         } catch (Exception e) {
@@ -82,12 +86,13 @@ public class ElectionMetadataManager {
                     });
             for (TopicPartitionGroup topicPartitionGroup : oldMetadataMap.keySet()) {
                 ElectionMetadataOld metadataOld = oldMetadataMap.get(topicPartitionGroup);
-                ElectionMetadata metadata = ElectionMetadata.Build.create(path, topicPartitionGroup)
+                try (ElectionMetadata metadata = ElectionMetadata.Build.create(path, topicPartitionGroup)
                         .allNodes(metadataOld.getAllNodes()).currentTerm(metadataOld.getCurrentTerm())
                         .localNode(metadataOld.getLocalNodeId()).learners(metadataOld.getLearners())
                         .leaderId(metadataOld.getLeaderId()).electionType(metadataOld.getElectType())
-                        .votedFor(metadataOld.getVotedFor()).build();
-                updateElectionMetadata(topicPartitionGroup, metadata);
+                        .votedFor(metadataOld.getVotedFor()).build()) {
+                    updateElectionMetadata(topicPartitionGroup, metadata);
+                }
             }
         }
         boolean ret = file.delete();
@@ -112,14 +117,20 @@ public class ElectionMetadataManager {
         }
 
         File[] topicDirs = root.listFiles();
-        if (topicDirs == null) return;
+        if (topicDirs == null) {
+            return;
+        }
 
         for (File topicDir : topicDirs) {
-            if (!topicDir.isDirectory()) continue;
+            if (!topicDir.isDirectory()) {
+                continue;
+            }
 
             String topic = topicDir.getName().replace('@', File.separatorChar);
             File[] pgsFiles = topicDir.listFiles();
-            if (pgsFiles == null) continue;
+            if (pgsFiles == null) {
+                continue;
+            }
 
             for (File filePg : pgsFiles) {
                 if (!StringUtils.isNumeric(filePg.getName())) {
@@ -128,8 +139,7 @@ public class ElectionMetadataManager {
                     continue;
                 }
                 TopicPartitionGroup partitionGroup = new TopicPartitionGroup(topic, Integer.valueOf(filePg.getName()));
-                try {
-                    ElectionMetadata metadata = ElectionMetadata.Build.create(this.path, partitionGroup).build();
+                try (ElectionMetadata metadata = ElectionMetadata.Build.create(this.path, partitionGroup).build()) {
                     metadata.recover();
                     metadataMap.put(partitionGroup, metadata);
                 } catch (Exception e) {
@@ -142,10 +152,11 @@ public class ElectionMetadataManager {
     @Deprecated
     private static Object readConfigFile(File file, Class objClass, Object defValue) throws IOException {
         if (file == null || !file.exists()) {
-            if (defValue == null)
+            if (defValue == null) {
                 throw new IOException("file is null or not exists");
-            else
+            } else {
                 return defValue;
+            }
         }
 
         byte[] buf;
@@ -196,7 +207,10 @@ public class ElectionMetadataManager {
             File topicDir = new File(this.path + File.separator + topicPartitionGroup.getTopic()
                     .replace(File.separatorChar, '@'));
             File[] pgFiles = topicDir.listFiles();
-            if (pgFiles == null) return;
+            if (pgFiles == null) {
+                logger.info("Remove election metadata of {} no file", topicPartitionGroup);
+                return;
+            }
 
             for (File pgFile : pgFiles) {
                 if (Integer.valueOf(pgFile.getName()) == topicPartitionGroup.getPartitionGroupId()) {
@@ -274,17 +288,18 @@ public class ElectionMetadataManager {
 
         Map<TopicName, TopicConfig> topicConfigs = clusterManager.getNameService().getTopicConfigByBroker(clusterManager.getBrokerId());
         for (TopicConfig topicConfig : topicConfigs.values()) {
-            topicConfig.getPartitionGroups().values().forEach((pg) -> {
-                try {
-                    ElectionMetadata metadata = generateMetadataFromPartitionGroup(topicConfig.getName().getFullName(),
-                            pg, clusterManager.getBrokerId());
-                    updateElectionMetadata(new TopicPartitionGroup(topicConfig.getName().getFullName(),
-                            pg.getGroup()), metadata);
-                } catch (Exception e) {
-                    logger.info("Sync election metadata of topic {} pg {} from name service fail",
-                            pg.getTopic(), pg.getGroup(), e);
-                }
-            });
+            topicConfig.getPartitionGroups().values().stream()
+                    .filter((pg) -> pg.getReplicas().contains(clusterManager.getBrokerId()))
+                    .forEach((pg) -> {
+                        try (ElectionMetadata metadata = generateMetadataFromPartitionGroup(topicConfig.getName().getFullName(),
+                                    pg, clusterManager.getBrokerId())) {
+                            updateElectionMetadata(new TopicPartitionGroup(topicConfig.getName().getFullName(),
+                                    pg.getGroup()), metadata);
+                        } catch (Exception e) {
+                            logger.info("Sync election metadata of topic {} pg {} from name service fail",
+                                    pg.getTopic(), pg.getGroup(), e);
+                        }
+                    });
         }
     }
 
