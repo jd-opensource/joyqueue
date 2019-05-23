@@ -25,6 +25,7 @@ import com.jd.journalq.model.domain.SimplifiedBrokeMessage;
 import com.jd.journalq.model.domain.Subscribe;
 import com.jd.journalq.monitor.BrokerMessageInfo;
 import com.jd.journalq.monitor.BrokerMonitorInfo;
+import com.jd.journalq.monitor.BrokerStartupInfo;
 import com.jd.journalq.monitor.Client;
 import com.jd.journalq.handler.error.ErrorCode;
 import com.jd.journalq.model.query.QMonitor;
@@ -353,6 +354,16 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
     public Response findBrokerDetail(@QueryParam("brokerId") Long brokerId){
         BrokerMonitorInfo brokerMonitorInfo = brokerTopicMonitorService.findBrokerMonitor(brokerId);
         return Responses.success(brokerMonitorInfo);
+    }
+    /**
+     * broker启动信息
+     * @param brokerId
+     * @return
+     */
+    @Path("startInfo")
+    public Response startInfo(@QueryParam("brokerId") Long brokerId){
+        BrokerStartupInfo brokerStartupInfo = brokerTopicMonitorService.getStartupInfo(brokerId);
+        return Responses.success(brokerStartupInfo);
     }
 
     @Override

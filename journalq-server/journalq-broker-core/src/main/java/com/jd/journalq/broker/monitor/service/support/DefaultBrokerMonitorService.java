@@ -16,6 +16,7 @@ package com.jd.journalq.broker.monitor.service.support;
 import com.jd.journalq.broker.coordinator.domain.CoordinatorDetail;
 import com.jd.journalq.broker.coordinator.domain.CoordinatorGroup;
 import com.jd.journalq.broker.coordinator.domain.CoordinatorGroupMember;
+import com.jd.journalq.broker.monitor.BrokerStartupInfo;
 import com.jd.journalq.broker.monitor.service.ArchiveMonitorService;
 import com.jd.journalq.broker.monitor.service.BrokerMonitorInternalService;
 import com.jd.journalq.broker.monitor.stat.BrokerStatExt;
@@ -284,6 +285,10 @@ public class DefaultBrokerMonitorService implements BrokerMonitorService {
         return brokerMonitorInternalService.getExtendBrokerStat(timeStamp);
     }
 
+    @Override
+    public BrokerStartupInfo getStartInfo() {
+        return brokerMonitorInternalService.getStartInfo();
+    }
     @Override
     public TopicConfig getTopicMetadata(String topic, boolean isCluster) {
         return metadataMonitorService.getTopicMetadata(topic, isCluster);

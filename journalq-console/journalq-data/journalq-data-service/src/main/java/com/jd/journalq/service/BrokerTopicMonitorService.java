@@ -16,6 +16,7 @@ package com.jd.journalq.service;
 import com.jd.journalq.model.PageResult;
 import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.monitor.BrokerMonitorInfo;
+import com.jd.journalq.monitor.BrokerStartupInfo;
 import com.jd.journalq.monitor.Client;
 import com.jd.journalq.model.domain.BrokerTopicMonitor;
 import com.jd.journalq.model.query.QMonitor;
@@ -28,4 +29,5 @@ public interface BrokerTopicMonitorService {
     PageResult<Client> queryClientConnectionDetail(QPageQuery<QMonitor> qPageQuery);
     PageResult<BrokerTopicMonitor> queryTopicsMointor(QPageQuery<QMonitor> qPageQuery);
     BrokerMonitorInfo findBrokerMonitor(Long brokerId);
+    BrokerStartupInfo getStartupInfo(Long brokerId);
 }

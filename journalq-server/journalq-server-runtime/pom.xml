@@ -165,6 +165,29 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <!-- Description: https://github.com/ktoso/maven-git-commit-id-plugin -->
+                <groupId>pl.project13.maven</groupId>
+                <artifactId>git-commit-id-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>revision</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <dotGitDirectory>${project.basedir}/../.git</dotGitDirectory>
+                    <generateGitPropertiesFile>true</generateGitPropertiesFile>
+                    <failOnNoGitDirectory>false</failOnNoGitDirectory>
+                    <skipPoms>false</skipPoms>
+                    <generateGitPropertiesFilename>src/main/resources/.version.properties</generateGitPropertiesFilename>
+                    <gitDescribe>
+                        <!-- don't generate the describe property -->
+                        <skip>true</skip>
+                    </gitDescribe>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>

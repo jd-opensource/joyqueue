@@ -29,6 +29,7 @@ import com.jd.journalq.model.query.QConsumer;
 import com.jd.journalq.model.query.QMonitor;
 import com.jd.journalq.model.query.QProducer;
 import com.jd.journalq.monitor.BrokerMonitorInfo;
+import com.jd.journalq.monitor.BrokerStartupInfo;
 import com.jd.journalq.monitor.Client;
 import com.jd.journalq.monitor.ConnectionMonitorDetailInfo;
 import com.jd.journalq.monitor.ConsumerMonitorInfo;
@@ -178,7 +179,20 @@ public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService 
         }
         return null;
     }
-
+    /**
+     * 查询启动信息
+     * @param brokerId
+     * @return
+     */
+    public BrokerStartupInfo getStartupInfo(Long brokerId){
+        try {
+            Broker broker = brokerService.findById(brokerId);
+            return getStartInfo(broker);
+        } catch (Exception e) {
+            logger.error("findBrokerMonitor exception",e);
+        }
+        return null;
+    }
     private BrokerTopicMonitor getMonitorByAppAndTopic(String topic,List<String> appList,Broker broker,SubscribeType type) throws Exception {
         BrokerTopicMonitor brokerTopicMonitor = new BrokerTopicMonitor();
         List<BrokerTopicMonitorRecord> brokerMonitorRecordList = new ArrayList<>();
@@ -309,6 +323,22 @@ public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService 
         args[0]=broker.getIp();
         args[1]=String.valueOf(broker.getMonitorPort());
         RestResponse<BrokerMonitorInfo> restResponse = httpRestService.get(path,BrokerMonitorInfo.class,false,args);
+        if (restResponse != null && restResponse.getData() != null) {
+            return restResponse.getData();
+        }
+        return null;
+    }
+
+    /**
+     * 查询broker监控
+     * @return
+     */
+    private BrokerStartupInfo getStartInfo(Broker  broker) throws Exception {
+        String path="startupInfo";
+        String[] args=new String[2];
+        args[0]=broker.getIp();
+        args[1]=String.valueOf(broker.getMonitorPort());
+        RestResponse<BrokerStartupInfo> restResponse = httpRestService.get(path,BrokerStartupInfo.class,false,args);
         if (restResponse != null && restResponse.getData() != null) {
             return restResponse.getData();
         }

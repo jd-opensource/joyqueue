@@ -87,6 +87,7 @@ public class BrokerRestUrlMappingServiceImpl implements BrokerRestUrlMappingServ
 
     /** broker **/
     private String brokerMonitorPath = "/monitor/broker";
+    private String startupInfoPath = "/startInfo";
 
 
     /** proxy monitor */

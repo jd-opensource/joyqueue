@@ -383,6 +383,10 @@
         <route inherit="get"
                path="/v1/monitor/broker/:brokerId" handlers="brokerMonitor#findBrokerDetail render"
                errors="error"/>
+        <route inherit="get"
+               path="/v1/monitor/start/:brokerId" handlers="brokerMonitor#startInfo render"
+               errors="error"/>
+
 
 
         <!--metric -->
