@@ -149,8 +149,8 @@ export default {
             key: 'port'
           },
           {
-            title: '存活',
-            key: 'start'
+            title: '启动时间',
+            key: 'startupTime'
           },
           {
             title: '重试方式',
@@ -236,10 +236,9 @@ export default {
     getBrokerStatus (rowData, i) {
       apiRequest.get(this.urlOrigin.startInfo + '/' + rowData[i].id).then((data) => {
         if(data.code == 200) {
-          this.tableData.rowData[i].start = "是";
-        }
-        if (data.code == 500) {
-          this.tableData.rowData[i].start = "否"
+          this.tableData.rowData[i].startupTime = data.data.startupTime;
+        } else {
+          this.tableData.rowData[i].startupTime = "不存活"
         }
         this.$set(this.tableData.rowData, i, this.tableData.rowData[i])
       });
