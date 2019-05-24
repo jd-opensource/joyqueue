@@ -29,5 +29,5 @@ public interface BrokerTopicMonitorService {
     PageResult<Client> queryClientConnectionDetail(QPageQuery<QMonitor> qPageQuery);
     PageResult<BrokerTopicMonitor> queryTopicsMointor(QPageQuery<QMonitor> qPageQuery);
     BrokerMonitorInfo findBrokerMonitor(Long brokerId);
-    BrokerStartupInfo getStartupInfo(Long brokerId);
+    BrokerStartupInfo getStartupInfo(Long brokerId) throws Exception;
 }

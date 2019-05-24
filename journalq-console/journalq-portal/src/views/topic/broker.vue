@@ -8,6 +8,7 @@
 import MyTable from '../../components/common/myTable'
 import crud from '../../mixins/crud.js'
 import apiRequest from '../../utils/apiRequest.js'
+import {timeStampToString} from '../../utils/dateTimeUtils'
 
 export default {
   name: 'broker',
@@ -40,6 +41,10 @@ export default {
           {
             title: '启动时间',
             key: 'startupTime'
+          },
+          {
+            title: 'revision',
+            key: 'revision'
           }
         ]
       }
@@ -60,8 +65,9 @@ export default {
     getBrokerStatus (rowData, i) {
       apiRequest.get(this.urlOrigin.startInfo + '/' + rowData[i].id).then((data) => {
         if(data.code == 200) {
-          this.tableData.rowData[i].startupTime = data.data.startupTime;
-        } else {
+          this.tableData.rowData[i].startupTime = timeStampToString(data.data.startupTime);
+        this.tableData.rowData[i].revision = data.data.revision;
+      } else {
           this.tableData.rowData[i].startupTime = '不存活';
         }
       this.$set(this.tableData.rowData, i, this.tableData.rowData[i])

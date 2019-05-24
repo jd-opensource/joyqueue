@@ -78,6 +78,7 @@ import myTable from '../../components/common/myTable.vue'
 import myDialog from '../../components/common/myDialog.vue'
 import crud from '../../mixins/crud.js'
 import BrokerMonitor from './brokerMonitor'
+import {timeStampToString} from '../../utils/dateTimeUtils'
 
 export default {
   name: 'application',
@@ -236,7 +237,7 @@ export default {
     getBrokerStatus (rowData, i) {
       apiRequest.get(this.urlOrigin.startInfo + '/' + rowData[i].id).then((data) => {
         if(data.code == 200) {
-          this.tableData.rowData[i].startupTime = data.data.startupTime;
+          this.tableData.rowData[i].startupTime = timeStampToString(data.data.startupTime);
         } else {
           this.tableData.rowData[i].startupTime = "不存活"
         }

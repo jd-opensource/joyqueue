@@ -184,14 +184,9 @@ public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService 
      * @param brokerId
      * @return
      */
-    public BrokerStartupInfo getStartupInfo(Long brokerId){
-        try {
-            Broker broker = brokerService.findById(brokerId);
-            return getStartInfo(broker);
-        } catch (Exception e) {
-            logger.error("findBrokerMonitor exception",e);
-        }
-        return null;
+    public BrokerStartupInfo getStartupInfo(Long brokerId) throws Exception {
+        Broker broker = brokerService.findById(brokerId);
+        return getStartInfo(broker);
     }
     private BrokerTopicMonitor getMonitorByAppAndTopic(String topic,List<String> appList,Broker broker,SubscribeType type) throws Exception {
         BrokerTopicMonitor brokerTopicMonitor = new BrokerTopicMonitor();
