@@ -104,7 +104,8 @@ export default {
           del: '/broker/delete',
           edit: '/broker/update',
           archiveMonitor: '/monitor/archive',
-          telnet: '/broker'
+          telnet: '/broker',
+          startInfo: '/monitor/start/'
         }
       }
     },
@@ -233,7 +234,7 @@ export default {
     })
     },
     getBrokerStatus (rowData, i) {
-      apiRequest.get(this.urlOrigin.telnet + '/' + rowData[i].ip + '/' + rowData[i].port).then((data) => {
+      apiRequest.get(this.urlOrigin.startInfo + '/' + rowData[i].id).then((data) => {
         if(data.code == 200) {
           this.tableData.rowData[i].start = "是";
         }
