@@ -1,21 +1,23 @@
 <template>
   <detail-slot ref="detail">
     <template slot="tabs">
-      <d-tab-pane label="生产者" name="producer" icon="user-plus">
-        <producer ref="producer" :search="search" @on-detail="openProducerDetailTab"/>
-      </d-tab-pane>
-      <d-tab-pane label="消费者" name="consumer" icon="user-minus">
-        <consumer ref="consumer" :search="search"/>
-      </d-tab-pane>
-      <d-tab-pane label="用户" name="myAppUsers" icon="users">
-        <my-app-users ref="myAppUsers"/>
-      </d-tab-pane>
-      <d-tab-pane label="令牌" name="myAppToken" icon="feather">
-        <my-app-token ref="myAppToken"/>
-      </d-tab-pane>
-      <d-tab-pane :label="producerDetail.name" name="producerDetail" closable icon="paperclip">
-        <producer-detail ref="producerDetail"/>
-      </d-tab-pane>
+      <d-tabs @on-change="handleTabChange" :value="tab" @on-tab-remove="removeTab">
+        <d-tab-pane label="生产者" name="producer" icon="user-plus">
+          <producer ref="producer" :search="search" @on-detail="openProducerDetailTab"/>
+        </d-tab-pane>
+        <d-tab-pane label="消费者" name="consumer" icon="user-minus">
+          <consumer ref="consumer" :search="search"/>
+        </d-tab-pane>
+        <d-tab-pane label="用户" name="myAppUsers" icon="users">
+          <my-app-users ref="myAppUsers"/>
+        </d-tab-pane>
+        <d-tab-pane label="令牌" name="myAppToken" icon="feather">
+          <my-app-token ref="myAppToken"/>
+        </d-tab-pane>
+        <d-tab-pane :label="producerDetail.name" name="producerDetail" closable icon="paperclip" :visible="producerDetail.visible">
+          <producer-detail ref="producerDetail"/>
+        </d-tab-pane>
+      </d-tabs>
     </template>
   </detail-slot>
 </template>
@@ -42,6 +44,7 @@ export default {
     return {
       appDetailType: this.$store.getters.appDetailType,
       producerDetail: {
+        visible: false,
         name: '生产详情',
         app: {
           id: 0,
@@ -59,8 +62,20 @@ export default {
     }
   },
   methods: {
+    handleTabChange (data) {
+      this.$refs.detail.handleTabChange(data)
+    },
+    removeTab (data) {
+      console.log(data)
+      if (data === 'producerDetail') {
+        this.producerDetail.visible = false
+      } else if (data === 'consumerDetail') {
+
+      }
+    },
     openProducerDetailTab (item) {
       this.producerDetail.name = '生产详情 - ' + item.topic.code
+      this.producerDetail.visible = true
       //Jump to producer detail router
       this.$router.push({
         name: `/${this.$i18n.locale}/application/detail`,

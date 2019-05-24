@@ -1,6 +1,6 @@
 <template>
   <div>
-    <d-tabs @on-change="handleTabChange" :value="subTab" >
+    <d-tabs @on-change="handleTabChange" :value="subTab" size="small">
       <d-tab-pane label="分组" name="partition" icon="pocket">
         <partition ref="partition" :colData="partitionColData" :doSearch="doSearch" :search="search"/>
       </d-tab-pane>
@@ -135,10 +135,6 @@
         this.$refs[name].getList()
       },
       getList () {
-        console.log(2)
-        console.log(this.$route.query)
-        console.log(this.search)
-        console.log
         if (this.$route.query.app && this.$route.query.topic) {
           this.$refs[this.subTab].getList()
         }

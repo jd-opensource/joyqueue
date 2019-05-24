@@ -21,10 +21,8 @@
         </grid-col>
       </grid-row>
     </div>
-    <d-tabs @on-change="handleTabChange" :value="tab" @on-tab-remove="removeTab">
       <!--tabs由于没有单独的路由名称，所以在调用table时，需要在data中自定义urls-->
       <slot name="tabs"></slot>
-    </d-tabs>
   </div>
 </template>
 
@@ -52,6 +50,8 @@ export default {
         system: '',
         owner: {},
         sign: ''
+      },
+      visible: {
       }
     }
   },
@@ -99,9 +99,6 @@ export default {
         })
       }
       this.$refs[name].getList()
-    },
-    removeTab (data) {
-      //todo
     }
   },
   mounted () {
