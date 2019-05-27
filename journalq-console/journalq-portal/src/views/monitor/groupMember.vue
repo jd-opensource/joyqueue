@@ -13,7 +13,7 @@ import apiRequest from '../../utils/apiRequest.js'
 import crud from '../../mixins/crud.js'
 
 export default {
-  name: 'coordinator-group',
+  name: 'group-member',
   components: {MyTable},
   mixins: [crud],
   props: {
@@ -87,11 +87,11 @@ export default {
         clientType: this.clientType
       }
       apiRequest.postBase(this.urls.search, {}, data, false).then((data) => {
-        let result = (data.data || [])['members']
-        this.extension = (result || []).extension
-        this.tableData.rowData = result
+        let result = (data.data || {})
+        this.extension = result.extension
+        this.tableData.rowData = (result.members ||[])
         // this.onListResult(data)
-        this.page.total = (result || []).length
+        this.page.total = (result.members || []).length
         this.showTablePin = false
       })
     }
