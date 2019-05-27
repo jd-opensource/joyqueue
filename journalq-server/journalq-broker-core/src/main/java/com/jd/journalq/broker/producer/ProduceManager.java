@@ -360,7 +360,7 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
     protected void onPutMessage(String topic, String app, int partitionGroup, long startTime, List<WriteRequest> writeRequests) {
         long now = SystemClock.now();
         writeRequests.forEach(writeRequest -> {
-            brokerMonitor.onPutMessage(topic, app, partitionGroup, writeRequest.getPartition(), 1, writeRequest.getBuffer().limit(), now - startTime);
+            brokerMonitor.onPutMessage(topic, app, partitionGroup, writeRequest.getPartition(), 1, writeRequest.getBuffer().limit(), now > startTime ? now - startTime : 0);
         });
     }
 
@@ -385,8 +385,9 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
         }
         @Override
         public void onEvent(WriteResult event) {
-            metric.addLatency("callback",System.nanoTime() - t0);
-            onPutMessage(topic, app, partitionGroup, t0/1000000, writeRequests);
+            long elapse = System.nanoTime() - t0;
+            metric.addLatency("callback", elapse);
+            onPutMessage(topic, app, partitionGroup, SystemClock.now() - elapse/1000000, writeRequests);
             eventListener.onEvent(event);
         }
     }
