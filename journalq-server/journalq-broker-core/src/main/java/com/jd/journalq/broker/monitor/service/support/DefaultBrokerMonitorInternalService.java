@@ -20,6 +20,7 @@ import com.jd.journalq.broker.monitor.converter.BrokerMonitorConverter;
 import com.jd.journalq.broker.monitor.exception.MonitorException;
 import com.jd.journalq.broker.monitor.service.BrokerMonitorInternalService;
 import com.jd.journalq.monitor.BrokerMonitorInfo;
+import com.jd.journalq.monitor.BrokerStartupInfo;
 import com.jd.journalq.monitor.ElectionMonitorInfo;
 import com.jd.journalq.monitor.NameServerMonitorInfo;
 import com.jd.journalq.monitor.StoreMonitorInfo;
@@ -57,11 +58,13 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
     private StoreService store;
     private ElectionService electionService;
     private ClusterManager clusterManager;
+    private BrokerStartupInfo brokerStartupInfo;
 
     public DefaultBrokerMonitorInternalService(BrokerStat brokerStat, Consume consume,
                                                StoreManagementService storeManagementService,
                                                NameService nameService, StoreService store,
-                                               ElectionService electionManager, ClusterManager clusterManager) {
+                                               ElectionService electionManager, ClusterManager clusterManager,
+                                                BrokerStartupInfo brokerStartupInfo) {
         this.brokerStat = brokerStat;
         this.consume=consume;
         this.storeManagementService=storeManagementService;
@@ -69,6 +72,7 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
         this.store = store;
         this.electionService = electionManager;
         this.clusterManager = clusterManager;
+        this.brokerStartupInfo = brokerStartupInfo;
     }
 
     @Override
@@ -81,6 +85,8 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
 
         StoreMonitorInfo storeMonitorInfo = new StoreMonitorInfo();
         storeMonitorInfo.setStarted(store instanceof Online?((Online) store).isStarted():true);
+        storeMonitorInfo.setFreeSpace(storeManagementService.freeSpace());
+        storeMonitorInfo.setTotalSpace(storeManagementService.totalSpace());
 
         NameServerMonitorInfo nameServerMonitorInfo = new NameServerMonitorInfo();
         nameServerMonitorInfo.setStarted(nameService.isStarted());
@@ -169,7 +175,12 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
         return statExt;
     }
 
-   /**
+    @Override
+    public BrokerStartupInfo getStartInfo() {
+        return brokerStartupInfo;
+    }
+
+    /**
     * fill heap and non-heap memory usage state of current
     *
     **/
@@ -178,4 +189,5 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
        brokerStatExt.setHeap(memoryMXBean.getHeapMemoryUsage());
        brokerStatExt.setNonHeap(memoryMXBean.getNonHeapMemoryUsage());
    }
+
 }

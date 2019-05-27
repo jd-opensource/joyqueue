@@ -51,6 +51,18 @@ public interface StoreManagementService {
     File [] listFiles(File directory);
 
     /**
+     * 返回totalSpace
+     * @return
+     */
+    long totalSpace();
+
+    /**
+     * 返回totalSpace
+     * @return
+     */
+    long freeSpace();
+
+    /**
      * 读取消息
      */
     byte [][] readMessages(String topic, int partitionGroup, long position, int count);
