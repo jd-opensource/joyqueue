@@ -130,7 +130,8 @@ export default {
           },
           {
             txt: '限流',
-            method: 'on-rateLimit'
+            method: 'on-rateLimit',
+            isAdmin: true
           }
         ]
       }
@@ -415,6 +416,9 @@ export default {
           }
         })
       }
+    },
+    isAdmin (item) {
+      return this.$store.getters.isAdmin
     },
     getMonitor (row, index) {
       let data = {
