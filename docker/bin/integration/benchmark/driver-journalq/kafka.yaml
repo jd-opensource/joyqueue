@@ -1,5 +1,3 @@
-# -*- coding:utf-8 -*-
-#! python27
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,10 +13,24 @@
 #
 
 
+name: JournalQ Kafka
+driverClass: io.openmessaging.benchmark.driver.kafka.JournalQKafkaBenchmarkDriver
 
-def bootstrap():
-    print 'started';
+# Kafka client-specific configuration
+replicationFactor: 3
 
+topicConfig: |
+  min.insync.replicas=2
 
-if __name__ == '__main__':
-    bootstrap();
+commonConfig: |
+  bootstrap.servers=172.17.0.1:50088
+  naming.servers=http://172.17.0.1:50091
+
+producerConfig: |
+  acks=all
+  linger.ms=1
+  batch.size=131072
+
+consumerConfig: |
+  auto.offset.reset=earliest
+  enable.auto.commit=false

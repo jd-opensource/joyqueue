@@ -20,22 +20,27 @@
     <parent>
         <artifactId>journalq-server</artifactId>
         <groupId>com.jd.journalq</groupId>
-        <version>4.0.1</version>
+        <version>4.0.2</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>journalq-broker-core</artifactId>
-    <version>4.0.1</version>
+    <version>4.0.2</version>
 
     <properties>
         <commons-beanutils.version>1.9.3</commons-beanutils.version>
-        <hibernate-validator.version>6.0.9.Final</hibernate-validator.version>
+        <!--<hibernate-validator.version>6.0.9.Final</hibernate-validator.version>-->
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency> <!-- 桥接：告诉Slf4j使用Log4j2 -->
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>
@@ -143,7 +148,7 @@
         <dependency>
             <groupId>com.jd.journalq</groupId>
             <artifactId>journalq-retry-remote</artifactId>
-            <version>4.0.1</version>
+            <version>4.0.2</version>
         </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>
@@ -226,7 +231,7 @@
         <dependency>
             <groupId>com.jd.journalq</groupId>
             <artifactId>journalq-store-core</artifactId>
-            <version>4.0.1</version>
+            <version>4.0.2</version>
             <scope>test</scope>
         </dependency>
 

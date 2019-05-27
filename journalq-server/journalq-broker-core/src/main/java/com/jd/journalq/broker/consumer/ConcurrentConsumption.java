@@ -599,6 +599,13 @@ class ConcurrentConsumption extends Service {
             expireQueueMap.putIfAbsent(consumePartition, queue);
         }
         queue.add(partitionSegment);
+
+        // 记录下超时未应答队列的情况
+        long size = queue.size();
+        logger.debug("expire queue size is:[{}], partitionInfo:[{}], ", size, consumePartition);
+        if (queue.size() > 10000) {
+            logger.info("expire queue size is:[{}], partitionInfo:[{}], ", size, consumePartition);
+        }
     }
 
     /**
