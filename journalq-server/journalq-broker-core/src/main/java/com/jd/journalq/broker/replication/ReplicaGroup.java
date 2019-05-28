@@ -350,20 +350,18 @@ public class ReplicaGroup extends Service {
      * 如果只有一个节点，直接commit
      */
     private void replicateLocal() {
+        long delayTime;
         if (replicas.size() == 1) {
             if (replicableStore.commitPosition() < replicableStore.rightPosition()) {
                 replicableStore.commit(replicableStore.rightPosition());
+                delayTime = System.nanoTime();
             } else {
-                try {
-                    Thread.sleep(1);
-                } catch (InterruptedException ignored) {}
+                delayTime = System.nanoTime() + ONE_MS_NANO / 5;
             }
-            replicateResponseQueue.put(new DelayedCommand(System.nanoTime(), localReplicaId));
         } else {
-            replicateResponseQueue.put(new DelayedCommand(
-                    System.nanoTime() + ONE_SECOND_NANO, localReplicaId));
+            delayTime = System.nanoTime() + ONE_SECOND_NANO;
         }
-
+        replicateResponseQueue.put(new DelayedCommand(delayTime, localReplicaId));
     }
 
     /**
@@ -379,7 +377,7 @@ public class ReplicaGroup extends Service {
                     AppendEntriesRequest request = generateAppendEntriesRequest(replica);
                     if (request == null) {
                         replicateResponseQueue.put(new DelayedCommand(
-                                System.nanoTime() + ONE_MS_NANO, replica.replicaId()));
+                                System.nanoTime() + ONE_MS_NANO / 5, replica.replicaId()));
                         return;
                     }
 
@@ -589,22 +587,29 @@ public class ReplicaGroup extends Service {
         replica.lastReplicateConsumePosTime(now);
 
         try {
-            String consumePositions = consume.getConsumeInfoByGroup(TopicName.parse(topicPartitionGroup.getTopic()),
-                    null, topicPartitionGroup.getPartitionGroupId());
-            if (consumePositions == null) {
-                logger.info("Partition group {}/node {} get consumer info return null",
-                        topicPartitionGroup, localReplicaId);
-                return;
-            }
-
-            ReplicateConsumePosRequest request = new ReplicateConsumePosRequest(consumePositions);
-            JMQHeader header = new JMQHeader(Direction.REQUEST, CommandType.REPLICATE_CONSUME_POS_REQUEST);
-
-            logger.debug("Partition group {}/node {} send consume position {} to node {}",
-                    topicPartitionGroup, localReplicaId, consumePositions, replica.replicaId());
-
             replicateExecutor.submit(() -> {
                 try {
+                    long startTime = usTime();
+
+                    String consumePositions = consume.getConsumeInfoByGroup(TopicName.parse(topicPartitionGroup.getTopic()),
+                            null, topicPartitionGroup.getPartitionGroupId());
+
+                    logger.info("Partition group {}/node {} replicate consume pos elapse {} us",
+                            topicPartitionGroup, localReplicaId, usTime() - startTime);
+
+                    if (consumePositions == null) {
+                        logger.info("Partition group {}/node {} get consumer info return null",
+                                topicPartitionGroup, localReplicaId);
+                        return;
+                    }
+
+                    ReplicateConsumePosRequest request = new ReplicateConsumePosRequest(consumePositions);
+                    JMQHeader header = new JMQHeader(Direction.REQUEST, CommandType.REPLICATE_CONSUME_POS_REQUEST);
+
+                    logger.debug("Partition group {}/node {} send consume position {} to node {}",
+                            topicPartitionGroup, localReplicaId, consumePositions, replica.replicaId());
+
+
                     replicationManager.sendCommand(replica.getAddress(), new Command(header, request),
                             electionConfig.getSendCommandTimeout(), new ReplicateConsumePosRequestCallback(replica));
                 } catch (Exception e) {
