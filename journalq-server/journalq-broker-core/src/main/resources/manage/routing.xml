@@ -70,7 +70,7 @@
                handlers="brokerMonitorService.getConsumerPartitionInfoByTopicAndApp"/>
         <route path="/monitor/topic/:topic/app/:app/consumer/partitionGroups" inherit="get"
                handlers="brokerMonitorService.getConsumerPartitionGroupInfos"/>
-        <route path="/monitor/topic/:topic/app/:app/consumer/partitionGroup/:partitionGroup" inherit="get"
+        <route path="/monitor/topic/:topic/app/:app/consumer/partitionGroup/:partitionGroupId" inherit="get"
                handlers="brokerMonitorService.getConsumerPartitionGroupInfoByTopicAndApp"/>
         <!-- producer -->
         <route path="/monitor/topic/:topic/app/:app/producer" inherit="get"
