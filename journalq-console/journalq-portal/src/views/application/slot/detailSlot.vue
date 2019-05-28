@@ -84,7 +84,7 @@ export default {
             topic: this.$route.query.topic || '',
             namespace: this.$route.query.namespace || '',
             subscribeGroup: this.$route.query.subscribeGroup || '',
-            subTab: this.$route.query.subTab || 'partitioin',
+            subTab: this.$route.query.subTab || 'partition',
             tab: name
           }
         })
