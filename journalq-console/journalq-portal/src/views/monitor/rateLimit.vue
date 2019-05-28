@@ -13,6 +13,7 @@
         <i slot="append" style="width: 30px">byte/s</i>
       </d-input>
     </div>
+  </div>
 </template>
 
 <script>
