@@ -17,6 +17,9 @@
       <d-tab-pane label="分组信息" name="brokerPartitionGroupMonitor">
         <broker-partition-group-monitor ref="brokerPartitionGroupMonitor" style="height: 500px;overflow-y:auto" :broker-id="this.brokerId"></broker-partition-group-monitor>
       </d-tab-pane>
+      <d-tab-pane label="服务器监控" name="brokerServerMonitor">
+        <broker-server-monitor ref="brokerServerMonitor" :brokerId="brokerId"> </broker-server-monitor>
+      </d-tab-pane>
     </d-tabs>
   </div>
 </template>
@@ -29,6 +32,7 @@
   import ClientConnection from "../monitor/clientConnection";
   import BrokerConnectionMonitor from "./brokerConnectionMonitor";
   import BrokerPartitionGroupMonitor from "./brokerPartitionGroupMonitor";
+  import BrokerServerMonitor from "./brokerServerMonitor.vue";
 
   export default {
     name: "brokerMonitor",
@@ -37,7 +41,8 @@
       BrokerConnectionMonitor,
       ClientConnection,
       myTable,
-      myDialog
+      myDialog,
+      BrokerServerMonitor
     },
     props:{
       brokerId:{

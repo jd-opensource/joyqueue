@@ -163,6 +163,7 @@ public class ReplicaGroup extends Service {
     public void addNode(ElectionNode node) {
         Replica newReplica = new Replica(node.getNodeId(), node.getAddress());
         newReplica.nextPosition(replicableStore.rightPosition());
+
         replicas.add(newReplica);
 
         replicateResponseQueue.put(new DelayedCommand(
@@ -189,6 +190,11 @@ public class ReplicaGroup extends Service {
         replicasWithoutLearners = replicasWithoutLearners.stream()
                 .filter(r -> r.replicaId() != nodeId)
                 .collect(Collectors.toList());
+
+        for (Replica replica : replicas) {
+            logger.info("Partition group {}/node {} remove node, replica {}'s next position is {}",
+                    topicPartitionGroup, localReplicaId, replica.replicaId(), replica.nextPosition());
+        }
     }
 
     /**
@@ -307,8 +313,8 @@ public class ReplicaGroup extends Service {
                     }
 
                     if (!replicas.contains(getReplica(command.replicaId()))) {
-                        logger.info("Partition group {}/node {} not contain this node",
-                                topicPartitionGroup, localReplicaId);
+                        logger.info("Partition group {}/node {} not contain this node {}",
+                                topicPartitionGroup, localReplicaId, command.replicaId());
                         continue;
                     }
 
@@ -353,6 +359,9 @@ public class ReplicaGroup extends Service {
                 } catch (InterruptedException ignored) {}
             }
             replicateResponseQueue.put(new DelayedCommand(System.nanoTime(), localReplicaId));
+        } else {
+            replicateResponseQueue.put(new DelayedCommand(
+                    System.nanoTime() + ONE_SECOND_NANO, localReplicaId));
         }
 
     }

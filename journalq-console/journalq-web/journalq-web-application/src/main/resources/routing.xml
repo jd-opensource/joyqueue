@@ -380,6 +380,14 @@
         <route inherit="post"
                path="/v1/monitor/broker/partition/search" handlers="brokerMonitor#partitionGroupMonitor render"
                errors="error"/>
+        <route inherit="get"
+               path="/v1/monitor/broker/:brokerId" handlers="brokerMonitor#findBrokerDetail render"
+               errors="error"/>
+        <route inherit="get"
+               path="/v1/monitor/start/:brokerId" handlers="brokerMonitor#startInfo render"
+               errors="error"/>
+
+
 
         <!--metric -->
         <route inherit="post"
@@ -424,6 +432,10 @@
         <route inherit="post"
                path="/v1/broker/findByTopic" handlers="broker#findByTopic render"
                errors="error"/>
+        <route inherit="get"
+               path="/v1/broker/:ip/:port" handlers="broker#telnet render"
+               errors="error"/>
+
         <!--<route inherit="post"-->
         <!--path="/v1/broker/getBrokersByBrokerGroupIds" handlers="broker#getBrokersByBrokerGroupIds render"-->
         <!--errors="error"/>-->
