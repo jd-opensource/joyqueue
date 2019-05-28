@@ -393,7 +393,7 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
         public void onEvent(WriteResult event) {
             long elapse = System.nanoTime() - t0;
             metric.addLatency("callback", elapse);
-            onPutMessage(topic, app, partitionGroup, SystemClock.now() - elapse/1000000, writeRequests);
+            onPutMessage(topic, app, partitionGroup, startTime, writeRequests);
             eventListener.onEvent(event);
         }
     }
