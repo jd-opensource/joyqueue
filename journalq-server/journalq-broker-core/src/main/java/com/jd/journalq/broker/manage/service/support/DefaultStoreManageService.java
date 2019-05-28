@@ -22,6 +22,7 @@ import com.jd.journalq.manage.PartitionMetric;
 import com.jd.journalq.manage.TopicMetric;
 import com.jd.journalq.store.StoreManagementService;
 import com.jd.journalq.store.message.MessageParser;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.nio.ByteBuffer;
@@ -94,7 +95,9 @@ public class DefaultStoreManageService implements StoreManageService {
             String partitionFile=partitionGroupPath+"/"+file.getName()+"/index";
             File[] partitionFiles = storeManagementService.listFiles(partitionFile);
             String partitions= Arrays.stream(partitionFiles).map(file1 -> file1.getName()).sorted().collect(Collectors.joining(","));
-            partitionGroupMetric.setPartitionGroup(Long.valueOf(file.getName()).intValue());
+            if (StringUtils.isNumeric(file.getName())) {
+                partitionGroupMetric.setPartitionGroup(Long.valueOf(file.getName()).intValue());
+            }
             partitionGroupMetric.setPartitions(partitions);
             partitionGroupMetrics.add(partitionGroupMetric);
         }

@@ -15,6 +15,7 @@ package com.jd.journalq.broker.monitor.service;
 
 import com.jd.journalq.broker.monitor.stat.BrokerStatExt;
 import com.jd.journalq.monitor.BrokerMonitorInfo;
+import com.jd.journalq.monitor.BrokerStartupInfo;
 
 /**
  * broker monitor service
@@ -40,4 +41,10 @@ public interface BrokerMonitorInternalService {
      * @return  BrokerStatExt
      **/
     BrokerStatExt getExtendBrokerStat(long timeStamp);
+
+    /**
+     * 获取启动信息
+     * @return
+     */
+    BrokerStartupInfo getStartInfo();
 }
