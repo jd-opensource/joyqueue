@@ -26,6 +26,7 @@ import java.io.RandomAccessFile;
 import java.lang.reflect.Method;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
+import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ConcurrentModificationException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -95,15 +96,23 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
 
     private void loadRoUnsafe() throws IOException {
         if (null != pageBuffer) throw new IOException("Buffer already loaded!");
-        ByteBuffer loadBuffer;
-        try (RandomAccessFile raf = new RandomAccessFile(file, "r"); FileChannel fileChannel = raf.getChannel()) {
-            loadBuffer =
-                    fileChannel.map(FileChannel.MapMode.READ_ONLY, headerSize, file.length() - headerSize);
+        bufferPool.allocateMMap(this);
+        try {
+            MappedByteBuffer loadBuffer;
+            try (RandomAccessFile raf = new RandomAccessFile(file, "r"); FileChannel fileChannel = raf.getChannel()) {
+                loadBuffer =
+                        fileChannel.map(FileChannel.MapMode.READ_ONLY, headerSize, file.length() - headerSize);
+            }
+            loadBuffer.load();
+            pageBuffer = loadBuffer;
+            bufferType = MAPPED_BUFFER;
+            pageBuffer.clear();
+        } catch (Throwable t) {
+            logger.warn("Exception: ", t);
+            bufferPool.releaseMMap(this);
+            pageBuffer = null;
+            throw t;
         }
-        pageBuffer = loadBuffer;
-        bufferType = MAPPED_BUFFER;
-        pageBuffer.clear();
-        bufferPool.addMemoryMappedBufferHolder(this);
     }
 
     private void loadRwUnsafe() throws IOException {
@@ -112,7 +121,7 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
         } else if (bufferType == MAPPED_BUFFER) {
             unloadUnsafe();
         }
-        ByteBuffer buffer = bufferPool.allocate(capacity, this);
+        ByteBuffer buffer = bufferPool.allocateDirect( this);
         loadDirectBuffer(buffer);
     }
 
@@ -411,7 +420,7 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
         final ByteBuffer direct = pageBuffer;
         pageBuffer = null;
         this.bufferType = NO_BUFFER;
-        if (null != direct) bufferPool.release(direct, this);
+        if (null != direct) bufferPool.releaseDirect(direct, this);
     }
 
     private void unloadMappedBuffer() {
@@ -426,6 +435,7 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
                 Cleaner cleaner = (Cleaner) getCleanerMethod.invoke(mapped, new Object[0]);
                 cleaner.clean();
             }
+            bufferPool.releaseMMap(this);
         } catch (Exception e) {
             logger.warn("Release direct buffer exception: ", e);
         }
