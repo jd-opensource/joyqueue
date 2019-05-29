@@ -199,6 +199,10 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                 throw new ReadException(String.format("Read log failed! store: %s, position: %d.", store.base().getAbsolutePath(), indexPosition));
             IndexItem indexItem = IndexItem.parseMessage(byteBuffer, indexPosition);
             Partition partition = partitionMap.get(indexItem.getPartition());
+            if(null == partition) {
+                indexPosition += indexItem.getLength();
+                continue;
+            }
             PositioningStore<IndexItem> indexStore = partition.store;
 
             if (indexStore.right() == 0) {
