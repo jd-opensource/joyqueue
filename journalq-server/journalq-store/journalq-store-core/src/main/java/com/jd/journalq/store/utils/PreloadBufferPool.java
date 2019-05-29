@@ -281,7 +281,7 @@ public class PreloadBufferPool implements Closeable {
         }
 
         if (usedSize.get() > maxMemorySize * EVICT_RATIO) {
-            evictThread.weakup();
+            evictThread.wakeup();
         }
         mMapBufferHolders.add(bufferHolder);
     }
