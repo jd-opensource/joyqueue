@@ -70,7 +70,7 @@ public class QosStore implements PartitionGroupStore {
     }
 
     @Override
-    public long deleteMinStoreMessages(long targetDeleteTimeline, Map<Short, Long> partitionAckMap) throws IOException {
+    public long deleteMinStoreMessages(long targetDeleteTimeline, Map<Short, Long> partitionAckMap, boolean doNotDeleteConsumed) throws IOException {
         long deletedSize = 0L;
 
         // 计算最小索引的消息位置
@@ -80,8 +80,10 @@ public class QosStore implements PartitionGroupStore {
             long minPartitionIndex = partition.getValue();
             PositioningStore<IndexItem> indexStore = store.indexStore(p);
             if (indexStore != null) {
-                if (minPartitionIndex != Long.MAX_VALUE) {
+                if (minPartitionIndex != Long.MAX_VALUE && doNotDeleteConsumed) {
                     minPartitionIndex *= IndexItem.STORAGE_SIZE;
+                } else {
+                    minPartitionIndex = Long.MAX_VALUE;
                 }
                 if (targetDeleteTimeline <= 0) {
                     // 依次删除每个分区p索引中最左侧的文件 满足当前分区p的最小消费位置之前的文件块

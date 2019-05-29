@@ -603,7 +603,6 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
         return connectionRecords;
     }
 
-
     public List<PartitionGroupPosition> findPartitionGroupMetric(String namespace, String topic, Integer groupNo){
         TopicPartitionGroup topicPartitionGroup = partitionGroupService.findByTopicAndGroup(namespace,topic,groupNo);
         String path = "partitiongroupIndex";
