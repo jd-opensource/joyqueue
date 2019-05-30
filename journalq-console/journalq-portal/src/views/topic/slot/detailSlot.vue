@@ -159,7 +159,7 @@ export default {
     removeTab (data) {
       if (data.name === 'producerDetail' || data.name === 'consumerDetail') {
         this.$router.push({
-          name: `/${this.$i18n.locale}/application/detail`,
+          name: `/${this.$i18n.locale}/topic/detail`,
           query: {
             id: this.topic.id,
             code: this.topic.code,
