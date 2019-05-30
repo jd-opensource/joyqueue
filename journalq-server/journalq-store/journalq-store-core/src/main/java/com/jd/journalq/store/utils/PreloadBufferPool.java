@@ -240,7 +240,7 @@ public class PreloadBufferPool implements Closeable {
 
         if (usedSize.get() + size > maxMemorySize) {
             // 如果内存不足，唤醒清理线程立即执行清理
-            evictThread.weakup();
+            evictThread.wakeup();
             // 等待5x10ms，如果还不足抛出异常
             for (int i = 0; i < 5 && usedSize.get() + size > maxMemorySize; i++) {
                 try {
@@ -255,7 +255,7 @@ public class PreloadBufferPool implements Closeable {
         }
 
         if (usedSize.addAndGet(size) > maxMemorySize * EVICT_RATIO) {
-            evictThread.weakup();
+            evictThread.wakeup();
         }
     }
 
@@ -281,7 +281,7 @@ public class PreloadBufferPool implements Closeable {
         }
 
         if (usedSize.get() > maxMemorySize * EVICT_RATIO) {
-            evictThread.weakup();
+            evictThread.wakeup();
         }
         mMapBufferHolders.add(bufferHolder);
     }
