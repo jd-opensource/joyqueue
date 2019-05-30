@@ -32,7 +32,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.SocketAddress;
-import java.nio.channels.ClosedChannelException;
 import java.util.concurrent.Future;
 
 /**
@@ -91,8 +90,6 @@ public class FailoverChannelTransport implements ChannelTransport {
                         // 重连失败，抛出异常
                         throw e;
                     }
-                } else if (e.getCause() instanceof ClosedChannelException) {
-                    tryReconnect();
                 }
 
                 lastException = e;
