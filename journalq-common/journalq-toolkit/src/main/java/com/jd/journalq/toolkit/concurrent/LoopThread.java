@@ -18,6 +18,7 @@ import com.jd.journalq.toolkit.time.SystemClock;
 
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -35,7 +36,11 @@ public abstract class LoopThread implements Runnable,LifeCycle{
     private boolean daemon;
     private final Lock wakeupLock = new ReentrantLock();
     private final java.util.concurrent.locks.Condition wakeupCondition = wakeupLock.newCondition();
-
+    private static final int STATE_STOPPED = 0;
+    private static final int STATE_STOPPING = 1;
+    private static final int STATE_STARTING = 2;
+    private static final int STATE_RUNNING = 3;
+    private AtomicInteger state = new AtomicInteger(STATE_STOPPED);
     /**
      * 每次循环需要执行的代码。
      */
@@ -68,8 +73,9 @@ public abstract class LoopThread implements Runnable,LifeCycle{
     @Override
     public synchronized void start() {
         if(!isStarted()) {
+            state.set(STATE_STARTING);
             thread = new Thread(this);
-            thread.setName(name);
+            thread.setName(name == null ? "LoopThread": name);
             thread.setDaemon(daemon);
             thread.start();
         }
@@ -78,51 +84,57 @@ public abstract class LoopThread implements Runnable,LifeCycle{
     @Override
     public synchronized void stop() {
 
-
-        while (isStarted()){
+        if(state.get() != STATE_STOPPED) {
+            state.set(STATE_STOPPING);
             thread.interrupt();
-            try {
-                Thread.sleep(10L);
-            } catch (InterruptedException ignored) {}
+            while (state.get() != STATE_STOPPED) {
+                try {
+                    wakeup();
+                    Thread.sleep(10L);
+                } catch (InterruptedException ignored) {
+                }
+            }
         }
-
     }
 
     @Override
     public boolean isStarted() {
-        return thread!= null && thread.isAlive();
+        return state.get() == STATE_RUNNING;
     }
 
     @Override
     public void run() {
-        while (!Thread.currentThread().isInterrupted()) {
+        if(state.compareAndSet(STATE_STARTING, STATE_RUNNING) ) {
+            while (state.get() == STATE_RUNNING) {
 
-            long t0 = SystemClock.now();
-            try {
-                wakeupLock.lock();
-                if(condition()) doWork();
-                long t1 = SystemClock.now();
+                long t0 = SystemClock.now();
+                try {
+                    wakeupLock.lock();
+                    if (condition()) doWork();
+                    long t1 = SystemClock.now();
 
-                // 为了避免空转CPU高，如果执行时间过短，等一会儿再进行下一次循环
-                if (t1 - t0 < minSleep) {
-                    wakeupCondition.await(minSleep < maxSleep ? ThreadLocalRandom.current().nextLong(minSleep, maxSleep): minSleep, TimeUnit.MILLISECONDS);
+                    // 为了避免空转CPU高，如果执行时间过短，等一会儿再进行下一次循环
+                    if (t1 - t0 < minSleep) {
+                        wakeupCondition.await(minSleep < maxSleep ? ThreadLocalRandom.current().nextLong(minSleep, maxSleep) : minSleep, TimeUnit.MILLISECONDS);
+                    }
+                } catch (InterruptedException i) {
+                    Thread.currentThread().interrupt();
+                } catch (Throwable t) {
+                    if (!handleException(t)) {
+                        break;
+                    }
+                } finally {
+                    wakeupLock.unlock();
                 }
-            } catch (InterruptedException i) {
-                Thread.currentThread().interrupt();
-            } catch (Throwable t) {
-                if (!handleException(t)) {
-                    break;
-                }
-            } finally {
-                wakeupLock.unlock();
             }
         }
+        state.set(STATE_STOPPED);
     }
 
     /**
      * 唤醒任务如果任务在Sleep
      */
-    public synchronized void weakup() {
+    public synchronized void wakeup() {
         if(wakeupLock.tryLock()) {
             try {
                 wakeupCondition.signal();

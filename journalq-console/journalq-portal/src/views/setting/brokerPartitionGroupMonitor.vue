@@ -11,7 +11,7 @@
 import myTable from '../../components/common/myTable.vue'
 import myDialog from '../../components/common/myDialog.vue'
 import crud from '../../mixins/crud.js'
-import ClientConnection from '../monitor/clientConnection'
+import ClientConnection from '../monitor/detail/clientConnection'
 
 export default {
   name: 'brokerPartitionGroupMonitor',

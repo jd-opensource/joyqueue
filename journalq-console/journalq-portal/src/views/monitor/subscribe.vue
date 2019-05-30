@@ -1,7 +1,8 @@
 <template>
   <div>
     <div class="ml20 mt10">
-      <d-input v-model="keyword" :placeholder="keywordTip" class="left" style="width: 60%">
+      <d-input v-model="keyword" :placeholder="keywordTip" class="left" style="width: 400px" @on-enter="getList">
+        <span slot="prepend">{{keywordName}}</span>
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
     </div>
@@ -25,7 +26,10 @@ export default {
   props: {
     keywordTip: {
       type: String,
-      default: '请输入代码/名称'
+      default: '请输入代码'
+    },
+    keywordName: {
+      type: String
     },
     operates: {
       type: Array
@@ -125,17 +129,10 @@ export default {
         return
       }
       data.clientType = item.clientType
+      //Subscribe group format verification
       if (this.type === this.$store.getters.consumerType) {
-        // if (!item.subscribeGroup) {
-        //   this.$Dialog.warning({
-        //     content: '请先输入订阅分组！'
-        //   })
-        //   return
-        // }
         if (item.subscribeGroup && !item.subscribeGroup.match(this.$store.getters.pattern.subscribeGroup)) {
-          this.$Dialog.warning({
-            content: '订阅分组格式不匹配！支持格式：' + this.$store.getters.placeholder.subscribeGroup
-          })
+          this.$Message.error('订阅分组格式不匹配！支持格式：' + this.$store.getters.placeholder.subscribeGroup)
           return
         }
         data.subscribeGroup = item.subscribeGroup || ''

@@ -33,7 +33,7 @@ export default {
       type: Object,
       default: function () {
         return {
-          id: '0',
+          id: '',
           key: '',
           value: '',
           name: '',

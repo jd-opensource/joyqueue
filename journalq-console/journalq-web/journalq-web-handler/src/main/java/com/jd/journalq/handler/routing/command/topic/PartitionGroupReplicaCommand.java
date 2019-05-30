@@ -27,6 +27,7 @@ import com.jd.journalq.model.query.QPartitionGroupReplica;
 import com.jd.journalq.service.BrokerService;
 import com.jd.journalq.service.PartitionGroupReplicaService;
 import com.jd.journalq.service.TopicPartitionGroupService;
+import com.jd.journalq.util.NullUtil;
 import com.jd.laf.binding.annotation.Value;
 import com.jd.laf.web.vertx.annotation.Body;
 import com.jd.laf.web.vertx.annotation.Path;
@@ -48,12 +49,15 @@ public class PartitionGroupReplicaCommand extends NsrCommandSupport<PartitionGro
     public Response toScaleSearch(@PageQuery QPageQuery<QPartitionGroupReplica> qPageQuery) throws Exception {
         List<PartitionGroupReplica> list = service.findByQuery(qPageQuery.getQuery());
         QPageQuery<QBroker> brokerQuery = new QPageQuery(qPageQuery.getPagination(),new QBroker());
-        if(null!=list && list.size()>0) {
+        if (NullUtil.isNotEmpty(list)) {
             brokerQuery.getQuery().setNotInBrokerIds(Ints.asList(list.stream().mapToInt(
                     replica -> Long.valueOf(replica.getBrokerId()).intValue()).toArray()));
-            brokerQuery.getQuery().setBrokerGroupId(list.get(0).getBroker().getGroup().getId());
-            brokerQuery.getQuery().setKeyword(qPageQuery.getQuery().getKeyword());
+            Broker broker = list.get(0).getBroker();
+            if (broker != null && broker.getGroup() != null) {
+                brokerQuery.getQuery().setBrokerGroupId(broker.getGroup().getId());
+            }
         }
+        brokerQuery.getQuery().setKeyword(qPageQuery.getQuery().getKeyword());
         PageResult<Broker> result = brokerService.findByQuery(brokerQuery);
         return Responses.success(result.getPagination(), result.getResult());
     }

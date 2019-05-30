@@ -26,7 +26,6 @@ import java.net.URL;
  */
 @SpringBootApplication
 @PropertySource({"classpath:important.properties"})
-@EnableAutoConfiguration
 @Import(H2DBServerAutoConfiguration.class)
 public class WebApplication {
     public static void main(String[] args) {

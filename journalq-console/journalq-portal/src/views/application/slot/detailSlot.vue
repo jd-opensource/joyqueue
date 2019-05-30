@@ -21,8 +21,8 @@
         </grid-col>
       </grid-row>
     </div>
-    <d-tabs  @on-change="handleTabChange" :value="tab">
       <!--tabs由于没有单独的路由名称，所以在调用table时，需要在data中自定义urls-->
+    <d-tabs @on-change="handleTabChange" :value="tab" @on-tab-remove="removeTab">
       <slot name="tabs"></slot>
     </d-tabs>
   </div>
@@ -31,6 +31,7 @@
 <script>
 import apiRequest from '../../../utils/apiRequest.js'
 import crud from '../../../mixins/crud.js'
+// import {generateProducerDetailTabName, generateConsumerDetailTabName} from '../../../utils/common.js'
 
 export default {
   name: 'applicationDetailSlot',
@@ -60,11 +61,11 @@ export default {
       this.app.id = to.query.id
       this.app.code = to.query.code
       this.tab = to.query.tab || this.tab
-      this.$refs[this.tab].getList()
+      // this.$refs[this.tab].getList()
     }
   },
   methods: {
-    getDetail (id) {
+    getDetail () {
       apiRequest.get(this.urlOrigin.detail + '/' + this.app.id, {}).then((data) => {
         this.detail = data.data || {}
       })
@@ -72,23 +73,81 @@ export default {
     gotoList () {
       this.$router.push({name: `/${this.$i18n.locale}/application`})
     },
-    queryAppDetail () {
-      // 获取我的应用详情页
-      this.getDetail(this.app.id)
-    },
     handleTabChange (data) {
       let name = data.name
+      if (name === 'producerDetail') {
+        let topicCode = this.$route.query.topic || ''
+        let namespaceCode = this.$route.query.namespace || ''
+        this.$router.push({
+          name: `/${this.$i18n.locale}/application/detail`,
+          query: {
+            id: this.app.id,
+            code: this.app.code,
+            app: this.app.code,
+            topic: topicCode,
+            namespace: namespaceCode,
+            // subscribeGroup: this.$route.query.subscribeGroup || '',
+            clientType: this.$route.query.clientType,
+            subTab: this.$route.query.subTab || 'partition',
+            tab: name,
+            producerDetailVisible: '1',
+            consumerDetailVisible: this.$route.query.consumerDetailVisible || '0'
+          }
+        })
+      } else if (name === 'consumerDetail') {
+        let topicCode = this.$route.query.topic || ''
+        let namespaceCode = this.$route.query.namespace || ''
+        let subscribeGroup = this.$route.query.subscribeGroup || ''
+        this.$router.push({
+          name: `/${this.$i18n.locale}/application/detail`,
+          query: {
+            id: this.app.id,
+            code: this.app.code,
+            app: this.app.code,
+            topic: topicCode,
+            namespace: namespaceCode,
+            subscribeGroup: subscribeGroup,
+            clientType: this.$route.query.clientType,
+            subTab: this.$route.query.subTab || 'partition',
+            tab: name,
+            producerDetailVisible: this.$route.query.producerDetailVisible || '0',
+            consumerDetailVisible: '1'
+          }
+        })
+      } else {
+        this.$router.push({
+          name: `/${this.$i18n.locale}/application/detail`,
+          query: {
+            id: this.app.id,
+            code: this.app.code,
+            tab: name,
+            producerDetailVisible: '0',
+            consumerDetailVisible: '0'
+          }
+        })
+      }
       this.$refs[name].getList()
-      this.$router.push({
-        name: `/${this.$i18n.locale}/application/detail`,
-        query: { id: this.app.id, code: this.app.code, tab: name }})
+    },
+    removeTab (data) {
+      if (data.name === 'producerDetail' || data.name === 'consumerDetail') {
+        this.$router.push({
+          name: `/${this.$i18n.locale}/application/detail`,
+          query: {
+            id: this.app.id,
+            code: this.app.code,
+            tab: 'producer',
+            producerDetailVisible: '0',
+            consumerDetailVisible: '0'
+          }
+        })
+      }
     }
   },
   mounted () {
     this.app.id = this.$route.query.id
     this.app.code = this.$route.query.code
     this.tab = this.$route.query.tab || 'producer'
-    this.queryAppDetail()
+    this.getDetail()
   }
 
 }

@@ -1,8 +1,8 @@
 <template>
   <div>
-    <producer-base ref="producerBase" :keywordTip="keywordTip" :colData="colData"
-                   :subscribeDialogColData="subscribeDialog.colData"
-                    :search="search" :subscribeUrls="subscribeDialog.urls"/>
+    <producer-base ref="producerBase" :keywordTip="keywordTip" :keywordName="keywordName" :colData="colData"
+                   :subscribeDialogColData="subscribeDialog.colData" @on-enter="getList"
+                    :search="search" :subscribeUrls="subscribeDialog.urls" @on-detail="handleDetail"/>
   </div>
 </template>
 
@@ -24,6 +24,7 @@ export default {
   data () {
     return {
       keywordTip: '请输入应用',
+      keywordName: '应用',
       colData: [
         // {
         //   title: 'ID',
@@ -115,35 +116,15 @@ export default {
           add: `/producer/add`,
           search: `/application/unsubscribed/search`
         }
-      },
-      // 生产详情
-      detailDialog: {
-        partition: {
-          colData: [
-            // {
-            //   title: 'ID',
-            //   key: 'groupNo'
-            // },
-            // {
-            //   title: '主分片',
-            //   key: 'ip'
-            // },
-            // {
-            //   title: '分片',
-            //   key: 'partitions'
-            // },
-            // {
-            //   title: '入队数',
-            //   key: 'enQuence.count'
-            // }
-          ]
-        }
       }
     }
   },
   methods: {
     getList () {
       this.$refs.producerBase.getList()
+    },
+    handleDetail (item) {
+      this.$emit('on-detail', item)
     }
   }
 }
