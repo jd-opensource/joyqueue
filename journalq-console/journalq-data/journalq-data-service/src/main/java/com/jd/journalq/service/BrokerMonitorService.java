@@ -63,7 +63,7 @@ public interface BrokerMonitorService {
      * @return  topic and app 的生产或者消费客户端client 信息 和broker ip:port
      *
      **/
-    List<BrokerClient>  findClients(Subscribe subscribe);
+    List<BrokerClient> findClients(Subscribe subscribe);
 
 
     /**

@@ -1,7 +1,9 @@
 <template>
   <div>
     <div class="ml20 mt10">
-      <d-input v-model="searchData.keyword" placeholder="请输入要查询的IP/ID/标签" class="left" style="width: 60%">
+      <d-input v-model="searchData.keyword" placeholder="请输入要查询的IP/ID/标签" class="left"
+               style="width: 300px" @on-enter="getList">
+        <span slot="prepend">关键词</span>
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
     </div>
