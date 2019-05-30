@@ -143,7 +143,7 @@ export default {
         rule1: {
           code: [
             {required: true, message: '请输入topic英文名', trigger: 'change'},
-            {pattern: /^[a-zA-Z/]+[a-zA-Z0-9/_-]{1,120}[a-zA-Z0-9/]+$/, message: '英文名格式不匹配', trigger: 'change'}
+            {pattern: /^[a-zA-Z0-9/]+[a-zA-Z0-9/_-]{1,120}[a-zA-Z0-9/]+$/, message: '英文名格式不匹配', trigger: 'change'}
           ],
           name: getNameRule(),
           partitions: [
