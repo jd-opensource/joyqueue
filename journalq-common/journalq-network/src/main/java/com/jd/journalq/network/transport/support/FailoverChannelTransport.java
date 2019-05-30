@@ -222,10 +222,7 @@ public class FailoverChannelTransport implements ChannelTransport {
         return SystemClock.now() - lastReconnect > config.getRetryPolicy().getRetryDelay();
     }
 
-    protected synchronized boolean reconnect() {
-        if (delegate.state() == TransportState.CONNECTED) {
-            return true;
-        }
+    protected boolean reconnect() {
         try {
             ChannelTransport newTransport = (ChannelTransport) transportClient.createTransport(address, connectionTimeout);
             ChannelTransport delegate = this.delegate;
