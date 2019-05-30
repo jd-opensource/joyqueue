@@ -92,9 +92,7 @@ public class FailoverChannelTransport implements ChannelTransport {
                         throw e;
                     }
                 } else if (e.getCause() instanceof ClosedChannelException) {
-                    synchronized (this) {
-                        reconnect();
-                    }
+                    tryReconnect();
                 }
 
                 lastException = e;
@@ -221,10 +219,13 @@ public class FailoverChannelTransport implements ChannelTransport {
     }
 
     protected boolean isNeedReconnect() {
-        return SystemClock.now() - lastReconnect > config.getRetryPolicy().getMaxRetryDelay();
+        return SystemClock.now() - lastReconnect > config.getRetryPolicy().getRetryDelay();
     }
 
-    protected boolean reconnect() {
+    protected synchronized boolean reconnect() {
+        if (delegate.state() == TransportState.CONNECTED) {
+            return true;
+        }
         try {
             ChannelTransport newTransport = (ChannelTransport) transportClient.createTransport(address, connectionTimeout);
             ChannelTransport delegate = this.delegate;
