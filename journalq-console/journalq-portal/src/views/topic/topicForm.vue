@@ -97,7 +97,7 @@ export default {
             id: '',
             code: ''
           },
-          partitions: 5,
+          partitions: 24,
           // brokerGroups: [],
           brokerGroup: {
             id: -1,

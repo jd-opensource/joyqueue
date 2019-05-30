@@ -79,6 +79,7 @@ import myTable from '../../components/common/myTable.vue'
 import myDialog from '../../components/common/myDialog.vue'
 import crud from '../../mixins/crud.js'
 import BrokerMonitor from './brokerMonitor'
+import {timeStampToString} from '../../utils/dateTimeUtils'
 
 export default {
   name: 'application',
@@ -104,7 +105,9 @@ export default {
           search: '/broker/search',
           del: '/broker/delete',
           edit: '/broker/update',
-          archiveMonitor: '/monitor/archive'
+          archiveMonitor: '/monitor/archive',
+          telnet: '/broker',
+          startInfo: '/monitor/start/'
         }
       }
     },
@@ -146,6 +149,10 @@ export default {
           {
             title: '端口',
             key: 'port'
+          },
+          {
+            title: '启动时间',
+            key: 'startupTime'
           },
           {
             title: '重试方式',
@@ -200,6 +207,44 @@ export default {
     }
   },
   methods: {
+    getList(){
+      this.showTablePin = true
+      let data = {
+        pagination: {
+          page: this.page.page,
+          size: this.page.size
+        },
+        query: {
+          topic: this.searchData.topic,
+          namespace: this.searchData.namespace,
+          keyword: this.searchData.keyword
+        }
+      }
+      apiRequest.post(this.urlOrigin.search, {}, data).then((data) => {
+        data.data = data.data || []
+      data.pagination = data.pagination || {
+        totalRecord: data.data.length
+      }
+      this.page.total = data.pagination.totalRecord
+      this.page.page = data.pagination.page
+      this.page.size = data.pagination.size
+      this.tableData.rowData = data.data
+      for (var i = 0; i < this.tableData.rowData.length; i++) {
+        this.getBrokerStatus(this.tableData.rowData, i)
+      }
+      this.showTablePin = false
+    })
+    },
+    getBrokerStatus (rowData, i) {
+      apiRequest.get(this.urlOrigin.startInfo + '/' + rowData[i].id).then((data) => {
+        if(data.code == 200) {
+          this.tableData.rowData[i].startupTime = timeStampToString(data.data.startupTime);
+        } else {
+          this.tableData.rowData[i].startupTime = "不存活"
+        }
+        this.$set(this.tableData.rowData, i, this.tableData.rowData[i])
+      });
+    },
     archiveMonitor (item) {
       let broker = {
         ip: item.ip,
@@ -231,7 +276,7 @@ export default {
     }
   },
   mounted () {
-    this.getList()
+    this.getList();
   }
 }
 </script>

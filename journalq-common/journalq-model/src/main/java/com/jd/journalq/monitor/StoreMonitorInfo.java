@@ -23,11 +23,30 @@ public class StoreMonitorInfo {
 
     private boolean started;
 
+    private long totalSpace;
+    private long freeSpace;
+
     public void setStarted(boolean started) {
         this.started = started;
     }
 
     public boolean isStarted() {
         return started;
+    }
+
+    public long getTotalSpace() {
+        return totalSpace;
+    }
+
+    public void setTotalSpace(long totalSpace) {
+        this.totalSpace = totalSpace;
+    }
+
+    public long getFreeSpace() {
+        return freeSpace;
+    }
+
+    public void setFreeSpace(long freeSpace) {
+        this.freeSpace = freeSpace;
     }
 }

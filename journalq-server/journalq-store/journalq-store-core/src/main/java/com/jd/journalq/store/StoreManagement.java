@@ -145,6 +145,18 @@ public class StoreManagement implements StoreManagementService {
         return directory.listFiles();
     }
 
+    public long freeSpace() {
+        return store.base().getFreeSpace();
+    }
+
+    public long totalSpace(){
+        return store.base().getTotalSpace();
+    }
+
+    private long usableSpace(){
+        return store.base().getUsableSpace();
+    }
+
 
     /**
      * 读取消息

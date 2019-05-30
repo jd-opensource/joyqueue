@@ -151,7 +151,8 @@ export default {
           },
           {
             txt: this.langConfig['colData']['btnDelete'],
-            method: 'on-del'
+            method: 'on-del',
+            isAdmin: true
           }
         ]
       }
@@ -186,7 +187,9 @@ export default {
         name: `/${this.curLang}/application/detail`,
         query: {id: item.id, code: item.code}})
     },
-
+    isAdmin (item) {
+      return this.$store.getters.isAdmin
+    },
   },
   mounted () {
     this.getList()

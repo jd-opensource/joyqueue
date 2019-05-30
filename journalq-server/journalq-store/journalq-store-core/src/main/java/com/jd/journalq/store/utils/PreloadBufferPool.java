@@ -35,6 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author liyue25
@@ -92,7 +93,7 @@ public class PreloadBufferPool implements Closeable {
                 .name("DirectBufferPrintThread")
                 .sleepTime(printMetricInterval, printMetricInterval)
                 .doWork(() -> {
-                    long used = usedSize.get();
+                    long totalUsed = usedSize.get();
                     long plUsed = bufferCache.values().stream().mapToLong(preLoadCache -> {
                         long cached = preLoadCache.cache.size();
                         long usedPreLoad = preLoadCache.onFlyCounter.get();
@@ -103,9 +104,13 @@ public class PreloadBufferPool implements Closeable {
                                 Format.formatTraffic(totalSize));
                         return totalSize;
                     }).sum();
-                    logger.info("DirectBuffer preload/used/max: {}/{}/{}.",
+                    long mmpUsed = mMapBufferHolders.stream().mapToInt(BufferHolder::size).sum();
+                    long directUsed = directBufferHolders.stream().mapToInt(BufferHolder::size).sum();
+                    logger.info("Direct memory usage: preload/direct/mmp/used/max: {}/{}/{}/{}/{}.",
                             Format.formatTraffic(plUsed),
-                            Format.formatTraffic(used),
+                            Format.formatTraffic(directUsed),
+                            Format.formatTraffic(mmpUsed),
+                            Format.formatTraffic(totalUsed),
                             Format.formatTraffic(maxMemorySize));
 
                 })
@@ -140,13 +145,9 @@ public class PreloadBufferPool implements Closeable {
      */
     private void evict() {
         // 先清除过期的
-        for (BufferHolder holder : directBufferHolders) {
-            if (SystemClock.now() - holder.lastAccessTime() > cacheLifetimeMs) {
-                holder.evict();
-            }
-        }
-
-        mMapBufferHolders.removeIf(holder -> SystemClock.now() - holder.lastAccessTime() > cacheLifetimeMs && holder.evict());
+        Stream.concat(directBufferHolders.stream(), mMapBufferHolders.stream())
+                .filter(holder -> SystemClock.now() - holder.lastAccessTime() > cacheLifetimeMs)
+                .forEach(BufferHolder::evict);
 
 
         // 清理超过maxCount的缓存页
@@ -166,7 +167,7 @@ public class PreloadBufferPool implements Closeable {
 
         if (usedSize.get() > maxMemorySize * EVICT_RATIO) {
             List<LruWrapper<BufferHolder>> sorted;
-            sorted = directBufferHolders.stream()
+            sorted = Stream.concat(directBufferHolders.stream(), mMapBufferHolders.stream())
                     .filter(BufferHolder::isFree)
                     .map(bufferHolder -> new LruWrapper<>(bufferHolder, bufferHolder.lastAccessTime()))
                     .sorted(Comparator.comparing(LruWrapper::getLastAccessTime))
@@ -220,6 +221,12 @@ public class PreloadBufferPool implements Closeable {
     }
 
     private ByteBuffer createOne(int size) {
+        reserveMemory(size);
+        return ByteBuffer.allocateDirect(size);
+
+    }
+
+    private void reserveMemory(int size) {
         while (usedSize.get() + size > maxMemorySize) {
             PreLoadCache preLoadCache = bufferCache.values().stream()
                     .filter(p -> p.cache.size() > 0)
@@ -246,18 +253,10 @@ public class PreloadBufferPool implements Closeable {
                 throw new OutOfMemoryError();
             }
         }
-        ByteBuffer byteBuffer = ByteBuffer.allocateDirect(size);
-        long u;
-        while (!usedSize.compareAndSet(u = usedSize.get(), u + size)) {
-            Thread.yield();
-        }
 
-        if (usedSize.get() > maxMemorySize * EVICT_RATIO) {
+        if (usedSize.addAndGet(size) > maxMemorySize * EVICT_RATIO) {
             evictThread.weakup();
         }
-//        logger.info("Allocate : {}", size);
-        return byteBuffer;
-
     }
 
     private void releaseIfDirect(ByteBuffer byteBuffer) {
@@ -274,17 +273,26 @@ public class PreloadBufferPool implements Closeable {
         }
     }
 
-    public void addMemoryMappedBufferHolder(BufferHolder bufferHolder) {
+    public void allocateMMap(BufferHolder bufferHolder) {
+        reserveMemory(bufferHolder.size());
+        long u;
+        while (!usedSize.compareAndSet(u = usedSize.get(), u + bufferHolder.size())) {
+            Thread.yield();
+        }
+
+        if (usedSize.get() > maxMemorySize * EVICT_RATIO) {
+            evictThread.weakup();
+        }
         mMapBufferHolders.add(bufferHolder);
     }
 
-    public ByteBuffer allocate(int bufferSize, BufferHolder bufferHolder) {
-        ByteBuffer buffer = allocate(bufferSize);
+    public ByteBuffer allocateDirect(BufferHolder bufferHolder) {
+        ByteBuffer buffer = allocateDirect(bufferHolder.size());
         directBufferHolders.add(bufferHolder);
         return buffer;
     }
 
-    private ByteBuffer allocate(int bufferSize) {
+    private ByteBuffer allocateDirect(int bufferSize) {
         try {
             PreLoadCache preLoadCache = bufferCache.get(bufferSize);
             if (null != preLoadCache) {
@@ -309,7 +317,7 @@ public class PreloadBufferPool implements Closeable {
         }
     }
 
-    public void release(ByteBuffer byteBuffer, BufferHolder bufferHolder) {
+    public void releaseDirect(ByteBuffer byteBuffer, BufferHolder bufferHolder) {
         directBufferHolders.remove(bufferHolder);
         int size = byteBuffer.capacity();
         PreLoadCache preLoadCache = bufferCache.get(size);
@@ -320,6 +328,12 @@ public class PreloadBufferPool implements Closeable {
         } else {
             destroyOne(byteBuffer);
         }
+    }
+
+    public void releaseMMap(BufferHolder bufferHolder) {
+        mMapBufferHolders.remove(bufferHolder);
+        usedSize.getAndAdd(-1 * bufferHolder.size());
+
     }
 
     static class PreLoadCache {
