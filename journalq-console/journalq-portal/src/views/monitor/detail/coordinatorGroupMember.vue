@@ -8,12 +8,12 @@
 </template>
 
 <script>
-import MyTable from '../../components/common/myTable'
-import apiRequest from '../../utils/apiRequest.js'
-import crud from '../../mixins/crud.js'
+import MyTable from '../../../components/common/myTable'
+import apiRequest from '../../../utils/apiRequest.js'
+import crud from '../../../mixins/crud.js'
 
 export default {
-  name: 'coordinator-group',
+  name: 'coordinator-group-member',
   components: {MyTable},
   mixins: [crud],
   props: {
@@ -24,38 +24,39 @@ export default {
     colData: {
       type: Array
     },
-    app: {
-      id: 0,
-      code: ''
-    },
-    subscribeGroup: '',
-    topic: {
-      id: '',
-      code: ''
-    },
-    namespace: {
-      id: '',
-      code: ''
-    },
-    type: {
-      type: Number,
-      default: 0
-    },
-    searchData: {},
     search: {
-      type: String,
-      default: ''
+      type: Object,
+      default: function () {
+        return {
+          topic: {
+            id: '',
+            code: ''
+          },
+          namespace: {
+            id: '',
+            code: ''
+          },
+          app: {
+            id: 0,
+            code: ''
+          },
+          subscribeGroup: '',
+          type: 1,
+          clientType: -1
+        }
+      }
     },
-    clientType: {
-      type: Number,
-      default: -1
-    }
+    urls: {
+      type: Object,
+      default: function () {
+        return {
+          search: ''
+        }
+      }
+    },
   },
   data () {
     return {
-      urls: {
-        search: this.search
-      },
       tableData: {
         rowData: [],
         colData: this.colData
@@ -69,24 +70,7 @@ export default {
   methods: {
     getList () {
       this.showTablePin = true
-      let data = {
-        topic: {
-          id: this.topic.id,
-          code: this.topic.code
-        },
-        namespace: {
-          id: this.namespace.id,
-          code: this.namespace.code
-        },
-        app: {
-          id: this.app.id,
-          code: this.app.code
-        },
-        subscribeGroup: this.subscribeGroup || '',
-        type: this.type,
-        clientType: this.clientType
-      }
-      apiRequest.postBase(this.urls.search, {}, data, false).then((data) => {
+      apiRequest.postBase(this.urls.search, {}, this.search, false).then((data) => {
         let result = (data.data || [])['members']
         this.extension = (result || []).extension
         this.tableData.rowData = result

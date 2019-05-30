@@ -2,7 +2,7 @@
   <div>
     <consumer-base ref="consumerBase" :keywordTip="keywordTip" :keywordName="keywordName" :colData="colData"
                    :subscribeDialogColData="subscribeDialog.colData" :showSummaryChart="true"
-                   :search="search" :subscribeUrls="subscribeDialog.urls"/>
+                   :search="search" :subscribeUrls="subscribeDialog.urls" @on-detail="handleDetail"/>
   </div>
 </template>
 
@@ -160,6 +160,9 @@ export default {
   methods: {
     getList () {
       this.$refs.consumerBase.getList()
+    },
+    handleDetail (item) {
+      this.$emit('on-detail', item)
     }
   }
 }

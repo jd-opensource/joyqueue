@@ -13,9 +13,10 @@
     </div>
 
     <my-table :data="tableData" :showPin="showTablePin" :page="page"
-              @on-detail-chart="goDetailChart" @on-current-change="handleCurrentChange" @on-detail="openDetailDialog"
+              @on-detail-chart="goDetailChart" @on-current-change="handleCurrentChange" @on-detail="openDetailTab"
               @on-msg-preview="openMsgPreviewDialog" @on-msg-detail="openMsgDetailDialog" @on-config="openConfigDialog"
-              @on-performance-chart="goPerformanceChart" @on-summary-chart="goSummaryChart" @on-size-change="handleSizeChange"/>
+              @on-performance-chart="goPerformanceChart" @on-summary-chart="goSummaryChart"
+              @on-size-change="handleSizeChange"/>
 
     <!--Consumer subscribe dialog-->
     <my-dialog :dialog="subscribeDialog" @on-dialog-cancel="dialogCancel('subscribeDialog')">
@@ -23,53 +24,6 @@
                  :searchUrl="subscribeDialog.urls.search" :addUrl="subscribeDialog.urls.add"
                  :keywordName="keywordName"
                  :doSearch="subscribeDialog.doSearch" @on-refresh="getList"/>
-    </my-dialog>
-
-    <!--Detail dialog-->
-    <my-dialog :dialog="detailDialog" @on-dialog-cancel="dialogCancel('detailDialog')">
-      <d-tabs @on-change="handleTabChange">
-        <d-tab-pane label="分组" name="partition" icon="pocket">
-          <partition ref="partition" :app="detailDialog.app" :topic="detailDialog.topic"
-                     :colData="detailDialog.partition.colData" :namespace="detailDialog.namespace"
-                     :type="type" :doSearch="detailDialog.doSearch" :subscribeGroup="detailDialog.subscribeGroup"/>
-        </d-tab-pane>
-        <d-tab-pane label="客户端连接" name="clientConnection" icon="github">
-          <client-connection ref="clientConnection" :app="detailDialog.app" :topic="detailDialog.topic" :namespace="detailDialog.namespace"
-                             :type="type" :doSearch="detailDialog.doSearch" :subscribeGroup="detailDialog.subscribeGroup"/>
-        </d-tab-pane>
-        <d-tab-pane v-if="detailDialog.clientType==2" label="mqtt客户端" name="mqttClient" icon="file-text">
-          <mqtt-base-monitor  ref="mqttClient" :client-id="detailDialog.subscribeGroup"  :inputable=false :btns="mqttConnectionsProperties.btns"
-                      :col-data="mqttConnectionsProperties.colData"   :search="mqttConnectionsProperties.search"/>
-        </d-tab-pane>
-
-        <d-tab-pane  label="消费位置" name="offsetInfo" icon="file-text">
-          <offset  ref="offsetInfo" :app="detailDialog.app" :topic="detailDialog.topic" :namespace="detailDialog.namespace"
-                      :type="type"  :doSearch="detailDialog.doSearch" :subscribeGroup="detailDialog.subscribeGroup"
-                      :searchData="detailDialog" :client-type="detailDialog.clientType"/>
-        </d-tab-pane>
-
-        <d-tab-pane label="Broker" name="broker" icon="file-text">
-          <broker ref="broker" :app="detailDialog.app" :topic="detailDialog.topic" :namespace="detailDialog.namespace"
-                  :type="type" :doSearch="detailDialog.doSearch" :subscribeGroup="detailDialog.subscribeGroup"/>
-        </d-tab-pane>
-
-        <d-tab-pane v-if="$store.getters.isAdmin" label="协调者信息" name="coordinatorInfo" icon="file-text">
-          <tab-table  ref="coordinatorInfo" :app="detailDialog.app" :topic="detailDialog.topic" :namespace="detailDialog.namespace"
-                      :type="type"  :doSearch="detailDialog.doSearch" :client-type="detailDialog.clientType"  :subscribeGroup="detailDialog.subscribeGroup" :searchData="detailDialog"
-                      :col-data="coordinatorTable.colData"   :search="coordinatorTable.search"/>
-        </d-tab-pane>
-
-        <d-tab-pane v-if="$store.getters.isAdmin" label="消费组成员" name="coordinatorGroupMember" icon="file-text">
-          <tab-coordinator-group ref="coordinatorGroupMember" :app="detailDialog.app" :topic="detailDialog.topic" :namespace="detailDialog.namespace"
-                     :type="type" :client-type="detailDialog.clientType"  :doSearch="detailDialog.doSearch" :subscribeGroup="detailDialog.subscribeGroup" :searchData="detailDialog"
-                     :col-data="coordinatorGroupMemberTable.colData" :search="coordinatorGroupMemberTable.search"/>
-        </d-tab-pane>
-        <d-tab-pane v-if="$store.getters.isAdmin" label="消费组过期成员" name="coordinatorGroupExpiredMember" icon="file-text">
-          <tab-table ref="coordinatorGroupExpiredMember" :app="detailDialog.app" :topic="detailDialog.topic" :namespace="detailDialog.namespace"
-                     :type="type" :client-type="detailDialog.clientType"  :doSearch="detailDialog.doSearch" :subscribeGroup="detailDialog.subscribeGroup" :searchData="detailDialog"
-                     :col-data="coordinatorGroupExpiredMemberTable.colData" :search="coordinatorGroupExpiredMemberTable.search"/>
-        </d-tab-pane>
-      </d-tabs>
     </my-dialog>
 
     <!--Msg preview dialog-->
@@ -95,16 +49,7 @@ import myTable from '../../components/common/myTable.vue'
 import myDialog from '../../components/common/myDialog.vue'
 import consumerConfigForm from './consumerConfigForm.vue'
 import subscribe from './subscribe.vue'
-import broker from './detail/broker.vue'
-import partition from './detail/partition.vue'
-import clientConnection from './detail/clientConnection.vue'
 import msgPreview from './msgPreview.vue'
-import tabTable from './tabTable'
-import coordinatorGroupMember from './coordinatorGroup.vue'
-import partitionExpand from './detail/partitionExpand'
-import {timeStampToString} from '../../utils/dateTimeUtils'
-import mqttBaseMonitor from '../setting/mqttBaseMonitor'
-import offset from './offset'
 import {getTopicCode, getAppCode, replaceChartUrl} from '../../utils/common.js'
 import MsgDetail from './msgDetail'
 
@@ -115,16 +60,8 @@ export default {
     myTable,
     myDialog,
     subscribe,
-    broker,
-    partition,
-    clientConnection,
     msgPreview,
-    consumerConfigForm,
-    tabTable,
-    partitionExpand,
-    mqttBaseMonitor,
-    offset,
-    coordinatorGroupMember
+    consumerConfigForm
   },
   props: {
     keywordTip: {
@@ -188,66 +125,6 @@ export default {
     subscribeUrls: {
       type: Object
     },
-    partitionColData: { // 分片列表表头
-      type: Array,
-      default: function () {
-        return [
-          {
-            type: 'expand',
-            width: 50,
-            render: (h, params) => {
-              // console.log(h);
-              return h(partitionExpand, {
-                props: {
-                  row: params.row,
-                  colData: [
-                    {
-                      title: 'ID',
-                      key: 'partitionGroup'
-                    },
-                    {
-                      title: '分区',
-                      key: 'partition'
-                    },
-                    {
-                      title: '积压数',
-                      key: 'pending.count'
-                    },
-                    {
-                      title: '出队数',
-                      key: 'deQuence.count'
-                    }
-                  ],
-                  subscribe: params.row.subscribe,
-                  partitionGroup: params.row.groupNo
-                }
-              })
-            }
-          },
-          {
-            title: 'ID',
-            key: 'groupNo'
-          },
-          {
-            title: '主分片',
-            key: 'ip'
-          },
-          {
-            title: '分区',
-            key: 'partitions'
-          },
-          {
-            title: '积压数',
-            key: 'pending.count'
-          },
-          {
-            title: '出队数',
-            key: 'deQuence.count'
-          }
-
-        ]
-      }
-    },
     monitorUrls: {// url variable format: [app], [topic], [namespace]
       type: Object
     }
@@ -285,31 +162,6 @@ export default {
           add: this.subscribeUrls.add,
           search: this.subscribeUrls.search
         }
-      },
-      detailDialog: {
-        visible: false,
-        title: '消费详情',
-        width: '1000',
-        showFooter: false,
-        scrollable: true,
-        doSearch: true,
-        app: {
-          id: 0,
-          code: ''
-        },
-        subscribeGroup: '',
-        topic: {
-          id: '',
-          code: ''
-        },
-        namespace: {
-          id: '',
-          code: ''
-        },
-        partition: {
-          colData: this.partitionColData
-        },
-        clientType: -1
       },
       configConsumerData: {},
       configDialog: {
@@ -361,148 +213,6 @@ export default {
           id: '',
           code: ''
         }
-      },
-      mqttConnectionsProperties: {
-        colData: [
-          {
-            title: '客户端ID',
-            key: 'clientId',
-            width: 800
-          },
-          {
-            title: '应用',
-            key: 'application',
-            width: 300
-          },
-          {
-            title: 'IP',
-            key: 'ipAddress',
-            width: 1200
-          },
-          {
-            title: '非持久化会话',
-            key: 'cleanSession'
-            // },{
-            //   title:'保留消息',
-            //   key:'isWillRetain'
-          },
-          {
-            type: 'expand',
-            title: '分组名称',
-            // key:'clientGroupName',
-            render: (h, params) => {
-              return h('span', params.row.clientGroupName)
-            }
-          },
-          {
-            //   title:'服务等级',
-            //   key:'willQos'
-            // },{
-            title: '版本',
-            key: 'mqttVersion'
-          },
-          {
-            title: '遗嘱标识',
-            key: 'willFlag'
-          },
-          {
-            title: '存活时间(s)',
-            key: 'keepAliveTimeSeconds'
-          },
-          {
-            title: '创建时间',
-            key: 'createdTime',
-            width: 400,
-            formatter (item) {
-              return timeStampToString(item.createdTime)
-            }
-          },
-          {
-            title: '操作时间',
-            key: 'lastOperateTime',
-            width: 400,
-            formatter (item) {
-              return timeStampToString(item.lastOperateTime)
-            }
-          }
-        ],
-        btns: [
-          {
-            txt: '断开',
-            method: 'on-close-connection'
-          }
-        ],
-        search: '/monitor/mqtt/proxy/connection/client',
-        close: '/monitor/mqtt/proxy/closeConnection',
-        executorId: -1,
-        inputable: false
-      },
-      coordinatorTable: {
-        colData: [
-          {
-            title: 'broker',
-            key: 'broker',
-            formatter (row) {
-              return row.broker.ip + ':' + row.broker.port
-            }
-          },
-          {
-            title: '协调者',
-            key: 'coordinator'
-          }
-        ],
-        search: '/monitor/coordinator'
-      },
-      coordinatorGroupMemberTable: {
-        colData: [
-          {
-            title: 'id',
-            key: 'connectionHost'
-          },
-          {
-            title: '最新心跳时间',
-            key: 'latestHeartbeat',
-            formatter (item) {
-              return timeStampToString(item.latestHeartbeat)
-            }
-          },
-          {
-            title: '会话超时',
-            key: 'sessionTimeout'
-          },
-          {
-            title: '分区分配',
-            key: 'assignmentList'
-          }
-        ],
-        search: '/monitor/coordinator/group/member'
-      },
-      coordinatorGroupExpiredMemberTable: {
-        colData: [
-          {
-            title: 'id',
-            key: 'hosts'
-          },
-          {
-            title: '最新心跳时间',
-            key: 'latestHeartbeat',
-            formatter (item) {
-              return timeStampToString(item.latestHeartbeat)
-            }
-          },
-          {
-            title: '过期时间',
-            key: 'expireTime',
-            formatter (item) {
-              return timeStampToString(item.expireTime)
-            }
-          },
-          {
-            title: '过期次数',
-            key: 'expireTimes'
-          }
-        ],
-        search: '/monitor/coordinator/group/expired/member'
       }
 
     }
@@ -512,17 +222,8 @@ export default {
       this[dialog].doSearch = true
       this[dialog].visible = true
     },
-    openDetailDialog (item) {
-      this.detailDialog.app.id = item.app.id
-      this.detailDialog.app.code = item.app.code
-      this.detailDialog.subscribeGroup = item.subscribeGroup
-      this.detailDialog.topic.id = item.topic.id
-      this.detailDialog.topic.code = item.topic.code
-      this.detailDialog.namespace.id = item.namespace.id
-      this.detailDialog.namespace.code = item.namespace.code
-      this.detailDialog.clientType = item.clientType
-
-      this.openDialog('detailDialog')
+    openDetailTab (item) {
+      this.$emit('on-detail', item)
     },
     openMsgPreviewDialog (item) {
       this.msgPreviewDialog.app.id = item.app.id

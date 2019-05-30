@@ -7,12 +7,12 @@
 </template>
 
 <script>
-import MyTable from '../../components/common/myTable'
-import apiRequest from '../../utils/apiRequest.js'
-import crud from '../../mixins/crud.js'
+import MyTable from '../../../components/common/myTable'
+import apiRequest from '../../../utils/apiRequest.js'
+import crud from '../../../mixins/crud.js'
 
 export default {
-  name: 'tab-table',
+  name: 'detail-table',
   components: {MyTable},
   mixins: [crud],
   props: {
@@ -20,30 +20,38 @@ export default {
       type: Boolean,
       default: false
     },
+    search: {
+      type: Object,
+      default: function () {
+        return {
+          topic: {
+            id: '',
+            code: ''
+          },
+          namespace: {
+            id: '',
+            code: ''
+          },
+          app: {
+            id: 0,
+            code: ''
+          },
+          subscribeGroup: '',
+          type: 1,
+          clientType: -1
+        }
+      }
+    },
     colData: {
       type: Array
     },
-    app: {
-      id: 0,
-      code: ''
-    },
-    subscribeGroup: '',
-    topic: {
-      id: '',
-      code: ''
-    },
-    namespace: {
-      id: '',
-      code: ''
-    },
-    type: {
-      type: Number,
-      default: 0
-    },
-    searchData: {},
-    search: {
-      type: String,
-      default: ''
+    urls: {
+      type: Object,
+      default: function () {
+        return {
+          search: ''
+        }
+      }
     },
     clientType: {
       type: Number,
@@ -52,9 +60,6 @@ export default {
   },
   data () {
     return {
-      urls: {
-        search: this.search
-      },
       tableData: {
         rowData: [],
         colData: this.colData
@@ -67,24 +72,7 @@ export default {
   methods: {
     getList () {
       this.showTablePin = true
-      let data = {
-        topic: {
-          id: this.topic.id,
-          code: this.topic.code
-        },
-        namespace: {
-          id: this.namespace.id,
-          code: this.namespace.code
-        },
-        app: {
-          id: this.app.id,
-          code: this.app.code
-        },
-        subscribeGroup: this.subscribeGroup || '',
-        type: this.type,
-        clientType: this.clientType
-      }
-      apiRequest.postBase(this.urls.search, {}, data, false).then((data) => {
+      apiRequest.postBase(this.urls.search, {}, this.search, false).then((data) => {
         data.data = data.data || []
         this.tableData.rowData = data.data
         // this.onListResult(data);

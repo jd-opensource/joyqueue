@@ -43,7 +43,6 @@ export default {
     getList () {
       this.showTablePin = true
       apiRequest.postBase(this.urls.search, {}, this.searchData, false).then((data) => {
-        console.log(66)
         data.data = data.data || []
         this.tableData.rowData = data.data
         this.showTablePin = false
@@ -52,7 +51,6 @@ export default {
   },
   watch: {
     row () {
-      console.log(77)
       this.getList()
     }
   },

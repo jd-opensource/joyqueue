@@ -26,15 +26,12 @@ export default {
         return {
           subscribeGroup: '',
           topic: {
-            id: '',
             code: ''
           },
           namespace: {
-            id: '',
             code: ''
           },
           app: {
-            id: '',
             code: ''
           },
           type: 0

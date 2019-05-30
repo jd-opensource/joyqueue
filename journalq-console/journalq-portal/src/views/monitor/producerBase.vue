@@ -183,7 +183,7 @@ export default {
       this[dialog].visible = true
     },
     openDetailTab (item) {
-      this.$emit("on-detail", item)
+      this.$emit('on-detail', item)
     },
     openConfigDialog (item) {
       this.configData = item.config || {}

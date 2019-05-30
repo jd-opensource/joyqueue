@@ -22,13 +22,16 @@
       </grid-row>
     </div>
       <!--tabs由于没有单独的路由名称，所以在调用table时，需要在data中自定义urls-->
+    <d-tabs @on-change="handleTabChange" :value="tab" @on-tab-remove="removeTab">
       <slot name="tabs"></slot>
+    </d-tabs>
   </div>
 </template>
 
 <script>
 import apiRequest from '../../../utils/apiRequest.js'
 import crud from '../../../mixins/crud.js'
+// import {generateProducerDetailTabName, generateConsumerDetailTabName} from '../../../utils/common.js'
 
 export default {
   name: 'applicationDetailSlot',
@@ -50,8 +53,6 @@ export default {
         system: '',
         owner: {},
         sign: ''
-      },
-      visible: {
       }
     }
   },
@@ -75,17 +76,42 @@ export default {
     handleTabChange (data) {
       let name = data.name
       if (name === 'producerDetail') {
+        let topicCode = this.$route.query.topic || ''
+        let namespaceCode = this.$route.query.namespace || ''
         this.$router.push({
           name: `/${this.$i18n.locale}/application/detail`,
           query: {
             id: this.app.id,
             code: this.app.code,
             app: this.app.code,
-            topic: this.$route.query.topic || '',
-            namespace: this.$route.query.namespace || '',
-            subscribeGroup: this.$route.query.subscribeGroup || '',
-            subTab: this.$route.query.subTab || 'partitioin',
-            tab: name
+            topic: topicCode,
+            namespace: namespaceCode,
+            // subscribeGroup: this.$route.query.subscribeGroup || '',
+            clientType: this.$route.query.clientType,
+            subTab: this.$route.query.subTab || 'partition',
+            tab: name,
+            producerDetailVisible: '1',
+            consumerDetailVisible: this.$route.query.consumerDetailVisible || '0'
+          }
+        })
+      } else if (name === 'consumerDetail') {
+        let topicCode = this.$route.query.topic || ''
+        let namespaceCode = this.$route.query.namespace || ''
+        let subscribeGroup = this.$route.query.subscribeGroup || ''
+        this.$router.push({
+          name: `/${this.$i18n.locale}/application/detail`,
+          query: {
+            id: this.app.id,
+            code: this.app.code,
+            app: this.app.code,
+            topic: topicCode,
+            namespace: namespaceCode,
+            subscribeGroup: subscribeGroup,
+            clientType: this.$route.query.clientType,
+            subTab: this.$route.query.subTab || 'partition',
+            tab: name,
+            producerDetailVisible: this.$route.query.producerDetailVisible || '0',
+            consumerDetailVisible: '1'
           }
         })
       } else {
@@ -94,11 +120,27 @@ export default {
           query: {
             id: this.app.id,
             code: this.app.code,
-            tab: name
+            tab: name,
+            producerDetailVisible: '0',
+            consumerDetailVisible: '0'
           }
         })
       }
       this.$refs[name].getList()
+    },
+    removeTab (data) {
+      if (data.name === 'producerDetail' || data.name === 'consumerDetail') {
+        this.$router.push({
+          name: `/${this.$i18n.locale}/application/detail`,
+          query: {
+            id: this.app.id,
+            code: this.app.code,
+            tab: 'producer',
+            producerDetailVisible: '0',
+            consumerDetailVisible: '0'
+          }
+        })
+      }
     }
   },
   mounted () {
