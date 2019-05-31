@@ -166,6 +166,7 @@ public class AsyncHttpClient {
             if(result==null&&!isDone()){
                 latch.await(timeout,unit);
             }
+            if(result==null) throw new ExecutionException(throwable);
             return result;
         }
     }

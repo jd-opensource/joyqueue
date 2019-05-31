@@ -27,7 +27,7 @@ import random
 from model.task import Task
 from model.workspace import Workspace
 
-logging.basicConfig()
+
 FAILED_TO_LOCK_LOCAL_WORKSPACE = 501
 FAILED_TO_PREPARE_PRESSURE = 502
 FAILED_TO_PREPARE_MQ_DOCKER = 503
@@ -488,7 +488,7 @@ class Workflow:
     def __run_remote_script(self, remote, script):
         passwd = self.__parse_password(self.ssh_passwd_file)
         ssh_pass = """ sshpass -p {}""".format(passwd).rstrip()
-        ssh = 'ssh {}@{} -p {}'.format(self.ssh_user, remote,self.ssh_port)
+        ssh = 'ssh {}@{} -p {}'.format(self.ssh_user, remote, self.ssh_port)
         # if password exist
         if passwd is not None:
             ssh = ssh_pass+ssh

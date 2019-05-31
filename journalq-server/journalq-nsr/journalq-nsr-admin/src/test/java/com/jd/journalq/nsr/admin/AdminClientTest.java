@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class AdminClientTest {
 
-    private static final String host="http://127.0.0.1:50091";
+    private static final String host="196.0.0.1:50091,127.0.0.1:50091";
     private static final String topic="test_topic_0";
     private static final String app="test_app_0";
     static AdminClient client;
@@ -38,8 +38,8 @@ public class AdminClientTest {
         BrokerAdmin.ListArg listArg=new BrokerAdmin.ListArg();
         TopicAdmin.TopicArg topicArg=new TopicAdmin.TopicArg();
         topicArg.code=topic;
-        List<Broker> brokers=client.listBroker(listArg);
-        Assert.assertNotEquals(null,brokers);
+        List<Broker> brokers = client.listBroker(listArg);
+        Assert.assertNotEquals(null, brokers);
         topicArg.brokers=brokers.stream().map(broker -> broker.getId()).collect(Collectors.toList());
         client.createTopic(topicArg);
     }
@@ -80,6 +80,7 @@ public class AdminClientTest {
         result=client.unSubscribe(pubSubArg);
         Assert.assertEquals("success",result);
     }
+
 
 
     @AfterClass

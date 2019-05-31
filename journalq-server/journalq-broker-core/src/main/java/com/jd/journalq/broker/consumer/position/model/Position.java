@@ -21,7 +21,7 @@ package com.jd.journalq.broker.consumer.position.model;
 public class Position implements Cloneable {
     // 开始应答序号
     private volatile long ackStartIndex;
-    // 结束应答序号
+    // 结束应答序号,下一次应答的 index or 即将被消费的消息索引 index
     private volatile long ackCurIndex;
     // 开始拉取序号
     private volatile long pullStartIndex;

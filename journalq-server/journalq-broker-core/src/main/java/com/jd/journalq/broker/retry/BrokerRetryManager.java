@@ -26,15 +26,16 @@ import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.network.transport.TransportClient;
 import com.jd.journalq.network.transport.config.ClientConfig;
 import com.jd.journalq.nsr.NameService;
+import com.jd.journalq.server.retry.NullMessageRetry;
 import com.jd.journalq.server.retry.api.MessageRetry;
 import com.jd.journalq.server.retry.api.RetryPolicyProvider;
 import com.jd.journalq.server.retry.model.RetryMessageModel;
-import com.jd.journalq.server.retry.remote.RemoteMessageRetry;
+
 import com.jd.journalq.server.retry.remote.RemoteRetryProvider;
 import com.jd.journalq.toolkit.concurrent.EventListener;
 import com.jd.journalq.toolkit.retry.RetryPolicy;
 import com.jd.journalq.toolkit.service.Service;
-import com.jd.laf.extension.ExtensionManager;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +44,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static com.jd.journalq.domain.Broker.DEFAULT_RETRY_TYPE;
+
 
 /**
  * 服务端重试消息管理
@@ -165,13 +166,13 @@ public class BrokerRetryManager extends Service implements MessageRetry<Long>, B
     }
 
     private MessageRetry loadRetryManager(String type) throws Exception {
-        MessageRetry messageRetry;
+        MessageRetry messageRetry = new NullMessageRetry();
 
-        if (type.equals(DEFAULT_RETRY_TYPE)) {
-            messageRetry = new RemoteMessageRetry(remoteRetryProvider);
-        } else {
-            messageRetry = ExtensionManager.getOrLoadExtension(MessageRetry.class, type);
-        }
+//        if (type.equals(DEFAULT_RETRY_TYPE)) {
+//            messageRetry = new RemoteMessageRetry(remoteRetryProvider);
+//        } else {
+//            messageRetry = ExtensionManager.getOrLoadExtension(MessageRetry.class, type);
+//        }
 
         if (messageRetry == null) {
             throw new RuntimeException("No such implementation found." + type);

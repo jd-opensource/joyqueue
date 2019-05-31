@@ -15,69 +15,164 @@ package com.jd.journalq.nsr.admin;
 
 import com.jd.journalq.domain.Broker;
 import com.jd.journalq.nsr.NsrAdmin;
+import com.jd.journalq.nsr.utils.HostProvider;
+import com.jd.journalq.nsr.utils.RoundRobinHostProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.util.List;
 
 public class AdminClient implements NsrAdmin {
+    private Logger logger=LoggerFactory.getLogger(AdminClient.class);
+    private final long DELAY_MS=100;
     private AppAdmin appAdmin=new AppAdmin();
     private TopicAdmin topicAdmin=new TopicAdmin();
     private BrokerAdmin brokerAdmin=new BrokerAdmin();
     private String host;
-    public AdminClient(String host){
-        this.host=host;
+    private HostProvider hostProvider;
+    public AdminClient(String connectionStr){
+          this.hostProvider=new RoundRobinHostProvider(connectionStr);
+          this.host=hostProvider.next(DELAY_MS);
     }
     @Override
     public String publish(TopicAdmin.PubSubArg pubSubArg) throws Exception{
         pubSubArg.host=host;
-        return topicAdmin.publish(pubSubArg,null);
+        try {
+            String result= topicAdmin.publish(pubSubArg, null);
+            hostProvider.onConnected();
+            return result;
+        }catch (Exception e){
+            onException();
+            logger.info("request exception",e);
+            throw  e;
+        }
+
     }
 
     @Override
     public String subscribe(TopicAdmin.PubSubArg pubSubArg) throws Exception{
         pubSubArg.host=host;
-        return topicAdmin.subscribe(pubSubArg,null);
+
+        try {
+            String result=  topicAdmin.subscribe(pubSubArg,null);
+            hostProvider.onConnected();
+            return result;
+        }catch (Exception e){
+            onException();
+            logger.info("request exception",e);
+            throw  e;
+        }
+
     }
 
     @Override
     public String unPublish(TopicAdmin.PubSubArg pubSubArg) throws Exception {
         pubSubArg.host=host;
-        return topicAdmin.unPublish(pubSubArg,null);
+
+        try {
+            String result= topicAdmin.unPublish(pubSubArg,null);
+            hostProvider.onConnected();
+            return result;
+        }catch (Exception e){
+            onException();
+            logger.info("request exception",e);
+            throw  e;
+        }
+
     }
 
     @Override
     public String unSubscribe(TopicAdmin.PubSubArg pubSubArg) throws Exception {
         pubSubArg.host=host;
-        return topicAdmin.unSubscribe(pubSubArg,null);
+        try {
+            String result= topicAdmin.unSubscribe(pubSubArg,null);
+            hostProvider.onConnected();
+            return result;
+        }catch (Exception e){
+            onException();
+            logger.info("request exception",e);
+            throw e;
+        }
     }
 
     @Override
     public String delTopic(TopicAdmin.TopicArg topicArg) throws Exception {
         topicArg.host=host;
-        return topicAdmin.delete(topicArg,null);
+        try {
+            String result= topicAdmin.delete(topicArg,null);
+            hostProvider.onConnected();
+            return result;
+        }catch (Exception e){
+            onException();
+            logger.info("request exception",e);
+            throw e;
+        }
     }
 
     @Override
     public String createTopic(TopicAdmin.TopicArg topicArg) throws Exception{
         topicArg.host=host;
-        return topicAdmin.add(topicArg,null);
+        try {
+            String result= topicAdmin.add(topicArg,null);
+            hostProvider.onConnected();
+            return result;
+        }catch (Exception e){
+            onException();
+            logger.info("request exception",e);
+            throw  e;
+        }
     }
 
     @Override
     public String token(AppAdmin.TokenArg tokenArg) throws Exception{
         tokenArg.host=host;
-        return appAdmin.token(tokenArg,null);
+
+        try {
+            String result= appAdmin.token(tokenArg,null);
+            hostProvider.onConnected();
+            return result;
+        }catch (Exception e){
+            onException();
+            logger.info("request exception",e);
+            throw  e;
+        }
     }
 
     @Override
     public List<Broker> listBroker(BrokerAdmin.ListArg listArg) throws Exception {
         listArg.host=host;
-        return brokerAdmin.list(listArg,null);
+        try {
+            List<Broker> result= brokerAdmin.list(listArg,null);
+            hostProvider.onConnected();
+            return  result;
+        }catch (Exception e){
+            onException();
+            logger.info("request exception",e);
+            throw e;
+        }
     }
 
     @Override
     public String partitionGroup(TopicAdmin.PartitionGroupArg partitionGroupArg) throws Exception {
         partitionGroupArg.host=host;
-        return topicAdmin.partitionGroups(partitionGroupArg,null);
+
+        try {
+            String result= topicAdmin.partitionGroups(partitionGroupArg,null);
+            hostProvider.onConnected();
+            return result;
+        }catch (Exception e){
+            onException();
+            logger.info("request exception",e);
+            throw e;
+        }
+    }
+
+    /**
+     * Exception event
+     **/
+    public void onException(){
+        this.host=hostProvider.next(DELAY_MS);
     }
 
     @Override
@@ -85,6 +180,5 @@ public class AdminClient implements NsrAdmin {
         appAdmin.close();
         topicAdmin.close();
         topicAdmin.close();
-
     }
 }
