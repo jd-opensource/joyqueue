@@ -31,5 +31,5 @@ public interface ProducerMonitor {
      * @param size
      * @param time
      */
-    void onPutMessage(String topic, String app, int partitionGroup, short partition, long count, long size, long time);
+    void onPutMessage(String topic, String app, int partitionGroup, short partition, long count, long size, double time);
 }

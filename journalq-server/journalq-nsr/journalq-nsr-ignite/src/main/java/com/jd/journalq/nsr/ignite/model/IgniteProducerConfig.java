@@ -38,13 +38,17 @@ public class IgniteProducerConfig implements IgniteBaseModel, Binarylizable {
     public static final String COLUMN_WEIGHT = "weight";
     public static final String COLUMN_BLACK_LIST = "black_list";
     public static final String COLUMN_TIMEOUT = "timeout";
+    public static final String COLUMN_LIMIT_TPS = "limit_tps";
+    public static final String COLUMN_LIMIT_TRAFFIC = "limit_traffic";
 
     private IgniteProducer producer;
     private Producer.ProducerPolicy producerPolicy;
+    private Producer.ProducerLimitPolicy limitPolicy;
 
     public IgniteProducerConfig(IgniteProducer producer) {
         this.producer = producer;
         this.producerPolicy = producer.getProducerPolicy();
+        this.limitPolicy = producer.getLimitPolicy();
     }
     private String id;
     /**
@@ -61,6 +65,14 @@ public class IgniteProducerConfig implements IgniteBaseModel, Binarylizable {
 
     public Producer.ProducerPolicy getProducerPolicy() {
         return producerPolicy;
+    }
+
+    public Producer.ProducerLimitPolicy getLimitPolicy() {
+        return limitPolicy;
+    }
+
+    public void setLimitPolicy(Producer.ProducerLimitPolicy limitPolicy) {
+        this.limitPolicy = limitPolicy;
     }
 
     @Override
@@ -84,6 +96,10 @@ public class IgniteProducerConfig implements IgniteBaseModel, Binarylizable {
             }
         }
         writer.writeInt(COLUMN_TIMEOUT, producerPolicy.getTimeOut());
+        if (limitPolicy != null) {
+            writer.writeInt(COLUMN_LIMIT_TPS, limitPolicy.getTps());
+            writer.writeInt(COLUMN_LIMIT_TRAFFIC, limitPolicy.getTraffic());
+        }
     }
 
     @Override
@@ -95,5 +111,6 @@ public class IgniteProducerConfig implements IgniteBaseModel, Binarylizable {
                 .single(reader.readBoolean(COLUMN_SINGLE))
                 .blackList(reader.readString(COLUMN_BLACK_LIST))
                 .weight(reader.readString(COLUMN_WEIGHT)).timeout(reader.readInt(COLUMN_TIMEOUT)).create();
+        this.limitPolicy = new Producer.ProducerLimitPolicy(reader.readInt(COLUMN_LIMIT_TPS), reader.readInt(COLUMN_LIMIT_TRAFFIC));
     }
 }

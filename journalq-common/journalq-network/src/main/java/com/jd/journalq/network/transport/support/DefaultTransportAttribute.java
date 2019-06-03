@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class DefaultTransportAttribute implements TransportAttribute {
 
-    private volatile AtomicReference<ConcurrentMap<Object, Object>> attributes = new AtomicReference();
+    private AtomicReference<ConcurrentMap<Object, Object>> attributes = new AtomicReference();
 
     @Override
     public <T> T set(Object key, Object value) {

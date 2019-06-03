@@ -49,7 +49,7 @@ public class ClientManager extends Service {
     private NameServerConfig nameServerConfig;
     private TransportClient transportClient;
     private ClientGroupManager clientGroupManager;
-    private ScheduledExecutorService heartbeatThreadPool;
+    private ScheduledExecutorService heartbeatThreadScheduler;
 
     public ClientManager(TransportConfig transportConfig, NameServerConfig nameServerConfig) {
         TransportConfigChecker.check(transportConfig);
@@ -63,20 +63,20 @@ public class ClientManager extends Service {
     protected void validate() throws Exception {
         clientGroupManager = new ClientGroupManager(transportConfig);
         transportClient = new DefaultTransportClientFactory(new JournalqCodec()).create(convertToClientConfig(transportConfig));
-        heartbeatThreadPool = Executors.newScheduledThreadPool(1, new NamedThreadFactory("journalqclient-heartbeat"));
+        heartbeatThreadScheduler = Executors.newScheduledThreadPool(1, new NamedThreadFactory("journalq-client-heartbeat"));
     }
 
     @Override
     protected void doStart() throws Exception {
         clientGroupManager.start();
-        heartbeatThreadPool.scheduleWithFixedDelay(new ClientHeartbeatThread(transportConfig, clientGroupManager),
+        heartbeatThreadScheduler.scheduleWithFixedDelay(new ClientHeartbeatThread(transportConfig, clientGroupManager),
                 transportConfig.getHeartbeatInterval(), transportConfig.getHeartbeatInterval(), TimeUnit.MILLISECONDS);
     }
 
     @Override
     protected void doStop() {
-        if (heartbeatThreadPool != null) {
-            heartbeatThreadPool.shutdown();
+        if (heartbeatThreadScheduler != null) {
+            heartbeatThreadScheduler.shutdown();
         }
         if (clientGroupManager != null) {
             clientGroupManager.stop();
@@ -183,6 +183,7 @@ public class ClientManager extends Service {
         clientConfig.setMaxAsync(transportConfig.getMaxAsync());
         clientConfig.setRetryPolicy(transportConfig.getRetryPolicy());
         clientConfig.setNonBlockOneway(transportConfig.isNonBlockOneway());
+        clientConfig.setIoThreadName("journalq-client-io-eventLoop");
         return clientConfig;
     }
 }

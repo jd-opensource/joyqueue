@@ -50,10 +50,10 @@ public class Metrics {
         this.meter.mark(count);
     }
 
-    public void mark(long time, long count) {
+    public void mark(double time, long count) {
         this.counter.add(count);
         this.meter.mark(count);
-        this.histogram.update(time);
+        this.histogram.update((long) time);
     }
 
     public void setCount(long count) {

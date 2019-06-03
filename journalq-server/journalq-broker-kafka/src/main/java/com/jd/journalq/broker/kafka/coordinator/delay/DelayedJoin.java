@@ -13,13 +13,13 @@
  */
 package com.jd.journalq.broker.kafka.coordinator.delay;
 
+import com.jd.journalq.broker.kafka.KafkaErrorCode;
+import com.jd.journalq.broker.kafka.coordinator.GroupBalanceManager;
 import com.jd.journalq.broker.kafka.coordinator.KafkaCoordinatorGroupManager;
 import com.jd.journalq.broker.kafka.coordinator.domain.GroupJoinGroupResult;
 import com.jd.journalq.broker.kafka.coordinator.domain.GroupState;
 import com.jd.journalq.broker.kafka.coordinator.domain.KafkaCoordinatorGroup;
 import com.jd.journalq.broker.kafka.coordinator.domain.KafkaCoordinatorGroupMember;
-import com.jd.journalq.broker.kafka.KafkaErrorCode;
-import com.jd.journalq.broker.kafka.coordinator.GroupBalanceManager;
 import com.jd.journalq.toolkit.delay.DelayedOperation;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;

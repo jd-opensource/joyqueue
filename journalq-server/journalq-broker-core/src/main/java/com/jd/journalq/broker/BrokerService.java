@@ -13,6 +13,7 @@
  */
 package com.jd.journalq.broker;
 
+import com.google.common.base.Preconditions;
 import com.jd.journalq.broker.archive.ArchiveManager;
 import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.config.BrokerConfig;
@@ -23,6 +24,7 @@ import com.jd.journalq.broker.consumer.MessageConvertSupport;
 import com.jd.journalq.broker.coordinator.CoordinatorService;
 import com.jd.journalq.broker.coordinator.config.CoordinatorConfig;
 import com.jd.journalq.broker.election.ElectionService;
+import com.jd.journalq.broker.helper.AwareHelper;
 import com.jd.journalq.broker.manage.BrokerManageService;
 import com.jd.journalq.broker.manage.config.BrokerManageConfig;
 import com.jd.journalq.broker.monitor.BrokerMonitorService;
@@ -42,10 +44,8 @@ import com.jd.journalq.server.retry.api.MessageRetry;
 import com.jd.journalq.store.StoreService;
 import com.jd.journalq.toolkit.config.Property;
 import com.jd.journalq.toolkit.config.PropertySupplier;
-import com.jd.journalq.toolkit.config.PropertySupplierAware;
 import com.jd.journalq.toolkit.lang.Close;
 import com.jd.journalq.toolkit.lang.LifeCycle;
-import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -324,16 +324,7 @@ public class BrokerService extends Service {
     }
 
     public void enrichIfNecessary(Object obj, BrokerContext brokerContext) {
-        if (obj == null) {
-            return;
-        }
-        if (obj instanceof PropertySupplierAware) {
-            ((PropertySupplierAware) obj).setSupplier(brokerContext.getPropertySupplier());
-        }
-
-        if (obj instanceof BrokerContextAware) {
-            ((BrokerContextAware) obj).setBrokerContext(brokerContext);
-        }
+        AwareHelper.enrichIfNecessary(obj, brokerContext);
     }
 
     private void startIfNecessary(Object object) throws Exception {

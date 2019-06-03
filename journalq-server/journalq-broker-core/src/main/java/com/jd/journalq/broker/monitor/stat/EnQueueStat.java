@@ -31,7 +31,7 @@ public class EnQueueStat {
         this.size = new Metrics();
     }
 
-    public void mark(long time, long size, long count) {
+    public void mark(double time, long size, long count) {
         this.count.mark(time, count);
         this.size.mark(size);
     }
