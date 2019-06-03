@@ -90,7 +90,7 @@ public class MessagingAccessPointImpl implements MessagingAccessPoint {
     public synchronized Producer createProducer(TransactionStateCheckListener transactionStateCheckListener) {
         MessageAccessPointHolder messageAccessPointHolder = getOrCreateMessageAccessPointHolder();
         MessageAccessPoint messageAccessPoint = messageAccessPointHolder.getMessageAccessPoint();
-        MessageProducer messageProducer = messageAccessPointHolder.getMessageAccessPoint().createProducer(producerConfig);
+        MessageProducer messageProducer = messageAccessPoint.createProducer(producerConfig);
         ProducerImpl producer = new ProducerImpl(messageProducer, messageFactory);
         TransactionProducerImpl transactionProducer = new TransactionProducerImpl(producer, transactionStateCheckListener, messageProducer, messageAccessPoint, txFeedbackConfig);
         return new ProducerWrapper(transactionProducer, messageAccessPointHolder);

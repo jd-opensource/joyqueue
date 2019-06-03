@@ -2,10 +2,10 @@
   <detail-slot ref="detail">
     <template slot="tabs">
       <d-tab-pane label="生产者" name="producer" icon="user-plus">
-        <producer ref="producer" :search="search"/>
+        <producer ref="producer" :search="search" @on-detail="openProducerDetailTab"/>
       </d-tab-pane>
       <d-tab-pane label="消费者" name="consumer" icon="user-minus">
-        <consumer ref="consumer" :search="search"/>
+        <consumer ref="consumer" :search="search" @on-detail="openConsumerDetailTab"/>
       </d-tab-pane>
       <d-tab-pane label="分组信息" name="partitionGroup" icon="folder" v-if="$store.getters.isAdmin">
         <partitionGroup ref="partitionGroup" @on-partition-group-change="queryTopicDetail"
@@ -14,11 +14,17 @@
       <d-tab-pane label="Broker" v-if="$store.getters.isAdmin" name="broker" icon="cpu">
         <broker ref="broker" :topicId="this.$route.query.id"/>
       </d-tab-pane>
-      <d-tab-pane label="重试" name="retry" icon="user-minus">
+      <d-tab-pane label="重试" name="retry" icon="zap">
         <retry ref="retry" :search="retrySearch"/>
       </d-tab-pane>
-      <d-tab-pane label="归档" name="archive" icon="user-minus">
+      <d-tab-pane label="归档" name="archive" icon="package">
         <archive ref="archive" :search="archiveSearch"/>
+      </d-tab-pane>
+      <d-tab-pane :label="producerDetailName" name="producerDetail" closable icon="paperclip" :visible="producerDetailVisible">
+        <producer-detail ref="producerDetail" :detailType="$store.getters.topicDetailType"/>
+      </d-tab-pane>
+      <d-tab-pane :label="consumerDetailName" name="consumerDetail" closable icon="paperclip" :visible="consumerDetailVisible">
+        <consumer-detail ref="consumerDetail" :detailType="$store.getters.topicDetailType"/>
       </d-tab-pane>
     </template>
   </detail-slot>
@@ -32,6 +38,9 @@ import PartitionGroup from './partitionGroup.vue'
 import retry from '../tool/retry.vue'
 import broker from './broker.vue'
 import archive from '../tool/archive.vue'
+import ProducerDetail from '../monitor/detail/producerDetail.vue'
+import ConsumerDetail from '../monitor/detail/consumerDetail.vue'
+import {generateProducerDetailTabName, generateConsumerDetailTabName} from '../../utils/common.js'
 
 export default {
   name: 'applicationDetail',
@@ -42,7 +51,9 @@ export default {
     PartitionGroup,
     retry,
     broker,
-    archive
+    archive,
+    ProducerDetail,
+    ConsumerDetail
   },
   computed: {
     search () {
@@ -76,9 +87,77 @@ export default {
         messageId: '',
         count: 10
       }
+    },
+    producerDetailName () {
+      if (!this.$route.query.app || !this.$route.query.topic) {
+        return '生产详情'
+      }
+      return generateProducerDetailTabName(this.$route.query.app, this.$route.query.topic, this.$route.query.namespace || '')
+    },
+    consumerDetailName () {
+      if (!this.$route.query.app || !this.$route.query.topic) {
+        return '消费详情'
+      }
+      return generateConsumerDetailTabName(this.$route.query.app, this.$route.query.subscribeGroup || '',
+        this.$route.query.topic, this.$route.query.namespace || '')
+    },
+    producerDetailVisible () {
+      if (this.$route.query.producerDetailVisible && this.$route.query.producerDetailVisible === '1') {
+        return true
+      } else {
+        return false
+      }
+    },
+    consumerDetailVisible () {
+      if (this.$route.query.consumerDetailVisible && this.$route.query.consumerDetailVisible === '1') {
+        return true
+      } else {
+        return false
+      }
     }
   },
   methods: {
+    openProducerDetailTab (item) {
+      // Jump to producer detail router
+      this.$router.push({
+        name: `/${this.$i18n.locale}/topic/detail`,
+        query: {
+          id: this.$route.query.id,
+          code: this.$route.query.code,
+          app: item.app.code,
+          topic: item.topic.code,
+          namespace: item.namespace.code,
+          namespaceId: item.namespace.id,
+          namespaceCode: item.namespace.code,
+          clientType: item.clientType,
+          subTab: 'partition',
+          tab: 'producerDetail',
+          producerDetailVisible: '1',
+          consumerDetailVisible: this.consumerDetailVisible ? '1' : '0'
+        }
+      })
+    },
+    openConsumerDetailTab (item) {
+      // Jump to consumer detail router
+      this.$router.push({
+        name: `/${this.$i18n.locale}/topic/detail`,
+        query: {
+          id: this.$route.query.id,
+          code: this.$route.query.code,
+          app: item.app.code,
+          topic: item.topic.code,
+          namespace: item.namespace.code,
+          namespaceId: item.namespace.id,
+          namespaceCode: item.namespace.code,
+          subscribeGroup: item.subscribeGroup,
+          clientType: item.clientType,
+          subTab: 'partition',
+          tab: 'consumerDetail',
+          producerDetailVisible: this.producerDetailVisible ? '1' : '0',
+          consumerDetailVisible: '1'
+        }
+      })
+    },
     queryTopicDetail () {
       this.$refs.detail.getDetail(this.$route.query.id)
     }
@@ -96,6 +175,8 @@ export default {
     this.$refs.detail.$refs['broker'] = this.$refs.broker
     this.$refs.detail.$refs['retry'] = this.$refs.retry
     this.$refs.detail.$refs['archive'] = this.$refs.archive
+    this.$refs.detail.$refs['producerDetail'] = this.$refs.producerDetail
+    this.$refs.detail.$refs['consumerDetail'] = this.$refs.consumerDetail
   }
 }
 </script>

@@ -245,7 +245,7 @@ export default {
       groupNewDialog: {
         visible: false,
         title: '详情',
-        width: 800,
+        width: 900,
         showFooter: false
       },
       groupNewDialogData: {
@@ -294,10 +294,12 @@ export default {
       })
     },
     getBroker (rowData, i) {
-      apiRequest.get(this.urlOrigin.getBroker + '/' + rowData[i].leader).then((data) => {
-        this.tableData.rowData[i].ip = data.data.ip
-        this.$set(this.tableData.rowData, i, this.tableData.rowData[i])
-      })
+      if (rowData[i].leader && rowData[i].leader!=-1) {
+        apiRequest.get(this.urlOrigin.getBroker + '/' + rowData[i].leader).then((data) => {
+          this.tableData.rowData[i].ip = data.data.ip
+          this.$set(this.tableData.rowData, i, this.tableData.rowData[i])
+        })
+      }
     },
     goBrokerChart () {
       apiRequest.get(this.urls.getUrl + '/broker', {}, {}).then((data) => {
