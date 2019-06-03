@@ -15,10 +15,12 @@ package com.jd.journalq.broker.consumer.position;
 
 import com.jd.journalq.broker.consumer.model.ConsumePartition;
 import com.jd.journalq.broker.consumer.position.model.Position;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentMap;
 
@@ -31,14 +33,31 @@ public class LocalFileStoreTest {
 
     // 本地文件存储
     private LocalFileStore localFileStore = new LocalFileStore();
-    private String basePath = "temp/position_store";
+    private File base;
     private ConsumePartition consumePartition = new ConsumePartition("topic", "app", (short) 1);
     private Position position = new Position(0, 0, 0, 0);
 
     @Before
     public void setup() throws Exception {
-        localFileStore.setBasePath(basePath);
+        final String basePath = "LocalFileTest";
+        String property = "java.io.tmpdir";
+        String tempDir = System.getProperty(property);
+        File tempDirFile = new File(tempDir);
+        Assert.assertTrue(tempDirFile.exists() && tempDirFile.isDirectory() && tempDirFile.canWrite());
+
+        base = new File(basePath);
+        deleteBaseFolder();
+        base.mkdirs();
+        localFileStore.setBasePath(base.getAbsolutePath());
         localFileStore.start();
+    }
+
+    @After
+    public void deleteBaseFolder() throws IOException {
+        if (base.exists()) {
+            if (base.isDirectory()) deleteFolder(base);
+            else base.delete();
+        }
     }
 
 
@@ -91,9 +110,25 @@ public class LocalFileStoreTest {
 
     @Test
     public void recover() throws IOException {
+        put();
+        localFileStore.forceFlush();
         ConcurrentMap<ConsumePartition, Position> recover = localFileStore.recover();
         Position positionVal = recover.get(consumePartition);
         Assert.assertEquals(position.toString(), positionVal.toString());
+    }
+
+    private static void deleteFolder(File folder) {
+        File[] files = folder.listFiles();
+        if (files != null) { //some JVMs return null for empty dirs
+            for (File f : files) {
+                if (f.isDirectory()) {
+                    deleteFolder(f);
+                } else {
+                    f.delete();
+                }
+            }
+        }
+        folder.delete();
     }
 
 }
