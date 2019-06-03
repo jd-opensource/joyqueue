@@ -15,7 +15,7 @@
     <my-table :data="tableData" :showPin="showTablePin" :page="page"
               @on-detail-chart="goDetailChart" @on-current-change="handleCurrentChange" @on-detail="openDetailTab"
               @on-msg-preview="openMsgPreviewDialog" @on-msg-detail="openMsgDetailDialog" @on-config="openConfigDialog"
-              @on-performance-chart="goPerformanceChart" @on-summary-chart="goSummaryChart"
+              @on-performance-chart="goPerformanceChart" @on-summary-chart="goSummaryChart"  @on-rateLimit="openRateLimitDialog"
               @on-size-change="handleSizeChange"/>
 
     <!--Consumer subscribe dialog-->
@@ -40,6 +40,10 @@
       <consumer-config-form ref="configForm" :data="configConsumerData"/>
     </my-dialog>
 
+    <my-dialog :dialog="rateLimitDialog" @on-dialog-confirm="rateLimitConfirm" @on-dialog-cancel="dialogCancel('rateLimitDialog')">
+      <rate-limit ref="rateLimit" :limitTraffic="rateLimitDialog.limitTraffic" :limitTps="rateLimitDialog.limitTps"/>
+    </my-dialog>
+
   </div>
 </template>
 
@@ -52,10 +56,12 @@ import subscribe from './subscribe.vue'
 import msgPreview from './msgPreview.vue'
 import {getTopicCode, getAppCode, replaceChartUrl} from '../../utils/common.js'
 import MsgDetail from './msgDetail'
+import RateLimit from "./rateLimit"
 
 export default {
   name: 'consumer-base',
   components: {
+    RateLimit,
     MsgDetail,
     myTable,
     myDialog,
@@ -109,6 +115,11 @@ export default {
           {
             txt: '消息查询',
             method: 'on-msg-detail'
+          },
+          {
+            txt: '限流',
+            method: 'on-rateLimit',
+            isAdmin: true
           }
         ]
       }
@@ -149,6 +160,15 @@ export default {
         page: 1,
         size: 10,
         total: 100
+      },
+      rateLimitDialog: {
+        visible: false,
+        title: '限流',
+        width: '400',
+        showFooter: true,
+        doSearch: false,
+        limitTps:0,
+        limitTraffic:0
       },
       type: this.$store.getters.consumerType, // 1:生产， 2：消费
       subscribeDialog: {
@@ -253,6 +273,20 @@ export default {
       this.configConsumerData = Object.assign({}, item.config)
       this.configConsumerData['consumerId'] = item.id
       this.configDialog.visible = true
+    },
+    openRateLimitDialog (item) {
+      this.rateLimitDialog.limitTps = item.config.limitTps
+      this.configConsumerData['consumerId'] = item.id
+      this.rateLimitDialog.limitTraffic = item.config.limitTraffic
+      this.rateLimitDialog.visible = true
+    },
+    rateLimitConfirm () {
+      let configData = {
+        consumerId: this.configConsumerData.consumerId,
+        limitTps: this.$refs.rateLimit.tps,
+        limitTraffic: this.$refs.rateLimit.traffic
+      }
+      this.config(configData, 'rateLimitDialog')
     },
     handleSizeChange (val) {
       this.page.size = val
@@ -365,6 +399,22 @@ export default {
         // reject(error)
         // this.$Message.error(error);
       }) // validate
+    },
+    config (configData, dialog) {
+      apiRequest.post(this.configDialog.urls.addOrUpdate, {}, configData).then((data) => {
+        if (data.code !== 200) {
+          this.$Dialog.error({
+            content: '配置失败'
+          })
+        } else {
+          this[dialog].visible = false
+          this.getList()
+        }
+      }).catch(() => {
+      })
+    },
+    isAdmin (item) {
+      return this.$store.getters.isAdmin
     },
     addOrUpdateConfig () {
       apiRequest.post(this.configDialog.urls.addOrUpdate, {}, this.configConsumerData).then(() => {
