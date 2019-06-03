@@ -65,6 +65,8 @@ public class NsrConsumerConverter extends Converter<Consumer, com.jd.journalq.do
                     .maxRetryDelay(consumer.getConfig().getMaxRetryDelay())
                     .useExponentialBackOff(consumer.getConfig().isUseExponentialBackOff())
                     .backOffMultiplier(consumer.getConfig().getBackOffMultiplier()).create());
+
+            nsrConsumer.setLimitPolicy(new com.jd.journalq.domain.Consumer.ConsumerLimitPolicy(consumer.getConfig().getLimitTps(), consumer.getConfig().getLimitTraffic()));
         }
         return nsrConsumer;
     }
@@ -115,6 +117,12 @@ public class NsrConsumerConverter extends Converter<Consumer, com.jd.journalq.do
             if (retryPolicy.getUseExponentialBackOff() != null) {
                 consumerConfig.setUseExponentialBackOff(retryPolicy.getUseExponentialBackOff());
             }
+        }
+
+        com.jd.journalq.domain.Consumer.ConsumerLimitPolicy limitPolicy = nsrConsumer.getLimitPolicy();
+        if (limitPolicy != null) {
+            consumerConfig.setLimitTps(limitPolicy.getTps());
+            consumerConfig.setLimitTraffic(limitPolicy.getTraffic());
         }
         consumer.setConfig(consumerConfig);
 

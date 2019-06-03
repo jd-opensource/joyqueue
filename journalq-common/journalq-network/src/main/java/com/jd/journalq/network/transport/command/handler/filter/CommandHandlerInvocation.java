@@ -31,21 +31,21 @@ import java.util.List;
 public class CommandHandlerInvocation {
 
     private Transport transport;
-    private Command command;
+    private Command request;
     private CommandHandler commandHandler;
     private Iterator<CommandHandlerFilter> filterIterator;
     private CommandHandlerContext context;
 
-    public CommandHandlerInvocation(Transport transport, Command command, CommandHandler commandHandler, List<CommandHandlerFilter> filterList) {
+    public CommandHandlerInvocation(Transport transport, Command request, CommandHandler commandHandler, List<CommandHandlerFilter> filterList) {
         this.transport = transport;
-        this.command = command;
+        this.request = request;
         this.commandHandler = commandHandler;
         this.filterIterator = (CollectionUtils.isEmpty(filterList) ? null : filterList.iterator());
     }
 
     public Command invoke() throws TransportException {
         if (filterIterator == null || !filterIterator.hasNext()) {
-            return commandHandler.handle(transport, command);
+            return commandHandler.handle(transport, request);
         } else {
             return filterIterator.next().invoke(this);
         }
@@ -55,8 +55,8 @@ public class CommandHandlerInvocation {
         return transport;
     }
 
-    public Command getCommand() {
-        return command;
+    public Command getRequest() {
+        return request;
     }
 
     public CommandHandlerContext getContext() {

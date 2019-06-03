@@ -26,6 +26,11 @@ public abstract class AbstractDelayedOperation extends DelayedOperation {
     }
 
     @Override
+    protected boolean tryComplete() {
+        return false;
+    }
+
+    @Override
     protected void onComplete() {
 
     }

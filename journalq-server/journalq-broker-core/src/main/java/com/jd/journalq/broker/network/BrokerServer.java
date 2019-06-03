@@ -13,14 +13,14 @@
  */
 package com.jd.journalq.broker.network;
 
+import com.google.common.base.Preconditions;
+import com.jd.journalq.broker.BrokerContext;
+import com.jd.journalq.broker.monitor.SessionManager;
+import com.jd.journalq.broker.network.backend.BackendServer;
 import com.jd.journalq.broker.network.frontend.FrontendServer;
 import com.jd.journalq.broker.network.listener.BrokerTransportListener;
 import com.jd.journalq.broker.network.protocol.ProtocolManager;
-import com.jd.journalq.broker.BrokerContext;
-import com.jd.journalq.broker.monitor.SessionManager;
 import com.jd.journalq.network.transport.config.ServerConfig;
-import com.jd.journalq.broker.network.backend.BackendServer;
-import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 
 /**
@@ -49,7 +49,7 @@ public class BrokerServer extends Service {
         backendConfig.setIoThreadName("journalq-backend-io-eventLoop");
 
         this.transportListener = new BrokerTransportListener(sessionManager);
-        this.frontendServer = new FrontendServer(frontendConfig, protocolManager);
+        this.frontendServer = new FrontendServer(frontendConfig, brokerContext, protocolManager);
         this.backendServer = new BackendServer(backendConfig, brokerContext);
         this.frontendServer.addListener(transportListener);
         this.backendServer.addListener(transportListener);

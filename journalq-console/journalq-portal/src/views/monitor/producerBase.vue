@@ -1,7 +1,8 @@
 <template>
   <div>
     <div class="ml20 mt30">
-      <d-input v-model="keyword" :placeholder="keywordTip" class="left mr10" style="width: 10%">
+      <d-input v-model="keyword" :placeholder="keywordTip" class="left mr10" style="width: 213px" @on-enter="getList">
+        <span slot="prepend">{{keywordName}}</span>
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
       <d-button type="primary" v-if="$store.getters.isAdmin" @click="openDialog('subscribeDialog')" class="left mr10">
@@ -14,34 +15,16 @@
       <!--</d-button>-->
     </div>
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
-              @on-detail-chart="goDetailChart" @on-current-change="handleCurrentChange" @on-detail="openDetailDialog"
+              @on-detail-chart="goDetailChart" @on-current-change="handleCurrentChange" @on-detail="openDetailTab"
               @on-config="openConfigDialog" @on-set-produce-weight="openWeightConfigDialog"
               @on-summary-chart="goSummaryChart" @on-performance-chart="goPerformanceChart"/>
 
     <!--生产订阅弹出框-->
     <my-dialog :dialog="subscribeDialog" @on-dialog-cancel="dialogCancel('subscribeDialog')">
       <subscribe ref="subscribe" :search="search" :type="type" :colData="subscribeDialog.colData"
+                 :keywordName="keywordName"
                  :searchUrl="subscribeDialog.urls.search" :addUrl="subscribeDialog.urls.add"
                  :doSearch="subscribeDialog.doSearch" @on-refresh="getList"/>
-    </my-dialog>
-
-    <!--详情弹出框-->
-    <my-dialog :dialog="detailDialog" @on-dialog-cancel="dialogCancel('detailDialog')">
-      <d-tabs @on-change="handleTabChange">
-        <d-tab-pane label="分组" name="partition" icon="pocket">
-          <partition ref="partition" :app="detailDialog.app" :topic="detailDialog.topic"
-                     :colData="detailDialog.partition.colData" :namespace="detailDialog.namespace"
-                     :type="type" :doSearch="detailDialog.doSearch"/>
-        </d-tab-pane>
-        <d-tab-pane label="客户端连接" name="clientConnection" icon="github">
-          <client-connection ref="clientConnection" :app="detailDialog.app" :topic="detailDialog.topic" :namespace="detailDialog.namespace"
-                             :type="type" :doSearch="detailDialog.doSearch"/>
-        </d-tab-pane>
-        <d-tab-pane label="Broker" name="broker" icon="file-text">
-          <broker ref="broker" :app="detailDialog.app" :topic="detailDialog.topic" :namespace="detailDialog.namespace"
-                  :type="type" :doSearch="detailDialog.doSearch"/>
-        </d-tab-pane>
-      </d-tabs>
     </my-dialog>
 
     <!--Config dialog-->
@@ -61,12 +44,8 @@ import apiRequest from '../../utils/apiRequest.js'
 import myTable from '../../components/common/myTable.vue'
 import myDialog from '../../components/common/myDialog.vue'
 import subscribe from './subscribe.vue'
-import broker from './broker.vue'
-import partition from './partition.vue'
-import clientConnection from './clientConnection.vue'
 import ProducerConfigForm from './producerConfigForm.vue'
 import ProducerWeight from './produceWight.vue'
-import partitionExpand from './partitionExpand'
 import {getTopicCode, replaceChartUrl} from '../../utils/common.js'
 
 export default {
@@ -75,15 +54,14 @@ export default {
     myTable,
     myDialog,
     subscribe,
-    broker,
-    partition,
-    clientConnection,
     ProducerConfigForm,
-    ProducerWeight,
-    partitionExpand
+    ProducerWeight
   },
   props: {
     keywordTip: {
+      type: String
+    },
+    keywordName: {
       type: String
     },
     btns: {
@@ -138,60 +116,6 @@ export default {
     subscribeUrls: {
       type: Object
     },
-    partitionColData: { // 分片 列表表头
-      type: Array,
-      default: function () {
-        return [
-          {
-            type: 'expand',
-            width: 50,
-            render: (h, params) => {
-              return h(partitionExpand, {
-                props: {
-                  row: params.row,
-                  colData: [
-                    {
-                      title: 'ID',
-                      key: 'partitionGroup'
-                    },
-                    // {
-                    //   title: '主分片',
-                    //   key: 'ip'
-                    // },
-                    {
-                      title: '分区',
-                      key: 'partition'
-                    },
-                    {
-                      title: '入队数',
-                      key: 'enQuence.count'
-                    }
-                  ],
-                  subscribe: params.row.subscribe,
-                  partitionGroup: params.row.groupNo
-                }
-              })
-            }
-          },
-          {
-            title: 'ID',
-            key: 'groupNo'
-          },
-          {
-            title: '主分片',
-            key: 'ip'
-          },
-          {
-            title: '分区',
-            key: 'partitions'
-          },
-          {
-            title: '入队数',
-            key: 'enQuence.count'
-          }
-        ]
-      }
-    },
     monitorUrls: {// url variable format: [app], [topic], [namespace]
       type: Object
     }
@@ -241,29 +165,6 @@ export default {
           update: '/'
         }
       },
-      detailDialog: {
-        visible: false,
-        title: '生产者详情',
-        width: '900',
-        showFooter: false,
-        doSearch: true,
-        app: {
-          id: 0,
-          code: ''
-        },
-        topic: {
-          id: '0',
-          code: ''
-        },
-        namespace: {
-          id: '0',
-          code: ''
-        },
-        partition: {
-          colData: this.partitionColData
-
-        }
-      },
       configDialog: {
         visible: false,
         title: '生产者配置详情',
@@ -281,14 +182,8 @@ export default {
       this[dialog].doSearch = true
       this[dialog].visible = true
     },
-    openDetailDialog (item) {
-      this.detailDialog.app.id = item.app.id
-      this.detailDialog.app.code = item.app.code
-      this.detailDialog.topic.id = item.topic.id
-      this.detailDialog.topic.code = item.topic.code
-      this.detailDialog.namespace.id = item.namespace.id
-      this.detailDialog.namespace.code = item.namespace.code
-      this.openDialog('detailDialog')
+    openDetailTab (item) {
+      this.$emit('on-detail', item)
     },
     openConfigDialog (item) {
       this.configData = item.config || {}
@@ -307,10 +202,6 @@ export default {
     handleCurrentChange (val) {
       this.page.page = val
       this.getList()
-    },
-    handleTabChange (data) {
-      let name = data.name
-      this.$refs[name].getList()
     },
     dialogConfirm (dialog) {
       this[dialog].visible = false

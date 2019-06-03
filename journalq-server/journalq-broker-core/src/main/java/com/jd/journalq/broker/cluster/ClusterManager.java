@@ -13,6 +13,7 @@
  */
 package com.jd.journalq.broker.cluster;
 
+import com.google.common.base.Preconditions;
 import com.jd.journalq.broker.BrokerContext;
 import com.jd.journalq.broker.config.BrokerConfig;
 import com.jd.journalq.domain.AppToken;
@@ -34,12 +35,11 @@ import com.jd.journalq.event.ProducerEvent;
 import com.jd.journalq.event.TopicEvent;
 import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.exception.JournalqException;
-import com.jd.journalq.response.BooleanResponse;
 import com.jd.journalq.nsr.NameService;
+import com.jd.journalq.response.BooleanResponse;
 import com.jd.journalq.toolkit.concurrent.EventBus;
 import com.jd.journalq.toolkit.concurrent.EventListener;
 import com.jd.journalq.toolkit.lang.LifeCycle;
-import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.network.IpUtil;
 import com.jd.journalq.toolkit.service.Service;
 import com.jd.journalq.toolkit.time.SystemClock;
@@ -52,7 +52,18 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
@@ -415,11 +426,15 @@ public class ClusterManager extends Service {
      * @return
      */
     public Consumer getConsumer(TopicName topic, String app) throws JournalqException {
-        Consumer consumer = localCache.getConsumerByTopicAndApp(topic, app);
+        Consumer consumer = tryGetConsumer(topic, app);
         if (null == consumer) {
             throw new JournalqException(JournalqCode.FW_CONSUMER_NOT_EXISTS);
         }
         return consumer;
+    }
+
+    public Consumer tryGetConsumer(TopicName topic, String app) {
+        return localCache.getConsumerByTopicAndApp(topic, app);
     }
 
     /**
@@ -469,6 +484,17 @@ public class ClusterManager extends Service {
         return !(config != null && config.checkSequential());
     }
 
+    public Producer getProducer(TopicName topic, String app) throws JournalqException {
+        Producer producer = tryGetProducer(topic, app);
+        if (null == producer) {
+            throw new JournalqException(JournalqCode.FW_PRODUCER_NOT_EXISTS);
+        }
+        return producer;
+    }
+
+    public Producer tryGetProducer(TopicName topic, String app) {
+        return localCache.getProducerByTopicAndApp(topic, app);
+    }
 
     /**
      * 获取生产策略

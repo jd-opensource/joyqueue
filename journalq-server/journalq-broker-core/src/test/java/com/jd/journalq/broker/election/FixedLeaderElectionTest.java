@@ -161,7 +161,7 @@ public class FixedLeaderElectionTest {
         produceTask.start();
         consumeTask.start();
 
-        Thread.sleep(10000);
+        Thread.sleep(3000);
 
         produceTask.stop(true);
         consumeTask.stop(true);
@@ -171,7 +171,7 @@ public class FixedLeaderElectionTest {
 
         System.out.println("Produce task and consume task interrupted.");
 
-        Thread.sleep(10000);
+        Thread.sleep(3000);
 
         for (int i = 0; i < FIX_ELECTION_NUM; i++) {
             ReplicableStore rStore = storeServices[i].getReplicableStore(topic1.getFullName(), partitionGroup1);
@@ -180,7 +180,7 @@ public class FixedLeaderElectionTest {
                     + ", commit position is " + rStore.commitPosition()
                     + ", term is " + rStore.term());
         }
-        Thread.sleep(5000);
+        Thread.sleep(1000);
 
         //Assert.assertEquals(messages.size(), 10);
 

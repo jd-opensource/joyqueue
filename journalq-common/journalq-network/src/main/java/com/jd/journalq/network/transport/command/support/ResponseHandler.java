@@ -49,8 +49,8 @@ public class ResponseHandler {
         this.asyncExecutorService = newAsyncExecutorService();
     }
 
-    public void handle(Transport transport, Command command) {
-        Header header = command.getHeader();
+    public void handle(Transport transport, Command response) {
+        Header header = response.getHeader();
         // 超时被删除了
         final ResponseFuture responseFuture = barrier.get(header.getRequestId());
         if (responseFuture == null) {
@@ -60,7 +60,7 @@ public class ResponseHandler {
             return;
         }
         // 设置应答
-        responseFuture.setResponse(command);
+        responseFuture.setResponse(response);
         // 异步调用
         if (responseFuture.getCallback() != null) {
             boolean success = false;

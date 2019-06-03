@@ -14,9 +14,9 @@
 package com.jd.journalq.broker.handler;
 
 import com.google.common.collect.Maps;
-import com.jd.journalq.broker.JournalqCommandHandler;
 import com.jd.journalq.broker.BrokerContext;
 import com.jd.journalq.broker.BrokerContextAware;
+import com.jd.journalq.broker.JournalqCommandHandler;
 import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.helper.SessionHelper;
 import com.jd.journalq.broker.monitor.SessionManager;
@@ -31,7 +31,6 @@ import com.jd.journalq.network.session.Consumer;
 import com.jd.journalq.network.transport.Transport;
 import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.transport.command.Type;
-import com.jd.journalq.response.BooleanResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,9 +70,8 @@ public class AddConsumerHandler implements JournalqCommandHandler, Type, BrokerC
         for (String topic : addConsumer.getTopics()) {
             TopicName topicName = TopicName.parse(topic);
 
-            BooleanResponse checkResult = clusterManager.checkReadable(topicName, addConsumer.getApp(), null);
-            if (!checkResult.isSuccess()) {
-                logger.warn("checkReadable failed, transport: {}, topic: {}, app: {}, code: {}", transport, topicName, addConsumer.getApp(), checkResult.getJournalqCode());
+            if (clusterManager.tryGetConsumer(topicName, addConsumer.getApp()) == null) {
+                logger.warn("addConsumer failed, transport: {}, topic: {}, app: {}", transport, topicName, addConsumer.getApp());
                 return BooleanAck.build(JournalqCode.CN_NO_PERMISSION);
             }
 

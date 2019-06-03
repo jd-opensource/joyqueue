@@ -18,7 +18,6 @@ import com.jd.journalq.network.transport.command.handler.filter.CommandHandlerFi
 import com.jd.journalq.network.transport.command.handler.filter.CommandHandlerFilterFactory;
 import com.jd.laf.extension.ExtensionManager;
 
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -37,7 +36,7 @@ public class DefaultCommandHandlerFilterFactory implements CommandHandlerFilterF
 
     @Override
     public List<CommandHandlerFilter> getFilters() {
-        return Collections.unmodifiableList(commandHandlerFilters);
+        return commandHandlerFilters;
     }
 
     protected List<CommandHandlerFilter> initCommandHandlerFilters() {
@@ -46,7 +45,7 @@ public class DefaultCommandHandlerFilterFactory implements CommandHandlerFilterF
         return commandHandlerFilters;
     }
 
-    protected List<CommandHandlerFilter> getCommandHandlerFilters() {
+    protected List getCommandHandlerFilters() {
         return Lists.newArrayList(ExtensionManager.getOrLoadExtensions(CommandHandlerFilter.class));
     }
 }

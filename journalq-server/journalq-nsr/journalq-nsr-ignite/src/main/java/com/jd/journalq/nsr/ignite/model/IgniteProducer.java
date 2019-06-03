@@ -50,11 +50,13 @@ public class IgniteProducer extends Producer implements IgniteBaseModel, Binaryl
         this.clientType = producer.getClientType();
         this.topic = producer.getTopic();
         this.producerPolicy = producer.getProducerPolicy();
+        this.limitPolicy = producer.getLimitPolicy();
     }
 
     public IgniteProducer fillConfig(IgniteProducerConfig producerConfig) {
         if (null != producerConfig) {
             this.producerPolicy = producerConfig.getProducerPolicy();
+            this.limitPolicy = producerConfig.getLimitPolicy();
         }
         return this;
     }

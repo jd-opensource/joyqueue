@@ -5,6 +5,8 @@
         <!-- broker -->
         <route path="/monitor/broker" inherit="get"
                handlers="brokerMonitorService.getBrokerInfo"/>
+        <route path="/startInfo" inherit="get"
+               handlers="brokerMonitorService.getStartInfo"/>
 
         <route path="/monitor/broker/brokerStatExt" inherit="get"
                handlers="brokerMonitorService.getExtendBrokerStat"/>
@@ -86,7 +88,7 @@
                handlers="brokerMonitorService.getPartitionInfoByTopicAndApp"/>
         <route path="/monitor/topic/:topic/app/:app/partitions" inherit="get"
                handlers="brokerMonitorService.getPartitionInfosByTopicAndApp"/>
-        <route path="/monitor/topic/:topic/app/:app/partitionGroup/:partitionGroupId" inherit="get"
+        <route path="/monitor/topic/:topic/app/:app/partitionGroup/:partitionGroup" inherit="get"
                handlers="brokerMonitorService.getPartitionGroupInfoByTopicAndApp"/>
         <route path="/monitor/topic/:topic/app/:app/partitionGroups" inherit="get"
                handlers="brokerMonitorService.getPartitionGroupInfosByTopicAndApp"/>

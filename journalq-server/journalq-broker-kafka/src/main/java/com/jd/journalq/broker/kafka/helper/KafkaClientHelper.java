@@ -24,13 +24,17 @@ import org.apache.commons.lang3.StringUtils;
 public class KafkaClientHelper {
 
     private static final String SEPARATOR = "-";
+    private static final String[] REPLACE = {"spark-executor-"};
 
     public static String parseClient(String clientId) {
+        if (StringUtils.isBlank(clientId)) {
+            return clientId;
+        }
+        for (String replace : REPLACE) {
+            clientId = StringUtils.replace(clientId, replace, "");
+        }
         if (StringUtils.contains(clientId, SEPARATOR)) {
             String[] strings = StringUtils.splitByWholeSeparator(clientId, SEPARATOR);
-//            if (StringUtils.isNumeric(strings[strings.length - 1])) {
-//                return clientId.substring(0, clientId.lastIndexOf(SEPARATOR));
-//            }
             return strings[0];
         }
         return clientId;
