@@ -29,7 +29,7 @@ public class BlockLimitRejectedStrategy implements LimitRejectedStrategy {
     public Command execute(LimitContext context) {
         try {
             synchronized (Thread.currentThread()) {
-                Thread.currentThread().wait(context.getDelay());
+                Thread.currentThread().sleep(context.getDelay());
             }
         } catch (InterruptedException e) {
         }
