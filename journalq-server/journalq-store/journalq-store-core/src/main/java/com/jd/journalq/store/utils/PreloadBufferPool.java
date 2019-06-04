@@ -275,14 +275,6 @@ public class PreloadBufferPool implements Closeable {
 
     public void allocateMMap(BufferHolder bufferHolder) {
         reserveMemory(bufferHolder.size());
-        long u;
-        while (!usedSize.compareAndSet(u = usedSize.get(), u + bufferHolder.size())) {
-            Thread.yield();
-        }
-
-        if (usedSize.get() > maxMemorySize * EVICT_RATIO) {
-            evictThread.wakeup();
-        }
         mMapBufferHolders.add(bufferHolder);
     }
 
