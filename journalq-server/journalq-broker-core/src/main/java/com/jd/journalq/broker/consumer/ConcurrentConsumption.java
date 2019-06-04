@@ -636,7 +636,7 @@ class ConcurrentConsumption extends Service {
             Position position = sortAndMerge(consumePartition);
             // 查询应答位置
             long lastMsgAckIndex = positionManager.getLastMsgAckIndex(TopicName.parse(topic), app, partition);
-            if (lastMsgAckIndex == position.getAckStartIndex()) {
+            if (position.getAckStartIndex() <= lastMsgAckIndex && position.getAckCurIndex() >= lastMsgAckIndex) {
                 // 将当前序号向后移动一位
                 long updateMsgAckIndex = position.getAckCurIndex() + 1;
                 positionManager.updateLastMsgAckIndex(TopicName.parse(topic), app, partition, updateMsgAckIndex);
