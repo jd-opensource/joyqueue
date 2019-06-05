@@ -16,6 +16,8 @@ import com.jd.journalq.broker.kafka.message.KafkaBrokerMessage;
 import com.jd.journalq.broker.kafka.message.converter.KafkaMessageConverter;
 import com.jd.journalq.broker.kafka.model.ProducePartitionGroupRequest;
 import com.jd.journalq.broker.monitor.SessionManager;
+import com.jd.journalq.broker.network.traffic.Traffic;
+import com.jd.journalq.broker.producer.ProduceConfig;
 import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.domain.QosLevel;
 import com.jd.journalq.domain.TopicConfig;
@@ -28,6 +30,7 @@ import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.response.BooleanResponse;
 import com.jd.journalq.toolkit.concurrent.EventListener;
 import com.jd.journalq.toolkit.network.IpUtil;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +52,7 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
     protected static final Logger logger = LoggerFactory.getLogger(ProduceRequestHandler.class);
 
     private ClusterManager clusterManager;
+    private ProduceConfig produceConfig;
     private ProduceHandler produceHandler;
     private TransactionProduceHandler transactionProduceHandler;
     private SessionManager sessionManager;
@@ -56,8 +60,10 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
     @Override
     public void setKafkaContext(KafkaContext kafkaContext) {
         this.clusterManager = kafkaContext.getBrokerContext().getClusterManager();
+        this.produceConfig = new ProduceConfig(kafkaContext.getBrokerContext().getPropertySupplier());
         this.produceHandler = new ProduceHandler(kafkaContext.getBrokerContext().getProduce());
-        this.transactionProduceHandler = new TransactionProduceHandler(kafkaContext.getConfig(), kafkaContext.getBrokerContext().getProduce(), kafkaContext.getTransactionCoordinator(), kafkaContext.getTransactionIdManager());
+        this.transactionProduceHandler = new TransactionProduceHandler(kafkaContext.getConfig(), kafkaContext.getBrokerContext().getProduce(),
+                kafkaContext.getTransactionCoordinator(), kafkaContext.getTransactionIdManager());
         this.sessionManager = kafkaContext.getBrokerContext().getSessionManager();
     }
 
@@ -75,6 +81,7 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
         String clientIp = ((InetSocketAddress) transport.remoteAddress()).getHostString();
         byte[] clientAddress = IpUtil.toByte((InetSocketAddress) transport.remoteAddress());
         Connection connection = SessionHelper.getConnection(transport);
+        Traffic traffic = new Traffic(clientId);
 
         for (Map.Entry<String, List<ProduceRequest.PartitionRequest>> entry : partitionRequestMap.entrySet()) {
             TopicName topicName = TopicName.parse(entry.getKey());
@@ -109,6 +116,8 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
                 List<BrokerMessage> brokerMessages = Lists.newLinkedList();
                 for (KafkaBrokerMessage message : partitionRequest.getMessages()) {
                     BrokerMessage brokerMessage = KafkaMessageConverter.toBrokerMessage(producer.getTopic(), partition, producer.getApp(), clientAddress, message);
+                    checkAndFillMessage(brokerMessage);
+                    traffic.record(topicName.getFullName(), brokerMessage.getSize());
                     brokerMessages.add(brokerMessage);
                 }
 
@@ -153,8 +162,14 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
             logger.error("wait produce exception, transport: {}, app: {}, topics: {}", transport.remoteAddress(), clientId, produceRequest.getPartitionRequests().keySet(), e);
         }
 
-        ProduceResponse response = new ProduceResponse(partitionResponseMap);
+        ProduceResponse response = new ProduceResponse(traffic, partitionResponseMap);
         return new Command(response);
+    }
+
+    protected void checkAndFillMessage(BrokerMessage message) {
+        if (StringUtils.length(message.getBusinessId()) > produceConfig.getBusinessIdLength()) {
+            message.setBusinessId(message.getBusinessId().substring(0, produceConfig.getBusinessIdLength()));
+        }
     }
 
     protected void buildPartitionResponse(int partition, long[] indices, short code, List<KafkaBrokerMessage> messages, List<ProduceResponse.PartitionResponse> partitionResponses) {

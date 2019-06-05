@@ -55,7 +55,7 @@ public class ProduceMessagePrepareRequestHandler implements JournalqCommandHandl
         Connection connection = SessionHelper.getConnection(transport);
 
         if (connection == null || !connection.isAuthorized(produceMessagePrepareRequest.getApp())) {
-            logger.warn("connection is not exists, transport: {}", transport);
+            logger.warn("connection is not exists, transport: {}, app: {}", transport, produceMessagePrepareRequest.getApp());
             return BooleanAck.build(JournalqCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
@@ -66,9 +66,11 @@ public class ProduceMessagePrepareRequestHandler implements JournalqCommandHandl
             return BooleanAck.build(JournalqCode.FW_PRODUCER_NOT_EXISTS.getCode());
         }
 
-        BooleanResponse checkResult = clusterManager.checkWritable(TopicName.parse(produceMessagePrepareRequest.getTopic()), produceMessagePrepareRequest.getApp(), connection.getHost());
+        BooleanResponse checkResult = clusterManager.checkWritable(TopicName.parse(produceMessagePrepareRequest.getTopic()),
+                produceMessagePrepareRequest.getApp(), connection.getHost());
         if (!checkResult.isSuccess()) {
-            logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport, produceMessagePrepareRequest, produceMessagePrepareRequest.getApp(), checkResult.getJournalqCode());
+            logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport, produceMessagePrepareRequest,
+                    produceMessagePrepareRequest.getApp(), checkResult.getJournalqCode());
             return new Command(new ProduceMessagePrepareResponse(CheckResultConverter.convertCommonCode(checkResult.getJournalqCode())));
         }
 

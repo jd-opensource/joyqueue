@@ -1,18 +1,19 @@
 package com.jd.journalq.broker.protocol.handler;
 
 import com.google.common.collect.Maps;
-import com.jd.journalq.broker.network.traffic.Traffic;
-import com.jd.journalq.broker.protocol.JournalqCommandHandler;
-import com.jd.journalq.broker.protocol.JournalqContext;
-import com.jd.journalq.broker.protocol.JournalqContextAware;
 import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.consumer.Consume;
 import com.jd.journalq.broker.consumer.model.PullResult;
-import com.jd.journalq.broker.protocol.converter.CheckResultConverter;
 import com.jd.journalq.broker.helper.SessionHelper;
 import com.jd.journalq.broker.monitor.SessionManager;
+import com.jd.journalq.broker.network.traffic.Traffic;
 import com.jd.journalq.broker.polling.LongPolling;
 import com.jd.journalq.broker.polling.LongPollingManager;
+import com.jd.journalq.broker.protocol.JournalqCommandHandler;
+import com.jd.journalq.broker.protocol.JournalqContext;
+import com.jd.journalq.broker.protocol.JournalqContextAware;
+import com.jd.journalq.broker.protocol.command.FetchTopicMessageResponse;
+import com.jd.journalq.broker.protocol.converter.CheckResultConverter;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.exception.JournalqException;
@@ -20,7 +21,6 @@ import com.jd.journalq.network.command.BooleanAck;
 import com.jd.journalq.network.command.FetchTopicMessageAckData;
 import com.jd.journalq.network.command.FetchTopicMessageData;
 import com.jd.journalq.network.command.FetchTopicMessageRequest;
-import com.jd.journalq.network.command.FetchTopicMessageResponse;
 import com.jd.journalq.network.command.JournalqCommandType;
 import com.jd.journalq.network.session.Connection;
 import com.jd.journalq.network.session.Consumer;
@@ -65,7 +65,7 @@ public class FetchTopicMessageRequestHandler implements JournalqCommandHandler, 
         Connection connection = SessionHelper.getConnection(transport);
 
         if (connection == null || !connection.isAuthorized(fetchTopicMessageRequest.getApp())) {
-            logger.warn("connection is not exists, transport: {}", transport);
+            logger.warn("connection is not exists, transport: {}, app: {}", transport, fetchTopicMessageRequest.getApp());
             return BooleanAck.build(JournalqCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
@@ -106,6 +106,7 @@ public class FetchTopicMessageRequestHandler implements JournalqCommandHandler, 
         }
 
         FetchTopicMessageResponse fetchTopicMessageResponse = new FetchTopicMessageResponse();
+        fetchTopicMessageResponse.setTraffic(traffic);
         fetchTopicMessageResponse.setData(result);
         return new Command(fetchTopicMessageResponse);
     }

@@ -23,7 +23,6 @@ import com.jd.journalq.client.internal.consumer.interceptor.ConsumerInterceptorM
 import com.jd.journalq.client.internal.consumer.interceptor.ConsumerInvocation;
 import com.jd.journalq.client.internal.metadata.domain.TopicMetadata;
 import com.jd.journalq.client.internal.nameserver.NameServerConfig;
-import com.jd.journalq.domain.Consumer;
 import com.jd.journalq.domain.ConsumerPolicy;
 import com.jd.journalq.toolkit.concurrent.NamedThreadFactory;
 import com.jd.journalq.toolkit.service.Service;

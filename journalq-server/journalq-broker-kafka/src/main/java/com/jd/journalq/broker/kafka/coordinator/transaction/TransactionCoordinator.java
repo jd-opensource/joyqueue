@@ -23,7 +23,8 @@ public class TransactionCoordinator extends Service {
     private TransactionHandler transactionHandler;
     private TransactionOffsetHandler transactionOffsetHandler;
 
-    public TransactionCoordinator(Coordinator coordinator, TransactionMetadataManager transactionMetadataManager, TransactionHandler transactionHandler, TransactionOffsetHandler transactionOffsetHandler) {
+    public TransactionCoordinator(Coordinator coordinator, TransactionMetadataManager transactionMetadataManager,
+                                  TransactionHandler transactionHandler, TransactionOffsetHandler transactionOffsetHandler) {
         this.coordinator = coordinator;
         this.transactionMetadataManager = transactionMetadataManager;
         this.transactionHandler = transactionHandler;
@@ -54,7 +55,8 @@ public class TransactionCoordinator extends Service {
         return transactionOffsetHandler.addOffsetsToTxn(clientId, transactionId, groupId, producerId, producerEpoch);
     }
 
-    public Map<String, List<PartitionMetadataAndError>> handleCommitOffset(String clientId, String transactionId, String groupId, long producerId, short producerEpoch, Map<String, List<OffsetAndMetadata>> offsetAndMetadata) {
+    public Map<String, List<PartitionMetadataAndError>> handleCommitOffset(String clientId, String transactionId, String groupId,
+                                                                           long producerId, short producerEpoch, Map<String, List<OffsetAndMetadata>> offsetAndMetadata) {
         return transactionOffsetHandler.commitOffset(clientId, transactionId, groupId, producerId, producerEpoch, offsetAndMetadata);
     }
 

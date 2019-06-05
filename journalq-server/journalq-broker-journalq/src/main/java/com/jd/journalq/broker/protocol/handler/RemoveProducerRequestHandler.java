@@ -40,7 +40,7 @@ public class RemoveProducerRequestHandler implements JournalqCommandHandler, Typ
         Connection connection = SessionHelper.getConnection(transport);
 
         if (connection == null || !connection.isAuthorized(removeProducerRequest.getApp())) {
-            logger.warn("connection is not exists, transport: {}", transport);
+            logger.warn("connection is not exists, transport: {}, app: {}", transport, removeProducerRequest.getApp());
             return BooleanAck.build(JournalqCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 

@@ -22,7 +22,6 @@ import com.jd.journalq.client.internal.consumer.exception.IgnoreAckException;
 import com.jd.journalq.client.internal.consumer.interceptor.ConsumeContext;
 import com.jd.journalq.client.internal.consumer.interceptor.ConsumerInvoker;
 import com.jd.journalq.client.internal.metadata.domain.TopicMetadata;
-import com.jd.journalq.domain.Consumer;
 import com.jd.journalq.domain.ConsumerPolicy;
 import com.jd.journalq.network.command.RetryType;
 import org.apache.commons.collections.CollectionUtils;

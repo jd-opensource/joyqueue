@@ -779,7 +779,7 @@ public class RaftLeaderElection extends LeaderElection  {
             }
             try {
                 electionExecutor.submit(() -> {
-                    JMQHeader header = new JMQHeader(Direction.REQUEST, CommandType.RAFT_APPEND_ENTRIES_REQUEST);
+                    JournalqHeader header = new JournalqHeader(Direction.REQUEST, CommandType.RAFT_APPEND_ENTRIES_REQUEST);
                     Command command = new Command(header, appendEntriesRequest);
 
                     logger.debug("Partition group {}/node{} send heartbeat request {} to {}",

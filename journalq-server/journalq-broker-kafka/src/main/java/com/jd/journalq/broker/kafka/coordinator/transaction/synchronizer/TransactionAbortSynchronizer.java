@@ -56,7 +56,8 @@ public class TransactionAbortSynchronizer extends Service {
             List<String> txIds = Lists.newLinkedList();
 
             for (TransactionPrepare prepare : brokerPrepareList) {
-                String txId = transactionIdManager.generateId(prepare.getTopic(), prepare.getPartition(), prepare.getApp(), prepare.getTransactionId(), prepare.getProducerId(), prepare.getProducerEpoch());
+                String txId = transactionIdManager.generateId(prepare.getTopic(), prepare.getPartition(), prepare.getApp(),
+                        prepare.getTransactionId(), prepare.getProducerId(), prepare.getProducerEpoch());
                 txIds.add(txId);
             }
 

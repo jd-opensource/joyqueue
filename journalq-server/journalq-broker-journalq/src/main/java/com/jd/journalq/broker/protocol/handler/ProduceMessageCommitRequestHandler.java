@@ -2,11 +2,11 @@ package com.jd.journalq.broker.protocol.handler;
 
 import com.jd.journalq.broker.BrokerContext;
 import com.jd.journalq.broker.BrokerContextAware;
-import com.jd.journalq.broker.protocol.JournalqCommandHandler;
 import com.jd.journalq.broker.cluster.ClusterManager;
-import com.jd.journalq.broker.protocol.converter.CheckResultConverter;
 import com.jd.journalq.broker.helper.SessionHelper;
 import com.jd.journalq.broker.producer.Produce;
+import com.jd.journalq.broker.protocol.JournalqCommandHandler;
+import com.jd.journalq.broker.protocol.converter.CheckResultConverter;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.exception.JournalqException;
@@ -49,13 +49,14 @@ public class ProduceMessageCommitRequestHandler implements JournalqCommandHandle
         Connection connection = SessionHelper.getConnection(transport);
 
         if (connection == null || !connection.isAuthorized(produceMessageCommitRequest.getApp())) {
-            logger.warn("connection is not exists, transport: {}", transport);
+            logger.warn("connection is not exists, transport: {}, app: {}", transport, produceMessageCommitRequest.getApp());
             return BooleanAck.build(JournalqCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
         BooleanResponse checkResult = clusterManager.checkWritable(TopicName.parse(produceMessageCommitRequest.getTopic()), produceMessageCommitRequest.getApp(), connection.getHost());
         if (!checkResult.isSuccess()) {
-            logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport, produceMessageCommitRequest.getTopic(), produceMessageCommitRequest.getApp(), checkResult.getJournalqCode());
+            logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport,
+                    produceMessageCommitRequest.getTopic(), produceMessageCommitRequest.getApp(), checkResult.getJournalqCode());
             return new Command(new ProduceMessageCommitResponse(CheckResultConverter.convertCommonCode(checkResult.getJournalqCode())));
         }
 

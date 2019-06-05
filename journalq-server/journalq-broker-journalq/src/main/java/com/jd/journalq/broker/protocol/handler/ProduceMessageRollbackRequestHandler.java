@@ -49,13 +49,14 @@ public class ProduceMessageRollbackRequestHandler implements JournalqCommandHand
         Connection connection = SessionHelper.getConnection(transport);
 
         if (connection == null || !connection.isAuthorized(produceMessageRollbackRequest.getApp())) {
-            logger.warn("connection is not exists, transport: {}", transport);
+            logger.warn("connection is not exists, transport: {}, app: {}", transport, produceMessageRollbackRequest.getApp());
             return BooleanAck.build(JournalqCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
         BooleanResponse checkResult = clusterManager.checkWritable(TopicName.parse(produceMessageRollbackRequest.getTopic()), produceMessageRollbackRequest.getApp(), connection.getHost());
         if (!checkResult.isSuccess()) {
-            logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport, produceMessageRollbackRequest.getTopic(), produceMessageRollbackRequest.getApp(), checkResult.getJournalqCode());
+            logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport,
+                    produceMessageRollbackRequest.getTopic(), produceMessageRollbackRequest.getApp(), checkResult.getJournalqCode());
             return new Command(new ProduceMessageRollbackResponse(CheckResultConverter.convertCommonCode(checkResult.getJournalqCode())));
         }
 

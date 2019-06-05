@@ -19,7 +19,6 @@ import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.domain.TopicConfig;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.exception.JournalqCode;
-import com.jd.journalq.network.transport.codec.JournalqHeader;
 import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.transport.command.CommandCallback;
 import com.jd.journalq.network.transport.command.JournalqCommand;
@@ -68,7 +67,8 @@ public class TransactionCommitSynchronizer extends Service {
             List<String> txIds = Lists.newLinkedList();
 
             for (TransactionPrepare prepare : brokerPrepareList) {
-                String txId = transactionIdManager.generateId(prepare.getTopic(), prepare.getPartition(), prepare.getApp(), prepare.getTransactionId(), prepare.getProducerId(), prepare.getProducerEpoch());
+                String txId = transactionIdManager.generateId(prepare.getTopic(), prepare.getPartition(), prepare.getApp(),
+                        prepare.getTransactionId(), prepare.getProducerId(), prepare.getProducerEpoch());
                 txIds.add(txId);
             }
 

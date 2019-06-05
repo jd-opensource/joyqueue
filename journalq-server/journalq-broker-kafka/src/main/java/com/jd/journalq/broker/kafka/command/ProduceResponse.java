@@ -14,6 +14,7 @@
 package com.jd.journalq.broker.kafka.command;
 
 import com.jd.journalq.broker.kafka.KafkaCommandType;
+import com.jd.journalq.broker.network.traffic.ProduceTrafficPayload;
 import com.jd.journalq.broker.network.traffic.Traffic;
 
 import java.util.List;

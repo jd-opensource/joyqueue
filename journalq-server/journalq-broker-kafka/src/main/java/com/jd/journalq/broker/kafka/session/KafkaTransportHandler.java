@@ -1,5 +1,6 @@
 package com.jd.journalq.broker.kafka.session;
 
+import com.jd.journalq.broker.kafka.KafkaCommandType;
 import com.jd.journalq.network.transport.ChannelTransport;
 import com.jd.journalq.network.transport.RequestBarrier;
 import com.jd.journalq.network.transport.TransportHelper;

@@ -58,7 +58,7 @@ public class AddConsumerRequestHandler implements JournalqCommandHandler, Type, 
             TopicName topicName = TopicName.parse(topic);
 
             if (clusterManager.tryGetConsumer(topicName, addConsumerRequest.getApp()) == null) {
-                logger.warn("addConsumer failed, transport: {}, topic: {}, app: {}", transport, topicName, addConsumer.getApp());
+                logger.warn("addConsumer failed, transport: {}, topic: {}, app: {}", transport, topicName, addConsumerRequest.getApp());
                 return BooleanAck.build(JournalqCode.CN_NO_PERMISSION);
             }
 

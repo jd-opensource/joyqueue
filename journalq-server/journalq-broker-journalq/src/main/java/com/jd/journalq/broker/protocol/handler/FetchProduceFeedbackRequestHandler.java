@@ -53,13 +53,15 @@ public class FetchProduceFeedbackRequestHandler implements JournalqCommandHandle
         Connection connection = SessionHelper.getConnection(transport);
 
         if (connection == null || !connection.isAuthorized(fetchProduceFeedbackRequest.getApp())) {
-            logger.warn("connection is not exists, transport: {}", transport);
+            logger.warn("connection is not exists, transport: {}, app: {}", transport, fetchProduceFeedbackRequest.getApp());
             return BooleanAck.build(JournalqCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
-        BooleanResponse checkResult = clusterManager.checkWritable(TopicName.parse(fetchProduceFeedbackRequest.getTopic()), fetchProduceFeedbackRequest.getApp(), connection.getHost());
+        BooleanResponse checkResult = clusterManager.checkWritable(TopicName.parse(fetchProduceFeedbackRequest.getTopic()),
+                fetchProduceFeedbackRequest.getApp(), connection.getHost());
         if (!checkResult.isSuccess()) {
-            logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport, fetchProduceFeedbackRequest.getTopic(), fetchProduceFeedbackRequest.getApp(), checkResult.getJournalqCode());
+            logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport,
+                    fetchProduceFeedbackRequest.getTopic(), fetchProduceFeedbackRequest.getApp(), checkResult.getJournalqCode());
             return new Command(new FetchProduceFeedbackResponse(CheckResultConverter.convertCommonCode(checkResult.getJournalqCode())));
         }
 
@@ -76,10 +78,12 @@ public class FetchProduceFeedbackRequestHandler implements JournalqCommandHandle
             fetchProduceFeedbackResponse.setCode(JournalqCode.SUCCESS);
             return fetchProduceFeedbackResponse;
         } catch (JournalqException e) {
-            logger.error("fetch feedback exception, transport: {}, topic: {}, app: {}", connection.getTransport().remoteAddress(), fetchProduceFeedbackRequest.getTopic(), fetchProduceFeedbackRequest.getApp(), e);
+            logger.error("fetch feedback exception, transport: {}, topic: {}, app: {}", connection.getTransport().remoteAddress(),
+                    fetchProduceFeedbackRequest.getTopic(), fetchProduceFeedbackRequest.getApp(), e);
             return new FetchProduceFeedbackResponse(JournalqCode.valueOf(e.getCode()));
         } catch (Exception e) {
-            logger.error("fetch feedback exception, transport: {}, topic: {}, app: {}", connection.getTransport().remoteAddress(), fetchProduceFeedbackRequest.getTopic(), fetchProduceFeedbackRequest.getApp(), e);
+            logger.error("fetch feedback exception, transport: {}, topic: {}, app: {}", connection.getTransport().remoteAddress(),
+                    fetchProduceFeedbackRequest.getTopic(), fetchProduceFeedbackRequest.getApp(), e);
             return new FetchProduceFeedbackResponse(JournalqCode.CN_UNKNOWN_ERROR);
         }
     }

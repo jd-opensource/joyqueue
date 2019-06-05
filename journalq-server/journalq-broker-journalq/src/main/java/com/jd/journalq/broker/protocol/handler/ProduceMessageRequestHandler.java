@@ -2,14 +2,17 @@ package com.jd.journalq.broker.protocol.handler;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.jd.journalq.broker.cluster.ClusterManager;
+import com.jd.journalq.broker.helper.SessionHelper;
+import com.jd.journalq.broker.network.traffic.Traffic;
+import com.jd.journalq.broker.producer.Produce;
+import com.jd.journalq.broker.producer.ProduceConfig;
 import com.jd.journalq.broker.protocol.JournalqCommandHandler;
 import com.jd.journalq.broker.protocol.JournalqContext;
 import com.jd.journalq.broker.protocol.JournalqContextAware;
-import com.jd.journalq.broker.cluster.ClusterManager;
+import com.jd.journalq.broker.protocol.command.ProduceMessageResponse;
 import com.jd.journalq.broker.protocol.config.JournalqConfig;
 import com.jd.journalq.broker.protocol.converter.CheckResultConverter;
-import com.jd.journalq.broker.helper.SessionHelper;
-import com.jd.journalq.broker.producer.Produce;
 import com.jd.journalq.domain.QosLevel;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.exception.JournalqCode;
@@ -21,7 +24,6 @@ import com.jd.journalq.network.command.ProduceMessageAckData;
 import com.jd.journalq.network.command.ProduceMessageAckItemData;
 import com.jd.journalq.network.command.ProduceMessageData;
 import com.jd.journalq.network.command.ProduceMessageRequest;
-import com.jd.journalq.network.command.ProduceMessageResponse;
 import com.jd.journalq.network.session.Connection;
 import com.jd.journalq.network.session.Producer;
 import com.jd.journalq.network.transport.Transport;
@@ -32,6 +34,7 @@ import com.jd.journalq.store.WriteResult;
 import com.jd.journalq.toolkit.concurrent.EventListener;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,7 +72,7 @@ public class ProduceMessageRequestHandler implements JournalqCommandHandler, Typ
         Connection connection = SessionHelper.getConnection(transport);
 
         if (connection == null || !connection.isAuthorized(produceMessageRequest.getApp())) {
-            logger.warn("connection is not exists, transport: {}", transport);
+            logger.warn("connection is not exists, transport: {}, app: {}", transport, produceMessageRequest.getApp());
             return BooleanAck.build(JournalqCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
@@ -77,7 +80,7 @@ public class ProduceMessageRequestHandler implements JournalqCommandHandler, Typ
         boolean isNeedAck = !qosLevel.equals(QosLevel.ONE_WAY);
         CountDownLatch latch = new CountDownLatch(produceMessageRequest.getData().size());
         Map<String, ProduceMessageAckData> resultData = Maps.newConcurrentMap();
-        Traffic traffic = new Traffic(produceMessage.getApp());
+        Traffic traffic = new Traffic(produceMessageRequest.getApp());
 
         for (Map.Entry<String, ProduceMessageData> entry : produceMessageRequest.getData().entrySet()) {
             String topic = entry.getKey();
@@ -93,7 +96,8 @@ public class ProduceMessageRequestHandler implements JournalqCommandHandler, Typ
                 continue;
             }
 
-            BooleanResponse checkResult = clusterManager.checkWritable(TopicName.parse(topic), produceMessageRequest.getApp(), connection.getHost(), produceMessageData.getMessages().get(0).getPartition());
+            BooleanResponse checkResult = clusterManager.checkWritable(TopicName.parse(topic), produceMessageRequest.getApp(),
+                    connection.getHost(), produceMessageData.getMessages().get(0).getPartition());
             if (!checkResult.isSuccess()) {
                 logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport, topic, produceMessageRequest.getApp(), checkResult.getJournalqCode());
                 resultData.put(topic, buildAck(produceMessageData, CheckResultConverter.convertProduceCode(checkResult.getJournalqCode())));

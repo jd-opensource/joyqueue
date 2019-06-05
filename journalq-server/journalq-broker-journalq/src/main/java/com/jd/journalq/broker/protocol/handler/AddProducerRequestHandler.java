@@ -3,10 +3,10 @@ package com.jd.journalq.broker.protocol.handler;
 import com.google.common.collect.Maps;
 import com.jd.journalq.broker.BrokerContext;
 import com.jd.journalq.broker.BrokerContextAware;
-import com.jd.journalq.broker.protocol.JournalqCommandHandler;
 import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.helper.SessionHelper;
 import com.jd.journalq.broker.monitor.SessionManager;
+import com.jd.journalq.broker.protocol.JournalqCommandHandler;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.command.AddProducerRequest;
@@ -48,7 +48,7 @@ public class AddProducerRequestHandler implements JournalqCommandHandler, Type, 
         Connection connection = SessionHelper.getConnection(transport);
 
         if (connection == null || !connection.isAuthorized(addProducerRequest.getApp())) {
-            logger.warn("connection is not exists, transport: {}", transport);
+            logger.warn("connection is not exists, transport: {}, app: {}", transport, addProducerRequest.getApp());
             return BooleanAck.build(JournalqCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
@@ -58,7 +58,7 @@ public class AddProducerRequestHandler implements JournalqCommandHandler, Type, 
             TopicName topicName = TopicName.parse(topic);
 
             if (clusterManager.tryGetProducer(topicName, addProducerRequest.getApp()) == null) {
-                logger.warn("addProducer failed, transport: {}, topic: {}, app: {}, code: {}", transport, topicName, addProducer.getApp());
+                logger.warn("addProducer failed, transport: {}, topic: {}, app: {}, code: {}", transport, topicName, addProducerRequest.getApp());
                 return BooleanAck.build(JournalqCode.CN_NO_PERMISSION);
             }
 

@@ -28,6 +28,7 @@ import com.jd.journalq.domain.Topic;
 import com.jd.journalq.domain.TopicConfig;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.event.NameServerEvent;
+import com.jd.journalq.network.command.CommandType;
 import com.jd.journalq.network.command.GetTopics;
 import com.jd.journalq.network.command.GetTopicsAck;
 import com.jd.journalq.network.command.SubscribeAck;
@@ -148,7 +149,8 @@ public class ThinNameService extends Service implements NameService, PropertySup
 
     @Override
     public List<TopicConfig> subscribe(List<Subscription> subscriptions, ClientType clientType) {
-        Command request = new Command(new JournalqHeader(Direction.REQUEST, NsrCommandType.SUBSCRIBE), new com.jd.journalq.network.command.Subscribe().subscriptions(subscriptions).clientType(clientType));
+        Command request = new Command(new JournalqHeader(Direction.REQUEST, NsrCommandType.SUBSCRIBE),
+                new com.jd.journalq.network.command.Subscribe().subscriptions(subscriptions).clientType(clientType));
         Command response = send(request);
         if (!response.isSuccess()) {
             logger.error("subscribe error request {},response {}", request, response);

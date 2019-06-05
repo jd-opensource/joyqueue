@@ -42,8 +42,4 @@ public class CommandInvocation extends SimpleChannelInboundHandler<Command> {
     public CommandDispatcher getCommandDispatcher() {
         return commandDispatcher;
     }
-
-    public CommandDispatcher getCommandDispatcher() {
-        return commandDispatcher;
-    }
 }

@@ -38,7 +38,8 @@ public class Coordinator {
     private CoordinatorInitializer coordinatorInitializer;
     private CoordinatorSessionManager coordinatorSessionManager;
 
-    public Coordinator(CoordinatorConfig config, ClusterManager clusterManager, CoordinatorResolver coordinatorResolver, CoordinatorInitializer coordinatorInitializer, CoordinatorSessionManager coordinatorSessionManager) {
+    public Coordinator(CoordinatorConfig config, ClusterManager clusterManager, CoordinatorResolver coordinatorResolver,
+                       CoordinatorInitializer coordinatorInitializer, CoordinatorSessionManager coordinatorSessionManager) {
         this.config = config;
         this.clusterManager = clusterManager;
         this.coordinatorResolver = coordinatorResolver;

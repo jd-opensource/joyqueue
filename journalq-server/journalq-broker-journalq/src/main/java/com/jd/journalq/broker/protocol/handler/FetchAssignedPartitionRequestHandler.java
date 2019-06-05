@@ -66,7 +66,7 @@ public class FetchAssignedPartitionRequestHandler implements JournalqCommandHand
         String connectionId = ((InetSocketAddress) transport.remoteAddress()).getHostString();
 
         if (connection == null || !connection.isAuthorized(fetchAssignedPartitionRequest.getApp())) {
-            logger.warn("connection is not exists, transport: {}", transport);
+            logger.warn("connection is not exists, transport: {}, app: {}", transport, fetchAssignedPartitionRequest.getApp());
             return BooleanAck.build(JournalqCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
@@ -77,7 +77,9 @@ public class FetchAssignedPartitionRequestHandler implements JournalqCommandHand
 
         Map<String, FetchAssignedPartitionAckData> topicPartitions = Maps.newHashMapWithExpectedSize(fetchAssignedPartitionRequest.getData().size());
         for (FetchAssignedPartitionData fetchAssignedPartitionData : fetchAssignedPartitionRequest.getData()) {
-            FetchAssignedPartitionAckData fetchAssignedPartitionAckData = assignPartition(fetchAssignedPartitionData, fetchAssignedPartitionRequest.getApp(), connection.getRegion(), connectionId, connection.getAddressStr());
+            FetchAssignedPartitionAckData fetchAssignedPartitionAckData = assignPartition(fetchAssignedPartitionData,
+                    fetchAssignedPartitionRequest.getApp(), connection.getRegion(), connectionId, connection.getAddressStr());
+
             if (fetchAssignedPartitionAckData == null) {
                 logger.warn("partitionAssignment is null, topic: {}, app: {}, transport: {}", fetchAssignedPartitionData, fetchAssignedPartitionRequest.getApp(), transport);
                 fetchAssignedPartitionAckData = new FetchAssignedPartitionAckData(JournalqCode.FW_COORDINATOR_PARTITION_ASSIGNOR_ERROR);
@@ -106,7 +108,8 @@ public class FetchAssignedPartitionRequestHandler implements JournalqCommandHand
             return new FetchAssignedPartitionAckData(JournalqCode.FW_COORDINATOR_PARTITION_ASSIGNOR_NO_PARTITIONS);
         }
 
-        PartitionAssignment partitionAssignment = partitionAssignmentHandler.assign(fetchAssignedPartitionData.getTopic(), app, connectionId, connectionHost, fetchAssignedPartitionData.getSessionTimeout(), topicPartitionGroups);
+        PartitionAssignment partitionAssignment = partitionAssignmentHandler.assign(fetchAssignedPartitionData.getTopic(),
+                app, connectionId, connectionHost, fetchAssignedPartitionData.getSessionTimeout(), topicPartitionGroups);
         return new FetchAssignedPartitionAckData(partitionAssignment.getPartitions(), JournalqCode.SUCCESS);
     }
 

@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jd.journalq.broker.command;
+package com.jd.journalq.broker.protocol.command;
 
 import com.jd.journalq.broker.network.traffic.FetchTrafficPayload;
 import com.jd.journalq.broker.network.traffic.Traffic;

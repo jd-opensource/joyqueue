@@ -27,7 +27,6 @@ import com.jd.journalq.client.internal.consumer.transport.ConsumerClientManager;
 import com.jd.journalq.client.internal.metadata.domain.TopicMetadata;
 import com.jd.journalq.client.internal.nameserver.NameServerConfig;
 import com.jd.journalq.client.internal.nameserver.helper.NameServerHelper;
-import com.jd.journalq.domain.Topic;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.domain.TopicType;
 import com.jd.journalq.exception.JournalqCode;

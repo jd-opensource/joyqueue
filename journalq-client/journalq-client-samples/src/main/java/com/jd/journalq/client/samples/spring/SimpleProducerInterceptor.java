@@ -1,6 +1,5 @@
 package com.jd.journalq.client.samples.spring;
 
-import com.alibaba.fastjson.JSON;
 import io.openmessaging.interceptor.Context;
 import io.openmessaging.interceptor.ProducerInterceptor;
 import io.openmessaging.message.Message;

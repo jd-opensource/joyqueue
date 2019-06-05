@@ -46,7 +46,8 @@ public class TransactionSegmentCompletionHandler {
     private long currentIndex = 0;
     private long committedIndex = 0;
 
-    public TransactionSegmentCompletionHandler(KafkaConfig config, Coordinator coordinator, TransactionMetadataManager transactionMetadataManager, TransactionLogSegment transactionLogSegment, TransactionSynchronizer transactionSynchronizer) {
+    public TransactionSegmentCompletionHandler(KafkaConfig config, Coordinator coordinator, TransactionMetadataManager transactionMetadataManager,
+                                               TransactionLogSegment transactionLogSegment, TransactionSynchronizer transactionSynchronizer) {
         this.config = config;
         this.coordinator = coordinator;
         this.transactionMetadataManager = transactionMetadataManager;
@@ -107,7 +108,8 @@ public class TransactionSegmentCompletionHandler {
     }
 
     protected UnCompletedTransactionMetadata handlePrepare(TransactionPrepare transactionPrepare, long index) {
-        String key = generateKey(transactionPrepare.getApp(), transactionPrepare.getTransactionId(), transactionPrepare.getProducerId(), transactionPrepare.getProducerEpoch(), transactionPrepare.getEpoch());
+        String key = generateKey(transactionPrepare.getApp(), transactionPrepare.getTransactionId(), transactionPrepare.getProducerId(),
+                transactionPrepare.getProducerEpoch(), transactionPrepare.getEpoch());
         UnCompletedTransactionMetadata unCompletedTransaction = unCompletedTransactionMap.get(key);
         if (unCompletedTransaction == null) {
             unCompletedTransaction = new UnCompletedTransactionMetadata();
@@ -129,7 +131,8 @@ public class TransactionSegmentCompletionHandler {
     }
 
     protected UnCompletedTransactionMetadata handleOffset(TransactionOffset transactionOffset, long index) {
-        String key = generateKey(transactionOffset.getApp(), transactionOffset.getTransactionId(), transactionOffset.getProducerId(), transactionOffset.getProducerEpoch(), transactionOffset.getEpoch());
+        String key = generateKey(transactionOffset.getApp(), transactionOffset.getTransactionId(), transactionOffset.getProducerId(),
+                transactionOffset.getProducerEpoch(), transactionOffset.getEpoch());
         UnCompletedTransactionMetadata unCompletedTransaction = unCompletedTransactionMap.get(key);
         if (unCompletedTransaction == null) {
             return null;
@@ -141,7 +144,8 @@ public class TransactionSegmentCompletionHandler {
     }
 
     protected UnCompletedTransactionMetadata handleMarker(TransactionMarker transactionMarker, long index) {
-        String key = generateKey(transactionMarker.getApp(), transactionMarker.getTransactionId(), transactionMarker.getProducerId(), transactionMarker.getProducerEpoch(), transactionMarker.getEpoch());
+        String key = generateKey(transactionMarker.getApp(), transactionMarker.getTransactionId(), transactionMarker.getProducerId(),
+                transactionMarker.getProducerEpoch(), transactionMarker.getEpoch());
         UnCompletedTransactionMetadata unCompletedTransaction = unCompletedTransactionMap.get(key);
         if (unCompletedTransaction == null || unCompletedTransaction.getState().equals(transactionMarker.getState())) {
             return null;

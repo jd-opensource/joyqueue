@@ -4,13 +4,14 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.jd.journalq.broker.BrokerContext;
 import com.jd.journalq.broker.BrokerContextAware;
-import com.jd.journalq.broker.protocol.JournalqCommandHandler;
 import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.consumer.Consume;
 import com.jd.journalq.broker.consumer.model.PullResult;
-import com.jd.journalq.broker.protocol.converter.CheckResultConverter;
 import com.jd.journalq.broker.helper.SessionHelper;
 import com.jd.journalq.broker.network.traffic.Traffic;
+import com.jd.journalq.broker.protocol.JournalqCommandHandler;
+import com.jd.journalq.broker.protocol.command.FetchPartitionMessageResponse;
+import com.jd.journalq.broker.protocol.converter.CheckResultConverter;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.exception.JournalqException;
@@ -18,7 +19,6 @@ import com.jd.journalq.network.command.BooleanAck;
 import com.jd.journalq.network.command.FetchPartitionMessageAckData;
 import com.jd.journalq.network.command.FetchPartitionMessageData;
 import com.jd.journalq.network.command.FetchPartitionMessageRequest;
-import com.jd.journalq.network.command.FetchPartitionMessageResponse;
 import com.jd.journalq.network.command.JournalqCommandType;
 import com.jd.journalq.network.session.Connection;
 import com.jd.journalq.network.session.Consumer;
@@ -57,12 +57,12 @@ public class FetchPartitionMessageRequestHandler implements JournalqCommandHandl
         Connection connection = SessionHelper.getConnection(transport);
 
         if (connection == null || !connection.isAuthorized(fetchPartitionMessageRequest.getApp())) {
-            logger.warn("connection is not exists, transport: {}", transport);
+            logger.warn("connection is not exists, transport: {}, app: {}", transport, fetchPartitionMessageRequest.getApp());
             return BooleanAck.build(JournalqCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
         Table<String, Short, FetchPartitionMessageAckData> result = HashBasedTable.create();
-        Traffic traffic = new Traffic(fetchPartitionMessage.getApp());
+        Traffic traffic = new Traffic(fetchPartitionMessageRequest.getApp());
 
         for (Map.Entry<String, Map<Short, FetchPartitionMessageData>> entry : fetchPartitionMessageRequest.getPartitions().rowMap().entrySet()) {
             String topic = entry.getKey();
@@ -70,15 +70,18 @@ public class FetchPartitionMessageRequestHandler implements JournalqCommandHandl
             for (Map.Entry<Short, FetchPartitionMessageData> partitionEntry : entry.getValue().entrySet()) {
                 short partition = partitionEntry.getKey();
 
-                BooleanResponse checkResult = clusterManager.checkReadable(TopicName.parse(topic), fetchPartitionMessageRequest.getApp(), connection.getHost(), partition);
+                BooleanResponse checkResult = clusterManager.checkReadable(TopicName.parse(topic), fetchPartitionMessageRequest.getApp(),
+                        connection.getHost(), partition);
                 if (!checkResult.isSuccess()) {
-                    logger.warn("checkReadable failed, transport: {}, topic: {}, partition: {}, app: {}, code: {}", transport, consumer.getTopic(), partition, consumer.getApp(), checkResult.getJournalqCode());
+                    logger.warn("checkReadable failed, transport: {}, topic: {}, partition: {}, app: {}, code: {}", transport,
+                            consumer.getTopic(), partition, consumer.getApp(), checkResult.getJournalqCode());
                     buildFetchPartitionMessageAckData(topic, entry.getValue(), CheckResultConverter.convertFetchCode(checkResult.getJournalqCode()), result);
                     continue;
                 }
 
                 FetchPartitionMessageData fetchPartitionMessageData = partitionEntry.getValue();
-                FetchPartitionMessageAckData fetchPartitionMessageAckData = fetchMessage(transport, consumer, partition, fetchPartitionMessageData.getIndex(), fetchPartitionMessageData.getCount());
+                FetchPartitionMessageAckData fetchPartitionMessageAckData = fetchMessage(transport, consumer, partition,
+                        fetchPartitionMessageData.getIndex(), fetchPartitionMessageData.getCount());
                 result.put(topic, partitionEntry.getKey(), fetchPartitionMessageAckData);
                 traffic.record(topic, fetchPartitionMessageAckData.getSize());
             }

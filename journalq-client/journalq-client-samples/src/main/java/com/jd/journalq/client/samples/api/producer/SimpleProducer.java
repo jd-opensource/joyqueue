@@ -37,7 +37,7 @@ public class SimpleProducer {
         // 自定义发送的partition
         // 最好根据元数据自定义分配，不要写死partitions
 //        List<QueueMetaData.Partition> partitions = producer.getQueueMetaData("test_topic_0").partitions();
-//        QueueMetaData.Partition partition = partitions.get((int) System.currentTimeMillis() % partitions.size());
+//        QueueMetaData.Partition partition = partitions.get((int) SystemClock.now() % partitions.size());
 //        message.extensionHeader().get().setPartition(partition.partitionId());
 
         // 生产消息，不抛异常就算成功，sendResult里的messageId暂时没有意义

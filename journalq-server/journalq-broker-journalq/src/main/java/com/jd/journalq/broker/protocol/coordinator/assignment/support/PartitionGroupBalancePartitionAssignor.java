@@ -74,7 +74,8 @@ public class PartitionGroupBalancePartitionAssignor implements PartitionAssignor
         return buildPartitionAssignment(member, assignedPartitionGroups);
     }
 
-    protected List<PartitionGroup> doAssign(GroupMetadata group, TopicPartitionGroupAssignmentMetadata topicPartitionGroupAssignmentMetadata, List<PartitionGroup> partitionGroups, int minConnections) {
+    protected List<PartitionGroup> doAssign(GroupMetadata group, TopicPartitionGroupAssignmentMetadata topicPartitionGroupAssignmentMetadata,
+                                            List<PartitionGroup> partitionGroups, int minConnections) {
         // 返回相对空闲的partitionGroup
         List<PartitionGroup> idledPartitionGroups = getIdledPartitionGroups(topicPartitionGroupAssignmentMetadata, partitionGroups, minConnections);
 
@@ -124,7 +125,8 @@ public class PartitionGroupBalancePartitionAssignor implements PartitionAssignor
         return result;
     }
 
-    protected void saveAssignedPartitionGroups(TopicPartitionGroupAssignmentMetadata topicPartitionGroupAssignmentMetadata, GroupMemberMetadata member, String topic, List<PartitionGroup> assignedPartitionGroups) {
+    protected void saveAssignedPartitionGroups(TopicPartitionGroupAssignmentMetadata topicPartitionGroupAssignmentMetadata,
+                                               GroupMemberMetadata member, String topic, List<PartitionGroup> assignedPartitionGroups) {
         for (PartitionGroup assignedPartitionGroup : assignedPartitionGroups) {
             assignPartitionGroup(member, topicPartitionGroupAssignmentMetadata, assignedPartitionGroup.getGroup());
         }

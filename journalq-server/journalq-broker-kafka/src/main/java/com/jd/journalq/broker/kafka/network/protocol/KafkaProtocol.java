@@ -35,20 +35,17 @@ import com.jd.journalq.broker.kafka.coordinator.transaction.completion.Transacti
 import com.jd.journalq.broker.kafka.coordinator.transaction.completion.TransactionCompletionScheduler;
 import com.jd.journalq.broker.kafka.coordinator.transaction.log.TransactionLog;
 import com.jd.journalq.broker.kafka.coordinator.transaction.synchronizer.TransactionSynchronizer;
-import com.jd.journalq.broker.kafka.handler.ratelimit.KafkaRateLimitHandlerFactory;
 import com.jd.journalq.broker.kafka.manage.KafkaManageServiceFactory;
 import com.jd.journalq.broker.kafka.network.helper.KafkaProtocolHelper;
 import com.jd.journalq.broker.kafka.session.KafkaConnectionHandler;
 import com.jd.journalq.broker.kafka.session.KafkaConnectionManager;
 import com.jd.journalq.broker.kafka.session.KafkaTransportHandler;
-import com.jd.journalq.broker.kafka.util.RateLimiter;
 import com.jd.journalq.network.protocol.CommandHandlerProvider;
 import com.jd.journalq.network.protocol.ExceptionHandlerProvider;
 import com.jd.journalq.network.protocol.ProtocolService;
 import com.jd.journalq.network.transport.codec.CodecFactory;
 import com.jd.journalq.network.transport.command.handler.CommandHandlerFactory;
 import com.jd.journalq.network.transport.command.handler.ExceptionHandler;
-import com.jd.journalq.toolkit.delay.DelayedOperationManager;
 import com.jd.journalq.toolkit.service.Service;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
@@ -88,15 +85,16 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
     private TransactionCoordinator transactionCoordinator;
     private KafkaConnectionManager connectionManager;
 
-    private KafkaRateLimitHandlerFactory rateLimitHandlerFactory;
     private KafkaConnectionHandler connectionHandler;
     private KafkaTransportHandler transportHandler;
     private KafkaContext kafkaContext;
 
     @Override
     public void setBrokerContext(BrokerContext brokerContext) {
-        com.jd.journalq.broker.coordinator.group.GroupMetadataManager groupMetadataManager = brokerContext.getCoordinatorService().getOrCreateGroupMetadataManager(KafkaConsts.COORDINATOR_NAMESPACE);
-        com.jd.journalq.broker.coordinator.transaction.TransactionMetadataManager transactionMetadataManager = brokerContext.getCoordinatorService().getOrCreateTransactionMetadataManager(KafkaConsts.COORDINATOR_NAMESPACE);
+        com.jd.journalq.broker.coordinator.group.GroupMetadataManager groupMetadataManager =
+                brokerContext.getCoordinatorService().getOrCreateGroupMetadataManager(KafkaConsts.COORDINATOR_NAMESPACE);
+        com.jd.journalq.broker.coordinator.transaction.TransactionMetadataManager transactionMetadataManager =
+                brokerContext.getCoordinatorService().getOrCreateTransactionMetadataManager(KafkaConsts.COORDINATOR_NAMESPACE);
 
         this.config = new KafkaConfig(brokerContext.getPropertySupplier());
         this.coordinator = new Coordinator(brokerContext.getCoordinatorService().getCoordinator());
@@ -120,7 +118,6 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
         this.transactionCoordinator = new TransactionCoordinator(coordinator, this.transactionMetadataManager, transactionHandler, transactionOffsetHandler);
 
         this.connectionManager = new KafkaConnectionManager(brokerContext.getSessionManager());
-        this.rateLimitHandlerFactory = newRateLimitKafkaHandlerFactory(config);
 
         this.connectionHandler = new KafkaConnectionHandler(connectionManager);
         this.transportHandler = new KafkaTransportHandler();
@@ -150,7 +147,6 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
         transactionOffsetHandler.start();
         transactionCompletionHandler.start();
         transactionCompletionScheduler.start();
-        rateLimitHandlerFactory.start();
     }
 
     @Override
@@ -168,7 +164,6 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
         transactionSynchronizer.stop();
         transactionLog.stop();
         transactionCoordinator.stop();
-        rateLimitHandlerFactory.stop();
     }
 
     @Override

@@ -51,7 +51,9 @@ public class ConsumerPolicy {
 
     }
 
-    public ConsumerPolicy(Boolean nearby, Boolean paused, Boolean archive, Boolean retry, Boolean seq, Integer ackTimeout, Short batchSize, Integer concurrent, Integer delay, Set<String> blackList, Integer errTimes, Integer maxPartitionNum, Integer readRetryProbability, Map<String, String> filters) {
+    public ConsumerPolicy(Boolean nearby, Boolean paused, Boolean archive, Boolean retry, Boolean seq, Integer ackTimeout,
+                          Short batchSize, Integer concurrent, Integer delay, Set<String> blackList, Integer errTimes,
+                          Integer maxPartitionNum, Integer readRetryProbability, Map<String, String> filters) {
         this.nearby = nearby;
         this.paused = paused;
         this.archive = archive;

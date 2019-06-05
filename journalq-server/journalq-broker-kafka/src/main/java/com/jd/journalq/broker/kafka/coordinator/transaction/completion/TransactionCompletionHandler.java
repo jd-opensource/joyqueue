@@ -34,7 +34,8 @@ public class TransactionCompletionHandler extends Service {
 
     private Map<Short, TransactionSegmentCompletionHandler> handlerMap = Maps.newHashMap();
 
-    public TransactionCompletionHandler(KafkaConfig config, Coordinator coordinator, TransactionMetadataManager transactionMetadataManager, TransactionLog transactionLog, TransactionSynchronizer transactionSynchronizer) {
+    public TransactionCompletionHandler(KafkaConfig config, Coordinator coordinator, TransactionMetadataManager transactionMetadataManager,
+                                        TransactionLog transactionLog, TransactionSynchronizer transactionSynchronizer) {
         this.config = config;
         this.coordinator = coordinator;
         this.transactionMetadataManager = transactionMetadataManager;

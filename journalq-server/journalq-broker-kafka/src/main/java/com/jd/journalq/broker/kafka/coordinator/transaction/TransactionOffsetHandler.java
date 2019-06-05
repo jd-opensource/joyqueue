@@ -60,7 +60,8 @@ public class TransactionOffsetHandler extends Service {
         return true;
     }
 
-    public Map<String, List<PartitionMetadataAndError>> commitOffset(String clientId, String transactionId, String groupId, long producerId, short producerEpoch, Map<String, List<OffsetAndMetadata>> offsetts) {
+    public Map<String, List<PartitionMetadataAndError>> commitOffset(String clientId, String transactionId, String groupId,
+                                                                     long producerId, short producerEpoch, Map<String, List<OffsetAndMetadata>> offsetts) {
         checkCoordinatorState(clientId, transactionId);
 
         TransactionMetadata transactionMetadata = transactionMetadataManager.getTransaction(transactionId);
@@ -86,8 +87,10 @@ public class TransactionOffsetHandler extends Service {
 
         for (Map.Entry<String, List<OffsetAndMetadata>> entry : offsets.entrySet()) {
             for (OffsetAndMetadata offsetAndMetadata : entry.getValue()) {
-                transactionOffsets.add(new TransactionOffset(entry.getKey(), (short) offsetAndMetadata.getPartition(), offsetAndMetadata.getOffset(), transactionMetadata.getApp(),
-                        transactionMetadata.getId(), transactionMetadata.getProducerId(), transactionMetadata.getProducerEpoch(), transactionMetadata.getEpoch(), transactionMetadata.getTimeout(), SystemClock.now()));
+                transactionOffsets.add(new TransactionOffset(entry.getKey(), (short) offsetAndMetadata.getPartition(),
+                        offsetAndMetadata.getOffset(), transactionMetadata.getApp(), transactionMetadata.getId(),
+                        transactionMetadata.getProducerId(), transactionMetadata.getProducerEpoch(), transactionMetadata.getEpoch(),
+                        transactionMetadata.getTimeout(), SystemClock.now()));
             }
         }
 

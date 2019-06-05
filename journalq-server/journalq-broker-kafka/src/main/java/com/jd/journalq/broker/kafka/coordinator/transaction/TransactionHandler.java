@@ -125,8 +125,10 @@ public class TransactionHandler extends Service {
                     partitionMetadataAndErrors.add(new PartitionMetadataAndError(partition, KafkaErrorCode.NOT_LEADER_FOR_PARTITION.getCode()));
                 } else {
                     Broker broker = partitionGroup.getLeaderBroker();
-                    TransactionPrepare prepare = new TransactionPrepare(topic.getFullName(), (short) partition.intValue(), transactionMetadata.getApp(), broker.getId(), broker.getIp(), broker.getPort(),
-                            transactionMetadata.getId(), transactionMetadata.getProducerId(), transactionMetadata.getProducerEpoch(), transactionMetadata.getEpoch(), transactionMetadata.getTimeout(), SystemClock.now());
+                    TransactionPrepare prepare = new TransactionPrepare(topic.getFullName(), (short) partition.intValue(),
+                            transactionMetadata.getApp(), broker.getId(), broker.getIp(), broker.getPort(),
+                            transactionMetadata.getId(), transactionMetadata.getProducerId(), transactionMetadata.getProducerEpoch(),
+                            transactionMetadata.getEpoch(), transactionMetadata.getTimeout(), SystemClock.now());
                     prepareSet.add(prepare);
                 }
             }

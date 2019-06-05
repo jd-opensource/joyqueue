@@ -14,7 +14,6 @@
 package com.jd.journalq.broker.kafka.network.codec;
 
 import com.google.common.collect.Lists;
-import com.jd.journalq.broker.kafka.network.KafkaPayloadCodec;
 import com.jd.journalq.broker.kafka.KafkaCommandType;
 import com.jd.journalq.broker.kafka.KafkaErrorCode;
 import com.jd.journalq.broker.kafka.command.TopicMetadataRequest;
@@ -23,7 +22,7 @@ import com.jd.journalq.broker.kafka.model.KafkaBroker;
 import com.jd.journalq.broker.kafka.model.KafkaPartitionMetadata;
 import com.jd.journalq.broker.kafka.model.KafkaTopicMetadata;
 import com.jd.journalq.broker.kafka.network.KafkaHeader;
-import com.jd.journalq.domain.TopicName;
+import com.jd.journalq.broker.kafka.network.KafkaPayloadCodec;
 import com.jd.journalq.network.serializer.Serializer;
 import com.jd.journalq.network.transport.command.Type;
 import com.jd.journalq.network.transport.exception.TransportException;
