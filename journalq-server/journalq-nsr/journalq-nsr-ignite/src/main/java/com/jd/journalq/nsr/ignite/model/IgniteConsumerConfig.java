@@ -47,6 +47,8 @@ public class IgniteConsumerConfig implements IgniteBaseModel, Binarylizable {
     public static final String COLUMN_ERROR_TIMES = "err_times";
     public static final String COLUMN_MAX_PARTITION_NUM = "max_partition_num";
     public static final String COLUMN_RETRY_READ_PROBABILITY = "retry_read_probability";
+    public static final String COLUMN_LIMIT_TPS = "limit_tps";
+    public static final String COLUMN_LIMIT_TRAFFIC = "limit_traffic";
 
     private IgniteConsumer consumer;
     /**
@@ -57,6 +59,10 @@ public class IgniteConsumerConfig implements IgniteBaseModel, Binarylizable {
      * 重试策略
      */
     private RetryPolicy retryPolicy;
+    /**
+     * 限流策略
+     */
+    private Consumer.ConsumerLimitPolicy limitPolicy;
 
     private String id;
 
@@ -64,7 +70,7 @@ public class IgniteConsumerConfig implements IgniteBaseModel, Binarylizable {
         this.consumer = consumer;
         this.consumerPolicy = consumer.getConsumerPolicy();
         this.retryPolicy = consumer.getRetryPolicy();
-
+        this.limitPolicy = consumer.getLimitPolicy();
     }
 
     public Consumer.ConsumerPolicy getConsumerPolicy() {
@@ -81,6 +87,14 @@ public class IgniteConsumerConfig implements IgniteBaseModel, Binarylizable {
 
     public void setRetryPolicy(RetryPolicy retryPolicy) {
         this.retryPolicy = retryPolicy;
+    }
+
+    public void setLimitPolicy(Consumer.ConsumerLimitPolicy limitPolicy) {
+        this.limitPolicy = limitPolicy;
+    }
+
+    public Consumer.ConsumerLimitPolicy getLimitPolicy() {
+        return limitPolicy;
     }
 
     @Override
@@ -120,6 +134,10 @@ public class IgniteConsumerConfig implements IgniteBaseModel, Binarylizable {
             writer.writeInt(COLUMN_RETRY_DELAY, retryPolicy.getRetryDelay());
             writer.writeInt(COLUMN_EXPIRE_TIME, retryPolicy.getExpireTime());
         }
+        if (limitPolicy != null) {
+            writer.writeInt(COLUMN_LIMIT_TPS, limitPolicy.getTps());
+            writer.writeInt(COLUMN_LIMIT_TRAFFIC, limitPolicy.getTraffic());
+        }
     }
 
     @Override
@@ -145,5 +163,6 @@ public class IgniteConsumerConfig implements IgniteBaseModel, Binarylizable {
                 .retryDelay(reader.readInt(COLUMN_RETRY_DELAY))
                 .expireTime(reader.readInt(COLUMN_EXPIRE_TIME))
                 .create();
+        this.limitPolicy = new Consumer.ConsumerLimitPolicy(reader.readInt(COLUMN_LIMIT_TPS), reader.readInt(COLUMN_LIMIT_TRAFFIC));
     }
 }

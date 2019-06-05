@@ -7,9 +7,9 @@
 </template>
 
 <script>
-import MyTable from '../../components/common/myTable'
-import apiRequest from '../../utils/apiRequest.js'
-import crud from '../../mixins/crud.js'
+import MyTable from '../../../components/common/myTable'
+import apiRequest from '../../../utils/apiRequest.js'
+import crud from '../../../mixins/crud.js'
 
 export default {
   name: 'partition',
@@ -20,22 +20,26 @@ export default {
       type: Boolean,
       default: false
     },
-    app: {
-      id: 0,
-      code: ''
-    },
-    subscribeGroup: '',
-    topic: {
-      id: '0',
-      code: ''
-    },
-    namespace: {
-      id: '0',
-      code: ''
-    },
-    type: {
-      type: Number,
-      default: 0
+    search: {
+      type: Object,
+      default: function () {
+        return {
+          subscribeGroup: '',
+          topic: {
+            id: '',
+            code: ''
+          },
+          namespace: {
+            id: '',
+            code: ''
+          },
+          app: {
+            id: '',
+            code: ''
+          },
+          type: 0
+        }
+      }
     },
     btns: {
       type: Array
@@ -68,25 +72,8 @@ export default {
   methods: {
     getList () {
       this.showTablePin = true
-      let payload = {
-        topic: {
-          id: this.topic.id,
-          code: this.topic.code
-        },
-        namespace: {
-          id: this.namespace.id,
-          code: this.namespace.code
-        },
-        app: {
-          id: this.app.id,
-          code: this.app.code
-        },
-        subscribeGroup: this.subscribeGroup || '',
-        type: this.type
-      }
-      // if(this.type == this.$store.getters.producerType) {
       // Find database
-      apiRequest.post(this.urls.search, {}, payload).then((resp) => {
+      apiRequest.post(this.urls.search, {}, this.search).then((resp) => {
         resp.data = resp.data || []
         this.tableData.rowData = resp.data
         this.showTablePin = false
@@ -95,11 +82,15 @@ export default {
         let that = this
         // add subscribe column
         for (let i = 0; i < that.tableData.rowData.length; i++) {
-          that.tableData.rowData[i].subscribe = payload
+          that.tableData.rowData[i].subscribe = this.search
         }
-        let requestUrl = this.type === this.$store.getters.producerType ? this.urls.findProducerPartitionGroups : this.urls.findConsumerPartitionGroups
-        apiRequest.postBase(requestUrl, {}, payload, false).then((data) => {
-          let monitorData = data.data || []
+        let requestUrl = this.type === this.$store.getters.producerType ? this.urls.findProducerPartitionGroups
+          : this.urls.findConsumerPartitionGroups
+        apiRequest.postBase(requestUrl, {}, this.search, false).then((data) => {
+          if (!data || !data.data) {
+            return
+          }
+          let monitorData = data.data
           for (let i = 0; i < that.tableData.rowData.length; i++) {
             for (let j = 0; j < monitorData.length; j++) {
               if (that.tableData.rowData[i].groupNo === monitorData[j].partitionGroup) {
@@ -115,14 +106,14 @@ export default {
                 that.$set(this.tableData.rowData, i, that.tableData.rowData[i])
               }
             }
-            that.tableData.rowData[i].subscribe = payload
+            // that.tableData.rowData[i].subscribe = this.search
           }
         })
       })
       // }
       // if(this.type == this.$store.getters.consumerType){
       //    //Only find by monitor service
-      //    apiRequest.postBase(this.urls.findConsumerPartitionGroups, {}, payload, false).then((data) => {
+      //    apiRequest.postBase(this.urls.findConsumerPartitionGroups, {}, this.search, false).then((data) => {
       //      if (data.code == 200) {
       //        this.tableData.rowData = data.data || [];
       //      }

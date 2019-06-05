@@ -122,7 +122,7 @@ public abstract class TransportClientSupport extends Service {
             if (e instanceof TransportException) {
                 throw (TransportException) e;
             } else {
-                throw new TransportException.UnknownException();
+                throw new TransportException.UnknownException(e.getMessage(), e);
             }
         }
     }

@@ -37,8 +37,9 @@ public class CommandInvocation extends SimpleChannelInboundHandler<Command> {
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Command command) throws Exception {
         commandDispatcher.dispatch(ctx.channel(), command);
-        if (ctx.pipeline().last() != this) {
-            ctx.fireChannelRead(command);
-        }
+    }
+
+    public CommandDispatcher getCommandDispatcher() {
+        return commandDispatcher;
     }
 }

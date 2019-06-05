@@ -47,12 +47,12 @@
 </template>
 
 <script>
-import MyTable from '../../components/common/myTable'
-import apiRequest from '../../utils/apiRequest.js'
-import crud from '../../mixins/crud.js'
-import myDialog from '../../components/common/myDialog.vue'
-import {getTopicCode, getAppCode} from '../../utils/common.js'
-import {timeStampToString} from '../../utils/dateTimeUtils'
+import MyTable from '../../../components/common/myTable'
+import apiRequest from '../../../utils/apiRequest.js'
+import crud from '../../../mixins/crud.js'
+import myDialog from '../../../components/common/myDialog.vue'
+import {getTopicCode, getAppCode} from '../../../utils/common.js'
+import {timeStampToString} from '../../../utils/dateTimeUtils'
 
 export default {
   name: 'offset',
@@ -64,56 +64,16 @@ export default {
       default: false
     },
     colData: {
-      type: Array
-    },
-    app: {
-      id: 0,
-      code: ''
-    },
-    subscribeGroup: '',
-    topic: {
-      id: '0',
-      code: ''
-    },
-    namespace: {
-      id: '0',
-      code: ''
-    },
-    type: {
-      type: Number,
-      default: 0
-    },
-    searchData: {},
-    url: {
-      type: Object
-    },
-    search: {
-      type: String,
-      default: ''
-    },
-    clientType: {
-      type: Number,
-      default: -1
-    }
-  },
-  data () {
-    return {
-      urls: {
-        search: '/consumer/offsets',
-        boundReset: '/consumer/offset/reset/location/', // MAX,MIN
-        offsetResetPartition: '/consumer/offset/reset/partition/', // partition/:partition/offset/:offset
-        offsetResetByTime: '/consumer/offset/reset/timestamp/'
-      },
-      tableData: {
-        rowData: [],
-        colData: [
+      type: Array,
+      default: function () {
+        return [
           {
             title: '分区',
             key: 'partition'
           },
           {
             title: '主',
-            key: 'leader',
+            key: 'leader'
           },
           {
             title: '最小值',
@@ -141,8 +101,43 @@ export default {
             title: '应答',
             key: 'offset'
           }
-
-        ],
+        ]
+      }
+    },
+    search: {
+      type: Object,
+      default: function () {
+        return {
+          topic: {
+            id: '',
+            code: ''
+          },
+          namespace: {
+            id: '',
+            code: ''
+          },
+          app: {
+            id: 0,
+            code: ''
+          },
+          subscribeGroup: '',
+          type: 1,
+          clientType: -1
+        }
+      }
+    }
+  },
+  data () {
+    return {
+      urls: {
+        search: '/consumer/offsets',
+        boundReset: '/consumer/offset/reset/location/', // MAX,MIN
+        offsetResetPartition: '/consumer/offset/reset/partition/', // partition/:partition/offset/:offset
+        offsetResetByTime: '/consumer/offset/reset/timestamp/'
+      },
+      tableData: {
+        rowData: [],
+        colData: this.colData,
         btns: [
           {
             txt: '重置消费位置',
@@ -185,8 +180,7 @@ export default {
         title: '提示',
         content: '确定将所有分区消费位置设成最' + (location === 'MIN' ? '小' : '大') + '值吗？'
       }).then(() => {
-        let data = _this.getSubscribe()
-        apiRequest.postBase(_this.urls.boundReset + location, {}, data, false).then((data) => {
+        apiRequest.postBase(_this.urls.boundReset + location, {}, _this.search, false).then((data) => {
           data.data = data.data
           if (data.data === 'success') {
             _this.$Message.success('重置成功')
@@ -198,7 +192,7 @@ export default {
       })
     },
     showResetOffset (item) {
-      this.partitionInfo.subscribe = this.getSubscribe()
+      this.partitionInfo.subscribe = this.search
       this.partitionInfo.topic = getTopicCode(this.partitionInfo.subscribe.topic, this.partitionInfo.subscribe.namespace)
       this.partitionInfo.app = getAppCode(this.partitionInfo.subscribe.app, this.partitionInfo.subscribe.subscribeGroup)
       if (!item) {
@@ -210,9 +204,8 @@ export default {
       this.openDialog('resetDialog')
     },
     resetPartitionOffset () {
-      let data = this.getSubscribe()
       let path = this.partitionInfo.partition.partition + '/offset/' + this.partitionInfo.offset
-      apiRequest.postBase(this.urls.offsetResetPartition + path, {}, data, false).then((data) => {
+      apiRequest.postBase(this.urls.offsetResetPartition + path, {}, this.search, false).then((data) => {
         data.data = data.data
         if (data.data === 'success') {
           this.$Message.success('重置成功')
@@ -234,8 +227,7 @@ export default {
 
     },
     resetAppOffset () {
-      let data = this.getSubscribe()
-      apiRequest.postBase(this.urls.offsetResetByTime + this.partitionInfo.time, {}, data, false).then((data) => {
+      apiRequest.postBase(this.urls.offsetResetByTime + this.partitionInfo.time, {}, this.search, false).then((data) => {
         data.data = data.data
         if (data.data === 'success') {
           this.$Message.success('重置成功')
@@ -248,10 +240,9 @@ export default {
     },
     getList () {
       this.showTablePin = true
-      let data = this.getSubscribe()
-      apiRequest.postBase(this.urls.search, {}, data, false).then((data) => {
+      apiRequest.postBase(this.urls.search, {}, this.search, false).then((data) => {
         data.data = data.data || []
-        for (var i = 0; i < data.data.length; i++) {
+        for (let i = 0; i < data.data.length; i++) {
           data.data[i].offset = data.data[i].index
         }
         this.tableData.rowData = data.data
@@ -259,26 +250,6 @@ export default {
         this.page.total = data.data.length
         this.showTablePin = false
       })
-    },
-    getSubscribe () {
-      let data = {
-        topic: {
-          id: this.topic.id,
-          code: this.topic.code
-        },
-        namespace: {
-          id: this.namespace.id,
-          code: this.namespace.code
-        },
-        app: {
-          id: this.app.id,
-          code: this.app.code
-        },
-        subscribeGroup: this.subscribeGroup || '',
-        type: this.type,
-        clientType: this.clientType
-      }
-      return data
     }
   }
 

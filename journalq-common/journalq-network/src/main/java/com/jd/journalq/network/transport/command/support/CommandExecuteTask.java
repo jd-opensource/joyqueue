@@ -36,14 +36,14 @@ public class CommandExecuteTask implements Runnable {
     protected static final Logger logger = LoggerFactory.getLogger(CommandExecuteTask.class);
 
     private Transport transport;
-    private Command command;
+    private Command request;
     private CommandHandler commandHandler;
     private CommandHandlerFilterFactory commandHandlerFilterFactory;
     private ExceptionHandler exceptionHandler;
 
-    public CommandExecuteTask(Transport transport, Command command, CommandHandler commandHandler, CommandHandlerFilterFactory commandHandlerFilterFactory, ExceptionHandler exceptionHandler) {
+    public CommandExecuteTask(Transport transport, Command request, CommandHandler commandHandler, CommandHandlerFilterFactory commandHandlerFilterFactory, ExceptionHandler exceptionHandler) {
         this.transport = transport;
-        this.command = command;
+        this.request = request;
         this.commandHandler = commandHandler;
         this.commandHandlerFilterFactory = commandHandlerFilterFactory;
         this.exceptionHandler = exceptionHandler;
@@ -53,17 +53,17 @@ public class CommandExecuteTask implements Runnable {
     public void run() {
         try {
             List<CommandHandlerFilter> commandHandlerFilters = commandHandlerFilterFactory.getFilters();
-            CommandHandlerInvocation commandHandlerInvocation = new CommandHandlerInvocation(transport, command, commandHandler, commandHandlerFilters);
+            CommandHandlerInvocation commandHandlerInvocation = new CommandHandlerInvocation(transport, request, commandHandler, commandHandlerFilters);
             Command response = commandHandlerInvocation.invoke();
 
             if (response != null) {
-                transport.acknowledge(command, response);
+                transport.acknowledge(request, response);
             }
         } catch (Throwable t) {
-            logger.error("command handler exception, tratnsport: {}, command: {}", transport, command, t);
+            logger.error("command handler exception, tratnsport: {}, command: {}", transport, request, t);
 
             if (exceptionHandler != null) {
-                exceptionHandler.handle(transport, command, t);
+                exceptionHandler.handle(transport, request, t);
             }
         }
     }

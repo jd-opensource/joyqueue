@@ -56,6 +56,7 @@ public class IgniteConsumer extends Consumer implements IgniteBaseModel, Binaryl
         this.topicType = consumer.getTopicType();
         this.consumerPolicy = consumer.getConsumerPolicy();
         this.retryPolicy = consumer.getRetryPolicy();
+        this.limitPolicy = consumer.getLimitPolicy();
     }
 
     @Override
@@ -71,6 +72,7 @@ public class IgniteConsumer extends Consumer implements IgniteBaseModel, Binaryl
         if (null != consumerConfig) {
             this.consumerPolicy = consumerConfig.getConsumerPolicy();
             this.retryPolicy = consumerConfig.getRetryPolicy();
+            this.limitPolicy = consumerConfig.getLimitPolicy();
         }
         return this;
     }

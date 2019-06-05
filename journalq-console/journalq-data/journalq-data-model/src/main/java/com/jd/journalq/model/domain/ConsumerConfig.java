@@ -115,6 +115,10 @@ public class ConsumerConfig extends BaseNsrModel {
 
     private String filters;
 
+    private int limitTps;
+
+    private int limitTraffic;
+
 
     public boolean isNearBy() {
         return nearBy;
@@ -250,6 +254,22 @@ public class ConsumerConfig extends BaseNsrModel {
 
     public void setFilters(String filters) {
         this.filters = filters;
+    }
+
+    public void setLimitTps(int limitTps) {
+        this.limitTps = limitTps;
+    }
+
+    public int getLimitTps() {
+        return limitTps;
+    }
+
+    public void setLimitTraffic(int limitTraffic) {
+        this.limitTraffic = limitTraffic;
+    }
+
+    public int getLimitTraffic() {
+        return limitTraffic;
     }
 
     public OffsetMode getOffsetMode() {

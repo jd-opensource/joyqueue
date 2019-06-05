@@ -86,6 +86,14 @@ public class DelayedJoin extends DelayedOperation {
             }
         }
 
+        // 如果member为空，那么移除group
+        if (group.isMemberEmpty()) {
+            logger.info("group {} generation {} is dead and removed", group.getId(), group.getGenerationId());
+            group.transitionStateTo(GroupState.DEAD);
+            groupMetadataManager.removeGroup(group);
+            return;
+        }
+
         // join成功
         if (!group.stateIs(GroupState.DEAD)) {
             group.initNextGeneration();

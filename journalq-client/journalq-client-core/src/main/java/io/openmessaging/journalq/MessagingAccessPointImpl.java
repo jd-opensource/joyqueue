@@ -33,6 +33,9 @@ import io.openmessaging.journalq.consumer.support.ConsumerImpl;
 import io.openmessaging.journalq.producer.message.MessageFactoryAdapter;
 import io.openmessaging.journalq.producer.support.ProducerImpl;
 import io.openmessaging.journalq.producer.support.TransactionProducerImpl;
+import io.openmessaging.journalq.support.ConsumerWrapper;
+import io.openmessaging.journalq.support.MessageAccessPointHolder;
+import io.openmessaging.journalq.support.ProducerWrapper;
 import io.openmessaging.manager.ResourceManager;
 import io.openmessaging.message.MessageFactory;
 import io.openmessaging.producer.Producer;
@@ -58,7 +61,7 @@ public class MessagingAccessPointImpl implements MessagingAccessPoint {
     private ConsumerConfig consumerConfig;
     private TxFeedbackConfig txFeedbackConfig;
     private MessageFactory messageFactory;
-    private MessageAccessPoint messageAccessPoint;
+    private MessageAccessPointHolder messageAccessPointHolder;
 
     public MessagingAccessPointImpl(KeyValue attributes) {
         this.attributes = attributes;
@@ -68,41 +71,54 @@ public class MessagingAccessPointImpl implements MessagingAccessPoint {
         this.consumerConfig = KeyValueConverter.convertConsumerConfig(nameServerConfig, attributes);
         this.txFeedbackConfig = KeyValueConverter.convertFeedbackConfig(nameServerConfig, attributes);
         this.messageFactory = createMessageFactory();
-        this.messageAccessPoint = createMessageAccessPoint();
     }
 
     protected MessageFactory createMessageFactory() {
         return new MessageFactoryAdapter();
     }
 
-    protected MessageAccessPoint createMessageAccessPoint() {
+    @Override
+    public synchronized Producer createProducer() {
+        MessageAccessPointHolder messageAccessPointHolder = getOrCreateMessageAccessPointHolder();
+        MessageAccessPoint messageAccessPoint = messageAccessPointHolder.getMessageAccessPoint();
+        MessageProducer messageProducer = messageAccessPoint.createProducer(producerConfig);
+        ProducerImpl producer = new ProducerImpl(messageProducer, messageFactory);
+        return new ProducerWrapper(producer, messageAccessPointHolder);
+    }
+
+    @Override
+    public synchronized Producer createProducer(TransactionStateCheckListener transactionStateCheckListener) {
+        MessageAccessPointHolder messageAccessPointHolder = getOrCreateMessageAccessPointHolder();
+        MessageAccessPoint messageAccessPoint = messageAccessPointHolder.getMessageAccessPoint();
+        MessageProducer messageProducer = messageAccessPoint.createProducer(producerConfig);
+        ProducerImpl producer = new ProducerImpl(messageProducer, messageFactory);
+        TransactionProducerImpl transactionProducer = new TransactionProducerImpl(producer, transactionStateCheckListener, messageProducer, messageAccessPoint, txFeedbackConfig);
+        return new ProducerWrapper(transactionProducer, messageAccessPointHolder);
+    }
+
+    @Override
+    public synchronized Consumer createConsumer() {
+        MessageAccessPointHolder messageAccessPointHolder = getOrCreateMessageAccessPointHolder();
+        MessageAccessPoint messageAccessPoint = messageAccessPointHolder.getMessageAccessPoint();
+        MessageConsumer messageConsumer = messageAccessPoint.createConsumer(consumerConfig);
+        ConsumerImpl consumer = new ConsumerImpl(messageConsumer);
+        return new ConsumerWrapper(consumer, messageAccessPointHolder);
+    }
+
+    protected MessageAccessPointHolder getOrCreateMessageAccessPointHolder() {
+        if (messageAccessPointHolder != null && messageAccessPointHolder.getMessageAccessPoint().isStarted()) {
+            return messageAccessPointHolder;
+        }
+
         try {
-            messageAccessPoint = MessageAccessPointFactory.create(nameServerConfig, transportConfig);
+            MessageAccessPoint messageAccessPoint = MessageAccessPointFactory.create(nameServerConfig, transportConfig);
             messageAccessPoint.start();
+            messageAccessPointHolder = new MessageAccessPointHolder(messageAccessPoint);
         } catch (Exception e) {
             logger.error("create messagingAccessPoint exception", e);
             throw ExceptionConverter.convertRuntimeException(e);
         }
-        return messageAccessPoint;
-    }
-
-    @Override
-    public Producer createProducer() {
-        MessageProducer messageProducer = messageAccessPoint.createProducer(producerConfig);
-        return new ProducerImpl(messageProducer, messageFactory);
-    }
-
-    @Override
-    public Producer createProducer(TransactionStateCheckListener transactionStateCheckListener) {
-        MessageProducer messageProducer = messageAccessPoint.createProducer(producerConfig);
-        ProducerImpl producer = new ProducerImpl(messageProducer, messageFactory);
-        return new TransactionProducerImpl(producer, transactionStateCheckListener, messageProducer, messageAccessPoint, txFeedbackConfig);
-    }
-
-    @Override
-    public Consumer createConsumer() {
-        MessageConsumer messageConsumer = messageAccessPoint.createConsumer(consumerConfig);
-        return new ConsumerImpl(messageConsumer);
+        return messageAccessPointHolder;
     }
 
     @Override

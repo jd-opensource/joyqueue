@@ -42,10 +42,12 @@ public class NsrProducerConverter extends Converter<Producer, com.jd.journalq.do
                     .nearby(producer.getConfig().isNearBy())
                     .single(producer.getConfig().isSingle())
                     .blackList(producer.getConfig().getBlackList())
-                    .archive(producer.isArchive())
+                    .archive(producer.getConfig().isArchive())
                     .weight(producer.getConfig().getWeight())
                     //.timeout()
                     .create());
+
+            nsrProducer.setLimitPolicy(new com.jd.journalq.domain.Producer.ProducerLimitPolicy(producer.getConfig().getLimitTps(), producer.getConfig().getLimitTraffic()));
         }
         return nsrProducer;
     }
@@ -60,6 +62,7 @@ public class NsrProducerConverter extends Converter<Producer, com.jd.journalq.do
         producer.setNamespace(new Namespace(nsrProducer.getTopic().getNamespace()));
         ProducerConfig producerConfig = new ProducerConfig();
         com.jd.journalq.domain.Producer.ProducerPolicy producerPolicy = nsrProducer.getProducerPolicy();
+        com.jd.journalq.domain.Producer.ProducerLimitPolicy limitPolicy = nsrProducer.getLimitPolicy();
         if (producerPolicy != null) {
             producerConfig.setNearBy(producerPolicy.getNearby());
             producerConfig.setBlackList(StringUtils.join(producerPolicy.getBlackList(), ","));
@@ -71,6 +74,10 @@ public class NsrProducerConverter extends Converter<Producer, com.jd.journalq.do
                 List<String> weightList = map.entrySet().stream().map(entry -> (entry.getKey()+":"+ entry.getValue()) ).collect(Collectors.toList());
                 producerConfig.setWeight(StringUtils.join(weightList,","));
             }
+        }
+        if (limitPolicy != null) {
+            producerConfig.setLimitTps(limitPolicy.getTps());
+            producerConfig.setLimitTraffic(limitPolicy.getTraffic());
         }
         producer.setConfig(producerConfig);
 

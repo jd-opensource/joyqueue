@@ -1,7 +1,8 @@
 <template>
   <div>
     <div class="ml20 mt30">
-      <d-input v-model="keyword" :placeholder="keywordTip" class="left mr10" style="width: 10%">
+      <d-input v-model="keyword" :placeholder="keywordTip" class="left mr10" style="width: 213px" @on-enter="getList">
+        <span slot="prepend">{{keywordName}}</span>
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
       <d-button type="primary" v-if="$store.getters.isAdmin" @click="openDialog('subscribeDialog')" class="left mr10">
@@ -14,34 +15,16 @@
       <!--</d-button>-->
     </div>
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
-              @on-detail-chart="goDetailChart" @on-current-change="handleCurrentChange" @on-detail="openDetailDialog"
+              @on-detail-chart="goDetailChart" @on-current-change="handleCurrentChange" @on-detail="openDetailTab"
               @on-config="openConfigDialog" @on-set-produce-weight="openWeightConfigDialog"
-              @on-summary-chart="goSummaryChart" @on-performance-chart="goPerformanceChart"/>
+              @on-summary-chart="goSummaryChart" @on-performance-chart="goPerformanceChart" @on-rateLimit="openRateLimitDialog"/>
 
     <!--生产订阅弹出框-->
     <my-dialog :dialog="subscribeDialog" @on-dialog-cancel="dialogCancel('subscribeDialog')">
       <subscribe ref="subscribe" :search="search" :type="type" :colData="subscribeDialog.colData"
+                 :keywordName="keywordName"
                  :searchUrl="subscribeDialog.urls.search" :addUrl="subscribeDialog.urls.add"
                  :doSearch="subscribeDialog.doSearch" @on-refresh="getList"/>
-    </my-dialog>
-
-    <!--详情弹出框-->
-    <my-dialog :dialog="detailDialog" @on-dialog-cancel="dialogCancel('detailDialog')">
-      <d-tabs @on-change="handleTabChange">
-        <d-tab-pane label="分组" name="partition" icon="pocket">
-          <partition ref="partition" :app="detailDialog.app" :topic="detailDialog.topic"
-                     :colData="detailDialog.partition.colData" :namespace="detailDialog.namespace"
-                     :type="type" :doSearch="detailDialog.doSearch"/>
-        </d-tab-pane>
-        <d-tab-pane label="客户端连接" name="clientConnection" icon="github">
-          <client-connection ref="clientConnection" :app="detailDialog.app" :topic="detailDialog.topic" :namespace="detailDialog.namespace"
-                             :type="type" :doSearch="detailDialog.doSearch"/>
-        </d-tab-pane>
-        <d-tab-pane label="Broker" name="broker" icon="file-text">
-          <broker ref="broker" :app="detailDialog.app" :topic="detailDialog.topic" :namespace="detailDialog.namespace"
-                  :type="type" :doSearch="detailDialog.doSearch"/>
-        </d-tab-pane>
-      </d-tabs>
     </my-dialog>
 
     <!--Config dialog-->
@@ -53,6 +36,10 @@
                        :search="produceWeightDialog.urls.search" :update="produceWeightDialog.urls.update"/>
     </my-dialog>
 
+    <my-dialog :dialog="rateLimitDialog" @on-dialog-confirm="rateLimitConfirm" @on-dialog-cancel="dialogCancel('rateLimitDialog')">
+      <rate-limit ref="rateLimit" :limitTraffic="rateLimitDialog.limitTraffic" :limitTps="rateLimitDialog.limitTps"/>
+    </my-dialog>
+
   </div>
 </template>
 
@@ -61,29 +48,26 @@ import apiRequest from '../../utils/apiRequest.js'
 import myTable from '../../components/common/myTable.vue'
 import myDialog from '../../components/common/myDialog.vue'
 import subscribe from './subscribe.vue'
-import broker from './broker.vue'
-import partition from './partition.vue'
-import clientConnection from './clientConnection.vue'
 import ProducerConfigForm from './producerConfigForm.vue'
 import ProducerWeight from './produceWight.vue'
-import partitionExpand from './partitionExpand'
 import {getTopicCode, replaceChartUrl} from '../../utils/common.js'
+import RateLimit from "./rateLimit";
 
 export default {
   name: 'producer-base',
   components: {
+    RateLimit,
     myTable,
     myDialog,
     subscribe,
-    broker,
-    partition,
-    clientConnection,
     ProducerConfigForm,
-    ProducerWeight,
-    partitionExpand
+    ProducerWeight
   },
   props: {
     keywordTip: {
+      type: String
+    },
+    keywordName: {
       type: String
     },
     btns: {
@@ -121,8 +105,12 @@ export default {
           {
             txt: '设置生产权重',
             method: 'on-set-produce-weight'
+          },
+          {
+            txt: '限流',
+            method: 'on-rateLimit',
+            isAdmin: true
           }
-
         ]
       }
     },
@@ -137,60 +125,6 @@ export default {
     },
     subscribeUrls: {
       type: Object
-    },
-    partitionColData: { // 分片 列表表头
-      type: Array,
-      default: function () {
-        return [
-          {
-            type: 'expand',
-            width: 50,
-            render: (h, params) => {
-              return h(partitionExpand, {
-                props: {
-                  row: params.row,
-                  colData: [
-                    {
-                      title: 'ID',
-                      key: 'partitionGroup'
-                    },
-                    // {
-                    //   title: '主分片',
-                    //   key: 'ip'
-                    // },
-                    {
-                      title: '分区',
-                      key: 'partition'
-                    },
-                    {
-                      title: '入队数',
-                      key: 'enQuence.count'
-                    }
-                  ],
-                  subscribe: params.row.subscribe,
-                  partitionGroup: params.row.groupNo
-                }
-              })
-            }
-          },
-          {
-            title: 'ID',
-            key: 'groupNo'
-          },
-          {
-            title: '主分片',
-            key: 'ip'
-          },
-          {
-            title: '分区',
-            key: 'partitions'
-          },
-          {
-            title: '入队数',
-            key: 'enQuence.count'
-          }
-        ]
-      }
     },
     monitorUrls: {// url variable format: [app], [topic], [namespace]
       type: Object
@@ -215,6 +149,15 @@ export default {
         page: 1,
         size: 10,
         total: 100
+      },
+      rateLimitDialog: {
+        visible: false,
+        title: '限流',
+        width: '400',
+        showFooter: true,
+        doSearch: false,
+        limitTps:0,
+        limitTraffic:0
       },
       type: this.$store.getters.producerType, // 1:生产， 2：消费
       subscribeDialog: {
@@ -241,29 +184,6 @@ export default {
           update: '/'
         }
       },
-      detailDialog: {
-        visible: false,
-        title: '生产者详情',
-        width: '900',
-        showFooter: false,
-        doSearch: true,
-        app: {
-          id: 0,
-          code: ''
-        },
-        topic: {
-          id: '0',
-          code: ''
-        },
-        namespace: {
-          id: '0',
-          code: ''
-        },
-        partition: {
-          colData: this.partitionColData
-
-        }
-      },
       configDialog: {
         visible: false,
         title: '生产者配置详情',
@@ -281,14 +201,8 @@ export default {
       this[dialog].doSearch = true
       this[dialog].visible = true
     },
-    openDetailDialog (item) {
-      this.detailDialog.app.id = item.app.id
-      this.detailDialog.app.code = item.app.code
-      this.detailDialog.topic.id = item.topic.id
-      this.detailDialog.topic.code = item.topic.code
-      this.detailDialog.namespace.id = item.namespace.id
-      this.detailDialog.namespace.code = item.namespace.code
-      this.openDialog('detailDialog')
+    openDetailTab (item) {
+      this.$emit('on-detail', item)
     },
     openConfigDialog (item) {
       this.configData = item.config || {}
@@ -300,6 +214,12 @@ export default {
       this.configData['producerId'] = item.id
       this.produceWeightDialog.visible = true
     },
+    openRateLimitDialog (item) {
+      this.rateLimitDialog.limitTps = item.config.limitTps
+      this.configData['producerId'] = item.id
+      this.rateLimitDialog.limitTraffic = item.config.limitTraffic
+      this.rateLimitDialog.visible = true
+    },
     handleSizeChange (val) {
       this.page.size = val
       this.getList()
@@ -307,10 +227,6 @@ export default {
     handleCurrentChange (val) {
       this.page.page = val
       this.getList()
-    },
-    handleTabChange (data) {
-      let name = data.name
-      this.$refs[name].getList()
     },
     dialogConfirm (dialog) {
       this[dialog].visible = false
@@ -330,6 +246,14 @@ export default {
         weight: this.$refs.weightForm.getWeights()
       }
       this.config(configData, 'produceWeightDialog')
+    },
+    rateLimitConfirm () {
+      let configData = {
+        producerId: this.configData.producerId,
+        limitTps: this.$refs.rateLimit.tps,
+        limitTraffic: this.$refs.rateLimit.traffic
+      }
+      this.config(configData, 'rateLimitDialog')
     },
     goSummaryChart (item) {
       if (this.monitorUrls && this.monitorUrls.summary) {
@@ -383,6 +307,9 @@ export default {
           }
         })
       }
+    },
+    isAdmin (item) {
+      return this.$store.getters.isAdmin
     },
     getMonitor (row, index) {
       let data = {

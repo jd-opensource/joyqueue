@@ -26,19 +26,17 @@ import com.jd.journalq.broker.kafka.coordinator.GroupOffsetHandler;
 import com.jd.journalq.broker.kafka.coordinator.GroupOffsetManager;
 import com.jd.journalq.broker.kafka.coordinator.KafkaCoordinator;
 import com.jd.journalq.broker.kafka.coordinator.KafkaCoordinatorGroupManager;
-import com.jd.journalq.broker.kafka.handler.ratelimit.KafkaRateLimitHandlerFactory;
 import com.jd.journalq.broker.kafka.manage.KafkaManageServiceFactory;
 import com.jd.journalq.broker.kafka.network.helper.KafkaProtocolHelper;
 import com.jd.journalq.broker.kafka.session.KafkaConnectionHandler;
 import com.jd.journalq.broker.kafka.session.KafkaConnectionManager;
-import com.jd.journalq.broker.kafka.util.RateLimiter;
-import com.jd.journalq.network.protocol.ChannelHandlerProvider;
+import com.jd.journalq.broker.kafka.session.KafkaTransportHandler;
+import com.jd.journalq.network.protocol.CommandHandlerProvider;
 import com.jd.journalq.network.protocol.ExceptionHandlerProvider;
 import com.jd.journalq.network.protocol.ProtocolService;
 import com.jd.journalq.network.transport.codec.CodecFactory;
 import com.jd.journalq.network.transport.command.handler.CommandHandlerFactory;
 import com.jd.journalq.network.transport.command.handler.ExceptionHandler;
-import com.jd.journalq.toolkit.delay.DelayedOperationManager;
 import com.jd.journalq.toolkit.service.Service;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
@@ -53,7 +51,7 @@ import org.slf4j.LoggerFactory;
  * email: gaohaoxiang@jd.com
  * date: 2018/8/21
  */
-public class KafkaProtocol extends Service implements ProtocolService, BrokerContextAware, ChannelHandlerProvider, ExceptionHandlerProvider {
+public class KafkaProtocol extends Service implements ProtocolService, BrokerContextAware, CommandHandlerProvider, ExceptionHandlerProvider {
 
     protected static final Logger logger = LoggerFactory.getLogger(KafkaProtocol.class);
 
@@ -66,8 +64,8 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
     private GroupBalanceHandler groupBalanceHandler;
     private GroupCoordinator groupCoordinator;
     private KafkaConnectionManager connectionManager;
-    private KafkaRateLimitHandlerFactory rateLimitHandlerFactory;
     private KafkaConnectionHandler connectionHandler;
+    private KafkaTransportHandler transportHandler;
     private KafkaContext kafkaContext;
 
     @Override
@@ -86,19 +84,13 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
 
         this.connectionManager = new KafkaConnectionManager(brokerContext.getSessionManager());
 
-        this.rateLimitHandlerFactory = newRateLimitKafkaHandlerFactory(config);
         this.connectionHandler = new KafkaConnectionHandler(connectionManager);
+        this.transportHandler = new KafkaTransportHandler();
 
         this.kafkaContext = new KafkaContext(config, connectionManager, groupMetadataManager,
-                groupOffsetManager, groupBalanceManager, groupOffsetHandler, groupBalanceHandler, groupCoordinator, rateLimitHandlerFactory, brokerContext);
+                groupOffsetManager, groupBalanceManager, groupOffsetHandler, groupBalanceHandler, groupCoordinator, brokerContext);
 
         registerManage(brokerContext, kafkaContext);
-    }
-
-    protected KafkaRateLimitHandlerFactory newRateLimitKafkaHandlerFactory(KafkaConfig config) {
-        DelayedOperationManager rateLimitDelayedOperation = new DelayedOperationManager("kafkaRateLimit");
-        RateLimiter rateLimiter = new RateLimiter(config);
-        return new KafkaRateLimitHandlerFactory(config, rateLimitDelayedOperation, rateLimiter);
     }
 
     protected void registerManage(BrokerContext brokerContext, KafkaContext kafkaContext) {
@@ -114,7 +106,6 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
         groupOffsetHandler.start();
         groupBalanceHandler.start();
         groupCoordinator.start();
-        rateLimitHandlerFactory.start();
     }
 
     @Override
@@ -124,7 +115,6 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
         groupBalanceManager.stop();
         groupOffsetHandler.stop();
         groupBalanceHandler.stop();
-        rateLimitHandlerFactory.stop();
     }
 
     @Override
@@ -143,11 +133,14 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
     }
 
     @Override
-    public ChannelHandler getChannelHandler(ChannelHandler channelHandler) {
+    public ChannelHandler getCommandHandler(ChannelHandler channelHandler) {
         return new ChannelInitializer<Channel>() {
             @Override
             protected void initChannel(Channel ch) throws Exception {
-                ch.pipeline().addLast(channelHandler).addLast(connectionHandler);
+                ch.pipeline()
+                        .addLast(transportHandler)
+                        .addLast(connectionHandler)
+                        .addLast(channelHandler);
             }
         };
     }

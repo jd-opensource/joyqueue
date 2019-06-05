@@ -69,4 +69,15 @@ public class FetchPartitionMessageAckData {
     public void setCode(JournalqCode code) {
         this.code = code;
     }
+
+    public int getSize() {
+        if (buffers == null) {
+            return 0;
+        }
+        int size = 0;
+        for (ByteBuffer buffer : buffers) {
+            size += buffer.limit();
+        }
+        return size;
+    }
 }

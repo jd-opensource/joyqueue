@@ -106,16 +106,16 @@ public class FetchCodec implements KafkaPayloadCodec<FetchResponse>, Type {
                 FetchResponsePartitionData fetchResponsePartitionData = partitionDataMap.get(partition);
                 buffer.writeInt(partition);
                 buffer.writeShort(fetchResponsePartitionData.getError());
-                buffer.writeLong(fetchResponsePartitionData.getHw());
+                buffer.writeLong(fetchResponsePartitionData.getHighWater());
 
                 // not fully supported, just make it compatible
                 if (version >= 4) {
                     // last_stable_offset
-                    buffer.writeLong(0);
+                    buffer.writeLong(fetchResponsePartitionData.getLastStableOffset());
 
                     // log_start_offset
                     if (version >= 5) {
-                        buffer.writeLong(0);
+                        buffer.writeLong(fetchResponsePartitionData.getLogStartOffset());
                     }
 
                     // aborted_transactions
@@ -131,10 +131,7 @@ public class FetchCodec implements KafkaPayloadCodec<FetchResponse>, Type {
                 KafkaMessageSerializer.writeMessages(buffer, fetchResponsePartitionData.getMessages());
 
                 int length = buffer.writerIndex() - startIndex - 4;
-                buffer.markWriterIndex();
-                buffer.writerIndex(startIndex);
-                buffer.writeInt(length);
-                buffer.resetWriterIndex();
+                buffer.setInt(startIndex, length);
             }
         }
     }
