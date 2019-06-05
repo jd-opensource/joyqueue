@@ -26,7 +26,6 @@ import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.network.transport.TransportClient;
 import com.jd.journalq.network.transport.config.ClientConfig;
 import com.jd.journalq.nsr.NameService;
-import com.jd.journalq.server.retry.NullMessageRetry;
 import com.jd.journalq.server.retry.api.MessageRetry;
 import com.jd.journalq.server.retry.api.RetryPolicyProvider;
 import com.jd.journalq.server.retry.model.RetryMessageModel;
@@ -72,7 +71,6 @@ public class BrokerRetryManager extends Service implements MessageRetry<Long>, B
     public BrokerRetryManager(BrokerContext brokerContext) {
         this.nameService = brokerContext.getNameService();
         this.clusterManager = brokerContext.getClusterManager();
-        this.brokerContext = brokerContext;
     }
 
     @Override
@@ -167,11 +165,8 @@ public class BrokerRetryManager extends Service implements MessageRetry<Long>, B
     }
 
     private MessageRetry loadRetryManager(String type) throws Exception {
-        if (brokerContext.getPropertySupplier().getProperty("retry.enable").getBoolean() == false) {
-            return new NullMessageRetry();
-        }
-
         MessageRetry messageRetry;
+
         if (type.equals(DEFAULT_RETRY_TYPE)) {
             messageRetry = new RemoteMessageRetry(remoteRetryProvider);
         } else {
