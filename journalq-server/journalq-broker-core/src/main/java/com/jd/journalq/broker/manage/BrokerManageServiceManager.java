@@ -29,22 +29,18 @@ import com.jd.journalq.broker.manage.service.support.DefaultMessageManageService
 import com.jd.journalq.broker.manage.service.support.DefaultStoreManageService;
 import com.jd.journalq.broker.monitor.BrokerMonitor;
 import com.jd.journalq.broker.monitor.service.BrokerMonitorService;
-import com.jd.journalq.broker.monitor.service.support.DefaultArchiveMonitorService;
-import com.jd.journalq.broker.monitor.service.support.DefaultBrokerMonitorInternalService;
-import com.jd.journalq.broker.monitor.service.support.DefaultBrokerMonitorService;
-import com.jd.journalq.broker.monitor.service.support.DefaultConnectionMonitorService;
-import com.jd.journalq.broker.monitor.service.support.DefaultConsumerMonitorService;
-import com.jd.journalq.broker.monitor.service.support.DefaultCoordinatorMonitorService;
-import com.jd.journalq.broker.monitor.service.support.DefaultMetadataMonitorService;
-import com.jd.journalq.broker.monitor.service.support.DefaultPartitionMonitorService;
-import com.jd.journalq.broker.monitor.service.support.DefaultProducerMonitorService;
-import com.jd.journalq.broker.monitor.service.support.DefaultTopicMonitorService;
+import com.jd.journalq.broker.monitor.service.support.*;
 import com.jd.journalq.broker.monitor.stat.BrokerStat;
+import com.jd.journalq.monitor.BrokerStartupInfo;
 import com.jd.journalq.nsr.NameService;
 import com.jd.journalq.server.retry.api.MessageRetry;
 import com.jd.journalq.store.StoreManagementService;
 import com.jd.journalq.store.StoreService;
 import com.jd.journalq.toolkit.service.Service;
+
+import java.io.InputStream;
+import java.util.Date;
+import java.util.Properties;
 
 /**
  * BrokerManageServiceManager
@@ -92,8 +88,9 @@ public class BrokerManageServiceManager extends Service {
 
     protected BrokerMonitorService newBrokerMonitorService() {
         BrokerStat brokerStat = brokerMonitor.getBrokerStat();
+        BrokerStartupInfo brokerStartupInfo = newBrokerStartInfo();
         DefaultBrokerMonitorInternalService brokerMonitorInternalService = new DefaultBrokerMonitorInternalService(brokerStat, consume,
-                storeManagementService, nameService, storeService, electionManager, clusterManager);
+                storeManagementService, nameService, storeService, electionManager, clusterManager, brokerStartupInfo);
         DefaultConnectionMonitorService connectionMonitorService = new DefaultConnectionMonitorService(brokerStat);
         DefaultConsumerMonitorService consumerMonitorService = new DefaultConsumerMonitorService(brokerStat, consume, storeManagementService, retryManager, clusterManager);
         DefaultProducerMonitorService producerMonitorService = new DefaultProducerMonitorService(brokerStat, storeManagementService, clusterManager);
@@ -119,6 +116,28 @@ public class BrokerManageServiceManager extends Service {
         return new DefaultBrokerManageService(connectionManageService, messageManageService, storeManageService, consumerManageService, coordinatorManageService, electionManageService);
     }
 
+    protected BrokerStartupInfo newBrokerStartInfo() {
+        BrokerStartupInfo brokerStartupInfo = new BrokerStartupInfo();
+        brokerStartupInfo.setStartupTime(new Date().getTime());
+
+        String revision = null;
+        String commitDate = null;
+        try (InputStream propFile = BrokerManageServiceManager.class.getClassLoader().getResourceAsStream(".version.properties")) {
+            if (propFile != null) {
+                Properties properties = new Properties();
+                properties.load(propFile);
+                String propRevision = properties.getProperty("git.commit.id.abbrev");
+                String propCommitDate = properties.getProperty("git.commit.time");
+                revision = propRevision != null ? propRevision : "UNKNOWN";
+                commitDate = propCommitDate != null ? propCommitDate : "UNKNOWN";
+            }
+        } catch (Throwable t) {
+
+        }
+        brokerStartupInfo.setCommitDate(commitDate);
+        brokerStartupInfo.setRevision(revision);
+        return brokerStartupInfo;
+    }
     public BrokerManageService getBrokerManageService() {
         return brokerManageService;
     }

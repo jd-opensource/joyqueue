@@ -24,15 +24,18 @@ import com.jd.journalq.nsr.NsrPlugins;
  */
 abstract class NsrCommandHandlerFactory extends DefaultCommandHandlerFactory {
     public abstract String getType();
+
     public abstract void doWithHandler(NsrCommandHandler nsrCommandHandler);
+
     public void register(NameService nameService) {
         NsrPlugins.nsrCommandHandlerPlugins.metas(getType()).forEach(meta -> {
             NsrCommandHandler commandHandler = meta.getTarget();
-            enrichIfNecessary(commandHandler,nameService);
+            enrichIfNecessary(commandHandler, nameService);
             register(commandHandler);
             doWithHandler(meta.getTarget());
         });
     }
+
     public static void enrichIfNecessary(Object obj, NameService nameService) {
         if (obj == null) {
             return;

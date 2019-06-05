@@ -1,7 +1,9 @@
 <template>
   <div>
     <div class="ml20 mt30">
-      <d-input v-model="searchData.keyword" placeholder="请输入编码/名称" class="left mr10" style="width:213px">
+      <d-input v-model="searchData.keyword" placeholder="请输入编码/名称" class="left mr10"
+               style="width:300px" @on-enter="getList">
+        <span slot="prepend">关键词</span>
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
       <d-button type="primary" @click="openDialog('addDialog')">新建分组<icon name="plus-circle" style="margin-left: 5px;"></icon></d-button>
@@ -65,7 +67,7 @@
     </my-dialog>
     <!--添加broker-->
     <my-dialog :dialog="addBrokerDialog" @on-dialog-cancel="addBrokerCancel()">
-      <add-broker :group="group" :data="brokerData" ref="broker"></add-broker>
+      <add-broker ref="broker" :urls="addBrokerUrls" :colData="addBrokerColData" :btns="addBrokerBtns"></add-broker>
     </my-dialog>
   </div>
 </template>
@@ -73,18 +75,79 @@
 <script>
 import myTable from '../../components/common/myTable.vue'
 import myDialog from '../../components/common/myDialog.vue'
-import addBroker from './addBroker.vue'
+import addBroker from '../topic/addBroker.vue'
 import crud from '../../mixins/crud.js'
 import apiRequest from '../../utils/apiRequest.js'
 
 export default {
-  name: 'application',
+  name: 'broker-group',
   components: {
     myTable,
     myDialog,
     addBroker
   },
   mixins: [ crud ],
+  props: {
+    addBrokerUrls: {
+      type: Object,
+      default () {
+        return {
+          search: '/broker/search',
+          addBroker: '/brokerGroup/updateBroker'
+        }
+      }
+    },
+    addBrokerColData: {
+      type: Array,
+      default () {
+        return [
+          {
+            title: 'ID',
+            key: 'id'
+          },
+          {
+            title: 'IP',
+            key: 'ip'
+          },
+          {
+            title: '端口',
+            key: 'port'
+          },
+          {
+            title: '分组',
+            key: 'group.code'
+          }
+        ]
+      }
+    },
+    addBrokerBtns: {
+      type: Array,
+      default () {
+        return [
+          {
+            txt: '添加',
+            method: function (item) {
+              let that = this.$parent
+              let parmas = {
+                id: item.id,
+                group: that.$parent.$parent.$parent.group
+              }
+              that.$Dialog.confirm({
+                title: '提示',
+                content: '确定要添加吗？'
+              }).then(() => {
+                apiRequest.put(that.urls.addBroker + '/' + item.id, null, parmas).then((data) => {
+                  that.getList()
+                })
+              })
+            },
+            bindKey: 'status',
+            bindVal: 1
+          }
+        ]
+      }
+    }
+  },
   data () {
     return {
       group: {
@@ -93,8 +156,6 @@ export default {
       },
       searchData: {
         keyword: ''
-      },
-      searchRules: {
       },
       tableData: {
         rowData: [],
@@ -127,7 +188,7 @@ export default {
         // 表格操作，如果需要根据特定值隐藏显示， 设置bindKey对应的属性名和bindVal对应的属性值
         btns: [
           {
-            txt: '查看详情',
+            txt: '详情',
             method: 'on-detail'
           },
           {
@@ -190,7 +251,8 @@ export default {
       this.addData.name = ''
     },
     goDetail (item) {
-      this.$router.push({name: `/${this.curLang}/setting/brokerGroup/detail`, query: {id: item.id, code: item.code, name: item.name}})
+      this.$router.push({name: `/${this.curLang}/setting/brokerGroup/detail`,
+        query: {id: item.id, code: item.code, name: item.name}})
     },
     addBroker (item, index) {
       this.group = {
@@ -199,7 +261,7 @@ export default {
       }
       this.addBrokerDialog.visible = true
       this.$nextTick(() => {
-        this.$refs.broker.getList()
+        this.$refs.broker.getList(item.id)
       })
     },
     submit () {

@@ -26,6 +26,7 @@ import com.jd.journalq.network.session.Consumer;
 import com.jd.journalq.server.archive.store.api.ArchiveStore;
 import com.jd.journalq.server.archive.store.model.AchivePosition;
 import com.jd.journalq.server.archive.store.model.SendLog;
+import com.jd.journalq.store.PositionUnderflowException;
 import com.jd.journalq.toolkit.concurrent.LoopThread;
 import com.jd.journalq.toolkit.lang.Close;
 import com.google.common.base.Preconditions;
@@ -206,6 +207,16 @@ public class ProduceArchiveService extends Service {
             } catch (Throwable th) {
                 logger.error("read message from topic:" + item.topic + " partition:" + item.partition
                         + " index:" + item.getReadIndex() + " error.", th);
+
+                if (th instanceof PositionUnderflowException) {
+                    // 如果读取位置小于存储索引的最小位置，将位置重置为可读到的最小位置
+                    PositionUnderflowException positionException = (PositionUnderflowException) th;
+
+                    logger.info("repair read message position SendArchiveItem info:[{}], currentIndex:[{}]", item, positionException.getLeft());
+
+                    item.setReadIndex(positionException.getLeft());
+                }
+
                 // 报错暂停一会
                 put2PauseMap(item.getTopic(), item.getPartition());
                 continue;
@@ -499,6 +510,15 @@ public class ProduceArchiveService extends Service {
                 return false;
             }
             return true;
+        }
+
+        @Override
+        public String toString() {
+            return "SendArchiveItem{" +
+                    "topic='" + topic + '\'' +
+                    ", partition=" + partition +
+                    ", readIndex=" + readIndex +
+                    '}';
         }
     }
 

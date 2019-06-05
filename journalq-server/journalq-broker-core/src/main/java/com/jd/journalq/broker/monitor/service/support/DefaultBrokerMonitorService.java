@@ -29,19 +29,7 @@ import com.jd.journalq.broker.monitor.service.TopicMonitorService;
 import com.jd.journalq.broker.monitor.stat.BrokerStatExt;
 import com.jd.journalq.domain.TopicConfig;
 import com.jd.journalq.model.Pager;
-import com.jd.journalq.monitor.ArchiveMonitorInfo;
-import com.jd.journalq.monitor.BrokerMonitorInfo;
-import com.jd.journalq.monitor.ConnectionMonitorDetailInfo;
-import com.jd.journalq.monitor.ConnectionMonitorInfo;
-import com.jd.journalq.monitor.ConsumerMonitorInfo;
-import com.jd.journalq.monitor.ConsumerPartitionGroupMonitorInfo;
-import com.jd.journalq.monitor.ConsumerPartitionMonitorInfo;
-import com.jd.journalq.monitor.PartitionGroupMonitorInfo;
-import com.jd.journalq.monitor.PartitionMonitorInfo;
-import com.jd.journalq.monitor.ProducerMonitorInfo;
-import com.jd.journalq.monitor.ProducerPartitionGroupMonitorInfo;
-import com.jd.journalq.monitor.ProducerPartitionMonitorInfo;
-import com.jd.journalq.monitor.TopicMonitorInfo;
+import com.jd.journalq.monitor.*;
 import com.jd.journalq.response.BooleanResponse;
 
 import java.util.List;
@@ -284,6 +272,10 @@ public class DefaultBrokerMonitorService implements BrokerMonitorService {
         return brokerMonitorInternalService.getExtendBrokerStat(timeStamp);
     }
 
+    @Override
+    public BrokerStartupInfo getStartInfo() {
+        return brokerMonitorInternalService.getStartInfo();
+    }
     @Override
     public TopicConfig getTopicMetadata(String topic, boolean isCluster) {
         return metadataMonitorService.getTopicMetadata(topic, isCluster);

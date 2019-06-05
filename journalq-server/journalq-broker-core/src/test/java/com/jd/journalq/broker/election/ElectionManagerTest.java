@@ -13,18 +13,20 @@
  */
 package com.jd.journalq.broker.election;
 
-import com.jd.journalq.broker.BrokerContext;
-import com.jd.journalq.broker.BrokerService;
+import com.jd.journalq.broker.config.Configuration;
 import com.jd.journalq.domain.Broker;
 import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.domain.TopicName;
-
+import com.jd.journalq.store.Store;
+import com.jd.journalq.store.StoreConfig;
 import com.jd.journalq.store.StoreService;
+import com.jd.journalq.toolkit.io.Files;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeSet;
@@ -33,8 +35,6 @@ import java.util.TreeSet;
  * Created by zhuduohui on 2018/8/27.
  */
 public class ElectionManagerTest {
-    BrokerService brokerService = new BrokerService();
-
     private ElectionManager electionManager;
     private StoreService storeService;
 
@@ -47,17 +47,37 @@ public class ElectionManagerTest {
     private String topic2 = "test1";
     private int partitionGroup2 = 2;
 
+    private short[] partitions = new short[]{0, 1, 2, 3, 4};
+
+
     public ElectionManagerTest() throws Exception {
+    }
+
+    private String getStoreDir() {
+        String property = "java.io.tmpdir";
+        return System.getProperty(property) + "store";
+    }
+
+    private String getElectionDir() {
+        String property = "java.io.tmpdir";
+        return System.getProperty(property) + "election";
     }
 
     @Before
     public void setUp() throws Exception {
-        brokerService.start();
+        Configuration conf = new Configuration();
+        StoreConfig storeConfig = new StoreConfig(conf);
+        storeConfig.setPath(getStoreDir());
+        storeService = new Store(storeConfig);
+        ((Store) storeService).start();
 
-        BrokerContext brokerContext = brokerService.getBrokerContext();
+        ElectionConfig electionConfig = new ElectionConfig(conf);
+        electionConfig.setElectionMetaPath(getElectionDir());
+        electionConfig.setElectionMetaFile(getElectionDir() + ".dat");
+        electionConfig.setListenPort("18000");
 
-        electionManager = (ElectionManager) brokerContext.getElectionService();
-        storeService = brokerContext.getStoreService();
+        electionManager = new ElectionManagerStub(electionConfig, storeService, new ConsumeStub());
+        electionManager.start();
 
         broker1 = new Broker();
         broker1.setId(1);
@@ -77,7 +97,11 @@ public class ElectionManagerTest {
     public void tearDown() {
         storeService.removePartitionGroup(topic1, partitionGroup1);
         storeService.removePartitionGroup(topic2, partitionGroup2);
-        brokerService.stop();
+        ((Store)storeService).stop();
+        electionManager.stop();
+
+        Files.deleteDirectory(new File(getStoreDir()));
+        Files.deleteDirectory(new File(getElectionDir()));
     }
 
     @Test
@@ -90,7 +114,7 @@ public class ElectionManagerTest {
         allNodes1.add(broker3);
 
         storeService.removePartitionGroup(topic1, partitionGroup1);
-        storeService.createPartitionGroup(topic1, partitionGroup1, new short[]{1});
+        storeService.createPartitionGroup(topic1, partitionGroup1, partitions);
 
         electionManager.onPartitionGroupCreate(PartitionGroup.ElectType.fix, new TopicName(topic1),
                 partitionGroup1, allNodes1, new TreeSet<>(), broker1.getId(), broker1.getId());
@@ -99,12 +123,12 @@ public class ElectionManagerTest {
         Assert.assertEquals(election.getLeaderId(), broker1.getId().longValue());
 
         storeService.removePartitionGroup(topic2, partitionGroup2);
-        storeService.createPartitionGroup(topic2, partitionGroup2, new short[]{1});
+        storeService.createPartitionGroup(topic2, partitionGroup2, partitions);
 
         List<Broker> allNodes2 = new LinkedList<>();
         allNodes2.add(broker1);
         allNodes2.add(broker2);
-        //TopicPartitionGroup topicPartitionGroup1 = new TopicPartitionGroup(topic2, partitionGroup2);
+
         electionManager.onPartitionGroupCreate(PartitionGroup.ElectType.fix, new TopicName(topic2),
                 partitionGroup2, allNodes1, new TreeSet<>(), broker1.getId(), broker2.getId());
         Assert.assertEquals(electionManager.getLeaderElectionCount(), 2);

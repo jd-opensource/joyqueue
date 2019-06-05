@@ -34,34 +34,6 @@ public class KafkaConfig {
         this.propertySupplier = propertySupplier;
     }
 
-    public boolean isRateLimit(int type) {
-        return getConfig(KafkaConfigKey.RATE_LIMIT_ENABLE.getName() + "." + type, PropertyDef.Type.BOOLEAN, KafkaConfigKey.RATE_LIMIT_ENABLE.getValue());
-    }
-
-    public int getRateLimitDelay(int type) {
-        return getConfig(KafkaConfigKey.RATE_LIMIT_DELAY.getName() + "." + type, PropertyDef.Type.INT, KafkaConfigKey.RATE_LIMIT_DELAY.getValue());
-    }
-
-    public int getRateLimitTimes(int type) {
-        return getConfig(KafkaConfigKey.RATE_LIMIT_TIMES.getName() + "." + type, PropertyDef.Type.INT, KafkaConfigKey.RATE_LIMIT_TIMES.getValue());
-    }
-
-    public boolean isRateLimitEnable() {
-        return getConfig(KafkaConfigKey.RATE_LIMIT_ENABLE);
-    }
-
-    public int getRateLimitWindowSize() {
-        return getConfig(KafkaConfigKey.RATE_LIMIT_TIME_WINDOW_SIZE);
-    }
-
-    public int getRateLimitDelay() {
-        return getConfig(KafkaConfigKey.RATE_LIMIT_DELAY);
-    }
-
-    public int getRateLimitTimes() {
-        return getConfig(KafkaConfigKey.RATE_LIMIT_TIMES);
-    }
-
     public int getFetchBatchSize() {
         return getConfig(KafkaConfigKey.FETCH_BATCH_SIZE);
     }

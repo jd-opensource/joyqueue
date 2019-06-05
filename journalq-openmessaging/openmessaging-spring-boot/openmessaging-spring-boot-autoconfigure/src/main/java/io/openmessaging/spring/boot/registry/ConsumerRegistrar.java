@@ -121,7 +121,9 @@ public class ConsumerRegistrar implements BeanPostProcessor, BeanFactoryAware, E
         Type[] genericParameterTypes = method.getGenericParameterTypes();
 
         boolean isListener = (parameterTypes.length == 2 && parameterTypes[0].equals(Message.class) && parameterTypes[1].equals(MessageListener.Context.class));
-        boolean isBatchListener = (parameterTypes.length == 2 && genericParameterTypes[0].getTypeName().equals(String.format("java.util.List<%s>", Message.class.getName())) && parameterTypes[1].equals(BatchMessageListener.Context.class));
+        boolean isBatchListener = (parameterTypes.length == 2 &&
+                genericParameterTypes[0].getTypeName().equals(String.format("java.util.List<%s>", Message.class.getName())) &&
+                parameterTypes[1].equals(BatchMessageListener.Context.class));
 
         if (!isListener && !isBatchListener) {
             throw new IllegalArgumentException("listener parameters error, need MessageListener.onReceived or BatchMessageListener.onReceived");

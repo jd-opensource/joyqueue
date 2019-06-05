@@ -1,6 +1,7 @@
 package com.jd.journalq.broker.protocol.handler;
 
 import com.google.common.collect.Maps;
+import com.jd.journalq.broker.network.traffic.Traffic;
 import com.jd.journalq.broker.protocol.JournalqCommandHandler;
 import com.jd.journalq.broker.protocol.JournalqContext;
 import com.jd.journalq.broker.protocol.JournalqContextAware;
@@ -70,6 +71,7 @@ public class FetchTopicMessageRequestHandler implements JournalqCommandHandler, 
 
         boolean isNeedLongPoll = fetchTopicMessageRequest.getTopics().size() == 1 && fetchTopicMessageRequest.getLongPollTimeout() > 0;
         Map<String, FetchTopicMessageAckData> result = Maps.newHashMapWithExpectedSize(fetchTopicMessageRequest.getTopics().size());
+        Traffic traffic = new Traffic(fetchTopicMessageRequest.getApp());
 
         for (Map.Entry<String, FetchTopicMessageData> entry : fetchTopicMessageRequest.getTopics().entrySet()) {
             String topic = entry.getKey();
@@ -99,6 +101,7 @@ public class FetchTopicMessageRequestHandler implements JournalqCommandHandler, 
                 }
             }
 
+            traffic.record(topic, fetchTopicMessageAckData.getSize());
             result.put(topic, fetchTopicMessageAckData);
         }
 

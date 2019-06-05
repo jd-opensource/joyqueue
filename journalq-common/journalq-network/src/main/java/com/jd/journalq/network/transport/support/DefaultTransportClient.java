@@ -74,6 +74,10 @@ public class DefaultTransportClient extends TransportClientSupport implements Tr
                 requestBarrier.evict();
             }
         }, 1000 * 3, 1000);
+        try {
+            super.start();
+        } catch (Exception e) {
+        }
     }
 
     @Override
@@ -125,7 +129,8 @@ public class DefaultTransportClient extends TransportClientSupport implements Tr
 
     @Override
     protected void doStop() {
-        super.doStop();
         requestBarrier.clear();
+        clearTimer.cancel();
+        super.doStop();
     }
 }

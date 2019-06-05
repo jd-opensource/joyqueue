@@ -22,6 +22,7 @@ import com.jd.journalq.broker.config.ConfigurationManager;
 import com.jd.journalq.broker.consumer.Consume;
 import com.jd.journalq.broker.consumer.MessageConvertSupport;
 import com.jd.journalq.broker.election.ElectionService;
+import com.jd.journalq.broker.helper.AwareHelper;
 import com.jd.journalq.broker.manage.BrokerManageService;
 import com.jd.journalq.broker.manage.config.BrokerManageConfig;
 import com.jd.journalq.broker.monitor.BrokerMonitorService;
@@ -43,7 +44,6 @@ import com.jd.journalq.server.retry.api.MessageRetry;
 import com.jd.journalq.store.StoreService;
 import com.jd.journalq.toolkit.config.Property;
 import com.jd.journalq.toolkit.config.PropertySupplier;
-import com.jd.journalq.toolkit.config.PropertySupplierAware;
 import com.jd.journalq.toolkit.lang.Close;
 import com.jd.journalq.toolkit.lang.LifeCycle;
 import com.jd.journalq.toolkit.service.Service;
@@ -136,7 +136,8 @@ public class BrokerService extends Service {
         // new AppTokenAuthentication(clusterManager, brokerConfig.getJmqAdmin());
         this.brokerMonitorService = new BrokerMonitorService(clusterManager.getBrokerId(),
                 new BrokerMonitorConfig(configuration, brokerConfig),
-                sessionManager);
+                sessionManager,
+                clusterManager);
         this.brokerContext.brokerMonitorService(this.brokerMonitorService);
 
         // new coordinator service
@@ -273,6 +274,7 @@ public class BrokerService extends Service {
         startIfNecessary(brokerServer);
         startIfNecessary(coordinatorService);
         startIfNecessary(brokerManageService);
+        startIfNecessary(archiveManager);
         printConfig();
     }
 
@@ -321,16 +323,7 @@ public class BrokerService extends Service {
     }
 
     public void enrichIfNecessary(Object obj, BrokerContext brokerContext) {
-        if (obj == null) {
-            return;
-        }
-        if (obj instanceof PropertySupplierAware) {
-            ((PropertySupplierAware) obj).setSupplier(brokerContext.getPropertySupplier());
-        }
-
-        if (obj instanceof BrokerContextAware) {
-            ((BrokerContextAware) obj).setBrokerContext(brokerContext);
-        }
+        AwareHelper.enrichIfNecessary(obj, brokerContext);
     }
 
     private void startIfNecessary(Object object) throws Exception {

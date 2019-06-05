@@ -37,7 +37,11 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -130,6 +134,46 @@ public class PartitionGroupStoreManagerTest {
             ByteBuffer readBuffer = readResult.getMessages()[0];
             Assert.assertEquals(writeBuffer, readBuffer);
         }
+    }
+    @Test
+    public void rePartitionTest() throws Exception {
+        int count = 1024;
+        long timeout = 500000L;
+        List<ByteBuffer> messages = MessageUtils.build(count, 1024);
+
+
+        long length = messages.stream().mapToInt(Buffer::remaining).sum();
+        WriteRequest [] writeRequests = IntStream.range(0, messages.size())
+                .mapToObj(i -> new WriteRequest(partitions[i % partitions.length], messages.get(i)))
+                .toArray(WriteRequest[]::new);
+
+        final EventFuture<WriteResult> future = new EventFuture<>();
+        store.asyncWrite(QosLevel.RECEIVE, future,writeRequests);
+
+
+        // 等待建索引都完成
+        long t0 = SystemClock.now();
+        while (SystemClock.now() - t0 < timeout && store.indexPosition() < length) {
+            Thread.sleep(10L);
+        }
+
+        store.rePartition(new Short[] {1, 2, 5});
+
+        destroyStore();
+        if (null == virtualThreadPool) virtualThreadPool = new VirtualThreadExecutor(500, 100, 10, 1000, 4);
+        if (null == bufferPool) {
+            bufferPool = new PreloadBufferPool();
+            bufferPool.addPreLoad(128 * 1024 * 1024, 2, 4);
+            bufferPool.addPreLoad(10 * 1024 * 1024, 2, 4);
+        }
+
+        this.store = new PartitionGroupStoreManager(topic, partitionGroup, groupBase, new PartitionGroupStoreManager.Config(),
+                bufferPool,
+                Executors.newSingleThreadScheduledExecutor(),
+                virtualThreadPool);
+        this.store.recover();
+        this.store.start();
+        this.store.enable();
     }
 
     @Test
@@ -391,8 +435,6 @@ public class PartitionGroupStoreManagerTest {
     private long getPositionByQosLevel(QosLevel qosLevel, PartitionGroupStoreManager store) {
         switch (qosLevel) {
 
-            case PERSISTENCE:
-                return store.rightPosition();
             case REPLICATION:
                 return store.commitPosition();
             default:

@@ -2,6 +2,19 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
  * <p>
@@ -65,6 +78,8 @@ import com.jd.journalq.sync.ApplicationInfo;
 import com.jd.journalq.sync.SyncService;
 import com.jd.journalq.util.LocalSession;
 import com.jd.journalq.util.NullUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -77,7 +92,7 @@ import static com.jd.journalq.exception.ServiceException.INTERNAL_SERVER_ERROR;
 
 @Service("openAPIService")
 public class OpenAPIServiceImpl implements OpenAPIService {
-
+    private final Logger logger = LoggerFactory.getLogger(OpenAPIServiceImpl.class);
     @Autowired
     private TopicService topicService;
 
@@ -125,7 +140,11 @@ public class OpenAPIServiceImpl implements OpenAPIService {
         List<Topic> topics = topicPageResult.getResult();
         List<TopicPubSub> pubSubs = new ArrayList(topics.size());
         for (Topic topic : topics) {
-            pubSubs.add(findTopicPubsub(topic));
+            try {
+                pubSubs.add(findTopicPubsub(topic));
+            }catch(Exception e){
+                logger.error(String.format("Find Topic PubSub Info, topic:%s", topic.getName()), e);
+            }
         }
         PageResult<TopicPubSub> topicPubSubPageResult = new PageResult<>();
         topicPubSubPageResult.setPagination(topicPageResult.getPagination());

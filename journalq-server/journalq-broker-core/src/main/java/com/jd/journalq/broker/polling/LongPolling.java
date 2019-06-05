@@ -81,4 +81,16 @@ public class LongPolling {
     public long getExpire() {
         return expire;
     }
+
+    @Override
+    public String toString() {
+        return "LongPolling{" +
+                "consumer=" + consumer +
+                ", count=" + count +
+                ", ackTimeout=" + ackTimeout +
+                ", longPollingTimeout=" + longPollingTimeout +
+                ", longPollingCallback=" + longPollingCallback +
+                ", expire=" + expire +
+                '}';
+    }
 }

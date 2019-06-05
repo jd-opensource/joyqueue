@@ -34,6 +34,8 @@ import com.jd.journalq.broker.kafka.helper.KafkaClientHelper;
 import com.jd.journalq.broker.kafka.message.KafkaBrokerMessage;
 import com.jd.journalq.broker.kafka.message.converter.KafkaMessageConverter;
 import com.jd.journalq.broker.monitor.SessionManager;
+import com.jd.journalq.broker.kafka.model.FetchResponsePartitionData;
+import com.jd.journalq.broker.network.traffic.Traffic;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.message.BrokerMessage;
@@ -71,7 +73,7 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
     private ClusterManager clusterManager;
     private MessageConvertSupport messageConvertSupport;
     private SessionManager sessionManager;
-    private DelayedOperationManager<DelayedOperation> waitPurgatory;
+    private DelayedOperationManager<DelayedOperation> delayPurgatory;
 
     @Override
     public void setKafkaContext(KafkaContext kafkaContext) {
@@ -80,8 +82,8 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
         this.clusterManager = kafkaContext.getBrokerContext().getClusterManager();
         this.messageConvertSupport = kafkaContext.getBrokerContext().getMessageConvertSupport();
         this.sessionManager = kafkaContext.getBrokerContext().getSessionManager();
-        this.waitPurgatory = new DelayedOperationManager<>("kafka-fetch-wait");
-        this.waitPurgatory.start();
+        this.delayPurgatory = new DelayedOperationManager<>("kafka-fetch-wait");
+        this.delayPurgatory.start();
     }
 
     @Override
@@ -92,6 +94,7 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
         String clientIp = ((InetSocketAddress) transport.remoteAddress()).getHostString();
 //        IsolationLevel isolationLevel = IsolationLevel.valueOf(fetchRequest.getIsolationLevel());
         int maxBytes = fetchRequest.getMaxBytes();
+        Traffic traffic = new Traffic(clientId);
 
         Map<String, List<FetchResponse.PartitionResponse>> fetchPartitionResponseMap = Maps.newHashMapWithExpectedSize(partitionRequestMap.size());
         int currentBytes = 0;
@@ -121,6 +124,7 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
 
                 currentBytes += partitionResponse.getBytes();
                 partitionResponses.add(partitionResponse);
+                traffic.record(topic.getFullName(), partitionResponse.getBytes());
             }
 
             fetchPartitionResponseMap.put(entry.getKey(), partitionResponses);
@@ -163,7 +167,7 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
         int currentBytes = 0;
 
         // 判断总体长度
-        while (currentBytes < maxBytes) {
+        while (currentBytes < maxBytes && offset < maxIndex) {
             List<BrokerMessage> messages = null;
             try {
                 messages = doFetchMessage(consumer, partition, offset, batchSize);
@@ -213,11 +217,11 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
 
     private List<BrokerMessage> doFetchMessage(Consumer consumer, int partition, long offset, int batchSize) throws Exception {
         PullResult pullResult = consume.getMessage(consumer, (short) partition, offset, batchSize);
-        if (pullResult.size() == 0) {
+        if (pullResult.getJournalqCode() != JournalqCode.SUCCESS) {
+            logger.warn("fetch message error, consumer: {}, partition: {}, offset: {}, batchSize: {}, code: {}", consumer, partition, offset, batchSize, pullResult.getJournalqCode());
             return null;
         }
-        if (pullResult.getJournalqCode() != JournalqCode.SUCCESS) {
-            logger.warn("fetch message error, consumer: {}, partition: {}, offset: {}, batchSize: {}", consumer, partition, offset, batchSize);
+        if (pullResult.size() == 0) {
             return null;
         }
         List<BrokerMessage> brokerMessages = Lists.newArrayListWithCapacity(pullResult.getBuffers().size());

@@ -63,7 +63,7 @@ public class CommitAckRequestHandler implements JournalqCommandHandler, Type, Br
         Connection connection = SessionHelper.getConnection(transport);
 
         if (connection == null || !connection.isAuthorized(commitAckRequest.getApp())) {
-            logger.warn("connection is not exists, transport: {}", transport);
+            logger.warn("connection is not exists, transport: {}, app: {}", transport, commitAckRequest.getApp());
             return BooleanAck.build(JournalqCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 

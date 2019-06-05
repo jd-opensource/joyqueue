@@ -294,9 +294,7 @@ public class GroupBalanceHandler extends Service {
             return KafkaErrorCode.UNKNOWN_MEMBER_ID.getCode();
         }
 
-        synchronized (group) {
-            return doHeartbeat(group, memberId, generationId);
-        }
+        return doHeartbeat(group, memberId, generationId);
     }
 
     protected short doHeartbeat(GroupMetadata group, String memberId, int generationId) {

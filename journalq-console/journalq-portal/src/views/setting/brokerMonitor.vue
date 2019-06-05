@@ -2,20 +2,23 @@
   <div>
     <d-tabs @on-change="menuChange">
       <d-tab-pane label="生产者详情" name="producer">
-        <my-table :data="tableData" :showPin="showTablePin" style="height: 400px;overflow-y:auto" :page="page" @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
+        <my-table :data="tableData" :showPin="showTablePin" style="height: 500px;overflow-y:auto" :page="page" @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
                   @on-edit="edit">
         </my-table>
       </d-tab-pane>
       <d-tab-pane label="消费者详情" name="consumer">
-        <my-table :data="tableData" :showPin="showTablePin" style="height: 400px;overflow-y:auto" :page="page" @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
+        <my-table :data="tableData" :showPin="showTablePin" style="height: 500px;overflow-y:auto" :page="page" @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
                   @on-edit="edit">
         </my-table>
       </d-tab-pane>
       <d-tab-pane label="连接信息" name="brokerConnectionMonitor">
-        <broker-connection-monitor ref="brokerConnectionMonitor" style="height: 400px;overflow-y:auto" :broker-id="this.brokerId"></broker-connection-monitor>
+        <broker-connection-monitor ref="brokerConnectionMonitor" style="height: 500px;overflow-y:auto" :broker-id="this.brokerId"></broker-connection-monitor>
       </d-tab-pane>
       <d-tab-pane label="分组信息" name="brokerPartitionGroupMonitor">
-        <broker-partition-group-monitor ref="brokerPartitionGroupMonitor" style="height: 400px;overflow-y:auto" :broker-id="this.brokerId"></broker-partition-group-monitor>
+        <broker-partition-group-monitor ref="brokerPartitionGroupMonitor" style="height: 500px;overflow-y:auto" :broker-id="this.brokerId"></broker-partition-group-monitor>
+      </d-tab-pane>
+      <d-tab-pane label="服务器监控" name="brokerServerMonitor">
+        <broker-server-monitor ref="brokerServerMonitor" :brokerId="brokerId"> </broker-server-monitor>
       </d-tab-pane>
     </d-tabs>
   </div>
@@ -26,9 +29,10 @@
   import myTable from '../../components/common/myTable.vue'
   import myDialog from '../../components/common/myDialog.vue'
   import crud from '../../mixins/crud.js'
-  import ClientConnection from "../monitor/clientConnection";
+  import ClientConnection from "../monitor/detail/clientConnection";
   import BrokerConnectionMonitor from "./brokerConnectionMonitor";
   import BrokerPartitionGroupMonitor from "./brokerPartitionGroupMonitor";
+  import BrokerServerMonitor from "./brokerServerMonitor.vue";
 
   export default {
     name: "brokerMonitor",
@@ -37,7 +41,8 @@
       BrokerConnectionMonitor,
       ClientConnection,
       myTable,
-      myDialog
+      myDialog,
+      BrokerServerMonitor
     },
     props:{
       brokerId:{

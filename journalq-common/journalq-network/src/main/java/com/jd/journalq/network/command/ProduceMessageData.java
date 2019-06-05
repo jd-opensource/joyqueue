@@ -62,4 +62,15 @@ public class ProduceMessageData {
     public void setMessages(List<BrokerMessage> messages) {
         this.messages = messages;
     }
+
+    public int getSize() {
+        if (messages == null) {
+            return 0;
+        }
+        int size = 0;
+        for (BrokerMessage message : messages) {
+            size += message.getSize();
+        }
+        return size;
+    }
 }

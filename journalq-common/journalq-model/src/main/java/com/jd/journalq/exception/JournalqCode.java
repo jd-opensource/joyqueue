@@ -134,7 +134,7 @@ public enum JournalqCode {
     SE_INDEX_UNDERFLOW(93, "消息序号小于最小值"),
     //    SE_OFFSET_OVERFLOW(92, "偏移量越界"),
 //    SE_MESSAGE_SIZE_EXCEEDED(93, "消息体大小超过最大限制"),
-//    SE_DISK_FULL(94, "磁盘满了"),
+    SE_DISK_FULL(94, "磁盘满了"),
 //    SE_CREATE_FILE_ERROR(95, "创建文件失败"),
 //    SE_FLUSH_TIMEOUT(96, "刷盘超时"),
 //    SE_INVALID_JOURNAL(97, "无效日志数据，文件:%d 位置:%d"),
@@ -214,7 +214,9 @@ public enum JournalqCode {
     //250~259 消费位置
     CONSUME_POSITION_NULL(250, "消费位置空异常"),
     CONSUME_POSITION_UPDATE_ERROR(251, "消费位置更新异常"),
-    CONSUME_POSITION_META_DATA_NULL(252, "消费位置元数据匹配异常");
+    CONSUME_POSITION_META_DATA_NULL(252, "消费位置元数据匹配异常"),
+
+    NSR_REGISTER_ERR_BROKER_NOT_EXIST(260,"BROKER 不存在");
 
 
     private static Map<Integer, JournalqCode> codes = new HashMap<Integer, JournalqCode>();

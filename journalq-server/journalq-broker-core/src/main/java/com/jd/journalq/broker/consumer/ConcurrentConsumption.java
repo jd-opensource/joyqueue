@@ -23,6 +23,7 @@ import com.jd.journalq.broker.consumer.model.ConsumePartition;
 import com.jd.journalq.broker.consumer.model.PullResult;
 import com.jd.journalq.broker.consumer.position.PositionManager;
 import com.jd.journalq.broker.consumer.position.model.Position;
+import com.jd.journalq.broker.monitor.SessionManager;
 import com.jd.journalq.domain.Partition;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.exception.JournalqCode;
@@ -37,6 +38,7 @@ import com.jd.journalq.store.PositionOverflowException;
 import com.jd.journalq.store.PositionUnderflowException;
 import com.jd.journalq.store.ReadResult;
 import com.jd.journalq.store.StoreService;
+import com.jd.journalq.toolkit.concurrent.EventListener;
 import com.jd.journalq.toolkit.network.IpUtil;
 import com.jd.journalq.toolkit.service.Service;
 import com.jd.journalq.toolkit.service.ServiceThread;
@@ -98,10 +100,12 @@ class ConcurrentConsumption extends Service {
     private DelayHandler delayHandler = new DelayHandler();
     // 消费归档服务
     private ArchiveManager archiveManager;
+    // 会话管理
+    private SessionManager sessionManager;
 
     ConcurrentConsumption(ClusterManager clusterManager, StoreService storeService, PartitionManager partitionManager,
-                                 MessageRetry messageRetry, PositionManager positionManager,
-                                 FilterMessageSupport filterMessageSupport, ArchiveManager archiveManager) {
+                          MessageRetry messageRetry, PositionManager positionManager,
+                          FilterMessageSupport filterMessageSupport, ArchiveManager archiveManager, SessionManager sessionManager) {
         this.clusterManager = clusterManager;
         this.storeService = storeService;
         this.partitionManager = partitionManager;
@@ -109,6 +113,7 @@ class ConcurrentConsumption extends Service {
         this.positionManager = positionManager;
         this.filterMessageSupport = filterMessageSupport;
         this.archiveManager = archiveManager;
+        this.sessionManager = sessionManager;
     }
 
     @Override
@@ -134,6 +139,8 @@ class ConcurrentConsumption extends Service {
         }, "JMQ_SERVER_CONCURRENT_CONSUMPTION");
         thread.start();
         logger.info("ConcurrentConsumption is started.");
+
+        sessionManager.addListener(new MovePartitionSegmentListener());
     }
 
     @Override
@@ -580,17 +587,25 @@ class ConcurrentConsumption extends Service {
 
     /**
      * 添加过期未应答的分区段到过期队列
+     * （线程安全，由于定时清理过期未应答partitionSegment和监听会话断开事件后转移到过期队列，存在并发场景）
      *
      * @param consumePartition 消费分区
      * @param partitionSegment 分区段
      */
-    private void addToExpireQueue(ConsumePartition consumePartition, PartitionSegment partitionSegment) {
+    private synchronized void addToExpireQueue(ConsumePartition consumePartition, PartitionSegment partitionSegment) {
         ConcurrentLinkedQueue<PartitionSegment> queue = expireQueueMap.get(consumePartition);
-        if (partitionSegment != null) {
+        if (queue != null) {
             queue = new ConcurrentLinkedQueue<>();
             expireQueueMap.putIfAbsent(consumePartition, queue);
         }
         queue.add(partitionSegment);
+
+        // 记录下超时未应答队列的情况
+        long size = queue.size();
+        logger.debug("expire queue size is:[{}], partitionInfo:[{}], ", size, consumePartition);
+        if (queue.size() > 10000) {
+            logger.info("expire queue size is:[{}], partitionInfo:[{}], ", size, consumePartition);
+        }
     }
 
     /**
@@ -855,6 +870,40 @@ class ConcurrentConsumption extends Service {
             sb.append(", endIndex=").append(endIndex);
             sb.append('}');
             return sb.toString();
+        }
+    }
+
+    /**
+     * 监听回话断开事件，将没有ACK的PartitionSegment转移到过期未应答队列中，当应用再次连接的时候可以直接消费
+     */
+    class MovePartitionSegmentListener implements EventListener<SessionManager.SessionEvent> {
+
+        @Override
+        public void onEvent(SessionManager.SessionEvent event) {
+            if (event.getType() == SessionManager.SessionEventType.RemoveConsumer) {
+                logger.info("Listen SessionManager.SessionEventType.RemoveConsumer, Event:[{}]", event);
+
+                Consumer consumer = event.getConsumer();
+                movePartitionSegmentToExpire(consumer);
+            }
+        }
+
+        /**
+         * 移除占用
+         */
+        private void movePartitionSegmentToExpire(Consumer consumer) {
+            Iterator<PartitionSegment> iterator = segmentConsumeMap.keySet().iterator();
+            while(iterator.hasNext()) {
+                PartitionSegment next = iterator.next();
+                if (next != null && StringUtils.equals(next.getTopic(), consumer.getTopic())
+                        && StringUtils.equals(next.getApp(), consumer.getApp())) {
+                    // 加入过期队列
+                    addToExpireQueue(new ConsumePartition(next.getTopic(), next.getApp(), next.getPartition()), next);
+                    // 从未应答队列移除
+                    iterator.remove();
+                }
+            }
+
         }
     }
 

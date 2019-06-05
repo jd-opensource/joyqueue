@@ -538,7 +538,9 @@ public class Serializer extends AbstractSerializer {
                 Serializer.write(broker,out);
             }
         }
+        out.writeInt(partitionGroup.getRecLeader());
     }
+
     public static PartitionGroup readPartitionGroup(final ByteBuf in) throws Exception {
         PartitionGroup group = new PartitionGroup();
         group.setTopic(TopicName.parse(Serializer.readString(in)));
@@ -576,6 +578,11 @@ public class Serializer extends AbstractSerializer {
             brokers.put(broker.getId(),broker);
         }
         group.setBrokers(brokers);
+
+        if (in.readableBytes() >= Integer.BYTES) {
+            group.setRecLeader(in.readInt());
+        }
+
         return group;
     }
     public static void write(final Broker broker, final ByteBuf out) throws Exception {

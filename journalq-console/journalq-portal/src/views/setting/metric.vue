@@ -1,11 +1,12 @@
 <template>
   <div>
     <div class="ml20 mt30">
-      <d-input v-model="searchData.keyword" placeholder="请输入代码/名称/来源" class="left mr10" style="width:213px">
-        <!--<icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>-->
+      <d-input v-model="searchData.keyword" placeholder="请输入代码/名称/来源" class="left mr10"
+               style="width:300px" @on-enter="getList">
+        <span slot="prepend">关键词</span>
+        <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
 
-      <d-button type="primary" color="success" @click="getList">查询<icon name="search" style="margin-left: 5px;"></icon></d-button>
       <d-button type="primary" class="left ml10" @click="openDialog('addDialog')">新建指标<icon name="plus-circle" style="margin-left: 5px;"></icon></d-button>
     </div>
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"

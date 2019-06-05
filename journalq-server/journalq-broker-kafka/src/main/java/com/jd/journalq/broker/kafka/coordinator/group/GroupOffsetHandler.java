@@ -86,9 +86,7 @@ public class GroupOffsetHandler extends Service {
             }
         }
 
-        synchronized (group) {
-            return handleCommitOffsets(group, groupId, memberId, generationId, offsets);
-        }
+        return handleCommitOffsets(group, groupId, memberId, generationId, offsets);
     }
 
     protected Map<String, List<OffsetMetadataAndError>> handleCommitOffsets(GroupMetadata group, String groupId, String memberId, int generationId, Map<String, List<OffsetAndMetadata>> offsets) {

@@ -38,18 +38,20 @@ public class FrontendServer extends Service {
     protected static final Logger logger = LoggerFactory.getLogger(FrontendServer.class);
 
     private ServerConfig config;
+    private BrokerContext brokerContext;
     private ProtocolManager protocolManager;
     private EventBus<TransportEvent> transportEventBus;
     private ExceptionHandler exceptionHandler;
     private TransportServerFactory transportServerFactory;
     private TransportServer transportServer;
 
-    public FrontendServer(ServerConfig config, ProtocolManager protocolManager) {
+    public FrontendServer(ServerConfig config, BrokerContext brokerContext, ProtocolManager protocolManager) {
         this.config = config;
+        this.brokerContext = brokerContext;
         this.protocolManager = protocolManager;
         this.transportEventBus = new EventBus<>("journalq-frontend-eventBus");
         this.exceptionHandler = new BrokerExceptionHandler();
-        this.transportServerFactory = new MultiProtocolTransportServerFactory(protocolManager, transportEventBus, exceptionHandler);
+        this.transportServerFactory = new MultiProtocolTransportServerFactory(protocolManager, brokerContext, transportEventBus, exceptionHandler);
     }
 
     public void addListener(EventListener<TransportEvent> listener) {

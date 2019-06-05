@@ -54,4 +54,8 @@ public class ProduceConfig {
     public long getPrintMetricIntervalMs() {
         return PropertySupplier.getValue(propertySupplier, ProducerConfigKey.PRINT_METRIC_INTERVAL_MS);
     }
+
+    public int getBusinessIdLength() {
+        return PropertySupplier.getValue(propertySupplier, ProducerConfigKey.PRODUCE_BUSINESSID_lENGTH);
+    }
 }

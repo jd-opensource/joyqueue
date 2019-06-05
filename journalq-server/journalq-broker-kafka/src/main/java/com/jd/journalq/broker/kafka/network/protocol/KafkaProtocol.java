@@ -121,17 +121,12 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
 
         this.connectionManager = new KafkaConnectionManager(brokerContext.getSessionManager());
         this.rateLimitHandlerFactory = newRateLimitKafkaHandlerFactory(config);
+
         this.connectionHandler = new KafkaConnectionHandler(connectionManager);
         this.transportHandler = new KafkaTransportHandler();
 
-        this.kafkaContext = new KafkaContext(config, groupCoordinator, transactionCoordinator, transactionIdManager, rateLimitHandlerFactory, brokerContext);
+        this.kafkaContext = new KafkaContext(config, groupCoordinator, transactionCoordinator, transactionIdManager, brokerContext);
         registerManage(brokerContext, kafkaContext);
-    }
-
-    protected KafkaRateLimitHandlerFactory newRateLimitKafkaHandlerFactory(KafkaConfig config) {
-        DelayedOperationManager rateLimitDelayedOperation = new DelayedOperationManager("kafkaRateLimit");
-        RateLimiter rateLimiter = new RateLimiter(config);
-        return new KafkaRateLimitHandlerFactory(config, rateLimitDelayedOperation, rateLimiter);
     }
 
     protected void registerManage(BrokerContext brokerContext, KafkaContext kafkaContext) {

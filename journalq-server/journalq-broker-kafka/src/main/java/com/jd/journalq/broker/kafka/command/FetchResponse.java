@@ -17,6 +17,8 @@ package com.jd.journalq.broker.kafka.command;
 import com.jd.journalq.broker.kafka.KafkaCommandType;
 import com.jd.journalq.broker.kafka.KafkaErrorCode;
 import com.jd.journalq.broker.kafka.message.KafkaBrokerMessage;
+import com.jd.journalq.broker.network.traffic.FetchTrafficPayload;
+import com.jd.journalq.broker.network.traffic.Traffic;
 
 import java.util.List;
 import java.util.Map;
@@ -24,8 +26,9 @@ import java.util.Map;
 /**
  * Created by zhangkepeng on 16-8-4.
  */
-public class FetchResponse extends KafkaRequestOrResponse {
+public class FetchResponse extends KafkaRequestOrResponse implements FetchTrafficPayload {
 
+    private Traffic traffic;
     private Map<String, List<PartitionResponse>> partitionResponses;
 
     public void setPartitionResponses(Map<String, List<PartitionResponse>> partitionResponses) {
@@ -36,9 +39,18 @@ public class FetchResponse extends KafkaRequestOrResponse {
         return partitionResponses;
     }
 
+    public void setTraffic(Traffic traffic) {
+        this.traffic = traffic;
+    }
+
     @Override
     public int type() {
         return KafkaCommandType.FETCH.getCode();
+    }
+
+    @Override
+    public Traffic getTraffic() {
+        return traffic;
     }
 
     @Override

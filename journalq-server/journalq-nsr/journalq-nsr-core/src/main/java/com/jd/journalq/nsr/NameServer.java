@@ -63,8 +63,8 @@ import com.jd.journalq.toolkit.service.Service;
 import com.jd.journalq.toolkit.time.SystemClock;
 import com.jd.laf.extension.ExtensionPoint;
 import com.jd.laf.extension.ExtensionPointLazy;
-import com.jd.laf.extension.SpiLoader;
 import com.jd.laf.extension.Type;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,14 +88,9 @@ import static com.jd.journalq.event.NameServerEvent.BROKER_ID_ALL_BROKER;
  * 2.器动管理端的http接口
  *
  * @author wylixiaobin
- * Date: 2018/9/4
+ * @date 2018/9/4
  */
 public class NameServer extends Service implements NameService, PropertySupplierAware, Type {
-    /**
-     * service provider
-     */
-    ExtensionPoint<ServiceProvider, String> serviceProviderPoint = new ExtensionPointLazy<>(ServiceProvider.class, SpiLoader.INSTANCE, null, null);
-    private static final Logger logger = LoggerFactory.getLogger(NameServer.class);
     /**
      * name server config
      */
@@ -120,17 +115,10 @@ public class NameServer extends Service implements NameService, PropertySupplier
      * 元数据变更监听器
      */
     private MessageListener listener;
-
-    /**
-     * 事件管理器
-     */
-    protected EventBus<NameServerEvent> eventManager = new EventBus<>("BROKER_NAMESERVER_EVENT_BUS");
-
     /**
      * properties
      */
     private PropertySupplier propertySupplier;
-
     /**
      * service provider
      */
@@ -140,7 +128,18 @@ public class NameServer extends Service implements NameService, PropertySupplier
      */
     private MetaCache metaCache = new MetaCache();
 
+    /**
+     * 事件管理器
+     */
+    protected EventBus<NameServerEvent> eventManager = new EventBus<>("BROKER_NAMESERVER_EVENT_BUS");
+    /**
+     * service provider
+     */
+    public static ExtensionPoint<ServiceProvider, String> serviceProviderPoint = new ExtensionPointLazy<>(ServiceProvider.class);
+    private static final Logger logger = LoggerFactory.getLogger(NameServer.class);
+
     public NameServer() {
+        // do nothing
     }
 
     @Override
@@ -149,56 +148,39 @@ public class NameServer extends Service implements NameService, PropertySupplier
         if (nameServerConfig == null) {
             nameServerConfig = new NameServerConfig(propertySupplier);
         }
-        if (transportServerFactory == null) {
-            this.transportServerFactory = new NsrTransportServerFactory(this);
-        }
         if (serviceProvider == null){
             serviceProvider = loadServiceProvider(propertySupplier);
         }
-
-        if (manageServer == null) {
-            this.manageServer = buildManageServer();
-        }
-
         if (metaManager == null) {
             metaManager = buildMetaManager();
         }
         if (listener == null) {
             listener = new MetaDataListener();
         }
+        if (transportServerFactory == null) {
+            this.transportServerFactory = new NsrTransportServerFactory(this);
+        }
+        if (manageServer == null) {
+            this.manageServer = buildManageServer();
+        }
+        if (transportServer == null){
+            this.transportServer = buildTransportServer();
+        }
     }
 
-    private ServiceProvider loadServiceProvider(PropertySupplier propertySupplier) throws Exception{
-        ServiceProvider serviceProvider = serviceProviderPoint.get();
-        Preconditions.checkArgument(serviceProvider != null, "service provider can not be null.");
-        if (serviceProvider instanceof PropertySupplierAware) {
-            ((PropertySupplierAware) serviceProvider).setSupplier(propertySupplier);
-        }
-
-        if (serviceProvider instanceof LifeCycle){
-            ((LifeCycle) serviceProvider).start();
-        }
-        return serviceProvider;
-    }
 
 
     @Override
     public void doStart() throws Exception {
         super.doStart();
-        metaManager.addListener(listener);
-        this.manageServer.setManager_port(nameServerConfig.getManagerPort());
-        manageServer.start();
-        ServerConfig serverConfig = nameServerConfig.getServerConfig();
-        serverConfig.setAcceptThreadName("journalqnameserver-accept-eventLoop");
-        serverConfig.setIoThreadName("journalqnameserver-io-eventLoop");
-        this.transportServer = transportServerFactory.bind(serverConfig, serverConfig.getHost(), serverConfig.getPort());
-        this.transportServer.start();
-        logger.info("nameServer is started");
+        this.metaManager.addListener(listener);
+        this.manageServer.setManagerPort(nameServerConfig.getManagerPort());
 
-        ///
-        metaManager.start();
-        eventManager.start();
-        logger.info("nameService is started");
+        this.metaManager.start();
+        this.eventManager.start();
+        this.transportServer.start();
+        this.manageServer.start();
+        logger.info("nameServer is started");
     }
 
     @Override
@@ -208,13 +190,11 @@ public class NameServer extends Service implements NameService, PropertySupplier
             Close.close(manageServer);
             Close.close(metaManager);
             Close.close(eventManager);
+            Close.close(transportServer);
         } finally {
             logger.info("nameServer is stopped");
         }
     }
-
-
-
 
     @Override
     public List<TopicConfig> subscribe(List<Subscription> subscriptions, ClientType clientType) {
@@ -314,9 +294,16 @@ public class NameServer extends Service implements NameService, PropertySupplier
     public void leaderReport(TopicName topic, int partitionGroup, int leaderBrokerId, Set<Integer> isrId, int termId) {
         logger.info("Leader report, topic is {}, partition group is {}, leader is {}, term is {}",
                 topic, partitionGroup, leaderBrokerId, termId);
-
-        TopicConfig topicConfig = getTopicConfig(topic);
-        if (null == topicConfig) {
+        TopicConfig topicConfig = null;
+        try {
+            topicConfig = reloadTopicConfig(topic);
+        } catch (Exception e) {
+            logger.warn("try to reload topic config failure, topic[{}]", topic.getFullName(), e);
+        }
+        if (topicConfig == null) {
+            topicConfig = metaCache.topicConfigs.get(topic);
+        }
+        if (topicConfig == null) {
             return;
         }
         PartitionGroup group = null;
@@ -325,7 +312,7 @@ public class NameServer extends Service implements NameService, PropertySupplier
             PartitionGroup pgroup = groupIterator.next();
             if (pgroup.getGroup() == partitionGroup) {
                 if (pgroup.getTerm() > termId || (pgroup.getTerm() == termId && leaderBrokerId == -1)) {
-                    logger.info("Leader report for topic {} group {}, term {} less than current term {}, leaderId is {}",
+                    logger.warn("Leader report for topic {} group {}, term {} less than current term {}, leaderId is {}",
                             topic, partitionGroup, termId, pgroup.getTerm(), leaderBrokerId);
                     return;
                 }
@@ -345,7 +332,7 @@ public class NameServer extends Service implements NameService, PropertySupplier
     @Override
     public Broker getBroker(int brokerId) {
         Broker broker = metaCache.brokerConfigs.get(brokerId);
-        if (null != broker){
+        if (null != broker) {
             return broker;
         }
         return reloadBroker(brokerId, false);
@@ -353,11 +340,18 @@ public class NameServer extends Service implements NameService, PropertySupplier
 
     @Override
     public List<Broker> getAllBrokers() {
-        return metaManager.getAllBrokers();
-    }
+        List<Broker> brokers = null;
+        try {
+            brokers = reloadBrokers();
+        } catch (Exception ignored) {
+        }
 
-    public void addConsumer(Consumer consumer) {
-        metaManager.addConsumer(consumer);
+        if (brokers == null) {
+            Collection col = metaCache.brokerConfigs.values();
+            brokers = (CollectionUtils.isEmpty(col) ? Collections.emptyList() : new ArrayList<>(col));
+        }
+
+        return brokers;
     }
 
     @Override
@@ -388,6 +382,7 @@ public class NameServer extends Service implements NameService, PropertySupplier
     }
 
 
+    //TODO Ignite不可用
     @Override
     public Set<String> getTopics(String app, Subscription.Type subscribe) {
         Set<String> topics = new HashSet<>();
@@ -438,8 +433,17 @@ public class NameServer extends Service implements NameService, PropertySupplier
 
     @Override
     public AppToken getAppToken(String app, String token) {
-        return metaManager.findByAppAndToken(app, token);
+        AppToken appToken = reloadAppToken(app, token);
+        if (appToken == null) {
+            reloadAppToken();
+            appToken =  metaCache.appTokens.get(createAppTokenCacheKey(app, token));
+        }
+
+        return appToken;
     }
+
+
+
 
     @Override
     public Broker register(Integer brokerId, String brokerIp, Integer port) {
@@ -447,7 +451,6 @@ public class NameServer extends Service implements NameService, PropertySupplier
         if (null == brokerId) {
             broker = metaManager.getBrokerByIpAndPort(brokerIp, port);
             if (null == broker) {
-                //TODO broker ID 生成逻辑不严谨，重复几率大
                 brokerId = Integer.parseInt(String.valueOf(SystemClock.now() / 1000));
                 broker = new Broker();
                 broker.setId(brokerId);
@@ -473,23 +476,26 @@ public class NameServer extends Service implements NameService, PropertySupplier
             broker.setDataCenter(getDataCenter(brokerIp).getCode());
             metaManager.addBroker(broker);
         }
+
         return broker;
     }
 
     @Override
     public Producer getProducerByTopicAndApp(TopicName topic, String app) {
-        if (metaCache.producerConfigs.containsKey(topic) && metaCache.producerConfigs.get(topic).containsKey(app)) {
-            return metaCache.producerConfigs.get(topic).get(app);
+        Map<String, Producer> cachedAppProducers = metaCache.producerConfigs.get(topic);
+        if (cachedAppProducers != null && cachedAppProducers.containsKey(app)) {
+            return cachedAppProducers.get(app);
         } else {
             Producer producer = metaManager.getProducer(topic, app);
             if (null != producer) {
-                if (!metaCache.producerConfigs.containsKey(topic)) {
-                    Map map = new ConcurrentHashMap();
-                    map.put(app,producer);
-                    metaCache.producerConfigs.put(topic,map);
-                } else {
-                    metaCache.producerConfigs.get(topic).putIfAbsent(app, producer);
+                if (cachedAppProducers == null) {
+                    cachedAppProducers = new ConcurrentHashMap<>();
+                    Map<String, Producer> preCache = metaCache.producerConfigs.putIfAbsent(topic, cachedAppProducers);
+                    if (preCache != null) {
+                        cachedAppProducers = preCache;
+                    }
                 }
+                cachedAppProducers.put(app, producer);
             }
             return producer;
         }
@@ -497,19 +503,21 @@ public class NameServer extends Service implements NameService, PropertySupplier
 
     @Override
     public Consumer getConsumerByTopicAndApp(TopicName topic, String app) {
-
-        if (metaCache.consumerConfigs.containsKey(topic) && metaCache.consumerConfigs.get(topic).containsKey(app)) {
-            return metaCache.consumerConfigs.get(topic).get(app);
+        Map<String, Consumer> cachedAppConsumers = metaCache.consumerConfigs.get(topic);
+        if (cachedAppConsumers != null && cachedAppConsumers.containsKey(app)) {
+            return cachedAppConsumers.get(app);
         } else {
             Consumer consumer = metaManager.getConsumer(topic, app);
             if (null != consumer) {
-                if (!metaCache.consumerConfigs.containsKey(topic)) {
-                    Map map = new ConcurrentHashMap();
-                    map.put(app,consumer);
-                    metaCache.consumerConfigs.put(topic,map);
-                } else {
-                    metaCache.consumerConfigs.get(topic).putIfAbsent(app, consumer);
+                if (cachedAppConsumers == null) {
+                    cachedAppConsumers = new ConcurrentHashMap();
                 }
+
+                Map<String, Consumer> preCached = metaCache.consumerConfigs.putIfAbsent(topic, cachedAppConsumers);
+                if (preCached != null) {
+                    cachedAppConsumers = preCached;
+                }
+                cachedAppConsumers.put(app, consumer);
             }
             return consumer;
         }
@@ -542,6 +550,7 @@ public class NameServer extends Service implements NameService, PropertySupplier
 
     @Override
     public boolean hasSubscribe(String subscribeApp, Subscription.Type subscribe) {
+        //TODO Ignite 不可用
         switch (subscribe) {
             case CONSUMPTION:
                 List<Consumer> consumers = metaManager.getConsumer(subscribeApp);
@@ -557,13 +566,14 @@ public class NameServer extends Service implements NameService, PropertySupplier
     public DataCenter getDataCenter(String ip) {
         if (metaCache.dataCenterMap.isEmpty()) {
             Collection<DataCenter> dcs = metaManager.getAllDataCenter();
-            synchronized (metaCache.dataCenterMap) {
-                if (null != dcs){
-                    dcs.forEach(dataCenter -> {
-                        metaCache.dataCenterMap.put(dataCenter.getCode(), new DCWrapper(dataCenter));
-                    });
-                }
+            //应该不需要同步
+            // synchronized (metaCache.dataCenterMap) {
+            if (null != dcs) {
+                dcs.forEach(dataCenter -> {
+                    metaCache.dataCenterMap.put(dataCenter.getCode(), new DCWrapper(dataCenter));
+                });
             }
+            //}
         }
         Optional<DCWrapper> optional = metaCache.dataCenterMap.values().stream().filter(dataCenter -> dataCenter.match(ip)).findFirst();
         if (optional.isPresent()) {
@@ -575,10 +585,7 @@ public class NameServer extends Service implements NameService, PropertySupplier
     @Override
     public String getConfig(String group, String key) {
         Config config = metaManager.getConfig(group, key);
-        if (null == config){
-            return null;
-        }
-        return config.getValue();
+        return config == null ? null : config.getValue();
     }
 
     @Override
@@ -638,11 +645,10 @@ public class NameServer extends Service implements NameService, PropertySupplier
                 group.setBrokers(brokerMap);
             });
         }
-        ;
-        if (null != old) {
-            Set<Integer> removeBrokerids = old.fetchAllBrokerIds();
-            removeBrokerids.removeAll(topicConfig.fetchAllBrokerIds());
 
+        if (null != old) {
+            Set<Integer> removeBrokerIds = old.fetchAllBrokerIds();
+            removeBrokerIds.removeAll(topicConfig.fetchAllBrokerIds());
         }
         /**
          * 初始化 consumerConfigs
@@ -659,13 +665,15 @@ public class NameServer extends Service implements NameService, PropertySupplier
     private Consumer reloadConsumer(TopicName topic, String app) {
         Consumer consumer = metaManager.getConsumer(topic, app);
         if (null != consumer) {
-            if (!metaCache.consumerConfigs.containsKey(topic)) {
-                Map<String, Consumer> map = new HashMap<>();
-                map.put(app, consumer);
-                metaCache.consumerConfigs.put(topic, map);
-            } else {
-                metaCache.consumerConfigs.get(topic).put(app, consumer);
+            Map<String, Consumer> cachedConsumers = metaCache.consumerConfigs.get(topic);
+            if (cachedConsumers == null) {
+                cachedConsumers = new HashMap<>();
+                Map<String, Consumer> preCache = metaCache.consumerConfigs.putIfAbsent(topic, cachedConsumers);
+                if (preCache != null) {
+                    cachedConsumers = preCache;
+                }
             }
+            cachedConsumers.put(app, consumer);
         }
         return consumer;
     }
@@ -673,13 +681,15 @@ public class NameServer extends Service implements NameService, PropertySupplier
     private Producer reloadProducer(TopicName topic, String app) {
         Producer producer = metaManager.getProducer(topic, app);
         if (null != producer) {
-            if (!metaCache.producerConfigs.containsKey(topic)) {
-                Map<String, Producer> map = new HashMap<>();
-                map.put(app, producer);
-                metaCache.producerConfigs.put(topic, map);
-            } else {
-                metaCache.producerConfigs.get(topic).put(app, producer);
+            Map<String, Producer> cachedProducers = metaCache.producerConfigs.get(topic);
+            if (cachedProducers == null) {
+                cachedProducers = new HashMap<>();
+                Map preCache = metaCache.producerConfigs.putIfAbsent(topic, cachedProducers);
+                if (preCache != null) {
+                    cachedProducers = preCache;
+                }
             }
+            cachedProducers.put(app, producer);
         }
         return producer;
     }
@@ -699,6 +709,14 @@ public class NameServer extends Service implements NameService, PropertySupplier
             }
         }
         return broker;
+    }
+
+    private List<Broker> reloadBrokers() {
+        List<Broker> brokers = metaManager.getAllBrokers();
+        for (Broker broker : brokers) {
+            metaCache.brokerConfigs.put(broker.getId(), broker);
+        }
+        return brokers;
     }
 
     @Override
@@ -856,15 +874,22 @@ public class NameServer extends Service implements NameService, PropertySupplier
 
     protected class MetaCache {
         /**
-         * 主题配置
+         * app tokens
          */
-        private Map<TopicName, TopicConfig> topicConfigs = new ConcurrentHashMap<>();
+        private Map<String, AppToken> appTokens = new ConcurrentHashMap<>();
+        /**
+         * 数据中心
+         */
+        private Map<String, DCWrapper> dataCenterMap = new ConcurrentHashMap<>();
         /**
          * broker配置
          * Map<datacenter@ip@port,BrokerConfig>
          */
         private Map<Integer, Broker> brokerConfigs = new ConcurrentHashMap<>();
-
+        /**
+         * 主题配置
+         */
+        private Map<TopicName, TopicConfig> topicConfigs = new ConcurrentHashMap<>();
         /**
          * 消费配置
          */
@@ -873,10 +898,6 @@ public class NameServer extends Service implements NameService, PropertySupplier
          * 发送配置
          */
         private Map<TopicName, Map<String, Producer>> producerConfigs = new ConcurrentHashMap<>();
-        /**
-         * 数据中心
-         */
-        private Map<String, DCWrapper> dataCenterMap = new ConcurrentHashMap<>();
 
     }
 
@@ -889,16 +910,16 @@ public class NameServer extends Service implements NameService, PropertySupplier
         AppTokenService appTokenService = serviceProvider.getService(AppTokenService.class);
         DataCenterService dataCenterService = serviceProvider.getService(DataCenterService.class);
         NamespaceService namespaceService = serviceProvider.getService(NamespaceService.class);
-        PartitionGroupReplicaService partitionGroupReplicaService = serviceProvider.getService(PartitionGroupReplicaService.class);
         PartitionGroupService partitionGroupService = serviceProvider.getService(PartitionGroupService.class);
+        PartitionGroupReplicaService partitionGroupReplicaService = serviceProvider.getService(PartitionGroupReplicaService.class);
 
         Preconditions.checkArgument(brokerService != null, "broker service can not be null");
         Preconditions.checkArgument(topicService != null, "topic service can not be null");
         Preconditions.checkArgument(consumerService != null, "consumer service can not be null");
         Preconditions.checkArgument(producerService != null, "producer service can not be null");
         Preconditions.checkArgument(appTokenService != null, "appToken service can not be null");
-        Preconditions.checkArgument(dataCenterService != null, "datacenter service can not be null");
         Preconditions.checkArgument(namespaceService != null, "namespace service can not be null");
+        Preconditions.checkArgument(dataCenterService != null, "datacenter service can not be null");
         Preconditions.checkArgument(partitionGroupReplicaService != null, "replica service can not be null");
         Preconditions.checkArgument(partitionGroupService != null, "partitionGroup service can not be null");
         return new ManageServer(topicService, producerService, consumerService,
@@ -909,20 +930,68 @@ public class NameServer extends Service implements NameService, PropertySupplier
 
 
     private MetaManager buildMetaManager() {
+        Messenger messenger = serviceProvider.getService(Messenger.class);
         TopicService topicService = serviceProvider.getService(TopicService.class);
+        ConfigService configService = serviceProvider.getService(ConfigService.class);
         BrokerService brokerService = serviceProvider.getService(BrokerService.class);
         ConsumerService consumerService = serviceProvider.getService(ConsumerService.class);
         ProducerService producerService = serviceProvider.getService(ProducerService.class);
+        AppTokenService appTokenService = serviceProvider.getService(AppTokenService.class);
+        DataCenterService dataCenterService = serviceProvider.getService(DataCenterService.class);
         PartitionGroupService partitionGroupService = serviceProvider.getService(PartitionGroupService.class);
         PartitionGroupReplicaService partitionGroupReplicaService = serviceProvider.getService(PartitionGroupReplicaService.class);
-        ConfigService configService = serviceProvider.getService(ConfigService.class);
-        AppTokenService appTokenService = serviceProvider.getService(AppTokenService.class);
-        Messenger messenger = serviceProvider.getService(Messenger.class);
-        DataCenterService dataCenterService = serviceProvider.getService(DataCenterService.class);
 
         return new MetaManager(messenger, configService, topicService, brokerService,
                 consumerService, producerService, partitionGroupService,
                 partitionGroupReplicaService, appTokenService, dataCenterService);
 
     }
+
+
+
+    private TransportServer buildTransportServer(){
+        ServerConfig serverConfig = nameServerConfig.getServerConfig();
+        serverConfig.setAcceptThreadName("journalq-nameserver-accept-eventLoop");
+        serverConfig.setIoThreadName("journalq-nameserver-io-eventLoop");
+        return transportServerFactory.bind(serverConfig, serverConfig.getHost(), serverConfig.getPort());
+    }
+
+
+    private ServiceProvider loadServiceProvider(PropertySupplier propertySupplier) throws Exception{
+        ServiceProvider serviceProvider = serviceProviderPoint.get();
+        Preconditions.checkArgument(serviceProvider != null, "service provider can not be null.");
+        if (serviceProvider instanceof PropertySupplierAware) {
+            ((PropertySupplierAware) serviceProvider).setSupplier(propertySupplier);
+        }
+
+        if (serviceProvider instanceof LifeCycle){
+            ((LifeCycle) serviceProvider).start();
+        }
+        return serviceProvider;
+    }
+
+
+    private AppToken reloadAppToken(String app, String token) {
+        AppToken appToken = metaManager.findAppToken(app, token);
+        if (appToken != null) {
+            metaCache.appTokens.put(createAppTokenCacheKey(app, token), appToken);
+        }
+        return appToken;
+    }
+
+
+    private void reloadAppToken() {
+        List<AppToken> appTokens = metaManager.listAppToken();
+        if (!CollectionUtils.isEmpty(appTokens)) {
+            for (AppToken appToken : appTokens) {
+                metaCache.appTokens.put(createAppTokenCacheKey(appToken.getApp(), appToken.getToken()), appToken);
+            }
+        }
+    }
+
+
+    private String createAppTokenCacheKey(String app, String token) {
+        return app + "@" + token;
+    }
+
 }

@@ -20,7 +20,7 @@
     <parent>
         <artifactId>journalq-server</artifactId>
         <groupId>com.jd.journalq</groupId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.2</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -145,14 +145,7 @@
                         </exclusions>
                     </dependency>
                 </dependencies>
-                <configuration>
-                    <!-- not appendOne assembly id in release file name -->
-                    <finalName>journalq-server</finalName>
-                    <appendAssemblyId>false</appendAssemblyId>
-                    <descriptors>
-                        <descriptor>src/main/assemble/package.xml</descriptor>
-                    </descriptors>
-                </configuration>
+
                 <executions>
                     <execution>
                         <id>make-assembly</id>
@@ -160,8 +153,54 @@
                         <goals>
                             <goal>single</goal>
                         </goals>
+                        <configuration>
+                            <!-- not appendOne assembly id in release file name -->
+                            <finalName>journalq-server</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <descriptors>
+                                <descriptor>src/main/assemble/package.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>bin-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <!-- not appendOne assembly id in release file name -->
+                            <finalName>journalq-server-runtime-${project.version}</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <descriptors>
+                                <descriptor>src/main/assemble/bin.xml</descriptor>
+                            </descriptors>
+                        </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <!-- Description: https://github.com/ktoso/maven-git-commit-id-plugin -->
+                <groupId>pl.project13.maven</groupId>
+                <artifactId>git-commit-id-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>revision</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <dotGitDirectory>${project.basedir}/../.git</dotGitDirectory>
+                    <generateGitPropertiesFile>true</generateGitPropertiesFile>
+                    <failOnNoGitDirectory>false</failOnNoGitDirectory>
+                    <skipPoms>false</skipPoms>
+                    <generateGitPropertiesFilename>src/main/resources/.version.properties</generateGitPropertiesFilename>
+                    <gitDescribe>
+                        <!-- don't generate the describe property -->
+                        <skip>true</skip>
+                    </gitDescribe>
+                </configuration>
             </plugin>
         </plugins>
     </build>

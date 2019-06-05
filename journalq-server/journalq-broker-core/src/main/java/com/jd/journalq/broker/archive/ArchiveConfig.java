@@ -22,7 +22,7 @@ import com.jd.journalq.toolkit.config.PropertySupplier;
  * Created by chengzhiliang on 2018/12/6.
  */
 public class ArchiveConfig {
-    private static final String ARCHIVE_PATH ="/archive";
+    private static final String ARCHIVE_PATH ="/archive/";
     private PropertySupplier propertySupplier;
     private String archivePath;
 

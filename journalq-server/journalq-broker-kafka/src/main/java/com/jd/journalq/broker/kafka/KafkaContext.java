@@ -18,7 +18,6 @@ import com.jd.journalq.broker.kafka.config.KafkaConfig;
 import com.jd.journalq.broker.kafka.coordinator.group.GroupCoordinator;
 import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionCoordinator;
 import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionIdManager;
-import com.jd.journalq.broker.kafka.handler.ratelimit.KafkaRateLimitHandlerFactory;
 
 /**
  * KafkaContext
@@ -32,16 +31,14 @@ public class KafkaContext {
     private GroupCoordinator groupCoordinator;
     private TransactionCoordinator transactionCoordinator;
     private TransactionIdManager transactionIdManager;
-    private KafkaRateLimitHandlerFactory rateLimitHandlerFactory;
     private BrokerContext brokerContext;
 
     public KafkaContext(KafkaConfig config, GroupCoordinator groupCoordinator, TransactionCoordinator transactionCoordinator, TransactionIdManager transactionIdManager,
-                        KafkaRateLimitHandlerFactory rateLimitHandlerFactory, BrokerContext brokerContext) {
+                        BrokerContext brokerContext) {
         this.config = config;
         this.groupCoordinator = groupCoordinator;
         this.transactionCoordinator = transactionCoordinator;
         this.transactionIdManager = transactionIdManager;
-        this.rateLimitHandlerFactory = rateLimitHandlerFactory;
         this.brokerContext = brokerContext;
     }
 
@@ -59,10 +56,6 @@ public class KafkaContext {
 
     public TransactionIdManager getTransactionIdManager() {
         return transactionIdManager;
-    }
-
-    public KafkaRateLimitHandlerFactory getRateLimitHandlerFactory() {
-        return rateLimitHandlerFactory;
     }
 
     public BrokerContext getBrokerContext() {

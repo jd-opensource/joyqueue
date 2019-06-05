@@ -20,11 +20,13 @@
     <parent>
         <artifactId>journalq-client</artifactId>
         <groupId>com.jd.journalq</groupId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.2</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>journalq-client-core</artifactId>
+    <name>JournalQ - Client - Core</name>
+    <description>Client SDK</description>
 
     <properties>
         <openmessaging-api.version>1.0.0-alpha</openmessaging-api.version>
@@ -55,7 +57,6 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 

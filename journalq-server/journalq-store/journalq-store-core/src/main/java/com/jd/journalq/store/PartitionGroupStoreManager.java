@@ -15,6 +15,7 @@ package com.jd.journalq.store;
 
 import com.jd.journalq.domain.QosLevel;
 import com.jd.journalq.exception.JournalqCode;
+import com.jd.journalq.store.file.DiskFullException;
 import com.jd.journalq.store.file.PositioningStore;
 import com.jd.journalq.store.file.RollBackException;
 import com.jd.journalq.store.file.StoreMessageSerializer;
@@ -198,6 +199,10 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                 throw new ReadException(String.format("Read log failed! store: %s, position: %d.", store.base().getAbsolutePath(), indexPosition));
             IndexItem indexItem = IndexItem.parseMessage(byteBuffer, indexPosition);
             Partition partition = partitionMap.get(indexItem.getPartition());
+            if(null == partition) {
+                indexPosition += indexItem.getLength();
+                continue;
+            }
             PositioningStore<IndexItem> indexStore = partition.store;
 
             if (indexStore.right() == 0) {
@@ -521,7 +526,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                             indexItem.getPartition(), indexItem.getIndex());
                 }
                 writeIndex(indexItem, partition.store);
-                flushLoopThread.weakup();
+                flushLoopThread.wakeup();
             }
         } catch (Throwable t) {
             logger.warn("Write failed, rollback to position: {}, topic={}, partitionGroup={}.", start, topic, partitionGroup, t);
@@ -595,6 +600,10 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                 produceMetric.addCounter("WriteCount", 1);
 
             }
+        } catch (DiskFullException e) {
+            if (null != writeCommand && writeCommand.eventListener != null)
+                writeCommand.eventListener.onEvent(new WriteResult(JournalqCode.SE_DISK_FULL, null));
+            throw e;
         } catch (Throwable t) {
             if (null != writeCommand && writeCommand.eventListener != null)
                 writeCommand.eventListener.onEvent(new WriteResult(JournalqCode.SE_WRITE_FAILED, null));

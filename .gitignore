@@ -1,7 +1,7 @@
 *.iml
 .idea/
 .vertx/
-target
+target/
 h2-db-journalq
 .classpath
 .settings
@@ -18,4 +18,5 @@ h2-db-journalq
 .version.properties
 filter.properties
 .factorypath
+*.pyc
 journalq-console/journalq-web/journalq-web-webroot/src/main/webroot/

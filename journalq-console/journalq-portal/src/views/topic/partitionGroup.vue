@@ -5,7 +5,7 @@
         扩容
         <icon name="plus-circle" style="margin-left: 5px;"/>
       </d-button>
-      <slot name="extendBtns"></slot>
+      <slot name="extendBtn"></slot>
       <d-button type="primary" v-if="showBrokerChart" @click="goBrokerChart" class="left mr10">
         Broker监控
         <icon name="bar-chart" style="margin-left: 5px;"/>
@@ -144,7 +144,7 @@ export default {
           {
             title: '副本数',
             width: '2%',
-            key: 'replicas'
+            key: 'replicas.length'
           },
           {
             title: '当前leader',
@@ -245,7 +245,7 @@ export default {
       groupNewDialog: {
         visible: false,
         title: '详情',
-        width: 800,
+        width: 900,
         showFooter: false
       },
       groupNewDialogData: {
@@ -286,16 +286,20 @@ export default {
         this.page.size = data.pagination.size
         this.tableData.rowData = data.data
         for (var i = 0; i < this.tableData.rowData.length; i++) {
-          this.getBroker(this.tableData.rowData, i)
+          if (this.tableData.rowData[i].leader > 0) {
+            this.getBroker(this.tableData.rowData, i)
+          }
         }
         this.showTablePin = false
       })
     },
     getBroker (rowData, i) {
-      apiRequest.get(this.urlOrigin.getBroker + '/' + rowData[i].leader).then((data) => {
-        this.tableData.rowData[i].ip = data.data.ip
-        this.$set(this.tableData.rowData, i, this.tableData.rowData[i])
-      })
+      if (rowData[i].leader && rowData[i].leader!=-1) {
+        apiRequest.get(this.urlOrigin.getBroker + '/' + rowData[i].leader).then((data) => {
+          this.tableData.rowData[i].ip = data.data.ip
+          this.$set(this.tableData.rowData, i, this.tableData.rowData[i])
+        })
+      }
     },
     goBrokerChart () {
       apiRequest.get(this.urls.getUrl + '/broker', {}, {}).then((data) => {

@@ -49,7 +49,7 @@ public class BrokerServer extends Service {
         backendConfig.setIoThreadName("journalq-backend-io-eventLoop");
 
         this.transportListener = new BrokerTransportListener(sessionManager);
-        this.frontendServer = new FrontendServer(frontendConfig, protocolManager);
+        this.frontendServer = new FrontendServer(frontendConfig, brokerContext, protocolManager);
         this.backendServer = new BackendServer(backendConfig, brokerContext);
         this.frontendServer.addListener(transportListener);
         this.backendServer.addListener(transportListener);

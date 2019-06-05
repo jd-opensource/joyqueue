@@ -10,6 +10,7 @@ import com.jd.journalq.broker.consumer.Consume;
 import com.jd.journalq.broker.consumer.model.PullResult;
 import com.jd.journalq.broker.protocol.converter.CheckResultConverter;
 import com.jd.journalq.broker.helper.SessionHelper;
+import com.jd.journalq.broker.network.traffic.Traffic;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.exception.JournalqException;
@@ -61,6 +62,7 @@ public class FetchPartitionMessageRequestHandler implements JournalqCommandHandl
         }
 
         Table<String, Short, FetchPartitionMessageAckData> result = HashBasedTable.create();
+        Traffic traffic = new Traffic(fetchPartitionMessage.getApp());
 
         for (Map.Entry<String, Map<Short, FetchPartitionMessageData>> entry : fetchPartitionMessageRequest.getPartitions().rowMap().entrySet()) {
             String topic = entry.getKey();
@@ -78,10 +80,12 @@ public class FetchPartitionMessageRequestHandler implements JournalqCommandHandl
                 FetchPartitionMessageData fetchPartitionMessageData = partitionEntry.getValue();
                 FetchPartitionMessageAckData fetchPartitionMessageAckData = fetchMessage(transport, consumer, partition, fetchPartitionMessageData.getIndex(), fetchPartitionMessageData.getCount());
                 result.put(topic, partitionEntry.getKey(), fetchPartitionMessageAckData);
+                traffic.record(topic, fetchPartitionMessageAckData.getSize());
             }
         }
 
         FetchPartitionMessageResponse fetchPartitionMessageResponse = new FetchPartitionMessageResponse();
+        fetchPartitionMessageResponse.setTraffic(traffic);
         fetchPartitionMessageResponse.setData(result);
         return new Command(fetchPartitionMessageResponse);
     }

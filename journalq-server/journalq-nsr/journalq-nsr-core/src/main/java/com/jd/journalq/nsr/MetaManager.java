@@ -49,8 +49,10 @@ import java.util.List;
 import java.util.Set;
 
 /**
+ * meta manager
+ *
  * @author lixiaobin6
- * 下午4:33 2018/7/25
+ * @date 下午4:33 2018/7/25
  */
 public class MetaManager extends Service {
     private static final Logger logger = LoggerFactory.getLogger(MetaManager.class);
@@ -65,6 +67,20 @@ public class MetaManager extends Service {
     private AppTokenService appTokenService;
     private Messenger<MetaEvent> metaMessenger;
 
+    /**
+     * construct
+     *
+     * @param messenger
+     * @param configService
+     * @param topicService
+     * @param brokerService
+     * @param consumerService
+     * @param producerService
+     * @param partitionGroupService
+     * @param partitionGroupReplicaService
+     * @param appTokenService
+     * @param dataCenterService
+     */
     public MetaManager(Messenger messenger,
                        ConfigService configService,
                        TopicService topicService,
@@ -76,24 +92,24 @@ public class MetaManager extends Service {
                        AppTokenService appTokenService,
                        DataCenterService dataCenterService) {
 
-        Preconditions.checkArgument(brokerService != null, "broker service can not be null");
+        Preconditions.checkArgument(messenger != null, "messenger can not be null");
         Preconditions.checkArgument(topicService != null, "topic service can not be null");
+        Preconditions.checkArgument(brokerService != null, "broker service can not be null");
         Preconditions.checkArgument(consumerService != null, "consumer service can not be null");
         Preconditions.checkArgument(producerService != null, "producer service can not be null");
-        Preconditions.checkArgument(partitionGroupService != null, "partition group service can not be null");
         Preconditions.checkArgument(dataCenterService != null, "data center service can not be null");
+        Preconditions.checkArgument(partitionGroupService != null, "partition group service can not be null");
         Preconditions.checkArgument(partitionGroupReplicaService != null, "partition group replica service can not be null");
-        Preconditions.checkArgument(messenger != null, "messenger can not be null");
+        this.topicService = topicService;
+        this.metaMessenger = messenger;
         this.brokerService = brokerService;
         this.configService = configService;
         this.consumerService = consumerService;
         this.producerService = producerService;
-        this.partitionGroupService = partitionGroupService;
-        this.partitionGroupReplicaService = partitionGroupReplicaService;
-        this.topicService = topicService;
         this.appTokenService = appTokenService;
         this.dataCenterService = dataCenterService;
-        this.metaMessenger = messenger;
+        this.partitionGroupService = partitionGroupService;
+        this.partitionGroupReplicaService = partitionGroupReplicaService;
     }
 
     @Override
@@ -108,35 +124,78 @@ public class MetaManager extends Service {
         logger.info("metadata manager is stopped");
     }
 
+    /**
+     * get topic
+     *
+     * @param topic
+     * @return
+     */
     public Topic getTopicByName(TopicName topic) {
         return topicService.getById(topic.getFullName());
     }
 
+    /**
+     * get broker
+     *
+     * @param brokerId
+     * @return
+     */
     public Broker getBrokerById(Integer brokerId) {
         return brokerService.getById(brokerId);
     }
 
+    /**
+     * get broker
+     *
+     * @param brokerIp
+     * @param brokerPort
+     * @return
+     */
     public Broker getBrokerByIpAndPort(String brokerIp, Integer brokerPort) {
         return brokerService.getByIpAndPort(brokerIp, brokerPort);
     }
 
+    /**
+     * add broker
+     *
+     * @param broker
+     * @return
+     */
     public boolean addBroker(Broker broker) {
         brokerService.addOrUpdate(broker);
         return true;
     }
 
+    /**
+     * add consumer
+     *
+     * @param consumer
+     * @return
+     */
     public Consumer addConsumer(Consumer consumer) {
         consumerService.addOrUpdate(consumer);
         metaMessenger.publish(ConsumerEvent.add(consumer.getTopic(), consumer.getApp()));
         return consumer;
     }
 
+    /**
+     * add producer
+     *
+     * @param producer
+     */
     public Producer addProducer(Producer producer) {
         producerService.add(producer);
         metaMessenger.publish(ProducerEvent.add(producer.getTopic(), producer.getApp()));
         return producer;
     }
 
+    /**
+     * remove consumer
+     *
+     * @param topic
+     * @param app
+     * @return
+     */
     public boolean removeConsumer(TopicName topic, String app) {
         Consumer consumer = new Consumer();
         consumer.setTopic(topic);
@@ -155,34 +214,82 @@ public class MetaManager extends Service {
         return true;
     }
 
+    /**
+     * get producer
+     *
+     * @param topic
+     * @param app
+     * @return
+     */
     public Producer getProducer(TopicName topic, String app) {
         return producerService.getByTopicAndApp(topic, app);
     }
 
+    /**
+     * get producer
+     *
+     * @param app
+     * @return
+     */
     public List<Producer> getProducer(String app) {
         return producerService.getByApp(app, false);
     }
 
+    /**
+     * get consumer
+     *
+     * @param topic
+     * @param app
+     * @return
+     */
     public Consumer getConsumer(TopicName topic, String app) {
-        return consumerService.getByTopicAndApp(topic , app);
+        return consumerService.getByTopicAndApp(topic, app);
     }
 
+    /**
+     * get consumer
+     *
+     * @param app
+     * @return
+     */
     public List<Consumer> getConsumer(String app) {
         return consumerService.getByApp(app, false);
     }
 
+    /**
+     * get consumer
+     *
+     * @param topic
+     * @return
+     */
     public List<Consumer> getConsumerByTopic(TopicName topic) {
         return consumerService.getByTopic(topic, true);
     }
+
+    /**
+     * get producer
+     */
     public List<Producer> getProducerByTopic(TopicName topic) {
         return producerService.getByTopic(topic, true);
     }
 
+    /**
+     * get partition group
+     *
+     * @param topic
+     * @return
+     */
     public List<PartitionGroup> getPartitionGroupByTopic(TopicName topic) {
         return partitionGroupService.getByTopic(topic);
     }
 
 
+    /**
+     * get topic
+     *
+     * @param brokerId
+     * @return
+     */
     public Set<TopicName> getTopicByBroker(Integer brokerId) {
         List<Replica> list = partitionGroupReplicaService.findByBrokerId(brokerId);
         Set<TopicName> topics = new HashSet<>();
@@ -192,81 +299,199 @@ public class MetaManager extends Service {
         return topics;
     }
 
+    /**
+     * get replica
+     *
+     * @param brokerId
+     * @return
+     */
     public List<Replica> getReplicaByBroker(Integer brokerId) {
         return partitionGroupReplicaService.findByBrokerId(brokerId);
     }
 
 
+    /**
+     * add topic
+     *
+     * @param topic
+     * @param partitionGroups
+     */
     public void addTopic(Topic topic, List<PartitionGroup> partitionGroups) {
         topicService.addTopic(topic, partitionGroups);
     }
 
-    public AppToken findByAppAndToken(String app, String token) {
+    /**
+     * find app token
+     *
+     * @param app
+     * @param token
+     * @return
+     */
+    public AppToken findAppToken(String app, String token) {
         return appTokenService.getByAppAndToken(app, token);
     }
 
+    /**
+     * list app token
+     *
+     * @return
+     */
+    public List<AppToken> listAppToken() {
+        return appTokenService.list();
+    }
+
+    /**
+     * get broker
+     *
+     * @return
+     */
     public List<Broker> getAllBrokers() {
         return brokerService.list();
     }
 
+    /**
+     * get data center
+     *
+     * @return
+     */
     public Collection<DataCenter> getAllDataCenter() {
         return dataCenterService.list();
     }
 
+    /**
+     * get data center
+     *
+     * @param code
+     * @return
+     */
     public DataCenter getDataCenter(String code) {
         return dataCenterService.getById(code);
     }
 
+    /**
+     * get config
+     *
+     * @param group
+     * @param key
+     * @return
+     */
     public Config getConfig(String group, String key) {
         return configService.getByGroupAndKey(group, key);
     }
 
+    /**
+     * get config
+     *
+     * @return
+     */
     public List<Config> getAllConfigs() {
         return configService.list();
     }
 
+    /**
+     * get topic
+     *
+     * @return
+     */
     public List<Topic> getAllTopics() {
         return topicService.list();
     }
 
+    /**
+     * get broker
+     *
+     * @param retryType
+     * @return
+     */
     public List<Broker> getBrokerByRetryType(String retryType) {
         return brokerService.getByRetryType(retryType);
     }
 
+    /**
+     * update partition group
+     *
+     * @param partitionGroup
+     */
     public void updatePartitionGroup(PartitionGroup partitionGroup) {
-        partitionGroupService.addOrUpdate(partitionGroup);
-        metaMessenger.publish(PartitionGroupEvent.update(partitionGroup.getTopic(), partitionGroup.getGroup()));
+        PartitionGroup group = partitionGroupService.get(partitionGroup);
+        if (group != null){
+            group.setIsrs(partitionGroup.getIsrs());
+            group.setLeader(partitionGroup.getLeader());
+            group.setTerm(partitionGroup.getTerm());
+            partitionGroupService.addOrUpdate(group);
+            metaMessenger.publish(PartitionGroupEvent.update(partitionGroup.getTopic(), partitionGroup.getGroup()));
+        }
+
     }
 
+    /**
+     * add listener
+     *
+     * @param listener
+     */
     public void addListener(MessageListener listener) {
         metaMessenger.addListener(listener);
     }
 
-
+    /**
+     * get topic service
+     *
+     * @return
+     */
     public TopicService getTopicService() {
         return topicService;
     }
 
+    /**
+     * get broker service
+     *
+     * @return
+     */
     public BrokerService getBrokerService() {
         return brokerService;
     }
 
+    /**
+     * get consumer service
+     *
+     * @return
+     */
     public ConsumerService getConsumerService() {
         return consumerService;
     }
 
+    /**
+     * get producer service
+     *
+     * @return
+     */
     public ProducerService getProducerService() {
         return producerService;
     }
 
+    /**
+     * get partition group service
+     *
+     * @return
+     */
     public PartitionGroupService getPartitionGroupService() {
         return partitionGroupService;
     }
 
+    /**
+     * get partition group replica service
+     *
+     * @return
+     */
     public PartitionGroupReplicaService getPartitionGroupReplicaService() {
         return partitionGroupReplicaService;
     }
 
+    /**
+     * get config service
+     *
+     * @return
+     */
     public ConfigService getConfigService() {
         return configService;
     }

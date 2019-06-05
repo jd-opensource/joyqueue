@@ -51,12 +51,14 @@ public class ProduceMessageRequestHandler implements JournalqCommandHandler, Typ
     protected static final Logger logger = LoggerFactory.getLogger(ProduceMessageRequestHandler.class);
 
     private JournalqConfig config;
+    private ProduceConfig produceConfig;
     private Produce produce;
     private ClusterManager clusterManager;
 
     @Override
     public void setJournalqContext(JournalqContext journalqContext) {
         this.config = journalqContext.getConfig();
+        this.produceConfig = new ProduceConfig(journalqContext.getBrokerContext().getPropertySupplier());
         this.produce = journalqContext.getBrokerContext().getProduce();
         this.clusterManager= journalqContext.getBrokerContext().getClusterManager();
     }
@@ -75,6 +77,7 @@ public class ProduceMessageRequestHandler implements JournalqCommandHandler, Typ
         boolean isNeedAck = !qosLevel.equals(QosLevel.ONE_WAY);
         CountDownLatch latch = new CountDownLatch(produceMessageRequest.getData().size());
         Map<String, ProduceMessageAckData> resultData = Maps.newConcurrentMap();
+        Traffic traffic = new Traffic(produceMessage.getApp());
 
         for (Map.Entry<String, ProduceMessageData> entry : produceMessageRequest.getData().entrySet()) {
             String topic = entry.getKey();
@@ -100,6 +103,7 @@ public class ProduceMessageRequestHandler implements JournalqCommandHandler, Typ
 
             produceMessage(connection, topic, produceMessageRequest.getApp(), produceMessageData, (data) -> {
                 resultData.put(topic, data);
+                traffic.record(topic, produceMessageData.getSize());
                 latch.countDown();
             });
         }
@@ -118,6 +122,7 @@ public class ProduceMessageRequestHandler implements JournalqCommandHandler, Typ
         }
 
         ProduceMessageResponse produceMessageResponse = new ProduceMessageResponse();
+        produceMessageResponse.setTraffic(traffic);
         produceMessageResponse.setData(resultData);
         return new Command(produceMessageResponse);
     }
@@ -153,6 +158,9 @@ public class ProduceMessageRequestHandler implements JournalqCommandHandler, Typ
         for (BrokerMessage brokerMessage : produceMessageData.getMessages()) {
             if (brokerMessage.getPartition() != partition) {
                 throw new JournalqException(JournalqCode.CN_PARAM_ERROR, "the put message command has multi partition");
+            }
+            if (StringUtils.length(brokerMessage.getBusinessId()) > produceConfig.getBusinessIdLength()) {
+                throw new JournalqException(JournalqCode.CN_PARAM_ERROR, "message businessId out of rage");
             }
             brokerMessage.setClientIp(address);
             brokerMessage.setTxId(txId);

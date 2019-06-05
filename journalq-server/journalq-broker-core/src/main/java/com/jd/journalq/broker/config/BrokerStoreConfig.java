@@ -25,6 +25,7 @@ public class BrokerStoreConfig {
     public static final long DEFAULT_MAX_STORE_TIME = 1000 * 60 * 60 * 24 * 7;  // 7days
     public static final long DEFAULT_STORE_CLEAN_SCHEDULE_BEGIN = 30 * 1000;
     public static final long DEFAULT_STORE_CLEAN_SCHEDULE_END = 60 * 1000;
+    public static final boolean DEFAULT_DO_NOT_DELETE_CONSUMED = true;
 
     private PropertySupplier propertySupplier;
 
@@ -36,6 +37,7 @@ public class BrokerStoreConfig {
         CLEAN_STRATEGY_CLASS("store.clean.strategy.class", DEFAULT_CLEAN_STRATEGY_CLASS, Type.STRING),
         MAX_STORE_SIZE("store.max.store.size", DEFAULT_MAX_STORE_SIZE, Type.LONG),
         MAX_STORE_TIME("store.max.store.time", DEFAULT_MAX_STORE_TIME, Type.LONG),
+        DO_NOT_DELETE_CONSUMED("store.clean.donot.delete.consumed", DEFAULT_DO_NOT_DELETE_CONSUMED, Type.BOOLEAN),
         CLEAN_SCHEDULE_BEGIN("store.clean.schedule.begin", DEFAULT_STORE_CLEAN_SCHEDULE_BEGIN, Type.LONG),
         CLEAN_SCHEDULE_END("store.clean.schedule.end", DEFAULT_STORE_CLEAN_SCHEDULE_END, Type.LONG);
 
@@ -75,6 +77,10 @@ public class BrokerStoreConfig {
 
     public long getMaxStoreTime() {
         return PropertySupplier.getValue(propertySupplier, BrokerStoreConfigKey.MAX_STORE_TIME, DEFAULT_MAX_STORE_TIME);
+    }
+
+    public boolean getDoNotDeleteConsumed() {
+        return PropertySupplier.getValue(propertySupplier, BrokerStoreConfigKey.DO_NOT_DELETE_CONSUMED, DEFAULT_DO_NOT_DELETE_CONSUMED);
     }
 
     public long getStoreCleanScheduleBegin() {

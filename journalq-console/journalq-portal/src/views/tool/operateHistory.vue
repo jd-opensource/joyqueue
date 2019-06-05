@@ -3,7 +3,7 @@
     <div class="ml20 mt30">
       <d-date-picker v-model="times" type="daterange" range-separator="至" start-placeholder="开始日期" class="left mr5"
                      end-placeholder="结束日期" value-format="timestamp" :default-time="['00:00:00', '23:59:59']"
-                     style="width: 370px">
+                     style="width: 370px" @on-change="getListWithDate">
         <span slot="prepend">日期范围</span>
       </d-date-picker>
       <d-select v-model="searchData.type" class="left mr5"  style="width:213px">

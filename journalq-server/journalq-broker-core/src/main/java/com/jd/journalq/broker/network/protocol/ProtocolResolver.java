@@ -55,6 +55,10 @@ public class ProtocolResolver extends ByteToMessageDecoder {
         }
 
         bindProtocol(ctx, protocolContext);
+
+        // 执行其他处理类
+        ctx.pipeline().fireChannelRegistered()
+                .fireChannelActive();
     }
 
     @Override

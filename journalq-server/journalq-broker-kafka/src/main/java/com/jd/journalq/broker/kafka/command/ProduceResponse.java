@@ -14,6 +14,7 @@
 package com.jd.journalq.broker.kafka.command;
 
 import com.jd.journalq.broker.kafka.KafkaCommandType;
+import com.jd.journalq.broker.network.traffic.Traffic;
 
 import java.util.List;
 import java.util.Map;
@@ -21,15 +22,17 @@ import java.util.Map;
 /**
  * Created by zhangkepeng on 16-8-1.
  */
-public class ProduceResponse extends KafkaRequestOrResponse {
+public class ProduceResponse extends KafkaRequestOrResponse implements ProduceTrafficPayload {
 
+    private Traffic traffic;
     private Map<String, List<PartitionResponse>> partitionResponses;
 
     public ProduceResponse() {
 
     }
 
-    public ProduceResponse(Map<String, List<PartitionResponse>> partitionResponses) {
+    public ProduceResponse(Traffic traffic, Map<String, List<PartitionResponse>> partitionResponses) {
+        this.traffic = traffic;
         this.partitionResponses = partitionResponses;
     }
 
@@ -39,6 +42,11 @@ public class ProduceResponse extends KafkaRequestOrResponse {
 
     public Map<String, List<PartitionResponse>> getPartitionResponses() {
         return partitionResponses;
+    }
+
+    @Override
+    public Traffic getTraffic() {
+        return traffic;
     }
 
     @Override

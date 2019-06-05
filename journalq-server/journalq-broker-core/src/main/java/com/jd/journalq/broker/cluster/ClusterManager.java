@@ -55,6 +55,7 @@ import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -130,11 +131,10 @@ public class ClusterManager extends Service {
     protected void doStart() throws Exception {
         super.doStart();
         localCache.start();
-        //TODO 刚到这里是否合适
-        register();
         eventBus.start();
-        localCache.initCache();
         eventBus.addListener(event -> listenEvent(event));
+        register();
+        localCache.initCache();
         logger.info("clusterManager is started");
     }
 
@@ -258,18 +258,6 @@ public class ClusterManager extends Service {
     /**
      * 根据主题+分区查询对应的主master
      *
-     * @param topic     主题
-     * @param partition 分区
-     * @return
-     */
-    public Broker getBrokerByPartition(TopicName topic, short partition) {
-        TopicConfig topicConfig = localCache.getTopicConfig(topic);
-        return topicConfig.fetchBrokerByPartition(partition);
-    }
-
-    /**
-     * 根据主题+分区查询对应的主master
-     *
      * @param topic 主题
      * @param group group
      * @return
@@ -376,13 +364,16 @@ public class ClusterManager extends Service {
     /**
      * 获取该topic对应的所有partition
      *
-     *
      * @param topic
      * @return
      */
     public List<Short> getPartitionList(TopicName topic) {
         TopicConfig config = getTopicConfig(topic);
-        return new ArrayList<>(config.fetchAllPartitions());
+        if (config != null) {
+            return new ArrayList<>(config.fetchAllPartitions());
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     /**
@@ -409,7 +400,7 @@ public class ClusterManager extends Service {
                 return new ArrayList<>(priorityPartitions);
             }
         }
-        return new ArrayList<>(0);
+        return Collections.emptyList();
     }
 
     /**
@@ -435,11 +426,15 @@ public class ClusterManager extends Service {
      * @return
      */
     public Consumer getConsumer(TopicName topic, String app) throws JournalqException {
-        Consumer consumer = localCache.getConsumerByTopicAndApp(topic, app);
+        Consumer consumer = tryGetConsumer(topic, app);
         if (null == consumer) {
             throw new JournalqException(JournalqCode.FW_CONSUMER_NOT_EXISTS);
         }
         return consumer;
+    }
+
+    public Consumer tryGetConsumer(TopicName topic, String app) {
+        return localCache.getConsumerByTopicAndApp(topic, app);
     }
 
     /**
@@ -472,27 +467,6 @@ public class ClusterManager extends Service {
         return getProducerPolicyOrDefault(producer);
     }
 
-    /**
-     * 是否开启就近消费
-     *
-     * @param topic 主题
-     * @param app   应用
-     * @return
-     */
-    public boolean isNeedNearby(TopicName topic, String app) throws JournalqException {
-        return getConsumerPolicy(topic, app).getNearby();
-    }
-
-    /**
-     * 判断是否配置延迟消费
-     *
-     * @param topic
-     * @return 是否需要延迟消费
-     * @Param app
-     */
-    public boolean isNeedDelay(TopicName topic, String app) throws JournalqException {
-        return getConsumerPolicy(topic, app).getDelay() > 0;
-    }
 
     /**
      * 是否需要长轮询
@@ -510,17 +484,17 @@ public class ClusterManager extends Service {
         return !(config != null && config.checkSequential());
     }
 
-    /**
-     * 获取应答超时时间
-     *
-     * @param topic 主题
-     * @param app   应用
-     * @return
-     */
-    public int getAckTimeout(TopicName topic, String app) throws JournalqException {
-        return getConsumerPolicy(topic, app).getAckTimeout();
+    public Producer getProducer(TopicName topic, String app) throws JournalqException {
+        Producer producer = tryGetProducer(topic, app);
+        if (null == producer) {
+            throw new JournalqException(JournalqCode.FW_PRODUCER_NOT_EXISTS);
+        }
+        return producer;
     }
 
+    public Producer tryGetProducer(TopicName topic, String app) {
+        return localCache.getProducerByTopicAndApp(topic, app);
+    }
 
     /**
      * 获取生产策略
@@ -553,30 +527,14 @@ public class ClusterManager extends Service {
         return consumer.getConsumerPolicy();
     }
 
-    public boolean isLeader(String topic) {
-        return isLeader(TopicName.parse(topic));
-    }
-
     public boolean isLeader(String topic, short partition) {
         return isLeader(TopicName.parse(topic), partition);
     }
 
-    public boolean isLeader(String topic, int partitionGroupId) {
-        return isLeader(TopicName.parse(topic), partitionGroupId);
+    public boolean isLeader(String topic, int partitionGroup) {
+        return isLeader(TopicName.parse(topic), partitionGroup);
     }
 
-    public boolean isLeader(TopicName topic) {
-        TopicConfig topicConfig = getTopicConfig(topic);
-        if (topicConfig == null) {
-            return false;
-        }
-        for (Map.Entry<Integer, PartitionGroup> entry : topicConfig.getPartitionGroups().entrySet()) {
-            if (getBrokerId().equals(entry.getValue().getLeader())) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     public boolean isLeader(TopicName topic, int partitionGroupId) {
         TopicConfig topicConfig = getTopicConfig(topic);
@@ -630,7 +588,6 @@ public class ClusterManager extends Service {
                 return BooleanResponse.failed(JournalqCode.FW_PUT_MESSAGE_TOPIC_NOT_WRITE);
             }
         }
-        ;
         if (logger.isDebugEnabled()) {
             logger.debug("checkWritable topicConfig[{}]", topicConfig);
         }
@@ -644,7 +601,6 @@ public class ClusterManager extends Service {
             logger.error("topic[{}] cant't be write on broker [] ", topic, app, broker.getId() + "[" + broker.getIp() + ":" + broker.getPort() + "]");
             return BooleanResponse.failed(JournalqCode.FW_PRODUCE_MESSAGE_BROKER_NOT_LEADER);
         }
-        ;
         return BooleanResponse.success();
     }
 
@@ -713,7 +669,6 @@ public class ClusterManager extends Service {
             if (blackList.stream().anyMatch(ip -> ip.equals(address))) {
                 return BooleanResponse.failed(JournalqCode.FW_GET_MESSAGE_APP_CLIENT_IP_NOT_READ);
             }
-            ;
         }
         Collection<PartitionGroup> partitionGroups = topicConfig.fetchPartitionGroupByBrokerId(broker.getId());
         if (CollectionUtils.isEmpty(partitionGroups)) {
@@ -726,7 +681,6 @@ public class ClusterManager extends Service {
             logger.error("topic[{}],app[{}],error[{}]", topic, app, JournalqCode.FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER.getMessage());
             return BooleanResponse.failed(JournalqCode.FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER);
         }
-        ;
         return BooleanResponse.success();
     }
 
@@ -894,7 +848,7 @@ public class ClusterManager extends Service {
          */
         protected void initCache() {
             buildTopicConfigCaches();
-            timerUpdateAllExecutor.scheduleAtFixedRate(() -> {
+            timerUpdateAllExecutor.scheduleWithFixedDelay(() -> {
                 try {
                     logger.info("begin update all topicConfigs");
                     Map<TopicName, TopicConfig> topicConfigNew = nameService.getTopicConfigByBroker(brokerConfig.getBrokerId());
@@ -919,8 +873,9 @@ public class ClusterManager extends Service {
                             if (!topicConfigOld.containsKey(topicName.getFullName())) {
                                 eventBus.add(TopicEvent.add(topicName));
                             }
-                            clearConsumerCache(topicName);
-                            clearProducerCache(topicName);
+
+                            updateConsumerCache(topicName);
+                            updateProducerCache(topicName);
                         }
                     }
                 } catch (Exception e) {
@@ -1054,6 +1009,7 @@ public class ClusterManager extends Service {
             return producerCache.get(topic.getFullName());
         }
 
+        @Deprecated
         private void clearConsumerCache(TopicName topicName) {
             Map<String, CacheConsumer> cacheConsuemerMap = consumerCache.get(topicName.getFullName());
             cacheConsuemerMap.values().forEach(cacheConsuemer -> {
@@ -1062,7 +1018,28 @@ public class ClusterManager extends Service {
                 }
             });
         }
+        /**
+         * 更新消费者配置信息
+         * </br>
+         * 用本地缓存去查询远程nameserver，如果查到覆盖本地，查不到删除本地
+         * @param topicName
+         */
+        private void updateConsumerCache(TopicName topicName) {
+            Map<String, CacheConsumer> cacheConsumerMapOld = consumerCache.get(topicName.getFullName());
+            Iterator<Map.Entry<String, CacheConsumer>> iterator = cacheConsumerMapOld.entrySet().iterator();
+            while(iterator.hasNext()) {
+                Map.Entry<String, CacheConsumer> next = iterator.next();
+                String app = next.getKey();
+                Consumer consumerByTopicAndApp = nameService.getConsumerByTopicAndApp(topicName, app);
+                if (null != consumerByTopicAndApp) {
+                    cacheConsumerMapOld.put(app, new CacheConsumer(consumerByTopicAndApp));
+                } else {
+                    iterator.remove();
+                }
+            }
+        }
 
+        @Deprecated
         private void clearProducerCache(TopicName topicName) {
             Map<String, CacheProducer> cacheProducerMap = producerCache.get(topicName.getFullName());
             cacheProducerMap.values().forEach(cacheProducer -> {
@@ -1070,6 +1047,28 @@ public class ClusterManager extends Service {
                     cacheProducerMap.remove(cacheProducer.getProducer().getApp());
                 }
             });
+        }
+
+        /**
+         * 更新发送者配置信息
+         * </br>
+         * 用本地缓存去查询远程nameserver，如果查到覆盖本地，查不到删除本地
+         * @param topicName
+         */
+        private void updateProducerCache(TopicName topicName) {
+            Map<String, CacheProducer> cacheProducerMapOld = producerCache.get(topicName.getFullName());
+
+            Iterator<Map.Entry<String, CacheProducer>> iterator = cacheProducerMapOld.entrySet().iterator();
+            while(iterator.hasNext()) {
+                Map.Entry<String, CacheProducer> next = iterator.next();
+                String app = next.getKey();
+                Producer producerByTopic = nameService.getProducerByTopicAndApp(topicName, app);
+                if (null != producerByTopic) {
+                    cacheProducerMapOld.put(app, new CacheProducer(producerByTopic));
+                } else {
+                    iterator.remove();
+                }
+            }
         }
 
         @Override
@@ -1138,10 +1137,12 @@ public class ClusterManager extends Service {
                         TopicConfig topicConfig = buildTopicConfigCache(((PartitionGroupEvent) event.getMetaEvent()).getTopic());
                         PartitionGroup groupNew = topicConfig.fetchPartitionGroupByGroup(((PartitionGroupEvent) event.getMetaEvent()).getPartitionGroup());
                         Set<Integer> brokerIds = new HashSet<>();
-                        if (groupOld != null)
+                        if (groupOld != null) {
                             brokerIds.addAll(groupOld.getReplicas());
-                        if (groupNew != null)
+                        }
+                        if (groupNew != null) {
                             brokerIds.addAll(groupNew.getReplicas());
+                        }
                         if (!brokerIds.contains(brokerConfig.getBrokerId())) {
                             return;
                         }

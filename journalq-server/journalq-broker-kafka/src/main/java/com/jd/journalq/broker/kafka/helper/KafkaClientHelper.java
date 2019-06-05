@@ -31,13 +31,10 @@ public class KafkaClientHelper {
             return clientId;
         }
         for (String replace : REPLACE) {
-            clientId = clientId.replace(replace, "");
+            clientId = StringUtils.replace(clientId, replace, "");
         }
         if (StringUtils.contains(clientId, SEPARATOR)) {
             String[] strings = StringUtils.splitByWholeSeparator(clientId, SEPARATOR);
-//            if (StringUtils.isNumeric(strings[strings.length - 1])) {
-//                return clientId.substring(0, clientId.lastIndexOf(SEPARATOR));
-//            }
             return strings[0];
         }
         return clientId;

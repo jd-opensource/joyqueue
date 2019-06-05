@@ -32,6 +32,7 @@
                       }
                     ]"
                    v-for="(item, index) in navList" :key="index"
+                   v-show="item.visible"
                    @click="setNavByIndex(index)">
                 <!-- S icon -->
                 <Icon v-if="item.icon"
@@ -157,14 +158,20 @@ export default {
       return this.prevable || this.nextable
     },
     activeIndex () {
+      let firstVisibleIndex = -1
       const navList = this.navList
       for (let i = 0, len = navList.length; i < len; i++) {
         const item = navList[i]
-        if (item.name === this.activeKey) {
-          return i
+        if (item.visible) {
+          if (firstVisibleIndex < 0) {
+            firstVisibleIndex = i
+          }
+          if (item.name === this.activeKey) {
+            return i
+          }
         }
       }
-      return 0
+      return firstVisibleIndex
     },
     tabsBodyTranslateStyle () {
       const activeIndex = this.activeIndex
@@ -285,14 +292,16 @@ export default {
           name: item.currentName || index,
           disabled: item.disabled,
           icon: item.icon,
-          closable: item.isClosable
+          closable: item.isClosable,
+          visible: item.visible
         })
 
         if (!item.currentName) {
           item.currentName = index
         }
 
-        if (index === 0 && !this.activeKey) {
+        // 取第一个可见的pane
+        if (item.visible && !this.activeKey) {
           this.activeKey = item.currentName || index
         }
 
@@ -315,8 +324,8 @@ export default {
     switchTabsWithNoAnimated () {
       const tabs = this.getTabs()
 
-      tabs.forEach(item => {
-        item.show = (item.currentName === this.activeKey)
+      tabs.forEach((item, index) => {
+        item.show = (item.currentName === this.activeKey) || (index === this.activeIndex)
       })
     },
     updateHandle () {

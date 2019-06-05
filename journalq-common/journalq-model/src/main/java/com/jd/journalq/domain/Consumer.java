@@ -47,6 +47,11 @@ public class Consumer extends Subscription {
      */
     protected ConsumerPolicy consumerPolicy;
 
+    /**
+     * 限流策略
+     */
+    protected ConsumerLimitPolicy limitPolicy;
+
     public Consumer() {
         setType(Type.CONSUMPTION);
     }
@@ -85,6 +90,47 @@ public class Consumer extends Subscription {
 
     public void setConsumerPolicy(ConsumerPolicy consumerPolicy) {
         this.consumerPolicy = consumerPolicy;
+    }
+
+    public void setLimitPolicy(ConsumerLimitPolicy limitPolicy) {
+        this.limitPolicy = limitPolicy;
+    }
+
+    public ConsumerLimitPolicy getLimitPolicy() {
+        return limitPolicy;
+    }
+
+    /**
+     * 限流策略
+     */
+    public static class ConsumerLimitPolicy implements Serializable {
+        private Integer tps;
+        private Integer traffic;
+
+        public ConsumerLimitPolicy() {
+
+        }
+
+        public ConsumerLimitPolicy(Integer tps, Integer traffic) {
+            this.tps = tps;
+            this.traffic = traffic;
+        }
+
+        public void setTps(Integer tps) {
+            this.tps = tps;
+        }
+
+        public Integer getTps() {
+            return tps;
+        }
+
+        public void setTraffic(Integer traffic) {
+            this.traffic = traffic;
+        }
+
+        public Integer getTraffic() {
+            return traffic;
+        }
     }
 
     /**
@@ -290,7 +336,7 @@ public class Consumer extends Subscription {
             //出错次数
             private Integer errTimes = 3;
             //一个连接最多占用的分区数
-            private Integer maxPartitionNum = 3;
+            private Integer maxPartitionNum = Integer.MAX_VALUE;
             //黑名单
             private Set<String> blackList;
             //读取到重试队列比例(0~100)

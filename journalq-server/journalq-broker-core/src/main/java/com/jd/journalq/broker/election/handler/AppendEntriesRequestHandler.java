@@ -47,16 +47,28 @@ public class AppendEntriesRequestHandler implements CommandHandler, Type {
         Preconditions.checkArgument(brokerContext != null, "broker context is null");
         Preconditions.checkArgument(brokerContext.getElectionService() != null, "election service is null");
 
+        if (!(brokerContext.getElectionService() instanceof ElectionManager)) {
+            logger.info("Append entries request handler, election service {} not election manager",
+                    brokerContext.getElectionService());
+            throw new IllegalArgumentException();
+        }
         this.electionManager = (ElectionManager)brokerContext.getElectionService();
     }
 
     public AppendEntriesRequestHandler(ElectionService electionService) {
+        if (!(electionService instanceof ElectionManager)) {
+            logger.info("Append entries request handler, election service {} not election manager",
+                    electionService);
+            throw new IllegalArgumentException();
+        }
         this.electionManager = (ElectionManager)electionService;
     }
 
     @Override
     public Command handle(Transport transport, Command command) throws TransportException {
-        logger.debug("Receive append entries request from {}", transport.remoteAddress());
+        if (!(command.getPayload() instanceof  AppendEntriesRequest)) {
+            throw new IllegalArgumentException();
+        }
 
         AppendEntriesRequest request = (AppendEntriesRequest) command.getPayload();
         if (request == null) {
@@ -64,6 +76,8 @@ public class AppendEntriesRequestHandler implements CommandHandler, Type {
             throw new TransportException("Append entries request payload is null",
                     JournalqCode.CT_MESSAGE_BODY_NULL.getCode());
         }
+
+        logger.debug("Receive append entries request {} from {}", request, transport.remoteAddress());
 
         try {
             LeaderElection leaderElection = electionManager.getLeaderElection(request.getTopic(),

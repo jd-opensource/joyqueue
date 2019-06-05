@@ -14,7 +14,6 @@
 package com.jd.journalq.application;
 
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
@@ -26,7 +25,6 @@ import java.net.URL;
  */
 @SpringBootApplication
 @PropertySource({"classpath:important.properties"})
-@EnableAutoConfiguration
 @Import(H2DBServerAutoConfiguration.class)
 public class WebApplication {
     public static void main(String[] args) {

@@ -65,16 +65,6 @@ public enum KafkaConfigKey implements PropertyDef {
 
     // 拉取批量大小
     FETCH_BATCH_SIZE("kafka.fetch.batch.size", 10, Type.INT),
-
-    // 是否启用限速
-    RATE_LIMIT_ENABLE("kafka.rate.limit.enable", false, Type.BOOLEAN),
-    // 限速延迟
-    RATE_LIMIT_DELAY("kafka.rate.limit.delay", 100 * 1, Type.INT),
-    // 限速次数
-    RATE_LIMIT_TIMES("kafka.rate.limit.times", 100, Type.INT),
-    // 限速窗口时间
-    RATE_LIMIT_TIME_WINDOW_SIZE("kafka.rate.limit.time.window.size", 1000 * 1, Type.INT),
-
     ;
 
     private String name;

@@ -1,7 +1,9 @@
 <template>
   <div>
     <div class="ml20 mt30">
-      <d-input v-model="searchData.keyword" placeholder="请输入英文名" class="left mr10" style="width:213px">
+      <d-input v-model="searchData.keyword" placeholder="请输入英文名" class="left mr10"
+               style="width:300px" @on-enter="getList">
+        <span slot="prepend">英文名</span>
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
       <d-button type="primary" @click="openDialog('addDialog')">添加用户<icon name="plus-circle" style="margin-left: 5px;"></icon></d-button>

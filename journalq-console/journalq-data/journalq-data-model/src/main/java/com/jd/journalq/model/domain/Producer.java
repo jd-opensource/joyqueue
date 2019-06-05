@@ -108,4 +108,9 @@ public class Producer extends BaseNsrModel {
         }
         return false;
     }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
 }

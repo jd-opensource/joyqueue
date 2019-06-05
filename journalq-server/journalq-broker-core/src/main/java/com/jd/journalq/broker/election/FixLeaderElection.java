@@ -28,9 +28,7 @@ import com.jd.journalq.toolkit.concurrent.EventBus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -41,7 +39,7 @@ import java.util.List;
 public class FixLeaderElection extends LeaderElection {
     private static Logger logger = LoggerFactory.getLogger(FixLeaderElection.class);
 
-    private List<DefaultElectionNode> allNodes = new LinkedList<>();
+    private List<DefaultElectionNode> allNodes;
 
     public FixLeaderElection(TopicPartitionGroup topicPartitionGroup, ElectionConfig electionConfig,
                              ElectionManager electionManager, ClusterManager clusterManager,
@@ -94,7 +92,7 @@ public class FixLeaderElection extends LeaderElection {
     }
 
     @Override
-    public void setLeaderId(int leaderId) throws IOException {
+    public void setLeaderId(int leaderId) {
         if (leaderId != this.leaderId && this.leaderId != ElectionNode.INVALID_NODE_ID) {
 
             if (leaderId == localNodeId) {
@@ -116,10 +114,9 @@ public class FixLeaderElection extends LeaderElection {
      * 更新选举元数据
      */
     private void updateElectionMetadata() {
-        try {
-            ElectionMetadata metadata = ElectionMetadata.Build.create(electionConfig.getMetadataPath(), topicPartitionGroup)
-                    .electionType(PartitionGroup.ElectType.fix)
-                    .allNodes(allNodes).leaderId(leaderId).localNode(localNodeId).build();
+        try (ElectionMetadata metadata = ElectionMetadata.Build.create(electionConfig.getMetadataPath(), topicPartitionGroup)
+                .electionType(PartitionGroup.ElectType.fix)
+                .allNodes(allNodes).leaderId(leaderId).localNode(localNodeId).build()) {
             electionMetadataManager.updateElectionMetadata(topicPartitionGroup, metadata);
         } catch (Exception e) {
             logger.warn("Partition group {}/node {} update election metadata fail",

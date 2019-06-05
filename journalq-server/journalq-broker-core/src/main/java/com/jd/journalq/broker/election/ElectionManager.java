@@ -14,7 +14,6 @@
 package com.jd.journalq.broker.election;
 
 import com.alibaba.fastjson.JSON;
-import com.google.common.base.Preconditions;
 import com.jd.journalq.broker.BrokerContext;
 import com.jd.journalq.broker.BrokerContextAware;
 import com.jd.journalq.broker.cluster.ClusterManager;
@@ -41,6 +40,8 @@ import com.jd.journalq.store.replication.ReplicableStore;
 import com.jd.journalq.toolkit.concurrent.EventBus;
 import com.jd.journalq.toolkit.concurrent.EventListener;
 import com.jd.journalq.toolkit.concurrent.NamedThreadFactory;
+import com.google.common.base.Preconditions;
+import com.jd.journalq.toolkit.lang.Close;
 import com.jd.journalq.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -188,14 +189,13 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
             }
         }
         leaderElections.clear();
-
         sessions.clear();
 
-        if (electionTimerExecutor != null) electionTimerExecutor.shutdown();
-        if (electionExecutor != null) electionExecutor.shutdown();
-        if (electionEventManager != null) electionEventManager.stop();
-        if (transportClient != null) transportClient.stop();
-        if (replicationManager != null) replicationManager.stop();
+        Close.close(electionTimerExecutor);
+        Close.close(electionExecutor);
+        Close.close(electionEventManager);
+        Close.close(transportClient);
+        Close.close(replicationManager);
 
         super.doStop();
     }
@@ -439,6 +439,7 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
      *
      * @param listener 监听者
      */
+    @Override
     public void addListener(EventListener<ElectionEvent> listener) {
         electionEventManager.addListener(listener);
     }
@@ -448,6 +449,7 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
      *
      * @param listener 监听者
      */
+    @Override
     public void removeListener(EventListener<ElectionEvent> listener) {
         electionEventManager.removeListener(listener);
     }

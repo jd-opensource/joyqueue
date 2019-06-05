@@ -524,6 +524,16 @@ public class SessionManager extends Service {
         public void setProducer(Producer producer) {
             this.producer = producer;
         }
+
+        @Override
+        public String toString() {
+            return "SessionEvent{" +
+                    "type=" + type +
+                    ", connection=" + connection +
+                    ", consumer=" + consumer +
+                    ", producer=" + producer +
+                    '}';
+        }
     }
 
 }
