@@ -1,28 +1,32 @@
 <template>
   <div>
     <div style="margin-left: 20px;">
-      <d-form :model="addData" inline label-width="520">
-        <d-form-item label="队列数量：" required style="width: 32%">
-          <d-input v-model="addData.partitions" placeholder="必填项"></d-input>
+      <d-form :model="addData" inline label-width="850">
+        <d-form-item label="队列数量：" required style="margin-right: 20px;">
+          <d-input v-model="addData.partitions" placeholder="请输入数字"  style="width: 150px"></d-input>
         </d-form-item>
-        <d-form-item label="选举类型：" required style="width:20%">
-          <d-select v-model="addData.electType" value="0" placeholder="请选择">
+        <d-form-item label="选举类型：" required style="margin-right: 20px;">
+          <d-select v-model="addData.electType" value="0" placeholder="请选择" style="width: 100px">
             <d-option :value="0">raft</d-option>
             <d-option :value="1">fix</d-option>
           </d-select>
         </d-form-item>
-        <d-form-item label="推荐leader：" required style="width:30%">
-          <d-select v-model="addData.recLeader" placeholder="必选项，请选择">
+        <d-form-item label="推荐leader：" required style="margin-right: 20px;">
+          <d-select v-model="addData.recLeader" placeholder="请先勾选表格中broker" style="width: 170px">
             <d-option v-for="item in addData.replicaGroups" :value="item.brokerId" :key="item.id">{{item.brokerId}}</d-option>
           </d-select>
         </d-form-item>
+        <d-form-item>
+          <d-button type="primary" @click="addNewPartitionGroup">
+            添加
+            <icon name="plus-circle" style="margin-left: 5px;"></icon>
+          </d-button>
+        </d-form-item>
       </d-form>
     </div>
-    <my-table :optional="true" :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange" style="height: 400px;overflow-y:auto"
+    <my-table :optional="true" :data="tableData" :showPin="showTablePin" :page="page"
+              @on-size-change="handleSizeChange" style="height: 400px;overflow-y:auto"
               @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"/>
-    <div class="d-dialog__footer">
-      <d-button type="primary" @click.native="addNewPartitionGroup()">确定</d-button>
-    </div>
   </div>
 </template>
 
@@ -73,19 +77,23 @@ export default {
         colData: [
           {
             title: 'brokerId',
-            key: 'id'
+            key: 'id',
+            width: '25%'
           },
           {
             title: '分组',
-            key: 'group.code'
+            key: 'group.code',
+            width: '25%'
           },
           {
             title: 'IP',
-            key: 'ip'
+            key: 'ip',
+            width: '25%'
           },
           {
             title: '端口',
-            key: 'port'
+            key: 'port',
+            width: '20%'
           }
         ]
       },
@@ -135,20 +143,20 @@ export default {
     },
     addNewPartitionGroup () {
       let addData = this.addData
-      if (addData.electType == null || addData.partitions <= 0) {
-        this.$Dialog.success({
-          content: '请输入队列数量和选举方式'
-        })
+      if (!addData.partitions) {
+        this.$Message.error('请输入队列数量')
+        return
+      }
+      if (!addData.recLeader) {
+        this.$Message.error('请选择推荐leader')
         return
       }
       let _this = this
       apiRequest.post(this.urls.add, {}, addData).then((data) => {
-        // this.addDialog.visible = false;
-        this.$Dialog.success({
-          content: '添加成功'
-        })
-        _this.$emit('on-partition-group-change')
-        this.$emit('on-dialog-cancel')
+        if (data && data.data) {
+          _this.$emit('on-partition-group-change')
+          _this.$emit('on-dialog-cancel')
+        }
       })
     }
   },

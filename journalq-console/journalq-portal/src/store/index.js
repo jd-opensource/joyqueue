@@ -29,6 +29,10 @@ const state = {
     producerType: 1,
     consumerType: 2
   },
+  detailType: {
+    appDetailType: 0,
+    topicDetailType: 1
+  },
   formType: {
     addFormType: 0,
     editFormType: 1
@@ -42,10 +46,10 @@ const state = {
     placeholder: {
       code: '仅支持字母、数字、- 和 _ ，首字符为字母',
       name: '仅支持中文、数字、字母、-和_，首字符汉字或字母',
-      subscribeGroup: '可输入，支持大小写字母、数字、_  -，首字母,长度至少3位'
+      subscribeGroup: '可输入，支持大小写字母、数字，首字母,长度至少3位'
     },
     pattern: {
-      subscribeGroup: /^[a-zA-Z]+[a-zA-Z0-9_-]{1,20}[a-zA-Z0-9]+$/
+      subscribeGroup: /^[a-zA-Z]+[a-zA-Z0-9]{1,20}[a-zA-Z0-9]+$/
     }
   },
   page: {
@@ -77,6 +81,12 @@ const getters = {
   },
   consumerType: state => {
     return state.subscribeType.consumerType
+  },
+  appDetailType: state => {
+    return state.detailType.appDetailType
+  },
+  topicDetailType: state => {
+    return state.detailType.topicDetailType
   },
   addFormType: state => {
     return state.formType.addFormType

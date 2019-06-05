@@ -268,11 +268,11 @@ public class NameServer extends Service implements NameService, PropertySupplier
         logger.info("Leader report, topic is {}, partition group is {}, leader is {}, term is {}",
                 topic, partitionGroup, leaderBrokerId, termId);
         TopicConfig topicConfig = null;
-//        try {
-//            topicConfig = reloadTopicConfig(topic);
-//        } catch (Exception e) {
-//            logger.warn("try to reload topic config failure, topic[{}]", topic.getFullName(), e);
-//        }
+        try {
+            topicConfig = reloadTopicConfig(topic);
+        } catch (Exception e) {
+            logger.warn("try to reload topic config failure, topic[{}]", topic.getFullName(), e);
+        }
         if (topicConfig == null) {
             topicConfig = metaCache.topicConfigs.get(topic);
         }

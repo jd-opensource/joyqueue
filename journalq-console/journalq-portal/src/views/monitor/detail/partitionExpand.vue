@@ -1,15 +1,14 @@
 <template>
   <div>
     <d-table :columns="tableData.colData" :data="tableData.rowData"></d-table>
-    <!--{{tableData.rowData}}-->
   </div>
 
 </template>
 
 <script>
-import MyTable from '../../components/common/myTable'
-import apiRequest from '../../utils/apiRequest.js'
-import crud from '../../mixins/crud.js'
+import MyTable from '../../../components/common/myTable'
+import apiRequest from '../../../utils/apiRequest.js'
+import crud from '../../../mixins/crud.js'
 export default {
   name: 'partition-expand',
   components: {MyTable},
@@ -48,6 +47,11 @@ export default {
         this.tableData.rowData = data.data
         this.showTablePin = false
       })
+    }
+  },
+  watch: {
+    row () {
+      this.getList()
     }
   },
   mounted () {

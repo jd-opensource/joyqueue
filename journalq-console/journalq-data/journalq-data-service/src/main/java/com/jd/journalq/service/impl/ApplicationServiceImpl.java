@@ -50,6 +50,7 @@ import java.util.stream.Collectors;
 
 import static com.jd.journalq.exception.ServiceException.BAD_REQUEST;
 import static com.jd.journalq.exception.ServiceException.INTERNAL_SERVER_ERROR;
+import static com.jd.journalq.exception.ValidationException.NOT_FOUND_EXCEPTION_STATUS;
 import static com.jd.journalq.exception.ValidationException.UNIQUE_EXCEPTION_STATUS;
 
 /**
@@ -82,6 +83,8 @@ public class ApplicationServiceImpl extends PageServiceSupport<Application, QApp
             User user = userService.findByCode(app.getOwner().getCode());
             if (user != null) {
                 app.getOwner().setId(user.getId());
+            } else {
+                throw new ValidationException(NOT_FOUND_EXCEPTION_STATUS, "owner|不存在");
             }
         }
         //Add

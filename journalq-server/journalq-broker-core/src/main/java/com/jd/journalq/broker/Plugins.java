@@ -16,6 +16,7 @@ package com.jd.journalq.broker;
 import com.jd.journalq.broker.consumer.Consume;
 import com.jd.journalq.broker.consumer.MessageConverter;
 import com.jd.journalq.broker.election.ElectionService;
+import com.jd.journalq.broker.limit.LimitRejectedStrategy;
 import com.jd.journalq.broker.producer.Produce;
 import com.jd.journalq.nsr.NameService;
 import com.jd.journalq.security.Authentication;
@@ -73,6 +74,11 @@ public interface Plugins {
      * 消息转换扩展点
      */
     ExtensionPoint<MessageConverter, String> MESSAGE_CONVERTER = new ExtensionPointLazy<>(MessageConverter.class, SpiLoader.INSTANCE, null, null);
+
+    /**
+     * 限流拒绝策略扩展点
+     */
+    ExtensionPoint<LimitRejectedStrategy, String> LIMIT_REJECTED_STRATEGY = new ExtensionPointLazy<>(LimitRejectedStrategy.class, SpiLoader.INSTANCE, null, null);
 
 
 }

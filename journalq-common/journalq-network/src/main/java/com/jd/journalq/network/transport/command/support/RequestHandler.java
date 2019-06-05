@@ -43,26 +43,26 @@ public class RequestHandler {
         this.exceptionHandler = exceptionHandler;
     }
 
-    public void handle(Transport transport, Command command) {
-        CommandHandler commandHandler = commandHandlerFactory.getHandler(command);
+    public void handle(Transport transport, Command request) {
+        CommandHandler commandHandler = commandHandlerFactory.getHandler(request);
         if (commandHandler == null) {
-            logger.error("unsupported command, command: {}", command);
+            logger.error("unsupported command, request: {}", request);
             return;
         }
 
-        CommandExecuteTask commandExecuteTask = new CommandExecuteTask(transport, command, commandHandler, commandHandlerFilterFactory, exceptionHandler);
+        CommandExecuteTask commandExecuteTask = new CommandExecuteTask(transport, request, commandHandler, commandHandlerFilterFactory, exceptionHandler);
 
         try {
             if (commandHandler instanceof ExecutorServiceProvider) {
-                ((ExecutorServiceProvider) commandHandler).getExecutorService(transport, command).execute(commandExecuteTask);
+                ((ExecutorServiceProvider) commandHandler).getExecutorService(transport, request).execute(commandExecuteTask);
             } else {
                 commandExecuteTask.run();
             }
         } catch (Throwable t) {
-            logger.error("command handler exception, transport: {}, command: {}", transport, command, t);
+            logger.error("command handler exception, transport: {}, request: {}", transport, request, t);
 
             if (exceptionHandler != null) {
-                exceptionHandler.handle(transport, command, t);
+                exceptionHandler.handle(transport, request, t);
             }
         }
     }

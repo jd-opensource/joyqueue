@@ -13,19 +13,19 @@
  */
 package com.jd.journalq.broker.network.protocol;
 
+import com.jd.journalq.broker.BrokerContext;
 import com.jd.journalq.broker.network.protocol.support.DefaultMultiProtocolHandlerPipelineFactory;
 import com.jd.journalq.broker.network.protocol.support.DefaultProtocolHandlerPipelineFactory;
-import com.jd.journalq.network.transport.command.CommandDispatcherFactory;
-import com.jd.journalq.network.transport.command.handler.ExceptionHandler;
-import com.jd.journalq.network.transport.command.handler.filter.CommandHandlerFilterFactory;
-import com.jd.journalq.network.transport.command.support.DefaultCommandDispatcherFactory;
-import com.jd.journalq.network.transport.command.support.DefaultCommandHandlerFilterFactory;
 import com.jd.journalq.network.event.TransportEvent;
 import com.jd.journalq.network.event.TransportEventHandler;
 import com.jd.journalq.network.handler.ConnectionHandler;
 import com.jd.journalq.network.transport.RequestBarrier;
 import com.jd.journalq.network.transport.TransportServer;
 import com.jd.journalq.network.transport.TransportServerFactory;
+import com.jd.journalq.network.transport.command.CommandDispatcherFactory;
+import com.jd.journalq.network.transport.command.handler.ExceptionHandler;
+import com.jd.journalq.network.transport.command.handler.filter.CommandHandlerFilterFactory;
+import com.jd.journalq.network.transport.command.support.DefaultCommandDispatcherFactory;
 import com.jd.journalq.network.transport.config.ServerConfig;
 import com.jd.journalq.network.transport.config.TransportConfig;
 import com.jd.journalq.toolkit.concurrent.EventBus;
@@ -41,6 +41,7 @@ public class MultiProtocolTransportServerFactory implements TransportServerFacto
     private TransportConfig transportConfig;
     private EventBus<TransportEvent> transportEventBus;
     private ProtocolManager protocolManager;
+    private BrokerContext brokerContext;
     private ExceptionHandler exceptionHandler;
     private RequestBarrier requestBarrier;
     private CommandHandlerFilterFactory commandHandlerFilterFactory;
@@ -50,8 +51,9 @@ public class MultiProtocolTransportServerFactory implements TransportServerFacto
     private MultiProtocolHandlerPipelineFactory multiProtocolHandlerPipelineFactory;
     private ProtocolHandlerPipelineFactory protocolHandlerPipelineFactory;
 
-    public MultiProtocolTransportServerFactory(ProtocolManager protocolManager, EventBus<TransportEvent> transportEventBus, ExceptionHandler exceptionHandler) {
+    public MultiProtocolTransportServerFactory(ProtocolManager protocolManager, BrokerContext brokerContext, EventBus<TransportEvent> transportEventBus, ExceptionHandler exceptionHandler) {
         this.protocolManager = protocolManager;
+        this.brokerContext = brokerContext;
         this.transportEventBus = transportEventBus;
         this.exceptionHandler = exceptionHandler;
     }
@@ -70,7 +72,7 @@ public class MultiProtocolTransportServerFactory implements TransportServerFacto
     public TransportServer bind(ServerConfig serverConfig, String host, int port) {
         this.transportConfig = serverConfig;
         this.requestBarrier = new RequestBarrier(transportConfig);
-        this.commandHandlerFilterFactory = new DefaultCommandHandlerFilterFactory();
+        this.commandHandlerFilterFactory = new ProtocolCommandHandlerFilterFactory(brokerContext);
         this.commandDispatcherFactory = new DefaultCommandDispatcherFactory(transportConfig, requestBarrier, commandHandlerFilterFactory, exceptionHandler);
         this.transportEventHandler = new TransportEventHandler(requestBarrier, transportEventBus);
         this.connectionHandler = new ConnectionHandler();

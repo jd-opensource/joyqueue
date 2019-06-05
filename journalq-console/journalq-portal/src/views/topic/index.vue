@@ -1,14 +1,16 @@
 <template>
   <div>
     <div class="ml20 mt30">
-      <d-select v-model="searchData.type" placeholder="请选择类型" class="left mr5" style="width:213px">
+      <d-select v-model="searchData.type" placeholder="请选择类型" class="left mr5"
+                style="width:213px" @on-change="getList">
         <span slot="prepend">主题类型</span>
         <d-option value="-1" >全部</d-option>
         <d-option value="0" >普通主题</d-option>
         <d-option value="1" >广播主题</d-option>
         <d-option value="2" >顺序主题</d-option>
       </d-select>
-      <d-input v-model="searchData.keyword" placeholder="请输入英文名" class="left mr5" style="width:213px">
+      <d-input v-model="searchData.keyword" placeholder="请输入英文名" class="left mr5"
+               style="width:213px" @on-enter="getList">
         <span slot="prepend">关键词</span>
       </d-input>
       <d-button type="primary" color="success" @click="getList">查询<icon name="search" style="margin-left: 5px;"></icon></d-button>

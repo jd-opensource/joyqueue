@@ -53,10 +53,14 @@ public class ThrowableSupplier implements ErrorSupplier {
                 return Responses.error(ServiceError.getCode(), serviceException.getStatus(), serviceException.getMessage());
             }
             return Responses.error(RuntimeError.getCode(), RuntimeError.getStatus(), targetException.getMessage());
+        } else if(throwable instanceof NullPointerException) {
+            return Responses.error(RuntimeError.getCode(), RuntimeError.getStatus(), ((NullPointerException) throwable).toString());
         }
 
-//        return Responses.error(RuntimeError.getCode(), RuntimeError.getStatus(), StringUtils.isBlank(throwable.getMessage())? throwable.toString() : throwable.getMessage());
-        return Responses.error(RuntimeError.getCode(), RuntimeError.getStatus(), StringUtils.isBlank(throwable.getMessage())?RuntimeError.getMessage(): throwable.getMessage());
+        return Responses.error(RuntimeError.getCode(), RuntimeError.getStatus(),
+                StringUtils.isNotBlank(throwable.getMessage()) ? throwable.getMessage()
+                        : (StringUtils.isNotBlank(throwable.toString())
+                        ? throwable.toString(): RuntimeError.getMessage()));
     }
 
     @Override

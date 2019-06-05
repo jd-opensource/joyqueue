@@ -141,7 +141,7 @@ public class DelayedOperationManager<T extends DelayedOperation> {
         }
 
         synchronized (operation) {
-            isCompletedByMe = operation.safeTryComplete();
+            isCompletedByMe = operation.tryComplete();
             if (isCompletedByMe) {
                 return true;
             }

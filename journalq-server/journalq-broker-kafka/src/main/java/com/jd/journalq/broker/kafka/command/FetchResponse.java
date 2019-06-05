@@ -17,13 +17,25 @@ package com.jd.journalq.broker.kafka.command;
 import com.google.common.collect.Table;
 import com.jd.journalq.broker.kafka.KafkaCommandType;
 import com.jd.journalq.broker.kafka.model.FetchResponsePartitionData;
+import com.jd.journalq.broker.network.traffic.FetchTrafficPayload;
+import com.jd.journalq.broker.network.traffic.Traffic;
 
 /**
  * Created by zhangkepeng on 16-8-4.
  */
-public class FetchResponse extends KafkaRequestOrResponse {
+public class FetchResponse extends KafkaRequestOrResponse implements FetchTrafficPayload {
 
+    private Traffic traffic;
     private Table<String, Integer, FetchResponsePartitionData> fetchResponses;
+
+    public FetchResponse() {
+
+    }
+
+    public FetchResponse(Traffic traffic, Table<String, Integer, FetchResponsePartitionData> fetchResponses) {
+        this.traffic = traffic;
+        this.fetchResponses = fetchResponses;
+    }
 
     public Table<String, Integer, FetchResponsePartitionData> getFetchResponses() {
         return fetchResponses;
@@ -31,6 +43,11 @@ public class FetchResponse extends KafkaRequestOrResponse {
 
     public void setFetchResponses(Table<String, Integer, FetchResponsePartitionData> fetchResponses) {
         this.fetchResponses = fetchResponses;
+    }
+
+    @Override
+    public Traffic getTraffic() {
+        return traffic;
     }
 
     @Override

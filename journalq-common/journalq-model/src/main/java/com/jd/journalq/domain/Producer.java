@@ -36,6 +36,11 @@ public class Producer extends Subscription {
      */
     protected ProducerPolicy producerPolicy;
 
+    /**
+     * 限流策略
+     */
+    protected ProducerLimitPolicy limitPolicy;
+
     public Producer() {
         setType(Type.PRODUCTION);
     }
@@ -58,6 +63,47 @@ public class Producer extends Subscription {
 
     public void setProducerPolicy(ProducerPolicy producerPolicy) {
         this.producerPolicy = producerPolicy;
+    }
+
+    public void setLimitPolicy(ProducerLimitPolicy limitPolicy) {
+        this.limitPolicy = limitPolicy;
+    }
+
+    public ProducerLimitPolicy getLimitPolicy() {
+        return limitPolicy;
+    }
+
+    /**
+     * 限流策略
+     */
+    public static class ProducerLimitPolicy implements Serializable {
+        private Integer tps;
+        private Integer traffic;
+
+        public ProducerLimitPolicy() {
+
+        }
+
+        public ProducerLimitPolicy(Integer tps, Integer traffic) {
+            this.tps = tps;
+            this.traffic = traffic;
+        }
+
+        public void setTps(Integer tps) {
+            this.tps = tps;
+        }
+
+        public Integer getTps() {
+            return tps;
+        }
+
+        public void setTraffic(Integer traffic) {
+            this.traffic = traffic;
+        }
+
+        public Integer getTraffic() {
+            return traffic;
+        }
     }
 
     /**

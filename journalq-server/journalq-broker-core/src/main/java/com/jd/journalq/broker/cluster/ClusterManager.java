@@ -13,6 +13,7 @@
  */
 package com.jd.journalq.broker.cluster;
 
+import com.google.common.base.Preconditions;
 import com.jd.journalq.broker.BrokerContext;
 import com.jd.journalq.broker.config.BrokerConfig;
 import com.jd.journalq.domain.AppToken;
@@ -34,12 +35,11 @@ import com.jd.journalq.event.ProducerEvent;
 import com.jd.journalq.event.TopicEvent;
 import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.exception.JournalqException;
-import com.jd.journalq.response.BooleanResponse;
 import com.jd.journalq.nsr.NameService;
+import com.jd.journalq.response.BooleanResponse;
 import com.jd.journalq.toolkit.concurrent.EventBus;
 import com.jd.journalq.toolkit.concurrent.EventListener;
 import com.jd.journalq.toolkit.lang.LifeCycle;
-import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.network.IpUtil;
 import com.jd.journalq.toolkit.service.Service;
 import com.jd.journalq.toolkit.time.SystemClock;
@@ -52,7 +52,18 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
@@ -415,11 +426,15 @@ public class ClusterManager extends Service {
      * @return
      */
     public Consumer getConsumer(TopicName topic, String app) throws JournalqException {
-        Consumer consumer = localCache.getConsumerByTopicAndApp(topic, app);
+        Consumer consumer = tryGetConsumer(topic, app);
         if (null == consumer) {
             throw new JournalqException(JournalqCode.FW_CONSUMER_NOT_EXISTS);
         }
         return consumer;
+    }
+
+    public Consumer tryGetConsumer(TopicName topic, String app) {
+        return localCache.getConsumerByTopicAndApp(topic, app);
     }
 
     /**
@@ -469,6 +484,17 @@ public class ClusterManager extends Service {
         return !(config != null && config.checkSequential());
     }
 
+    public Producer getProducer(TopicName topic, String app) throws JournalqException {
+        Producer producer = tryGetProducer(topic, app);
+        if (null == producer) {
+            throw new JournalqException(JournalqCode.FW_PRODUCER_NOT_EXISTS);
+        }
+        return producer;
+    }
+
+    public Producer tryGetProducer(TopicName topic, String app) {
+        return localCache.getProducerByTopicAndApp(topic, app);
+    }
 
     /**
      * 获取生产策略
@@ -822,7 +848,7 @@ public class ClusterManager extends Service {
          */
         protected void initCache() {
             buildTopicConfigCaches();
-            timerUpdateAllExecutor.scheduleAtFixedRate(() -> {
+            timerUpdateAllExecutor.scheduleWithFixedDelay(() -> {
                 try {
                     logger.info("begin update all topicConfigs");
                     Map<TopicName, TopicConfig> topicConfigNew = nameService.getTopicConfigByBroker(brokerConfig.getBrokerId());
@@ -847,8 +873,9 @@ public class ClusterManager extends Service {
                             if (!topicConfigOld.containsKey(topicName.getFullName())) {
                                 eventBus.add(TopicEvent.add(topicName));
                             }
-                            clearConsumerCache(topicName);
-                            clearProducerCache(topicName);
+
+                            updateConsumerCache(topicName);
+                            updateProducerCache(topicName);
                         }
                     }
                 } catch (Exception e) {
@@ -982,6 +1009,7 @@ public class ClusterManager extends Service {
             return producerCache.get(topic.getFullName());
         }
 
+        @Deprecated
         private void clearConsumerCache(TopicName topicName) {
             Map<String, CacheConsumer> cacheConsuemerMap = consumerCache.get(topicName.getFullName());
             cacheConsuemerMap.values().forEach(cacheConsuemer -> {
@@ -990,7 +1018,28 @@ public class ClusterManager extends Service {
                 }
             });
         }
+        /**
+         * 更新消费者配置信息
+         * </br>
+         * 用本地缓存去查询远程nameserver，如果查到覆盖本地，查不到删除本地
+         * @param topicName
+         */
+        private void updateConsumerCache(TopicName topicName) {
+            Map<String, CacheConsumer> cacheConsumerMapOld = consumerCache.get(topicName.getFullName());
+            Iterator<Map.Entry<String, CacheConsumer>> iterator = cacheConsumerMapOld.entrySet().iterator();
+            while(iterator.hasNext()) {
+                Map.Entry<String, CacheConsumer> next = iterator.next();
+                String app = next.getKey();
+                Consumer consumerByTopicAndApp = nameService.getConsumerByTopicAndApp(topicName, app);
+                if (null != consumerByTopicAndApp) {
+                    cacheConsumerMapOld.put(app, new CacheConsumer(consumerByTopicAndApp));
+                } else {
+                    iterator.remove();
+                }
+            }
+        }
 
+        @Deprecated
         private void clearProducerCache(TopicName topicName) {
             Map<String, CacheProducer> cacheProducerMap = producerCache.get(topicName.getFullName());
             cacheProducerMap.values().forEach(cacheProducer -> {
@@ -998,6 +1047,28 @@ public class ClusterManager extends Service {
                     cacheProducerMap.remove(cacheProducer.getProducer().getApp());
                 }
             });
+        }
+
+        /**
+         * 更新发送者配置信息
+         * </br>
+         * 用本地缓存去查询远程nameserver，如果查到覆盖本地，查不到删除本地
+         * @param topicName
+         */
+        private void updateProducerCache(TopicName topicName) {
+            Map<String, CacheProducer> cacheProducerMapOld = producerCache.get(topicName.getFullName());
+
+            Iterator<Map.Entry<String, CacheProducer>> iterator = cacheProducerMapOld.entrySet().iterator();
+            while(iterator.hasNext()) {
+                Map.Entry<String, CacheProducer> next = iterator.next();
+                String app = next.getKey();
+                Producer producerByTopic = nameService.getProducerByTopicAndApp(topicName, app);
+                if (null != producerByTopic) {
+                    cacheProducerMapOld.put(app, new CacheProducer(producerByTopic));
+                } else {
+                    iterator.remove();
+                }
+            }
         }
 
         @Override

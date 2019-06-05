@@ -134,7 +134,7 @@ public class IgniteConsumerService implements ConsumerService {
             }
             IgniteConsumer igConsumer = toIgniteModel(consumer);
             consumerDao.addOrUpdate(igConsumer);
-            if (null != consumer.getConsumerPolicy() || null != consumer.getRetryPolicy()) {
+            if (null != consumer.getConsumerPolicy() || null != consumer.getRetryPolicy() || consumer.getLimitPolicy() != null) {
                 consumerConfigDao.addOrUpdate(new IgniteConsumerConfig(igConsumer));
             }
             if (commit) tx.commit();
