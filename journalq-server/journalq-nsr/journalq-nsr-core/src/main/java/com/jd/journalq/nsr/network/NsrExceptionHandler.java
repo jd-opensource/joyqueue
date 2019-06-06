@@ -16,14 +16,19 @@ package com.jd.journalq.nsr.network;
 import com.jd.journalq.network.transport.Transport;
 import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.transport.command.handler.ExceptionHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author wylixiaobin
  * Date: 2019/1/27
  */
 public class NsrExceptionHandler implements ExceptionHandler {
+
+    protected static final Logger logger = LoggerFactory.getLogger(NsrExceptionHandler.class);
+
     @Override
     public void handle(Transport transport, Command command, Throwable throwable) {
-
+        logger.error("nameserver exception, transport: {}, command: {}", transport, command, throwable);
     }
 }
