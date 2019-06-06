@@ -95,6 +95,8 @@ public class TransportConfigSupport {
                     transportConfig.setNonBlockOneway(property.getBoolean());
                 } else if (fullKey.equals(keyPrefix + TRANSPORT_SEND_TIMEOUT)) {
                     transportConfig.setSendTimeout(property.getInteger());
+                } else if (fullKey.equals(keyPrefix + TRANSPORT_RETRY_DELAY)) {
+                    transportConfig.getRetryPolicy().setRetryDelay(property.getInteger());
                 }
             }
 
@@ -121,6 +123,7 @@ public class TransportConfigSupport {
     public static final String TRANSPORT_CALL_BACK_THREADS = "transport.callbackThreads";
     public static final String TRANSPORT_CALL_NON_BLOCK_ONEWAY = "transport.nonBlockOneway";
     public static final String TRANSPORT_SEND_TIMEOUT = "transport.sendTimeout";
+    public static final String TRANSPORT_RETRY_DELAY = "transport.retryDelay";
 
     //server transport config
     public static final String TRANSPORT_SERVER_PORT = "transport.server.port";

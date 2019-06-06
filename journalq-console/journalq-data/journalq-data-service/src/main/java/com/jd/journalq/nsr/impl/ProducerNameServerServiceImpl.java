@@ -17,24 +17,23 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
-import com.jd.journalq.domain.ClientType;
-import com.jd.journalq.domain.TopicName;
-import com.jd.journalq.model.PageResult;
-import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.convert.CodeConverter;
 import com.jd.journalq.convert.NsrProducerConverter;
+import com.jd.journalq.domain.ClientType;
+import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.exception.ServiceException;
+import com.jd.journalq.model.PageResult;
+import com.jd.journalq.model.QPageQuery;
 import com.jd.journalq.model.domain.Identity;
 import com.jd.journalq.model.domain.Namespace;
 import com.jd.journalq.model.domain.OperLog;
 import com.jd.journalq.model.domain.Producer;
 import com.jd.journalq.model.domain.Topic;
 import com.jd.journalq.model.query.QProducer;
-import com.jd.journalq.nsr.model.ProducerQuery;
 import com.jd.journalq.nsr.NameServerBase;
 import com.jd.journalq.nsr.ProducerNameServerService;
+import com.jd.journalq.nsr.model.ProducerQuery;
 import com.jd.journalq.toolkit.security.EscapeUtils;
-import com.jd.journalq.util.NullUtil;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -67,20 +66,7 @@ public class ProducerNameServerServiceImpl extends NameServerBase implements Pro
      */
     @Override
     public int add(Producer producer) throws Exception {
-        com.jd.journalq.domain.Producer nsrProducer = new com.jd.journalq.domain.Producer();
-        nsrProducer.setApp(producer.getApp().getCode());
-        nsrProducer.setClientType(ClientType.valueOf(producer.getClientType()));
-        nsrProducer.setTopic(CodeConverter.convertTopic(producer.getNamespace(),producer.getTopic()));
-        if(!NullUtil.isEmpty(producer.getConfig())){
-            nsrProducer.setProducerPolicy(com.jd.journalq.domain.Producer.ProducerPolicy.Builder.build()
-                    .nearby(producer.getConfig().isNearBy())
-                    .single(producer.getConfig().isSingle())
-                    .blackList(producer.getConfig().getBlackList())
-                    .archive(producer.isArchive())
-                    .weight(producer.getConfig().getWeight())
-                    //.timeout()
-                    .create());
-        }
+        com.jd.journalq.domain.Producer nsrProducer = nsrProducerConverter.convert(producer);
         String result = postWithLog(ADD_PRODUCER, nsrProducer, OperLog.Type.PRODUCER.value(),OperLog.OperType.ADD.value(),producer.getTopic().getCode());
         return isSuccess(result);
     }
@@ -92,27 +78,7 @@ public class ProducerNameServerServiceImpl extends NameServerBase implements Pro
      */
     @Override
     public int update(Producer producer) throws Exception {
-
-        String result = post(GETBYID_PRODUCER,producer.getId());
-        com.jd.journalq.domain.Producer nsrProducer = JSON.parseObject(result, com.jd.journalq.domain.Producer.class);
-
-        if (nsrProducer == null) {
-            nsrProducer = new com.jd.journalq.domain.Producer();
-        }
-
-        nsrProducer.setApp(producer.getApp().getCode());
-        nsrProducer.setTopic(CodeConverter.convertTopic(producer.getNamespace(),producer.getTopic()));
-        nsrProducer.setClientType(ClientType.valueOf(producer.getClientType()));
-        if(!NullUtil.isEmpty(producer.getConfig())){
-            nsrProducer.setProducerPolicy(com.jd.journalq.domain.Producer.ProducerPolicy.Builder.build()
-                    .nearby(producer.getConfig().isNearBy())
-                    .single(producer.getConfig().isSingle())
-                    .blackList(producer.getConfig().getBlackList())
-                    .archive(producer.getConfig().isArchive())
-                    .weight(producer.getConfig().getWeight())
-                    //.timeout()
-                    .create());
-        }
+        com.jd.journalq.domain.Producer nsrProducer = nsrProducerConverter.convert(producer);
         String result1 = postWithLog(UPDATE_PRODUCER, nsrProducer,OperLog.Type.PRODUCER.value(),OperLog.OperType.UPDATE.value(),producer.getTopic().getCode());
         return isSuccess(result1);
     }

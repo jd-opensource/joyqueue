@@ -17,7 +17,7 @@
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
               @on-detail-chart="goDetailChart" @on-current-change="handleCurrentChange" @on-detail="openDetailTab"
               @on-config="openConfigDialog" @on-set-produce-weight="openWeightConfigDialog"
-              @on-summary-chart="goSummaryChart" @on-performance-chart="goPerformanceChart"/>
+              @on-summary-chart="goSummaryChart" @on-performance-chart="goPerformanceChart" @on-rateLimit="openRateLimitDialog"/>
 
     <!--生产订阅弹出框-->
     <my-dialog :dialog="subscribeDialog" @on-dialog-cancel="dialogCancel('subscribeDialog')">
@@ -36,6 +36,10 @@
                        :search="produceWeightDialog.urls.search" :update="produceWeightDialog.urls.update"/>
     </my-dialog>
 
+    <my-dialog :dialog="rateLimitDialog" @on-dialog-confirm="rateLimitConfirm" @on-dialog-cancel="dialogCancel('rateLimitDialog')">
+      <rate-limit ref="rateLimit" :limitTraffic="rateLimitDialog.limitTraffic" :limitTps="rateLimitDialog.limitTps"/>
+    </my-dialog>
+
   </div>
 </template>
 
@@ -47,10 +51,12 @@ import subscribe from './subscribe.vue'
 import ProducerConfigForm from './producerConfigForm.vue'
 import ProducerWeight from './produceWight.vue'
 import {getTopicCode, replaceChartUrl} from '../../utils/common.js'
+import RateLimit from "./rateLimit";
 
 export default {
   name: 'producer-base',
   components: {
+    RateLimit,
     myTable,
     myDialog,
     subscribe,
@@ -99,8 +105,12 @@ export default {
           {
             txt: '设置生产权重',
             method: 'on-set-produce-weight'
+          },
+          {
+            txt: '限流',
+            method: 'on-rateLimit',
+            isAdmin: true
           }
-
         ]
       }
     },
@@ -139,6 +149,15 @@ export default {
         page: 1,
         size: 10,
         total: 100
+      },
+      rateLimitDialog: {
+        visible: false,
+        title: '限流',
+        width: '400',
+        showFooter: true,
+        doSearch: false,
+        limitTps:0,
+        limitTraffic:0
       },
       type: this.$store.getters.producerType, // 1:生产， 2：消费
       subscribeDialog: {
@@ -195,6 +214,12 @@ export default {
       this.configData['producerId'] = item.id
       this.produceWeightDialog.visible = true
     },
+    openRateLimitDialog (item) {
+      this.rateLimitDialog.limitTps = item.config.limitTps
+      this.configData['producerId'] = item.id
+      this.rateLimitDialog.limitTraffic = item.config.limitTraffic
+      this.rateLimitDialog.visible = true
+    },
     handleSizeChange (val) {
       this.page.size = val
       this.getList()
@@ -221,6 +246,14 @@ export default {
         weight: this.$refs.weightForm.getWeights()
       }
       this.config(configData, 'produceWeightDialog')
+    },
+    rateLimitConfirm () {
+      let configData = {
+        producerId: this.configData.producerId,
+        limitTps: this.$refs.rateLimit.tps,
+        limitTraffic: this.$refs.rateLimit.traffic
+      }
+      this.config(configData, 'rateLimitDialog')
     },
     goSummaryChart (item) {
       if (this.monitorUrls && this.monitorUrls.summary) {
@@ -274,6 +307,9 @@ export default {
           }
         })
       }
+    },
+    isAdmin (item) {
+      return this.$store.getters.isAdmin
     },
     getMonitor (row, index) {
       let data = {

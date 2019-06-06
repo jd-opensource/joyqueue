@@ -29,7 +29,7 @@ import io.netty.buffer.ByteBuf;
  */
 public class VoteRequestDecoder implements PayloadDecoder<JMQHeader>, Type {
     @Override
-    public VoteRequest decode(JMQHeader header, final ByteBuf buffer) throws Exception {
+    public Object decode(JMQHeader header, final ByteBuf buffer) throws Exception {
         VoteRequest voteRequest = new VoteRequest();
 
         String topic = Serializer.readString(buffer);

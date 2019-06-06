@@ -71,11 +71,11 @@ export default {
     getList () {
       this.showTablePin = true
       apiRequest.postBase(this.urls.search, {}, this.search, false).then((data) => {
-        let result = (data.data || [])['members']
-        this.extension = (result || []).extension
-        this.tableData.rowData = result
+        let result = (data.data || {})
+        this.extension = result.extension
+        this.tableData.rowData = (result.members ||[])
         // this.onListResult(data)
-        this.page.total = (result || []).length
+        this.page.total = (result.members || []).length
         this.showTablePin = false
       })
     }

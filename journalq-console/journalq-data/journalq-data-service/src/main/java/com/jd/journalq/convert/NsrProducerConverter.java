@@ -42,7 +42,7 @@ public class NsrProducerConverter extends Converter<Producer, com.jd.journalq.do
                     .nearby(producer.getConfig().isNearBy())
                     .single(producer.getConfig().isSingle())
                     .blackList(producer.getConfig().getBlackList())
-                    .archive(producer.isArchive())
+                    .archive(producer.getConfig().isArchive())
                     .weight(producer.getConfig().getWeight())
                     //.timeout()
                     .create());

@@ -27,7 +27,7 @@ import io.netty.buffer.ByteBuf;
  */
 public class VoteResponseDecoder implements PayloadDecoder<JMQHeader>, Type {
     @Override
-    public VoteResponse decode(JMQHeader header, final ByteBuf buffer) {
+    public Object decode(JMQHeader header, final ByteBuf buffer) {
         VoteResponse voteResponse = new VoteResponse();
 
         voteResponse.setTerm(buffer.readInt());

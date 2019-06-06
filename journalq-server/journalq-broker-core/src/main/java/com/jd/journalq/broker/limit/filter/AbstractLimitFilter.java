@@ -58,7 +58,7 @@ public abstract class AbstractLimitFilter implements ProtocolCommandHandlerFilte
     }
 
     protected Command maybeLimit(Transport transport, Command request, Command response, TrafficPayload trafficPayload) {
-        if (!(trafficPayload instanceof TrafficType)) {
+        if (!(trafficPayload instanceof TrafficType) || trafficPayload.getTraffic() == null) {
             return response;
         }
 
