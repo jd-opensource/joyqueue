@@ -30,7 +30,7 @@ public enum LimitConfigKey implements PropertyDef {
     DELAY("limit.delay", LimitConfig.DELAY_DYNAMIC, PropertyDef.Type.INT),
 
     // 最大延时
-    MAX_DELAY("limit.delay.max", 100, PropertyDef.Type.INT),
+    MAX_DELAY("limit.delay.max", 1000, PropertyDef.Type.INT),
 
     // 拒绝策略
     REJECTED_STRATEGY("limit.rejected.strategy", "delay", PropertyDef.Type.STRING),
