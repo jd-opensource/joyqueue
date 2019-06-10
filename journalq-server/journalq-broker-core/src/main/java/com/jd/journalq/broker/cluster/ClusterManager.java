@@ -876,6 +876,8 @@ public class ClusterManager extends Service {
 
                             updateConsumerCache(topicName);
                             updateProducerCache(topicName);
+                            // 补偿订阅事件
+                            compensateAddConsumeEvent(topicName);
                         }
                     }
                 } catch (Exception e) {
@@ -1037,6 +1039,35 @@ public class ClusterManager extends Service {
                     iterator.remove();
                 }
             }
+        }
+
+        /**
+         * 补偿订阅事件
+         * </br>
+         * 远程拉取主题的所有订阅者和本地缓存对比，如果本地缓存没有，则补偿一个订阅事件
+         * @param topicName
+         */
+        private void compensateAddConsumeEvent(TopicName topicName) {
+            List<Consumer> consumerByTopic = nameService.getConsumerByTopic(topicName);
+            ConcurrentHashMap<String, CacheConsumer> localConsumeCache = consumerCache.get(topicName.getFullName());
+            consumerByTopic.stream().forEach(consumer -> {
+                if (consumer != null) {
+                    String app = consumer.getApp();
+                    if (!localConsumeCache.contains(app)) {
+                        // 如果本地缓存不包含这个订阅关系，则补偿一个订阅关系事件
+                        ConsumerEvent consumerEvent = new ConsumerEvent();
+                        consumerEvent.setEventType(EventType.ADD_CONSUMER);
+                        consumerEvent.setApp(app);
+                        consumerEvent.setTopic(topicName);
+
+                        // 添加订阅事件
+                        eventBus.add(consumerEvent);
+
+                        // 添加到本地缓存
+                        localConsumeCache.put(app, new CacheConsumer(consumer));
+                    }
+                }
+            });
         }
 
         @Deprecated
