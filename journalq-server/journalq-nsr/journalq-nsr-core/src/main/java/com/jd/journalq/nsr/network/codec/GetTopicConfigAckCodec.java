@@ -30,7 +30,7 @@ public class GetTopicConfigAckCodec implements NsrPayloadCodec<GetTopicConfigAck
     public Object decode(Header header, ByteBuf buffer) throws Exception {
         GetTopicConfigAck getTopicConfigAck = new GetTopicConfigAck();
         if(buffer.readBoolean()){
-            getTopicConfigAck.topicConfig(Serializer.readTopicConfig(buffer));
+            getTopicConfigAck.topicConfig(Serializer.readTopicConfig(buffer, header.getVersion()));
         }
         return getTopicConfigAck;
     }

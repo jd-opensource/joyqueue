@@ -30,7 +30,12 @@ import io.netty.buffer.ByteBuf;
 public class ReplicateConsumePosRequestDecoder implements PayloadDecoder<JMQHeader>, Type {
     @Override
     public Object decode(final JMQHeader header, final ByteBuf buffer) throws Exception {
-        String consumePositions = Serializer.readString(buffer, Serializer.SHORT_SIZE);
+        String consumePositions;
+        if (header.getVersion() == JMQHeader.VERSION1) {
+            consumePositions = Serializer.readString(buffer, Serializer.SHORT_SIZE);
+        } else {
+            consumePositions = Serializer.readString(buffer, Serializer.INT_SIZE);
+        }
         return new ReplicateConsumePosRequest(consumePositions);
     }
 

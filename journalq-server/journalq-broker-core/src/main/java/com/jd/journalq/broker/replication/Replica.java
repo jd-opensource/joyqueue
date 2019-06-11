@@ -49,6 +49,8 @@ public class Replica {
 
     private long lastReplicateConsumePosTime;
 
+    private ReplicateCommandState replicateCommandState;
+
     private ScheduledFuture heartbeatTimerFuture;
 
     Replica(int replicaId, String address) {
@@ -141,6 +143,14 @@ public class Replica {
         return heartbeatTimerFuture;
     }
 
+    public ReplicateCommandState getReplicateCommandState() {
+        return replicateCommandState;
+    }
+
+    public void setReplicateCommandState(ReplicateCommandState replicateCommandState) {
+        this.replicateCommandState = replicateCommandState;
+    }
+
     @Override
     public String toString() {
         return new StringBuilder("Replica:{").append("replicaId:").append(replicaId)
@@ -152,6 +162,10 @@ public class Replica {
                 .append(", lastAppendSuccessTime:").append(lastAppendSuccessTime)
                 .append(", lastReplicateConsumePosTime:").append(lastReplicateConsumePosTime).toString();
 
+    }
+    enum ReplicateCommandState {
+        REPLICATE,
+        WAITING_RESPONSE
     }
 
 }
