@@ -548,7 +548,7 @@ public class RaftLeaderElectionTest {
     @Test
     public void testTransferLeader() throws Exception {
         System.out.println("Start test transfer leader");
-/*
+
         List<Broker> allNodes = new LinkedList<>();
         for (int i = 0; i < NODE_NUM; i++) {
             allNodes.add(brokers[i]);
@@ -556,16 +556,17 @@ public class RaftLeaderElectionTest {
 
         createElectionManager(allNodes);
 
-        produceTask.start();
-        consumeTask.start();
-
         Thread.sleep(10000);
         int leaderId = leaderElections[0].getLeaderId();
         Assert.assertNotEquals(leaderId, -1);
         logger.info("Leader id is " + leaderId);
-        System.out.println("Leader id is " + leaderId);
         Assert.assertEquals(leaderId, leaderElections[1].getLeaderId());
         Assert.assertEquals(leaderId, leaderElections[2].getLeaderId());
+
+        produceTask = new ProduceTask(storeServices[leaderId - 1], topic1, partitionGroup1);
+        produceTask.start();
+        consumeTask = new ConsumeTask(storeServices[leaderId - 1], topic1, partitionGroup1);
+        consumeTask.start();
 
         electionManager[leaderId - 1].onLeaderChange(topic1, partitionGroup1, nextNode(leaderId));
 
@@ -614,9 +615,8 @@ public class RaftLeaderElectionTest {
 
         produceTask.stop(true);
         consumeTask.stop(true);
-*/
-    }
 
+    }
 
     private class ElectionEventListener implements EventListener<ElectionEvent> {
         @Override

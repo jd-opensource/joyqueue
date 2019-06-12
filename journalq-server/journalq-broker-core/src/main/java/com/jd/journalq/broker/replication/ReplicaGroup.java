@@ -166,8 +166,7 @@ public class ReplicaGroup extends Service {
 
         replicas.add(newReplica);
 
-        replicateResponseQueue.put(new DelayedCommand(
-                System.nanoTime() + ONE_SECOND_NANO, newReplica.replicaId()));
+        replicateResponseQueue.put(new DelayedCommand(ONE_SECOND_NANO, newReplica.replicaId()));
 
         //startNewHeartbeat(newReplica);
 
@@ -343,27 +342,26 @@ public class ReplicaGroup extends Service {
      */
     private void initResponseQueue() {
         replicas.forEach((r) -> replicateResponseQueue.put(
-                new DelayedCommand(System.nanoTime(), r.replicaId())));
+                new DelayedCommand(0, r.replicaId())));
     }
 
     /**
      * 如果只有一个节点，直接commit
      */
     private void replicateLocal() {
+        long delayTimeNs;
         if (replicas.size() == 1) {
             if (replicableStore.commitPosition() < replicableStore.rightPosition()) {
                 replicableStore.commit(replicableStore.rightPosition());
+                delayTimeNs = 0;
             } else {
-                try {
-                    Thread.sleep(1);
-                } catch (InterruptedException ignored) {}
+                delayTimeNs = ONE_MS_NANO / 5;
             }
-            replicateResponseQueue.put(new DelayedCommand(System.nanoTime(), localReplicaId));
         } else {
-            replicateResponseQueue.put(new DelayedCommand(
-                    System.nanoTime() + ONE_SECOND_NANO, localReplicaId));
+            delayTimeNs = ONE_SECOND_NANO;
         }
 
+        replicateResponseQueue.put(new DelayedCommand(delayTimeNs, localReplicaId));
     }
 
     /**
@@ -378,8 +376,7 @@ public class ReplicaGroup extends Service {
 
                     AppendEntriesRequest request = generateAppendEntriesRequest(replica);
                     if (request == null) {
-                        replicateResponseQueue.put(new DelayedCommand(
-                                System.nanoTime() + ONE_MS_NANO, replica.replicaId()));
+                        replicateResponseQueue.put(new DelayedCommand(ONE_MS_NANO / 5, replica.replicaId()));
                         return;
                     }
 
@@ -398,14 +395,13 @@ public class ReplicaGroup extends Service {
                 } catch (Throwable t) {
                     logger.warn("Partition group {}/ node {} send append entries to {} fail",
                             topicPartitionGroup, localReplicaId, replica.replicaId(), t);
-                    replicateResponseQueue.put(new DelayedCommand(System.nanoTime() + ONE_SECOND_NANO, replica.replicaId()));
+                    replicateResponseQueue.put(new DelayedCommand(ONE_SECOND_NANO, replica.replicaId()));
                 }
             });
         } catch (Exception e) {
             logger.info("Partition group {}/node {} replicate message to {} fail",
                     topicPartitionGroup, localReplicaId, replica.replicaId(), e);
-            replicateResponseQueue.put(new DelayedCommand(
-                    System.nanoTime() + ONE_SECOND_NANO, replica.replicaId()));
+            replicateResponseQueue.put(new DelayedCommand(ONE_SECOND_NANO, replica.replicaId()));
         }
     }
 
@@ -513,7 +509,7 @@ public class ReplicaGroup extends Service {
                 logger.info("Partition group {}/node {} process append entries reponse fail",
                         topicPartitionGroup, localReplicaId, e);
             } finally {
-                replicateResponseQueue.put(new DelayedCommand(System.nanoTime(), replica.replicaId()));
+                replicateResponseQueue.put(new DelayedCommand(0, replica.replicaId()));
             }
         }
 
@@ -535,7 +531,7 @@ public class ReplicaGroup extends Service {
                         topicPartitionGroup, localReplicaId, request, e);
             } finally {
                 replicateResponseQueue.put(
-                        new DelayedCommand(System.nanoTime() + ONE_SECOND_NANO, replica.replicaId()));
+                        new DelayedCommand(ONE_SECOND_NANO, replica.replicaId()));
             }
         }
     }
@@ -589,22 +585,25 @@ public class ReplicaGroup extends Service {
         replica.lastReplicateConsumePosTime(now);
 
         try {
-            String consumePositions = consume.getConsumeInfoByGroup(TopicName.parse(topicPartitionGroup.getTopic()),
-                    null, topicPartitionGroup.getPartitionGroupId());
-            if (consumePositions == null) {
-                logger.info("Partition group {}/node {} get consumer info return null",
-                        topicPartitionGroup, localReplicaId);
-                return;
-            }
-
-            ReplicateConsumePosRequest request = new ReplicateConsumePosRequest(consumePositions);
-            JMQHeader header = new JMQHeader(Direction.REQUEST, CommandType.REPLICATE_CONSUME_POS_REQUEST);
-
-            logger.debug("Partition group {}/node {} send consume position {} to node {}",
-                    topicPartitionGroup, localReplicaId, consumePositions, replica.replicaId());
-
             replicateExecutor.submit(() -> {
                 try {
+                    long startTime = usTime();
+
+                    String consumePositions = consume.getConsumeInfoByGroup(TopicName.parse(topicPartitionGroup.getTopic()),
+                            null, topicPartitionGroup.getPartitionGroupId());
+                    if (consumePositions == null) {
+                        logger.info("Partition group {}/node {} get consumer info return null",
+                                topicPartitionGroup, localReplicaId);
+                        return;
+                    }
+
+                    ReplicateConsumePosRequest request = new ReplicateConsumePosRequest(consumePositions);
+                    JMQHeader header = new JMQHeader(Direction.REQUEST, CommandType.REPLICATE_CONSUME_POS_REQUEST);
+
+                    logger.debug("Partition group {}/node {} send consume position {} to node {}",
+                            topicPartitionGroup, localReplicaId, consumePositions, replica.replicaId());
+
+
                     replicationManager.sendCommand(replica.getAddress(), new Command(header, request),
                             electionConfig.getSendCommandTimeout(), new ReplicateConsumePosRequestCallback(replica));
                 } catch (Exception e) {
@@ -1039,27 +1038,32 @@ public class ReplicaGroup extends Service {
 
 
     private class DelayedCommand implements Delayed {
+        private long startTimeNs;
         private long delayTimeNs;
         private int replicaId;
 
         DelayedCommand(long delayTimeNs, int replicaId) {
+            this.startTimeNs = System.nanoTime();
             this.delayTimeNs = delayTimeNs;
             this.replicaId = replicaId;
         }
 
         @Override
         public long getDelay(@NotNull TimeUnit unit) {
-            return unit.convert(delayTimeNs - System.nanoTime(), TimeUnit.NANOSECONDS);
+            return unit.convert(remainTimeNs(), TimeUnit.NANOSECONDS);
         }
 
         @Override
         public int compareTo(@NotNull Delayed another) {
             if (another instanceof DelayedCommand) {
-                return Long.compare(delayTimeNs, ((DelayedCommand) another).delayTimeNs);
+                return Long.compare(remainTimeNs(), ((DelayedCommand) another).remainTimeNs());
             } else {
                 return 0;
             }
+        }
 
+        private long remainTimeNs() {
+            return delayTimeNs - (System.nanoTime() - startTimeNs);
         }
 
         int replicaId() {
