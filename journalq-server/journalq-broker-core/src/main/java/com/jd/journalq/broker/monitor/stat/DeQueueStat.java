@@ -15,7 +15,6 @@ package com.jd.journalq.broker.monitor.stat;
 
 import com.jd.journalq.broker.monitor.metrics.Metrics;
 
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
 
 /**
