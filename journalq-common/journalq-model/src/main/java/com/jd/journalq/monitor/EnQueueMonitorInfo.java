@@ -22,14 +22,22 @@ package com.jd.journalq.monitor;
 public class EnQueueMonitorInfo extends BaseMonitorInfo {
 
     private long count;
-    private long oneMinuteRate;
     private double tp99;
     private double tp90;
     private double max;
     private double min;
     private double avg;
-    private long size;
     private long totalSize;
+
+    // 分钟级
+    @Deprecated
+    private long oneMinuteRate;
+    @Deprecated
+    private long size;
+
+    // 秒级
+    private long tps;
+    private long traffic;
 
     public long getCount() {
         return count;
@@ -101,5 +109,21 @@ public class EnQueueMonitorInfo extends BaseMonitorInfo {
 
     public void setTotalSize(long totalSize) {
         this.totalSize = totalSize;
+    }
+
+    public void setTps(long tps) {
+        this.tps = tps;
+    }
+
+    public long getTps() {
+        return tps;
+    }
+
+    public void setTraffic(long traffic) {
+        this.traffic = traffic;
+    }
+
+    public long getTraffic() {
+        return traffic;
     }
 }
