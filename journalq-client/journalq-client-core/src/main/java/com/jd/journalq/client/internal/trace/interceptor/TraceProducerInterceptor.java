@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jd.journalq.client.internal.consumer.trace;
+package com.jd.journalq.client.internal.trace.interceptor;
 
 import com.jd.journalq.client.internal.common.ordered.Ordered;
 import com.jd.journalq.client.internal.producer.domain.SendResult;
