@@ -186,8 +186,6 @@ class PartitionConsumption extends Service {
             PullResult pullResult = getMessage4Sequence(consumer, partition, count, ackTimeout);
             int pullMsgCount = pullResult.getBuffers().size();
             if (pullMsgCount > 0) {
-                // 增加拉取序号
-                positionManager.increaseMsgPullIndex(TopicName.parse(consumer.getTopic()), consumer.getApp(), partition, pullMsgCount);
                 return pullResult;
             }
             listIndex++;
@@ -463,13 +461,16 @@ class PartitionConsumption extends Service {
                 // 将当前序号向后移动一位
                 long updateMsgAckIndex = curIndex + 1;
                 isSuccess = positionManager.updateLastMsgAckIndex(TopicName.parse(topic), app, partition, updateMsgAckIndex);
+
+                // 更新拉取位置(普通消费于并行消费来回切换之后需要用到实时的拉取位置)
+                positionManager.updateLastMsgPullIndex(TopicName.parse(consumer.getTopic()), consumer.getApp(), partition, updateMsgAckIndex);
             } else if (lastMsgAckIndex >= indexArr[1]) {
                 isSuccess = true;
             } else {
-                logger.error("ack index is not continue.");
+                logger.error("ack index : [{} - {}] is not continue, currentIndex is : [{}], consumer info is : {}", indexArr[0], indexArr[1], lastMsgAckIndex, consumer);
             }
         } else {
-            throw new JournalqException(JournalqCode.FW_CONSUMER_ACK_FAIL, "序号不连续或有重复");
+            throw new JournalqException(JournalqCode.FW_CONSUMER_ACK_FAIL, "ack index is not continue or repeatable!");
         }
 
         return isSuccess;
