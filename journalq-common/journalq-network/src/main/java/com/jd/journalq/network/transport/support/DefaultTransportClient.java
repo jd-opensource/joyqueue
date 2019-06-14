@@ -65,7 +65,7 @@ public class DefaultTransportClient extends TransportClientSupport implements Tr
         this.requestHandler = requestHandler;
         this.responseHandler = responseHandler;
         this.transportEventBus = transportEventBus;
-        this.clearTimer = new Timer("journalqclient-clear-timer");
+        this.clearTimer = new Timer("journalq-client-clear-timer");
 
         // TODO 延迟和调度时间
         this.clearTimer.scheduleAtFixedRate(new TimerTask() {
@@ -74,6 +74,10 @@ public class DefaultTransportClient extends TransportClientSupport implements Tr
                 requestBarrier.evict();
             }
         }, 1000 * 3, 1000);
+        try {
+            super.start();
+        } catch (Exception e) {
+        }
     }
 
     @Override
@@ -125,7 +129,8 @@ public class DefaultTransportClient extends TransportClientSupport implements Tr
 
     @Override
     protected void doStop() {
-        super.doStop();
         requestBarrier.clear();
+        clearTimer.cancel();
+        super.doStop();
     }
 }

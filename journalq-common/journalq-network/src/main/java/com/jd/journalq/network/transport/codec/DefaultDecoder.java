@@ -48,12 +48,15 @@ public class DefaultDecoder implements Decoder {
                 logger.debug("Default decoder, readable bytes is {}", buffer.readableBytes());
                 return null;
             }
-            buffer.markReaderIndex();
+
+            int readerIndex = buffer.readerIndex();
             int length = readLength(buffer);
+
             if (buffer.readableBytes() < length) {
-                buffer.resetReaderIndex();
+                buffer.readerIndex(readerIndex);
                 return null;
             }
+
             return doDecode(buffer);
         } catch (Exception e) {
             logger.error("decode exception", e);

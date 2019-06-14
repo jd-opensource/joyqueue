@@ -18,11 +18,14 @@ import com.google.common.collect.Maps;
 import com.jd.journalq.broker.JournalqCommandHandler;
 import com.jd.journalq.broker.JournalqContext;
 import com.jd.journalq.broker.JournalqContextAware;
-import com.jd.journalq.broker.converter.CheckResultConverter;
-import com.jd.journalq.broker.config.JournalqConfig;
 import com.jd.journalq.broker.cluster.ClusterManager;
+import com.jd.journalq.broker.command.ProduceMessageAck;
+import com.jd.journalq.broker.config.JournalqConfig;
+import com.jd.journalq.broker.converter.CheckResultConverter;
 import com.jd.journalq.broker.helper.SessionHelper;
+import com.jd.journalq.broker.network.traffic.Traffic;
 import com.jd.journalq.broker.producer.Produce;
+import com.jd.journalq.broker.producer.ProduceConfig;
 import com.jd.journalq.domain.QosLevel;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.exception.JournalqCode;
@@ -31,7 +34,6 @@ import com.jd.journalq.message.BrokerMessage;
 import com.jd.journalq.network.command.BooleanAck;
 import com.jd.journalq.network.command.JournalqCommandType;
 import com.jd.journalq.network.command.ProduceMessage;
-import com.jd.journalq.network.command.ProduceMessageAck;
 import com.jd.journalq.network.command.ProduceMessageAckData;
 import com.jd.journalq.network.command.ProduceMessageAckItemData;
 import com.jd.journalq.network.command.ProduceMessageData;
@@ -45,6 +47,7 @@ import com.jd.journalq.store.WriteResult;
 import com.jd.journalq.toolkit.concurrent.EventListener;
 import com.jd.journalq.toolkit.time.SystemClock;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,12 +68,14 @@ public class ProduceMessageHandler implements JournalqCommandHandler, Type, Jour
     protected static final Logger logger = LoggerFactory.getLogger(ProduceMessageHandler.class);
 
     private JournalqConfig config;
+    private ProduceConfig produceConfig;
     private Produce produce;
     private ClusterManager clusterManager;
 
     @Override
     public void setJmqContext(JournalqContext journalqContext) {
         this.config = journalqContext.getConfig();
+        this.produceConfig = new ProduceConfig(journalqContext.getBrokerContext().getPropertySupplier());
         this.produce = journalqContext.getBrokerContext().getProduce();
         this.clusterManager= journalqContext.getBrokerContext().getClusterManager();
     }
@@ -89,6 +94,7 @@ public class ProduceMessageHandler implements JournalqCommandHandler, Type, Jour
         boolean isNeedAck = !qosLevel.equals(QosLevel.ONE_WAY);
         CountDownLatch latch = new CountDownLatch(produceMessage.getData().size());
         Map<String, ProduceMessageAckData> resultData = Maps.newConcurrentMap();
+        Traffic traffic = new Traffic(produceMessage.getApp());
 
         for (Map.Entry<String, ProduceMessageData> entry : produceMessage.getData().entrySet()) {
             String topic = entry.getKey();
@@ -114,6 +120,7 @@ public class ProduceMessageHandler implements JournalqCommandHandler, Type, Jour
 
             produceMessage(connection, topic, produceMessage.getApp(), produceMessageData, (data) -> {
                 resultData.put(topic, data);
+                traffic.record(topic, produceMessageData.getSize());
                 latch.countDown();
             });
         }
@@ -132,6 +139,7 @@ public class ProduceMessageHandler implements JournalqCommandHandler, Type, Jour
         }
 
         ProduceMessageAck produceMessageAck = new ProduceMessageAck();
+        produceMessageAck.setTraffic(traffic);
         produceMessageAck.setData(resultData);
         return new Command(produceMessageAck);
     }
@@ -183,6 +191,9 @@ public class ProduceMessageHandler implements JournalqCommandHandler, Type, Jour
         for (BrokerMessage brokerMessage : produceMessageData.getMessages()) {
             if (brokerMessage.getPartition() != partition) {
                 throw new JournalqException(JournalqCode.CN_PARAM_ERROR, "the put message command has multi partition");
+            }
+            if (StringUtils.length(brokerMessage.getBusinessId()) > produceConfig.getBusinessIdLength()) {
+                throw new JournalqException(JournalqCode.CN_PARAM_ERROR, "message businessId out of rage");
             }
             brokerMessage.setClientIp(address);
             brokerMessage.setTxId(txId);

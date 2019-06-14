@@ -58,4 +58,8 @@ public class DefaultCommandDispatcher implements CommandDispatcher {
             logger.error("unsupported direction, direction: {}, transport: {}, command: {}", direction, transport, command);
         }
     }
+
+    public RequestBarrier getRequestBarrier() {
+        return requestBarrier;
+    }
 }

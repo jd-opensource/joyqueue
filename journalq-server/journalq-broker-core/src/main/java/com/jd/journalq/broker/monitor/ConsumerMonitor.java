@@ -31,7 +31,7 @@ public interface ConsumerMonitor {
      * @param size
      * @param time
      */
-    void onGetMessage(String topic, String app, int partitionGroup, short partition, long count, long size, long time);
+    void onGetMessage(String topic, String app, int partitionGroup, short partition, long count, long size, double time);
 
     /**
      * 重试消息
@@ -40,7 +40,7 @@ public interface ConsumerMonitor {
      * @param count
      * @param time
      */
-    void onGetRetry(String topic, String app, long count, long time);
+    void onGetRetry(String topic, String app, long count, double time);
 
     /**
      * 添加重试
@@ -49,7 +49,7 @@ public interface ConsumerMonitor {
      * @param count
      * @param time
      */
-    void onAddRetry(String topic, String app, long count, long time);
+    void onAddRetry(String topic, String app, long count, double time);
 
     /**
      * 重试成功

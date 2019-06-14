@@ -28,6 +28,10 @@ export default {
     closable: {
       type: Boolean,
       default: true
+    },
+    visible: {
+      type: Boolean,
+      default: true
     }
   },
   data () {
@@ -39,7 +43,7 @@ export default {
   },
   computed: {
     isClosable () {
-      return this.closable ? this.$parent.closable : false
+      return this.closable ? true : this.$parent.closable
     }
   },
   watch: {
@@ -54,6 +58,9 @@ export default {
       this.updateNav()
     },
     disabled () {
+      this.updateNav()
+    },
+    visible () {
       this.updateNav()
     }
   },

@@ -100,7 +100,7 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
     }
 
     @Override
-    public void onPutMessage(String topic, String app, int partitionGroup, short partition, long count, long size, long time) {
+    public void onPutMessage(String topic, String app, int partitionGroup, short partition, long count, long size, double time) {
         if (!config.isEnable()) {
             return;
         }
@@ -127,7 +127,7 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
     }
 
     @Override
-    public void onGetMessage(String topic, String app, int partitionGroup, short partition, long count, long size, long time) {
+    public void onGetMessage(String topic, String app, int partitionGroup, short partition, long count, long size, double time) {
         if (!config.isEnable()) {
             return;
         }
@@ -154,7 +154,7 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
     }
 
     @Override
-    public void onReplicateMessage(String topic, int partitionGroup, long count, long size, long time) {
+    public void onReplicateMessage(String topic, int partitionGroup, long count, long size, double time) {
         if (!config.isEnable()) {
             return;
         }
@@ -166,7 +166,7 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
     }
 
     @Override
-    public void onAppendReplicateMessage(String topic, int partitionGroup, long count, long size, long time) {
+    public void onAppendReplicateMessage(String topic, int partitionGroup, long count, long size, double time) {
         if (!config.isEnable()) {
             return;
         }
@@ -178,14 +178,14 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
     }
 
     @Override
-    public void onGetRetry(String topic, String app, long count, long time) {
+    public void onGetRetry(String topic, String app, long count, double time) {
         if (!config.isEnable()) {
             return;
         }
     }
 
     @Override
-    public void onAddRetry(String topic, String app, long count, long time) {
+    public void onAddRetry(String topic, String app, long count, double time) {
         if (!config.isEnable()) {
             return;
         }

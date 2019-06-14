@@ -45,7 +45,7 @@ public class RaftLeaderElectionTest {
 
     private final int RAFT_ELECTION_NUM = 3;
     private final int NODE_NUM = 3;
-    private final int TOPIC_NUM = 20;
+    private final int TOPIC_NUM = 5;
 
     private ElectionManagerStub[] electionManager = new ElectionManagerStub[RAFT_ELECTION_NUM];
     private LeaderElection[] leaderElections = new RaftLeaderElection[RAFT_ELECTION_NUM];
@@ -147,7 +147,7 @@ public class RaftLeaderElectionTest {
     }
 
     private int getLeader(LeaderElection leaderElection, int waitTimes) throws InterruptedException{
-        Thread.sleep(10000);
+        Thread.sleep(5000);
         int times = 0;
         int leaderId = leaderElection.getLeaderId();
         while (leaderId == -1 && times < waitTimes) {
@@ -179,13 +179,17 @@ public class RaftLeaderElectionTest {
         Assert.assertEquals(leaderId, leaderElections[1].getLeaderId());
         Assert.assertEquals(leaderId, leaderElections[2].getLeaderId());
 
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 1; i++) {
             electionManager[leaderId - 1].stop();
             logger.info("Node " + leaderId + " stop");
+
+            Thread.sleep(10000);
 
             int leaderIdNew = getLeader(leaderElections[nextNode(leaderId) - 1], 10);
             Assert.assertNotEquals(leaderIdNew, -1);
             logger.info("leaderIdNew id is " + leaderIdNew);
+
+            Thread.sleep(1000);
 
             for (int j = 0; j < NODE_NUM; j++) {
                 if (j != leaderId - 1) {
@@ -229,7 +233,7 @@ public class RaftLeaderElectionTest {
         consumeTask = new ConsumeTask(storeServices[leaderId - 1], topic1, partitionGroup1);
         consumeTask.start();
 
-        Thread.sleep(10000);
+        Thread.sleep(3000);
 
         produceTask.stop(true);
         produceTask = null;
@@ -263,8 +267,8 @@ public class RaftLeaderElectionTest {
         consumeTask = new ConsumeTask(storeServices[leaderId - 1], topic1, partitionGroup1);
         consumeTask.start();
 
-        for (int i = 0; i < 3; i++) {
-            Thread.sleep(10000);
+        for (int i = 0; i < 1; i++) {
+            Thread.sleep(5000);
 
             electionManager[leaderId - 1].removeLeaderElection(topic1.getFullName(), partitionGroup1);
             electionManager[leaderId - 1].stop();
@@ -277,7 +281,7 @@ public class RaftLeaderElectionTest {
             produceTask.setStoreService(storeServices[leaderId1 - 1]);
             consumeTask.setStoreService(storeServices[leaderId1 - 1]);
 
-            Thread.sleep(10000);
+            Thread.sleep(5000);
 
             electionManager[leaderId - 1].start();
             electionManager[leaderId - 1].onPartitionGroupCreate(PartitionGroup.ElectType.raft,
@@ -285,7 +289,7 @@ public class RaftLeaderElectionTest {
             leaderElections[leaderId - 1] = electionManager[leaderId - 1].getLeaderElection(topic1, partitionGroup1);
             electionManager[leaderId - 1].addListener(new ElectionEventListener());
 
-            Thread.sleep(10000);
+            Thread.sleep(5000);
             leaderId = leaderId1;
         }
 
@@ -296,7 +300,7 @@ public class RaftLeaderElectionTest {
 
         System.out.println("Produce task and consume task interrupted.");
 
-        Thread.sleep(10000);
+        Thread.sleep(5000);
 
         long[] messageLength = new long[RAFT_ELECTION_NUM];
         for (int i = 0; i < RAFT_ELECTION_NUM; i++) {
@@ -316,7 +320,7 @@ public class RaftLeaderElectionTest {
             if (i > 0) Assert.assertEquals(messageLength[i], messageLength[i - 1]);
         }
 
-        Thread.sleep(10000);
+        Thread.sleep(1000);
 
         //Assert.assertEquals(messages.size(), 10);
 
@@ -350,7 +354,7 @@ public class RaftLeaderElectionTest {
             logger.info("Leader of topic {} is {}", topics[i], leaderId);
         }
 
-        Thread.sleep(15000);
+        Thread.sleep(5000);
 
         for (int i = 0; i < TOPIC_NUM; i++) {
             logger.info("Leader of topic {}, 1 is {}", topics[i], multiLeaderElections[1][i].getLeaderId());
@@ -370,7 +374,7 @@ public class RaftLeaderElectionTest {
             consumeTasks[i].start();
         }
 
-        Thread.sleep(60000);
+        Thread.sleep(5000);
 
         for (int i = 0; i < produceTasks.length; i++) {
             produceTasks[i].stop(true);
@@ -383,7 +387,7 @@ public class RaftLeaderElectionTest {
 
         System.out.println("Produce task and consume task interrupted.");
 
-        Thread.sleep(10000);
+        Thread.sleep(3000);
 
         for (int j = 0; j < TOPIC_NUM; j++) {
             for (int i = 0; i < RAFT_ELECTION_NUM; i++) {
@@ -394,7 +398,7 @@ public class RaftLeaderElectionTest {
                         + ", term is " + rStore.term());
             }
         }
-        Thread.sleep(10000);
+        Thread.sleep(1000);
 
         //Assert.assertEquals(messages.size(), 10);
 
@@ -421,7 +425,7 @@ public class RaftLeaderElectionTest {
         consumeTask = new ConsumeTask(storeServices[leaderId - 1], topic1, partitionGroup1);
         consumeTask.start();
 
-        Thread.sleep(10000);
+        Thread.sleep(5000);
 
         electionManager[nextNode(leaderId) - 1].removeLeaderElection(topic1.getFullName(), partitionGroup1);
         electionManager[nextNode(leaderId) - 1].stop();
@@ -443,7 +447,7 @@ public class RaftLeaderElectionTest {
                     + ", commit position is " + rStore.commitPosition()
                     + ", term is " + rStore.term());
         }
-        Thread.sleep(10000);
+        Thread.sleep(1000);
 
         //Assert.assertEquals(messages.size(), 10);
 
@@ -480,6 +484,8 @@ public class RaftLeaderElectionTest {
             }
         }
 
+        Thread.sleep(10000);
+
         int leaderId1 = getLeader(leaderElections[nextNode(leaderId) - 1], 10);
         logger.info("Leader1 id is " + leaderId1);
         Assert.assertNotEquals(leaderId1, -1);
@@ -497,7 +503,7 @@ public class RaftLeaderElectionTest {
             }
         }
 
-        Thread.sleep(10000);
+        Thread.sleep(5000);
 
         int i;
         for (i = 0; i < RAFT_ELECTION_NUM; i++) {
@@ -542,7 +548,7 @@ public class RaftLeaderElectionTest {
     @Test
     public void testTransferLeader() throws Exception {
         System.out.println("Start test transfer leader");
-/*
+
         List<Broker> allNodes = new LinkedList<>();
         for (int i = 0; i < NODE_NUM; i++) {
             allNodes.add(brokers[i]);
@@ -550,16 +556,17 @@ public class RaftLeaderElectionTest {
 
         createElectionManager(allNodes);
 
-        produceTask.start();
-        consumeTask.start();
-
         Thread.sleep(10000);
         int leaderId = leaderElections[0].getLeaderId();
         Assert.assertNotEquals(leaderId, -1);
         logger.info("Leader id is " + leaderId);
-        System.out.println("Leader id is " + leaderId);
         Assert.assertEquals(leaderId, leaderElections[1].getLeaderId());
         Assert.assertEquals(leaderId, leaderElections[2].getLeaderId());
+
+        produceTask = new ProduceTask(storeServices[leaderId - 1], topic1, partitionGroup1);
+        produceTask.start();
+        consumeTask = new ConsumeTask(storeServices[leaderId - 1], topic1, partitionGroup1);
+        consumeTask.start();
 
         electionManager[leaderId - 1].onLeaderChange(topic1, partitionGroup1, nextNode(leaderId));
 
@@ -608,9 +615,8 @@ public class RaftLeaderElectionTest {
 
         produceTask.stop(true);
         consumeTask.stop(true);
-*/
-    }
 
+    }
 
     private class ElectionEventListener implements EventListener<ElectionEvent> {
         @Override

@@ -26,6 +26,7 @@ import java.util.Map;
  */
 public class IntervalTimeStoreCleaningStrategy implements StoreCleaningStrategy {
     private long maxIntervalTime;
+    private boolean doNotDeleteConsumed = true;
 
     public IntervalTimeStoreCleaningStrategy() {
 
@@ -41,7 +42,7 @@ public class IntervalTimeStoreCleaningStrategy implements StoreCleaningStrategy 
 
         if (partitionGroupStore != null) {
             do {
-                deletedSize = partitionGroupStore.deleteMinStoreMessages(targetDeleteTimeline, partitionAckMap);
+                deletedSize = partitionGroupStore.deleteMinStoreMessages(targetDeleteTimeline, partitionAckMap, doNotDeleteConsumed);
                 totalDeletedSize += deletedSize;
             } while (deletedSize > 0L);
         }
@@ -51,6 +52,8 @@ public class IntervalTimeStoreCleaningStrategy implements StoreCleaningStrategy 
 
     @Override
     public void setSupplier(PropertySupplier supplier) {
-        this.maxIntervalTime = new BrokerStoreConfig(supplier).getMaxStoreTime();
+        BrokerStoreConfig brokerStoreConfig = new BrokerStoreConfig(supplier);
+        this.maxIntervalTime = brokerStoreConfig.getMaxStoreTime();
+        this.doNotDeleteConsumed = brokerStoreConfig.getDoNotDeleteConsumed();
     }
 }

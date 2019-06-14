@@ -57,9 +57,8 @@ public class ProtocolResolver extends ByteToMessageDecoder {
         bindProtocol(ctx, protocolContext);
 
         // 执行其他处理类
-        buffer.retain();
         ctx.pipeline().fireChannelRegistered()
-                .fireChannelActive().fireChannelRead(buffer);
+                .fireChannelActive();
     }
 
     @Override
@@ -78,8 +77,8 @@ public class ProtocolResolver extends ByteToMessageDecoder {
 
         // 绑定协议handler
         ctx.pipeline()
-                .remove(this)
-                .addLast(protocolContext.getHandlerPipeline());
+                .addLast(protocolContext.getHandlerPipeline())
+                .remove(this);
     }
 
     /**

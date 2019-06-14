@@ -24,7 +24,7 @@
     <d-form-item label="并行消费:">
       <d-input style="width: 60%"  placeholder="请输入值,范围1-50,默认1" v-model.number="formData.concurrent"/>
     </d-form-item>
-    <d-form-item label="限制IP消费:">
+    <d-form-item label="禁止IP消费:">
       <d-input style="width: 60%"  type="textarea" rows="3" v-model="formData.blackList" placeholder="请输入要限制的IP，多个IP之间请用英文逗号隔开"/>
     </d-form-item>
     <d-form-item label="过滤规则:">

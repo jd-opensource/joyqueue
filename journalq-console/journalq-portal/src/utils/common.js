@@ -28,6 +28,26 @@ export function getTopicCode (topic, namespace) {
   return (namespace || {}).code + '.' + topicCode
 }
 
+export function getTopicCodeByCode (topicCode, namespaceCode) {
+  if (topicCode.indexOf('.') >= 0) {
+    topicCode = topicCode.split('.')[1]
+  }
+
+  if (!namespaceCode || namespaceCode.trim().length === 0) {
+    return topicCode
+  }
+
+  return namespaceCode + '.' + topicCode
+}
+
+export function generateProducerDetailTabName (appCode, topicCode, namespaceCode) {
+  return '生产详情-' + appCode + '@' + getTopicCodeByCode(topicCode, namespaceCode)
+}
+
+export function generateConsumerDetailTabName (appCode, subscribeGroup, topicCode, namespaceCode) {
+  return '消费详情-' + getAppCodeByCode(appCode, subscribeGroup) + '@' + getTopicCodeByCode(topicCode, namespaceCode)
+}
+
 export function resolveTopicCode (topicCode) {
   if (topicCode === undefined) {
     return undefined
@@ -53,6 +73,13 @@ export function getAppCode (app, subscribeGroup) {
     return (app || {}).code
   }
   return (app || {}).code + '.' + subscribeGroup
+}
+
+export function getAppCodeByCode (appCode, subscribeGroup) {
+  if (!subscribeGroup || subscribeGroup.trim().length === 0) {
+    return appCode
+  }
+  return appCode + '.' + subscribeGroup
 }
 
 export function getCodeRule () {

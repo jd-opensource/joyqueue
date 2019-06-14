@@ -1,1 +1,1 @@
-com.jd.journalq.client.internal.consumer.trace.TraceConsumerInterceptor
+com.jd.journalq.client.internal.trace.interceptor.TraceConsumerInterceptor

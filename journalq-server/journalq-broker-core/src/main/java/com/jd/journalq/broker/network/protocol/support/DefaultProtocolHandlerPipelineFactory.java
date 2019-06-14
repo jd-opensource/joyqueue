@@ -14,12 +14,12 @@
 package com.jd.journalq.broker.network.protocol.support;
 
 import com.jd.journalq.broker.network.protocol.ProtocolHandlerPipelineFactory;
-import com.jd.journalq.network.transport.command.CommandDispatcher;
-import com.jd.journalq.network.transport.command.CommandDispatcherFactory;
 import com.jd.journalq.network.event.TransportEventHandler;
 import com.jd.journalq.network.handler.ConnectionHandler;
 import com.jd.journalq.network.protocol.ChannelHandlerProvider;
 import com.jd.journalq.network.protocol.Protocol;
+import com.jd.journalq.network.transport.command.CommandDispatcher;
+import com.jd.journalq.network.transport.command.CommandDispatcherFactory;
 import io.netty.channel.ChannelHandler;
 
 /**
@@ -30,19 +30,19 @@ import io.netty.channel.ChannelHandler;
  */
 public class DefaultProtocolHandlerPipelineFactory implements ProtocolHandlerPipelineFactory {
 
-    private CommandDispatcherFactory commandHandlerFilterFactory;
+    private CommandDispatcherFactory commandDispatcherFactory;
     private TransportEventHandler transportEventHandler;
     private ConnectionHandler connectionHandler;
 
-    public DefaultProtocolHandlerPipelineFactory(CommandDispatcherFactory commandHandlerFilterFactory, TransportEventHandler transportEventHandler, ConnectionHandler connectionHandler) {
-        this.commandHandlerFilterFactory = commandHandlerFilterFactory;
+    public DefaultProtocolHandlerPipelineFactory(CommandDispatcherFactory commandDispatcherFactory, TransportEventHandler transportEventHandler, ConnectionHandler connectionHandler) {
+        this.commandDispatcherFactory = commandDispatcherFactory;
         this.transportEventHandler = transportEventHandler;
         this.connectionHandler = connectionHandler;
     }
 
     @Override
     public ChannelHandler createPipeline(Protocol protocol) {
-        CommandDispatcher commandDispatcher = commandHandlerFilterFactory.getCommandDispatcher(protocol);
+        CommandDispatcher commandDispatcher = commandDispatcherFactory.getCommandDispatcher(protocol);
         ChannelHandler handlerPipeline = new DefaultProtocolHandlerPipeline(protocol, commandDispatcher, transportEventHandler, connectionHandler);
 
         if (protocol instanceof ChannelHandlerProvider) {

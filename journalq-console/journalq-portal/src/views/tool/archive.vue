@@ -3,27 +3,29 @@
     <div class="ml20">
       <d-date-picker v-model="times" type="daterange" class="left mr5 mt10" range-separator="至"
                      start-placeholder="开始日期" end-placeholder="结束日期" value-format="timestamp"
-                     :default-time="['00:00:00', '23:59:59']"  style="width:370px">
+                     :default-time="['00:00:00', '23:59:59']"  style="width:370px" @on-enter="getList">
         <span slot="prepend">日期范围</span>
       </d-date-picker>
-      <d-input v-model="search.topic" placeholder="队列名" class="left mr5 mt10" style="width: 213px">
+      <d-input v-model="search.topic" placeholder="队列名" class="left mr5 mt10" style="width: 213px"
+               @on-enter="getList">
         <span slot="prepend">队列名</span>
       </d-input>
-      <d-input v-model="search.businessId" placeholder="业务ID" class="left mr5 mt10" style="width: 213px">
+      <d-input v-model="search.businessId" placeholder="业务ID" class="left mr5 mt10" style="width: 213px"
+               @on-enter="getList">
         <span slot="prepend">业务ID</span>
       </d-input>
-      <d-button class="left mr5 mt10" type="primary" color="success" @click="getListWithDate(false)">查询</d-button>
+      <d-button class="left mr5 mt10" type="primary" color="success" @click="getList">查询</d-button>
       <slot name="extendBtn"></slot>
     </div>
     <my-table :showPagination="false" :showPin="showTablePin" :data="tableData" :page="page" @on-size-change="handleSizeChange"
               @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
               @on-consume="consume" @on-download="download" @on-retry="retry">
     </my-table>
-    <div style="float: right">
-      <d-button type="primary" v-if="!firstDis" @click="getListWithDate(false)">首页</d-button>
+    <div style="text-align: right; margin-right: 50px">
+      <d-button type="primary" v-if="!firstDis" @click="getList" class="left mr10">首页</d-button>
       <d-button color="info" disabled v-else>首页</d-button>
 
-      <d-button type="primary" v-if="!nextDis" @click="getListWithDate(true)">下一页</d-button>
+      <d-button type="primary" v-if="!nextDis" @click="getNext">下一页</d-button>
       <d-button color="info" disabled v-else>下一页</d-button>
     </div>
     <my-dialog :dialog="showDialog">
@@ -171,33 +173,43 @@ export default {
         btns: this.btns
       },
       multipleSelection: [],
-      times: []
+      times: [
+        new Date(new Date().setHours(0, 0, 0, 0)),
+        new Date(new Date().setHours(23, 59, 59, 0))
+      ]
     }
   },
   methods: {
-    getListWithDate (isNext) {
-      if (!this.times || this.times.length < 2 || !this.search.topic) {
-        this.$Dialog.error({
-          title: '格式错误',
-          content: '起始时间, 结束时间，主题 都不能为空'
-        })
-        return false
-      }
+    getList () {
+      this.firstDis = false
+      this.nextDis = true
+      this.getListWithDate (false)
+    },
+    getNext() {
       this.firstDis = true
+      this.nextDis = true
+      this.getListWithDate (true)
+    },
+    getListWithDate (isNext) {
+      if (!this.times || this.times.length < 2) {
+        this.$Message.error('日期时间范围不能为空')
+        return
+      }
+      if (!this.search.topic) {
+        this.$Message.error('队列名不能为空')
+        return
+      }
       let oldData = this.tableData.rowData
       this.search.beginTime = this.times[0]
       this.search.endTime = this.times[1]
       if (isNext) {
         this.search.sendTime = oldData[oldData.length - 1].sendTime
-        this.firstDis = false
       } else {
         this.search.sendTime = this.search.beginTime
-        this.firstDis = true
       }
-      // this.getList();
       apiRequest.post(this.urlOrigin.search, {}, this.search).then((data) => {
         this.tableData.rowData = data.data
-        if (this.tableData.rowData.length < this.search.count) {
+        if (this.tableData.rowData && this.tableData.rowData.length < this.search.count) {
           this.nextDis = true
         } else {
           this.nextDis = false

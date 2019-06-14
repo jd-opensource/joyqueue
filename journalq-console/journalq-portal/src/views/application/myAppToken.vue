@@ -2,7 +2,10 @@
   <div>
     <div class="ml20 mt30">
       <d-button type="primary" class="mr10" @click="getList">刷新<icon name="rotate-cw" style="margin-left: 5px;"></icon></d-button>
-      <d-button type="primary" class="mr10" @click="openDialog('addDialog')">添加<icon name="plus-circle" style="margin-left: 5px;"></icon></d-button>
+      <d-button type="primary" class="mr10" @click="openDialog('addDialog')">
+        添加
+        <icon name="plus-circle" style="margin-left: 5px;"></icon>
+      </d-button>
     </div>
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
               @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"

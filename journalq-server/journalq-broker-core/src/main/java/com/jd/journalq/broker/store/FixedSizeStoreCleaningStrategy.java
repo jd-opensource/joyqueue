@@ -25,6 +25,7 @@ import java.util.Map;
  */
 public class FixedSizeStoreCleaningStrategy implements StoreCleaningStrategy {
     private long maxStorageSize;
+    private boolean doNotDeleteConsumed = true;
 
     public FixedSizeStoreCleaningStrategy() {
 
@@ -41,7 +42,7 @@ public class FixedSizeStoreCleaningStrategy implements StoreCleaningStrategy {
 
                 long lastDeletedSize;  // 上一次删除长度
                 do {
-                    lastDeletedSize = partitionGroupStore.deleteMinStoreMessages(0, partitionAckMap);
+                    lastDeletedSize = partitionGroupStore.deleteMinStoreMessages(0, partitionAckMap, doNotDeleteConsumed);
                 } while (lastDeletedSize > 0L && (totalDeletedSize += lastDeletedSize) < targetDeleteSize);
             }
         }
@@ -51,6 +52,8 @@ public class FixedSizeStoreCleaningStrategy implements StoreCleaningStrategy {
 
     @Override
     public void setSupplier(PropertySupplier supplier) {
-        this.maxStorageSize = new BrokerStoreConfig(supplier).getMaxStoreSize();
+        BrokerStoreConfig brokerStoreConfig = new BrokerStoreConfig(supplier);
+        this.maxStorageSize = brokerStoreConfig.getMaxStoreSize();
+        this.doNotDeleteConsumed = brokerStoreConfig.getDoNotDeleteConsumed();
     }
 }

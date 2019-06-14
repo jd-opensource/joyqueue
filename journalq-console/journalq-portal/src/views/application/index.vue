@@ -1,7 +1,9 @@
 <template>
   <div>
     <div class="ml20 mt30">
-      <d-input v-model="searchData.keyword" :placeholder="langConfig.placeholder1" class="left mr10" style="width:213px">
+      <d-input v-model="searchData.keyword" :placeholder="langConfig.placeholder1" class="left mr10"
+               style="width:300px" @on-enter="getList">
+        <span slot="prepend">关键词</span>
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
       <d-button type="primary" @click="openDialog('addDialog')">新建应用<icon name="plus-circle" style="margin-left: 5px;"></icon></d-button>
@@ -149,7 +151,8 @@ export default {
           },
           {
             txt: this.langConfig['colData']['btnDelete'],
-            method: 'on-del'
+            method: 'on-del',
+            isAdmin: true
           }
         ]
       }
@@ -184,7 +187,9 @@ export default {
         name: `/${this.curLang}/application/detail`,
         query: {id: item.id, code: item.code}})
     },
-
+    isAdmin (item) {
+      return this.$store.getters.isAdmin
+    },
   },
   mounted () {
     this.getList()

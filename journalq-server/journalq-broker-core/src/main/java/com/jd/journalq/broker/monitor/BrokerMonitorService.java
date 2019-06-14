@@ -30,6 +30,7 @@ public class BrokerMonitorService extends Service {
     private BrokerMonitor brokerMonitor;
     private BrokerStatManager brokerStatManager;
     private BrokerStatSaveScheduler brokerStatSaveScheduler;
+    private BrokerMonitorSlicer brokerMonitorSlicer;
 
     public BrokerMonitorService(Integer brokerId, BrokerMonitorConfig config, SessionManager sessionManager, ClusterManager clusterManager) {
         this.config = config;
@@ -37,6 +38,7 @@ public class BrokerMonitorService extends Service {
         this.brokerStatManager = new BrokerStatManager(brokerId, config);
         this.brokerMonitor = new BrokerMonitor(config, sessionManager, brokerStatManager, clusterManager);
         this.brokerStatSaveScheduler = new BrokerStatSaveScheduler(config, brokerStatManager);
+        this.brokerMonitorSlicer = new BrokerMonitorSlicer(brokerMonitor);
     }
 
     @Override
@@ -44,6 +46,7 @@ public class BrokerMonitorService extends Service {
         brokerStatManager.start();
         brokerMonitor.start();
         brokerStatSaveScheduler.start();
+        brokerMonitorSlicer.start();
     }
 
     @Override
@@ -51,6 +54,7 @@ public class BrokerMonitorService extends Service {
         brokerStatManager.stop();
         brokerStatSaveScheduler.stop();
         brokerMonitor.stop();
+        brokerMonitorSlicer.stop();
     }
 
     public BrokerMonitor getBrokerMonitor() {

@@ -15,6 +15,8 @@ package com.jd.journalq.broker.monitor.stat;
 
 import com.jd.journalq.broker.monitor.metrics.Metrics;
 
+import java.util.concurrent.atomic.LongAdder;
+
 /**
  * EnQueueStat
  * author: gaohaoxiang
@@ -23,35 +25,50 @@ import com.jd.journalq.broker.monitor.metrics.Metrics;
  */
 public class EnQueueStat {
 
+    private LongAdder totalCount = new LongAdder();
+    private LongAdder totalTraffic = new LongAdder();
+
     private Metrics count;
-    private Metrics size;
+    private Metrics traffic;
 
     public EnQueueStat() {
         this.count = new Metrics();
-        this.size = new Metrics();
+        this.traffic = new Metrics();
     }
 
-    public void mark(long time, long size, long count) {
+    public void slice() {
+        this.count.slice();
+        this.traffic.slice();
+    }
+
+    public void mark(double time, long size, long count) {
         this.count.mark(time, count);
-        this.size.mark(size);
+        this.traffic.mark(size);
+        this.totalCount.add(count);
+        this.totalTraffic.add(size);
     }
 
     public void setTotal(long total) {
-        this.count.setCount(total);
+        this.totalCount.reset();
+        this.totalCount.add(total);
     }
 
     public void setTotalSize(long totalSize) {
-        this.size.setCount(totalSize);
+        this.totalTraffic.reset();
+        this.totalTraffic.add(totalSize);
     }
 
     public long getTotal() {
-        return this.count.getCount();
+        return this.totalCount.longValue();
     }
 
+    @Deprecated
     public long getTotalSize() {
-        return this.size.getCount();
+        return this.totalTraffic.longValue();
     }
 
+    // 分钟
+    @Deprecated
     public long getOneMinuteRate() {
         return this.count.getOneMinuteRate();
     }
@@ -76,7 +93,21 @@ public class EnQueueStat {
         return this.count.getAvg();
     }
 
+    // 分钟
+    @Deprecated
     public long getSize() {
-        return this.size.getOneMinuteRate();
+        return this.traffic.getOneMinuteRate();
+    }
+
+    public long getTps() {
+        return this.count.getMeanRate();
+    }
+
+    public long getTraffic() {
+        return this.traffic.getMeanRate();
+    }
+
+    public long getTotalTraffic() {
+        return this.totalTraffic.longValue();
     }
 }

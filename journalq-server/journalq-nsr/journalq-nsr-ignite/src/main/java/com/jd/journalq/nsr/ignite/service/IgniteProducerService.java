@@ -138,7 +138,7 @@ public class IgniteProducerService implements ProducerService {
                 commit = true;
             }
             producerDao.addOrUpdate(toIgniteModel(producer));
-            if (null != producer.getProducerPolicy()) {
+            if (null != producer.getProducerPolicy() || producer.getLimitPolicy() != null) {
                 producerConfigDao.addOrUpdate(new IgniteProducerConfig(new IgniteProducer(producer)));
             }
             if (commit) {
