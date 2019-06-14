@@ -318,7 +318,7 @@ class Workflow:
                         sleep {sleep} 
                     done  
                 fi
-        """.format(workspace_home=self.workspace.home,docker_namespace=self.task.mq_docker_namespace,
+        """.format(workspace_home=self.workspace.home, docker_namespace=self.task.mq_docker_namespace,
                    repo_name=self.task.mq_repo_name,
                    mq_home=self.task.mq_home,
                    max_attempts=max_attempts,
