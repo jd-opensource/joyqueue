@@ -114,6 +114,7 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
                     logger.warn("checkReadable failed, transport: {}, topic: {}, partition: {}, app: {}, code: {}", transport, topic, partition, clientId, checkResult.getJournalqCode());
                     short errorCode = CheckResultConverter.convertFetchCode(checkResult.getJournalqCode());
                     partitionResponses.add(new FetchResponse.PartitionResponse(partition, errorCode));
+                    traffic.record(topic.getFullName(), 0);
                     continue;
                 }
 

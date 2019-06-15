@@ -14,6 +14,7 @@
 package com.jd.journalq.broker.kafka.handler;
 
 import com.jd.journalq.broker.kafka.KafkaErrorCode;
+import com.jd.journalq.broker.kafka.command.ProduceRequest;
 import com.jd.journalq.broker.kafka.command.ProduceResponse;
 import com.jd.journalq.broker.kafka.model.ProducePartitionGroupRequest;
 import com.jd.journalq.broker.producer.Produce;
@@ -40,7 +41,7 @@ public class ProduceHandler {
         this.produce = produce;
     }
 
-    public void produceMessage(QosLevel qosLevel, Producer producer, ProducePartitionGroupRequest partitionGroupRequest, EventListener<ProduceResponse.PartitionResponse> listener) {
+    public void produceMessage(ProduceRequest request, QosLevel qosLevel, Producer producer, ProducePartitionGroupRequest partitionGroupRequest, EventListener<ProduceResponse.PartitionResponse> listener) {
         try {
             produce.putMessageAsync(producer, partitionGroupRequest.getMessages(), qosLevel, (writeResult) -> {
                 if (!writeResult.getCode().equals(JournalqCode.SUCCESS)) {

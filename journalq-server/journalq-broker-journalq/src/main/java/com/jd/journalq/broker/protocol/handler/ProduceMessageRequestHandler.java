@@ -91,7 +91,8 @@ public class ProduceMessageRequestHandler implements JournalqCommandHandler, Typ
                 checkAndFillMessage(connection, produceMessageData);
             } catch (JournalqException e) {
                 logger.warn("checkMessage error, transport: {}, topic: {}, app: {}", transport, topic, produceMessageRequest.getApp(), e);
-                resultData.put(topic, buildAck(produceMessageData, JournalqCode.valueOf(e.getCode())));
+                resultData.put(topic, buildResponse(produceMessageData, JournalqCode.valueOf(e.getCode())));
+                traffic.record(topic, 0);
                 latch.countDown();
                 continue;
             }
@@ -100,7 +101,8 @@ public class ProduceMessageRequestHandler implements JournalqCommandHandler, Typ
                     connection.getHost(), produceMessageData.getMessages().get(0).getPartition());
             if (!checkResult.isSuccess()) {
                 logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport, topic, produceMessageRequest.getApp(), checkResult.getJournalqCode());
-                resultData.put(topic, buildAck(produceMessageData, CheckResultConverter.convertProduceCode(checkResult.getJournalqCode())));
+                resultData.put(topic, buildResponse(produceMessageData, CheckResultConverter.convertProduceCode(checkResult.getJournalqCode())));
+                traffic.record(topic, 0);
                 latch.countDown();
                 continue;
             }
@@ -140,15 +142,15 @@ public class ProduceMessageRequestHandler implements JournalqCommandHandler, Typ
                 }
                 ProduceMessageAckData produceMessageAckData = new ProduceMessageAckData();
                 produceMessageAckData.setCode(writeResult.getCode());
-                produceMessageAckData.setItem(buildAck(produceMessageData.getMessages(), writeResult));
+                produceMessageAckData.setItem(buildResponse(produceMessageData.getMessages(), writeResult));
                 listener.onEvent(produceMessageAckData);
             });
         } catch (JournalqException e) {
             logger.error("produceMessage exception, transport: {}, topic: {}, app: {}", connection.getTransport().remoteAddress(), topic, app, e);
-            listener.onEvent(buildAck(produceMessageData, JournalqCode.valueOf(e.getCode())));
+            listener.onEvent(buildResponse(produceMessageData, JournalqCode.valueOf(e.getCode())));
         } catch (Exception e) {
             logger.error("produceMessage exception, transport: {}, topic: {}, app: {}", connection.getTransport().remoteAddress(), topic, app, e);
-            listener.onEvent(buildAck(produceMessageData, JournalqCode.CN_UNKNOWN_ERROR));
+            listener.onEvent(buildResponse(produceMessageData, JournalqCode.CN_UNKNOWN_ERROR));
         }
     }
 
@@ -171,7 +173,7 @@ public class ProduceMessageRequestHandler implements JournalqCommandHandler, Typ
         }
     }
 
-    protected List<ProduceMessageAckItemData> buildAck(List<BrokerMessage> messages, WriteResult writeResult) {
+    protected List<ProduceMessageAckItemData> buildResponse(List<BrokerMessage> messages, WriteResult writeResult) {
         BrokerMessage firstMessage = messages.get(0);
         List<ProduceMessageAckItemData> item = Lists.newLinkedList();
 
@@ -201,7 +203,7 @@ public class ProduceMessageRequestHandler implements JournalqCommandHandler, Typ
         return item;
     }
 
-    protected ProduceMessageAckData buildAck(ProduceMessageData produceMessageData, JournalqCode code) {
+    protected ProduceMessageAckData buildResponse(ProduceMessageData produceMessageData, JournalqCode code) {
         BrokerMessage firstMessage = produceMessageData.getMessages().get(0);
         List<ProduceMessageAckItemData> item = Lists.newLinkedList();
 

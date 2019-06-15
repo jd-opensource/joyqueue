@@ -66,6 +66,10 @@ public class KafkaConfig {
         return getConfig(KafkaConfigKey.TRANSACTION_LOG_INTERVAL);
     }
 
+    public int getTransactionProducerSequenceExpire() {
+        return getConfig(KafkaConfigKey.TRANSACTION_PRODUCER_SEQUENCE_EXPIRE);
+    }
+
     public String getTransactionLogApp() {
         return getConfig(KafkaConfigKey.TRANSACTION_LOG_APP);
     }

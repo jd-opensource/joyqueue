@@ -76,6 +76,7 @@ public class FetchPartitionMessageRequestHandler implements JournalqCommandHandl
                     logger.warn("checkReadable failed, transport: {}, topic: {}, partition: {}, app: {}, code: {}", transport,
                             consumer.getTopic(), partition, consumer.getApp(), checkResult.getJournalqCode());
                     buildFetchPartitionMessageAckData(topic, entry.getValue(), CheckResultConverter.convertFetchCode(checkResult.getJournalqCode()), result);
+                    traffic.record(topic, 0);
                     continue;
                 }
 

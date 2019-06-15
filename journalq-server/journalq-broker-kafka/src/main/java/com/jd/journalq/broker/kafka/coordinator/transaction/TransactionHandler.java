@@ -82,20 +82,22 @@ public class TransactionHandler extends Service {
         checkCoordinatorState(clientId, transactionId);
 
         TransactionMetadata transactionMetadata = transactionMetadataManager.getTransaction(transactionId);
-        if (transactionMetadata == null || transactionMetadata.getProducerId() != producerId || !StringUtils.equals(transactionMetadata.getApp(), clientId)) {
+        if (transactionMetadata == null) {
             throw new TransactionException(KafkaErrorCode.INVALID_PRODUCER_ID_MAPPING.getCode());
         }
-        if (transactionMetadata.getProducerEpoch() != producerEpoch) {
-            throw new TransactionException(KafkaErrorCode.INVALID_PRODUCER_EPOCH.getCode());
-        }
-        if (transactionMetadata.isExpired()) {
-            throw new TransactionException(KafkaErrorCode.INVALID_PRODUCER_EPOCH.getCode());
-        }
-        if (transactionMetadata.isPrepared()) {
-            throw new TransactionException(KafkaErrorCode.CONCURRENT_TRANSACTIONS.getCode());
-        }
-
         synchronized (transactionMetadata) {
+            if (transactionMetadata.getProducerId() != producerId || !StringUtils.equals(transactionMetadata.getApp(), clientId)) {
+                throw new TransactionException(KafkaErrorCode.INVALID_PRODUCER_ID_MAPPING.getCode());
+            }
+            if (transactionMetadata.getProducerEpoch() != producerEpoch) {
+                throw new TransactionException(KafkaErrorCode.INVALID_PRODUCER_EPOCH.getCode());
+            }
+            if (transactionMetadata.isExpired()) {
+                throw new TransactionException(KafkaErrorCode.INVALID_PRODUCER_EPOCH.getCode());
+            }
+            if (transactionMetadata.isPrepared()) {
+                throw new TransactionException(KafkaErrorCode.CONCURRENT_TRANSACTIONS.getCode());
+            }
             return doAddPartitionsToTxn(transactionMetadata, partitions);
         }
     }
@@ -157,20 +159,22 @@ public class TransactionHandler extends Service {
         checkCoordinatorState(clientId, transactionId);
 
         TransactionMetadata transactionMetadata = transactionMetadataManager.getTransaction(transactionId);
-        if (transactionMetadata == null || transactionMetadata.getProducerId() != producerId || !StringUtils.equals(transactionMetadata.getApp(), clientId)) {
+        if (transactionMetadata == null) {
             throw new TransactionException(KafkaErrorCode.INVALID_PRODUCER_ID_MAPPING.getCode());
         }
-        if (transactionMetadata.getProducerEpoch() != producerEpoch) {
-            throw new TransactionException(KafkaErrorCode.INVALID_PRODUCER_EPOCH.getCode());
-        }
-        if (transactionMetadata.isExpired()) {
-            throw new TransactionException(KafkaErrorCode.INVALID_PRODUCER_EPOCH.getCode());
-        }
-        if (transactionMetadata.isCompleted()) {
-            throw new TransactionException(KafkaErrorCode.INVALID_PRODUCER_EPOCH.getCode());
-        }
-
         synchronized (transactionMetadata) {
+            if (transactionMetadata.getProducerId() != producerId || !StringUtils.equals(transactionMetadata.getApp(), clientId)) {
+                throw new TransactionException(KafkaErrorCode.INVALID_PRODUCER_ID_MAPPING.getCode());
+            }
+            if (transactionMetadata.getProducerEpoch() != producerEpoch) {
+                throw new TransactionException(KafkaErrorCode.INVALID_PRODUCER_EPOCH.getCode());
+            }
+            if (transactionMetadata.isExpired()) {
+                throw new TransactionException(KafkaErrorCode.INVALID_PRODUCER_EPOCH.getCode());
+            }
+            if (transactionMetadata.isCompleted()) {
+                throw new TransactionException(KafkaErrorCode.INVALID_PRODUCER_EPOCH.getCode());
+            }
             return doEndTxn(transactionMetadata, isCommit);
         }
     }

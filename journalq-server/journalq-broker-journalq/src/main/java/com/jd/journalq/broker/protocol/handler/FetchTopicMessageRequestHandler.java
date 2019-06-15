@@ -79,6 +79,7 @@ public class FetchTopicMessageRequestHandler implements JournalqCommandHandler, 
             if (!checkResult.isSuccess()) {
                 logger.warn("checkReadable failed, transport: {}, topic: {}, app: {}, code: {}", transport, topic, fetchTopicMessageRequest.getApp(), checkResult.getJournalqCode());
                 result.put(topic, new FetchTopicMessageAckData(CheckResultConverter.convertFetchCode(checkResult.getJournalqCode())));
+                traffic.record(topic, 0);
                 continue;
             }
 

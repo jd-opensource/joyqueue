@@ -63,7 +63,7 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
         this.produceConfig = new ProduceConfig(kafkaContext.getBrokerContext().getPropertySupplier());
         this.produceHandler = new ProduceHandler(kafkaContext.getBrokerContext().getProduce());
         this.transactionProduceHandler = new TransactionProduceHandler(kafkaContext.getConfig(), kafkaContext.getBrokerContext().getProduce(),
-                kafkaContext.getTransactionCoordinator(), kafkaContext.getTransactionIdManager());
+                kafkaContext.getTransactionCoordinator(), kafkaContext.getTransactionIdManager(), kafkaContext.getTransactionProducerSequenceManager());
         this.sessionManager = kafkaContext.getBrokerContext().getSessionManager();
     }
 
@@ -84,46 +84,29 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
         Traffic traffic = new Traffic(clientId);
 
         for (Map.Entry<String, List<ProduceRequest.PartitionRequest>> entry : partitionRequestMap.entrySet()) {
-            TopicName topicName = TopicName.parse(entry.getKey());
+            TopicName topic = TopicName.parse(entry.getKey());
             Map<Integer, ProducePartitionGroupRequest> partitionGroupRequestMap = Maps.newHashMap();
             List<ProduceResponse.PartitionResponse> partitionResponses = Lists.newArrayListWithCapacity(entry.getValue().size());
-            partitionResponseMap.put(topicName.getFullName(), partitionResponses);
+            partitionResponseMap.put(topic.getFullName(), partitionResponses);
 
-            String producerId = connection.getProducer(topicName.getFullName(), clientId);
+            String producerId = connection.getProducer(topic.getFullName(), clientId);
             Producer producer = sessionManager.getProducerById(producerId);
-            TopicConfig topicConfig = clusterManager.getTopicConfig(topicName);
+            TopicConfig topicConfig = clusterManager.getTopicConfig(topic);
 
             for (ProduceRequest.PartitionRequest partitionRequest : entry.getValue()) {
                 int partition = partitionRequest.getPartition();
-                BooleanResponse checkResult = clusterManager.checkWritable(topicName, clientId, clientIp, (short) partition);
+                BooleanResponse checkResult = clusterManager.checkWritable(topic, clientId, clientIp, (short) partition);
 
                 if (!checkResult.isSuccess()) {
-                    logger.warn("checkWritable failed, transport: {}, topic: {}, partition: {}, app: {}, code: {}", transport, topicName, partition, clientId, checkResult.getJournalqCode());
+                    logger.warn("checkWritable failed, transport: {}, topic: {}, partition: {}, app: {}, code: {}", transport, topic, partition, clientId, checkResult.getJournalqCode());
                     short kafkaErrorCode = CheckResultConverter.convertProduceCode(checkResult.getJournalqCode());
                     buildPartitionResponse(partition, null, kafkaErrorCode, partitionRequest.getMessages(), partitionResponses);
+                    traffic.record(topic.getFullName(), 0);
                     latch.countDown();
                     continue;
                 }
 
-                PartitionGroup partitionGroup = topicConfig.fetchPartitionGroupByPartition((short) partition);
-                ProducePartitionGroupRequest producePartitionGroupRequest = partitionGroupRequestMap.get(partitionGroup.getGroup());
-
-                if (producePartitionGroupRequest == null) {
-                    producePartitionGroupRequest = new ProducePartitionGroupRequest(Lists.newLinkedList(), Lists.newLinkedList(), Maps.newHashMap());
-                    partitionGroupRequestMap.put(partitionGroup.getGroup(), producePartitionGroupRequest);
-                }
-
-                List<BrokerMessage> brokerMessages = Lists.newLinkedList();
-                for (KafkaBrokerMessage message : partitionRequest.getMessages()) {
-                    BrokerMessage brokerMessage = KafkaMessageConverter.toBrokerMessage(producer.getTopic(), partition, producer.getApp(), clientAddress, message);
-                    checkAndFillMessage(brokerMessage);
-                    traffic.record(topicName.getFullName(), brokerMessage.getSize());
-                    brokerMessages.add(brokerMessage);
-                }
-
-                producePartitionGroupRequest.getPartitions().add(partition);
-                producePartitionGroupRequest.getMessages().addAll(brokerMessages);
-                producePartitionGroupRequest.getMessageMap().put(partitionRequest.getPartition(), brokerMessages);
+                splitByPartitionGroup(topicConfig, topic, producer, clientAddress, traffic, partitionRequest, partitionGroupRequestMap);
             }
 
             for (Map.Entry<Integer, ProducePartitionGroupRequest> partitionGroupEntry : partitionGroupRequestMap.entrySet()) {
@@ -141,10 +124,10 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
                 };
 
                 if (produceRequest.isTransaction()) {
-                    transactionProduceHandler.produceMessage(produceRequest.getTransactionalId(), produceRequest.getProducerId(), produceRequest.getProducerEpoch(),
+                    transactionProduceHandler.produceMessage(produceRequest, produceRequest.getTransactionalId(), produceRequest.getProducerId(), produceRequest.getProducerEpoch(),
                             qosLevel, producer, partitionGroupEntry.getValue(), listener);
                 } else {
-                    produceHandler.produceMessage(qosLevel, producer, partitionGroupEntry.getValue(), listener);
+                    produceHandler.produceMessage(produceRequest, qosLevel, producer, partitionGroupEntry.getValue(), listener);
                 }
             }
         }
@@ -164,6 +147,32 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
 
         ProduceResponse response = new ProduceResponse(traffic, partitionResponseMap);
         return new Command(response);
+    }
+
+    protected void splitByPartitionGroup(TopicConfig topicConfig, TopicName topic, Producer producer, byte[] clientAddress, Traffic traffic,
+                                ProduceRequest.PartitionRequest partitionRequest, Map<Integer, ProducePartitionGroupRequest> partitionGroupRequestMap) {
+        PartitionGroup partitionGroup = topicConfig.fetchPartitionGroupByPartition((short) partitionRequest.getPartition());
+        ProducePartitionGroupRequest producePartitionGroupRequest = partitionGroupRequestMap.get(partitionGroup.getGroup());
+
+        if (producePartitionGroupRequest == null) {
+            producePartitionGroupRequest = new ProducePartitionGroupRequest(Lists.newLinkedList(), Lists.newLinkedList(),
+                    Lists.newLinkedList(), Maps.newHashMap(), Maps.newHashMap());
+            partitionGroupRequestMap.put(partitionGroup.getGroup(), producePartitionGroupRequest);
+        }
+
+        List<BrokerMessage> brokerMessages = Lists.newLinkedList();
+        for (KafkaBrokerMessage message : partitionRequest.getMessages()) {
+            BrokerMessage brokerMessage = KafkaMessageConverter.toBrokerMessage(producer.getTopic(), partitionRequest.getPartition(), producer.getApp(), clientAddress, message);
+            checkAndFillMessage(brokerMessage);
+            traffic.record(topic.getFullName(), brokerMessage.getSize());
+            brokerMessages.add(brokerMessage);
+        }
+
+        producePartitionGroupRequest.getPartitions().add(partitionRequest.getPartition());
+        producePartitionGroupRequest.getMessages().addAll(brokerMessages);
+        producePartitionGroupRequest.getMessageMap().put(partitionRequest.getPartition(), brokerMessages);
+        producePartitionGroupRequest.getKafkaMessages().addAll(partitionRequest.getMessages());
+        producePartitionGroupRequest.getKafkaMessageMap().put(partitionRequest.getPartition(), partitionRequest.getMessages());
     }
 
     protected void checkAndFillMessage(BrokerMessage message) {

@@ -28,7 +28,7 @@ import com.jd.journalq.broker.election.command.TimeoutNowResponse;
 import com.jd.journalq.broker.monitor.BrokerMonitor;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.network.command.CommandType;
-import com.jd.journalq.network.transport.codec.JMQHeader;
+import com.jd.journalq.network.transport.codec.JournalqHeader;
 import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.transport.command.CommandCallback;
 import com.jd.journalq.network.transport.command.Direction;
@@ -380,7 +380,7 @@ public class ReplicaGroup extends Service {
                         return;
                     }
 
-                    JMQHeader header = new JMQHeader(Direction.REQUEST, CommandType.RAFT_APPEND_ENTRIES_REQUEST);
+                    JournalqHeader header = new JournalqHeader(Direction.REQUEST, CommandType.RAFT_APPEND_ENTRIES_REQUEST);
 
                     if (!replica.isMatch() || logger.isDebugEnabled()) {
                         logger.info("Partition group {}/node {} send append entries request {} to node {}, " +
@@ -598,7 +598,7 @@ public class ReplicaGroup extends Service {
                     }
 
                     ReplicateConsumePosRequest request = new ReplicateConsumePosRequest(consumePositions);
-                    JMQHeader header = new JMQHeader(Direction.REQUEST, CommandType.REPLICATE_CONSUME_POS_REQUEST);
+                    JournalqHeader header = new JournalqHeader(Direction.REQUEST, CommandType.REPLICATE_CONSUME_POS_REQUEST);
 
                     logger.debug("Partition group {}/node {} send consume position {} to node {}",
                             topicPartitionGroup, localReplicaId, consumePositions, replica.replicaId());
@@ -732,7 +732,7 @@ public class ReplicaGroup extends Service {
                 .replicaId(localReplicaId).success(success).entriesTerm(request.getEntriesTerm())
                 .build();
 
-        return new Command(new JMQHeader(Direction.RESPONSE, CommandType.RAFT_APPEND_ENTRIES_RESPONSE), response);
+        return new Command(new JournalqHeader(Direction.RESPONSE, CommandType.RAFT_APPEND_ENTRIES_RESPONSE), response);
     }
 
     /**
@@ -817,7 +817,7 @@ public class ReplicaGroup extends Service {
 
         try {
             replicateExecutor.submit(() -> {
-                JMQHeader header = new JMQHeader(Direction.REQUEST, CommandType.RAFT_APPEND_ENTRIES_REQUEST);
+                JournalqHeader header = new JournalqHeader(Direction.REQUEST, CommandType.RAFT_APPEND_ENTRIES_REQUEST);
                 Command command = new Command(header, appendEntriesRequest);
 
                 logger.debug("Partition group {}/node{} send heartbeat request {} to {}",
@@ -1030,7 +1030,7 @@ public class ReplicaGroup extends Service {
                 topicPartitionGroup, localReplicaId, transferee);
 
         TimeoutNowRequest request = new TimeoutNowRequest(topicPartitionGroup, currentTerm);
-        JMQHeader header = new JMQHeader(Direction.REQUEST, CommandType.RAFT_TIMEOUT_NOW_REQUEST);
+        JournalqHeader header = new JournalqHeader(Direction.REQUEST, CommandType.RAFT_TIMEOUT_NOW_REQUEST);
 
         replicationManager.sendCommand(getReplica(transferee).getAddress(), new Command(header, request),
                 electionConfig.getSendCommandTimeout(), new TimeoutNowRequestCallback());

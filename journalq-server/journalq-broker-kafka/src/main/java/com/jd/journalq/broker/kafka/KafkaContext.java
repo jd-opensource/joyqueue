@@ -18,6 +18,7 @@ import com.jd.journalq.broker.kafka.config.KafkaConfig;
 import com.jd.journalq.broker.kafka.coordinator.group.GroupCoordinator;
 import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionCoordinator;
 import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionIdManager;
+import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionProducerSequenceManager;
 
 /**
  * KafkaContext
@@ -31,14 +32,16 @@ public class KafkaContext {
     private GroupCoordinator groupCoordinator;
     private TransactionCoordinator transactionCoordinator;
     private TransactionIdManager transactionIdManager;
+    private TransactionProducerSequenceManager transactionProducerSequenceManager;
     private BrokerContext brokerContext;
 
     public KafkaContext(KafkaConfig config, GroupCoordinator groupCoordinator, TransactionCoordinator transactionCoordinator, TransactionIdManager transactionIdManager,
-                        BrokerContext brokerContext) {
+                        TransactionProducerSequenceManager transactionProducerSequenceManager, BrokerContext brokerContext) {
         this.config = config;
         this.groupCoordinator = groupCoordinator;
         this.transactionCoordinator = transactionCoordinator;
         this.transactionIdManager = transactionIdManager;
+        this.transactionProducerSequenceManager = transactionProducerSequenceManager;
         this.brokerContext = brokerContext;
     }
 
@@ -56,6 +59,10 @@ public class KafkaContext {
 
     public TransactionIdManager getTransactionIdManager() {
         return transactionIdManager;
+    }
+
+    public TransactionProducerSequenceManager getTransactionProducerSequenceManager() {
+        return transactionProducerSequenceManager;
     }
 
     public BrokerContext getBrokerContext() {
