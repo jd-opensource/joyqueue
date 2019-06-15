@@ -24,6 +24,11 @@ import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.impl.nio.client.HttpAsyncClients;
+import org.apache.http.impl.nio.conn.PoolingNHttpClientConnectionManager;
+import org.apache.http.impl.nio.reactor.DefaultConnectingIOReactor;
+import org.apache.http.impl.nio.reactor.IOReactorConfig;
+import org.apache.http.nio.reactor.ConnectingIOReactor;
+import org.apache.http.nio.reactor.IOReactor;
 import org.apache.http.util.EntityUtils;
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
@@ -35,14 +40,22 @@ import java.util.concurrent.TimeoutException;
 
 public class AsyncHttpClient {
     private  CloseableHttpAsyncClient httpclient;
+
     public AsyncHttpClient(){
-        httpclient= HttpAsyncClients
+        IOReactorConfig ioReactorConfig=IOReactorConfig.custom().setIoThreadCount(4).build();
+        try {
+            ConnectingIOReactor ioReactor = new DefaultConnectingIOReactor(ioReactorConfig);
+            httpclient= HttpAsyncClients
                     .custom()
+                    .setConnectionManager(new PoolingNHttpClientConnectionManager(ioReactor))
                     .setDefaultRequestConfig(RequestConfig.custom()
                     .setConnectTimeout(600)
                     .setSocketTimeout(700)
                     .setConnectionRequestTimeout(500).build()).build();
-        httpclient.start();
+            httpclient.start();
+        }catch (Exception e){
+
+        }
     }
 
     private  <T> Future<T> asyncRequest(HttpUriRequest request, Class<T> clazz){

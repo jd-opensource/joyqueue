@@ -15,6 +15,7 @@ package com.jd.journalq.nsr.admin;
 
 import com.jd.journalq.domain.Broker;
 import com.jd.journalq.nsr.NsrAdmin;
+import com.jd.journalq.nsr.utils.AsyncHttpClient;
 import com.jd.journalq.nsr.utils.HostProvider;
 import com.jd.journalq.nsr.utils.RoundRobinHostProvider;
 import org.slf4j.Logger;
@@ -26,14 +27,19 @@ import java.util.List;
 public class AdminClient implements NsrAdmin {
     private Logger logger=LoggerFactory.getLogger(AdminClient.class);
     private final long DELAY_MS=100;
-    private AppAdmin appAdmin=new AppAdmin();
-    private TopicAdmin topicAdmin=new TopicAdmin();
-    private BrokerAdmin brokerAdmin=new BrokerAdmin();
+    private AppAdmin appAdmin;
+    private TopicAdmin topicAdmin;
+    private BrokerAdmin brokerAdmin;
     private String host;
     private HostProvider hostProvider;
+    AsyncHttpClient httpClient;
     public AdminClient(String connectionStr){
           this.hostProvider=new RoundRobinHostProvider(connectionStr);
           this.host=hostProvider.next(DELAY_MS);
+          this.httpClient=new AsyncHttpClient();
+          this.appAdmin=new AppAdmin(httpClient);
+          this.topicAdmin =new TopicAdmin(httpClient);
+          this.brokerAdmin=new BrokerAdmin(httpClient);
     }
     @Override
     public String publish(TopicAdmin.PubSubArg pubSubArg) throws Exception{
@@ -177,8 +183,6 @@ public class AdminClient implements NsrAdmin {
 
     @Override
     public void close() throws IOException {
-        appAdmin.close();
-        topicAdmin.close();
-        topicAdmin.close();
+       httpClient.close();
     }
 }

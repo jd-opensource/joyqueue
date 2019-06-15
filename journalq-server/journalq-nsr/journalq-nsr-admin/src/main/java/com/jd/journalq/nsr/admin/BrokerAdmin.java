@@ -35,7 +35,10 @@ public class BrokerAdmin extends AbstractAdmin {
 
     private AsyncHttpClient httpClient;
     public BrokerAdmin(){
-        this.httpClient=new AsyncHttpClient();
+        this(new AsyncHttpClient());
+    }
+    public BrokerAdmin(AsyncHttpClient httpClient){
+        this.httpClient=httpClient;
     }
     @Parameters(separators = "=", commandDescription = "List broker arguments")
     public static class ListArg extends CommandArgs {

@@ -35,7 +35,10 @@ public class AppAdmin extends AbstractAdmin {
     private AsyncHttpClient httpClient;
 
     public AppAdmin(){
-        this.httpClient=new AsyncHttpClient();
+        this(new AsyncHttpClient());
+    }
+    public AppAdmin(AsyncHttpClient httpClient){
+        this.httpClient=httpClient;
     }
     @Parameters(separators = "=", commandDescription = "Generate a token for App")
     public static class TokenArg extends CommandArgs {

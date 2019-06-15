@@ -47,8 +47,13 @@ public class TopicAdmin extends AbstractAdmin {
 
     private AsyncHttpClient httpClient;
     public TopicAdmin(){
-        this.httpClient=new AsyncHttpClient();
+        this(new AsyncHttpClient());
     }
+
+    public TopicAdmin(AsyncHttpClient httpClient){
+        this.httpClient=httpClient;
+    }
+
     @Parameters(separators = "=", commandDescription = "Topic arguments")
     public static class TopicArg extends CommandArgs {
 
