@@ -14,9 +14,8 @@
 package com.jd.journalq.server.retry.util;
 
 import com.jd.journalq.server.retry.model.RetryMessageModel;
-import com.jd.journalq.toolkit.time.SystemClock;
+import io.netty.buffer.ByteBuf;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -28,48 +27,48 @@ import java.nio.charset.Charset;
  */
 public class RetrySerializerUtil {
 
-    public static RetryMessageModel deserialize(ByteBuffer buffer) {
+    public static RetryMessageModel deserialize(ByteBuf buffer) {
         RetryMessageModel retryMessageModel = new RetryMessageModel();
 
-        short buzIdLen = buffer.getShort();
+        short buzIdLen = buffer.readShort();
         if (buzIdLen > 0) {
             byte[] buzId = new byte[buzIdLen];
-            buffer.get(buzId);
+            buffer.readBytes(buzId);
             String businessId = new String(buzId, Charset.forName("UTF-8"));
             retryMessageModel.setBusinessId(businessId);
         }
 
-        short topicLen = buffer.getShort();
+        short topicLen = buffer.readShort();
         byte[] topicBytes = new byte[topicLen];
-        buffer.get(topicBytes);
+        buffer.readBytes(topicBytes);
         String topic = new String(topicBytes, Charset.forName("UTF-8"));
         retryMessageModel.setTopic(topic);
 
-        short appLen = buffer.getShort();
+        short appLen = buffer.readShort();
         byte[] appBytes = new byte[appLen];
-        buffer.get(appBytes);
+        buffer.readBytes(appBytes);
         String app = new String(appBytes, Charset.forName("UTF-8"));
         retryMessageModel.setApp(app);
 
-        short partition = buffer.getShort();
+        short partition = buffer.readShort();
         retryMessageModel.setPartition(partition);
 
-        long index = buffer.getLong();
+        long index = buffer.readLong();
         retryMessageModel.setIndex(index);
 
-        short messageLen = buffer.getShort();
+        int messageLen = buffer.readInt();
         byte[] messageBytes = new byte[messageLen];
-        buffer.get(messageBytes);
+        buffer.readBytes(messageBytes);
         retryMessageModel.setBrokerMessage(messageBytes);
 
-        short exceptionLen = buffer.getShort();
+        short exceptionLen = buffer.readShort();
         if (exceptionLen > 0) {
             byte[] exceptionBytes = new byte[exceptionLen];
-            buffer.get(exceptionBytes);
+            buffer.readBytes(exceptionBytes);
             retryMessageModel.setException(exceptionBytes);
         }
 
-        long sendTime = buffer.getLong();
+        long sendTime = buffer.readLong();
         retryMessageModel.setSendTime(sendTime);
 
         return retryMessageModel;
@@ -113,7 +112,7 @@ public class RetrySerializerUtil {
         allocate.putLong(index);
 
         byte[] brokerMessage = retryMessageModel.getBrokerMessage();
-        allocate.putShort((short)brokerMessage.length);
+        allocate.putInt(brokerMessage.length);
         allocate.put(brokerMessage);
 
         byte[] exception = retryMessageModel.getException();
@@ -133,8 +132,8 @@ public class RetrySerializerUtil {
     }
 
     private static int size(RetryMessageModel retryMessageModel) {
-        // 2个字节业务Id长度、2个字节主题长度、2个字节应用长度、2个字节消息长度、2个字节异常信息长度
-        int messageSize = 2 * 5;
+        // 2个字节业务Id长度、2个字节主题长度、2个字节应用长度、4个字节消息长度、2个字节异常信息长度
+        int messageSize = 2 + 2 + 2 + 4 + 2;
 
         String businessId = retryMessageModel.getBusinessId();
         if (StringUtils.isNotEmpty(businessId)) {
@@ -174,25 +173,25 @@ public class RetrySerializerUtil {
     }
 
 
-    public static void main(String[] args) {
-        RetryMessageModel retry = new RetryMessageModel();
-        retry.setBusinessId("business");
-        retry.setTopic("topic");
-        retry.setApp("app");
-        retry.setPartition((short)255);
-        retry.setIndex(100L);
-        retry.setBrokerMessage(new byte[168]);
-        retry.setException(new byte[16]);
-        retry.setSendTime(SystemClock.now());
-
-        ByteBuffer serialize = serialize(retry);
-        serialize.flip();
-
-
-        RetryMessageModel deserialize = deserialize(serialize);
-
-        System.out.println(ToStringBuilder.reflectionToString(deserialize));
-
-
-    }
+//    public static void main(String[] args) {
+//        RetryMessageModel retry = new RetryMessageModel();
+//        retry.setBusinessId("business");
+//        retry.setTopic("topic");
+//        retry.setApp("app");
+//        retry.setPartition((short)255);
+//        retry.setIndex(100L);
+//        retry.setBrokerMessage(new byte[168]);
+//        retry.setException(new byte[16]);
+//        retry.setSendTime(SystemClock.now());
+//
+//        ByteBuffer serialize = serialize(retry);
+//        serialize.flip();
+//
+//
+//        RetryMessageModel deserialize = deserialize(serialize);
+//
+//        System.out.println(ToStringBuilder.reflectionToString(deserialize));
+//
+//
+//    }
 }
