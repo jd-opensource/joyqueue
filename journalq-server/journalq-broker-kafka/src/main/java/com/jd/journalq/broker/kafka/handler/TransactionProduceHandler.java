@@ -51,7 +51,8 @@ public class TransactionProduceHandler {
         this.transactionProducerSequenceManager = transactionProducerSequenceManager;
     }
 
-    public void produceMessage(ProduceRequest request, String transactionalId, long producerId, short producerEpoch, QosLevel qosLevel, Producer producer, ProducePartitionGroupRequest partitionGroupRequest,
+    public void produceMessage(ProduceRequest request, String transactionalId, long producerId, short producerEpoch,
+                               QosLevel qosLevel, Producer producer, ProducePartitionGroupRequest partitionGroupRequest,
                                EventListener<ProduceResponse.PartitionResponse> listener) {
 
         short[] code = {KafkaErrorCode.NONE.getCode()};

@@ -41,7 +41,8 @@ public class ProduceHandler {
         this.produce = produce;
     }
 
-    public void produceMessage(ProduceRequest request, QosLevel qosLevel, Producer producer, ProducePartitionGroupRequest partitionGroupRequest, EventListener<ProduceResponse.PartitionResponse> listener) {
+    public void produceMessage(ProduceRequest request, QosLevel qosLevel, Producer producer,
+                               ProducePartitionGroupRequest partitionGroupRequest, EventListener<ProduceResponse.PartitionResponse> listener) {
         try {
             produce.putMessageAsync(producer, partitionGroupRequest.getMessages(), qosLevel, (writeResult) -> {
                 if (!writeResult.getCode().equals(JournalqCode.SUCCESS)) {

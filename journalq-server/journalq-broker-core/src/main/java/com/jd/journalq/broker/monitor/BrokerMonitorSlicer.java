@@ -48,6 +48,18 @@ public class BrokerMonitorSlicer extends Service implements Runnable {
             topicStat.getEnQueueStat().slice();
             topicStat.getDeQueueStat().slice();
 
+            for (Map.Entry<Integer, PartitionGroupStat> partitionGroupStatEntry : topicStat.getPartitionGroupStatMap().entrySet()) {
+                partitionGroupStatEntry.getValue().getEnQueueStat().slice();
+                partitionGroupStatEntry.getValue().getDeQueueStat().slice();
+                partitionGroupStatEntry.getValue().getReplicationStat().getReplicaStat().slice();
+                partitionGroupStatEntry.getValue().getReplicationStat().getAppendStat().slice();
+
+                for (Map.Entry<Short, PartitionStat> partitionStatEntry : partitionGroupStatEntry.getValue().getPartitionStatMap().entrySet()) {
+                    partitionStatEntry.getValue().getEnQueueStat().slice();
+                    partitionStatEntry.getValue().getDeQueueStat().slice();
+                }
+            }
+
             for (Map.Entry<String, AppStat> appEntry : topicStat.getAppStats().entrySet()) {
                 // topic
                 AppStat appStat = appEntry.getValue();
@@ -85,5 +97,11 @@ public class BrokerMonitorSlicer extends Service implements Runnable {
                 }
             }
         }
+
+        brokerMonitor.getBrokerStat().getReplicationStat().getAppendStat().slice();
+        brokerMonitor.getBrokerStat().getReplicationStat().getReplicaStat().slice();
+
+        brokerMonitor.getBrokerStat().getEnQueueStat().slice();
+        brokerMonitor.getBrokerStat().getDeQueueStat().slice();
     }
 }
