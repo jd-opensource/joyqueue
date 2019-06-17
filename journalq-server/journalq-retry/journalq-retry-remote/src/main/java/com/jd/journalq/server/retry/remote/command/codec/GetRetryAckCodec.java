@@ -41,9 +41,8 @@ public class GetRetryAckCodec implements PayloadCodec<JournalqHeader, GetRetryAc
         int count = buffer.readShort(); // 读取重试消息条数
         List<RetryMessageModel> list = new ArrayList<>(count);
 
-        ByteBuffer byteBuffer = buffer.nioBuffer();
         for (int i = 0; i < count; i++) {
-            RetryMessageModel retryMessageModel = RetrySerializerUtil.deserialize(byteBuffer);
+            RetryMessageModel retryMessageModel = RetrySerializerUtil.deserialize(buffer);
             list.add(retryMessageModel);
         }
 
