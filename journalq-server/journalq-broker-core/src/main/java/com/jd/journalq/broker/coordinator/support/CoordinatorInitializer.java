@@ -83,6 +83,7 @@ public class CoordinatorInitializer extends Service {
             partitionGroup.setLeader(currentBroker.getId());
             partitionGroup.setPartitions(Sets.newHashSet((short) i));
             partitionGroup.setReplicas(Sets.newHashSet(currentBroker.getId()));
+            partitionGroup.setElectType(PartitionGroup.ElectType.raft);
             partitionGroupList.add(partitionGroup);
         }
 
