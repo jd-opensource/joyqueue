@@ -91,7 +91,7 @@ export default {
       this.$router.push({
         name: `/${this.$i18n.locale}/topic/detail`,
         query: {
-          id: this.topic.id,
+          id: item.topic.id,
           app: item.app.code,
           topic: item.topic.code,
           namespace: item.namespace.code,
@@ -121,7 +121,6 @@ export default {
       }
     },
     retrySearch () {
-      console.log(77)
       return {
         topic: this.$route.query.id,
         app: this.$route.query.app,

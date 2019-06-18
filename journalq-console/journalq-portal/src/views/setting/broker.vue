@@ -207,7 +207,7 @@ export default {
     }
   },
   methods: {
-    getList(){
+    getList () {
       this.showTablePin = true
       let data = {
         pagination: {
@@ -222,28 +222,28 @@ export default {
       }
       apiRequest.post(this.urlOrigin.search, {}, data).then((data) => {
         data.data = data.data || []
-      data.pagination = data.pagination || {
-        totalRecord: data.data.length
-      }
-      this.page.total = data.pagination.totalRecord
-      this.page.page = data.pagination.page
-      this.page.size = data.pagination.size
-      this.tableData.rowData = data.data
-      for (var i = 0; i < this.tableData.rowData.length; i++) {
-        this.getBrokerStatus(this.tableData.rowData, i)
-      }
-      this.showTablePin = false
-    })
+        data.pagination = data.pagination || {
+          totalRecord: data.data.length
+        }
+        this.page.total = data.pagination.totalRecord
+        this.page.page = data.pagination.page
+        this.page.size = data.pagination.size
+        this.tableData.rowData = data.data
+        for (let i = 0; i < this.tableData.rowData.length; i++) {
+          this.getBrokerStatus(this.tableData.rowData, i)
+        }
+        this.showTablePin = false
+      })
     },
     getBrokerStatus (rowData, i) {
       apiRequest.get(this.urlOrigin.startInfo + '/' + rowData[i].id).then((data) => {
-        if(data.code == 200) {
-          this.tableData.rowData[i].startupTime = timeStampToString(data.data.startupTime);
+        if (data.code === 200) {
+          this.tableData.rowData[i].startupTime = timeStampToString(data.data.startupTime)
         } else {
-          this.tableData.rowData[i].startupTime = "不存活"
+          this.tableData.rowData[i].startupTime = '不存活'
         }
         this.$set(this.tableData.rowData, i, this.tableData.rowData[i])
-      });
+      })
     },
     archiveMonitor (item) {
       let broker = {
@@ -276,7 +276,7 @@ export default {
     }
   },
   mounted () {
-    this.getList();
+    this.getList()
   }
 }
 </script>

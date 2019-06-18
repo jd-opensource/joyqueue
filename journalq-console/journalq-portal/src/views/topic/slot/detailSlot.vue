@@ -121,6 +121,8 @@ export default {
             consumerDetailVisible: this.$route.query.consumerDetailVisible || '0'
           }
         })
+
+        this.$refs[name].$refs[subTab].getList()
       } else if (name === 'consumerDetail') {
         let subTab = this.$route.query.subTab || 'partition'
 
@@ -137,7 +139,7 @@ export default {
             id: this.topic.id,
             app: this.$route.query.app || '',
             topic: this.topic.code,
-            namespace: this.topic.namespace.code,
+            namespace: this.namespace.code,
             subscribeGroup: this.$route.query.subscribeGroup || '',
             clientType: this.$route.query.clientType,
             subTab: this.$route.query.subTab || 'partition',
@@ -146,6 +148,8 @@ export default {
             consumerDetailVisible: '1'
           }
         })
+
+        this.$refs[name].$refs[subTab].getList()
       } else if (name === 'retry') {
         this.$refs[name].search.app = this.$route.query.app || ''
         this.$refs[name].search.topic = this.topic.id

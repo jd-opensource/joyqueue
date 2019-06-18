@@ -34,7 +34,7 @@
         </icon>
       </d-button>
     </div>
-    <my-table :data="tableData" :showPin="showTablePin" :page="page1" @on-size-change="handleSizeChange"
+    <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
               @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
               @on-del="del" @on-download="download">
     </my-table>
@@ -81,11 +81,11 @@ export default {
         {key: 0, value: '成功'}
       ],
       showTablePin: false,
-      page1: {
-        page: 1,
-        size: 10,
-        total: 100
-      },
+      // page1: {
+      //   page: 1,
+      //   size: 10,
+      //   total: 100
+      // },
       tableData: {
         rowData: [],
         colData: [
@@ -96,28 +96,34 @@ export default {
           {
             title: '队列',
             key: 'topic'
-          }, {
+          },
+          {
             title: '应用',
             key: 'app'
-          }, {
+          },
+          {
             title: '业务ID',
             key: 'businessId'
-          }, {
+          },
+          {
             title: '次数',
             key: 'retryCount'
-          }, {
+          },
+          {
             title: '发送时间',
             key: 'sendTime',
             formatter (item) {
               return timeStampToString(item.sendTime)
             }
-          }, {
+          },
+          {
             title: '下次重试时间',
             key: 'retryTime',
             formatter (item) {
               return timeStampToString(item.retryTime)
             }
-          }, {
+          },
+          {
             title: '过期时间',
             key: 'expireTime',
             formatter (item) {
@@ -150,8 +156,8 @@ export default {
       this.showTablePin = true
       let data = {
         pagination: {
-          page: this.page1.page,
-          size: this.page1.size
+          page: this.page.page,
+          size: this.page.size
         },
         query: {
           topic: this.search.topic,

@@ -113,7 +113,6 @@ export default {
   },
   created () {
     this.brokerGroup.id = this.$route.query.id
-    // todo 下行是否要修改
     this.brokerGroup.code = this.$route.query.code
     this.brokerGroup.name = this.$route.query.name
   }

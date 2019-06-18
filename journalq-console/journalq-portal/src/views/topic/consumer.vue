@@ -66,12 +66,12 @@ export default {
                 click: () => {
                   this.$router.push({
                     name: `/${this.$i18n.locale}/topic/detail`,
-                    query: {id: params.item.topic.code,
-                      code: params.item.topic.code,
-                      namespaceId: params.item.topic.namespace.id,
-                      namespaceCode: params.item.topic.namespace.code,
+                    query: {
+                      id: params.item.topic.code,
+                      app: getAppCode(params.item.app, params.item.subscribeGroup),
+                      topic: params.item.topic.code,
+                      namespace: params.item.namespace.code,
                       tab: 'retry',
-                      app: getAppCode(params.item.app, params.item.subscribeGroup)
                     }
                   })
                 }
