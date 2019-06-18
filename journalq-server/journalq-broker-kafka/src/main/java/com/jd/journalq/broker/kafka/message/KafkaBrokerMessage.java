@@ -24,6 +24,7 @@ import java.util.Map;
 public class KafkaBrokerMessage {
 
     public static final byte INVALID_MAGIC = -1;
+    public static final int NO_SEQUENCE = -1;
 
     private int size;
     private byte magic = INVALID_MAGIC;
@@ -39,7 +40,7 @@ public class KafkaBrokerMessage {
 
     private boolean isTransaction;
     private long producerId;
-    private int baseSequence;
+    private int baseSequence = NO_SEQUENCE;
     private short producerEpoch;
 
     public void setSize(int size) {

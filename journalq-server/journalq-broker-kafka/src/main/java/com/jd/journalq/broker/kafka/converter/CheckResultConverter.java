@@ -31,10 +31,11 @@ public class CheckResultConverter {
     public static short convertProduceCode(JournalqCode code) {
         switch (code) {
             case FW_TOPIC_NOT_EXIST:
-            case FW_PRODUCER_NOT_EXISTS:
-            case FW_PUT_MESSAGE_TOPIC_NOT_WRITE: {
+            case FW_PRODUCER_NOT_EXISTS: {
+//                return KafkaErrorCode.TOPIC_AUTHORIZATION_FAILED.getCode();
                 return KafkaErrorCode.UNKNOWN_TOPIC_OR_PARTITION.getCode();
             }
+            case FW_PUT_MESSAGE_TOPIC_NOT_WRITE:
             case FW_PRODUCE_MESSAGE_BROKER_NOT_LEADER:
             case FW_TOPIC_NO_PARTITIONGROUP: {
                 return KafkaErrorCode.NOT_LEADER_FOR_PARTITION.getCode();
@@ -58,6 +59,7 @@ public class CheckResultConverter {
             }
             case FW_TOPIC_NOT_EXIST:
             case FW_CONSUMER_NOT_EXISTS: {
+//                return KafkaErrorCode.TOPIC_AUTHORIZATION_FAILED.getCode();
                 return KafkaErrorCode.UNKNOWN_TOPIC_OR_PARTITION.getCode();
             }
             default : {

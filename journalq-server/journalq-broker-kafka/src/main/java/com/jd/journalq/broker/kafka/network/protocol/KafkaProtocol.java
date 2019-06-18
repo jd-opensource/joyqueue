@@ -31,7 +31,7 @@ import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionHandler;
 import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionIdManager;
 import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionMetadataManager;
 import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionOffsetHandler;
-import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionProducerSequenceManager;
+import com.jd.journalq.broker.kafka.coordinator.transaction.ProducerSequenceManager;
 import com.jd.journalq.broker.kafka.coordinator.transaction.completion.TransactionCompletionHandler;
 import com.jd.journalq.broker.kafka.coordinator.transaction.completion.TransactionCompletionScheduler;
 import com.jd.journalq.broker.kafka.coordinator.transaction.log.TransactionLog;
@@ -76,7 +76,7 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
 
     private ProducerIdManager producerIdManager;
     private TransactionIdManager transactionIdManager;
-    private TransactionProducerSequenceManager transactionProducerSequenceManager;
+    private ProducerSequenceManager producerSequenceManager;
     private TransactionMetadataManager transactionMetadataManager;
     private TransactionLog transactionLog;
     private TransactionSynchronizer transactionSynchronizer;
@@ -110,7 +110,7 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
 
         this.producerIdManager = new ProducerIdManager();
         this.transactionIdManager = new TransactionIdManager();
-        this.transactionProducerSequenceManager = new TransactionProducerSequenceManager(config);
+        this.producerSequenceManager = new ProducerSequenceManager(config);
         this.transactionMetadataManager = new TransactionMetadataManager(config, transactionMetadataManager);
         this.transactionLog = new TransactionLog(config, brokerContext.getProduce(), brokerContext.getConsume(), coordinator, brokerContext.getClusterManager());
         this.transactionSynchronizer = new TransactionSynchronizer(config, transactionIdManager, transactionLog, coordinator.getSessionManager(), brokerContext.getNameService());
@@ -125,7 +125,7 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
         this.connectionHandler = new KafkaConnectionHandler(connectionManager);
         this.transportHandler = new KafkaTransportHandler();
 
-        this.kafkaContext = new KafkaContext(config, groupCoordinator, transactionCoordinator, transactionIdManager, transactionProducerSequenceManager, brokerContext);
+        this.kafkaContext = new KafkaContext(config, groupCoordinator, transactionCoordinator, transactionIdManager, producerSequenceManager, brokerContext);
         registerManage(brokerContext, kafkaContext);
     }
 

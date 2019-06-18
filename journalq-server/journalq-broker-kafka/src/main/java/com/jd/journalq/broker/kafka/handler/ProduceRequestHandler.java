@@ -8,9 +8,11 @@ import com.jd.journalq.broker.kafka.KafkaAcknowledge;
 import com.jd.journalq.broker.kafka.KafkaCommandType;
 import com.jd.journalq.broker.kafka.KafkaContext;
 import com.jd.journalq.broker.kafka.KafkaContextAware;
+import com.jd.journalq.broker.kafka.KafkaErrorCode;
 import com.jd.journalq.broker.kafka.command.ProduceRequest;
 import com.jd.journalq.broker.kafka.command.ProduceResponse;
 import com.jd.journalq.broker.kafka.converter.CheckResultConverter;
+import com.jd.journalq.broker.kafka.coordinator.transaction.ProducerSequenceManager;
 import com.jd.journalq.broker.kafka.helper.KafkaClientHelper;
 import com.jd.journalq.broker.kafka.message.KafkaBrokerMessage;
 import com.jd.journalq.broker.kafka.message.converter.KafkaMessageConverter;
@@ -55,6 +57,7 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
     private ProduceConfig produceConfig;
     private ProduceHandler produceHandler;
     private TransactionProduceHandler transactionProduceHandler;
+    private ProducerSequenceManager producerSequenceManager;
     private SessionManager sessionManager;
 
     @Override
@@ -63,7 +66,8 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
         this.produceConfig = new ProduceConfig(kafkaContext.getBrokerContext().getPropertySupplier());
         this.produceHandler = new ProduceHandler(kafkaContext.getBrokerContext().getProduce());
         this.transactionProduceHandler = new TransactionProduceHandler(kafkaContext.getConfig(), kafkaContext.getBrokerContext().getProduce(),
-                kafkaContext.getTransactionCoordinator(), kafkaContext.getTransactionIdManager(), kafkaContext.getTransactionProducerSequenceManager());
+                kafkaContext.getTransactionCoordinator(), kafkaContext.getTransactionIdManager());
+        this.producerSequenceManager = kafkaContext.getProducerSequenceManager();
         this.sessionManager = kafkaContext.getBrokerContext().getSessionManager();
     }
 
@@ -94,18 +98,13 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
             TopicConfig topicConfig = clusterManager.getTopicConfig(topic);
 
             for (ProduceRequest.PartitionRequest partitionRequest : entry.getValue()) {
-                int partition = partitionRequest.getPartition();
-                BooleanResponse checkResult = clusterManager.checkWritable(topic, clientId, clientIp, (short) partition);
-
-                if (!checkResult.isSuccess()) {
-                    logger.warn("checkWritable failed, transport: {}, topic: {}, partition: {}, app: {}, code: {}", transport, topic, partition, clientId, checkResult.getJournalqCode());
-                    short kafkaErrorCode = CheckResultConverter.convertProduceCode(checkResult.getJournalqCode());
-                    buildPartitionResponse(partition, null, kafkaErrorCode, partitionRequest.getMessages(), partitionResponses);
+                short checkCode = checkPartitionRequest(transport, produceRequest, partitionRequest, topic, producer, clientIp);
+                if (checkCode != KafkaErrorCode.NONE.getCode()) {
+                    buildPartitionResponse(partitionRequest.getPartition(), null, checkCode, partitionRequest.getMessages(), partitionResponses);
                     traffic.record(topic.getFullName(), 0);
                     latch.countDown();
                     continue;
                 }
-
                 splitByPartitionGroup(topicConfig, topic, producer, clientAddress, traffic, partitionRequest, partitionGroupRequestMap);
             }
 
@@ -149,6 +148,32 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
         return new Command(response);
     }
 
+    protected short checkPartitionRequest(Transport transport, ProduceRequest produceRequest, ProduceRequest.PartitionRequest partitionRequest,
+                                          TopicName topic, Producer producer, String clientIp) {
+
+        BooleanResponse checkResult = clusterManager.checkWritable(topic, producer.getApp(), clientIp, (short) partitionRequest.getPartition());
+        if (!checkResult.isSuccess()) {
+            logger.warn("checkWritable failed, transport: {}, topic: {}, partition: {}, app: {}, code: {}",
+                    transport, topic, partitionRequest.getPartition(), producer.getApp(), checkResult.getJournalqCode());
+            return CheckResultConverter.convertProduceCode(checkResult.getJournalqCode());
+        }
+
+        int baseSequence = partitionRequest.getMessages().get(0).getBaseSequence();
+        if (baseSequence != KafkaBrokerMessage.NO_SEQUENCE) {
+            if (!producerSequenceManager.checkSequence(producer.getApp(), produceRequest.getProducerId(), produceRequest.getProducerEpoch(), partitionRequest.getPartition(), baseSequence)) {
+                logger.warn("out of order sequence, topic: {}, app: {}, partition: {}, transactionId: {}, producerId: {}, producerEpoch: {}, sequence: {}",
+                        producer.getTopic(), producer.getApp(), partitionRequest.getPartition(), produceRequest.getTransactionalId(),
+                        produceRequest.getProducerId(), produceRequest.getProducerEpoch(), baseSequence);
+
+                return KafkaErrorCode.OUT_OF_ORDER_SEQUENCE_NUMBER.getCode();
+            } else {
+                producerSequenceManager.updateSequence(producer.getApp(), produceRequest.getProducerId(), produceRequest.getProducerEpoch(), partitionRequest.getPartition(), baseSequence);
+            }
+        }
+
+        return KafkaErrorCode.NONE.getCode();
+    }
+
     protected void splitByPartitionGroup(TopicConfig topicConfig, TopicName topic, Producer producer, byte[] clientAddress, Traffic traffic,
                                 ProduceRequest.PartitionRequest partitionRequest, Map<Integer, ProducePartitionGroupRequest> partitionGroupRequestMap) {
         PartitionGroup partitionGroup = topicConfig.fetchPartitionGroupByPartition((short) partitionRequest.getPartition());
@@ -183,17 +208,9 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
 
     protected void buildPartitionResponse(int partition, long[] indices, short code, List<KafkaBrokerMessage> messages, List<ProduceResponse.PartitionResponse> partitionResponses) {
         if (ArrayUtils.isEmpty(indices)) {
-            if (messages.get(0).isBatch()) {
-                partitionResponses.add(new ProduceResponse.PartitionResponse(partition, ProduceResponse.PartitionResponse.NONE_OFFSET, code));
-            } else {
-                partitionResponses.add(new ProduceResponse.PartitionResponse(partition, ProduceResponse.PartitionResponse.NONE_OFFSET, code));
-            }
+            partitionResponses.add(new ProduceResponse.PartitionResponse(partition, ProduceResponse.PartitionResponse.NONE_OFFSET, code));
         } else {
-            if (messages.get(0).isBatch()) {
-                partitionResponses.add(new ProduceResponse.PartitionResponse(partition, indices[0], code));
-            } else {
-                partitionResponses.add(new ProduceResponse.PartitionResponse(partition, indices[0], code));
-            }
+            partitionResponses.add(new ProduceResponse.PartitionResponse(partition, indices[0], code));
         }
     }
 

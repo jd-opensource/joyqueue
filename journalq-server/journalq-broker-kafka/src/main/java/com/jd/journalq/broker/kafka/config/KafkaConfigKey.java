@@ -61,7 +61,7 @@ public enum KafkaConfigKey implements PropertyDef {
     // 事务扫描大小
     TRANSACTION_LOG_SCAN_SIZE("kafka.transaction.log.scan.size", 1000, Type.INT),
     // 事务生产者序号过期时间
-    TRANSACTION_PRODUCER_SEQUENCE_EXPIRE("kafka.transaction.producer.sequence.expire", 1000 * 60 * 10, Type.INT),
+    TRANSACTION_PRODUCER_SEQUENCE_EXPIRE("kafka.transaction.producer.sequence.expire", 1000 * 60 * 5, Type.INT),
     // 事务日志app
     TRANSACTION_LOG_APP("coordinator.transaction.log.app", "__transaction_log", PropertyDef.Type.STRING),
 

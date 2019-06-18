@@ -6,7 +6,6 @@ import com.jd.journalq.broker.kafka.command.ProduceResponse;
 import com.jd.journalq.broker.kafka.config.KafkaConfig;
 import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionCoordinator;
 import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionIdManager;
-import com.jd.journalq.broker.kafka.coordinator.transaction.TransactionProducerSequenceManager;
 import com.jd.journalq.broker.kafka.model.ProducePartitionGroupRequest;
 import com.jd.journalq.broker.producer.Produce;
 import com.jd.journalq.domain.QosLevel;
@@ -40,15 +39,13 @@ public class TransactionProduceHandler {
     private Produce produce;
     private TransactionCoordinator transactionCoordinator;
     private TransactionIdManager transactionIdManager;
-    private TransactionProducerSequenceManager transactionProducerSequenceManager;
 
     public TransactionProduceHandler(KafkaConfig config, Produce produce, TransactionCoordinator transactionCoordinator,
-                                     TransactionIdManager transactionIdManager, TransactionProducerSequenceManager transactionProducerSequenceManager) {
+                                     TransactionIdManager transactionIdManager) {
         this.config = config;
         this.produce = produce;
         this.transactionCoordinator = transactionCoordinator;
         this.transactionIdManager = transactionIdManager;
-        this.transactionProducerSequenceManager = transactionProducerSequenceManager;
     }
 
     public void produceMessage(ProduceRequest request, String transactionalId, long producerId, short producerEpoch,
@@ -58,7 +55,7 @@ public class TransactionProduceHandler {
         short[] code = {KafkaErrorCode.NONE.getCode()};
         CountDownLatch latch = new CountDownLatch(partitionGroupRequest.getMessageMap().size());
 
-        for (Map.Entry<Integer, List<BrokerMessage>> entry : partitionGroupRequest.getMessageMap().entrySet())
+        for (Map.Entry<Integer, List<BrokerMessage>> entry : partitionGroupRequest.getMessageMap().entrySet()) {
             try {
                 int partition = entry.getKey();
                 List<BrokerMessage> messages = entry.getValue();
@@ -78,6 +75,7 @@ public class TransactionProduceHandler {
                 code[0] = KafkaErrorCode.exceptionFor(e);
                 latch.countDown();
             }
+        }
 
         try {
             latch.await(request.getAckTimeoutMs(), TimeUnit.MILLISECONDS);
@@ -85,18 +83,6 @@ public class TransactionProduceHandler {
             logger.error("produce message failed, topic: {}", producer.getTopic(), e);
         }
         listener.onEvent(new ProduceResponse.PartitionResponse(ProduceResponse.PartitionResponse.NONE_OFFSET, code[0]));
-    }
-
-    protected boolean checkSequence(long producerId, short producerEpoch, long sequence) {
-        long lastSequence = transactionProducerSequenceManager.getSequence(producerId, producerEpoch);
-        if (sequence == 0 || sequence == lastSequence + 1) {
-            return true;
-        }
-        return false;
-    }
-
-    protected void updateSequence(long producerId, short producerEpoch, long sequence) {
-        transactionProducerSequenceManager.updateSequence(producerId, producerEpoch, sequence);
     }
 
     protected String generateTxId(Producer producer, int partition, String transactionalId, long producerId, short producerEpoch) {
