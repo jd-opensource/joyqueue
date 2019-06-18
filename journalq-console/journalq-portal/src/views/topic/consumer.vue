@@ -8,7 +8,7 @@
 
 <script>
 import consumerBase from '../monitor/consumerBase.vue'
-import {getTopicCode, getAppCode, openOrCloseBtnRender, clientTypeSelectRender,
+import {getAppCode, openOrCloseBtnRender, clientTypeSelectRender,
   clientTypeBtnRender, topicTypeBtnRender, baseBtnRender, subscribeGroupAutoCompleteRender} from '../../utils/common.js'
 
 export default {
@@ -35,10 +35,11 @@ export default {
         },
         {
           title: '主题',
-          key: 'topic.code',
-          formatter (row) {
-            return getTopicCode(row.topic, row.namespace)
-          }
+          key: 'topic.code'
+        },
+        {
+          title: '命名空间',
+          key: 'namespace.code'
         },
         {
           title: '连接数',

@@ -24,7 +24,7 @@
                      style="width:370px">
         <span slot="prepend">发送时间</span>
       </d-date-picker>
-      <d-input v-model="search.businessId" placeholder="请输入业务ID" class="left mr5 mt10"
+      <d-input v-model="businessId" placeholder="请输入业务ID" class="left mr5 mt10"
                style="width: 213px" @on-enter="getList">
         <span slot="prepend">业务ID</span>
       </d-input>
@@ -34,7 +34,7 @@
         </icon>
       </d-button>
     </div>
-    <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
+    <my-table :data="tableData" :showPin="showTablePin" :page="page1" @on-size-change="handleSizeChange"
               @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
               @on-del="del" @on-download="download">
     </my-table>
@@ -60,9 +60,7 @@ export default {
         return {
           topic: '',
           app: '',
-          status: 1,
-          beginTime: '',
-          endTime: ''
+          status: 1
         }
       }
     }
@@ -82,6 +80,12 @@ export default {
         {key: -1, value: '已删除'},
         {key: 0, value: '成功'}
       ],
+      showTablePin: false,
+      page1: {
+        page: 1,
+        size: 10,
+        total: 100
+      },
       tableData: {
         rowData: [],
         colData: [
@@ -142,15 +146,44 @@ export default {
     }
   },
   methods: {
-    beforeSearch (obj) {
-      if (this.times && this.times.length === 2) {
-        obj.query.beginTime = this.times[0]
-        obj.query.endTime = this.times[1]
-      } else {
-        obj.query.beginTime = ''
-        obj.query.endTime = ''
+    getList () {
+      this.showTablePin = true
+      let data = {
+        pagination: {
+          page: this.page1.page,
+          size: this.page1.size
+        },
+        query: {
+          topic: this.search.topic,
+          // app: this.search.app,
+          app: this.$route.query.app,
+          status: this.search.status,
+          businessId: this.businessId
+        }
       }
-      return obj
+
+      if (this.times && this.times.length === 2) {
+        data.query.beginTime = this.times[0]
+        data.query.endTime = this.times[1]
+      } else {
+        data.query.beginTime = ''
+        data.query.endTime = ''
+      }
+
+      apiRequest.post(this.urlOrigin.search, {}, data).then((data) => {
+        if (data === '') {
+          return
+        }
+        data.data = data.data || []
+        data.pagination = data.pagination || {
+          totalRecord: data.data.length
+        }
+        this.page.total = data.pagination.totalRecord
+        this.page.page = data.pagination.page
+        this.page.size = data.pagination.size
+        this.tableData.rowData = data.data
+        this.showTablePin = false
+      })
     },
     download (item) {
       apiRequest.get(this.urlOrigin.download + '/' + item.id).then()
@@ -165,7 +198,7 @@ export default {
     }
   },
   mounted () {
-    this.getList()
+    // this.getList()
   }
 }
 </script>

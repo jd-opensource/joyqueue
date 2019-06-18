@@ -1,18 +1,18 @@
 <template>
   <div>
-    <div class="ml20 mt30">
-      <d-input v-model="keyword" :placeholder="keywordTip" class="left mr10" style="width: 213px" @on-enter="getList">
+    <div class="headLine">
+      <d-input v-model="keyword" :placeholder="keywordTip" class="input" @on-enter="getList">
         <span slot="prepend">{{keywordName}}</span>
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
-      <d-button type="primary" v-if="$store.getters.isAdmin" @click="openDialog('subscribeDialog')" class="left mr10">
-        订阅
-        <icon name="plus-circle" style="margin-left: 5px;"/>
-      </d-button>
-      <!--<d-button type="primary" v-if="showSummaryChart" @click="goSummaryChart" class="left mr10">-->
-        <!--汇总图表-->
-        <!--<icon name="bar-chart" style="margin-left: 5px;"/>-->
-      <!--</d-button>-->
+      <d-button-group>
+        <d-button type="primary" v-if="$store.getters.isAdmin" @click="openDialog('subscribeDialog')" class="button">
+          订阅<icon name="plus-circle" style="margin-left: 3px;"/>
+        </d-button>
+        <d-button type="primary" @click="getList" class="button">刷新
+          <icon name="refresh-cw" style="margin-left: 3px;"></icon>
+        </d-button>
+      </d-button-group>
     </div>
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
               @on-detail-chart="goDetailChart" @on-current-change="handleCurrentChange" @on-detail="openDetailTab"
@@ -51,11 +51,13 @@ import subscribe from './subscribe.vue'
 import ProducerConfigForm from './producerConfigForm.vue'
 import ProducerWeight from './produceWight.vue'
 import {getTopicCode, replaceChartUrl} from '../../utils/common.js'
-import RateLimit from "./rateLimit";
+import RateLimit from './rateLimit'
+import ButtonGroup from '../../components/button/button-group'
 
 export default {
   name: 'producer-base',
   components: {
+    ButtonGroup,
     RateLimit,
     myTable,
     myDialog,
@@ -156,8 +158,8 @@ export default {
         width: '400',
         showFooter: true,
         doSearch: false,
-        limitTps:0,
-        limitTraffic:0
+        limitTps: 0,
+        limitTraffic: 0
       },
       type: this.$store.getters.producerType, // 1:生产， 2：消费
       subscribeDialog: {

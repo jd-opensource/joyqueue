@@ -55,26 +55,77 @@ export default {
     ProducerDetail,
     ConsumerDetail
   },
+  // data () {
+  //   return {
+  //     appCode: ''
+  //   }
+  // // },
+  // watch: {
+  //   '$route' (to, from) {
+  //     console.log(44)
+  //     this.appCode = to.query.app
+  //     console.log(this.appCode)
+  //     // this.$refs[this.tab].getList()
+  //   }
+  // },
+  methods: {
+    openProducerDetailTab (item) {
+      // Jump to producer detail router
+      this.$router.push({
+        name: `/${this.$i18n.locale}/topic/detail`,
+        query: {
+          id: item.topic.id,
+          app: item.app.code,
+          topic: item.topic.code,
+          namespace: item.namespace.code,
+          clientType: item.clientType,
+          subTab: 'partition',
+          tab: 'producerDetail',
+          producerDetailVisible: '1',
+          consumerDetailVisible: this.consumerDetailVisible ? '1' : '0'
+        }
+      })
+    },
+    openConsumerDetailTab (item) {
+      // Jump to consumer detail router
+      this.$router.push({
+        name: `/${this.$i18n.locale}/topic/detail`,
+        query: {
+          id: this.topic.id,
+          app: item.app.code,
+          topic: item.topic.code,
+          namespace: item.namespace.code,
+          subscribeGroup: item.subscribeGroup,
+          clientType: item.clientType,
+          subTab: 'partition',
+          tab: 'consumerDetail',
+          producerDetailVisible: this.producerDetailVisible ? '1' : '0',
+          consumerDetailVisible: '1'
+        }
+      })
+    },
+    queryTopicDetail () {
+      this.$refs.detail.getDetail(this.$route.query.id)
+    }
+  },
   computed: {
     search () {
       return {
         topic: {
           id: this.$route.query.id,
-          code: this.$route.query.code,
+          code: this.$route.query.topic,
           namespace: {
-            id: this.$route.query.namespaceId,
-            code: this.$route.query.namespaceCode
+            code: this.$route.query.namespace
           }
         }
       }
     },
     retrySearch () {
+      console.log(77)
       return {
         topic: this.$route.query.id,
         app: this.$route.query.app,
-        status: 1,
-        beginTime: '',
-        endTime: ''
+        status: 1
       }
     },
     archiveSearch () {
@@ -116,59 +167,8 @@ export default {
       }
     }
   },
-  methods: {
-    openProducerDetailTab (item) {
-      // Jump to producer detail router
-      this.$router.push({
-        name: `/${this.$i18n.locale}/topic/detail`,
-        query: {
-          id: this.$route.query.id,
-          code: this.$route.query.code,
-          app: item.app.code,
-          topic: item.topic.code,
-          namespace: item.namespace.code,
-          namespaceId: item.namespace.id,
-          namespaceCode: item.namespace.code,
-          clientType: item.clientType,
-          subTab: 'partition',
-          tab: 'producerDetail',
-          producerDetailVisible: '1',
-          consumerDetailVisible: this.consumerDetailVisible ? '1' : '0'
-        }
-      })
-    },
-    openConsumerDetailTab (item) {
-      // Jump to consumer detail router
-      this.$router.push({
-        name: `/${this.$i18n.locale}/topic/detail`,
-        query: {
-          id: this.$route.query.id,
-          code: this.$route.query.code,
-          app: item.app.code,
-          topic: item.topic.code,
-          namespace: item.namespace.code,
-          namespaceId: item.namespace.id,
-          namespaceCode: item.namespace.code,
-          subscribeGroup: item.subscribeGroup,
-          clientType: item.clientType,
-          subTab: 'partition',
-          tab: 'consumerDetail',
-          producerDetailVisible: this.producerDetailVisible ? '1' : '0',
-          consumerDetailVisible: '1'
-        }
-      })
-    },
-    queryTopicDetail () {
-      this.$refs.detail.getDetail(this.$route.query.id)
-    }
-  },
   mounted () {
-    // init topic
-    // this.topic.id = this.$route.query.id
-    // this.topic.code = this.$route.query.code
-    // this.topic.namespace.id = this.$route.query.namespaceId
-    // this.topic.namespace.code = this.$route.query.namespaceCode
-    // add archive refs into detail tab refs
+    // add refs into detail tab refs
     this.$refs.detail.$refs['producer'] = this.$refs.producer
     this.$refs.detail.$refs['consumer'] = this.$refs.consumer
     this.$refs.detail.$refs['partitionGroup'] = this.$refs.partitionGroup

@@ -44,24 +44,18 @@ export default {
     ProducerDetail,
     ConsumerDetail
   },
-  // data () {
-  //   return {
-  //     appDetailType: this.$store.getters.appDetailType
-  //   }
-  // },
   methods: {
     openProducerDetailTab (item) {
       // Jump to producer detail router
       this.$router.push({
         name: `/${this.$i18n.locale}/application/detail`,
         query: {
-          id: this.$route.query.id,
-          code: this.$route.query.code,
-          tab: 'producerDetail',
+          id: item.app.id,
           app: item.app.code,
           topic: item.topic.code,
           namespace: item.namespace.code,
           clientType: item.clientType,
+          tab: 'producerDetail',
           subTab: 'partition',
           producerDetailVisible: '1',
           consumerDetailVisible: this.consumerDetailVisible ? '1' : '0'
@@ -73,14 +67,13 @@ export default {
       this.$router.push({
         name: `/${this.$i18n.locale}/application/detail`,
         query: {
-          id: this.$route.query.id,
-          code: this.$route.query.code,
-          tab: 'consumerDetail',
+          id: item.app.id,
           app: item.app.code,
           topic: item.topic.code,
           namespace: item.namespace.code,
           subscribeGroup: item.subscribeGroup,
           clientType: item.clientType,
+          tab: 'consumerDetail',
           subTab: 'partition',
           producerDetailVisible: this.producerDetailVisible ? '1' : '0',
           consumerDetailVisible: '1'
@@ -93,7 +86,7 @@ export default {
       return {
         app: {
           id: this.$route.query.id,
-          code: this.$route.query.code
+          code: this.$route.query.app
         }
       }
     },

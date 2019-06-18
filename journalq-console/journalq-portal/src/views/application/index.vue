@@ -61,7 +61,7 @@ export default {
                   click: () => {
                     this.$router.push({
                       name: `/${this.curLang}/application/detail`,
-                      query: {id: params.item.id, code: params.item.code}
+                      query: {id: params.item.id, app: params.item.code}
                     })
                   }
                 }
@@ -128,7 +128,7 @@ export default {
                   click: () => {
                     this.$router.push({
                       name: `/${this.curLang}/application/detail`,
-                      query: {id: params.item.id, code: params.item.code}
+                      query: { id: params.item.id, app: params.item.code }
                     })
                   }
                 }
@@ -185,7 +185,7 @@ export default {
     goDetail (item) {
       this.$router.push({
         name: `/${this.curLang}/application/detail`,
-        query: {id: item.id, code: item.code}})
+        query: {id: item.id, app: item.code}})
     },
     isAdmin (item) {
       return this.$store.getters.isAdmin

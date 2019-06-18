@@ -19,10 +19,10 @@
       <d-input  style="width: 60%" placeholder="请输入值，默认10s" v-model.number="formData.ackTimeout"/>
     </d-form-item>
     <d-form-item label="批量大小:" prop="batchSize">
-      <d-input style="width: 60%"  placeholder="请输入值，范围1-100，默认10" v-model.number="formData.batchSize"/>
+      <d-input style="width: 60%"  placeholder="请输入批量数，范围1-100，默认10" v-model.number="formData.batchSize"/>
     </d-form-item>
     <d-form-item label="并行消费:">
-      <d-input style="width: 60%"  placeholder="请输入值,范围1-50,默认1" v-model.number="formData.concurrent"/>
+      <d-input style="width: 60%"  placeholder="请输入并行数,范围1-50,默认1" v-del.number="formData.concurrent"/>
     </d-form-item>
     <d-form-item label="禁止IP消费:">
       <d-input style="width: 60%"  type="textarea" rows="3" v-model="formData.blackList" placeholder="请输入要限制的IP，多个IP之间请用英文逗号隔开"/>

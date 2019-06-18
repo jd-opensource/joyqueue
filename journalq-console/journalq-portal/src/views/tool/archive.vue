@@ -183,12 +183,12 @@ export default {
     getList () {
       this.firstDis = false
       this.nextDis = true
-      this.getListWithDate (false)
+      this.getListWithDate(false)
     },
-    getNext() {
+    getNext () {
       this.firstDis = true
       this.nextDis = true
-      this.getListWithDate (true)
+      this.getListWithDate(true)
     },
     getListWithDate (isNext) {
       if (!this.times || this.times.length < 2) {

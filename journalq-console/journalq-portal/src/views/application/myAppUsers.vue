@@ -1,15 +1,18 @@
 <template>
   <div>
     <div class="ml20 mt30">
-      <d-input v-model="searchData.keyword" placeholder="请输入Erp或中文名" class="left mr10"
-               style="width:300px" @on-enter="getList">
+      <d-input v-model="searchData.keyword" placeholder="请输入Erp或中文名" class="input" @on-enter="getList">
         <span slot="prepend">关键词</span>
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
-      <d-button type="primary" @click="openDialog('addDialog')">
-        添加
-        <icon name="plus-circle" style="margin-left: 5px;"></icon>
-      </d-button>
+      <d-button-group>
+        <d-button type="primary" @click="openDialog('addDialog')" class="button">添加
+          <icon name="plus-circle" style="margin-left: 3px;"></icon>
+        </d-button>
+        <d-button type="primary" @click="getList" class="button">刷新
+          <icon name="refresh-cw" style="margin-left: 3px;"></icon>
+        </d-button>
+      </d-button-group>
     </div>
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
               @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange">
@@ -90,6 +93,13 @@ export default {
   },
   methods: {
   },
+  // watch: {
+  //   '$route' (to, from) {
+  //     if (to.query.tab === 'myAppUsers') {
+  //       this.getList()
+  //     }
+  //   }
+  // },
   mounted () {
     // this.getList();
   }

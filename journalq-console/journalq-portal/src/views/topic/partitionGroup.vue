@@ -103,11 +103,10 @@ export default {
       searchData: {
         topic: {
           id: this.$route.query.id,
-          code: this.$route.query.code
+          code: this.$route.query.topic
         },
         namespace: {
-          id: this.$route.query.namespaceId,
-          code: this.$route.query.namespaceCode
+          code: this.$route.query.namespace
         },
         keyword: ''
       },

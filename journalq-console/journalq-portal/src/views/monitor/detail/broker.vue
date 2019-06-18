@@ -26,15 +26,12 @@ export default {
         return {
           subscribeGroup: '',
           topic: {
-            id: '',
             code: ''
           },
           namespace: {
-            id: '',
             code: ''
           },
           app: {
-            id: '',
             code: ''
           },
           type: 0
@@ -89,7 +86,21 @@ export default {
         this.showTablePin = false
       })
     }
-  }
+  },
+  // watch: {
+  //   '$route' (to, from) {
+  //     console.log('broker')
+  //     if (to.query.subTab === 'broker') {
+  //       this.search.app.code = to.query.app
+  //       this.search.topic.code = to.query.topic
+  //       this.search.namespace.code = to.query.namespace
+  //       this.getList()
+  //     }
+  //   }
+  // },
+  // mounted () {
+  //   this.getList()
+  // }
 }
 
 </script>

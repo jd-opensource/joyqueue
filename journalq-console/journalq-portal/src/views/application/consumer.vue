@@ -8,7 +8,7 @@
 
 <script>
 import consumerBase from '../monitor/consumerBase.vue'
-import {getTopicCode, getAppCode, openOrCloseBtnRender, clientTypeSelectRender,
+import {getAppCode, openOrCloseBtnRender, clientTypeSelectRender,
   clientTypeBtnRender, topicTypeBtnRender, baseBtnRender, subscribeGroupAutoCompleteRender} from '../../utils/common.js'
 
 export default {
@@ -17,7 +17,7 @@ export default {
     consumerBase
   },
   props: {
-    search: {// 查询条件，格式：app:{id:0,code:'',namespace:{id:0,code:''}}
+    search: {// 查询条件，格式：app:{id:0,code:''}
       type: Object
     }
   },
@@ -35,10 +35,11 @@ export default {
         },
         {
           title: '主题',
-          key: 'topic.code',
-          formatter (row) {
-            return getTopicCode(row.topic, row.namespace)
-          }
+          key: 'topic.code'
+        },
+        {
+          title: '命名空间',
+          key: 'namespace.code'
         },
         // {
         //   title:'负责人',
@@ -164,6 +165,9 @@ export default {
     handleDetail (item) {
       this.$emit('on-detail', item)
     }
+  },
+  mounted () {
+    // this.getList()
   }
 }
 </script>

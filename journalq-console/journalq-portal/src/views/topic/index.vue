@@ -139,16 +139,16 @@ export default {
                   click: () => {
                     this.$router.push({
                       name: `/${this.$i18n.locale}/topic/detail`,
-                      query: {id: params.item.id, code: params.item.code, namespaceId: params.item.namespace.id, namespaceCode: params.item.namespace.code}})
+                      query: { id: params.item.id, topic: params.item.code, namespace: params.item.namespace.code }})
                   }
                 }
               }, params.item.code)
             }
           },
-          // {
-          //   title:'命名空间',
-          //   key: 'namespace.code'
-          // },
+          {
+            title: '命名空间',
+            key: 'namespace.code'
+          },
           {
             title: '类型',
             key: 'type',
@@ -229,7 +229,7 @@ export default {
   methods: {
     goDetail (item) {
       this.$router.push({name: `/${this.$i18n.locale}/topic/detail`,
-        query: {id: item.id, code: item.code, namespaceId: item.namespace.id, namespaceCode: item.namespace.code, tab: 'producer'}})
+        query: { id: item.id, topic: item.code, namespace: item.namespace.code }})
     },
     // editLabel (item) {
     //   this.openDialog('editLabelDialog')
