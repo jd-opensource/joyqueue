@@ -16,11 +16,11 @@ import com.jd.journalq.toolkit.network.IpUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.security.krb5.internal.crypto.crc32;
 
 import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.List;
-import java.util.zip.CRC32;
 
 /**
  * TransactionLogSegment
@@ -115,10 +115,6 @@ public class TransactionLogSegment {
         message.setBody(body);
         message.setClientIp(LOCAL_IP);
         message.setPartition(partition);
-
-        CRC32 crc32 = new CRC32();
-        crc32.update(body);
-        message.setBodyCRC(crc32.getValue());
         return message;
     }
 

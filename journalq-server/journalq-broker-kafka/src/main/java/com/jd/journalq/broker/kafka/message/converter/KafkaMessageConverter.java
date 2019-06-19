@@ -13,12 +13,12 @@
  */
 package com.jd.journalq.broker.kafka.message.converter;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.jd.journalq.broker.kafka.message.KafkaBrokerMessage;
 import com.jd.journalq.broker.kafka.message.KafkaMessageSerializer;
 import com.jd.journalq.message.BrokerMessage;
 import com.jd.journalq.message.SourceType;
-import com.google.common.base.Charsets;
 import com.jd.journalq.toolkit.network.IpUtil;
 import com.jd.journalq.toolkit.time.SystemClock;
 import org.apache.commons.lang3.ArrayUtils;
@@ -26,7 +26,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.net.InetSocketAddress;
 import java.util.List;
-import java.util.zip.CRC32;
 
 
 /**
@@ -85,10 +84,6 @@ public class KafkaMessageConverter {
         brokerMessage.setBatch(kafkaBrokerMessage.isBatch());
         brokerMessage.setFlag(kafkaBrokerMessage.getFlag());
         KafkaMessageSerializer.writeExtension(brokerMessage, kafkaBrokerMessage);
-
-        CRC32 crc32 = new CRC32();
-        crc32.update(brokerMessage.getBody().slice());
-        brokerMessage.setBodyCRC(crc32.getValue());
 
         return brokerMessage;
     }

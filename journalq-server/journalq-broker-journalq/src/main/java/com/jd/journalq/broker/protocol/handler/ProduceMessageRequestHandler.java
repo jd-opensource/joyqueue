@@ -165,6 +165,9 @@ public class ProduceMessageRequestHandler implements JournalqCommandHandler, Typ
             if (brokerMessage.getPartition() != partition) {
                 throw new JournalqException(JournalqCode.CN_PARAM_ERROR, "the put message command has multi partition");
             }
+            if (ArrayUtils.getLength(brokerMessage.getByteBody()) > produceConfig.getBodyLength()) {
+                throw new JournalqException(JournalqCode.CN_PARAM_ERROR, "message body out of rage");
+            }
             if (StringUtils.length(brokerMessage.getBusinessId()) > produceConfig.getBusinessIdLength()) {
                 throw new JournalqException(JournalqCode.CN_PARAM_ERROR, "message businessId out of rage");
             }

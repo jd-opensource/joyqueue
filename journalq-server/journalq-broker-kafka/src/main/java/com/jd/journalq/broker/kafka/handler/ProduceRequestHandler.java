@@ -36,6 +36,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.security.krb5.internal.crypto.crc32;
 
 import java.net.InetSocketAddress;
 import java.util.List;
@@ -203,6 +204,9 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
     protected void checkAndFillMessage(BrokerMessage message) {
         if (StringUtils.length(message.getBusinessId()) > produceConfig.getBusinessIdLength()) {
             message.setBusinessId(message.getBusinessId().substring(0, produceConfig.getBusinessIdLength()));
+        }
+        if (ArrayUtils.getLength(message.getByteBody()) > produceConfig.getBodyLength()) {
+            message.setBody(message.getByteBody(), 0, produceConfig.getBodyLength());
         }
     }
 

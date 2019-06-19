@@ -70,7 +70,6 @@ public class ProduceMessageConverter {
     public static BrokerMessage convertToBrokerMessage(String topic, String app, ProduceMessage produceMessage, boolean compress, int compressThreshold, String compressType) {
         BrokerMessage brokerMessage = convertToBrokerMessage(topic, app, produceMessage);
         compress(brokerMessage, compress, compressThreshold, compressType);
-        crc(brokerMessage);
         return brokerMessage;
     }
 
@@ -96,7 +95,6 @@ public class ProduceMessageConverter {
         brokerMessage.setBatch(true);
 
         compress(brokerMessage, compress, compressThreshold, compressType);
-        crc(brokerMessage);
         return brokerMessage;
     }
 
@@ -116,12 +114,6 @@ public class ProduceMessageConverter {
         brokerMessage.setCompressed(false);
         brokerMessage.setBatch(false);
         return brokerMessage;
-    }
-
-    protected static void crc(BrokerMessage brokerMessage) {
-        CRC32 crc32 = new CRC32();
-        crc32.update(brokerMessage.getByteBody());
-        brokerMessage.setBodyCRC(crc32.getValue());
     }
 
     protected static void compress(BrokerMessage brokerMessage, boolean compress, int compressThreshold, String compressType) {
