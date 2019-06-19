@@ -38,7 +38,7 @@ public class OperatePartitionGroupCodec implements NsrPayloadCodec<OperatePartit
 
     @Override
     public Object decode(Header header, ByteBuf buffer) throws Exception {
-        PartitionGroup group = Serializer.readPartitionGroup(buffer);
+        PartitionGroup group = Serializer.readPartitionGroup(buffer, header.getVersion());
         boolean rollback = buffer.readBoolean();
         int cmdType = header.getType();
         if (cmdType == NsrCommandType.NSR_CREATE_PARTITIONGROUP) {

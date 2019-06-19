@@ -36,7 +36,7 @@ public class SubscribeAckCodec implements PayloadCodec<Header, SubscribeAck>, Ty
         List<TopicConfig> configs = new ArrayList();
         if (configSize > 0) {
             for (int i = 0; i < configSize; i++) {
-                configs.add(Serializer.readTopicConfig(buffer));
+                configs.add(Serializer.readTopicConfig(buffer, header.getVersion()));
             }
         }
         return new SubscribeAck().topicConfigs(configs);

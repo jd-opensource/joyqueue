@@ -29,7 +29,10 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class JMQHeader implements Header {
 
-    public static final byte VERSION = 1;
+    public static final byte VERSION1 = 1;
+    public static final byte VERSION2 = 2;
+
+    public static final byte VERSION = VERSION1;
 
     // TODO 定一个magic
     public static final int MAGIC = 0xCAFEBEBE;
