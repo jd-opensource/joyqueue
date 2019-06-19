@@ -42,9 +42,8 @@ public class PutRetryCodec implements PayloadCodec<JMQHeader, PutRetry>, Type {
         int count = buffer.readShort(); // 读取重试消息条数
         List<RetryMessageModel> messageList = new ArrayList<>(count);
 
-        ByteBuffer byteBuffer = buffer.nioBuffer();
         for (int i = 0; i < count; i++) {
-            RetryMessageModel retryMessageModel = RetrySerializerUtil.deserialize(byteBuffer);
+            RetryMessageModel retryMessageModel = RetrySerializerUtil.deserialize(buffer);
             messageList.add(retryMessageModel);
         }
 
