@@ -16,7 +16,6 @@ import com.jd.journalq.toolkit.network.IpUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.security.krb5.internal.crypto.crc32;
 
 import java.nio.ByteBuffer;
 import java.util.Collections;
