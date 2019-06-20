@@ -1,13 +1,13 @@
 <template>
   <div>
     <d-tabs type="card" @on-change="handleTabChange" :value="subTab" size="small">
-      <d-tab-pane label="分组" name="partition" icon="pocket">
+      <d-tab-pane label="分组" name="partition" icon="pocket" :closable="false">
         <partition ref="partition" :search="search" :colData="partitionColData" :doSearch="doSearch"/>
       </d-tab-pane>
-      <d-tab-pane label="客户端连接" name="clientConnection" icon="github">
+      <d-tab-pane label="客户端连接" name="clientConnection" icon="github" :closable="false">
         <client-connection :search="search" ref="clientConnection" :doSearch="doSearch"/>
       </d-tab-pane>
-      <d-tab-pane label="Broker" name="broker" icon="file-text">
+      <d-tab-pane label="Broker" name="broker" icon="file-text" :closable="false">
         <broker ref="broker" :search="search" :doSearch="doSearch"/>
       </d-tab-pane>
       <div slot="extra">

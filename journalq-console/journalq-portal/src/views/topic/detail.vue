@@ -1,29 +1,31 @@
 <template>
   <detail-slot ref="detail">
-    <template slot="tabs">
-      <d-tab-pane label="生产者" name="producer" icon="user-plus">
+    <template slot="tabs" :closable="false">
+      <d-tab-pane label="生产者" name="producer" icon="user-plus" :closable="false">
         <producer ref="producer" :search="search" @on-detail="openProducerDetailTab"/>
       </d-tab-pane>
-      <d-tab-pane label="消费者" name="consumer" icon="user-minus">
+      <d-tab-pane label="消费者" name="consumer" icon="user-minus" :closable="false">
         <consumer ref="consumer" :search="search" @on-detail="openConsumerDetailTab"/>
       </d-tab-pane>
-      <d-tab-pane label="分组信息" name="partitionGroup" icon="folder" v-if="$store.getters.isAdmin">
+      <d-tab-pane label="分组信息" name="partitionGroup" icon="folder" v-if="$store.getters.isAdmin" :closable="false">
         <partitionGroup ref="partitionGroup" @on-partition-group-change="queryTopicDetail"
                         :showBrokerChart="false" :showHostChart="false"/>
       </d-tab-pane>
-      <d-tab-pane label="Broker" v-if="$store.getters.isAdmin" name="broker" icon="cpu">
+      <d-tab-pane label="Broker" v-if="$store.getters.isAdmin" name="broker" icon="cpu" :closable="false">
         <broker ref="broker" :topicId="this.$route.query.id"/>
       </d-tab-pane>
-      <d-tab-pane label="重试" name="retry" icon="zap">
+      <d-tab-pane label="重试" name="retry" icon="zap" :closable="false">
         <retry ref="retry" :search="retrySearch"/>
       </d-tab-pane>
-      <d-tab-pane label="归档" name="archive" icon="package">
+      <d-tab-pane label="归档" name="archive" icon="package" :closable="false">
         <archive ref="archive" :search="archiveSearch"/>
       </d-tab-pane>
-      <d-tab-pane :label="producerDetailName" name="producerDetail" closable icon="paperclip" :visible="producerDetailVisible">
+      <d-tab-pane :label="producerDetailName" name="producerDetail" icon="paperclip" :visible="producerDetailVisible"
+                  :closable="false">
         <producer-detail ref="producerDetail" :detailType="$store.getters.topicDetailType"/>
       </d-tab-pane>
-      <d-tab-pane :label="consumerDetailName" name="consumerDetail" closable icon="paperclip" :visible="consumerDetailVisible">
+      <d-tab-pane :label="consumerDetailName" name="consumerDetail" icon="paperclip" :visible="consumerDetailVisible"
+                  :closable="false">
         <consumer-detail ref="consumerDetail" :detailType="$store.getters.topicDetailType"/>
       </d-tab-pane>
     </template>

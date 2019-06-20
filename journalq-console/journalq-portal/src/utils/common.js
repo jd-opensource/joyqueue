@@ -140,6 +140,29 @@ export function baseBtnRender (h, value, valueTxtColorOptions) {
   }, txt)
 }
 
+export function basePrimaryBtnRender (h, value, valueTxtColorOptions) {
+  if (value === undefined || value === '') {
+    return h('label', '')
+  }
+
+  let txt = value
+  let color = ''
+  valueTxtColorOptions.forEach((option) => {
+    if (value === option.value) {
+      txt = option.txt
+      color = option.color
+    }
+  })
+
+  return h('d-button', {
+    props: {
+      type: 'primary',
+      size: 'small',
+      color: color
+    }
+  }, txt)
+}
+
 export function openOrCloseOptions () {
   return [
     {
@@ -247,7 +270,7 @@ export function clientTypeSelectRender (h, params, subscribeRef) {
 }
 
 export function clientTypeBtnRender (h, value) {
-  return baseBtnRender(h, value, clientTypeOptions())
+  return basePrimaryBtnRender(h, value, clientTypeOptions())
 }
 export function topicTypeBtnRender (h, value) {
   return baseBtnRender(h, value, topicTypeOptions())

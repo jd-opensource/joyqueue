@@ -35,15 +35,19 @@
       <msg-preview :app="msgPreviewDialog.app" :topic="msgPreviewDialog.topic" :namespace="msgPreviewDialog.namespace"
                    :type="type" :doSearch="msgPreviewDialog.doSearch" :subscribeGroup="msgPreviewDialog.subscribeGroup"/>
     </my-dialog>
+
+    <!--Msg detail dialog-->
     <my-dialog :dialog="msgDetailDialog" @on-dialog-cancel="dialogCancel('msgDetailDialog')">
       <msg-detail :app="msgDetailDialog.app" :topic="msgDetailDialog.topic" :namespace="msgDetailDialog.namespace"
                    :type="type" :doSearch="msgDetailDialog.doSearch" :subscribeGroup="msgDetailDialog.subscribeGroup"/>
     </my-dialog>
+
     <!--Config dialog-->
     <my-dialog :dialog="configDialog" @on-dialog-confirm="configConsumerConfirm" @on-dialog-cancel="dialogCancel('configDialog')">
       <consumer-config-form ref="configForm" :data="configConsumerData"/>
     </my-dialog>
 
+    <!--Rate limit dialog-->
     <my-dialog :dialog="rateLimitDialog" @on-dialog-confirm="rateLimitConfirm" @on-dialog-cancel="dialogCancel('rateLimitDialog')">
       <rate-limit ref="rateLimit" :limitTraffic="rateLimitDialog.limitTraffic" :limitTps="rateLimitDialog.limitTps"/>
     </my-dialog>
@@ -191,7 +195,7 @@ export default {
       configDialog: {
         visible: false,
         title: '消费者配置详情',
-        width: '600',
+        width: '800',
         showFooter: true,
         urls: {
           addOrUpdate: `/consumer/config/addOrUpdate`,

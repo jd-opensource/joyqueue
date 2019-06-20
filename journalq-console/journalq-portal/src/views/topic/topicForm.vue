@@ -15,11 +15,11 @@
             <!--<d-form-item label="主题中文名：" prop="name">-->
               <!--<d-input v-model="formData.name" :placeholder="$store.getters.placeholder.name" style="width: 70%"></d-input>-->
             <!--</d-form-item>-->
-            <!--<d-form-item label="命名空间：" prop="namespace.code">-->
-              <!--<d-select v-model="formData.namespace.code" style="width: 50%">-->
-                <!--<d-option v-for="item in namespaceList" :value="{id:item.id,code:item.code}" :key="item.id">{{ item.code }}</d-option>-->
-              <!--</d-select>-->
-            <!--</d-form-item>-->
+            <d-form-item label="命名空间：" prop="namespace.code">
+              <d-select v-model="formData.namespace.code" style="width: 50%">
+                <d-option v-for="item in namespaceList" :value="{id:item.id,code:item.code}" :key="item.id">{{ item.code }}</d-option>
+              </d-select>
+            </d-form-item>
             <d-form-item label="主题类型：" prop="type">
               <d-select v-model="formData.type" :value="0" style="width: 70%" @on-change="handlerTypeChange">
                 <d-option :value="0" >普通主题</d-option>

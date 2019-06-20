@@ -65,13 +65,6 @@ export default {
           title: '限制IP发送',
           key: 'config.blackList'
         },
-        // {
-        //   title: '单线程发送',
-        //   key: 'config.single',
-        //   render: (h, params) => {
-        //     return yesOrNoBtnRender(h, params.item.config === undefined ? undefined : params.item.config.single)
-        //   }
-        // },
         {
           title: '归档',
           key: 'config.archive',

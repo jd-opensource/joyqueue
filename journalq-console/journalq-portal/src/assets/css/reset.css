@@ -111,8 +111,16 @@ body {
   margin-top: 40px;
 }
 
+.mt5 {
+  margin-top: 5px;
+}
+
 .mt7 {
   margin-top: 7px;
+}
+
+.mt8 {
+  margin-top: 8px;
 }
 
 .mt116{
@@ -204,14 +212,45 @@ body {
   margin-top: 10px;
 }
 
+.headLine2{
+  margin-left: 0px;
+  margin-right: 20px;
+  margin-top: 2px;
+}
+
 .button{
   aligin: center;
   margin-right: 10px;
   margin-bottom: 8px
 }
 
+.button2{
+  aligin: center;
+  margin-right: 10px;
+  margin-bottom: 8px;
+  margin-top: 8px;
+}
+
 .input{
   aligin: left;
   margin-right: 10px;
   width: 250px
+}
+
+.input2{
+  aligin: left;
+  margin-right: 10px;
+  width: 220px
+}
+
+.input3{
+  aligin: left;
+  margin-right: 10px;
+  width: 150px
+}
+
+.input4{
+  aligin: left;
+  margin-right: 10px;
+  width: 370px
 }

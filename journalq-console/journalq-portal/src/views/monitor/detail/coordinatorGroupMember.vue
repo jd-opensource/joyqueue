@@ -1,7 +1,7 @@
 <template>
   <div>
     <p> 扩展字段：{{extension}}</p>
-    <my-table :data="tableData" :showPin="showTablePin" style="height: 400px;overflow-y:auto" :showPagination=false
+    <my-table :data="tableData" :showPin="showTablePin" :showPagination=false
               :page="page" @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange"/>
     <label >共：{{page.total}} 条记录</label>
   </div>

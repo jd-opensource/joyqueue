@@ -1,34 +1,40 @@
 <template>
   <div>
-    <d-tabs @on-change="handleTabChange" :value="subTab" size="small">
-      <d-tab-pane label="分组" name="partition" icon="pocket">
+    <d-tabs type="card" @on-change="handleTabChange" :value="subTab" size="small">
+      <d-tab-pane label="分组" name="partition" icon="pocket" :closable="false">
         <partition ref="partition" :colData="partitionColData" :doSearch="doSearch" :search="search"/>
       </d-tab-pane>
-      <d-tab-pane label="客户端连接" name="clientConnection" icon="github">
+      <d-tab-pane label="客户端连接" name="clientConnection" icon="github" :closable="false">
         <client-connection ref="clientConnection" :search="search" :doSearch="doSearch"/>
       </d-tab-pane>
-      <d-tab-pane label="Broker" name="broker" icon="file-text">
+      <d-tab-pane label="Broker" name="broker" icon="file-text" :closable="false">
         <broker ref="broker" :search="search" :doSearch="doSearch"/>
       </d-tab-pane>
-    <d-tab-pane label="消费位置" name="offsetInfo" icon="file-text">
+      <d-tab-pane label="消费位置" name="offsetInfo" icon="file-text" :closable="false">
         <offset ref="offsetInfo" :search="search" :doSearch="doSearch"/>
       </d-tab-pane>
-      <d-tab-pane v-if="$store.getters.isAdmin" label="协调者信息" name="coordinatorInfo" icon="file-text">
+      <d-tab-pane v-if="$store.getters.isAdmin" label="协调者信息" name="coordinatorInfo" icon="file-text"
+                  :closable="false">
         <detail-table ref="coordinatorInfo" :doSearch="doSearch" :colData="coordinatorInfo.colData"
                       :urls="coordinatorInfo.urls" :search="search"/>
       </d-tab-pane>
-      <d-tab-pane v-if="$store.getters.isAdmin" label="消费组成员" name="coordinatorGroupMember" icon="file-text">
+      <d-tab-pane v-if="$store.getters.isAdmin" label="消费组成员" name="coordinatorGroupMember" icon="file-text"
+                  :closable="false">
         <coordinator-group-member ref="coordinatorGroupMember" :doSearch="doSearch" :search="search"
                                :colData="coordinatorGroupMember.colData" :urls="coordinatorGroupMember.urls"/>
       </d-tab-pane>
-      <d-tab-pane v-if="$store.getters.isAdmin" label="消费组过期成员" name="coordinatorGroupExpiredMember" icon="file-text">
+      <d-tab-pane v-if="$store.getters.isAdmin" label="消费组过期成员" name="coordinatorGroupExpiredMember"
+                  icon="file-text" :closable="false">
         <detail-table ref="coordinatorGroupExpiredMember" :doSearch="doSearch" :search="search"
                    :col-data="coordinatorGroupExpiredMember.colData" :urls="coordinatorGroupExpiredMember.urls"/>
       </d-tab-pane>
-      <d-tab-pane v-if="search.clientType==2" label="mqtt客户端" name="mqttClient" icon="file-text">
+      <d-tab-pane v-if="search.clientType==2" label="mqtt客户端" name="mqttClient" icon="file-text" :closable="false">
         <mqtt-base-monitor ref="mqttClient" :client-id="subscribeGroup"  :inputable=false :btns="mqttClient.btns"
                            :col-data="mqttClient.colData" :urls="mqttClient.urls"/>
       </d-tab-pane>
+      <div slot="extra">
+        <d-button type="primary" size="small" @click="getList" class="mr40">刷新</d-button>
+      </div>
     </d-tabs>
   </div>
 </template>

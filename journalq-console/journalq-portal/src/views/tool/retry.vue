@@ -1,39 +1,34 @@
 <template>
   <div>
-    <div class="ml20">
-      <d-input v-model="search.topic" placeholder="请输入队列名" class="left mr5 mt10"
-               style="width: 213px" @on-enter="getList">
+    <div class="headLine2">
+      <d-input v-model="search.topic" placeholder="请输入队列名" class="input2" @on-enter="getList">
         <span slot="prepend">队列名</span>
       </d-input>
-      <d-input v-model="search.app" placeholder="请输入消费者" class="left mr5 mt10"
-               style="width: 213px"  @on-enter="getList">
+      <d-input v-model="search.app" placeholder="请输入消费者" class="input2" @on-enter="getList">
         <span slot="prepend">消费者</span>
       </d-input>
-      <d-select v-model="search.status" class="left mr5 mt10" style="width: 143px" @on-change="getList">
+      <d-select v-model="search.status" class="input3" @on-change="getList">
         <span slot="prepend">状态</span>
         <d-option v-for="item in statusList" :value="item.key" :key="item.key">{{ item.value }}</d-option>
       </d-select>
-      <d-date-picker class="left mr5 mt10"
+      <d-date-picker class="input4"
                      v-model="times"
                      type="daterange"
                      range-separator="至"
                      start-placeholder="开始日期"
                      end-placeholder="结束日期"
                      value-format="timestamp"
-                     :default-time="['00:00:00', '23:59:59']"
-                     style="width:370px">
+                     :default-time="['00:00:00', '23:59:59']">
         <span slot="prepend">发送时间</span>
       </d-date-picker>
-      <d-input v-model="businessId" placeholder="请输入业务ID" class="left mr5 mt10"
-               style="width: 213px" @on-enter="getList">
+      <d-input v-model="businessId" placeholder="请输入业务ID" class="input2" @on-enter="getList">
         <span slot="prepend">业务ID</span>
       </d-input>
-      <d-button class="left mr5 mt10" type="primary" color="success" @click="getList">
-        查询
-        <icon name="search" style="margin-left: 5px;">
-        </icon>
+      <d-button class="button2" type="primary" @click="getList">查询
+        <icon name="search" style="margin-left: 3px;"></icon>
       </d-button>
     </div>
+
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
               @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
               @on-del="del" @on-download="download">
