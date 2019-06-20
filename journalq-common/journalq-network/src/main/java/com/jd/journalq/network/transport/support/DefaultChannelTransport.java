@@ -309,11 +309,9 @@ public class DefaultChannelTransport implements ChannelTransport {
             }
         }
 
-        channel.eventLoop().execute(() -> {
-            channel.writeAndFlush(response)
-                    .addListener(new CallbackListener(request, response, callback))
-                    .addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
-        });
+        channel.writeAndFlush(response)
+                .addListener(new CallbackListener(request, response, callback))
+                .addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
     }
 
     @Override
