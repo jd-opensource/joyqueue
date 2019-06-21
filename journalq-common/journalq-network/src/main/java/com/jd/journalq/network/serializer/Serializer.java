@@ -44,8 +44,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import static com.jd.journalq.network.transport.codec.JMQHeader.VERSION2;
-
+import static com.jd.journalq.network.transport.codec.JournalqHeader.VERSION2;
 
 /**
  * 负责broker端消息的序列化
