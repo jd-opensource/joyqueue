@@ -44,6 +44,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import static com.jd.journalq.network.transport.codec.JMQHeader.VERSION2;
+
+
 /**
  * 负责broker端消息的序列化
  *
@@ -415,7 +418,7 @@ public class Serializer extends AbstractSerializer {
             }
         }
     }
-    public static TopicConfig readTopicConfig(final ByteBuf in) throws Exception {
+    public static TopicConfig readTopicConfig(final ByteBuf in, final int version) throws Exception {
         TopicConfig topicConfig = new TopicConfig();
         // 2 1 string
         topicConfig.setName(TopicName.parse(Serializer.readString(in)));
@@ -432,7 +435,7 @@ public class Serializer extends AbstractSerializer {
         int partitionGroupSize = in.readInt();
         Map<Integer,PartitionGroup> partitionGroups = new HashMap<>(partitionGroupSize);
         for(int i =0;i<partitionGroupSize;i++){
-            PartitionGroup group = readPartitionGroup(in);
+            PartitionGroup group = readPartitionGroup(in, version);
             partitionGroups.put(group.getGroup(),group);
         }
         topicConfig.setPartitionGroups(partitionGroups);
@@ -541,7 +544,7 @@ public class Serializer extends AbstractSerializer {
         //out.writeInt(partitionGroup.getRecLeader());
     }
 
-    public static PartitionGroup readPartitionGroup(final ByteBuf in) throws Exception {
+    public static PartitionGroup readPartitionGroup(final ByteBuf in, final int version) throws Exception {
         PartitionGroup group = new PartitionGroup();
         group.setTopic(TopicName.parse(Serializer.readString(in)));
         group.setLeader(in.readInt());
@@ -579,9 +582,9 @@ public class Serializer extends AbstractSerializer {
         }
         group.setBrokers(brokers);
 
-        //if (in.readableBytes() >= Integer.BYTES) {
-        //    group.setRecLeader(in.readInt());
-        //}
+        if (version >= VERSION2) {
+            group.setRecLeader(in.readInt());
+        }
 
         return group;
     }

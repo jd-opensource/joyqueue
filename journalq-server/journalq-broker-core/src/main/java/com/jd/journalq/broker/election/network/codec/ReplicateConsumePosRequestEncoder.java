@@ -29,6 +29,7 @@ public class ReplicateConsumePosRequestEncoder implements PayloadEncoder<Replica
     @Override
     public void encode(final ReplicateConsumePosRequest request, ByteBuf buffer) throws Exception {
         Serializer.write(request.getConsumePositions(), buffer, Serializer.SHORT_SIZE);
+        //Serializer.write(request.getConsumePositions(), buffer, Serializer.INT_SIZE);
     }
 
     @Override
