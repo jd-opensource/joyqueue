@@ -10,9 +10,9 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class ProducerIdManager {
 
-    private final AtomicLong producerIdSeq = new AtomicLong();
+    private final AtomicLong producerIdSequence = new AtomicLong();
 
     public long generateId() {
-        return producerIdSeq.getAndIncrement();
+        return producerIdSequence.getAndIncrement();
     }
 }

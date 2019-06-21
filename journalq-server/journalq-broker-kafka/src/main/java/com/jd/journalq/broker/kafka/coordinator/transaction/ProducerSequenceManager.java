@@ -58,6 +58,6 @@ public class ProducerSequenceManager {
     }
 
     protected String generateKey(String app, long producerId, short producerEpoch, int partition) {
-        return app + "_" + producerId + "_" + producerEpoch + "_" + partition;
+        return String.format("%s_%s_%s_%s", app, producerId, producerEpoch, partition);
     }
 }
