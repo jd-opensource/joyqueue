@@ -37,7 +37,7 @@ public class AddTopicCodec implements NsrPayloadCodec<AddTopic>, Type {
         int size = buffer.readInt();
         List<PartitionGroup> partitionGroups = new ArrayList<>(size);
         for(int i = 0;i<size;i++){
-            partitionGroups.add(Serializer.readPartitionGroup(buffer));
+            partitionGroups.add(Serializer.readPartitionGroup(buffer, header.getVersion()));
         }
         addTopic.partitiionGroups(partitionGroups);
         return addTopic;
