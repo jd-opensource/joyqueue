@@ -42,7 +42,7 @@ public class AdminClient implements NsrAdmin {
           this.brokerAdmin=new BrokerAdmin(httpClient);
     }
     @Override
-    public String publish(TopicAdmin.PubSubArg pubSubArg) throws Exception{
+    public String publish(TopicAdmin.PublishArg pubSubArg) throws Exception{
         pubSubArg.host=host;
         try {
             String result= topicAdmin.publish(pubSubArg, null);
@@ -57,7 +57,7 @@ public class AdminClient implements NsrAdmin {
     }
 
     @Override
-    public String subscribe(TopicAdmin.PubSubArg pubSubArg) throws Exception{
+    public String subscribe(TopicAdmin.SubscribeArg pubSubArg) throws Exception{
         pubSubArg.host=host;
 
         try {
@@ -73,7 +73,7 @@ public class AdminClient implements NsrAdmin {
     }
 
     @Override
-    public String unPublish(TopicAdmin.PubSubArg pubSubArg) throws Exception {
+    public String unPublish(TopicAdmin.PublishArg pubSubArg) throws Exception {
         pubSubArg.host=host;
 
         try {
@@ -89,7 +89,7 @@ public class AdminClient implements NsrAdmin {
     }
 
     @Override
-    public String unSubscribe(TopicAdmin.PubSubArg pubSubArg) throws Exception {
+    public String unSubscribe(TopicAdmin.SubscribeArg pubSubArg) throws Exception {
         pubSubArg.host=host;
         try {
             String result= topicAdmin.unSubscribe(pubSubArg,null);

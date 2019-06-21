@@ -15,30 +15,18 @@ package com.jd.journalq.nsr.admin;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-
-
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import com.beust.jcommander.ParametersDelegate;
-import com.jd.journalq.domain.ClientType;
-import com.jd.journalq.domain.Consumer;
-import com.jd.journalq.domain.PartitionGroup;
-import com.jd.journalq.domain.Producer;
-import com.jd.journalq.domain.Subscription;
-import com.jd.journalq.domain.Topic;
-import com.jd.journalq.domain.TopicName;
+import com.jd.journalq.domain.*;
 import com.jd.journalq.nsr.AdminConfig;
 import com.jd.journalq.nsr.CommandArgs;
 import com.jd.journalq.nsr.model.PartitionGroupQuery;
 import com.jd.journalq.nsr.utils.AsyncHttpClient;
+
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -85,11 +73,13 @@ public class TopicAdmin extends AbstractAdmin {
        @Parameter(names = { "-n", "--namespace" }, description = "Topic namespace", required = false)
        public String namespace="";
    }
+
+
     /**
      *  Subscription args
      *
      **/
-    public static class SubscribeArg {
+    public static class SubscriptionArg {
         @Parameter(names = { "-c", "--topic" }, description = "Topic code", required = true)
         public String topic;
 
@@ -101,42 +91,149 @@ public class TopicAdmin extends AbstractAdmin {
 
         @Parameter(names = { "-t", "--type" }, description = "Topic type:1 produce,2 consume", required = false)
         public Integer type;
-    }
 
-    @Parameters(separators = "=", commandDescription = "Publish or subscribe args")
-    public static class PubSubArg extends CommandArgs{
-        @ParametersDelegate
-        public SubscribeArg subscribe=new SubscribeArg();
         @Parameter(names = {  "--client" }, description = "client type: 0 jmq,1 kafka,2 mqtt,other  ", required = false)
         public Integer client=0;
+    }
+
+
+    /**
+     *  Subscription args
+     *
+     **/
+    public static class ConsumerPolicyArg {
+
+        // 就近发送
+        @Parameter(names = { "--nearby" }, description = "near by consume", required = false)
+        public boolean nearby;
+        // 是否暂停消费
+
+        @Parameter(names = { "--pause" }, description = "pause consume", required = false)
+        public boolean paused;
+
+        // 是否需要归档,默认归档
+        @Parameter(names = { "--archive" }, description = "archive consume", required = false)
+        public boolean archive;
+        // 是否需要重试，默认重试
+
+        @Parameter(names = { "--retry" }, description = " consumen retry,default true", required = false)
+        public boolean retry=true;
+
+        // 应答超时时间
+        @Parameter(names = { "--timeout" }, description = " consume timeout", required = false)
+        private Integer ackTimeout = 12000;
+        // 批量大小
+        @Parameter(names = { "--batch" }, description = " batch sieze size", required = false)
+        public Integer batchSize=10;
+
+        //并行消费预取数量
+        @Parameter(names = { "--concurrent" }, description = " concurrent prefetch size", required = false)
+        public Integer concurrent=1;
+
+
+        //延迟消费
+        @Parameter(names = { "--delay" }, description = " delay timeout ", required = false)
+        public Integer delay = 0;
+        //黑名单
+
+        @Parameter(names = { "--blacklist" }, description = "black list ", required = false)
+        public String blackList;
+        //出错次数
+
+        @Parameter(names = { "--weight" }, description = " weight ", required = false)
+        public String weight;
+    }
+
+
+    /**
+     *  Subscription args
+     *
+     **/
+    public static class ProducerPolicyArg {
+
+        @Parameter(names = { "--nearby" }, description = "consume from near", required = false)
+        private boolean nearby;
+        //单线程发送
+
+        @Parameter(names = { "--single" }, description = "single thread produce", required = false)
+        private boolean single;
+
+        // 是否需要归档,默认归档
+        @Parameter(names = { "--archive" }, description = "archive produce", required = false)
+        private boolean archive;
+
+        /**
+         * 黑名单
+         */
+        @Parameter(names = { "--blackList" }, description = "black list", required = false)
+        public String blackList;
+
+        @Parameter(names = { "--timeout" }, description = "timeout ", required = false)
+        public Integer timeout=1000;
+
+        @Parameter(names = { "--weight" }, description = " weight ", required = false)
+        public String weight;
 
     }
+
+
+
+
+
+
+    @Parameters(separators = "=", commandDescription = "Publish args")
+    public static class PublishArg extends CommandArgs{
+        @ParametersDelegate
+        public SubscriptionArg subscribe=new SubscriptionArg();
+
+        @ParametersDelegate
+        public ProducerPolicyArg  producerPolicy =new ProducerPolicyArg();
+
+    }
+
+
+    @Parameters(separators = "=", commandDescription = "Subscribe args")
+    public static class SubscribeArg extends CommandArgs{
+        @ParametersDelegate
+        public SubscriptionArg subscribe=new SubscriptionArg();
+
+        @ParametersDelegate
+        public ConsumerPolicyArg  consumerPolicyArg =new ConsumerPolicyArg();
+
+    }
+
+
+
     //192.168.73.147 1543486432  1543486547 "-b" ,"1543486432","-b","1543486547"
     // local 1556178070
     String[] argV={"add", "-c", "test_topic_bh_6" ,"--host","http://localhost:50091", "-b" ,"1556178070"};
     //String[] argV={"publish", "--topic", "test_topic_bh_6" ,"--app","test_app","--type","1","--host","http://localhost:50091"};
 
     public static void main(String[] args){
+        String[] argV={"subscribe", "--topic", "test_topic_bh_6" ,
+                "--app","test_app","--type","1","--host","http://localhost:50091","--delay","10000"};
+//        String[] argV={"add", "-c", "test_topic_bh_6" ,"--host","http://localhost:50091", "-b" ,"1561112964"};
         final TopicArg topicArg=new TopicArg();
-        final PubSubArg pubSubArg=new PubSubArg();
+        final PublishArg publishArg=new PublishArg();
+        final SubscribeArg consumeArg=new SubscribeArg();
         final PartitionGroupArg partitionGroupArg=new PartitionGroupArg();
         TopicAdmin topicAdmin=new TopicAdmin();
         Map<String,CommandArgs> argsMap=new HashMap(8);
                                 argsMap.put(Command.add.name(),topicArg);
-                                argsMap.put(Command.publish.name(),pubSubArg);
-                                argsMap.put(Command.subscribe.name(),pubSubArg);
+                                argsMap.put(Command.publish.name(),publishArg);
+                                argsMap.put(Command.subscribe.name(),consumeArg);
         JCommander jc =JCommander.newBuilder()
                 .addObject(topicAdmin)
                 .addCommand(Command.add.name(),topicArg)
                 .addCommand(Command.delete.name(),topicAdmin)
-                .addCommand(Command.publish.name(),pubSubArg)
-                .addCommand(Command.unpublish.name(),pubSubArg)
-                .addCommand(Command.subscribe.name(),pubSubArg)
-                .addCommand(Command.unsubscribe.name(),pubSubArg)
+                .addCommand(Command.publish.name(),publishArg)
+                .addCommand(Command.unpublish.name(),publishArg)
+                .addCommand(Command.subscribe.name(),consumeArg)
+                .addCommand(Command.unsubscribe.name(),consumeArg)
                 .addCommand(Command.partitiongroup.name(),partitionGroupArg)
                 .build();
         jc.setProgramName("topic");
-        topicAdmin.execute(jc,args,argsMap);
+        topicAdmin.execute(jc,argV,argsMap);
     }
 
     /**
@@ -155,16 +252,16 @@ public class TopicAdmin extends AbstractAdmin {
            case update:
                break;
            case publish:
-               publish((PubSubArg)arguments,jCommander);
+               publish((PublishArg) arguments,jCommander);
                break;
            case unpublish:
-               unPublish((PubSubArg)arguments,jCommander);
+               unPublish((PublishArg)arguments,jCommander);
                break;
            case subscribe:
-               subscribe((PubSubArg)arguments,jCommander);
+               subscribe((SubscribeArg) arguments,jCommander);
                break;
            case unsubscribe:
-               unSubscribe((PubSubArg)arguments,jCommander);
+               unSubscribe((SubscribeArg)arguments,jCommander);
                break;
            case partitiongroup:
                partitionGroups((PartitionGroupArg)arguments,jCommander);
@@ -245,13 +342,20 @@ public class TopicAdmin extends AbstractAdmin {
      * Publish to a topic
      *
      **/
-    public  String publish(PubSubArg pubSubArg,JCommander jCommander) throws Exception{
+    public  String publish(PublishArg pubSubArg,JCommander jCommander) throws Exception{
         Producer producer=new Producer();
         producer.setApp(pubSubArg.subscribe.app);
         producer.setTopic(new TopicName(pubSubArg.subscribe.topic,pubSubArg.subscribe.namespace));
         producer.setType(Subscription.Type.valueOf(pubSubArg.subscribe.type.byteValue()));
-        producer.setClientType(ClientType.valueOf(pubSubArg.client));
-        producer.setProducerPolicy(new Producer.ProducerPolicy());
+        producer.setClientType(ClientType.valueOf(pubSubArg.subscribe.client));
+        Producer.ProducerPolicy producerPolicy=Producer.ProducerPolicy.Builder.build().archive(pubSubArg.producerPolicy.archive)
+                                               .blackList(pubSubArg.producerPolicy.blackList)
+                                               .nearby(pubSubArg.producerPolicy.nearby)
+                                               .single(pubSubArg.producerPolicy.single)
+                                               .timeout(pubSubArg.producerPolicy.timeout)
+                                               .weight(pubSubArg.producerPolicy.weight)
+                                               .archive(pubSubArg.producerPolicy.archive).create();
+        producer.setProducerPolicy(producerPolicy);
         Future<String> futureResult=httpClient.post(pubSubArg.host,"/producer/add",JSON.toJSONString(producer),String.class);
         String result=futureResult.get(AdminConfig.TIMEOUT_MS,TimeUnit.MILLISECONDS);
         System.out.println(result);
@@ -262,7 +366,7 @@ public class TopicAdmin extends AbstractAdmin {
      * Unpublish to a topic
      *
      **/
-    public  String unPublish(PubSubArg pubSubArg,JCommander jCommander) throws Exception{
+    public  String unPublish(PublishArg pubSubArg,JCommander jCommander) throws Exception{
         Producer producer=new Producer();
         producer.setApp(pubSubArg.subscribe.app);
         producer.setTopic(new TopicName(pubSubArg.subscribe.topic,pubSubArg.subscribe.namespace));
@@ -278,12 +382,24 @@ public class TopicAdmin extends AbstractAdmin {
      *  Subscribe to a topic
      *
      **/
-    public  String subscribe(PubSubArg pubSubArg,JCommander jCommander) throws Exception{
+    public  String subscribe( SubscribeArg pubSubArg,JCommander jCommander) throws Exception{
         Consumer consumer=new Consumer();
         consumer.setApp(pubSubArg.subscribe.app);
         consumer.setTopic(new TopicName(pubSubArg.subscribe.topic,pubSubArg.subscribe.namespace));
         consumer.setType(Subscription.Type.valueOf(pubSubArg.subscribe.type.byteValue()));
-        consumer.setClientType(ClientType.valueOf(pubSubArg.client));
+        consumer.setClientType(ClientType.valueOf(pubSubArg.subscribe.client));
+        Consumer.ConsumerPolicy  consumerPolicy= Consumer.ConsumerPolicy.Builder.build()
+                                                          .ackTimeout(pubSubArg.consumerPolicyArg.ackTimeout)
+                                                          .paused(pubSubArg.consumerPolicyArg.paused)
+                                                          .archive(pubSubArg.consumerPolicyArg.paused)
+                                                          .blackList(pubSubArg.consumerPolicyArg.blackList)
+                                                          .delay(pubSubArg.consumerPolicyArg.delay)
+                                                          .batchSize(pubSubArg.consumerPolicyArg.batchSize==null?null:pubSubArg.consumerPolicyArg.batchSize.shortValue())
+                                                          .nearby(pubSubArg.consumerPolicyArg.nearby)
+                                                          .concurrent(pubSubArg.consumerPolicyArg.concurrent)
+                                                          .retry(pubSubArg.consumerPolicyArg.retry)
+                                                          .create();
+        consumer.setConsumerPolicy(consumerPolicy);
         String consumerJson=JSON.toJSONString(consumer);
         Future<String> futureResult=httpClient.post(pubSubArg.host,"/consumer/add",consumerJson,String.class);
         String result=futureResult.get(AdminConfig.TIMEOUT_MS,TimeUnit.MILLISECONDS);
@@ -295,7 +411,7 @@ public class TopicAdmin extends AbstractAdmin {
      *  Subscribe to a topic
      *
      **/
-    public  String unSubscribe(PubSubArg pubSubArg,JCommander jCommander) throws Exception{
+    public  String unSubscribe(SubscribeArg pubSubArg,JCommander jCommander) throws Exception{
         Consumer consumer=new Consumer();
         consumer.setApp(pubSubArg.subscribe.app);
         consumer.setTopic(new TopicName(pubSubArg.subscribe.topic,pubSubArg.subscribe.namespace));

@@ -23,10 +23,10 @@ import java.io.Closeable;
 import java.util.List;
 
 public interface NsrAdmin extends Closeable {
-    String publish(TopicAdmin.PubSubArg pubSubArg) throws Exception;
-    String unPublish(TopicAdmin.PubSubArg pubSubArg) throws Exception;
-    String subscribe(TopicAdmin.PubSubArg pubSubArg) throws Exception;
-    String unSubscribe(TopicAdmin.PubSubArg pubSubArg) throws Exception;
+    String publish(TopicAdmin.PublishArg pubSubArg) throws Exception;
+    String unPublish(TopicAdmin.PublishArg pubSubArg) throws Exception;
+    String subscribe(TopicAdmin.SubscribeArg pubSubArg) throws Exception;
+    String unSubscribe(TopicAdmin.SubscribeArg pubSubArg) throws Exception;
 
     String createTopic(TopicAdmin.TopicArg topicArg) throws Exception;
     String delTopic(TopicAdmin.TopicArg topicArg) throws Exception;

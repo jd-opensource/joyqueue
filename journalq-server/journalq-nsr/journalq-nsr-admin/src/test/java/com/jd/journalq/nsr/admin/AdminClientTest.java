@@ -57,7 +57,7 @@ public class AdminClientTest {
 
     @Test
     public void publish() throws Exception{
-        TopicAdmin.PubSubArg pubSubArg=new TopicAdmin.PubSubArg();
+        TopicAdmin.PublishArg pubSubArg=new TopicAdmin.PublishArg();
         pubSubArg.subscribe.topic=topic;
         pubSubArg.subscribe.app=app;
         pubSubArg.subscribe.type=(int)Subscription.Type.PRODUCTION.getValue();
@@ -71,7 +71,7 @@ public class AdminClientTest {
 
     @Test
     public void subscribe() throws Exception{
-        TopicAdmin.PubSubArg pubSubArg=new TopicAdmin.PubSubArg();
+        TopicAdmin.SubscribeArg pubSubArg=new TopicAdmin.SubscribeArg();
         pubSubArg.subscribe.topic=topic;
         pubSubArg.subscribe.app=app;
         pubSubArg.subscribe.type=(int)Subscription.Type.CONSUMPTION.getValue();

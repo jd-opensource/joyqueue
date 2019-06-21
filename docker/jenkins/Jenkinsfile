@@ -16,7 +16,7 @@ def integrate_result="unknown"
 pipeline {
     agent any
     environment {
-            integrate_result_home = "/home"
+       integrate_result_home = "/home"
     }
     stages {
         stage('Test') {
@@ -25,9 +25,9 @@ pipeline {
                 sh 'mvn -P docker install'
             }
         }
-        stage('Integration Test') {
+        stage('Integrations Test') {
             steps {
-                echo 'Integration Test....'
+                echo 'Integrations Test....'
                 sh 'printenv'
                 dir('docker/bin'){
                     sh ' pwd && git branch '
