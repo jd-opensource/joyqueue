@@ -19,8 +19,6 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.Reservoir;
 import com.codahale.metrics.Snapshot;
 
-import java.util.concurrent.atomic.LongAdder;
-
 /**
  * metrics
  * author: gaohaoxiang
@@ -30,13 +28,26 @@ import java.util.concurrent.atomic.LongAdder;
 public class Metrics {
 
     private Meter meter;
-    private LongAdder counter;
     private Reservoir reservoir;
     private Histogram histogram;
 
+    private long oneMinuteRate;
+
     public Metrics() {
+        init();
+    }
+
+    public void slice() {
+        oneMinuteRate = meter.getCount();
+        reset();
+    }
+
+    public void reset() {
+        init();
+    }
+
+    protected void init() {
         this.meter = new Meter();
-        this.counter = new LongAdder();
         this.reservoir = new ExponentiallyDecayingReservoir();
         this.histogram = new Histogram(reservoir);
     }
@@ -46,35 +57,32 @@ public class Metrics {
     }
 
     public void mark(long count) {
-        this.counter.add(count);
         this.meter.mark(count);
     }
 
     public void mark(double time, long count) {
-        this.counter.add(count);
         this.meter.mark(count);
         this.histogram.update((long) time);
     }
 
     public void setCount(long count) {
-        this.counter.reset();
-        this.counter.add(count);
+        this.meter.mark(count);
     }
 
     public long getCount() {
-        return this.counter.longValue();
+        return this.meter.getCount();
     }
 
     public long getOneMinuteRate() {
-        return (long) this.meter.getOneMinuteRate();
+        if (oneMinuteRate == 0) {
+            return this.meter.getCount();
+        } else {
+            return oneMinuteRate;
+        }
     }
 
-    public long getFiveMinuteRate() {
-        return (long) this.meter.getFiveMinuteRate();
-    }
-
-    public long getFifteenMinuteRate() {
-        return (long) this.meter.getFifteenMinuteRate();
+    public long getMeanRate() {
+        return (long) this.meter.getMeanRate();
     }
 
     public double getTp999() {

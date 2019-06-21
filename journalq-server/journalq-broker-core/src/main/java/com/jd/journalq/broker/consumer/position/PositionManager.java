@@ -535,12 +535,13 @@ public class PositionManager extends Service {
             // 获取当前（主题+分区）的最大消息序号
             long currentIndex = getMaxMsgIndex(topic, partition);
             long currentIndexVal = Math.max(currentIndex, 0);
-            // 为新订阅的应用初始化消费位置对象
-            Position position = new Position(currentIndex, currentIndex, currentIndex, currentIndex);
 
             appList.stream().forEach(app -> {
                 ConsumePartition consumePartition = new ConsumePartition(topic.getFullName(), app, partition);
                 consumePartition.setPartitionGroup(partitionGroup);
+
+                // 为新订阅的应用初始化消费位置对象
+                Position position = new Position(currentIndex, currentIndex, currentIndex, currentIndex);
 
                 positionStore.putIfAbsent(consumePartition, position);
 
