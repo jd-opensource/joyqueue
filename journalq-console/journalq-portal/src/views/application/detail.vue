@@ -1,22 +1,24 @@
 <template>
   <detail-slot ref="detail">
     <template slot="tabs">
-      <d-tab-pane label="生产者" name="producer" icon="user-plus">
+      <d-tab-pane label="生产者" name="producer" icon="user-plus" :closable="false">
         <producer ref="producer" :search="search" @on-detail="openProducerDetailTab"/>
       </d-tab-pane>
-      <d-tab-pane label="消费者" name="consumer" icon="user-minus">
+      <d-tab-pane label="消费者" name="consumer" icon="user-minus" :closable="false">
         <consumer ref="consumer" :search="search" @on-detail="openConsumerDetailTab"/>
       </d-tab-pane>
-      <d-tab-pane label="用户" name="myAppUsers" icon="users">
+      <d-tab-pane label="用户" name="myAppUsers" icon="users" :closable="false">
         <my-app-users ref="myAppUsers"/>
       </d-tab-pane>
-      <d-tab-pane label="令牌" name="myAppToken" icon="feather">
+      <d-tab-pane label="令牌" name="myAppToken" icon="feather" :closable="false">
         <my-app-token ref="myAppToken"/>
       </d-tab-pane>
-      <d-tab-pane :label="producerDetailName" name="producerDetail" closable icon="paperclip" :visible="producerDetailVisible">
+      <d-tab-pane :label="producerDetailName" name="producerDetail" icon="paperclip" :visible="producerDetailVisible"
+                  :closable="false">
         <producer-detail ref="producerDetail" :detailType="$store.getters.appDetailType"/>
       </d-tab-pane>
-      <d-tab-pane :label="consumerDetailName" name="consumerDetail" closable icon="paperclip" :visible="consumerDetailVisible">
+      <d-tab-pane :label="consumerDetailName" name="consumerDetail" icon="paperclip" :visible="consumerDetailVisible"
+                  :closable="false">
         <consumer-detail ref="consumerDetail" :detailType="$store.getters.appDetailType"/>
       </d-tab-pane>
     </template>
@@ -44,24 +46,18 @@ export default {
     ProducerDetail,
     ConsumerDetail
   },
-  // data () {
-  //   return {
-  //     appDetailType: this.$store.getters.appDetailType
-  //   }
-  // },
   methods: {
     openProducerDetailTab (item) {
       // Jump to producer detail router
       this.$router.push({
         name: `/${this.$i18n.locale}/application/detail`,
         query: {
-          id: this.$route.query.id,
-          code: this.$route.query.code,
-          tab: 'producerDetail',
+          id: item.app.id,
           app: item.app.code,
           topic: item.topic.code,
           namespace: item.namespace.code,
           clientType: item.clientType,
+          tab: 'producerDetail',
           subTab: 'partition',
           producerDetailVisible: '1',
           consumerDetailVisible: this.consumerDetailVisible ? '1' : '0'
@@ -73,14 +69,13 @@ export default {
       this.$router.push({
         name: `/${this.$i18n.locale}/application/detail`,
         query: {
-          id: this.$route.query.id,
-          code: this.$route.query.code,
-          tab: 'consumerDetail',
+          id: item.app.id,
           app: item.app.code,
           topic: item.topic.code,
           namespace: item.namespace.code,
           subscribeGroup: item.subscribeGroup,
           clientType: item.clientType,
+          tab: 'consumerDetail',
           subTab: 'partition',
           producerDetailVisible: this.producerDetailVisible ? '1' : '0',
           consumerDetailVisible: '1'
@@ -93,7 +88,7 @@ export default {
       return {
         app: {
           id: this.$route.query.id,
-          code: this.$route.query.code
+          code: this.$route.query.app
         }
       }
     },

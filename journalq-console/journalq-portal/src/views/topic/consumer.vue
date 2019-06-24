@@ -8,7 +8,7 @@
 
 <script>
 import consumerBase from '../monitor/consumerBase.vue'
-import {getTopicCode, getAppCode, openOrCloseBtnRender, clientTypeSelectRender,
+import {getAppCode, openOrCloseBtnRender, clientTypeSelectRender,
   clientTypeBtnRender, topicTypeBtnRender, baseBtnRender, subscribeGroupAutoCompleteRender} from '../../utils/common.js'
 
 export default {
@@ -35,10 +35,11 @@ export default {
         },
         {
           title: '主题',
-          key: 'topic.code',
-          formatter (row) {
-            return getTopicCode(row.topic, row.namespace)
-          }
+          key: 'topic.code'
+        },
+        {
+          title: '命名空间',
+          key: 'namespace.code'
         },
         {
           title: '连接数',
@@ -65,12 +66,12 @@ export default {
                 click: () => {
                   this.$router.push({
                     name: `/${this.$i18n.locale}/topic/detail`,
-                    query: {id: params.item.topic.code,
-                      code: params.item.topic.code,
-                      namespaceId: params.item.topic.namespace.id,
-                      namespaceCode: params.item.topic.namespace.code,
-                      tab: 'retry',
-                      app: getAppCode(params.item.app, params.item.subscribeGroup)
+                    query: {
+                      id: params.item.topic.code,
+                      app: getAppCode(params.item.app, params.item.subscribeGroup),
+                      topic: params.item.topic.code,
+                      namespace: params.item.namespace.code,
+                      tab: 'retry'
                     }
                   })
                 }

@@ -8,7 +8,7 @@
 
 <script>
 import producerBase from '../monitor/producerBase.vue'
-import {getTopicCode, getAppCode, yesOrNoBtnRender, openOrCloseBtnRender, clientTypeSelectRender,
+import {getAppCode, yesOrNoBtnRender, openOrCloseBtnRender, clientTypeSelectRender,
   clientTypeBtnRender} from '../../utils/common.js'
 
 export default {
@@ -26,10 +26,6 @@ export default {
       keywordTip: '请输入应用',
       keywordName: '应用',
       colData: [
-        // {
-        //   title: 'ID',
-        //   key: 'id'
-        // },
         {
           title: '应用',
           key: 'app.code',
@@ -39,10 +35,11 @@ export default {
         },
         {
           title: '主题',
-          key: 'topic.code',
-          formatter (row) {
-            return getTopicCode(row.topic, row.namespace)
-          }
+          key: 'topic.code'
+        },
+        {
+          title: '命名空间',
+          key: 'namespace.code'
         },
         // {
         //   title: '负责人',
@@ -121,6 +118,7 @@ export default {
   },
   methods: {
     getList () {
+      console.log('cc')
       this.$refs.producerBase.getList()
     },
     handleDetail (item) {

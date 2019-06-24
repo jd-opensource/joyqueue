@@ -1,15 +1,19 @@
 <template>
   <div>
-    <div class="ml20 mt30">
-      <d-input v-model="keyword" :placeholder="keywordTip" class="left mr10" style="width: 213px" @on-enter="getList">
+    <div class="headLine">
+      <d-input v-model="keyword" :placeholder="keywordTip" class="input" @on-enter="getList">
         <span slot="prepend">{{keywordName}}</span>
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
-      <d-button type="primary" v-if="$store.getters.isAdmin" @click="openDialog('subscribeDialog')" class="left mr10">
-        订阅
-        <icon name="plus-circle" style="margin-left: 5px;">
-        </icon>
-      </d-button>
+      <d-button-group>
+        <d-button v-if="$store.getters.isAdmin" @click="openDialog('subscribeDialog')" class="button">
+          订阅
+          <icon name="plus-circle" style="margin-left: 3px;"></icon>
+        </d-button>
+        <d-button type="primary" @click="getList" class="button">刷新
+          <icon name="refresh-cw" style="margin-left: 3px;"></icon>
+        </d-button>
+      </d-button-group>
     </div>
 
     <my-table :data="tableData" :showPin="showTablePin" :page="page"
@@ -31,15 +35,19 @@
       <msg-preview :app="msgPreviewDialog.app" :topic="msgPreviewDialog.topic" :namespace="msgPreviewDialog.namespace"
                    :type="type" :doSearch="msgPreviewDialog.doSearch" :subscribeGroup="msgPreviewDialog.subscribeGroup"/>
     </my-dialog>
+
+    <!--Msg detail dialog-->
     <my-dialog :dialog="msgDetailDialog" @on-dialog-cancel="dialogCancel('msgDetailDialog')">
       <msg-detail :app="msgDetailDialog.app" :topic="msgDetailDialog.topic" :namespace="msgDetailDialog.namespace"
                    :type="type" :doSearch="msgDetailDialog.doSearch" :subscribeGroup="msgDetailDialog.subscribeGroup"/>
     </my-dialog>
+
     <!--Config dialog-->
     <my-dialog :dialog="configDialog" @on-dialog-confirm="configConsumerConfirm" @on-dialog-cancel="dialogCancel('configDialog')">
       <consumer-config-form ref="configForm" :data="configConsumerData"/>
     </my-dialog>
 
+    <!--Rate limit dialog-->
     <my-dialog :dialog="rateLimitDialog" @on-dialog-confirm="rateLimitConfirm" @on-dialog-cancel="dialogCancel('rateLimitDialog')">
       <rate-limit ref="rateLimit" :limitTraffic="rateLimitDialog.limitTraffic" :limitTps="rateLimitDialog.limitTps"/>
     </my-dialog>
@@ -56,7 +64,7 @@ import subscribe from './subscribe.vue'
 import msgPreview from './msgPreview.vue'
 import {getTopicCode, getAppCode, replaceChartUrl} from '../../utils/common.js'
 import MsgDetail from './msgDetail'
-import RateLimit from "./rateLimit"
+import RateLimit from './rateLimit'
 
 export default {
   name: 'consumer-base',
@@ -167,8 +175,8 @@ export default {
         width: '400',
         showFooter: true,
         doSearch: false,
-        limitTps:0,
-        limitTraffic:0
+        limitTps: 0,
+        limitTraffic: 0
       },
       type: this.$store.getters.consumerType, // 1:生产， 2：消费
       subscribeDialog: {
@@ -187,7 +195,7 @@ export default {
       configDialog: {
         visible: false,
         title: '消费者配置详情',
-        width: '600',
+        width: '800',
         showFooter: true,
         urls: {
           addOrUpdate: `/consumer/config/addOrUpdate`,

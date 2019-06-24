@@ -22,7 +22,7 @@
       </grid-row>
     </div>
       <!--tabs由于没有单独的路由名称，所以在调用table时，需要在data中自定义urls-->
-    <d-tabs @on-change="handleTabChange" :value="tab" @on-tab-remove="removeTab">
+    <d-tabs @on-change="handleTabChange" :value="tab">
       <slot name="tabs"></slot>
     </d-tabs>
   </div>
@@ -31,7 +31,6 @@
 <script>
 import apiRequest from '../../../utils/apiRequest.js'
 import crud from '../../../mixins/crud.js'
-// import {generateProducerDetailTabName, generateConsumerDetailTabName} from '../../../utils/common.js'
 
 export default {
   name: 'applicationDetailSlot',
@@ -58,10 +57,7 @@ export default {
   },
   watch: {
     '$route' (to, from) {
-      this.app.id = to.query.id
-      this.app.code = to.query.code
-      this.tab = to.query.tab || this.tab
-      // this.$refs[this.tab].getList()
+      this.tab = to.query.tab || 'producer'
     }
   },
   methods: {
@@ -75,18 +71,37 @@ export default {
     },
     handleTabChange (data) {
       let name = data.name
-      if (name === 'producerDetail') {
-        let topicCode = this.$route.query.topic || ''
-        let namespaceCode = this.$route.query.namespace || ''
+      if (name === 'producer' || name === 'consumer') {
+        this.$refs[name].search.app.code = this.app.code
+
         this.$router.push({
           name: `/${this.$i18n.locale}/application/detail`,
           query: {
             id: this.app.id,
-            code: this.app.code,
             app: this.app.code,
-            topic: topicCode,
-            namespace: namespaceCode,
-            // subscribeGroup: this.$route.query.subscribeGroup || '',
+            tab: name,
+            producerDetailVisible: '0',
+            consumerDetailVisible: '0'
+          }
+        })
+
+        this.$refs[name].getList()
+      } else if (name === 'producerDetail') {
+        let subTab = this.$route.query.subTab || 'partition'
+
+        this.$refs[name].search.app.code = this.app.code
+        this.$refs[name].search.topic.code = this.$route.query.topic || ''
+        this.$refs[name].search.namespace.code = this.$route.query.namespace || ''
+        this.$refs[name].search.clientType = this.$route.query.clientType
+        this.$refs[name].subTab = subTab
+
+        this.$router.push({
+          name: `/${this.$i18n.locale}/application/detail`,
+          query: {
+            id: this.app.id,
+            app: this.app.code,
+            topic: this.$route.query.topic || '',
+            namespace: this.$route.query.namespace || '',
             clientType: this.$route.query.clientType,
             subTab: this.$route.query.subTab || 'partition',
             tab: name,
@@ -94,19 +109,26 @@ export default {
             consumerDetailVisible: this.$route.query.consumerDetailVisible || '0'
           }
         })
+
+        this.$refs[name].$refs[subTab].getList()
       } else if (name === 'consumerDetail') {
-        let topicCode = this.$route.query.topic || ''
-        let namespaceCode = this.$route.query.namespace || ''
-        let subscribeGroup = this.$route.query.subscribeGroup || ''
+        let subTab = this.$route.query.subTab || 'partition'
+
+        this.$refs[name].search.app.code = this.app.code
+        this.$refs[name].search.topic.code = this.$route.query.topic || ''
+        this.$refs[name].search.namespace.code = this.$route.query.namespace || ''
+        this.$refs[name].search.subscribeGroup = this.$route.query.subscribeGroup || ''
+        this.$refs[name].search.clientType = this.$route.query.clientType
+        this.$refs[name].subTab = subTab
+
         this.$router.push({
           name: `/${this.$i18n.locale}/application/detail`,
           query: {
             id: this.app.id,
-            code: this.app.code,
             app: this.app.code,
-            topic: topicCode,
-            namespace: namespaceCode,
-            subscribeGroup: subscribeGroup,
+            topic: this.$route.query.topic || '',
+            namespace: this.$route.query.namespace || '',
+            subscribeGroup: this.$route.query.subscribeGroup || '',
             clientType: this.$route.query.clientType,
             subTab: this.$route.query.subTab || 'partition',
             tab: name,
@@ -114,38 +136,27 @@ export default {
             consumerDetailVisible: '1'
           }
         })
+
+        this.$refs[name].$refs[subTab].getList()
       } else {
         this.$router.push({
           name: `/${this.$i18n.locale}/application/detail`,
           query: {
             id: this.app.id,
-            code: this.app.code,
+            app: this.app.code,
             tab: name,
             producerDetailVisible: '0',
             consumerDetailVisible: '0'
           }
         })
-      }
-      this.$refs[name].getList()
-    },
-    removeTab (data) {
-      if (data.name === 'producerDetail' || data.name === 'consumerDetail') {
-        this.$router.push({
-          name: `/${this.$i18n.locale}/application/detail`,
-          query: {
-            id: this.app.id,
-            code: this.app.code,
-            tab: 'producer',
-            producerDetailVisible: '0',
-            consumerDetailVisible: '0'
-          }
-        })
+
+        this.$refs[name].getList()
       }
     }
   },
   mounted () {
     this.app.id = this.$route.query.id
-    this.app.code = this.$route.query.code
+    this.app.code = this.$route.query.app
     this.tab = this.$route.query.tab || 'producer'
     this.getDetail()
   }

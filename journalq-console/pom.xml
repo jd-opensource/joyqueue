@@ -56,4 +56,14 @@
             </plugin>
         </plugins>
     </build>
+
+    <!--frontend编译比较慢，日常无需编译-->
+    <profiles>
+        <profile>
+            <id>frontend</id>
+            <modules>
+                <module>journalq-portal</module>
+            </modules>
+        </profile>
+    </profiles>
 </project>

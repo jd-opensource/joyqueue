@@ -1,34 +1,40 @@
 <template>
   <div>
-    <d-tabs @on-change="handleTabChange" :value="subTab" size="small">
-      <d-tab-pane label="分组" name="partition" icon="pocket">
+    <d-tabs type="card" @on-change="handleTabChange" :value="subTab" size="small">
+      <d-tab-pane label="分组" name="partition" icon="pocket" :closable="false">
         <partition ref="partition" :colData="partitionColData" :doSearch="doSearch" :search="search"/>
       </d-tab-pane>
-      <d-tab-pane label="客户端连接" name="clientConnection" icon="github">
+      <d-tab-pane label="客户端连接" name="clientConnection" icon="github" :closable="false">
         <client-connection ref="clientConnection" :search="search" :doSearch="doSearch"/>
       </d-tab-pane>
-      <d-tab-pane label="Broker" name="broker" icon="file-text">
+      <d-tab-pane label="Broker" name="broker" icon="file-text" :closable="false">
         <broker ref="broker" :search="search" :doSearch="doSearch"/>
       </d-tab-pane>
-    <d-tab-pane label="消费位置" name="offsetInfo" icon="file-text">
+      <d-tab-pane label="消费位置" name="offsetInfo" icon="file-text" :closable="false">
         <offset ref="offsetInfo" :search="search" :doSearch="doSearch"/>
       </d-tab-pane>
-      <d-tab-pane v-if="$store.getters.isAdmin" label="协调者信息" name="coordinatorInfo" icon="file-text">
+      <d-tab-pane v-if="$store.getters.isAdmin" label="协调者信息" name="coordinatorInfo" icon="file-text"
+                  :closable="false">
         <detail-table ref="coordinatorInfo" :doSearch="doSearch" :colData="coordinatorInfo.colData"
                       :urls="coordinatorInfo.urls" :search="search"/>
       </d-tab-pane>
-      <d-tab-pane v-if="$store.getters.isAdmin" label="消费组成员" name="coordinatorGroupMember" icon="file-text">
+      <d-tab-pane v-if="$store.getters.isAdmin" label="消费组成员" name="coordinatorGroupMember" icon="file-text"
+                  :closable="false">
         <coordinator-group-member ref="coordinatorGroupMember" :doSearch="doSearch" :search="search"
                                :colData="coordinatorGroupMember.colData" :urls="coordinatorGroupMember.urls"/>
       </d-tab-pane>
-      <d-tab-pane v-if="$store.getters.isAdmin" label="消费组过期成员" name="coordinatorGroupExpiredMember" icon="file-text">
+      <d-tab-pane v-if="$store.getters.isAdmin" label="消费组过期成员" name="coordinatorGroupExpiredMember"
+                  icon="file-text" :closable="false">
         <detail-table ref="coordinatorGroupExpiredMember" :doSearch="doSearch" :search="search"
                    :col-data="coordinatorGroupExpiredMember.colData" :urls="coordinatorGroupExpiredMember.urls"/>
       </d-tab-pane>
-      <d-tab-pane v-if="clientType==2" label="mqtt客户端" name="mqttClient" icon="file-text">
+      <d-tab-pane v-if="search.clientType==2" label="mqtt客户端" name="mqttClient" icon="file-text" :closable="false">
         <mqtt-base-monitor ref="mqttClient" :client-id="subscribeGroup"  :inputable=false :btns="mqttClient.btns"
                            :col-data="mqttClient.colData" :urls="mqttClient.urls"/>
       </d-tab-pane>
+      <div slot="extra">
+        <d-button type="primary" size="small" @click="getList" class="mr40">刷新</d-button>
+      </div>
     </d-tabs>
   </div>
 </template>
@@ -288,106 +294,93 @@ export default {
           inputable: false
         }
       }
+    },
+    search: {
+      type: Object,
+      default: function () {
+        return {
+          app: {
+            code: ''
+          },
+          topic: {
+            code: ''
+          },
+          namespace: {
+            code: ''
+          },
+          subscribeGroup: '',
+          type: this.$store.getters.consumerType,
+          clientType: -1
+        }
+      }
     }
   },
   data () {
     return {
       doSearch: true,
-      subTab: 'partition',
-      type: this.$store.getters.consumerType,
-      app: {
-        id: 0,
-        code: ''
-      },
-      subscribeGroup: '',
-      topic: {
-        id: '',
-        code: ''
-      },
-      namespace: {
-        id: '',
-        code: ''
-      },
-      clientType: -1
-    }
-  },
-  watch: {
-    '$route' (to, from) {
-      // this.app.code = to.query.app
-      // this.topic.code = to.query.topic
-      // this.namespace.code = to.query.namespace
-      // this.subscribeGroup =
-      this.subTab = to.query.subTab || this.subTab
-      // this.tab = to.query.tab || this.tab
-      // this.$refs[this.tab].getList()
+      subTab: 'partition'
+      // type: this.$store.getters.consumerType,
+      // app: {
+      //   id: 0,
+      //   code: ''
+      // },
+      // subscribeGroup: '',
+      // topic: {
+      //   id: '',
+      //   code: ''
+      // },
+      // namespace: {
+      //   id: '',
+      //   code: ''
+      // },
+      // clientType: -1
     }
   },
   methods: {
     handleTabChange (data) {
-      if (data.index === 0 && data.name !== 'partition') {
-        return
-      }
+      if (this.$route.query.consumerDetailVisible === '1') {
+        console.log('cd')
+        let name = data.name
+        this.$refs[name].search.app.code = this.$route.query.app || ''
+        this.$refs[name].search.topic.code = this.$route.query.topic || ''
+        this.$refs[name].search.namespace.code = this.$route.query.namespace || ''
+        this.$refs[name].search.subscribeGroup = this.$route.query.subscribeGroup || ''
+        this.$refs[name].search.clientType = this.$route.query.clientType || -1
 
-      let name = data.name
-      if (this.detailType === this.$store.getters.appDetailType) { // my application
+        let routeName = ''
+        if (this.detailType === this.$store.getters.appDetailType) {
+          routeName = `/${this.$i18n.locale}/application/detail`
+        } else {
+          routeName = `/${this.$i18n.locale}/topic/detail`
+        }
+
         this.$router.push({
-          name: `/${this.$i18n.locale}/application/detail`,
+          name: routeName,
           query: {
             id: this.$route.query.id,
-            code: this.$route.query.code,
-            app: this.$route.query.code,
+            app: this.$route.query.app || '',
             topic: this.$route.query.topic || '',
             namespace: this.$route.query.namespace || '',
+            clientType: this.$route.query.clientType || -1,
             subscribeGroup: this.$route.query.subscribeGroup || '',
-            clientType: this.$route.query.clientType,
             subTab: name,
             tab: this.$route.query.tab,
             producerDetailVisible: this.$route.query.producerDetailVisible || '0',
             consumerDetailVisible: this.$route.query.consumerDetailVisible || '0'
           }
         })
-      } else { // topic center
-        this.$router.push({
-          name: `/${this.$i18n.locale}/topic/detail`,
-          query: {
-            id: this.$route.query.id,
-            code: this.$route.query.code,
-            app: this.$route.query.code,
-            topic: this.$route.query.topic || '',
-            namespace: this.$route.query.namespace || '',
-            namespaceId: this.$route.query.namespaceId || '',
-            namespaceCode: this.$route.query.namespaceCode || '',
-            clientType: this.$route.query.clientType,
-            subTab: name,
-            tab: this.$route.query.tab,
-            producerDetailVisible: this.$route.query.producerDetailVisible || '0',
-            consumerDetailVisible: this.$route.query.consumerDetailVisible || '0'
-          }
-        })
+        this.$refs[name].getList()
       }
-      this.$refs[name].getList()
     },
     getList () {
-      if (this.$route.query.app && this.$route.query.topic) {
-        this.$refs[this.subTab].getList()
-      }
+      this.$refs[this.subTab].getList()
     }
   },
-  computed: {
-    search () {
-      return {
-        app: {
-          code: this.$route.query.app
-        },
-        topic: {
-          code: this.$route.query.topic
-        },
-        namespace: {
-          code: this.$route.query.namespace
-        },
-        subscribeGroup: this.$route.query.subscribeGroup,
-        clientType: this.clientType,
-        type: this.type
+  watch: {
+    '$route' (to, from) {
+      if (to.query.tab === 'consumerDetail') {
+        console.log('cd')
+        this.subTab = to.query.subTab || this.subTab
       }
     }
   }

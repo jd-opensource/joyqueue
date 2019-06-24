@@ -1,39 +1,34 @@
 <template>
   <div>
-    <div class="ml20">
-      <d-input v-model="search.topic" placeholder="请输入队列名" class="left mr5 mt10"
-               style="width: 213px" @on-enter="getList">
+    <div class="headLine2">
+      <d-input v-model="search.topic" placeholder="请输入队列名" class="input2" @on-enter="getList">
         <span slot="prepend">队列名</span>
       </d-input>
-      <d-input v-model="search.app" placeholder="请输入消费者" class="left mr5 mt10"
-               style="width: 213px"  @on-enter="getList">
+      <d-input v-model="search.app" placeholder="请输入消费者" class="input2" @on-enter="getList">
         <span slot="prepend">消费者</span>
       </d-input>
-      <d-select v-model="search.status" class="left mr5 mt10" style="width: 143px" @on-change="getList">
+      <d-select v-model="search.status" class="input3" @on-change="getList">
         <span slot="prepend">状态</span>
         <d-option v-for="item in statusList" :value="item.key" :key="item.key">{{ item.value }}</d-option>
       </d-select>
-      <d-date-picker class="left mr5 mt10"
+      <d-date-picker class="input4"
                      v-model="times"
                      type="daterange"
                      range-separator="至"
                      start-placeholder="开始日期"
                      end-placeholder="结束日期"
                      value-format="timestamp"
-                     :default-time="['00:00:00', '23:59:59']"
-                     style="width:370px">
+                     :default-time="['00:00:00', '23:59:59']">
         <span slot="prepend">发送时间</span>
       </d-date-picker>
-      <d-input v-model="search.businessId" placeholder="请输入业务ID" class="left mr5 mt10"
-               style="width: 213px" @on-enter="getList">
+      <d-input v-model="businessId" placeholder="请输入业务ID" class="input2" @on-enter="getList">
         <span slot="prepend">业务ID</span>
       </d-input>
-      <d-button class="left mr5 mt10" type="primary" color="success" @click="getList">
-        查询
-        <icon name="search" style="margin-left: 5px;">
-        </icon>
+      <d-button class="button2" type="primary" @click="getList">查询
+        <icon name="search" style="margin-left: 3px;"></icon>
       </d-button>
     </div>
+
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
               @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
               @on-del="del" @on-download="download">
@@ -60,9 +55,7 @@ export default {
         return {
           topic: '',
           app: '',
-          status: 1,
-          beginTime: '',
-          endTime: ''
+          status: 1
         }
       }
     }
@@ -82,6 +75,12 @@ export default {
         {key: -1, value: '已删除'},
         {key: 0, value: '成功'}
       ],
+      showTablePin: false,
+      // page1: {
+      //   page: 1,
+      //   size: 10,
+      //   total: 100
+      // },
       tableData: {
         rowData: [],
         colData: [
@@ -92,28 +91,34 @@ export default {
           {
             title: '队列',
             key: 'topic'
-          }, {
+          },
+          {
             title: '应用',
             key: 'app'
-          }, {
+          },
+          {
             title: '业务ID',
             key: 'businessId'
-          }, {
+          },
+          {
             title: '次数',
             key: 'retryCount'
-          }, {
+          },
+          {
             title: '发送时间',
             key: 'sendTime',
             formatter (item) {
               return timeStampToString(item.sendTime)
             }
-          }, {
+          },
+          {
             title: '下次重试时间',
             key: 'retryTime',
             formatter (item) {
               return timeStampToString(item.retryTime)
             }
-          }, {
+          },
+          {
             title: '过期时间',
             key: 'expireTime',
             formatter (item) {
@@ -142,15 +147,44 @@ export default {
     }
   },
   methods: {
-    beforeSearch (obj) {
-      if (this.times && this.times.length === 2) {
-        obj.query.beginTime = this.times[0]
-        obj.query.endTime = this.times[1]
-      } else {
-        obj.query.beginTime = ''
-        obj.query.endTime = ''
+    getList () {
+      this.showTablePin = true
+      let data = {
+        pagination: {
+          page: this.page.page,
+          size: this.page.size
+        },
+        query: {
+          topic: this.search.topic,
+          // app: this.search.app,
+          app: this.$route.query.app,
+          status: this.search.status,
+          businessId: this.businessId
+        }
       }
-      return obj
+
+      if (this.times && this.times.length === 2) {
+        data.query.beginTime = this.times[0]
+        data.query.endTime = this.times[1]
+      } else {
+        data.query.beginTime = ''
+        data.query.endTime = ''
+      }
+
+      apiRequest.post(this.urlOrigin.search, {}, data).then((data) => {
+        if (data === '') {
+          return
+        }
+        data.data = data.data || []
+        data.pagination = data.pagination || {
+          totalRecord: data.data.length
+        }
+        this.page.total = data.pagination.totalRecord
+        this.page.page = data.pagination.page
+        this.page.size = data.pagination.size
+        this.tableData.rowData = data.data
+        this.showTablePin = false
+      })
     },
     download (item) {
       apiRequest.get(this.urlOrigin.download + '/' + item.id).then()
@@ -165,7 +199,7 @@ export default {
     }
   },
   mounted () {
-    this.getList()
+    // this.getList()
   }
 }
 </script>

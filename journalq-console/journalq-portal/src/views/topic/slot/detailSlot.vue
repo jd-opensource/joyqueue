@@ -2,10 +2,10 @@
   <div style="margin:20px;" class="clearfix">
     <d-breadcrumb class="mb20" separator=">">
       <d-breadcrumb-item :to="{ name: `/${$i18n.locale}/topic` }">主题中心</d-breadcrumb-item>
-      <d-breadcrumb-item>{{topic.code}}</d-breadcrumb-item>
+      <d-breadcrumb-item>{{topic.id}}</d-breadcrumb-item>
     </d-breadcrumb>
     <div class="detail mb20">
-      <div class="title">{{topic.code}}</div>
+      <div class="title">{{topic.id}}</div>
       <grid-row :gutter="16">
         <grid-col span="8">
           <span>队列数:</span>
@@ -21,7 +21,7 @@
         </grid-col>
       </grid-row>
     </div>
-    <d-tabs @on-change="handleTabChange" :value="tab" @on-tab-remove="removeTab">
+    <d-tabs @on-change="handleTabChange" :value="tab">
       <slot name="tabs"></slot>
     </d-tabs>
   </div>
@@ -32,7 +32,7 @@ import apiRequest from '../../../utils/apiRequest.js'
 import crud from '../../../mixins/crud.js'
 
 export default {
-  name: 'applicationDetailSlot',
+  name: 'topicDetailSlot',
   mixins: [ crud ],
   data () {
     return {
@@ -41,13 +41,11 @@ export default {
       },
       topic: {
         id: '',
-        code: '',
-        namespace: {
-          id: '',
-          code: ''
-        }
+        code: ''
       },
-      // app: '',
+      namespace: {
+        code: ''
+      },
       tab: '',
       detail: {
         id: '',
@@ -63,13 +61,7 @@ export default {
   },
   watch: {
     '$route' (to, from) {
-      this.topic.id = to.query.id
-      this.topic.code = to.query.code
-      this.topic.namespace.id = to.query.namespaceId
-      this.topic.namespace.code = to.query.namespaceCode || ''
-      // this.app = to.query.app
-      this.tab = to.query.tab || this.tab
-      // this.$refs[this.tab].getList()
+      this.tab = to.query.tab || 'producer'
     }
   },
   methods: {
@@ -86,42 +78,69 @@ export default {
       this.$router.push({name: `/${this.$i18n.locale}/topic`})
     },
     handleTabChange (data) {
+      console.log('detail')
       let name = data.name
-      this.$refs[name].getList()
-      if (name === 'producerDetail') {
-        let topicCode = this.$route.query.topic || ''
+
+      if (name === 'producer' || name === 'consumer') {
+        this.$refs[name].search.topic.code = this.topic.code
+        this.$refs[name].search.topic.namespace.code = this.namespace.code
+
         this.$router.push({
           name: `/${this.$i18n.locale}/topic/detail`,
           query: {
             id: this.topic.id,
-            code: this.topic.code,
-            app: this.$route.query.app || '',
-            topic: topicCode,
-            namespace: this.topic.namespace.code,
-            namespaceId: this.topic.namespace.id,
-            namespaceCode: this.topic.namespace.code,
-            // subscribeGroup: this.$route.query.subscribeGroup || '',
-            clientType: this.$route.query.clientType,
-            subTab: this.$route.query.subTab || 'partition',
+            topic: this.topic.code,
+            namespace: this.namespace.code,
             tab: name,
+            producerDetailVisible: '0',
+            consumerDetailVisible: '0'
+          }
+        })
+
+        this.$refs[name].getList()
+      } else if (name === 'producerDetail') {
+        let subTab = this.$route.query.subTab || 'partition'
+
+        this.$refs[name].search.app.code = this.$route.query.app
+        this.$refs[name].search.topic.code = this.topic.code
+        this.$refs[name].search.namespace.code = this.namespace.code
+        this.$refs[name].search.clientType = this.$route.query.clientType
+        this.$refs[name].subTab = subTab
+
+        this.$router.push({
+          name: `/${this.$i18n.locale}/topic/detail`,
+          query: {
+            id: this.topic.id,
+            app: this.$route.query.app,
+            topic: this.topic.code,
+            namespace: this.namespace.code,
+            clientType: this.$route.query.clientType,
+            tab: name,
+            subTab: this.$route.query.subTab || 'partition',
             producerDetailVisible: '1',
             consumerDetailVisible: this.$route.query.consumerDetailVisible || '0'
           }
         })
+
+        this.$refs[name].$refs[subTab].getList()
       } else if (name === 'consumerDetail') {
-        let topicCode = this.$route.query.topic || ''
-        let subscribeGroup = this.$route.query.subscribeGroup || ''
+        let subTab = this.$route.query.subTab || 'partition'
+
+        this.$refs[name].search.app.code = this.$route.query.app || ''
+        this.$refs[name].search.topic.code = this.topic.code
+        this.$refs[name].search.namespace.code = this.namespace.code
+        this.$refs[name].search.subscribeGroup = this.$route.query.subscribeGroup || ''
+        this.$refs[name].search.clientType = this.$route.query.clientType
+        this.$refs[name].subTab = subTab
+
         this.$router.push({
           name: `/${this.$i18n.locale}/topic/detail`,
           query: {
             id: this.topic.id,
-            code: this.topic.code,
             app: this.$route.query.app || '',
-            topic: topicCode,
-            namespace: this.topic.namespace.code,
-            namespaceId: this.topic.namespace.id,
-            namespaceCode: this.topic.namespace.code,
-            subscribeGroup: subscribeGroup,
+            topic: this.topic.code,
+            namespace: this.namespace.code,
+            subscribeGroup: this.$route.query.subscribeGroup || '',
             clientType: this.$route.query.clientType,
             subTab: this.$route.query.subTab || 'partition',
             tab: name,
@@ -129,55 +148,48 @@ export default {
             consumerDetailVisible: '1'
           }
         })
+
+        this.$refs[name].$refs[subTab].getList()
       } else if (name === 'retry') {
-        this.$router.push({name: `/${this.$i18n.locale}/topic/detail`,
-          query: {
-            id: this.topic.id,
-            code: this.topic.code,
-            namespaceId: this.topic.namespace.id,
-            namespaceCode: this.topic.namespace.code,
-            tab: name,
-            app: this.$route.query.app || '',
-            producerDetailVisible: '0',
-            consumerDetailVisible: '0'
-          }
-        })
-      } else {
-        this.$router.push({name: `/${this.$i18n.locale}/topic/detail`,
-          query: {
-            id: this.topic.id,
-            code: this.topic.code,
-            namespaceId: this.topic.namespace.id,
-            namespaceCode: this.topic.namespace.code,
-            tab: name,
-            producerDetailVisible: '0',
-            consumerDetailVisible: '0'
-          }
-        })
-      }
-    },
-    removeTab (data) {
-      if (data.name === 'producerDetail' || data.name === 'consumerDetail') {
+        this.$refs[name].search.app = this.$route.query.app || ''
+        this.$refs[name].search.topic = this.topic.id
+
         this.$router.push({
           name: `/${this.$i18n.locale}/topic/detail`,
           query: {
             id: this.topic.id,
-            code: this.topic.code,
-            namespaceId: this.topic.namespace.id,
-            namespaceCode: this.topic.namespace.code,
-            tab: 'producer',
+            app: this.$route.query.app || '',
+            topic: this.topic.code,
+            namespace: this.namespace.code,
+            subscribeGroup: this.$route.query.subscribeGroup,
+            tab: name,
             producerDetailVisible: '0',
             consumerDetailVisible: '0'
           }
         })
+
+        this.$refs[name].getList()
+      } else {
+        this.$router.push({
+          name: `/${this.$i18n.locale}/topic/detail`,
+          query: {
+            id: this.topic.id,
+            topic: this.topic.code,
+            namespace: this.namespace.code,
+            tab: name,
+            producerDetailVisible: '0',
+            consumerDetailVisible: '0'
+          }
+        })
+
+        this.$refs[name].getList()
       }
     }
   },
   mounted () {
     this.topic.id = this.$route.query.id
-    this.topic.code = this.$route.query.code
-    this.topic.namespace.id = this.$route.query.namespaceId
-    this.topic.namespace.code = this.$route.query.namespaceCode
+    this.topic.code = this.$route.query.topic
+    this.namespace.code = this.$route.query.namespace
     this.tab = this.$route.query.tab || 'producer'
     this.getDetail()
   }

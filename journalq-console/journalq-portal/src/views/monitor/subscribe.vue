@@ -52,7 +52,7 @@ export default {
       type: Boolean,
       default: false
     },
-    search: {// 查询条件，我的应用：app:{id:0,code:'',namespace:{id:0,code:''}}  ， 主题中心：topic:{id:0,code:'',namespace:{id:0,code:''}}
+    search: {// 查询条件，我的应用：app:{id:0,code:''}  ， 主题中心：topic:{id:0,code:'',namespace:{id:0,code:''}}
       type: Object
     },
     type: { // 1-生产者， 2-消费者
@@ -129,7 +129,7 @@ export default {
         return
       }
       data.clientType = item.clientType
-      //Subscribe group format verification
+      // Subscribe group format verification
       if (this.type === this.$store.getters.consumerType) {
         if (item.subscribeGroup && !item.subscribeGroup.match(this.$store.getters.pattern.subscribeGroup)) {
           this.$Message.error('订阅分组格式不匹配！支持格式：' + this.$store.getters.placeholder.subscribeGroup)

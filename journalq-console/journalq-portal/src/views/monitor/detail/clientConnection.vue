@@ -1,6 +1,6 @@
 <template>
   <div>
-    <my-table :data="tableData" :showPin="showTablePin" style="height: 400px;overflow-y:auto" :showPagination=false
+    <my-table :data="tableData" :showPin="showTablePin" :showPagination=false
               :page="page" @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange"/>
     <label >共 {{page.total}} 条记录</label>
   </div>
@@ -90,7 +90,7 @@ export default {
   methods: {
     getList () {
       this.showTablePin = true
-
+      console.log('cc')
       apiRequest.postBase(this.urls.getMonitor, {}, this.search, false).then((data) => {
         data.data = data.data || []
         // this.onListResult(data);
@@ -106,6 +106,20 @@ export default {
       })
     }
   }
+  // watch: {
+  //   '$route' (to, from) {
+  //     console.log('clientconn')
+  //     if (to.query.subTab === 'clientConnection') {
+  //       this.search.app.code = to.query.app
+  //       this.search.topic.code = to.query.topic
+  //       this.search.namespace.code = to.query.namespace
+  //       this.getList()
+  //     }
+  //   }
+  // },
+  // mounted () {
+  //   this.getList()
+  // }
 }
 </script>
 

@@ -5,6 +5,7 @@
     @click="handleClick"
     :disabled="buttonDisabled || loading"
     :autofocus="autofocus"
+    :style="styles"
   >
     <Icon name="loader" :class="loadingClass" v-if="loading"></Icon>
     <Icon :name="icon" :class="iconClass" v-if="icon"></Icon>
@@ -14,7 +15,7 @@
 <script>
 import Config from '../../config'
 import Icon from '../icon'
-import { oneOf } from '../../utils/assist'
+import { oneOf, isColor } from '../../utils/assist'
 
 const prefixCls = `${Config.clsPrefix}btn`
 
@@ -38,7 +39,7 @@ export default {
     },
     color: {
       validator (value) {
-        return oneOf(value, ['primary', 'success', 'warning', 'danger', 'info'])
+        return oneOf(value, ['primary', 'success', 'warning', 'danger', 'info']) || isColor(value)
       }
     },
     size: {
@@ -80,21 +81,32 @@ export default {
     long: {
       type: Boolean,
       default: false
+    },
+    className: {
+      type: String
     }
   },
-
   computed: {
+    styles () {
+      let styles = {}
+      if (isColor(this.color)) {
+        styles.borderColor = this.color
+        styles.backgroundColor = this.color
+      }
+      return styles
+    },
     classes () {
       return [
         `${prefixCls}`,
         {
           [`${prefixCls}--${this.type}`]: !!this.type,
-          [`${prefixCls}--${this.type}--${this.color}`]: !!this.color,
+          [`${prefixCls}--${this.type}--${this.color}`]: oneOf(this.color, ['primary', 'success', 'warning', 'danger', 'info']),
           [`${prefixCls}--${this.buttonSize}`]: !!this.buttonSize,
           [`${prefixCls}--${this.$parent.size}`]: !!this.$parent.size,
           [`${prefixCls}--round`]: this.round,
           [`${prefixCls}--circle`]: this.circle && !this.showSlot,
-          [`${prefixCls}--long`]: !!this.long
+          [`${prefixCls}--long`]: !!this.long,
+          [`${this.className}`]: !!this.className
         }
       ]
     },

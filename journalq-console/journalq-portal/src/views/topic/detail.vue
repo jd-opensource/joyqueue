@@ -1,29 +1,31 @@
 <template>
   <detail-slot ref="detail">
-    <template slot="tabs">
-      <d-tab-pane label="生产者" name="producer" icon="user-plus">
+    <template slot="tabs" :closable="false">
+      <d-tab-pane label="生产者" name="producer" icon="user-plus" :closable="false">
         <producer ref="producer" :search="search" @on-detail="openProducerDetailTab"/>
       </d-tab-pane>
-      <d-tab-pane label="消费者" name="consumer" icon="user-minus">
+      <d-tab-pane label="消费者" name="consumer" icon="user-minus" :closable="false">
         <consumer ref="consumer" :search="search" @on-detail="openConsumerDetailTab"/>
       </d-tab-pane>
-      <d-tab-pane label="分组信息" name="partitionGroup" icon="folder" v-if="$store.getters.isAdmin">
+      <d-tab-pane label="分组信息" name="partitionGroup" icon="folder" v-if="$store.getters.isAdmin" :closable="false">
         <partitionGroup ref="partitionGroup" @on-partition-group-change="queryTopicDetail"
                         :showBrokerChart="false" :showHostChart="false"/>
       </d-tab-pane>
-      <d-tab-pane label="Broker" v-if="$store.getters.isAdmin" name="broker" icon="cpu">
+      <d-tab-pane label="Broker" v-if="$store.getters.isAdmin" name="broker" icon="cpu" :closable="false">
         <broker ref="broker" :topicId="this.$route.query.id"/>
       </d-tab-pane>
-      <d-tab-pane label="重试" name="retry" icon="zap">
+      <d-tab-pane label="重试" name="retry" icon="zap" :closable="false">
         <retry ref="retry" :search="retrySearch"/>
       </d-tab-pane>
-      <d-tab-pane label="归档" name="archive" icon="package">
+      <d-tab-pane label="归档" name="archive" icon="package" :closable="false">
         <archive ref="archive" :search="archiveSearch"/>
       </d-tab-pane>
-      <d-tab-pane :label="producerDetailName" name="producerDetail" closable icon="paperclip" :visible="producerDetailVisible">
+      <d-tab-pane :label="producerDetailName" name="producerDetail" icon="paperclip" :visible="producerDetailVisible"
+                  :closable="false">
         <producer-detail ref="producerDetail" :detailType="$store.getters.topicDetailType"/>
       </d-tab-pane>
-      <d-tab-pane :label="consumerDetailName" name="consumerDetail" closable icon="paperclip" :visible="consumerDetailVisible">
+      <d-tab-pane :label="consumerDetailName" name="consumerDetail" icon="paperclip" :visible="consumerDetailVisible"
+                  :closable="false">
         <consumer-detail ref="consumerDetail" :detailType="$store.getters.topicDetailType"/>
       </d-tab-pane>
     </template>
@@ -55,15 +57,67 @@ export default {
     ProducerDetail,
     ConsumerDetail
   },
+  // data () {
+  //   return {
+  //     appCode: ''
+  //   }
+  // // },
+  // watch: {
+  //   '$route' (to, from) {
+  //     console.log(44)
+  //     this.appCode = to.query.app
+  //     console.log(this.appCode)
+  //     // this.$refs[this.tab].getList()
+  //   }
+  // },
+  methods: {
+    openProducerDetailTab (item) {
+      // Jump to producer detail router
+      this.$router.push({
+        name: `/${this.$i18n.locale}/topic/detail`,
+        query: {
+          id: item.topic.id,
+          app: item.app.code,
+          topic: item.topic.code,
+          namespace: item.namespace.code,
+          clientType: item.clientType,
+          subTab: 'partition',
+          tab: 'producerDetail',
+          producerDetailVisible: '1',
+          consumerDetailVisible: this.consumerDetailVisible ? '1' : '0'
+        }
+      })
+    },
+    openConsumerDetailTab (item) {
+      // Jump to consumer detail router
+      this.$router.push({
+        name: `/${this.$i18n.locale}/topic/detail`,
+        query: {
+          id: item.topic.id,
+          app: item.app.code,
+          topic: item.topic.code,
+          namespace: item.namespace.code,
+          subscribeGroup: item.subscribeGroup,
+          clientType: item.clientType,
+          subTab: 'partition',
+          tab: 'consumerDetail',
+          producerDetailVisible: this.producerDetailVisible ? '1' : '0',
+          consumerDetailVisible: '1'
+        }
+      })
+    },
+    queryTopicDetail () {
+      this.$refs.detail.getDetail(this.$route.query.id)
+    }
+  },
   computed: {
     search () {
       return {
         topic: {
           id: this.$route.query.id,
-          code: this.$route.query.code,
+          code: this.$route.query.topic,
           namespace: {
-            id: this.$route.query.namespaceId,
-            code: this.$route.query.namespaceCode
+            code: this.$route.query.namespace
           }
         }
       }
@@ -72,9 +126,7 @@ export default {
       return {
         topic: this.$route.query.id,
         app: this.$route.query.app,
-        status: 1,
-        beginTime: '',
-        endTime: ''
+        status: 1
       }
     },
     archiveSearch () {
@@ -116,59 +168,8 @@ export default {
       }
     }
   },
-  methods: {
-    openProducerDetailTab (item) {
-      // Jump to producer detail router
-      this.$router.push({
-        name: `/${this.$i18n.locale}/topic/detail`,
-        query: {
-          id: this.$route.query.id,
-          code: this.$route.query.code,
-          app: item.app.code,
-          topic: item.topic.code,
-          namespace: item.namespace.code,
-          namespaceId: item.namespace.id,
-          namespaceCode: item.namespace.code,
-          clientType: item.clientType,
-          subTab: 'partition',
-          tab: 'producerDetail',
-          producerDetailVisible: '1',
-          consumerDetailVisible: this.consumerDetailVisible ? '1' : '0'
-        }
-      })
-    },
-    openConsumerDetailTab (item) {
-      // Jump to consumer detail router
-      this.$router.push({
-        name: `/${this.$i18n.locale}/topic/detail`,
-        query: {
-          id: this.$route.query.id,
-          code: this.$route.query.code,
-          app: item.app.code,
-          topic: item.topic.code,
-          namespace: item.namespace.code,
-          namespaceId: item.namespace.id,
-          namespaceCode: item.namespace.code,
-          subscribeGroup: item.subscribeGroup,
-          clientType: item.clientType,
-          subTab: 'partition',
-          tab: 'consumerDetail',
-          producerDetailVisible: this.producerDetailVisible ? '1' : '0',
-          consumerDetailVisible: '1'
-        }
-      })
-    },
-    queryTopicDetail () {
-      this.$refs.detail.getDetail(this.$route.query.id)
-    }
-  },
   mounted () {
-    // init topic
-    // this.topic.id = this.$route.query.id
-    // this.topic.code = this.$route.query.code
-    // this.topic.namespace.id = this.$route.query.namespaceId
-    // this.topic.namespace.code = this.$route.query.namespaceCode
-    // add archive refs into detail tab refs
+    // add refs into detail tab refs
     this.$refs.detail.$refs['producer'] = this.$refs.producer
     this.$refs.detail.$refs['consumer'] = this.$refs.consumer
     this.$refs.detail.$refs['partitionGroup'] = this.$refs.partitionGroup
