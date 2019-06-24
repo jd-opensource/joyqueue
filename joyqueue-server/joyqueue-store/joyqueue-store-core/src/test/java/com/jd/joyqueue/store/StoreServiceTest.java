@@ -15,7 +15,7 @@ package com.jd.joyqueue.store;
 
 import com.jd.joyqueue.domain.QosLevel;
 import com.jd.joyqueue.exception.JoyQueueCode;
-import com.jd.joyqueue.store.utils.BaseDirUtils;
+import com.jd.joyqueue.toolkit.util.BaseDirUtils;
 import com.jd.joyqueue.store.utils.MessageUtils;
 import com.jd.joyqueue.toolkit.time.SystemClock;
 import org.junit.After;
