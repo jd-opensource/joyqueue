@@ -127,7 +127,7 @@ public class ReplicationManager extends Service {
                     "%d failed, replicable store is null", topic, partitionGroup));
         }
         replicaGroup = new ReplicaGroup(topicPartitionGroup, this, replicableStore, electionConfig,
-                consume, replicateExecutor, replicateTimerExecutor, brokerMonitor, allNodes, learners, localReplicaId, leaderId);
+                consume, replicateExecutor, brokerMonitor, allNodes, learners, localReplicaId, leaderId);
         try {
             replicaGroup.start();
         } catch (Exception e) {

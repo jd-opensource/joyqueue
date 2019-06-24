@@ -13,6 +13,7 @@
  */
 package com.jd.journalq.broker.election;
 
+import com.jd.journalq.broker.config.Configuration;
 import com.jd.journalq.broker.election.handler.AppendEntriesRequestHandler;
 import com.jd.journalq.broker.election.handler.ReplicateConsumePosRequestHandler;
 import com.jd.journalq.broker.election.handler.TimeoutNowRequestHandler;
@@ -29,7 +30,8 @@ public class ElectionCommandHandlerRegistrarStub {
         commandHandlerFactory.register(CommandType.RAFT_VOTE_REQUEST, new VoteRequestHandler(electionManager));
         commandHandlerFactory.register(CommandType.RAFT_APPEND_ENTRIES_REQUEST, new AppendEntriesRequestHandler(electionManager));
         commandHandlerFactory.register(CommandType.RAFT_TIMEOUT_NOW_REQUEST, new TimeoutNowRequestHandler(electionManager));
-        commandHandlerFactory.register(CommandType.REPLICATE_CONSUME_POS_REQUEST, new ReplicateConsumePosRequestHandler(new ConsumeStub()));
+        commandHandlerFactory.register(CommandType.REPLICATE_CONSUME_POS_REQUEST, new ReplicateConsumePosRequestHandler(
+                new ElectionConfig(new Configuration()), new ConsumeStub()));
         return commandHandlerFactory;
     }
 }

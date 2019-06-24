@@ -22,6 +22,7 @@ import com.jd.journalq.store.replication.ReplicableStore;
 import com.jd.journalq.toolkit.concurrent.EventBus;
 import com.jd.journalq.toolkit.service.Service;
 
+import com.jd.journalq.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -107,9 +108,7 @@ public abstract class LeaderElection extends Service {
     void updateMetadata(int leaderId, int term) {
         Set<Integer> isrId = new HashSet<>();
 
-        logger.info("Leader report, topic is {}, group id is {}, leader is {}, term is {}",
-                topicPartitionGroup.getTopic(), topicPartitionGroup.getPartitionGroupId(),
-                leaderId, term);
+        long startTime = SystemClock.now();
 
         try {
             clusterManager.leaderReport(TopicName.parse(topicPartitionGroup.getTopic()),
@@ -118,6 +117,10 @@ public abstract class LeaderElection extends Service {
             logger.warn("Partition group {}/node {} report leader fail",
                     topicPartitionGroup, localNodeId, e);
         }
+
+        logger.info("Leader report, topic is {}, group id is {}, leader is {}, term is {}, elapse {} ms",
+                topicPartitionGroup.getTopic(), topicPartitionGroup.getPartitionGroupId(),
+                leaderId, term, SystemClock.now() - startTime);
     }
 
     /**
