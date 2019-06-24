@@ -82,7 +82,7 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
     @Override
     protected void validate() throws Exception {
         writerThread = new ThreadPoolExecutor(config.getWriterThread(), config.getWriterThread(), 0L,
-                TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(config.getWriterSize()), new NamedThreadFactory("journalq-monitor-writer"), new ThreadPoolExecutor.CallerRunsPolicy());
+                TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(config.getWriterSize()), new NamedThreadFactory("joyqueue-monitor-writer"), new ThreadPoolExecutor.CallerRunsPolicy());
     }
 
     @Override

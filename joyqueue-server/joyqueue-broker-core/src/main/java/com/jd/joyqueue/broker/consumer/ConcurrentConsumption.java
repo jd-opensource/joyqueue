@@ -122,7 +122,7 @@ class ConcurrentConsumption extends Service {
 
         thread = LoopThread.builder()
                 .sleepTime(1000 * 5, 1000 * 5)
-                .name("JournalQ-concurrent-consumption-move-expire-Thread")
+                .name("joyqueue-concurrent-consumption-move-expire-Thread")
                 .onException(e -> logger.warn("Exception:", e))
                 .doWork(() -> {
                     moveSegment2ExpireQueue();

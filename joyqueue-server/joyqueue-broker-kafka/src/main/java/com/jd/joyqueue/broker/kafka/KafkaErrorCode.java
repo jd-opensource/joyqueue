@@ -116,7 +116,7 @@ public enum KafkaErrorCode {
 
     protected static final Logger logger = LoggerFactory.getLogger(KafkaErrorCode.class);
 
-    private static final Map<Integer, Short> JOURNALQ_CODE_TO_CODE_MAPPER = Maps.newHashMap();
+    private static final Map<Integer, Short> JOYQUEUE_CODE_TO_CODE_MAPPER = Maps.newHashMap();
     private static final Map<Class<?>, Short> EXCEPTION_TO_CODE_MAPPER = Maps.newHashMap();
 
     static {
@@ -125,7 +125,7 @@ public enum KafkaErrorCode {
                 continue;
             }
             for (JoyQueueCode JoyQueueCode : errorCode.getJoyQueueCodes()) {
-                JOURNALQ_CODE_TO_CODE_MAPPER.put(JoyQueueCode.getCode(), errorCode.getCode());
+                JOYQUEUE_CODE_TO_CODE_MAPPER.put(JoyQueueCode.getCode(), errorCode.getCode());
             }
         }
 
@@ -177,7 +177,7 @@ public enum KafkaErrorCode {
 
     public static short exceptionFor(Throwable exception) {
         if (exception instanceof JoyQueueException) {
-            return journalqCodeFor(((JoyQueueException) exception).getCode());
+            return joyQueueCodeFor(((JoyQueueException) exception).getCode());
         } else {
             return kafkaExceptionFor(exception);
         }
@@ -192,10 +192,10 @@ public enum KafkaErrorCode {
         return code;
     }
 
-    public static short journalqCodeFor(int journalqCode) {
-        Short code = JOURNALQ_CODE_TO_CODE_MAPPER.get(journalqCode);
+    public static short joyQueueCodeFor(int joyQueueCode) {
+        Short code = JOYQUEUE_CODE_TO_CODE_MAPPER.get(joyQueueCode);
         if (code == null) {
-            logger.warn("unsupported code mapper, code: {}", JoyQueueCode.valueOf(journalqCode));
+            logger.warn("unsupported code mapper, code: {}", JoyQueueCode.valueOf(joyQueueCode));
             code = UNKNOWN_SERVER_ERROR.getCode();
         }
         return code;

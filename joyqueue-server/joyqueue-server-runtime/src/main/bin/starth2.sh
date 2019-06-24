@@ -16,7 +16,7 @@
 
 BASEDIR=`dirname $0`/..
 BASEDIR=`(cd "$BASEDIR"; pwd)`
-CONFIG_FILE="$BASEDIR/conf/journalq.properties"
+CONFIG_FILE="$BASEDIR/conf/joyqueue.properties"
 JAVA_HOME=`grep -ios 'JAVA_HOME=.*$' ${CONFIG_FILE} | cut -d '=' -f 2`
 # If a specific java binary isn't specified search for the standard 'java' binary
 if [ -z "$JAVACMD" ] ; then
@@ -41,6 +41,6 @@ if [ ! -x "$JAVACMD" ] ; then
   exit 1
 fi
 
-nohup "$JAVACMD" -classpath "$CLASSPATH" -Dbasedir="$BASEDIR" -Dfile.encoding="UTF-8" org.h2.tools.Server -tcp -baseDir ./h2-db-journalq \
+nohup "$JAVACMD" -classpath "$CLASSPATH" -Dbasedir="$BASEDIR" -Dfile.encoding="UTF-8" org.h2.tools.Server -tcp -baseDir ./h2-db-joyqueue \
 "$@" >/dev/null 2>/dev/null &
 echo $! > h2.pid

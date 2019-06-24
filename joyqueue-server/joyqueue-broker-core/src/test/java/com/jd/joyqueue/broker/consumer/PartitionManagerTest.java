@@ -32,7 +32,7 @@ public class PartitionManagerTest {
 //        consumer.setTopic("topic");
 //        consumer.setApp("app");
 //
-//        com.jd.journalq.domain.Consumer.ConsumerPolicy consumerPolicy = new com.jd.journalq.domain.Consumer.ConsumerPolicy();
+//        com.jd.joyqueue.domain.Consumer.ConsumerPolicy consumerPolicy = new com.jd.joyqueue.domain.Consumer.ConsumerPolicy();
 //        consumerPolicy.setMaxPartitionNum(3);
 //        consumerPolicy.setErrTimes(1);
 //

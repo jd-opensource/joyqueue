@@ -17,7 +17,7 @@ import com.jd.joyqueue.network.transport.command.Header;
 import io.netty.buffer.ByteBuf;
 
 /**
- * journalq消息体解码
+ * joyqueue消息体解码
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/21

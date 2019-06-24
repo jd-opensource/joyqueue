@@ -28,7 +28,7 @@ import java.util.List;
  * date: 2019/4/8
  */
 // Ordered接口提供getOrder方法，用于指定顺序，可以不实现
-// context还有attributes等可使用，具体看com.jd.journalq.client.internal.producer.interceptor.ProduceContext
+// context还有attributes等可使用，具体看com.jd.joyqueue.client.internal.producer.interceptor.ProduceContext
 public class JoyQueueSimpleProducerInterceptor implements ProducerInterceptor, Ordered {
 
     @Override

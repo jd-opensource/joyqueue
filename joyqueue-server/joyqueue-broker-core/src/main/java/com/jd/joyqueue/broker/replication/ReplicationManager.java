@@ -86,7 +86,7 @@ public class ReplicationManager extends Service {
         replicaGroups = new ConcurrentHashMap<>();
 
         ClientConfig clientConfig = new ClientConfig();
-        clientConfig.setIoThreadName("journalqreplication-io-eventLoop");
+        clientConfig.setIoThreadName("joyqueue-replication-io-eventLoop");
         clientConfig.setMaxAsync(1000);
         transportClient = new BrokerTransportClientFactory().create(clientConfig);
         transportClient.start();

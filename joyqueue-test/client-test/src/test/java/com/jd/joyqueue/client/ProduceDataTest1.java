@@ -36,7 +36,7 @@ public class ProduceDataTest1 {
 
         KeyValue attributes = OMS.newKeyValue();
         attributes.put(OMSBuiltinKeys.ACCOUNT_KEY, AbstractClientTest.ACCOUNT_KEY);
-        producer = OMS.getMessagingAccessPoint(String.format("oms:journalq://%s@%s/%s",
+        producer = OMS.getMessagingAccessPoint(String.format("oms:joyqueue://%s@%s/%s",
                 AbstractClientTest.ACCOUNT_ID, AbstractClientTest.SERVER, AbstractClientTest.REGION), attributes).createProducer();
         producer.start();
     }

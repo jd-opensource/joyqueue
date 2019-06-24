@@ -11,5 +11,5 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jd.joyqueue.nsr;//package com.jd.journalq.nsr.service;
+package com.jd.joyqueue.nsr;//package com.jd.joyqueue.nsr.service;
 

@@ -46,7 +46,7 @@ public class BackendServer extends Service {
 
     public BackendServer(ServerConfig config, BrokerContext brokerContext) {
         this.config = config;
-        this.transportEventBus = new EventBus<>("journalq-backend-eventBus");
+        this.transportEventBus = new EventBus<>("joyqueue-backend-eventBus");
         this.exceptionHandler = new BrokerExceptionHandler();
         this.commandHandlerFactory = new BrokerCommandHandlerFactory(brokerContext);
         this.transportServerFactory = new BrokerTransportServerFactory(commandHandlerFactory, exceptionHandler, transportEventBus);

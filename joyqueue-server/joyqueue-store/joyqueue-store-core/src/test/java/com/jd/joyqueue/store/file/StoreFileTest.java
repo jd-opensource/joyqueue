@@ -128,7 +128,7 @@ public class StoreFileTest {
     private void prepareBaseDir() throws IOException {
         String property = "java.io.tmpdir";
         String tempDir = System.getProperty(property);
-        base = new File(tempDir + File.separator + "journalq-data");
+        base = new File(tempDir + File.separator + "joyqueue-data");
         if (!base.exists()) {
             base.mkdirs();
         }

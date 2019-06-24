@@ -20,7 +20,7 @@ import java.io.InputStream;
 import java.util.Properties;
 
 /**
- * journalq加载器
+ * joyqueue加载器
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/27
@@ -49,9 +49,9 @@ public class Launcher {
                             ">>> | |__| | | |  | | | |__| |" + separator +
                             ">>> \\______/ |_|  |_| \\__\\__\\/" + separator +
                             ">>>                           ");
-            logger.info("JournalQ is started");
+            logger.info("JoyQueue is started");
         } catch (Throwable t) {
-            logger.error("JournalQ start exception", t);
+            logger.error("JoyQueue start exception", t);
             brokerService.stop();
             System.exit(-1);
         }
@@ -61,9 +61,9 @@ public class Launcher {
             public void run() {
                 try {
                     brokerService.stop();
-                    logger.info("JournalQ stopped");
+                    logger.info("JoyQueue stopped");
                 } catch (Throwable t) {
-                    logger.error("JournalQ stop exception", t);
+                    logger.error("JoyQueue stop exception", t);
                     System.exit(-1);
                 }
             }

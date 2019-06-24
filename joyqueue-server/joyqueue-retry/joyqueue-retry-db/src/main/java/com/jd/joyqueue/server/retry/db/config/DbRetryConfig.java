@@ -66,14 +66,14 @@ public class DbRetryConfig {
     // 写据源配置
     private static DataSourceConfig dsConfig;
     // 配置路径加名称
-    private static final String configFile = "journalq.properties";
+    private static final String configFile = "joyqueue.properties";
 
     // 初始化数据源配置
     static {
         Properties properties = new Properties();
         InputStream inputStream = DbRetryConfig.class.getClassLoader().getResourceAsStream(configFile);
         if (null == inputStream) {
-            throw new JoyQueueConfigException("cannot load journalq.properties.");
+            throw new JoyQueueConfigException("cannot load joyqueue.properties.");
         }
         try {
             properties.load(inputStream);

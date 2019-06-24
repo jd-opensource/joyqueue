@@ -63,7 +63,7 @@ public class ClientManager extends Service {
     protected void validate() throws Exception {
         clientGroupManager = new ClientGroupManager(transportConfig);
         transportClient = new DefaultTransportClientFactory(new JoyQueueCodec()).create(convertToClientConfig(transportConfig));
-        heartbeatThreadScheduler = Executors.newScheduledThreadPool(1, new NamedThreadFactory("journalq-client-heartbeat"));
+        heartbeatThreadScheduler = Executors.newScheduledThreadPool(1, new NamedThreadFactory("joyqueue-client-heartbeat"));
     }
 
     @Override
@@ -183,7 +183,7 @@ public class ClientManager extends Service {
         clientConfig.setMaxAsync(transportConfig.getMaxAsync());
         clientConfig.setRetryPolicy(transportConfig.getRetryPolicy());
         clientConfig.setNonBlockOneway(transportConfig.isNonBlockOneway());
-        clientConfig.setIoThreadName("journalq-client-io-eventLoop");
+        clientConfig.setIoThreadName("joyqueue-client-io-eventLoop");
         return clientConfig;
     }
 }

@@ -35,7 +35,7 @@ public class ExtensionTransactionProducer {
         KeyValue keyValue = OMS.newKeyValue();
         keyValue.put(OMSBuiltinKeys.ACCOUNT_KEY, "test_token");
 
-        MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint(String.format("oms:journalq://test_app@%s:50088/UNKNOWN", IpUtil.getLocalIp()), keyValue);
+        MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint(String.format("oms:joyqueue://test_app@%s:50088/UNKNOWN", IpUtil.getLocalIp()), keyValue);
 
         ExtensionProducer extensionProducer = (ExtensionProducer) messagingAccessPoint.createProducer();
         extensionProducer.start();

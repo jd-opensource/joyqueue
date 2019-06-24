@@ -28,7 +28,7 @@ import static org.h2.engine.Constants.DEFAULT_TCP_PORT;
 public class H2DBServer {
     private static final Logger logger = LoggerFactory.getLogger(H2DBServer.class);
 
-    public static final String BASE_DIR = "./h2-db-journalq";
+    public static final String BASE_DIR = "./h2-db-joyqueue";
     public static final int TCP_PORT = DEFAULT_TCP_PORT;
     public static final int WEB_PORT = DEFAULT_HTTP_PORT;
 
@@ -79,7 +79,7 @@ public class H2DBServer {
         }
     }
 
-    //jdbc:h2:tcp://127.0.0.1/./h2-db-journalq;INIT...
+    //jdbc:h2:tcp://127.0.0.1/./h2-db-joyqueue;INIT...
     protected String getBaseDir(String url) {
         try {
             String[] strs = url.split("//");

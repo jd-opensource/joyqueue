@@ -33,7 +33,7 @@ public class RemoteRetryConfig {
     private static int remoteRetryUpdateInterval;
 
     // 配置文件路径
-    private static final String configFile = "journalq.properties";
+    private static final String configFile = "joyqueue.properties";
 
 
     // 初始化数据源配置

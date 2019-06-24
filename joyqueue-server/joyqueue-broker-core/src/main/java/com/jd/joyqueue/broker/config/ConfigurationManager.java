@@ -53,7 +53,7 @@ import static com.jd.joyqueue.broker.config.Configuration.DEFAULT_CONFIGURATION_
 public class ConfigurationManager extends Service implements EventListener<NameServerEvent> {
     private static final String DEFAULT_CONFIGURATION_NAME = "_BROKER_CONFIG_";
     private static final String CONFIGURATION_VERSION = "_CONFIGURATION_VERSION_";
-    private static final String DEFAULT_CONFIG_PATH = "journalq.properties";
+    private static final String DEFAULT_CONFIG_PATH = "joyqueue.properties";
 
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationManager.class);

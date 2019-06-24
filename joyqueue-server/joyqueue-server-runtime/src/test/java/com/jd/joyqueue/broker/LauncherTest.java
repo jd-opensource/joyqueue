@@ -27,9 +27,9 @@ public class LauncherTest {
         BrokerServiceTest brokerService = new BrokerServiceTest();
         try {
             brokerService.start();
-            logger.info("JournalQ Test is start");
+            logger.info("JoyQueue Test is start");
         } catch (Throwable t) {
-            logger.error("JournalQ Test start exception", t);
+            logger.error("JoyQueue Test start exception", t);
             brokerService.stop();
             System.exit(-1);
         }
@@ -40,7 +40,7 @@ public class LauncherTest {
                 try {
                     brokerService.stop();
                 } catch (Throwable t) {
-                    logger.error("JournalQ Test stop exception", t);
+                    logger.error("JoyQueue Test stop exception", t);
                     System.exit(-1);
                 }
             }

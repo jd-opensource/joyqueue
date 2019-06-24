@@ -56,7 +56,7 @@ public class MemberTimeoutDelayedOperation extends AbstractDelayedOperation {
                 return;
             }
 
-            logger.info("journalq consumer {} is expired, release assigned partition, connection: {}, latestHeartbeat: {}", member.getId(), member.getConnectionHost(), member.getLatestHeartbeat());
+            logger.info("joyqueue consumer {} is expired, release assigned partition, connection: {}, latestHeartbeat: {}", member.getId(), member.getConnectionHost(), member.getLatestHeartbeat());
 
             if (member.getTimeoutCallback() != null) {
                 member.getTimeoutCallback().onCompletion(group, member);

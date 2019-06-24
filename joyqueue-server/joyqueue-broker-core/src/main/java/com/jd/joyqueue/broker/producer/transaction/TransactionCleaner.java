@@ -56,7 +56,7 @@ public class TransactionCleaner extends Service implements Runnable {
 
     @Override
     protected void validate() throws Exception {
-        clearThreadPool = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("journalq-transaction-clear"));
+        clearThreadPool = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("joyqueue-transaction-clear"));
     }
 
     @Override

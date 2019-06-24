@@ -19,7 +19,7 @@ public class Subscribe implements Serializable {
     private Topic topic;
     private Identity app;
     private SubscribeType type; // producer or consumer
-    private byte clientType; //include journalq,kafka et.
+    private byte clientType; //include joyqueue,kafka et.
     private Namespace namespace;
     private String subscribeGroup;
 

@@ -63,7 +63,7 @@ public class BrokerStatSaveScheduler extends Service implements Runnable {
     }
 
     protected ScheduledExecutorService newScheduledExecutorService() {
-        NamedThreadFactory threadFactory = new NamedThreadFactory("journalq-stat-save-scheduler");
+        NamedThreadFactory threadFactory = new NamedThreadFactory("joyqueue-stat-save-scheduler");
         return Executors.newSingleThreadScheduledExecutor(threadFactory);
     }
 }

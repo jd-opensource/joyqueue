@@ -24,16 +24,16 @@ import com.jd.joyqueue.toolkit.config.PropertyDef;
 public enum JoyQueueConfigKey implements PropertyDef {
 
     // 协调者分区分配类型
-    COORDINATOR_PARTITION_ASSIGN_TYPE("journalq.coordinator.partition.assign.type", "PARTITION_GROUP_BALANCE", PropertyDef.Type.STRING),
+    COORDINATOR_PARTITION_ASSIGN_TYPE("joyqueue.coordinator.partition.assign.type", "PARTITION_GROUP_BALANCE", PropertyDef.Type.STRING),
 
     // 协调者分配超时溢出
-    COORDINATOR_PARTITION_ASSIGN_TIMEOUT_OVERFLOW("journalq.coordinator.partition.assign.timeout.overflow", 1000 * 60 * 1, PropertyDef.Type.INT),
+    COORDINATOR_PARTITION_ASSIGN_TIMEOUT_OVERFLOW("joyqueue.coordinator.partition.assign.timeout.overflow", 1000 * 60 * 1, PropertyDef.Type.INT),
 
     // 协调者分区分配最小连接数
-    COORDINATOR_PARTITION_ASSIGN_MIN_CONNECTIONS("journalq.coordinator.partition.assign.minConnections", 1, PropertyDef.Type.INT),
+    COORDINATOR_PARTITION_ASSIGN_MIN_CONNECTIONS("joyqueue.coordinator.partition.assign.minConnections", 1, PropertyDef.Type.INT),
 
     // 生产最大超时
-    PRODUCE_MAX_TIMEOUT("journalq.producer.max.timeout", 1000 * 60, PropertyDef.Type.INT),
+    PRODUCE_MAX_TIMEOUT("joyqueue.producer.max.timeout", 1000 * 60, PropertyDef.Type.INT),
 
 
     ;

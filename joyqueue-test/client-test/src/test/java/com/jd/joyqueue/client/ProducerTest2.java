@@ -39,7 +39,7 @@ public class ProducerTest2 extends AbstractProducerTest {
         KeyValue attributes = getAttributes();
         attributes.put(OMSBuiltinKeys.ACCOUNT_KEY, ACCOUNT_KEY);
         attributes.put(JoyQueueProducerBuiltinKeys.TRANSACTION_TIMEOUT, 1000 * 10);
-        messagingAccessPoint = OMS.getMessagingAccessPoint(String.format("oms:journalq://%s@%s/%s", ACCOUNT_ID, SERVER, "test_region"), attributes);
+        messagingAccessPoint = OMS.getMessagingAccessPoint(String.format("oms:joyqueue://%s@%s/%s", ACCOUNT_ID, SERVER, "test_region"), attributes);
 
         producer = (ExtensionProducer) messagingAccessPoint.createProducer();
         producer.start();

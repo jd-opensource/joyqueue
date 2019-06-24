@@ -33,7 +33,7 @@ import org.apache.commons.lang3.StringUtils;
  * Date: 2019/1/21
  */
 public class AppTokenAuthentication implements Authentication, BrokerContextAware {
-    public static final String DEFAULT_ADMIN_USER="journalq";
+    public static final String DEFAULT_ADMIN_USER="joyqueue";
     private String admin = DEFAULT_ADMIN_USER;
     private ClusterManager clusterManager;
 

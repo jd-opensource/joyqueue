@@ -21,7 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * journalq解码
+ * joyqueue解码
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/21

@@ -84,7 +84,7 @@ public class TempMetadataInitializer extends Service {
 
     public static void prepare() {
         try {
-            FileUtils.deleteDirectory(new File("/export/Data/journalq"));
+            FileUtils.deleteDirectory(new File("/export/Data/joyqueue"));
             FileUtils.deleteDirectory(new File("/export/Data/ignite"));
         } catch (Exception e) {
             e.printStackTrace();

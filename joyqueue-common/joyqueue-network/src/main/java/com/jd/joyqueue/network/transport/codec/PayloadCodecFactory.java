@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 
 /**
- * journalq消息体编解码器工厂
+ * joyqueue消息体编解码器工厂
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/21

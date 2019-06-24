@@ -90,7 +90,7 @@ nohup "$JAVACMD" $JPDA_OPTS \
   -classpath "$CLASSPATH" \
   -Dbasedir="$BASEDIR" \
   -Dfile.encoding="UTF-8" \
-  com.jd.journalq.application.WebApplication \
+  com.jd.joyqueue.application.WebApplication \
   > /dev/null &
 
 

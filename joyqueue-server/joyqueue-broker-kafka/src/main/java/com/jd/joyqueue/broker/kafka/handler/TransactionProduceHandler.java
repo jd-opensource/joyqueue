@@ -80,7 +80,7 @@ public class TransactionProduceHandler {
                     if (!writeResult.getCode().equals(JoyQueueCode.SUCCESS)) {
                         logger.error("produce message failed, topic: {}, code: {}", producer.getTopic(), writeResult.getCode());
                     }
-                    code[0] = KafkaErrorCode.journalqCodeFor(writeResult.getCode().getCode());
+                    code[0] = KafkaErrorCode.joyQueueCodeFor(writeResult.getCode().getCode());
                     latch.countDown();
                 });
             } catch (Exception e) {

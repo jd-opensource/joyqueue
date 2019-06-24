@@ -14,7 +14,7 @@
 #
 
 
-MAIN_CLASS="com.jd.journalq.store.cli.PGCheck"
+MAIN_CLASS="com.jd.joyqueue.store.cli.PGCheck"
 
 APP_HOME="$( cd "$(dirname "$0")" ; cd .. ; pwd -P )"
 

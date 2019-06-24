@@ -45,7 +45,7 @@ public class TransactionCompletionScheduler extends Service {
 
     @Override
     protected void validate() throws Exception {
-        executor = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("journalq-transaction-compensate"));
+        executor = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("joyqueue-transaction-compensate"));
     }
 
     @Override

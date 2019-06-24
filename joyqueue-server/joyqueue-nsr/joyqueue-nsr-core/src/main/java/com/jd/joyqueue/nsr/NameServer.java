@@ -951,8 +951,8 @@ public class NameServer extends Service implements NameService, PropertySupplier
 
     private TransportServer buildTransportServer(){
         ServerConfig serverConfig = nameServerConfig.getServerConfig();
-        serverConfig.setAcceptThreadName("journalq-nameserver-accept-eventLoop");
-        serverConfig.setIoThreadName("journalq-nameserver-io-eventLoop");
+        serverConfig.setAcceptThreadName("joyqueue-nameserver-accept-eventLoop");
+        serverConfig.setIoThreadName("joyqueue-nameserver-io-eventLoop");
         return transportServerFactory.bind(serverConfig, serverConfig.getHost(), serverConfig.getPort());
     }
 

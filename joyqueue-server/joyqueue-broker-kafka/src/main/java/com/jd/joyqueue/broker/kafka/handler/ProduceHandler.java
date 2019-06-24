@@ -48,7 +48,7 @@ public class ProduceHandler {
                 if (!writeResult.getCode().equals(JoyQueueCode.SUCCESS)) {
                     logger.error("produce message failed, topic: {}, code: {}", producer.getTopic(), writeResult.getCode());
                 }
-                short code = KafkaErrorCode.journalqCodeFor(writeResult.getCode().getCode());
+                short code = KafkaErrorCode.joyQueueCodeFor(writeResult.getCode().getCode());
                 listener.onEvent(new ProduceResponse.PartitionResponse(ProduceResponse.PartitionResponse.NONE_OFFSET, code));
             });
         } catch (Exception e) {

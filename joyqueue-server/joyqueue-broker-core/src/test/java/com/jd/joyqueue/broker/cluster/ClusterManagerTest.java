@@ -63,7 +63,7 @@ public class ClusterManagerTest {
 //
 //    @Test
 //    public void getBrokerByPartition() {
-//        TopicName topic = TopicName.parse("journalq@Test");
+//        TopicName topic = TopicName.parse("joyqueue@Test");
 //        short partitionId = 1;
 //        clusterManager.getTopics().forEach(topicConfig -> {
 //            topicConfig.getPartitionGroups().values().forEach(
@@ -79,7 +79,7 @@ public class ClusterManagerTest {
 //
 //    @Test
 //    public void getPartitionGroupByGroup() {
-//        TopicName topic = TopicName.parse("journalq@Test");
+//        TopicName topic = TopicName.parse("joyqueue@Test");
 //        short groupId = 1;
 //        clusterManager.getTopics().forEach(topicConfig -> {
 //            topicConfig.getPartitionGroups().values().forEach(
@@ -93,7 +93,7 @@ public class ClusterManagerTest {
 //
 //    @Test
 //    public void getTopicConfig() {
-//        TopicName topic = TopicName.parse("journalq@Test");
+//        TopicName topic = TopicName.parse("joyqueue@Test");
 //        clusterManager.getTopics().forEach(topicConfig -> {
 //            logger.info("getTopics[{}]",JSON.toJSONString(clusterManager.getTopicConfig(topicConfig.getName())));
 //        });
@@ -108,7 +108,7 @@ public class ClusterManagerTest {
 //
 //    @Test
 //    public void getPartitionGroup() {
-//        TopicName topic = TopicName.parse("journalq@Test");
+//        TopicName topic = TopicName.parse("joyqueue@Test");
 //        clusterManager.getTopics().forEach(topicConfig -> {
 //            logger.info("topic[{}] ,getPartitionGroup[{}]",topicConfig.getName(),JSON.toJSONString(clusterManager.getPartitionGroup(topicConfig.getName())));
 //        });
@@ -117,8 +117,8 @@ public class ClusterManagerTest {
 //
 //    @Test
 //    public void getPartitionGroupId() {
-//        String app = "journalq";
-//        TopicName topic = TopicName.parse("journalq@Test");
+//        String app = "joyqueue";
+//        TopicName topic = TopicName.parse("joyqueue@Test");
 //        short partitionNum = 1;
 //        clusterManager.getTopics().forEach(topicConfig -> {
 //                    topicConfig.getPartitionGroups().values().forEach(group -> {
@@ -132,8 +132,8 @@ public class ClusterManagerTest {
 //
 //    @Test
 //    public void getReplicaGroup() {
-//        String app = "journalq";
-//        TopicName topic = TopicName.parse("journalq@Test");
+//        String app = "joyqueue";
+//        TopicName topic = TopicName.parse("joyqueue@Test");
 //        clusterManager.getTopics().forEach(topicConfig -> {
 //            logger.info("topic[{}] app[{}] ,getReplicaGroup[{}]",topicConfig.getName(),app,JSON.toJSONString(clusterManager.getReplicaGroup(topicConfig.getName())));
 //        });
@@ -142,9 +142,9 @@ public class ClusterManagerTest {
 //
 //    @Test
 //    public void getPartitionList() {
-//        String app = "journalq";
+//        String app = "joyqueue";
 //        String ip = IpUtil.getLocalIp();
-//        TopicName topic = TopicName.parse("journalq@Test");
+//        TopicName topic = TopicName.parse("joyqueue@Test");
 //        clusterManager.getTopics().forEach(topicConfig -> {
 //            logger.info("topic[{}] app[{}] ,getPartitionList[{}]",topicConfig.getName(),app,JSON.toJSONString(clusterManager.getPartitionList(topicConfig.getName())));
 //        });
@@ -153,9 +153,9 @@ public class ClusterManagerTest {
 //
 //    @Test
 //    public void getMasterPartitionList() {
-//        String app = "journalq";
+//        String app = "joyqueue";
 //        String ip = IpUtil.getLocalIp();
-//        TopicName topic = TopicName.parse("journalq@Test");
+//        TopicName topic = TopicName.parse("joyqueue@Test");
 //        clusterManager.getTopics().forEach(topicConfig -> {
 //            logger.info("topic[{}] app[{}] ,getMasterPartitionList[{}]",topicConfig.getName(),app,JSON.toJSONString(clusterManager.getMasterPartitionList(topicConfig.getName())));
 //        });
@@ -164,9 +164,9 @@ public class ClusterManagerTest {
 //
 //    @Test
 //    public void getPriorityPartitionList() {
-//        String app = "journalq";
+//        String app = "joyqueue";
 //        String ip = IpUtil.getLocalIp();
-//        TopicName topic = TopicName.parse("journalq@Test");
+//        TopicName topic = TopicName.parse("joyqueue@Test");
 //        clusterManager.getTopics().forEach(topicConfig -> {
 //            logger.info("topic[{}] app[{}] ,getPriorityPartitionList[{}]",topicConfig.getName(),app,JSON.toJSONString(clusterManager.getPriorityPartitionList(topicConfig.getName())));
 //        });
@@ -175,9 +175,9 @@ public class ClusterManagerTest {
 //
 //    @Test
 //    public void getConsumerPolicy() throws JoyQueueException {
-//        String app = "journalq";
+//        String app = "joyqueue";
 //        String ip = IpUtil.getLocalIp();
-//        TopicName topic = TopicName.parse("journalq@Test");
+//        TopicName topic = TopicName.parse("joyqueue@Test");
 //        for (TopicConfig topicConfig : clusterManager.getTopics()) {
 //            logger.info("topic[{}] app[{}] ,getConsumerPolicy[{}]", topicConfig.getName(), app, JSON.toJSONString(clusterManager.getConsumerPolicy(topicConfig.getName(), app)));
 //        }
@@ -186,9 +186,9 @@ public class ClusterManagerTest {
 //
 //    @Test
 //    public void isNeedNearby() throws JoyQueueException {
-//        String app = "journalq";
+//        String app = "joyqueue";
 //        String ip = IpUtil.getLocalIp();
-//        TopicName topic = TopicName.parse("journalq@Test");
+//        TopicName topic = TopicName.parse("joyqueue@Test");
 //        for (TopicConfig topicConfig : clusterManager.getTopics()) {
 //            logger.info("topic[{}] app[{}] ,isNeedNearby[{}]", topicConfig.getName(), app, clusterManager.isNeedNearby(topicConfig.getName(), app));
 //        }
@@ -197,9 +197,9 @@ public class ClusterManagerTest {
 //
 //    @Test
 //    public void getAckTimeout() throws JoyQueueException {
-//        String app = "journalq";
+//        String app = "joyqueue";
 //        String ip = IpUtil.getLocalIp();
-//        TopicName topic = TopicName.parse("journalq@Test");
+//        TopicName topic = TopicName.parse("joyqueue@Test");
 //        for (TopicConfig topicConfig : clusterManager.getTopics()) {
 //            logger.info("topic[{}] app[{}] ,getAckTimeout[{}]", topicConfig.getName(), app, clusterManager.getAckTimeout(topicConfig.getName(), app));
 //        }
@@ -212,9 +212,9 @@ public class ClusterManagerTest {
 //
 //    @Test
 //    public void checkWritable() throws JoyQueueException {
-//        String app = "journalq";
+//        String app = "joyqueue";
 //        String ip = clusterManager.getBroker().getIp();
-//        TopicName topic = TopicName.parse("journalq@Test");
+//        TopicName topic = TopicName.parse("joyqueue@Test");
 //        for (TopicConfig topicConfig : clusterManager.getTopics()) {
 //            logger.info("topic[{}] app[{}] ip [{}],checkWritable[{}]", topicConfig.getName(), app, ip, clusterManager.checkWritable(topicConfig.getName(), app, IpUtil.getLocalIp()));
 //        }
@@ -223,9 +223,9 @@ public class ClusterManagerTest {
 //
 //    @Test
 //    public void checkReadable() {
-//        String app = "journalq";
+//        String app = "joyqueue";
 //        String ip = clusterManager.getBroker().getIp();
-//        String topic = "journalq@Test";
+//        String topic = "joyqueue@Test";
 //        clusterManager.getTopics().forEach(topicConfig -> {
 //            logger.info("topic[{}] app[{}] ip [{}],checkReadable[{}]",topicConfig.getName(),app,ip,clusterManager.checkReadable(topicConfig.getName(),app,IpUtil.getLocalIp()));
 //        });

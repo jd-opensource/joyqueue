@@ -37,8 +37,8 @@ import java.util.Properties;
 public class AutoDocTest {
     @Test
     public void autoDocTest() throws Exception {
-        String pkgName = "com.jd.journalq.broker.manage.service";
-        String pkgNameB="com.jd.journalq.broker.monitor.service";
+        String pkgName = "com.jd.joyqueue.broker.manage.service";
+        String pkgNameB="com.jd.joyqueue.broker.monitor.service";
         String routPath= "manage/routing.xml";
         String defaultProperties="auto_doc.properties";
         String host="http://192.168.112.99:50090";
@@ -75,7 +75,7 @@ public class AutoDocTest {
 
     @Test
     public void pkgMethodParamType(){
-        String pkgName = "com.jd.journalq.broker.monitor.service";
+        String pkgName = "com.jd.joyqueue.broker.monitor.service";
         PackageDocScanParser parser=new PackageDocScanParser(pkgName);
         Map<String,Class> classMap=parser.packageScan();
         for(Map.Entry<String,Class> e:classMap.entrySet()){
@@ -90,7 +90,7 @@ public class AutoDocTest {
             }
 
         }
-        List<Class> classes=parser.getNonRawParams("com.jd.journalq.broker.monitor.service.TopicMonitorService","getTopicInfoByTopics");
+        List<Class> classes=parser.getNonRawParams("com.jd.joyqueue.broker.monitor.service.TopicMonitorService","getTopicInfoByTopics");
         Assert.assertEquals("[interface java.util.List]",classes.toString());
     }
 }

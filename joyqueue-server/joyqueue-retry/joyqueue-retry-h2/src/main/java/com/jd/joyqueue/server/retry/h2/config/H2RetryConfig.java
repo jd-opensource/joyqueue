@@ -66,7 +66,7 @@ public class H2RetryConfig {
     // 写据源配置
     private static DataSourceConfig dsConfig;
     // 配置路径加名称
-    private static final String configFile = "journalq.properties";
+    private static final String configFile = "joyqueue.properties";
 
     // 初始化数据源配置
     static {

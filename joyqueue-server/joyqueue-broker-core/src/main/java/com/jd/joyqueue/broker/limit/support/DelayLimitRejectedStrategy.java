@@ -32,7 +32,7 @@ public class DelayLimitRejectedStrategy implements LimitRejectedStrategy {
     private DelayedOperationManager delayPurgatory;
 
     public DelayLimitRejectedStrategy() {
-        this.delayPurgatory = new DelayedOperationManager("journalq-limit-delayed");
+        this.delayPurgatory = new DelayedOperationManager("joyqueue-limit-delayed");
         this.delayPurgatory.start();
     }
 
