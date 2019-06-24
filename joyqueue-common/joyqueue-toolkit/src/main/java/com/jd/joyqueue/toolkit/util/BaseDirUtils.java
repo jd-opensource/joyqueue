@@ -11,9 +11,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jd.joyqueue.store.utils;
+package com.jd.joyqueue.toolkit.util;
 
-import org.junit.Assert;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,7 +26,7 @@ public class BaseDirUtils {
         String property = "java.io.tmpdir";
         String tempDir = System.getProperty(property);
         File tempDirFile = new File(tempDir);
-        Assert.assertTrue(tempDirFile.exists() && tempDirFile.isDirectory() && tempDirFile.canWrite());
+        assert tempDirFile.exists() && tempDirFile.isDirectory() && tempDirFile.canWrite();
 
         File base = new File(basePath);
         if (base.exists()) {
