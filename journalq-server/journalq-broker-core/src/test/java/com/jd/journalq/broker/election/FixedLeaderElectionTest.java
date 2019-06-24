@@ -82,7 +82,6 @@ public class FixedLeaderElectionTest {
 
             ElectionConfig electionConfig = new ElectionConfig(conf);
             electionConfig.setElectionMetaPath(getElectionDir() + i);
-            electionConfig.setElectionMetaFile(getElectionDir() + i + ".dat");
             electionConfig.setListenPort("1800" + (i + 1));
 
             electionManager[i] = new ElectionManagerStub(electionConfig, storeServices[i], new ConsumeStub());

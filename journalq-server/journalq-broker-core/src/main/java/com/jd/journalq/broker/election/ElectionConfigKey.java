@@ -23,6 +23,7 @@ import com.jd.journalq.toolkit.config.PropertyDef;
 public enum ElectionConfigKey implements PropertyDef {
     ELECTION_METADATA("election.metadata.file", "raft_metafile.dat", Type.STRING),
     ELECTION_TIMEOUT("election.election.timeout", 1000 * 5, Type.INT),
+    VOTE_TIMEOUT("election.vote.timeout", 1000 * 5, Type.INT),
     EXECUTOR_THREAD_NUM_MIN("election.executor.thread.num.min", 5, Type.INT),
     EXECUTOR_THREAD_NUM_MAX("election.executor.thread.num.max", 50, Type.INT),
     TIMER_SCHEDULE_THREAD_NUM("election.timer.schedule.thread.num", 5, Type.INT),
@@ -32,7 +33,7 @@ public enum ElectionConfigKey implements PropertyDef {
     DISABLE_STORE_TIMEOUT("election.disable.store.timeout", 1000 * 5, Type.INT),
     LISTEN_PORT("election.listen.port", 18001, Type.INT),
     TRANSFER_LEADER_TIMEOUT("election.transfer.leader.timeout", 1000 * 10, Type.INT),
-    REPLICATE_CONSUME_POS_INTERVAL("election.replicate.consume.pos.interval", 1000, Type.INT),
+    REPLICATE_CONSUME_POS_INTERVAL("election.replicate.consume.pos.interval", 1000 * 5, Type.INT),
     REPLICATE_THREAD_NUM_MIN("election.replicate.thread.num.min", 10, Type.INT),
     REPLICATE_THREAD_NUM_MAX("election.replicate.thread.num.max", 100, Type.INT),
     COMMAND_QUEUE_SIZE("election.command.queue.size", 1024, Type.INT),
@@ -40,7 +41,8 @@ public enum ElectionConfigKey implements PropertyDef {
     TRANSFER_LEADER_MIN_LAG("election.transfer.leader.min.lag", 10 * 1024 * 1024L, Type.LONG),
     ENABLE_REBALANCE_LEADER("election.enable.rebalance.leader", false, Type.BOOLEAN),
     MIN_REBALANCE_INTERVAL("election.min.rebalance.interval", 60 * 60 * 1000, Type.INT),
-    ENABLE_REPORT_LEADER_PERIODICALLY("election.enable.report.leader.periodically", false, Type.BOOLEAN);
+    ENABLE_REPORT_LEADER_PERIODICALLY("election.enable.report.leader.periodically", false, Type.BOOLEAN),
+    OUTPUT_CONSUME_POS("election.consume.pos.output", false, Type.BOOLEAN);
 
     private String name;
     private Object value;
