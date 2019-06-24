@@ -91,16 +91,19 @@ export default {
       subscribeDialog: {
         colData: [
           {
-            title: 'ID',
-            key: 'id'
+            title: '主题代码',
+            key: 'code',
+            width: '30%'
           },
           {
-            title: '主题代码',
-            key: 'code'
+            title: '命名空间',
+            key: 'namespace.code',
+            width: '30%'
           },
           {
             title: '客户端类型',
             key: 'clientType',
+            width: '30%',
             render: (h, params) => {
               return clientTypeSelectRender(h, params, this.$refs.producerBase.$refs.subscribe)
             }

@@ -67,8 +67,6 @@ export default {
     },
     // 各组件可以公用的方法写这里，注意数据结构， 增删改查列表查详情
     getSearchVal () {
-      console.log(22)
-      console.log(this.page)
       let obj = {
         pagination: {
           page: this.page.page,

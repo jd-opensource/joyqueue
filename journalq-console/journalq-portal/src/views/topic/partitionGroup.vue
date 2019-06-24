@@ -2,14 +2,14 @@
   <div>
     <div class="headLine">
       <d-button-group>
-        <d-button type="primary" @click="groupNew" class="button">扩容
+        <d-button @click="groupNew" class="button">扩容
           <icon name="plus-circle" style="margin-left: 3px;"/>
         </d-button>
         <slot name="extendBtn"></slot>
-        <d-button type="primary" v-if="showBrokerChart" @click="goBrokerChart" class="button">Broker监控
+        <d-button v-if="showBrokerChart" @click="goBrokerChart" class="button">Broker监控
           <icon name="cpu" style="margin-left: 3px;"/>
         </d-button>
-        <d-button type="primary" v-if="showHostChart" @click="goHostChart" class="button">主机监控
+        <d-button v-if="showHostChart" @click="goHostChart" class="button">主机监控
           <icon name="monitor" style="margin-left: 3px;"/>
         </d-button>
         <d-button type="primary" @click="getList" class="button">刷新

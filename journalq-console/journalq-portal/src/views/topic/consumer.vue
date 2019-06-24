@@ -71,7 +71,7 @@ export default {
                       app: getAppCode(params.item.app, params.item.subscribeGroup),
                       topic: params.item.topic.code,
                       namespace: params.item.namespace.code,
-                      tab: 'retry',
+                      tab: 'retry'
                     }
                   })
                 }

@@ -2,7 +2,7 @@
   <div>
     <div class="ml20 mt30">
       <d-button-group>
-        <d-button type="primary" class="button" @click="openDialog('addDialog')">添加
+        <d-button class="button" @click="openDialog('addDialog')">添加
           <icon name="plus-circle" style="margin-left: 3px;"></icon>
         </d-button>
         <d-button type="primary" @click="getList" class="button">刷新

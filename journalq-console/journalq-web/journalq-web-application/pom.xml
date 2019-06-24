@@ -177,7 +177,7 @@
                 <spring_datasource_hikari_maximum-pool-size>5</spring_datasource_hikari_maximum-pool-size>
                 <spring_datasource_hikari_idle-timeout>30000</spring_datasource_hikari_idle-timeout>
                 <spring_datasource_hikari_max-lifetime>1800000</spring_datasource_hikari_max-lifetime>
-                <http_server_port>10030</http_server_port>
+                <http_server_port>10031</http_server_port>
                 <sso_login_url>http://test.ssa.jd.com/sso/login</sso_login_url>
                 <jone_app_alias>dev</jone_app_alias>
                 <jone_app_token>1qaz2wsx</jone_app_token>

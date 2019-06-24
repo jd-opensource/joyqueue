@@ -13,7 +13,6 @@
  */
 import apiRequest from './apiRequest.js'
 import apiUrl from './apiUrl.js'
-import {t} from "../locale";
 
 export function getTopicCode (topic, namespace) {
   let topicCode = (topic || {}).code

@@ -54,7 +54,7 @@ import myTable from '../../components/common/myTable.vue'
 import myDialog from '../../components/common/myDialog.vue'
 import topicForm from './topicForm.vue'
 import crud from '../../mixins/crud.js'
-import {baseBtnRender} from '../../utils/common.js'
+import {basePrimaryBtnRender} from '../../utils/common.js'
 
 export default {
   name: 'topic',
@@ -153,7 +153,7 @@ export default {
             title: '类型',
             key: 'type',
             render: (h, params) => {
-              return baseBtnRender(h, params.item.type, [
+              return basePrimaryBtnRender(h, params.item.type, [
                 {
                   value: 0,
                   txt: 'Normal',

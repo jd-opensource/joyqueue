@@ -6,7 +6,7 @@
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
       <d-button-group>
-        <d-button type="primary" v-if="$store.getters.isAdmin" @click="openDialog('subscribeDialog')" class="button">
+        <d-button v-if="$store.getters.isAdmin" @click="openDialog('subscribeDialog')" class="button">
           订阅
           <icon name="plus-circle" style="margin-left: 3px;"></icon>
         </d-button>

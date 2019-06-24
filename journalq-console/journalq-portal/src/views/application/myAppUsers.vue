@@ -6,7 +6,7 @@
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
       <d-button-group>
-        <d-button type="primary" @click="openDialog('addDialog')" class="button">添加
+        <d-button @click="openDialog('addDialog')" class="button">添加
           <icon name="plus-circle" style="margin-left: 3px;"></icon>
         </d-button>
         <d-button type="primary" @click="getList" class="button">刷新

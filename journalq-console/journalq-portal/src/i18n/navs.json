@@ -23,17 +23,12 @@
     {
       "name": "setting",
       "path": "/setting",
-      "redirect": "/setting/user",
+      "redirect": "/setting/dataCenter",
       "component": "setting/index.vue",
       "children": [
         {
           "path":"/",
-          "redirect": "/setting/user"
-        },
-        {
-          "path": "user",
-          "name": "user",
-          "component": "setting/userManage.vue"
+          "redirect": "/setting/dataCenter"
         },
         {
           "path": "dataCenter",
@@ -124,17 +119,12 @@
     {
       "name": "setting",
       "path": "/setting",
-      "redirect": "/setting/user",
+      "redirect": "/setting/dataCenter",
       "component": "setting/index.vue",
       "children": [
         {
           "path":"/",
-          "redirect": "/setting/user"
-        },
-        {
-          "path": "user",
-          "name": "user",
-          "component": "setting/userManage.vue"
+          "redirect": "/setting/dataCenter"
         },
         {
           "path": "dataCenter",

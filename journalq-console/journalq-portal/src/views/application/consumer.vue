@@ -122,12 +122,17 @@ export default {
           {
             title: '主题代码',
             key: 'code',
-            width: '35%'
+            width: '22%'
+          },
+          {
+            title: '命名空间',
+            key: 'namespace.code',
+            width: '22%'
           },
           {
             title: '订阅分组',
             key: 'subscribeGroup',
-            width: '33%',
+            width: '22%',
             render: (h, params) => {
               return subscribeGroupAutoCompleteRender(h, params, this.$refs.consumerBase.$refs.subscribe)
             }
@@ -135,7 +140,7 @@ export default {
           {
             title: '客户端类型',
             key: 'clientType',
-            width: '32%',
+            width: '22%',
             render: (h, params) => {
               return clientTypeSelectRender(h, params, this.$refs.consumerBase.$refs.subscribe)
             }
