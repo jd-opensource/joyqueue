@@ -367,7 +367,7 @@ public class Message implements Serializable {
                 return body;
             }
         } catch (Exception e) {
-            logger.error("getDecompressedBody error", e);
+            logger.error("getDecompressedBody error, topic: {}, app: {}", topic, app, e);
             return body;
         }
     }
