@@ -1,0 +1,5 @@
+com.jd.joyqueue.handler.error.ConfigExceptionSupplier
+com.jd.joyqueue.handler.error.HttpStatusExceptionSupplier
+com.jd.joyqueue.handler.error.SQLExceptionSupplier
+com.jd.joyqueue.handler.error.ThrowableSupplier
+com.jd.joyqueue.handler.error.ValidationExceptionSupplier

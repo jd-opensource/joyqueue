@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jd.joyqueue.repository.BrokerGroupRelatedRepository">
+    <sql id="select">
+        SELECT
+          b.id,
+          b.`group_id` AS `group.id`,
+          b.`group_code` AS `group.code`,
+          b.`create_time` AS `createTime`,
+          b.`create_by` AS `createBy.id`,
+          b.`update_time` AS `updateTime`,
+          b.`update_by` AS `updateBy.id`,
+          b.`status`
+        FROM broker_group_related b
+    </sql>
+
+    <update id="update" parameterType="BrokerGroupRelated">
+        UPDATE broker_group_related
+        <set>
+            <if test="group!=null and group.id>0"> group_id = #{group.id},</if>
+            <if test="group!=null and group.id==-1"> group_id = null,</if>
+            <if test="group!=null and group.code!=''"> group_code = #{group.code},</if>
+            <if test="updateBy != null">update_by = #{updateBy.id},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="status != null">status = #{status},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateGroupByGroupId" parameterType="BrokerGroupRelated">
+        UPDATE broker_group_related
+        <set>
+            <if test="group!=null and group.code!=''"> group_code = #{group.code},</if>
+            <if test="updateBy != null">update_by = #{updateBy.id},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="status != null">status = #{status},</if>
+        </set>
+        WHERE group_id = #{group.id} AND status > 0
+    </update>
+
+    <insert id="add" parameterType="BrokerGroupRelated" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO
+        broker_group_related(id,group_id,group_code,create_time,create_by,update_time,update_by,status)
+        VALUES
+        (#{id},#{group.id},#{group.code},#{createTime},#{createBy.id},#{updateTime},#{updateBy.id},#{status})
+    </insert>
+
+
+    <select id="findById" parameterType="long" resultType="BrokerGroupRelated">
+        <include refid="select"/>
+        WHERE b.id=#{id}
+    </select>
+
+    <select id="findByIds" resultType="BrokerGroupRelated">
+        <include refid="select"/>
+        WHERE b.id IN
+        <foreach collection="list" separator="," close=")" open="(" item="item" index="index">
+            #{item}
+        </foreach>
+    </select>
+
+    <sql id="queryCondition">
+        <trim prefix="where" prefixOverrides="and | or">
+            <if test="null!=query and query.keyword!=null and query.keyword!=''">(b.ip LIKE CONCAT('%',#{query.keyword},'%') OR b.group_code LIKE CONCAT('%',#{query.keyword},'%')) AND </if>
+            <if test="null!=query and query.brokerGroupId==-1"> (b.group_id = -1 or b.group_id is null or b.group_id = '') AND </if>
+            <if test="null!=query and query.brokerGroupId!=-1 and query.brokerGroupId !=0"> b.group_id = #{query.brokerGroupId} AND </if>
+            <if test="null!=query and null!=query.group and query.group.id > 0"> b.group_id = #{query.group.id} AND </if>
+            <if test="null!=query and null!=query.group and query.group.code!=''"> b.group_code = #{query.group.code} AND </if>
+            <if test="null!=query and query.brokerGroupIds!=null"> b.group_id IN
+                <foreach collection="query.brokerGroupIds" separator="," close=")" open="(" item="item" index="index">
+                    #{item}
+                </foreach>
+                AND
+            </if>
+            <if test="null!=query and query.notInBrokerIds!=null and query.notInBrokerIds.size()>0"> b.id NOT IN
+                <foreach collection="query.notInBrokerIds" separator="," close=")" open="(" item="item" index="index">
+                    #{item}
+                </foreach>
+                AND </if>
+            b.status > 0
+        </trim>
+    </sql>
+
+    <select id="findCountByQuery" parameterType="QPageQuery" resultType="int">
+        SELECT COUNT(b.id) FROM broker_group_related b
+        <include refid="queryCondition"/>
+    </select>
+
+    <select id="findByQuery" parameterType="ListQuery" resultType="BrokerGroupRelated">
+        <include refid="select"/>
+        <include refid="queryCondition"/>
+        ORDER BY b.id desc
+    </select>
+
+    <update id="state" parameterType="BrokerGroupRelated">
+        UPDATE
+            `broker_group_related`
+        SET
+           `status`=#{status},
+           `update_by`=#{updateBy.id},
+           `update_time`=#{updateTime}
+        WHERE
+            id=#{id}
+    </update>
+
+    <delete id="delete" parameterType="BrokerGroupRelated">
+        UPDATE
+            `broker_group_related`
+        SET
+           `status`=#{status},
+           `update_by`=#{updateBy.id},
+           `update_time`=#{updateTime}
+        WHERE
+            id=#{id}
+    </delete>
+
+    <delete id="deleteByGroupId" parameterType="long">
+        DELETE FROM `broker_group_related`
+        WHERE
+        group_id=#{group_id}
+    </delete>
+
+</mapper>
