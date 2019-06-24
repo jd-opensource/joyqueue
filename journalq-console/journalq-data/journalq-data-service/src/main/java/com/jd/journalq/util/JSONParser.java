@@ -26,13 +26,13 @@
  */
 package com.jd.journalq.util;
 
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.alibaba.fastjson.JSON;
+import com.jd.journalq.exception.ServiceException;
 import com.jd.journalq.monitor.RestResponse;
 import com.jd.journalq.monitor.RestResponseCode;
-import com.jd.journalq.exception.ServiceException;
 
-import java.io.IOException;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.List;
 
 /**
@@ -42,38 +42,6 @@ import java.util.List;
  *
  **/
 public class JSONParser {
-    public static final ObjectMapper mapper = new ObjectMapper();
-
-    public static <T> T parse(String content, Class restClass, Class dataClass) throws IOException {
-        JavaType javaType = composite(restClass, dataClass);
-        return mapper.readValue(content, javaType);
-    }
-
-    public static <T> T parseList(String content, Class restClass, Class dataClass) throws IOException {
-        JavaType javaType = compositeList(restClass, dataClass);
-        return mapper.readValue(content, javaType);
-    }
-
-
-    /**
-     *  composite class a and b to a Java Type
-     *
-     **/
-    public static JavaType composite(Class a, Class b) {
-        return mapper.getTypeFactory().constructParametricType(a, b);
-    }
-
-
-    /**
-     *
-     *composite list
-     **/
-    private static JavaType compositeList(Class a, Class listClass) {
-        JavaType listType = mapper.getTypeFactory().constructParametricType(List.class, listClass);
-        return mapper.getTypeFactory().constructParametricType(a, listType);
-    }
-
-
     /**
      * @param list true indicate body is a list<dataClass> or
      * @return response
@@ -83,17 +51,43 @@ public class JSONParser {
         RestResponse<T> response = null;
         try {
             if (list) {
-                response = JSONParser.parseList(content, restResponse, dataClass);
+                response = parse(content,type(restResponse,type(List.class,dataClass)));
             } else {
-                response = JSONParser.parse(content, restResponse, dataClass);
+                response = parse(content,type(restResponse,dataClass));
             }
             if (response.getCode() != RestResponseCode.SUCCESS.getCode()) {
                 throw new ServiceException(response.getCode(), response.getMessage());
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
         }
         return response;
     }
 
+    public static <T> RestResponse<T> parse(String content,Type type) {
+        RestResponse<T> response = null;
+        try {
+            response = JSON.parseObject(content, type);
+            if (response.getCode() != RestResponseCode.SUCCESS.getCode()) {
+                throw new ServiceException(response.getCode(), response.getMessage());
+            }
+        } catch (Exception e) {
+        }
+        return response;
+    }
 
+    public static Type type(final Class<?> raw, final Type... args) {
+        return new ParameterizedType() {
+            public Type getRawType() {
+                return raw;
+            }
+
+            public Type[] getActualTypeArguments() {
+                return args;
+            }
+
+            public Type getOwnerType() {
+                return null;
+            }
+        };
+    }
 }
