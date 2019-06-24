@@ -128,6 +128,15 @@ public class RaftLeaderElectionTest {
             Files.deleteDirectory(new File(getElectionDir() + i));
         }
 
+        if (produceTask != null) {
+            produceTask.stop(true);
+            produceTask = null;
+        }
+        if (consumeTask != null) {
+            consumeTask.stop(true);
+            consumeTask = null;
+        }
+
     }
 
     private void createElectionManager(List<Broker> allNodes) throws Exception {
@@ -567,54 +576,55 @@ public class RaftLeaderElectionTest {
         consumeTask = new ConsumeTask(storeServices[leaderId - 1], topic1, partitionGroup1);
         consumeTask.start();
 
-        electionManager[leaderId - 1].onLeaderChange(topic1, partitionGroup1, nextNode(leaderId));
+        try {
+            electionManager[leaderId - 1].onLeaderChange(topic1, partitionGroup1, nextNode(leaderId));
 
-        Thread.sleep(10000);
-        int leaderId1 = leaderElections[leaderId - 1].getLeaderId();
-        logger.info("Leader1 id is " + leaderId1);
-        System.out.println("Leader1 is " + leaderId1);
-        Assert.assertEquals(leaderId1, nextNode(leaderId));
+            Thread.sleep(10000);
+            int leaderId1 = leaderElections[leaderId - 1].getLeaderId();
+            logger.info("Leader1 id is " + leaderId1);
+            System.out.println("Leader1 is " + leaderId1);
+            Assert.assertEquals(leaderId1, nextNode(leaderId));
 
-        for (int i = 0; i < RAFT_ELECTION_NUM; i++) {
-            Assert.assertEquals(leaderId1, leaderElections[i].getLeaderId());
+            for (int i = 0; i < RAFT_ELECTION_NUM; i++) {
+                Assert.assertEquals(leaderId1, leaderElections[i].getLeaderId());
+            }
+
+            {
+                electionManager[nextNode(leaderId1) - 1].removeLeaderElection(topic1.getFullName(), partitionGroup1);
+                electionManager[nextNode(leaderId1) - 1].stop();
+                logger.info("Node " + nextNode(leaderId1) + " stop");
+
+                System.out.println("Node " + nextNode(leaderId1) + " stop");
+
+                Thread.sleep(3000);
+
+                electionManager[nextNode(leaderId1) - 1].start();
+                electionManager[nextNode(leaderId1) - 1].onPartitionGroupCreate(PartitionGroup.ElectType.raft,
+                        topic1, partitionGroup1, allNodes, new TreeSet<>(), brokers[nextNode(leaderId1) - 1].getId(), -1);
+                leaderElections[nextNode(leaderId1) - 1] = electionManager[nextNode(leaderId1) - 1].getLeaderElection(topic1, partitionGroup1);
+                electionManager[nextNode(leaderId1) - 1].addListener(new ElectionEventListener());
+                Thread.sleep(10000);
+            }
+
+            System.out.println("Change node from " + leaderId1 + " to " + nextNode(leaderId1));
+
+            electionManager[leaderId1 - 1].onLeaderChange(topic1, partitionGroup1, nextNode(leaderId1));
+            Thread.sleep(10000);
+
+            int leaderId2 = leaderElections[leaderId1 - 1].getLeaderId();
+            logger.info("Leader2 id is " + leaderId2);
+            System.out.println("Leader2 is " + leaderId2);
+            Assert.assertEquals(leaderId2, nextNode(leaderId1));
+
+            for (int i = 0; i < RAFT_ELECTION_NUM; i++) {
+                Assert.assertEquals(leaderId2, leaderElections[i].getLeaderId());
+            }
+
+            Thread.sleep(10000);
+        } finally {
+            produceTask.stop(true);
+            consumeTask.stop(true);
         }
-
-        {
-            electionManager[nextNode(leaderId1) - 1].removeLeaderElection(topic1.getFullName(), partitionGroup1);
-            electionManager[nextNode(leaderId1) - 1].stop();
-            logger.info("Node " + nextNode(leaderId1) + " stop");
-
-            System.out.println("Node " + nextNode(leaderId1) + " stop");
-
-            Thread.sleep(3000);
-
-            electionManager[nextNode(leaderId1) - 1].start();
-            electionManager[nextNode(leaderId1) - 1].onPartitionGroupCreate(PartitionGroup.ElectType.raft,
-                    topic1, partitionGroup1, allNodes, new TreeSet<>(), brokers[nextNode(leaderId1) - 1].getId(), -1);
-            leaderElections[nextNode(leaderId1) - 1] = electionManager[nextNode(leaderId1) - 1].getLeaderElection(topic1, partitionGroup1);
-            electionManager[nextNode(leaderId1) - 1].addListener(new ElectionEventListener());
-            Thread.sleep(1000);
-        }
-
-        System.out.println("Change node from " + leaderId1 + " to " + nextNode(leaderId1));
-
-        electionManager[leaderId1 - 1].onLeaderChange(topic1, partitionGroup1, nextNode(leaderId1));
-        Thread.sleep(10000);
-
-        int leaderId2 = leaderElections[leaderId1 - 1].getLeaderId();
-        logger.info("Leader2 id is " + leaderId2);
-        System.out.println("Leader2 is " + leaderId2);
-        Assert.assertEquals(leaderId2, nextNode(leaderId1));
-
-        for (int i = 0; i < RAFT_ELECTION_NUM; i++) {
-            Assert.assertEquals(leaderId2, leaderElections[i].getLeaderId());
-        }
-
-        Thread.sleep(10000);
-
-        produceTask.stop(true);
-        consumeTask.stop(true);
-
     }
 
     private class ElectionEventListener implements EventListener<ElectionEvent> {
