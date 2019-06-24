@@ -39,7 +39,7 @@ public class TransactionHandler extends Service {
 
     protected static final Logger logger = LoggerFactory.getLogger(TransactionHandler.class);
 
-    private static final String IDEMPOTENCE_TRANSACTION_ID_PREFIX = "__SUFFIX_";
+    private static final String IDEMPOTENCE_TRANSACTION_ID_SUFFIX = "__SUFFIX_";
 
     private Coordinator coordinator;
     private TransactionMetadataManager transactionMetadataManager;
@@ -59,7 +59,7 @@ public class TransactionHandler extends Service {
     public TransactionMetadata initProducer(String clientId, String transactionId, int transactionTimeout) {
         // 幂等
         if (StringUtils.isBlank(transactionId)) {
-            transactionId = clientId + IDEMPOTENCE_TRANSACTION_ID_PREFIX;
+            transactionId = clientId + IDEMPOTENCE_TRANSACTION_ID_SUFFIX;
         } else {
             // 幂等不判断协调者
             checkCoordinatorState(clientId, transactionId);
