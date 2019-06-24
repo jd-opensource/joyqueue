@@ -24,12 +24,10 @@ import com.jd.journalq.toolkit.config.PropertySupplier;
 public class ElectionConfig {
     public static final String ELECTION_META_PATH ="/election";
     private String electionMetaPath ;
-    private String electionMetaFile;
     private PropertySupplier propertySupplier;
 
     private int listenPort;
 
-    private String electionMetaFileStub;
     private String electionMetaPathStub;
 
     public ElectionConfig(PropertySupplier propertySupplier) {
@@ -57,19 +55,12 @@ public class ElectionConfig {
         return electionMetaPath;
     }
 
-    public String getMetadataFile() {
-        if (electionMetaFileStub != null) {
-            return electionMetaFileStub;
-        }
-		
-        Property property = propertySupplier.getProperty(Property.APPLICATION_DATA_PATH);
-        String prefix = property == null ? "" : property.getString();
-
-        return prefix + PropertySupplier.getValue(propertySupplier, ElectionConfigKey.ELECTION_METADATA);
-    }
-
     public int getElectionTimeout() {
         return PropertySupplier.getValue(propertySupplier, ElectionConfigKey.ELECTION_TIMEOUT);
+    }
+
+    public int getVoteTimeout() {
+        return PropertySupplier.getValue(propertySupplier, ElectionConfigKey.VOTE_TIMEOUT);
     }
 
     public int getExecutorThreadNumMin() {
@@ -144,6 +135,10 @@ public class ElectionConfig {
         return PropertySupplier.getValue(propertySupplier, ElectionConfigKey.ENABLE_REPORT_LEADER_PERIODICALLY);
     }
 
+    public boolean getOutputConsumePos() {
+        return PropertySupplier.getValue(propertySupplier, ElectionConfigKey.OUTPUT_CONSUME_POS);
+    }
+
     public void setListenPort(String port) {
         listenPort = Integer.valueOf(port);
     }
@@ -152,7 +147,4 @@ public class ElectionConfig {
         this.electionMetaPathStub = electionMetaPath;
     }
 
-    public void setElectionMetaFile(String electionMetaFile) {
-        this.electionMetaFileStub = electionMetaFile;
-    }
 }

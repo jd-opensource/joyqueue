@@ -76,6 +76,7 @@ public class RaftLeaderElection extends LeaderElection  {
 
     private ScheduledExecutorService electionTimerExecutor;
     private ScheduledFuture electionTimerFuture;
+    private ScheduledFuture voteTimerFuture;
     private ScheduledFuture heartbeatTimerFuture;
     private ScheduledFuture transferLeaderTimerFuture;
     private ExecutorService electionExecutor;
@@ -121,10 +122,10 @@ public class RaftLeaderElection extends LeaderElection  {
         resetElectionTimer();
 
         electionTimerExecutor.scheduleAtFixedRate(this::rebalanceLeader,
-                60, 60, TimeUnit.SECONDS);
+                60 + new Random().nextInt(60), 60, TimeUnit.SECONDS);
 
         electionTimerExecutor.scheduleAtFixedRate(this::reportLeadership,
-                60, 60, TimeUnit.SECONDS);
+                60 + new Random().nextInt(60), 60, TimeUnit.SECONDS);
 
         logger.info("Raft leader election of {}, local node {}, all node {} started, " +
                     "term is {}, vote for is {}",
@@ -263,6 +264,8 @@ public class RaftLeaderElection extends LeaderElection  {
      * @return 最后一条log的term
      */
     private int getLastLogTerm() {
+        long startTime = SystemClock.now();
+
         try {
             long leftPosition = replicableStore.leftPosition();
             long rightPosition = replicableStore.rightPosition();
@@ -272,13 +275,19 @@ public class RaftLeaderElection extends LeaderElection  {
                 return -1;
             }
             long prevPosition = replicableStore.position(rightPosition, -1);
-            return replicableStore.getEntryTerm(prevPosition);
+            int term = replicableStore.getEntryTerm(prevPosition);
+
+            logger.info("Partition group {}/node {} get last log term elapse {} ms",
+                    topicPartitionGroup, localNode, SystemClock.now() - startTime);
+
+            return term;
 
         } catch (Exception e) {
             logger.warn("Partition group {}/node {} get last log term fail",
                     topicPartitionGroup, localNode, e);
             return -1;
         }
+
     }
 
     /**
@@ -301,10 +310,36 @@ public class RaftLeaderElection extends LeaderElection  {
                 getElectionTimeoutMs(), TimeUnit.MILLISECONDS);
     }
 
+    /**
+     * Cancel the election timer
+     */
+    private synchronized void cancelElectionTimer() {
+        if (electionTimerFuture != null && !electionTimerFuture.isDone()) {
+            electionTimerFuture.cancel(true);
+            electionTimerFuture = null;
+        }
+    }
+
     private int getElectionTimeoutMs() {
         Random random = new Random();
         return electionConfig.getElectionTimeout() + random.nextInt(electionConfig.getElectionTimeout());
 
+    }
+
+    private synchronized void resetVoteTimer() {
+        if (voteTimerFuture != null && !voteTimerFuture.isDone()) {
+            voteTimerFuture.cancel(true);
+            voteTimerFuture = null;
+        }
+        voteTimerFuture = electionTimerExecutor.schedule(this::handleVoteTimeout,
+                electionConfig.getVoteTimeout(), TimeUnit.MILLISECONDS);
+    }
+
+    private synchronized void cancelVoteTimer() {
+        if (voteTimerFuture != null && !voteTimerFuture.isDone()) {
+            voteTimerFuture.cancel(true);
+            voteTimerFuture = null;
+        }
     }
 
     /**
@@ -401,6 +436,8 @@ public class RaftLeaderElection extends LeaderElection  {
         electionEventManager.add(new ElectionEvent(START_ELECTION,
                 currentTerm, INVALID_NODE_ID, topicPartitionGroup));
 
+        resetVoteTimer();
+
         int lastLogTerm = getLastLogTerm();
         long lastLogPos = getLastLogPosition();
 
@@ -473,6 +510,29 @@ public class RaftLeaderElection extends LeaderElection  {
             logger.info("Partition group {}/node {} send vote request to {} failed",
                     topicPartitionGroup, localNode, node.getNodeId(), cause);
         }
+    }
+
+    /**
+     * 投票定时器超时，重新进行pre vote
+     */
+    private synchronized void handleVoteTimeout() {
+        if (!isStarted()) {
+            throw new IllegalStateException("Vote timeout, election service not start");
+        }
+
+        if (voteTimerFuture == null) {
+            logger.info("Partition group {}/node {} vote timeout, timer future is null",
+                    topicPartitionGroup, localNode);
+        }
+
+        logger.info("Partition group {}/node {} vote timeout, term is {}, state is {}",
+                topicPartitionGroup, localNode, currentTerm, state());
+
+        if (state() != CONDIDATE) {
+            return;
+        }
+
+        stepDown(currentTerm);
     }
 
     /**
@@ -899,6 +959,7 @@ public class RaftLeaderElection extends LeaderElection  {
             electionEventManager.add(new ElectionEvent(LEADER_FOUND,
                     currentTerm, localNode.getNodeId(), topicPartitionGroup));
             cancelElectionTimer();
+            cancelVoteTimer();
         } catch (Exception e) {
             logger.warn("Partition group {}/node {} as leader fail",
                     topicPartitionGroup, localNode, e);
@@ -982,6 +1043,7 @@ public class RaftLeaderElection extends LeaderElection  {
         switch(state()) {
             case CONDIDATE:
                 cancelElectionTimer();
+                cancelVoteTimer();
                 break;
             case LEADER:
                 updateMetadata(leaderId, currentTerm);
@@ -1001,19 +1063,8 @@ public class RaftLeaderElection extends LeaderElection  {
         resetElectionTimer();
     }
 
-    /**
-     * Cancel the election timer
-     */
-    private synchronized void cancelElectionTimer() {
-        if (electionTimerFuture != null && !electionTimerFuture.isDone()) {
-            electionTimerFuture.cancel(true);
-            electionTimerFuture = null;
-        }
-    }
-
     private synchronized void nodeOffline(int term) {
-        logger.info("Partition group {}/node {} disable store, current status is {}",
-                topicPartitionGroup, localNode, replicableStore.serviceStatus());
+        long startTime = SystemClock.now();
 
         try {
             if (replicableStore.serviceStatus()) {
@@ -1025,11 +1076,13 @@ public class RaftLeaderElection extends LeaderElection  {
                     topicPartitionGroup, localNode, e);
         }
 
+        logger.info("Partition group {}/node {} disable store elapse {} ms",
+                topicPartitionGroup, localNode, SystemClock.now() - startTime);
     }
 
     private synchronized void nodeOnline(int term) {
-        logger.info("Partition group {}/node {} enable store, current status is {}",
-                topicPartitionGroup, localNode, replicableStore.serviceStatus());
+        long startTime = SystemClock.now();
+
         try {
             if (!replicableStore.serviceStatus()) {
                 replicableStore.enable();
@@ -1039,6 +1092,9 @@ public class RaftLeaderElection extends LeaderElection  {
             logger.warn("Partition group {}/node {} enable store fail",
                     topicPartitionGroup, localNode, e);
         }
+
+        logger.info("Partition group {}/node {} enable store elapse {} ms",
+                topicPartitionGroup, localNode, SystemClock.now() - startTime);
     }
 
     /**
