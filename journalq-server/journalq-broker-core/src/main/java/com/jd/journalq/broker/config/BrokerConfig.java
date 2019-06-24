@@ -13,6 +13,7 @@
  */
 package com.jd.journalq.broker.config;
 
+import com.google.common.base.Preconditions;
 import com.jd.journalq.domain.Broker;
 import com.jd.journalq.network.transport.config.ServerConfig;
 import com.jd.journalq.network.transport.config.TransportConfigSupport;
@@ -20,7 +21,6 @@ import com.jd.journalq.toolkit.config.Property;
 import com.jd.journalq.toolkit.config.PropertySupplier;
 import com.jd.journalq.toolkit.config.PropertySupplierAware;
 import com.jd.journalq.toolkit.io.Files;
-import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.network.IpUtil;
 
 import java.io.File;

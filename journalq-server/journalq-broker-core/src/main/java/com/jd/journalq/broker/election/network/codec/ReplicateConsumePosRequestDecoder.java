@@ -14,7 +14,7 @@
 package com.jd.journalq.broker.election.network.codec;
 
 import com.jd.journalq.broker.election.command.ReplicateConsumePosRequest;
-import com.jd.journalq.network.transport.codec.JMQHeader;
+import com.jd.journalq.network.transport.codec.JournalqHeader;
 import com.jd.journalq.network.transport.codec.PayloadDecoder;
 import com.jd.journalq.network.command.CommandType;
 import com.jd.journalq.network.serializer.Serializer;
@@ -27,11 +27,11 @@ import io.netty.buffer.ByteBuf;
  * email: zhuduohui@jd.com
  * date: 2018/9/29
  */
-public class ReplicateConsumePosRequestDecoder implements PayloadDecoder<JMQHeader>, Type {
+public class ReplicateConsumePosRequestDecoder implements PayloadDecoder<JournalqHeader>, Type {
     @Override
-    public Object decode(final JMQHeader header, final ByteBuf buffer) throws Exception {
+    public Object decode(final JournalqHeader header, final ByteBuf buffer) throws Exception {
         String consumePositions;
-        if (header.getVersion() == JMQHeader.VERSION1) {
+        if (header.getVersion() == JournalqHeader.VERSION1) {
             consumePositions = Serializer.readString(buffer, Serializer.SHORT_SIZE);
         } else {
             consumePositions = Serializer.readString(buffer, Serializer.INT_SIZE);

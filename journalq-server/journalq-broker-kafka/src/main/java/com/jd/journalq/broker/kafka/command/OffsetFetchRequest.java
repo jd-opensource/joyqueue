@@ -14,15 +14,17 @@
 package com.jd.journalq.broker.kafka.command;
 
 
-import com.google.common.collect.HashMultimap;
 import com.jd.journalq.broker.kafka.KafkaCommandType;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by zhangkepeng on 16-7-28.
  */
 public class OffsetFetchRequest extends KafkaRequestOrResponse {
     private String groupId;
-    private HashMultimap<String, Integer> topicAndPartitions;
+    private Map<String, List<Integer>> topicAndPartitions;
 
     public String getGroupId() {
         return groupId;
@@ -32,12 +34,12 @@ public class OffsetFetchRequest extends KafkaRequestOrResponse {
         this.groupId = groupId;
     }
 
-    public HashMultimap<String, Integer> getTopicAndPartitions() {
-        return topicAndPartitions;
+    public void setTopicAndPartitions(Map<String, List<Integer>> topicAndPartitions) {
+        this.topicAndPartitions = topicAndPartitions;
     }
 
-    public void setTopicAndPartitions(HashMultimap<String, Integer> topicAndPartitions) {
-        this.topicAndPartitions = topicAndPartitions;
+    public Map<String, List<Integer>> getTopicAndPartitions() {
+        return topicAndPartitions;
     }
 
     @Override

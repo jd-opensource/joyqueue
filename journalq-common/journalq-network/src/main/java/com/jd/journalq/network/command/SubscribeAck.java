@@ -14,7 +14,7 @@
 package com.jd.journalq.network.command;
 
 import com.jd.journalq.domain.TopicConfig;
-import com.jd.journalq.network.transport.command.JMQPayload;
+import com.jd.journalq.network.transport.command.JournalqPayload;
 
 import java.util.List;
 
@@ -22,7 +22,7 @@ import java.util.List;
  * @author wylixiaobin
  * Date: 2018/10/10
  */
-public class SubscribeAck extends JMQPayload {
+public class SubscribeAck extends JournalqPayload {
     private List<TopicConfig> topicConfigs;
 
     public SubscribeAck topicConfigs(List<TopicConfig> topicConfigs) {

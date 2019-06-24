@@ -28,6 +28,8 @@ import java.util.List;
  */
 public class RandomBrokerLoadBalance implements BrokerLoadBalance {
 
+    public static final String NAME = "random";
+
     @Override
     public BrokerAssignment loadBalance(BrokerAssignments brokerAssignments) {
         List<BrokerAssignment> assignments = brokerAssignments.getAssignments();
@@ -36,7 +38,7 @@ public class RandomBrokerLoadBalance implements BrokerLoadBalance {
 
     @Override
     public String type() {
-        return "random";
+        return NAME;
     }
 
 }

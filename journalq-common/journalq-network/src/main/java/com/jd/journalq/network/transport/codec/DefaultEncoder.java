@@ -17,7 +17,6 @@ import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.transport.command.Header;
 import com.jd.journalq.network.transport.command.Payload;
 import com.jd.journalq.network.transport.exception.TransportException;
-
 import io.netty.buffer.ByteBuf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

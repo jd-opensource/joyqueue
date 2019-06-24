@@ -1,0 +1,1 @@
+com.jd.journalq.broker.kafka.converter.JournalqToKafkaMessageConverter

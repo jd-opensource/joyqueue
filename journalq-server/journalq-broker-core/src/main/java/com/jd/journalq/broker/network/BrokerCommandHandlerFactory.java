@@ -16,8 +16,8 @@ package com.jd.journalq.broker.network;
 import com.google.common.collect.Lists;
 import com.jd.journalq.broker.BrokerContext;
 import com.jd.journalq.broker.BrokerContextAware;
-import com.jd.journalq.network.transport.command.support.DefaultCommandHandlerFactory;
 import com.jd.journalq.broker.network.support.BrokerCommandHandlerRegistrar;
+import com.jd.journalq.network.transport.command.support.DefaultCommandHandlerFactory;
 import com.jd.laf.extension.ExtensionManager;
 
 import java.util.List;

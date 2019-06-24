@@ -14,7 +14,7 @@
 package com.jd.journalq.nsr.network.command;
 
 import com.jd.journalq.domain.Consumer;
-import com.jd.journalq.network.transport.command.JMQPayload;
+import com.jd.journalq.network.transport.command.JournalqPayload;
 
 import java.util.List;
 
@@ -22,7 +22,7 @@ import java.util.List;
  * @author wylixiaobin
  * Date: 2019/1/29
  */
-public class GetConsumerByTopicAck extends JMQPayload {
+public class GetConsumerByTopicAck extends JournalqPayload {
     private List<Consumer> consumers;
 
     public GetConsumerByTopicAck consumers(List<Consumer> consumers){

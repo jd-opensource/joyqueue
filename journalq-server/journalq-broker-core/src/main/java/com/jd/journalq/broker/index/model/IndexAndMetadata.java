@@ -72,11 +72,12 @@ public class IndexAndMetadata {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("ConsumePartition{");
-        sb.append("index='").append(index).append('\'');
-        sb.append(", metadata=").append(metadata);
-        sb.append('}');
-        return sb.toString();
+        return "IndexAndMetadata{" +
+                "index=" + index +
+                ", metadata='" + metadata + '\'' +
+                ", indexCacheRetainTime=" + indexCacheRetainTime +
+                ", indexCommitTime=" + indexCommitTime +
+                '}';
     }
 }
 

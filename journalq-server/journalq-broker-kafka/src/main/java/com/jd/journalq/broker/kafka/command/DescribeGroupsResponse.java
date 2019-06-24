@@ -13,7 +13,7 @@
  */
 package com.jd.journalq.broker.kafka.command;
 
-import com.jd.journalq.broker.kafka.coordinator.domain.GroupDescribe;
+import com.jd.journalq.broker.kafka.coordinator.group.domain.GroupDescribe;
 import com.jd.journalq.broker.kafka.KafkaCommandType;
 
 import java.util.List;

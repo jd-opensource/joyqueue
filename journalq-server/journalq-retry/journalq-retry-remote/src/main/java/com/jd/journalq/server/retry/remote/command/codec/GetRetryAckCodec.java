@@ -14,7 +14,7 @@
 package com.jd.journalq.server.retry.remote.command.codec;
 
 import com.jd.journalq.network.command.CommandType;
-import com.jd.journalq.network.transport.codec.JMQHeader;
+import com.jd.journalq.network.transport.codec.JournalqHeader;
 import com.jd.journalq.network.transport.codec.PayloadCodec;
 import com.jd.journalq.network.transport.command.Type;
 import com.jd.journalq.server.retry.model.RetryMessageModel;
@@ -29,9 +29,9 @@ import java.util.List;
 /**
  * Created by chengzhiliang on 2018/9/17.
  */
-public class GetRetryAckCodec implements PayloadCodec<JMQHeader, GetRetryAck>, Type {
+public class GetRetryAckCodec implements PayloadCodec<JournalqHeader, GetRetryAck>, Type {
     @Override
-    public Object decode(JMQHeader header, ByteBuf buffer) throws Exception {
+    public Object decode(JournalqHeader header, ByteBuf buffer) throws Exception {
         if (buffer == null) {
             return null;
         }

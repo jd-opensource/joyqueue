@@ -55,7 +55,7 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
     private Consume consume;
     private StoreManagementService storeManagementService;
     private NameService nameService;
-    private StoreService store;
+    private StoreService storeService;
     private ElectionService electionService;
     private ClusterManager clusterManager;
     private BrokerStartupInfo brokerStartupInfo;
@@ -63,13 +63,12 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
     public DefaultBrokerMonitorInternalService(BrokerStat brokerStat, Consume consume,
                                                StoreManagementService storeManagementService,
                                                NameService nameService, StoreService store,
-                                               ElectionService electionManager, ClusterManager clusterManager,
-                                                BrokerStartupInfo brokerStartupInfo) {
+                                               ElectionService electionManager, ClusterManager clusterManager, BrokerStartupInfo brokerStartupInfo) {
         this.brokerStat = brokerStat;
         this.consume=consume;
         this.storeManagementService=storeManagementService;
         this.nameService = nameService;
-        this.store = store;
+        this.storeService = storeService;
         this.electionService = electionManager;
         this.clusterManager = clusterManager;
         this.brokerStartupInfo = brokerStartupInfo;
@@ -84,7 +83,7 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
         brokerMonitorInfo.setReplication(BrokerMonitorConverter.convertReplicationMonitorInfo(brokerStat.getReplicationStat()));
 
         StoreMonitorInfo storeMonitorInfo = new StoreMonitorInfo();
-        storeMonitorInfo.setStarted(store instanceof Online?((Online) store).isStarted():true);
+        storeMonitorInfo.setStarted(storeService instanceof Online?((Online) storeService).isStarted():true);
         storeMonitorInfo.setFreeSpace(storeManagementService.freeSpace());
         storeMonitorInfo.setTotalSpace(storeManagementService.totalSpace());
 
@@ -189,5 +188,4 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
        brokerStatExt.setHeap(memoryMXBean.getHeapMemoryUsage());
        brokerStatExt.setNonHeap(memoryMXBean.getNonHeapMemoryUsage());
    }
-
 }

@@ -14,6 +14,7 @@
 package com.jd.journalq.client.internal.transport;
 
 import com.jd.journalq.client.internal.transport.config.TransportConfig;
+import com.jd.journalq.network.transport.TransportState;
 import com.jd.journalq.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,8 +46,8 @@ public class ClientHeartbeatThread implements Runnable {
 
     protected void doHeartbeat(ClientGroup clientGroup) {
         for (Client client : clientGroup.getClients()) {
-            if (client.getLastUseTime() != 0 &&
-                    SystemClock.now() - client.getLastUseTime() >= transportConfig.getHeartbeatMaxIdleTime()) {
+            if (client.getTransport().state().equals(TransportState.DISCONNECTED)
+                    || (client.getLastUseTime() != 0 && SystemClock.now() - client.getLastUseTime() >= transportConfig.getHeartbeatMaxIdleTime())) {
                 doHeartbeat(client);
             }
         }

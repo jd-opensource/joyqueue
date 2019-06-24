@@ -31,7 +31,7 @@ public class SendResultAdapter implements SendResult {
 
     @Override
     public String messageId() {
-        return null;
+        return String.valueOf(sendResult.getIndex());
     }
 
     @Override

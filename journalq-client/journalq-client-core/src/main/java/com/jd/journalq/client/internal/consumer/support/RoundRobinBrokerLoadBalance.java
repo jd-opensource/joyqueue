@@ -30,6 +30,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Extension(singleton = false)
 public class RoundRobinBrokerLoadBalance implements BrokerLoadBalance {
 
+    public static final String NAME = "roundrobin";
+
     private AtomicInteger next = new AtomicInteger();
 
     @Override
@@ -45,6 +47,6 @@ public class RoundRobinBrokerLoadBalance implements BrokerLoadBalance {
 
     @Override
     public String type() {
-        return "roundrobin";
+        return NAME;
     }
 }

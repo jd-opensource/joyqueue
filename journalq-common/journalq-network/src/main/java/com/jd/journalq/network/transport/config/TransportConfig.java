@@ -69,7 +69,7 @@ public class TransportConfig {
     // 最大重试间隔(默认5分钟)
     private int maxRetryDelay = 1000 * 10;
     // 重试间隔
-    private int retryDelay = 1000 * 3;
+    private int retryDelay = 1000 * 1;
     // 指数增加间隔时间
     private boolean useExponentialBackOff = false;
     // 指数系数，必须>=1

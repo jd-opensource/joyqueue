@@ -13,34 +13,35 @@
  */
 package com.jd.journalq.broker.kafka.command;
 
-import com.google.common.collect.Table;
 import com.jd.journalq.broker.kafka.KafkaCommandType;
-import com.jd.journalq.broker.kafka.model.PartitionOffsetsResponse;
+
+import java.util.List;
+import java.util.Map;
 
 /**
- * ListOffsetsHandler
+ * ListOffsetsResponse
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/11/5
  */
 public class ListOffsetsResponse extends KafkaRequestOrResponse {
 
-    private Table<String, Integer, PartitionOffsetsResponse> offsetsResponseTable;
+    private Map<String, List<PartitionOffsetResponse>> partitionResponses;
 
     public ListOffsetsResponse() {
 
     }
 
-    public ListOffsetsResponse(Table<String, Integer, PartitionOffsetsResponse> offsetsResponseTable) {
-        this.offsetsResponseTable = offsetsResponseTable;
+    public ListOffsetsResponse(Map<String, List<PartitionOffsetResponse>> partitionResponses) {
+        this.partitionResponses = partitionResponses;
     }
 
-    public void setOffsetsResponseTable(Table<String, Integer, PartitionOffsetsResponse> offsetsResponseTable) {
-        this.offsetsResponseTable = offsetsResponseTable;
+    public void setPartitionResponses(Map<String, List<PartitionOffsetResponse>> partitionResponses) {
+        this.partitionResponses = partitionResponses;
     }
 
-    public Table<String, Integer, PartitionOffsetsResponse> getOffsetsResponseTable() {
-        return offsetsResponseTable;
+    public Map<String, List<PartitionOffsetResponse>> getPartitionResponses() {
+        return partitionResponses;
     }
 
     @Override
@@ -53,5 +54,61 @@ public class ListOffsetsResponse extends KafkaRequestOrResponse {
         StringBuilder builder = new StringBuilder();
         builder.append("Name: " + this.getClass().getSimpleName());
         return builder.toString();
+    }
+
+    public static class PartitionOffsetResponse {
+
+        private int partition;
+        private short errorCode;
+        private long timestamp;
+        private long offset;
+
+        public PartitionOffsetResponse(int partition, short errorCode, long timestamp, long offset) {
+            this.partition = partition;
+            this.errorCode = errorCode;
+            this.offset = offset;
+            this.timestamp = timestamp;
+        }
+
+        public void setPartition(int partition) {
+            this.partition = partition;
+        }
+
+        public int getPartition() {
+            return partition;
+        }
+
+        public short getErrorCode() {
+            return errorCode;
+        }
+
+        public void setErrorCode(short errorCode) {
+            this.errorCode = errorCode;
+        }
+
+        public long getTimestamp() {
+            return timestamp;
+        }
+
+        public void setTimestamp(long timestamp) {
+            this.timestamp = timestamp;
+        }
+
+        public long getOffset() {
+            return offset;
+        }
+
+        public void setOffset(long offset) {
+            this.offset = offset;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append("Name: " + this.getClass().getSimpleName());
+            stringBuilder.append(",errorCode : " + errorCode);
+            stringBuilder.append(",offset :" + offset);
+            return stringBuilder.toString();
+        }
     }
 }

@@ -13,13 +13,13 @@
  */
 package com.jd.journalq.nsr.network.command;
 
-import com.jd.journalq.network.transport.command.JMQPayload;
+import com.jd.journalq.network.transport.command.JournalqPayload;
 
 /**
  * @author wylixiaobin
  * Date: 2019/1/29
  */
-public class GetConfig extends JMQPayload {
+public class GetConfig extends JournalqPayload {
     private String group;
     private String key;
     public GetConfig group(String group){

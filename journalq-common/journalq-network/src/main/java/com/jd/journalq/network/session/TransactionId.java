@@ -35,6 +35,7 @@ public class TransactionId {
     private long timeout;
     private long startTime;
     private String producerId;
+    private byte source;
 
     private AtomicLong lastQueryTimestamp = new AtomicLong();
 
@@ -74,12 +75,13 @@ public class TransactionId {
         this.txId = producerId.getProducerId() + "-" + sequence;
     }
 
-    public TransactionId(String topic, String app, String txId, String queryId, int storeId, long timeout, long startTime) {
+    public TransactionId(String topic, String app, String txId, String queryId, int storeId, byte source, long timeout, long startTime) {
         this.topic = topic;
         this.app = app;
         this.txId = txId;
         this.queryId = queryId;
         this.storeId = storeId;
+        this.source = source;
         this.timeout = timeout;
         this.startTime = startTime;
     }
@@ -92,8 +94,8 @@ public class TransactionId {
         return (SystemClock.now() > (startTime + timeout));
     }
 
-    public boolean isExpired(long expireTime) {
-        return (SystemClock.now() > (startTime + expireTime));
+    public boolean isExpired(long timeout) {
+        return (SystemClock.now() > (startTime + timeout));
     }
 
     public String getTopic() {
@@ -136,6 +138,14 @@ public class TransactionId {
         return this.lastQueryTimestamp.compareAndSet(oldLastQueryTimestamp, lastQueryTimestamp);
     }
 
+    public void setSource(byte source) {
+        this.source = source;
+    }
+
+    public byte getSource() {
+        return source;
+    }
+
     @Override
     public String toString() {
         return "TransactionId{" +
@@ -144,6 +154,7 @@ public class TransactionId {
                 ", txId='" + txId + '\'' +
                 ", queryId='" + queryId + '\'' +
                 ", storeId=" + storeId +
+                ", source=" + source +
                 '}';
     }
 }

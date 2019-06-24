@@ -13,11 +13,11 @@
  */
 package com.jd.journalq.broker.kafka.manage.support;
 
-import com.jd.journalq.broker.kafka.coordinator.KafkaCoordinatorGroupManager;
-import com.jd.journalq.broker.kafka.coordinator.domain.GroupJoinGroupResult;
-import com.jd.journalq.broker.kafka.coordinator.domain.KafkaCoordinatorGroup;
-import com.jd.journalq.broker.kafka.coordinator.domain.KafkaCoordinatorGroupMember;
 import com.jd.journalq.broker.kafka.KafkaErrorCode;
+import com.jd.journalq.broker.kafka.coordinator.group.GroupCoordinator;
+import com.jd.journalq.broker.kafka.coordinator.group.domain.GroupJoinGroupResult;
+import com.jd.journalq.broker.kafka.coordinator.group.domain.GroupMemberMetadata;
+import com.jd.journalq.broker.kafka.coordinator.group.domain.GroupMetadata;
 import com.jd.journalq.broker.kafka.manage.KafkaGroupManageService;
 
 /**
@@ -28,36 +28,38 @@ import com.jd.journalq.broker.kafka.manage.KafkaGroupManageService;
  */
 public class DefaultKafkaGroupManageService implements KafkaGroupManageService {
 
-    private KafkaCoordinatorGroupManager groupMetadataManager;
+    private GroupCoordinator groupCoordinator;
 
-    public DefaultKafkaGroupManageService(KafkaCoordinatorGroupManager groupMetadataManager) {
-        this.groupMetadataManager = groupMetadataManager;
+    public DefaultKafkaGroupManageService(GroupCoordinator groupCoordinator) {
+        this.groupCoordinator = groupCoordinator;
     }
 
     @Override
     public boolean removeGroup(String groupId) {
-        KafkaCoordinatorGroup group = groupMetadataManager.getGroup(groupId);
+        GroupMetadata group = groupCoordinator.getGroup(groupId);
         if (group == null) {
             return false;
         }
-        return groupMetadataManager.removeGroup(group);
+        return groupCoordinator.removeGroup(group);
     }
 
     @Override
     public boolean rebalanceGroup(String groupId) {
-        KafkaCoordinatorGroup group = groupMetadataManager.getGroup(groupId);
+        GroupMetadata group = groupCoordinator.getGroup(groupId);
         if (group == null) {
             return false;
         }
 
-        groupMetadataManager.removeGroup(group);
+        groupCoordinator.removeGroup(group);
 
-        for (KafkaCoordinatorGroupMember groupMemberMetadata : group.getAllMembers()) {
+        for (GroupMemberMetadata groupMemberMetadata : group.getAllMembers()) {
             if (groupMemberMetadata.getAwaitingJoinCallback() != null) {
-                groupMemberMetadata.getAwaitingJoinCallback().sendResponseCallback(GroupJoinGroupResult.buildError(groupMemberMetadata.getId(), KafkaErrorCode.UNKNOWN_MEMBER_ID));
+                groupMemberMetadata.getAwaitingJoinCallback().sendResponseCallback(GroupJoinGroupResult.buildError(groupMemberMetadata.getId(), KafkaErrorCode.UNKNOWN_MEMBER_ID.getCode()));
+                groupMemberMetadata.setAwaitingJoinCallback(null);
             }
             if (groupMemberMetadata.getAwaitingSyncCallback() != null) {
-                groupMemberMetadata.getAwaitingSyncCallback().sendResponseCallback(null, KafkaErrorCode.UNKNOWN_MEMBER_ID);
+                groupMemberMetadata.getAwaitingSyncCallback().sendResponseCallback(null, KafkaErrorCode.UNKNOWN_MEMBER_ID.getCode());
+                groupMemberMetadata.setAwaitingSyncCallback(null);
             }
         }
 

@@ -52,8 +52,6 @@ public class Connection {
     private ConcurrentMap<String /** app **/, ConcurrentMap<String /** topic **/, String /** id **/>> consumers = Maps.newConcurrentMap();
     // 创建时间
     private long createTime;
-    // 是否添加到monitor
-    private boolean addedMonitor;
     // 是否管理员
     private boolean isSystem;
 
@@ -147,14 +145,6 @@ public class Connection {
 
     public void setTransport(Transport transport) {
         this.transport = transport;
-    }
-
-    public void setAddedMonitor(boolean addedMonitor) {
-        this.addedMonitor = addedMonitor;
-    }
-
-    public boolean isAddedMonitor() {
-        return addedMonitor;
     }
 
     public void setRegion(String region) {

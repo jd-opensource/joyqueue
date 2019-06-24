@@ -24,6 +24,7 @@ import java.util.Map;
 public class KafkaBrokerMessage {
 
     public static final byte INVALID_MAGIC = -1;
+    public static final int NO_SEQUENCE = -1;
 
     private int size;
     private byte magic = INVALID_MAGIC;
@@ -33,10 +34,14 @@ public class KafkaBrokerMessage {
     private byte[] key;
     private byte[] value;
     private long offset;
-    private int compressionCodecType;
     private boolean batch;
     private short flag;
     private Map<byte[], byte[]> header;
+
+    private boolean isTransaction;
+    private long producerId;
+    private int baseSequence = NO_SEQUENCE;
+    private short producerEpoch;
 
     public void setSize(int size) {
         this.size = size;
@@ -102,14 +107,6 @@ public class KafkaBrokerMessage {
         this.offset = offset;
     }
 
-    public void setCompressionCodecType(int compressionCodecType) {
-        this.compressionCodecType = compressionCodecType;
-    }
-
-    public int getCompressionCodecType() {
-        return compressionCodecType;
-    }
-
     public void setBatch(boolean batch) {
         this.batch = batch;
     }
@@ -132,5 +129,37 @@ public class KafkaBrokerMessage {
 
     public Map<byte[], byte[]> getHeader() {
         return header;
+    }
+
+    public boolean isTransaction() {
+        return isTransaction;
+    }
+
+    public void setTransaction(boolean transaction) {
+        isTransaction = transaction;
+    }
+
+    public long getProducerId() {
+        return producerId;
+    }
+
+    public void setProducerId(long producerId) {
+        this.producerId = producerId;
+    }
+
+    public int getBaseSequence() {
+        return baseSequence;
+    }
+
+    public void setBaseSequence(int baseSequence) {
+        this.baseSequence = baseSequence;
+    }
+
+    public short getProducerEpoch() {
+        return producerEpoch;
+    }
+
+    public void setProducerEpoch(short producerEpoch) {
+        this.producerEpoch = producerEpoch;
     }
 }

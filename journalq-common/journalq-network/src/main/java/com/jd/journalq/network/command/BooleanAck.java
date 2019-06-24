@@ -14,10 +14,10 @@
 package com.jd.journalq.network.command;
 
 import com.jd.journalq.exception.JournalqCode;
-import com.jd.journalq.network.transport.codec.JMQHeader;
+import com.jd.journalq.network.transport.codec.JournalqHeader;
 import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.transport.command.Direction;
-import com.jd.journalq.network.transport.command.JMQPayload;
+import com.jd.journalq.network.transport.command.JournalqPayload;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -26,7 +26,7 @@ import org.apache.commons.lang3.StringUtils;
  * @author lindeqiang
  * @since 2016/8/11 10:32
  */
-public class BooleanAck extends JMQPayload {
+public class BooleanAck extends JournalqPayload {
 
     @Override
     public int type() {
@@ -71,7 +71,7 @@ public class BooleanAck extends JMQPayload {
      * @return 布尔应答
      */
     public static Command build(final int code, final String message) {
-        JMQHeader header = new JMQHeader(Direction.RESPONSE, CommandType.BOOLEAN_ACK);
+        JournalqHeader header = new JournalqHeader(Direction.RESPONSE, CommandType.BOOLEAN_ACK);
         header.setStatus((short) code);
         header.setError(code == JournalqCode.SUCCESS.getCode() ? null : (StringUtils.isBlank(message) ? JournalqCode.valueOf(code).getMessage() : message));
         return new Command(header, null);

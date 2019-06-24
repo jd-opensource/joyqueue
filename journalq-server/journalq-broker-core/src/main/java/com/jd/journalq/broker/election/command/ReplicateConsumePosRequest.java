@@ -13,7 +13,7 @@
  */
 package com.jd.journalq.broker.election.command;
 
-import com.jd.journalq.network.transport.command.JMQPayload;
+import com.jd.journalq.network.transport.command.JournalqPayload;
 import com.jd.journalq.network.command.CommandType;
 
 /**
@@ -21,7 +21,7 @@ import com.jd.journalq.network.command.CommandType;
  * email: zhuduohui@jd.com
  * date: 2018/8/15
  */
-public class ReplicateConsumePosRequest extends JMQPayload {
+public class ReplicateConsumePosRequest extends JournalqPayload {
     private String consumePositions;
 
     public ReplicateConsumePosRequest(String consumePositions) {

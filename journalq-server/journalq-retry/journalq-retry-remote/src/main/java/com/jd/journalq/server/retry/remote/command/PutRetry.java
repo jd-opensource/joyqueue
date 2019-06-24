@@ -14,7 +14,7 @@
 package com.jd.journalq.server.retry.remote.command;
 
 import com.jd.journalq.network.command.CommandType;
-import com.jd.journalq.network.transport.command.JMQPayload;
+import com.jd.journalq.network.transport.command.JournalqPayload;
 import com.jd.journalq.server.retry.model.RetryMessageModel;
 
 import java.util.List;
@@ -24,7 +24,7 @@ import java.util.List;
  * <p>
  * Created by chengzhiliang on 2019/2/14.
  */
-public class PutRetry extends JMQPayload {
+public class PutRetry extends JournalqPayload {
 
     // 重试消息
     private List<RetryMessageModel> messages;

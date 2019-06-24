@@ -14,7 +14,7 @@
 package com.jd.journalq.nsr.network.command;
 
 import com.jd.journalq.domain.Config;
-import com.jd.journalq.network.transport.command.JMQPayload;
+import com.jd.journalq.network.transport.command.JournalqPayload;
 
 import java.util.List;
 
@@ -22,7 +22,7 @@ import java.util.List;
  * @author wylixiaobin
  * Date: 2019/1/29
  */
-public class GetAllConfigsAck extends JMQPayload {
+public class GetAllConfigsAck extends JournalqPayload {
     private List<Config> configs;
 
     public GetAllConfigsAck configs(List<Config> configs){

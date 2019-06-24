@@ -33,7 +33,7 @@ import java.util.zip.GZIPOutputStream;
  */
 public final class KafkaCompressionCodecFactory {
 
-    public static OutputStream apply(KafkaCompressionCodec codec, OutputStream stream, byte messageVersion) throws IOException {
+    public static OutputStream apply(KafkaCompressionCodec codec, OutputStream stream, byte messageMagic) throws IOException {
         switch (codec) {
             case GZIPCompressionCodec:
                 return new GZIPOutputStream(stream);
@@ -46,14 +46,14 @@ public final class KafkaCompressionCodecFactory {
         }
     }
 
-    public static InputStream apply(KafkaCompressionCodec codec, InputStream stream, byte messageVersion) throws IOException {
+    public static InputStream apply(KafkaCompressionCodec codec, InputStream stream, byte messageMagic) throws IOException {
         switch (codec) {
             case GZIPCompressionCodec:
                 return new GZIPInputStream(stream);
             case SnappyCompressionCodec:
                 return new SnappyInputStream(stream);
             case LZ4CompressionCodec:
-                return new KafkaLZ4BlockInputStream(stream, messageVersion == 0); // RecordBatch.MAGIC_VALUE_V0
+                return new KafkaLZ4BlockInputStream(stream, messageMagic == 0); // RecordBatch.MAGIC_VALUE_V0
             default:
                 throw new UnknownCodecException(String.format("unknown codec: %s", codec));
         }

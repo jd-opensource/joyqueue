@@ -22,7 +22,7 @@ import com.jd.journalq.client.internal.consumer.coordinator.domain.PartitionAssi
 import com.jd.journalq.client.internal.metadata.domain.PartitionMetadata;
 import com.jd.journalq.client.internal.metadata.domain.TopicMetadata;
 import com.jd.journalq.exception.JournalqCode;
-import com.jd.journalq.network.command.FetchAssignedPartitionAck;
+import com.jd.journalq.network.command.FetchAssignedPartitionResponse;
 import com.jd.journalq.network.command.FetchAssignedPartitionAckData;
 import com.jd.journalq.network.domain.BrokerNode;
 import com.jd.journalq.toolkit.service.Service;
@@ -91,9 +91,9 @@ public class PartitionAssignmentManager extends Service {
                 return null;
             }
 
-            FetchAssignedPartitionAck fetchAssignedPartitionAck =
-                    coordinatorManager.fetchAssignedPartition(coordinator, topicMetadata.getTopic(), app, topicMetadata.getConsumerPolicy().getNearby(), sessionTimeout);
-            FetchAssignedPartitionAckData fetchAssignedPartitionAckData = fetchAssignedPartitionAck.getTopicPartitions().get(topicMetadata.getTopic());
+            FetchAssignedPartitionResponse fetchAssignedPartitionResponse = coordinatorManager.fetchAssignedPartition(coordinator,
+                    topicMetadata.getTopic(), app, topicMetadata.getConsumerPolicy().getNearby(), sessionTimeout);
+            FetchAssignedPartitionAckData fetchAssignedPartitionAckData = fetchAssignedPartitionResponse.getTopicPartitions().get(topicMetadata.getTopic());
 
             if (fetchAssignedPartitionAckData == null) {
                 logger.warn("fetch partition assignment error, no partitions, topic: {}, app: {}", topicMetadata.getTopic(), app);

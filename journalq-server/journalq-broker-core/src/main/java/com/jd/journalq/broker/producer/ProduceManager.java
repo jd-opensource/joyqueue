@@ -19,6 +19,7 @@ import com.jd.journalq.broker.BrokerContextAware;
 import com.jd.journalq.broker.buffer.Serializer;
 import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.monitor.BrokerMonitor;
+import com.jd.journalq.broker.producer.transaction.TransactionManager;
 import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.domain.QosLevel;
 import com.jd.journalq.domain.TopicName;
@@ -444,7 +445,11 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
                 writeRequestList = new ArrayList<>();
                 resultMap.put(writePartitionGroup, writeRequestList);
             }
-            writeRequestList.add(new WriteRequest(writePartition, convertBrokerMessage2RByteBuffer(msg)));
+            int batchCount = 1;
+            if (msg.isBatch()) {
+                batchCount = msg.getFlag();
+            }
+            writeRequestList.add(new WriteRequest(writePartition, convertBrokerMessage2RByteBuffer(msg), batchCount));
         }
 
         return resultMap;
@@ -533,6 +538,11 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
         } else {
             throw new JournalqException(JournalqCode.CN_COMMAND_UNSUPPORTED);
         }
+    }
+
+    @Override
+    public TransactionId getTransaction(Producer producer, String txId) {
+        return transactionManager.getTransaction(producer.getTopic(), producer.getApp(), txId);
     }
 
     @Override

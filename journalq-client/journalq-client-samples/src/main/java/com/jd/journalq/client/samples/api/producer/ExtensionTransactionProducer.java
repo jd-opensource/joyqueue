@@ -17,7 +17,7 @@ import com.jd.journalq.toolkit.network.IpUtil;
 import io.openmessaging.KeyValue;
 import io.openmessaging.MessagingAccessPoint;
 import io.openmessaging.OMS;
-import io.openmessaging.journalq.JournalQBuiltinKeys;
+import io.openmessaging.OMSBuiltinKeys;
 import io.openmessaging.journalq.producer.ExtensionProducer;
 import io.openmessaging.journalq.producer.ExtensionTransactionalResult;
 import io.openmessaging.message.Message;
@@ -33,26 +33,31 @@ public class ExtensionTransactionProducer {
 
     public static void main(String[] args) throws Exception {
         KeyValue keyValue = OMS.newKeyValue();
-        keyValue.put(JournalQBuiltinKeys.ACCOUNT_KEY, "test_token");
+        keyValue.put(OMSBuiltinKeys.ACCOUNT_KEY, "test_token");
 
         MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint(String.format("oms:journalq://test_app@%s:50088/UNKNOWN", IpUtil.getLocalIp()), keyValue);
 
-        ExtensionProducer producer = (ExtensionProducer) messagingAccessPoint.createProducer();
-        producer.start();
+        ExtensionProducer extensionProducer = (ExtensionProducer) messagingAccessPoint.createProducer();
+        extensionProducer.start();
 
-        ExtensionTransactionalResult transactionalResult = producer.prepare();
+        ExtensionTransactionalResult transactionalResult = extensionProducer.prepare();
 
-        // 可以发多条事务消息
-        Message message = producer.createMessage("test_topic_0", "body".getBytes());
+        for (int i = 0; i < 10; i++) {
+            // 可以发多条事务消息
+            Message message = extensionProducer.createMessage("test_topic_0", "body".getBytes());
 
-        SendResult sendResult = transactionalResult.send(message);
-        System.out.println(sendResult.messageId());
+            // 添加事务id，设置过事务id的才会被补偿，补偿时会带上这个事务id，非必填
+            // 建议根据业务使用有意义的事务id
+            message.extensionHeader().get().setTransactionId("test_transactionId");
 
-        sendResult = transactionalResult.send(message);
-        System.out.println(sendResult.messageId());
+            SendResult sendResult = transactionalResult.send(message);
+            System.out.println(sendResult.messageId());
+        }
 
+        // 提交事务
         transactionalResult.commit();
 
-        System.in.read();
+        // 回滚事务
+//        transactionalResult.rollback();
     }
 }

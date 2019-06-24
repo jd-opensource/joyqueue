@@ -13,6 +13,10 @@
  */
 package com.jd.journalq.network.transport.support;
 
+import com.jd.journalq.network.event.TransportEvent;
+import com.jd.journalq.network.transport.RequestBarrier;
+import com.jd.journalq.network.transport.TransportServer;
+import com.jd.journalq.network.transport.TransportServerFactory;
 import com.jd.journalq.network.transport.codec.Codec;
 import com.jd.journalq.network.transport.command.handler.CommandHandlerFactory;
 import com.jd.journalq.network.transport.command.handler.ExceptionHandler;
@@ -20,10 +24,6 @@ import com.jd.journalq.network.transport.command.handler.filter.CommandHandlerFi
 import com.jd.journalq.network.transport.command.support.DefaultCommandHandlerFilterFactory;
 import com.jd.journalq.network.transport.command.support.RequestHandler;
 import com.jd.journalq.network.transport.command.support.ResponseHandler;
-import com.jd.journalq.network.event.TransportEvent;
-import com.jd.journalq.network.transport.RequestBarrier;
-import com.jd.journalq.network.transport.TransportServer;
-import com.jd.journalq.network.transport.TransportServerFactory;
 import com.jd.journalq.network.transport.config.ServerConfig;
 import com.jd.journalq.toolkit.concurrent.EventBus;
 
@@ -71,6 +71,6 @@ public class DefaultTransportServerFactory implements TransportServerFactory {
         RequestBarrier requestBarrier = new RequestBarrier(serverConfig);
         RequestHandler requestHandler = new RequestHandler(commandHandlerFactory, commandHandlerFilterFactory, exceptionHandler);
         ResponseHandler responseHandler = new ResponseHandler(serverConfig, requestBarrier, exceptionHandler);
-        return new DefaultTransportServer(serverConfig, host, port, codec, requestBarrier, requestHandler, responseHandler, eventBus);
+        return new DefaultTransportServer(serverConfig, host, port, codec, exceptionHandler, requestBarrier, requestHandler, responseHandler, eventBus);
     }
 }

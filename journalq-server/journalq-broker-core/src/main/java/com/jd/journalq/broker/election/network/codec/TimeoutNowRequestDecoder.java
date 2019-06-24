@@ -14,7 +14,7 @@
 package com.jd.journalq.broker.election.network.codec;
 
 import com.jd.journalq.broker.election.TopicPartitionGroup;
-import com.jd.journalq.network.transport.codec.JMQHeader;
+import com.jd.journalq.network.transport.codec.JournalqHeader;
 import com.jd.journalq.network.transport.codec.PayloadDecoder;
 import com.jd.journalq.network.command.CommandType;
 import com.jd.journalq.network.serializer.Serializer;
@@ -27,9 +27,9 @@ import io.netty.buffer.ByteBuf;
  * email: zhuduohui@jd.com
  * date: 2018/10/01
  */
-public class TimeoutNowRequestDecoder implements PayloadDecoder<JMQHeader>, Type {
+public class TimeoutNowRequestDecoder implements PayloadDecoder<JournalqHeader>, Type {
     @Override
-    public Object decode(final JMQHeader header, final ByteBuf buffer) throws Exception {
+    public Object decode(final JournalqHeader header, final ByteBuf buffer) throws Exception {
         String topic = Serializer.readString(buffer, Serializer.SHORT_SIZE);
         int partitionGroup = buffer.readInt();
         int term = buffer.readInt();

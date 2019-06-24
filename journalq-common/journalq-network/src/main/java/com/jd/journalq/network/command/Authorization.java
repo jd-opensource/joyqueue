@@ -14,7 +14,7 @@
 package com.jd.journalq.network.command;
 
 import com.jd.journalq.network.session.Language;
-import com.jd.journalq.network.transport.command.JMQPayload;
+import com.jd.journalq.network.transport.command.JournalqPayload;
 import com.google.common.base.Preconditions;
 
 import com.google.common.base.Objects;
@@ -22,7 +22,7 @@ import com.google.common.base.Objects;
 /**
  * 添加连接
  */
-public class Authorization extends JMQPayload {
+public class Authorization extends JournalqPayload {
     // 应用
     private String app;
     // 密码

@@ -14,7 +14,7 @@
 package com.jd.journalq.broker.election.command;
 
 import com.jd.journalq.broker.election.TopicPartitionGroup;
-import com.jd.journalq.network.transport.command.JMQPayload;
+import com.jd.journalq.network.transport.command.JournalqPayload;
 import com.jd.journalq.network.command.CommandType;
 
 /**
@@ -22,7 +22,7 @@ import com.jd.journalq.network.command.CommandType;
  * email: zhuduohui@jd.com
  * date: 2018/8/15
  */
-public class TimeoutNowRequest extends JMQPayload {
+public class TimeoutNowRequest extends JournalqPayload {
     private TopicPartitionGroup topicPartitionGroup;
     private int term;
 

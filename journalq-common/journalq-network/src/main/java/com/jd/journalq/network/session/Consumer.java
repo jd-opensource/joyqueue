@@ -126,7 +126,8 @@ public class Consumer extends Joint {
         JMQ,
         JMQ2,
         KAFKA,
-        MQTT;
+        MQTT,
+        INTERNAL;
     }
 
     @Override

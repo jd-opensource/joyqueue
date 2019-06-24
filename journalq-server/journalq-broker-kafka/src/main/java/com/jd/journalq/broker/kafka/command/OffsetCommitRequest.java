@@ -14,9 +14,11 @@
 package com.jd.journalq.broker.kafka.command;
 
 
-import com.google.common.collect.Table;
 import com.jd.journalq.broker.kafka.KafkaCommandType;
 import com.jd.journalq.broker.kafka.model.OffsetAndMetadata;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by zhangkepeng on 16-7-28.
@@ -26,8 +28,9 @@ public class OffsetCommitRequest extends KafkaRequestOrResponse {
     public static final int DEFAULT_GENERATION_ID = -1;
     public static final String DEFAULT_CONSUMER_ID = "";
     public static final long DEFAULT_TIMESTAMP = -1L;
+
     private String groupId;
-    private Table<String, Integer, OffsetAndMetadata> offsetAndMetadata;
+    private Map<String, List<OffsetAndMetadata>> offsets;
     private int groupGenerationId;
     private String memberId;
     private long retentionTime;
@@ -48,12 +51,12 @@ public class OffsetCommitRequest extends KafkaRequestOrResponse {
         this.groupGenerationId = groupGenerationId;
     }
 
-    public Table<String, Integer, OffsetAndMetadata> getOffsetAndMetadata() {
-        return offsetAndMetadata;
+    public void setOffsets(Map<String, List<OffsetAndMetadata>> offsets) {
+        this.offsets = offsets;
     }
 
-    public void setOffsetAndMetadata(Table<String, Integer, OffsetAndMetadata> offsetAndMetadata) {
-        this.offsetAndMetadata = offsetAndMetadata;
+    public Map<String, List<OffsetAndMetadata>> getOffsets() {
+        return offsets;
     }
 
     public String getGroupId() {

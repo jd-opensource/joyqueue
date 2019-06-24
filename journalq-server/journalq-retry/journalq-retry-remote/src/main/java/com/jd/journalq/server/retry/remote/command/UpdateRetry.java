@@ -14,14 +14,14 @@
 package com.jd.journalq.server.retry.remote.command;
 
 import com.jd.journalq.network.command.CommandType;
-import com.jd.journalq.network.transport.command.JMQPayload;
+import com.jd.journalq.network.transport.command.JournalqPayload;
 
 import java.util.Arrays;
 
 /**
  * 更新重试
  */
-public class UpdateRetry extends JMQPayload {
+public class UpdateRetry extends JournalqPayload {
     public static byte SUCCESS = 0;
     public static byte EXPIRED = -2;
     public static byte FAILED = 1;

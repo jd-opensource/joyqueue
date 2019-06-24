@@ -13,31 +13,33 @@
  */
 package com.jd.journalq.broker.kafka.command;
 
-import com.google.common.collect.Table;
 import com.jd.journalq.broker.kafka.KafkaCommandType;
 import com.jd.journalq.broker.kafka.model.OffsetMetadataAndError;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by zhangkepeng on 16-8-4.
  */
 public class OffsetFetchResponse extends KafkaRequestOrResponse {
 
-    private Table<String, Integer, OffsetMetadataAndError> topicMetadataAndErrors;
+    private Map<String, List<OffsetMetadataAndError>> topicMetadataAndErrors;
 
     public OffsetFetchResponse() {
 
     }
 
-    public OffsetFetchResponse(Table<String, Integer, OffsetMetadataAndError> topicMetadataAndErrors) {
+    public OffsetFetchResponse(Map<String, List<OffsetMetadataAndError>> topicMetadataAndErrors) {
         this.topicMetadataAndErrors = topicMetadataAndErrors;
     }
 
-    public Table<String, Integer, OffsetMetadataAndError>  getTopicMetadataAndErrors() {
+    public void setTopicMetadataAndErrors(Map<String, List<OffsetMetadataAndError>> topicMetadataAndErrors) {
+        this.topicMetadataAndErrors = topicMetadataAndErrors;
+    }
+
+    public Map<String, List<OffsetMetadataAndError>> getTopicMetadataAndErrors() {
         return topicMetadataAndErrors;
-    }
-
-    public void setTopicMetadataAndErrors(Table<String, Integer, OffsetMetadataAndError> topicMetadataAndErrors) {
-        this.topicMetadataAndErrors = topicMetadataAndErrors;
     }
 
     @Override

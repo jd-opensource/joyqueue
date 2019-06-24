@@ -14,12 +14,12 @@
 package com.jd.journalq.server.retry.remote.command;
 
 import com.jd.journalq.network.command.CommandType;
-import com.jd.journalq.network.transport.command.JMQPayload;
+import com.jd.journalq.network.transport.command.JournalqPayload;
 
 /**
  * 获取重试
  */
-public class GetRetry extends JMQPayload {
+public class GetRetry extends JournalqPayload {
 
     // 主题
     private String topic;

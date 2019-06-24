@@ -22,7 +22,7 @@ import com.jd.journalq.client.internal.consumer.exception.IgnoreAckException;
 import com.jd.journalq.client.internal.consumer.interceptor.ConsumeContext;
 import com.jd.journalq.client.internal.consumer.interceptor.ConsumerInvoker;
 import com.jd.journalq.client.internal.metadata.domain.TopicMetadata;
-import com.jd.journalq.domain.Consumer;
+import com.jd.journalq.domain.ConsumerPolicy;
 import com.jd.journalq.network.command.RetryType;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
@@ -47,12 +47,12 @@ public class BatchConsumerInvoker implements ConsumerInvoker {
 
     private ConsumerConfig config;
     private TopicMetadata topicMetadata;
-    private Consumer.ConsumerPolicy consumerPolicy;
+    private ConsumerPolicy consumerPolicy;
     private List<ConsumeMessage> messages;
     private List<BatchMessageListener> listeners;
     private ExecutorService listenerExecutor;
 
-    public BatchConsumerInvoker(ConsumerConfig config, TopicMetadata topicMetadata, Consumer.ConsumerPolicy consumerPolicy,
+    public BatchConsumerInvoker(ConsumerConfig config, TopicMetadata topicMetadata, ConsumerPolicy consumerPolicy,
                                 List<ConsumeMessage> messages, List<BatchMessageListener> listeners, ExecutorService listenerExecutor) {
         this.config = config;
         this.topicMetadata = topicMetadata;

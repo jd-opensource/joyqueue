@@ -43,7 +43,7 @@ public abstract class AbstractSerializer {
      * @param attributes 散列
      * @return 返回值 字符串
      */
-    protected static String toProperties(final Map<String, String> attributes) {
+    public static String toProperties(final Map<String, String> attributes) {
         if (attributes == null) {
             return "";
         }
@@ -189,7 +189,7 @@ public abstract class AbstractSerializer {
      * @param in     输入缓冲区
      * @param length 长度
      */
-    protected static byte[] readBytes(final ByteBuffer in, final int length) {
+    public static byte[] readBytes(final ByteBuffer in, final int length) {
         if (in == null || length <= 0) {
             return new byte[0];
         }
@@ -216,7 +216,7 @@ public abstract class AbstractSerializer {
      * @throws IOException 序列化异常
      */
     @SuppressWarnings("unchecked")
-    protected static Map<String, String> toStringMap(final String text) throws IOException {
+    public static Map<String, String> toStringMap(final String text) throws IOException {
         if (text == null || text.isEmpty()) {
             return null;
         }
@@ -256,7 +256,7 @@ public abstract class AbstractSerializer {
      * @param charset 字符集
      * @return 返回值 字节数组
      */
-    protected static byte[] getBytes(final String value, final Charset charset) {
+    public static byte[] getBytes(final String value, final Charset charset) {
         if (value == null) {
             return new byte[0];
         }

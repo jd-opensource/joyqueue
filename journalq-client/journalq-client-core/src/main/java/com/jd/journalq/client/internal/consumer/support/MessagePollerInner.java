@@ -13,6 +13,7 @@
  */
 package com.jd.journalq.client.internal.consumer.support;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.jd.journalq.client.internal.cluster.ClusterManager;
 import com.jd.journalq.client.internal.consumer.BrokerLoadBalance;
@@ -36,10 +37,9 @@ import com.jd.journalq.client.internal.trace.TraceBuilder;
 import com.jd.journalq.client.internal.trace.TraceCaller;
 import com.jd.journalq.client.internal.trace.TraceType;
 import com.jd.journalq.client.internal.transport.ClientState;
-import com.jd.journalq.domain.Consumer;
+import com.jd.journalq.domain.ConsumerPolicy;
 import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.domain.BrokerNode;
-import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -87,7 +87,7 @@ public class MessagePollerInner extends Service {
     public List<ConsumeMessage> fetchTopic(BrokerNode brokerNode, String topic, int batchSize, long timeout, TimeUnit timeoutUnit, ConsumerListener listener) {
         Preconditions.checkArgument(StringUtils.isNotBlank(topic), "topic not blank");
 
-        TopicMetadata topicMetadata = checkTopicMetadata(topic);
+        TopicMetadata topicMetadata = getAndCheckTopicMetadata(topic);
         return fetchTopic(brokerNode, topicMetadata, batchSize, timeout, timeoutUnit, listener);
     }
 
@@ -110,7 +110,7 @@ public class MessagePollerInner extends Service {
     }
 
     protected List<ConsumeMessage> doFetchTopic(BrokerNode brokerNode, TopicMetadata topicMetadata, int batchSize, long timeout, TimeUnit timeoutUnit, final ConsumerListener listener) {
-        Consumer.ConsumerPolicy consumerPolicy = topicMetadata.getConsumerPolicy();
+        ConsumerPolicy consumerPolicy = topicMetadata.getConsumerPolicy();
         timeout = timeoutUnit.toMillis(timeout);
         final String topic = topicMetadata.getTopic();
         final String app = getAppFullName();
@@ -151,7 +151,7 @@ public class MessagePollerInner extends Service {
     public List<ConsumeMessage> fetchPartition(BrokerNode brokerNode, String topic, short partition, long index, int batchSize, long timeout, TimeUnit timeoutUnit, ConsumerListener listener) {
         Preconditions.checkArgument(StringUtils.isNotBlank(topic), "topic not blank");
 
-        TopicMetadata topicMetadata = checkTopicMetadata(topic);
+        TopicMetadata topicMetadata = getAndCheckTopicMetadata(topic);
         return fetchPartition(brokerNode, topicMetadata, partition, index, batchSize, timeout, timeoutUnit, listener);
     }
 
@@ -223,16 +223,13 @@ public class MessagePollerInner extends Service {
             return fetchMessageData.getMessages();
         }
 
-        // TODO 临时日志
-        logger.warn("fetch message error, topic: {}, code: {}, error: {}", topic, code, code.getMessage());
-
         switch (code) {
             case CN_NO_PERMISSION:
             case CN_SERVICE_NOT_AVAILABLE:
             case FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER: {
                 // 尝试更新元数据
                 logger.warn("fetch message error, no permission, topic: {}", topic);
-                clusterManager.tryUpdateTopicMetadata(topic, app);
+                clusterManager.updateTopicMetadata(topic, app);
                 break;
             }
             case FW_GET_MESSAGE_TOPIC_NOT_READ:
@@ -326,7 +323,7 @@ public class MessagePollerInner extends Service {
         return BrokerAssignmentConverter.convertBrokerAssignments(topicMetadata);
     }
 
-    public TopicMetadata checkTopicMetadata(String topic) {
+    public TopicMetadata getAndCheckTopicMetadata(String topic) {
         TopicMetadata topicMetadata = clusterManager.fetchTopicMetadata(getTopicFullName(topic), getAppFullName());
         if (topicMetadata == null) {
             throw new ConsumerException(String.format("topic %s is not exist", topic), JournalqCode.FW_TOPIC_NOT_EXIST.getCode());

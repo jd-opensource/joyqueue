@@ -41,6 +41,8 @@ public interface JournalQProducerBuiltinKeys extends OMSBuiltinKeys {
 
     String COMPRESS_THRESHOLD = "PRODUCER_COMPRESS_THRESHOLD";
 
+    String BATCH = "PRODUCER_BATCH";
+
     String SELECTOR_TYPE = "PRODUCER_SELECTOR_TYPE";
 
     String BUSINESSID_LENGTH_LIMIT = "PRODUCER_BUSINESSID_LENGTH_LIMIT";

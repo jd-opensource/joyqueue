@@ -14,9 +14,14 @@
 package com.jd.journalq.broker.coordinator;
 
 import com.google.common.collect.Maps;
-import com.jd.journalq.broker.coordinator.config.CoordinatorConfig;
-import com.jd.journalq.nsr.NameService;
 import com.jd.journalq.broker.cluster.ClusterManager;
+import com.jd.journalq.broker.coordinator.config.CoordinatorConfig;
+import com.jd.journalq.broker.coordinator.group.GroupMetadataManager;
+import com.jd.journalq.broker.coordinator.session.CoordinatorSessionManager;
+import com.jd.journalq.broker.coordinator.support.CoordinatorInitializer;
+import com.jd.journalq.broker.coordinator.support.CoordinatorResolver;
+import com.jd.journalq.broker.coordinator.transaction.TransactionMetadataManager;
+import com.jd.journalq.nsr.NameService;
 import com.jd.journalq.toolkit.service.Service;
 
 import java.util.concurrent.ConcurrentMap;
@@ -27,7 +32,7 @@ import java.util.concurrent.ConcurrentMap;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/4
  */
-public class CoordinatorService extends Service{
+public class CoordinatorService extends Service {
 
     private CoordinatorConfig config;
     private ClusterManager clusterManager;
@@ -35,9 +40,11 @@ public class CoordinatorService extends Service{
 
     private CoordinatorInitializer coordinatorInitializer;
     private CoordinatorResolver coordinatorResolver;
+    private CoordinatorSessionManager coordinatorSessionManager;
     private Coordinator coordinator;
 
-    private ConcurrentMap<String, CoordinatorGroupManager> coordinatorGroupManagerCache = Maps.newConcurrentMap();
+    private final ConcurrentMap<String, GroupMetadataManager> groupMetadataManagerMap = Maps.newConcurrentMap();
+    private final ConcurrentMap<String, TransactionMetadataManager> transactionMetadataManagerMap = Maps.newConcurrentMap();
 
     public CoordinatorService(CoordinatorConfig config, ClusterManager clusterManager, NameService nameService) {
         this.config = config;
@@ -45,31 +52,56 @@ public class CoordinatorService extends Service{
         this.nameService = nameService;
         this.coordinatorInitializer = new CoordinatorInitializer(config, clusterManager, nameService);
         this.coordinatorResolver = new CoordinatorResolver(config, clusterManager);
-        this.coordinator = new Coordinator(config, clusterManager, coordinatorResolver, coordinatorInitializer);
+        this.coordinatorSessionManager = new CoordinatorSessionManager(config);
+        this.coordinator = new Coordinator(config, clusterManager, coordinatorResolver, coordinatorInitializer, coordinatorSessionManager);
     }
 
     @Override
     protected void doStart() throws Exception {
         coordinatorInitializer.init();
+        coordinatorSessionManager.start();
+    }
+
+    @Override
+    protected void doStop() {
+        if (coordinatorSessionManager != null) {
+            coordinatorSessionManager.stop();
+        }
     }
 
     public Coordinator getCoordinator() {
         return coordinator;
     }
 
-    public CoordinatorGroupManager getOrCreateCoordinatorGroupManager(String namespace) {
-        CoordinatorGroupManager coordinatorGroupManager = coordinatorGroupManagerCache.get(namespace);
-        if (coordinatorGroupManager == null) {
-            coordinatorGroupManager = doCreateCoordinatorGroupManager(namespace);
-            CoordinatorGroupManager oldCoordinatorGroupManager = coordinatorGroupManagerCache.putIfAbsent(namespace, coordinatorGroupManager);
-            if (oldCoordinatorGroupManager != null) {
-                coordinatorGroupManager = oldCoordinatorGroupManager;
+    public GroupMetadataManager getOrCreateGroupMetadataManager(String namespace) {
+        GroupMetadataManager groupMetadataManager = groupMetadataManagerMap.get(namespace);
+        if (groupMetadataManager == null) {
+            groupMetadataManager = doCreateGroupMetadataManager(namespace);
+            GroupMetadataManager oldGroupMetadataManager = groupMetadataManagerMap.putIfAbsent(namespace, groupMetadataManager);
+            if (oldGroupMetadataManager != null) {
+                groupMetadataManager = oldGroupMetadataManager;
             }
         }
-        return coordinatorGroupManager;
+        return groupMetadataManager;
     }
 
-    protected CoordinatorGroupManager doCreateCoordinatorGroupManager(String namespace) {
-        return new CoordinatorGroupManager(namespace, config);
+    public TransactionMetadataManager getOrCreateTransactionMetadataManager(String namespace) {
+        TransactionMetadataManager transactionMetadataManager = transactionMetadataManagerMap.get(namespace);
+        if (transactionMetadataManager == null) {
+            transactionMetadataManager = doCreateTransactionMetadataManager(namespace);
+            TransactionMetadataManager oldTransactionMetadataManager = transactionMetadataManagerMap.putIfAbsent(namespace, transactionMetadataManager);
+            if (oldTransactionMetadataManager != null) {
+                transactionMetadataManager = oldTransactionMetadataManager;
+            }
+        }
+        return transactionMetadataManager;
+    }
+
+    protected TransactionMetadataManager doCreateTransactionMetadataManager(String namespace) {
+        return new TransactionMetadataManager(namespace, config);
+    }
+
+    protected GroupMetadataManager doCreateGroupMetadataManager(String namespace) {
+        return new GroupMetadataManager(namespace, config);
     }
 }

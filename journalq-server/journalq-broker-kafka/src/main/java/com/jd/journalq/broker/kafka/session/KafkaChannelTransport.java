@@ -135,6 +135,7 @@ public class KafkaChannelTransport implements ChannelTransport {
         try {
             semaphore.acquire();
         } catch (InterruptedException e) {
+            logger.error("wait acquire exception", e);
         }
     }
 

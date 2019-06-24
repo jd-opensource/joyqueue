@@ -32,6 +32,7 @@
         <dependency>
             <groupId>com.jd.journalq</groupId>
             <artifactId>journalq-client-core</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>io.openmessaging</groupId>

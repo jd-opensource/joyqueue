@@ -16,7 +16,7 @@ package com.jd.journalq.util.serializer;
 import com.jd.journalq.message.JournalLog;
 import com.jd.journalq.message.BrokerMessage;
 import com.jd.journalq.message.Message;
-import com.jd.journalq.network.serializer.JMQMapTools;
+import com.jd.journalq.network.serializer.JournalqMapTools;
 import com.jd.journalq.toolkit.io.Compressors;
 import com.jd.journalq.toolkit.io.Zip;
 import com.jd.journalq.toolkit.io.ZipUtil;
@@ -646,7 +646,7 @@ public class BrokerMessageCoder extends AbstractSerializer {
      */
     @Deprecated
     public static <K, V> void write(final Map<K, V> hashMap, ByteBuf out) throws Exception {
-        JMQMapTools.write(hashMap, out);
+        JournalqMapTools.write(hashMap, out);
     }
 
 

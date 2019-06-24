@@ -17,7 +17,7 @@ import com.jd.journalq.broker.election.TopicPartitionGroup;
 import com.jd.journalq.broker.election.command.AppendEntriesRequest;
 import com.jd.journalq.network.command.CommandType;
 import com.jd.journalq.network.serializer.Serializer;
-import com.jd.journalq.network.transport.codec.JMQHeader;
+import com.jd.journalq.network.transport.codec.JournalqHeader;
 import com.jd.journalq.network.transport.codec.PayloadDecoder;
 import com.jd.journalq.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
@@ -29,9 +29,9 @@ import java.nio.ByteBuffer;
  * email: zhuduohui@jd.com
  * date: 2018/9/27
  */
-public class AppendEntriesRequestDecoder implements PayloadDecoder<JMQHeader>, Type {
+public class AppendEntriesRequestDecoder implements PayloadDecoder<JournalqHeader>, Type {
     @Override
-    public Object decode(final JMQHeader header, final ByteBuf buffer) throws Exception {
+    public Object decode(final JournalqHeader header, final ByteBuf buffer) throws Exception {
 
         AppendEntriesRequest request = new AppendEntriesRequest();
 

@@ -13,13 +13,13 @@
  */
 package com.jd.journalq.nsr.network.command;
 
-import com.jd.journalq.network.transport.command.JMQPayload;
+import com.jd.journalq.network.transport.command.JournalqPayload;
 
 /**
  * @author wylixiaobin
  * Date: 2019/3/15
  */
-public class NsrConnection extends JMQPayload {
+public class NsrConnection extends JournalqPayload {
     private Integer brokerId;
     public NsrConnection brokerId(Integer brokerId){
         this.brokerId = brokerId;

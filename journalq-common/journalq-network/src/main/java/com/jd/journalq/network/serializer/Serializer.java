@@ -44,8 +44,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import static com.jd.journalq.network.transport.codec.JMQHeader.VERSION2;
-
+import static com.jd.journalq.network.transport.codec.JournalqHeader.VERSION2;
 
 /**
  * 负责broker端消息的序列化
@@ -63,7 +62,7 @@ public class Serializer extends AbstractSerializer {
             4 // size
                     + 2 // partition
                     + 8 // index
-                    + 4
+                    + 4 // term
                     + 2 // magic code
                     + 2 // sys code
                     + 2 // flag
@@ -238,6 +237,26 @@ public class Serializer extends AbstractSerializer {
         }
         if (length > 0) {
             out.writeBytes(value);
+        }
+    }
+
+    public static void write(final byte[] value, final ByteBuffer out, final int lengthSize) {
+        write(value, out, true, lengthSize);
+    }
+
+    public static void write(final byte[] value, final ByteBuffer out, final boolean writeLength, final int lengthSize) {
+        int length = value == null ? 0 : value.length;
+        if (writeLength) {
+            if (lengthSize == 1) {
+                out.put((byte) length);
+            } else if (lengthSize == 2) {
+                out.putShort((short) length);
+            } else {
+                out.putInt(length);
+            }
+        }
+        if (length > 0) {
+            out.put(value);
         }
     }
 
@@ -751,6 +770,22 @@ public class Serializer extends AbstractSerializer {
         write(value, out, lengthSize, false);
     }
 
+    public static void write(final String value, final ByteBuffer out, final int lengthSize) {
+        write(value, out, true, lengthSize);
+    }
+
+    public static void write(final String value, final ByteBuffer out, final boolean writeLength, final int lengthSize) {
+        if (out == null) {
+            return;
+        }
+        if (value != null && !value.isEmpty()) {
+            byte[] bytes = getBytes(value, Charsets.UTF_8);
+            write(bytes, out, writeLength, lengthSize);
+        } else {
+            write((byte[]) null, out, writeLength, lengthSize);
+        }
+    }
+
     /**
      * 写字符串(长度<=255)
      *
@@ -862,7 +897,7 @@ public class Serializer extends AbstractSerializer {
      * @throws Exception 序列化/反序列化错误
      */
     public static <K, V> void write(final Map<K, V> hashMap, ByteBuf out) throws Exception {
-        JMQMapTools.write(hashMap, out);
+        JournalqMapTools.write(hashMap, out);
     }
 
     /**

@@ -13,17 +13,15 @@
  */
 package com.jd.journalq.broker.kafka.network.codec;
 
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Table;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.jd.journalq.broker.kafka.KafkaCommandType;
 import com.jd.journalq.broker.kafka.command.ProduceRequest;
 import com.jd.journalq.broker.kafka.command.ProduceResponse;
 import com.jd.journalq.broker.kafka.message.KafkaBrokerMessage;
 import com.jd.journalq.broker.kafka.message.KafkaMessageSerializer;
-import com.jd.journalq.broker.kafka.model.ProducePartitionStatus;
 import com.jd.journalq.broker.kafka.network.KafkaHeader;
 import com.jd.journalq.broker.kafka.network.KafkaPayloadCodec;
-import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.network.serializer.Serializer;
 import com.jd.journalq.network.transport.command.Type;
 import com.jd.journalq.network.transport.exception.TransportException;
@@ -42,9 +40,8 @@ import java.util.Map;
 public class ProduceCodec implements KafkaPayloadCodec<ProduceResponse>, Type {
 
     @Override
-    public Object decode(KafkaHeader header, ByteBuf buffer) throws Exception {
+    public ProduceRequest decode(KafkaHeader header, ByteBuf buffer) throws Exception {
         ProduceRequest produceRequest = new ProduceRequest();
-        Table<TopicName, Integer, List<KafkaBrokerMessage>> topicPartitionMessages = HashBasedTable.create();
 
         if (header.getVersion() >= 3) {
             produceRequest.setTransactionalId(Serializer.readString(buffer, Serializer.SHORT_SIZE));
@@ -52,49 +49,66 @@ public class ProduceCodec implements KafkaPayloadCodec<ProduceResponse>, Type {
 
         produceRequest.setRequiredAcks(buffer.readShort());
         produceRequest.setAckTimeoutMs(buffer.readInt());
-        int topicCount = buffer.readInt();
-        for (int i = 0; i < topicCount; i++) {
-            TopicName topic = TopicName.parse(Serializer.readString(buffer, Serializer.SHORT_SIZE));
-            int partitionCount = buffer.readInt();
-            for (int j = 0; j < partitionCount; j++) {
+        int topicSize = Math.max(buffer.readInt(), 0);
+        Map<String, List<ProduceRequest.PartitionRequest>> partitionRequestMap = Maps.newHashMapWithExpectedSize(topicSize);
+        int partitionNum = 0;
+
+        for (int i = 0; i < topicSize; i++) {
+            String topic = Serializer.readString(buffer, Serializer.SHORT_SIZE);
+            int partitionSize = Math.max(buffer.readInt(), 0);
+            partitionNum += partitionSize;
+            List<ProduceRequest.PartitionRequest> partitionRequests = Lists.newArrayListWithCapacity(partitionSize);
+
+            for (int j = 0; j < partitionSize; j++) {
                 int partition = buffer.readInt();
                 int messageSetSize = buffer.readInt();
 
                 byte[] bytes = new byte[messageSetSize];
                 buffer.readBytes(bytes);
 
-                // TODO buffer优化，不需要buffer
                 List<KafkaBrokerMessage> messages = KafkaMessageSerializer.readMessages(ByteBuffer.wrap(bytes));
-                topicPartitionMessages.put(topic, partition, messages);
+                if (!produceRequest.isTransaction()) {
+                    for (KafkaBrokerMessage message : messages) {
+                        if (message.isTransaction()) {
+                            produceRequest.setTransaction(true);
+                            produceRequest.setProducerId(message.getProducerId());
+                            produceRequest.setProducerEpoch(message.getProducerEpoch());
+                        }
+                    }
+                }
+                partitionRequests.add(new ProduceRequest.PartitionRequest(partition, messages));
             }
+
+            partitionRequestMap.put(topic, partitionRequests);
         }
 
-        produceRequest.setTopicPartitionMessages(topicPartitionMessages);
+        produceRequest.setPartitionRequests(partitionRequestMap);
+        produceRequest.setPartitionNum(partitionNum);
         return produceRequest;
     }
 
     @Override
     public void encode(ProduceResponse payload, ByteBuf buffer) throws Exception {
         int version = payload.getVersion();
-        buffer.writeInt(payload.getProducerResponseStatuss().size());
-        for (Map.Entry<String, List<ProducePartitionStatus>> entry : payload.getProducerResponseStatuss().entrySet()) {
+        buffer.writeInt(payload.getPartitionResponses().size());
+        for (Map.Entry<String, List<ProduceResponse.PartitionResponse>> entry : payload.getPartitionResponses().entrySet()) {
             try {
                 Serializer.write(entry.getKey(), buffer, Serializer.SHORT_SIZE);
             } catch (Exception e) {
                 throw new TransportException.CodecException(e);
             }
             buffer.writeInt(entry.getValue().size());
-            for (ProducePartitionStatus partitionStatus : entry.getValue()) {
-                buffer.writeInt(partitionStatus.getPartition());
-                buffer.writeShort(partitionStatus.getErrorCode());
-                buffer.writeLong(partitionStatus.getOffset());
+            for (ProduceResponse.PartitionResponse partitionResponse : entry.getValue()) {
+                buffer.writeInt(partitionResponse.getPartition());
+                buffer.writeShort(partitionResponse.getErrorCode());
+                buffer.writeLong(partitionResponse.getOffset());
                 if (version >= 2) {
-                    // TODO: log_append_time
-                    buffer.writeLong(-1);
+                    // log_append_time
+                    buffer.writeLong(partitionResponse.getLogAppendTime());
                 }
                 if (version >= 5) {
-                    // TODO: log_start_offset
-                    buffer.writeLong(0);
+                    // log_start_offset
+                    buffer.writeLong(partitionResponse.getLogStartOffset());
                 }
             }
         }

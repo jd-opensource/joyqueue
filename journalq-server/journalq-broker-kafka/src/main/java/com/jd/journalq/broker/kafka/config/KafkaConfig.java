@@ -13,6 +13,7 @@
  */
 package com.jd.journalq.broker.kafka.config;
 
+import com.jd.journalq.domain.QosLevel;
 import com.jd.journalq.toolkit.config.PropertyDef;
 import com.jd.journalq.toolkit.config.PropertySupplier;
 import org.slf4j.Logger;
@@ -37,12 +38,48 @@ public class KafkaConfig {
         return getConfig(KafkaConfigKey.FETCH_BATCH_SIZE);
     }
 
-    public int getCoordinatorOffsetSessionCache() {
-        return getConfig(KafkaConfigKey.COORDINATOR_OFFSET_SESSION_CACHE);
+    public int getOffsetSyncTimeout() {
+        return getConfig(KafkaConfigKey.OFFSET_SYNC_TIMEOUT);
     }
 
-    public int getCoordinatorOffsetSyncTimeout() {
-        return getConfig(KafkaConfigKey.COORDINATOR_OFFSET_SYNC_TIMEOUT);
+    public int getOffsetCacheExpireTime() {
+        return getConfig(KafkaConfigKey.OFFSET_CACHE_EXPIRE_TIME);
+    }
+
+    public int getTransactionSyncTimeout() {
+        return getConfig(KafkaConfigKey.TRANSACTION_SYNC_TIMEOUT);
+    }
+
+    public int getTransactionTimeout() {
+        return getConfig(KafkaConfigKey.TRANSACTION_TIMEOUT);
+    }
+
+    public int getTransactionLogWriteTimeout() {
+        return getConfig(KafkaConfigKey.TRANSACTION_LOG_WRITE_TIMEOUT);
+    }
+
+    public int getTransactionLogRetries() {
+        return getConfig(KafkaConfigKey.TRANSACTION_LOG_RETRIES);
+    }
+
+    public int getTransactionLogInterval() {
+        return getConfig(KafkaConfigKey.TRANSACTION_LOG_INTERVAL);
+    }
+
+    public int getTransactionProducerSequenceExpire() {
+        return getConfig(KafkaConfigKey.TRANSACTION_PRODUCER_SEQUENCE_EXPIRE);
+    }
+
+    public String getTransactionLogApp() {
+        return getConfig(KafkaConfigKey.TRANSACTION_LOG_APP);
+    }
+
+    public int getTransactionLogScanSize() {
+        return getConfig(KafkaConfigKey.TRANSACTION_LOG_SCAN_SIZE);
+    }
+
+    public QosLevel getTransactionLogWriteQosLevel() {
+        return QosLevel.valueOf((int) getConfig(KafkaConfigKey.TRANSACTION_LOG_WRITE_QOSLEVEL));
     }
 
     public int getSessionMaxTimeout() {
@@ -67,6 +104,10 @@ public class KafkaConfig {
 
     public int getRebalanceTimeout() {
         return getConfig(KafkaConfigKey.REBALANCE_TIMEOUT);
+    }
+
+    public int getRebalanceHeartbeatOverflow() {
+        return getConfig(KafkaConfigKey.REBALANCE_HEARTBEAT_OVERFLOW);
     }
 
     protected <T> T getConfig(String key, PropertyDef.Type type, Object defaultValue) {

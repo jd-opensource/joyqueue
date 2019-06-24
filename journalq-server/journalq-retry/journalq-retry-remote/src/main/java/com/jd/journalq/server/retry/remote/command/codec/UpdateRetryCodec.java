@@ -15,7 +15,7 @@ package com.jd.journalq.server.retry.remote.command.codec;
 
 import com.jd.journalq.network.command.CommandType;
 import com.jd.journalq.network.serializer.Serializer;
-import com.jd.journalq.network.transport.codec.JMQHeader;
+import com.jd.journalq.network.transport.codec.JournalqHeader;
 import com.jd.journalq.network.transport.codec.PayloadCodec;
 import com.jd.journalq.network.transport.command.Type;
 import com.jd.journalq.server.retry.remote.command.UpdateRetry;
@@ -24,10 +24,10 @@ import io.netty.buffer.ByteBuf;
 /**
  * Created by chengzhiliang on 2018/9/17.
  */
-public class UpdateRetryCodec implements PayloadCodec<JMQHeader, UpdateRetry>, Type {
+public class UpdateRetryCodec implements PayloadCodec<JournalqHeader, UpdateRetry>, Type {
 
     @Override
-    public Object decode(JMQHeader header, ByteBuf buffer) throws Exception {
+    public Object decode(JournalqHeader header, ByteBuf buffer) throws Exception {
         if (buffer == null) {
             return null;
         }

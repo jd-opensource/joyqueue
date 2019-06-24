@@ -13,22 +13,22 @@
  */
 package com.jd.journalq.broker.kafka.model;
 
-
-import com.jd.journalq.broker.kafka.KafkaErrorCode;
-
 /**
  * Created by zhangkepeng on 16-8-4.
  */
 public class OffsetMetadataAndError {
 
+    private int partition;
     private long offset;
     private String metadata = OffsetAndMetadata.NO_METADATA;
-    private short error = KafkaErrorCode.NONE;
-
-    public static final OffsetMetadataAndError OFFSET_SYNC_FAIL = new OffsetMetadataAndError(OffsetAndMetadata.INVALID_OFFSET, OffsetAndMetadata.NO_METADATA, KafkaErrorCode.NOT_LEADER_FOR_PARTITION);
-    public static final OffsetMetadataAndError OFFSET_SYNC_SUCCESS = new OffsetMetadataAndError(OffsetAndMetadata.INVALID_OFFSET, OffsetAndMetadata.NO_METADATA, KafkaErrorCode.NONE);
+    private short error;
 
     public OffsetMetadataAndError(short error) {
+        this.error = error;
+    }
+
+    public OffsetMetadataAndError(int partition, short error) {
+        this.partition = partition;
         this.error = error;
     }
 
@@ -36,6 +36,23 @@ public class OffsetMetadataAndError {
         this.offset = offset;
         this.metadata = metadata;
         this.error = error;
+    }
+
+    public OffsetMetadataAndError(int partition, long offset, String metadata, short error) {
+        this.partition = partition;
+        this.offset = offset;
+        this.metadata = metadata;
+        this.error = error;
+    }
+
+    public OffsetMetadataAndError(int partition, long offset, short error) {
+        this.partition = partition;
+        this.offset = offset;
+        this.error = error;
+    }
+
+    public int getPartition() {
+        return partition;
     }
 
     public long getOffset() {
@@ -48,6 +65,18 @@ public class OffsetMetadataAndError {
 
     public short getError() {
         return error;
+    }
+
+    public void setOffset(long offset) {
+        this.offset = offset;
+    }
+
+    public void setMetadata(String metadata) {
+        this.metadata = metadata;
+    }
+
+    public void setError(short error) {
+        this.error = error;
     }
 
     @Override

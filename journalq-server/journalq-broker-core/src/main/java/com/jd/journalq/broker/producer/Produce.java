@@ -78,6 +78,14 @@ public interface Produce {
     TransactionId putTransactionMessage(Producer producer, JournalLog tx) throws JournalqException;
 
     /**
+     * 获取事务id
+     * @param producer
+     * @param txId
+     * @return
+     */
+    TransactionId getTransaction(Producer producer, String txId);
+
+    /**
      * 获取补偿
      * @param producer
      * @param count

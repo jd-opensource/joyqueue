@@ -13,21 +13,21 @@
  */
 package com.jd.journalq.broker.kafka.network.codec;
 
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Table;
-import com.jd.journalq.broker.kafka.network.KafkaHeader;
-import com.jd.journalq.broker.kafka.network.KafkaPayloadCodec;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.jd.journalq.broker.kafka.KafkaCommandType;
 import com.jd.journalq.broker.kafka.command.OffsetCommitRequest;
 import com.jd.journalq.broker.kafka.command.OffsetCommitResponse;
 import com.jd.journalq.broker.kafka.model.OffsetAndMetadata;
 import com.jd.journalq.broker.kafka.model.OffsetMetadataAndError;
+import com.jd.journalq.broker.kafka.network.KafkaHeader;
+import com.jd.journalq.broker.kafka.network.KafkaPayloadCodec;
 import com.jd.journalq.network.serializer.Serializer;
 import com.jd.journalq.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * OffsetCommitCodec
@@ -40,7 +40,6 @@ public class OffsetCommitCodec implements KafkaPayloadCodec<OffsetCommitResponse
     @Override
     public Object decode(KafkaHeader header, ByteBuf buffer) throws Exception {
         OffsetCommitRequest offsetCommitRequest = new OffsetCommitRequest();
-        Table<String, Integer, OffsetAndMetadata> topicPartitionOffsetMetadata = HashBasedTable.create();
 
         offsetCommitRequest.setGroupId(Serializer.readString(buffer, Serializer.SHORT_SIZE));
         // 0.8 above
@@ -59,20 +58,26 @@ public class OffsetCommitCodec implements KafkaPayloadCodec<OffsetCommitResponse
         }
 
         int topicCount = buffer.readInt();
+        Map<String, List<OffsetAndMetadata>> offsets = Maps.newHashMapWithExpectedSize(topicCount);
+
         for (int i = 0; i < topicCount; i++) {
             String topic = Serializer.readString(buffer, Serializer.SHORT_SIZE);
             int partitionCount = buffer.readInt();
+            List<OffsetAndMetadata> offsetList = Lists.newArrayListWithCapacity(partitionCount);
+            offsets.put(topic, offsetList);
+
             for (int j = 0; j < partitionCount; j++) {
-                int partitionId = buffer.readInt();
+                int partition = buffer.readInt();
                 long offset = buffer.readLong();
                 long timestamp = header.getVersion() == 1 ? buffer.readLong() : OffsetCommitRequest.DEFAULT_TIMESTAMP;
                 String metadata = Serializer.readString(buffer, Serializer.SHORT_SIZE);
-                OffsetAndMetadata offsetAndMetadata = new OffsetAndMetadata(offset, metadata, timestamp);
-                topicPartitionOffsetMetadata.put(topic, partitionId, offsetAndMetadata);
+                OffsetAndMetadata offsetAndMetadata = new OffsetAndMetadata(partition, offset, metadata, timestamp);
+
+                offsetList.add(offsetAndMetadata);
             }
         }
 
-        offsetCommitRequest.setOffsetAndMetadata(topicPartitionOffsetMetadata);
+        offsetCommitRequest.setOffsets(offsets);
         return offsetCommitRequest;
     }
 
@@ -83,18 +88,13 @@ public class OffsetCommitCodec implements KafkaPayloadCodec<OffsetCommitResponse
             buffer.writeInt(payload.getThrottleTimeMs());
         }
 
-        Table<String, Integer, OffsetMetadataAndError> commitOffsetStatus = payload.getCommitStatus();
-        Set<String> topics = commitOffsetStatus.rowKeySet();
-        buffer.writeInt(topics.size());
-        for (String topic : topics) {
-            Serializer.write(topic, buffer, Serializer.SHORT_SIZE);
-            Map<Integer, OffsetMetadataAndError> partitionStatusMap = commitOffsetStatus.row(topic);
-            Set<Integer> partitions = partitionStatusMap.keySet();
-            buffer.writeInt(partitions.size());
-            for (int partition : partitions) {
-                buffer.writeInt(partition);
-                OffsetMetadataAndError status = partitionStatusMap.get(partition);
-                buffer.writeShort(status.getError());
+        buffer.writeInt(payload.getOffsets().size());
+        for (Map.Entry<String, List<OffsetMetadataAndError>> entry : payload.getOffsets().entrySet()) {
+            Serializer.write(entry.getKey(), buffer, Serializer.SHORT_SIZE);
+            buffer.writeInt(entry.getValue().size());
+            for (OffsetMetadataAndError offsetMetadataAndError : entry.getValue()) {
+                buffer.writeInt(offsetMetadataAndError.getPartition());
+                buffer.writeShort(offsetMetadataAndError.getError());
             }
         }
     }
