@@ -15,21 +15,21 @@ package com.jd.journalq.client.internal.producer.transport;
 
 import com.jd.journalq.client.internal.transport.Client;
 import com.jd.journalq.client.internal.transport.ClientState;
-import com.jd.journalq.network.command.FetchProduceFeedback;
-import com.jd.journalq.network.command.FetchProduceFeedbackAck;
-import com.jd.journalq.network.command.ProduceMessage;
-import com.jd.journalq.network.command.ProduceMessageAck;
-import com.jd.journalq.network.command.ProduceMessageCommit;
-import com.jd.journalq.network.command.ProduceMessageCommitAck;
+import com.jd.journalq.network.command.FetchProduceFeedbackRequest;
+import com.jd.journalq.network.command.FetchProduceFeedbackResponse;
+import com.jd.journalq.network.command.ProduceMessageCommitRequest;
+import com.jd.journalq.network.command.ProduceMessagePrepareRequest;
+import com.jd.journalq.network.command.ProduceMessagePrepareResponse;
+import com.jd.journalq.network.command.ProduceMessageRequest;
+import com.jd.journalq.network.command.ProduceMessageResponse;
+import com.jd.journalq.network.command.ProduceMessageCommitResponse;
 import com.jd.journalq.network.command.ProduceMessageData;
-import com.jd.journalq.network.command.ProduceMessagePrepare;
-import com.jd.journalq.network.command.ProduceMessagePrepareAck;
-import com.jd.journalq.network.command.ProduceMessageRollback;
-import com.jd.journalq.network.command.ProduceMessageRollbackAck;
+import com.jd.journalq.network.command.ProduceMessageRollbackRequest;
+import com.jd.journalq.network.command.ProduceMessageRollbackResponse;
 import com.jd.journalq.network.command.TxStatus;
 import com.jd.journalq.network.transport.TransportAttribute;
 import com.jd.journalq.network.transport.command.CommandCallback;
-import com.jd.journalq.network.transport.command.JMQCommand;
+import com.jd.journalq.network.transport.command.JournalqCommand;
 
 import java.util.Collection;
 import java.util.Map;
@@ -65,61 +65,61 @@ public class ProducerClient {
         this.connectionState = new ProducerConnectionState(this);
     }
 
-    public ProduceMessageAck produceMessage(String app, Map<String, ProduceMessageData> messages, long timeout) {
-        ProduceMessage produceMessage = new ProduceMessage();
-        produceMessage.setApp(app);
-        produceMessage.setData(messages);
-        return (ProduceMessageAck) client.sync(new JMQCommand(produceMessage), timeout).getPayload();
+    public ProduceMessageResponse produceMessage(String app, Map<String, ProduceMessageData> messages, long timeout) {
+        ProduceMessageRequest produceMessageRequest = new ProduceMessageRequest();
+        produceMessageRequest.setApp(app);
+        produceMessageRequest.setData(messages);
+        return (ProduceMessageResponse) client.sync(new JournalqCommand(produceMessageRequest), timeout).getPayload();
     }
 
     public void produceMessageOneway(String app, Map<String, ProduceMessageData> messages, long timeout) {
-        ProduceMessage produceMessage = new ProduceMessage();
-        produceMessage.setApp(app);
-        produceMessage.setData(messages);
-        client.oneway(new JMQCommand(produceMessage), timeout);
+        ProduceMessageRequest produceMessageRequest = new ProduceMessageRequest();
+        produceMessageRequest.setApp(app);
+        produceMessageRequest.setData(messages);
+        client.oneway(new JournalqCommand(produceMessageRequest), timeout);
     }
 
     public void asyncProduceMessage(String app, Map<String, ProduceMessageData> messages, long timeout, CommandCallback callback) {
-        ProduceMessage produceMessage = new ProduceMessage();
-        produceMessage.setApp(app);
-        produceMessage.setData(messages);
-        client.async(new JMQCommand(produceMessage), timeout, callback);
+        ProduceMessageRequest produceMessageRequest = new ProduceMessageRequest();
+        produceMessageRequest.setApp(app);
+        produceMessageRequest.setData(messages);
+        client.async(new JournalqCommand(produceMessageRequest), timeout, callback);
     }
 
-    public ProduceMessagePrepareAck produceMessagePrepare(String topic, String app, long sequence, String transactionId, long transactionTimeout, long timeout) {
-        ProduceMessagePrepare produceMessagePrepare = new ProduceMessagePrepare();
-        produceMessagePrepare.setTopic(topic);
-        produceMessagePrepare.setApp(app);
-        produceMessagePrepare.setSequence(sequence);
-        produceMessagePrepare.setTransactionId(transactionId);
-        produceMessagePrepare.setTimeout((int) transactionTimeout);
-        return (ProduceMessagePrepareAck) client.sync(new JMQCommand(produceMessagePrepare), timeout).getPayload();
+    public ProduceMessagePrepareResponse produceMessagePrepare(String topic, String app, long sequence, String transactionId, long transactionTimeout, long timeout) {
+        ProduceMessagePrepareRequest produceMessagePrepareRequest = new ProduceMessagePrepareRequest();
+        produceMessagePrepareRequest.setTopic(topic);
+        produceMessagePrepareRequest.setApp(app);
+        produceMessagePrepareRequest.setSequence(sequence);
+        produceMessagePrepareRequest.setTransactionId(transactionId);
+        produceMessagePrepareRequest.setTimeout((int) transactionTimeout);
+        return (ProduceMessagePrepareResponse) client.sync(new JournalqCommand(produceMessagePrepareRequest), timeout).getPayload();
     }
 
-    public ProduceMessageCommitAck produceMessageCommit(String topic, String app, String txId, long timeout) {
-        ProduceMessageCommit produceMessageCommit = new ProduceMessageCommit();
-        produceMessageCommit.setTopic(topic);
-        produceMessageCommit.setApp(app);
-        produceMessageCommit.setTxId(txId);
-        return (ProduceMessageCommitAck) client.sync(new JMQCommand(produceMessageCommit), timeout).getPayload();
+    public ProduceMessageCommitResponse produceMessageCommit(String topic, String app, String txId, long timeout) {
+        ProduceMessageCommitRequest produceMessageCommitRequest = new ProduceMessageCommitRequest();
+        produceMessageCommitRequest.setTopic(topic);
+        produceMessageCommitRequest.setApp(app);
+        produceMessageCommitRequest.setTxId(txId);
+        return (ProduceMessageCommitResponse) client.sync(new JournalqCommand(produceMessageCommitRequest), timeout).getPayload();
     }
 
-    public ProduceMessageRollbackAck produceMessageRollback(String topic, String app, String txId, long timeout) {
-        ProduceMessageRollback produceMessageRollback = new ProduceMessageRollback();
-        produceMessageRollback.setTopic(topic);
-        produceMessageRollback.setApp(app);
-        produceMessageRollback.setTxId(txId);
-        return (ProduceMessageRollbackAck) client.sync(new JMQCommand(produceMessageRollback), timeout).getPayload();
+    public ProduceMessageRollbackResponse produceMessageRollback(String topic, String app, String txId, long timeout) {
+        ProduceMessageRollbackRequest produceMessageRollbackRequest = new ProduceMessageRollbackRequest();
+        produceMessageRollbackRequest.setTopic(topic);
+        produceMessageRollbackRequest.setApp(app);
+        produceMessageRollbackRequest.setTxId(txId);
+        return (ProduceMessageRollbackResponse) client.sync(new JournalqCommand(produceMessageRollbackRequest), timeout).getPayload();
     }
 
-    public FetchProduceFeedbackAck fetchFeedback(String topic, String app, TxStatus txStatus, int count, long longPollTimeout, long timeout) {
-        FetchProduceFeedback fetchProduceFeedback = new FetchProduceFeedback();
-        fetchProduceFeedback.setTopic(topic);
-        fetchProduceFeedback.setApp(app);
-        fetchProduceFeedback.setStatus(txStatus);
-        fetchProduceFeedback.setCount(count);
-        fetchProduceFeedback.setLongPollTimeout((int) longPollTimeout);
-        return (FetchProduceFeedbackAck) client.sync(new JMQCommand(fetchProduceFeedback), timeout).getPayload();
+    public FetchProduceFeedbackResponse fetchFeedback(String topic, String app, TxStatus txStatus, int count, long longPollTimeout, long timeout) {
+        FetchProduceFeedbackRequest fetchProduceFeedbackRequest = new FetchProduceFeedbackRequest();
+        fetchProduceFeedbackRequest.setTopic(topic);
+        fetchProduceFeedbackRequest.setApp(app);
+        fetchProduceFeedbackRequest.setStatus(txStatus);
+        fetchProduceFeedbackRequest.setCount(count);
+        fetchProduceFeedbackRequest.setLongPollTimeout((int) longPollTimeout);
+        return (FetchProduceFeedbackResponse) client.sync(new JournalqCommand(fetchProduceFeedbackRequest), timeout).getPayload();
     }
 
     public void addProducers(Collection<String> topics, String app) {

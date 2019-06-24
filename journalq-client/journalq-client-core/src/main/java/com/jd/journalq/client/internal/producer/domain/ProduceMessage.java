@@ -20,7 +20,7 @@ import java.util.Collections;
 import java.util.Map;
 
 /**
- * ProduceMessage
+ * ProduceMessageRequest
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/12/10
@@ -28,7 +28,6 @@ import java.util.Map;
 public class ProduceMessage implements Serializable {
 
     public static final short NONE_PARTITION = -1;
-
     public static final String NONE_PARTITION_KEY = null;
 
     private String topic;
@@ -161,7 +160,7 @@ public class ProduceMessage implements Serializable {
 
     @Override
     public String toString() {
-        return "ProduceMessage{" +
+        return "ProduceMessageRequest{" +
                 "topic='" + topic + '\'' +
                 ", partition=" + partition +
                 ", partitionKey='" + partitionKey + '\'' +

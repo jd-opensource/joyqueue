@@ -26,6 +26,7 @@
  */
 package com.jd.journalq.broker.config;
 
+import com.google.common.base.Preconditions;
 import com.jd.journalq.domain.Config;
 import com.jd.journalq.event.ConfigEvent;
 import com.jd.journalq.event.NameServerEvent;
@@ -33,7 +34,6 @@ import com.jd.journalq.toolkit.concurrent.EventBus;
 import com.jd.journalq.toolkit.concurrent.EventListener;
 import com.jd.journalq.toolkit.config.Property;
 import com.jd.journalq.toolkit.lang.Close;
-import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

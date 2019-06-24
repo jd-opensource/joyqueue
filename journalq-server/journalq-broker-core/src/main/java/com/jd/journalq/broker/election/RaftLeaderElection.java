@@ -26,7 +26,7 @@ import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.domain.TopicConfig;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.network.command.CommandType;
-import com.jd.journalq.network.transport.codec.JMQHeader;
+import com.jd.journalq.network.transport.codec.JournalqHeader;
 import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.transport.command.CommandCallback;
 import com.jd.journalq.network.transport.command.Direction;
@@ -403,7 +403,7 @@ public class RaftLeaderElection extends LeaderElection  {
                 node.setVoteGranted(false);
                 VoteRequest voteRequest = new VoteRequest(topicPartitionGroup, currentTerm, localNodeId,
                         lastLogTerm, lastLogPos, true);
-                JMQHeader header = new JMQHeader(Direction.REQUEST, CommandType.RAFT_VOTE_REQUEST);
+                JournalqHeader header = new JournalqHeader(Direction.REQUEST, CommandType.RAFT_VOTE_REQUEST);
                 Command command = new Command(header, voteRequest);
 
                 logger.info("Partition group {}/node{} send prevote request to node {}",
@@ -450,7 +450,7 @@ public class RaftLeaderElection extends LeaderElection  {
                 node.setVoteGranted(false);
                 VoteRequest voteRequest = new VoteRequest(topicPartitionGroup, currentTerm, localNodeId,
                         lastLogTerm, lastLogPos, false);
-                JMQHeader header = new JMQHeader(Direction.REQUEST, CommandType.RAFT_VOTE_REQUEST);
+                JournalqHeader header = new JournalqHeader(Direction.REQUEST, CommandType.RAFT_VOTE_REQUEST);
                 Command command = new Command(header, voteRequest);
 
                 logger.info("Partition group {}/node{} send vote request to node {}",
@@ -565,7 +565,7 @@ public class RaftLeaderElection extends LeaderElection  {
             logger.info("Partition group {}/node{} receive vote request from {}, currentTerm {} is " +
                             "great than request term {}",
                     topicPartitionGroup, localNode, voteRequest.getCandidateId(), currentTerm, voteRequest.getTerm());
-            return new Command(new JMQHeader(Direction.RESPONSE, CommandType.RAFT_VOTE_RESPONSE),
+            return new Command(new JournalqHeader(Direction.RESPONSE, CommandType.RAFT_VOTE_RESPONSE),
                     new VoteResponse(currentTerm, voteRequest.getCandidateId(), localNodeId, voteGranted));
         }
 
@@ -597,7 +597,7 @@ public class RaftLeaderElection extends LeaderElection  {
             }
         }
 
-        return new Command(new JMQHeader(Direction.RESPONSE, CommandType.RAFT_VOTE_RESPONSE),
+        return new Command(new JournalqHeader(Direction.RESPONSE, CommandType.RAFT_VOTE_RESPONSE),
                            new VoteResponse(currentTerm, voteRequest.getCandidateId(), localNodeId, voteGranted));
     }
 
@@ -631,7 +631,7 @@ public class RaftLeaderElection extends LeaderElection  {
             logger.info("Partition group {}/node{} receive pre vote request from {}, currentTerm {} is " +
                             "great than request term {}",
                     topicPartitionGroup, localNode, voteRequest.getCandidateId(), currentTerm, voteRequest.getTerm());
-            return new Command(new JMQHeader(Direction.RESPONSE, CommandType.RAFT_VOTE_RESPONSE),
+            return new Command(new JournalqHeader(Direction.RESPONSE, CommandType.RAFT_VOTE_RESPONSE),
                     new VoteResponse(currentTerm, voteRequest.getCandidateId(), localNodeId, voteGranted));
         }
 
@@ -649,7 +649,7 @@ public class RaftLeaderElection extends LeaderElection  {
             voteGranted = true;
         }
 
-        return new Command(new JMQHeader(Direction.RESPONSE, CommandType.RAFT_VOTE_RESPONSE),
+        return new Command(new JournalqHeader(Direction.RESPONSE, CommandType.RAFT_VOTE_RESPONSE),
                            new VoteResponse(currentTerm, voteRequest.getCandidateId(), localNodeId, voteGranted));
     }
 
@@ -797,7 +797,7 @@ public class RaftLeaderElection extends LeaderElection  {
             logger.info("Partition group {}/node {} receive append entries request, current term {} " +
                         "is bigger than request term {}",
                     topicPartitionGroup, localNode, currentTerm, request.getTerm());
-            return new Command(new JMQHeader(Direction.RESPONSE, CommandType.RAFT_APPEND_ENTRIES_RESPONSE),
+            return new Command(new JournalqHeader(Direction.RESPONSE, CommandType.RAFT_APPEND_ENTRIES_RESPONSE),
                                new AppendEntriesResponse.Build().success(false).term(currentTerm)
                                        .nextPosition(request.getStartPosition()).build());
         }
@@ -810,7 +810,7 @@ public class RaftLeaderElection extends LeaderElection  {
             return replicaGroup.appendEntries(request);
         } else {
             // as heartbeat
-            return new Command(new JMQHeader(Direction.RESPONSE, CommandType.RAFT_APPEND_ENTRIES_RESPONSE),
+            return new Command(new JournalqHeader(Direction.RESPONSE, CommandType.RAFT_APPEND_ENTRIES_RESPONSE),
                                new AppendEntriesResponse.Build().success(true).term(currentTerm)
                                        .nextPosition(request.getStartPosition())
                                        .writePosition(replicableStore.rightPosition()).build());
@@ -839,7 +839,7 @@ public class RaftLeaderElection extends LeaderElection  {
             }
             try {
                 electionExecutor.submit(() -> {
-                    JMQHeader header = new JMQHeader(Direction.REQUEST, CommandType.RAFT_APPEND_ENTRIES_REQUEST);
+                    JournalqHeader header = new JournalqHeader(Direction.REQUEST, CommandType.RAFT_APPEND_ENTRIES_REQUEST);
                     Command command = new Command(header, appendEntriesRequest);
 
                     logger.debug("Partition group {}/node{} send heartbeat request {} to {}",
@@ -1223,7 +1223,7 @@ public class RaftLeaderElection extends LeaderElection  {
 
         } while(false);
 
-        JMQHeader header = new JMQHeader(Direction.RESPONSE, CommandType.RAFT_TIMEOUT_NOW_RESPONSE);
+        JournalqHeader header = new JournalqHeader(Direction.RESPONSE, CommandType.RAFT_TIMEOUT_NOW_RESPONSE);
         return new Command(header, response);
     }
 

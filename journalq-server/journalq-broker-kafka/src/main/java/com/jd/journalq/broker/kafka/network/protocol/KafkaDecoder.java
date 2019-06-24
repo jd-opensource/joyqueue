@@ -42,14 +42,6 @@ public class KafkaDecoder extends DefaultDecoder {
         if (command != null) {
             fillHeader((KafkaHeader) command.getHeader(), (KafkaRequestOrResponse) command.getPayload());
         }
-
-        // TODO 临时代码
-        //int readableBytes = buffer.readableBytes();
-        //if (readableBytes > 0 && readableBytes < 10) {
-        //    logger.warn("skip bytes, command: {}, readableBytes: {}", command, readableBytes);
-        //    buffer.skipBytes(readableBytes);
-        //}
-
         return command;
     }
 

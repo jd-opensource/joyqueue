@@ -13,6 +13,7 @@
  */
 package com.jd.journalq.client.internal.consumer.converter;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -21,12 +22,13 @@ import com.jd.journalq.client.internal.consumer.domain.ConsumeMessage;
 import com.jd.journalq.client.internal.consumer.domain.FetchMessageData;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.message.BrokerMessage;
+import com.jd.journalq.message.SourceType;
 import com.jd.journalq.network.command.FetchPartitionMessageAckData;
 import com.jd.journalq.network.command.FetchTopicMessageAckData;
+import com.jd.journalq.network.serializer.BatchMessageSerializer;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 
-import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +40,8 @@ import java.util.Map;
  * date: 2018/12/7
  */
 public class BrokerMessageConverter {
+
+    private static MessageConvertSupport messageConvertSupport = new MessageConvertSupport();
 
     public static Table<String, Short, FetchMessageData> convert(String app, Table<String, Short, FetchPartitionMessageAckData> topicMessageTable) {
         Table<String, Short, FetchMessageData> result = HashBasedTable.create();
@@ -75,15 +79,37 @@ public class BrokerMessageConverter {
         }
         List<ConsumeMessage> result = Lists.newLinkedList();
         for (BrokerMessage brokerMessage : brokerMessages) {
-            result.add(convert(topic, app, brokerMessage));
+            if (brokerMessage.isBatch()) {
+                List<BrokerMessage> convertedBrokerMessages = convertBatch(topic, app, brokerMessage);
+                if (convertedBrokerMessages != null) {
+                    for (BrokerMessage convertedBrokerMessage : convertedBrokerMessages) {
+                        result.add(convert(topic, app, convertedBrokerMessage));
+                    }
+                }
+            } else {
+                BrokerMessage convertedMessage = messageConvertSupport.convert(brokerMessage);
+                if (convertedMessage == null) {
+                    convertedMessage = brokerMessage;
+                }
+                result.add(convert(topic, app, convertedMessage));
+            }
         }
         return result;
+    }
+
+    public static List<BrokerMessage> convertBatch(String topic, String app, BrokerMessage batchBrokerMessage) {
+        if (batchBrokerMessage.getSource() != SourceType.JMQ.getValue()) {
+            return messageConvertSupport.convertBatch(batchBrokerMessage);
+        }
+        byte[] body = batchBrokerMessage.getDecompressedBody();
+        batchBrokerMessage.setBody(body);
+        return BatchMessageSerializer.deserialize(batchBrokerMessage);
     }
 
     public static ConsumeMessage convert(String topic, String app, BrokerMessage brokerMessage) {
         byte[] body = brokerMessage.getDecompressedBody();
         ConsumeMessage consumeMessage = new ConsumeMessage(TopicName.parse(topic), app, brokerMessage.getPartition(), brokerMessage.getMsgIndexNo(),
-                brokerMessage.getTxId(), brokerMessage.getBusinessId(), new String(body, Charset.forName("UTF-8")), body, brokerMessage.getFlag(), brokerMessage.getPriority(),
+                brokerMessage.getTxId(), brokerMessage.getBusinessId(), new String(body, Charsets.UTF_8), body, brokerMessage.getFlag(), brokerMessage.getPriority(),
                 brokerMessage.getStartTime(), brokerMessage.getSource(), brokerMessage.getAttributes());
         return consumeMessage;
     }

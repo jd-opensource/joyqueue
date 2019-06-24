@@ -26,7 +26,7 @@ import io.netty.buffer.ByteBuf;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * FindCoordinatorCodec
+ * FindCoordinatorRequestCodec
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/11/5
@@ -36,7 +36,7 @@ public class FindCoordinatorCodec implements KafkaPayloadCodec<FindCoordinatorRe
     @Override
     public FindCoordinatorRequest decode(KafkaHeader header, ByteBuf buffer) throws Exception {
         FindCoordinatorRequest request = new FindCoordinatorRequest();
-        request.setGroupId(Serializer.readString(buffer, Serializer.SHORT_SIZE));
+        request.setCoordinatorKey(Serializer.readString(buffer, Serializer.SHORT_SIZE));
         if (header.getVersion() >= 1) {
             request.setCoordinatorType(CoordinatorType.valueOf(buffer.readByte()));
         }

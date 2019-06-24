@@ -13,10 +13,10 @@
  */
 package com.jd.journalq.broker.kafka.command;
 
-import com.google.common.collect.Table;
 import com.jd.journalq.broker.kafka.KafkaCommandType;
-import com.jd.journalq.broker.kafka.model.IsolationLevel;
-import com.jd.journalq.domain.TopicName;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by zhuduohui on 2018/9/10.
@@ -24,16 +24,15 @@ import com.jd.journalq.domain.TopicName;
 public class ListOffsetsRequest extends KafkaRequestOrResponse {
 
     private int replicaId;
-    private IsolationLevel isolationLevel;
-    private Table<TopicName, Integer, PartitionOffsetRequestInfo> offsetRequestTable;
+    private byte isolationLevel;
+    private Map<String, List<PartitionOffsetRequest>> partitionRequests;
 
-
-    public IsolationLevel getIsolationLevel() {
-        return isolationLevel;
+    public void setIsolationLevel(byte isolationLevel) {
+        this.isolationLevel = isolationLevel;
     }
 
-    public void setIsolationLevel(IsolationLevel isolationLevel) {
-        this.isolationLevel = isolationLevel;
+    public byte getIsolationLevel() {
+        return isolationLevel;
     }
 
     public int getReplicaId() {
@@ -44,12 +43,12 @@ public class ListOffsetsRequest extends KafkaRequestOrResponse {
         this.replicaId = replicaId;
     }
 
-    public void setOffsetRequestTable(Table<TopicName, Integer, PartitionOffsetRequestInfo> offsetRequestTable) {
-        this.offsetRequestTable = offsetRequestTable;
+    public void setPartitionRequests(Map<String, List<PartitionOffsetRequest>> partitionRequests) {
+        this.partitionRequests = partitionRequests;
     }
 
-    public Table<TopicName, Integer, PartitionOffsetRequestInfo> getOffsetRequestTable() {
-        return offsetRequestTable;
+    public Map<String, List<PartitionOffsetRequest>> getPartitionRequests() {
+        return partitionRequests;
     }
 
     @Override
@@ -69,11 +68,31 @@ public class ListOffsetsRequest extends KafkaRequestOrResponse {
         return offsetRequest.toString();
     }
 
-    public class PartitionOffsetRequestInfo {
+    public static class PartitionOffsetRequest {
 
+        private int partition;
         private long time;
+        private int maxNumOffsets;
 
-        public PartitionOffsetRequestInfo(long time, int maxNumOffsets) {
+        public PartitionOffsetRequest() {
+
+        }
+
+        public PartitionOffsetRequest(int partition, long time, int maxNumOffsets) {
+            this.partition = partition;
+            this.time = time;
+            this.maxNumOffsets = maxNumOffsets;
+        }
+
+        public void setPartition(int partition) {
+            this.partition = partition;
+        }
+
+        public int getPartition() {
+            return partition;
+        }
+
+        public void setTime(long time) {
             this.time = time;
         }
 
@@ -81,5 +100,12 @@ public class ListOffsetsRequest extends KafkaRequestOrResponse {
             return time;
         }
 
+        public void setMaxNumOffsets(int maxNumOffsets) {
+            this.maxNumOffsets = maxNumOffsets;
+        }
+
+        public int getMaxNumOffsets() {
+            return maxNumOffsets;
+        }
     }
 }

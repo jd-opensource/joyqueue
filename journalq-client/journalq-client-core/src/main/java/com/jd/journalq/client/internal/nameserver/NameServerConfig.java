@@ -42,11 +42,11 @@ public class NameServerConfig {
     // 更新元数据间隔
     private int updateMetadataInterval = 1000 * 60 * 1;
     // 临时元数据更新间隔
-    private int tempMetadataInterval = 1000 * 5;
+    private int tempMetadataInterval = 1000 * 1;
     // 更新元数据线程数
     private int updateMetadataThread = 1;
     // 更新元数据大小
-    private int updateMetadataQueueSize = 10240;
+    private int updateMetadataQueueSize = 1024;
 
     public String getAddress() {
         return address;

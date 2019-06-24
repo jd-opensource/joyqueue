@@ -14,7 +14,7 @@
 package com.jd.journalq.network.command;
 
 import com.jd.journalq.domain.Subscription;
-import com.jd.journalq.network.transport.command.JMQPayload;
+import com.jd.journalq.network.transport.command.JournalqPayload;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
@@ -24,7 +24,7 @@ import java.util.List;
  * @author wylixiaobin
  * Date: 2018/10/10
  */
-public class UnSubscribe extends JMQPayload {
+public class UnSubscribe extends JournalqPayload {
     //订阅关系
     private List<Subscription> subscriptions;
 

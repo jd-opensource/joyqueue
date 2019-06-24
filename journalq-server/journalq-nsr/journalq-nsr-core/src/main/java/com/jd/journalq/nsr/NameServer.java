@@ -210,27 +210,51 @@ public class NameServer extends Service implements NameService, PropertySupplier
 
     @Override
     public TopicConfig subscribe(Subscription subscription, ClientType clientType) {
+        //TODO 考虑下这个
         if (subscription.getType() == Subscription.Type.CONSUMPTION) {
             TopicName topic = subscription.getTopic();
-
-            Topic preTopic = metaManager.getTopicByName(topic);
-            if (null == preTopic) {
-                logger.warn("topic [{}] may be not exists.", topic);
+            String app = subscription.getApp();
+            TopicConfig topicConfig = getTopicConfig(topic);
+            if (null == topicConfig){
                 return null;
             }
-            String app = subscription.getApp();
-            Consumer consumer = metaManager.getConsumer(topic, app);
-            if (null == consumer) {
-                consumer = new Consumer();
-                consumer.setTopic(topic);
-                consumer.setApp(app);
-                consumer.setClientType(clientType);
-                metaManager.addConsumer(consumer);
-            } else {
-                logger.warn("app [{}] already  subscribe topic [{}].", app, topic);
+            Map<String, Consumer> consumerConfigMap = metaCache.consumerConfigs.get(topic);
+            if (null == consumerConfigMap){
+                consumerConfigMap = new ConcurrentHashMap<>();
             }
+            if (!consumerConfigMap.containsKey(app)) {
+                Consumer consumer = metaManager.getConsumer(topic, app);
+                if (null == consumer) {
+                    consumer = new Consumer();
+                    consumer.setTopic(topic);
+                    consumer.setApp(app);
 
-            return reloadTopicConfig(topic);
+                    consumer.setClientType(clientType);
+                    consumer = metaManager.addConsumer(consumer);
+                    consumerConfigMap.put(app, consumer);
+                }
+            }
+            return topicConfig;
+        } else if (subscription.getType() == Subscription.Type.PRODUCTION) {
+            TopicName topic = subscription.getTopic();
+            String app = subscription.getApp();
+            TopicConfig topicConfig = getTopicConfig(topic);
+            if (null == topicConfig) return null;
+            Map<String, Producer> producerConfigMap = metaCache.producerConfigs.get(topic);
+            if (null == producerConfigMap) producerConfigMap = new ConcurrentHashMap<>();
+            if (!producerConfigMap.containsKey(app)) {
+                Producer producer = metaManager.getProducer(topic, app);
+                if (null == producer) {
+                    producer = new Producer();
+                    producer.setTopic(topic);
+                    producer.setApp(app);
+
+                    producer.setClientType(clientType);
+                    producer = metaManager.addProducer(producer);
+                    producerConfigMap.put(app, producer);
+                }
+            }
+            return topicConfig;
         } else {
             throw new IllegalStateException("operation do not supported");
         }
@@ -239,18 +263,21 @@ public class NameServer extends Service implements NameService, PropertySupplier
     @Override
     public void unSubscribe(Subscription subscription) {
         if (subscription.getType() == Subscription.Type.CONSUMPTION) {
-            String app = subscription.getApp();
-            Consumer consumer = metaManager.getConsumer(subscription.getTopic(), app);
-            if (null == consumer) {
-                logger.warn("App [{}] may not subscribe Topic[{}].", app, subscription.getTopic());
-            } else {
-                metaManager.removeConsumer(subscription.getTopic(), app);
+            TopicConfig topicConfig = getTopicConfig(subscription.getTopic());
+            if (null == topicConfig){
+                return;
             }
-
-            Map<String, Consumer> cachedConsumers = metaCache.consumerConfigs.get(subscription.getTopic());
-            if (cachedConsumers != null) {
-                cachedConsumers.remove(app);
-            }
+            Map<String, Consumer> consumerConfigMap = metaCache.consumerConfigs.get(subscription.getTopic());
+            //todo 取消订阅
+            consumerConfigMap.remove(subscription.getApp());
+            metaManager.removeConsumer(subscription.getTopic(), subscription.getApp());
+        } else if (subscription.getType() == Subscription.Type.PRODUCTION) {
+            TopicConfig topicConfig = getTopicConfig(subscription.getTopic());
+            if (null == topicConfig) return;
+            Map<String, Producer> producerConfigMap = metaCache.producerConfigs.get(subscription.getTopic());
+            //todo 取消订阅
+            producerConfigMap.remove(subscription.getApp());
+            metaManager.removeProducer(subscription.getTopic(), subscription.getApp());
         } else {
             throw new IllegalStateException("operation do not supported");
         }

@@ -14,13 +14,13 @@
 package com.jd.journalq.nsr.network.command;
 
 import com.jd.journalq.domain.Subscription;
-import com.jd.journalq.network.transport.command.JMQPayload;
+import com.jd.journalq.network.transport.command.JournalqPayload;
 
 /**
  * @author wylixiaobin
  * Date: 2019/1/28
  */
-public class GetTopicConfigByApp extends JMQPayload {
+public class GetTopicConfigByApp extends JournalqPayload {
     private String app;
     private Subscription.Type subscribe;
     public GetTopicConfigByApp app(String app){

@@ -13,10 +13,31 @@
  */
 package com.jd.journalq.broker.election;
 
-import com.jd.journalq.broker.election.command.*;
-import com.jd.journalq.broker.election.network.codec.*;
-import com.jd.journalq.network.command.TopicPartition;
-import com.jd.journalq.network.transport.codec.JMQHeader;
+import com.jd.journalq.broker.election.command.AppendEntriesRequest;
+import com.jd.journalq.broker.election.command.AppendEntriesResponse;
+import com.jd.journalq.broker.election.command.ReplicateConsumePosRequest;
+import com.jd.journalq.broker.election.command.ReplicateConsumePosResponse;
+import com.jd.journalq.broker.election.command.TimeoutNowRequest;
+import com.jd.journalq.broker.election.command.TimeoutNowResponse;
+import com.jd.journalq.broker.election.command.VoteRequest;
+import com.jd.journalq.broker.election.command.VoteResponse;
+import com.jd.journalq.broker.election.network.codec.AppendEntriesRequestDecoder;
+import com.jd.journalq.broker.election.network.codec.AppendEntriesRequestEncoder;
+import com.jd.journalq.broker.election.network.codec.AppendEntriesResponseDecoder;
+import com.jd.journalq.broker.election.network.codec.AppendEntriesResponseEncoder;
+import com.jd.journalq.broker.election.network.codec.ReplicateConsumePosRequestDecoder;
+import com.jd.journalq.broker.election.network.codec.ReplicateConsumePosRequestEncoder;
+import com.jd.journalq.broker.election.network.codec.ReplicateConsumePosResponseDecoder;
+import com.jd.journalq.broker.election.network.codec.ReplicateConsumePosResponseEncoder;
+import com.jd.journalq.broker.election.network.codec.TimeoutNowRequestDecoder;
+import com.jd.journalq.broker.election.network.codec.TimeoutNowRequestEncoder;
+import com.jd.journalq.broker.election.network.codec.TimeoutNowResponseDecoder;
+import com.jd.journalq.broker.election.network.codec.TimeoutNowResponseEncoder;
+import com.jd.journalq.broker.election.network.codec.VoteRequestDecoder;
+import com.jd.journalq.broker.election.network.codec.VoteRequestEncoder;
+import com.jd.journalq.broker.election.network.codec.VoteResponseDecoder;
+import com.jd.journalq.broker.election.network.codec.VoteResponseEncoder;
+import com.jd.journalq.network.transport.codec.JournalqHeader;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.Assert;
@@ -68,7 +89,7 @@ public class ElectionCommandCodecTest {
         encoder.encode(request, byteBuf);
 
         AppendEntriesRequestDecoder decoder = new AppendEntriesRequestDecoder();
-        JMQHeader header = new JMQHeader(request.type());
+        JournalqHeader header = new JournalqHeader(request.type());
         AppendEntriesRequest decodeRequest = (AppendEntriesRequest)decoder.decode(header, byteBuf);
 
         Assert.assertEquals(decodeRequest.getCommitPosition(), commitPosition);
@@ -115,7 +136,7 @@ public class ElectionCommandCodecTest {
         encoder.encode(response, byteBuf);
 
         AppendEntriesResponseDecoder decoder = new AppendEntriesResponseDecoder();
-        JMQHeader header = new JMQHeader(response.type());
+        JournalqHeader header = new JournalqHeader(response.type());
         AppendEntriesResponse decodeResponse = (AppendEntriesResponse)decoder.decode(header, byteBuf);
 
         //Assert.assertEquals(decodeResponse.getEntriesTerm(), entriesTerm);
@@ -138,7 +159,7 @@ public class ElectionCommandCodecTest {
         encoder.encode(request, byteBuf);
 
         ReplicateConsumePosRequestDecoder decoder = new ReplicateConsumePosRequestDecoder();
-        JMQHeader header = new JMQHeader(request.type());
+        JournalqHeader header = new JournalqHeader(request.type());
         ReplicateConsumePosRequest decodeRequest = (ReplicateConsumePosRequest)decoder.decode(header, byteBuf);
 
         Assert.assertEquals(decodeRequest.getConsumePositions(), consumePosition);
@@ -154,7 +175,7 @@ public class ElectionCommandCodecTest {
         encoder.encode(request, byteBuf);
 
         ReplicateConsumePosResponseDecoder decoder = new ReplicateConsumePosResponseDecoder();
-        JMQHeader header = new JMQHeader(request.type());
+        JournalqHeader header = new JournalqHeader(request.type());
         ReplicateConsumePosResponse decodeRequest = (ReplicateConsumePosResponse)decoder.decode(header, byteBuf);
 
         Assert.assertEquals(decodeRequest.isSuccess(), success);
@@ -172,7 +193,7 @@ public class ElectionCommandCodecTest {
         encoder.encode(request, byteBuf);
 
         TimeoutNowRequestDecoder decoder = new TimeoutNowRequestDecoder();
-        JMQHeader header = new JMQHeader(request.type());
+        JournalqHeader header = new JournalqHeader(request.type());
         TimeoutNowRequest decodeRequest = (TimeoutNowRequest)decoder.decode(header, byteBuf);
 
         Assert.assertEquals(decodeRequest.getTerm(), term);
@@ -191,7 +212,7 @@ public class ElectionCommandCodecTest {
         encoder.encode(response, byteBuf);
 
         TimeoutNowResponseDecoder decoder = new TimeoutNowResponseDecoder();
-        JMQHeader header = new JMQHeader(response.type());
+        JournalqHeader header = new JournalqHeader(response.type());
         TimeoutNowResponse decodeResponse = (TimeoutNowResponse)decoder.decode(header, byteBuf);
 
         Assert.assertEquals(decodeResponse.getTerm(), term);
@@ -215,7 +236,7 @@ public class ElectionCommandCodecTest {
         encoder.encode(request, byteBuf);
 
         VoteRequestDecoder decoder = new VoteRequestDecoder();
-        JMQHeader header = new JMQHeader(request.type());
+        JournalqHeader header = new JournalqHeader(request.type());
         VoteRequest decodeRequest = (VoteRequest)decoder.decode(header, byteBuf);
 
         Assert.assertEquals(decodeRequest.getTopic(), topicPartitionGroup.getTopic());
@@ -241,7 +262,7 @@ public class ElectionCommandCodecTest {
         encoder.encode(response, byteBuf);
 
         VoteResponseDecoder decoder = new VoteResponseDecoder();
-        JMQHeader header = new JMQHeader(response.type());
+        JournalqHeader header = new JournalqHeader(response.type());
         VoteResponse decodeResponse = (VoteResponse)decoder.decode(header, byteBuf);
 
         Assert.assertEquals(decodeResponse.getTerm(), term);

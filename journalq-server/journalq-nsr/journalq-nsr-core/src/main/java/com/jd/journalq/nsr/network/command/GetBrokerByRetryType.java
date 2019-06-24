@@ -13,13 +13,13 @@
  */
 package com.jd.journalq.nsr.network.command;
 
-import com.jd.journalq.network.transport.command.JMQPayload;
+import com.jd.journalq.network.transport.command.JournalqPayload;
 
 /**
  * @author wylixiaobin
  * Date: 2019/1/29
  */
-public class GetBrokerByRetryType extends JMQPayload {
+public class GetBrokerByRetryType extends JournalqPayload {
 
     private String retryType;
     public GetBrokerByRetryType retryType(String retryType){

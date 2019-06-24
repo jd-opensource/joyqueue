@@ -14,13 +14,13 @@
 package com.jd.journalq.nsr.network.command;
 
 import com.jd.journalq.domain.TopicConfig;
-import com.jd.journalq.network.transport.command.JMQPayload;
+import com.jd.journalq.network.transport.command.JournalqPayload;
 
 /**
  * @author wylixiaobin
  * Date: 2019/1/27
  */
-public class GetTopicConfigAck extends JMQPayload {
+public class GetTopicConfigAck extends JournalqPayload {
     private TopicConfig topicConfig;
     public GetTopicConfigAck topicConfig(TopicConfig topicConfig){
         this.topicConfig = topicConfig;

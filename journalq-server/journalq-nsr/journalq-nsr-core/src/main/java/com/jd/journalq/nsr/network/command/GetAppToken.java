@@ -13,13 +13,13 @@
  */
 package com.jd.journalq.nsr.network.command;
 
-import com.jd.journalq.network.transport.command.JMQPayload;
+import com.jd.journalq.network.transport.command.JournalqPayload;
 
 /**
  * @author wylixiaobin
  * Date: 2019/2/13
  */
-public class GetAppToken extends JMQPayload {
+public class GetAppToken extends JournalqPayload {
     private String app;
     private String token;
     public GetAppToken app(String app){

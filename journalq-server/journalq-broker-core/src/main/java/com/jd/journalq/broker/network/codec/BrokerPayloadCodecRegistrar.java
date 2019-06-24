@@ -37,6 +37,8 @@ import com.jd.journalq.broker.index.network.codec.IndexStoreRequestDecoder;
 import com.jd.journalq.broker.index.network.codec.IndexStoreRequestEncoder;
 import com.jd.journalq.broker.index.network.codec.IndexStoreResponseDecoder;
 import com.jd.journalq.broker.index.network.codec.IndexStoreResponseEncoder;
+import com.jd.journalq.broker.producer.transaction.codec.TransactionCommitRequestCodec;
+import com.jd.journalq.broker.producer.transaction.codec.TransactionRollbackRequestCodec;
 import com.jd.journalq.network.codec.BooleanAckCodec;
 import com.jd.journalq.network.transport.codec.PayloadCodecFactory;
 import com.jd.journalq.nsr.network.codec.OperatePartitionGroupCodec;
@@ -100,6 +102,11 @@ public class BrokerPayloadCodecRegistrar {
         payloadCodecFactory.register(new ReplicateConsumePosResponseEncoder());
         //nsr
         payloadCodecFactory.register(new OperatePartitionGroupCodec());
+
+        // transaction
+        payloadCodecFactory.register(new TransactionCommitRequestCodec());
+        payloadCodecFactory.register(new TransactionRollbackRequestCodec());
+
         return payloadCodecFactory;
     }
 }

@@ -188,7 +188,7 @@ public class TempMetadataInitializer extends Service {
             Consumer consumer = new Consumer();
             consumer.setTopic(topicName);
             consumer.setApp(app);
-            consumer.setTopicType(TopicType.TOPIC);
+            consumer.setTopicType(topic.getType().equals(Topic.Type.TOPIC) ? TopicType.TOPIC : TopicType.BROADCAST);
             consumer.setClientType(ClientType.JMQ);
             consumer.setRetryPolicy(new RetryPolicy(1000, 1000, 2, false, 2.0, 0));
             consumer.setConsumerPolicy(new Consumer.ConsumerPolicy.Builder().nearby((topicName.getFullName().contains("nearby"))).paused(false).archive(true).

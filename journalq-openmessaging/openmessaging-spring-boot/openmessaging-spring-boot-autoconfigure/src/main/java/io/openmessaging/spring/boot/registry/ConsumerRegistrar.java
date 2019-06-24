@@ -31,7 +31,9 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.util.StringValueResolver;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -45,7 +47,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @version OMS 1.0.0
  * @since OMS 1.0.0
  */
-public class ConsumerRegistrar implements BeanPostProcessor, BeanFactoryAware, SmartInitializingSingleton {
+public class ConsumerRegistrar implements BeanPostProcessor, BeanFactoryAware, EmbeddedValueResolverAware, SmartInitializingSingleton {
 
     private static final String CONSUMER_CONTAINER_ID = "%s.consumer.%s";
 
@@ -53,6 +55,7 @@ public class ConsumerRegistrar implements BeanPostProcessor, BeanFactoryAware, S
 
     private AccessPointContainer accessPointContainer;
     private BeanFactory beanFactory;
+    private StringValueResolver stringValueResolver;
 
     private List<String> consumerIds = new LinkedList<>();
 
@@ -63,6 +66,11 @@ public class ConsumerRegistrar implements BeanPostProcessor, BeanFactoryAware, S
     @Override
     public void setBeanFactory(BeanFactory beanFactory) {
         this.beanFactory = beanFactory;
+    }
+
+    @Override
+    public void setEmbeddedValueResolver(StringValueResolver resolver) {
+        this.stringValueResolver = resolver;
     }
 
     @Override
@@ -133,7 +141,7 @@ public class ConsumerRegistrar implements BeanPostProcessor, BeanFactoryAware, S
         String id = String.format(CONSUMER_CONTAINER_ID, OMSSpringConsts.BEAN_ID_PREFIX, SEQUENCE.getAndIncrement());
 
         BeanDefinition consumerBeanDefinition = BeanDefinitionBuilder.rootBeanDefinition(ConsumerContainer.class)
-                .addConstructorArgValue(omsMessageListener.queueName())
+                .addConstructorArgValue(stringValueResolver.resolveStringValue(omsMessageListener.queueName()))
                 .addConstructorArgValue(accessPointContainer)
                 .addConstructorArgValue(listenerBean)
                 .getBeanDefinition();

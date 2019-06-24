@@ -81,7 +81,7 @@ public class DefaultMessageProducer extends Service implements MessageProducer {
     @Override
     protected void validate() throws Exception {
         transactionSequence = new AtomicLong();
-        senderConfig = new SenderConfig(config.isCompress(), config.getCompressThreshold(), config.getCompressType());
+        senderConfig = new SenderConfig(config.isCompress(), config.getCompressThreshold(), config.getCompressType(), config.isBatch());
         messageSender = new DefaultMessageSender(producerClientManager, senderConfig);
         messageProducerInner = new MessageProducerInner(config, nameServerConfig, messageSender, clusterManager, producerClientManager, producerInterceptorManager);
     }

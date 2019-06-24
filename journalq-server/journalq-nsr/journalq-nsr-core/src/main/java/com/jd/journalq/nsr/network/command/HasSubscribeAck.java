@@ -13,13 +13,13 @@
  */
 package com.jd.journalq.nsr.network.command;
 
-import com.jd.journalq.network.transport.command.JMQPayload;
+import com.jd.journalq.network.transport.command.JournalqPayload;
 
 /**
  * @author wylixiaobin
  * Date: 2019/1/27
  */
-public class HasSubscribeAck extends JMQPayload {
+public class HasSubscribeAck extends JournalqPayload {
 
     private boolean have;
 

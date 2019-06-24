@@ -13,7 +13,7 @@
  */
 package com.jd.journalq.broker.index.command;
 
-import com.jd.journalq.network.transport.command.JMQPayload;
+import com.jd.journalq.network.transport.command.JournalqPayload;
 import com.jd.journalq.network.command.CommandType;
 import com.jd.journalq.broker.index.model.IndexMetadataAndError;
 
@@ -23,7 +23,7 @@ import java.util.Map;
 /**
  * Created by zhuduohui on 2018/9/7.
  */
-public class ConsumeIndexQueryResponse extends JMQPayload {
+public class ConsumeIndexQueryResponse extends JournalqPayload {
     Map<String, Map<Integer, IndexMetadataAndError>> topicPartitionIndexs;
 
     public ConsumeIndexQueryResponse(Map<String, Map<Integer, IndexMetadataAndError>> topicPartitionIndexs) {

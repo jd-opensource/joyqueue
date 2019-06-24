@@ -14,7 +14,7 @@
 package com.jd.journalq.broker.index.network.codec;
 
 import com.jd.journalq.broker.index.command.ConsumeIndexStoreResponse;
-import com.jd.journalq.network.transport.codec.JMQHeader;
+import com.jd.journalq.network.transport.codec.JournalqHeader;
 import com.jd.journalq.network.transport.codec.PayloadDecoder;
 import com.jd.journalq.network.command.CommandType;
 import com.jd.journalq.network.serializer.Serializer;
@@ -28,10 +28,10 @@ import java.util.Map;
 /**
  * Created by zhuduohui on 2018/9/7.
  */
-public class IndexStoreResponseDecoder implements PayloadDecoder<JMQHeader>, Type {
+public class IndexStoreResponseDecoder implements PayloadDecoder<JournalqHeader>, Type {
 
     @Override
-    public Object decode(final JMQHeader header, final ByteBuf buffer) throws Exception {
+    public Object decode(final JournalqHeader header, final ByteBuf buffer) throws Exception {
         Map<String, Map<Integer, Short>> indexStoreStatus = new HashedMap();
         int topics = buffer.readInt();
         for (int i = 0; i < topics; i++) {

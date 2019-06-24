@@ -14,7 +14,7 @@
 package com.jd.journalq.nsr.network.command;
 
 import com.jd.journalq.domain.Broker;
-import com.jd.journalq.network.transport.command.JMQPayload;
+import com.jd.journalq.network.transport.command.JournalqPayload;
 
 import java.util.List;
 
@@ -22,7 +22,7 @@ import java.util.List;
  * @author wylixiaobin
  * Date: 2019/1/27
  */
-public class GetAllBrokersAck extends JMQPayload {
+public class GetAllBrokersAck extends JournalqPayload {
     private List<Broker> brokers;
     public GetAllBrokersAck brokers(List<Broker> brokers){
         this.brokers = brokers;

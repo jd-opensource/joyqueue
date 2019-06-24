@@ -79,7 +79,8 @@ public class Producer extends Joint {
         JMQ,
         JMQ2,
         KAFKA,
-        MQTT;
+        MQTT,
+        INTERNAL;
     }
 
     @Override

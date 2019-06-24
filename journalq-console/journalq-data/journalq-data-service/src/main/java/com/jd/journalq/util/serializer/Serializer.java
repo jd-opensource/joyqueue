@@ -646,7 +646,7 @@ public class Serializer extends AbstractSerializer {
      */
 //    @Deprecated
 //    public static <K, V> void write(final Map<K, V> hashMap, ByteBuf out) throws Exception {
-//        JMQMapTools.write(hashMap, out);
+//        JournalqMapTools.write(hashMap, out);
 //    }
 
 

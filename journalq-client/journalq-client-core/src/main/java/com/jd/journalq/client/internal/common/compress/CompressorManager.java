@@ -14,7 +14,6 @@
 package com.jd.journalq.client.internal.common.compress;
 
 import com.jd.journalq.client.internal.Plugins;
-import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -32,9 +31,10 @@ public class CompressorManager {
             compressor = Plugins.COMPRESSORS.get();
         } else {
             compressor = Plugins.COMPRESSORS.get(type);
+            if (compressor == null) {
+                throw new IllegalArgumentException(String.format("compressor %s not found.", type));
+            }
         }
-
-        Preconditions.checkArgument(compressor != null, String.format("compressor %s not found.", type));
         return compressor;
     }
 }

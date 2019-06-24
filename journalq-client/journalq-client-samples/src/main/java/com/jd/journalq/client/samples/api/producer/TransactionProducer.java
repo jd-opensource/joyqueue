@@ -17,8 +17,8 @@ import com.jd.journalq.toolkit.network.IpUtil;
 import io.openmessaging.KeyValue;
 import io.openmessaging.MessagingAccessPoint;
 import io.openmessaging.OMS;
+import io.openmessaging.OMSBuiltinKeys;
 import io.openmessaging.journalq.JournalQBuiltinKeys;
-import io.openmessaging.journalq.domain.JournalQProducerBuiltinKeys;
 import io.openmessaging.message.Message;
 import io.openmessaging.producer.Producer;
 import io.openmessaging.producer.TransactionStateCheckListener;
@@ -34,26 +34,42 @@ public class TransactionProducer {
 
     public static void main(String[] args) {
         KeyValue keyValue = OMS.newKeyValue();
-        keyValue.put(JournalQBuiltinKeys.ACCOUNT_KEY, "test_token");
-        keyValue.put(JournalQProducerBuiltinKeys.TRANSACTION_TIMEOUT, 1000 * 10);
+        keyValue.put(OMSBuiltinKeys.ACCOUNT_KEY, "test_token");
+        keyValue.put(JournalQBuiltinKeys.TRANSACTION_TIMEOUT, 1000 * 10);
 
         MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint(String.format("oms:journalq://test_app@%s:50088/UNKNOWN", IpUtil.getLocalIp()), keyValue);
 
         // 事务补偿
+        // 创建producer，如果是spring或springboot通过xml和注解方式添加
+        // producer只会补偿发送过的主题的事务
         Producer producer = messagingAccessPoint.createProducer(new TransactionStateCheckListener() {
             @Override
             public void check(Message message, TransactionalContext context) {
-                System.out.println(String.format("check, message: %s", message));
+                // 使用context的commit和rollback方法提交事务状态
+                // 使用transactionId进行状态查询，这里只是简单例子，以具体业务为准
+                String topic = message.header().getDestination();
+                String transactionId = message.extensionHeader().get().getTransactionId();
+                System.out.println(String.format("check, message: %s, transactionId: %s", message, transactionId));
                 context.commit();
             }
         });
         producer.start();
 
         Message message = producer.createMessage("test_topic_0", "body".getBytes());
-        message.extensionHeader().get().setTransactionId("test_transactionId");
-        TransactionalResult prepare = producer.prepare(message);
-        prepare.commit();
 
-        System.out.println(String.format("messageId: %s", message.header().getMessageId()));
+        // 添加事务id，设置过事务id的才会被补偿，补偿时会带上这个事务id，非必填
+        // 建议根据业务使用有意义的事务id
+        message.extensionHeader().get().setTransactionId("test_transactionId");
+
+        // 事务prepare
+        TransactionalResult transactionalResult = producer.prepare(message);
+
+        // 提交事务
+        transactionalResult.commit();
+
+        // 回滚事务
+//        transactionalResult.rollback();
+
+        System.out.println(String.format("messageId: %s", transactionalResult.messageId()));
     }
 }

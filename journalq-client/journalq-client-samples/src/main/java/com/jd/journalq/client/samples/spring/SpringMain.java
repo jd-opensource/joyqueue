@@ -30,7 +30,7 @@ public class SpringMain {
     protected static final Logger logger = LoggerFactory.getLogger(SpringMain.class);
 
     public static void main(String[] args) {
-        ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext("spring1.xml");
+        ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext("spring-sample.xml");
         Producer producer = (Producer) applicationContext.getBean("producer1");
 
         for (int i = 0; i < 10; i++) {

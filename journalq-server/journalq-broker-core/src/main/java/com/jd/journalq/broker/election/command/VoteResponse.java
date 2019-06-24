@@ -14,7 +14,7 @@
 package com.jd.journalq.broker.election.command;
 
 
-import com.jd.journalq.network.transport.command.JMQPayload;
+import com.jd.journalq.network.transport.command.JournalqPayload;
 import com.jd.journalq.network.command.CommandType;
 
 /**
@@ -22,7 +22,7 @@ import com.jd.journalq.network.command.CommandType;
  * email: zhuduohui@jd.com
  * date: 2018/8/15
  */
-public class VoteResponse extends JMQPayload {
+public class VoteResponse extends JournalqPayload {
     private int term;
     private int candidateId;
     private int voteNodeId;

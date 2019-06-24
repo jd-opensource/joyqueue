@@ -13,8 +13,9 @@
  */
 package com.jd.journalq.network.command;
 
-import com.jd.journalq.domain.Consumer;
-import com.jd.journalq.domain.Producer;
+import com.jd.journalq.domain.ConsumerPolicy;
+import com.jd.journalq.domain.ProducerPolicy;
+import com.jd.journalq.domain.TopicType;
 import com.jd.journalq.exception.JournalqCode;
 
 import java.io.Serializable;
@@ -29,9 +30,9 @@ import java.util.Map;
 public class Topic implements Serializable {
 
     private String topic;
-    private Producer.ProducerPolicy producerPolicy;
-    private Consumer.ConsumerPolicy consumerPolicy;
-    private com.jd.journalq.domain.Topic.Type type;
+    private ProducerPolicy producerPolicy;
+    private ConsumerPolicy consumerPolicy;
+    private TopicType type;
     private Map<Integer, TopicPartitionGroup> partitionGroups;
     private JournalqCode code;
 
@@ -43,27 +44,27 @@ public class Topic implements Serializable {
         return topic;
     }
 
-    public Producer.ProducerPolicy getProducerPolicy() {
+    public ProducerPolicy getProducerPolicy() {
         return producerPolicy;
     }
 
-    public void setProducerPolicy(Producer.ProducerPolicy producerPolicy) {
+    public void setProducerPolicy(ProducerPolicy producerPolicy) {
         this.producerPolicy = producerPolicy;
     }
 
-    public Consumer.ConsumerPolicy getConsumerPolicy() {
+    public ConsumerPolicy getConsumerPolicy() {
         return consumerPolicy;
     }
 
-    public void setConsumerPolicy(Consumer.ConsumerPolicy consumerPolicy) {
+    public void setConsumerPolicy(ConsumerPolicy consumerPolicy) {
         this.consumerPolicy = consumerPolicy;
     }
 
-    public com.jd.journalq.domain.Topic.Type getType() {
+    public TopicType getType() {
         return type;
     }
 
-    public void setType(com.jd.journalq.domain.Topic.Type type) {
+    public void setType(TopicType type) {
         this.type = type;
     }
 

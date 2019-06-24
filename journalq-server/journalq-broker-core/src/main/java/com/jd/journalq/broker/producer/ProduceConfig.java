@@ -56,6 +56,10 @@ public class ProduceConfig {
     }
 
     public int getBusinessIdLength() {
-        return PropertySupplier.getValue(propertySupplier, ProducerConfigKey.PRODUCE_BUSINESSID_lENGTH);
+        return PropertySupplier.getValue(propertySupplier, ProducerConfigKey.PRODUCE_BUSINESSID_LENGTH);
+    }
+
+    public int getBodyLength() {
+        return PropertySupplier.getValue(propertySupplier, ProducerConfigKey.PRODUCE_BODY_LENGTH);
     }
 }

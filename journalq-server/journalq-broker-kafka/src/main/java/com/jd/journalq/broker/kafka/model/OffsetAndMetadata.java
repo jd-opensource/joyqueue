@@ -24,11 +24,18 @@ public class OffsetAndMetadata {
     public static final long INVALID_OFFSET = -1L;
     public static final String NO_METADATA = "";
 
+    private int partition;
     private long offset;
     private String metadata;
+    private int leaderEpoch;
     private long offsetCommitTime;
 
     public OffsetAndMetadata() {
+    }
+
+    public OffsetAndMetadata(long offset, short partition) {
+        this.offset = offset;
+        this.partition = partition;
     }
 
     public OffsetAndMetadata(long offset, String metadata) {
@@ -40,6 +47,28 @@ public class OffsetAndMetadata {
         this.offset = offset;
         this.metadata = metadata;
         this.offsetCommitTime = offsetCommitTime;
+    }
+
+    public OffsetAndMetadata(int partition, long offset, String metadata, long offsetCommitTime) {
+        this.partition = partition;
+        this.offset = offset;
+        this.metadata = metadata;
+        this.offsetCommitTime = offsetCommitTime;
+    }
+
+    public OffsetAndMetadata(long offset, String metadata, int leaderEpoch, long offsetCommitTime) {
+        this.offset = offset;
+        this.metadata = metadata;
+        this.leaderEpoch = leaderEpoch;
+        this.offsetCommitTime = offsetCommitTime;
+    }
+
+    public void setPartition(int partition) {
+        this.partition = partition;
+    }
+
+    public int getPartition() {
+        return partition;
     }
 
     public long getOffset() {
@@ -57,6 +86,15 @@ public class OffsetAndMetadata {
     public void setMetadata(String metadata) {
         this.metadata = metadata;
     }
+
+    public void setLeaderEpoch(int leaderEpoch) {
+        this.leaderEpoch = leaderEpoch;
+    }
+
+    public int getLeaderEpoch() {
+        return leaderEpoch;
+    }
+
     public long getOffsetCommitTime() {
         return offsetCommitTime;
     }
@@ -68,8 +106,10 @@ public class OffsetAndMetadata {
     @Override
     public String toString() {
         return "OffsetAndMetadata{" +
-                "offset=" + offset +
+                "partition=" + partition +
+                ", offset=" + offset +
                 ", metadata='" + metadata + '\'' +
+                ", leaderEpoch=" + leaderEpoch +
                 ", offsetCommitTime=" + offsetCommitTime +
                 '}';
     }

@@ -51,6 +51,7 @@ public class KafkaMessageSerializer extends AbstractKafkaMessageSerializer {
         }
 
         byte magic = getExtensionMagic(brokerMessage.getExtension());
+        kafkaBrokerMessage.setMagic(magic);
         if (magic == INVALID_EXTENSION_MAGIC) {
             return;
         }
@@ -66,36 +67,50 @@ public class KafkaMessageSerializer extends AbstractKafkaMessageSerializer {
         }
     }
 
-    public static void writeMessages(ByteBuf buffer, List<KafkaBrokerMessage> messages) throws Exception {
+    public static void writeMessages(ByteBuf buffer, List<KafkaBrokerMessage> messages, short version) throws Exception {
         if (CollectionUtils.isEmpty(messages)) {
             return;
         }
+
+        byte supportedMagic = getSupportedMagic(version);
+
         for (KafkaBrokerMessage message : messages) {
-            // TODO 临时处理，需要根据协议版本决定
-            byte magic = message.getMagic();
-            if (magic == MESSAGE_MAGIC_V0) {
-                KafkaMessageV0Serializer.writeMessage(buffer, message);
-            } else if (magic == MESSAGE_MAGIC_V1) {
-                KafkaMessageV1Serializer.writeMessage(buffer, message);
-            }  else if (magic == MESSAGE_MAGIC_V2) {
-                KafkaMessageV2Serializer.writeMessage(buffer, message);
-            } else if (magic == KafkaBrokerMessage.INVALID_MAGIC) {
-                KafkaMessageV0Serializer.writeMessage(buffer, message);
+            byte currentMagic = message.getMagic();
+            byte requiredMagic = (byte) Math.min(currentMagic, supportedMagic);
+
+            // 如果不支持V2, 但是当前版本是V2，需要先转换
+            if (requiredMagic < MESSAGE_MAGIC_V2 && currentMagic == MESSAGE_MAGIC_V2) {
+                List<KafkaBrokerMessage> batchMessages = KafkaMessageV2Serializer.readMessages(message);
+                for (KafkaBrokerMessage batchMessage : batchMessages) {
+                    writeMessage(buffer, batchMessage, requiredMagic);
+                }
             } else {
-                throw new UnsupportedOperationException(String.format("writeMessage unsupported magic, magic: %s", magic));
+                writeMessage(buffer, message, requiredMagic);
             }
         }
     }
 
-    public static void writeMessage(ByteBuf buffer, KafkaBrokerMessage message) throws Exception {
-        if (message.getMagic() == MESSAGE_MAGIC_V0) {
+    protected static byte getSupportedMagic(short version) {
+        if (version <= 1) {
+            return MESSAGE_MAGIC_V0;
+        } else if (version <= 3) {
+            return MESSAGE_MAGIC_V1;
+        } else {
+            return MESSAGE_MAGIC_V2;
+        }
+    }
+
+    protected static void writeMessage(ByteBuf buffer, KafkaBrokerMessage message, byte magic) throws Exception {
+        if (magic == MESSAGE_MAGIC_V0) {
             KafkaMessageV0Serializer.writeMessage(buffer, message);
-        } else if (message.getMagic() == MESSAGE_MAGIC_V1) {
+        } else if (magic == MESSAGE_MAGIC_V1) {
             KafkaMessageV1Serializer.writeMessage(buffer, message);
-        } else if (message.getMagic() == KafkaBrokerMessage.INVALID_MAGIC) {
+        }  else if (magic == MESSAGE_MAGIC_V2) {
+            KafkaMessageV2Serializer.writeMessage(buffer, message);
+        } else if (magic == KafkaBrokerMessage.INVALID_MAGIC) {
             KafkaMessageV0Serializer.writeMessage(buffer, message);
         } else {
-            throw new UnsupportedOperationException(String.format("writeMessage unsupported magic, magic: %s", message.getMagic()));
+            throw new UnsupportedOperationException(String.format("writeMessage unsupported magic, magic: %s", magic));
         }
     }
 

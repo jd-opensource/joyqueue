@@ -21,7 +21,7 @@ import com.jd.journalq.client.internal.producer.domain.SendBatchResultData;
 import com.jd.journalq.client.internal.producer.domain.SendResult;
 import com.jd.journalq.domain.QosLevel;
 import com.jd.journalq.message.BrokerMessage;
-import com.jd.journalq.network.command.FetchProduceFeedbackAck;
+import com.jd.journalq.network.command.FetchProduceFeedbackResponse;
 import com.jd.journalq.network.command.FetchProduceFeedbackAckData;
 import com.jd.journalq.network.command.ProduceMessageAckData;
 import com.jd.journalq.network.command.ProduceMessageAckItemData;
@@ -38,16 +38,16 @@ import java.util.List;
  */
 public class MessageSenderConverter {
 
-    public static FetchFeedbackData convertToFetchFeedbackData(String topic, String app, FetchProduceFeedbackAck fetchProduceFeedbackAck) {
+    public static FetchFeedbackData convertToFetchFeedbackData(String topic, String app, FetchProduceFeedbackResponse fetchProduceFeedbackResponse) {
         FetchFeedbackData fetchFeedbackData = new FetchFeedbackData();
-        if (CollectionUtils.isNotEmpty(fetchProduceFeedbackAck.getData())) {
-            List<FeedbackData> data = Lists.newArrayListWithCapacity(fetchProduceFeedbackAck.getData().size());
-            for (FetchProduceFeedbackAckData ackData : fetchProduceFeedbackAck.getData()) {
+        if (CollectionUtils.isNotEmpty(fetchProduceFeedbackResponse.getData())) {
+            List<FeedbackData> data = Lists.newArrayListWithCapacity(fetchProduceFeedbackResponse.getData().size());
+            for (FetchProduceFeedbackAckData ackData : fetchProduceFeedbackResponse.getData()) {
                 data.add(new FeedbackData(ackData.getTopic(), ackData.getTxId(), ackData.getTransactionId()));
             }
             fetchFeedbackData.setData(data);
         }
-        fetchFeedbackData.setCode(fetchProduceFeedbackAck.getCode());
+        fetchFeedbackData.setCode(fetchProduceFeedbackResponse.getCode());
         return fetchFeedbackData;
     }
 
@@ -68,8 +68,8 @@ public class MessageSenderConverter {
     }
 
     public static ProduceMessageData convertToProduceMessageData(String topic, String app, String txId, List<ProduceMessage> messages, QosLevel qosLevel, long timeout,
-                                                                 boolean compress, int compressThreshold, String compressType) {
-        List<BrokerMessage> brokerMessages = ProduceMessageConverter.convertToBrokerMessages(topic, app, messages, compress, compressThreshold, compressType);
+                                                                 boolean compress, int compressThreshold, String compressType, boolean batch) {
+        List<BrokerMessage> brokerMessages = ProduceMessageConverter.convertToBrokerMessages(topic, app, messages, compress, compressThreshold, compressType, batch);
         ProduceMessageData produceMessageData = new ProduceMessageData();
         produceMessageData.setQosLevel(qosLevel);
         produceMessageData.setMessages(brokerMessages);

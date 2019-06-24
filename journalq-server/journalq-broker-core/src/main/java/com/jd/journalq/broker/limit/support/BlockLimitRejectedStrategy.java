@@ -28,9 +28,7 @@ public class BlockLimitRejectedStrategy implements LimitRejectedStrategy {
     @Override
     public Command execute(LimitContext context) {
         try {
-            synchronized (Thread.currentThread()) {
-                Thread.currentThread().sleep(context.getDelay());
-            }
+            Thread.currentThread().sleep(context.getDelay());
         } catch (InterruptedException e) {
         }
         return context.getResponse();

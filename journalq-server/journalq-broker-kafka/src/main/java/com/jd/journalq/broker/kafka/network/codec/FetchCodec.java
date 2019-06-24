@@ -13,24 +13,21 @@
  */
 package com.jd.journalq.broker.kafka.network.codec;
 
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Table;
-import com.jd.journalq.broker.kafka.network.KafkaHeader;
-import com.jd.journalq.broker.kafka.network.KafkaPayloadCodec;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.jd.journalq.broker.kafka.KafkaCommandType;
 import com.jd.journalq.broker.kafka.command.FetchRequest;
 import com.jd.journalq.broker.kafka.command.FetchResponse;
 import com.jd.journalq.broker.kafka.message.KafkaMessageSerializer;
-import com.jd.journalq.broker.kafka.model.FetchResponsePartitionData;
-import com.jd.journalq.broker.kafka.model.IsolationLevel;
-import com.jd.journalq.domain.TopicName;
+import com.jd.journalq.broker.kafka.network.KafkaHeader;
+import com.jd.journalq.broker.kafka.network.KafkaPayloadCodec;
 import com.jd.journalq.network.serializer.Serializer;
 import com.jd.journalq.network.transport.command.Type;
 import com.jd.journalq.network.transport.exception.TransportException;
 import io.netty.buffer.ByteBuf;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * FetchCodec
@@ -41,7 +38,7 @@ import java.util.Set;
 public class FetchCodec implements KafkaPayloadCodec<FetchResponse>, Type {
 
     @Override
-    public Object decode(KafkaHeader header, ByteBuf buffer) throws Exception {
+    public FetchRequest decode(KafkaHeader header, ByteBuf buffer) throws Exception {
         FetchRequest fetchRequest = new FetchRequest();
         fetchRequest.setReplicaId(buffer.readInt());
         fetchRequest.setMaxWait(buffer.readInt());
@@ -52,17 +49,17 @@ public class FetchCodec implements KafkaPayloadCodec<FetchResponse>, Type {
         }
         if (header.getApiVersion() >= 4) {
             // isolation_level
-            fetchRequest.setIsolationLevel(IsolationLevel.valueOf(buffer.readByte()));
+            fetchRequest.setIsolationLevel(buffer.readByte());
         }
-        int topicCount = buffer.readInt();
-        int numPartitions = 0;
-        Table<TopicName, Integer, FetchRequest.PartitionFetchInfo> topicFetchInfoTable = HashBasedTable.create();
-        for (int i = 0; i < topicCount; i++) {
-            TopicName topic = TopicName.parse(Serializer.readString(buffer, Serializer.SHORT_SIZE));
-            int partitionCount = buffer.readInt();
-            // 计算partition总数
-            numPartitions += partitionCount;
-            for (int j = 0; j < partitionCount; j++) {
+        int topicSize = Math.max(buffer.readInt(), 0);
+        Map<String, List<FetchRequest.PartitionRequest>> partitionRequestMap = Maps.newHashMapWithExpectedSize(topicSize);
+
+        for (int i = 0; i < topicSize; i++) {
+            String topic = Serializer.readString(buffer, Serializer.SHORT_SIZE);
+            int partitionSize = Math.max(buffer.readInt(), 0);
+            List<FetchRequest.PartitionRequest> partitionRequests = Lists.newArrayListWithCapacity(partitionSize);
+
+            for (int j = 0; j < partitionSize; j++) {
                 int partitionId = buffer.readInt();
                 long offset = buffer.readLong();
                 long logStartOffset = 0;
@@ -71,15 +68,19 @@ public class FetchCodec implements KafkaPayloadCodec<FetchResponse>, Type {
                     logStartOffset = buffer.readLong();
                 }
                 int partitionMaxBytes = buffer.readInt();
-                FetchRequest.PartitionFetchInfo partitionFetchInfo = fetchRequest.new PartitionFetchInfo(offset, partitionMaxBytes);
+
+                FetchRequest.PartitionRequest partitionRequest = new FetchRequest.PartitionRequest();
+                partitionRequest.setPartition(partitionId);
+                partitionRequest.setOffset(offset);
+                partitionRequest.setMaxBytes(partitionMaxBytes);
                 if (header.getApiVersion() >= 5) {
-                    partitionFetchInfo.setLogStartOffset(logStartOffset);
+                    partitionRequest.setLogStartOffset(logStartOffset);
                 }
-                topicFetchInfoTable.put(topic, partitionId, partitionFetchInfo);
+                partitionRequests.add(partitionRequest);
             }
+            partitionRequestMap.put(topic, partitionRequests);
         }
-        fetchRequest.setNumPartitions(numPartitions);
-        fetchRequest.setRequestInfo(topicFetchInfoTable);
+        fetchRequest.setPartitionRequests(partitionRequestMap);
         return fetchRequest;
     }
 
@@ -89,33 +90,31 @@ public class FetchCodec implements KafkaPayloadCodec<FetchResponse>, Type {
         if (version >= 1) {
             buffer.writeInt(payload.getThrottleTimeMs());
         }
-        Table<String, Integer, FetchResponsePartitionData> fetchDataTable = payload.getFetchResponses();
-        Set<String> topics = fetchDataTable.rowKeySet();
-        buffer.writeInt(topics.size());
-        for (String topic : topics) {
+        Map<String, List<FetchResponse.PartitionResponse>> partitionResponseMap = payload.getPartitionResponses();
+        buffer.writeInt(partitionResponseMap.size());
+
+        for (Map.Entry<String, List<FetchResponse.PartitionResponse>> entry : partitionResponseMap.entrySet()) {
             try {
-                Serializer.write(topic, buffer, Serializer.SHORT_SIZE);
+                Serializer.write(entry.getKey(), buffer, Serializer.SHORT_SIZE);
             } catch (Exception e) {
                 throw new TransportException.CodecException(e);
             }
-            Map<Integer, FetchResponsePartitionData> partitionDataMap = fetchDataTable.row(topic);
-            Set<Integer> partitions = partitionDataMap.keySet();
-            buffer.writeInt(partitions.size());
+            List<FetchResponse.PartitionResponse> partitionResponses = entry.getValue();
+            buffer.writeInt(partitionResponses.size());
 
-            for (int partition : partitions) {
-                FetchResponsePartitionData fetchResponsePartitionData = partitionDataMap.get(partition);
-                buffer.writeInt(partition);
-                buffer.writeShort(fetchResponsePartitionData.getError());
-                buffer.writeLong(fetchResponsePartitionData.getHighWater());
+            for (FetchResponse.PartitionResponse partitionResponse : partitionResponses) {
+                buffer.writeInt(partitionResponse.getPartition());
+                buffer.writeShort(partitionResponse.getError());
+                buffer.writeLong(partitionResponse.getHighWater());
 
                 // not fully supported, just make it compatible
                 if (version >= 4) {
                     // last_stable_offset
-                    buffer.writeLong(fetchResponsePartitionData.getLastStableOffset());
+                    buffer.writeLong(partitionResponse.getLastStableOffset());
 
                     // log_start_offset
                     if (version >= 5) {
-                        buffer.writeLong(fetchResponsePartitionData.getLogStartOffset());
+                        buffer.writeLong(partitionResponse.getLogStartOffset());
                     }
 
                     // aborted_transactions
@@ -128,7 +127,7 @@ public class FetchCodec implements KafkaPayloadCodec<FetchResponse>, Type {
                 int startIndex = buffer.writerIndex();
                 buffer.writeInt(0); // length
 
-                KafkaMessageSerializer.writeMessages(buffer, fetchResponsePartitionData.getMessages());
+                KafkaMessageSerializer.writeMessages(buffer, partitionResponse.getMessages(), payload.getVersion());
 
                 int length = buffer.writerIndex() - startIndex - 4;
                 buffer.setInt(startIndex, length);

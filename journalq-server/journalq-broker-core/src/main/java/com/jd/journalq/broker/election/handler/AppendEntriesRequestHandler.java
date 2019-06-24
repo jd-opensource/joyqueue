@@ -20,7 +20,7 @@ import com.jd.journalq.broker.election.LeaderElection;
 import com.jd.journalq.broker.election.command.AppendEntriesRequest;
 import com.jd.journalq.broker.election.command.AppendEntriesResponse;
 import com.jd.journalq.exception.JournalqCode;
-import com.jd.journalq.network.transport.codec.JMQHeader;
+import com.jd.journalq.network.transport.codec.JournalqHeader;
 import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.command.CommandType;
 import com.jd.journalq.network.transport.command.Direction;
@@ -85,7 +85,7 @@ public class AppendEntriesRequestHandler implements CommandHandler, Type {
             if (leaderElection == null) {
                 logger.warn("Handle append entries request of topic {} partition group {} election is null",
                         request.getTopic(), request.getPartitionGroup());
-                return new Command(new JMQHeader(Direction.RESPONSE, CommandType.RAFT_APPEND_ENTRIES_RESPONSE),
+                return new Command(new JournalqHeader(Direction.RESPONSE, CommandType.RAFT_APPEND_ENTRIES_RESPONSE),
                         new AppendEntriesResponse.Build().success(false).nextPosition(-1L).build());
             }
 
@@ -94,7 +94,7 @@ public class AppendEntriesRequestHandler implements CommandHandler, Type {
         } catch (Exception e) {
             logger.warn("Handle append entries request of topic {} partition group {} fail",
                     request.getTopic(), request.getPartitionGroup(), e);
-            return new Command(new JMQHeader(Direction.RESPONSE, CommandType.RAFT_APPEND_ENTRIES_RESPONSE),
+            return new Command(new JournalqHeader(Direction.RESPONSE, CommandType.RAFT_APPEND_ENTRIES_RESPONSE),
                                new AppendEntriesResponse.Build().success(false).nextPosition(-1L).build());
         }
 

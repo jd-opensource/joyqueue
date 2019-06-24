@@ -18,21 +18,21 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Table;
 import com.jd.journalq.client.internal.transport.Client;
 import com.jd.journalq.client.internal.transport.ClientState;
-import com.jd.journalq.network.command.CommitAck;
-import com.jd.journalq.network.command.CommitAckAck;
+import com.jd.journalq.network.command.CommitAckRequest;
+import com.jd.journalq.network.command.CommitAckResponse;
 import com.jd.journalq.network.command.CommitAckData;
-import com.jd.journalq.network.command.FetchIndex;
-import com.jd.journalq.network.command.FetchIndexAck;
-import com.jd.journalq.network.command.FetchPartitionMessage;
-import com.jd.journalq.network.command.FetchPartitionMessageAck;
+import com.jd.journalq.network.command.FetchIndexRequest;
+import com.jd.journalq.network.command.FetchIndexResponse;
+import com.jd.journalq.network.command.FetchPartitionMessageRequest;
+import com.jd.journalq.network.command.FetchPartitionMessageResponse;
 import com.jd.journalq.network.command.FetchPartitionMessageData;
-import com.jd.journalq.network.command.FetchTopicMessage;
-import com.jd.journalq.network.command.FetchTopicMessageAck;
+import com.jd.journalq.network.command.FetchTopicMessageRequest;
+import com.jd.journalq.network.command.FetchTopicMessageResponse;
 import com.jd.journalq.network.command.FetchTopicMessageData;
 import com.jd.journalq.network.transport.TransportAttribute;
 import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.transport.command.CommandCallback;
-import com.jd.journalq.network.transport.command.JMQCommand;
+import com.jd.journalq.network.transport.command.JournalqCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,51 +73,51 @@ public class ConsumerClient {
         this.connectionState = new ConsumerConnectionState(this);
     }
 
-    public FetchIndexAck fetchIndex(Map<String, List<Short>> partitions, String app, long timeout) {
-        FetchIndex fetchIndex = new FetchIndex();
-        fetchIndex.setPartitions(partitions);
-        fetchIndex.setApp(app);
-        return (FetchIndexAck) client.sync(new JMQCommand(fetchIndex), timeout).getPayload();
+    public FetchIndexResponse fetchIndex(Map<String, List<Short>> partitions, String app, long timeout) {
+        FetchIndexRequest fetchIndexRequest = new FetchIndexRequest();
+        fetchIndexRequest.setPartitions(partitions);
+        fetchIndexRequest.setApp(app);
+        return (FetchIndexResponse) client.sync(new JournalqCommand(fetchIndexRequest), timeout).getPayload();
     }
 
-    public CommitAckAck commitAck(Table<String, Short, List<CommitAckData>> data, String app, long timeout) {
-        CommitAck commitAck = new CommitAck();
-        commitAck.setData(data);
-        commitAck.setApp(app);
-        return (CommitAckAck) client.sync(new JMQCommand(commitAck), timeout).getPayload();
+    public CommitAckResponse commitAck(Table<String, Short, List<CommitAckData>> data, String app, long timeout) {
+        CommitAckRequest commitAckRequest = new CommitAckRequest();
+        commitAckRequest.setData(data);
+        commitAckRequest.setApp(app);
+        return (CommitAckResponse) client.sync(new JournalqCommand(commitAckRequest), timeout).getPayload();
     }
 
     public void asyncFetchTopicMessage(List<String> topics, String app, int count, long timeout, long ackTimeout, long longPollTimeout, CommandCallback callback) {
-        FetchTopicMessage fetchTopicMessage = buildFetchTopicMessageCommand(topics, app, count, ackTimeout, longPollTimeout);
-        client.async(new JMQCommand(fetchTopicMessage), timeout, callback);
+        FetchTopicMessageRequest fetchTopicMessageRequest = buildFetchTopicMessageCommand(topics, app, count, ackTimeout, longPollTimeout);
+        client.async(new JournalqCommand(fetchTopicMessageRequest), timeout, callback);
     }
 
-    public FetchTopicMessageAck fetchTopicMessage(List<String> topics, String app, int count, long timeout, long ackTimeout, long longPollTimeout) {
-        FetchTopicMessage fetchTopicMessage = buildFetchTopicMessageCommand(topics, app, count, ackTimeout, longPollTimeout);
-        Command response = client.sync(new JMQCommand(fetchTopicMessage), timeout);
-        return (FetchTopicMessageAck) response.getPayload();
+    public FetchTopicMessageResponse fetchTopicMessage(List<String> topics, String app, int count, long timeout, long ackTimeout, long longPollTimeout) {
+        FetchTopicMessageRequest fetchTopicMessageRequest = buildFetchTopicMessageCommand(topics, app, count, ackTimeout, longPollTimeout);
+        Command response = client.sync(new JournalqCommand(fetchTopicMessageRequest), timeout);
+        return (FetchTopicMessageResponse) response.getPayload();
     }
 
-    public FetchPartitionMessageAck fetchPartitionMessage(Map<String, Short> partitions, String app, int count, long timeout) {
-        FetchPartitionMessage fetchPartitionMessage = buildPartitionTopicMessageCommand(partitions, app, count);
-        Command response = client.sync(new JMQCommand(fetchPartitionMessage), timeout);
-        return (FetchPartitionMessageAck) response.getPayload();
+    public FetchPartitionMessageResponse fetchPartitionMessage(Map<String, Short> partitions, String app, int count, long timeout) {
+        FetchPartitionMessageRequest fetchPartitionMessageRequest = buildPartitionTopicMessageCommand(partitions, app, count);
+        Command response = client.sync(new JournalqCommand(fetchPartitionMessageRequest), timeout);
+        return (FetchPartitionMessageResponse) response.getPayload();
     }
 
     public void asyncFetchPartitionMessage(Map<String, Short> partitions, String app, int count, long timeout, CommandCallback callback) {
-        FetchPartitionMessage fetchPartitionMessage = buildPartitionTopicMessageCommand(partitions, app, count);
-        client.async(new JMQCommand(fetchPartitionMessage), timeout, callback);
+        FetchPartitionMessageRequest fetchPartitionMessageRequest = buildPartitionTopicMessageCommand(partitions, app, count);
+        client.async(new JournalqCommand(fetchPartitionMessageRequest), timeout, callback);
     }
 
-    public FetchPartitionMessageAck fetchPartitionMessage(Table<String, Short, Long> partitions, String app, int count, long timeout) {
-        FetchPartitionMessage fetchPartitionMessage = buildPartitionTopicMessageCommand(partitions, app, count);
-        Command response = client.sync(new JMQCommand(fetchPartitionMessage), timeout);
-        return (FetchPartitionMessageAck) response.getPayload();
+    public FetchPartitionMessageResponse fetchPartitionMessage(Table<String, Short, Long> partitions, String app, int count, long timeout) {
+        FetchPartitionMessageRequest fetchPartitionMessageRequest = buildPartitionTopicMessageCommand(partitions, app, count);
+        Command response = client.sync(new JournalqCommand(fetchPartitionMessageRequest), timeout);
+        return (FetchPartitionMessageResponse) response.getPayload();
     }
 
     public void asyncFetchPartitionMessage(Table<String, Short, Long> partitions, String app, int count, long timeout, CommandCallback callback) {
-        FetchPartitionMessage fetchPartitionMessage = buildPartitionTopicMessageCommand(partitions, app, count);
-        client.async(new JMQCommand(fetchPartitionMessage), timeout, callback);
+        FetchPartitionMessageRequest fetchPartitionMessageRequest = buildPartitionTopicMessageCommand(partitions, app, count);
+        client.async(new JournalqCommand(fetchPartitionMessageRequest), timeout, callback);
     }
 
     public void addConsumers(Collection<String> topics, String app) {
@@ -133,19 +133,19 @@ public class ConsumerClient {
         client.stop();
     }
 
-    protected FetchPartitionMessage buildPartitionTopicMessageCommand(Map<String, Short> partitions, String app, int count) {
+    protected FetchPartitionMessageRequest buildPartitionTopicMessageCommand(Map<String, Short> partitions, String app, int count) {
         Table<String, Short, FetchPartitionMessageData> partitionMap = HashBasedTable.create();
         for (Map.Entry<String, Short> entry : partitions.entrySet()) {
-            partitionMap.put(entry.getKey(), entry.getValue(), new FetchPartitionMessageData(count, FetchPartitionMessage.NONE_INDEX));
+            partitionMap.put(entry.getKey(), entry.getValue(), new FetchPartitionMessageData(count, FetchPartitionMessageRequest.NONE_INDEX));
         }
 
-        FetchPartitionMessage fetchPartitionMessage = new FetchPartitionMessage();
-        fetchPartitionMessage.setPartitions(partitionMap);
-        fetchPartitionMessage.setApp(app);
-        return fetchPartitionMessage;
+        FetchPartitionMessageRequest fetchPartitionMessageRequest = new FetchPartitionMessageRequest();
+        fetchPartitionMessageRequest.setPartitions(partitionMap);
+        fetchPartitionMessageRequest.setApp(app);
+        return fetchPartitionMessageRequest;
     }
 
-    protected FetchPartitionMessage buildPartitionTopicMessageCommand(Table<String, Short, Long> partitions, String app, int count) {
+    protected FetchPartitionMessageRequest buildPartitionTopicMessageCommand(Table<String, Short, Long> partitions, String app, int count) {
         Table<String, Short, FetchPartitionMessageData> partitionMap = HashBasedTable.create();
         for (Map.Entry<String, Map<Short, Long>> topicEntry : partitions.rowMap().entrySet()) {
             String topic = topicEntry.getKey();
@@ -154,24 +154,24 @@ public class ConsumerClient {
             }
         }
 
-        FetchPartitionMessage fetchPartitionMessage = new FetchPartitionMessage();
-        fetchPartitionMessage.setPartitions(partitionMap);
-        fetchPartitionMessage.setApp(app);
-        return fetchPartitionMessage;
+        FetchPartitionMessageRequest fetchPartitionMessageRequest = new FetchPartitionMessageRequest();
+        fetchPartitionMessageRequest.setPartitions(partitionMap);
+        fetchPartitionMessageRequest.setApp(app);
+        return fetchPartitionMessageRequest;
     }
 
-    protected FetchTopicMessage buildFetchTopicMessageCommand(List<String> topics, String app, int count, long ackTimeout, long longPollTimeout) {
+    protected FetchTopicMessageRequest buildFetchTopicMessageCommand(List<String> topics, String app, int count, long ackTimeout, long longPollTimeout) {
         Map<String, FetchTopicMessageData> topicMap = Maps.newHashMap();
         for (String topic : topics) {
             topicMap.put(topic, new FetchTopicMessageData(count));
         }
 
-        FetchTopicMessage fetchTopicMessage = new FetchTopicMessage();
-        fetchTopicMessage.setTopics(topicMap);
-        fetchTopicMessage.setApp(app);
-        fetchTopicMessage.setAckTimeout((int) ackTimeout);
-        fetchTopicMessage.setLongPollTimeout((int) longPollTimeout);
-        return fetchTopicMessage;
+        FetchTopicMessageRequest fetchTopicMessageRequest = new FetchTopicMessageRequest();
+        fetchTopicMessageRequest.setTopics(topicMap);
+        fetchTopicMessageRequest.setApp(app);
+        fetchTopicMessageRequest.setAckTimeout((int) ackTimeout);
+        fetchTopicMessageRequest.setLongPollTimeout((int) longPollTimeout);
+        return fetchTopicMessageRequest;
     }
 
     public TransportAttribute getAttribute() {

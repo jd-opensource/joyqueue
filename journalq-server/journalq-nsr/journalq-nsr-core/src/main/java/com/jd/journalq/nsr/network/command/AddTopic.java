@@ -15,7 +15,7 @@ package com.jd.journalq.nsr.network.command;
 
 import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.domain.Topic;
-import com.jd.journalq.network.transport.command.JMQPayload;
+import com.jd.journalq.network.transport.command.JournalqPayload;
 
 import java.util.List;
 
@@ -23,7 +23,7 @@ import java.util.List;
  * @author wylixiaobin
  * Date: 2019/2/21
  */
-public class AddTopic extends JMQPayload {
+public class AddTopic extends JournalqPayload {
     private Topic topic;
     private List<PartitionGroup> partitionGroups;
 

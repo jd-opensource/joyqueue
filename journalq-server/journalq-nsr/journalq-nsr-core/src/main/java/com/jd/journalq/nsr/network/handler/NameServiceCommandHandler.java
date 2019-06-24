@@ -34,7 +34,7 @@ import com.jd.journalq.network.command.UnSubscribe;
 import com.jd.journalq.network.event.TransportEvent;
 import com.jd.journalq.network.transport.Transport;
 import com.jd.journalq.network.transport.TransportAttribute;
-import com.jd.journalq.network.transport.codec.JMQHeader;
+import com.jd.journalq.network.transport.codec.JournalqHeader;
 import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.transport.command.CommandCallback;
 import com.jd.journalq.network.transport.command.Direction;
@@ -228,7 +228,7 @@ public class NameServiceCommandHandler implements NsrCommandHandler, Types, com.
                 } else {
                     topicNames = nameService.getTopics(getTopics.getApp(), Subscription.Type.valueOf((byte) getTopics.getSubscribeType()));
                 }
-                response = new Command(new JMQHeader(Direction.RESPONSE,
+                response = new Command(new JournalqHeader(Direction.RESPONSE,
                         command.getHeader().getType() == NsrCommandType.MQTT_GET_TOPICS ? NsrCommandType.MQTT_GET_TOPICS_ACK : NsrCommandType.GET_TOPICS_ACK),
                         new GetTopicsAck().topics(topicNames));
                 break;
@@ -255,7 +255,7 @@ public class NameServiceCommandHandler implements NsrCommandHandler, Types, com.
             case NsrCommandType.SUBSCRIBE:
                 Subscribe subscribe = (Subscribe) command.getPayload();
                 List<TopicConfig> subscribeTopicConfigs = nameService.subscribe(subscribe.getSubscriptions(), subscribe.getClientType());
-                response = new Command(new JMQHeader(Direction.RESPONSE, NsrCommandType.SUBSCRIBE_ACK), new SubscribeAck().topicConfigs(subscribeTopicConfigs));
+                response = new Command(new JournalqHeader(Direction.RESPONSE, NsrCommandType.SUBSCRIBE_ACK), new SubscribeAck().topicConfigs(subscribeTopicConfigs));
                 break;
             case NsrCommandType.UN_SUBSCRIBE:
                 UnSubscribe unSubscribe = (UnSubscribe) command.getPayload();
@@ -365,7 +365,7 @@ public class NameServiceCommandHandler implements NsrCommandHandler, Types, com.
             }
 
             for (Transport transport : transports) {
-                transport.async(new Command(new JMQHeader(Direction.REQUEST, NsrCommandType.PUSH_NAMESERVER_EVENT), new PushNameServerEvent().event(event)), new CommandCallback() {
+                transport.async(new Command(new JournalqHeader(Direction.REQUEST, NsrCommandType.PUSH_NAMESERVER_EVENT), new PushNameServerEvent().event(event)), new CommandCallback() {
                     @Override
                     public void onSuccess(Command request, Command response) {
                         logger.info("event[{}] send to [{}] success", event, event.getBrokerId());
