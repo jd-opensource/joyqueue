@@ -18,13 +18,13 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>journalq-server</artifactId>
-        <groupId>com.jd.journalq</groupId>
+        <artifactId>joyqueue-server</artifactId>
+        <groupId>com.jd.joyqueue</groupId>
         <version>4.1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>journalq-retry</artifactId>
+    <artifactId>joyqueue-retry</artifactId>
     <packaging>pom</packaging>
     <modules>
         <module>joyqueue-retry-api</module>

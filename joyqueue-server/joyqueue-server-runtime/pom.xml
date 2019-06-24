@@ -18,13 +18,13 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>journalq-server</artifactId>
-        <groupId>com.jd.journalq</groupId>
+        <artifactId>joyqueue-server</artifactId>
+        <groupId>com.jd.joyqueue</groupId>
         <version>4.1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>journalq-server-runtime</artifactId>
+    <artifactId>joyqueue-server-runtime</artifactId>
 
     <dependencies>
         <!-- 测试用log4j2 -->
@@ -34,37 +34,37 @@
 
         </dependency>
         <dependency>
-            <groupId>com.jd.journalq</groupId>
-            <artifactId>journalq-retry-h2</artifactId>
+            <groupId>com.jd.joyqueue</groupId>
+            <artifactId>joyqueue-retry-h2</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.jd.journalq</groupId>
-            <artifactId>journalq-broker-kafka</artifactId>
+            <groupId>com.jd.joyqueue</groupId>
+            <artifactId>joyqueue-broker-kafka</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.jd.journalq</groupId>
-            <artifactId>journalq-broker-mqtt</artifactId>
+            <groupId>com.jd.joyqueue</groupId>
+            <artifactId>joyqueue-broker-mqtt</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.jd.journalq</groupId>
-            <artifactId>journalq-broker-journalq</artifactId>
+            <groupId>com.jd.joyqueue</groupId>
+            <artifactId>joyqueue-broker-protocol</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.jd.journalq</groupId>
-            <artifactId>journalq-nsr-core</artifactId>
+            <groupId>com.jd.joyqueue</groupId>
+            <artifactId>joyqueue-nsr-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.jd.journalq</groupId>
-            <artifactId>journalq-nsr-ignite</artifactId>
+            <groupId>com.jd.joyqueue</groupId>
+            <artifactId>joyqueue-nsr-ignite</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.jd.journalq</groupId>
-            <artifactId>journalq-broker-monitor-pth</artifactId>
+            <groupId>com.jd.joyqueue</groupId>
+            <artifactId>joyqueue-broker-monitor-pth</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.jd.journalq</groupId>
-            <artifactId>journalq-store-core</artifactId>
+            <groupId>com.jd.joyqueue</groupId>
+            <artifactId>joyqueue-store-core</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
@@ -155,7 +155,7 @@
                         </goals>
                         <configuration>
                             <!-- not appendOne assembly id in release file name -->
-                            <finalName>journalq-server</finalName>
+                            <finalName>joyqueue-server</finalName>
                             <appendAssemblyId>false</appendAssemblyId>
                             <descriptors>
                                 <descriptor>src/main/assemble/package.xml</descriptor>
@@ -170,7 +170,7 @@
                         </goals>
                         <configuration>
                             <!-- not appendOne assembly id in release file name -->
-                            <finalName>journalq-server-runtime-${project.version}</finalName>
+                            <finalName>joyqueue-server-runtime-${project.version}</finalName>
                             <appendAssemblyId>false</appendAssemblyId>
                             <descriptors>
                                 <descriptor>src/main/assemble/bin.xml</descriptor>

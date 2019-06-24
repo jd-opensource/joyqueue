@@ -18,18 +18,18 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>journalq-console</artifactId>
-        <groupId>com.jd.journalq</groupId>
+        <artifactId>joyqueue-console</artifactId>
+        <groupId>com.jd.joyqueue</groupId>
         <version>4.1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>journalq-openapi</artifactId>
+    <artifactId>joyqueue-openapi</artifactId>
 
     <dependencies>
         <dependency>
-            <artifactId>journalq-web-springboot-starter</artifactId>
-            <groupId>com.jd.journalq</groupId>
+            <artifactId>joyqueue-web-springboot-starter</artifactId>
+            <groupId>com.jd.joyqueue</groupId>
             <version>${project.version}</version>
         </dependency>
 
@@ -144,7 +144,7 @@
                 <log_jd_level>info</log_jd_level>
                 <log_file_level>info</log_file_level>
 
-                <log_dir>${user.home}/export/Logs/journalq</log_dir>
+                <log_dir>${user.home}/export/Logs/joyqueue</log_dir>
 
                 <java_path><![CDATA[java]]></java_path>
                 <java_jvm><![CDATA[-Xms2G -Xmx2G -Xmn1G -server -XX:+PrintGCDetails -Xloggc:${user.home}/export/Logs/mq.jd.com/gc.log -Xss256K -XX:SurvivorRatio=8 -XX:+UseG1GC -XX:+PrintGCTimeStamps -DIGNITE_LOG_DIR=${user.home}/export/Logs/jst_home/mq.jd.com -DJM.LOG.PATH=${user.home}/export/Logs/jst_home/mq.jd.com -Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.SLF4JLogDelegateFactory]]></java_jvm>
@@ -190,7 +190,7 @@
                 <log_jd_level>info</log_jd_level>
                 <log_file_level>info</log_file_level>
 
-                <log_dir>${user.home}/export/Logs/journalq</log_dir>
+                <log_dir>${user.home}/export/Logs/joyqueue</log_dir>
 
                 <java_path><![CDATA[java]]></java_path>
                 <java_jvm><![CDATA[-Xms2G -Xmx2G -Xmn1G -server -XX:+PrintGCDetails -Xloggc:${user.home}/export/Logs/mq.jd.com/gc.log -Xss256K -XX:SurvivorRatio=8 -XX:+UseG1GC -XX:+PrintGCTimeStamps -DIGNITE_LOG_DIR=${user.home}/export/Logs/jst_home/mq.jd.com -DJM.LOG.PATH=${user.home}/export/Logs/jst_home/mq.jd.com -Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.SLF4JLogDelegateFactory]]></java_jvm>

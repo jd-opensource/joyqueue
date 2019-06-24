@@ -18,13 +18,13 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>journalq-server</artifactId>
-        <groupId>com.jd.journalq</groupId>
+        <artifactId>joyqueue-server</artifactId>
+        <groupId>com.jd.joyqueue</groupId>
         <version>4.1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>journalq-broker-core</artifactId>
+    <artifactId>joyqueue-broker-core</artifactId>
     <version>4.1.0-SNAPSHOT</version>
 
     <properties>
@@ -67,8 +67,8 @@
             <version>1.0.13</version>
         </dependency>
         <dependency>
-            <groupId>com.jd.journalq</groupId>
-            <artifactId>journalq-retry-api</artifactId>
+            <groupId>com.jd.joyqueue</groupId>
+            <artifactId>joyqueue-retry-api</artifactId>
         </dependency>
         <dependency>
             <groupId>com.jd.laf.web</groupId>
@@ -134,20 +134,20 @@
             <artifactId>concurrentlinkedhashmap-lru</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.jd.journalq</groupId>
-            <artifactId>journalq-model</artifactId>
+            <groupId>com.jd.joyqueue</groupId>
+            <artifactId>joyqueue-model</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.jd.journalq</groupId>
-            <artifactId>journalq-toolkit</artifactId>
+            <groupId>com.jd.joyqueue</groupId>
+            <artifactId>joyqueue-toolkit</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.jd.journalq</groupId>
-            <artifactId>journalq-network</artifactId>
+            <groupId>com.jd.joyqueue</groupId>
+            <artifactId>joyqueue-network</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.jd.journalq</groupId>
-            <artifactId>journalq-retry-remote</artifactId>
+            <groupId>com.jd.joyqueue</groupId>
+            <artifactId>joyqueue-retry-remote</artifactId>
             <version>4.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
@@ -155,21 +155,21 @@
             <artifactId>fastjson</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.jd.journalq</groupId>
-            <artifactId>journalq-store-api</artifactId>
+            <groupId>com.jd.joyqueue</groupId>
+            <artifactId>joyqueue-store-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.jd.journalq</groupId>
-            <artifactId>journalq-nsr-core</artifactId>
+            <groupId>com.jd.joyqueue</groupId>
+            <artifactId>joyqueue-nsr-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.jd.journalq</groupId>
-            <artifactId>journalq-nsr-ignite</artifactId>
+            <groupId>com.jd.joyqueue</groupId>
+            <artifactId>joyqueue-nsr-ignite</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.jd.journalq</groupId>
-            <artifactId>journalq-cache</artifactId>
+            <groupId>com.jd.joyqueue</groupId>
+            <artifactId>joyqueue-cache</artifactId>
             <exclusions>
                 <exclusion>
                     <artifactId>slf4j-log4j12</artifactId>
@@ -178,24 +178,24 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.jd.journalq</groupId>
-            <artifactId>journalq-datasource-dbcp</artifactId>
+            <groupId>com.jd.joyqueue</groupId>
+            <artifactId>joyqueue-datasource-dbcp</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.jd.journalq</groupId>
-            <artifactId>journalq-security</artifactId>
+            <groupId>com.jd.joyqueue</groupId>
+            <artifactId>joyqueue-security</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.jd.journalq</groupId>
-            <artifactId>journalq-datasource-hikaricp</artifactId>
+            <groupId>com.jd.joyqueue</groupId>
+            <artifactId>joyqueue-datasource-hikaricp</artifactId>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.jd.journalq</groupId>
-            <artifactId>journalq-archive-hbase</artifactId>
+            <groupId>com.jd.joyqueue</groupId>
+            <artifactId>joyqueue-archive-hbase</artifactId>
             <exclusions>
                 <exclusion>
                     <artifactId>slf4j-log4j12</artifactId>
@@ -229,8 +229,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.jd.journalq</groupId>
-            <artifactId>journalq-store-core</artifactId>
+            <groupId>com.jd.joyqueue</groupId>
+            <artifactId>joyqueue-store-core</artifactId>
             <version>4.1.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>

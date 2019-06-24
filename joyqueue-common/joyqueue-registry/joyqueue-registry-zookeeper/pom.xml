@@ -18,18 +18,18 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>journalq-registry</artifactId>
-        <groupId>com.jd.journalq</groupId>
+        <artifactId>joyqueue-registry</artifactId>
+        <groupId>com.jd.joyqueue</groupId>
         <version>4.1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>journalq-registry-zookeeper</artifactId>
+    <artifactId>joyqueue-registry-zookeeper</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>com.jd.journalq</groupId>
-            <artifactId>journalq-registry-api</artifactId>
+            <groupId>com.jd.joyqueue</groupId>
+            <artifactId>joyqueue-registry-api</artifactId>
         </dependency>
 
         <dependency>
@@ -42,8 +42,8 @@
         </dependency>
 
         <dependency>
-            <groupId>com.jd.journalq</groupId>
-            <artifactId>journalq-toolkit</artifactId>
+            <groupId>com.jd.joyqueue</groupId>
+            <artifactId>joyqueue-toolkit</artifactId>
         </dependency>
     </dependencies>
 

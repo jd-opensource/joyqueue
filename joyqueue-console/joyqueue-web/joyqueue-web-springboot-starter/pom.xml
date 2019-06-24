@@ -18,14 +18,14 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>journalq-web</artifactId>
-        <groupId>com.jd.journalq</groupId>
+        <artifactId>joyqueue-web</artifactId>
+        <groupId>com.jd.joyqueue</groupId>
         <version>4.1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <version>4.1.0-SNAPSHOT</version>
 
-    <artifactId>journalq-web-springboot-starter</artifactId>
+    <artifactId>joyqueue-web-springboot-starter</artifactId>
 
     <dependencies>
         <dependency>
@@ -34,20 +34,20 @@
             <version>${h2database.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.jd.journalq</groupId>
-            <artifactId>journalq-token-uuid-starter</artifactId>
+            <groupId>com.jd.joyqueue</groupId>
+            <artifactId>joyqueue-token-uuid-starter</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>com.jd.journalq</groupId>
-            <artifactId>journalq-web-handler</artifactId>
+            <groupId>com.jd.joyqueue</groupId>
+            <artifactId>joyqueue-web-handler</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>com.jd.journalq</groupId>
-            <artifactId>journalq-data-repository-mybatis</artifactId>
+            <groupId>com.jd.joyqueue</groupId>
+            <artifactId>joyqueue-data-repository-mybatis</artifactId>
             <version>${project.version}</version>
         </dependency>
 

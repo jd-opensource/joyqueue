@@ -18,15 +18,15 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>journalq</artifactId>
-        <groupId>com.jd.journalq</groupId>
+        <artifactId>joyqueue</artifactId>
+        <groupId>com.jd.joyqueue</groupId>
         <version>4.1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>journalq-client</artifactId>
+    <artifactId>joyqueue-client</artifactId>
     <packaging>pom</packaging>
-    <name>JournalQ - Client</name>
+    <name>JoyQueue - Client</name>
     <description>Client SDK and Samples</description>
 
     <modules>

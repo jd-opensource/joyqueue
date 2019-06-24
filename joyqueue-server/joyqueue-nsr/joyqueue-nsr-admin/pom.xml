@@ -19,15 +19,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>journalq-nsr</artifactId>
-        <groupId>com.jd.journalq</groupId>
+        <artifactId>joyqueue-nsr</artifactId>
+        <groupId>com.jd.joyqueue</groupId>
         <version>4.1.0-SNAPSHOT</version>
     </parent>
-    <artifactId>journalq-nsr-admin</artifactId>
+    <artifactId>joyqueue-nsr-admin</artifactId>
     <dependencies>
         <dependency>
-            <groupId>com.jd.journalq</groupId>
-            <artifactId>journalq-model</artifactId>
+            <groupId>com.jd.joyqueue</groupId>
+            <artifactId>joyqueue-model</artifactId>
         </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>
@@ -43,8 +43,8 @@
             <artifactId>httpasyncclient</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.jd.journalq</groupId>
-            <artifactId>journalq-nsr-core</artifactId>
+            <groupId>com.jd.joyqueue</groupId>
+            <artifactId>joyqueue-nsr-core</artifactId>
         </dependency>
     </dependencies>
     <build>
@@ -71,7 +71,7 @@
                 <version>2.2.1</version>
                 <configuration>
                     <!-- not appendOne assembly id in release file name -->
-                    <finalName>journalq-nsr-admin-${project.version}</finalName>
+                    <finalName>joyqueue-nsr-admin-${project.version}</finalName>
                     <appendAssemblyId>false</appendAssemblyId>
                     <descriptors>
                         <descriptor>src/main/assemble/bin.xml</descriptor>

@@ -17,27 +17,27 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <parent>
-        <artifactId>journalq-common</artifactId>
-        <groupId>com.jd.journalq</groupId>
+        <artifactId>joyqueue-common</artifactId>
+        <groupId>com.jd.joyqueue</groupId>
         <version>4.1.0-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>journalq-network</artifactId>
+    <artifactId>joyqueue-network</artifactId>
 
     <dependencies>
 
         <dependency>
-            <groupId>com.jd.journalq</groupId>
-            <artifactId>journalq-model</artifactId>
+            <groupId>com.jd.joyqueue</groupId>
+            <artifactId>joyqueue-model</artifactId>
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.jd.journalq</groupId>
-            <artifactId>journalq-toolkit</artifactId>
+            <groupId>com.jd.joyqueue</groupId>
+            <artifactId>joyqueue-toolkit</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

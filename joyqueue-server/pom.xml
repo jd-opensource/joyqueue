@@ -18,13 +18,13 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>journalq</artifactId>
-        <groupId>com.jd.journalq</groupId>
+        <artifactId>joyqueue</artifactId>
+        <groupId>com.jd.joyqueue</groupId>
         <version>4.1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>journalq-server</artifactId>
+    <artifactId>joyqueue-server</artifactId>
     <packaging>pom</packaging>
     <modules>
         <module>joyqueue-broker-core</module>
@@ -48,8 +48,8 @@
                 <version>${concurrentlinkedhashmap-lru.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.jd.journalq</groupId>
-                <artifactId>journalq-broker-monitor-pth</artifactId>
+                <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-broker-monitor-pth</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>
@@ -61,8 +61,8 @@
         <artifactId>slf4j-api</artifactId>
     </dependency>
     <dependency>
-        <groupId>com.jd.journalq</groupId>
-        <artifactId>journalq-toolkit</artifactId>
+        <groupId>com.jd.joyqueue</groupId>
+        <artifactId>joyqueue-toolkit</artifactId>
     </dependency>
     <dependency>
         <groupId>junit</groupId>
