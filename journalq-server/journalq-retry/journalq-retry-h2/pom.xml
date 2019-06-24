@@ -20,7 +20,7 @@
     <parent>
         <artifactId>journalq-retry</artifactId>
         <groupId>com.jd.journalq</groupId>
-        <version>4.0.3</version>
+        <version>4.1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -35,12 +35,12 @@
         <dependency>
             <groupId>com.jd.journalq</groupId>
             <artifactId>journalq-retry-api</artifactId>
-            <version>4.0.3</version>
+            <version>4.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.jd.journalq</groupId>
             <artifactId>journalq-datasource-hikaricp</artifactId>
-            <version>4.0.3</version>
+            <version>4.1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

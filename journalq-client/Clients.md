@@ -20,7 +20,7 @@ JMQ2.0 客户端使用方式参考[java  客户端使用手册](http://jpcloud.j
 <dependency>
     <groupId>com.jd.journalq</groupId>
     <artifactId>journalq-client-all</artifactId>
-    <version>4.0.0-SNAPSHOT</version>
+    <version>4.1.0-SNAPSHOT</version>
 </dependency>
 
 <!-- 使用spring引用 -->

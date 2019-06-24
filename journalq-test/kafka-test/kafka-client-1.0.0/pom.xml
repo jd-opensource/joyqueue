@@ -20,7 +20,7 @@
     <parent>
         <artifactId>kafka-test</artifactId>
         <groupId>com.jd.journalq</groupId>
-        <version>4.0.3</version>
+        <version>4.1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -31,7 +31,7 @@
         <dependency>
             <groupId>com.jd.journalq</groupId>
             <artifactId>kafka-client-common</artifactId>
-            <version>4.0.3</version>
+            <version>4.1.0-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.kafka</groupId>
