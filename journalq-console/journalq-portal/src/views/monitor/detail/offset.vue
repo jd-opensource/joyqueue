@@ -1,6 +1,6 @@
 <template>
   <div>
-    <my-table :data="tableData" :showPin="showTablePin" style="height: 400px;overflow-y:auto"  :showPagination=false :page="page"
+    <my-table :data="tableData" :showPin="showTablePin" :showPagination=false :page="page"
               @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange" @on-set-offset="showResetOffset"/>
     <label >共：{{page.total}} 条记录</label>
     <grid-row type="flex" justify="end" >

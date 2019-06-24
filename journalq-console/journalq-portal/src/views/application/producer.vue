@@ -8,7 +8,7 @@
 
 <script>
 import producerBase from '../monitor/producerBase.vue'
-import {getTopicCode, getAppCode, openOrCloseBtnRender, clientTypeSelectRender,
+import {getAppCode, openOrCloseBtnRender, clientTypeSelectRender,
   clientTypeBtnRender} from '../../utils/common.js'
 
 export default {
@@ -17,7 +17,7 @@ export default {
     producerBase
   },
   props: {
-    search: {// 查询条件，格式：app:{id:0,code:'',namespace:{id:0,code:''}}
+    search: {// 查询条件，格式：app:{id:0,code:''}
       type: Object
     }
   },
@@ -39,10 +39,11 @@ export default {
         },
         {
           title: '主题',
-          key: 'topic.code',
-          formatter (row) {
-            return getTopicCode(row.topic, row.namespace)
-          }
+          key: 'topic.code'
+        },
+        {
+          title: '命名空间',
+          key: 'namespace.code'
         },
         // {
         //   title: '负责人',
@@ -64,13 +65,6 @@ export default {
           title: '限制IP发送',
           key: 'config.blackList'
         },
-        // {
-        //   title: '单线程发送',
-        //   key: 'config.single',
-        //   render: (h, params) => {
-        //     return yesOrNoBtnRender(h, params.item.config === undefined ? undefined : params.item.config.single)
-        //   }
-        // },
         {
           title: '归档',
           key: 'config.archive',
@@ -97,16 +91,19 @@ export default {
       subscribeDialog: {
         colData: [
           {
-            title: 'ID',
-            key: 'id'
+            title: '主题代码',
+            key: 'code',
+            width: '30%'
           },
           {
-            title: '主题代码',
-            key: 'code'
+            title: '命名空间',
+            key: 'namespace.code',
+            width: '30%'
           },
           {
             title: '客户端类型',
             key: 'clientType',
+            width: '30%',
             render: (h, params) => {
               return clientTypeSelectRender(h, params, this.$refs.producerBase.$refs.subscribe)
             }
@@ -126,6 +123,9 @@ export default {
     handleDetail (item) {
       this.$emit('on-detail', item)
     }
+  },
+  mounted () {
+    // this.getList()
   }
 }
 </script>

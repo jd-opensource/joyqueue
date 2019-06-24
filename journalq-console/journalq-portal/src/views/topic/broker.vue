@@ -56,7 +56,7 @@ export default {
       apiRequest.postBase(this.urls.search, {}, this.topicId, false).then((data) => {
         data.data = data.data || []
         this.tableData.rowData = data.data
-        for (var i = 0; i < this.tableData.rowData.length; i++) {
+        for (let i = 0; i < this.tableData.rowData.length; i++) {
           this.getBrokerStatus(this.tableData.rowData, i)
         }
         this.showTablePin = false
@@ -64,14 +64,14 @@ export default {
     },
     getBrokerStatus (rowData, i) {
       apiRequest.get(this.urlOrigin.startInfo + '/' + rowData[i].id).then((data) => {
-        if(data.code == 200) {
-          this.tableData.rowData[i].startupTime = timeStampToString(data.data.startupTime);
-        this.tableData.rowData[i].revision = data.data.revision;
-      } else {
-          this.tableData.rowData[i].startupTime = '不存活';
+        if (data.code === 200) {
+          this.tableData.rowData[i].startupTime = timeStampToString(data.data.startupTime)
+          this.tableData.rowData[i].revision = data.data.revision
+        } else {
+          this.tableData.rowData[i].startupTime = '不存活'
         }
-      this.$set(this.tableData.rowData, i, this.tableData.rowData[i])
-    });
+        this.$set(this.tableData.rowData, i, this.tableData.rowData[i])
+      })
     }
   }
 }

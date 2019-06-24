@@ -1,6 +1,6 @@
 <template>
   <div class="wrapper">
-    <main-header @log-out="logout" ></main-header>
+    <main-header></main-header>
     <div class="transition-main main-content">
       <router-view></router-view>
     </div>
@@ -11,10 +11,6 @@
 <script>
 import { mapGetters } from 'vuex'
 import mainHeader from './components/common/header.vue'
-// import mainFooter from './components/common/footer.vue'
-import cookie from './utils/cookie.js'
-import apiRequest from './utils/apiRequest.js'
-import apiUrl from './utils/apiUrl.js'
 
 export default {
   components: {
@@ -27,12 +23,12 @@ export default {
     ])
   },
   methods: {
-    logout () {
-      cookie.del('sso.jd.com', '/', '.jd.com')
-      apiRequest.get(apiUrl.logout).then(function (data) {
-      }, function () {
-      })
-    },
+    // logout () {
+    //   cookie.del('sso.jd.com', '/', '.jd.com')
+    //   apiRequest.get(apiUrl.logout).then(function (data) {
+    //   }, function () {
+    //   })
+    // }
   },
   mounted () {
   }

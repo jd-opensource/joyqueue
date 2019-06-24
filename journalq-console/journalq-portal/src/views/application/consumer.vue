@@ -8,7 +8,7 @@
 
 <script>
 import consumerBase from '../monitor/consumerBase.vue'
-import {getTopicCode, getAppCode, openOrCloseBtnRender, clientTypeSelectRender,
+import {getAppCode, openOrCloseBtnRender, clientTypeSelectRender,
   clientTypeBtnRender, topicTypeBtnRender, baseBtnRender, subscribeGroupAutoCompleteRender} from '../../utils/common.js'
 
 export default {
@@ -17,7 +17,7 @@ export default {
     consumerBase
   },
   props: {
-    search: {// 查询条件，格式：app:{id:0,code:'',namespace:{id:0,code:''}}
+    search: {// 查询条件，格式：app:{id:0,code:''}
       type: Object
     }
   },
@@ -35,10 +35,11 @@ export default {
         },
         {
           title: '主题',
-          key: 'topic.code',
-          formatter (row) {
-            return getTopicCode(row.topic, row.namespace)
-          }
+          key: 'topic.code'
+        },
+        {
+          title: '命名空间',
+          key: 'namespace.code'
         },
         // {
         //   title:'负责人',
@@ -121,12 +122,17 @@ export default {
           {
             title: '主题代码',
             key: 'code',
-            width: '35%'
+            width: '22%'
+          },
+          {
+            title: '命名空间',
+            key: 'namespace.code',
+            width: '22%'
           },
           {
             title: '订阅分组',
             key: 'subscribeGroup',
-            width: '33%',
+            width: '22%',
             render: (h, params) => {
               return subscribeGroupAutoCompleteRender(h, params, this.$refs.consumerBase.$refs.subscribe)
             }
@@ -134,7 +140,7 @@ export default {
           {
             title: '客户端类型',
             key: 'clientType',
-            width: '32%',
+            width: '22%',
             render: (h, params) => {
               return clientTypeSelectRender(h, params, this.$refs.consumerBase.$refs.subscribe)
             }
@@ -164,6 +170,9 @@ export default {
     handleDetail (item) {
       this.$emit('on-detail', item)
     }
+  },
+  mounted () {
+    // this.getList()
   }
 }
 </script>
