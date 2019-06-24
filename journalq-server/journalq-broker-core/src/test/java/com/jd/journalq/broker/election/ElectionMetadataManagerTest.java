@@ -34,7 +34,6 @@ import java.util.Set;
  * Created by zhuduohui on 2018/8/27.
  */
 public class ElectionMetadataManagerTest {
-    private String metadataFile = getElectionDir() + File.separator + "raft_metadata.dat";
     private String metadataPath = getElectionDir();
     private ElectionMetadataManager electionMetadataManager;
     private int localNodeId = 1;
@@ -59,9 +58,6 @@ public class ElectionMetadataManagerTest {
 
     @Before
     public void setUp() throws Exception {
-        File file = new File(metadataFile);
-        file.delete();
-
         allNodes.add(new DefaultElectionNode("192.168.0.1:50089", 1));
         allNodes.add(new DefaultElectionNode("192.168.0.2:50089", 2));
 
@@ -76,7 +72,6 @@ public class ElectionMetadataManagerTest {
 
         ElectionConfig electionConfig = new ElectionConfig(conf);
         electionConfig.setElectionMetaPath(getElectionDir());
-        electionConfig.setElectionMetaFile(getElectionDir() + ".dat");
         electionConfig.setListenPort("18000");
 
         electionManager = new ElectionManagerStub(electionConfig, storeService, new ConsumeStub());
@@ -90,13 +85,12 @@ public class ElectionMetadataManagerTest {
 
         Files.deleteDirectory(new File(metadataPath));
         Files.deleteDirectory(new File(getStoreDir()));
-        new File(metadataFile).delete();
     }
 
     @Test
     public void testOneMetadata() {
         try {
-            electionMetadataManager = new ElectionMetadataManager(metadataFile, metadataPath);
+            electionMetadataManager = new ElectionMetadataManager(metadataPath);
 
             ElectionMetadata raftMetadata = ElectionMetadata.Build.create(metadataPath, raftTopic)
                     .electionType(PartitionGroup.ElectType.raft)
@@ -111,7 +105,7 @@ public class ElectionMetadataManagerTest {
             electionMetadataManager.updateElectionMetadata(fixTopic, fixMetadata);
             electionMetadataManager.close();
 
-            electionMetadataManager = new ElectionMetadataManager(metadataFile, metadataPath);
+            electionMetadataManager = new ElectionMetadataManager(metadataPath);
             electionMetadataManager.recover(electionManager);
 
             ElectionMetadata raftMetadataLoad = electionMetadataManager.getElectionMetadata(raftTopic);
@@ -143,7 +137,7 @@ public class ElectionMetadataManagerTest {
     @Test
     public void testMultiMetadata() {
         try {
-            electionMetadataManager = new ElectionMetadataManager(metadataFile, metadataPath);
+            electionMetadataManager = new ElectionMetadataManager(metadataPath);
             for (int i = 0; i < 100; i++) {
                 TopicPartitionGroup partitionGroup = new TopicPartitionGroup("test", i);
                 ElectionMetadata metadata = ElectionMetadata.Build.create(metadataPath, partitionGroup)
@@ -154,7 +148,7 @@ public class ElectionMetadataManagerTest {
             }
             electionMetadataManager.close();
 
-            electionMetadataManager = new ElectionMetadataManager(metadataFile, metadataPath);
+            electionMetadataManager = new ElectionMetadataManager(metadataPath);
             electionMetadataManager.recover(electionManager);
             for (int i = 0; i < 100; i++) {
                 TopicPartitionGroup partitionGroup = new TopicPartitionGroup("test", i);

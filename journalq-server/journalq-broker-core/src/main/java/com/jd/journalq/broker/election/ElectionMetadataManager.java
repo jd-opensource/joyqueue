@@ -13,8 +13,6 @@
  */
 package com.jd.journalq.broker.election;
 
-import com.alibaba.fastjson.TypeReference;
-
 import com.alibaba.fastjson.JSON;
 import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.domain.PartitionGroup;
@@ -25,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -41,13 +38,11 @@ import java.util.stream.Collectors;
 public class ElectionMetadataManager {
     private static Logger logger = LoggerFactory.getLogger(ElectionMetadataManager.class);
 
-    private String fileName;
     private String path;
 
     private Map<TopicPartitionGroup, ElectionMetadata> metadataMap = new ConcurrentHashMap<>();
 
-    public ElectionMetadataManager(String fileName, String path) {
-        this.fileName = fileName;
+    public ElectionMetadataManager(String path) {
         this.path = path;
     }
 
@@ -56,49 +51,12 @@ public class ElectionMetadataManager {
      * 从文件恢复元数据
      * @param electionManager election manager
      */
-    void recover(ElectionManager electionManager) throws Exception {
+    void recover(ElectionManager electionManager) {
         try {
-            File file = new File(fileName);
-            if (file.exists()) {
-                recoverMetadataOld(file);
-            }
-            else {
-                recoverMetadata();
-            }
-
+            recoverMetadata();
             restoreLeaderElections(electionManager);
         } catch (Exception e) {
             logger.info("Recover election metadata fail", e);
-        }
-    }
-
-    /**
-     * 恢复旧的格式的元数据
-     * @param file 存储元数据的文件
-     */
-    private void recoverMetadataOld(File file) throws IOException {
-        logger.info("recover metadata from {}", file.getAbsoluteFile());
-
-        String metadataStr = (String) readConfigFile(file, String.class, "");
-        if (metadataStr != null && !metadataStr.isEmpty()) {
-            Map<TopicPartitionGroup, ElectionMetadataOld> oldMetadataMap = JSON.parseObject(metadataStr,
-                    new TypeReference<ConcurrentHashMap<TopicPartitionGroup, ElectionMetadataOld>>() {
-                    });
-            for (TopicPartitionGroup topicPartitionGroup : oldMetadataMap.keySet()) {
-                ElectionMetadataOld metadataOld = oldMetadataMap.get(topicPartitionGroup);
-                try (ElectionMetadata metadata = ElectionMetadata.Build.create(path, topicPartitionGroup)
-                        .allNodes(metadataOld.getAllNodes()).currentTerm(metadataOld.getCurrentTerm())
-                        .localNode(metadataOld.getLocalNodeId()).learners(metadataOld.getLearners())
-                        .leaderId(metadataOld.getLeaderId()).electionType(metadataOld.getElectType())
-                        .votedFor(metadataOld.getVotedFor()).build()) {
-                    updateElectionMetadata(topicPartitionGroup, metadata);
-                }
-            }
-        }
-        boolean ret = file.delete();
-        if (!ret) {
-            logger.info("Recover old metadata, delete file {} fail", file.getAbsoluteFile());
-            throw new IOException("Delete file " + file.getAbsoluteFile() + " fail");
         }
     }
 
@@ -146,35 +104,6 @@ public class ElectionMetadataManager {
                     logger.info("Create election metadata fail", e);
                 }
             }
-        }
-    }
-
-    @Deprecated
-    private static Object readConfigFile(File file, Class objClass, Object defValue) throws IOException {
-        if (file == null || !file.exists()) {
-            if (defValue == null) {
-                throw new IOException("file is null or not exists");
-            } else {
-                return defValue;
-            }
-        }
-
-        byte[] buf;
-        try(FileInputStream reader = new FileInputStream(file)) {
-            if (reader.available() > 3 * 1024 * 1024) {
-                throw new IOException("file " + file.getAbsolutePath() + " is too large to process");
-            } else if (reader.available() == 0) {
-                return defValue;
-            }
-            buf = new byte[reader.available()];
-            reader.read(buf);
-        }
-
-        if (objClass.equals(String.class)) {
-            return new String(buf);
-        } else {
-            Object retObj = JSON.parseObject(buf, objClass);
-            return (retObj == null ? defValue : retObj);
         }
     }
 
