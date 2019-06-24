@@ -1,6 +1,6 @@
 <template>
   <div>
-    <my-table :data="tableData" :showPin="showTablePin" style="height: 400px;overflow-y:auto" :showPagination=false
+    <my-table :data="tableData" :showPin="showTablePin" :showPagination=false
               :page="page" @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange"/>
     <label >共 {{page.total}} 条记录</label>
   </div>
@@ -26,15 +26,12 @@ export default {
         return {
           subscribeGroup: '',
           topic: {
-            id: '',
             code: ''
           },
           namespace: {
-            id: '',
             code: ''
           },
           app: {
-            id: '',
             code: ''
           },
           type: 0
@@ -51,6 +48,17 @@ export default {
       type: Array
     }
   },
+  // watch: {
+  //   '$route' (to, from) {
+  //     console.log('partition')
+  //     if (to.query.subTab === 'partition') {
+  //       this.search.app.code = to.query.app
+  //       this.search.topic.code = to.query.topic
+  //       this.search.namespace.code = to.query.namespace
+  //       this.getList()
+  //     }
+  //   }
+  // },
   data () {
     return {
       urls: {
@@ -119,7 +127,10 @@ export default {
       //      }
       //    });
       //  }
-    }
+    },
+    // mounted () {
+    //   this.getList()
+    // }
   }
 }
 </script>

@@ -1,26 +1,28 @@
 <template>
   <div>
-    <div class="ml20">
-      <d-date-picker v-model="times" type="daterange" class="left mr5 mt10" range-separator="至"
+    <div class="headLine2">
+      <d-date-picker v-model="times" type="daterange" class="input4" range-separator="至"
                      start-placeholder="开始日期" end-placeholder="结束日期" value-format="timestamp"
-                     :default-time="['00:00:00', '23:59:59']"  style="width:370px" @on-enter="getList">
+                     :default-time="['00:00:00', '23:59:59']" @on-enter="getList">
         <span slot="prepend">日期范围</span>
       </d-date-picker>
-      <d-input v-model="search.topic" placeholder="队列名" class="left mr5 mt10" style="width: 213px"
-               @on-enter="getList">
+      <d-input v-model="search.topic" placeholder="队列名" class="input2" @on-enter="getList">
         <span slot="prepend">队列名</span>
       </d-input>
-      <d-input v-model="search.businessId" placeholder="业务ID" class="left mr5 mt10" style="width: 213px"
-               @on-enter="getList">
+      <d-input v-model="search.businessId" placeholder="业务ID" class="input2" @on-enter="getList">
         <span slot="prepend">业务ID</span>
       </d-input>
-      <d-button class="left mr5 mt10" type="primary" color="success" @click="getList">查询</d-button>
+      <d-button class="button2" type="primary" @click="getList">查询
+        <icon name="search" style="margin-left: 3px;"></icon>
+      </d-button>
       <slot name="extendBtn"></slot>
     </div>
+
     <my-table :showPagination="false" :showPin="showTablePin" :data="tableData" :page="page" @on-size-change="handleSizeChange"
               @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
               @on-consume="consume" @on-download="download" @on-retry="retry">
     </my-table>
+
     <div style="text-align: right; margin-right: 50px">
       <d-button type="primary" v-if="!firstDis" @click="getList" class="left mr10">首页</d-button>
       <d-button color="info" disabled v-else>首页</d-button>
@@ -183,12 +185,12 @@ export default {
     getList () {
       this.firstDis = false
       this.nextDis = true
-      this.getListWithDate (false)
+      this.getListWithDate(false)
     },
-    getNext() {
+    getNext () {
       this.firstDis = true
       this.nextDis = true
-      this.getListWithDate (true)
+      this.getListWithDate(true)
     },
     getListWithDate (isNext) {
       if (!this.times || this.times.length < 2) {

@@ -1,20 +1,48 @@
 # 开源前的准备工作
 
+标注Optional的，不需要在开源前完成。
+
+- [x] 修改项目名称、包名（浩翔）
 - [x] 增加License信息;
-- [ ] 源代码侵权检查：检查每一个源代码文件，是否有抄袭未注明的情况；
-- [ ] 图片侵权检查
-- [ ] 字体侵权检查
-- [ ] [日志治理](http://git.jd.com/laf/journalQ/issues/24)
-- [ ] pom规范化
-- [ ] 关键字筛查：筛查代码变量名、注释、常量等，确保不含以下关键字：
+- [ ] 源代码侵权检查：检查每一个源代码文件，是否有抄袭未注明的情况；(李玥)
+- [x] 图片侵权检查
+- [x] 字体侵权检查
+- [ ] [日志治理](http://git.jd.com/laf/journalQ/issues/24)（李玥）
+- [ ] pom规范化（李玥）
+- [ ] 关键字筛查：筛查代码变量名、注释、常量等，确保不含以下关键字：（浩翔）
   - JD
   - JMQ
-- [ ] 所有日志中不能出现中文
-- [ ] 删除无用的代码
-- [ ] 作者名替换成GitHub ID
-- [ ] 文档
-  - [x] Geting Started
-  - [x] Examples
-  - [ ] Configuration
-  - [ ] Administration: 管理端功能以外，需要说明的管理操作；
-  - [ ] Rest API
+  - JournalQ
+- [ ] 删除无用的代码（李玥）
+- [x] Examples（浩翔）
+  - [ ] java/open messaging
+  - [ ] java/kafka
+  - [ ] python
+  - [ ] spring/spring boot
+  - [ ] Flink(Optional)
+  - [ ] Spark(Optional)
+- [ ] 文档，优先中文文档，英文文档可以上线后慢慢补齐（王金）
+  - [ ] Readme
+  - [ ] Tutorials
+    - [x] Geting Started
+    - [ ] Concepts
+    - [ ] Configurations
+    - [ ] Administration：How to....(Optional)
+      - [ ] 集群部署
+      - [ ] 监控
+      - [ ] 归档
+      - [ ] 重试
+    - [x] Rest API
+- [ ] 增强 runtime 模块 （浩翔）
+  - [ ] 包含管理端
+  - [ ] 包含文档
+- [ ] CLI Tools （浩翔）
+  - [ ] Consumer/Producer
+  - [ ] Start/Stop 脚本改进
+  - [ ] 修复Store脚本（李玥）
+- [ ] GitHub相关（王金）
+  - [ ] 相关生态的账号申请
+  - [ ] 自动构建，自动测试
+  - [ ] Maven Central 发布
+  - [ ] Docker Hub 发布（Optional）
+- [ ] 验证性能，确认与性能测试报告中的数据基本一致；（浩翔）

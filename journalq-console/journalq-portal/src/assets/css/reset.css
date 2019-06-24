@@ -82,9 +82,6 @@ body {
   text-align: right;
 }
 
-.ml8 {
-  margin-left: 8px;
-}
 .ml20 {
   margin-left: 20px;
 }
@@ -114,8 +111,16 @@ body {
   margin-top: 40px;
 }
 
+.mt5 {
+  margin-top: 5px;
+}
+
 .mt7 {
   margin-top: 7px;
+}
+
+.mt8 {
+  margin-top: 8px;
 }
 
 .mt116{
@@ -144,13 +149,18 @@ body {
 .mr20 {
   margin-right: 20px;
 }
-
+.mr40 {
+  margin-right: 40px;
+}
 .mr200 {
   margin-right: 200px;
 }
 
 .mb36 {
   margin-bottom: 36px;
+}
+.mb8 {
+  margin-bottom: 8px;
 }
 .mb10 {
   margin-bottom: 10px;
@@ -194,4 +204,53 @@ body {
 }
 .tableTd{
   min-width: 20px;
+}
+
+.headLine{
+  margin-left: 20px;
+  margin-right: 20px;
+  margin-top: 10px;
+}
+
+.headLine2{
+  margin-left: 0px;
+  margin-right: 20px;
+  margin-top: 2px;
+}
+
+.button{
+  aligin: center;
+  margin-right: 10px;
+  margin-bottom: 8px
+}
+
+.button2{
+  aligin: center;
+  margin-right: 10px;
+  margin-bottom: 8px;
+  margin-top: 8px;
+}
+
+.input{
+  aligin: left;
+  margin-right: 10px;
+  width: 250px
+}
+
+.input2{
+  aligin: left;
+  margin-right: 10px;
+  width: 220px
+}
+
+.input3{
+  aligin: left;
+  margin-right: 10px;
+  width: 150px
+}
+
+.input4{
+  aligin: left;
+  margin-right: 10px;
+  width: 370px
 }

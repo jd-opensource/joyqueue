@@ -6,7 +6,9 @@
         <span slot="prepend">关键词</span>
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
-      <d-button type="primary" @click="openDialog('addDialog')">新建 Namespace<icon name="plus-circle" style="margin-left: 5px;"></icon></d-button>
+      <d-button type="primary" @click="openDialog('addDialog')">新建 Namespace
+        <icon name="plus-circle" style="margin-left: 5px;">
+      </icon></d-button>
     </div>
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
               @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange" @on-edit="edit" @on-del="del">
@@ -21,13 +23,6 @@
             <d-input v-model="addData.code"></d-input>
           </grid-col>
         </grid-row>
-        <grid-row class="mb10">
-          <grid-col :span="3" class="label">名称:</grid-col>
-          <grid-col :span="1"/>
-          <grid-col :span="14" class="val">
-            <d-input v-model="addData.name"></d-input>
-          </grid-col>
-        </grid-row>
     </my-dialog>
     <!--编辑namespace-->
     <my-dialog :dialog="editDialog" @on-dialog-confirm="editConfirm()" @on-dialog-cancel="editCancel()">
@@ -36,13 +31,6 @@
         <grid-col :span="1"/>
         <grid-col :span="14" class="val">
           <d-input v-model="editData.code" disabled></d-input>
-        </grid-col>
-      </grid-row>
-      <grid-row class="mb10">
-        <grid-col :span="5" class="label">名称:</grid-col>
-        <grid-col :span="1"/>
-        <grid-col :span="14" class="val">
-          <d-input v-model="editData.name"></d-input>
         </grid-col>
       </grid-row>
     </my-dialog>
@@ -65,8 +53,6 @@ export default {
       searchData: {
         keyword: ''
       },
-      searchRules: {
-      },
       tableData: {
         rowData: [],
         colData: [
@@ -76,9 +62,6 @@ export default {
           }, {
             title: '代码',
             key: 'code'
-          }, {
-            title: '名称',
-            key: 'name'
           }
         ],
         // 表格操作，如果需要根据特定值隐藏显示， 设置bindKey对应的属性名和bindVal对应的属性值
@@ -100,8 +83,7 @@ export default {
         showFooter: true
       },
       addData: {
-        code: '',
-        name: ''
+        code: ''
       },
       editDialog: {
         visible: false,
@@ -115,14 +97,12 @@ export default {
     openDialog (dialog) {
       this[dialog].visible = true
       this.addData.code = ''
-      this.addData.name = ''
     },
     beforeEdit () {
       return new Promise((resolve, reject) => {
         resolve({
           id: this.editData.id,
-          code: this.editData.code,
-          name: this.editData.name
+          code: this.editData.code
         })
       })
     }

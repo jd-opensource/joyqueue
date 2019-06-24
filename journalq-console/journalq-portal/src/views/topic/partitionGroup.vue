@@ -1,19 +1,21 @@
 <template>
   <div>
-    <div class="ml20 mt30">
-      <d-button type="primary" @click="groupNew" class="left mr10">
-        扩容
-        <icon name="plus-circle" style="margin-left: 5px;"/>
-      </d-button>
-      <slot name="extendBtn"></slot>
-      <d-button type="primary" v-if="showBrokerChart" @click="goBrokerChart" class="left mr10">
-        Broker监控
-        <icon name="bar-chart" style="margin-left: 5px;"/>
-      </d-button>
-      <d-button type="primary" v-if="showHostChart" @click="goHostChart" class="left mr10">
-        主机监控
-        <icon name="bar-chart" style="margin-left: 5px;"/>
-      </d-button>
+    <div class="headLine">
+      <d-button-group>
+        <d-button @click="groupNew" class="button">扩容
+          <icon name="plus-circle" style="margin-left: 3px;"/>
+        </d-button>
+        <slot name="extendBtn"></slot>
+        <d-button v-if="showBrokerChart" @click="goBrokerChart" class="button">Broker监控
+          <icon name="cpu" style="margin-left: 3px;"/>
+        </d-button>
+        <d-button v-if="showHostChart" @click="goHostChart" class="button">主机监控
+          <icon name="monitor" style="margin-left: 3px;"/>
+        </d-button>
+        <d-button type="primary" @click="getList" class="button">刷新
+          <icon name="refresh-cw" style="margin-left: 3px;"></icon>
+        </d-button>
+      </d-button-group>
     </div>
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
               @on-current-change="handleCurrentChange" @on-view-detail="goDetail" @on-scale="groupScale"
@@ -103,11 +105,10 @@ export default {
       searchData: {
         topic: {
           id: this.$route.query.id,
-          code: this.$route.query.code
+          code: this.$route.query.topic
         },
         namespace: {
-          id: this.$route.query.namespaceId,
-          code: this.$route.query.namespaceCode
+          code: this.$route.query.namespace
         },
         keyword: ''
       },

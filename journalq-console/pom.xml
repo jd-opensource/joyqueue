@@ -20,10 +20,10 @@
     <parent>
         <artifactId>journalq</artifactId>
         <groupId>com.jd.journalq</groupId>
-        <version>4.0.2</version>
+        <version>4.0.3</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <version>4.0.2</version>
+    <version>4.0.3</version>
     <packaging>pom</packaging>
     <artifactId>journalq-console</artifactId>
 
@@ -54,4 +54,14 @@
             </plugin>
         </plugins>
     </build>
+
+    <!--frontend编译比较慢，日常无需编译-->
+    <profiles>
+        <profile>
+            <id>frontend</id>
+            <modules>
+                <module>journalq-portal</module>
+            </modules>
+        </profile>
+    </profiles>
 </project>

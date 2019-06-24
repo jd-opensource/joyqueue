@@ -1,4 +1,4 @@
-<template xmlns:v-if="http://www.w3.org/1999/xhtml">
+<template>
     <div>
       <div class="ml20 mt30" v-if="!threadSelect&&inputable">
           <d-input v-model="searchData.clientId" placeholder="客户端ID" class="left mr10"

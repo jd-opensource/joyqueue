@@ -1,11 +1,14 @@
 <template>
   <div>
     <div class="ml20 mt30">
-      <d-button type="primary" class="mr10" @click="getList">刷新<icon name="rotate-cw" style="margin-left: 5px;"></icon></d-button>
-      <d-button type="primary" class="mr10" @click="openDialog('addDialog')">
-        添加
-        <icon name="plus-circle" style="margin-left: 5px;"></icon>
-      </d-button>
+      <d-button-group>
+        <d-button class="button" @click="openDialog('addDialog')">添加
+          <icon name="plus-circle" style="margin-left: 3px;"></icon>
+        </d-button>
+        <d-button type="primary" @click="getList" class="button">刷新
+          <icon name="refresh-cw" style="margin-left: 3px;"></icon>
+        </d-button>
+      </d-button-group>
     </div>
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
               @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
@@ -174,9 +177,16 @@ export default {
       })
     }
   },
-  mounted () {
-    // this.getList();
-  }
+  // watch: {
+  //   '$route' (to, from) {
+  //     if (to.query.tab === 'myAppToken') {
+  //       this.getList()
+  //     }
+  //   }
+  // },
+  // mounted () {
+  //   this.getList()
+  // }
 }
 </script>
 
