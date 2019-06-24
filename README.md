@@ -1,6 +1,6 @@
-JournalQ
+JoyQueue
 ===
-JournalQ is a distributed and cloud-native message platform with high-throughput,high-availability and compatible with Kafka,MQTT.
+JoyQueue is a distributed and cloud-native message platform with high-throughput,high-availability and compatible with Kafka,MQTT.
 
 ### Main features as following:
 
@@ -27,7 +27,7 @@ see [docs/en/quickstart.md](docs/en/quickstart.md).
 
 Contributing
 ===
-JournalQ will continuely dedicate to build a messageing platform community, any thoughts or issues are  appreciated.
+JoyQueue will continuely dedicate to build a messageing platform community, any thoughts or issues are  appreciated.
 
 
 License

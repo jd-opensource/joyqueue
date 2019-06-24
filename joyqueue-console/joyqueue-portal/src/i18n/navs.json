@@ -1,0 +1,194 @@
+{
+  "zh-CN": [
+    {
+      "name": "application",
+      "path": "/application",
+      "component": "application/index.vue"
+    },
+    {
+      "name": "applicationDetail",
+      "path": "/application/detail",
+      "component": "application/detail.vue"
+    },
+    {
+      "name": "topic",
+      "path": "/topic",
+      "component": "topic/index.vue"
+    },
+    {
+      "name": "topicDetail",
+      "path": "/topic/detail",
+      "component": "topic/detail.vue"
+    },
+    {
+      "name": "setting",
+      "path": "/setting",
+      "redirect": "/setting/dataCenter",
+      "component": "setting/index.vue",
+      "children": [
+        {
+          "path":"/",
+          "redirect": "/setting/dataCenter"
+        },
+        {
+          "path": "dataCenter",
+          "name": "dataCenter",
+          "component": "setting/dataCenter.vue"
+        },
+        {
+          "path": "config",
+          "name": "config",
+          "component": "setting/config.vue"
+        },
+        {
+          "path": "brokerGroup",
+          "name": "brokerGroup",
+          "component": "setting/brokerGroup.vue"
+        },
+        {
+          "path": "brokerGroup/detail",
+          "name": "brokerGroupDetail",
+          "component": "setting/brokerGroupDetail.vue"
+        },
+        {
+          "path": "broker",
+          "name": "broker",
+          "component": "setting/broker.vue"
+        },
+        {
+          "path": "metric",
+          "name": "metric",
+          "component": "setting/metric.vue"
+        },
+        {
+          "path": "namespace",
+          "name": "namespace",
+          "component": "setting/namespace.vue"
+        }
+      ]
+    },
+    {
+      "name": "tool",
+      "path": "/tool",
+      "redirect": "/tool/retry",
+      "component": "tool/index.vue",
+      "children": [
+        {
+          "path": "/",
+          "redirect": "/tool/retry"
+        },
+        {
+          "path": "retry",
+          "name": "retry",
+          "component": "tool/retry.vue"
+        },
+        {
+          "path": "archive",
+          "name": "archive",
+          "component": "tool/archive.vue"
+        },
+        {
+          "path": "operateHistory",
+          "name": "operateHistory",
+          "component": "tool/operateHistory.vue"
+        }
+      ]
+    }
+  ],
+  "en-US": [
+    {
+      "name": "application",
+      "path": "/application",
+      "component": "application/index.vue"
+    },
+    {
+      "name": "applicationDetail",
+      "path": "/application/detail",
+      "component": "application/detail.vue"
+    },
+    {
+      "name": "topic",
+      "path": "/topic",
+      "component": "topic/index.vue"
+    },
+    {
+      "name": "topicDetail",
+      "path": "/topic/detail",
+      "component": "topic/detail.vue"
+    },
+    {
+      "name": "setting",
+      "path": "/setting",
+      "redirect": "/setting/dataCenter",
+      "component": "setting/index.vue",
+      "children": [
+        {
+          "path":"/",
+          "redirect": "/setting/dataCenter"
+        },
+        {
+          "path": "dataCenter",
+          "name": "dataCenter",
+          "component": "setting/dataCenter.vue"
+        },
+        {
+          "path": "config",
+          "name": "config",
+          "component": "setting/config.vue"
+        },
+        {
+          "path": "brokerGroup",
+          "name": "brokerGroup",
+          "component": "setting/brokerGroup.vue"
+        },
+        {
+          "path": "brokerGroup/detail",
+          "name": "brokerGroupDetail",
+          "component": "setting/brokerGroupDetail.vue"
+        },
+        {
+          "path": "broker",
+          "name": "broker",
+          "component": "setting/broker.vue"
+        },
+        {
+          "path": "metric",
+          "name": "metric",
+          "component": "setting/metric.vue"
+        },
+        {
+          "path": "namespace",
+          "name": "namespace",
+          "component": "setting/namespace.vue"
+        }
+      ]
+    },
+    {
+      "name": "tool",
+      "path": "/tool",
+      "redirect": "/tool/retry",
+      "component": "tool/index.vue",
+      "children": [
+        {
+          "path":"/",
+          "redirect": "/tool/retry"
+        },
+        {
+          "path":"retry",
+          "name": "retry",
+          "component": "tool/retry.vue"
+        },
+        {
+          "path":"archive",
+          "name": "archive",
+          "component": "tool/archive.vue"
+        },
+        {
+          "path":"operateHistory",
+          "name": "operateHistory",
+          "component": "tool/operateHistory.vue"
+        }
+      ]
+    }
+  ]
+}

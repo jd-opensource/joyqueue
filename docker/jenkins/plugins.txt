@@ -1,0 +1,93 @@
+====
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+====
+
+workflow-multibranch:2.21
+antisamy-markup-formatter:1.5
+workflow-cps-global-lib:2.13
+workflow-cps:2.66
+workflow-durable-task-step:2.30
+ws-cleanup:0.37
+github-api:1.95
+workflow-api:2.33
+pipeline-milestone-step:1.3.1
+ssh-credentials:1.15
+ant:1.9
+pipeline-model-declarative-agent:1.1.1
+pipeline-build-step:2.9
+git-server:1.7
+workflow-support:3.2
+momentjs:1.1.1
+mailer:1.23
+jackson2-api:2.9.8
+pipeline-graph-analysis:1.9
+matrix-project:1.14
+gitlab-merge-request-jenkins:2.0.0
+workflow-step-api:2.19
+gradle:1.31
+pam-auth:1.5
+credentials:2.1.18
+resource-disposer:0.12
+github:1.29.4
+pipeline-model-definition:1.3.8
+ldap:1.20
+git-client:2.7.7
+bouncycastle-api:2.17
+workflow-aggregator:2.6
+subversion:2.12.1
+scm-api:2.4.1
+jdk-tool:1.2
+authentication-tokens:1.3
+pipeline-rest-api:2.10
+token-macro:2.7
+pipeline-stage-step:2.3
+plain-credentials:1.5
+mapdb-api:1.0.9.0
+email-ext:2.66
+pipeline-github-lib:1.0
+matrix-auth:2.3
+pipeline-model-api:1.3.8
+command-launcher:1.3
+apache-httpcomponents-client-4-api:4.5.5-3.0
+gitlab-logo:1.0.3
+docker-commons:1.14
+docker-workflow:1.18
+jsch:0.1.55
+credentials-binding:1.18
+github-branch-source:2.4.5
+pipeline-stage-tags-metadata:1.3.8
+display-url-api:2.3.1
+gitlab-plugin:1.5.12
+ssh-slaves:1.29.4
+workflow-job:2.32
+script-security:1.57
+windows-slaves:1.4
+cloudbees-folder:6.8
+workflow-basic-steps:2.15
+timestamper:1.9
+pipeline-stage-view:2.10
+handlebars:1.1.1
+durable-task:1.29
+branch-api:2.4.0
+ace-editor:1.1
+build-timeout:1.19
+git:3.9.3
+pipeline-model-extensions:1.3.8
+structs:1.17
+ruby-runtime:0.12
+junit:1.27
+workflow-scm-step:2.7
+jquery-detached:1.2.1
+lockable-resources:2.5
+pipeline-input-step:2.10
+gitlab-hook:1.4.2

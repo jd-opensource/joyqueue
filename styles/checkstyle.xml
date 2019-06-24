@@ -47,13 +47,13 @@
     </module>
 
     <module name="RegexpMultiline">
-        <property name="id" value="PrintStackTrace"/>
+        <property name="id" value="PrintStackTraceCheck"/>
         <property name="format" value="printStackTrace"/>
         <property name="fileExtensions" value="java"/>
         <property name="message" value="Could not use printStackTrace."/>
     </module>
  <module name="RegexpMultiline">
-        <property name="id" value="systemclock"/>
+        <property name="id" value="SystemClockCheck"/>
         <property name="format" value="System\.currentTimeMillis"/>
         <property name="fileExtensions" value="java"/>
         <property name="message" value="Please use SystemClock.now() instead."/>
@@ -69,8 +69,8 @@
             <property name="ignorePattern" value="^ *\* *https?://[^ ]+$"/>
         </module>
 
-        <module name="AvoidStarImport" />
-
+     <!--   <module name="AvoidStarImport" />
+-->
         <!-- Unused imports are forbidden -->
         <module name="UnusedImports" />
 

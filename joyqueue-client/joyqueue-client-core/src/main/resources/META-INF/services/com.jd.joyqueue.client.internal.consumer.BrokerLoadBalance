@@ -1,0 +1,2 @@
+com.jd.joyqueue.client.internal.consumer.support.RoundRobinBrokerLoadBalance
+com.jd.joyqueue.client.internal.consumer.support.RandomBrokerLoadBalance

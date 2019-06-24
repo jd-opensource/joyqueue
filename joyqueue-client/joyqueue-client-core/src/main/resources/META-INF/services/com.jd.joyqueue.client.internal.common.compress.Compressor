@@ -1,0 +1,2 @@
+com.jd.joyqueue.client.internal.common.compress.support.ZlibCompressor
+com.jd.joyqueue.client.internal.common.compress.support.SnappyCompressor

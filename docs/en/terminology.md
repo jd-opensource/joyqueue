@@ -1,10 +1,10 @@
-# JournalQ Terminology
+# JoyQueue Terminology
 
-Here is a glossary of terms related to JournalQ.
+Here is a glossary of terms related to JoyQueue.
 
-## JournalQ
+## JoyQueue
 
-JournalQ is a multi protocols and distibuted message broker which handles and accumulates incoming messages from applications,and then delivers messages to application who is interested in.
+JoyQueue is a multi protocols and distibuted message broker which handles and accumulates incoming messages from applications,and then delivers messages to application who is interested in.
 
 ## Pub-Sub
 
@@ -24,7 +24,7 @@ The identity of a message sender(publisher) or receiver(subscriber).
 
 ## Producer
 
-A process that publishes message to JournalQ.
+A process that publishes message to JoyQueue.
 
 ## Consumer
 
