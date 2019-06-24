@@ -28,7 +28,7 @@ import java.util.Map;
  属性 | 变长 |
  *
  */
-public class BrokerCommit implements JournalLog {
+public class BrokerCommit implements JoyQueueLog {
     private int size;
     private long startTime;
     private int storeTime;

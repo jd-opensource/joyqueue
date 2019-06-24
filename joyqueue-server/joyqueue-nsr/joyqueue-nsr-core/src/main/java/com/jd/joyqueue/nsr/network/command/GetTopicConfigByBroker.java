@@ -13,13 +13,13 @@
  */
 package com.jd.joyqueue.nsr.network.command;
 
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 /**
  * @author wylixiaobin
  * Date: 2019/1/27
  */
-public class GetTopicConfigByBroker extends JournalqPayload {
+public class GetTopicConfigByBroker extends JoyQueuePayload {
     private int brokerId;
     public GetTopicConfigByBroker brokerId(int brokerId){
         this.brokerId = brokerId;

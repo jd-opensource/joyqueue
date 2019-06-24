@@ -19,7 +19,7 @@ import com.jd.joyqueue.broker.kafka.command.ProduceResponse;
 import com.jd.joyqueue.broker.kafka.model.ProducePartitionGroupRequest;
 import com.jd.joyqueue.broker.producer.Produce;
 import com.jd.joyqueue.domain.QosLevel;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.network.session.Producer;
 import com.jd.joyqueue.toolkit.concurrent.EventListener;
 import org.slf4j.Logger;
@@ -45,7 +45,7 @@ public class ProduceHandler {
                                ProducePartitionGroupRequest partitionGroupRequest, EventListener<ProduceResponse.PartitionResponse> listener) {
         try {
             produce.putMessageAsync(producer, partitionGroupRequest.getMessages(), qosLevel, (writeResult) -> {
-                if (!writeResult.getCode().equals(JournalqCode.SUCCESS)) {
+                if (!writeResult.getCode().equals(JoyQueueCode.SUCCESS)) {
                     logger.error("produce message failed, topic: {}, code: {}", producer.getTopic(), writeResult.getCode());
                 }
                 short code = KafkaErrorCode.journalqCodeFor(writeResult.getCode().getCode());

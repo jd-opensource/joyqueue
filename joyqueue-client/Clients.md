@@ -9,17 +9,17 @@ JMQ2.0 客户端使用方式参考[java  客户端使用手册](http://jpcloud.j
 - jmq.passwd: 填写jmq4.0 中的token
 
 ### JMQ4
-客户端demo：http://git.jd.com/laf/journalQ/tree/master/journalq-client/journalq-client-samples/src/main/java/com/jd/journalq/client/samples
+客户端demo：http://git.jd.com/laf/journalQ/tree/master/joyqueue-client/joyqueue-client-samples/src/main/java/com/jd/joyqueue/client/samples
 
 #### pom
 
-配置pom.xml文件如下，journalq-client-all必选，其它根据需要引用，具体可参考IDE提示信息进行配置： 
+配置pom.xml文件如下，joyqueue-client-all必选，其它根据需要引用，具体可参考IDE提示信息进行配置： 
     
 ```
 <!-- 必选 -->
 <dependency>
-    <groupId>com.jd.journalq</groupId>
-    <artifactId>journalq-client-all</artifactId>
+    <groupId>com.jd.joyqueue</groupId>
+    <artifactId>joyqueue-client-all</artifactId>
     <version>4.1.0-SNAPSHOT</version>
 </dependency>
 
@@ -51,7 +51,7 @@ JMQ2.0 客户端使用方式参考[java  客户端使用手册](http://jpcloud.j
 
 手动创建的使用方式, 可自己控制producer和consumer实例化，自己控制调度等
 
-可参考[手动方式使用](http://git.jd.com/laf/laf-journalQ/tree/master/journalq-client/journalq-client-samples/src/main/java/com/jd/journalq/client/samples/api)
+可参考[手动方式使用](http://git.jd.com/laf/journalQ/tree/master/joyqueue-client/joyqueue-client-samples/src/main/java/com/jd/joyqueue/client/samples/api)
 
 ##### accessPoint
 
@@ -64,15 +64,15 @@ public class SimpleProducer {
         KeyValue keyValue = OMS.newKeyValue();
         
         // ACCOUNT_KEY对应管理端的令牌，必须填写
-        // keyValue还可以传递一些配置，包括超时，重试，namespace等，具体看io.openmessaging.journalq.JournalQBuiltinKeys
-        // 一些配置的默认值可以查看 com.jd.journalq.client.internal.producer.config.ProducerConfig, com.jd.journalq.client.internal.consumer.config.ConsumerConfig
+        // keyValue还可以传递一些配置，包括超时，重试，namespace等，具体看io.openmessaging.joyqueue.JoyQueueBuiltinKeys
+        // 一些配置的默认值可以查看 com.jd.joyqueue.client.internal.producer.config.ProducerConfig, com.jd.joyqueue.client.internal.consumer.config.ConsumerConfig
         keyValue.put(OMSBuiltinKeys.ACCOUNT_KEY, "test_token");
         
-        // 创建MessagingAccessPoint, url格式为 oms:journalq://[app]@[nameserver]/[region], 三个参数都是必填
+        // 创建MessagingAccessPoint, url格式为 oms:joyqueue://[app]@[nameserver]/[region], 三个参数都是必填
         // app对应管理端的应用
         // nameserver根据不同环境填写不同地址，比如jmq.jd.local:80
         // region表示区域，如果使用就近发送就近消费需要填写机房信息，如果不使用填写DEFAULT或UNKNOWN都可以，建议填写真实的
-        MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint("oms:journalq://test_app@jmq.jd.local:80/UNKNOWN", keyValue);
+        MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint("oms:joyqueue://test_app@jmq.jd.local:80/UNKNOWN", keyValue);
 
         // 创建producer
         Producer producer = messagingAccessPoint.createProducer();
@@ -88,7 +88,7 @@ public class SimpleProducer {
 
 ##### producer
 
-可参考[demo](http://git.jd.com/laf/journalQ/tree/master/journalq-client/journalq-client-samples/src/main/java/com/jd/journalq/client/samples/api/producer/SimpleProducer.java)
+可参考[demo](http://git.jd.com/laf/journalQ/tree/master/joyqueue-client/joyqueue-client-samples/src/main/java/com/jd/joyqueue/client/samples/api/producer/SimpleProducer.java)
 
 生产者，使用MessagingAccessPoint创建，调用start方法后使用
 
@@ -98,7 +98,7 @@ public class SimpleProducer {
     public static void main(String[] args) {
         KeyValue keyValue = OMS.newKeyValue();
         keyValue.put(OMSBuiltinKeys.ACCOUNT_KEY, "test_token");
-        MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint(journalq, keyValue);
+        MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint("oms:joyqueue://test_app@jmq.jd.local:80/UNKNOWN", keyValue);
 
         // 使用MessagingAccessPoint创建producer
         Producer producer = messagingAccessPoint.createProducer();
@@ -120,16 +120,16 @@ public class SimpleProducer {
 
 消费者，使用MessagingAccessPoint创建，调用bindQueue后再调用start使用
 
-可参考[demo](http://git.jd.com/laf/journalQ/tree/master/journalq-client/journalq-client-samples/src/main/java/com/jd/journalq/client/samples/api/consumer/SimpleConsumer.java)
+可参考[demo](http://git.jd.com/laf/journalQ/tree/master/joyqueue-client/joyqueue-client-samples/src/main/java/com/jd/joyqueue/client/samples/api/consumer/SimpleConsumer.java)
 
 ````java
 public class SimpleConsumer {
 
     public static void main(String[] args) {
         KeyValue keyValue = OMS.newKeyValue();
-        keyValue.put(journalQBuiltinKeys.ACCOUNT_KEY, "test_token");
+        keyValue.put(OMSBuiltinKeys.ACCOUNT_KEY, "test_token");
 
-        MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint(String.format("oms:journalq://test_app@%s:50088/UNKNOWN", IpUtil.getLocalIp()), keyValue);
+        MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint(String.format("oms:joyqueue://test_app@%s:50088/UNKNOWN", IpUtil.getLocalIp()), keyValue);
 
         // 创建consumer实例
         Consumer consumer = messagingAccessPoint.createConsumer();
@@ -424,7 +424,7 @@ public class SimpleMetadata {
         KeyValue keyValue = OMS.newKeyValue();
         keyValue.put(OMSBuiltinKeys.ACCOUNT_KEY, "test_token");
 
-        MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint(String.format("oms:journalq://test_app@%s:50088/UNKNOWN", IpUtil.getLocalIp()), keyValue);
+        MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint(String.format("oms:joyqueue://test_app@%s:50088/UNKNOWN", IpUtil.getLocalIp()), keyValue);
 
         Producer producer = messagingAccessPoint.createProducer();
         producer.start();
@@ -684,11 +684,11 @@ public class SimpleConsumerInterceptor {
 简单consumer拦截器 (jmq)
 
 使用时需要通过spi的方式注册
-把实现类添加到 META-INF/services/com.jd.journalq.client.internal.consumer.interceptor.ConsumerInterceptor 文件内，每行一个
+把实现类添加到 META-INF/services/com.jd.joyqueue.client.internal.consumer.interceptor.ConsumerInterceptor 文件内，每行一个
 
 ````java
 // Ordered接口提供getOrder方法，用于指定顺序，可以不实现
-// context还有attributes等可使用，具体看com.jd.journalq.client.internal.consumer.interceptor.ConsumeContext
+// context还有attributes等可使用，具体看com.jd.joyqueue.client.internal.consumer.interceptor.ConsumeContext
 public class JMQSimpleConsumerInterceptor implements ConsumerInterceptor, Ordered {
 
     @Override
@@ -751,11 +751,11 @@ public class SimpleProducerInterceptor {
 简单producer拦截器 (jmq)
 
 使用时需要通过spi的方式注册
-把实现类添加到 META-INF/services/com.jd.journalq.client.internal.producer.interceptor.ProducerInterceptor 文件内，每行一个
+把实现类添加到 META-INF/services/com.jd.joyqueue.client.internal.producer.interceptor.ProducerInterceptor 文件内，每行一个
 
 ````java
 // Ordered接口提供getOrder方法，用于指定顺序，可以不实现
-// context还有attributes等可使用，具体看com.jd.journalq.client.internal.producer.interceptor.ProduceContext
+// context还有attributes等可使用，具体看com.jd.joyqueue.client.internal.producer.interceptor.ProduceContext
 public class JMQSimpleProducerInterceptor implements ProducerInterceptor, Ordered {
 
     @Override
@@ -786,7 +786,7 @@ public class JMQSimpleProducerInterceptor implements ProducerInterceptor, Ordere
 
 可参考
 
-[简单按环境消息生产和过滤](http://git.jd.com/laf/journalQ/tree/master/journalq-client/journalq-client-samples/src/main/java/com/jd/journalq/client/samples/api/interceptor)
+[简单按环境消息生产和过滤](http://git.jd.com/laf/journalQ/tree/master/joyqueue-client/joyqueue-client-samples/src/main/java/com/jd/joyqueue/client/samples/api/interceptor)
 [客户端监控](http://git.jd.com/laf/laf-jmq/tree/master/jmq-client/jmq-client-core/src/main/java/com/jd/jmq/client/internal/trace/interceptor)
 
 ##### 监控
@@ -799,13 +799,13 @@ public class JMQSimpleProducerInterceptor implements ProducerInterceptor, Ordere
 
 [ump监控](http://git.jd.com/laf/laf-jmq/tree/master/jmq-jd/jmq-client-ump/src/main/java/com/jd/jmq/client/internal/ump)
 
-ump的实现提供可配参数，可以通过com.jd.journalq.client.internal.ump.UMPTraceConfig的appNames设置监控的app，如果有需要可自行设置
+ump的实现提供可配参数，可以通过com.jd.joyqueue.client.internal.ump.UMPTraceConfig的appNames设置监控的app，如果有需要可自行设置
 
 #### spring
 
 和spring整合的使用方式
 
-可参考[demo](http://git.jd.com/laf/journalQ/tree/master/journalq-client/journalq-client-samples/src/main/java/com/jd/journalq/client/samples/spring)
+可参考[demo](http://git.jd.com/laf/JournalQ/tree/master/joyqueue-client/joyqueue-client-samples/src/main/java/com/jd/joyqueue/client/samples/spring)
 
 ````xml
 <beans xmlns="http://www.springframework.org/schema/beans"
@@ -816,7 +816,7 @@ ump的实现提供可配参数，可以通过com.jd.journalq.client.internal.ump
         http://openmessaging.io/schema/oms.xsd">
     
     <!-- 定义accessPoint -->
-    <oms:access-point url="oms:journalq://test_app@jmq.jd.local:80/UNKNOWN">
+    <oms:access-point url="oms:joyqueue://test_app@jmq.jd.local:80/UNKNOWN">
         <oms:attribute key="ACCOUNT_KEY" value="test_token"></oms:attribute>
         <!-- 更多配置 -->
     </oms:access-point>
@@ -825,24 +825,24 @@ ump的实现提供可配参数，可以通过com.jd.journalq.client.internal.ump
     <oms:producer id="producer1"></oms:producer>
     
     <!-- 需要需要事务补偿，可以指定对应的listener，需要实现io.openmessaging.producer.TransactionStateCheckListener接口 -->
-    <oms:producer id="producer2" listener="com.jd.journalq.client.samples.spring.SimpleTransactionStateCheckListener"></oms:producer>
+    <oms:producer id="producer2" listener="com.jd.joyqueue.client.samples.spring.SimpleTransactionStateCheckListener"></oms:producer>
 
     <!-- 如果listener不需要由spring自动创建，也可以设置listener的引用 -->
-    <bean id="simpleTransactionStateCheckListener" class="com.jd.journalq.client.samples.spring.SimpleTransactionStateCheckListener"></bean>
+    <bean id="simpleTransactionStateCheckListener" class="com.jd.joyqueue.client.samples.spring.SimpleTransactionStateCheckListener"></bean>
     <oms:producer id="producer3" listener-ref="simpleTransactionStateCheckListener"></oms:producer>
     
     <!-- 创建一个consumer实例，由spring创建并管理生命周期，不需要再手动调用bind和start -->
     <!-- queue-name对应需要消费的主题 -->
     <!-- listener需要实现io.openmessaging.consumer.MessageListener或io.openmessaging.consumer.BatchMessageListener接口，对应单条和批量消费 -->
-    <oms:consumer queue-name="test_topic_0" listener="com.jd.journalq.client.samples.spring.SimpleMessageListener"></oms:consumer>
+    <oms:consumer queue-name="test_topic_0" listener="com.jd.joyqueue.client.samples.spring.SimpleMessageListener"></oms:consumer>
     
     <!-- 如果listener不需要由spring自动创建，也可以设置listener的引用 -->
-    <bean id="messageListenerRef" class="com.jd.journalq.client.samples.spring.SimpleMessageListener"></bean>
+    <bean id="messageListenerRef" class="com.jd.joyqueue.client.samples.spring.SimpleMessageListener"></bean>
     <oms:consumer queue-name="test_topic_1" listener-ref="messageListenerRef"></oms:consumer>
     
     <!-- 定义拦截器，如果不需要由spring自动创建，也可以设置interceptor的引用 -->
     <!-- 需要实现io.openmessaging.interceptor.ProducerInterceptor或io.openmessaging.interceptor.ConsumerInterceptor接口，对应生产和消费拦截 -->
-    <oms:interceptor class="com.jd.journalq.client.samples.spring.SimpleConsumerInterceptor"></oms:interceptor>
+    <oms:interceptor class="com.jd.joyqueue.client.samples.spring.SimpleConsumerInterceptor"></oms:interceptor>
     <!--<oms:interceptor ref="consumerInterceptor1"></oms:interceptor>-->
 </beans>
 ````
@@ -858,22 +858,22 @@ ump的实现提供可配参数，可以通过com.jd.journalq.client.internal.ump
         http://openmessaging.io/schema/oms.xsd">
     
     <!-- accessPoint1 -->
-    <oms:access-point id="accessPoint1" url="oms:journalq://test_app@jmq.jd.local:80/UNKNOWN">
+    <oms:access-point id="accessPoint1" url="oms:joyqueue://test_app@jmq.jd.local:80/UNKNOWN">
         <oms:attribute key="ACCOUNT_KEY" value="test_token"></oms:attribute>
     </oms:access-point>
 
     <oms:producer id="producer1" access-point="accessPoint1"></oms:producer>
 
-    <oms:consumer access-point="accessPoint1" queue-name="test_topic_0" listener="com.jd.journalq.client.samples.spring.SimpleMessageListener"></oms:consumer>
+    <oms:consumer access-point="accessPoint1" queue-name="test_topic_0" listener="com.jd.joyqueue.client.samples.spring.SimpleMessageListener"></oms:consumer>
 
     <!-- accessPoint2 -->
-    <oms:access-point id="accessPoint2" url="oms:journalq://test_app@jmq.jd.local:80/UNKNOWN">
+    <oms:access-point id="accessPoint2" url="oms:joyqueue://test_app@jmq.jd.local:80/UNKNOWN">
         <oms:attribute key="ACCOUNT_KEY" value="test_token"></oms:attribute>
     </oms:access-point>
 
     <oms:producer id="producer2" access-point="accessPoint2"></oms:producer>
 
-    <oms:consumer access-point="producer2" queue-name="test_topic_0" listener="com.jd.journalq.client.samples.spring.SimpleMessageListener"></oms:consumer>
+    <oms:consumer access-point="producer2" queue-name="test_topic_0" listener="com.jd.joyqueue.client.samples.spring.SimpleMessageListener"></oms:consumer>
 </beans>
 ````
 
@@ -881,14 +881,14 @@ ump的实现提供可配参数，可以通过com.jd.journalq.client.internal.ump
 
 和spring-boot整合的使用方式
 
-可参考[demo](http://git.jd.com/laf/journalQ/tree/master/journalq-client/journalq-client-samples/src/main/java/com/jd/journalq/client/samples/springboot)
+可参考[demo](http://git.jd.com/laf/journalQ/tree/master/joyqueue-client/joyqueue-client-samples/src/main/java/com/jd/joyqueue/client/samples/springboot)
 
 ##### 配置
 
 ````properties
 #spring.oms.url是核心配置，必须配置，否则无法使用
 #spring.oms.attributes是一些配置信息，里面的ACCOUNT_KEY必须配置，对应管理端的app
-spring.oms.url=oms:journalq://test_app@jmq.jd.local:80/UNKNOWN
+spring.oms.url=oms:joyqueue://test_app@jmq.jd.local:80/UNKNOWN
 spring.oms.attributes[ACCOUNT_KEY]=test_token
 
 #是否启用消费者, 默认启用
@@ -910,7 +910,7 @@ spring.oms.attributes[ACCOUNT_KEY]=test_token
 
 ````java
 @SpringBootApplication
-@ComponentScan("com.jd.journalq.client.samples.springboot")
+@ComponentScan("com.jd.joyqueue.client.samples.springboot")
 public class SpringBootMain implements InitializingBean {
 
     protected static final Logger logger = LoggerFactory.getLogger(SpringBootMain.class);

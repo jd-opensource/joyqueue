@@ -14,7 +14,7 @@
 package com.jd.joyqueue.nsr.network.command;
 
 import com.jd.joyqueue.domain.Broker;
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 import java.util.List;
 
@@ -22,7 +22,7 @@ import java.util.List;
  * @author wylixiaobin
  * Date: 2019/1/27
  */
-public class GetAllBrokersAck extends JournalqPayload {
+public class GetAllBrokersAck extends JoyQueuePayload {
     private List<Broker> brokers;
     public GetAllBrokersAck brokers(List<Broker> brokers){
         this.brokers = brokers;

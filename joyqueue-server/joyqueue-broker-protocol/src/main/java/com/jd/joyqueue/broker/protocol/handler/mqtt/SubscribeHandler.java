@@ -15,13 +15,13 @@ package com.jd.joyqueue.broker.protocol.handler.mqtt;
 
 import com.jd.joyqueue.broker.BrokerContext;
 import com.jd.joyqueue.broker.BrokerContextAware;
-import com.jd.joyqueue.broker.protocol.JournalqCommandHandler;
+import com.jd.joyqueue.broker.protocol.JoyQueueCommandHandler;
 import com.jd.joyqueue.domain.TopicConfig;
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.command.Subscribe;
 import com.jd.joyqueue.network.command.SubscribeAck;
 import com.jd.joyqueue.network.transport.Transport;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.command.Command;
 import com.jd.joyqueue.network.transport.command.Direction;
 import com.jd.joyqueue.network.transport.command.Type;
@@ -34,12 +34,12 @@ import java.util.List;
  * Date: 2018/10/10
  */
 @Deprecated
-public class SubscribeHandler implements JournalqCommandHandler, Type, BrokerContextAware {
+public class SubscribeHandler implements JoyQueueCommandHandler, Type, BrokerContextAware {
     private NameService nameService;
 
     @Override
     public int type() {
-        return JournalqCommandType.MQTT_SUBSCRIBE.getCode();
+        return JoyQueueCommandType.MQTT_SUBSCRIBE.getCode();
     }
 
     @Override
@@ -51,6 +51,6 @@ public class SubscribeHandler implements JournalqCommandHandler, Type, BrokerCon
     public Command handle(Transport transport, Command command) {
         Subscribe subscribe = (Subscribe) command.getPayload();
         List<TopicConfig> topicConfigs = nameService.subscribe(subscribe.getSubscriptions(), subscribe.getClientType());
-        return new Command(new JournalqHeader(Direction.RESPONSE, JournalqCommandType.MQTT_SUBSCRIBE_ACK.getCode()), new SubscribeAck().topicConfigs(topicConfigs));
+        return new Command(new JoyQueueHeader(Direction.RESPONSE, JoyQueueCommandType.MQTT_SUBSCRIBE_ACK.getCode()), new SubscribeAck().topicConfigs(topicConfigs));
     }
 }

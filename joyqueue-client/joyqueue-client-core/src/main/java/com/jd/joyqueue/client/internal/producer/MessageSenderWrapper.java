@@ -23,7 +23,7 @@ import com.jd.joyqueue.client.internal.producer.domain.SendPrepareResult;
 import com.jd.joyqueue.client.internal.producer.domain.SendResultData;
 import com.jd.joyqueue.client.internal.producer.transport.ProducerClientManager;
 import com.jd.joyqueue.domain.QosLevel;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.network.command.TxStatus;
 import com.jd.joyqueue.network.domain.BrokerNode;
 import com.jd.joyqueue.toolkit.service.Service;
@@ -140,12 +140,12 @@ public class MessageSenderWrapper extends Service implements MessageSender {
     }
 
     @Override
-    public JournalqCode commit(BrokerNode brokerNode, String topic, String app, String txId, long timeout) {
+    public JoyQueueCode commit(BrokerNode brokerNode, String topic, String app, String txId, long timeout) {
         return delegate.commit(brokerNode, topic, app, txId, timeout);
     }
 
     @Override
-    public JournalqCode rollback(BrokerNode brokerNode, String topic, String app, String txId, long timeout) {
+    public JoyQueueCode rollback(BrokerNode brokerNode, String topic, String app, String txId, long timeout) {
         return delegate.rollback(brokerNode, topic, app, txId, timeout);
     }
 

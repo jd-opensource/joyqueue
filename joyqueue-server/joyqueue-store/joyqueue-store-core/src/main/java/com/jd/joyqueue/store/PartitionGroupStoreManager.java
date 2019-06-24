@@ -14,7 +14,7 @@
 package com.jd.joyqueue.store;
 
 import com.jd.joyqueue.domain.QosLevel;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.store.file.DiskFullException;
 import com.jd.joyqueue.store.file.PositioningStore;
 import com.jd.joyqueue.store.file.RollBackException;
@@ -473,7 +473,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
             }
         }
         readResult.setMessages(buffers.toArray(new ByteBuffer[0]));
-        readResult.setCode(JournalqCode.SUCCESS);
+        readResult.setCode(JoyQueueCode.SUCCESS);
         if (null != consumeMetric) {
             consumeMetric.addCounter("ReadCount", buffers.size());
             consumeMetric.addLatency("ReadLatency", System.nanoTime() - t0);
@@ -565,7 +565,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         if (null != (writeCommand = writeCommandCache.poll())) {
             try {
                 if (waitForFlush()) {
-                    writeCommand.eventListener.onEvent(new WriteResult(JournalqCode.SE_WRITE_TIMEOUT, null));
+                    writeCommand.eventListener.onEvent(new WriteResult(JoyQueueCode.SE_WRITE_TIMEOUT, null));
                 } else {
                     long[] indices = write(writeCommand.messages);
                     handleCallback(writeCommand, store.right(), indices);
@@ -573,7 +573,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                 ret = true;
             } catch (Throwable t) {
                 if (writeCommand.eventListener != null)
-                    writeCommand.eventListener.onEvent(new WriteResult(JournalqCode.SE_WRITE_FAILED, null));
+                    writeCommand.eventListener.onEvent(new WriteResult(JoyQueueCode.SE_WRITE_FAILED, null));
             }
         }
         return ret;
@@ -588,7 +588,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
             }
             long t0 = System.nanoTime();
             if (waitForFlush()) {
-                writeCommand.eventListener.onEvent(new WriteResult(JournalqCode.SE_WRITE_TIMEOUT, null));
+                writeCommand.eventListener.onEvent(new WriteResult(JoyQueueCode.SE_WRITE_TIMEOUT, null));
             } else {
                 long[] indices = write(writeCommand.messages);
                 handleCallback(writeCommand, store.right(), indices);
@@ -602,11 +602,11 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
             }
         } catch (DiskFullException e) {
             if (null != writeCommand && writeCommand.eventListener != null)
-                writeCommand.eventListener.onEvent(new WriteResult(JournalqCode.SE_DISK_FULL, null));
+                writeCommand.eventListener.onEvent(new WriteResult(JoyQueueCode.SE_DISK_FULL, null));
             throw e;
         } catch (Throwable t) {
             if (null != writeCommand && writeCommand.eventListener != null)
-                writeCommand.eventListener.onEvent(new WriteResult(JournalqCode.SE_WRITE_FAILED, null));
+                writeCommand.eventListener.onEvent(new WriteResult(JoyQueueCode.SE_WRITE_FAILED, null));
             throw t;
         }
     }
@@ -718,11 +718,11 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         } catch (InterruptedException e) {
             logger.warn("Exception: ", e);
             if (eventListener != null)
-                eventListener.onEvent(new WriteResult(JournalqCode.SE_WRITE_FAILED, null));
+                eventListener.onEvent(new WriteResult(JoyQueueCode.SE_WRITE_FAILED, null));
         }
 
         if (qosLevel == QosLevel.RECEIVE && null != eventListener) {
-            eventListener.onEvent(new WriteResult(JournalqCode.SUCCESS, null));
+            eventListener.onEvent(new WriteResult(JoyQueueCode.SUCCESS, null));
         }
     }
 
@@ -1350,12 +1350,12 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
             try {
                 while (getFirst().position <= position) {
                     Callback callback = removeFirst();
-                    callback.listener.onEvent(new WriteResult(JournalqCode.SUCCESS, callback.indices));
+                    callback.listener.onEvent(new WriteResult(JoyQueueCode.SUCCESS, callback.indices));
                 }
                 long deadline = SystemClock.now() - EVENT_TIMEOUT_MILLS;
                 while (getFirst().timestamp < deadline) {
                     Callback callback = removeFirst();
-                    callback.listener.onEvent(new WriteResult(JournalqCode.SE_WRITE_TIMEOUT, null));
+                    callback.listener.onEvent(new WriteResult(JoyQueueCode.SE_WRITE_TIMEOUT, null));
                 }
             } catch (NoSuchElementException ignored) {
             }
@@ -1364,7 +1364,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         void put(Callback callback) {
             addLast(callback);
             if (callback.position <= callbackPosition.get() && remove(callback)) {
-                callback.listener.onEvent(new WriteResult(JournalqCode.SUCCESS, callback.indices));
+                callback.listener.onEvent(new WriteResult(JoyQueueCode.SUCCESS, callback.indices));
             }
         }
     }

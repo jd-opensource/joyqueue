@@ -44,7 +44,7 @@ public class ElectionManagerStub extends ElectionManager {
         Codec codec = new CodecFactory() {
             @Override
             public Codec getCodec() {
-                JournalqHeaderCodec headerCodec = new JournalqHeaderCodec();
+                JoyQueueHeaderCodec headerCodec = new JoyQueueHeaderCodec();
                 PayloadCodecFactory payloadCodecFactory = new PayloadCodecFactory();
                 new BrokerPayloadCodecRegistrar().register(payloadCodecFactory);
                 payloadCodecFactory.register(new VoteRequestDecoder());

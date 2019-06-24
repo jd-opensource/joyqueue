@@ -36,7 +36,7 @@ import com.jd.joyqueue.broker.store.StoreManager;
 import com.jd.joyqueue.domain.Config;
 import com.jd.joyqueue.domain.Consumer;
 import com.jd.joyqueue.domain.Producer;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.nsr.NameService;
 import com.jd.joyqueue.security.Authentication;
 import com.jd.joyqueue.server.retry.api.MessageRetry;
@@ -262,32 +262,32 @@ public class BrokerServiceTest extends Service {
     private MessageRetry getMessageRetry(BrokerContext brokerContext) {
         return new MessageRetry() {
             @Override
-            public void addRetry(List list) throws JournalqException {
+            public void addRetry(List list) throws JoyQueueException {
 
             }
 
             @Override
-            public void retrySuccess(String topic, String app, Object[] messageIds) throws JournalqException {
+            public void retrySuccess(String topic, String app, Object[] messageIds) throws JoyQueueException {
 
             }
 
             @Override
-            public void retryError(String topic, String app, Object[] messageIds) throws JournalqException {
+            public void retryError(String topic, String app, Object[] messageIds) throws JoyQueueException {
 
             }
 
             @Override
-            public void retryExpire(String topic, String app, Object[] messageIds) throws JournalqException {
+            public void retryExpire(String topic, String app, Object[] messageIds) throws JoyQueueException {
 
             }
 
             @Override
-            public List<RetryMessageModel> getRetry(String topic, String app, short count, long startIndex) throws JournalqException {
+            public List<RetryMessageModel> getRetry(String topic, String app, short count, long startIndex) throws JoyQueueException {
                 return null;
             }
 
             @Override
-            public int countRetry(String topic, String app) throws JournalqException {
+            public int countRetry(String topic, String app) throws JoyQueueException {
                 return 0;
             }
 

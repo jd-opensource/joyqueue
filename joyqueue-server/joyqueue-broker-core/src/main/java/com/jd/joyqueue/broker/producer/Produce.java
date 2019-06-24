@@ -14,9 +14,9 @@
 package com.jd.joyqueue.broker.producer;
 
 import com.jd.joyqueue.domain.QosLevel;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.message.BrokerMessage;
-import com.jd.joyqueue.message.JournalLog;
+import com.jd.joyqueue.message.JoyQueueLog;
 import com.jd.joyqueue.network.session.Producer;
 import com.jd.joyqueue.network.session.TransactionId;
 import com.jd.joyqueue.store.WriteResult;
@@ -42,10 +42,10 @@ public interface Produce {
      * Date: 2018/8/17
      */
     PutResult putMessage(Producer producer, List<BrokerMessage> msgs,
-                         QosLevel qosLevel) throws JournalqException;
+                         QosLevel qosLevel) throws JoyQueueException;
 
     PutResult putMessage(Producer producer, List<BrokerMessage> msgs,
-                         QosLevel qosLevel, int timeout) throws JournalqException;
+                         QosLevel qosLevel, int timeout) throws JoyQueueException;
 
     /**
      * 异步写入
@@ -53,10 +53,10 @@ public interface Produce {
      * @param producer    session 中生产者
      * @param msgs        要写入的消息，如果是事务消息，则该批次的消息，必须都在同一个事务内，具有相同的txId
      * @param qosLevel    服务水平
-     * @throws JournalqException
+     * @throws JoyQueueException
      */
     void putMessageAsync(Producer producer, List<BrokerMessage> msgs,
-                         QosLevel qosLevel, EventListener<WriteResult> eventListener) throws JournalqException;
+                         QosLevel qosLevel, EventListener<WriteResult> eventListener) throws JoyQueueException;
 
     /**
      * 异步写入
@@ -65,17 +65,17 @@ public interface Produce {
      * @param msgs        要写入的消息，如果是事务消息，则该批次的消息，必须都在同一个事务内，具有相同的txId
      * @param qosLevel    服务水平
      * @param timeout
-     * @throws JournalqException
+     * @throws JoyQueueException
      */
     void putMessageAsync(Producer producer, List<BrokerMessage> msgs,
-                         QosLevel qosLevel, int timeout, EventListener<WriteResult> eventListener) throws JournalqException;
+                         QosLevel qosLevel, int timeout, EventListener<WriteResult> eventListener) throws JoyQueueException;
 
     /**
      * @param producer 会话相关的producer，用来存储当前会话
      * @param tx       命令类型，包括prepare，commit，rollback
-     * @throws JournalqException 处理异常。
+     * @throws JoyQueueException 处理异常。
      */
-    TransactionId putTransactionMessage(Producer producer, JournalLog tx) throws JournalqException;
+    TransactionId putTransactionMessage(Producer producer, JoyQueueLog tx) throws JoyQueueException;
 
     /**
      * 获取事务id
@@ -90,7 +90,7 @@ public interface Produce {
      * @param producer
      * @param count
      * @return
-     * @throws JournalqException
+     * @throws JoyQueueException
      */
-    List<TransactionId> getFeedback(Producer producer, int count) throws JournalqException;
+    List<TransactionId> getFeedback(Producer producer, int count) throws JoyQueueException;
 }

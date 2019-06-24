@@ -23,8 +23,8 @@ import com.jd.joyqueue.broker.consumer.model.PullResult;
 import com.jd.joyqueue.broker.consumer.position.PositionManager;
 import com.jd.joyqueue.domain.Partition;
 import com.jd.joyqueue.domain.TopicName;
-import com.jd.joyqueue.exception.JournalqCode;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueCode;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.message.MessageLocation;
 import com.jd.joyqueue.network.session.Connection;
 import com.jd.joyqueue.network.session.Consumer;
@@ -117,7 +117,7 @@ class PartitionConsumption extends Service {
      * @param accessTimes 访问次数用于均匀读取每个分区
      * @return 读取的消息
      */
-    protected PullResult getMessage(Consumer consumer, int count, long ackTimeout, long accessTimes) throws JournalqException {
+    protected PullResult getMessage(Consumer consumer, int count, long ackTimeout, long accessTimes) throws JoyQueueException {
         logger.debug("getMessage by topic:[{}], app:[{}], count:[{}], ackTimeout:[{}]", consumer.getTopic(), consumer.getApp(), count, ackTimeout);
 
         PullResult pullResult = new PullResult(consumer, (short) -1, new ArrayList<>(0));
@@ -155,7 +155,7 @@ class PartitionConsumption extends Service {
      * @param msgList
      * @return
      */
-    private PullResult brokerMessage2PullResult(Consumer consumer, List<RetryMessageModel> msgList) throws JournalqException {
+    private PullResult brokerMessage2PullResult(Consumer consumer, List<RetryMessageModel> msgList) throws JoyQueueException {
         List<ByteBuffer> resultList = new ArrayList<>(msgList.size());
         for (RetryMessageModel message : msgList) {
             ByteBuffer wrap = ByteBuffer.wrap(message.getBrokerMessage());
@@ -177,7 +177,7 @@ class PartitionConsumption extends Service {
      * @param accessTimes 访问次数
      * @return
      */
-    private PullResult getFromPartition(Consumer consumer, List<Short> partitionList, int count, long ackTimeout, long accessTimes) throws JournalqException {
+    private PullResult getFromPartition(Consumer consumer, List<Short> partitionList, int count, long ackTimeout, long accessTimes) throws JoyQueueException {
         int partitionSize = partitionList.size();
         int listIndex = -1;
         for (int i = 0; i < partitionSize; i++) {
@@ -202,7 +202,7 @@ class PartitionConsumption extends Service {
      * @param partition 消费分区
      * @return 读取的消息
      */
-    protected PullResult getMsgByPartitionAndIndex(Consumer consumer, int group, short partition, long index, int count) throws JournalqException, IOException {
+    protected PullResult getMsgByPartitionAndIndex(Consumer consumer, int group, short partition, long index, int count) throws JoyQueueException, IOException {
         PullResult pullResult = new PullResult(consumer, (short) -1, new ArrayList<>(0));
         try {
             long startTime = System.nanoTime();
@@ -212,7 +212,7 @@ class PartitionConsumption extends Service {
 
             TPStatUtil.append(monitorKey, startTime, System.nanoTime());
 
-            if (readRst.getCode() == JournalqCode.SUCCESS) {
+            if (readRst.getCode() == JoyQueueCode.SUCCESS) {
                 ByteBuffer[] byteBufferArr = readRst.getMessages();
                 if (byteBufferArr == null) {
                     // 没有拉到消息直接返回
@@ -239,11 +239,11 @@ class PartitionConsumption extends Service {
         } catch (PositionOverflowException overflow) {
             logger.debug("PositionOverflow,topic:{},partition:{},index:{}", consumer.getTopic(), partition, index);
             if (overflow.getPosition() != overflow.getRight()) {
-                pullResult.setJmqCode(JournalqCode.SE_INDEX_OVERFLOW);
+                pullResult.setJmqCode(JoyQueueCode.SE_INDEX_OVERFLOW);
             }
         } catch (PositionUnderflowException underflow) {
             logger.debug("PositionUnderflow,topic:{},partition:{},index:{}", consumer.getTopic(), partition, index);
-            pullResult.setJmqCode(JournalqCode.SE_INDEX_UNDERFLOW);
+            pullResult.setJmqCode(JoyQueueCode.SE_INDEX_UNDERFLOW);
         }
 
         return pullResult;
@@ -257,7 +257,7 @@ class PartitionConsumption extends Service {
      * @param partition 消费分区
      * @return 读取的消息
      */
-    protected PullResult getMsgByPartitionAndIndex(Consumer consumer, short partition, long index, int count) throws IOException, JournalqException {
+    protected PullResult getMsgByPartitionAndIndex(Consumer consumer, short partition, long index, int count) throws IOException, JoyQueueException {
         Integer group = partitionManager.getGroupByPartition(TopicName.parse(consumer.getTopic()), partition);
         Preconditions.checkArgument(group != null && group >= 0, "找不到主题[" + consumer.getTopic() + "]" + ",分区[" + partition + "]的分区组");
         return getMsgByPartitionAndIndex(consumer, group, partition, index, count);
@@ -272,7 +272,7 @@ class PartitionConsumption extends Service {
      * @param ackTimeout 应答超时时间
      * @return 读取的消息
      */
-    protected PullResult getMessage4Sequence(Consumer consumer, short partition, int count, long ackTimeout) throws JournalqException {
+    protected PullResult getMessage4Sequence(Consumer consumer, short partition, int count, long ackTimeout) throws JoyQueueException {
         logger.debug("getMessage4Sequence by topic:[{}], app:[{}], partition:[{}], count:[{}], ackTimeout:[{}]", consumer.getTopic(), consumer.getApp(), partition, count, ackTimeout);
 
         // 初始化默认
@@ -313,9 +313,9 @@ class PartitionConsumption extends Service {
                 partitionManager.releasePartition(consumer, partition);
 
                 if (ex instanceof PositionOverflowException) {
-                    pullResult.setJmqCode(JournalqCode.SE_INDEX_OVERFLOW);
+                    pullResult.setJmqCode(JoyQueueCode.SE_INDEX_OVERFLOW);
                 } else if (ex instanceof PositionUnderflowException) {
-                    pullResult.setJmqCode(JournalqCode.SE_INDEX_UNDERFLOW);
+                    pullResult.setJmqCode(JoyQueueCode.SE_INDEX_UNDERFLOW);
                 } else {
                     logger.error("get message error, consumer: {}, partition: {}", consumer, partition, ex);
                 }
@@ -333,7 +333,7 @@ class PartitionConsumption extends Service {
         }
 
         @Override
-        public void callback(List<ByteBuffer> byteBuffers) throws JournalqException {
+        public void callback(List<ByteBuffer> byteBuffers) throws JoyQueueException {
             innerAcknowledge(consumer, byteBuffers);
         }
     }
@@ -355,7 +355,7 @@ class PartitionConsumption extends Service {
         PartitionGroupStore store = storeService.getStore(consumer.getTopic(), partitionGroup);
         try {
             ReadResult readRst = store.read(partition, index, count, Long.MAX_VALUE);
-            if (readRst.getCode() == JournalqCode.SUCCESS) {
+            if (readRst.getCode() == JoyQueueCode.SUCCESS) {
                 return readRst.getMessages();
             } else {
                 logger.error("read message error, error code[{}]", readRst.getCode());
@@ -379,9 +379,9 @@ class PartitionConsumption extends Service {
      *
      * @param consumer    消费者
      * @param inValidList 无效消息集合
-     * @throws JournalqException
+     * @throws JoyQueueException
      */
-    private void innerAcknowledge(Consumer consumer, List<ByteBuffer> inValidList) throws JournalqException{
+    private void innerAcknowledge(Consumer consumer, List<ByteBuffer> inValidList) throws JoyQueueException {
         if (inValidList == null) {
             return;
         }
@@ -390,7 +390,7 @@ class PartitionConsumption extends Service {
         archiveIfNecessary(messageLocations);
     }
 
-    private void archiveIfNecessary(MessageLocation[] messageLocations) throws JournalqException {
+    private void archiveIfNecessary(MessageLocation[] messageLocations) throws JoyQueueException {
         ConsumeArchiveService archiveService;
 
         if (archiveManager == null || (archiveService = archiveManager.getConsumeArchiveService()) == null) {
@@ -435,9 +435,9 @@ class PartitionConsumption extends Service {
      * @param consumer     消费者信息
      * @param isSuccessAck 是否消费成功
      * @return
-     * @throws JournalqException
+     * @throws JoyQueueException
      */
-    public boolean acknowledge(MessageLocation[] locations, Consumer consumer, boolean isSuccessAck) throws JournalqException {
+    public boolean acknowledge(MessageLocation[] locations, Consumer consumer, boolean isSuccessAck) throws JoyQueueException {
         boolean isSuccess = false;
         if (locations.length < 1) {
             return false;
@@ -470,7 +470,7 @@ class PartitionConsumption extends Service {
                 logger.error("ack index : [{} - {}] is not continue, currentIndex is : [{}], consumer info is : {}", indexArr[0], indexArr[1], lastMsgAckIndex, consumer);
             }
         } else {
-            throw new JournalqException(JournalqCode.FW_CONSUMER_ACK_FAIL, "ack index is not continue or repeatable!");
+            throw new JoyQueueException(JoyQueueCode.FW_CONSUMER_ACK_FAIL, "ack index is not continue or repeatable!");
         }
 
         return isSuccess;
@@ -483,7 +483,7 @@ class PartitionConsumption extends Service {
      * @param app
      * @param isSuccess
      * @return
-     * @throws JournalqException
+     * @throws JoyQueueException
      */
     private boolean retryAck(String topic, String app, MessageLocation[] locations, boolean isSuccess) {
         Long[] indexArr = new Long[locations.length];
@@ -496,7 +496,7 @@ class PartitionConsumption extends Service {
             } else {
                 messageRetry.retryError(topic, app, indexArr);
             }
-        } catch (JournalqException e) {
+        } catch (JoyQueueException e) {
             logger.error("RetryAck error.", e);
             return false;
         }

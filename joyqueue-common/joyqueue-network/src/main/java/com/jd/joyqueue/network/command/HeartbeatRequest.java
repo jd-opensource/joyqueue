@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.network.command;
 
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 /**
  * HeartbeatRequest
@@ -21,10 +21,10 @@ import com.jd.joyqueue.network.transport.command.JournalqPayload;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/28
  */
-public class HeartbeatRequest extends JournalqPayload {
+public class HeartbeatRequest extends JoyQueuePayload {
 
     @Override
     public int type() {
-        return JournalqCommandType.HEARTBEAT_REQUEST.getCode();
+        return JoyQueueCommandType.HEARTBEAT_REQUEST.getCode();
     }
 }

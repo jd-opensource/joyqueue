@@ -15,19 +15,19 @@ package com.jd.joyqueue.broker.protocol.handler;
 
 import com.jd.joyqueue.broker.BrokerContext;
 import com.jd.joyqueue.broker.BrokerContextAware;
-import com.jd.joyqueue.broker.protocol.JournalqCommandHandler;
+import com.jd.joyqueue.broker.protocol.JoyQueueCommandHandler;
 import com.jd.joyqueue.broker.cluster.ClusterManager;
 import com.jd.joyqueue.broker.protocol.converter.CheckResultConverter;
 import com.jd.joyqueue.broker.helper.SessionHelper;
 import com.jd.joyqueue.broker.monitor.SessionManager;
 import com.jd.joyqueue.broker.producer.Produce;
 import com.jd.joyqueue.domain.TopicName;
-import com.jd.joyqueue.exception.JournalqCode;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueCode;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.message.BrokerPrepare;
 import com.jd.joyqueue.message.SourceType;
 import com.jd.joyqueue.network.command.BooleanAck;
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.command.ProduceMessagePrepareRequest;
 import com.jd.joyqueue.network.command.ProduceMessagePrepareResponse;
 import com.jd.joyqueue.network.session.Connection;
@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/19
  */
-public class ProduceMessagePrepareRequestHandler implements JournalqCommandHandler, Type, BrokerContextAware {
+public class ProduceMessagePrepareRequestHandler implements JoyQueueCommandHandler, Type, BrokerContextAware {
 
     protected static final Logger logger = LoggerFactory.getLogger(ProduceMessagePrepareRequestHandler.class);
 
@@ -69,22 +69,22 @@ public class ProduceMessagePrepareRequestHandler implements JournalqCommandHandl
 
         if (connection == null || !connection.isAuthorized(produceMessagePrepareRequest.getApp())) {
             logger.warn("connection is not exists, transport: {}, app: {}", transport, produceMessagePrepareRequest.getApp());
-            return BooleanAck.build(JournalqCode.FW_CONNECTION_NOT_EXISTS.getCode());
+            return BooleanAck.build(JoyQueueCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
         String producerId = connection.getProducer(produceMessagePrepareRequest.getTopic(), produceMessagePrepareRequest.getApp());
         Producer producer = (StringUtils.isBlank(producerId) ? null : sessionManager.getProducerById(producerId));
         if (producer == null) {
             logger.warn("producer is not exists, transport: {}", transport);
-            return BooleanAck.build(JournalqCode.FW_PRODUCER_NOT_EXISTS.getCode());
+            return BooleanAck.build(JoyQueueCode.FW_PRODUCER_NOT_EXISTS.getCode());
         }
 
         BooleanResponse checkResult = clusterManager.checkWritable(TopicName.parse(produceMessagePrepareRequest.getTopic()),
                 produceMessagePrepareRequest.getApp(), connection.getHost());
         if (!checkResult.isSuccess()) {
             logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport, produceMessagePrepareRequest,
-                    produceMessagePrepareRequest.getApp(), checkResult.getJournalqCode());
-            return new Command(new ProduceMessagePrepareResponse(CheckResultConverter.convertCommonCode(checkResult.getJournalqCode())));
+                    produceMessagePrepareRequest.getApp(), checkResult.getJoyQueueCode());
+            return new Command(new ProduceMessagePrepareResponse(CheckResultConverter.convertCommonCode(checkResult.getJoyQueueCode())));
         }
 
         ProduceMessagePrepareResponse produceMessagePrepareResponse = produceMessagePrepare(producer, connection, produceMessagePrepareRequest);
@@ -97,24 +97,24 @@ public class ProduceMessagePrepareRequestHandler implements JournalqCommandHandl
         brokerPrepare.setApp(produceMessagePrepareRequest.getApp());
         brokerPrepare.setQueryId(produceMessagePrepareRequest.getTransactionId());
         brokerPrepare.setTimeout(produceMessagePrepareRequest.getTimeout());
-        brokerPrepare.setSource(SourceType.JMQ.getValue());
+        brokerPrepare.setSource(SourceType.JOYQUEUE.getValue());
 
         try {
             TransactionId transactionId = produce.putTransactionMessage(producer, brokerPrepare);
-            return new ProduceMessagePrepareResponse(transactionId.getTxId(), JournalqCode.SUCCESS);
-        } catch (JournalqException e) {
+            return new ProduceMessagePrepareResponse(transactionId.getTxId(), JoyQueueCode.SUCCESS);
+        } catch (JoyQueueException e) {
             logger.error("produceMessage prepare exception, transport: {}, topic: {}, app: {}",
                     connection.getTransport().remoteAddress(), produceMessagePrepareRequest.getTopic(), produceMessagePrepareRequest.getApp(), e);
-            return new ProduceMessagePrepareResponse(JournalqCode.valueOf(e.getCode()));
+            return new ProduceMessagePrepareResponse(JoyQueueCode.valueOf(e.getCode()));
         } catch (Exception e) {
             logger.error("produceMessage prepare exception, transport: {}, topic: {}, app: {}",
                     connection.getTransport().remoteAddress(), produceMessagePrepareRequest.getTopic(), produceMessagePrepareRequest.getApp(), e);
-            return new ProduceMessagePrepareResponse(JournalqCode.CN_UNKNOWN_ERROR);
+            return new ProduceMessagePrepareResponse(JoyQueueCode.CN_UNKNOWN_ERROR);
         }
     }
 
     @Override
     public int type() {
-        return JournalqCommandType.PRODUCE_MESSAGE_PREPARE_REQUEST.getCode();
+        return JoyQueueCommandType.PRODUCE_MESSAGE_PREPARE_REQUEST.getCode();
     }
 }

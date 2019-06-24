@@ -16,9 +16,9 @@ package com.jd.joyqueue.client;
 import io.openmessaging.KeyValue;
 import io.openmessaging.consumer.BatchMessageListener;
 import io.openmessaging.consumer.Consumer;
-import io.openmessaging.joyqueue.domain.JournalQConsumerBuiltinKeys;
-import io.openmessaging.joyqueue.domain.JournalQProducerBuiltinKeys;
-import io.openmessaging.joyqueue.domain.JournalQTxFeedbackBuiltinKeys;
+import io.openmessaging.joyqueue.domain.JoyQueueConsumerBuiltinKeys;
+import io.openmessaging.joyqueue.domain.JoyQueueProducerBuiltinKeys;
+import io.openmessaging.joyqueue.domain.JoyQueueTxFeedbackBuiltinKeys;
 import io.openmessaging.joyqueue.producer.ExtensionProducer;
 import io.openmessaging.joyqueue.producer.ExtensionTransactionalResult;
 import io.openmessaging.message.Message;
@@ -59,11 +59,11 @@ public class ProduceConsumeTest1 extends AbstractClientTest {
     @Override
     protected KeyValue getAttributes() {
         KeyValue keyValue = super.getAttributes();
-        keyValue.put(JournalQConsumerBuiltinKeys.LONGPOLL_TIMEOUT, -1);
-        keyValue.put(JournalQConsumerBuiltinKeys.BROADCAST_LOCAL_PATH, "/export/Data/jmq/broadcast");
-        keyValue.put(JournalQProducerBuiltinKeys.TRANSACTION_TIMEOUT, 1000 * 10);
-        keyValue.put(JournalQTxFeedbackBuiltinKeys.FETCH_INTERVAL, 1);
-        keyValue.put(JournalQTxFeedbackBuiltinKeys.FETCH_SIZE, 10);
+        keyValue.put(JoyQueueConsumerBuiltinKeys.LONGPOLL_TIMEOUT, -1);
+        keyValue.put(JoyQueueConsumerBuiltinKeys.BROADCAST_LOCAL_PATH, "/export/Data/jmq/broadcast");
+        keyValue.put(JoyQueueProducerBuiltinKeys.TRANSACTION_TIMEOUT, 1000 * 10);
+        keyValue.put(JoyQueueTxFeedbackBuiltinKeys.FETCH_INTERVAL, 1);
+        keyValue.put(JoyQueueTxFeedbackBuiltinKeys.FETCH_SIZE, 10);
         return keyValue;
     }
 

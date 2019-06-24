@@ -98,7 +98,7 @@ public class BrokerMessageConverter {
     }
 
     public static List<BrokerMessage> convertBatch(String topic, String app, BrokerMessage batchBrokerMessage) {
-        if (batchBrokerMessage.getSource() != SourceType.JMQ.getValue()) {
+        if (batchBrokerMessage.getSource() != SourceType.JOYQUEUE.getValue()) {
             return messageConvertSupport.convertBatch(batchBrokerMessage);
         }
         byte[] body = batchBrokerMessage.getDecompressedBody();

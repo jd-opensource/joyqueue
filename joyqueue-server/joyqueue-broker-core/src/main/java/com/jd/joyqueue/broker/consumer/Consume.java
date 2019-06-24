@@ -15,9 +15,9 @@ package com.jd.joyqueue.broker.consumer;
 
 import com.jd.joyqueue.broker.consumer.model.PullResult;
 import com.jd.joyqueue.domain.TopicName;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.network.session.Connection;
 import com.jd.joyqueue.network.session.Consumer;
-import com.jd.joyqueue.exception.JournalqException;
 import com.jd.joyqueue.message.MessageLocation;
 
 /**
@@ -32,9 +32,9 @@ public interface Consume {
      * @param count      获取消息条数
      * @param ackTimeout 占用partition的超时时间，单位毫秒
      * @return
-     * @throws JournalqException
+     * @throws JoyQueueException
      */
-    PullResult getMessage(Consumer consumer, int count, int ackTimeout) throws JournalqException;
+    PullResult getMessage(Consumer consumer, int count, int ackTimeout) throws JoyQueueException;
 
     /**
      * 指定分区、消息序号、获取消息条数获取消息
@@ -44,9 +44,9 @@ public interface Consume {
      * @param index     默认值-1
      * @param count     获取消息条数
      * @return
-     * @throws JournalqException
+     * @throws JoyQueueException
      */
-    PullResult getMessage(Consumer consumer, short partition, long index, int count) throws JournalqException;
+    PullResult getMessage(Consumer consumer, short partition, long index, int count) throws JoyQueueException;
 
     /**
      * 应答消息，不包含重试消息
@@ -55,9 +55,9 @@ public interface Consume {
      * @param consumer     消费者
      * @param isSuccessAck 是否正常确认
      * @return 是否成功
-     * @throws JournalqException
+     * @throws JoyQueueException
      */
-    boolean acknowledge(MessageLocation[] locations, Consumer consumer, Connection connection, boolean isSuccessAck) throws JournalqException;
+    boolean acknowledge(MessageLocation[] locations, Consumer consumer, Connection connection, boolean isSuccessAck) throws JoyQueueException;
 
 
     /**
@@ -74,7 +74,7 @@ public interface Consume {
      * @param consumer 消费者
      * @param index    消息序号
      */
-    void setPullIndex(Consumer consumer, short partition, long index) throws JournalqException;
+    void setPullIndex(Consumer consumer, short partition, long index) throws JoyQueueException;
 
     /**
      * 获取指定主题+应用+分区的拉取序号
@@ -91,7 +91,7 @@ public interface Consume {
      * @param consumer 消费者
      * @param index    消息序号
      */
-    void setAckIndex(Consumer consumer, short partition, long index) throws JournalqException;
+    void setAckIndex(Consumer consumer, short partition, long index) throws JoyQueueException;
 
     /**
      * 重置指定主题+应用+分区的应答序号（起始订阅位置）
@@ -99,7 +99,7 @@ public interface Consume {
      * @param consumer 消费者
      * @param index    消息序号
      */
-    void setStartAckIndex(Consumer consumer, short partition, long index) throws JournalqException;
+    void setStartAckIndex(Consumer consumer, short partition, long index) throws JoyQueueException;
 
     /**
      * 获取指定主题+应用+分区的应答序号
@@ -126,7 +126,7 @@ public interface Consume {
      * @param app   应用
      * @return
      */
-    boolean resetPullIndex(String topic, String app) throws JournalqException;
+    boolean resetPullIndex(String topic, String app) throws JoyQueueException;
 
     /**
      * 保存消息位置

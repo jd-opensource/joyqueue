@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.network.transport.command;
 
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -74,7 +74,7 @@ public class Command {
     }
 
     public boolean isSuccess() {
-        return (header.getStatus() == JournalqCode.SUCCESS.getCode());
+        return (header.getStatus() == JoyQueueCode.SUCCESS.getCode());
     }
 
     public void release() {

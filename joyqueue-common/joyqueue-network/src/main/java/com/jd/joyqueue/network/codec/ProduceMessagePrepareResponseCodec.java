@@ -13,11 +13,11 @@
  */
 package com.jd.joyqueue.network.codec;
 
-import com.jd.joyqueue.exception.JournalqCode;
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.exception.JoyQueueCode;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.command.ProduceMessagePrepareResponse;
 import com.jd.joyqueue.network.serializer.Serializer;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.codec.PayloadCodec;
 import com.jd.joyqueue.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
@@ -28,13 +28,13 @@ import io.netty.buffer.ByteBuf;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/19
  */
-public class ProduceMessagePrepareResponseCodec implements PayloadCodec<JournalqHeader, ProduceMessagePrepareResponse>, Type {
+public class ProduceMessagePrepareResponseCodec implements PayloadCodec<JoyQueueHeader, ProduceMessagePrepareResponse>, Type {
 
     @Override
-    public ProduceMessagePrepareResponse decode(JournalqHeader header, ByteBuf buffer) throws Exception {
+    public ProduceMessagePrepareResponse decode(JoyQueueHeader header, ByteBuf buffer) throws Exception {
         ProduceMessagePrepareResponse produceMessagePrepareResponse = new ProduceMessagePrepareResponse();
         produceMessagePrepareResponse.setTxId(Serializer.readString(buffer, Serializer.SHORT_SIZE));
-        produceMessagePrepareResponse.setCode(JournalqCode.valueOf(buffer.readInt()));
+        produceMessagePrepareResponse.setCode(JoyQueueCode.valueOf(buffer.readInt()));
         return produceMessagePrepareResponse;
     }
 
@@ -46,6 +46,6 @@ public class ProduceMessagePrepareResponseCodec implements PayloadCodec<Journalq
 
     @Override
     public int type() {
-        return JournalqCommandType.PRODUCE_MESSAGE_PREPARE_RESPONSE.getCode();
+        return JoyQueueCommandType.PRODUCE_MESSAGE_PREPARE_RESPONSE.getCode();
     }
 }

@@ -14,10 +14,10 @@
 package com.jd.joyqueue.network.codec;
 
 import com.google.common.collect.Lists;
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.command.RemoveConsumerRequest;
 import com.jd.joyqueue.network.serializer.Serializer;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.codec.PayloadCodec;
 import com.jd.joyqueue.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
@@ -31,10 +31,10 @@ import java.util.List;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/10
  */
-public class RemoveConsumerRequestCodec implements PayloadCodec<JournalqHeader, RemoveConsumerRequest>, Type {
+public class RemoveConsumerRequestCodec implements PayloadCodec<JoyQueueHeader, RemoveConsumerRequest>, Type {
 
     @Override
-    public RemoveConsumerRequest decode(JournalqHeader header, ByteBuf buffer) throws Exception {
+    public RemoveConsumerRequest decode(JoyQueueHeader header, ByteBuf buffer) throws Exception {
         RemoveConsumerRequest removeConsumerRequest = new RemoveConsumerRequest();
 
         short topicSize = buffer.readShort();
@@ -59,6 +59,6 @@ public class RemoveConsumerRequestCodec implements PayloadCodec<JournalqHeader, 
 
     @Override
     public int type() {
-        return JournalqCommandType.REMOVE_CONSUMER_REQUEST.getCode();
+        return JoyQueueCommandType.REMOVE_CONSUMER_REQUEST.getCode();
     }
 }

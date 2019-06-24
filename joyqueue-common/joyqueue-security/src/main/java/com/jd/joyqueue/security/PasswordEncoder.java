@@ -13,12 +13,12 @@
  */
 package com.jd.joyqueue.security;
 
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueException;
 
 /**
  * @author majun8
  */
 public interface PasswordEncoder {
 
-    String encode(String password) throws JournalqException;
+    String encode(String password) throws JoyQueueException;
 }

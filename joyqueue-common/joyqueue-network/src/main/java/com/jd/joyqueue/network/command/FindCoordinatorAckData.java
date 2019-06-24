@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.network.command;
 
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.network.domain.BrokerNode;
 
 /**
@@ -25,17 +25,17 @@ import com.jd.joyqueue.network.domain.BrokerNode;
 public class FindCoordinatorAckData {
 
     private BrokerNode node;
-    private JournalqCode code;
+    private JoyQueueCode code;
 
     public FindCoordinatorAckData() {
 
     }
 
-    public FindCoordinatorAckData(JournalqCode code) {
+    public FindCoordinatorAckData(JoyQueueCode code) {
         this.code = code;
     }
 
-    public FindCoordinatorAckData(BrokerNode node, JournalqCode code) {
+    public FindCoordinatorAckData(BrokerNode node, JoyQueueCode code) {
         this.node = node;
         this.code = code;
     }
@@ -48,11 +48,11 @@ public class FindCoordinatorAckData {
         this.node = node;
     }
 
-    public JournalqCode getCode() {
+    public JoyQueueCode getCode() {
         return code;
     }
 
-    public void setCode(JournalqCode code) {
+    public void setCode(JoyQueueCode code) {
         this.code = code;
     }
 }

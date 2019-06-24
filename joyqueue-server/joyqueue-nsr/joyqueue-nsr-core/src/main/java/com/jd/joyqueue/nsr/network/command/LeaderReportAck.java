@@ -13,13 +13,13 @@
  */
 package com.jd.joyqueue.nsr.network.command;
 
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 /**
  * @author wylixiaobin
  * Date: 2019/2/17
  */
-public class LeaderReportAck extends JournalqPayload {
+public class LeaderReportAck extends JoyQueuePayload {
     @Override
     public int type() {
         return NsrCommandType.LEADER_REPORT_ACK;

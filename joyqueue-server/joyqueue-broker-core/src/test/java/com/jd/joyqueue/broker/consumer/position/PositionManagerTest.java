@@ -61,14 +61,14 @@ public class PositionManagerTest {
 //
 //
 //    @Test
-//    public void getLastMsgAckIndex() throws JournalqException {
+//    public void getLastMsgAckIndex() throws JoyQueueException {
 //        addConsumer();
 //        long lastMsgAckIndex = positionManager.getLastMsgAckIndex(new TopicName("topic"), "app", partition);
 //        Assert.assertEquals(0, lastMsgAckIndex);
 //    }
 //
 //    @Test
-//    public void updateLastMsgAckIndex() throws JournalqException {
+//    public void updateLastMsgAckIndex() throws JoyQueueException {
 //        addConsumer();
 //        boolean b = positionManager.updateLastMsgAckIndex(topic, app, partition, 10);
 //        Assert.assertEquals(true, b);
@@ -78,7 +78,7 @@ public class PositionManagerTest {
 //    }
 //
 //    @Test
-//    public void updateStartMsgAckIndex() throws JournalqException {
+//    public void updateStartMsgAckIndex() throws JoyQueueException {
 //        addConsumer();
 //        boolean b = positionManager.updateStartMsgAckIndex(topic, app, partition, 10);
 //        Assert.assertEquals(true, b);
@@ -88,14 +88,14 @@ public class PositionManagerTest {
 //    }
 //
 //    @Test
-//    public void getLastMsgPullIndex() throws JournalqException {
+//    public void getLastMsgPullIndex() throws JoyQueueException {
 //        addConsumer();
 //        long lastMsgAckIndex = positionManager.getLastMsgAckIndex(topic, app, partition);
 //        Assert.assertEquals(0, lastMsgAckIndex);
 //    }
 //
 //    @Test
-//    public void updateLastMsgPullIndex() throws JournalqException {
+//    public void updateLastMsgPullIndex() throws JoyQueueException {
 //        addConsumer();
 //        boolean b = positionManager.updateLastMsgPullIndex(topic, app, partition, 10);
 //        Assert.assertEquals(true, b);
@@ -105,7 +105,7 @@ public class PositionManagerTest {
 //    }
 //
 //    @Test
-//    public void increaseMsgPullIndex() throws JournalqException {
+//    public void increaseMsgPullIndex() throws JoyQueueException {
 //        addConsumer();
 //        boolean b = positionManager.increaseMsgPullIndex(topic, app, partition, 10);
 //        Assert.assertEquals(true, b);

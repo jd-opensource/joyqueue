@@ -19,7 +19,7 @@ import com.jd.joyqueue.broker.BrokerContext;
 import com.jd.joyqueue.broker.BrokerContextAware;
 import com.jd.joyqueue.broker.config.BrokerConfig;
 import com.jd.joyqueue.broker.helper.SessionHelper;
-import com.jd.joyqueue.broker.protocol.JournalqCommandHandler;
+import com.jd.joyqueue.broker.protocol.JoyQueueCommandHandler;
 import com.jd.joyqueue.broker.protocol.converter.BrokerNodeConverter;
 import com.jd.joyqueue.broker.protocol.converter.PolicyConverter;
 import com.jd.joyqueue.domain.Broker;
@@ -30,11 +30,11 @@ import com.jd.joyqueue.domain.Producer;
 import com.jd.joyqueue.domain.TopicConfig;
 import com.jd.joyqueue.domain.TopicName;
 import com.jd.joyqueue.domain.TopicType;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.network.command.BooleanAck;
 import com.jd.joyqueue.network.command.FetchClusterRequest;
 import com.jd.joyqueue.network.command.FetchClusterResponse;
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.command.Topic;
 import com.jd.joyqueue.network.command.TopicPartition;
 import com.jd.joyqueue.network.command.TopicPartitionGroup;
@@ -56,7 +56,7 @@ import java.util.Map;
  * email: gaohaoxiang@jd.com
  * date: 2018/11/30
  */
-public class FetchClusterRequestHandler implements JournalqCommandHandler, Type, BrokerContextAware {
+public class FetchClusterRequestHandler implements JoyQueueCommandHandler, Type, BrokerContextAware {
 
     protected static final Logger logger = LoggerFactory.getLogger(FetchClusterRequestHandler.class);
 
@@ -78,7 +78,7 @@ public class FetchClusterRequestHandler implements JournalqCommandHandler, Type,
 
         if (connection == null || !connection.isAuthorized(fetchClusterRequest.getApp())) {
             logger.warn("connection is not exists, transport: {}, app: {}", transport, fetchClusterRequest.getApp());
-            return BooleanAck.build(JournalqCode.FW_CONNECTION_NOT_EXISTS.getCode());
+            return BooleanAck.build(JoyQueueCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
         Map<String, Topic> topics = Maps.newHashMapWithExpectedSize(fetchClusterRequest.getTopics().size());
@@ -110,7 +110,7 @@ public class FetchClusterRequestHandler implements JournalqCommandHandler, Type,
 
         if (topicConfig == null) {
             logger.warn("topic not exist, topic: {}, app: {}", topic, app);
-            result.setCode(JournalqCode.FW_TOPIC_NOT_EXIST);
+            result.setCode(JoyQueueCode.FW_TOPIC_NOT_EXIST);
             return result;
         }
 
@@ -119,7 +119,7 @@ public class FetchClusterRequestHandler implements JournalqCommandHandler, Type,
 
         if (producer == null && consumer == null) {
             logger.warn("topic policy not exist, topic: {}, app: {}", topic, app);
-            result.setCode(JournalqCode.CN_NO_PERMISSION);
+            result.setCode(JoyQueueCode.CN_NO_PERMISSION);
             return result;
         }
 
@@ -140,7 +140,7 @@ public class FetchClusterRequestHandler implements JournalqCommandHandler, Type,
             result.setType(consumer.getTopicType());
         }
 
-        result.setCode(JournalqCode.SUCCESS);
+        result.setCode(JoyQueueCode.SUCCESS);
         result.setPartitionGroups(convertTopicPartitionGroups(connection, topicConfig.getPartitionGroups().values(), brokers));
         return result;
     }
@@ -184,6 +184,6 @@ public class FetchClusterRequestHandler implements JournalqCommandHandler, Type,
 
     @Override
     public int type() {
-        return JournalqCommandType.FETCH_CLUSTER_REQUEST.getCode();
+        return JoyQueueCommandType.FETCH_CLUSTER_REQUEST.getCode();
     }
 }

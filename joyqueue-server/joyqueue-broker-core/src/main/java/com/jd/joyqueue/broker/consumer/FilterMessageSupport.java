@@ -23,8 +23,8 @@ import com.jd.joyqueue.domain.TopicName;
 import com.jd.joyqueue.event.ConsumerEvent;
 import com.jd.joyqueue.event.EventType;
 import com.jd.joyqueue.event.MetaEvent;
-import com.jd.joyqueue.exception.JournalqCode;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueCode;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.toolkit.concurrent.EventListener;
 import com.jd.joyqueue.toolkit.security.Hex;
 import com.jd.joyqueue.toolkit.security.Md5;
@@ -69,9 +69,9 @@ class FilterMessageSupport {
      * @param byteBuffers    消息缓存集合
      * @param filterCallback 过滤回调函数，用于处理被过滤消息的应答问题
      * @return
-     * @throws JournalqException
+     * @throws JoyQueueException
      */
-    public List<ByteBuffer> filter(Consumer consumer, List<ByteBuffer> byteBuffers, FilterCallback filterCallback) throws JournalqException {
+    public List<ByteBuffer> filter(Consumer consumer, List<ByteBuffer> byteBuffers, FilterCallback filterCallback) throws JoyQueueException {
         FilterPipeline<MessageFilter> filterPipeline = filterRuleCache.get(consumer.getId());
         if (filterPipeline == null) {
             filterPipeline = createFilterPipeline(consumer.getConsumerPolicy());
@@ -86,9 +86,9 @@ class FilterMessageSupport {
      *
      * @param consumerPolicy 用户消费策略
      * @return 消息过滤管道
-     * @throws JournalqException
+     * @throws JoyQueueException
      */
-    private FilterPipeline<MessageFilter> createFilterPipeline(Consumer.ConsumerPolicy consumerPolicy) throws JournalqException {
+    private FilterPipeline<MessageFilter> createFilterPipeline(Consumer.ConsumerPolicy consumerPolicy) throws JoyQueueException {
         Map<String, String> filterRule = consumerPolicy.getFilters();
         String pipelineId = generatePipelineId(filterRule);
         FilterPipeline<MessageFilter> filterPipeline = new FilterPipeline<>(pipelineId);
@@ -112,9 +112,9 @@ class FilterMessageSupport {
      *
      * @param filterRule 过滤规则
      * @return 管道编号
-     * @throws JournalqException
+     * @throws JoyQueueException
      */
-    private String generatePipelineId(Map<String, String> filterRule) throws JournalqException {
+    private String generatePipelineId(Map<String, String> filterRule) throws JoyQueueException {
         if (MapUtils.isEmpty(filterRule)) {
             return null;
         }
@@ -124,7 +124,7 @@ class FilterMessageSupport {
             return Hex.encode(encrypt);
         } catch (Exception e) {
             logger.error("generate filter pipeline error.", e);
-            throw new JournalqException(e, JournalqCode.CN_UNKNOWN_ERROR.getCode());
+            throw new JoyQueueException(e, JoyQueueCode.CN_UNKNOWN_ERROR.getCode());
         }
     }
 

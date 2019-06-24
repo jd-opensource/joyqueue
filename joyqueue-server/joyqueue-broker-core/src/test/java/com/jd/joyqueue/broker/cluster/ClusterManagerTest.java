@@ -174,7 +174,7 @@ public class ClusterManagerTest {
 //    }
 //
 //    @Test
-//    public void getConsumerPolicy() throws JournalqException {
+//    public void getConsumerPolicy() throws JoyQueueException {
 //        String app = "journalq";
 //        String ip = IpUtil.getLocalIp();
 //        TopicName topic = TopicName.parse("journalq@Test");
@@ -185,7 +185,7 @@ public class ClusterManagerTest {
 //    }
 //
 //    @Test
-//    public void isNeedNearby() throws JournalqException {
+//    public void isNeedNearby() throws JoyQueueException {
 //        String app = "journalq";
 //        String ip = IpUtil.getLocalIp();
 //        TopicName topic = TopicName.parse("journalq@Test");
@@ -196,7 +196,7 @@ public class ClusterManagerTest {
 //    }
 //
 //    @Test
-//    public void getAckTimeout() throws JournalqException {
+//    public void getAckTimeout() throws JoyQueueException {
 //        String app = "journalq";
 //        String ip = IpUtil.getLocalIp();
 //        TopicName topic = TopicName.parse("journalq@Test");
@@ -211,7 +211,7 @@ public class ClusterManagerTest {
 //    }
 //
 //    @Test
-//    public void checkWritable() throws JournalqException {
+//    public void checkWritable() throws JoyQueueException {
 //        String app = "journalq";
 //        String ip = clusterManager.getBroker().getIp();
 //        TopicName topic = TopicName.parse("journalq@Test");

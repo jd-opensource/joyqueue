@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.network.command;
 
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 /**
  * FetchHealthResponse
@@ -21,7 +21,7 @@ import com.jd.joyqueue.network.transport.command.JournalqPayload;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/28
  */
-public class FetchHealthResponse extends JournalqPayload {
+public class FetchHealthResponse extends JoyQueuePayload {
 
     private double point;
 
@@ -35,7 +35,7 @@ public class FetchHealthResponse extends JournalqPayload {
 
     @Override
     public int type() {
-        return JournalqCommandType.FETCH_HEALTH_RESPONSE.getCode();
+        return JoyQueueCommandType.FETCH_HEALTH_RESPONSE.getCode();
     }
 
     public void setPoint(double point) {

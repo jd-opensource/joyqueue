@@ -15,7 +15,7 @@ package com.jd.joyqueue.nsr.network.command;
 
 import com.jd.joyqueue.domain.TopicConfig;
 import com.jd.joyqueue.domain.TopicName;
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 import java.util.Map;
 
@@ -23,7 +23,7 @@ import java.util.Map;
  * @author wylixiaobin
  * Date: 2019/1/27
  */
-public class GetTopicConfigByAppAck extends JournalqPayload {
+public class GetTopicConfigByAppAck extends JoyQueuePayload {
     private Map<TopicName, TopicConfig> topicConfigs;
 
     public GetTopicConfigByAppAck topicConfigs(Map<TopicName, TopicConfig> topicConfigs){

@@ -13,8 +13,8 @@
  */
 package com.jd.joyqueue.network.command;
 
-import com.jd.joyqueue.exception.JournalqCode;
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.exception.JoyQueueCode;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 /**
  * ProduceMessageCommitResponse
@@ -22,28 +22,28 @@ import com.jd.joyqueue.network.transport.command.JournalqPayload;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/18
  */
-public class ProduceMessageCommitResponse extends JournalqPayload {
+public class ProduceMessageCommitResponse extends JoyQueuePayload {
 
-    private JournalqCode code;
+    private JoyQueueCode code;
 
     public ProduceMessageCommitResponse() {
 
     }
 
-    public ProduceMessageCommitResponse(JournalqCode code) {
+    public ProduceMessageCommitResponse(JoyQueueCode code) {
         this.code = code;
     }
 
     @Override
     public int type() {
-        return JournalqCommandType.PRODUCE_MESSAGE_COMMIT_RESPONSE.getCode();
+        return JoyQueueCommandType.PRODUCE_MESSAGE_COMMIT_RESPONSE.getCode();
     }
 
-    public void setCode(JournalqCode code) {
+    public void setCode(JoyQueueCode code) {
         this.code = code;
     }
 
-    public JournalqCode getCode() {
+    public JoyQueueCode getCode() {
         return code;
     }
 }

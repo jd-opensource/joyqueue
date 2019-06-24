@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.security;
 
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.response.BooleanResponse;
 
 /**
@@ -22,7 +22,7 @@ import com.jd.joyqueue.response.BooleanResponse;
 public interface Authentication {
 
     @Deprecated
-    UserDetails getUser(String user) throws JournalqException;
+    UserDetails getUser(String user) throws JoyQueueException;
 
     @Deprecated
     PasswordEncoder getPasswordEncode();

@@ -14,7 +14,7 @@
 package com.jd.joyqueue.server.retry.api;
 
 import com.jd.joyqueue.domain.TopicName;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.toolkit.retry.RetryPolicy;
 
 /**
@@ -30,7 +30,7 @@ public interface RetryPolicyProvider {
      * @param topic 主题
      * @param app 应用
      * @return
-     * @throws JournalqException
+     * @throws JoyQueueException
      */
-    RetryPolicy getPolicy(TopicName topic, String app) throws JournalqException;
+    RetryPolicy getPolicy(TopicName topic, String app) throws JoyQueueException;
 }

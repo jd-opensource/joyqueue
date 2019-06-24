@@ -21,7 +21,7 @@ import com.jd.joyqueue.broker.election.ElectionService;
 import com.jd.joyqueue.domain.Broker;
 import com.jd.joyqueue.domain.PartitionGroup;
 import com.jd.joyqueue.domain.TopicName;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.network.command.BooleanAck;
 import com.jd.joyqueue.network.transport.Transport;
 import com.jd.joyqueue.network.transport.command.Command;
@@ -86,7 +86,7 @@ public class UpdatePartitionGroupHandler implements CommandHandler, Type {
             return BooleanAck.build();
         } catch (Exception e) {
             logger.error(String.format("UpdatePartitionGroupHandler request command[%s] error", command.getPayload()), e);
-            return BooleanAck.build(JournalqCode.CN_UNKNOWN_ERROR, e.getMessage());
+            return BooleanAck.build(JoyQueueCode.CN_UNKNOWN_ERROR, e.getMessage());
         }
     }
 

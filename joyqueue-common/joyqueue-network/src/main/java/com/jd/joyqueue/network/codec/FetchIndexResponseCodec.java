@@ -15,12 +15,12 @@ package com.jd.joyqueue.network.codec;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.network.command.FetchIndexAckData;
 import com.jd.joyqueue.network.command.FetchIndexResponse;
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.serializer.Serializer;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.codec.PayloadCodec;
 import com.jd.joyqueue.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
@@ -33,10 +33,10 @@ import java.util.Map;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/13
  */
-public class FetchIndexResponseCodec implements PayloadCodec<JournalqHeader, FetchIndexResponse>, Type {
+public class FetchIndexResponseCodec implements PayloadCodec<JoyQueueHeader, FetchIndexResponse>, Type {
 
     @Override
-    public FetchIndexResponse decode(JournalqHeader header, ByteBuf buffer) throws Exception {
+    public FetchIndexResponse decode(JoyQueueHeader header, ByteBuf buffer) throws Exception {
         Table<String, Short, FetchIndexAckData> result = HashBasedTable.create();
         short topicSize = buffer.readShort();
         for (int i = 0; i < topicSize; i++) {
@@ -45,7 +45,7 @@ public class FetchIndexResponseCodec implements PayloadCodec<JournalqHeader, Fet
             for (int j = 0; j < partitionSize; j++) {
                 short partition = buffer.readShort();
                 long index = buffer.readLong();
-                JournalqCode code = JournalqCode.valueOf(buffer.readInt());
+                JoyQueueCode code = JoyQueueCode.valueOf(buffer.readInt());
                 FetchIndexAckData fetchIndexAckData = new FetchIndexAckData(index, code);
                 result.put(topic, partition, fetchIndexAckData);
             }
@@ -73,6 +73,6 @@ public class FetchIndexResponseCodec implements PayloadCodec<JournalqHeader, Fet
 
     @Override
     public int type() {
-        return JournalqCommandType.FETCH_INDEX_RESPONSE.getCode();
+        return JoyQueueCommandType.FETCH_INDEX_RESPONSE.getCode();
     }
 }

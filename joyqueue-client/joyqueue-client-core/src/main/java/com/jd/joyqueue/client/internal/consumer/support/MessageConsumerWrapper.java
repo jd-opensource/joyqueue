@@ -26,7 +26,7 @@ import com.jd.joyqueue.client.internal.consumer.interceptor.ConsumerInterceptor;
 import com.jd.joyqueue.client.internal.consumer.transport.ConsumerClientManager;
 import com.jd.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import com.jd.joyqueue.client.internal.nameserver.NameServerConfig;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.toolkit.service.Service;
 
 import java.util.List;
@@ -231,12 +231,12 @@ public class MessageConsumerWrapper extends Service implements MessageConsumer {
     }
 
     @Override
-    public JournalqCode reply(List<ConsumeReply> replyList) {
+    public JoyQueueCode reply(List<ConsumeReply> replyList) {
         return delegate.reply(replyList);
     }
 
     @Override
-    public JournalqCode replyOnce(ConsumeReply reply) {
+    public JoyQueueCode replyOnce(ConsumeReply reply) {
         return delegate.replyOnce(reply);
     }
 

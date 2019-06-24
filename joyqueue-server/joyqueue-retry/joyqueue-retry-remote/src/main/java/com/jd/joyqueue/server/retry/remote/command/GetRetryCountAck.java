@@ -14,12 +14,12 @@
 package com.jd.joyqueue.server.retry.remote.command;
 
 import com.jd.joyqueue.network.command.CommandType;
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 /**
  * 获取重试条数应答
  */
-public class GetRetryCountAck extends JournalqPayload {
+public class GetRetryCountAck extends JoyQueuePayload {
     // 主题
     private String topic;
     // 应用

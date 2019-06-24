@@ -28,7 +28,7 @@ import com.jd.joyqueue.broker.election.command.TimeoutNowResponse;
 import com.jd.joyqueue.broker.monitor.BrokerMonitor;
 import com.jd.joyqueue.domain.TopicName;
 import com.jd.joyqueue.network.command.CommandType;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.command.Command;
 import com.jd.joyqueue.network.transport.command.CommandCallback;
 import com.jd.joyqueue.network.transport.command.Direction;
@@ -368,7 +368,7 @@ public class ReplicaGroup extends Service {
                         return;
                     }
 
-                    JournalqHeader header = new JournalqHeader(Direction.REQUEST, CommandType.RAFT_APPEND_ENTRIES_REQUEST);
+                    JoyQueueHeader header = new JoyQueueHeader(Direction.REQUEST, CommandType.RAFT_APPEND_ENTRIES_REQUEST);
 
                     if (!replica.isMatch() || logger.isDebugEnabled()) {
                         logger.info("Partition group {}/node {} send append entries request {} to node {}, " +
@@ -586,7 +586,7 @@ public class ReplicaGroup extends Service {
                     }
 
                     ReplicateConsumePosRequest request = new ReplicateConsumePosRequest(consumePositions);
-                    JournalqHeader header = new JournalqHeader(Direction.REQUEST, CommandType.REPLICATE_CONSUME_POS_REQUEST);
+                    JoyQueueHeader header = new JoyQueueHeader(Direction.REQUEST, CommandType.REPLICATE_CONSUME_POS_REQUEST);
 
                     if (logger.isDebugEnabled() || electionConfig.getOutputConsumePos()) {
                         logger.info("Partition group {}/node {} send consume position {} to node {}",
@@ -730,7 +730,7 @@ public class ReplicaGroup extends Service {
                 .replicaId(localReplicaId).success(success).entriesTerm(request.getEntriesTerm())
                 .build();
 
-        return new Command(new JournalqHeader(Direction.RESPONSE, CommandType.RAFT_APPEND_ENTRIES_RESPONSE), response);
+        return new Command(new JoyQueueHeader(Direction.RESPONSE, CommandType.RAFT_APPEND_ENTRIES_RESPONSE), response);
     }
 
     /**
@@ -888,7 +888,7 @@ public class ReplicaGroup extends Service {
                 topicPartitionGroup, localReplicaId, transferee);
 
         TimeoutNowRequest request = new TimeoutNowRequest(topicPartitionGroup, currentTerm);
-        JournalqHeader header = new JournalqHeader(Direction.REQUEST, CommandType.RAFT_TIMEOUT_NOW_REQUEST);
+        JoyQueueHeader header = new JoyQueueHeader(Direction.REQUEST, CommandType.RAFT_TIMEOUT_NOW_REQUEST);
 
         replicationManager.sendCommand(getReplica(transferee).getAddress(), new Command(header, request),
                 electionConfig.getSendCommandTimeout(), new TimeoutNowRequestCallback());

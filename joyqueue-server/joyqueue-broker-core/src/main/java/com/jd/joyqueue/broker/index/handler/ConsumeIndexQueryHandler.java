@@ -19,11 +19,11 @@ import com.jd.joyqueue.broker.index.command.ConsumeIndexQueryRequest;
 import com.jd.joyqueue.broker.index.command.ConsumeIndexQueryResponse;
 import com.jd.joyqueue.broker.index.model.IndexMetadataAndError;
 import com.jd.joyqueue.domain.QosLevel;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.network.command.CommandType;
 import com.jd.joyqueue.network.session.Consumer;
 import com.jd.joyqueue.network.transport.Transport;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.command.Command;
 import com.jd.joyqueue.network.transport.command.Direction;
 import com.jd.joyqueue.network.transport.command.Type;
@@ -59,13 +59,13 @@ public class ConsumeIndexQueryHandler implements CommandHandler, Type {
             Map<Integer, IndexMetadataAndError> partitionIndexes = new HashedMap();
             for (int partition : partitions) {
                 long index = getConsumerIndex(topic, (short)partition, app);
-                IndexMetadataAndError indexMetadataAndError = new IndexMetadataAndError(index, "", (short)JournalqCode.SUCCESS.getCode());
+                IndexMetadataAndError indexMetadataAndError = new IndexMetadataAndError(index, "", (short) JoyQueueCode.SUCCESS.getCode());
                 partitionIndexes.put(partition, indexMetadataAndError);
             }
             topicPartitionIndex.put(topic, partitionIndexes);
         }
         ConsumeIndexQueryResponse response = new ConsumeIndexQueryResponse(topicPartitionIndex);
-        JournalqHeader header = new JournalqHeader(Direction.RESPONSE, QosLevel.ONE_WAY, CommandType.CONSUME_INDEX_QUERY_RESPONSE);
+        JoyQueueHeader header = new JoyQueueHeader(Direction.RESPONSE, QosLevel.ONE_WAY, CommandType.CONSUME_INDEX_QUERY_RESPONSE);
         return new Command(header, response);
     }
 

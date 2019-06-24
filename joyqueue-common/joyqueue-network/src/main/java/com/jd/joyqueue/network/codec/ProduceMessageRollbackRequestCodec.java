@@ -13,10 +13,10 @@
  */
 package com.jd.joyqueue.network.codec;
 
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.command.ProduceMessageRollbackRequest;
 import com.jd.joyqueue.network.serializer.Serializer;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.codec.PayloadCodec;
 import com.jd.joyqueue.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
@@ -27,10 +27,10 @@ import io.netty.buffer.ByteBuf;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/19
  */
-public class ProduceMessageRollbackRequestCodec implements PayloadCodec<JournalqHeader, ProduceMessageRollbackRequest>, Type {
+public class ProduceMessageRollbackRequestCodec implements PayloadCodec<JoyQueueHeader, ProduceMessageRollbackRequest>, Type {
 
     @Override
-    public ProduceMessageRollbackRequest decode(JournalqHeader header, ByteBuf buffer) throws Exception {
+    public ProduceMessageRollbackRequest decode(JoyQueueHeader header, ByteBuf buffer) throws Exception {
         ProduceMessageRollbackRequest produceMessageRollbackRequest = new ProduceMessageRollbackRequest();
         produceMessageRollbackRequest.setTopic(Serializer.readString(buffer, Serializer.SHORT_SIZE));
         produceMessageRollbackRequest.setApp(Serializer.readString(buffer, Serializer.SHORT_SIZE));
@@ -47,6 +47,6 @@ public class ProduceMessageRollbackRequestCodec implements PayloadCodec<Journalq
 
     @Override
     public int type() {
-        return JournalqCommandType.PRODUCE_MESSAGE_ROLLBACK_REQUEST.getCode();
+        return JoyQueueCommandType.PRODUCE_MESSAGE_ROLLBACK_REQUEST.getCode();
     }
 }

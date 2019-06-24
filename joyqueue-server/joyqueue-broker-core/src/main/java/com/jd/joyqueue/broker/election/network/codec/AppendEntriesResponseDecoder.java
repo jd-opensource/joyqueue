@@ -14,7 +14,7 @@
 package com.jd.joyqueue.broker.election.network.codec;
 
 import com.jd.joyqueue.broker.election.command.AppendEntriesResponse;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.codec.PayloadDecoder;
 import com.jd.joyqueue.network.command.CommandType;
 import com.jd.joyqueue.network.transport.command.Type;
@@ -25,9 +25,9 @@ import io.netty.buffer.ByteBuf;
  * email: zhuduohui@jd.com
  * date: 2018/9/27
  */
-public class AppendEntriesResponseDecoder implements PayloadDecoder<JournalqHeader>, Type {
+public class AppendEntriesResponseDecoder implements PayloadDecoder<JoyQueueHeader>, Type {
     @Override
-    public Object decode(final JournalqHeader header, final ByteBuf buffer) throws Exception {
+    public Object decode(final JoyQueueHeader header, final ByteBuf buffer) throws Exception {
         AppendEntriesResponse appendEntriesResponse = new AppendEntriesResponse();
 
         appendEntriesResponse.setTerm(buffer.readInt());

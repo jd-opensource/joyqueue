@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.server.retry;
 
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.server.retry.api.MessageRetry;
 import com.jd.joyqueue.server.retry.api.RetryPolicyProvider;
 import com.jd.joyqueue.server.retry.model.RetryMessageModel;
@@ -40,32 +40,32 @@ public class NullMessageRetry implements MessageRetry<Long> {
     }
 
     @Override
-    public void addRetry(List<RetryMessageModel> retryMessageModelList) throws JournalqException {
+    public void addRetry(List<RetryMessageModel> retryMessageModelList) throws JoyQueueException {
 
     }
 
     @Override
-    public void retrySuccess(String topic, String app, Long[] messageIds) throws JournalqException {
+    public void retrySuccess(String topic, String app, Long[] messageIds) throws JoyQueueException {
 
     }
 
     @Override
-    public void retryError(String topic, String app, Long[] messageIds) throws JournalqException {
+    public void retryError(String topic, String app, Long[] messageIds) throws JoyQueueException {
 
     }
 
     @Override
-    public void retryExpire(String topic, String app, Long[] messageIds) throws JournalqException {
+    public void retryExpire(String topic, String app, Long[] messageIds) throws JoyQueueException {
 
     }
 
     @Override
-    public List<RetryMessageModel> getRetry(String topic, String app, short count, long startIndex) throws JournalqException {
+    public List<RetryMessageModel> getRetry(String topic, String app, short count, long startIndex) throws JoyQueueException {
         return null;
     }
 
     @Override
-    public int countRetry(String topic, String app) throws JournalqException {
+    public int countRetry(String topic, String app) throws JoyQueueException {
         return 0;
     }
 

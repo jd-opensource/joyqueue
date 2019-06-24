@@ -14,7 +14,7 @@
 package com.jd.joyqueue.network.command;
 
 import com.google.common.collect.Table;
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 /**
  * FetchPartitionMessageRequest
@@ -22,7 +22,7 @@ import com.jd.joyqueue.network.transport.command.JournalqPayload;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/7
  */
-public class FetchPartitionMessageRequest extends JournalqPayload {
+public class FetchPartitionMessageRequest extends JoyQueuePayload {
 
     public static final long NONE_INDEX = -1;
 
@@ -31,7 +31,7 @@ public class FetchPartitionMessageRequest extends JournalqPayload {
 
     @Override
     public int type() {
-        return JournalqCommandType.FETCH_PARTITION_MESSAGE_REQUEST.getCode();
+        return JoyQueueCommandType.FETCH_PARTITION_MESSAGE_REQUEST.getCode();
     }
 
     public void setPartitions(Table<String, Short, FetchPartitionMessageData> partitions) {

@@ -14,7 +14,7 @@
 package com.jd.joyqueue.broker.index.network.codec;
 
 import com.jd.joyqueue.broker.index.command.ConsumeIndexStoreResponse;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.codec.PayloadDecoder;
 import com.jd.joyqueue.network.command.CommandType;
 import com.jd.joyqueue.network.serializer.Serializer;
@@ -28,10 +28,10 @@ import java.util.Map;
 /**
  * Created by zhuduohui on 2018/9/7.
  */
-public class IndexStoreResponseDecoder implements PayloadDecoder<JournalqHeader>, Type {
+public class IndexStoreResponseDecoder implements PayloadDecoder<JoyQueueHeader>, Type {
 
     @Override
-    public Object decode(final JournalqHeader header, final ByteBuf buffer) throws Exception {
+    public Object decode(final JoyQueueHeader header, final ByteBuf buffer) throws Exception {
         Map<String, Map<Integer, Short>> indexStoreStatus = new HashedMap();
         int topics = buffer.readInt();
         for (int i = 0; i < topics; i++) {

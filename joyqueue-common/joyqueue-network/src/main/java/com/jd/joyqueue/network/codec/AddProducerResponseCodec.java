@@ -15,9 +15,9 @@ package com.jd.joyqueue.network.codec;
 
 import com.google.common.collect.Maps;
 import com.jd.joyqueue.network.command.AddProducerResponse;
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.serializer.Serializer;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.codec.PayloadCodec;
 import com.jd.joyqueue.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
@@ -30,10 +30,10 @@ import java.util.Map;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/10
  */
-public class AddProducerResponseCodec implements PayloadCodec<JournalqHeader, AddProducerResponse>, Type {
+public class AddProducerResponseCodec implements PayloadCodec<JoyQueueHeader, AddProducerResponse>, Type {
 
     @Override
-    public AddProducerResponse decode(JournalqHeader header, ByteBuf buffer) throws Exception {
+    public AddProducerResponse decode(JoyQueueHeader header, ByteBuf buffer) throws Exception {
         Map<String, String> result = Maps.newHashMap();
         short producerSize = buffer.readShort();
         for (int i = 0; i < producerSize; i++) {
@@ -58,6 +58,6 @@ public class AddProducerResponseCodec implements PayloadCodec<JournalqHeader, Ad
 
     @Override
     public int type() {
-        return JournalqCommandType.ADD_PRODUCER_RESPONSE.getCode();
+        return JoyQueueCommandType.ADD_PRODUCER_RESPONSE.getCode();
     }
 }

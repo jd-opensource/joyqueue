@@ -15,13 +15,13 @@ package com.jd.joyqueue.broker.protocol.handler.mqtt;
 
 import com.jd.joyqueue.broker.BrokerContext;
 import com.jd.joyqueue.broker.BrokerContextAware;
-import com.jd.joyqueue.broker.protocol.JournalqCommandHandler;
+import com.jd.joyqueue.broker.protocol.JoyQueueCommandHandler;
 import com.jd.joyqueue.domain.Subscription;
 import com.jd.joyqueue.network.command.GetTopics;
 import com.jd.joyqueue.network.command.GetTopicsAck;
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.transport.Transport;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.command.Command;
 import com.jd.joyqueue.network.transport.command.Direction;
 import com.jd.joyqueue.network.transport.command.Type;
@@ -36,11 +36,11 @@ import java.util.Set;
  * @author wylixiaobin
  * Date: 2018/10/19
  */
-public class GetTopicsHandler implements JournalqCommandHandler, Type, BrokerContextAware {
+public class GetTopicsHandler implements JoyQueueCommandHandler, Type, BrokerContextAware {
     private NameService nameService;
     @Override
     public int type() {
-        return JournalqCommandType.MQTT_GET_TOPICS.getCode();
+        return JoyQueueCommandType.MQTT_GET_TOPICS.getCode();
     }
 
     @Override
@@ -57,6 +57,6 @@ public class GetTopicsHandler implements JournalqCommandHandler, Type, BrokerCon
         }else {
             topics.addAll(nameService.getTopics(getTopics.getApp(), Subscription.Type.valueOf((byte)getTopics.getSubscribeType())));
         }
-        return new Command(new JournalqHeader(Direction.RESPONSE, JournalqCommandType.MQTT_GET_TOPICS_ACK.getCode()),new GetTopicsAck().topics(topics));
+        return new Command(new JoyQueueHeader(Direction.RESPONSE, JoyQueueCommandType.MQTT_GET_TOPICS_ACK.getCode()),new GetTopicsAck().topics(topics));
     }
 }

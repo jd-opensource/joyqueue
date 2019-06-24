@@ -14,7 +14,7 @@
 package com.jd.joyqueue.store;
 
 import com.jd.joyqueue.domain.QosLevel;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.store.utils.BaseDirUtils;
 import com.jd.joyqueue.store.utils.MessageUtils;
 import com.jd.joyqueue.toolkit.time.SystemClock;
@@ -83,7 +83,7 @@ public class StoreServiceTest {
             short partition = partitions[ThreadLocalRandom.current().nextInt(partitions.length)];
             Future<WriteResult> future = partitionGroupStore.asyncWrite(Arrays.stream(messages).map(b -> new WriteRequest(partition, b)).toArray(WriteRequest[]::new));
             WriteResult writeResult = future.get();
-            Assert.assertEquals(JournalqCode.SUCCESS, writeResult.getCode());
+            Assert.assertEquals(JoyQueueCode.SUCCESS, writeResult.getCode());
         }
         long t1 = SystemClock.now();
         long totalSize = count * batchSize * bodySize / 1024 / 1024;

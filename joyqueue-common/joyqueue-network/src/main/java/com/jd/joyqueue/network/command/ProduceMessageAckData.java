@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.network.command;
 
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 
 import java.util.List;
 
@@ -26,13 +26,13 @@ import java.util.List;
 public class ProduceMessageAckData {
 
     private List<ProduceMessageAckItemData> item;
-    private JournalqCode code;
+    private JoyQueueCode code;
 
     public ProduceMessageAckData() {
 
     }
 
-    public ProduceMessageAckData(List<ProduceMessageAckItemData> item, JournalqCode code) {
+    public ProduceMessageAckData(List<ProduceMessageAckItemData> item, JoyQueueCode code) {
         this.item = item;
         this.code = code;
     }
@@ -45,11 +45,11 @@ public class ProduceMessageAckData {
         return item;
     }
 
-    public void setCode(JournalqCode code) {
+    public void setCode(JoyQueueCode code) {
         this.code = code;
     }
 
-    public JournalqCode getCode() {
+    public JoyQueueCode getCode() {
         return code;
     }
 }

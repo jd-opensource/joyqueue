@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.broker.protocol.converter;
 
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,67 +27,67 @@ public class CheckResultConverter {
 
     protected static final Logger logger = LoggerFactory.getLogger(CheckResultConverter.class);
 
-    public static JournalqCode convertProduceCode(JournalqCode code) {
+    public static JoyQueueCode convertProduceCode(JoyQueueCode code) {
         switch (code) {
             case FW_TOPIC_NOT_EXIST: {
-                return JournalqCode.FW_TOPIC_NOT_EXIST;
+                return JoyQueueCode.FW_TOPIC_NOT_EXIST;
             }
             case FW_PRODUCE_MESSAGE_BROKER_NOT_LEADER:
             case FW_TOPIC_NO_PARTITIONGROUP: {
-                return JournalqCode.FW_PRODUCE_MESSAGE_BROKER_NOT_LEADER;
+                return JoyQueueCode.FW_PRODUCE_MESSAGE_BROKER_NOT_LEADER;
             }
             case FW_PUT_MESSAGE_TOPIC_NOT_WRITE: {
-                return JournalqCode.FW_PUT_MESSAGE_TOPIC_NOT_WRITE;
+                return JoyQueueCode.FW_PUT_MESSAGE_TOPIC_NOT_WRITE;
             }
             case FW_PRODUCER_NOT_EXISTS: {
-                return JournalqCode.CN_NO_PERMISSION;
+                return JoyQueueCode.CN_NO_PERMISSION;
             }
             default : {
                 logger.warn("unknown produce code {}", code);
-                return JournalqCode.CN_NO_PERMISSION;
+                return JoyQueueCode.CN_NO_PERMISSION;
             }
         }
     }
 
-    public static JournalqCode convertFetchCode(JournalqCode code) {
+    public static JoyQueueCode convertFetchCode(JoyQueueCode code) {
         switch (code) {
             case FW_TOPIC_NOT_EXIST: {
-                return JournalqCode.FW_TOPIC_NOT_EXIST;
+                return JoyQueueCode.FW_TOPIC_NOT_EXIST;
             }
             case FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER:
             case FW_TOPIC_NO_PARTITIONGROUP: {
-                return JournalqCode.FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER;
+                return JoyQueueCode.FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER;
             }
             case FW_GET_MESSAGE_APP_CLIENT_IP_NOT_READ: {
-                return JournalqCode.FW_GET_MESSAGE_TOPIC_NOT_READ;
+                return JoyQueueCode.FW_GET_MESSAGE_TOPIC_NOT_READ;
             }
             case FW_FETCH_TOPIC_MESSAGE_PAUSED: {
-                return JournalqCode.FW_FETCH_TOPIC_MESSAGE_PAUSED;
+                return JoyQueueCode.FW_FETCH_TOPIC_MESSAGE_PAUSED;
             }
             case FW_CONSUMER_NOT_EXISTS: {
-                return JournalqCode.FW_CONSUMER_NOT_EXISTS;
+                return JoyQueueCode.FW_CONSUMER_NOT_EXISTS;
             }
             default : {
                 logger.warn("unknown fetch code {}", code);
-                return JournalqCode.CN_NO_PERMISSION;
+                return JoyQueueCode.CN_NO_PERMISSION;
             }
         }
     }
 
-    public static JournalqCode convertCommonCode(JournalqCode code) {
+    public static JoyQueueCode convertCommonCode(JoyQueueCode code) {
         switch (code) {
             case FW_TOPIC_NO_PARTITIONGROUP:
             case FW_TOPIC_NOT_EXIST: {
-                return JournalqCode.CN_NO_PERMISSION;
+                return JoyQueueCode.CN_NO_PERMISSION;
             }
             case FW_PUT_MESSAGE_TOPIC_NOT_WRITE:
             case FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER:
             case FW_PRODUCE_MESSAGE_BROKER_NOT_LEADER: {
-                return JournalqCode.CN_NO_PERMISSION;
+                return JoyQueueCode.CN_NO_PERMISSION;
             }
             default : {
                 logger.warn("unknown common code {}", code);
-                return JournalqCode.CN_NO_PERMISSION;
+                return JoyQueueCode.CN_NO_PERMISSION;
             }
         }
     }

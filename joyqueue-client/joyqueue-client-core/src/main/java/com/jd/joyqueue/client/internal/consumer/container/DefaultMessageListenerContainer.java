@@ -25,7 +25,7 @@ import com.jd.joyqueue.client.internal.consumer.exception.ConsumerException;
 import com.jd.joyqueue.client.internal.consumer.support.TopicMessageConsumer;
 import com.jd.joyqueue.client.internal.consumer.transport.ConsumerClientManager;
 import com.jd.joyqueue.client.internal.nameserver.NameServerConfig;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.google.common.base.Preconditions;
 import com.jd.joyqueue.toolkit.service.Service;
 import org.apache.commons.lang3.StringUtils;
@@ -107,7 +107,7 @@ public class DefaultMessageListenerContainer extends Service implements MessageL
                     topicMessageConsumer.start();
                 } catch (Exception e) {
                     logger.error("start topic message consumer exception, topic : {}", topic, e);
-                    throw new ConsumerException("start message consumer exception", JournalqCode.CN_SERVICE_NOT_AVAILABLE.getCode());
+                    throw new ConsumerException("start message consumer exception", JoyQueueCode.CN_SERVICE_NOT_AVAILABLE.getCode());
                 }
             }
         }

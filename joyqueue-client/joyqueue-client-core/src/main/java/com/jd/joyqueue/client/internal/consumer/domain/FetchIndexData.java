@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.client.internal.consumer.domain;
 
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 
 /**
  * FetchIndexData
@@ -24,17 +24,17 @@ import com.jd.joyqueue.exception.JournalqCode;
 public class FetchIndexData {
 
     private long index;
-    private JournalqCode code;
+    private JoyQueueCode code;
 
     public FetchIndexData() {
 
     }
 
-    public FetchIndexData(JournalqCode code) {
+    public FetchIndexData(JoyQueueCode code) {
         this.code = code;
     }
 
-    public FetchIndexData(long index, JournalqCode code) {
+    public FetchIndexData(long index, JoyQueueCode code) {
         this.index = index;
         this.code = code;
     }
@@ -47,11 +47,11 @@ public class FetchIndexData {
         this.index = index;
     }
 
-    public JournalqCode getCode() {
+    public JoyQueueCode getCode() {
         return code;
     }
 
-    public void setCode(JournalqCode code) {
+    public void setCode(JoyQueueCode code) {
         this.code = code;
     }
 }

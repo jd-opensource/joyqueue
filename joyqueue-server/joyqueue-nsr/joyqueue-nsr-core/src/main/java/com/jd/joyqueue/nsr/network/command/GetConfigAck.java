@@ -13,13 +13,13 @@
  */
 package com.jd.joyqueue.nsr.network.command;
 
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 /**
  * @author wylixiaobin
  * Date: 2019/1/29
  */
-public class GetConfigAck extends JournalqPayload {
+public class GetConfigAck extends JoyQueuePayload {
     private String value;
     public GetConfigAck value(String value){
         this.value = value;

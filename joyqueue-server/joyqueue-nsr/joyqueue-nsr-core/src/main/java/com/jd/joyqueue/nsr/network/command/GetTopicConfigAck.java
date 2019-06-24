@@ -14,13 +14,13 @@
 package com.jd.joyqueue.nsr.network.command;
 
 import com.jd.joyqueue.domain.TopicConfig;
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 /**
  * @author wylixiaobin
  * Date: 2019/1/27
  */
-public class GetTopicConfigAck extends JournalqPayload {
+public class GetTopicConfigAck extends JoyQueuePayload {
     private TopicConfig topicConfig;
     public GetTopicConfigAck topicConfig(TopicConfig topicConfig){
         this.topicConfig = topicConfig;

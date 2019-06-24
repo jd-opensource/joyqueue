@@ -16,8 +16,8 @@ package com.jd.joyqueue.broker.producer.transaction.handler;
 import com.jd.joyqueue.broker.BrokerContext;
 import com.jd.joyqueue.broker.producer.Produce;
 import com.jd.joyqueue.broker.producer.transaction.command.TransactionCommitRequest;
-import com.jd.joyqueue.exception.JournalqCode;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueCode;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.message.BrokerCommit;
 import com.jd.joyqueue.network.command.BooleanAck;
 import com.jd.joyqueue.network.command.CommandType;
@@ -49,7 +49,7 @@ public class TransactionCommitRequestHandler implements CommandHandler, Type {
     public Command handle(Transport transport, Command command) {
         TransactionCommitRequest transactionCommitRequest = (TransactionCommitRequest) command.getPayload();
         Producer producer = new Producer(transactionCommitRequest.getTopic(), transactionCommitRequest.getTopic(), transactionCommitRequest.getApp(), Producer.ProducerType.JMQ);
-        int code = JournalqCode.SUCCESS.getCode();
+        int code = JoyQueueCode.SUCCESS.getCode();
 
         for (String txId : transactionCommitRequest.getTxIds()) {
             BrokerCommit brokerCommit = new BrokerCommit();
@@ -59,18 +59,18 @@ public class TransactionCommitRequestHandler implements CommandHandler, Type {
 
             try {
                 produce.putTransactionMessage(producer, brokerCommit);
-            } catch (JournalqException e) {
-                if (e.getCode() == JournalqCode.CN_TRANSACTION_NOT_EXISTS.getCode()) {
+            } catch (JoyQueueException e) {
+                if (e.getCode() == JoyQueueCode.CN_TRANSACTION_NOT_EXISTS.getCode()) {
                     logger.error("commit transaction error, transaction not exists, topic: {}, app: {}, txId: {}", transactionCommitRequest.getTopic(), transactionCommitRequest.getApp(), txId);
                 } else {
                     logger.error("commit transaction exception, topic: {}, app: {}, txId: {}", transactionCommitRequest.getTopic(), transactionCommitRequest.getApp(), txId, e);
                 }
-                if (e.getCode() != JournalqCode.SUCCESS.getCode()) {
+                if (e.getCode() != JoyQueueCode.SUCCESS.getCode()) {
                     code = e.getCode();
                 }
             } catch (Exception e) {
                 logger.error("commit transaction exception, topic: {}, app: {}, txId: {}", transactionCommitRequest.getTopic(), transactionCommitRequest.getApp(), txId, e);
-                code = JournalqCode.CN_UNKNOWN_ERROR.getCode();
+                code = JoyQueueCode.CN_UNKNOWN_ERROR.getCode();
             }
         }
 

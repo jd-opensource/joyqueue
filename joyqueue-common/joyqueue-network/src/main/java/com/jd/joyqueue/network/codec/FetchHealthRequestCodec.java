@@ -14,8 +14,8 @@
 package com.jd.joyqueue.network.codec;
 
 import com.jd.joyqueue.network.command.FetchHealthRequest;
-import com.jd.joyqueue.network.command.JournalqCommandType;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.codec.PayloadCodec;
 import com.jd.joyqueue.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
@@ -26,10 +26,10 @@ import io.netty.buffer.ByteBuf;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/28
  */
-public class FetchHealthRequestCodec implements PayloadCodec<JournalqHeader, FetchHealthRequest>, Type {
+public class FetchHealthRequestCodec implements PayloadCodec<JoyQueueHeader, FetchHealthRequest>, Type {
 
     @Override
-    public Object decode(JournalqHeader header, ByteBuf buffer) throws Exception {
+    public Object decode(JoyQueueHeader header, ByteBuf buffer) throws Exception {
         return new FetchHealthRequest();
     }
 
@@ -40,6 +40,6 @@ public class FetchHealthRequestCodec implements PayloadCodec<JournalqHeader, Fet
 
     @Override
     public int type() {
-        return JournalqCommandType.FETCH_HEALTH_REQUEST.getCode();
+        return JoyQueueCommandType.FETCH_HEALTH_REQUEST.getCode();
     }
 }

@@ -20,7 +20,7 @@ import com.jd.joyqueue.broker.monitor.SessionManager;
 import com.jd.joyqueue.broker.retry.RetryProbability;
 import com.jd.joyqueue.domain.Consumer.ConsumerPolicy;
 import com.jd.joyqueue.domain.TopicName;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.network.session.Consumer;
 import com.jd.joyqueue.toolkit.concurrent.EventListener;
 import com.jd.joyqueue.toolkit.time.SystemClock;
@@ -188,7 +188,7 @@ public class PartitionManager {
      * @param consumer 消费者信息
      * @return
      */
-    public boolean needPause(Consumer consumer) throws JournalqException {
+    public boolean needPause(Consumer consumer) throws JoyQueueException {
         ConsumerPolicy consumerPolicy = clusterManager.getConsumerPolicy(TopicName.parse(consumer.getTopic()), consumer.getApp());
         // 允许连续出错的限制
         int thresholdVal = consumerPolicy.getErrTimes();
@@ -244,7 +244,7 @@ public class PartitionManager {
      *
      * @return 是否重试
      */
-    protected boolean isRetry(Consumer consumer) throws JournalqException {
+    protected boolean isRetry(Consumer consumer) throws JoyQueueException {
         Boolean retry = clusterManager.getConsumer(TopicName.parse(consumer.getTopic()), consumer.getApp()).getConsumerPolicy().getRetry();
         if (!retry.booleanValue()) {
             logger.debug("retry enable is false.");
@@ -422,7 +422,7 @@ public class PartitionManager {
             try {
                 ConsumerPolicy consumerPolicy = clusterManager.getConsumerPolicy(TopicName.parse(topic), app);
                 maxPartitionNum = consumerPolicy.getMaxPartitionNum();
-            } catch (JournalqException e) {
+            } catch (JoyQueueException e) {
                 logger.error(e.getMessage(), e);
             }
 

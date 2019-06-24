@@ -37,7 +37,7 @@ import com.jd.joyqueue.broker.election.network.codec.VoteRequestDecoder;
 import com.jd.joyqueue.broker.election.network.codec.VoteRequestEncoder;
 import com.jd.joyqueue.broker.election.network.codec.VoteResponseDecoder;
 import com.jd.joyqueue.broker.election.network.codec.VoteResponseEncoder;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.Assert;
@@ -89,7 +89,7 @@ public class ElectionCommandCodecTest {
         encoder.encode(request, byteBuf);
 
         AppendEntriesRequestDecoder decoder = new AppendEntriesRequestDecoder();
-        JournalqHeader header = new JournalqHeader(request.type());
+        JoyQueueHeader header = new JoyQueueHeader(request.type());
         AppendEntriesRequest decodeRequest = (AppendEntriesRequest)decoder.decode(header, byteBuf);
 
         Assert.assertEquals(decodeRequest.getCommitPosition(), commitPosition);
@@ -136,7 +136,7 @@ public class ElectionCommandCodecTest {
         encoder.encode(response, byteBuf);
 
         AppendEntriesResponseDecoder decoder = new AppendEntriesResponseDecoder();
-        JournalqHeader header = new JournalqHeader(response.type());
+        JoyQueueHeader header = new JoyQueueHeader(response.type());
         AppendEntriesResponse decodeResponse = (AppendEntriesResponse)decoder.decode(header, byteBuf);
 
         //Assert.assertEquals(decodeResponse.getEntriesTerm(), entriesTerm);
@@ -159,7 +159,7 @@ public class ElectionCommandCodecTest {
         encoder.encode(request, byteBuf);
 
         ReplicateConsumePosRequestDecoder decoder = new ReplicateConsumePosRequestDecoder();
-        JournalqHeader header = new JournalqHeader(request.type());
+        JoyQueueHeader header = new JoyQueueHeader(request.type());
         ReplicateConsumePosRequest decodeRequest = (ReplicateConsumePosRequest)decoder.decode(header, byteBuf);
 
         Assert.assertEquals(decodeRequest.getConsumePositions(), consumePosition);
@@ -175,7 +175,7 @@ public class ElectionCommandCodecTest {
         encoder.encode(request, byteBuf);
 
         ReplicateConsumePosResponseDecoder decoder = new ReplicateConsumePosResponseDecoder();
-        JournalqHeader header = new JournalqHeader(request.type());
+        JoyQueueHeader header = new JoyQueueHeader(request.type());
         ReplicateConsumePosResponse decodeRequest = (ReplicateConsumePosResponse)decoder.decode(header, byteBuf);
 
         Assert.assertEquals(decodeRequest.isSuccess(), success);
@@ -193,7 +193,7 @@ public class ElectionCommandCodecTest {
         encoder.encode(request, byteBuf);
 
         TimeoutNowRequestDecoder decoder = new TimeoutNowRequestDecoder();
-        JournalqHeader header = new JournalqHeader(request.type());
+        JoyQueueHeader header = new JoyQueueHeader(request.type());
         TimeoutNowRequest decodeRequest = (TimeoutNowRequest)decoder.decode(header, byteBuf);
 
         Assert.assertEquals(decodeRequest.getTerm(), term);
@@ -212,7 +212,7 @@ public class ElectionCommandCodecTest {
         encoder.encode(response, byteBuf);
 
         TimeoutNowResponseDecoder decoder = new TimeoutNowResponseDecoder();
-        JournalqHeader header = new JournalqHeader(response.type());
+        JoyQueueHeader header = new JoyQueueHeader(response.type());
         TimeoutNowResponse decodeResponse = (TimeoutNowResponse)decoder.decode(header, byteBuf);
 
         Assert.assertEquals(decodeResponse.getTerm(), term);
@@ -236,7 +236,7 @@ public class ElectionCommandCodecTest {
         encoder.encode(request, byteBuf);
 
         VoteRequestDecoder decoder = new VoteRequestDecoder();
-        JournalqHeader header = new JournalqHeader(request.type());
+        JoyQueueHeader header = new JoyQueueHeader(request.type());
         VoteRequest decodeRequest = (VoteRequest)decoder.decode(header, byteBuf);
 
         Assert.assertEquals(decodeRequest.getTopic(), topicPartitionGroup.getTopic());
@@ -262,7 +262,7 @@ public class ElectionCommandCodecTest {
         encoder.encode(response, byteBuf);
 
         VoteResponseDecoder decoder = new VoteResponseDecoder();
-        JournalqHeader header = new JournalqHeader(response.type());
+        JoyQueueHeader header = new JoyQueueHeader(response.type());
         VoteResponse decodeResponse = (VoteResponse)decoder.decode(header, byteBuf);
 
         Assert.assertEquals(decodeResponse.getTerm(), term);

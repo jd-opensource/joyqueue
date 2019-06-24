@@ -13,8 +13,8 @@
  */
 package com.jd.joyqueue.security.impl;
 
-import com.jd.joyqueue.exception.JournalqCode;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueCode;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.security.PasswordEncoder;
 import com.jd.joyqueue.toolkit.security.Encrypt;
 import com.jd.joyqueue.toolkit.security.Sha;
@@ -24,11 +24,11 @@ import com.jd.joyqueue.toolkit.security.Sha;
  */
 public class DefaultPasswordEncoder implements PasswordEncoder {
     @Override
-    public String encode(String password) throws JournalqException {
+    public String encode(String password) throws JoyQueueException {
         try {
             return Encrypt.encrypt(password, Encrypt.DEFAULT_KEY, Sha.INSTANCE);
         } catch (Exception e) {
-            throw new JournalqException(JournalqCode.CN_AUTHENTICATION_ERROR);
+            throw new JoyQueueException(JoyQueueCode.CN_AUTHENTICATION_ERROR);
         }
 
     }

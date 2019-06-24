@@ -14,7 +14,7 @@
 package com.jd.joyqueue.broker.election.network.codec;
 
 import com.jd.joyqueue.broker.election.command.VoteResponse;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.codec.PayloadDecoder;
 import com.jd.joyqueue.network.command.CommandType;
 import com.jd.joyqueue.network.transport.command.Type;
@@ -25,9 +25,9 @@ import io.netty.buffer.ByteBuf;
  * email: zhuduohui@jd.com
  * date: 2018/8/20
  */
-public class VoteResponseDecoder implements PayloadDecoder<JournalqHeader>, Type {
+public class VoteResponseDecoder implements PayloadDecoder<JoyQueueHeader>, Type {
     @Override
-    public VoteResponse decode(JournalqHeader header, final ByteBuf buffer) {
+    public VoteResponse decode(JoyQueueHeader header, final ByteBuf buffer) {
         VoteResponse voteResponse = new VoteResponse();
 
         voteResponse.setTerm(buffer.readInt());

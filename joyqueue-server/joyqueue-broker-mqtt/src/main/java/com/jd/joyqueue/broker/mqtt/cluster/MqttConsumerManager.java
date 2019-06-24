@@ -16,7 +16,7 @@ package com.jd.joyqueue.broker.mqtt.cluster;
 import com.jd.joyqueue.broker.consumer.Consume;
 import com.jd.joyqueue.broker.mqtt.connection.MqttConnection;
 import com.jd.joyqueue.broker.mqtt.session.MqttSession;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.message.BrokerMessage;
 import com.jd.joyqueue.network.session.Consumer;
 import com.jd.joyqueue.broker.BrokerContext;
@@ -187,7 +187,7 @@ public class MqttConsumerManager extends Service {
     private void commitAcknowledge(Consumer consumer, short partition, long index) {
         try {
             consume.setAckIndex(consumer, partition, index);
-        } catch (JournalqException e) {
+        } catch (JoyQueueException e) {
             LOG.error(e.getMessage(), e);
         }
     }

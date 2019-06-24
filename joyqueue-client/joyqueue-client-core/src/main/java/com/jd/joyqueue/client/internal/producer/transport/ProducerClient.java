@@ -29,7 +29,7 @@ import com.jd.joyqueue.network.command.ProduceMessageRollbackResponse;
 import com.jd.joyqueue.network.command.TxStatus;
 import com.jd.joyqueue.network.transport.TransportAttribute;
 import com.jd.joyqueue.network.transport.command.CommandCallback;
-import com.jd.joyqueue.network.transport.command.JournalqCommand;
+import com.jd.joyqueue.network.transport.command.JoyQueueCommand;
 
 import java.util.Collection;
 import java.util.Map;
@@ -69,21 +69,21 @@ public class ProducerClient {
         ProduceMessageRequest produceMessageRequest = new ProduceMessageRequest();
         produceMessageRequest.setApp(app);
         produceMessageRequest.setData(messages);
-        return (ProduceMessageResponse) client.sync(new JournalqCommand(produceMessageRequest), timeout).getPayload();
+        return (ProduceMessageResponse) client.sync(new JoyQueueCommand(produceMessageRequest), timeout).getPayload();
     }
 
     public void produceMessageOneway(String app, Map<String, ProduceMessageData> messages, long timeout) {
         ProduceMessageRequest produceMessageRequest = new ProduceMessageRequest();
         produceMessageRequest.setApp(app);
         produceMessageRequest.setData(messages);
-        client.oneway(new JournalqCommand(produceMessageRequest), timeout);
+        client.oneway(new JoyQueueCommand(produceMessageRequest), timeout);
     }
 
     public void asyncProduceMessage(String app, Map<String, ProduceMessageData> messages, long timeout, CommandCallback callback) {
         ProduceMessageRequest produceMessageRequest = new ProduceMessageRequest();
         produceMessageRequest.setApp(app);
         produceMessageRequest.setData(messages);
-        client.async(new JournalqCommand(produceMessageRequest), timeout, callback);
+        client.async(new JoyQueueCommand(produceMessageRequest), timeout, callback);
     }
 
     public ProduceMessagePrepareResponse produceMessagePrepare(String topic, String app, long sequence, String transactionId, long transactionTimeout, long timeout) {
@@ -93,7 +93,7 @@ public class ProducerClient {
         produceMessagePrepareRequest.setSequence(sequence);
         produceMessagePrepareRequest.setTransactionId(transactionId);
         produceMessagePrepareRequest.setTimeout((int) transactionTimeout);
-        return (ProduceMessagePrepareResponse) client.sync(new JournalqCommand(produceMessagePrepareRequest), timeout).getPayload();
+        return (ProduceMessagePrepareResponse) client.sync(new JoyQueueCommand(produceMessagePrepareRequest), timeout).getPayload();
     }
 
     public ProduceMessageCommitResponse produceMessageCommit(String topic, String app, String txId, long timeout) {
@@ -101,7 +101,7 @@ public class ProducerClient {
         produceMessageCommitRequest.setTopic(topic);
         produceMessageCommitRequest.setApp(app);
         produceMessageCommitRequest.setTxId(txId);
-        return (ProduceMessageCommitResponse) client.sync(new JournalqCommand(produceMessageCommitRequest), timeout).getPayload();
+        return (ProduceMessageCommitResponse) client.sync(new JoyQueueCommand(produceMessageCommitRequest), timeout).getPayload();
     }
 
     public ProduceMessageRollbackResponse produceMessageRollback(String topic, String app, String txId, long timeout) {
@@ -109,7 +109,7 @@ public class ProducerClient {
         produceMessageRollbackRequest.setTopic(topic);
         produceMessageRollbackRequest.setApp(app);
         produceMessageRollbackRequest.setTxId(txId);
-        return (ProduceMessageRollbackResponse) client.sync(new JournalqCommand(produceMessageRollbackRequest), timeout).getPayload();
+        return (ProduceMessageRollbackResponse) client.sync(new JoyQueueCommand(produceMessageRollbackRequest), timeout).getPayload();
     }
 
     public FetchProduceFeedbackResponse fetchFeedback(String topic, String app, TxStatus txStatus, int count, long longPollTimeout, long timeout) {
@@ -119,7 +119,7 @@ public class ProducerClient {
         fetchProduceFeedbackRequest.setStatus(txStatus);
         fetchProduceFeedbackRequest.setCount(count);
         fetchProduceFeedbackRequest.setLongPollTimeout((int) longPollTimeout);
-        return (FetchProduceFeedbackResponse) client.sync(new JournalqCommand(fetchProduceFeedbackRequest), timeout).getPayload();
+        return (FetchProduceFeedbackResponse) client.sync(new JoyQueueCommand(fetchProduceFeedbackRequest), timeout).getPayload();
     }
 
     public void addProducers(Collection<String> topics, String app) {

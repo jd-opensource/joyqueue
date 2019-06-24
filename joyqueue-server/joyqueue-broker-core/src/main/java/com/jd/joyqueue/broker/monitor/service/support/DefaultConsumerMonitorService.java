@@ -24,7 +24,7 @@ import com.jd.joyqueue.broker.monitor.stat.BrokerStat;
 import com.jd.joyqueue.broker.monitor.stat.ConsumerStat;
 import com.jd.joyqueue.broker.monitor.stat.PartitionGroupStat;
 import com.jd.joyqueue.broker.monitor.stat.TopicStat;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.model.Pager;
 import com.jd.joyqueue.monitor.ConsumerMonitorInfo;
 import com.jd.joyqueue.monitor.ConsumerPartitionGroupMonitorInfo;
@@ -234,7 +234,7 @@ public class DefaultConsumerMonitorService implements ConsumerMonitorService {
         RetryMonitorInfo retryMonitorInfo = new RetryMonitorInfo();
         try {
             retryMonitorInfo.setCount(retryManager.countRetry(consumerStat.getTopic(), consumerStat.getApp()));
-        } catch (JournalqException e) {
+        } catch (JoyQueueException e) {
             logger.error("getRetry exception, topic: {}, app: {}", consumerStat.getTopic(), consumerStat.getApp(), e);
         }
         retryMonitorInfo.setSuccess(consumerStat.getRetryStat().getSuccess().getOneMinuteRate());

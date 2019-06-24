@@ -15,9 +15,9 @@ package com.jd.joyqueue.network.codec;
 
 import com.google.common.collect.Lists;
 import com.jd.joyqueue.network.command.FetchClusterRequest;
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.serializer.Serializer;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.codec.PayloadCodec;
 import com.jd.joyqueue.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
@@ -30,10 +30,10 @@ import java.util.List;
  * email: gaohaoxiang@jd.com
  * date: 2018/11/30
  */
-public class FetchClusterRequestCodec implements PayloadCodec<JournalqHeader, FetchClusterRequest>, Type {
+public class FetchClusterRequestCodec implements PayloadCodec<JoyQueueHeader, FetchClusterRequest>, Type {
 
     @Override
-    public Object decode(JournalqHeader header, ByteBuf buffer) throws Exception {
+    public Object decode(JoyQueueHeader header, ByteBuf buffer) throws Exception {
         FetchClusterRequest fetchClusterRequest = new FetchClusterRequest();
 
         short topicSize = buffer.readShort();
@@ -58,6 +58,6 @@ public class FetchClusterRequestCodec implements PayloadCodec<JournalqHeader, Fe
 
     @Override
     public int type() {
-        return JournalqCommandType.FETCH_CLUSTER_REQUEST.getCode();
+        return JoyQueueCommandType.FETCH_CLUSTER_REQUEST.getCode();
     }
 }

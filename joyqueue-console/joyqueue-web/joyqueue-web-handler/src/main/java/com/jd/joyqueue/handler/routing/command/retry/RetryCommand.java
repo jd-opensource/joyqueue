@@ -14,7 +14,7 @@
 package com.jd.joyqueue.handler.routing.command.retry;
 
 import com.jd.joyqueue.domain.ConsumeRetry;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.handler.annotation.Operator;
 import com.jd.joyqueue.handler.annotation.PageQuery;
 import com.jd.joyqueue.message.BrokerMessage;
@@ -125,7 +125,7 @@ public class RetryCommand implements Command<Response>, Poolable {
             HttpServerResponse response = request.response();
             byte[] data = retry.getData();
             if (data.length == 0) {
-                throw new JournalqException("消息内容为空",HTTP_BAD_REQUEST);
+                throw new JoyQueueException("消息内容为空",HTTP_BAD_REQUEST);
             }
             String fileName = retry.getId() +".txt";
             response.reset();

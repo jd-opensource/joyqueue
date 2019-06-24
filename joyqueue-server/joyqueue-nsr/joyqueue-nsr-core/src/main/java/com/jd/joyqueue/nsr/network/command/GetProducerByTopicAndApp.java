@@ -14,13 +14,13 @@
 package com.jd.joyqueue.nsr.network.command;
 
 import com.jd.joyqueue.domain.TopicName;
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 /**
  * @author wylixiaobin
  * Date: 2019/1/27
  */
-public class GetProducerByTopicAndApp extends JournalqPayload {
+public class GetProducerByTopicAndApp extends JoyQueuePayload {
     private TopicName topic;
     private String app;
     public GetProducerByTopicAndApp app(String app){

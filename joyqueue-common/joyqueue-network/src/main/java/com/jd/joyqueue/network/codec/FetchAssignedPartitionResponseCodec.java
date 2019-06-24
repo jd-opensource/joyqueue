@@ -15,12 +15,12 @@ package com.jd.joyqueue.network.codec;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.network.command.FetchAssignedPartitionAckData;
 import com.jd.joyqueue.network.command.FetchAssignedPartitionResponse;
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.serializer.Serializer;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.codec.PayloadCodec;
 import com.jd.joyqueue.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
@@ -34,10 +34,10 @@ import java.util.Map;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/4
  */
-public class FetchAssignedPartitionResponseCodec implements PayloadCodec<JournalqHeader, FetchAssignedPartitionResponse>, Type {
+public class FetchAssignedPartitionResponseCodec implements PayloadCodec<JoyQueueHeader, FetchAssignedPartitionResponse>, Type {
 
     @Override
-    public FetchAssignedPartitionResponse decode(JournalqHeader header, ByteBuf buffer) throws Exception {
+    public FetchAssignedPartitionResponse decode(JoyQueueHeader header, ByteBuf buffer) throws Exception {
         FetchAssignedPartitionResponse fetchAssignedPartitionResponse = new FetchAssignedPartitionResponse();
         Map<String, FetchAssignedPartitionAckData> topicPartitions = Maps.newHashMap();
 
@@ -51,7 +51,7 @@ public class FetchAssignedPartitionResponseCodec implements PayloadCodec<Journal
                 partitions.add(buffer.readShort());
             }
 
-            JournalqCode code = JournalqCode.valueOf(buffer.readInt());
+            JoyQueueCode code = JoyQueueCode.valueOf(buffer.readInt());
             topicPartitions.put(topic, new FetchAssignedPartitionAckData(partitions, code));
         }
 
@@ -75,6 +75,6 @@ public class FetchAssignedPartitionResponseCodec implements PayloadCodec<Journal
 
     @Override
     public int type() {
-        return JournalqCommandType.FETCH_ASSIGNED_PARTITION_RESPONSE.getCode();
+        return JoyQueueCommandType.FETCH_ASSIGNED_PARTITION_RESPONSE.getCode();
     }
 }

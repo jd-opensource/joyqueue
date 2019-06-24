@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.network.command;
 
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 import java.util.Map;
 
@@ -23,7 +23,7 @@ import java.util.Map;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/7
  */
-public class FetchTopicMessageRequest extends JournalqPayload {
+public class FetchTopicMessageRequest extends JoyQueuePayload {
 
     private Map<String, FetchTopicMessageData> topics;
     private String app;
@@ -32,7 +32,7 @@ public class FetchTopicMessageRequest extends JournalqPayload {
 
     @Override
     public int type() {
-        return JournalqCommandType.FETCH_TOPIC_MESSAGE_REQUEST.getCode();
+        return JoyQueueCommandType.FETCH_TOPIC_MESSAGE_REQUEST.getCode();
     }
 
     public void setTopics(Map<String, FetchTopicMessageData> topics) {

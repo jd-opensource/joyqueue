@@ -28,7 +28,7 @@ public class DBMessageRetryTest {
 //
 //
 //    @Test
-//    public void addRetry() throws JournalqException {
+//    public void addRetry() throws JoyQueueException {
 //        List<RetryMessageModel> retryMessageModelList = new ArrayList<>();
 //
 //        RetryMessageModel retry = new RetryMessageModel();
@@ -48,7 +48,7 @@ public class DBMessageRetryTest {
 //
 //
 //    @Test
-//    public void retrySuccess() throws JournalqException {
+//    public void retrySuccess() throws JoyQueueException {
 //        String topic = "topic";
 //        String app = "app";
 //        Long[] messageIds = {1l};
@@ -56,7 +56,7 @@ public class DBMessageRetryTest {
 //    }
 //
 //    @Test
-//    public void retryError() throws JournalqException {
+//    public void retryError() throws JoyQueueException {
 //        String topic = "topic";
 //        String app = "app";
 //        Long[] messageIds = {1l};
@@ -64,7 +64,7 @@ public class DBMessageRetryTest {
 //    }
 //
 //    @Test
-//    public void retryExpire() throws JournalqException {
+//    public void retryExpire() throws JoyQueueException {
 //        String topic = "topic";
 //        String app = "app";
 //        Long[] messageIds = {1l};
@@ -73,7 +73,7 @@ public class DBMessageRetryTest {
 //    }
 //
 //    @Test
-//    public void getRetry() throws JournalqException {
+//    public void getRetry() throws JoyQueueException {
 //        String topic = "topic";
 //        String app = "app";
 //        short count = 10;
@@ -85,7 +85,7 @@ public class DBMessageRetryTest {
 //    }
 //
 //    @Test
-//    public void countRetry() throws JournalqException {
+//    public void countRetry() throws JoyQueueException {
 //        String topic = "topic";
 //        String app = "app";
 //        int count = dbMessageRetry.countRetry(topic, app);

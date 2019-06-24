@@ -23,10 +23,10 @@ import com.jd.joyqueue.broker.kafka.coordinator.transaction.domain.TransactionPr
 import com.jd.joyqueue.broker.kafka.coordinator.transaction.helper.TransactionHelper;
 import com.jd.joyqueue.broker.producer.transaction.command.TransactionRollbackRequest;
 import com.jd.joyqueue.domain.Broker;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.network.transport.command.Command;
 import com.jd.joyqueue.network.transport.command.CommandCallback;
-import com.jd.joyqueue.network.transport.command.JournalqCommand;
+import com.jd.joyqueue.network.transport.command.JoyQueueCommand;
 import com.jd.joyqueue.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,11 +76,11 @@ public class TransactionAbortSynchronizer extends Service {
 
             CoordinatorSession session = sessionManager.getOrCreateSession(broker);
             TransactionRollbackRequest transactionRollbackRequest = new TransactionRollbackRequest(brokerPrepare.getTopic(), brokerPrepare.getApp(), txIds);
-            session.async(new JournalqCommand(transactionRollbackRequest), new CommandCallback() {
+            session.async(new JoyQueueCommand(transactionRollbackRequest), new CommandCallback() {
                 @Override
                 public void onSuccess(Command request, Command response) {
-                    if (response.getHeader().getStatus() != JournalqCode.SUCCESS.getCode() &&
-                            response.getHeader().getStatus() != JournalqCode.CN_TRANSACTION_NOT_EXISTS.getCode()) {
+                    if (response.getHeader().getStatus() != JoyQueueCode.SUCCESS.getCode() &&
+                            response.getHeader().getStatus() != JoyQueueCode.CN_TRANSACTION_NOT_EXISTS.getCode()) {
                         logger.error("abort transaction error, broker: {}, request: {}", broker, transactionRollbackRequest);
                         result[0] = false;
                     }

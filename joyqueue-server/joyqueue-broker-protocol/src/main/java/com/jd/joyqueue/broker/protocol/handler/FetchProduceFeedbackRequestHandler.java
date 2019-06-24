@@ -16,19 +16,19 @@ package com.jd.joyqueue.broker.protocol.handler;
 import com.google.common.collect.Lists;
 import com.jd.joyqueue.broker.BrokerContext;
 import com.jd.joyqueue.broker.BrokerContextAware;
-import com.jd.joyqueue.broker.protocol.JournalqCommandHandler;
+import com.jd.joyqueue.broker.protocol.JoyQueueCommandHandler;
 import com.jd.joyqueue.broker.cluster.ClusterManager;
 import com.jd.joyqueue.broker.protocol.converter.CheckResultConverter;
 import com.jd.joyqueue.broker.helper.SessionHelper;
 import com.jd.joyqueue.broker.producer.Produce;
 import com.jd.joyqueue.domain.TopicName;
-import com.jd.joyqueue.exception.JournalqCode;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueCode;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.network.command.BooleanAck;
 import com.jd.joyqueue.network.command.FetchProduceFeedbackAckData;
 import com.jd.joyqueue.network.command.FetchProduceFeedbackRequest;
 import com.jd.joyqueue.network.command.FetchProduceFeedbackResponse;
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.session.Connection;
 import com.jd.joyqueue.network.session.Producer;
 import com.jd.joyqueue.network.session.TransactionId;
@@ -47,7 +47,7 @@ import java.util.List;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/19
  */
-public class FetchProduceFeedbackRequestHandler implements JournalqCommandHandler, Type, BrokerContextAware {
+public class FetchProduceFeedbackRequestHandler implements JoyQueueCommandHandler, Type, BrokerContextAware {
 
     protected static final Logger logger = LoggerFactory.getLogger(FetchProduceFeedbackRequestHandler.class);
 
@@ -67,15 +67,15 @@ public class FetchProduceFeedbackRequestHandler implements JournalqCommandHandle
 
         if (connection == null || !connection.isAuthorized(fetchProduceFeedbackRequest.getApp())) {
             logger.warn("connection is not exists, transport: {}, app: {}", transport, fetchProduceFeedbackRequest.getApp());
-            return BooleanAck.build(JournalqCode.FW_CONNECTION_NOT_EXISTS.getCode());
+            return BooleanAck.build(JoyQueueCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
         BooleanResponse checkResult = clusterManager.checkWritable(TopicName.parse(fetchProduceFeedbackRequest.getTopic()),
                 fetchProduceFeedbackRequest.getApp(), connection.getHost());
         if (!checkResult.isSuccess()) {
             logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport,
-                    fetchProduceFeedbackRequest.getTopic(), fetchProduceFeedbackRequest.getApp(), checkResult.getJournalqCode());
-            return new Command(new FetchProduceFeedbackResponse(CheckResultConverter.convertCommonCode(checkResult.getJournalqCode())));
+                    fetchProduceFeedbackRequest.getTopic(), fetchProduceFeedbackRequest.getApp(), checkResult.getJoyQueueCode());
+            return new Command(new FetchProduceFeedbackResponse(CheckResultConverter.convertCommonCode(checkResult.getJoyQueueCode())));
         }
 
         FetchProduceFeedbackResponse fetchProduceFeedbackResponse = FetchProduceFeedback(connection, fetchProduceFeedbackRequest);
@@ -88,16 +88,16 @@ public class FetchProduceFeedbackRequestHandler implements JournalqCommandHandle
             FetchProduceFeedbackResponse fetchProduceFeedbackResponse = new FetchProduceFeedbackResponse();
             List<TransactionId> transactionIdList = produce.getFeedback(producer, fetchProduceFeedbackRequest.getCount());
             fetchProduceFeedbackResponse.setData(buildFeedbackAckData(transactionIdList));
-            fetchProduceFeedbackResponse.setCode(JournalqCode.SUCCESS);
+            fetchProduceFeedbackResponse.setCode(JoyQueueCode.SUCCESS);
             return fetchProduceFeedbackResponse;
-        } catch (JournalqException e) {
+        } catch (JoyQueueException e) {
             logger.error("fetch feedback exception, transport: {}, topic: {}, app: {}", connection.getTransport().remoteAddress(),
                     fetchProduceFeedbackRequest.getTopic(), fetchProduceFeedbackRequest.getApp(), e);
-            return new FetchProduceFeedbackResponse(JournalqCode.valueOf(e.getCode()));
+            return new FetchProduceFeedbackResponse(JoyQueueCode.valueOf(e.getCode()));
         } catch (Exception e) {
             logger.error("fetch feedback exception, transport: {}, topic: {}, app: {}", connection.getTransport().remoteAddress(),
                     fetchProduceFeedbackRequest.getTopic(), fetchProduceFeedbackRequest.getApp(), e);
-            return new FetchProduceFeedbackResponse(JournalqCode.CN_UNKNOWN_ERROR);
+            return new FetchProduceFeedbackResponse(JoyQueueCode.CN_UNKNOWN_ERROR);
         }
     }
 
@@ -111,6 +111,6 @@ public class FetchProduceFeedbackRequestHandler implements JournalqCommandHandle
 
     @Override
     public int type() {
-        return JournalqCommandType.FETCH_PRODUCE_FEEDBACK_REQUEST.getCode();
+        return JoyQueueCommandType.FETCH_PRODUCE_FEEDBACK_REQUEST.getCode();
     }
 }

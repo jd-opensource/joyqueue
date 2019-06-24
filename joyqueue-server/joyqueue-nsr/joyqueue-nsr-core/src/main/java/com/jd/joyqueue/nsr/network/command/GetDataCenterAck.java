@@ -14,13 +14,13 @@
 package com.jd.joyqueue.nsr.network.command;
 
 import com.jd.joyqueue.domain.DataCenter;
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 /**
  * @author wylixiaobin
  * Date: 2019/1/29
  */
-public class GetDataCenterAck extends JournalqPayload {
+public class GetDataCenterAck extends JoyQueuePayload {
     private DataCenter dataCenter;
 
     public GetDataCenterAck dataCenter(DataCenter dataCenter){

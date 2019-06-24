@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.server.archive.store.api;
 
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.server.archive.store.model.AchivePosition;
 import com.jd.joyqueue.server.archive.store.model.ConsumeLog;
 import com.jd.joyqueue.server.archive.store.model.Query;
@@ -35,25 +35,25 @@ public interface ArchiveStore extends LifeCycle {
      * 持久化消费日志
      *
      * @param consumeLogs
-     * @throws JournalqException
+     * @throws JoyQueueException
      */
-    void putConsumeLog(List<ConsumeLog> consumeLogs) throws JournalqException;
+    void putConsumeLog(List<ConsumeLog> consumeLogs) throws JoyQueueException;
 
     /**
      * 持久化发送日志
      *
      * @param sendLogs
-     * @throws JournalqException
+     * @throws JoyQueueException
      */
-    void putSendLog(List<SendLog> sendLogs) throws JournalqException;
+    void putSendLog(List<SendLog> sendLogs) throws JoyQueueException;
 
     /**
      * 持久化归档进度信息
      *
      * @param achivePosition
-     * @throws JournalqException
+     * @throws JoyQueueException
      */
-    void putPosition(AchivePosition achivePosition) throws JournalqException;
+    void putPosition(AchivePosition achivePosition) throws JoyQueueException;
 
     /**
      * 查询归档进度信息
@@ -61,27 +61,27 @@ public interface ArchiveStore extends LifeCycle {
      * @param topic
      * @param partition
      * @return
-     * @throws JournalqException
+     * @throws JoyQueueException
      */
-    Long getPosition(String topic, short partition) throws JournalqException;
+    Long getPosition(String topic, short partition) throws JoyQueueException;
 
     /**
      * 查看发送日志
      *
      * @param query
      * @return
-     * @throws JournalqException
+     * @throws JoyQueueException
      */
-    List<SendLog> scanSendLog(Query query) throws JournalqException;
+    List<SendLog> scanSendLog(Query query) throws JoyQueueException;
 
     /**
      * 查看一条发送日志
      *
      * @param query
      * @return
-     * @throws JournalqException
+     * @throws JoyQueueException
      */
-    SendLog getOneSendLog(Query query) throws JournalqException;
+    SendLog getOneSendLog(Query query) throws JoyQueueException;
 
     /**
      * 查询消费日志
@@ -89,7 +89,7 @@ public interface ArchiveStore extends LifeCycle {
      * @param messageId
      * @param count
      * @return
-     * @throws JournalqException
+     * @throws JoyQueueException
      */
-    List<ConsumeLog> scanConsumeLog(String messageId,Integer count) throws JournalqException;
+    List<ConsumeLog> scanConsumeLog(String messageId,Integer count) throws JoyQueueException;
 }

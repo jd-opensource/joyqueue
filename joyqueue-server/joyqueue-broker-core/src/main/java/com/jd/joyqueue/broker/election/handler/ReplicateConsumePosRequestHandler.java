@@ -18,7 +18,7 @@ import com.jd.joyqueue.broker.election.ElectionConfig;
 import com.jd.joyqueue.broker.election.command.ReplicateConsumePosRequest;
 import com.jd.joyqueue.broker.election.command.ReplicateConsumePosResponse;
 import com.jd.joyqueue.broker.BrokerContext;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.command.Command;
 import com.jd.joyqueue.network.command.CommandType;
 import com.jd.joyqueue.network.transport.command.Direction;
@@ -64,7 +64,7 @@ public class ReplicateConsumePosRequestHandler implements CommandHandler, Type {
 
         ReplicateConsumePosRequest request = (ReplicateConsumePosRequest)command.getPayload();
         boolean success;
-        JournalqHeader header = new JournalqHeader(Direction.RESPONSE, CommandType.REPLICATE_CONSUME_POS_RESPONSE);
+        JoyQueueHeader header = new JoyQueueHeader(Direction.RESPONSE, CommandType.REPLICATE_CONSUME_POS_RESPONSE);
         ReplicateConsumePosResponse response = new ReplicateConsumePosResponse(false);
 
         if (request.getConsumePositions() == null) {

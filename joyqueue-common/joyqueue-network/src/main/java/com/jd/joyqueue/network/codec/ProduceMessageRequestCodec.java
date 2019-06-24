@@ -17,11 +17,11 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jd.joyqueue.domain.QosLevel;
 import com.jd.joyqueue.message.BrokerMessage;
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.command.ProduceMessageRequest;
 import com.jd.joyqueue.network.command.ProduceMessageData;
 import com.jd.joyqueue.network.serializer.Serializer;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.codec.PayloadCodec;
 import com.jd.joyqueue.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
@@ -35,10 +35,10 @@ import java.util.Map;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/18
  */
-public class ProduceMessageRequestCodec implements PayloadCodec<JournalqHeader, ProduceMessageRequest>, Type {
+public class ProduceMessageRequestCodec implements PayloadCodec<JoyQueueHeader, ProduceMessageRequest>, Type {
 
     @Override
-    public ProduceMessageRequest decode(JournalqHeader header, ByteBuf buffer) throws Exception {
+    public ProduceMessageRequest decode(JoyQueueHeader header, ByteBuf buffer) throws Exception {
         short dataSize = buffer.readShort();
         Map<String, ProduceMessageData> data = Maps.newHashMapWithExpectedSize(dataSize);
         for (int i = 0; i < dataSize; i++) {
@@ -90,6 +90,6 @@ public class ProduceMessageRequestCodec implements PayloadCodec<JournalqHeader, 
 
     @Override
     public int type() {
-        return JournalqCommandType.PRODUCE_MESSAGE_REQUEST.getCode();
+        return JoyQueueCommandType.PRODUCE_MESSAGE_REQUEST.getCode();
     }
 }

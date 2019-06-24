@@ -27,7 +27,7 @@ public class PartitionManagerTest {
 //    private final long occupyTimeout = 1000l;
 //
 //    @Before
-//    public void setup() throws JournalqException {
+//    public void setup() throws JoyQueueException {
 //        consumer.setId("" + 1);
 //        consumer.setTopic("topic");
 //        consumer.setApp("app");
@@ -90,7 +90,7 @@ public class PartitionManagerTest {
 //    }
 //
 //    @Test
-//    public void needPause() throws JournalqException {
+//    public void needPause() throws JoyQueueException {
 //        boolean b = partitionManager.needPause(consumer);
 //        Assert.assertEquals(false, b);
 //
@@ -100,11 +100,11 @@ public class PartitionManagerTest {
 //    /**
 //     * 过期场景
 //     *
-//     * @throws JournalqException
+//     * @throws JoyQueueException
 //     * @throws InterruptedException
 //     */
 //    @Test
-//    public void needPause2() throws JournalqException, InterruptedException {
+//    public void needPause2() throws JoyQueueException, InterruptedException {
 //        OwnerShip ownerShip = new OwnerShip("1", 2 * 1000);
 //        partitionManager.increaseSerialErr(ownerShip);
 //        boolean b = partitionManager.needPause(consumer);
@@ -117,7 +117,7 @@ public class PartitionManagerTest {
 //    }
 //
 //    @Test
-//    public void increaseSerialErr() throws JournalqException {
+//    public void increaseSerialErr() throws JoyQueueException {
 //        OwnerShip ownerShip = new OwnerShip("1", 10 * 1000);
 //        partitionManager.increaseSerialErr(ownerShip);
 //
@@ -126,7 +126,7 @@ public class PartitionManagerTest {
 //    }
 //
 //    @Test
-//    public void clearSerialErr() throws JournalqException {
+//    public void clearSerialErr() throws JoyQueueException {
 //        increaseSerialErr();
 //
 //        partitionManager.clearSerialErr(consumer);

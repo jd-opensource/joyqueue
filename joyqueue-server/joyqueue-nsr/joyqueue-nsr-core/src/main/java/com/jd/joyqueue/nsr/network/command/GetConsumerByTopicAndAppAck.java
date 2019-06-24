@@ -14,13 +14,13 @@
 package com.jd.joyqueue.nsr.network.command;
 
 import com.jd.joyqueue.domain.Consumer;
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 /**
  * @author wylixiaobin
  * Date: 2019/1/27
  */
-public class GetConsumerByTopicAndAppAck extends JournalqPayload {
+public class GetConsumerByTopicAndAppAck extends JoyQueuePayload {
     private Consumer consumer;
     public GetConsumerByTopicAndAppAck consumer(Consumer consumer){
         this.consumer = consumer;

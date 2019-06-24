@@ -29,7 +29,7 @@ import com.jd.joyqueue.client.internal.producer.exception.ProducerException;
 import com.jd.joyqueue.client.internal.producer.interceptor.ProducerInterceptor;
 import com.jd.joyqueue.client.internal.producer.interceptor.ProducerInterceptorManager;
 import com.jd.joyqueue.client.internal.producer.transport.ProducerClientManager;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.toolkit.concurrent.SimpleFuture;
 import com.google.common.base.Preconditions;
 import com.jd.joyqueue.toolkit.service.Service;
@@ -271,7 +271,7 @@ public class DefaultMessageProducer extends Service implements MessageProducer {
 
     protected void checkState() {
         if (!isStarted()) {
-            throw new ProducerException("producer is not started", JournalqCode.CN_SERVICE_NOT_AVAILABLE.getCode());
+            throw new ProducerException("producer is not started", JoyQueueCode.CN_SERVICE_NOT_AVAILABLE.getCode());
         }
     }
 }

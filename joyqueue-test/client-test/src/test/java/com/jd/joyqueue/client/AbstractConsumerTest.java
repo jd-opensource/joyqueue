@@ -16,7 +16,7 @@ package com.jd.joyqueue.client;
 import io.openmessaging.KeyValue;
 import io.openmessaging.OMS;
 import io.openmessaging.joyqueue.consumer.ExtensionConsumer;
-import io.openmessaging.joyqueue.domain.JournalQConsumerBuiltinKeys;
+import io.openmessaging.joyqueue.domain.JoyQueueConsumerBuiltinKeys;
 import org.junit.Before;
 
 /**
@@ -40,8 +40,8 @@ public class AbstractConsumerTest extends AbstractClientTest {
     @Override
     protected KeyValue getAttributes() {
         KeyValue keyValue = OMS.newKeyValue();
-        keyValue.put(JournalQConsumerBuiltinKeys.LONGPOLL_TIMEOUT, -1);
-        keyValue.put(JournalQConsumerBuiltinKeys.BROADCAST_LOCAL_PATH, "/export/Data/journalq/broadcast");
+        keyValue.put(JoyQueueConsumerBuiltinKeys.LONGPOLL_TIMEOUT, -1);
+        keyValue.put(JoyQueueConsumerBuiltinKeys.BROADCAST_LOCAL_PATH, "/export/Data/journalq/broadcast");
         return keyValue;
     }
 }

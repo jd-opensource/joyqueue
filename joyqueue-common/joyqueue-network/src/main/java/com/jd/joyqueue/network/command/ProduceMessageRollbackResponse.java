@@ -13,8 +13,8 @@
  */
 package com.jd.joyqueue.network.command;
 
-import com.jd.joyqueue.exception.JournalqCode;
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.exception.JoyQueueCode;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 /**
  * ProduceMessageRollbackResponse
@@ -22,28 +22,28 @@ import com.jd.joyqueue.network.transport.command.JournalqPayload;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/18
  */
-public class ProduceMessageRollbackResponse extends JournalqPayload {
+public class ProduceMessageRollbackResponse extends JoyQueuePayload {
 
-    private JournalqCode code;
+    private JoyQueueCode code;
 
     public ProduceMessageRollbackResponse() {
 
     }
 
-    public ProduceMessageRollbackResponse(JournalqCode code) {
+    public ProduceMessageRollbackResponse(JoyQueueCode code) {
         this.code = code;
     }
 
     @Override
     public int type() {
-        return JournalqCommandType.PRODUCE_MESSAGE_ROLLBACK_RESPONSE.getCode();
+        return JoyQueueCommandType.PRODUCE_MESSAGE_ROLLBACK_RESPONSE.getCode();
     }
 
-    public void setCode(JournalqCode code) {
+    public void setCode(JoyQueueCode code) {
         this.code = code;
     }
 
-    public JournalqCode getCode() {
+    public JoyQueueCode getCode() {
         return code;
     }
 }

@@ -13,11 +13,11 @@
  */
 package com.jd.joyqueue.network.command;
 
-import com.jd.joyqueue.exception.JournalqCode;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.exception.JoyQueueCode;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.command.Command;
 import com.jd.joyqueue.network.transport.command.Direction;
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -26,7 +26,7 @@ import org.apache.commons.lang3.StringUtils;
  * @author lindeqiang
  * @since 2016/8/11 10:32
  */
-public class BooleanAck extends JournalqPayload {
+public class BooleanAck extends JoyQueuePayload {
 
     @Override
     public int type() {
@@ -39,7 +39,7 @@ public class BooleanAck extends JournalqPayload {
      * @return 布尔应答
      */
     public static Command build() {
-        return build(JournalqCode.SUCCESS);
+        return build(JoyQueueCode.SUCCESS);
     }
 
     /**
@@ -49,7 +49,7 @@ public class BooleanAck extends JournalqPayload {
      * @param args
      * @return
      */
-    public static Command build(final JournalqCode code, Object... args) {
+    public static Command build(final JoyQueueCode code, Object... args) {
         return build(code.getCode(), code.getMessage(args));
     }
 
@@ -71,9 +71,9 @@ public class BooleanAck extends JournalqPayload {
      * @return 布尔应答
      */
     public static Command build(final int code, final String message) {
-        JournalqHeader header = new JournalqHeader(Direction.RESPONSE, CommandType.BOOLEAN_ACK);
+        JoyQueueHeader header = new JoyQueueHeader(Direction.RESPONSE, CommandType.BOOLEAN_ACK);
         header.setStatus((short) code);
-        header.setError(code == JournalqCode.SUCCESS.getCode() ? null : (StringUtils.isBlank(message) ? JournalqCode.valueOf(code).getMessage() : message));
+        header.setError(code == JoyQueueCode.SUCCESS.getCode() ? null : (StringUtils.isBlank(message) ? JoyQueueCode.valueOf(code).getMessage() : message));
         return new Command(header, null);
     }
 }

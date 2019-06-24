@@ -14,7 +14,7 @@
 package com.jd.joyqueue.network.codec;
 
 import com.jd.joyqueue.network.command.CommandType;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.codec.PayloadCodec;
 import com.jd.joyqueue.network.command.BooleanAck;
 import com.jd.joyqueue.network.transport.command.Type;
@@ -26,10 +26,10 @@ import io.netty.buffer.ByteBuf;
  * email: gaohaoxiang@jd.com
  * date: 2018/11/30
  */
-public class BooleanAckCodec implements PayloadCodec<JournalqHeader, BooleanAck>, Type {
+public class BooleanAckCodec implements PayloadCodec<JoyQueueHeader, BooleanAck>, Type {
 
     @Override
-    public Object decode(JournalqHeader header, ByteBuf buffer) throws Exception {
+    public Object decode(JoyQueueHeader header, ByteBuf buffer) throws Exception {
         return null;
     }
 

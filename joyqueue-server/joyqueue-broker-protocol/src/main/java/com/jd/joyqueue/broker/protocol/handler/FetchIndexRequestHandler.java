@@ -17,15 +17,15 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.jd.joyqueue.broker.BrokerContext;
 import com.jd.joyqueue.broker.BrokerContextAware;
-import com.jd.joyqueue.broker.protocol.JournalqCommandHandler;
+import com.jd.joyqueue.broker.protocol.JoyQueueCommandHandler;
 import com.jd.joyqueue.broker.consumer.Consume;
 import com.jd.joyqueue.broker.helper.SessionHelper;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.network.command.BooleanAck;
 import com.jd.joyqueue.network.command.FetchIndexAckData;
 import com.jd.joyqueue.network.command.FetchIndexRequest;
 import com.jd.joyqueue.network.command.FetchIndexResponse;
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.session.Connection;
 import com.jd.joyqueue.network.session.Consumer;
 import com.jd.joyqueue.network.transport.Transport;
@@ -43,7 +43,7 @@ import java.util.Map;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/13
  */
-public class FetchIndexRequestHandler implements JournalqCommandHandler, Type, BrokerContextAware {
+public class FetchIndexRequestHandler implements JoyQueueCommandHandler, Type, BrokerContextAware {
 
     protected static final Logger logger = LoggerFactory.getLogger(FetchIndexRequestHandler.class);
 
@@ -61,7 +61,7 @@ public class FetchIndexRequestHandler implements JournalqCommandHandler, Type, B
 
         if (connection == null || !connection.isAuthorized(fetchIndexRequest.getApp())) {
             logger.warn("connection is not exists, transport: {}, app: {}", transport, fetchIndexRequest.getApp());
-            return BooleanAck.build(JournalqCode.FW_CONNECTION_NOT_EXISTS.getCode());
+            return BooleanAck.build(JoyQueueCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
         Table<String, Short, FetchIndexAckData> result = HashBasedTable.create();
@@ -85,9 +85,9 @@ public class FetchIndexRequestHandler implements JournalqCommandHandler, Type, B
         try  {
             long index = consume.getAckIndex(consumer, partition);
             fetchIndexAckData.setIndex(index);
-            fetchIndexAckData.setCode(JournalqCode.SUCCESS);
+            fetchIndexAckData.setCode(JoyQueueCode.SUCCESS);
         } catch (Exception e) {
-            fetchIndexAckData.setCode(JournalqCode.CN_UNKNOWN_ERROR);
+            fetchIndexAckData.setCode(JoyQueueCode.CN_UNKNOWN_ERROR);
             logger.error("fetchIndex exception, consumer: {}, partition: {}, transport: {}", consumer, partition, connection.getTransport(), e);
         }
         return fetchIndexAckData;
@@ -95,6 +95,6 @@ public class FetchIndexRequestHandler implements JournalqCommandHandler, Type, B
 
     @Override
     public int type() {
-        return JournalqCommandType.FETCH_INDEX_REQUEST.getCode();
+        return JoyQueueCommandType.FETCH_INDEX_REQUEST.getCode();
     }
 }

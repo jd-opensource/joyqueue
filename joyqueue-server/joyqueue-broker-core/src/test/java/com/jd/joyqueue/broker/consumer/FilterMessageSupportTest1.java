@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.broker.consumer;
 
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.message.BrokerMessage;
 import org.junit.Assert;
 import org.junit.Test;
@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
 public class FilterMessageSupportTest1 {
 
     @Test
-    public void doFilterTestAckAndReturn() throws JournalqException {
+    public void doFilterTestAckAndReturn() throws JoyQueueException {
         List<BrokerMessage> messages = new ArrayList<>();
         BrokerMessage brokerMessage1 = new BrokerMessage();
         brokerMessage1.setFlag((short) 1);
@@ -57,7 +57,7 @@ public class FilterMessageSupportTest1 {
 
 
     @Test
-    public void doFilterTestAckAndReturnByFalse() throws JournalqException {
+    public void doFilterTestAckAndReturnByFalse() throws JoyQueueException {
         List<BrokerMessage> messages = new ArrayList<>();
         BrokerMessage brokerMessage1 = new BrokerMessage();
         brokerMessage1.setFlag((short) 1);
@@ -84,7 +84,7 @@ public class FilterMessageSupportTest1 {
     }
 
     @Test
-    public void doFilterTestNoAckAndReturn() throws JournalqException {
+    public void doFilterTestNoAckAndReturn() throws JoyQueueException {
         List<BrokerMessage> messages = new ArrayList<>();
         BrokerMessage brokerMessage1 = new BrokerMessage();
         brokerMessage1.setFlag((short) 1);
@@ -111,7 +111,7 @@ public class FilterMessageSupportTest1 {
     }
 
     @Test
-    public void doFilterTestNoAckAndReturnByFalse() throws JournalqException {
+    public void doFilterTestNoAckAndReturnByFalse() throws JoyQueueException {
         List<BrokerMessage> messages = new ArrayList<>();
         BrokerMessage brokerMessage1 = new BrokerMessage();
         brokerMessage1.setFlag((short) 1);
@@ -138,7 +138,7 @@ public class FilterMessageSupportTest1 {
     }
 
     @Test
-    public void doFilterTestAllReturn() throws JournalqException {
+    public void doFilterTestAllReturn() throws JoyQueueException {
         List<BrokerMessage> messages = new ArrayList<>();
         BrokerMessage brokerMessage1 = new BrokerMessage();
         brokerMessage1.setFlag((short) 1);
@@ -166,7 +166,7 @@ public class FilterMessageSupportTest1 {
     }
 
     @Test
-    public void doFilterTestAllAck() throws JournalqException {
+    public void doFilterTestAllAck() throws JoyQueueException {
         List<BrokerMessage> messages = new ArrayList<>();
         BrokerMessage brokerMessage1 = new BrokerMessage();
         brokerMessage1.setFlag((short) 1);
@@ -206,7 +206,7 @@ public class FilterMessageSupportTest1 {
      * @param pattern
      * @return
      */
-    private FilterResult doFilter(List<BrokerMessage> messages, String pattern) throws JournalqException {
+    private FilterResult doFilter(List<BrokerMessage> messages, String pattern) throws JoyQueueException {
         List<BrokerMessage> validList = new ArrayList<>(); // 有效队列
         List<BrokerMessage> inValidList = null; // 无效队列
         boolean /* 有效到无效 */ valid2InvalidFlag = false,

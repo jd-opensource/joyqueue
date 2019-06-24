@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.network.command;
 
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 /**
  * ProduceMessagePrepareRequest
@@ -21,7 +21,7 @@ import com.jd.joyqueue.network.transport.command.JournalqPayload;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/18
  */
-public class ProduceMessagePrepareRequest extends JournalqPayload {
+public class ProduceMessagePrepareRequest extends JoyQueuePayload {
 
     private String topic;
     private String app;
@@ -31,7 +31,7 @@ public class ProduceMessagePrepareRequest extends JournalqPayload {
 
     @Override
     public int type() {
-        return JournalqCommandType.PRODUCE_MESSAGE_PREPARE_REQUEST.getCode();
+        return JoyQueueCommandType.PRODUCE_MESSAGE_PREPARE_REQUEST.getCode();
     }
 
     public void setTopic(String topic) {

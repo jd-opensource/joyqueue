@@ -15,7 +15,7 @@ package com.jd.joyqueue.broker.election.command;
 
 import com.jd.joyqueue.broker.election.TopicPartitionGroup;
 import com.jd.joyqueue.network.command.CommandType;
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 import com.jd.joyqueue.network.transport.command.Releasable;
 
 import java.nio.ByteBuffer;
@@ -25,7 +25,7 @@ import java.nio.ByteBuffer;
  * email: zhuduohui@jd.com
  * date: 2018/8/15
  */
-public class AppendEntriesRequest extends JournalqPayload implements Releasable {
+public class AppendEntriesRequest extends JoyQueuePayload implements Releasable {
     private TopicPartitionGroup topicPartitionGroup;
 
     private int term;

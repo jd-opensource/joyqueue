@@ -18,10 +18,10 @@ import com.jd.joyqueue.client.internal.nameserver.NameServerConfig;
 import com.jd.joyqueue.client.internal.nameserver.NameServerConfigChecker;
 import com.jd.joyqueue.client.internal.transport.config.TransportConfig;
 import com.jd.joyqueue.client.internal.transport.config.TransportConfigChecker;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.network.domain.BrokerNode;
 import com.jd.joyqueue.network.transport.TransportClient;
-import com.jd.joyqueue.network.transport.codec.support.JournalqCodec;
+import com.jd.joyqueue.network.transport.codec.support.JoyQueueCodec;
 import com.jd.joyqueue.network.transport.config.ClientConfig;
 import com.jd.joyqueue.network.transport.support.DefaultTransportClientFactory;
 import com.jd.joyqueue.toolkit.concurrent.NamedThreadFactory;
@@ -62,7 +62,7 @@ public class ClientManager extends Service {
     @Override
     protected void validate() throws Exception {
         clientGroupManager = new ClientGroupManager(transportConfig);
-        transportClient = new DefaultTransportClientFactory(new JournalqCodec()).create(convertToClientConfig(transportConfig));
+        transportClient = new DefaultTransportClientFactory(new JoyQueueCodec()).create(convertToClientConfig(transportConfig));
         heartbeatThreadScheduler = Executors.newScheduledThreadPool(1, new NamedThreadFactory("journalq-client-heartbeat"));
     }
 
@@ -165,7 +165,7 @@ public class ClientManager extends Service {
 
     protected void checkState() {
         if (!isStarted()) {
-            throw new ClientException("clientManager is not started", JournalqCode.CN_SERVICE_NOT_AVAILABLE.getCode());
+            throw new ClientException("clientManager is not started", JoyQueueCode.CN_SERVICE_NOT_AVAILABLE.getCode());
         }
     }
 

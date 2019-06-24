@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.broker.protocol.coordinator;
 
-import com.jd.joyqueue.broker.protocol.config.JournalqConfig;
+import com.jd.joyqueue.broker.protocol.config.JoyQueueConfig;
 import com.jd.joyqueue.broker.protocol.coordinator.domain.GroupMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,10 +28,10 @@ public class GroupMetadataManager {
 
     protected static final Logger logger = LoggerFactory.getLogger(GroupMetadataManager.class);
 
-    private JournalqConfig config;
+    private JoyQueueConfig config;
     private com.jd.joyqueue.broker.coordinator.group.GroupMetadataManager groupMetadataManager;
 
-    public GroupMetadataManager(JournalqConfig config, com.jd.joyqueue.broker.coordinator.group.GroupMetadataManager groupMetadataManager) {
+    public GroupMetadataManager(JoyQueueConfig config, com.jd.joyqueue.broker.coordinator.group.GroupMetadataManager groupMetadataManager) {
         this.config = config;
         this.groupMetadataManager = groupMetadataManager;
     }

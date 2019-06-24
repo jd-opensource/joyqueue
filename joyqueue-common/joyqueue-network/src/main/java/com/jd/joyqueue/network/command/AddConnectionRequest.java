@@ -15,7 +15,7 @@ package com.jd.joyqueue.network.command;
 
 import com.jd.joyqueue.network.session.ClientId;
 import com.jd.joyqueue.network.session.Language;
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 /**
  * AddConnection
@@ -23,7 +23,7 @@ import com.jd.joyqueue.network.transport.command.JournalqPayload;
  * email: gaohaoxiang@jd.com
  * date: 2018/11/29
  */
-public class AddConnectionRequest extends JournalqPayload {
+public class AddConnectionRequest extends JoyQueuePayload {
 
     private String username;
     private String password;
@@ -36,7 +36,7 @@ public class AddConnectionRequest extends JournalqPayload {
 
     @Override
     public int type() {
-        return JournalqCommandType.ADD_CONNECTION_REQUEST.getCode();
+        return JoyQueueCommandType.ADD_CONNECTION_REQUEST.getCode();
     }
 
     public String getUsername() {

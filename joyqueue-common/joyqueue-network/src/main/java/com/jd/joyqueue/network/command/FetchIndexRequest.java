@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.network.command;
 
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 import java.util.List;
 import java.util.Map;
@@ -24,14 +24,14 @@ import java.util.Map;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/13
  */
-public class FetchIndexRequest extends JournalqPayload {
+public class FetchIndexRequest extends JoyQueuePayload {
 
     private Map<String, List<Short>> partitions;
     private String app;
 
     @Override
     public int type() {
-        return JournalqCommandType.FETCH_INDEX_REQUEST.getCode();
+        return JoyQueueCommandType.FETCH_INDEX_REQUEST.getCode();
     }
 
     public void setPartitions(Map<String, List<Short>> partitions) {

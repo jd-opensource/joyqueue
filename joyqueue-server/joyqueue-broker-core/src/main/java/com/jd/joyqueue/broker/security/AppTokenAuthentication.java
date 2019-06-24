@@ -17,8 +17,8 @@ import com.jd.joyqueue.broker.BrokerContext;
 import com.jd.joyqueue.broker.BrokerContextAware;
 import com.jd.joyqueue.broker.cluster.ClusterManager;
 import com.jd.joyqueue.domain.AppToken;
-import com.jd.joyqueue.exception.JournalqCode;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueCode;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.response.BooleanResponse;
 import com.jd.joyqueue.security.Authentication;
 
@@ -50,7 +50,7 @@ public class AppTokenAuthentication implements Authentication, BrokerContextAwar
     }
 
     @Override
-    public UserDetails getUser(String user) throws JournalqException {
+    public UserDetails getUser(String user) throws JoyQueueException {
         return null;
     }
 
@@ -63,11 +63,11 @@ public class AppTokenAuthentication implements Authentication, BrokerContextAwar
     public BooleanResponse auth(String userName, String password) {
         AppToken appToken = clusterManager.getAppToken(userName, password);
         if (null == appToken) {
-            return BooleanResponse.failed(JournalqCode.CN_AUTHENTICATION_ERROR);
+            return BooleanResponse.failed(JoyQueueCode.CN_AUTHENTICATION_ERROR);
         }
         long now = SystemClock.now();
         if (now < appToken.getEffectiveTime().getTime() || now > appToken.getExpirationTime().getTime()) {
-            return BooleanResponse.failed(JournalqCode.CN_AUTHENTICATION_ERROR);
+            return BooleanResponse.failed(JoyQueueCode.CN_AUTHENTICATION_ERROR);
         }
         return BooleanResponse.success();
     }
@@ -76,7 +76,7 @@ public class AppTokenAuthentication implements Authentication, BrokerContextAwar
     public BooleanResponse auth(String userName, String password, boolean checkAdmin) {
         BooleanResponse response = auth(userName, password);
         if (response.isSuccess() && (checkAdmin?isAdmin(userName):true)) return response;
-        return BooleanResponse.failed(JournalqCode.CN_AUTHENTICATION_ERROR);
+        return BooleanResponse.failed(JoyQueueCode.CN_AUTHENTICATION_ERROR);
     }
 
     @Override

@@ -14,7 +14,7 @@
 package com.jd.joyqueue.client;
 
 import io.openmessaging.KeyValue;
-import io.openmessaging.joyqueue.domain.JournalQConsumerBuiltinKeys;
+import io.openmessaging.joyqueue.domain.JoyQueueConsumerBuiltinKeys;
 
 /**
  * author: gaohaoxiang
@@ -26,7 +26,7 @@ public class ConsumerTest2 extends ConsumerTest1 {
     @Override
     protected KeyValue getAttributes() {
         KeyValue keyValue = super.getAttributes();
-        keyValue.put(JournalQConsumerBuiltinKeys.LOADBALANCE, false);
+        keyValue.put(JoyQueueConsumerBuiltinKeys.LOADBALANCE, false);
         return keyValue;
     }
 }

@@ -15,8 +15,8 @@ package com.jd.joyqueue.server.retry.console;
 
 import com.google.common.collect.Lists;
 import com.jd.joyqueue.domain.ConsumeRetry;
-import com.jd.joyqueue.exception.JournalqCode;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueCode;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.model.PageResult;
 import com.jd.joyqueue.model.Pagination;
 import com.jd.joyqueue.server.retry.api.ConsoleMessageRetry;
@@ -81,7 +81,7 @@ public class DbConsoleMessageRetry implements ConsoleMessageRetry<Long> {
     private static final String COUNT_SQL = "select count(*) from message_retry where topic = ? and app = ? and status = ? ";
 
     @Override
-    public PageResult<ConsumeRetry> queryConsumeRetryList(RetryQueryCondition retryQueryCondition) throws JournalqException {
+    public PageResult<ConsumeRetry> queryConsumeRetryList(RetryQueryCondition retryQueryCondition) throws JoyQueueException {
 
         String queryDataSql = addCondition(retryQueryCondition, QUERY_SQL, true);
         PageResult<ConsumeRetry> pageResult = new PageResult<>();
@@ -128,11 +128,11 @@ public class DbConsoleMessageRetry implements ConsoleMessageRetry<Long> {
 
             return pageResult;
         } catch (Exception e) {
-            throw new JournalqException(ToStringBuilder.reflectionToString(retryQueryCondition), e, JournalqCode.CN_DB_ERROR.getCode());
+            throw new JoyQueueException(ToStringBuilder.reflectionToString(retryQueryCondition), e, JoyQueueCode.CN_DB_ERROR.getCode());
         }
     }
     @Override
-    public ConsumeRetry getConsumeRetryById(Long id) throws JournalqException {
+    public ConsumeRetry getConsumeRetryById(Long id) throws JoyQueueException {
 
         try {
             ConsumeRetry consumeRetry = DaoUtil.queryObject(dataSource, GET_BYID, new DaoUtil.QueryCallback<ConsumeRetry>() {
@@ -168,7 +168,7 @@ public class DbConsoleMessageRetry implements ConsoleMessageRetry<Long> {
             });
             return consumeRetry;
         } catch (Exception e) {
-            throw new JournalqException(ToStringBuilder.reflectionToString(id),e,JournalqCode.CN_DB_ERROR.getCode());
+            throw new JoyQueueException(ToStringBuilder.reflectionToString(id),e, JoyQueueCode.CN_DB_ERROR.getCode());
         }
     }
     /**
@@ -257,33 +257,33 @@ public class DbConsoleMessageRetry implements ConsoleMessageRetry<Long> {
     }
 
     @Override
-    public void addRetry(List<RetryMessageModel> retryMessageModelList) throws JournalqException {
+    public void addRetry(List<RetryMessageModel> retryMessageModelList) throws JoyQueueException {
         dbMessageRetry.addRetry(retryMessageModelList);
     }
 
     @Override
-    public void retrySuccess(String topic, String app, Long[] messageIds) throws JournalqException {
+    public void retrySuccess(String topic, String app, Long[] messageIds) throws JoyQueueException {
         dbMessageRetry.retrySuccess(topic, app, messageIds);
     }
 
     @Override
-    public void retryError(String topic, String app, Long[] messageIds) throws JournalqException {
+    public void retryError(String topic, String app, Long[] messageIds) throws JoyQueueException {
         dbMessageRetry.retryError(topic, app, messageIds);
     }
 
     @Override
-    public void retryExpire(String topic, String app, Long[] messageIds) throws JournalqException {
+    public void retryExpire(String topic, String app, Long[] messageIds) throws JoyQueueException {
         dbMessageRetry.retryExpire(topic, app, messageIds);
     }
 
     @Override
-    public List<RetryMessageModel> getRetry(String topic, String app, short count, long startIndex) throws JournalqException {
+    public List<RetryMessageModel> getRetry(String topic, String app, short count, long startIndex) throws JoyQueueException {
         // 该方法会操作缓存和数据库，管理端调用会影响broker
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public int countRetry(String topic, String app) throws JournalqException {
+    public int countRetry(String topic, String app) throws JoyQueueException {
         return dbMessageRetry.countRetry(topic, app);
     }
 

@@ -16,7 +16,7 @@ package com.jd.joyqueue.nsr.network;
 import com.jd.joyqueue.network.transport.codec.Codec;
 import com.jd.joyqueue.network.transport.codec.CodecFactory;
 import com.jd.joyqueue.network.transport.codec.PayloadCodecFactory;
-import com.jd.joyqueue.network.transport.codec.support.JournalqCodec;
+import com.jd.joyqueue.network.transport.codec.support.JoyQueueCodec;
 import com.jd.joyqueue.nsr.NsrPlugins;
 
 /**
@@ -34,6 +34,6 @@ public class NsrCodecFactory implements CodecFactory {
     public Codec getCodec() {
         PayloadCodecFactory payloadCodecFactory = new PayloadCodecFactory();
         NsrPlugins.nsrPayloadCodecPlugins.extensions().forEach(nsrPayloadCodec -> payloadCodecFactory.register(nsrPayloadCodec));
-        return new JournalqCodec(payloadCodecFactory);
+        return new JoyQueueCodec(payloadCodecFactory);
     }
 }

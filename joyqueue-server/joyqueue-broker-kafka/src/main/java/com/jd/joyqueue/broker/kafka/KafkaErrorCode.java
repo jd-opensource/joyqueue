@@ -14,8 +14,8 @@
 package com.jd.joyqueue.broker.kafka;
 
 import com.google.common.collect.Maps;
-import com.jd.joyqueue.exception.JournalqCode;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueCode;
+import com.jd.joyqueue.exception.JoyQueueException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,21 +30,21 @@ import java.util.Map;
 public enum KafkaErrorCode {
 
     UNKNOWN_SERVER_ERROR(-1),
-    NONE(0, JournalqCode.SUCCESS),
+    NONE(0, JoyQueueCode.SUCCESS),
     OFFSET_OUT_OF_RANGE(1),
     CORRUPT_MESSAGE(2,
-            JournalqCode.CN_CHECKSUM_ERROR, JournalqCode.CT_MESSAGE_BODY_NULL),
+            JoyQueueCode.CN_CHECKSUM_ERROR, JoyQueueCode.CT_MESSAGE_BODY_NULL),
     UNKNOWN_TOPIC_OR_PARTITION(3,
-            JournalqCode.CN_NO_PERMISSION, JournalqCode.CN_AUTHENTICATION_ERROR),
+            JoyQueueCode.CN_NO_PERMISSION, JoyQueueCode.CN_AUTHENTICATION_ERROR),
     INVALID_FETCH_SIZE(4),
     LEADER_NOT_AVAILABLE(5),
-    NOT_LEADER_FOR_PARTITION(6, JournalqCode.CT_NO_CLUSTER),
+    NOT_LEADER_FOR_PARTITION(6, JoyQueueCode.CT_NO_CLUSTER),
     REQUEST_TIMED_OUT(7,
-            JournalqCode.CN_REQUEST_TIMEOUT, JournalqCode.CN_REQUEST_ERROR, JournalqCode.CN_REQUEST_EXCESSIVE, JournalqCode.CN_THREAD_INTERRUPTED, JournalqCode.CN_THREAD_EXECUTOR_BUSY),
+            JoyQueueCode.CN_REQUEST_TIMEOUT, JoyQueueCode.CN_REQUEST_ERROR, JoyQueueCode.CN_REQUEST_EXCESSIVE, JoyQueueCode.CN_THREAD_INTERRUPTED, JoyQueueCode.CN_THREAD_EXECUTOR_BUSY),
     BROKER_NOT_AVAILABLE(8,
-            JournalqCode.CN_SERVICE_NOT_AVAILABLE, JournalqCode.CN_CONNECTION_ERROR, JournalqCode.CN_CONNECTION_TIMEOUT),
+            JoyQueueCode.CN_SERVICE_NOT_AVAILABLE, JoyQueueCode.CN_CONNECTION_ERROR, JoyQueueCode.CN_CONNECTION_TIMEOUT),
     REPLICA_NOT_AVAILABLE(9,
-            JournalqCode.CY_REPLICATE_TIMEOUT, JournalqCode.CY_REPLICATE_ERROR, JournalqCode.CY_REPLICATE_ENQUEUE_TIMEOUT),
+            JoyQueueCode.CY_REPLICATE_TIMEOUT, JoyQueueCode.CY_REPLICATE_ERROR, JoyQueueCode.CY_REPLICATE_ENQUEUE_TIMEOUT),
     MESSAGE_TOO_LARGE(10),
     STALE_CONTROLLER_EPOCH(11),
     OFFSET_METADATA_TOO_LARGE(12),
@@ -121,11 +121,11 @@ public enum KafkaErrorCode {
 
     static {
         for (KafkaErrorCode errorCode : KafkaErrorCode.values()) {
-            if (errorCode.getJournalqCodes() == null) {
+            if (errorCode.getJoyQueueCodes() == null) {
                 continue;
             }
-            for (JournalqCode JournalqCode : errorCode.getJournalqCodes()) {
-                JOURNALQ_CODE_TO_CODE_MAPPER.put(JournalqCode.getCode(), errorCode.getCode());
+            for (JoyQueueCode JoyQueueCode : errorCode.getJoyQueueCodes()) {
+                JOURNALQ_CODE_TO_CODE_MAPPER.put(JoyQueueCode.getCode(), errorCode.getCode());
             }
         }
 
@@ -140,7 +140,7 @@ public enum KafkaErrorCode {
     }
 
     private int code;
-    private JournalqCode[] JournalqCodes;
+    private JoyQueueCode[] joyQueueCodes;
     private Throwable[] exception;
 
     KafkaErrorCode(int code) {
@@ -152,14 +152,14 @@ public enum KafkaErrorCode {
         this.exception = exception;
     }
 
-    KafkaErrorCode(int code, JournalqCode... JournalqCodes) {
+    KafkaErrorCode(int code, JoyQueueCode... joyQueueCodes) {
         this.code = code;
-        this.JournalqCodes = JournalqCodes;
+        this.joyQueueCodes = joyQueueCodes;
     }
 
-    KafkaErrorCode(int code, Throwable[] exception, JournalqCode[] JournalqCodes) {
+    KafkaErrorCode(int code, Throwable[] exception, JoyQueueCode[] joyQueueCodes) {
         this.code = code;
-        this.JournalqCodes = JournalqCodes;
+        this.joyQueueCodes = joyQueueCodes;
         this.exception = exception;
     }
 
@@ -167,8 +167,8 @@ public enum KafkaErrorCode {
         return (short) code;
     }
 
-    public JournalqCode[] getJournalqCodes() {
-        return JournalqCodes;
+    public JoyQueueCode[] getJoyQueueCodes() {
+        return joyQueueCodes;
     }
 
     public Throwable[] getException() {
@@ -176,8 +176,8 @@ public enum KafkaErrorCode {
     }
 
     public static short exceptionFor(Throwable exception) {
-        if (exception instanceof JournalqException) {
-            return journalqCodeFor(((JournalqException) exception).getCode());
+        if (exception instanceof JoyQueueException) {
+            return journalqCodeFor(((JoyQueueException) exception).getCode());
         } else {
             return kafkaExceptionFor(exception);
         }
@@ -195,7 +195,7 @@ public enum KafkaErrorCode {
     public static short journalqCodeFor(int journalqCode) {
         Short code = JOURNALQ_CODE_TO_CODE_MAPPER.get(journalqCode);
         if (code == null) {
-            logger.warn("unsupported code mapper, code: {}", JournalqCode.valueOf(journalqCode));
+            logger.warn("unsupported code mapper, code: {}", JoyQueueCode.valueOf(journalqCode));
             code = UNKNOWN_SERVER_ERROR.getCode();
         }
         return code;

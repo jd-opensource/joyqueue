@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.store.transaction;
 
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.store.ReadException;
 import com.jd.joyqueue.store.StoreInitializeException;
 import com.jd.joyqueue.store.WriteResult;
@@ -124,10 +124,10 @@ public class TransactionStoreManager implements TransactionStore, Closeable {
             PositioningStore<ByteBuffer> positioningStore = getOrCreate(id);
             positioningStore.append(messages);
             positioningStore.flush();
-            writeResult.setCode(JournalqCode.SUCCESS);
+            writeResult.setCode(JoyQueueCode.SUCCESS);
         } catch (Throwable t) {
             logger.warn("Write transaction file \"{}/{}\" exception: ", base.getAbsoluteFile(), id, t);
-            writeResult.setCode(JournalqCode.CN_TRANSACTION_EXECUTE_ERROR);
+            writeResult.setCode(JoyQueueCode.CN_TRANSACTION_EXECUTE_ERROR);
         }
         return writeResult;
     }

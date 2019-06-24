@@ -15,7 +15,7 @@ package com.jd.joyqueue.broker.buffer;
 
 import com.jd.joyqueue.message.BrokerMessage;
 import com.jd.joyqueue.message.BrokerPrepare;
-import com.jd.joyqueue.message.JournalLog;
+import com.jd.joyqueue.message.JoyQueueLog;
 import com.jd.joyqueue.message.Message;
 import com.jd.joyqueue.toolkit.io.Compressors;
 import com.jd.joyqueue.toolkit.io.Zip;
@@ -169,7 +169,7 @@ public class Serializer extends AbstractSerializer {
     }
 
     @Deprecated
-    public static ByteBuf serialize(JournalLog log, ByteBuf out) throws Exception {
+    public static ByteBuf serialize(JoyQueueLog log, ByteBuf out) throws Exception {
 
         BrokerMessage message = (BrokerMessage) log;
         write(message, out);
@@ -177,7 +177,7 @@ public class Serializer extends AbstractSerializer {
         return out;
     }
 
-    public static ByteBuffer serialize(JournalLog log, ByteBuffer out, int size) throws Exception {
+    public static ByteBuffer serialize(JoyQueueLog log, ByteBuffer out, int size) throws Exception {
 
         BrokerMessage message = (BrokerMessage) log;
         write(message, out, size);
@@ -772,7 +772,7 @@ public class Serializer extends AbstractSerializer {
      */
 //    @Deprecated
 //    public static <K, V> void write(final Map<K, V> hashMap, ByteBuf out) throws Exception {
-//        JournalqMapTools.write(hashMap, out);
+//        JoyQueueMapTools.write(hashMap, out);
 //    }
 
 

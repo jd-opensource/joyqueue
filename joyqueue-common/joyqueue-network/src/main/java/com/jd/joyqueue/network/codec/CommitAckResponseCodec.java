@@ -15,11 +15,11 @@ package com.jd.joyqueue.network.codec;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.network.command.CommitAckResponse;
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.serializer.Serializer;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.codec.PayloadCodec;
 import com.jd.joyqueue.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
@@ -32,19 +32,19 @@ import java.util.Map;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/12
  */
-public class CommitAckResponseCodec implements PayloadCodec<JournalqHeader, CommitAckResponse>, Type {
+public class CommitAckResponseCodec implements PayloadCodec<JoyQueueHeader, CommitAckResponse>, Type {
 
     @Override
-    public CommitAckResponse decode(JournalqHeader header, ByteBuf buffer) throws Exception {
+    public CommitAckResponse decode(JoyQueueHeader header, ByteBuf buffer) throws Exception {
         short size = buffer.readShort();
-        Table<String, Short, JournalqCode> result = HashBasedTable.create();
+        Table<String, Short, JoyQueueCode> result = HashBasedTable.create();
 
         for (int i = 0; i < size; i++) {
             String topic = Serializer.readString(buffer, Serializer.SHORT_SIZE);
             short partitionSize = buffer.readShort();
             for (int j = 0; j < partitionSize; j++) {
                 short partition = buffer.readShort();
-                result.put(topic, partition, JournalqCode.valueOf(buffer.readInt()));
+                result.put(topic, partition, JoyQueueCode.valueOf(buffer.readInt()));
             }
         }
 
@@ -56,10 +56,10 @@ public class CommitAckResponseCodec implements PayloadCodec<JournalqHeader, Comm
     @Override
     public void encode(CommitAckResponse payload, ByteBuf buffer) throws Exception {
         buffer.writeShort(payload.getResult().size());
-        for (Map.Entry<String, Map<Short, JournalqCode>> entry : payload.getResult().rowMap().entrySet()) {
+        for (Map.Entry<String, Map<Short, JoyQueueCode>> entry : payload.getResult().rowMap().entrySet()) {
             Serializer.write(entry.getKey(), buffer, Serializer.SHORT_SIZE);
             buffer.writeShort(entry.getValue().size());
-            for (Map.Entry<Short, JournalqCode> partitionEntry : entry.getValue().entrySet()) {
+            for (Map.Entry<Short, JoyQueueCode> partitionEntry : entry.getValue().entrySet()) {
                 buffer.writeShort(partitionEntry.getKey());
                 buffer.writeInt(partitionEntry.getValue().getCode());
             }
@@ -68,6 +68,6 @@ public class CommitAckResponseCodec implements PayloadCodec<JournalqHeader, Comm
 
     @Override
     public int type() {
-        return JournalqCommandType.COMMIT_ACK_RESPONSE.getCode();
+        return JoyQueueCommandType.COMMIT_ACK_RESPONSE.getCode();
     }
 }

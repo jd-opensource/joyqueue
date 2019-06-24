@@ -14,8 +14,8 @@
 package com.jd.joyqueue.network.codec;
 
 import com.jd.joyqueue.network.command.FetchHealthResponse;
-import com.jd.joyqueue.network.command.JournalqCommandType;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.codec.PayloadCodec;
 import com.jd.joyqueue.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
@@ -26,10 +26,10 @@ import io.netty.buffer.ByteBuf;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/28
  */
-public class FetchHealthResponseCodec implements PayloadCodec<JournalqHeader, FetchHealthResponse>, Type {
+public class FetchHealthResponseCodec implements PayloadCodec<JoyQueueHeader, FetchHealthResponse>, Type {
 
     @Override
-    public Object decode(JournalqHeader header, ByteBuf buffer) throws Exception {
+    public Object decode(JoyQueueHeader header, ByteBuf buffer) throws Exception {
         double point = buffer.readDouble();
         FetchHealthResponse fetchHealthResponse = new FetchHealthResponse();
         fetchHealthResponse.setPoint(point);
@@ -43,6 +43,6 @@ public class FetchHealthResponseCodec implements PayloadCodec<JournalqHeader, Fe
 
     @Override
     public int type() {
-        return JournalqCommandType.FETCH_HEALTH_RESPONSE.getCode();
+        return JoyQueueCommandType.FETCH_HEALTH_RESPONSE.getCode();
     }
 }

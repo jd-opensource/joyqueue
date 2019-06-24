@@ -32,8 +32,8 @@ import io.openmessaging.KeyValue;
 import io.openmessaging.extension.QueueMetaData;
 import io.openmessaging.interceptor.Context;
 import io.openmessaging.interceptor.ProducerInterceptor;
-import io.openmessaging.joyqueue.domain.JournalQProducerBuiltinKeys;
-import io.openmessaging.joyqueue.domain.JournalQTxFeedbackBuiltinKeys;
+import io.openmessaging.joyqueue.domain.JoyQueueProducerBuiltinKeys;
+import io.openmessaging.joyqueue.domain.JoyQueueTxFeedbackBuiltinKeys;
 import io.openmessaging.joyqueue.producer.ExtensionProducer;
 import io.openmessaging.joyqueue.producer.ExtensionTransactionalResult;
 import io.openmessaging.message.Message;
@@ -61,9 +61,9 @@ public class ProducerTest1 extends AbstractProducerTest {
     @Override
     protected KeyValue getAttributes() {
         KeyValue keyValue = super.getAttributes();
-        keyValue.put(JournalQTxFeedbackBuiltinKeys.FETCH_INTERVAL, 1);
-        keyValue.put(JournalQTxFeedbackBuiltinKeys.FETCH_SIZE, 10);
-        keyValue.put(JournalQProducerBuiltinKeys.TRANSACTION_TIMEOUT, 1000 * 10);
+        keyValue.put(JoyQueueTxFeedbackBuiltinKeys.FETCH_INTERVAL, 1);
+        keyValue.put(JoyQueueTxFeedbackBuiltinKeys.FETCH_SIZE, 10);
+        keyValue.put(JoyQueueProducerBuiltinKeys.TRANSACTION_TIMEOUT, 1000 * 10);
         return keyValue;
     }
 

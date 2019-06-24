@@ -15,7 +15,7 @@ package com.jd.joyqueue.broker.archive;
 
 import com.jd.joyqueue.broker.Plugins;
 import com.jd.joyqueue.broker.cluster.ClusterManager;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.message.MessageLocation;
 import com.jd.joyqueue.network.session.Connection;
 import com.jd.joyqueue.server.archive.store.api.ArchiveStore;
@@ -130,7 +130,7 @@ public class ConsumeArchiveService extends Service {
     /**
      * 读本地文件写归档存储服务
      */
-    private void readAndWrite() throws JournalqException, InterruptedException {
+    private void readAndWrite() throws JoyQueueException, InterruptedException {
         // 读信息，一次读指定条数
         List<ConsumeLog> list = readConsumeLog(archiveConfig.getReadBatchNum());
         if (list.size() > 0) {
@@ -184,7 +184,7 @@ public class ConsumeArchiveService extends Service {
      * @param connection 客户端连接信息
      * @param locations  应答位置信息数组
      */
-    public void appendConsumeLog(Connection connection, MessageLocation[] locations) throws JournalqException {
+    public void appendConsumeLog(Connection connection, MessageLocation[] locations) throws JoyQueueException {
         if (!isStarted()) {
             // 没有启动消费归档服务，添加消费日志
             logger.debug("ConsumeArchiveService not be started.");
@@ -206,7 +206,7 @@ public class ConsumeArchiveService extends Service {
      * @param locations  应答位置信息数组
      * @return
      */
-    private List<ConsumeLog> convert(Connection connection, MessageLocation[] locations) throws JournalqException {
+    private List<ConsumeLog> convert(Connection connection, MessageLocation[] locations) throws JoyQueueException {
         List<ConsumeLog> list = new LinkedList<>();
         for (MessageLocation location : locations) {
             ConsumeLog log = new ConsumeLog();

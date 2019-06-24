@@ -15,9 +15,9 @@ package com.jd.joyqueue.broker.protocol.handler;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.jd.joyqueue.broker.protocol.JournalqCommandHandler;
-import com.jd.joyqueue.broker.protocol.JournalqContext;
-import com.jd.joyqueue.broker.protocol.JournalqContextAware;
+import com.jd.joyqueue.broker.protocol.JoyQueueCommandHandler;
+import com.jd.joyqueue.broker.protocol.JoyQueueContext;
+import com.jd.joyqueue.broker.protocol.JoyQueueContextAware;
 import com.jd.joyqueue.broker.protocol.coordinator.Coordinator;
 import com.jd.joyqueue.broker.protocol.coordinator.assignment.PartitionAssignmentHandler;
 import com.jd.joyqueue.broker.protocol.coordinator.domain.PartitionAssignment;
@@ -26,13 +26,13 @@ import com.jd.joyqueue.domain.DataCenter;
 import com.jd.joyqueue.domain.PartitionGroup;
 import com.jd.joyqueue.domain.TopicConfig;
 import com.jd.joyqueue.domain.TopicName;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.network.command.BooleanAck;
 import com.jd.joyqueue.network.command.FetchAssignedPartitionAckData;
 import com.jd.joyqueue.network.command.FetchAssignedPartitionData;
 import com.jd.joyqueue.network.command.FetchAssignedPartitionRequest;
 import com.jd.joyqueue.network.command.FetchAssignedPartitionResponse;
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.session.Connection;
 import com.jd.joyqueue.network.transport.Transport;
 import com.jd.joyqueue.network.transport.command.Command;
@@ -55,7 +55,7 @@ import java.util.Map;
  * date: 2018/12/4
  */
 // TODO 部分逻辑移到partitionAssignmentHandler
-public class FetchAssignedPartitionRequestHandler implements JournalqCommandHandler, Type, JournalqContextAware {
+public class FetchAssignedPartitionRequestHandler implements JoyQueueCommandHandler, Type, JoyQueueContextAware {
 
     protected static final Logger logger = LoggerFactory.getLogger(FetchAssignedPartitionRequestHandler.class);
 
@@ -64,10 +64,10 @@ public class FetchAssignedPartitionRequestHandler implements JournalqCommandHand
     private NameService nameService;
 
     @Override
-    public void setJournalqContext(JournalqContext journalqContext) {
-        this.coordinator = journalqContext.getCoordinator();
-        this.partitionAssignmentHandler = journalqContext.getPartitionAssignmentHandler();
-        this.nameService = journalqContext.getBrokerContext().getNameService();
+    public void setJoyQueueContext(JoyQueueContext joyQueueContext) {
+        this.coordinator = joyQueueContext.getCoordinator();
+        this.partitionAssignmentHandler = joyQueueContext.getPartitionAssignmentHandler();
+        this.nameService = joyQueueContext.getBrokerContext().getNameService();
     }
 
     @Override
@@ -80,12 +80,12 @@ public class FetchAssignedPartitionRequestHandler implements JournalqCommandHand
 
         if (connection == null || !connection.isAuthorized(fetchAssignedPartitionRequest.getApp())) {
             logger.warn("connection is not exists, transport: {}, app: {}", transport, fetchAssignedPartitionRequest.getApp());
-            return BooleanAck.build(JournalqCode.FW_CONNECTION_NOT_EXISTS.getCode());
+            return BooleanAck.build(JoyQueueCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
         if (!coordinator.isCurrentGroup(fetchAssignedPartitionRequest.getApp())) {
             logger.warn("coordinator is not current, app: {}, topics: {}, transport: {}", fetchAssignedPartitionRequest.getApp(), fetchAssignedPartitionRequest.getData(), transport);
-            return BooleanAck.build(JournalqCode.FW_COORDINATOR_NOT_AVAILABLE.getCode());
+            return BooleanAck.build(JoyQueueCode.FW_COORDINATOR_NOT_AVAILABLE.getCode());
         }
 
         Map<String, FetchAssignedPartitionAckData> topicPartitions = Maps.newHashMapWithExpectedSize(fetchAssignedPartitionRequest.getData().size());
@@ -95,7 +95,7 @@ public class FetchAssignedPartitionRequestHandler implements JournalqCommandHand
 
             if (fetchAssignedPartitionAckData == null) {
                 logger.warn("partitionAssignment is null, topic: {}, app: {}, transport: {}", fetchAssignedPartitionData, fetchAssignedPartitionRequest.getApp(), transport);
-                fetchAssignedPartitionAckData = new FetchAssignedPartitionAckData(JournalqCode.FW_COORDINATOR_PARTITION_ASSIGNOR_ERROR);
+                fetchAssignedPartitionAckData = new FetchAssignedPartitionAckData(JoyQueueCode.FW_COORDINATOR_PARTITION_ASSIGNOR_ERROR);
             }
             topicPartitions.put(fetchAssignedPartitionData.getTopic(), fetchAssignedPartitionAckData);
         }
@@ -118,12 +118,12 @@ public class FetchAssignedPartitionRequestHandler implements JournalqCommandHand
             topicPartitionGroups = Lists.newArrayList(topicConfig.getPartitionGroups().values());
         }
         if (CollectionUtils.isEmpty(topicPartitionGroups)) {
-            return new FetchAssignedPartitionAckData(JournalqCode.FW_COORDINATOR_PARTITION_ASSIGNOR_NO_PARTITIONS);
+            return new FetchAssignedPartitionAckData(JoyQueueCode.FW_COORDINATOR_PARTITION_ASSIGNOR_NO_PARTITIONS);
         }
 
         PartitionAssignment partitionAssignment = partitionAssignmentHandler.assign(fetchAssignedPartitionData.getTopic(),
                 app, connectionId, connectionHost, fetchAssignedPartitionData.getSessionTimeout(), topicPartitionGroups);
-        return new FetchAssignedPartitionAckData(partitionAssignment.getPartitions(), JournalqCode.SUCCESS);
+        return new FetchAssignedPartitionAckData(partitionAssignment.getPartitions(), JoyQueueCode.SUCCESS);
     }
 
     protected List<PartitionGroup> getTopicRegionPartitionGroup(TopicConfig topicConfig, String region) {
@@ -142,6 +142,6 @@ public class FetchAssignedPartitionRequestHandler implements JournalqCommandHand
 
     @Override
     public int type() {
-        return JournalqCommandType.FETCH_ASSIGNED_PARTITION_REQUEST.getCode();
+        return JoyQueueCommandType.FETCH_ASSIGNED_PARTITION_REQUEST.getCode();
     }
 }

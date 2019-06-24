@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.nsr.network.command;
 
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 import java.util.Set;
 
@@ -21,7 +21,7 @@ import java.util.Set;
  * @author wylixiaobin
  * Date: 2019/1/27
  */
-public class GetAllTopicsAck extends JournalqPayload {
+public class GetAllTopicsAck extends JoyQueuePayload {
 
     private Set<String> topicNames;
 

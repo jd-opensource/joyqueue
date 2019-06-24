@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.store;
 
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.store.file.PositioningStore;
 import com.jd.joyqueue.store.file.StoreFile;
 import com.jd.joyqueue.store.index.IndexItem;
@@ -202,7 +202,7 @@ public class StoreManagement implements StoreManagementService {
                         }
                     })
                     .filter(Objects::nonNull)
-                    .filter(r -> r.getCode() == JournalqCode.SUCCESS)
+                    .filter(r -> r.getCode() == JoyQueueCode.SUCCESS)
                     .map(ReadResult::getMessages)
                     .flatMap(Arrays::stream)
                     .map(this::getBytes)

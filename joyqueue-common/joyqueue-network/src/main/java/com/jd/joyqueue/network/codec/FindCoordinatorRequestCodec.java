@@ -15,9 +15,9 @@ package com.jd.joyqueue.network.codec;
 
 import com.google.common.collect.Lists;
 import com.jd.joyqueue.network.command.FindCoordinatorRequest;
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.serializer.Serializer;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.codec.PayloadCodec;
 import com.jd.joyqueue.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
@@ -30,10 +30,10 @@ import java.util.List;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/3
  */
-public class FindCoordinatorRequestCodec implements PayloadCodec<JournalqHeader, FindCoordinatorRequest>, Type {
+public class FindCoordinatorRequestCodec implements PayloadCodec<JoyQueueHeader, FindCoordinatorRequest>, Type {
 
     @Override
-    public FindCoordinatorRequest decode(JournalqHeader header, ByteBuf buffer) throws Exception {
+    public FindCoordinatorRequest decode(JoyQueueHeader header, ByteBuf buffer) throws Exception {
         FindCoordinatorRequest findCoordinatorRequest = new FindCoordinatorRequest();
 
         short topicSize = buffer.readShort();
@@ -58,6 +58,6 @@ public class FindCoordinatorRequestCodec implements PayloadCodec<JournalqHeader,
 
     @Override
     public int type() {
-        return JournalqCommandType.FIND_COORDINATOR_REQUEST.getCode();
+        return JoyQueueCommandType.FIND_COORDINATOR_REQUEST.getCode();
     }
 }

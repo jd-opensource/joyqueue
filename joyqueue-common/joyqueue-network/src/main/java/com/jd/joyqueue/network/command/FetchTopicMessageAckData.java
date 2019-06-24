@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.network.command;
 
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.message.BrokerMessage;
 
 import java.nio.ByteBuffer;
@@ -30,18 +30,18 @@ public class FetchTopicMessageAckData {
 
     private List<BrokerMessage> messages;
     private List<ByteBuffer> buffers;
-    private JournalqCode code;
+    private JoyQueueCode code;
 
     public FetchTopicMessageAckData() {
 
     }
 
-    public FetchTopicMessageAckData(JournalqCode code) {
+    public FetchTopicMessageAckData(JoyQueueCode code) {
         this.code = code;
         this.buffers = Collections.emptyList();
     }
 
-    public FetchTopicMessageAckData(List<BrokerMessage> messages, JournalqCode code) {
+    public FetchTopicMessageAckData(List<BrokerMessage> messages, JoyQueueCode code) {
         this.messages = messages;
         this.code = code;
     }
@@ -62,11 +62,11 @@ public class FetchTopicMessageAckData {
         this.buffers = buffers;
     }
 
-    public JournalqCode getCode() {
+    public JoyQueueCode getCode() {
         return code;
     }
 
-    public void setCode(JournalqCode code) {
+    public void setCode(JoyQueueCode code) {
         this.code = code;
     }
 

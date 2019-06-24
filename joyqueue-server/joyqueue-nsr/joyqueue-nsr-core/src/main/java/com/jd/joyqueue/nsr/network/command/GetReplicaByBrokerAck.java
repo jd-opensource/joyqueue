@@ -14,7 +14,7 @@
 package com.jd.joyqueue.nsr.network.command;
 
 import com.jd.joyqueue.domain.Replica;
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 import java.util.List;
 
@@ -22,7 +22,7 @@ import java.util.List;
  * @author wylixiaobin
  * Date: 2019/1/29
  */
-public class GetReplicaByBrokerAck extends JournalqPayload {
+public class GetReplicaByBrokerAck extends JoyQueuePayload {
     private List<Replica> replicas;
     public GetReplicaByBrokerAck replicas(List<Replica> replicas){
         this.replicas = replicas;

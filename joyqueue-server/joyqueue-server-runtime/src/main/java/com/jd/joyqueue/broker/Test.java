@@ -14,8 +14,8 @@
 package com.jd.joyqueue.broker;
 
 import com.jd.joyqueue.broker.buffer.Serializer;
-import com.jd.joyqueue.exception.JournalqCode;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueCode;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.message.BrokerMessage;
 import com.jd.joyqueue.toolkit.network.IpUtil;
 
@@ -37,14 +37,14 @@ public class Test {
 
     }
 
-    public static ByteBuffer convertBrokerMessage2RByteBuffer(BrokerMessage brokerMessage) throws JournalqException {
+    public static ByteBuffer convertBrokerMessage2RByteBuffer(BrokerMessage brokerMessage) throws JoyQueueException {
         int msgSize = Serializer.sizeOf(brokerMessage);
         // todo bufferPool有问题，暂时直接创建
         ByteBuffer allocate = ByteBuffer.allocate(msgSize);
         try {
             Serializer.write(brokerMessage, allocate, msgSize);
         } catch (Exception e) {
-            throw new JournalqException(JournalqCode.SE_SERIALIZER_ERROR,e);
+            throw new JoyQueueException(JoyQueueCode.SE_SERIALIZER_ERROR,e);
         }
         return allocate;
     }

@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.network.command;
 
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 import java.util.List;
 
@@ -23,7 +23,7 @@ import java.util.List;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/10
  */
-public class AddProducerRequest extends JournalqPayload {
+public class AddProducerRequest extends JoyQueuePayload {
 
     private List<String> topics;
     private String app;
@@ -31,7 +31,7 @@ public class AddProducerRequest extends JournalqPayload {
 
     @Override
     public int type() {
-        return JournalqCommandType.ADD_PRODUCER_REQUEST.getCode();
+        return JoyQueueCommandType.ADD_PRODUCER_REQUEST.getCode();
     }
 
     public void setTopics(List<String> topics) {

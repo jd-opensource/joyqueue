@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.network.command;
 
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 /**
  * AddConnectionResponse
@@ -21,14 +21,14 @@ import com.jd.joyqueue.network.transport.command.JournalqPayload;
  * email: gaohaoxiang@jd.com
  * date: 2018/11/29
  */
-public class AddConnectionResponse extends JournalqPayload {
+public class AddConnectionResponse extends JoyQueuePayload {
 
     private String connectionId;
     private String notification;
 
     @Override
     public int type() {
-        return JournalqCommandType.ADD_CONNECTION_RESPONSE.getCode();
+        return JoyQueueCommandType.ADD_CONNECTION_RESPONSE.getCode();
     }
 
     public void setConnectionId(String connectionId) {

@@ -75,7 +75,7 @@
                     <!-- 禁用jcache标准中缓存读取获取的是副本的机制 -->
                     <property name="copyOnRead" value="false"/>
                     <!-- 内存区名-->
-                    <property name="dataRegionName" value="journalqRegion"/>
+                    <property name="dataRegionName" value="joyqueueRegion"/>
                     <!-- 是否以二进制形式存储-->
                     <property name="storeKeepBinary" value="true"/>
                     <!--<property name="writeBehindEnabled" value="true"/>-->
@@ -91,7 +91,7 @@
                 <property name="defaultDataRegionConfiguration">
                     <bean class="org.apache.ignite.configuration.DataRegionConfiguration">
                         <!-- 存储区名-->
-                        <property name="name" value="journalqRegion"/>
+                        <property name="name" value="joyqueueRegion"/>
                         <!-- 存储区大小-->
                         <!-- Setting the size of the default region to 1GB. -->
                         <!--<property name="maxSize" value="#{1L * 1024 * 1024 * 1024}"/>-->

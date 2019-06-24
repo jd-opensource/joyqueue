@@ -22,7 +22,7 @@ import com.jd.joyqueue.client.internal.producer.domain.SendBatchResultData;
 import com.jd.joyqueue.client.internal.producer.domain.SendPrepareResult;
 import com.jd.joyqueue.client.internal.producer.domain.SendResultData;
 import com.jd.joyqueue.domain.QosLevel;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.network.command.TxStatus;
 import com.jd.joyqueue.network.domain.BrokerNode;
 import com.jd.joyqueue.toolkit.lang.LifeCycle;
@@ -69,9 +69,9 @@ public interface MessageSender extends LifeCycle {
     // transaction
     SendPrepareResult prepare(BrokerNode brokerNode, String topic, String app, String transactionId, long sequence, long transactionTimeout, long timeout);
 
-    JournalqCode commit(BrokerNode brokerNode, String topic, String app, String txId, long timeout);
+    JoyQueueCode commit(BrokerNode brokerNode, String topic, String app, String txId, long timeout);
 
-    JournalqCode rollback(BrokerNode brokerNode, String topic, String app, String txId, long timeout);
+    JoyQueueCode rollback(BrokerNode brokerNode, String topic, String app, String txId, long timeout);
 
     FetchFeedbackData fetchFeedback(BrokerNode brokerNode, String topic, String app, TxStatus txStatus, int count, long longPollTimeout, long timeout);
 }

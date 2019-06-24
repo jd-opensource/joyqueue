@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.store;
 
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 
 import java.nio.ByteBuffer;
 
@@ -26,7 +26,7 @@ public class ReadResult {
     /**
      * 状态码
      */
-    private JournalqCode code;
+    private JoyQueueCode code;
 
     /**
      * 消息数组
@@ -38,11 +38,11 @@ public class ReadResult {
      */
     private boolean eop;
 
-    public JournalqCode getCode() {
+    public JoyQueueCode getCode() {
         return code;
     }
 
-    public void setCode(JournalqCode code) {
+    public void setCode(JoyQueueCode code) {
         this.code = code;
     }
 

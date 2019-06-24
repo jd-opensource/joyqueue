@@ -14,20 +14,20 @@
 package com.jd.joyqueue.broker.protocol.handler;
 
 import com.google.common.collect.Maps;
-import com.jd.joyqueue.broker.protocol.JournalqCommandHandler;
-import com.jd.joyqueue.broker.protocol.JournalqContext;
-import com.jd.joyqueue.broker.protocol.JournalqContextAware;
+import com.jd.joyqueue.broker.protocol.JoyQueueCommandHandler;
+import com.jd.joyqueue.broker.protocol.JoyQueueContext;
+import com.jd.joyqueue.broker.protocol.JoyQueueContextAware;
 import com.jd.joyqueue.broker.protocol.converter.BrokerNodeConverter;
 import com.jd.joyqueue.broker.protocol.coordinator.Coordinator;
 import com.jd.joyqueue.broker.helper.SessionHelper;
 import com.jd.joyqueue.domain.Broker;
 import com.jd.joyqueue.domain.DataCenter;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.network.command.BooleanAck;
 import com.jd.joyqueue.network.command.FindCoordinatorAckData;
 import com.jd.joyqueue.network.command.FindCoordinatorRequest;
 import com.jd.joyqueue.network.command.FindCoordinatorResponse;
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.domain.BrokerNode;
 import com.jd.joyqueue.network.session.Connection;
 import com.jd.joyqueue.network.transport.Transport;
@@ -46,7 +46,7 @@ import java.util.Map;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/3
  */
-public class FindCoordinatorRequestHandler implements JournalqCommandHandler, Type, JournalqContextAware {
+public class FindCoordinatorRequestHandler implements JoyQueueCommandHandler, Type, JoyQueueContextAware {
 
     protected static final Logger logger = LoggerFactory.getLogger(FindCoordinatorRequestHandler.class);
 
@@ -54,9 +54,9 @@ public class FindCoordinatorRequestHandler implements JournalqCommandHandler, Ty
     private NameService nameService;
 
     @Override
-    public void setJournalqContext(JournalqContext journalqContext) {
-        this.coordinator = journalqContext.getCoordinator();
-        this.nameService = journalqContext.getBrokerContext().getNameService();
+    public void setJoyQueueContext(JoyQueueContext joyQueueContext) {
+        this.coordinator = joyQueueContext.getCoordinator();
+        this.nameService = joyQueueContext.getBrokerContext().getNameService();
     }
 
     @Override
@@ -66,7 +66,7 @@ public class FindCoordinatorRequestHandler implements JournalqCommandHandler, Ty
 
         if (connection == null || !connection.isAuthorized(findCoordinatorRequest.getApp())) {
             logger.warn("connection is not exists, transport: {}, app: {}", transport, findCoordinatorRequest.getApp());
-            return BooleanAck.build(JournalqCode.FW_CONNECTION_NOT_EXISTS.getCode());
+            return BooleanAck.build(JoyQueueCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
         Map<String, FindCoordinatorAckData> coordinators = findCoordinators(connection, findCoordinatorRequest.getTopics(), findCoordinatorRequest.getApp());
@@ -78,7 +78,7 @@ public class FindCoordinatorRequestHandler implements JournalqCommandHandler, Ty
 
     protected Map<String, FindCoordinatorAckData> findCoordinators(Connection connection, List<String> topics, String app) {
         Broker coordinatorBroker = coordinator.findGroup(app);
-        JournalqCode code = JournalqCode.SUCCESS;
+        JoyQueueCode code = JoyQueueCode.SUCCESS;
         BrokerNode coordinatorNode = null;
 
         if (coordinatorBroker != null) {
@@ -86,7 +86,7 @@ public class FindCoordinatorRequestHandler implements JournalqCommandHandler, Ty
             coordinatorNode = BrokerNodeConverter.convertBrokerNode(coordinatorBroker, brokerDataCenter, connection.getRegion());
         } else {
             logger.warn("find coordinator error, coordinator not exist, topics: {}, app: {}, remoteAddress: {}", topics, app, connection.getAddressStr());
-            code = JournalqCode.FW_COORDINATOR_NOT_AVAILABLE;
+            code = JoyQueueCode.FW_COORDINATOR_NOT_AVAILABLE;
         }
 
         Map<String, FindCoordinatorAckData> result = Maps.newHashMap();
@@ -99,6 +99,6 @@ public class FindCoordinatorRequestHandler implements JournalqCommandHandler, Ty
 
     @Override
     public int type() {
-        return JournalqCommandType.FIND_COORDINATOR_REQUEST.getCode();
+        return JoyQueueCommandType.FIND_COORDINATOR_REQUEST.getCode();
     }
 }

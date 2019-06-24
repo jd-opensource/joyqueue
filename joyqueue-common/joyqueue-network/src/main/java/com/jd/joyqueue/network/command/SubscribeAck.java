@@ -14,7 +14,7 @@
 package com.jd.joyqueue.network.command;
 
 import com.jd.joyqueue.domain.TopicConfig;
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 import java.util.List;
 
@@ -22,7 +22,7 @@ import java.util.List;
  * @author wylixiaobin
  * Date: 2018/10/10
  */
-public class SubscribeAck extends JournalqPayload {
+public class SubscribeAck extends JoyQueuePayload {
     private List<TopicConfig> topicConfigs;
 
     public SubscribeAck topicConfigs(List<TopicConfig> topicConfigs) {
@@ -32,7 +32,7 @@ public class SubscribeAck extends JournalqPayload {
 
     @Override
     public int type() {
-        return JournalqCommandType.MQTT_SUBSCRIBE_ACK.getCode();
+        return JoyQueueCommandType.MQTT_SUBSCRIBE_ACK.getCode();
     }
 
 

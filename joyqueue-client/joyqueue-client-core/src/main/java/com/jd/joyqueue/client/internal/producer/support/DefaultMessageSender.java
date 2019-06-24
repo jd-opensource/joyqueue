@@ -32,10 +32,10 @@ import com.jd.joyqueue.client.internal.producer.transport.ProducerClientGroup;
 import com.jd.joyqueue.client.internal.producer.transport.ProducerClientManager;
 import com.jd.joyqueue.client.internal.transport.ConnectionState;
 import com.jd.joyqueue.domain.QosLevel;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.network.command.FetchProduceFeedbackResponse;
 import com.jd.joyqueue.network.command.ProduceMessagePrepareResponse;
 import com.jd.joyqueue.network.command.ProduceMessageResponse;
-import com.jd.joyqueue.exception.JournalqCode;
 import com.jd.joyqueue.network.command.ProduceMessageAckData;
 import com.jd.joyqueue.network.command.ProduceMessageCommitResponse;
 import com.jd.joyqueue.network.command.ProduceMessageData;
@@ -300,7 +300,7 @@ public class DefaultMessageSender extends Service implements MessageSender {
     }
 
     @Override
-    public JournalqCode commit(BrokerNode brokerNode, String topic, String app, String txId, long timeout) {
+    public JoyQueueCode commit(BrokerNode brokerNode, String topic, String app, String txId, long timeout) {
         checkState();
         ProducerClient client = producerClientManager.getOrCreateClient(brokerNode);
         handleAddProducers(brokerNode, Lists.newArrayList(topic), app, client);
@@ -310,7 +310,7 @@ public class DefaultMessageSender extends Service implements MessageSender {
     }
 
     @Override
-    public JournalqCode rollback(BrokerNode brokerNode, String topic, String app, String txId, long timeout) {
+    public JoyQueueCode rollback(BrokerNode brokerNode, String topic, String app, String txId, long timeout) {
         checkState();
         ProducerClient client = producerClientManager.getOrCreateClient(brokerNode);
         handleAddProducers(brokerNode, Lists.newArrayList(topic), app, client);
@@ -331,7 +331,7 @@ public class DefaultMessageSender extends Service implements MessageSender {
 
     protected void checkState() {
         if (!isStarted()) {
-            throw new ClientException("sender is not started", JournalqCode.CN_SERVICE_NOT_AVAILABLE.getCode());
+            throw new ClientException("sender is not started", JoyQueueCode.CN_SERVICE_NOT_AVAILABLE.getCode());
         }
     }
 

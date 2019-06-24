@@ -28,8 +28,8 @@ import com.jd.joyqueue.domain.Broker;
 import com.jd.joyqueue.domain.PartitionGroup;
 import com.jd.joyqueue.domain.TopicConfig;
 import com.jd.joyqueue.domain.TopicName;
-import com.jd.joyqueue.exception.JournalqCode;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueCode;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.nsr.NameService;
 import com.jd.joyqueue.toolkit.service.Service;
 import com.jd.joyqueue.toolkit.time.SystemClock;
@@ -220,13 +220,13 @@ public class TransactionHandler extends Service {
     protected void doCommit(TransactionMetadata transactionMetadata) throws Exception {
         if (!transactionMetadata.getState().equals(TransactionState.PREPARE_COMMIT)) {
             if (!transactionSynchronizer.prepareCommit(transactionMetadata, transactionMetadata.getPrepare())) {
-                throw new JournalqException(String.format("prepare commit transaction failed, metadata: %s", transactionMetadata), JournalqCode.CN_UNKNOWN_ERROR.getCode());
+                throw new JoyQueueException(String.format("prepare commit transaction failed, metadata: %s", transactionMetadata), JoyQueueCode.CN_UNKNOWN_ERROR.getCode());
             }
             transactionMetadata.transitionStateTo(TransactionState.PREPARE_COMMIT);
         }
 
         if (!transactionSynchronizer.commit(transactionMetadata, transactionMetadata.getPrepare(), transactionMetadata.getOffsets())) {
-            throw new JournalqException(String.format("commit transaction failed, metadata: %s", transactionMetadata), JournalqCode.CN_UNKNOWN_ERROR.getCode());
+            throw new JoyQueueException(String.format("commit transaction failed, metadata: %s", transactionMetadata), JoyQueueCode.CN_UNKNOWN_ERROR.getCode());
         }
         transactionMetadata.transitionStateTo(TransactionState.COMPLETE_COMMIT);
     }
@@ -234,13 +234,13 @@ public class TransactionHandler extends Service {
     protected void doAbort(TransactionMetadata transactionMetadata) throws Exception {
         if (!transactionMetadata.getState().equals(TransactionState.PREPARE_ABORT)) {
             if (!transactionSynchronizer.prepareAbort(transactionMetadata, transactionMetadata.getPrepare())) {
-                throw new JournalqException(String.format("prepare abort transaction failed, metadata: %s", transactionMetadata), JournalqCode.CN_UNKNOWN_ERROR.getCode());
+                throw new JoyQueueException(String.format("prepare abort transaction failed, metadata: %s", transactionMetadata), JoyQueueCode.CN_UNKNOWN_ERROR.getCode());
             }
             transactionMetadata.transitionStateTo(TransactionState.PREPARE_ABORT);
         }
 
         if (!transactionSynchronizer.abort(transactionMetadata, transactionMetadata.getPrepare())) {
-            throw new JournalqException(String.format("abort transaction failed, metadata: %s", transactionMetadata), JournalqCode.CN_UNKNOWN_ERROR.getCode());
+            throw new JoyQueueException(String.format("abort transaction failed, metadata: %s", transactionMetadata), JoyQueueCode.CN_UNKNOWN_ERROR.getCode());
         }
         transactionMetadata.transitionStateTo(TransactionState.COMPLETE_ABORT);
     }

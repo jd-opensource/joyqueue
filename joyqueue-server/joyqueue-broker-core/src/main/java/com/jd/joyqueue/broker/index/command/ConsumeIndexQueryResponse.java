@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.broker.index.command;
 
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 import com.jd.joyqueue.network.command.CommandType;
 import com.jd.joyqueue.broker.index.model.IndexMetadataAndError;
 
@@ -23,7 +23,7 @@ import java.util.Map;
 /**
  * Created by zhuduohui on 2018/9/7.
  */
-public class ConsumeIndexQueryResponse extends JournalqPayload {
+public class ConsumeIndexQueryResponse extends JoyQueuePayload {
     Map<String, Map<Integer, IndexMetadataAndError>> topicPartitionIndexs;
 
     public ConsumeIndexQueryResponse(Map<String, Map<Integer, IndexMetadataAndError>> topicPartitionIndexs) {

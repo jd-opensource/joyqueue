@@ -14,13 +14,13 @@
 package com.jd.joyqueue.nsr.network.command;
 
 import com.jd.joyqueue.domain.Subscription;
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 /**
  * @author wylixiaobin
  * Date: 2019/1/27
  */
-public class HasSubscribe extends JournalqPayload {
+public class HasSubscribe extends JoyQueuePayload {
 
     private String app;
     private Subscription.Type subscribe;

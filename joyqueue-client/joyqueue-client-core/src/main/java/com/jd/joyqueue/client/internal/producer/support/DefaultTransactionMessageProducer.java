@@ -27,7 +27,7 @@ import com.jd.joyqueue.client.internal.producer.domain.SendPrepareResult;
 import com.jd.joyqueue.client.internal.producer.domain.SendResult;
 import com.jd.joyqueue.client.internal.producer.exception.ProducerException;
 import com.jd.joyqueue.client.internal.producer.helper.ProducerHelper;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.network.domain.BrokerNode;
 import com.google.common.base.Preconditions;
 import org.apache.commons.collections.CollectionUtils;
@@ -60,8 +60,8 @@ public class DefaultTransactionMessageProducer implements TransactionMessageProd
 
     private PartitionMetadata transactionPartition;
     private SendPrepareResult prepare;
-    private JournalqCode commit;
-    private JournalqCode rollback;
+    private JoyQueueCode commit;
+    private JoyQueueCode rollback;
 
     public DefaultTransactionMessageProducer(String transactionId, long timeout, TimeUnit timeoutUnit, long sequence, ProducerConfig config,
                                              NameServerConfig nameServerConfig, ClusterManager clusterManager, MessageSender messageSender, MessageProducerInner messageProducerInner) {
@@ -87,8 +87,8 @@ public class DefaultTransactionMessageProducer implements TransactionMessageProd
         checkPrepare();
         checkState();
 
-        JournalqCode commit = messageSender.commit(transactionPartition.getLeader(), transactionPartition.getTopic(), config.getApp(), prepare.getTxId(), config.getTimeout());
-        if (!commit.equals(JournalqCode.SUCCESS)) {
+        JoyQueueCode commit = messageSender.commit(transactionPartition.getLeader(), transactionPartition.getTopic(), config.getApp(), prepare.getTxId(), config.getTimeout());
+        if (!commit.equals(JoyQueueCode.SUCCESS)) {
             throw new ProducerException(commit.getMessage(), commit.getCode());
         }
         this.commit = commit;
@@ -99,8 +99,8 @@ public class DefaultTransactionMessageProducer implements TransactionMessageProd
         checkPrepare();
         checkState();
 
-        JournalqCode rollback = messageSender.rollback(transactionPartition.getLeader(), transactionPartition.getTopic(), config.getApp(), prepare.getTxId(), config.getTimeout());
-        if (!rollback.equals(JournalqCode.SUCCESS)) {
+        JoyQueueCode rollback = messageSender.rollback(transactionPartition.getLeader(), transactionPartition.getTopic(), config.getApp(), prepare.getTxId(), config.getTimeout());
+        if (!rollback.equals(JoyQueueCode.SUCCESS)) {
             throw new ProducerException(rollback.getMessage(), rollback.getCode());
         }
         this.rollback = rollback;
@@ -155,7 +155,7 @@ public class DefaultTransactionMessageProducer implements TransactionMessageProd
         SendPrepareResult sendPrepareResult = messageSender.prepare(partition.getLeader(), partition.getTopic(), config.getApp(),
                 transactionId, sequence, timeoutUnit.toMillis(timeout), config.getTimeout());
 
-        if (!sendPrepareResult.getCode().equals(JournalqCode.SUCCESS)) {
+        if (!sendPrepareResult.getCode().equals(JoyQueueCode.SUCCESS)) {
             throw new ProducerException(sendPrepareResult.getCode().getMessage(), sendPrepareResult.getCode().getCode());
         }
         return sendPrepareResult;
@@ -163,13 +163,13 @@ public class DefaultTransactionMessageProducer implements TransactionMessageProd
 
     protected void checkPrepare() {
         if (prepare == null) {
-            throw new ProducerException("transaction is not beginning", JournalqCode.FW_TRANSACTION_EXISTS.getCode());
+            throw new ProducerException("transaction is not beginning", JoyQueueCode.FW_TRANSACTION_EXISTS.getCode());
         }
     }
 
     protected void checkState() {
         if (commit != null || rollback != null) {
-            throw new ProducerException("transaction is not beginning", JournalqCode.FW_TRANSACTION_EXISTS.getCode());
+            throw new ProducerException("transaction is not beginning", JoyQueueCode.FW_TRANSACTION_EXISTS.getCode());
         }
     }
 }

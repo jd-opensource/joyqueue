@@ -16,7 +16,7 @@ package com.jd.joyqueue.client.internal.producer.checker;
 import com.jd.joyqueue.client.internal.producer.config.ProducerConfig;
 import com.jd.joyqueue.client.internal.producer.domain.ProduceMessage;
 import com.jd.joyqueue.client.internal.producer.exception.ProducerException;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -78,6 +78,6 @@ public class ProduceMessageChecker {
     }
 
     protected static void throwCheckException(String message) {
-        throw new ProducerException(message, JournalqCode.CN_PARAM_ERROR.getCode());
+        throw new ProducerException(message, JoyQueueCode.CN_PARAM_ERROR.getCode());
     }
 }

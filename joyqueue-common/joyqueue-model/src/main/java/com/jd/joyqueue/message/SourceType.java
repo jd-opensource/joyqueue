@@ -16,13 +16,13 @@ package com.jd.joyqueue.message;
 
 public enum SourceType {
 
-    JMQ2((byte) 0),
+    JMQ((byte) 0),
 
     KAFKA((byte) 1),
 
     MQTT((byte) 2),
 
-    JMQ((byte) 3),
+    JOYQUEUE((byte) 3),
 
     OTHERS((byte) 10);
 

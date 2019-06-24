@@ -22,7 +22,7 @@ import com.jd.joyqueue.client.internal.producer.MessageProducer;
 import com.jd.joyqueue.client.internal.producer.config.ProducerConfig;
 import com.jd.joyqueue.client.internal.producer.feedback.config.TxFeedbackConfig;
 import com.jd.joyqueue.client.internal.transport.config.TransportConfig;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import io.openmessaging.KeyValue;
 import io.openmessaging.MessagingAccessPoint;
 import io.openmessaging.consumer.Consumer;
@@ -123,7 +123,7 @@ public class MessagingAccessPointImpl implements MessagingAccessPoint {
 
     @Override
     public ResourceManager resourceManager() {
-        throw new OMSUnsupportException(JournalqCode.CN_COMMAND_UNSUPPORTED.getCode(), "resourceManager is not supported");
+        throw new OMSUnsupportException(JoyQueueCode.CN_COMMAND_UNSUPPORTED.getCode(), "resourceManager is not supported");
     }
 
     @Override
@@ -138,6 +138,6 @@ public class MessagingAccessPointImpl implements MessagingAccessPoint {
 
     @Override
     public String version() {
-        return JournalQOMSConsts.VERSION;
+        return JoyQueueOMSConsts.VERSION;
     }
 }

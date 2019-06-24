@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.network.command;
 
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 import java.util.List;
 
@@ -23,14 +23,14 @@ import java.util.List;
  * email: gaohaoxiang@jd.com
  * date: 2018/11/30
  */
-public class FetchClusterRequest extends JournalqPayload {
+public class FetchClusterRequest extends JoyQueuePayload {
 
     private List<String> topics;
     private String app;
 
     @Override
     public int type() {
-        return JournalqCommandType.FETCH_CLUSTER_REQUEST.getCode();
+        return JoyQueueCommandType.FETCH_CLUSTER_REQUEST.getCode();
     }
 
     public void setTopics(List<String> topics) {

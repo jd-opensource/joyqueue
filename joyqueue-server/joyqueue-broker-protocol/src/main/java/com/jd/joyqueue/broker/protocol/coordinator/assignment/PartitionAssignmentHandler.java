@@ -14,15 +14,15 @@
 package com.jd.joyqueue.broker.protocol.coordinator.assignment;
 
 import com.google.common.collect.Sets;
-import com.jd.joyqueue.broker.protocol.config.JournalqConfig;
+import com.jd.joyqueue.broker.protocol.config.JoyQueueConfig;
 import com.jd.joyqueue.broker.protocol.coordinator.GroupMetadataManager;
 import com.jd.joyqueue.broker.protocol.coordinator.assignment.delay.MemberTimeoutDelayedOperation;
 import com.jd.joyqueue.broker.protocol.coordinator.domain.GroupMemberMetadata;
 import com.jd.joyqueue.broker.protocol.coordinator.domain.GroupMetadata;
 import com.jd.joyqueue.broker.protocol.coordinator.domain.PartitionAssignment;
-import com.jd.joyqueue.broker.protocol.exception.JournalqException;
+import com.jd.joyqueue.broker.protocol.exception.JoyQueueException;
 import com.jd.joyqueue.domain.PartitionGroup;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.toolkit.delay.DelayedOperationKey;
 import com.jd.joyqueue.toolkit.delay.DelayedOperationManager;
 import com.jd.joyqueue.toolkit.service.Service;
@@ -42,13 +42,13 @@ public class PartitionAssignmentHandler extends Service {
 
     protected static final Logger logger = LoggerFactory.getLogger(PartitionAssignmentHandler.class);
 
-    private JournalqConfig config;
+    private JoyQueueConfig config;
     private GroupMetadataManager coordinatorGroupManager;
 
     private PartitionAssignorResolver partitionAssignorResolver;
     private DelayedOperationManager memberTimeoutDelayedOperationManager;
 
-    public PartitionAssignmentHandler(JournalqConfig config, GroupMetadataManager coordinatorGroupManager) {
+    public PartitionAssignmentHandler(JoyQueueConfig config, GroupMetadataManager coordinatorGroupManager) {
         this.config = config;
         this.coordinatorGroupManager = coordinatorGroupManager;
     }
@@ -76,7 +76,7 @@ public class PartitionAssignmentHandler extends Service {
 
         PartitionAssignment assignment = partitionAssignorResolver.assign(group, member, topic, partitionGroups);
         if (assignment == null) {
-            throw new JournalqException(JournalqCode.FW_COORDINATOR_PARTITION_ASSIGNOR_ERROR.getCode());
+            throw new JoyQueueException(JoyQueueCode.FW_COORDINATOR_PARTITION_ASSIGNOR_ERROR.getCode());
         }
 
         member.setLatestHeartbeat(SystemClock.now());

@@ -20,7 +20,7 @@ import com.jd.joyqueue.broker.consumer.Consume;
 import com.jd.joyqueue.broker.consumer.model.PullResult;
 import com.jd.joyqueue.domain.TopicConfig;
 import com.jd.joyqueue.domain.TopicName;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.message.BrokerMessage;
 import com.jd.joyqueue.network.session.Consumer;
 import com.jd.joyqueue.server.archive.store.api.ArchiveStore;
@@ -170,7 +170,7 @@ public class ProduceArchiveService extends Service {
     /**
      * 更新归档项
      */
-    private void updateArchiveItem() throws JournalqException {
+    private void updateArchiveItem() throws JoyQueueException {
         List<SendArchiveItem> list = new ArrayList<>();
 
         List<TopicConfig> topics = clusterManager.getTopics();
@@ -307,7 +307,7 @@ public class ProduceArchiveService extends Service {
      * 写入数据
      *
      * @throws InterruptedException
-     * @throws JournalqException
+     * @throws JoyQueueException
      */
     private void write2Store() throws InterruptedException {
         List<SendLog> sendLogs = new ArrayList<>(batchNum);
@@ -327,7 +327,7 @@ public class ProduceArchiveService extends Service {
                     logger.debug("Write sendLogs size:{} to archive store.", sendLogs.size());
                     // 写入计数（用于归档位置）
                     writeCounter(sendLogs);
-                } catch (JournalqException e) {
+                } catch (JoyQueueException e) {
                     // 写入存储失败
                     hasStoreError.set(true);
                     // 回滚读取位置
@@ -558,7 +558,7 @@ public class ProduceArchiveService extends Service {
          *
          * @param newItemList
          */
-        public void addAndUpdate(List<SendArchiveItem> newItemList) throws JournalqException {
+        public void addAndUpdate(List<SendArchiveItem> newItemList) throws JoyQueueException {
             // 删除当前失效的归档项
             cpList.stream().forEach(item -> {
                 // 最新的归档项列表不包含这个项，则删除该项

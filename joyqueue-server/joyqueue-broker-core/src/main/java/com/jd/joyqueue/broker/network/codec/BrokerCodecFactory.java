@@ -17,7 +17,7 @@ import com.google.common.collect.Lists;
 import com.jd.joyqueue.network.transport.codec.Codec;
 import com.jd.joyqueue.network.transport.codec.CodecFactory;
 import com.jd.joyqueue.network.transport.codec.PayloadCodecFactory;
-import com.jd.joyqueue.network.transport.codec.support.JournalqCodec;
+import com.jd.joyqueue.network.transport.codec.support.JoyQueueCodec;
 import com.jd.laf.extension.ExtensionManager;
 
 import java.util.List;
@@ -57,7 +57,7 @@ public class BrokerCodecFactory implements CodecFactory {
 
     @Override
     public Codec getCodec() {
-        return new JournalqCodec(payloadCodecFactory);
+        return new JoyQueueCodec(payloadCodecFactory);
     }
 
     public static Codec getInstance() {

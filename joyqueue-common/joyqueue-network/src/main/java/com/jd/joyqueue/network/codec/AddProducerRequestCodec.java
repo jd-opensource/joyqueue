@@ -15,9 +15,9 @@ package com.jd.joyqueue.network.codec;
 
 import com.google.common.collect.Lists;
 import com.jd.joyqueue.network.command.AddProducerRequest;
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.serializer.Serializer;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.codec.PayloadCodec;
 import com.jd.joyqueue.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
@@ -30,10 +30,10 @@ import java.util.List;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/10
  */
-public class AddProducerRequestCodec implements PayloadCodec<JournalqHeader, AddProducerRequest>, Type {
+public class AddProducerRequestCodec implements PayloadCodec<JoyQueueHeader, AddProducerRequest>, Type {
 
     @Override
-    public AddProducerRequest decode(JournalqHeader header, ByteBuf buffer) throws Exception {
+    public AddProducerRequest decode(JoyQueueHeader header, ByteBuf buffer) throws Exception {
         AddProducerRequest addProducerRequest = new AddProducerRequest();
 
         short topicSize = buffer.readShort();
@@ -60,6 +60,6 @@ public class AddProducerRequestCodec implements PayloadCodec<JournalqHeader, Add
 
     @Override
     public int type() {
-        return JournalqCommandType.ADD_PRODUCER_REQUEST.getCode();
+        return JoyQueueCommandType.ADD_PRODUCER_REQUEST.getCode();
     }
 }

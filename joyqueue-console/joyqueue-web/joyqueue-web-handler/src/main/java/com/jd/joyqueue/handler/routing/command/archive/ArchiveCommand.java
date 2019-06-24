@@ -13,9 +13,9 @@
  */
 package com.jd.joyqueue.handler.routing.command.archive;
 
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.server.retry.model.RetryMessageModel;
 import com.jd.joyqueue.util.serializer.Serializer;
-import com.jd.joyqueue.exception.JournalqException;
 import com.jd.joyqueue.handler.Constants;
 import com.jd.joyqueue.message.BrokerMessage;
 import com.jd.joyqueue.model.domain.Archive;
@@ -128,7 +128,7 @@ public class ArchiveCommand implements Command<Response>, Poolable {
             HttpServerResponse response = request.response();
             byte[] data = sendLog.getMessageBody();
             if (data.length == 0) {
-                throw new JournalqException("消息内容为空",HTTP_BAD_REQUEST);
+                throw new JoyQueueException("消息内容为空",HTTP_BAD_REQUEST);
             }
             String fileName = sendLog.getMessageId() +".txt";
             response.reset();

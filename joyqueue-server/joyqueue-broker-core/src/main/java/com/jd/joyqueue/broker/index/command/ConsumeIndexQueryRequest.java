@@ -14,7 +14,7 @@
 package com.jd.joyqueue.broker.index.command;
 
 import com.jd.joyqueue.network.command.CommandType;
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 import java.util.List;
 import java.util.Map;
@@ -22,7 +22,7 @@ import java.util.Map;
 /**
  * Created by zhuduohui on 2018/9/7.
  */
-public class ConsumeIndexQueryRequest extends JournalqPayload {
+public class ConsumeIndexQueryRequest extends JoyQueuePayload {
     private String app;
     private Map<String, List<Integer>> topicPartitions;
 

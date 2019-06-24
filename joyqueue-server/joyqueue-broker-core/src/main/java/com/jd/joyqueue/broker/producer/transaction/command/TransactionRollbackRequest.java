@@ -14,7 +14,7 @@
 package com.jd.joyqueue.broker.producer.transaction.command;
 
 import com.jd.joyqueue.network.command.CommandType;
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 import java.util.List;
 
@@ -24,7 +24,7 @@ import java.util.List;
  * email: gaohaoxiang@jd.com
  * date: 2019/4/12
  */
-public class TransactionRollbackRequest extends JournalqPayload {
+public class TransactionRollbackRequest extends JoyQueuePayload {
 
     private String topic;
     private String app;

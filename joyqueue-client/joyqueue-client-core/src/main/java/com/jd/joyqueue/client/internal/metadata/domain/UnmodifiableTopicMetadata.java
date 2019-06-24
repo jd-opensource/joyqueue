@@ -16,7 +16,7 @@ package com.jd.joyqueue.client.internal.metadata.domain;
 import com.jd.joyqueue.domain.ConsumerPolicy;
 import com.jd.joyqueue.domain.ProducerPolicy;
 import com.jd.joyqueue.domain.TopicType;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.network.domain.BrokerNode;
 
 import java.util.Collections;
@@ -35,7 +35,7 @@ public class UnmodifiableTopicMetadata extends TopicMetadata {
     public UnmodifiableTopicMetadata(String topic, ProducerPolicy producerPolicy, ConsumerPolicy consumerPolicy, TopicType type, List<PartitionGroupMetadata> partitionGroups,
                                      List<PartitionMetadata> partitions, Map<Short, PartitionMetadata> partitionMap, Map<Integer, PartitionGroupMetadata> partitionGroupMap, List<BrokerNode> brokers,
                                      List<BrokerNode> nearbyBrokers, Map<Integer, BrokerNode> brokerMap, Map<Integer, List<PartitionMetadata>> brokerPartitions,
-                                     Map<Integer, List<PartitionGroupMetadata>> brokerPartitionGroups, boolean allAvailable, JournalqCode code) {
+                                     Map<Integer, List<PartitionGroupMetadata>> brokerPartitionGroups, boolean allAvailable, JoyQueueCode code) {
         super(topic, producerPolicy, consumerPolicy, type, partitionGroups, partitions, partitionMap, partitionGroupMap,
                 brokers, nearbyBrokers, brokerMap, brokerPartitions, brokerPartitionGroups, allAvailable, code);
     }

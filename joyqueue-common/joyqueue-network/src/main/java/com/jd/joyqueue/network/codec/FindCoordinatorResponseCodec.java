@@ -14,13 +14,13 @@
 package com.jd.joyqueue.network.codec;
 
 import com.google.common.collect.Maps;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.network.command.FindCoordinatorResponse;
 import com.jd.joyqueue.network.command.FindCoordinatorAckData;
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.domain.BrokerNode;
 import com.jd.joyqueue.network.serializer.Serializer;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.codec.PayloadCodec;
 import com.jd.joyqueue.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
@@ -33,12 +33,12 @@ import java.util.Map;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/3
  */
-public class FindCoordinatorResponseCodec implements PayloadCodec<JournalqHeader, FindCoordinatorResponse>, Type {
+public class FindCoordinatorResponseCodec implements PayloadCodec<JoyQueueHeader, FindCoordinatorResponse>, Type {
 
     private static final int NONE_BROKER_ID = -1;
 
     @Override
-    public FindCoordinatorResponse decode(JournalqHeader header, ByteBuf buffer) throws Exception {
+    public FindCoordinatorResponse decode(JoyQueueHeader header, ByteBuf buffer) throws Exception {
         FindCoordinatorResponse findCoordinatorResponse = new FindCoordinatorResponse();
         Map<String, FindCoordinatorAckData> coordinators = Maps.newHashMap();
 
@@ -57,7 +57,7 @@ public class FindCoordinatorResponseCodec implements PayloadCodec<JournalqHeader
                 node.setWeight(buffer.readInt());
             }
 
-            JournalqCode code = JournalqCode.valueOf(buffer.readInt());
+            JoyQueueCode code = JoyQueueCode.valueOf(buffer.readInt());
             FindCoordinatorAckData findCoordinatorAckData = new FindCoordinatorAckData(node, code);
             coordinators.put(topic, findCoordinatorAckData);
         }
@@ -91,6 +91,6 @@ public class FindCoordinatorResponseCodec implements PayloadCodec<JournalqHeader
 
     @Override
     public int type() {
-        return JournalqCommandType.FIND_COORDINATOR_RESPONSE.getCode();
+        return JoyQueueCommandType.FIND_COORDINATOR_RESPONSE.getCode();
     }
 }

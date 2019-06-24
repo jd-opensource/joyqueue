@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.network.command;
 
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 
 import java.util.Collections;
 import java.util.List;
@@ -27,18 +27,18 @@ import java.util.List;
 public class FetchAssignedPartitionAckData {
 
     private List<Short> partitions;
-    private JournalqCode code;
+    private JoyQueueCode code;
 
     public FetchAssignedPartitionAckData() {
 
     }
 
-    public FetchAssignedPartitionAckData(JournalqCode code) {
+    public FetchAssignedPartitionAckData(JoyQueueCode code) {
         this.partitions = Collections.emptyList();
         this.code = code;
     }
 
-    public FetchAssignedPartitionAckData(List<Short> partitions, JournalqCode code) {
+    public FetchAssignedPartitionAckData(List<Short> partitions, JoyQueueCode code) {
         this.partitions = partitions;
         this.code = code;
     }
@@ -51,11 +51,11 @@ public class FetchAssignedPartitionAckData {
         return partitions;
     }
 
-    public void setCode(JournalqCode code) {
+    public void setCode(JoyQueueCode code) {
         this.code = code;
     }
 
-    public JournalqCode getCode() {
+    public JoyQueueCode getCode() {
         return code;
     }
 }

@@ -14,7 +14,7 @@
 package com.jd.joyqueue.service;
 
 import com.jd.joyqueue.domain.ConsumeRetry;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.model.PageResult;
 import com.jd.joyqueue.model.QPageQuery;
 import com.jd.joyqueue.model.query.QRetry;
@@ -25,9 +25,9 @@ import com.jd.joyqueue.server.retry.model.RetryMessageModel;
  */
 public interface RetryService {
 
-    PageResult<ConsumeRetry> findByQuery(QPageQuery<QRetry> qRetryQPageQuery) throws JournalqException;
+    PageResult<ConsumeRetry> findByQuery(QPageQuery<QRetry> qRetryQPageQuery) throws JoyQueueException;
 
-    ConsumeRetry getDataById(Long id) throws JournalqException;
+    ConsumeRetry getDataById(Long id) throws JoyQueueException;
 
     void add(RetryMessageModel retryMessageModel);
 

@@ -22,19 +22,19 @@ import com.jd.joyqueue.broker.monitor.SessionManager;
 import com.jd.joyqueue.broker.network.traffic.Traffic;
 import com.jd.joyqueue.broker.polling.LongPolling;
 import com.jd.joyqueue.broker.polling.LongPollingManager;
-import com.jd.joyqueue.broker.protocol.JournalqCommandHandler;
-import com.jd.joyqueue.broker.protocol.JournalqContext;
-import com.jd.joyqueue.broker.protocol.JournalqContextAware;
+import com.jd.joyqueue.broker.protocol.JoyQueueCommandHandler;
+import com.jd.joyqueue.broker.protocol.JoyQueueContext;
+import com.jd.joyqueue.broker.protocol.JoyQueueContextAware;
 import com.jd.joyqueue.broker.protocol.command.FetchTopicMessageResponse;
 import com.jd.joyqueue.broker.protocol.converter.CheckResultConverter;
 import com.jd.joyqueue.domain.TopicName;
-import com.jd.joyqueue.exception.JournalqCode;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueCode;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.network.command.BooleanAck;
 import com.jd.joyqueue.network.command.FetchTopicMessageAckData;
 import com.jd.joyqueue.network.command.FetchTopicMessageData;
 import com.jd.joyqueue.network.command.FetchTopicMessageRequest;
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.session.Connection;
 import com.jd.joyqueue.network.session.Consumer;
 import com.jd.joyqueue.network.transport.Transport;
@@ -55,7 +55,7 @@ import java.util.Map;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/7
  */
-public class FetchTopicMessageRequestHandler implements JournalqCommandHandler, Type, JournalqContextAware {
+public class FetchTopicMessageRequestHandler implements JoyQueueCommandHandler, Type, JoyQueueContextAware {
 
     protected static final Logger logger = LoggerFactory.getLogger(FetchTopicMessageRequestHandler.class);
 
@@ -65,11 +65,11 @@ public class FetchTopicMessageRequestHandler implements JournalqCommandHandler, 
     private LongPollingManager longPollingManager;
 
     @Override
-    public void setJournalqContext(JournalqContext journalqContext) {
-        this.consume = journalqContext.getBrokerContext().getConsume();
-        this.sessionManager = journalqContext.getBrokerContext().getSessionManager();
-        this.clusterManager = journalqContext.getBrokerContext().getClusterManager();
-        this.longPollingManager = journalqContext.getLongPollingManager();
+    public void setJoyQueueContext(JoyQueueContext joyQueueContext) {
+        this.consume = joyQueueContext.getBrokerContext().getConsume();
+        this.sessionManager = joyQueueContext.getBrokerContext().getSessionManager();
+        this.clusterManager = joyQueueContext.getBrokerContext().getClusterManager();
+        this.longPollingManager = joyQueueContext.getLongPollingManager();
     }
 
     @Override
@@ -79,7 +79,7 @@ public class FetchTopicMessageRequestHandler implements JournalqCommandHandler, 
 
         if (connection == null || !connection.isAuthorized(fetchTopicMessageRequest.getApp())) {
             logger.warn("connection is not exists, transport: {}, app: {}", transport, fetchTopicMessageRequest.getApp());
-            return BooleanAck.build(JournalqCode.FW_CONNECTION_NOT_EXISTS.getCode());
+            return BooleanAck.build(JoyQueueCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
         boolean isNeedLongPoll = fetchTopicMessageRequest.getTopics().size() == 1 && fetchTopicMessageRequest.getLongPollTimeout() > 0;
@@ -90,8 +90,8 @@ public class FetchTopicMessageRequestHandler implements JournalqCommandHandler, 
             String topic = entry.getKey();
             BooleanResponse checkResult = clusterManager.checkReadable(TopicName.parse(topic), fetchTopicMessageRequest.getApp(), connection.getHost());
             if (!checkResult.isSuccess()) {
-                logger.warn("checkReadable failed, transport: {}, topic: {}, app: {}, code: {}", transport, topic, fetchTopicMessageRequest.getApp(), checkResult.getJournalqCode());
-                result.put(topic, new FetchTopicMessageAckData(CheckResultConverter.convertFetchCode(checkResult.getJournalqCode())));
+                logger.warn("checkReadable failed, transport: {}, topic: {}, app: {}, code: {}", transport, topic, fetchTopicMessageRequest.getApp(), checkResult.getJoyQueueCode());
+                result.put(topic, new FetchTopicMessageAckData(CheckResultConverter.convertFetchCode(checkResult.getJoyQueueCode())));
                 traffic.record(topic, 0);
                 continue;
             }
@@ -101,7 +101,7 @@ public class FetchTopicMessageRequestHandler implements JournalqCommandHandler, 
 
             if (consumer == null) {
                 logger.warn("consumer is not exists, transport: {}", transport);
-                result.put(topic, new FetchTopicMessageAckData(CheckResultConverter.convertFetchCode(JournalqCode.FW_CONSUMER_NOT_EXISTS)));
+                result.put(topic, new FetchTopicMessageAckData(CheckResultConverter.convertFetchCode(JoyQueueCode.FW_CONSUMER_NOT_EXISTS)));
                 continue;
             }
 
@@ -130,23 +130,23 @@ public class FetchTopicMessageRequestHandler implements JournalqCommandHandler, 
         fetchTopicMessageAckData.setBuffers(Collections.emptyList());
         try {
             PullResult pullResult = consume.getMessage(consumer, count, ackTimeout);
-            if (!pullResult.getJournalqCode().equals(JournalqCode.SUCCESS)) {
+            if (!pullResult.getJoyQueueCode().equals(JoyQueueCode.SUCCESS)) {
                 logger.error("fetchTopicMessage exception, transport: {}, consumer: {}, count: {}", transport, consumer, count);
             }
             fetchTopicMessageAckData.setBuffers(pullResult.getBuffers());
-            fetchTopicMessageAckData.setCode(pullResult.getJournalqCode());
-        } catch (JournalqException e) {
+            fetchTopicMessageAckData.setCode(pullResult.getJoyQueueCode());
+        } catch (JoyQueueException e) {
             logger.error("fetchTopicMessage exception, transport: {}, consumer: {}, count: {}", transport, consumer, count, e);
-            fetchTopicMessageAckData.setCode(JournalqCode.valueOf(e.getCode()));
+            fetchTopicMessageAckData.setCode(JoyQueueCode.valueOf(e.getCode()));
         } catch (Exception e) {
             logger.error("fetchTopicMessage exception, transport: {}, consumer: {}, count: {}", transport, consumer, count, e);
-            fetchTopicMessageAckData.setCode(JournalqCode.CN_UNKNOWN_ERROR);
+            fetchTopicMessageAckData.setCode(JoyQueueCode.CN_UNKNOWN_ERROR);
         }
         return fetchTopicMessageAckData;
     }
 
     @Override
     public int type() {
-        return JournalqCommandType.FETCH_TOPIC_MESSAGE_REQUEST.getCode();
+        return JoyQueueCommandType.FETCH_TOPIC_MESSAGE_REQUEST.getCode();
     }
 }

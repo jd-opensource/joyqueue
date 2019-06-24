@@ -44,8 +44,8 @@ public class NameServiceTest{
 //    public void subscribe() throws InterruptedException {
 //        String app = "jm";
 //        String topic = "__group_coordinators";
-//        nameService.subscribe(new Subscription(TopicName.parse(topic),app, Subscription.Type.CONSUMPTION), ClientType.JMQ);
-//        nameService.subscribe(new Subscription(TopicName.parse(topic),app, Subscription.Type.CONSUMPTION), ClientType.JMQ);
+//        nameService.subscribe(new Subscription(TopicName.parse(topic),app, Subscription.Type.CONSUMPTION), ClientType.JOYQUEUE);
+//        nameService.subscribe(new Subscription(TopicName.parse(topic),app, Subscription.Type.CONSUMPTION), ClientType.JOYQUEUE);
 //        System.out.println("success");
 //    }
 //

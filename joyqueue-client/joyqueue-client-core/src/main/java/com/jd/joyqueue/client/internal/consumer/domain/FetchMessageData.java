@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.client.internal.consumer.domain;
 
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 
 import java.util.Collections;
 import java.util.List;
@@ -27,17 +27,17 @@ import java.util.List;
 public class FetchMessageData {
 
     private List<ConsumeMessage> messages;
-    private JournalqCode code;
+    private JoyQueueCode code;
 
     public FetchMessageData() {
     }
 
-    public FetchMessageData(JournalqCode code) {
+    public FetchMessageData(JoyQueueCode code) {
         this.messages = Collections.emptyList();
         this.code = code;
     }
 
-    public FetchMessageData(List<ConsumeMessage> messages, JournalqCode code) {
+    public FetchMessageData(List<ConsumeMessage> messages, JoyQueueCode code) {
         this.messages = messages;
         this.code = code;
     }
@@ -50,11 +50,11 @@ public class FetchMessageData {
         this.messages = messages;
     }
 
-    public JournalqCode getCode() {
+    public JoyQueueCode getCode() {
         return code;
     }
 
-    public void setCode(JournalqCode code) {
+    public void setCode(JoyQueueCode code) {
         this.code = code;
     }
 }

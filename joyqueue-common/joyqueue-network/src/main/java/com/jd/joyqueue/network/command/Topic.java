@@ -16,7 +16,7 @@ package com.jd.joyqueue.network.command;
 import com.jd.joyqueue.domain.ConsumerPolicy;
 import com.jd.joyqueue.domain.ProducerPolicy;
 import com.jd.joyqueue.domain.TopicType;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -34,7 +34,7 @@ public class Topic implements Serializable {
     private ConsumerPolicy consumerPolicy;
     private TopicType type;
     private Map<Integer, TopicPartitionGroup> partitionGroups;
-    private JournalqCode code;
+    private JoyQueueCode code;
 
     public void setTopic(String topic) {
         this.topic = topic;
@@ -76,11 +76,11 @@ public class Topic implements Serializable {
         this.partitionGroups = partitionGroups;
     }
 
-    public void setCode(JournalqCode code) {
+    public void setCode(JoyQueueCode code) {
         this.code = code;
     }
 
-    public JournalqCode getCode() {
+    public JoyQueueCode getCode() {
         return code;
     }
 }

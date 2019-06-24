@@ -88,7 +88,7 @@ public class ProduceMessageConverter {
         brokerMessage.setPriority(firstProduceMessage.getPriority());
         brokerMessage.setStartTime(SystemClock.now());
         brokerMessage.setFlag((short) produceMessages.size());
-        brokerMessage.setSource(SourceType.JMQ.getValue());
+        brokerMessage.setSource(SourceType.JOYQUEUE.getValue());
         brokerMessage.setClientIp(CLIENT_IP);
         brokerMessage.setCompressed(false);
         brokerMessage.setBatch(true);
@@ -108,7 +108,7 @@ public class ProduceMessageConverter {
         brokerMessage.setAttributes(produceMessage.getAttributes());
         brokerMessage.setStartTime(SystemClock.now());
         brokerMessage.setFlag(produceMessage.getFlag());
-        brokerMessage.setSource(SourceType.JMQ.getValue());
+        brokerMessage.setSource(SourceType.JOYQUEUE.getValue());
         brokerMessage.setClientIp(CLIENT_IP);
         brokerMessage.setCompressed(false);
         brokerMessage.setBatch(false);

@@ -15,7 +15,7 @@ package com.jd.joyqueue.server.retry.remote.command.codec;
 
 import com.jd.joyqueue.network.command.CommandType;
 import com.jd.joyqueue.network.serializer.Serializer;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.codec.PayloadCodec;
 import com.jd.joyqueue.network.transport.command.Type;
 import com.jd.joyqueue.server.retry.remote.command.GetRetryCountAck;
@@ -24,9 +24,9 @@ import io.netty.buffer.ByteBuf;
 /**
  * Created by chengzhiliang on 2018/9/17.
  */
-public class GetRetryCountAckCodec implements PayloadCodec<JournalqHeader, GetRetryCountAck>, Type {
+public class GetRetryCountAckCodec implements PayloadCodec<JoyQueueHeader, GetRetryCountAck>, Type {
     @Override
-    public Object decode(JournalqHeader header, ByteBuf buffer) throws Exception {
+    public Object decode(JoyQueueHeader header, ByteBuf buffer) throws Exception {
         if (buffer == null) {
             return null;
         }

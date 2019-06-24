@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.network.command;
 
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 /**
  * RemoveConnectionRequest
@@ -21,10 +21,10 @@ import com.jd.joyqueue.network.transport.command.JournalqPayload;
  * email: gaohaoxiang@jd.com
  * date: 2018/11/30
  */
-public class RemoveConnectionRequest extends JournalqPayload {
+public class RemoveConnectionRequest extends JoyQueuePayload {
 
     @Override
     public int type() {
-        return JournalqCommandType.REMOVE_CONNECTION_REQUEST.getCode();
+        return JoyQueueCommandType.REMOVE_CONNECTION_REQUEST.getCode();
     }
 }

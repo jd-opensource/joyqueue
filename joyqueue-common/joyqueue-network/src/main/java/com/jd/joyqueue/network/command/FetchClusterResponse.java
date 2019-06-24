@@ -14,7 +14,7 @@
 package com.jd.joyqueue.network.command;
 
 import com.jd.joyqueue.network.domain.BrokerNode;
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 import java.util.Map;
 
@@ -24,14 +24,14 @@ import java.util.Map;
  * email: gaohaoxiang@jd.com
  * date: 2018/11/30
  */
-public class FetchClusterResponse extends JournalqPayload {
+public class FetchClusterResponse extends JoyQueuePayload {
 
     private Map<String, Topic> topics;
     private Map<Integer, BrokerNode> brokers;
 
     @Override
     public int type() {
-        return JournalqCommandType.FETCH_CLUSTER_RESPONSE.getCode();
+        return JoyQueueCommandType.FETCH_CLUSTER_RESPONSE.getCode();
     }
 
     public Map<String, Topic> getTopics() {

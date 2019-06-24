@@ -16,7 +16,7 @@ package com.jd.joyqueue.broker.election;
 import com.jd.joyqueue.broker.consumer.Consume;
 import com.jd.joyqueue.broker.consumer.model.PullResult;
 import com.jd.joyqueue.domain.TopicName;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.message.MessageLocation;
 import com.jd.joyqueue.network.session.Connection;
 import com.jd.joyqueue.network.session.Consumer;
@@ -34,9 +34,9 @@ public class ConsumeStub implements Consume {
      * @param count      获取消息条数
      * @param ackTimeout 占用partition的超时时间，单位毫秒
      * @return
-     * @throws JournalqException
+     * @throws JoyQueueException
      */
-    public PullResult getMessage(Consumer consumer, int count, int ackTimeout) throws JournalqException{
+    public PullResult getMessage(Consumer consumer, int count, int ackTimeout) throws JoyQueueException {
         return null;
     }
 
@@ -48,9 +48,9 @@ public class ConsumeStub implements Consume {
      * @param index     默认值-1
      * @param count     获取消息条数
      * @return
-     * @throws JournalqException
+     * @throws JoyQueueException
      */
-    public PullResult getMessage(Consumer consumer, short partition, long index, int count) throws JournalqException {
+    public PullResult getMessage(Consumer consumer, short partition, long index, int count) throws JoyQueueException {
         return null;
     }
 
@@ -61,9 +61,9 @@ public class ConsumeStub implements Consume {
      * @param consumer     消费者
      * @param isSuccessAck 是否正常确认
      * @return 是否成功
-     * @throws JournalqException
+     * @throws JoyQueueException
      */
-    public boolean acknowledge(MessageLocation[] locations, Consumer consumer, Connection connection, boolean isSuccessAck) throws JournalqException {
+    public boolean acknowledge(MessageLocation[] locations, Consumer consumer, Connection connection, boolean isSuccessAck) throws JoyQueueException {
         return true;
     }
 

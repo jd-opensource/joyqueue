@@ -20,7 +20,7 @@ import com.jd.joyqueue.broker.manage.service.CoordinatorManageService;
 import com.jd.joyqueue.broker.manage.service.ElectionManageService;
 import com.jd.joyqueue.broker.manage.service.MessageManageService;
 import com.jd.joyqueue.broker.manage.service.StoreManageService;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.manage.IndexItem;
 import com.jd.joyqueue.manage.PartitionGroupMetric;
 import com.jd.joyqueue.manage.PartitionMetric;
@@ -70,12 +70,12 @@ public class DefaultBrokerManageService implements BrokerManageService {
     }
 
     @Override
-    public boolean setAckIndex(String topic, String app, short partition, long index) throws JournalqException {
+    public boolean setAckIndex(String topic, String app, short partition, long index) throws JoyQueueException {
         return consumerManageService.setAckIndex(topic, app, partition, index);
     }
 
     @Override
-    public boolean setMaxAckIndex(String topic, String app, short partition) throws JournalqException {
+    public boolean setMaxAckIndex(String topic, String app, short partition) throws JoyQueueException {
         return consumerManageService.setMaxAckIndex(topic, app, partition);
     }
 
@@ -90,17 +90,17 @@ public class DefaultBrokerManageService implements BrokerManageService {
     }
 
     @Override
-    public boolean setMaxAckIndexes(String topic, String app) throws JournalqException {
+    public boolean setMaxAckIndexes(String topic, String app) throws JoyQueueException {
         return consumerManageService.setMaxAckIndexes(topic, app);
     }
 
     @Override
-    public boolean setAckIndexByTime(String topic, String app, short partition, long timestamp) throws JournalqException {
+    public boolean setAckIndexByTime(String topic, String app, short partition, long timestamp) throws JoyQueueException {
         return consumerManageService.setAckIndexByTime(topic, app, partition, timestamp);
     }
 
     @Override
-    public boolean setAckIndexesByTime(String topic, String app, long timestamp) throws JournalqException {
+    public boolean setAckIndexesByTime(String topic, String app, long timestamp) throws JoyQueueException {
         return consumerManageService.setAckIndexesByTime(topic, app, timestamp);
     }
 

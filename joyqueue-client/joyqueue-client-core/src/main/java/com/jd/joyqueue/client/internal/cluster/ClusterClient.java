@@ -25,7 +25,7 @@ import com.jd.joyqueue.network.command.FetchClusterResponse;
 import com.jd.joyqueue.network.command.FindCoordinatorRequest;
 import com.jd.joyqueue.network.command.FindCoordinatorResponse;
 import com.jd.joyqueue.network.transport.command.Command;
-import com.jd.joyqueue.network.transport.command.JournalqCommand;
+import com.jd.joyqueue.network.transport.command.JoyQueueCommand;
 
 import java.util.List;
 
@@ -66,7 +66,7 @@ public class ClusterClient {
         fetchAssignedPartitionRequest.setApp(app);
         fetchAssignedPartitionRequest.setData(data);
 
-        Command response = client.sync(new JournalqCommand(fetchAssignedPartitionRequest));
+        Command response = client.sync(new JoyQueueCommand(fetchAssignedPartitionRequest));
         return (FetchAssignedPartitionResponse) response.getPayload();
     }
 
@@ -75,7 +75,7 @@ public class ClusterClient {
         findCoordinatorRequest.setTopics(topics);
         findCoordinatorRequest.setApp(app);
 
-        Command response = client.sync(new JournalqCommand(findCoordinatorRequest));
+        Command response = client.sync(new JoyQueueCommand(findCoordinatorRequest));
         return (FindCoordinatorResponse) response.getPayload();
     }
 
@@ -84,7 +84,7 @@ public class ClusterClient {
         fetchClusterRequest.setTopics(topics);
         fetchClusterRequest.setApp(app);
 
-        Command response = client.sync(new JournalqCommand(fetchClusterRequest));
+        Command response = client.sync(new JoyQueueCommand(fetchClusterRequest));
         return (FetchClusterResponse) response.getPayload();
     }
 

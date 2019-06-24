@@ -13,8 +13,8 @@
  */
 package com.jd.joyqueue.service.impl;
 
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.model.query.QArchive;
-import com.jd.joyqueue.exception.JournalqException;
 import com.jd.joyqueue.server.archive.store.QueryCondition;
 import com.jd.joyqueue.server.archive.store.api.ArchiveStore;
 import com.jd.joyqueue.server.archive.store.model.ConsumeLog;
@@ -43,14 +43,14 @@ public class ArchiveServiceImpl implements ArchiveService {
     }
 
     @Override
-    public List<SendLog> findByQuery(QArchive qPageQuery) throws JournalqException {
+    public List<SendLog> findByQuery(QArchive qPageQuery) throws JoyQueueException {
         QueryCondition queryCondition = conditionConvert(qPageQuery);
         List<SendLog> sendLogs = archiveStore.scanSendLog(queryCondition);
         return sendLogs;
     }
 
     @Override
-    public SendLog findSendLog(String topic,Long time,String businessId,String messageId) throws JournalqException {
+    public SendLog findSendLog(String topic,Long time,String businessId,String messageId) throws JoyQueueException {
         QueryCondition queryCondition = new QueryCondition();
         QueryCondition.RowKey startRow = new QueryCondition.RowKey();
         startRow.setBusinessId(businessId);
@@ -63,7 +63,7 @@ public class ArchiveServiceImpl implements ArchiveService {
     }
 
     @Override
-    public List<ConsumeLog> findConsumeLog(String messageId, Integer count) throws JournalqException {
+    public List<ConsumeLog> findConsumeLog(String messageId, Integer count) throws JoyQueueException {
         return archiveStore.scanConsumeLog(messageId,count);
     }
 

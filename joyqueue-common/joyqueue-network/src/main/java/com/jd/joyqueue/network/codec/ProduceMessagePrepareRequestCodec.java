@@ -13,10 +13,10 @@
  */
 package com.jd.joyqueue.network.codec;
 
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.command.ProduceMessagePrepareRequest;
 import com.jd.joyqueue.network.serializer.Serializer;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.codec.PayloadCodec;
 import com.jd.joyqueue.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
@@ -27,10 +27,10 @@ import io.netty.buffer.ByteBuf;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/19
  */
-public class ProduceMessagePrepareRequestCodec implements PayloadCodec<JournalqHeader, ProduceMessagePrepareRequest>, Type {
+public class ProduceMessagePrepareRequestCodec implements PayloadCodec<JoyQueueHeader, ProduceMessagePrepareRequest>, Type {
 
     @Override
-    public ProduceMessagePrepareRequest decode(JournalqHeader header, ByteBuf buffer) throws Exception {
+    public ProduceMessagePrepareRequest decode(JoyQueueHeader header, ByteBuf buffer) throws Exception {
         ProduceMessagePrepareRequest produceMessagePrepareRequest = new ProduceMessagePrepareRequest();
         produceMessagePrepareRequest.setTopic(Serializer.readString(buffer, Serializer.SHORT_SIZE));
         produceMessagePrepareRequest.setApp(Serializer.readString(buffer, Serializer.SHORT_SIZE));
@@ -51,6 +51,6 @@ public class ProduceMessagePrepareRequestCodec implements PayloadCodec<JournalqH
 
     @Override
     public int type() {
-        return JournalqCommandType.PRODUCE_MESSAGE_PREPARE_REQUEST.getCode();
+        return JoyQueueCommandType.PRODUCE_MESSAGE_PREPARE_REQUEST.getCode();
     }
 }

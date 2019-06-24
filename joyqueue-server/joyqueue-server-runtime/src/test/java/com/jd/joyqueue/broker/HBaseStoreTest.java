@@ -25,7 +25,7 @@ public class HBaseStoreTest {
 //    HBaseStore hBaseStore = new HBaseStore();
 //
 //    @Test
-//    public void putMessages() throws JournalqException {
+//    public void putMessages() throws JoyQueueException {
 //        hBaseStore.putSendLog(getSendList(1));
 //    }
 //
@@ -65,7 +65,7 @@ public class HBaseStoreTest {
 //    }
 //
 //    @Test
-//    public void putConsumeLogs() throws GeneralSecurityException, JournalqException {
+//    public void putConsumeLogs() throws GeneralSecurityException, JoyQueueException {
 //        List<ConsumeLog> consumeList = getConsumeList(1);
 //        hBaseStore.putConsumeLog(consumeList);
 //    }
@@ -153,7 +153,7 @@ public class HBaseStoreTest {
 //    }
 //
 //    @Test
-//    public void readPosition() throws JournalqException {
+//    public void readPosition() throws JoyQueueException {
 //        for (int i = 0; i < 3; i++) {
 //            Long position = hBaseStore.getPosition("default.topic_test", (short) i);
 //            System.out.println(position);

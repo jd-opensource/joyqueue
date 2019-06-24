@@ -20,8 +20,8 @@ import com.jd.joyqueue.broker.cluster.ClusterManager;
 import com.jd.joyqueue.broker.election.ElectionService;
 import com.jd.joyqueue.domain.Broker;
 import com.jd.joyqueue.domain.PartitionGroup;
-import com.jd.joyqueue.exception.JournalqCode;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueCode;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.network.command.BooleanAck;
 import com.jd.joyqueue.network.transport.Transport;
 import com.jd.joyqueue.network.transport.command.Command;
@@ -74,12 +74,12 @@ public class CreatePartitionGroupHandler implements CommandHandler, Type {
                 rollback(group);
             }
             return BooleanAck.build();
-        }catch (JournalqException e) {
+        }catch (JoyQueueException e) {
             logger.error(String.format("CreatePartitionGroupHandler request command[%s] error",request),e);
             return BooleanAck.build(e.getCode(),e.getMessage());
         } catch (Exception e) {
             logger.error(String.format("CreatePartitionGroupHandler request command[%s] error",request),e);
-            return BooleanAck.build(JournalqCode.CN_UNKNOWN_ERROR,e.getMessage());
+            return BooleanAck.build(JoyQueueCode.CN_UNKNOWN_ERROR,e.getMessage());
         }
     }
 

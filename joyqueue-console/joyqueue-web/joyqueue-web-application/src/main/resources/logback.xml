@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration debug="false">
-    <property name="log_file" value="/export/Logs/journalq" />
+    <property name="log_file" value="/export/Logs/joyqueue" />
     <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
         <!-- reset all previous level configurations of all j.u.l. loggers -->
         <resetJUL>true</resetJUL>

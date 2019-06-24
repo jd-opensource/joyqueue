@@ -32,7 +32,7 @@ import java.util.Map;
  * @author lining11
  * Date: 2018/8/17
  */
-public class BrokerPrepare implements JournalLog {
+public class BrokerPrepare implements JoyQueueLog {
     private int size;
     //开始时间
     private long startTime;

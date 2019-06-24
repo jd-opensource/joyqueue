@@ -23,8 +23,8 @@ import com.jd.joyqueue.broker.producer.ProduceConfig;
 import com.jd.joyqueue.domain.PartitionGroup;
 import com.jd.joyqueue.domain.QosLevel;
 import com.jd.joyqueue.domain.TopicName;
-import com.jd.joyqueue.exception.JournalqCode;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueCode;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.message.BrokerCommit;
 import com.jd.joyqueue.message.BrokerPrepare;
 import com.jd.joyqueue.message.BrokerRollback;
@@ -80,16 +80,16 @@ public class TransactionManager extends Service {
         this.brokerMonitor = brokerMonitor;
     }
 
-    public TransactionId prepare(Producer producer, BrokerPrepare prepare) throws JournalqException {
+    public TransactionId prepare(Producer producer, BrokerPrepare prepare) throws JoyQueueException {
         if (unCompletedTransactionManager.getTransactionCount(producer.getTopic(), producer.getApp()) > config.getTransactionMaxUncomplete()) {
             logger.warn("too many transactions, topic: {}, app: {}. txId: {}", prepare.getTopic(), prepare.getApp(), prepare.getTxId());
-            throw new JournalqException(JournalqCode.FW_TRANSACTION_LIMIT);
+            throw new JoyQueueException(JoyQueueCode.FW_TRANSACTION_LIMIT);
         }
 
         TransactionStore transactionStore = store.getTransactionStore(producer.getTopic());
         if (transactionStore == null) {
             logger.error("transaction store not exist, topic: {}", producer.getTopic());
-            throw new JournalqException(JournalqCode.CN_TRANSACTION_NOT_EXISTS);
+            throw new JoyQueueException(JoyQueueCode.CN_TRANSACTION_NOT_EXISTS);
         }
 
         int storeId = transactionStore.next();
@@ -113,7 +113,7 @@ public class TransactionManager extends Service {
             }
 
             logger.error("write prepare exception, topic: {}, app: {}. txId: {}", prepare.getTopic(), prepare.getApp(), prepare.getTxId(), e);
-            throw new JournalqException(JournalqCode.CN_TRANSACTION_PREPARE_ERROR);
+            throw new JoyQueueException(JoyQueueCode.CN_TRANSACTION_PREPARE_ERROR);
         }
 
         return transactionId;
@@ -128,17 +128,17 @@ public class TransactionManager extends Service {
         return new TransactionId(prepare.getTopic(), prepare.getApp(), txId, prepare.getQueryId(), storeId, prepare.getSource(), prepare.getTimeout(), now);
     }
 
-    public TransactionId commit(final Producer producer, final BrokerCommit commit) throws JournalqException {
+    public TransactionId commit(final Producer producer, final BrokerCommit commit) throws JoyQueueException {
         TransactionStore transactionStore = store.getTransactionStore(producer.getTopic());
         if (transactionStore == null) {
             logger.error("transaction store not exist, topic: {}", producer.getTopic());
-            throw new JournalqException(JournalqCode.CN_TRANSACTION_NOT_EXISTS);
+            throw new JoyQueueException(JoyQueueCode.CN_TRANSACTION_NOT_EXISTS);
         }
 
         TransactionId transactionId = unCompletedTransactionManager.getTransaction(commit.getTopic(), commit.getApp(), commit.getTxId());
         if (transactionId == null) {
             logger.debug("The current tx is not in txManager, topic: {}, app: {}, txId: {}", commit.getTxId(), commit.getApp(), commit.getTxId());
-            throw new JournalqException(JournalqCode.CN_TRANSACTION_NOT_EXISTS);
+            throw new JoyQueueException(JoyQueueCode.CN_TRANSACTION_NOT_EXISTS);
         }
 
         BrokerPrepare brokerPrepare = null;
@@ -156,7 +156,7 @@ public class TransactionManager extends Service {
                     short currentPartition = dispatchPartition(byteBuffer, (short) 0);
                     PartitionGroup partitionGroup = clusterManager.getPartitionGroup(TopicName.parse(producer.getTopic()), currentPartition);
                     if (partitionGroup == null) {
-                        throw new JournalqException(JournalqCode.SE_WRITE_FAILED);
+                        throw new JoyQueueException(JoyQueueCode.SE_WRITE_FAILED);
                     }
                     List<WriteRequest> writeRequests = writeRequestMap.get(partitionGroup.getGroup());
                     if (writeRequests == null) {
@@ -183,16 +183,16 @@ public class TransactionManager extends Service {
                 }
             } catch (Exception e) {
                 logger.warn("write transaction message exception, topic: {}, app: {}, txId: {}", brokerPrepare.getTopic(), brokerPrepare.getApp(), brokerPrepare.getTxId(), e);
-                throw new JournalqException(JournalqCode.SE_IO_ERROR);
+                throw new JoyQueueException(JoyQueueCode.SE_IO_ERROR);
             }
 
             unCompletedTransactionManager.removeTransaction(transactionId);
         } catch (Exception e) {
             logger.error("write transaction message exception, topic: {}, app: {}, txId: {}", commit.getTopic(), commit.getApp(), commit.getTxId(), e);
-            if (e instanceof JournalqException) {
-                throw (JournalqException) e;
+            if (e instanceof JoyQueueException) {
+                throw (JoyQueueException) e;
             } else {
-                throw new JournalqException(JournalqCode.SE_IO_ERROR);
+                throw new JoyQueueException(JoyQueueCode.SE_IO_ERROR);
             }
         }
         return transactionId;
@@ -203,7 +203,7 @@ public class TransactionManager extends Service {
         return partition < 0 ? defaultPartition : partition;
     }
 
-    protected void waitFuture(Producer producer, Future<WriteResult> future) throws JournalqException {
+    protected void waitFuture(Producer producer, Future<WriteResult> future) throws JoyQueueException {
         try {
             com.jd.joyqueue.domain.Producer.ProducerPolicy producerPolicy = clusterManager.tryGetProducerPolicy(TopicName.parse(producer.getTopic()), producer.getApp());
             int configTimeOut = (producerPolicy == null ? 0 : producerPolicy.getTimeOut());
@@ -213,25 +213,25 @@ public class TransactionManager extends Service {
                 future.get(configTimeOut, TimeUnit.MILLISECONDS);
             }
         } catch (InterruptedException e) {
-            throw new JournalqException(JournalqCode.SE_DISK_FLUSH_SLOW);
+            throw new JoyQueueException(JoyQueueCode.SE_DISK_FLUSH_SLOW);
         } catch (ExecutionException | TimeoutException e) {
-            throw new JournalqException(JournalqCode.SE_WRITE_TIMEOUT);
+            throw new JoyQueueException(JoyQueueCode.SE_WRITE_TIMEOUT);
         } catch (Exception e) {
-            throw new JournalqException(JournalqCode.CN_CONNECTION_TIMEOUT);
+            throw new JoyQueueException(JoyQueueCode.CN_CONNECTION_TIMEOUT);
         }
     }
 
-    public TransactionId rollback(final Producer producer, final BrokerRollback rollback) throws JournalqException {
+    public TransactionId rollback(final Producer producer, final BrokerRollback rollback) throws JoyQueueException {
         TransactionStore transactionStore = store.getTransactionStore(producer.getTopic());
         if (transactionStore == null) {
             logger.error("transaction store not exist, topic: {}", producer.getTopic());
-            throw new JournalqException(JournalqCode.CN_TRANSACTION_NOT_EXISTS);
+            throw new JoyQueueException(JoyQueueCode.CN_TRANSACTION_NOT_EXISTS);
         }
 
         TransactionId transactionId = unCompletedTransactionManager.getTransaction(rollback.getTopic(), rollback.getApp(), rollback.getTxId());
         if (transactionId == null) {
             logger.debug("transaction not exist, topic: {}, id: {}", producer.getTopic(), rollback.getTxId());
-            throw new JournalqException(JournalqCode.CN_TRANSACTION_NOT_EXISTS);
+            throw new JoyQueueException(JoyQueueCode.CN_TRANSACTION_NOT_EXISTS);
         }
 
         transactionStore.remove(transactionId.getStoreId());
@@ -239,17 +239,17 @@ public class TransactionManager extends Service {
         return transactionId;
     }
 
-    public Future<WriteResult> putMessage(Producer producer, String txId, ByteBuffer... byteBuffers) throws JournalqException {
+    public Future<WriteResult> putMessage(Producer producer, String txId, ByteBuffer... byteBuffers) throws JoyQueueException {
         TransactionStore transactionStore = store.getTransactionStore(producer.getTopic());
         if (Strings.isNullOrEmpty(txId)) {
             logger.error("The current message is not a tx message!");
-            throw new JournalqException(JournalqCode.CN_UNKNOWN_ERROR);
+            throw new JoyQueueException(JoyQueueCode.CN_UNKNOWN_ERROR);
         }
 
         TransactionId transactionId = unCompletedTransactionManager.getTransaction(producer.getTopic(), producer.getApp(), txId);
         if (transactionId == null) {
             logger.debug("The current tx is not in txManager! txId:{}...", txId);
-            throw new JournalqException(JournalqCode.CN_TRANSACTION_NOT_EXISTS);
+            throw new JoyQueueException(JoyQueueCode.CN_TRANSACTION_NOT_EXISTS);
         }
 
         return transactionStore.asyncWrite(transactionId.getStoreId(), byteBuffers);

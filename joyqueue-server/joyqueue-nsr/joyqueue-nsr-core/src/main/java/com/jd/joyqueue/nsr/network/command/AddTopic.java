@@ -15,7 +15,7 @@ package com.jd.joyqueue.nsr.network.command;
 
 import com.jd.joyqueue.domain.PartitionGroup;
 import com.jd.joyqueue.domain.Topic;
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 import java.util.List;
 
@@ -23,7 +23,7 @@ import java.util.List;
  * @author wylixiaobin
  * Date: 2019/2/21
  */
-public class AddTopic extends JournalqPayload {
+public class AddTopic extends JoyQueuePayload {
     private Topic topic;
     private List<PartitionGroup> partitionGroups;
 

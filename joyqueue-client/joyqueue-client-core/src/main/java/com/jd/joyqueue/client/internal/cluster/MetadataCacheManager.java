@@ -18,7 +18,7 @@ import com.google.common.collect.Maps;
 import com.jd.joyqueue.client.internal.cluster.domain.TopicMetadataHolder;
 import com.jd.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import com.jd.joyqueue.client.internal.nameserver.NameServerConfig;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.toolkit.time.SystemClock;
 
 import java.util.List;
@@ -80,7 +80,7 @@ public class MetadataCacheManager {
     }
 
     protected TopicMetadataHolder newTopicMetadataHolder(String topic, TopicMetadata topicMetadata) {
-        if (topicMetadata.getCode().equals(JournalqCode.SUCCESS)) {
+        if (topicMetadata.getCode().equals(JoyQueueCode.SUCCESS)) {
             if (topicMetadata.isAllAvailable()) {
                 return new TopicMetadataHolder(topic, topicMetadata, SystemClock.now(), config.getUpdateMetadataInterval(), topicMetadata.getCode());
             } else {

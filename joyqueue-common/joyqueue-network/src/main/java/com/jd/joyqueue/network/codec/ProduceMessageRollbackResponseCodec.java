@@ -13,10 +13,10 @@
  */
 package com.jd.joyqueue.network.codec;
 
-import com.jd.joyqueue.exception.JournalqCode;
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.exception.JoyQueueCode;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.command.ProduceMessageRollbackResponse;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.codec.PayloadCodec;
 import com.jd.joyqueue.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
@@ -27,12 +27,12 @@ import io.netty.buffer.ByteBuf;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/19
  */
-public class ProduceMessageRollbackResponseCodec implements PayloadCodec<JournalqHeader, ProduceMessageRollbackResponse>, Type {
+public class ProduceMessageRollbackResponseCodec implements PayloadCodec<JoyQueueHeader, ProduceMessageRollbackResponse>, Type {
 
     @Override
-    public ProduceMessageRollbackResponse decode(JournalqHeader header, ByteBuf buffer) throws Exception {
+    public ProduceMessageRollbackResponse decode(JoyQueueHeader header, ByteBuf buffer) throws Exception {
         ProduceMessageRollbackResponse produceMessageRollbackResponse = new ProduceMessageRollbackResponse();
-        produceMessageRollbackResponse.setCode(JournalqCode.valueOf(buffer.readInt()));
+        produceMessageRollbackResponse.setCode(JoyQueueCode.valueOf(buffer.readInt()));
         return produceMessageRollbackResponse;
     }
 
@@ -43,6 +43,6 @@ public class ProduceMessageRollbackResponseCodec implements PayloadCodec<Journal
 
     @Override
     public int type() {
-        return JournalqCommandType.PRODUCE_MESSAGE_ROLLBACK_RESPONSE.getCode();
+        return JoyQueueCommandType.PRODUCE_MESSAGE_ROLLBACK_RESPONSE.getCode();
     }
 }

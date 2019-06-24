@@ -32,8 +32,8 @@ import com.jd.joyqueue.domain.TopicName;
 import com.jd.joyqueue.event.ConsumerEvent;
 import com.jd.joyqueue.event.EventType;
 import com.jd.joyqueue.event.MetaEvent;
-import com.jd.joyqueue.exception.JournalqCode;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueCode;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.message.MessageLocation;
 import com.jd.joyqueue.network.session.Connection;
 import com.jd.joyqueue.network.session.Consumer;
@@ -192,7 +192,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
     }
 
     @Override
-    public PullResult getMessage(Consumer consumer, int count, int ackTimeout) throws JournalqException {
+    public PullResult getMessage(Consumer consumer, int count, int ackTimeout) throws JoyQueueException {
         Preconditions.checkArgument(consumer != null, "消费者信息不能为空");
 
         // 监控开始时间
@@ -211,7 +211,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
         // 判断是否暂停消费, 返回空
         if (partitionManager.needPause(consumer)) {
             PullResult pullResult = new PullResult(consumer, (short) -1, Collections.emptyList());
-            pullResult.setJmqCode(JournalqCode.FW_FETCH_TOPIC_MESSAGE_PAUSED);
+            pullResult.setJmqCode(JoyQueueCode.FW_FETCH_TOPIC_MESSAGE_PAUSED);
             return pullResult;
         }
 
@@ -234,7 +234,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
                 default:
                     break;
             }
-        } catch (JournalqException ex) {
+        } catch (JoyQueueException ex) {
             // 连续异常计数
             partitionManager.increaseSerialErr(new OwnerShip(consumer));
             throw ex;
@@ -325,7 +325,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
     }
 
     @Override
-    public PullResult getMessage(Consumer consumer, short partition, long index, int count) throws JournalqException {
+    public PullResult getMessage(Consumer consumer, short partition, long index, int count) throws JoyQueueException {
         Preconditions.checkArgument(consumer != null, "消费者信息不能为空");
         Preconditions.checkArgument(partition >= 0, "分区不能小于0");
         Preconditions.checkArgument(index >= 0, "消费序号不能小于0");
@@ -346,7 +346,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
             return pullResult;
         } catch (IOException e) {
             logger.warn(e.getMessage(), e);
-            throw new JournalqException(JournalqCode.SE_IO_ERROR, e);
+            throw new JoyQueueException(JoyQueueCode.SE_IO_ERROR, e);
         }
     }
 
@@ -370,7 +370,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
     }
 
     @Override
-    public boolean acknowledge(MessageLocation[] locations, Consumer consumer, Connection connection, boolean isSuccessAck) throws JournalqException {
+    public boolean acknowledge(MessageLocation[] locations, Consumer consumer, Connection connection, boolean isSuccessAck) throws JoyQueueException {
         boolean isSuccess = false;
         if (locations.length < 0) {
             return isSuccess;
@@ -440,7 +440,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
     }
 
     @Override
-    public void setPullIndex(Consumer consumer, short partition, long index) throws JournalqException {
+    public void setPullIndex(Consumer consumer, short partition, long index) throws JoyQueueException {
         String topic = consumer.getTopic();
         String app = consumer.getApp();
         Preconditions.checkArgument(topic != null, "topic can not be null.");
@@ -493,7 +493,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
     }
 
     @Override
-    public void setAckIndex(Consumer consumer, short partition, long index) throws JournalqException {
+    public void setAckIndex(Consumer consumer, short partition, long index) throws JoyQueueException {
         String topic = consumer.getTopic();
         String app = consumer.getApp();
         Preconditions.checkArgument(topic != null, "topic can not be null.");
@@ -504,7 +504,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
     }
 
     @Override
-    public void setStartAckIndex(Consumer consumer, short partition, long index) throws JournalqException {
+    public void setStartAckIndex(Consumer consumer, short partition, long index) throws JoyQueueException {
         String topic = consumer.getTopic();
         String app = consumer.getApp();
         Preconditions.checkArgument(topic != null, "topic can not be null.");
@@ -515,7 +515,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
     }
 
     @Override
-    public boolean resetPullIndex(String topic, String app) throws JournalqException {
+    public boolean resetPullIndex(String topic, String app) throws JoyQueueException {
         // 获取当前broker上master角色的partition集合
         List<Short> masterPartitionList = clusterManager.getMasterPartitionList(TopicName.parse(topic));
         // 遍历partition集合，重置消费拉取位置
@@ -596,7 +596,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
                     ConsumerPolicy consumerPolicy = clusterManager.getConsumerPolicy(updateConsumerEvent.getTopic(), updateConsumerEvent.getApp());
                     Integer readRetryProbability = consumerPolicy.getReadRetryProbability();
                     partitionManager.resetRetryProbability(readRetryProbability);
-                } catch (JournalqException e) {
+                } catch (JoyQueueException e) {
                     logger.error("listen update consume event error.", e);
                 }
             }

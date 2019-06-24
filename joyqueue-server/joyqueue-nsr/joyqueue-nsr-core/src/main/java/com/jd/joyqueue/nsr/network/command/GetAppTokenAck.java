@@ -14,13 +14,13 @@
 package com.jd.joyqueue.nsr.network.command;
 
 import com.jd.joyqueue.domain.AppToken;
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 /**
  * @author wylixiaobin
  * Date: 2019/2/13
  */
-public class GetAppTokenAck extends JournalqPayload {
+public class GetAppTokenAck extends JoyQueuePayload {
     private AppToken appToken;
 
     public GetAppTokenAck appToken(AppToken appToken){

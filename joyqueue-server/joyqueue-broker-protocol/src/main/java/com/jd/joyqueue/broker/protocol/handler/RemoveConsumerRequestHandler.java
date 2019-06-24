@@ -15,12 +15,12 @@ package com.jd.joyqueue.broker.protocol.handler;
 
 import com.jd.joyqueue.broker.BrokerContext;
 import com.jd.joyqueue.broker.BrokerContextAware;
-import com.jd.joyqueue.broker.protocol.JournalqCommandHandler;
+import com.jd.joyqueue.broker.protocol.JoyQueueCommandHandler;
 import com.jd.joyqueue.broker.helper.SessionHelper;
 import com.jd.joyqueue.broker.monitor.SessionManager;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.network.command.BooleanAck;
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.command.RemoveConsumerRequest;
 import com.jd.joyqueue.network.session.Connection;
 import com.jd.joyqueue.network.transport.Transport;
@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/28
  */
-public class RemoveConsumerRequestHandler implements JournalqCommandHandler, Type, BrokerContextAware {
+public class RemoveConsumerRequestHandler implements JoyQueueCommandHandler, Type, BrokerContextAware {
 
     protected static final Logger logger = LoggerFactory.getLogger(RemoveConsumerRequestHandler.class);
 
@@ -54,7 +54,7 @@ public class RemoveConsumerRequestHandler implements JournalqCommandHandler, Typ
 
         if (connection == null || !connection.isAuthorized(removeConsumerRequest.getApp())) {
             logger.warn("connection is not exists, transport: {}, app: {}", transport, removeConsumerRequest.getApp());
-            return BooleanAck.build(JournalqCode.FW_CONNECTION_NOT_EXISTS.getCode());
+            return BooleanAck.build(JoyQueueCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
         for (String topic : removeConsumerRequest.getTopics()) {
@@ -70,6 +70,6 @@ public class RemoveConsumerRequestHandler implements JournalqCommandHandler, Typ
 
     @Override
     public int type() {
-        return JournalqCommandType.REMOVE_CONSUMER_REQUEST.getCode();
+        return JoyQueueCommandType.REMOVE_CONSUMER_REQUEST.getCode();
     }
 }

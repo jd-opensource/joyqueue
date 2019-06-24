@@ -14,7 +14,7 @@
 package com.jd.joyqueue.network.command;
 
 import com.google.common.collect.Table;
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 /**
  * FetchIndexResponse
@@ -22,13 +22,13 @@ import com.jd.joyqueue.network.transport.command.JournalqPayload;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/13
  */
-public class FetchIndexResponse extends JournalqPayload {
+public class FetchIndexResponse extends JoyQueuePayload {
 
     private Table<String, Short, FetchIndexAckData> data;
 
     @Override
     public int type() {
-        return JournalqCommandType.FETCH_INDEX_RESPONSE.getCode();
+        return JoyQueueCommandType.FETCH_INDEX_RESPONSE.getCode();
     }
 
     public void setData(Table<String, Short, FetchIndexAckData> data) {

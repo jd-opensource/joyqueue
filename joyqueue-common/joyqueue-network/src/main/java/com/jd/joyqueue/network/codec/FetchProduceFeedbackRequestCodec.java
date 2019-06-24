@@ -14,10 +14,10 @@
 package com.jd.joyqueue.network.codec;
 
 import com.jd.joyqueue.network.command.FetchProduceFeedbackRequest;
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.command.TxStatus;
 import com.jd.joyqueue.network.serializer.Serializer;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.codec.PayloadCodec;
 import com.jd.joyqueue.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
@@ -28,10 +28,10 @@ import io.netty.buffer.ByteBuf;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/19
  */
-public class FetchProduceFeedbackRequestCodec implements PayloadCodec<JournalqHeader, FetchProduceFeedbackRequest>, Type {
+public class FetchProduceFeedbackRequestCodec implements PayloadCodec<JoyQueueHeader, FetchProduceFeedbackRequest>, Type {
 
     @Override
-    public FetchProduceFeedbackRequest decode(JournalqHeader header, ByteBuf buffer) throws Exception {
+    public FetchProduceFeedbackRequest decode(JoyQueueHeader header, ByteBuf buffer) throws Exception {
         FetchProduceFeedbackRequest fetchProduceFeedbackRequest = new FetchProduceFeedbackRequest();
         fetchProduceFeedbackRequest.setApp(Serializer.readString(buffer, Serializer.SHORT_SIZE));
         fetchProduceFeedbackRequest.setTopic(Serializer.readString(buffer, Serializer.SHORT_SIZE));
@@ -50,6 +50,6 @@ public class FetchProduceFeedbackRequestCodec implements PayloadCodec<JournalqHe
 
     @Override
     public int type() {
-        return JournalqCommandType.FETCH_PRODUCE_FEEDBACK_REQUEST.getCode();
+        return JoyQueueCommandType.FETCH_PRODUCE_FEEDBACK_REQUEST.getCode();
     }
 }

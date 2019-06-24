@@ -25,13 +25,13 @@ test/3 | 6 | 200 | 50 | 200 | 120GB
 
 序号 | Consumer | Producer |
 -- | -- | -- 
-1 | journalq | journalq 
+1 | joyqueue | joyqueue 
 2 | Kafka | Kafka 
-3 | journalq2 | journalq2
+3 | joyqueue2 | joyqueue2
 4 | mqtt | mqtt
-5 | journalq2 | journalq
-6 | Kafka | journalq
-7 | journalq | Kafka
+5 | joyqueue2 | joyqueue
+6 | Kafka | joyqueue
+7 | joyqueue | Kafka
 
 #### 测试步骤
 

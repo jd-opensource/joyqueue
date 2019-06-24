@@ -29,7 +29,7 @@ import com.jd.joyqueue.client.internal.nameserver.NameServerConfig;
 import com.jd.joyqueue.client.internal.nameserver.helper.NameServerHelper;
 import com.jd.joyqueue.domain.TopicName;
 import com.jd.joyqueue.domain.TopicType;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,7 +121,7 @@ public class TopicMessageConsumer extends Service {
         TopicMetadata topicMetadata = clusterManager.fetchTopicMetadata(topicName.getFullName(), config.getApp());
 
         if (topicMetadata == null || topicMetadata.getConsumerPolicy() == null) {
-            throw new ConsumerException(String.format("topic %s is not exist", topic), JournalqCode.FW_TOPIC_NOT_EXIST.getCode());
+            throw new ConsumerException(String.format("topic %s is not exist", topic), JoyQueueCode.FW_TOPIC_NOT_EXIST.getCode());
         }
 
         if (topicMetadata.getType().equals(TopicType.BROADCAST)) {

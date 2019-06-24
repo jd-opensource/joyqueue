@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.client.internal.producer.domain;
 
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 
 import java.io.Serializable;
 
@@ -26,13 +26,13 @@ import java.io.Serializable;
 public class SendPrepareResult implements Serializable {
 
     private String txId;
-    private JournalqCode code;
+    private JoyQueueCode code;
 
     public SendPrepareResult() {
 
     }
 
-    public SendPrepareResult(String txId, JournalqCode code) {
+    public SendPrepareResult(String txId, JoyQueueCode code) {
         this.txId = txId;
         this.code = code;
     }
@@ -45,11 +45,11 @@ public class SendPrepareResult implements Serializable {
         return txId;
     }
 
-    public void setCode(JournalqCode code) {
+    public void setCode(JoyQueueCode code) {
         this.code = code;
     }
 
-    public JournalqCode getCode() {
+    public JoyQueueCode getCode() {
         return code;
     }
 }

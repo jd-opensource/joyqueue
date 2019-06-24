@@ -14,7 +14,7 @@
 package com.jd.joyqueue.service.impl;
 
 import com.jd.joyqueue.domain.ConsumeRetry;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.model.PageResult;
 import com.jd.joyqueue.model.QPageQuery;
 import com.jd.joyqueue.model.query.QRetry;
@@ -43,7 +43,7 @@ public class RetryServiceImpl implements RetryService {
 
 
     @Override
-    public PageResult<ConsumeRetry> findByQuery(QPageQuery<QRetry> qPageQuery) throws JournalqException {
+    public PageResult<ConsumeRetry> findByQuery(QPageQuery<QRetry> qPageQuery) throws JoyQueueException {
         RetryQueryCondition queryCondition = new RetryQueryCondition();
         if (qPageQuery != null) {
             QRetry qRetry = qPageQuery.getQuery();
@@ -69,7 +69,7 @@ public class RetryServiceImpl implements RetryService {
     }
 
     @Override
-    public ConsumeRetry getDataById(Long id) throws JournalqException {
+    public ConsumeRetry getDataById(Long id) throws JoyQueueException {
         return consoleMessageRetry.getConsumeRetryById(id);
     }
 
@@ -79,7 +79,7 @@ public class RetryServiceImpl implements RetryService {
         retryMessageModels.add(retryMessageModel);
         try {
             consoleMessageRetry.addRetry(retryMessageModels);
-        } catch (JournalqException e) {
+        } catch (JoyQueueException e) {
             throw new RuntimeException("add retry error",e);
         }
     }

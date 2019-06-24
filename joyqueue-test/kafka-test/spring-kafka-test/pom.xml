@@ -23,7 +23,7 @@
         <version>2.1.1.RELEASE</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.jd.journalq</groupId>
+    <groupId>com.jd.joyqueue</groupId>
     <artifactId>spring-kafka-test</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>spring-kafka-test</name>

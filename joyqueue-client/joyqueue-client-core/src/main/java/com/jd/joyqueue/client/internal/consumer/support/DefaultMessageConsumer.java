@@ -31,7 +31,7 @@ import com.jd.joyqueue.client.internal.exception.ClientException;
 import com.jd.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import com.jd.joyqueue.client.internal.nameserver.NameServerConfig;
 import com.jd.joyqueue.client.internal.nameserver.helper.NameServerHelper;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.google.common.base.Preconditions;
 import com.jd.joyqueue.toolkit.service.Service;
 import org.apache.commons.collections.CollectionUtils;
@@ -155,7 +155,7 @@ public class DefaultMessageConsumer extends Service implements MessageConsumer {
             throw new ConsumerException(e.getMessage(), e.getCode(), e);
         } catch (Exception e) {
             logger.debug("newTopicMessageConsumer exception, topic: {}", topic, e);
-            throw new ConsumerException(JournalqCode.CN_UNKNOWN_ERROR.getMessage(), JournalqCode.CN_UNKNOWN_ERROR.getCode(), e);
+            throw new ConsumerException(JoyQueueCode.CN_UNKNOWN_ERROR.getMessage(), JoyQueueCode.CN_UNKNOWN_ERROR.getCode(), e);
         }
         return topicMessageConsumer;
     }
@@ -322,7 +322,7 @@ public class DefaultMessageConsumer extends Service implements MessageConsumer {
     }
 
     @Override
-    public JournalqCode reply(List<ConsumeReply> replyList) {
+    public JoyQueueCode reply(List<ConsumeReply> replyList) {
         Preconditions.checkArgument(CollectionUtils.isNotEmpty(replyList), "replyList can not be null");
 
         checkState();
@@ -331,7 +331,7 @@ public class DefaultMessageConsumer extends Service implements MessageConsumer {
     }
 
     @Override
-    public JournalqCode replyOnce(ConsumeReply reply) {
+    public JoyQueueCode replyOnce(ConsumeReply reply) {
         Preconditions.checkArgument(reply != null, "replyList can not be null");
 
         checkState();
@@ -350,19 +350,19 @@ public class DefaultMessageConsumer extends Service implements MessageConsumer {
 
     protected void checkState() {
         if (!isStarted()) {
-            throw new ConsumerException("consumer is not started", JournalqCode.CN_SERVICE_NOT_AVAILABLE.getCode());
+            throw new ConsumerException("consumer is not started", JoyQueueCode.CN_SERVICE_NOT_AVAILABLE.getCode());
         }
     }
 
     protected void checkSubscribe() {
         if (StringUtils.isBlank(subscribeTopic)) {
-            throw new ConsumerException("consumer not subscribe topic", JournalqCode.CN_SERVICE_NOT_AVAILABLE.getCode());
+            throw new ConsumerException("consumer not subscribe topic", JoyQueueCode.CN_SERVICE_NOT_AVAILABLE.getCode());
         }
     }
 
     protected void checkUnsubscribe() {
         if (StringUtils.isNotBlank(subscribeTopic)) {
-            throw new ConsumerException("consumer is subscribed topic", JournalqCode.CN_SERVICE_NOT_AVAILABLE.getCode());
+            throw new ConsumerException("consumer is subscribed topic", JoyQueueCode.CN_SERVICE_NOT_AVAILABLE.getCode());
         }
     }
 }

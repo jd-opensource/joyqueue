@@ -14,8 +14,8 @@
 package com.jd.joyqueue.network.codec;
 
 import com.jd.joyqueue.network.command.HeartbeatRequest;
-import com.jd.joyqueue.network.command.JournalqCommandType;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.codec.PayloadCodec;
 import com.jd.joyqueue.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
@@ -26,10 +26,10 @@ import io.netty.buffer.ByteBuf;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/28
  */
-public class HeartbeatRequestCodec implements PayloadCodec<JournalqHeader, HeartbeatRequest>, Type {
+public class HeartbeatRequestCodec implements PayloadCodec<JoyQueueHeader, HeartbeatRequest>, Type {
 
     @Override
-    public HeartbeatRequest decode(JournalqHeader header, ByteBuf buffer) throws Exception {
+    public HeartbeatRequest decode(JoyQueueHeader header, ByteBuf buffer) throws Exception {
         return new HeartbeatRequest();
     }
 
@@ -40,6 +40,6 @@ public class HeartbeatRequestCodec implements PayloadCodec<JournalqHeader, Heart
 
     @Override
     public int type() {
-        return JournalqCommandType.HEARTBEAT_REQUEST.getCode();
+        return JoyQueueCommandType.HEARTBEAT_REQUEST.getCode();
     }
 }

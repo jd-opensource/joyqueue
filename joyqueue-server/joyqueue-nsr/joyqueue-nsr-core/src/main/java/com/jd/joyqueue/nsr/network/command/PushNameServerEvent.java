@@ -14,13 +14,13 @@
 package com.jd.joyqueue.nsr.network.command;
 
 import com.jd.joyqueue.event.NameServerEvent;
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 /**
  * @author wylixiaobin
  * Date: 2019/2/17
  */
-public class PushNameServerEvent extends JournalqPayload {
+public class PushNameServerEvent extends JoyQueuePayload {
     private NameServerEvent event;
     public PushNameServerEvent event(NameServerEvent event){
         this.event = event;

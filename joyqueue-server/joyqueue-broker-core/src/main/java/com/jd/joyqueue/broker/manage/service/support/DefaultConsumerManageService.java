@@ -18,7 +18,7 @@ import com.jd.joyqueue.broker.cluster.ClusterManager;
 import com.jd.joyqueue.broker.consumer.Consume;
 import com.jd.joyqueue.broker.manage.service.ConsumerManageService;
 import com.jd.joyqueue.domain.TopicName;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.monitor.PartitionAckMonitorInfo;
 import com.jd.joyqueue.network.session.Consumer;
 import com.jd.joyqueue.store.PartitionGroupStore;
@@ -49,7 +49,7 @@ public class DefaultConsumerManageService implements ConsumerManageService {
     }
 
     @Override
-    public boolean setAckIndex(String topic, String app, short partition, long index) throws JournalqException {
+    public boolean setAckIndex(String topic, String app, short partition, long index) throws JoyQueueException {
         Consumer consumer = new Consumer();
         consumer.setTopic(topic);
         consumer.setApp(app);
@@ -58,7 +58,7 @@ public class DefaultConsumerManageService implements ConsumerManageService {
     }
 
     @Override
-    public boolean setMaxAckIndex(String topic, String app, short partition) throws JournalqException {
+    public boolean setMaxAckIndex(String topic, String app, short partition) throws JoyQueueException {
         StoreManagementService.PartitionMetric partitionMetric = storeManagementService.partitionMetric(topic, partition);
         Consumer consumer = new Consumer();
         consumer.setTopic(topic);
@@ -98,7 +98,7 @@ public class DefaultConsumerManageService implements ConsumerManageService {
     }
 
     @Override
-    public boolean setMaxAckIndexes(String topic, String app) throws JournalqException {
+    public boolean setMaxAckIndexes(String topic, String app) throws JoyQueueException {
         StoreManagementService.TopicMetric topicMetric = storeManagementService.topicMetric(topic);
         Consumer consumer = new Consumer();
         consumer.setTopic(topic);
@@ -112,7 +112,7 @@ public class DefaultConsumerManageService implements ConsumerManageService {
     }
 
     @Override
-    public boolean setAckIndexByTime(String topic, String app, short partition, long timestamp) throws JournalqException {
+    public boolean setAckIndexByTime(String topic, String app, short partition, long timestamp) throws JoyQueueException {
         StoreManagementService.TopicMetric topicMetric = storeManagementService.topicMetric(topic);
         for (StoreManagementService.PartitionGroupMetric partitionGroupMetric : topicMetric.getPartitionGroupMetrics()) {
             for (StoreManagementService.PartitionMetric partitionMetric : partitionGroupMetric.getPartitionMetrics()) {
@@ -125,7 +125,7 @@ public class DefaultConsumerManageService implements ConsumerManageService {
     }
 
     @Override
-    public boolean setAckIndexesByTime(String topic, String app, long timestamp) throws JournalqException {
+    public boolean setAckIndexesByTime(String topic, String app, long timestamp) throws JoyQueueException {
         StoreManagementService.TopicMetric topicMetric = storeManagementService.topicMetric(topic);
         for (StoreManagementService.PartitionGroupMetric partitionGroupMetric : topicMetric.getPartitionGroupMetrics()) {
             for (StoreManagementService.PartitionMetric partitionMetric : partitionGroupMetric.getPartitionMetrics()) {
@@ -164,7 +164,7 @@ public class DefaultConsumerManageService implements ConsumerManageService {
         }
         return partitionAckMonitorInfos;
     }
-    protected boolean setPartitionAckIndexByTime(String topic, String app, int partitionGroup, short partition, long timestamp) throws JournalqException {
+    protected boolean setPartitionAckIndexByTime(String topic, String app, int partitionGroup, short partition, long timestamp) throws JoyQueueException {
         PartitionGroupStore store = storeService.getStore(topic, partitionGroup);
         long index = store.getIndex(partition, timestamp);
         if (index < 0) {

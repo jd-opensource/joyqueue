@@ -15,13 +15,13 @@ package com.jd.joyqueue.network.codec;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.jd.joyqueue.exception.JournalqCode;
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.exception.JoyQueueCode;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.command.ProduceMessageAckData;
 import com.jd.joyqueue.network.command.ProduceMessageAckItemData;
 import com.jd.joyqueue.network.command.ProduceMessageResponse;
 import com.jd.joyqueue.network.serializer.Serializer;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.codec.PayloadCodec;
 import com.jd.joyqueue.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
@@ -35,15 +35,15 @@ import java.util.Map;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/19
  */
-public class ProduceMessageResponseCodec implements PayloadCodec<JournalqHeader, ProduceMessageResponse>, Type {
+public class ProduceMessageResponseCodec implements PayloadCodec<JoyQueueHeader, ProduceMessageResponse>, Type {
 
     @Override
-    public ProduceMessageResponse decode(JournalqHeader header, ByteBuf buffer) throws Exception {
+    public ProduceMessageResponse decode(JoyQueueHeader header, ByteBuf buffer) throws Exception {
         short dataSize = buffer.readShort();
         Map<String, ProduceMessageAckData> data = Maps.newHashMap();
         for (int i = 0; i < dataSize; i++) {
             String topic = Serializer.readString(buffer, Serializer.SHORT_SIZE);
-            JournalqCode code = JournalqCode.valueOf(buffer.readInt());
+            JoyQueueCode code = JoyQueueCode.valueOf(buffer.readInt());
             short itemSize = buffer.readShort();
             List<ProduceMessageAckItemData> item = Lists.newArrayListWithCapacity(itemSize);
 
@@ -78,6 +78,6 @@ public class ProduceMessageResponseCodec implements PayloadCodec<JournalqHeader,
 
     @Override
     public int type() {
-        return JournalqCommandType.PRODUCE_MESSAGE_RESPONSE.getCode();
+        return JoyQueueCommandType.PRODUCE_MESSAGE_RESPONSE.getCode();
     }
 }

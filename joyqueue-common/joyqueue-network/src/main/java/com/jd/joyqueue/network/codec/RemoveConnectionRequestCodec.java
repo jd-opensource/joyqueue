@@ -13,9 +13,9 @@
  */
 package com.jd.joyqueue.network.codec;
 
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.command.RemoveConnectionRequest;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.codec.PayloadCodec;
 import com.jd.joyqueue.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
@@ -26,10 +26,10 @@ import io.netty.buffer.ByteBuf;
  * email: gaohaoxiang@jd.com
  * date: 2018/11/30
  */
-public class RemoveConnectionRequestCodec implements PayloadCodec<JournalqHeader, RemoveConnectionRequest>, Type {
+public class RemoveConnectionRequestCodec implements PayloadCodec<JoyQueueHeader, RemoveConnectionRequest>, Type {
 
     @Override
-    public RemoveConnectionRequest decode(JournalqHeader header, ByteBuf buffer) throws Exception {
+    public RemoveConnectionRequest decode(JoyQueueHeader header, ByteBuf buffer) throws Exception {
         return new RemoveConnectionRequest();
     }
 
@@ -39,6 +39,6 @@ public class RemoveConnectionRequestCodec implements PayloadCodec<JournalqHeader
 
     @Override
     public int type() {
-        return JournalqCommandType.REMOVE_CONNECTION_REQUEST.getCode();
+        return JoyQueueCommandType.REMOVE_CONNECTION_REQUEST.getCode();
     }
 }

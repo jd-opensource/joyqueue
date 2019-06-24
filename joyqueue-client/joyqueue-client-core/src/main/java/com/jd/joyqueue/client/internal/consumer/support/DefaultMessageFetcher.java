@@ -32,7 +32,7 @@ import com.jd.joyqueue.client.internal.exception.ClientException;
 import com.jd.joyqueue.client.internal.transport.ConnectionState;
 import com.jd.joyqueue.network.command.FetchPartitionMessageResponse;
 import com.jd.joyqueue.network.command.FetchTopicMessageResponse;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.network.domain.BrokerNode;
 import com.jd.joyqueue.network.transport.command.Command;
 import com.jd.joyqueue.network.transport.command.CommandCallback;
@@ -241,7 +241,7 @@ public class DefaultMessageFetcher extends Service implements MessageFetcher {
 
     protected void checkState() {
         if (!isStarted()) {
-            throw new ClientException("fetcher is not started", JournalqCode.CN_SERVICE_NOT_AVAILABLE.getCode());
+            throw new ClientException("fetcher is not started", JoyQueueCode.CN_SERVICE_NOT_AVAILABLE.getCode());
         }
     }
 

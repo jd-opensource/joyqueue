@@ -17,9 +17,9 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.jd.joyqueue.network.command.FetchPartitionMessageRequest;
 import com.jd.joyqueue.network.command.FetchPartitionMessageData;
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.serializer.Serializer;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.codec.PayloadCodec;
 import com.jd.joyqueue.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
@@ -32,10 +32,10 @@ import java.util.Map;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/13
  */
-public class FetchPartitionMessageRequestCodec implements PayloadCodec<JournalqHeader, FetchPartitionMessageRequest>, Type {
+public class FetchPartitionMessageRequestCodec implements PayloadCodec<JoyQueueHeader, FetchPartitionMessageRequest>, Type {
 
     @Override
-    public FetchPartitionMessageRequest decode(JournalqHeader header, ByteBuf buffer) throws Exception {
+    public FetchPartitionMessageRequest decode(JoyQueueHeader header, ByteBuf buffer) throws Exception {
         Table<String, Short, FetchPartitionMessageData> partitions = HashBasedTable.create();
         int topicSize = buffer.readShort();
         for (int i = 0; i < topicSize; i++) {
@@ -74,6 +74,6 @@ public class FetchPartitionMessageRequestCodec implements PayloadCodec<JournalqH
 
     @Override
     public int type() {
-        return JournalqCommandType.FETCH_PARTITION_MESSAGE_REQUEST.getCode();
+        return JoyQueueCommandType.FETCH_PARTITION_MESSAGE_REQUEST.getCode();
     }
 }

@@ -44,7 +44,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import static com.jd.joyqueue.network.transport.codec.JournalqHeader.VERSION2;
+import static com.jd.joyqueue.network.transport.codec.JoyQueueHeader.VERSION2;
 
 /**
  * 负责broker端消息的序列化
@@ -897,7 +897,7 @@ public class Serializer extends AbstractSerializer {
      * @throws Exception 序列化/反序列化错误
      */
     public static <K, V> void write(final Map<K, V> hashMap, ByteBuf out) throws Exception {
-        JournalqMapTools.write(hashMap, out);
+        JoyQueueMapTools.write(hashMap, out);
     }
 
     /**

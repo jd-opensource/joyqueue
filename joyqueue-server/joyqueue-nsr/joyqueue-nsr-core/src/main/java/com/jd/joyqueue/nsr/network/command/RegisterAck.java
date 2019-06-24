@@ -14,13 +14,13 @@
 package com.jd.joyqueue.nsr.network.command;
 
 import com.jd.joyqueue.domain.Broker;
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 /**
  * @author wylixiaobin
  * Date: 2019/1/27
  */
-public class RegisterAck extends JournalqPayload {
+public class RegisterAck extends JoyQueuePayload {
     private Broker broker;
 
     public RegisterAck broker(Broker broker){

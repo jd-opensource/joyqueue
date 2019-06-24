@@ -14,11 +14,11 @@
 package com.jd.joyqueue.broker.protocol.handler.mqtt;
 
 
-import com.jd.joyqueue.broker.protocol.JournalqCommandHandler;
+import com.jd.joyqueue.broker.protocol.JoyQueueCommandHandler;
 import com.jd.joyqueue.broker.BrokerContext;
 import com.jd.joyqueue.broker.BrokerContextAware;
 import com.jd.joyqueue.network.command.BooleanAck;
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.command.UnSubscribe;
 import com.jd.joyqueue.network.transport.Transport;
 import com.jd.joyqueue.network.transport.command.Command;
@@ -30,12 +30,12 @@ import com.jd.joyqueue.nsr.NameService;
  * Date: 2018/10/10
  */
 @Deprecated
-public class UnSubscribeHandler implements JournalqCommandHandler, Type, BrokerContextAware {
+public class UnSubscribeHandler implements JoyQueueCommandHandler, Type, BrokerContextAware {
     private NameService nameService;
 
     @Override
     public int type() {
-        return JournalqCommandType.MQTT_UNSUBSCRIBE.getCode();
+        return JoyQueueCommandType.MQTT_UNSUBSCRIBE.getCode();
     }
 
     @Override

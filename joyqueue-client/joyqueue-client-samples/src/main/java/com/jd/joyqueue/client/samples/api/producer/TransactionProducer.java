@@ -18,7 +18,7 @@ import io.openmessaging.KeyValue;
 import io.openmessaging.MessagingAccessPoint;
 import io.openmessaging.OMS;
 import io.openmessaging.OMSBuiltinKeys;
-import io.openmessaging.joyqueue.JournalQBuiltinKeys;
+import io.openmessaging.joyqueue.JoyQueueBuiltinKeys;
 import io.openmessaging.message.Message;
 import io.openmessaging.producer.Producer;
 import io.openmessaging.producer.TransactionStateCheckListener;
@@ -35,7 +35,7 @@ public class TransactionProducer {
     public static void main(String[] args) {
         KeyValue keyValue = OMS.newKeyValue();
         keyValue.put(OMSBuiltinKeys.ACCOUNT_KEY, "test_token");
-        keyValue.put(JournalQBuiltinKeys.TRANSACTION_TIMEOUT, 1000 * 10);
+        keyValue.put(JoyQueueBuiltinKeys.TRANSACTION_TIMEOUT, 1000 * 10);
 
         MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint(String.format("oms:journalq://test_app@%s:50088/UNKNOWN", IpUtil.getLocalIp()), keyValue);
 

@@ -1,4 +1,4 @@
-# journalq-portal
+# joyqueue-portal
 
 > A Vue.js project
 

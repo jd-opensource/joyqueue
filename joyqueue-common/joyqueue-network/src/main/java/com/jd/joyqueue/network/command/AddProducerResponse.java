@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.network.command;
 
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 import java.util.Map;
 
@@ -23,13 +23,13 @@ import java.util.Map;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/10
  */
-public class AddProducerResponse extends JournalqPayload {
+public class AddProducerResponse extends JoyQueuePayload {
 
     private Map<String, String> producerIds;
 
     @Override
     public int type() {
-        return JournalqCommandType.ADD_PRODUCER_RESPONSE.getCode();
+        return JoyQueueCommandType.ADD_PRODUCER_RESPONSE.getCode();
     }
 
     public void setProducerIds(Map<String, String> producerIds) {

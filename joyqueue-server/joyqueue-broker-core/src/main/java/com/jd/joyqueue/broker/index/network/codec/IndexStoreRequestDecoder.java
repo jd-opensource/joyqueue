@@ -15,7 +15,7 @@ package com.jd.joyqueue.broker.index.network.codec;
 
 import com.jd.joyqueue.broker.index.command.ConsumeIndexStoreRequest;
 import com.jd.joyqueue.broker.index.model.IndexAndMetadata;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.codec.PayloadDecoder;
 import com.jd.joyqueue.network.command.CommandType;
 import com.jd.joyqueue.network.serializer.Serializer;
@@ -29,10 +29,10 @@ import java.util.Map;
 /**
  * Created by zhuduohui on 2018/9/7.
  */
-public class IndexStoreRequestDecoder implements PayloadDecoder<JournalqHeader>, Type {
+public class IndexStoreRequestDecoder implements PayloadDecoder<JoyQueueHeader>, Type {
 
     @Override
-    public Object decode(final JournalqHeader header, final ByteBuf buffer) throws Exception {
+    public Object decode(final JoyQueueHeader header, final ByteBuf buffer) throws Exception {
         Map<String, Map<Integer, IndexAndMetadata>> indexMetadata = new HashedMap();
         String app = Serializer.readString(buffer, Serializer.SHORT_SIZE);
         int topics = buffer.readInt();

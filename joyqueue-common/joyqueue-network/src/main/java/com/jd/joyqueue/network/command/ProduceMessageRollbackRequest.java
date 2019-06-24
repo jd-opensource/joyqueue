@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.network.command;
 
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 /**
  * ProduceMessageRollbackRequest
@@ -21,7 +21,7 @@ import com.jd.joyqueue.network.transport.command.JournalqPayload;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/18
  */
-public class ProduceMessageRollbackRequest extends JournalqPayload {
+public class ProduceMessageRollbackRequest extends JoyQueuePayload {
 
     private String topic;
     private String app;
@@ -29,7 +29,7 @@ public class ProduceMessageRollbackRequest extends JournalqPayload {
 
     @Override
     public int type() {
-        return JournalqCommandType.PRODUCE_MESSAGE_ROLLBACK_REQUEST.getCode();
+        return JoyQueueCommandType.PRODUCE_MESSAGE_ROLLBACK_REQUEST.getCode();
     }
 
     public void setTopic(String topic) {

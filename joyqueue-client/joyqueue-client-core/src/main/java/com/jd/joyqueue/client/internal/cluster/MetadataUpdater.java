@@ -19,7 +19,7 @@ import com.jd.joyqueue.client.internal.metadata.MetadataManager;
 import com.jd.joyqueue.client.internal.metadata.domain.ClusterMetadata;
 import com.jd.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import com.jd.joyqueue.client.internal.nameserver.NameServerConfig;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.toolkit.concurrent.NamedThreadFactory;
 import com.jd.joyqueue.toolkit.service.Service;
 import com.jd.joyqueue.toolkit.time.SystemClock;
@@ -113,7 +113,7 @@ public class MetadataUpdater extends Service {
         try {
             TopicMetadata topicMetadata = metadataManager.fetchMetadata(topic, app);
             metadataCacheManager.putTopicMetadata(topic, app, topicMetadata);
-            if (topicMetadata.getCode().equals(JournalqCode.SUCCESS)) {
+            if (topicMetadata.getCode().equals(JoyQueueCode.SUCCESS)) {
                 return topicMetadata;
             }
             return null;
@@ -121,7 +121,7 @@ public class MetadataUpdater extends Service {
             logger.error("update topic metadata exception, topic: {}, app: {}", topic, app, e);
 
             if (metadataCacheManager.getTopicMetadata(topic, app) == null) {
-                metadataCacheManager.putTopicMetadata(topic, app, new TopicMetadata(JournalqCode.CN_SERVICE_NOT_AVAILABLE));
+                metadataCacheManager.putTopicMetadata(topic, app, new TopicMetadata(JoyQueueCode.CN_SERVICE_NOT_AVAILABLE));
             }
             return null;
         }
@@ -136,7 +136,7 @@ public class MetadataUpdater extends Service {
             for (String topic : topics) {
                 TopicMetadata topicMetadata = clusterMetadata.getTopic(topic);
                 metadataCacheManager.putTopicMetadata(topic, app, topicMetadata);
-                if (topicMetadata.getCode().equals(JournalqCode.SUCCESS)) {
+                if (topicMetadata.getCode().equals(JoyQueueCode.SUCCESS)) {
                     result.put(topic, topicMetadata);
                 }
             }
@@ -145,7 +145,7 @@ public class MetadataUpdater extends Service {
 
             for (String topic : topics) {
                 if (metadataCacheManager.getTopicMetadata(topic, app) == null) {
-                    metadataCacheManager.putTopicMetadata(topic, app, new TopicMetadata(JournalqCode.CN_SERVICE_NOT_AVAILABLE));
+                    metadataCacheManager.putTopicMetadata(topic, app, new TopicMetadata(JoyQueueCode.CN_SERVICE_NOT_AVAILABLE));
                 }
             }
         }

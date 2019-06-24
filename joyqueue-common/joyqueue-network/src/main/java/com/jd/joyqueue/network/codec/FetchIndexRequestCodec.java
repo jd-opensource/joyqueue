@@ -16,9 +16,9 @@ package com.jd.joyqueue.network.codec;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jd.joyqueue.network.command.FetchIndexRequest;
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.serializer.Serializer;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.codec.PayloadCodec;
 import com.jd.joyqueue.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
@@ -32,10 +32,10 @@ import java.util.Map;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/13
  */
-public class FetchIndexRequestCodec implements PayloadCodec<JournalqHeader, FetchIndexRequest>, Type {
+public class FetchIndexRequestCodec implements PayloadCodec<JoyQueueHeader, FetchIndexRequest>, Type {
 
     @Override
-    public FetchIndexRequest decode(JournalqHeader header, ByteBuf buffer) throws Exception {
+    public FetchIndexRequest decode(JoyQueueHeader header, ByteBuf buffer) throws Exception {
         Map<String, List<Short>> result = Maps.newHashMap();
         short topicSize = buffer.readShort();
         for (int i = 0; i < topicSize; i++) {
@@ -69,6 +69,6 @@ public class FetchIndexRequestCodec implements PayloadCodec<JournalqHeader, Fetc
 
     @Override
     public int type() {
-        return JournalqCommandType.FETCH_INDEX_REQUEST.getCode();
+        return JoyQueueCommandType.FETCH_INDEX_REQUEST.getCode();
     }
 }

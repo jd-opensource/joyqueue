@@ -15,7 +15,7 @@ package com.jd.joyqueue.network.command;
 
 import com.jd.joyqueue.domain.ClientType;
 import com.jd.joyqueue.domain.Subscription;
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
@@ -25,13 +25,13 @@ import java.util.List;
  * @author wylixiaobin
  * Date: 2018/10/10
  */
-public class Subscribe extends JournalqPayload {
+public class Subscribe extends JoyQueuePayload {
     private List<Subscription> subscriptions;
     private ClientType clientType;
 
     @Override
     public int type() {
-        return JournalqCommandType.MQTT_SUBSCRIBE.getCode();
+        return JoyQueueCommandType.MQTT_SUBSCRIBE.getCode();
     }
 
     public List<Subscription> getSubscriptions() {

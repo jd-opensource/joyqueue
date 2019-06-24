@@ -14,12 +14,12 @@
 package com.jd.joyqueue.network.codec;
 
 import com.google.common.collect.Lists;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.network.command.FetchProduceFeedbackAckData;
 import com.jd.joyqueue.network.command.FetchProduceFeedbackResponse;
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.serializer.Serializer;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.codec.PayloadCodec;
 import com.jd.joyqueue.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
@@ -32,10 +32,10 @@ import java.util.List;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/19
  */
-public class FetchProduceFeedbackResponseCodec implements PayloadCodec<JournalqHeader, FetchProduceFeedbackResponse>, Type {
+public class FetchProduceFeedbackResponseCodec implements PayloadCodec<JoyQueueHeader, FetchProduceFeedbackResponse>, Type {
 
     @Override
-    public FetchProduceFeedbackResponse decode(JournalqHeader header, ByteBuf buffer) throws Exception {
+    public FetchProduceFeedbackResponse decode(JoyQueueHeader header, ByteBuf buffer) throws Exception {
         short dataSize = buffer.readShort();
         List<FetchProduceFeedbackAckData> data = Lists.newArrayListWithCapacity(dataSize);
         for (int i = 0; i < dataSize; i++) {
@@ -47,7 +47,7 @@ public class FetchProduceFeedbackResponseCodec implements PayloadCodec<JournalqH
 
         FetchProduceFeedbackResponse fetchProduceFeedbackResponse = new FetchProduceFeedbackResponse();
         fetchProduceFeedbackResponse.setData(data);
-        fetchProduceFeedbackResponse.setCode(JournalqCode.valueOf(buffer.readInt()));
+        fetchProduceFeedbackResponse.setCode(JoyQueueCode.valueOf(buffer.readInt()));
         return fetchProduceFeedbackResponse;
     }
 
@@ -64,6 +64,6 @@ public class FetchProduceFeedbackResponseCodec implements PayloadCodec<JournalqH
 
     @Override
     public int type() {
-        return JournalqCommandType.FETCH_PRODUCE_FEEDBACK_RESPONSE.getCode();
+        return JoyQueueCommandType.FETCH_PRODUCE_FEEDBACK_RESPONSE.getCode();
     }
 }

@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.broker.consumer.filter;
 
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueException;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -35,7 +35,7 @@ public class FlagFilterTest {
     }
 
     @Test
-    public void filter() throws JournalqException {
+    public void filter() throws JoyQueueException {
         setRule();
 
         List<ByteBuffer> byteBufferList = new LinkedList<>();
@@ -50,7 +50,7 @@ public class FlagFilterTest {
         // List<ByteBuffer> byteBufferList, FilterCallback filterCallback
         List<ByteBuffer> filter = flagFilter.filter(byteBufferList, new FilterCallback() {
             @Override
-            public void callback(List<ByteBuffer> list) throws JournalqException {
+            public void callback(List<ByteBuffer> list) throws JoyQueueException {
                 Assert.assertEquals(1, list.size());
             }
         });
@@ -59,7 +59,7 @@ public class FlagFilterTest {
     }
 
     @Test
-    public void filter1() throws JournalqException {
+    public void filter1() throws JoyQueueException {
         flagFilter.setRule("[0,1,2]");
 
         List<ByteBuffer> byteBufferList = new LinkedList<>();
@@ -74,7 +74,7 @@ public class FlagFilterTest {
         // List<ByteBuffer> byteBufferList, FilterCallback filterCallback
         List<ByteBuffer> filter = flagFilter.filter(byteBufferList, new FilterCallback() {
             @Override
-            public void callback(List<ByteBuffer> list) throws JournalqException {
+            public void callback(List<ByteBuffer> list) throws JoyQueueException {
                 Assert.assertEquals(null, list);
             }
         });
@@ -83,7 +83,7 @@ public class FlagFilterTest {
     }
 
     @Test
-    public void filter2() throws JournalqException {
+    public void filter2() throws JoyQueueException {
         flagFilter.setRule("[9]");
 
         List<ByteBuffer> byteBufferList = new LinkedList<>();
@@ -98,7 +98,7 @@ public class FlagFilterTest {
         // List<ByteBuffer> byteBufferList, FilterCallback filterCallback
         List<ByteBuffer> filter = flagFilter.filter(byteBufferList, new FilterCallback() {
             @Override
-            public void callback(List<ByteBuffer> list) throws JournalqException {
+            public void callback(List<ByteBuffer> list) throws JoyQueueException {
                 Assert.assertEquals(9, list.size());
             }
         });

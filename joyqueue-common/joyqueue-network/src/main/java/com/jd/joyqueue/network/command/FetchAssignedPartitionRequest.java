@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.network.command;
 
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 import java.util.List;
 
@@ -23,14 +23,14 @@ import java.util.List;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/4
  */
-public class FetchAssignedPartitionRequest extends JournalqPayload {
+public class FetchAssignedPartitionRequest extends JoyQueuePayload {
 
     private List<FetchAssignedPartitionData> data;
     private String app;
 
     @Override
     public int type() {
-        return JournalqCommandType.FETCH_ASSIGNED_PARTITION_REQUEST.getCode();
+        return JoyQueueCommandType.FETCH_ASSIGNED_PARTITION_REQUEST.getCode();
     }
 
     public void setApp(String app) {

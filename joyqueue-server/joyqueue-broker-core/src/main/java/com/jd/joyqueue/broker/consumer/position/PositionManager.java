@@ -26,8 +26,8 @@ import com.jd.joyqueue.event.ConsumerEvent;
 import com.jd.joyqueue.event.EventType;
 import com.jd.joyqueue.event.MetaEvent;
 import com.jd.joyqueue.event.PartitionGroupEvent;
-import com.jd.joyqueue.exception.JournalqCode;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueCode;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.store.PartitionGroupStore;
 import com.jd.joyqueue.store.StoreService;
 import com.jd.joyqueue.toolkit.concurrent.EventListener;
@@ -221,12 +221,12 @@ public class PositionManager extends Service {
      * @param partition 消费分区
      * @return 指定分区已经消费到的消息序号
      */
-    public long getLastMsgAckIndex(TopicName topic, String app, short partition) throws JournalqException {
+    public long getLastMsgAckIndex(TopicName topic, String app, short partition) throws JoyQueueException {
         ConsumePartition consumePartition = new ConsumePartition(topic.getFullName(), app, partition);
         Position position = positionStore.get(consumePartition);
         // 消费位置对象为空时，无此位置信息抛出异常
         if (position == null) {
-            throw new JournalqException(JournalqCode.CONSUME_POSITION_NULL, "topic=" + topic + ",app=" + app + ",partition=" + partition);
+            throw new JoyQueueException(JoyQueueCode.CONSUME_POSITION_NULL, "topic=" + topic + ",app=" + app + ",partition=" + partition);
         }
         return position.getAckCurIndex();
     }
@@ -240,7 +240,7 @@ public class PositionManager extends Service {
      * @param index     起始消息序号
      * @return 是否更新成功
      */
-    public boolean updateLastMsgAckIndex(TopicName topic, String app, short partition, long index) throws JournalqException {
+    public boolean updateLastMsgAckIndex(TopicName topic, String app, short partition, long index) throws JoyQueueException {
         logger.debug("Update last ack index, topic:{}, app:{}, partition:{}, index:{}", topic, app, partition, index);
         // 检查索引有效性
         checkIndex(topic, partition, index);
@@ -265,25 +265,25 @@ public class PositionManager extends Service {
      * @param topic
      * @param partition
      * @param index
-     * @throws JournalqException
+     * @throws JoyQueueException
      */
-    private void checkIndex(TopicName topic, short partition, long index) throws JournalqException {
+    private void checkIndex(TopicName topic, short partition, long index) throws JoyQueueException {
         Integer partitionGroupId = clusterManager.getPartitionGroupId(topic, partition);
         if (partitionGroupId == null) {
             // 元数据获取不到partitionGroup
-            throw new JournalqException(JournalqCode.CONSUME_POSITION_META_DATA_NULL, String.format("topic:[%s], partition:[%s], index:[%s]", topic, partition, index));
+            throw new JoyQueueException(JoyQueueCode.CONSUME_POSITION_META_DATA_NULL, String.format("topic:[%s], partition:[%s], index:[%s]", topic, partition, index));
         }
 
         PartitionGroupStore store = storeService.getStore(topic.getFullName(), partitionGroupId);
 
         long leftIndex = store.getLeftIndex(partition);
         if (index < leftIndex) {
-            throw new JournalqException(JournalqCode.SE_INDEX_UNDERFLOW , "index less than leftIndex error.");
+            throw new JoyQueueException(JoyQueueCode.SE_INDEX_UNDERFLOW , "index less than leftIndex error.");
         }
 
         long rightIndex = store.getRightIndex(partition);
         if (index > rightIndex) {
-            throw new JournalqException(JournalqCode.SE_INDEX_UNDERFLOW , "index more than rightIndex error.");
+            throw new JoyQueueException(JoyQueueCode.SE_INDEX_UNDERFLOW , "index more than rightIndex error.");
         }
 
 
@@ -314,7 +314,7 @@ public class PositionManager extends Service {
      * @param partition
      * @param index
      */
-    private void addAndUpdatePosition(TopicName topic, String app, short partition, long index) throws JournalqException {
+    private void addAndUpdatePosition(TopicName topic, String app, short partition, long index) throws JoyQueueException {
         logger.info("Try to init a position by topic:{}, app:{}, partition:{}, curIndex:{}", topic.getFullName(), app, partition, index);
 
         if (topic == null || app == null || app.isEmpty()) {
@@ -326,7 +326,7 @@ public class PositionManager extends Service {
         if(partitionGroup == null) {
             logger.error("Fail to add and update partition consume position by topic:[{}], app:[{}], partition:[{}], index:[{}]",
                     topic.getFullName(), app, partition, index);
-            throw new JournalqException(JournalqCode.FW_PARTITION_BROKER_NOT_LEADER, "");
+            throw new JoyQueueException(JoyQueueCode.FW_PARTITION_BROKER_NOT_LEADER, "");
         }
         ConsumePartition consumePartition = new ConsumePartition(topic.getFullName(), app, partition);
         consumePartition.setPartitionGroup(partitionGroup.getGroup());
@@ -350,7 +350,7 @@ public class PositionManager extends Service {
      * @param index     起始消息序号
      * @return 是否更新成功
      */
-    public boolean updateStartMsgAckIndex(TopicName topic, String app, short partition, long index) throws JournalqException {
+    public boolean updateStartMsgAckIndex(TopicName topic, String app, short partition, long index) throws JoyQueueException {
         logger.debug("Update stater ack index, topic:{}, app:{}, partition:{}, index:{}", topic, app, partition, index);
         ConsumePartition consumePartition = new ConsumePartition(topic.getFullName(), app, partition);
         Position position = positionStore.get(consumePartition);
@@ -372,12 +372,12 @@ public class PositionManager extends Service {
      * @param partition 消费分区
      * @return 指定分区已经消费到的消息序号
      */
-    public long getLastMsgPullIndex(TopicName topic, String app, short partition) throws JournalqException {
+    public long getLastMsgPullIndex(TopicName topic, String app, short partition) throws JoyQueueException {
         ConsumePartition consumePartition = new ConsumePartition(topic.getFullName(), app, partition);
         Position position = positionStore.get(consumePartition);
         // 消费位置对象为空时，无此位置信息抛出异常
         if (position == null) {
-            throw new JournalqException(JournalqCode.CONSUME_POSITION_NULL, "topic=" + topic + ",app=" + app + ",partition=" + partition);
+            throw new JoyQueueException(JoyQueueCode.CONSUME_POSITION_NULL, "topic=" + topic + ",app=" + app + ",partition=" + partition);
         }
         return position.getPullCurIndex();
     }
@@ -391,7 +391,7 @@ public class PositionManager extends Service {
      * @param index     起始消息序号
      * @return 是否更新成功
      */
-    public boolean updateLastMsgPullIndex(TopicName topic, String app, short partition, long index) throws JournalqException {
+    public boolean updateLastMsgPullIndex(TopicName topic, String app, short partition, long index) throws JoyQueueException {
         logger.debug("Update last pull index, topic:{}, app:{}, partition:{}, index:{}", topic, app, partition, index);
         ConsumePartition consumePartition = new ConsumePartition(topic.getFullName(), app, partition);
         Position position = positionStore.get(consumePartition);
@@ -415,7 +415,7 @@ public class PositionManager extends Service {
      * @param count     增加的连续序号
      * @return 是否更新成功
      */
-    public boolean increaseMsgPullIndex(TopicName topic, String app, short partition, int count) throws JournalqException {
+    public boolean increaseMsgPullIndex(TopicName topic, String app, short partition, int count) throws JoyQueueException {
         long lastMsgPullIndex = getLastMsgPullIndex(topic, app, partition);
         long updateMsgPullIndex = lastMsgPullIndex + count;
         return updateLastMsgPullIndex(topic, app, partition, updateMsgPullIndex);

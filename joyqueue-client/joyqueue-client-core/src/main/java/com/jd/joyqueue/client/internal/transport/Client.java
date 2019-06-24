@@ -16,7 +16,7 @@ package com.jd.joyqueue.client.internal.transport;
 import com.jd.joyqueue.client.internal.exception.ClientException;
 import com.jd.joyqueue.client.internal.nameserver.NameServerConfig;
 import com.jd.joyqueue.client.internal.transport.config.TransportConfig;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.network.command.HeartbeatRequest;
 import com.jd.joyqueue.network.domain.BrokerNode;
 import com.jd.joyqueue.network.transport.Transport;
@@ -24,7 +24,7 @@ import com.jd.joyqueue.network.transport.TransportAttribute;
 import com.jd.joyqueue.network.transport.TransportClient;
 import com.jd.joyqueue.network.transport.command.Command;
 import com.jd.joyqueue.network.transport.command.CommandCallback;
-import com.jd.joyqueue.network.transport.command.JournalqCommand;
+import com.jd.joyqueue.network.transport.command.JoyQueueCommand;
 import com.jd.joyqueue.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +59,7 @@ public class Client extends Service {
     }
 
     public void heartbeat(long timeout) {
-        sync(new JournalqCommand(new HeartbeatRequest()), timeout);
+        sync(new JoyQueueCommand(new HeartbeatRequest()), timeout);
     }
 
     public Future<Command> async(Command request, long timeout) {
@@ -84,7 +84,7 @@ public class Client extends Service {
                     if (response.isSuccess()) {
                         callback.onSuccess(request, response);
                     } else {
-                        callback.onException(request, new JournalqException(response.getHeader().getError(), response.getHeader().getStatus()));
+                        callback.onException(request, new JoyQueueException(response.getHeader().getError(), response.getHeader().getStatus()));
                     }
                 }
 

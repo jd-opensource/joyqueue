@@ -16,14 +16,14 @@ package com.jd.joyqueue.client.internal.transport;
 import com.jd.joyqueue.client.internal.ClientConsts;
 import com.jd.joyqueue.client.internal.exception.ClientException;
 import com.jd.joyqueue.client.internal.nameserver.NameServerConfig;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.network.command.AddConnectionRequest;
 import com.jd.joyqueue.network.command.AddConnectionResponse;
 import com.jd.joyqueue.network.command.RemoveConnectionRequest;
 import com.jd.joyqueue.network.session.ClientId;
 import com.jd.joyqueue.network.session.Language;
 import com.jd.joyqueue.network.transport.command.Command;
-import com.jd.joyqueue.network.transport.command.JournalqCommand;
+import com.jd.joyqueue.network.transport.command.JoyQueueCommand;
 import com.jd.joyqueue.toolkit.network.IpUtil;
 import com.jd.joyqueue.toolkit.time.SystemClock;
 import org.apache.commons.lang3.StringUtils;
@@ -98,7 +98,7 @@ public class ClientConnectionState {
         addConnectionRequest.setClientId(clientId);
 
         try {
-            Command response = client.sync(new JournalqCommand(addConnectionRequest));
+            Command response = client.sync(new JoyQueueCommand(addConnectionRequest));
 
             AddConnectionResponse addConnectionResponse = (AddConnectionResponse) response.getPayload();
             ClientConnectionInfo clientConnectionInfo = new ClientConnectionInfo();
@@ -110,7 +110,7 @@ public class ClientConnectionState {
         } catch (ClientException e) {
             int code = e.getCode();
             String error = e.getMessage();
-            if (code == JournalqCode.CN_AUTHENTICATION_ERROR.getCode()) {
+            if (code == JoyQueueCode.CN_AUTHENTICATION_ERROR.getCode()) {
                 logger.error("client addConnection error, no permission, please check your app and token", error);
                 throw e;
             } else {
@@ -136,7 +136,7 @@ public class ClientConnectionState {
         RemoveConnectionRequest removeConnectionRequest = new RemoveConnectionRequest();
 
         try {
-            Command response = client.sync(new JournalqCommand(removeConnectionRequest));
+            Command response = client.sync(new JoyQueueCommand(removeConnectionRequest));
             client.getAttribute().set(DISCONNECTED_KEY, true);
         } catch (Exception e) {
             logger.debug("client removeConnection error, connection: {}", removeConnectionRequest, e);

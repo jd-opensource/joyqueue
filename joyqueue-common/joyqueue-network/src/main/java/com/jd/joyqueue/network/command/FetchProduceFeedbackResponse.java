@@ -13,8 +13,8 @@
  */
 package com.jd.joyqueue.network.command;
 
-import com.jd.joyqueue.exception.JournalqCode;
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.exception.JoyQueueCode;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 import java.util.Collections;
 import java.util.List;
@@ -25,30 +25,30 @@ import java.util.List;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/18
  */
-public class FetchProduceFeedbackResponse extends JournalqPayload {
+public class FetchProduceFeedbackResponse extends JoyQueuePayload {
 
     private List<FetchProduceFeedbackAckData> data;
-    private JournalqCode code;
+    private JoyQueueCode code;
 
     public FetchProduceFeedbackResponse() {
 
     }
 
-    public FetchProduceFeedbackResponse(JournalqCode code) {
+    public FetchProduceFeedbackResponse(JoyQueueCode code) {
         this.data = Collections.emptyList();
         this.code = code;
     }
 
     @Override
     public int type() {
-        return JournalqCommandType.FETCH_PRODUCE_FEEDBACK_RESPONSE.getCode();
+        return JoyQueueCommandType.FETCH_PRODUCE_FEEDBACK_RESPONSE.getCode();
     }
 
-    public void setCode(JournalqCode code) {
+    public void setCode(JoyQueueCode code) {
         this.code = code;
     }
 
-    public JournalqCode getCode() {
+    public JoyQueueCode getCode() {
         return code;
     }
 

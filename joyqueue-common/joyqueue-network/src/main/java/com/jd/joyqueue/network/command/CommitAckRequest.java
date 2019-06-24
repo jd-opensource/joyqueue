@@ -14,7 +14,7 @@
 package com.jd.joyqueue.network.command;
 
 import com.google.common.collect.Table;
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 import java.util.List;
 
@@ -24,14 +24,14 @@ import java.util.List;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/12
  */
-public class CommitAckRequest extends JournalqPayload {
+public class CommitAckRequest extends JoyQueuePayload {
 
     private Table<String, Short, List<CommitAckData>> data;
     private String app;
 
     @Override
     public int type() {
-        return JournalqCommandType.COMMIT_ACK_REQUEST.getCode();
+        return JoyQueueCommandType.COMMIT_ACK_REQUEST.getCode();
     }
 
     public void setData(Table<String, Short, List<CommitAckData>> data) {

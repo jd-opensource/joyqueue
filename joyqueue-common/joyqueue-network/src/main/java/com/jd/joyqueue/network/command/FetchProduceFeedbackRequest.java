@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.network.command;
 
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 /**
  * FetchProduceFeedbackRequest
@@ -21,7 +21,7 @@ import com.jd.joyqueue.network.transport.command.JournalqPayload;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/18
  */
-public class FetchProduceFeedbackRequest extends JournalqPayload {
+public class FetchProduceFeedbackRequest extends JoyQueuePayload {
 
     private String app;
     private String topic;
@@ -31,7 +31,7 @@ public class FetchProduceFeedbackRequest extends JournalqPayload {
 
     @Override
     public int type() {
-        return JournalqCommandType.FETCH_PRODUCE_FEEDBACK_REQUEST.getCode();
+        return JoyQueueCommandType.FETCH_PRODUCE_FEEDBACK_REQUEST.getCode();
     }
 
     public String getApp() {

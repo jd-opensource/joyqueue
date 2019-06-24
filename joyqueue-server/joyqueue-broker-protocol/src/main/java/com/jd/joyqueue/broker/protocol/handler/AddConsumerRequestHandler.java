@@ -16,16 +16,16 @@ package com.jd.joyqueue.broker.protocol.handler;
 import com.google.common.collect.Maps;
 import com.jd.joyqueue.broker.BrokerContext;
 import com.jd.joyqueue.broker.BrokerContextAware;
-import com.jd.joyqueue.broker.protocol.JournalqCommandHandler;
+import com.jd.joyqueue.broker.protocol.JoyQueueCommandHandler;
 import com.jd.joyqueue.broker.cluster.ClusterManager;
 import com.jd.joyqueue.broker.helper.SessionHelper;
 import com.jd.joyqueue.broker.monitor.SessionManager;
 import com.jd.joyqueue.domain.TopicName;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.network.command.AddConsumerRequest;
 import com.jd.joyqueue.network.command.AddConsumerResponse;
 import com.jd.joyqueue.network.command.BooleanAck;
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.session.Connection;
 import com.jd.joyqueue.network.session.Consumer;
 import com.jd.joyqueue.network.transport.Transport;
@@ -42,7 +42,7 @@ import java.util.Map;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/10
  */
-public class AddConsumerRequestHandler implements JournalqCommandHandler, Type, BrokerContextAware {
+public class AddConsumerRequestHandler implements JoyQueueCommandHandler, Type, BrokerContextAware {
 
     protected static final Logger logger = LoggerFactory.getLogger(AddConsumerRequestHandler.class);
 
@@ -62,7 +62,7 @@ public class AddConsumerRequestHandler implements JournalqCommandHandler, Type, 
 
         if (connection == null || !connection.isAuthorized(addConsumerRequest.getApp())) {
             logger.warn("connection is not exists, transport: {}", transport);
-            return BooleanAck.build(JournalqCode.FW_CONNECTION_NOT_EXISTS.getCode());
+            return BooleanAck.build(JoyQueueCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
         Map<String, String> result = Maps.newHashMap();
@@ -72,7 +72,7 @@ public class AddConsumerRequestHandler implements JournalqCommandHandler, Type, 
 
             if (clusterManager.tryGetConsumer(topicName, addConsumerRequest.getApp()) == null) {
                 logger.warn("addConsumer failed, transport: {}, topic: {}, app: {}", transport, topicName, addConsumerRequest.getApp());
-                return BooleanAck.build(JournalqCode.CN_NO_PERMISSION);
+                return BooleanAck.build(JoyQueueCode.CN_NO_PERMISSION);
             }
 
             Consumer consumer = buildConsumer(connection, topic, addConsumerRequest.getApp(), addConsumerRequest.getSequence());
@@ -101,6 +101,6 @@ public class AddConsumerRequestHandler implements JournalqCommandHandler, Type, 
 
     @Override
     public int type() {
-        return JournalqCommandType.ADD_CONSUMER_REQUEST.getCode();
+        return JoyQueueCommandType.ADD_CONSUMER_REQUEST.getCode();
     }
 }

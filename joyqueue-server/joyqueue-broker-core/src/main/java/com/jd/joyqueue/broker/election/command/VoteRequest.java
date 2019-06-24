@@ -14,7 +14,7 @@
 package com.jd.joyqueue.broker.election.command;
 
 import com.jd.joyqueue.broker.election.TopicPartitionGroup;
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 import com.jd.joyqueue.network.command.CommandType;
 
 /**
@@ -22,7 +22,7 @@ import com.jd.joyqueue.network.command.CommandType;
  * email: zhuduohui@jd.com
  * date: 2018/8/15
  */
-public class VoteRequest extends JournalqPayload {
+public class VoteRequest extends JoyQueuePayload {
     private TopicPartitionGroup topicPartitionGroup;
     private int term;
     private int candidateId;

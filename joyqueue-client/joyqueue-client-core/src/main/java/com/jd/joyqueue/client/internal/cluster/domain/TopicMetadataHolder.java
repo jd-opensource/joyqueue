@@ -14,7 +14,7 @@
 package com.jd.joyqueue.client.internal.cluster.domain;
 
 import com.jd.joyqueue.client.internal.metadata.domain.TopicMetadata;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.toolkit.time.SystemClock;
 
 /**
@@ -29,9 +29,9 @@ public class TopicMetadataHolder {
     private TopicMetadata topicMetadata;
     private long createTime;
     private long expireTime;
-    private JournalqCode code;
+    private JoyQueueCode code;
 
-    public TopicMetadataHolder(String topic, TopicMetadata topicMetadata, long createTime, long expireTime, JournalqCode code) {
+    public TopicMetadataHolder(String topic, TopicMetadata topicMetadata, long createTime, long expireTime, JoyQueueCode code) {
         this.topic = topic;
         this.topicMetadata = topicMetadata;
         this.createTime = createTime;
@@ -55,7 +55,7 @@ public class TopicMetadataHolder {
         return topicMetadata;
     }
 
-    public JournalqCode getCode() {
+    public JoyQueueCode getCode() {
         return code;
     }
 }

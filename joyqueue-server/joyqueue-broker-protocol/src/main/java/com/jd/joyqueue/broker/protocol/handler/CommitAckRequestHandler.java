@@ -18,21 +18,21 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
 import com.jd.joyqueue.broker.BrokerContext;
 import com.jd.joyqueue.broker.BrokerContextAware;
-import com.jd.joyqueue.broker.protocol.JournalqCommandHandler;
+import com.jd.joyqueue.broker.protocol.JoyQueueCommandHandler;
 import com.jd.joyqueue.broker.buffer.Serializer;
 import com.jd.joyqueue.broker.consumer.Consume;
 import com.jd.joyqueue.broker.consumer.model.PullResult;
 import com.jd.joyqueue.broker.helper.SessionHelper;
 import com.jd.joyqueue.domain.Partition;
-import com.jd.joyqueue.exception.JournalqCode;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueCode;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.message.BrokerMessage;
 import com.jd.joyqueue.message.MessageLocation;
 import com.jd.joyqueue.network.command.BooleanAck;
 import com.jd.joyqueue.network.command.CommitAckData;
 import com.jd.joyqueue.network.command.CommitAckRequest;
 import com.jd.joyqueue.network.command.CommitAckResponse;
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.command.RetryType;
 import com.jd.joyqueue.network.session.Connection;
 import com.jd.joyqueue.network.session.Consumer;
@@ -57,7 +57,7 @@ import java.util.Map;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/12
  */
-public class CommitAckRequestHandler implements JournalqCommandHandler, Type, BrokerContextAware {
+public class CommitAckRequestHandler implements JoyQueueCommandHandler, Type, BrokerContextAware {
 
     protected static final Logger logger = LoggerFactory.getLogger(CommitAckRequestHandler.class);
 
@@ -77,15 +77,15 @@ public class CommitAckRequestHandler implements JournalqCommandHandler, Type, Br
 
         if (connection == null || !connection.isAuthorized(commitAckRequest.getApp())) {
             logger.warn("connection is not exists, transport: {}, app: {}", transport, commitAckRequest.getApp());
-            return BooleanAck.build(JournalqCode.FW_CONNECTION_NOT_EXISTS.getCode());
+            return BooleanAck.build(JoyQueueCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
-        Table<String, Short, JournalqCode> result = HashBasedTable.create();
+        Table<String, Short, JoyQueueCode> result = HashBasedTable.create();
 
         for (Map.Entry<String, Map<Short, List<CommitAckData>>> entry : commitAckRequest.getData().rowMap().entrySet()) {
             String topic = entry.getKey();
             for (Map.Entry<Short, List<CommitAckData>> partitionEntry : entry.getValue().entrySet()) {
-                JournalqCode ackCode = commitAck(connection, topic, commitAckRequest.getApp(), partitionEntry.getKey(), partitionEntry.getValue());
+                JoyQueueCode ackCode = commitAck(connection, topic, commitAckRequest.getApp(), partitionEntry.getKey(), partitionEntry.getValue());
                 result.put(topic, partitionEntry.getKey(), ackCode);
             }
         }
@@ -95,7 +95,7 @@ public class CommitAckRequestHandler implements JournalqCommandHandler, Type, Br
         return new Command(commitAckResponse);
     }
 
-    protected JournalqCode commitAck(Connection connection, String topic, String app, short partition, List<CommitAckData> dataList) {
+    protected JoyQueueCode commitAck(Connection connection, String topic, String app, short partition, List<CommitAckData> dataList) {
         if (partition == Partition.RETRY_PARTITION_ID) {
             return doCommitRetry(connection, topic, app, partition, dataList);
         } else {
@@ -103,7 +103,7 @@ public class CommitAckRequestHandler implements JournalqCommandHandler, Type, Br
         }
     }
 
-    protected JournalqCode doCommitRetry(Connection connection, String topic, String app, short partition, List<CommitAckData> dataList) {
+    protected JoyQueueCode doCommitRetry(Connection connection, String topic, String app, short partition, List<CommitAckData> dataList) {
         try {
             List<Long> retrySuccess = Lists.newLinkedList();
             List<Long> retryError = Lists.newLinkedList();
@@ -124,17 +124,17 @@ public class CommitAckRequestHandler implements JournalqCommandHandler, Type, Br
                 retryManager.retryError(topic, app, ListUtil.toArray(retryError));
             }
 
-            return JournalqCode.SUCCESS;
-        } catch (JournalqException e) {
+            return JoyQueueCode.SUCCESS;
+        } catch (JoyQueueException e) {
             logger.error("commit ack exception, topic: {}, app: {}, partition: {}, transport: {}", topic, app, partition, connection.getTransport(), e);
-            return JournalqCode.valueOf(e.getCode());
+            return JoyQueueCode.valueOf(e.getCode());
         } catch (Exception e) {
             logger.error("commit ack exception, topic: {}, app: {}, partition: {}, transport: {}", topic, app, partition, connection.getTransport(), e);
-            return JournalqCode.CN_UNKNOWN_ERROR;
+            return JoyQueueCode.CN_UNKNOWN_ERROR;
         }
     }
 
-    protected JournalqCode doCommitAck(Connection connection, String topic, String app, short partition, List<CommitAckData> dataList) {
+    protected JoyQueueCode doCommitAck(Connection connection, String topic, String app, short partition, List<CommitAckData> dataList) {
         try {
             MessageLocation[] messageLocations = new MessageLocation[dataList.size()];
             List<CommitAckData> retryDataList = null;
@@ -158,17 +158,17 @@ public class CommitAckRequestHandler implements JournalqCommandHandler, Type, Br
                 commitRetry(connection, consumer, retryDataList);
             }
 
-            return JournalqCode.SUCCESS;
-        } catch (JournalqException e) {
+            return JoyQueueCode.SUCCESS;
+        } catch (JoyQueueException e) {
             logger.error("commit ack exception, topic: {}, app: {}, partition: {}, transport: {}", topic, app, partition, connection.getTransport(), e);
-            return JournalqCode.valueOf(e.getCode());
+            return JoyQueueCode.valueOf(e.getCode());
         } catch (Exception e) {
             logger.error("commit ack exception, topic: {}, app: {}, partition: {}, transport: {}", topic, app, partition, connection.getTransport(), e);
-            return JournalqCode.CN_UNKNOWN_ERROR;
+            return JoyQueueCode.CN_UNKNOWN_ERROR;
         }
     }
 
-    protected void commitRetry(Connection connection, Consumer consumer, List<CommitAckData> data) throws JournalqException {
+    protected void commitRetry(Connection connection, Consumer consumer, List<CommitAckData> data) throws JoyQueueException {
         for (CommitAckData ackData : data) {
             PullResult pullResult = consume.getMessage(consumer, ackData.getPartition(), ackData.getIndex(), 1);
             List<ByteBuffer> buffers = pullResult.getBuffers();
@@ -209,6 +209,6 @@ public class CommitAckRequestHandler implements JournalqCommandHandler, Type, Br
 
     @Override
     public int type() {
-        return JournalqCommandType.COMMIT_ACK_REQUEST.getCode();
+        return JoyQueueCommandType.COMMIT_ACK_REQUEST.getCode();
     }
 }

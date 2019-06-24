@@ -13,13 +13,13 @@
  */
 package com.jd.joyqueue.nsr.network.command;
 
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 /**
  * @author wylixiaobin
  * Date: 2019/1/28
  */
-public class GetDataCenter extends JournalqPayload {
+public class GetDataCenter extends JoyQueuePayload {
     private String ip;
 
     public GetDataCenter ip(String ip){

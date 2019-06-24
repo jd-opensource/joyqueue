@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.client.internal.producer.domain;
 
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 
 /**
  * SendResultData
@@ -24,7 +24,7 @@ import com.jd.joyqueue.exception.JournalqCode;
 public class SendResultData {
 
     private SendResult result;
-    private JournalqCode code;
+    private JoyQueueCode code;
 
     public SendResult getResult() {
         return result;
@@ -34,11 +34,11 @@ public class SendResultData {
         this.result = result;
     }
 
-    public JournalqCode getCode() {
+    public JoyQueueCode getCode() {
         return code;
     }
 
-    public void setCode(JournalqCode code) {
+    public void setCode(JoyQueueCode code) {
         this.code = code;
     }
 }

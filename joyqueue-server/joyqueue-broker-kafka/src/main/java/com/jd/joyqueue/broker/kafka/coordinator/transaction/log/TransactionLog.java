@@ -24,8 +24,8 @@ import com.jd.joyqueue.broker.kafka.coordinator.transaction.helper.TransactionSe
 import com.jd.joyqueue.broker.producer.Produce;
 import com.jd.joyqueue.domain.PartitionGroup;
 import com.jd.joyqueue.domain.TopicConfig;
-import com.jd.joyqueue.exception.JournalqCode;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueCode;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.network.session.Consumer;
 import com.jd.joyqueue.network.session.Producer;
 import com.jd.joyqueue.toolkit.service.Service;
@@ -82,7 +82,7 @@ public class TransactionLog extends Service {
     public boolean write(String app, String transactionId, TransactionDomain transactionDomain) throws Exception {
         TransactionLogSegment transactionLogSegment = resolveSegment(app, transactionId);
         if (transactionLogSegment == null) {
-            throw new JournalqException(String.format("logSegment not exist, app: %s, transactionId: %s", app, transactionId), JournalqCode.SE_WRITE_FAILED.getCode());
+            throw new JoyQueueException(String.format("logSegment not exist, app: %s, transactionId: %s", app, transactionId), JoyQueueCode.SE_WRITE_FAILED.getCode());
         }
         byte[] body = TransactionSerializer.serialize(transactionDomain);
         return transactionLogSegment.write(app, transactionId, body);
@@ -91,7 +91,7 @@ public class TransactionLog extends Service {
     public boolean batchWrite(String app, String transactionId, Set<? extends TransactionDomain> transactionDomains) throws Exception {
         TransactionLogSegment transactionLogSegment = resolveSegment(app, transactionId);
         if (transactionLogSegment == null) {
-            throw new JournalqException(String.format("logSegment not exist, app: %s, transactionId: %s", app, transactionId), JournalqCode.SE_WRITE_FAILED.getCode());
+            throw new JoyQueueException(String.format("logSegment not exist, app: %s, transactionId: %s", app, transactionId), JoyQueueCode.SE_WRITE_FAILED.getCode());
         }
         List<byte[]> bodyList = Lists.newArrayListWithCapacity(transactionDomains.size());
         for (TransactionDomain transactionDomain : transactionDomains) {

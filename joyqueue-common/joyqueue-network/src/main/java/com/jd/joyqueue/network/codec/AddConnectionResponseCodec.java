@@ -13,10 +13,10 @@
  */
 package com.jd.joyqueue.network.codec;
 
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.command.AddConnectionResponse;
 import com.jd.joyqueue.network.serializer.Serializer;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.codec.PayloadCodec;
 import com.jd.joyqueue.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
@@ -27,10 +27,10 @@ import io.netty.buffer.ByteBuf;
  * email: gaohaoxiang@jd.com
  * date: 2018/11/29
  */
-public class AddConnectionResponseCodec implements PayloadCodec<JournalqHeader, AddConnectionResponse>, Type {
+public class AddConnectionResponseCodec implements PayloadCodec<JoyQueueHeader, AddConnectionResponse>, Type {
 
     @Override
-    public Object decode(JournalqHeader header, ByteBuf buffer) throws Exception {
+    public Object decode(JoyQueueHeader header, ByteBuf buffer) throws Exception {
         AddConnectionResponse addConnectionResponse = new AddConnectionResponse();
         addConnectionResponse.setConnectionId(Serializer.readString(buffer, Serializer.BYTE_SIZE));
         addConnectionResponse.setNotification(Serializer.readString(buffer, Serializer.SHORT_SIZE));
@@ -45,6 +45,6 @@ public class AddConnectionResponseCodec implements PayloadCodec<JournalqHeader, 
 
     @Override
     public int type() {
-        return JournalqCommandType.ADD_CONNECTION_RESPONSE.getCode();
+        return JoyQueueCommandType.ADD_CONNECTION_RESPONSE.getCode();
     }
 }

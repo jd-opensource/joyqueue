@@ -14,7 +14,7 @@
 package com.jd.joyqueue.server.retry.api;
 
 import com.jd.joyqueue.domain.ConsumeRetry;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.model.PageResult;
 import com.jd.joyqueue.server.retry.model.RetryQueryCondition;
 import com.jd.joyqueue.server.retry.model.RetryStatus;
@@ -24,9 +24,9 @@ import com.jd.joyqueue.server.retry.model.RetryStatus;
  */
 public interface ConsoleMessageRetry<T> extends MessageRetry<T> {
 
-    PageResult<ConsumeRetry> queryConsumeRetryList(RetryQueryCondition retryQueryCondition) throws JournalqException;
+    PageResult<ConsumeRetry> queryConsumeRetryList(RetryQueryCondition retryQueryCondition) throws JoyQueueException;
 
-    ConsumeRetry getConsumeRetryById(Long id) throws JournalqException;
+    ConsumeRetry getConsumeRetryById(Long id) throws JoyQueueException;
 
     void updateStatus(String topic, String app, T[] messageId, RetryStatus status, long updateTime, int updateBy) throws Exception;
 

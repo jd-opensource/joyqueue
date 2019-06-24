@@ -51,6 +51,6 @@ nohup "$JAVACMD"\
   -classpath "$CLASSPATH" \
   -Dbasedir="$BASEDIR" \
   -Dfile.encoding="UTF-8" \
-  com.jd.journalq.broker.JournalqLauncher \
+  com.jd.joyqueue.broker.Launcher \
   "$@" >/dev/null 2>/dev/null &
 echo $! > journalq.pid

@@ -23,7 +23,7 @@ import com.jd.joyqueue.client.internal.producer.TxFeedbackManager;
 import com.jd.joyqueue.client.internal.producer.callback.TxFeedbackCallback;
 import com.jd.joyqueue.client.internal.producer.exception.ProducerException;
 import com.jd.joyqueue.client.internal.producer.feedback.config.TxFeedbackConfig;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.google.common.base.Preconditions;
 import com.jd.joyqueue.toolkit.service.Service;
 import org.apache.commons.lang3.StringUtils;
@@ -101,7 +101,7 @@ public class DefaultTxFeedbackManager extends Service implements TxFeedbackManag
                 txFeedbackScheduler.start();
             } catch (Exception e) {
                 logger.error("start feedback callback exception, topic: {}, app: {}", topic, config.getApp(), e);
-                throw new ProducerException("start feedback callback exception", JournalqCode.CN_UNKNOWN_ERROR.getCode());
+                throw new ProducerException("start feedback callback exception", JoyQueueCode.CN_UNKNOWN_ERROR.getCode());
             }
         }
 
@@ -128,10 +128,10 @@ public class DefaultTxFeedbackManager extends Service implements TxFeedbackManag
     protected TopicMetadata checkTopicMetadata(String topic) {
         TopicMetadata topicMetadata = clusterManager.fetchTopicMetadata(getTopicFullName(topic), config.getApp());
         if (topicMetadata == null) {
-            throw new ProducerException(String.format("topic %s is not exist", topic), JournalqCode.FW_TOPIC_NOT_EXIST.getCode());
+            throw new ProducerException(String.format("topic %s is not exist", topic), JoyQueueCode.FW_TOPIC_NOT_EXIST.getCode());
         }
         if (topicMetadata.getProducerPolicy() == null) {
-            throw new ProducerException(String.format("topic %s producer %s is not exist", topic, config.getApp()), JournalqCode.FW_PRODUCER_NOT_EXISTS.getCode());
+            throw new ProducerException(String.format("topic %s producer %s is not exist", topic, config.getApp()), JoyQueueCode.FW_PRODUCER_NOT_EXISTS.getCode());
         }
         return topicMetadata;
     }

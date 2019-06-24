@@ -15,7 +15,7 @@ package com.jd.joyqueue.server.retry.remote.command.codec;
 
 import com.jd.joyqueue.network.command.BooleanAck;
 import com.jd.joyqueue.network.command.CommandType;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.codec.PayloadCodec;
 import com.jd.joyqueue.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
@@ -23,10 +23,10 @@ import io.netty.buffer.ByteBuf;
 /**
  * Created by chengzhiliang on 2018/10/12.
  */
-public class BooleanAckCodec implements PayloadCodec<JournalqHeader, BooleanAck>, Type {
+public class BooleanAckCodec implements PayloadCodec<JoyQueueHeader, BooleanAck>, Type {
 
     @Override
-    public Object decode(JournalqHeader header, ByteBuf buffer) throws Exception {
+    public Object decode(JoyQueueHeader header, ByteBuf buffer) throws Exception {
         // 布尔应答不解析消息体
         return null;
     }

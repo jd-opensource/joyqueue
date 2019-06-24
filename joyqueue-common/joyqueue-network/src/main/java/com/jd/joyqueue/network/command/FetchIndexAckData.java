@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.network.command;
 
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 
 /**
  * FetchIndexAckData
@@ -24,13 +24,13 @@ import com.jd.joyqueue.exception.JournalqCode;
 public class FetchIndexAckData {
 
     private long index;
-    private JournalqCode code;
+    private JoyQueueCode code;
 
     public FetchIndexAckData() {
 
     }
 
-    public FetchIndexAckData(long index, JournalqCode code) {
+    public FetchIndexAckData(long index, JoyQueueCode code) {
         this.index = index;
         this.code = code;
     }
@@ -43,11 +43,11 @@ public class FetchIndexAckData {
         this.index = index;
     }
 
-    public JournalqCode getCode() {
+    public JoyQueueCode getCode() {
         return code;
     }
 
-    public void setCode(JournalqCode code) {
+    public void setCode(JoyQueueCode code) {
         this.code = code;
     }
 }

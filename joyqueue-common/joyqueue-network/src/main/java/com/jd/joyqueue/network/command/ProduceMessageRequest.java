@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.network.command;
 
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 import java.util.Map;
 
@@ -23,14 +23,14 @@ import java.util.Map;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/18
  */
-public class ProduceMessageRequest extends JournalqPayload {
+public class ProduceMessageRequest extends JoyQueuePayload {
 
     private String app;
     private Map<String, ProduceMessageData> data;
 
     @Override
     public int type() {
-        return JournalqCommandType.PRODUCE_MESSAGE_REQUEST.getCode();
+        return JoyQueueCommandType.PRODUCE_MESSAGE_REQUEST.getCode();
     }
 
     public String getApp() {

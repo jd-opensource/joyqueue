@@ -18,14 +18,14 @@ import com.jd.joyqueue.broker.BrokerContextAware;
 import com.jd.joyqueue.broker.cluster.ClusterManager;
 import com.jd.joyqueue.broker.helper.SessionHelper;
 import com.jd.joyqueue.broker.producer.Produce;
-import com.jd.joyqueue.broker.protocol.JournalqCommandHandler;
+import com.jd.joyqueue.broker.protocol.JoyQueueCommandHandler;
 import com.jd.joyqueue.broker.protocol.converter.CheckResultConverter;
 import com.jd.joyqueue.domain.TopicName;
-import com.jd.joyqueue.exception.JournalqCode;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueCode;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.message.BrokerCommit;
 import com.jd.joyqueue.network.command.BooleanAck;
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.command.ProduceMessageCommitRequest;
 import com.jd.joyqueue.network.command.ProduceMessageCommitResponse;
 import com.jd.joyqueue.network.session.Connection;
@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/19
  */
-public class ProduceMessageCommitRequestHandler implements JournalqCommandHandler, Type, BrokerContextAware {
+public class ProduceMessageCommitRequestHandler implements JoyQueueCommandHandler, Type, BrokerContextAware {
 
     protected static final Logger logger = LoggerFactory.getLogger(ProduceMessageCommitRequestHandler.class);
 
@@ -63,14 +63,14 @@ public class ProduceMessageCommitRequestHandler implements JournalqCommandHandle
 
         if (connection == null || !connection.isAuthorized(produceMessageCommitRequest.getApp())) {
             logger.warn("connection is not exists, transport: {}, app: {}", transport, produceMessageCommitRequest.getApp());
-            return BooleanAck.build(JournalqCode.FW_CONNECTION_NOT_EXISTS.getCode());
+            return BooleanAck.build(JoyQueueCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
         BooleanResponse checkResult = clusterManager.checkWritable(TopicName.parse(produceMessageCommitRequest.getTopic()), produceMessageCommitRequest.getApp(), connection.getHost());
         if (!checkResult.isSuccess()) {
             logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport,
-                    produceMessageCommitRequest.getTopic(), produceMessageCommitRequest.getApp(), checkResult.getJournalqCode());
-            return new Command(new ProduceMessageCommitResponse(CheckResultConverter.convertCommonCode(checkResult.getJournalqCode())));
+                    produceMessageCommitRequest.getTopic(), produceMessageCommitRequest.getApp(), checkResult.getJoyQueueCode());
+            return new Command(new ProduceMessageCommitResponse(CheckResultConverter.convertCommonCode(checkResult.getJoyQueueCode())));
         }
 
         ProduceMessageCommitResponse produceMessageCommitResponse = produceMessageCommit(connection, produceMessageCommitRequest);
@@ -87,20 +87,20 @@ public class ProduceMessageCommitRequestHandler implements JournalqCommandHandle
 
         try {
             produce.putTransactionMessage(producer, brokerCommit);
-            return new ProduceMessageCommitResponse(JournalqCode.SUCCESS);
-        } catch (JournalqException e) {
+            return new ProduceMessageCommitResponse(JoyQueueCode.SUCCESS);
+        } catch (JoyQueueException e) {
             logger.error("produceMessage commit exception, transport: {}, topic: {}, app: {}",
                     connection.getTransport().remoteAddress(), produceMessageCommitRequest.getTopic(), produceMessageCommitRequest.getApp(), e);
-            return new ProduceMessageCommitResponse(JournalqCode.valueOf(e.getCode()));
+            return new ProduceMessageCommitResponse(JoyQueueCode.valueOf(e.getCode()));
         } catch (Exception e) {
             logger.error("produceMessage commit exception, transport: {}, topic: {}, app: {}",
                     connection.getTransport().remoteAddress(), produceMessageCommitRequest.getTopic(), produceMessageCommitRequest.getApp(), e);
-            return new ProduceMessageCommitResponse(JournalqCode.CN_UNKNOWN_ERROR);
+            return new ProduceMessageCommitResponse(JoyQueueCode.CN_UNKNOWN_ERROR);
         }
     }
 
     @Override
     public int type() {
-        return JournalqCommandType.PRODUCE_MESSAGE_COMMIT_REQUEST.getCode();
+        return JoyQueueCommandType.PRODUCE_MESSAGE_COMMIT_REQUEST.getCode();
     }
 }

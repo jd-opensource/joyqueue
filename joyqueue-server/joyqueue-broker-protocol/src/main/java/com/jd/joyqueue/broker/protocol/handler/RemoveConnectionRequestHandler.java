@@ -15,12 +15,12 @@ package com.jd.joyqueue.broker.protocol.handler;
 
 import com.jd.joyqueue.broker.BrokerContext;
 import com.jd.joyqueue.broker.BrokerContextAware;
-import com.jd.joyqueue.broker.protocol.JournalqCommandHandler;
+import com.jd.joyqueue.broker.protocol.JoyQueueCommandHandler;
 import com.jd.joyqueue.broker.helper.SessionHelper;
 import com.jd.joyqueue.broker.monitor.SessionManager;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.network.command.BooleanAck;
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.command.RemoveConnectionRequest;
 import com.jd.joyqueue.network.session.Connection;
 import com.jd.joyqueue.network.transport.Transport;
@@ -33,7 +33,7 @@ import com.jd.joyqueue.network.transport.command.Type;
  * email: gaohaoxiang@jd.com
  * date: 2018/11/30
  */
-public class RemoveConnectionRequestHandler implements JournalqCommandHandler, Type, BrokerContextAware {
+public class RemoveConnectionRequestHandler implements JoyQueueCommandHandler, Type, BrokerContextAware {
 
     private SessionManager sessionManager;
 
@@ -48,7 +48,7 @@ public class RemoveConnectionRequestHandler implements JournalqCommandHandler, T
         Connection connection = SessionHelper.getConnection(transport);
 
         if (connection == null) {
-            return BooleanAck.build(JournalqCode.FW_CONNECTION_NOT_EXISTS.getCode());
+            return BooleanAck.build(JoyQueueCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
         sessionManager.removeConnection(connection.getId());
@@ -57,6 +57,6 @@ public class RemoveConnectionRequestHandler implements JournalqCommandHandler, T
 
     @Override
     public int type() {
-        return JournalqCommandType.REMOVE_CONNECTION_REQUEST.getCode();
+        return JoyQueueCommandType.REMOVE_CONNECTION_REQUEST.getCode();
     }
 }

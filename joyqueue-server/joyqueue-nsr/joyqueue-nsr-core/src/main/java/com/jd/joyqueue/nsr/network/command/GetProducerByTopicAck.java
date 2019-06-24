@@ -14,7 +14,7 @@
 package com.jd.joyqueue.nsr.network.command;
 
 import com.jd.joyqueue.domain.Producer;
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 import java.util.List;
 
@@ -22,7 +22,7 @@ import java.util.List;
  * @author wylixiaobin
  * Date: 2019/1/29
  */
-public class GetProducerByTopicAck extends JournalqPayload {
+public class GetProducerByTopicAck extends JoyQueuePayload {
     private List<Producer> producers;
 
     public GetProducerByTopicAck producers(List<Producer> producers){

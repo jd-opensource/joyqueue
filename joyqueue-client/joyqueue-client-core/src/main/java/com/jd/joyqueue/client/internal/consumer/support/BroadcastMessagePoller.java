@@ -22,7 +22,7 @@ import com.jd.joyqueue.client.internal.consumer.domain.ConsumeReply;
 import com.jd.joyqueue.client.internal.consumer.transport.ConsumerClientManager;
 import com.jd.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import com.jd.joyqueue.client.internal.nameserver.NameServerConfig;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.google.common.base.Preconditions;
 import com.jd.joyqueue.toolkit.service.Service;
 import org.apache.commons.lang3.StringUtils;
@@ -166,12 +166,12 @@ public class BroadcastMessagePoller extends Service implements MessagePoller {
     }
 
     @Override
-    public JournalqCode reply(String topic, List<ConsumeReply> replyList) {
+    public JoyQueueCode reply(String topic, List<ConsumeReply> replyList) {
         return delegate.reply(topic, replyList);
     }
 
     @Override
-    public JournalqCode replyOnce(String topic, ConsumeReply reply) {
+    public JoyQueueCode replyOnce(String topic, ConsumeReply reply) {
         return delegate.replyOnce(topic, reply);
     }
 

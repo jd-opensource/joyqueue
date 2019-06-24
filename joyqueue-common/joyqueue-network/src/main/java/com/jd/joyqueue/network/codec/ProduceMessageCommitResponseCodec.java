@@ -13,10 +13,10 @@
  */
 package com.jd.joyqueue.network.codec;
 
-import com.jd.joyqueue.exception.JournalqCode;
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.exception.JoyQueueCode;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.command.ProduceMessageCommitResponse;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.codec.PayloadCodec;
 import com.jd.joyqueue.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
@@ -27,12 +27,12 @@ import io.netty.buffer.ByteBuf;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/19
  */
-public class ProduceMessageCommitResponseCodec implements PayloadCodec<JournalqHeader, ProduceMessageCommitResponse>, Type {
+public class ProduceMessageCommitResponseCodec implements PayloadCodec<JoyQueueHeader, ProduceMessageCommitResponse>, Type {
 
     @Override
-    public ProduceMessageCommitResponse decode(JournalqHeader header, ByteBuf buffer) throws Exception {
+    public ProduceMessageCommitResponse decode(JoyQueueHeader header, ByteBuf buffer) throws Exception {
         ProduceMessageCommitResponse produceMessageCommitResponse = new ProduceMessageCommitResponse();
-        produceMessageCommitResponse.setCode(JournalqCode.valueOf(buffer.readInt()));
+        produceMessageCommitResponse.setCode(JoyQueueCode.valueOf(buffer.readInt()));
         return produceMessageCommitResponse;
     }
 
@@ -43,6 +43,6 @@ public class ProduceMessageCommitResponseCodec implements PayloadCodec<JournalqH
 
     @Override
     public int type() {
-        return JournalqCommandType.PRODUCE_MESSAGE_COMMIT_RESPONSE.getCode();
+        return JoyQueueCommandType.PRODUCE_MESSAGE_COMMIT_RESPONSE.getCode();
     }
 }

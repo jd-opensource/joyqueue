@@ -21,7 +21,7 @@ import com.jd.joyqueue.broker.kafka.config.KafkaConfig;
 import com.jd.joyqueue.broker.kafka.coordinator.transaction.domain.TransactionDomain;
 import com.jd.joyqueue.broker.kafka.coordinator.transaction.helper.TransactionSerializer;
 import com.jd.joyqueue.broker.producer.Produce;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.message.BrokerMessage;
 import com.jd.joyqueue.network.session.Consumer;
 import com.jd.joyqueue.network.session.Producer;
@@ -92,8 +92,8 @@ public class TransactionLogSegment {
 
     protected List<ByteBuffer> doRead(short partition, long index, int count) throws Exception {
         PullResult pullResult = consume.getMessage(consumer, partition, index, count);
-        if (!pullResult.getJournalqCode().equals(JournalqCode.SUCCESS)) {
-            logger.error("read transaction log exception, partition: {}, index: {}, count: {}", partition, index, count, pullResult.getJournalqCode());
+        if (!pullResult.getJoyQueueCode().equals(JoyQueueCode.SUCCESS)) {
+            logger.error("read transaction log exception, partition: {}, index: {}, count: {}", partition, index, count, pullResult.getJoyQueueCode());
             return Collections.emptyList();
         }
         List<ByteBuffer> buffers = Lists.newArrayListWithCapacity(pullResult.getBuffers().size());

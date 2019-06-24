@@ -14,7 +14,7 @@
 package com.jd.joyqueue.store;
 
 import com.jd.joyqueue.domain.QosLevel;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.store.message.MessageParser;
 import com.jd.joyqueue.store.nsm.VirtualThreadExecutor;
 import com.jd.joyqueue.store.utils.BaseDirUtils;
@@ -93,7 +93,7 @@ public class PartitionGroupStoreManagerTest {
 
             for (long j = 0; j < store.getRightIndex(partitions[i]); j++) {
                 ReadResult readResult = store.read(partitions[i], j, 1, 0);
-                Assert.assertEquals(JournalqCode.SUCCESS, readResult.getCode());
+                Assert.assertEquals(JoyQueueCode.SUCCESS, readResult.getCode());
                 Assert.assertEquals(1, readResult.getMessages().length);
                 ByteBuffer readBuffer = readResult.getMessages()[0];
                 Assert.assertEquals(readBuffer.getInt(0), readBuffer.remaining());
@@ -129,7 +129,7 @@ public class PartitionGroupStoreManagerTest {
             writeBuffer.clear();
 
             ReadResult readResult = store.read(partition, i, 1, 0);
-            Assert.assertEquals(JournalqCode.SUCCESS, readResult.getCode());
+            Assert.assertEquals(JoyQueueCode.SUCCESS, readResult.getCode());
             Assert.assertEquals(1, readResult.getMessages().length);
             ByteBuffer readBuffer = readResult.getMessages()[0];
             Assert.assertEquals(writeBuffer, readBuffer);
@@ -205,7 +205,7 @@ public class PartitionGroupStoreManagerTest {
             for (int j = 0; j < batchSize; j++) {
                 long index = i * batchSize + j;
                 ReadResult readResult = store.read(partition, index, 1, 0);
-                Assert.assertEquals(JournalqCode.SUCCESS, readResult.getCode());
+                Assert.assertEquals(JoyQueueCode.SUCCESS, readResult.getCode());
                 Assert.assertEquals(1, readResult.getMessages().length);
                 ByteBuffer readBuffer = readResult.getMessages()[0];
                 writeBuffer.clear();
@@ -244,7 +244,7 @@ public class PartitionGroupStoreManagerTest {
 
         replicationThread.interrupt();
         // 验证结果
-        Assert.assertEquals(JournalqCode.SUCCESS, writeResult.getCode());
+        Assert.assertEquals(JoyQueueCode.SUCCESS, writeResult.getCode());
         Assert.assertEquals(count, writeResult.getIndices().length);
 
         while (store.indexPosition() < store.rightPosition()) {
@@ -257,7 +257,7 @@ public class PartitionGroupStoreManagerTest {
             writeBuffer.clear();
 
             ReadResult readResult = store.read(partition, i, 1, 0);
-            Assert.assertEquals(JournalqCode.SUCCESS, readResult.getCode());
+            Assert.assertEquals(JoyQueueCode.SUCCESS, readResult.getCode());
             Assert.assertEquals(1, readResult.getMessages().length);
             ByteBuffer readBuffer = readResult.getMessages()[0];
             Assert.assertEquals(writeBuffer, readBuffer);
@@ -324,7 +324,7 @@ public class PartitionGroupStoreManagerTest {
         Future<WriteResult> future = qosStore.asyncWrite(messages.stream().map(b -> new WriteRequest(partition, b)).toArray(WriteRequest[]::new));
         // 等待写入完成
         WriteResult writeResult = future.get();
-        Assert.assertEquals(JournalqCode.SUCCESS, writeResult.getCode());
+        Assert.assertEquals(JoyQueueCode.SUCCESS, writeResult.getCode());
         Assert.assertEquals(size, store.rightPosition());
         // 2. 模拟LEADER读取消息
         List<ByteBuffer> readTermBuffers = new LinkedList<>();
@@ -366,7 +366,7 @@ public class PartitionGroupStoreManagerTest {
             writeBuffer.clear();
 
             ReadResult readResult = store.read(partition, i, 1, 0);
-            Assert.assertEquals(JournalqCode.SUCCESS, readResult.getCode());
+            Assert.assertEquals(JoyQueueCode.SUCCESS, readResult.getCode());
             Assert.assertEquals(1, readResult.getMessages().length);
             ByteBuffer readBuffer = readResult.getMessages()[0];
             Assert.assertEquals(writeBuffer, readBuffer);

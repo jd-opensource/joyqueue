@@ -21,7 +21,7 @@ import com.jd.joyqueue.client.internal.consumer.coordinator.domain.BrokerAssignm
 import com.jd.joyqueue.client.internal.consumer.coordinator.domain.PartitionAssignment;
 import com.jd.joyqueue.client.internal.metadata.domain.PartitionMetadata;
 import com.jd.joyqueue.client.internal.metadata.domain.TopicMetadata;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.network.command.FetchAssignedPartitionResponse;
 import com.jd.joyqueue.network.command.FetchAssignedPartitionAckData;
 import com.jd.joyqueue.network.domain.BrokerNode;
@@ -98,7 +98,7 @@ public class PartitionAssignmentManager extends Service {
             if (fetchAssignedPartitionAckData == null) {
                 logger.warn("fetch partition assignment error, no partitions, topic: {}, app: {}", topicMetadata.getTopic(), app);
                 return null;
-            } else if (!fetchAssignedPartitionAckData.getCode().equals(JournalqCode.SUCCESS)) {
+            } else if (!fetchAssignedPartitionAckData.getCode().equals(JoyQueueCode.SUCCESS)) {
                 logger.warn("fetch partition assignment error, topic: {}, app: {}, error: {}", topicMetadata.getTopic(), app, fetchAssignedPartitionAckData.getCode().getMessage());
                 return null;
             }

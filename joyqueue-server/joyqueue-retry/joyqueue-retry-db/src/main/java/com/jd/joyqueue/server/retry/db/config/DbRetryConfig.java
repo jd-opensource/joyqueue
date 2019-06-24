@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.server.retry.db.config;
 
-import com.jd.joyqueue.exception.JournalqConfigException;
+import com.jd.joyqueue.exception.JoyQueueConfigException;
 import com.jd.joyqueue.datasource.DataSourceConfig;
 import com.jd.joyqueue.toolkit.retry.RetryPolicy;
 import org.slf4j.Logger;
@@ -73,7 +73,7 @@ public class DbRetryConfig {
         Properties properties = new Properties();
         InputStream inputStream = DbRetryConfig.class.getClassLoader().getResourceAsStream(configFile);
         if (null == inputStream) {
-            throw new JournalqConfigException("cannot load journalq.properties.");
+            throw new JoyQueueConfigException("cannot load journalq.properties.");
         }
         try {
             properties.load(inputStream);
@@ -95,7 +95,7 @@ public class DbRetryConfig {
 
             dsConfig = writeDataSource;
         } catch (IOException e) {
-            throw new JournalqConfigException("load and parse config error.", e);
+            throw new JoyQueueConfigException("load and parse config error.", e);
         }
 
         logger.info("Success init DbRetryConfig.");

@@ -20,7 +20,7 @@ import java.util.Map;
  * @author lining11
  * Date: 2018/8/17
  */
-public class BrokerRollback implements JournalLog {
+public class BrokerRollback implements JoyQueueLog {
     private int size;
     private long startTime;
     private int storeTime;

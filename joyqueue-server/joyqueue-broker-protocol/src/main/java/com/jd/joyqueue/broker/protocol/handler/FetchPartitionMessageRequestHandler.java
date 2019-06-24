@@ -22,17 +22,17 @@ import com.jd.joyqueue.broker.consumer.Consume;
 import com.jd.joyqueue.broker.consumer.model.PullResult;
 import com.jd.joyqueue.broker.helper.SessionHelper;
 import com.jd.joyqueue.broker.network.traffic.Traffic;
-import com.jd.joyqueue.broker.protocol.JournalqCommandHandler;
+import com.jd.joyqueue.broker.protocol.JoyQueueCommandHandler;
 import com.jd.joyqueue.broker.protocol.command.FetchPartitionMessageResponse;
 import com.jd.joyqueue.broker.protocol.converter.CheckResultConverter;
 import com.jd.joyqueue.domain.TopicName;
-import com.jd.joyqueue.exception.JournalqCode;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueCode;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.network.command.BooleanAck;
 import com.jd.joyqueue.network.command.FetchPartitionMessageAckData;
 import com.jd.joyqueue.network.command.FetchPartitionMessageData;
 import com.jd.joyqueue.network.command.FetchPartitionMessageRequest;
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.session.Connection;
 import com.jd.joyqueue.network.session.Consumer;
 import com.jd.joyqueue.network.transport.Transport;
@@ -51,7 +51,7 @@ import java.util.Map;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/13
  */
-public class FetchPartitionMessageRequestHandler implements JournalqCommandHandler, Type, BrokerContextAware {
+public class FetchPartitionMessageRequestHandler implements JoyQueueCommandHandler, Type, BrokerContextAware {
 
     protected static final Logger logger = LoggerFactory.getLogger(FetchPartitionMessageRequestHandler.class);
 
@@ -71,7 +71,7 @@ public class FetchPartitionMessageRequestHandler implements JournalqCommandHandl
 
         if (connection == null || !connection.isAuthorized(fetchPartitionMessageRequest.getApp())) {
             logger.warn("connection is not exists, transport: {}, app: {}", transport, fetchPartitionMessageRequest.getApp());
-            return BooleanAck.build(JournalqCode.FW_CONNECTION_NOT_EXISTS.getCode());
+            return BooleanAck.build(JoyQueueCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
         Table<String, Short, FetchPartitionMessageAckData> result = HashBasedTable.create();
@@ -87,8 +87,8 @@ public class FetchPartitionMessageRequestHandler implements JournalqCommandHandl
                         connection.getHost(), partition);
                 if (!checkResult.isSuccess()) {
                     logger.warn("checkReadable failed, transport: {}, topic: {}, partition: {}, app: {}, code: {}", transport,
-                            consumer.getTopic(), partition, consumer.getApp(), checkResult.getJournalqCode());
-                    buildFetchPartitionMessageAckData(topic, entry.getValue(), CheckResultConverter.convertFetchCode(checkResult.getJournalqCode()), result);
+                            consumer.getTopic(), partition, consumer.getApp(), checkResult.getJoyQueueCode());
+                    buildFetchPartitionMessageAckData(topic, entry.getValue(), CheckResultConverter.convertFetchCode(checkResult.getJoyQueueCode()), result);
                     traffic.record(topic, 0);
                     continue;
                 }
@@ -107,7 +107,7 @@ public class FetchPartitionMessageRequestHandler implements JournalqCommandHandl
         return new Command(fetchPartitionMessageResponse);
     }
 
-    protected void buildFetchPartitionMessageAckData(String topic, Map<Short, FetchPartitionMessageData> partitionMap, JournalqCode code, Table<String, Short, FetchPartitionMessageAckData> result) {
+    protected void buildFetchPartitionMessageAckData(String topic, Map<Short, FetchPartitionMessageData> partitionMap, JoyQueueCode code, Table<String, Short, FetchPartitionMessageAckData> result) {
         FetchPartitionMessageAckData fetchPartitionMessageAckData = new FetchPartitionMessageAckData(code);
         for (Map.Entry<Short, FetchPartitionMessageData> entry : partitionMap.entrySet()) {
             result.put(topic, entry.getKey(), fetchPartitionMessageAckData);
@@ -123,27 +123,27 @@ public class FetchPartitionMessageRequestHandler implements JournalqCommandHandl
             }
             if (index < consume.getMinIndex(consumer, partition) || index > consume.getMaxIndex(consumer, partition)) {
                 logger.warn("fetchPartitionMessage exception, index ou of range, transport: {}, consumer: {}, partition: {}, index: {}", transport, consumer, partition, index);
-                fetchPartitionMessageAckData.setCode(JournalqCode.FW_FETCH_MESSAGE_INDEX_OUT_OF_RANGE);
+                fetchPartitionMessageAckData.setCode(JoyQueueCode.FW_FETCH_MESSAGE_INDEX_OUT_OF_RANGE);
             } else {
                 PullResult pullResult = consume.getMessage(consumer, partition, index, count);
-                if (!pullResult.getJournalqCode().equals(JournalqCode.SUCCESS)) {
+                if (!pullResult.getJoyQueueCode().equals(JoyQueueCode.SUCCESS)) {
                     logger.error("fetchPartitionMessage exception, transport: {}, consumer: {}, partition: {}, index: {}", transport, consumer, partition, index);
                 }
                 fetchPartitionMessageAckData.setBuffers(pullResult.getBuffers());
-                fetchPartitionMessageAckData.setCode(pullResult.getJournalqCode());
+                fetchPartitionMessageAckData.setCode(pullResult.getJoyQueueCode());
             }
-        } catch (JournalqException e) {
+        } catch (JoyQueueException e) {
             logger.error("fetchPartitionMessage exception, transport: {}, consumer: {}, partition: {}, index: {}", transport, consumer, partition, index, e);
-            fetchPartitionMessageAckData.setCode(JournalqCode.valueOf(e.getCode()));
+            fetchPartitionMessageAckData.setCode(JoyQueueCode.valueOf(e.getCode()));
         } catch (Exception e) {
             logger.error("fetchPartitionMessage exception, transport: {}, consumer: {}, partition: {}, index: {}", transport, consumer, partition, index, e);
-            fetchPartitionMessageAckData.setCode(JournalqCode.CN_UNKNOWN_ERROR);
+            fetchPartitionMessageAckData.setCode(JoyQueueCode.CN_UNKNOWN_ERROR);
         }
         return fetchPartitionMessageAckData;
     }
 
     @Override
     public int type() {
-        return JournalqCommandType.FETCH_PARTITION_MESSAGE_REQUEST.getCode();
+        return JoyQueueCommandType.FETCH_PARTITION_MESSAGE_REQUEST.getCode();
     }
 }

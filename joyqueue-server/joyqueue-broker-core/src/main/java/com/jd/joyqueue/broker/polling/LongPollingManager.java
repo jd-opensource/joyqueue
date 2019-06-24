@@ -17,7 +17,7 @@ import com.jd.joyqueue.broker.consumer.Consume;
 import com.jd.joyqueue.broker.cluster.ClusterManager;
 import com.jd.joyqueue.broker.monitor.SessionManager;
 import com.jd.joyqueue.domain.TopicName;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.network.session.Consumer;
 import com.jd.joyqueue.network.session.Joint;
 import com.jd.joyqueue.broker.consumer.model.PullResult;
@@ -247,8 +247,8 @@ public class LongPollingManager extends Service {
                     longPollingQueue.offer(longPolling);
                 }
 
-                if (!pullResult.getJournalqCode().equals(JournalqCode.SUCCESS)) {
-                    logger.error("getMessage error, code: {}, consumer: {}", pullResult.getJournalqCode(), consumer);
+                if (!pullResult.getJoyQueueCode().equals(JoyQueueCode.SUCCESS)) {
+                    logger.error("getMessage error, code: {}, consumer: {}", pullResult.getJoyQueueCode(), consumer);
                 }
             } catch (Throwable th) {
                 try {

@@ -16,7 +16,7 @@ package com.jd.joyqueue.client.internal.metadata.domain;
 import com.jd.joyqueue.domain.ConsumerPolicy;
 import com.jd.joyqueue.domain.ProducerPolicy;
 import com.jd.joyqueue.domain.TopicType;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.network.domain.BrokerNode;
 
 import java.io.Serializable;
@@ -35,7 +35,7 @@ public class TopicMetadata implements Serializable {
     private ProducerPolicy producerPolicy;
     private ConsumerPolicy consumerPolicy;
     private TopicType type;
-    private JournalqCode code;
+    private JoyQueueCode code;
 
     private List<PartitionGroupMetadata> partitionGroups;
     private List<PartitionMetadata> partitions;
@@ -58,14 +58,14 @@ public class TopicMetadata implements Serializable {
 
     }
 
-    public TopicMetadata(JournalqCode code) {
+    public TopicMetadata(JoyQueueCode code) {
         this.code = code;
     }
 
     public TopicMetadata(String topic, ProducerPolicy producerPolicy, ConsumerPolicy consumerPolicy, TopicType type, List<PartitionGroupMetadata> partitionGroups,
                          List<PartitionMetadata> partitions, Map<Short, PartitionMetadata> partitionMap, Map<Integer, PartitionGroupMetadata> partitionGroupMap, List<BrokerNode> brokers,
                          List<BrokerNode> nearbyBrokers, Map<Integer, BrokerNode> brokerMap, Map<Integer, List<PartitionMetadata>> brokerPartitions,
-                         Map<Integer, List<PartitionGroupMetadata>> brokerPartitionGroups, boolean allAvailable, JournalqCode code) {
+                         Map<Integer, List<PartitionGroupMetadata>> brokerPartitionGroups, boolean allAvailable, JoyQueueCode code) {
         this.topic = topic;
         this.producerPolicy = producerPolicy;
         this.consumerPolicy = consumerPolicy;
@@ -164,7 +164,7 @@ public class TopicMetadata implements Serializable {
         return allAvailable;
     }
 
-    public JournalqCode getCode() {
+    public JoyQueueCode getCode() {
         return code;
     }
 

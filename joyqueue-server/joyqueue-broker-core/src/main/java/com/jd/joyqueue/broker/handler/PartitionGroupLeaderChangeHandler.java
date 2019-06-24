@@ -16,7 +16,7 @@ package com.jd.joyqueue.broker.handler;
 import com.jd.joyqueue.broker.BrokerContext;
 import com.jd.joyqueue.broker.election.ElectionService;
 import com.jd.joyqueue.domain.PartitionGroup;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.network.command.BooleanAck;
 import com.jd.joyqueue.network.transport.Transport;
 import com.jd.joyqueue.network.transport.command.Command;
@@ -55,7 +55,7 @@ public class PartitionGroupLeaderChangeHandler implements CommandHandler, Type {
             electionService.onLeaderChange(group.getTopic(),group.getGroup(),group.getLeader());
         } catch (Exception e) {
             logger.error(String.format("PartitionGroupLeaderChangeHandler request command[%s] error", command.getPayload()), e);
-            return BooleanAck.build(JournalqCode.CN_UNKNOWN_ERROR, e.getMessage());
+            return BooleanAck.build(JoyQueueCode.CN_UNKNOWN_ERROR, e.getMessage());
         }
         return BooleanAck.build();
     }

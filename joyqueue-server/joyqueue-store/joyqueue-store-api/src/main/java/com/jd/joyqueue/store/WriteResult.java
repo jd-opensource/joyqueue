@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.store;
 
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 
 /**
  * 写消息结果
@@ -22,11 +22,11 @@ public class WriteResult {
     private long [] metrics;
 
     public WriteResult() {}
-    public WriteResult(JournalqCode code, long [] indices) {
+    public WriteResult(JoyQueueCode code, long [] indices) {
         this. code = code;
         this.indices = indices;
     }
-    public WriteResult(JournalqCode code, long [] indices, long [] metrics) {
+    public WriteResult(JoyQueueCode code, long [] indices, long [] metrics) {
         this. code = code;
         this.indices = indices;
         this.metrics = metrics;
@@ -34,18 +34,18 @@ public class WriteResult {
     /**
      * 状态码
      */
-    private JournalqCode code;
+    private JoyQueueCode code;
 
     /**
      * 写入消息的在partition中的序号
      */
     private long [] indices;
 
-    public JournalqCode getCode() {
+    public JoyQueueCode getCode() {
         return code;
     }
 
-    public void setCode(JournalqCode code) {
+    public void setCode(JoyQueueCode code) {
         this.code = code;
     }
 

@@ -36,7 +36,7 @@ import com.jd.joyqueue.broker.kafka.message.converter.KafkaMessageConverter;
 import com.jd.joyqueue.broker.monitor.SessionManager;
 import com.jd.joyqueue.broker.network.traffic.Traffic;
 import com.jd.joyqueue.domain.TopicName;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.message.BrokerMessage;
 import com.jd.joyqueue.message.SourceType;
 import com.jd.joyqueue.network.session.Connection;
@@ -111,8 +111,8 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
 
                 BooleanResponse checkResult = clusterManager.checkReadable(topic, clientId, clientIp, (short) partition);
                 if (!checkResult.isSuccess()) {
-                    logger.warn("checkReadable failed, transport: {}, topic: {}, partition: {}, app: {}, code: {}", transport, topic, partition, clientId, checkResult.getJournalqCode());
-                    short errorCode = CheckResultConverter.convertFetchCode(checkResult.getJournalqCode());
+                    logger.warn("checkReadable failed, transport: {}, topic: {}, partition: {}, app: {}, code: {}", transport, topic, partition, clientId, checkResult.getJoyQueueCode());
+                    short errorCode = CheckResultConverter.convertFetchCode(checkResult.getJoyQueueCode());
                     partitionResponses.add(new FetchResponse.PartitionResponse(partition, errorCode));
                     traffic.record(topic.getFullName(), 0);
                     continue;
@@ -216,8 +216,8 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
 
     private List<BrokerMessage> doFetchMessage(Consumer consumer, int partition, long offset, int batchSize) throws Exception {
         PullResult pullResult = consume.getMessage(consumer, (short) partition, offset, batchSize);
-        if (pullResult.getJournalqCode() != JournalqCode.SUCCESS) {
-            logger.warn("fetch message error, consumer: {}, partition: {}, offset: {}, batchSize: {}, code: {}", consumer, partition, offset, batchSize, pullResult.getJournalqCode());
+        if (pullResult.getJoyQueueCode() != JoyQueueCode.SUCCESS) {
+            logger.warn("fetch message error, consumer: {}, partition: {}, offset: {}, batchSize: {}, code: {}", consumer, partition, offset, batchSize, pullResult.getJoyQueueCode());
             return null;
         }
         if (pullResult.size() == 0) {

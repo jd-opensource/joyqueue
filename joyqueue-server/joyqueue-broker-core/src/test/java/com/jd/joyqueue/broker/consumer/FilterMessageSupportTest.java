@@ -16,7 +16,7 @@ package com.jd.joyqueue.broker.consumer;
 import com.jd.joyqueue.broker.cluster.ClusterManager;
 import com.jd.joyqueue.broker.consumer.filter.FilterCallback;
 import com.jd.joyqueue.domain.Consumer;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueException;
 import org.assertj.core.util.Maps;
 import org.junit.Assert;
 import org.junit.Before;
@@ -46,7 +46,7 @@ public class FilterMessageSupportTest {
     }
 
     @Test
-    public void filter() throws JournalqException {
+    public void filter() throws JoyQueueException {
         // Consumer consumer, List<ByteBuffer> byteBuffers, FilterCallback filterCallback
         List<ByteBuffer> byteBufferList = new LinkedList<>();
         for (int i = 0; i < 10; i++) {
@@ -60,7 +60,7 @@ public class FilterMessageSupportTest {
 
         List<ByteBuffer> filter = filterMessageSupport.filter(consumer, byteBufferList, new FilterCallback() {
             @Override
-            public void callback(List<ByteBuffer> list) throws JournalqException {
+            public void callback(List<ByteBuffer> list) throws JoyQueueException {
                 // nothing to do;
                 Assert.assertEquals(1, list.size());
             }

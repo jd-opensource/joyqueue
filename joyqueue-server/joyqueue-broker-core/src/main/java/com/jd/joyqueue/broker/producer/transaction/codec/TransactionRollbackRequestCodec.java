@@ -17,7 +17,7 @@ import com.google.common.collect.Lists;
 import com.jd.joyqueue.broker.producer.transaction.command.TransactionRollbackRequest;
 import com.jd.joyqueue.network.command.CommandType;
 import com.jd.joyqueue.network.serializer.Serializer;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.codec.PayloadCodec;
 import com.jd.joyqueue.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
@@ -30,10 +30,10 @@ import java.util.List;
  * email: gaohaoxiang@jd.com
  * date: 2019/4/12
  */
-public class TransactionRollbackRequestCodec implements PayloadCodec<JournalqHeader, TransactionRollbackRequest>, Type {
+public class TransactionRollbackRequestCodec implements PayloadCodec<JoyQueueHeader, TransactionRollbackRequest>, Type {
 
     @Override
-    public TransactionRollbackRequest decode(JournalqHeader header, ByteBuf buffer) throws Exception {
+    public TransactionRollbackRequest decode(JoyQueueHeader header, ByteBuf buffer) throws Exception {
         TransactionRollbackRequest transactionRollbackRequest = new TransactionRollbackRequest();
         transactionRollbackRequest.setTopic(Serializer.readString(buffer, Serializer.SHORT_SIZE));
         transactionRollbackRequest.setApp(Serializer.readString(buffer, Serializer.SHORT_SIZE));

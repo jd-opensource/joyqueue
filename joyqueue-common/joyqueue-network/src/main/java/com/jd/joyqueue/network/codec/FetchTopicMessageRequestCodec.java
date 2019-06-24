@@ -16,9 +16,9 @@ package com.jd.joyqueue.network.codec;
 import com.google.common.collect.Maps;
 import com.jd.joyqueue.network.command.FetchTopicMessageRequest;
 import com.jd.joyqueue.network.command.FetchTopicMessageData;
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.serializer.Serializer;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.codec.PayloadCodec;
 import com.jd.joyqueue.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
@@ -31,10 +31,10 @@ import java.util.Map;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/7
  */
-public class FetchTopicMessageRequestCodec implements PayloadCodec<JournalqHeader, FetchTopicMessageRequest>, Type {
+public class FetchTopicMessageRequestCodec implements PayloadCodec<JoyQueueHeader, FetchTopicMessageRequest>, Type {
 
     @Override
-    public FetchTopicMessageRequest decode(JournalqHeader header, ByteBuf buffer) throws Exception {
+    public FetchTopicMessageRequest decode(JoyQueueHeader header, ByteBuf buffer) throws Exception {
         FetchTopicMessageRequest fetchTopicMessageRequest = new FetchTopicMessageRequest();
 
         short topicSize = buffer.readShort();
@@ -68,6 +68,6 @@ public class FetchTopicMessageRequestCodec implements PayloadCodec<JournalqHeade
 
     @Override
     public int type() {
-        return JournalqCommandType.FETCH_TOPIC_MESSAGE_REQUEST.getCode();
+        return JoyQueueCommandType.FETCH_TOPIC_MESSAGE_REQUEST.getCode();
     }
 }

@@ -13,12 +13,12 @@
  */
 package com.jd.joyqueue.client;
 
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import io.openmessaging.KeyValue;
 import io.openmessaging.OMS;
 import io.openmessaging.OMSBuiltinKeys;
 import io.openmessaging.exception.OMSRuntimeException;
-import io.openmessaging.joyqueue.domain.JournalQProducerBuiltinKeys;
+import io.openmessaging.joyqueue.domain.JoyQueueProducerBuiltinKeys;
 import io.openmessaging.joyqueue.producer.ExtensionProducer;
 import io.openmessaging.message.Message;
 import org.junit.Assert;
@@ -38,7 +38,7 @@ public class ProducerTest2 extends AbstractProducerTest {
     public void before() {
         KeyValue attributes = getAttributes();
         attributes.put(OMSBuiltinKeys.ACCOUNT_KEY, ACCOUNT_KEY);
-        attributes.put(JournalQProducerBuiltinKeys.TRANSACTION_TIMEOUT, 1000 * 10);
+        attributes.put(JoyQueueProducerBuiltinKeys.TRANSACTION_TIMEOUT, 1000 * 10);
         messagingAccessPoint = OMS.getMessagingAccessPoint(String.format("oms:journalq://%s@%s/%s", ACCOUNT_ID, SERVER, "test_region"), attributes);
 
         producer = (ExtensionProducer) messagingAccessPoint.createProducer();
@@ -54,7 +54,7 @@ public class ProducerTest2 extends AbstractProducerTest {
         try {
             producer.send(message);
         } catch (OMSRuntimeException e) {
-            Assert.assertEquals(e.getErrorCode(), JournalqCode.FW_TOPIC_NO_PARTITIONGROUP.getCode());
+            Assert.assertEquals(e.getErrorCode(), JoyQueueCode.FW_TOPIC_NO_PARTITIONGROUP.getCode());
         }
     }
 }

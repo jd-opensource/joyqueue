@@ -22,7 +22,7 @@ import com.jd.joyqueue.broker.kafka.coordinator.transaction.TransactionIdManager
 import com.jd.joyqueue.broker.kafka.model.ProducePartitionGroupRequest;
 import com.jd.joyqueue.broker.producer.Produce;
 import com.jd.joyqueue.domain.QosLevel;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.message.BrokerMessage;
 import com.jd.joyqueue.message.BrokerPrepare;
 import com.jd.joyqueue.message.BrokerRollback;
@@ -77,7 +77,7 @@ public class TransactionProduceHandler {
                 fillTxId(messages, transaction.getTxId());
 
                 produce.putMessageAsync(producer, messages, qosLevel, (writeResult) -> {
-                    if (!writeResult.getCode().equals(JournalqCode.SUCCESS)) {
+                    if (!writeResult.getCode().equals(JoyQueueCode.SUCCESS)) {
                         logger.error("produce message failed, topic: {}, code: {}", producer.getTopic(), writeResult.getCode());
                     }
                     code[0] = KafkaErrorCode.journalqCodeFor(writeResult.getCode().getCode());

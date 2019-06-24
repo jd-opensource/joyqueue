@@ -14,8 +14,8 @@
 package com.jd.joyqueue.broker.protocol.coordinator.assignment.support;
 
 import com.google.common.collect.Lists;
-import com.jd.joyqueue.broker.protocol.JournalqContext;
-import com.jd.joyqueue.broker.protocol.config.JournalqConfig;
+import com.jd.joyqueue.broker.protocol.JoyQueueContext;
+import com.jd.joyqueue.broker.protocol.config.JoyQueueConfig;
 import com.jd.joyqueue.broker.protocol.coordinator.GroupMemberTimeoutCallback;
 import com.jd.joyqueue.broker.protocol.coordinator.assignment.PartitionAssignor;
 import com.jd.joyqueue.broker.protocol.coordinator.assignment.converter.PartitionAssignmentConverter;
@@ -47,7 +47,7 @@ public class PartitionGroupBalancePartitionAssignor implements PartitionAssignor
     @Override
     public PartitionAssignment assign(GroupMetadata group, GroupMemberMetadata member, String topic, List<PartitionGroup> partitionGroups) {
         // TODO 去掉静态
-        JournalqConfig config = JournalqContext.getConfig();
+        JoyQueueConfig config = JoyQueueContext.getConfig();
         int minConnections = config.getCoordinatorPartitionAssignMinConnections();
         TopicPartitionGroupAssignmentMetadata topicPartitionGroupAssignmentMetadata = getOrCreateTopicPartitionGroupAssignMetadata(group, topic);
 

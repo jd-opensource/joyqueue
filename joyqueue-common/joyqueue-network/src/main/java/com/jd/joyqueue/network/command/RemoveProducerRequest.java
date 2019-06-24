@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.network.command;
 
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 import java.util.List;
 
@@ -23,14 +23,14 @@ import java.util.List;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/10
  */
-public class RemoveProducerRequest extends JournalqPayload {
+public class RemoveProducerRequest extends JoyQueuePayload {
 
     private List<String> topics;
     private String app;
 
     @Override
     public int type() {
-        return JournalqCommandType.REMOVE_PRODUCER_REQUEST.getCode();
+        return JoyQueueCommandType.REMOVE_PRODUCER_REQUEST.getCode();
     }
 
     public void setTopics(List<String> topics) {

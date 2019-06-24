@@ -13,8 +13,8 @@
  */
 package com.jd.joyqueue.service;
 
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.model.query.QArchive;
-import com.jd.joyqueue.exception.JournalqException;
 import com.jd.joyqueue.server.archive.store.api.ArchiveStore;
 import com.jd.joyqueue.server.archive.store.model.ConsumeLog;
 import com.jd.joyqueue.server.archive.store.model.SendLog;
@@ -33,20 +33,20 @@ public interface ArchiveService {
      * @param qArchive
      * @return
      */
-    List<SendLog> findByQuery(QArchive qArchive) throws JournalqException;
+    List<SendLog> findByQuery(QArchive qArchive) throws JoyQueueException;
 
     /**
      * 按id查询归档
      * @param messageId
      * @return
      */
-    SendLog findSendLog(String topic, Long time, String businessId, String messageId) throws JournalqException;
+    SendLog findSendLog(String topic, Long time, String businessId, String messageId) throws JoyQueueException;
 
     /**
      * 获取消费详情
      * @param messageId
      * @return
-     * @throws JournalqException
+     * @throws JoyQueueException
      */
-    List<ConsumeLog> findConsumeLog(String messageId, Integer count) throws JournalqException;
+    List<ConsumeLog> findConsumeLog(String messageId, Integer count) throws JoyQueueException;
 }

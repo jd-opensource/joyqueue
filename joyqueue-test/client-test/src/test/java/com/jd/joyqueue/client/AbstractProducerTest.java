@@ -14,7 +14,7 @@
 package com.jd.joyqueue.client;
 
 import io.openmessaging.KeyValue;
-import io.openmessaging.joyqueue.domain.JournalQProducerBuiltinKeys;
+import io.openmessaging.joyqueue.domain.JoyQueueProducerBuiltinKeys;
 import io.openmessaging.joyqueue.producer.ExtensionProducer;
 import org.junit.Before;
 
@@ -39,7 +39,7 @@ public class AbstractProducerTest extends AbstractClientTest {
     @Override
     protected KeyValue getAttributes() {
         KeyValue attributes = super.getAttributes();
-        attributes.put(JournalQProducerBuiltinKeys.COMPRESS_THRESHOLD, 1);
+        attributes.put(JoyQueueProducerBuiltinKeys.COMPRESS_THRESHOLD, 1);
         return attributes;
     }
 }

@@ -16,8 +16,8 @@ package com.jd.joyqueue.broker.protocol.handler;
 import com.google.common.collect.Maps;
 import com.jd.joyqueue.broker.consumer.model.PullResult;
 import com.jd.joyqueue.broker.polling.LongPollingCallback;
-import com.jd.joyqueue.exception.JournalqCode;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueCode;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.network.command.FetchTopicMessageRequest;
 import com.jd.joyqueue.network.command.FetchTopicMessageResponse;
 import com.jd.joyqueue.network.command.FetchTopicMessageAckData;
@@ -55,7 +55,7 @@ public class FetchTopicMessageLongPollCallback implements LongPollingCallback {
     public void onSuccess(Consumer consumer, PullResult pullResult) throws TransportException {
         FetchTopicMessageAckData fetchTopicMessageAckData = new FetchTopicMessageAckData();
         fetchTopicMessageAckData.setBuffers(pullResult.getBuffers());
-        fetchTopicMessageAckData.setCode(pullResult.getJournalqCode());
+        fetchTopicMessageAckData.setCode(pullResult.getJoyQueueCode());
 
         transport.acknowledge(request, new Command(buildFetchTopicMessageAck(consumer, fetchTopicMessageAckData)));
     }
@@ -64,7 +64,7 @@ public class FetchTopicMessageLongPollCallback implements LongPollingCallback {
     public void onExpire(Consumer consumer) throws TransportException {
         FetchTopicMessageAckData fetchTopicMessageAckData = new FetchTopicMessageAckData();
         fetchTopicMessageAckData.setBuffers(Collections.emptyList());
-        fetchTopicMessageAckData.setCode(JournalqCode.SUCCESS);
+        fetchTopicMessageAckData.setCode(JoyQueueCode.SUCCESS);
 
         transport.acknowledge(request, new Command(buildFetchTopicMessageAck(consumer, fetchTopicMessageAckData)));
     }
@@ -74,10 +74,10 @@ public class FetchTopicMessageLongPollCallback implements LongPollingCallback {
         logger.error("fetchTopicMessage longPolling exception, transport: {}, consumer: {}", transport, consumer, throwable);
         FetchTopicMessageAckData fetchTopicMessageAckData = new FetchTopicMessageAckData();
         fetchTopicMessageAckData.setBuffers(Collections.emptyList());
-        if (throwable instanceof JournalqException) {
-            fetchTopicMessageAckData.setCode(JournalqCode.valueOf(((JournalqException) throwable).getCode()));
+        if (throwable instanceof JoyQueueException) {
+            fetchTopicMessageAckData.setCode(JoyQueueCode.valueOf(((JoyQueueException) throwable).getCode()));
         } else {
-            fetchTopicMessageAckData.setCode(JournalqCode.CN_UNKNOWN_ERROR);
+            fetchTopicMessageAckData.setCode(JoyQueueCode.CN_UNKNOWN_ERROR);
         }
 
         transport.acknowledge(request, new Command(buildFetchTopicMessageAck(consumer, fetchTopicMessageAckData)));

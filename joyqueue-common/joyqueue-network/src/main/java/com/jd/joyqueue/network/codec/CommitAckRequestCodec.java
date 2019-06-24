@@ -18,10 +18,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
 import com.jd.joyqueue.network.command.CommitAckData;
 import com.jd.joyqueue.network.command.CommitAckRequest;
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.command.RetryType;
 import com.jd.joyqueue.network.serializer.Serializer;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.codec.PayloadCodec;
 import com.jd.joyqueue.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
@@ -35,10 +35,10 @@ import java.util.Map;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/12
  */
-public class CommitAckRequestCodec implements PayloadCodec<JournalqHeader, CommitAckRequest>, Type {
+public class CommitAckRequestCodec implements PayloadCodec<JoyQueueHeader, CommitAckRequest>, Type {
 
     @Override
-    public CommitAckRequest decode(JournalqHeader header, ByteBuf buffer) throws Exception {
+    public CommitAckRequest decode(JoyQueueHeader header, ByteBuf buffer) throws Exception {
         short size = buffer.readShort();
         Table<String, Short, List<CommitAckData>> data = HashBasedTable.create();
 
@@ -87,6 +87,6 @@ public class CommitAckRequestCodec implements PayloadCodec<JournalqHeader, Commi
 
     @Override
     public int type() {
-        return JournalqCommandType.COMMIT_ACK_REQUEST.getCode();
+        return JoyQueueCommandType.COMMIT_ACK_REQUEST.getCode();
     }
 }

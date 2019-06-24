@@ -1,1 +1,1 @@
-com.jd.joyqueue.broker.kafka.converter.JournalqToKafkaMessageConverter
+com.jd.joyqueue.broker.kafka.converter.JoyQueueToKafkaMessageConverter

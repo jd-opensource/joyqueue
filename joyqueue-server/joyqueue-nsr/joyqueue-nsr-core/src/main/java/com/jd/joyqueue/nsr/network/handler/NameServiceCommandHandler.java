@@ -23,7 +23,7 @@ import com.jd.joyqueue.domain.Subscription;
 import com.jd.joyqueue.domain.TopicConfig;
 import com.jd.joyqueue.domain.TopicName;
 import com.jd.joyqueue.event.NameServerEvent;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.network.command.Authorization;
 import com.jd.joyqueue.network.command.BooleanAck;
 import com.jd.joyqueue.network.command.GetTopics;
@@ -34,7 +34,7 @@ import com.jd.joyqueue.network.command.UnSubscribe;
 import com.jd.joyqueue.network.event.TransportEvent;
 import com.jd.joyqueue.network.transport.Transport;
 import com.jd.joyqueue.network.transport.TransportAttribute;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.command.Command;
 import com.jd.joyqueue.network.transport.command.CommandCallback;
 import com.jd.joyqueue.network.transport.command.Direction;
@@ -228,7 +228,7 @@ public class NameServiceCommandHandler implements NsrCommandHandler, Types, com.
                 } else {
                     topicNames = nameService.getTopics(getTopics.getApp(), Subscription.Type.valueOf((byte) getTopics.getSubscribeType()));
                 }
-                response = new Command(new JournalqHeader(Direction.RESPONSE,
+                response = new Command(new JoyQueueHeader(Direction.RESPONSE,
                         command.getHeader().getType() == NsrCommandType.MQTT_GET_TOPICS ? NsrCommandType.MQTT_GET_TOPICS_ACK : NsrCommandType.GET_TOPICS_ACK),
                         new GetTopicsAck().topics(topicNames));
                 break;
@@ -249,13 +249,13 @@ public class NameServiceCommandHandler implements NsrCommandHandler, Types, com.
                     fillTransportBrokerId(transport, brokerRegister.getId());
                     response = new Command(new RegisterAck().broker(brokerRegister));
                 } else {
-                    response = BooleanAck.build(JournalqCode.NSR_REGISTER_ERR_BROKER_NOT_EXIST);
+                    response = BooleanAck.build(JoyQueueCode.NSR_REGISTER_ERR_BROKER_NOT_EXIST);
                 }
                 break;
             case NsrCommandType.SUBSCRIBE:
                 Subscribe subscribe = (Subscribe) command.getPayload();
                 List<TopicConfig> subscribeTopicConfigs = nameService.subscribe(subscribe.getSubscriptions(), subscribe.getClientType());
-                response = new Command(new JournalqHeader(Direction.RESPONSE, NsrCommandType.SUBSCRIBE_ACK), new SubscribeAck().topicConfigs(subscribeTopicConfigs));
+                response = new Command(new JoyQueueHeader(Direction.RESPONSE, NsrCommandType.SUBSCRIBE_ACK), new SubscribeAck().topicConfigs(subscribeTopicConfigs));
                 break;
             case NsrCommandType.UN_SUBSCRIBE:
                 UnSubscribe unSubscribe = (UnSubscribe) command.getPayload();
@@ -268,7 +268,7 @@ public class NameServiceCommandHandler implements NsrCommandHandler, Types, com.
                 AppToken appTokenforAuth = nameService.getAppToken(authorization.getApp(), authorization.getToken());
                 response = ((null != appTokenforAuth) && appTokenforAuth.getEffectiveTime().before(now) && appTokenforAuth.getExpirationTime().after(now)) ?
                         BooleanAck.build() :
-                        BooleanAck.build(JournalqCode.CN_AUTHENTICATION_ERROR);
+                        BooleanAck.build(JoyQueueCode.CN_AUTHENTICATION_ERROR);
                 break;
             case NsrCommandType.CONNECT:
                 Integer brokerId = ((NsrConnection) command.getPayload()).getBrokerId();
@@ -276,7 +276,7 @@ public class NameServiceCommandHandler implements NsrCommandHandler, Types, com.
                 response = BooleanAck.build();
                 break;
             default:
-                response = BooleanAck.build(JournalqCode.CN_UNKNOWN_ERROR, "unRecognize command ");
+                response = BooleanAck.build(JoyQueueCode.CN_UNKNOWN_ERROR, "unRecognize command ");
                 break;
         }
         return response;
@@ -365,7 +365,7 @@ public class NameServiceCommandHandler implements NsrCommandHandler, Types, com.
             }
 
             for (Transport transport : transports) {
-                transport.async(new Command(new JournalqHeader(Direction.REQUEST, NsrCommandType.PUSH_NAMESERVER_EVENT), new PushNameServerEvent().event(event)), new CommandCallback() {
+                transport.async(new Command(new JoyQueueHeader(Direction.REQUEST, NsrCommandType.PUSH_NAMESERVER_EVENT), new PushNameServerEvent().event(event)), new CommandCallback() {
                     @Override
                     public void onSuccess(Command request, Command response) {
                         logger.info("event[{}] send to [{}] success", event, event.getBrokerId());

@@ -13,8 +13,8 @@
  */
 package com.jd.joyqueue.server.archive.store;
 
-import com.jd.joyqueue.exception.JournalqCode;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueCode;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.hbase.HBaseClient;
 import com.jd.joyqueue.toolkit.lang.Pair;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -63,26 +63,26 @@ public class HBaseTopicAppMapping {
      * @return
      * @throws InterruptedException
      */
-    public int getTopicId(String name) throws JournalqException {
+    public int getTopicId(String name) throws JoyQueueException {
         Integer id = topicMappingCache.get(name);
         if (id == null) {
             try {
                 id = getIdFromHBase(autoTopicIncreaseRowKey, topicPrefix + name, 1);
             } catch (Exception e) {
-                throw new JournalqException(JournalqCode.CN_DB_ERROR, e);
+                throw new JoyQueueException(JoyQueueCode.CN_DB_ERROR, e);
             }
             topicMappingCache.putIfAbsent(name, id);
         }
         return id;
     }
 
-    public String getTopicName(int id) throws JournalqException {
+    public String getTopicName(int id) throws JoyQueueException {
         String topic = topicIdMappingCache.get(id);
         if (topic == null) {
             try {
                 topic = getNameFromHBase(cf, col, topicPrefix + id);
             } catch (Exception e) {
-                throw new JournalqException(JournalqCode.CN_DB_ERROR, e);
+                throw new JoyQueueException(JoyQueueCode.CN_DB_ERROR, e);
             }
             topicIdMappingCache.putIfAbsent(id, topic);
         }
@@ -97,13 +97,13 @@ public class HBaseTopicAppMapping {
      * @return
      * @throws InterruptedException
      */
-    public int getAppId(String name) throws JournalqException {
+    public int getAppId(String name) throws JoyQueueException {
         Integer id = appMappingCache.get(name);
         if (id == null) {
             try {
                 id = getIdFromHBase(autoAppIncreaseRowKey, appPrefix + name, 1);
             } catch (Exception e) {
-                throw new JournalqException(JournalqCode.CN_DB_ERROR, e);
+                throw new JoyQueueException(JoyQueueCode.CN_DB_ERROR, e);
             }
             appMappingCache.putIfAbsent(name, id);
         }
@@ -111,13 +111,13 @@ public class HBaseTopicAppMapping {
     }
 
 
-    public String getAppName(int id) throws JournalqException {
+    public String getAppName(int id) throws JoyQueueException {
         String app = appIdMappingCache.get(id);
         if (app == null) {
             try {
                 app = getNameFromHBase(cf, col, appPrefix + id);
             } catch (Exception e) {
-                throw new JournalqException(JournalqCode.CN_DB_ERROR, e);
+                throw new JoyQueueException(JoyQueueCode.CN_DB_ERROR, e);
             }
             appIdMappingCache.putIfAbsent(id, app);
         }

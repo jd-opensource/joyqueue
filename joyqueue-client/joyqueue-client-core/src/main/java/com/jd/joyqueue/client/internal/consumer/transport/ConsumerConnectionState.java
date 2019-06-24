@@ -19,7 +19,7 @@ import com.google.common.collect.Sets;
 import com.jd.joyqueue.network.command.AddConsumerRequest;
 import com.jd.joyqueue.network.command.RemoveConsumerRequest;
 import com.jd.joyqueue.network.transport.TransportAttribute;
-import com.jd.joyqueue.network.transport.command.JournalqCommand;
+import com.jd.joyqueue.network.transport.command.JoyQueueCommand;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
@@ -122,7 +122,7 @@ public class ConsumerConnectionState {
         addConsumerRequest.setApp(app);
         addConsumerRequest.setSequence(SEQUENCE.incrementAndGet());
         try {
-            consumerClient.getClient().sync(new JournalqCommand(addConsumerRequest));
+            consumerClient.getClient().sync(new JoyQueueCommand(addConsumerRequest));
             return true;
         } catch (Exception e) {
             logger.warn("add consumer exception, topics: {}, app: {}, error: {}", topics, app, e.getMessage());
@@ -136,7 +136,7 @@ public class ConsumerConnectionState {
         removeConsumerRequest.setTopics(topics);
         removeConsumerRequest.setApp(app);
         try {
-            consumerClient.getClient().sync(new JournalqCommand(removeConsumerRequest));
+            consumerClient.getClient().sync(new JoyQueueCommand(removeConsumerRequest));
             return true;
         } catch (Exception e) {
             logger.warn("remove consumer exception, topics: {}, app: {}, error: {}", topics, app, e.getMessage());

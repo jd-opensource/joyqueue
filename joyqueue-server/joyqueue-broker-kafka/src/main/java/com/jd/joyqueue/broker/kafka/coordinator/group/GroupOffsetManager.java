@@ -32,10 +32,10 @@ import com.jd.joyqueue.broker.kafka.model.OffsetMetadataAndError;
 import com.jd.joyqueue.domain.Broker;
 import com.jd.joyqueue.domain.TopicConfig;
 import com.jd.joyqueue.domain.TopicName;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.network.transport.command.Command;
 import com.jd.joyqueue.network.transport.command.CommandCallback;
-import com.jd.joyqueue.network.transport.command.JournalqCommand;
+import com.jd.joyqueue.network.transport.command.JoyQueueCommand;
 import com.jd.joyqueue.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,7 +78,7 @@ public class GroupOffsetManager extends Service {
             try {
                 CoordinatorSession session = sessionManager.getOrCreateSession(broker);
                 ConsumeIndexQueryRequest indexQueryRequest = new ConsumeIndexQueryRequest(groupId, entry.getValue());
-                Command request = new JournalqCommand(indexQueryRequest);
+                Command request = new JoyQueueCommand(indexQueryRequest);
 
                 session.async(request, new CommandCallback() {
                     @Override
@@ -98,9 +98,9 @@ public class GroupOffsetManager extends Service {
                                     partitions.add(new OffsetMetadataAndError(partitionEntry.getKey(), indexMetadataAndError.getIndex(), indexMetadataAndError.getMetadata(),
                                             KafkaErrorCode.journalqCodeFor(indexMetadataAndError.getError())));
 
-                                    if (partitionEntry.getValue().getError() != JournalqCode.SUCCESS.getCode()) {
+                                    if (partitionEntry.getValue().getError() != JoyQueueCode.SUCCESS.getCode()) {
                                         logger.error("get offset error, broker: {}, topic: {}, partition: {}, group: {},code: {}",
-                                                broker, topic, partitionEntry.getKey(), groupId, JournalqCode.valueOf(partitionEntry.getValue().getError()));
+                                                broker, topic, partitionEntry.getKey(), groupId, JoyQueueCode.valueOf(partitionEntry.getValue().getError()));
                                     }
                                 }
                             }
@@ -185,7 +185,7 @@ public class GroupOffsetManager extends Service {
             try {
                 CoordinatorSession session = sessionManager.getOrCreateSession(broker);
                 ConsumeIndexStoreRequest indexStoreRequest = new ConsumeIndexStoreRequest(groupId, buildSaveOffsetParam(entry.getValue()));
-                Command request = new JournalqCommand(indexStoreRequest);
+                Command request = new JoyQueueCommand(indexStoreRequest);
 
                 session.async(request, new CommandCallback() {
                     @Override
@@ -204,9 +204,9 @@ public class GroupOffsetManager extends Service {
                                     partitions.add(new OffsetMetadataAndError(partitionEntry.getKey(), OffsetAndMetadata.INVALID_OFFSET, OffsetAndMetadata.NO_METADATA,
                                             KafkaErrorCode.journalqCodeFor(partitionEntry.getValue())));
 
-                                    if (partitionEntry.getValue() != JournalqCode.SUCCESS.getCode()) {
+                                    if (partitionEntry.getValue() != JoyQueueCode.SUCCESS.getCode()) {
                                         logger.error("save offset failed, broker: {}, topic: {}, partition: {}, group: {}, code: {}",
-                                                broker, topic, partitionEntry.getKey(), groupId, JournalqCode.valueOf(partitionEntry.getValue()));
+                                                broker, topic, partitionEntry.getKey(), groupId, JoyQueueCode.valueOf(partitionEntry.getValue()));
                                     }
                                 }
                             }

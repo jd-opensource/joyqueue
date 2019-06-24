@@ -20,19 +20,19 @@ import com.jd.joyqueue.broker.helper.SessionHelper;
 import com.jd.joyqueue.broker.network.traffic.Traffic;
 import com.jd.joyqueue.broker.producer.Produce;
 import com.jd.joyqueue.broker.producer.ProduceConfig;
-import com.jd.joyqueue.broker.protocol.JournalqCommandHandler;
-import com.jd.joyqueue.broker.protocol.JournalqContext;
-import com.jd.joyqueue.broker.protocol.JournalqContextAware;
+import com.jd.joyqueue.broker.protocol.JoyQueueCommandHandler;
+import com.jd.joyqueue.broker.protocol.JoyQueueContext;
+import com.jd.joyqueue.broker.protocol.JoyQueueContextAware;
 import com.jd.joyqueue.broker.protocol.command.ProduceMessageResponse;
-import com.jd.joyqueue.broker.protocol.config.JournalqConfig;
+import com.jd.joyqueue.broker.protocol.config.JoyQueueConfig;
 import com.jd.joyqueue.broker.protocol.converter.CheckResultConverter;
 import com.jd.joyqueue.domain.QosLevel;
 import com.jd.joyqueue.domain.TopicName;
-import com.jd.joyqueue.exception.JournalqCode;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueCode;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.message.BrokerMessage;
 import com.jd.joyqueue.network.command.BooleanAck;
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.command.ProduceMessageAckData;
 import com.jd.joyqueue.network.command.ProduceMessageAckItemData;
 import com.jd.joyqueue.network.command.ProduceMessageData;
@@ -62,21 +62,21 @@ import java.util.concurrent.TimeUnit;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/19
  */
-public class ProduceMessageRequestHandler implements JournalqCommandHandler, Type, JournalqContextAware {
+public class ProduceMessageRequestHandler implements JoyQueueCommandHandler, Type, JoyQueueContextAware {
 
     protected static final Logger logger = LoggerFactory.getLogger(ProduceMessageRequestHandler.class);
 
-    private JournalqConfig config;
+    private JoyQueueConfig config;
     private ProduceConfig produceConfig;
     private Produce produce;
     private ClusterManager clusterManager;
 
     @Override
-    public void setJournalqContext(JournalqContext journalqContext) {
-        this.config = journalqContext.getConfig();
-        this.produceConfig = new ProduceConfig(journalqContext.getBrokerContext().getPropertySupplier());
-        this.produce = journalqContext.getBrokerContext().getProduce();
-        this.clusterManager= journalqContext.getBrokerContext().getClusterManager();
+    public void setJoyQueueContext(JoyQueueContext joyQueueContext) {
+        this.config = joyQueueContext.getConfig();
+        this.produceConfig = new ProduceConfig(joyQueueContext.getBrokerContext().getPropertySupplier());
+        this.produce = joyQueueContext.getBrokerContext().getProduce();
+        this.clusterManager= joyQueueContext.getBrokerContext().getClusterManager();
     }
 
     @Override
@@ -86,7 +86,7 @@ public class ProduceMessageRequestHandler implements JournalqCommandHandler, Typ
 
         if (connection == null || !connection.isAuthorized(produceMessageRequest.getApp())) {
             logger.warn("connection is not exists, transport: {}, app: {}", transport, produceMessageRequest.getApp());
-            return BooleanAck.build(JournalqCode.FW_CONNECTION_NOT_EXISTS.getCode());
+            return BooleanAck.build(JoyQueueCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
         QosLevel qosLevel = command.getHeader().getQosLevel();
@@ -102,9 +102,9 @@ public class ProduceMessageRequestHandler implements JournalqCommandHandler, Typ
             // 校验
             try {
                 checkAndFillMessage(connection, produceMessageData);
-            } catch (JournalqException e) {
+            } catch (JoyQueueException e) {
                 logger.warn("checkMessage error, transport: {}, topic: {}, app: {}", transport, topic, produceMessageRequest.getApp(), e);
-                resultData.put(topic, buildResponse(produceMessageData, JournalqCode.valueOf(e.getCode())));
+                resultData.put(topic, buildResponse(produceMessageData, JoyQueueCode.valueOf(e.getCode())));
                 traffic.record(topic, 0);
                 latch.countDown();
                 continue;
@@ -113,8 +113,8 @@ public class ProduceMessageRequestHandler implements JournalqCommandHandler, Typ
             BooleanResponse checkResult = clusterManager.checkWritable(TopicName.parse(topic), produceMessageRequest.getApp(),
                     connection.getHost(), produceMessageData.getMessages().get(0).getPartition());
             if (!checkResult.isSuccess()) {
-                logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport, topic, produceMessageRequest.getApp(), checkResult.getJournalqCode());
-                resultData.put(topic, buildResponse(produceMessageData, CheckResultConverter.convertProduceCode(checkResult.getJournalqCode())));
+                logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport, topic, produceMessageRequest.getApp(), checkResult.getJoyQueueCode());
+                resultData.put(topic, buildResponse(produceMessageData, CheckResultConverter.convertProduceCode(checkResult.getJoyQueueCode())));
                 traffic.record(topic, 0);
                 latch.countDown();
                 continue;
@@ -150,7 +150,7 @@ public class ProduceMessageRequestHandler implements JournalqCommandHandler, Typ
         Producer producer = new Producer(connection.getId(), topic, app, Producer.ProducerType.JMQ);
         try {
             produce.putMessageAsync(producer, produceMessageData.getMessages(), produceMessageData.getQosLevel(), produceMessageData.getTimeout(), (writeResult) -> {
-                if (!writeResult.getCode().equals(JournalqCode.SUCCESS)) {
+                if (!writeResult.getCode().equals(JoyQueueCode.SUCCESS)) {
                     logger.error("produce message failed, topic: {}, code: {}", producer.getTopic(), writeResult.getCode());
                 }
                 ProduceMessageAckData produceMessageAckData = new ProduceMessageAckData();
@@ -158,31 +158,31 @@ public class ProduceMessageRequestHandler implements JournalqCommandHandler, Typ
                 produceMessageAckData.setItem(buildResponse(produceMessageData.getMessages(), writeResult));
                 listener.onEvent(produceMessageAckData);
             });
-        } catch (JournalqException e) {
+        } catch (JoyQueueException e) {
             logger.error("produceMessage exception, transport: {}, topic: {}, app: {}", connection.getTransport().remoteAddress(), topic, app, e);
-            listener.onEvent(buildResponse(produceMessageData, JournalqCode.valueOf(e.getCode())));
+            listener.onEvent(buildResponse(produceMessageData, JoyQueueCode.valueOf(e.getCode())));
         } catch (Exception e) {
             logger.error("produceMessage exception, transport: {}, topic: {}, app: {}", connection.getTransport().remoteAddress(), topic, app, e);
-            listener.onEvent(buildResponse(produceMessageData, JournalqCode.CN_UNKNOWN_ERROR));
+            listener.onEvent(buildResponse(produceMessageData, JoyQueueCode.CN_UNKNOWN_ERROR));
         }
     }
 
-    protected void checkAndFillMessage(Connection connection, ProduceMessageData produceMessageData) throws JournalqException {
+    protected void checkAndFillMessage(Connection connection, ProduceMessageData produceMessageData) throws JoyQueueException {
         if (CollectionUtils.isEmpty(produceMessageData.getMessages())) {
-            throw new JournalqException(JournalqCode.CN_PARAM_ERROR, "messages not empty");
+            throw new JoyQueueException(JoyQueueCode.CN_PARAM_ERROR, "messages not empty");
         }
         byte[] address = connection.getAddress();
         String txId = produceMessageData.getTxId();
         int partition = produceMessageData.getMessages().get(0).getPartition();
         for (BrokerMessage brokerMessage : produceMessageData.getMessages()) {
             if (brokerMessage.getPartition() != partition) {
-                throw new JournalqException(JournalqCode.CN_PARAM_ERROR, "the put message command has multi partition");
+                throw new JoyQueueException(JoyQueueCode.CN_PARAM_ERROR, "the put message command has multi partition");
             }
             if (ArrayUtils.getLength(brokerMessage.getByteBody()) > produceConfig.getBodyLength()) {
-                throw new JournalqException(JournalqCode.CN_PARAM_ERROR, "message body out of rage");
+                throw new JoyQueueException(JoyQueueCode.CN_PARAM_ERROR, "message body out of rage");
             }
             if (StringUtils.length(brokerMessage.getBusinessId()) > produceConfig.getBusinessIdLength()) {
-                throw new JournalqException(JournalqCode.CN_PARAM_ERROR, "message businessId out of rage");
+                throw new JoyQueueException(JoyQueueCode.CN_PARAM_ERROR, "message businessId out of rage");
             }
             brokerMessage.setClientIp(address);
             brokerMessage.setTxId(txId);
@@ -219,7 +219,7 @@ public class ProduceMessageRequestHandler implements JournalqCommandHandler, Typ
         return item;
     }
 
-    protected ProduceMessageAckData buildResponse(ProduceMessageData produceMessageData, JournalqCode code) {
+    protected ProduceMessageAckData buildResponse(ProduceMessageData produceMessageData, JoyQueueCode code) {
         BrokerMessage firstMessage = produceMessageData.getMessages().get(0);
         List<ProduceMessageAckItemData> item = Lists.newLinkedList();
 
@@ -238,6 +238,6 @@ public class ProduceMessageRequestHandler implements JournalqCommandHandler, Typ
 
     @Override
     public int type() {
-        return JournalqCommandType.PRODUCE_MESSAGE_REQUEST.getCode();
+        return JoyQueueCommandType.PRODUCE_MESSAGE_REQUEST.getCode();
     }
 }

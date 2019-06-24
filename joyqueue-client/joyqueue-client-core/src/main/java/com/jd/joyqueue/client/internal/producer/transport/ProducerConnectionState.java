@@ -19,7 +19,7 @@ import com.google.common.collect.Sets;
 import com.jd.joyqueue.network.command.AddProducerRequest;
 import com.jd.joyqueue.network.command.RemoveProducerRequest;
 import com.jd.joyqueue.network.transport.TransportAttribute;
-import com.jd.joyqueue.network.transport.command.JournalqCommand;
+import com.jd.joyqueue.network.transport.command.JoyQueueCommand;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
@@ -120,7 +120,7 @@ public class ProducerConnectionState {
         addProducerRequest.setApp(app);
         addProducerRequest.setSequence(SEQUENCE.incrementAndGet());
         try {
-            producerClient.getClient().sync(new JournalqCommand(addProducerRequest));
+            producerClient.getClient().sync(new JoyQueueCommand(addProducerRequest));
             return true;
         } catch (Exception e) {
             logger.warn("add producer exception, topics: {}, app: {}, error: {}", topics, app, e.getMessage());
@@ -134,7 +134,7 @@ public class ProducerConnectionState {
         removeProducerRequest.setTopics(topics);
         removeProducerRequest.setApp(app);
         try {
-            producerClient.getClient().sync(new JournalqCommand(removeProducerRequest));
+            producerClient.getClient().sync(new JoyQueueCommand(removeProducerRequest));
             return true;
         } catch (Exception e) {
             logger.warn("remove producer exception, topics: {}, app: {}, error: {}", topics, app, e.getMessage());

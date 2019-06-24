@@ -40,7 +40,7 @@ package com.jd.joyqueue.message;
  * @author lining11
  * Date: 2018/8/17
  */
-public class BrokerMessage extends Message implements JournalLog{
+public class BrokerMessage extends Message implements JoyQueueLog {
     public static final short MAGIC_CODE = 0x1234;
     public static final short MAGIC_LOG_CODE = 0x3456;//只是做个引用方便
 
@@ -48,7 +48,7 @@ public class BrokerMessage extends Message implements JournalLog{
     private byte[] clientIp;
     private int storeTime;
     private long startTime;
-    private byte source = SourceType.JMQ.getValue();
+    private byte source = SourceType.JOYQUEUE.getValue();
     private int size;
     private byte type = TYPE_MESSAGE;
     private int term;

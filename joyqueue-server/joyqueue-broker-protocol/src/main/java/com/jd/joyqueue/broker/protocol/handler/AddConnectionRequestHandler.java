@@ -19,13 +19,13 @@ import com.jd.joyqueue.broker.cluster.ClusterManager;
 import com.jd.joyqueue.broker.config.BrokerConfig;
 import com.jd.joyqueue.broker.helper.SessionHelper;
 import com.jd.joyqueue.broker.monitor.SessionManager;
-import com.jd.joyqueue.broker.protocol.JournalqCommandHandler;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.broker.protocol.JoyQueueCommandHandler;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.message.SourceType;
 import com.jd.joyqueue.network.command.AddConnectionRequest;
 import com.jd.joyqueue.network.command.AddConnectionResponse;
 import com.jd.joyqueue.network.command.BooleanAck;
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.session.Connection;
 import com.jd.joyqueue.network.transport.Transport;
 import com.jd.joyqueue.network.transport.command.Command;
@@ -44,7 +44,7 @@ import java.net.InetSocketAddress;
  * email: gaohaoxiang@jd.com
  * date: 2018/11/29
  */
-public class AddConnectionRequestHandler implements JournalqCommandHandler, Type, BrokerContextAware {
+public class AddConnectionRequestHandler implements JoyQueueCommandHandler, Type, BrokerContextAware {
 
     protected static final Logger logger = LoggerFactory.getLogger(AddConnectionRequestHandler.class);
 
@@ -67,8 +67,8 @@ public class AddConnectionRequestHandler implements JournalqCommandHandler, Type
 
         if (!authentication.auth(addConnectionRequest.getApp(), addConnectionRequest.getToken()).isSuccess()) {
             logger.warn("user auth failed, transport: {}, app: {}", transport, addConnectionRequest.getApp());
-            return BooleanAck.build(JournalqCode.CN_AUTHENTICATION_ERROR.getCode(),
-                    JournalqCode.CN_AUTHENTICATION_ERROR.getMessage() + String.format(", app: %s", addConnectionRequest.getApp()));
+            return BooleanAck.build(JoyQueueCode.CN_AUTHENTICATION_ERROR.getCode(),
+                    JoyQueueCode.CN_AUTHENTICATION_ERROR.getMessage() + String.format(", app: %s", addConnectionRequest.getApp()));
         }
 
         Connection connection = buildConnection(transport, addConnectionRequest);
@@ -90,7 +90,7 @@ public class AddConnectionRequestHandler implements JournalqCommandHandler, Type
         connection.setRegion(addConnectionRequest.getRegion());
         connection.setNamespace(addConnectionRequest.getNamespace());
         connection.setLanguage(addConnectionRequest.getLanguage());
-        connection.setSource(SourceType.JMQ.name());
+        connection.setSource(SourceType.JOYQUEUE.name());
         connection.setCreateTime(SystemClock.now());
         connection.setVersion(addConnectionRequest.getClientId().getVersion());
         connection.setAddressStr(IpUtil.toAddress(transport.remoteAddress()));
@@ -109,6 +109,6 @@ public class AddConnectionRequestHandler implements JournalqCommandHandler, Type
 
     @Override
     public int type() {
-        return JournalqCommandType.ADD_CONNECTION_REQUEST.getCode();
+        return JoyQueueCommandType.ADD_CONNECTION_REQUEST.getCode();
     }
 }

@@ -14,9 +14,9 @@
 package com.jd.joyqueue.nsr.network.command;
 
 import com.jd.joyqueue.domain.PartitionGroup;
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
-public abstract class OperatePartitionGroup extends JournalqPayload {
+public abstract class OperatePartitionGroup extends JoyQueuePayload {
     protected boolean rollback = false;
     protected PartitionGroup partitionGroup;
 

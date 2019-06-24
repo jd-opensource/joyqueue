@@ -22,7 +22,7 @@ import com.jd.joyqueue.domain.Consumer;
 import com.jd.joyqueue.event.BrokerEvent;
 import com.jd.joyqueue.event.EventType;
 import com.jd.joyqueue.event.MetaEvent;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.network.transport.TransportClient;
 import com.jd.joyqueue.network.transport.config.ClientConfig;
 import com.jd.joyqueue.nsr.NameService;
@@ -135,32 +135,32 @@ public class BrokerRetryManager extends Service implements MessageRetry<Long>, B
 
 
     @Override
-    public void addRetry(List<RetryMessageModel> retryMessageModelList) throws JournalqException {
+    public void addRetry(List<RetryMessageModel> retryMessageModelList) throws JoyQueueException {
         delegate.addRetry(retryMessageModelList);
     }
 
     @Override
-    public void retrySuccess(String topic, String app, Long[] messageIds) throws JournalqException {
+    public void retrySuccess(String topic, String app, Long[] messageIds) throws JoyQueueException {
         delegate.retrySuccess(topic, app, messageIds);
     }
 
     @Override
-    public void retryError(String topic, String app, Long[] messageIds) throws JournalqException {
+    public void retryError(String topic, String app, Long[] messageIds) throws JoyQueueException {
         delegate.retryError(topic, app, messageIds);
     }
 
     @Override
-    public void retryExpire(String topic, String app, Long[] messageIds) throws JournalqException {
+    public void retryExpire(String topic, String app, Long[] messageIds) throws JoyQueueException {
         delegate.retryExpire(topic, app, messageIds);
     }
 
     @Override
-    public List<RetryMessageModel> getRetry(String topic, String app, short count, long startId) throws JournalqException {
+    public List<RetryMessageModel> getRetry(String topic, String app, short count, long startId) throws JoyQueueException {
         return delegate.getRetry(topic, app, count, startId);
     }
 
     @Override
-    public int countRetry(String topic, String app) throws JournalqException {
+    public int countRetry(String topic, String app) throws JoyQueueException {
         return delegate.countRetry(topic, app);
     }
 

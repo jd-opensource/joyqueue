@@ -13,8 +13,8 @@
  */
 package com.jd.joyqueue.security.impl;
 
-import com.jd.joyqueue.exception.JournalqCode;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueCode;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.response.BooleanResponse;
 import com.jd.joyqueue.security.Authentication;
 import com.jd.joyqueue.security.PasswordEncoder;
@@ -84,7 +84,7 @@ public class DefaultAuthentication implements Authentication {
      * @param user
      * @return
      */
-    public static String createPassword(final String user) throws JournalqException {
+    public static String createPassword(final String user) throws JoyQueueException {
         try {
             // 构造用户名，不足32位则右填充‘0’
             StringBuilder builder = new StringBuilder(32).append(user == null ? "" : user);
@@ -109,12 +109,12 @@ public class DefaultAuthentication implements Authentication {
             source = builder.toString();
             return source;
         } catch (Exception e) {
-            throw new JournalqException(JournalqCode.CN_AUTHENTICATION_ERROR);
+            throw new JoyQueueException(JoyQueueCode.CN_AUTHENTICATION_ERROR);
         }
 
     }
     @Override
-    public UserDetails getUser(final String user) throws JournalqException {
+    public UserDetails getUser(final String user) throws JoyQueueException {
         boolean admin = false;
         String password;
         if (adminUser != null && adminUser.equalsIgnoreCase(user)) {

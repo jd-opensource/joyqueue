@@ -43,7 +43,7 @@ public class RemoteMessageRetryTest {
 //    }
 //
 //    @Test
-//    public void addRetry() throws JournalqException {
+//    public void addRetry() throws JoyQueueException {
 //        List<RetryMessageModel> retryMessageModelList = new ArrayList<>();
 //
 //        RetryMessageModel retry = new RetryMessageModel();
@@ -62,7 +62,7 @@ public class RemoteMessageRetryTest {
 //    }
 //
 //    @Test
-//    public void getRetry() throws JournalqException {
+//    public void getRetry() throws JoyQueueException {
 //        String topic = "topic";
 //        String app = "app";
 //        short count = 10;
@@ -74,22 +74,22 @@ public class RemoteMessageRetryTest {
 //    }
 //
 //    @Test
-//    public void countRetry() throws JournalqException {
+//    public void countRetry() throws JoyQueueException {
 //        remoteMessageRetry.countRetry("topic", "app");
 //    }
 //
 //    @Test
-//    public void retrySuccess() throws JournalqException {
+//    public void retrySuccess() throws JoyQueueException {
 //        remoteMessageRetry.retrySuccess("topic", "app", new Long[]{1l});
 //    }
 //
 //    @Test
-//    public void retryError() throws JournalqException {
+//    public void retryError() throws JoyQueueException {
 //        remoteMessageRetry.retryError("topic", "app", new Long[]{1l});
 //    }
 //
 //    @Test
-//    public void retryExpire() throws JournalqException {
+//    public void retryExpire() throws JoyQueueException {
 //        remoteMessageRetry.retryExpire("topic", "app", new Long[]{1l});
 //    }
 

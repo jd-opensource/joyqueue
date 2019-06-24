@@ -16,9 +16,9 @@ package com.jd.joyqueue.network.codec;
 import com.google.common.collect.Lists;
 import com.jd.joyqueue.network.command.FetchAssignedPartitionData;
 import com.jd.joyqueue.network.command.FetchAssignedPartitionRequest;
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.serializer.Serializer;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.codec.PayloadCodec;
 import com.jd.joyqueue.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
@@ -31,10 +31,10 @@ import java.util.List;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/4
  */
-public class FetchAssignedPartitionRequestCodec implements PayloadCodec<JournalqHeader, FetchAssignedPartitionRequest>, Type {
+public class FetchAssignedPartitionRequestCodec implements PayloadCodec<JoyQueueHeader, FetchAssignedPartitionRequest>, Type {
 
     @Override
-    public FetchAssignedPartitionRequest decode(JournalqHeader header, ByteBuf buffer) throws Exception {
+    public FetchAssignedPartitionRequest decode(JoyQueueHeader header, ByteBuf buffer) throws Exception {
         short dataSize = buffer.readShort();
         List<FetchAssignedPartitionData> data = Lists.newArrayListWithCapacity(dataSize);
         for (int i = 0; i < dataSize; i++) {
@@ -64,6 +64,6 @@ public class FetchAssignedPartitionRequestCodec implements PayloadCodec<Journalq
 
     @Override
     public int type() {
-        return JournalqCommandType.FETCH_ASSIGNED_PARTITION_REQUEST.getCode();
+        return JoyQueueCommandType.FETCH_ASSIGNED_PARTITION_REQUEST.getCode();
     }
 }

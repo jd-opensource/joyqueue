@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.network.command;
 
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 import java.util.Map;
 
@@ -23,13 +23,13 @@ import java.util.Map;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/3
  */
-public class FindCoordinatorResponse extends JournalqPayload {
+public class FindCoordinatorResponse extends JoyQueuePayload {
 
     private Map<String, FindCoordinatorAckData> coordinators;
 
     @Override
     public int type() {
-        return JournalqCommandType.FIND_COORDINATOR_RESPONSE.getCode();
+        return JoyQueueCommandType.FIND_COORDINATOR_RESPONSE.getCode();
     }
 
     public void setCoordinators(Map<String, FindCoordinatorAckData> coordinators) {

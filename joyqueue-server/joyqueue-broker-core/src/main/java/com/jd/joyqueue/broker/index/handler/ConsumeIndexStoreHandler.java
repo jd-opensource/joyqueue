@@ -20,12 +20,12 @@ import com.jd.joyqueue.broker.index.command.ConsumeIndexStoreResponse;
 import com.jd.joyqueue.broker.index.model.IndexAndMetadata;
 import com.jd.joyqueue.domain.QosLevel;
 import com.jd.joyqueue.domain.TopicName;
-import com.jd.joyqueue.exception.JournalqCode;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueCode;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.network.command.CommandType;
 import com.jd.joyqueue.network.session.Consumer;
 import com.jd.joyqueue.network.transport.Transport;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.command.Command;
 import com.jd.joyqueue.network.transport.command.Direction;
 import com.jd.joyqueue.network.transport.command.Type;
@@ -75,11 +75,11 @@ public class ConsumeIndexStoreHandler implements CommandHandler, Type {
 
             for (int partition : partitionIndexes.keySet()) {
                 // set consume index
-                int retCode = JournalqCode.SUCCESS.getCode();
+                int retCode = JoyQueueCode.SUCCESS.getCode();
                 IndexAndMetadata indexAndMetadata = partitionIndexes.get(partition);
                 try {
                     setConsumeIndex(topic, (short) partition, app, indexAndMetadata.getIndex(), indexAndMetadata.getIndexCommitTime());
-                } catch (JournalqException je) {
+                } catch (JoyQueueException je) {
                     retCode = je.getCode();
                 }
                 partitionIndexStoreStatus.put(partition, (short)retCode);
@@ -87,12 +87,12 @@ public class ConsumeIndexStoreHandler implements CommandHandler, Type {
             indexStoreStatus.put(topic, partitionIndexStoreStatus);
         }
 
-        JournalqHeader header = new JournalqHeader(Direction.RESPONSE, QosLevel.ONE_WAY, CommandType.CONSUME_INDEX_STORE_RESPONSE);
+        JoyQueueHeader header = new JoyQueueHeader(Direction.RESPONSE, QosLevel.ONE_WAY, CommandType.CONSUME_INDEX_STORE_RESPONSE);
         ConsumeIndexStoreResponse offsetStoreResponse = new ConsumeIndexStoreResponse(indexStoreStatus);
         return new Command(header, offsetStoreResponse);
     }
 
-    private void setConsumeIndex(String topic, short partition, String app, long offset, long commitTime) throws JournalqException {
+    private void setConsumeIndex(String topic, short partition, String app, long offset, long commitTime) throws JoyQueueException {
         Consumer consumer = new Consumer(topic, app);
         if (consume.getLastAckTimeByPartition(TopicName.parse(topic), app, partition) > commitTime) {
             return;

@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.server.retry.api;
 
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.server.retry.model.RetryMessageModel;
 import com.jd.joyqueue.toolkit.lang.LifeCycle;
 
@@ -30,9 +30,9 @@ public interface MessageRetry<T> extends LifeCycle {
      * 增加重试
      *
      * @param retryMessageModelList 重试实例集合
-     * @throws JournalqException
+     * @throws JoyQueueException
      */
-    void addRetry(List<RetryMessageModel> retryMessageModelList) throws JournalqException;
+    void addRetry(List<RetryMessageModel> retryMessageModelList) throws JoyQueueException;
 
     /**
      * 更新重试消息状态到重试成功
@@ -40,9 +40,9 @@ public interface MessageRetry<T> extends LifeCycle {
      * @param topic      主题
      * @param app        应用
      * @param messageIds 消息
-     * @throws JournalqException 操作失败时
+     * @throws JoyQueueException 操作失败时
      */
-    void retrySuccess(String topic, String app, T[] messageIds) throws JournalqException;
+    void retrySuccess(String topic, String app, T[] messageIds) throws JoyQueueException;
 
     /**
      * 更新重试消息状态到重试错误
@@ -50,9 +50,9 @@ public interface MessageRetry<T> extends LifeCycle {
      * @param topic      主题
      * @param app        应用
      * @param messageIds 消息
-     * @throws JournalqException 操作失败时
+     * @throws JoyQueueException 操作失败时
      */
-    void retryError(String topic, String app, T[] messageIds) throws JournalqException;
+    void retryError(String topic, String app, T[] messageIds) throws JoyQueueException;
 
     /**
      * 更新重试消息状态为重试过期
@@ -60,9 +60,9 @@ public interface MessageRetry<T> extends LifeCycle {
      * @param topic      主题
      * @param app        应用
      * @param messageIds 消息
-     * @throws JournalqException 操作失败时
+     * @throws JoyQueueException 操作失败时
      */
-    void retryExpire(String topic, String app, T[] messageIds) throws JournalqException;
+    void retryExpire(String topic, String app, T[] messageIds) throws JoyQueueException;
 
     /**
      * 查询指定主题和个数的重试消息
@@ -76,7 +76,7 @@ public interface MessageRetry<T> extends LifeCycle {
      * @param count      条数
      * @param startIndex 起始ID
      */
-    List<RetryMessageModel> getRetry(String topic, String app, short count, long startIndex) throws JournalqException;
+    List<RetryMessageModel> getRetry(String topic, String app, short count, long startIndex) throws JoyQueueException;
 
     /**
      * 获取重试数据量
@@ -84,9 +84,9 @@ public interface MessageRetry<T> extends LifeCycle {
      * @param topic 主题
      * @param app   应用
      * @return 重试数据量
-     * @throws JournalqException
+     * @throws JoyQueueException
      */
-    int countRetry(String topic, String app) throws JournalqException;
+    int countRetry(String topic, String app) throws JoyQueueException;
 
     /**
      * 设置重试策略和主题发现

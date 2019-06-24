@@ -19,8 +19,8 @@ import com.jd.joyqueue.broker.election.ElectionService;
 import com.jd.joyqueue.broker.election.LeaderElection;
 import com.jd.joyqueue.broker.election.command.AppendEntriesRequest;
 import com.jd.joyqueue.broker.election.command.AppendEntriesResponse;
-import com.jd.joyqueue.exception.JournalqCode;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.exception.JoyQueueCode;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.command.Command;
 import com.jd.joyqueue.network.command.CommandType;
 import com.jd.joyqueue.network.transport.command.Direction;
@@ -74,7 +74,7 @@ public class AppendEntriesRequestHandler implements CommandHandler, Type {
         if (request == null) {
             logger.warn("Receive append entries request from {}, request is null", transport.remoteAddress());
             throw new TransportException("Append entries request payload is null",
-                    JournalqCode.CT_MESSAGE_BODY_NULL.getCode());
+                    JoyQueueCode.CT_MESSAGE_BODY_NULL.getCode());
         }
 
         logger.debug("Receive append entries request {} from {}", request, transport.remoteAddress());
@@ -85,7 +85,7 @@ public class AppendEntriesRequestHandler implements CommandHandler, Type {
             if (leaderElection == null) {
                 logger.warn("Handle append entries request of topic {} partition group {} election is null",
                         request.getTopic(), request.getPartitionGroup());
-                return new Command(new JournalqHeader(Direction.RESPONSE, CommandType.RAFT_APPEND_ENTRIES_RESPONSE),
+                return new Command(new JoyQueueHeader(Direction.RESPONSE, CommandType.RAFT_APPEND_ENTRIES_RESPONSE),
                         new AppendEntriesResponse.Build().success(false).nextPosition(-1L).build());
             }
 
@@ -94,7 +94,7 @@ public class AppendEntriesRequestHandler implements CommandHandler, Type {
         } catch (Exception e) {
             logger.warn("Handle append entries request of topic {} partition group {} fail",
                     request.getTopic(), request.getPartitionGroup(), e);
-            return new Command(new JournalqHeader(Direction.RESPONSE, CommandType.RAFT_APPEND_ENTRIES_RESPONSE),
+            return new Command(new JoyQueueHeader(Direction.RESPONSE, CommandType.RAFT_APPEND_ENTRIES_RESPONSE),
                                new AppendEntriesResponse.Build().success(false).nextPosition(-1L).build());
         }
 

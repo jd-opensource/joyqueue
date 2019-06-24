@@ -22,7 +22,7 @@ import com.jd.joyqueue.broker.mqtt.connection.MqttConnection;
 import com.jd.joyqueue.broker.mqtt.session.MqttSession;
 import com.jd.joyqueue.broker.producer.Produce;
 import com.jd.joyqueue.domain.QosLevel;
-import com.jd.joyqueue.exception.JournalqException;
+import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.message.BrokerMessage;
 import com.jd.joyqueue.network.session.Consumer;
 import com.jd.joyqueue.network.session.Producer;
@@ -62,7 +62,7 @@ public class MessagePublisher {
         this.connectionManager = connectionManager;
     }
 
-    public void publishMessage(Producer producer, Channel client, MqttPublishMessage publishMessage) throws JournalqException {
+    public void publishMessage(Producer producer, Channel client, MqttPublishMessage publishMessage) throws JoyQueueException {
         final MqttQoS qos = publishMessage.fixedHeader().qosLevel();
         final int packageID = publishMessage.variableHeader().packetId();
 

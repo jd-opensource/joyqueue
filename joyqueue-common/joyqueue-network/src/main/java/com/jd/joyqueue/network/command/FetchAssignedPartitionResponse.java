@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.network.command;
 
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 import java.util.Map;
 
@@ -23,13 +23,13 @@ import java.util.Map;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/4
  */
-public class FetchAssignedPartitionResponse extends JournalqPayload {
+public class FetchAssignedPartitionResponse extends JoyQueuePayload {
 
     private Map<String, FetchAssignedPartitionAckData> topicPartitions;
 
     @Override
     public int type() {
-        return JournalqCommandType.FETCH_ASSIGNED_PARTITION_RESPONSE.getCode();
+        return JoyQueueCommandType.FETCH_ASSIGNED_PARTITION_RESPONSE.getCode();
     }
 
     public Map<String, FetchAssignedPartitionAckData> getTopicPartitions() {

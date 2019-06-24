@@ -14,8 +14,8 @@
 package com.jd.joyqueue.network.command;
 
 import com.google.common.collect.Table;
-import com.jd.joyqueue.exception.JournalqCode;
-import com.jd.joyqueue.network.transport.command.JournalqPayload;
+import com.jd.joyqueue.exception.JoyQueueCode;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 
 /**
  * CommitAckRequest
@@ -23,20 +23,20 @@ import com.jd.joyqueue.network.transport.command.JournalqPayload;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/12
  */
-public class CommitAckResponse extends JournalqPayload {
+public class CommitAckResponse extends JoyQueuePayload {
 
-    private Table<String, Short, JournalqCode> result;
+    private Table<String, Short, JoyQueueCode> result;
 
     @Override
     public int type() {
-        return JournalqCommandType.COMMIT_ACK_RESPONSE.getCode();
+        return JoyQueueCommandType.COMMIT_ACK_RESPONSE.getCode();
     }
 
-    public void setResult(Table<String, Short, JournalqCode> result) {
+    public void setResult(Table<String, Short, JoyQueueCode> result) {
         this.result = result;
     }
 
-    public Table<String, Short, JournalqCode> getResult() {
+    public Table<String, Short, JoyQueueCode> getResult() {
         return result;
     }
 }

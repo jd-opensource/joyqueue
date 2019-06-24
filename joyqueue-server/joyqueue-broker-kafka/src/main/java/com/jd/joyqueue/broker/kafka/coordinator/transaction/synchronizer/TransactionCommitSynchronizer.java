@@ -31,10 +31,10 @@ import com.jd.joyqueue.domain.Broker;
 import com.jd.joyqueue.domain.PartitionGroup;
 import com.jd.joyqueue.domain.TopicConfig;
 import com.jd.joyqueue.domain.TopicName;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.network.transport.command.Command;
 import com.jd.joyqueue.network.transport.command.CommandCallback;
-import com.jd.joyqueue.network.transport.command.JournalqCommand;
+import com.jd.joyqueue.network.transport.command.JoyQueueCommand;
 import com.jd.joyqueue.nsr.NameService;
 import com.jd.joyqueue.toolkit.service.Service;
 import org.slf4j.Logger;
@@ -87,11 +87,11 @@ public class TransactionCommitSynchronizer extends Service {
 
             CoordinatorSession session = sessionManager.getOrCreateSession(broker);
             TransactionCommitRequest transactionCommitRequest = new TransactionCommitRequest(brokerPrepare.getTopic(), brokerPrepare.getApp(), txIds);
-            session.async(new JournalqCommand(transactionCommitRequest), new CommandCallback() {
+            session.async(new JoyQueueCommand(transactionCommitRequest), new CommandCallback() {
                 @Override
                 public void onSuccess(Command request, Command response) {
-                    if (response.getHeader().getStatus() != JournalqCode.SUCCESS.getCode() &&
-                            response.getHeader().getStatus() != JournalqCode.CN_TRANSACTION_NOT_EXISTS.getCode()) {
+                    if (response.getHeader().getStatus() != JoyQueueCode.SUCCESS.getCode() &&
+                            response.getHeader().getStatus() != JoyQueueCode.CN_TRANSACTION_NOT_EXISTS.getCode()) {
                         logger.error("commit transaction error, broker: {}, request: {}", broker, transactionCommitRequest);
                         result[0] = false;
                     }
@@ -127,7 +127,7 @@ public class TransactionCommitSynchronizer extends Service {
             try {
                 CoordinatorSession session = sessionManager.getOrCreateSession(broker);
                 ConsumeIndexStoreRequest indexStoreRequest = new ConsumeIndexStoreRequest(transactionMetadata.getApp(), saveOffsetParam);
-                Command request = new JournalqCommand(indexStoreRequest);
+                Command request = new JoyQueueCommand(indexStoreRequest);
 
                 session.async(request, new CommandCallback() {
                     @Override
@@ -136,9 +136,9 @@ public class TransactionCommitSynchronizer extends Service {
                         for (Map.Entry<String, Map<Integer, Short>> topicEntry : payload.getIndexStoreStatus().entrySet()) {
                             String topic = topicEntry.getKey();
                             for (Map.Entry<Integer, Short> partitionEntry : topicEntry.getValue().entrySet()) {
-                                if (partitionEntry.getValue() != JournalqCode.SUCCESS.getCode()) {
+                                if (partitionEntry.getValue() != JoyQueueCode.SUCCESS.getCode()) {
                                     logger.error("commit transaction offset error, broker: {}, topic: {}, partition: {}, code: {}",
-                                            broker, topic, partitionEntry.getKey(), JournalqCode.valueOf(partitionEntry.getValue()));
+                                            broker, topic, partitionEntry.getKey(), JoyQueueCode.valueOf(partitionEntry.getValue()));
                                 }
                             }
                         }

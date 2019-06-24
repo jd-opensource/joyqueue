@@ -13,9 +13,9 @@
  */
 package com.jd.joyqueue.broker.protocol.handler;
 
-import com.jd.joyqueue.broker.protocol.JournalqCommandHandler;
+import com.jd.joyqueue.broker.protocol.JoyQueueCommandHandler;
 import com.jd.joyqueue.network.command.FetchHealthResponse;
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.transport.Transport;
 import com.jd.joyqueue.network.transport.command.Command;
 import com.jd.joyqueue.network.transport.command.Type;
@@ -26,7 +26,7 @@ import com.jd.joyqueue.network.transport.command.Type;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/28
  */
-public class FetchHealthRequestHandler implements JournalqCommandHandler, Type {
+public class FetchHealthRequestHandler implements JoyQueueCommandHandler, Type {
 
     @Override
     public Command handle(Transport transport, Command command) {
@@ -36,6 +36,6 @@ public class FetchHealthRequestHandler implements JournalqCommandHandler, Type {
 
     @Override
     public int type() {
-        return JournalqCommandType.FETCH_HEALTH_REQUEST.getCode();
+        return JoyQueueCommandType.FETCH_HEALTH_REQUEST.getCode();
     }
 }

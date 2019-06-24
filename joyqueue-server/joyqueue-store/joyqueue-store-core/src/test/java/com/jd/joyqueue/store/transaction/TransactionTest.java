@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.store.transaction;
 
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.store.WriteResult;
 import com.jd.joyqueue.store.file.PositioningStore;
 import com.jd.joyqueue.store.utils.BaseDirUtils;
@@ -53,7 +53,7 @@ public class TransactionTest {
         List<ByteBuffer> messages = MessageTestUtils.createMessages(bodyList);
         Future<WriteResult> future = transactionStoreManager.asyncWrite(tId, messages.stream().map(ByteBuffer::slice).toArray(ByteBuffer[]::new));
         WriteResult writeResult = future.get();
-        Assert.assertEquals(JournalqCode.SUCCESS, writeResult.getCode());
+        Assert.assertEquals(JoyQueueCode.SUCCESS, writeResult.getCode());
 
         Iterator<ByteBuffer> iterator = transactionStoreManager.readIterator(tId);
         int i = 0;

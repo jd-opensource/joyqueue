@@ -35,6 +35,6 @@ public class GetTopicsAck implements Payload, Types {
 
     @Override
     public int[] types() {
-        return new int[]{CommandType.GET_TOPICS_ACK,JournalqCommandType.MQTT_GET_TOPICS_ACK.getCode()};
+        return new int[]{CommandType.GET_TOPICS_ACK, JoyQueueCommandType.MQTT_GET_TOPICS_ACK.getCode()};
     }
 }

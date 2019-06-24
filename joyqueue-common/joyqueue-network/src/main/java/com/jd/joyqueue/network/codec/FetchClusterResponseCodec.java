@@ -18,15 +18,15 @@ import com.google.common.collect.Sets;
 import com.jd.joyqueue.domain.ConsumerPolicy;
 import com.jd.joyqueue.domain.ProducerPolicy;
 import com.jd.joyqueue.domain.TopicType;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.network.command.FetchClusterResponse;
-import com.jd.joyqueue.network.command.JournalqCommandType;
+import com.jd.joyqueue.network.command.JoyQueueCommandType;
 import com.jd.joyqueue.network.command.Topic;
 import com.jd.joyqueue.network.command.TopicPartition;
 import com.jd.joyqueue.network.command.TopicPartitionGroup;
 import com.jd.joyqueue.network.domain.BrokerNode;
 import com.jd.joyqueue.network.serializer.Serializer;
-import com.jd.joyqueue.network.transport.codec.JournalqHeader;
+import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.codec.PayloadCodec;
 import com.jd.joyqueue.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
@@ -42,12 +42,12 @@ import java.util.Set;
  * email: gaohaoxiang@jd.com
  * date: 2018/11/30
  */
-public class FetchClusterResponseCodec implements PayloadCodec<JournalqHeader, FetchClusterResponse>, Type {
+public class FetchClusterResponseCodec implements PayloadCodec<JoyQueueHeader, FetchClusterResponse>, Type {
 
     private static final byte NONE_TOPIC_TYPE = -1;
 
     @Override
-    public FetchClusterResponse decode(JournalqHeader header, ByteBuf buffer) throws Exception {
+    public FetchClusterResponse decode(JoyQueueHeader header, ByteBuf buffer) throws Exception {
         FetchClusterResponse fetchClusterResponse = new FetchClusterResponse();
         Map<String, Topic> topics = Maps.newHashMap();
         Map<Integer, BrokerNode> brokers = Maps.newHashMap();
@@ -146,7 +146,7 @@ public class FetchClusterResponseCodec implements PayloadCodec<JournalqHeader, F
         }
 
         topic.setPartitionGroups(partitionGroups);
-        topic.setCode(JournalqCode.valueOf(buffer.readInt()));
+        topic.setCode(JoyQueueCode.valueOf(buffer.readInt()));
         return topic;
     }
 
@@ -274,6 +274,6 @@ public class FetchClusterResponseCodec implements PayloadCodec<JournalqHeader, F
 
     @Override
     public int type() {
-        return JournalqCommandType.FETCH_CLUSTER_RESPONSE.getCode();
+        return JoyQueueCommandType.FETCH_CLUSTER_RESPONSE.getCode();
     }
 }

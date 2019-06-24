@@ -13,7 +13,7 @@
  */
 package com.jd.joyqueue.network.command;
 
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 
 /**
  * CommitAckData
@@ -23,21 +23,21 @@ import com.jd.joyqueue.exception.JournalqCode;
  */
 public class CommitAckResult {
 
-    private JournalqCode code;
+    private JoyQueueCode code;
 
     public CommitAckResult() {
 
     }
 
-    public CommitAckResult(JournalqCode code) {
+    public CommitAckResult(JoyQueueCode code) {
         this.code = code;
     }
 
-    public void setCode(JournalqCode code) {
+    public void setCode(JoyQueueCode code) {
         this.code = code;
     }
 
-    public JournalqCode getCode() {
+    public JoyQueueCode getCode() {
         return code;
     }
 }

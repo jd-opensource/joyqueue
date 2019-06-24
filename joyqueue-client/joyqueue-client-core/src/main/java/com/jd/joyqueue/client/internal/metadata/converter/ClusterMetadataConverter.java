@@ -19,7 +19,7 @@ import com.jd.joyqueue.client.internal.metadata.domain.ClusterMetadata;
 import com.jd.joyqueue.client.internal.metadata.domain.PartitionGroupMetadata;
 import com.jd.joyqueue.client.internal.metadata.domain.PartitionMetadata;
 import com.jd.joyqueue.client.internal.metadata.domain.TopicMetadata;
-import com.jd.joyqueue.exception.JournalqCode;
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.network.command.FetchClusterResponse;
 import com.jd.joyqueue.network.command.Topic;
 import com.jd.joyqueue.network.command.TopicPartition;
@@ -54,7 +54,7 @@ public class ClusterMetadataConverter {
     }
 
     public static TopicMetadata convertTopicMetadata(String code, Topic topic, Map<Integer, BrokerNode> brokerMap) {
-        if (!topic.getCode().equals(JournalqCode.SUCCESS)) {
+        if (!topic.getCode().equals(JoyQueueCode.SUCCESS)) {
             return new TopicMetadata(topic.getCode());
         }
 
