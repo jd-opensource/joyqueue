@@ -27,9 +27,9 @@
     <artifactId>journalq-nsr</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>journalq-nsr-admin</module>
-        <module>journalq-nsr-core</module>
-        <module>journalq-nsr-ignite</module>
+        <module>joyqueue-nsr-admin</module>
+        <module>joyqueue-nsr-core</module>
+        <module>joyqueue-nsr-ignite</module>
     </modules>
     <properties>
         <ignite.version>2.6.0</ignite.version>

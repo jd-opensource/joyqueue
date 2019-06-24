@@ -877,7 +877,7 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven-surefire-plugin.version}</version>
                     <configuration>
-                        <skipTests>true</skipTests>
+                        <skipTests>false</skipTests>
                     </configuration>
                 </plugin>
                 <!--<plugin>-->
@@ -1074,13 +1074,13 @@
     </distributionManagement>
 
     <modules>
-        <module>journalq-common</module>
-        <module>journalq-server</module>
-        <module>journalq-console</module>
-        <module>journalq-client</module>
+        <module>joyqueue-common</module>
+        <module>joyqueue-server</module>
+        <module>joyqueue-console</module>
+        <module>joyqueue-client</module>
         <!-- FIXME: 单元测试未通过 -->
-        <!--        <module>journalq-test</module>-->
-        <module>journalq-openmessaging</module>
+        <!--        <module>joyqueue-test</module>-->
+        <module>joyqueue-openmessaging</module>
         <module>docker</module>
     </modules>
 

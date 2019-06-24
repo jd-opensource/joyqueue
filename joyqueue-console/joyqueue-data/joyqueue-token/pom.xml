@@ -25,11 +25,12 @@
     <modelVersion>4.0.0</modelVersion>
     <version>4.1.0-SNAPSHOT</version>
 
-    <artifactId>journalq-data-repository</artifactId>
+    <artifactId>journalq-token</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>journalq-data-repository-api</module>
-        <module>journalq-data-repository-mybatis</module>
+        <module>joyqueue-token-api</module>
+        <module>joyqueue-token-uuid</module>
+        <module>joyqueue-token-uuid-starter</module>
     </modules>
 
 </project>

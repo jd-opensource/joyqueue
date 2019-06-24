@@ -29,10 +29,10 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>journalq-data-model</module>
-        <module>journalq-data-repository</module>
-        <module>journalq-token</module>
-        <module>journalq-data-service</module>
+        <module>joyqueue-data-model</module>
+        <module>joyqueue-data-repository</module>
+        <module>joyqueue-token</module>
+        <module>joyqueue-data-service</module>
     </modules>
 
 </project>

@@ -27,11 +27,11 @@
     <artifactId>journalq-retry</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>journalq-retry-api</module>
-        <module>journalq-retry-db</module>
-        <module>journalq-retry-remote</module>
-        <module>journalq-retry-db-console</module>
-        <module>journalq-retry-h2</module>
+        <module>joyqueue-retry-api</module>
+        <module>joyqueue-retry-db</module>
+        <module>joyqueue-retry-remote</module>
+        <module>joyqueue-retry-db-console</module>
+        <module>joyqueue-retry-h2</module>
     </modules>
 
 

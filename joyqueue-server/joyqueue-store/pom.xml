@@ -27,8 +27,8 @@
     <artifactId>journalq-store</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>journalq-store-api</module>
-        <module>journalq-store-core</module>
+        <module>joyqueue-store-api</module>
+        <module>joyqueue-store-core</module>
     </modules>
     <dependencies>
         <dependency>

@@ -27,14 +27,14 @@
     <artifactId>journalq-common</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>journalq-toolkit</module>
-        <module>journalq-model</module>
-        <module>journalq-network</module>
-        <module>journalq-security</module>
-        <module>journalq-cache</module>
-        <module>journalq-datasource</module>
-        <module>journalq-registry</module>
-        <module>journalq-hbase</module>
+        <module>joyqueue-toolkit</module>
+        <module>joyqueue-model</module>
+        <module>joyqueue-network</module>
+        <module>joyqueue-security</module>
+        <module>joyqueue-cache</module>
+        <module>joyqueue-datasource</module>
+        <module>joyqueue-registry</module>
+        <module>joyqueue-hbase</module>
     </modules>
 
 </project>

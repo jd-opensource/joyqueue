@@ -28,8 +28,8 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>journalq-registry-api</module>
-        <module>journalq-registry-zookeeper</module>
+        <module>joyqueue-registry-api</module>
+        <module>joyqueue-registry-zookeeper</module>
     </modules>
 
 </project>

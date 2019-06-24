@@ -27,17 +27,17 @@
     <artifactId>journalq-server</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>journalq-broker-core</module>
-        <module>journalq-broker-journalq</module>
-        <module>journalq-broker-kafka</module>
-        <module>journalq-broker-mqtt</module>
-        <module>journalq-broker-monitor-pth</module>
-        <module>journalq-server-runtime</module>
+        <module>joyqueue-broker-core</module>
+        <module>joyqueue-broker-protocol</module>
+        <module>joyqueue-broker-kafka</module>
+        <module>joyqueue-broker-mqtt</module>
+        <module>joyqueue-broker-monitor-pth</module>
+        <module>joyqueue-server-runtime</module>
 
-        <module>journalq-archive</module>
-        <module>journalq-retry</module>
-        <module>journalq-store</module>
-        <module>journalq-nsr</module>
+        <module>joyqueue-archive</module>
+        <module>joyqueue-retry</module>
+        <module>joyqueue-store</module>
+        <module>joyqueue-nsr</module>
     </modules>
 
     <dependencyManagement>

@@ -28,10 +28,10 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>journalq-web-webroot</module>
-        <module>journalq-web-application</module>
-        <module>journalq-web-handler</module>
-        <module>journalq-web-springboot-starter</module>
+        <module>joyqueue-web-webroot</module>
+        <module>joyqueue-web-application</module>
+        <module>joyqueue-web-handler</module>
+        <module>joyqueue-web-springboot-starter</module>
     </modules>
 
 </project>

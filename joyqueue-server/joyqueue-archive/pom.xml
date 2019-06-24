@@ -27,8 +27,8 @@
     <artifactId>journalq-archive</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>journalq-archive-api</module>
-        <module>journalq-archive-hbase</module>
+        <module>joyqueue-archive-api</module>
+        <module>joyqueue-archive-hbase</module>
     </modules>
 
 

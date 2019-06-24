@@ -27,9 +27,9 @@
     <artifactId>journalq-datasource</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>journalq-datasource-api</module>
-        <module>journalq-datasource-dbcp</module>
-        <module>journalq-datasource-hikaricp</module>
+        <module>joyqueue-datasource-api</module>
+        <module>joyqueue-datasource-dbcp</module>
+        <module>joyqueue-datasource-hikaricp</module>
     </modules>
 
 

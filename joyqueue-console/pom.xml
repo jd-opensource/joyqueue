@@ -28,10 +28,10 @@
     <artifactId>journalq-console</artifactId>
 
     <modules>
-        <module>journalq-data</module>
-        <module>journalq-web</module>
-        <!--<module>journalq-task</module>-->
-        <module>journalq-openapi</module>
+        <module>joyqueue-data</module>
+        <module>joyqueue-web</module>
+        <!--<module>joyqueue-task</module>-->
+        <module>joyqueue-openapi</module>
     </modules>
 
     <dependencyManagement>
@@ -60,7 +60,7 @@
         <profile>
             <id>frontend</id>
             <modules>
-                <module>journalq-portal</module>
+                <module>joyqueue-portal</module>
             </modules>
         </profile>
     </profiles>
