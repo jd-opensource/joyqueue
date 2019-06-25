@@ -55,7 +55,7 @@ public class MessageViewer {
                 new PositioningStore.Config();
 
 
-        PreloadBufferPool bufferPool = new PreloadBufferPool();
+        PreloadBufferPool bufferPool = PreloadBufferPool.getInstance();
         bufferPool.addPreLoad(PositioningStore.Config.DEFAULT_FILE_DATA_SIZE, 1, 1);
 
         PositioningStore<ByteBuffer> store =
