@@ -14,7 +14,7 @@
 #
 
 
-MAIN_CLASS="com.jd.journalq.store.cli.FileTool"
+MAIN_CLASS="com.jd.joyqueue.store.cli.FileTool"
 
 APP_HOME="$( cd "$(dirname "$0")" ; cd .. ; pwd -P )"
 
