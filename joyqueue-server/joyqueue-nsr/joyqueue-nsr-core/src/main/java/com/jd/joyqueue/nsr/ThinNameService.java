@@ -28,7 +28,6 @@ import com.jd.joyqueue.domain.Topic;
 import com.jd.joyqueue.domain.TopicConfig;
 import com.jd.joyqueue.domain.TopicName;
 import com.jd.joyqueue.event.NameServerEvent;
-import com.jd.joyqueue.network.command.CommandType;
 import com.jd.joyqueue.network.command.GetTopics;
 import com.jd.joyqueue.network.command.GetTopicsAck;
 import com.jd.joyqueue.network.command.SubscribeAck;
@@ -166,7 +165,7 @@ public class ThinNameService extends Service implements NameService, PropertySup
 
     @Override
     public void unSubscribe(List<Subscription> subscriptions) {
-        Command request = new Command(new JoyQueueHeader(Direction.REQUEST, CommandType.UNSUBSCRIBE), new UnSubscribe().subscriptions(subscriptions));
+        Command request = new Command(new JoyQueueHeader(Direction.REQUEST, NsrCommandType.UN_SUBSCRIBE), new UnSubscribe().subscriptions(subscriptions));
         Command response = send(request);
         if (!response.isSuccess()) {
             logger.error("unSubscribe error request {},response {}", request, response);

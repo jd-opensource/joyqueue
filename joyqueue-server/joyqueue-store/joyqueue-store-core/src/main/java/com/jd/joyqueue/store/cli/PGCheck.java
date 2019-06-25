@@ -86,7 +86,7 @@ public class PGCheck {
         } else {
             System.out.println("All files will be checked.");
         }
-        PreloadBufferPool pool = new PreloadBufferPool();
+        PreloadBufferPool pool = PreloadBufferPool.getInstance();
         pool.addPreLoad(StoreConfig.DEFAULT_INDEX_FILE_SIZE, 0, 1);
         pool.addPreLoad(StoreConfig.DEFAULT_MESSAGE_FILE_SIZE, 0, 1);
 
@@ -211,7 +211,7 @@ public class PGCheck {
         if ("RECOVER".equals(inputStr)) {
             PartitionGroupStoreManager partitionGroupStoreManger = new PartitionGroupStoreManager(
                     "topic", 0, base, new PartitionGroupStoreManager.Config(),
-                    new PreloadBufferPool(),
+                    PreloadBufferPool.getInstance(),
                     new ScheduledThreadPoolExecutor(1));
             partitionGroupStoreManger.recover();
             partitionGroupStoreManger.close();

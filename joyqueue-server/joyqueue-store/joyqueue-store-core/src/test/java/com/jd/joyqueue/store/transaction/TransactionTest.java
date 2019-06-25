@@ -45,7 +45,7 @@ public class TransactionTest {
     public void transactionTest() throws Exception {
         int count = 1024;
         PositioningStore.Config config = new PositioningStore.Config();
-        PreloadBufferPool bufferPool = new PreloadBufferPool();
+        PreloadBufferPool bufferPool = PreloadBufferPool.getInstance();
 
         TransactionStoreManager transactionStoreManager = new TransactionStoreManager(base, config, bufferPool);
         int tId = transactionStoreManager.next();

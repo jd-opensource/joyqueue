@@ -77,7 +77,7 @@ public class IndexLengthCheck {
     }
 
     private static void checkIndexLength(String topicBase, String topic, int group, short partition) throws IOException {
-        PreloadBufferPool bufferPool = new PreloadBufferPool();
+        PreloadBufferPool bufferPool = PreloadBufferPool.getInstance();
         System.out.println(String.format("Store directory: %s.", topicBase));
         System.out.println(String.format("Topic: %s, group: %s, partition: %s.", topic,
                 group < 0 ? "ALL" : String.valueOf(group),
