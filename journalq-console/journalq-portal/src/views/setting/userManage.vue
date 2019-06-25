@@ -49,7 +49,7 @@ import myDialog from '../../components/common/myDialog.vue'
 import crud from '../../mixins/crud.js'
 import GridCol from '../../components/grid/col'
 export default {
-  name: 'application',
+  name: 'userManage',
   components: {
     GridCol,
     myTable,

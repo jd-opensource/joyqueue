@@ -89,7 +89,6 @@
         <mysql.version>5.1.41</mysql.version>
         <laf-binding.version>1.0.9-SNAPSHOT</laf-binding.version>
         <laf-vertx.version>1.0.18-SNAPSHOT</laf-vertx.version>
-        <lar-extention.version>1.0.13</lar-extention.version>
         <vertx.version>3.6.3</vertx.version>
         <ignite.version>2.7.0</ignite.version>
         <junit.version>4.12</junit.version>
