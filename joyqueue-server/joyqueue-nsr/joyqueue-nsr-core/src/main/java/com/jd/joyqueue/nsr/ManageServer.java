@@ -462,7 +462,7 @@ public class ManageServer extends Service {
         });
         router.post("/broker/update").handler(routingContext -> {
             try{
-                brokerService.addOrUpdate(JSONObject.parseObject(routingContext.getBodyAsString(), Broker.class));
+                brokerService.update(JSONObject.parseObject(routingContext.getBodyAsString(), Broker.class));
                 routingContext.response().end("success");
             }catch (Exception e){
                 logger.error("broker[{}] add error",routingContext.getBodyAsString(),e);

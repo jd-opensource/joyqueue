@@ -46,4 +46,7 @@ public interface BrokerService extends DataService<Broker, BrokerQuery, Integer>
      * @return
      */
     List<Broker> getByIds(List<Integer> ids);
+
+
+    void update(Broker broker);
 }

@@ -55,6 +55,7 @@ public class IgniteBrokerDao implements BrokerDao {
         fields.put(IgniteBroker.COLUMN_PORT, String.class.getName());
         fields.put(IgniteBroker.COLUMN_DATA_CENTER, String.class.getName());
         fields.put(IgniteBroker.COLUMN_RETRY_TYPE, String.class.getName());
+        fields.put(IgniteBroker.COLUMN_PERMISSION, String.class.getName());
         queryEntity.setFields(fields);
         queryEntity.setTableName(CACHE_NAME);
         queryEntity.setIndexes(Arrays.asList(new QueryIndex(IgniteBroker.COLUMN_BROKER_ID)));

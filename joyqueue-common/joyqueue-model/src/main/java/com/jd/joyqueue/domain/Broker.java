@@ -166,6 +166,7 @@ public class Broker implements Serializable {
                 ", port=" + port +
                 ", dataCenter='" + dataCenter + '\'' +
                 ", retryType=" + retryType +
+                ", permission=" + permission +
                 '}';
     }
 }
