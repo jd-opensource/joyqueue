@@ -26,8 +26,9 @@ public class Launcher {
 
     protected static final Logger logger = LoggerFactory.getLogger(Launcher.class);
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         BrokerService brokerService = new BrokerService(args);
+
         try {
             brokerService.start();
             BannerPrinter.print();
@@ -38,17 +39,14 @@ public class Launcher {
             System.exit(-1);
         }
 
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                try {
-                    brokerService.stop();
-                    logger.info("JoyQueue stopped");
-                } catch (Throwable t) {
-                    logger.error("JoyQueue stop exception", t);
-                    System.exit(-1);
-                }
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                brokerService.stop();
+                logger.info("JoyQueue stopped");
+            } catch (Throwable t) {
+                logger.error("JoyQueue stop exception", t);
+                System.exit(-1);
             }
-        });
+        }));
     }
 }

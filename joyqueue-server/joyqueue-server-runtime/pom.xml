@@ -67,6 +67,15 @@
             <artifactId>joyqueue-store-core</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.jd.joyqueue</groupId>
+            <artifactId>joyqueue-client-all</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.beust</groupId>
+            <artifactId>jcommander</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <resources>
