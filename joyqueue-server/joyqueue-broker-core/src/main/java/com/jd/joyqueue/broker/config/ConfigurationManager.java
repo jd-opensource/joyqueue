@@ -85,6 +85,7 @@ public class ConfigurationManager extends Service implements EventListener<NameS
     @Override
     protected void validate() throws Exception {
         super.validate();
+        SystemConfigLoader.load();
         if (configuration == null) {
             this.configuration = buildConfiguration();
         }
