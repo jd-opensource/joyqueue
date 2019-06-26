@@ -28,7 +28,6 @@
     <packaging>pom</packaging>
     <modules>
         <module>joyqueue-datasource-api</module>
-        <module>joyqueue-datasource-dbcp</module>
         <module>joyqueue-datasource-hikaricp</module>
     </modules>
 

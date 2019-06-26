@@ -33,7 +33,6 @@
         <module>joyqueue-security</module>
         <module>joyqueue-cache</module>
         <module>joyqueue-datasource</module>
-        <module>joyqueue-registry</module>
         <module>joyqueue-hbase</module>
     </modules>
 
