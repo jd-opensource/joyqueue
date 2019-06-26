@@ -1,5 +1,5 @@
 # Performance
-  JournalQ is a multi-protocols and distributed pub/sub messaging broker,with high throughput,highly scalable and low latency.you maybe interested in the performance of JounalQ if you prepare to deploy and use it in production. In this section,a simple benchmark is designed to show JournalQ's produce performance on single instance.
+  JoyQueue is a multi-protocols and distributed pub/sub messaging broker,with high throughput,highly scalable and low latency.you maybe interested in the performance of JounalQ if you prepare to deploy and use it in production. In this section,a simple benchmark is designed to show JoyQueue's produce performance on single instance.
 
 ## Set up
 For the tests,hareware requirement show as following:

@@ -1,0 +1,2 @@
+com.jd.joyqueue.broker.store.FixedSizeStoreCleaningStrategy
+com.jd.joyqueue.broker.store.IntervalTimeStoreCleaningStrategy

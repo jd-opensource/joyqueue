@@ -1,2 +1,0 @@
-com.jd.journalq.broker.mqtt.protocol.MqttProtocol
-com.jd.journalq.broker.mqtt.protocol.MqttOverWebsocketProtocol

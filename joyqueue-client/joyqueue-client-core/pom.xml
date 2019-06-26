@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>joyqueue-client</artifactId>
+        <groupId>com.jd.joyqueue</groupId>
+        <version>4.1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>joyqueue-client-core</artifactId>
+    <name>JoyQueue - Client - Core</name>
+    <description>Client SDK</description>
+
+    <properties>
+        <openmessaging-api.version>1.0.0-alpha</openmessaging-api.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.jd.joyqueue</groupId>
+            <artifactId>joyqueue-toolkit</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.jd.joyqueue</groupId>
+            <artifactId>joyqueue-network</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.openmessaging</groupId>
+            <artifactId>openmessaging-api</artifactId>
+            <version>${openmessaging-api.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.1</version>
+                <configuration>
+                    <attach>true</attach>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!--<plugin>-->
+                <!--<groupId>org.apache.maven.plugins</groupId>-->
+                <!--<artifactId>maven-shade-plugin</artifactId>-->
+                <!--<version>3.2.1</version>-->
+                <!--<executions>-->
+                    <!--<execution>-->
+                        <!--<phase>package</phase>-->
+                        <!--<goals>-->
+                            <!--<goal>shade</goal>-->
+                        <!--</goals>-->
+                        <!--<configuration>-->
+                            <!--<minimizeJar>false</minimizeJar>-->
+                            <!--<artifactSet>-->
+                                <!--<includes>-->
+                                    <!--<include>org.apache.commons:commons-lang3:*</include>-->
+                                    <!--<include>commons-collections:commons-collections:*</include>-->
+                                    <!--<include>com.google.inject:guice:*</include>-->
+                                    <!--<include>javax.inject:javax.inject:*</include>-->
+                                    <!--<include>aopalliance:aopalliance:*</include>-->
+                                    <!--<include>com.google.guava:guava:*</include>-->
+                                    <!--<include>javax.validation:validation-api:*</include>-->
+                                    <!--<include>io.dropwizard.metrics:*</include>-->
+                                    <!--<include>io.netty:netty-all:*</include>-->
+                                    <!--<include>com.alibaba:fastjson:*</include>-->
+                                    <!--<include>commons-io:commons-io:*</include>-->
+                                    <!--<include>com.jd.joyqueue:joyqueue-network:*</include>-->
+                                    <!--<include>com.jd.joyqueue:joyqueue-model:*</include>-->
+                                    <!--<include>com.jd.joyqueue:joyqueue-toolkit:*</include>-->
+                                    <!--<include>com.jd.laf:laf-extension-core:*</include>-->
+                                <!--</includes>-->
+                                <!--<excludes>-->
+                                    <!--<exclude>org.slf4j:slf4j-api:*</exclude>-->
+                                <!--</excludes>-->
+                            <!--</artifactSet>-->
+                            <!--<relocations>-->
+                                <!--<relocation>-->
+                                    <!--<pattern>com.alibaba</pattern>-->
+                                    <!--<shadedPattern>com.jd.joyqueue.shaded.com.alibaba</shadedPattern>-->
+                                <!--</relocation>-->
+                                <!--<relocation>-->
+                                    <!--<pattern>com.codahale</pattern>-->
+                                    <!--<shadedPattern>com.jd.joyqueue.shaded.com.codahale</shadedPattern>-->
+                                <!--</relocation>-->
+                                <!--<relocation>-->
+                                    <!--<pattern>com.google</pattern>-->
+                                    <!--<shadedPattern>com.jd.joyqueue.shaded.com.google</shadedPattern>-->
+                                <!--</relocation>-->
+                                <!--<relocation>-->
+                                    <!--<pattern>io.netty</pattern>-->
+                                    <!--<shadedPattern>com.jd.joyqueue.shaded.io.netty</shadedPattern>-->
+                                <!--</relocation>-->
+                                <!--<relocation>-->
+                                    <!--<pattern>javax.inject</pattern>-->
+                                    <!--<shadedPattern>com.jd.joyqueue.shaded.javax.inject</shadedPattern>-->
+                                <!--</relocation>-->
+                                <!--<relocation>-->
+                                    <!--<pattern>javax.validation</pattern>-->
+                                    <!--<shadedPattern>com.jd.joyqueue.shaded.javax.validation</shadedPattern>-->
+                                <!--</relocation>-->
+                                <!--<relocation>-->
+                                    <!--<pattern>org.aopalliance</pattern>-->
+                                    <!--<shadedPattern>com.jd.joyqueue.shaded.org.aopalliance</shadedPattern>-->
+                                <!--</relocation>-->
+                                <!--<relocation>-->
+                                    <!--<pattern>org.apache</pattern>-->
+                                    <!--<shadedPattern>com.jd.joyqueue.shaded.org.apache</shadedPattern>-->
+                                <!--</relocation>-->
+                                <!--<relocation>-->
+                                    <!--<pattern>com.jd.laf.extension</pattern>-->
+                                    <!--<shadedPattern>com.jd.joyqueue.shaded.com.jd.laf.extension</shadedPattern>-->
+                                <!--</relocation>-->
+                            <!--</relocations>-->
+                        <!--</configuration>-->
+                    <!--</execution>-->
+                <!--</executions>-->
+            <!--</plugin>-->
+        </plugins>
+    </build>
+</project>

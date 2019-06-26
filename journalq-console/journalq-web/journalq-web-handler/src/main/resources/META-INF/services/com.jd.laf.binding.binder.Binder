@@ -1,3 +1,0 @@
-com.jd.journalq.handler.binder.GenericValueBinder
-com.jd.journalq.handler.binder.OperatorBinder
-com.jd.journalq.handler.binder.PageQueryBinder

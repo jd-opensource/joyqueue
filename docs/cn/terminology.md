@@ -1,10 +1,10 @@
-# JournalQ 术语
+# JoyQueue 术语
 
-这里罗列了JournalQ的常用术语。
+这里罗列了JoyQueue的常用术语。
 
-## JournalQ
+## JoyQueue
 
-JournalQ是个具有处理消息生产、堆积并分发给相关应用的多协议、分布式消息中间件。
+JoyQueue是个具有处理消息生产、堆积并分发给相关应用的多协议、分布式消息中间件。
 
 
 ## 发布/订阅
@@ -26,7 +26,7 @@ JournalQ是个具有处理消息生产、堆积并分发给相关应用的多协
 
 ## 生产者
 
-向JournalQ发送消费的进程。
+向JoyQueue发送消费的进程。
 
 ## 消费者
 
