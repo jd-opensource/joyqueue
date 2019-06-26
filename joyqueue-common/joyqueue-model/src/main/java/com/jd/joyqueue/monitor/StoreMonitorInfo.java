@@ -23,8 +23,8 @@ public class StoreMonitorInfo {
 
     private boolean started;
 
-    private long totalSpace;
-    private long freeSpace;
+    private String totalSpace;
+    private String freeSpace;
 
     public void setStarted(boolean started) {
         this.started = started;
@@ -34,19 +34,19 @@ public class StoreMonitorInfo {
         return started;
     }
 
-    public long getTotalSpace() {
+    public String getTotalSpace() {
         return totalSpace;
     }
 
-    public void setTotalSpace(long totalSpace) {
+    public void setTotalSpace(String totalSpace) {
         this.totalSpace = totalSpace;
     }
 
-    public long getFreeSpace() {
+    public String getFreeSpace() {
         return freeSpace;
     }
 
-    public void setFreeSpace(long freeSpace) {
+    public void setFreeSpace(String freeSpace) {
         this.freeSpace = freeSpace;
     }
 }

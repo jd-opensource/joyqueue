@@ -28,6 +28,8 @@ public class BrokerMonitorInfo extends BaseMonitorInfo {
     private StoreMonitorInfo store;
     private NameServerMonitorInfo nameServer;
     private ElectionMonitorInfo election;
+    private BufferPoolMonitorInfo bufferPoolMonitorInfo;
+
 
     public ConnectionMonitorInfo getConnection() {
         return connection;
@@ -83,5 +85,13 @@ public class BrokerMonitorInfo extends BaseMonitorInfo {
 
     public ElectionMonitorInfo getElection() {
         return election;
+    }
+
+    public BufferPoolMonitorInfo getBufferPoolMonitorInfo() {
+        return bufferPoolMonitorInfo;
+    }
+
+    public void setBufferPoolMonitorInfo(BufferPoolMonitorInfo bufferPoolMonitorInfo) {
+        this.bufferPoolMonitorInfo = bufferPoolMonitorInfo;
     }
 }

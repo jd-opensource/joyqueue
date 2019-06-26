@@ -13,6 +13,7 @@
  */
 package com.jd.joyqueue.store.utils;
 
+import com.jd.joyqueue.monitor.BufferPoolMonitorInfo;
 import com.jd.joyqueue.toolkit.concurrent.LoopThread;
 import com.jd.joyqueue.toolkit.format.Format;
 import com.jd.joyqueue.toolkit.time.SystemClock;
@@ -25,6 +26,7 @@ import sun.nio.ch.DirectBuffer;
 import java.io.Closeable;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -335,6 +337,38 @@ public class PreloadBufferPool implements Closeable {
 
     }
 
+    /**
+     * buffer监控
+     * @return
+     */
+    public BufferPoolMonitorInfo monitorInfo() {
+        BufferPoolMonitorInfo bufferPoolMonitorInfo = new BufferPoolMonitorInfo();
+
+        List<BufferPoolMonitorInfo.PLMonitorInfo> plMonitorInfos = new ArrayList<>();
+        long totalUsed = usedSize.get();
+        long plUsed = bufferCache.values().stream().mapToLong(preLoadCache -> {
+            long cached = preLoadCache.cache.size();
+            long usedPreLoad = preLoadCache.onFlyCounter.get();
+            long totalSize = preLoadCache.bufferSize * (cached + usedPreLoad);
+            BufferPoolMonitorInfo.PLMonitorInfo plMonitorInfo = new BufferPoolMonitorInfo.PLMonitorInfo();
+            plMonitorInfo.setBufferSize(Format.formatSize(preLoadCache.bufferSize));
+            plMonitorInfo.setCached(Format.formatSize(preLoadCache.bufferSize * cached));
+            plMonitorInfo.setUsedPreLoad(Format.formatSize(preLoadCache.bufferSize * usedPreLoad));
+            plMonitorInfo.setTotalSize(Format.formatSize(totalSize));
+            plMonitorInfos.add(plMonitorInfo);
+            return totalSize;
+        }).sum();
+        long mmpUsed = mMapBufferHolders.stream().mapToInt(BufferHolder::size).sum();
+        long directUsed = directBufferHolders.stream().mapToInt(BufferHolder::size).sum();
+
+        bufferPoolMonitorInfo.setPlMonitorInfos(plMonitorInfos);
+        bufferPoolMonitorInfo.setPlUsed(Format.formatSize(plUsed));
+        bufferPoolMonitorInfo.setUsed(Format.formatSize(totalUsed));
+        bufferPoolMonitorInfo.setMaxMemorySize(Format.formatSize(maxMemorySize));
+        bufferPoolMonitorInfo.setMmpUsed(Format.formatSize(mmpUsed));
+        bufferPoolMonitorInfo.setDirectUsed(Format.formatSize(directUsed));
+        return bufferPoolMonitorInfo;
+    }
     static class PreLoadCache {
         final int bufferSize;
         final int coreCount, maxCount;
