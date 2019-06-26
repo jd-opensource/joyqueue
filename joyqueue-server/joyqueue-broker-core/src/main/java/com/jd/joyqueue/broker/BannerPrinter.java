@@ -32,10 +32,10 @@ public class BannerPrinter {
 
     protected static final Logger logger = LoggerFactory.getLogger(BannerPrinter.class);
 
-    protected static final String BANNER_RESOURCE = "joyqueue/banner";
-    protected static final String VERSION_RESOURCE = "joyqueue/version.properties";
-    protected static final String PLACEHOLDER_PREFIX = "{";
-    protected static final String PLACEHOLDER_SUFFIX = "}";
+    private static final String BANNER_RESOURCE = "joyqueue/banner";
+    private static final String VERSION_RESOURCE = "joyqueue/version.properties";
+    private static final String PLACEHOLDER_PREFIX = "{";
+    private static final String PLACEHOLDER_SUFFIX = "}";
 
     public static void print() {
         InputStream inputStream = BannerPrinter.class.getClassLoader().getResourceAsStream(BANNER_RESOURCE);
