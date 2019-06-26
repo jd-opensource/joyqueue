@@ -20,7 +20,7 @@ import com.jd.joyqueue.network.transport.exception.TransportException;
 import io.netty.buffer.ByteBuf;
 
 /**
- * joyqueue协议头编解码器
+ * JoyQueueHeaderCodec
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/21

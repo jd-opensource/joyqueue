@@ -23,7 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * 命令处理器上下文
+ * CommandHandlerInvocation
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/16

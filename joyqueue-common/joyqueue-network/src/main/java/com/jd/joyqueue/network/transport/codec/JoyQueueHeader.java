@@ -22,7 +22,7 @@ import com.jd.joyqueue.toolkit.time.SystemClock;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * joyqueue协议头
+ * JoyQueueHeader
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/21

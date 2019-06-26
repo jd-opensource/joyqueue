@@ -16,7 +16,7 @@ package com.jd.joyqueue.network.transport.command.handler;
 import com.jd.joyqueue.network.transport.command.Command;
 
 /**
- * 命令处理器工厂类
+ * CommandHandlerFactory
  */
 public interface CommandHandlerFactory {
 

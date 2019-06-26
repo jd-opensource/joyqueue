@@ -21,7 +21,7 @@ import com.jd.laf.extension.ExtensionManager;
 import java.util.List;
 
 /**
- * 默认命令调用链工厂
+ * DefaultCommandHandlerFilterFactory
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/16

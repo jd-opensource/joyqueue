@@ -14,7 +14,7 @@
 package com.jd.joyqueue.network.event;
 
 /**
- * 通信事件类型
+ * TransportEventType
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/15

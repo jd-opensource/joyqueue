@@ -16,7 +16,7 @@ package com.jd.joyqueue.network.transport.command;
 import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 
 /**
- * joyqueue消息体
+ * JoyQueuePayload
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/21

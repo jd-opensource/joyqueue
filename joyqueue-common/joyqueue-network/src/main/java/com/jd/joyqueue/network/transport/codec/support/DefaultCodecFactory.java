@@ -19,7 +19,7 @@ import com.jd.joyqueue.network.transport.codec.Decoder;
 import com.jd.joyqueue.network.transport.codec.Encoder;
 
 /**
- * 默认编解码器工厂
+ * DefaultCodecFactory
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/13

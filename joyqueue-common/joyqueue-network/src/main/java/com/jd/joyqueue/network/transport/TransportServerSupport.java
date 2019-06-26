@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 import java.net.InetSocketAddress;
 
 /**
- * 通信服务支持
+ * TransportServerSupport
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/13

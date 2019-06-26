@@ -22,7 +22,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * 默认通信属性
+ * DefaultTransportAttribute
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/14

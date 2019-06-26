@@ -16,7 +16,7 @@ package com.jd.joyqueue.network.transport;
 import com.jd.joyqueue.network.transport.config.ClientConfig;
 
 /**
- * 客户端通信工厂
+ * TransportClientFactory
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/24

@@ -19,7 +19,7 @@ import com.jd.joyqueue.network.transport.Transport;
 import java.util.concurrent.ExecutorService;
 
 /**
- * 执行线程提供
+ * ExecutorServiceProvider
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/13

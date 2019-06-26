@@ -19,7 +19,7 @@ import com.jd.joyqueue.broker.network.protocol.ProtocolManager;
 import io.netty.channel.ChannelHandler;
 
 /**
- * 默认多协议处理管道工厂
+ * DefaultMultiProtocolHandlerPipelineFactory
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/14

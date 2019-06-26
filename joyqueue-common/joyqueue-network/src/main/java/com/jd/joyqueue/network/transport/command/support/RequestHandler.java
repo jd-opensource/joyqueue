@@ -24,7 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 请求处理器
+ * RequestHandler
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/24

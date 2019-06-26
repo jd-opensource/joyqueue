@@ -41,7 +41,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 
 /**
- * 默认通信
+ * DefaultChannelTransport
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/14

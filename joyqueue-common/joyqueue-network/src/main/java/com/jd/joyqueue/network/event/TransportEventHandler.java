@@ -21,7 +21,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
 /**
- * 通信事件处理
+ * TransportEventHandler
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/15

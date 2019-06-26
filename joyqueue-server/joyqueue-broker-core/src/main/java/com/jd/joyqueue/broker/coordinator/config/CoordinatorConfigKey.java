@@ -16,6 +16,7 @@ package com.jd.joyqueue.broker.coordinator.config;
 import com.jd.joyqueue.toolkit.config.PropertyDef;
 
 /**
+ * CoordinatorConfigKey
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/12/4

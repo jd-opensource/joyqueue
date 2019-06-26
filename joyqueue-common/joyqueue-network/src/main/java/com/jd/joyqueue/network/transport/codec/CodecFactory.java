@@ -14,7 +14,7 @@
 package com.jd.joyqueue.network.transport.codec;
 
 /**
- * 编解码器工厂
+ * CodecFactory
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/13

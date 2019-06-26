@@ -16,7 +16,7 @@ package com.jd.joyqueue.network.transport.exception;
 import java.io.IOException;
 
 /**
- * 连接异常
+ * TransportException
  * Created by hexiaofeng on 16-6-22.
  */
 public class TransportException extends RuntimeException {

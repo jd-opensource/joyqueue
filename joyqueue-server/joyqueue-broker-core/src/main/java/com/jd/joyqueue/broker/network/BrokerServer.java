@@ -24,7 +24,7 @@ import com.jd.joyqueue.network.transport.config.ServerConfig;
 import com.jd.joyqueue.toolkit.service.Service;
 
 /**
- * broker服务
+ * BrokerServer
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/14
