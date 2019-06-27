@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jd.joyqueue.broker.protocol.network;
+package com.jd.joyqueue.broker.protocol.network.codec;
 
 import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.codec.PayloadCodec;

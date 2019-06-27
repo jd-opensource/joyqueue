@@ -14,6 +14,7 @@
 package com.jd.joyqueue.broker.protocol.network;
 
 import com.google.common.collect.Lists;
+import com.jd.joyqueue.broker.protocol.network.codec.JoyQueuePayloadCodec;
 import com.jd.joyqueue.network.transport.codec.Codec;
 import com.jd.joyqueue.network.transport.codec.CodecFactory;
 import com.jd.joyqueue.network.transport.codec.support.JoyQueueCodec;

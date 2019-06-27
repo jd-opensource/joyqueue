@@ -196,7 +196,7 @@ public class MessageProducerInner extends Service {
                 lastException = e;
                 retryTimes++;
                 logger.debug("send message exception, topic: {}, app:{} messages: {}", topic, app, messages, e);
-            }catch (Exception e) {
+            } catch (Exception e) {
                 logger.error("send message exception, topic: {}, app:{} messages: {}", topic, app, messages, e);
                 new ProducerException(lastException);
             }
@@ -358,7 +358,7 @@ public class MessageProducerInner extends Service {
         }
         PartitionSelector partitionSelector = partitionSelectorManager.getPartitionSelector(topicMetadata.getTopic(), config.getSelectorType());
         PartitionMetadata partition = ProducerHelper.dispatchPartitions(messages, topicMetadata, partitions, partitionSelector);
-        if (partition == null || partition.getLeader() == null) {
+        if (partition == null || partition.getLeader() == null || !partition.getLeader().isWritable()) {
             if (partitionBlackList == null) {
                 partitionBlackList = Lists.newArrayList();
             }

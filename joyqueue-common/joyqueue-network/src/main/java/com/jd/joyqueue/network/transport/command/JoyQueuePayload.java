@@ -21,7 +21,7 @@ import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
  * email: gaohaoxiang@jd.com
  * date: 2018/8/21
  */
-public abstract class JoyQueuePayload implements Payload, Type, HeaderAware {
+public abstract class JoyQueuePayload implements Payload, Type {
 
     private JoyQueueHeader header;
 
@@ -32,11 +32,8 @@ public abstract class JoyQueuePayload implements Payload, Type, HeaderAware {
         //Do nothing
     }
 
-    @Override
-    public void setHeader(Header header) {
-        if (header instanceof JoyQueueHeader) {
-            this.header = (JoyQueueHeader) header;
-        }
+    public void setHeader(JoyQueueHeader header) {
+        this.header = header;
     }
 
     public JoyQueueHeader getHeader() {

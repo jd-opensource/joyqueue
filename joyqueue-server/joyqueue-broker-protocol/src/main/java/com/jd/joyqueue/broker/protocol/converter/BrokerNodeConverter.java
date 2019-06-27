@@ -34,6 +34,7 @@ public class BrokerNodeConverter {
         return convertBrokerNode(broker, brokerDataCenter, region, 0);
     }
 
+    // TODO 权限处理
     public static BrokerNode convertBrokerNode(Broker broker, DataCenter brokerDataCenter, String region, int weight) {
         BrokerNode result = new BrokerNode();
         result.setId(broker.getId());

@@ -23,7 +23,6 @@ import com.jd.joyqueue.network.transport.command.Command;
 import com.jd.joyqueue.network.transport.command.CommandCallback;
 import com.jd.joyqueue.network.transport.command.Direction;
 import com.jd.joyqueue.network.transport.command.Header;
-import com.jd.joyqueue.network.transport.command.HeaderAware;
 import com.jd.joyqueue.network.transport.command.Type;
 import com.jd.joyqueue.network.transport.config.TransportConfig;
 import com.jd.joyqueue.network.transport.exception.TransportException;
@@ -288,10 +287,6 @@ public class DefaultChannelTransport implements ChannelTransport {
                     }
                 }
                 response.getHeader().setRequestId(header.getRequestId());
-
-                if (response.getPayload() instanceof HeaderAware) {
-                    ((HeaderAware) response.getPayload()).setHeader(header);
-                }
 
                 // 判断请求是否要应答
                 if (header.getQosLevel() == QosLevel.ONE_WAY) {

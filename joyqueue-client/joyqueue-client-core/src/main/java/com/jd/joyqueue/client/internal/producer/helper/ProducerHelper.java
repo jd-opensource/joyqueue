@@ -48,7 +48,7 @@ public class ProducerHelper {
 
     public static PartitionMetadata dispatchPartitions(List<ProduceMessage> messages, TopicMetadata topicMetadata, List<PartitionMetadata> partitions, PartitionSelector partitionSelector) {
         PartitionMetadata partition = partitionSelector.select(messages.get(0), topicMetadata, partitions);
-        if (partition == null || partition.getLeader() == null) {
+        if (partition == null || partition.getLeader() == null || !partition.getLeader().isWritable()) {
             return null;
         }
         return partition;
