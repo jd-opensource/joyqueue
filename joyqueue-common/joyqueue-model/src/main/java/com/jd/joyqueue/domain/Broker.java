@@ -57,7 +57,8 @@ public class Broker implements Serializable {
      * default FULL
      * @return
      */
-    protected String permission = DEFAULT_PERMISSION;
+
+    protected PermissionEnum permission = PermissionEnum.FULL;
 
     public Integer getId() {
         return id;
@@ -103,11 +104,11 @@ public class Broker implements Serializable {
         this.retryType = retryType;
     }
 
-    public String getPermission() {
+    public PermissionEnum getPermission() {
         return permission;
     }
 
-    public void setPermission(String permission) {
+    public void setPermission(PermissionEnum permission) {
         this.permission = permission;
     }
 
@@ -153,6 +154,37 @@ public class Broker implements Serializable {
                 Objects.equals(ip, broker.ip);
     }
 
+    public enum PermissionEnum {
+        FULL(0,"FULL"),
+        READ(1,"READ"),
+        WRITE(2,"WRITE"),
+        NONE(3,"NONE");
+
+        private int value;
+        private String name;
+
+        PermissionEnum(int value, String name) {
+            this.value = value;
+            this.name = name;
+        }
+
+        public int getValue() {
+            return value;
+        }
+
+        public void setValue(int value) {
+            this.value = value;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(id, ip, port);
@@ -166,6 +198,7 @@ public class Broker implements Serializable {
                 ", port=" + port +
                 ", dataCenter='" + dataCenter + '\'' +
                 ", retryType=" + retryType +
+                ", permission=" + permission +
                 '}';
     }
 }
