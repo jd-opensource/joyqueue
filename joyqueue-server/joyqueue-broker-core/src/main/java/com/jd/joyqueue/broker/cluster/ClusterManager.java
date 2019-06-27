@@ -1267,7 +1267,7 @@ public class ClusterManager extends Service {
                                 break;
                             case UPDATE_BROKER:
                                 BrokerEvent brokerEvent = (BrokerEvent) event.getMetaEvent();
-                                broker.setPermission(brokerEvent.getBroker().getPermission());;
+                                broker.setPermission(brokerEvent.getBroker().getPermission());
                                 break;
                             default:break;
                         }
