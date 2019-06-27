@@ -37,7 +37,6 @@ public class WebApplication {
             }
         }
         System.setProperty("vertx.logger-delegate-factory-class-name","io.vertx.core.logging.SLF4JLogDelegateFactory");
-        
         SpringApplication.run(WebApplication.class, args);
     }
 
