@@ -733,7 +733,7 @@ public class ClusterManager extends Service {
      */
     public BooleanResponse checkBrokerReadable(){
         Broker broker = getBroker();
-        if (!StringUtils.equals(broker.getPermission(), Broker.PERMISSION_FULL) && !StringUtils.equals(broker.getPermission(), Broker.PERMISSION_READ)) {
+        if (Broker.PermissionEnum.NONE.getValue() == broker.getPermissionEnum().getValue() || Broker.PermissionEnum.WRITE.getValue() == broker.getPermissionEnum().getValue()) {
             logger.error("No read permission broker:[{}]", broker);
 
             return BooleanResponse.failed(JoyQueueCode.FW_BROKER_NOT_READABLE);
@@ -748,7 +748,7 @@ public class ClusterManager extends Service {
      */
     public BooleanResponse checkBrokerWritable(){
         Broker broker = getBroker();
-        if (!StringUtils.equals(broker.getPermission(), Broker.PERMISSION_FULL) && !StringUtils.equals(broker.getPermission(), Broker.PERMISSION_WRITE)) {
+        if (Broker.PermissionEnum.NONE.getValue() == broker.getPermissionEnum().getValue() || Broker.PermissionEnum.READ.getValue() == broker.getPermissionEnum().getValue()) {
             logger.error("No write permission broker info is [{}]", broker);
 
             return BooleanResponse.failed(JoyQueueCode.FW_BROKER_NOT_WRITABLE);
