@@ -57,9 +57,8 @@ public class Broker implements Serializable {
      * default FULL
      * @return
      */
-    protected String permission = DEFAULT_PERMISSION;
 
-    protected PermissionEnum permissionEnum = PermissionEnum.FULL;
+    protected PermissionEnum permission = PermissionEnum.FULL;
 
     public Integer getId() {
         return id;
@@ -105,21 +104,12 @@ public class Broker implements Serializable {
         this.retryType = retryType;
     }
 
-    public String getPermission() {
+    public PermissionEnum getPermission() {
         return permission;
     }
 
-    public void setPermission(String permission) {
-        this.permissionEnum = PermissionEnum.valueOf(permission);
+    public void setPermission(PermissionEnum permission) {
         this.permission = permission;
-    }
-
-    public PermissionEnum getPermissionEnum() {
-        return permissionEnum;
-    }
-
-    public void setPermissionEnum(PermissionEnum permissionEnum) {
-        this.permissionEnum = permissionEnum;
     }
 
     /**
