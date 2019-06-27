@@ -48,7 +48,7 @@ public class IgniteBroker extends Broker implements IgniteBaseModel, Binarylizab
         writer.writeInt(COLUMN_PORT, port);
         writer.writeString(COLUMN_DATA_CENTER, dataCenter);
         writer.writeString(COLUMN_RETRY_TYPE, retryType);
-        writer.writeString(COLUMN_PERMISSION,permission);
+        writer.writeString(COLUMN_PERMISSION,permission.getName());
     }
 
     @Override
@@ -58,6 +58,6 @@ public class IgniteBroker extends Broker implements IgniteBaseModel, Binarylizab
         this.port = reader.readInt(COLUMN_PORT);
         this.dataCenter = reader.readString(COLUMN_DATA_CENTER);
         this.retryType = reader.readString(COLUMN_RETRY_TYPE);
-        this.permission = reader.readString(COLUMN_PERMISSION);
+        this.permission = PermissionEnum.valueOf(reader.readString(COLUMN_PERMISSION));
     }
 }

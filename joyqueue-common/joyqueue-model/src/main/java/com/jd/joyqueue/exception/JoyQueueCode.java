@@ -191,6 +191,8 @@ public enum JoyQueueCode {
     FW_TOPIC_NOT_EXIST(189, "TOPIC不存在"),
     FW_TOPIC_NO_PARTITIONGROUP(190, "TOPIC无可用分组"),
     FW_PARTITION_BROKER_NOT_LEADER(191, "partition在当前broker上不是leader"),
+    FW_BROKER_NOT_READABLE(192, "当前broker不可读"),
+    FW_BROKER_NOT_WRITABLE(193, "当前broker不可写"),
 
     // 151~160 agent错误，以JA开头
     JA_COMMAND_ERROR(151, "命令执行失败"),

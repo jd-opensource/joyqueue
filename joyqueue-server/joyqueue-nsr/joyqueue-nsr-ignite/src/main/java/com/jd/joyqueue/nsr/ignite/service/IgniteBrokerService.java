@@ -14,6 +14,7 @@
 package com.jd.joyqueue.nsr.ignite.service;
 
 
+import com.alibaba.fastjson.JSON;
 import com.google.inject.Inject;
 import com.jd.joyqueue.domain.Broker;
 import com.jd.joyqueue.event.BrokerEvent;
@@ -25,6 +26,10 @@ import com.jd.joyqueue.nsr.ignite.model.IgniteBroker;
 import com.jd.joyqueue.nsr.message.Messenger;
 import com.jd.joyqueue.nsr.model.BrokerQuery;
 import com.jd.joyqueue.nsr.service.BrokerService;
+import org.apache.ignite.Ignition;
+import org.apache.ignite.transactions.Transaction;
+import org.apache.ignite.transactions.TransactionConcurrency;
+import org.apache.ignite.transactions.TransactionIsolation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,6 +116,18 @@ public class IgniteBrokerService implements BrokerService {
         }
     }
 
+    @Override
+    public void update(Broker broker) {
+        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
+            this.addOrUpdate(new IgniteBroker(broker));
+            this.publishEvent(BrokerEvent.event(broker));
+            tx.commit();
+        } catch (Exception e) {
+            String message = String.format("update broker [%s] error", JSON.toJSON(broker));
+            logger.error(message, e);
+            throw new RuntimeException(message, e);
+        }
+    }
     @Override
     public void deleteById(Integer id) {
         brokerDao.deleteById(id);
