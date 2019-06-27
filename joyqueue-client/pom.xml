@@ -26,7 +26,7 @@
 
     <artifactId>joyqueue-client</artifactId>
     <packaging>pom</packaging>
-    <name>JoyQueue - Client</name>
+    <name>JoyQueue-Client</name>
     <description>Client SDK and Samples</description>
 
     <modules>

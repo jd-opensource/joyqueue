@@ -25,7 +25,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>joyqueue-client-samples</artifactId>
-    <name>JoyQueue - Client - Samples</name>
+    <name>JoyQueue-Client-Samples</name>
     <description>Client Samples</description>
 
     <dependencies>
@@ -37,12 +37,10 @@
         <dependency>
             <groupId>io.openmessaging</groupId>
             <artifactId>openmessaging-spring</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>io.openmessaging</groupId>
             <artifactId>openmessaging-spring-boot-starter</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <groupId>ch.qos.logback</groupId>

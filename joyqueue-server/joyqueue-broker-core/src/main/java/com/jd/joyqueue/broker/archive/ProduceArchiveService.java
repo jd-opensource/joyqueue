@@ -13,6 +13,7 @@
  */
 package com.jd.joyqueue.broker.archive;
 
+import com.google.common.base.Preconditions;
 import com.jd.joyqueue.broker.Plugins;
 import com.jd.joyqueue.broker.buffer.Serializer;
 import com.jd.joyqueue.broker.cluster.ClusterManager;
@@ -29,7 +30,6 @@ import com.jd.joyqueue.server.archive.store.model.SendLog;
 import com.jd.joyqueue.store.PositionUnderflowException;
 import com.jd.joyqueue.toolkit.concurrent.LoopThread;
 import com.jd.joyqueue.toolkit.lang.Close;
-import com.google.common.base.Preconditions;
 import com.jd.joyqueue.toolkit.service.Service;
 import com.jd.joyqueue.toolkit.time.SystemClock;
 import org.apache.commons.lang3.StringUtils;

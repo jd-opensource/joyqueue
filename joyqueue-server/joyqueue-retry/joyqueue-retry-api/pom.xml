@@ -36,5 +36,9 @@
             <groupId>com.jd.laf</groupId>
             <artifactId>laf-extension-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+        </dependency>
     </dependencies>
 </project>

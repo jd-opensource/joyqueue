@@ -26,5 +26,7 @@
     <version>4.1.0-SNAPSHOT</version>
 
     <artifactId>joyqueue-token-api</artifactId>
+    <name>JoyQueue-Token-API</name>
+    <description>Token supplier API</description>
 
 </project>

@@ -25,6 +25,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>joyqueue-hbase</artifactId>
+    <name>JoyQueue-HBase</name>
+    <description>HBase operations</description>
 
     <dependencies>
         <dependency>
@@ -38,6 +40,12 @@
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-hdfs</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>asm</groupId>
+                    <artifactId>asm</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.jd.joyqueue</groupId>
