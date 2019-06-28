@@ -50,11 +50,6 @@
                 <artifactId>concurrentlinkedhashmap-lru</artifactId>
                 <version>${concurrentlinkedhashmap-lru.version}</version>
             </dependency>
-            <dependency>
-                <groupId>com.jd.joyqueue</groupId>
-                <artifactId>joyqueue-broker-monitor-pth</artifactId>
-                <version>${project.version}</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 

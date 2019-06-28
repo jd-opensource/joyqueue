@@ -26,5 +26,7 @@
 
     <artifactId>joyqueue-store-api</artifactId>
 
+    <name>JoyQueue-Store-API</name>
+    <description>Message storage API</description>
 
 </project>

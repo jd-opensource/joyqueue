@@ -355,7 +355,21 @@
                 <artifactId>joyqueue-nsr-ignite</artifactId>
                 <version>${project.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-broker-monitor-pth</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-store-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-client-all</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <!-- Mysql -->
             <dependency>
                 <groupId>mysql</groupId>

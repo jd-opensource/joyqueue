@@ -24,8 +24,8 @@
         <version>4.1.0-SNAPSHOT</version>
     </parent>
     <artifactId>joyqueue-nsr-admin</artifactId>
-    <name>JoyQueue-Broker-NamingService</name>
-    <description>JoyQueue naming service</description>
+    <name>JoyQueue-NamingService-Admin</name>
+    <description>JoyQueue CLI Admin tools</description>
 
     <dependencies>
         <dependency>

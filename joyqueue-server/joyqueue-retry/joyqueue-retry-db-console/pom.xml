@@ -25,7 +25,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>joyqueue-retry-db-console</artifactId>
-    
+    <name>JoyQueue-Retry-DB-Console</name>
+    <description>Retry message Database libraries used by web console</description>
+
     <dependencies>
         <dependency>
             <groupId>com.jd.joyqueue</groupId>
