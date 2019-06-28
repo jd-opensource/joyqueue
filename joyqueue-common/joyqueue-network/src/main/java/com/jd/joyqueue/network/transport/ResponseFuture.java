@@ -28,7 +28,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * 应答Future
+ * ResponseFuture
  */
 public class ResponseFuture implements Future {
     protected static Logger logger = LoggerFactory.getLogger(ResponseFuture.class);

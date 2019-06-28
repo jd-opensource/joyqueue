@@ -14,7 +14,7 @@
 package com.jd.joyqueue.network.transport.command;
 
 /**
- * 排序
+ * Ordered
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/27

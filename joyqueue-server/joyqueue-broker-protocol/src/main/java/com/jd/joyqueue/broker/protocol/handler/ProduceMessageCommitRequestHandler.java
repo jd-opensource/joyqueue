@@ -78,7 +78,7 @@ public class ProduceMessageCommitRequestHandler implements JoyQueueCommandHandle
     }
 
     protected ProduceMessageCommitResponse produceMessageCommit(Connection connection, ProduceMessageCommitRequest produceMessageCommitRequest) {
-        Producer producer = new Producer(connection.getId(), produceMessageCommitRequest.getTopic(), produceMessageCommitRequest.getApp(), Producer.ProducerType.JMQ);
+        Producer producer = new Producer(connection.getId(), produceMessageCommitRequest.getTopic(), produceMessageCommitRequest.getApp(), Producer.ProducerType.JOYQUEUE);
 
         BrokerCommit brokerCommit = new BrokerCommit();
         brokerCommit.setTopic(produceMessageCommitRequest.getTopic());

@@ -16,7 +16,7 @@ package com.jd.joyqueue.network.event;
 import com.jd.joyqueue.network.transport.Transport;
 
 /**
- * 通信事件
+ * TransportEvent
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/15

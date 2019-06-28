@@ -29,7 +29,7 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 
 /**
- * 协议处理器管道
+ * DefaultProtocolHandlerPipeline
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/13

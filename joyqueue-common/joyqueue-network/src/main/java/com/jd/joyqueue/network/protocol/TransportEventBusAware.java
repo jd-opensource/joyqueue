@@ -17,7 +17,7 @@ import com.jd.joyqueue.network.event.TransportEvent;
 import com.jd.joyqueue.toolkit.concurrent.EventBus;
 
 /**
- * 通信事件注入
+ * TransportEventBusAware
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/15

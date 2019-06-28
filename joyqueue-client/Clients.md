@@ -1,20 +1,5 @@
 ## 客户端使用说明
 
-### JMQ2 客户端 
-
-JMQ2.0 客户端使用方式参考[java  客户端使用手册](http://jpcloud.jd.com/pages/viewpage.action?pageId=13507053). 配置参数略有不同，详情如下：
-- jmq.address: 参考[集群地址](http://help.mq.jd.com/ClusterAddress.html)，填写其中相应集群的nameserver地址
-- jmq.app:  同jmq2， 填写app名称。 如果配置了消费者组，则app配置为 "app名称.消费者组"，如"jmq.group1"
-- jmq.user:  与jmq.app 相同
-- jmq.passwd: 填写jmq4.0 中的token
-
-### JMQ4
-客户端demo：http://git.jd.com/laf/journalQ/tree/master/joyqueue-client/joyqueue-client-samples/src/main/java/com/jd/joyqueue/client/samples
-
-#### pom
-
-配置pom.xml文件如下，joyqueue-client-all必选，其它根据需要引用，具体可参考IDE提示信息进行配置： 
-    
 ```
 <!-- 必选 -->
 <dependency>
@@ -70,9 +55,9 @@ public class SimpleProducer {
         
         // 创建MessagingAccessPoint, url格式为 oms:joyqueue://[app]@[nameserver]/[region], 三个参数都是必填
         // app对应管理端的应用
-        // nameserver根据不同环境填写不同地址，比如jmq.jd.local:80
+        // nameserver根据不同环境填写不同地址，比如nameserver.joyqueue.local:50088
         // region表示区域，如果使用就近发送就近消费需要填写机房信息，如果不使用填写DEFAULT或UNKNOWN都可以，建议填写真实的
-        MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint("oms:joyqueue://test_app@jmq.jd.local:80/UNKNOWN", keyValue);
+        MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint("oms:joyqueue://test_app@nameserver.joyqueue.local:50088/UNKNOWN", keyValue);
 
         // 创建producer
         Producer producer = messagingAccessPoint.createProducer();
@@ -98,7 +83,7 @@ public class SimpleProducer {
     public static void main(String[] args) {
         KeyValue keyValue = OMS.newKeyValue();
         keyValue.put(OMSBuiltinKeys.ACCOUNT_KEY, "test_token");
-        MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint("oms:joyqueue://test_app@jmq.jd.local:80/UNKNOWN", keyValue);
+        MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint("oms:joyqueue://test_app@nameserver.joyqueue.local:50088/UNKNOWN", keyValue);
 
         // 使用MessagingAccessPoint创建producer
         Producer producer = messagingAccessPoint.createProducer();
@@ -301,7 +286,7 @@ public class BatchConsumer {
 
 ##### 事务
 
-jmq4支持事务消息，支持单条事务消息和多条事务消息，未提交的事务消息不会被消费到
+JoyQueue支持事务消息，支持单条事务消息和多条事务消息，未提交的事务消息不会被消费到
 
 单条事务消息
 ````java
@@ -455,7 +440,7 @@ public class SimpleProducer {
         // 使用producer.createMessage方法创建message
         Message message = producer.createMessage("test_topic_0", "body".getBytes());
 
-        // 设置messageKey，和jmq2的businessId相同，非必填
+        // 设置messageKey，非必填
         // 如果需要相对顺序消息，也可以使用messageKey作为key指定分区
         message.extensionHeader().get().setMessageKey("test_key");
         
@@ -645,7 +630,7 @@ public class PartitionIndexReceiveConsumer {
 
 下面的例子都是基于api方式的，如果是spring或springboot可以使用xml和注解声明
 
-拦截器分为openmessaging和jmq两种，openmessaging只有基本的拦截器，jmq额外提供消息过滤，拦截器排序等
+拦截器分为openmessaging和joyqueue两种，openmessaging只有基本的拦截器，joyqueue额外提供消息过滤，拦截器排序等
 
 consumer拦截器只有在使用listener时生效
 
@@ -681,7 +666,7 @@ public class SimpleConsumerInterceptor {
 }
 ````
 
-简单consumer拦截器 (jmq)
+简单consumer拦截器 (joyqueue)
 
 使用时需要通过spi的方式注册
 把实现类添加到 META-INF/services/com.jd.joyqueue.client.internal.consumer.interceptor.ConsumerInterceptor 文件内，每行一个
@@ -689,7 +674,7 @@ public class SimpleConsumerInterceptor {
 ````java
 // Ordered接口提供getOrder方法，用于指定顺序，可以不实现
 // context还有attributes等可使用，具体看com.jd.joyqueue.client.internal.consumer.interceptor.ConsumeContext
-public class JMQSimpleConsumerInterceptor implements ConsumerInterceptor, Ordered {
+public class JoyQueueSimpleConsumerInterceptor implements ConsumerInterceptor, Ordered {
 
     @Override
     public boolean preConsume(ConsumeContext context) {
@@ -748,7 +733,7 @@ public class SimpleProducerInterceptor {
 }
 ````
 
-简单producer拦截器 (jmq)
+简单producer拦截器 (joyqueue)
 
 使用时需要通过spi的方式注册
 把实现类添加到 META-INF/services/com.jd.joyqueue.client.internal.producer.interceptor.ProducerInterceptor 文件内，每行一个
@@ -756,7 +741,7 @@ public class SimpleProducerInterceptor {
 ````java
 // Ordered接口提供getOrder方法，用于指定顺序，可以不实现
 // context还有attributes等可使用，具体看com.jd.joyqueue.client.internal.producer.interceptor.ProduceContext
-public class JMQSimpleProducerInterceptor implements ProducerInterceptor, Ordered {
+public class JoyQueueSimpleProducerInterceptor implements ProducerInterceptor, Ordered {
 
     @Override
     public boolean preSend(ProduceContext context) {
@@ -816,7 +801,7 @@ ump的实现提供可配参数，可以通过com.jd.joyqueue.client.internal.ump
         http://openmessaging.io/schema/oms.xsd">
     
     <!-- 定义accessPoint -->
-    <oms:access-point url="oms:joyqueue://test_app@jmq.jd.local:80/UNKNOWN">
+    <oms:access-point url="oms:joyqueue://test_app@nameserver.joyqueue.local:50088/UNKNOWN">
         <oms:attribute key="ACCOUNT_KEY" value="test_token"></oms:attribute>
         <!-- 更多配置 -->
     </oms:access-point>
@@ -825,24 +810,24 @@ ump的实现提供可配参数，可以通过com.jd.joyqueue.client.internal.ump
     <oms:producer id="producer1"></oms:producer>
     
     <!-- 需要需要事务补偿，可以指定对应的listener，需要实现io.openmessaging.producer.TransactionStateCheckListener接口 -->
-    <oms:producer id="producer2" listener="com.jd.joyqueue.client.samples.spring.SimpleTransactionStateCheckListener"></oms:producer>
+    <oms:producer id="producer2" listener="com.jd.joyqueue.client.samples.com.jd.joyqueue.client.samples.spring.SimpleTransactionStateCheckListener"></oms:producer>
 
     <!-- 如果listener不需要由spring自动创建，也可以设置listener的引用 -->
-    <bean id="simpleTransactionStateCheckListener" class="com.jd.joyqueue.client.samples.spring.SimpleTransactionStateCheckListener"></bean>
+    <bean id="simpleTransactionStateCheckListener" class="com.jd.joyqueue.client.samples.com.jd.joyqueue.client.samples.spring.SimpleTransactionStateCheckListener"></bean>
     <oms:producer id="producer3" listener-ref="simpleTransactionStateCheckListener"></oms:producer>
     
     <!-- 创建一个consumer实例，由spring创建并管理生命周期，不需要再手动调用bind和start -->
     <!-- queue-name对应需要消费的主题 -->
     <!-- listener需要实现io.openmessaging.consumer.MessageListener或io.openmessaging.consumer.BatchMessageListener接口，对应单条和批量消费 -->
-    <oms:consumer queue-name="test_topic_0" listener="com.jd.joyqueue.client.samples.spring.SimpleMessageListener"></oms:consumer>
+    <oms:consumer queue-name="test_topic_0" listener="com.jd.joyqueue.client.samples.com.jd.joyqueue.client.samples.spring.SimpleMessageListener"></oms:consumer>
     
     <!-- 如果listener不需要由spring自动创建，也可以设置listener的引用 -->
-    <bean id="messageListenerRef" class="com.jd.joyqueue.client.samples.spring.SimpleMessageListener"></bean>
+    <bean id="messageListenerRef" class="com.jd.joyqueue.client.samples.com.jd.joyqueue.client.samples.spring.SimpleMessageListener"></bean>
     <oms:consumer queue-name="test_topic_1" listener-ref="messageListenerRef"></oms:consumer>
     
     <!-- 定义拦截器，如果不需要由spring自动创建，也可以设置interceptor的引用 -->
     <!-- 需要实现io.openmessaging.interceptor.ProducerInterceptor或io.openmessaging.interceptor.ConsumerInterceptor接口，对应生产和消费拦截 -->
-    <oms:interceptor class="com.jd.joyqueue.client.samples.spring.SimpleConsumerInterceptor"></oms:interceptor>
+    <oms:interceptor class="com.jd.joyqueue.client.samples.com.jd.joyqueue.client.samples.spring.SimpleConsumerInterceptor"></oms:interceptor>
     <!--<oms:interceptor ref="consumerInterceptor1"></oms:interceptor>-->
 </beans>
 ````
@@ -858,22 +843,22 @@ ump的实现提供可配参数，可以通过com.jd.joyqueue.client.internal.ump
         http://openmessaging.io/schema/oms.xsd">
     
     <!-- accessPoint1 -->
-    <oms:access-point id="accessPoint1" url="oms:joyqueue://test_app@jmq.jd.local:80/UNKNOWN">
+    <oms:access-point id="accessPoint1" url="oms:joyqueue://test_app@nameserver.joyqueue.local:50088/UNKNOWN">
         <oms:attribute key="ACCOUNT_KEY" value="test_token"></oms:attribute>
     </oms:access-point>
 
     <oms:producer id="producer1" access-point="accessPoint1"></oms:producer>
 
-    <oms:consumer access-point="accessPoint1" queue-name="test_topic_0" listener="com.jd.joyqueue.client.samples.spring.SimpleMessageListener"></oms:consumer>
+    <oms:consumer access-point="accessPoint1" queue-name="test_topic_0" listener="com.jd.joyqueue.client.samples.com.jd.joyqueue.client.samples.spring.SimpleMessageListener"></oms:consumer>
 
     <!-- accessPoint2 -->
-    <oms:access-point id="accessPoint2" url="oms:joyqueue://test_app@jmq.jd.local:80/UNKNOWN">
+    <oms:access-point id="accessPoint2" url="oms:joyqueue://test_app@nameserver.joyqueue.local:50088/UNKNOWN">
         <oms:attribute key="ACCOUNT_KEY" value="test_token"></oms:attribute>
     </oms:access-point>
 
     <oms:producer id="producer2" access-point="accessPoint2"></oms:producer>
 
-    <oms:consumer access-point="producer2" queue-name="test_topic_0" listener="com.jd.joyqueue.client.samples.spring.SimpleMessageListener"></oms:consumer>
+    <oms:consumer access-point="producer2" queue-name="test_topic_0" listener="com.jd.joyqueue.client.samples.com.jd.joyqueue.client.samples.spring.SimpleMessageListener"></oms:consumer>
 </beans>
 ````
 
@@ -888,7 +873,7 @@ ump的实现提供可配参数，可以通过com.jd.joyqueue.client.internal.ump
 ````properties
 #spring.oms.url是核心配置，必须配置，否则无法使用
 #spring.oms.attributes是一些配置信息，里面的ACCOUNT_KEY必须配置，对应管理端的app
-spring.oms.url=oms:joyqueue://test_app@jmq.jd.local:80/UNKNOWN
+spring.oms.url=oms:joyqueue://test_app@nameserver.joyqueue.local:50088/UNKNOWN
 spring.oms.attributes[ACCOUNT_KEY]=test_token
 
 #是否启用消费者, 默认启用
@@ -1016,7 +1001,7 @@ public class SimpleProducerInterceptor implements ProducerInterceptor {
  
 ### kafka
 
-- jmq兼容kafka协议，可直接使用原生kafka客户端, 但使用kafka-python客户端时需在配置中指定客户端版本为'0.9.0.1' （正在开发，后续不需要指定）
+- JoyQueue兼容kafka协议，可直接使用原生kafka客户端
 
 #### kafka-java客户端
 
@@ -1039,7 +1024,7 @@ public class SimpleKafkaProducer {
 
     public static void main(String[] args) {
         Properties props = new Properties();
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "jmq.jd.local:80");
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "nameserver.joyqueue.local:50088");
         
         // 需指定client.id，值是管理端的app
         // 如果特殊情况需要多个producer实例，可以在app后加 '-' 区分，比如 test_app-0,test_app-0
@@ -1091,7 +1076,6 @@ public class SimpleKafkaConsumer {
 - git 地址：https://github.com/dpkp/kafka-python
 - 使用说明：
     0. 注意事项：
-        - jmq兼容kafka 客户端1.0.0版本的协议
         - 生产时如果有异常需要根据业务逻辑做异常处理，重新发送消息
         - 支持发送到指定key和partition
         - 压缩方式建议使用gzip。其它压缩方式中，lz4和snappy服务端支持，但客户端配置较复杂，zstd服务端不支持
@@ -1108,7 +1092,7 @@ public class SimpleKafkaConsumer {
             topic="your_topic"
             message="test_message"
             conf={
-                'bootstrap_servers':'test-nameserver.jmq.jd.local:50088',
+                'bootstrap_servers':'test-nameserver.nameserver.joyqueue.local:50088',
                 'client_id':'your_app'
             }
             producer = KafkaProducer(**conf)
@@ -1126,9 +1110,8 @@ public class SimpleKafkaConsumer {
         from kafka import KafkaConsumer
 
         conf={
-            'bootstrap_servers':'test-nameserver.jmq.jd.local:50088',
-            'client_id':'your_app',
-            'api_version':'0.9.0.1'
+            'bootstrap_servers':'test-nameserver.nameserver.joyqueue.local:50088',
+            'client_id':'your_app'
         }
         conf['group_id'] = 'your_app.your_group'
         consumer = KafkaConsumer(your_topic,**conf)      
@@ -1141,13 +1124,13 @@ public class SimpleKafkaConsumer {
 #### MQTT开发与测试注意事项
 
 * 可以参阅网上其它关于mqtt的教程来完善自己的mqtt业务场景开发。
-* JMQ4 MQTT服务器只支持MQTT Version 3.1.1协议版本。
-* JMQ4 MQTT服务器连接connection报文必须提供鉴权信息：username和password，username为应用名称，password为应用token。
-* JMQ4 MQTT服务支持clean session客户端。
-* JMQ4 MQTT服务不支持will主题和消息，也不支持retained消息投递。
-* JMQ4 MQTT服务器目前不支持qos=2的消息交互协议，只能发送qos<=1的报文，订阅主题没有变化，因为消息发送都是qos<=1，所以即使订阅qos=2的主题即会投递qos=1的消息，整体消息服务为AT_MOST_ONCE和AT_LEAST_ONCE两种。
-* JMQ4 MQTT测试服务器地址为192.168.53.169，192.168.131.206，192.168.131.205，连接其中任意一台即可，如果有问题请尝试更换地址再做测试。
-* JMQ4 MQTT线上服务器，请参考<a href ="http://git.jd.com/laf/laf-jmq/wikis/JMQ4%E6%8E%A5%E5%85%A5(%E7%BA%BF%E4%B8%8A&%E6%B5%8B%E8%AF%95)">Jmq4接入(线上&测试)</a>服务文档，线上JMQ4 MQTT服务连接域名即可，外网连接地址：mqtt.jd.com:2000，内网连接地址：mqtt.jd.local:1883。
+* JoyQueue MQTT服务器只支持MQTT Version 3.1.1协议版本。
+* JoyQueue MQTT服务器连接connection报文必须提供鉴权信息：username和password，username为应用名称，password为应用token。
+* JoyQueue MQTT服务支持clean session客户端。
+* JoyQueue MQTT服务不支持will主题和消息，也不支持retained消息投递。
+* JoyQueue MQTT服务器目前不支持qos=2的消息交互协议，只能发送qos<=1的报文，订阅主题没有变化，因为消息发送都是qos<=1，所以即使订阅qos=2的主题即会投递qos=1的消息，整体消息服务为AT_MOST_ONCE和AT_LEAST_ONCE两种。
+* JoyQueue MQTT测试服务器地址为192.168.53.169，192.168.131.206，192.168.131.205，连接其中任意一台即可，如果有问题请尝试更换地址再做测试。
+* JoyQueue MQTT线上服务器，请参考<a href ="http://git.jd.com/laf/laf-jmq/wikis/JMQ4%E6%8E%A5%E5%85%A5(%E7%BA%BF%E4%B8%8A&%E6%B5%8B%E8%AF%95)">Jmq4接入(线上&测试)</a>服务文档，线上JMQ4 MQTT服务连接域名即可，外网连接地址：mqtt.jd.com:2000，内网连接地址：mqtt.jd.local:1883。
 
 #### MQTT开发用例参考
 在开发测试前，推荐使用一些开源的mqtt client工具来做测试，服务器端兼容并且支持开源客户端连接的，比如GUI支持很好的MQTT.fx，或者其他使用paho库的客户端实现。如要开发和使用mqtt客户端与服务器的交互，来满足自己的业务场景，以下为使用paho这个开源客户端实现为例进行说明：
@@ -1258,13 +1241,13 @@ public class MqttTest {
 
 #### MQTT开发与测试说明
 
-* MQTT代理集群，目前JMQ4 MQTT测试环境为docker部署3台，分别为：192.168.53.169，192.168.131.206，192.168.131.205，测试环境没有配置域名，请使用mqtt客户端连接其中任意一台服务器即可进行测试，端口号为默认的mqtt协议1883配置。
+* MQTT代理集群，目前JoyQueue MQTT测试环境为docker部署3台，分别为：192.168.53.169，192.168.131.206，192.168.131.205，测试环境没有配置域名，请使用mqtt客户端连接其中任意一台服务器即可进行测试，端口号为默认的mqtt协议1883配置。
 * ClientID请使用自己独立的并且唯一的标识ID（推荐业务应用名称加随机数生成组合），以避免跟其他客户端ID冲突而导致一些协议交互错误。如果使用相同ClientID的多个客户端进行连接，服务器会受理最新连入的相同ClientID客户端，断开之前连入受理的客户端，请知悉，如果设置了重连情况下出现频繁的连接成功并中断连接很可能是这种情况，请尝试更换另一个唯一的ClientID进行客户端连接。
 * Connect timeout设置，客户端连接超时默认可以设置30秒，该超时时间设置针对客户端连接服务器时服务器的最大响应时间，如果超过该值设置的时间内没有连接成功可能有多种原因，可能是网络原因，地址端口不正确或者服务器连接数上限无响应，如必要请连接管理员处理。
 * KeepAlive时间设置，该设置是mqtt客户端与服务器之间的心跳包ping-pong交互时间，每个keepalive时间间隔客户端都会发送ping报文给服务器，服务器收到该clientID的ping报文即可发送pong响应报文，以此作为客户端判断服务器存活的关键，相反如果服务器在keepalive时间间隔的1.5倍时间内没有收到ping请求报文，服务器也会判断该客户端是否存活，做出响应的处理，即客户端端和服务器端都会主动断开连接。所以请根据客户端的场景合理设置该值，该值默认可以设置为60秒。
 * CleanSession设置，该值是布尔数值，表示该客户端是否session持久化。true的情况为在客户端失去与服务器的连接后（主动断开与被动断开），服务器不保留客户端的订阅关系，客户端再次连接后需要做订阅关系的操作才能消费，并且消费的消息为最新推送的消息。false的情况为持久化session，服务器会保证客户端的订阅关系，在任何时刻再次连接后都会立即推送之前持久化的消息，保证消息不丢失。
 * Max Inflight设置，该值体现在发送消息的客户端发送窗口大小，针对qos>0的消息，发送到服务器后必须等待服务器的响应，qos=1和2的响应与处理交互是不一样，但都会在没收到服务器确认该消息回执的同时占用这个发送窗口，直到收到回执后才会释放该窗口的消息数量保证其他消息可被发送，该值默认可以设置为10，如果发送qos>0的消息并且单位时间内要求发送消息吞吐高的情况下请尽量增大该窗口的值，比如50或者100。
-* MQTT version设置，请设置该协议版本为3.1.1，目前JMQ4 MQTT服务只支持3.1.1的连接受理，如果使用3.1及以下版本的话在连接交互的过程中会提示：Invalid protocol version。
-* JMQ4 MQTT服务必须要求鉴权，所以username和password必须配置，不能为空，username的值配置成申请创建的应用名称，password的值配置成申请创建的应用令牌。如果配置不正确或者鉴权导致的问题在连接交互的过程中会提示：Bad user name or password。
-* JMQ4 MQTT服务同时支持SSL/TLS安全加密通信，目前只提供CA certificate file加密方式，如需证书秘钥文件及相关帮助，请联系管理员。
-* JMQ4 MQTT服务也提供mqtt over websocket支持，可以使用http协议连接后升级到websocket协议上，然后使用mqtt报文进行操作交互，后续业务流程一致，mqtt over websocket适合浏览器客户端的场景，有额外的js库mqtt client可以开发该应用业务实现，适合一些移动端http浏览器或者轻量级js客户端的实现。
+* MQTT version设置，请设置该协议版本为3.1.1，目前JoyQueue MQTT服务只支持3.1.1的连接受理，如果使用3.1及以下版本的话在连接交互的过程中会提示：Invalid protocol version。
+* JoyQueue MQTT服务必须要求鉴权，所以username和password必须配置，不能为空，username的值配置成申请创建的应用名称，password的值配置成申请创建的应用令牌。如果配置不正确或者鉴权导致的问题在连接交互的过程中会提示：Bad user name or password。
+* JoyQueue MQTT服务同时支持SSL/TLS安全加密通信，目前只提供CA certificate file加密方式，如需证书秘钥文件及相关帮助，请联系管理员。
+* JoyQueue MQTT服务也提供mqtt over websocket支持，可以使用http协议连接后升级到websocket协议上，然后使用mqtt报文进行操作交互，后续业务流程一致，mqtt over websocket适合浏览器客户端的场景，有额外的js库mqtt client可以开发该应用业务实现，适合一些移动端http浏览器或者轻量级js客户端的实现。

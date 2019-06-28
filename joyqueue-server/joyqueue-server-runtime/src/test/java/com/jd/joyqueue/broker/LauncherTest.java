@@ -27,6 +27,7 @@ public class LauncherTest {
         BrokerServiceTest brokerService = new BrokerServiceTest();
         try {
             brokerService.start();
+            BannerPrinter.print();
             logger.info("JoyQueue Test is start");
         } catch (Throwable t) {
             logger.error("JoyQueue Test start exception", t);

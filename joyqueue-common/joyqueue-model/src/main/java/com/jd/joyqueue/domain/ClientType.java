@@ -14,7 +14,7 @@
 package com.jd.joyqueue.domain;
 
 public enum ClientType {
-    JMQ((byte) 0, "jmq"),
+    JOYQUEUE((byte) 0, "joyqueue"),
 
     KAFKA((byte) 1, "kafka"),
 

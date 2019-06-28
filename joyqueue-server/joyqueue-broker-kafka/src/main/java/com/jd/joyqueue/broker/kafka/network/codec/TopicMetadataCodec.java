@@ -81,7 +81,7 @@ public class TopicMetadataCodec implements KafkaPayloadCodec<TopicMetadataRespon
             buffer.writeInt(broker.getPort());
 
             if (version >= 1) {
-                // TODO rack
+                // rack
                 try {
                     Serializer.write(StringUtils.EMPTY, buffer, Serializer.SHORT_SIZE);
                 } catch (Exception e) {
@@ -91,9 +91,8 @@ public class TopicMetadataCodec implements KafkaPayloadCodec<TopicMetadataRespon
         }
 
         if (version >= 2) {
-            // cluster id
             try {
-                Serializer.write(StringUtils.EMPTY, buffer, Serializer.SHORT_SIZE);
+                Serializer.write(payload.getClusterId(), buffer, Serializer.SHORT_SIZE);
             } catch (Exception e) {
                 throw new TransportException.CodecException(e);
             }

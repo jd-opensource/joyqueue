@@ -27,10 +27,17 @@ public class TopicMetadataResponse extends KafkaRequestOrResponse {
 
     private List<KafkaTopicMetadata> topicMetadatas;
     private List<KafkaBroker> brokers;
+    private String clusterId;
 
-    public TopicMetadataResponse(List<KafkaBroker> brokers, List<KafkaTopicMetadata> topicMetadatas) {
-        this.brokers = brokers;
+    public TopicMetadataResponse(List<KafkaTopicMetadata> topicMetadatas, List<KafkaBroker> brokers) {
         this.topicMetadatas = topicMetadatas;
+        this.brokers = brokers;
+    }
+
+    public TopicMetadataResponse(List<KafkaTopicMetadata> topicMetadatas, List<KafkaBroker> brokers, String clusterId) {
+        this.topicMetadatas = topicMetadatas;
+        this.brokers = brokers;
+        this.clusterId = clusterId;
     }
 
     public List<KafkaTopicMetadata> getTopicMetadatas() {
@@ -47,6 +54,14 @@ public class TopicMetadataResponse extends KafkaRequestOrResponse {
 
     public void setBrokers(List<KafkaBroker> brokers) {
         this.brokers = brokers;
+    }
+
+    public void setClusterId(String clusterId) {
+        this.clusterId = clusterId;
+    }
+
+    public String getClusterId() {
+        return clusterId;
     }
 
     @Override

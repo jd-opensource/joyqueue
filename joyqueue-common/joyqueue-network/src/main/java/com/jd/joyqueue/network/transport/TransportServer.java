@@ -18,7 +18,7 @@ import com.jd.joyqueue.toolkit.lang.LifeCycle;
 import java.net.InetSocketAddress;
 
 /**
- * 通信服务
+ * TransportServer
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/13

@@ -28,7 +28,7 @@ import com.jd.joyqueue.network.transport.config.ServerConfig;
 import com.jd.joyqueue.toolkit.concurrent.EventBus;
 
 /**
- * 默认通信服务工厂
+ * DefaultTransportServerFactory
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/22

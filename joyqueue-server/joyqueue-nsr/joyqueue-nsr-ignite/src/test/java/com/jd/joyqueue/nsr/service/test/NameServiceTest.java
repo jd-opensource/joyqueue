@@ -82,8 +82,8 @@ public class NameServiceTest {
     public void subscribe() {
         String app = "jm";
         String topic = "__group_coordinators";
-        TopicConfig topicConfig = nameService.subscribe(new Subscription(TopicName.parse(topic), app, Subscription.Type.CONSUMPTION), ClientType.JMQ);
-        topicConfig = nameService.subscribe(new Subscription(TopicName.parse(topic), app, Subscription.Type.CONSUMPTION), ClientType.JMQ);
+        TopicConfig topicConfig = nameService.subscribe(new Subscription(TopicName.parse(topic), app, Subscription.Type.CONSUMPTION), ClientType.JOYQUEUE);
+        topicConfig = nameService.subscribe(new Subscription(TopicName.parse(topic), app, Subscription.Type.CONSUMPTION), ClientType.JOYQUEUE);
         System.out.println("success");
     }
 

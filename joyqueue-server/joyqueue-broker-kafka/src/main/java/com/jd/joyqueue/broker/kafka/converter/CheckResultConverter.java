@@ -36,6 +36,9 @@ public class CheckResultConverter {
                 return KafkaErrorCode.UNKNOWN_TOPIC_OR_PARTITION.getCode();
             }
             case FW_PUT_MESSAGE_TOPIC_NOT_WRITE:
+            case FW_BROKER_NOT_WRITABLE: {
+                return KafkaErrorCode.LEADER_NOT_AVAILABLE.getCode();
+            }
             case FW_PRODUCE_MESSAGE_BROKER_NOT_LEADER:
             case FW_TOPIC_NO_PARTITIONGROUP: {
                 return KafkaErrorCode.NOT_LEADER_FOR_PARTITION.getCode();
@@ -49,10 +52,13 @@ public class CheckResultConverter {
 
     public static short convertFetchCode(JoyQueueCode code) {
         switch (code) {
-            case FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER:
             case FW_TOPIC_NO_PARTITIONGROUP: {
                 return KafkaErrorCode.NOT_LEADER_FOR_PARTITION.getCode();
             }
+            case FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER: {
+                return KafkaErrorCode.LEADER_NOT_AVAILABLE.getCode();
+            }
+            case FW_BROKER_NOT_READABLE:
             case FW_FETCH_TOPIC_MESSAGE_PAUSED:
             case FW_GET_MESSAGE_APP_CLIENT_IP_NOT_READ: {
                 return KafkaErrorCode.NONE.getCode();

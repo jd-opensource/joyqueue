@@ -18,7 +18,7 @@ import com.jd.joyqueue.network.transport.command.Ordered;
 import java.util.Comparator;
 
 /**
- * 命令处理顺序比较
+ * CommandHandlerFilterComparator
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/27

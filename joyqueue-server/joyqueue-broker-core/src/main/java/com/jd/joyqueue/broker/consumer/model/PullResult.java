@@ -32,7 +32,7 @@ public class PullResult {
     // 数据
     private List<ByteBuffer> buffers;
     // 状态码
-    private JoyQueueCode joyQueueCode = JoyQueueCode.SUCCESS;
+    private JoyQueueCode code = JoyQueueCode.SUCCESS;
 
     public PullResult(final Consumer consumer, final short partition, final List<ByteBuffer> buffers) {
         this.topic = consumer.getTopic();
@@ -71,12 +71,12 @@ public class PullResult {
         this.buffers = buffers;
     }
 
-    public JoyQueueCode getJoyQueueCode() {
-        return joyQueueCode;
+    public JoyQueueCode getCode() {
+        return code;
     }
 
-    public void setJmqCode(JoyQueueCode joyQueueCode) {
-        this.joyQueueCode = joyQueueCode;
+    public void setCode(JoyQueueCode joyQueueCode) {
+        this.code = joyQueueCode;
     }
 
     /**

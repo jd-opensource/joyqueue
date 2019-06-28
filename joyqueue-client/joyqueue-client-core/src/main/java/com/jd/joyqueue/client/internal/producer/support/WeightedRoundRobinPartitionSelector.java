@@ -72,7 +72,7 @@ public class WeightedRoundRobinPartitionSelector extends AbstractPartitionSelect
             }
             PartitionMetadata partition = partitions.get(index);
             BrokerNode partitionLeader = partition.getLeader();
-            if (partitionLeader == null) {
+            if (partitionLeader == null || !partitionLeader.isWritable()) {
                 continue;
             }
             int partitionWeight = partitionLeader.getWeight();

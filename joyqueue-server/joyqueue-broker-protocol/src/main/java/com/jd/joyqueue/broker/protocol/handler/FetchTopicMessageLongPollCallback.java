@@ -55,7 +55,7 @@ public class FetchTopicMessageLongPollCallback implements LongPollingCallback {
     public void onSuccess(Consumer consumer, PullResult pullResult) throws TransportException {
         FetchTopicMessageAckData fetchTopicMessageAckData = new FetchTopicMessageAckData();
         fetchTopicMessageAckData.setBuffers(pullResult.getBuffers());
-        fetchTopicMessageAckData.setCode(pullResult.getJoyQueueCode());
+        fetchTopicMessageAckData.setCode(pullResult.getCode());
 
         transport.acknowledge(request, new Command(buildFetchTopicMessageAck(consumer, fetchTopicMessageAckData)));
     }

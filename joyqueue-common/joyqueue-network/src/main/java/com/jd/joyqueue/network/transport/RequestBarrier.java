@@ -27,7 +27,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 请求并发控制
+ * RequestBarrier
  * Created by hexiaofeng on 16-6-23.
  */
 public class RequestBarrier {

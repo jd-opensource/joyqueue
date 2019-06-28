@@ -97,6 +97,6 @@ public class ConsumerCoordinator extends Service {
     }
 
     protected BrokerAssignments buildAllBrokerAssignments(TopicMetadata topicMetadata) {
-        return BrokerAssignmentConverter.convertTopicrAssignments(topicMetadata);
+        return BrokerAssignmentConverter.convertTopicAssignments(topicMetadata);
     }
 }

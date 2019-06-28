@@ -22,6 +22,10 @@
 	<includeBaseDirectory>false</includeBaseDirectory>
 	<fileSets>
 		<fileSet>
+			<directory>../../docs</directory>
+			<outputDirectory>docs</outputDirectory>
+		</fileSet>
+		<fileSet>
 			<directory>src/main/bin</directory>
 			<outputDirectory>bin</outputDirectory>
 			<fileMode>0755</fileMode>

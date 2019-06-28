@@ -32,7 +32,7 @@ import com.jd.joyqueue.nsr.network.command.NsrCommandType;
 import com.jd.joyqueue.server.retry.remote.handler.RemoteRetryMessageHandler;
 
 /**
- * 服务命令注册器
+ * BrokerCommandHandlerRegistrar
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/9/17

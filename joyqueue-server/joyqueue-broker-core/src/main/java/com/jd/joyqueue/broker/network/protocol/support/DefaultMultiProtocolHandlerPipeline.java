@@ -26,7 +26,7 @@ import io.netty.channel.ChannelInitializer;
 import java.util.Map;
 
 /**
- * 多协议处理器管道
+ * DefaultMultiProtocolHandlerPipeline
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/13

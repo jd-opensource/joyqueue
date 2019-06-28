@@ -31,7 +31,7 @@ public class ReplicateConsumePosRequestDecoder implements PayloadDecoder<JoyQueu
     @Override
     public Object decode(final JoyQueueHeader header, final ByteBuf buffer) throws Exception {
         String consumePositions;
-        if (header.getVersion() == JoyQueueHeader.VERSION1) {
+        if (header.getVersion() == JoyQueueHeader.VERSION_V1) {
             consumePositions = Serializer.readString(buffer, Serializer.SHORT_SIZE);
         } else {
             consumePositions = Serializer.readString(buffer, Serializer.INT_SIZE);

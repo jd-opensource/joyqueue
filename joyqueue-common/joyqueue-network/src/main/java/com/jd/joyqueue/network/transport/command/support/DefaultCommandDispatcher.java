@@ -24,7 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 命令调度器
+ * DefaultCommandDispatcher
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/13

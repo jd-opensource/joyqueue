@@ -16,7 +16,7 @@ package com.jd.joyqueue.broker.protocol;
 import com.jd.joyqueue.network.transport.command.handler.CommandHandler;
 
 /**
- * JMQCommandHandleer
+ * JoyQueueCommandHandler
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2019/2/28

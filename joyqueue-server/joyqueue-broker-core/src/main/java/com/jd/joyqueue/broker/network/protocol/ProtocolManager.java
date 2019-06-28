@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 /**
- * 协议管理器
+ * ProtocolManager
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/13

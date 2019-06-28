@@ -22,7 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 连接处理
+ * ClientConnectionHandler
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/15

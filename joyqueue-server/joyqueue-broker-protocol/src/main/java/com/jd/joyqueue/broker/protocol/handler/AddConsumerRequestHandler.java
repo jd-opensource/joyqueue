@@ -91,7 +91,7 @@ public class AddConsumerRequestHandler implements JoyQueueCommandHandler, Type, 
         consumer.setConnectionId(connection.getId());
         consumer.setApp(app);
         consumer.setTopic(topic);
-        consumer.setType(Consumer.ConsumeType.JMQ);
+        consumer.setType(Consumer.ConsumeType.JOYQUEUE);
         return consumer;
     }
 

@@ -15,7 +15,7 @@ package com.jd.joyqueue.network.transport.config;
 
 
 /**
- * 通信服务配置
+ * ServerConfig
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/13

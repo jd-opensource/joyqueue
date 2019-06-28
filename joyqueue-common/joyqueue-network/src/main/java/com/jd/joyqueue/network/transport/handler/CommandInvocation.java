@@ -20,7 +20,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
 /**
- * 命令调用器
+ * CommandInvocation
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/13

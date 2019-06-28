@@ -16,7 +16,7 @@ package com.jd.joyqueue.network.protocol;
 import io.netty.channel.ChannelHandler;
 
 /**
- * 通道处理提供
+ * ChannelHandlerProvider
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/16
