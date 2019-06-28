@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jd.joyqueue.repository.ApplicationUserRepository">
+    <resultMap id="baseResultMap" type="ApplicationUser">
+        <result property="id" column="id" jdbcType="BIGINT"/>
+        <result property="application.id" column="app_id" jdbcType="BIGINT"/>
+        <result property="application.code" column="app_code" jdbcType="VARCHAR"/>
+        <result property="user.id" column="user_id" jdbcType="BIGINT"/>
+        <result property="user.code" column="user_code" jdbcType="VARCHAR"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="createBy.id" column="create_by" jdbcType="BIGINT"/>
+        <result property="createBy.code" column="create_by_code" jdbcType="VARCHAR"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+        <result property="updateBy.id" column="update_by" jdbcType="BIGINT"/>
+        <result property="updateBy.code" column="update_by_code" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="BIGINT"/>
+    </resultMap>
+    <sql id="baseColumn">
+        id as id,
+        app_id as `app.id`,
+        app_code as `app.code`,
+        user_id as `user.id`,
+        user_code as `app.code`,
+        create_time,
+        create_by,
+        create_by_code,
+        update_time,
+        update_by,
+        update_by_code,
+         `status`
+    </sql>
+    <insert id="add" parameterType="ApplicationUser" useGeneratedKeys="true" keyProperty="id">
+        insert into application_user
+        (
+        app_id,
+        app_code,
+        user_id,
+        user_code,
+        create_time,
+        create_by,
+        create_by_code,
+        update_time,
+        update_by,
+        update_by_code)
+        values
+        (
+        #{application.id},
+        #{application.code},
+        #{user_id},
+        #{user_code},
+        now(),
+        #{createBy.id},
+        #{createBy.code},
+        now(),
+        #{updateBy.id},
+        #{updateBy.code}
+        )
+    </insert>
+
+    <update id="update" parameterType="qpagequery">
+        UPDATE application_user
+        <set>
+            update_by=#{updateBy.id},
+            update_by_code=#{updateBy.code},
+            update_time=#{updateTime}
+        </set>
+        WHERE
+        id=#{id}
+    </update>
+
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM application_user WHERE id=#{id}
+    </delete>
+
+    <delete id="deleteByAppId" parameterType="long">
+        DELETE FROM application_user WHERE app_id=#{appId}
+    </delete>
+
+    <select id="findById" parameterType="long" resultMap="baseResultMap">
+        SELECT
+          <include refid="baseColumn"/>
+        FROM
+          application_user
+        WHERE id=#{id}
+    </select>
+
+    <select id="findByAppId" parameterType="long" resultMap="baseResultMap">
+        SELECT
+        <include refid="baseColumn"/>
+        FROM
+          application_user
+        WHERE app_id = #{appId}
+    </select>
+
+    <select id="findByUserApp" resultMap="baseResultMap" parameterType="ApplicationUser">
+        SELECT
+        <include refid="baseColumn"/>
+        FROM
+        application_user
+        WHERE app_code = #{application.code} and user_code=#{user.code}
+    </select>
+
+</mapper>

@@ -1,1 +1,1 @@
-JournalQ transaction messge
+JoyQueue transaction messge

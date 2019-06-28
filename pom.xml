@@ -17,12 +17,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.jd.journalq</groupId>
-    <version>4.0.3</version>
-    <artifactId>journalq</artifactId>
+    <groupId>com.jd.joyqueue</groupId>
+    <version>4.1.0-SNAPSHOT</version>
+    <artifactId>joyqueue</artifactId>
     <packaging>pom</packaging>
-    <name>JournalQ</name>
-    <description>JournalQ is a distributed cloud-native message platform with high-throughput and high-availability
+    <name>JoyQueue</name>
+    <description>JoyQueue is a distributed cloud-native message platform with high-throughput and high-availability
         which is compatible with Kafka and MQTT protocol. </description>
     <organization>
         <name>JD.com, Inc.</name>
@@ -124,68 +124,68 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>com.jd.journalq</groupId>
-                <artifactId>journalq-data-model</artifactId>
+                <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-data-model</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.jd.journalq</groupId>
-                <artifactId>journalq-service-api</artifactId>
+                <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-service-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.jd.journalq</groupId>
-                <artifactId>journalq-toolkit</artifactId>
+                <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-toolkit</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.jd.journalq</groupId>
-                <artifactId>journalq-network</artifactId>
+                <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-network</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.jd.journalq</groupId>
-                <artifactId>journalq-archive-api</artifactId>
+                <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-archive-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.jd.journalq</groupId>
-                <artifactId>journalq-archive-hbase</artifactId>
+                <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-archive-hbase</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.jd.journalq</groupId>
-                <artifactId>journalq-data-repository-mybatis</artifactId>
+                <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-data-repository-mybatis</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.jd.journalq</groupId>
-                <artifactId>journalq-retry-api</artifactId>
+                <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-retry-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.jd.journalq</groupId>
-                <artifactId>journalq-retry-h2</artifactId>
+                <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-retry-h2</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.jd.journalq</groupId>
-                <artifactId>journalq-web-handler</artifactId>
+                <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-web-handler</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.jd.journalq</groupId>
-                <artifactId>journalq-web-webroot</artifactId>
+                <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-web-webroot</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.jd.journalq</groupId>
-                <artifactId>journalq-web-springboot</artifactId>
+                <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-web-springboot</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.jd.journalq</groupId>
-                <artifactId>journalq-model</artifactId>
+                <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-model</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -199,13 +199,13 @@
                 <version>1.0.13</version>
             </dependency>
             <dependency>
-                <groupId>com.jd.journalq</groupId>
-                <artifactId>journalq-store-api</artifactId>
+                <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-store-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.jd.journalq</groupId>
-                <artifactId>journalq-cache</artifactId>
+                <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-cache</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -219,48 +219,48 @@
                 <version>${laf-vertx.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.jd.journalq</groupId>
-                <artifactId>journalq-security</artifactId>
+                <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-security</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.jd.journalq</groupId>
-                <artifactId>journalq-broker-core</artifactId>
+                <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-broker-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.jd.journalq</groupId>
-                <artifactId>journalq-broker-journalq</artifactId>
+                <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-broker-protocol</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.jd.journalq</groupId>
-                <artifactId>journalq-broker-kafka</artifactId>
+                <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-broker-kafka</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.jd.journalq</groupId>
-                <artifactId>journalq-broker-mqtt</artifactId>
+                <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-broker-mqtt</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.jd.journalq</groupId>
-                <artifactId>journalq-client-core</artifactId>
+                <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-client-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.jd.journalq</groupId>
-                <artifactId>journalq-hbase</artifactId>
+                <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-hbase</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.jd.journalq</groupId>
-                <artifactId>journalq-data-service</artifactId>
+                <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-data-service</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.jd.journalq</groupId>
-                <artifactId>journalq-data-repository-api</artifactId>
+                <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-data-repository-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -339,8 +339,8 @@
 
 
             <dependency>
-                <groupId>com.jd.journalq</groupId>
-                <artifactId>journalq-registry-zookeeper</artifactId>
+                <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-registry-zookeeper</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -351,34 +351,34 @@
             </dependency>
 
             <dependency>
-                <groupId>com.jd.journalq</groupId>
-                <artifactId>journalq-registry-api</artifactId>
+                <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-registry-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>com.jd.journalq</groupId>
-                <artifactId>journalq-datasource-api</artifactId>
+                <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-datasource-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.jd.journalq</groupId>
-                <artifactId>journalq-datasource-dbcp</artifactId>
+                <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-datasource-dbcp</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.jd.journalq</groupId>
-                <artifactId>journalq-datasource-hikaricp</artifactId>
+                <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-datasource-hikaricp</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.jd.journalq</groupId>
-                <artifactId>journalq-nsr-core</artifactId>
+                <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-nsr-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.jd.journalq</groupId>
-                <artifactId>journalq-nsr-ignite</artifactId>
+                <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-nsr-ignite</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -876,9 +876,6 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven-surefire-plugin.version}</version>
-                    <configuration>
-                        <skipTests>false</skipTests>
-                    </configuration>
                 </plugin>
                 <!--<plugin>-->
                     <!--<groupId>org.apache.maven.plugins</groupId>-->
@@ -1025,8 +1022,8 @@
                         <exclude>src/test/resources/**</exclude>
                         <exclude>src/main/resources/**</exclude>
                         <exclude>**/node_modules/**</exclude>
-                        <exclude>**/journalq-portal/**</exclude>
-                        <exclude>**/journalq-web-webroot/**</exclude>
+                        <exclude>**/joyqueue-portal/**</exclude>
+                        <exclude>**/joyqueue-web-webroot/**</exclude>
                         <exclude>**/*.vue</exclude>
                         <exclude>**/*.js</exclude>
                         <exclude>**/*.js.map</exclude>
@@ -1074,13 +1071,13 @@
     </distributionManagement>
 
     <modules>
-        <module>journalq-common</module>
-        <module>journalq-server</module>
-        <module>journalq-console</module>
-        <module>journalq-client</module>
+        <module>joyqueue-common</module>
+        <module>joyqueue-server</module>
+        <module>joyqueue-console</module>
+        <module>joyqueue-client</module>
         <!-- FIXME: 单元测试未通过 -->
-        <!--        <module>journalq-test</module>-->
-        <module>journalq-openmessaging</module>
+        <!--        <module>joyqueue-test</module>-->
+        <module>joyqueue-openmessaging</module>
         <module>docker</module>
     </modules>
 

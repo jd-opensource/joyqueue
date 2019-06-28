@@ -14,9 +14,9 @@
 
 FROM openjdk:8-jdk
 
-ARG JOURNALQ_TARBALL
+ARG JOYQUEUE_TARBALL
 
-ADD ${JOURNALQ_TARBALL} /journalq-server-runtime
+ADD ${JOYQUEUE_TARBALL} /joyqueue-server-runtime
 
-WORKDIR /journalq-server-runtime
+WORKDIR /joyqueue-server-runtime
 
