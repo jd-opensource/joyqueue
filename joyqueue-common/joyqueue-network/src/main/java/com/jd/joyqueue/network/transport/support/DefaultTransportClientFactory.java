@@ -28,12 +28,12 @@ import com.jd.joyqueue.network.transport.config.ClientConfig;
 import com.jd.joyqueue.toolkit.concurrent.EventBus;
 
 /**
- * 默认通信客户端工厂
+ * DefaultTransportClientFactory
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/24
  */
-public class  DefaultTransportClientFactory implements TransportClientFactory {
+public class DefaultTransportClientFactory implements TransportClientFactory {
 
     private Codec codec;
     private CommandHandlerFactory commandHandlerFactory;

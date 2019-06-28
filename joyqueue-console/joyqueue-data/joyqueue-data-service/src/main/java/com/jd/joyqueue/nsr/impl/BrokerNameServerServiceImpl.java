@@ -106,7 +106,7 @@ public class BrokerNameServerServiceImpl extends NameServerBase implements Broke
             nsrBroker.setPort(broker.getPort());
         }
         if (broker.getPermission() != null) {
-            nsrBroker.setPermission(com.jd.joyqueue.domain.Broker.PermissionEnum.valueOf(broker.getPermission()));
+            nsrBroker.setPermission(com.jd.joyqueue.domain.Broker.PermissionEnum.value(broker.getPermission()));
         }
         nsrBroker.setId(Long.valueOf(broker.getId()).intValue());
         //nsrBroker.setDataCenter(broker.getDataCenter().getCode());

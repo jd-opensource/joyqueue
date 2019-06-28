@@ -18,7 +18,7 @@ import com.jd.joyqueue.network.transport.config.ServerConfig;
 import io.netty.channel.ChannelHandler;
 
 /**
- * 自定义channelHandler
+ * ChannelTransportServer
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/9/25

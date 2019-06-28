@@ -459,6 +459,7 @@ public class NameServer extends Service implements NameService, PropertySupplier
                 broker.setDataCenter(dataCenter.getCode());
                 broker.setPort(port);
                 broker.setRetryType(Broker.DEFAULT_RETRY_TYPE);
+                broker.setPermission(Broker.PermissionEnum.FULL);
                 metaManager.addBroker(broker);
                 logger.info("register broker success broker.id {}", brokerId);
             } else {

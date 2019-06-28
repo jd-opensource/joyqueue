@@ -20,7 +20,7 @@ import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 
 /**
- * 通信管理器
+ * TransportHelper
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/14

@@ -24,7 +24,7 @@ import java.util.List;
 
 
 /**
- * 编解码器工厂
+ * BrokerCodecFactory
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/21

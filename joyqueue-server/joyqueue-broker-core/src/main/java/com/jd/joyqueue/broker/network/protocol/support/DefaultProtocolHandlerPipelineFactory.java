@@ -23,7 +23,7 @@ import com.jd.joyqueue.network.transport.command.CommandDispatcherFactory;
 import io.netty.channel.ChannelHandler;
 
 /**
- * 默认协议处理管道工厂
+ * DefaultProtocolHandlerPipelineFactory
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/14

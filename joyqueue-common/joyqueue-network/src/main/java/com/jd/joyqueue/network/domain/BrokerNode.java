@@ -30,6 +30,9 @@ public class BrokerNode implements Serializable {
     private boolean nearby;
     private int weight;
 
+    private int sysCode;
+    private int permission;
+
     public BrokerNode() {
     }
 
@@ -93,6 +96,38 @@ public class BrokerNode implements Serializable {
 
     public int getWeight() {
         return weight;
+    }
+
+    public void setSysCode(int sysCode) {
+        this.sysCode = sysCode;
+    }
+
+    public int getSysCode() {
+        return sysCode;
+    }
+
+    public void setPermission(int permission) {
+        this.permission = permission;
+    }
+
+    public int getPermission() {
+        return permission;
+    }
+
+    public void setReadable(boolean readable) {
+        this.permission = BrokerPermission.setReadable(permission, readable);
+    }
+
+    public void setWritable(boolean writable) {
+        this.permission = BrokerPermission.setWritable(permission, writable);
+    }
+
+    public boolean isReadable() {
+        return BrokerPermission.isReadable(permission);
+    }
+
+    public boolean isWritable() {
+        return BrokerPermission.isWritable(permission);
     }
 
     @Override

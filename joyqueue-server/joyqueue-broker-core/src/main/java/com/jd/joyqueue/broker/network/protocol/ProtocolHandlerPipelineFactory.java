@@ -17,7 +17,7 @@ import com.jd.joyqueue.network.protocol.Protocol;
 import io.netty.channel.ChannelHandler;
 
 /**
- * 协议处理管道工厂
+ * ProtocolHandlerPipelineFactory
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/14

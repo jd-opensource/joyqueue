@@ -14,7 +14,7 @@
 package com.jd.joyqueue.network.protocol;
 
 /**
- * 协议异常
+ * ProtocolException
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/9/14

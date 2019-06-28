@@ -36,7 +36,7 @@ public class NsrBrokerConverter extends Converter<Broker, com.jd.joyqueue.domain
             nsrBroker.setDataCenter(broker.getDataCenter().getCode());
         }
         if (broker.getPermission() != null) {
-            nsrBroker.setPermission(com.jd.joyqueue.domain.Broker.PermissionEnum.valueOf(broker.getPermission()));
+            nsrBroker.setPermission(com.jd.joyqueue.domain.Broker.PermissionEnum.value(broker.getPermission()));
         }
         return nsrBroker;
     }

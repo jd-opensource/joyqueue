@@ -16,7 +16,7 @@ package com.jd.joyqueue.broker.network.protocol;
 import io.netty.channel.ChannelHandler;
 
 /**
- * 多协议处理管道工厂
+ * MultiProtocolHandlerPipelineFactory
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/14

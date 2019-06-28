@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 /**
- * 命令执行线程
+ * CommandExecuteTask
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/14

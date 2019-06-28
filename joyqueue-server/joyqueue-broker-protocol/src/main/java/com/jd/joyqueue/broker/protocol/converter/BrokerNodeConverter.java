@@ -47,6 +47,16 @@ public class BrokerNodeConverter {
             result.setNearby(StringUtils.equalsIgnoreCase(brokerDataCenter.getRegion(), region));
         }
         result.setWeight(weight);
+
+        if (Broker.PermissionEnum.FULL.equals(broker.getPermission())) {
+            result.setReadable(true);
+            result.setWritable(true);
+        } else if (Broker.PermissionEnum.READ.equals(broker.getPermission())) {
+            result.setReadable(true);
+        } else if (Broker.PermissionEnum.WRITE.equals(broker.getPermission())) {
+            result.setWritable(true);
+        }
+
         return result;
     }
 }

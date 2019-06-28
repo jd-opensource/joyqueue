@@ -16,7 +16,7 @@ package com.jd.joyqueue.network.transport;
 import java.util.Set;
 
 /**
- * 通信属性
+ * TransportAttribute
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/13

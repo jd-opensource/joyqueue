@@ -20,7 +20,7 @@ import com.jd.joyqueue.network.transport.exception.TransportException;
 import io.netty.buffer.ByteBuf;
 
 /**
- * 默认编解码器
+ * DefaultCodec
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/13

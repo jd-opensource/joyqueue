@@ -16,7 +16,7 @@ package com.jd.joyqueue.network.transport;
 import io.netty.channel.Channel;
 
 /**
- * 通达通道
+ * ChannelTransport
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/13

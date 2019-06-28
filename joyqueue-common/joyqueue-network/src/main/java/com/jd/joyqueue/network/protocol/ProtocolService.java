@@ -16,7 +16,7 @@ package com.jd.joyqueue.network.protocol;
 import io.netty.buffer.ByteBuf;
 
 /**
- * 协议服务
+ * ProtocolService
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/9/25

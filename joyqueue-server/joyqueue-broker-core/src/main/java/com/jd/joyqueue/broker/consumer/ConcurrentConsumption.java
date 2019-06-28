@@ -433,9 +433,9 @@ class ConcurrentConsumption extends Service {
             throw new JoyQueueException(JoyQueueCode.SE_IO_ERROR, ioe);
         } catch (Exception e) {
             if (e instanceof PositionOverflowException) {
-                pullResult.setJmqCode(JoyQueueCode.SE_INDEX_OVERFLOW);
+                pullResult.setCode(JoyQueueCode.SE_INDEX_OVERFLOW);
             } else if (e instanceof PositionUnderflowException) {
-                pullResult.setJmqCode(JoyQueueCode.SE_INDEX_UNDERFLOW);
+                pullResult.setCode(JoyQueueCode.SE_INDEX_UNDERFLOW);
             } else {
                 logger.error("get message error, consumer: {}, partition: {}", consumer, partition, e);
             }

@@ -14,6 +14,7 @@
 package com.jd.joyqueue.store;
 
 import com.jd.joyqueue.domain.QosLevel;
+import com.jd.joyqueue.monitor.BufferPoolMonitorInfo;
 import com.jd.joyqueue.store.file.PositioningStore;
 import com.jd.joyqueue.store.replication.ReplicableStore;
 import com.jd.joyqueue.store.transaction.TransactionStore;
@@ -357,6 +358,11 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
     public StoreManagementService getManageService() {
 
         return new StoreManagement(128, 128, config.getMaxMessageLength(), bufferPool, this);
+    }
+
+    @Override
+    public BufferPoolMonitorInfo monitorInfo() {
+        return bufferPool.monitorInfo();
     }
 
     private String getPartitionGroupRelPath(String topic, int partitionGroup) {

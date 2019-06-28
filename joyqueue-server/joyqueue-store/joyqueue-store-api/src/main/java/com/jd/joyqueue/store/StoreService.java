@@ -14,6 +14,7 @@
 package com.jd.joyqueue.store;
 
 import com.jd.joyqueue.domain.QosLevel;
+import com.jd.joyqueue.monitor.BufferPoolMonitorInfo;
 import com.jd.joyqueue.store.replication.ReplicableStore;
 import com.jd.joyqueue.store.transaction.TransactionStore;
 
@@ -130,6 +131,10 @@ public interface StoreService {
      */
     StoreManagementService getManageService();
 
-
+    /**
+     * 获取内存监控
+     * @return
+     */
+    BufferPoolMonitorInfo monitorInfo();
 
 }

@@ -23,7 +23,6 @@ import com.jd.joyqueue.broker.protocol.coordinator.GroupMetadataManager;
 import com.jd.joyqueue.broker.protocol.coordinator.assignment.PartitionAssignmentHandler;
 import com.jd.joyqueue.broker.protocol.network.helper.JoyQueueProtocolHelper;
 import com.jd.joyqueue.broker.polling.LongPollingManager;
-import com.jd.joyqueue.network.codec.JoyQueueCodecFactory;
 import com.jd.joyqueue.network.protocol.ExceptionHandlerProvider;
 import com.jd.joyqueue.network.protocol.ProtocolService;
 import com.jd.joyqueue.network.transport.codec.CodecFactory;

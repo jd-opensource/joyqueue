@@ -22,7 +22,7 @@ public class Producer extends Joint {
     // 连接ID
     private String connectionId;
     // 生产类型
-    private ProducerType type = ProducerType.JMQ;
+    private ProducerType type = ProducerType.JOYQUEUE;
 
     public Producer() {
     }
@@ -76,7 +76,7 @@ public class Producer extends Joint {
     }
 
     public enum ProducerType {
-        JMQ,
+        JOYQUEUE,
         JMQ2,
         KAFKA,
         MQTT,

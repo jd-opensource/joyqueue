@@ -52,8 +52,11 @@ public class KafkaSyncGroupAssignmentSerializer {
         }
 
         int userDataLength = buffer.readInt();
-        byte[] userData = new byte[userDataLength];
-        buffer.readBytes(userData);
+        byte[] userData = null;
+        if (userDataLength > 0) {
+            userData = new byte[userDataLength];
+            buffer.readBytes(userData);
+        }
 
         SyncGroupAssignment syncGroupAssignment = new SyncGroupAssignment();
         syncGroupAssignment.setUserData(userData);

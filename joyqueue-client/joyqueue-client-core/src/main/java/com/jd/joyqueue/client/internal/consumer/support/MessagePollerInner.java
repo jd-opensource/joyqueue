@@ -227,7 +227,6 @@ public class MessagePollerInner extends Service {
             case CN_NO_PERMISSION:
             case CN_SERVICE_NOT_AVAILABLE:
             case FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER: {
-                // 尝试更新元数据
                 logger.warn("fetch message error, no permission, topic: {}", topic);
                 clusterManager.updateTopicMetadata(topic, app);
                 break;
@@ -246,6 +245,11 @@ public class MessagePollerInner extends Service {
             case FW_TOPIC_NOT_EXIST: {
                 logger.debug("fetch message error, topic not exist, topic: {}", topic);
                 throw new ConsumerException(code.getMessage(), code.getCode());
+            }
+            case FW_BROKER_NOT_READABLE: {
+                logger.debug("fetch message error, broker not readable, topic: {}", topic);
+                clusterManager.updateTopicMetadata(topic, app);
+                break;
             }
             default: {
                 logger.error("fetch message error, topic: {}, code: {}, error: {}", topic, code, code.getMessage());

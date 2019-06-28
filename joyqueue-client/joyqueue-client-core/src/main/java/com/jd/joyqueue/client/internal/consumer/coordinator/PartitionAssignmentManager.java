@@ -22,8 +22,8 @@ import com.jd.joyqueue.client.internal.consumer.coordinator.domain.PartitionAssi
 import com.jd.joyqueue.client.internal.metadata.domain.PartitionMetadata;
 import com.jd.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import com.jd.joyqueue.exception.JoyQueueCode;
-import com.jd.joyqueue.network.command.FetchAssignedPartitionResponse;
 import com.jd.joyqueue.network.command.FetchAssignedPartitionAckData;
+import com.jd.joyqueue.network.command.FetchAssignedPartitionResponse;
 import com.jd.joyqueue.network.domain.BrokerNode;
 import com.jd.joyqueue.toolkit.service.Service;
 import org.apache.commons.collections.CollectionUtils;
@@ -63,7 +63,7 @@ public class PartitionAssignmentManager extends Service {
 
         for (Short partition : partitionAssignment.getPartitions()) {
             PartitionMetadata partitionMetadata = topicMetadata.getPartition(partition);
-            if (partitionMetadata.getLeader() == null) {
+            if (partitionMetadata.getLeader() == null || !partitionMetadata.getLeader().isReadable()) {
                 continue;
             }
             List<Short> brokerPartitionList = brokerPartitions.get(partitionMetadata.getLeader());

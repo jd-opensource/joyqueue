@@ -42,7 +42,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * 默认通信客户端
+ * DefaultTransportClient
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/24

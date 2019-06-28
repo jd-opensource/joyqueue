@@ -10,6 +10,8 @@
 
         <route path="/monitor/broker/brokerStatExt" inherit="get"
                handlers="brokerMonitorService.getExtendBrokerStat"/>
+        <route path="/metrics" inherit="get"
+               handlers="brokerMonitorService.getExtendBrokerStat"/>
 
         <!-- connection -->
         <route path="/monitor/connections" inherit="get"

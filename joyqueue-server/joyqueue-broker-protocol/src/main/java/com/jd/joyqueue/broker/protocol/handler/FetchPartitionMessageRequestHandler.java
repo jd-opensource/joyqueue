@@ -79,7 +79,7 @@ public class FetchPartitionMessageRequestHandler implements JoyQueueCommandHandl
 
         for (Map.Entry<String, Map<Short, FetchPartitionMessageData>> entry : fetchPartitionMessageRequest.getPartitions().rowMap().entrySet()) {
             String topic = entry.getKey();
-            Consumer consumer = new Consumer(connection.getId(), topic, fetchPartitionMessageRequest.getApp(), Consumer.ConsumeType.JMQ);
+            Consumer consumer = new Consumer(connection.getId(), topic, fetchPartitionMessageRequest.getApp(), Consumer.ConsumeType.JOYQUEUE);
             for (Map.Entry<Short, FetchPartitionMessageData> partitionEntry : entry.getValue().entrySet()) {
                 short partition = partitionEntry.getKey();
 
@@ -126,11 +126,11 @@ public class FetchPartitionMessageRequestHandler implements JoyQueueCommandHandl
                 fetchPartitionMessageAckData.setCode(JoyQueueCode.FW_FETCH_MESSAGE_INDEX_OUT_OF_RANGE);
             } else {
                 PullResult pullResult = consume.getMessage(consumer, partition, index, count);
-                if (!pullResult.getJoyQueueCode().equals(JoyQueueCode.SUCCESS)) {
+                if (!pullResult.getCode().equals(JoyQueueCode.SUCCESS)) {
                     logger.error("fetchPartitionMessage exception, transport: {}, consumer: {}, partition: {}, index: {}", transport, consumer, partition, index);
                 }
                 fetchPartitionMessageAckData.setBuffers(pullResult.getBuffers());
-                fetchPartitionMessageAckData.setCode(pullResult.getJoyQueueCode());
+                fetchPartitionMessageAckData.setCode(pullResult.getCode());
             }
         } catch (JoyQueueException e) {
             logger.error("fetchPartitionMessage exception, transport: {}, consumer: {}, partition: {}, index: {}", transport, consumer, partition, index, e);

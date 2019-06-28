@@ -85,7 +85,7 @@ public class TopicMetadataRequestHandler extends AbstractKafkaCommandHandler imp
                     topicMetadataRequest.getTopics(), transport.remoteAddress(), JSON.toJSONString(topicMetadata));
         }
 
-        TopicMetadataResponse topicMetadataResponse = new TopicMetadataResponse(brokers, topicMetadata);
+        TopicMetadataResponse topicMetadataResponse = new TopicMetadataResponse(topicMetadata, brokers);
         return new Command(topicMetadataResponse);
     }
 

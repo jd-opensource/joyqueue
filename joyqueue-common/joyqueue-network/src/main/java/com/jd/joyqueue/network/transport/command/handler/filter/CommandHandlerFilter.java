@@ -17,7 +17,7 @@ import com.jd.joyqueue.network.transport.command.Command;
 import com.jd.joyqueue.network.transport.exception.TransportException;
 
 /**
- * 命令处理调用链
+ * CommandHandlerFilter
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/16
