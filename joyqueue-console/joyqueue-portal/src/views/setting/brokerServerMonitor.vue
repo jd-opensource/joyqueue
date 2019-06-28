@@ -1,29 +1,39 @@
 <template>
   <div>
-    <div style="height: 60px;">
-      <h4>连接数</h4>
-      <br>
-      <span>总连接数:</span><span>{{detail.connection.total}}</span>
-      <span>消费者:</span><span>{{detail.connection.consumer}}</span>
-      <span style="width: 10px"></span>
-      <span>生产者:</span><span>{{detail.connection.producer}}</span>
+    <div style="border:10px solid #f7f7f7;width:600px;">
+      <h4>存储监控:</h4>
+      <span>started:</span><span v-if="detail.store.started">Running</span><span v-else>Stop</span>&nbsp&nbsp
+      <span>totalSpace:</span><span>{{detail.store.totalSpace}}</span>&nbsp&nbsp
+      <span>freeSpace:</span><span>{{detail.store.freeSpace}}</span>
     </div>
-    <div>
-      <h4>存储监控</h4>
+    <div style="border:10px solid #f7f7f7;width:600px;">
+      <h4>内存:</h4>
+      <div v-for="item in detail.bufferPoolMonitorInfo.plMonitorInfos">
+        <span>bufferSize:</span><span>{{item.bufferSize}}</span>&nbsp&nbsp
+        <span>cached:</span><span>{{item.cached}}</span>&nbsp&nbsp
+        <span>used:</span><span>{{item.usedPreLoad}}</span>&nbsp&nbsp
+        <span>totalSize:</span><span>{{item.totalSize}}</span>
+      </div>
       <br>
-      <span>状态:</span><span v-if="detail.store.started" style="background: #07bf0c">启动</span><span v-else style="background: #bf291e">未启动</span>
-      <span>总磁盘大小:</span><span>{{detail.store.totalSpace | numFilter}}GB</span>
-      <span>空闲磁盘大小:</span><span>{{detail.store.freeSpace | numFilter}}GB</span>
+      <span>preload:</span><span>{{detail.bufferPoolMonitorInfo.plUsed}}</span>&nbsp&nbsp
+      <span>used:</span><span>{{detail.bufferPoolMonitorInfo.used}}</span>&nbsp&nbsp
+      <span>direct:</span><span>{{detail.bufferPoolMonitorInfo.direct}}</span>&nbsp&nbsp
+      <span>mmp:</span><span>{{detail.bufferPoolMonitorInfo.mmp}}</span>&nbsp&nbsp
+      <span>maxMemorySize:</span><span>{{detail.bufferPoolMonitorInfo.maxMemorySize}}</span>
     </div>
-    <div>
-      <h4>选举</h4>
-      <br>
-      <span>状态:</span><span v-if="detail.election.started" style="background: #07bf0c">启动</span><span v-else style="background: #bf0f20">未启动</span>
+    <div style="border:10px solid #f7f7f7;width:600px;">
+      <h4>连接数:</h4>
+      <span>total:</span><span>{{detail.connection.total}}</span>&nbsp&nbsp
+      <span>consumer:</span><span>{{detail.connection.consumer}}</span>&nbsp&nbsp
+      <span>producer:</span><span>{{detail.connection.producer}}</span>
     </div>
-    <div>
-      <h4>nameServer</h4>
-      <br>
-      <span>状态:</span><span v-if="detail.nameServer.started" style="background: #07bf0c">启动</span><span v-else style="background: #bf0f20">未启动</span>
+    <div style="border:10px solid #f7f7f7;width:600px;">
+      <h4>选举:</h4>
+      <span>started:</span><span v-if="detail.election.started" >Running</span><span v-else >Stop</span>
+    </div>
+    <div style="border:10px solid #f7f7f7;width:600px;">
+      <h4>nsr:</h4>
+      <span>started:</span><span v-if="detail.nameServer.started" >Running</span><span v-else>Stop</span>
     </div>
   </div>
 </template>
