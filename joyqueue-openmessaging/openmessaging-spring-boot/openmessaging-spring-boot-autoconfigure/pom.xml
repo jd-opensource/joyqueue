@@ -25,6 +25,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>openmessaging-spring-boot-autoconfigure</artifactId>
+    <name>OpenMessaging-SpringBoot-AutoConfigure</name>
+    <description>SpringBoot Support for the OpenMessaging API</description>
 
     <dependencies>
         <dependency>

@@ -26,10 +26,10 @@
 
     <artifactId>joyqueue-client-samples</artifactId>
     <packaging>pom</packaging>
-    <name>JoyQueue - Client - Samples</name>
+    <name>JoyQueue-Client-Samples</name>
     <description>Client Samples</description>
     <modules>
-        <module>joyqueue-client-samples-api</module>
+        <module>joyqueue-client-samples-openmessaging</module>
         <module>joyqueue-client-samples-spring</module>
         <module>joyqueue-client-samples-springboot</module>
         <module>joyqueue-client-samples-kafka</module>

@@ -31,5 +31,6 @@
     <modules>
         <module>joyqueue-data</module>
         <module>joyqueue-web</module>
+        <module>joyqueue-portal</module>
     </modules>
 </project>

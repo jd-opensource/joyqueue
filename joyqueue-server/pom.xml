@@ -25,6 +25,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>joyqueue-server</artifactId>
+    <name>JoyQueue-Server</name>
+    <description>JoyQueue server collections</description>
+
     <packaging>pom</packaging>
     <modules>
         <module>joyqueue-broker-core</module>

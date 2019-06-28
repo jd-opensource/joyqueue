@@ -88,6 +88,8 @@
         <openmessaging-api.version>1.0.0-alpha</openmessaging-api.version>
         <asm.version>6.2.1</asm.version>
         <jackson-dataformat.version>RELEASE</jackson-dataformat.version>
+        <metrics.version>4.0.0</metrics.version>
+        <commons-lang.version>2.6</commons-lang.version>
     </properties>
 
     <dependencyManagement>
@@ -138,6 +140,11 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
+                <groupId>io.dropwizard.metrics</groupId>
+                <artifactId>metrics-core</artifactId>
+                <version>${metrics.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.jd.joyqueue</groupId>
                 <artifactId>joyqueue-token-api</artifactId>
                 <version>${project.version}</version>
@@ -171,6 +178,11 @@
                 <groupId>com.jd.joyqueue</groupId>
                 <artifactId>joyqueue-model</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-lang</groupId>
+                <artifactId>commons-lang</artifactId>
+                <version>${commons-lang.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.jd.laf.binding</groupId>
@@ -421,12 +433,6 @@
                 <artifactId>jcommander</artifactId>
                 <version>${jcommander.version}</version>
             </dependency>
-            <dependency>
-                <groupId>com.google.code.findbugs</groupId>
-                <artifactId>jsr305</artifactId>
-                <version>${jsr305.version}</version>
-            </dependency>
-
             <dependency>
                 <groupId>com.zaxxer</groupId>
                 <artifactId>HikariCP-java6</artifactId>

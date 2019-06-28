@@ -25,15 +25,18 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>joyqueue-broker-core</artifactId>
+    <name>JoyQueue-Broker-Core</name>
+    <description>Broker core library</description>
     <version>4.1.0-SNAPSHOT</version>
+
     <dependencies>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
-        <dependency> <!-- 桥接：告诉Slf4j使用Log4j2 -->
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -43,7 +46,6 @@
         <dependency>
             <groupId>com.jd.laf</groupId>
             <artifactId>laf-extension-core</artifactId>
-            <version>1.0.13</version>
         </dependency>
         <dependency>
             <groupId>com.jd.joyqueue</groupId>
@@ -52,12 +54,10 @@
         <dependency>
             <groupId>io.dropwizard.metrics</groupId>
             <artifactId>metrics-core</artifactId>
-            <version>4.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.jd.laf.web</groupId>
             <artifactId>laf-vertx-web</artifactId>
-            <version>${laf-vertx.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>io.netty</groupId>
@@ -109,10 +109,10 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>com.googlecode.concurrentlinkedhashmap</groupId>
-            <artifactId>concurrentlinkedhashmap-lru</artifactId>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.googlecode.concurrentlinkedhashmap</groupId>-->
+<!--            <artifactId>concurrentlinkedhashmap-lru</artifactId>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>com.jd.joyqueue</groupId>
             <artifactId>joyqueue-model</artifactId>
@@ -162,7 +162,7 @@
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
-
+        <!--FIXME: 不要直接依赖实现-->
         <dependency>
             <groupId>com.jd.joyqueue</groupId>
             <artifactId>joyqueue-store-core</artifactId>
@@ -180,8 +180,6 @@
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
-            <version>2.6</version>
-            <scope>compile</scope>
         </dependency>
 
     </dependencies>

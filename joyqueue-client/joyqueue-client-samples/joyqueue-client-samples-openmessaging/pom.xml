@@ -24,8 +24,9 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>joyqueue-client-api</artifactId>
-
+    <artifactId>joyqueue-client-samples-openmessaging</artifactId>
+    <name>JoyQueue-Client-Samples-OpenMessaging</name>
+    <description>Client samples using OpenMessaging API</description>
     <dependencies>
         <dependency>
             <groupId>com.jd.joyqueue</groupId>

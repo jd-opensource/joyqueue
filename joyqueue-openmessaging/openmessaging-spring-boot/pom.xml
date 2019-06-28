@@ -26,6 +26,9 @@
 
     <groupId>io.openmessaging</groupId>
     <artifactId>openmessaging-spring-boot</artifactId>
+    <name>OpenMessaging-SpringBoot</name>
+    <description>SpringBoot Support for the OpenMessaging API</description>
+
     <packaging>pom</packaging>
     <modules>
         <module>openmessaging-spring-boot-starter</module>
