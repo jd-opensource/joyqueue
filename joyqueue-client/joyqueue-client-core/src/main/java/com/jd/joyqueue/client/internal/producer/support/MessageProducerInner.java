@@ -187,18 +187,22 @@ public class MessageProducerInner extends Service {
                 lastException = e;
                 retryTimes++;
                 topicMetadata = getAndCheckTopicMetadata(topicMetadata.getTopic());
-                logger.debug("send message exception, topic: {}, app:{} messages: {}", topic, app, messages, e);
+                logger.debug("send message exception, topic: {}, app:{}, messages: {}", topic, app, messages, e);
             } catch (NeedRetryException e) {
                 lastException = new ProducerException(e.getMessage(), e.getCode(), e.getCause());
                 retryTimes++;
-                logger.debug("send message exception, topic: {}, app:{} messages: {}", topic, app, messages, e);
+                logger.debug("send message exception, topic: {}, app:{}, messages: {}", topic, app, messages, e);
             } catch (ClientException e) {
                 lastException = e;
                 retryTimes++;
-                logger.debug("send message exception, topic: {}, app:{} messages: {}", topic, app, messages, e);
+                logger.debug("send message exception, topic: {}, app:{}, messages: {}", topic, app, messages, e);
             } catch (Exception e) {
-                logger.error("send message exception, topic: {}, app:{} messages: {}", topic, app, messages, e);
-                new ProducerException(lastException);
+                logger.error("send message exception, topic: {}, app:{}, messages: {}", topic, app, messages, e);
+                if (e instanceof ProducerException) {
+                    throw (ProducerException) e;
+                } else {
+                    throw new ProducerException(e);
+                }
             }
         }
 
@@ -263,18 +267,22 @@ public class MessageProducerInner extends Service {
             case CN_NO_PERMISSION:
             case CN_SERVICE_NOT_AVAILABLE:
             case FW_PRODUCE_MESSAGE_BROKER_NOT_LEADER: {
-                // 尝试更新元数据
                 logger.debug("send message error, no permission, topic: {}", topic);
                 clusterManager.updateTopicMetadata(topic, app);
                 throw new MetadataException(code.getMessage(), code.getCode());
             }
             case FW_PUT_MESSAGE_TOPIC_NOT_WRITE: {
-                logger.debug("send message error, not write, topic: {}", topic);
+                logger.debug("send message error, topic not write, topic: {}", topic);
                 break;
             }
             case FW_TOPIC_NOT_EXIST: {
                 logger.debug("send message error, topic not exist, topic: {}", topic);
                 throw new ProducerException(code.getMessage(), code.getCode());
+            }
+            case FW_BROKER_NOT_WRITABLE: {
+                logger.debug("send message error, broker not writable, topic: {}", topic);
+                clusterManager.updateTopicMetadata(topic, app);
+                break;
             }
             default: {
                 logger.error("send message error, topic: {}, code: {}, error: {}", topic, code, code.getMessage());
@@ -356,9 +364,15 @@ public class MessageProducerInner extends Service {
         if (CollectionUtils.isEmpty(partitions)) {
             throw new ProducerException(String.format("no partitions available, topic: %s, messages: %s", topicMetadata.getTopic(), messages), JoyQueueCode.FW_TOPIC_NO_PARTITIONGROUP.getCode());
         }
+
         PartitionSelector partitionSelector = partitionSelectorManager.getPartitionSelector(topicMetadata.getTopic(), config.getSelectorType());
         PartitionMetadata partition = ProducerHelper.dispatchPartitions(messages, topicMetadata, partitions, partitionSelector);
-        if (partition == null || partition.getLeader() == null || !partition.getLeader().isWritable()) {
+
+        if (partition == null) {
+            throw new ProducerException(String.format("partition not available, topic: %s, messages: %s", topicMetadata.getTopic(), messages), JoyQueueCode.FW_TOPIC_NO_PARTITIONGROUP.getCode());
+        }
+
+        if (partition.getLeader() == null || !partition.getLeader().isWritable()) {
             if (partitionBlackList == null) {
                 partitionBlackList = Lists.newArrayList();
             }

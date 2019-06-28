@@ -32,7 +32,7 @@ public class JoyQueueHeader implements Header {
     public static final byte VERSION_V1 = 1;
     public static final byte VERSION_V2 = 2;
 
-    public static final byte CURRENT_VERSION = VERSION_V1;
+    public static final byte CURRENT_VERSION = VERSION_V2;
 
     // TODO 定一个magic
     public static final int MAGIC = 0xCAFEBEBE;

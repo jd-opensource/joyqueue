@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package api.metadata;
+package com.jd.joyqueue.client.samples.api.metadata;
 
 import com.jd.joyqueue.toolkit.network.IpUtil;
 import io.openmessaging.KeyValue;

@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package api.interceptor;
+package com.jd.joyqueue.client.samples.api.interceptor;
 
 import com.jd.joyqueue.client.internal.common.ordered.Ordered;
 import com.jd.joyqueue.client.internal.producer.domain.ProduceMessage;

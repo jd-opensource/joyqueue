@@ -28,8 +28,6 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>kafka-test</module>
-        <module>client-test</module>
     </modules>
 
     <build>

@@ -33,7 +33,7 @@ public class Consumer extends BaseNsrModel {
     private String subscribeGroup;
 
     /**
-     * 客户端类型，KAFKA,JMQ2,
+     * 客户端类型
      **/
     private byte clientType;
 

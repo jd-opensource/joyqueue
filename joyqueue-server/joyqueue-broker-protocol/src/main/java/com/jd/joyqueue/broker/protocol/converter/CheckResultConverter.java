@@ -40,7 +40,10 @@ public class CheckResultConverter {
                 return JoyQueueCode.FW_PUT_MESSAGE_TOPIC_NOT_WRITE;
             }
             case FW_PRODUCER_NOT_EXISTS: {
-                return JoyQueueCode.CN_NO_PERMISSION;
+                return JoyQueueCode.FW_PRODUCER_NOT_EXISTS;
+            }
+            case FW_BROKER_NOT_WRITABLE: {
+                return JoyQueueCode.FW_BROKER_NOT_WRITABLE;
             }
             default : {
                 logger.warn("unknown produce code {}", code);
@@ -66,6 +69,9 @@ public class CheckResultConverter {
             }
             case FW_CONSUMER_NOT_EXISTS: {
                 return JoyQueueCode.FW_CONSUMER_NOT_EXISTS;
+            }
+            case FW_BROKER_NOT_READABLE: {
+                return JoyQueueCode.FW_BROKER_NOT_READABLE;
             }
             default : {
                 logger.warn("unknown fetch code {}", code);

@@ -94,7 +94,7 @@ public class TopicAdmin extends AbstractAdmin {
     public static class PubSubArg extends CommandArgs{
         @ParametersDelegate
         public SubscribeArg subscribe=new SubscribeArg();
-        @Parameter(names = {  "--client" }, description = "client type: 0 jmq,1 kafka,2 mqtt,other  ", required = false)
+        @Parameter(names = {  "--client" }, description = "client type: 0 joyqueue,1 kafka,2 mqtt,other  ", required = false)
         public Integer client=0;
 
     }

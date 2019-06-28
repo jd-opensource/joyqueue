@@ -244,7 +244,7 @@ public class DefaultMessagePoller extends Service implements MessagePoller {
         }
 
         if (!partitionMetadata.getLeader().isReadable()) {
-            throw new ConsumerException(String.format("partition no permission, topic: %s, partition: %s", topic, partition), JoyQueueCode.FW_TOPIC_NO_PARTITIONGROUP.getCode());
+            throw new ConsumerException(String.format("partition not readable, topic: %s, partition: %s", topic, partition), JoyQueueCode.FW_TOPIC_NO_PARTITIONGROUP.getCode());
         }
 
         if (batchSize == CUSTOM_BATCH_SIZE) {

@@ -114,12 +114,12 @@ public class BrokerNode implements Serializable {
         return permission;
     }
 
-    public void setReadable() {
-        this.permission = BrokerPermission.setReadable(permission);
+    public void setReadable(boolean readable) {
+        this.permission = BrokerPermission.setReadable(permission, readable);
     }
 
-    public void setWritable() {
-        this.permission = BrokerPermission.setWritable(permission);
+    public void setWritable(boolean writable) {
+        this.permission = BrokerPermission.setWritable(permission, writable);
     }
 
     public boolean isReadable() {

@@ -90,7 +90,7 @@ JoyQueue 提供Java、Spring 以及Spring Boot三种客户端使用形式。
 ```java
 public static void main(String[] args) {
         KeyValue keyValue = OMS.newKeyValue();
-        keyValue.put(JMQBuiltinKeys.ACCOUNT_KEY, "test_token");
+        keyValue.put(JoyQueueBuiltinKeys.ACCOUNT_KEY, "test_token");
 
         MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint(String.format("oms:joyqueue://test_app@%s:50088/UNKNOWN", IpUtil.getLocalIp()), keyValue);
 
@@ -120,7 +120,7 @@ public static void main(String[] args) {
 ```java
 public static void main(String[] args) throws Exception {
         KeyValue keyValue = OMS.newKeyValue();
-        keyValue.put(JMQBuiltinKeys.ACCOUNT_KEY, "test_token");
+        keyValue.put(JoyQueueBuiltinKeys.ACCOUNT_KEY, "test_token");
 
         MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint(String.format("oms:joyqueue://test_app@%s:50088/UNKNOWN", IpUtil.getLocalIp()), keyValue);
 

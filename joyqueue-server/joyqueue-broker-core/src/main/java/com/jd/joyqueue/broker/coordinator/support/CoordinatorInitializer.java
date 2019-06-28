@@ -73,10 +73,10 @@ public class CoordinatorInitializer extends Service {
 
     protected boolean initCoordinatorSubscribe(TopicName topic, String app) {
         if (nameService.getConsumerByTopicAndApp(topic, app) == null) {
-            nameService.subscribe(new Subscription(topic, app, Subscription.Type.CONSUMPTION), ClientType.JMQ);
+            nameService.subscribe(new Subscription(topic, app, Subscription.Type.CONSUMPTION), ClientType.JOYQUEUE);
         }
         if (nameService.getProducerByTopicAndApp(topic, app) == null) {
-            nameService.subscribe(new Subscription(topic, app, Subscription.Type.PRODUCTION), ClientType.JMQ);
+            nameService.subscribe(new Subscription(topic, app, Subscription.Type.PRODUCTION), ClientType.JOYQUEUE);
         }
         return true;
     }

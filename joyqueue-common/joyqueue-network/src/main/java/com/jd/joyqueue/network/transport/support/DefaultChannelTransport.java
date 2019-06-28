@@ -110,7 +110,11 @@ public class DefaultChannelTransport implements ChannelTransport {
             } else if (e instanceof InterruptedException) {
                 throw TransportException.InterruptedException.build();
             } else {
-                throw TransportException.RequestErrorException.build("请求错误, " + channel.remoteAddress(), e);
+                if (channel.remoteAddress() == null) {
+                    throw TransportException.RequestErrorException.build("请求错误", e);
+                } else {
+                    throw TransportException.RequestErrorException.build("请求错误, " + channel.remoteAddress(), e);
+                }
             }
         }
     }

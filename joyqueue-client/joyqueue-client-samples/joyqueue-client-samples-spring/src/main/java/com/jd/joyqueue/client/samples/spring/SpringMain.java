@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spring;
+package com.jd.joyqueue.client.samples.spring;
 
 import io.openmessaging.message.Message;
 import io.openmessaging.producer.Producer;

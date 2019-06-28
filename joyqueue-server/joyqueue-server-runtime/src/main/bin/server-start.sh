@@ -46,11 +46,9 @@ OPTS_MEMORY=`grep -ios 'opts.memory=.*$' ${CONFIG_FILE} | tr -d '\r'`
 OPTS_MEMORY=${OPTS_MEMORY#*=}
 #DEBUG_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5006 -XX:-OmitStackTraceInFastThrow"
 
-nohup "$JAVACMD"\
+"$JAVACMD"\
   $OPTS_MEMORY $DEBUG_OPTS \
   -classpath "$CLASSPATH" \
   -Dbasedir="$BASEDIR" \
   -Dfile.encoding="UTF-8" \
-  com.jd.joyqueue.broker.Launcher \
-  "$@" >/dev/null 2>/dev/null &
-echo $! > joyqueue.pid
+  com.jd.joyqueue.broker.Launcher

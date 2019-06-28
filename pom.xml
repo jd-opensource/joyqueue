@@ -338,23 +338,10 @@
                 <version>${lz4.version}</version>
             </dependency>
 
-
-            <dependency>
-                <groupId>com.jd.joyqueue</groupId>
-                <artifactId>joyqueue-registry-zookeeper</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
             <dependency>
                 <groupId>org.apache.zookeeper</groupId>
                 <artifactId>zookeeper</artifactId>
                 <version>3.4.5</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.jd.joyqueue</groupId>
-                <artifactId>joyqueue-registry-api</artifactId>
-                <version>${project.version}</version>
             </dependency>
 
             <dependency>

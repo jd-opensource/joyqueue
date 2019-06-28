@@ -68,7 +68,7 @@ public class FetchIndexRequestHandler implements JoyQueueCommandHandler, Type, B
 
         for (Map.Entry<String, List<Short>> entry : fetchIndexRequest.getPartitions().entrySet()) {
             String topic = entry.getKey();
-            Consumer consumer = new Consumer(connection.getId(), topic, fetchIndexRequest.getApp(), Consumer.ConsumeType.JMQ);
+            Consumer consumer = new Consumer(connection.getId(), topic, fetchIndexRequest.getApp(), Consumer.ConsumeType.JOYQUEUE);
             for (Short partition : entry.getValue()) {
                 FetchIndexAckData fetchIndexAckData = fetchIndex(connection, consumer, partition);
                 result.put(topic, partition, fetchIndexAckData);

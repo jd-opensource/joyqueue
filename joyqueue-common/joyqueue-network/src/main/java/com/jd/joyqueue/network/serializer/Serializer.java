@@ -540,7 +540,7 @@ public class Serializer extends AbstractSerializer {
                 Serializer.write(broker,out);
             }
         }
-        //out.writeInt(partitionGroup.getRecLeader());
+        out.writeInt(partitionGroup.getRecLeader());
     }
 
     public static PartitionGroup readPartitionGroup(final ByteBuf in, final int version) throws Exception {

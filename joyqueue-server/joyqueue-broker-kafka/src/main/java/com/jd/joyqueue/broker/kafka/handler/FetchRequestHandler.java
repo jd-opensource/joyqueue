@@ -216,8 +216,8 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
 
     private List<BrokerMessage> doFetchMessage(Consumer consumer, int partition, long offset, int batchSize) throws Exception {
         PullResult pullResult = consume.getMessage(consumer, (short) partition, offset, batchSize);
-        if (pullResult.getJoyQueueCode() != JoyQueueCode.SUCCESS) {
-            logger.warn("fetch message error, consumer: {}, partition: {}, offset: {}, batchSize: {}, code: {}", consumer, partition, offset, batchSize, pullResult.getJoyQueueCode());
+        if (pullResult.getCode() != JoyQueueCode.SUCCESS) {
+            logger.warn("fetch message error, consumer: {}, partition: {}, offset: {}, batchSize: {}, code: {}", consumer, partition, offset, batchSize, pullResult.getCode());
             return null;
         }
         if (pullResult.size() == 0) {

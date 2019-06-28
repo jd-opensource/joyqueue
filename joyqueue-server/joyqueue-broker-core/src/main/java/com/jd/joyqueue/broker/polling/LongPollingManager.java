@@ -247,8 +247,8 @@ public class LongPollingManager extends Service {
                     longPollingQueue.offer(longPolling);
                 }
 
-                if (!pullResult.getJoyQueueCode().equals(JoyQueueCode.SUCCESS)) {
-                    logger.error("getMessage error, code: {}, consumer: {}", pullResult.getJoyQueueCode(), consumer);
+                if (!pullResult.getCode().equals(JoyQueueCode.SUCCESS)) {
+                    logger.error("getMessage error, code: {}, consumer: {}", pullResult.getCode(), consumer);
                 }
             } catch (Throwable th) {
                 try {

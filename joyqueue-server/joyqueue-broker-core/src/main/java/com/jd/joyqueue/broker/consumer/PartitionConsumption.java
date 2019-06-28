@@ -239,11 +239,11 @@ class PartitionConsumption extends Service {
         } catch (PositionOverflowException overflow) {
             logger.debug("PositionOverflow,topic:{},partition:{},index:{}", consumer.getTopic(), partition, index);
             if (overflow.getPosition() != overflow.getRight()) {
-                pullResult.setJmqCode(JoyQueueCode.SE_INDEX_OVERFLOW);
+                pullResult.setCode(JoyQueueCode.SE_INDEX_OVERFLOW);
             }
         } catch (PositionUnderflowException underflow) {
             logger.debug("PositionUnderflow,topic:{},partition:{},index:{}", consumer.getTopic(), partition, index);
-            pullResult.setJmqCode(JoyQueueCode.SE_INDEX_UNDERFLOW);
+            pullResult.setCode(JoyQueueCode.SE_INDEX_UNDERFLOW);
         }
 
         return pullResult;
@@ -313,9 +313,9 @@ class PartitionConsumption extends Service {
                 partitionManager.releasePartition(consumer, partition);
 
                 if (ex instanceof PositionOverflowException) {
-                    pullResult.setJmqCode(JoyQueueCode.SE_INDEX_OVERFLOW);
+                    pullResult.setCode(JoyQueueCode.SE_INDEX_OVERFLOW);
                 } else if (ex instanceof PositionUnderflowException) {
-                    pullResult.setJmqCode(JoyQueueCode.SE_INDEX_UNDERFLOW);
+                    pullResult.setCode(JoyQueueCode.SE_INDEX_UNDERFLOW);
                 } else {
                     logger.error("get message error, consumer: {}, partition: {}", consumer, partition, ex);
                 }

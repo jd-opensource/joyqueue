@@ -130,11 +130,11 @@ public class FetchTopicMessageRequestHandler implements JoyQueueCommandHandler, 
         fetchTopicMessageAckData.setBuffers(Collections.emptyList());
         try {
             PullResult pullResult = consume.getMessage(consumer, count, ackTimeout);
-            if (!pullResult.getJoyQueueCode().equals(JoyQueueCode.SUCCESS)) {
+            if (!pullResult.getCode().equals(JoyQueueCode.SUCCESS)) {
                 logger.error("fetchTopicMessage exception, transport: {}, consumer: {}, count: {}", transport, consumer, count);
             }
             fetchTopicMessageAckData.setBuffers(pullResult.getBuffers());
-            fetchTopicMessageAckData.setCode(pullResult.getJoyQueueCode());
+            fetchTopicMessageAckData.setCode(pullResult.getCode());
         } catch (JoyQueueException e) {
             logger.error("fetchTopicMessage exception, transport: {}, consumer: {}, count: {}", transport, consumer, count, e);
             fetchTopicMessageAckData.setCode(JoyQueueCode.valueOf(e.getCode()));

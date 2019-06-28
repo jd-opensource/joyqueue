@@ -138,7 +138,7 @@ public class CommitAckRequestHandler implements JoyQueueCommandHandler, Type, Br
         try {
             MessageLocation[] messageLocations = new MessageLocation[dataList.size()];
             List<CommitAckData> retryDataList = null;
-            Consumer consumer = new Consumer(connection.getId(), topic, app, Consumer.ConsumeType.JMQ);
+            Consumer consumer = new Consumer(connection.getId(), topic, app, Consumer.ConsumeType.JOYQUEUE);
 
             for (int i = 0; i < dataList.size(); i++) {
                 CommitAckData data = dataList.get(i);

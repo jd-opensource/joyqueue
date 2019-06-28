@@ -78,7 +78,7 @@ public class ProduceMessageRollbackRequestHandler implements JoyQueueCommandHand
     }
 
     protected ProduceMessageRollbackResponse produceMessageRollback(Connection connection, ProduceMessageRollbackRequest produceMessageRollbackRequest) {
-        Producer producer = new Producer(connection.getId(), produceMessageRollbackRequest.getTopic(), produceMessageRollbackRequest.getApp(), Producer.ProducerType.JMQ);
+        Producer producer = new Producer(connection.getId(), produceMessageRollbackRequest.getTopic(), produceMessageRollbackRequest.getApp(), Producer.ProducerType.JOYQUEUE);
 
         BrokerCommit brokerCommit = new BrokerCommit();
         brokerCommit.setTopic(produceMessageRollbackRequest.getTopic());

@@ -91,7 +91,7 @@ public class AddProducerRequestHandler implements JoyQueueCommandHandler, Type, 
         producer.setConnectionId(connection.getId());
         producer.setApp(app);
         producer.setTopic(topic);
-        producer.setType(Producer.ProducerType.JMQ);
+        producer.setType(Producer.ProducerType.JOYQUEUE);
         return producer;
     }
 
