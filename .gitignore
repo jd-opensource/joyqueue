@@ -1,6 +1,7 @@
 *.iml
 .idea/
 .vertx/
+.vscode/
 target/
 h2-db-joyqueue
 .classpath

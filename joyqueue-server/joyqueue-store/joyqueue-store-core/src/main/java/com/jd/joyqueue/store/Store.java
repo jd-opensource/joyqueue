@@ -14,6 +14,7 @@
 package com.jd.joyqueue.store;
 
 import com.jd.joyqueue.domain.QosLevel;
+import com.jd.joyqueue.monitor.BufferPoolMonitorInfo;
 import com.jd.joyqueue.store.file.PositioningStore;
 import com.jd.joyqueue.store.replication.ReplicableStore;
 import com.jd.joyqueue.store.transaction.TransactionStore;
@@ -115,7 +116,8 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
             this.scheduledExecutor = Executors.newScheduledThreadPool(SCHEDULE_EXECUTOR_THREADS, new NamedThreadFactory("Store-Scheduled-Executor"));
         }
         if (bufferPool == null) {
-            this.bufferPool = new PreloadBufferPool(config.getPrintMetricIntervalMs());
+            System.setProperty(PreloadBufferPool.PRINT_METRIC_INTERVAL_MS_KEY, String.valueOf(config.getPrintMetricIntervalMs()));
+            this.bufferPool = PreloadBufferPool.getInstance();
         }
         this.bufferPool.addPreLoad(config.getIndexFileSize(), config.getPreLoadBufferCoreCount(), config.getPreLoadBufferMaxCount());
         this.bufferPool.addPreLoad(config.getMessageFileSize(), config.getPreLoadBufferCoreCount(), config.getPreLoadBufferMaxCount());
@@ -356,6 +358,11 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
     public StoreManagementService getManageService() {
 
         return new StoreManagement(128, 128, config.getMaxMessageLength(), bufferPool, this);
+    }
+
+    @Override
+    public BufferPoolMonitorInfo monitorInfo() {
+        return bufferPool.monitorInfo();
     }
 
     private String getPartitionGroupRelPath(String topic, int partitionGroup) {

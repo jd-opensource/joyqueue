@@ -1,3 +1,0 @@
-com.jd.joyqueue.registry.provider.FailoverProvider
-com.jd.joyqueue.registry.provider.FileProvider
-com.jd.joyqueue.registry.provider.HttpProvider

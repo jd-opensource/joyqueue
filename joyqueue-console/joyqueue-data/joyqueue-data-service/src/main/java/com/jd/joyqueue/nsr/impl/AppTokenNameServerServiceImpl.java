@@ -84,7 +84,7 @@ public class AppTokenNameServerServiceImpl extends NameServerBase implements App
             nsrToken.setExpirationTime(token.getExpirationTime());
         }
         String success =  postWithLog(UPDATE_TOKEN, nsrToken,OperLog.Type.APP_TOKEN.value(),OperLog.OperType.UPDATE.value(),nsrToken.getApp());
-        return isSuccess(result);
+        return isSuccess(success);
     }
 
     @Override

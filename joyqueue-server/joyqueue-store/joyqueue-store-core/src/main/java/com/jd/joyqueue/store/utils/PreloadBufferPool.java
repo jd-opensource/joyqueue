@@ -13,6 +13,7 @@
  */
 package com.jd.joyqueue.store.utils;
 
+import com.jd.joyqueue.monitor.BufferPoolMonitorInfo;
 import com.jd.joyqueue.toolkit.concurrent.LoopThread;
 import com.jd.joyqueue.toolkit.format.Format;
 import com.jd.joyqueue.toolkit.time.SystemClock;
@@ -25,6 +26,7 @@ import sun.nio.ch.DirectBuffer;
 import java.io.Closeable;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +54,10 @@ public class PreloadBufferPool implements Closeable {
      * 缓存清理比率阈值，超过这个阈值执行缓存清理。
      */
     private static final double EVICT_RATIO = 0.8d;
+    public static final String CACHE_LIFE_TIME_MS_KEY = "PreloadBufferPool.CacheLifeTimeMs";
+    public static final String PRINT_METRIC_INTERVAL_MS_KEY = "PreloadBufferPool.PrintMetricIntervalMs";
+    public static final String MAX_MEMORY_KEY = "PreloadBufferPool.MaxMemory";
+
     private final LoopThread preloadThread;
     private final LoopThread metricThread;
     private final LoopThread evictThread;
@@ -61,17 +67,20 @@ public class PreloadBufferPool implements Closeable {
     private final Set<BufferHolder> directBufferHolders = ConcurrentHashMap.newKeySet();
     private final Set<BufferHolder> mMapBufferHolders = ConcurrentHashMap.newKeySet();
     private Map<Integer, PreLoadCache> bufferCache = new ConcurrentHashMap<>();
+    private static PreloadBufferPool instance = null;
 
-    public PreloadBufferPool() {
-        this(0L, DEFAULT_CACHE_LIFE_TIME_MS, Math.round(VM.maxDirectMemory() * CACHE_RATIO));
+    public static PreloadBufferPool getInstance() {
+        if(null == instance) {
+            instance = new PreloadBufferPool();
+        }
+        return instance;
     }
 
-    public PreloadBufferPool(long printMetricIntervalMs) {
-        this(printMetricIntervalMs, DEFAULT_CACHE_LIFE_TIME_MS, Math.round(VM.maxDirectMemory() * CACHE_RATIO));
-    }
+    private PreloadBufferPool() {
+        long printMetricInterval = Long.parseLong(System.getProperty(PRINT_METRIC_INTERVAL_MS_KEY,"0"));
+        this.cacheLifetimeMs = Long.parseLong(System.getProperty(CACHE_LIFE_TIME_MS_KEY,String.valueOf(DEFAULT_CACHE_LIFE_TIME_MS)));
+        long maxMemorySize = Format.parseSize(System.getProperty(MAX_MEMORY_KEY), Math.round(VM.maxDirectMemory() * CACHE_RATIO));
 
-    public PreloadBufferPool(long printMetricInterval, long cacheLifetimeMs, long maxMemorySize) {
-        this.cacheLifetimeMs = cacheLifetimeMs;
         preloadThread = buildPreloadThread();
         preloadThread.start();
 
@@ -85,7 +94,7 @@ public class PreloadBufferPool implements Closeable {
         evictThread = buildEvictThread();
         evictThread.start();
         this.maxMemorySize = maxMemorySize;
-        logger.info("Max direct memory size : {}.", Format.formatTraffic(maxMemorySize));
+        logger.info("Max direct memory size : {}.", Format.formatSize(maxMemorySize));
     }
 
     private LoopThread buildMetricThread(long printMetricInterval) {
@@ -99,19 +108,19 @@ public class PreloadBufferPool implements Closeable {
                         long usedPreLoad = preLoadCache.onFlyCounter.get();
                         long totalSize = preLoadCache.bufferSize * (cached + usedPreLoad);
                         logger.info("PreloadCache usage: cached: {} * {} = {}, used: {} * {} = {}, total: {}",
-                                Format.formatTraffic(preLoadCache.bufferSize), cached, Format.formatTraffic(preLoadCache.bufferSize * cached),
-                                Format.formatTraffic(preLoadCache.bufferSize), usedPreLoad, Format.formatTraffic(preLoadCache.bufferSize * usedPreLoad),
-                                Format.formatTraffic(totalSize));
+                                Format.formatSize(preLoadCache.bufferSize), cached, Format.formatSize(preLoadCache.bufferSize * cached),
+                                Format.formatSize(preLoadCache.bufferSize), usedPreLoad, Format.formatSize(preLoadCache.bufferSize * usedPreLoad),
+                                Format.formatSize(totalSize));
                         return totalSize;
                     }).sum();
                     long mmpUsed = mMapBufferHolders.stream().mapToInt(BufferHolder::size).sum();
                     long directUsed = directBufferHolders.stream().mapToInt(BufferHolder::size).sum();
                     logger.info("Direct memory usage: preload/direct/mmp/used/max: {}/{}/{}/{}/{}.",
-                            Format.formatTraffic(plUsed),
-                            Format.formatTraffic(directUsed),
-                            Format.formatTraffic(mmpUsed),
-                            Format.formatTraffic(totalUsed),
-                            Format.formatTraffic(maxMemorySize));
+                            Format.formatSize(plUsed),
+                            Format.formatSize(directUsed),
+                            Format.formatSize(mmpUsed),
+                            Format.formatSize(totalUsed),
+                            Format.formatSize(maxMemorySize));
 
                 })
                 .daemon(true)
@@ -304,7 +313,7 @@ public class PreloadBufferPool implements Closeable {
 
             }
         } catch (OutOfMemoryError outOfMemoryError) {
-            logger.debug("OOM: {}/{}.", Format.formatTraffic(usedSize.get()), Format.formatTraffic(maxMemorySize));
+            logger.debug("OOM: {}/{}.", Format.formatSize(usedSize.get()), Format.formatSize(maxMemorySize));
             throw outOfMemoryError;
         }
     }
@@ -328,6 +337,38 @@ public class PreloadBufferPool implements Closeable {
 
     }
 
+    /**
+     * buffer监控
+     * @return
+     */
+    public BufferPoolMonitorInfo monitorInfo() {
+        BufferPoolMonitorInfo bufferPoolMonitorInfo = new BufferPoolMonitorInfo();
+
+        List<BufferPoolMonitorInfo.PLMonitorInfo> plMonitorInfos = new ArrayList<>();
+        long totalUsed = usedSize.get();
+        long plUsed = bufferCache.values().stream().mapToLong(preLoadCache -> {
+            long cached = preLoadCache.cache.size();
+            long usedPreLoad = preLoadCache.onFlyCounter.get();
+            long totalSize = preLoadCache.bufferSize * (cached + usedPreLoad);
+            BufferPoolMonitorInfo.PLMonitorInfo plMonitorInfo = new BufferPoolMonitorInfo.PLMonitorInfo();
+            plMonitorInfo.setBufferSize(Format.formatSize(preLoadCache.bufferSize));
+            plMonitorInfo.setCached(Format.formatSize(preLoadCache.bufferSize * cached));
+            plMonitorInfo.setUsedPreLoad(Format.formatSize(preLoadCache.bufferSize * usedPreLoad));
+            plMonitorInfo.setTotalSize(Format.formatSize(totalSize));
+            plMonitorInfos.add(plMonitorInfo);
+            return totalSize;
+        }).sum();
+        long mmpUsed = mMapBufferHolders.stream().mapToInt(BufferHolder::size).sum();
+        long directUsed = directBufferHolders.stream().mapToInt(BufferHolder::size).sum();
+
+        bufferPoolMonitorInfo.setPlMonitorInfos(plMonitorInfos);
+        bufferPoolMonitorInfo.setPlUsed(Format.formatSize(plUsed));
+        bufferPoolMonitorInfo.setUsed(Format.formatSize(totalUsed));
+        bufferPoolMonitorInfo.setMaxMemorySize(Format.formatSize(maxMemorySize));
+        bufferPoolMonitorInfo.setMmpUsed(Format.formatSize(mmpUsed));
+        bufferPoolMonitorInfo.setDirectUsed(Format.formatSize(directUsed));
+        return bufferPoolMonitorInfo;
+    }
     static class PreLoadCache {
         final int bufferSize;
         final int coreCount, maxCount;

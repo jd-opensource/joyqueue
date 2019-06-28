@@ -139,7 +139,7 @@ public class ConsumeArchiveServiceTest {
      * @return
      */
     private String getTestPath() {
-        String userPath = System.getProperty("user.dir");
+        String userPath = System.getProperty("java.io.tmpdir");
         String childPath = "/test-folder/";
 
         return userPath + childPath;

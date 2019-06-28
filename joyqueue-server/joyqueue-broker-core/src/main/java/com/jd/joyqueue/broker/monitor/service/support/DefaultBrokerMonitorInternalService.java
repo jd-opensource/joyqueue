@@ -34,6 +34,7 @@ import com.jd.joyqueue.broker.monitor.stat.TopicPendingStat;
 import com.jd.joyqueue.broker.monitor.stat.TopicStat;
 import com.jd.joyqueue.store.StoreManagementService;
 import com.jd.joyqueue.store.StoreService;
+import com.jd.joyqueue.toolkit.format.Format;
 import com.jd.joyqueue.toolkit.lang.Online;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,8 +85,8 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
 
         StoreMonitorInfo storeMonitorInfo = new StoreMonitorInfo();
         storeMonitorInfo.setStarted(storeService instanceof Online?((Online) storeService).isStarted():true);
-        storeMonitorInfo.setFreeSpace(storeManagementService.freeSpace());
-        storeMonitorInfo.setTotalSpace(storeManagementService.totalSpace());
+        storeMonitorInfo.setFreeSpace(Format.formatSize(storeManagementService.freeSpace()));
+        storeMonitorInfo.setTotalSpace(Format.formatSize(storeManagementService.totalSpace()));
 
         NameServerMonitorInfo nameServerMonitorInfo = new NameServerMonitorInfo();
         nameServerMonitorInfo.setStarted(nameService.isStarted());
@@ -99,6 +100,8 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
         brokerMonitorInfo.setStore(storeMonitorInfo);
         brokerMonitorInfo.setNameServer(nameServerMonitorInfo);
         brokerMonitorInfo.setElection(electionMonitorInfo);
+
+        brokerMonitorInfo.setBufferPoolMonitorInfo(storeService.monitorInfo());
         return brokerMonitorInfo;
     }
 

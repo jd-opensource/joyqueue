@@ -16,9 +16,9 @@ package com.jd.joyqueue.store.transaction;
 import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.store.WriteResult;
 import com.jd.joyqueue.store.file.PositioningStore;
-import com.jd.joyqueue.store.utils.BaseDirUtils;
 import com.jd.joyqueue.store.utils.MessageTestUtils;
 import com.jd.joyqueue.store.utils.PreloadBufferPool;
+import com.jd.joyqueue.toolkit.util.BaseDirUtils;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -45,7 +45,7 @@ public class TransactionTest {
     public void transactionTest() throws Exception {
         int count = 1024;
         PositioningStore.Config config = new PositioningStore.Config();
-        PreloadBufferPool bufferPool = new PreloadBufferPool();
+        PreloadBufferPool bufferPool = PreloadBufferPool.getInstance();
 
         TransactionStoreManager transactionStoreManager = new TransactionStoreManager(base, config, bufferPool);
         int tId = transactionStoreManager.next();

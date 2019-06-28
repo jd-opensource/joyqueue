@@ -93,7 +93,6 @@ public class NameServiceTest {
         String app = "joyqueue";
         String topic = "__group_coordinators";
         nameService.unSubscribe(new Subscription(TopicName.parse(topic), app, Subscription.Type.CONSUMPTION));
-        nameService.unSubscribe(new Subscription(TopicName.parse(topic), app, Subscription.Type.CONSUMPTION));
         System.out.println("success");
 
     }

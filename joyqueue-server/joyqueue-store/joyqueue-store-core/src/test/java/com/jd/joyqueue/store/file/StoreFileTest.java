@@ -13,10 +13,10 @@
  */
 package com.jd.joyqueue.store.file;
 
-import com.jd.joyqueue.store.utils.BaseDirUtils;
 import com.jd.joyqueue.store.utils.MessageTestUtils;
 import com.jd.joyqueue.store.utils.PreloadBufferPool;
 import com.jd.joyqueue.toolkit.time.SystemClock;
+import com.jd.joyqueue.toolkit.util.BaseDirUtils;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -52,7 +52,7 @@ public class StoreFileTest {
     @Test
     public void timestampTest() throws IOException {
         long start = SystemClock.now();
-        StoreFileImpl<ByteBuffer> storeFile = new StoreFileImpl<>(666L, base, 128, new StoreMessageSerializer(1024), new PreloadBufferPool(), 1024 * 1024 * 10);
+        StoreFileImpl<ByteBuffer> storeFile = new StoreFileImpl<>(666L, base, 128, new StoreMessageSerializer(1024), PreloadBufferPool.getInstance(), 1024 * 1024 * 10);
         long timestamp = storeFile.timestamp();
 //        long timestamp = SystemClock.now();
         long end = SystemClock.now();
@@ -64,7 +64,7 @@ public class StoreFileTest {
         storeFile.flush();
         storeFile.unload();
 
-        storeFile = new StoreFileImpl<>(666L, base, 128, new StoreMessageSerializer(1024), new PreloadBufferPool(), 1024 * 1024 * 10);
+        storeFile = new StoreFileImpl<>(666L, base, 128, new StoreMessageSerializer(1024), PreloadBufferPool.getInstance(), 1024 * 1024 * 10);
 
         Assert.assertEquals(timestamp, storeFile.timestamp());
 

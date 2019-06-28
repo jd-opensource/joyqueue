@@ -17,12 +17,12 @@ import com.jd.joyqueue.domain.QosLevel;
 import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.store.message.MessageParser;
 import com.jd.joyqueue.store.nsm.VirtualThreadExecutor;
-import com.jd.joyqueue.store.utils.BaseDirUtils;
 import com.jd.joyqueue.store.utils.MessageUtils;
 import com.jd.joyqueue.store.utils.PreloadBufferPool;
 import com.jd.joyqueue.toolkit.concurrent.EventFuture;
 import com.jd.joyqueue.toolkit.format.Format;
 import com.jd.joyqueue.toolkit.time.SystemClock;
+import com.jd.joyqueue.toolkit.util.BaseDirUtils;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -162,7 +162,7 @@ public class PartitionGroupStoreManagerTest {
         destroyStore();
         if (null == virtualThreadPool) virtualThreadPool = new VirtualThreadExecutor(500, 100, 10, 1000, 4);
         if (null == bufferPool) {
-            bufferPool = new PreloadBufferPool();
+            bufferPool = PreloadBufferPool.getInstance();
             bufferPool.addPreLoad(128 * 1024 * 1024, 2, 4);
             bufferPool.addPreLoad(10 * 1024 * 1024, 2, 4);
         }
@@ -296,7 +296,7 @@ public class PartitionGroupStoreManagerTest {
                     repeat = false;
                 } catch (TimeoutException ignored) {
                 }
-            logger.info("Index: {}, {}...", index, Format.formatTraffic(index * 1024));
+            logger.info("Index: {}, {}...", index, Format.formatSize(index * 1024));
         }
 
 
@@ -493,7 +493,7 @@ public class PartitionGroupStoreManagerTest {
         PartitionGroupStoreSupport.init(groupBase, partitions);
         if (null == virtualThreadPool) virtualThreadPool = new VirtualThreadExecutor(500, 100, 10, 1000, 4);
         if (null == bufferPool) {
-            bufferPool = new PreloadBufferPool();
+            bufferPool = PreloadBufferPool.getInstance();
             bufferPool.addPreLoad(128 * 1024 * 1024, 2, 4);
             bufferPool.addPreLoad(10 * 1024 * 1024, 2, 4);
         }
