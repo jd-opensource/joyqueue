@@ -28,6 +28,7 @@ public class CheckResultConverter {
 
     protected static final Logger logger = LoggerFactory.getLogger(CheckResultConverter.class);
 
+    // TODO 权限处理 LEADER_NOT_AVAILABLE
     public static short convertProduceCode(JoyQueueCode code) {
         switch (code) {
             case FW_TOPIC_NOT_EXIST:
@@ -47,6 +48,7 @@ public class CheckResultConverter {
         }
     }
 
+    // TODO 权限处理
     public static short convertFetchCode(JoyQueueCode code) {
         switch (code) {
             case FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER:
