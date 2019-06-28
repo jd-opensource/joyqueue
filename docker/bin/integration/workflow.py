@@ -303,9 +303,9 @@ class Workflow:
                     ATTEMPTS=0
                     MAX_ATTEMPTS={max_attempts}
                     containerId=$(echo "$containerId"|sed ':a;N;$!ba;s/\\n/ /g') 
-                    echo "docker exec $containerId cat logs/debug.log|grep 'JournalQ is started'"
+                    echo "docker exec $containerId cat logs/debug.log|grep 'JoyQueue is started'"
                     while true; do
-                        started=$(docker exec $containerId cat logs/debug.log|grep 'JournalQ is started')
+                        started=$(docker exec $containerId cat logs/debug.log|grep 'JoyQueue is started')
                         echo "check state: $started"
                         if [[ -n $started ]]; then
                            exit 0

@@ -567,6 +567,13 @@ public class ClusterManager extends Service {
      * @return
      */
     public BooleanResponse checkWritable(TopicName topic, String app, String address) {
+        // 检查broker写权限
+        BooleanResponse brokerWritable = checkBrokerWritable();
+        if (!brokerWritable.isSuccess()) {
+            // 当前broker没有写权限
+            return brokerWritable;
+        }
+
         TopicConfig topicConfig = getTopicConfig(topic);
         if (topicConfig == null) {
             // 没有主题配置
@@ -646,6 +653,13 @@ public class ClusterManager extends Service {
      * @return 是否可读
      */
     public BooleanResponse checkReadable(TopicName topic, String app, String address) {
+        // 检查broker读权限
+        BooleanResponse brokerReadable = checkBrokerReadable();
+        if (!brokerReadable.isSuccess()) {
+            // 没有读权限
+            return brokerReadable;
+        }
+
         TopicConfig topicConfig = getTopicConfig(topic);
         if (topicConfig == null) {
             // 没有主题配置
@@ -707,6 +721,36 @@ public class ClusterManager extends Service {
         if (!group.getLeader().equals(broker.getId())) {
             logger.error("topic[{}],app[{}],partition[{}],error[{}]", topic, app,partition, JoyQueueCode.FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER.getMessage());
             return BooleanResponse.failed(JoyQueueCode.FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER);
+        }
+        return BooleanResponse.success();
+    }
+
+    /**
+     * 检查broker级别是否读
+     *
+     * @return broker是否可读
+     */
+    public BooleanResponse checkBrokerReadable(){
+        Broker broker = getBroker();
+        if (Broker.PermissionEnum.FULL != broker.getPermission() && Broker.PermissionEnum.READ != broker.getPermission()) {
+            logger.error("No read permission broker:[{}]", broker);
+
+            return BooleanResponse.failed(JoyQueueCode.FW_BROKER_NOT_READABLE);
+        }
+        return BooleanResponse.success();
+    }
+
+    /**
+     * 检查broker级别是否写
+     *
+     * @return broker是否可写
+     */
+    public BooleanResponse checkBrokerWritable(){
+        Broker broker = getBroker();
+        if (Broker.PermissionEnum.FULL != broker.getPermission() && Broker.PermissionEnum.WRITE != broker.getPermission()) {
+            logger.error("No write permission broker info is [{}]", broker);
+
+            return BooleanResponse.failed(JoyQueueCode.FW_BROKER_NOT_WRITABLE);
         }
         return BooleanResponse.success();
     }

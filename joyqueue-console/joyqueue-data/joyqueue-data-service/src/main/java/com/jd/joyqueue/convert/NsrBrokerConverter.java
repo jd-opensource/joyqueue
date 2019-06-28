@@ -36,7 +36,7 @@ public class NsrBrokerConverter extends Converter<Broker, com.jd.joyqueue.domain
             nsrBroker.setDataCenter(broker.getDataCenter().getCode());
         }
         if (broker.getPermission() != null) {
-            nsrBroker.setPermission(broker.getPermission());
+            nsrBroker.setPermission(com.jd.joyqueue.domain.Broker.PermissionEnum.valueOf(broker.getPermission()));
         }
         return nsrBroker;
     }
@@ -47,7 +47,7 @@ public class NsrBrokerConverter extends Converter<Broker, com.jd.joyqueue.domain
         broker.setId(nsrBroker.getId());
         broker.setIp(nsrBroker.getIp());
         broker.setPort(nsrBroker.getPort());
-        broker.setPermission(nsrBroker.getPermission());
+        broker.setPermission(nsrBroker.getPermission().getName());
 
         broker.setRetryType(nsrBroker.getRetryType());
         if (broker.getDataCenter() != null) {
