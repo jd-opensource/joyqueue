@@ -24,6 +24,8 @@
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>joyqueue-network</artifactId>
+    <name>JoyQueue-Network</name>
+    <description>Network libraries</description>
 
     <dependencies>
 

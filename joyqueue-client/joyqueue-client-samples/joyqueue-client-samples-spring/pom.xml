@@ -25,6 +25,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>joyqueue-client-samples-spring</artifactId>
+    <name>JoyQueue-Client-Samples-Spring</name>
+    <description>Client samples using Spring</description>
 
     <dependencies>
         <dependency>

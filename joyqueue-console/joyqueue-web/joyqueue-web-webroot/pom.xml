@@ -26,7 +26,8 @@
     <version>4.1.0-SNAPSHOT</version>
 
     <artifactId>joyqueue-web-webroot</artifactId>
-
+    <name>JoyQueue-Web-WebRoot</name>
+    <description>The container for compiled frontend resources</description>
     <build>
         <resources>
             <resource>

@@ -43,7 +43,7 @@ import com.jd.joyqueue.toolkit.concurrent.LoopThread;
 import com.jd.joyqueue.toolkit.network.IpUtil;
 import com.jd.joyqueue.toolkit.service.Service;
 import com.jd.joyqueue.toolkit.time.SystemClock;
-import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
