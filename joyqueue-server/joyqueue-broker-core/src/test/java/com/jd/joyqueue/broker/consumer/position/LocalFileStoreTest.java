@@ -53,6 +53,7 @@ public class LocalFileStoreTest {
 
     @After
     public void deleteBaseFolder() throws IOException {
+        localFileStore.stop();
         if (base.exists()) {
             if (base.isDirectory()) deleteFolder(base);
             else base.delete();
