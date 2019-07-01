@@ -29,19 +29,6 @@ public class TempAuthentication implements Authentication {
     public static final String PASSWORD = "admin";
 
     @Override
-    public UserDetails getUser(String user) throws AuthException {
-        if (!USERNAME.equals(user)) {
-            return null;
-        }
-        return new TempUserDetails();
-    }
-
-    @Override
-    public PasswordEncoder getPasswordEncode() {
-        return new TempPasswordEncoder();
-    }
-
-    @Override
     public BooleanResponse auth(String userName, String password) {
         return null;
     }

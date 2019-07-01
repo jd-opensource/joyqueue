@@ -42,10 +42,9 @@ public class LocalFileStoreTest {
         final String basePath = "LocalFileTest";
         String property = "java.io.tmpdir";
         String tempDir = System.getProperty(property);
-        File tempDirFile = new File(tempDir);
-        Assert.assertTrue(tempDirFile.exists() && tempDirFile.isDirectory() && tempDirFile.canWrite());
+        base = new File(tempDir);
+        Assert.assertTrue(base.exists() && base.isDirectory() && base.canWrite());
 
-        base = new File(basePath);
         deleteBaseFolder();
         base.mkdirs();
         localFileStore.setBasePath(base.getAbsolutePath());
