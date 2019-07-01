@@ -1,0 +1,9 @@
+com.jd.joyqueue.handler.routing.validate.ValidateAdminHandler
+com.jd.joyqueue.handler.routing.validate.ValidateApplicationHandler
+com.jd.joyqueue.handler.routing.validate.ValidateApplicationMemberHandler
+com.jd.joyqueue.handler.routing.validate.ValidateApplicationOwnerHandler
+com.jd.joyqueue.handler.routing.validate.ValidateApplicationOfHeaderHandler
+com.jd.joyqueue.handler.routing.validate.ValidateTokenOfApplicationHandler
+com.jd.joyqueue.handler.routing.validate.ValidateAppTokenHandler
+com.jd.joyqueue.handler.routing.AdminLoginHandler
+com.jd.joyqueue.handler.routing.GetLoginUserHandler

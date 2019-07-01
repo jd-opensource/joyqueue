@@ -1,1 +1,1 @@
-# JournalQ message replication
+# JoyQueue message replication

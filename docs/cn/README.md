@@ -1,6 +1,6 @@
-JournalQ
+JoyQueue
 ====
-JournalQ 是一个兼容Kafka、MQTT协议的分布式、云原生消息平台。
+JoyQueue 是一个兼容Kafka、MQTT协议的分布式、云原生消息平台。
 
 ## 主要特性：
 
@@ -22,7 +22,7 @@ JournalQ 是一个兼容Kafka、MQTT协议的分布式、云原生消息平台�
 
 参与贡献
 ====
-JournalQ 期待创建一个完善的消息平台社区，欢迎提出任何想法和问题
+JoyQueue 期待创建一个完善的消息平台社区，欢迎提出任何想法和问题
 
 开源协议
 ====

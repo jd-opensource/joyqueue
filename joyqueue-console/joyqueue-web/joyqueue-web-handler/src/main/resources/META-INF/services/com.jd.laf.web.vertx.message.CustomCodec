@@ -1,0 +1,2 @@
+com.jd.joyqueue.handler.message.AuditLogMessageCodec
+com.jd.joyqueue.handler.message.OperLogMessageCodec

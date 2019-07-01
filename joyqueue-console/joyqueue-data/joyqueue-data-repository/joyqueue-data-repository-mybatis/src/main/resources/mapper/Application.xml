@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jd.joyqueue.repository.ApplicationRepository">
+    <resultMap id="baseResultMap" type="Application">
+        <result property="id" column="id" jdbcType="BIGINT"/>
+        <result property="code" column="code" jdbcType="VARCHAR"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="system" column="system" jdbcType="VARCHAR"/>
+        <result property="department" column="department" jdbcType="VARCHAR"/>
+        <result property="source" column="source" jdbcType="TINYINT"/>
+        <result property="owner.id" column="owner_id" jdbcType="BIGINT"/>
+        <result property="owner.code" column="owner_code" jdbcType="VARCHAR"/>
+        <result property="sign" column="sign" jdbcType="INTEGER"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="createBy.id" column="create_by" jdbcType="BIGINT"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+        <result property="updateBy.id" column="update_by" jdbcType="BIGINT"/>
+        <result property="status" column="status" jdbcType="BIGINT"/>
+        <result property="aliasCode" column="alias_code" jdbcType="VARCHAR"/>
+        <result property="description" column="description" jdbcType="VARCHAR"/>
+    </resultMap>
+    <sql id="baseColumn">
+        a.id,
+        a.code,
+        a.`name`,
+        a.`system`,
+        a.`department`,
+        a.`source`,
+        a.`owner_id`,
+        a.owner_code,
+        a.`sign`,
+        a.create_time,
+        a.create_by,
+        a.update_time,
+        a.update_by,
+        a.`status`,
+        a.`alias_code`,
+        a.`description`
+    </sql>
+    <insert id="add" parameterType="application" useGeneratedKeys="true" keyProperty="id">
+        insert into application
+        (
+        code,
+        `name`,
+        `system`,
+        `department`,
+        `source`,
+        `owner_id`,
+        owner_code,
+        `sign`,
+        create_time,
+        create_by,
+        update_time,
+        update_by,
+        `status`,
+        `alias_code`,
+        `description`)
+        values
+        (
+        #{code},
+        #{name},
+        #{system},
+        #{department},
+        #{source},
+        #{owner.id},
+        #{owner.code},
+        #{sign},
+        #{createTime},
+        #{createBy.id},
+        #{updateTime},
+        #{updateBy.id},
+        #{status},
+        #{aliasCode},
+        #{description}
+        )
+    </insert>
+
+    <update id="update" parameterType="application">
+        UPDATE application
+        SET
+          `system`=#{system},
+          `department`=#{department},
+          `owner_id`=#{owner.id},
+          `owner_code`=#{owner.code},
+          `sign`=#{sign},
+          description=#{description}
+          update_time=#{updateTime},
+          update_by=#{updateBy.id}
+        WHERE
+        id=#{id}
+    </update>
+
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM application
+        WHERE
+        id=#{id}
+    </delete>
+
+    <select id="findById" parameterType="long" resultMap="baseResultMap">
+        SELECT
+        <include refid="baseColumn"/>
+        FROM
+        application a
+        WHERE a.id=#{id}
+    </select>
+
+    <select id="findByCode" parameterType="String" resultMap="baseResultMap">
+        SELECT
+        <include refid="baseColumn"/>
+        FROM
+        application a
+        WHERE a.code = #{code}
+        AND a.status != -1
+        limit 0,1
+    </select>
+
+    <select id="findByCodes" parameterType="java.util.List" resultMap="baseResultMap">
+        SELECT
+        <include refid="baseColumn"/>
+        FROM
+        application a
+        WHERE a.code in
+        <foreach collection="list" separator="," close=")" open="(" item="item" index="index">
+            #{item}
+        </foreach>
+        AND a.status > 0
+
+    </select>
+
+
+
+    <!--<select id="findWithDeletedByCode" parameterType="String" resultMap="baseResultMap">-->
+        <!--SELECT-->
+        <!--<include refid="baseColumn"/>-->
+        <!--FROM-->
+        <!--application a-->
+        <!--WHERE a.code = #{code}-->
+    <!--</select>-->
+
+    <sql id="queryCondition">
+        <where>
+            a.`status` > 0
+            <if test="query != null">
+                <if test="query.keyword != null and query.keyword != '' ">
+                  and (a.code like concat('%', #{query.keyword},'%' )
+                    or a.alias_code like concat('%', #{query.keyword},'%' )
+                    or a.name like concat('%', #{query.keyword},'%' ))
+                </if>
+                <if test="query.admin == false">
+                    <if test="query.userId != null">
+                        and (a.owner_id=#{query.userId}
+                        or EXISTS (SELECT 1 FROM application_user u where u.app_id=a.id and u.user_id=#{query.userId}))
+                    </if>
+                    <if test="query.userId == null">
+                        and 1 != 1
+                    </if>
+                </if>
+                <!--<if test="query.subscribeType!=null">-->
+                    <!--<if test="query.subscribeType==1">-->
+                      <!--AND exists (SELECT 1 FROM producer p WHERE p.app_id = a.id and p.status != -1)-->
+                    <!--</if>-->
+                    <!--<if test="query.subscribeType==2">-->
+                        <!--AND exists (SELECT 1 FROM consumer cr WHERE cr.app_id = a.id and cr.status != -1)-->
+                    <!--</if>-->
+                <!--</if>-->
+            </if>
+        </where>
+    </sql>
+    <select id="findByQuery" parameterType="qpagequery" resultMap="baseResultMap">
+        select
+        <include refid="baseColumn"/>
+        from application a
+        <include refid="queryCondition"/>
+        order by a.id desc
+    </select>
+
+    <sql id="unsubscribedQueryCondition">
+        <where>
+            1=1
+            <if test="query != null">
+                <!--<if test="query.subscribeType == 1 and query.topic != null and query.topic.id > 0">-->
+                    <!--AND not exists (select * from producer p where p.app_id = a.id-->
+                    <!--and p.topic_id = #{query.topic.id} and p.`status` > 0)-->
+                <!--</if>-->
+                <!--<if test="query.subscribeType == 2 and query.topic != null and query.topic.id > 0">-->
+                    <!--AND not exists (select * from consumer cr where cr.app_id = a.id-->
+                    <!--and cr.topic_id = #{query.topic.id} and cr.`status` > 0)-->
+                <!--</if>-->
+                <if test="query.keyword != null and query.keyword != ''">
+                    AND (a.code LIKE CONCAT('%', #{query.keyword}, '%') OR a.name LIKE CONCAT('%', #{query.keyword}, '%'))
+                </if>
+                <if test="query.noInCodes!= null and query.noInCodes.size()>0">
+                    AND a.code not in
+                    <foreach collection="query.noInCodes" separator="," close=")" open="(" item="item" index="index">
+                        #{item}
+                    </foreach>
+
+                </if>
+                <if test="query.admin == false">
+                    <if test="query.userId != null">
+                        AND (a.owner_id=#{query.userId}
+                        or EXISTS (SELECT 1 FROM application_user u where u.app_id=a.id and u.user_id=#{query.userId}))
+                    </if>
+                    <if test="query.userId == null">
+                        AND 1 != 1
+                    </if>
+                </if>
+            </if>
+            AND a.`status` > 0
+        </where>
+    </sql>
+    <select id="findUnsubscribedByQuery" parameterType="QPageQuery" resultType="Application">
+        select
+        <include refid="baseColumn"/>
+        from application a
+        <include refid="unsubscribedQueryCondition"/>
+        order by a.id desc
+    </select>
+    <select id="findUnsubscribedCountByQuery" parameterType="QPageQuery" resultType="int">
+        SELECT COUNT(a.id) FROM application a
+        <include refid="unsubscribedQueryCondition"/>
+    </select>
+
+    <select id="findCountByQuery" parameterType="qpagequery" resultType="int">
+        select count(1)
+        from application a
+        <include refid="queryCondition"/>
+    </select>
+
+    <update id="state" parameterType="application">
+        UPDATE
+            `application`
+        SET
+           `status`=#{status},
+           `update_by`=#{updateBy.id},
+           `update_time`=#{updateTime}
+        WHERE
+            id=#{id}
+    </update>
+</mapper>

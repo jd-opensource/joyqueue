@@ -1,8 +1,9 @@
 *.iml
 .idea/
 .vertx/
+.vscode/
 target/
-h2-db-journalq
+h2-db-joyqueue
 .classpath
 .settings
 .project
@@ -19,4 +20,4 @@ h2-db-journalq
 filter.properties
 .factorypath
 *.pyc
-journalq-console/journalq-web/journalq-web-webroot/src/main/webroot/
+joyqueue-console/joyqueue-web/joyqueue-web-webroot/src/main/webroot/

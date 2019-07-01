@@ -303,9 +303,9 @@ class Workflow:
                     ATTEMPTS=0
                     MAX_ATTEMPTS={max_attempts}
                     containerId=$(echo "$containerId"|sed ':a;N;$!ba;s/\\n/ /g') 
-                    echo "docker exec $containerId cat logs/debug.log|grep 'JournalQ is started'"
+                    echo "docker exec $containerId cat logs/debug.log|grep 'JoyQueue is started'"
                     while true; do
-                        started=$(docker exec $containerId cat logs/debug.log|grep 'JournalQ is started')
+                        started=$(docker exec $containerId cat logs/debug.log|grep 'JoyQueue is started')
                         echo "check state: $started"
                         if [[ -n $started ]]; then
                            exit 0
@@ -349,7 +349,7 @@ class Workflow:
                 else
                     echo '{mq_home} is clean'  
                 fi
-                docker run --network host --name {tag} --label cluster={tag} -v {mq_home}:{mq_home} -p 50088:50088 -p 50089:50089 -p 50090:50090 -p 50091:50091 -d {mq_docker_namespace}/{mq_docker_name} bin/startmq_docker.sh
+                docker run --network host --name {tag} --label cluster={tag} -v {mq_home}:{mq_home} -p 50088:50088 -p 50089:50089 -p 50090:50090 -p 50091:50091 -d {mq_docker_namespace}/{mq_docker_name} bin/docker-server-start.sh
         """.format(mq_home=self.task.mq_home,
                    mq_docker_namespace=self.task.mq_docker_namespace,
                    mq_docker_name=self.task.mq_repo_name,
