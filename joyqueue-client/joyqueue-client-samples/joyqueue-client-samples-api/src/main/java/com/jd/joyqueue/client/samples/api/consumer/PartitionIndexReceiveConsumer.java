@@ -14,7 +14,6 @@
 package com.jd.joyqueue.client.samples.api.consumer;
 
 import com.google.common.collect.Maps;
-import com.jd.joyqueue.toolkit.network.IpUtil;
 import io.openmessaging.KeyValue;
 import io.openmessaging.MessagingAccessPoint;
 import io.openmessaging.OMS;
@@ -37,7 +36,7 @@ public class PartitionIndexReceiveConsumer {
         KeyValue keyValue = OMS.newKeyValue();
         keyValue.put(OMSBuiltinKeys.ACCOUNT_KEY, "test_token");
 
-        MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint(String.format("oms:joyqueue://test_app@%s:50088/UNKNOWN", IpUtil.getLocalIp()), keyValue);
+        MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint("oms:joyqueue://test_app@127.0.0.1:50088/UNKNOWN", keyValue);
 
         // 首先需要对consumer强制转型
         ExtensionConsumer extensionConsumer = (ExtensionConsumer) messagingAccessPoint.createConsumer();

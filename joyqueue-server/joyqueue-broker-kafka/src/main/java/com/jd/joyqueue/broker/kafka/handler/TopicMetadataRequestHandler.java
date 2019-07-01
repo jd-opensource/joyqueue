@@ -80,9 +80,9 @@ public class TopicMetadataRequestHandler extends AbstractKafkaCommandHandler imp
         List<KafkaTopicMetadata> topicMetadata = getTopicMetadata(topicMetadataRequest.getTopics(), topicConfigs);
 
         // TODO 临时日志
-        if (CollectionUtils.isEmpty(topicMetadata) || logger.isDebugEnabled()) {
-            logger.info("get topic metadata, topics: {}, address: {}, metadata: {}",
-                    topicMetadataRequest.getTopics(), transport.remoteAddress(), JSON.toJSONString(topicMetadata));
+        if (CollectionUtils.isEmpty(topicMetadata)) {
+            logger.info("get topic metadata, topics: {}, address: {}, metadata: {}, app: {}",
+                    topicMetadataRequest.getTopics(), transport.remoteAddress(), JSON.toJSONString(topicMetadata), topicMetadataRequest.getClientId());
         }
 
         TopicMetadataResponse topicMetadataResponse = new TopicMetadataResponse(topicMetadata, brokers);

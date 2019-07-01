@@ -30,8 +30,6 @@
     <modules>
         <module>joyqueue-data</module>
         <module>joyqueue-web</module>
-        <!--<module>joyqueue-task</module>-->
-        <module>joyqueue-openapi</module>
     </modules>
 
     <dependencyManagement>

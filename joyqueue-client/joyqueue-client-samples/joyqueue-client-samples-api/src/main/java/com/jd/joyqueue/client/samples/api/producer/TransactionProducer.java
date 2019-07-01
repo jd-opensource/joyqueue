@@ -13,7 +13,6 @@
  */
 package com.jd.joyqueue.client.samples.api.producer;
 
-import com.jd.joyqueue.toolkit.network.IpUtil;
 import io.openmessaging.KeyValue;
 import io.openmessaging.MessagingAccessPoint;
 import io.openmessaging.OMS;
@@ -37,7 +36,7 @@ public class TransactionProducer {
         keyValue.put(OMSBuiltinKeys.ACCOUNT_KEY, "test_token");
         keyValue.put(JoyQueueBuiltinKeys.TRANSACTION_TIMEOUT, 1000 * 10);
 
-        MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint(String.format("oms:joyqueue://test_app@%s:50088/UNKNOWN", IpUtil.getLocalIp()), keyValue);
+        MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint("oms:joyqueue://test_app@127.0.0.1:50088/UNKNOWN", keyValue);
 
         // 事务补偿
         // 创建producer，如果是spring或springboot通过xml和注解方式添加

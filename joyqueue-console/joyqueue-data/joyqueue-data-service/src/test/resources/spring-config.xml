@@ -12,7 +12,7 @@
     <description>Spring MVC容器配置</description>
     <!--全局配置地址 -->
     <context:property-placeholder ignore-unresolvable="true"
-                                  location="classpath*:important.properties"/>
+                                  location="classpath*:application.properties"/>
 
     <context:annotation-config/>
     <aop:aspectj-autoproxy proxy-target-class="true"/>
