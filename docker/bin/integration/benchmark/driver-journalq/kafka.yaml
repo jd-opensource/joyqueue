@@ -23,8 +23,8 @@ topicConfig: |
   min.insync.replicas=2
 
 commonConfig: |
-  bootstrap.servers=172.17.0.1:50088
-  naming.servers=http://172.17.0.1:50091
+  bootstrap.servers=192.168.0.2:50088
+  naming.servers=http://192.168.0.2:50091
 
 producerConfig: |
   acks=all

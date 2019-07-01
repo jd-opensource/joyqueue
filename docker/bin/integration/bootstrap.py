@@ -30,7 +30,6 @@
 #
 import os
 import argparse
-import json
 from workflow import Workflow
 from configuration import Configuration
 from pathlib import Path
