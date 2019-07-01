@@ -15,7 +15,7 @@ package com.jd.journalq.nsr.network.command;
 
 import com.jd.journalq.domain.TopicConfig;
 import com.jd.journalq.domain.TopicName;
-import com.jd.journalq.network.transport.command.JMQPayload;
+import com.jd.journalq.network.transport.command.JournalqPayload;
 
 import java.util.Map;
 
@@ -23,7 +23,7 @@ import java.util.Map;
  * @author wylixiaobin
  * Date: 2019/1/27
  */
-public class GetTopicConfigByBrokerAck extends JMQPayload {
+public class GetTopicConfigByBrokerAck extends JournalqPayload {
     private Map<TopicName, TopicConfig> topicConfigs;
 
     public GetTopicConfigByBrokerAck topicConfigs(Map<TopicName, TopicConfig> topicConfigs){

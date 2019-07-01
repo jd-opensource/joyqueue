@@ -14,8 +14,8 @@
 package com.jd.journalq.broker.network.protocol.support;
 
 import com.google.common.collect.Maps;
-import com.jd.journalq.broker.network.protocol.ProtocolHandlerPipelineFactory;
 import com.jd.journalq.broker.network.protocol.ProtocolContext;
+import com.jd.journalq.broker.network.protocol.ProtocolHandlerPipelineFactory;
 import com.jd.journalq.broker.network.protocol.ProtocolManager;
 import com.jd.journalq.broker.network.protocol.ProtocolResolver;
 import com.jd.journalq.network.protocol.ProtocolService;

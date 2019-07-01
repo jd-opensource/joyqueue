@@ -14,7 +14,7 @@
 package com.jd.journalq.nsr.network.command;
 
 import com.jd.journalq.domain.TopicName;
-import com.jd.journalq.network.transport.command.JMQPayload;
+import com.jd.journalq.network.transport.command.JournalqPayload;
 
 import java.util.Set;
 
@@ -22,7 +22,7 @@ import java.util.Set;
  * @author wylixiaobin
  * Date: 2019/1/27
  */
-public class LeaderReport extends JMQPayload {
+public class LeaderReport extends JournalqPayload {
     private TopicName topic;
     private int partitionGroup;
     private int leaderBrokerId;

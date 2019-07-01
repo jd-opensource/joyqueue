@@ -20,7 +20,7 @@
     <parent>
         <artifactId>journalq-data</artifactId>
         <groupId>com.jd.journalq</groupId>
-        <version>4.0.2</version>
+        <version>4.0.3</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -29,12 +29,12 @@
         <dependency>
             <groupId>com.jd.journalq</groupId>
             <artifactId>journalq-token-api</artifactId>
-            <version>4.0.2</version>
+            <version>4.0.3</version>
         </dependency>
         <dependency>
             <groupId>com.jd.journalq</groupId>
             <artifactId>journalq-retry-db-console</artifactId>
-            <version>4.0.2</version>
+            <version>4.0.3</version>
         </dependency>
         <dependency>
             <groupId>com.jd.journalq</groupId>

@@ -13,6 +13,7 @@
  */
 package com.jd.journalq.nsr;
 
+import com.google.common.base.Preconditions;
 import com.jd.journalq.domain.AppToken;
 import com.jd.journalq.domain.Broker;
 import com.jd.journalq.domain.Config;
@@ -26,6 +27,7 @@ import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.event.ConsumerEvent;
 import com.jd.journalq.event.MetaEvent;
 import com.jd.journalq.event.PartitionGroupEvent;
+import com.jd.journalq.event.ProducerEvent;
 import com.jd.journalq.nsr.message.MessageListener;
 import com.jd.journalq.nsr.message.Messenger;
 import com.jd.journalq.nsr.service.AppTokenService;
@@ -37,7 +39,6 @@ import com.jd.journalq.nsr.service.PartitionGroupReplicaService;
 import com.jd.journalq.nsr.service.PartitionGroupService;
 import com.jd.journalq.nsr.service.ProducerService;
 import com.jd.journalq.nsr.service.TopicService;
-import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -182,8 +183,10 @@ public class MetaManager extends Service {
      *
      * @param producer
      */
-    public void addProducer(Producer producer) {
+    public Producer addProducer(Producer producer) {
         producerService.add(producer);
+        metaMessenger.publish(ProducerEvent.add(producer.getTopic(), producer.getApp()));
+        return producer;
     }
 
     /**
@@ -199,6 +202,15 @@ public class MetaManager extends Service {
         consumer.setApp(app);
         consumerService.delete(consumer);
         metaMessenger.publish(ConsumerEvent.remove(topic, app));
+        return true;
+    }
+
+    public boolean removeProducer(TopicName topic, String app) {
+        Producer producer = new Producer();
+        producer.setTopic(topic);
+        producer.setApp(app);
+        producerService.delete(producer);
+        metaMessenger.publish(ProducerEvent.remove(topic, app));
         return true;
     }
 

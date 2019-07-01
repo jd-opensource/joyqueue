@@ -15,8 +15,6 @@ package com.jd.journalq.broker.replication;
 
 import com.jd.journalq.broker.election.TopicPartitionGroup;
 
-import java.util.concurrent.ScheduledFuture;
-
 
 /**
  * author: zhuduohui
@@ -50,8 +48,6 @@ public class Replica {
     private long lastReplicateConsumePosTime;
 
     private ReplicateCommandState replicateCommandState;
-
-    private ScheduledFuture heartbeatTimerFuture;
 
     Replica(int replicaId, String address) {
         this.replicaId = replicaId;
@@ -135,14 +131,6 @@ public class Replica {
         return lastAppendSuccessTime;
     }
 
-    void heartbeatTimerFuture(ScheduledFuture future) {
-        this.heartbeatTimerFuture = future;
-    }
-
-    ScheduledFuture heartbeatTimerFuture() {
-        return heartbeatTimerFuture;
-    }
-
     public ReplicateCommandState getReplicateCommandState() {
         return replicateCommandState;
     }
@@ -163,6 +151,7 @@ public class Replica {
                 .append(", lastReplicateConsumePosTime:").append(lastReplicateConsumePosTime).toString();
 
     }
+
     enum ReplicateCommandState {
         REPLICATE,
         WAITING_RESPONSE

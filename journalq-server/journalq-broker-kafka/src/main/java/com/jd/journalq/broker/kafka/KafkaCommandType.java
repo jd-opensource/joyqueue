@@ -26,8 +26,7 @@ import java.util.Map;
 public enum KafkaCommandType {
 
     // 发送消息
-    PRODUCE(0, 0, 2), // TODO 先使用旧版本
-//    PRODUCE(0, 0, 7),
+    PRODUCE(0, 0, 7),
 
     // 取消息
     FETCH(1, 2, 6),
@@ -37,15 +36,6 @@ public enum KafkaCommandType {
 
     // 取元数据
     METADATA(3, 0, 4),
-
-//    // 取leader和isr
-//    LEADER_AND_ISR(4),
-//
-//    // 停掉复制
-//    STOP_REPLICA(5),
-//
-//    // 更新元数据
-//    UPDATE_METADATA(6),
 
     // 提交commit
     OFFSET_COMMIT(8, 0, 4),
@@ -73,6 +63,16 @@ public enum KafkaCommandType {
 
     // API VERSION
     API_VERSIONS(18, 0, 2),
+
+    INIT_PRODUCER_ID(22, 0, 0),
+
+    ADD_PARTITIONS_TO_TXN(24, 0, 1),
+
+    ADD_OFFSETS_TO_TXN(25, 0, 1),
+
+    END_TXN(26, 0, 1),
+
+    TXN_OFFSET_COMMIT(28, 0, 2),
 
     // 自定义命令
     CUSTOMER_COMMAND(100, false),

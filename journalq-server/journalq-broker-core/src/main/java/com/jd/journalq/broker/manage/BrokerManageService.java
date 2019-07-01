@@ -13,15 +13,15 @@
  */
 package com.jd.journalq.broker.manage;
 
+import com.jd.journalq.broker.archive.ArchiveManager;
 import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.consumer.Consume;
 import com.jd.journalq.broker.coordinator.CoordinatorService;
 import com.jd.journalq.broker.election.ElectionService;
-import com.jd.journalq.broker.manage.exporter.BrokerManageExporter;
-import com.jd.journalq.nsr.NameService;
-import com.jd.journalq.broker.archive.ArchiveManager;
 import com.jd.journalq.broker.manage.config.BrokerManageConfig;
+import com.jd.journalq.broker.manage.exporter.BrokerManageExporter;
 import com.jd.journalq.broker.monitor.BrokerMonitorService;
+import com.jd.journalq.nsr.NameService;
 import com.jd.journalq.server.retry.api.MessageRetry;
 import com.jd.journalq.store.StoreManagementService;
 import com.jd.journalq.store.StoreService;
@@ -47,8 +47,7 @@ public class BrokerManageService extends Service {
                                ClusterManager clusterManager, StoreManagementService storeManagementService,
                                StoreService storeService, Consume consume,
                                MessageRetry retryManager, CoordinatorService coordinatorService,
-                               ArchiveManager archiveManager, NameService nameService,
-                               StoreService store, ElectionService electionManager) {
+                               ArchiveManager archiveManager, NameService nameService, ElectionService electionManager) {
         this.config = config;
         this.storeService = storeService;
         this.retryManager = retryManager;
@@ -57,8 +56,7 @@ public class BrokerManageService extends Service {
                 clusterManager, storeManagementService,
                 storeService, consume,
                 retryManager, coordinatorService,
-                archiveManager, nameService,
-                store, electionManager);
+                archiveManager, nameService, electionManager);
         this.brokerManageExporter = new BrokerManageExporter(config, brokerManageServiceManager);
     }
 

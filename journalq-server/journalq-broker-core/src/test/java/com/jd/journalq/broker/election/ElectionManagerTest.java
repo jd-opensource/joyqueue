@@ -73,7 +73,6 @@ public class ElectionManagerTest {
 
         ElectionConfig electionConfig = new ElectionConfig(conf);
         electionConfig.setElectionMetaPath(getElectionDir());
-        electionConfig.setElectionMetaFile(getElectionDir() + ".dat");
         electionConfig.setListenPort("18000");
 
         electionManager = new ElectionManagerStub(electionConfig, storeService, new ConsumeStub());

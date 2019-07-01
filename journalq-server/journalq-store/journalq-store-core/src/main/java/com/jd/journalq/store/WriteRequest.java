@@ -24,12 +24,18 @@ import java.nio.ByteBuffer;
 public class WriteRequest implements Closeable {
     private final short partition;
     private ByteBuffer buffer;
+    private int batchSize;
 
     public WriteRequest(short partition, ByteBuffer buffer) {
         this.partition = partition;
         this.buffer = buffer;
     }
 
+    public WriteRequest(short partition, ByteBuffer buffer, int batchSize) {
+        this.partition = partition;
+        this.buffer = buffer;
+        this.batchSize = batchSize;
+    }
 
     public short getPartition() {
         return partition;
@@ -37,6 +43,10 @@ public class WriteRequest implements Closeable {
 
     public ByteBuffer getBuffer() {
         return buffer;
+    }
+
+    public int getBatchSize() {
+        return batchSize;
     }
 
     public void setBuffer(ByteBuffer buffer) {

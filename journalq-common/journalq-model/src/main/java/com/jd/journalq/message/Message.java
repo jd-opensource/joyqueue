@@ -27,6 +27,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.zip.CRC32;
 
 /**
  *
@@ -45,7 +46,7 @@ public class Message implements Serializable {
     protected short partition = -1;
     // 主题
     protected String topic;
-    // 标签
+    // 标签, 如果是批量消息代表批量条数
     protected short flag;
     // 应用
     protected String app;
@@ -73,6 +74,7 @@ public class Message implements Serializable {
 
     protected String txId;
 
+    @Deprecated
     public Message() {
     }
 
@@ -83,6 +85,7 @@ public class Message implements Serializable {
      * @param text       文本
      * @param businessId 业务ID
      */
+    @Deprecated
     public Message(String topic, String text, String businessId) {
         setTopic(topic);
         setBusinessId(businessId);
@@ -96,6 +99,7 @@ public class Message implements Serializable {
      * @param businessId 业务ID
      * @param compressionType 压缩方式
      */
+    @Deprecated
     public Message(String topic, String text, String businessId, CompressionType compressionType) {
         setTopic(topic);
         setBusinessId(businessId);
@@ -276,11 +280,11 @@ public class Message implements Serializable {
             length = buf.remaining();
             byte[] dest = new byte[length];
             System.arraycopy(data,offset,dest,0,length);
-            body = dest;
+            setBody(dest);
         } else {
             byte[] data = new byte[buf.remaining()];
             buf.get(data);
-            body = data;
+            setBody(data);
         }
     }
 
@@ -290,6 +294,9 @@ public class Message implements Serializable {
 
     public void setBody(byte[] body) {
         this.body = body;
+        CRC32 crc32 = new CRC32();
+        crc32.update(body);
+        this.bodyCRC = crc32.getValue();
     }
 
     public void setBody(byte[] data, int offset, int length) {
@@ -305,7 +312,6 @@ public class Message implements Serializable {
             System.arraycopy(data, offset, dest, 0, remain);
             setBody(dest);
         }
-        this.bodyCRC = 0;
     }
 
     public String getText() {
@@ -367,11 +373,12 @@ public class Message implements Serializable {
                 return body;
             }
         } catch (Exception e) {
-            logger.error("getDecompressedBody error", e);
+            logger.error("getDecompressedBody error, topic: {}, app: {}", topic, app, e);
             return body;
         }
     }
 
+    @Deprecated
     public void setText(String text) {
         this.text = text;
 

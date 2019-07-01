@@ -14,9 +14,9 @@
 package com.jd.journalq.nsr.network.command;
 
 import com.jd.journalq.domain.PartitionGroup;
-import com.jd.journalq.network.transport.command.JMQPayload;
+import com.jd.journalq.network.transport.command.JournalqPayload;
 
-public abstract class OperatePartitionGroup extends JMQPayload {
+public abstract class OperatePartitionGroup extends JournalqPayload {
     protected boolean rollback = false;
     protected PartitionGroup partitionGroup;
 

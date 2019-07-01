@@ -13,21 +13,21 @@
  */
 package com.jd.journalq.broker.kafka.network.codec;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Table;
-import com.jd.journalq.broker.kafka.network.KafkaHeader;
-import com.jd.journalq.broker.kafka.network.KafkaPayloadCodec;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.jd.journalq.broker.kafka.KafkaCommandType;
 import com.jd.journalq.broker.kafka.KafkaErrorCode;
 import com.jd.journalq.broker.kafka.command.OffsetFetchRequest;
 import com.jd.journalq.broker.kafka.command.OffsetFetchResponse;
 import com.jd.journalq.broker.kafka.model.OffsetMetadataAndError;
+import com.jd.journalq.broker.kafka.network.KafkaHeader;
+import com.jd.journalq.broker.kafka.network.KafkaPayloadCodec;
 import com.jd.journalq.network.serializer.Serializer;
 import com.jd.journalq.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * OffsetFetchCodec
@@ -39,16 +39,20 @@ public class OffsetFetchCodec implements KafkaPayloadCodec<OffsetFetchResponse>,
 
     @Override
     public Object decode(KafkaHeader header, ByteBuf buffer) throws Exception {
-        HashMultimap<String, Integer> topicAndPartitions = HashMultimap.create();
         OffsetFetchRequest offsetFetchRequest = new OffsetFetchRequest();
         offsetFetchRequest.setGroupId(Serializer.readString(buffer, Serializer.SHORT_SIZE));
         int topicCount = buffer.readInt();
+        Map<String, List<Integer>> topicAndPartitions = Maps.newHashMapWithExpectedSize(topicCount);
+
         for (int i = 0; i < topicCount; i++) {
             String topic = Serializer.readString(buffer, Serializer.SHORT_SIZE);
             int partitionCount = buffer.readInt();
+            List<Integer> partitions = Lists.newArrayListWithCapacity(partitionCount);
+            topicAndPartitions.put(topic, partitions);
+
             for (int j = 0; j < partitionCount; j++) {
-                int partitionId = buffer.readInt();
-                topicAndPartitions.put(topic, partitionId);
+                int partition = buffer.readInt();
+                partitions.add(partition);
             }
         }
 
@@ -64,20 +68,16 @@ public class OffsetFetchCodec implements KafkaPayloadCodec<OffsetFetchResponse>,
             buffer.writeInt(payload.getThrottleTimeMs());
         }
 
-        Table<String, Integer, OffsetMetadataAndError> topicOffsetMetadataAndErrors = payload.getTopicMetadataAndErrors();
-        Set<String> topics = topicOffsetMetadataAndErrors.rowKeySet();
+        Map<String, List<OffsetMetadataAndError>> topicOffsetMetadataAndErrors = payload.getTopicMetadataAndErrors();
         // 4字节主题数
-        buffer.writeInt(topics.size());
-        for (String topic : topics) {
-            Serializer.write(topic, buffer, Serializer.SHORT_SIZE);
+        buffer.writeInt(topicOffsetMetadataAndErrors.size());
+        for (Map.Entry<String, List<OffsetMetadataAndError>> entry : topicOffsetMetadataAndErrors.entrySet()) {
+            Serializer.write(entry.getKey(), buffer, Serializer.SHORT_SIZE);
 
-            Map<Integer, OffsetMetadataAndError> partitionOffsetMetadatAndErrors = topicOffsetMetadataAndErrors.row(topic);
-            Set<Integer> partitions = partitionOffsetMetadatAndErrors.keySet();
             // 4字节partition数
-            buffer.writeInt(partitions.size());
-            for (int partition : partitions) {
-                buffer.writeInt(partition);
-                OffsetMetadataAndError offsetMetadataAndError = partitionOffsetMetadatAndErrors.get(partition);
+            buffer.writeInt(entry.getValue().size());
+            for (OffsetMetadataAndError offsetMetadataAndError : entry.getValue()) {
+                buffer.writeInt(offsetMetadataAndError.getPartition());
                 buffer.writeLong(offsetMetadataAndError.getOffset());
                 Serializer.write(offsetMetadataAndError.getMetadata(), buffer, Serializer.SHORT_SIZE);
                 buffer.writeShort(offsetMetadataAndError.getError());
@@ -86,7 +86,7 @@ public class OffsetFetchCodec implements KafkaPayloadCodec<OffsetFetchResponse>,
 
         if (version >= 2) {
             // TODO: error code
-            buffer.writeShort(KafkaErrorCode.NONE);
+            buffer.writeShort(KafkaErrorCode.NONE.getCode());
         }
     }
 

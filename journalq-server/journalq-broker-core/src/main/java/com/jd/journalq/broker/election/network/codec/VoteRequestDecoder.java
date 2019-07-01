@@ -15,7 +15,7 @@ package com.jd.journalq.broker.election.network.codec;
 
 import com.jd.journalq.broker.election.TopicPartitionGroup;
 import com.jd.journalq.broker.election.command.VoteRequest;
-import com.jd.journalq.network.transport.codec.JMQHeader;
+import com.jd.journalq.network.transport.codec.JournalqHeader;
 import com.jd.journalq.network.transport.codec.PayloadDecoder;
 import com.jd.journalq.network.command.CommandType;
 import com.jd.journalq.network.serializer.Serializer;
@@ -27,9 +27,9 @@ import io.netty.buffer.ByteBuf;
  * email: zhuduohui@jd.com
  * date: 2018/8/20
  */
-public class VoteRequestDecoder implements PayloadDecoder<JMQHeader>, Type {
+public class VoteRequestDecoder implements PayloadDecoder<JournalqHeader>, Type {
     @Override
-    public Object decode(JMQHeader header, final ByteBuf buffer) throws Exception {
+    public VoteRequest decode(JournalqHeader header, final ByteBuf buffer) throws Exception {
         VoteRequest voteRequest = new VoteRequest();
 
         String topic = Serializer.readString(buffer);

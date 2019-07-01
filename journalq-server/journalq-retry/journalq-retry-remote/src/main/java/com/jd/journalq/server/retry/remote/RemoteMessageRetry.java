@@ -18,7 +18,7 @@ import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.network.command.CommandType;
 import com.jd.journalq.network.transport.Transport;
 import com.jd.journalq.network.transport.TransportClient;
-import com.jd.journalq.network.transport.codec.JMQHeader;
+import com.jd.journalq.network.transport.codec.JournalqHeader;
 import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.transport.command.Direction;
 import com.jd.journalq.server.retry.api.MessageRetry;
@@ -117,7 +117,7 @@ public class RemoteMessageRetry implements MessageRetry<Long> {
         checkStarted();
 
         PutRetry putRetryPayload = new PutRetry(retryMessageModelList);
-        Command putRetryCommand = new Command(new JMQHeader(Direction.REQUEST, CommandType.PUT_RETRY), putRetryPayload);
+        Command putRetryCommand = new Command(new JournalqHeader(Direction.REQUEST, CommandType.PUT_RETRY), putRetryPayload);
         Command sync = sync(putRetryCommand);
         if (sync.getHeader().getStatus() != JournalqCode.SUCCESS.getCode()) {
             throw new JournalqException(JournalqCode.RETRY_ADD, "");
@@ -156,7 +156,7 @@ public class RemoteMessageRetry implements MessageRetry<Long> {
                 }
 
                 GetRetry payload = new GetRetry().topic(topic).app(app).count(count).startId(startIndex);
-                Command getRetryCommand = new Command(new JMQHeader(Direction.REQUEST, CommandType.GET_RETRY), payload);
+                Command getRetryCommand = new Command(new JournalqHeader(Direction.REQUEST, CommandType.GET_RETRY), payload);
 
                 Command ack = sync(getRetryCommand);
                 if (ack.getHeader().getStatus() != JournalqCode.SUCCESS.getCode()) {
@@ -198,7 +198,7 @@ public class RemoteMessageRetry implements MessageRetry<Long> {
 
         GetRetryCount getRetryCountPayload = new GetRetryCount().topic(topic).app(app);
         Command getRetryCountCommand = new Command(
-                new JMQHeader(Direction.REQUEST, CommandType.GET_RETRY_COUNT), getRetryCountPayload);
+                new JournalqHeader(Direction.REQUEST, CommandType.GET_RETRY_COUNT), getRetryCountPayload);
         Command ack = sync(getRetryCountCommand);
 
         if (ack.getHeader().getStatus() != JournalqCode.SUCCESS.getCode()) {
@@ -221,7 +221,7 @@ public class RemoteMessageRetry implements MessageRetry<Long> {
     protected void remoteUpdateRetry(final String topic, final String app, final Long[] messages,
                                      final byte type) throws JournalqException {
 
-        JMQHeader header = new JMQHeader(Direction.REQUEST, CommandType.UPDATE_RETRY);
+        JournalqHeader header = new JournalqHeader(Direction.REQUEST, CommandType.UPDATE_RETRY);
         UpdateRetry updateRetryPayload = new UpdateRetry().topic(topic).app(app).messages(messages).updateType(type);
         Command updateRetryCommand = new Command(header, updateRetryPayload);
 

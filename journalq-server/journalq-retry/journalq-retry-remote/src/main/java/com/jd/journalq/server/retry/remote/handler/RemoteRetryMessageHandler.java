@@ -18,7 +18,7 @@ import com.jd.journalq.exception.JournalqException;
 import com.jd.journalq.network.command.BooleanAck;
 import com.jd.journalq.network.command.CommandType;
 import com.jd.journalq.network.transport.Transport;
-import com.jd.journalq.network.transport.codec.JMQHeader;
+import com.jd.journalq.network.transport.codec.JournalqHeader;
 import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.transport.command.Direction;
 import com.jd.journalq.network.transport.command.handler.CommandHandler;
@@ -106,7 +106,7 @@ public class RemoteRetryMessageHandler implements CommandHandler {
         payload.setMessages(retryMessageModelList);
 
         Command command = new Command();
-        command.setHeader(new JMQHeader(Direction.RESPONSE, CommandType.GET_RETRY_ACK));
+        command.setHeader(new JournalqHeader(Direction.RESPONSE, CommandType.GET_RETRY_ACK));
         command.setPayload(payload);
 
         return command;
@@ -137,7 +137,7 @@ public class RemoteRetryMessageHandler implements CommandHandler {
         getRetryCountAckPayload.setCount(retryCount);
 
         Command command = new Command();
-        command.setHeader(new JMQHeader(Direction.RESPONSE, CommandType.GET_RETRY_COUNT_ACK));
+        command.setHeader(new JournalqHeader(Direction.RESPONSE, CommandType.GET_RETRY_COUNT_ACK));
         command.setPayload(getRetryCountAckPayload);
 
         return command;

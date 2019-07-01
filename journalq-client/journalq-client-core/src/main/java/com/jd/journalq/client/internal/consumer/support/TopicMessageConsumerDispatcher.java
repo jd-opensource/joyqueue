@@ -23,7 +23,7 @@ import com.jd.journalq.client.internal.consumer.interceptor.ConsumerInterceptorM
 import com.jd.journalq.client.internal.consumer.interceptor.ConsumerInvocation;
 import com.jd.journalq.client.internal.metadata.domain.TopicMetadata;
 import com.jd.journalq.client.internal.nameserver.NameServerConfig;
-import com.jd.journalq.domain.Consumer;
+import com.jd.journalq.domain.ConsumerPolicy;
 import com.jd.journalq.toolkit.concurrent.NamedThreadFactory;
 import com.jd.journalq.toolkit.service.Service;
 import org.apache.commons.collections.CollectionUtils;
@@ -64,7 +64,7 @@ public class TopicMessageConsumerDispatcher extends Service {
 
     @Override
     protected void doStart() throws Exception {
-        listenerExecutor = Executors.newSingleThreadExecutor(new NamedThreadFactory(String.format("journalq-consumer-dispatch-%s", topic)));
+        listenerExecutor = Executors.newSingleThreadExecutor(new NamedThreadFactory(String.format("journalq-consumer-dispatcher-%s", topic)));
     }
 
     @Override
@@ -90,7 +90,7 @@ public class TopicMessageConsumerDispatcher extends Service {
         }
 
         TopicMetadata topicMetadata = messagePoller.getTopicMetadata(topic);
-        Consumer.ConsumerPolicy consumerPolicy = topicMetadata.getConsumerPolicy();
+        ConsumerPolicy consumerPolicy = topicMetadata.getConsumerPolicy();
         List<ConsumeReply> consumeReplies = doDispatch(topicMetadata, consumerPolicy, messages);
 
         if (logger.isDebugEnabled()) {
@@ -101,7 +101,7 @@ public class TopicMessageConsumerDispatcher extends Service {
         return true;
     }
 
-    protected List<ConsumeReply> doDispatch(TopicMetadata topicMetadata, Consumer.ConsumerPolicy consumerPolicy, List<ConsumeMessage> messages) {
+    protected List<ConsumeReply> doDispatch(TopicMetadata topicMetadata, ConsumerPolicy consumerPolicy, List<ConsumeMessage> messages) {
         List<MessageListener> listeners = messageListenerManager.getListeners();
         List<BatchMessageListener> batchListeners = messageListenerManager.getBatchListeners();
 
@@ -112,13 +112,13 @@ public class TopicMessageConsumerDispatcher extends Service {
         }
     }
 
-    protected List<ConsumeReply> doBatchDispatch(TopicMetadata topicMetadata, final Consumer.ConsumerPolicy consumerPolicy,
-                                                 final List<ConsumeMessage> messages, final List<BatchMessageListener> listeners) {
+    protected List<ConsumeReply> doBatchDispatch(TopicMetadata topicMetadata, ConsumerPolicy consumerPolicy,
+                                                 List<ConsumeMessage> messages, List<BatchMessageListener> listeners) {
         return new ConsumerInvocation(config, topic, nameServerConfig, messages, consumerInterceptorManager,
                 new BatchConsumerInvoker(config, topicMetadata, consumerPolicy, messages, listeners, listenerExecutor)).invoke();
     }
 
-    protected List<ConsumeReply> doOnceDispatch(TopicMetadata topicMetadata, final Consumer.ConsumerPolicy consumerPolicy, final List<ConsumeMessage> messages, final List<MessageListener> listeners) {
+    protected List<ConsumeReply> doOnceDispatch(TopicMetadata topicMetadata, final ConsumerPolicy consumerPolicy, final List<ConsumeMessage> messages, final List<MessageListener> listeners) {
         return new ConsumerInvocation(config, topic, nameServerConfig, messages, consumerInterceptorManager,
                 new OnceConsumerInvoker(config, topicMetadata, consumerPolicy, messages, listeners, listenerExecutor)).invoke();
     }

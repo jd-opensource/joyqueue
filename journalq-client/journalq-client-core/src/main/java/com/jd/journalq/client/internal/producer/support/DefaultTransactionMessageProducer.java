@@ -135,7 +135,7 @@ public class DefaultTransactionMessageProducer implements TransactionMessageProd
         ProduceMessageChecker.checkMessages(messages, config);
         Preconditions.checkArgument(timeoutUnit != null, "timeoutUnit not null");
 
-        TopicMetadata topicMetadata = messageProducerInner.checkTopicMetadata(messages.get(0).getTopic());
+        TopicMetadata topicMetadata = messageProducerInner.getAndCheckTopicMetadata(messages.get(0).getTopic());
 
         if (prepare == null) {
             List<BrokerNode> brokers = messageProducerInner.getRegionBrokers(topicMetadata);

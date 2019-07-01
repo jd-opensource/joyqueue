@@ -19,7 +19,7 @@ import com.jd.journalq.client.internal.cluster.ClusterClientManager;
 import com.jd.journalq.client.internal.metadata.converter.ClusterMetadataConverter;
 import com.jd.journalq.client.internal.metadata.domain.ClusterMetadata;
 import com.jd.journalq.client.internal.metadata.domain.TopicMetadata;
-import com.jd.journalq.network.command.FetchClusterAck;
+import com.jd.journalq.network.command.FetchClusterResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,10 +47,10 @@ public class MetadataManager {
     }
 
     public ClusterMetadata fetchMetadata(List<String> topics, String app) {
-        FetchClusterAck fetchClusterAck = clusterClientManager.getOrCreateClient().fetchCluster(topics, app);
+        FetchClusterResponse fetchClusterResponse = clusterClientManager.getOrCreateClient().fetchCluster(topics, app);
         if (logger.isDebugEnabled()) {
-            logger.debug("fetch metadata, topics: {}, app: {}, metadata: {}", topics, app, JSON.toJSONString(fetchClusterAck));
+            logger.debug("fetch metadata, topics: {}, app: {}, metadata: {}", topics, app, JSON.toJSONString(fetchClusterResponse));
         }
-        return ClusterMetadataConverter.convert(fetchClusterAck);
+        return ClusterMetadataConverter.convert(fetchClusterResponse);
     }
 }

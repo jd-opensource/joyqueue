@@ -14,13 +14,13 @@
 package com.jd.journalq.nsr.network.command;
 
 import com.jd.journalq.domain.TopicName;
-import com.jd.journalq.network.transport.command.JMQPayload;
+import com.jd.journalq.network.transport.command.JournalqPayload;
 
 /**
  * @author wylixiaobin
  * Date: 2019/1/27
  */
-public class GetProducerByTopicAndApp extends JMQPayload {
+public class GetProducerByTopicAndApp extends JournalqPayload {
     private TopicName topic;
     private String app;
     public GetProducerByTopicAndApp app(String app){

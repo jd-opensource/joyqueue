@@ -19,7 +19,7 @@ import com.jd.journalq.network.transport.codec.Decoder;
 import com.jd.journalq.network.transport.codec.DefaultDecoder;
 import com.jd.journalq.network.transport.codec.DefaultEncoder;
 import com.jd.journalq.network.transport.codec.Encoder;
-import com.jd.journalq.network.transport.codec.JMQHeaderCodec;
+import com.jd.journalq.network.transport.codec.JournalqHeaderCodec;
 import com.jd.journalq.network.transport.codec.PayloadCodecFactory;
 import com.jd.journalq.network.transport.exception.TransportException;
 import io.netty.buffer.ByteBuf;
@@ -41,14 +41,14 @@ public class JournalqCodec implements Codec {
     public JournalqCodec() {
         PayloadCodecFactory payloadCodecFactory = new PayloadCodecFactory();
         JournalqPayloadCodecRegistry.register(payloadCodecFactory);
-        this.headerCodec = new JMQHeaderCodec();
+        this.headerCodec = new JournalqHeaderCodec();
         this.payloadCodecFactory = payloadCodecFactory;
         this.decoder = new DefaultDecoder(headerCodec, payloadCodecFactory);
         this.encoder = new DefaultEncoder(headerCodec, payloadCodecFactory);
     }
 
     public JournalqCodec(PayloadCodecFactory payloadCodecFactory) {
-        this(new JMQHeaderCodec(), payloadCodecFactory);
+        this(new JournalqHeaderCodec(), payloadCodecFactory);
     }
 
     public JournalqCodec(Codec headerCodec, PayloadCodecFactory payloadCodecFactory) {

@@ -13,10 +13,15 @@
  */
 package com.jd.journalq.broker.coordinator;
 
+import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.coordinator.config.CoordinatorConfig;
 import com.jd.journalq.broker.coordinator.domain.CoordinatorDetail;
-import com.jd.journalq.broker.cluster.ClusterManager;
+import com.jd.journalq.broker.coordinator.session.CoordinatorSessionManager;
+import com.jd.journalq.broker.coordinator.support.CoordinatorInitializer;
+import com.jd.journalq.broker.coordinator.support.CoordinatorResolver;
 import com.jd.journalq.domain.Broker;
+import com.jd.journalq.domain.PartitionGroup;
+import com.jd.journalq.domain.TopicConfig;
 import com.jd.journalq.domain.TopicName;
 
 /**
@@ -31,32 +36,72 @@ public class Coordinator {
     private ClusterManager clusterManager;
     private CoordinatorResolver coordinatorResolver;
     private CoordinatorInitializer coordinatorInitializer;
+    private CoordinatorSessionManager coordinatorSessionManager;
 
-    public Coordinator(CoordinatorConfig config, ClusterManager clusterManager, CoordinatorResolver coordinatorResolver, CoordinatorInitializer coordinatorInitializer) {
+    public Coordinator(CoordinatorConfig config, ClusterManager clusterManager, CoordinatorResolver coordinatorResolver,
+                       CoordinatorInitializer coordinatorInitializer, CoordinatorSessionManager coordinatorSessionManager) {
         this.config = config;
         this.clusterManager = clusterManager;
         this.coordinatorResolver = coordinatorResolver;
         this.coordinatorInitializer = coordinatorInitializer;
+        this.coordinatorSessionManager = coordinatorSessionManager;
     }
 
-    public boolean isCurrentCoordinator(String key) {
-        Broker coordinatorBroker = findCoordinator(key);
+    // group
+
+    public boolean isCurrentGroup(String group) {
+        Broker coordinatorBroker = findGroup(group);
         return clusterManager.getBroker().equals(coordinatorBroker);
     }
 
-    public Broker findCoordinator(String key) {
-        return coordinatorResolver.resolve(key);
+    public Broker findGroup(String group) {
+        return coordinatorResolver.findCoordinator(group, config.getGroupTopic());
     }
 
-    public CoordinatorDetail getCoordinatorDetail(String key) {
-        return coordinatorResolver.resolveDetail(key);
+    public CoordinatorDetail getGroupDetail(String group) {
+        return coordinatorResolver.getCoordinatorDetail(group, config.getGroupTopic());
     }
 
-    public boolean isCoordinatorTopic(TopicName topic) {
-        return config.getTopic().getFullName().equals(topic);
+    public boolean isGroupTopic(TopicName topic) {
+        return config.getGroupTopic().getFullName().equals(topic.getFullName());
+    }
+
+    // transaction
+
+    public boolean isCurrentTransaction(String key) {
+        Broker coordinatorBroker = findTransaction(key);
+        return clusterManager.getBroker().equals(coordinatorBroker);
+    }
+
+    public Broker findTransaction(String key) {
+        return coordinatorResolver.findCoordinator(key, config.getTransactionTopic());
+    }
+
+    public CoordinatorDetail getTransactionDetail(String key) {
+        return coordinatorResolver.getCoordinatorDetail(key, config.getTransactionTopic());
+    }
+
+    public boolean isTransactionTopic(TopicName topic) {
+        return config.getTransactionTopic().getFullName().equals(topic.getFullName());
+    }
+
+    public TopicName getTransactionTopic() {
+        return config.getTransactionTopic();
+    }
+
+    public TopicConfig getTransactionTopicConfig() {
+        return clusterManager.getNameService().getTopicConfig(config.getTransactionTopic());
+    }
+
+    public PartitionGroup getTransactionPartitionGroup(String key) {
+        return coordinatorResolver.resolveCoordinatorPartitionGroup(key, config.getTransactionTopic());
     }
 
     public boolean initCoordinator() {
         return coordinatorInitializer.init();
+    }
+
+    public CoordinatorSessionManager getSessionManager() {
+        return coordinatorSessionManager;
     }
 }

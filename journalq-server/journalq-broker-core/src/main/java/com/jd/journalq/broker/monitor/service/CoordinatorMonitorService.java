@@ -14,8 +14,8 @@
 package com.jd.journalq.broker.monitor.service;
 
 import com.jd.journalq.broker.coordinator.domain.CoordinatorDetail;
-import com.jd.journalq.broker.coordinator.domain.CoordinatorGroup;
-import com.jd.journalq.broker.coordinator.domain.CoordinatorGroupMember;
+import com.jd.journalq.broker.coordinator.group.domain.GroupMemberMetadata;
+import com.jd.journalq.broker.coordinator.group.domain.GroupMetadata;
 
 import java.util.Map;
 
@@ -44,7 +44,7 @@ public interface CoordinatorMonitorService {
      * @param isFormat
      * @return
      */
-    CoordinatorGroup getCoordinatorGroup(String namespace, String groupId, String topic, boolean isFormat);
+    GroupMetadata getCoordinatorGroup(String namespace, String groupId, String topic, boolean isFormat);
 
     /**
      * 获得协调者组成员
@@ -55,5 +55,5 @@ public interface CoordinatorMonitorService {
      * @param isFormat
      * @return
      */
-    Map<String, CoordinatorGroupMember> getCoordinatorGroupMembers(String namespace, String groupId, String topic, boolean isFormat);
+    Map<String, GroupMemberMetadata> getCoordinatorGroupMembers(String namespace, String groupId, String topic, boolean isFormat);
 }

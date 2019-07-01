@@ -13,7 +13,7 @@
  */
 package com.jd.journalq.broker.network.codec;
 
-import com.jd.journalq.network.transport.codec.JMQHeader;
+import com.jd.journalq.network.transport.codec.JournalqHeader;
 import com.jd.journalq.network.transport.codec.PayloadCodec;
 import com.jd.journalq.network.transport.command.Payload;
 
@@ -23,5 +23,5 @@ import com.jd.journalq.network.transport.command.Payload;
  * email: gaohaoxiang@jd.com
  * date: 2019/2/28
  */
-public interface BrokerPayloadCodec<T extends Payload> extends PayloadCodec<JMQHeader, T> {
+public interface BrokerPayloadCodec<T extends Payload> extends PayloadCodec<JournalqHeader, T> {
 }

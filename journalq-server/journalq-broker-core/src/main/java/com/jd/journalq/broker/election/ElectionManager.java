@@ -171,7 +171,7 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
 
 		Thread.sleep(1000);
 
-        electionMetadataManager = new ElectionMetadataManager(electionConfig.getMetadataFile(), electionConfig.getMetadataPath());
+        electionMetadataManager = new ElectionMetadataManager(electionConfig.getMetadataPath());
         electionMetadataManager.recover(this);
 
         logger.info("Election manager started.");

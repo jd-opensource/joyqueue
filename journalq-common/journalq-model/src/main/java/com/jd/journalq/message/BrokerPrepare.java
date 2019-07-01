@@ -51,6 +51,8 @@ public class BrokerPrepare implements JournalLog {
 
     private Map<Object, Object> attrs;
 
+    private byte source;
+
     @Override
     public int getSize() {
         return size;
@@ -131,6 +133,14 @@ public class BrokerPrepare implements JournalLog {
         return timeout;
     }
 
+    public void setSource(byte source) {
+        this.source = source;
+    }
+
+    public byte getSource() {
+        return source;
+    }
+
     @Override
     public String toString() {
         return "BrokerPrepare{" +
@@ -141,6 +151,7 @@ public class BrokerPrepare implements JournalLog {
                 ", queryId='" + queryId + '\'' +
                 ", topic='" + topic + '\'' +
                 ", attrs=" + attrs +
+                ", source=" + source +
                 '}';
     }
 }

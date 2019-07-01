@@ -13,13 +13,13 @@
  */
 package com.jd.journalq.nsr.network.command;
 
-import com.jd.journalq.network.transport.command.JMQPayload;
+import com.jd.journalq.network.transport.command.JournalqPayload;
 
 /**
  * @author wylixiaobin
  * Date: 2019/1/28
  */
-public class GetDataCenter extends JMQPayload {
+public class GetDataCenter extends JournalqPayload {
     private String ip;
 
     public GetDataCenter ip(String ip){

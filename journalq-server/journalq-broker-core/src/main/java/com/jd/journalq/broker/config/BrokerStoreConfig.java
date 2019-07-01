@@ -43,9 +43,9 @@ public class BrokerStoreConfig {
 
         private String name;
         private Object value;
-        private PropertyDef.Type type;
+        private Type type;
 
-        BrokerStoreConfigKey(String name, Object value, PropertyDef.Type type) {
+        BrokerStoreConfigKey(String name, Object value, Type type) {
             this.name = name;
             this.value = value;
             this.type = type;

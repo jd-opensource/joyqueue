@@ -17,7 +17,7 @@ import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.election.command.AppendEntriesRequest;
 import com.jd.journalq.broker.election.command.AppendEntriesResponse;
 import com.jd.journalq.broker.replication.ReplicaGroup;
-import com.jd.journalq.network.transport.codec.JMQHeader;
+import com.jd.journalq.network.transport.codec.JournalqHeader;
 import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.network.command.CommandType;
 import com.jd.journalq.network.transport.command.Command;
@@ -155,7 +155,7 @@ public class FixLeaderElection extends LeaderElection {
         if (!isStarted()) {
             logger.warn("Partition group{}/node{} receive append entries request, election not started",
                     topicPartitionGroup, localNodeId);
-            return new Command(new JMQHeader(Direction.RESPONSE, CommandType.RAFT_APPEND_ENTRIES_RESPONSE),
+            return new Command(new JournalqHeader(Direction.RESPONSE, CommandType.RAFT_APPEND_ENTRIES_RESPONSE),
                     new AppendEntriesResponse.Build().success(false).build());
         }
 

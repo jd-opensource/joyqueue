@@ -14,6 +14,7 @@
 package com.jd.journalq.broker.handler;
 
 import com.jd.journalq.broker.BrokerContext;
+import com.jd.journalq.broker.election.ElectionService;
 import com.jd.journalq.domain.PartitionGroup;
 import com.jd.journalq.exception.JournalqCode;
 import com.jd.journalq.network.command.BooleanAck;
@@ -24,7 +25,6 @@ import com.jd.journalq.network.transport.command.handler.CommandHandler;
 import com.jd.journalq.network.transport.exception.TransportException;
 import com.jd.journalq.nsr.network.command.NsrCommandType;
 import com.jd.journalq.nsr.network.command.RemovePartitionGroup;
-import com.jd.journalq.broker.election.ElectionService;
 import com.jd.journalq.store.StoreService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

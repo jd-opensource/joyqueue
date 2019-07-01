@@ -33,25 +33,32 @@ import java.util.List;
  */
 public class KafkaMessageV1Serializer extends AbstractKafkaMessageSerializer {
 
-    // magic + timestamp
-    private static final int EXTENSION_LENGTH = 1 + 8;
+    private static final int EXTENSION_V0_LENGTH = 1 + 8; // magic + timestamp
+    private static final int EXTENSION_V1_LENGTH = 1 + 8 + 8; // magic + timestamp + attribute
+    private static final int CURRENT_EXTENSION_LENGTH = EXTENSION_V1_LENGTH;
 
     private static final byte CURRENT_MAGIC = MESSAGE_MAGIC_V1;
 
     public static void writeExtension(BrokerMessage brokerMessage, KafkaBrokerMessage kafkaBrokerMessage) {
-        byte[] extension = new byte[EXTENSION_LENGTH];
+        byte[] extension = new byte[CURRENT_EXTENSION_LENGTH];
         writeExtensionMagic(extension, CURRENT_MAGIC);
-        KafkaBufferUtils.writeUnsignedLongLE(extension, EXTENSION_CONTENT_OFFSET, kafkaBrokerMessage.getTimestamp());
+        writeExtensionTimestamp(extension, kafkaBrokerMessage.getTimestamp());
+        writeExtensionAttribute(extension, kafkaBrokerMessage.getAttribute());
         brokerMessage.setExtension(extension);
     }
 
     public static void readExtension(BrokerMessage brokerMessage, KafkaBrokerMessage kafkaBrokerMessage) {
         byte[] extension = brokerMessage.getExtension();
-        if (ArrayUtils.isEmpty(extension) || extension.length != EXTENSION_LENGTH) {
+        if (ArrayUtils.isEmpty(extension)) {
             return;
         }
-        kafkaBrokerMessage.setMagic(CURRENT_MAGIC);
-        kafkaBrokerMessage.setTimestamp(KafkaBufferUtils.readUnsignedLongLE(extension, EXTENSION_CONTENT_OFFSET));
+
+        if (extension.length == EXTENSION_V0_LENGTH) {
+            kafkaBrokerMessage.setTimestamp(readExtensionTimestamp(extension));
+        } else if (extension.length == EXTENSION_V1_LENGTH) {
+            kafkaBrokerMessage.setTimestamp(readExtensionTimestamp(extension));
+            kafkaBrokerMessage.setAttribute(readExtensionAttribute(extension));
+        }
     }
 
     public static void writeMessages(ByteBuf buffer, List<KafkaBrokerMessage> messages) throws Exception {
@@ -82,11 +89,8 @@ public class KafkaMessageV1Serializer extends AbstractKafkaMessageSerializer {
         long crc = KafkaBufferUtils.crc32(bytes, 4 + 4, bytes.length - 4 - 4);
 
         // 写入长度和crc
-        buffer.markWriterIndex();
-        buffer.writerIndex(startIndex);
-        buffer.writeInt(length - 4);
-        buffer.writeInt((int) (crc & 0xffffffffL));
-        buffer.resetWriterIndex();
+        buffer.setInt(startIndex, length - 4);
+        buffer.setInt(startIndex + 4, (int) (crc & 0xffffffffL));
     }
 
     public static List<KafkaBrokerMessage> readMessages(ByteBuffer buffer) throws Exception {
@@ -99,26 +103,30 @@ public class KafkaMessageV1Serializer extends AbstractKafkaMessageSerializer {
     }
 
     public static KafkaBrokerMessage readMessage(ByteBuffer buffer) throws Exception {
-        byte attribute = buffer.get(ATTRIBUTE_OFFSET);
+        long offset = buffer.getLong();
+        int size = buffer.getInt();
+        int crc = buffer.getInt();
+        byte magic = buffer.get();
+        byte attribute = buffer.get();
+        long timestamp = buffer.getLong();
+        byte[] key = KafkaBufferUtils.readBytes(buffer);
+        byte[] value = KafkaBufferUtils.readBytes(buffer);
         KafkaCompressionCodec compressionCodec = KafkaCompressionCodec.valueOf(getCompressionCodecType(attribute));
-        if (!compressionCodec.equals(KafkaCompressionCodec.NoCompressionCodec)) {
-            buffer.position(ATTRIBUTE_OFFSET + 1 + 8 + 4 + 4); // attribute, timestamp, key, valueLength
-            buffer = decompress(compressionCodec, buffer, CURRENT_MAGIC);
-        }
-        return doReadMessage(buffer);
-    }
 
-    protected static KafkaBrokerMessage doReadMessage(ByteBuffer buffer) throws Exception {
         KafkaBrokerMessage message = new KafkaBrokerMessage();
-        message.setOffset(buffer.getLong());
-        message.setSize(buffer.getInt());
-        message.setCrc(buffer.getInt());
-        message.setMagic(buffer.get());
-        message.setAttribute(buffer.get());
-        message.setCompressionCodecType(getCompressionCodecType(message.getAttribute()));
-        message.setTimestamp(buffer.getLong());
-        message.setKey(KafkaBufferUtils.readBytes(buffer));
-        message.setValue(KafkaBufferUtils.readBytes(buffer));
+        message.setOffset(offset);
+        message.setSize(size);
+        message.setCrc(crc);
+        message.setMagic(CURRENT_MAGIC);
+        message.setAttribute(attribute);
+        message.setTimestamp(timestamp);
+
+        if (compressionCodec.equals(KafkaCompressionCodec.NoCompressionCodec)) {
+            message.setKey(key);
+            message.setValue(value);
+        } else {
+            message.setValue(value);
+        }
         return message;
     }
 }

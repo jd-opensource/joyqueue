@@ -14,7 +14,7 @@
 package com.jd.journalq.broker.election.network.codec;
 
 import com.jd.journalq.broker.election.command.TimeoutNowResponse;
-import com.jd.journalq.network.transport.codec.JMQHeader;
+import com.jd.journalq.network.transport.codec.JournalqHeader;
 import com.jd.journalq.network.transport.codec.PayloadDecoder;
 import com.jd.journalq.network.command.CommandType;
 import com.jd.journalq.network.transport.command.Type;
@@ -25,9 +25,9 @@ import io.netty.buffer.ByteBuf;
  * email: zhuduohui@jd.com
  * date: 2018/10/2
  */
-public class TimeoutNowResponseDecoder implements PayloadDecoder<JMQHeader>, Type {
+public class TimeoutNowResponseDecoder implements PayloadDecoder<JournalqHeader>, Type {
     @Override
-    public Object decode(final JMQHeader header, final ByteBuf buffer) throws Exception {
+    public Object decode(final JournalqHeader header, final ByteBuf buffer) throws Exception {
         boolean success = buffer.readBoolean();
         int term = buffer.readInt();
         return new TimeoutNowResponse(success, term);

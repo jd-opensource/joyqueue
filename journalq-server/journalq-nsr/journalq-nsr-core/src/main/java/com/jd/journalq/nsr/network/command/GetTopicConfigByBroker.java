@@ -13,13 +13,13 @@
  */
 package com.jd.journalq.nsr.network.command;
 
-import com.jd.journalq.network.transport.command.JMQPayload;
+import com.jd.journalq.network.transport.command.JournalqPayload;
 
 /**
  * @author wylixiaobin
  * Date: 2019/1/27
  */
-public class GetTopicConfigByBroker extends JMQPayload {
+public class GetTopicConfigByBroker extends JournalqPayload {
     private int brokerId;
     public GetTopicConfigByBroker brokerId(int brokerId){
         this.brokerId = brokerId;

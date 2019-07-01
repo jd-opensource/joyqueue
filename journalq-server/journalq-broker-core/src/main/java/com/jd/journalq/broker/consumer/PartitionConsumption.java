@@ -220,7 +220,9 @@ class PartitionConsumption extends Service {
                 }
 
                 List<ByteBuffer> byteBuffers = Lists.newArrayList(byteBufferArr);
-                if (StringUtils.isNotEmpty(consumer.getApp())) {
+                if (StringUtils.isNotEmpty(consumer.getApp()) &&
+                        (!consumer.getType().equals(Consumer.ConsumeType.INTERNAL) && !consumer.getType().equals(Consumer.ConsumeType.KAFKA))) {
+
                     com.jd.journalq.domain.Consumer consumerConfig = clusterManager.getConsumer(TopicName.parse(consumer.getTopic()), consumer.getApp());
 
                     // 过滤消息

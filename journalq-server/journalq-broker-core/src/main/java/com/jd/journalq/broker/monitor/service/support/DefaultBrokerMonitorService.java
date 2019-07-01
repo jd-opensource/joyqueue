@@ -14,15 +14,10 @@
 package com.jd.journalq.broker.monitor.service.support;
 
 import com.jd.journalq.broker.coordinator.domain.CoordinatorDetail;
-import com.jd.journalq.broker.coordinator.domain.CoordinatorGroup;
-import com.jd.journalq.broker.coordinator.domain.CoordinatorGroupMember;
+import com.jd.journalq.broker.coordinator.group.domain.GroupMemberMetadata;
+import com.jd.journalq.broker.coordinator.group.domain.GroupMetadata;
 import com.jd.journalq.broker.monitor.service.ArchiveMonitorService;
 import com.jd.journalq.broker.monitor.service.BrokerMonitorInternalService;
-import com.jd.journalq.broker.monitor.stat.BrokerStatExt;
-import com.jd.journalq.domain.TopicConfig;
-import com.jd.journalq.model.Pager;
-import com.jd.journalq.monitor.*;
-import com.jd.journalq.response.BooleanResponse;
 import com.jd.journalq.broker.monitor.service.BrokerMonitorService;
 import com.jd.journalq.broker.monitor.service.ConnectionMonitorService;
 import com.jd.journalq.broker.monitor.service.ConsumerMonitorService;
@@ -31,6 +26,11 @@ import com.jd.journalq.broker.monitor.service.MetadataMonitorService;
 import com.jd.journalq.broker.monitor.service.PartitionMonitorService;
 import com.jd.journalq.broker.monitor.service.ProducerMonitorService;
 import com.jd.journalq.broker.monitor.service.TopicMonitorService;
+import com.jd.journalq.broker.monitor.stat.BrokerStatExt;
+import com.jd.journalq.domain.TopicConfig;
+import com.jd.journalq.model.Pager;
+import com.jd.journalq.monitor.*;
+import com.jd.journalq.response.BooleanResponse;
 
 import java.util.List;
 import java.util.Map;
@@ -243,12 +243,12 @@ public class DefaultBrokerMonitorService implements BrokerMonitorService {
     }
 
     @Override
-    public CoordinatorGroup getCoordinatorGroup(String namespace, String groupId, String topic, boolean isFormat) {
+    public GroupMetadata getCoordinatorGroup(String namespace, String groupId, String topic, boolean isFormat) {
         return coordinatorMonitorService.getCoordinatorGroup(namespace, groupId, topic, isFormat);
     }
 
     @Override
-    public Map<String, CoordinatorGroupMember> getCoordinatorGroupMembers(String namespace, String groupId, String topic, boolean isFormat) {
+    public Map<String, GroupMemberMetadata> getCoordinatorGroupMembers(String namespace, String groupId, String topic, boolean isFormat) {
         return coordinatorMonitorService.getCoordinatorGroupMembers(namespace, groupId, topic, isFormat);
     }
 

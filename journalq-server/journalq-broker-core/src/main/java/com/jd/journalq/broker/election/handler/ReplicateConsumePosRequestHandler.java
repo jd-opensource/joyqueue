@@ -14,10 +14,11 @@
 package com.jd.journalq.broker.election.handler;
 
 import com.jd.journalq.broker.consumer.Consume;
+import com.jd.journalq.broker.election.ElectionConfig;
 import com.jd.journalq.broker.election.command.ReplicateConsumePosRequest;
 import com.jd.journalq.broker.election.command.ReplicateConsumePosResponse;
 import com.jd.journalq.broker.BrokerContext;
-import com.jd.journalq.network.transport.codec.JMQHeader;
+import com.jd.journalq.network.transport.codec.JournalqHeader;
 import com.jd.journalq.network.transport.command.Command;
 import com.jd.journalq.network.command.CommandType;
 import com.jd.journalq.network.transport.command.Direction;
@@ -38,10 +39,12 @@ public class ReplicateConsumePosRequestHandler implements CommandHandler, Type {
     private static Logger logger = LoggerFactory.getLogger(ReplicateConsumePosRequestHandler.class);
 
     private Consume consume;
+    private ElectionConfig electionConfig;
 
-    public ReplicateConsumePosRequestHandler(Consume consume) {
+    public ReplicateConsumePosRequestHandler(ElectionConfig electionConfig, Consume consume) {
         Preconditions.checkArgument(consume != null, "consume is null");
 
+        this.electionConfig = electionConfig;
         this.consume = consume;
     }
 
@@ -50,6 +53,7 @@ public class ReplicateConsumePosRequestHandler implements CommandHandler, Type {
         Preconditions.checkArgument(brokerContext.getConsume() != null, "consume is null");
 
         this.consume = brokerContext.getConsume();
+        this.electionConfig = new ElectionConfig(brokerContext.getPropertySupplier());
     }
 
     @Override
@@ -60,7 +64,7 @@ public class ReplicateConsumePosRequestHandler implements CommandHandler, Type {
 
         ReplicateConsumePosRequest request = (ReplicateConsumePosRequest)command.getPayload();
         boolean success;
-        JMQHeader header = new JMQHeader(Direction.RESPONSE, CommandType.REPLICATE_CONSUME_POS_RESPONSE);
+        JournalqHeader header = new JournalqHeader(Direction.RESPONSE, CommandType.REPLICATE_CONSUME_POS_RESPONSE);
         ReplicateConsumePosResponse response = new ReplicateConsumePosResponse(false);
 
         if (request.getConsumePositions() == null) {
@@ -68,7 +72,9 @@ public class ReplicateConsumePosRequestHandler implements CommandHandler, Type {
             return new Command(header, response);
         }
 
-        logger.debug("Receive consume pos request {}", request.getConsumePositions());
+        if (logger.isDebugEnabled() || electionConfig.getOutputConsumePos()) {
+            logger.info("Receive consume pos request {}", request.getConsumePositions());
+        }
 
         try {
             success = consume.setConsumeInfo(request.getConsumePositions());

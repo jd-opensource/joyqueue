@@ -14,13 +14,13 @@
 package com.jd.journalq.nsr.network.command;
 
 import com.jd.journalq.domain.DataCenter;
-import com.jd.journalq.network.transport.command.JMQPayload;
+import com.jd.journalq.network.transport.command.JournalqPayload;
 
 /**
  * @author wylixiaobin
  * Date: 2019/1/29
  */
-public class GetDataCenterAck extends JMQPayload {
+public class GetDataCenterAck extends JournalqPayload {
     private DataCenter dataCenter;
 
     public GetDataCenterAck dataCenter(DataCenter dataCenter){

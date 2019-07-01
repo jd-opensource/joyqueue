@@ -21,8 +21,6 @@ import com.jd.journalq.broker.config.Configuration;
 import com.jd.journalq.broker.config.ConfigurationManager;
 import com.jd.journalq.broker.consumer.Consume;
 import com.jd.journalq.broker.consumer.MessageConvertSupport;
-import com.jd.journalq.broker.coordinator.CoordinatorService;
-import com.jd.journalq.broker.coordinator.config.CoordinatorConfig;
 import com.jd.journalq.broker.election.ElectionService;
 import com.jd.journalq.broker.helper.AwareHelper;
 import com.jd.journalq.broker.manage.BrokerManageService;
@@ -30,9 +28,11 @@ import com.jd.journalq.broker.manage.config.BrokerManageConfig;
 import com.jd.journalq.broker.monitor.BrokerMonitorService;
 import com.jd.journalq.broker.monitor.SessionManager;
 import com.jd.journalq.broker.monitor.config.BrokerMonitorConfig;
+import com.jd.journalq.broker.producer.Produce;
+import com.jd.journalq.broker.coordinator.CoordinatorService;
+import com.jd.journalq.broker.coordinator.config.CoordinatorConfig;
 import com.jd.journalq.broker.network.BrokerServer;
 import com.jd.journalq.broker.network.protocol.ProtocolManager;
-import com.jd.journalq.broker.producer.Produce;
 import com.jd.journalq.broker.retry.BrokerRetryManager;
 import com.jd.journalq.broker.store.StoreManager;
 import com.jd.journalq.domain.Config;
@@ -179,7 +179,6 @@ public class BrokerService extends Service {
                 coordinatorService,
                 archiveManager,
                 nameService,
-                storeService,
                 electionService);
         this.brokerContext.brokerManageService(brokerManageService);
 

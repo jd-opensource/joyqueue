@@ -13,27 +13,29 @@
  */
 package com.jd.journalq.broker.kafka.command;
 
-import com.google.common.collect.Table;
 import com.jd.journalq.broker.kafka.KafkaCommandType;
 import com.jd.journalq.broker.kafka.model.OffsetMetadataAndError;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by zhangkepeng on 16-8-4.
  */
 public class OffsetCommitResponse extends KafkaRequestOrResponse {
 
-    private Table<String, Integer, OffsetMetadataAndError> commitStatus;
+    private Map<String, List<OffsetMetadataAndError>> offsets;
 
-    public OffsetCommitResponse(Table<String, Integer, OffsetMetadataAndError> commitStatus) {
-        this.commitStatus = commitStatus;
+    public OffsetCommitResponse(Map<String, List<OffsetMetadataAndError>> offsets) {
+        this.offsets = offsets;
     }
 
-    public Table<String, Integer, OffsetMetadataAndError> getCommitStatus() {
-        return commitStatus;
+    public void setOffsets(Map<String, List<OffsetMetadataAndError>> offsets) {
+        this.offsets = offsets;
     }
 
-    public void setCommitStatus(Table<String, Integer, OffsetMetadataAndError> commitStatus) {
-        this.commitStatus = commitStatus;
+    public Map<String, List<OffsetMetadataAndError>> getOffsets() {
+        return offsets;
     }
 
     @Override

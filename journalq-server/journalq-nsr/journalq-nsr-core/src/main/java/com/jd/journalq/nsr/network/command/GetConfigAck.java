@@ -13,13 +13,13 @@
  */
 package com.jd.journalq.nsr.network.command;
 
-import com.jd.journalq.network.transport.command.JMQPayload;
+import com.jd.journalq.network.transport.command.JournalqPayload;
 
 /**
  * @author wylixiaobin
  * Date: 2019/1/29
  */
-public class GetConfigAck extends JMQPayload {
+public class GetConfigAck extends JournalqPayload {
     private String value;
     public GetConfigAck value(String value){
         this.value = value;

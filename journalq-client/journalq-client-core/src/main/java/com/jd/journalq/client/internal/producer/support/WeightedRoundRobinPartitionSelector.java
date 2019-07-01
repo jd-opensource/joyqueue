@@ -32,6 +32,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Extension(singleton = false)
 public class WeightedRoundRobinPartitionSelector extends AbstractPartitionSelector {
 
+    public static final String NAME = "roundrobin";
+
     private final AtomicInteger next = new AtomicInteger();
     private final AtomicInteger currentWeight = new AtomicInteger();
     private TopicMetadata lastTopicMetadata;
@@ -114,6 +116,6 @@ public class WeightedRoundRobinPartitionSelector extends AbstractPartitionSelect
 
     @Override
     public String type() {
-        return "roundrobin";
+        return NAME;
     }
 }

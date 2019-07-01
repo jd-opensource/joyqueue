@@ -14,13 +14,13 @@
 package com.jd.journalq.nsr.network.command;
 
 import com.jd.journalq.domain.Broker;
-import com.jd.journalq.network.transport.command.JMQPayload;
+import com.jd.journalq.network.transport.command.JournalqPayload;
 
 /**
  * @author wylixiaobin
  * Date: 2019/1/27
  */
-public class GetBrokerAck extends JMQPayload {
+public class GetBrokerAck extends JournalqPayload {
     private Broker broker;
     public GetBrokerAck broker(Broker broker){
         this.broker = broker;

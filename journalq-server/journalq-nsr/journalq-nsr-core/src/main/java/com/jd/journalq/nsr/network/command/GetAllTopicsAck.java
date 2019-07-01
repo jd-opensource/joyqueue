@@ -13,7 +13,7 @@
  */
 package com.jd.journalq.nsr.network.command;
 
-import com.jd.journalq.network.transport.command.JMQPayload;
+import com.jd.journalq.network.transport.command.JournalqPayload;
 
 import java.util.Set;
 
@@ -21,7 +21,7 @@ import java.util.Set;
  * @author wylixiaobin
  * Date: 2019/1/27
  */
-public class GetAllTopicsAck extends JMQPayload {
+public class GetAllTopicsAck extends JournalqPayload {
 
     private Set<String> topicNames;
 

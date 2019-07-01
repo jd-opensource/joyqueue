@@ -222,7 +222,7 @@ public class PartitionMessagePoller extends Service implements MessagePoller {
         Preconditions.checkArgument(StringUtils.isNotBlank(topic), "topic not blank");
         Preconditions.checkArgument(timeoutUnit != null, "timeoutUnit not null");
 
-        TopicMetadata topicMetadata = messagePollerInner.checkTopicMetadata(topic);
+        TopicMetadata topicMetadata = messagePollerInner.getAndCheckTopicMetadata(topic);
         PartitionMetadata partitionMetadata = topicMetadata.getPartition(partition);
 
         if (partitionMetadata == null) {
@@ -249,7 +249,7 @@ public class PartitionMessagePoller extends Service implements MessagePoller {
         Preconditions.checkArgument(StringUtils.isNotBlank(topic), "topic not blank");
         Preconditions.checkArgument(timeoutUnit != null, "timeoutUnit not null");
 
-        TopicMetadata topicMetadata = messagePollerInner.checkTopicMetadata(topic);
+        TopicMetadata topicMetadata = messagePollerInner.getAndCheckTopicMetadata(topic);
         BrokerAssignments brokerAssignments = buildAllBrokerAssignments(topicMetadata);
         brokerAssignments = messagePollerInner.filterRegionBrokers(topicMetadata, brokerAssignments);
         brokerAssignments = messagePollerInner.filterNotAvailableBrokers(brokerAssignments);
@@ -309,7 +309,7 @@ public class PartitionMessagePoller extends Service implements MessagePoller {
         checkState();
         Preconditions.checkArgument(StringUtils.isNotBlank(topic), "topic not blank");
 
-        TopicMetadata topicMetadata = messagePollerInner.checkTopicMetadata(topic);
+        TopicMetadata topicMetadata = messagePollerInner.getAndCheckTopicMetadata(topic);
 
         if (CollectionUtils.isEmpty(replyList)) {
             throw new IllegalArgumentException(String.format("topic %s reply is empty", topic));

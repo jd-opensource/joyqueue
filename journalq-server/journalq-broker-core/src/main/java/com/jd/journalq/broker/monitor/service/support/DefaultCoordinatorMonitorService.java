@@ -14,11 +14,11 @@
 package com.jd.journalq.broker.monitor.service.support;
 
 import com.google.common.collect.Maps;
-import com.jd.journalq.broker.coordinator.CoordinatorGroupManager;
 import com.jd.journalq.broker.coordinator.CoordinatorService;
 import com.jd.journalq.broker.coordinator.domain.CoordinatorDetail;
-import com.jd.journalq.broker.coordinator.domain.CoordinatorGroup;
-import com.jd.journalq.broker.coordinator.domain.CoordinatorGroupMember;
+import com.jd.journalq.broker.coordinator.group.GroupMetadataManager;
+import com.jd.journalq.broker.coordinator.group.domain.GroupMemberMetadata;
+import com.jd.journalq.broker.coordinator.group.domain.GroupMetadata;
 import com.jd.journalq.broker.monitor.service.CoordinatorMonitorService;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -42,20 +42,20 @@ public class DefaultCoordinatorMonitorService implements CoordinatorMonitorServi
 
     @Override
     public CoordinatorDetail getCoordinator(String groupId) {
-        return coordinatorService.getCoordinator().getCoordinatorDetail(groupId);
+        return coordinatorService.getCoordinator().getGroupDetail(groupId);
     }
 
     @Override
-    public CoordinatorGroup getCoordinatorGroup(String namespace, String groupId, String topic, boolean isFormat) {
-        CoordinatorGroupManager coordinatorGroupManager = coordinatorService.getOrCreateCoordinatorGroupManager(namespace);
-        CoordinatorGroup group = coordinatorGroupManager.getGroup(groupId);
+    public GroupMetadata getCoordinatorGroup(String namespace, String groupId, String topic, boolean isFormat) {
+        GroupMetadataManager groupMetadataManager = coordinatorService.getOrCreateGroupMetadataManager(namespace);
+        GroupMetadata group = groupMetadataManager.getGroup(groupId);
         if (group == null) {
             return null;
         }
         if (!isFormat) {
             return group;
         }
-        CoordinatorGroup result = new CoordinatorGroup();
+        GroupMetadata result = new GroupMetadata();
         result.setId(group.getId());
         result.setExtension(group.getExtension());
         result.setMembers(formatCoordinatorGroupMembers(group, topic));
@@ -64,9 +64,9 @@ public class DefaultCoordinatorMonitorService implements CoordinatorMonitorServi
     }
 
     @Override
-    public Map<String, CoordinatorGroupMember> getCoordinatorGroupMembers(String namespace, String groupId, String topic, boolean isFormat) {
-        CoordinatorGroupManager coordinatorGroupManager = coordinatorService.getOrCreateCoordinatorGroupManager(namespace);
-        CoordinatorGroup group = coordinatorGroupManager.getGroup(groupId);
+    public Map<String, GroupMemberMetadata> getCoordinatorGroupMembers(String namespace, String groupId, String topic, boolean isFormat) {
+        GroupMetadataManager groupMetadataManager = coordinatorService.getOrCreateGroupMetadataManager(namespace);
+        GroupMetadata group = groupMetadataManager.getGroup(groupId);
         if (group == null) {
             return null;
         }
@@ -76,19 +76,19 @@ public class DefaultCoordinatorMonitorService implements CoordinatorMonitorServi
         return formatCoordinatorGroupMembers(group, topic);
     }
 
-    protected ConcurrentMap<String, CoordinatorGroupMember> formatCoordinatorGroupMembers(CoordinatorGroup group, String topic) {
+    protected ConcurrentMap<String, GroupMemberMetadata> formatCoordinatorGroupMembers(GroupMetadata group, String topic) {
         if (MapUtils.isEmpty(group.getMembers())) {
             return null;
         }
-        ConcurrentMap<String, CoordinatorGroupMember> result = Maps.newConcurrentMap();
-        for (Map.Entry<String, CoordinatorGroupMember> entry : group.getMembers().entrySet()) {
-            CoordinatorGroupMember sourceMember = entry.getValue();
+        ConcurrentMap<String, GroupMemberMetadata> result = Maps.newConcurrentMap();
+        for (Map.Entry<String, GroupMemberMetadata> entry : group.getMembers().entrySet()) {
+            GroupMemberMetadata sourceMember = entry.getValue();
 
-            if (StringUtils.isNotBlank(topic) && !sourceMember.getAssignments().containsKey(topic)) {
+            if (StringUtils.isNotBlank(topic) && sourceMember.getAssignments() != null && !sourceMember.getAssignments().containsKey(topic)) {
                 continue;
             }
 
-            CoordinatorGroupMember member = new CoordinatorGroupMember();
+            GroupMemberMetadata member = new GroupMemberMetadata();
             member.setId(sourceMember.getId());
             member.setGroupId(sourceMember.getGroupId());
             member.setConnectionId(sourceMember.getConnectionId());

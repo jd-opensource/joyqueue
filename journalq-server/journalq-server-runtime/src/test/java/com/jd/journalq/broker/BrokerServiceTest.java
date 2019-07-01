@@ -13,12 +13,14 @@
  */
 package com.jd.journalq.broker;
 
+import com.google.common.base.Preconditions;
 import com.jd.journalq.broker.archive.ArchiveManager;
 import com.jd.journalq.broker.cluster.ClusterManager;
 import com.jd.journalq.broker.config.BrokerConfig;
 import com.jd.journalq.broker.config.Configuration;
 import com.jd.journalq.broker.config.ConfigurationManager;
 import com.jd.journalq.broker.consumer.Consume;
+import com.jd.journalq.broker.consumer.MessageConvertSupport;
 import com.jd.journalq.broker.coordinator.CoordinatorService;
 import com.jd.journalq.broker.coordinator.config.CoordinatorConfig;
 import com.jd.journalq.broker.election.ElectionService;
@@ -46,7 +48,6 @@ import com.jd.journalq.toolkit.config.PropertySupplier;
 import com.jd.journalq.toolkit.config.PropertySupplierAware;
 import com.jd.journalq.toolkit.lang.Close;
 import com.jd.journalq.toolkit.lang.LifeCycle;
-import com.google.common.base.Preconditions;
 import com.jd.journalq.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,6 +81,7 @@ public class BrokerServiceTest extends Service {
 
     private CoordinatorService coordinatorService;
     private ArchiveManager archiveManager;
+    private MessageConvertSupport messageConvertSupport;
     private ConfigurationManager configurationManager;
     private String[] args;
 
@@ -135,6 +137,9 @@ public class BrokerServiceTest extends Service {
                 clusterManager, nameService);
         this.brokerContext.coordinnatorService(this.coordinatorService);
 
+        this.messageConvertSupport = new MessageConvertSupport();
+        this.brokerContext.messageConvertSupport(this.messageConvertSupport);
+
         // build produce
         this.produce = getProduce(brokerContext);
         this.brokerContext.produce(produce);
@@ -166,7 +171,6 @@ public class BrokerServiceTest extends Service {
                 coordinatorService,
                 archiveManager,
                 nameService,
-                storeService,
                 electionService);
         this.brokerContext.brokerManageService(brokerManageService);
 

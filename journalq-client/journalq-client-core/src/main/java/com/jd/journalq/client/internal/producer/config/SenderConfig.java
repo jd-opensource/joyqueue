@@ -24,15 +24,17 @@ public class SenderConfig {
     private boolean compress = true;
     private int compressThreshold = 1024 * 1;
     private String compressType;
+    private boolean batch;
 
     public SenderConfig() {
 
     }
 
-    public SenderConfig(boolean compress, int compressThreshold, String compressType) {
+    public SenderConfig(boolean compress, int compressThreshold, String compressType, boolean batch) {
         this.compress = compress;
         this.compressThreshold = compressThreshold;
         this.compressType = compressType;
+        this.batch = batch;
     }
 
     public boolean isCompress() {
@@ -57,5 +59,13 @@ public class SenderConfig {
 
     public void setCompressType(String compressType) {
         this.compressType = compressType;
+    }
+
+    public void setBatch(boolean batch) {
+        this.batch = batch;
+    }
+
+    public boolean isBatch() {
+        return batch;
     }
 }

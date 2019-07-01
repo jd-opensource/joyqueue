@@ -15,7 +15,7 @@ package com.jd.journalq.network.command;
 
 import com.jd.journalq.domain.ClientType;
 import com.jd.journalq.domain.Subscription;
-import com.jd.journalq.network.transport.command.JMQPayload;
+import com.jd.journalq.network.transport.command.JournalqPayload;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
@@ -25,7 +25,7 @@ import java.util.List;
  * @author wylixiaobin
  * Date: 2018/10/10
  */
-public class Subscribe extends JMQPayload {
+public class Subscribe extends JournalqPayload {
     private List<Subscription> subscriptions;
     private ClientType clientType;
 
