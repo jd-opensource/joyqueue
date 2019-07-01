@@ -13,19 +13,12 @@
  */
 package com.jd.joyqueue.security;
 
-import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.response.BooleanResponse;
 
 /**
  * @author majun8
  */
 public interface Authentication {
-
-    @Deprecated
-    UserDetails getUser(String user) throws JoyQueueException;
-
-    @Deprecated
-    PasswordEncoder getPasswordEncode();
 
     BooleanResponse auth(String userName, String password);
 
