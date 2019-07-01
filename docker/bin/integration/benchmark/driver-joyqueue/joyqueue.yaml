@@ -12,17 +12,12 @@
 # limitations under the License.
 #
 
-name: 1 topic / 5 partition / 1Kb / 50P1C async
+name: JoyQueue
+driverClass: io.openmessaging.benchmark.driver.joyqueue.JoyQueueBenchmarkDriver
 
-topics: 1
-partitionsPerTopic: 5
-keyDistributor: "NO_KEY"
-messageSize: 1024
-payloadFile: "payload/payload-1Kb.data"
-subscriptionsPerTopic: 1
-consumerPerSubscription: 1
-syncProducer: false
-producersPerTopic: 50
-producerRate: 50000
-consumerBacklogSizeGB: 0
-testDurationMinutes: 1
+# JournalQ client-specific configuration
+clusterName: DefaultCluster
+namesrvAddr: 192.169.0.2:50088
+adminAddr: 192.169.0.2:50091
+
+
