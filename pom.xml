@@ -656,6 +656,7 @@
                     <compilerArgs>
                         <arg>-XDignore.symbol.file</arg>
                     </compilerArgs>
+                    <fork>true</fork>
                 </configuration>
             </plugin>
             <plugin>
