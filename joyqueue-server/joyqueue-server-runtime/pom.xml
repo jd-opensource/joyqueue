@@ -33,7 +33,6 @@
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
-
         </dependency>
         <dependency>
             <groupId>com.jd.joyqueue</groupId>
@@ -43,6 +42,25 @@
         <dependency>
             <groupId>com.jd.joyqueue</groupId>
             <artifactId>joyqueue-datasource-hikaricp</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.el</groupId>
+            <artifactId>javax.el-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.web</groupId>
+            <artifactId>javax.el</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.jd.joyqueue</groupId>
+            <artifactId>joyqueue-archive-hbase</artifactId>
             <scope>runtime</scope>
         </dependency>
         <dependency>
