@@ -31,6 +31,15 @@
     <modules>
         <module>joyqueue-data</module>
         <module>joyqueue-web</module>
-<!--        <module>joyqueue-portal</module>-->
     </modules>
+
+    <profiles>
+        <profile>
+            <id>CompileFrontend</id>
+            <modules>
+                <module>joyqueue-portal</module>
+            </modules>
+        </profile>
+
+    </profiles>
 </project>

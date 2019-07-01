@@ -633,6 +633,25 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <compilerArgs>
+                        <arg>-XDignore.symbol.file</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>com.jd.joyqueue.broker.election.RaftLeaderElectionTest</exclude>
+                        <exclude>com.jd.joyqueue.broker.election.ElectionMetadataManagerTest</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <version>3.0.0</version>
                 <executions>
@@ -648,36 +667,6 @@
                             <suppressionsLocation>styles/suppressions.xml</suppressionsLocation>
                             <suppressionsFileExpression>checkstyle.suppressions.file</suppressionsFileExpression>
                         </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>com.mycila</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <version>3.0</version>
-                <configuration>
-                    <!--suppress UnresolvedMavenProperty -->
-                    <header>${maven.multiModuleProjectDirectory}/HEADER</header>
-                    <excludes>
-                        <exclude>**/README</exclude>
-                        <exclude>src/test/resources/**</exclude>
-                        <exclude>src/main/resources/**</exclude>
-                        <exclude>**/node_modules/**</exclude>
-                        <exclude>**/joyqueue-portal/**</exclude>
-                        <exclude>**/joyqueue-web-webroot/**</exclude>
-                        <exclude>**/*.vue</exclude>
-                        <exclude>**/*.js</exclude>
-                        <exclude>**/*.js.map</exclude>
-                        <exclude>**/*.css.map</exclude>
-                        <exclude>**/*.css</exclude>
-                        <exclude>**/index.html</exclude>
-                    </excludes>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
                     </execution>
                 </executions>
             </plugin>
@@ -705,5 +694,62 @@
         <module>joyqueue-openmessaging</module>
         <module>docker</module>
     </modules>
+    <profiles>
+        <profile>
+            <id>RaftTest</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <includes>
+                                <include>com.jd.joyqueue.broker.election.RaftLeaderElectionTest</include>
+                                <include>com.jd.joyqueue.broker.election.ElectionMetadataManagerTest</include>
+                            </includes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>CheckLicense</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.mycila</groupId>
+                        <artifactId>license-maven-plugin</artifactId>
+                        <version>3.0</version>
+                        <configuration>
+                            <!--suppress UnresolvedMavenProperty -->
+                            <header>${maven.multiModuleProjectDirectory}/HEADER</header>
+                            <excludes>
+                                <exclude>**/README</exclude>
+                                <exclude>src/test/resources/**</exclude>
+                                <exclude>src/main/resources/**</exclude>
+                                <exclude>**/node_modules/**</exclude>
+                                <exclude>**/joyqueue-portal/**</exclude>
+                                <exclude>**/joyqueue-portal/node/**</exclude>
+                                <exclude>**/joyqueue-web-webroot/**</exclude>
+                                <exclude>**/*.vue</exclude>
+                                <exclude>**/*.js</exclude>
+                                <exclude>**/*.js.map</exclude>
+                                <exclude>**/*.css.map</exclude>
+                                <exclude>**/*.css</exclude>
+                                <exclude>**/index.html</exclude>
+                            </excludes>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
 
+    </profiles>
 </project>
