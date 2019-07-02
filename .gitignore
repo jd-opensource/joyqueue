@@ -8,7 +8,6 @@ h2-db-joyqueue
 .settings
 .project
 *.log
-
 # macOS
 .DS_Store
 
