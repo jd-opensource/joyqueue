@@ -15,6 +15,7 @@ package com.jd.joyqueue.network.transport.codec;
 
 import com.jd.joyqueue.network.transport.command.Command;
 import com.jd.joyqueue.network.transport.command.Header;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 import com.jd.joyqueue.network.transport.command.Payload;
 import com.jd.joyqueue.network.transport.exception.TransportException;
 import io.netty.buffer.ByteBuf;
@@ -56,15 +57,22 @@ public class DefaultEncoder implements Encoder {
                 if (!(payload instanceof Payload)) {
                     throw new TransportException.CodecException(String.format("unsupported encode payload type, payload: %s", payload));
                 }
-
-                headerCodec.encode(header, buffer);
-
                 PayloadEncoder encoder = payloadCodecFactory.getEncoder(header);
                 if (encoder == null) {
                     throw new TransportException.CodecException(String.format("unsupported encode payload type, header: %s", header));
                 }
+                if (payload instanceof JoyQueuePayload) {
+                    ((JoyQueuePayload) payload).setHeader(header);
+                }
+
+                int oldVersion = header.getVersion();
+                header.setVersion(JoyQueueHeader.CURRENT_VERSION);
+                headerCodec.encode(header, buffer);
+
+                header.setVersion(oldVersion);
                 encoder.encode((Payload) payload, buffer);
             } else {
+                header.setVersion(JoyQueueHeader.CURRENT_VERSION);
                 headerCodec.encode(header, buffer);
             }
 
