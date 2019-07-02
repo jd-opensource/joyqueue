@@ -107,7 +107,7 @@ export default {
           edit: '/broker/update',
           archiveMonitor: '/monitor/archive',
           telnet: '/broker',
-          startInfo: '/monitor/start/'
+          startInfo: '/monitor/start'
         }
       }
     },
@@ -236,7 +236,7 @@ export default {
       })
     },
     getBrokerStatus (rowData, i) {
-      apiRequest.get(this.urlOrigin.startInfo + '/' + rowData[i].id).then((data) => {
+      apiRequest.get(this.urls.startInfo + '/' + rowData[i].id).then((data) => {
         if (data.code === 200) {
           this.tableData.rowData[i].startupTime = timeStampToString(data.data.startupTime)
         } else {
