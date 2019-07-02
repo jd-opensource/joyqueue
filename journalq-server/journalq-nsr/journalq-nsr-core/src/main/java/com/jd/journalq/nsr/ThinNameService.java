@@ -166,7 +166,7 @@ public class ThinNameService extends Service implements NameService, PropertySup
 
     @Override
     public void unSubscribe(List<Subscription> subscriptions) {
-        Command request = new Command(new JournalqHeader(Direction.REQUEST, CommandType.UNSUBSCRIBE), new UnSubscribe().subscriptions(subscriptions));
+        Command request = new Command(new JournalqHeader(Direction.REQUEST, NsrCommandType.UN_SUBSCRIBE), new UnSubscribe().subscriptions(subscriptions));
         Command response = send(request);
         if (!response.isSuccess()) {
             logger.error("unSubscribe error request {},response {}", request, response);
