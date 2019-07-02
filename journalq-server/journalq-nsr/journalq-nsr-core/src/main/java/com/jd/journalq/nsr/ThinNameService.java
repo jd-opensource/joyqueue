@@ -28,7 +28,6 @@ import com.jd.journalq.domain.Topic;
 import com.jd.journalq.domain.TopicConfig;
 import com.jd.journalq.domain.TopicName;
 import com.jd.journalq.event.NameServerEvent;
-import com.jd.journalq.network.command.CommandType;
 import com.jd.journalq.network.command.GetTopics;
 import com.jd.journalq.network.command.GetTopicsAck;
 import com.jd.journalq.network.command.SubscribeAck;
