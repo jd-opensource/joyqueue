@@ -36,10 +36,11 @@
 - [x] 增强 runtime 模块 （浩翔）
   - [ ] 包含管理端 (暂定)
   - [x] 包含文档
+  - [x] 整理管理端配置
 - [x] CLI Tools （浩翔）
   - [x] Consumer/Producer
   - [x] Start/Stop 脚本改进
-  - [ ] windows 脚本
+  - [x] windows 脚本
   - [ ] 修复Store脚本（李玥）
 - [ ] GitHub相关（王金）
   - [ ] 相关生态的账号申请
