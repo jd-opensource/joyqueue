@@ -56,7 +56,6 @@
                                 <goals>
                                     <goal>build</goal>
                                 </goals>
-
                             </execution>
                             <execution>
                                 <id>add-no-repo-and-version</id>

@@ -35,7 +35,10 @@ public class BrokerAdmin extends AbstractAdmin {
 
     private AsyncHttpClient httpClient;
     public BrokerAdmin(){
-        this.httpClient=new AsyncHttpClient();
+        this(new AsyncHttpClient());
+    }
+    public BrokerAdmin(AsyncHttpClient httpClient){
+        this.httpClient=httpClient;
     }
     @Parameters(separators = "=", commandDescription = "List broker arguments")
     public static class ListArg extends CommandArgs {
@@ -57,7 +60,7 @@ public class BrokerAdmin extends AbstractAdmin {
         //String[] argv={"list","--host","http://localhost:50091"};
         BrokerAdmin brokerAdmin=new BrokerAdmin();
         Map<String,CommandArgs> argsMap=new HashMap(8);
-                                argsMap.put(Command.list.name(),listArg);
+        argsMap.put(Command.list.name(),listArg);
         JCommander jc =JCommander.newBuilder()
                 .addObject(brokerAdmin)
                 .addCommand(Command.list.name(),listArg)

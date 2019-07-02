@@ -46,6 +46,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* \
     && ln -nsf /usr/bin/python"${ver}" /usr/bin/python
 
+RUN /bin/cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo 'Asia/Shanghai' >/etc/timezone
 
 ENV DEBIAN_FRONTEND teletype
 USER jenkins
