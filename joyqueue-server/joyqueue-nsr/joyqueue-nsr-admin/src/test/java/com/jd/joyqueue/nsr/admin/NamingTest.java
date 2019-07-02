@@ -15,10 +15,11 @@ package com.jd.joyqueue.nsr.admin;
 
 import com.jd.joyqueue.domain.Broker;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.List;
-
+@Ignore
 public class NamingTest {
 
     private static final String ConnectionStr="196.0.0.1:50091,127.0.0.1:50091";

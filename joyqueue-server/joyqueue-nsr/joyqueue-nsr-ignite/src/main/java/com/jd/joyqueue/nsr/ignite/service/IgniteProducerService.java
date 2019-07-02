@@ -134,7 +134,7 @@ public class IgniteProducerService implements ProducerService {
         boolean commit = false;
         try {
             if (null == tx) {
-                tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED);
+                tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.REPEATABLE_READ);
                 commit = true;
             }
             producerDao.addOrUpdate(toIgniteModel(producer));
@@ -160,7 +160,7 @@ public class IgniteProducerService implements ProducerService {
         boolean commit = false;
         try {
             if (null == tx) {
-                tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED);
+                tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.REPEATABLE_READ);
                 commit = true;
             }
             producerDao.deleteById(id);
@@ -200,7 +200,7 @@ public class IgniteProducerService implements ProducerService {
     }
 
     public void add(Producer producer) {
-        Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED);
+        Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.REPEATABLE_READ);
         try {
             this.addOrUpdate(new IgniteProducer(producer));
             tx.commit();
@@ -212,7 +212,7 @@ public class IgniteProducerService implements ProducerService {
     }
 
     public void update(Producer producer) {
-        Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED);
+        Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.REPEATABLE_READ);
         try {
             this.addOrUpdate(new IgniteProducer(producer));
             tx.commit();
@@ -224,7 +224,7 @@ public class IgniteProducerService implements ProducerService {
     }
 
     public void remove(Producer producer) {
-        Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED);
+        Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.REPEATABLE_READ);
         try {
             this.delete(producer);
             tx.commit();
