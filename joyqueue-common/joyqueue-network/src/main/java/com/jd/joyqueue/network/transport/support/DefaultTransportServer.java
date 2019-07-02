@@ -34,7 +34,7 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 
 /**
- * 默认通信服务
+ * DefaultTransportServer
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/22

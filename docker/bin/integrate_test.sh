@@ -27,4 +27,7 @@ if [ -e $score/score.json ];then
 else
     exit 1
 fi
-
+echo 'rm log'
+if [ -f 'integration/log.txt' ]; then
+    rm integration/log.txt
+fi

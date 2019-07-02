@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 协议决定器
+ * ProtocolResolver
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/13

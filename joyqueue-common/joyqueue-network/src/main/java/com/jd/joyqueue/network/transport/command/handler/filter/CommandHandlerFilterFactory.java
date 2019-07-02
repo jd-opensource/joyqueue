@@ -16,7 +16,7 @@ package com.jd.joyqueue.network.transport.command.handler.filter;
 import java.util.List;
 
 /**
- * 命令处理调用链工厂
+ * CommandHandlerFilterFactory
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/16

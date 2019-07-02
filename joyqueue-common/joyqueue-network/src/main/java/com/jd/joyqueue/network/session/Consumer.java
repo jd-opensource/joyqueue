@@ -32,7 +32,7 @@ public class Consumer extends Joint {
     //最大锁定队列数
     private volatile int maxLockQueues = 1;
     //消费者类型
-    private ConsumeType type = ConsumeType.JMQ;
+    private ConsumeType type = ConsumeType.JOYQUEUE;
 
     public Consumer() {
     }
@@ -123,7 +123,7 @@ public class Consumer extends Joint {
     }
 
     public enum ConsumeType {
-        JMQ,
+        JOYQUEUE,
         JMQ2,
         KAFKA,
         MQTT,

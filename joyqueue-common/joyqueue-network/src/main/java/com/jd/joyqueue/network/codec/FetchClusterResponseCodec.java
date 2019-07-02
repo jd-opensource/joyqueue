@@ -60,7 +60,7 @@ public class FetchClusterResponseCodec implements PayloadCodec<JoyQueueHeader, F
 
         short brokerSize = buffer.readShort();
         for (int i = 0; i < brokerSize; i++) {
-            BrokerNode brokerNode = decodeBroker(buffer);
+            BrokerNode brokerNode = decodeBroker(header, buffer);
             brokers.put(brokerNode.getId(), brokerNode);
         }
 
@@ -150,7 +150,7 @@ public class FetchClusterResponseCodec implements PayloadCodec<JoyQueueHeader, F
         return topic;
     }
 
-    protected BrokerNode decodeBroker(ByteBuf buffer) throws Exception {
+    protected BrokerNode decodeBroker(JoyQueueHeader header, ByteBuf buffer) throws Exception {
         BrokerNode result = new BrokerNode();
         result.setId(buffer.readInt());
         result.setHost(Serializer.readString(buffer, Serializer.SHORT_SIZE));
@@ -158,6 +158,11 @@ public class FetchClusterResponseCodec implements PayloadCodec<JoyQueueHeader, F
         result.setDataCenter(Serializer.readString(buffer, Serializer.SHORT_SIZE));
         result.setNearby(buffer.readBoolean());
         result.setWeight(buffer.readInt());
+
+        if (header.getVersion() >= JoyQueueHeader.VERSION_V2) {
+            result.setSysCode(buffer.readInt());
+            result.setPermission(buffer.readInt());
+        }
         return result;
     }
 
@@ -170,7 +175,7 @@ public class FetchClusterResponseCodec implements PayloadCodec<JoyQueueHeader, F
 
         buffer.writeShort(payload.getBrokers().size());
         for (Map.Entry<Integer, BrokerNode> entry : payload.getBrokers().entrySet()) {
-            encodeBroker(entry.getValue(), buffer);
+            encodeBroker(payload.getHeader(), entry.getValue(), buffer);
         }
     }
 
@@ -263,13 +268,18 @@ public class FetchClusterResponseCodec implements PayloadCodec<JoyQueueHeader, F
         buffer.writeInt(topic.getCode().getCode());
     }
 
-    protected void encodeBroker(BrokerNode brokerNode, ByteBuf buffer) throws Exception {
+    protected void encodeBroker(JoyQueueHeader header, BrokerNode brokerNode, ByteBuf buffer) throws Exception {
         buffer.writeInt(brokerNode.getId());
         Serializer.write(brokerNode.getHost(), buffer, Serializer.SHORT_SIZE);
         buffer.writeInt(brokerNode.getPort());
         Serializer.write(brokerNode.getDataCenter(), buffer, Serializer.SHORT_SIZE);
         buffer.writeBoolean(brokerNode.isNearby());
         buffer.writeInt(brokerNode.getWeight());
+
+        if (header.getVersion() >= JoyQueueHeader.VERSION_V2) {
+            buffer.writeInt(brokerNode.getSysCode());
+            buffer.writeInt(brokerNode.getPermission());
+        }
     }
 
     @Override

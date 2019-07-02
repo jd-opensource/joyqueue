@@ -39,7 +39,7 @@ import java.net.SocketAddress;
 import java.net.UnknownHostException;
 
 /**
- * 通信服务支持
+ * TransportClientSupport
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/13

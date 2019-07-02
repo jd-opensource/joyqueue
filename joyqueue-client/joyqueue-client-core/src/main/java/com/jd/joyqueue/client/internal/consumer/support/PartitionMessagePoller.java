@@ -13,6 +13,7 @@
  */
 package com.jd.joyqueue.client.internal.consumer.support;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.jd.joyqueue.client.internal.cluster.ClusterManager;
 import com.jd.joyqueue.client.internal.consumer.BrokerLoadBalance;
@@ -35,7 +36,6 @@ import com.jd.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import com.jd.joyqueue.client.internal.nameserver.NameServerConfig;
 import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.network.domain.BrokerNode;
-import com.google.common.base.Preconditions;
 import com.jd.joyqueue.toolkit.service.Service;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -232,6 +232,9 @@ public class PartitionMessagePoller extends Service implements MessagePoller {
         if (partitionMetadata.getLeader() == null) {
             throw new ConsumerException(String.format("partition not available, topic: %s, partition: %s", topic, partition), JoyQueueCode.FW_TOPIC_NO_PARTITIONGROUP.getCode());
         }
+        if (!partitionMetadata.getLeader().isReadable()) {
+            throw new ConsumerException(String.format("partition not readable, topic: %s, partition: %s", topic, partition), JoyQueueCode.FW_TOPIC_NO_PARTITIONGROUP.getCode());
+        }
 
         if (batchSize == CUSTOM_BATCH_SIZE) {
             batchSize = (config.getBatchSize() == ConsumerConfig.NONE_BATCH_SIZE ? topicMetadata.getConsumerPolicy().getBatchSize() : config.getBatchSize());
@@ -296,7 +299,7 @@ public class PartitionMessagePoller extends Service implements MessagePoller {
     protected BrokerAssignments buildAllBrokerAssignments(TopicMetadata topicMetadata) {
         List<BrokerAssignment> assignments = Lists.newLinkedList();
         for (PartitionMetadata partitionMetadata : topicMetadata.getPartitions()) {
-            if (partitionMetadata.getLeader() == null) {
+            if (partitionMetadata.getLeader() == null || !partitionMetadata.getLeader().isReadable()) {
                 continue;
             }
             assignments.add(new BrokerAssignment(partitionMetadata.getLeader(), new PartitionAssignment(Lists.newArrayList(partitionMetadata.getId()))));

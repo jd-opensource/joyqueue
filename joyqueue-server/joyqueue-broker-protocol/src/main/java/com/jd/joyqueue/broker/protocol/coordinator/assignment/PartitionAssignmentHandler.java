@@ -90,7 +90,7 @@ public class PartitionAssignmentHandler extends Service {
     @Override
     protected void validate() throws Exception {
         partitionAssignorResolver = new PartitionAssignorResolver(config);
-        memberTimeoutDelayedOperationManager = new DelayedOperationManager("jmqMemberTimeout");
+        memberTimeoutDelayedOperationManager = new DelayedOperationManager("joyqueue-member-timeout-delayed");
     }
 
     @Override

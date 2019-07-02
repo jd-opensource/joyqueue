@@ -17,7 +17,7 @@ import com.jd.joyqueue.network.transport.command.Header;
 import com.jd.joyqueue.network.transport.command.Payload;
 
 /**
- * joyqueue消息体编解码器
+ * PayloadCodec
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/21

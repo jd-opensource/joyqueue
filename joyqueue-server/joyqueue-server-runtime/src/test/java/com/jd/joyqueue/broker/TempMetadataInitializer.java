@@ -181,7 +181,7 @@ public class TempMetadataInitializer extends Service {
                     blackList("127.0.0.1,127.0.0.2").weight("0:1,1:10").timeout(1000 * 11).create());
             producer.setTopic(topicName);
             producer.setApp(app);
-            producer.setClientType(ClientType.JMQ);
+            producer.setClientType(ClientType.JOYQUEUE);
 //            producer.setLimitPolicy(new Producer.ProducerLimitPolicy(1000 * 1, 1024 * 1024 * 5));
 //            producer.setLimitPolicy(new Producer.ProducerLimitPolicy(1000 * 1, 1024 * 10));
 
@@ -189,7 +189,7 @@ public class TempMetadataInitializer extends Service {
             consumer.setTopic(topicName);
             consumer.setApp(app);
             consumer.setTopicType(topic.getType().equals(Topic.Type.TOPIC) ? TopicType.TOPIC : TopicType.BROADCAST);
-            consumer.setClientType(ClientType.JMQ);
+            consumer.setClientType(ClientType.JOYQUEUE);
             consumer.setRetryPolicy(new RetryPolicy(1000, 1000, 2, false, 2.0, 0));
             consumer.setConsumerPolicy(new Consumer.ConsumerPolicy.Builder().nearby((topicName.getFullName().contains("nearby"))).paused(false).archive(true).
                     retry(false).seq(false).ackTimeout(1000 * 11).batchSize((short) 100).concurrent(1).delay(0).errTimes(10).maxPartitionNum(PARTITION_GROUPS * PARTITIONS).blackList("127.0.0.1,127.0.0.3").retryReadProbability(30).create());

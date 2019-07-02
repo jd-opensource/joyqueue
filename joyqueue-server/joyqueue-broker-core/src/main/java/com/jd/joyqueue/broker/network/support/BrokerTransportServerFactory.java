@@ -22,7 +22,7 @@ import com.jd.joyqueue.network.transport.support.DefaultTransportServerFactory;
 import com.jd.joyqueue.toolkit.concurrent.EventBus;
 
 /**
- * 服务端工厂
+ * BrokerTransportServerFactory
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/9/21

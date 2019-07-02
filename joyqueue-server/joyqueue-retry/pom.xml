@@ -25,6 +25,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>joyqueue-retry</artifactId>
+    <name>JoyQueue-Retry</name>
+    <description>Retry message API and implementations</description>
     <packaging>pom</packaging>
     <modules>
         <module>joyqueue-retry-api</module>

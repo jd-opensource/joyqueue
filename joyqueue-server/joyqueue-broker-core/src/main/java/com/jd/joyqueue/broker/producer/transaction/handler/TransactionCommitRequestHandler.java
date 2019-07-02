@@ -48,7 +48,7 @@ public class TransactionCommitRequestHandler implements CommandHandler, Type {
     @Override
     public Command handle(Transport transport, Command command) {
         TransactionCommitRequest transactionCommitRequest = (TransactionCommitRequest) command.getPayload();
-        Producer producer = new Producer(transactionCommitRequest.getTopic(), transactionCommitRequest.getTopic(), transactionCommitRequest.getApp(), Producer.ProducerType.JMQ);
+        Producer producer = new Producer(transactionCommitRequest.getTopic(), transactionCommitRequest.getTopic(), transactionCommitRequest.getApp(), Producer.ProducerType.JOYQUEUE);
         int code = JoyQueueCode.SUCCESS.getCode();
 
         for (String txId : transactionCommitRequest.getTxIds()) {

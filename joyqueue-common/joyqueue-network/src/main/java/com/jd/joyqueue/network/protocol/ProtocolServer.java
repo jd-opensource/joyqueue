@@ -16,7 +16,7 @@ package com.jd.joyqueue.network.protocol;
 import com.jd.joyqueue.network.transport.config.ServerConfig;
 
 /**
- * 协议服务
+ * ProtocolServer
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/9/25

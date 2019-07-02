@@ -31,7 +31,7 @@ import com.jd.joyqueue.network.transport.config.TransportConfig;
 import com.jd.joyqueue.toolkit.concurrent.EventBus;
 
 /**
- * 多协议通信工厂
+ * MultiProtocolTransportServerFactory
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/14

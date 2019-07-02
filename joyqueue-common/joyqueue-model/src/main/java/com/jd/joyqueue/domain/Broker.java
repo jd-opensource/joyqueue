@@ -168,6 +168,15 @@ public class Broker implements Serializable {
             this.name = name;
         }
 
+        public static PermissionEnum value(String permission) {
+            for (PermissionEnum permissionEnum:PermissionEnum.values()){
+                if (permissionEnum.name.equals(permission)) {
+                    return permissionEnum;
+                }
+            }
+            return PermissionEnum.FULL;
+        }
+
         public int getValue() {
             return value;
         }

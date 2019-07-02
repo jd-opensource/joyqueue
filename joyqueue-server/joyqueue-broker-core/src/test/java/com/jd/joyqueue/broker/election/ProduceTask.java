@@ -62,7 +62,7 @@ public class ProduceTask extends Thread {
 
         for (int i = 0; i < messageCount; i++) {
             BrokerMessage brokerMessage = new BrokerMessage();
-            brokerMessage.setSource(SourceType.JMQ.getValue());
+            brokerMessage.setSource(SourceType.JOYQUEUE.getValue());
             brokerMessage.setClientIp("10.1.1.1".getBytes());
             brokerMessage.setBody(("Test_abcdefghigklmnopqrstuvwxyz" + i).getBytes());
 

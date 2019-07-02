@@ -50,7 +50,7 @@ import com.jd.joyqueue.server.retry.remote.command.codec.PutRetryCodec;
 import com.jd.joyqueue.server.retry.remote.command.codec.UpdateRetryCodec;
 
 /**
- * joyqueue消息体编解码器注册器
+ * BrokerPayloadCodecRegistrar
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/21

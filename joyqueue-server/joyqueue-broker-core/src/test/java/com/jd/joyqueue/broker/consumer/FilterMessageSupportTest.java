@@ -17,13 +17,13 @@ import com.jd.joyqueue.broker.cluster.ClusterManager;
 import com.jd.joyqueue.broker.consumer.filter.FilterCallback;
 import com.jd.joyqueue.domain.Consumer;
 import com.jd.joyqueue.exception.JoyQueueException;
-import org.assertj.core.util.Maps;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.nio.ByteBuffer;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -40,7 +40,7 @@ public class FilterMessageSupportTest {
     public void setup() {
         Mockito.when(consumer.getId()).thenReturn("1");
         Consumer.ConsumerPolicy consumerPolicy = new Consumer.ConsumerPolicy();
-        consumerPolicy.setFilters(Maps.newHashMap("flag", "[1,2]"));
+        consumerPolicy.setFilters(Collections.singletonMap("flag", "[1,2]"));
         Mockito.when(consumer.getConsumerPolicy()).thenReturn(consumerPolicy);
 
     }

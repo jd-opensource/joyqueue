@@ -23,7 +23,6 @@ import com.jd.joyqueue.network.transport.command.Command;
 import com.jd.joyqueue.network.transport.command.CommandCallback;
 import com.jd.joyqueue.network.transport.command.Direction;
 import com.jd.joyqueue.network.transport.command.Header;
-import com.jd.joyqueue.network.transport.command.HeaderAware;
 import com.jd.joyqueue.network.transport.command.Type;
 import com.jd.joyqueue.network.transport.config.TransportConfig;
 import com.jd.joyqueue.network.transport.exception.TransportException;
@@ -41,7 +40,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 
 /**
- * 默认通信
+ * DefaultChannelTransport
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/14
@@ -111,7 +110,11 @@ public class DefaultChannelTransport implements ChannelTransport {
             } else if (e instanceof InterruptedException) {
                 throw TransportException.InterruptedException.build();
             } else {
-                throw TransportException.RequestErrorException.build("请求错误, " + channel.remoteAddress(), e);
+                if (channel.remoteAddress() == null) {
+                    throw TransportException.RequestErrorException.build("请求错误", e);
+                } else {
+                    throw TransportException.RequestErrorException.build("请求错误, " + channel.remoteAddress(), e);
+                }
             }
         }
     }
@@ -288,10 +291,6 @@ public class DefaultChannelTransport implements ChannelTransport {
                     }
                 }
                 response.getHeader().setRequestId(header.getRequestId());
-
-                if (response.getPayload() instanceof HeaderAware) {
-                    ((HeaderAware) response.getPayload()).setHeader(header);
-                }
 
                 // 判断请求是否要应答
                 if (header.getQosLevel() == QosLevel.ONE_WAY) {

@@ -28,8 +28,8 @@ import io.netty.buffer.ByteBuf;
 public class ReplicateConsumePosRequestEncoder implements PayloadEncoder<ReplicateConsumePosRequest>, Type {
     @Override
     public void encode(final ReplicateConsumePosRequest request, ByteBuf buffer) throws Exception {
-        Serializer.write(request.getConsumePositions(), buffer, Serializer.SHORT_SIZE);
-        //Serializer.write(request.getConsumePositions(), buffer, Serializer.INT_SIZE);
+//        Serializer.write(request.getConsumePositions(), buffer, Serializer.SHORT_SIZE);
+        Serializer.write(request.getConsumePositions(), buffer, Serializer.INT_SIZE);
     }
 
     @Override

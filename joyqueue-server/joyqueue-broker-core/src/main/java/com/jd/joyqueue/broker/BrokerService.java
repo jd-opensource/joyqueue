@@ -57,7 +57,7 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * broker服务
+ * BrokerService
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/14

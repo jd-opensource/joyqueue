@@ -25,6 +25,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>joyqueue-nsr-ignite</artifactId>
+    <name>JoyQueue-NamingService-Ignite</name>
+    <description>JoyQueue naming service ignite</description>
 
     <dependencies>
         <dependency>

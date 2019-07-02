@@ -17,7 +17,7 @@ import com.jd.joyqueue.network.transport.codec.CodecFactory;
 import com.jd.joyqueue.network.transport.command.handler.CommandHandlerFactory;
 
 /**
- * 协议
+ * Protocol
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/13

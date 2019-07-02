@@ -21,7 +21,7 @@ import com.jd.joyqueue.network.session.Connection;
 import com.jd.joyqueue.toolkit.concurrent.EventListener;
 
 /**
- * 通信监听
+ * BrokerTransportListener
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/10/10

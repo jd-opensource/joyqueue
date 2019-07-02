@@ -25,6 +25,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>joyqueue-broker-mqtt</artifactId>
+    <name>JoyQueue-Broker-MQTT</name>
+    <description>MQTT protocol support library</description>
 
     <dependencies>
         <dependency>

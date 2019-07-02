@@ -16,39 +16,22 @@ package com.jd.joyqueue.broker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.InputStream;
-import java.util.Properties;
-
 /**
- * joyqueue加载器
+ * Launcher
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/27
  */
 public class Launcher {
-    protected static final Logger logger = LoggerFactory.getLogger(Launcher.class);
-    protected static final String SYSTEM_EVN_FILE = "system.properties";
-    protected static final String separator = "\n";
 
-    public static void main(String[] args) throws Exception {
+    protected static final Logger logger = LoggerFactory.getLogger(Launcher.class);
+
+    public static void main(String[] args) {
         BrokerService brokerService = new BrokerService(args);
+
         try {
-            Properties sysEvn = new Properties();
-            InputStream inputStream = Launcher.class.getClassLoader().getResourceAsStream(SYSTEM_EVN_FILE);
-            if (null != inputStream) {
-                sysEvn.load(inputStream);
-            }
-            sysEvn.forEach((k, v) -> System.setProperty(k.toString(), v.toString()));
             brokerService.start();
-            logger.info(
-                    ">>>" + separator +
-                            ">>>       _   __  __    ____  " + separator +
-                            ">>>      | | |  \\/  |  / __ \\ " + separator +
-                            ">>>      | | | \\  / | | |  | |" + separator +
-                            ">>>  _   | | | |\\/| | | |  | |" + separator +
-                            ">>> | |__| | | |  | | | |__| |" + separator +
-                            ">>> \\______/ |_|  |_| \\__\\__\\/" + separator +
-                            ">>>                           ");
+            BannerPrinter.print();
             logger.info("JoyQueue is started");
         } catch (Throwable t) {
             logger.error("JoyQueue start exception", t);
@@ -56,17 +39,14 @@ public class Launcher {
             System.exit(-1);
         }
 
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                try {
-                    brokerService.stop();
-                    logger.info("JoyQueue stopped");
-                } catch (Throwable t) {
-                    logger.error("JoyQueue stop exception", t);
-                    System.exit(-1);
-                }
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                brokerService.stop();
+                logger.info("JoyQueue stopped");
+            } catch (Throwable t) {
+                logger.error("JoyQueue stop exception", t);
+                System.exit(-1);
             }
-        });
+        }));
     }
 }

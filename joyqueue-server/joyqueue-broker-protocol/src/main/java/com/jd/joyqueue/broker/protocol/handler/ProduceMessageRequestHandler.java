@@ -147,7 +147,7 @@ public class ProduceMessageRequestHandler implements JoyQueueCommandHandler, Typ
     }
 
     protected void produceMessage(Connection connection, String topic, String app, ProduceMessageData produceMessageData, EventListener<ProduceMessageAckData> listener) {
-        Producer producer = new Producer(connection.getId(), topic, app, Producer.ProducerType.JMQ);
+        Producer producer = new Producer(connection.getId(), topic, app, Producer.ProducerType.JOYQUEUE);
         try {
             produce.putMessageAsync(producer, produceMessageData.getMessages(), produceMessageData.getQosLevel(), produceMessageData.getTimeout(), (writeResult) -> {
                 if (!writeResult.getCode().equals(JoyQueueCode.SUCCESS)) {

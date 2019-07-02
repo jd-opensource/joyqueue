@@ -21,7 +21,7 @@ import com.jd.joyqueue.network.transport.command.support.DefaultCommandHandlerFa
 import com.jd.joyqueue.network.transport.support.DefaultTransportClientFactory;
 
 /**
- * 客户端工厂
+ * BrokerTransportClientFactory
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/9/21

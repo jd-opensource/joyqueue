@@ -16,7 +16,7 @@ package com.jd.joyqueue.network.transport.command;
 import io.netty.channel.Channel;
 
 /**
- * 命令调度器
+ * CommandDispatcher
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/13

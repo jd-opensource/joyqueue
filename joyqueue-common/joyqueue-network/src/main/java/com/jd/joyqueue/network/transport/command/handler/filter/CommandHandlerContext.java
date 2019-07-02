@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * 上下文
+ * CommandHandlerContext
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/24

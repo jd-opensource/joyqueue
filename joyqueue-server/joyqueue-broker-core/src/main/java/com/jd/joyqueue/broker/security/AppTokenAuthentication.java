@@ -13,18 +13,14 @@
  */
 package com.jd.joyqueue.broker.security;
 
+import com.google.common.base.Preconditions;
 import com.jd.joyqueue.broker.BrokerContext;
 import com.jd.joyqueue.broker.BrokerContextAware;
 import com.jd.joyqueue.broker.cluster.ClusterManager;
 import com.jd.joyqueue.domain.AppToken;
 import com.jd.joyqueue.exception.JoyQueueCode;
-import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.response.BooleanResponse;
 import com.jd.joyqueue.security.Authentication;
-
-import com.jd.joyqueue.security.PasswordEncoder;
-import com.jd.joyqueue.security.UserDetails;
-import com.google.common.base.Preconditions;
 import com.jd.joyqueue.toolkit.time.SystemClock;
 import org.apache.commons.lang3.StringUtils;
 
@@ -47,16 +43,6 @@ public class AppTokenAuthentication implements Authentication, BrokerContextAwar
     public AppTokenAuthentication(ClusterManager clusterManager, String admin) {
         this(clusterManager);
         this.admin = admin;
-    }
-
-    @Override
-    public UserDetails getUser(String user) throws JoyQueueException {
-        return null;
-    }
-
-    @Override
-    public PasswordEncoder getPasswordEncode() {
-        return null;
     }
 
     @Override

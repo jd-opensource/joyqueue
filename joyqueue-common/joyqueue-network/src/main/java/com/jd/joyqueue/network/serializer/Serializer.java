@@ -44,7 +44,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import static com.jd.joyqueue.network.transport.codec.JoyQueueHeader.VERSION2;
+import static com.jd.joyqueue.network.transport.codec.JoyQueueHeader.VERSION_V2;
 
 /**
  * 负责broker端消息的序列化
@@ -540,7 +540,7 @@ public class Serializer extends AbstractSerializer {
                 Serializer.write(broker,out);
             }
         }
-        //out.writeInt(partitionGroup.getRecLeader());
+        out.writeInt(partitionGroup.getRecLeader());
     }
 
     public static PartitionGroup readPartitionGroup(final ByteBuf in, final int version) throws Exception {
@@ -581,7 +581,7 @@ public class Serializer extends AbstractSerializer {
         }
         group.setBrokers(brokers);
 
-        if (version >= VERSION2) {
+        if (version >= VERSION_V2) {
             group.setRecLeader(in.readInt());
         }
 

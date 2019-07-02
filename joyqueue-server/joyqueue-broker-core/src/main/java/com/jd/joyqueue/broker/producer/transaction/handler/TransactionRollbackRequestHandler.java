@@ -48,7 +48,7 @@ public class TransactionRollbackRequestHandler implements CommandHandler, Type {
     @Override
     public Command handle(Transport transport, Command command) {
         TransactionRollbackRequest transactionRollbackRequest = (TransactionRollbackRequest) command.getPayload();
-        Producer producer = new Producer(transactionRollbackRequest.getTopic(), transactionRollbackRequest.getTopic(), transactionRollbackRequest.getApp(), Producer.ProducerType.JMQ);
+        Producer producer = new Producer(transactionRollbackRequest.getTopic(), transactionRollbackRequest.getTopic(), transactionRollbackRequest.getApp(), Producer.ProducerType.JOYQUEUE);
         int code = JoyQueueCode.SUCCESS.getCode();
 
         for (String txId : transactionRollbackRequest.getTxIds()) {

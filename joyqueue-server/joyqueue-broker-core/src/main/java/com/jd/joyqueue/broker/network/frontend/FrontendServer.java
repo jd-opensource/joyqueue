@@ -29,7 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 前端服务
+ * FrontendServer
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/9/17

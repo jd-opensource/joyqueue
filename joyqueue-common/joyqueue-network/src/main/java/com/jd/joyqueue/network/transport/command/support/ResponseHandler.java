@@ -28,7 +28,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * 响应处理器
+ * ResponseHandler
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/24

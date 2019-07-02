@@ -14,7 +14,7 @@
 package com.jd.joyqueue.network.protocol;
 
 /**
- * 协议通信
+ * ProtocolTransport
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/16

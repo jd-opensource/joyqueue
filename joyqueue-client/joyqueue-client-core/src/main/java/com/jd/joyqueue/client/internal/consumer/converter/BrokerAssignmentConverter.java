@@ -38,7 +38,7 @@ public class BrokerAssignmentConverter {
         Map<BrokerNode, List<Short>> brokerPartitions = Maps.newHashMap();
 
         for (PartitionMetadata partitionMetadata : topicMetadata.getPartitions()) {
-            if (partitionMetadata.getLeader() == null) {
+            if (partitionMetadata.getLeader() == null || !partitionMetadata.getLeader().isReadable()) {
                 continue;
             }
             List<Short> brokerPartitionList = brokerPartitions.get(partitionMetadata.getLeader());
@@ -58,10 +58,10 @@ public class BrokerAssignmentConverter {
         return result;
     }
 
-    public static BrokerAssignments convertTopicrAssignments(TopicMetadata topicMetadata) {
+    public static BrokerAssignments convertTopicAssignments(TopicMetadata topicMetadata) {
         List<BrokerAssignment> assignments = Lists.newArrayListWithCapacity(topicMetadata.getPartitions().size());
         for (PartitionMetadata partitionMetadata : topicMetadata.getPartitions()) {
-            if (partitionMetadata.getLeader() == null) {
+            if (partitionMetadata.getLeader() == null || !partitionMetadata.getLeader().isReadable()) {
                 continue;
             }
             assignments.add(new BrokerAssignment(partitionMetadata.getLeader(),

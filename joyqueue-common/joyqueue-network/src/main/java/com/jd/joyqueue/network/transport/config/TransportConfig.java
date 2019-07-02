@@ -19,7 +19,7 @@ import com.jd.joyqueue.toolkit.retry.RetryPolicy;
 
 
 /**
- * 通信服务配置
+ * TransportConfig
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/13

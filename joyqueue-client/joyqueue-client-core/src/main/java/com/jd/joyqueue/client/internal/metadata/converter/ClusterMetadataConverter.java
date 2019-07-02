@@ -84,6 +84,10 @@ public class ClusterMetadataConverter {
             if (partitionGroupMetadata.getLeader() == null) {
                 allAvailable = false;
             } else {
+                if (!partitionGroupMetadata.getLeader().isWritable() || !partitionGroupMetadata.getLeader().isReadable()) {
+                    allAvailable = false;
+                }
+
                 List<PartitionGroupMetadata> brokerPartitionGroupList = brokerPartitionGroups.get(partitionGroupMetadata.getLeader().getId());
                 if (brokerPartitionGroupList == null) {
                     brokerPartitionGroupList = Lists.newArrayList();

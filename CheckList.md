@@ -9,16 +9,16 @@
 - [x] 字体侵权检查
 - [ ] [日志治理](http://git.jd.com/laf/journalQ/issues/24)（李玥）
 - [ ] pom规范化（李玥）
-- [ ] 关键字筛查：筛查代码变量名、注释、常量等，确保不含以下关键字：（浩翔）
+- [x] 关键字筛查：筛查代码变量名、注释、常量等，确保不含以下关键字：（浩翔）
   - JD
   - JMQ
   - JournalQ
 - [ ] 删除无用的代码（李玥）
 - [x] Examples（浩翔）
-  - [ ] java/open messaging
-  - [ ] java/kafka
-  - [ ] python
-  - [ ] spring/spring boot
+  - [x] java/open messaging
+  - [x] java/kafka
+  - [x] python
+  - [x] spring/spring boot
   - [ ] Flink(Optional)
   - [ ] Spark(Optional)
 - [ ] 文档，优先中文文档，英文文档可以上线后慢慢补齐（王金）
@@ -33,12 +33,13 @@
       - [ ] 归档
       - [ ] 重试
     - [x] Rest API
-- [ ] 增强 runtime 模块 （浩翔）
-  - [ ] 包含管理端
-  - [ ] 包含文档
-- [ ] CLI Tools （浩翔）
-  - [ ] Consumer/Producer
-  - [ ] Start/Stop 脚本改进
+- [x] 增强 runtime 模块 （浩翔）
+  - [ ] 包含管理端 (暂定)
+  - [x] 包含文档
+- [x] CLI Tools （浩翔）
+  - [x] Consumer/Producer
+  - [x] Start/Stop 脚本改进
+  - [ ] windows 脚本
   - [ ] 修复Store脚本（李玥）
 - [ ] GitHub相关（王金）
   - [ ] 相关生态的账号申请

@@ -20,7 +20,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 
 /**
- * netty编码器
+ * NettyEncoder
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/14

@@ -186,7 +186,7 @@ export default {
           colData: [
             {
               title: 'id',
-              key: 'hosts'
+              key: 'host'
             },
             {
               title: '最新心跳时间',

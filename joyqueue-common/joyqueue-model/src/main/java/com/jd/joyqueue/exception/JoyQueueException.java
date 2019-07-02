@@ -14,7 +14,7 @@
 package com.jd.joyqueue.exception;
 
 /**
- * JMQ异常
+ * JoyQueueException
  *
  * @author Jame.HU
  * @version V1.0

@@ -211,7 +211,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
         // 判断是否暂停消费, 返回空
         if (partitionManager.needPause(consumer)) {
             PullResult pullResult = new PullResult(consumer, (short) -1, Collections.emptyList());
-            pullResult.setJmqCode(JoyQueueCode.FW_FETCH_TOPIC_MESSAGE_PAUSED);
+            pullResult.setCode(JoyQueueCode.FW_FETCH_TOPIC_MESSAGE_PAUSED);
             return pullResult;
         }
 

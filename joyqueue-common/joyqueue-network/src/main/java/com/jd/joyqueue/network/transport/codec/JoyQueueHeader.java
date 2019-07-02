@@ -22,17 +22,17 @@ import com.jd.joyqueue.toolkit.time.SystemClock;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * joyqueue协议头
+ * JoyQueueHeader
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/21
  */
 public class JoyQueueHeader implements Header {
 
-    public static final byte VERSION1 = 1;
-    public static final byte VERSION2 = 2;
+    public static final byte VERSION_V1 = 1;
+    public static final byte VERSION_V2 = 2;
 
-    public static final byte VERSION = VERSION1;
+    public static final byte CURRENT_VERSION = VERSION_V2;
 
     // TODO 定一个magic
     public static final int MAGIC = 0xCAFEBEBE;
@@ -71,7 +71,7 @@ public class JoyQueueHeader implements Header {
 
     public JoyQueueHeader(Direction direction, QosLevel qosLevel, int type) {
         this.type = type;
-        this.version = VERSION;
+        this.version = CURRENT_VERSION;
         this.direction = direction;
         this.qosLevel = qosLevel;
         this.time = SystemClock.now();

@@ -35,7 +35,7 @@ import java.net.SocketAddress;
 import java.util.concurrent.Future;
 
 /**
- * 故障切换通信
+ * FailoverChannelTransport
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/9/3

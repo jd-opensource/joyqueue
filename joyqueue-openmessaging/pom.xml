@@ -25,9 +25,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>joyqueue-openmessaging</artifactId>
+    <name>JoyQueue-OpenMessaging</name>
+    <description>Spring and SpringBoot Support for the OpenMessaging API</description>
+
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
+        <module>openmessaging-samples</module>
         <module>openmessaging-spring</module>
         <module>openmessaging-spring-boot</module>
     </modules>

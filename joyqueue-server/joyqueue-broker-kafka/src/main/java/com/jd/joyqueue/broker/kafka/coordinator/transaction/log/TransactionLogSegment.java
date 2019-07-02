@@ -92,8 +92,8 @@ public class TransactionLogSegment {
 
     protected List<ByteBuffer> doRead(short partition, long index, int count) throws Exception {
         PullResult pullResult = consume.getMessage(consumer, partition, index, count);
-        if (!pullResult.getJoyQueueCode().equals(JoyQueueCode.SUCCESS)) {
-            logger.error("read transaction log exception, partition: {}, index: {}, count: {}", partition, index, count, pullResult.getJoyQueueCode());
+        if (!pullResult.getCode().equals(JoyQueueCode.SUCCESS)) {
+            logger.error("read transaction log exception, partition: {}, index: {}, count: {}", partition, index, count, pullResult.getCode());
             return Collections.emptyList();
         }
         List<ByteBuffer> buffers = Lists.newArrayListWithCapacity(pullResult.getBuffers().size());

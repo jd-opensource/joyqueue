@@ -30,55 +30,32 @@
     </organization>
 
     <properties>
-        <spring.security.version>3.2.5.RELEASE</spring.security.version>
         <fastjson.version>1.2.33</fastjson.version>
         <netty.version>4.1.27.Final</netty.version>
         <log4j.version>2.9.0</log4j.version>
-        <jannotation.version>2.1.0</jannotation.version>
         <commons-logging.version>1.2</commons-logging.version>
-        <commons-codec.version>1.9</commons-codec.version>
         <commons-io.version>2.3</commons-io.version>
-        <commons-lang.version>2.6</commons-lang.version>
         <commons-lang3.version>3.8.1</commons-lang3.version>
         <commons-beanutils.version>1.8.3</commons-beanutils.version>
-        <commons-fileupload.version>1.3.1</commons-fileupload.version>
         <commons-collections.version>3.2.2</commons-collections.version>
         <commons-collections4.version>4.1</commons-collections4.version>
+        <commons-cli.version>1.4</commons-cli.version>
         <httpclient.version>4.5.2</httpclient.version>
         <httpasyncclient.version>4.1.4</httpasyncclient.version>
         <jackson-databind.version>2.9.4</jackson-databind.version>
         <validation-api.version>2.0.1.Final</validation-api.version>
         <hibernate-validator.version>5.3.0.Final</hibernate-validator.version>
-        <javax.el.version>2.2.4</javax.el.version>
-        <mail.version>1.4.7</mail.version>
-        <cglib.version>2.2</cglib.version>
-        <javax.inject.version>1</javax.inject.version>
-        <aopalliance.version>1.0</aopalliance.version>
+        <el.version>2.2.4</el.version>
         <guava.version>21.0</guava.version>
-        <joda-time.version>2.3</joda-time.version>
-        <resteasy.version>3.0.6.Final</resteasy.version>
-        <commons-dbcp.version>1.4</commons-dbcp.version>
-        <commons-pool.version>1.5.5</commons-pool.version>
-        <jboss.netty.version>3.2.5.Final</jboss.netty.version>
-        <jsr305.version>2.0.3</jsr305.version>
         <amq.core.version>5.6.0</amq.core.version>
         <amq.client.version>5.1.0</amq.client.version>
-        <jsch.version>0.1.50</jsch.version>
-        <jzlib.version>1.1.3</jzlib.version>
-        <poi.version>3.9</poi.version>
-        <jxls.version>1.0</jxls.version>
-        <activation.version>1.1</activation.version>
-
         <snappy-java.version>1.1.2.6</snappy-java.version>
         <lz4.version>1.3.0</lz4.version>
-        <jcommander.version>1.48</jcommander.version>
+        <jcommander.version>1.71</jcommander.version>
         <concurrentlinkedhashmap-lru.version>1.4.2</concurrentlinkedhashmap-lru.version>
         <shifro.web.version>1.3.2</shifro.web.version>
-
-        <!--laf-config-->
         <jdk.version>1.8</jdk.version>
         <slf4j.version>1.7.25</slf4j.version>
-
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mybatis.version>3.4.6</mybatis.version>
         <mybatis-spring.version>1.3.2</mybatis-spring.version>
@@ -89,7 +66,7 @@
         <mysql.version>5.1.41</mysql.version>
         <laf-binding.version>1.0.9-SNAPSHOT</laf-binding.version>
         <laf-vertx.version>1.0.18-SNAPSHOT</laf-vertx.version>
-        <lar-extention.version>1.0.13</lar-extention.version>
+        <laf-extention.version>1.0.13</laf-extention.version>
         <vertx.version>3.6.3</vertx.version>
         <ignite.version>2.7.0</ignite.version>
         <junit.version>4.12</junit.version>
@@ -103,23 +80,18 @@
         <maven-assembly-plugin.version>3.1.0</maven-assembly-plugin.version>
         <mysql-connector-java.version>5.1.41</mysql-connector-java.version>
         <h2database.version>1.4.195</h2database.version>
-        <!-- hbase -->
         <hadoop.version>2.7.6</hadoop.version>
         <hbase.version>1.4.8</hbase.version>
-
         <log4j.version>2.9.0</log4j.version>
-
-        <!-- mock -->
-        <powermock.version>1.7.1</powermock.version>
-        <mockito1.version>1.10.19</mockito1.version>
         <mockito2.version>2.8.9</mockito2.version>
-        <easymock.version>3.4</easymock.version>
-        <assertj-core.version>3.5.2</assertj-core.version>
+        <git-commit-id-pulgin.version>2.1.10</git-commit-id-pulgin.version>
+        <openmessaging-spring.version>0.0.1-SNAPSHOT</openmessaging-spring.version>
+        <openmessaging-api.version>1.0.0-alpha</openmessaging-api.version>
+        <asm.version>6.2.1</asm.version>
+        <jackson-dataformat.version>RELEASE</jackson-dataformat.version>
+        <metrics.version>4.0.0</metrics.version>
+        <commons-lang.version>2.6</commons-lang.version>
     </properties>
-
-    <dependencies>
-
-    </dependencies>
 
     <dependencyManagement>
         <dependencies>
@@ -165,7 +137,27 @@
             </dependency>
             <dependency>
                 <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-retry-db-console</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.dropwizard.metrics</groupId>
+                <artifactId>metrics-core</artifactId>
+                <version>${metrics.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-token-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.jd.joyqueue</groupId>
                 <artifactId>joyqueue-retry-h2</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-retry-remote</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -179,14 +171,19 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
+                <artifactId>joyqueue-web-springboot-starter</artifactId>
                 <groupId>com.jd.joyqueue</groupId>
-                <artifactId>joyqueue-web-springboot</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.jd.joyqueue</groupId>
                 <artifactId>joyqueue-model</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-lang</groupId>
+                <artifactId>commons-lang</artifactId>
+                <version>${commons-lang.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.jd.laf.binding</groupId>
@@ -196,7 +193,7 @@
             <dependency>
                 <groupId>com.jd.laf</groupId>
                 <artifactId>laf-extension-core</artifactId>
-                <version>1.0.13</version>
+                <version>${laf-extention.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.jd.joyqueue</groupId>
@@ -205,8 +202,13 @@
             </dependency>
             <dependency>
                 <groupId>com.jd.joyqueue</groupId>
-                <artifactId>joyqueue-cache</artifactId>
+                <artifactId>joyqueue-token-uuid-starter</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mybatis.spring.boot</groupId>
+                <artifactId>mybatis-spring-boot-starter</artifactId>
+                <version>${mybatis-spring.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.jd.laf.web</groupId>
@@ -250,6 +252,11 @@
             </dependency>
             <dependency>
                 <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-client-kafka</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.jd.joyqueue</groupId>
                 <artifactId>joyqueue-hbase</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -285,23 +292,15 @@
                 <artifactId>fastjson</artifactId>
                 <version>${fastjson.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-xml</artifactId>
+                <version>${jackson-dataformat.version}</version>
+            </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-all</artifactId>
                 <version>${netty.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.jboss.netty</groupId>
-                <artifactId>netty</artifactId>
-                <version>${jboss.netty.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.jcraft</groupId>
-                <artifactId>jsch</artifactId>
-                <version>${jsch.version}</version>
             </dependency>
 
             <dependency>
@@ -319,11 +318,6 @@
                 <artifactId>jackson-databind</artifactId>
                 <version>${jackson-databind.version}</version>
             </dependency>
-            <dependency>
-                <groupId>com.jcraft</groupId>
-                <artifactId>jzlib</artifactId>
-                <version>${jzlib.version}</version>
-            </dependency>
 
             <dependency>
                 <groupId>org.xerial.snappy</groupId>
@@ -337,25 +331,6 @@
                 <version>${lz4.version}</version>
             </dependency>
 
-
-            <dependency>
-                <groupId>com.jd.joyqueue</groupId>
-                <artifactId>joyqueue-registry-zookeeper</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.zookeeper</groupId>
-                <artifactId>zookeeper</artifactId>
-                <version>3.4.5</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.jd.joyqueue</groupId>
-                <artifactId>joyqueue-registry-api</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
             <dependency>
                 <groupId>com.jd.joyqueue</groupId>
                 <artifactId>joyqueue-datasource-api</artifactId>
@@ -363,7 +338,7 @@
             </dependency>
             <dependency>
                 <groupId>com.jd.joyqueue</groupId>
-                <artifactId>joyqueue-datasource-dbcp</artifactId>
+                <artifactId>joyqueue-token-uuid</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -381,6 +356,37 @@
                 <artifactId>joyqueue-nsr-ignite</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-broker-monitor-pth</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-store-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-client-all</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-validator</artifactId>
+                <version>${hibernate-validator.version}</version>
+                <scope>runtime</scope>
+            </dependency>
+            <dependency>
+                <groupId>javax.el</groupId>
+                <artifactId>javax.el-api</artifactId>
+                <version>${el.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.web</groupId>
+                <artifactId>javax.el</artifactId>
+                <version>${el.version}</version>
+            </dependency>
 
             <!-- Mysql -->
             <dependency>
@@ -389,36 +395,14 @@
                 <version>${mysql.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.mybatis</groupId>
-                <artifactId>mybatis</artifactId>
-                <version>${mybatis.version}</version>
+                <groupId>com.zaxxer</groupId>
+                <artifactId>HikariCP</artifactId>
+                <version>${HikariCP.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.mybatis</groupId>
-                <artifactId>mybatis-spring</artifactId>
-                <version>${mybatis-spring.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.mybatis</groupId>
-                        <artifactId>mybatis</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.springframework</groupId>
-                        <artifactId>spring-core</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.springframework</groupId>
-                        <artifactId>spring-jdbc</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.springframework</groupId>
-                        <artifactId>spring-context</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.springframework</groupId>
-                        <artifactId>spring-tx</artifactId>
-                    </exclusion>
-                </exclusions>
+                <artifactId>mybatis</artifactId>
+                <version>${mybatis.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
@@ -435,38 +419,11 @@
                 <artifactId>validation-api</artifactId>
                 <version>${validation-api.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.hibernate</groupId>
-                <artifactId>hibernate-validator</artifactId>
-                <version>${hibernate-validator.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.glassfish.web</groupId>
-                        <artifactId>javax.el</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.glassfish.web</groupId>
-                <artifactId>javax.el</artifactId>
-                <version>${javax.el.version}</version>
-            </dependency>
 
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>${guava.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>joda-time</groupId>
-                <artifactId>joda-time</artifactId>
-                <version>${joda-time.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>commons-lang</groupId>
-                <artifactId>commons-lang</artifactId>
-                <version>${commons-lang.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
@@ -479,11 +436,6 @@
                 <version>${commons-io.version}</version>
             </dependency>
             <dependency>
-                <groupId>commons-codec</groupId>
-                <artifactId>commons-codec</artifactId>
-                <version>${commons-codec.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-collections4</artifactId>
                 <version>${commons-collections4.version}</version>
@@ -492,22 +444,6 @@
                 <groupId>commons-collections</groupId>
                 <artifactId>commons-collections</artifactId>
                 <version>${commons-collections.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-dbcp</groupId>
-                <artifactId>commons-dbcp</artifactId>
-                <version>${commons-dbcp.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>commons-pool</groupId>
-                        <artifactId>commons-pool</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>commons-pool</groupId>
-                <artifactId>commons-pool</artifactId>
-                <version>${commons-pool.version}</version>
             </dependency>
             <dependency>
                 <groupId>commons-beanutils</groupId>
@@ -520,28 +456,19 @@
                 <version>${commons-fileupload.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.google.code.findbugs</groupId>
-                <artifactId>jsr305</artifactId>
-                <version>${jsr305.version}</version>
+                <groupId>commons-cli</groupId>
+                <artifactId>commons-cli</artifactId>
+                <version>${commons-cli.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>com.beust</groupId>
+                <artifactId>jcommander</artifactId>
+                <version>${jcommander.version}</version>
+            </dependency>
             <dependency>
                 <groupId>com.zaxxer</groupId>
                 <artifactId>HikariCP-java6</artifactId>
                 <version>${HikariCP.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>javax.inject</groupId>
-                <artifactId>javax.inject</artifactId>
-                <version>${javax.inject.version}</version>
-            </dependency>
-
-            <!-- AOP -->
-            <dependency>
-                <groupId>aopalliance</groupId>
-                <artifactId>aopalliance</artifactId>
-                <version>${aopalliance.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.aspectj</groupId>
@@ -552,34 +479,6 @@
                 <groupId>org.aspectj</groupId>
                 <artifactId>aspectjweaver</artifactId>
                 <version>${aspectj.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>cglib</groupId>
-                <artifactId>cglib-nodep</artifactId>
-                <version>${cglib.version}</version>
-            </dependency>
-
-            <!-- Spring -->
-            <dependency>
-                <groupId>javax.activation</groupId>
-                <artifactId>activation</artifactId>
-                <version>${activation.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-asm</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-core</artifactId>
-                <version>${spring.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>commons-logging</groupId>
-                        <artifactId>commons-logging</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
@@ -593,17 +492,7 @@
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
-                <artifactId>spring-aop</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
                 <artifactId>spring-context</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-context-support</artifactId>
                 <version>${spring.version}</version>
             </dependency>
             <dependency>
@@ -612,98 +501,9 @@
                 <version>${spring.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-web</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-webmvc</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.security</groupId>
-                <artifactId>spring-security-core</artifactId>
-                <version>${spring.security.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.security</groupId>
-                <artifactId>spring-security-web</artifactId>
-                <version>${spring.security.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.security</groupId>
-                <artifactId>spring-security-config</artifactId>
-                <version>${spring.security.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.security</groupId>
-                <artifactId>spring-security-taglibs</artifactId>
-                <version>${spring.security.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>com.h2database</groupId>
                 <artifactId>h2</artifactId>
                 <version>${h2database.version}</version>
-            </dependency>
-
-            <!-- excel file -->
-            <dependency>
-                <groupId>org.apache.poi</groupId>
-                <artifactId>poi</artifactId>
-                <version>${poi.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.poi</groupId>
-                <artifactId>poi-ooxml</artifactId>
-                <version>${poi.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.apache.poi</groupId>
-                        <artifactId>poi-ooxml-schemas</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>dom4j</groupId>
-                        <artifactId>dom4j</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>net.sf.jxls</groupId>
-                <artifactId>jxls-core</artifactId>
-                <version>${jxls.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>net.sf.jxls</groupId>
-                <artifactId>jxls-reader</artifactId>
-                <version>${jxls.version}</version>
-            </dependency>
-
-            <!-- resteasy -->
-            <dependency>
-                <groupId>org.jboss.resteasy</groupId>
-                <artifactId>resteasy-jaxrs</artifactId>
-                <version>${resteasy.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>commons-codec</groupId>
-                        <artifactId>commons-codec</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>commons-io</groupId>
-                        <artifactId>commons-io</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.resteasy</groupId>
-                <artifactId>resteasy-client</artifactId>
-                <version>${resteasy.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.resteasy</groupId>
-                <artifactId>resteasy-jackson-provider</artifactId>
-                <version>${resteasy.version}</version>
             </dependency>
 
             <dependency>
@@ -716,14 +516,21 @@
                 <artifactId>commons-logging</artifactId>
                 <version>${commons-logging.version}</version>
             </dependency>
-
-
             <dependency>
-                <groupId>javax.mail</groupId>
-                <artifactId>mail</artifactId>
-                <version>${mail.version}</version>
+                <groupId>io.openmessaging</groupId>
+                <artifactId>openmessaging-spring</artifactId>
+                <version>${openmessaging-spring.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>io.openmessaging</groupId>
+                <artifactId>openmessaging-spring-boot-starter</artifactId>
+                <version>${openmessaging-spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.openmessaging</groupId>
+                <artifactId>openmessaging-api</artifactId>
+                <version>${openmessaging-api.version}</version>
+            </dependency>
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
@@ -741,11 +548,6 @@
                 <artifactId>slf4j-simple</artifactId>
                 <version>${slf4j.version}</version>
                 <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>jul-to-slf4j</artifactId>
-                <version>${slf4j.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -767,32 +569,14 @@
                 <groupId>org.apache.hadoop</groupId>
                 <artifactId>hadoop-hdfs</artifactId>
                 <version>${hadoop.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>asm</groupId>
-                        <artifactId>asm</artifactId>
-                    </exclusion>
-                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>io.vertx</groupId>
+                <artifactId>vertx-ignite</artifactId>
+                <version>${vertx.version}</version>
             </dependency>
 
             <!--mock-->
-            <dependency>
-                <groupId>org.powermock</groupId>
-                <artifactId>powermock-core</artifactId>
-                <version>${powermock.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.powermock</groupId>
-                <artifactId>powermock-api-mockito2</artifactId>
-                <version>${powermock.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.powermock</groupId>
-                <artifactId>powermock-module-junit4</artifactId>
-                <version>${powermock.version}</version>
-            </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
@@ -800,18 +584,12 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.assertj</groupId>
-                <artifactId>assertj-core</artifactId>
-                <version>${assertj-core.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.easymock</groupId>
-                <artifactId>easymock</artifactId>
-                <version>${easymock.version}</version>
-                <scope>test</scope>
+                <groupId>org.ow2.asm</groupId>
+                <artifactId>asm</artifactId>
+                <version>${asm.version}</version>
             </dependency>
         </dependencies>
+
     </dependencyManagement>
 
     <build>
@@ -854,115 +632,21 @@
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-jar-plugin</artifactId>
-                    <version>${maven-jar-plugin.version}</version>
-                    <configuration>
-                        <archive>
-                            <manifest>
-                                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                            </manifest>
-                        </archive>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-eclipse-plugin</artifactId>
-                    <version>${maven-eclipse-plugin.version}</version>
-                    <configuration>
-                        <ajdtVersion>none</ajdtVersion>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven-surefire-plugin.version}</version>
+                    <configuration>
+                        <skipTests>false</skipTests>
+                    </configuration>
                 </plugin>
-                <!--<plugin>-->
-                    <!--<groupId>org.apache.maven.plugins</groupId>-->
-                    <!--<artifactId>maven-deploy-plugin</artifactId>-->
-                <!--</plugin>-->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-assembly-plugin</artifactId>
                     <version>${maven-assembly-plugin.version}</version>
-                    <dependencies>
-                        <dependency>
-                            <groupId>org.apache.maven</groupId>
-                            <artifactId>maven-core</artifactId>
-                            <version>${maven-assembly-plugin.version}</version>
-                            <exclusions>
-                                <exclusion>
-                                    <groupId>org.apache.maven.wagon</groupId>
-                                    <artifactId>wagon-file</artifactId>
-                                </exclusion>
-                                <exclusion>
-                                    <groupId>org.apache.maven.wagon</groupId>
-                                    <artifactId>wagon-provider-api</artifactId>
-                                </exclusion>
-                                <exclusion>
-                                    <groupId>org.apache.maven.wagon</groupId>
-                                    <artifactId>wagon-http-lightweight</artifactId>
-                                </exclusion>
-                                <exclusion>
-                                    <groupId>org.apache.maven.wagon</groupId>
-                                    <artifactId>wagon-http-shared</artifactId>
-                                </exclusion>
-                                <exclusion>
-                                    <groupId>org.apache.maven.wagon</groupId>
-                                    <artifactId>wagon-provider-api</artifactId>
-                                </exclusion>
-                                <exclusion>
-                                    <groupId>org.apache.maven.wagon</groupId>
-                                    <artifactId>wagon-http</artifactId>
-                                </exclusion>
-                                <exclusion>
-                                    <groupId>org.apache.maven.wagon</groupId>
-                                    <artifactId>wagon-webdav-jackrabbit</artifactId>
-                                </exclusion>
-                                <exclusion>
-                                    <groupId>org.apache.maven.wagon</groupId>
-                                    <artifactId>wagon-ssh-external</artifactId>
-                                </exclusion>
-                                <exclusion>
-                                    <groupId>org.apache.maven.wagon</groupId>
-                                    <artifactId>wagon-ssh</artifactId>
-                                </exclusion>
-                                <exclusion>
-                                    <groupId>org.apache.maven.reporting</groupId>
-                                    <artifactId>maven-reporting-api</artifactId>
-                                </exclusion>
-                            </exclusions>
-                        </dependency>
-                    </dependencies>
-                    <configuration>
-                        <!-- not append assembly id in release file name -->
-                        <finalName>${project.artifactId}</finalName>
-                        <appendAssemblyId>false</appendAssemblyId>
-                        <descriptors>
-                            <!--<descriptor>src/main/assemble/package.xml</descriptor>-->
-                        </descriptors>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <id>make-assembly</id>
-                            <phase>package</phase>
-                            <goals>
-                                <goal>single</goal>
-                            </goals>
-                        </execution>
-                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>pl.project13.maven</groupId>
                     <artifactId>git-commit-id-plugin</artifactId>
-                    <version>2.1.10</version>
-                    <configuration>
-                        <excludeProperties>
-                            <excludeProperty>git.build.*</excludeProperty>
-                            <excludeProperty>git.branch.*</excludeProperty>
-                            <excludeProperty>git.remote.*</excludeProperty>
-                        </excludeProperties>
-                    </configuration>
+                    <version>${git-commit-id-pulgin.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -971,22 +655,22 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <compilerArgs>
+                        <arg>-XDignore.symbol.file</arg>
+                    </compilerArgs>
+                    <fork>true</fork>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>com.jd.joyqueue.broker.election.RaftLeaderElectionTest</exclude>
+                        <exclude>com.jd.joyqueue.broker.election.ElectionMetadataManagerTest</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -1005,52 +689,6 @@
                             <suppressionsLocation>styles/suppressions.xml</suppressionsLocation>
                             <suppressionsFileExpression>checkstyle.suppressions.file</suppressionsFileExpression>
                         </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-<!--            license:check: verify if some files miss license header. This goal is attached to the verify phase if declared in your pom.xml like above.-->
-<!--            license:format: add the license header when missing. If a header is existing, it is updated to the new one.-->
-<!--            license:remove: remove existing license header-->
-            <plugin>
-                <groupId>com.mycila</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <version>3.0</version>
-                <configuration>
-                    <header>${maven.multiModuleProjectDirectory}/HEADER</header>
-                    <excludes>
-                        <exclude>**/README</exclude>
-                        <exclude>src/test/resources/**</exclude>
-                        <exclude>src/main/resources/**</exclude>
-                        <exclude>**/node_modules/**</exclude>
-                        <exclude>**/joyqueue-portal/**</exclude>
-                        <exclude>**/joyqueue-web-webroot/**</exclude>
-                        <exclude>**/*.vue</exclude>
-                        <exclude>**/*.js</exclude>
-                        <exclude>**/*.js.map</exclude>
-                        <exclude>**/*.css.map</exclude>
-                        <exclude>**/*.css</exclude>
-                        <exclude>**/index.html</exclude>
-                    </excludes>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>3.0.1</version>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>jar-no-fork</goal>
-                        </goals>
                     </execution>
                 </executions>
             </plugin>
@@ -1075,10 +713,65 @@
         <module>joyqueue-server</module>
         <module>joyqueue-console</module>
         <module>joyqueue-client</module>
-        <!-- FIXME: 单元测试未通过 -->
-        <!--        <module>joyqueue-test</module>-->
         <module>joyqueue-openmessaging</module>
         <module>docker</module>
     </modules>
+    <profiles>
+        <profile>
+            <id>RaftTest</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <includes>
+                                <include>com.jd.joyqueue.broker.election.RaftLeaderElectionTest</include>
+                                <include>com.jd.joyqueue.broker.election.ElectionMetadataManagerTest</include>
+                            </includes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>CheckLicense</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.mycila</groupId>
+                        <artifactId>license-maven-plugin</artifactId>
+                        <version>3.0</version>
+                        <configuration>
+                            <!--suppress UnresolvedMavenProperty -->
+                            <header>${maven.multiModuleProjectDirectory}/HEADER</header>
+                            <excludes>
+                                <exclude>**/README</exclude>
+                                <exclude>src/test/resources/**</exclude>
+                                <exclude>src/main/resources/**</exclude>
+                                <exclude>**/node_modules/**</exclude>
+                                <exclude>**/joyqueue-portal/**</exclude>
+                                <exclude>**/joyqueue-portal/node/**</exclude>
+                                <exclude>**/joyqueue-web-webroot/**</exclude>
+                                <exclude>**/*.vue</exclude>
+                                <exclude>**/*.js</exclude>
+                                <exclude>**/*.js.map</exclude>
+                                <exclude>**/*.css.map</exclude>
+                                <exclude>**/*.css</exclude>
+                                <exclude>**/index.html</exclude>
+                            </excludes>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
 
+    </profiles>
 </project>

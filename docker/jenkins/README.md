@@ -1,11 +1,14 @@
 
 # Jenkins docker build and start
 
+
 ## Docker build 
+
 docker build -t jenkins/jenkins:lts_python35 .
 
 
 ## Docker run 
+
 
 ### bridge network mode
 

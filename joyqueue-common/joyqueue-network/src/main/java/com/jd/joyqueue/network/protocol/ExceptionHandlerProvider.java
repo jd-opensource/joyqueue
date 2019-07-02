@@ -16,7 +16,7 @@ package com.jd.joyqueue.network.protocol;
 import com.jd.joyqueue.network.transport.command.handler.ExceptionHandler;
 
 /**
- * 异常处理提供器
+ * ExceptionHandlerProvider
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/28

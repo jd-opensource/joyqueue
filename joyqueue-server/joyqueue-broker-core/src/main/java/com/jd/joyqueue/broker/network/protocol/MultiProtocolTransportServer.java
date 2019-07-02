@@ -26,7 +26,7 @@ import java.net.InetSocketAddress;
 import java.util.List;
 
 /**
- * 多协议通信服务
+ * MultiProtocolTransportServer
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/13

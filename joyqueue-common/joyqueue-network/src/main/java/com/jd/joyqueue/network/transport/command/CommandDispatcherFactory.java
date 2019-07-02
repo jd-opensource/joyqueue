@@ -16,7 +16,7 @@ package com.jd.joyqueue.network.transport.command;
 import com.jd.joyqueue.network.protocol.Protocol;
 
 /**
- * 命令调度器工厂
+ * CommandDispatcherFactory
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
  * date: 2018/8/16
