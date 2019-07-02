@@ -22,7 +22,6 @@ import logging
 import time
 import json
 import fcntl
-from shlex import split
 from model.task import Task
 from model.workspace import Workspace
 
