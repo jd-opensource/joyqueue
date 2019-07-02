@@ -25,17 +25,17 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>joyqueue-client-all</artifactId>
+    <name>JoyQueue-Client-All</name>
+    <description>Client SDK</description>
 
     <dependencies>
         <dependency>
             <groupId>com.jd.joyqueue</groupId>
             <artifactId>joyqueue-client-core</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.jd.joyqueue</groupId>
             <artifactId>joyqueue-client-kafka</artifactId>
-            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

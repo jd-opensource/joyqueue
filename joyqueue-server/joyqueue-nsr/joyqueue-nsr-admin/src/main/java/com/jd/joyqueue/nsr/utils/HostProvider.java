@@ -11,20 +11,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jd.joyqueue.test.service;
+package com.jd.joyqueue.nsr.utils;
 
-import com.jd.joyqueue.service.BrokerRestUrlMappingService;
-import com.jd.joyqueue.service.impl.BrokerRestUrlMappingServiceImpl;
-import org.junit.Test;
-
-public class UrlMappingTest {
-
-
-    @Test
-    public void urlTest(){
-        BrokerRestUrlMappingService urlMappingService=new BrokerRestUrlMappingServiceImpl();
-        String url=urlMappingService.urlTemplate("appClientMonitor");
-        System.out.println(url);
-
-    }
+public interface HostProvider {
+    int size();
+    String next(long spinMs);
+    void onConnected();
 }

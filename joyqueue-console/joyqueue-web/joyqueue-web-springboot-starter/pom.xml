@@ -26,191 +26,41 @@
     <version>4.1.0-SNAPSHOT</version>
 
     <artifactId>joyqueue-web-springboot-starter</artifactId>
-
+    <name>JoyQueue-Web-SpringBoot-Starter</name>
     <dependencies>
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <version>${h2database.version}</version>
-        </dependency>
+
         <dependency>
             <groupId>com.jd.joyqueue</groupId>
             <artifactId>joyqueue-token-uuid-starter</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.jd.joyqueue</groupId>
             <artifactId>joyqueue-web-handler</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.jd.joyqueue</groupId>
-            <artifactId>joyqueue-data-repository-mybatis</artifactId>
-            <version>${project.version}</version>
-        </dependency>
 
         <dependency>
             <groupId>com.jd.laf.web</groupId>
             <artifactId>laf-vertx-web-springboot-starter</artifactId>
-            <version>${laf-vertx.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-autoconfigure</artifactId>
-            <version>${spring-boot.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-jdbc</artifactId>
-            <version>${spring-boot.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.mybatis.spring.boot</groupId>
             <artifactId>mybatis-spring-boot-starter</artifactId>
-            <version>${mybatis-spring.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-jdbc</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.8.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.zaxxer</groupId>
-            <artifactId>HikariCP</artifactId>
-            <version>${HikariCP.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>${mysql-connector-java.version}</version>
-        </dependency>
-        <!--<dependency>-->
-        <!--<groupId>org.apache.ignite</groupId>-->
-        <!--<artifactId>ignite-slf4j</artifactId>-->
-        <!--<version>${ignite.version}</version>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-        <!--<groupId>org.apache.ignite</groupId>-->
-        <!--<artifactId>ignite-core</artifactId>-->
-        <!--<version>${ignite.version}</version>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-        <!--<groupId>org.apache.ignite</groupId>-->
-        <!--<artifactId>ignite-spring</artifactId>-->
-        <!--<version>${ignite.version}</version>-->
-        <!--<exclusions>-->
-        <!--<exclusion>-->
-        <!--<groupId>org.apache.ignite</groupId>-->
-        <!--<artifactId>ignite-indexing</artifactId>-->
-        <!--</exclusion>-->
-        <!--<exclusion>-->
-        <!--<groupId>org.springframework</groupId>-->
-        <!--<artifactId>spring-core</artifactId>-->
-        <!--</exclusion>-->
-        <!--<exclusion>-->
-        <!--<groupId>org.springframework</groupId>-->
-        <!--<artifactId>spring-aop</artifactId>-->
-        <!--</exclusion>-->
-        <!--<exclusion>-->
-        <!--<groupId>org.springframework</groupId>-->
-        <!--<artifactId>spring-beans</artifactId>-->
-        <!--</exclusion>-->
-        <!--<exclusion>-->
-        <!--<groupId>org.springframework</groupId>-->
-        <!--<artifactId>spring-context</artifactId>-->
-        <!--</exclusion>-->
-        <!--<exclusion>-->
-        <!--<groupId>org.springframework</groupId>-->
-        <!--<artifactId>spring-expression</artifactId>-->
-        <!--</exclusion>-->
-        <!--<exclusion>-->
-        <!--<groupId>org.springframework</groupId>-->
-        <!--<artifactId>spring-tx</artifactId>-->
-        <!--</exclusion>-->
-        <!--<exclusion>-->
-        <!--<groupId>org.springframework</groupId>-->
-        <!--<artifactId>spring-jdbc</artifactId>-->
-        <!--</exclusion>-->
-        <!--<exclusion>-->
-        <!--<groupId>commons-logging</groupId>-->
-        <!--<artifactId>commons-logging</artifactId>-->
-        <!--</exclusion>-->
-        <!--</exclusions>-->
-        <!--</dependency>-->
-
-        <!--<dependency>-->
-        <!--<groupId>io.vertx</groupId>-->
-        <!--<artifactId>vertx-ignite</artifactId>-->
-        <!--<version>${vertx.version}</version>-->
-        <!--<exclusions>-->
-        <!--<exclusion>-->
-        <!--<groupId>org.apache.ignite</groupId>-->
-        <!--<artifactId>ignite-core</artifactId>-->
-        <!--</exclusion>-->
-        <!--<exclusion>-->
-        <!--<groupId>org.apache.ignite</groupId>-->
-        <!--<artifactId>ignite-spring</artifactId>-->
-        <!--</exclusion>-->
-        <!--<exclusion>-->
-        <!--<artifactId>netty-transport</artifactId>-->
-        <!--<groupId>io.netty</groupId>-->
-        <!--</exclusion>-->
-        <!--<exclusion>-->
-        <!--<artifactId>netty-common</artifactId>-->
-        <!--<groupId>io.netty</groupId>-->
-        <!--</exclusion>-->
-        <!--</exclusions>-->
-        <!--</dependency>-->
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-core</artifactId>
-            <version>${vertx.version}</version>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-ignite</artifactId>
-            <version>${vertx.version}</version>
-            <optional>true</optional>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.ignite</groupId>
-                    <artifactId>ignite-core</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.ignite</groupId>
-                    <artifactId>ignite-spring</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.ignite</groupId>
-            <artifactId>ignite-core</artifactId>
-            <version>${ignite.version}</version>
-            <optional>true</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.ignite</groupId>
-            <artifactId>ignite-spring</artifactId>
-            <version>${ignite.version}</version>
             <optional>true</optional>
             <exclusions>
                 <exclusion>

@@ -26,5 +26,12 @@
 
     <artifactId>joyqueue-store-api</artifactId>
 
-
+    <name>JoyQueue-Store-API</name>
+    <description>Message storage API</description>
+    <dependencies>
+        <dependency>
+            <groupId>com.jd.joyqueue</groupId>
+            <artifactId>joyqueue-model</artifactId>
+        </dependency>
+    </dependencies>
 </project>

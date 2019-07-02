@@ -25,6 +25,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>joyqueue-server</artifactId>
+    <name>JoyQueue-Server</name>
+    <description>JoyQueue server collections</description>
+
     <packaging>pom</packaging>
     <modules>
         <module>joyqueue-broker-core</module>
@@ -47,11 +50,6 @@
                 <artifactId>concurrentlinkedhashmap-lru</artifactId>
                 <version>${concurrentlinkedhashmap-lru.version}</version>
             </dependency>
-            <dependency>
-                <groupId>com.jd.joyqueue</groupId>
-                <artifactId>joyqueue-broker-monitor-pth</artifactId>
-                <version>${project.version}</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -69,15 +67,4 @@
         <artifactId>junit</artifactId>
     </dependency>
 </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>

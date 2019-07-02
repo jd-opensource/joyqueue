@@ -25,6 +25,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>joyqueue-retry-remote</artifactId>
+    <name>JoyQueue-Retry-Remote</name>
+    <description>Retry message remote implementation</description>
 
     <dependencies>
         <dependency>

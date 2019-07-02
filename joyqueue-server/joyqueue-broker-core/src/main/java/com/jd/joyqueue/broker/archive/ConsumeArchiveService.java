@@ -26,7 +26,7 @@ import com.google.common.base.Preconditions;
 import com.jd.joyqueue.toolkit.security.Md5;
 import com.jd.joyqueue.toolkit.service.Service;
 import com.jd.joyqueue.toolkit.time.SystemClock;
-import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

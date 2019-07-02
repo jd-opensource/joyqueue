@@ -25,6 +25,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>joyqueue-retry-api</artifactId>
+    <name>JoyQueue-Retry-API</name>
+    <description>Retry message API</description>
 
 
     <dependencies>
@@ -35,6 +37,10 @@
         <dependency>
             <groupId>com.jd.laf</groupId>
             <artifactId>laf-extension-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
         </dependency>
     </dependencies>
 </project>

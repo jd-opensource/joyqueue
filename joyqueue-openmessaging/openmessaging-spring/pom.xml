@@ -26,6 +26,8 @@
 
     <groupId>io.openmessaging</groupId>
     <artifactId>openmessaging-spring</artifactId>
+    <name>OpenMessaging-Spring</name>
+    <description>Spring Support for the OpenMessaging API</description>
 
     <properties>
         <spring.version>5.1.5.RELEASE</spring.version>

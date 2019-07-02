@@ -25,6 +25,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>joyqueue-data-repository-mybatis</artifactId>
+    <name>JoyQueue-Data-Repository-MyBatis</name>
+    <description>Data repository MyBatis implementation</description>
+
     <dependencies>
         <dependency>
             <groupId>com.jd.joyqueue</groupId>

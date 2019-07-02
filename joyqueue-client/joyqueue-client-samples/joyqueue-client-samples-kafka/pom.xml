@@ -25,6 +25,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>joyqueue-client-samples-kafka</artifactId>
+    <name>JoyQueue-Client-Samples-Kafka</name>
+    <description>Client samples using Kafka Client</description>
 
     <dependencies>
         <dependency>

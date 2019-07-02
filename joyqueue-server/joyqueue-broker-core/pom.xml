@@ -25,113 +25,39 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>joyqueue-broker-core</artifactId>
+    <name>JoyQueue-Broker-Core</name>
+    <description>Broker core library</description>
     <version>4.1.0-SNAPSHOT</version>
-
-    <properties>
-        <commons-beanutils.version>1.9.3</commons-beanutils.version>
-        <!--<hibernate-validator.version>6.0.9.Final</hibernate-validator.version>-->
-    </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
-        <dependency> <!-- 桥接：告诉Slf4j使用Log4j2 -->
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-validator</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.web</groupId>
-            <artifactId>javax.el</artifactId>
-            <version>2.2.4</version>
         </dependency>
         <dependency>
             <groupId>commons-beanutils</groupId>
             <artifactId>commons-beanutils</artifactId>
-            <version>${commons-beanutils.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.dropwizard.metrics</groupId>
-            <artifactId>metrics-core</artifactId>
-            <version>4.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.jd.laf</groupId>
             <artifactId>laf-extension-core</artifactId>
-            <version>1.0.13</version>
         </dependency>
         <dependency>
             <groupId>com.jd.joyqueue</groupId>
             <artifactId>joyqueue-retry-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-core</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.jd.laf.web</groupId>
             <artifactId>laf-vertx-web</artifactId>
-            <version>${laf-vertx.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>io.netty</groupId>
-                    <artifactId>netty-common</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>io.netty</groupId>
-                    <artifactId>netty-codec</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>io.netty</groupId>
-                    <artifactId>netty-buffer</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>io.netty</groupId>
-                    <artifactId>netty-transport</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>io.netty</groupId>
-                    <artifactId>netty-resolver</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>io.netty</groupId>
-                    <artifactId>netty-handler</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>io.netty</groupId>
-                    <artifactId>netty-handler-proxy</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>io.netty</groupId>
-                    <artifactId>netty-codec-dns</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>io.netty</groupId>
-                    <artifactId>netty-codec-http</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>io.netty</groupId>
-                    <artifactId>netty-codec-http2</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>io.netty</groupId>
-                    <artifactId>netty-codec-socks</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>io.netty</groupId>
-                    <artifactId>netty-resolver-dns</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-collections4</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.googlecode.concurrentlinkedhashmap</groupId>
-            <artifactId>concurrentlinkedhashmap-lru</artifactId>
         </dependency>
         <dependency>
             <groupId>com.jd.joyqueue</groupId>
@@ -148,7 +74,6 @@
         <dependency>
             <groupId>com.jd.joyqueue</groupId>
             <artifactId>joyqueue-retry-remote</artifactId>
-            <version>4.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>
@@ -162,79 +87,38 @@
             <groupId>com.jd.joyqueue</groupId>
             <artifactId>joyqueue-nsr-core</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.jd.joyqueue</groupId>
-            <artifactId>joyqueue-nsr-ignite</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.jd.joyqueue</groupId>
-            <artifactId>joyqueue-cache</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>slf4j-log4j12</artifactId>
-                    <groupId>org.slf4j</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.jd.joyqueue</groupId>
-            <artifactId>joyqueue-datasource-dbcp</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>com.jd.joyqueue</groupId>
             <artifactId>joyqueue-security</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.jd.joyqueue</groupId>
-            <artifactId>joyqueue-datasource-hikaricp</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.jd.joyqueue</groupId>
-            <artifactId>joyqueue-archive-hbase</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>slf4j-log4j12</artifactId>
-                    <groupId>org.slf4j</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
 
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-api-mockito2</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-module-junit4</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-            <scope>test</scope>
-        </dependency>
+        <!--FIXME: 不要直接依赖实现-->
         <dependency>
             <groupId>com.jd.joyqueue</groupId>
             <artifactId>joyqueue-store-core</artifactId>
             <version>4.1.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.jd.joyqueue</groupId>
+            <artifactId>joyqueue-archive-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+        </dependency>
 
     </dependencies>
 
 </project>
+

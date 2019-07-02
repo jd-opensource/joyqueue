@@ -172,26 +172,4 @@ public class RetrySerializerUtil {
         return messageSize;
     }
 
-
-//    public static void main(String[] args) {
-//        RetryMessageModel retry = new RetryMessageModel();
-//        retry.setBusinessId("business");
-//        retry.setTopic("topic");
-//        retry.setApp("app");
-//        retry.setPartition((short)255);
-//        retry.setIndex(100L);
-//        retry.setBrokerMessage(new byte[168]);
-//        retry.setException(new byte[16]);
-//        retry.setSendTime(SystemClock.now());
-//
-//        ByteBuffer serialize = serialize(retry);
-//        serialize.flip();
-//
-//
-//        RetryMessageModel deserialize = deserialize(serialize);
-//
-//        System.out.println(ToStringBuilder.reflectionToString(deserialize));
-//
-//
-//    }
 }

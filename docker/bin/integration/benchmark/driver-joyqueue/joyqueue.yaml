@@ -12,12 +12,12 @@
 # limitations under the License.
 #
 
-name: JournalQ
-driverClass: io.openmessaging.benchmark.driver.journalq.JournalQBenchmarkDriver
+name: JoyQueue
+driverClass: io.openmessaging.benchmark.driver.joyqueue.JoyQueueBenchmarkDriver
 
 # JournalQ client-specific configuration
 clusterName: DefaultCluster
-namesrvAddr: 172.17.0.1:50088
-adminAddr: http://172.17.0.1:50091
+namesrvAddr: 192.169.0.2:50088
+adminAddr: 192.169.0.2:50091
 
 

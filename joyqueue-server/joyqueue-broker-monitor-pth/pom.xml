@@ -25,8 +25,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>joyqueue-broker-monitor-pth</artifactId>
+    <name>JoyQueue-Broker-Monitor-Prometheus</name>
+    <description>Integration with Prometheus</description>
 
-    <name>joyqueue-broker-pth</name>
 
     <dependencies>
         <dependency>

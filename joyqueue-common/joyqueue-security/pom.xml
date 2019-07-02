@@ -25,6 +25,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>joyqueue-security</artifactId>
+    <name>JoyQueue-Security</name>
+    <description>Security API and default implementations</description>
 
     <dependencies>
         <dependency>

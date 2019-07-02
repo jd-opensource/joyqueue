@@ -25,16 +25,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>joyqueue-data-service</artifactId>
+    <name>JoyQueue-Data-Service</name>
+    <description>Data access services for admin console</description>
     <dependencies>
         <dependency>
             <groupId>com.jd.joyqueue</groupId>
             <artifactId>joyqueue-token-api</artifactId>
-            <version>4.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.jd.joyqueue</groupId>
             <artifactId>joyqueue-retry-db-console</artifactId>
-            <version>4.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.jd.joyqueue</groupId>
@@ -45,10 +45,6 @@
             <artifactId>joyqueue-data-repository-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.inject</groupId>
-            <artifactId>javax.inject</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
         </dependency>
@@ -57,11 +53,6 @@
             <artifactId>spring-tx</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
@@ -75,11 +66,6 @@
                     <groupId>org.apache.httpcomponents</groupId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -112,11 +98,11 @@
             <artifactId>jackson-databind</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>dom4j</groupId>
-            <artifactId>dom4j</artifactId>
-            <version>1.6.1</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>dom4j</groupId>-->
+<!--            <artifactId>dom4j</artifactId>-->
+<!--            <version>1.6.1</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>com.jd.joyqueue</groupId>
             <artifactId>joyqueue-network</artifactId>
@@ -128,36 +114,6 @@
         <dependency>
             <groupId>com.jd.joyqueue</groupId>
             <artifactId>joyqueue-hbase</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>slf4j-log4j12</artifactId>
-                    <groupId>org.slf4j</groupId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.jd.joyqueue</groupId>
-                    <artifactId>joyqueue-model</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.jd.joyqueue</groupId>
-                    <artifactId>joyqueue-toolkit</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.hadoop</groupId>
-                    <artifactId>hadoop-hdfs</artifactId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>gson</artifactId>
-                    <groupId>com.google.code.gson</groupId>
-                </exclusion>
-                <!--<exclusion>-->
-                    <!--<groupId>org.apache.hbase</groupId>-->
-                    <!--<artifactId>hbase-common</artifactId>-->
-                <!--</exclusion>-->
-                <!--<exclusion>-->
-                    <!--<groupId>org.apache.hbase</groupId>-->
-                    <!--<artifactId>hbase-client</artifactId>-->
-                <!--</exclusion>-->
-            </exclusions>
         </dependency>
        <dependency>
             <groupId>com.jd.joyqueue</groupId>
@@ -167,10 +123,12 @@
             <groupId>com.jd.joyqueue</groupId>
             <artifactId>joyqueue-archive-api</artifactId>
         </dependency>
+<!--        FIXME: 应该依赖joyqueue-archive-api 而不是这个joyqueue-archive-hbase实现-->
         <dependency>
             <groupId>com.jd.joyqueue</groupId>
             <artifactId>joyqueue-archive-hbase</artifactId>
         </dependency>
+
     </dependencies>
 
 </project>

@@ -35,7 +35,10 @@ public class AppAdmin extends AbstractAdmin {
     private AsyncHttpClient httpClient;
 
     public AppAdmin(){
-        this.httpClient=new AsyncHttpClient();
+        this(new AsyncHttpClient());
+    }
+    public AppAdmin(AsyncHttpClient httpClient){
+        this.httpClient=httpClient;
     }
     @Parameters(separators = "=", commandDescription = "Generate a token for App")
     public static class TokenArg extends CommandArgs {
@@ -56,7 +59,7 @@ public class AppAdmin extends AbstractAdmin {
         String[] argv={"token","--host","http://localhost:50091","-a","test_app"};
         AppAdmin appAdmin=new AppAdmin();
         Map<String,CommandArgs> argsMap=new HashMap(8);
-                                argsMap.put(Command.token.name(),tokenArg);
+        argsMap.put(Command.token.name(),tokenArg);
         JCommander jc =JCommander.newBuilder()
                 .addObject(appAdmin)
                 .addCommand(Command.token.name(),tokenArg)
@@ -120,6 +123,4 @@ public class AppAdmin extends AbstractAdmin {
             return undef;
         }
     }
-
-
 }

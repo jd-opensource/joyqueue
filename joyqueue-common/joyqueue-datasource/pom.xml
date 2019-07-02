@@ -26,9 +26,11 @@
 
     <artifactId>joyqueue-datasource</artifactId>
     <packaging>pom</packaging>
+    <name>JoyQueue-DataSource</name>
+    <description>DataSource API and implementations</description>
+
     <modules>
         <module>joyqueue-datasource-api</module>
-        <module>joyqueue-datasource-dbcp</module>
         <module>joyqueue-datasource-hikaricp</module>
     </modules>
 
