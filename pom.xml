@@ -1023,15 +1023,6 @@
                         <exclude>**/README</exclude>
                         <exclude>src/test/resources/**</exclude>
                         <exclude>src/main/resources/**</exclude>
-                        <exclude>**/node_modules/**</exclude>
-                        <exclude>**/journalq-portal/**</exclude>
-                        <exclude>**/journalq-web-webroot/**</exclude>
-                        <exclude>**/*.vue</exclude>
-                        <exclude>**/*.js</exclude>
-                        <exclude>**/*.js.map</exclude>
-                        <exclude>**/*.css.map</exclude>
-                        <exclude>**/*.css</exclude>
-                        <exclude>**/index.html</exclude>
                     </excludes>
                 </configuration>
                 <executions>

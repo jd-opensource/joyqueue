@@ -20,3 +20,4 @@ filter.properties
 .factorypath
 *.pyc
 journalq-console/journalq-web/journalq-web-webroot/src/main/webroot/
+journalq-console/journalq-portal/node/
