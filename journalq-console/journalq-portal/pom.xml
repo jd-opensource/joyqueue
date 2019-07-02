@@ -24,7 +24,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>journalq-portal</artifactId>
+  <artifactId>journalq-portal</artifactId>
 
   <build>
     <plugins>
@@ -74,8 +74,25 @@
         <artifactId>license-maven-plugin</artifactId>
         <version>3.0</version>
         <configuration>
-          <skip>true</skip>
+          <header>${maven.multiModuleProjectDirectory}/HEADER</header>
+          <excludes>
+            <exclude>**/node_modules/**</exclude>
+            <exclude>**/node/**</exclude>
+            <exclude>**/dist/**</exclude>
+          </excludes>
+          <includes>
+            <include>**/*.js</include>
+            <include>**/*.css</include>
+            <include>**/index.html</include>
+          </includes>
         </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
 
       <plugin>
