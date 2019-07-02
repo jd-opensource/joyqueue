@@ -17,12 +17,13 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.jd.joyqueue.broker.BrokerContext;
-import com.jd.joyqueue.broker.BrokerContextAware;
 import com.jd.joyqueue.broker.kafka.KafkaCommandType;
+import com.jd.joyqueue.broker.kafka.KafkaContext;
+import com.jd.joyqueue.broker.kafka.KafkaContextAware;
 import com.jd.joyqueue.broker.kafka.KafkaErrorCode;
 import com.jd.joyqueue.broker.kafka.command.TopicMetadataRequest;
 import com.jd.joyqueue.broker.kafka.command.TopicMetadataResponse;
+import com.jd.joyqueue.broker.kafka.config.KafkaConfig;
 import com.jd.joyqueue.broker.kafka.helper.KafkaClientHelper;
 import com.jd.joyqueue.broker.kafka.model.KafkaBroker;
 import com.jd.joyqueue.broker.kafka.model.KafkaPartitionMetadata;
@@ -36,6 +37,9 @@ import com.jd.joyqueue.network.transport.Transport;
 import com.jd.joyqueue.network.transport.command.Command;
 import com.jd.joyqueue.nsr.NameService;
 import com.jd.joyqueue.nsr.ignite.model.IgniteBaseModel;
+import com.jd.joyqueue.toolkit.delay.AbstractDelayedOperation;
+import com.jd.joyqueue.toolkit.delay.DelayedOperationKey;
+import com.jd.joyqueue.toolkit.delay.DelayedOperationManager;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -53,15 +57,20 @@ import java.util.Set;
  * email: gaohaoxiang@jd.com
  * date: 2018/11/5
  */
-public class TopicMetadataRequestHandler extends AbstractKafkaCommandHandler implements BrokerContextAware {
+public class TopicMetadataRequestHandler extends AbstractKafkaCommandHandler implements KafkaContextAware {
 
     protected static final Logger logger = LoggerFactory.getLogger(TopicMetadataRequestHandler.class);
 
     private NameService nameService;
+    private KafkaConfig config;
+    private DelayedOperationManager delayPurgatory;
 
     @Override
-    public void setBrokerContext(BrokerContext brokerContext) {
-        this.nameService = brokerContext.getNameService();
+    public void setKafkaContext(KafkaContext kafkaContext) {
+        this.nameService = kafkaContext.getBrokerContext().getNameService();
+        this.config = kafkaContext.getConfig();
+        this.delayPurgatory = new DelayedOperationManager("kafka-metadata-delayed");
+        this.delayPurgatory.start();
     }
 
     @Override
@@ -79,14 +88,23 @@ public class TopicMetadataRequestHandler extends AbstractKafkaCommandHandler imp
         List<KafkaBroker> brokers = getTopicBrokers(topicConfigs);
         List<KafkaTopicMetadata> topicMetadata = getTopicMetadata(topicMetadataRequest.getTopics(), topicConfigs);
 
-        // TODO 临时日志
-        if (CollectionUtils.isEmpty(topicMetadata) || logger.isDebugEnabled()) {
-            logger.info("get topic metadata, topics: {}, address: {}, metadata: {}",
-                    topicMetadataRequest.getTopics(), transport.remoteAddress(), JSON.toJSONString(topicMetadata));
+        TopicMetadataResponse topicMetadataResponse = new TopicMetadataResponse(topicMetadata, brokers);
+        Command response = new Command(topicMetadataResponse);
+
+        if (CollectionUtils.isEmpty(topicMetadata)) {
+            logger.info("get topic metadata, topics: {}, address: {}, metadata: {}, app: {}",
+                    topicMetadataRequest.getTopics(), transport.remoteAddress(), JSON.toJSONString(topicMetadata), topicMetadataRequest.getClientId());
+
+            delayPurgatory.tryCompleteElseWatch(new AbstractDelayedOperation(config.getMetadataDelay()) {
+                @Override
+                protected void onComplete() {
+                    transport.acknowledge(command, response);
+                }
+            }, Sets.newHashSet(new DelayedOperationKey()));
+            return null;
         }
 
-        TopicMetadataResponse topicMetadataResponse = new TopicMetadataResponse(topicMetadata, brokers);
-        return new Command(topicMetadataResponse);
+        return response;
     }
 
     @Override

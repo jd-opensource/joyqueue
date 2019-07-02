@@ -178,7 +178,7 @@ public class TempMetadataInitializer extends Service {
         for (String app : APP) {
             Producer producer = new Producer();
             producer.setProducerPolicy(Producer.ProducerPolicy.Builder.build().nearby((topicName.getFullName().contains("nearby"))).archive(true).single(true).
-                    blackList("127.0.0.1,127.0.0.2").weight("0:1,1:10").timeout(1000 * 11).create());
+                    blackList("127.0.0.2,127.0.0.3").weight("0:1,1:10").timeout(1000 * 11).create());
             producer.setTopic(topicName);
             producer.setApp(app);
             producer.setClientType(ClientType.JOYQUEUE);
@@ -192,7 +192,7 @@ public class TempMetadataInitializer extends Service {
             consumer.setClientType(ClientType.JOYQUEUE);
             consumer.setRetryPolicy(new RetryPolicy(1000, 1000, 2, false, 2.0, 0));
             consumer.setConsumerPolicy(new Consumer.ConsumerPolicy.Builder().nearby((topicName.getFullName().contains("nearby"))).paused(false).archive(true).
-                    retry(false).seq(false).ackTimeout(1000 * 11).batchSize((short) 100).concurrent(1).delay(0).errTimes(10).maxPartitionNum(PARTITION_GROUPS * PARTITIONS).blackList("127.0.0.1,127.0.0.3").retryReadProbability(30).create());
+                    retry(false).seq(false).ackTimeout(1000 * 11).batchSize((short) 100).concurrent(1).delay(0).errTimes(10).maxPartitionNum(PARTITION_GROUPS * PARTITIONS).blackList("127.0.0.2,127.0.0.3").retryReadProbability(30).create());
 //            consumer.setLimitPolicy(new Consumer.ConsumerLimitPolicy(1000 * 1, 1024 * 1024 * 10));
 //            consumer.setLimitPolicy(new Consumer.ConsumerLimitPolicy(10, 1024 * 1024 * 10));
 

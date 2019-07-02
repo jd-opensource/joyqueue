@@ -29,7 +29,8 @@ public class TransportConfigSupport {
             for (Property property : properties) {
                 if (property.getKey().equals(keyPrefix + TRANSPORT_SERVER_PORT)) {
                     serverConfig.setPort(property.getInteger());
-                    break;
+                } else if (property.getKey().equals(keyPrefix + TRANSPORT_SERVER_HOST)) {
+                    serverConfig.setHost(property.getString());
                 }
             }
         }
@@ -127,6 +128,7 @@ public class TransportConfigSupport {
 
     //server transport config
     public static final String TRANSPORT_SERVER_PORT = "transport.server.port";
+    public static final String TRANSPORT_SERVER_HOST = "transport.server.host";
 
     //client transport config
     public static final String TRANSPORT_CLIENT_CONNECT_TIMEOUT = "transport.client.connectTimeout";

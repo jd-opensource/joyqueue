@@ -53,7 +53,7 @@ public class GrafanaUtils {
 
     public static GrafanaConfig getConfig() {
         if (config == null) {
-            return load("grafana.xml");
+            return load("grafana/grafana.xml");
         }
         return config;
     }

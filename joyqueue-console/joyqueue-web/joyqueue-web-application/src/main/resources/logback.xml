@@ -14,10 +14,10 @@
     </appender>
     <!-- 按照每天生成日志文件 -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${log_file}.log</file>
+        <file>log.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <!--日志文件输出的文件名-->
-            <fileNamePattern>${log_file}.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>log.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <!--每个日志文件大小-->
             <maxFileSize>100MB</maxFileSize>
             <totalSizeCap>10GB</totalSizeCap>
@@ -30,13 +30,11 @@
         </encoder>
     </appender>
 
-    <!-- jd logger -->
-    <logger name="com.jd" level="${log_jd_level}" />
     <!-- Spring framework logger -->
     <logger name="org.springframework" level="info" />
 
     <!-- 日志输出级别 -->
-    <root level="${log_root_level}">
+    <root level="info">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="FILE"/>
     </root>
