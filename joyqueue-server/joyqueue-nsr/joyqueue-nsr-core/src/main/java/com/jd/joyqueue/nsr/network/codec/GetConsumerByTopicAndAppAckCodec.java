@@ -30,7 +30,7 @@ public class GetConsumerByTopicAndAppAckCodec implements NsrPayloadCodec<GetCons
     public GetConsumerByTopicAndAppAck decode(Header header, ByteBuf buffer) throws Exception {
         GetConsumerByTopicAndAppAck getConsumerByTopicAndAppAck = new GetConsumerByTopicAndAppAck();
         if(buffer.readBoolean()){
-            getConsumerByTopicAndAppAck.consumer(Serializer.readConsumer(buffer));
+            getConsumerByTopicAndAppAck.consumer(Serializer.readConsumer(header.getVersion(), buffer));
         }
         return getConsumerByTopicAndAppAck;
     }
@@ -42,7 +42,7 @@ public class GetConsumerByTopicAndAppAckCodec implements NsrPayloadCodec<GetCons
             return;
         }
         buffer.writeBoolean(true);
-        Serializer.write(payload.getConsumer(),buffer);
+        Serializer.write(payload.getHeader().getVersion(), payload.getConsumer(),buffer);
     }
 
     @Override

@@ -19,10 +19,10 @@ var htmlreplace = require('gulp-html-replace');
 
 
 gulp.task('journalq',function (cb) {
-    runSequence('cleanjournalq', 'movejournalq')(function () {
-        cb()
-        console.log('journalq编译完毕');
-    });
+  runSequence('cleanjournalq', 'movejournalq')(function () {
+    cb()
+    console.log('journalq编译完毕');
+  });
 });
 
 /* -------------------------------------
@@ -30,19 +30,19 @@ gulp.task('journalq',function (cb) {
  ----------------------------------------*/
 
 gulp.task('cleanjournalq', function (cb) {
-    var targetPath = path.resolve(__dirname, '../journalq-web/journalq-web-webroot/src/main/webroot');
-    console.log('清空 /journalq 目录');
-    return  del([targetPath+'/**/*'],{force:true});
+  var targetPath = path.resolve(__dirname, '../joyqueue-web/joyqueue-web-webroot/src/main/webroot');
+  console.log('清空 /journalq 目录');
+  return  del([targetPath+'/**/*'],{force:true});
 });
 gulp.task('movejournalq',function () {
-    console.log('journalq/dist和html到后端目录');
-    gulp.src(['./dist/**','!./dist/index.html'])
-        .pipe(gulp.dest(path.resolve(__dirname,  '../journalq-web/journalq-web-webroot/src/main/webroot')));
-    gulp.src(['./static/**'])
-        .pipe(gulp.dest(path.resolve(__dirname,  '../journalq-web/journalq-web-webroot/src/main/webroot/public')));
-    gulp.src('./dist/index.html')
-        .pipe(htmlreplace({
-            'mock': ''
-        }))
-        .pipe(gulp.dest(path.resolve(__dirname,  '../journalq-web/journalq-web-webroot/src/main/webroot')));
+  console.log('journalq/dist和html到后端目录');
+  gulp.src(['./dist/**','!./dist/index.html'])
+    .pipe(gulp.dest(path.resolve(__dirname,  '../joyqueue-web/joyqueue-web-webroot/src/main/webroot')));
+  gulp.src(['./static/**'])
+    .pipe(gulp.dest(path.resolve(__dirname,  '../joyqueue-web/joyqueue-web-webroot/src/main/webroot/public')));
+  gulp.src('./dist/index.html')
+    .pipe(htmlreplace({
+      'mock': ''
+    }))
+    .pipe(gulp.dest(path.resolve(__dirname,  '../joyqueue-web/joyqueue-web-webroot/src/main/webroot')));
 });

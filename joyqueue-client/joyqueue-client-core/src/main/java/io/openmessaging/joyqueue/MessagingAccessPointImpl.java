@@ -30,7 +30,8 @@ import io.openmessaging.exception.OMSUnsupportException;
 import io.openmessaging.joyqueue.config.ExceptionConverter;
 import io.openmessaging.joyqueue.config.KeyValueConverter;
 import io.openmessaging.joyqueue.consumer.support.ConsumerImpl;
-import io.openmessaging.joyqueue.producer.message.MessageFactoryAdapter;
+import io.openmessaging.joyqueue.producer.extension.ExtensionMessageFactory;
+import io.openmessaging.joyqueue.producer.message.ExtensionMessageFactoryImpl;
 import io.openmessaging.joyqueue.producer.support.ProducerImpl;
 import io.openmessaging.joyqueue.producer.support.TransactionProducerImpl;
 import io.openmessaging.joyqueue.support.ConsumerWrapper;
@@ -60,7 +61,7 @@ public class MessagingAccessPointImpl implements MessagingAccessPoint {
     private ProducerConfig producerConfig;
     private ConsumerConfig consumerConfig;
     private TxFeedbackConfig txFeedbackConfig;
-    private MessageFactory messageFactory;
+    private ExtensionMessageFactory extensionMessageFactory;
     private MessageAccessPointHolder messageAccessPointHolder;
 
     public MessagingAccessPointImpl(KeyValue attributes) {
@@ -70,11 +71,11 @@ public class MessagingAccessPointImpl implements MessagingAccessPoint {
         this.producerConfig = KeyValueConverter.convertProducerConfig(nameServerConfig, attributes);
         this.consumerConfig = KeyValueConverter.convertConsumerConfig(nameServerConfig, attributes);
         this.txFeedbackConfig = KeyValueConverter.convertFeedbackConfig(nameServerConfig, attributes);
-        this.messageFactory = createMessageFactory();
+        this.extensionMessageFactory = createMessageFactory();
     }
 
-    protected MessageFactory createMessageFactory() {
-        return new MessageFactoryAdapter();
+    protected ExtensionMessageFactory createMessageFactory() {
+        return new ExtensionMessageFactoryImpl();
     }
 
     @Override
@@ -82,7 +83,7 @@ public class MessagingAccessPointImpl implements MessagingAccessPoint {
         MessageAccessPointHolder messageAccessPointHolder = getOrCreateMessageAccessPointHolder();
         MessageAccessPoint messageAccessPoint = messageAccessPointHolder.getMessageAccessPoint();
         MessageProducer messageProducer = messageAccessPoint.createProducer(producerConfig);
-        ProducerImpl producer = new ProducerImpl(messageProducer, messageFactory);
+        ProducerImpl producer = new ProducerImpl(messageProducer, extensionMessageFactory);
         return new ProducerWrapper(producer, messageAccessPointHolder);
     }
 
@@ -91,7 +92,7 @@ public class MessagingAccessPointImpl implements MessagingAccessPoint {
         MessageAccessPointHolder messageAccessPointHolder = getOrCreateMessageAccessPointHolder();
         MessageAccessPoint messageAccessPoint = messageAccessPointHolder.getMessageAccessPoint();
         MessageProducer messageProducer = messageAccessPoint.createProducer(producerConfig);
-        ProducerImpl producer = new ProducerImpl(messageProducer, messageFactory);
+        ProducerImpl producer = new ProducerImpl(messageProducer, extensionMessageFactory);
         TransactionProducerImpl transactionProducer = new TransactionProducerImpl(producer, transactionStateCheckListener, messageProducer, messageAccessPoint, txFeedbackConfig);
         return new ProducerWrapper(transactionProducer, messageAccessPointHolder);
     }
@@ -128,7 +129,7 @@ public class MessagingAccessPointImpl implements MessagingAccessPoint {
 
     @Override
     public MessageFactory messageFactory() {
-        return messageFactory;
+        return extensionMessageFactory;
     }
 
     @Override

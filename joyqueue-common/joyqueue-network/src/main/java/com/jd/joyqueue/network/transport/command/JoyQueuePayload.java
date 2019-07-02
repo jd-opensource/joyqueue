@@ -13,8 +13,6 @@
  */
 package com.jd.joyqueue.network.transport.command;
 
-import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
-
 /**
  * JoyQueuePayload
  * author: gaohaoxiang
@@ -23,7 +21,7 @@ import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
  */
 public abstract class JoyQueuePayload implements Payload, Type {
 
-    private JoyQueueHeader header;
+    private Header header;
 
     /**
      * 校验
@@ -32,11 +30,11 @@ public abstract class JoyQueuePayload implements Payload, Type {
         //Do nothing
     }
 
-    public void setHeader(JoyQueueHeader header) {
+    public void setHeader(Header header) {
         this.header = header;
     }
 
-    public JoyQueueHeader getHeader() {
+    public Header getHeader() {
         return header;
     }
 }

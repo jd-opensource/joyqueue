@@ -13,10 +13,10 @@
  */
 package com.jd.joyqueue.nsr.config;
 
+import com.google.common.base.Preconditions;
 import com.jd.joyqueue.network.transport.config.ClientConfig;
 import com.jd.joyqueue.network.transport.config.TransportConfigSupport;
 import com.jd.joyqueue.toolkit.config.PropertySupplier;
-import com.google.common.base.Preconditions;
 
 public class NameServiceConfig {
     private ClientConfig clientConfig;
@@ -34,7 +34,10 @@ public class NameServiceConfig {
 
     public String getNamserverAddress() {
         return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_ADDRESS);
+    }
 
+    public int getThinTransportTimeout() {
+        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_THIN_TRANSPORT_TIMEOUT);
     }
 
     public void setPropertySupplier(PropertySupplier propertySupplier) {

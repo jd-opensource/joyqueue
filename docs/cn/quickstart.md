@@ -46,7 +46,7 @@ $ cd distribution/joyqueue-console/bin
 $ ./start.sh
 ```
 
-管理端元数据依托命名服务，默认连接本地命名服务。如有调整，请修改joyqueue-console/conf/important.properties中nameserver.host参数配置。
+管理端元数据依托命名服务，默认连接本地命名服务。如有调整，请修改joyqueue-console/conf/application.properties中nameserver.host参数配置。
 现在可以通过启动日志和网络端口监听情况，判断管理端服务是否正常启动。如果你能在日志中看到如下日志，表明管理端服务已经正常启动，并监听在10030端口上。
 
 ```

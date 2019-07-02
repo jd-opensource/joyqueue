@@ -129,4 +129,9 @@ public class ProducerWrapper implements ExtensionProducer {
     public Message createMessage(String queueName, byte[] body) {
         return delegate.createMessage(queueName, body);
     }
+
+    @Override
+    public Message createMessage(String queueName, String body) {
+        return delegate.createMessage(queueName, body);
+    }
 }
