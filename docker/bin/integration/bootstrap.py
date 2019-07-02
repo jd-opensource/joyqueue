@@ -30,9 +30,11 @@
 #
 import os
 import argparse
+from shell import  Shell
 from workflow import Workflow
 from configuration import Configuration
 from pathlib import Path
+
 
 def bootstrap():
     config_file = os.path.dirname(__file__)+'/bootstrap.conf'
@@ -71,6 +73,15 @@ def collect_data():
             print(score)
 
 
+def pyc_clean():
+    shell = Shell()
+    clean = """
+            find ./ -name *.pyc -delete
+          """
+    shell.run_local_script(clean)
+
+
 if __name__ == '__main__':
     bootstrap()
     collect_data()
+    pyc_clean()
