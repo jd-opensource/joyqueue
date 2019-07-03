@@ -52,7 +52,6 @@ public class BrokerManageExportServer extends Service {
 
     protected RoutingVerticle initRoutingVerticle(BrokerManageConfig config) {
         HttpServerOptions httpServerOptions = new HttpServerOptions();
-        httpServerOptions.setHost(config.getExportHost());
         httpServerOptions.setPort(config.getExportPort());
         return new RoutingVerticle(new Environment.MapEnvironment(), httpServerOptions);
     }
@@ -67,7 +66,7 @@ public class BrokerManageExportServer extends Service {
         try {
             routingVerticle.registerServices(serviceMap);
             routingVerticle.start();
-            logger.info("broker manage server is started, host: {}, port: {}", config.getExportHost(), config.getExportPort());
+            logger.info("broker manage server is started, port: {}", config.getExportPort());
         } catch (Exception e) {
             logger.error("broker manage server start exception", e);
             throw e;
