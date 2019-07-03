@@ -16,7 +16,10 @@ package com.jd.joyqueue.nsr.config;
 import com.jd.joyqueue.toolkit.config.PropertyDef;
 
 public enum NameServiceConfigKey implements PropertyDef {
-    NAMESERVER_ADDRESS("nameservice.serverAddress", "127.0.0.1:50091", Type.STRING);
+
+    NAMESERVER_ADDRESS("nameservice.serverAddress", "127.0.0.1:50091", Type.STRING),
+    NAMESERVER_THIN_TRANSPORT_TIMEOUT("nameservice.thin.transport.timeout", 1000 * 3, Type.INT);
+
     public static final String NAMESERVICE_KEY_PREFIX ="nameservice.";
 
     private String name;

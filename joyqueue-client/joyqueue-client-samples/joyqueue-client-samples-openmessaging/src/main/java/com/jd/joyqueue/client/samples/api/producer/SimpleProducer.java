@@ -13,7 +13,6 @@
  */
 package com.jd.joyqueue.client.samples.api.producer;
 
-import com.jd.joyqueue.toolkit.network.IpUtil;
 import io.openmessaging.KeyValue;
 import io.openmessaging.MessagingAccessPoint;
 import io.openmessaging.OMS;
@@ -34,7 +33,7 @@ public class SimpleProducer {
         KeyValue keyValue = OMS.newKeyValue();
         keyValue.put(OMSBuiltinKeys.ACCOUNT_KEY, "test_token");
 
-        MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint(String.format("oms:joyqueue://test_app@%s:50088/UNKNOWN", IpUtil.getLocalIp()), keyValue);
+        MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint("oms:joyqueue://test_app@127.0.0.1:50088/UNKNOWN", keyValue);
 
         // 使用MessagingAccessPoint创建producer
         Producer producer = messagingAccessPoint.createProducer();

@@ -28,6 +28,7 @@ import com.jd.joyqueue.network.domain.BrokerNode;
 import com.jd.joyqueue.network.serializer.Serializer;
 import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.network.transport.codec.PayloadCodec;
+import com.jd.joyqueue.network.transport.command.Header;
 import com.jd.joyqueue.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
 import org.apache.commons.collections.CollectionUtils;
@@ -268,7 +269,7 @@ public class FetchClusterResponseCodec implements PayloadCodec<JoyQueueHeader, F
         buffer.writeInt(topic.getCode().getCode());
     }
 
-    protected void encodeBroker(JoyQueueHeader header, BrokerNode brokerNode, ByteBuf buffer) throws Exception {
+    protected void encodeBroker(Header header, BrokerNode brokerNode, ByteBuf buffer) throws Exception {
         buffer.writeInt(brokerNode.getId());
         Serializer.write(brokerNode.getHost(), buffer, Serializer.SHORT_SIZE);
         buffer.writeInt(brokerNode.getPort());

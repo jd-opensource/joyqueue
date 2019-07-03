@@ -13,6 +13,10 @@
  */
 package com.jd.joyqueue.nsr;
 
+import com.google.common.base.Preconditions;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.Maps;
 import com.jd.joyqueue.domain.AppToken;
 import com.jd.joyqueue.domain.Broker;
 import com.jd.joyqueue.domain.ClientType;
@@ -58,7 +62,6 @@ import com.jd.joyqueue.toolkit.config.PropertySupplier;
 import com.jd.joyqueue.toolkit.config.PropertySupplierAware;
 import com.jd.joyqueue.toolkit.lang.Close;
 import com.jd.joyqueue.toolkit.lang.LifeCycle;
-import com.google.common.base.Preconditions;
 import com.jd.joyqueue.toolkit.service.Service;
 import com.jd.joyqueue.toolkit.time.SystemClock;
 import com.jd.laf.extension.ExtensionPoint;
@@ -78,7 +81,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.jd.joyqueue.event.NameServerEvent.BROKER_ID_ALL_BROKER;
@@ -138,6 +144,8 @@ public class NameServer extends Service implements NameService, PropertySupplier
     public static ExtensionPoint<ServiceProvider, String> serviceProviderPoint = new ExtensionPointLazy<>(ServiceProvider.class);
     private static final Logger logger = LoggerFactory.getLogger(NameServer.class);
 
+    private Cache<String, Map<TopicName, TopicConfig>> appTopicCache;
+
     public NameServer() {
         // do nothing
     }
@@ -165,6 +173,11 @@ public class NameServer extends Service implements NameService, PropertySupplier
         }
         if (transportServer == null){
             this.transportServer = buildTransportServer();
+        }
+        if (appTopicCache == null) {
+            this.appTopicCache = CacheBuilder.newBuilder()
+                    .expireAfterWrite(nameServerConfig.getCacheExpireTime(), TimeUnit.MILLISECONDS)
+                    .build();
         }
     }
 
@@ -526,27 +539,38 @@ public class NameServer extends Service implements NameService, PropertySupplier
 
     @Override
     public Map<TopicName, TopicConfig> getTopicConfigByApp(String subscribeApp, Subscription.Type subscribe) {
-        Map<TopicName, TopicConfig> appTopicConfigs = new HashMap<>();
+        try {
+            return appTopicCache.get(subscribeApp + "_" + String.valueOf(subscribe), new Callable<Map<TopicName, TopicConfig>>() {
+                @Override
+                public Map<TopicName, TopicConfig> call() throws Exception {
+                    Map<TopicName, TopicConfig> appTopicConfigs = new HashMap<>();
 
-        List<? extends Subscription> subscriptions = null;
-        switch (subscribe) {
-            case CONSUMPTION:
-                subscriptions = metaManager.getConsumer(subscribeApp);
-                break;
-            case PRODUCTION:
-                subscriptions = metaManager.getProducer(subscribeApp);
-                break;
-        }
+                    List<? extends Subscription> subscriptions = null;
+                    switch (subscribe) {
+                        case CONSUMPTION:
+                            subscriptions = metaManager.getConsumer(subscribeApp);
+                            break;
+                        case PRODUCTION:
+                            subscriptions = metaManager.getProducer(subscribeApp);
+                            break;
+                    }
 
-        if (null != subscriptions) {
-            subscriptions.forEach(p -> {
-                TopicConfig topicConfig = getTopicConfig(p.getTopic());
-                if (null != topicConfig) {
-                    appTopicConfigs.put(p.getTopic(), topicConfig);
+                    if (null != subscriptions) {
+                        subscriptions.forEach(p -> {
+                            TopicConfig topicConfig = getTopicConfig(p.getTopic());
+                            if (null != topicConfig) {
+                                appTopicConfigs.put(p.getTopic(), topicConfig);
+                            }
+                        });
+                    }
+                    return appTopicConfigs;
                 }
             });
+        } catch (ExecutionException e) {
+            logger.error("getTopicConfigByApp exception, subscribeApp: {}, subscribe: {}",
+                    subscribeApp, subscribe);
+            return Maps.newHashMap();
         }
-        return appTopicConfigs;
     }
 
     @Override

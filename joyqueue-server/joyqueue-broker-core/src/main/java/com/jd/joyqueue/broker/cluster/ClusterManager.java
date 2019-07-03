@@ -40,7 +40,6 @@ import com.jd.joyqueue.response.BooleanResponse;
 import com.jd.joyqueue.toolkit.concurrent.EventBus;
 import com.jd.joyqueue.toolkit.concurrent.EventListener;
 import com.jd.joyqueue.toolkit.lang.LifeCycle;
-import com.jd.joyqueue.toolkit.network.IpUtil;
 import com.jd.joyqueue.toolkit.service.Service;
 import com.jd.joyqueue.toolkit.time.SystemClock;
 import org.apache.commons.collections.CollectionUtils;
@@ -144,7 +143,7 @@ public class ClusterManager extends Service {
      * @return
      */
     private void register() throws Exception {
-        String localIp = IpUtil.getLocalIp();
+        String localIp = brokerConfig.getFrontendConfig().getHost();
         long port = brokerConfig.getFrontendConfig().getPort();
         Integer brokerId = readBroker();
         broker = nameService.register(brokerId, localIp, (int) port);
