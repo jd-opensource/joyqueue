@@ -123,7 +123,7 @@ public abstract class TransportServerSupport extends Service implements Transpor
     }
 
     protected Channel doBind(ServerBootstrap serverBootstrap) throws Exception {
-        return serverBootstrap.bind(host, port)
+        return serverBootstrap.bind(port)
                 .sync()
                 .channel();
     }
