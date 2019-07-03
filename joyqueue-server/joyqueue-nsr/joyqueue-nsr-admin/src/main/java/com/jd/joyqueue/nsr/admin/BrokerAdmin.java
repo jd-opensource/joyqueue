@@ -22,7 +22,8 @@ import com.jd.joyqueue.nsr.AdminConfig;
 import com.jd.joyqueue.nsr.CommandArgs;
 import com.jd.joyqueue.nsr.model.BrokerQuery;
 import com.jd.joyqueue.nsr.utils.AsyncHttpClient;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,7 +33,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 public class BrokerAdmin extends AbstractAdmin {
-
+    private  static final  Logger logger= LoggerFactory.getLogger(BrokerAdmin.class);
     private AsyncHttpClient httpClient;
     public BrokerAdmin(){
         this(new AsyncHttpClient());
@@ -110,7 +111,7 @@ public class BrokerAdmin extends AbstractAdmin {
             brokers =JSON.parseArray(result,Broker.class);
         }
         if(brokers!=null){
-            System.out.println(result);
+            logger.info(result);
         }
         return brokers;
     }
