@@ -18,6 +18,7 @@ import com.jd.joyqueue.broker.consumer.position.model.Position;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -29,6 +30,7 @@ import java.util.concurrent.ConcurrentMap;
  * <p>
  * Created by chengzhiliang on 2019/3/11.
  */
+@Ignore
 public class LocalFileStoreTest {
 
     // 本地文件存储

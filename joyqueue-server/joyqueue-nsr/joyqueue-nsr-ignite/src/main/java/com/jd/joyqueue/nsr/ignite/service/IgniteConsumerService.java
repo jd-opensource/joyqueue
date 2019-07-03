@@ -129,7 +129,7 @@ public class IgniteConsumerService implements ConsumerService {
         boolean commit = false;
         try {
             if (null == tx) {
-                tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED);
+                tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.REPEATABLE_READ);
                 commit = true;
             }
             IgniteConsumer igConsumer = toIgniteModel(consumer);
@@ -157,7 +157,7 @@ public class IgniteConsumerService implements ConsumerService {
         boolean commit = false;
         try {
             if (null == tx) {
-                tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED);
+                tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.REPEATABLE_READ);
                 commit = true;
             }
             consumerDao.deleteById(id);
@@ -205,7 +205,7 @@ public class IgniteConsumerService implements ConsumerService {
 
 
     public void add(Consumer consumer) {
-        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
+        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.REPEATABLE_READ)) {
             this.addOrUpdate(new IgniteConsumer(consumer));
             tx.commit();
             this.publishEvent(ConsumerEvent.add(consumer.getTopic(), consumer.getApp()));
@@ -217,7 +217,7 @@ public class IgniteConsumerService implements ConsumerService {
     }
 
     public void update(Consumer consumer) {
-        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
+        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.REPEATABLE_READ)) {
             this.addOrUpdate(new IgniteConsumer(consumer));
             tx.commit();
             this.publishEvent(ConsumerEvent.update(consumer.getTopic(), consumer.getApp()));
@@ -229,7 +229,7 @@ public class IgniteConsumerService implements ConsumerService {
     }
 
     public void remove(Consumer consumer) {
-        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
+        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.REPEATABLE_READ)) {
             this.deleteById(new StringBuffer(consumer.getTopic().getFullName()).append(IgniteBaseModel.SPLICE).append(consumer.getApp()).toString());
             tx.commit();
             this.publishEvent(ConsumerEvent.remove(consumer.getTopic(), consumer.getApp()));
