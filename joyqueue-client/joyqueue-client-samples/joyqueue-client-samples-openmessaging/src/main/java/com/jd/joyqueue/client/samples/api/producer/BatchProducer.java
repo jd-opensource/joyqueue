@@ -13,7 +13,6 @@
  */
 package com.jd.joyqueue.client.samples.api.producer;
 
-import com.jd.joyqueue.toolkit.network.IpUtil;
 import io.openmessaging.KeyValue;
 import io.openmessaging.MessagingAccessPoint;
 import io.openmessaging.OMS;

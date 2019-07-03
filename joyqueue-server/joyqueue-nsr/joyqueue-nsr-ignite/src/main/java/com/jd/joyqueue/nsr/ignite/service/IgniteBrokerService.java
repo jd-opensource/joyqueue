@@ -118,7 +118,7 @@ public class IgniteBrokerService implements BrokerService {
 
     @Override
     public void update(Broker broker) {
-        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
+        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.REPEATABLE_READ)) {
             this.addOrUpdate(new IgniteBroker(broker));
             this.publishEvent(BrokerEvent.event(broker));
             tx.commit();

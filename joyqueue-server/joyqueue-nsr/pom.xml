@@ -34,9 +34,6 @@
         <module>joyqueue-nsr-core</module>
         <module>joyqueue-nsr-ignite</module>
     </modules>
-    <properties>
-        <ignite.version>2.6.0</ignite.version>
-    </properties>
     <dependencies>
 
 
