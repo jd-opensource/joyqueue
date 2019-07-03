@@ -40,10 +40,6 @@ public class BrokerManageConfig {
     }
 
     public int getExportPort() {
-        return PropertySupplier.getValue(propertySupplier,BrokerManageConfigKey.EXPORT_PORT,brokerConfig.getBroker().getMonitorPort());
-    }
-
-    public String getExportHost() {
-        return PropertySupplier.getValue(propertySupplier,BrokerManageConfigKey.EXPORT_HOST);
+        return PropertySupplier.getValue(propertySupplier,BrokerManageConfigKey.EXPORT_PORT, brokerConfig.getBroker().getMonitorPort());
     }
 }

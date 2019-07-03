@@ -248,6 +248,11 @@
             </dependency>
             <dependency>
                 <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-server-runtime</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.jd.joyqueue</groupId>
                 <artifactId>joyqueue-client-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -736,6 +741,7 @@
         <module>joyqueue-client</module>
         <module>joyqueue-openmessaging</module>
         <module>docker</module>
+        <module>joyqueue-distribution</module>
     </modules>
     <profiles>
         <profile>
