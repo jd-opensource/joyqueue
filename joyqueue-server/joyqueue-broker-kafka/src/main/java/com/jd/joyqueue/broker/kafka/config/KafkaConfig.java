@@ -38,6 +38,10 @@ public class KafkaConfig {
         return getConfig(KafkaConfigKey.FETCH_BATCH_SIZE);
     }
 
+    public int getMetadataDelay() {
+        return getConfig(KafkaConfigKey.METADATA_DELAY);
+    }
+
     public int getOffsetSyncTimeout() {
         return getConfig(KafkaConfigKey.OFFSET_SYNC_TIMEOUT);
     }

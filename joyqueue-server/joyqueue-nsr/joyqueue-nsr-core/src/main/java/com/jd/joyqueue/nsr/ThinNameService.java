@@ -457,7 +457,7 @@ public class ThinNameService extends Service implements NameService, PropertySup
         // TODO 临时监控
         long startTime = SystemClock.now();
         try {
-            return clientTransport.getOrCreateTransport().sync(request,10000);
+            return clientTransport.getOrCreateTransport().sync(request, nameServiceConfig.getThinTransportTimeout());
         } catch (TransportException exception) {
             logger.error("send command to nameServer error request {}", request);
             throw exception;
@@ -471,7 +471,7 @@ public class ThinNameService extends Service implements NameService, PropertySup
 
     private void sendAsync(Command request, CommandCallback callback) throws TransportException {
         try {
-            clientTransport.getOrCreateTransport().async(request,10000, callback);
+            clientTransport.getOrCreateTransport().async(request, nameServiceConfig.getThinTransportTimeout(), callback);
         } catch (TransportException exception) {
             logger.error("send command to nameServer error request {}", request);
             throw exception;

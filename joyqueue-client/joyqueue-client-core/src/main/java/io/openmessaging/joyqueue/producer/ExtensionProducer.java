@@ -13,6 +13,7 @@
  */
 package io.openmessaging.joyqueue.producer;
 
+import io.openmessaging.joyqueue.producer.extension.ExtensionMessageFactory;
 import io.openmessaging.producer.Producer;
 
 /**
@@ -21,7 +22,7 @@ import io.openmessaging.producer.Producer;
  * email: gaohaoxiang@jd.com
  * date: 2019/3/4
  */
-public interface ExtensionProducer extends Producer {
+public interface ExtensionProducer extends Producer, ExtensionMessageFactory {
 
     ExtensionTransactionalResult prepare();
 

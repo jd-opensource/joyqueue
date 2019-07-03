@@ -183,7 +183,7 @@ public class IgniteTopicService implements TopicService {
      */
     @Override
     public void addTopic(Topic topic, List<PartitionGroup> partitionGroups) {
-        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
+        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.REPEATABLE_READ)) {
             Topic oldTopic = get(topic);
             if (oldTopic != null) {
                 throw new Exception(String.format("topic:%s is aleady exsit",topic.getName()));
@@ -265,7 +265,7 @@ public class IgniteTopicService implements TopicService {
     @Override
     public void removeTopic(Topic topic) {
         TopicName topicName = topic.getName();
-        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
+        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.REPEATABLE_READ)) {
             List<PartitionGroup> partitionGroups = partitionGroupService.getByTopic(topicName);
             this.deleteById(topicName.getFullName());
             partitionGroupReplicaService.deleteByTopic(topicName);
@@ -318,7 +318,7 @@ public class IgniteTopicService implements TopicService {
         Command command = null;
         Transport transport = null;
         Command response = null;
-        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
+        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.REPEATABLE_READ)) {
 
             if (group.getElectType().type() == PartitionGroup.ElectType.fix.type()) {
                 group.setLeader(group.getReplicas().iterator().next());
@@ -387,7 +387,7 @@ public class IgniteTopicService implements TopicService {
         Transport transport = null;
         TopicName topicName = group.getTopic();
         int groupNo = group.getGroup();
-        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
+        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.REPEATABLE_READ)) {
 
             Topic topic = getById(topicName.getFullName());
             topic.setPartitions((short) (topic.getPartitions()-group.getPartitions().size()));
@@ -487,7 +487,7 @@ public class IgniteTopicService implements TopicService {
     public Collection<Integer> updatePartitionGroup(PartitionGroup group) {
         List<Pair<Set<Integer>, Command>> commands = new ArrayList<>();
         List<Pair<Set<Integer>, Command>> rollbackCommands = new ArrayList<>();
-        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
+        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.REPEATABLE_READ)) {
             final PartitionGroup groupOld = partitionGroupService.getById(group.getTopic().getFullName() + IgniteBaseModel.SPLICE + group.getGroup());
             final PartitionGroup groupNew = group;
             groupNew.setLeader(groupOld.getLeader());

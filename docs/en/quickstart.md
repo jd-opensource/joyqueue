@@ -68,7 +68,7 @@ $ ./start.sh
 ```
 
 Console Server depends on Naming server. It will start with the default configuration without any modification. 
-But if Naming server did not start at the same server, you need modify the 'nameserver.host' parameter configuration of the 'important.properties' property file under the 'joyqueue-console/conf' directory.
+But if Naming server did not start at the same server, you need modify the 'nameserver.host' parameter configuration of the 'application.properties' property file under the 'joyqueue-console/conf' directory.
 
 Now, we can check whether Console Server started normally or not. Both startup logs and **netstat** port listen state can be used to validate.
 If you see logs as following, which indicate the console service started and listening on 10030 port:

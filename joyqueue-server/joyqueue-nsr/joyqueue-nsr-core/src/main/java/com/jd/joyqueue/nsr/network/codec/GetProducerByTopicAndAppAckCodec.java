@@ -29,7 +29,7 @@ public class GetProducerByTopicAndAppAckCodec implements NsrPayloadCodec<GetProd
     @Override
     public GetProducerByTopicAndAppAck decode(Header header, ByteBuf buffer) throws Exception {
         GetProducerByTopicAndAppAck getProducerByTopicAndAppAck = new GetProducerByTopicAndAppAck();
-        if(buffer.readBoolean())getProducerByTopicAndAppAck.producer(Serializer.readProducer(buffer));
+        if(buffer.readBoolean())getProducerByTopicAndAppAck.producer(Serializer.readProducer(header.getVersion(), buffer));
         return getProducerByTopicAndAppAck;
     }
 
@@ -40,7 +40,7 @@ public class GetProducerByTopicAndAppAckCodec implements NsrPayloadCodec<GetProd
             return;
         }
         buffer.writeBoolean(true);
-        Serializer.write(payload.getProducer(),buffer);
+        Serializer.write(payload.getHeader().getVersion(), payload.getProducer(),buffer);
     }
 
     @Override

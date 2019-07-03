@@ -15,6 +15,7 @@ package com.jd.joyqueue.network.transport.codec;
 
 import com.jd.joyqueue.network.transport.command.Command;
 import com.jd.joyqueue.network.transport.command.Header;
+import com.jd.joyqueue.network.transport.command.JoyQueuePayload;
 import com.jd.joyqueue.network.transport.exception.TransportException;
 import io.netty.buffer.ByteBuf;
 import org.slf4j.Logger;
@@ -77,6 +78,11 @@ public class DefaultDecoder implements Decoder {
         }
 
         Object payload = decoder.decode(header, buffer);
+
+        if (payload instanceof JoyQueuePayload) {
+            ((JoyQueuePayload) payload).setHeader(header);
+        }
+
         return new Command(header, payload);
 
     }

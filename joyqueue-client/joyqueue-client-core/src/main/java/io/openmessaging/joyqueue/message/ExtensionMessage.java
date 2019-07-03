@@ -11,27 +11,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.openmessaging.joyqueue.producer.message;
+package io.openmessaging.joyqueue.message;
 
 import io.openmessaging.message.Message;
-import io.openmessaging.message.MessageFactory;
 
 /**
- * MessageFactoryAdapter
+ * ExtensionMessage
  * author: gaohaoxiang
  * email: gaohaoxiang@jd.com
- * date: 2019/3/1
+ * date: 2019/7/1
  */
-public class MessageFactoryAdapter implements MessageFactory {
+public interface ExtensionMessage extends Message {
 
-    @Override
-    public Message createMessage(String queueName, byte[] body) {
-        OMSProduceMessage omsProduceMessage = new OMSProduceMessage();
-        omsProduceMessage.setTopic(queueName);
-        omsProduceMessage.setBodyBytes(body);
+    void setStringData(String data);
 
-        MessageAdapter messageAdapter = new MessageAdapter(omsProduceMessage);
-        omsProduceMessage.setOmsMessage(messageAdapter);
-        return messageAdapter;
-    }
+    String getStringData();
 }

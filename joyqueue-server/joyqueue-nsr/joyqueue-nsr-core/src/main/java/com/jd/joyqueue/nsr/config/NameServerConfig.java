@@ -34,6 +34,10 @@ public class NameServerConfig {
         return propertySupplier.getValue(NameServerConfigKey.NAMESERVER_MANAGE_PORT);
     }
 
+    public int getCacheExpireTime() {
+        return propertySupplier.getValue(NameServerConfigKey.NAMESERVER_CACHE_EXPIRE_TIME);
+    }
+
     public String getNameserverAddress() {
         return propertySupplier.getValue(NameServerConfigKey.NAMESERVER_ADDRESS);
     }

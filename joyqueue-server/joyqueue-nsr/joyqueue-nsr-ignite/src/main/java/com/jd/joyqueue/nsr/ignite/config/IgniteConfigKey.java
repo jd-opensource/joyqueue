@@ -30,7 +30,7 @@ public enum IgniteConfigKey implements PropertyDef {
 
     CACHE_NAME("nameserver.ignite.cache.name", "IGNITE_CACHE_KEY_PCOMM_RATE", Type.STRING),
     CACHE_MODE("nameserver.ignite.cache.cacheMode", "REPLICATED", Type.STRING),
-    CACHE_ATOMICITY_MODE("nameserver.ignite.cache.atomicityMode", "TRANSACTIONAL", Type.STRING),
+    CACHE_ATOMICITY_MODE("nameserver.ignite.cache.atomicityMode", "TRANSACTIONAL_SNAPSHOT", Type.STRING),
     CACHE_BACKUPS("nameserver.ignite.cache.backups", 1, Type.INT),
     CACHE_COPY_READ("nameserver.ignite.cache.copyOnRead", false, Type.BOOLEAN),
     CACHE_DATA_REGION_NAME("nameserver.ignite.cache.dataRegionName", null, Type.BOOLEAN),

@@ -142,4 +142,9 @@ public class KafkaChannelTransport implements ChannelTransport {
     public void release() {
         semaphore.release();
     }
+
+    @Override
+    public String toString() {
+        return delegate.toString();
+    }
 }

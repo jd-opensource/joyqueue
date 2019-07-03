@@ -13,11 +13,11 @@
  */
 package io.openmessaging.joyqueue.producer.support;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import com.jd.joyqueue.client.internal.MessageAccessPoint;
 import com.jd.joyqueue.client.internal.producer.MessageProducer;
 import com.jd.joyqueue.client.internal.producer.feedback.config.TxFeedbackConfig;
-import com.google.common.base.Preconditions;
 import io.openmessaging.Future;
 import io.openmessaging.ServiceLifeState;
 import io.openmessaging.extension.Extension;
@@ -123,14 +123,32 @@ public class TransactionProducerImpl implements ExtensionProducer {
             Preconditions.checkArgument(StringUtils.isNotBlank(queueName), "queueName can not be null");
             Preconditions.checkArgument(ArrayUtils.isNotEmpty(body), "body can not be null");
 
-            if (topics.add(queueName)) {
-                messageAccessPoint.setTransactionCallback(queueName, txFeedbackConfig,
-                        new TransactionStateCheckListenerAdapter(transactionStateCheckListener));
-            }
+            doProcessCreateMessage(queueName);
             return delegate.createMessage(queueName, body);
         } catch (Throwable cause) {
             throw ExceptionConverter.convertProduceException(cause);
         }
+    }
+
+    @Override
+    public Message createMessage(String queueName, String body) {
+        try {
+            Preconditions.checkArgument(StringUtils.isNotBlank(queueName), "queueName can not be null");
+            Preconditions.checkArgument(StringUtils.isNotBlank(body), "body can not be null");
+
+            doProcessCreateMessage(queueName);
+            return delegate.createMessage(queueName, body);
+        } catch (Throwable cause) {
+            throw ExceptionConverter.convertProduceException(cause);
+        }
+    }
+
+    protected void doProcessCreateMessage(String queueName) {
+        if (!topics.add(queueName)) {
+            return;
+        }
+        messageAccessPoint.setTransactionCallback(queueName, txFeedbackConfig,
+                new TransactionStateCheckListenerAdapter(transactionStateCheckListener));
     }
 
     @Override

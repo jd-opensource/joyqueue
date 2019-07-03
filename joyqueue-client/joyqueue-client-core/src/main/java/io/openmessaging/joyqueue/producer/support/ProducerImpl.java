@@ -13,12 +13,12 @@
  */
 package io.openmessaging.joyqueue.producer.support;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.jd.joyqueue.client.internal.producer.MessageProducer;
 import com.jd.joyqueue.client.internal.producer.callback.AsyncBatchProduceCallback;
 import com.jd.joyqueue.client.internal.producer.callback.AsyncProduceCallback;
 import com.jd.joyqueue.client.internal.producer.domain.ProduceMessage;
-import com.google.common.base.Preconditions;
 import io.openmessaging.Future;
 import io.openmessaging.exception.OMSRuntimeException;
 import io.openmessaging.extension.Extension;
@@ -28,10 +28,10 @@ import io.openmessaging.joyqueue.config.ExceptionConverter;
 import io.openmessaging.joyqueue.producer.ExtensionProducer;
 import io.openmessaging.joyqueue.producer.ExtensionTransactionalResult;
 import io.openmessaging.joyqueue.producer.extension.ExtensionAdapter;
+import io.openmessaging.joyqueue.producer.extension.ExtensionMessageFactory;
 import io.openmessaging.joyqueue.producer.message.MessageAdapter;
 import io.openmessaging.joyqueue.support.AbstractServiceLifecycle;
 import io.openmessaging.message.Message;
-import io.openmessaging.message.MessageFactory;
 import io.openmessaging.producer.SendResult;
 import io.openmessaging.producer.TransactionalResult;
 import org.apache.commons.collections.CollectionUtils;
@@ -48,10 +48,10 @@ import java.util.Optional;
 public class ProducerImpl extends AbstractServiceLifecycle implements ExtensionProducer {
 
     private MessageProducer messageProducer;
-    private MessageFactory messageFactory;
+    private ExtensionMessageFactory messageFactory;
     private Optional<Extension> extension;
 
-    public ProducerImpl(MessageProducer messageProducer, MessageFactory messageFactory) {
+    public ProducerImpl(MessageProducer messageProducer, ExtensionMessageFactory messageFactory) {
         this.messageProducer = messageProducer;
         this.messageFactory = messageFactory;
     }
@@ -226,6 +226,11 @@ public class ProducerImpl extends AbstractServiceLifecycle implements ExtensionP
 
     @Override
     public Message createMessage(String queueName, byte[] body) {
+        return messageFactory.createMessage(queueName, body);
+    }
+
+    @Override
+    public Message createMessage(String queueName, String body) {
         return messageFactory.createMessage(queueName, body);
     }
 

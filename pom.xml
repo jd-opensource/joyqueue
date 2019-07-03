@@ -68,7 +68,7 @@
         <laf-vertx.version>1.0.18-SNAPSHOT</laf-vertx.version>
         <laf-extention.version>1.0.13</laf-extention.version>
         <vertx.version>3.6.3</vertx.version>
-        <ignite.version>2.7.0</ignite.version>
+        <ignite.version>2.7.5</ignite.version>
         <junit.version>4.12</junit.version>
         <maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
         <maven-resources-plugin.version>3.1.0</maven-resources-plugin.version>
@@ -79,7 +79,7 @@
         <maven-compiler-plugin.compilerArgument>-parameters</maven-compiler-plugin.compilerArgument>
         <maven-assembly-plugin.version>3.1.0</maven-assembly-plugin.version>
         <mysql-connector-java.version>5.1.41</mysql-connector-java.version>
-        <h2database.version>1.4.195</h2database.version>
+        <h2database.version>1.4.197</h2database.version>
         <hadoop.version>2.7.6</hadoop.version>
         <hbase.version>1.4.8</hbase.version>
         <log4j.version>2.9.0</log4j.version>
@@ -91,6 +91,7 @@
         <jackson-dataformat.version>RELEASE</jackson-dataformat.version>
         <metrics.version>4.0.0</metrics.version>
         <commons-lang.version>2.6</commons-lang.version>
+        <guice.version>4.2.2</guice.version>
     </properties>
 
     <dependencyManagement>
@@ -291,6 +292,26 @@
                 <groupId>com.alibaba</groupId>
                 <artifactId>fastjson</artifactId>
                 <version>${fastjson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.inject</groupId>
+                <artifactId>guice</artifactId>
+                <version>${guice.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.ignite</groupId>
+                <artifactId>ignite-core</artifactId>
+                <version>${ignite.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.ignite</groupId>
+                <artifactId>ignite-indexing</artifactId>
+                <version>${ignite.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.ignite</groupId>
+                <artifactId>ignite-slf4j</artifactId>
+                <version>${ignite.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.dataformat</groupId>

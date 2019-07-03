@@ -23,7 +23,7 @@ import org.springframework.context.annotation.Configuration;
  * Created by chenyanying3 on 19-4-13.
  */
 @Configuration
-@ConditionalOnProperty(name = "spring.profiles.active", havingValue = "h2")
+@ConditionalOnProperty(name = "spring.datasource.driver", havingValue = "h2")
 public class H2DBServerAutoConfiguration {
     private static final Logger logger = LoggerFactory.getLogger(H2DBServerAutoConfiguration.class);
 

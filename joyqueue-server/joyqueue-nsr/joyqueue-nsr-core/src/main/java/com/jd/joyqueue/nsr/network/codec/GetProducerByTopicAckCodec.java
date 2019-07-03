@@ -36,7 +36,7 @@ public class GetProducerByTopicAckCodec implements NsrPayloadCodec<GetProducerBy
             int size = buffer.readInt();
             List<Producer> list = new ArrayList<>(size);
             for(int i = 0;i<size;i++){
-                list.add(Serializer.readProducer(buffer));
+                list.add(Serializer.readProducer(header.getVersion(), buffer));
             }
             getProducerByTopicAck.producers(list);
         return getProducerByTopicAck;
@@ -51,7 +51,7 @@ public class GetProducerByTopicAckCodec implements NsrPayloadCodec<GetProducerBy
         }
         buffer.writeInt(producers.size());
         for(Producer producer : producers){
-            Serializer.write(producer,buffer);
+            Serializer.write(payload.getHeader().getVersion(), producer,buffer);
         }
     }
 

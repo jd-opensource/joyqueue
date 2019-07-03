@@ -18,8 +18,8 @@ import io.openmessaging.KeyValue;
 import io.openmessaging.consumer.MessageReceipt;
 import io.openmessaging.extension.ExtensionHeader;
 import io.openmessaging.joyqueue.message.EmptyMessageReceipt;
+import io.openmessaging.joyqueue.message.ExtensionMessage;
 import io.openmessaging.message.Header;
-import io.openmessaging.message.Message;
 
 import java.util.Optional;
 
@@ -29,7 +29,7 @@ import java.util.Optional;
  * email: gaohaoxiang@jd.com
  * date: 2019/3/1
  */
-public class MessageAdapter implements Message {
+public class MessageAdapter implements ExtensionMessage {
 
     private ProduceMessage message;
 
@@ -74,6 +74,17 @@ public class MessageAdapter implements Message {
     @Override
     public void setData(byte[] data) {
         message.setBodyBytes(data);
+    }
+
+    @Override
+    public void setStringData(String data) {
+        message.setBodyBytes(null);
+        message.setBody(data);
+    }
+
+    @Override
+    public String getStringData() {
+        return message.getBody();
     }
 
     @Override
