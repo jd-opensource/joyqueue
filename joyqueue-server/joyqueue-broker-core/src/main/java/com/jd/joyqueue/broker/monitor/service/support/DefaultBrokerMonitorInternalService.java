@@ -63,10 +63,10 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
 
     public DefaultBrokerMonitorInternalService(BrokerStat brokerStat, Consume consume,
                                                StoreManagementService storeManagementService,
-                                               NameService nameService, StoreService store,
+                                               NameService nameService, StoreService storeService,
                                                ElectionService electionManager, ClusterManager clusterManager, BrokerStartupInfo brokerStartupInfo) {
         this.brokerStat = brokerStat;
-        this.consume=consume;
+        this.consume = consume;
         this.storeManagementService=storeManagementService;
         this.nameService = nameService;
         this.storeService = storeService;
