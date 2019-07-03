@@ -34,7 +34,7 @@
     <dependencies>
         <dependency>
             <groupId>com.jd.joyqueue</groupId>
-            <artifactId>joyqueue-server-runtime</artifactId>
+            <artifactId>joyqueue-distribution</artifactId>
             <version>${project.parent.version}</version>
             <type>tar.gz</type>
             <scope>provided</scope>
@@ -63,7 +63,7 @@
                                     <goal>tag</goal>
                                 </goals>
                                 <configuration>
-                                    <repository>joyqueue-runtime</repository>
+                                    <repository>joyqueue-server</repository>
                                     <tag>${project.version}</tag>
                                 </configuration>
                             </execution>
@@ -73,17 +73,17 @@
                                     <goal>tag</goal>
                                 </goals>
                                 <configuration>
-                                    <repository>${docker.organization}/joyqueue-runtime</repository>
+                                    <repository>${docker.organization}/joyqueue-server</repository>
                                     <tag>latest</tag>
                                 </configuration>
                             </execution>
                         </executions>
                         <configuration>
-                            <repository>${docker.organization}/joyqueue-runtime</repository>
+                            <repository>${docker.organization}/joyqueue-server</repository>
                             <pullNewerImage>false</pullNewerImage>
                             <tag>${project.version}</tag>
                             <buildArgs>
-                                <JOYQUEUE_TARBALL>target/joyqueue-server-runtime-${project.version}.tar.gz</JOYQUEUE_TARBALL>
+                                <JOYQUEUE_TARBALL>target/joyqueue-distribution-${project.version}.tar.gz</JOYQUEUE_TARBALL>
                             </buildArgs>
                             <noCache>true</noCache>
                         </configuration>
@@ -100,7 +100,7 @@
                                 <phase>generate-resources</phase>
                                 <configuration>
                                     <outputDirectory>${project.build.directory}/</outputDirectory>
-                                    <includeArtifactIds>joyqueue-server-runtime</includeArtifactIds>
+                                    <includeArtifactIds>joyqueue-distribution</includeArtifactIds>
                                     <excludeTransitive>true</excludeTransitive>
                                 </configuration>
                             </execution>
