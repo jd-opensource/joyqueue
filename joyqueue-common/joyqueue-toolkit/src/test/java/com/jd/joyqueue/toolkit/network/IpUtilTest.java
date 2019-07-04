@@ -24,6 +24,11 @@ import java.net.SocketException;
  */
 public class IpUtilTest {
 
+    @Test
+    public void showDefaultLocalIp() {
+        System.out.println(IpUtil.getLocalIp());
+    }
+
   /*  @Test
     public void testIsIp() {
         Assert.assertTrue(IpUtil.isIp("127.0.0.1"));
