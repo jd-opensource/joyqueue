@@ -73,9 +73,8 @@ public class IpUtil {
      * 得到本机所有的地址
      *
      * @return 本机所有的地址
-     * @throws Exception
      */
-    public static List<String> getLocalIps() throws Exception {
+    public static List<String> getLocalIps() {
         return getLocalIps(null, null);
     }
 
@@ -180,9 +179,25 @@ public class IpUtil {
      * @return 本机地址
      */
     public static String getLocalIp() {
-        return getLocalIp(NET_INTERFACE, MANAGE_IP);
+        // In JD.com IDC, this should be:
+        // return getLocalIp(NET_INTERFACE, MANAGE_IP);
+        return getDefaultLocalIp();
     }
 
+
+    private static String getDefaultLocalIp() {
+        try {
+            return InetAddress.getLocalHost().getHostAddress();
+        } catch (UnknownHostException e) {
+
+            List<String> ips = getLocalIps();
+            if(null != ips && !ips.isEmpty()){
+                return ips.get(0);
+            }
+
+            return "127.0.0.1";
+        }
+    }
     /**
      * 把地址对象转换成字符串
      *
