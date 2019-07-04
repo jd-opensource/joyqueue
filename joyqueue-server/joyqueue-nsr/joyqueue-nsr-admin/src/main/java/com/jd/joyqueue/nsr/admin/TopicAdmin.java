@@ -24,6 +24,8 @@ import com.jd.joyqueue.nsr.AdminConfig;
 import com.jd.joyqueue.nsr.CommandArgs;
 import com.jd.joyqueue.nsr.model.PartitionGroupQuery;
 import com.jd.joyqueue.nsr.utils.AsyncHttpClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
@@ -32,7 +34,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class TopicAdmin extends AbstractAdmin {
-
+    private  static final Logger logger= LoggerFactory.getLogger(TopicAdmin.class);
     private AsyncHttpClient httpClient;
     public TopicAdmin(){
         this(new AsyncHttpClient());
@@ -285,6 +287,7 @@ public class TopicAdmin extends AbstractAdmin {
         Future<String> futureResult=httpClient.post(args.host,"/partitiongroup/list",JSON.toJSONString(query),String.class);
         String result=futureResult.get(AdminConfig.TIMEOUT_MS,TimeUnit.MILLISECONDS);
         System.out.println(result);
+        logger.info("partition groups:{}",result);
         return result;
     }
     /**
@@ -320,6 +323,7 @@ public class TopicAdmin extends AbstractAdmin {
         Future<String> futureResult=httpClient.post(arguments.host,"/topic/add",request.toJSONString(),String.class);
         String result=futureResult.get(AdminConfig.TIMEOUT_MS,TimeUnit.MILLISECONDS);
         System.out.println(result);
+        logger.info("create topic :{}",result);
         return result;
     }
 
@@ -328,11 +332,11 @@ public class TopicAdmin extends AbstractAdmin {
      *
      **/
     public  String delete(TopicArg arguments,JCommander jCommander) throws Exception{
-        List<PartitionGroup> partitionGroups;
         Topic topic=new Topic();
         topic.setName(new TopicName(arguments.code,arguments.namespace));
         Future<String> futureResult=httpClient.post(arguments.host,"/topic/remove",JSON.toJSONString(topic),String.class);
         String result=futureResult.get(AdminConfig.TIMEOUT_MS,TimeUnit.MILLISECONDS);
+        logger.info("delete topic {}:{}",arguments.code,result);
         System.out.println(result);
         return result;
     }
@@ -359,6 +363,7 @@ public class TopicAdmin extends AbstractAdmin {
         Future<String> futureResult=httpClient.post(pubSubArg.host,"/producer/add",JSON.toJSONString(producer),String.class);
         String result=futureResult.get(AdminConfig.TIMEOUT_MS,TimeUnit.MILLISECONDS);
         System.out.println(result);
+        logger.info("publish topic {}, app {} {}",pubSubArg.subscribe.topic,pubSubArg.subscribe.app,result);
         return result;
     }
 
@@ -373,6 +378,7 @@ public class TopicAdmin extends AbstractAdmin {
         Future<String> futureResult=httpClient.post(pubSubArg.host,"/producer/remove",JSON.toJSONString(producer),String.class);
         String result=futureResult.get(AdminConfig.TIMEOUT_MS,TimeUnit.MILLISECONDS);
         System.out.println(result);
+        logger.info("unPublish topic {},app  {} {}",pubSubArg.subscribe.topic,pubSubArg.subscribe.app,result);
         return result;
     }
 
@@ -404,6 +410,7 @@ public class TopicAdmin extends AbstractAdmin {
         Future<String> futureResult=httpClient.post(pubSubArg.host,"/consumer/add",consumerJson,String.class);
         String result=futureResult.get(AdminConfig.TIMEOUT_MS,TimeUnit.MILLISECONDS);
         System.out.println(result);
+        logger.info("subscribe topic {},app {} {}",pubSubArg.subscribe.topic,pubSubArg.subscribe.app,result);
         return result;
     }
 
@@ -419,6 +426,7 @@ public class TopicAdmin extends AbstractAdmin {
         Future<String> futureResult=httpClient.post(pubSubArg.host,"/consumer/remove",consumerJson,String.class);
         String result=futureResult.get(AdminConfig.TIMEOUT_MS,TimeUnit.MILLISECONDS);
         System.out.println(result);
+        logger.info("unSubscribe topic {},app {} {}",pubSubArg.subscribe.topic,pubSubArg.subscribe.app,result);
         return result;
     }
 
