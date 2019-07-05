@@ -179,6 +179,7 @@ public class BrokerRetryManager extends Service implements MessageRetry<Long>, B
             throw new RuntimeException("No such implementation found." + type);
         }
 
+        messageRetry.setSupplier(propertySupplier);
         messageRetry.setRetryPolicyProvider(retryPolicyProvider);
 
         messageRetry.start();
