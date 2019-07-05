@@ -204,6 +204,8 @@ public class NameServer extends Service implements NameService, PropertySupplier
             Close.close(metaManager);
             Close.close(eventManager);
             Close.close(transportServer);
+            if(serviceProvider instanceof LifeCycle)
+            Close.close((LifeCycle )serviceProvider);
         } finally {
             logger.info("nameServer is stopped");
         }

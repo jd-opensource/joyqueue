@@ -26,12 +26,14 @@ import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.network.transport.TransportClient;
 import com.jd.joyqueue.network.transport.config.ClientConfig;
 import com.jd.joyqueue.nsr.NameService;
+import com.jd.joyqueue.server.retry.NullMessageRetry;
 import com.jd.joyqueue.server.retry.api.MessageRetry;
 import com.jd.joyqueue.server.retry.api.RetryPolicyProvider;
 import com.jd.joyqueue.server.retry.model.RetryMessageModel;
 import com.jd.joyqueue.server.retry.remote.RemoteMessageRetry;
 import com.jd.joyqueue.server.retry.remote.RemoteRetryProvider;
 import com.jd.joyqueue.toolkit.concurrent.EventListener;
+import com.jd.joyqueue.toolkit.config.Property;
 import com.jd.joyqueue.toolkit.config.PropertySupplier;
 import com.jd.joyqueue.toolkit.retry.RetryPolicy;
 import com.jd.joyqueue.toolkit.service.Service;
@@ -168,8 +170,12 @@ public class BrokerRetryManager extends Service implements MessageRetry<Long>, B
     private MessageRetry loadRetryManager(String type) throws Exception {
         MessageRetry messageRetry;
 
-        if (type.equals(DEFAULT_RETRY_TYPE)) {
+        Property retryEnabledProperty = propertySupplier.getProperty("retry.enable");
+        boolean retryEnable = null == retryEnabledProperty ? false : retryEnabledProperty.getBoolean(false);
 
+        if (!retryEnable) {
+            messageRetry = new NullMessageRetry();
+        } else if (type.equals(DEFAULT_RETRY_TYPE)) {
             messageRetry = new RemoteMessageRetry(remoteRetryProvider);
         } else {
             messageRetry = ExtensionManager.getOrLoadExtension(MessageRetry.class, type);

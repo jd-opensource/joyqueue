@@ -42,21 +42,19 @@ public class NameServiceTest {
         System.out.println("before....................");
         Map properties = new HashMap();
 
-        Random random = new Random();
-        int nameServerPort = random.nextInt(1024) + 5000;
+        int nameServerPort = 50002;
         Files.deleteDirectory(dataRoot);
         Files.createDirectory(dataRoot);
         properties.put("application.data.path", dataRoot);
-        properties.put("nameserver.ignite.storage.defaultDataRegion.name", "test");
+        properties.put("nameserver.ignite.storage.defaultDataRegion.name", "joyqueueRegion");
         properties.put("nameserver.nsr.manage.port", nameServerPort + 1);
-        properties.put("nameserver.transport.server.port", nameServerPort);
+        properties.put("nameserver.nsr.service.port", nameServerPort);
         properties.put("nameserver.nameserver.transport.ioThreads", "8");
         properties.put("nameservice.serverAddress", IpUtil.getLocalIp() + ":" + nameServerPort);
         properties.put("nameserver.ignite.discoverySpi.localPort", "48600");
         properties.put("nameserver.ignite.discoverySpi.localPortRange", "20");
         properties.put("nameserver.ignite.communicationSpi.localPort", nameServerPort + 2);
 
-        properties.put("nameserver.ignite.discoverySpi.ipFinder.address", IpUtil.getLocalIp() + ":" + "48600..48620");
 
         NameServiceConfig nameServiceConfig = new NameServiceConfig(new PropertySupplier.MapSupplier(properties));
 

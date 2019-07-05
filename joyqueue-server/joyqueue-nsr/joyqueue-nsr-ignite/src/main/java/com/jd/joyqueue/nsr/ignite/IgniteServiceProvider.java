@@ -13,66 +13,62 @@
  */
 package com.jd.joyqueue.nsr.ignite;
 
+import com.google.common.base.Preconditions;
 import com.google.inject.Binder;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.jd.joyqueue.nsr.ServiceProvider;
 import com.jd.joyqueue.nsr.ignite.config.IgniteConfigKey;
+import com.jd.joyqueue.nsr.ignite.dao.AppTokenDao;
 import com.jd.joyqueue.nsr.ignite.dao.BrokerDao;
 import com.jd.joyqueue.nsr.ignite.dao.ConfigDao;
 import com.jd.joyqueue.nsr.ignite.dao.ConsumerConfigDao;
 import com.jd.joyqueue.nsr.ignite.dao.ConsumerDao;
-import com.jd.joyqueue.nsr.ignite.dao.TopicDao;
-import com.jd.joyqueue.nsr.ignite.dao.PartitionGroupDao;
-import com.jd.joyqueue.nsr.ignite.dao.PartitionGroupReplicaDao;
 import com.jd.joyqueue.nsr.ignite.dao.DataCenterDao;
 import com.jd.joyqueue.nsr.ignite.dao.NamespaceDao;
-import com.jd.joyqueue.nsr.ignite.dao.ProducerDao;
+import com.jd.joyqueue.nsr.ignite.dao.PartitionGroupDao;
+import com.jd.joyqueue.nsr.ignite.dao.PartitionGroupReplicaDao;
 import com.jd.joyqueue.nsr.ignite.dao.ProducerConfigDao;
-import com.jd.joyqueue.nsr.ignite.dao.AppTokenDao;
-
+import com.jd.joyqueue.nsr.ignite.dao.ProducerDao;
+import com.jd.joyqueue.nsr.ignite.dao.TopicDao;
+import com.jd.joyqueue.nsr.ignite.dao.impl.IgniteAppTokenDao;
 import com.jd.joyqueue.nsr.ignite.dao.impl.IgniteBrokerDao;
 import com.jd.joyqueue.nsr.ignite.dao.impl.IgniteConfigDao;
 import com.jd.joyqueue.nsr.ignite.dao.impl.IgniteConsumerConfigDao;
 import com.jd.joyqueue.nsr.ignite.dao.impl.IgniteConsumerDao;
-import com.jd.joyqueue.nsr.ignite.dao.impl.IgniteTopicDao;
-import com.jd.joyqueue.nsr.ignite.dao.impl.IgnitePartitionGroupDao;
-import com.jd.joyqueue.nsr.ignite.dao.impl.IgnitePartitionGroupReplicaDao;
 import com.jd.joyqueue.nsr.ignite.dao.impl.IgniteDataCenterDao;
 import com.jd.joyqueue.nsr.ignite.dao.impl.IgniteNamespaceDao;
-import com.jd.joyqueue.nsr.ignite.dao.impl.IgniteProducerDao;
+import com.jd.joyqueue.nsr.ignite.dao.impl.IgnitePartitionGroupDao;
+import com.jd.joyqueue.nsr.ignite.dao.impl.IgnitePartitionGroupReplicaDao;
 import com.jd.joyqueue.nsr.ignite.dao.impl.IgniteProducerConfigDao;
-import com.jd.joyqueue.nsr.ignite.dao.impl.IgniteAppTokenDao;
-
+import com.jd.joyqueue.nsr.ignite.dao.impl.IgniteProducerDao;
+import com.jd.joyqueue.nsr.ignite.dao.impl.IgniteTopicDao;
 import com.jd.joyqueue.nsr.ignite.message.IgniteMessenger;
-import com.jd.joyqueue.nsr.message.Messenger;
-import com.jd.joyqueue.nsr.service.BrokerService;
-import com.jd.joyqueue.nsr.service.ConfigService;
-import com.jd.joyqueue.nsr.service.ConsumerService;
-import com.jd.joyqueue.nsr.service.ProducerService;
-import com.jd.joyqueue.nsr.service.PartitionGroupService;
-import com.jd.joyqueue.nsr.service.PartitionGroupReplicaService;
-import com.jd.joyqueue.nsr.service.TopicService;
-import com.jd.joyqueue.nsr.service.AppTokenService;
-import com.jd.joyqueue.nsr.service.DataCenterService;
-import com.jd.joyqueue.nsr.service.NamespaceService;
-
+import com.jd.joyqueue.nsr.ignite.service.IgniteAppTokenService;
 import com.jd.joyqueue.nsr.ignite.service.IgniteBrokerService;
 import com.jd.joyqueue.nsr.ignite.service.IgniteConfigService;
 import com.jd.joyqueue.nsr.ignite.service.IgniteConsumerService;
-import com.jd.joyqueue.nsr.ignite.service.IgniteProducerService;
-import com.jd.joyqueue.nsr.ignite.service.IgnitePartitionGroupService;
-import com.jd.joyqueue.nsr.ignite.service.IgnitePartitionGroupReplicaService;
-import com.jd.joyqueue.nsr.ignite.service.IgniteTopicService;
-import com.jd.joyqueue.nsr.ignite.service.IgniteAppTokenService;
 import com.jd.joyqueue.nsr.ignite.service.IgniteDataCenterService;
 import com.jd.joyqueue.nsr.ignite.service.IgniteNamespaceService;
-
+import com.jd.joyqueue.nsr.ignite.service.IgnitePartitionGroupReplicaService;
+import com.jd.joyqueue.nsr.ignite.service.IgnitePartitionGroupService;
+import com.jd.joyqueue.nsr.ignite.service.IgniteProducerService;
+import com.jd.joyqueue.nsr.ignite.service.IgniteTopicService;
+import com.jd.joyqueue.nsr.message.Messenger;
+import com.jd.joyqueue.nsr.service.AppTokenService;
+import com.jd.joyqueue.nsr.service.BrokerService;
+import com.jd.joyqueue.nsr.service.ConfigService;
+import com.jd.joyqueue.nsr.service.ConsumerService;
+import com.jd.joyqueue.nsr.service.DataCenterService;
+import com.jd.joyqueue.nsr.service.NamespaceService;
+import com.jd.joyqueue.nsr.service.PartitionGroupReplicaService;
+import com.jd.joyqueue.nsr.service.PartitionGroupService;
+import com.jd.joyqueue.nsr.service.ProducerService;
+import com.jd.joyqueue.nsr.service.TopicService;
 import com.jd.joyqueue.toolkit.config.Property;
 import com.jd.joyqueue.toolkit.config.PropertySupplier;
 import com.jd.joyqueue.toolkit.config.PropertySupplierAware;
-import com.google.common.base.Preconditions;
 import com.jd.joyqueue.toolkit.service.Service;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.cache.CacheAtomicityMode;
@@ -98,6 +94,7 @@ import static org.apache.ignite.events.EventType.EVT_CACHE_OBJECT_REMOVED;
 public class IgniteServiceProvider extends Service implements Module, ServiceProvider, PropertySupplierAware {
     private static Injector injector;
     private PropertySupplier propertySupplier;
+    private String name = null;
 
     public IgniteServiceProvider() {
     }
@@ -123,6 +120,7 @@ public class IgniteServiceProvider extends Service implements Module, ServicePro
     public void configure(Binder binder) {
         try {
             Ignite ignite = startIgnite();
+            name = ignite.name();
             ignite.cluster().active(true);
             ignite.cluster().setBaselineTopology(ignite.cluster().topologyVersion());
             binder.bind(Ignite.class).toInstance(ignite);
@@ -282,4 +280,9 @@ public class IgniteServiceProvider extends Service implements Module, ServicePro
         this.propertySupplier = supplier;
     }
 
+    @Override
+    protected void doStop() {
+        super.doStop();
+        IgnitionEx.stop(name, true, true);
+    }
 }
