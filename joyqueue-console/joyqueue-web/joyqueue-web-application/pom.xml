@@ -89,6 +89,12 @@
             <groupId>com.jd.joyqueue</groupId>
             <artifactId>joyqueue-archive-hbase</artifactId>
             <scope>runtime</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.code.gson</groupId>
+                    <artifactId>gson</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.jd.joyqueue</groupId>
