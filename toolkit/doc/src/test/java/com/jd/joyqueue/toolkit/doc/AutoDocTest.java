@@ -36,7 +36,7 @@ public class AutoDocTest {
         String pkgNameB="com.jd.joyqueue.broker.monitor.service";
         String routPath= "manage/routing.xml";
         String defaultProperties="auto_doc.properties";
-        String host="http://127.0.0.1:50090";
+        String host="http://localhost:50090";
         List<String> pkgNames=new ArrayList<>();
         List<String> routes=new ArrayList<>();
         pkgNames.add(pkgName);
