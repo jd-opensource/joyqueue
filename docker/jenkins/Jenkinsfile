@@ -22,7 +22,7 @@ pipeline {
        integrate_result_home = "/home"
     }
     stages {
-        stage('Test') {cd
+        stage('Test') {
             steps {
                 echo 'Packaging....'
                 sh 'mvn -P  CheckLicense,RaftTest,docker install'
