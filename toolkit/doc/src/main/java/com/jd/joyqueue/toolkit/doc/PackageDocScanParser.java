@@ -16,25 +16,17 @@ package com.jd.joyqueue.toolkit.doc;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.ConstructorDeclaration;
-import com.github.javaparser.ast.body.EnumDeclaration;
-import com.github.javaparser.ast.body.FieldDeclaration;
-import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.*;
 import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
-import com.jd.joyqueue.toolkit.util.ClassUtil;
+import com.jd.joyqueue.toolkit.doc.util.PackageParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -56,7 +48,7 @@ public class PackageDocScanParser implements MetaParser<JavadocComment> {
         Map<String, Map<String, JavadocComment>> serviceMethodsMap = new HashMap<>();
         Map<String, Class> classMap = packageScan();
         for (Map.Entry<String, Class> entry : classMap.entrySet()) {
-            String path = ClassUtil.getSrcPath(entry.getKey());
+            String path = PackageParser.getSrcPath(entry.getKey());
             File srcFile = new File(path);
             int simpleNameStart = entry.getKey().lastIndexOf(".");
             String serviceName = entry.getKey().substring(simpleNameStart + 1);
@@ -94,7 +86,7 @@ public class PackageDocScanParser implements MetaParser<JavadocComment> {
     public Map<String, Class> packageScan() {
         Map<String, Class> uniqueClass = new HashMap<>();
         try {
-            Class[] classes = ClassUtil.getClasses(pkg);
+            Class[] classes = PackageParser.scanClass(pkg);
             for (Class s : classes) {
                 if (s.isInterface()) {
                     traverse(s, uniqueClass);

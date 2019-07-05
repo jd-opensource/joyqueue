@@ -23,10 +23,10 @@ import net.steppschuh.markdowngenerator.table.TableRow;
 import net.steppschuh.markdowngenerator.text.Text;
 import net.steppschuh.markdowngenerator.text.code.CodeBlock;
 import net.steppschuh.markdowngenerator.text.heading.Heading;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 
 /**
  *
@@ -107,16 +107,4 @@ public class MarkdownAPIDocFormat implements Format<APIDoc> {
     }
 
 
-    public String filter(List<String> filterKeys,String content){
-        for(String k:filterKeys){
-            if(content.startsWith(k)){
-                return  content.substring(k.length());
-            }
-        }
-        return content;
-    }
-
-    public List<String> filterKeys(int i){
-       return Arrays.asList("返回","获取","获得");
-    }
 }

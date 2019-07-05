@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class AdminClientTest {
     private static final String host="127.0.0.1:50091";
-    private static final String topic="test_topic_0";
+    private static final String topic="test_topic_11";
     private static final String app="test_app_0";
     static AdminClient client;
     @BeforeClass
