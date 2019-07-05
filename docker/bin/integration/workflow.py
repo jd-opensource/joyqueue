@@ -300,6 +300,7 @@ class Workflow:
     def __shutdown_mq_worker_script(self, host):
         cidfile ='run_{}.cid'.format(host)
         script = """
+                docker containers 
                 full_cid=$(cat {cidfile})
                 echo $full_cid
                 containerId=$(docker ps --filter id=$full_cid|grep {docker_namespace}/{repo_name}|awk '{{print $1}}')
