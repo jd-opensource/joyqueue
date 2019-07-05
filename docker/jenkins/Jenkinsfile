@@ -15,11 +15,14 @@ limitations under the License.
 def integrate_result="unknown"
 pipeline {
     agent any
+    options {
+       timeout(time: 1, unit: 'HOURS')
+    }
     environment {
        integrate_result_home = "/home"
     }
     stages {
-        stage('Test') {
+        stage('Test') {cd
             steps {
                 echo 'Packaging....'
                 sh 'mvn -P  CheckLicense,RaftTest,docker install'
