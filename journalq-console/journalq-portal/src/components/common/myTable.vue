@@ -292,11 +292,12 @@ export default {
 
 <style lang="scss" scoped>
   .table{
+    width:99%;
     position: relative;
     padding-bottom: 30px;
 
     & .tablePadding{
-      padding:20px;
+      padding:20px 20px 20px 0;
       word-wrap:break-word;
       word-break:break-all
     }
