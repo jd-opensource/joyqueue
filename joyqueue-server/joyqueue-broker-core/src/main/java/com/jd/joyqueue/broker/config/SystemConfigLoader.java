@@ -35,8 +35,9 @@ public class SystemConfigLoader {
 
     static {
         DEFAULT_PROPERTIES.setProperty("IGNITE_QUIET", "true");
-        DEFAULT_PROPERTIES.setProperty("IGNITE_DUMP_THREADS_ON_FAILURE", "true");
+        DEFAULT_PROPERTIES.setProperty("IGNITE_DUMP_THREADS_ON_FAILURE", "false");
         DEFAULT_PROPERTIES.setProperty("IGNITE_NO_ASCII", "true");
+        DEFAULT_PROPERTIES.setProperty("IGNITE_UPDATE_NOTIFIER", "false");
     }
 
     public static void load() {
