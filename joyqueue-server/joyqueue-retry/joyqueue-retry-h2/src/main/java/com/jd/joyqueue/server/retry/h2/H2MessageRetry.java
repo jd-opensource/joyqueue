@@ -25,6 +25,7 @@ import com.jd.joyqueue.server.retry.h2.config.H2RetryConfig;
 import com.jd.joyqueue.server.retry.model.RetryMessageModel;
 import com.jd.joyqueue.server.retry.model.RetryStatus;
 import com.jd.joyqueue.server.retry.util.RetryUtil;
+import com.jd.joyqueue.toolkit.config.PropertySupplier;
 import com.jd.joyqueue.toolkit.db.DaoUtil;
 import com.jd.joyqueue.toolkit.lang.Close;
 import com.jd.joyqueue.toolkit.retry.RetryPolicy;
@@ -82,6 +83,8 @@ public class H2MessageRetry implements MessageRetry<Long> {
     public DataSource getDataSource() {
         return dataSource;
     }
+
+    private PropertySupplier propertySupplier = null;
 
     @Override
     public void start() {
@@ -538,5 +541,9 @@ public class H2MessageRetry implements MessageRetry<Long> {
         }
     }
 
+    @Override
+    public void setSupplier(PropertySupplier supplier) {
+        this.propertySupplier = supplier;
+    }
 }
 

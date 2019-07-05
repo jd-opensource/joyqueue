@@ -30,7 +30,7 @@
     </organization>
 
     <properties>
-        <fastjson.version>1.2.33</fastjson.version>
+        <fastjson.version>1.2.58</fastjson.version>
         <netty.version>4.1.27.Final</netty.version>
         <log4j.version>2.9.0</log4j.version>
         <commons-logging.version>1.2</commons-logging.version>
@@ -82,7 +82,6 @@
         <h2database.version>1.4.197</h2database.version>
         <hadoop.version>2.7.6</hadoop.version>
         <hbase.version>1.4.8</hbase.version>
-        <log4j.version>2.9.0</log4j.version>
         <mockito2.version>2.8.9</mockito2.version>
         <git-commit-id-pulgin.version>2.1.10</git-commit-id-pulgin.version>
         <openmessaging-spring.version>0.0.1-SNAPSHOT</openmessaging-spring.version>

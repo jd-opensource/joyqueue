@@ -25,6 +25,7 @@ import com.jd.joyqueue.server.retry.db.config.DbRetryConfig;
 import com.jd.joyqueue.server.retry.model.RetryMessageModel;
 import com.jd.joyqueue.server.retry.model.RetryStatus;
 import com.jd.joyqueue.server.retry.util.RetryUtil;
+import com.jd.joyqueue.toolkit.config.PropertySupplier;
 import com.jd.joyqueue.toolkit.db.DaoUtil;
 import com.jd.joyqueue.toolkit.lang.Close;
 import com.jd.joyqueue.toolkit.retry.RetryPolicy;
@@ -78,6 +79,7 @@ public class DBMessageRetry implements MessageRetry<Long> {
     private boolean isStartFlag = false;
     // 重试策略
     private RetryPolicyProvider retryPolicyProvider;
+    private PropertySupplier propertySupplier = null;
 
     public DBMessageRetry() {
     }
@@ -553,6 +555,10 @@ public class DBMessageRetry implements MessageRetry<Long> {
         } catch (Exception e) {
             throw new JoyQueueException(String.format("%s topic:%s,app:%s,count:%d", JoyQueueCode.CN_DB_ERROR.getMessage(), topic, app, count), e, JoyQueueCode.CN_DB_ERROR.getCode());
         }
+    }
+    @Override
+    public void setSupplier(PropertySupplier supplier) {
+        this.propertySupplier = supplier;
     }
 
 }
