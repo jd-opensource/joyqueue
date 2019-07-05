@@ -12,7 +12,6 @@
  * limitations under the License.
  */
 
-//FIXME: 抽到AutoDoc中，不开源
 package com.jd.joyqueue.toolkit.doc.util;
 
 import java.io.File;
