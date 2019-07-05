@@ -13,7 +13,6 @@
  */
 package com.jd.joyqueue.broker.config;
 
-import com.google.common.base.Preconditions;
 import com.jd.joyqueue.domain.Broker;
 import com.jd.joyqueue.network.transport.config.ServerConfig;
 import com.jd.joyqueue.network.transport.config.TransportConfigSupport;
@@ -33,6 +32,7 @@ public class BrokerConfig implements PropertySupplierAware {
     public static final String BROKER_BACKEND_SERVER_CONFIG_PREFIX = "broker.backend-server.";
     public static final String BROKER_ID_FILE_NAME = "broker.id";
     public static final String ADMIN_USER = "broker.joyqueue.admin";
+    public static final String DEFAULT_DATA_DIR = ".joyqueue";
     public static final int INVALID_BROKER_ID = -1;
 
     /**
@@ -62,10 +62,10 @@ public class BrokerConfig implements PropertySupplierAware {
     /**
      * property supplier
      */
-    private PropertySupplier propertySupplier;
+    private Configuration propertySupplier;
 
 
-    public BrokerConfig(PropertySupplier propertySupplier) {
+    public BrokerConfig(Configuration propertySupplier) {
         setSupplier(propertySupplier);
     }
 
@@ -79,9 +79,16 @@ public class BrokerConfig implements PropertySupplierAware {
             if (dataPath == null) {
                 Property property = propertySupplier == null ? null : propertySupplier.getProperty(Property.APPLICATION_DATA_PATH);
                 String path = property == null ? null : property.getString();
-                Preconditions.checkArgument(path != null, "data path can not be null.");
-                Files.createDirectory(new File(path));
-                dataPath = path;
+                File dataFile;
+                if(path == null) {
+                    dataFile = new File(new File(System.getProperty("user.home")), DEFAULT_DATA_DIR);
+                } else {
+                    dataFile = new File(path);
+                }
+                Files.createDirectory(dataFile);
+                dataPath = dataFile.getPath();
+                propertySupplier.addProperty(Property.APPLICATION_DATA_PATH, dataPath);
+
             }
         }
 
@@ -114,7 +121,7 @@ public class BrokerConfig implements PropertySupplierAware {
 
     @Override
     public void setSupplier(PropertySupplier propertySupplier) {
-        this.propertySupplier = propertySupplier;
+        this.propertySupplier = (Configuration) propertySupplier;
         this.frontendConfig = TransportConfigSupport.buildServerConfig(propertySupplier, BROKER_FRONTEND_SERVER_CONFIG_PREFIX);
         this.backendConfig = TransportConfigSupport.buildServerConfig(propertySupplier, BROKER_BACKEND_SERVER_CONFIG_PREFIX);
         Property adminUser = propertySupplier.getProperty(ADMIN_USER);
@@ -122,7 +129,6 @@ public class BrokerConfig implements PropertySupplierAware {
     }
 
     public Broker getBroker() {
-        //TODO
         return broker;
     }
 

@@ -310,6 +310,10 @@ public class BrokerServiceTest extends Service {
             public boolean isStarted() {
                 return false;
             }
+            @Override
+            public void setSupplier(PropertySupplier supplier) {
+            }
+
         };
 //        //TODO 由于要动态调整重试方式，直接new 一个默认实现
 //        MessageRetry messageRetry = new BrokerRetryManager(brokerContext);

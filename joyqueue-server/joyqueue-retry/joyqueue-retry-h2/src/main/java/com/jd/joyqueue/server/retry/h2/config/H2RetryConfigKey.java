@@ -11,32 +11,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jd.joyqueue.broker.archive;
+package com.jd.joyqueue.server.retry.h2.config;
 
 import com.jd.joyqueue.toolkit.config.PropertyDef;
 
 /**
- * 归档配置
- * <p>
- * Created by chengzhiliang on 2018/12/6.
+ * @author liyue25
+ * Date: 2019-07-05
  */
-public enum ArchiveConfigKey implements PropertyDef {
-    WRITE_BATCH_NUM("archive.write.batch.num", 1000, Type.INT),
-    READ_BATCH_NUM("archive.read.batch.num", 1000, Type.INT),
-    LOG_QUEUE_SIZE("archive.send.log.queue.size", 10000, Type.INT),
-    WRITE_THREAD_NUM("archive.thread.num", 5, Type.INT),
-    ARCHIVE_SWITCH("archive.switch", false, Type.BOOLEAN);
+public enum H2RetryConfigKey implements PropertyDef {
+
+    WRITE_URL("retry.h2.url.write", "", Type.STRING),
+    WRITE_USER_NAME("retry.h2.username.write", "", Type.STRING),
+    WRITE_PASSWORD("retry.h2.password.write", "", Type.STRING),
+    DRIVER("retry.h2.driver", "com.h2.jdbc.Driver", Type.STRING),
+    RETRY_DELAY("retry.delay", 1000, Type.INT),
+    MAX_RETRY_TIMES("retry.max.retry.times", 3, Type.INT);
 
     private String name;
     private Object value;
-    private PropertyDef.Type type;
+    private Type type;
 
-    ArchiveConfigKey(String name, Object value, PropertyDef.Type type) {
+    H2RetryConfigKey(String name, Object value, Type type) {
         this.name = name;
         this.value = value;
         this.type = type;
     }
-
     @Override
     public String getName() {
         return name;
@@ -51,5 +51,4 @@ public enum ArchiveConfigKey implements PropertyDef {
     public Type getType() {
         return type;
     }
-
 }

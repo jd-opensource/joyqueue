@@ -267,8 +267,6 @@ public class IgniteServiceProvider extends Service implements Module, ServicePro
 
         communicationSpi.setLocalPort(PropertySupplier.getValue(propertySupplier, IgniteConfigKey.DISCOVERY_SPI_COMMUNICATION_SPI_LOCAL_PORT));
         cfg.setCommunicationSpi(communicationSpi);
-        // Disable Ignite LOGO
-        System.setProperty("IGNITE_NO_ASCII", "true");
 
         return IgnitionEx.start(cfg);
     }

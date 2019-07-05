@@ -39,6 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -94,28 +95,32 @@ public class ConfigurationManager extends Service implements EventListener<NameS
 
     private Configuration buildConfiguration() throws Exception {
         Configuration configuration = new Configuration();
-        InputStream in = getClass().getClassLoader().getResourceAsStream(this.configPath);
-        Preconditions.checkArgument(in != null, "config file not found.path:" + DEFAULT_CONFIG_PATH);
-        Properties properties = new Properties();
-        properties.load(in);
-        String text = (String) properties.remove(CONFIGURATION_VERSION);
-        long dataVersion = Configuration.DEFAULT_CONFIGURATION_VERSION;
-        if (text != null && !text.isEmpty()) {
-            try {
-                dataVersion = Long.parseLong(text);
-            } catch (NumberFormatException e) {
+        URL url = getClass().getClassLoader().getResource(this.configPath);
+        if (null != url) {
+            logger.info("Found conf file: {}.", url);
+            InputStream in = url.openStream();
+            Properties properties = new Properties();
+            properties.load(in);
+            String text = (String) properties.remove(CONFIGURATION_VERSION);
+            long dataVersion = Configuration.DEFAULT_CONFIGURATION_VERSION;
+            if (text != null && !text.isEmpty()) {
+                try {
+                    dataVersion = Long.parseLong(text);
+                } catch (NumberFormatException e) {
+                }
             }
+            List<Property> propertyList = new ArrayList<>(properties.size());
+            String key;
+            String value;
+            for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+                key = entry.getKey().toString();
+                value = entry.getValue().toString();
+                propertyList.add(new Property(DEFAULT_CONFIGURATION_NAME, key, value, dataVersion, DEFAULT_CONFIGURATION_PRIORITY));
+            }
+            configuration.addProperties(propertyList);
+        } else {
+            logger.info("No {} in classpath, using default.", this.configPath);
         }
-        List<Property> propertyList = new ArrayList<>(properties.size());
-        String key;
-        String value;
-        for (Map.Entry<Object, Object> entry : properties.entrySet()) {
-            key = entry.getKey().toString();
-            value = entry.getValue().toString();
-            propertyList.add(new Property(DEFAULT_CONFIGURATION_NAME, key, value, dataVersion, DEFAULT_CONFIGURATION_PRIORITY));
-        }
-        configuration.addProperties(propertyList);
-
         return configuration;
     }
 

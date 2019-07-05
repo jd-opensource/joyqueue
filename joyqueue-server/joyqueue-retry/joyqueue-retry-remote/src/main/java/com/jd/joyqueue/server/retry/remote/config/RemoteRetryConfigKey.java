@@ -11,32 +11,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jd.joyqueue.broker.archive;
+package com.jd.joyqueue.server.retry.remote.config;
 
 import com.jd.joyqueue.toolkit.config.PropertyDef;
 
 /**
- * 归档配置
- * <p>
- * Created by chengzhiliang on 2018/12/6.
+ * @author liyue25
+ * Date: 2019-07-05
  */
-public enum ArchiveConfigKey implements PropertyDef {
-    WRITE_BATCH_NUM("archive.write.batch.num", 1000, Type.INT),
-    READ_BATCH_NUM("archive.read.batch.num", 1000, Type.INT),
-    LOG_QUEUE_SIZE("archive.send.log.queue.size", 10000, Type.INT),
-    WRITE_THREAD_NUM("archive.thread.num", 5, Type.INT),
-    ARCHIVE_SWITCH("archive.switch", false, Type.BOOLEAN);
+public enum  RemoteRetryConfigKey implements PropertyDef {
+
+    REMOTE_RETRY_LIMIT_THREADS("retry.remote.retry.limit.thread", 10, Type.INT),
+    REMOTE_RETRY_UPDATE_INTERVAL("retry.remote.retry.update.interval", 60000L, Type.LONG);
+
 
     private String name;
     private Object value;
     private PropertyDef.Type type;
 
-    ArchiveConfigKey(String name, Object value, PropertyDef.Type type) {
+    RemoteRetryConfigKey(String name, Object value, PropertyDef.Type type) {
         this.name = name;
         this.value = value;
         this.type = type;
     }
-
     @Override
     public String getName() {
         return name;
@@ -51,5 +48,4 @@ public enum ArchiveConfigKey implements PropertyDef {
     public Type getType() {
         return type;
     }
-
 }

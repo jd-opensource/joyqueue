@@ -25,6 +25,7 @@ import com.jd.joyqueue.server.retry.db.DBMessageRetry;
 import com.jd.joyqueue.server.retry.model.RetryMessageModel;
 import com.jd.joyqueue.server.retry.model.RetryQueryCondition;
 import com.jd.joyqueue.server.retry.model.RetryStatus;
+import com.jd.joyqueue.toolkit.config.PropertySupplier;
 import com.jd.joyqueue.toolkit.db.DaoUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -53,6 +54,7 @@ public class DbConsoleMessageRetry implements ConsoleMessageRetry<Long> {
     private DBMessageRetry dbMessageRetry = new DBMessageRetry();
     // start flag
     private boolean isStartFlag = false;
+    private PropertySupplier propertySupplier = null;
 
     @Override
     public void start() throws Exception {
@@ -291,4 +293,10 @@ public class DbConsoleMessageRetry implements ConsoleMessageRetry<Long> {
     public void setRetryPolicyProvider(RetryPolicyProvider retryPolicyProvider) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public void setSupplier(PropertySupplier supplier) {
+        this.propertySupplier = supplier;
+    }
+
 }
