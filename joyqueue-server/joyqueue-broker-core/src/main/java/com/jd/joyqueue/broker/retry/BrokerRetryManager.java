@@ -32,6 +32,7 @@ import com.jd.joyqueue.server.retry.model.RetryMessageModel;
 import com.jd.joyqueue.server.retry.remote.RemoteMessageRetry;
 import com.jd.joyqueue.server.retry.remote.RemoteRetryProvider;
 import com.jd.joyqueue.toolkit.concurrent.EventListener;
+import com.jd.joyqueue.toolkit.config.PropertySupplier;
 import com.jd.joyqueue.toolkit.retry.RetryPolicy;
 import com.jd.joyqueue.toolkit.service.Service;
 import com.jd.laf.extension.ExtensionManager;
@@ -64,13 +65,13 @@ public class BrokerRetryManager extends Service implements MessageRetry<Long>, B
     private NameService nameService;
     // 集群管理
     private ClusterManager clusterManager;
-    //broker context
-    private BrokerContext brokerContext;
+
+    private PropertySupplier propertySupplier;
 
 
     public BrokerRetryManager(BrokerContext brokerContext) {
-        this.nameService = brokerContext.getNameService();
-        this.clusterManager = brokerContext.getClusterManager();
+        setBrokerContext(brokerContext);
+
     }
 
     @Override
@@ -168,6 +169,7 @@ public class BrokerRetryManager extends Service implements MessageRetry<Long>, B
         MessageRetry messageRetry;
 
         if (type.equals(DEFAULT_RETRY_TYPE)) {
+
             messageRetry = new RemoteMessageRetry(remoteRetryProvider);
         } else {
             messageRetry = ExtensionManager.getOrLoadExtension(MessageRetry.class, type);
@@ -186,7 +188,14 @@ public class BrokerRetryManager extends Service implements MessageRetry<Long>, B
 
     @Override
     public void setBrokerContext(BrokerContext brokerContext) {
-        this.brokerContext = brokerContext;
+        this.nameService = brokerContext.getNameService();
+        this.clusterManager = brokerContext.getClusterManager();
+        this.propertySupplier = brokerContext.getPropertySupplier();
+    }
+
+    @Override
+    public void setSupplier(PropertySupplier supplier) {
+        this.propertySupplier = supplier;
     }
 
     /**

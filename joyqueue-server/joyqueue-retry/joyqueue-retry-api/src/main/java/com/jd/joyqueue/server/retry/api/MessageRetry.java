@@ -15,6 +15,7 @@ package com.jd.joyqueue.server.retry.api;
 
 import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.server.retry.model.RetryMessageModel;
+import com.jd.joyqueue.toolkit.config.PropertySupplierAware;
 import com.jd.joyqueue.toolkit.lang.LifeCycle;
 
 import java.util.List;
@@ -24,7 +25,7 @@ import java.util.List;
  * <p>
  * Created by chengzhiliang on 2018/9/13.
  */
-public interface MessageRetry<T> extends LifeCycle {
+public interface MessageRetry<T> extends LifeCycle, PropertySupplierAware {
 
     /**
      * 增加重试

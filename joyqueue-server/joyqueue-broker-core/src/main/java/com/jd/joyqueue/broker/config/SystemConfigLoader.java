@@ -17,7 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.net.URL;
 import java.util.Properties;
 
 /**
@@ -29,19 +29,37 @@ import java.util.Properties;
 public class SystemConfigLoader {
 
     protected static final Logger logger = LoggerFactory.getLogger(SystemConfigLoader.class);
+    protected static final Properties DEFAULT_PROPERTIES = new Properties();
 
     protected static final String SYSTEM_EVN_FILE = "system.properties";
 
+    static {
+        DEFAULT_PROPERTIES.setProperty("IGNITE_QUIET", "true");
+        DEFAULT_PROPERTIES.setProperty("IGNITE_DUMP_THREADS_ON_FAILURE", "true");
+        DEFAULT_PROPERTIES.setProperty("IGNITE_NO_ASCII", "true");
+    }
+
     public static void load() {
+        Properties sysEvn = new Properties();
+
         try {
-            Properties sysEvn = new Properties();
-            InputStream inputStream = SystemConfigLoader.class.getClassLoader().getResourceAsStream(SYSTEM_EVN_FILE);
-            if (null != inputStream) {
-                sysEvn.load(inputStream);
+            URL sysEnvFileUrl = SystemConfigLoader.class.getClassLoader().getResource(SYSTEM_EVN_FILE);
+            if(null != sysEnvFileUrl) {
+                logger.info("Found system properties file: {}.", sysEnvFileUrl);
+                sysEvn.load(sysEnvFileUrl.openStream());
+            } else {
+                logger.info("No system properties file in classpath, using default properties.");
+                sysEvn = DEFAULT_PROPERTIES;
             }
-            sysEvn.forEach((k, v) -> System.setProperty(k.toString(), v.toString()));
         } catch (IOException e) {
-            logger.warn("load system config exception", e);
+            logger.warn("load system config exception, using default.", e);
+            sysEvn = DEFAULT_PROPERTIES;
         }
+
+        sysEvn.forEach((k, v) -> {
+            logger.info("Set system property: {} -> {}.", k, v);
+            System.setProperty(k.toString(), v.toString());
+        });
+
     }
 }

@@ -30,8 +30,9 @@ import com.jd.joyqueue.server.retry.remote.command.GetRetryCount;
 import com.jd.joyqueue.server.retry.remote.command.GetRetryCountAck;
 import com.jd.joyqueue.server.retry.remote.command.PutRetry;
 import com.jd.joyqueue.server.retry.remote.command.UpdateRetry;
-import com.jd.joyqueue.server.retry.remote.config.RemoteRetryConfig;
+import com.jd.joyqueue.server.retry.remote.config.RemoteRetryConfigKey;
 import com.jd.joyqueue.toolkit.concurrent.LoopThread;
+import com.jd.joyqueue.toolkit.config.PropertySupplier;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,11 +53,13 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class RemoteMessageRetry implements MessageRetry<Long> {
     private static final Logger logger = LoggerFactory.getLogger(RemoteMessageRetry.class);
-
+    private PropertySupplier propertySupplier = null;
     // 远程调用限制的并发线程数
-    private int remoteRetryLimitThread;
+    private int remoteRetryLimitThread = (int ) RemoteRetryConfigKey.REMOTE_RETRY_LIMIT_THREADS.getValue();
+
+    private long remoteRetryUpdateInterval = (long )RemoteRetryConfigKey.REMOTE_RETRY_UPDATE_INTERVAL.getValue();
     // 信号量（控制并发）
-    private Semaphore retrySemaphore;
+    private Semaphore retrySemaphore = null;
     // 连接通道客户端
     private TransportClient transportClient;
     // 可直连DB的broker的网络通道
@@ -70,16 +73,16 @@ public class RemoteMessageRetry implements MessageRetry<Long> {
     // 重试主题策略
     private RetryPolicyProvider retryPolicyProvider;
 
+
     public RemoteMessageRetry(RemoteRetryProvider remoteRetryProvider) {
         this.remoteRetryProvider = remoteRetryProvider;
     }
 
     @Override
     public void start() {
-        remoteRetryLimitThread = RemoteRetryConfig.getRemoteRetryLimitThread();
         retrySemaphore = new Semaphore(remoteRetryLimitThread);
         transportClient = remoteRetryProvider.createTransportClient();
-        transports = new RemoteTransportCollection(BalanceType.ROLL, transportClient);
+        transports = new RemoteTransportCollection(BalanceType.ROLL, transportClient, remoteRetryUpdateInterval);
 
         startFlag = true;
         logger.info("remote retry manager is started");
@@ -146,7 +149,6 @@ public class RemoteMessageRetry implements MessageRetry<Long> {
     public List<RetryMessageModel> getRetry(final String topic, final String app, short count, long startIndex) throws
             JoyQueueException {
         checkStarted();
-        checkSemaphore();
 
         Semaphore semaphore = this.retrySemaphore;
         if (semaphore.tryAcquire()) {
@@ -245,15 +247,11 @@ public class RemoteMessageRetry implements MessageRetry<Long> {
         return transport.sync(request);
     }
 
-    public void checkSemaphore() {
-        if (remoteRetryLimitThread != RemoteRetryConfig.getRemoteRetryLimitThread()) {
-            synchronized (this) {
-                if (remoteRetryLimitThread != RemoteRetryConfig.getRemoteRetryLimitThread()) {
-                    remoteRetryLimitThread = RemoteRetryConfig.getRemoteRetryLimitThread();
-                    retrySemaphore = new Semaphore(remoteRetryLimitThread, true);
-                }
-            }
-        }
+    @Override
+    public void setSupplier(PropertySupplier supplier) {
+        this.propertySupplier = supplier;
+        this.remoteRetryLimitThread = propertySupplier.getValue(RemoteRetryConfigKey.REMOTE_RETRY_LIMIT_THREADS);
+        this.remoteRetryUpdateInterval = propertySupplier.getValue(RemoteRetryConfigKey.REMOTE_RETRY_UPDATE_INTERVAL);
     }
 
     /**
@@ -277,21 +275,21 @@ public class RemoteMessageRetry implements MessageRetry<Long> {
         private CopyOnWriteArrayList<Transport> transportList = new CopyOnWriteArrayList<>();
         private AtomicInteger rollCounter = new AtomicInteger(0);
         private Random random = new Random();
-        private int updateInterval = RemoteRetryConfig.getRemoteRetryUpdateInterval();
         // 定时更新远程重试通道集合
-        private LoopThread updateThread = LoopThread.builder()
-                .sleepTime(updateInterval, updateInterval)
-                .name("Update-Remote-Transport-Thread")
-                .onException(e -> logger.error(e.getMessage(), e))
-                .doWork(this::buildRemoteTransport)
-                .build();
+        private final LoopThread updateThread;
 
-        RemoteTransportCollection(BalanceType balanceType, TransportClient nettyClient) {
+        RemoteTransportCollection(BalanceType balanceType, TransportClient nettyClient, long updateInterval) {
             this.balanceType = balanceType;
             this.nettyClient = nettyClient;
             // 第一次构建远程重试服务通道集合
             buildRemoteTransport();
             // 启动定时更新线程
+            this.updateThread = LoopThread.builder()
+                    .sleepTime(updateInterval, updateInterval)
+                    .name("Update-Remote-Transport-Thread")
+                    .onException(e -> logger.error(e.getMessage(), e))
+                    .doWork(this::buildRemoteTransport)
+                    .build();
             updateThread.start();
         }
 

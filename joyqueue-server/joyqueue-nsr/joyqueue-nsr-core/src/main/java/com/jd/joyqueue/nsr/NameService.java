@@ -42,6 +42,7 @@ import java.util.Set;
  */
 public interface NameService extends LifeCycle {
 
+
     /**
      * 订阅
      */

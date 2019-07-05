@@ -29,11 +29,23 @@
     <description>Server runtime</description>
 
     <dependencies>
-        <!-- 测试用log4j2 -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
+            <artifactId>log4j-api</artifactId>
+            <scope>runtime</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency> <!-- 桥接：告诉Slf4j使用Log4j2 -->
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
         <dependency>
             <groupId>com.jd.joyqueue</groupId>
             <artifactId>joyqueue-retry-h2</artifactId>
@@ -62,12 +74,6 @@
             <groupId>com.jd.joyqueue</groupId>
             <artifactId>joyqueue-archive-hbase</artifactId>
             <scope>runtime</scope>
-            <exclusions>
-                <exclusion>
-                    <artifactId>slf4j-log4j12</artifactId>
-                    <groupId>org.slf4j</groupId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.jd.joyqueue</groupId>
