@@ -27,31 +27,31 @@ import java.util.Map;
  */
 public class ConsoleProducerConfig {
 
-    @Parameter(names = "-bootstrap", description = "server bootstrap", required = true)
-    private String bootstrap;
+    @Parameter(names = {"--bootstrap"}, description = "server bootstrap")
+    private String bootstrap="localhost:50088";
 
-    @Parameter(names = "-topic", description = "producer topic", required = true)
+    @Parameter(names = {"-t","--topic"}, description = "producer topic", required = true)
     private String topic;
 
-    @Parameter(names = "-namespace", description = "producer namespace")
+    @Parameter(names = {"-n","--namespace"}, description = "producer namespace")
     private String namespace;
 
-    @Parameter(names = "-region", description = "producer region")
+    @Parameter(names = {"-r","--region"}, description = "producer region")
     private String region;
 
-    @Parameter(names = "-app", description = "producer app", required = true)
+    @Parameter(names ={"-a","--app"}, description = "producer app", required = true)
     private String app;
 
-    @Parameter(names = "-token", description = "app token", required = true)
+    @Parameter(names ={"--token"}, description = "app token", required = true)
     private String token;
 
     @DynamicParameter(names = "-params", description = "producer params")
     private Map<String, String> params = new HashMap<>();
 
-    @Parameter(names = "-key", description = "message key")
+    @Parameter(names = {"-k","--key"}, description = "message key")
     private String key;
 
-    @Parameter(names = "-body", description = "message body")
+    @Parameter(names = {"-b","--body"}, description = "message body")
     private String body;
 
     @Parameter(names = "--help", help = true)

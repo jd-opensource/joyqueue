@@ -10,11 +10,11 @@ JoyQueue 是一个兼容Kafka、MQTT协议的分布式、云原生消息平台�
 * 分区消息保证严格先进先出（FIFO）
 * 支持生产/消费负载均衡
 * 2PC 事务消息
-* 支持Qos级别：UNRELIABLE, LOCAL_RELIABLE,CLUSTER_RELABLE
+* 支持Qos级别：ONE_WAY, RECEIVE,PERSISTENCE and REPLICATION
 * 基于Raft选举的分区组复制
-* 单分区百万级消息堆积
+* 单分区千万级消息堆积
 * 主题、分区组和分区可水平扩展
-* 丰富的客户端支持，如Kafka,MQTT以及符合OMS（open messaging）协议的客户端
+* 丰富的客户端支持，如Kafka,MQTT以及符合OMS（openmessaging）协议的客户端
 * 完善的管理、配置和监控管理端
 
 编译及安装
@@ -22,6 +22,7 @@ JoyQueue 是一个兼容Kafka、MQTT协议的分布式、云原生消息平台�
 
 参与贡献
 ====
+
 JoyQueue 期待创建一个完善的消息平台社区，欢迎提出任何想法和问题
 
 开源协议

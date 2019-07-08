@@ -1,6 +1,6 @@
 # JoyQueue 文档目录
 
-## [README](../../Readme.md)
+## [README](../../README.md)
 
 1. 快速开始（链接到快速开始）
 2. 主要特性
