@@ -95,70 +95,71 @@
         </executions>
       </plugin>
 
-      <plugin>
-        <groupId>com.github.eirslett</groupId>
-        <artifactId>frontend-maven-plugin</artifactId>
-        <version>1.5</version>
-        <executions>
-          <!-- Install our node and npm version to run npm/node scripts-->
-          <execution>
-            <id>install node and npm</id>
-            <goals>
-              <goal>install-node-and-npm</goal>
-            </goals>
-            <configuration>
-              <nodeVersion>v10.15.3</nodeVersion>
-              <npmVersion>6.4.1</npmVersion>
-              <nodeDownloadRoot>https://nodejs.org/dist/</nodeDownloadRoot>
-              <npmDownloadRoot>http://registry.npmjs.org/npm/-/</npmDownloadRoot>
-            </configuration>
-          </execution>
-          <!-- Set NPM Registry -->
-          <execution>
-            <id>npm set registry</id>
-            <goals>
-              <goal>npm</goal>
-            </goals>
-            <configuration>
-              <arguments>config set registry https://registry.npmjs.org</arguments>
-            </configuration>
-          </execution>
-          <!-- Set SSL privilege -->
-          <execution>
-            <id>npm set non-strict ssl</id>
-            <goals>
-              <goal>npm</goal>
-            </goals>
-            <!-- Optional configuration which provides for running any npm command -->
-            <configuration>
-              <arguments>config set strict-ssl false</arguments>
-            </configuration>
-          </execution>
-          <!-- Install all project dependencies -->
-          <execution>
-            <id>npm install</id>
-            <goals>
-              <goal>npm</goal>
-            </goals>
-            <!-- optional: default phase is "generate-resources" -->
-            <phase>generate-resources</phase>
-            <!-- Optional configuration which provides for running any npm command -->
-            <configuration>
-              <arguments>install</arguments>
-            </configuration>
-          </execution>
-          <!-- Build and minify static files -->
-          <execution>
-            <id>npm run build</id>
-            <goals>
-              <goal>npm</goal>
-            </goals>
-            <configuration>
-              <arguments>run build</arguments>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
+      <!-- 线上无法访问npm、node网址，导致编译不过,临时注释 -->
+<!--      <plugin>-->
+<!--        <groupId>com.github.eirslett</groupId>-->
+<!--        <artifactId>frontend-maven-plugin</artifactId>-->
+<!--        <version>1.5</version>-->
+<!--        <executions>-->
+<!--          &lt;!&ndash; Install our node and npm version to run npm/node scripts&ndash;&gt;-->
+<!--          <execution>-->
+<!--            <id>install node and npm</id>-->
+<!--            <goals>-->
+<!--              <goal>install-node-and-npm</goal>-->
+<!--            </goals>-->
+<!--            <configuration>-->
+<!--              <nodeVersion>v10.15.3</nodeVersion>-->
+<!--              <npmVersion>6.4.1</npmVersion>-->
+<!--              <nodeDownloadRoot>https://nodejs.org/dist/</nodeDownloadRoot>-->
+<!--              <npmDownloadRoot>http://registry.npmjs.org/npm/-/</npmDownloadRoot>-->
+<!--            </configuration>-->
+<!--          </execution>-->
+<!--          &lt;!&ndash; Set NPM Registry &ndash;&gt;-->
+<!--          <execution>-->
+<!--            <id>npm set registry</id>-->
+<!--            <goals>-->
+<!--              <goal>npm</goal>-->
+<!--            </goals>-->
+<!--            <configuration>-->
+<!--              <arguments>config set registry https://registry.npmjs.org</arguments>-->
+<!--            </configuration>-->
+<!--          </execution>-->
+<!--          &lt;!&ndash; Set SSL privilege &ndash;&gt;-->
+<!--          <execution>-->
+<!--            <id>npm set non-strict ssl</id>-->
+<!--            <goals>-->
+<!--              <goal>npm</goal>-->
+<!--            </goals>-->
+<!--            &lt;!&ndash; Optional configuration which provides for running any npm command &ndash;&gt;-->
+<!--            <configuration>-->
+<!--              <arguments>config set strict-ssl false</arguments>-->
+<!--            </configuration>-->
+<!--          </execution>-->
+<!--          &lt;!&ndash; Install all project dependencies &ndash;&gt;-->
+<!--          <execution>-->
+<!--            <id>npm install</id>-->
+<!--            <goals>-->
+<!--              <goal>npm</goal>-->
+<!--            </goals>-->
+<!--            &lt;!&ndash; optional: default phase is "generate-resources" &ndash;&gt;-->
+<!--            <phase>generate-resources</phase>-->
+<!--            &lt;!&ndash; Optional configuration which provides for running any npm command &ndash;&gt;-->
+<!--            <configuration>-->
+<!--              <arguments>install</arguments>-->
+<!--            </configuration>-->
+<!--          </execution>-->
+<!--          &lt;!&ndash; Build and minify static files &ndash;&gt;-->
+<!--          <execution>-->
+<!--            <id>npm run build</id>-->
+<!--            <goals>-->
+<!--              <goal>npm</goal>-->
+<!--            </goals>-->
+<!--            <configuration>-->
+<!--              <arguments>run build</arguments>-->
+<!--            </configuration>-->
+<!--          </execution>-->
+<!--        </executions>-->
+<!--      </plugin>-->
     </plugins>
   </build>
 </project>
