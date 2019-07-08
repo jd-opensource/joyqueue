@@ -1,13 +1,14 @@
 {
-  "name": "journalq-portal",
-  "version": "1.1.0",
-  "description": "JournalQ管理后台",
+
+  "name": "joyqueue-web",
+  "version": "1.0.5",
+  "description": "JoyQueue web administration console",
   "author": "yuanchanglong <yuanchanglong@jd.com>",
   "scripts": {
     "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
     "start": "npm run dev",
     "lint": "eslint --ext .js,.vue src",
-    "build": "node build/build.js && gulp journalq"
+    "build": "node build/build.js"
   },
   "files": [
     "src"

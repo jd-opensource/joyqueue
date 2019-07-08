@@ -167,7 +167,7 @@
             </dependency>
             <dependency>
                 <groupId>com.jd.joyqueue</groupId>
-                <artifactId>joyqueue-web-webroot</artifactId>
+                <artifactId>joyqueue-portal</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -779,7 +779,6 @@
                                 <exclude>**/node_modules/**</exclude>
                                 <exclude>**/joyqueue-portal/**</exclude>
                                 <exclude>**/joyqueue-portal/node/**</exclude>
-                                <exclude>**/joyqueue-web-webroot/**</exclude>
                                 <exclude>**/*.vue</exclude>
                                 <exclude>**/*.js</exclude>
                                 <exclude>**/*.js.map</exclude>

@@ -69,29 +69,14 @@ fi
 CLASSPATH="$BASEDIR"/conf/:"$BASEDIR"/root/:"$BASEDIR"/lib/*
 echo "$CLASSPATH"
 
-# ------ set jvm memory
-sed "s/\r$//g" jvm.properties > 1.properties
-mv 1.properties jvm.properties
-if [ -z "$OPTS_MEMORY" ] ; then
-    OPTS_MEMORY="`sed -n '1p' jvm.properties`"
-fi
-if [ "`sed -n '2p' jvm.properties`" != "" ] ; then
-    JAVA_CMD="`sed -n '2p' jvm.properties`"
-    if [ -f $JAVA_CMD ]; then
-        JAVACMD=$JAVA_CMD
-    fi
-fi
-
 #DEBUG_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8000"
 #JPDA_OPTS="-agentlib:jdwp=transport=dt_socket,address=8000,server=y,suspend=n"
 # ------ run proxy
-nohup "$JAVACMD" $JPDA_OPTS \
-  $OPTS_MEMORY $DEBUG_OPTS \
+"$JAVACMD" $JPDA_OPTS \
   -classpath "$CLASSPATH" \
   -Dbasedir="$BASEDIR" \
   -Dfile.encoding="UTF-8" \
-  com.jd.joyqueue.application.WebApplication \
-  > /dev/null &
+  com.jd.joyqueue.application.WebApplication
 
 
 # ------ wirte pid to file

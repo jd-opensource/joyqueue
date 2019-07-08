@@ -31,10 +31,10 @@
     <description>Web console runtime</description>
 
     <dependencies>
-
         <dependency>
             <groupId>com.jd.joyqueue</groupId>
-            <artifactId>joyqueue-web-webroot</artifactId>
+            <artifactId>joyqueue-portal</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
@@ -114,69 +114,16 @@
     </dependencies>
 
     <build>
-
-        <resources>
-            <!-- 打包时过滤掉所有的配置文件，使用conf中的配置文件！ -->
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-                <includes>
-                    <include>**/*.*</include>
-                </includes>
-            </resource>
-            <resource>
-                <directory>src/main/webroot</directory>
-                <filtering>false</filtering>
-                <includes>
-                    <include>**/*.*</include>
-                </includes>
-                <targetPath>webroot</targetPath>
-            </resource>
-        </resources>
-
         <plugins>
             <!-- jar包 插件 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>${maven-jar-plugin.version}</version>
                 <configuration>
                     <excludes>
-                        <exclude>**/*.properties</exclude>
-                        <exclude>**/*.xml</exclude>
+                        <exclude>/logback.xml</exclude>
                     </excludes>
-                    <archive>
-                        <addMavenDescriptor>false</addMavenDescriptor>
-                        <index>true</index>
-                        <manifest>
-                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                        </manifest>
-                        <manifestEntries>
-                            <Implementation-Build>${maven.build.timestamp}</Implementation-Build>
-                        </manifestEntries>
-                    </archive>
                 </configuration>
-            </plugin>
-            <!-- 打包插件 -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>${maven-assembly-plugin.version}</version>
-                <configuration>
-                    <descriptors>
-                        <descriptor>src/main/assembly/assembly.xml</descriptor>
-                    </descriptors>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>make-assembly</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
