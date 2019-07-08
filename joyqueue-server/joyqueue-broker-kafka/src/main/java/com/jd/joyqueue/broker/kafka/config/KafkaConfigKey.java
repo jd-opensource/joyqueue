@@ -69,6 +69,8 @@ public enum KafkaConfigKey implements PropertyDef {
     FETCH_BATCH_SIZE("kafka.fetch.batch.size", 10, Type.INT),
     // 元数据延迟
     METADATA_DELAY("kafka.metadata.delay", 1000 * 1, Type.INT),
+    // 拉取延迟
+    FETCH_DELAY("kafka.fetch.delay", 1000 * 1, Type.BOOLEAN),
     ;
 
     private String name;

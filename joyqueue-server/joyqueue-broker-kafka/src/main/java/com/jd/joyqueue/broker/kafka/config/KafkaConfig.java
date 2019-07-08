@@ -42,6 +42,10 @@ public class KafkaConfig {
         return getConfig(KafkaConfigKey.METADATA_DELAY);
     }
 
+    public boolean getFetchDelay() {
+        return getConfig(KafkaConfigKey.FETCH_DELAY);
+    }
+
     public int getOffsetSyncTimeout() {
         return getConfig(KafkaConfigKey.OFFSET_SYNC_TIMEOUT);
     }

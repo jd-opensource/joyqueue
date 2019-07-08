@@ -14,6 +14,7 @@
 package com.jd.joyqueue.broker.kafka.session;
 
 import com.jd.joyqueue.broker.kafka.KafkaCommandType;
+import com.jd.joyqueue.broker.kafka.command.ProduceRequest;
 import com.jd.joyqueue.network.transport.ChannelTransport;
 import com.jd.joyqueue.network.transport.RequestBarrier;
 import com.jd.joyqueue.network.transport.TransportHelper;
@@ -64,11 +65,17 @@ public class KafkaTransportHandler extends ChannelDuplexHandler {
 
         int type = ((Command) msg).getHeader().getType();
         if (type == KafkaCommandType.METADATA.getCode()
+                || type == KafkaCommandType.LIST_OFFSETS.getCode()
                 || type == KafkaCommandType.PRODUCE.getCode()
                 || type == KafkaCommandType.FETCH.getCode()) {
             ((KafkaChannelTransport) transport).acquire();
         } else {
             ((KafkaChannelTransport) transport).tryAcquire();
+        }
+
+        if (((Command) msg).getPayload() instanceof ProduceRequest
+                && ((ProduceRequest) ((Command) msg).getPayload()).getRequiredAcks() == 0) {
+            ((KafkaChannelTransport) transport).release();
         }
 
         super.channelRead(ctx, msg);
