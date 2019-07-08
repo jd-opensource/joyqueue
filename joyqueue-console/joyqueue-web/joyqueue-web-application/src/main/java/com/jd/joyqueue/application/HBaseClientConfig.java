@@ -18,8 +18,11 @@ import com.jd.laf.extension.ExtensionPoint;
 import com.jd.laf.extension.ExtensionPointLazy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Scope;
 
 /**
  * Created by wangxiaofei1 on 2018/12/19.
@@ -29,6 +32,8 @@ public class HBaseClientConfig {
     private static final Logger logger = LoggerFactory.getLogger(HBaseClientConfig.class);
     private ExtensionPoint<ArchiveStore, String> archiveStores = new ExtensionPointLazy<>(ArchiveStore.class);
 
+    @Lazy
+    @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
     @Bean(value="archiveStore", destroyMethod="stop")
     public ArchiveStore getArchiveStore(){
         ArchiveStore archiveStore =  archiveStores.get();
