@@ -55,7 +55,7 @@ public class AutoTestAPIDoc implements HeuristicAutoTest<APIDoc> {
             }
             if (params != null && params.length() > 1) {
                 params.deleteCharAt(params.length() - 1);// &
-                pathTemplate += params.toString();
+                pathTemplate +=params.toString();
             }
         }
         return curl(host, pathTemplate, apiDoc.getHttpMethod(), null);

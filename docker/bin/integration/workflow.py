@@ -65,6 +65,7 @@ class Workflow:
         result = 'unknown'
         try:
             self.__lock_local_workspace()
+            self.__preclean_container()
             self.__create_subnet()
             self.__prepare_pressure_worker()
             self.__start_mq_cluster_workers()
@@ -299,6 +300,7 @@ class Workflow:
     def __shutdown_mq_worker_script(self, host):
         cidfile ='run_{}.cid'.format(host)
         script = """
+                docker containers 
                 full_cid=$(cat {cidfile})
                 echo $full_cid
                 containerId=$(docker ps --filter id=$full_cid|grep {docker_namespace}/{repo_name}|awk '{{print $1}}')
@@ -314,6 +316,23 @@ class Workflow:
                        cidfile=cidfile,
                        tag=self.mq_tag).rstrip()
         return script
+
+    def __preclean_container(self):
+        clean = """
+              ls -l ./
+              docker container prune -f
+              mq_containerId=$(docker ps |grep {mq_docker_namespace}/{mq_repo_name}|awk '{{print $1}}|uniq')
+              pressure_containerId=$(docker ps |grep {pressure_repo_name}|awk '{{print $1}}|uniq')
+              docker stop $(mq_containerId)
+              docker rm $(mq_containerId)
+              docker stop $(pressure_containerId) 
+              docker rm $(pressure_containerId)  
+              rm *.cid
+              """.format(mq_docker_namespace=self.task.mq_docker_namespace,
+                         mq_repo_name=self.task.mq_repo_name,
+                         pressure_repo_name=self.task.pressure_repo_name)
+        self.__run_local_script(clean)
+
 
     def __cleanup_local_docker(self):
         # script = self.__shutdown_cleanup_mq_worker_script()
@@ -333,7 +352,9 @@ class Workflow:
                 fi
                 docker images
                 docker ps -a 
-        """.format(mq_repo_name=self.task.mq_repo_name, pressure_repo_name=self.task.pressure_repo_name,mq_home=self.task.mq_home).rstrip()
+        """.format(mq_repo_name=self.task.mq_repo_name,
+                   pressure_repo_name=self.task.pressure_repo_name,
+                   mq_home=self.task.mq_home).rstrip()
         self.__run_local_script(script)
 
     def __cleanup_workspace(self):

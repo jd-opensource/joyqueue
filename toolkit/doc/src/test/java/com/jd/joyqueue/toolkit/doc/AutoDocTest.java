@@ -11,19 +11,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jd.joyqueue.broker.doc;
+package com.jd.joyqueue.toolkit.doc;
 
 import com.alibaba.fastjson.JSON;
-import com.jd.joyqueue.toolkit.doc.AutoDoc;
-import com.jd.joyqueue.toolkit.doc.AutoTestAPIDoc;
-import com.jd.joyqueue.toolkit.doc.PackageDocScanParser;
-import com.jd.joyqueue.toolkit.doc.Param;
 import com.jd.joyqueue.toolkit.doc.format.MarkdownAPIDocFormat;
 import com.jd.joyqueue.toolkit.doc.vertx.RoutingParser;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,7 +36,7 @@ public class AutoDocTest {
         String pkgNameB="com.jd.joyqueue.broker.monitor.service";
         String routPath= "manage/routing.xml";
         String defaultProperties="auto_doc.properties";
-        String host="http://192.168.112.99:50090";
+        String host="http://localhost:50090";
         List<String> pkgNames=new ArrayList<>();
         List<String> routes=new ArrayList<>();
         pkgNames.add(pkgName);

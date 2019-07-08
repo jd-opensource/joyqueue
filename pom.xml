@@ -741,6 +741,7 @@
         <module>joyqueue-openmessaging</module>
         <module>docker</module>
         <module>joyqueue-distribution</module>
+        <module>toolkit</module>
     </modules>
     <profiles>
         <profile>
