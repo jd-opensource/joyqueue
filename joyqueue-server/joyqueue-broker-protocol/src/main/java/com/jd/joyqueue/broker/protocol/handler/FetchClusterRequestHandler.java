@@ -117,13 +117,15 @@ public class FetchClusterRequestHandler implements JoyQueueCommandHandler, Type,
         Producer producer = nameService.getProducerByTopicAndApp(topicName, app);
         Consumer consumer = nameService.getConsumerByTopicAndApp(topicName, app);
 
-        if (producer == null && consumer == null) {
+        if (producer == null && consumer == null && !connection.isSystem()) {
             logger.warn("topic policy not exist, topic: {}, app: {}", topic, app);
             result.setCode(JoyQueueCode.CN_NO_PERMISSION);
             return result;
         }
 
-        if (producer != null) {
+        if (producer == null) {
+            result.setProducerPolicy(PolicyConverter.convertProducer(brokerContext.getProducerPolicy()));
+        } else {
             if (producer.getProducerPolicy() == null) {
                 result.setProducerPolicy(PolicyConverter.convertProducer(brokerContext.getProducerPolicy()));
             } else {
@@ -131,7 +133,10 @@ public class FetchClusterRequestHandler implements JoyQueueCommandHandler, Type,
             }
         }
 
-        if (consumer != null) {
+        if (consumer == null) {
+            result.setConsumerPolicy(PolicyConverter.convertConsumer(brokerContext.getConsumerPolicy()));
+            result.setType(TopicType.TOPIC);
+        } else {
             if (consumer.getConsumerPolicy() == null) {
                 result.setConsumerPolicy(PolicyConverter.convertConsumer(brokerContext.getConsumerPolicy()));
             } else {
