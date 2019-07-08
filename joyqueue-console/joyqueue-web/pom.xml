@@ -30,7 +30,6 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>joyqueue-web-webroot</module>
         <module>joyqueue-web-application</module>
         <module>joyqueue-web-handler</module>
         <module>joyqueue-web-springboot-starter</module>
