@@ -29,7 +29,6 @@
 </template>
 
 <script>
-import store from '../../store'
 import viewLang from '../../i18n/views.json'
 import {deepCopy} from '../../utils/assist.js'
 
@@ -246,10 +245,10 @@ export default {
       return colOpData
     },
     blankStyle() {
-      if (!this.data.operates || this.data.operates===[]) {
+      if (!this.data.operates || this.data.operates === []) {
         return { 'margin-top': `20px` }
       } else {
-        let height = 20* this.data.operates.length
+        let height = 20 * this.data.operates.length
         return { 'margin-top': `${height}px` }
       }
     }

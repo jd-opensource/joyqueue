@@ -272,7 +272,7 @@ export function clientTypeBtnRender (h, value) {
   return basePrimaryBtnRender(h, value, clientTypeOptions())
 }
 export function topicTypeBtnRender (h, value) {
-  return baseBtnRender(h, value, topicTypeOptions())
+  return basePrimaryBtnRender(h, value, topicTypeOptions())
 }
 
 export function subscribeGroupAutoCompleteRender (h, params, subscribeRef) {
