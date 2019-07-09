@@ -21,9 +21,9 @@ $ git clone git@git.jd.com:laf/journalQ.git
 $ cd journalQ && git checkout 4.1.0-SNAPSHOT
 $ mvn install -Dmaven.test.skip=true -P CompileFrontend install
 $ src_home=$(pwd)
-$ mkdir ~/joyqueue-server ~/joyqueue-web
-$ tar -zxvf  $src_home/joyqueue-distribution/target/joyqueue-server-4.1.0-SNAPSHOT.tar.gz -C ~/joyqueue-server
-$ unzip $src_home/joyqueue-console/joyqueue-web/joyqueue-web-application/target/joyqueue-web-application-4.1.0-SNAPSHOT-assembly.zip  -d ~/joyqueue-web
+$ mkdir ~/joyqueue
+$ tar -zxvf  $src_home/joyqueue-distribution/joyqueue-distribution-server/target/joyqueue-server-4.1.0-SNAPSHOT.tar.gz -C ~/joyqueue
+$ tar -zxvf $src_home/joyqueue-distribution/joyqueue-distribution-web//target/joyqueue-web-4.1.0-SNAPSHOT.tar.gz  -C ~/joyqueue
 
 ```
 
@@ -33,7 +33,7 @@ $ unzip $src_home/joyqueue-console/joyqueue-web/joyqueue-web-application/target/
 
 ```bash
 
-$ cd ~/joyqueue-server
+$ cd ~/joyqueue/joyqueue-server-4.1.0-SNAPSHOT
 $ bin/server-start.sh
 
 ```
@@ -62,9 +62,10 @@ $ bin/server-start.sh
 ## 第3步：以默认配置启动JoyQueue Web 
 
 使用如下命令启动管理端：
+
 ```bash
 
-$ cd ～/joyqueue-web/
+$ cd ～/joyqueue/joyqueue-web-4.1.0-SNAPSHOT
 $ bin/start.sh
 
 ```
@@ -73,57 +74,102 @@ $ bin/start.sh
 现在可以通过启动日志和网络端口监听情况，判断管理端服务是否正常启动。如果你能在日志中看到如下日志，表明管理端服务已经正常启动，并监听在10031端口上。正常的启动日志如下：
 
 ```
-2019-07-08 18:26:49.676 [main] INFO  com.jd.laf.web.vertx.spring.SpringVertx - success starting Vert.x
-2019-07-08 18:26:49.700 [main] INFO  com.jd.joyqueue.application.WebApplication - Started WebApplication in 4.821 seconds (JVM running for 6.16)
-2019-07-08 18:26:49.705 [routing-6] INFO  com.jd.laf.web.vertx.RoutingVerticle - success binding http listener 5 on port 10031
-2019-07-08 18:26:49.705 [routing-7] INFO  com.jd.laf.web.vertx.RoutingVerticle - success binding http listener 2 on port 10031
-2019-07-08 18:26:49.706 [routing-9] INFO  com.jd.laf.web.vertx.RoutingVerticle - success binding http listener 4 on port 10031
-2019-07-08 18:26:49.706 [routing-10] INFO  com.jd.laf.web.vertx.RoutingVerticle - success binding http listener 1 on port 10031
-2019-07-08 18:26:49.705 [routing-8] INFO  com.jd.laf.web.vertx.RoutingVerticle - success binding http listener 6 on port 10031
-2019-07-08 18:26:49.706 [routing-11] INFO  com.jd.laf.web.vertx.RoutingVerticle - success binding http listener 3 on port 10031
+
+2019-07-09 13:04:25.319 [main] INFO  com.jd.laf.web.vertx.spring.SpringVertx - success starting Vert.x
+2019-07-09 13:04:25.329 [main] INFO  com.jd.joyqueue.application.WebApplication - Started WebApplication in 4.179 seconds (JVM running for 4.776)
+2019-07-09 13:04:25.331 [main] INFO  com.jd.joyqueue.application.WebApplication - JoyQueue web started on port 10031.
+2019-07-09 13:04:25.339 [routing-6] INFO  com.jd.laf.web.vertx.RoutingVerticle - success binding http listener 4 on port 10031
+2019-07-09 13:04:25.339 [routing-7] INFO  com.jd.laf.web.vertx.RoutingVerticle - success binding http listener 1 on port 10031
+2019-07-09 13:04:25.339 [routing-8] INFO  com.jd.laf.web.vertx.RoutingVerticle - success binding http listener 3 on port 10031
+2019-07-09 13:04:25.339 [routing-9] INFO  com.jd.laf.web.vertx.RoutingVerticle - success binding http listener 6 on port 10031
+2019-07-09 13:04:25.339 [routing-10] INFO  com.jd.laf.web.vertx.RoutingVerticle - success binding http listener 5 on port 10031
+2019-07-09 13:04:25.339 [routing-11] INFO  com.jd.laf.web.vertx.RoutingVerticle - success binding http listener 2 on port 10031
 
 
 ```
 服务启动后，可以通过浏览器访问管理端，默认访问地址为: http://localhost:10031
 
+
+
 ## 第4步：创建发布和订阅关系
 
 在开始生产和消费之前，需要先在管理端创建主题、生产和消费者应用以及对应的令牌，令牌用于认证应用的合法性。
-假设创建一个独立的命名空间，假设为test;主题为joy_topic;生产和消费应用都是同一个应用为joyqueue,消费分组为abc;并且为joyqueue创建令牌，用于鉴权。
-现在可以访问管理端，http://localhost:10031，依次创建生产及消费订阅关系
+假设创建一个独立的命名空间，假设为test;主题为joy_topic;生产和消费应用都是同一个应用为joyqueue,消费分组为abc;并为joyqueue创建令牌，用于鉴权。
+现在可以访问管理端:http://localhost:10031，依次创建生产及消费订阅关系
 
 * 命名空间：test,操作路径：系统管理-》命名空间管理-》新建Namespace
 * 主题：joy_test,操作路径：主题中心-》添加主题-》选择Broker
 * 应用：joyqueue,操作路径：我的应用-》新建应用，应用负责人默认admin 
-* 发布主题： 主题中心列表-》joy_test-》生产者》订阅-》选择客户端类型:joyqueue-》订阅
-* 订阅主题： 主题中心列表-》joy_test》消费者》订阅》填写消费分组：abc-》选择端类型类型:joyqueue-》订阅
+* 发布主题：joyqueue 发布joy_test,操作路径:主题中心列表-》joy_test-》生产者-》订阅-》选择客户端类型:joyqueue-》订阅
+* 订阅主题：joyqueue 订阅joy_test,操作路径:主题中心列表-》joy_test》消费者-》订阅》填写消费分组：abc-》选择端类型类型:joyqueue-》订阅
 * 应用token: 我的应用列表-》joyqueue-》令牌-》添加
 
 
 ## 第5步：生产和消费示例
 
-到目前为止，我们已经创建好应用和主题，可以尝试使用console-consumer和console-producer来生产和消费消息，这一步会利用到前面创建的topic,app及app token等信息。 
+到目前为止，我们已经创建好主题和应用及token,并且已经维护好发布/订阅关系。可以尝试利用console-consumer和console-producer生产和消费消息，这一步会利用到前面创建的topic,app及app token等信息。 
 
-### 第5.1步：使用命令行生产和消费
+注意，*topic 带有namespace 前缀，app 带消费分组后缀*。
+### 第5.1步：使用脚本生产消息
 
-生产消息，可以先利用*bin/console-producer.sh --help* 熟悉需要提供哪些参数。
+生产消息前，可以先利用*bin/console-producer.sh --help* 熟悉需要提供哪些参数。
 
 ```
 
- cd ~/joyqueue-server
- bin/console-producer.sh --help 
- bin/consol-producer.sh -a joyqueue --token bed6af17e9fd4ae3a767406446afe73f -t test.joy_topic -b "hello,jouqueue!"
+ cd ~/joyqueue/joyqueue-server-4.1.0-SNAPSHOT
+ bin/console-producer.sh -a joyqueue --token bed6af17e9fd4ae3a767406446afe73f -t test.joy_topic -b "hello,jouqueue!"
    
 ```
 
-消费消息,可以先利用*bin/console-consumer.sh --help* 熟悉需要提供哪些参数。
+### 第5.2步：使用脚本消费消息
+消费消息前,可以先利用*bin/console-consumer.sh --help* 熟悉需要提供哪些参数。
 
 ```
 
- cd ~/joyqueue-server
- bin/console-consumer.sh
+ cd ~/joyqueue/joyqueue-server-4.1.0-SNAPSHOT
  bin/console-consumer.sh -a joyqueue.abc --token bed6af17e9fd4ae3a767406446afe73f  -t test.joy_topic 
    
+
 ```
+## 第6步：使用JoyQueue 镜像
+可以从Docker hub 拉去或基于源码build JoyQueue server及web镜像
+
+* Docker hub 获取
+
+```
+
+  docker pull joyqueue/joyqueue-server:4.1.0-SNAPSHOT
+  docker pull joyqueue/joyqueue-web:4.1.0-SNAPSHOT
+  
+``` 
+
+* 基于源码build 镜像
+
+```
+
+$ git clone git@git.jd.com:laf/journalQ.git
+$ cd journalQ && git checkout 4.1.0-SNAPSHOT
+$ mvn install -Dmaven.test.skip=true -P CompileFrontend,docker install
+
+
+```
+
+* 启动JoyQueue server 和 web 服务
+
+JoyQueue server 默认监听50088-50091端口;JoyQueue web 默认监听10031端口
+
+```
+
+$ docker run -p 80:10031  -d  joyqueue/joyqueue-server  bin/server-start.sh
+$ server_cid=$(docker ps |grep 'joyqueue/joyqueue-server'|awk '{print $1}')
+$ docker exec -it -d  $server_cid  /joyqueue-web/bin/start.sh
+$ docker exec -it $server_cid /bin/bash 
+
+```
+
+生产和发送参考(## 第5步：生产和消费示例) 
+
+
+感谢你耐心的试用JoyQueue服务!
 
 

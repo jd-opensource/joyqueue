@@ -20,9 +20,11 @@ FROM openjdk:8-jdk
 #RUN apt-get install vim -y
 #RUN /bin/cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo 'Asia/Shanghai' >/etc/timezone
 
-ARG JOYQUEUE_TARBALL
+ARG JOYQUEUE_WEB_TARBALL
 
-ADD ${JOYQUEUE_TARBALL} /joyqueue-server
+ADD ${JOYQUEUE_WEB_TARBALL} /
 
-WORKDIR /joyqueue-server
+RUN cp -r /joyqueue-web-*  /joyqueue-web
+
+WORKDIR /joyqueue-web
 

@@ -8,13 +8,7 @@
 4. 参与贡献
 5. License
 
-## 快速开始
-
-1. 下载JoyQueue
-2. 运行JoyQueue Server和JoyQueue Web
-3. 创建APP和Topic
-4. 生产和消费消息
-5. 使用JoyQueue Docker Image体验JoyQueue
+## [快速开始](./quickstart.md)
 
 ## 使用教程
 

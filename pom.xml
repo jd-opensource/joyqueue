@@ -91,6 +91,7 @@
         <metrics.version>4.0.0</metrics.version>
         <commons-lang.version>2.6</commons-lang.version>
         <guice.version>4.2.2</guice.version>
+        <gson.version>2.8.5</gson.version>
     </properties>
 
     <dependencyManagement>
@@ -612,6 +613,11 @@
                 <groupId>org.ow2.asm</groupId>
                 <artifactId>asm</artifactId>
                 <version>${asm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>${gson.version}</version>
             </dependency>
         </dependencies>
 
