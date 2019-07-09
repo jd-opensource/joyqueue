@@ -13,4 +13,4 @@
 # limitations under the License.
 #
 
-exec $(dirname $0)/run-class.sh com.jd.joyqueue.store.cli.PGCheck "$@"
+exec $(dirname $0)/run-class.sh com.jd.joyqueue.store.cli.RecoverStore "$@"

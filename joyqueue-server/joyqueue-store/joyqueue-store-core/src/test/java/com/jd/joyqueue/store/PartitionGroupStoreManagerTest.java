@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
@@ -373,6 +374,67 @@ public class PartitionGroupStoreManagerTest {
         }
 
 
+    }
+
+    @Test
+    public void brokenIndexStoreTest() throws Exception{
+        int count = 55;
+        long timeout = 500000L;
+        short partition = 4;
+        List<ByteBuffer> messages = MessageUtils.build(count, 1024);
+
+
+        long length = messages.stream().mapToInt(Buffer::remaining).sum();
+
+        final EventFuture<WriteResult> future = new EventFuture<>();
+        store.asyncWrite(QosLevel.RECEIVE, future, messages.stream().map(b -> new WriteRequest(partition, b)).toArray(WriteRequest[]::new));
+
+
+        // 等待建索引都完成
+        long t0 = SystemClock.now();
+        while (SystemClock.now() - t0 < timeout && store.indexPosition() < length) {
+            Thread.sleep(10L);
+        }
+
+        store.disable();
+        store.stop();
+        store.close();
+        store = null;
+
+        File indexBase = new File(groupBase, "index/" + partitions[0]);
+
+        File[] files = indexBase.listFiles(file -> file.isFile() && file.getName().matches("\\d+"));
+
+        File lastFile = new File(indexBase, String.valueOf(Arrays.stream(files).mapToLong(file -> Long.parseLong(file.getName())).max().orElse(0L)));
+
+        byte [] zeros = new byte[] {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
+        FileOutputStream output = new FileOutputStream(lastFile,true);
+        try {
+            output.write(zeros);
+            output.flush();
+        } finally {
+            output.close();
+        }
+
+        store = new PartitionGroupStoreManager(topic, partitionGroup, groupBase, new PartitionGroupStoreManager.Config(),
+                bufferPool,
+                Executors.newSingleThreadScheduledExecutor(),
+                virtualThreadPool);
+        store.recover();
+        store.start();
+        store.enable();
+
+        for (int i = 0; i < messages.size(); i++) {
+            ByteBuffer writeBuffer = messages.get(i);
+            writeBuffer.clear();
+
+            ReadResult readResult = store.read(partition, i, 1, 0);
+            Assert.assertEquals(JoyQueueCode.SUCCESS, readResult.getCode());
+            Assert.assertEquals(1, readResult.getMessages().length);
+            ByteBuffer readBuffer = readResult.getMessages()[0];
+            Assert.assertEquals(writeBuffer, readBuffer);
+        }
     }
 
     @Test

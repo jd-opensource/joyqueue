@@ -180,7 +180,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
             indexPosition = recoverPartitions();
             logger.info("Building indices ...");
             recoverIndices();
-        } catch (IOException e) {
+        } catch (Throwable e) {
             throw new StoreInitializeException(e);
         }
     }
@@ -293,6 +293,23 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
             PositioningStore<IndexItem> indexStore =
                     new PositioningStore<>(partitionBase, config.indexStoreConfig, bufferPool, new IndexSerializer());
             indexStore.recover();
+
+            //截掉末尾可能存在的半条索引
+            indexStore.setRight(indexStore.right() - indexStore.right() % IndexItem.STORAGE_SIZE);
+
+            // 删除末尾的全是0的部分
+            long validPosition = indexStore.right();
+
+            while ((validPosition -= IndexItem.STORAGE_SIZE) > IndexItem.STORAGE_SIZE) { //第一条索引有可能是全0，这是合法的。
+                byte [] bytes  = indexStore.readBytes(validPosition, IndexItem.STORAGE_SIZE);
+                if(!isAllZero(bytes)){
+                    break;
+                }
+            }
+
+            indexStore.setRight(validPosition + IndexItem.STORAGE_SIZE);
+
+
             partitionMap.put(partitionIndex, new Partition(indexStore));
 
             if (indexStore.right() > 0) {
@@ -325,6 +342,15 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         }
 
         return indexPosition;
+    }
+
+    private boolean isAllZero(byte[] bytes) {
+        for (byte b : bytes) {
+            if (b != 0) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private Short[] loadPartitionIndices(File indexBase) {
