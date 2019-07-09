@@ -204,6 +204,8 @@ public class NameServer extends Service implements NameService, PropertySupplier
             Close.close(metaManager);
             Close.close(eventManager);
             Close.close(transportServer);
+            if(serviceProvider instanceof LifeCycle)
+            Close.close((LifeCycle )serviceProvider);
         } finally {
             logger.info("nameServer is stopped");
         }
@@ -976,6 +978,7 @@ public class NameServer extends Service implements NameService, PropertySupplier
 
     private TransportServer buildTransportServer(){
         ServerConfig serverConfig = nameServerConfig.getServerConfig();
+        serverConfig.setPort(nameServerConfig.getServicePort());
         serverConfig.setAcceptThreadName("joyqueue-nameserver-accept-eventLoop");
         serverConfig.setIoThreadName("joyqueue-nameserver-io-eventLoop");
         return transportServerFactory.bind(serverConfig, serverConfig.getHost(), serverConfig.getPort());

@@ -13,18 +13,20 @@
  */
 package com.jd.joyqueue.server.retry.h2;
 
+import com.jd.joyqueue.datasource.DataSourceConfig;
+import com.jd.joyqueue.datasource.DataSourceFactory;
 import com.jd.joyqueue.domain.ConsumeRetry;
 import com.jd.joyqueue.domain.Partition;
 import com.jd.joyqueue.domain.TopicName;
 import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.exception.JoyQueueException;
-import com.jd.joyqueue.datasource.DataSourceFactory;
 import com.jd.joyqueue.server.retry.api.MessageRetry;
 import com.jd.joyqueue.server.retry.api.RetryPolicyProvider;
-import com.jd.joyqueue.server.retry.h2.config.H2RetryConfig;
+import com.jd.joyqueue.server.retry.h2.config.H2RetryConfigKey;
 import com.jd.joyqueue.server.retry.model.RetryMessageModel;
 import com.jd.joyqueue.server.retry.model.RetryStatus;
 import com.jd.joyqueue.server.retry.util.RetryUtil;
+import com.jd.joyqueue.toolkit.config.PropertySupplier;
 import com.jd.joyqueue.toolkit.db.DaoUtil;
 import com.jd.joyqueue.toolkit.lang.Close;
 import com.jd.joyqueue.toolkit.retry.RetryPolicy;
@@ -83,9 +85,13 @@ public class H2MessageRetry implements MessageRetry<Long> {
         return dataSource;
     }
 
+    private DataSourceConfig writeDataSourceConfig = null;
+    private RetryPolicy retryPolicy = null;
+
+
     @Override
     public void start() {
-        this.dataSource = DataSourceFactory.build(H2RetryConfig.getDsConfig());
+        this.dataSource = DataSourceFactory.build(writeDataSourceConfig);
         isStartFlag = true;
         logger.info("db retry manager is started");
     }
@@ -361,7 +367,7 @@ public class H2MessageRetry implements MessageRetry<Long> {
                 long startTime = createTime.getTime(); // 临时存放创建时间
                 int retryCount = resultSet.getInt(3);
 
-                nextRetryTime = H2RetryConfig.getRetryPolicy().getTime(SystemClock.now(), retryCount, startTime);
+                nextRetryTime = retryPolicy.getTime(SystemClock.now(), retryCount, startTime);
             }
         } catch (Exception e) {
             throw new JoyQueueException(JoyQueueCode.CN_DB_ERROR, e);
@@ -538,5 +544,16 @@ public class H2MessageRetry implements MessageRetry<Long> {
         }
     }
 
+    @Override
+    public void setSupplier(PropertySupplier supplier) {
+
+        writeDataSourceConfig = new DataSourceConfig();
+        writeDataSourceConfig.setDriver(supplier.getValue(H2RetryConfigKey.DRIVER));
+        writeDataSourceConfig.setUrl(supplier.getValue(H2RetryConfigKey.WRITE_URL));
+        writeDataSourceConfig.setUser(supplier.getValue(H2RetryConfigKey.WRITE_USER_NAME));
+        writeDataSourceConfig.setPassword(supplier.getValue(H2RetryConfigKey.WRITE_PASSWORD));
+
+        retryPolicy = new RetryPolicy(supplier.getValue(H2RetryConfigKey.RETRY_DELAY), supplier.getValue(H2RetryConfigKey.MAX_RETRY_TIMES));
+    }
 }
 

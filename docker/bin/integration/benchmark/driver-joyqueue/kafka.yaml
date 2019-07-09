@@ -13,7 +13,7 @@
 #
 
 
-name: JournalQ Kafka
+name: JoyQueue Kafka
 driverClass: io.openmessaging.benchmark.driver.kafka.JoyQueueKafkaBenchmarkDriver
 
 # Kafka client-specific configuration

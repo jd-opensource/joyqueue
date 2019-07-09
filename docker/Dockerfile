@@ -22,7 +22,7 @@ FROM openjdk:8-jdk
 
 ARG JOYQUEUE_TARBALL
 
-ADD ${JOYQUEUE_TARBALL} /joyqueue-server-runtime
+ADD ${JOYQUEUE_TARBALL} /joyqueue-server
 
-WORKDIR /joyqueue-server-runtime
+WORKDIR /joyqueue-server
 

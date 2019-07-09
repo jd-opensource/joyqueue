@@ -22,6 +22,8 @@ import com.jd.joyqueue.nsr.AdminConfig;
 import com.jd.joyqueue.nsr.CommandArgs;
 import com.jd.joyqueue.nsr.utils.AsyncHttpClient;
 import com.jd.joyqueue.toolkit.time.SystemClock;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Date;
@@ -32,8 +34,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 public class AppAdmin extends AbstractAdmin {
+    private  static final Logger logger= LoggerFactory.getLogger(AppAdmin.class);
     private AsyncHttpClient httpClient;
-
     public AppAdmin(){
         this(new AsyncHttpClient());
     }
@@ -106,6 +108,7 @@ public class AppAdmin extends AbstractAdmin {
             result=token.getToken();
         }
         System.out.println(result);
+        logger.info("token:{}",result);
         return result;
     }
 

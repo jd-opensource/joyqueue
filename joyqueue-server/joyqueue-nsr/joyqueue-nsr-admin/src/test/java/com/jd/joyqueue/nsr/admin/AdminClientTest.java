@@ -27,9 +27,8 @@ import java.util.stream.Collectors;
 @Ignore
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class AdminClientTest {
-
     private static final String host="127.0.0.1:50091";
-    private static final String topic="test_topic_0";
+    private static final String topic="test_topic_11";
     private static final String app="test_app_0";
     static AdminClient client;
     @BeforeClass
@@ -39,9 +38,18 @@ public class AdminClientTest {
         TopicAdmin.TopicArg topicArg=new TopicAdmin.TopicArg();
         topicArg.code=topic;
         List<Broker> brokers = client.listBroker(listArg);
-        Assert.assertNotEquals(null, brokers);
+        Assert.assertNotNull("no available brokers",brokers);
         topicArg.brokers=brokers.stream().map(broker -> broker.getId()).collect(Collectors.toList());
         client.createTopic(topicArg);
+    }
+
+    @Test
+    public void appToken() throws Exception{
+        AppAdmin.TokenArg tokenArg=new AppAdmin.TokenArg();
+        tokenArg.app=this.app;
+        String token=client.token(tokenArg);
+        Assert.assertNotNull(token);
+
     }
 
 

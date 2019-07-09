@@ -17,6 +17,7 @@ import com.jd.joyqueue.exception.JoyQueueException;
 import com.jd.joyqueue.server.retry.api.MessageRetry;
 import com.jd.joyqueue.server.retry.api.RetryPolicyProvider;
 import com.jd.joyqueue.server.retry.model.RetryMessageModel;
+import com.jd.joyqueue.toolkit.config.PropertySupplier;
 
 import java.util.List;
 
@@ -71,6 +72,11 @@ public class NullMessageRetry implements MessageRetry<Long> {
 
     @Override
     public void setRetryPolicyProvider(RetryPolicyProvider retryPolicyProvider) {
+
+    }
+
+    @Override
+    public void setSupplier(PropertySupplier supplier) {
 
     }
 }

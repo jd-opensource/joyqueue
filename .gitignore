@@ -3,6 +3,7 @@
 .vertx/
 .vscode/
 target/
+/dist/
 h2-db-joyqueue
 .classpath
 .settings
@@ -19,5 +20,4 @@ h2-db-joyqueue
 filter.properties
 .factorypath
 *.pyc
-joyqueue-console/joyqueue-web/joyqueue-web-webroot/src/main/webroot/
 joyqueue-console/joyqueue-portal/node/

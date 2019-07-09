@@ -24,90 +24,14 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
+    <modules>
+        <module>joyqueue-distribution-server</module>
+        <module>joyqueue-distribution-web</module>
+    </modules>
 
     <artifactId>joyqueue-distribution</artifactId>
     <name>JoyQueue-Distribution</name>
     <description>JoyQueue distribution</description>
 
-    <dependencies>
-        <dependency>
-            <groupId>com.jd.joyqueue</groupId>
-            <artifactId>joyqueue-server-runtime</artifactId>
-        </dependency>
-    </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.maven</groupId>
-                        <artifactId>maven-core</artifactId>
-                        <version>2.2.1</version>
-                        <exclusions>
-                            <exclusion>
-                                <groupId>org.apache.maven.wagon</groupId>
-                                <artifactId>wagon-file</artifactId>
-                            </exclusion>
-                            <exclusion>
-                                <groupId>org.apache.maven.wagon</groupId>
-                                <artifactId>wagon-provider-api</artifactId>
-                            </exclusion>
-                            <exclusion>
-                                <groupId>org.apache.maven.wagon</groupId>
-                                <artifactId>wagon-http-lightweight</artifactId>
-                            </exclusion>
-                            <exclusion>
-                                <groupId>org.apache.maven.wagon</groupId>
-                                <artifactId>wagon-http-shared</artifactId>
-                            </exclusion>
-                            <exclusion>
-                                <groupId>org.apache.maven.wagon</groupId>
-                                <artifactId>wagon-provider-api</artifactId>
-                            </exclusion>
-                            <exclusion>
-                                <groupId>org.apache.maven.wagon</groupId>
-                                <artifactId>wagon-http</artifactId>
-                            </exclusion>
-                            <exclusion>
-                                <groupId>org.apache.maven.wagon</groupId>
-                                <artifactId>wagon-webdav-jackrabbit</artifactId>
-                            </exclusion>
-                            <exclusion>
-                                <groupId>org.apache.maven.wagon</groupId>
-                                <artifactId>wagon-ssh-external</artifactId>
-                            </exclusion>
-                            <exclusion>
-                                <groupId>org.apache.maven.wagon</groupId>
-                                <artifactId>wagon-ssh</artifactId>
-                            </exclusion>
-                            <exclusion>
-                                <groupId>org.apache.maven.reporting</groupId>
-                                <artifactId>maven-reporting-api</artifactId>
-                            </exclusion>
-                        </exclusions>
-                    </dependency>
-                </dependencies>
-
-                <executions>
-                    <execution>
-                        <id>bin-assembly</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <finalName>joyqueue-server-${project.version}</finalName>
-                            <tarLongFileMode>posix</tarLongFileMode>
-                            <appendAssemblyId>false</appendAssemblyId>
-                            <descriptors>
-                                <descriptor>assemble/package.xml</descriptor>
-                            </descriptors>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 </project>

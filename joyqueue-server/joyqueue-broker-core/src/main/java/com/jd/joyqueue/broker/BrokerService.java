@@ -65,6 +65,7 @@ import java.util.List;
 public class BrokerService extends Service {
     private static final Logger logger = LoggerFactory.getLogger(BrokerService.class);
     private static final String NAMESERVICE_NAME = "nameserver.nsr.name";
+    private static final String DEFAULT_NAMESERVICE_NAME = "server";
     private BrokerConfig brokerConfig;
     private SessionManager sessionManager;
     private BrokerMonitorService brokerMonitorService;
@@ -104,6 +105,13 @@ public class BrokerService extends Service {
 
         brokerContext.propertySupplier(configuration);
 
+        //build broker config
+        this.brokerConfig = new BrokerConfig(configuration);
+        String dataPath = brokerConfig.getAndCreateDataPath();
+        logger.info("Broker data path: {}.", dataPath);
+
+        this.brokerContext.brokerConfig(brokerConfig);
+
         //start name service first
         this.nameService = getNameService(brokerContext, configuration);
         this.nameService.start();
@@ -113,9 +121,7 @@ public class BrokerService extends Service {
         this.nameService.addListener(configurationManager);
         this.configurationManager.setConfigProvider(new ConfigProviderImpl(nameService));
 
-        //build broker config
-        this.brokerConfig = new BrokerConfig(configuration);
-        this.brokerContext.brokerConfig(brokerConfig);
+
         //build and cluster manager
         this.clusterManager = new ClusterManager(brokerConfig, nameService, brokerContext);
         this.clusterManager.start();
@@ -154,6 +160,9 @@ public class BrokerService extends Service {
 
         // build message retry
         this.retryManager = getMessageRetry(brokerContext);
+        if(null != this.retryManager) {
+            this.retryManager.setSupplier(configuration);
+        }
         this.brokerContext.retryManager(retryManager);
 
         // build consume
@@ -199,7 +208,7 @@ public class BrokerService extends Service {
 
     private NameService getNameService(BrokerContext brokerContext, Configuration configuration) {
         Property property = configuration.getProperty(NAMESERVICE_NAME);
-        NameService nameService = Plugins.NAMESERVICE.get(property == null ? null : property.getString());
+        NameService nameService = Plugins.NAMESERVICE.get(property == null ? DEFAULT_NAMESERVICE_NAME : property.getString());
         Preconditions.checkArgument(nameService != null, "nameService not found!");
         enrichIfNecessary(nameService, brokerContext);
         return nameService;

@@ -13,18 +13,20 @@
  */
 package com.jd.joyqueue.server.retry.db;
 
+import com.jd.joyqueue.datasource.DataSourceConfig;
+import com.jd.joyqueue.datasource.DataSourceFactory;
 import com.jd.joyqueue.domain.ConsumeRetry;
 import com.jd.joyqueue.domain.Partition;
 import com.jd.joyqueue.domain.TopicName;
 import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.exception.JoyQueueException;
-import com.jd.joyqueue.datasource.DataSourceFactory;
 import com.jd.joyqueue.server.retry.api.MessageRetry;
 import com.jd.joyqueue.server.retry.api.RetryPolicyProvider;
-import com.jd.joyqueue.server.retry.db.config.DbRetryConfig;
+import com.jd.joyqueue.server.retry.db.config.DbRetryConfigKey;
 import com.jd.joyqueue.server.retry.model.RetryMessageModel;
 import com.jd.joyqueue.server.retry.model.RetryStatus;
 import com.jd.joyqueue.server.retry.util.RetryUtil;
+import com.jd.joyqueue.toolkit.config.PropertySupplier;
 import com.jd.joyqueue.toolkit.db.DaoUtil;
 import com.jd.joyqueue.toolkit.lang.Close;
 import com.jd.joyqueue.toolkit.retry.RetryPolicy;
@@ -78,6 +80,8 @@ public class DBMessageRetry implements MessageRetry<Long> {
     private boolean isStartFlag = false;
     // 重试策略
     private RetryPolicyProvider retryPolicyProvider;
+    private DataSourceConfig writeDataSourceConfig = null;
+    private RetryPolicy retryPolicy = null;
 
     public DBMessageRetry() {
     }
@@ -88,7 +92,7 @@ public class DBMessageRetry implements MessageRetry<Long> {
 
     @Override
     public void start() {
-        this.dataSource = DataSourceFactory.build(DbRetryConfig.getDsConfig());
+        this.dataSource = DataSourceFactory.build(writeDataSourceConfig);
         isStartFlag = true;
         logger.info("db retry manager is started");
     }
@@ -370,7 +374,7 @@ public class DBMessageRetry implements MessageRetry<Long> {
                 long startTime = createTime.getTime(); // 临时存放创建时间
                 int retryCount = resultSet.getInt(3);
 
-                nextRetryTime = DbRetryConfig.getRetryPolicy().getTime(SystemClock.now(), retryCount, startTime);
+                nextRetryTime = retryPolicy.getTime(SystemClock.now(), retryCount, startTime);
             }
         } catch (Exception e) {
             throw new JoyQueueException(JoyQueueCode.CN_DB_ERROR, e);
@@ -553,6 +557,17 @@ public class DBMessageRetry implements MessageRetry<Long> {
         } catch (Exception e) {
             throw new JoyQueueException(String.format("%s topic:%s,app:%s,count:%d", JoyQueueCode.CN_DB_ERROR.getMessage(), topic, app, count), e, JoyQueueCode.CN_DB_ERROR.getCode());
         }
+    }
+    @Override
+    public void setSupplier(PropertySupplier supplier) {
+
+        writeDataSourceConfig = new DataSourceConfig();
+        writeDataSourceConfig.setDriver(supplier.getValue(DbRetryConfigKey.DRIVER));
+        writeDataSourceConfig.setUrl(supplier.getValue(DbRetryConfigKey.WRITE_URL));
+        writeDataSourceConfig.setUser(supplier.getValue(DbRetryConfigKey.WRITE_USER_NAME));
+        writeDataSourceConfig.setPassword(supplier.getValue(DbRetryConfigKey.WRITE_PASSWORD));
+
+        retryPolicy = new RetryPolicy(supplier.getValue(DbRetryConfigKey.RETRY_DELAY), supplier.getValue(DbRetryConfigKey.MAX_RETRY_TIMES));
     }
 
 }
