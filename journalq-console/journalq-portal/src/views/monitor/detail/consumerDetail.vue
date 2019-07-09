@@ -1,5 +1,5 @@
 <template>
-  <div style="margin-left:-30px;">
+  <div style="margin-left:-25px;">
     <d-tabs type="card" @on-change="handleTabChange" :value="subTab" size="small">
       <d-tab-pane label="分组" name="partition" icon="pocket" :closable="false">
         <partition ref="partition" :colData="partitionColData" :doSearch="doSearch" :search="search"/>
