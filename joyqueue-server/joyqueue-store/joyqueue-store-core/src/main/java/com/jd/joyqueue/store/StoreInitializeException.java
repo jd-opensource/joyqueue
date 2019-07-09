@@ -18,6 +18,7 @@ package com.jd.joyqueue.store;
  * Date: 2018/9/3
  */
 public class StoreInitializeException extends RuntimeException {
+
     StoreInitializeException() {
         super();
     }
