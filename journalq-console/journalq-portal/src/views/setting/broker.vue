@@ -209,17 +209,7 @@ export default {
   methods: {
     getList () {
       this.showTablePin = true
-      let data = {
-        pagination: {
-          page: this.page.page,
-          size: this.page.size
-        },
-        query: {
-          topic: this.searchData.topic,
-          namespace: this.searchData.namespace,
-          keyword: this.searchData.keyword
-        }
-      }
+      let data = this.getSearchVal()
       apiRequest.post(this.urlOrigin.search, {}, data).then((data) => {
         data.data = data.data || []
         data.pagination = data.pagination || {

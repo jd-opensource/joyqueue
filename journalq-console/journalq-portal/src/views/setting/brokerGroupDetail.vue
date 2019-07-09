@@ -96,8 +96,16 @@ export default {
           key: 'dataCenter.id'
         },
         {
+          title: '启动时间',
+          key: 'startupTime'
+        },
+        {
           title: '重试方式',
           key: 'retryType'
+        },
+        {
+          title: '权限',
+          key: 'permission'
         },
         {
           title: '描述',

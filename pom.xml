@@ -31,7 +31,7 @@
 
     <properties>
         <spring.security.version>3.2.5.RELEASE</spring.security.version>
-        <fastjson.version>1.2.33</fastjson.version>
+        <fastjson.version>1.2.58</fastjson.version>
         <netty.version>4.1.27.Final</netty.version>
         <log4j.version>2.9.0</log4j.version>
         <jannotation.version>2.1.0</jannotation.version>
