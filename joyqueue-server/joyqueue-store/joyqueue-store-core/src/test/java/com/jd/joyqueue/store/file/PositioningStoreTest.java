@@ -125,6 +125,56 @@ public class PositioningStoreTest {
 
     }
 
+
+    /**
+     * 测试宕机后，是否能正确恢复
+     */
+    @Test
+    public void recoverTailEmptyFilesTest() throws IOException {
+        int count = 10000;
+        String writeMessage = "Hello, world!";
+        List<String> bodyList = MessageTestUtils.createBodyList(writeMessage, count);
+        List<ByteBuffer> writeMessages = MessageTestUtils.createMessages(bodyList);
+        int fileDataSize = 128 * 1024;
+        PositioningStore.Config config = new PositioningStore.Config(fileDataSize,
+                PositioningStore.Config.DEFAULT_FILE_HEADER_SIZE);
+        PreloadBufferPool bufferPool = PreloadBufferPool.getInstance();
+        bufferPool.addPreLoad(fileDataSize, 1, 1);
+
+        StoreMessageSerializer factory = new StoreMessageSerializer(1024 * 1024);
+        PositioningStore<ByteBuffer> store =
+                new PositioningStore<>(logBase, config,
+                        bufferPool,
+                        new StoreMessageSerializer(1024));
+        store.recover();
+        long start = store.right();
+        store.append(writeMessages);
+
+        while (store.flush()) {
+            Thread.yield();
+        }
+        store.close();
+
+        File file = new File(logBase, "1440842");
+        Assert.assertTrue(file.createNewFile());
+
+        file = new File(logBase, "1571932");
+        Assert.assertTrue(file.createNewFile());
+
+        store =
+                new PositioningStore<>(logBase, config, bufferPool, factory);
+        store.recover();
+
+        List<ByteBuffer> readLogs = store.batchRead(start, writeMessages.size());
+        List<String> readBodyList = MessageTestUtils.getBodies(readLogs);
+        Assert.assertEquals(bodyList, readBodyList);
+        store.close();
+
+    }
+
+
+
+
     // setRight
 
     @Test
