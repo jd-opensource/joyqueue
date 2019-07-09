@@ -158,9 +158,10 @@ class Workflow:
         return open('{}/_filelock'.format(self.workspace.home), 'w')
 
     def __start_pressure_worker(self):
+        tag_id = int(time.time())
         script = """
-                    docker run --network {subnet} --name {name} {image_namepsace}/{image_name} {entry} -d {drivers}  {workloads}
-                 """.format(name=self.__pressure_container_name(),
+                    docker run --network {subnet} --name {image_name}_{tag_id} {image_namepsace}/{image_name} {entry} -d {drivers}  {workloads}
+                 """.format(tag_id=tag_id,
                             image_namepsace=self.task.pressure_docker_namespace,
                             image_name=self.task.pressure_repo_name,
                             entry=self.task.pressure_shell_entry,
@@ -228,14 +229,6 @@ class Workflow:
                     'Failed to start {} mq docker {}'.format(h, self.task.mq_repo_name),
                     error_code=FAILED_TO_INVOKE_MQ_DOCKER)
 
-    def __pressure_container_name(self):
-        length = len(self.running_mq_containers)
-        if length > 0:
-            self.pressure_container_name = '_'.join(self.running_mq_containers.values())
-        else:
-            self.pressure_container_name = self.task.pressure_repo_name + str(time.time()).replace('.', '_')
-        return self.pressure_container_name
-
     def __check_mq_stat(self, host, max_attempts=60, sleep=5):
         cidfile ='run_{}.cid'.format(host)
         script = """
@@ -275,17 +268,20 @@ class Workflow:
         return self.__run_local_script(script)
 
     def __invoke_mq_worker(self, host):
+        tag_id = int(time.time())
         script = """
-                docker run --network {subnet} --ip {ip}  --expose={expose} --cidfile run_{ip}.cid  -d {mq_docker_namespace}/{mq_docker_name} {entry}
+                docker run --network {subnet} --ip {ip}  --expose={expose} --cidfile run_{ip}.cid \
+                --name {mq_docker_name}_{tag_id}  -d {mq_docker_namespace}/{mq_docker_name} {entry}
         """.format(mq_home=self.task.mq_home,
                    mq_docker_namespace=self.task.mq_docker_namespace,
                    mq_docker_name=self.task.mq_repo_name,
                    subnet=self.subnet_name,
                    ip=host,
                    expose=self.task.expose_port,
+                   tag_id=tag_id,
                    entry=self.task.mq_start_shell_entry).rstrip()
 
-        code, outs, _ = self.__run_local_script( script)
+        code, outs, _ = self.__run_local_script(script)
         if code != 0:
             raise WorkflowError(
                 'Failed to invoke mq docker {} on {}'.format(self.task.mq_repo_name, host),
@@ -321,12 +317,21 @@ class Workflow:
         clean = """
               ls -l ./
               docker container prune -f
-              mq_containerId=$(docker ps |grep {mq_docker_namespace}/{mq_repo_name}|awk '{{print $1}}|uniq')
-              pressure_containerId=$(docker ps |grep {pressure_repo_name}|awk '{{print $1}}|uniq')
-              docker stop $(mq_containerId)
-              docker rm $(mq_containerId)
-              docker stop $(pressure_containerId) 
-              docker rm $(pressure_containerId)  
+              mq_containerId=$(docker ps |grep {mq_repo_name}|awk '{{print $1}}'|uniq)
+              pressure_containerId=$(docker ps |grep {pressure_repo_name}|awk '{{print $1}}'|uniq)
+              if [ -n "$mq_containerId" ];then
+                    docker stop $(mq_containerId)
+                    docker rm $(mq_containerId)
+              else
+                    echo "no mq container is running!"
+              fi  
+              if [ -n "$pressure_containerId" ];then
+                    docker stop $(pressure_containerId) 
+                    docker rm $(pressure_containerId) 
+              else
+                    echo "no benchmark container is running!"
+              fi
+               
               rm *.cid
               """.format(mq_docker_namespace=self.task.mq_docker_namespace,
                          mq_repo_name=self.task.mq_repo_name,
