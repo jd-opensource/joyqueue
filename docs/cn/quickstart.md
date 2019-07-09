@@ -101,9 +101,9 @@ $ bin/start.sh
 
 * 命名空间：test，操作路径：系统管理-》命名空间管理-》新建Namespace
 * 主题：joy_test，操作路径：主题中心-》添加主题-》选择Broker
-* 应用：joyqueue，操作路径：我的应用-》新建应用，应用负责人默认admin 
+* 应用：joyqueue，操作路径：我的应用-》新建应用，应用负责人admin 
 * 发布主题：joyqueue 发布joy_test，操作路径:主题中心列表-》joy_test-》生产者-》订阅-》选择客户端类型:joyqueue-》订阅
-* 订阅主题：joyqueue 订阅joy_test，操作路径:主题中心列表-》joy_test》消费者-》订阅-》填写消费分组：abc-》选择端类型类型:joyqueue-》订阅
+* 订阅主题：joyqueue 订阅joy_test，操作路径:主题中心列表-》joy_test-》消费者-》订阅-》填写消费分组：abc-》选择端类型类型:joyqueue-》订阅
 * 应用token: 我的应用列表-》joyqueue-》令牌-》添加
 
 
