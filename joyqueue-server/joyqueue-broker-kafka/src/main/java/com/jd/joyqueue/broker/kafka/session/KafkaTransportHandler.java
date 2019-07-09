@@ -65,6 +65,7 @@ public class KafkaTransportHandler extends ChannelDuplexHandler {
 
         int type = ((Command) msg).getHeader().getType();
         if (type == KafkaCommandType.METADATA.getCode()
+                || type == KafkaCommandType.FIND_COORDINATOR.getCode()
                 || type == KafkaCommandType.LIST_OFFSETS.getCode()
                 || type == KafkaCommandType.PRODUCE.getCode()
                 || type == KafkaCommandType.FETCH.getCode()) {

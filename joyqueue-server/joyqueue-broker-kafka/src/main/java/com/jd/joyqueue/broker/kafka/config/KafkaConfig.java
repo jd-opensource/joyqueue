@@ -34,6 +34,10 @@ public class KafkaConfig {
         this.propertySupplier = propertySupplier;
     }
 
+    public int getProduceTimeout() {
+        return getConfig(KafkaConfigKey.PRODUCE_TIMEOUT);
+    }
+
     public int getFetchBatchSize() {
         return getConfig(KafkaConfigKey.FETCH_BATCH_SIZE);
     }
@@ -50,20 +54,12 @@ public class KafkaConfig {
         return getConfig(KafkaConfigKey.OFFSET_SYNC_TIMEOUT);
     }
 
-    public int getOffsetCacheExpireTime() {
-        return getConfig(KafkaConfigKey.OFFSET_CACHE_EXPIRE_TIME);
-    }
-
     public int getTransactionSyncTimeout() {
         return getConfig(KafkaConfigKey.TRANSACTION_SYNC_TIMEOUT);
     }
 
     public int getTransactionTimeout() {
         return getConfig(KafkaConfigKey.TRANSACTION_TIMEOUT);
-    }
-
-    public int getTransactionLogWriteTimeout() {
-        return getConfig(KafkaConfigKey.TRANSACTION_LOG_WRITE_TIMEOUT);
     }
 
     public int getTransactionLogRetries() {
@@ -98,24 +94,12 @@ public class KafkaConfig {
         return getConfig(KafkaConfigKey.SESSION_MAX_TIMEOUT);
     }
 
-    public int getPermitsPerSecond() {
-        return getConfig(KafkaConfigKey.PERMITSPER_SECOND);
-    }
-
-    public int getAcquirePermitsTimeout() {
-        return getConfig(KafkaConfigKey.ACQUIRE_PERMITS_TIMEOUT);
-    }
-
     public int getRebalanceInitialDelay() {
         return getConfig(KafkaConfigKey.REBALANCE_INITIAL_DELAY);
     }
 
     public int getRebalanceTimeout() {
         return getConfig(KafkaConfigKey.REBALANCE_TIMEOUT);
-    }
-
-    public int getRebalanceHeartbeatOverflow() {
-        return getConfig(KafkaConfigKey.REBALANCE_HEARTBEAT_OVERFLOW);
     }
 
     protected <T> T getConfig(String key, PropertyDef.Type type, Object defaultValue) {

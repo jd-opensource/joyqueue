@@ -319,17 +319,13 @@ public class GroupOffsetManager extends Service {
 
     protected Map<Broker, Map<String, List<Integer>>> splitPartitionByBroker(Map<String, List<Integer>> topicAndPartitions) {
         Map<Broker, Map<String, List<Integer>>> result = Maps.newHashMapWithExpectedSize(topicAndPartitions.size());
-        Map<String, TopicConfig> topicCache = Maps.newHashMap();
 
         for (Map.Entry<String, List<Integer>> entry : topicAndPartitions.entrySet()) {
             String topic = entry.getKey();
-            TopicConfig topicConfig = topicCache.get(topic);
+            TopicConfig topicConfig = clusterManager.getNameService().getTopicConfig(TopicName.parse(topic));
             if (topicConfig == null) {
-                topicConfig = clusterManager.getNameService().getTopicConfig(TopicName.parse(topic));
-                if (topicConfig == null) {
-                    logger.error("get leader failed, topic not exist, topic: {}", topic);
-                    continue;
-                }
+                logger.error("get leader failed, topic not exist, topic: {}", topic);
+                continue;
             }
 
             for (Integer partition : entry.getValue()) {

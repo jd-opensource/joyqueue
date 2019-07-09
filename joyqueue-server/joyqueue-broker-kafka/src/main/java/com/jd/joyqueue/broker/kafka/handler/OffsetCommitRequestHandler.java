@@ -17,7 +17,6 @@ package com.jd.joyqueue.broker.kafka.handler;
 import com.jd.joyqueue.broker.kafka.KafkaCommandType;
 import com.jd.joyqueue.broker.kafka.KafkaContext;
 import com.jd.joyqueue.broker.kafka.KafkaContextAware;
-import com.jd.joyqueue.broker.kafka.KafkaErrorCode;
 import com.jd.joyqueue.broker.kafka.command.OffsetCommitRequest;
 import com.jd.joyqueue.broker.kafka.command.OffsetCommitResponse;
 import com.jd.joyqueue.broker.kafka.coordinator.group.GroupCoordinator;
@@ -54,20 +53,9 @@ public class OffsetCommitRequestHandler extends AbstractKafkaCommandHandler impl
         Map<String, List<OffsetMetadataAndError>> result = groupCoordinator.handleCommitOffsets(offsetCommitRequest.getGroupId(), offsetCommitRequest.getMemberId(),
                 offsetCommitRequest.getGroupGenerationId(), offsetCommitRequest.getOffsets());
 
-        // TODO 临时日志
         if (logger.isDebugEnabled()) {
-            for (Map.Entry<String, List<OffsetMetadataAndError>> entry : result.entrySet()) {
-                for (OffsetMetadataAndError offset : entry.getValue()) {
-                    if (offset.getError() == KafkaErrorCode.NONE.getCode()) {
-                        logger.debug("offset commit request with correlation id {} from client {} on topic {} partition {} offset {}",
-                                offsetCommitRequest.getCorrelationId(), offsetCommitRequest.getGroupId(), entry.getKey(), offset.getPartition(), offset.getOffset());
-                    } else {
-                        logger.debug("offset commit request with correlation id {} from client {} on topic {} partition {} failed due to {}",
-                                offsetCommitRequest.getCorrelationId(), offsetCommitRequest.getGroupId(), entry.getKey(), offset.getPartition(), offset.getOffset());
-                    }
-                }
-
-            }
+            logger.debug("offset commit request with correlation id {} from client {}, request: {}, result: {}",
+                    offsetCommitRequest.getCorrelationId(), offsetCommitRequest.getGroupId(), offsetCommitRequest, result);
         }
 
         OffsetCommitResponse offsetCommitResponse = new OffsetCommitResponse(result);

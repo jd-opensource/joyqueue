@@ -13,6 +13,8 @@
  */
 package com.jd.joyqueue.nsr;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.jd.joyqueue.domain.AppToken;
 import com.jd.joyqueue.domain.Broker;
@@ -99,6 +101,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -119,6 +124,7 @@ public class ThinNameService extends Service implements NameService, PropertySup
      */
     protected EventBus<NameServerEvent> eventBus = new EventBus<>("BROKER_THIN_NAMESERVICE_ENENT_BUS");
 
+    private Cache<TopicName, TopicConfig> topicCache;
 
     public ThinNameService() {
         //do nothing
@@ -133,6 +139,11 @@ public class ThinNameService extends Service implements NameService, PropertySup
         super.validate();
         if (nameServiceConfig == null) {
             nameServiceConfig = new NameServiceConfig(propertySupplier);
+        }
+        if (topicCache == null) {
+            topicCache = CacheBuilder.newBuilder()
+                    .expireAfterWrite(nameServiceConfig.getThinCacheExpireTime(), TimeUnit.MILLISECONDS)
+                    .build();
         }
         clientTransport = new ClientTransport(nameServiceConfig,this);
     }
@@ -237,6 +248,24 @@ public class ThinNameService extends Service implements NameService, PropertySup
 
     @Override
     public TopicConfig getTopicConfig(TopicName topic) {
+        if (nameServiceConfig.getThinCacheEnable()) {
+            try {
+                return topicCache.get(topic, new Callable<TopicConfig>() {
+                    @Override
+                    public TopicConfig call() throws Exception {
+                        return doGetTopicConfig(topic);
+                    }
+                });
+            } catch (ExecutionException e) {
+                logger.error("getTopicConfig exception, topic: {}", topic, e);
+                return null;
+            }
+        } else {
+            return doGetTopicConfig(topic);
+        }
+    }
+
+    protected TopicConfig doGetTopicConfig(TopicName topic) {
         Command request = new Command(new JoyQueueHeader(Direction.REQUEST, NsrCommandType.GET_TOPICCONFIG), new GetTopicConfig().topic(topic));
         Command response = send(request);
         if (!response.isSuccess()) {

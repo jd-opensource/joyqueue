@@ -40,6 +40,14 @@ public class NameServiceConfig {
         return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_THIN_TRANSPORT_TIMEOUT);
     }
 
+    public boolean getThinCacheEnable() {
+        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_THIN_CACHE_ENABLE);
+    }
+
+    public int getThinCacheExpireTime() {
+        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_THIN_CACHE_EXPIRE_TIME);
+    }
+
     public void setPropertySupplier(PropertySupplier propertySupplier) {
         if (propertySupplier != null) {
             this.propertySupplier = propertySupplier;

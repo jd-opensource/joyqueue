@@ -52,8 +52,10 @@ public class OffsetFetchRequestHandler extends AbstractKafkaCommandHandler imple
         Map<String, List<Integer>> topicAndPartitions = offsetFetchRequest.getTopicAndPartitions();
         Map<String, List<OffsetMetadataAndError>> result = groupCoordinator.handleFetchOffsets(groupId, topicAndPartitions);
 
-        // TODO 临时日志
-        logger.info("fetch offset, request: {}, response: {}", offsetFetchRequest, result);
+        if (logger.isDebugEnabled()) {
+            logger.info("fetch offset, request: {}, response: {}", offsetFetchRequest, result);
+        }
+
         OffsetFetchResponse offsetFetchResponse = new OffsetFetchResponse(result);
         return new Command(offsetFetchResponse);
     }

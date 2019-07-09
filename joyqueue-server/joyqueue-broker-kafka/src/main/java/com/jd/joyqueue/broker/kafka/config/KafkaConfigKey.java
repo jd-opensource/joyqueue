@@ -24,11 +24,6 @@ import com.jd.joyqueue.toolkit.config.PropertyDef;
  */
 public enum KafkaConfigKey implements PropertyDef {
 
-    // 每秒处理的消息条数，防止对象太多导致的GC问题，后续需要在对象分配上进行调优
-    PERMITSPER_SECOND("kafka.permitsper.second", 1000 * 60 * 5, Type.INT),
-    // 消息等待写入队列流控超时时间,单位ms
-    ACQUIRE_PERMITS_TIMEOUT("kafka.acquire.permits.timeout", 20, Type.INT),
-
     // 加入组最小会话超时
     SESSION_MIN_TIMEOUT("kafka.session.min.timeout.ms", 1000 * 6, Type.INT),
     // 加入组最大会话超时
@@ -38,20 +33,14 @@ public enum KafkaConfigKey implements PropertyDef {
     REBALANCE_INITIAL_DELAY("kafka.rebalance.initial.delay", 1000 * 3, Type.INT),
     // rebalance超时时间
     REBALANCE_TIMEOUT("kafka.rebalance.timeout", 1000 * 60, Type.INT),
-    // rebalance心跳溢出
-    REBALANCE_HEARTBEAT_OVERFLOW("kafka.rebalance.heartbeat.overflow", 3, Type.INT),
 
     // offset同步超时
     OFFSET_SYNC_TIMEOUT("kafka.offset.sync.timeout", 1000 * 3, Type.INT),
-    // offset缓存过期时间
-    OFFSET_CACHE_EXPIRE_TIME("kafka.offset.expire.time", 1000 * 60 * 10, Type.INT),
 
     // 事务同步超时
     TRANSACTION_SYNC_TIMEOUT("kafka.offset.sync.timeout", 1000 * 3, Type.INT),
     // 事务超时
     TRANSACTION_TIMEOUT("kafka.transaction.timeout", 1000 * 60 * 30, Type.INT),
-    // 事务日志写入超时
-    TRANSACTION_LOG_WRITE_TIMEOUT("kafka.transaction.log.write.timeout", 1000 * 1, Type.INT),
     // 事务日志写入级别
     TRANSACTION_LOG_WRITE_QOSLEVEL("kafka.transaction.log.write.qosLevel", QosLevel.REPLICATION.value(), Type.INT),
     // 事务重试次数
@@ -68,9 +57,12 @@ public enum KafkaConfigKey implements PropertyDef {
     // 拉取批量大小
     FETCH_BATCH_SIZE("kafka.fetch.batch.size", 10, Type.INT),
     // 元数据延迟
-    METADATA_DELAY("kafka.metadata.delay", 1000 * 1, Type.INT),
+    METADATA_DELAY("kafka.metadata.delay", true, Type.INT),
     // 拉取延迟
-    FETCH_DELAY("kafka.fetch.delay", 1000 * 1, Type.BOOLEAN),
+    FETCH_DELAY("kafka.fetch.delay", true, Type.BOOLEAN),
+    // 写入超时
+    PRODUCE_TIMEOUT("kafka.produce.timeout", 1000 * 10, Type.INT),
+
     ;
 
     private String name;
