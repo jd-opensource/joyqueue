@@ -34,7 +34,7 @@
     <dependencies>
         <dependency>
             <groupId>com.jd.joyqueue</groupId>
-            <artifactId>joyqueue-distribution</artifactId>
+            <artifactId>joyqueue-distribution-server</artifactId>
             <version>${project.parent.version}</version>
             <type>tar.gz</type>
             <scope>provided</scope>
