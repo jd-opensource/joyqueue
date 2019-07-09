@@ -12,7 +12,7 @@
 ## 第1步：下载安装包或源码编译并安装
 
 下载[JoyQueue Server](http://storage.jd.com/jmq4/joyqueue-server-4.1.0-SNAPSHOT.tar.gz?Expires=1566171865&AccessKey=6baa071a4e099393e996950bafc339240598e819&Signature=q1A2XMFZCDW8e5eq2duKc3tPaxc%3D)和
-[JoyQueue Web](http://storage.jd.com/jmq4/joyqueue-server-4.1.0-SNAPSHOT.tar.gz?Expires=1566171865&AccessKey=6baa071a4e099393e996950bafc339240598e819&Signature=q1A2XMFZCDW8e5eq2duKc3tPaxc%3D)最新的安装包，从源码编译如下
+[JoyQueue Web](http://storage.jd.com/jmq4/joyqueue-server-4.1.0-SNAPSHOT.tar.gz?Expires=1566171865&AccessKey=6baa071a4e099393e996950bafc339240598e819&Signature=q1A2XMFZCDW8e5eq2duKc3tPaxc%3D)最新的安装包，或从源码编译。如下
 
 
 ```bash
@@ -130,10 +130,12 @@ $ bin/start.sh
 ```
 
  cd ~/joyqueue/joyqueue-server-4.1.0-SNAPSHOT
- bin/console-consumer.sh -a joyqueue.abc --token bed6af17e9fd4ae3a767406446afe73f  -t test.joy_topic 
-   
+ bin/console-consumer.sh -a joyqueue.abc --token bed6af17e9fd4ae3a767406446afe73f  -t test.joy_topic    
 
 ```
+
+观察控制台，是否消费到上一步发送的消息。
+
 ## 第6步：使用JoyQueue 镜像
 
 可以从Docker hub 拉去或基于源码build JoyQueue server及web镜像
@@ -171,7 +173,7 @@ $ docker exec -it $server_cid /bin/bash
 
 ```
 
-生产和发送参考(## 第5步：生产和消费示例) 
+生产和发送参考[第5步：生产和消费示例](##第5步：生产和消费示例) 
 
 感谢您耐心的试用JoyQueue服务，如有任何疑问，请贡献issue或在用户邮箱user-joyqueue@jd.com 中讨论!
 
