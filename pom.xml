@@ -400,7 +400,6 @@
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-validator</artifactId>
                 <version>${hibernate-validator.version}</version>
-                <scope>runtime</scope>
             </dependency>
             <dependency>
                 <groupId>javax.el</groupId>
