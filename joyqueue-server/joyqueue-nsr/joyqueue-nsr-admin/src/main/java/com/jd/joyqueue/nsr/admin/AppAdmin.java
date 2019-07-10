@@ -20,16 +20,14 @@ import com.beust.jcommander.Parameters;
 import com.jd.joyqueue.domain.AppToken;
 import com.jd.joyqueue.nsr.AdminConfig;
 import com.jd.joyqueue.nsr.CommandArgs;
+import com.jd.joyqueue.nsr.model.AppTokenQuery;
 import com.jd.joyqueue.nsr.utils.AsyncHttpClient;
 import com.jd.joyqueue.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -56,17 +54,32 @@ public class AppAdmin extends AbstractAdmin {
         public Long expire=SystemClock.now()+MONTH_MS*12;
     }
 
+    @Parameters(separators = "=", commandDescription = "List a token for App")
+    public static class TokensArg extends CommandArgs {
+
+        @Parameter(names = { "-a", "--app" }, description = "App code", required = true)
+        public String app;
+
+        @Parameter(names = { "-t", "--token" }, description = "App token", required = false)
+        public String token;
+
+    }
+
+
     public static void main(String[] args){
         final TokenArg tokenArg=new TokenArg();
+        final TokensArg tokensArg=new TokensArg();
         String[] argv={"token","--host","http://localhost:50091","-a","test_app"};
         AppAdmin appAdmin=new AppAdmin();
         Map<String,CommandArgs> argsMap=new HashMap(8);
         argsMap.put(Command.token.name(),tokenArg);
+        argsMap.put(Command.list.name(),tokensArg);
         JCommander jc =JCommander.newBuilder()
                 .addObject(appAdmin)
                 .addCommand(Command.token.name(),tokenArg)
+                .addCommand(Command.list.name(),tokensArg)
                 .build();
-        jc.setProgramName("broker");
+        jc.setProgramName("app");
         appAdmin.execute(jc,argv,argsMap);
     }
 
@@ -77,6 +90,8 @@ public class AppAdmin extends AbstractAdmin {
             case token:
                 token((TokenArg)arguments,jCommander);
                 break;
+            case list:
+                tokens((TokensArg) arguments,jCommander);
             default:
                 jCommander.usage();
                 System.exit(-1);
@@ -112,12 +127,33 @@ public class AppAdmin extends AbstractAdmin {
         return result;
     }
 
+
+    /**
+     *  List tokens of app
+     *
+     **/
+    public List<AppToken> tokens(TokensArg arguments, JCommander jCommander) throws Exception{
+        AppTokenQuery tokenQuery=new AppTokenQuery();
+        List<AppToken> tokens=null;
+        tokenQuery.setApp(arguments.app);
+        tokenQuery.setToken(arguments.token);
+        Future<String> futureResult=httpClient.post(arguments.host,"/apptoken/list",JSON.toJSONString(tokenQuery),String.class);
+        String result=futureResult.get(AdminConfig.TIMEOUT_MS,TimeUnit.MILLISECONDS);
+        if(result!=null){
+            tokens= JSON.parseArray(result,AppToken.class);
+        }
+        if(tokens==null) tokens=new ArrayList();
+        System.out.println(result);
+        logger.info("tokens:{}",result);
+        return tokens;
+    }
+
     /**
      * Command type enum
      *
      **/
     enum Command{
-        token,undef;
+        token,list,undef;
         public static Command type(String name){
             for(Command c: values()){
                 if(c.name().equals(name))
