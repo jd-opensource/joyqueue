@@ -91,6 +91,8 @@
         <metrics.version>4.0.0</metrics.version>
         <commons-lang.version>2.6</commons-lang.version>
         <guice.version>4.2.2</guice.version>
+        <poi.version>3.9</poi.version>
+        <jxls.version>1.0</jxls.version>
     </properties>
 
     <dependencyManagement>
@@ -529,7 +531,26 @@
                 <artifactId>h2</artifactId>
                 <version>${h2database.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi</artifactId>
+                <version>${poi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-ooxml</artifactId>
+                <version>${poi.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.poi</groupId>
+                        <artifactId>poi-ooxml-schemas</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>dom4j</groupId>
+                        <artifactId>dom4j</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
@@ -659,7 +680,7 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven-surefire-plugin.version}</version>
                     <configuration>
-                        <skipTests>false</skipTests>
+                        <skipTests>true</skipTests>
                     </configuration>
                 </plugin>
                 <plugin>

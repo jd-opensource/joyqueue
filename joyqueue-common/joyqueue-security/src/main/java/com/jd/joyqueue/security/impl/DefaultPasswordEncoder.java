@@ -11,25 +11,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jd.joyqueue.security;
+package com.jd.joyqueue.security.impl;
 
+import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.exception.JoyQueueException;
-import com.jd.joyqueue.response.BooleanResponse;
+import com.jd.joyqueue.security.PasswordEncoder;
+import com.jd.joyqueue.toolkit.security.Encrypt;
+import com.jd.joyqueue.toolkit.security.Sha;
 
 /**
  * @author majun8
  */
-public interface Authentication {
+public class DefaultPasswordEncoder implements PasswordEncoder {
+    @Override
+    public String encode(String password) throws JoyQueueException {
+        try {
+            return Encrypt.encrypt(password, Encrypt.DEFAULT_KEY, Sha.INSTANCE);
+        } catch (Exception e) {
+            throw new JoyQueueException(JoyQueueCode.CN_AUTHENTICATION_ERROR);
+        }
 
-    @Deprecated
-    UserDetails getUser(String user) throws JoyQueueException;
-
-    @Deprecated
-    PasswordEncoder getPasswordEncode();
-
-    BooleanResponse auth(String userName, String password);
-
-    BooleanResponse auth(String userName, String password, boolean checkAdmin);
-
-    boolean isAdmin(String userName);
+    }
 }
