@@ -41,7 +41,7 @@
   - [x] Consumer/Producer
   - [x] Start/Stop 脚本改进
   - [x] windows 脚本
-  - [ ] 修复Store脚本（李玥）
+  - [x] 修复Store脚本（李玥）
 - [ ] GitHub相关（王金）
   - [ ] 相关生态的账号申请
   - [ ] 自动构建，自动测试
