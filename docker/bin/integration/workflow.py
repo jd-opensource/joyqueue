@@ -49,7 +49,7 @@ class Workflow:
         self.mode = config.get_value('Mode')
         self.pwd = os.path.dirname(__file__)
         self.mq_tag = str(time.time()).replace('.', '_')
-        self.running_mq_containers = {}
+        self._benchmark_pressure_tag_id = None
         self.logs_dir = os.path.join(self.pwd, '../logs/')
         self.logger = logging.getLogger(__name__)
         self.lockfile = self.__lockfile()
@@ -158,9 +158,10 @@ class Workflow:
         return open('{}/_filelock'.format(self.workspace.home), 'w')
 
     def __start_pressure_worker(self):
+        self._benchmark_pressure_tag_id = int(time.time())
         script = """
-                    docker run --network {subnet} --name {name} {image_namepsace}/{image_name} {entry} -d {drivers}  {workloads}
-                 """.format(name=self.__pressure_container_name(),
+                    docker run --network {subnet} --name {image_name}_{tag_id} {image_namepsace}/{image_name} {entry} -d {drivers}  {workloads}
+                 """.format(tag_id=self._benchmark_pressure_tag_id,
                             image_namepsace=self.task.pressure_docker_namespace,
                             image_name=self.task.pressure_repo_name,
                             entry=self.task.pressure_shell_entry,
@@ -175,14 +176,16 @@ class Workflow:
 
     def __collect_data_from_pressure_worker(self):
         script = """
-            containerId=$(docker ps -a|grep {repo_name}|grep {label_name}|awk '{{print $1}}')
+            containerId=$(docker ps -a|grep {repo_name}_{tag_id}|awk '{{print $1}}')
             if [[ -n $containerId ]]; then
                 docker cp  $containerId:/benchmark {home}
             else 
                 echo '{repo_name} docker not found,failed to collect pressure result'
                 exit 1    
             fi
-        """.format(repo_name=self.task.pressure_repo_name, label_name=self.pressure_container_name ,home=self.workspace.home)
+        """.format(repo_name=self.task.pressure_repo_name,
+                   tag_id=self._benchmark_pressure_tag_id,
+                   home=self.workspace.home)
         self.__run_local_script(script)
 
     def __collect_data(self, sub_dir='benchmark'):
@@ -228,14 +231,6 @@ class Workflow:
                     'Failed to start {} mq docker {}'.format(h, self.task.mq_repo_name),
                     error_code=FAILED_TO_INVOKE_MQ_DOCKER)
 
-    def __pressure_container_name(self):
-        length = len(self.running_mq_containers)
-        if length > 0:
-            self.pressure_container_name = '_'.join(self.running_mq_containers.values())
-        else:
-            self.pressure_container_name = self.task.pressure_repo_name + str(time.time()).replace('.', '_')
-        return self.pressure_container_name
-
     def __check_mq_stat(self, host, max_attempts=60, sleep=5):
         cidfile ='run_{}.cid'.format(host)
         script = """
@@ -249,9 +244,9 @@ class Workflow:
                     ATTEMPTS=0
                     MAX_ATTEMPTS={max_attempts}
                     containerId=$(echo "$containerId"|sed ':a;N;$!ba;s/\\n/ /g') 
-                    # echo "docker exec $containerId cat logs/debug.log|grep {started_flag} "
+                    # echo "docker exec $containerId cat {mq_log_file}|grep {started_flag} "
                     while true; do
-                        started=$(docker exec $containerId cat logs/debug.log|grep {started_flag})
+                        started=$(docker exec $containerId cat {mq_log_file}|grep {started_flag})
                         echo "check state: $started"
                         if [[ -n $started ]]; then
                            exit 0
@@ -267,6 +262,7 @@ class Workflow:
         """.format(workspace_home=self.workspace.home, docker_namespace=self.task.mq_docker_namespace,
                    repo_name=self.task.mq_repo_name,
                    mq_home=self.task.mq_home,
+                   mq_log_file=self.task.mq_log_file,
                    max_attempts=max_attempts,
                    sleep=sleep,
                    cidfile=cidfile,
@@ -275,17 +271,20 @@ class Workflow:
         return self.__run_local_script(script)
 
     def __invoke_mq_worker(self, host):
+        tag_id = int(time.time())
         script = """
-                docker run --network {subnet} --ip {ip}  --expose={expose} --cidfile run_{ip}.cid  -d {mq_docker_namespace}/{mq_docker_name} {entry}
+                docker run --network {subnet} --ip {ip}  --expose={expose} --cidfile run_{ip}.cid \
+                --name {mq_docker_name}_{tag_id}  -d {mq_docker_namespace}/{mq_docker_name} {entry}
         """.format(mq_home=self.task.mq_home,
                    mq_docker_namespace=self.task.mq_docker_namespace,
                    mq_docker_name=self.task.mq_repo_name,
                    subnet=self.subnet_name,
                    ip=host,
                    expose=self.task.expose_port,
+                   tag_id=tag_id,
                    entry=self.task.mq_start_shell_entry).rstrip()
 
-        code, outs, _ = self.__run_local_script( script)
+        code, outs, _ = self.__run_local_script(script)
         if code != 0:
             raise WorkflowError(
                 'Failed to invoke mq docker {} on {}'.format(self.task.mq_repo_name, host),
@@ -300,7 +299,7 @@ class Workflow:
     def __shutdown_mq_worker_script(self, host):
         cidfile ='run_{}.cid'.format(host)
         script = """
-                docker containers 
+                docker ps 
                 full_cid=$(cat {cidfile})
                 echo $full_cid
                 containerId=$(docker ps --filter id=$full_cid|grep {docker_namespace}/{repo_name}|awk '{{print $1}}')
@@ -321,12 +320,21 @@ class Workflow:
         clean = """
               ls -l ./
               docker container prune -f
-              mq_containerId=$(docker ps |grep {mq_docker_namespace}/{mq_repo_name}|awk '{{print $1}}|uniq')
-              pressure_containerId=$(docker ps |grep {pressure_repo_name}|awk '{{print $1}}|uniq')
-              docker stop $(mq_containerId)
-              docker rm $(mq_containerId)
-              docker stop $(pressure_containerId) 
-              docker rm $(pressure_containerId)  
+              mq_containerId=$(docker ps |grep {mq_repo_name}|awk '{{print $1}}'|uniq)
+              pressure_containerId=$(docker ps |grep {pressure_repo_name}|awk '{{print $1}}'|uniq)
+              if [ -n "$mq_containerId" ];then
+                    docker stop $(mq_containerId)
+                    docker rm $(mq_containerId)
+              else
+                    echo "no mq container is running!"
+              fi  
+              if [ -n "$pressure_containerId" ];then
+                    docker stop $(pressure_containerId) 
+                    docker rm $(pressure_containerId) 
+              else
+                    echo "no benchmark container is running!"
+              fi
+               
               rm *.cid
               """.format(mq_docker_namespace=self.task.mq_docker_namespace,
                          mq_repo_name=self.task.mq_repo_name,

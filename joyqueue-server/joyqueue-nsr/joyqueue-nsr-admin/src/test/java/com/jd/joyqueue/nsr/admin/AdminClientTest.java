@@ -15,6 +15,7 @@ package com.jd.joyqueue.nsr.admin;
 
 
 import com.alibaba.fastjson.JSON;
+import com.jd.joyqueue.domain.AppToken;
 import com.jd.joyqueue.domain.Broker;
 import com.jd.joyqueue.domain.PartitionGroup;
 import com.jd.joyqueue.domain.Subscription;
@@ -52,6 +53,30 @@ public class AdminClientTest {
 
     }
 
+
+    @Test
+    public void appTokens() throws Exception{
+        int tokens=1000;
+        AppAdmin.TokensArg tokensArg=new AppAdmin.TokensArg();
+        AppAdmin.TokenArg tokenArg=new AppAdmin.TokenArg();
+        for(int i=0;i<tokens;i++) {
+            String app=this.app + System.currentTimeMillis();
+            tokenArg.app = app;
+            String token=client.token(tokenArg);
+            Assert.assertNotNull(token);
+            tokensArg.app = app;
+            List<AppToken> appTokens=client.tokens(tokensArg);
+            boolean found=false;
+            for(AppToken t:appTokens){
+                 if(token.equals(t.getToken())){
+                     found=true;
+                     continue;
+                }
+            }
+            Assert.assertTrue(String.format("app:%s , expected token: %s, ignite tokens: %s",app,token,JSON.toJSONString(appTokens)),found);
+        }
+
+    }
 
     @Test
     public void partitionGroup() throws Exception{
