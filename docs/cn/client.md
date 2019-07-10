@@ -414,6 +414,7 @@ Consumer需要使用io.openmessaging.spring.boot.annotation.OMSMessageListener�
 分为两种使用方式，一种是通过类实现接口的方式，另一种是通过方法直接消费。
 
 * 实现接口
+
 ````java
 @Component // 注册到spring
 @OMSMessageListener(queueName = "test_topic_0") // 声明类一个consumer，并消费test_topic_0
@@ -431,6 +432,7 @@ public class SimpleMessageListener implements MessageListener {
 * 方法消费
 
 注意方法参数不能写错
+
 ````java
 @Component // 注册到spring
 public class SimpleMessageListener {
