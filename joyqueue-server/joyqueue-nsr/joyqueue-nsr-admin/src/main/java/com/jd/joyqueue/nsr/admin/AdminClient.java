@@ -134,7 +134,6 @@ public class AdminClient implements NsrAdmin {
     @Override
     public String token(AppAdmin.TokenArg tokenArg) throws Exception{
         tokenArg.host=host;
-
         try {
             String result= appAdmin.token(tokenArg,null);
             hostProvider.onConnected();
