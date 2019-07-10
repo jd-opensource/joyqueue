@@ -12,4 +12,4 @@
 @REM limitations under the License.
 @REM
 
-"%~dp0kafka-run-class.bat" com.jd.joyqueue.store.cli.RecoverStore %*
+"%~dp0run-class.bat" com.jd.joyqueue.store.cli.RecoverStore %*
