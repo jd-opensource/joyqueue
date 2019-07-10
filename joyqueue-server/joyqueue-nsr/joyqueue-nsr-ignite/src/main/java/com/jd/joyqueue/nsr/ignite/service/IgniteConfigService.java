@@ -57,7 +57,7 @@ public class IgniteConfigService implements ConfigService {
 
     @Override
     public void add(Config config) {
-        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.REPEATABLE_READ)) {
+        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
             this.addOrUpdate(new IgniteConfig(config));
             this.publishEvent(ConfigEvent.add(config.getGroup(), config.getKey(), config.getValue()));
             tx.commit();
@@ -70,7 +70,7 @@ public class IgniteConfigService implements ConfigService {
 
     @Override
     public void update(Config config) {
-        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.REPEATABLE_READ)) {
+        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
             this.addOrUpdate(new IgniteConfig(config));
             this.publishEvent(ConfigEvent.update(config.getGroup(), config.getKey(), config.getValue()));
             tx.commit();
@@ -83,7 +83,7 @@ public class IgniteConfigService implements ConfigService {
 
     @Override
     public void remove(Config config) {
-        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.REPEATABLE_READ)) {
+        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
             this.deleteById(IgniteConfig.getId(config.getGroup(), config.getKey()));
             this.publishEvent(ConfigEvent.remove(config.getGroup(), config.getKey(), config.getValue()));
             tx.commit();
