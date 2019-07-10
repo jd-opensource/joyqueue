@@ -1,8 +1,8 @@
 # 客户端使用说明
 
 
-JoyQueue 支持Openmessaging协议，并提供Java版本的原生客户端。
-你还可以选择其它符合Openmessaging协议的实现作为客户端。另外除了支持JoyQueue原生的协议以外，还包括Kafka、MQTT协议。
+JoyQueue 支持Openmessaging协议，并提供Java版本的原生客户端,
+还可以选择其它符合Openmessaging协议的实现作为客户端。除了支持JoyQueue原生的协议以外，还包括Kafka、MQTT协议。
 下文将介绍JoyQueue客户端在纯Java、Spring及Sping boot 环境的基本使用示例，以及Kafka、MQTT客户端的使用。
 
 
@@ -603,7 +603,7 @@ public class SimpleKafkaConsumer {
     
         ```python
         from kafka import KafkaConsumer
-
+    
         conf={
             'bootstrap_servers':'test-nameserver.nameserver.joyqueue.local:50088',
             'client_id':'your_app'
