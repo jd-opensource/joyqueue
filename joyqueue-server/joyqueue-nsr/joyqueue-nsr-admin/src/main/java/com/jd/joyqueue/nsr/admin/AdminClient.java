@@ -13,6 +13,7 @@
  */
 package com.jd.joyqueue.nsr.admin;
 
+import com.jd.joyqueue.domain.AppToken;
 import com.jd.joyqueue.domain.Broker;
 import com.jd.joyqueue.nsr.NsrAdmin;
 import com.jd.joyqueue.nsr.utils.AsyncHttpClient;
@@ -133,9 +134,23 @@ public class AdminClient implements NsrAdmin {
     @Override
     public String token(AppAdmin.TokenArg tokenArg) throws Exception{
         tokenArg.host=host;
-
         try {
             String result= appAdmin.token(tokenArg,null);
+            hostProvider.onConnected();
+            return result;
+        }catch (Exception e){
+            onException();
+            logger.info("request exception",e);
+            throw  e;
+        }
+    }
+
+
+    @Override
+    public List<AppToken> tokens(AppAdmin.TokensArg tokensArg) throws Exception {
+        tokensArg.host=host;
+        try {
+            List<AppToken> result= appAdmin.tokens(tokensArg,null);
             hostProvider.onConnected();
             return result;
         }catch (Exception e){

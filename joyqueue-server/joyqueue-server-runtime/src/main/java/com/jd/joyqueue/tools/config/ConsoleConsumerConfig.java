@@ -27,25 +27,25 @@ import java.util.Map;
  */
 public class ConsoleConsumerConfig {
 
-    @Parameter(names = "-bootstrap", description = "server bootstrap", required = true)
-    private String bootstrap;
+    @Parameter(names = {"-b","--bootstrap"}, description = "server bootstrap")
+    private String bootstrap="localhost:50088";
 
-    @Parameter(names = "-topic", description = "consumer topic", required = true)
+    @Parameter(names = {"-t","--topic"}, description = "consumer topic", required = true)
     private String topic;
 
-    @Parameter(names = "-namespace", description = "consumer namespace")
+    @Parameter(names = {"-n","--namespace"}, description = "consumer namespace")
     private String namespace;
 
-    @Parameter(names = "-region", description = "consumer region")
+    @Parameter(names = {"-r","--region"}, description = "consumer region")
     private String region;
 
-    @Parameter(names = "-app", description = "consumer app", required = true)
+    @Parameter(names = {"-a","--app"}, description = "consumer app", required = true)
     private String app;
 
-    @Parameter(names = "-token", description = "app token", required = true)
+    @Parameter(names = {"--token"}, description = "app token", required = true)
     private String token;
 
-    @DynamicParameter(names = "-params", description = "consumer params")
+    @DynamicParameter(names = {"-p","--params"}, description = "consumer params")
     private Map<String, String> params = new HashMap<>();
 
     @Parameter(names = "--help", description = "help", help = true)

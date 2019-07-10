@@ -1,7 +1,6 @@
-#JoyQueue CI/CD 集成测试
+#JoyQueue CI/CD integration test
 
- 本地测试，在项目的根目录下
- 
+ cd to project root directory and execute following commands:
 ``` 
 
  mvn  -Dmaven.test.skip=true -P docker install 
