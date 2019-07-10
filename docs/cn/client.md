@@ -1,5 +1,12 @@
-## 客户端使用说明
+# 客户端使用说明
 
+
+JoyQueue 支持Openmessaging协议，并提供Java版本的原生客户端,
+还可以选择其它符合Openmessaging协议的实现作为客户端。除了支持JoyQueue原生的协议以外，还包括Kafka、MQTT协议。
+下文将介绍JoyQueue客户端在纯Java、Spring及Sping boot 环境的基本使用示例，以及Kafka、MQTT客户端的使用。
+
+
+依赖
 ```
 <!-- 必选 -->
 <dependency>
@@ -31,16 +38,17 @@
         </exclusion>
     </exclusions>
 </dependency>
+
 ```
-#### 手动创建和管理实例
 
-手动创建的使用方式, 可自己控制producer和consumer实例化，自己控制调度等
+## 1. JoyQueue 客户端(Java)
 
+主动创建生产和消费实例，灵活性最好。相较于Spring及Spring boot会稍微麻烦一点，用户可以根据实际使用情况，灵活选择。
 可参考[手动方式使用](http://git.jd.com/laf/journalQ/tree/master/joyqueue-client/joyqueue-client-samples/src/main/java/com/jd/joyqueue/client/samples/api)
 
-##### accessPoint
+### 1.1 AccessPoint实例化
 
-首先需要创建MessagingAccessPoint，相当于工厂类，由他再创建producer和consumer
+首先需要创建MessagingAccessPoint，相当于工厂类，由它再创建producer和consumer
 
 ````java
 public class SimpleProducer {
@@ -71,11 +79,9 @@ public class SimpleProducer {
 }
 ````
 
-##### producer
+### 1.2 Producer
 
-可参考[demo](http://git.jd.com/laf/journalQ/tree/master/joyqueue-client/joyqueue-client-samples/src/main/java/com/jd/joyqueue/client/samples/api/producer/SimpleProducer.java)
-
-生产者，使用MessagingAccessPoint创建，调用start方法后使用
+可参考[demo](http://git.jd.com/laf/journalQ/tree/master/joyqueue-client/joyqueue-client-samples/src/main/java/com/jd/joyqueue/client/samples/api/producer/SimpleProducer.java)。生产者，使用MessagingAccessPoint创建，调用start方法后使用
 
 ````java
 public class SimpleProducer {
@@ -101,11 +107,9 @@ public class SimpleProducer {
 }
 ````
 
-##### consumer
+### 1.3 Consumer
 
-消费者，使用MessagingAccessPoint创建，调用bindQueue后再调用start使用
-
-可参考[demo](http://git.jd.com/laf/journalQ/tree/master/joyqueue-client/joyqueue-client-samples/src/main/java/com/jd/joyqueue/client/samples/api/consumer/SimpleConsumer.java)
+消费者，使用MessagingAccessPoint创建，调用bindQueue后再调用start使用。可参考[demo](http://git.jd.com/laf/journalQ/tree/master/joyqueue-client/joyqueue-client-samples/src/main/java/com/jd/joyqueue/client/samples/api/consumer/SimpleConsumer.java)
 
 ````java
 public class SimpleConsumer {
@@ -134,507 +138,14 @@ public class SimpleConsumer {
     }
 }
 ````
-#### 基本用法
 
-##### producer
+### 1.4 拦截器
 
-基本的生产用法
-````java
-public class SimpleProducer {
-    
-    private Producer producer;
+拦截器分为producer和consumer两种，可以实现日志，监控，消息过滤等，下面的例子都是基于api方式的，如果是spring或springboot可以使用xml和注解声明。
+拦截器还可以分为openmessaging和joyqueue两种，openmessaging只有基本的拦截器，joyqueue额外提供消息过滤，拦截器排序等，注意consumer拦截器只在使用listener时生效。
 
-    public static void main(String[] args) {
-        // 使用producer.createMessage方法创建message
-        Message message = producer.createMessage("test_topic_0", "body".getBytes());
-        
-        // 生产消息，不抛异常就算成功，sendResult里的messageId暂时没有意义
-        SendResult sendResult = producer.send(message);
-        
-        // 打印生产结果
-        System.out.println(String.format("messageId: %s", sendResult.messageId()));
-    }
-}
-````
+#### 1.4.1 Consumer拦截器 (openmessaging)
 
-异步生产
-````java
-public class AsyncProducer {
-    
-    private Producer producer;
-
-    public static void main(String[] args) {
-        Message message = producer.createMessage("test_topic_0", "body".getBytes());
-        
-        Future<SendResult> future = producer.sendAsync(message);
-        
-        System.out.println(String.format("messageId: %s", future.get().messageId()));
-    }
-}
-````
-
-批量生产
-````java
-public class BatchProducer {
-    
-    private Producer producer;
-
-    public static void main(String[] args) {
-        List<Message> messages = new ArrayList<>();
-        
-        for (int i = 0; i < 10; i++) {
-            Message message = producer.createMessage("test_topic_0", "body".getBytes());
-            messages.add(message);
-        }
-
-        producer.send(messages);
-    }
-}
-````
-
-批量异步生产
-````java
-public class BatchAsyncProducer {
-    
-    private Producer producer;
-
-    public static void main(String[] args) {
-        List<Message> messages = new ArrayList<>();
-
-        for (int i = 0; i < 10; i++) {
-            Message message = producer.createMessage("test_topic_0", "body".getBytes());
-            messages.add(message);
-        }
-
-        Future<SendResult> future = producer.sendAsync(messages);
-        System.out.println(future.get().messageId());
-    }
-}
-````
-
-异步监听生产，异步方法返回的future可以注册listener实现callback
-````java
-public class BatchAsyncProducer {
-    
-    private Producer producer;
-
-    public static void main(String[] args) {
-        Message message = producer.createMessage("test_topic_0", "body".getBytes());
-        Future<SendResult> future = producer.sendAsync(message);
-
-        future.addListener(new FutureListener<SendResult>() {
-            @Override
-            public void operationComplete(Future<SendResult> future) {
-                System.out.println(future.get().messageId());
-            }
-        });
-    }
-}
-````
-
-##### consumer
-
-基本的consumer用法
-````java
-public class SimpleConsumer {
-    
-    private Consumer consumer;
-
-    public static void main(String[] args) {
-        // 绑定需要消费的topic和对应的listener
-        consumer.bindQueue("test_topic_0", new MessageListener() {
-            @Override
-            public void onReceived(Message message, Context context) {
-                System.out.println(String.format("onReceived, message: %s", message));
-                
-                // 确认消息消费成功，如果没有确认或抛出异常会进入重试队列
-                context.ack();
-            }
-        });
-
-        consumer.start();
-    }
-}
-````
-
-批量消费
-````java
-public class BatchConsumer {
-    
-    private Consumer consumer;
-
-    public static void main(String[] args) {
-        // 绑定需要消费的topic和对应的listener
-        consumer.bindQueue("test_topic_0", new BatchMessageListener() {
-            @Override
-            public void onReceived(List<Message> messages, Context context) {
-                for (Message message : messages) {
-                    System.out.println(String.format("onReceived, message: %s", message));
-                }
-                
-                // 代表这一批消息的ack
-                context.ack();
-            }
-        });
-    
-        consumer.start();
-
-        consumer.start();
-    }
-}
-````
-
-##### 事务
-
-JoyQueue支持事务消息，支持单条事务消息和多条事务消息，未提交的事务消息不会被消费到
-
-单条事务消息
-````java
-public class TransactionProducer {
-    
-    private Producder producer;
-
-    public static void main(String[] args) {
-        Message message = producer.createMessage("test_topic_0", "body".getBytes());
-        
-        // 添加事务id，设置过事务id的才会被补偿，补偿时会带上这个事务id，非必填
-        // 建议根据业务使用有意义的事务id
-        message.extensionHeader().get().setTransactionId("test_transactionId");
-        
-        // 事务prepare
-        TransactionalResult transactionalResult = producer.prepare(message);
-        
-        // 提交事务
-        transactionalResult.commit();
-        
-        // 回滚事务
-//        transactionalResult.rollback();
-
-        System.out.println(String.format("messageId: %s", transactionalResult.getMessageId()));
-    }
-}
-````
-
-多条事务消息
-````java
-public class ExtensionTransactionProducer {
-    
-    private Producder producer;
-
-    public static void main(String[] args) {
-        // 需要先对producer强制转型
-        ExtensionProducer extensionProducer = (ExtensionProducer) producer;
-        
-        ExtensionTransactionalResult transactionalResult = extensionProducer.prepare();
-        
-        for (int i = 0; i < 10; i++) {
-            // 可以发多条事务消息
-            Message message = extensionProducer.createMessage("test_topic_0", "body".getBytes());
-            
-            // 添加事务id，设置过事务id的才会被补偿，补偿时会带上这个事务id，非必填
-            // 建议根据业务使用有意义的事务id
-            message.extensionHeader().get().setTransactionId("test_transactionId");
-            
-            SendResult sendResult = transactionalResult.send(message);
-            System.out.println(sendResult.messageId());
-        }
-
-        // 提交事务
-        transactionalResult.commit();
-        
-        // 回滚事务
-//        transactionalResult.rollback();
-    }
-}
-````
-
-##### 事务补偿
-
-事务补偿，在超时时间内没有进行commit或rollback的事务会通过回调的方式补偿，由producer确认后commit或rollback
-
-只有生产时指定了transactionId的消息才会被补偿
-
-简单补偿例子
-````java
-public class TransactionProducer {
-    
-    private Producder producer;
-
-    public static void main(String[] args) {
-        // 创建producer，如果是spring或springboot通过xml和注解方式添加
-        // producer只会补偿发送过的主题的事务
-        Producer producer = messagingAccessPoint.createProducer(new TransactionStateCheckListener() {
-            @Override
-            public void check(Message message, TransactionalContext context) {
-                // 使用context的commit和rollback方法提交事务状态
-                // 使用transactionId进行状态查询，这里只是简单例子，以具体业务为准
-                String topic = message.header().getDestination();
-                String transactionId = message.extensionHeader().get().getTransactionId();
-                Xxx xxx = xxxService.findXxxById(transactionId);
-                
-                // 如果是已完成状态，代表业务完成，那么提交事务
-                if (xxx.getState().equals(SUCCESS)) {
-                    context.commit();
-                } else {
-                    // 否则进行回滚或重试业务逻辑再次提交
-                    context.rollback();
-//                    context.commit();
-                }
-            }
-        });
-
-        // 发送事务消息
-        Message message = producer.createMessage("test_topic_0", "body".getBytes());
-        message.extensionHeader().get().setTransactionId("test_transactionId");
-        
-        TransactionalResult transactionalResult = producer.prepare(message);
-        transactionalResult.commit();
-
-        System.out.println(String.format("messageId: %s", transactionalResult.messageId()));
-    }
-}
-````
-
-#### 高级用法
-
-##### 元数据相关
-
-可以通过producer和consumer获取到简单的元数据，根据元数据进行调度和分配
-
-元数据例子
-````java
-public class SimpleMetadata {
-
-    public static void main(String[] args) {
-        KeyValue keyValue = OMS.newKeyValue();
-        keyValue.put(OMSBuiltinKeys.ACCOUNT_KEY, "test_token");
-
-        MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint("oms:joyqueue://test_app@127.0.0.1:50088/UNKNOWN", keyValue);
-
-        Producer producer = messagingAccessPoint.createProducer();
-        producer.start();
-
-        QueueMetaData queueMetaData = producer.getQueueMetaData("test_topic_0");
-        for (QueueMetaData.Partition partition : queueMetaData.partitions()) {
-            System.out.println(String.format("partition: %s, partitionHost: %s", partition.partitionId(), partition.partitonHost()));
-        }
-
-        Message message = producer.createMessage("test_topic_0", "body".getBytes());
-
-        SendResult sendResult = producer.send(message);
-        System.out.println(String.format("messageId: %s", sendResult.messageId()));
-    }
-}
-````
-
-##### producer
-
-producer生产可以指定partition
-
-````java
-public class SimpleProducer {
-    
-    private Producer producer;
-
-    public static void main(String[] args) {
-        // 使用producer.createMessage方法创建message
-        Message message = producer.createMessage("test_topic_0", "body".getBytes());
-
-        // 设置messageKey，非必填
-        // 如果需要相对顺序消息，也可以使用messageKey作为key指定分区
-        message.extensionHeader().get().setMessageKey("test_key");
-        
-        // 自定义发送的partition
-        // 最好根据元数据分配，不要写死partitions
-        List<QueueMetaData.Partition> partitions = producer.getQueueMetaData("test_topic_0").partitions();
-        QueueMetaData.Partition partition = partitions.get((int) System.currentTimeMillis() % partitions.size());
-        message.extensionHeader().get().setPartition(partition.partitionId());
-
-        // 生产消息，不抛异常就算成功，sendResult里的messageId暂时没有意义
-        SendResult sendResult = producer.send(message);
-
-        // 打印生产结果
-        System.out.println(String.format("messageId: %s", sendResult.messageId()));
-    }
-}
-````
-
-##### consumer
-
-consumer可以由客户端调度拉取消息，也可以由用户自行调度拉取消息，也可以由用户自己指定想要拉取的partition和index
-
-单条拉取调度
-````java
-public class ReceiveConsumer {
-    
-    private Consumer consumer;
-
-    public static void main(String[] args) throws Exception {
-        // 绑定主题，将要消费的主题
-        consumer.bindQueue("test_topic_0");
-
-        // 这里只是简单例子，根据具体情况进行调度处理
-        while (true) {
-            // 拉取单条消息
-            // 参数是超时时间，只是网络请求的超时
-            Message message = consumer.receive(1000 * 10);
-
-            // 没有拉取到，继续循环
-            if (message == null) {
-                continue;
-            }
-
-            // 拉取到消息，打印日志并ack
-            System.out.println(String.format("receive, message: %s", message));
-            consumer.ack(message.getMessageReceipt());
-
-            Thread.currentThread().sleep(1000 * 1);
-        }
-    }
-}
-````
-
-批量拉取调度
-````java
-public class BatchReceiveConsumer {
-    
-    private Consumer consumer;
-
-    public static void main(String[] args) throws Exception {
-        // 绑定主题，将要消费的主题
-        consumer.bindQueue("test_topic_0");
-
-        // 这里只是简单例子，根据具体情况进行调度处理
-        // 参数是超时时间，只是网络请求的超时
-        while (true) {
-            // 批量拉取消息
-            List<Message> messages = consumer.batchReceive(1000 * 10);
-            
-            if (CollectionUtils.isEmpty(messages)) {
-                continue;
-            }
-    
-            for (Message message : messages) {
-                // 拉取到消息，打印日志并ack
-                System.out.println(String.format("receive, message: %s", messages));
-                consumer.ack(message.getMessageReceipt());
-            }
-
-            Thread.currentThread().sleep(1000 * 1);
-        }
-    }
-}
-````
-
-拉取调度和指定partition
-````java
-public class PartitionReceiveConsumer {
-    
-    private Consumer consumer;
-
-    public static void main(String[] args) throws Exception {
-        // 首先需要对consumer强制转型
-        ExtensionConsumer extensionConsumer = (ExtensionConsumer) consumer;
-        
-        // 绑定主题，将要消费的主题
-        extensionConsumer.bindQueue("test_topic_0");
-
-        // 获取元数据
-        QueueMetaData queueMetaData = extensionConsumer.getQueueMetaData("test_topic_0");
-
-        // 这里只是简单例子，根据具体情况进行调度处理
-        while (true) {
-            // 循环所有partition，并拉取相应消息
-            for (QueueMetaData.Partition partition : queueMetaData.partitions()) {
-                // 拉取分区单条消息
-                // 参数是超时时间，只是网络请求的超时
-                Message message = extensionConsumer.receive((short) partition.partitionId(), 1000 * 10);
-                
-                // 批量拉取的方式相同，不单独列出
-//                List<Message> messages = extensionConsumer.batchReceive((short) partition.partitionId(), 1000 * 10);
-    
-                // 没有拉取到，继续循环
-                if (message == null) {
-                    continue;
-                }
-    
-                // 拉取到消息，打印日志并ack
-                System.out.println(String.format("receive, message: %s", message));
-                extensionConsumer.ack(message.getMessageReceipt());
-            }
-
-            Thread.currentThread().sleep(1000 * 1);
-        }
-    }
-}
-````
-
-拉取调度和指定partition和index
-````java
-public class PartitionIndexReceiveConsumer {
-    
-    private Consumer consumer;
-
-    public static void main(String[] args) throws Exception {
-        // 首先需要对consumer强制转型
-        ExtensionConsumer extensionConsumer = (ExtensionConsumer) consumer;
-                
-        // 绑定主题，将要消费的主题
-        extensionConsumer.bindQueue("test_topic_0");
-
-        // 获取元数据
-        QueueMetaData queueMetaData = extensionConsumer.getQueueMetaData("test_topic_0");
-        Map<Integer, Long> indexMapper = Maps.newHashMap();
-
-        // 这里只是简单例子，根据具体情况进行调度处理
-        while (true) {
-            // 循环所有partition，并拉取相应消息
-            for (QueueMetaData.Partition partition : queueMetaData.partitions()) {
-                // 初始化index信息
-                Long index = indexMapper.get(partition.partitionId());
-                if (index == null) {
-                    index = 0L;
-                    indexMapper.put(partition.partitionId(), index);
-                }
-                                
-                // 拉取分区单条消息
-                // 参数是超时时间，只是网络请求的超时
-                Message message = extensionConsumer.receive((short) partition.partitionId(), index, 1000 * 10);
-                
-                // 批量拉取的方式相同，不单独列出
-//                List<Message> messages = extensionConsumer.batchReceive((short) partition.partitionId(), index, 1000 * 10);
-    
-                // 没有拉取到，继续循环
-                if (message == null) {
-                    continue;
-                }
-    
-                // 拉取到消息，打印日志并ack
-                System.out.println(String.format("receive, message: %s", message));
-                extensionConsumer.ack(message.getMessageReceipt());
-                
-                // 更新index到下一个消息处
-                index = message.extensionHeader().get().getOffset() + 1;
-                indexMapper.put(partition.partitionId(), index);
-            }
-
-            Thread.currentThread().sleep(1000 * 1);
-        }
-    }
-}
-````
-
-##### 拦截器
-
-拦截器分为producer和consumer两种，可以实现日志，监控，消息过滤等
-
-下面的例子都是基于api方式的，如果是spring或springboot可以使用xml和注解声明
-
-拦截器分为openmessaging和joyqueue两种，openmessaging只有基本的拦截器，joyqueue额外提供消息过滤，拦截器排序等
-
-consumer拦截器只有在使用listener时生效
-
-简单consumer拦截器 (openmessaging)
 ````java
 public class SimpleConsumerInterceptor {
     
@@ -666,10 +177,9 @@ public class SimpleConsumerInterceptor {
 }
 ````
 
-简单consumer拦截器 (joyqueue)
+#### 1.4.2 Consumer拦截器 (joyqueue)
 
-使用时需要通过spi的方式注册
-把实现类添加到 META-INF/services/com.jd.joyqueue.client.internal.consumer.interceptor.ConsumerInterceptor 文件内，每行一个
+使用时需要通过spi的方式注册，把实现类添加到META-INF/services/com.jd.joyqueue.client.internal.consumer.interceptor.ConsumerInterceptor里。
 
 ````java
 // Ordered接口提供getOrder方法，用于指定顺序，可以不实现
@@ -703,7 +213,7 @@ public class JoyQueueSimpleConsumerInterceptor implements ConsumerInterceptor, O
 }
 ````
 
-简单producer拦截器 (openmessaging)
+#### 1.4.3 Producer拦截器 (openmessaging)
 ````java
 public class SimpleProducerInterceptor {
     
@@ -733,10 +243,9 @@ public class SimpleProducerInterceptor {
 }
 ````
 
-简单producer拦截器 (joyqueue)
+#### 1.4.4 Producer拦截器 (joyqueue)
 
-使用时需要通过spi的方式注册
-把实现类添加到 META-INF/services/com.jd.joyqueue.client.internal.producer.interceptor.ProducerInterceptor 文件内，每行一个
+使用时需要通过spi的方式注册，把实现类添加到 META-INF/services/com.jd.joyqueue.client.internal.producer.interceptor.ProducerInterceptor 里。
 
 ````java
 // Ordered接口提供getOrder方法，用于指定顺序，可以不实现
@@ -767,30 +276,12 @@ public class JoyQueueSimpleProducerInterceptor implements ProducerInterceptor, O
 }
 ````
 
-拦截器的具体使用例子
-
-可参考
-
-[简单按环境消息生产和过滤](http://git.jd.com/laf/journalQ/tree/master/joyqueue-client/joyqueue-client-samples/src/main/java/com/jd/joyqueue/client/samples/api/interceptor)
+拦截器的具体使用例子,可参考[简单按环境消息生产和过滤](http://git.jd.com/laf/journalQ/tree/master/joyqueue-client/joyqueue-client-samples/src/main/java/com/jd/joyqueue/client/samples/api/interceptor)和
 [客户端监控](http://git.jd.com/laf/laf-jmq/tree/master/jmq-client/jmq-client-core/src/main/java/com/jd/jmq/client/internal/trace/interceptor)
 
-##### 监控
+## 2. JoyQueue客户端（Spring接入）
 
-客户端内置监控接口和ump的实现，根据需求使用
-
-客户端内置Trace接口，用于实现监控，目前监控包括生产，消费，拉取消息三种
-
-可参考
-
-[ump监控](http://git.jd.com/laf/laf-jmq/tree/master/jmq-jd/jmq-client-ump/src/main/java/com/jd/jmq/client/internal/ump)
-
-ump的实现提供可配参数，可以通过com.jd.joyqueue.client.internal.ump.UMPTraceConfig的appNames设置监控的app，如果有需要可自行设置
-
-#### spring
-
-和spring整合的使用方式
-
-可参考[demo](http://git.jd.com/laf/JournalQ/tree/master/joyqueue-client/joyqueue-client-samples/src/main/java/com/jd/joyqueue/client/samples/spring)
+和spring整合的使用方式，可参考[demo](http://git.jd.com/laf/JournalQ/tree/master/joyqueue-client/joyqueue-client-samples/src/main/java/com/jd/joyqueue/client/samples/spring)
 
 ````xml
 <beans xmlns="http://www.springframework.org/schema/beans"
@@ -862,13 +353,11 @@ ump的实现提供可配参数，可以通过com.jd.joyqueue.client.internal.ump
 </beans>
 ````
 
-#### spring-boot
+## 3. JoyQueue客户端（Spring boot）
 
-和spring-boot整合的使用方式
+和spring-boot整合的使用方式,可参考[demo](http://git.jd.com/laf/journalQ/tree/master/joyqueue-client/joyqueue-client-samples/src/main/java/com/jd/joyqueue/client/samples/springboot)
 
-可参考[demo](http://git.jd.com/laf/journalQ/tree/master/joyqueue-client/joyqueue-client-samples/src/main/java/com/jd/joyqueue/client/samples/springboot)
-
-##### 配置
+### 3.1 配置
 
 ````properties
 #spring.oms.url是核心配置，必须配置，否则无法使用
@@ -889,7 +378,7 @@ spring.oms.attributes[ACCOUNT_KEY]=test_token
 #spring.oms.producer.transaction.check.enable=false
 ````
 
-##### producer
+### 3.2 Producer
 
 默认配置下springboot会自动创建一个producer，注入到bean中可直接使用，不需要start
 
@@ -919,13 +408,13 @@ public class SpringBootMain implements InitializingBean {
 }
 ````
 
-##### consumer
+### 3.3 Consumer
 
-consumer需要使用io.openmessaging.spring.boot.annotation.OMSMessageListener注解定义
+Consumer需要使用io.openmessaging.spring.boot.annotation.OMSMessageListener注解定义，
+分为两种使用方式，一种是通过类实现接口的方式，另一种是通过方法直接消费。
 
-分为两种使用方式，一种是通过类实现接口的方式，另一种是通过方法直接消费
+* 实现接口
 
-实现接口
 ````java
 @Component // 注册到spring
 @OMSMessageListener(queueName = "test_topic_0") // 声明类一个consumer，并消费test_topic_0
@@ -940,7 +429,10 @@ public class SimpleMessageListener implements MessageListener {
 }
 ````
 
-方法消费，方法参数不能写错
+* 方法消费
+
+注意方法参数不能写错
+
 ````java
 @Component // 注册到spring
 public class SimpleMessageListener {
@@ -961,11 +453,12 @@ public class SimpleMessageListener {
 }
 ````
 
-##### 事务补偿
+### 3.4 事务补偿
 
 事务补偿也是通过注解声明
 
 ````java
+
 @OMSTransactionStateCheckListener // 声明是一个补偿类，已包含Component注解，可直接被spring扫描
 public class SimpleTransactionStateCheckListener implements TransactionStateCheckListener {
 
@@ -975,9 +468,10 @@ public class SimpleTransactionStateCheckListener implements TransactionStateChec
         context.commit();
     }
 }
+
 ````
 
-##### 拦截器
+### 3.5 拦截器
 
 拦截器也是通过注解声明
 
@@ -999,26 +493,28 @@ public class SimpleProducerInterceptor implements ProducerInterceptor {
 ````
 
  
-### kafka
+## 4. Kafka客户端
 
-- JoyQueue兼容kafka协议，可直接使用原生kafka客户端
+JoyQueue兼容kafka协议，可直接使用原生kafka客户端
 
-#### kafka-java客户端
+### 4.1 kafka-java客户端
 
-和kafka使用方式一样，唯一区别需要指定group.id和client.id为app
+和kafka使用方式一样，唯一区别需要指定group.id和client.id为app。
 
-kafka客户端建议使用1.0.0版本以上，兼容0.9及以上版本，不兼容0.8及以下版本
+kafka客户端建议使用1.0.0版本以上，兼容0.9及以上版本，不兼容0.8及以下版本。
 
-pom
+pom 依赖
 ````java
+
 <dependency>
     <groupId>org.apache.kafka</groupId>
     <artifactId>kafka-clients</artifactId>
     <version>2.1.0</version>
 </dependency>
+
 ````
 
-producer
+#### 4.1.1 Producer
 ````java
 public class SimpleKafkaProducer {
 
@@ -1040,7 +536,8 @@ public class SimpleKafkaProducer {
 }
 ````
 
-consumer
+#### 4.1.2 Consumer
+
 ````java
 public class SimpleKafkaConsumer {
 
@@ -1072,43 +569,42 @@ public class SimpleKafkaConsumer {
 }
 ````
 
-#### kafka-python客户端
-- git 地址：https://github.com/dpkp/kafka-python
-- 使用说明：
-    0. 注意事项：
-        - 生产时如果有异常需要根据业务逻辑做异常处理，重新发送消息
-        - 支持发送到指定key和partition
-        - 压缩方式建议使用gzip。其它压缩方式中，lz4和snappy服务端支持，但客户端配置较复杂，zstd服务端不支持
-    1. 安装：
-        
-        ```
-              >>> pip install kafka-python
-        ```
-        
-    2. 发送消息：
-          
-        ```python
-            from kafka import KafkaProduce
-            topic="your_topic"
-            message="test_message"
-            conf={
-                'bootstrap_servers':'test-nameserver.nameserver.joyqueue.local:50088',
-                'client_id':'your_app'
-            }
-            producer = KafkaProducer(**conf)
-            try:
-                future=producer.send(your_topic,message)
-                result = future.get(timeout=60)
-            except BaseException as e:
-                # 发送失败时，用户需根据业务逻辑做异常处理，否则消息可能会丢失
-                print(e)
-        ```
-        
-    3. 消费消息
+### 4.2 Kafka-python客户端
+git 地址：https://github.com/dpkp/kafka-python, 使用说明：
+0. 注意事项：
+    - 生产时如果有异常需要根据业务逻辑做异常处理，重新发送消息
+    - 支持发送到指定key和partition
+    - 压缩方式建议使用gzip。其它压缩方式中，lz4和snappy服务端支持，但客户端配置较复杂，zstd服务端不支持
+1. 安装：
     
-        ```python
-        from kafka import KafkaConsumer
+    ```
+          >>> pip install kafka-python
+    ```
+    
+2. 发送消息：
+      
+    ```python
+        from kafka import KafkaProduce
+        topic="your_topic"
+        message="test_message"
+        conf={
+            'bootstrap_servers':'test-nameserver.nameserver.joyqueue.local:50088',
+            'client_id':'your_app'
+        }
+        producer = KafkaProducer(**conf)
+        try:
+            future=producer.send(your_topic,message)
+            result = future.get(timeout=60)
+        except BaseException as e:
+            # 发送失败时，用户需根据业务逻辑做异常处理，否则消息可能会丢失
+            print(e)
+    ```
+    
+3. 消费消息
 
+    ```python
+        from kafka import KafkaConsumer
+    
         conf={
             'bootstrap_servers':'test-nameserver.nameserver.joyqueue.local:50088',
             'client_id':'your_app'
@@ -1117,23 +613,22 @@ public class SimpleKafkaConsumer {
         consumer = KafkaConsumer(your_topic,**conf)      
         for msg in consumer:
             print(msg)
-        ```
+    ```
 
-### MQTT
+## 5. MQTT
 
-#### MQTT开发与测试注意事项
-
+MQTT开发与测试注意事项
 * 可以参阅网上其它关于mqtt的教程来完善自己的mqtt业务场景开发。
 * JoyQueue MQTT服务器只支持MQTT Version 3.1.1协议版本。
 * JoyQueue MQTT服务器连接connection报文必须提供鉴权信息：username和password，username为应用名称，password为应用token。
 * JoyQueue MQTT服务支持clean session客户端。
 * JoyQueue MQTT服务不支持will主题和消息，也不支持retained消息投递。
 * JoyQueue MQTT服务器目前不支持qos=2的消息交互协议，只能发送qos<=1的报文，订阅主题没有变化，因为消息发送都是qos<=1，所以即使订阅qos=2的主题即会投递qos=1的消息，整体消息服务为AT_MOST_ONCE和AT_LEAST_ONCE两种。
-* JoyQueue MQTT测试服务器地址为192.168.53.169，192.168.131.206，192.168.131.205，连接其中任意一台即可，如果有问题请尝试更换地址再做测试。
-* JoyQueue MQTT线上服务器，请参考<a href ="http://git.jd.com/laf/laf-jmq/wikis/JMQ4%E6%8E%A5%E5%85%A5(%E7%BA%BF%E4%B8%8A&%E6%B5%8B%E8%AF%95)">Jmq4接入(线上&测试)</a>服务文档，线上JMQ4 MQTT服务连接域名即可，外网连接地址：mqtt.jd.com:2000，内网连接地址：mqtt.jd.local:1883。
 
-#### MQTT开发用例参考
-在开发测试前，推荐使用一些开源的mqtt client工具来做测试，服务器端兼容并且支持开源客户端连接的，比如GUI支持很好的MQTT.fx，或者其他使用paho库的客户端实现。如要开发和使用mqtt客户端与服务器的交互，来满足自己的业务场景，以下为使用paho这个开源客户端实现为例进行说明：
+### 5.1 MQTT开发用例
+
+在开发测试前，推荐使用一些开源的mqtt client工具来做测试，服务器端兼容并且支持开源客户端连接的，比如GUI支持很好的MQTT.fx，或者其他使用paho库的客户端实现。
+如要开发和使用mqtt客户端与服务器的交互，来满足自己的业务场景，以下为使用paho开源客户端实现为例进行说明：
 
 ```
 <dependency>
@@ -1141,6 +636,7 @@ public class SimpleKafkaConsumer {
     <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
     <version>1.1.1</version>
 </dependency>
+
 ```
 
 ```java
@@ -1239,7 +735,7 @@ public class MqttTest {
 
 测试用例中mqtt客户端使用了回调函数MqttCallback，这里paho的客户端实现都是异步的，所以最好使用该回调函数来跟踪客户端操作后的状态与信息，比如连接是否断开connectionLost，发送publish消息是否成功deliveryComplete，以及订阅subscribe后是否收到消息messageArrived。
 
-#### MQTT开发与测试说明
+### 5.2 MQTT开发与测试说明
 
 * MQTT代理集群，目前JoyQueue MQTT测试环境为docker部署3台，分别为：192.168.53.169，192.168.131.206，192.168.131.205，测试环境没有配置域名，请使用mqtt客户端连接其中任意一台服务器即可进行测试，端口号为默认的mqtt协议1883配置。
 * ClientID请使用自己独立的并且唯一的标识ID（推荐业务应用名称加随机数生成组合），以避免跟其他客户端ID冲突而导致一些协议交互错误。如果使用相同ClientID的多个客户端进行连接，服务器会受理最新连入的相同ClientID客户端，断开之前连入受理的客户端，请知悉，如果设置了重连情况下出现频繁的连接成功并中断连接很可能是这种情况，请尝试更换另一个唯一的ClientID进行客户端连接。
