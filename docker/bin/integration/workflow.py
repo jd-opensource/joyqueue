@@ -242,7 +242,7 @@ class Workflow:
                     ATTEMPTS=0
                     MAX_ATTEMPTS={max_attempts}
                     containerId=$(echo "$containerId"|sed ':a;N;$!ba;s/\\n/ /g') 
-                    # echo "docker exec $containerId cat logs/debug.log|grep {started_flag} "
+                    # echo "docker exec $containerId cat {mq_log_file}|grep {started_flag} "
                     while true; do
                         started=$(docker exec $containerId cat logs/debug.log|grep {started_flag})
                         echo "check state: $started"
@@ -260,6 +260,7 @@ class Workflow:
         """.format(workspace_home=self.workspace.home, docker_namespace=self.task.mq_docker_namespace,
                    repo_name=self.task.mq_repo_name,
                    mq_home=self.task.mq_home,
+                   mq_log_file=self.task.mq_log_file,
                    max_attempts=max_attempts,
                    sleep=sleep,
                    cidfile=cidfile,
