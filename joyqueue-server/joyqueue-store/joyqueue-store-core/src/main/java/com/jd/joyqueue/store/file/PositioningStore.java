@@ -213,7 +213,7 @@ public class PositioningStore<T> implements Closeable {
                 base.getAbsolutePath());
     }
 
-    private void recoverFileMap() {
+    private void recoverFileMap() throws IOException {
         File[] files = base.listFiles(file -> file.isFile() && file.getName().matches("\\d+"));
         long filePosition;
         if (null != files) {
@@ -221,6 +221,21 @@ public class PositioningStore<T> implements Closeable {
                 filePosition = Long.parseLong(file.getName());
                 storeFileMap.put(filePosition, new StoreFileImpl<>(filePosition, base, fileHeaderSize, serializer, bufferPool, fileDataSize));
 //                storeFileMap.put(filePosition, new FastWriteStoreFile<>(filePosition, base, fileHeaderSize, serializer, 10 * 1024 * 1024));
+            }
+        }
+        // 当服务器断电时，在存储的末尾，有可能会存在没来得及刷盘的空文件，需要删掉。
+
+        while (!storeFileMap.isEmpty() && storeFileMap.lastEntry().getValue().file().length() <= fileHeaderSize) {
+            Map.Entry<Long, StoreFile<T>> lastEntry = storeFileMap.pollLastEntry();
+            StoreFile<T> storeFile = lastEntry.getValue();
+            File file = storeFile.file();
+            if (file.exists()) {
+                if (file.delete()) {
+                    logger.info("Store file deleted: {}.",
+                            file.getAbsolutePath());
+                } else {
+                    throw new IOException(String.format("Delete file %s failed!", file.getAbsolutePath()));
+                }
             }
         }
 

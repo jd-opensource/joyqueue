@@ -504,10 +504,6 @@
         <route inherit="get"
                path="/v1/login/user" handlers="getLoginUser render"
                errors="error"/>
-        <route type="GET"
-               path="/v1/logout" handlers="cookie session ssoLogout render"
-               errors="error"/>
-
         <!--grafana web-->
         <route inherit="get"
                path="/v1/grafana" handlers="grafana#test render"

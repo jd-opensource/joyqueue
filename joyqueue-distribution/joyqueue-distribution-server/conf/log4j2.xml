@@ -23,22 +23,10 @@
 
         </console>
 
-        <RollingFile name="RollingFileDebug" fileName="${sys:user.dir}/logs/debug.log"
-                     filePattern="${sys:user.dir}/logs/$${date:yyyy-MM}/info-%d{yyyy-MM-dd}-%i.log">
-            <Filters>
-                <ThresholdFilter level="DEBUG"/>
-            </Filters>
-            <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss:SSS}] [%t] [%p] - %l - %m%n"/>
-            <Policies>
-                <TimeBasedTriggeringPolicy/>
-                <SizeBasedTriggeringPolicy size="2000 MB"/>
-            </Policies>
-        </RollingFile>
     </appenders>
     <loggers>
         <root level="INFO">
             <appender-ref ref="Console"/>
-            <appender-ref ref="RollingFileDebug"/>
         </root>
         <logger name="org.apache.ignite.internal.IgniteKernal" additivity="false">
             <level value ="OFF"/>

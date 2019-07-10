@@ -57,7 +57,7 @@ public class IgniteDataCenterService implements DataCenterService {
 
     @Override
     public void addOrUpdate(DataCenter dataCenter) {
-        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.REPEATABLE_READ)) {
+        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
             dataCenterDao.addOrUpdate(new IgniteDataCenter(dataCenter));
             this.publishEvent(DataCenterEvent.add(dataCenter.getRegion(),dataCenter.getCode(),dataCenter.getUrl()));
             tx.commit();
@@ -80,7 +80,7 @@ public class IgniteDataCenterService implements DataCenterService {
     @Override
     public void delete(DataCenter dataCenter) {
 
-        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.REPEATABLE_READ)) {
+        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
             this.deleteById(new IgniteDataCenter(dataCenter).getId());
             this.publishEvent(DataCenterEvent.remove(dataCenter.getRegion(),dataCenter.getCode(),dataCenter.getUrl()));
             tx.commit();
