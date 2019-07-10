@@ -41,12 +41,12 @@ JoyQueue 支持Openmessaging协议，并提供Java版本的原生客户端,
 
 ```
 
-## JoyQueue 客户端(Java)
+## 1. JoyQueue 客户端(Java)
 
 主动创建生产和消费实例，灵活性最好。相较于Spring及Spring boot会稍微麻烦一点，用户可以根据实际使用情况，灵活选择。
 可参考[手动方式使用](http://git.jd.com/laf/journalQ/tree/master/joyqueue-client/joyqueue-client-samples/src/main/java/com/jd/joyqueue/client/samples/api)
 
-### AccessPoint实例化
+### 1.1 AccessPoint实例化
 
 首先需要创建MessagingAccessPoint，相当于工厂类，由它再创建producer和consumer
 
@@ -79,7 +79,7 @@ public class SimpleProducer {
 }
 ````
 
-### Producer
+### 1.2 Producer
 
 可参考[demo](http://git.jd.com/laf/journalQ/tree/master/joyqueue-client/joyqueue-client-samples/src/main/java/com/jd/joyqueue/client/samples/api/producer/SimpleProducer.java)。生产者，使用MessagingAccessPoint创建，调用start方法后使用
 
@@ -107,7 +107,7 @@ public class SimpleProducer {
 }
 ````
 
-### Consumer
+### 1.3 Consumer
 
 消费者，使用MessagingAccessPoint创建，调用bindQueue后再调用start使用。可参考[demo](http://git.jd.com/laf/journalQ/tree/master/joyqueue-client/joyqueue-client-samples/src/main/java/com/jd/joyqueue/client/samples/api/consumer/SimpleConsumer.java)
 
@@ -139,12 +139,12 @@ public class SimpleConsumer {
 }
 ````
 
-### 拦截器
+### 1.4 拦截器
 
 拦截器分为producer和consumer两种，可以实现日志，监控，消息过滤等，下面的例子都是基于api方式的，如果是spring或springboot可以使用xml和注解声明。
 拦截器还可以分为openmessaging和joyqueue两种，openmessaging只有基本的拦截器，joyqueue额外提供消息过滤，拦截器排序等，注意consumer拦截器只在使用listener时生效。
 
-#### Consumer拦截器 (openmessaging)
+#### 1.4.1 Consumer拦截器 (openmessaging)
 
 ````java
 public class SimpleConsumerInterceptor {
@@ -177,7 +177,7 @@ public class SimpleConsumerInterceptor {
 }
 ````
 
-#### Consumer拦截器 (joyqueue)
+#### 1.4.2 Consumer拦截器 (joyqueue)
 
 使用时需要通过spi的方式注册，把实现类添加到META-INF/services/com.jd.joyqueue.client.internal.consumer.interceptor.ConsumerInterceptor里。
 
@@ -213,7 +213,7 @@ public class JoyQueueSimpleConsumerInterceptor implements ConsumerInterceptor, O
 }
 ````
 
-#### Producer拦截器 (openmessaging)
+#### 1.4.3 Producer拦截器 (openmessaging)
 ````java
 public class SimpleProducerInterceptor {
     
@@ -243,7 +243,7 @@ public class SimpleProducerInterceptor {
 }
 ````
 
-#### Producer拦截器 (joyqueue)
+#### 1.4.4 Producer拦截器 (joyqueue)
 
 使用时需要通过spi的方式注册，把实现类添加到 META-INF/services/com.jd.joyqueue.client.internal.producer.interceptor.ProducerInterceptor 里。
 
@@ -279,7 +279,7 @@ public class JoyQueueSimpleProducerInterceptor implements ProducerInterceptor, O
 拦截器的具体使用例子,可参考[简单按环境消息生产和过滤](http://git.jd.com/laf/journalQ/tree/master/joyqueue-client/joyqueue-client-samples/src/main/java/com/jd/joyqueue/client/samples/api/interceptor)和
 [客户端监控](http://git.jd.com/laf/laf-jmq/tree/master/jmq-client/jmq-client-core/src/main/java/com/jd/jmq/client/internal/trace/interceptor)
 
-## JoyQueue客户端（Spring接入）
+## 2. JoyQueue客户端（Spring接入）
 
 和spring整合的使用方式，可参考[demo](http://git.jd.com/laf/JournalQ/tree/master/joyqueue-client/joyqueue-client-samples/src/main/java/com/jd/joyqueue/client/samples/spring)
 
@@ -353,11 +353,11 @@ public class JoyQueueSimpleProducerInterceptor implements ProducerInterceptor, O
 </beans>
 ````
 
-## JoyQueue客户端（Spring boot）
+## 3. JoyQueue客户端（Spring boot）
 
 和spring-boot整合的使用方式,可参考[demo](http://git.jd.com/laf/journalQ/tree/master/joyqueue-client/joyqueue-client-samples/src/main/java/com/jd/joyqueue/client/samples/springboot)
 
-### 配置
+### 3.1 配置
 
 ````properties
 #spring.oms.url是核心配置，必须配置，否则无法使用
@@ -378,7 +378,7 @@ spring.oms.attributes[ACCOUNT_KEY]=test_token
 #spring.oms.producer.transaction.check.enable=false
 ````
 
-### Producer
+### 3.2 Producer
 
 默认配置下springboot会自动创建一个producer，注入到bean中可直接使用，不需要start
 
@@ -408,7 +408,7 @@ public class SpringBootMain implements InitializingBean {
 }
 ````
 
-### Consumer
+### 3.3 Consumer
 
 Consumer需要使用io.openmessaging.spring.boot.annotation.OMSMessageListener注解定义，
 分为两种使用方式，一种是通过类实现接口的方式，另一种是通过方法直接消费。
@@ -451,7 +451,7 @@ public class SimpleMessageListener {
 }
 ````
 
-### 事务补偿
+### 3.4 事务补偿
 
 事务补偿也是通过注解声明
 
@@ -469,7 +469,7 @@ public class SimpleTransactionStateCheckListener implements TransactionStateChec
 
 ````
 
-### 拦截器
+### 3.5 拦截器
 
 拦截器也是通过注解声明
 
@@ -491,11 +491,11 @@ public class SimpleProducerInterceptor implements ProducerInterceptor {
 ````
 
  
-## Kafka客户端
+## 4. Kafka客户端
 
 JoyQueue兼容kafka协议，可直接使用原生kafka客户端
 
-### kafka-java客户端
+### 4.1 kafka-java客户端
 
 和kafka使用方式一样，唯一区别需要指定group.id和client.id为app。
 
@@ -512,7 +512,7 @@ pom 依赖
 
 ````
 
-#### Producer
+#### 4.1.1 Producer
 ````java
 public class SimpleKafkaProducer {
 
@@ -534,7 +534,7 @@ public class SimpleKafkaProducer {
 }
 ````
 
-#### Consumer
+#### 4.1.2 Consumer
 
 ````java
 public class SimpleKafkaConsumer {
@@ -567,8 +567,8 @@ public class SimpleKafkaConsumer {
 }
 ````
 
-### Kafka-python客户端
-git 地址：https://github.com/dpkp/kafka-python,使用说明：
+### 4.2 Kafka-python客户端
+git 地址：https://github.com/dpkp/kafka-python, 使用说明：
 0. 注意事项：
     - 生产时如果有异常需要根据业务逻辑做异常处理，重新发送消息
     - 支持发送到指定key和partition
@@ -601,19 +601,19 @@ git 地址：https://github.com/dpkp/kafka-python,使用说明：
 3. 消费消息
 
     ```python
-    from kafka import KafkaConsumer
+        from kafka import KafkaConsumer
+    
+        conf={
+            'bootstrap_servers':'test-nameserver.nameserver.joyqueue.local:50088',
+            'client_id':'your_app'
+        }
+        conf['group_id'] = 'your_app.your_group'
+        consumer = KafkaConsumer(your_topic,**conf)      
+        for msg in consumer:
+            print(msg)
+    ```
 
-    conf={
-        'bootstrap_servers':'test-nameserver.nameserver.joyqueue.local:50088',
-        'client_id':'your_app'
-    }
-    conf['group_id'] = 'your_app.your_group'
-    consumer = KafkaConsumer(your_topic,**conf)      
-    for msg in consumer:
-        print(msg)
-```
-
-## MQTT
+## 5. MQTT
 
 MQTT开发与测试注意事项
 * 可以参阅网上其它关于mqtt的教程来完善自己的mqtt业务场景开发。
@@ -622,10 +622,8 @@ MQTT开发与测试注意事项
 * JoyQueue MQTT服务支持clean session客户端。
 * JoyQueue MQTT服务不支持will主题和消息，也不支持retained消息投递。
 * JoyQueue MQTT服务器目前不支持qos=2的消息交互协议，只能发送qos<=1的报文，订阅主题没有变化，因为消息发送都是qos<=1，所以即使订阅qos=2的主题即会投递qos=1的消息，整体消息服务为AT_MOST_ONCE和AT_LEAST_ONCE两种。
-* JoyQueue MQTT测试服务器地址为192.168.53.169，192.168.131.206，192.168.131.205，连接其中任意一台即可，如果有问题请尝试更换地址再做测试。
-* JoyQueue MQTT线上服务器，请参考<a href ="http://git.jd.com/laf/laf-jmq/wikis/JMQ4%E6%8E%A5%E5%85%A5(%E7%BA%BF%E4%B8%8A&%E6%B5%8B%E8%AF%95)">Jmq4接入(线上&测试)</a>服务文档，线上JMQ4 MQTT服务连接域名即可，外网连接地址：mqtt.jd.com:2000，内网连接地址：mqtt.jd.local:1883。
 
-### MQTT开发用例
+### 5.1 MQTT开发用例
 
 在开发测试前，推荐使用一些开源的mqtt client工具来做测试，服务器端兼容并且支持开源客户端连接的，比如GUI支持很好的MQTT.fx，或者其他使用paho库的客户端实现。
 如要开发和使用mqtt客户端与服务器的交互，来满足自己的业务场景，以下为使用paho开源客户端实现为例进行说明：
@@ -636,6 +634,7 @@ MQTT开发与测试注意事项
     <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
     <version>1.1.1</version>
 </dependency>
+
 ```
 
 ```java
@@ -734,7 +733,7 @@ public class MqttTest {
 
 测试用例中mqtt客户端使用了回调函数MqttCallback，这里paho的客户端实现都是异步的，所以最好使用该回调函数来跟踪客户端操作后的状态与信息，比如连接是否断开connectionLost，发送publish消息是否成功deliveryComplete，以及订阅subscribe后是否收到消息messageArrived。
 
-### MQTT开发与测试说明
+### 5.2 MQTT开发与测试说明
 
 * MQTT代理集群，目前JoyQueue MQTT测试环境为docker部署3台，分别为：192.168.53.169，192.168.131.206，192.168.131.205，测试环境没有配置域名，请使用mqtt客户端连接其中任意一台服务器即可进行测试，端口号为默认的mqtt协议1883配置。
 * ClientID请使用自己独立的并且唯一的标识ID（推荐业务应用名称加随机数生成组合），以避免跟其他客户端ID冲突而导致一些协议交互错误。如果使用相同ClientID的多个客户端进行连接，服务器会受理最新连入的相同ClientID客户端，断开之前连入受理的客户端，请知悉，如果设置了重连情况下出现频繁的连接成功并中断连接很可能是这种情况，请尝试更换另一个唯一的ClientID进行客户端连接。
