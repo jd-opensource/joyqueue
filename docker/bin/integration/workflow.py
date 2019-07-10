@@ -244,7 +244,7 @@ class Workflow:
                     containerId=$(echo "$containerId"|sed ':a;N;$!ba;s/\\n/ /g') 
                     # echo "docker exec $containerId cat {mq_log_file}|grep {started_flag} "
                     while true; do
-                        started=$(docker exec $containerId cat logs/debug.log|grep {started_flag})
+                        started=$(docker exec $containerId cat {mq_log_file}|grep {started_flag})
                         echo "check state: $started"
                         if [[ -n $started ]]; then
                            exit 0
@@ -297,7 +297,7 @@ class Workflow:
     def __shutdown_mq_worker_script(self, host):
         cidfile ='run_{}.cid'.format(host)
         script = """
-                docker containers 
+                docker ps 
                 full_cid=$(cat {cidfile})
                 echo $full_cid
                 containerId=$(docker ps --filter id=$full_cid|grep {docker_namespace}/{repo_name}|awk '{{print $1}}')
