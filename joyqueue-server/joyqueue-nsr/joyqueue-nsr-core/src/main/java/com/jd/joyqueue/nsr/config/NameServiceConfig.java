@@ -40,6 +40,10 @@ public class NameServiceConfig {
         return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_THIN_TRANSPORT_TIMEOUT);
     }
 
+    public int getThinTransportTopicTimeout() {
+        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_THIN_TRANSPORT_TOPIC_TIMEOUT);
+    }
+
     public boolean getThinCacheEnable() {
         return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_THIN_CACHE_ENABLE);
     }
