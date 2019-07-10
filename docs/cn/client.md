@@ -568,51 +568,50 @@ public class SimpleKafkaConsumer {
 ````
 
 ### Kafka-python客户端
-- git 地址：https://github.com/dpkp/kafka-python
-- 使用说明：
-    0. 注意事项：
-        - 生产时如果有异常需要根据业务逻辑做异常处理，重新发送消息
-        - 支持发送到指定key和partition
-        - 压缩方式建议使用gzip。其它压缩方式中，lz4和snappy服务端支持，但客户端配置较复杂，zstd服务端不支持
-    1. 安装：
-        
-        ```
-              >>> pip install kafka-python
-        ```
-        
-    2. 发送消息：
-          
-        ```python
-            from kafka import KafkaProduce
-            topic="your_topic"
-            message="test_message"
-            conf={
-                'bootstrap_servers':'test-nameserver.nameserver.joyqueue.local:50088',
-                'client_id':'your_app'
-            }
-            producer = KafkaProducer(**conf)
-            try:
-                future=producer.send(your_topic,message)
-                result = future.get(timeout=60)
-            except BaseException as e:
-                # 发送失败时，用户需根据业务逻辑做异常处理，否则消息可能会丢失
-                print(e)
-        ```
-        
-    3. 消费消息
+git 地址：https://github.com/dpkp/kafka-python,使用说明：
+0. 注意事项：
+    - 生产时如果有异常需要根据业务逻辑做异常处理，重新发送消息
+    - 支持发送到指定key和partition
+    - 压缩方式建议使用gzip。其它压缩方式中，lz4和snappy服务端支持，但客户端配置较复杂，zstd服务端不支持
+1. 安装：
     
-        ```python
-        from kafka import KafkaConsumer
+    ```
+          >>> pip install kafka-python
+    ```
     
+2. 发送消息：
+      
+    ```python
+        from kafka import KafkaProduce
+        topic="your_topic"
+        message="test_message"
         conf={
             'bootstrap_servers':'test-nameserver.nameserver.joyqueue.local:50088',
             'client_id':'your_app'
         }
-        conf['group_id'] = 'your_app.your_group'
-        consumer = KafkaConsumer(your_topic,**conf)      
-        for msg in consumer:
-            print(msg)
-        ```
+        producer = KafkaProducer(**conf)
+        try:
+            future=producer.send(your_topic,message)
+            result = future.get(timeout=60)
+        except BaseException as e:
+            # 发送失败时，用户需根据业务逻辑做异常处理，否则消息可能会丢失
+            print(e)
+    ```
+    
+3. 消费消息
+
+    ```python
+    from kafka import KafkaConsumer
+
+    conf={
+        'bootstrap_servers':'test-nameserver.nameserver.joyqueue.local:50088',
+        'client_id':'your_app'
+    }
+    conf['group_id'] = 'your_app.your_group'
+    consumer = KafkaConsumer(your_topic,**conf)      
+    for msg in consumer:
+        print(msg)
+```
 
 ## MQTT
 
