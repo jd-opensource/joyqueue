@@ -49,7 +49,7 @@ class Workflow:
         self.mode = config.get_value('Mode')
         self.pwd = os.path.dirname(__file__)
         self.mq_tag = str(time.time()).replace('.', '_')
-        self.running_mq_containers = {}
+        self._benchmark_pressure_tag_id = None
         self.logs_dir = os.path.join(self.pwd, '../logs/')
         self.logger = logging.getLogger(__name__)
         self.lockfile = self.__lockfile()
@@ -158,10 +158,10 @@ class Workflow:
         return open('{}/_filelock'.format(self.workspace.home), 'w')
 
     def __start_pressure_worker(self):
-        tag_id = int(time.time())
+        self._benchmark_pressure_tag_id = int(time.time())
         script = """
                     docker run --network {subnet} --name {image_name}_{tag_id} {image_namepsace}/{image_name} {entry} -d {drivers}  {workloads}
-                 """.format(tag_id=tag_id,
+                 """.format(tag_id=self._benchmark_pressure_tag_id,
                             image_namepsace=self.task.pressure_docker_namespace,
                             image_name=self.task.pressure_repo_name,
                             entry=self.task.pressure_shell_entry,
@@ -176,14 +176,16 @@ class Workflow:
 
     def __collect_data_from_pressure_worker(self):
         script = """
-            containerId=$(docker ps -a|grep {repo_name}|grep {label_name}|awk '{{print $1}}')
+            containerId=$(docker ps -a|grep {repo_name}_{tag_id}|awk '{{print $1}}')
             if [[ -n $containerId ]]; then
                 docker cp  $containerId:/benchmark {home}
             else 
                 echo '{repo_name} docker not found,failed to collect pressure result'
                 exit 1    
             fi
-        """.format(repo_name=self.task.pressure_repo_name, label_name=self.pressure_container_name ,home=self.workspace.home)
+        """.format(repo_name=self.task.pressure_repo_name,
+                   tag_id=self._benchmark_pressure_tag_id,
+                   home=self.workspace.home)
         self.__run_local_script(script)
 
     def __collect_data(self, sub_dir='benchmark'):
