@@ -24,6 +24,7 @@ import com.jd.joyqueue.broker.kafka.KafkaContextAware;
 import com.jd.joyqueue.broker.kafka.KafkaErrorCode;
 import com.jd.joyqueue.broker.kafka.command.ProduceRequest;
 import com.jd.joyqueue.broker.kafka.command.ProduceResponse;
+import com.jd.joyqueue.broker.kafka.config.KafkaConfig;
 import com.jd.joyqueue.broker.kafka.converter.CheckResultConverter;
 import com.jd.joyqueue.broker.kafka.coordinator.transaction.ProducerSequenceManager;
 import com.jd.joyqueue.broker.kafka.helper.KafkaClientHelper;
@@ -72,6 +73,7 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
     private TransactionProduceHandler transactionProduceHandler;
     private ProducerSequenceManager producerSequenceManager;
     private SessionManager sessionManager;
+    private KafkaConfig config;
 
     @Override
     public void setKafkaContext(KafkaContext kafkaContext) {
@@ -82,6 +84,7 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
                 kafkaContext.getTransactionCoordinator(), kafkaContext.getTransactionIdManager());
         this.producerSequenceManager = kafkaContext.getProducerSequenceManager();
         this.sessionManager = kafkaContext.getBrokerContext().getSessionManager();
+        this.config = kafkaContext.getConfig();
     }
 
     @Override
@@ -149,7 +152,7 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
         }
 
         try {
-            boolean isDone = latch.await(produceRequest.getAckTimeoutMs(), TimeUnit.MILLISECONDS);
+            boolean isDone = latch.await(Math.min(produceRequest.getAckTimeoutMs(), config.getProduceTimeout()), TimeUnit.MILLISECONDS);
             if (!isDone) {
                 logger.warn("wait produce timeout, transport: {}, app: {}, topics: {}", transport.remoteAddress(), clientId, produceRequest.getPartitionRequests().keySet());
             }
