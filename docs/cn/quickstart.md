@@ -5,11 +5,10 @@
 需要安装 Maven 和 Java 环境来启动 JoyQueue
 
 * 64 Linux/Mac 操作系统最佳
-* Maven 3.2及以上版本
 * JDK 8及以上版本
 
 
-## 第1步：下载安装包或源码编译并安装
+## 第1步：下载安装包
 
 下载[JoyQueue Server](http://storage.jd.com/jmq4/joyqueue-server-4.1.0-SNAPSHOT.tar.gz?Expires=1566171865&AccessKey=6baa071a4e099393e996950bafc339240598e819&Signature=q1A2XMFZCDW8e5eq2duKc3tPaxc%3D)和
 [JoyQueue Web](http://storage.jd.com/jmq4/joyqueue-server-4.1.0-SNAPSHOT.tar.gz?Expires=1566171865&AccessKey=6baa071a4e099393e996950bafc339240598e819&Signature=q1A2XMFZCDW8e5eq2duKc3tPaxc%3D)最新的安装包，或从源码编译。如下
@@ -17,13 +16,10 @@
 
 ```bash
 
-$ git clone git@git.jd.com:laf/journalQ.git
-$ cd journalQ && git checkout 4.1.0-SNAPSHOT
-$ mvn install -Dmaven.test.skip=true -P CompileFrontend install
-$ src_home=$(pwd)
+$ download_home=~/Downloads
 $ mkdir ~/joyqueue
-$ tar -zxvf  $src_home/joyqueue-distribution/joyqueue-distribution-server/target/joyqueue-server-4.1.0-SNAPSHOT.tar.gz -C ~/joyqueue
-$ tar -zxvf $src_home/joyqueue-distribution/joyqueue-distribution-web//target/joyqueue-web-4.1.0-SNAPSHOT.tar.gz  -C ~/joyqueue
+$ tar -zxvf  $download_home/joyqueue-server-4.1.0-SNAPSHOT.tar.gz -C ~/joyqueue
+$ tar -zxvf  $download_home/target/joyqueue-web-4.1.0-SNAPSHOT.tar.gz  -C ~/joyqueue
 
 ```
 
@@ -39,7 +35,7 @@ $ bin/server-start.sh
 ```
 
 现在可以通过启动日志和网络端口监听情况，判断JoyQueue 和 命名（Naming）服务是否正常启动。
-如果你能在日志中观察到如下的日志，表明broker/选举/监控/命名服务已经正常启动，并监听在50088/50089/50090/50091端口上。
+如果能在控制台中观察到如下的日志，表明broker/选举/监控/命名服务已经正常启动，并监听在50088/50089/50090/50091端口。
 
 ```
 ......
@@ -73,7 +69,7 @@ $ bin/start.sh
 ```
 
 管理端元数据依托命名服务，默认连接本地命名服务。如有调整，请修改conf/application.properties中nameserver.host参数配置。
-现在可以通过启动日志和网络端口监听情况，判断管理端服务是否正常启动。如果能在日志中观察到如下日志，表明管理端服务已经正常启动，并监听在10031端口上。正常的启动日志如下：
+现在可以通过启动日志和网络端口监听情况，判断管理端服务是否正常启动。如果能在控制台观察到如下日志，表明管理端服务已经正常启动，并监听在10031端口。
 
 ```
 ......
@@ -97,9 +93,10 @@ $ bin/start.sh
 
 在开始生产和消费之前，需要先在管理端创建主题、生产者和消费者应用以及对应的令牌，令牌用于认证应用的合法性。
 假设创建一个独立的命名空间，为test;主题为joy_topic;生产和消费应用都是同一个应用为joyqueue,消费分组为abc;并为joyqueue创建令牌，用于鉴权。
-现在可以访问管理端:http://localhost:10031，依次创建生产及消费订阅关系
+现在可以访问管理端:http://localhost:10031。 
 
-* 命名空间：test，操作路径：系统管理-》命名空间管理-》新建Namespace
+依次创建生产及消费订阅关系：
+* 命名空间(可选)：test，操作路径：系统管理-》命名空间管理-》新建Namespace
 * 主题：joy_test，操作路径：主题中心-》添加主题-》选择Broker
 * 应用：joyqueue，操作路径：我的应用-》新建应用，应用负责人admin 
 * 发布主题：joyqueue 发布joy_test，操作路径:主题中心列表-》joy_test-》生产者-》订阅-》选择客户端类型:joyqueue-》订阅
@@ -109,7 +106,7 @@ $ bin/start.sh
 
 ## 第5步：生产和消费示例
 
-到目前为止，我们已经创建好主题和应用及其token，并且已经维护好发布/订阅关系。可以尝试利用console-consumer和console-producer生产和消费消息，这一步会利用到前面创建的topic,app及app token等信息。 
+到目前为止，我们已经创建好主题和应用及其token，并且已经维护好发布/订阅关系。可以尝试利用console-consumer和console-producer生产和消费消息，这一步会利用到前面创建的topic，app及app token等信息。 
 
 注意，*topic 带有namespace 前缀，app 带消费分组后缀*。
 
@@ -120,12 +117,13 @@ $ bin/start.sh
 ```
 
  cd ~/joyqueue/joyqueue-server-4.1.0-SNAPSHOT
- bin/console-producer.sh -a joyqueue --token bed6af17e9fd4ae3a767406446afe73f -t test.joy_topic -b "hello,jouqueue!"
+ bin/console-producer.sh -a joyqueue --token bed6af17e9fd4ae3a767406446afe73f -t test.joy_topic -b "hello,joyqueue!"
    
 ```
 
 ### 第5.2步：使用脚本消费消息
 消费消息前,可以先利用*bin/console-consumer.sh --help* 熟悉需要提供哪些参数。
+需要注意的是，消费应用带有一个"."分割的消费分组（abc），多个消费实例共同消费一份完整的主题消息。 
 
 ```
 
@@ -138,8 +136,6 @@ $ bin/start.sh
 
 ## 第6步：使用JoyQueue 镜像
 
-可以从Docker hub 拉去或基于源码build JoyQueue server及web镜像
-
 * Docker hub 获取
 
 ```
@@ -149,20 +145,9 @@ $ bin/start.sh
   
 ``` 
 
-* 基于源码build 镜像
-
-```
-
-$ git clone git@git.jd.com:laf/journalQ.git
-$ cd journalQ && git checkout 4.1.0-SNAPSHOT
-$ mvn install -Dmaven.test.skip=true -P CompileFrontend,docker install
-
-
-```
-
 * 启动JoyQueue server 和 web 服务
 
-JoyQueue server 默认监听50088-50091端口;JoyQueue web 默认监听10031端口
+JoyQueue server 默认监听50088-50091端口；JoyQueue web 默认监听10031端口
 
 ```
 
@@ -172,6 +157,7 @@ $ docker exec -it -d  $server_cid  /joyqueue-web/bin/start.sh
 $ docker exec -it $server_cid /bin/bash 
 
 ```
+访问http://localhost:80 维护消费订阅关系，参考[第4步：创建发布和订阅关系](##第4步：创建发布和订阅关系)
 
 生产和发送参考[第5步：生产和消费示例](##第5步：生产和消费示例) 
 
