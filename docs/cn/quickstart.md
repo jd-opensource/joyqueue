@@ -39,7 +39,7 @@ $ bin/server-start.sh
 ```
 
 现在可以通过启动日志和网络端口监听情况，判断JoyQueue 和 命名（Naming）服务是否正常启动。
-如果你能在日志中观察到如下的日志，表明broker/选举/监控/命名服务已经正常启动，并监听在50088/50089/50090/50091端口上。
+如果能在日志中观察到如下的日志，表明broker/选举/监控/命名服务已经正常启动，并监听在50088/50089/50090/50091端口。
 
 ```
 ......
@@ -73,7 +73,7 @@ $ bin/start.sh
 ```
 
 管理端元数据依托命名服务，默认连接本地命名服务。如有调整，请修改conf/application.properties中nameserver.host参数配置。
-现在可以通过启动日志和网络端口监听情况，判断管理端服务是否正常启动。如果能在日志中观察到如下日志，表明管理端服务已经正常启动，并监听在10031端口上。正常的启动日志如下：
+现在可以通过启动日志和网络端口监听情况，判断管理端服务是否正常启动。如果能在日志中观察到如下日志，表明管理端服务已经正常启动，并监听在10031端口。正常的启动日志如下：
 
 ```
 ......
@@ -127,6 +127,7 @@ $ bin/start.sh
 
 ### 第5.2步：使用脚本消费消息
 消费消息前,可以先利用*bin/console-consumer.sh --help* 熟悉需要提供哪些参数。
+需要注意的是，消费应用带有一个"."分割的消费分组（abc），多个消费实例共同消费一份完整的主题消息。 
 
 ```
 
@@ -163,7 +164,7 @@ $ mvn install -Dmaven.test.skip=true -P CompileFrontend,docker install
 
 * 启动JoyQueue server 和 web 服务
 
-JoyQueue server 默认监听50088-50091端口;JoyQueue web 默认监听10031端口
+JoyQueue server 默认监听50088-50091端口；JoyQueue web 默认监听10031端口
 
 ```
 
@@ -173,6 +174,7 @@ $ docker exec -it -d  $server_cid  /joyqueue-web/bin/start.sh
 $ docker exec -it $server_cid /bin/bash 
 
 ```
+访问http://localhost:80 创建消费订阅关系[第4步：创建发布和订阅关系](##第4步：创建发布和订阅关系)
 
 生产和发送参考[第5步：生产和消费示例](##第5步：生产和消费示例) 
 
