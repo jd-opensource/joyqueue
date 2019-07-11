@@ -174,7 +174,7 @@ $ docker exec -it -d  $server_cid  /joyqueue-web/bin/start.sh
 $ docker exec -it $server_cid /bin/bash 
 
 ```
-访问http://localhost:80 创建消费订阅关系[第4步：创建发布和订阅关系](##第4步：创建发布和订阅关系)
+访问http://localhost:80 维护消费订阅关系，参考[第4步：创建发布和订阅关系](##第4步：创建发布和订阅关系)
 
 生产和发送参考[第5步：生产和消费示例](##第5步：生产和消费示例) 
 
