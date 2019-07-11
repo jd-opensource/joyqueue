@@ -1,5 +1,4 @@
 
-
 # 快速启动
 
 需要安装 Maven 和 Java 环境来启动 JoyQueue
@@ -19,7 +18,7 @@
 $ download_home=~/Downloads
 $ mkdir ~/joyqueue
 $ tar -zxvf  $download_home/joyqueue-server-4.1.0-SNAPSHOT.tar.gz -C ~/joyqueue
-$ tar -zxvf  $download_home/target/joyqueue-web-4.1.0-SNAPSHOT.tar.gz  -C ~/joyqueue
+$ tar -zxvf  $download_home/joyqueue-web-4.1.0-SNAPSHOT.tar.gz  -C ~/joyqueue
 
 ```
 
