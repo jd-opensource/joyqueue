@@ -141,8 +141,8 @@ export default {
                 })
               })
             },
-            bindKey: 'status',
-            bindVal: 1
+            bindKey: 'group',
+            bindVal: undefined
           }
         ]
       }

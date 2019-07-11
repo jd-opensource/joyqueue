@@ -1,34 +1,35 @@
 <template>
   <div class="table">
     <d-table class="tablePadding"
-      :optional="optional"
-      :columns="ColOpData"
-      :data="rowData"
-      :height="height"
-      @row-click="handleRowClick"
-      @on-selection-change="handleSelectionChange"
-      @on-select-all="handleSelectionAll">
+             :optional="optional"
+             :columns="ColOpData"
+             :data="rowData"
+             :height="height"
+             @row-click="handleRowClick"
+             @on-selection-change="handleSelectionChange"
+             @on-select-all="handleSelectionAll">
       <d-table-column v-if="data.selectable"
-        type="selection"
-        width="55">
+                      type="selection"
+                      width="55">
       </d-table-column>
     </d-table>
     <div class="blank" :style="blankStyle"></div>
     <d-pagination  class="right mr20"
-      v-if="showPagination"
-      show-total show-sizer show-quickjump
-      :page-size-opts="[10, 20, 50, 100]"
-      :current="page.page"
-      :page-size="page.size"
-      :total="page.total"
-      @pagesize-change="handleSizeChange"
-      @page-change="handleCurrentChange">
+                   v-if="showPagination"
+                   show-total show-sizer show-quickjump
+                   :page-size-opts="[10, 20, 50, 100]"
+                   :current="page.page"
+                   :page-size="page.size"
+                   :total="page.total"
+                   @pagesize-change="handleSizeChange"
+                   @page-change="handleCurrentChange">
     </d-pagination>
     <d-spin fix size="large" v-if="showPin"/>
   </div>
 </template>
 
 <script>
+import store from '../../store'
 import viewLang from '../../i18n/views.json'
 import {deepCopy} from '../../utils/assist.js'
 
@@ -163,6 +164,27 @@ export default {
               if (!show) {
                 continue
               }
+            } else if (btn.bindKey && !btn.bindVal) {
+              let show = false
+              if (!btn.bindCond || btn.bindCond === '=') {
+                if (params.item[btn.bindKey]) {
+                  show = false
+                } else {
+                  show = true
+                }
+              } else if (btn.bindCond && btn.bindCond === '!=') {
+                if (params.item[btn.bindKey]) {
+                  show = true
+                } else {
+                  show = false
+                }
+              } else {
+                show = false
+              }
+
+              if (!show) {
+                continue
+              }
             }
 
             if (btn.isAdmin && !this.$store.getters.isAdmin) { // 登录用户权限控制,admin:1,user:0
@@ -244,7 +266,7 @@ export default {
       })
       return colOpData
     },
-    blankStyle() {
+    blankStyle () {
       if (!this.data.operates || this.data.operates === []) {
         return { 'margin-top': `20px` }
       } else {
@@ -304,6 +326,5 @@ export default {
       display: block;
     }
   }
-
 
 </style>
