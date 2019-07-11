@@ -24,6 +24,7 @@ import java.util.List;
 public class QBroker implements Query {
 
     private String retryType;
+
     private String ip;
 
     private int brokerId;

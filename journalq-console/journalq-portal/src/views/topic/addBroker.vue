@@ -45,7 +45,7 @@ export default {
     return {
       searchData: {
         keyword: '',
-        brokerGroupId: 0
+        brokerGroupId: -1
       },
       tableData: {
         rowData: [{}],
