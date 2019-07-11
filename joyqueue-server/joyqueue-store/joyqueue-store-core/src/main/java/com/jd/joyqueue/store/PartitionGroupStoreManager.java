@@ -302,10 +302,17 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
 
             // 删除末尾的全是0的部分
             long validPosition = indexStore.right();
+            IndexItem currentIndex, previousIndex = null;
 
             while ((validPosition -= IndexItem.STORAGE_SIZE) >= IndexItem.STORAGE_SIZE) { //第一条索引有可能是全0，这是合法的。
-                byte [] bytes  = indexStore.readBytes(validPosition, IndexItem.STORAGE_SIZE);
-                if(!isAllZero(bytes)){
+                if(null == previousIndex) {
+                    currentIndex = indexStore.read(validPosition);
+                } else {
+                    currentIndex = previousIndex;
+                }
+
+                previousIndex = indexStore.read(validPosition - IndexItem.STORAGE_SIZE);
+                if(verifyCurrentIndex(currentIndex, previousIndex)){
                     break;
                 }
             }
@@ -347,13 +354,18 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         return indexPosition;
     }
 
-    private boolean isAllZero(byte[] bytes) {
-        for (byte b : bytes) {
-            if (b != 0) {
-                return false;
-            }
-        }
-        return true;
+    /**
+     * 根据上一条索引来验证这条索引的合法性
+     * @param current 当前索引
+     * @param previous 上一条索引
+     * @return
+     */
+    private boolean verifyCurrentIndex(IndexItem current, IndexItem previous) {
+        return current.getLength() > 0 && current.getOffset() > previous.getOffset();
+    }
+
+    private boolean isAllZero(IndexItem indexItem) {
+        return indexItem.getLength() == 0 && indexItem.getOffset() == 0;
     }
 
     private Short[] loadPartitionIndices(File indexBase) {
