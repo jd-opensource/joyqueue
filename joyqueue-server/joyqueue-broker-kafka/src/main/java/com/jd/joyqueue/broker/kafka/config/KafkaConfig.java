@@ -34,6 +34,14 @@ public class KafkaConfig {
         this.propertySupplier = propertySupplier;
     }
 
+    public boolean getLogDetail(String app) {
+        return (boolean) getConfig(KafkaConfigKey.LOG_DETAIL)
+                || (boolean) PropertySupplier.getValue(propertySupplier,
+                KafkaConfigKey.LOG_DETAIL_PREFIX.getName() + app,
+                KafkaConfigKey.LOG_DETAIL_PREFIX.getType(),
+                KafkaConfigKey.LOG_DETAIL_PREFIX.getValue());
+    }
+
     public int getProduceTimeout() {
         return getConfig(KafkaConfigKey.PRODUCE_TIMEOUT);
     }
@@ -42,7 +50,7 @@ public class KafkaConfig {
         return getConfig(KafkaConfigKey.FETCH_BATCH_SIZE);
     }
 
-    public int getMetadataDelay() {
+    public boolean getMetadataDelay() {
         return getConfig(KafkaConfigKey.METADATA_DELAY);
     }
 

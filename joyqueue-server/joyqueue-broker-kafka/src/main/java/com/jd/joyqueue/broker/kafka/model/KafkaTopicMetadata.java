@@ -53,4 +53,13 @@ public class KafkaTopicMetadata {
     public void setKafkaPartitionMetadata(List<KafkaPartitionMetadata> kafkaPartitionMetadata) {
         this.kafkaPartitionMetadata = kafkaPartitionMetadata;
     }
+
+    @Override
+    public String toString() {
+        return "KafkaTopicMetadata{" +
+                "topic='" + topic + '\'' +
+                ", errorCode=" + errorCode +
+                ", kafkaPartitionMetadata=" + kafkaPartitionMetadata +
+                '}';
+    }
 }

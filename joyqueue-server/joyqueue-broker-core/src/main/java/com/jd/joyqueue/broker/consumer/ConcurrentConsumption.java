@@ -417,7 +417,7 @@ class ConcurrentConsumption extends Service {
             if (readRst.getCode() == JoyQueueCode.SUCCESS) {
                 List<ByteBuffer> byteBufferList = Lists.newArrayList(readRst.getMessages());
                 com.jd.joyqueue.domain.Consumer consumerConfig = clusterManager.tryGetConsumer(TopicName.parse(consumer.getTopic()), consumer.getApp());
-                if (consumerConfig == null) {
+                if (consumerConfig != null) {
                     // 过滤消息
                     List<ByteBuffer> byteBuffers = filterMessageSupport.filter(consumerConfig, byteBufferList, new FilterCallbackImpl(consumer));
                     // 开启延迟消费，过滤未到消费时间的消息

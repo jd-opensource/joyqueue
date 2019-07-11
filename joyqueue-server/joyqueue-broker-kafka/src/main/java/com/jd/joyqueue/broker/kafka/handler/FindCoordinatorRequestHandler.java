@@ -91,7 +91,10 @@ public class FindCoordinatorRequestHandler extends AbstractKafkaCommandHandler i
             return new Command(new FindCoordinatorResponse(KafkaErrorCode.COORDINATOR_NOT_AVAILABLE.getCode(), KafkaBroker.INVALID));
         }
 
-        logger.info("find coordinator for coordinatorKey {}, broker: {id: {}, ip: {}, port: {}}", coordinatorKey, coordinator.getId(), coordinator.getIp(), coordinator.getPort());
+        if (logger.isDebugEnabled()) {
+            logger.debug("find coordinator for coordinatorKey {}, broker: {id: {}, ip: {}, port: {}}", coordinatorKey, coordinator.getId(), coordinator.getIp(), coordinator.getPort());
+        }
+
         FindCoordinatorResponse response = new FindCoordinatorResponse(KafkaErrorCode.NONE.getCode(),
                 new KafkaBroker(coordinator.getId(), coordinator.getIp(), coordinator.getPort()));
         return new Command(response);

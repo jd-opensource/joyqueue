@@ -19,6 +19,7 @@ import com.jd.joyqueue.broker.kafka.KafkaContext;
 import com.jd.joyqueue.broker.kafka.KafkaContextAware;
 import com.jd.joyqueue.broker.kafka.command.OffsetCommitRequest;
 import com.jd.joyqueue.broker.kafka.command.OffsetCommitResponse;
+import com.jd.joyqueue.broker.kafka.config.KafkaConfig;
 import com.jd.joyqueue.broker.kafka.coordinator.group.GroupCoordinator;
 import com.jd.joyqueue.broker.kafka.model.OffsetMetadataAndError;
 import com.jd.joyqueue.network.transport.Transport;
@@ -40,10 +41,12 @@ public class OffsetCommitRequestHandler extends AbstractKafkaCommandHandler impl
     protected static final Logger logger = LoggerFactory.getLogger(OffsetCommitRequestHandler.class);
 
     private GroupCoordinator groupCoordinator;
+    private KafkaConfig config;
 
     @Override
     public void setKafkaContext(KafkaContext kafkaContext) {
         this.groupCoordinator = kafkaContext.getGroupCoordinator();
+        this.config = kafkaContext.getConfig();
     }
 
     @Override
@@ -53,9 +56,9 @@ public class OffsetCommitRequestHandler extends AbstractKafkaCommandHandler impl
         Map<String, List<OffsetMetadataAndError>> result = groupCoordinator.handleCommitOffsets(offsetCommitRequest.getGroupId(), offsetCommitRequest.getMemberId(),
                 offsetCommitRequest.getGroupGenerationId(), offsetCommitRequest.getOffsets());
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("offset commit request with correlation id {} from client {}, request: {}, result: {}",
-                    offsetCommitRequest.getCorrelationId(), offsetCommitRequest.getGroupId(), offsetCommitRequest, result);
+        if (config.getLogDetail(offsetCommitRequest.getClientId())) {
+            logger.info("offset commit request with correlation id {} from transport: {}, client {}, request: {}, result: {}",
+                    transport, offsetCommitRequest.getCorrelationId(), offsetCommitRequest.getGroupId(), offsetCommitRequest, result);
         }
 
         OffsetCommitResponse offsetCommitResponse = new OffsetCommitResponse(result);

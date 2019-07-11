@@ -91,11 +91,16 @@ public class TopicMetadataRequestHandler extends AbstractKafkaCommandHandler imp
         TopicMetadataResponse topicMetadataResponse = new TopicMetadataResponse(topicMetadata, brokers);
         Command response = new Command(topicMetadataResponse);
 
-        if (CollectionUtils.isEmpty(topicMetadata)) {
+        if (config.getLogDetail(clientId)) {
+            logger.info("get topic metadata, transportt: {}, app: {}, request: {}, response: {}",
+                    transport, clientId, topicMetadataRequest, topicMetadataResponse);
+        }
+
+        if (config.getMetadataDelay() && CollectionUtils.isEmpty(topicMetadata)) {
             logger.info("get topic metadata, topics: {}, address: {}, metadata: {}, app: {}",
                     topicMetadataRequest.getTopics(), transport.remoteAddress(), JSON.toJSONString(topicMetadata), topicMetadataRequest.getClientId());
 
-            delayPurgatory.tryCompleteElseWatch(new AbstractDelayedOperation(config.getMetadataDelay()) {
+            delayPurgatory.tryCompleteElseWatch(new AbstractDelayedOperation(1000 * 1) {
                 @Override
                 protected void onComplete() {
                     transport.acknowledge(command, response);
