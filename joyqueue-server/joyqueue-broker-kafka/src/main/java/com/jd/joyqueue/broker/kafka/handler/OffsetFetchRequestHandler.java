@@ -18,6 +18,7 @@ import com.jd.joyqueue.broker.kafka.KafkaContext;
 import com.jd.joyqueue.broker.kafka.KafkaContextAware;
 import com.jd.joyqueue.broker.kafka.command.OffsetFetchRequest;
 import com.jd.joyqueue.broker.kafka.command.OffsetFetchResponse;
+import com.jd.joyqueue.broker.kafka.config.KafkaConfig;
 import com.jd.joyqueue.broker.kafka.coordinator.group.GroupCoordinator;
 import com.jd.joyqueue.broker.kafka.model.OffsetMetadataAndError;
 import com.jd.joyqueue.network.transport.Transport;
@@ -39,10 +40,12 @@ public class OffsetFetchRequestHandler extends AbstractKafkaCommandHandler imple
     protected static final Logger logger = LoggerFactory.getLogger(OffsetFetchRequestHandler.class);
 
     private GroupCoordinator groupCoordinator;
+    private KafkaConfig config;
 
     @Override
     public void setKafkaContext(KafkaContext kafkaContext) {
         this.groupCoordinator = kafkaContext.getGroupCoordinator();
+        this.config = kafkaContext.getConfig();
     }
 
     @Override
@@ -52,8 +55,11 @@ public class OffsetFetchRequestHandler extends AbstractKafkaCommandHandler imple
         Map<String, List<Integer>> topicAndPartitions = offsetFetchRequest.getTopicAndPartitions();
         Map<String, List<OffsetMetadataAndError>> result = groupCoordinator.handleFetchOffsets(groupId, topicAndPartitions);
 
-        // TODO 临时日志
-        logger.info("fetch offset, request: {}, response: {}", offsetFetchRequest, result);
+        if (config.getLogDetail(offsetFetchRequest.getClientId())) {
+            logger.info("fetch offset, transport: {}, app: {}, request: {}, response: {}",
+                    transport, offsetFetchRequest.getClientId(), offsetFetchRequest, result);
+        }
+
         OffsetFetchResponse offsetFetchResponse = new OffsetFetchResponse(result);
         return new Command(offsetFetchResponse);
     }

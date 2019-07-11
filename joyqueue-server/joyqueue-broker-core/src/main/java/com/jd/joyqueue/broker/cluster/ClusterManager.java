@@ -43,6 +43,7 @@ import com.jd.joyqueue.toolkit.lang.LifeCycle;
 import com.jd.joyqueue.toolkit.service.Service;
 import com.jd.joyqueue.toolkit.time.SystemClock;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -412,6 +413,9 @@ public class ClusterManager extends Service {
     public Consumer.ConsumerPolicy getConsumerPolicy(TopicName topic, String app) throws JoyQueueException {
         Consumer consumer = localCache.getConsumerByTopicAndApp(topic, app);
         if (null == consumer) {
+            if (StringUtils.equals(brokerConfig.getAdminUser(), app)) {
+                return brokerContext.getConsumerPolicy();
+            }
             throw new JoyQueueException(JoyQueueCode.FW_CONSUMER_NOT_EXISTS);
         }
         return getConsumerPolicyOrDefault(consumer);
@@ -446,6 +450,9 @@ public class ClusterManager extends Service {
     public Consumer.ConsumerPolicy tryGetConsumerPolicy(TopicName topic, String app) {
         Consumer consumer = localCache.getConsumerByTopicAndApp(topic, app);
         if (consumer == null) {
+            if (StringUtils.equals(brokerConfig.getAdminUser(), app)) {
+                return brokerContext.getConsumerPolicy();
+            }
             return null;
         }
         return getConsumerPolicyOrDefault(consumer);
@@ -461,6 +468,9 @@ public class ClusterManager extends Service {
     public Producer.ProducerPolicy tryGetProducerPolicy(TopicName topic, String app) {
         Producer producer = localCache.getProducerByTopicAndApp(topic, app);
         if (producer == null) {
+            if (StringUtils.equals(brokerConfig.getAdminUser(), app)) {
+                return brokerContext.getProducerPolicy();
+            }
             return null;
         }
         return getProducerPolicyOrDefault(producer);
@@ -505,6 +515,9 @@ public class ClusterManager extends Service {
     public Producer.ProducerPolicy getProducerPolicy(TopicName topic, String app) throws JoyQueueException {
         Producer producer = localCache.getProducerByTopicAndApp(topic, app);
         if (null == producer) {
+            if (StringUtils.equals(brokerConfig.getAdminUser(), app)) {
+                return brokerContext.getProducerPolicy();
+            }
             throw new JoyQueueException(JoyQueueCode.FW_PRODUCER_NOT_EXISTS);
         }
         return getProducerPolicyOrDefault(producer);

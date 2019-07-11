@@ -290,7 +290,7 @@ Once the topic you have subscribe has new arriving messages,you consumer which c
 ### Step 7.2: Spring boot application.properties
 ```
 spring.oms.enable=true
-spring.oms.url=oms:joyqueue://test_app@10.37.129.2:50088/UNKNOWN
+spring.oms.url=oms:joyqueue://test_app@127.0.0.1:50088/UNKNOWN
 spring.oms.attributes[ACCOUNT_KEY]=test_token
 
 spring.oms.consumer.enable=true

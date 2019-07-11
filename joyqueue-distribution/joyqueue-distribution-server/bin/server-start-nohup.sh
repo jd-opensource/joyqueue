@@ -13,5 +13,5 @@
 # limitations under the License.
 #
 
-nohup exec $(dirname $0)/server-start.sh "$@" >/dev/null 2>/dev/null &
+exec nohup $(dirname $0)/server-start.sh "$@" >/dev/null 2>/dev/null &
 echo $! > joyqueue.pid

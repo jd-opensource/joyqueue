@@ -245,7 +245,7 @@ public class PartitionManager {
      * @return 是否重试
      */
     protected boolean isRetry(Consumer consumer) throws JoyQueueException {
-        Boolean retry = clusterManager.getConsumer(TopicName.parse(consumer.getTopic()), consumer.getApp()).getConsumerPolicy().getRetry();
+        Boolean retry = clusterManager.getConsumerPolicy(TopicName.parse(consumer.getTopic()), consumer.getApp()).getRetry();
         if (!retry.booleanValue()) {
             logger.debug("retry enable is false.");
             return false;

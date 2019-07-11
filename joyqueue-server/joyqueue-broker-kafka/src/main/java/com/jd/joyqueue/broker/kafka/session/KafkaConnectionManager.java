@@ -115,19 +115,19 @@ public class KafkaConnectionManager {
 
     protected String generateProducerId(Connection connection, String topic) {
         InetSocketAddress inetRemoteAddress = (InetSocketAddress) connection.getTransport().remoteAddress();
-        return String.format("%s-%s_%s-%s",
-                connection.getVersion(), inetRemoteAddress.getHostString(), inetRemoteAddress.getPort(), SystemClock.now());
+        return String.format("%s-%s_%s_%s-%s",
+                connection.getVersion(), inetRemoteAddress.getHostString(), topic, inetRemoteAddress.getPort(), SystemClock.now());
     }
 
     protected String generateConsumerId(Connection connection, String topic) {
         InetSocketAddress inetRemoteAddress = (InetSocketAddress) connection.getTransport().remoteAddress();
-        return String.format("%s-%s_%s-%s",
-                connection.getVersion(), inetRemoteAddress.getHostString(), inetRemoteAddress.getPort(), SystemClock.now());
+        return String.format("%s-%s_%s_%s-%s",
+                connection.getVersion(), inetRemoteAddress.getHostString(), topic, inetRemoteAddress.getPort(), SystemClock.now());
     }
 
     protected String generateConnectionId(SocketAddress remoteAddress, String clientId, String version) {
         InetSocketAddress inetRemoteAddress = (InetSocketAddress) remoteAddress;
-        return String.format("%s-%s_%s-%s",
-                version, inetRemoteAddress.getHostString(), inetRemoteAddress.getPort(), SystemClock.now());
+        return String.format("%s-%s_%s_%s-%s",
+                version, inetRemoteAddress.getHostString(), inetRemoteAddress.getPort(), clientId, SystemClock.now());
     }
 }

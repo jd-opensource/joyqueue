@@ -223,13 +223,15 @@ class PartitionConsumption extends Service {
                 if (StringUtils.isNotEmpty(consumer.getApp()) &&
                         (!consumer.getType().equals(Consumer.ConsumeType.INTERNAL) && !consumer.getType().equals(Consumer.ConsumeType.KAFKA))) {
 
-                    com.jd.joyqueue.domain.Consumer consumerConfig = clusterManager.getConsumer(TopicName.parse(consumer.getTopic()), consumer.getApp());
+                    com.jd.joyqueue.domain.Consumer consumerConfig = clusterManager.tryGetConsumer(TopicName.parse(consumer.getTopic()), consumer.getApp());
 
-                    // 过滤消息
-                    byteBuffers = filterMessageSupport.filter(consumerConfig, byteBuffers, new FilterCallbackImpl(consumer));
+                    if (consumerConfig != null) {
+                        // 过滤消息
+                        byteBuffers = filterMessageSupport.filter(consumerConfig, byteBuffers, new FilterCallbackImpl(consumer));
 
-                    // 开启延迟消费，过滤未到消费时间的消息
-                    byteBuffers = delayHandler.handle(consumerConfig.getConsumerPolicy(), byteBuffers);
+                        // 开启延迟消费，过滤未到消费时间的消息
+                        byteBuffers = delayHandler.handle(consumerConfig.getConsumerPolicy(), byteBuffers);
+                    }
                 }
 
                 pullResult = new PullResult(consumer, partition, byteBuffers);

@@ -51,6 +51,13 @@ public class ProduceConfig {
         return PropertySupplier.getValue(propertySupplier, ProducerConfigKey.BROKER_QOS_LEVEL);
     }
 
+    public int getBrokerQosLevel(String topic) {
+        return PropertySupplier.getValue(propertySupplier,
+                ProducerConfigKey.BROKER_QOS_LEVEL_PREFIX.getName() + topic,
+                ProducerConfigKey.BROKER_QOS_LEVEL_PREFIX.getType(),
+                ProducerConfigKey.BROKER_QOS_LEVEL_PREFIX.getValue());
+    }
+
     public long getPrintMetricIntervalMs() {
         return PropertySupplier.getValue(propertySupplier, ProducerConfigKey.PRINT_METRIC_INTERVAL_MS);
     }

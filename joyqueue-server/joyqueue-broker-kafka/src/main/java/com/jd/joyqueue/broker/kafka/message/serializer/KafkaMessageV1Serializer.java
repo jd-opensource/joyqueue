@@ -103,30 +103,27 @@ public class KafkaMessageV1Serializer extends AbstractKafkaMessageSerializer {
     }
 
     public static KafkaBrokerMessage readMessage(ByteBuffer buffer) throws Exception {
-        long offset = buffer.getLong();
-        int size = buffer.getInt();
-        int crc = buffer.getInt();
-        byte magic = buffer.get();
-        byte attribute = buffer.get();
-        long timestamp = buffer.getLong();
-        byte[] key = KafkaBufferUtils.readBytes(buffer);
-        byte[] value = KafkaBufferUtils.readBytes(buffer);
+        byte attribute = buffer.get(ATTRIBUTE_OFFSET);
         KafkaCompressionCodec compressionCodec = KafkaCompressionCodec.valueOf(getCompressionCodecType(attribute));
-
-        KafkaBrokerMessage message = new KafkaBrokerMessage();
-        message.setOffset(offset);
-        message.setSize(size);
-        message.setCrc(crc);
-        message.setMagic(CURRENT_MAGIC);
-        message.setAttribute(attribute);
-        message.setTimestamp(timestamp);
-
-        if (compressionCodec.equals(KafkaCompressionCodec.NoCompressionCodec)) {
-            message.setKey(key);
-            message.setValue(value);
-        } else {
-            message.setValue(value);
+        if (!compressionCodec.equals(KafkaCompressionCodec.NoCompressionCodec)) {
+            buffer.position(ATTRIBUTE_OFFSET + 1 + 8 + 4 + 4); // attribute, timestamp, key, valueLength
+            buffer = ByteBuffer.wrap(decompress(compressionCodec, buffer, CURRENT_MAGIC));
         }
+        return doReadMessage(buffer);
+    }
+
+    protected static KafkaBrokerMessage doReadMessage(ByteBuffer buffer) throws Exception {
+        KafkaBrokerMessage message = new KafkaBrokerMessage();
+        message.setOffset(buffer.getLong());
+        message.setSize(buffer.getInt());
+        message.setCrc(buffer.getInt());
+        message.setMagic(buffer.get());
+        message.setAttribute(buffer.get());
+        message.setAttribute((short) 0);
+        message.setTimestamp(buffer.getLong());
+        message.setKey(KafkaBufferUtils.readBytes(buffer));
+        message.setValue(KafkaBufferUtils.readBytes(buffer));
         return message;
     }
+
 }

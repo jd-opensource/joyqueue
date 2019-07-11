@@ -297,14 +297,14 @@ public class DefaultMessageConsumer extends Service implements MessageConsumer {
     public List<ConsumeMessage> pollPartition(short partition, long index) {
         checkState();
         checkSubscribe();
-        return topicMessageConsumer.getMessagePoller().pollPartition(subscribeTopic, partition);
+        return topicMessageConsumer.getMessagePoller().pollPartition(subscribeTopic, partition, index);
     }
 
     @Override
     public List<ConsumeMessage> pollPartition(short partition, long index, long timeout, TimeUnit timeoutUnit) {
         checkState();
         checkSubscribe();
-        return topicMessageConsumer.getMessagePoller().pollPartition(subscribeTopic, partition, timeout, timeoutUnit);
+        return topicMessageConsumer.getMessagePoller().pollPartition(subscribeTopic, partition, index, timeout, timeoutUnit);
     }
 
     @Override

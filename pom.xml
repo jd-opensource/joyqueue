@@ -401,7 +401,6 @@
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-validator</artifactId>
                 <version>${hibernate-validator.version}</version>
-                <scope>runtime</scope>
             </dependency>
             <dependency>
                 <groupId>javax.el</groupId>
@@ -531,7 +530,6 @@
                 <artifactId>h2</artifactId>
                 <version>${h2database.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
