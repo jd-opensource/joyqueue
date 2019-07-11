@@ -23,7 +23,7 @@ $ mvn install -Dmaven.test.skip=true -P CompileFrontend install
 $ src_home=$(pwd)
 $ mkdir ~/joyqueue
 $ tar -zxvf  $src_home/joyqueue-distribution/joyqueue-distribution-server/target/joyqueue-server-4.1.0-SNAPSHOT.tar.gz -C ~/joyqueue
-$ tar -zxvf $src_home/joyqueue-distribution/joyqueue-distribution-web//target/joyqueue-web-4.1.0-SNAPSHOT.tar.gz  -C ~/joyqueue
+$ tar -zxvf $src_home/joyqueue-distribution/joyqueue-distribution-web/target/joyqueue-web-4.1.0-SNAPSHOT.tar.gz  -C ~/joyqueue
 
 ```
 
@@ -97,8 +97,9 @@ $ bin/start.sh
 
 在开始生产和消费之前，需要先在管理端创建主题、生产者和消费者应用以及对应的令牌，令牌用于认证应用的合法性。
 假设创建一个独立的命名空间，为test;主题为joy_topic;生产和消费应用都是同一个应用为joyqueue,消费分组为abc;并为joyqueue创建令牌，用于鉴权。
-现在可以访问管理端:http://localhost:10031，依次创建生产及消费订阅关系
+现在可以访问管理端:http://localhost:10031。 
 
+依次创建生产及消费订阅关系：
 * 命名空间：test，操作路径：系统管理-》命名空间管理-》新建Namespace
 * 主题：joy_test，操作路径：主题中心-》添加主题-》选择Broker
 * 应用：joyqueue，操作路径：我的应用-》新建应用，应用负责人admin 
@@ -109,7 +110,7 @@ $ bin/start.sh
 
 ## 第5步：生产和消费示例
 
-到目前为止，我们已经创建好主题和应用及其token，并且已经维护好发布/订阅关系。可以尝试利用console-consumer和console-producer生产和消费消息，这一步会利用到前面创建的topic,app及app token等信息。 
+到目前为止，我们已经创建好主题和应用及其token，并且已经维护好发布/订阅关系。可以尝试利用console-consumer和console-producer生产和消费消息，这一步会利用到前面创建的topic，app及app token等信息。 
 
 注意，*topic 带有namespace 前缀，app 带消费分组后缀*。
 
@@ -138,7 +139,7 @@ $ bin/start.sh
 
 ## 第6步：使用JoyQueue 镜像
 
-可以从Docker hub 拉去或基于源码build JoyQueue server及web镜像
+可以从Docker hub 拉取或基于源码build JoyQueue server及web镜像。
 
 * Docker hub 获取
 
