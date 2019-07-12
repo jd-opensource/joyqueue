@@ -16,9 +16,11 @@ package com.jd.joyqueue.broker.manage.service.support;
 import com.google.common.collect.Lists;
 import com.jd.joyqueue.broker.buffer.Serializer;
 import com.jd.joyqueue.broker.consumer.Consume;
+import com.jd.joyqueue.broker.consumer.MessageConvertSupport;
 import com.jd.joyqueue.broker.manage.exception.ManageException;
 import com.jd.joyqueue.broker.manage.service.MessageManageService;
 import com.jd.joyqueue.message.BrokerMessage;
+import com.jd.joyqueue.message.SourceType;
 import com.jd.joyqueue.monitor.BrokerMessageInfo;
 import com.jd.joyqueue.network.session.Consumer;
 import com.jd.joyqueue.store.StoreManagementService;
@@ -38,21 +40,29 @@ public class DefaultMessageManageService implements MessageManageService {
 
     private Consume consume;
     private StoreManagementService storeManagementService;
+    private MessageConvertSupport messageConvertSupport;
 
-    public DefaultMessageManageService(Consume consume, StoreManagementService storeManagementService) {
+    public DefaultMessageManageService(Consume consume, StoreManagementService storeManagementService, MessageConvertSupport messageConvertSupport) {
         this.consume = consume;
         this.storeManagementService = storeManagementService;
+        this.messageConvertSupport = messageConvertSupport;
     }
 
     @Override
     public List<BrokerMessageInfo> getPartitionMessage(String topic, String app, short partition, long index, int count) {
         try {
+            List<BrokerMessage> brokerMessages = Lists.newArrayListWithCapacity(count);
             List<BrokerMessageInfo> result = Lists.newArrayListWithCapacity(count);
             byte[][] bytes = storeManagementService.readMessages(topic, partition, index, count);
             if (ArrayUtils.isNotEmpty(bytes)) {
                 for (byte[] message : bytes) {
-                    result.add(new BrokerMessageInfo(Serializer.readBrokerMessage(ByteBuffer.wrap(message))));
+                    brokerMessages.add(Serializer.readBrokerMessage(ByteBuffer.wrap(message)));
                 }
+            }
+
+            brokerMessages = messageConvertSupport.convert(brokerMessages, SourceType.INTERNAL.getValue());
+            for (BrokerMessage brokerMessage : brokerMessages) {
+                result.add(new BrokerMessageInfo(brokerMessage));
             }
             return result;
         } catch (Exception e) {
@@ -67,6 +77,7 @@ public class DefaultMessageManageService implements MessageManageService {
             consumer.setTopic(topic);
             consumer.setApp(app);
 
+            List<BrokerMessage> brokerMessages = Lists.newArrayListWithCapacity(count);
             List<BrokerMessageInfo> result = Lists.newArrayListWithCapacity(count);
             StoreManagementService.TopicMetric topicMetric = storeManagementService.topicMetric(topic);
             for (StoreManagementService.PartitionGroupMetric partitionGroupMetric : topicMetric.getPartitionGroupMetrics()) {
@@ -86,11 +97,17 @@ public class DefaultMessageManageService implements MessageManageService {
                     if (ArrayUtils.isNotEmpty(bytes)) {
                         for (byte[] message : bytes) {
                             BrokerMessage brokerMessage = Serializer.readBrokerMessage(ByteBuffer.wrap(message));
-                            result.add(new BrokerMessageInfo(brokerMessage, (ackIndex > brokerMessage.getMsgIndexNo())));
+                            brokerMessages.add(brokerMessage);
                         }
+                    }
+
+                    brokerMessages = messageConvertSupport.convert(brokerMessages, SourceType.INTERNAL.getValue());
+                    for (BrokerMessage brokerMessage : brokerMessages) {
+                        result.add(new BrokerMessageInfo(brokerMessage, (ackIndex > brokerMessage.getMsgIndexNo())));
                     }
                 }
             }
+
             return result;
         } catch (Exception e) {
             throw new ManageException(e);
@@ -104,6 +121,7 @@ public class DefaultMessageManageService implements MessageManageService {
             consumer.setTopic(topic);
             consumer.setApp(app);
 
+            List<BrokerMessage> brokerMessages = Lists.newArrayListWithCapacity(count);
             List<BrokerMessageInfo> result = Lists.newArrayListWithCapacity(count);
             StoreManagementService.TopicMetric topicMetric = storeManagementService.topicMetric(topic);
             for (StoreManagementService.PartitionGroupMetric partitionGroupMetric : topicMetric.getPartitionGroupMetrics()) {
@@ -119,12 +137,23 @@ public class DefaultMessageManageService implements MessageManageService {
                         realIndex = partitionMetric.getRightIndex() - realCount;
                     }
                     long ackIndex = consume.getAckIndex(consumer, partitionMetric.getPartition());
+                    if (ackIndex < 0) {
+                        ackIndex = 0;
+                    }
+                    if (ackIndex >= partitionMetric.getRightIndex()) {
+                        continue;
+                    }
                     byte[][] bytes = storeManagementService.readMessages(topic, partitionMetric.getPartition(), realIndex, realCount);
                     if (ArrayUtils.isNotEmpty(bytes)) {
                         for (byte[] message : bytes) {
                             BrokerMessage brokerMessage = Serializer.readBrokerMessage(ByteBuffer.wrap(message));
-                            result.add(new BrokerMessageInfo(brokerMessage, (ackIndex > brokerMessage.getMsgIndexNo())));
+                            brokerMessages.add(brokerMessage);
                         }
+                    }
+
+                    brokerMessages = messageConvertSupport.convert(brokerMessages, SourceType.INTERNAL.getValue());
+                    for (BrokerMessage brokerMessage : brokerMessages) {
+                        result.add(new BrokerMessageInfo(brokerMessage, (ackIndex > brokerMessage.getMsgIndexNo())));
                     }
                 }
             }

@@ -78,8 +78,8 @@ public class GroupMetadata {
         if (host.startsWith("/")) {
             host = host.substring(1);
         }
-        if (!host.contains(":")) {
-            return host;
+        if (host.contains(":")) {
+            host = host.substring(0, host.indexOf(":"));
         }
         return host;
     }

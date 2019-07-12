@@ -91,9 +91,13 @@ public class TransactionProduceHandler {
         }
 
         try {
-            latch.await(request.getAckTimeoutMs(), TimeUnit.MILLISECONDS);
+            if (!latch.await(Math.min(request.getAckTimeoutMs(), config.getProduceTimeout()), TimeUnit.MILLISECONDS)) {
+                logger.warn("produce message timeout, topic: {}, request: {}", producer.getTopic(), partitionGroupRequest);
+                code[0] = KafkaErrorCode.KAFKA_STORAGE_ERROR.getCode();
+            }
         } catch (InterruptedException e) {
             logger.error("produce message failed, topic: {}", producer.getTopic(), e);
+            code[0] = KafkaErrorCode.KAFKA_STORAGE_ERROR.getCode();
         }
         listener.onEvent(new ProduceResponse.PartitionResponse(ProduceResponse.PartitionResponse.NONE_OFFSET, code[0]));
     }

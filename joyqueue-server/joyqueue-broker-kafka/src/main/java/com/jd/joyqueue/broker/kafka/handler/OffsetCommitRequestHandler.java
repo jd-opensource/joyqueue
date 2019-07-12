@@ -17,9 +17,9 @@ package com.jd.joyqueue.broker.kafka.handler;
 import com.jd.joyqueue.broker.kafka.KafkaCommandType;
 import com.jd.joyqueue.broker.kafka.KafkaContext;
 import com.jd.joyqueue.broker.kafka.KafkaContextAware;
-import com.jd.joyqueue.broker.kafka.KafkaErrorCode;
 import com.jd.joyqueue.broker.kafka.command.OffsetCommitRequest;
 import com.jd.joyqueue.broker.kafka.command.OffsetCommitResponse;
+import com.jd.joyqueue.broker.kafka.config.KafkaConfig;
 import com.jd.joyqueue.broker.kafka.coordinator.group.GroupCoordinator;
 import com.jd.joyqueue.broker.kafka.model.OffsetMetadataAndError;
 import com.jd.joyqueue.network.transport.Transport;
@@ -41,10 +41,12 @@ public class OffsetCommitRequestHandler extends AbstractKafkaCommandHandler impl
     protected static final Logger logger = LoggerFactory.getLogger(OffsetCommitRequestHandler.class);
 
     private GroupCoordinator groupCoordinator;
+    private KafkaConfig config;
 
     @Override
     public void setKafkaContext(KafkaContext kafkaContext) {
         this.groupCoordinator = kafkaContext.getGroupCoordinator();
+        this.config = kafkaContext.getConfig();
     }
 
     @Override
@@ -54,20 +56,9 @@ public class OffsetCommitRequestHandler extends AbstractKafkaCommandHandler impl
         Map<String, List<OffsetMetadataAndError>> result = groupCoordinator.handleCommitOffsets(offsetCommitRequest.getGroupId(), offsetCommitRequest.getMemberId(),
                 offsetCommitRequest.getGroupGenerationId(), offsetCommitRequest.getOffsets());
 
-        // TODO 临时日志
-        if (logger.isDebugEnabled()) {
-            for (Map.Entry<String, List<OffsetMetadataAndError>> entry : result.entrySet()) {
-                for (OffsetMetadataAndError offset : entry.getValue()) {
-                    if (offset.getError() == KafkaErrorCode.NONE.getCode()) {
-                        logger.debug("offset commit request with correlation id {} from client {} on topic {} partition {} offset {}",
-                                offsetCommitRequest.getCorrelationId(), offsetCommitRequest.getGroupId(), entry.getKey(), offset.getPartition(), offset.getOffset());
-                    } else {
-                        logger.debug("offset commit request with correlation id {} from client {} on topic {} partition {} failed due to {}",
-                                offsetCommitRequest.getCorrelationId(), offsetCommitRequest.getGroupId(), entry.getKey(), offset.getPartition(), offset.getOffset());
-                    }
-                }
-
-            }
+        if (config.getLogDetail(offsetCommitRequest.getClientId())) {
+            logger.info("offset commit request with correlation id {} from transport: {}, client {}, request: {}, result: {}",
+                    transport, offsetCommitRequest.getCorrelationId(), offsetCommitRequest.getGroupId(), offsetCommitRequest, result);
         }
 
         OffsetCommitResponse offsetCommitResponse = new OffsetCommitResponse(result);

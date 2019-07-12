@@ -541,38 +541,46 @@ public class NameServer extends Service implements NameService, PropertySupplier
 
     @Override
     public Map<TopicName, TopicConfig> getTopicConfigByApp(String subscribeApp, Subscription.Type subscribe) {
-        try {
-            return appTopicCache.get(subscribeApp + "_" + String.valueOf(subscribe), new Callable<Map<TopicName, TopicConfig>>() {
-                @Override
-                public Map<TopicName, TopicConfig> call() throws Exception {
-                    Map<TopicName, TopicConfig> appTopicConfigs = new HashMap<>();
-
-                    List<? extends Subscription> subscriptions = null;
-                    switch (subscribe) {
-                        case CONSUMPTION:
-                            subscriptions = metaManager.getConsumer(subscribeApp);
-                            break;
-                        case PRODUCTION:
-                            subscriptions = metaManager.getProducer(subscribeApp);
-                            break;
+        if (nameServerConfig.getCacheEnable()) {
+            try {
+                return appTopicCache.get(subscribeApp + "_" + String.valueOf(subscribe), new Callable<Map<TopicName, TopicConfig>>() {
+                    @Override
+                    public Map<TopicName, TopicConfig> call() throws Exception {
+                        return doGetTopicConfigByApp(subscribeApp, subscribe);
                     }
+                });
+            } catch (ExecutionException e) {
+                logger.error("getTopicConfigByApp exception, subscribeApp: {}, subscribe: {}",
+                        subscribeApp, subscribe);
+                return Maps.newHashMap();
+            }
+        } else {
+            return doGetTopicConfigByApp(subscribeApp, subscribe);
+        }
+    }
 
-                    if (null != subscriptions) {
-                        subscriptions.forEach(p -> {
-                            TopicConfig topicConfig = getTopicConfig(p.getTopic());
-                            if (null != topicConfig) {
-                                appTopicConfigs.put(p.getTopic(), topicConfig);
-                            }
-                        });
-                    }
-                    return appTopicConfigs;
+    protected Map<TopicName, TopicConfig> doGetTopicConfigByApp(String subscribeApp, Subscription.Type subscribe) {
+        Map<TopicName, TopicConfig> appTopicConfigs = new HashMap<>();
+
+        List<? extends Subscription> subscriptions = null;
+        switch (subscribe) {
+            case CONSUMPTION:
+                subscriptions = metaManager.getConsumer(subscribeApp);
+                break;
+            case PRODUCTION:
+                subscriptions = metaManager.getProducer(subscribeApp);
+                break;
+        }
+
+        if (null != subscriptions) {
+            subscriptions.forEach(p -> {
+                TopicConfig topicConfig = getTopicConfig(p.getTopic());
+                if (null != topicConfig) {
+                    appTopicConfigs.put(p.getTopic(), topicConfig);
                 }
             });
-        } catch (ExecutionException e) {
-            logger.error("getTopicConfigByApp exception, subscribeApp: {}, subscribe: {}",
-                    subscribeApp, subscribe);
-            return Maps.newHashMap();
         }
+        return appTopicConfigs;
     }
 
     @Override

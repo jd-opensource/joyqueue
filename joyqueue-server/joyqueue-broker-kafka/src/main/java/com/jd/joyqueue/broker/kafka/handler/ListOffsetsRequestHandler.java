@@ -16,13 +16,14 @@ package com.jd.joyqueue.broker.kafka.handler;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.jd.joyqueue.broker.BrokerContext;
-import com.jd.joyqueue.broker.BrokerContextAware;
 import com.jd.joyqueue.broker.cluster.ClusterManager;
 import com.jd.joyqueue.broker.kafka.KafkaCommandType;
+import com.jd.joyqueue.broker.kafka.KafkaContext;
+import com.jd.joyqueue.broker.kafka.KafkaContextAware;
 import com.jd.joyqueue.broker.kafka.KafkaErrorCode;
 import com.jd.joyqueue.broker.kafka.command.ListOffsetsRequest;
 import com.jd.joyqueue.broker.kafka.command.ListOffsetsResponse;
+import com.jd.joyqueue.broker.kafka.config.KafkaConfig;
 import com.jd.joyqueue.domain.PartitionGroup;
 import com.jd.joyqueue.domain.TopicName;
 import com.jd.joyqueue.network.transport.Transport;
@@ -41,7 +42,7 @@ import java.util.Map;
  * email: gaohaoxiang@jd.com
  * date: 2018/11/5
  */
-public class ListOffsetsRequestHandler extends AbstractKafkaCommandHandler implements BrokerContextAware {
+public class ListOffsetsRequestHandler extends AbstractKafkaCommandHandler implements KafkaContextAware {
 
     protected static final Logger logger = LoggerFactory.getLogger(ListOffsetsRequestHandler.class);
 
@@ -50,11 +51,13 @@ public class ListOffsetsRequestHandler extends AbstractKafkaCommandHandler imple
 
     private ClusterManager clusterManager;
     private StoreService storeService;
+    private KafkaConfig config;
 
     @Override
-    public void setBrokerContext(BrokerContext brokerContext) {
-        this.clusterManager = brokerContext.getClusterManager();
-        this.storeService = brokerContext.getStoreService();
+    public void setKafkaContext(KafkaContext kafkaContext) {
+        this.clusterManager = kafkaContext.getBrokerContext().getClusterManager();
+        this.storeService = kafkaContext.getBrokerContext().getStoreService();
+        this.config = kafkaContext.getConfig();
     }
 
     @Override
@@ -73,8 +76,11 @@ public class ListOffsetsRequestHandler extends AbstractKafkaCommandHandler imple
             partitionResponseMap.put(entry.getKey(), partitionResponses);
         }
 
-        // TODO 临时日志
-        logger.info("list offset, request: {}, response: {}", partitionRequestMap, partitionResponseMap);
+        if (config.getLogDetail(request.getClientId())) {
+            logger.info("list offset, transport: {}, app: {}, request: {}, response: {}",
+                    transport, request.getClientId(), partitionRequestMap, partitionResponseMap);
+        }
+
         ListOffsetsResponse response = new ListOffsetsResponse(partitionResponseMap);
         return new Command(response);
     }

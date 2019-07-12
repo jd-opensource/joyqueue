@@ -14,6 +14,7 @@
 package com.jd.joyqueue.nsr;
 
 
+import com.jd.joyqueue.domain.AppToken;
 import com.jd.joyqueue.domain.Broker;
 import com.jd.joyqueue.nsr.admin.AppAdmin;
 import com.jd.joyqueue.nsr.admin.BrokerAdmin;
@@ -32,6 +33,7 @@ public interface NsrAdmin extends Closeable {
     String createTopic(TopicAdmin.TopicArg topicArg) throws Exception;
     String delTopic(TopicAdmin.TopicArg topicArg) throws Exception;
     String token(AppAdmin.TokenArg tokenArg) throws Exception;
+    List<AppToken> tokens(AppAdmin.TokensArg tokensArg) throws Exception;
     String partitionGroup(TopicAdmin.PartitionGroupArg partitionGroupArg) throws Exception;
     List<Broker> listBroker(BrokerAdmin.ListArg listArg) throws Exception;
 

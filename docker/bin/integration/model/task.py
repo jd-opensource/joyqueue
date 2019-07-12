@@ -28,4 +28,6 @@ class Task:
         self.mq_repo_name = config.get_value('MQRepoName', 'Task')
         self.expose_port = config.get_value('expose', 'Task')
         self.mq_start_flag = config.get_value('startedFlag', 'Task')
+        self.mq_log_file = config.get_value('MQLogFile', 'Task')
+
 

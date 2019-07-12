@@ -76,8 +76,12 @@ public class KafkaPartitionMetadata {
 
     @Override
     public String toString() {
-        StringBuilder partitionMetadataString = new StringBuilder();
-        partitionMetadataString.append("\tpartition " + partition);
-        return partitionMetadataString.toString();
+        return "KafkaPartitionMetadata{" +
+                "partition=" + partition +
+                ", leader=" + leader +
+                ", replicas=" + replicas +
+                ", isrs=" + isrs +
+                ", errorCode=" + errorCode +
+                '}';
     }
 }

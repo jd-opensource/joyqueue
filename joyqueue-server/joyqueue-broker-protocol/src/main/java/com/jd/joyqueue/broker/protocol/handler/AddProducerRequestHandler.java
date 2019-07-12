@@ -71,7 +71,7 @@ public class AddProducerRequestHandler implements JoyQueueCommandHandler, Type, 
             TopicName topicName = TopicName.parse(topic);
 
             if (clusterManager.tryGetProducer(topicName, addProducerRequest.getApp()) == null) {
-                logger.warn("addProducer failed, transport: {}, topic: {}, app: {}, code: {}", transport, topicName, addProducerRequest.getApp());
+                logger.warn("addProducer failed, transport: {}, topic: {}, app: {}", transport, topicName, addProducerRequest.getApp());
                 return BooleanAck.build(JoyQueueCode.CN_NO_PERMISSION);
             }
 

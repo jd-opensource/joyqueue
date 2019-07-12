@@ -13,6 +13,8 @@
  */
 package com.jd.joyqueue.nsr;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.jd.joyqueue.domain.AppToken;
 import com.jd.joyqueue.domain.Broker;
@@ -99,6 +101,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -119,6 +124,7 @@ public class ThinNameService extends Service implements NameService, PropertySup
      */
     protected EventBus<NameServerEvent> eventBus = new EventBus<>("BROKER_THIN_NAMESERVICE_ENENT_BUS");
 
+    private Cache<TopicName, TopicConfig> topicCache;
 
     public ThinNameService() {
         //do nothing
@@ -133,6 +139,11 @@ public class ThinNameService extends Service implements NameService, PropertySup
         super.validate();
         if (nameServiceConfig == null) {
             nameServiceConfig = new NameServiceConfig(propertySupplier);
+        }
+        if (topicCache == null) {
+            topicCache = CacheBuilder.newBuilder()
+                    .expireAfterWrite(nameServiceConfig.getThinCacheExpireTime(), TimeUnit.MILLISECONDS)
+                    .build();
         }
         clientTransport = new ClientTransport(nameServiceConfig,this);
     }
@@ -237,8 +248,26 @@ public class ThinNameService extends Service implements NameService, PropertySup
 
     @Override
     public TopicConfig getTopicConfig(TopicName topic) {
+        if (nameServiceConfig.getThinCacheEnable()) {
+            try {
+                return topicCache.get(topic, new Callable<TopicConfig>() {
+                    @Override
+                    public TopicConfig call() throws Exception {
+                        return doGetTopicConfig(topic);
+                    }
+                });
+            } catch (ExecutionException e) {
+                logger.error("getTopicConfig exception, topic: {}", topic, e);
+                return null;
+            }
+        } else {
+            return doGetTopicConfig(topic);
+        }
+    }
+
+    protected TopicConfig doGetTopicConfig(TopicName topic) {
         Command request = new Command(new JoyQueueHeader(Direction.REQUEST, NsrCommandType.GET_TOPICCONFIG), new GetTopicConfig().topic(topic));
-        Command response = send(request);
+        Command response = send(request, nameServiceConfig.getThinTransportTopicTimeout());
         if (!response.isSuccess()) {
             logger.error("getTopicConfig error request {},response {}", request, response);
             throw new RuntimeException(String.format("getTopicConfig error request {},response {}", request, response));
@@ -454,10 +483,14 @@ public class ThinNameService extends Service implements NameService, PropertySup
     }
 
     private Command send(Command request) throws TransportException {
+        return send(request, nameServiceConfig.getThinTransportTimeout());
+    }
+
+    private Command send(Command request, int timeout) throws TransportException {
         // TODO 临时监控
         long startTime = SystemClock.now();
         try {
-            return clientTransport.getOrCreateTransport().sync(request, nameServiceConfig.getThinTransportTimeout());
+            return clientTransport.getOrCreateTransport().sync(request, timeout);
         } catch (TransportException exception) {
             logger.error("send command to nameServer error request {}", request);
             throw exception;
@@ -470,8 +503,12 @@ public class ThinNameService extends Service implements NameService, PropertySup
     }
 
     private void sendAsync(Command request, CommandCallback callback) throws TransportException {
+        sendAsync(request, nameServiceConfig.getThinTransportTimeout(), callback);
+    }
+
+    private void sendAsync(Command request, int timeout, CommandCallback callback) throws TransportException {
         try {
-            clientTransport.getOrCreateTransport().async(request, nameServiceConfig.getThinTransportTimeout(), callback);
+            clientTransport.getOrCreateTransport().async(request, timeout, callback);
         } catch (TransportException exception) {
             logger.error("send command to nameServer error request {}", request);
             throw exception;

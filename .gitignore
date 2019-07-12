@@ -21,3 +21,4 @@ filter.properties
 .factorypath
 *.pyc
 joyqueue-console/joyqueue-portal/node/
+joyqueue-console/joyqueue-web/joyqueue-web-webroot

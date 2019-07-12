@@ -23,13 +23,14 @@ public enum ProducerConfigKey implements PropertyDef {
     TRANSACTION_CLEAR_INTERVAL("produce.transaction.expire.clear.interval", 1000 * 60 * 10, Type.INT),
     TRANSACTION_MAX_UNCOMPLETE("produce.transaction.max.uncomplete", 10240, Type.INT),
     BROKER_QOS_LEVEL("broker.qos.level", -1, Type.INT),
+    BROKER_QOS_LEVEL_PREFIX("broker.qos.level.", -1, Type.INT),
     PRINT_METRIC_INTERVAL_MS("print.metric.interval", 0L ,Type.LONG),
 
     // businessId长度
     PRODUCE_BUSINESSID_LENGTH("produce.businessId.length", 100, PropertyDef.Type.INT),
 
     // body长度
-    PRODUCE_BODY_LENGTH("produce.body.length", 1024 * 1024 * 2, PropertyDef.Type.INT),
+    PRODUCE_BODY_LENGTH("produce.body.length", 1024 * 1024 * 5, PropertyDef.Type.INT),
 
     ;
 
