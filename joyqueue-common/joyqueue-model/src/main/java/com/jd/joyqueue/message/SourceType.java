@@ -24,7 +24,11 @@ public enum SourceType {
 
     JOYQUEUE((byte) 3),
 
-    OTHERS((byte) 10);
+    OTHERS((byte) 10),
+
+    INTERNAL((byte) 11),
+
+    ;
 
     private byte value;
 

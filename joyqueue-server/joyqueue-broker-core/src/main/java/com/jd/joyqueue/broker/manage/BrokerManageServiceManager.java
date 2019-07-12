@@ -16,6 +16,7 @@ package com.jd.joyqueue.broker.manage;
 import com.jd.joyqueue.broker.archive.ArchiveManager;
 import com.jd.joyqueue.broker.cluster.ClusterManager;
 import com.jd.joyqueue.broker.consumer.Consume;
+import com.jd.joyqueue.broker.consumer.MessageConvertSupport;
 import com.jd.joyqueue.broker.coordinator.CoordinatorService;
 import com.jd.joyqueue.broker.election.ElectionService;
 import com.jd.joyqueue.broker.manage.service.BrokerManageService;
@@ -62,12 +63,14 @@ public class BrokerManageServiceManager extends Service {
     private ArchiveManager archiveManager;
     private NameService nameService;
     private ElectionService electionManager;
+    private MessageConvertSupport messageConvertSupport;
 
     public BrokerManageServiceManager(BrokerMonitor brokerMonitor, ClusterManager clusterManager,
                                       StoreManagementService storeManagementService,
                                       StoreService storeService, Consume consume,
                                       MessageRetry messageRetry, CoordinatorService coordinatorService,
-                                      ArchiveManager archiveManager, NameService nameService, ElectionService electionManager) {
+                                      ArchiveManager archiveManager, NameService nameService, ElectionService electionManager,
+                                      MessageConvertSupport messageConvertSupport) {
         this.brokerMonitor = brokerMonitor;
         this.clusterManager = clusterManager;
         this.storeManagementService = storeManagementService;
@@ -78,6 +81,7 @@ public class BrokerManageServiceManager extends Service {
         this.archiveManager = archiveManager;
         this.nameService = nameService;
         this.electionManager = electionManager;
+        this.messageConvertSupport = messageConvertSupport;
     }
 
     @Override
@@ -108,7 +112,7 @@ public class BrokerManageServiceManager extends Service {
 
     protected BrokerManageService newBrokerManageService() {
         ConnectionManageService connectionManageService = new DefaultConnectionManageService(brokerMonitor.getSessionManager());
-        DefaultMessageManageService messageManageService = new DefaultMessageManageService(consume, storeManagementService);
+        DefaultMessageManageService messageManageService = new DefaultMessageManageService(consume, storeManagementService, messageConvertSupport);
         DefaultStoreManageService storeManageService = new DefaultStoreManageService(storeManagementService);
         DefaultConsumerManageService consumerManageService = new DefaultConsumerManageService(consume, storeManagementService, storeService, clusterManager);
         DefaultCoordinatorManageService coordinatorManageService = new DefaultCoordinatorManageService(coordinatorService);

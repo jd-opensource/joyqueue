@@ -171,7 +171,8 @@ public class BrokerServiceTest extends Service {
                 coordinatorService,
                 archiveManager,
                 nameService,
-                electionService);
+                electionService,
+                messageConvertSupport);
         this.brokerContext.brokerManageService(brokerManageService);
 
         //build store manager
