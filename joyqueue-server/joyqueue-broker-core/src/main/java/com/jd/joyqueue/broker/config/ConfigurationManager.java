@@ -58,7 +58,7 @@ public class ConfigurationManager extends Service implements EventListener<NameS
     private static final String DEFAULT_CONFIGURATION_NAME = "_BROKER_CONFIG_";
     private static final String CONFIGURATION_VERSION = "_CONFIGURATION_VERSION_";
     private static final String DEFAULT_CONFIG_PATH = "joyqueue.properties";
-
+    private static final String GROUP_SPLITTER = ",";
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationManager.class);
     private ConfigProvider configProvider;
@@ -172,12 +172,13 @@ public class ConfigurationManager extends Service implements EventListener<NameS
         for (Config config : configs) {
             logger.info("received config [{}], corresponding property is [{}]", config,configuration.getProperty(config.getKey()) != null ? configuration.getProperty(config.getKey()) : "null");
             if (configProvider.getConfig(config.getGroup(), config.getKey()) == null) {
-                // 因事件没有类型，反查一次确定是否被删除
+                // 因事件没有类型，反查一次确定是否被删除，被删除还原默认值
                 logger.info("delete config {}", config.getKey());
                 configuration.addProperty(config.getKey(), null);
             } else {
                 // 如果group为空或group包含自身ip配置才生效
-                if (StringUtils.isBlank(config.getGroup()) || ArrayUtils.contains(config.getGroup().split(","), IpUtil.getLocalIp())) {
+                if (StringUtils.isBlank(config.getGroup()) ||
+                        ArrayUtils.contains(config.getGroup().split(GROUP_SPLITTER), IpUtil.getLocalIp())) {
                     logger.info("add config {}, value is {}", config.getKey(), config.getValue());
                     configuration.addProperty(config.getKey(), config.getValue());
                 } else {
