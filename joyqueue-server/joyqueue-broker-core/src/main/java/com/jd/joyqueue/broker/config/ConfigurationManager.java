@@ -34,7 +34,10 @@ import com.jd.joyqueue.toolkit.concurrent.EventBus;
 import com.jd.joyqueue.toolkit.concurrent.EventListener;
 import com.jd.joyqueue.toolkit.config.Property;
 import com.jd.joyqueue.toolkit.lang.Close;
+import com.jd.joyqueue.toolkit.network.IpUtil;
 import com.jd.joyqueue.toolkit.service.Service;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -163,13 +166,25 @@ public class ConfigurationManager extends Service implements EventListener<NameS
 
 
     private void doUpdateProperty(Config... configs) {
-        if (configs != null) {
-            for (Config config : configs) {
-                logger.info("received config [{}], corresponding property is [{}]", config,configuration.getProperty(config.getKey()) != null ? configuration.getProperty(config.getKey()) : "null");
-                configuration.addProperty(config.getKey(), config.getValue());
+        if (ArrayUtils.isEmpty(configs)) {
+            return;
+        }
+        for (Config config : configs) {
+            logger.info("received config [{}], corresponding property is [{}]", config,configuration.getProperty(config.getKey()) != null ? configuration.getProperty(config.getKey()) : "null");
+            if (configProvider.getConfig(config.getGroup(), config.getKey()) == null) {
+                // 因事件没有类型，反查一次确定是否被删除
+                logger.info("delete config {}", config.getKey());
+                configuration.addProperty(config.getKey(), null);
+            } else {
+                // 如果group为空或group包含自身ip配置才生效
+                if (StringUtils.isBlank(config.getGroup()) || ArrayUtils.contains(config.getGroup().split(","), IpUtil.getLocalIp())) {
+                    logger.info("add config {}, value is {}", config.getKey(), config.getValue());
+                    configuration.addProperty(config.getKey(), config.getValue());
+                } else {
+                    logger.info("config {} group not match, value is {}, group is {}, ", config.getKey(), config.getValue(), config.getGroup());
+                }
             }
         }
-
     }
 
 
