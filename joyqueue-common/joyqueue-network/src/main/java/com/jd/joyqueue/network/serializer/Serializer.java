@@ -28,7 +28,6 @@ import com.jd.joyqueue.message.BrokerMessage;
 import com.jd.joyqueue.message.BrokerPrepare;
 import com.jd.joyqueue.message.BrokerRollback;
 import com.jd.joyqueue.message.Message;
-import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.toolkit.io.Compressors;
 import com.jd.joyqueue.toolkit.io.Zip;
 import com.jd.joyqueue.toolkit.io.ZipUtil;
