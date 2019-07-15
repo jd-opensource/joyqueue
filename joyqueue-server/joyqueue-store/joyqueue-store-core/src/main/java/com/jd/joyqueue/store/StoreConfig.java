@@ -30,7 +30,7 @@ public class StoreConfig {
     public static final int DEFAULT_INDEX_FILE_SIZE = 512 * 1024;
     public static final int DEFAULT_THREAD_COUNT = 4;
     public static final int DEFAULT_PRE_LOAD_BUFFER_CORE_COUNT = 3;
-    public static final int DEFAULT_PRE_LOAD_BUFFER_MAX_COUNT = 10;
+    public static final int DEFAULT_PRE_LOAD_BUFFER_MAX_COUNT = 20;
     public static final long DEFAULT_PRINT_METRIC_INTERVAL_MS = 0;
 
     public static final String STORE_PATH = "/store";
