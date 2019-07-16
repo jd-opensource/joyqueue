@@ -1,1 +1,0 @@
-JournalQ transaction messge

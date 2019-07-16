@@ -1,3 +1,0 @@
-com.jd.journalq.registry.provider.FailoverProvider
-com.jd.journalq.registry.provider.FileProvider
-com.jd.journalq.registry.provider.HttpProvider

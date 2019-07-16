@@ -1,1 +1,0 @@
-# JournalQ message replication
