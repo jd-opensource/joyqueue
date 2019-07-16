@@ -14,7 +14,7 @@
       <d-tab-pane label="连接信息" name="brokerConnectionMonitor">
         <broker-connection-monitor ref="brokerConnectionMonitor" style="height: 500px;overflow-y:auto" :broker-id="this.brokerId"></broker-connection-monitor>
       </d-tab-pane>
-      <d-tab-pane label="分组信息" name="brokerPartitionGroupMonitor">
+      <d-tab-pane label="分区组" name="brokerPartitionGroupMonitor">
         <broker-partition-group-monitor ref="brokerPartitionGroupMonitor" style="height: 500px;overflow-y:auto" :broker-id="this.brokerId"></broker-partition-group-monitor>
       </d-tab-pane>
       <d-tab-pane label="服务器监控" name="brokerServerMonitor">

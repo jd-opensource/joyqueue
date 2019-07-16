@@ -81,7 +81,7 @@ export default {
             width: '25%'
           },
           {
-            title: '分组',
+            title: 'Broker分组',
             key: 'group.code',
             width: '25%'
           },

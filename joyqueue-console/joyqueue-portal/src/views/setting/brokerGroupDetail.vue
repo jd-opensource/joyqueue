@@ -1,7 +1,7 @@
 <template>
   <div style="margin:20px;" class="clearfix">
     <d-breadcrumb class="mb20" separator=">">
-      <d-breadcrumb-item :to="{ name: `/${$i18n.locale}/setting/brokerGroup` }">分组管理</d-breadcrumb-item>
+      <d-breadcrumb-item :to="{ name: `/${$i18n.locale}/setting/brokerGroup` }">Broker分组管理</d-breadcrumb-item>
       <d-breadcrumb-item>{{brokerGroup.name}}</d-breadcrumb-item>
     </d-breadcrumb>
     <div class="detail mb20">
