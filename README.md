@@ -1,35 +1,56 @@
-JoyQueue
-===
-JoyQueue is a distributed,cloud-native messaging platform with high-throughput,high-availability and compatible with Kafka,MQTT.
+# JoyQueue
 
-### Main features as following:
+[阅读中文版](docs/cn/README.md)
 
-* Pub/Sub messaging model
-* Compatible with multiple protocols: kafka,mqtt,etc.
-* Partition group and partition semantics
-* Totally ordered in each partition(FIFO)
-* Support produce/consume load balance
-* 2PC transaction message
-* Optional Qos levels: ONE_WAY, RECEIVE,PERSISTENCE and REPLICATION
-* Raft-based partition group replication
-* 10-million level message accumulation in single partition
-* Horizontally scalable(topics,partition groups,partitions)
-* support various clients,such as Kafka,MQTT,openmessaging client
-* Well-designed administration,configuration and monitoring dashboard
+JoyQueue -- A cloud-native production-ready messaging platform with high-throughput.
 
+## Features
 
+* High performance design with low latency and high throughput, see [performance](#Performance).
+* Buildin multiple protocols, compatible with OpenMessaging, Kafka and MQTT clients.
+* Out of the box, easy to deploy: single-process, zero-dependent, no need to deploy additional ZooKeeper or Naming Service processes.
+* Large-scale clustering.
+* High availability, high reliability and auto recovery based on [Raft consensus algorithm](https://raft.github.io/).
+* Full-featured web management console.
+* More features:
+  * Buildin metric APIs
+  * Transaction
+  * Parallel message consumption
+  * Message archiving
+  * Message preview
+  * Automatically save consumption failure messages and error logs
+  * Unlimited message stacking capacity
 
-Build and install
-====
-see [docs/en/quickstart.md](docs/en/quickstart.md).
+## Performance
 
+A JoyQueue performance test results here：
 
+| Scenario | QPS | clients | Delay AVG/TP99/TP999 (ms) | Fail(%)
+| :----:| :----:|:----: |:----: |:----:|
+|**Online service**| **510, 924** | 400| 1/4/8 | 0
+|**Streaming** | **32, 961, 776** | 900 | N/A | 0
 
-Contributing
-===
+Scenario settings:
+
+Scenario | Sync/Async | Batch | Compress | Msg size | Partitions
+-- | -- | -- | -- | -- | -- | --
+**Online service** | Sync | 1 | Not compressed | 1KB | 200
+**Streaming** | Async | 100 | LZ4 | 1KB | 200
+
+For detail，visit [Performance](docs/en/performance.md)。
+
+## Quickstart
+
+Visit [Quick start](docs/en/quickstart.md)。
+
+## Documentation
+
+Visit [Documentation Index](docs/en/index.md)。
+
+## Contributing
+
 JoyQueue will continually dedicate to build a messaging platform community,any thoughts or issues are appreciated.
 
+## License
 
-License
-===
-Licensed under the Apache License, Version 2.0:https://www.apache.org/licenses/LICENSE-2.0
+Licensed under the [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0).
