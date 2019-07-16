@@ -34,6 +34,10 @@ public class KafkaConfig {
         this.propertySupplier = propertySupplier;
     }
 
+    public int getTransportAcquireTimeout() {
+        return getConfig(KafkaConfigKey.TRANSPORT_ACQUIRE_TIMEOUT);
+    }
+
     public boolean getLogDetail(String app) {
         return (boolean) getConfig(KafkaConfigKey.LOG_DETAIL)
                 || (boolean) PropertySupplier.getValue(propertySupplier,
