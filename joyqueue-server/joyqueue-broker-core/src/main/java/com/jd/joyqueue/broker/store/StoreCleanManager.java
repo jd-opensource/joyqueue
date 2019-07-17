@@ -156,7 +156,7 @@ public class StoreCleanManager extends Service {
                                 }
                                 StoreCleaningStrategy cleaningStrategy = cleaningStrategyMap.get(brokerStoreConfig.getCleanStrategyClass());
                                 if (cleaningStrategy != null) {
-                                    LOG.info("Begin store clean topic: <{}>, partition group: <{}>, partition ack map: <{}>",
+                                    LOG.debug("Begin store clean topic: <{}>, partition group: <{}>, partition ack map: <{}>",
                                             topicConfig.getName().getFullName(), partitionGroup.getGroup(), partitionAckMap);
                                     cleaningStrategy.deleteIfNeeded(storeService.getStore(topicConfig.getName().getFullName(), partitionGroup.getGroup()), partitionAckMap);
                                 }

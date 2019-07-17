@@ -76,7 +76,7 @@ public class TPStatUtil {
     private static void analyze(String monitorKey, Queue<Double> queue) {
         double[] tempArr = queue.parallelStream().mapToDouble(Double::doubleValue).sorted().toArray();
         if (tempArr.length == 0) {
-            logger.info("TPStatUtil have no element to analyze!");
+//            logger.info("TPStatUtil have no element to analyze!");
             return;
         }
         double average = queue.parallelStream().mapToDouble(Double::doubleValue).average().orElse(0); // 平均响应时间

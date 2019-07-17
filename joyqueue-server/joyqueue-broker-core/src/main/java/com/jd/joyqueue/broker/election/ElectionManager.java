@@ -14,6 +14,7 @@
 package com.jd.joyqueue.broker.election;
 
 import com.alibaba.fastjson.JSON;
+import com.google.common.base.Preconditions;
 import com.jd.joyqueue.broker.BrokerContext;
 import com.jd.joyqueue.broker.BrokerContextAware;
 import com.jd.joyqueue.broker.cluster.ClusterManager;
@@ -40,7 +41,6 @@ import com.jd.joyqueue.store.replication.ReplicableStore;
 import com.jd.joyqueue.toolkit.concurrent.EventBus;
 import com.jd.joyqueue.toolkit.concurrent.EventListener;
 import com.jd.joyqueue.toolkit.concurrent.NamedThreadFactory;
-import com.google.common.base.Preconditions;
 import com.jd.joyqueue.toolkit.lang.Close;
 import com.jd.joyqueue.toolkit.service.Service;
 import org.slf4j.Logger;
@@ -161,7 +161,7 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
         EventListener<TransportEvent> clientEventListener = new ClientEventListener();
         transportClient.addListener(clientEventListener);
 
-        electionTimerExecutor = Executors.newScheduledThreadPool(electionConfig.getTimerScheduleThreadNum());
+        electionTimerExecutor = Executors.newScheduledThreadPool(electionConfig.getTimerScheduleThreadNum(), new NamedThreadFactory("Election-Timer"));
         electionExecutor = new ThreadPoolExecutor(electionConfig.getExecutorThreadNumMin(), electionConfig.getExecutorThreadNumMax(),
                 60, TimeUnit.SECONDS, new LinkedBlockingDeque<>(electionConfig.getCommandQueueSize()),
                 new NamedThreadFactory("Election-sendCommand"));

@@ -71,6 +71,7 @@ import com.jd.joyqueue.toolkit.config.PropertySupplier;
 import com.jd.joyqueue.toolkit.config.PropertySupplierAware;
 import com.jd.joyqueue.toolkit.service.Service;
 import org.apache.ignite.Ignite;
+import org.apache.ignite.Ignition;
 import org.apache.ignite.cache.CacheAtomicityMode;
 import org.apache.ignite.cache.CacheMode;
 import org.apache.ignite.configuration.BinaryConfiguration;
@@ -266,7 +267,7 @@ public class IgniteServiceProvider extends Service implements Module, ServicePro
         communicationSpi.setLocalPort(PropertySupplier.getValue(propertySupplier, IgniteConfigKey.DISCOVERY_SPI_COMMUNICATION_SPI_LOCAL_PORT));
         cfg.setCommunicationSpi(communicationSpi);
 
-        return IgnitionEx.start(cfg);
+        return Ignition.start(cfg);
     }
 
     @Override
