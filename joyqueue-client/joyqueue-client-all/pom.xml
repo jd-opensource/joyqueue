@@ -31,7 +31,7 @@
     <dependencies>
         <dependency>
             <groupId>com.jd.joyqueue</groupId>
-            <artifactId>joyqueue-client-core</artifactId>
+            <artifactId>joyqueue-client-core-shaded</artifactId>
         </dependency>
         <dependency>
             <groupId>com.jd.joyqueue</groupId>

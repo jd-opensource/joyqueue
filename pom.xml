@@ -258,6 +258,11 @@
             </dependency>
             <dependency>
                 <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-client-core-shaded</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.jd.joyqueue</groupId>
                 <artifactId>joyqueue-client-kafka</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -664,7 +669,7 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven-surefire-plugin.version}</version>
                     <configuration>
-                        <skipTests>false</skipTests>
+                        <skipTests>true</skipTests>
                     </configuration>
                 </plugin>
                 <plugin>
