@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="ml20 mt30">
-      <d-input v-model="searchData.keyword" placeholder="请输入ID/分组编码/IP" class="left mr10"
+      <d-input v-model="searchData.keyword" placeholder="请输入ID/Broker分组编码/IP" class="left mr10"
                style="width:300px" @on-enter="getList">
         <span slot="prepend">关键词</span>
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
@@ -107,7 +107,7 @@ export default {
           edit: '/broker/update',
           archiveMonitor: '/monitor/archive',
           telnet: '/broker',
-          startInfo: '/monitor/start/'
+          startInfo: '/monitor/start'
         }
       }
     },
@@ -139,7 +139,7 @@ export default {
             key: 'id'
           },
           {
-            title: '分组编码',
+            title: 'Broker分组编码',
             key: 'group.code'
           },
           {
@@ -209,17 +209,7 @@ export default {
   methods: {
     getList () {
       this.showTablePin = true
-      let data = {
-        pagination: {
-          page: this.page.page,
-          size: this.page.size
-        },
-        query: {
-          topic: this.searchData.topic,
-          namespace: this.searchData.namespace,
-          keyword: this.searchData.keyword
-        }
-      }
+      let data = this.getSearchVal()
       apiRequest.post(this.urlOrigin.search, {}, data).then((data) => {
         data.data = data.data || []
         data.pagination = data.pagination || {
@@ -236,7 +226,7 @@ export default {
       })
     },
     getBrokerStatus (rowData, i) {
-      apiRequest.get(this.urlOrigin.startInfo + '/' + rowData[i].id).then((data) => {
+      apiRequest.get(this.urls.startInfo + '/' + rowData[i].id).then((data) => {
         if (data.code === 200) {
           this.tableData.rowData[i].startupTime = timeStampToString(data.data.startupTime)
         } else {

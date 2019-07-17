@@ -48,17 +48,6 @@ export default {
       type: Array
     }
   },
-  // watch: {
-  //   '$route' (to, from) {
-  //     console.log('partition')
-  //     if (to.query.subTab === 'partition') {
-  //       this.search.app.code = to.query.app
-  //       this.search.topic.code = to.query.topic
-  //       this.search.namespace.code = to.query.namespace
-  //       this.getList()
-  //     }
-  //   }
-  // },
   data () {
     return {
       urls: {
@@ -118,19 +107,7 @@ export default {
           }
         })
       })
-      // }
-      // if(this.type == this.$store.getters.consumerType){
-      //    //Only find by monitor service
-      //    apiRequest.postBase(this.urls.findConsumerPartitionGroups, {}, this.search, false).then((data) => {
-      //      if (data.code == 200) {
-      //        this.tableData.rowData = data.data || [];
-      //      }
-      //    });
-      //  }
-    },
-    // mounted () {
-    //   this.getList()
-    // }
+    }
   }
 }
 </script>

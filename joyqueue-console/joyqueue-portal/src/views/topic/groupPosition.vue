@@ -49,7 +49,7 @@ export default {
             }
           },
           {
-            title: '分组',
+            title: '分区组',
             key: 'partitionGroup'
           },
           {

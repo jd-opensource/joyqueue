@@ -1,7 +1,7 @@
 <template>
   <d-menu mode="horizontal" :theme="theme1" :active-name="activeName" class="left">
     <span class="logo">
-      <img src="../../assets/images/journalq-logo.png"/>
+      <img src="../../assets/images/joyqueue-logo.png"/>
     </span>
     <div class="left">
       <d-menu-item name="application" icon="home" color="#D98880" :to="`/${ curLang }/application`">
@@ -80,7 +80,7 @@ export default {
       if (this.curLang === targetLang) return
       const oldLang = this.curLang
       this.$i18n.locale = targetLang
-      window.localStorage.setItem('journalq-language', targetLang)
+      window.localStorage.setItem('joyqueue-language', targetLang)
       this.$router.push(this.$route.path.replace(oldLang, targetLang))
     },
     logout () {

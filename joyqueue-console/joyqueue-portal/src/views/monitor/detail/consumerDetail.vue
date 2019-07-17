@@ -1,7 +1,7 @@
 <template>
   <div>
     <d-tabs type="card" @on-change="handleTabChange" :value="subTab" size="small">
-      <d-tab-pane label="分组" name="partition" icon="pocket" :closable="false">
+      <d-tab-pane label="分区组" name="partition" icon="pocket" :closable="false">
         <partition ref="partition" :colData="partitionColData" :doSearch="doSearch" :search="search"/>
       </d-tab-pane>
       <d-tab-pane label="客户端连接" name="clientConnection" icon="github" :closable="false">

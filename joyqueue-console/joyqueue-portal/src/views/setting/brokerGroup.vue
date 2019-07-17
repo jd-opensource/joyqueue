@@ -6,7 +6,7 @@
         <span slot="prepend">关键词</span>
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
-      <d-button type="primary" @click="openDialog('addDialog')">新建分组<icon name="plus-circle" style="margin-left: 5px;"></icon></d-button>
+      <d-button type="primary" @click="openDialog('addDialog')">新建Broker分组<icon name="plus-circle" style="margin-left: 5px;"></icon></d-button>
     </div>
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange"
               @on-selection-change="handleSelectionChange" @on-detail="goDetail" @on-add-broker="addBroker" @on-del="del" @on-edit="edit">
@@ -114,7 +114,7 @@ export default {
             key: 'port'
           },
           {
-            title: '分组',
+            title: 'Broker分组',
             key: 'group.code'
           }
         ]
@@ -141,8 +141,8 @@ export default {
                 })
               })
             },
-            bindKey: 'status',
-            bindVal: 1
+            bindKey: 'group',
+            bindVal: undefined
           }
         ]
       }
@@ -296,7 +296,7 @@ export default {
       let _this = this
       this.$Dialog.confirm({
         title: '提示',
-        content: '删除后分组绑定的broker会自动解除绑定，确定还要删除吗？'
+        content: '删除后Broker分组绑定的broker会自动解除绑定，确定还要删除吗？'
       }).then(() => {
         if (typeof (_this.beforeDel) === 'function') {
           _this.beforeDel(item)

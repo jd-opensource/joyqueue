@@ -94,7 +94,7 @@ export default {
       default () {
         return [
           {
-            title: '分组',
+            title: 'Broker分组',
             key: 'group.code'
           },
           {
@@ -217,7 +217,7 @@ export default {
       // editLabelData: {},
       addBrokerGroupDialog: {
         visible: false,
-        title: '添加分组',
+        title: '添加Broker分组',
         width: 700,
         showFooter: true
       },
@@ -284,7 +284,7 @@ export default {
       let _this = this
       this.$Dialog.confirm({
         title: '提示',
-        content: '删除时会自动删除与该主题关联的分片分组信息，确定要删除吗？'
+        content: '删除时会自动删除与该主题关联的分片、分区组信息，确定要删除吗？'
       }).then(() => {
         apiRequest.post(_this.urlOrigin.del, {}, item.id).then((data) => {
           if (data.code !== this.$store.getters.successCode) {
