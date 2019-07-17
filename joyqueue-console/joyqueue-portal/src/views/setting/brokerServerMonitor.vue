@@ -17,8 +17,8 @@
       <br>
       <span>preload:</span><span>{{detail.bufferPoolMonitorInfo.plUsed}}</span>&nbsp&nbsp
       <span>used:</span><span>{{detail.bufferPoolMonitorInfo.used}}</span>&nbsp&nbsp
-      <span>direct:</span><span>{{detail.bufferPoolMonitorInfo.direct}}</span>&nbsp&nbsp
-      <span>mmp:</span><span>{{detail.bufferPoolMonitorInfo.mmp}}</span>&nbsp&nbsp
+      <span>direct:</span><span>{{detail.bufferPoolMonitorInfo.directUsed}}</span>&nbsp&nbsp
+      <span>mmp:</span><span>{{detail.bufferPoolMonitorInfo.mmpUsed}}</span>&nbsp&nbsp
       <span>maxMemorySize:</span><span>{{detail.bufferPoolMonitorInfo.maxMemorySize}}</span>
     </div>
     <div style="border:10px solid #f7f7f7;width:600px;">
