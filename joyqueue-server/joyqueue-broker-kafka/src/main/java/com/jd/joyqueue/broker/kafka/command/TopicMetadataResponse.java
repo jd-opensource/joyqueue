@@ -71,8 +71,10 @@ public class TopicMetadataResponse extends KafkaRequestOrResponse {
 
     @Override
     public String toString() {
-        StringBuilder responseStringBuilder = new StringBuilder();
-        responseStringBuilder.append("Name: " + this.getClass().getSimpleName());
-        return responseStringBuilder.toString();
+        return "TopicMetadataResponse{" +
+                "topicMetadatas=" + topicMetadatas +
+                ", brokers=" + brokers +
+                ", clusterId='" + clusterId + '\'' +
+                '}';
     }
 }

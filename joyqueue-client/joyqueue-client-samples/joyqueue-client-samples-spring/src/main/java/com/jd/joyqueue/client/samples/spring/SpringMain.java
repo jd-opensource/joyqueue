@@ -36,7 +36,7 @@ public class SpringMain {
         for (int i = 0; i < 10; i++) {
             Message message = producer.createMessage("test_topic_0", "test".getBytes());
             SendResult sendResult = producer.send(message);
-            logger.info("sendResult: {}", sendResult);
+            logger.info("Message ID: {}", sendResult.messageId());
         }
     }
 }

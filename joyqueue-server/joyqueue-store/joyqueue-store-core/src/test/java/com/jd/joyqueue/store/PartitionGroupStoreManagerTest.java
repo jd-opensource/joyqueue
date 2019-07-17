@@ -289,7 +289,7 @@ public class PartitionGroupStoreManagerTest {
             }
 
             replicationMessages.flip();
-
+            store.disable();
             boolean repeat = true;
             while (repeat)
                 try {
@@ -345,7 +345,7 @@ public class PartitionGroupStoreManagerTest {
         destroyBaseDir();
         prepareBaseDir();
         prepareStore();
-
+        store.disable();
         // 3. 模拟FOLLOWER 写入消息
         position = 0L;
         for (ByteBuffer termBuffer : readTermBuffers) {

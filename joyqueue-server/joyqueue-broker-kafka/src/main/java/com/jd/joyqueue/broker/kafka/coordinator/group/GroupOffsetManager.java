@@ -319,6 +319,7 @@ public class GroupOffsetManager extends Service {
 
     protected Map<Broker, Map<String, List<Integer>>> splitPartitionByBroker(Map<String, List<Integer>> topicAndPartitions) {
         Map<Broker, Map<String, List<Integer>>> result = Maps.newHashMapWithExpectedSize(topicAndPartitions.size());
+
         for (Map.Entry<String, List<Integer>> entry : topicAndPartitions.entrySet()) {
             String topic = entry.getKey();
             TopicConfig topicConfig = clusterManager.getNameService().getTopicConfig(TopicName.parse(topic));

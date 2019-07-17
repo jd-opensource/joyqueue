@@ -33,7 +33,7 @@
                 <d-option :value="1" >Fix</d-option>
               </d-select>
             </d-form-item>
-            <d-form-item label="分组：" prop="brokerGroup">
+            <d-form-item label="Broker分组：" prop="brokerGroup">
               <d-select v-model="formData.brokerGroup.id" style="width: 70%" @on-change="handlerBrokerGroupChange">
                 <d-option v-for="item in brokerGroupList" :value="item.id" :key="item.id">
                   <span>{{ item.name }}</span>
@@ -147,7 +147,7 @@ export default {
             {type: 'number', required: true, message: '请输入队列数量', trigger: 'change'}
           ],
           brokerGroup: [
-            {required: true, message: '请选择一个分组', trigger: 'change'}
+            {required: true, message: '请选择一个Broker分组', trigger: 'change'}
           ],
           description: [
             {required: true, message: '请输入申请描述', trigger: 'change'}

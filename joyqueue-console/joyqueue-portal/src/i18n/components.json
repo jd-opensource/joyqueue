@@ -16,14 +16,10 @@
     "setting": {
       "dataCenter": "数据中心管理",
       "config": "配置管理",
-      "brokerGroup": "分组管理",
+      "brokerGroup": "Broker分组管理",
       "broker": "Broker管理",
       "metric": "指标管理",
       "namespace": "命名空间管理"
-    },
-    "footer": {
-      "copyright": "Copyright@2019 JD.COM 京东版权所有 Power by",
-      "department": "数据技术架构部"
     }
   },
   "en-US" : {
@@ -46,10 +42,6 @@
       "broker": "Broker Manage",
       "metric": "Alarm Metric",
       "namespace": "Namespace Manage"
-    },
-    "footer": {
-      "copyright": "Copyright@2019 JD.COM All Rights Reserved Power by",
-      "department": " Tech Infrastructure Group"
     }
   }
 }

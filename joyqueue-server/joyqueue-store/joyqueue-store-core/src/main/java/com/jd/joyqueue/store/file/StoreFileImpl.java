@@ -103,7 +103,7 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
                 loadBuffer =
                         fileChannel.map(FileChannel.MapMode.READ_ONLY, headerSize, file.length() - headerSize);
             }
-            loadBuffer.load();
+//            loadBuffer.load();
             pageBuffer = loadBuffer;
             bufferType = MAPPED_BUFFER;
             pageBuffer.clear();

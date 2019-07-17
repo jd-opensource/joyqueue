@@ -171,7 +171,8 @@ public class BrokerServiceTest extends Service {
                 coordinatorService,
                 archiveManager,
                 nameService,
-                electionService);
+                electionService,
+                messageConvertSupport);
         this.brokerContext.brokerManageService(brokerManageService);
 
         //build store manager
@@ -188,12 +189,12 @@ public class BrokerServiceTest extends Service {
 
     private Consumer.ConsumerPolicy buildGlobalConsumePolicy(PropertySupplier propertySupplier) {
         //TODO
-        return new Consumer.ConsumerPolicy();
+        return new Consumer.ConsumerPolicy.Builder().create();
     }
 
     private Producer.ProducerPolicy buildGlobalProducePolicy(PropertySupplier propertySupplier) {
         //TODO
-        return new Producer.ProducerPolicy();
+        return new Producer.ProducerPolicy.Builder().create();
     }
 
     @Override

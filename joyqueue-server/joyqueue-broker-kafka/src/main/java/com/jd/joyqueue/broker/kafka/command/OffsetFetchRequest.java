@@ -49,16 +49,9 @@ public class OffsetFetchRequest extends KafkaRequestOrResponse {
 
     @Override
     public String toString() {
-        return describe();
-    }
-
-    public String describe() {
-        StringBuilder offsetFetchRequest = new StringBuilder();
-        offsetFetchRequest.append("Name: " + this.getClass().getSimpleName());
-        offsetFetchRequest.append("; Version: " + getVersion());
-        offsetFetchRequest.append("; CorrelationId: " + getCorrelationId());
-        offsetFetchRequest.append("; ClientId: " + getClientId());
-        offsetFetchRequest.append("; GroupId: " + groupId);
-        return offsetFetchRequest.toString();
+        return "OffsetFetchRequest{" +
+                "groupId='" + groupId + '\'' +
+                ", topicAndPartitions=" + topicAndPartitions +
+                '}';
     }
 }

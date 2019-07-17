@@ -21,7 +21,7 @@
         http://openmessaging.io/schema
 	    http://openmessaging.io/schema/oms.xsd">
 
-    <oms:access-point url="oms:joyqueue://test_app@10.37.129.2:50088/UNKNOWN">
+    <oms:access-point url="oms:joyqueue://test_app@127.0.0.1:50088/UNKNOWN">
         <oms:attribute key="ACCOUNT_KEY" value="test_token"></oms:attribute>
     </oms:access-point>
 

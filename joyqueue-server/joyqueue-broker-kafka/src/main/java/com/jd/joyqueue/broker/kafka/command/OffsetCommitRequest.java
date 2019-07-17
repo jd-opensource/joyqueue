@@ -77,12 +77,13 @@ public class OffsetCommitRequest extends KafkaRequestOrResponse {
 
     @Override
     public String toString() {
-        StringBuilder offsetCommitRequest = new StringBuilder();
-        offsetCommitRequest.append("Name: " + this.getClass().getSimpleName());
-        offsetCommitRequest.append("; GroupId: " + groupId);
-        offsetCommitRequest.append("; GroupGenerationId: " + groupGenerationId);
-        offsetCommitRequest.append("; memberId: " + memberId);
-        return offsetCommitRequest.toString();
+        return "OffsetCommitRequest{" +
+                "groupId='" + groupId + '\'' +
+                ", offsets=" + offsets +
+                ", groupGenerationId=" + groupGenerationId +
+                ", memberId='" + memberId + '\'' +
+                ", retentionTime=" + retentionTime +
+                '}';
     }
 
     @Override

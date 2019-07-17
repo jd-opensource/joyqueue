@@ -16,10 +16,10 @@ package com.jd.joyqueue.broker.protocol.handler;
 import com.google.common.collect.Maps;
 import com.jd.joyqueue.broker.BrokerContext;
 import com.jd.joyqueue.broker.BrokerContextAware;
-import com.jd.joyqueue.broker.protocol.JoyQueueCommandHandler;
 import com.jd.joyqueue.broker.cluster.ClusterManager;
 import com.jd.joyqueue.broker.helper.SessionHelper;
 import com.jd.joyqueue.broker.monitor.SessionManager;
+import com.jd.joyqueue.broker.protocol.JoyQueueCommandHandler;
 import com.jd.joyqueue.domain.TopicName;
 import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.network.command.AddConsumerRequest;
@@ -70,7 +70,7 @@ public class AddConsumerRequestHandler implements JoyQueueCommandHandler, Type, 
         for (String topic : addConsumerRequest.getTopics()) {
             TopicName topicName = TopicName.parse(topic);
 
-            if (clusterManager.tryGetConsumer(topicName, addConsumerRequest.getApp()) == null) {
+            if (clusterManager.tryGetConsumerPolicy(topicName, addConsumerRequest.getApp()) == null) {
                 logger.warn("addConsumer failed, transport: {}, topic: {}, app: {}", transport, topicName, addConsumerRequest.getApp());
                 return BooleanAck.build(JoyQueueCode.CN_NO_PERMISSION);
             }

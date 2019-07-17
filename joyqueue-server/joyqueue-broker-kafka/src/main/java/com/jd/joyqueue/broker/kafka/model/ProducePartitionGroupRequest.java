@@ -85,4 +85,15 @@ public class ProducePartitionGroupRequest {
     public Map<Integer, List<KafkaBrokerMessage>> getKafkaMessageMap() {
         return kafkaMessageMap;
     }
+
+    @Override
+    public String toString() {
+        return "ProducePartitionGroupRequest{" +
+                "partitions=" + partitions +
+                ", messages=" + messages +
+                ", kafkaMessages=" + kafkaMessages +
+                ", messageMap=" + messageMap +
+                ", kafkaMessageMap=" + kafkaMessageMap +
+                '}';
+    }
 }

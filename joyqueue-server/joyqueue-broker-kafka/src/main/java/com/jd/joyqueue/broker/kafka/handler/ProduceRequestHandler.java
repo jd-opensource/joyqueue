@@ -24,6 +24,7 @@ import com.jd.joyqueue.broker.kafka.KafkaContextAware;
 import com.jd.joyqueue.broker.kafka.KafkaErrorCode;
 import com.jd.joyqueue.broker.kafka.command.ProduceRequest;
 import com.jd.joyqueue.broker.kafka.command.ProduceResponse;
+import com.jd.joyqueue.broker.kafka.config.KafkaConfig;
 import com.jd.joyqueue.broker.kafka.converter.CheckResultConverter;
 import com.jd.joyqueue.broker.kafka.coordinator.transaction.ProducerSequenceManager;
 import com.jd.joyqueue.broker.kafka.helper.KafkaClientHelper;
@@ -45,7 +46,6 @@ import com.jd.joyqueue.network.transport.command.Command;
 import com.jd.joyqueue.response.BooleanResponse;
 import com.jd.joyqueue.toolkit.concurrent.EventListener;
 import com.jd.joyqueue.toolkit.network.IpUtil;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,6 +72,7 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
     private TransactionProduceHandler transactionProduceHandler;
     private ProducerSequenceManager producerSequenceManager;
     private SessionManager sessionManager;
+    private KafkaConfig config;
 
     @Override
     public void setKafkaContext(KafkaContext kafkaContext) {
@@ -82,6 +83,7 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
                 kafkaContext.getTransactionCoordinator(), kafkaContext.getTransactionIdManager());
         this.producerSequenceManager = kafkaContext.getProducerSequenceManager();
         this.sessionManager = kafkaContext.getBrokerContext().getSessionManager();
+        this.config = kafkaContext.getConfig();
     }
 
     @Override
@@ -149,7 +151,7 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
         }
 
         try {
-            boolean isDone = latch.await(produceRequest.getAckTimeoutMs(), TimeUnit.MILLISECONDS);
+            boolean isDone = latch.await(Math.min(produceRequest.getAckTimeoutMs(), config.getProduceTimeout()), TimeUnit.MILLISECONDS);
             if (!isDone) {
                 logger.warn("wait produce timeout, transport: {}, app: {}, topics: {}", transport.remoteAddress(), clientId, produceRequest.getPartitionRequests().keySet());
             }
@@ -163,6 +165,11 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
 
     protected short checkPartitionRequest(Transport transport, ProduceRequest produceRequest, ProduceRequest.PartitionRequest partitionRequest,
                                           TopicName topic, Producer producer, String clientIp) {
+
+        short checkAndFillMessageResult = checkAndFillMessages(partitionRequest.getMessages());
+        if (checkAndFillMessageResult != KafkaErrorCode.NONE.getCode()) {
+            return checkAndFillMessageResult;
+        }
 
         BooleanResponse checkResult = clusterManager.checkWritable(topic, producer.getApp(), clientIp, (short) partitionRequest.getPartition());
         if (!checkResult.isSuccess()) {
@@ -201,7 +208,6 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
         List<BrokerMessage> brokerMessages = Lists.newLinkedList();
         for (KafkaBrokerMessage message : partitionRequest.getMessages()) {
             BrokerMessage brokerMessage = KafkaMessageConverter.toBrokerMessage(producer.getTopic(), partitionRequest.getPartition(), producer.getApp(), clientAddress, message);
-            checkAndFillMessage(brokerMessage);
             traffic.record(topic.getFullName(), brokerMessage.getSize());
             brokerMessages.add(brokerMessage);
         }
@@ -213,15 +219,16 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
         producePartitionGroupRequest.getKafkaMessageMap().put(partitionRequest.getPartition(), partitionRequest.getMessages());
     }
 
-    protected void checkAndFillMessage(BrokerMessage message) {
-        if (StringUtils.length(message.getBusinessId()) > produceConfig.getBusinessIdLength()) {
-            logger.warn("businessId length out of range, topic: {}, app: {}, length: {}", message.getTopic(), message.getApp(), message.getBusinessId().length());
-            message.setBusinessId(message.getBusinessId().substring(0, produceConfig.getBusinessIdLength()));
+    protected short checkAndFillMessages(List<KafkaBrokerMessage> messages) {
+        for (KafkaBrokerMessage message : messages) {
+            if (ArrayUtils.getLength(message.getKey()) > produceConfig.getBusinessIdLength()) {
+                return KafkaErrorCode.MESSAGE_TOO_LARGE.getCode();
+            }
+            if (ArrayUtils.getLength(message.getValue()) > produceConfig.getBodyLength()) {
+                return KafkaErrorCode.MESSAGE_TOO_LARGE.getCode();
+            }
         }
-        if (ArrayUtils.getLength(message.getByteBody()) > produceConfig.getBodyLength()) {
-            logger.warn("body length out of range, topic: {}, app: {}, length: {}", message.getTopic(), message.getApp(), message.getByteBody().length);
-            message.setBody(message.getByteBody(), 0, produceConfig.getBodyLength());
-        }
+        return KafkaErrorCode.NONE.getCode();
     }
 
     protected void buildPartitionResponse(int partition, long[] indices, short code, List<KafkaBrokerMessage> messages, List<ProduceResponse.PartitionResponse> partitionResponses) {

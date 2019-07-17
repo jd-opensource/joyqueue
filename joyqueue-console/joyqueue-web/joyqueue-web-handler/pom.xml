@@ -28,18 +28,27 @@
     <artifactId>joyqueue-web-handler</artifactId>
     <name>JoyQueue-Web-Handler</name>
     <description>Web handlers</description>
+
     <dependencies>
         <dependency>
             <groupId>com.jd.laf.web</groupId>
             <artifactId>laf-vertx-web</artifactId>
+            <version>${laf-vertx.version}</version>
         </dependency>
         <dependency>
             <groupId>com.jd.joyqueue</groupId>
             <artifactId>joyqueue-data-service</artifactId>
+            <version>${project.version}</version>
         </dependency>
+        <!--<dependency>-->
+        <!--<groupId>org.apache.commons</groupId>-->
+        <!--<artifactId>commons-lang3</artifactId>-->
+        <!--<version>${commons-lang3.version}</version>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-xml</artifactId>
+            <version>${jackson-databind.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
