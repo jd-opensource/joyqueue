@@ -80,7 +80,7 @@ $ joyqueue-web-4.1.0-SNAPSHOT/bin/start.sh
 * 创建应用：joyqueue，操作路径：我的应用 - 新建应用
 * 创建令牌：操作路径：我的应用 - joyqueue - 详情 - 令牌 - 添加
 * 订阅生产：操作路径：主题中心 - joy_topic - 生产者 - 点击“订阅”按钮 - 找到应用代码为“joyqueue"的行 - ”选择客户端类型:joyqueue - 点击行尾“订阅”按钮
-* 订阅消费：主题中心 - joy_topic - 消费者 - 点击“订阅”按钮 - 找到应用代码为“joyqueue"的行 - ”选择客户端类型:joyqueue - 点击行尾“订阅”按钮
+* 订阅消费：操作路径：主题中心 - joy_topic - 消费者 - 点击“订阅”按钮 - 找到应用代码为“joyqueue"的行 - ”选择客户端类型:joyqueue - 点击行尾“订阅”按钮
 
 ## 第5步：发送和接收消息
 
@@ -106,13 +106,13 @@ $ joyqueue-server-4.1.0-SNAPSHOT/bin/console-consumer.sh -a joyqueue --token a76
 Message{topic: joy_topic, partition: 0, index: 0, txId: null, key: null, body: Hello,JoyQueue}
 ```
 
-## 使用Docker镜像体验JoyQueue
+## 第6步： 使用Docker镜像体验JoyQueue
 
 * 启动JoyQueue server 和 web 服务
 
 JoyQueue server 镜像(joyqueue/joyqueue-server)默认会启动一个本地管理端
 
-```
+```bash
 
 $ docker run -p 80:10031  -d  --name joy joyqueue/joyqueue-server
 
@@ -122,12 +122,12 @@ $ docker run -p 80:10031  -d  --name joy joyqueue/joyqueue-server
 
 参考[第4步：创建发布和订阅关系](##第4步：创建发布和订阅关系)
 
-## 发送和接受消息
+* 发送和接受消息
 
 参考[第5步：生产和消费示例](##第5步：生产和消费示例)
 
-```
-  docker exec -it  joy  bin/console-producer.sh -a joyqueue --token a768388469e144b0b6cbe87a6e339a3c -t joy_topic -b "Hello,JoyQueue"
-  docker exec -it  joy  bin/console-consumer.sh -a joyqueue --token a768388469e144b0b6cbe87a6e339a3c -t joy_topic
+```bash
+ $ docker exec -it  joy  bin/console-producer.sh -a joyqueue --token a768388469e144b0b6cbe87a6e339a3c -t joy_topic -b "Hello,JoyQueue"
+ $ docker exec -it  joy  bin/console-consumer.sh -a joyqueue --token a768388469e144b0b6cbe87a6e339a3c -t joy_topic
 
 ```
