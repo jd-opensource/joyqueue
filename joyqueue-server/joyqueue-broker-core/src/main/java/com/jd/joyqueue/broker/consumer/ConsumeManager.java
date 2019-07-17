@@ -18,6 +18,7 @@ import com.jd.joyqueue.broker.BrokerContext;
 import com.jd.joyqueue.broker.BrokerContextAware;
 import com.jd.joyqueue.broker.archive.ArchiveManager;
 import com.jd.joyqueue.broker.archive.ConsumeArchiveService;
+import com.jd.joyqueue.broker.buffer.Serializer;
 import com.jd.joyqueue.broker.cluster.ClusterManager;
 import com.jd.joyqueue.broker.consumer.model.ConsumePartition;
 import com.jd.joyqueue.broker.consumer.model.OwnerShip;
@@ -34,6 +35,7 @@ import com.jd.joyqueue.event.EventType;
 import com.jd.joyqueue.event.MetaEvent;
 import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.exception.JoyQueueException;
+import com.jd.joyqueue.message.BrokerMessage;
 import com.jd.joyqueue.message.MessageLocation;
 import com.jd.joyqueue.network.session.Connection;
 import com.jd.joyqueue.network.session.Consumer;
@@ -361,11 +363,18 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
     private void monitor(PullResult pullResult, long startTime, Consumer consumer, int partitionGroup) {
         if (pullResult != null && CollectionUtils.isNotEmpty(pullResult.getBuffers())) {
             long now = SystemClock.now();
+            int messageCount = 0;
             int messageSize = 0;
             for (ByteBuffer buffer : pullResult.getBuffers()) {
                 messageSize += (buffer.limit() - buffer.position());
+                BrokerMessage brokerMessage = Serializer.readBrokerMessageHeader(buffer);
+                if (brokerMessage.isBatch()) {
+                    messageCount += brokerMessage.getFlag();
+                } else {
+                    messageCount += 1;
+                }
             }
-            brokerMonitor.onGetMessage(consumer.getTopic(), consumer.getApp(), partitionGroup, pullResult.getPartition(), pullResult.getBuffers().size(), messageSize, now - startTime);
+            brokerMonitor.onGetMessage(consumer.getTopic(), consumer.getApp(), partitionGroup, pullResult.getPartition(), messageCount, messageSize, now - startTime);
         }
     }
 
