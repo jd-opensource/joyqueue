@@ -114,7 +114,7 @@ JoyQueue server 镜像(joyqueue/joyqueue-server)默认会启动一个本地管�
 
 ```bash
 
-$ docker run -p 80:10031  -d  --name joy joyqueue/joyqueue-server
+$ docker run -p 10031:10031  -d  --name joy joyqueue/joyqueue-server
 
 ```
 
