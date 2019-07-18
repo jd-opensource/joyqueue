@@ -110,11 +110,12 @@ Message{topic: joy_topic, partition: 0, index: 0, txId: null, key: null, body: H
 
 * 启动JoyQueue server 和 web 服务
 
-JoyQueue server 镜像(joyqueue/joyqueue-server)默认会启动一个本地管理端
+JoyQueue server 镜像(joyqueue/joyqueue-server)默认会启动一个本地管理端。消息默认存储在 ~/.joyqueue，可以将它映射到本地文件的指定目录，在启动命令里添加
+-v local_target_directory:/root/.joyqueue 参数即可。
 
 ```bash
 
-$ docker run -p 10031:10031  -d  --name joy joyqueue/joyqueue-server
+$ docker run -p 10031:10031  -d   --name joy joyqueue/joyqueue-server
 
 ```
 
@@ -125,6 +126,7 @@ $ docker run -p 10031:10031  -d  --name joy joyqueue/joyqueue-server
 * 发送和接受消息
 
 ```bash
+
  $ docker exec -it  joy  bin/console-producer.sh -a joyqueue --token a768388469e144b0b6cbe87a6e339a3c -t joy_topic -b "Hello,JoyQueue"
  $ docker exec -it  joy  bin/console-consumer.sh -a joyqueue --token a768388469e144b0b6cbe87a6e339a3c -t joy_topic
 
