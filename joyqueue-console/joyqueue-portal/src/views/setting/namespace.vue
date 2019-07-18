@@ -6,7 +6,7 @@
         <span slot="prepend">关键词</span>
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
-      <d-button type="primary" @click="openDialog('addDialog')">新建 Namespace
+      <d-button type="primary" @click="openDialog('addDialog')">新建命名空间
         <icon name="plus-circle" style="margin-left: 5px;">
       </icon></d-button>
     </div>

@@ -28,6 +28,7 @@ import java.io.File;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -94,7 +95,7 @@ public class DefaultStoreManageService implements StoreManageService {
             PartitionGroupMetric partitionGroupMetric = new PartitionGroupMetric();
             String partitionFile=partitionGroupPath+"/"+file.getName()+"/index";
             File[] partitionFiles = storeManagementService.listFiles(partitionFile);
-            String partitions= Arrays.stream(partitionFiles).map(file1 -> file1.getName()).sorted().collect(Collectors.joining(","));
+            String partitions= Arrays.stream(partitionFiles).map(file1 -> file1.getName()).sorted(Comparator.comparingInt(Integer::valueOf)).collect(Collectors.joining(","));
             if (StringUtils.isNumeric(file.getName())) {
                 partitionGroupMetric.setPartitionGroup(Long.valueOf(file.getName()).intValue());
             }
