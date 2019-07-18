@@ -61,7 +61,7 @@ public enum KafkaConfigKey implements PropertyDef {
     // 拉取延迟
     FETCH_DELAY("kafka.fetch.delay", true, Type.BOOLEAN),
     // 写入超时
-    PRODUCE_TIMEOUT("kafka.produce.timeout", 1000 * 10, Type.INT),
+    PRODUCE_TIMEOUT("kafka.produce.timeout", 1000 * 3, Type.INT),
     // 通信acquire超时
     TRANSPORT_ACQUIRE_TIMEOUT("kafka.transport.acquire.timeout", 1000 * 3, Type.INT),
     // 详细日志
