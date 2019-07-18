@@ -310,7 +310,7 @@ public class ReplicaGroup extends Service {
 
                 } catch (InterruptedException ie) {
                     logger.info("Partition group {}/node {} replicate interrupted",
-                            topicPartitionGroup, localReplicaId, ie);
+                            topicPartitionGroup, localReplicaId);
                     break;
                 } catch (Throwable t) {
                     logger.warn("Partition group {}/node {} replicate fail",
