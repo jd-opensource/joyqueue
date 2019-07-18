@@ -1,5 +1,8 @@
 <template>
-  <div v-transfer-dom :data-transfer="transfer">
+  <div v-dialog-drag="draggable"
+       v-dialog-resize="{ resizable, minWidth, minHeight }"
+       v-transfer-dom
+       :data-transfer="transfer">
     <transition :name="transitionNames[1]" v-if="modal">
       <div :class="maskClasses" v-show="visible" @click="handleMaskClick"></div>
     </transition>
@@ -18,7 +21,7 @@
                 <div :class="[prefixCls + '__title']">{{ title }}</div>
               </slot>
             </div>
-            <div :class="[prefixCls + '__body']" v-if="visible">
+            <div :class="[prefixCls + '__body']" v-show="visible">
               <slot>
                 <div v-html="content"></div>
                 <div :class="[prefixCls + '__input']" v-if="showInput">
@@ -32,6 +35,7 @@
                 <d-button type="primary" v-show="showConfirmButton" :loading="buttonLoading" @click.native="handleAction('confirm', $event)">{{ localeOkText }}</d-button>
               </slot>
             </div>
+            <div v-if="resizable" :class="[prefixCls + '__resize']"></div>
           </div>
         </div>
       </transition>
@@ -44,6 +48,8 @@ import Icon from '../icon'
 import DButton from '../button/button.vue'
 import DInput from '../input/input.vue'
 import TransferDom from '../../directives/transfer-dom'
+import DialogResize from '../../directives/dialog-resize'
+import DialogDrag from '../../directives/dialog-drag'
 import Locale from '../../mixins/locale'
 import Emitter from '../../mixins/emitter'
 import ScrollbarMixins from '../../mixins/scrollbar'
@@ -56,7 +62,7 @@ export default {
   name: `${Config.namePrefix}Dialog`,
   mixins: [ Locale, Emitter, ScrollbarMixins ],
   components: { Icon, DButton, DInput },
-  directives: { TransferDom },
+  directives: { TransferDom, DialogDrag, DialogResize },
   props: {
     value: {
       type: Boolean,
@@ -138,6 +144,22 @@ export default {
     },
     beforeClose: {
       type: Function
+    },
+    draggable: {
+      type: Boolean,
+      default: false
+    },
+    resizable: {
+      type: Boolean,
+      default: false
+    },
+    minWidth: {
+      type: Number,
+      default: 323
+    },
+    minHeight: {
+      type: Number,
+      default: 200
     }
   },
   data () {
