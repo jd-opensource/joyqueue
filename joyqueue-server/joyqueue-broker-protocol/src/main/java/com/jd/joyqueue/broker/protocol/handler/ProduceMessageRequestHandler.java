@@ -76,7 +76,7 @@ public class ProduceMessageRequestHandler implements JoyQueueCommandHandler, Typ
         this.config = joyQueueContext.getConfig();
         this.produceConfig = new ProduceConfig(joyQueueContext.getBrokerContext().getPropertySupplier());
         this.produce = joyQueueContext.getBrokerContext().getProduce();
-        this.clusterManager= joyQueueContext.getBrokerContext().getClusterManager();
+        this.clusterManager = joyQueueContext.getBrokerContext().getClusterManager();
     }
 
     @Override
