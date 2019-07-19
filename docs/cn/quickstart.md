@@ -76,11 +76,11 @@ $ joyqueue-web-4.1.0-SNAPSHOT/bin/start.sh
 
 依次创建生产及消费订阅关系：
 
-* 创建主题：joy_test，操作路径：主题中心 - 添加主题
+* 创建主题：joy_topic，操作路径：主题中心 - 添加主题
 * 创建应用：joyqueue，操作路径：我的应用 - 新建应用
 * 创建令牌：操作路径：我的应用 - joyqueue - 详情 - 令牌 - 添加
-* 订阅生产：操作路径：主题中心 - joy_test - 生产者 - 点击“订阅”按钮 - 找到应用代码为“joyqueue"的行 - ”选择客户端类型:joyqueue - 点击行尾“订阅”按钮
-* 订阅消费：主题中心 - joy_test - 消费者 - 点击“订阅”按钮 - 找到应用代码为“joyqueue"的行 - ”选择客户端类型:joyqueue - 点击行尾“订阅”按钮
+* 订阅生产：操作路径：主题中心 - joy_topic - 生产者 - 点击“订阅”按钮 - 找到应用代码为“joyqueue"的行 - ”选择客户端类型:joyqueue - 点击行尾“订阅”按钮
+* 订阅消费：操作路径：主题中心 - joy_topic - 消费者 - 点击“订阅”按钮 - 找到应用代码为“joyqueue"的行 - ”选择客户端类型:joyqueue - 点击行尾“订阅”按钮
 
 ## 第5步：发送和接收消息
 
@@ -106,33 +106,28 @@ $ joyqueue-server-4.1.0-SNAPSHOT/bin/console-consumer.sh -a joyqueue --token a76
 Message{topic: joy_topic, partition: 0, index: 0, txId: null, key: null, body: Hello,JoyQueue}
 ```
 
-## 使用Docker镜像体验JoyQueue
-
-**TODO：这步不需要pull，直接docker run就会自动pull**
-
-* Docker hub 获取
-
-```
-
-  docker pull joyqueue/joyqueue-server:4.1.0-SNAPSHOT
-  docker pull joyqueue/joyqueue-web:4.1.0-SNAPSHOT
-  
-``` 
+## 第6步： 使用Docker镜像体验JoyQueue
 
 * 启动JoyQueue server 和 web 服务
 
-**TODO: 现在不是一个镜像中就包括server和web吗？能否一个命令就拉起server 和 web？**
+JoyQueue server 镜像(joyqueue/joyqueue-server)默认会启动一个本地管理端。消息默认存储在 ~/.joyqueue，可以将它映射到本地文件的指定目录，在启动命令里添加
+-v local_target_directory:/root/.joyqueue 参数即可。
+
+```bash
+
+$ docker run -p 10031:10031  -d   --name joy joyqueue/joyqueue-server
+
 ```
 
-$ docker run -p 80:10031  -d  joyqueue/joyqueue-server  bin/server-start.sh
-$ server_cid=$(docker ps |grep 'joyqueue/joyqueue-server'|awk '{print $1}')
-$ docker exec -it -d  $server_cid  /joyqueue-web/bin/start.sh
-$ docker exec -it $server_cid /bin/bash 
+现在可以访问管理端: [http://localhost:10031](http://localhost:10031)
+
+* 参考[第4步：创建发布和订阅关系](##第4步：创建发布和订阅关系)
+
+* 发送和接受消息
+
+```bash
+
+ $ docker exec -it  joy  bin/console-producer.sh -a joyqueue --token a768388469e144b0b6cbe87a6e339a3c -t joy_topic -b "Hello,JoyQueue"
+ $ docker exec -it  joy  bin/console-consumer.sh -a joyqueue --token a768388469e144b0b6cbe87a6e339a3c -t joy_topic
 
 ```
-
-参考[第4步：创建发布和订阅关系](##第4步：创建发布和订阅关系)
-
-参考[第5步：生产和消费示例](##第5步：生产和消费示例)
-
-**TODO：在Docker中调用console-producer.sh和console-consumer.sh命令和直接调用不一样，需要给出命令。**
