@@ -35,8 +35,8 @@ export default {
         }
         dragDom.style.width = `${width}px`
         dragDom.style.height = `${height}px`
-        const headerHeight = dialogHeaderEl.offsetHeight
-        const footerHeight = dialogFooterEl.offsetHeight
+        const headerHeight = dialogHeaderEl ? dialogHeaderEl.offsetHeight : 0
+        const footerHeight = dialogFooterEl ? dialogFooterEl.offsetHeight : 0
         dialogBodyEl.style.height = `${height - headerHeight - footerHeight}px`
       }
 
