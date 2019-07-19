@@ -97,9 +97,9 @@ class Workflow:
         self.logger.info('create network {},result {}'.format(self.subnet_name, out))
 
     def __remove_subnet(self):
-        subnet_rm ="""
-                    docker network rm {}
-                  """.format(self.subnet_name)
+        subnet_rm = """
+                      docker network rm {}
+                    """.format(self.subnet_name)
         self.__run_local_script(subnet_rm)
 
     def __save_result(self, result):
@@ -340,7 +340,6 @@ class Workflow:
                          mq_repo_name=self.task.mq_repo_name,
                          pressure_repo_name=self.task.pressure_repo_name)
         self.__run_local_script(clean)
-
 
     def __cleanup_local_docker(self):
         # script = self.__shutdown_cleanup_mq_worker_script()

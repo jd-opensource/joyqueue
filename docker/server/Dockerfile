@@ -30,3 +30,6 @@ RUN cp -r /joyqueue-web-*  /joyqueue-web
 
 WORKDIR /joyqueue-server
 
+CMD  /joyqueue-server/bin/server-start-nohup.sh && /joyqueue-web/bin/start.sh
+
+
