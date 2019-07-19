@@ -1,51 +1,31 @@
 
 
-# 快速启动
+# 快速开始
 
-需要安装 Maven 和 Java 环境来启动 JoyQueue
+需要安装Java 8及以上版本来启动 JoyQueue
 
-* 64 Linux/Mac 操作系统最佳
-* Maven 3.2及以上版本
-* JDK 8及以上版本
-
-
-## 第1步：下载安装包或源码编译并安装
-
-下载[JoyQueue Server](http://storage.jd.com/jmq4/joyqueue-server-4.1.0-SNAPSHOT.tar.gz?Expires=1566171865&AccessKey=6baa071a4e099393e996950bafc339240598e819&Signature=q1A2XMFZCDW8e5eq2duKc3tPaxc%3D)和
-[JoyQueue Web](http://storage.jd.com/jmq4/joyqueue-server-4.1.0-SNAPSHOT.tar.gz?Expires=1566171865&AccessKey=6baa071a4e099393e996950bafc339240598e819&Signature=q1A2XMFZCDW8e5eq2duKc3tPaxc%3D)最新的安装包，或从源码编译。如下
-
+确认Java环境以及Java版本正确：
 
 ```bash
-
-$ git clone git@git.jd.com:laf/journalQ.git
-$ cd journalQ && git checkout 4.1.0-SNAPSHOT
-$ mvn install -Dmaven.test.skip=true -P CompileFrontend install
-$ src_home=$(pwd)
-$ mkdir ~/joyqueue
-$ tar -zxvf  $src_home/joyqueue-distribution/joyqueue-distribution-server/target/joyqueue-server-4.1.0-SNAPSHOT.tar.gz -C ~/joyqueue
-$ tar -zxvf $src_home/joyqueue-distribution/joyqueue-distribution-web//target/joyqueue-web-4.1.0-SNAPSHOT.tar.gz  -C ~/joyqueue
-
+$ java -version
+java version "1.8.0_202"
+Java(TM) SE Runtime Environment (build 1.8.0_202-b08)
+Java HotSpot(TM) 64-Bit Server VM (build 25.202-b08, mixed mode)
 ```
 
-## 第2步：以默认配置启动JoyQueue Server 
+## 第1步：下载安装包
 
-使用如下命令启动消息服务实例：
+在[这里（**TODO：需要替换成我们的下载页地址**）](https://github.com/shadowsocks/shadowsocks-windows/releases/latest)下载JoyQueue Server和JoyQueue Web的最新版本。
+
+## 第2步：启动JoyQueue Server
+
+使用`server-start.sh`命令启动消息服务实例:
 
 ```bash
+$ joyqueue-server-4.1.0-SNAPSHOT/bin/server-start.sh
 
-$ cd ~/joyqueue/joyqueue-server-4.1.0-SNAPSHOT
-$ bin/server-start.sh
-
-```
-
-现在可以通过启动日志和网络端口监听情况，判断JoyQueue 和 命名（Naming）服务是否正常启动。
-如果你能在日志中观察到如下的日志，表明broker/选举/监控/命名服务已经正常启动，并监听在50088/50089/50090/50091端口上。
-
-```
 ......
-信息: success starting routing verticle 1 at null
-[19:17:13:180] [main] [INFO] - com.jd.joyqueue.broker.BrokerService.printConfig(BrokerService.java:302) - broker start with configuration:
-	application.data.path: /var/root/.joyqueue
+
 [19:17:13:180] [main] [INFO] - com.jd.joyqueue.broker.BrokerService.printConfig(BrokerService.java:303) - broker.id[1562576766],ip[10.0.16.231],frontPort[50088],backendPort[50089],monitorPort[50090],nameServer port[50091]
       _              ___
      | | ___  _   _ / _ \ _   _  ___ _   _  ___
@@ -58,87 +38,77 @@ $ bin/server-start.sh
 
 [19:17:13:183] [main] [INFO] - com.jd.joyqueue.broker.Launcher.main(Launcher.java:35) - JoyQueue is started
 ......
-
 ```
 
-## 第3步：以默认配置启动JoyQueue Web 
+控制台上打印JoyQueue的LOGO说明JoyQueue Server启动成功。
 
-使用如下命令启动管理端：
+## 第3步：启动JoyQueue Web
+
+JoyQueue Web，默认连接本机的JoyQueue Server。如果JoyQueue Web与JoyQueue Server部署在不同的服务器上，需要修改`conf/application.properties`中`nameserver.host`参数配置。
+
+使用`start.sh`启动管理端:
 
 ```bash
 
-$ cd ～/joyqueue/joyqueue-web-4.1.0-SNAPSHOT
-$ bin/start.sh
+$ joyqueue-web-4.1.0-SNAPSHOT/bin/start.sh
 
-```
-
-管理端元数据依托命名服务，默认连接本地命名服务。如有调整，请修改conf/application.properties中nameserver.host参数配置。
-现在可以通过启动日志和网络端口监听情况，判断管理端服务是否正常启动。如果能在日志中观察到如下日志，表明管理端服务已经正常启动，并监听在10031端口上。正常的启动日志如下：
-
-```
 ......
 2019-07-09 13:04:25.319 [main] INFO  com.jd.laf.web.vertx.spring.SpringVertx - success starting Vert.x
 2019-07-09 13:04:25.329 [main] INFO  com.jd.joyqueue.application.WebApplication - Started WebApplication in 4.179 seconds (JVM running for 4.776)
 2019-07-09 13:04:25.331 [main] INFO  com.jd.joyqueue.application.WebApplication - JoyQueue web started on port 10031.
-2019-07-09 13:04:25.339 [routing-6] INFO  com.jd.laf.web.vertx.RoutingVerticle - success binding http listener 4 on port 10031
-2019-07-09 13:04:25.339 [routing-7] INFO  com.jd.laf.web.vertx.RoutingVerticle - success binding http listener 1 on port 10031
-2019-07-09 13:04:25.339 [routing-8] INFO  com.jd.laf.web.vertx.RoutingVerticle - success binding http listener 3 on port 10031
-2019-07-09 13:04:25.339 [routing-9] INFO  com.jd.laf.web.vertx.RoutingVerticle - success binding http listener 6 on port 10031
-2019-07-09 13:04:25.339 [routing-10] INFO  com.jd.laf.web.vertx.RoutingVerticle - success binding http listener 5 on port 10031
-2019-07-09 13:04:25.339 [routing-11] INFO  com.jd.laf.web.vertx.RoutingVerticle - success binding http listener 2 on port 10031
+
 ......
-
 ```
-服务启动后，可以通过浏览器访问管理端，默认访问地址为: http://localhost:10031
 
+在控制台观察到如下日志，表明JoyQueue Web已经正常启动，并监听在10031端口:
 
+> JoyQueue web started on port 10031.
 
-## 第4步：创建发布和订阅关系
+服务启动后，可以通过浏览器访问管理端，默认访问地址为: [http://localhost:10031](http://localhost:10031)。
+
+## 第4步：创建主题和发布订阅关系
 
 在开始生产和消费之前，需要先在管理端创建主题、生产者和消费者应用以及对应的令牌，令牌用于认证应用的合法性。
-假设创建一个独立的命名空间，为test;主题为joy_topic;生产和消费应用都是同一个应用为joyqueue,消费分组为abc;并为joyqueue创建令牌，用于鉴权。
-现在可以访问管理端:http://localhost:10031，依次创建生产及消费订阅关系
 
-* 命名空间：test，操作路径：系统管理-》命名空间管理-》新建Namespace
-* 主题：joy_test，操作路径：主题中心-》添加主题-》选择Broker
-* 应用：joyqueue，操作路径：我的应用-》新建应用，应用负责人admin 
-* 发布主题：joyqueue 发布joy_test，操作路径:主题中心列表-》joy_test-》生产者-》订阅-》选择客户端类型:joyqueue-》订阅
-* 订阅主题：joyqueue 订阅joy_test，操作路径:主题中心列表-》joy_test-》消费者-》订阅-》填写消费分组：abc-》选择端类型类型:joyqueue-》订阅
-* 应用token: 我的应用列表-》joyqueue-》令牌-》添加
+* 主题：joy_topic
+* 应用：joyqueue
+现在可以访问管理端: [http://localhost:10031](http://localhost:10031)
 
+依次创建生产及消费订阅关系：
 
-## 第5步：生产和消费示例
+* 创建主题：joy_test，操作路径：主题中心 - 添加主题
+* 创建应用：joyqueue，操作路径：我的应用 - 新建应用
+* 创建令牌：操作路径：我的应用 - joyqueue - 详情 - 令牌 - 添加
+* 订阅生产：操作路径：主题中心 - joy_test - 生产者 - 点击“订阅”按钮 - 找到应用代码为“joyqueue"的行 - ”选择客户端类型:joyqueue - 点击行尾“订阅”按钮
+* 订阅消费：主题中心 - joy_test - 消费者 - 点击“订阅”按钮 - 找到应用代码为“joyqueue"的行 - ”选择客户端类型:joyqueue - 点击行尾“订阅”按钮
 
-到目前为止，我们已经创建好主题和应用及其token，并且已经维护好发布/订阅关系。可以尝试利用console-consumer和console-producer生产和消费消息，这一步会利用到前面创建的topic,app及app token等信息。 
+## 第5步：发送和接收消息
 
-注意，*topic 带有namespace 前缀，app 带消费分组后缀*。
+到目前为止，我们已经创建好主题和应用及其token，并且已经维护好发布/订阅关系。可以尝试生产和消费消息，这一步会利用到前面创建的topic，app及app token等信息。
 
-### 第5.1步：使用脚本生产消息
+### 第5.1步：发送消息
 
-生产消息前，可以先利用*bin/console-producer.sh --help* 熟悉需要提供哪些参数。
+使用`console-producer.sh`来发送消息，**注意其中的token要替换成上一步在管理端创建的令牌**：
 
-```
+```bash
 
- cd ~/joyqueue/joyqueue-server-4.1.0-SNAPSHOT
- bin/console-producer.sh -a joyqueue --token bed6af17e9fd4ae3a767406446afe73f -t test.joy_topic -b "hello,jouqueue!"
+ $ joyqueue-server-4.1.0-SNAPSHOT/bin/console-producer.sh -a joyqueue --token a768388469e144b0b6cbe87a6e339a3c -t joy_topic -b "Hello,JoyQueue"
    
 ```
 
 ### 第5.2步：使用脚本消费消息
-消费消息前,可以先利用*bin/console-consumer.sh --help* 熟悉需要提供哪些参数。
 
+使用`console-consumer.sh`来接收消息：
+
+```bash
+$ joyqueue-server-4.1.0-SNAPSHOT/bin/console-consumer.sh -a joyqueue --token a768388469e144b0b6cbe87a6e339a3c -t joy_topic
+
+Message{topic: joy_topic, partition: 0, index: 0, txId: null, key: null, body: Hello,JoyQueue}
 ```
 
- cd ~/joyqueue/joyqueue-server-4.1.0-SNAPSHOT
- bin/console-consumer.sh -a joyqueue.abc --token bed6af17e9fd4ae3a767406446afe73f  -t test.joy_topic    
+## 使用Docker镜像体验JoyQueue
 
-```
-
-观察控制台，是否消费到上一步发送的消息。
-
-## 第6步：使用JoyQueue 镜像
-
-可以从Docker hub 拉去或基于源码build JoyQueue server及web镜像
+**TODO：这步不需要pull，直接docker run就会自动pull**
 
 * Docker hub 获取
 
@@ -149,21 +119,9 @@ $ bin/start.sh
   
 ``` 
 
-* 基于源码build 镜像
-
-```
-
-$ git clone git@git.jd.com:laf/journalQ.git
-$ cd journalQ && git checkout 4.1.0-SNAPSHOT
-$ mvn install -Dmaven.test.skip=true -P CompileFrontend,docker install
-
-
-```
-
 * 启动JoyQueue server 和 web 服务
 
-JoyQueue server 默认监听50088-50091端口;JoyQueue web 默认监听10031端口
-
+**TODO: 现在不是一个镜像中就包括server和web吗？能否一个命令就拉起server 和 web？**
 ```
 
 $ docker run -p 80:10031  -d  joyqueue/joyqueue-server  bin/server-start.sh
@@ -173,8 +131,8 @@ $ docker exec -it $server_cid /bin/bash
 
 ```
 
-生产和发送参考[第5步：生产和消费示例](##第5步：生产和消费示例) 
+参考[第4步：创建发布和订阅关系](##第4步：创建发布和订阅关系)
 
-感谢您耐心的试用JoyQueue服务，如有任何疑问，请贡献issue或在用户邮箱user-joyqueue@jd.com 中讨论!
+参考[第5步：生产和消费示例](##第5步：生产和消费示例)
 
-
+**TODO：在Docker中调用console-producer.sh和console-consumer.sh命令和直接调用不一样，需要给出命令。**

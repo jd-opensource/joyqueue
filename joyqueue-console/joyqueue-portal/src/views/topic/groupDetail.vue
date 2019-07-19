@@ -51,7 +51,7 @@ export default {
             key: 'brokerId'
           },
           {
-            title: '分组',
+            title: 'Broker分组',
             key: 'groupNo'
           },
           {

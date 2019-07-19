@@ -45,7 +45,7 @@ export default {
     return {
       searchData: {
         keyword: '',
-        brokerGroupIds: []
+        brokerGroupId: -1
       },
       tableData: {
         rowData: [{}],
@@ -66,15 +66,14 @@ export default {
     getListByGroupAndbrokers (brokerGroupId, brokers) {
       let query = {}
       if (!brokerGroupId) {
-        this.searchData.brokerGroupIds = []
         query = {
           keyword: this.searchData.keyword
         }
       } else {
-        this.searchData.brokerGroupIds = [brokerGroupId]
+        this.searchData.brokerGroupId = brokerGroupId
         query = {
           keyword: this.searchData.keyword,
-          brokerGroupIds: this.searchData.brokerGroupIds
+          brokerGroupId: this.searchData.brokerGroupId
         }
       }
 
@@ -118,6 +117,6 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-.label{text-align: right; line-height: 32px;}
-.val{}
+  .label{text-align: right; line-height: 32px;}
+  .val{}
 </style>

@@ -44,7 +44,7 @@ export default {
         rowData: [],
         colData: [
           {
-            title: '分组',
+            title: 'Broker分组',
             key: 'brokerGroup.code'
           },
           {

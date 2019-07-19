@@ -36,6 +36,11 @@
           "component": "setting/dataCenter.vue"
         },
         {
+          "path": "user",
+          "name": "user",
+          "component": "setting/userManage.vue"
+        },
+        {
           "path": "config",
           "name": "config",
           "component": "setting/config.vue"
@@ -130,6 +135,11 @@
           "path": "dataCenter",
           "name": "dataCenter",
           "component": "setting/dataCenter.vue"
+        },
+        {
+          "path": "user",
+          "name": "user",
+          "component": "setting/userManage.vue"
         },
         {
           "path": "config",

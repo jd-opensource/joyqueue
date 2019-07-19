@@ -21,7 +21,7 @@ export default {
     return {
       urls: {
         search: `/broker/findByTopic`,
-        startInfo: '/monitor/start/'
+        startInfo: '/monitor/start'
       },
       tableData: {
         rowData: [],
@@ -63,7 +63,7 @@ export default {
       })
     },
     getBrokerStatus (rowData, i) {
-      apiRequest.get(this.urlOrigin.startInfo + '/' + rowData[i].id).then((data) => {
+      apiRequest.get(this.urls.startInfo + '/' + rowData[i].id).then((data) => {
         if (data.code === 200) {
           this.tableData.rowData[i].startupTime = timeStampToString(data.data.startupTime)
           this.tableData.rowData[i].revision = data.data.revision

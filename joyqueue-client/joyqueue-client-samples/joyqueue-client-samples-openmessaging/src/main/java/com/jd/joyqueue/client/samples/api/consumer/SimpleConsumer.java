@@ -30,16 +30,24 @@ import io.openmessaging.message.Message;
 public class SimpleConsumer {
 
     public static void main(String[] args) throws Exception {
-        KeyValue keyValue = OMS.newKeyValue();
-        keyValue.put(OMSBuiltinKeys.ACCOUNT_KEY, "test_token");
+        final String app = "test_app";
+        final String token = "some token";
+        final String dataCenter = "default";
+        final String brokerAddr = "127.0.0.1:50088";
+        final String topic = "test_topic_0";
+        // oms:joyqueue://test_app@127.0.0.1:50088/default
+        final String url = "oms:joyqueue://" + app +  "@" + brokerAddr + "/" + dataCenter;
 
-        MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint("oms:joyqueue://test_app@127.0.0.1:50088/UNKNOWN", keyValue);
+        KeyValue keyValue = OMS.newKeyValue();
+        keyValue.put(OMSBuiltinKeys.ACCOUNT_KEY, token);
+
+        MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint(url, keyValue);
 
         // 创建consumer实例
         Consumer consumer = messagingAccessPoint.createConsumer();
 
         // 绑定需要消费的topic和对应的listener
-        consumer.bindQueue("test_topic_0", new MessageListener() {
+        consumer.bindQueue(topic, new MessageListener() {
             @Override
             public void onReceived(Message message, Context context) {
                 System.out.println(String.format("onReceived, message: %s", message));

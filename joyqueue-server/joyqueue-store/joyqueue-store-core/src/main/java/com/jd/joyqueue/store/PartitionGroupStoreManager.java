@@ -58,6 +58,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -96,6 +98,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
     private Metric produceMetrics = null, consumeMetrics = null;
     private Metric.MetricInstance produceMetric = null, consumeMetric;
     private ScheduledFuture callbackFeature;
+    private final Lock writeLock = new ReentrantLock();
 
     public PartitionGroupStoreManager(String topic, int partitionGroup, File base, Config config,
                                       PreloadBufferPool bufferPool,
@@ -299,10 +302,17 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
 
             // 删除末尾的全是0的部分
             long validPosition = indexStore.right();
+            IndexItem currentIndex, previousIndex = null;
 
-            while ((validPosition -= IndexItem.STORAGE_SIZE) > IndexItem.STORAGE_SIZE) { //第一条索引有可能是全0，这是合法的。
-                byte [] bytes  = indexStore.readBytes(validPosition, IndexItem.STORAGE_SIZE);
-                if(!isAllZero(bytes)){
+            while ((validPosition -= IndexItem.STORAGE_SIZE) >= IndexItem.STORAGE_SIZE) { //第一条索引有可能是全0，这是合法的。
+                if(null == previousIndex) {
+                    currentIndex = indexStore.read(validPosition);
+                } else {
+                    currentIndex = previousIndex;
+                }
+
+                previousIndex = indexStore.read(validPosition - IndexItem.STORAGE_SIZE);
+                if(verifyCurrentIndex(currentIndex, previousIndex)){
                     break;
                 }
             }
@@ -344,13 +354,18 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         return indexPosition;
     }
 
-    private boolean isAllZero(byte[] bytes) {
-        for (byte b : bytes) {
-            if (b != 0) {
-                return false;
-            }
-        }
-        return true;
+    /**
+     * 根据上一条索引来验证这条索引的合法性
+     * @param current 当前索引
+     * @param previous 上一条索引
+     * @return
+     */
+    private boolean verifyCurrentIndex(IndexItem current, IndexItem previous) {
+        return current.getLength() > 0 && current.getOffset() > previous.getOffset();
+    }
+
+    private boolean isAllZero(IndexItem indexItem) {
+        return indexItem.getLength() == 0 && indexItem.getOffset() == 0;
     }
 
     private Short[] loadPartitionIndices(File indexBase) {
@@ -585,6 +600,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         indexStore.appendByteBuffer(indexBuffer);
     }
 
+    @Deprecated
     private boolean writeVT() {
         boolean ret = false;
         WriteCommand writeCommand;
@@ -607,12 +623,18 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
 
     private void write() throws IOException, InterruptedException {
         WriteCommand writeCommand = null;
+        if(!writeLock.tryLock()) {
+            throw new IllegalStateException("Acquire write lock failed!");
+        }
         try {
             writeCommand = writeCommandCache.take();
             if (null != produceMetric) {
                 produceMetric.addTraffic("WriteTraffic", Arrays.stream(writeCommand.messages).mapToInt(ByteBuffer::remaining).sum());
             }
             long t0 = System.nanoTime();
+
+            verifyState(true);
+
             if (waitForFlush()) {
                 writeCommand.eventListener.onEvent(new WriteResult(JoyQueueCode.SE_WRITE_TIMEOUT, null));
             } else {
@@ -630,10 +652,22 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
             if (null != writeCommand && writeCommand.eventListener != null)
                 writeCommand.eventListener.onEvent(new WriteResult(JoyQueueCode.SE_DISK_FULL, null));
             throw e;
+        } catch (IllegalStateException e) {
+            if (null != writeCommand && writeCommand.eventListener != null)
+                writeCommand.eventListener.onEvent(new WriteResult(JoyQueueCode.CY_STATUS_ERROR, null));
+            throw e;
         } catch (Throwable t) {
             if (null != writeCommand && writeCommand.eventListener != null)
                 writeCommand.eventListener.onEvent(new WriteResult(JoyQueueCode.SE_WRITE_FAILED, null));
             throw t;
+        } finally {
+            writeLock.unlock();
+        }
+    }
+
+    private void verifyState(boolean expectedState) {
+        if(enabled.get() != expectedState) {
+            throw new IllegalStateException();
         }
     }
 
@@ -1033,62 +1067,70 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
 
     @Override
     public long appendEntryBuffer(ByteBuffer byteBuffer) throws IOException, TimeoutException {
-        long t0 = System.nanoTime();
-        if (waitForFlush()) {
-            throw new TimeoutException("Wait for flush timeout! The broker is too much busy to write data to disks.");
+        if(!writeLock.tryLock()) {
+            throw new IllegalStateException("Acquire write lock failed!");
         }
-        long start = store.right();
-        int counter = 0;
-        int size = byteBuffer.remaining();
         try {
-            // 写入消息
-            long position = store.appendByteBuffer(byteBuffer.asReadOnlyBuffer());
-
-            // 写入索引
-            while (byteBuffer.hasRemaining()) {
-                IndexItem indexItem = IndexItem.parseMessage(byteBuffer, start + byteBuffer.position());
-                Partition partition = partitionMap.get(indexItem.getPartition());
-                if (partition.store.right() == 0L) {
-                    partition.store.setRight(indexItem.getIndex() * IndexItem.STORAGE_SIZE);
-                } else if (indexItem.getIndex() * IndexItem.STORAGE_SIZE != partition.store.right()) {
-                    throw new WriteException(
-                            String.format(
-                                    "Index must be continuous, store: %s, partition: %d, next index of the partition: %s，index in log: %s, log position: %s, log: \n%s",
-                                    this.base, indexItem.getPartition(),
-                                    Format.formatWithComma(partition.store.right() / IndexItem.STORAGE_SIZE),
-                                    Format.formatWithComma(indexItem.getIndex()),
-                                    Format.formatWithComma(start + byteBuffer.position()),
-                                    MessageParser.getString(byteBuffer)));
-                }
-
-                if (BatchMessageParser.isBatch(byteBuffer)) {
-                    short batchSize = BatchMessageParser.getBatchSize(byteBuffer);
-                    indexItem.setBatchMessage(true);
-                    indexItem.setBatchMessageSize(batchSize);
-                }
-
-                writeIndex(indexItem, partition.store);
-                byteBuffer.position(byteBuffer.position() + indexItem.getLength());
-                counter++;
+            verifyState(false);
+            long t0 = System.nanoTime();
+            if (waitForFlush()) {
+                throw new TimeoutException("Wait for flush timeout! The broker is too much busy to write data to disks.");
             }
-
-            if (null != produceMetric) {
-                long t1 = System.nanoTime();
-                produceMetric.addTraffic("WriteTraffic", size);
-                produceMetric.addLatency("WriteLatency", t1 - t0);
-                produceMetric.addCounter("WriteCount", counter);
-
-            }
-
-            return position;
-        } catch (Throwable t) {
-            logger.warn("Write failed, rollback to position: {}, topic={}, partitionGroup={}.", start, topic, partitionGroup, t);
+            long start = store.right();
+            int counter = 0;
+            int size = byteBuffer.remaining();
             try {
-                setRightPosition(start);
-            } catch (Throwable e) {
-                logger.warn("Rollback failed, rollback to position: {}, topic={}, partitionGroup={}.", start, topic, partitionGroup, e);
+                // 写入消息
+                long position = store.appendByteBuffer(byteBuffer.asReadOnlyBuffer());
+
+                // 写入索引
+                while (byteBuffer.hasRemaining()) {
+                    IndexItem indexItem = IndexItem.parseMessage(byteBuffer, start + byteBuffer.position());
+                    Partition partition = partitionMap.get(indexItem.getPartition());
+                    if (partition.store.right() == 0L) {
+                        partition.store.setRight(indexItem.getIndex() * IndexItem.STORAGE_SIZE);
+                    } else if (indexItem.getIndex() * IndexItem.STORAGE_SIZE != partition.store.right()) {
+                        throw new WriteException(
+                                String.format(
+                                        "Index must be continuous, store: %s, partition: %d, next index of the partition: %s，index in log: %s, log position: %s, log: \n%s",
+                                        this.base, indexItem.getPartition(),
+                                        Format.formatWithComma(partition.store.right() / IndexItem.STORAGE_SIZE),
+                                        Format.formatWithComma(indexItem.getIndex()),
+                                        Format.formatWithComma(start + byteBuffer.position()),
+                                        MessageParser.getString(byteBuffer)));
+                    }
+
+                    if (BatchMessageParser.isBatch(byteBuffer)) {
+                        short batchSize = BatchMessageParser.getBatchSize(byteBuffer);
+                        indexItem.setBatchMessage(true);
+                        indexItem.setBatchMessageSize(batchSize);
+                    }
+
+                    writeIndex(indexItem, partition.store);
+                    byteBuffer.position(byteBuffer.position() + indexItem.getLength());
+                    counter++;
+                }
+
+                if (null != produceMetric) {
+                    long t1 = System.nanoTime();
+                    produceMetric.addTraffic("WriteTraffic", size);
+                    produceMetric.addLatency("WriteLatency", t1 - t0);
+                    produceMetric.addCounter("WriteCount", counter);
+
+                }
+
+                return position;
+            } catch (Throwable t) {
+                logger.warn("Write failed, rollback to position: {}, topic={}, partitionGroup={}.", start, topic, partitionGroup, t);
+                try {
+                    setRightPosition(start);
+                } catch (Throwable e) {
+                    logger.warn("Rollback failed, rollback to position: {}, topic={}, partitionGroup={}.", start, topic, partitionGroup, e);
+                }
+                throw t;
             }
-            throw t;
+        }finally {
+            writeLock.unlock();
         }
     }
 

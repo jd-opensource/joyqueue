@@ -4,7 +4,6 @@
     <div class="transition-main main-content">
       <router-view></router-view>
     </div>
-    <!--<main-footer></main-footer>-->
   </div>
 </template>
 
@@ -15,20 +14,11 @@ import mainHeader from './components/common/header.vue'
 export default {
   components: {
     mainHeader
-    // , mainFooter
   },
   computed: {
     ...mapGetters([
       'loginUsername'
     ])
-  },
-  methods: {
-    // logout () {
-    //   cookie.del('sso.jd.com', '/', '.jd.com')
-    //   apiRequest.get(apiUrl.logout).then(function (data) {
-    //   }, function () {
-    //   })
-    // }
   },
   mounted () {
   }

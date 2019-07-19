@@ -54,7 +54,7 @@ public enum IgniteConfigKey implements PropertyDef {
     DISCOVERY_SPI_LOCAL_PORT_RANGE("nameserver.ignite.discoverySpi.localPortRange", 20, Type.INT),
     DISCOVERY_SPI_JOIN_TIMEOUT("nameserver.ignite.discoverySpi.joinTimeout", 0, Type.LONG),
     DISCOVERY_SPI_NETWORK_TIMEOUT("nameserver.ignite.discoverySpi.networkTimeout", 5000, Type.LONG),
-    DISCOVERY_SPI_IP_FINDER_ADDRESS("nameserver.ignite.discoverySpi.ipFinder.address", null, Type.STRING),
+    DISCOVERY_SPI_IP_FINDER_ADDRESS("nameserver.ignite.discoverySpi.ipFinder.address", "127.0.0.1", Type.STRING),
     DISCOVERY_SPI_COMMUNICATION_SPI_LOCAL_PORT("nameserver.ignite.communicationSpi.localPort", 48100, Type.INT);
 
     public static final String STORAGE_STORE_PATH = "/ignite/cache/nameserver/persisted";

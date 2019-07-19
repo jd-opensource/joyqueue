@@ -7,7 +7,7 @@
       <d-tab-pane label="消费者" name="consumer" icon="user-minus" :closable="false">
         <consumer ref="consumer" :search="search" @on-detail="openConsumerDetailTab"/>
       </d-tab-pane>
-      <d-tab-pane label="分组信息" name="partitionGroup" icon="folder" v-if="$store.getters.isAdmin" :closable="false">
+      <d-tab-pane label="分区组" name="partitionGroup" icon="folder" v-if="$store.getters.isAdmin" :closable="false">
         <partitionGroup ref="partitionGroup" @on-partition-group-change="queryTopicDetail"
                         :showBrokerChart="false" :showHostChart="false"/>
       </d-tab-pane>
