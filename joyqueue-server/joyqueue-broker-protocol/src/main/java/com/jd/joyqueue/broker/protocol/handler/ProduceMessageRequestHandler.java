@@ -196,13 +196,9 @@ public class ProduceMessageRequestHandler implements JoyQueueCommandHandler, Typ
         // 批量消息处理
         if (firstMessage.isBatch()) {
             if (ArrayUtils.isEmpty(writeResult.getIndices())) {
-                for (int i = 0; i < firstMessage.getFlag(); i++) {
-                    item.add(new ProduceMessageAckItemData(firstMessage.getPartition(), ProduceMessageAckItemData.INVALID_INDEX, firstMessage.getStartTime()));
-                }
+                item.add(new ProduceMessageAckItemData(firstMessage.getPartition(), ProduceMessageAckItemData.INVALID_INDEX, firstMessage.getStartTime()));
             } else {
-                for (int i = 0; i < writeResult.getIndices().length; i++) {
-                    item.add(new ProduceMessageAckItemData(firstMessage.getPartition(), writeResult.getIndices()[i], firstMessage.getStartTime()));
-                }
+                item.add(new ProduceMessageAckItemData(firstMessage.getPartition(), writeResult.getIndices()[0], firstMessage.getStartTime()));
             }
         } else {
             if (ArrayUtils.isEmpty(writeResult.getIndices())) {
@@ -225,9 +221,7 @@ public class ProduceMessageRequestHandler implements JoyQueueCommandHandler, Typ
 
         // 批量消息处理
         if (firstMessage.isBatch()) {
-            for (int i = 0; i < firstMessage.getFlag(); i++) {
-                item.add(ProduceMessageAckItemData.INVALID_INSTANCE);
-            }
+            item.add(ProduceMessageAckItemData.INVALID_INSTANCE);
         } else {
             for (int i = 0; i < produceMessageData.getMessages().size(); i++) {
                 item.add(ProduceMessageAckItemData.INVALID_INSTANCE);
