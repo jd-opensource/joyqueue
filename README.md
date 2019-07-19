@@ -37,15 +37,15 @@ Scenario | Sync/Async | Batch | Compress | Msg size | Partitions
 **Online service** | Sync | 1 | Not compressed | 1KB | 200
 **Streaming** | Async | 100 | LZ4 | 1KB | 200
 
-For detail，visit [Performance](docs/en/performance.md)。
+For detail，visit [Performance](./docs/en/performance.md)。
 
 ## Quickstart
 
-Visit [Quick start](docs/en/quickstart.md)。
+Visit [Quick start](./docs/en/quickstart.md)。
 
 ## Documentation
 
-Visit [Documentation Index](docs/en/index.md)。
+Visit [Documentation Index](./docs/en/index.md)。
 
 ## Contributing
 

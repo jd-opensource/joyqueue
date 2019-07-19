@@ -4,11 +4,11 @@
 
 ## 使用教程
 
-1. [基础概念](concepts.md)
-2. [客户端使用说明](client.md)
-3. [配置JoyQueue](configurations.md)
-4. [Rest API](rest_api.md)
-5. [部署JoyQueue集群](cluster.md)
+1. [基础概念](./concepts.md)
+2. [客户端使用说明](./client.md)
+3. [配置JoyQueue](./configurations.md)
+4. [Rest API](./rest_api.md)
+5. [部署JoyQueue集群](./cluster.md)
 6. 确保消息可靠性
 7. 性能优化
 8. 事务消息
