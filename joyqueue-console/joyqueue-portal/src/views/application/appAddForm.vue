@@ -3,9 +3,9 @@
     <d-form-item label="英文名称：" prop="code" :error="error.code" >
       <d-input placeholder="仅支持英文字母大小写和数字，首字母" v-model="formData.code" style="width: 80%"/>
     </d-form-item>
-    <d-form-item label="应用负责人：" prop="owner.code">
-      <d-input placeholder="user code" v-model="formData.owner.code" style="width: 80%"></d-input>
-    </d-form-item>
+<!--    <d-form-item label="应用负责人：" prop="owner.code">-->
+<!--      <d-input placeholder="user code" v-model="formData.owner.code" style="width: 80%"></d-input>-->
+<!--    </d-form-item>-->
   </d-form>
 </template>
 
@@ -24,7 +24,7 @@ export default {
         return {
           code: '',
           owner: {
-            code: ''
+            code: 'admin'
           }
         }
       }
@@ -41,10 +41,7 @@ export default {
     return {
       formData: this.data,
       rules: {
-        code: getCodeRule2(),
-        'owner.code': [
-          { required: true, message: '请选择应用负责人', trigger: 'change' }
-        ]
+        code: getCodeRule2()
       },
       error: {
         code: ''

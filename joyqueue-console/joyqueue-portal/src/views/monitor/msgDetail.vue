@@ -34,7 +34,7 @@ import MyTable from '../../components/common/myTable'
 import apiRequest from '../../utils/apiRequest.js'
 import crud from '../../mixins/crud.js'
 
-import {timeStampToString, stringToTimeStamp} from '../../utils/dateTimeUtils'
+import {timeStampToString} from '../../utils/dateTimeUtils'
 
 export default {
   name: 'msg-detail',
@@ -113,8 +113,8 @@ export default {
   data () {
     return {
       searchData: {
-        partition:'',
-        index:'',
+        partition: '',
+        index: '',
         timestamp: ''
       },
       urls: {
@@ -165,7 +165,17 @@ export default {
       })
     }
   },
-
+  watch: {
+    doSearch: {
+      handler (curVal, oldVal) {
+        if (curVal) {
+          this.getList()
+          this.doSearch = false
+        }
+      },
+      deep: true
+    }
+  },
   mounted () {
     // this.getList()
   }

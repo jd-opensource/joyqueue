@@ -102,8 +102,8 @@ export default {
   },
   methods: {
     handleSelectionChange (val) {
-      var brokerIds = []
-      for (var i = 0; i < val.length; i++) {
+      let brokerIds = []
+      for (let i = 0; i < val.length; i++) {
         brokerIds.push({brokerId: val[i].id})
       }
       this.multipleSelection = val

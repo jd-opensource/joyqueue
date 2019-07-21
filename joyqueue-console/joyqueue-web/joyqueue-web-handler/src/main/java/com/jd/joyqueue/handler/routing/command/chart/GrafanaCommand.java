@@ -73,7 +73,7 @@ import static com.jd.joyqueue.handler.util.GrafanaUtils.getResult;
         if (NullUtil.isNotEmpty(metrics)) {
             return metrics;
         }
-        // not metric, then find variables by key
+        // no metric, find variables by key
         GrafanaVariable variable = GrafanaUtils.getVariables().get(key[0]);
         if (variable == null) {
             logger.error(String.format("can not get grafana variable config with target %s", target));

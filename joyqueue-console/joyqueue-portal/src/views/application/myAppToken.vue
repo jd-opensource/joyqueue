@@ -18,7 +18,7 @@
     <!--添加-->
     <my-dialog :dialog="addDialog" @on-dialog-confirm="addConfirm()" @on-dialog-cancel="addCancel()">
         <grid-row class="mb10">
-          <grid-col :span="4" class="label">生效范围:</grid-col>
+          <grid-col :span="4" class="label">有效时间:</grid-col>
           <grid-col :span="1"></grid-col>
           <grid-col :span="16" class="val">
             <d-date-picker
@@ -40,7 +40,7 @@
           <grid-col :span="16" class="val"><d-input v-model="editData.token" class="change-line-400" placeholder="请输入" disabled/></grid-col>
         </grid-row>
         <grid-row class="mb10">
-          <grid-col :span="4" class="label">生效范围:</grid-col>
+          <grid-col :span="4" class="label">有效时间:</grid-col>
           <grid-col :span="1"/>
           <grid-col :span="16" class="val">
             <d-date-picker

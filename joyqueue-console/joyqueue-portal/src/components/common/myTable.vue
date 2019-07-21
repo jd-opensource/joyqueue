@@ -137,7 +137,7 @@ export default {
                     show = true
                   }
                 } else if (Array.isArray(btn.bindVal)) {
-                  for (var val of btn.bindVal) {
+                  for (let val of btn.bindVal) {
                     if (params.item[btn.bindKey] === val) {
                       show = true
                       break

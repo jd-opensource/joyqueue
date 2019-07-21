@@ -1,14 +1,14 @@
 <template>
   <div>
     <d-steps :current='current'>
-      <d-step title="步骤1" description="主题信息"></d-step>
-      <d-step title="步骤2" description="Broker列表"></d-step>
+      <d-step title="步骤1" description="填写主题信息"></d-step>
+      <d-step title="步骤2" description="选择Broker"></d-step>
     </d-steps>
     <div class="steps-content" style="margin-top: 15px; border: 1px solid #e9e9e9; border-radius: 6px;background-color:
-    #fafafa; min-height: 200px; text-align: left; padding: 20px 30px 40px 50px;">
+    #fafafa; text-align: left; padding: 20px 30px 40px 50px; height: 100%">
       <div class="step1" v-show="current===0">
         <div class="stepForm1">
-          <d-form ref="form1" :model="formData" :rules="rules.rule1" label-width="110px" style="height: 420px; overflow-y:auto; width: 100%">
+          <d-form ref="form1" :model="formData" :rules="rules.rule1" label-width="110px">
             <d-form-item label="主题英文名：" :error="error.code" prop="code">
               <d-input v-model="formData.code" placeholder="仅支持英文字母大小写、数字、-、_和/" style="width: 70%"></d-input>
             </d-form-item>
@@ -53,7 +53,7 @@
       </div>
       <div class="step2" v-show="current===1">
         <div class="stepForm2">
-          <d-form ref="form" :model="formData" :rules="rules.rule2" label-width="100px" style="overflow-y:auto; height:420px">
+          <d-form ref="form" :model="formData" :rules="rules.rule2" label-width="100px">
             <add-broker ref="brokers" :model="formData.brokers" @on-choosed-broker="choosedBroker"
                         :urls="addBrokerUrls" :colData="addBrokerColData">
             </add-broker>
@@ -95,7 +95,6 @@ export default {
             code: ''
           },
           partitions: 24,
-          // brokerGroups: [],
           brokerGroup: {
             id: -1,
             code: '',
@@ -115,7 +114,7 @@ export default {
     }
   },
   data () {
-    var validateBroker = (rule, value, callback) => {
+    let validateBroker = (rule, value, callback) => {
       if (this.formData.topic.partitions !== undefined && this.formData.topic.brokers !== undefined &&
           this.formData.topic.brokers.length > this.formData.topic.partitions) {
         callback(new Error('勾选的broker数量不能大于队列数量'))
@@ -216,8 +215,6 @@ export default {
     },
     beforeConfirm () {
       let copyData = deepCopy(this.formData || {})
-      // let brokerGroups = copyData.brokerGroups;
-      // copyData.brokerGroups = transStringListToObject(brokerGroups);
       return copyData
     }
   },

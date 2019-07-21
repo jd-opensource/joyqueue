@@ -10,8 +10,8 @@
       @on-confirm="handleSave"
       @on-cancel="handleCancel"
       :maskClosable="false"
-      draggable
-      resizable>
+      :draggable="dialog.draggable || true"
+      :resizable="dialog.resizable || true">
       <slot></slot>
   </d-dialog>
 </template>

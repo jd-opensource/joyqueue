@@ -17,7 +17,6 @@
       "config": "配置管理",
       "brokerGroup": "Broker分组管理",
       "broker": "Broker管理",
-      "metric": "指标管理",
       "namespace": "命名空间管理"
     }
   },
@@ -39,7 +38,6 @@
       "config": "Config Manage",
       "brokerGroup": "Broker Group Manage",
       "broker": "Broker Manage",
-      "metric": "Alarm Metric",
       "namespace": "Namespace Manage"
     }
   }

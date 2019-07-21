@@ -23,7 +23,7 @@
           <d-input placeholder="请输入值,最大延迟1小时" v-model.number="formData.delay" style="width:130%"/>
         </d-form-item>
         <d-form-item label="并行消费:" style="width:46%; padding-left:35px">
-          <d-input placeholder="请输入并行数,范围1-50,默认1" v-del.number="formData.concurrent" style="width:130%"/>
+          <d-input placeholder="请输入并行数,范围1-50,默认1" v-model.number="formData.concurrent" style="width:130%"/>
         </d-form-item>
         <d-form-item label="禁止消费IP:" style="width:100%" label-width="90px" >
           <d-input type="textarea" rows="3" v-model="formData.blackList" style="width:330%"

@@ -61,11 +61,11 @@ export function getWindowH () {
  * @return {Object} client rect
  */
 export function getBoundingClientRect (element) {
-  var rect = element.getBoundingClientRect()
+  let rect = element.getBoundingClientRect()
   // whether the IE version is lower than 11
-  var isIE = navigator.userAgent.indexOf('MSIE') !== -1
+  let isIE = navigator.userAgent.indexOf('MSIE') !== -1
   // fix ie document bounding top always 0 bug
-  var rectTop = isIE && element.tagName === 'HTML'
+  let rectTop = isIE && element.tagName === 'HTML'
     ? -element.scrollTop
     : rect.top
 

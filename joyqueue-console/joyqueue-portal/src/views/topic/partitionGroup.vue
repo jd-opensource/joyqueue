@@ -24,15 +24,15 @@
 
     <!--详情-->
     <my-dialog :dialog="groupDetailDialog" @on-dialog-confirm="groupDetailConfirm()" @on-dialog-cancel="groupDetailCancel()">
-      <group-detail :data="groupDetailDialogData"></group-detail>
+      <group-detail ref='groupDetail' :data="groupDetailDialogData"></group-detail>
     </my-dialog>
     <!--添加节点-->
     <my-dialog :dialog="groupScaleDialog" @on-dialog-confirm="groupScaleConfirm()" @on-dialog-cancel="groupScaleCancel()" >
-      <group-scale :data="groupScaleDialogData"  ></group-scale>
+      <group-scale ref='groupScale' :data="groupScaleDialogData"  ></group-scale>
     </my-dialog>
     <!--移除节点-->
     <my-dialog :dialog="groupMergeDialog" @on-dialog-confirm="groupMergeConfirm()" @on-dialog-cancel="groupMergeCancel()"  >
-      <group-merge :data="groupMergeDialogData"></group-merge>
+      <group-merge ref='groupMerge' :data="groupMergeDialogData"></group-merge>
     </my-dialog>
     <!--主从同步-->
     <my-dialog :dialog="positionDialog" @on-dialog-confirm="positionConfirm()" @on-dialog-cancel="positionCancel()">
@@ -286,7 +286,7 @@ export default {
         this.page.page = data.pagination.page
         this.page.size = data.pagination.size
         this.tableData.rowData = data.data
-        for (var i = 0; i < this.tableData.rowData.length; i++) {
+        for (let i = 0; i < this.tableData.rowData.length; i++) {
           if (this.tableData.rowData[i].leader > 0) {
             this.getBroker(this.tableData.rowData, i)
           }
@@ -295,7 +295,7 @@ export default {
       })
     },
     getBroker (rowData, i) {
-      if (rowData[i].leader && rowData[i].leader!=-1) {
+      if (rowData[i].leader && rowData[i].leader !== -1) {
         apiRequest.get(this.urlOrigin.getBroker + '/' + rowData[i].leader).then((data) => {
           this.tableData.rowData[i].ip = data.data.ip
           this.$set(this.tableData.rowData, i, this.tableData.rowData[i])
@@ -416,7 +416,7 @@ export default {
         title: '提示',
         content: '确定要删除吗？'
       }).then(() => {
-        var data = item
+        let data = item
         apiRequest.post(_this.urls.del, {}, data).then(() => {
           _this.getList()
         })

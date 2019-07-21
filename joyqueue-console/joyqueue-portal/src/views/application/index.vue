@@ -13,7 +13,8 @@
     </my-table>
 
     <!--新建弹出框-->
-    <my-dialog :dialog="addDialog" @on-dialog-confirm="addConfirm()" @on-dialog-cancel="addCancel('addDialog')">
+    <my-dialog :dialog="addDialog" @on-dialog-confirm="addConfirm()" @on-dialog-cancel="addCancel('addDialog')"
+               :styles="{top: '200px'}">
       <app-add-form ref="addForm" :type="$store.getters.addFormType" />
     </my-dialog>
   </div>
@@ -189,7 +190,7 @@ export default {
     },
     isAdmin (item) {
       return this.$store.getters.isAdmin
-    },
+    }
   },
   mounted () {
     this.getList()

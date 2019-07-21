@@ -6,7 +6,7 @@
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
       <d-button-group>
-        <d-button v-if="$store.getters.isAdmin" @click="openDialog('subscribeDialog')" class="button">
+        <d-button v-if="$store.getters.isAdmin" @click="openAndQueryDialog('subscribeDialog', 'subscribe')" class="button">
           订阅
           <icon name="plus-circle" style="margin-left: 3px;"></icon>
         </d-button>
@@ -26,20 +26,19 @@
     <my-dialog :dialog="subscribeDialog" @on-dialog-cancel="dialogCancel('subscribeDialog')">
       <subscribe ref="subscribe" :search="search" :type="type" :colData="subscribeDialog.colData"
                  :searchUrl="subscribeDialog.urls.search" :addUrl="subscribeDialog.urls.add"
-                 :keywordName="keywordName"
-                 :doSearch="subscribeDialog.doSearch" @on-refresh="getList"/>
+                 :keywordName="keywordName" @on-refresh="getList"/>
     </my-dialog>
 
     <!--Msg preview dialog-->
     <my-dialog :dialog="msgPreviewDialog" @on-dialog-cancel="dialogCancel('msgPreviewDialog')">
-      <msg-preview :app="msgPreviewDialog.app" :topic="msgPreviewDialog.topic" :namespace="msgPreviewDialog.namespace"
-                   :type="type" :doSearch="msgPreviewDialog.doSearch" :subscribeGroup="msgPreviewDialog.subscribeGroup"/>
+      <msg-preview ref="msgPreview" :app="msgPreviewDialog.app" :topic="msgPreviewDialog.topic" :namespace="msgPreviewDialog.namespace"
+                   :type="type" :subscribeGroup="msgPreviewDialog.subscribeGroup"/>
     </my-dialog>
 
     <!--Msg detail dialog-->
     <my-dialog :dialog="msgDetailDialog" @on-dialog-cancel="dialogCancel('msgDetailDialog')">
-      <msg-detail :app="msgDetailDialog.app" :topic="msgDetailDialog.topic" :namespace="msgDetailDialog.namespace"
-                   :type="type" :doSearch="msgDetailDialog.doSearch" :subscribeGroup="msgDetailDialog.subscribeGroup"/>
+      <msg-detail ref="msgDetail" :app="msgDetailDialog.app" :topic="msgDetailDialog.topic" :namespace="msgDetailDialog.namespace"
+                   :type="type" :subscribeGroup="msgDetailDialog.subscribeGroup"/>
     </my-dialog>
 
     <!--Config dialog-->
@@ -174,7 +173,7 @@ export default {
         title: '限流',
         width: '400',
         showFooter: true,
-        doSearch: false,
+        // doSearch: false,
         limitTps: 0,
         limitTraffic: 0
       },
@@ -184,7 +183,7 @@ export default {
         title: '添加消费者',
         width: '950',
         showFooter: false,
-        doSearch: false,
+        // doSearch: false,
         colData: this.subscribeDialogColData, // 订阅框 列表表头,
         urls: {
           add: this.subscribeUrls.add,
@@ -207,7 +206,7 @@ export default {
         title: '生产者详情',
         width: '1000',
         showFooter: false,
-        doSearch: true,
+        // doSearch: false,
         app: {
           id: 0,
           code: ''
@@ -227,7 +226,7 @@ export default {
         title: '生产者详情',
         width: '1000',
         showFooter: false,
-        doSearch: true,
+        // doSearch: false,
         app: {
           id: 0,
           code: ''
@@ -247,7 +246,10 @@ export default {
   },
   methods: {
     openDialog (dialog) {
-      this[dialog].doSearch = true
+      this[dialog].visible = true
+    },
+    openAndQueryDialog (dialog, ref) {
+      this.$refs[ref].getList()
       this[dialog].visible = true
     },
     openDetailTab (item) {
@@ -263,7 +265,7 @@ export default {
       this.msgPreviewDialog.namespace.code = item.namespace.code
       this.msgPreviewDialog.title = '消息预览 [App: ' + this.msgPreviewDialog.app.code +
               ', Topic: ' + this.msgPreviewDialog.topic.code + ']'
-      this.openDialog('msgPreviewDialog')
+      this.openAndQueryDialog('msgPreviewDialog', 'msgPreview')
     },
     openMsgDetailDialog (item) {
       this.msgDetailDialog.app.id = item.app.id
@@ -275,7 +277,7 @@ export default {
       this.msgDetailDialog.namespace.code = item.namespace.code
       this.msgDetailDialog.title = '消息查询 [App: ' + this.msgDetailDialog.app.code +
         ', Topic: ' + this.msgDetailDialog.topic.code + ']'
-      this.openDialog('msgDetailDialog')
+      this.openAndQueryDialog('msgDetailDialog', 'msgDetail')
     },
     openConfigDialog (item) {
       this.configConsumerData = Object.assign({}, item.config)
@@ -443,7 +445,7 @@ export default {
           keyword: this.keyword
         }
       }
-      for (var i in this.search) {
+      for (let i in this.search) {
         if (this.search.hasOwnProperty(i)) {
           data.query[i] = this.search[i]
         }

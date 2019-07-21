@@ -47,10 +47,10 @@ export default {
             title: 'partitionGroup',
             key: 'partitionGroupMetricList',
             render: (h, params) => {
-              var list = params.item.partitionGroupMetricList
-              var html = []
-              for (var i = 0; i < list.length; i++) {
-                var p = h('div', list[i].partitionGroup)
+              let list = params.item.partitionGroupMetricList
+              let html = []
+              for (let i = 0; i < list.length; i++) {
+                let p = h('div', list[i].partitionGroup)
                 html.push(p)
               }
               return h('div', {}, html)
@@ -60,10 +60,10 @@ export default {
             title: 'partition',
             key: 'partitionGroupMetricList',
             render: (h, params) => {
-              var list = params.item.partitionGroupMetricList
-              var html = []
-              for (var i = 0; i < list.length; i++) {
-                var p = h('div', list[i].partitions)
+              let list = params.item.partitionGroupMetricList
+              let html = []
+              for (let i = 0; i < list.length; i++) {
+                let p = h('div', list[i].partitions)
                 html.push(p)
               }
               return h('div', {}, html)
