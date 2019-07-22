@@ -64,7 +64,7 @@
         <HikariCP.version>2.3.13</HikariCP.version>
         <aspectj.version>1.9.2</aspectj.version>
         <mysql.version>5.1.41</mysql.version>
-        <laf-binding.version>1.0.9-SNAPSHOT</laf-binding.version>
+        <laf-binding.version>1.0.9</laf-binding.version>
         <laf-vertx.version>1.0.18-SNAPSHOT</laf-vertx.version>
         <laf-extention.version>1.0.13</laf-extention.version>
         <vertx.version>3.6.3</vertx.version>
