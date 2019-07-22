@@ -43,7 +43,7 @@ public class AutoDocTest {
         pkgNames.add(pkgNameB);
         routes.add(routPath);
         String current=System.getProperty("user.dir");
-        AutoDoc autoDoc=new AutoDoc(new File(current+"/../../docs/cn/manage_monitor_auto_doc.md"),routes,pkgNames);
+        AutoDoc autoDoc=new AutoDoc(new File(current+"/../../docs/cn/rest_api.md"),routes,pkgNames);
         autoDoc.write(new MarkdownAPIDocFormat(), RoutingParser.class,new AutoTestAPIDoc(parse(defaultProperties),host));
         for(Param m:autoDoc.getParamKeys()){
             System.out.println(JSON.toJSONString(m));

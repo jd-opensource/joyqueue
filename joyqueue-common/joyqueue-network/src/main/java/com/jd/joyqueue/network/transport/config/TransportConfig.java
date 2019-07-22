@@ -47,7 +47,7 @@ public class TransportConfig {
     // socket读超时时间(毫秒)
     private  int soTimeout = 2000;
     // socket缓冲区大小
-    private  int socketBufferSize = 1024 * 1024 * 2;
+    private  int socketBufferSize = 1024 * 16;
     // 数据包最大大小
     private  int frameMaxSize = 1024 * 1024 * 4 + 1024;
     // 连接请求最大队列长度，如果队列满时收到连接指示，则拒绝该连接。
