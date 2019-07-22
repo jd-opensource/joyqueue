@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import java.net.SocketAddress;
 import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 /**
  * KafkaChannelTransport
@@ -129,6 +130,15 @@ public class KafkaChannelTransport implements ChannelTransport {
 
     public boolean tryAcquire() {
         return semaphore.tryAcquire();
+    }
+
+    public boolean tryAcquire(int timeout, TimeUnit timeUnit) {
+        try {
+            return semaphore.tryAcquire(timeout, timeUnit);
+        } catch (InterruptedException e) {
+            logger.error("wait acquire exception", e);
+            return false;
+        }
     }
 
     public void acquire() {

@@ -36,14 +36,6 @@ public class BrokerMonitorConfig {
         return propertySupplier.getValue(BrokerMonitorConfigKey.ENABLE);
     }
 
-    public int getWriterSize() {
-        return propertySupplier.getValue(BrokerMonitorConfigKey.WRITER_SIZE);
-    }
-
-    public int getWriterThread() {
-        return propertySupplier.getValue(BrokerMonitorConfigKey.WRITER_THREAD);
-    }
-
     public String getStatSaveFile() {
         return brokerConfig.getAndCreateDataPath() + propertySupplier.getValue(BrokerMonitorConfigKey.STAT_SAVE_FILE);
     }

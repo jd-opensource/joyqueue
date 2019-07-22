@@ -28,7 +28,7 @@ public class TransportConfig {
     // 超时
     private int sendTimeout = 1000 * 5;
     // io线程数
-    private int ioThreads = Runtime.getRuntime().availableProcessors();
+    private int ioThreads = Runtime.getRuntime().availableProcessors() * 4;
     // 回调线程数
     private int callbackThreads = Runtime.getRuntime().availableProcessors();
     // 最大空闲

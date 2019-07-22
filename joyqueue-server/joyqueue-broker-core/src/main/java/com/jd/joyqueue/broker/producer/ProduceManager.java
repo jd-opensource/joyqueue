@@ -370,7 +370,7 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
     protected void onPutMessage(String topic, String app, int partitionGroup, long startTime, List<WriteRequest> writeRequests) {
         long now = SystemClock.now();
         writeRequests.forEach(writeRequest -> {
-            brokerMonitor.onPutMessage(topic, app, partitionGroup, writeRequest.getPartition(), 1, writeRequest.getBuffer().limit(), now - startTime);
+            brokerMonitor.onPutMessage(topic, app, partitionGroup, writeRequest.getPartition(), writeRequest.getBatchSize(), writeRequest.getBuffer().limit(), now - startTime);
         });
     }
 
