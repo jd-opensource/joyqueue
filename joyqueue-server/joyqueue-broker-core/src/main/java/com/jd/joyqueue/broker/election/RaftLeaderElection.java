@@ -1273,7 +1273,7 @@ public class RaftLeaderElection extends LeaderElection  {
         int recommendLeader = getRecommendLeader();
 
         if (recommendLeader == INVALID_NODE_ID) {
-            logger.info("Partition group {}/node {} rebalance leader, recommend leader is -1",
+            logger.debug("Partition group {}/node {} rebalance leader, recommend leader is -1",
                     topicPartitionGroup, localNode);
             return;
         }

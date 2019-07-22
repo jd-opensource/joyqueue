@@ -28,7 +28,6 @@ import com.jd.joyqueue.message.BrokerMessage;
 import com.jd.joyqueue.message.BrokerPrepare;
 import com.jd.joyqueue.message.BrokerRollback;
 import com.jd.joyqueue.message.Message;
-import com.jd.joyqueue.network.transport.codec.JoyQueueHeader;
 import com.jd.joyqueue.toolkit.io.Compressors;
 import com.jd.joyqueue.toolkit.io.Zip;
 import com.jd.joyqueue.toolkit.io.ZipUtil;
@@ -649,15 +648,13 @@ public class Serializer extends AbstractSerializer {
             }
         }
 
-        if (version >= JoyQueueHeader.VERSION_V2) {
-            Producer.ProducerLimitPolicy limitPolicy = producer.getLimitPolicy();
-            if (limitPolicy == null) {
-                out.writeBoolean(false);
-            } else {
-                out.writeBoolean(true);
-                out.writeInt(limitPolicy.getTps());
-                out.writeInt(limitPolicy.getTraffic());
-            }
+        Producer.ProducerLimitPolicy limitPolicy = producer.getLimitPolicy();
+        if (limitPolicy == null) {
+            out.writeBoolean(false);
+        } else {
+            out.writeBoolean(true);
+            out.writeInt(limitPolicy.getTps());
+            out.writeInt(limitPolicy.getTraffic());
         }
     }
     public static Producer readProducer(int version, final ByteBuf in) throws Exception {
@@ -681,14 +678,12 @@ public class Serializer extends AbstractSerializer {
             producer.setProducerPolicy(policy.create());
         }
 
-        if (version >= JoyQueueHeader.VERSION_V2) {
-            boolean hasLimitPolicy = in.readBoolean();
-            if (hasLimitPolicy) {
-                Producer.ProducerLimitPolicy limitPolicy = new Producer.ProducerLimitPolicy();
-                limitPolicy.setTps(in.readInt());
-                limitPolicy.setTraffic(in.readInt());
-                producer.setLimitPolicy(limitPolicy);
-            }
+        boolean hasLimitPolicy = in.readBoolean();
+        if (hasLimitPolicy) {
+            Producer.ProducerLimitPolicy limitPolicy = new Producer.ProducerLimitPolicy();
+            limitPolicy.setTps(in.readInt());
+            limitPolicy.setTraffic(in.readInt());
+            producer.setLimitPolicy(limitPolicy);
         }
 
         return producer;
@@ -741,15 +736,13 @@ public class Serializer extends AbstractSerializer {
             out.writeInt(retryPolicy.getRetryDelay());
         }
 
-        if (version >= JoyQueueHeader.VERSION_V2) {
-            Consumer.ConsumerLimitPolicy limitPolicy = consumer.getLimitPolicy();
-            if (limitPolicy == null) {
-                out.writeBoolean(false);
-            } else {
-                out.writeBoolean(true);
-                out.writeInt(limitPolicy.getTps());
-                out.writeInt(limitPolicy.getTraffic());
-            }
+        Consumer.ConsumerLimitPolicy limitPolicy = consumer.getLimitPolicy();
+        if (limitPolicy == null) {
+            out.writeBoolean(false);
+        } else {
+            out.writeBoolean(true);
+            out.writeInt(limitPolicy.getTps());
+            out.writeInt(limitPolicy.getTraffic());
         }
     }
     public static Consumer readConsumer(int version, final ByteBuf in) throws Exception {
@@ -791,14 +784,12 @@ public class Serializer extends AbstractSerializer {
             consumer.setRetryPolicy(retryPolicy.create());
         }
 
-        if (version >= JoyQueueHeader.VERSION_V2) {
-            boolean hasLimitPolicy = in.readBoolean();
-            if (hasLimitPolicy) {
-                Consumer.ConsumerLimitPolicy limitPolicy = new Consumer.ConsumerLimitPolicy();
-                limitPolicy.setTps(in.readInt());
-                limitPolicy.setTraffic(in.readInt());
-                consumer.setLimitPolicy(limitPolicy);
-            }
+        boolean hasLimitPolicy = in.readBoolean();
+        if (hasLimitPolicy) {
+            Consumer.ConsumerLimitPolicy limitPolicy = new Consumer.ConsumerLimitPolicy();
+            limitPolicy.setTps(in.readInt());
+            limitPolicy.setTraffic(in.readInt());
+            consumer.setLimitPolicy(limitPolicy);
         }
 
         return consumer;

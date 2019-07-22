@@ -472,7 +472,7 @@ public class PositionManager extends Service {
             Position position = new Position(currentIndex, currentIndex, currentIndex, currentIndex);
             positionStore.putIfAbsent(consumePartition, position);
 
-            logger.info("Add ConsumePartition by topic:{}, app:{}, partition:{}, curIndex:{}", topic.getFullName(), app, partition, currentIndex);
+            logger.debug("Add ConsumePartition by topic:{}, app:{}, partition:{}, curIndex:{}", topic.getFullName(), app, partition, currentIndex);
         });
         // 落盘
         positionStore.forceFlush();

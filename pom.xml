@@ -258,6 +258,11 @@
             </dependency>
             <dependency>
                 <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-client-core-shaded</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.jd.joyqueue</groupId>
                 <artifactId>joyqueue-client-kafka</artifactId>
                 <version>${project.version}</version>
             </dependency>

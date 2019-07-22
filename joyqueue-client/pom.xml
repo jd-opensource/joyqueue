@@ -34,6 +34,7 @@
         <module>joyqueue-client-samples</module>
         <module>joyqueue-client-kafka</module>
         <module>joyqueue-client-all</module>
+        <module>joyqueue-client-core-shaded</module>
     </modules>
 
     <properties>

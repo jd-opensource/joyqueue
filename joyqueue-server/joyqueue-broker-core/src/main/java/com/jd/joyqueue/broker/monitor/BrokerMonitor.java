@@ -34,7 +34,6 @@ import com.jd.joyqueue.network.session.Connection;
 import com.jd.joyqueue.network.session.Consumer;
 import com.jd.joyqueue.network.session.Producer;
 import com.jd.joyqueue.toolkit.concurrent.EventListener;
-import com.jd.joyqueue.toolkit.concurrent.NamedThreadFactory;
 import com.jd.joyqueue.toolkit.network.IpUtil;
 import com.jd.joyqueue.toolkit.service.Service;
 import org.slf4j.Logger;
@@ -43,10 +42,6 @@ import org.slf4j.LoggerFactory;
 import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * BrokerMonitor
@@ -66,7 +61,6 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
 
     // 统计基础汇总信息
     private BrokerStat brokerStat;
-    private ExecutorService writerThread;
 
     public BrokerMonitor() {
 
@@ -80,12 +74,6 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
     }
 
     @Override
-    protected void validate() throws Exception {
-        writerThread = new ThreadPoolExecutor(config.getWriterThread(), config.getWriterThread(), 0L,
-                TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(config.getWriterSize()), new NamedThreadFactory("joyqueue-monitor-writer"), new ThreadPoolExecutor.CallerRunsPolicy());
-    }
-
-    @Override
     protected void doStart() throws Exception {
         brokerStat = brokerStatManager.getBrokerStat();
         sessionManager.addListener(this);
@@ -96,7 +84,6 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
     @Override
     protected void doStop() {
         sessionManager.removeListener(this);
-        writerThread.shutdown();
     }
 
     @Override
@@ -104,26 +91,25 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
         if (!config.isEnable()) {
             return;
         }
-        writerThread.execute(() -> {
-            TopicStat topicStat = brokerStat.getOrCreateTopicStat(topic);
-            AppStat appStat = topicStat.getOrCreateAppStat(app);
+
+        TopicStat topicStat = brokerStat.getOrCreateTopicStat(topic);
+        AppStat appStat = topicStat.getOrCreateAppStat(app);
 //            PartitionGroupStat partitionGroupStat = appStat.getOrCreatePartitionGroupStat(partitionGroup);
 //            PartitionStat partitionStat = partitionGroupStat.getOrCreatePartitionStat(partition);
-            ProducerStat producerStat = appStat.getProducerStat();
-            PartitionGroupStat producerPartitionGroupStat = producerStat.getOrCreatePartitionGroupStat(partitionGroup);
+        ProducerStat producerStat = appStat.getProducerStat();
+        PartitionGroupStat producerPartitionGroupStat = producerStat.getOrCreatePartitionGroupStat(partitionGroup);
 
 //            topicStat.getEnQueueStat().mark(time, size, count);
 //            topicStat.getOrCreatePartitionGroupStat(partitionGroup).getEnQueueStat().mark(time, size, count);
 //            topicStat.getOrCreatePartitionGroupStat(partitionGroup).getOrCreatePartitionStat(partition).getEnQueueStat().mark(time, size, count);
 
-            producerStat.getEnQueueStat().mark(time, size, count);
-            producerPartitionGroupStat.getEnQueueStat().mark(time, size, count);
-            producerPartitionGroupStat.getOrCreatePartitionStat(partition).getEnQueueStat().mark(time, size, count);
+        producerStat.getEnQueueStat().mark(time, size, count);
+        producerPartitionGroupStat.getEnQueueStat().mark(time, size, count);
+        producerPartitionGroupStat.getOrCreatePartitionStat(partition).getEnQueueStat().mark(time, size, count);
 
 //            partitionGroupStat.getEnQueueStat().mark(time, size, count);
 //            partitionStat.getEnQueueStat().mark(time, size, count);
-            brokerStat.getEnQueueStat().mark(time, size, count);
-        });
+        brokerStat.getEnQueueStat().mark(time, size, count);
     }
 
     @Override
@@ -131,26 +117,24 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
         if (!config.isEnable()) {
             return;
         }
-        writerThread.execute(() -> {
-            TopicStat topicStat = brokerStat.getOrCreateTopicStat(topic);
-            AppStat appStat = topicStat.getOrCreateAppStat(app);
+        TopicStat topicStat = brokerStat.getOrCreateTopicStat(topic);
+        AppStat appStat = topicStat.getOrCreateAppStat(app);
 //            PartitionGroupStat partitionGroupStat = appStat.getOrCreatePartitionGroupStat(partitionGroup);
 //            PartitionStat partitionStat = partitionGroupStat.getOrCreatePartitionStat(partition);
-            ConsumerStat consumerStat = appStat.getConsumerStat();
-            PartitionGroupStat consumerPartitionGroupStat = consumerStat.getOrCreatePartitionGroupStat(partitionGroup);
+        ConsumerStat consumerStat = appStat.getConsumerStat();
+        PartitionGroupStat consumerPartitionGroupStat = consumerStat.getOrCreatePartitionGroupStat(partitionGroup);
 
 //            topicStat.getDeQueueStat().mark(time, size, count);
 //            topicStat.getOrCreatePartitionGroupStat(partitionGroup).getDeQueueStat().mark(time, size, count);
 //            topicStat.getOrCreatePartitionGroupStat(partitionGroup).getOrCreatePartitionStat(partition).getDeQueueStat().mark(time, size, count);
 
-            consumerStat.getDeQueueStat().mark(time, size, count);
-            consumerPartitionGroupStat.getDeQueueStat().mark(time, size, count);
-            consumerPartitionGroupStat.getOrCreatePartitionStat(partition).getDeQueueStat().mark(time, size, count);
+        consumerStat.getDeQueueStat().mark(time, size, count);
+        consumerPartitionGroupStat.getDeQueueStat().mark(time, size, count);
+        consumerPartitionGroupStat.getOrCreatePartitionStat(partition).getDeQueueStat().mark(time, size, count);
 
 //            partitionGroupStat.getDeQueueStat().mark(time, size, count);
 //            partitionStat.getDeQueueStat().mark(time, size, count);
-            brokerStat.getDeQueueStat().mark(time, size, count);
-        });
+        brokerStat.getDeQueueStat().mark(time, size, count);
     }
 
     @Override
@@ -158,11 +142,9 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
         if (!config.isEnable()) {
             return;
         }
-        writerThread.execute(() -> {
-            ReplicationStat replicationStat = brokerStat.getOrCreateTopicStat(topic).getOrCreatePartitionGroupStat(partitionGroup).getReplicationStat();
-            replicationStat.getReplicaStat().mark(time, size, count);
-            brokerStat.getReplicationStat().getReplicaStat().mark(time, size, count);
-        });
+        ReplicationStat replicationStat = brokerStat.getOrCreateTopicStat(topic).getOrCreatePartitionGroupStat(partitionGroup).getReplicationStat();
+        replicationStat.getReplicaStat().mark(time, size, count);
+        brokerStat.getReplicationStat().getReplicaStat().mark(time, size, count);
     }
 
     @Override
@@ -170,11 +152,9 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
         if (!config.isEnable()) {
             return;
         }
-        writerThread.execute(() -> {
-            ReplicationStat replicationStat = brokerStat.getOrCreateTopicStat(topic).getOrCreatePartitionGroupStat(partitionGroup).getReplicationStat();
-            replicationStat.getAppendStat().mark(time, size, count);
-            brokerStat.getReplicationStat().getAppendStat().mark(time, size, count);
-        });
+        ReplicationStat replicationStat = brokerStat.getOrCreateTopicStat(topic).getOrCreatePartitionGroupStat(partitionGroup).getReplicationStat();
+        replicationStat.getAppendStat().mark(time, size, count);
+        brokerStat.getReplicationStat().getAppendStat().mark(time, size, count);
     }
 
     @Override
@@ -196,11 +176,9 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
         if (!config.isEnable()) {
             return;
         }
-        writerThread.execute(() -> {
-            TopicStat topicStat = brokerStat.getOrCreateTopicStat(topic);
-            AppStat appStat = topicStat.getOrCreateAppStat(app);
-            appStat.getConsumerStat().getRetryStat().getSuccess().mark(count);
-        });
+        TopicStat topicStat = brokerStat.getOrCreateTopicStat(topic);
+        AppStat appStat = topicStat.getOrCreateAppStat(app);
+        appStat.getConsumerStat().getRetryStat().getSuccess().mark(count);
     }
 
     @Override
@@ -208,11 +186,9 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
         if (!config.isEnable()) {
             return;
         }
-        writerThread.execute(() -> {
-            TopicStat topicStat = brokerStat.getOrCreateTopicStat(topic);
-            AppStat appStat = topicStat.getOrCreateAppStat(app);
-            appStat.getConsumerStat().getRetryStat().getFailure().mark(count);
-        });
+        TopicStat topicStat = brokerStat.getOrCreateTopicStat(topic);
+        AppStat appStat = topicStat.getOrCreateAppStat(app);
+        appStat.getConsumerStat().getRetryStat().getFailure().mark(count);
     }
 
     @Override

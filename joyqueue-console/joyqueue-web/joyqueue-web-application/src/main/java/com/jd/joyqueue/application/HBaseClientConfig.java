@@ -19,6 +19,7 @@ import com.jd.laf.extension.ExtensionPointLazy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -28,6 +29,7 @@ import org.springframework.context.annotation.Scope;
  * Created by wangxiaofei1 on 2018/12/19.
  */
 @Configuration
+@ConditionalOnProperty(name = "archive.enabled", havingValue = "true")
 public class HBaseClientConfig {
     private static final Logger logger = LoggerFactory.getLogger(HBaseClientConfig.class);
     private ExtensionPoint<ArchiveStore, String> archiveStores = new ExtensionPointLazy<>(ArchiveStore.class);
@@ -46,5 +48,4 @@ public class HBaseClientConfig {
         }
         return archiveStore;
     }
-
 }

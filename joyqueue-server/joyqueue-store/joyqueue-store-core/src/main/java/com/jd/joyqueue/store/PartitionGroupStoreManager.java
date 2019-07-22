@@ -1323,8 +1323,8 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
 
     public static class Config {
         public static final int DEFAULT_MAX_MESSAGE_LENGTH = 4 * 1024 * 1024;
-        public static final int DEFAULT_WRITE_REQUEST_CACHE_SIZE = 128;
-        public static final long DEFAULT_FLUSH_INTERVAL_MS = 50L;
+        public static final int DEFAULT_WRITE_REQUEST_CACHE_SIZE = 1024;
+        public static final long DEFAULT_FLUSH_INTERVAL_MS = 20L;
         public static final long DEFAULT_WRITE_TIMEOUT_MS = 3000L;
         public static final long DEFAULT_MAX_DIRTY_SIZE = 10L * 1024 * 1024;
         public static final long DEFAULT_PRINT_METRIC_INTERVAL_MS = 0L;

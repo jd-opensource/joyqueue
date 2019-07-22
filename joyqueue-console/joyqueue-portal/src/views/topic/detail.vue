@@ -14,10 +14,10 @@
       <d-tab-pane label="Broker" v-if="$store.getters.isAdmin" name="broker" icon="cpu" :closable="false">
         <broker ref="broker" :topicId="this.$route.query.id"/>
       </d-tab-pane>
-      <d-tab-pane label="重试" name="retry" icon="zap" :closable="false">
+      <d-tab-pane label="重试" name="retry" icon="zap" :closable="false" :visible="retryEnabled">
         <retry ref="retry" :search="retrySearch"/>
       </d-tab-pane>
-      <d-tab-pane label="归档" name="archive" icon="package" :closable="false">
+      <d-tab-pane label="归档" name="archive" icon="package" :closable="false" :visible="archiveEnabled">
         <archive ref="archive" :search="archiveSearch"/>
       </d-tab-pane>
       <d-tab-pane :label="producerDetailName" name="producerDetail" icon="paperclip" :visible="producerDetailVisible"
@@ -33,6 +33,7 @@
 </template>
 
 <script>
+import apiRequest from '../../utils/apiRequest.js'
 import detailSlot from './slot/detailSlot.vue'
 import Producer from './producer.vue'
 import Consumer from './consumer.vue'
@@ -57,19 +58,16 @@ export default {
     ProducerDetail,
     ConsumerDetail
   },
-  // data () {
-  //   return {
-  //     appCode: ''
-  //   }
-  // // },
-  // watch: {
-  //   '$route' (to, from) {
-  //     console.log(44)
-  //     this.appCode = to.query.app
-  //     console.log(this.appCode)
-  //     // this.$refs[this.tab].getList()
-  //   }
-  // },
+  data () {
+    return {
+      urls: {
+        isArchiveEnabled: `/archive/isServerEnabled`,
+        isRetryEnabled: `/retry/isServerEnabled`
+      },
+      archiveEnabled: false,
+      retryEnabled: false
+    }
+  },
   methods: {
     openProducerDetailTab (item) {
       // Jump to producer detail router
@@ -108,6 +106,16 @@ export default {
     },
     queryTopicDetail () {
       this.$refs.detail.getDetail(this.$route.query.id)
+    },
+    isArchiveEnabled () {
+      apiRequest.get(this.urls.isArchiveEnabled).then((data) => {
+        this.archiveEnabled = data.data
+      })
+    },
+    isRetryEnabled () {
+      apiRequest.get(this.urls.isRetryEnabled).then((data) => {
+        this.retryEnabled = data.data
+      })
     }
   },
   computed: {
@@ -178,6 +186,11 @@ export default {
     this.$refs.detail.$refs['archive'] = this.$refs.archive
     this.$refs.detail.$refs['producerDetail'] = this.$refs.producerDetail
     this.$refs.detail.$refs['consumerDetail'] = this.$refs.consumerDetail
+    console.log(11)
+    this.isArchiveEnabled()
+    this.isRetryEnabled()
+    console.log(this.archiveEnabled)
+    console.log(this.retryEnabled)
   }
 }
 </script>

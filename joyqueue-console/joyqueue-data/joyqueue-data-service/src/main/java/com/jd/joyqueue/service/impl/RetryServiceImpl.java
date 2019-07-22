@@ -15,6 +15,7 @@ package com.jd.joyqueue.service.impl;
 
 import com.jd.joyqueue.domain.ConsumeRetry;
 import com.jd.joyqueue.exception.JoyQueueException;
+import com.jd.joyqueue.exception.ServiceException;
 import com.jd.joyqueue.model.PageResult;
 import com.jd.joyqueue.model.QPageQuery;
 import com.jd.joyqueue.model.query.QRetry;
@@ -26,10 +27,14 @@ import com.jd.joyqueue.service.RetryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.jd.joyqueue.exception.ServiceException.FORBIDDEN;
+import static com.jd.joyqueue.exception.ServiceException.INTERNAL_SERVER_ERROR;
 
 /**
  * Created by wangxiaofei1 on 2018/12/5.
@@ -41,9 +46,12 @@ public class RetryServiceImpl implements RetryService {
     @Autowired(required = false)
     private ConsoleMessageRetry consoleMessageRetry;
 
+    @Value("retry.enabled")
+    private String retryEnabled;
 
     @Override
     public PageResult<ConsumeRetry> findByQuery(QPageQuery<QRetry> qPageQuery) throws JoyQueueException {
+        check();
         RetryQueryCondition queryCondition = new RetryQueryCondition();
         if (qPageQuery != null) {
             QRetry qRetry = qPageQuery.getQuery();
@@ -70,11 +78,13 @@ public class RetryServiceImpl implements RetryService {
 
     @Override
     public ConsumeRetry getDataById(Long id) throws JoyQueueException {
+        check();
         return consoleMessageRetry.getConsumeRetryById(id);
     }
 
     @Override
     public void add(RetryMessageModel retryMessageModel) {
+        check();
         List<RetryMessageModel> retryMessageModels = new ArrayList<>();
         retryMessageModels.add(retryMessageModel);
         try {
@@ -83,6 +93,7 @@ public class RetryServiceImpl implements RetryService {
             throw new RuntimeException("add retry error",e);
         }
     }
+
     /**
      * 恢复不修改缓存
      * broker定时去db拉取要重试的消息
@@ -92,6 +103,7 @@ public class RetryServiceImpl implements RetryService {
      */
     @Override
     public void recover(ConsumeRetry retry) throws Exception {
+        check();
         Long[] messageIds = {Long.valueOf(retry.getMessageId())};
         consoleMessageRetry.updateStatus(retry.getTopic(),retry.getApp(),messageIds, RetryStatus.RETRY_ING,retry.getUpdateTime(),retry.getUpdateBy());
     }
@@ -103,7 +115,27 @@ public class RetryServiceImpl implements RetryService {
      */
     @Override
     public void delete(ConsumeRetry retry) throws Exception {
+        check();
         Long[] messageIds = {Long.valueOf(retry.getMessageId())};
         consoleMessageRetry.updateStatus(retry.getTopic(),retry.getApp(),messageIds, RetryStatus.RETRY_ING,retry.getUpdateTime(),retry.getUpdateBy());
+    }
+
+    /**
+     * 重试服务是否可用
+     * @return
+     */
+    @Override
+    public boolean isServerEnabled() {
+        return retryEnabled != null && retryEnabled.equals("true");
+    }
+
+    private void check() {
+        if (!isServerEnabled()) {
+            throw new ServiceException(FORBIDDEN, "retry service is disabled. please set retry.enabled to be true first.");
+        }
+
+        if (consoleMessageRetry == null) {
+            throw new ServiceException(INTERNAL_SERVER_ERROR, "consoleMessageRetry can not be null. ");
+        }
     }
 }

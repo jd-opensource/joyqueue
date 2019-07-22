@@ -14,9 +14,9 @@
 package com.jd.joyqueue.broker.election.network.codec;
 
 import com.jd.joyqueue.broker.election.command.ReplicateConsumePosRequest;
-import com.jd.joyqueue.network.transport.codec.PayloadEncoder;
 import com.jd.joyqueue.network.command.CommandType;
 import com.jd.joyqueue.network.serializer.Serializer;
+import com.jd.joyqueue.network.transport.codec.PayloadEncoder;
 import com.jd.joyqueue.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
 

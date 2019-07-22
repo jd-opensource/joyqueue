@@ -50,7 +50,7 @@ export default {
             title: '连接数',
             key: 'connection',
             render: (h, params) => {
-              if (this.type === this.$store.getters.producerType) {
+              if (this.search.type === this.$store.getters.producerType) {
                 return h('span', params.item.producer)
               } else {
                 return h('span', params.item.consumer)

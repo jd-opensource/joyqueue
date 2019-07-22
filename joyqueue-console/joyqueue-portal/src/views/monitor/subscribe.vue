@@ -48,12 +48,6 @@ export default {
         ]
       }
     },
-    // doSearch: {
-    //   type: Boolean,
-    //   default: function () {
-    //     return false
-    //   }
-    // },
     search: {// 查询条件，我的应用：app:{id:0,code:''}  ， 主题中心：topic:{id:0,code:'',namespace:{id:0,code:''}}
       type: Object
     },
@@ -190,18 +184,6 @@ export default {
   mounted () {
     // this.getList()
   }
-  // ,
-  // watch: {
-  //   doSearch: {
-  //     handler (curVal, oldVal) {
-  //       if (curVal) {
-  //         this.getList()
-  //         this.doSearch = false
-  //       }
-  //     },
-  //     deep: true
-  //   }
-  // }
 }
 </script>
 
