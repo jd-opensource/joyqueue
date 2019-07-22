@@ -1,10 +1,44 @@
 # 配置
 
+## JoyQueue Server 配置
+
+JoyQueue Server的配置文件位于joyqueue-server/conf/joyqueue.properties。
+
 配置项 | 默认值 | 说明
 -- | -- | --
 application.data.path | ${HOME}/joyqueue | JoyQueue数据目录
-broker.frontend-server.transport.server.port | 50088 | JoyQueue Server与客户端通信的端口
-broker.backend-server.transport.server.port | 50089 | 内部端口，JoyQueue Server各节点之间通信的端口
-manager.export.port | 50090 | Broker监控服务的端口
-nameserver.nsr.manage.port | 50091 | JoyQueue Server rest API 端口
-nameserver.transport.server.port | 50092 | 内部端口，JoyQueue Server各节点之间通信的端口。
+broker.frontend-server.transport.server.port | 50088 | JoyQueue Server与客户端通信的端口。JoyQueue Server 会启用**连续的5个端口**用于通信，默认为：50088 - 50092。如果修改客户端端口号，其它的端口会自动跟随修改。
+ -- | broker.frontend-server.transport.server.port + 1（50089） | 内部端口，JoyQueue Server各节点之间通信的端口
+ -- | broker.frontend-server.transport.server.port + 2（50090） | Broker监控服务的端口
+ -- | broker.frontend-server.transport.server.port + 3（50091） | JoyQueue Server rest API 端口，JoyQueue Web 也使用这个端口与JoyQueue Server通信。
+ -- | broker.frontend-server.transport.server.port + 4（50092） | 内部端口，JoyQueue Server 元数据服务端口。
+ broker.opts.memory | -Xms2G -Xmx2G -server  -Xss256K -XX:SurvivorRatio=8 -XX:+UseConcMarkSweepGC -XX:+UseCMSCompactAtFullCollection -XX:CMSInitiatingOccupancyFraction=70 -XX:+CMSParallelRemarkEnabled -XX:SoftRefLRUPolicyMSPerMB=0 -XX:CMSMaxAbortablePrecleanTime=20 -XX:-OmitStackTraceInFastThrow -XX:MaxDirectMemorySize=2G | jvm 参数。
+store.message.file.size | 128 MB | 消息文件大小
+store.index.file.size | 512 KB | 索引文件大小
+store.preload.buffer.core.count | 3 | 预加载DirectBuffer的核心数量
+store.preload.buffer.max.count | 10 | 预加载DirectBuffer的最大数量
+store.max.message.length | 4 MB | 每条消息的最大长度
+store.write.request.cache.size | 1024 | 写入请求缓存中，最多缓存的请求数量
+store.write.timeout | 3000 ms | 存储写入超时时间
+store.flush.interval | 20 ms | 存储刷盘时间间隔
+store.max.dirty.size | 10 MB| 脏数据的最大长度，如果内存中未刷盘的脏数据长度超过这个值，将阻塞消息写入。
+print.metric.interval | 0 ms | 打印存储监控信息的时间间隔，默认为0， 不打印。
+store.max.store.size | 10 GB | 每个分区组最多保留消息的大小，超过这个大小之后，旧的消息将被自动删除。
+store.max.store.time | 7 天 | 每个分区组最长保留消息的时长，超时的消息将被自动删除。
+store.clean.donot.delete.consumed | true | 不删除已订阅未消费的消息。默认对于已经订阅但还未消费的消息，即使满足删除条件，也不会自动删除。
+nameserver.nsr.name | server | NameServer的启动方式：<br/> server: 默认的启动方式，存储元数据。<br/> thin: 不存储元数据，远程去其它Server读写元数据。
+nameservice.serverAddress | 127.0.0.1:50092 | thin模式时，需要连接其它Server获取元数据，在这里配置其它Server的地址。这里配置的Server中，NameServer的启动方式必须是server模式。支持配置多个地址，用英文逗号隔开。例如：192.168.1.1:50092,192.168.1.2:50092。
+nameserver.ignite.discoverySpi.localPort | 48500| Ignite服务发现本地端口
+nameserver.ignite.discoverySpi.localPortRange | 20 | Ignite服务发现本地端口范围
+nameserver.ignite.discoverySpi.networkTimeout | 5000 ms | Ignite服务发现超时
+nameserver.ignite.discoverySpi.ipFinder.address | 127.0.0.1 | Ignite本地服务发现地址范围，支持多个地址，例如：1.2.3.4,1.2.3.5:47500..47509
+nameserver.ignite.communicationSpi.localPort | 48100 | Ignite使用的通信端口号
+
+## JoyQueue Web 配置
+
+JoyQueue Web的配置文件位于joyqueue-web/conf/application.properties。
+
+配置项 | 默认值 | 说明
+-- | -- | --
+vertx.http.port | 10031 | Web服务端口
+joyqueue.servers | 127.0.0.1:50091 | 提供元数据服务的JoyQueue Server地址和端口。支持配置多个地址，用逗号分开，默认端口为50091。例如：192.168.1.1,192.168.1.2:8888
