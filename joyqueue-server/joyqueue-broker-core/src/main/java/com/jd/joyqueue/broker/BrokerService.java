@@ -21,24 +21,28 @@ import com.jd.joyqueue.broker.config.Configuration;
 import com.jd.joyqueue.broker.config.ConfigurationManager;
 import com.jd.joyqueue.broker.consumer.Consume;
 import com.jd.joyqueue.broker.consumer.MessageConvertSupport;
+import com.jd.joyqueue.broker.coordinator.CoordinatorService;
+import com.jd.joyqueue.broker.coordinator.config.CoordinatorConfig;
 import com.jd.joyqueue.broker.election.ElectionService;
 import com.jd.joyqueue.broker.helper.AwareHelper;
 import com.jd.joyqueue.broker.manage.BrokerManageService;
 import com.jd.joyqueue.broker.manage.config.BrokerManageConfig;
+import com.jd.joyqueue.broker.manage.config.BrokerManageConfigKey;
 import com.jd.joyqueue.broker.monitor.BrokerMonitorService;
 import com.jd.joyqueue.broker.monitor.SessionManager;
 import com.jd.joyqueue.broker.monitor.config.BrokerMonitorConfig;
-import com.jd.joyqueue.broker.producer.Produce;
-import com.jd.joyqueue.broker.coordinator.CoordinatorService;
-import com.jd.joyqueue.broker.coordinator.config.CoordinatorConfig;
 import com.jd.joyqueue.broker.network.BrokerServer;
 import com.jd.joyqueue.broker.network.protocol.ProtocolManager;
+import com.jd.joyqueue.broker.producer.Produce;
 import com.jd.joyqueue.broker.retry.BrokerRetryManager;
 import com.jd.joyqueue.broker.store.StoreManager;
 import com.jd.joyqueue.domain.Config;
 import com.jd.joyqueue.domain.Consumer;
 import com.jd.joyqueue.domain.Producer;
+import com.jd.joyqueue.network.transport.config.ServerConfig;
+import com.jd.joyqueue.network.transport.config.TransportConfigSupport;
 import com.jd.joyqueue.nsr.NameService;
+import com.jd.joyqueue.nsr.config.NameServerConfigKey;
 import com.jd.joyqueue.security.Authentication;
 import com.jd.joyqueue.server.retry.api.MessageRetry;
 import com.jd.joyqueue.store.StoreService;
@@ -102,7 +106,7 @@ public class BrokerService extends Service {
         this.configurationManager = new ConfigurationManager(args);
         configurationManager.start();
         Configuration configuration = configurationManager.getConfiguration();
-
+        enrichServicePorts(configuration);
         brokerContext.propertySupplier(configuration);
 
         //build broker config
@@ -203,6 +207,41 @@ public class BrokerService extends Service {
         this.brokerContext.producerPolicy(buildGlobalProducePolicy(configuration));
         //build consume policy
         this.brokerContext.consumerPolicy(buildGlobalConsumePolicy(configuration));
+
+    }
+
+    private void enrichServicePorts(Configuration configuration) {
+        // broker.frontend-server.transport.server.port	50088	JoyQueue Server与客户端通信的端口
+        String key = BrokerConfig.BROKER_FRONTEND_SERVER_CONFIG_PREFIX + TransportConfigSupport.TRANSPORT_SERVER_PORT;
+        Property basePortProperty = configuration.getOrCreateProperty(key);
+        int port = ServerConfig.DEFAULT_TRANSPORT_PORT;
+        try {
+                port = basePortProperty.getInteger();
+        } catch (NullPointerException | NumberFormatException ignored) {}
+        configuration.addProperty(key, String.valueOf(port));
+
+        // broker.backend-server.transport.server.port	50089	内部端口，JoyQueue Server各节点之间通信的端口
+
+        key = BrokerConfig.BROKER_BACKEND_SERVER_CONFIG_PREFIX + TransportConfigSupport.TRANSPORT_SERVER_PORT;
+        port += 1;
+        configuration.addProperty(key, String.valueOf(port));
+
+        // manager.export.port	50090	Broker监控服务的端口
+        key = BrokerManageConfigKey.EXPORT_PORT.getName();
+        port += 1;
+        configuration.addProperty(key, String.valueOf(port));
+
+        // nameserver.nsr.manage.port	50091	JoyQueue Server rest API 端口
+
+        key = NameServerConfigKey.NAMESERVER_MANAGE_PORT.getName();
+        port += 1;
+        configuration.addProperty(key, String.valueOf(port));
+
+        // nameserver.transport.server.port	50092	内部端口，JoyQueue Server各节点之间通信的端口。
+
+        key = NameServerConfigKey.NAMESERVER_SERVICE_PORT.getName();
+        port += 1;
+        configuration.addProperty(key, String.valueOf(port));
 
     }
 
