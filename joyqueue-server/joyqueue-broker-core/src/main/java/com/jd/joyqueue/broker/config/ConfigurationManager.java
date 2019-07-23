@@ -29,6 +29,7 @@ package com.jd.joyqueue.broker.config;
 import com.google.common.base.Preconditions;
 import com.jd.joyqueue.domain.Config;
 import com.jd.joyqueue.event.ConfigEvent;
+import com.jd.joyqueue.event.EventType;
 import com.jd.joyqueue.event.NameServerEvent;
 import com.jd.joyqueue.toolkit.concurrent.EventBus;
 import com.jd.joyqueue.toolkit.concurrent.EventListener;
@@ -155,7 +156,7 @@ public class ConfigurationManager extends Service implements EventListener<NameS
         if (configProvider != null) {
             List<Config> configs = configProvider.getConfigs();
             if (null != configs) {
-                doUpdateProperty(configs.toArray(new Config[configs.size()]));
+                doUpdateProperty(EventType.ADD_CONFIG, configs.toArray(new Config[configs.size()]));
             } else {
                 logger.warn("no dynamic config found.");
             }
@@ -165,14 +166,13 @@ public class ConfigurationManager extends Service implements EventListener<NameS
     }
 
 
-    private void doUpdateProperty(Config... configs) {
+    private void doUpdateProperty(EventType type, Config... configs) {
         if (ArrayUtils.isEmpty(configs)) {
             return;
         }
         for (Config config : configs) {
             logger.info("received config [{}], corresponding property is [{}]", config,configuration.getProperty(config.getKey()) != null ? configuration.getProperty(config.getKey()) : "null");
-            if (configProvider.getConfig(config.getGroup(), config.getKey()) == null) {
-                // 因事件没有类型，反查一次确定是否被删除，被删除还原默认值
+            if (type.equals(EventType.REMOVE_CONFIG)) {
                 logger.info("delete config {}", config.getKey());
                 configuration.addProperty(config.getKey(), null);
             } else {
@@ -193,7 +193,7 @@ public class ConfigurationManager extends Service implements EventListener<NameS
     public void onEvent(NameServerEvent event) {
         if (event.getMetaEvent() instanceof ConfigEvent) {
             ConfigEvent configEvent = (ConfigEvent) event.getMetaEvent();
-            doUpdateProperty(new Config(configEvent.getGroup(), configEvent.getKey(), configEvent.getValue()));
+            doUpdateProperty(configEvent.getEventType(), new Config(configEvent.getGroup(), configEvent.getKey(), configEvent.getValue()));
         }
     }
 

@@ -42,9 +42,9 @@ if [ ! -x "$JAVACMD" ] ; then
 fi
 
 
-OPTS_MEMORY=`grep -ios 'opts.memory=.*$' ${CONFIG_FILE} | tr -d '\r'`
+OPTS_MEMORY=`grep -ios '\s*broker.opts.memory=.*$' ${CONFIG_FILE} | tr -d '\r'`
 OPTS_MEMORY=${OPTS_MEMORY#*=}
-#DEBUG_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5006 -XX:-OmitStackTraceInFastThrow"
+
 
 "$JAVACMD"\
   $OPTS_MEMORY $DEBUG_OPTS \

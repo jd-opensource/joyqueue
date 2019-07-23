@@ -32,7 +32,7 @@ public class TransportConfig {
     private  int acceptThread = 1;
     private String acceptThreadName = "accept-eventLoop";
     // io线程数
-    private  int ioThread = Runtime.getRuntime().availableProcessors();
+    private  int ioThread = Runtime.getRuntime().availableProcessors() * 2;
     private String ioThreadName = "io-eventLoop";
     // 通道最大空闲时间(毫秒)
     private  int maxIdleTime = 120 * 1000;

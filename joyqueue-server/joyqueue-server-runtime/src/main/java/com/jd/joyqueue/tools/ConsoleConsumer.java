@@ -81,7 +81,7 @@ public class ConsoleConsumer {
                 Header header = message.header();
                 ExtensionHeader extensionHeader = message.extensionHeader().get();
 
-                logger.info("Message{topic: {}, partition: {}, index: {}, txId: {}, key: {}, body: {}",
+                logger.info("Message{topic: {}, partition: {}, index: {}, txId: {}, key: {}, body: {}}",
                         header.getDestination(), extensionHeader.getPartiton(), extensionHeader.getOffset(),
                         extensionHeader.getTransactionId(), extensionHeader.getMessageKey(), new String(message.getData()));
             }

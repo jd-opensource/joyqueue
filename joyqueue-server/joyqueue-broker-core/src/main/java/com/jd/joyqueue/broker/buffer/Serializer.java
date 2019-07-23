@@ -474,6 +474,58 @@ public class Serializer extends AbstractSerializer {
         return message;
     }
 
+    /**
+     * 读取存储的消息
+     *
+     * @param in 输入缓冲区
+     */
+    public static BrokerMessage readBrokerMessageHeader(ByteBuffer in) {
+        if (in == null) {
+            return null;
+        }
+        in = in.slice();
+        int startPosition = in.position();
+        BrokerMessage message = new BrokerMessage();
+
+        // 4个字节的消息长度
+        int totalLength = in.getInt();
+
+        message.setPartition(in.getShort());
+        message.setMsgIndexNo(in.getLong());
+        message.setTerm(in.getInt());
+        in.getShort();
+
+        // 2字节系统字段
+        short sysCode = in.getShort();
+        byte version = (byte) ((sysCode >> 8) & 15);
+        boolean isIpv4 = (sysCode & (1 << 7)) > 1;
+
+        message.setCompressed(((sysCode & 0x1) > 0));
+        message.setOrdered(((sysCode & 0x2) > 0));
+        message.setSource((byte) (sysCode >> 2 & 0x3));
+        message.setBatch(((sysCode >> 12) == 1));
+
+        if (version == MESSAGE_VERSION_V0) {
+            message.setCompressionType(Message.CompressionType.valueOf((sysCode >> 4 & 3)));
+            isIpv4 = true;
+        } else {
+            message.setCompressionType(Message.CompressionType.valueOf((sysCode >> 4 & 7)));
+        }
+
+        message.setPriority(in.get());
+        if (isIpv4) {
+            message.setClientIp(readBytes(in, 6));
+            readBytes(in, 10);
+        } else {
+            message.setClientIp(readBytes(in, 16));
+        }
+
+        message.setStartTime(in.getLong());
+        message.setStoreTime(in.getInt());
+        message.setBodyCRC(in.getLong());
+        message.setFlag(in.getShort());
+        return message;
+    }
 
     /**
      * 读取存储的消息

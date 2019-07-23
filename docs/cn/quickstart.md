@@ -121,9 +121,9 @@ $ docker run -p 10031:10031  -d   --name joy joyqueue/joyqueue-server
 
 现在可以访问管理端: [http://localhost:10031](http://localhost:10031)
 
-* 参考[第4步：创建发布和订阅关系](##第4步：创建发布和订阅关系)
+* 参考[第4步：创建发布和订阅关系](#%e7%ac%ac4%e6%ad%a5%e5%88%9b%e5%bb%ba%e4%b8%bb%e9%a2%98%e5%92%8c%e5%8f%91%e5%b8%83%e8%ae%a2%e9%98%85%e5%85%b3%e7%b3%bb)
 
-* 发送和接受消息
+* 发送和接收消息
 
 ```bash
 

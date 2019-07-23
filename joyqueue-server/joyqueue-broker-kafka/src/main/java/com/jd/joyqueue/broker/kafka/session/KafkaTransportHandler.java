@@ -15,6 +15,7 @@ package com.jd.joyqueue.broker.kafka.session;
 
 import com.jd.joyqueue.broker.kafka.KafkaCommandType;
 import com.jd.joyqueue.broker.kafka.command.ProduceRequest;
+import com.jd.joyqueue.broker.kafka.config.KafkaConfig;
 import com.jd.joyqueue.network.transport.ChannelTransport;
 import com.jd.joyqueue.network.transport.RequestBarrier;
 import com.jd.joyqueue.network.transport.TransportHelper;
@@ -28,6 +29,8 @@ import io.netty.channel.ChannelHandlerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * KafkaTransportHandler
  * author: gaohaoxiang
@@ -38,6 +41,12 @@ import org.slf4j.LoggerFactory;
 public class KafkaTransportHandler extends ChannelDuplexHandler {
 
     protected static final Logger logger = LoggerFactory.getLogger(KafkaTransportHandler.class);
+
+    private KafkaConfig config;
+
+    public KafkaTransportHandler(KafkaConfig config) {
+        this.config = config;
+    }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
@@ -69,7 +78,9 @@ public class KafkaTransportHandler extends ChannelDuplexHandler {
                 || type == KafkaCommandType.LIST_OFFSETS.getCode()
                 || type == KafkaCommandType.PRODUCE.getCode()
                 || type == KafkaCommandType.FETCH.getCode()) {
-            ((KafkaChannelTransport) transport).acquire();
+            if (!((KafkaChannelTransport) transport).tryAcquire(config.getTransportAcquireTimeout(), TimeUnit.MILLISECONDS)) {
+                logger.warn("transport acquire failed, transport: {}, type: {}", transport, type);
+            }
         } else {
             ((KafkaChannelTransport) transport).tryAcquire();
         }
