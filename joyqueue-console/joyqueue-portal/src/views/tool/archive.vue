@@ -107,7 +107,8 @@ export default {
         colData: [
           {
             title: '消息ID',
-            key: 'messageId'
+            key: 'messageId',
+            width: '20%'
           },
           // {
           //   title:"队列",
@@ -116,17 +117,20 @@ export default {
           {
             title: '消费时间',
             key: 'consumeTime',
+            width: '20%',
             formatter (item) {
               return timeStampToString(item.consumeTime)
             }
           },
           {
             title: '消费者',
-            key: 'app'
+            key: 'app',
+            width: '20%'
           },
           {
             title: '消费者主机',
-            key: 'clientIpStr'
+            key: 'clientIpStr',
+            width: '20%'
           }
           // ,
           // {
@@ -140,14 +144,18 @@ export default {
         colData: [
           {
             title: '消息ID',
-            key: 'messageId'
+            key: 'messageId',
+            width: '15%'
           },
           {
             title: '业务ID',
-            key: 'businessId'
-          }, {
+            key: 'businessId',
+            width: '15%'
+          },
+          {
             title: '发送时间',
             key: 'sendTime',
+            width: '15%',
             formatter (item) {
               return timeStampToString(item.sendTime)
             }
@@ -161,15 +169,18 @@ export default {
           // }
           {
             title: '生产者IP',
-            key: 'clientIpStr'
+            key: 'clientIpStr',
+            width: '20%'
           },
           {
             title: '生产者',
-            key: 'app'
+            key: 'app',
+            width: '15%'
           },
           {
             title: '队列',
-            key: 'topic'
+            key: 'topic',
+            width: '15%'
           }
         ],
         btns: this.btns

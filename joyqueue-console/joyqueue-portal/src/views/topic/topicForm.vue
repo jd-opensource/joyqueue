@@ -122,6 +122,13 @@ export default {
         callback()
       }
     }
+    let validateBrokerGroup = (rule, value, callback) => {
+      if (this.formData.brokerGroup.id < 0) {
+        callback(new Error('请选择Broker分组'))
+      } else {
+        callback()
+      }
+    }
     return {
       current: 0,
       formData: this.data,
@@ -146,10 +153,7 @@ export default {
             {type: 'number', required: true, message: '请输入队列数量', trigger: 'change'}
           ],
           brokerGroup: [
-            {ype: 'number', required: true, message: '请选择一个Broker分组', trigger: 'change'}
-          ],
-          description: [
-            {required: true, message: '请输入申请描述', trigger: 'change'}
+            {validator: validateBrokerGroup, trigger: 'change'}
           ]
         },
         rule2: {
@@ -211,8 +215,11 @@ export default {
         (data.data || []).forEach(item => {
           this.brokerGroupList.push(item)
         })
-
-        // this.formData.brokerGroup.id = this.brokerGroupList[0].id
+        // set default value
+        this.formData.brokerGroup.id = this.brokerGroupList[0].id
+        this.formData.brokerGroup.code = this.brokerGroupList[0].code
+        this.formData.brokerGroup.name = this.brokerGroupList[0].name
+        this.handlerBrokerGroupChange(this.formData.brokerGroup.id)
       })
     },
     beforeConfirm () {

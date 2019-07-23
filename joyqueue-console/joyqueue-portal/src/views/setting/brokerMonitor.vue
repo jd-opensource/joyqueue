@@ -134,7 +134,7 @@ export default {
       } else if (item.name === 'producer') {
         this.searchData.type = 1
         this.getList()
-      } else {ß
+      } else {
         this.$refs[item.name].getList()
       }
     }
