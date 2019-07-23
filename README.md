@@ -32,11 +32,10 @@ A JoyQueue performance test results here：
 
 Scenario settings:
 
-
-| Scenario | Sync/Async | Batch | Compress | Msg size | Partitions
-| :----: | :----: | :----:| :----: | :----: |:----:| 
-|**Online service** | Sync | 1 | Not compressed | 1KB | 200
-|**Streaming** | Async | 100 | LZ4 | 1KB | 200
+Scenario | Sync/Async | Batch | Compress | Msg size | Partitions | Client SDK
+-- | -- | -- | -- | -- | -- | --
+**Online service** | Sync | 1 | Not compressed | 1KB | 200 | joyqueue-client-4.1.0
+**Streaming** | Async | 100 | LZ4 | 1KB | 200 | kafka-clients-2.1.1
 
 For detail，visit [Performance](./docs/cn/performance.md)。
 
