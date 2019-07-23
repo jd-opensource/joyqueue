@@ -38,7 +38,6 @@ Scenario settings:
 |**Online service** | Sync | 1 | Not compressed | 1KB | 200
 |**Streaming** | Async | 100 | LZ4 | 1KB | 200
 
-
 For detail，visit [Performance](./docs/cn/performance.md)。
 
 ## Quickstart
