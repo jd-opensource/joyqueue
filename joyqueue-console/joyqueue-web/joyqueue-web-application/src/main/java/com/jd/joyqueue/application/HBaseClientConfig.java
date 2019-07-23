@@ -29,12 +29,11 @@ import org.springframework.context.annotation.Scope;
  * Created by wangxiaofei1 on 2018/12/19.
  */
 @Configuration
-@ConditionalOnProperty(name = "archive.enabled", havingValue = "true")
+@ConditionalOnProperty(name = "archive.enable", havingValue = "true")
 public class HBaseClientConfig {
     private static final Logger logger = LoggerFactory.getLogger(HBaseClientConfig.class);
     private ExtensionPoint<ArchiveStore, String> archiveStores = new ExtensionPointLazy<>(ArchiveStore.class);
 
-    @Lazy
     @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
     @Bean(value="archiveStore", destroyMethod="stop")
     public ArchiveStore getArchiveStore(){

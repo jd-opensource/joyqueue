@@ -44,8 +44,8 @@ public class ArchiveServiceImpl implements ArchiveService {
     @Autowired(required = false)
     private ArchiveStore archiveStore;
 
-    @Value("archive.enabled")
-    private String archiveEnabled;
+    @Value("${archive.enable}")
+    private Boolean archiveEnable;
 
     @Override
     public void register(ArchiveStore archiveStore) {
@@ -86,12 +86,12 @@ public class ArchiveServiceImpl implements ArchiveService {
      */
     @Override
     public boolean isServerEnabled() {
-        return archiveEnabled != null && archiveEnabled.equals("true");
+        return archiveEnable != null && archiveEnable.booleanValue();
     }
 
     private void check() {
         if (!isServerEnabled()) {
-            throw new ServiceException(FORBIDDEN, "archive service is disabled. please set archive.enabled to be true first.");
+            throw new ServiceException(FORBIDDEN, "archive service is disabled. please set archive.enable to be true first.");
         }
 
         if (archiveStore == null) {

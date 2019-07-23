@@ -46,8 +46,8 @@ public class RetryServiceImpl implements RetryService {
     @Autowired(required = false)
     private ConsoleMessageRetry consoleMessageRetry;
 
-    @Value("retry.enabled")
-    private String retryEnabled;
+    @Value("${retry.enable}")
+    private Boolean retryEnable;
 
     @Override
     public PageResult<ConsumeRetry> findByQuery(QPageQuery<QRetry> qPageQuery) throws JoyQueueException {
@@ -126,12 +126,12 @@ public class RetryServiceImpl implements RetryService {
      */
     @Override
     public boolean isServerEnabled() {
-        return retryEnabled != null && retryEnabled.equals("true");
+        return retryEnable != null && retryEnable.booleanValue();
     }
 
     private void check() {
         if (!isServerEnabled()) {
-            throw new ServiceException(FORBIDDEN, "retry service is disabled. please set retry.enabled to be true first.");
+            throw new ServiceException(FORBIDDEN, "retry service is disabled. please set retry.enable to be true first.");
         }
 
         if (consoleMessageRetry == null) {
