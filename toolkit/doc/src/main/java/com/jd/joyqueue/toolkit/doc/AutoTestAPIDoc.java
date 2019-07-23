@@ -86,7 +86,7 @@ public class AutoTestAPIDoc implements HeuristicAutoTest<APIDoc> {
             StringBuilder result = new StringBuilder();
             String line;
             while ((line = in.readLine()) != null) {
-                result.append(line);
+                result.append(line+"\n");
             }
             testCase.setResponse(result.toString());
         }

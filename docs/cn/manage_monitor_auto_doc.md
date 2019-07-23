@@ -15,7 +15,18 @@ curl -X GET 'http://localhost:50090/monitor/topics?page=0&pageSize=10'
 ```
 响应: 
 ```
-{	"code":200,	"data":{		"data":[],		"page":0,		"pageSize":10,		"pages":1,		"total":2	},	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":{
+		"data":[],
+		"page":0,
+		"pageSize":10,
+		"pages":1,
+		"total":2
+	},
+	"message":"SUCCESS"
+}
+
 ```
 2.获取启动信息
 --------
@@ -31,7 +42,16 @@ curl -X GET 'http://localhost:50090/startInfo'
 ```
 响应: 
 ```
-{	"code":200,	"data":{		"commitDate":"18.07.2019 @ 22:01:17 CST",		"revision":"92e54a4",		"startupTime":1563873560706	},	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":{
+		"commitDate":"18.07.2019 @ 22:01:17 CST",
+		"revision":"92e54a4",
+		"startupTime":1563873560706
+	},
+	"message":"SUCCESS"
+}
+
 ```
 3.获取连接明细
 --------
@@ -49,7 +69,17 @@ curl -X GET 'http://localhost:50090/monitor/topic/test_topic_1/connections/detai
 ```
 响应: 
 ```
-{	"code":200,	"data":{		"clients":[],		"consumer":0,		"producer":0,		"total":0	},	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":{
+		"clients":[],
+		"consumer":0,
+		"producer":0,
+		"total":0
+	},
+	"message":"SUCCESS"
+}
+
 ```
 4.获取partition监控信息
 -----------------
@@ -69,7 +99,42 @@ curl -X GET 'http://localhost:50090/monitor/topic/test_topic_1/app/test_app/part
 ```
 响应: 
 ```
-{	"code":200,	"data":{		"app":"test_app",		"deQueue":{			"avg":0.0,			"count":0,			"max":0.0,			"min":0.0,			"oneMinuteRate":0,			"size":0,			"totalSize":0,			"tp90":0.0,			"tp99":0.0,			"tps":0,			"traffic":0		},		"enQueue":{			"avg":0.0,			"count":0,			"max":0.0,			"min":0.0,			"oneMinuteRate":0,			"size":0,			"totalSize":0,			"tp90":0.0,			"tp99":0.0,			"tps":0,			"traffic":0		},		"partition":0,		"topic":"test_topic_1"	},	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":{
+		"app":"test_app",
+		"deQueue":{
+			"avg":0.0,
+			"count":0,
+			"max":0.0,
+			"min":0.0,
+			"oneMinuteRate":0,
+			"size":0,
+			"totalSize":0,
+			"tp90":0.0,
+			"tp99":0.0,
+			"tps":0,
+			"traffic":0
+		},
+		"enQueue":{
+			"avg":0.0,
+			"count":0,
+			"max":0.0,
+			"min":0.0,
+			"oneMinuteRate":0,
+			"size":0,
+			"totalSize":0,
+			"tp90":0.0,
+			"tp99":0.0,
+			"tps":0,
+			"traffic":0
+		},
+		"partition":0,
+		"topic":"test_topic_1"
+	},
+	"message":"SUCCESS"
+}
+
 ```
 5.getWritableResult
 -------------------
@@ -85,7 +150,15 @@ curl -X GET 'http://localhost:50090/monitor/topic/:topic/app/:app/writable'
 ```
 响应: 
 ```
-{	"code":200,	"data":{		"joyQueueCode":"FW_TOPIC_NOT_EXIST",		"success":false	},	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":{
+		"joyQueueCode":"FW_TOPIC_NOT_EXIST",
+		"success":false
+	},
+	"message":"SUCCESS"
+}
+
 ```
 6.获取生产者信息
 ---------
@@ -105,7 +178,29 @@ curl -X GET 'http://localhost:50090/monitor/topic/test_topic_1/app/test_app/prod
 ```
 响应: 
 ```
-{	"code":200,	"data":{		"app":"test_app",		"enQueue":{			"avg":0.0,			"count":0,			"max":0.0,			"min":0.0,			"oneMinuteRate":0,			"size":0,			"totalSize":0,			"tp90":0.0,			"tp99":0.0,			"tps":0,			"traffic":0		},		"partitionGroupId":0,		"topic":"test_topic_1"	},	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":{
+		"app":"test_app",
+		"enQueue":{
+			"avg":0.0,
+			"count":0,
+			"max":0.0,
+			"min":0.0,
+			"oneMinuteRate":0,
+			"size":0,
+			"totalSize":0,
+			"tp90":0.0,
+			"tp99":0.0,
+			"tps":0,
+			"traffic":0
+		},
+		"partitionGroupId":0,
+		"topic":"test_topic_1"
+	},
+	"message":"SUCCESS"
+}
+
 ```
 7.获取partition监控信息
 -----------------
@@ -124,7 +219,12 @@ curl -X GET 'http://localhost:50090/monitor/topic/test_topic_1/app/test_app/part
 ```
 响应: 
 ```
-{	"code":200,	"data":[],	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":[],
+	"message":"SUCCESS"
+}
+
 ```
 8.获取消费者信息
 ---------
@@ -144,7 +244,32 @@ curl -X GET 'http://localhost:50090/monitor/topic/test_topic_1/app/test_app/cons
 ```
 响应: 
 ```
-{	"code":200,	"data":{		"app":"test_app",		"deQueue":{			"avg":0.0,			"count":0,			"max":0.0,			"min":0.0,			"oneMinuteRate":0,			"size":0,			"totalSize":0,			"tp90":0.0,			"tp99":0.0,			"tps":0,			"traffic":0		},		"partition":0,		"pending":{			"count":0		},		"topic":"test_topic_1"	},	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":{
+		"app":"test_app",
+		"deQueue":{
+			"avg":0.0,
+			"count":0,
+			"max":0.0,
+			"min":0.0,
+			"oneMinuteRate":0,
+			"size":0,
+			"totalSize":0,
+			"tp90":0.0,
+			"tp99":0.0,
+			"tps":0,
+			"traffic":0
+		},
+		"partition":0,
+		"pending":{
+			"count":0
+		},
+		"topic":"test_topic_1"
+	},
+	"message":"SUCCESS"
+}
+
 ```
 9.获取连接明细
 --------
@@ -163,7 +288,17 @@ curl -X GET 'http://localhost:50090/monitor/topic/test_topic_1/app/test_app/prod
 ```
 响应: 
 ```
-{	"code":200,	"data":{		"clients":[],		"consumer":0,		"producer":0,		"total":0	},	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":{
+		"clients":[],
+		"consumer":0,
+		"producer":0,
+		"total":0
+	},
+	"message":"SUCCESS"
+}
+
 ```
 10.获取消费者信息
 ----------
@@ -183,7 +318,32 @@ curl -X GET 'http://localhost:50090/monitor/topic/test_topic_1/app/test_app/cons
 ```
 响应: 
 ```
-{	"code":200,	"data":{		"app":"test_app",		"deQueue":{			"avg":0.0,			"count":0,			"max":0.0,			"min":0.0,			"oneMinuteRate":0,			"size":0,			"totalSize":0,			"tp90":0.0,			"tp99":0.0,			"tps":0,			"traffic":0		},		"partitionGroupId":0,		"pending":{			"count":0		},		"topic":"test_topic_1"	},	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":{
+		"app":"test_app",
+		"deQueue":{
+			"avg":0.0,
+			"count":0,
+			"max":0.0,
+			"min":0.0,
+			"oneMinuteRate":0,
+			"size":0,
+			"totalSize":0,
+			"tp90":0.0,
+			"tp99":0.0,
+			"tps":0,
+			"traffic":0
+		},
+		"partitionGroupId":0,
+		"pending":{
+			"count":0
+		},
+		"topic":"test_topic_1"
+	},
+	"message":"SUCCESS"
+}
+
 ```
 11.查找协调者
 --------
@@ -201,7 +361,32 @@ curl -X GET 'http://localhost:50090/monitor/coordinator/group/abc/detail'
 ```
 响应: 
 ```
-{	"code":200,	"data":{		"current":{			"address":"10.0.16.231:50088",			"backEndPort":50089,			"dataCenter":"UNKNOWN",			"id":1563873557,			"ip":"10.0.16.231",			"managerPort":50091,			"monitorPort":50090,			"permission":"FULL",			"port":50088,			"retryType":"RemoteRetry"		},		"partitionGroup":4,		"replicas":[],		"topic":{			"code":"__group_coordinators",			"fullName":"__group_coordinators",			"namespace":""		}	},	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":{
+		"current":{
+			"address":"10.0.16.231:50088",
+			"backEndPort":50089,
+			"dataCenter":"UNKNOWN",
+			"id":1563873557,
+			"ip":"10.0.16.231",
+			"managerPort":50091,
+			"monitorPort":50090,
+			"permission":"FULL",
+			"port":50088,
+			"retryType":"RemoteRetry"
+		},
+		"partitionGroup":4,
+		"replicas":[],
+		"topic":{
+			"code":"__group_coordinators",
+			"fullName":"__group_coordinators",
+			"namespace":""
+		}
+	},
+	"message":"SUCCESS"
+}
+
 ```
 12.获取生产者信息
 ----------
@@ -220,7 +405,12 @@ curl -X GET 'http://localhost:50090/monitor/topic/test_topic_1/app/test_app/prod
 ```
 响应: 
 ```
-{	"code":200,	"data":[],	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":[],
+	"message":"SUCCESS"
+}
+
 ```
 13.获取生产者信息
 ----------
@@ -239,7 +429,12 @@ curl -X GET 'http://localhost:50090/monitor/topic/test_topic_1/app/test_app/prod
 ```
 响应: 
 ```
-{	"code":200,	"data":[],	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":[],
+	"message":"SUCCESS"
+}
+
 ```
 14.获取partitionGroup监控信息
 -----------------------
@@ -258,7 +453,11 @@ curl -X GET 'http://localhost:50090/monitor/topic/test_topic_1/app/test_app/part
 ```
 响应: 
 ```
-{	"code":500,	"message":"java.lang.NullPointerException"}
+{
+	"code":500,
+	"message":"java.lang.NullPointerException"
+}
+
 ```
 15.获取连接明细
 ---------
@@ -277,7 +476,17 @@ curl -X GET 'http://localhost:50090/monitor/topic/test_topic_1/app/test_app/cons
 ```
 响应: 
 ```
-{	"code":200,	"data":{		"clients":[],		"consumer":0,		"producer":0,		"total":0	},	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":{
+		"clients":[],
+		"consumer":0,
+		"producer":0,
+		"total":0
+	},
+	"message":"SUCCESS"
+}
+
 ```
 16.thread safe
 broker state 扩展信息
@@ -298,7 +507,499 @@ curl -X GET 'http://localhost:50090/metrics?timeStamp=19395935'
 ```
 响应: 
 ```
-{	"code":200,	"data":{		"brokerId":1563873557,		"brokerStat":{			"brokerId":1563873557,			"connectionStat":{				"connection":0,				"connectionMap":{},				"consumer":0,				"producer":0			},			"deQueueStat":{				"avg":0.0,				"max":0.0,				"min":0.0,				"oneMinuteRate":0,				"size":0,				"total":0,				"totalSize":0,				"totalTraffic":0,				"tp90":0.0,				"tp99":0.0,				"tps":0,				"traffic":0			},			"enQueueStat":{				"avg":0.0,				"max":0.0,				"min":0.0,				"oneMinuteRate":0,				"size":0,				"total":0,				"totalSize":0,				"totalTraffic":0,				"tp90":0.0,				"tp99":0.0,				"tps":0,				"traffic":0			},			"replicationStat":{				"appendStat":{					"avg":0.0,					"max":0.0,					"min":0.0,					"oneMinuteRate":0,					"size":0,					"total":0,					"totalSize":0,					"totalTraffic":0,					"tp90":0.0,					"tp99":0.0,					"tps":0,					"traffic":0				},				"partitionGroup":0,				"replicaStat":{					"avg":0.0,					"max":0.0,					"min":0.0,					"oneMinuteRate":0,					"size":0,					"total":0,					"totalSize":0,					"totalTraffic":0,					"tp90":0.0,					"tp99":0.0,					"tps":0,					"traffic":0				}			},			"topicStats":{				"test_topic_1":{					"appStats":{						"test_app":{							"app":"test_app",							"connectionStat":{								"connection":0,								"connectionMap":{},								"consumer":0,								"producer":0							},							"consumerStat":{								"app":"test_app",								"connectionStat":{									"connection":0,									"connectionMap":{},									"consumer":0,									"producer":0								},								"deQueueStat":{									"avg":0.0,									"max":0.0,									"min":0.0,									"oneMinuteRate":0,									"size":0,									"total":0,									"totalSize":0,									"totalTraffic":0,									"tp90":0.0,									"tp99":0.0,									"tps":0,									"traffic":0								},								"partitionGroupStatMap":{0:{										"app":"test_app",										"deQueueStat":{											"avg":0.0,											"max":0.0,											"min":0.0,											"oneMinuteRate":0,											"size":0,											"total":0,											"totalSize":0,											"totalTraffic":0,											"tp90":0.0,											"tp99":0.0,											"tps":0,											"traffic":0										},										"enQueueStat":{											"avg":0.0,											"max":0.0,											"min":0.0,											"oneMinuteRate":0,											"size":0,											"total":0,											"totalSize":0,											"totalTraffic":0,											"tp90":0.0,											"tp99":0.0,											"tps":0,											"traffic":0										},										"partitionGroup":0,										"partitionStatMap":{},										"replicationStat":{											"appendStat":{												"avg":0.0,												"max":0.0,												"min":0.0,												"oneMinuteRate":0,												"size":0,												"total":0,												"totalSize":0,												"totalTraffic":0,												"tp90":0.0,												"tp99":0.0,												"tps":0,												"traffic":0											},											"partitionGroup":0,											"replicaStat":{												"avg":0.0,												"max":0.0,												"min":0.0,												"oneMinuteRate":0,												"size":0,												"total":0,												"totalSize":0,												"totalTraffic":0,												"tp90":0.0,												"tp99":0.0,												"tps":0,												"traffic":0											}										},										"topic":"test_topic_1"									}								},								"retryStat":{									"failure":{										"avg":0.0,										"count":0,										"max":0.0,										"meanRate":0,										"min":0.0,										"oneMinuteRate":0,										"tp75":0.0,										"tp90":0.0,										"tp95":0.0,										"tp99":0.0,										"tp999":0.0									},									"success":{										"avg":0.0,										"count":0,										"max":0.0,										"meanRate":0,										"min":0.0,										"oneMinuteRate":0,										"tp75":0.0,										"tp90":0.0,										"tp95":0.0,										"tp99":0.0,										"tp999":0.0									}								},								"topic":"test_topic_1"							},							"partitionGroupStatMap":{0:{									"app":"test_app",									"deQueueStat":{										"avg":0.0,										"max":0.0,										"min":0.0,										"oneMinuteRate":0,										"size":0,										"total":0,										"totalSize":0,										"totalTraffic":0,										"tp90":0.0,										"tp99":0.0,										"tps":0,										"traffic":0									},									"enQueueStat":{										"avg":0.0,										"max":0.0,										"min":0.0,										"oneMinuteRate":0,										"size":0,										"total":0,										"totalSize":0,										"totalTraffic":0,										"tp90":0.0,										"tp99":0.0,										"tps":0,										"traffic":0									},									"partitionGroup":0,									"partitionStatMap":{},									"replicationStat":{										"appendStat":{											"avg":0.0,											"max":0.0,											"min":0.0,											"oneMinuteRate":0,											"size":0,											"total":0,											"totalSize":0,											"totalTraffic":0,											"tp90":0.0,											"tp99":0.0,											"tps":0,											"traffic":0										},										"partitionGroup":0,										"replicaStat":{											"avg":0.0,											"max":0.0,											"min":0.0,											"oneMinuteRate":0,											"size":0,											"total":0,											"totalSize":0,											"totalTraffic":0,											"tp90":0.0,											"tp99":0.0,											"tps":0,											"traffic":0										}									},									"topic":"test_topic_1"								}							},							"producerStat":{								"app":"test_app",								"connectionStat":{									"connection":0,									"connectionMap":{},									"consumer":0,									"producer":0								},								"enQueueStat":{									"avg":0.0,									"max":0.0,									"min":0.0,									"oneMinuteRate":0,									"size":0,									"total":0,									"totalSize":0,									"totalTraffic":0,									"tp90":0.0,									"tp99":0.0,									"tps":0,									"traffic":0								},								"partitionGroupStatMap":{0:{										"app":"test_app",										"deQueueStat":{											"avg":0.0,											"max":0.0,											"min":0.0,											"oneMinuteRate":0,											"size":0,											"total":0,											"totalSize":0,											"totalTraffic":0,											"tp90":0.0,											"tp99":0.0,											"tps":0,											"traffic":0										},										"enQueueStat":{											"avg":0.0,											"max":0.0,											"min":0.0,											"oneMinuteRate":0,											"size":0,											"total":0,											"totalSize":0,											"totalTraffic":0,											"tp90":0.0,											"tp99":0.0,											"tps":0,											"traffic":0										},										"partitionGroup":0,										"partitionStatMap":{},										"replicationStat":{											"appendStat":{												"avg":0.0,												"max":0.0,												"min":0.0,												"oneMinuteRate":0,												"size":0,												"total":0,												"totalSize":0,												"totalTraffic":0,												"tp90":0.0,												"tp99":0.0,												"tps":0,												"traffic":0											},											"partitionGroup":0,											"replicaStat":{												"avg":0.0,												"max":0.0,												"min":0.0,												"oneMinuteRate":0,												"size":0,												"total":0,												"totalSize":0,												"totalTraffic":0,												"tp90":0.0,												"tp99":0.0,												"tps":0,												"traffic":0											}										},										"topic":"test_topic_1"									}								},								"topic":"test_topic_1"							},							"topic":"test_topic_1"						}					},					"connectionStat":{						"connection":0,						"connectionMap":{},						"consumer":0,						"producer":0					},					"deQueueStat":{						"avg":0.0,						"max":0.0,						"min":0.0,						"oneMinuteRate":0,						"size":0,						"total":0,						"totalSize":0,						"totalTraffic":0,						"tp90":0.0,						"tp99":0.0,						"tps":0,						"traffic":0					},					"enQueueStat":{						"avg":0.0,						"max":0.0,						"min":0.0,						"oneMinuteRate":0,						"size":0,						"total":0,						"totalSize":0,						"totalTraffic":0,						"tp90":0.0,						"tp99":0.0,						"tps":0,						"traffic":0					},					"partitionGroupStatMap":{0:{							"deQueueStat":{								"avg":0.0,								"max":0.0,								"min":0.0,								"oneMinuteRate":0,								"size":0,								"total":0,								"totalSize":0,								"totalTraffic":0,								"tp90":0.0,								"tp99":0.0,								"tps":0,								"traffic":0							},							"enQueueStat":{								"avg":0.0,								"max":0.0,								"min":0.0,								"oneMinuteRate":0,								"size":0,								"total":0,								"totalSize":0,								"totalTraffic":0,								"tp90":0.0,								"tp99":0.0,								"tps":0,								"traffic":0							},							"partitionGroup":0,							"partitionStatMap":{},							"replicationStat":{								"appendStat":{									"avg":0.0,									"max":0.0,									"min":0.0,									"oneMinuteRate":0,									"size":0,									"total":0,									"totalSize":0,									"totalTraffic":0,									"tp90":0.0,									"tp99":0.0,									"tps":0,									"traffic":0								},								"partitionGroup":0,								"replicaStat":{									"avg":0.0,									"max":0.0,									"min":0.0,									"oneMinuteRate":0,									"size":0,									"total":0,									"totalSize":0,									"totalTraffic":0,									"tp90":0.0,									"tp99":0.0,									"tps":0,									"traffic":0								}							},							"topic":"test_topic_1"						}					},					"topic":"test_topic_1"				}			}		},		"heap":{			"committed":668991488,			"init":268435456,			"max":3817865216,			"used":351247400		},		"nonHeap":{			"committed":92807168,			"init":2555904,			"max":-1,			"used":90549096		},		"timeStamp":19395935,		"topicPendingStatMap":{			"test_topic_1":{				"pending":0,				"pendingStatSubMap":{					"test_app":{						"app":"test_app",						"pending":0,						"pendingStatSubMap":{},						"topic":"test_topic_1"					}				},				"topic":"test_topic_1"			}		}	},	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":{
+		"brokerId":1563873557,
+		"brokerStat":{
+			"brokerId":1563873557,
+			"connectionStat":{
+				"connection":0,
+				"connectionMap":{},
+				"consumer":0,
+				"producer":0
+			},
+			"deQueueStat":{
+				"avg":0.0,
+				"max":0.0,
+				"min":0.0,
+				"oneMinuteRate":0,
+				"size":0,
+				"total":0,
+				"totalSize":0,
+				"totalTraffic":0,
+				"tp90":0.0,
+				"tp99":0.0,
+				"tps":0,
+				"traffic":0
+			},
+			"enQueueStat":{
+				"avg":0.0,
+				"max":0.0,
+				"min":0.0,
+				"oneMinuteRate":0,
+				"size":0,
+				"total":0,
+				"totalSize":0,
+				"totalTraffic":0,
+				"tp90":0.0,
+				"tp99":0.0,
+				"tps":0,
+				"traffic":0
+			},
+			"replicationStat":{
+				"appendStat":{
+					"avg":0.0,
+					"max":0.0,
+					"min":0.0,
+					"oneMinuteRate":0,
+					"size":0,
+					"total":0,
+					"totalSize":0,
+					"totalTraffic":0,
+					"tp90":0.0,
+					"tp99":0.0,
+					"tps":0,
+					"traffic":0
+				},
+				"partitionGroup":0,
+				"replicaStat":{
+					"avg":0.0,
+					"max":0.0,
+					"min":0.0,
+					"oneMinuteRate":0,
+					"size":0,
+					"total":0,
+					"totalSize":0,
+					"totalTraffic":0,
+					"tp90":0.0,
+					"tp99":0.0,
+					"tps":0,
+					"traffic":0
+				}
+			},
+			"topicStats":{
+				"test_topic_1":{
+					"appStats":{
+						"test_app":{
+							"app":"test_app",
+							"connectionStat":{
+								"connection":0,
+								"connectionMap":{},
+								"consumer":0,
+								"producer":0
+							},
+							"consumerStat":{
+								"app":"test_app",
+								"connectionStat":{
+									"connection":0,
+									"connectionMap":{},
+									"consumer":0,
+									"producer":0
+								},
+								"deQueueStat":{
+									"avg":0.0,
+									"max":0.0,
+									"min":0.0,
+									"oneMinuteRate":0,
+									"size":0,
+									"total":0,
+									"totalSize":0,
+									"totalTraffic":0,
+									"tp90":0.0,
+									"tp99":0.0,
+									"tps":0,
+									"traffic":0
+								},
+								"partitionGroupStatMap":{0:{
+										"app":"test_app",
+										"deQueueStat":{
+											"avg":0.0,
+											"max":0.0,
+											"min":0.0,
+											"oneMinuteRate":0,
+											"size":0,
+											"total":0,
+											"totalSize":0,
+											"totalTraffic":0,
+											"tp90":0.0,
+											"tp99":0.0,
+											"tps":0,
+											"traffic":0
+										},
+										"enQueueStat":{
+											"avg":0.0,
+											"max":0.0,
+											"min":0.0,
+											"oneMinuteRate":0,
+											"size":0,
+											"total":0,
+											"totalSize":0,
+											"totalTraffic":0,
+											"tp90":0.0,
+											"tp99":0.0,
+											"tps":0,
+											"traffic":0
+										},
+										"partitionGroup":0,
+										"partitionStatMap":{},
+										"replicationStat":{
+											"appendStat":{
+												"avg":0.0,
+												"max":0.0,
+												"min":0.0,
+												"oneMinuteRate":0,
+												"size":0,
+												"total":0,
+												"totalSize":0,
+												"totalTraffic":0,
+												"tp90":0.0,
+												"tp99":0.0,
+												"tps":0,
+												"traffic":0
+											},
+											"partitionGroup":0,
+											"replicaStat":{
+												"avg":0.0,
+												"max":0.0,
+												"min":0.0,
+												"oneMinuteRate":0,
+												"size":0,
+												"total":0,
+												"totalSize":0,
+												"totalTraffic":0,
+												"tp90":0.0,
+												"tp99":0.0,
+												"tps":0,
+												"traffic":0
+											}
+										},
+										"topic":"test_topic_1"
+									}
+								},
+								"retryStat":{
+									"failure":{
+										"avg":0.0,
+										"count":0,
+										"max":0.0,
+										"meanRate":0,
+										"min":0.0,
+										"oneMinuteRate":0,
+										"tp75":0.0,
+										"tp90":0.0,
+										"tp95":0.0,
+										"tp99":0.0,
+										"tp999":0.0
+									},
+									"success":{
+										"avg":0.0,
+										"count":0,
+										"max":0.0,
+										"meanRate":0,
+										"min":0.0,
+										"oneMinuteRate":0,
+										"tp75":0.0,
+										"tp90":0.0,
+										"tp95":0.0,
+										"tp99":0.0,
+										"tp999":0.0
+									}
+								},
+								"topic":"test_topic_1"
+							},
+							"partitionGroupStatMap":{0:{
+									"app":"test_app",
+									"deQueueStat":{
+										"avg":0.0,
+										"max":0.0,
+										"min":0.0,
+										"oneMinuteRate":0,
+										"size":0,
+										"total":0,
+										"totalSize":0,
+										"totalTraffic":0,
+										"tp90":0.0,
+										"tp99":0.0,
+										"tps":0,
+										"traffic":0
+									},
+									"enQueueStat":{
+										"avg":0.0,
+										"max":0.0,
+										"min":0.0,
+										"oneMinuteRate":0,
+										"size":0,
+										"total":0,
+										"totalSize":0,
+										"totalTraffic":0,
+										"tp90":0.0,
+										"tp99":0.0,
+										"tps":0,
+										"traffic":0
+									},
+									"partitionGroup":0,
+									"partitionStatMap":{},
+									"replicationStat":{
+										"appendStat":{
+											"avg":0.0,
+											"max":0.0,
+											"min":0.0,
+											"oneMinuteRate":0,
+											"size":0,
+											"total":0,
+											"totalSize":0,
+											"totalTraffic":0,
+											"tp90":0.0,
+											"tp99":0.0,
+											"tps":0,
+											"traffic":0
+										},
+										"partitionGroup":0,
+										"replicaStat":{
+											"avg":0.0,
+											"max":0.0,
+											"min":0.0,
+											"oneMinuteRate":0,
+											"size":0,
+											"total":0,
+											"totalSize":0,
+											"totalTraffic":0,
+											"tp90":0.0,
+											"tp99":0.0,
+											"tps":0,
+											"traffic":0
+										}
+									},
+									"topic":"test_topic_1"
+								}
+							},
+							"producerStat":{
+								"app":"test_app",
+								"connectionStat":{
+									"connection":0,
+									"connectionMap":{},
+									"consumer":0,
+									"producer":0
+								},
+								"enQueueStat":{
+									"avg":0.0,
+									"max":0.0,
+									"min":0.0,
+									"oneMinuteRate":0,
+									"size":0,
+									"total":0,
+									"totalSize":0,
+									"totalTraffic":0,
+									"tp90":0.0,
+									"tp99":0.0,
+									"tps":0,
+									"traffic":0
+								},
+								"partitionGroupStatMap":{0:{
+										"app":"test_app",
+										"deQueueStat":{
+											"avg":0.0,
+											"max":0.0,
+											"min":0.0,
+											"oneMinuteRate":0,
+											"size":0,
+											"total":0,
+											"totalSize":0,
+											"totalTraffic":0,
+											"tp90":0.0,
+											"tp99":0.0,
+											"tps":0,
+											"traffic":0
+										},
+										"enQueueStat":{
+											"avg":0.0,
+											"max":0.0,
+											"min":0.0,
+											"oneMinuteRate":0,
+											"size":0,
+											"total":0,
+											"totalSize":0,
+											"totalTraffic":0,
+											"tp90":0.0,
+											"tp99":0.0,
+											"tps":0,
+											"traffic":0
+										},
+										"partitionGroup":0,
+										"partitionStatMap":{},
+										"replicationStat":{
+											"appendStat":{
+												"avg":0.0,
+												"max":0.0,
+												"min":0.0,
+												"oneMinuteRate":0,
+												"size":0,
+												"total":0,
+												"totalSize":0,
+												"totalTraffic":0,
+												"tp90":0.0,
+												"tp99":0.0,
+												"tps":0,
+												"traffic":0
+											},
+											"partitionGroup":0,
+											"replicaStat":{
+												"avg":0.0,
+												"max":0.0,
+												"min":0.0,
+												"oneMinuteRate":0,
+												"size":0,
+												"total":0,
+												"totalSize":0,
+												"totalTraffic":0,
+												"tp90":0.0,
+												"tp99":0.0,
+												"tps":0,
+												"traffic":0
+											}
+										},
+										"topic":"test_topic_1"
+									}
+								},
+								"topic":"test_topic_1"
+							},
+							"topic":"test_topic_1"
+						}
+					},
+					"connectionStat":{
+						"connection":0,
+						"connectionMap":{},
+						"consumer":0,
+						"producer":0
+					},
+					"deQueueStat":{
+						"avg":0.0,
+						"max":0.0,
+						"min":0.0,
+						"oneMinuteRate":0,
+						"size":0,
+						"total":0,
+						"totalSize":0,
+						"totalTraffic":0,
+						"tp90":0.0,
+						"tp99":0.0,
+						"tps":0,
+						"traffic":0
+					},
+					"enQueueStat":{
+						"avg":0.0,
+						"max":0.0,
+						"min":0.0,
+						"oneMinuteRate":0,
+						"size":0,
+						"total":0,
+						"totalSize":0,
+						"totalTraffic":0,
+						"tp90":0.0,
+						"tp99":0.0,
+						"tps":0,
+						"traffic":0
+					},
+					"partitionGroupStatMap":{0:{
+							"deQueueStat":{
+								"avg":0.0,
+								"max":0.0,
+								"min":0.0,
+								"oneMinuteRate":0,
+								"size":0,
+								"total":0,
+								"totalSize":0,
+								"totalTraffic":0,
+								"tp90":0.0,
+								"tp99":0.0,
+								"tps":0,
+								"traffic":0
+							},
+							"enQueueStat":{
+								"avg":0.0,
+								"max":0.0,
+								"min":0.0,
+								"oneMinuteRate":0,
+								"size":0,
+								"total":0,
+								"totalSize":0,
+								"totalTraffic":0,
+								"tp90":0.0,
+								"tp99":0.0,
+								"tps":0,
+								"traffic":0
+							},
+							"partitionGroup":0,
+							"partitionStatMap":{},
+							"replicationStat":{
+								"appendStat":{
+									"avg":0.0,
+									"max":0.0,
+									"min":0.0,
+									"oneMinuteRate":0,
+									"size":0,
+									"total":0,
+									"totalSize":0,
+									"totalTraffic":0,
+									"tp90":0.0,
+									"tp99":0.0,
+									"tps":0,
+									"traffic":0
+								},
+								"partitionGroup":0,
+								"replicaStat":{
+									"avg":0.0,
+									"max":0.0,
+									"min":0.0,
+									"oneMinuteRate":0,
+									"size":0,
+									"total":0,
+									"totalSize":0,
+									"totalTraffic":0,
+									"tp90":0.0,
+									"tp99":0.0,
+									"tps":0,
+									"traffic":0
+								}
+							},
+							"topic":"test_topic_1"
+						}
+					},
+					"topic":"test_topic_1"
+				}
+			}
+		},
+		"heap":{
+			"committed":494403584,
+			"init":268435456,
+			"max":3817865216,
+			"used":107002248
+		},
+		"nonHeap":{
+			"committed":97984512,
+			"init":2555904,
+			"max":-1,
+			"used":95203800
+		},
+		"timeStamp":19395935,
+		"topicPendingStatMap":{
+			"test_topic_1":{
+				"pending":0,
+				"pendingStatSubMap":{
+					"test_app":{
+						"app":"test_app",
+						"pending":0,
+						"pendingStatSubMap":{},
+						"topic":"test_topic_1"
+					}
+				},
+				"topic":"test_topic_1"
+			}
+		}
+	},
+	"message":"SUCCESS"
+}
+
 ```
 17.获取消费者信息
 ----------
@@ -317,7 +1018,12 @@ curl -X GET 'http://localhost:50090/monitor/topic/test_topic_1/app/test_app/cons
 ```
 响应: 
 ```
-{	"code":200,	"data":[],	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":[],
+	"message":"SUCCESS"
+}
+
 ```
 18.获取生产者信息
 ----------
@@ -336,7 +1042,29 @@ curl -X GET 'http://localhost:50090/monitor/topic/test_topic_1/app/test_app/prod
 ```
 响应: 
 ```
-{	"code":200,	"data":{		"app":"test_app",		"connections":0,		"enQueue":{			"avg":0.0,			"count":0,			"max":0.0,			"min":0.0,			"oneMinuteRate":0,			"size":0,			"totalSize":0,			"tp90":0.0,			"tp99":0.0,			"tps":0,			"traffic":0		},		"topic":"test_topic_1"	},	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":{
+		"app":"test_app",
+		"connections":0,
+		"enQueue":{
+			"avg":0.0,
+			"count":0,
+			"max":0.0,
+			"min":0.0,
+			"oneMinuteRate":0,
+			"size":0,
+			"totalSize":0,
+			"tp90":0.0,
+			"tp99":0.0,
+			"tps":0,
+			"traffic":0
+		},
+		"topic":"test_topic_1"
+	},
+	"message":"SUCCESS"
+}
+
 ```
 19.获得协调者组成员
 -----------
@@ -357,7 +1085,11 @@ curl -X GET 'http://localhost:50090/monitor/coordinator/namespace/joyqueue/group
 ```
 响应: 
 ```
-{	"code":200,	"message":"SUCCESS"}
+{
+	"code":200,
+	"message":"SUCCESS"
+}
+
 ```
 20.获取所有生产topic监控信息
 ------------------
@@ -376,7 +1108,18 @@ curl -X GET 'http://localhost:50090/monitor/producers?page=0&pageSize=10'
 ```
 响应: 
 ```
-{	"code":200,	"data":{		"data":[],		"page":0,		"pageSize":10,		"pages":1,		"total":1	},	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":{
+		"data":[],
+		"page":0,
+		"pageSize":10,
+		"pages":1,
+		"total":1
+	},
+	"message":"SUCCESS"
+}
+
 ```
 21.getReadableResult
 --------------------
@@ -392,7 +1135,15 @@ curl -X GET 'http://localhost:50090/monitor/topic/:topic/app/:app/readable'
 ```
 响应: 
 ```
-{	"code":200,	"data":{		"joyQueueCode":"FW_TOPIC_NOT_EXIST",		"success":false	},	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":{
+		"joyQueueCode":"FW_TOPIC_NOT_EXIST",
+		"success":false
+	},
+	"message":"SUCCESS"
+}
+
 ```
 22.获取生产者信息
 ----------
@@ -412,7 +1163,29 @@ curl -X GET 'http://localhost:50090/monitor/topic/test_topic_1/app/test_app/prod
 ```
 响应: 
 ```
-{	"code":200,	"data":{		"app":"test_app",		"enQueue":{			"avg":0.0,			"count":0,			"max":0.0,			"min":0.0,			"oneMinuteRate":0,			"size":0,			"totalSize":0,			"tp90":0.0,			"tp99":0.0,			"tps":0,			"traffic":0		},		"partition":0,		"topic":"test_topic_1"	},	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":{
+		"app":"test_app",
+		"enQueue":{
+			"avg":0.0,
+			"count":0,
+			"max":0.0,
+			"min":0.0,
+			"oneMinuteRate":0,
+			"size":0,
+			"totalSize":0,
+			"tp90":0.0,
+			"tp99":0.0,
+			"tps":0,
+			"traffic":0
+		},
+		"partition":0,
+		"topic":"test_topic_1"
+	},
+	"message":"SUCCESS"
+}
+
 ```
 23.获取连接明细
 ---------
@@ -430,7 +1203,17 @@ curl -X GET 'http://localhost:50090/monitor/topic/test_topic_1/consumer/connecti
 ```
 响应: 
 ```
-{	"code":200,	"data":{		"clients":[],		"consumer":0,		"producer":0,		"total":0	},	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":{
+		"clients":[],
+		"consumer":0,
+		"producer":0,
+		"total":0
+	},
+	"message":"SUCCESS"
+}
+
 ```
 24.获取所有消费topic监控信息
 ------------------
@@ -449,7 +1232,18 @@ curl -X GET 'http://localhost:50090/monitor/consumers?page=0&pageSize=10'
 ```
 响应: 
 ```
-{	"code":200,	"data":{		"data":[],		"page":0,		"pageSize":10,		"pages":1,		"total":1	},	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":{
+		"data":[],
+		"page":0,
+		"pageSize":10,
+		"pages":1,
+		"total":1
+	},
+	"message":"SUCCESS"
+}
+
 ```
 25.获取broker信息
 -------------
@@ -465,7 +1259,106 @@ curl -X GET 'http://localhost:50090/monitor/broker'
 ```
 响应: 
 ```
-{	"code":200,	"data":{		"bufferPoolMonitorInfo":{			"directUsed":"0",			"maxMemorySize":"3.2 GB",			"mmpUsed":"0",			"plMonitorInfos":[				{					"bufferSize":"128 MB",					"cached":"384 MB",					"totalSize":"384 MB",					"usedPreLoad":"0"				},				{					"bufferSize":"512 kB",					"cached":"1.5 MB",					"totalSize":"1.5 MB",					"usedPreLoad":"0"				}			],			"plUsed":"385.5 MB",			"used":"385.5 MB"		},		"connection":{			"consumer":0,			"producer":0,			"total":0		},		"deQueue":{			"avg":0.0,			"count":0,			"max":0.0,			"min":0.0,			"oneMinuteRate":0,			"size":0,			"totalSize":0,			"tp90":0.0,			"tp99":0.0,			"tps":0,			"traffic":0		},		"election":{			"started":true		},		"enQueue":{			"avg":0.0,			"count":0,			"max":0.0,			"min":0.0,			"oneMinuteRate":0,			"size":0,			"totalSize":0,			"tp90":0.0,			"tp99":0.0,			"tps":0,			"traffic":0		},		"nameServer":{			"started":true		},		"replication":{			"appendStat":{				"avg":0.0,				"count":0,				"max":0.0,				"min":0.0,				"oneMinuteRate":0,				"size":0,				"totalSize":0,				"tp90":0.0,				"tp99":0.0,				"tps":0,				"traffic":0			},			"partitionGroup":0,			"replicaStat":{				"avg":0.0,				"count":0,				"max":0.0,				"min":0.0,				"oneMinuteRate":0,				"size":0,				"totalSize":0,				"tp90":0.0,				"tp99":0.0,				"tps":0,				"traffic":0			},			"started":true		},		"store":{			"freeSpace":"59.4 GB",			"started":true,			"totalSpace":"233.5 GB"		}	},	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":{
+		"bufferPoolMonitorInfo":{
+			"directUsed":"0",
+			"maxMemorySize":"3.2 GB",
+			"mmpUsed":"0",
+			"plMonitorInfos":[
+				{
+					"bufferSize":"128 MB",
+					"cached":"384 MB",
+					"totalSize":"384 MB",
+					"usedPreLoad":"0"
+				},
+				{
+					"bufferSize":"512 kB",
+					"cached":"1.5 MB",
+					"totalSize":"1.5 MB",
+					"usedPreLoad":"0"
+				}
+			],
+			"plUsed":"385.5 MB",
+			"used":"385.5 MB"
+		},
+		"connection":{
+			"consumer":0,
+			"producer":0,
+			"total":0
+		},
+		"deQueue":{
+			"avg":0.0,
+			"count":0,
+			"max":0.0,
+			"min":0.0,
+			"oneMinuteRate":0,
+			"size":0,
+			"totalSize":0,
+			"tp90":0.0,
+			"tp99":0.0,
+			"tps":0,
+			"traffic":0
+		},
+		"election":{
+			"started":true
+		},
+		"enQueue":{
+			"avg":0.0,
+			"count":0,
+			"max":0.0,
+			"min":0.0,
+			"oneMinuteRate":0,
+			"size":0,
+			"totalSize":0,
+			"tp90":0.0,
+			"tp99":0.0,
+			"tps":0,
+			"traffic":0
+		},
+		"nameServer":{
+			"started":true
+		},
+		"replication":{
+			"appendStat":{
+				"avg":0.0,
+				"count":0,
+				"max":0.0,
+				"min":0.0,
+				"oneMinuteRate":0,
+				"size":0,
+				"totalSize":0,
+				"tp90":0.0,
+				"tp99":0.0,
+				"tps":0,
+				"traffic":0
+			},
+			"partitionGroup":0,
+			"replicaStat":{
+				"avg":0.0,
+				"count":0,
+				"max":0.0,
+				"min":0.0,
+				"oneMinuteRate":0,
+				"size":0,
+				"totalSize":0,
+				"tp90":0.0,
+				"tp99":0.0,
+				"tps":0,
+				"traffic":0
+			},
+			"started":true
+		},
+		"store":{
+			"freeSpace":"59.3 GB",
+			"started":true,
+			"totalSpace":"233.5 GB"
+		}
+	},
+	"message":"SUCCESS"
+}
+
 ```
 26.获取当前连接数信息
 ------------
@@ -481,7 +1374,16 @@ curl -X GET 'http://localhost:50090/monitor/connections'
 ```
 响应: 
 ```
-{	"code":200,	"data":{		"consumer":0,		"producer":0,		"total":0	},	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":{
+		"consumer":0,
+		"producer":0,
+		"total":0
+	},
+	"message":"SUCCESS"
+}
+
 ```
 27.获取partitionGroup监控信息
 -----------------------
@@ -501,7 +1403,11 @@ curl -X GET 'http://localhost:50090/monitor/topic/test_topic_1/app/test_app/part
 ```
 响应: 
 ```
-{	"code":500,	"message":"java.lang.NullPointerException"}
+{
+	"code":500,
+	"message":"java.lang.NullPointerException"
+}
+
 ```
 28.获取partition监控信息
 ------------------
@@ -519,7 +1425,12 @@ curl -X GET 'http://localhost:50090/monitor/topic/test_topic_1/partitions'
 ```
 响应: 
 ```
-{	"code":200,	"data":[],	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":[],
+	"message":"SUCCESS"
+}
+
 ```
 29.getArchiveMonitorInfo
 ------------------------
@@ -535,7 +1446,11 @@ curl -X GET 'http://localhost:50090/monitor/archive/info'
 ```
 响应: 
 ```
-{	"code":500,	"message":"java.lang.NullPointerException"}
+{
+	"code":500,
+	"message":"java.lang.NullPointerException"
+}
+
 ```
 30.获取当前连接数信息
 ------------
@@ -554,7 +1469,16 @@ curl -X GET 'http://localhost:50090/monitor/topic/test_topic_1/app/test_app/conn
 ```
 响应: 
 ```
-{	"code":200,	"data":{		"consumer":0,		"producer":0,		"total":0	},	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":{
+		"consumer":0,
+		"producer":0,
+		"total":0
+	},
+	"message":"SUCCESS"
+}
+
 ```
 31.获取消费者信息
 ----------
@@ -573,7 +1497,12 @@ curl -X GET 'http://localhost:50090/monitor/topic/test_topic_1/app/test_app/cons
 ```
 响应: 
 ```
-{	"code":200,	"data":[],	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":[],
+	"message":"SUCCESS"
+}
+
 ```
 32.获取topic监控信息
 --------------
@@ -609,7 +1538,45 @@ curl -X GET 'http://localhost:50090/monitor/topic/test_topic_1'
 ```
 响应: 
 ```
-{	"code":200,	"data":{		"connection":{			"consumer":0,			"producer":0,			"total":0		},		"deQueue":{			"avg":0.0,			"count":0,			"max":0.0,			"min":0.0,			"oneMinuteRate":0,			"size":0,			"totalSize":0,			"tp90":0.0,			"tp99":0.0,			"tps":0,			"traffic":0		},		"enQueue":{			"avg":0.0,			"count":0,			"max":0.0,			"min":0.0,			"oneMinuteRate":0,			"size":0,			"totalSize":0,			"tp90":0.0,			"tp99":0.0,			"tps":0,			"traffic":0		},		"topic":"test_topic_1"	},	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":{
+		"connection":{
+			"consumer":0,
+			"producer":0,
+			"total":0
+		},
+		"deQueue":{
+			"avg":0.0,
+			"count":0,
+			"max":0.0,
+			"min":0.0,
+			"oneMinuteRate":0,
+			"size":0,
+			"totalSize":0,
+			"tp90":0.0,
+			"tp99":0.0,
+			"tps":0,
+			"traffic":0
+		},
+		"enQueue":{
+			"avg":0.0,
+			"count":0,
+			"max":0.0,
+			"min":0.0,
+			"oneMinuteRate":0,
+			"size":0,
+			"totalSize":0,
+			"tp90":0.0,
+			"tp99":0.0,
+			"tps":0,
+			"traffic":0
+		},
+		"topic":"test_topic_1"
+	},
+	"message":"SUCCESS"
+}
+
 ```
 34.返回当前所有连接数
 ------------
@@ -625,7 +1592,17 @@ curl -X GET 'http://localhost:50090/monitor/connections/detail'
 ```
 响应: 
 ```
-{	"code":200,	"data":{		"clients":[],		"consumer":0,		"producer":0,		"total":0	},	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":{
+		"clients":[],
+		"consumer":0,
+		"producer":0,
+		"total":0
+	},
+	"message":"SUCCESS"
+}
+
 ```
 35.获取连接明细
 ---------
@@ -644,7 +1621,17 @@ curl -X GET 'http://localhost:50090/monitor/topic/test_topic_1/app/test_app/conn
 ```
 响应: 
 ```
-{	"code":200,	"data":{		"clients":[],		"consumer":0,		"producer":0,		"total":0	},	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":{
+		"clients":[],
+		"consumer":0,
+		"producer":0,
+		"total":0
+	},
+	"message":"SUCCESS"
+}
+
 ```
 36.获取当前连接数信息
 ------------
@@ -662,7 +1649,16 @@ curl -X GET 'http://localhost:50090/monitor/topic/test_topic_1/connections'
 ```
 响应: 
 ```
-{	"code":200,	"data":{		"consumer":0,		"producer":0,		"total":0	},	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":{
+		"consumer":0,
+		"producer":0,
+		"total":0
+	},
+	"message":"SUCCESS"
+}
+
 ```
 37.getSendBackLogNum
 --------------------
@@ -678,7 +1674,12 @@ curl -X GET 'http://localhost:50090/monitor/archive/send'
 ```
 响应: 
 ```
-{	"code":200,	"data":0,	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":0,
+	"message":"SUCCESS"
+}
+
 ```
 38.getTopicMetadata
 -------------------
@@ -694,7 +1695,11 @@ curl -X GET 'http://localhost:50090/monitor/topic/:topic/metadata'
 ```
 响应: 
 ```
-{	"code":200,	"message":"SUCCESS"}
+{
+	"code":200,
+	"message":"SUCCESS"
+}
+
 ```
 39.获取partitionGroup监控信息
 -----------------------
@@ -712,7 +1717,11 @@ curl -X GET 'http://localhost:50090/monitor/topic/test_topic_1/partitionGroups'
 ```
 响应: 
 ```
-{	"code":500,	"message":"java.lang.NullPointerException"}
+{
+	"code":500,
+	"message":"java.lang.NullPointerException"
+}
+
 ```
 40.获取连接明细
 ---------
@@ -730,7 +1739,17 @@ curl -X GET 'http://localhost:50090/monitor/topic/test_topic_1/producer/connecti
 ```
 响应: 
 ```
-{	"code":200,	"data":{		"clients":[],		"consumer":0,		"producer":0,		"total":0	},	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":{
+		"clients":[],
+		"consumer":0,
+		"producer":0,
+		"total":0
+	},
+	"message":"SUCCESS"
+}
+
 ```
 41.获取partition监控信息
 ------------------
@@ -749,7 +1768,41 @@ curl -X GET 'http://localhost:50090/monitor/topic/test_topic_1/partition/0'
 ```
 响应: 
 ```
-{	"code":200,	"data":{		"deQueue":{			"avg":0.0,			"count":0,			"max":0.0,			"min":0.0,			"oneMinuteRate":0,			"size":0,			"totalSize":0,			"tp90":0.0,			"tp99":0.0,			"tps":0,			"traffic":0		},		"enQueue":{			"avg":0.0,			"count":0,			"max":0.0,			"min":0.0,			"oneMinuteRate":0,			"size":0,			"totalSize":0,			"tp90":0.0,			"tp99":0.0,			"tps":0,			"traffic":0		},		"partition":0,		"topic":"test_topic_1"	},	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":{
+		"deQueue":{
+			"avg":0.0,
+			"count":0,
+			"max":0.0,
+			"min":0.0,
+			"oneMinuteRate":0,
+			"size":0,
+			"totalSize":0,
+			"tp90":0.0,
+			"tp99":0.0,
+			"tps":0,
+			"traffic":0
+		},
+		"enQueue":{
+			"avg":0.0,
+			"count":0,
+			"max":0.0,
+			"min":0.0,
+			"oneMinuteRate":0,
+			"size":0,
+			"totalSize":0,
+			"tp90":0.0,
+			"tp99":0.0,
+			"tps":0,
+			"traffic":0
+		},
+		"partition":0,
+		"topic":"test_topic_1"
+	},
+	"message":"SUCCESS"
+}
+
 ```
 42.获取partitionGroup监控信息
 -----------------------
@@ -768,7 +1821,11 @@ curl -X GET 'http://localhost:50090/monitor/topic/test_topic_1/partitionGroup/0I
 ```
 响应: 
 ```
-{	"code":500,	"message":"java.lang.NullPointerException"}
+{
+	"code":500,
+	"message":"java.lang.NullPointerException"
+}
+
 ```
 43.获取消费者信息
 ----------
@@ -787,7 +1844,37 @@ curl -X GET 'http://localhost:50090/monitor/topic/test_topic_1/app/test_app/cons
 ```
 响应: 
 ```
-{	"code":200,	"data":{		"app":"test_app",		"connections":0,		"deQueue":{			"avg":0.0,			"count":0,			"max":0.0,			"min":0.0,			"oneMinuteRate":0,			"size":0,			"totalSize":0,			"tp90":0.0,			"tp99":0.0,			"tps":0,			"traffic":0		},		"pending":{			"count":0		},		"retry":{			"count":0,			"failure":0,			"success":0		},		"topic":"test_topic_1"	},	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":{
+		"app":"test_app",
+		"connections":0,
+		"deQueue":{
+			"avg":0.0,
+			"count":0,
+			"max":0.0,
+			"min":0.0,
+			"oneMinuteRate":0,
+			"size":0,
+			"totalSize":0,
+			"tp90":0.0,
+			"tp99":0.0,
+			"tps":0,
+			"traffic":0
+		},
+		"pending":{
+			"count":0
+		},
+		"retry":{
+			"count":0,
+			"failure":0,
+			"success":0
+		},
+		"topic":"test_topic_1"
+	},
+	"message":"SUCCESS"
+}
+
 ```
 44.获得协调者组
 ---------
@@ -808,7 +1895,11 @@ curl -X GET 'http://localhost:50090/monitor/coordinator/namespace/joyqueue/group
 ```
 响应: 
 ```
-{	"code":200,	"message":"SUCCESS"}
+{
+	"code":200,
+	"message":"SUCCESS"
+}
+
 ```
 45.getConsumeBacklogNum
 -----------------------
@@ -824,7 +1915,11 @@ curl -X GET 'http://localhost:50090/monitor/archive/consume'
 ```
 响应: 
 ```
-{	"code":500,	"message":"java.lang.NullPointerException"}
+{
+	"code":500,
+	"message":"java.lang.NullPointerException"
+}
+
 ```
 46.partitionGroupMetric
 -----------------------
@@ -840,7 +1935,11 @@ curl -X GET 'http://localhost:50090/manage/topic/:topic/partitionGroup/:partitio
 ```
 响应: 
 ```
-{	"code":500,	"message":"java.lang.NullPointerException"}
+{
+	"code":500,
+	"message":"java.lang.NullPointerException"
+}
+
 ```
 47.listAbsolutePathFiles
 ------------------------
@@ -856,7 +1955,11 @@ curl -X GET 'http://localhost:50090/manage/store/absolutePathFiles'
 ```
 响应: 
 ```
-{	"code":500,	"message":"java.lang.NullPointerException"}
+{
+	"code":500,
+	"message":"java.lang.NullPointerException"
+}
+
 ```
 48.读取消息
 -------
@@ -877,7 +1980,11 @@ curl -X GET 'http://localhost:50090/manage/topic/test_topic_1/partitionGroup/0/s
 ```
 响应: 
 ```
-{	"code":500,	"message":"java.lang.NullPointerException"}
+{
+	"code":500,
+	"message":"java.lang.NullPointerException"
+}
+
 ```
 49.初始化协调者主题
 -----------
@@ -902,7 +2009,15 @@ curl -X GET 'http://localhost:50090/manage/topic/:topic/store/metric'
 ```
 响应: 
 ```
-{	"code":200,	"data":{		"partitionGroupMetrics":[],		"topic":":topic"	},	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":{
+		"partitionGroupMetrics":[],
+		"topic":":topic"
+	},
+	"message":"SUCCESS"
+}
+
 ```
 51.readPartitionMessage
 -----------------------
@@ -918,7 +2033,12 @@ curl -X GET 'http://localhost:50090/manage/topic/:topic/partition/:partition/sto
 ```
 响应: 
 ```
-{	"code":200,	"data":[],	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":[],
+	"message":"SUCCESS"
+}
+
 ```
 52.关闭消费者连接
 返回关闭的连接数
@@ -948,7 +2068,11 @@ curl -X GET 'http://localhost:50090/manage/store/messages'
 ```
 响应: 
 ```
-{	"code":500,	"message":"java.lang.NullPointerException"}
+{
+	"code":500,
+	"message":"java.lang.NullPointerException"
+}
+
 ```
 54.updateTerm
 -------------
@@ -964,7 +2088,11 @@ curl -X GET 'http://localhost:50090/manage/election/metadata/updateTerm/topic/:t
 ```
 响应: 
 ```
-{	"code":500,	"message":"java.lang.NullPointerException"}
+{
+	"code":500,
+	"message":"java.lang.NullPointerException"
+}
+
 ```
 55.设置最大ack索引
 ------------
@@ -998,7 +2126,12 @@ curl -X GET 'http://localhost:50090/manage/topic/test_topic_1/partition/0/store/
 ```
 响应: 
 ```
-{	"code":200,	"data":[],	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":[],
+	"message":"SUCCESS"
+}
+
 ```
 57.根据时间返回ack
 ------------
@@ -1018,7 +2151,12 @@ curl -X GET 'http://localhost:50090/manage/topic/test_topic_1/app/test_app/times
 ```
 响应: 
 ```
-{	"code":200,	"data":[],	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":[],
+	"message":"SUCCESS"
+}
+
 ```
 58.获取最后message
 --------------
@@ -1038,7 +2176,12 @@ curl -X GET 'http://localhost:50090/manage/topic/test_topic_1/app/test_app/messa
 ```
 响应: 
 ```
-{	"code":200,	"data":[],	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":[],
+	"message":"SUCCESS"
+}
+
 ```
 59.根据时间设置ack
 ------------
@@ -1071,7 +2214,12 @@ curl -X GET 'http://localhost:50090/manage/topic/test_topic_1/app/test_app/acks'
 ```
 响应: 
 ```
-{	"code":200,	"data":[],	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":[],
+	"message":"SUCCESS"
+}
+
 ```
 61.列出store中给定path的所有文件
 ----------------------
@@ -1089,7 +2237,11 @@ curl -X GET 'http://localhost:50090/manage/store/files/xxxx'
 ```
 响应: 
 ```
-{	"code":200,	"message":"SUCCESS"}
+{
+	"code":200,
+	"message":"SUCCESS"
+}
+
 ```
 62.readPartitionGroupStore
 --------------------------
@@ -1105,7 +2257,11 @@ curl -X GET 'http://localhost:50090/manage/topic/:topic/partitionGroup/:partitio
 ```
 响应: 
 ```
-{	"code":500,	"message":"java.lang.NullPointerException"}
+{
+	"code":500,
+	"message":"java.lang.NullPointerException"
+}
+
 ```
 63.关闭生产者连接
 返回关闭的连接数
@@ -1140,7 +2296,12 @@ curl -X GET 'http://localhost:50090/manage/topic/test_topic_1/app/test_app/parti
 ```
 响应: 
 ```
-{	"code":200,	"data":-1,	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":-1,
+	"message":"SUCCESS"
+}
+
 ```
 65.获取积压message
 --------------
@@ -1160,7 +2321,12 @@ curl -X GET 'http://localhost:50090/manage/topic/test_topic_1/app/test_app/messa
 ```
 响应: 
 ```
-{	"code":200,	"data":[],	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":[],
+	"message":"SUCCESS"
+}
+
 ```
 66.topics
 ---------
@@ -1176,7 +2342,15 @@ curl -X GET 'http://localhost:50090/manage/topic/list'
 ```
 响应: 
 ```
-{	"code":200,	"data":[		"__transaction_coordinators",		"__group_coordinators"	],	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":[
+		"__transaction_coordinators",
+		"__group_coordinators"
+	],
+	"message":"SUCCESS"
+}
+
 ```
 67.读取partition
 --------------
@@ -1194,7 +2368,11 @@ curl -X GET 'http://localhost:50090/manage/topic/test_topic_1/partitionGroup/det
 ```
 响应: 
 ```
-{	"code":500,	"message":"java.lang.NullPointerException"}
+{
+	"code":500,
+	"message":"java.lang.NullPointerException"
+}
+
 ```
 68.移除协调者组
 ---------
@@ -1222,7 +2400,12 @@ curl -X GET 'http://localhost:50090/manage/election/metadata/describeTopic/topic
 ```
 响应: 
 ```
-{	"code":200,	"data":"null",	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":"null",
+	"message":"SUCCESS"
+}
+
 ```
 70.根据时间设置ack
 ------------
@@ -1257,7 +2440,12 @@ curl -X GET 'http://localhost:50090/manage/topic/test_topic_1/app/test_app/parti
 ```
 响应: 
 ```
-{	"code":200,	"data":[],	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":[],
+	"message":"SUCCESS"
+}
+
 ```
 72.readIndices
 --------------
@@ -1273,7 +2461,11 @@ curl -X GET 'http://localhost:50090/manage/store/indexes'
 ```
 响应: 
 ```
-{	"code":500,	"message":"java.lang.NullPointerException"}
+{
+	"code":500,
+	"message":"java.lang.NullPointerException"
+}
+
 ```
 73.设置最大ack索引
 ------------
@@ -1301,7 +2493,258 @@ curl -X GET 'http://localhost:50090/manage/topic/store/metrics'
 ```
 响应: 
 ```
-{	"code":200,	"data":[{		"partitionGroupMetrics":[{			"flushPosition":0,			"indexPosition":0,			"leftPosition":0,			"partitionGroup":4,			"partitionMetrics":[{				"leftIndex":0,				"partition":4,				"rightIndex":0			}],			"replicationPosition":0,			"rightPosition":0		},{			"flushPosition":0,			"indexPosition":0,			"leftPosition":0,			"partitionGroup":3,			"partitionMetrics":[{				"leftIndex":0,				"partition":3,				"rightIndex":0			}],			"replicationPosition":0,			"rightPosition":0		},{			"flushPosition":0,			"indexPosition":0,			"leftPosition":0,			"partitionGroup":6,			"partitionMetrics":[{				"leftIndex":0,				"partition":6,				"rightIndex":0			}],			"replicationPosition":0,			"rightPosition":0		},{			"flushPosition":0,			"indexPosition":0,			"leftPosition":0,			"partitionGroup":5,			"partitionMetrics":[{				"leftIndex":0,				"partition":5,				"rightIndex":0			}],			"replicationPosition":0,			"rightPosition":0		},{			"flushPosition":0,			"indexPosition":0,			"leftPosition":0,			"partitionGroup":8,			"partitionMetrics":[{				"leftIndex":0,				"partition":8,				"rightIndex":0			}],			"replicationPosition":0,			"rightPosition":0		},{			"flushPosition":0,			"indexPosition":0,			"leftPosition":0,			"partitionGroup":7,			"partitionMetrics":[{				"leftIndex":0,				"partition":7,				"rightIndex":0			}],			"replicationPosition":0,			"rightPosition":0		},{			"flushPosition":0,			"indexPosition":0,			"leftPosition":0,			"partitionGroup":9,			"partitionMetrics":[{				"leftIndex":0,				"partition":9,				"rightIndex":0			}],			"replicationPosition":0,			"rightPosition":0		},{			"flushPosition":0,			"indexPosition":0,			"leftPosition":0,			"partitionGroup":0,			"partitionMetrics":[{				"leftIndex":0,				"partition":0,				"rightIndex":0			}],			"replicationPosition":0,			"rightPosition":0		},{			"flushPosition":0,			"indexPosition":0,			"leftPosition":0,			"partitionGroup":2,			"partitionMetrics":[{				"leftIndex":0,				"partition":2,				"rightIndex":0			}],			"replicationPosition":0,			"rightPosition":0		},{			"flushPosition":0,			"indexPosition":0,			"leftPosition":0,			"partitionGroup":1,			"partitionMetrics":[{				"leftIndex":0,				"partition":1,				"rightIndex":0			}],			"replicationPosition":0,			"rightPosition":0		}],		"topic":"__transaction_coordinators"	},{		"partitionGroupMetrics":[{			"flushPosition":0,			"indexPosition":0,			"leftPosition":0,			"partitionGroup":3,			"partitionMetrics":[{				"leftIndex":0,				"partition":3,				"rightIndex":0			}],			"replicationPosition":0,			"rightPosition":0		},{			"flushPosition":0,			"indexPosition":0,			"leftPosition":0,			"partitionGroup":2,			"partitionMetrics":[{				"leftIndex":0,				"partition":2,				"rightIndex":0			}],			"replicationPosition":0,			"rightPosition":0		},{			"flushPosition":0,			"indexPosition":0,			"leftPosition":0,			"partitionGroup":1,			"partitionMetrics":[{				"leftIndex":0,				"partition":1,				"rightIndex":0			}],			"replicationPosition":0,			"rightPosition":0		},{			"flushPosition":0,			"indexPosition":0,			"leftPosition":0,			"partitionGroup":0,			"partitionMetrics":[{				"leftIndex":0,				"partition":0,				"rightIndex":0			}],			"replicationPosition":0,			"rightPosition":0		},{			"flushPosition":0,			"indexPosition":0,			"leftPosition":0,			"partitionGroup":9,			"partitionMetrics":[{				"leftIndex":0,				"partition":9,				"rightIndex":0			}],			"replicationPosition":0,			"rightPosition":0		},{			"flushPosition":0,			"indexPosition":0,			"leftPosition":0,			"partitionGroup":8,			"partitionMetrics":[{				"leftIndex":0,				"partition":8,				"rightIndex":0			}],			"replicationPosition":0,			"rightPosition":0		},{			"flushPosition":0,			"indexPosition":0,			"leftPosition":0,			"partitionGroup":7,			"partitionMetrics":[{				"leftIndex":0,				"partition":7,				"rightIndex":0			}],			"replicationPosition":0,			"rightPosition":0		},{			"flushPosition":0,			"indexPosition":0,			"leftPosition":0,			"partitionGroup":6,			"partitionMetrics":[{				"leftIndex":0,				"partition":6,				"rightIndex":0			}],			"replicationPosition":0,			"rightPosition":0		},{			"flushPosition":0,			"indexPosition":0,			"leftPosition":0,			"partitionGroup":5,			"partitionMetrics":[{				"leftIndex":0,				"partition":5,				"rightIndex":0			}],			"replicationPosition":0,			"rightPosition":0		},{			"flushPosition":0,			"indexPosition":0,			"leftPosition":0,			"partitionGroup":4,			"partitionMetrics":[{				"leftIndex":0,				"partition":4,				"rightIndex":0			}],			"replicationPosition":0,			"rightPosition":0		}],		"topic":"__group_coordinators"	}],	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":[{
+		"partitionGroupMetrics":[{
+			"flushPosition":0,
+			"indexPosition":0,
+			"leftPosition":0,
+			"partitionGroup":4,
+			"partitionMetrics":[{
+				"leftIndex":0,
+				"partition":4,
+				"rightIndex":0
+			}],
+			"replicationPosition":0,
+			"rightPosition":0
+		},{
+			"flushPosition":0,
+			"indexPosition":0,
+			"leftPosition":0,
+			"partitionGroup":3,
+			"partitionMetrics":[{
+				"leftIndex":0,
+				"partition":3,
+				"rightIndex":0
+			}],
+			"replicationPosition":0,
+			"rightPosition":0
+		},{
+			"flushPosition":0,
+			"indexPosition":0,
+			"leftPosition":0,
+			"partitionGroup":6,
+			"partitionMetrics":[{
+				"leftIndex":0,
+				"partition":6,
+				"rightIndex":0
+			}],
+			"replicationPosition":0,
+			"rightPosition":0
+		},{
+			"flushPosition":0,
+			"indexPosition":0,
+			"leftPosition":0,
+			"partitionGroup":5,
+			"partitionMetrics":[{
+				"leftIndex":0,
+				"partition":5,
+				"rightIndex":0
+			}],
+			"replicationPosition":0,
+			"rightPosition":0
+		},{
+			"flushPosition":0,
+			"indexPosition":0,
+			"leftPosition":0,
+			"partitionGroup":8,
+			"partitionMetrics":[{
+				"leftIndex":0,
+				"partition":8,
+				"rightIndex":0
+			}],
+			"replicationPosition":0,
+			"rightPosition":0
+		},{
+			"flushPosition":0,
+			"indexPosition":0,
+			"leftPosition":0,
+			"partitionGroup":7,
+			"partitionMetrics":[{
+				"leftIndex":0,
+				"partition":7,
+				"rightIndex":0
+			}],
+			"replicationPosition":0,
+			"rightPosition":0
+		},{
+			"flushPosition":0,
+			"indexPosition":0,
+			"leftPosition":0,
+			"partitionGroup":9,
+			"partitionMetrics":[{
+				"leftIndex":0,
+				"partition":9,
+				"rightIndex":0
+			}],
+			"replicationPosition":0,
+			"rightPosition":0
+		},{
+			"flushPosition":0,
+			"indexPosition":0,
+			"leftPosition":0,
+			"partitionGroup":0,
+			"partitionMetrics":[{
+				"leftIndex":0,
+				"partition":0,
+				"rightIndex":0
+			}],
+			"replicationPosition":0,
+			"rightPosition":0
+		},{
+			"flushPosition":0,
+			"indexPosition":0,
+			"leftPosition":0,
+			"partitionGroup":2,
+			"partitionMetrics":[{
+				"leftIndex":0,
+				"partition":2,
+				"rightIndex":0
+			}],
+			"replicationPosition":0,
+			"rightPosition":0
+		},{
+			"flushPosition":0,
+			"indexPosition":0,
+			"leftPosition":0,
+			"partitionGroup":1,
+			"partitionMetrics":[{
+				"leftIndex":0,
+				"partition":1,
+				"rightIndex":0
+			}],
+			"replicationPosition":0,
+			"rightPosition":0
+		}],
+		"topic":"__transaction_coordinators"
+	},{
+		"partitionGroupMetrics":[{
+			"flushPosition":0,
+			"indexPosition":0,
+			"leftPosition":0,
+			"partitionGroup":3,
+			"partitionMetrics":[{
+				"leftIndex":0,
+				"partition":3,
+				"rightIndex":0
+			}],
+			"replicationPosition":0,
+			"rightPosition":0
+		},{
+			"flushPosition":0,
+			"indexPosition":0,
+			"leftPosition":0,
+			"partitionGroup":2,
+			"partitionMetrics":[{
+				"leftIndex":0,
+				"partition":2,
+				"rightIndex":0
+			}],
+			"replicationPosition":0,
+			"rightPosition":0
+		},{
+			"flushPosition":0,
+			"indexPosition":0,
+			"leftPosition":0,
+			"partitionGroup":1,
+			"partitionMetrics":[{
+				"leftIndex":0,
+				"partition":1,
+				"rightIndex":0
+			}],
+			"replicationPosition":0,
+			"rightPosition":0
+		},{
+			"flushPosition":0,
+			"indexPosition":0,
+			"leftPosition":0,
+			"partitionGroup":0,
+			"partitionMetrics":[{
+				"leftIndex":0,
+				"partition":0,
+				"rightIndex":0
+			}],
+			"replicationPosition":0,
+			"rightPosition":0
+		},{
+			"flushPosition":0,
+			"indexPosition":0,
+			"leftPosition":0,
+			"partitionGroup":9,
+			"partitionMetrics":[{
+				"leftIndex":0,
+				"partition":9,
+				"rightIndex":0
+			}],
+			"replicationPosition":0,
+			"rightPosition":0
+		},{
+			"flushPosition":0,
+			"indexPosition":0,
+			"leftPosition":0,
+			"partitionGroup":8,
+			"partitionMetrics":[{
+				"leftIndex":0,
+				"partition":8,
+				"rightIndex":0
+			}],
+			"replicationPosition":0,
+			"rightPosition":0
+		},{
+			"flushPosition":0,
+			"indexPosition":0,
+			"leftPosition":0,
+			"partitionGroup":7,
+			"partitionMetrics":[{
+				"leftIndex":0,
+				"partition":7,
+				"rightIndex":0
+			}],
+			"replicationPosition":0,
+			"rightPosition":0
+		},{
+			"flushPosition":0,
+			"indexPosition":0,
+			"leftPosition":0,
+			"partitionGroup":6,
+			"partitionMetrics":[{
+				"leftIndex":0,
+				"partition":6,
+				"rightIndex":0
+			}],
+			"replicationPosition":0,
+			"rightPosition":0
+		},{
+			"flushPosition":0,
+			"indexPosition":0,
+			"leftPosition":0,
+			"partitionGroup":5,
+			"partitionMetrics":[{
+				"leftIndex":0,
+				"partition":5,
+				"rightIndex":0
+			}],
+			"replicationPosition":0,
+			"rightPosition":0
+		},{
+			"flushPosition":0,
+			"indexPosition":0,
+			"leftPosition":0,
+			"partitionGroup":4,
+			"partitionMetrics":[{
+				"leftIndex":0,
+				"partition":4,
+				"rightIndex":0
+			}],
+			"replicationPosition":0,
+			"rightPosition":0
+		}],
+		"topic":"__group_coordinators"
+	}],
+	"message":"SUCCESS"
+}
+
 ```
 75.裸接口
 ------
@@ -1321,7 +2764,12 @@ curl -X GET 'http://localhost:50090/manage/store/file?file=abc&position=0&length
 ```
 响应: 
 ```
-{	"code":200,	"data":"LENGTH(4): 0\nPARTITION(2): 0\nINDEX(8): 0\nTERM(4): 0\nMAGIC(2): 0\nSYS(2): 0\nPRIORITY(1): 00(0)\nCLIENT_IP(16): \n\tHex: 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 \n\tString: \u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\nCLIENT_TIMESTAMP(8): 0 (1970-01-01 08:00:00.000)\nSTORAGE_TIMESTAMP(4): 0 (1970-01-01 08:00:00.000)\nCRC(8): 0\nFLAG(2): 0\nBODY(0): \n\tHex: \n\tString: \nBIZ_ID(0): \n\tHex: \n\tString: \nPROPERTY(0): \n\tHex: \n\tString: \nEXPAND(0): \n\tHex: \n\tString: \nAPP(0): \n\tHex: \n\tString: \n",	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":"LENGTH(4): 0\nPARTITION(2): 0\nINDEX(8): 0\nTERM(4): 0\nMAGIC(2): 0\nSYS(2): 0\nPRIORITY(1): 00(0)\nCLIENT_IP(16): \n\tHex: 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 \n\tString: \u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\nCLIENT_TIMESTAMP(8): 0 (1970-01-01 08:00:00.000)\nSTORAGE_TIMESTAMP(4): 0 (1970-01-01 08:00:00.000)\nCRC(8): 0\nFLAG(2): 0\nBODY(0): \n\tHex: \n\tString: \nBIZ_ID(0): \n\tHex: \n\tString: \nPROPERTY(0): \n\tHex: \n\tString: \nEXPAND(0): \n\tHex: \n\tString: \nAPP(0): \n\tHex: \n\tString: \n",
+	"message":"SUCCESS"
+}
+
 ```
 76.设置ackindex
 -------------
@@ -1351,7 +2799,11 @@ curl -X GET 'http://localhost:50090/manage/election/metadata/restore'
 ```
 响应: 
 ```
-{	"code":200,	"message":"SUCCESS"}
+{
+	"code":200,
+	"message":"SUCCESS"
+}
+
 ```
 78.partitionMetric
 ------------------
@@ -1367,7 +2819,11 @@ curl -X GET 'http://localhost:50090/manage/topic/:topic/partition/:partition/sto
 ```
 响应: 
 ```
-{	"code":500,	"message":"java.lang.NullPointerException"}
+{
+	"code":500,
+	"message":"java.lang.NullPointerException"
+}
+
 ```
 79.获取message，如果有积压消息返回积压，否则返回最后几条
 ---------------------------------
@@ -1387,7 +2843,12 @@ curl -X GET 'http://localhost:50090/manage/topic/test_topic_1/app/test_app/messa
 ```
 响应: 
 ```
-{	"code":200,	"data":[],	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":[],
+	"message":"SUCCESS"
+}
+
 ```
 80.describe
 -----------
@@ -1403,7 +2864,12 @@ curl -X GET 'http://localhost:50090/manage/election/metadata/describe'
 ```
 响应: 
 ```
-{	"code":200,	"data":"{{\"partitionGroupId\":0,\"topic\":\"__group_coordinators\"}:{\"allNodes\":[{\"address\":\"10.0.16.231:50089\",\"nodeId\":1563873557,\"priority\":0,\"state\":\"FOLLOWER\",\"voteGranted\":false}],\"currentTerm\":0,\"electType\":\"raft\",\"leaderId\":1563873557,\"learners\":[],\"localNodeId\":1563873557,\"timestamp\":1563873787095,\"votedFor\":-1},{\"partitionGroupId\":3,\"topic\":\"__group_coordinators\"}:{\"allNodes\":[{\"address\":\"10.0.16.231:50089\",\"nodeId\":1563873557,\"priority\":0,\"state\":\"FOLLOWER\",\"voteGranted\":false}],\"currentTerm\":0,\"electType\":\"raft\",\"leaderId\":1563873557,\"learners\":[],\"localNodeId\":1563873557,\"timestamp\":1563873787102,\"votedFor\":-1},{\"partitionGroupId\":4,\"topic\":\"__group_coordinators\"}:{\"allNodes\":[{\"address\":\"10.0.16.231:50089\",\"nodeId\":1563873557,\"priority\":0,\"state\":\"FOLLOWER\",\"voteGranted\":false}],\"currentTerm\":0,\"electType\":\"raft\",\"leaderId\":1563873557,\"learners\":[],\"localNodeId\":1563873557,\"timestamp\":1563873787105,\"votedFor\":-1},{\"partitionGroupId\":1,\"topic\":\"__group_coordinators\"}:{\"allNodes\":[{\"address\":\"10.0.16.231:50089\",\"nodeId\":1563873557,\"priority\":0,\"state\":\"FOLLOWER\",\"voteGranted\":false}],\"currentTerm\":0,\"electType\":\"raft\",\"leaderId\":1563873557,\"learners\":[],\"localNodeId\":1563873557,\"timestamp\":1563873787097,\"votedFor\":-1},{\"partitionGroupId\":2,\"topic\":\"__group_coordinators\"}:{\"allNodes\":[{\"address\":\"10.0.16.231:50089\",\"nodeId\":1563873557,\"priority\":0,\"state\":\"FOLLOWER\",\"voteGranted\":false}],\"currentTerm\":0,\"electType\":\"raft\",\"leaderId\":1563873557,\"learners\":[],\"localNodeId\":1563873557,\"timestamp\":1563873787099,\"votedFor\":-1},{\"partitionGroupId\":7,\"topic\":\"__group_coordinators\"}:{\"allNodes\":[{\"address\":\"10.0.16.231:50089\",\"nodeId\":1563873557,\"priority\":0,\"state\":\"FOLLOWER\",\"voteGranted\":false}],\"currentTerm\":0,\"electType\":\"raft\",\"leaderId\":1563873557,\"learners\":[],\"localNodeId\":1563873557,\"timestamp\":1563873787112,\"votedFor\":-1},{\"partitionGroupId\":8,\"topic\":\"__group_coordinators\"}:{\"allNodes\":[{\"address\":\"10.0.16.231:50089\",\"nodeId\":1563873557,\"priority\":0,\"state\":\"FOLLOWER\",\"voteGranted\":false}],\"currentTerm\":0,\"electType\":\"raft\",\"leaderId\":1563873557,\"learners\":[],\"localNodeId\":1563873557,\"timestamp\":1563873787115,\"votedFor\":-1},{\"partitionGroupId\":5,\"topic\":\"__group_coordinators\"}:{\"allNodes\":[{\"address\":\"10.0.16.231:50089\",\"nodeId\":1563873557,\"priority\":0,\"state\":\"FOLLOWER\",\"voteGranted\":false}],\"currentTerm\":0,\"electType\":\"raft\",\"leaderId\":1563873557,\"learners\":[],\"localNodeId\":1563873557,\"timestamp\":1563873787106,\"votedFor\":-1},{\"partitionGroupId\":6,\"topic\":\"__group_coordinators\"}:{\"allNodes\":[{\"address\":\"10.0.16.231:50089\",\"nodeId\":1563873557,\"priority\":0,\"state\":\"FOLLOWER\",\"voteGranted\":false}],\"currentTerm\":0,\"electType\":\"raft\",\"leaderId\":1563873557,\"learners\":[],\"localNodeId\":1563873557,\"timestamp\":1563873787108,\"votedFor\":-1},{\"partitionGroupId\":9,\"topic\":\"__group_coordinators\"}:{\"allNodes\":[{\"address\":\"10.0.16.231:50089\",\"nodeId\":1563873557,\"priority\":0,\"state\":\"FOLLOWER\",\"voteGranted\":false}],\"currentTerm\":0,\"electType\":\"raft\",\"leaderId\":1563873557,\"learners\":[],\"localNodeId\":1563873557,\"timestamp\":1563873787116,\"votedFor\":-1},{\"partitionGroupId\":9,\"topic\":\"__transaction_coordinators\"}:{\"allNodes\":[{\"address\":\"10.0.16.231:50089\",\"nodeId\":1563873557,\"priority\":0,\"state\":\"FOLLOWER\",\"voteGranted\":false}],\"currentTerm\":0,\"electType\":\"raft\",\"leaderId\":1563873557,\"learners\":[],\"localNodeId\":1563873557,\"timestamp\":1563873787091,\"votedFor\":-1},{\"partitionGroupId\":8,\"topic\":\"__transaction_coordinators\"}:{\"allNodes\":[{\"address\":\"10.0.16.231:50089\",\"nodeId\":1563873557,\"priority\":0,\"state\":\"FOLLOWER\",\"voteGranted\":false}],\"currentTerm\":0,\"electType\":\"raft\",\"leaderId\":1563873557,\"learners\":[],\"localNodeId\":1563873557,\"timestamp\":1563873787090,\"votedFor\":-1},{\"partitionGroupId\":7,\"topic\":\"__transaction_coordinators\"}:{\"allNodes\":[{\"address\":\"10.0.16.231:50089\",\"nodeId\":1563873557,\"priority\":0,\"state\":\"FOLLOWER\",\"voteGranted\":false}],\"currentTerm\":0,\"electType\":\"raft\",\"leaderId\":1563873557,\"learners\":[],\"localNodeId\":1563873557,\"timestamp\":1563873787087,\"votedFor\":-1},{\"partitionGroupId\":6,\"topic\":\"__transaction_coordinators\"}:{\"allNodes\":[{\"address\":\"10.0.16.231:50089\",\"nodeId\":1563873557,\"priority\":0,\"state\":\"FOLLOWER\",\"voteGranted\":false}],\"currentTerm\":0,\"electType\":\"raft\",\"leaderId\":1563873557,\"learners\":[],\"localNodeId\":1563873557,\"timestamp\":1563873787084,\"votedFor\":-1},{\"partitionGroupId\":5,\"topic\":\"__transaction_coordinators\"}:{\"allNodes\":[{\"address\":\"10.0.16.231:50089\",\"nodeId\":1563873557,\"priority\":0,\"state\":\"FOLLOWER\",\"voteGranted\":false}],\"currentTerm\":0,\"electType\":\"raft\",\"leaderId\":1563873557,\"learners\":[],\"localNodeId\":1563873557,\"timestamp\":1563873787081,\"votedFor\":-1},{\"partitionGroupId\":4,\"topic\":\"__transaction_coordinators\"}:{\"allNodes\":[{\"address\":\"10.0.16.231:50089\",\"nodeId\":1563873557,\"priority\":0,\"state\":\"FOLLOWER\",\"voteGranted\":false}],\"currentTerm\":0,\"electType\":\"raft\",\"leaderId\":1563873557,\"learners\":[],\"localNodeId\":1563873557,\"timestamp\":1563873787079,\"votedFor\":-1},{\"partitionGroupId\":3,\"topic\":\"__transaction_coordinators\"}:{\"allNodes\":[{\"address\":\"10.0.16.231:50089\",\"nodeId\":1563873557,\"priority\":0,\"state\":\"FOLLOWER\",\"voteGranted\":false}],\"currentTerm\":0,\"electType\":\"raft\",\"leaderId\":1563873557,\"learners\":[],\"localNodeId\":1563873557,\"timestamp\":1563873787076,\"votedFor\":-1},{\"partitionGroupId\":2,\"topic\":\"__transaction_coordinators\"}:{\"allNodes\":[{\"address\":\"10.0.16.231:50089\",\"nodeId\":1563873557,\"priority\":0,\"state\":\"FOLLOWER\",\"voteGranted\":false}],\"currentTerm\":0,\"electType\":\"raft\",\"leaderId\":1563873557,\"learners\":[],\"localNodeId\":1563873557,\"timestamp\":1563873787074,\"votedFor\":-1},{\"partitionGroupId\":1,\"topic\":\"__transaction_coordinators\"}:{\"allNodes\":[{\"address\":\"10.0.16.231:50089\",\"nodeId\":1563873557,\"priority\":0,\"state\":\"FOLLOWER\",\"voteGranted\":false}],\"currentTerm\":0,\"electType\":\"raft\",\"leaderId\":1563873557,\"learners\":[],\"localNodeId\":1563873557,\"timestamp\":1563873787069,\"votedFor\":-1},{\"partitionGroupId\":0,\"topic\":\"__transaction_coordinators\"}:{\"allNodes\":[{\"address\":\"10.0.16.231:50089\",\"nodeId\":1563873557,\"priority\":0,\"state\":\"FOLLOWER\",\"voteGranted\":false}],\"currentTerm\":0,\"electType\":\"raft\",\"leaderId\":1563873557,\"learners\":[],\"localNodeId\":1563873557,\"timestamp\":1563873787065,\"votedFor\":-1}}",	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":"{{\"partitionGroupId\":0,\"topic\":\"__group_coordinators\"}:{\"allNodes\":[{\"address\":\"10.0.16.231:50089\",\"nodeId\":1563873557,\"priority\":0,\"state\":\"FOLLOWER\",\"voteGranted\":false}],\"currentTerm\":0,\"electType\":\"raft\",\"leaderId\":1563873557,\"learners\":[],\"localNodeId\":1563873557,\"timestamp\":1563875591804,\"votedFor\":-1},{\"partitionGroupId\":3,\"topic\":\"__group_coordinators\"}:{\"allNodes\":[{\"address\":\"10.0.16.231:50089\",\"nodeId\":1563873557,\"priority\":0,\"state\":\"FOLLOWER\",\"voteGranted\":false}],\"currentTerm\":0,\"electType\":\"raft\",\"leaderId\":1563873557,\"learners\":[],\"localNodeId\":1563873557,\"timestamp\":1563875591813,\"votedFor\":-1},{\"partitionGroupId\":4,\"topic\":\"__group_coordinators\"}:{\"allNodes\":[{\"address\":\"10.0.16.231:50089\",\"nodeId\":1563873557,\"priority\":0,\"state\":\"FOLLOWER\",\"voteGranted\":false}],\"currentTerm\":0,\"electType\":\"raft\",\"leaderId\":1563873557,\"learners\":[],\"localNodeId\":1563873557,\"timestamp\":1563875591816,\"votedFor\":-1},{\"partitionGroupId\":1,\"topic\":\"__group_coordinators\"}:{\"allNodes\":[{\"address\":\"10.0.16.231:50089\",\"nodeId\":1563873557,\"priority\":0,\"state\":\"FOLLOWER\",\"voteGranted\":false}],\"currentTerm\":0,\"electType\":\"raft\",\"leaderId\":1563873557,\"learners\":[],\"localNodeId\":1563873557,\"timestamp\":1563875591807,\"votedFor\":-1},{\"partitionGroupId\":2,\"topic\":\"__group_coordinators\"}:{\"allNodes\":[{\"address\":\"10.0.16.231:50089\",\"nodeId\":1563873557,\"priority\":0,\"state\":\"FOLLOWER\",\"voteGranted\":false}],\"currentTerm\":0,\"electType\":\"raft\",\"leaderId\":1563873557,\"learners\":[],\"localNodeId\":1563873557,\"timestamp\":1563875591810,\"votedFor\":-1},{\"partitionGroupId\":7,\"topic\":\"__group_coordinators\"}:{\"allNodes\":[{\"address\":\"10.0.16.231:50089\",\"nodeId\":1563873557,\"priority\":0,\"state\":\"FOLLOWER\",\"voteGranted\":false}],\"currentTerm\":0,\"electType\":\"raft\",\"leaderId\":1563873557,\"learners\":[],\"localNodeId\":1563873557,\"timestamp\":1563875591822,\"votedFor\":-1},{\"partitionGroupId\":8,\"topic\":\"__group_coordinators\"}:{\"allNodes\":[{\"address\":\"10.0.16.231:50089\",\"nodeId\":1563873557,\"priority\":0,\"state\":\"FOLLOWER\",\"voteGranted\":false}],\"currentTerm\":0,\"electType\":\"raft\",\"leaderId\":1563873557,\"learners\":[],\"localNodeId\":1563873557,\"timestamp\":1563875591824,\"votedFor\":-1},{\"partitionGroupId\":5,\"topic\":\"__group_coordinators\"}:{\"allNodes\":[{\"address\":\"10.0.16.231:50089\",\"nodeId\":1563873557,\"priority\":0,\"state\":\"FOLLOWER\",\"voteGranted\":false}],\"currentTerm\":0,\"electType\":\"raft\",\"leaderId\":1563873557,\"learners\":[],\"localNodeId\":1563873557,\"timestamp\":1563875591818,\"votedFor\":-1},{\"partitionGroupId\":6,\"topic\":\"__group_coordinators\"}:{\"allNodes\":[{\"address\":\"10.0.16.231:50089\",\"nodeId\":1563873557,\"priority\":0,\"state\":\"FOLLOWER\",\"voteGranted\":false}],\"currentTerm\":0,\"electType\":\"raft\",\"leaderId\":1563873557,\"learners\":[],\"localNodeId\":1563873557,\"timestamp\":1563875591820,\"votedFor\":-1},{\"partitionGroupId\":9,\"topic\":\"__group_coordinators\"}:{\"allNodes\":[{\"address\":\"10.0.16.231:50089\",\"nodeId\":1563873557,\"priority\":0,\"state\":\"FOLLOWER\",\"voteGranted\":false}],\"currentTerm\":0,\"electType\":\"raft\",\"leaderId\":1563873557,\"learners\":[],\"localNodeId\":1563873557,\"timestamp\":1563875591826,\"votedFor\":-1},{\"partitionGroupId\":9,\"topic\":\"__transaction_coordinators\"}:{\"allNodes\":[{\"address\":\"10.0.16.231:50089\",\"nodeId\":1563873557,\"priority\":0,\"state\":\"FOLLOWER\",\"voteGranted\":false}],\"currentTerm\":0,\"electType\":\"raft\",\"leaderId\":1563873557,\"learners\":[],\"localNodeId\":1563873557,\"timestamp\":1563875591803,\"votedFor\":-1},{\"partitionGroupId\":8,\"topic\":\"__transaction_coordinators\"}:{\"allNodes\":[{\"address\":\"10.0.16.231:50089\",\"nodeId\":1563873557,\"priority\":0,\"state\":\"FOLLOWER\",\"voteGranted\":false}],\"currentTerm\":0,\"electType\":\"raft\",\"leaderId\":1563873557,\"learners\":[],\"localNodeId\":1563873557,\"timestamp\":1563875591800,\"votedFor\":-1},{\"partitionGroupId\":7,\"topic\":\"__transaction_coordinators\"}:{\"allNodes\":[{\"address\":\"10.0.16.231:50089\",\"nodeId\":1563873557,\"priority\":0,\"state\":\"FOLLOWER\",\"voteGranted\":false}],\"currentTerm\":0,\"electType\":\"raft\",\"leaderId\":1563873557,\"learners\":[],\"localNodeId\":1563873557,\"timestamp\":1563875591798,\"votedFor\":-1},{\"partitionGroupId\":6,\"topic\":\"__transaction_coordinators\"}:{\"allNodes\":[{\"address\":\"10.0.16.231:50089\",\"nodeId\":1563873557,\"priority\":0,\"state\":\"FOLLOWER\",\"voteGranted\":false}],\"currentTerm\":0,\"electType\":\"raft\",\"leaderId\":1563873557,\"learners\":[],\"localNodeId\":1563873557,\"timestamp\":1563875591796,\"votedFor\":-1},{\"partitionGroupId\":5,\"topic\":\"__transaction_coordinators\"}:{\"allNodes\":[{\"address\":\"10.0.16.231:50089\",\"nodeId\":1563873557,\"priority\":0,\"state\":\"FOLLOWER\",\"voteGranted\":false}],\"currentTerm\":0,\"electType\":\"raft\",\"leaderId\":1563873557,\"learners\":[],\"localNodeId\":1563873557,\"timestamp\":1563875591793,\"votedFor\":-1},{\"partitionGroupId\":4,\"topic\":\"__transaction_coordinators\"}:{\"allNodes\":[{\"address\":\"10.0.16.231:50089\",\"nodeId\":1563873557,\"priority\":0,\"state\":\"FOLLOWER\",\"voteGranted\":false}],\"currentTerm\":0,\"electType\":\"raft\",\"leaderId\":1563873557,\"learners\":[],\"localNodeId\":1563873557,\"timestamp\":1563875591788,\"votedFor\":-1},{\"partitionGroupId\":3,\"topic\":\"__transaction_coordinators\"}:{\"allNodes\":[{\"address\":\"10.0.16.231:50089\",\"nodeId\":1563873557,\"priority\":0,\"state\":\"FOLLOWER\",\"voteGranted\":false}],\"currentTerm\":0,\"electType\":\"raft\",\"leaderId\":1563873557,\"learners\":[],\"localNodeId\":1563873557,\"timestamp\":1563875591785,\"votedFor\":-1},{\"partitionGroupId\":2,\"topic\":\"__transaction_coordinators\"}:{\"allNodes\":[{\"address\":\"10.0.16.231:50089\",\"nodeId\":1563873557,\"priority\":0,\"state\":\"FOLLOWER\",\"voteGranted\":false}],\"currentTerm\":0,\"electType\":\"raft\",\"leaderId\":1563873557,\"learners\":[],\"localNodeId\":1563873557,\"timestamp\":1563875591783,\"votedFor\":-1},{\"partitionGroupId\":1,\"topic\":\"__transaction_coordinators\"}:{\"allNodes\":[{\"address\":\"10.0.16.231:50089\",\"nodeId\":1563873557,\"priority\":0,\"state\":\"FOLLOWER\",\"voteGranted\":false}],\"currentTerm\":0,\"electType\":\"raft\",\"leaderId\":1563873557,\"learners\":[],\"localNodeId\":1563873557,\"timestamp\":1563875591781,\"votedFor\":-1},{\"partitionGroupId\":0,\"topic\":\"__transaction_coordinators\"}:{\"allNodes\":[{\"address\":\"10.0.16.231:50089\",\"nodeId\":1563873557,\"priority\":0,\"state\":\"FOLLOWER\",\"voteGranted\":false}],\"currentTerm\":0,\"electType\":\"raft\",\"leaderId\":1563873557,\"learners\":[],\"localNodeId\":1563873557,\"timestamp\":1563875591779,\"votedFor\":-1}}",
+	"message":"SUCCESS"
+}
+
 ```
 81.返回最大ack索引
 ------------
@@ -1423,5 +2889,10 @@ curl -X GET 'http://localhost:50090/manage/topic/test_topic_1/app/test_app/parti
 ```
 响应: 
 ```
-{	"code":200,	"data":-1,	"message":"SUCCESS"}
+{
+	"code":200,
+	"data":-1,
+	"message":"SUCCESS"
+}
+
 ```
