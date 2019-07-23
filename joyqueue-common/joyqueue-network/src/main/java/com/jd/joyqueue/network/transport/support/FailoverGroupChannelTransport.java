@@ -34,7 +34,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 /**
@@ -53,7 +52,7 @@ public class FailoverGroupChannelTransport implements ChannelTransport {
     private TransportConfig config;
     private EventBus<TransportEvent> transportEventBus;
 
-    private AtomicInteger roundrobinIndex = new AtomicInteger();
+    private volatile int roundrobinIndex = 0;
     private ConcurrentMap<SocketAddress, ChannelTransportEntry> transports = new ConcurrentHashMap<>();
 
     public FailoverGroupChannelTransport(List<SocketAddress> addresses, long connectionTimeout,
@@ -93,7 +92,7 @@ public class FailoverGroupChannelTransport implements ChannelTransport {
 
     @Override
     public Command sync(Command command, long timeout) throws TransportException {
-        return (Command) execute((transport) -> {
+        return execute((transport) -> {
             return transport.sync(command, timeout);
         });
     }
@@ -108,7 +107,7 @@ public class FailoverGroupChannelTransport implements ChannelTransport {
 
     @Override
     public Future<?> async(Command command, long timeout) throws TransportException {
-        return (Future<?>) execute((transport) -> {
+        return execute((transport) -> {
             return transport.async(command, timeout);
         });
     }
@@ -128,23 +127,24 @@ public class FailoverGroupChannelTransport implements ChannelTransport {
 
     @Override
     public SocketAddress remoteAddress() {
-        for (Map.Entry<SocketAddress, ChannelTransportEntry> entry : transports.entrySet()) {
-            ChannelTransport transport = entry.getValue().getTransport();
-            if (transport != null && transport.state().equals(TransportState.CONNECTED)) {
-                return entry.getKey();
-            }
-        }
-        return null;
+        return execute((transport) -> {
+            return transport.remoteAddress();
+        });
     }
 
     @Override
     public TransportAttribute attr() {
-        throw new UnsupportedOperationException();
+        return execute((transport) -> {
+            return transport.attr();
+        });
     }
 
     @Override
     public void attr(TransportAttribute attribute) {
-        throw new UnsupportedOperationException();
+        execute((transport) -> {
+            transport.attr(attribute);
+            return null;
+        });
     }
 
     @Override
@@ -170,13 +170,9 @@ public class FailoverGroupChannelTransport implements ChannelTransport {
 
     @Override
     public Channel getChannel() {
-        for (Map.Entry<SocketAddress, ChannelTransportEntry> entry : transports.entrySet()) {
-            ChannelTransport transport = entry.getValue().getTransport();
-            if (transport != null && transport.state().equals(TransportState.CONNECTED)) {
-                return transport.getChannel();
-            }
-        }
-        return null;
+        return execute((transport) -> {
+            return transport.getChannel();
+        });
     }
 
     protected void init() {
@@ -186,40 +182,36 @@ public class FailoverGroupChannelTransport implements ChannelTransport {
                 return;
             } catch (TransportException e) {
                 logger.warn("create transport exception, address: {}", address, e);
-                roundrobinIndex.incrementAndGet();
+                roundrobinIndex++;
             }
         }
         throw new TransportException.ConnectionException();
     }
 
-    protected Object execute(Function<ChannelTransport, Object> function) throws TransportException {
+    protected <T> T execute(Function<ChannelTransport, T> function) throws TransportException {
         int addressesSize = addresses.size();
-        int index = 0;
+        int index = roundrobinIndex;
 
         for (int i = 0; i < addressesSize; i++) {
-            if (i == 0) {
-                index = roundrobinIndex.get();
-            } else {
-                index = roundrobinIndex.incrementAndGet();
-            }
-
             if (index >= addressesSize) {
                 index = 0;
-                roundrobinIndex.set(0);
             }
 
             SocketAddress address = addresses.get(index);
 
             try {
                 ChannelTransport transport = getOrCreateTransport(address);
-                return function.apply(transport);
+                T result = function.apply(transport);
+                roundrobinIndex = index;
+                return result;
             } catch (TransportException e) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("execute exception, address: {}", address, e);
                 }
+                index++;
             }
         }
-        throw new TransportException.ConnectionException();
+        throw new TransportException.RequestErrorException();
     }
 
     protected ChannelTransport getOrCreateTransport(SocketAddress address) throws TransportException {
@@ -230,7 +222,7 @@ public class FailoverGroupChannelTransport implements ChannelTransport {
             if (transportEntry.getTransport() != null) {
                 return transportEntry.getTransport();
             }
-            if (config.getRetryDelay() > now - transportEntry.getLastConnect()) {
+            if (now - transportEntry.getLastConnect() < config.getRetryDelay()) {
                 throw new TransportException.ConnectionException(address.toString());
             }
         }
@@ -242,7 +234,7 @@ public class FailoverGroupChannelTransport implements ChannelTransport {
                 if (transportEntry.getTransport() != null) {
                     return transportEntry.getTransport();
                 }
-                if (config.getRetryDelay() > now - transportEntry.getLastConnect()) {
+                if (now - transportEntry.getLastConnect() < config.getRetryDelay()) {
                     throw new TransportException.ConnectionException(address.toString());
                 }
             } else {
