@@ -42,10 +42,10 @@ public class DefaultNsrServiceProvider implements NsrServiceProvider {
         for (int i = 0; i < servers.length; i++) {
             servers[i] = servers[i].trim();
             if (!servers[i].matches(PATTERN)) {
-                throw new InvalidPropertiesFormatException("Invalid property! joyqueue.servers: " + servers);
+                throw new InvalidPropertiesFormatException("Invalid property! joyqueue.servers: " + String.join(",", servers));
             }
             if(!servers[i].contains(":")) {
-                servers[i] += ":50092";
+                servers[i] += ":50091";
             }
         }
         logger.info("Using nameservers: {}.", String.join(",", servers));

@@ -41,7 +41,7 @@ nameservice.serverAddress=192.168.1.1:50092,192.168.1.2:50092,192.168.1.3:50092
 对应的JoyQueue Web需要在配置文件application.properties中配置：
 
 ```properties
-joyqueue.servers=192.168.1.1:50092,192.168.1.2:50092,192.168.1.3:50092
+joyqueue.servers=192.168.1.1,192.168.1.2,192.168.1.3
 ```
 
 配置成功后，可以打开JoyQueue Web，在“系统管理-Broker管理”中看到集群中所有的节点。
