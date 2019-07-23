@@ -31,8 +31,7 @@
       <producer-config-form ref="configForm" :data="configData"/>
     </my-dialog>
     <my-dialog :dialog="weightDialog" @on-dialog-confirm="weightConfigConfirm" @on-dialog-cancel="dialogCancel('weightDialog')">
-      <producer-weight-form ref="weightForm" :weights="weightDialog.weights" :producerId="configData.producerId"
-                       :search="weightDialog.urls.search" :update="weightDialog.urls.update"/>
+      <producer-weight-form ref="weightForm"/>
     </my-dialog>
 
     <my-dialog :dialog="rateLimitDialog" @on-dialog-confirm="rateLimitConfirm" @on-dialog-cancel="dialogCancel('rateLimitDialog')">
@@ -175,12 +174,7 @@ export default {
         visible: false,
         title: '设置生产权重',
         width: '700',
-        showFooter: true,
-        weights: [], // 订阅框 列表表头,
-        urls: {
-          search: '/producer/weight',
-          update: '/'
-        }
+        showFooter: true
       },
       configDialog: {
         visible: false,
@@ -211,9 +205,8 @@ export default {
       this.configDialog.visible = true
     },
     openWeightDialog (item) {
-      this.configData = item.config || {}
-      this.configData['producerId'] = item.id
-      this.openAndQueryDialog('weightDialog', 'weightForm')
+      this.$refs['weightForm'].getListById(item.id)
+      this['weightDialog'].visible = true
     },
     openRateLimitDialog (item) {
       this.rateLimitDialog.limitTps = item.config.limitTps

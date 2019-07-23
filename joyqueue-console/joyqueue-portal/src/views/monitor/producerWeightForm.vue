@@ -23,16 +23,14 @@ export default {
   components: {},
   mixins: [crud],
   props: {
-    producerId: {
-      type: String,
-      default: ''
-    },
-    weights: {
-      type: Array
-    },
-    search: {
-      type: String,
-      default: ''
+    urls: {
+      type: Object,
+      default: function () {
+        return {
+          search: '/producer/weight',
+          update: '/'
+        }
+      }
     },
     data: {
       type: Array,
@@ -47,25 +45,26 @@ export default {
   },
   data () {
     return {
+      producerId: '',
       searchData: {
         topic: this.topic,
         namespace: this.namespace,
         keyword: ''
       },
-      urls: {
-        search: this.search
-      },
       rules: {
       },
       formData: this.data
-
     }
   },
   methods: {
     getList () {
-      apiRequest.get(this.urlOrigin.search + '/' + this.producerId, {}).then(data => {
+      apiRequest.get(this.urls.search + '/' + this.producerId, {}).then(data => {
         this.formData = data.data
       })
+    },
+    getListById (id) {
+      this.producerId = id
+      this.getList()
     },
     getWeights () {
       let weight = ''

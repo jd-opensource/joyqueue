@@ -277,7 +277,7 @@ export default {
       this.msgDetailDialog.namespace.code = item.namespace.code
       this.msgDetailDialog.title = '消息查询 [App: ' + this.msgDetailDialog.app.code +
         ', Topic: ' + this.msgDetailDialog.topic.code + ']'
-      this.openAndQueryDialog('msgDetailDialog', 'msgDetail')
+      this.openDialog('msgDetailDialog')
     },
     openConfigDialog (item) {
       this.configConsumerData = Object.assign({}, item.config)
