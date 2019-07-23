@@ -29,6 +29,7 @@ package com.jd.joyqueue.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.jd.joyqueue.model.domain.Identity;
 import com.jd.joyqueue.model.domain.OperLog;
+import com.jd.joyqueue.nsr.NsrServiceProvider;
 import com.jd.joyqueue.service.NameServerService;
 import com.jd.joyqueue.service.OperLogService;
 import com.jd.joyqueue.toolkit.security.EscapeUtils;
@@ -46,7 +47,6 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -64,9 +64,8 @@ public class NameServerServiceImpl implements NameServerService {
     @Autowired
     private OperLogService operLogService;
 
-
-    @Value("${nameserver.host}")
-    public String host;
+    @Autowired
+    private NsrServiceProvider nsrHostProvider;
 
     /**
      * 带操作日志请求
@@ -128,7 +127,7 @@ public class NameServerServiceImpl implements NameServerService {
      * @throws Exception
      */
     private String post(String uri, Object obj) throws Exception {
-        HttpPost post = new HttpPost(host + uri);
+        HttpPost post = new HttpPost(nsrHostProvider.getBaseUrl() + uri);
         if (null != obj) {
             StringEntity entity = new StringEntity(JSON.toJSONString(obj), Charsets.UTF_8);//解决中文乱码问题
             entity.setContentEncoding(CharEncoding.UTF_8);

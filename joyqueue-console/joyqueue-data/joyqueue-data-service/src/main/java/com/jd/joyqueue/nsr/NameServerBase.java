@@ -32,7 +32,6 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.util.Date;
 
@@ -46,9 +45,8 @@ public class NameServerBase {
     @Autowired
     private OperLogService operLogService;
 
-    @Value("${nameserver.host}")
-    public String host;
-
+    @Autowired
+    private NsrServiceProvider nsrServiceProvider;
     /**
      * 带操作日志请求
      * @param uri
@@ -67,7 +65,7 @@ public class NameServerBase {
             operLog = new OperLog();
             operLog.setType(type);
             operLog.setOperType(operType);
-            target.append(host+uri).append(",").append(JSON.toJSONString(obj));
+            target.append(nsrServiceProvider.getBaseUrl()+uri).append(",").append(JSON.toJSONString(obj));
             //执行请求
             result = post(uri,obj);
             //操作结果记录到数据库
@@ -125,7 +123,7 @@ public class NameServerBase {
      * @throws Exception
      */
     public String post(String uri, Object obj) throws Exception {
-        HttpPost post = new HttpPost(host + uri);
+        HttpPost post = new HttpPost(nsrServiceProvider.getBaseUrl() + uri);
         if(null!=obj) {
             StringEntity entity = new StringEntity(JSON.toJSONString(obj), Charsets.UTF_8);//解决中文乱码问题
             entity.setContentEncoding(CharEncoding.UTF_8);
