@@ -9,7 +9,6 @@ export default {
     const minWidth = Number(binding.value.minWidth)
     const minHeight = Number(binding.value.minHeight)
     const dialogHeaderEl = el.querySelector(`.${prefixCls}__header`)
-    const dialogBodyEl = el.querySelector(`.${prefixCls}__body`)
     const dialogFooterEl = el.querySelector(`.${prefixCls}__footer`)
     const dialogResizeEl = el.querySelector(`.${prefixCls}__resize`)
     const dragDom = el.querySelector(`.${prefixCls}`)
@@ -37,7 +36,9 @@ export default {
         dragDom.style.height = `${height}px`
         const headerHeight = dialogHeaderEl ? dialogHeaderEl.offsetHeight : 0
         const footerHeight = dialogFooterEl ? dialogFooterEl.offsetHeight : 0
+        const dialogBodyEl = el.querySelector(`.${prefixCls}__body`)
         dialogBodyEl.style.height = `${height - headerHeight - footerHeight}px`
+        dialogBodyEl.style.paddingBottom = '16px'
       }
 
       document.onmouseup = function (e) {

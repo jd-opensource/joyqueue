@@ -21,11 +21,13 @@
                 <div :class="[prefixCls + '__title']">{{ title }}</div>
               </slot>
             </div>
-            <div :class="[prefixCls + '__body']" v-show="visible">
+            <div :class="[prefixCls + '__body']">
               <slot>
-                <div v-html="content"></div>
-                <div :class="[prefixCls + '__input']" v-if="showInput">
-                  <d-input v-model="inputValue" :placeholder="inputPlaceholder" @keyup.enter.native="handleAction('confirm', $event)" ref="input"></d-input>
+                <div v-if="visible">
+                  <div v-html="content"></div>
+                  <div :class="[prefixCls + '__input']" v-if="showInput">
+                    <d-input v-model="inputValue" :placeholder="inputPlaceholder" @keyup.enter.native="handleAction('confirm', $event)" ref="input"></d-input>
+                  </div>
                 </div>
               </slot>
             </div>
