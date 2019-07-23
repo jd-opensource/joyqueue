@@ -4,23 +4,7 @@
       <d-breadcrumb-item :to="{ name: `/${$i18n.locale}/application` }">我的应用</d-breadcrumb-item>
       <d-breadcrumb-item>{{detail.code}}</d-breadcrumb-item>
     </d-breadcrumb>
-    <div class="detail mb20">
-      <div class="title">{{app.code}}</div>
-      <grid-row :gutter="16">
-        <grid-col span="8">
-          <span>中文名称:</span>
-          <span>{{detail.name}}</span>
-        </grid-col>
-        <grid-col span="8">
-          <span>负责人:</span>
-          <span>{{detail.owner != null ? detail.owner.code : '-'}}</span>
-        </grid-col>
-        <grid-col span="8">
-          <span>签名:</span>
-          <span>{{detail.sign}}</span>
-        </grid-col>
-      </grid-row>
-    </div>
+    <slot :detail="detail"></slot>
       <!--tabs由于没有单独的路由名称，所以在调用table时，需要在data中自定义urls-->
     <d-tabs @on-change="handleTabChange" :value="tab">
       <slot name="tabs"></slot>

@@ -44,7 +44,7 @@ public class ArchiveServiceImpl implements ArchiveService {
     @Autowired(required = false)
     private ArchiveStore archiveStore;
 
-    @Value("${archive.enable}")
+    @Value("${archive.enable:false}")
     private Boolean archiveEnable;
 
     @Override

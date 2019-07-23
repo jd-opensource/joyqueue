@@ -146,7 +146,7 @@ export default {
             {type: 'number', required: true, message: '请输入队列数量', trigger: 'change'}
           ],
           brokerGroup: [
-            {required: true, message: '请选择一个Broker分组', trigger: 'change'}
+            {ype: 'number', required: true, message: '请选择一个Broker分组', trigger: 'change'}
           ],
           description: [
             {required: true, message: '请输入申请描述', trigger: 'change'}
@@ -211,6 +211,8 @@ export default {
         (data.data || []).forEach(item => {
           this.brokerGroupList.push(item)
         })
+
+        // this.formData.brokerGroup.id = this.brokerGroupList[0].id
       })
     },
     beforeConfirm () {

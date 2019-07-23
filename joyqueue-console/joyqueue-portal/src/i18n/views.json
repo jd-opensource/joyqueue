@@ -9,8 +9,6 @@
       "colData": {
         "id": "ID",
         "code": "英文名",
-        "department": "所属部门",
-        "ownerCode": "负责人",
         "system": "来源[应用来源/系统名称/应用代码]",
         "btnDetail": "详情",
         "btnDelete": "删除"
@@ -27,8 +25,6 @@
       "colData": {
         "id": "ID",
         "code": "Code",
-        "department": "Department",
-        "ownerCode": "Owner",
         "system": "Source[appSource/sysName/appCode]",
         "btnDetail": "Show Detail",
         "btnDelete": "Delete"

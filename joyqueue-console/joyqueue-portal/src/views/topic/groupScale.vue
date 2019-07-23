@@ -34,7 +34,6 @@ export default {
   mixins: [ crud ],
   data () {
     return {
-      partitionGroup: {},
       urls: {
         search: '/partitionGroupReplica/searchBrokerToScale',
         addUrl: '/partitionGroupReplica/add'
@@ -76,11 +75,13 @@ export default {
     // 扩容
     add (item) {
       let parmas = {
-        topic: this.partitionGroup.topic,
-        namespace: this.partitionGroup.namespace,
-        groupNo: this.partitionGroup.groupNo,
+        topic: this.data.topic,
+        namespace: this.data.namespace,
+        groupNo: this.data.groupNo,
         brokerId: item.id
       }
+      console.log(99)
+      console.log(this.data)
       let _this = this
       this.$Dialog.confirm({
         title: '提示',
@@ -107,10 +108,10 @@ export default {
           size: this.page.size
         },
         query: {
-          topic: this.partitionGroup.topic,
-          namespace: this.partitionGroup.namespace,
-          groupNo: this.partitionGroup.groupNo,
-          keyword:this.searchData.keyword
+          topic: this.data.topic,
+          namespace: this.data.namespace,
+          groupNo: this.data.groupNo,
+          keyword: this.searchData.keyword
         }
       }
       apiRequest.post(this.urlOrigin.search, {}, data).then((data) => {
@@ -127,7 +128,6 @@ export default {
     }
   },
   mounted () {
-    this.partitionGroup = this.data
     this.getList()
   }
 }

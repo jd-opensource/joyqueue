@@ -40,60 +40,56 @@
 
 <script>
 
-  import apiRequest from '../../utils/apiRequest.js'
-  export default {
-    name:"brokerServerMonitor",
-    props:{
-      brokerId:{
-        type:Number
-      }
-    },
-    data () {
-      return {
-        urls:{
-          findbroker: '/monitor/broker'
+import apiRequest from '../../utils/apiRequest.js'
+export default {
+  name: 'brokerServerMonitor',
+  props: {
+    brokerId: {
+      type: Number
+    }
+  },
+  data () {
+    return {
+      urls: {
+        findbroker: '/monitor/broker'
+      },
+      detail: {
+        store: {
+
         },
-        detail:{
-          store:{
+        connection: {
 
-          },
-          connection:{
-
-          },
-          nameServer:{
-
-          },
-          election:{
-
-          }
         },
+        nameServer: {
 
-      }
-    },
-    methods: {
-      getList(){
-        apiRequest.get(this.urls.findbroker+"/" + this.brokerId,"",{}).then(data=>{
-          if(data.code == 200) {
-            this.detail = data.data;
-            console.log(data.data)
+        },
+        election: {
+
         }
-        })
-      }
-    },
-    mounted () {
-      this.getList();
-    },
-    filters: {
-      numFilter(value) {
-        // 截取当前数据到小数点后两位
-        let value1 = value/1024/1024/1024;
-        let realVal = parseFloat(value1).toFixed(2)
-        return realVal
-
       }
 
     }
+  },
+  methods: {
+    getList () {
+      apiRequest.get(this.urls.findbroker + '/' + this.brokerId, '', {}).then(data => {
+        this.detail = data.data
+      })
+    }
+  },
+  mounted () {
+    this.getList()
+  },
+  filters: {
+    numFilter (value) {
+      // 截取当前数据到小数点后两位
+      let value1 = value / 1024 / 1024 / 1024
+      let realVal = parseFloat(value1).toFixed(2)
+      return realVal
+    }
+
   }
+}
 </script>
 
 <style scoped>

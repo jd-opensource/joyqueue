@@ -16,7 +16,7 @@
     </div>
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
               @on-detail-chart="goDetailChart" @on-current-change="handleCurrentChange" @on-detail="openDetailTab"
-              @on-config="openConfigDialog" @on-weight="openWeightDialog"
+              @on-config="openConfigDialog" @on-weight="openWeightDialog" @on-cancel-subscribe="cancelSubscribe"
               @on-summary-chart="goSummaryChart" @on-performance-chart="goPerformanceChart" @on-rateLimit="openRateLimitDialog"/>
 
     <!--生产订阅弹出框-->
@@ -81,6 +81,10 @@ export default {
           {
             txt: '配置',
             method: 'on-config'
+          },
+          {
+            txt: '取消订阅',
+            method: 'on-cancel-subscribe'
           }
           // ,
           // {
@@ -135,7 +139,8 @@ export default {
       urls: {
         search: `/producer/search`,
         getMonitor: `/monitor/find`,
-        getUrl: `/grafana/getRedirectUrl`
+        getUrl: `/grafana/getRedirectUrl`,
+        del: `/producer/delete`
       },
       showTablePin: false,
       tableData: {
@@ -213,6 +218,24 @@ export default {
       this.configData['producerId'] = item.id
       this.rateLimitDialog.limitTraffic = item.config.limitTraffic
       this.rateLimitDialog.visible = true
+    },
+    cancelSubscribe (item) {
+      let _this = this
+      this.$Dialog.confirm({
+        title: '提示',
+        content: '确定要取消订阅吗？'
+      }).then(() => {
+        apiRequest.delete(_this.urls.del + '/' + item.id).then((data) => {
+          if (data.code !== this.$store.getters.successCode) {
+            this.$Dialog.error({
+              content: '取消订阅失败'
+            })
+          } else {
+            this.$Message.success('取消订阅成功')
+            _this.getList()
+          }
+        })
+      })
     },
     handleSizeChange (val) {
       this.page.size = val

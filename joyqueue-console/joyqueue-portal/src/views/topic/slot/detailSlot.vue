@@ -4,23 +4,7 @@
       <d-breadcrumb-item :to="{ name: `/${$i18n.locale}/topic` }">主题中心</d-breadcrumb-item>
       <d-breadcrumb-item>{{topic.id}}</d-breadcrumb-item>
     </d-breadcrumb>
-    <div class="detail mb20">
-      <div class="title">{{topic.id}}</div>
-      <grid-row :gutter="16">
-        <grid-col span="8">
-          <span>队列数:</span>
-          <span>{{detail.partitions}}</span>
-        </grid-col>
-        <grid-col span="8">
-          <span>标签:</span>
-          <span>{{detail.labels}}</span>
-        </grid-col>
-        <grid-col span="8">
-          <span>备注:</span>
-          <span>{{detail.description}}</span>
-        </grid-col>
-      </grid-row>
-    </div>
+    <slot :detail="detail"></slot>
     <d-tabs @on-change="handleTabChange" :value="tab">
       <slot name="tabs"></slot>
     </d-tabs>

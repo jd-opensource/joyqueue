@@ -70,28 +70,17 @@ export default {
     myDialog
   },
   mixins: [ crud ],
-  data () {
-    return {
-      urls: {
-        search: `/application/${this.$route.query.id}/token/search`,
-        add: `/application/${this.$route.query.id}/token/add`,
-        edit: `/application/${this.$route.query.id}/token/update`,
-        del: `/application/${this.$route.query.id}/token/delete`
-      },
-      searchData: {
-        keyword: ''
-      },
-      searchRules: {
-      },
-      tableData: {
-        rowData: [],
-        colData: [
+  props: {
+    colData: {
+      type: Array,
+      default: function () {
+        return [
           {
-            title: 'Username',
+            title: '应用',
             key: 'application.code'
           },
           {
-            title: 'Password',
+            title: 'Token',
             key: 'token'
           },
           {
@@ -108,7 +97,26 @@ export default {
               return timeStampToString(item.expirationTime)
             }
           }
-        ],
+        ]
+      }
+    }
+  },
+  data () {
+    return {
+      urls: {
+        search: `/application/${this.$route.query.id}/token/search`,
+        add: `/application/${this.$route.query.id}/token/add`,
+        edit: `/application/${this.$route.query.id}/token/update`,
+        del: `/application/${this.$route.query.id}/token/delete`
+      },
+      searchData: {
+        keyword: ''
+      },
+      searchRules: {
+      },
+      tableData: {
+        rowData: [],
+        colData: this.colData,
         // 常用btn
         btns: [
           {
@@ -177,16 +185,11 @@ export default {
       })
     }
   },
-  // watch: {
-  //   '$route' (to, from) {
-  //     if (to.query.tab === 'myAppToken') {
-  //       this.getList()
-  //     }
-  //   }
-  // },
-  // mounted () {
-  //   this.getList()
-  // }
+  mounted () {
+    let startTime = new Date(new Date().toLocaleDateString()).getTime()
+    let endTime = new Date(new Date().toLocaleDateString()).getTime() + (100 * 365 + 4) * 24 * 60 * 60 * 1000 - 1
+    this.addData.timeList = [startTime, endTime]
+  }
 }
 </script>
 

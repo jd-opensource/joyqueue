@@ -20,7 +20,7 @@
               @on-detail-chart="goDetailChart" @on-current-change="handleCurrentChange" @on-detail="openDetailTab"
               @on-msg-preview="openMsgPreviewDialog" @on-msg-detail="openMsgDetailDialog" @on-config="openConfigDialog"
               @on-performance-chart="goPerformanceChart" @on-summary-chart="goSummaryChart"  @on-rateLimit="openRateLimitDialog"
-              @on-size-change="handleSizeChange"/>
+              @on-size-change="handleSizeChange" @on-cancel-subscribe="cancelSubscribe"/>
 
     <!--Consumer subscribe dialog-->
     <my-dialog :dialog="subscribeDialog" @on-dialog-cancel="dialogCancel('subscribeDialog')">
@@ -94,6 +94,10 @@ export default {
           {
             txt: '配置',
             method: 'on-config'
+          },
+          {
+            txt: '取消订阅',
+            method: 'on-cancel-subscribe'
           }
           // ,
           // {
@@ -153,7 +157,8 @@ export default {
         search: `/consumer/search`,
         getMonitor: `/monitor/find`,
         previewMessage: '/monitor/preview/message',
-        getUrl: `/grafana/getRedirectUrl`
+        getUrl: `/grafana/getRedirectUrl`,
+        del: `/consumer/delete`
       },
       showTablePin: false,
       tableData: {
@@ -297,6 +302,24 @@ export default {
         limitTraffic: this.$refs.rateLimit.traffic
       }
       this.config(configData, 'rateLimitDialog')
+    },
+    cancelSubscribe (item) {
+      let _this = this
+      this.$Dialog.confirm({
+        title: '提示',
+        content: '确定要取消订阅吗？'
+      }).then(() => {
+        apiRequest.delete(_this.urls.del + '/' + item.id).then((data) => {
+          if (data.code !== this.$store.getters.successCode) {
+            this.$Dialog.error({
+              content: '取消订阅失败'
+            })
+          } else {
+            this.$Message.success('取消订阅成功')
+            _this.getList()
+          }
+        })
+      })
     },
     handleSizeChange (val) {
       this.page.size = val

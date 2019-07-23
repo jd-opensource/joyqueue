@@ -68,14 +68,6 @@ export default {
                 }
               }, params.item.code)
             }
-          },
-          {
-            title: curLangConfig['colData']['department'],
-            key: 'department'
-          },
-          {
-            title: curLangConfig['colData']['ownerCode'],
-            key: 'owner.code'
           }
         ],
         btns: [

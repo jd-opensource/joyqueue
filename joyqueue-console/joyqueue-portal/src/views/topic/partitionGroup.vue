@@ -28,7 +28,7 @@
     </my-dialog>
     <!--添加节点-->
     <my-dialog :dialog="groupScaleDialog" @on-dialog-confirm="groupScaleConfirm()" @on-dialog-cancel="groupScaleCancel()" >
-      <group-scale ref='groupScale' :data="groupScaleDialogData"  ></group-scale>
+      <group-scale ref='groupScale' :data="groupScaleDialogData"></group-scale>
     </my-dialog>
     <!--移除节点-->
     <my-dialog :dialog="groupMergeDialog" @on-dialog-confirm="groupMergeConfirm()" @on-dialog-cancel="groupMergeCancel()"  >
@@ -347,6 +347,7 @@ export default {
       this.positionDialog.visible = false
     },
     groupScale (item) {
+      console.log(88)
       this.groupScaleDialogData = {groupNo: item.groupNo, topic: {id: item.topic.id, code: item.topic.code}, namespace: {id: item.namespace.id, code: item.namespace.code}}
       this.groupScaleDialog.visible = true
     },

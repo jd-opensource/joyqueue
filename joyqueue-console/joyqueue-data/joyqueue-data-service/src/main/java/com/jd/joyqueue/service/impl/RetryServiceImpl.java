@@ -46,7 +46,7 @@ public class RetryServiceImpl implements RetryService {
     @Autowired(required = false)
     private ConsoleMessageRetry consoleMessageRetry;
 
-    @Value("${retry.enable}")
+    @Value("${retry.enable:false}")
     private Boolean retryEnable;
 
     @Override
