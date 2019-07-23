@@ -13,13 +13,15 @@ JoyQueue Server内置元数据服务（也叫NameServer或NameService），元�
 ## 配置集群
 
 例如，配置5个节点的集群，其中3个NameServer，2个ThinServer。
-IP | 类型
--- | --
-192.168.1.1 | NameServer
-192.168.1.2 | NameServer
-192.168.1.3 | NameServer
-192.168.1.4 | ThinServer
-192.168.1.5 | ThinServer
+
+| IP | 类型 |
+| -- | -- |
+| 192.168.1.1 | NameServer |
+| 192.168.1.2 | NameServer |
+| 192.168.1.3 | NameServer |
+| 192.168.1.4 | ThinServer |
+| 192.168.1.5 | ThinServer |
+
 
 所有的NameServer中，需要配置属性`nameserver.ignite.discoverySpi.ipFinder.address`来互相发现。NameServer需要在配置文件joyqueue.properties中配置：
 
