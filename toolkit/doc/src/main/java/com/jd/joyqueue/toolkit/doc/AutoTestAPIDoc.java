@@ -66,8 +66,9 @@ public class AutoTestAPIDoc implements HeuristicAutoTest<APIDoc> {
         TestCase testCase = new TestCase();
         switch (method) {
             case GET:
-                testCase.setRequest("curl -X GET " + host + path);
-                process = Runtime.getRuntime().exec(testCase.getRequest());
+                String shell_curl= String.format("curl -X GET '%s%s' ",host,path);
+                testCase.setRequest(shell_curl);
+                process = Runtime.getRuntime().exec(testCase.getRequest().replace("'",""));
                 break;
             case POST:
                 break;
@@ -85,7 +86,7 @@ public class AutoTestAPIDoc implements HeuristicAutoTest<APIDoc> {
             StringBuilder result = new StringBuilder();
             String line;
             while ((line = in.readLine()) != null) {
-                result.append(line);
+                result.append(line+"\n");
             }
             testCase.setResponse(result.toString());
         }
