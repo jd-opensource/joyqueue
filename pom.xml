@@ -42,7 +42,7 @@
         <commons-cli.version>1.4</commons-cli.version>
         <httpclient.version>4.5.2</httpclient.version>
         <httpasyncclient.version>4.1.4</httpasyncclient.version>
-        <jackson-databind.version>2.9.4</jackson-databind.version>
+        <jackson-databind.version>2.9.9.1</jackson-databind.version>
         <validation-api.version>2.0.1.Final</validation-api.version>
         <hibernate-validator.version>5.3.0.Final</hibernate-validator.version>
         <el.version>2.2.4</el.version>
@@ -87,7 +87,7 @@
         <openmessaging-spring.version>0.0.1-SNAPSHOT</openmessaging-spring.version>
         <openmessaging-api.version>1.0.0-alpha</openmessaging-api.version>
         <asm.version>6.2.1</asm.version>
-        <jackson-dataformat.version>RELEASE</jackson-dataformat.version>
+        <jackson-dataformat.version>2.7.8</jackson-dataformat.version>
         <metrics.version>4.0.0</metrics.version>
         <commons-lang.version>2.6</commons-lang.version>
         <guice.version>4.2.2</guice.version>
