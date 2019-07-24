@@ -124,11 +124,13 @@ public class CoordinatorMonitorServiceImpl implements CoordinatorMonitorService 
         List<CoordinatorGroupMember> members = new ArrayList();
         CoordinatorGroupMemberExtension extension = new CoordinatorGroupMemberExtension();
         CoordinatorGroup group = findCoordinatorGroup(subscribe);
-        if (!NullUtil.isEmpty(group) && !NullUtil.isEmpty(group.getMembers())) {
-            members.addAll(group.getMembers().values());
+        if (!NullUtil.isEmpty(group)) {
+            extension.setExtension(group.getExtension());
+            if(!NullUtil.isEmpty(group.getMembers())) {
+                members.addAll(group.getMembers().values());
+            }
         }
         extension.setMembers(members);
-        extension.setExtension(group.getExtension());
         return extension;
     }
 

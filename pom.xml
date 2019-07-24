@@ -42,7 +42,7 @@
         <commons-cli.version>1.4</commons-cli.version>
         <httpclient.version>4.5.2</httpclient.version>
         <httpasyncclient.version>4.1.4</httpasyncclient.version>
-        <jackson-databind.version>2.9.4</jackson-databind.version>
+        <jackson-databind.version>2.9.9.1</jackson-databind.version>
         <validation-api.version>2.0.1.Final</validation-api.version>
         <hibernate-validator.version>5.3.0.Final</hibernate-validator.version>
         <el.version>2.2.4</el.version>
@@ -64,7 +64,7 @@
         <HikariCP.version>2.3.13</HikariCP.version>
         <aspectj.version>1.9.2</aspectj.version>
         <mysql.version>5.1.41</mysql.version>
-        <laf-binding.version>1.0.9-SNAPSHOT</laf-binding.version>
+        <laf-binding.version>1.0.9</laf-binding.version>
         <laf-vertx.version>1.0.18-SNAPSHOT</laf-vertx.version>
         <laf-extention.version>1.0.13</laf-extention.version>
         <vertx.version>3.6.3</vertx.version>
@@ -87,7 +87,7 @@
         <openmessaging-spring.version>0.0.1-SNAPSHOT</openmessaging-spring.version>
         <openmessaging-api.version>1.0.0-alpha</openmessaging-api.version>
         <asm.version>6.2.1</asm.version>
-        <jackson-dataformat.version>RELEASE</jackson-dataformat.version>
+        <jackson-dataformat.version>2.7.8</jackson-dataformat.version>
         <metrics.version>4.0.0</metrics.version>
         <commons-lang.version>2.6</commons-lang.version>
         <guice.version>4.2.2</guice.version>
@@ -736,14 +736,12 @@
 
     <distributionManagement>
         <snapshotRepository>
-            <id>snapshots</id>
-            <name>JD maven2 repository-snapshots</name>
-            <url>http://artifactory.jd.com/libs-snapshots-local</url>
+            <id>oss</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
         <repository>
-            <id>releases</id>
-            <name>JD maven2 repository-snapshots</name>
-            <url>http://artifactory.jd.com/libs-releases-local</url>
+            <id>oss</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
 

@@ -49,12 +49,14 @@ export default {
             render: (h, params) => {
               var list = params.item.partitionGroupMetricList
               if (list!= null && list.length > 0) {
-                list = list.sort((a,b) => a.partitionGroup-b.partitionGroup)
+                list = list.slice().sort((a,b) => a.partitionGroup-b.partitionGroup)
               }
               var html = []
-              for (var i = 0; i < list.length; i++) {
-                var p = h('div',{ style:'border-bottom: 1px solid #ECECEC;'},list[i].partitionGroup)
-                html.push(p)
+              if (list != undefined) {
+                for (var i = 0; i < list.length; i++) {
+                  var p = h('div', {style: 'border-bottom: 1px solid #ECECEC;'}, list[i].partitionGroup)
+                  html.push(p)
+                }
               }
               return h('div', {}, html)
             }
@@ -65,12 +67,14 @@ export default {
             render: (h, params) => {
               var list = params.item.partitionGroupMetricList;
               if (list!= null && list.length > 0) {
-                list = list.sort((a,b) => a.partitionGroup-b.partitionGroup)
+                list = list.slice().sort((a,b) => a.partitionGroup-b.partitionGroup)
               }
               var html = []
-              for (var i = 0; i < list.length; i++) {
-                var p = h('div',{style:'border-bottom: 1px solid #ECECEC;'}, list[i].partitions)
-                html.push(p)
+              if (list != undefined) {
+                for (var i = 0; i < list.length; i++) {
+                  var p = h('div', {style: 'border-bottom: 1px solid #ECECEC;'}, list[i].partitions)
+                  html.push(p)
+                }
               }
               return h('div', {}, html)
             }
