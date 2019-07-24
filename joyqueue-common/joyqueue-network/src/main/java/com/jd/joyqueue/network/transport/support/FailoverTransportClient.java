@@ -22,8 +22,12 @@ import com.jd.joyqueue.network.transport.config.TransportConfig;
 import com.jd.joyqueue.network.transport.exception.TransportException;
 import com.jd.joyqueue.toolkit.concurrent.EventBus;
 import com.jd.joyqueue.toolkit.concurrent.EventListener;
+import org.apache.commons.lang3.StringUtils;
 
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * FailoverTransportClient
@@ -32,6 +36,8 @@ import java.net.SocketAddress;
  * date: 2018/10/30
  */
 public class FailoverTransportClient implements TransportClient {
+
+    private static final String GROUP_SPLITTER = ",";
 
     private TransportClient delegate;
     private TransportConfig config;
@@ -50,7 +56,17 @@ public class FailoverTransportClient implements TransportClient {
 
     @Override
     public Transport createTransport(String address, long connectionTimeout) throws TransportException {
-        return this.createTransport(TransportClientSupport.createInetSocketAddress(address), connectionTimeout);
+        String[] addresses = StringUtils.splitByWholeSeparator(address, GROUP_SPLITTER);
+        if (addresses.length == 1) {
+            return this.createTransport(TransportClientSupport.createInetSocketAddress(address), connectionTimeout);
+        } else {
+            List<SocketAddress> socketAddresses = new ArrayList<>(addresses.length);
+            for (String addressItem : addresses) {
+                InetSocketAddress socketAddress = TransportClientSupport.createInetSocketAddress(addressItem);
+                socketAddresses.add(socketAddress);
+            }
+            return createGroupTransport(socketAddresses, connectionTimeout);
+        }
     }
 
     @Override
@@ -62,6 +78,10 @@ public class FailoverTransportClient implements TransportClient {
     public Transport createTransport(SocketAddress address, long connectionTimeout) throws TransportException {
         ChannelTransport transport = (ChannelTransport) delegate.createTransport(address, connectionTimeout);
         return new FailoverChannelTransport(transport, address, connectionTimeout, delegate, config, transportEventBus);
+    }
+
+    protected Transport createGroupTransport(List<SocketAddress> addresses, long connectionTimeout) throws TransportException {
+        return new FailoverGroupChannelTransport(addresses, connectionTimeout, delegate, config, transportEventBus);
     }
 
     @Override

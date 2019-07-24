@@ -13,6 +13,7 @@
  */
 package com.jd.joyqueue.client.internal.support;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.jd.joyqueue.client.internal.MessageAccessPoint;
 import com.jd.joyqueue.client.internal.cluster.ClusterClientManager;
@@ -40,7 +41,6 @@ import com.jd.joyqueue.client.internal.producer.transport.ProducerClientManager;
 import com.jd.joyqueue.client.internal.producer.transport.ProducerClientManagerFactory;
 import com.jd.joyqueue.client.internal.transport.config.TransportConfig;
 import com.jd.joyqueue.client.internal.transport.config.TransportConfigChecker;
-import com.google.common.base.Preconditions;
 import com.jd.joyqueue.toolkit.service.Service;
 import org.apache.commons.lang3.StringUtils;
 
@@ -179,13 +179,13 @@ public class DefaultMessageAccessPoint extends Service implements MessageAccessP
         if (clusterManager != null) {
             return clusterManager;
         }
-        clusterManager = ClusterManagerFactory.create(nameServerConfig, getClusterClientManager());
+        ClusterManager clusterManager = ClusterManagerFactory.create(nameServerConfig, getClusterClientManager());
         try {
             clusterManager.start();
         } catch (Exception e) {
-            clusterManager = null;
             throw new ClientException(e);
         }
+        this.clusterManager = clusterManager;
         return clusterManager;
     }
 
@@ -193,13 +193,13 @@ public class DefaultMessageAccessPoint extends Service implements MessageAccessP
         if (clusterClientManager != null) {
             return clusterClientManager;
         }
-        clusterClientManager = ClusterClientManagerFactory.create(nameServerConfig, transportConfig);
+        ClusterClientManager clusterClientManager = ClusterClientManagerFactory.create(nameServerConfig, transportConfig);
         try {
             clusterClientManager.start();
         } catch (Exception e) {
-            clusterClientManager = null;
             throw new ClientException(e);
         }
+        this.clusterClientManager = clusterClientManager;
         return clusterClientManager;
     }
 
@@ -207,13 +207,13 @@ public class DefaultMessageAccessPoint extends Service implements MessageAccessP
         if (producerClientManager != null) {
             return producerClientManager;
         }
-        producerClientManager = ProducerClientManagerFactory.create(nameServerConfig, transportConfig);
+        ProducerClientManager producerClientManager = ProducerClientManagerFactory.create(nameServerConfig, transportConfig);
         try {
             producerClientManager.start();
         } catch (Exception e) {
-            producerClientManager = null;
             throw new ClientException(e);
         }
+        this.producerClientManager = producerClientManager;
         return producerClientManager;
     }
 
@@ -221,13 +221,13 @@ public class DefaultMessageAccessPoint extends Service implements MessageAccessP
         if (consumerClientManager != null) {
             return consumerClientManager;
         }
-        consumerClientManager = ConsumerClientManagerFactory.create(nameServerConfig, transportConfig);
+        ConsumerClientManager consumerClientManager = ConsumerClientManagerFactory.create(nameServerConfig, transportConfig);
         try {
             consumerClientManager.start();
         } catch (Exception e) {
-            consumerClientManager = null;
             throw new ClientException(e);
         }
+        this.consumerClientManager = consumerClientManager;
         return consumerClientManager;
     }
 

@@ -76,7 +76,11 @@ public class ClusterClientManager extends Service {
         transportConfig.setConnections(1);
 
         URL url = URL.valueOf(String.format("joyqueue://%s", nameServerConfig.getAddress()));
-        bootstrapNode = new BrokerNode(url.getHost(), url.getPort());
+        if (url.getPort() == 0) {
+            bootstrapNode = new BrokerNode(url.getHost(), -1);
+        } else {
+            bootstrapNode = new BrokerNode(url.getHost(), url.getPort());
+        }
         clientManager = new ClientManager(transportConfig, nameServerConfig);
     }
 

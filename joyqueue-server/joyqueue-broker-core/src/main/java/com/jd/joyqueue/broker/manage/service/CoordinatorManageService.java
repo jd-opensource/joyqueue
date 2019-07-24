@@ -22,18 +22,18 @@ package com.jd.joyqueue.broker.manage.service;
 public interface CoordinatorManageService {
 
     /**
-     * 初始化协调者主题
+     * 初始化协调者
      *
-     * @return
+     * @return 是否成功
      */
     boolean initCoordinator();
 
     /**
-     * 移除协调者组
+     * 移除协调组信息
      *
-     * @param namespace
-     * @param groupId
-     * @return
+     * @param namespace 作用域
+     * @param groupId 组
+     * @return 是否成功
      */
     boolean removeCoordinatorGroup(String namespace, String groupId);
 }

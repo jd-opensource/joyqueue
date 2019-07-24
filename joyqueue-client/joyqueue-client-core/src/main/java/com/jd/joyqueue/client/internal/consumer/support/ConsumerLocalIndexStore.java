@@ -13,12 +13,11 @@
  */
 package com.jd.joyqueue.client.internal.consumer.support;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Table;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.jd.joyqueue.client.internal.consumer.domain.LocalIndexData;
 import com.jd.joyqueue.toolkit.concurrent.NamedThreadFactory;
 import com.jd.joyqueue.toolkit.service.Service;
@@ -132,19 +131,24 @@ public class ConsumerLocalIndexStore extends Service {
             return result;
         }
 
-        JSONObject jsonObject = JSON.parseObject(json);
-        for (String app : jsonObject.keySet()) {
-            JSONObject appJsonObject = jsonObject.getJSONObject(app);
-            for (String topic : appJsonObject.keySet()) {
-                JSONObject topicJsonObject = appJsonObject.getJSONObject(topic);
+        Gson gson = new GsonBuilder().create();
+        Map<String, Map<String, Map<String, Map<String, Object>>>> map = gson.fromJson(json, Map.class);
 
+        for (Map.Entry<String, Map<String, Map<String, Map<String, Object>>>> appEntry : map.entrySet()) {
+            String app = appEntry.getKey();
+
+            for (Map.Entry<String, Map<String, Map<String, Object>>> topicEntry : appEntry.getValue().entrySet()) {
+                String topic = topicEntry.getKey();
                 Map<Short, LocalIndexData> partitions = Maps.newHashMap();
-                for (String partition : topicJsonObject.keySet()) {
-                    JSONObject partitionJsonObject = topicJsonObject.getJSONObject(partition);
-                    long index = partitionJsonObject.getLong("index");
-                    long updateTime = partitionJsonObject.getLong("updateTime");
-                    long createTime = partitionJsonObject.getLong("createTime");
-                    partitions.put(Short.valueOf(partition), new LocalIndexData(index, updateTime, createTime));
+
+                for (Map.Entry<String, Map<String, Object>> partitionEntry : topicEntry.getValue().entrySet()) {
+                    short partition = Short.valueOf(partitionEntry.getKey());
+                    Map<String, Object> values = partitionEntry.getValue();
+
+                    long index = Double.valueOf(String.valueOf(values.get("index"))).longValue();
+                    long updateTime = Double.valueOf(String.valueOf(values.get("updateTime"))).longValue();
+                    long createTime = Double.valueOf(String.valueOf(values.get("createTime"))).longValue();
+                    partitions.put(partition, new LocalIndexData(index, updateTime, createTime));
                 }
 
                 result.put(app, topic, partitions);
@@ -162,7 +166,7 @@ public class ConsumerLocalIndexStore extends Service {
     }
 
     protected void doPersist(File persistFile) {
-        String json = JSON.toJSONString(indexTable.rowMap(), SerializerFeature.DisableCircularReferenceDetect);
+        String json = new GsonBuilder().create().toJson(indexTable.rowMap());
 
         try {
             FileUtils.writeStringToFile(persistFile, json);

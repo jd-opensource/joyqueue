@@ -51,4 +51,13 @@ public class TopicPartitionGroup implements Serializable {
     public void setPartitions(Map<Short, TopicPartition> partitions) {
         this.partitions = partitions;
     }
+
+    @Override
+    public String toString() {
+        return "TopicPartitionGroup{" +
+                "id=" + id +
+                ", leader=" + leader +
+                ", partitions=" + partitions +
+                '}';
+    }
 }

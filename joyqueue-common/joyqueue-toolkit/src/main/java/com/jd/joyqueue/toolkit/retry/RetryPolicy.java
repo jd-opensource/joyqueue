@@ -23,14 +23,14 @@ public class RetryPolicy implements Serializable {
     private static final long serialVersionUID = 1L;
     public static final int EXPIRE_TIME = 1000 * 3600 * 24 * 3;
     public static final int RETRY_DELAY = 1000;
-    public static final int MAX_RETRY_DELAY = 1000 * 60 * 5;
+    public static final int MAX_RETRY_DELAY = 0;
     public static final double BACKOFF_MULTIPLIER = 2.0;
     public static final int MAX_RETRYS = 0;
     // 最大指数，初始化计算一次
     private volatile AtomicReference<Integer> maxExponential = new AtomicReference();
-    // 最大重试次数(无限制)
+    // 最大重试次数
     private Integer maxRetrys;
-    // 最大重试间隔(默认5分钟)
+    // 最大重试间隔
     private Integer maxRetryDelay;
     // 重试间隔
     private Integer retryDelay;

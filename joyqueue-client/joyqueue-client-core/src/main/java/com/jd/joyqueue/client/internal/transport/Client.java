@@ -168,7 +168,11 @@ public class Client extends Service {
 
     @Override
     protected void doStart() throws Exception {
-        transport = transportClient.createTransport(new InetSocketAddress(node.getHost(), node.getPort()), transportConfig.getSendTimeout());
+        if (node.getPort() <= 0) {
+            transport = transportClient.createTransport(node.getHost(), transportConfig.getSendTimeout());
+        } else {
+            transport = transportClient.createTransport(new InetSocketAddress(node.getHost(), node.getPort()), transportConfig.getSendTimeout());
+        }
     }
 
     @Override

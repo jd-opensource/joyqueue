@@ -181,4 +181,24 @@ public class ConsumerPolicy {
     public void setFilters(Map<String, String> filters) {
         this.filters = filters;
     }
+
+    @Override
+    public String toString() {
+        return "ConsumerPolicy{" +
+                "nearby=" + nearby +
+                ", paused=" + paused +
+                ", archive=" + archive +
+                ", retry=" + retry +
+                ", seq=" + seq +
+                ", ackTimeout=" + ackTimeout +
+                ", batchSize=" + batchSize +
+                ", concurrent=" + concurrent +
+                ", delay=" + delay +
+                ", blackList=" + blackList +
+                ", errTimes=" + errTimes +
+                ", maxPartitionNum=" + maxPartitionNum +
+                ", readRetryProbability=" + readRetryProbability +
+                ", filters=" + filters +
+                '}';
+    }
 }

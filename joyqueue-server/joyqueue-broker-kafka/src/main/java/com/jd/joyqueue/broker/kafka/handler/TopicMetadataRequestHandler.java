@@ -92,7 +92,7 @@ public class TopicMetadataRequestHandler extends AbstractKafkaCommandHandler imp
         Command response = new Command(topicMetadataResponse);
 
         if (config.getLogDetail(clientId)) {
-            logger.info("get topic metadata, transportt: {}, app: {}, request: {}, response: {}",
+            logger.info("get topic metadata, transport: {}, app: {}, request: {}, response: {}",
                     transport, clientId, topicMetadataRequest, topicMetadataResponse);
         }
 

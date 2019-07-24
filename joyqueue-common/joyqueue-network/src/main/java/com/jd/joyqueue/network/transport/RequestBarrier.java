@@ -36,12 +36,11 @@ public class RequestBarrier {
 
     private TransportConfig config;
     // 单向信号量
-    public Semaphore onewaySemaphore;
+    private Semaphore onewaySemaphore;
     // 异步信号量
-    public Semaphore asyncSemaphore;
+    private Semaphore asyncSemaphore;
     // 存放同步和异步命令应答
-    public Map<Integer, ResponseFuture> futures = new ConcurrentHashMap<Integer, ResponseFuture>(200);
-
+    private Map<Integer, ResponseFuture> futures = new ConcurrentHashMap<Integer, ResponseFuture>(200);
 
     public RequestBarrier(TransportConfig config) {
         this.config = config;
@@ -155,6 +154,19 @@ public class RequestBarrier {
         } catch (InterruptedException e) {
             throw TransportException.InterruptedException.build();
         }
+    }
+
+    /**
+     * 释放信号量
+     *
+     * @param type
+     */
+    public void release(SemaphoreType type) {
+        if (type == null) {
+            return;
+        }
+        Semaphore semaphore = type == SemaphoreType.ASYNC ? asyncSemaphore : onewaySemaphore;
+        semaphore.release();
     }
 
     public TransportConfig getConfig() {
