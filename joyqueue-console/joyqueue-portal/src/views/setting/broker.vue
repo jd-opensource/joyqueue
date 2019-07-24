@@ -180,7 +180,7 @@ export default {
         colData: this.colData,
         btns: this.btns
       },
-      brokerId: '',
+      brokerId: -1,
       multipleSelection: [],
       editDialog: {
         visible: false,

@@ -25,7 +25,6 @@
 </template>
 
 <script>
-import apiRequest from '../../utils/apiRequest.js'
 import myTable from '../../components/common/myTable.vue'
 import myDialog from '../../components/common/myDialog.vue'
 import crud from '../../mixins/crud.js'
