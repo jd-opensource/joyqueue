@@ -347,7 +347,6 @@ export default {
       this.positionDialog.visible = false
     },
     groupScale (item) {
-      console.log(88)
       this.groupScaleDialogData = {groupNo: item.groupNo, topic: {id: item.topic.id, code: item.topic.code}, namespace: {id: item.namespace.id, code: item.namespace.code}}
       this.groupScaleDialog.visible = true
     },

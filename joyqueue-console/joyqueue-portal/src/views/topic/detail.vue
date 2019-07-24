@@ -205,11 +205,8 @@ export default {
     this.$refs.detail.$refs['archive'] = this.$refs.archive
     this.$refs.detail.$refs['producerDetail'] = this.$refs.producerDetail
     this.$refs.detail.$refs['consumerDetail'] = this.$refs.consumerDetail
-    console.log(11)
     this.isArchiveEnabled()
     this.isRetryEnabled()
-    console.log(this.archiveEnabled)
-    console.log(this.retryEnabled)
   }
 }
 </script>

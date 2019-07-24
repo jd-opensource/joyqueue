@@ -80,8 +80,6 @@ export default {
         groupNo: this.data.groupNo,
         brokerId: item.id
       }
-      console.log(99)
-      console.log(this.data)
       let _this = this
       this.$Dialog.confirm({
         title: '提示',

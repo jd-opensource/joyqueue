@@ -62,7 +62,6 @@ export default {
       this.$router.push({name: `/${this.$i18n.locale}/topic`})
     },
     handleTabChange (data) {
-      console.log('detail')
       let name = data.name
 
       if (name === 'producer' || name === 'consumer') {

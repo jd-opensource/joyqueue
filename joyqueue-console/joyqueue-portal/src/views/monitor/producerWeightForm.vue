@@ -74,8 +74,6 @@ export default {
     }
   },
   mounted () {
-    console.log(2)
-    console.log(this.producerId)
     this.getList()
   }
 }
