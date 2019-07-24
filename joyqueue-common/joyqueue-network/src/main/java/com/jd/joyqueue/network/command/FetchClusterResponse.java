@@ -49,4 +49,12 @@ public class FetchClusterResponse extends JoyQueuePayload {
     public void setBrokers(Map<Integer, BrokerNode> brokers) {
         this.brokers = brokers;
     }
+
+    @Override
+    public String toString() {
+        return "FetchClusterResponse{" +
+                "topics=" + topics +
+                ", brokers=" + brokers +
+                '}';
+    }
 }

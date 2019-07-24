@@ -27,25 +27,27 @@ import java.util.List;
 public interface TopicMonitorService {
 
     /**
-     * 获取所有topic监控信息
+     * 获取所有主题的监控信息
      *
-     * @return
+     * @param page 页数
+     * @param pageSize 每页大小
+     * @return 分页的主题监控信息
      */
     Pager<TopicMonitorInfo> getTopicInfos(int page, int pageSize);
 
     /**
-     * 获取topic监控信息
+     * 获取主题的监控信息
      *
      * @param topic 主题
-     * @return 入队数量
+     * @return 主题监控信息
      */
     TopicMonitorInfo getTopicInfoByTopic(String topic);
 
     /**
-     * 获取topic监控信息
+     * 获取多个列表的监控信息
      *
-     * @param topics 主题
-     * @return 入队数量
+     * @param topics 主题列表
+     * @return 主题监控信息
      */
     List<TopicMonitorInfo> getTopicInfoByTopics(List<String> topics);
 }

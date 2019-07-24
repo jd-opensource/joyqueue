@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -56,8 +55,10 @@ public class ResponseFuture implements Future {
     private AtomicBoolean released = new AtomicBoolean(false);
     // 门闩
     private CountDownLatch latch;
-    // 信号量
-    private Semaphore semaphore;
+    // barrier
+    private RequestBarrier requestBarrier;
+    // 信号量类型
+    private RequestBarrier.SemaphoreType semaphoreType;
     // 是否完成
     private volatile boolean isDone = false;
     // 是否取消
@@ -70,11 +71,12 @@ public class ResponseFuture implements Future {
      * @param request   请求
      * @param timeout   超时
      * @param callback  异步调用回调
-     * @param semaphore 信号量
+     * @param requestBarrier barrier
+     * @param semaphoreType 信号量类型
      * @param latch     门闩
      */
     public ResponseFuture(Transport transport, Command request, long timeout, CommandCallback callback,
-                          Semaphore semaphore, CountDownLatch latch) {
+                          RequestBarrier requestBarrier, RequestBarrier.SemaphoreType semaphoreType, CountDownLatch latch) {
         if (request == null) {
             throw new IllegalArgumentException("request can not be null");
         }
@@ -85,7 +87,8 @@ public class ResponseFuture implements Future {
         }
         this.timeout = timeout;
         this.callback = callback;
-        this.semaphore = semaphore;
+        this.requestBarrier = requestBarrier;
+        this.semaphoreType = semaphoreType;
         this.latch = latch;
     }
 
@@ -245,8 +248,8 @@ public class ResponseFuture implements Future {
                 request.release();
             }
             // 释放信号量
-            if (semaphore != null) {
-                semaphore.release();
+            if (semaphoreType != null) {
+                requestBarrier.release(semaphoreType);
             }
             // 唤醒同步等待线程
             if (latch != null) {

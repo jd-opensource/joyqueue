@@ -13,7 +13,6 @@
  */
 package com.jd.joyqueue.client.internal.metadata;
 
-import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.jd.joyqueue.client.internal.cluster.ClusterClientManager;
 import com.jd.joyqueue.client.internal.metadata.converter.ClusterMetadataConverter;
@@ -49,7 +48,7 @@ public class MetadataManager {
     public ClusterMetadata fetchMetadata(List<String> topics, String app) {
         FetchClusterResponse fetchClusterResponse = clusterClientManager.getOrCreateClient().fetchCluster(topics, app);
         if (logger.isDebugEnabled()) {
-            logger.debug("fetch metadata, topics: {}, app: {}, metadata: {}", topics, app, JSON.toJSONString(fetchClusterResponse));
+            logger.debug("fetch metadata, topics: {}, app: {}, metadata: {}", topics, app, fetchClusterResponse);
         }
         return ClusterMetadataConverter.convert(fetchClusterResponse);
     }

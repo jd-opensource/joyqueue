@@ -51,6 +51,7 @@ public class FailoverChannelTransport implements ChannelTransport {
     private TransportConfig config;
     private EventBus<TransportEvent> transportEventBus;
     private volatile long lastReconnect;
+    private volatile long lastRequest;
 
     public FailoverChannelTransport(ChannelTransport delegate, SocketAddress address, long connectionTimeout,
                                     TransportClient transportClient, TransportConfig config,
@@ -83,10 +84,14 @@ public class FailoverChannelTransport implements ChannelTransport {
         for (int i = 0, retryLimit = retryPolicy.getMaxRetrys(); i <= retryLimit; i++) {
             try {
                 response = delegate.sync(command, timeout);
+                lastRequest = SystemClock.now();
                 break;
             } catch (TransportException e) {
-                if (!(e instanceof TransportException.RequestTimeoutException)) {
-                    if (!isChannelActive() && !tryReconnect()) {
+                // 如果不是超时异常或者超过最大成功请求时间，那么尝试重连
+                if (!(e instanceof TransportException.RequestTimeoutException)
+                        || (retryPolicy.getMaxRetryDelay() > 0 && SystemClock.now() - lastRequest > retryPolicy.getMaxRetryDelay())) {
+
+                    if (!tryReconnect()) {
                         // 重连失败，抛出异常
                         throw e;
                     }
@@ -104,7 +109,9 @@ public class FailoverChannelTransport implements ChannelTransport {
 
         // 有过重试，打印日志
         if (lastException != null) {
-            logger.warn("transport sync exception, retry {} times success, command: {}, timeout: {}", retryTimes, command, timeout, lastException);
+            if (logger.isWarnEnabled()) {
+                logger.warn("transport sync exception, retry {} times success, command: {}, timeout: {}", retryTimes, command, timeout, lastException);
+            }
         }
 
         return response;
@@ -229,12 +236,17 @@ public class FailoverChannelTransport implements ChannelTransport {
             } catch (Throwable t) {
                 logger.warn("stop transport exception, transport: {}", newTransport, t);
             }
-            logger.info("reconnect transport success, transport: {}", newTransport);
+
+            if (logger.isInfoEnabled()) {
+                logger.info("reconnect transport success, transport: {}", newTransport);
+            }
+
             transportEventBus.add(new TransportEvent(TransportEventType.RECONNECT, newTransport));
             return true;
         } catch (Throwable t) {
-            logger.debug("reconnect transport exception, address: {}", address, t);
-//            logger.warn("reconnect transport exception, address: {}", address);
+            if (logger.isDebugEnabled()) {
+                logger.debug("reconnect transport exception, address: {}", address, t);
+            }
             return false;
         } finally {
             lastReconnect = SystemClock.now();

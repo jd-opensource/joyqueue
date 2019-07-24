@@ -22,20 +22,20 @@ package com.jd.joyqueue.broker.manage.service;
 public interface ConnectionManageService {
 
     /**
-     * 关闭生产者连接
-     * 返回关闭的连接数
+     * 关闭主题下应用的所有生产者连接
      *
-     * @param topic
-     * @param app
+     * @param topic 主题
+     * @param app 应用
+     * @return 被关闭的连接数量
      */
     int closeProducer(String topic, String app);
 
     /**
-     * 关闭消费者连接
-     * 返回关闭的连接数
+     * 关闭主题下应用的所有消费者连接
      *
-     * @param topic
-     * @param app
+     * @param topic 主题
+     * @param app 应用
+     * @return 被关闭的连接数量
      */
     int closeConsumer(String topic, String app);
 }

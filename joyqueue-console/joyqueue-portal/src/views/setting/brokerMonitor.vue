@@ -75,9 +75,11 @@
               render: (h, params) => {
                 var list=params.item.brokerTopicMonitorRecordList;
                 var html=[];
-                for(var i=0;i<list.length;i++){
-                  var p=h('div',list[i].app);
-                  html.push(p);
+                if (list != undefined) {
+                  for (var i = 0; i < list.length; i++) {
+                    var p = h('div', list[i].app);
+                    html.push(p);
+                  }
                 }
                 return h('div',{},html)
               }
@@ -88,9 +90,11 @@
               render: (h, params) => {
                 var list=params.item.brokerTopicMonitorRecordList;
                 var html=[];
-                for(var i=0;i<list.length;i++){
-                  var p=h('div',list[i].connections);
-                  html.push(p);
+                if (list != undefined) {
+                  for (var i = 0; i < list.length; i++) {
+                    var p = h('div', list[i].connections);
+                    html.push(p);
+                  }
                 }
                 return h('div',html)
               }
@@ -101,9 +105,11 @@
               render: (h, params) => {
                 var list=params.item.brokerTopicMonitorRecordList;
                 var html=[]
-                for(var i=0;i<list.length;i++){
-                  var p=h('div',list[i].count);
-                  html.push(p);
+                if (list != undefined) {
+                  for (var i = 0; i < list.length; i++) {
+                    var p = h('div', list[i].count);
+                    html.push(p);
+                  }
                 }
                 return h('div',html)
               }
@@ -114,9 +120,11 @@
               render: (h, params) => {
                 var list=params.item.brokerTopicMonitorRecordList;
                 var html=[];
-                for(var i=0;i<list.length;i++){
-                  var p=h('div',list[i].totalSize);
-                  html.push(p);
+                if (list != undefined) {
+                  for (var i = 0; i < list.length; i++) {
+                    var p = h('div', list[i].totalSize);
+                    html.push(p);
+                  }
                 }
                 return h('div',html)
               }
