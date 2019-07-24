@@ -1,12 +1,12 @@
 <template>
   <div>
-    <div style="border:10px solid #f7f7f7;width:600px;">
+    <div style="border:10px solid #f7f7f7;width:600px;" v-if="detail.store">
       <h4>存储监控:</h4>
       <span>started:</span><span v-if="detail.store.started">Running</span><span v-else>Stop</span>&nbsp&nbsp
       <span>totalSpace:</span><span>{{detail.store.totalSpace}}</span>&nbsp&nbsp
       <span>freeSpace:</span><span>{{detail.store.freeSpace}}</span>
     </div>
-    <div style="border:10px solid #f7f7f7;width:600px;">
+    <div style="border:10px solid #f7f7f7;width:600px;" v-if="detail.bufferPoolMonitorInfo">
       <h4>内存:</h4>
       <div v-for="item in detail.bufferPoolMonitorInfo.plMonitorInfos">
         <span>bufferSize:</span><span>{{item.bufferSize}}</span>&nbsp&nbsp
@@ -21,17 +21,17 @@
       <span>mmp:</span><span>{{detail.bufferPoolMonitorInfo.mmpUsed}}</span>&nbsp&nbsp
       <span>maxMemorySize:</span><span>{{detail.bufferPoolMonitorInfo.maxMemorySize}}</span>
     </div>
-    <div style="border:10px solid #f7f7f7;width:600px;">
+    <div style="border:10px solid #f7f7f7;width:600px;" v-if="detail.connection">
       <h4>连接数:</h4>
       <span>total:</span><span>{{detail.connection.total}}</span>&nbsp&nbsp
       <span>consumer:</span><span>{{detail.connection.consumer}}</span>&nbsp&nbsp
       <span>producer:</span><span>{{detail.connection.producer}}</span>
     </div>
-    <div style="border:10px solid #f7f7f7;width:600px;">
+    <div style="border:10px solid #f7f7f7;width:600px;" v-if="detail.election">
       <h4>选举:</h4>
       <span>started:</span><span v-if="detail.election.started" >Running</span><span v-else >Stop</span>
     </div>
-    <div style="border:10px solid #f7f7f7;width:600px;">
+    <div style="border:10px solid #f7f7f7;width:600px;" v-if="detail.nameServer">
       <h4>nsr:</h4>
       <span>started:</span><span v-if="detail.nameServer.started" >Running</span><span v-else>Stop</span>
     </div>
@@ -41,6 +41,7 @@
 <script>
 
 import apiRequest from '../../utils/apiRequest.js'
+
 export default {
   name: 'brokerServerMonitor',
   props: {
@@ -65,6 +66,8 @@ export default {
         },
         election: {
 
+        },
+        bufferPoolMonitorInfo: {
         }
       }
 
@@ -73,21 +76,14 @@ export default {
   methods: {
     getList () {
       apiRequest.get(this.urls.findbroker + '/' + this.brokerId, '', {}).then(data => {
-        this.detail = data.data
+        if (data.code == 200) {
+          this.detail = data.data
+        }
       })
     }
   },
   mounted () {
     this.getList()
-  },
-  filters: {
-    numFilter (value) {
-      // 截取当前数据到小数点后两位
-      let value1 = value / 1024 / 1024 / 1024
-      let realVal = parseFloat(value1).toFixed(2)
-      return realVal
-    }
-
   }
 }
 </script>

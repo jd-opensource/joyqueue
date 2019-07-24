@@ -25,25 +25,24 @@ import com.jd.joyqueue.monitor.BrokerStartupInfo;
  */
 public interface BrokerMonitorInternalService {
 
-    // TODO jvm监控
-
     /**
-     * 获取broker信息
+     * 获取监控信息
      *
-     * @return
+     * @return broker信息
      */
     BrokerMonitorInfo getBrokerInfo();
 
     /**
-     * thread safe
-     * broker state 扩展信息,扩展信息包含topic>app>partitionGroup>partition积压
-     * and broker id
-     * @return  BrokerStatExt
-     **/
+     * 获取扩展监控信息，包括额外的积压信息等
+     *
+     * @param timeStamp 时间戳，会写回到返回值
+     * @return broker扩展信息
+     */
     BrokerStatExt getExtendBrokerStat(long timeStamp);
 
     /**
      * 获取启动信息
+     *
      * @return
      */
     BrokerStartupInfo getStartInfo();

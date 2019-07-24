@@ -11,32 +11,4 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jd.joyqueue.network.command;
-
-import java.io.Serializable;
-
-/**
- * TopicPartition
- * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
- * date: 2018/11/30
- */
-public class TopicPartition implements Serializable {
-
-    private short id;
-
-    public short getId() {
-        return id;
-    }
-
-    public void setId(short id) {
-        this.id = id;
-    }
-
-    @Override
-    public String toString() {
-        return "TopicPartition{" +
-                "id=" + id +
-                '}';
-    }
-}
+package com.jd.joyqueue;

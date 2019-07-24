@@ -31,7 +31,7 @@
       <producer-config-form ref="configForm" :data="configData"/>
     </my-dialog>
     <my-dialog :dialog="weightDialog" @on-dialog-confirm="weightConfigConfirm" @on-dialog-cancel="dialogCancel('weightDialog')">
-      <producer-weight-form ref="weightForm"/>
+      <producer-weight-form ref="weightForm" :producerId="producerId"/>
     </my-dialog>
 
     <my-dialog :dialog="rateLimitDialog" @on-dialog-confirm="rateLimitConfirm" @on-dialog-cancel="dialogCancel('rateLimitDialog')">
@@ -181,6 +181,7 @@ export default {
         width: '700',
         showFooter: true
       },
+      producerId: '',
       configDialog: {
         visible: false,
         title: '生产者配置详情',
@@ -212,8 +213,9 @@ export default {
       this.configDialog.visible = true
     },
     openWeightDialog (item) {
-      this.$refs['weightForm'].getListById(item.id)
-      this['weightDialog'].visible = true
+      // this.$refs['weightForm'].getListById(item.id)
+      this.producerId = item.id
+      this.openDialog('weightDialog')
     },
     openRateLimitDialog (item) {
       this.rateLimitDialog.limitTps = item.config.limitTps
@@ -261,7 +263,7 @@ export default {
     },
     weightConfigConfirm () {
       let configData = {
-        producerId: this.configData.producerId,
+        producerId: this.producerId,
         weight: this.$refs.weightForm.getWeights()
       }
       this.config(configData, 'weightDialog')

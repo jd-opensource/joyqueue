@@ -24,12 +24,16 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>joyqueue-client-core-shaded</artifactId>
+    <artifactId>joyqueue-client-all-shaded</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>com.jd.joyqueue</groupId>
             <artifactId>joyqueue-client-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.jd.joyqueue</groupId>
+            <artifactId>joyqueue-client-kafka</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -95,6 +99,14 @@
                                 <relocation>
                                     <pattern>org.apache</pattern>
                                     <shadedPattern>com.jd.joyqueue.shaded.org.apache</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.xerial.snappy</pattern>
+                                    <shadedPattern>com.jd.joyqueue.shaded.org.xerial.snappy</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>net.jpountz.lz4</pattern>
+                                    <shadedPattern>com.jd.joyqueue.shaded.net.jpountz.lz4</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>com.jd.laf.extension</pattern>

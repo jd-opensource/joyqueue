@@ -41,11 +41,13 @@ export default {
         }
         ]
       }
+    },
+    producerId: {
+      type: String
     }
   },
   data () {
     return {
-      producerId: '',
       searchData: {
         topic: this.topic,
         namespace: this.namespace,
@@ -62,10 +64,6 @@ export default {
         this.formData = data.data
       })
     },
-    getListById (id) {
-      this.producerId = id
-      this.getList()
-    },
     getWeights () {
       let weight = ''
       for (let i = 0; i < this.formData.length; i++) {
@@ -76,7 +74,9 @@ export default {
     }
   },
   mounted () {
-    // this.getList()
+    console.log(2)
+    console.log(this.producerId)
+    this.getList()
   }
 }
 </script>

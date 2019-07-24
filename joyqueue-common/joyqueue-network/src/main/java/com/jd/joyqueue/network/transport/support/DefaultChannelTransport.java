@@ -78,7 +78,8 @@ public class DefaultChannelTransport implements ChannelTransport {
         }
         long sendTimeout = timeout <= 0 ? barrier.getSendTimeout() : timeout;
         // 同步调用
-        ResponseFuture future = new ResponseFuture(this, command, sendTimeout, null, null, new CountDownLatch(1));
+        ResponseFuture future = new ResponseFuture(this, command, sendTimeout, null,
+                null, null, new CountDownLatch(1));
         barrier.put(command.getHeader().getRequestId(), future);
         // 发送数据,应答成功回来或超时会自动释放command
         channel.writeAndFlush(command).addListener(new ResponseListener(future, barrier));
@@ -144,7 +145,7 @@ public class DefaultChannelTransport implements ChannelTransport {
 
             // 发送请求
             ResponseFuture future =
-                    new ResponseFuture(this, command, sendTimeout, callback, barrier.asyncSemaphore, null);
+                    new ResponseFuture(this, command, sendTimeout, callback, barrier, RequestBarrier.SemaphoreType.ASYNC, null);
             if (barrier.get(command.getHeader().getRequestId()) != null) {
                 logger.warn("async command(type {}, request id {}) already exist",
                         command.getHeader().getType(), command.getHeader().getRequestId());
@@ -183,7 +184,7 @@ public class DefaultChannelTransport implements ChannelTransport {
 
             // 发送请求
             ResponseFuture future =
-                    new ResponseFuture(this, command, sendTimeout, null, barrier.asyncSemaphore, null);
+                    new ResponseFuture(this, command, sendTimeout, null, barrier, RequestBarrier.SemaphoreType.ASYNC, null);
             if (barrier.get(command.getHeader().getRequestId()) != null) {
                 logger.warn("async command(type {}, request id {}) already exist",
                         command.getHeader().getType(), command.getHeader().getRequestId());
@@ -229,7 +230,7 @@ public class DefaultChannelTransport implements ChannelTransport {
             sendTimeout = sendTimeout < 0 ? 0 : sendTimeout;
 
             // 发送请求
-            future = new ResponseFuture(this, command, sendTimeout, null, barrier.onewaySemaphore,
+            future = new ResponseFuture(this, command, sendTimeout, null, barrier, RequestBarrier.SemaphoreType.ONEWAY,
                     new CountDownLatch(1));
             // 命令执行成功或超时则会自动释放command
             channel.writeAndFlush(command).addListener(new OnewayListener(future));

@@ -72,11 +72,13 @@ export default {
             title: '应用',
             key: 'brokerTopicMonitorRecordList',
             render: (h, params) => {
-              let list = params.item.brokerTopicMonitorRecordList
-              let html = []
-              for (let i = 0; i < list.length; i++) {
-                let p = h('div', list[i].app)
-                html.push(p)
+              var list = params.item.brokerTopicMonitorRecordList
+              var html = []
+              if (list != undefined) {
+                for (var i = 0; i < list.length; i++) {
+                  var p = h('div', list[i].app)
+                  html.push(p)
+                }
               }
               return h('div', {}, html)
             }
@@ -85,11 +87,13 @@ export default {
             title: '连接数',
             key: 'brokerTopicMonitorRecordList',
             render: (h, params) => {
-              let list = params.item.brokerTopicMonitorRecordList
-              let html = []
-              for (let i = 0; i < list.length; i++) {
-                let p = h('div', list[i].connections)
-                html.push(p)
+              var list = params.item.brokerTopicMonitorRecordList
+              var html = []
+              if (list != undefined) {
+                for (var i = 0; i < list.length; i++) {
+                  var p = h('div', list[i].connections)
+                  html.push(p)
+                }
               }
               return h('div', html)
             }
@@ -98,11 +102,13 @@ export default {
             title: '出/入对数',
             key: 'brokerTopicMonitorRecordList',
             render: (h, params) => {
-              let list = params.item.brokerTopicMonitorRecordList
-              let html = []
-              for (let i = 0; i < list.length; i++) {
-                let p = h('div', list[i].count)
-                html.push(p)
+              var list = params.item.brokerTopicMonitorRecordList
+              var html = []
+              if (list != undefined) {
+                for (var i = 0; i < list.length; i++) {
+                  var p = h('div', list[i].count)
+                  html.push(p)
+                }
               }
               return h('div', html)
             }
@@ -111,26 +117,35 @@ export default {
             title: '出/入队流量',
             key: 'brokerTopicMonitorRecordList',
             render: (h, params) => {
-              let list = params.item.brokerTopicMonitorRecordList
-              let html = []
-              for (let i = 0; i < list.length; i++) {
-                let p = h('div', list[i].totalSize)
-                html.push(p)
+              var list = params.item.brokerTopicMonitorRecordList
+              var html = []
+              if (list != undefined) {
+                for (var i = 0; i < list.length; i++) {
+                  var p = h('div', list[i].totalSize)
+                  html.push(p)
+                }
               }
               return h('div', html)
             }
           }
         ]
+        // 表格操作，如果需要根据特定值隐藏显示， 设置bindKey对应的属性名和bindVal对应的属性值
+        // btns: [
+        //   {
+        //     txt: '编辑',
+        //     method: 'on-edit'
+        //   }
+        // ]
       },
       multipleSelection: []
     }
   },
   methods: {
     menuChange (item) {
-      if (item.name === 'consumer') {
+      if (item.name == 'consumer') {
         this.searchData.type = 2
         this.getList()
-      } else if (item.name === 'producer') {
+      } else if (item.name == 'producer') {
         this.searchData.type = 1
         this.getList()
       } else {
