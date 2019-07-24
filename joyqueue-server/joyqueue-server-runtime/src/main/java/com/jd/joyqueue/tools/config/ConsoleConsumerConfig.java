@@ -27,7 +27,7 @@ import java.util.Map;
  */
 public class ConsoleConsumerConfig {
 
-    @Parameter(names = {"-b", "--bootstrap"}, description = "server bootstrap")
+    @Parameter(names = {"-s", "--server"}, description = "server bootstrap")
     private String bootstrap = "localhost:50088";
 
     @Parameter(names = {"-t", "--topic"}, description = "consumer topic", required = true)
@@ -42,7 +42,7 @@ public class ConsoleConsumerConfig {
     @Parameter(names = {"-a", "--app"}, description = "consumer app", required = true)
     private String app;
 
-    @Parameter(names = {"-T", "-token"}, description = "app token", required = true)
+    @Parameter(names = {"-T", "--token"}, description = "app token", required = true)
     private String token;
 
     @DynamicParameter(names = {"-p", "--params"}, description = "consumer params")
