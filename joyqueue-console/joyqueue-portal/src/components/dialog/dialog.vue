@@ -22,14 +22,14 @@
               </slot>
             </div>
             <div :class="[prefixCls + '__body']">
-              <slot>
-                <div v-if="visible">
+              <div v-if="visible">
+                <slot>
                   <div v-html="content"></div>
                   <div :class="[prefixCls + '__input']" v-if="showInput">
                     <d-input v-model="inputValue" :placeholder="inputPlaceholder" @keyup.enter.native="handleAction('confirm', $event)" ref="input"></d-input>
                   </div>
-                </div>
-              </slot>
+                </slot>
+              </div>
             </div>
             <div :class="[prefixCls + '__footer']" v-if="showFooter">
               <slot name="footer">

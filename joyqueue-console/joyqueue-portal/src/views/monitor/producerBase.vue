@@ -198,8 +198,10 @@ export default {
       this[dialog].visible = true
     },
     openAndQueryDialog (dialog, ref) {
-      this.$refs[ref].getList()
       this[dialog].visible = true
+      this.$nextTick(() => {
+        this.$refs[ref].getList()
+      })
     },
     openDetailTab (item) {
       this.$emit('on-detail', item)
