@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div style="border:10px solid #f7f7f7;width:600px;">
+    <div style="border:10px solid #f7f7f7;width:600px;" v-if="detail.store">
       <h4>存储监控:</h4>
       <span>started:</span><span v-if="detail.store.started">Running</span><span v-else>Stop</span>&nbsp&nbsp
       <span>totalSpace:</span><span>{{detail.store.totalSpace}}</span>&nbsp&nbsp
@@ -21,17 +21,17 @@
       <span>mmp:</span><span>{{detail.bufferPoolMonitorInfo.mmpUsed}}</span>&nbsp&nbsp
       <span>maxMemorySize:</span><span>{{detail.bufferPoolMonitorInfo.maxMemorySize}}</span>
     </div>
-    <div style="border:10px solid #f7f7f7;width:600px;">
+    <div style="border:10px solid #f7f7f7;width:600px;" v-if="detail.connection">
       <h4>连接数:</h4>
       <span>total:</span><span>{{detail.connection.total}}</span>&nbsp&nbsp
       <span>consumer:</span><span>{{detail.connection.consumer}}</span>&nbsp&nbsp
       <span>producer:</span><span>{{detail.connection.producer}}</span>
     </div>
-    <div style="border:10px solid #f7f7f7;width:600px;">
+    <div style="border:10px solid #f7f7f7;width:600px;" v-if="detail.election">
       <h4>选举:</h4>
       <span>started:</span><span v-if="detail.election.started" >Running</span><span v-else >Stop</span>
     </div>
-    <div style="border:10px solid #f7f7f7;width:600px;">
+    <div style="border:10px solid #f7f7f7;width:600px;" v-if="detail.nameServer">
       <h4>nsr:</h4>
       <span>started:</span><span v-if="detail.nameServer.started" >Running</span><span v-else>Stop</span>
     </div>
