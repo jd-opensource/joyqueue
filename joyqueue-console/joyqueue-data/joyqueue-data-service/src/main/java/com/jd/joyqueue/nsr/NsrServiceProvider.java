@@ -11,32 +11,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jd.joyqueue.network.command;
-
-import java.io.Serializable;
+package com.jd.joyqueue.nsr;
 
 /**
- * TopicPartition
- * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
- * date: 2018/11/30
+ * @author liyue25
+ * Date: 2019-07-22
  */
-public class TopicPartition implements Serializable {
-
-    private short id;
-
-    public short getId() {
-        return id;
-    }
-
-    public void setId(short id) {
-        this.id = id;
-    }
-
-    @Override
-    public String toString() {
-        return "TopicPartition{" +
-                "id=" + id +
-                '}';
-    }
+public interface NsrServiceProvider {
+    String getBaseUrl();
 }

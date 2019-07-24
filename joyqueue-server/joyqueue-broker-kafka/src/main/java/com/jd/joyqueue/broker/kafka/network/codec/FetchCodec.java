@@ -57,7 +57,11 @@ public class FetchCodec implements KafkaPayloadCodec<FetchResponse>, Type {
         for (int i = 0; i < topicSize; i++) {
             String topic = Serializer.readString(buffer, Serializer.SHORT_SIZE);
             int partitionSize = Math.max(buffer.readInt(), 0);
-            List<FetchRequest.PartitionRequest> partitionRequests = Lists.newArrayListWithCapacity(partitionSize);
+            List<FetchRequest.PartitionRequest> partitionRequests = partitionRequestMap.get(topic);
+            if (partitionRequests == null) {
+                partitionRequests = Lists.newArrayListWithCapacity(partitionSize);
+                partitionRequestMap.put(topic, partitionRequests);
+            }
 
             for (int j = 0; j < partitionSize; j++) {
                 int partitionId = buffer.readInt();
@@ -78,7 +82,6 @@ public class FetchCodec implements KafkaPayloadCodec<FetchResponse>, Type {
                 }
                 partitionRequests.add(partitionRequest);
             }
-            partitionRequestMap.put(topic, partitionRequests);
         }
         fetchRequest.setPartitionRequests(partitionRequestMap);
         return fetchRequest;

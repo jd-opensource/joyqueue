@@ -95,4 +95,16 @@ public class ProducerPolicy {
     public void setTimeOut(Integer timeOut) {
         this.timeOut = timeOut;
     }
+
+    @Override
+    public String toString() {
+        return "ProducerPolicy{" +
+                "nearby=" + nearby +
+                ", single=" + single +
+                ", archive=" + archive +
+                ", weight=" + weight +
+                ", blackList=" + blackList +
+                ", timeOut=" + timeOut +
+                '}';
+    }
 }

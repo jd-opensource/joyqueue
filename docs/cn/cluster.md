@@ -1,28 +1,47 @@
 # JoyQueue 集群部署
 
-JoyQueue的集群由元数据集群和 partition group 多副本集群共同组成。
+JoyQueue支持集群部署。不同于其它的消息平台，JoyQueue在集群部署时，不需要依赖任何外部服务，只需要通过简单的配置即可实现可靠的大规模集群。
 
-JoyQueue的元数据管理依赖于Ignite服务，JoyQueue启动时会在同一进程内启动一个Ignite client或server。
-多个JoyQueue实例可以通过配置`nameserver.ignite.discoverySpi.ipFinder.address`在相同的ip范围或列举具体的ip，使它们组成元数据集群。
-可以通过配置`nameserver.ignite.clientMode`指定Ignite节点的角色，默认为true。当clientMode=true时，本地Ignite作为Ignite server会保存元数据，否则不保存元数据。
-Ignite的所有配置均可通过`joyqueue.properties`文件覆盖默认值。
+## 元数据服务
 
-JoyQueue的partition group 是一个独立的Raft集群。在创建topic时选择多个broker，则topic的partition groups将尽可能均匀的分布在broker上。
-JoyQueue依赖于Raft一致性协议来保障消息的可靠性，任意partition group都有多个副本，默认为三副本。
+JoyQueue Server内置元数据服务（也叫NameServer或NameService），元数据存储在每个节点的本地磁盘上。JoyQueue Server可以以server或者thin两种模式启动，以server模式启动的节点提供元数据服务，存储元数据；以thin模式启动的节点只访问元数据，不存储元数据。
 
-以三个节点的JoyQueue实例为例，假设ip分别为192.169.0.2,192.169.0.3,192.169.0.4。joyqueue.properties 文件包含如下配置：
+只要提供元数据服务的节点中，超过半数以上的节点存活，集群就可以持续提供服务。建议一个集群内NameServer节点（nameserver.nsr.name = server）配置为3个或者5个，其它节点配置为thin模式（nameserver.nsr.name = thin ）, 即ThinServer。无论是NameServer还是ThinServer都可以提供收发消息的服务。
+
+![JoyQueue集群](../images/cluster.png)
+
+## 配置集群
+
+例如，配置5个节点的集群，其中3个NameServer，2个ThinServer。
+
+| IP | 类型 |
+| -- | -- |
+| 192.168.1.1 | NameServer |
+| 192.168.1.2 | NameServer |
+| 192.168.1.3 | NameServer |
+| 192.168.1.4 | ThinServer |
+| 192.168.1.5 | ThinServer |
 
 
+所有的NameServer中，需要配置属性`nameserver.ignite.discoverySpi.ipFinder.address`来互相发现。NameServer需要在配置文件joyqueue.properties中配置：
+
+```properties
+nameserver.nsr.name=server
+# 如果不配置端口，使用默认的发现端口
+nameserver.ignite.discoverySpi.ipFinder.address=192.168.1.1,192.168.1.2,192.168.1.3
 ```
 
-nameserver.ignite.discoverySpi.ipFinder.address=192.169.0.2:48500..48520;,192.169.0.3:48500..48520;,192.169.0.4:48500..48520
+ThinServer中，需要配置NameServer的元数据服务地址和端口`nameservice.serverAddress`用于访问元数据服务。ThinServer需要在配置文件joyqueue.properties中配置：
 
+```properties
+nameserver.nsr.name=thin
+nameservice.serverAddress=192.168.1.1:50092,192.168.1.2:50092,192.168.1.3:50092
 ```
 
-分别启动这三个JoyQueue实例。新建主题joy_topic，在broker列表同时选择如上的三个ip，此时三副本的joy_topic就创建完成。
+对应的JoyQueue Web需要在配置文件application.properties中配置：
 
+```properties
+joyqueue.servers=192.168.1.1,192.168.1.2,192.168.1.3
+```
 
-
-
-
-
+配置成功后，可以打开JoyQueue Web，在“系统管理-Broker管理”中看到集群中所有的节点。
