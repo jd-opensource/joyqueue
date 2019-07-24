@@ -16,8 +16,9 @@ package com.jd.joyqueue.network.transport.command;
 import com.jd.joyqueue.domain.QosLevel;
 
 /**
+ * 16-6-22.
  * @author hexiaofeng
- * @date 16-6-22.
+ *
  */
 public interface Header {
 

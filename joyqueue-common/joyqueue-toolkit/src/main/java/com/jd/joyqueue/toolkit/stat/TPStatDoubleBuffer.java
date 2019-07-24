@@ -19,7 +19,7 @@ import com.jd.joyqueue.toolkit.time.SystemClock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
- * 性能统计，读写双缓冲区<br/>
+ * 性能统计，读写双缓冲区
  * 可以设置时间间隔，在该时间间隔内多次的请求都只会返回一条
  */
 public class TPStatDoubleBuffer<T extends TPStatSlice> {

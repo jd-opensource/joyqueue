@@ -757,8 +757,11 @@ public final class URL implements Serializable {
      * 判断参数是否存在
      *
      * @param key 参数名称
-     * @return <li>true 存在</li>
+     * @return
+     * <ul>
+     * <li>true 存在</li>
      * <li>false 不存在</li>
+     * </ul>
      */
     public boolean hasParameter(final String key) {
         String value = getString(key);

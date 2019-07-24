@@ -21,7 +21,6 @@ public interface Reference {
     /**
      * 获取引用
      *
-     * @return 获取的引用.
      */
     void acquire();
 

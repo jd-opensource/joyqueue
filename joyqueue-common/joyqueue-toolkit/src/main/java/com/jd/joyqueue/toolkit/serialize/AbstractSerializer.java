@@ -227,7 +227,7 @@ public abstract class AbstractSerializer {
     }
 
     /**
-     * 读取字符串，字符长度<=255
+     * 读取字符串，字符长度&lt;=255
      *
      * @param in 输入缓冲区
      * @return 返回值 字符串

@@ -18,7 +18,7 @@ import java.util.Map;
 
 /**
  * joyqueue异常码枚举类
- * <p/>
+ *
  * <p>
  * 该类定义了JMQ框架抛出的所有异常码和消息提示文本，用于统一约定和管理所有异常信息
  * </p>
@@ -26,9 +26,8 @@ import java.util.Map;
  * JMQ按功能大致分为：公用、服务端、客户端、存储、复制以及流程六大模块。为了方便
  * 管理异常码,所有的异常码命名和分段也按照模块来划分。
  * </p>
- * <p/>
  * <p>以下是具体的码段及前缀分配规则：</p>
- * <table>
+ * <table  summary="JoyQueue exception code ">
  * <tr>
  * <th>模块名</th>
  * <th>预留码段</th>
@@ -71,7 +70,6 @@ import java.util.Map;
  * <td>CY_</td>
  * <td>CY_COPY_ERROR(111, "复制出错")</td>
  * </tr>
- * <p/>
  * <tr>
  * <td>流程</td>
  * <td>131 ~ 150</td>
@@ -79,12 +77,12 @@ import java.util.Map;
  * <td>FW_FLOW_ERROR(131, "流程出错")</td>
  * </tr>
  * </table>
- * <p/>
  * <strong>注：实现者应严格按照该规则定义自己的异常码</strong>
  *
+ * 14-4-19 上午10:43
  * @author Jame.HU
  * @version V1.0
- * @date 14-4-19 上午10:43
+ *
  */
 public enum JoyQueueCode {
     // 0：表示成功

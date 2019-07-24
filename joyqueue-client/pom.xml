@@ -20,7 +20,7 @@
     <parent>
         <artifactId>joyqueue</artifactId>
         <groupId>com.jd.joyqueue</groupId>
-        <version>4.1.0-SNAPSHOT</version>
+        <version>4.1.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -39,6 +39,8 @@
 
     <properties>
         <openmessaging-api.version>1.0.0-alpha</openmessaging-api.version>
+        <maven.deploy.skip>false</maven.deploy.skip>
+
     </properties>
 
     <build>
@@ -61,11 +63,4 @@
         </plugins>
     </build>
 
-    <distributionManagement>
-        <snapshotRepository>
-            <id>snapshots</id>
-            <name>JD maven2 repository-snapshots</name>
-            <url>http://artifactory.jd.com/libs-snapshots-local</url>
-        </snapshotRepository>
-    </distributionManagement>
 </project>

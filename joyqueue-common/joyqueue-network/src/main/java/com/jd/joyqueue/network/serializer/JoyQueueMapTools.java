@@ -169,7 +169,7 @@ public class JoyQueueMapTools {
      *
      * @param object
      * @param out
-     * @throws Exception
+     *
      */
     public static void write(final Object object, final ByteBuf out) {
         if (object instanceof Byte) {

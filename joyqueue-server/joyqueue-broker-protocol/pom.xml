@@ -20,7 +20,7 @@
     <parent>
         <artifactId>joyqueue-server</artifactId>
         <groupId>com.jd.joyqueue</groupId>
-        <version>4.1.0-SNAPSHOT</version>
+        <version>4.1.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -28,7 +28,7 @@
     <name>JoyQueue-Broker-Protocol</name>
     <description>JoyQueue protocol support library</description>
 
-    <version>4.1.0-SNAPSHOT</version>
+    <version>4.1.0</version>
 
     <dependencies>
         <dependency>

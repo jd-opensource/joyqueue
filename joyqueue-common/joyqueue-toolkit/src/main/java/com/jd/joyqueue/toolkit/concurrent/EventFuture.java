@@ -108,7 +108,7 @@ public class EventFuture<R> implements Future<R>,EventListener<R>{
      * retrieves its result.
      *
      * @return the computed result
-     * @throws CancellationException if the computation was cancelled
+     * @throws java.util.concurrent.CancellationException if the computation was cancelled
      * @throws InterruptedException  if the current thread was interrupted
      *                               while waiting
      */
@@ -133,7 +133,7 @@ public class EventFuture<R> implements Future<R>,EventListener<R>{
      * @param timeout the maximum time to wait
      * @param unit    the time unit of the timeout argument
      * @return the computed result
-     * @throws CancellationException if the computation was cancelled
+     * @throws java.util.concurrent.CancellationException if the computation was cancelled
      * @throws InterruptedException  if the current thread was interrupted
      *                               while waiting
      */

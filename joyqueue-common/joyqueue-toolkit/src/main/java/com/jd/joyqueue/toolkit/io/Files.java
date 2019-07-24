@@ -328,8 +328,7 @@ public abstract class Files {
     }
 
     /**
-     * Reads <i>length</i> bytes from <i>source</i> into <i>dest</i> starting at <i>offset</i>. <br/>
-     * <p/>
+     * Reads <i>length</i> bytes from <i>source</i> into <i>dest</i> starting at <i>offset</i>.
      * The only case where the <i>length</i> <tt>byte</tt>s will not be read is if <i>source</i> returns EOF.
      *
      * @param source The source of bytes to read from. Must not be <code>null</code>.
