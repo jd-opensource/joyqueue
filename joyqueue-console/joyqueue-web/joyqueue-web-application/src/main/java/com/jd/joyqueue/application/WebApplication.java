@@ -21,12 +21,13 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.PropertySource;
 
 /**
  * Created by chenyanying3 on 19-3-3.
  */
 @SpringBootApplication
-//@PropertySource({"classpath:application.properties"})
+@PropertySource({"classpath:application.properties"})
 @Import(H2DBServerAutoConfiguration.class)
 public class WebApplication implements ApplicationRunner {
     private static final Logger logger = LoggerFactory.getLogger(WebApplication.class);

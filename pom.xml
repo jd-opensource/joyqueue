@@ -87,7 +87,7 @@
         <openmessaging-spring.version>0.0.1-SNAPSHOT</openmessaging-spring.version>
         <openmessaging-api.version>1.0.0-alpha</openmessaging-api.version>
         <asm.version>6.2.1</asm.version>
-        <jackson-dataformat.version>2.7.8</jackson-dataformat.version>
+        <jackson-dataformat.version>RELEASE</jackson-dataformat.version>
         <metrics.version>4.0.0</metrics.version>
         <commons-lang.version>2.6</commons-lang.version>
         <guice.version>4.2.2</guice.version>
