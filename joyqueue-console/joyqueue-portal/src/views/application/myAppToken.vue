@@ -187,7 +187,7 @@ export default {
   },
   mounted () {
     let startTime = new Date(new Date().toLocaleDateString()).getTime()
-    let endTime = new Date(new Date().toLocaleDateString()).getTime() + (100 * 365 + 4) * 24 * 60 * 60 * 1000 - 1
+    let endTime = new Date(new Date().toLocaleDateString()).getTime() + (100 * 365 + 24) * 24 * 60 * 60 * 1000 - 1
     this.addData.timeList = [startTime, endTime]
   }
 }
