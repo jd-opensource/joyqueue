@@ -14,10 +14,7 @@
 package com.jd.joyqueue;
 
 /**
- *
- * To avoid javadoc error
- *
+ *  To avoid javadoc error
  **/
-public class FakeAll {
-
+public class FakeAllShade {
 }
