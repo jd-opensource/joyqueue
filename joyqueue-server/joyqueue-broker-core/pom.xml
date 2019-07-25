@@ -44,7 +44,7 @@
             <artifactId>commons-beanutils</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.jd.laf</groupId>
+            <groupId>com.jd.joyqueue</groupId>
             <artifactId>laf-extension-core</artifactId>
         </dependency>
         <dependency>
@@ -56,7 +56,7 @@
             <artifactId>metrics-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.jd.laf.web</groupId>
+            <groupId>com.jd.joyqueue</groupId>
             <artifactId>laf-vertx-web</artifactId>
         </dependency>
         <dependency>

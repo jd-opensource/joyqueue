@@ -14,7 +14,7 @@ JoyQueue 支持Openmessaging协议，并提供Java版本的原生客户端。此
 <dependency>
     <groupId>com.jd.joyqueue</groupId>
     <artifactId>joyqueue-client-all</artifactId>
-    <version>4.1.0-SNAPSHOT</version>
+    <version>4.1.0</version>
 </dependency>
 ```
 
@@ -238,7 +238,7 @@ public class JoyQueueSimpleProducerInterceptor implements ProducerInterceptor, O
 <dependency>
     <groupId>com.jd.joyqueue</groupId>
     <artifactId>joyqueue-client-all</artifactId>
-    <version>4.1.0-SNAPSHOT</version>
+    <version>4.1.0</version>
 </dependency>
 <dependency>
     <groupId>io.openmessaging</groupId>
@@ -313,7 +313,7 @@ public class SimpleMessageListener implements MessageListener {
 <dependency>
     <groupId>com.jd.joyqueue</groupId>
     <artifactId>joyqueue-client-all</artifactId>
-    <version>4.1.0-SNAPSHOT</version>
+    <version>4.1.0</version>
 </dependency>
 <dependency>
     <groupId>io.openmessaging</groupId>

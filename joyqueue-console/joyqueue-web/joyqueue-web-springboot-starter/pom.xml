@@ -41,7 +41,7 @@
 
 
         <dependency>
-            <groupId>com.jd.laf.web</groupId>
+            <groupId>com.jd.joyqueue</groupId>
             <artifactId>laf-vertx-web-springboot-starter</artifactId>
         </dependency>
 

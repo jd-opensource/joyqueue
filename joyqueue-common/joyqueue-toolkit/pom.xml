@@ -61,7 +61,7 @@
             <artifactId>asm</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.jd.laf</groupId>
+            <groupId>com.jd.joyqueue</groupId>
             <artifactId>laf-extension-core</artifactId>
         </dependency>
 

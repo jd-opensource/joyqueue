@@ -22,7 +22,7 @@ Java HotSpot(TM) 64-Bit Server VM (build 25.202-b08, mixed mode)
 使用`server-start.sh`命令启动消息服务实例:
 
 ```bash
-$ joyqueue-server-4.1.0-SNAPSHOT/bin/server-start.sh
+$ joyqueue-server-4.1.0/bin/server-start.sh
 
 ......
 
@@ -34,7 +34,7 @@ $ joyqueue-server-4.1.0-SNAPSHOT/bin/server-start.sh
   \___/ \___/ \__, |\__\_\\__,_|\___|\__,_|\___|
               |___/
 
- ver. 4.1.0-SNAPSHOT
+ ver. 4.1.0
 
 [19:17:13:183] [main] [INFO] - com.jd.joyqueue.broker.Launcher.main(Launcher.java:35) - JoyQueue is started
 ......
@@ -50,7 +50,7 @@ JoyQueue Web，默认连接本机的JoyQueue Server。如果JoyQueue Web与JoyQu
 
 ```bash
 
-$ joyqueue-web-4.1.0-SNAPSHOT/bin/start.sh
+$ joyqueue-web-4.1.0/bin/start.sh
 
 ......
 2019-07-09 13:04:25.319 [main] INFO  com.jd.laf.web.vertx.spring.SpringVertx - success starting Vert.x
@@ -92,7 +92,7 @@ $ joyqueue-web-4.1.0-SNAPSHOT/bin/start.sh
 
 ```bash
 
- $ joyqueue-server-4.1.0-SNAPSHOT/bin/console-producer.sh -a joyqueue --token a768388469e144b0b6cbe87a6e339a3c -t joy_topic -b "Hello,JoyQueue"
+ $ joyqueue-server-4.1.0/bin/console-producer.sh -a joyqueue --token a768388469e144b0b6cbe87a6e339a3c -t joy_topic -b "Hello,JoyQueue"
    
 ```
 
@@ -101,7 +101,7 @@ $ joyqueue-web-4.1.0-SNAPSHOT/bin/start.sh
 使用`console-consumer.sh`来接收消息：
 
 ```bash
-$ joyqueue-server-4.1.0-SNAPSHOT/bin/console-consumer.sh -a joyqueue --token a768388469e144b0b6cbe87a6e339a3c -t joy_topic
+$ joyqueue-server-4.1.0/bin/console-consumer.sh -a joyqueue --token a768388469e144b0b6cbe87a6e339a3c -t joy_topic
 
 Message{topic: joy_topic, partition: 0, index: 0, txId: null, key: null, body: Hello,JoyQueue}
 ```
