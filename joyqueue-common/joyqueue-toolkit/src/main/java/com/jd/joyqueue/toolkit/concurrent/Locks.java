@@ -34,14 +34,18 @@ public class Locks {
      *
      * @param lock    锁
      * @param timeout 超时时间
-     *                <li>>0 等待超时时间</li>
-     *                <li>=0 无限等待</li>
-     *                <li><0 无限等待</li>
+     *                <ul>
+     *                <li> &gt;0 等待超时时间</li>
+     *                <li> =0 无限等待</li>
+     *                <li> &lt;0 无限等待</li>
+     *                </ul>
      * @return 剩余的超时时间
-     * <li>>0 锁成功，timeout>0，剩余超时时间</li>
+     * <ul>
+     * <li> &gt;0 锁成功，timeout&gt;0，剩余超时时间</li>
      * <li>0 锁成功，timeout=0</li>
-     * <li>-1 锁成功，timeout<0</li>
+     * <li>-1 锁成功，timeout&lt;0</li>
      * <li>-2 失败</li>
+     * </ul>
      */
     public static long tryLock(final Lock lock, final long timeout) {
         long time;
@@ -77,8 +81,10 @@ public class Locks {
      *
      * @param lock        锁
      * @param timeout     超时时间
-     *                    <li>>0 等待超时时间</li>
-     *                    <li>=0 无限等待</li>
+     *                    <ul>
+     *                    <li> &gt;0 等待超时时间</li>
+     *                    <li> =0 无限等待</li>
+     *                    </ul>
      * @param doubleCheck 拿到锁后进行二次校验，如果满足条件则不需要等待
      * @return 是否成功
      */
@@ -246,7 +252,6 @@ public class Locks {
      *
      * @param lock      锁
      * @param condition 信号量
-     * @return 是否成功
      */
     public static void signalAll(final Lock lock, final Condition condition) {
         lock.lock();
@@ -262,7 +267,6 @@ public class Locks {
      *
      * @param lock       锁
      * @param conditions 信号量
-     * @return 是否成功
      */
     public static void signalAll(final Lock lock, final Condition... conditions) {
         lock.lock();
@@ -279,7 +283,7 @@ public class Locks {
      * 通知
      *
      * @param mutex 信号量
-     * @throws InterruptedException
+     *
      */
 
     public static void notify(final Object mutex) {
@@ -295,7 +299,6 @@ public class Locks {
      * 通知
      *
      * @param mutex 信号量
-     * @throws InterruptedException
      */
     public static void notifyAll(final Object mutex) {
         if (mutex == null) {

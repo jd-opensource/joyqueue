@@ -15,19 +15,8 @@ package com.jd.joyqueue.toolkit.network;
 
 import sun.net.util.IPAddressUtil;
 
-import java.net.Inet4Address;
-import java.net.Inet6Address;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.NetworkInterface;
-import java.net.SocketAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.net.*;
+import java.util.*;
 
 /**
  * Ipv4工具
@@ -83,8 +72,6 @@ public class IpUtil {
      *
      * @param nic     网卡
      * @param exclude 排除的地址
-     * @return 地址列表
-     * @throws SocketException
      */
     public static List<String> getLocalIps(final String nic, final String exclude) {
         try {

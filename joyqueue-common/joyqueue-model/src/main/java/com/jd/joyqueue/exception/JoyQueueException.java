@@ -15,10 +15,10 @@ package com.jd.joyqueue.exception;
 
 /**
  * JoyQueueException
- *
+ * 14-4-19 上午10:41
  * @author Jame.HU
  * @version V1.0
- * @date 14-4-19 上午10:41
+ *
  */
 public class JoyQueueException extends Exception {
     // 异常代码

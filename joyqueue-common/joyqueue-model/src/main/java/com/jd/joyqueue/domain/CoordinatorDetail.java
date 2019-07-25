@@ -17,9 +17,10 @@ import java.util.List;
 
 
 /**
- *  @author  wangjin18
- *  @date    2019-01-23
- * @see
+ *
+ * 2019/01/23
+ * @author  wangjin18
+ *
  **/
 public class CoordinatorDetail {
     private TopicName topic;

@@ -20,14 +20,14 @@
     <parent>
         <artifactId>joyqueue-server</artifactId>
         <groupId>com.jd.joyqueue</groupId>
-        <version>4.1.0-SNAPSHOT</version>
+        <version>4.1.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>joyqueue-broker-core</artifactId>
     <name>JoyQueue-Broker-Core</name>
     <description>Broker core library</description>
-    <version>4.1.0-SNAPSHOT</version>
+    <version>4.1.0</version>
 
     <dependencies>
         <dependency>
@@ -44,7 +44,7 @@
             <artifactId>commons-beanutils</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.jd.laf</groupId>
+            <groupId>com.jd.joyqueue</groupId>
             <artifactId>laf-extension-core</artifactId>
         </dependency>
         <dependency>
@@ -56,7 +56,7 @@
             <artifactId>metrics-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.jd.laf.web</groupId>
+            <groupId>com.jd.joyqueue</groupId>
             <artifactId>laf-vertx-web</artifactId>
         </dependency>
         <dependency>
@@ -102,7 +102,7 @@
         <dependency>
             <groupId>com.jd.joyqueue</groupId>
             <artifactId>joyqueue-store-core</artifactId>
-            <version>4.1.0-SNAPSHOT</version>
+            <version>4.1.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>

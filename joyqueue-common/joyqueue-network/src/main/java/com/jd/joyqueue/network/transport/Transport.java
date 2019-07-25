@@ -134,7 +134,6 @@ public interface Transport {
 
     /**
      * 设置属性
-     * @return
      */
     void attr( TransportAttribute attribute);
 

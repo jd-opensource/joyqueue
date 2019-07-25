@@ -55,7 +55,6 @@ public class Broker implements Serializable {
     /**
      * 权限
      * default FULL
-     * @return
      */
 
     protected PermissionEnum permission = PermissionEnum.FULL;

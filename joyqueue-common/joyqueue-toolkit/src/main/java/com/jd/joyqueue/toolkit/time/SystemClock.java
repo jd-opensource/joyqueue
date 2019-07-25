@@ -19,9 +19,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 //CHECKSTYLE.OFF: RegexpMultiline
 /**
- * {@link SystemClock} is a optimized substitute of {@link System.currentTimeMillis()} for avoiding config switch
+ * {@link SystemClock} is a optimized substitute of {@link System#currentTimeMillis()} for avoiding config switch
  * overload.
- * <p/>
  * Every instance would start a concurrent to update the time, so it's supposed to be singleton in application config.
  */
 public class SystemClock {

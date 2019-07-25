@@ -66,8 +66,8 @@ public class RetryPolicy implements Serializable {
      * @param now        当前时间
      * @param retryTimes 当前重试次数，从1开始计数
      * @param startTime  初始化起始时间
-     * @return <li><=0 过期</li>
-     * <li>>0 下次重试时间</li>
+     * @return  &lt;=0 过期, &gt;0 下次重试时间
+     *
      */
     public long getTime(final long now, final int retryTimes, final long startTime) {
         long time = 0;

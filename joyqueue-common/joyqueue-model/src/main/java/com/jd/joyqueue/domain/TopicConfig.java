@@ -31,7 +31,7 @@ public class TopicConfig extends Topic implements Serializable {
 
     /**
      * Topic所有partitionGroup信息
-     * <broker,id-PartitionGroup>
+     * &lt; broker,id-PartitionGroup&gt;
      * -1表示还没有leader的broker的partitionGroup;
      */
     private Map<Short, PartitionGroup> partitionGroupMap = new HashMap<>();
@@ -144,7 +144,7 @@ public class TopicConfig extends Topic implements Serializable {
 
     /**
      * 返回相关的broker(获取topic中所有partition的replicas)
-     * @return
+     * @return all brokers
      */
     public Set<Integer> fetchAllBrokerIds() {
         Set<Integer> brokers = new HashSet<>();

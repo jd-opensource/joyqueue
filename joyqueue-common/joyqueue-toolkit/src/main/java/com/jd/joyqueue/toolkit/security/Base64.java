@@ -235,7 +235,6 @@ public class Base64 {
      *
      * @param in  输入流
      * @param out 输出流
-     * @return 是否成功，使用或操作并BASE64.[X]
      * @throws IOException
      */
     public static void encode(final InputStream in, final OutputStream out) throws IOException {
@@ -248,7 +247,6 @@ public class Base64 {
      * @param in      输入流
      * @param out     输出流
      * @param options 编码参数，使用或操作并BASE64.[X]
-     * @return 是否成功
      * @throws IOException
      */
     public static void encode(final InputStream in, final OutputStream out, final int options) throws IOException {
@@ -347,7 +345,6 @@ public class Base64 {
      *
      * @param in  输入流
      * @param out 输出流
-     * @return 是否成功
      * @throws IOException
      */
     public static void decode(final InputStream in, final OutputStream out) throws IOException {
@@ -360,7 +357,6 @@ public class Base64 {
      * @param in      输入流
      * @param out     输出流
      * @param options 解码参数
-     * @return 是否成功
      * @throws IOException
      */
     public static void decode(final InputStream in, final OutputStream out, final int options) throws IOException {

@@ -17,8 +17,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
 /**
+ *
+ * 2019-01-23
  * @author  wangjin18
- * @date    2019-01-23
  *
  **/
 public class CoordinatorGroup {
