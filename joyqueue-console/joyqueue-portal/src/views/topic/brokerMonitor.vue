@@ -39,23 +39,28 @@ export default {
         colData: [
           {
             title: 'Broker分组',
-            key: 'brokerGroup.code'
+            key: 'brokerGroup.code',
+            width: '10%'
           },
           {
             title: 'IP',
-            key: 'ip'
+            key: 'ip',
+            width: '12%'
           },
           {
             title: '端口',
-            key: 'port'
+            key: 'port',
+            width: '8%'
           },
           {
             title: '数据中心',
-            key: 'dataCenter.name'
+            key: 'dataCenter.name',
+            width: '8%'
           },
           {
             title: '角色',
             key: 'role',
+            width: '8%',
             render: (h, params) => {
               let txt = params.item.role === 'SLAVE' ? '从' : '主'
               return h('label', {}, txt)
@@ -64,6 +69,7 @@ export default {
           {
             title: '复制方式',
             key: 'syncMode',
+            width: '8%',
             render: (h, params) => {
               let txt = params.item.syncMode === 'SYNCHRONOUS' ? '同步' : '异步'
               return h('label', {}, txt)
@@ -72,6 +78,7 @@ export default {
           {
             title: '重试类型',
             key: 'retryType',
+            width: '8%',
             render: (h, params) => {
               let label
               switch (params.item.retryType) {
@@ -88,6 +95,7 @@ export default {
           {
             title: '权限',
             key: 'permission',
+            width: '8%',
             render: (h, params) => {
               let label
               switch (params.item.permission) {
@@ -109,11 +117,13 @@ export default {
           },
           {
             title: '备注',
+            width: '10%',
             key: 'description'
           },
           {
             title: '状态',
             key: 'status',
+            width: '8%',
             render: (h, params) => {
               let txt = params.item.status === 1 ? '已启用' : '不可用'
               return h('label', {}, txt)

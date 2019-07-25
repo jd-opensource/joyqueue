@@ -14,6 +14,7 @@
 package com.jd.joyqueue.service.impl;
 
 import com.jd.joyqueue.exception.JoyQueueException;
+import com.jd.joyqueue.exception.ServiceException;
 import com.jd.joyqueue.model.query.QArchive;
 import com.jd.joyqueue.server.archive.store.QueryCondition;
 import com.jd.joyqueue.server.archive.store.api.ArchiveStore;
@@ -24,10 +25,14 @@ import com.jd.joyqueue.util.NullUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
+import static com.jd.joyqueue.exception.ServiceException.FORBIDDEN;
+import static com.jd.joyqueue.exception.ServiceException.INTERNAL_SERVER_ERROR;
 
 /**
  * Created by wangxiaofei1 on 2018/12/7.
@@ -39,6 +44,9 @@ public class ArchiveServiceImpl implements ArchiveService {
     @Autowired(required = false)
     private ArchiveStore archiveStore;
 
+    @Value("${archive.enable:false}")
+    private Boolean archiveEnable;
+
     @Override
     public void register(ArchiveStore archiveStore) {
         this.archiveStore = archiveStore;
@@ -46,6 +54,7 @@ public class ArchiveServiceImpl implements ArchiveService {
 
     @Override
     public List<SendLog> findByQuery(QArchive qPageQuery) throws JoyQueueException {
+        check();
         QueryCondition queryCondition = conditionConvert(qPageQuery);
         List<SendLog> sendLogs = archiveStore.scanSendLog(queryCondition);
         return sendLogs;
@@ -53,6 +62,7 @@ public class ArchiveServiceImpl implements ArchiveService {
 
     @Override
     public SendLog findSendLog(String topic,Long time,String businessId,String messageId) throws JoyQueueException {
+        check();
         QueryCondition queryCondition = new QueryCondition();
         QueryCondition.RowKey startRow = new QueryCondition.RowKey();
         startRow.setBusinessId(businessId);
@@ -66,10 +76,28 @@ public class ArchiveServiceImpl implements ArchiveService {
 
     @Override
     public List<ConsumeLog> findConsumeLog(String messageId, Integer count) throws JoyQueueException {
+        check();
         return archiveStore.scanConsumeLog(messageId,count);
     }
 
+    /**
+     * 归档服务是否可用
+     * @return
+     */
+    @Override
+    public boolean isServerEnabled() {
+        return archiveEnable != null && archiveEnable.booleanValue();
+    }
 
+    private void check() {
+        if (!isServerEnabled()) {
+            throw new ServiceException(FORBIDDEN, "archive service is disabled. please set archive.enable to be true first.");
+        }
+
+        if (archiveStore == null) {
+            throw new ServiceException(INTERNAL_SERVER_ERROR, "archiveStore can not be null. ");
+        }
+    }
 
     /**
      * query转QueryCondition

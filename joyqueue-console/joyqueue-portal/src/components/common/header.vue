@@ -17,7 +17,7 @@
         {{ langConfig.setting }}
       </d-menu-item>
     </div>
-    <div class="right">
+    <div class="right mr40">
       <!-- 语言选择 -->
       <d-dropdown class="lang-select" @on-command="switchLang">
         <a class="d-dropdown-link">
@@ -30,16 +30,6 @@
                            :command="key">{{ value }}</d-dropdown-item>
         </d-dropdown-menu>
       </d-dropdown>
-      <d-submenu name="6" class="right">
-        <template slot="title">
-          <icon name="user"/>
-          {{loginUserName}}
-        </template>
-        <d-menu-item name="6-1" @click.native="logout()">
-          <icon name="log-out" />
-          {{ langConfig.logout }}
-        </d-menu-item>
-      </d-submenu>
     </div>
   </d-menu>
 </template>

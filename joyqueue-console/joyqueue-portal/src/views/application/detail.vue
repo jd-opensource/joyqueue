@@ -1,14 +1,30 @@
 <template>
   <detail-slot ref="detail">
+<!--    <template slot-scope="prop">-->
+<!--      <div class="detail mb20">-->
+<!--        <div class="title">{{prop.detail.code}}</div>-->
+<!--        <grid-row :gutter="16">-->
+<!--          <grid-col span="8">-->
+<!--            <span>中文名称:</span>-->
+<!--            <span>{{prop.detail.name}}</span>-->
+<!--          </grid-col>-->
+<!--          <grid-col span="8">-->
+<!--            <span>负责人:</span>-->
+<!--            <span>{{prop.detail.owner != null ? prop.detail.owner.code : '-'}}</span>-->
+<!--          </grid-col>-->
+<!--          <grid-col span="8">-->
+<!--            <span>签名:</span>-->
+<!--            <span>{{prop.detail.sign}}</span>-->
+<!--          </grid-col>-->
+<!--        </grid-row>-->
+<!--      </div>-->
+<!--    </template>-->
     <template slot="tabs">
       <d-tab-pane label="生产者" name="producer" icon="user-plus" :closable="false">
         <producer ref="producer" :search="search" @on-detail="openProducerDetailTab"/>
       </d-tab-pane>
       <d-tab-pane label="消费者" name="consumer" icon="user-minus" :closable="false">
         <consumer ref="consumer" :search="search" @on-detail="openConsumerDetailTab"/>
-      </d-tab-pane>
-      <d-tab-pane label="用户" name="myAppUsers" icon="users" :closable="false">
-        <my-app-users ref="myAppUsers"/>
       </d-tab-pane>
       <d-tab-pane label="令牌" name="myAppToken" icon="feather" :closable="false">
         <my-app-token ref="myAppToken"/>

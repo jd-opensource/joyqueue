@@ -31,13 +31,13 @@ export default {
   },
   data () {
     return {
-      traffic:this.limitTraffic,
-      tps:this.limitTps
+      traffic: this.limitTraffic,
+      tps: this.limitTps
     }
   },
-  methods:{
+  methods: {
   },
-  mounted(){
+  mounted () {
   }
 }
 </script>

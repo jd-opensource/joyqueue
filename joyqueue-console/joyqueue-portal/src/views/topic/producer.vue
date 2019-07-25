@@ -118,7 +118,6 @@ export default {
   },
   methods: {
     getList () {
-      console.log('cc')
       this.$refs.producerBase.getList()
     },
     handleDetail (item) {

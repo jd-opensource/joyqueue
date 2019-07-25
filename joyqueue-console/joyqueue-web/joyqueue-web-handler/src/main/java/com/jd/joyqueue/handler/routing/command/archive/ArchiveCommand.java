@@ -156,6 +156,16 @@ public class ArchiveCommand implements Command<Response>, Poolable {
         }
     }
 
+    /**
+     * 归档服务是否可用
+     * @return
+     * @throws Exception
+     */
+    @Path("isServerEnabled")
+    public Response isServerEnabled() throws Exception {
+        return Responses.success(archiveService.isServerEnabled());
+    }
+
     private String convertParams(QArchive qArchive) {
         StringBuilder builder = new StringBuilder();
 //        {"beginTime":1551369600000,"businessId":"","count":100,"endTime":1551887999000,"messageId":"","topic":"test_topic"}

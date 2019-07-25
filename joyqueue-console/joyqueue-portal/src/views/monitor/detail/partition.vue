@@ -81,7 +81,7 @@ export default {
         for (let i = 0; i < that.tableData.rowData.length; i++) {
           that.tableData.rowData[i].subscribe = this.search
         }
-        let requestUrl = this.type === this.$store.getters.producerType ? this.urls.findProducerPartitionGroups
+        let requestUrl = this.search.type === this.$store.getters.producerType ? this.urls.findProducerPartitionGroups
           : this.urls.findConsumerPartitionGroups
         apiRequest.postBase(requestUrl, {}, this.search, false).then((data) => {
           if (!data || !data.data) {
@@ -93,10 +93,10 @@ export default {
               if (that.tableData.rowData[i].groupNo === monitorData[j].partitionGroup) {
                 that.tableData.rowData[i].ip = monitorData[j].ip
                 // that.tableData.rowData[i].connections = monitorData[j].connections;
-                if (this.type === this.$store.getters.producerType) {
+                if (this.search.type === this.$store.getters.producerType) {
                   that.tableData.rowData[i].enQuence = monitorData[j].enQuence || {count: 0}
                   that.tableData.rowData[i].deQuence = monitorData[j].deQuence || {count: 0}
-                } else if (this.type === this.$store.getters.consumerType) {
+                } else if (this.search.type === this.$store.getters.consumerType) {
                   that.tableData.rowData[i].deQuence = monitorData[j].deQuence || {count: 0}
                   that.tableData.rowData[i].pending = monitorData[j].pending || {count: 0}
                 }

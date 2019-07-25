@@ -19,20 +19,18 @@
 import crud from '../../mixins/crud.js'
 import apiRequest from '../../utils/apiRequest.js'
 export default {
-  name: 'producer-weight',
+  name: 'producer-weight-form',
   components: {},
   mixins: [crud],
   props: {
-    producerId: {
-      type: String,
-      default: ''
-    },
-    weights: {
-      type: Array
-    },
-    search: {
-      type: String,
-      default: ''
+    urls: {
+      type: Object,
+      default: function () {
+        return {
+          search: '/producer/weight',
+          update: '/'
+        }
+      }
     },
     data: {
       type: Array,
@@ -43,6 +41,9 @@ export default {
         }
         ]
       }
+    },
+    producerId: {
+      type: String
     }
   },
   data () {
@@ -52,24 +53,20 @@ export default {
         namespace: this.namespace,
         keyword: ''
       },
-      urls: {
-        search: this.search
-      },
       rules: {
       },
       formData: this.data
-
     }
   },
   methods: {
-    loadPartitionGroup () {
-      apiRequest.get(this.urlOrigin.search + '/' + this.producerId, {}).then(data => {
+    getList () {
+      apiRequest.get(this.urls.search + '/' + this.producerId, {}).then(data => {
         this.formData = data.data
       })
     },
     getWeights () {
       let weight = ''
-      for (var i = 0; i < this.formData.length; i++) {
+      for (let i = 0; i < this.formData.length; i++) {
         let item = this.formData[i]
         weight += item.groupNo + ':' + item.weight + ','
       }
@@ -77,7 +74,7 @@ export default {
     }
   },
   mounted () {
-    this.loadPartitionGroup()
+    this.getList()
   }
 }
 </script>

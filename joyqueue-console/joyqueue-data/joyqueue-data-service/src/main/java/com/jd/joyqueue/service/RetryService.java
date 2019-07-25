@@ -39,4 +39,10 @@ public interface RetryService {
     void recover(ConsumeRetry retry) throws Exception;
 
     void delete(ConsumeRetry retry) throws Exception;
+
+    /**
+     * 重试服务是否可用
+     * @throws Exception
+     */
+    boolean isServerEnabled();
 }

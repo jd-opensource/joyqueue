@@ -99,7 +99,7 @@ export default {
         this.tableData.rowData.forEach(element => {
           element['isChecked'] = false
           if (brokers && brokers.length > 0) {
-            for (var broker of brokers) {
+            for (let broker of brokers) {
               if (broker.id === element.id) {
                 element['isChecked'] = true
                 break

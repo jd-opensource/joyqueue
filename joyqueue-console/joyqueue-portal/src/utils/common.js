@@ -279,13 +279,13 @@ export function subscribeGroupAutoCompleteRender (h, params, subscribeRef) {
   function querySearch (queryString, callback) {
     apiRequest.get(apiUrl.common.findSubscribeGroup).then((data) => {
       if (data.data === undefined || data.data === []) {
-        var emptyResult = [{'value': ''}]
+        let emptyResult = [{'value': ''}]
         callback(emptyResult)
       }
-      var subscribeGroups = data.data.map(sg => {
+      let subscribeGroups = data.data.map(sg => {
         return {'value': sg}
       })
-      var results = queryString ? subscribeGroups.filter(sg => {
+      let results = queryString ? subscribeGroups.filter(sg => {
         return sg.value.toLowerCase().indexOf(queryString.toLowerCase().trim()) === 0
       }) : subscribeGroups
       // 调用 callback 返回建议列表的数据

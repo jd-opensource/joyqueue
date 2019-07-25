@@ -3,9 +3,6 @@
     <layout-sider class="layout-sider" width="180px">
       <d-menu :active-name="activeName" :theme="theme" width="auto">
         <div class="layout-logo-left"></div>
-<!--        <d-menu-item name="user" icon="users" :size="iconSize" :to="`/${ curLang }/setting/user`">&lt;!&ndash;color="#98D358"&ndash;&gt;-->
-<!--          <span class="layout-text">{{ langConfig.user }}</span>-->
-<!--        </d-menu-item>-->
         <d-menu-item name="dataCenter" icon="radio" :size="iconSize" :to="`/${ curLang }/setting/dataCenter`"><!--color="#FFD306"-->
           <span class="layout-text">{{ langConfig.dataCenter }}</span>
         </d-menu-item>
@@ -18,9 +15,6 @@
         <d-menu-item name="broker" icon="cpu" :size="iconSize" :to="`/${ curLang }/setting/broker`"><!--color="#F5B7B1"-->
           <span class="layout-text">{{ langConfig.broker }}</span>
         </d-menu-item>
-        <d-menu-item name="metric" icon="tag" :size="iconSize" :to="`/${ curLang }/setting/metric`">
-          <span class="layout-text">{{ langConfig.metric }}</span>
-        </d-menu-item>
         <d-menu-item name="namespace" icon="feather" :size="iconSize" :to="`/${ curLang }/setting/namespace`"><!--color="#73C6B6"-->
           <span class="layout-text">{{ langConfig.namespace }}</span>
         </d-menu-item>
@@ -31,28 +25,6 @@
     </layout-content>
   </layout-container>
 
-  <!--<div class="layout" :class="{'layout-hide-text': spanLeft === spanLeftFold}">
-    <grid-row>
-      <grid-col :span="spanLeft"  :style="style">
-        <div v-on:mouseover="expandMenu" v-on:mouseleave="foldMenu">
-        </div>
-      </grid-col>
-      <grid-col :span="spanRight">
-        <div class="layout-header">
-          <d-button type="borderless" icon="menu" class="toggle-btn" @click="toggleClick"></d-button>
-          <div class="layout-breadcrumb">
-            <d-breadcrumb>
-              <d-breadcrumb-item href="#">{{langHeaderConfig.setting}}</d-breadcrumb-item>
-              <d-breadcrumb-item>{{submenu}}</d-breadcrumb-item>
-            </d-breadcrumb>
-          </div>
-        </div>
-        <div class="layout-content">
-          <router-view></router-view>
-        </div>
-      </grid-col>
-    </grid-row>
-  </div>-->
 </template>
 
 <script>

@@ -133,13 +133,8 @@ export default {
   watch: {
     '$route' (to, from) {
       if (to.query.tab === 'producerDetail') {
-        console.log('pd')
         this.subTab = to.query.subTab || this.subTab
       }
-      // console.log('to')
-      // if (to.query.tab === 'producerDetail') {
-      //   this.getList()
-      // }
     }
   },
   methods: {
@@ -148,7 +143,6 @@ export default {
       //   return
       // }
       if (this.$route.query.producerDetailVisible === '1') {
-        console.log('pd')
         let name = data.name
         this.$refs[name].search.app.code = this.$route.query.app || ''
         this.$refs[name].search.topic.code = this.$route.query.topic || ''

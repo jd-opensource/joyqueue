@@ -49,4 +49,10 @@ public interface ArchiveService {
      * @throws JoyQueueException
      */
     List<ConsumeLog> findConsumeLog(String messageId, Integer count) throws JoyQueueException;
+
+    /**
+     * 归档服务是否可用
+     * @throws Exception
+     */
+    boolean isServerEnabled();
 }

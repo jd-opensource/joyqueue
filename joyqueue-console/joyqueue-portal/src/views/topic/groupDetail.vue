@@ -105,7 +105,7 @@ export default {
     },
     leader (item) {
       let brokerIds = []
-      for (var i = 0; i < this.multipleSelection.length; i++) {
+      for (let i = 0; i < this.multipleSelection.length; i++) {
         brokerIds.push(this.multipleSelection[i].brokerId)
       }
       item.outSyncReplicas = brokerIds

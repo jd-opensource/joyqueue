@@ -136,31 +136,38 @@ export default {
         return [
           {
             title: 'ID',
-            key: 'id'
+            key: 'id',
+            width: '10%'
           },
           {
             title: 'Broker分组编码',
-            key: 'group.code'
+            key: 'group.code',
+            width: '15%'
           },
           {
             title: 'IP',
-            key: 'ip'
+            key: 'ip',
+            width: '15%'
           },
           {
             title: '端口',
-            key: 'port'
+            key: 'port',
+            width: '10%'
           },
           {
             title: '启动时间',
-            key: 'startupTime'
+            key: 'startupTime',
+            width: '15%'
           },
           {
             title: '重试方式',
-            key: 'retryType'
+            key: 'retryType',
+            width: '10%'
           },
           {
             title: '权限',
-            key: 'permission'
+            key: 'permission',
+            width: '10%'
           }
         ]
       }
@@ -173,7 +180,7 @@ export default {
         colData: this.colData,
         btns: this.btns
       },
-      brokerId: '',
+      brokerId: -1,
       multipleSelection: [],
       editDialog: {
         visible: false,

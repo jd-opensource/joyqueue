@@ -2,12 +2,6 @@
   <layout-container>
     <layout-sider class="layout-sider" width="180px">
       <d-menu :active-name="activeName" :theme="theme" width="auto">
-        <d-menu-item name="retry" icon="zap" :size="iconSize" :to="`/${ curLang }/tool/retry`">
-          <span class="layout-text">{{ langConfig.retry }}</span>
-        </d-menu-item>
-        <d-menu-item name="archive" icon="package" :size="iconSize" :to="`/${ curLang }/tool/archive`">
-          <span class="layout-text">{{ langConfig.archive }}</span>
-        </d-menu-item>
         <d-menu-item name="operateHistory" icon="target" :size="iconSize" :to="`/${ curLang }/tool/operateHistory`">
           <span class="layout-text">{{ langConfig.operateHistory }}</span>
         </d-menu-item>

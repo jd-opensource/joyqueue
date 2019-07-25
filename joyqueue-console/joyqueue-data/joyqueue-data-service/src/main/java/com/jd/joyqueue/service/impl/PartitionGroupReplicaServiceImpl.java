@@ -127,7 +127,9 @@ public class PartitionGroupReplicaServiceImpl  implements PartitionGroupReplicaS
                 try {
                     Broker broker = brokerNameServerService.findById(Long.valueOf(replica.getBrokerId()));
                     BrokerGroupRelated brokerGroupRelatedId = brokerGroupRelatedService.findById(Long.valueOf(replica.getBrokerId()));
-                    broker.setGroup(brokerGroupRelatedId.getGroup());
+                    if (brokerGroupRelatedId != null) {
+                        broker.setGroup(brokerGroupRelatedId.getGroup());
+                    }
                     replica.setBroker(broker);
                 } catch (Exception e) {
                     logger.error("findById error",e);
