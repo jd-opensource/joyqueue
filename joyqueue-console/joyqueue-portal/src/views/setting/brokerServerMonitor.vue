@@ -40,51 +40,52 @@
 
 <script>
 
-  import apiRequest from '../../utils/apiRequest.js'
-  export default {
-    name:"brokerServerMonitor",
-    props:{
-      brokerId:{
-        type:Number
-      }
-    },
-    data () {
-      return {
-        urls:{
-          findbroker: '/monitor/broker'
-        },
-        detail:{
-          store:{
+import apiRequest from '../../utils/apiRequest.js'
 
-          },
-          connection:{
-
-          },
-          nameServer:{
-
-          },
-          election:{
-
-          },
-          bufferPoolMonitorInfo:{
-          }
-        },
-
-      }
-    },
-    methods: {
-      getList(){
-        apiRequest.get(this.urls.findbroker+"/" + this.brokerId,"",{}).then(data=>{
-          if(data.code == 200) {
-            this.detail = data.data;
-          }
-        })
-      }
-    },
-    mounted () {
-      this.getList();
+export default {
+  name: 'brokerServerMonitor',
+  props: {
+    brokerId: {
+      type: Number
     }
+  },
+  data () {
+    return {
+      urls: {
+        findbroker: '/monitor/broker'
+      },
+      detail: {
+        store: {
+
+        },
+        connection: {
+
+        },
+        nameServer: {
+
+        },
+        election: {
+
+        },
+        bufferPoolMonitorInfo: {
+        }
+      }
+
+    }
+  },
+  methods: {
+    getList () {
+      apiRequest.get(this.urls.findbroker + '/' + this.brokerId, '', {}).then(data => {
+        if (data.code == 200) {
+          this.detail = data.data
+        }
+      })
+    }
+  },
+  mounted () {
+    this.getList()
   }
+}
 </script>
 
 <style scoped>

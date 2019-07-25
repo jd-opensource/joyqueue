@@ -6,7 +6,7 @@
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
       <d-button-group>
-        <d-button v-if="$store.getters.isAdmin" @click="openDialog('subscribeDialog')" class="button">
+        <d-button v-if="$store.getters.isAdmin" @click="openAndQueryDialog('subscribeDialog', 'subscribe')" class="button">
           订阅
           <icon name="plus-circle" style="margin-left: 3px;"></icon>
         </d-button>
@@ -20,26 +20,25 @@
               @on-detail-chart="goDetailChart" @on-current-change="handleCurrentChange" @on-detail="openDetailTab"
               @on-msg-preview="openMsgPreviewDialog" @on-msg-detail="openMsgDetailDialog" @on-config="openConfigDialog"
               @on-performance-chart="goPerformanceChart" @on-summary-chart="goSummaryChart"  @on-rateLimit="openRateLimitDialog"
-              @on-size-change="handleSizeChange"/>
+              @on-size-change="handleSizeChange" @on-cancel-subscribe="cancelSubscribe"/>
 
     <!--Consumer subscribe dialog-->
     <my-dialog :dialog="subscribeDialog" @on-dialog-cancel="dialogCancel('subscribeDialog')">
       <subscribe ref="subscribe" :search="search" :type="type" :colData="subscribeDialog.colData"
                  :searchUrl="subscribeDialog.urls.search" :addUrl="subscribeDialog.urls.add"
-                 :keywordName="keywordName"
-                 :doSearch="subscribeDialog.doSearch" @on-refresh="getList"/>
+                 :keywordName="keywordName" @on-refresh="getList"/>
     </my-dialog>
 
     <!--Msg preview dialog-->
     <my-dialog :dialog="msgPreviewDialog" @on-dialog-cancel="dialogCancel('msgPreviewDialog')">
-      <msg-preview :app="msgPreviewDialog.app" :topic="msgPreviewDialog.topic" :namespace="msgPreviewDialog.namespace"
-                   :type="type" :doSearch="msgPreviewDialog.doSearch" :subscribeGroup="msgPreviewDialog.subscribeGroup"/>
+      <msg-preview ref="msgPreview" :app="msgPreviewDialog.app" :topic="msgPreviewDialog.topic" :namespace="msgPreviewDialog.namespace"
+                   :type="type" :subscribeGroup="msgPreviewDialog.subscribeGroup"/>
     </my-dialog>
 
     <!--Msg detail dialog-->
     <my-dialog :dialog="msgDetailDialog" @on-dialog-cancel="dialogCancel('msgDetailDialog')">
-      <msg-detail :app="msgDetailDialog.app" :topic="msgDetailDialog.topic" :namespace="msgDetailDialog.namespace"
-                   :type="type" :doSearch="msgDetailDialog.doSearch" :subscribeGroup="msgDetailDialog.subscribeGroup"/>
+      <msg-detail ref="msgDetail" :app="msgDetailDialog.app" :topic="msgDetailDialog.topic" :namespace="msgDetailDialog.namespace"
+                   :type="type" :subscribeGroup="msgDetailDialog.subscribeGroup"/>
     </my-dialog>
 
     <!--Config dialog-->
@@ -95,6 +94,10 @@ export default {
           {
             txt: '配置',
             method: 'on-config'
+          },
+          {
+            txt: '取消订阅',
+            method: 'on-cancel-subscribe'
           }
           // ,
           // {
@@ -154,7 +157,8 @@ export default {
         search: `/consumer/search`,
         getMonitor: `/monitor/find`,
         previewMessage: '/monitor/preview/message',
-        getUrl: `/grafana/getRedirectUrl`
+        getUrl: `/grafana/getRedirectUrl`,
+        del: `/consumer/delete`
       },
       showTablePin: false,
       tableData: {
@@ -174,7 +178,7 @@ export default {
         title: '限流',
         width: '400',
         showFooter: true,
-        doSearch: false,
+        // doSearch: false,
         limitTps: 0,
         limitTraffic: 0
       },
@@ -184,7 +188,7 @@ export default {
         title: '添加消费者',
         width: '950',
         showFooter: false,
-        doSearch: false,
+        // doSearch: false,
         colData: this.subscribeDialogColData, // 订阅框 列表表头,
         urls: {
           add: this.subscribeUrls.add,
@@ -207,7 +211,7 @@ export default {
         title: '生产者详情',
         width: '1000',
         showFooter: false,
-        doSearch: true,
+        // doSearch: false,
         app: {
           id: 0,
           code: ''
@@ -227,7 +231,7 @@ export default {
         title: '生产者详情',
         width: '1000',
         showFooter: false,
-        doSearch: true,
+        // doSearch: false,
         app: {
           id: 0,
           code: ''
@@ -247,8 +251,13 @@ export default {
   },
   methods: {
     openDialog (dialog) {
-      this[dialog].doSearch = true
       this[dialog].visible = true
+    },
+    openAndQueryDialog (dialog, ref) {
+      this[dialog].visible = true
+      this.$nextTick(() => {
+        this.$refs[ref].getList()
+      })
     },
     openDetailTab (item) {
       this.$emit('on-detail', item)
@@ -263,7 +272,7 @@ export default {
       this.msgPreviewDialog.namespace.code = item.namespace.code
       this.msgPreviewDialog.title = '消息预览 [App: ' + this.msgPreviewDialog.app.code +
               ', Topic: ' + this.msgPreviewDialog.topic.code + ']'
-      this.openDialog('msgPreviewDialog')
+      this.openAndQueryDialog('msgPreviewDialog', 'msgPreview')
     },
     openMsgDetailDialog (item) {
       this.msgDetailDialog.app.id = item.app.id
@@ -295,6 +304,24 @@ export default {
         limitTraffic: this.$refs.rateLimit.traffic
       }
       this.config(configData, 'rateLimitDialog')
+    },
+    cancelSubscribe (item) {
+      let _this = this
+      this.$Dialog.confirm({
+        title: '提示',
+        content: '确定要取消订阅吗？'
+      }).then(() => {
+        apiRequest.delete(_this.urls.del + '/' + item.id).then((data) => {
+          if (data.code !== this.$store.getters.successCode) {
+            this.$Dialog.error({
+              content: '取消订阅失败'
+            })
+          } else {
+            this.$Message.success('取消订阅成功')
+            _this.getList()
+          }
+        })
+      })
     },
     handleSizeChange (val) {
       this.page.size = val
@@ -443,7 +470,7 @@ export default {
           keyword: this.keyword
         }
       }
-      for (var i in this.search) {
+      for (let i in this.search) {
         if (this.search.hasOwnProperty(i)) {
           data.query[i] = this.search[i]
         }

@@ -29,7 +29,6 @@
 </template>
 
 <script>
-import store from '../../store'
 import viewLang from '../../i18n/views.json'
 import {deepCopy} from '../../utils/assist.js'
 
@@ -137,7 +136,7 @@ export default {
                     show = true
                   }
                 } else if (Array.isArray(btn.bindVal)) {
-                  for (var val of btn.bindVal) {
+                  for (let val of btn.bindVal) {
                     if (params.item[btn.bindKey] === val) {
                       show = true
                       break
@@ -152,7 +151,7 @@ export default {
                     show = false
                   }
                 } else if (Array.isArray(btn.bindVal)) {
-                  for (val of btn.bindVal) {
+                  for (let val of btn.bindVal) {
                     if (params.item[btn.bindKey] === val) {
                       show = false
                       break

@@ -25,6 +25,7 @@ export default {
     return {
       keywordTip: '请输入应用',
       keywordName: '应用',
+      isRetryEnable: false,
       colData: [
         {
           title: '应用',
@@ -55,29 +56,7 @@ export default {
         },
         {
           title: '重试数',
-          key: 'retry.count',
-          render: (h, params) => {
-            return h('label', {
-              style: {
-                cursor: 'pointer',
-                color: '#3366FF'
-              },
-              on: {
-                click: () => {
-                  this.$router.push({
-                    name: `/${this.$i18n.locale}/topic/detail`,
-                    query: {
-                      id: params.item.topic.code,
-                      app: getAppCode(params.item.app, params.item.subscribeGroup),
-                      topic: params.item.topic.code,
-                      namespace: params.item.namespace.code,
-                      tab: 'retry'
-                    }
-                  })
-                }
-              }
-            }, params.item.retry === undefined ? 0 : params.item.retry.count)
-          }
+          key: 'retry.count'
         },
         {
           title: '消息类型',

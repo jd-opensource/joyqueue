@@ -6,7 +6,7 @@
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
       <d-button-group>
-        <d-button v-if="$store.getters.isAdmin" @click="openDialog('subscribeDialog')" class="button">
+        <d-button v-if="$store.getters.isAdmin" @click="openAndQueryDialog('subscribeDialog', 'subscribe')" class="button">
           订阅<icon name="plus-circle" style="margin-left: 3px;"/>
         </d-button>
         <d-button type="primary" @click="getList" class="button">刷新
@@ -16,24 +16,22 @@
     </div>
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
               @on-detail-chart="goDetailChart" @on-current-change="handleCurrentChange" @on-detail="openDetailTab"
-              @on-config="openConfigDialog" @on-set-produce-weight="openWeightConfigDialog"
+              @on-config="openConfigDialog" @on-weight="openWeightDialog" @on-cancel-subscribe="cancelSubscribe"
               @on-summary-chart="goSummaryChart" @on-performance-chart="goPerformanceChart" @on-rateLimit="openRateLimitDialog"/>
 
     <!--生产订阅弹出框-->
     <my-dialog :dialog="subscribeDialog" @on-dialog-cancel="dialogCancel('subscribeDialog')">
       <subscribe ref="subscribe" :search="search" :type="type" :colData="subscribeDialog.colData"
-                 :keywordName="keywordName"
-                 :searchUrl="subscribeDialog.urls.search" :addUrl="subscribeDialog.urls.add"
-                 :doSearch="subscribeDialog.doSearch" @on-refresh="getList"/>
+                 :keywordName="keywordName" :searchUrl="subscribeDialog.urls.search" :addUrl="subscribeDialog.urls.add"
+                 @on-refresh="getList"/>
     </my-dialog>
 
     <!--Config dialog-->
     <my-dialog :dialog="configDialog" @on-dialog-confirm="configConfirm" @on-dialog-cancel="dialogCancel('configDialog')">
       <producer-config-form ref="configForm" :data="configData"/>
     </my-dialog>
-    <my-dialog :dialog="produceWeightDialog" @on-dialog-confirm="weightConfigConfirm" @on-dialog-cancel="dialogCancel('produceWeightDialog')">
-      <producer-weight ref="weightForm" :weights="produceWeightDialog.weights" :producer-id="configData.producerId"
-                       :search="produceWeightDialog.urls.search" :update="produceWeightDialog.urls.update"/>
+    <my-dialog :dialog="weightDialog" @on-dialog-confirm="weightConfigConfirm" @on-dialog-cancel="dialogCancel('weightDialog')">
+      <producer-weight-form ref="weightForm" :producerId="producerId"/>
     </my-dialog>
 
     <my-dialog :dialog="rateLimitDialog" @on-dialog-confirm="rateLimitConfirm" @on-dialog-cancel="dialogCancel('rateLimitDialog')">
@@ -49,7 +47,7 @@ import myTable from '../../components/common/myTable.vue'
 import myDialog from '../../components/common/myDialog.vue'
 import subscribe from './subscribe.vue'
 import ProducerConfigForm from './producerConfigForm.vue'
-import ProducerWeight from './produceWight.vue'
+import ProducerWeightForm from './producerWeightForm.vue'
 import {getTopicCode, replaceChartUrl} from '../../utils/common.js'
 import RateLimit from './rateLimit'
 import ButtonGroup from '../../components/button/button-group'
@@ -63,7 +61,7 @@ export default {
     myDialog,
     subscribe,
     ProducerConfigForm,
-    ProducerWeight
+    ProducerWeightForm
   },
   props: {
     keywordTip: {
@@ -83,6 +81,10 @@ export default {
           {
             txt: '配置',
             method: 'on-config'
+          },
+          {
+            txt: '取消订阅',
+            method: 'on-cancel-subscribe'
           }
           // ,
           // {
@@ -106,7 +108,7 @@ export default {
         return [
           {
             txt: '设置生产权重',
-            method: 'on-set-produce-weight'
+            method: 'on-weight'
           },
           {
             txt: '限流',
@@ -137,7 +139,8 @@ export default {
       urls: {
         search: `/producer/search`,
         getMonitor: `/monitor/find`,
-        getUrl: `/grafana/getRedirectUrl`
+        getUrl: `/grafana/getRedirectUrl`,
+        del: `/producer/delete`
       },
       showTablePin: false,
       tableData: {
@@ -157,7 +160,6 @@ export default {
         title: '限流',
         width: '400',
         showFooter: true,
-        doSearch: false,
         limitTps: 0,
         limitTraffic: 0
       },
@@ -167,25 +169,19 @@ export default {
         title: '添加生产者',
         width: '850',
         showFooter: false,
-        doSearch: false,
         colData: this.subscribeDialogColData.map((element) => Object.assign({}, element)), // 订阅框 列表表头,
         urls: {
           add: this.subscribeUrls.add,
           search: this.subscribeUrls.search
         }
       },
-      produceWeightDialog: {
+      weightDialog: {
         visible: false,
         title: '设置生产权重',
         width: '700',
-        showFooter: true,
-        doSearch: false,
-        weights: [], // 订阅框 列表表头,
-        urls: {
-          search: '/producer/weight',
-          update: '/'
-        }
+        showFooter: true
       },
+      producerId: '',
       configDialog: {
         visible: false,
         title: '生产者配置详情',
@@ -200,8 +196,13 @@ export default {
   },
   methods: {
     openDialog (dialog) {
-      this[dialog].doSearch = true
       this[dialog].visible = true
+    },
+    openAndQueryDialog (dialog, ref) {
+      this[dialog].visible = true
+      this.$nextTick(() => {
+        this.$refs[ref].getList()
+      })
     },
     openDetailTab (item) {
       this.$emit('on-detail', item)
@@ -211,16 +212,34 @@ export default {
       this.configData['producerId'] = item.id
       this.configDialog.visible = true
     },
-    openWeightConfigDialog (item) {
-      this.configData = item.config || {}
-      this.configData['producerId'] = item.id
-      this.produceWeightDialog.visible = true
+    openWeightDialog (item) {
+      // this.$refs['weightForm'].getListById(item.id)
+      this.producerId = item.id
+      this.openDialog('weightDialog')
     },
     openRateLimitDialog (item) {
       this.rateLimitDialog.limitTps = item.config.limitTps
       this.configData['producerId'] = item.id
       this.rateLimitDialog.limitTraffic = item.config.limitTraffic
       this.rateLimitDialog.visible = true
+    },
+    cancelSubscribe (item) {
+      let _this = this
+      this.$Dialog.confirm({
+        title: '提示',
+        content: '确定要取消订阅吗？'
+      }).then(() => {
+        apiRequest.delete(_this.urls.del + '/' + item.id).then((data) => {
+          if (data.code !== this.$store.getters.successCode) {
+            this.$Dialog.error({
+              content: '取消订阅失败'
+            })
+          } else {
+            this.$Message.success('取消订阅成功')
+            _this.getList()
+          }
+        })
+      })
     },
     handleSizeChange (val) {
       this.page.size = val
@@ -244,10 +263,10 @@ export default {
     },
     weightConfigConfirm () {
       let configData = {
-        producerId: this.configData.producerId,
+        producerId: this.producerId,
         weight: this.$refs.weightForm.getWeights()
       }
-      this.config(configData, 'produceWeightDialog')
+      this.config(configData, 'weightDialog')
     },
     rateLimitConfirm () {
       let configData = {
@@ -347,7 +366,7 @@ export default {
           keyword: this.keyword
         }
       }
-      for (var i in this.search) {
+      for (let i in this.search) {
         if (this.search.hasOwnProperty(i)) {
           data.query[i] = this.search[i]
         }

@@ -478,9 +478,11 @@
         <route inherit="put"
                path="/v1/retry/recovery/:id" handlers="retry#recovery render"
                errors="error"/>
-
         <route inherit="get"
                path="/v1/retry/download/:id" handlers="retry#download render"
+               errors="error"/>
+        <route inherit="get"
+               path="/v1/retry/isServerEnabled" handlers="retry#isServerEnabled render"
                errors="error"/>
 
         <!-- archive -->
@@ -498,6 +500,9 @@
                errors="error"/>
         <route inherit="get"
                path="/v1/archive/consume/:id" handlers="archive#consume render"
+               errors="error"/>
+        <route inherit="get"
+               path="/v1/archive/isServerEnabled" handlers="archive#isServerEnabled render"
                errors="error"/>
 
         <!--用户登录 登出 -->

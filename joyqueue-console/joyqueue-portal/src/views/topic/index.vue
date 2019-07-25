@@ -25,25 +25,9 @@
       <topic-form @on-dialog-cancel="dialogCancel('addDialog')" :type="$store.getters.addFormType"
                   :addBrokerUrls="addBrokerUrls" :addBrokerColData="addBrokerColData"/>
     </my-dialog>
-    <!--编辑-->
-    <!--<my-dialog :dialog="editDialog" @on-dialog-confirm="editConfirm()" @on-dialog-cancel="dialogCancel('editDialog')">-->
-      <!--<topic-form :data="editData" @on-dialog-cancel="dialogCancel('editDialog')"/>-->
-    <!--</my-dialog>-->
-    <!--编辑标签-->
-    <!--<my-dialog :dialog="editLabelDialog" @on-dialog-confirm="editLabelConfirm()" @on-dialog-cancel="editLabelCancel()">-->
-        <!--<grid-row class="mb10">-->
-          <!--<grid-col :span="4" class="label">业务分组:</grid-col>-->
-          <!--<grid-col :span="20" class="val">-->
-            <!--<d-select v-model="editLabelData.bs" class="left">-->
-              <!--<d-option value="sc">商城</d-option>-->
-              <!--<d-option value="jr">金融</d-option>-->
-            <!--</d-select>-->
-          <!--</grid-col>-->
-        <!--</grid-row>-->
-    <!--</my-dialog>-->
     <!--添加分组-->
     <my-dialog :dialog="addBrokerGroupDialog" @on-dialog-confirm="addBrokerGroupConfirm()" @on-dialog-cancel="addBrokerGroupCancel()">
-      <add-brokerGroup :data="addBrokerGroupData" @on-choosed-brokerGroup="choosedBrokerGroup"></add-brokerGroup>
+      <add-broker-group :data="addBrokerGroupData" @on-choosed-brokerGroup="choosedBrokerGroup"></add-broker-group>
     </my-dialog>
   </div>
 </template>
@@ -52,6 +36,7 @@
 import apiRequest from '../../utils/apiRequest.js'
 import myTable from '../../components/common/myTable.vue'
 import myDialog from '../../components/common/myDialog.vue'
+import addBrokerGroup from './addBrokerGroup.vue'
 import topicForm from './topicForm.vue'
 import crud from '../../mixins/crud.js'
 import {basePrimaryBtnRender} from '../../utils/common.js'
@@ -61,7 +46,8 @@ export default {
   components: {
     myTable,
     myDialog,
-    topicForm
+    topicForm,
+    addBrokerGroup
   },
   mixins: [ crud ],
   props: {
@@ -201,20 +187,6 @@ export default {
         showFooter: false
       },
       addData: {},
-      // editDialog: {
-      //   visible: false,
-      //   title: '编辑主题',
-      //   width: 700,
-      //   showFooter: true
-      // },
-      // editData: {},
-      // editLabelDialog: {
-      //   visible: false,
-      //   title: '编辑主题标签',
-      //   width: 700,
-      //   showFooter: true
-      // },
-      // editLabelData: {},
       addBrokerGroupDialog: {
         visible: false,
         title: '添加Broker分组',

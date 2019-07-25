@@ -120,7 +120,7 @@ export default {
         title: '提示',
         content: '确定要删除吗？'
       }).then(() => {
-        var data = item
+        let data = item
         apiRequest.post(this.urls.del, {}, data).then((data) => {
           _this.$Message.success('删除成功')
           _this.getList()

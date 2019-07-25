@@ -9,7 +9,9 @@
       :styles="styles"
       @on-confirm="handleSave"
       @on-cancel="handleCancel"
-      >
+      :maskClosable="false"
+      :draggable="dialog.draggable || true"
+      :resizable="dialog.resizable || true">
       <slot></slot>
   </d-dialog>
 </template>
@@ -17,14 +19,14 @@
 <script>
 export default {
   name: 'myDialog',
-  data() {
+  data () {
     return {
-    };
+    }
   },
   props: {
     dialog: {
       type: Object,
-      default (){
+      default () {
         return {
           visible: false
         }
@@ -38,11 +40,11 @@ export default {
     }
   },
   methods: {
-    handleSave(){
-      this.$emit('on-dialog-confirm');
+    handleSave () {
+      this.$emit('on-dialog-confirm')
     },
-    handleCancel(){
-      this.$emit('on-dialog-cancel');
+    handleCancel () {
+      this.$emit('on-dialog-cancel')
     }
   }
 }

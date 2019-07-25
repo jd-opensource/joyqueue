@@ -48,10 +48,6 @@ export default {
         ]
       }
     },
-    doSearch: {
-      type: Boolean,
-      default: false
-    },
     search: {// 查询条件，我的应用：app:{id:0,code:''}  ， 主题中心：topic:{id:0,code:'',namespace:{id:0,code:''}}
       type: Object
     },
@@ -95,7 +91,7 @@ export default {
         }
       }
 
-      for (var key in this.search) {
+      for (let key in this.search) {
         if (this.search.hasOwnProperty(key)) {
           data.query[key] = this.search[key]
         }
@@ -137,7 +133,7 @@ export default {
         }
         data.subscribeGroup = item.subscribeGroup || ''
       }
-      for (var key in this.search) {
+      for (let key in this.search) {
         if (this.search.hasOwnProperty(key)) {
           data[key] = this.search[key]
           if (key === 'app') {
@@ -177,8 +173,8 @@ export default {
       })
     },
     querySubscribeGroup (queryString, callback) {
-      var subscribeGroups = this.subscribeGroupList
-      var results = queryString ? subscribeGroups.filter(subscribeGroup => {
+      let subscribeGroups = this.subscribeGroupList
+      let results = queryString ? subscribeGroups.filter(subscribeGroup => {
         return subscribeGroup.toLowerCase().indexOf(queryString.toLowerCase().trim()) === 0
       }) : subscribeGroups
       // 调用 callback 返回建议列表的数据
@@ -186,18 +182,7 @@ export default {
     }
   },
   mounted () {
-    this.getList()
-  },
-  watch: {
-    doSearch: {
-      handler (curVal, oldVal) {
-        if (curVal) {
-          this.getList()
-          this.doSearch = false
-        }
-      },
-      deep: true
-    }
+    // this.getList()
   }
 }
 </script>

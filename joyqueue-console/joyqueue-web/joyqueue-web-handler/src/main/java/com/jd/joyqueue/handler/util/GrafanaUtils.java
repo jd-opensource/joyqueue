@@ -187,14 +187,4 @@ public class GrafanaUtils {
         return result.length()==0? null:result.deleteCharAt(result.length()-1).toString();
     }
 
-    public static void main(String[] args) {
-//        Broker broker = new Broker();
-//        broker.setIp("127.0.0.1");
-//        broker.setPort(80);
-//        broker.setId(12343434);
-//        getResult(broker, "$ip:$port$port[$id]");
-        load("grafana.xml");
-        getKey("metrics:uid:$granularity:*");
-    }
-
 }

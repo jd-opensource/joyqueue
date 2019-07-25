@@ -180,6 +180,16 @@ public class RetryCommand implements Command<Response>, Poolable {
         return Responses.success();
     }
 
+    /**
+     * 重试服务是否可用
+     * @return
+     * @throws Exception
+     */
+    @Path("isServerEnabled")
+    public Response isServerEnabled() throws Exception {
+        return Responses.success(retryService.isServerEnabled());
+    }
+
     private boolean hasSubscribe(String topic, String app) {
         QConsumer qConsumer =  new QConsumer();
         qConsumer.setApp(new Identity(app));
@@ -194,6 +204,7 @@ public class RetryCommand implements Command<Response>, Poolable {
         }
         return false;
     }
+
     private boolean hasPrivilege(String app) {
         User user = LocalSession.getSession().getUser();
         if (user == null) {

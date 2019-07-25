@@ -90,7 +90,6 @@ export default {
   methods: {
     getList () {
       this.showTablePin = true
-      console.log('cc')
       apiRequest.postBase(this.urls.getMonitor, {}, this.search, false).then((data) => {
         data.data = data.data || []
         // this.onListResult(data);

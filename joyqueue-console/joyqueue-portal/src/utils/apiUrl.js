@@ -45,8 +45,7 @@ export default {
     search: '/dataCenter/search',
     add: '/dataCenter/add',
     edit: '/dataCenter/update',
-    del: '/dataCenter/delete',
-    addNet: ''
+    del: '/dataCenter/delete'
   },
   '/setting/config': {
     search: '/config/search',
@@ -65,7 +64,7 @@ export default {
   '/setting/broker': {
     search: '/broker/search',
     edit: '/broker/update',
-    del: ''
+    del: '/broker/delete'
   },
   '/setting/namespace': {
     search: '/namespace/search',

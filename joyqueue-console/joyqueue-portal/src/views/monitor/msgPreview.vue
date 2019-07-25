@@ -11,17 +11,17 @@ import MyTable from '../../components/common/myTable'
 import apiRequest from '../../utils/apiRequest.js'
 import crud from '../../mixins/crud.js'
 
-import {timeStampToString, stringToTimeStamp} from '../../utils/dateTimeUtils'
+import {timeStampToString} from '../../utils/dateTimeUtils'
 
 export default {
   name: 'msg-preview',
   components: {MyTable},
   mixins: [crud],
   props: {
-    doSearch: {
-      type: Boolean,
-      default: false
-    },
+    // doSearch: {
+    //   type: Boolean,
+    //   default: false
+    // },
     app: {
       id: 0,
       code: ''
@@ -129,9 +129,19 @@ export default {
       })
     }
   },
-
+  // watch: {
+  //   doSearch: {
+  //     handler (curVal, oldVal) {
+  //       if (curVal) {
+  //         this.getList()
+  //         this.doSearch = false
+  //       }
+  //     },
+  //     deep: true
+  //   }
+  // },
   mounted () {
-    this.getList()
+    // this.getList()
   }
 
 }

@@ -75,22 +75,12 @@
     {
       "name": "tool",
       "path": "/tool",
-      "redirect": "/tool/retry",
+      "redirect": "/tool/operateHistory",
       "component": "tool/index.vue",
       "children": [
         {
           "path": "/",
-          "redirect": "/tool/retry"
-        },
-        {
-          "path": "retry",
-          "name": "retry",
-          "component": "tool/retry.vue"
-        },
-        {
-          "path": "archive",
-          "name": "archive",
-          "component": "tool/archive.vue"
+          "redirect": "/tool/operateHistory"
         },
         {
           "path": "operateHistory",
@@ -176,22 +166,12 @@
     {
       "name": "tool",
       "path": "/tool",
-      "redirect": "/tool/retry",
+      "redirect": "/tool/operateHistory",
       "component": "tool/index.vue",
       "children": [
         {
           "path":"/",
-          "redirect": "/tool/retry"
-        },
-        {
-          "path":"retry",
-          "name": "retry",
-          "component": "tool/retry.vue"
-        },
-        {
-          "path":"archive",
-          "name": "archive",
-          "component": "tool/archive.vue"
+          "redirect": "/tool/operateHistory"
         },
         {
           "path":"operateHistory",

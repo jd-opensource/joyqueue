@@ -64,17 +64,17 @@ export default {
         rowData: [],
         colData: [
           {
-            title: '用户名',
-            key: 'createBy.code'
-          }, {
             title: '操作时间',
             key: 'createTime',
+            width: '12%',
             formatter (row) {
               return timeStampToString(row.createTime)
             }
-          }, {
+          },
+          {
             title: '类型',
             key: 'type',
+            width: '10%',
             formatter (row) {
               switch (row.type) {
                 case 1:
@@ -101,15 +101,28 @@ export default {
                   return 'replica'
               }
             }
-          }, {
+          },
+          {
             title: '关联id',
-            key: 'identity'
-          }, {
+            key: 'identity',
+            width: '12%'
+          },
+          {
+            title: '操作人',
+            key: 'createBy.code',
+            width: '10%',
+            render: (h, params) => {
+              if (params.item.createBy.code === 'admin') {
+                return h('label', {}, '-')
+              } else {
+                return h('label', {}, params.item.createBy.code)
+              }
+            }
+          },
+          {
             title: '操作描述',
-            key: 'target'
-            // render(h, params) {
-            //   return  h('div',params.item.target)
-            // }
+            key: 'target',
+            width: '55%'
           }
         ],
         // 表格操作，如果需要根据特定值隐藏显示， 设置bindKey对应的属性名和bindVal对应的属性值
