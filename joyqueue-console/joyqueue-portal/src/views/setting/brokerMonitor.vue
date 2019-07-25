@@ -74,7 +74,7 @@ export default {
             render: (h, params) => {
               var list = params.item.brokerTopicMonitorRecordList
               var html = []
-              if (list != undefined) {
+              if (list !== undefined) {
                 for (var i = 0; i < list.length; i++) {
                   var p = h('div', list[i].app)
                   html.push(p)
@@ -89,7 +89,7 @@ export default {
             render: (h, params) => {
               var list = params.item.brokerTopicMonitorRecordList
               var html = []
-              if (list != undefined) {
+              if (list !== undefined) {
                 for (var i = 0; i < list.length; i++) {
                   var p = h('div', list[i].connections)
                   html.push(p)
@@ -99,12 +99,12 @@ export default {
             }
           },
           {
-            title: '出/入对数',
+            title: '出/入队数',
             key: 'brokerTopicMonitorRecordList',
             render: (h, params) => {
               var list = params.item.brokerTopicMonitorRecordList
               var html = []
-              if (list != undefined) {
+              if (list !== undefined) {
                 for (var i = 0; i < list.length; i++) {
                   var p = h('div', list[i].count)
                   html.push(p)
@@ -119,7 +119,7 @@ export default {
             render: (h, params) => {
               var list = params.item.brokerTopicMonitorRecordList
               var html = []
-              if (list != undefined) {
+              if (list !== undefined) {
                 for (var i = 0; i < list.length; i++) {
                   var p = h('div', list[i].totalSize)
                   html.push(p)
@@ -142,10 +142,10 @@ export default {
   },
   methods: {
     menuChange (item) {
-      if (item.name == 'consumer') {
+      if (item.name === 'consumer') {
         this.searchData.type = 2
         this.getList()
-      } else if (item.name == 'producer') {
+      } else if (item.name === 'producer') {
         this.searchData.type = 1
         this.getList()
       } else {
