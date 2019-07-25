@@ -42,9 +42,8 @@
             <artifactId>joyqueue-broker-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.jd.laf.web</groupId>
+            <groupId>com.jd.joyqueue</groupId>
             <artifactId>laf-vertx-web</artifactId>
-            <version>${laf-vertx.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>io.netty</groupId>
@@ -96,13 +95,11 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!--        FIXME: #86 删除这3个引用-->
         <dependency>
             <groupId>com.github.javaparser</groupId>
             <artifactId>javaparser-symbol-solver-core</artifactId>
             <version>3.13.6</version>
         </dependency>
-        <!--        FIXME: #86 删除这3个引用-->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

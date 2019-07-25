@@ -82,7 +82,7 @@
         <amq.client.version>5.1.0</amq.client.version>
         <snappy-java.version>1.1.2.6</snappy-java.version>
         <lz4.version>1.3.0</lz4.version>
-        <jcommander.version>1.71</jcommander.version>
+        <jcommander.version>1.72</jcommander.version>
         <concurrentlinkedhashmap-lru.version>1.4.2</concurrentlinkedhashmap-lru.version>
         <shifro.web.version>1.3.2</shifro.web.version>
         <jdk.version>1.8</jdk.version>
