@@ -15,7 +15,7 @@ Java HotSpot(TM) 64-Bit Server VM (build 25.202-b08, mixed mode)
 
 ## 第1步：下载安装包
 
-在[这里（**TODO：需要替换成我们的下载页地址**）](https://github.com/shadowsocks/shadowsocks-windows/releases/latest)下载JoyQueue Server和JoyQueue Web的最新版本。
+在[https://github.com/joyqueue/joyqueue/releases](https://github.com/joyqueue/joyqueue/releases)下载JoyQueue Server和JoyQueue Web的最新版本。
 
 ## 第2步：启动JoyQueue Server
 
