@@ -1,8 +1,8 @@
-# JoyQueue
+# 快乐队列 | JoyQueue
 
 [View in English](../../README.md)  
 
-**JoyQueue** -- 云原生、高性能、企业级消息平台。
+**快乐队列** -- 云原生、高性能、企业级消息平台。
 
 ## 主要特性
 
