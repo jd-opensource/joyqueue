@@ -1,5 +1,9 @@
 # JoyQueue | 快乐队列
 
+[![Maven Central](https://img.shields.io/maven-central/v/com.jd.joyqueue/joyqueue-client?color=brightgreen)](https://search.maven.org/search?q=com.jd.joyqueue)
+[![GitHub release](https://img.shields.io/badge/release-download-orange.svg)](https://github.com/joyqueue/joyqueue/releases)
+![GitHub](https://img.shields.io/github/license/joyqueue/joyqueue)
+
 [阅读中文版](docs/cn/README.md)
 
 JoyQueue -- A cloud-native production-ready messaging platform with excellent performance. 
