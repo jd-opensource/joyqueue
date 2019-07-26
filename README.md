@@ -2,19 +2,20 @@
 
 [阅读中文版](docs/cn/README.md)
 
-JoyQueue -- A cloud-native production-ready messaging platform with high-throughput.
+JoyQueue -- A cloud-native production-ready messaging platform with excellent performance. 
 
 ## Features
 
 * High performance design with low latency and high throughput, see [performance](#Performance).
-* Buildin multiple protocols, compatible with OpenMessaging, Kafka and MQTT clients.
-* Out of the box, easy to deploy: single-process, zero-dependent, no need to deploy additional ZooKeeper or Naming Service processes.
+* Built-in multi-protocol support, working pretty well with OpenMessaging, Kafka and MQTT clients.
+* easy to deploy: single-process, zero-dependent, no need of additional cluster coordination services.
 * Large-scale clustering.
-* High availability, high reliability and auto recovery based on [Raft consensus algorithm](https://raft.github.io/).
+* Strong durability
+* Consistent replication based on [Raft consensus algorithm](https://raft.github.io/).
 * Full-featured web management console.
-* More features:
-  * Buildin metric APIs
-  * Transaction
+* Other nice features:
+  * Rich metrics APIs
+  * Transactions
   * Parallel message consumption
   * Message archiving
   * Message preview
@@ -49,7 +50,7 @@ Visit [Documentation Index](./docs/cn/index.md)。
 
 ## Contributing
 
-JoyQueue will continually dedicate to build a messaging platform community,any thoughts or issues are appreciated.
+We are dedicate to building high-quality messaging platform product. So any thoughts, pull requests, or issues are appreciated.
 
 ## License
 
