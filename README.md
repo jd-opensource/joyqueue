@@ -1,4 +1,4 @@
-# JoyQueue
+# JoyQueue | 快乐队列
 
 [阅读中文版](docs/cn/README.md)
 
