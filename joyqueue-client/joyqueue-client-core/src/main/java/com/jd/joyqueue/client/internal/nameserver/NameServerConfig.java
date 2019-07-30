@@ -40,7 +40,7 @@ public class NameServerConfig {
     // 令牌
     private String token;
     // 更新元数据间隔
-    private int updateMetadataInterval = 1000 * 60 * 1;
+    private int updateMetadataInterval = 1000 * 30;
     // 临时元数据更新间隔
     private int tempMetadataInterval = 1000 * 1;
     // 更新元数据线程数

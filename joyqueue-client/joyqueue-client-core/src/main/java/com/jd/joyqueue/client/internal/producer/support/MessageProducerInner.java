@@ -129,11 +129,11 @@ public class MessageProducerInner extends Service {
         return doBatchSend(messages, topicMetadata, partition, partitions, txId, timeout, timeoutUnit, isOneway, failover, callback);
     }
 
-    public List<SendResult> doBatchSend(final List<ProduceMessage> messages, final TopicMetadata topicMetadata, final PartitionMetadata partition, final List<PartitionMetadata> partitions,
-                                        final String txId, final long timeout, final TimeUnit timeoutUnit, final boolean isOneway, final boolean failover, final AsyncBatchProduceCallback callback) {
+    public List<SendResult> doBatchSend(List<ProduceMessage> messages, TopicMetadata topicMetadata, PartitionMetadata partition, List<PartitionMetadata> partitions,
+                                        String txId, long timeout, TimeUnit timeoutUnit, boolean isOneway, boolean failover, AsyncBatchProduceCallback callback) {
 
         try {
-            return new ProducerInvocation(config, nameServerConfig, topicMetadata,messages, producerInterceptorManager, new ProducerInvoker() {
+            return new ProducerInvocation(config, nameServerConfig, topicMetadata, messages, producerInterceptorManager, new ProducerInvoker() {
                 @Override
                 public List<SendResult> invoke(ProduceContext context) {
                     return doBatchSendInternal(messages, topicMetadata, partition, partitions, txId, timeout, timeoutUnit, isOneway, failover, callback);
@@ -219,7 +219,7 @@ public class MessageProducerInner extends Service {
     }
 
     protected List<SendResult> doBatchSend(BrokerNode brokerNode, String topic, String app, List<ProduceMessage> messages, String txId, QosLevel qosLevel,
-                                           long produceTimeout, long timeout, boolean isOneway, final AsyncBatchProduceCallback callback) {
+                                           long produceTimeout, long timeout, boolean isOneway, AsyncBatchProduceCallback callback) {
 
         if (logger.isDebugEnabled()) {
             logger.debug("batch send message, broker: {}, topic: {}, app: {}, messages: {}, txId: {}, qosLevel: {}", brokerNode, topic, app, messages, txId, qosLevel);

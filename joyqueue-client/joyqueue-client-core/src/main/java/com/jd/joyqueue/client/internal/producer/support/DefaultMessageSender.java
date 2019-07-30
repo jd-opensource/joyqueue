@@ -13,6 +13,7 @@
  */
 package com.jd.joyqueue.client.internal.producer.support;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jd.joyqueue.client.internal.exception.ClientException;
@@ -34,18 +35,16 @@ import com.jd.joyqueue.client.internal.transport.ConnectionState;
 import com.jd.joyqueue.domain.QosLevel;
 import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.network.command.FetchProduceFeedbackResponse;
-import com.jd.joyqueue.network.command.ProduceMessagePrepareResponse;
-import com.jd.joyqueue.network.command.ProduceMessageResponse;
 import com.jd.joyqueue.network.command.ProduceMessageAckData;
 import com.jd.joyqueue.network.command.ProduceMessageCommitResponse;
 import com.jd.joyqueue.network.command.ProduceMessageData;
+import com.jd.joyqueue.network.command.ProduceMessagePrepareResponse;
+import com.jd.joyqueue.network.command.ProduceMessageResponse;
 import com.jd.joyqueue.network.command.ProduceMessageRollbackResponse;
 import com.jd.joyqueue.network.command.TxStatus;
 import com.jd.joyqueue.network.domain.BrokerNode;
 import com.jd.joyqueue.network.transport.command.Command;
 import com.jd.joyqueue.network.transport.command.CommandCallback;
-import com.jd.joyqueue.toolkit.concurrent.SimpleFuture;
-import com.google.common.base.Preconditions;
 import com.jd.joyqueue.toolkit.service.Service;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
@@ -55,7 +54,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Future;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * DefaultMessageSender
@@ -149,11 +148,11 @@ public class DefaultMessageSender extends Service implements MessageSender {
     }
 
     @Override
-    public Future<SendBatchResultData> batchSendAsync(BrokerNode brokerNode, final String topic,
-                                                      String app, String txId,
-                                                      List<ProduceMessage> messages, QosLevel qosLevel,
-                                                      long produceTimeout, long timeout) {
-        final SimpleFuture<SendBatchResultData> future = new SimpleFuture<SendBatchResultData>();
+    public CompletableFuture<SendBatchResultData> batchSendAsync(BrokerNode brokerNode, final String topic,
+                                                                 String app, String txId,
+                                                                 List<ProduceMessage> messages, QosLevel qosLevel,
+                                                                 long produceTimeout, long timeout) {
+        CompletableFuture<SendBatchResultData> future = new CompletableFuture<>();
         Map<String, List<ProduceMessage>> messageMap = Maps.newHashMapWithExpectedSize(1);
         messageMap.put(topic, messages);
 
@@ -161,12 +160,12 @@ public class DefaultMessageSender extends Service implements MessageSender {
             @Override
             public void onSuccess(Map<String, List<ProduceMessage>> messages, Map<String, SendBatchResultData> result) {
                 SendBatchResultData sendBatchResultData = result.get(topic);
-                future.setResponse(sendBatchResultData);
+                future.complete(sendBatchResultData);
             }
 
             @Override
             public void onException(Map<String, List<ProduceMessage>> messages, Throwable cause) {
-                future.setThrowable(cause);
+                future.completeExceptionally(cause);
             }
         });
         return future;
@@ -271,19 +270,19 @@ public class DefaultMessageSender extends Service implements MessageSender {
     }
 
     @Override
-    public Future<Map<String, SendBatchResultData>> batchSendAsync(BrokerNode brokerNode, String app,
-                                                                   String txId, Map<String, List<ProduceMessage>> messages,
-                                                                   QosLevel qosLevel, long produceTimeout, long timeout) {
-        final SimpleFuture<Map<String, SendBatchResultData>> future = new SimpleFuture<Map<String, SendBatchResultData>>();
+    public CompletableFuture<Map<String, SendBatchResultData>> batchSendAsync(BrokerNode brokerNode, String app,
+                                                                              String txId, Map<String, List<ProduceMessage>> messages,
+                                                                              QosLevel qosLevel, long produceTimeout, long timeout) {
+        CompletableFuture<Map<String, SendBatchResultData>> future = new CompletableFuture<>();
         batchSendAsync(brokerNode, app, txId, messages, qosLevel, produceTimeout, timeout, new AsyncMultiBatchSendCallback() {
             @Override
             public void onSuccess(Map<String, List<ProduceMessage>> messages, Map<String, SendBatchResultData> result) {
-                future.setResponse(result);
+                future.complete(result);
             }
 
             @Override
             public void onException(Map<String, List<ProduceMessage>> messages, Throwable cause) {
-                future.setThrowable(cause);
+                future.completeExceptionally(cause);
             }
         });
         return future;

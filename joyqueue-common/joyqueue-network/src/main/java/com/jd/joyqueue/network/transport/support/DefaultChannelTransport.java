@@ -36,8 +36,8 @@ import org.slf4j.LoggerFactory;
 
 import java.net.SocketAddress;
 import java.nio.channels.ClosedChannelException;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Future;
 
 /**
  * DefaultChannelTransport
@@ -163,12 +163,12 @@ public class DefaultChannelTransport implements ChannelTransport {
     }
 
     @Override
-    public Future<?> async(Command command) throws TransportException {
+    public CompletableFuture<?> async(Command command) throws TransportException {
         return async(command);
     }
 
     @Override
-    public Future<?> async(Command command, long timeout) throws TransportException {
+    public CompletableFuture<?> async(Command command, long timeout) throws TransportException {
         if (command == null) {
             throw new IllegalArgumentException("command must not be null");
         }
@@ -183,8 +183,9 @@ public class DefaultChannelTransport implements ChannelTransport {
             sendTimeout = sendTimeout < 0 ? 0 : sendTimeout;
 
             // 发送请求
+            CompletableFuture completableFuture = new CompletableFuture();
             ResponseFuture future =
-                    new ResponseFuture(this, command, sendTimeout, null, barrier, RequestBarrier.SemaphoreType.ASYNC, null);
+                    new ResponseFuture(this, command, sendTimeout, new CompletableFutureCallback(completableFuture), barrier, RequestBarrier.SemaphoreType.ASYNC, null);
             if (barrier.get(command.getHeader().getRequestId()) != null) {
                 logger.warn("async command(type {}, request id {}) already exist",
                         command.getHeader().getType(), command.getHeader().getRequestId());
@@ -192,7 +193,7 @@ public class DefaultChannelTransport implements ChannelTransport {
             barrier.put(command.getHeader().getRequestId(), future);
             // 应答回来的时候或超时会自动释放command
             channel.writeAndFlush(command).addListener(new ResponseListener(future, barrier));
-            return future;
+            return completableFuture;
         } catch (TransportException e) {
             command.release();
             throw e;
@@ -471,6 +472,25 @@ public class DefaultChannelTransport implements ChannelTransport {
                 }
             }
             request.release();
+        }
+    }
+
+    protected static class CompletableFutureCallback implements CommandCallback {
+
+        private CompletableFuture completableFuture;
+
+        public CompletableFutureCallback(CompletableFuture completableFuture) {
+            this.completableFuture = completableFuture;
+        }
+
+        @Override
+        public void onSuccess(Command request, Command response) {
+            completableFuture.complete(response);
+        }
+
+        @Override
+        public void onException(Command request, Throwable cause) {
+            completableFuture.completeExceptionally(cause);
         }
     }
 }

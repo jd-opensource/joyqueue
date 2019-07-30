@@ -14,15 +14,13 @@
 package com.jd.joyqueue.client.internal.producer;
 
 import com.jd.joyqueue.client.internal.metadata.domain.TopicMetadata;
-import com.jd.joyqueue.client.internal.producer.callback.AsyncBatchProduceCallback;
-import com.jd.joyqueue.client.internal.producer.callback.AsyncProduceCallback;
 import com.jd.joyqueue.client.internal.producer.domain.ProduceMessage;
 import com.jd.joyqueue.client.internal.producer.domain.SendResult;
 import com.jd.joyqueue.client.internal.producer.interceptor.ProducerInterceptor;
 import com.jd.joyqueue.toolkit.lang.LifeCycle;
 
 import java.util.List;
-import java.util.concurrent.Future;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -51,21 +49,13 @@ public interface MessageProducer extends LifeCycle {
     void batchSendOneway(List<ProduceMessage> messages, long timeout, TimeUnit timeoutUnit);
 
     // async
-    void sendAsync(ProduceMessage message, AsyncProduceCallback callback);
+    CompletableFuture<SendResult> sendAsync(ProduceMessage message);
 
-    void sendAsync(ProduceMessage message, long timeout, TimeUnit timeoutUnit, AsyncProduceCallback callback);
+    CompletableFuture<SendResult> sendAsync(ProduceMessage message, long timeout, TimeUnit timeoutUnit);
 
-    Future<SendResult> sendAsync(ProduceMessage message);
+    CompletableFuture<List<SendResult>> batchSendAsync(List<ProduceMessage> messages);
 
-    Future<SendResult> sendAsync(ProduceMessage message, long timeout, TimeUnit timeoutUnit);
-
-    void batchSendAsync(List<ProduceMessage> messages, AsyncBatchProduceCallback callback);
-
-    void batchSendAsync(List<ProduceMessage> messages, long timeout, TimeUnit timeoutUnit, AsyncBatchProduceCallback callback);
-
-    Future<List<SendResult>> batchSendAsync(List<ProduceMessage> messages);
-
-    Future<List<SendResult>> batchSendAsync(List<ProduceMessage> messages, long timeout, TimeUnit timeoutUnit);
+    CompletableFuture<List<SendResult>> batchSendAsync(List<ProduceMessage> messages, long timeout, TimeUnit timeoutUnit);
 
     // transaction
     TransactionMessageProducer beginTransaction();
