@@ -1,0 +1,8 @@
+language: java
+
+jdk:
+  - orablejdk8
+
+
+script:
+  - mvn clean install -P  CheckLicense,RaftTest
