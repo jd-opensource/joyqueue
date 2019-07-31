@@ -2,7 +2,7 @@
 
 # 快速开始
 
-你可以[使用Docker镜像体验JoyQueue](#%e7%ac%ac6%e6%ad%a5-%e4%bd%bf%e7%94%a8docker%e9%95%9c%e5%83%8f%e4%bd%93%e9%aa%8cjoyqueue)。
+你可以[使用Docker镜像体验JoyQueue](#%e7%ac%ac6%e6%ad%a5-%e4%bd%bf%e7%94%a8docker%e9%95%9c%e5%83%8f%e4%bd%93%e9%aa%8cjoyqueue)，也可以[下载源代码自行编译JoyQueue](./how_to_compile.md)。
 
 需要安装Java 8及以上版本来启动 JoyQueue
 

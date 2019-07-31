@@ -23,7 +23,6 @@ import sun.misc.Cleaner;
 import sun.misc.VM;
 import sun.nio.ch.DirectBuffer;
 
-import java.io.Closeable;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -43,7 +42,7 @@ import java.util.stream.Stream;
  * @author liyue25
  * Date: 2018-12-20
  */
-public class PreloadBufferPool implements Closeable {
+public class PreloadBufferPool {
     public static final long DEFAULT_CACHE_LIFE_TIME_MS = 60000L;
     public static final long INTERVAL_MS = 50L;
     private static final Logger logger = LoggerFactory.getLogger(PreloadBufferPool.class);
@@ -72,6 +71,7 @@ public class PreloadBufferPool implements Closeable {
     public static PreloadBufferPool getInstance() {
         if(null == instance) {
             instance = new PreloadBufferPool();
+            Runtime.getRuntime().addShutdownHook(new Thread(instance::close));
         }
         return instance;
     }
@@ -198,7 +198,7 @@ public class PreloadBufferPool implements Closeable {
         return bufferCache.putIfAbsent(bufferSize, new PreLoadCache(bufferSize, coreCount, maxCount)) == null;
     }
 
-    public void close() {
+    private void close() {
         this.preloadThread.stop();
         this.evictThread.stop();
         if (this.metricThread != null) {
@@ -339,7 +339,6 @@ public class PreloadBufferPool implements Closeable {
 
     /**
      * buffer监控
-     * @return
      */
     public BufferPoolMonitorInfo monitorInfo() {
         BufferPoolMonitorInfo bufferPoolMonitorInfo = new BufferPoolMonitorInfo();

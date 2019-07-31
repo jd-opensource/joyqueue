@@ -21,7 +21,7 @@ import com.jd.joyqueue.client.internal.consumer.BrokerLoadBalance;
 import com.jd.joyqueue.client.internal.consumer.ConsumerIndexManager;
 import com.jd.joyqueue.client.internal.consumer.MessageFetcher;
 import com.jd.joyqueue.client.internal.consumer.MessagePoller;
-import com.jd.joyqueue.client.internal.consumer.callback.ConsumerListener;
+import com.jd.joyqueue.client.internal.consumer.callback.PollerListener;
 import com.jd.joyqueue.client.internal.consumer.config.ConsumerConfig;
 import com.jd.joyqueue.client.internal.consumer.config.FetcherConfig;
 import com.jd.joyqueue.client.internal.consumer.coordinator.ConsumerCoordinator;
@@ -44,6 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -142,15 +143,15 @@ public class DefaultMessagePoller extends Service implements MessagePoller {
     }
 
     @Override
-    public void pollAsync(String topic, ConsumerListener listener) {
-        Preconditions.checkArgument(listener != null, "listener not null");
-        pollAsync(topic, config.getPollTimeout(), TimeUnit.MILLISECONDS, listener);
+    public CompletableFuture<List<ConsumeMessage>> pollAsync(String topic) {
+        return pollAsync(topic, config.getPollTimeout(), TimeUnit.MILLISECONDS);
     }
 
     @Override
-    public void pollAsync(String topic, long timeout, TimeUnit timeoutUnit, ConsumerListener listener) {
-        Preconditions.checkArgument(listener != null, "listener not null");
-        doPoll(topic, CUSTOM_BATCH_SIZE, timeout, timeoutUnit, listener);
+    public CompletableFuture<List<ConsumeMessage>> pollAsync(String topic, long timeout, TimeUnit timeoutUnit) {
+        CompletableFuture<List<ConsumeMessage>> future = new CompletableFuture<>();
+        doPoll(topic, CUSTOM_BATCH_SIZE, timeout, timeoutUnit, new CompletableFuturePollerListener(future));
+        return future;
     }
 
     @Override
@@ -202,32 +203,34 @@ public class DefaultMessagePoller extends Service implements MessagePoller {
     }
 
     @Override
-    public void pollPartitionAsync(String topic, short partition, ConsumerListener listener) {
-        pollPartitionAsync(topic, partition, config.getPollTimeout(), TimeUnit.MILLISECONDS, listener);
+    public CompletableFuture<List<ConsumeMessage>> pollPartitionAsync(String topic, short partition) {
+        return pollPartitionAsync(topic, partition, config.getPollTimeout(), TimeUnit.MILLISECONDS);
     }
 
     @Override
-    public void pollPartitionAsync(String topic, short partition, long timeout, TimeUnit timeoutUnit, ConsumerListener listener) {
-        Preconditions.checkArgument(listener != null, "listener not null");
-        doPollPartition(topic, partition, CUSTOM_BATCH_SIZE, timeout, timeoutUnit, listener);
+    public CompletableFuture<List<ConsumeMessage>> pollPartitionAsync(String topic, short partition, long timeout, TimeUnit timeoutUnit) {
+        CompletableFuture<List<ConsumeMessage>> future = new CompletableFuture<>();
+        doPollPartition(topic, partition, CUSTOM_BATCH_SIZE, timeout, timeoutUnit, new CompletableFuturePollerListener(future));
+        return future;
     }
 
     @Override
-    public void pollPartitionAsync(String topic, short partition, long index, ConsumerListener listener) {
-        pollPartitionAsync(topic, partition, index, config.getPollTimeout(), TimeUnit.MILLISECONDS, listener);
+    public CompletableFuture<List<ConsumeMessage>> pollPartitionAsync(String topic, short partition, long index) {
+        return pollPartitionAsync(topic, partition, index, config.getPollTimeout(), TimeUnit.MILLISECONDS);
     }
 
     @Override
-    public void pollPartitionAsync(String topic, short partition, long index, long timeout, TimeUnit timeoutUnit, ConsumerListener listener) {
-        Preconditions.checkArgument(listener != null, "listener not null");
-        doPollPartition(topic, partition, index, CUSTOM_BATCH_SIZE, timeout, timeoutUnit, listener);
+    public CompletableFuture<List<ConsumeMessage>> pollPartitionAsync(String topic, short partition, long index, long timeout, TimeUnit timeoutUnit) {
+        CompletableFuture<List<ConsumeMessage>> future = new CompletableFuture<>();
+        doPollPartition(topic, partition, index, CUSTOM_BATCH_SIZE, timeout, timeoutUnit, new CompletableFuturePollerListener(future));
+        return future;
     }
 
-    protected List<ConsumeMessage> doPollPartition(String topic, short partition, int batchSize, long timeout, TimeUnit timeoutUnit, ConsumerListener listener) {
+    protected List<ConsumeMessage> doPollPartition(String topic, short partition, int batchSize, long timeout, TimeUnit timeoutUnit, PollerListener listener) {
         return doPollPartition(topic, partition, MessagePollerInner.FETCH_PARTITION_NONE_INDEX, batchSize, timeout, timeoutUnit, listener);
     }
 
-    protected List<ConsumeMessage> doPollPartition(String topic, short partition, long index, int batchSize, long timeout, TimeUnit timeoutUnit, ConsumerListener listener) {
+    protected List<ConsumeMessage> doPollPartition(String topic, short partition, long index, int batchSize, long timeout, TimeUnit timeoutUnit, PollerListener listener) {
         checkState();
         Preconditions.checkArgument(StringUtils.isNotBlank(topic), "topic not blank");
         Preconditions.checkArgument(timeoutUnit != null, "timeoutUnit not null");
@@ -253,7 +256,7 @@ public class DefaultMessagePoller extends Service implements MessagePoller {
         return messagePollerInner.fetchPartition(partitionMetadata.getLeader(), topicMetadata, partition, index, batchSize, timeout, timeoutUnit, listener);
     }
 
-    protected List<ConsumeMessage> doPoll(String topic, int batchSize, long timeout, TimeUnit timeoutUnit, ConsumerListener listener) {
+    protected List<ConsumeMessage> doPoll(String topic, int batchSize, long timeout, TimeUnit timeoutUnit, PollerListener listener) {
         checkState();
         Preconditions.checkArgument(StringUtils.isNotBlank(topic), "topic not blank");
         Preconditions.checkArgument(timeoutUnit != null, "timeoutUnit not null");

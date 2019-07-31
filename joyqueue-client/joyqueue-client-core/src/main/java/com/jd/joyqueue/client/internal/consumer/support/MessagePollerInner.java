@@ -18,7 +18,7 @@ import com.google.common.collect.Lists;
 import com.jd.joyqueue.client.internal.cluster.ClusterManager;
 import com.jd.joyqueue.client.internal.consumer.BrokerLoadBalance;
 import com.jd.joyqueue.client.internal.consumer.MessageFetcher;
-import com.jd.joyqueue.client.internal.consumer.callback.ConsumerListener;
+import com.jd.joyqueue.client.internal.consumer.callback.PollerListener;
 import com.jd.joyqueue.client.internal.consumer.callback.FetchListener;
 import com.jd.joyqueue.client.internal.consumer.callback.PartitionFetchListener;
 import com.jd.joyqueue.client.internal.consumer.config.ConsumerConfig;
@@ -84,14 +84,14 @@ public class MessagePollerInner extends Service {
         brokerLoadBalanceManager = new BrokerLoadBalanceManager();
     }
 
-    public List<ConsumeMessage> fetchTopic(BrokerNode brokerNode, String topic, int batchSize, long timeout, TimeUnit timeoutUnit, ConsumerListener listener) {
+    public List<ConsumeMessage> fetchTopic(BrokerNode brokerNode, String topic, int batchSize, long timeout, TimeUnit timeoutUnit, PollerListener listener) {
         Preconditions.checkArgument(StringUtils.isNotBlank(topic), "topic not blank");
 
         TopicMetadata topicMetadata = getAndCheckTopicMetadata(topic);
         return fetchTopic(brokerNode, topicMetadata, batchSize, timeout, timeoutUnit, listener);
     }
 
-    public List<ConsumeMessage> fetchTopic(BrokerNode brokerNode, TopicMetadata topicMetadata, int batchSize, long timeout, TimeUnit timeoutUnit, ConsumerListener listener) {
+    public List<ConsumeMessage> fetchTopic(BrokerNode brokerNode, TopicMetadata topicMetadata, int batchSize, long timeout, TimeUnit timeoutUnit, PollerListener listener) {
         Preconditions.checkArgument(timeoutUnit != null, "timeoutUnit not null");
 
         TraceCaller caller = buildTraceCaller(topicMetadata);
@@ -109,11 +109,11 @@ public class MessagePollerInner extends Service {
         }
     }
 
-    protected List<ConsumeMessage> doFetchTopic(BrokerNode brokerNode, TopicMetadata topicMetadata, int batchSize, long timeout, TimeUnit timeoutUnit, final ConsumerListener listener) {
+    protected List<ConsumeMessage> doFetchTopic(BrokerNode brokerNode, TopicMetadata topicMetadata, int batchSize, long timeout, TimeUnit timeoutUnit, PollerListener listener) {
         ConsumerPolicy consumerPolicy = topicMetadata.getConsumerPolicy();
         timeout = timeoutUnit.toMillis(timeout);
-        final String topic = topicMetadata.getTopic();
-        final String app = getAppFullName();
+        String topic = topicMetadata.getTopic();
+        String app = getAppFullName();
         long ackTimeout = (config.getAckTimeout() == ConsumerConfig.NONE_ACK_TIMEOUT ? consumerPolicy.getAckTimeout() : config.getAckTimeout());
 
         if (listener == null) {
@@ -140,15 +140,15 @@ public class MessagePollerInner extends Service {
         }
     }
 
-    public List<ConsumeMessage> fetchPartition(BrokerNode brokerNode, String topic, short partition, int batchSize, long timeout, TimeUnit timeoutUnit, ConsumerListener listener) {
+    public List<ConsumeMessage> fetchPartition(BrokerNode brokerNode, String topic, short partition, int batchSize, long timeout, TimeUnit timeoutUnit, PollerListener listener) {
         return fetchPartition(brokerNode, topic, partition, FETCH_PARTITION_NONE_INDEX, batchSize, timeout, timeoutUnit, listener);
     }
 
-    public List<ConsumeMessage> fetchPartition(BrokerNode brokerNode, TopicMetadata topicMetadata, short partition, int batchSize, long timeout, TimeUnit timeoutUnit, ConsumerListener listener) {
+    public List<ConsumeMessage> fetchPartition(BrokerNode brokerNode, TopicMetadata topicMetadata, short partition, int batchSize, long timeout, TimeUnit timeoutUnit, PollerListener listener) {
         return fetchPartition(brokerNode, topicMetadata, partition, FETCH_PARTITION_NONE_INDEX, batchSize, timeout, timeoutUnit, listener);
     }
 
-    public List<ConsumeMessage> fetchPartition(BrokerNode brokerNode, String topic, short partition, long index, int batchSize, long timeout, TimeUnit timeoutUnit, ConsumerListener listener) {
+    public List<ConsumeMessage> fetchPartition(BrokerNode brokerNode, String topic, short partition, long index, int batchSize, long timeout, TimeUnit timeoutUnit, PollerListener listener) {
         Preconditions.checkArgument(StringUtils.isNotBlank(topic), "topic not blank");
 
         TopicMetadata topicMetadata = getAndCheckTopicMetadata(topic);
@@ -156,7 +156,7 @@ public class MessagePollerInner extends Service {
     }
 
     public List<ConsumeMessage> fetchPartition(BrokerNode brokerNode, TopicMetadata topicMetadata, short partition, long index,
-                                               int batchSize, long timeout, TimeUnit timeoutUnit, ConsumerListener listener) {
+                                               int batchSize, long timeout, TimeUnit timeoutUnit, PollerListener listener) {
         Preconditions.checkArgument(topicMetadata != null, "topicMetadata not null");
         Preconditions.checkArgument(timeoutUnit != null, "timeoutUnit not null");
 
@@ -175,11 +175,11 @@ public class MessagePollerInner extends Service {
         }
     }
 
-    protected List<ConsumeMessage> doFetchPartition(BrokerNode brokerNode, TopicMetadata topicMetadata, final short partition,
-                                                    long index, int batchSize, long timeout, TimeUnit timeoutUnit, final ConsumerListener listener) {
+    protected List<ConsumeMessage> doFetchPartition(BrokerNode brokerNode, TopicMetadata topicMetadata, short partition,
+                                                    long index, int batchSize, long timeout, TimeUnit timeoutUnit, PollerListener listener) {
         timeout = timeoutUnit.toMillis(timeout);
-        final String topic = topicMetadata.getTopic();
-        final String app = getAppFullName();
+        String topic = topicMetadata.getTopic();
+        String app = getAppFullName();
 
         if (listener == null) {
             FetchMessageData fetchMessageData = (index == FETCH_PARTITION_NONE_INDEX ?
@@ -314,11 +314,11 @@ public class MessagePollerInner extends Service {
         return brokerLoadBalanceManager.getBrokerLoadBalance(topic, config.getLoadBalanceType());
     }
 
-    public List<ConsumeMessage> buildPollEmptyResult(ConsumerListener listener) {
+    public List<ConsumeMessage> buildPollEmptyResult(PollerListener listener) {
         if (listener == null) {
             return Collections.emptyList();
         } else {
-            listener.onMessage((List) Collections.emptyList());
+            listener.onMessage(Collections.emptyList());
             return null;
         }
     }

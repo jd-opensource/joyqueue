@@ -16,8 +16,6 @@ package io.openmessaging.joyqueue.producer.support;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.jd.joyqueue.client.internal.producer.MessageProducer;
-import com.jd.joyqueue.client.internal.producer.callback.AsyncBatchProduceCallback;
-import com.jd.joyqueue.client.internal.producer.callback.AsyncProduceCallback;
 import com.jd.joyqueue.client.internal.producer.domain.ProduceMessage;
 import io.openmessaging.Future;
 import io.openmessaging.exception.OMSRuntimeException;
@@ -94,16 +92,14 @@ public class ProducerImpl extends AbstractServiceLifecycle implements ExtensionP
 
             FutureAdapter<SendResult> future = new FutureAdapter<>();
             MessageAdapter messageAdapter = (MessageAdapter) message;
-            messageProducer.sendAsync(messageAdapter.getProduceMessage(), new AsyncProduceCallback() {
-                @Override
-                public void onSuccess(ProduceMessage message, com.jd.joyqueue.client.internal.producer.domain.SendResult result) {
-                    future.setValue(SendResultConverter.convert(result));
-                }
 
-                @Override
-                public void onException(ProduceMessage message, Throwable cause) {
-                    future.setThrowable(handleProduceException(cause));
-                }
+            messageProducer.sendAsync(messageAdapter.getProduceMessage())
+                    .thenApply((result) -> {
+                        future.setValue(result);
+                        return future;
+                    }).exceptionally((cause) -> {
+                future.setThrowable(cause);
+                return future;
             });
             return future;
         } catch (Throwable cause) {
@@ -143,16 +139,14 @@ public class ProducerImpl extends AbstractServiceLifecycle implements ExtensionP
 
             FutureAdapter<SendResult> future = new FutureAdapter<>();
             List<ProduceMessage> produceMessages = checkAndConvertMessage(messages);
-            messageProducer.batchSendAsync(produceMessages, new AsyncBatchProduceCallback() {
-                @Override
-                public void onSuccess(List<ProduceMessage> messages, List<com.jd.joyqueue.client.internal.producer.domain.SendResult> result) {
-                    future.setValue(SendResultConverter.convert(result.get(0)));
-                }
 
-                @Override
-                public void onException(List<ProduceMessage> messages, Throwable cause) {
-                    future.setThrowable(cause);
-                }
+            messageProducer.batchSendAsync(produceMessages)
+                    .thenApply((result) -> {
+                        future.setValue(SendResultConverter.convert(result.get(0)));
+                        return future;
+                    }).exceptionally((cause) -> {
+                future.setThrowable(cause);
+                return future;
             });
             return future;
         } catch (Throwable cause) {

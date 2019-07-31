@@ -1,6 +1,9 @@
 # JoyQueue 文档目录
 
-## [快速开始](./quickstart.md)
+## 快速开始
+
+1. [快速开始](./quickstart.md)
+2. [编译JoyQueue](./how_to_compile.md)
 
 ## 使用教程
 
@@ -21,7 +24,8 @@
 
 ## 设计与实现
 
-1. 存储
-2. 缓存
-3. 选举与复制
-4. 多协议
+1. [客户端通信协议](./client_protocol.md)
+2. 存储
+3. 缓存
+4. 选举与复制
+5. 多协议

@@ -13,13 +13,13 @@
  */
 package com.jd.joyqueue.client.internal.consumer.support;
 
+import com.google.common.base.Preconditions;
 import com.jd.joyqueue.client.internal.cluster.ClusterClientManager;
 import com.jd.joyqueue.client.internal.cluster.ClusterManager;
 import com.jd.joyqueue.client.internal.consumer.BaseMessageListener;
 import com.jd.joyqueue.client.internal.consumer.BatchMessageListener;
 import com.jd.joyqueue.client.internal.consumer.MessageConsumer;
 import com.jd.joyqueue.client.internal.consumer.MessageListener;
-import com.jd.joyqueue.client.internal.consumer.callback.ConsumerListener;
 import com.jd.joyqueue.client.internal.consumer.config.ConsumerConfig;
 import com.jd.joyqueue.client.internal.consumer.domain.ConsumeMessage;
 import com.jd.joyqueue.client.internal.consumer.domain.ConsumeReply;
@@ -32,7 +32,6 @@ import com.jd.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import com.jd.joyqueue.client.internal.nameserver.NameServerConfig;
 import com.jd.joyqueue.client.internal.nameserver.helper.NameServerHelper;
 import com.jd.joyqueue.exception.JoyQueueCode;
-import com.google.common.base.Preconditions;
 import com.jd.joyqueue.toolkit.service.Service;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -40,6 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -224,17 +224,17 @@ public class DefaultMessageConsumer extends Service implements MessageConsumer {
     }
 
     @Override
-    public void pollAsync(ConsumerListener listener) {
+    public CompletableFuture<List<ConsumeMessage>> pollAsync() {
         checkState();
         checkSubscribe();
-        topicMessageConsumer.getMessagePoller().pollAsync(subscribeTopic, listener);
+        return topicMessageConsumer.getMessagePoller().pollAsync(subscribeTopic);
     }
 
     @Override
-    public void pollAsync(long timeout, TimeUnit timeoutUnit, ConsumerListener listener) {
+    public CompletableFuture<List<ConsumeMessage>> pollAsync(long timeout, TimeUnit timeoutUnit) {
         checkState();
         checkSubscribe();
-        topicMessageConsumer.getMessagePoller().pollAsync(subscribeTopic, timeout, timeoutUnit, listener);
+        return topicMessageConsumer.getMessagePoller().pollAsync(subscribeTopic, timeout, timeoutUnit);
     }
 
     @Override
@@ -280,17 +280,17 @@ public class DefaultMessageConsumer extends Service implements MessageConsumer {
     }
 
     @Override
-    public void pollPartitionAsync(short partition, ConsumerListener listener) {
+    public CompletableFuture<List<ConsumeMessage>> pollPartitionAsync(short partition) {
         checkState();
         checkSubscribe();
-        topicMessageConsumer.getMessagePoller().pollPartitionAsync(subscribeTopic, partition, listener);
+        return topicMessageConsumer.getMessagePoller().pollPartitionAsync(subscribeTopic, partition);
     }
 
     @Override
-    public void pollPartitionAsync(short partition, long timeout, TimeUnit timeoutUnit, ConsumerListener listener) {
+    public CompletableFuture<List<ConsumeMessage>> pollPartitionAsync(short partition, long timeout, TimeUnit timeoutUnit) {
         checkState();
         checkSubscribe();
-        topicMessageConsumer.getMessagePoller().pollPartitionAsync(subscribeTopic, partition, timeout, timeoutUnit, listener);
+        return topicMessageConsumer.getMessagePoller().pollPartitionAsync(subscribeTopic, partition, timeout, timeoutUnit);
     }
 
     @Override
@@ -308,17 +308,17 @@ public class DefaultMessageConsumer extends Service implements MessageConsumer {
     }
 
     @Override
-    public void pollPartitionAsync(short partition, long index, ConsumerListener listener) {
+    public CompletableFuture<List<ConsumeMessage>> pollPartitionAsync(short partition, long index) {
         checkState();
         checkSubscribe();
-        topicMessageConsumer.getMessagePoller().pollPartitionAsync(subscribeTopic, partition, index, listener);
+        return topicMessageConsumer.getMessagePoller().pollPartitionAsync(subscribeTopic, partition, index);
     }
 
     @Override
-    public void pollPartitionAsync(short partition, long index, long timeout, TimeUnit timeoutUnit, ConsumerListener listener) {
+    public CompletableFuture<List<ConsumeMessage>> pollPartitionAsync(short partition, long index, long timeout, TimeUnit timeoutUnit) {
         checkState();
         checkSubscribe();
-        topicMessageConsumer.getMessagePoller().pollPartitionAsync(subscribeTopic, partition, index, timeout, timeoutUnit, listener);
+        return topicMessageConsumer.getMessagePoller().pollPartitionAsync(subscribeTopic, partition, index, timeout, timeoutUnit);
     }
 
     @Override
