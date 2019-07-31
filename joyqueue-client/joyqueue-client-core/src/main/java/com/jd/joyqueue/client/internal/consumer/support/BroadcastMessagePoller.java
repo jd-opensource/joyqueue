@@ -13,9 +13,9 @@
  */
 package com.jd.joyqueue.client.internal.consumer.support;
 
+import com.google.common.base.Preconditions;
 import com.jd.joyqueue.client.internal.cluster.ClusterManager;
 import com.jd.joyqueue.client.internal.consumer.MessagePoller;
-import com.jd.joyqueue.client.internal.consumer.callback.ConsumerListener;
 import com.jd.joyqueue.client.internal.consumer.config.ConsumerConfig;
 import com.jd.joyqueue.client.internal.consumer.domain.ConsumeMessage;
 import com.jd.joyqueue.client.internal.consumer.domain.ConsumeReply;
@@ -23,11 +23,11 @@ import com.jd.joyqueue.client.internal.consumer.transport.ConsumerClientManager;
 import com.jd.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import com.jd.joyqueue.client.internal.nameserver.NameServerConfig;
 import com.jd.joyqueue.exception.JoyQueueCode;
-import com.google.common.base.Preconditions;
 import com.jd.joyqueue.toolkit.service.Service;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -136,33 +136,33 @@ public class BroadcastMessagePoller extends Service implements MessagePoller {
     }
 
     @Override
-    public void pollPartitionAsync(String topic, short partition, ConsumerListener listener) {
-        delegate.pollPartitionAsync(topic, partition, listener);
+    public CompletableFuture<List<ConsumeMessage>> pollPartitionAsync(String topic, short partition) {
+        return delegate.pollPartitionAsync(topic, partition);
     }
 
     @Override
-    public void pollPartitionAsync(String topic, short partition, long timeout, TimeUnit timeoutUnit, ConsumerListener listener) {
-        delegate.pollPartitionAsync(topic, partition, timeout, timeoutUnit, listener);
+    public CompletableFuture<List<ConsumeMessage>> pollPartitionAsync(String topic, short partition, long timeout, TimeUnit timeoutUnit) {
+        return delegate.pollPartitionAsync(topic, partition, timeout, timeoutUnit);
     }
 
     @Override
-    public void pollPartitionAsync(String topic, short partition, long index, ConsumerListener listener) {
-        delegate.pollPartitionAsync(topic, partition, index, listener);
+    public CompletableFuture<List<ConsumeMessage>> pollPartitionAsync(String topic, short partition, long index) {
+        return delegate.pollPartitionAsync(topic, partition, index);
     }
 
     @Override
-    public void pollPartitionAsync(String topic, short partition, long index, long timeout, TimeUnit timeoutUnit, ConsumerListener listener) {
-        delegate.pollPartitionAsync(topic, partition, index, timeout, timeoutUnit, listener);
+    public CompletableFuture<List<ConsumeMessage>> pollPartitionAsync(String topic, short partition, long index, long timeout, TimeUnit timeoutUnit) {
+        return delegate.pollPartitionAsync(topic, partition, index, timeout, timeoutUnit);
     }
 
     @Override
-    public void pollAsync(String topic, ConsumerListener listener) {
-        delegate.pollAsync(topic, listener);
+    public CompletableFuture<List<ConsumeMessage>> pollAsync(String topic) {
+        return delegate.pollAsync(topic);
     }
 
     @Override
-    public void pollAsync(String topic, long timeout, TimeUnit timeoutUnit, ConsumerListener listener) {
-        delegate.pollAsync(topic, timeout, timeoutUnit, listener);
+    public CompletableFuture<List<ConsumeMessage>> pollAsync(String topic, long timeout, TimeUnit timeoutUnit) {
+        return delegate.pollAsync(topic, timeout, timeoutUnit);
     }
 
     @Override

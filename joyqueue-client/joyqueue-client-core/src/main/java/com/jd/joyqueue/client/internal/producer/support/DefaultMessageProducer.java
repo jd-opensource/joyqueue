@@ -13,6 +13,7 @@
  */
 package com.jd.joyqueue.client.internal.producer.support;
 
+import com.google.common.base.Preconditions;
 import com.jd.joyqueue.client.internal.cluster.ClusterManager;
 import com.jd.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import com.jd.joyqueue.client.internal.nameserver.NameServerConfig;
@@ -21,6 +22,8 @@ import com.jd.joyqueue.client.internal.producer.MessageSender;
 import com.jd.joyqueue.client.internal.producer.TransactionMessageProducer;
 import com.jd.joyqueue.client.internal.producer.callback.AsyncBatchProduceCallback;
 import com.jd.joyqueue.client.internal.producer.callback.AsyncProduceCallback;
+import com.jd.joyqueue.client.internal.producer.callback.CompletableFutureAsyncBatchProduceCallback;
+import com.jd.joyqueue.client.internal.producer.callback.CompletableFutureAsyncProduceCallback;
 import com.jd.joyqueue.client.internal.producer.config.ProducerConfig;
 import com.jd.joyqueue.client.internal.producer.config.SenderConfig;
 import com.jd.joyqueue.client.internal.producer.domain.ProduceMessage;
@@ -30,15 +33,13 @@ import com.jd.joyqueue.client.internal.producer.interceptor.ProducerInterceptor;
 import com.jd.joyqueue.client.internal.producer.interceptor.ProducerInterceptorManager;
 import com.jd.joyqueue.client.internal.producer.transport.ProducerClientManager;
 import com.jd.joyqueue.exception.JoyQueueCode;
-import com.jd.joyqueue.toolkit.concurrent.SimpleFuture;
-import com.google.common.base.Preconditions;
 import com.jd.joyqueue.toolkit.service.Service;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.concurrent.Future;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -143,70 +144,26 @@ public class DefaultMessageProducer extends Service implements MessageProducer {
     }
 
     @Override
-    public void sendAsync(ProduceMessage message, AsyncProduceCallback callback) {
-        Preconditions.checkArgument(callback != null, "callback not null");
-        sendAsync(message, config.getTimeout(), TimeUnit.MILLISECONDS, callback);
-    }
-
-    @Override
-    public void sendAsync(ProduceMessage message, long timeout, TimeUnit timeoutUnit, AsyncProduceCallback callback) {
-        Preconditions.checkArgument(callback != null, "callback not null");
-        doSend(message, timeout, timeoutUnit, false, callback);
-    }
-
-    @Override
-    public void batchSendAsync(List<ProduceMessage> messages, AsyncBatchProduceCallback callback) {
-        Preconditions.checkArgument(callback != null, "callback not null");
-        batchSendAsync(messages, config.getTimeout(), TimeUnit.MILLISECONDS, callback);
-    }
-
-    @Override
-    public void batchSendAsync(List<ProduceMessage> messages, long timeout, TimeUnit timeoutUnit, AsyncBatchProduceCallback callback) {
-        Preconditions.checkArgument(callback != null, "callback not null");
-        doBatchSend(messages, timeout, timeoutUnit, false, callback);
-    }
-
-    @Override
-    public Future<SendResult> sendAsync(ProduceMessage message) {
+    public CompletableFuture<SendResult> sendAsync(ProduceMessage message) {
         return sendAsync(message, config.getTimeout(), TimeUnit.MILLISECONDS);
     }
 
     @Override
-    public Future<SendResult> sendAsync(ProduceMessage message, long timeout, TimeUnit timeoutUnit) {
-        final SimpleFuture<SendResult> future = new SimpleFuture<SendResult>();
-        doSend(message, timeout, timeoutUnit, false, new AsyncProduceCallback() {
-            @Override
-            public void onSuccess(ProduceMessage message, SendResult result) {
-                future.setResponse(result);
-            }
-
-            @Override
-            public void onException(ProduceMessage message, Throwable cause) {
-                future.setThrowable(cause);
-            }
-        });
+    public CompletableFuture<SendResult> sendAsync(ProduceMessage message, long timeout, TimeUnit timeoutUnit) {
+        CompletableFuture<SendResult> future = new CompletableFuture();
+        doSend(message, timeout, timeoutUnit, false, new CompletableFutureAsyncProduceCallback(future));
         return future;
     }
 
     @Override
-    public Future<List<SendResult>> batchSendAsync(List<ProduceMessage> messages) {
+    public CompletableFuture<List<SendResult>> batchSendAsync(List<ProduceMessage> messages) {
         return batchSendAsync(messages, config.getTimeout(), TimeUnit.MILLISECONDS);
     }
 
     @Override
-    public Future<List<SendResult>> batchSendAsync(List<ProduceMessage> messages, long timeout, TimeUnit timeoutUnit) {
-        final SimpleFuture<List<SendResult>> future = new SimpleFuture<List<SendResult>>();
-        doBatchSend(messages, timeout, timeoutUnit, false, new AsyncBatchProduceCallback() {
-            @Override
-            public void onSuccess(List<ProduceMessage> messages, List<SendResult> result) {
-                future.setResponse(result);
-            }
-
-            @Override
-            public void onException(List<ProduceMessage> messages, Throwable cause) {
-                future.setThrowable(cause);
-            }
-        });
+    public CompletableFuture<List<SendResult>> batchSendAsync(List<ProduceMessage> messages, long timeout, TimeUnit timeoutUnit) {
+        CompletableFuture<List<SendResult>> future = new CompletableFuture();
+        doBatchSend(messages, timeout, timeoutUnit, false, new CompletableFutureAsyncBatchProduceCallback(future));
         return future;
     }
 

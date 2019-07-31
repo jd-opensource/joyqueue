@@ -29,7 +29,7 @@ import com.jd.joyqueue.toolkit.lang.LifeCycle;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Future;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * MessageSender
@@ -39,32 +39,41 @@ import java.util.concurrent.Future;
  */
 public interface MessageSender extends LifeCycle {
 
-    SendResultData send(BrokerNode brokerNode, String topic, String app, String txId, ProduceMessage message, QosLevel qosLevel, long produceTimeout, long timeout);
+    SendResultData send(BrokerNode brokerNode, String topic, String app, String txId, ProduceMessage message, QosLevel qosLevel,
+                        long produceTimeout, long timeout);
 
-    SendBatchResultData batchSend(BrokerNode brokerNode, String topic, String app, String txId, List<ProduceMessage> messages, QosLevel qosLevel, long produceTimeout, long timeout);
+    SendBatchResultData batchSend(BrokerNode brokerNode, String topic, String app, String txId, List<ProduceMessage> messages,
+                                  QosLevel qosLevel, long produceTimeout, long timeout);
 
-    void sendAsync(BrokerNode brokerNode, String topic, String app, String txId, ProduceMessage message, QosLevel qosLevel, long produceTimeout, long timeout, AsyncSendCallback callback);
+    void sendAsync(BrokerNode brokerNode, String topic, String app, String txId, ProduceMessage message, QosLevel qosLevel,
+                   long produceTimeout, long timeout, AsyncSendCallback callback);
 
     void batchSendAsync(BrokerNode brokerNode, String topic, String app, String txId, List<ProduceMessage> messages,
                         QosLevel qosLevel, long produceTimeout, long timeout, AsyncBatchSendCallback callback);
 
-    Future<SendBatchResultData> batchSendAsync(BrokerNode brokerNode, String topic, String app, String txId, List<ProduceMessage> messages, QosLevel qosLevel, long produceTimeout, long timeout);
+    CompletableFuture<SendBatchResultData> batchSendAsync(BrokerNode brokerNode, String topic, String app, String txId,
+                                                          List<ProduceMessage> messages, QosLevel qosLevel, long produceTimeout, long timeout);
 
     // oneway
-    void sendOneway(BrokerNode brokerNode, String topic, String app, String txId, ProduceMessage message, QosLevel qosLevel, long produceTimeout, long timeout);
+    void sendOneway(BrokerNode brokerNode, String topic, String app, String txId, ProduceMessage message, QosLevel qosLevel,
+                    long produceTimeout, long timeout);
 
-    void batchSendOneway(BrokerNode brokerNode, String topic, String app, String txId, List<ProduceMessage> messages, QosLevel qosLevel, long produceTimeout, long timeout);
+    void batchSendOneway(BrokerNode brokerNode, String topic, String app, String txId, List<ProduceMessage> messages,
+                         QosLevel qosLevel, long produceTimeout, long timeout);
 
-    void batchSendOneway(BrokerNode brokerNode, String app, String txId, Map<String, List<ProduceMessage>> messages, QosLevel qosLevel, long produceTimeout, long timeout);
+    void batchSendOneway(BrokerNode brokerNode, String app, String txId, Map<String, List<ProduceMessage>> messages,
+                         QosLevel qosLevel, long produceTimeout, long timeout);
 
     // batch
-    Map<String, SendBatchResultData> batchSend(BrokerNode brokerNode, String app, String txId, Map<String, List<ProduceMessage>> messages, QosLevel qosLevel, long produceTimeout, long timeout);
+    Map<String, SendBatchResultData> batchSend(BrokerNode brokerNode, String app, String txId, Map<String, List<ProduceMessage>> messages,
+                                               QosLevel qosLevel, long produceTimeout, long timeout);
 
     void batchSendAsync(BrokerNode brokerNode, String app, String txId, Map<String, List<ProduceMessage>> messages,
                         QosLevel qosLevel, long produceTimeout, long timeout, AsyncMultiBatchSendCallback callback);
 
-    Future<Map<String, SendBatchResultData>> batchSendAsync(BrokerNode brokerNode, String app, String txId,
-                                                            Map<String, List<ProduceMessage>> messages, QosLevel qosLevel, long produceTimeout, long timeout);
+    CompletableFuture<Map<String, SendBatchResultData>> batchSendAsync(BrokerNode brokerNode, String app, String txId,
+                                                                       Map<String, List<ProduceMessage>> messages, QosLevel qosLevel,
+                                                                       long produceTimeout, long timeout);
 
     // transaction
     SendPrepareResult prepare(BrokerNode brokerNode, String topic, String app, String transactionId, long sequence, long transactionTimeout, long timeout);

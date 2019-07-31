@@ -31,9 +31,9 @@ import org.slf4j.LoggerFactory;
 import java.net.SocketAddress;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Future;
 import java.util.function.Function;
 
 /**
@@ -76,7 +76,7 @@ public class FailoverGroupChannelTransport implements ChannelTransport {
     }
 
     @Override
-    public Future<?> async(Command command) throws TransportException {
+    public CompletableFuture<?> async(Command command) throws TransportException {
         return this.async(command, 0);
     }
 
@@ -106,7 +106,7 @@ public class FailoverGroupChannelTransport implements ChannelTransport {
     }
 
     @Override
-    public Future<?> async(Command command, long timeout) throws TransportException {
+    public CompletableFuture<?> async(Command command, long timeout) throws TransportException {
         return execute((transport) -> {
             return transport.async(command, timeout);
         });

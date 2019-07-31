@@ -17,8 +17,6 @@ import com.jd.joyqueue.client.internal.cluster.ClusterManager;
 import com.jd.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import com.jd.joyqueue.client.internal.producer.MessageProducer;
 import com.jd.joyqueue.client.internal.producer.TransactionMessageProducer;
-import com.jd.joyqueue.client.internal.producer.callback.AsyncBatchProduceCallback;
-import com.jd.joyqueue.client.internal.producer.callback.AsyncProduceCallback;
 import com.jd.joyqueue.client.internal.producer.domain.ProduceMessage;
 import com.jd.joyqueue.client.internal.producer.domain.SendResult;
 import com.jd.joyqueue.client.internal.producer.interceptor.ProducerInterceptor;
@@ -26,7 +24,7 @@ import com.jd.joyqueue.client.internal.producer.transport.ProducerClientManager;
 import com.jd.joyqueue.toolkit.service.Service;
 
 import java.util.List;
-import java.util.concurrent.Future;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -110,42 +108,22 @@ public class MessageProducerWrapper extends Service implements MessageProducer {
     }
 
     @Override
-    public void sendAsync(ProduceMessage message, AsyncProduceCallback callback) {
-        delegate.sendAsync(message, callback);
-    }
-
-    @Override
-    public void sendAsync(ProduceMessage message, long timeout, TimeUnit timeoutUnit, AsyncProduceCallback callback) {
-        delegate.sendAsync(message, timeout, timeoutUnit, callback);
-    }
-
-    @Override
-    public void batchSendAsync(List<ProduceMessage> messages, AsyncBatchProduceCallback callback) {
-        delegate.batchSendAsync(messages, callback);
-    }
-
-    @Override
-    public void batchSendAsync(List<ProduceMessage> messages, long timeout, TimeUnit timeoutUnit, AsyncBatchProduceCallback callback) {
-        delegate.batchSendAsync(messages, timeout, timeoutUnit, callback);
-    }
-
-    @Override
-    public Future<SendResult> sendAsync(ProduceMessage message) {
+    public CompletableFuture<SendResult> sendAsync(ProduceMessage message) {
         return delegate.sendAsync(message);
     }
 
     @Override
-    public Future<SendResult> sendAsync(ProduceMessage message, long timeout, TimeUnit timeoutUnit) {
+    public CompletableFuture<SendResult> sendAsync(ProduceMessage message, long timeout, TimeUnit timeoutUnit) {
         return delegate.sendAsync(message, timeout, timeoutUnit);
     }
 
     @Override
-    public Future<List<SendResult>> batchSendAsync(List<ProduceMessage> messages) {
+    public CompletableFuture<List<SendResult>> batchSendAsync(List<ProduceMessage> messages) {
         return delegate.batchSendAsync(messages);
     }
 
     @Override
-    public Future<List<SendResult>> batchSendAsync(List<ProduceMessage> messages, long timeout, TimeUnit timeoutUnit) {
+    public CompletableFuture<List<SendResult>> batchSendAsync(List<ProduceMessage> messages, long timeout, TimeUnit timeoutUnit) {
         return delegate.batchSendAsync(messages, timeout, timeoutUnit);
     }
 

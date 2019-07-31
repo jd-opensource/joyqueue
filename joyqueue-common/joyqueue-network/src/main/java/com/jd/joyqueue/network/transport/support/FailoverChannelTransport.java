@@ -32,7 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.SocketAddress;
-import java.util.concurrent.Future;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * FailoverChannelTransport
@@ -138,12 +138,12 @@ public class FailoverChannelTransport implements ChannelTransport {
     }
 
     @Override
-    public Future<?> async(Command command) throws TransportException {
+    public CompletableFuture<?> async(Command command) throws TransportException {
         return delegate.async(command);
     }
 
     @Override
-    public Future<?> async(Command command, long timeout) throws TransportException {
+    public CompletableFuture<?> async(Command command, long timeout) throws TransportException {
         return delegate.async(command, timeout);
     }
 

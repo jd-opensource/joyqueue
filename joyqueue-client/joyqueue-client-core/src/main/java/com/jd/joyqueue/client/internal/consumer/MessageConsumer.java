@@ -13,7 +13,6 @@
  */
 package com.jd.joyqueue.client.internal.consumer;
 
-import com.jd.joyqueue.client.internal.consumer.callback.ConsumerListener;
 import com.jd.joyqueue.client.internal.consumer.domain.ConsumeMessage;
 import com.jd.joyqueue.client.internal.consumer.domain.ConsumeReply;
 import com.jd.joyqueue.client.internal.consumer.interceptor.ConsumerInterceptor;
@@ -22,6 +21,7 @@ import com.jd.joyqueue.exception.JoyQueueCode;
 import com.jd.joyqueue.toolkit.lang.LifeCycle;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -66,9 +66,9 @@ public interface MessageConsumer extends LifeCycle {
 
     List<ConsumeMessage> poll(long timeout, TimeUnit timeoutUnit);
 
-    void pollAsync(ConsumerListener listener);
+    CompletableFuture<List<ConsumeMessage>> pollAsync();
 
-    void pollAsync(long timeout, TimeUnit timeoutUnit, ConsumerListener listener);
+    CompletableFuture<List<ConsumeMessage>> pollAsync(long timeout, TimeUnit timeoutUnit);
 
     // poll partition
     ConsumeMessage pollPartitionOnce(short partition);
@@ -87,13 +87,15 @@ public interface MessageConsumer extends LifeCycle {
 
     List<ConsumeMessage> pollPartition(short partition, long index, long timeout, TimeUnit timeoutUnit);
 
-    void pollPartitionAsync(short partition, ConsumerListener listener);
+    // async
 
-    void pollPartitionAsync(short partition, long timeout, TimeUnit timeoutUnit, ConsumerListener listener);
+    CompletableFuture<List<ConsumeMessage>> pollPartitionAsync(short partition);
 
-    void pollPartitionAsync(short partition, long index, ConsumerListener listener);
+    CompletableFuture<List<ConsumeMessage>> pollPartitionAsync(short partition, long timeout, TimeUnit timeoutUnit);
 
-    void pollPartitionAsync(short partition, long index, long timeout, TimeUnit timeoutUnit, ConsumerListener listener);
+    CompletableFuture<List<ConsumeMessage>> pollPartitionAsync(short partition, long index);
+
+    CompletableFuture<List<ConsumeMessage>> pollPartitionAsync(short partition, long index, long timeout, TimeUnit timeoutUnit);
 
     // reply
     JoyQueueCode reply(List<ConsumeReply> replyList);

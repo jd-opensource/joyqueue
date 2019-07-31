@@ -18,7 +18,7 @@ import com.jd.joyqueue.network.transport.command.CommandCallback;
 import com.jd.joyqueue.network.transport.exception.TransportException;
 
 import java.net.SocketAddress;
-import java.util.concurrent.Future;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Transport
@@ -72,7 +72,7 @@ public interface Transport {
      * @param command  命令
      * @throws TransportException
      */
-    Future<?> async(Command command) throws TransportException;
+    CompletableFuture<?> async(Command command) throws TransportException;
 
     /**
      * 异步发送，需要应答
@@ -81,7 +81,7 @@ public interface Transport {
      * @param timeout  超时
      * @throws TransportException
      */
-    Future<?> async(Command command, long timeout) throws TransportException;
+    CompletableFuture<?> async(Command command, long timeout) throws TransportException;
 
     /**
      * 单向发送，不需要应答
@@ -134,6 +134,7 @@ public interface Transport {
 
     /**
      * 设置属性
+     * @return
      */
     void attr( TransportAttribute attribute);
 
