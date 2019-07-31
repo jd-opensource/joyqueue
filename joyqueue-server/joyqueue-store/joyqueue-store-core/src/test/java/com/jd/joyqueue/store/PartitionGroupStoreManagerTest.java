@@ -556,8 +556,8 @@ public class PartitionGroupStoreManagerTest {
         if (null == virtualThreadPool) virtualThreadPool = new VirtualThreadExecutor(500, 100, 10, 1000, 4);
         if (null == bufferPool) {
             bufferPool = PreloadBufferPool.getInstance();
-            bufferPool.addPreLoad(128 * 1024 * 1024, 2, 4);
-            bufferPool.addPreLoad(10 * 1024 * 1024, 2, 4);
+            bufferPool.addPreLoad(128 * 1024 * 1024, 0, 0);
+            bufferPool.addPreLoad(10 * 1024 * 1024, 0, 0);
         }
 
         this.store = new PartitionGroupStoreManager(topic, partitionGroup, groupBase, new PartitionGroupStoreManager.Config(),
