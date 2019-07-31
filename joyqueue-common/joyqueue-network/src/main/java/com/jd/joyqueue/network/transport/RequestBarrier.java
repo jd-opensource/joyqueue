@@ -27,6 +27,7 @@ import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * RequestBarrier
@@ -43,20 +44,13 @@ public class RequestBarrier {
     private Semaphore asyncSemaphore;
     // 存放同步和异步命令应答
     private Map<Integer, ResponseFuture> futures = new ConcurrentHashMap<Integer, ResponseFuture>(200);
-    private Timer clearTimer;
+    // 清理时钟
+    private AtomicReference<Timer> clearTimer = new AtomicReference<>();
 
     public RequestBarrier(TransportConfig config) {
         this.config = config;
         this.onewaySemaphore = config.getMaxOneway() > 0 ? new Semaphore(config.getMaxOneway(), true) : null;
         this.asyncSemaphore = config.getMaxAsync() > 0 ? new Semaphore(config.getMaxAsync(), true) : null;
-        this.clearTimer = new Timer("joyqueue-barrier-clear-timer");
-
-        this.clearTimer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                evict();
-            }
-        }, config.getClearInterval(), config.getClearInterval());
     }
 
     /**
@@ -85,7 +79,25 @@ public class RequestBarrier {
      * @param future    异步调用
      */
     public void put(final int requestId, final ResponseFuture future) {
+        startClearTimerIfNecessary();
         futures.put(requestId, future);
+    }
+
+    protected void startClearTimerIfNecessary() {
+        if (this.clearTimer.get() != null) {
+            return;
+        }
+        Timer clearTimer = new Timer("joyqueue-barrier-clear-timer");
+        if (this.clearTimer.compareAndSet(null, clearTimer)) {
+            clearTimer.scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
+                    evict();
+                }
+            }, config.getClearInterval(), config.getClearInterval());
+        } else {
+            clearTimer.cancel();
+        }
     }
 
     /**
@@ -140,7 +152,10 @@ public class RequestBarrier {
             }
         }
         futures.clear();
-        clearTimer.cancel();
+        if (clearTimer.get() != null) {
+            clearTimer.get().cancel();
+            clearTimer.set(null);
+        }
     }
 
     /**
