@@ -23,7 +23,7 @@ import java.util.List;
  * email: gaohaoxiang@jd.com
  * date: 2018/12/10
  */
-public interface ConsumerListener {
+public interface PollerListener {
 
     void onMessage(List<ConsumeMessage> messages);
 

@@ -30,7 +30,7 @@ import com.jd.joyqueue.toolkit.service.Service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Future;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * MessageSenderWrapper
@@ -71,10 +71,10 @@ public class MessageSenderWrapper extends Service implements MessageSender {
     }
 
     @Override
-    public Future<SendBatchResultData> batchSendAsync(BrokerNode brokerNode, String topic,
-                                                      String app, String txId,
-                                                      List<ProduceMessage> messages, QosLevel qosLevel,
-                                                      long produceTimeout, long timeout) {
+    public CompletableFuture<SendBatchResultData> batchSendAsync(BrokerNode brokerNode, String topic,
+                                                                 String app, String txId,
+                                                                 List<ProduceMessage> messages, QosLevel qosLevel,
+                                                                 long produceTimeout, long timeout) {
         return delegate.batchSendAsync(brokerNode, topic, app, txId, messages, qosLevel, produceTimeout, timeout);
     }
 
@@ -127,10 +127,10 @@ public class MessageSenderWrapper extends Service implements MessageSender {
     }
 
     @Override
-    public Future<Map<String, SendBatchResultData>> batchSendAsync(BrokerNode brokerNode, String app,
-                                                                   String txId, Map<String, List<ProduceMessage>> messages,
-                                                                   QosLevel qosLevel, long produceTimeout,
-                                                                   long timeout) {
+    public CompletableFuture<Map<String, SendBatchResultData>> batchSendAsync(BrokerNode brokerNode, String app,
+                                                                              String txId, Map<String, List<ProduceMessage>> messages,
+                                                                              QosLevel qosLevel, long produceTimeout,
+                                                                              long timeout) {
         return delegate.batchSendAsync(brokerNode, app, txId, messages, qosLevel, produceTimeout, timeout);
     }
 
