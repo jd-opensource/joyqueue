@@ -75,4 +75,10 @@ public class DefaultTransportServer extends TransportServerSupport {
             }
         };
     }
+
+    @Override
+    protected void doStop() {
+        requestBarrier.clear();
+        super.doStop();
+    }
 }

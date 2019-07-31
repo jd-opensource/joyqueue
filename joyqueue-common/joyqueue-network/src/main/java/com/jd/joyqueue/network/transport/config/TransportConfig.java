@@ -78,6 +78,8 @@ public class TransportConfig {
     private int expireTime = 0;
     // 重试
     private RetryPolicy retryPolicy;
+    // 清理间隔
+    private int clearInterval = 1000 * 3;
 
 
     public RetryPolicy getRetryPolicy() {
@@ -289,5 +291,13 @@ public class TransportConfig {
 
     public String getIoThreadName() {
         return ioThreadName;
+    }
+
+    public void setClearInterval(int clearInterval) {
+        this.clearInterval = clearInterval;
+    }
+
+    public int getClearInterval() {
+        return clearInterval;
     }
 }

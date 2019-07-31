@@ -38,8 +38,6 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 
 import java.net.SocketAddress;
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * DefaultTransportClient
@@ -54,7 +52,6 @@ public class DefaultTransportClient extends TransportClientSupport implements Tr
     private RequestHandler requestHandler;
     private ResponseHandler responseHandler;
     private EventBus<TransportEvent> transportEventBus;
-    private Timer clearTimer;
 
     public DefaultTransportClient(ClientConfig config, Codec codec, final RequestBarrier requestBarrier,
                                   RequestHandler requestHandler, ResponseHandler responseHandler,
@@ -65,15 +62,6 @@ public class DefaultTransportClient extends TransportClientSupport implements Tr
         this.requestHandler = requestHandler;
         this.responseHandler = responseHandler;
         this.transportEventBus = transportEventBus;
-        this.clearTimer = new Timer("joyqueue-client-clear-timer");
-
-        // TODO 延迟和调度时间
-        this.clearTimer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                requestBarrier.evict();
-            }
-        }, 1000 * 3, 1000);
         try {
             super.start();
         } catch (Exception e) {
@@ -130,7 +118,6 @@ public class DefaultTransportClient extends TransportClientSupport implements Tr
     @Override
     protected void doStop() {
         requestBarrier.clear();
-        clearTimer.cancel();
         super.doStop();
     }
 }

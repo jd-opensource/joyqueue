@@ -22,6 +22,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -41,11 +43,20 @@ public class RequestBarrier {
     private Semaphore asyncSemaphore;
     // 存放同步和异步命令应答
     private Map<Integer, ResponseFuture> futures = new ConcurrentHashMap<Integer, ResponseFuture>(200);
+    private Timer clearTimer;
 
     public RequestBarrier(TransportConfig config) {
         this.config = config;
         this.onewaySemaphore = config.getMaxOneway() > 0 ? new Semaphore(config.getMaxOneway(), true) : null;
         this.asyncSemaphore = config.getMaxAsync() > 0 ? new Semaphore(config.getMaxAsync(), true) : null;
+        this.clearTimer = new Timer("joyqueue-barrier-clear-timer");
+
+        this.clearTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                evict();
+            }
+        }, config.getClearInterval(), config.getClearInterval());
     }
 
     /**
@@ -129,6 +140,7 @@ public class RequestBarrier {
             }
         }
         futures.clear();
+        clearTimer.cancel();
     }
 
     /**
