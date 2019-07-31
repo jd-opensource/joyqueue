@@ -55,12 +55,12 @@ public class ElectionManagerTest {
 
     private String getStoreDir() {
         String property = "java.io.tmpdir";
-        return System.getProperty(property) + "store";
+        return System.getProperty(property) + File.separator + "store";
     }
 
     private String getElectionDir() {
         String property = "java.io.tmpdir";
-        return System.getProperty(property) + "election";
+        return System.getProperty(property) + File.separator + "election";
     }
 
     @Before
