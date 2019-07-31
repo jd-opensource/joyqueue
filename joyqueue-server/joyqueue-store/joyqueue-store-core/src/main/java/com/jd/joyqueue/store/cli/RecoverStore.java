@@ -379,8 +379,6 @@ public class RecoverStore {
             System.out.println("All files will be checked.");
         }
         PreloadBufferPool pool = PreloadBufferPool.getInstance();
-        pool.addPreLoad(StoreConfig.DEFAULT_INDEX_FILE_SIZE, 0, 1);
-        pool.addPreLoad(StoreConfig.DEFAULT_MESSAGE_FILE_SIZE, 0, 1);
 
         PositioningStore<ByteBuffer> logStore =
                 new PositioningStore<>(base, new PositioningStore.Config(StoreConfig.DEFAULT_MESSAGE_FILE_SIZE),

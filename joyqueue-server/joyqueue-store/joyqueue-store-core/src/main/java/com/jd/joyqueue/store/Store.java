@@ -158,9 +158,9 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
 
     public void checkOrCreateBase() {
         if (!base.exists()) {
-            if (!base.mkdirs()) throw new StoreInitializeException();
+            if (!base.mkdirs()) throw new StoreInitializeException(String.format("Failed to create directory: %s.", base.getAbsolutePath()));
         } else {
-            if (!base.isDirectory()) throw new StoreInitializeException();
+            if (!base.isDirectory()) throw new StoreInitializeException(String.format("Failed to create directory: %s! Cause: file exists!", base.getAbsolutePath()));
         }
     }
 
