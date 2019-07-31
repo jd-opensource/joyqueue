@@ -36,6 +36,11 @@ public class BrokerRestUrlMappingServiceImpl implements BrokerRestUrlMappingServ
 
     /** message preview path  */
     private static final String pendingByteMessagePath="/manage/topic/%s/app/%s/message/pending?count=%s";
+
+
+    /** message preview path  */
+    private static final String previewMessagePath="/manage/topic/%s/app/%s/message/view?count=%s";
+
     private String lastestMessagePath="/manage/topic/%s/app/%s/message/last";
     private String partitoinMessagePath="/manage/topic/%s/app/%s/partition/%d/message";
 

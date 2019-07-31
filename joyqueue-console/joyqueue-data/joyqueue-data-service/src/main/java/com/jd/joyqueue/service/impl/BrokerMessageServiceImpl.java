@@ -76,7 +76,7 @@ public class BrokerMessageServiceImpl implements BrokerMessageService {
                         subscribe.getType()== SubscribeType.PRODUCER?subscribe.getApp().getCode():CodeConverter.convertApp(subscribe.getApp(),
                                 subscribe.getSubscribeGroup()),String.valueOf(count)));
             }
-        },"pendingByteMessage" ," pending message");
+        },"previewMessage" ," pending message");
         Map<String/*request key*/, String/*response*/> resultMap= brokerClusterQuery.get(resultFuture,TIMEOUT,TimeUnit.MILLISECONDS);
         SimplifiedBrokeMessage message;
         RestResponse<List<BrokerMessageInfo>> brokerMessageResponse;
