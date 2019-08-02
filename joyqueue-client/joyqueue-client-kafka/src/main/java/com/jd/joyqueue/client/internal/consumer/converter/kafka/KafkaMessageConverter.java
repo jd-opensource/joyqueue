@@ -159,15 +159,21 @@ public class KafkaMessageConverter implements MessageConverter {
         result.setMsgIndexNo(KafkaBufferUtils.readVarint(buffer) + message.getMsgIndexNo());
 
         byte[] businessId = KafkaBufferUtils.readVarBytes(buffer);
+        result.setTopic(message.getTopic());
         result.setBusinessId((ArrayUtils.isEmpty(businessId) ? null : new String(businessId, Charsets.UTF_8)));
         result.setBody(KafkaBufferUtils.readVarBytes(buffer));
 
+        result.setApp(message.getApp());
         result.setPartition(message.getPartition());
         result.setAttributes(message.getAttributes());
         result.setStartTime(message.getStartTime());
         result.setFlag(message.getFlag());
         result.setSource(SourceType.KAFKA.getValue());
         result.setClientIp(message.getClientIp());
+        result.setPriority(message.getPriority());
+        result.setOrdered(message.isOrdered());
+        result.setStartTime(message.getStartTime());
+        result.setStoreTime(message.getStoreTime());
         result.setCompressed(false);
         result.setBatch(true);
 
