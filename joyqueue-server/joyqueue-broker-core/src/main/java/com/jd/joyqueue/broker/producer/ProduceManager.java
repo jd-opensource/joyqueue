@@ -182,7 +182,7 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
             qosLevel = QosLevel.valueOf(config.getBrokerQosLevel());
         }
         if (config.getBrokerQosLevel(producer.getTopic()) != -1) {
-            qosLevel = QosLevel.valueOf(config.getBrokerQosLevel());
+            qosLevel = QosLevel.valueOf(config.getBrokerQosLevel(producer.getTopic()));
         }
 
         // 写入消息
@@ -222,7 +222,7 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
             qosLevel = QosLevel.valueOf(config.getBrokerQosLevel());
         }
         if (config.getBrokerQosLevel(producer.getTopic()) != -1) {
-            qosLevel = QosLevel.valueOf(config.getBrokerQosLevel());
+            qosLevel = QosLevel.valueOf(config.getBrokerQosLevel(producer.getTopic()));
         }
 
         if (StringUtils.isNotEmpty(txId)) {

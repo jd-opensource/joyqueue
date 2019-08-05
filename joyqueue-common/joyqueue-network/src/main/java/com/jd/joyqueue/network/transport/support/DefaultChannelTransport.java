@@ -136,9 +136,10 @@ public class DefaultChannelTransport implements ChannelTransport {
 
         long sendTimeout = timeout <= 0 ? barrier.getSendTimeout() : timeout;
         // 获取信号量
+        barrier.acquire(RequestBarrier.SemaphoreType.ASYNC, sendTimeout);
+
         try {
             long time = SystemClock.now();
-            barrier.acquire(RequestBarrier.SemaphoreType.ASYNC, sendTimeout);
             time = SystemClock.now() - time;
             sendTimeout = (int) (sendTimeout - time);
             sendTimeout = sendTimeout < 0 ? 0 : sendTimeout;
@@ -156,6 +157,7 @@ public class DefaultChannelTransport implements ChannelTransport {
 
         } catch (Throwable th) {
             logger.warn("Default channel transport async fail, command type is {}", command.getHeader().getType(), th);
+            barrier.release(RequestBarrier.SemaphoreType.ASYNC);
             barrier.remove(command.getHeader().getRequestId());
             command.release();
             throw th;
@@ -164,7 +166,7 @@ public class DefaultChannelTransport implements ChannelTransport {
 
     @Override
     public CompletableFuture<?> async(Command command) throws TransportException {
-        return async(command);
+        return async(command, 0);
     }
 
     @Override
@@ -173,31 +175,9 @@ public class DefaultChannelTransport implements ChannelTransport {
             throw new IllegalArgumentException("command must not be null");
         }
 
-        long sendTimeout = timeout <= 0 ? barrier.getSendTimeout() : timeout;
-        // 获取信号量
-        try {
-            long time = SystemClock.now();
-            barrier.acquire(RequestBarrier.SemaphoreType.ASYNC, sendTimeout);
-            time = SystemClock.now() - time;
-            sendTimeout = (int) (sendTimeout - time);
-            sendTimeout = sendTimeout < 0 ? 0 : sendTimeout;
-
-            // 发送请求
-            CompletableFuture completableFuture = new CompletableFuture();
-            ResponseFuture future =
-                    new ResponseFuture(this, command, sendTimeout, new CompletableFutureCallback(completableFuture), barrier, RequestBarrier.SemaphoreType.ASYNC, null);
-            if (barrier.get(command.getHeader().getRequestId()) != null) {
-                logger.warn("async command(type {}, request id {}) already exist",
-                        command.getHeader().getType(), command.getHeader().getRequestId());
-            }
-            barrier.put(command.getHeader().getRequestId(), future);
-            // 应答回来的时候或超时会自动释放command
-            channel.writeAndFlush(command).addListener(new ResponseListener(future, barrier));
-            return completableFuture;
-        } catch (TransportException e) {
-            command.release();
-            throw e;
-        }
+        CompletableFuture completableFuture = new CompletableFuture();
+        async(command, timeout, new CompletableFutureCallback(completableFuture));
+        return completableFuture;
     }
 
     @Override
@@ -213,8 +193,15 @@ public class DefaultChannelTransport implements ChannelTransport {
 
         // 不需要应答
         command.getHeader().setQosLevel(QosLevel.ONE_WAY);
-
         ResponseFuture future = null;
+
+        long sendTimeout = timeout <= 0 ? barrier.getSendTimeout() : timeout;
+        long time = SystemClock.now();
+        // 获取信号量
+        if (!config.isNonBlockOneway()) {
+            barrier.acquire(RequestBarrier.SemaphoreType.ONEWAY, sendTimeout);
+        }
+
         try {
             // 如果非阻塞，发送完不处理
             if (config.isNonBlockOneway()) {
@@ -222,10 +209,6 @@ public class DefaultChannelTransport implements ChannelTransport {
                 return;
             }
 
-            long sendTimeout = timeout <= 0 ? barrier.getSendTimeout() : timeout;
-            long time = SystemClock.now();
-            // 获取信号量
-            barrier.acquire(RequestBarrier.SemaphoreType.ONEWAY, sendTimeout);
             time = SystemClock.now() - time;
             sendTimeout = (int) (sendTimeout - time);
             sendTimeout = sendTimeout < 0 ? 0 : sendTimeout;
@@ -250,16 +233,22 @@ public class DefaultChannelTransport implements ChannelTransport {
                 }
                 throw TransportException.RequestErrorException.build();
             }
-        } catch (TransportException e) {
-            // 防止在acquireSemaphore获取异常
-            command.release();
-            throw e;
-        } catch (InterruptedException e) {
-            TransportException.InterruptedException ex = TransportException.InterruptedException.build();
-            if (future != null) {
-                future.release(ex, false);
+        } catch (Throwable th) {
+            if (th instanceof TransportException) {
+                // 防止在acquireSemaphore获取异常
+                command.release();
+                throw (TransportException) th;
+            } else if (th instanceof InterruptedException) {
+                TransportException.InterruptedException ex = TransportException.InterruptedException.build();
+                if (future != null) {
+                    future.release(ex, false);
+                }
+                throw ex;
             }
-            throw ex;
+
+            if (!config.isNonBlockOneway()) {
+                barrier.release(RequestBarrier.SemaphoreType.ONEWAY);
+            }
         }
     }
 
