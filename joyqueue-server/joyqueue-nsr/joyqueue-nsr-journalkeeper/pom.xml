@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>joyqueue-nsr</artifactId>
+        <groupId>com.jd.joyqueue</groupId>
+        <version>4.1.0</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>joyqueue-nsr-journalkeeper</artifactId>
+
+    <properties>
+        <journalkeeper.version>0.1-SNAPSHOT</journalkeeper.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.jd.joyqueue</groupId>
+            <artifactId>joyqueue-nsr-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.journalkeeper</groupId>
+            <artifactId>journalkeeper-sql-core</artifactId>
+            <version>${journalkeeper.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.journalkeeper</groupId>
+            <artifactId>journalkeeper-sql-h2</artifactId>
+            <version>${journalkeeper.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.journalkeeper</groupId>
+            <artifactId>journalkeeper-sql-druid</artifactId>
+            <version>${journalkeeper.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.journalkeeper</groupId>
+            <artifactId>journalkeeper-persistence-local</artifactId>
+            <version>${journalkeeper.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.journalkeeper</groupId>
+            <artifactId>journalkeeper-rpc-netty</artifactId>
+            <version>${journalkeeper.version}</version>
+        </dependency>
+    </dependencies>
+</project>

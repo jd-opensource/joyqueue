@@ -93,7 +93,7 @@
         </dependency>
         <dependency>
             <groupId>com.jd.joyqueue</groupId>
-            <artifactId>joyqueue-nsr-ignite</artifactId>
+            <artifactId>joyqueue-nsr-composition</artifactId>
         </dependency>
         <dependency>
             <groupId>com.jd.joyqueue</groupId>

@@ -425,6 +425,11 @@
             </dependency>
             <dependency>
                 <groupId>com.jd.joyqueue</groupId>
+                <artifactId>joyqueue-nsr-composition</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.jd.joyqueue</groupId>
                 <artifactId>joyqueue-broker-monitor-pth</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -705,7 +710,7 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven-surefire-plugin.version}</version>
                     <configuration>
-                        <skipTests>false</skipTests>
+                        <skipTests>true</skipTests>
                     </configuration>
                 </plugin>
                 <plugin>

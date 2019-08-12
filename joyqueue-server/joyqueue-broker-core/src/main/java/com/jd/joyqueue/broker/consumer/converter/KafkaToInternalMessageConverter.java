@@ -162,6 +162,7 @@ public class KafkaToInternalMessageConverter extends AbstractInternalMessageConv
         result.setBusinessId((ArrayUtils.isEmpty(businessId) ? null : new String(businessId, Charsets.UTF_8)));
         result.setBody(KafkaBufferUtils.readVarBytes(buffer));
 
+        result.setApp(message.getApp());
         result.setPartition(message.getPartition());
         result.setAttributes(message.getAttributes());
         result.setStartTime(message.getStartTime());
