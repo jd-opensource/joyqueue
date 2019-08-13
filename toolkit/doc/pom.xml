@@ -19,7 +19,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>toolkit</artifactId>
-        <groupId>com.jd.joyqueue</groupId>
+        <groupId>io.chubao.joyqueue</groupId>
         <version>4.1.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -38,7 +38,7 @@
             <version>1.3.1.1</version>
         </dependency>
         <dependency>
-            <groupId>com.jd.joyqueue</groupId>
+            <groupId>io.chubao.joyqueue</groupId>
             <artifactId>joyqueue-broker-core</artifactId>
         </dependency>
         <dependency>

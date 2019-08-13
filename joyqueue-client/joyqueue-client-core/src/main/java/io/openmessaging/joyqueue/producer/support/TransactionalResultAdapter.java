@@ -13,9 +13,9 @@
  */
 package io.openmessaging.joyqueue.producer.support;
 
-import com.jd.joyqueue.client.internal.producer.MessageProducer;
-import com.jd.joyqueue.client.internal.producer.TransactionMessageProducer;
-import com.jd.joyqueue.client.internal.producer.domain.ProduceMessage;
+import io.chubao.joyqueue.client.internal.producer.MessageProducer;
+import io.chubao.joyqueue.client.internal.producer.TransactionMessageProducer;
+import io.chubao.joyqueue.client.internal.producer.domain.ProduceMessage;
 import io.openmessaging.joyqueue.config.ExceptionConverter;
 import io.openmessaging.joyqueue.producer.message.MessageAdapter;
 import io.openmessaging.message.Message;

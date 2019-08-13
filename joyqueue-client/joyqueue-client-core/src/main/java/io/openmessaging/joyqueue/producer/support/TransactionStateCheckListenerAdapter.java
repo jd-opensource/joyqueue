@@ -13,10 +13,10 @@
  */
 package io.openmessaging.joyqueue.producer.support;
 
-import com.jd.joyqueue.client.internal.producer.callback.TxFeedbackCallback;
-import com.jd.joyqueue.client.internal.producer.domain.ProduceMessage;
-import com.jd.joyqueue.client.internal.producer.domain.TransactionStatus;
-import com.jd.joyqueue.domain.TopicName;
+import io.chubao.joyqueue.client.internal.producer.callback.TxFeedbackCallback;
+import io.chubao.joyqueue.client.internal.producer.domain.ProduceMessage;
+import io.chubao.joyqueue.client.internal.producer.domain.TransactionStatus;
+import io.chubao.joyqueue.domain.TopicName;
 import io.openmessaging.joyqueue.producer.message.MessageAdapter;
 import io.openmessaging.message.Message;
 import io.openmessaging.producer.TransactionStateCheckListener;

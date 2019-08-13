@@ -13,7 +13,7 @@
  */
 package io.openmessaging.joyqueue.extension;
 
-import com.jd.joyqueue.client.internal.metadata.domain.TopicMetadata;
+import io.chubao.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import com.google.common.base.Preconditions;
 import io.openmessaging.extension.Extension;
 import io.openmessaging.extension.QueueMetaData;

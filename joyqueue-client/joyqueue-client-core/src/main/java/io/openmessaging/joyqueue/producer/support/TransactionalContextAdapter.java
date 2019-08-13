@@ -13,7 +13,7 @@
  */
 package io.openmessaging.joyqueue.producer.support;
 
-import com.jd.joyqueue.client.internal.producer.domain.TransactionStatus;
+import io.chubao.joyqueue.client.internal.producer.domain.TransactionStatus;
 import io.openmessaging.producer.TransactionStateCheckListener;
 
 /**

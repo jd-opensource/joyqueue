@@ -19,7 +19,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>joyqueue-web</artifactId>
-        <groupId>com.jd.joyqueue</groupId>
+        <groupId>io.chubao.joyqueue</groupId>
         <version>4.1.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -32,7 +32,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.jd.joyqueue</groupId>
+            <groupId>io.chubao.joyqueue</groupId>
             <artifactId>joyqueue-portal</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -46,7 +46,7 @@
         </dependency>
         <dependency>
             <artifactId>joyqueue-web-springboot-starter</artifactId>
-            <groupId>com.jd.joyqueue</groupId>
+            <groupId>io.chubao.joyqueue</groupId>
             <exclusions>
                 <exclusion>
                     <artifactId>netty-transport</artifactId>
@@ -86,7 +86,7 @@
             <artifactId>spring-beans</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.jd.joyqueue</groupId>
+            <groupId>io.chubao.joyqueue</groupId>
             <artifactId>joyqueue-archive-hbase</artifactId>
             <scope>runtime</scope>
             <exclusions>
@@ -97,7 +97,7 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.jd.joyqueue</groupId>
+            <groupId>io.chubao.joyqueue</groupId>
             <artifactId>joyqueue-data-repository-mybatis</artifactId>
             <scope>runtime</scope>
         </dependency>

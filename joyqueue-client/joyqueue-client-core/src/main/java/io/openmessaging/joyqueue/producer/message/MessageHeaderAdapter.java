@@ -13,7 +13,7 @@
  */
 package io.openmessaging.joyqueue.producer.message;
 
-import com.jd.joyqueue.client.internal.producer.domain.ProduceMessage;
+import io.chubao.joyqueue.client.internal.producer.domain.ProduceMessage;
 import io.openmessaging.message.Header;
 
 /**

@@ -1,2 +1,2 @@
-com.jd.joyqueue.handler.message.AuditLogMessageCodec
-com.jd.joyqueue.handler.message.OperLogMessageCodec
+io.chubao.joyqueue.handler.message.AuditLogMessageCodec
+io.chubao.joyqueue.handler.message.OperLogMessageCodec

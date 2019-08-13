@@ -19,12 +19,11 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>joyqueue-openmessaging</artifactId>
-        <groupId>com.jd.joyqueue</groupId>
+        <groupId>io.chubao.joyqueue</groupId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.openmessaging</groupId>
     <artifactId>openmessaging-spring</artifactId>
     <name>OpenMessaging-Spring</name>
     <description>Spring Support for the OpenMessaging API</description>

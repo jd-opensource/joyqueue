@@ -13,9 +13,9 @@
  */
 package io.openmessaging.joyqueue.consumer.support;
 
-import com.jd.joyqueue.client.internal.consumer.domain.ConsumeReply;
-import com.jd.joyqueue.client.internal.consumer.interceptor.ConsumeContext;
-import com.jd.joyqueue.client.internal.consumer.interceptor.ConsumerInterceptor;
+import io.chubao.joyqueue.client.internal.consumer.domain.ConsumeReply;
+import io.chubao.joyqueue.client.internal.consumer.interceptor.ConsumeContext;
+import io.chubao.joyqueue.client.internal.consumer.interceptor.ConsumerInterceptor;
 import io.openmessaging.interceptor.Context;
 import io.openmessaging.joyqueue.consumer.interceptor.ContextAdapter;
 import io.openmessaging.joyqueue.consumer.message.MessageConverter;

@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  com.jd.joyqueue.springboot.starter.ServiceAutoConfiguration
+  io.chubao.joyqueue.springboot.starter.ServiceAutoConfiguration

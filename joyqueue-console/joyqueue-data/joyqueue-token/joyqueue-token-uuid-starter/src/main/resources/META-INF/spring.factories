@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-com.jd.joyqueue.token.UuidTokenAutoConfiguration
+io.chubao.joyqueue.token.UuidTokenAutoConfiguration

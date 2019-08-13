@@ -12,4 +12,4 @@
 @REM limitations under the License.
 @REM
 
-"%~dp0run-class.bat" com.jd.joyqueue.broker.Launcher
+"%~dp0run-class.bat" io.chubao.joyqueue.broker.Launcher

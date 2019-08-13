@@ -12,7 +12,7 @@ JoyQueue 支持Openmessaging协议，并提供Java版本的原生客户端。此
 
 ```xml
 <dependency>
-    <groupId>com.jd.joyqueue</groupId>
+    <groupId>io.chubao.joyqueue</groupId>
     <artifactId>joyqueue-client-all</artifactId>
     <version>4.1.0</version>
 </dependency>
@@ -132,11 +132,11 @@ public class SimpleConsumerInterceptor {
 
 #### JoyQueue Consumer拦截器
 
-拦截器使用时需要通过spi的方式注册，把实现类添加到META-INF/services/com.jd.joyqueue.client.internal.consumer.interceptor.ConsumerInterceptor里。
+拦截器使用时需要通过spi的方式注册，把实现类添加到META-INF/services/io.chubao.joyqueue.client.internal.consumer.interceptor.ConsumerInterceptor里。
 
 ````java
 // Ordered接口提供getOrder方法，用于指定顺序，可以不实现
-// context还有attributes等可使用，具体看com.jd.joyqueue.client.internal.consumer.interceptor.ConsumeContext
+// context还有attributes等可使用，具体看io.chubao.joyqueue.client.internal.consumer.interceptor.ConsumeContext
 public class JoyQueueSimpleConsumerInterceptor implements ConsumerInterceptor, Ordered {
 
     @Override
@@ -199,11 +199,11 @@ public class SimpleProducerInterceptor {
 
 #### JoyQueue Producer拦截器 
 
-使用时需要通过spi的方式注册，把实现类添加到 META-INF/services/com.jd.joyqueue.client.internal.producer.interceptor.ProducerInterceptor 里。
+使用时需要通过spi的方式注册，把实现类添加到 META-INF/services/io.chubao.joyqueue.client.internal.producer.interceptor.ProducerInterceptor 里。
 
 ````java
 // Ordered接口提供getOrder方法，用于指定顺序，可以不实现
-// context还有attributes等可使用，具体看com.jd.joyqueue.client.internal.producer.interceptor.ProduceContext
+// context还有attributes等可使用，具体看io.chubao.joyqueue.client.internal.producer.interceptor.ProduceContext
 public class JoyQueueSimpleProducerInterceptor implements ProducerInterceptor, Ordered {
 
     @Override
@@ -236,12 +236,12 @@ public class JoyQueueSimpleProducerInterceptor implements ProducerInterceptor, O
 
 ```xml
 <dependency>
-    <groupId>com.jd.joyqueue</groupId>
+    <groupId>io.chubao.joyqueue</groupId>
     <artifactId>joyqueue-client-all</artifactId>
     <version>4.1.0</version>
 </dependency>
 <dependency>
-    <groupId>io.openmessaging</groupId>
+    <groupId>io.chubao.joyqueue</groupId>
     <artifactId>openmessaging-spring</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 </dependency>
@@ -267,7 +267,7 @@ public class JoyQueueSimpleProducerInterceptor implements ProducerInterceptor, O
     <!-- 创建一个consumer实例，由spring创建并管理生命周期，不需要再手动调用bind和start -->
     <!-- queue-name对应需要消费的主题 -->
     <!-- listener需要实现io.openmessaging.consumer.MessageListener或io.openmessaging.consumer.BatchMessageListener接口，对应单条和批量消费 -->
-    <oms:consumer queue-name="test_topic_0" listener="com.jd.joyqueue.client.samples.com.jd.joyqueue.client.samples.spring.SimpleMessageListener"></oms:consumer>
+    <oms:consumer queue-name="test_topic_0" listener="io.chubao.joyqueue.client.samples.io.chubao.joyqueue.client.samples.spring.SimpleMessageListener"></oms:consumer>
     
 </beans>
 ````
@@ -311,7 +311,7 @@ public class SimpleMessageListener implements MessageListener {
 
 ```xml
 <dependency>
-    <groupId>com.jd.joyqueue</groupId>
+    <groupId>io.chubao.joyqueue</groupId>
     <artifactId>joyqueue-client-all</artifactId>
     <version>4.1.0</version>
 </dependency>
@@ -359,7 +359,7 @@ spring.oms.attributes[ACCOUNT_KEY]=test_token
 
 ````java
 @SpringBootApplication
-@ComponentScan("com.jd.joyqueue.client.samples.springboot")
+@ComponentScan("io.chubao.joyqueue.client.samples.springboot")
 public class SpringBootMain implements InitializingBean {
 
     protected static final Logger logger = LoggerFactory.getLogger(SpringBootMain.class);

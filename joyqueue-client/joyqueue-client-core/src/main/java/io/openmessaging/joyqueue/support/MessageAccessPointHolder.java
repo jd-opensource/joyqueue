@@ -13,7 +13,7 @@
  */
 package io.openmessaging.joyqueue.support;
 
-import com.jd.joyqueue.client.internal.MessageAccessPoint;
+import io.chubao.joyqueue.client.internal.MessageAccessPoint;
 
 /**
  * MessageAccessPointHolder

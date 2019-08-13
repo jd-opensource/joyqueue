@@ -19,14 +19,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>joyqueue-docker</artifactId>
-        <groupId>com.jd.joyqueue</groupId>
+        <groupId>io.chubao.joyqueue</groupId>
         <version>4.1.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>docker-web</artifactId>
     <dependencies>
         <dependency>
-            <groupId>com.jd.joyqueue</groupId>
+            <groupId>io.chubao.joyqueue</groupId>
             <artifactId>joyqueue-distribution-web</artifactId>
             <version>${project.parent.version}</version>
             <type>tar.gz</type>
