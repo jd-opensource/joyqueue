@@ -19,7 +19,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>joyqueue-data</artifactId>
-        <groupId>com.jd.joyqueue</groupId>
+        <groupId>io.chubao.joyqueue</groupId>
         <version>4.1.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -29,19 +29,19 @@
     <description>Data access services for admin console</description>
     <dependencies>
         <dependency>
-            <groupId>com.jd.joyqueue</groupId>
+            <groupId>io.chubao.joyqueue</groupId>
             <artifactId>joyqueue-token-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.jd.joyqueue</groupId>
+            <groupId>io.chubao.joyqueue</groupId>
             <artifactId>joyqueue-retry-db-console</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.jd.joyqueue</groupId>
+            <groupId>io.chubao.joyqueue</groupId>
             <artifactId>joyqueue-data-model</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.jd.joyqueue</groupId>
+            <groupId>io.chubao.joyqueue</groupId>
             <artifactId>joyqueue-data-repository-api</artifactId>
         </dependency>
         <dependency>
@@ -90,7 +90,7 @@
             <artifactId>fastjson</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.jd.joyqueue</groupId>
+            <groupId>io.chubao.joyqueue</groupId>
             <artifactId>joyqueue-model</artifactId>
         </dependency>
         <dependency>
@@ -104,7 +104,7 @@
 <!--            <version>1.6.1</version>-->
 <!--        </dependency>-->
         <dependency>
-            <groupId>com.jd.joyqueue</groupId>
+            <groupId>io.chubao.joyqueue</groupId>
             <artifactId>joyqueue-network</artifactId>
         </dependency>
         <dependency>
@@ -112,20 +112,20 @@
             <artifactId>commons-beanutils</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.jd.joyqueue</groupId>
+            <groupId>io.chubao.joyqueue</groupId>
             <artifactId>joyqueue-hbase</artifactId>
         </dependency>
        <dependency>
-            <groupId>com.jd.joyqueue</groupId>
+            <groupId>io.chubao.joyqueue</groupId>
             <artifactId>joyqueue-nsr-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.jd.joyqueue</groupId>
+            <groupId>io.chubao.joyqueue</groupId>
             <artifactId>joyqueue-archive-api</artifactId>
         </dependency>
 <!--        FIXME: 应该依赖joyqueue-archive-api 而不是这个joyqueue-archive-hbase实现-->
         <dependency>
-            <groupId>com.jd.joyqueue</groupId>
+            <groupId>io.chubao.joyqueue</groupId>
             <artifactId>joyqueue-archive-hbase</artifactId>
         </dependency>
 

@@ -14,8 +14,8 @@
 package io.openmessaging.joyqueue.extension;
 
 import com.google.common.collect.Lists;
-import com.jd.joyqueue.client.internal.metadata.domain.PartitionMetadata;
-import com.jd.joyqueue.client.internal.metadata.domain.TopicMetadata;
+import io.chubao.joyqueue.client.internal.metadata.domain.PartitionMetadata;
+import io.chubao.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import io.openmessaging.extension.QueueMetaData;
 
 import java.util.List;

@@ -14,7 +14,7 @@
 package io.openmessaging.joyqueue.consumer.message;
 
 import com.google.common.collect.Lists;
-import com.jd.joyqueue.client.internal.consumer.domain.ConsumeMessage;
+import io.chubao.joyqueue.client.internal.consumer.domain.ConsumeMessage;
 import io.openmessaging.message.Message;
 
 import java.util.List;

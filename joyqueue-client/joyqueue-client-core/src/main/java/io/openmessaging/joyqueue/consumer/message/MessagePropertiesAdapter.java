@@ -13,7 +13,7 @@
  */
 package io.openmessaging.joyqueue.consumer.message;
 
-import com.jd.joyqueue.client.internal.consumer.domain.ConsumeMessage;
+import io.chubao.joyqueue.client.internal.consumer.domain.ConsumeMessage;
 import io.openmessaging.KeyValue;
 
 import java.util.Collections;

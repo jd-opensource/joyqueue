@@ -13,4 +13,4 @@
 # limitations under the License.
 #
 
-exec $(dirname $0)/run-class.sh com.jd.joyqueue.tools.ConsoleProducer "$@"
+exec $(dirname $0)/run-class.sh io.chubao.joyqueue.tools.ConsoleProducer "$@"

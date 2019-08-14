@@ -13,8 +13,8 @@
  */
 package io.openmessaging.joyqueue.consumer.extension;
 
-import com.jd.joyqueue.client.internal.consumer.MessageConsumer;
-import com.jd.joyqueue.client.internal.metadata.domain.TopicMetadata;
+import io.chubao.joyqueue.client.internal.consumer.MessageConsumer;
+import io.chubao.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import io.openmessaging.joyqueue.extension.AbstractExtensionAdapter;
 
 /**

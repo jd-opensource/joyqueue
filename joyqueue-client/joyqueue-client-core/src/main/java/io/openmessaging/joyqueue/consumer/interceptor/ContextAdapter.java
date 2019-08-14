@@ -13,7 +13,7 @@
  */
 package io.openmessaging.joyqueue.consumer.interceptor;
 
-import com.jd.joyqueue.client.internal.consumer.interceptor.ConsumeContext;
+import io.chubao.joyqueue.client.internal.consumer.interceptor.ConsumeContext;
 import io.openmessaging.KeyValue;
 import io.openmessaging.interceptor.Context;
 

@@ -13,4 +13,4 @@
 # limitations under the License.
 #
 
-exec $(dirname $0)/run-class.sh com.jd.joyqueue.store.cli.RecoverStore "$@"
+exec $(dirname $0)/run-class.sh io.chubao.joyqueue.store.cli.RecoverStore "$@"

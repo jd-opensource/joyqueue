@@ -13,8 +13,8 @@
  */
 package io.openmessaging.joyqueue.support;
 
-import com.jd.joyqueue.exception.JoyQueueCode;
-import com.jd.joyqueue.toolkit.service.Service;
+import io.chubao.joyqueue.exception.JoyQueueCode;
+import io.chubao.joyqueue.toolkit.service.Service;
 import io.openmessaging.ServiceLifeState;
 import io.openmessaging.ServiceLifecycle;
 import io.openmessaging.exception.OMSRuntimeException;

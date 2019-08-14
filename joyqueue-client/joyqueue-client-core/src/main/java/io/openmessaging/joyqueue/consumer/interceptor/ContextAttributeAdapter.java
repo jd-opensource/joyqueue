@@ -14,7 +14,7 @@
 package io.openmessaging.joyqueue.consumer.interceptor;
 
 import com.google.common.collect.Sets;
-import com.jd.joyqueue.client.internal.consumer.interceptor.ConsumeContext;
+import io.chubao.joyqueue.client.internal.consumer.interceptor.ConsumeContext;
 import io.openmessaging.KeyValue;
 
 import java.util.Collections;

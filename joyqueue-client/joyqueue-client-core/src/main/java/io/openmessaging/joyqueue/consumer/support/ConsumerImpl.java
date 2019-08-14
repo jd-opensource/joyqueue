@@ -13,10 +13,10 @@
  */
 package io.openmessaging.joyqueue.consumer.support;
 
-import com.jd.joyqueue.client.internal.consumer.MessageConsumer;
-import com.jd.joyqueue.client.internal.consumer.domain.ConsumeMessage;
-import com.jd.joyqueue.client.internal.consumer.domain.ConsumeReply;
-import com.jd.joyqueue.network.command.RetryType;
+import io.chubao.joyqueue.client.internal.consumer.MessageConsumer;
+import io.chubao.joyqueue.client.internal.consumer.domain.ConsumeMessage;
+import io.chubao.joyqueue.client.internal.consumer.domain.ConsumeReply;
+import io.chubao.joyqueue.network.command.RetryType;
 import com.google.common.base.Preconditions;
 import io.openmessaging.consumer.BatchMessageListener;
 import io.openmessaging.consumer.MessageListener;

@@ -1,0 +1,2 @@
+io.chubao.joyqueue.broker.consumer.converter.JoyQueueToInternalMessageConverter
+io.chubao.joyqueue.broker.consumer.converter.KafkaToInternalMessageConverter

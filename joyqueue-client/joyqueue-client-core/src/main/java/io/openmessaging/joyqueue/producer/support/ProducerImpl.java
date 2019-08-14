@@ -15,8 +15,8 @@ package io.openmessaging.joyqueue.producer.support;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.jd.joyqueue.client.internal.producer.MessageProducer;
-import com.jd.joyqueue.client.internal.producer.domain.ProduceMessage;
+import io.chubao.joyqueue.client.internal.producer.MessageProducer;
+import io.chubao.joyqueue.client.internal.producer.domain.ProduceMessage;
 import io.openmessaging.Future;
 import io.openmessaging.exception.OMSRuntimeException;
 import io.openmessaging.extension.Extension;
@@ -78,7 +78,7 @@ public class ProducerImpl extends AbstractServiceLifecycle implements ExtensionP
             Preconditions.checkArgument(message instanceof MessageAdapter, "message is not supported");
 
             MessageAdapter messageAdapter = (MessageAdapter) message;
-            com.jd.joyqueue.client.internal.producer.domain.SendResult sendResult = messageProducer.send(messageAdapter.getProduceMessage());
+            io.chubao.joyqueue.client.internal.producer.domain.SendResult sendResult = messageProducer.send(messageAdapter.getProduceMessage());
             return SendResultConverter.convert(sendResult);
         } catch (Throwable cause) {
             throw handleProduceException(cause);
@@ -94,13 +94,13 @@ public class ProducerImpl extends AbstractServiceLifecycle implements ExtensionP
             MessageAdapter messageAdapter = (MessageAdapter) message;
 
             messageProducer.sendAsync(messageAdapter.getProduceMessage())
-                    .thenApply((result) -> {
-                        future.setValue(result);
-                        return future;
-                    }).exceptionally((cause) -> {
-                future.setThrowable(cause);
-                return future;
-            });
+                    .whenComplete((result, cause) -> {
+                        if (cause == null) {
+                            future.setValue(result);
+                        } else {
+                            future.setThrowable(cause);
+                        }
+                    });
             return future;
         } catch (Throwable cause) {
             throw handleProduceException(cause);
@@ -141,13 +141,13 @@ public class ProducerImpl extends AbstractServiceLifecycle implements ExtensionP
             List<ProduceMessage> produceMessages = checkAndConvertMessage(messages);
 
             messageProducer.batchSendAsync(produceMessages)
-                    .thenApply((result) -> {
-                        future.setValue(SendResultConverter.convert(result.get(0)));
-                        return future;
-                    }).exceptionally((cause) -> {
-                future.setThrowable(cause);
-                return future;
-            });
+                    .whenComplete((result, cause) -> {
+                        if (cause == null) {
+                            future.setValue(result);
+                        } else {
+                            future.setThrowable(cause);
+                        }
+                    });
             return future;
         } catch (Throwable cause) {
             throw handleProduceException(cause);

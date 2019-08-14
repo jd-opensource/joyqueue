@@ -19,7 +19,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>openmessaging-spring-boot</artifactId>
-        <groupId>io.openmessaging</groupId>
+        <groupId>io.chubao.joyqueue</groupId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -30,7 +30,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.openmessaging</groupId>
+            <groupId>io.chubao.joyqueue</groupId>
             <artifactId>openmessaging-spring-boot-autoconfigure</artifactId>
             <version>${project.version}</version>
         </dependency>
