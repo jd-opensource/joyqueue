@@ -25,5 +25,25 @@
             <artifactId>journalkeeper-sql-core</artifactId>
             <version>${journalkeeper.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.journalkeeper</groupId>
+            <artifactId>journalkeeper-sql-h2</artifactId>
+            <version>${journalkeeper.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.journalkeeper</groupId>
+            <artifactId>journalkeeper-sql-druid</artifactId>
+            <version>${journalkeeper.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.journalkeeper</groupId>
+            <artifactId>journalkeeper-persistence-local</artifactId>
+            <version>${journalkeeper.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.journalkeeper</groupId>
+            <artifactId>journalkeeper-rpc-netty</artifactId>
+            <version>${journalkeeper.version}</version>
+        </dependency>
     </dependencies>
 </project>

@@ -1,12 +1,14 @@
 package io.chubao.joyqueue.nsr.composition.service;
 
-import io.chubao.joyqueue.nsr.composition.config.CompositionConfig;
 import io.chubao.joyqueue.domain.PartitionGroup;
 import io.chubao.joyqueue.domain.TopicName;
 import io.chubao.joyqueue.model.PageResult;
 import io.chubao.joyqueue.model.QPageQuery;
+import io.chubao.joyqueue.nsr.composition.config.CompositionConfig;
 import io.chubao.joyqueue.nsr.model.PartitionGroupQuery;
 import io.chubao.joyqueue.nsr.service.PartitionGroupService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -16,6 +18,8 @@ import java.util.List;
  * date: 2019/8/12
  */
 public class CompositionPartitionGroupService implements PartitionGroupService {
+
+    protected final Logger logger = LoggerFactory.getLogger(CompositionPartitionGroupService.class);
 
     private CompositionConfig config;
     private PartitionGroupService ignitePartitionGroupService;
@@ -30,51 +34,106 @@ public class CompositionPartitionGroupService implements PartitionGroupService {
 
     @Override
     public PartitionGroup findByTopicAndGroup(TopicName topic, int group) {
-        return null;
+        if (config.isReadIgnite()) {
+            return ignitePartitionGroupService.findByTopicAndGroup(topic, group);
+        } else {
+            return journalkeeperPartitionGroupService.findByTopicAndGroup(topic, group);
+        }
     }
 
     @Override
     public List<PartitionGroup> getByTopic(TopicName topic) {
-        return null;
+        if (config.isReadIgnite()) {
+            return ignitePartitionGroupService.getByTopic(topic);
+        } else {
+            return journalkeeperPartitionGroupService.getByTopic(topic);
+        }
     }
 
     @Override
     public PartitionGroup getById(String id) {
-        return null;
+        if (config.isReadIgnite()) {
+            return ignitePartitionGroupService.getById(id);
+        } else {
+            return journalkeeperPartitionGroupService.getById(id);
+        }
     }
 
     @Override
     public PartitionGroup get(PartitionGroup model) {
-        return null;
+        if (config.isReadIgnite()) {
+            return ignitePartitionGroupService.get(model);
+        } else {
+            return journalkeeperPartitionGroupService.get(model);
+        }
     }
 
     @Override
     public void addOrUpdate(PartitionGroup partitionGroup) {
-
+        if (config.isWriteIgnite()) {
+            ignitePartitionGroupService.addOrUpdate(partitionGroup);
+        }
+        if (config.isWriteJournalkeeper()) {
+            try {
+                journalkeeperPartitionGroupService.addOrUpdate(partitionGroup);
+            } catch (Exception e) {
+                logger.error("addOrUpdate journalkeeper exception, params: {}", partitionGroup, e);
+            }
+        }
     }
 
     @Override
     public void deleteById(String id) {
-
+        if (config.isWriteIgnite()) {
+            ignitePartitionGroupService.deleteById(id);
+        }
+        if (config.isWriteJournalkeeper()) {
+            try {
+                journalkeeperPartitionGroupService.deleteById(id);
+            } catch (Exception e) {
+                logger.error("deleteById journalkeeper exception, params: {}", id, e);
+            }
+        }
     }
 
     @Override
     public void delete(PartitionGroup model) {
-
+        if (config.isWriteIgnite()) {
+            ignitePartitionGroupService.delete(model);
+        }
+        if (config.isWriteJournalkeeper()) {
+            try {
+                journalkeeperPartitionGroupService.delete(model);
+            } catch (Exception e) {
+                logger.error("delete journalkeeper exception, params: {}", model, e);
+            }
+        }
     }
 
     @Override
     public List<PartitionGroup> list() {
-        return null;
+        if (config.isReadIgnite()) {
+            return ignitePartitionGroupService.list();
+        } else {
+            return journalkeeperPartitionGroupService.list();
+        }
     }
 
     @Override
     public List<PartitionGroup> list(PartitionGroupQuery query) {
-        return null;
+        if (config.isReadIgnite()) {
+            return ignitePartitionGroupService.list(query);
+        } else {
+            return journalkeeperPartitionGroupService.list(query);
+        }
     }
 
     @Override
     public PageResult<PartitionGroup> pageQuery(QPageQuery<PartitionGroupQuery> pageQuery) {
-        return null;
+        if (config.isReadIgnite()) {
+            return ignitePartitionGroupService.pageQuery(pageQuery);
+        } else {
+            return journalkeeperPartitionGroupService.pageQuery(pageQuery);
+        }
     }
 }

@@ -1,6 +1,10 @@
 package io.chubao.joyqueue.nsr.composition;
 
 import com.google.common.base.Preconditions;
+import com.jd.laf.extension.Extension;
+import com.jd.laf.extension.ExtensionPoint;
+import com.jd.laf.extension.ExtensionPointLazy;
+import io.chubao.joyqueue.nsr.ServiceProvider;
 import io.chubao.joyqueue.nsr.composition.config.CompositionConfig;
 import io.chubao.joyqueue.nsr.composition.service.CompositionAppTokenService;
 import io.chubao.joyqueue.nsr.composition.service.CompositionBrokerService;
@@ -12,10 +16,7 @@ import io.chubao.joyqueue.nsr.composition.service.CompositionPartitionGroupRepli
 import io.chubao.joyqueue.nsr.composition.service.CompositionPartitionGroupService;
 import io.chubao.joyqueue.nsr.composition.service.CompositionProducerService;
 import io.chubao.joyqueue.nsr.composition.service.CompositionTopicService;
-import com.jd.laf.extension.Extension;
-import com.jd.laf.extension.ExtensionPoint;
-import com.jd.laf.extension.ExtensionPointLazy;
-import io.chubao.joyqueue.nsr.ServiceProvider;
+import io.chubao.joyqueue.nsr.message.Messenger;
 import io.chubao.joyqueue.nsr.service.AppTokenService;
 import io.chubao.joyqueue.nsr.service.BrokerService;
 import io.chubao.joyqueue.nsr.service.ConfigService;
@@ -173,6 +174,14 @@ public class CompositionServiceProvider extends Service implements ServiceProvid
             return (T) compositionProducerService;
         } else if (clazz.equals(TopicService.class)) {
             return (T) compositionTopicService;
+        } else if (clazz.equals(Messenger.class)) {
+            if (igniteServiceProvider != null) {
+                return igniteServiceProvider.getService((Class<T>) Messenger.class);
+            } else if (journalkeeperServiceProvider != null) {
+                return journalkeeperServiceProvider.getService((Class<T>) Messenger.class);
+            } else if (serviceProvider != null) {
+                return serviceProvider.getService((Class<T>) Messenger.class);
+            }
         }
         throw new UnsupportedOperationException(clazz.getName());
     }

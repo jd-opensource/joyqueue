@@ -36,7 +36,7 @@ public class CompositionConfig {
     }
 
     public boolean isWriteIgnite() {
-        return getWriteSource().equalsIgnoreCase("ignite");
+        return isWriteAll() || getWriteSource().equalsIgnoreCase("ignite");
     }
 
     public boolean isReadJournalkeeper() {
@@ -44,6 +44,6 @@ public class CompositionConfig {
     }
 
     public boolean isWriteJournalkeeper() {
-        return getReadSource().equalsIgnoreCase("journalkeeper");
+        return isWriteAll() || getReadSource().equalsIgnoreCase("journalkeeper");
     }
 }

@@ -934,6 +934,7 @@ public class ClusterManager extends Service {
                             updateProducerCache(topicName);
                             // 补偿订阅事件
                             compensateAddConsumeEvent(topicName);
+                            compensateAddProduceEvent(topicName);
                         }
                     }
                 } catch (Exception e) {
@@ -1098,6 +1099,33 @@ public class ClusterManager extends Service {
         }
 
         /**
+         * 补偿生产
+         * @param topicName
+         */
+        private void compensateAddProduceEvent(TopicName topicName) {
+            List<Producer> producerByTopic = nameService.getProducerByTopic(topicName);
+            ConcurrentHashMap<String, CacheProducer> localProducerCache = producerCache.get(topicName.getFullName());
+            producerByTopic.stream().forEach(producer -> {
+                if (producer != null) {
+                    String app = producer.getApp();
+                    if (!localProducerCache.contains(app)) {
+                        // 如果本地缓存不包含这个订阅关系，则补偿一个订阅关系事件
+                        ProducerEvent producerEvent = new ProducerEvent();
+                        producerEvent.setEventType(EventType.ADD_PRODUCER);
+                        producerEvent.setApp(app);
+                        producerEvent.setTopic(topicName);
+
+                        // 添加订阅事件
+                        eventBus.add(producerEvent);
+                    }
+
+                    // 添加到本地缓存
+                    localProducerCache.put(app, new CacheProducer(producer));
+                }
+            });
+        }
+
+        /**
          * 补偿订阅事件
          * </br>
          * 远程拉取主题的所有订阅者和本地缓存对比，如果本地缓存没有，则补偿一个订阅事件
@@ -1118,10 +1146,10 @@ public class ClusterManager extends Service {
 
                         // 添加订阅事件
                         eventBus.add(consumerEvent);
-
-                        // 添加到本地缓存
-                        localConsumeCache.put(app, new CacheConsumer(consumer));
                     }
+
+                    // 添加到本地缓存
+                    localConsumeCache.put(app, new CacheConsumer(consumer));
                 }
             });
         }

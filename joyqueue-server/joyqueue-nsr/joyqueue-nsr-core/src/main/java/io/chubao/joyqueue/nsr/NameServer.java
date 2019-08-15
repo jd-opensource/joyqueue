@@ -375,6 +375,10 @@ public class NameServer extends Service implements NameService, PropertySupplier
 
     @Override
     public TopicConfig getTopicConfig(TopicName topic) {
+        // TODO 临时
+        if (true) {
+            return reloadTopicConfig(topic);
+        }
         TopicConfig topicConfig = metaCache.topicConfigs.get(topic);
         if (null != topicConfig) {
             return topicConfig;
