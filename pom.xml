@@ -17,7 +17,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>io.chubao.joyqueue</groupId>
+    <groupId>io.chubao</groupId>
     <version>4.1.0</version>
     <artifactId>joyqueue</artifactId>
     <packaging>pom</packaging>
@@ -128,47 +128,47 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>io.chubao.joyqueue</groupId>
+                <groupId>io.chubao</groupId>
                 <artifactId>joyqueue-data-model</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao.joyqueue</groupId>
+                <groupId>io.chubao</groupId>
                 <artifactId>joyqueue-service-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao.joyqueue</groupId>
+                <groupId>io.chubao</groupId>
                 <artifactId>joyqueue-toolkit</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao.joyqueue</groupId>
+                <groupId>io.chubao</groupId>
                 <artifactId>joyqueue-network</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao.joyqueue</groupId>
+                <groupId>io.chubao</groupId>
                 <artifactId>joyqueue-archive-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao.joyqueue</groupId>
+                <groupId>io.chubao</groupId>
                 <artifactId>joyqueue-archive-hbase</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao.joyqueue</groupId>
+                <groupId>io.chubao</groupId>
                 <artifactId>joyqueue-data-repository-mybatis</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao.joyqueue</groupId>
+                <groupId>io.chubao</groupId>
                 <artifactId>joyqueue-retry-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao.joyqueue</groupId>
+                <groupId>io.chubao</groupId>
                 <artifactId>joyqueue-retry-db-console</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -178,37 +178,37 @@
                 <version>${metrics.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao.joyqueue</groupId>
+                <groupId>io.chubao</groupId>
                 <artifactId>joyqueue-token-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao.joyqueue</groupId>
+                <groupId>io.chubao</groupId>
                 <artifactId>joyqueue-retry-h2</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao.joyqueue</groupId>
+                <groupId>io.chubao</groupId>
                 <artifactId>joyqueue-retry-remote</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao.joyqueue</groupId>
+                <groupId>io.chubao</groupId>
                 <artifactId>joyqueue-web-handler</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao.joyqueue</groupId>
+                <groupId>io.chubao</groupId>
                 <artifactId>joyqueue-portal</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <artifactId>joyqueue-web-springboot-starter</artifactId>
-                <groupId>io.chubao.joyqueue</groupId>
+                <groupId>io.chubao</groupId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao.joyqueue</groupId>
+                <groupId>io.chubao</groupId>
                 <artifactId>joyqueue-model</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -228,12 +228,12 @@
                 <version>${laf-extention.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao.joyqueue</groupId>
+                <groupId>io.chubao</groupId>
                 <artifactId>joyqueue-store-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao.joyqueue</groupId>
+                <groupId>io.chubao</groupId>
                 <artifactId>joyqueue-token-uuid-starter</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -253,67 +253,67 @@
                 <version>${laf-vertx.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao.joyqueue</groupId>
+                <groupId>io.chubao</groupId>
                 <artifactId>joyqueue-security</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao.joyqueue</groupId>
+                <groupId>io.chubao</groupId>
                 <artifactId>joyqueue-broker-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao.joyqueue</groupId>
+                <groupId>io.chubao</groupId>
                 <artifactId>joyqueue-broker-protocol</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao.joyqueue</groupId>
+                <groupId>io.chubao</groupId>
                 <artifactId>joyqueue-broker-kafka</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao.joyqueue</groupId>
+                <groupId>io.chubao</groupId>
                 <artifactId>joyqueue-broker-mqtt</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao.joyqueue</groupId>
+                <groupId>io.chubao</groupId>
                 <artifactId>joyqueue-server-runtime</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao.joyqueue</groupId>
+                <groupId>io.chubao</groupId>
                 <artifactId>joyqueue-client-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao.joyqueue</groupId>
+                <groupId>io.chubao</groupId>
                 <artifactId>joyqueue-client-core-shaded</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao.joyqueue</groupId>
+                <groupId>io.chubao</groupId>
                 <artifactId>joyqueue-client-all-shaded</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao.joyqueue</groupId>
+                <groupId>io.chubao</groupId>
                 <artifactId>joyqueue-client-kafka</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao.joyqueue</groupId>
+                <groupId>io.chubao</groupId>
                 <artifactId>joyqueue-hbase</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao.joyqueue</groupId>
+                <groupId>io.chubao</groupId>
                 <artifactId>joyqueue-data-service</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao.joyqueue</groupId>
+                <groupId>io.chubao</groupId>
                 <artifactId>joyqueue-data-repository-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -399,42 +399,42 @@
             </dependency>
 
             <dependency>
-                <groupId>io.chubao.joyqueue</groupId>
+                <groupId>io.chubao</groupId>
                 <artifactId>joyqueue-datasource-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao.joyqueue</groupId>
+                <groupId>io.chubao</groupId>
                 <artifactId>joyqueue-token-uuid</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao.joyqueue</groupId>
+                <groupId>io.chubao</groupId>
                 <artifactId>joyqueue-datasource-hikaricp</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao.joyqueue</groupId>
+                <groupId>io.chubao</groupId>
                 <artifactId>joyqueue-nsr-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao.joyqueue</groupId>
+                <groupId>io.chubao</groupId>
                 <artifactId>joyqueue-nsr-ignite</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao.joyqueue</groupId>
+                <groupId>io.chubao</groupId>
                 <artifactId>joyqueue-broker-monitor-pth</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao.joyqueue</groupId>
+                <groupId>io.chubao</groupId>
                 <artifactId>joyqueue-store-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao.joyqueue</groupId>
+                <groupId>io.chubao</groupId>
                 <artifactId>joyqueue-client-all</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -582,12 +582,12 @@
                 <version>${commons-logging.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao.joyqueue</groupId>
+                <groupId>io.chubao</groupId>
                 <artifactId>openmessaging-spring</artifactId>
                 <version>${openmessaging-spring.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao.joyqueue</groupId>
+                <groupId>io.chubao</groupId>
                 <artifactId>openmessaging-spring-boot-starter</artifactId>
                 <version>${openmessaging-spring.version}</version>
             </dependency>
