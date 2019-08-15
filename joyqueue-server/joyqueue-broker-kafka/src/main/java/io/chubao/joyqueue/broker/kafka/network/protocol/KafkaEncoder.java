@@ -13,8 +13,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * kafka编码
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/21
  */
 public class KafkaEncoder extends DefaultEncoder {

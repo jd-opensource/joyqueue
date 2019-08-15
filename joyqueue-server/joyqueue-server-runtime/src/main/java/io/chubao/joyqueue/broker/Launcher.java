@@ -5,8 +5,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Launcher
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/27
  */
 public class Launcher {

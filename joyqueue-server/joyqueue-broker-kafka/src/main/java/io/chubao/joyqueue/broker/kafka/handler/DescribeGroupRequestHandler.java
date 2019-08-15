@@ -14,8 +14,8 @@ import java.util.List;
 
 /**
  * DescribeGroupRequestHandler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/5
  */
 public class DescribeGroupRequestHandler extends AbstractKafkaCommandHandler implements KafkaContextAware {

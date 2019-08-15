@@ -5,8 +5,8 @@ import java.util.Map;
 
 /**
  * StringResponse
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/28
  */
 public class StringResponse {

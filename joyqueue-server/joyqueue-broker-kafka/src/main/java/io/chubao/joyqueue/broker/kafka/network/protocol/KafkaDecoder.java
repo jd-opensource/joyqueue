@@ -12,8 +12,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * kafka解码
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/21
  */
 public class KafkaDecoder extends DefaultDecoder {

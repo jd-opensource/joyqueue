@@ -25,8 +25,8 @@ import java.util.Map;
 
 /**
  * TransactionCompletionHandler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/19
  */
 public class TransactionSegmentCompletionHandler {

@@ -10,8 +10,8 @@ import io.chubao.joyqueue.toolkit.concurrent.EventBus;
 
 /**
  * BrokerTransportServerFactory
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/9/21
  */
 public class BrokerTransportServerFactory extends DefaultTransportServerFactory {

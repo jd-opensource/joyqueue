@@ -26,8 +26,8 @@ import java.util.Map;
 
 /**
  * FetchIndexRequestHandler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/13
  */
 public class FetchIndexRequestHandler implements JoyQueueCommandHandler, Type, BrokerContextAware {

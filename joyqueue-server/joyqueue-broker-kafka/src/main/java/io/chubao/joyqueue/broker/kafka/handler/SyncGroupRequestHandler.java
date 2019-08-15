@@ -21,8 +21,8 @@ import java.util.Map;
 
 /**
  * SyncGroupRequestHandler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/6
  */
 public class SyncGroupRequestHandler extends AbstractKafkaCommandHandler implements KafkaContextAware {

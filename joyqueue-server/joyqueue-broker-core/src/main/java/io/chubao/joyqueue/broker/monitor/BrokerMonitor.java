@@ -32,8 +32,8 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * BrokerMonitor
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/16
  */
 public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerMonitor, ReplicationMonitor, SessionMonitor, EventListener<SessionManager.SessionEvent> {

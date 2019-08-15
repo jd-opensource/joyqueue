@@ -13,8 +13,8 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * UnCompletedTransactionManager
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/1/2
  */
 public class UnCompletedTransactionManager {

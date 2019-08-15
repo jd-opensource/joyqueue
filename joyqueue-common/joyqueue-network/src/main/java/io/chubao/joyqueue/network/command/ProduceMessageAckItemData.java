@@ -2,8 +2,8 @@ package io.chubao.joyqueue.network.command;
 
 /**
  * ProduceMessageAckItemData
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/19
  */
 public class ProduceMessageAckItemData {

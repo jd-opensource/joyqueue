@@ -11,8 +11,8 @@ import io.netty.buffer.ByteBuf;
 
 /**
  * AddOffsetsToTxnCodec
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/4
  */
 public class AddOffsetsToTxnCodec implements KafkaPayloadCodec<AddOffsetsToTxnResponse>, Type {

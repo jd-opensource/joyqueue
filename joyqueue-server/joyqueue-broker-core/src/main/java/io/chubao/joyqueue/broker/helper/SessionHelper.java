@@ -6,8 +6,8 @@ import io.chubao.joyqueue.network.transport.Transport;
 
 /**
  * session帮助类
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/9/10
  */
 public class SessionHelper {

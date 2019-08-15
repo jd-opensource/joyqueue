@@ -25,8 +25,8 @@ import java.util.Map;
 
 /**
  * AddConsumerRequestHandler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/10
  */
 public class AddConsumerRequestHandler implements JoyQueueCommandHandler, Type, BrokerContextAware {

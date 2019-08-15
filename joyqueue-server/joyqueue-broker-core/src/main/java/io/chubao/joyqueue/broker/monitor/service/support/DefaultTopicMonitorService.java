@@ -13,8 +13,8 @@ import java.util.List;
 
 /**
  * TopicMonitorService
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/10/15
  */
 public class DefaultTopicMonitorService implements TopicMonitorService {

@@ -22,8 +22,8 @@ import java.util.Map;
 
 /**
  * PartitionAssignmentManager
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/11
  */
 public class PartitionAssignmentManager extends Service {

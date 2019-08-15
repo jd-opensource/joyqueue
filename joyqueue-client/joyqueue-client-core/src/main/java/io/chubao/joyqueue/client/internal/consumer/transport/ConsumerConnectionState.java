@@ -22,8 +22,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * ConsumerConnectionState
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/3
  */
 public class ConsumerConnectionState {

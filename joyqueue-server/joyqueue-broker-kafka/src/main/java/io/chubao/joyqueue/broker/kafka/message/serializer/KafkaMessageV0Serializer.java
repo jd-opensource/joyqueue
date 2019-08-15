@@ -13,8 +13,8 @@ import java.util.List;
 
 /**
  * KafkaMessageV0Serializer
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/11
  */
 public class KafkaMessageV0Serializer extends AbstractKafkaMessageSerializer {

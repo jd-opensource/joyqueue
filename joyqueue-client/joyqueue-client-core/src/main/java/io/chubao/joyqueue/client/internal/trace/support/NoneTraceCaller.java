@@ -4,8 +4,8 @@ import io.chubao.joyqueue.client.internal.trace.TraceCaller;
 
 /**
  * NoneTraceCaller
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/1/3
  */
 public class NoneTraceCaller implements TraceCaller {

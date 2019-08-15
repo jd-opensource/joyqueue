@@ -24,8 +24,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * FindCoordinatorRequestHandler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/5
  */
 public class FindCoordinatorRequestHandler extends AbstractKafkaCommandHandler implements KafkaContextAware {

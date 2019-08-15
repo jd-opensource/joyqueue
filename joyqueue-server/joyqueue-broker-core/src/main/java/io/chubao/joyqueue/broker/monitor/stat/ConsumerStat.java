@@ -7,8 +7,8 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * ConsumerStat
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/10/11
  */
 public class ConsumerStat {

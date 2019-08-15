@@ -9,8 +9,8 @@ import java.util.List;
 
 /**
  * FetchTopicMessageAckData
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/13
  */
 public class FetchTopicMessageAckData {

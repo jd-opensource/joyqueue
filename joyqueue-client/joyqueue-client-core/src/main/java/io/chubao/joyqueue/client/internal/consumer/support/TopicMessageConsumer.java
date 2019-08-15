@@ -23,8 +23,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * TopicMessageConsumerGroup
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/25
  */
 public class TopicMessageConsumer extends Service {

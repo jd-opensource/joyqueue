@@ -18,8 +18,8 @@ import java.util.Set;
 
 /**
  * TransactionCompletionHandler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/19
  */
 public class TransactionCompletionHandler extends Service {

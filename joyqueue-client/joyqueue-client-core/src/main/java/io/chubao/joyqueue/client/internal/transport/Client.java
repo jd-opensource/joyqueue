@@ -21,8 +21,8 @@ import java.util.concurrent.Future;
 
 /**
  * Client
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/28
  */
 public class Client extends Service {

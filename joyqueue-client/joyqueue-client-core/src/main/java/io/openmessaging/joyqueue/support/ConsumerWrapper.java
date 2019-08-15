@@ -15,8 +15,8 @@ import java.util.Optional;
 
 /**
  * ConsumerWrapper
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/5/14
  */
 public class ConsumerWrapper implements ExtensionConsumer {

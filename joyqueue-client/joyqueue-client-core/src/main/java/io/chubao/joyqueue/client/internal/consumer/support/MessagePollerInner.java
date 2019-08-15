@@ -39,8 +39,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * MessagePollerInner
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/1/4
  */
 public class MessagePollerInner extends Service {

@@ -18,8 +18,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * MessagePollerWrapper
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/27
  */
 public class MessagePollerWrapper extends Service implements MessagePoller {

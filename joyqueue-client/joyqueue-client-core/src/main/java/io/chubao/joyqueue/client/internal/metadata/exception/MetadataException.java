@@ -4,8 +4,8 @@ import io.chubao.joyqueue.client.internal.exception.ClientException;
 
 /**
  * MetadataException
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/3
  */
 public class MetadataException extends ClientException {

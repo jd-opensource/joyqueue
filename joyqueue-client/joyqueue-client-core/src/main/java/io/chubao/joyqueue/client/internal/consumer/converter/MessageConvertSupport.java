@@ -12,8 +12,8 @@ import java.util.Map;
 
 /**
  * MessageConvertSupport
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/3
  */
 public class MessageConvertSupport {

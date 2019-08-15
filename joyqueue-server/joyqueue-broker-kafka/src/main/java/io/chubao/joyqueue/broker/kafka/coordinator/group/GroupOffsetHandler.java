@@ -40,8 +40,8 @@ import java.util.Map;
 
 /**
  * GroupOffsetHandler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/7
  */
 public class GroupOffsetHandler extends Service {

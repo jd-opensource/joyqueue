@@ -16,8 +16,8 @@ import io.chubao.joyqueue.toolkit.concurrent.EventBus;
 
 /**
  * DefaultTransportClientFactory
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/24
  */
 public class DefaultTransportClientFactory implements TransportClientFactory {

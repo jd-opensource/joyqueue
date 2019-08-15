@@ -8,8 +8,8 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * CompletableFuturePollerListener
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/7/25
  */
 public class CompletableFuturePollerListener implements PollerListener {

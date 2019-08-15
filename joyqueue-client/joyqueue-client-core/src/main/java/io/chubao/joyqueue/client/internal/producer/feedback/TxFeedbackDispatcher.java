@@ -18,8 +18,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * TxFeedbackDispatcher
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/24
  */
 public class TxFeedbackDispatcher {

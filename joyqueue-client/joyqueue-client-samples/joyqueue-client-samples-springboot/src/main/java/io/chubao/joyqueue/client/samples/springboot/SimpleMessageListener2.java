@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 
 /**
  * MessageListener2
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/3/6
  */
 @Component

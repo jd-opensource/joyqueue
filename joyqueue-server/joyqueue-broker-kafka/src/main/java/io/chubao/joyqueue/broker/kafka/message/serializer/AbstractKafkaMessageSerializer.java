@@ -12,8 +12,8 @@ import java.nio.ByteBuffer;
 
 /**
  * AbstractKafkaMessageSerializer
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/11
  */
 public abstract class AbstractKafkaMessageSerializer {

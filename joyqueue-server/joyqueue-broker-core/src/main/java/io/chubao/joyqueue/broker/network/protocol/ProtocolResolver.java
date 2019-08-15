@@ -13,8 +13,8 @@ import java.util.Map;
 
 /**
  * ProtocolResolver
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/13
  */
 public class ProtocolResolver extends ByteToMessageDecoder {

@@ -5,8 +5,8 @@ import io.chubao.joyqueue.network.transport.Transport;
 
 /**
  * ExceptionHandler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/13
  */
 public interface ExceptionHandler {

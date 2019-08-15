@@ -4,8 +4,8 @@ import java.io.Serializable;
 
 /**
  * PartitionStat
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/10/11
  */
 public class PartitionStat implements Serializable {

@@ -24,8 +24,8 @@ import java.util.concurrent.TimeoutException;
 
 /**
  * OnceConsumerInvoker
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/1/11
  */
 public class OnceConsumerInvoker implements ConsumerInvoker {

@@ -17,8 +17,8 @@ import java.io.IOException;
 
 /**
  * brokerstat管理器
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/10/10
  */
 // TODO 定期清理

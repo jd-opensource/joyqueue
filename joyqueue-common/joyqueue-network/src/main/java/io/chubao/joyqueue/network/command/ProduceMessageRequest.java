@@ -6,8 +6,8 @@ import java.util.Map;
 
 /**
  * ProduceMessageRequest
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/18
  */
 public class ProduceMessageRequest extends JoyQueuePayload {

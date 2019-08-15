@@ -4,8 +4,8 @@ import io.chubao.joyqueue.exception.JoyQueueCode;
 
 /**
  * CommitAckData
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/12
  */
 public class CommitAckResult {

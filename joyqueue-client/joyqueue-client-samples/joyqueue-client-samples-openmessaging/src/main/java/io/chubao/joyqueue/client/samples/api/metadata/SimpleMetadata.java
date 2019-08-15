@@ -11,8 +11,8 @@ import io.openmessaging.producer.SendResult;
 
 /**
  * SimpleMetadata
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/8
  */
 public class SimpleMetadata {

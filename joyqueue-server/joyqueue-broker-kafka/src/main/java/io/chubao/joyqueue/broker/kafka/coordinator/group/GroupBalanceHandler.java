@@ -46,8 +46,8 @@ import java.util.Set;
 
 /**
  * GroupBalanceHandler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/7
  */
 public class GroupBalanceHandler extends Service {

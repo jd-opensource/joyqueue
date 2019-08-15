@@ -2,8 +2,8 @@ package io.chubao.joyqueue.network.command;
 
 /**
  * FetchTopicMessageData
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/13
  */
 public class FetchTopicMessageData {

@@ -24,8 +24,8 @@ import io.chubao.joyqueue.toolkit.config.PropertySupplier;
 
 /**
  * broker上下文
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/21
  */
 public class BrokerContext {

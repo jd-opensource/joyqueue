@@ -12,8 +12,8 @@ import java.util.Optional;
 
 /**
  * MessageAdapter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/3/1
  */
 public class MessageAdapter implements ExtensionMessage {

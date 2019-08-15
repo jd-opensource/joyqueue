@@ -26,8 +26,8 @@ import java.util.Optional;
 
 /**
  * ProducerImpl
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/2/19
  */
 public class ProducerImpl extends AbstractServiceLifecycle implements ExtensionProducer {

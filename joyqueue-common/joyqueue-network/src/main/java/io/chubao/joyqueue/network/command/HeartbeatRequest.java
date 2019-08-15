@@ -4,8 +4,8 @@ import io.chubao.joyqueue.network.transport.command.JoyQueuePayload;
 
 /**
  * HeartbeatRequest
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/28
  */
 public class HeartbeatRequest extends JoyQueuePayload {

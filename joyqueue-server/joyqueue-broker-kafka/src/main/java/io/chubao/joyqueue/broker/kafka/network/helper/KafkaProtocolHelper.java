@@ -5,8 +5,8 @@ import io.netty.buffer.ByteBuf;
 
 /**
  * KafkaProtocolHelper
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/13
  */
 public class KafkaProtocolHelper {

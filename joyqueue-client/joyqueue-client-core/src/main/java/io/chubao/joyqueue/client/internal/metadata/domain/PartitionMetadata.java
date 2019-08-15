@@ -7,8 +7,8 @@ import java.io.Serializable;
 
 /**
  * PartitionMetadata
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/3
  */
 public class PartitionMetadata implements Serializable {

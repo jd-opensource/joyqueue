@@ -6,8 +6,8 @@ import java.util.List;
 
 /**
  * FetchAssignedPartitionRequest
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/4
  */
 public class FetchAssignedPartitionRequest extends JoyQueuePayload {

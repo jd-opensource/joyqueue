@@ -10,8 +10,8 @@ import java.util.Map;
 
 /**
  * Topic
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/30
  */
 public class Topic implements Serializable {

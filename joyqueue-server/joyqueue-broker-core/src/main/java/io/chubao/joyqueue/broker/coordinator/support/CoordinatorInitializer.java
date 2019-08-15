@@ -20,8 +20,8 @@ import java.util.List;
 
 /**
  * CoordinatorInitializer
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/4
  */
 public class CoordinatorInitializer extends Service {

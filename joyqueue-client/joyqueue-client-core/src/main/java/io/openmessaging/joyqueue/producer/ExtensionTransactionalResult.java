@@ -7,8 +7,8 @@ import java.util.List;
 
 /**
  * ExtensionTransactionalResult
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/3/4
  */
 public interface ExtensionTransactionalResult {

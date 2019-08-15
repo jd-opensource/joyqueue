@@ -34,8 +34,8 @@ import java.util.Map;
 
 /**
  * FetchPartitionMessageRequestHandler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/13
  */
 public class FetchPartitionMessageRequestHandler implements JoyQueueCommandHandler, Type, BrokerContextAware {

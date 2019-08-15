@@ -5,8 +5,8 @@ import io.netty.buffer.ByteBuf;
 
 /**
  * PayloadDecoder
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/21
  */
 public interface PayloadDecoder<H extends Header> {

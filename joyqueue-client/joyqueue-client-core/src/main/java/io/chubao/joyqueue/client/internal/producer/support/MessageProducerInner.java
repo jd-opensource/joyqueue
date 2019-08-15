@@ -46,8 +46,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * MessageProducerInner
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/1/4
  */
 public class MessageProducerInner extends Service {

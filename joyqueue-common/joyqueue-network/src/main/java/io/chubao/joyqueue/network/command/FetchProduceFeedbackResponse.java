@@ -8,8 +8,8 @@ import java.util.List;
 
 /**
  * FetchProduceFeedbackResponse
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/18
  */
 public class FetchProduceFeedbackResponse extends JoyQueuePayload {

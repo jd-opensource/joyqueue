@@ -4,8 +4,8 @@ import io.chubao.joyqueue.network.transport.codec.JoyQueueHeader;
 
 /**
  * JoyQueueCommand
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/29
  */
 public class JoyQueueCommand extends Command {

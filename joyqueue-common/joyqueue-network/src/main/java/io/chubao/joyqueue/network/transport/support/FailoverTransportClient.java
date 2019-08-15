@@ -18,8 +18,8 @@ import java.util.List;
 
 /**
  * FailoverTransportClient
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/10/30
  */
 public class FailoverTransportClient implements TransportClient {

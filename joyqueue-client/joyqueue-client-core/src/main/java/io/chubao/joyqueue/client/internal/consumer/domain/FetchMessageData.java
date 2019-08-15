@@ -7,8 +7,8 @@ import java.util.List;
 
 /**
  * FetchMessageData
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/13
  */
 public class FetchMessageData {

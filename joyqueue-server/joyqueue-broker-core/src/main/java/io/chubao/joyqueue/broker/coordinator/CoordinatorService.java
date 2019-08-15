@@ -15,8 +15,8 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * CoordinatorService
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/4
  */
 public class CoordinatorService extends Service {

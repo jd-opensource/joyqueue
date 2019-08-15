@@ -10,8 +10,8 @@ import java.util.zip.Inflater;
 
 /**
  * ZlibCompressor
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/1/2
  */
 public class ZlibCompressor implements Compressor {

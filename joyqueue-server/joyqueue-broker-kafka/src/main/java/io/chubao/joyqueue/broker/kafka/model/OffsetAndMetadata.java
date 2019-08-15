@@ -2,8 +2,8 @@ package io.chubao.joyqueue.broker.kafka.model;
 
 /**
  * OffsetAndMetadata
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/7
  */
 public class OffsetAndMetadata {

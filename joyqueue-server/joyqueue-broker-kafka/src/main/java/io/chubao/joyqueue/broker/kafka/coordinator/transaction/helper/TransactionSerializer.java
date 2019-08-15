@@ -12,8 +12,8 @@ import java.nio.ByteBuffer;
 
 /**
  * TransactionSerializer
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/15
  */
 public class TransactionSerializer {

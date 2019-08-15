@@ -2,8 +2,8 @@ package io.chubao.joyqueue.client.internal.consumer.coordinator.domain;
 
 /**
  * PartitionAssignmentHolder
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/11
  */
 public class PartitionAssignmentHolder {

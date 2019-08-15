@@ -4,8 +4,8 @@ import io.chubao.joyqueue.broker.kafka.exception.KafkaException;
 
 /**
  * CoordinatorException
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/7
  */
 public class CoordinatorException extends KafkaException {

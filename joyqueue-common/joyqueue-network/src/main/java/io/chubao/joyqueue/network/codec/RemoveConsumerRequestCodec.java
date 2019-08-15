@@ -14,8 +14,8 @@ import java.util.List;
 
 /**
  * RemoveConsumerRequestCodec
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/10
  */
 public class RemoveConsumerRequestCodec implements PayloadCodec<JoyQueueHeader, RemoveConsumerRequest>, Type {

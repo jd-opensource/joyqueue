@@ -22,8 +22,8 @@ import io.netty.channel.ChannelInitializer;
 
 /**
  * DefaultTransportServer
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/22
  */
 public class DefaultTransportServer extends TransportServerSupport {

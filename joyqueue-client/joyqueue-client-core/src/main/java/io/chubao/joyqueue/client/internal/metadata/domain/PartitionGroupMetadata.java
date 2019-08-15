@@ -7,8 +7,8 @@ import java.util.Map;
 
 /**
  * PartitionGroupMetadata
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/3
  */
 public class PartitionGroupMetadata implements Serializable {

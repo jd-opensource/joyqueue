@@ -28,8 +28,8 @@ import java.net.SocketAddress;
 
 /**
  * DefaultTransportClient
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/24
  */
 public class DefaultTransportClient extends TransportClientSupport implements TransportClient {

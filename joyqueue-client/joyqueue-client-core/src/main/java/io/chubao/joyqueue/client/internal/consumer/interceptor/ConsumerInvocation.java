@@ -11,8 +11,8 @@ import java.util.List;
 
 /**
  * ConsumerInvocation
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/1/11
  */
 public class ConsumerInvocation {

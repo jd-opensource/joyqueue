@@ -6,8 +6,8 @@ import java.util.List;
 
 /**
  * CompositeTraceCaller
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/1/3
  */
 public class CompositeTraceCaller implements TraceCaller {

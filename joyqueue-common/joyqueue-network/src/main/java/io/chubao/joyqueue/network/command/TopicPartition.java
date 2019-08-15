@@ -4,8 +4,8 @@ import java.io.Serializable;
 
 /**
  * TopicPartition
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/30
  */
 public class TopicPartition implements Serializable {

@@ -4,8 +4,8 @@ import io.chubao.joyqueue.toolkit.config.PropertyDef;
 
 /**
  * broker监控配置key
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/10/10
  */
 public enum BrokerMonitorConfigKey implements PropertyDef {

@@ -2,8 +2,8 @@ package io.chubao.joyqueue.client.internal.trace;
 
 /**
  * TraceType
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/1/3
  */
 public enum TraceType {

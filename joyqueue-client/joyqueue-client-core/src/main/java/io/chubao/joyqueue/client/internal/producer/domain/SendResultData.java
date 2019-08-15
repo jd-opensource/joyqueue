@@ -4,8 +4,8 @@ import io.chubao.joyqueue.exception.JoyQueueCode;
 
 /**
  * SendResultData
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/20
  */
 public class SendResultData {

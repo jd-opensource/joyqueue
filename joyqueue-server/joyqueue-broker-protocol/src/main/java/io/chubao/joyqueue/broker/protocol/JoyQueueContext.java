@@ -9,8 +9,8 @@ import io.chubao.joyqueue.broker.protocol.coordinator.assignment.PartitionAssign
 
 /**
  * JoyQueueContext
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/28
  */
 public class JoyQueueContext {

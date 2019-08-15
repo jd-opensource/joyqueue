@@ -5,8 +5,8 @@ import java.util.Map;
 
 /**
  * TopicPartitionGroup
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/30
  */
 public class TopicPartitionGroup implements Serializable {

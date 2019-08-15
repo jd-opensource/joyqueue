@@ -6,8 +6,8 @@ import java.util.List;
 
 /**
  * SendBatchResultData
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/20
  */
 public class SendBatchResultData {

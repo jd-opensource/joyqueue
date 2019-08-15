@@ -4,8 +4,8 @@ import io.openmessaging.OMSBuiltinKeys;
 
 /**
  * JoyQueueTxFeedbackBuiltinKeys
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/2/19
  */
 public interface JoyQueueTxFeedbackBuiltinKeys extends OMSBuiltinKeys {

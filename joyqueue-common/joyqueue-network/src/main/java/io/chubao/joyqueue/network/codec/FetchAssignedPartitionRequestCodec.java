@@ -14,8 +14,8 @@ import java.util.List;
 
 /**
  * FetchAssignedPartitionRequestCodec
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/4
  */
 public class FetchAssignedPartitionRequestCodec implements PayloadCodec<JoyQueueHeader, FetchAssignedPartitionRequest>, Type {

@@ -31,8 +31,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * DefaultMessageConsumer
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/1/10
  */
 public class DefaultMessageConsumer extends Service implements MessageConsumer {

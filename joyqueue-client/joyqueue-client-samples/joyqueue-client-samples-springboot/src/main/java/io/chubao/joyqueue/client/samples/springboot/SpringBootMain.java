@@ -14,8 +14,8 @@ import javax.annotation.Resource;
 
 /**
  * SpringBootMain
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/2/22
  */
 @SpringBootApplication

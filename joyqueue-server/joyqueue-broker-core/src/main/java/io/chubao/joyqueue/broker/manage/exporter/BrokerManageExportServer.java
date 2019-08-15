@@ -13,8 +13,8 @@ import java.util.Map;
 
 /**
  * BrokerManageExportServer
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/10/16
  */
 public class BrokerManageExportServer extends Service {

@@ -16,8 +16,8 @@ import java.util.List;
 
 /**
  * ApiVersionsRequestHandler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/5
  */
 public class ApiVersionsRequestHandler extends AbstractKafkaCommandHandler {

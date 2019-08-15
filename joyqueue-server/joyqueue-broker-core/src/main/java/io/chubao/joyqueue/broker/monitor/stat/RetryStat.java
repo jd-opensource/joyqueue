@@ -4,8 +4,8 @@ import io.chubao.joyqueue.broker.monitor.metrics.Metrics;
 
 /**
  * RetryStat
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/10/11
  */
 public class RetryStat {

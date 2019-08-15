@@ -23,8 +23,8 @@ import java.util.concurrent.Executors;
 
 /**
  * TopicMessageConsumerDispatcher
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/25
  */
 public class TopicMessageConsumerDispatcher extends Service {

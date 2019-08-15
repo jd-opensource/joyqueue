@@ -8,8 +8,8 @@ import java.util.Map;
 
 /**
  * AddPartitionsToTxnResponse
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/4
  */
 public class AddPartitionsToTxnResponse extends KafkaRequestOrResponse {

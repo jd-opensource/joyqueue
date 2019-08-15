@@ -6,8 +6,8 @@ import io.chubao.joyqueue.network.transport.codec.support.JoyQueueCodec;
 
 /**
  * JoyQueueCodecFactory
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/28
  */
 public class JoyQueueCodecFactory implements CodecFactory {

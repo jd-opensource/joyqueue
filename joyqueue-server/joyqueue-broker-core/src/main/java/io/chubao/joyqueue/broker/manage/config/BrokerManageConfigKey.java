@@ -5,8 +5,8 @@ import io.chubao.joyqueue.toolkit.network.IpUtil;
 
 /**
  * broker监控配置key
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/10/10
  */
 public enum BrokerManageConfigKey implements PropertyDef {

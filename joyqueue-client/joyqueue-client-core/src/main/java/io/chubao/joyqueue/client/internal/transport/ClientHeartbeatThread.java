@@ -8,8 +8,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * ClientHeartbeatThread
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/1/7
  */
 public class ClientHeartbeatThread implements Runnable {

@@ -17,8 +17,8 @@ import java.util.List;
 
 /**
  * ConsumerManageService
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/10/18
  */
 public class DefaultConsumerManageService implements ConsumerManageService {

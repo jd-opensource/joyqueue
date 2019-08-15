@@ -4,8 +4,8 @@ import io.chubao.joyqueue.toolkit.lang.LifeCycle;
 
 /**
  * MessageListenerContainer
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/25
  */
 public interface MessageListenerContainer extends LifeCycle {

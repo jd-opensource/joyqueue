@@ -5,8 +5,8 @@ import io.chubao.joyqueue.broker.protocol.coordinator.domain.GroupMetadata;
 
 /**
  * GroupMemberTimeoutCallback
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/6
  */
 public interface GroupMemberTimeoutCallback {

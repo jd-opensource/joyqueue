@@ -16,8 +16,8 @@ import java.util.Map;
 
 /**
  * FetchIndexResponseCodec
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/13
  */
 public class FetchIndexResponseCodec implements PayloadCodec<JoyQueueHeader, FetchIndexResponse>, Type {

@@ -4,8 +4,8 @@ import java.io.Serializable;
 
 /**
  * ReplicationStat
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/16
  */
 public class ReplicationStat implements Serializable {

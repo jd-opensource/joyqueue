@@ -8,8 +8,8 @@ import java.util.Set;
 
 /**
  * TransactionMetadata
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/10
  */
 public class TransactionMetadata extends io.chubao.joyqueue.broker.coordinator.transaction.domain.TransactionMetadata {

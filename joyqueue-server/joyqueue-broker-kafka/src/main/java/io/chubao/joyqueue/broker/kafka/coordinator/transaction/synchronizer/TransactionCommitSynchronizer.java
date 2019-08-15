@@ -35,8 +35,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * TransactionCommitSynchronizer
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/18
  */
 public class TransactionCommitSynchronizer extends Service {

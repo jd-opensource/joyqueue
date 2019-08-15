@@ -10,8 +10,8 @@ import java.util.List;
 
 /**
  * SimpleMessageListener
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/3/6
  */
 @Component

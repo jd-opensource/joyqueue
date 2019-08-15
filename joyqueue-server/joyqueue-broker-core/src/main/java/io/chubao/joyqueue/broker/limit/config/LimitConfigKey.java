@@ -4,8 +4,8 @@ import io.chubao.joyqueue.toolkit.config.PropertyDef;
 
 /**
  * LimitConfigKey
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/5/16
  */
 public enum LimitConfigKey implements PropertyDef {

@@ -16,8 +16,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * 后端服务
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/9/17
  */
 public class BackendServer extends Service {

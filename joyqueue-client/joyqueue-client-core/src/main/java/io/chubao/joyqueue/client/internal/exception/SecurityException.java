@@ -2,8 +2,8 @@ package io.chubao.joyqueue.client.internal.exception;
 
 /**
  * SecurityException
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/1/16
  */
 public class SecurityException extends RuntimeException {

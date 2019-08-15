@@ -7,8 +7,8 @@ import java.util.List;
 
 /**
  * ConsumerManageService
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/10/15
  */
 public interface ConsumerManageService {

@@ -6,8 +6,8 @@ import java.util.Map;
 
 /**
  * FetchTopicMessageResponse
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/7
  */
 public class FetchTopicMessageResponse extends JoyQueuePayload {

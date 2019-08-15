@@ -6,8 +6,8 @@ import io.openmessaging.message.Message;
 
 /**
  * SimpleProducerInterceptor
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/3/8
  */
 public class SimpleProducerInterceptor implements ProducerInterceptor {

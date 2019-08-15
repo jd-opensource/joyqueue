@@ -10,8 +10,8 @@ import io.openmessaging.message.Message;
 
 /**
  * SimpleConsumer
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/2/20
  */
 public class SimpleConsumer {

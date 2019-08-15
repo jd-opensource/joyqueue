@@ -2,8 +2,8 @@ package io.chubao.joyqueue.broker.kafka.exception;
 
 /**
  * KafkaException
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/5
  */
 public class KafkaException extends RuntimeException {

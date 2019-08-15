@@ -14,8 +14,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * ClientGroup
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/28
  */
 public class ClientGroup extends Service {

@@ -22,8 +22,8 @@ import java.util.List;
 
 /**
  * ProduceMessageConverter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/20
  */
 public class ProduceMessageConverter {

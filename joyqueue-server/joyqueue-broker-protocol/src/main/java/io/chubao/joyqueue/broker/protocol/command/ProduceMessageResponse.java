@@ -5,8 +5,8 @@ import io.chubao.joyqueue.broker.network.traffic.Traffic;
 
 /**
  * ProduceMessageResponse
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/5/16
  */
 public class ProduceMessageResponse extends io.chubao.joyqueue.network.command.ProduceMessageResponse implements ProduceTrafficPayload {

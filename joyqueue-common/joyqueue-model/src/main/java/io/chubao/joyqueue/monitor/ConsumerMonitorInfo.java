@@ -2,8 +2,8 @@ package io.chubao.joyqueue.monitor;
 
 /**
  * 消费者信息
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/10/10
  */
 public class ConsumerMonitorInfo extends BaseMonitorInfo {

@@ -9,8 +9,8 @@ import io.chubao.joyqueue.toolkit.service.Service;
 
 /**
  * CoordinatorSession
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/12
  */
 public class CoordinatorSession extends Service {

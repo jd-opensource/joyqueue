@@ -5,8 +5,8 @@ import io.chubao.joyqueue.toolkit.time.SystemClock;
 
 /**
  * TraceBuilder
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/1/3
  */
 public class TraceBuilder {

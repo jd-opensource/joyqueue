@@ -18,8 +18,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * TransactionCommitRequestHandler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/12
  */
 public class TransactionCommitRequestHandler implements CommandHandler, Type {

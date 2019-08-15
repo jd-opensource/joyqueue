@@ -11,8 +11,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * DefaultEncoder
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/21
  */
 public class DefaultEncoder implements Encoder {

@@ -6,8 +6,8 @@ import java.util.Map;
 
 /**
  * FindCoordinatorResponse
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/3
  */
 public class FindCoordinatorResponse extends JoyQueuePayload {

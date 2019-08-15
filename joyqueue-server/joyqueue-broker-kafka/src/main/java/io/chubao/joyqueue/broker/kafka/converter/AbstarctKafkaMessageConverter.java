@@ -5,8 +5,8 @@ import io.chubao.joyqueue.message.SourceType;
 
 /**
  * AbstarctKafkaMessageConverter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/3
  */
 public abstract class AbstarctKafkaMessageConverter implements MessageConverter {

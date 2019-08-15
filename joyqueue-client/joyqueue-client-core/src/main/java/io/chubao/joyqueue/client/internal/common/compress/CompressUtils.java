@@ -6,8 +6,8 @@ import java.io.OutputStream;
 
 /**
  * CompressUtils
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/1/2
  */
 public class CompressUtils {

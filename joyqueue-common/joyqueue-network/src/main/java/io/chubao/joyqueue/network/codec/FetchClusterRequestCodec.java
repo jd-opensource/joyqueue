@@ -13,8 +13,8 @@ import java.util.List;
 
 /**
  * FetchClusterRequestCodec
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/30
  */
 public class FetchClusterRequestCodec implements PayloadCodec<JoyQueueHeader, FetchClusterRequest>, Type {

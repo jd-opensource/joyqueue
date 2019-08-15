@@ -21,8 +21,8 @@ import java.net.InetSocketAddress;
 
 /**
  * TransportServerSupport
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/13
  */
 public abstract class TransportServerSupport extends Service implements TransportServer {

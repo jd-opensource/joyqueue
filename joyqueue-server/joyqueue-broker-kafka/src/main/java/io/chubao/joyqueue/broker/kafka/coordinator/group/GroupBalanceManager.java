@@ -47,8 +47,8 @@ import java.util.Set;
 
 /**
  * GroupBalanceManager
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/7
  */
 public class GroupBalanceManager extends Service {

@@ -12,8 +12,8 @@ import java.util.Map;
 
 /**
  * UnmodifiableTopicMetadata
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/1/22
  */
 @Deprecated

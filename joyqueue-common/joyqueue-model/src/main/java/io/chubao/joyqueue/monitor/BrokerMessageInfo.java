@@ -6,8 +6,8 @@ import java.util.Map;
 
 /**
  * BrokerMessageInfo
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/29
  */
 public class BrokerMessageInfo extends BaseMonitorInfo {

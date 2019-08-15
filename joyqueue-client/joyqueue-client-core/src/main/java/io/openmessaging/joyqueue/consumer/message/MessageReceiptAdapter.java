@@ -5,8 +5,8 @@ import io.openmessaging.consumer.MessageReceipt;
 
 /**
  * MessageReceiptAdapter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/3/1
  */
 public class MessageReceiptAdapter implements MessageReceipt {

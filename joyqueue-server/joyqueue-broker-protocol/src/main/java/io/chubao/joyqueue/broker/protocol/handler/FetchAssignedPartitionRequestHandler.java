@@ -37,8 +37,8 @@ import java.util.Map;
 
 /**
  * FetchAssignedPartitionRequestHandler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/4
  */
 // TODO 部分逻辑移到partitionAssignmentHandler

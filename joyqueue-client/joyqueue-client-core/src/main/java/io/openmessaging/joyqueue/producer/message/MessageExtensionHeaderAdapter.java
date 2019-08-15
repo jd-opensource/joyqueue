@@ -4,8 +4,8 @@ import io.chubao.joyqueue.client.internal.producer.domain.ProduceMessage;
 
 /**
  * MessageExtensionAdapter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/3/1
  */
 public class MessageExtensionHeaderAdapter implements ExtensionHeader {

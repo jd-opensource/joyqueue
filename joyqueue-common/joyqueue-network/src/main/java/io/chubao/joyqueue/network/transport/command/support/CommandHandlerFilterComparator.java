@@ -6,8 +6,8 @@ import java.util.Comparator;
 
 /**
  * CommandHandlerFilterComparator
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/27
  */
 public class CommandHandlerFilterComparator implements Comparator<Object> {

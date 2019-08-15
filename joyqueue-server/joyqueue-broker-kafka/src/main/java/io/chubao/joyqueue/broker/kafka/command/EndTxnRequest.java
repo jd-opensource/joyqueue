@@ -6,8 +6,8 @@ import java.util.Objects;
 
 /**
  * EndTxnRequest
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/4
  */
 public class EndTxnRequest extends KafkaRequestOrResponse {

@@ -7,8 +7,8 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * CompletableFutureAsyncProduceCallback
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/7/25
  */
 public class CompletableFutureAsyncProduceCallback implements AsyncProduceCallback {

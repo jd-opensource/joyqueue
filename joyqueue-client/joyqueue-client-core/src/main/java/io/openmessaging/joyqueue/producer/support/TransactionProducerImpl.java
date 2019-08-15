@@ -26,8 +26,8 @@ import java.util.Set;
 
 /**
  * TransactionProducerImpl
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/2/22
  */
 public class TransactionProducerImpl implements ExtensionProducer {

@@ -13,8 +13,8 @@ import java.util.List;
 
 /**
  * TransactionRollbackRequestCodec
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/12
  */
 public class TransactionRollbackRequestCodec implements PayloadCodec<JoyQueueHeader, TransactionRollbackRequest>, Type {

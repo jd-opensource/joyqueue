@@ -8,8 +8,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * KafkaExceptionHandler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/3/27
  */
 public class KafkaExceptionHandler implements ExceptionHandler {

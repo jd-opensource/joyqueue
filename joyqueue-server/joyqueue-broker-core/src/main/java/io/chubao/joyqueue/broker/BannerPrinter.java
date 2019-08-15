@@ -11,8 +11,8 @@ import java.util.Properties;
 
 /**
  * BannerPrinter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/6/26
  */
 public class BannerPrinter {

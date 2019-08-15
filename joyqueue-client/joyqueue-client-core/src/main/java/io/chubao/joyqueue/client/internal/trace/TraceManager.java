@@ -9,8 +9,8 @@ import java.util.stream.StreamSupport;
 
 /**
  * TraceManager
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/1/3
  */
 public class TraceManager {

@@ -4,8 +4,8 @@ import io.chubao.joyqueue.network.domain.BrokerNode;
 
 /**
  * BrokerAssignment
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/11
  */
 public class BrokerAssignment {

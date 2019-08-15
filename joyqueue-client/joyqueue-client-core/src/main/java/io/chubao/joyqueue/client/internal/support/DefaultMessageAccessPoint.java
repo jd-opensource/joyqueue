@@ -35,8 +35,8 @@ import java.util.Map;
 
 /**
  * DefaultMessageAccessPoint
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/2/19
  */
 public class DefaultMessageAccessPoint extends Service implements MessageAccessPoint {

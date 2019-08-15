@@ -24,8 +24,8 @@ import java.util.Map;
 
 /**
  * AddPartitionsToTxnRequestHandler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/4
  */
 public class AddPartitionsToTxnRequestHandler implements KafkaCommandHandler, Type, KafkaContextAware {

@@ -26,8 +26,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * TransactionAbortSynchronizer
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/18
  */
 public class TransactionAbortSynchronizer extends Service {

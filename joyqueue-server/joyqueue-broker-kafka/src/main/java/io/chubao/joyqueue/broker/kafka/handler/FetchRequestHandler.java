@@ -46,8 +46,8 @@ import java.util.Map;
 
 /**
  * FetchRequestHandler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/5
  */
 public class FetchRequestHandler extends AbstractKafkaCommandHandler implements KafkaContextAware {

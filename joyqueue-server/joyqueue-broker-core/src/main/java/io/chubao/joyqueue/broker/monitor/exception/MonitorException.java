@@ -2,8 +2,8 @@ package io.chubao.joyqueue.broker.monitor.exception;
 
 /**
  * monitor
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/10/12
  */
 public class MonitorException extends RuntimeException {

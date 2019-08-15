@@ -12,8 +12,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * TransactionCompletionScheduler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/15
  */
 public class TransactionCompletionScheduler extends Service {

@@ -11,8 +11,8 @@ import java.util.Map;
 
 /**
  * PayloadCodecFactory
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/21
  */
 public class PayloadCodecFactory {

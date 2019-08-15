@@ -23,8 +23,8 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * FailoverChannelTransport
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/9/3
  */
 public class FailoverChannelTransport implements ChannelTransport {

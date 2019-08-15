@@ -2,8 +2,8 @@ package io.chubao.joyqueue.client.internal.producer.domain;
 
 /**
  * FeedbackData
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/24
  */
 public class FeedbackData {

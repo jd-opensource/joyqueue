@@ -6,8 +6,8 @@ import io.chubao.joyqueue.network.transport.command.Header;
 
 /**
  * kafka协议头
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/21
  */
 public class KafkaHeader implements Header {

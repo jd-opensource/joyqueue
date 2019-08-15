@@ -2,8 +2,8 @@ package io.chubao.joyqueue.broker.kafka.coordinator.transaction.domain;
 
 /**
  * UnCompletedTransactionMetadata
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/19
  */
 public class UnCompletedTransactionMetadata extends TransactionMetadata {

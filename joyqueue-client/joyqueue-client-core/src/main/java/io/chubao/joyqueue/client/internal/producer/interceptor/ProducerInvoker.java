@@ -6,8 +6,8 @@ import java.util.List;
 
 /**
  * ProducerInvoker
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/1/11
  */
 public interface ProducerInvoker {

@@ -2,8 +2,8 @@ package io.chubao.joyqueue.network.command;
 
 /**
  * TxStatus
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/10
  */
 public enum TxStatus {

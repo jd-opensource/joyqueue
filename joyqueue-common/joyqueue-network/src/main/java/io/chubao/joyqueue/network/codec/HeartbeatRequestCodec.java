@@ -9,8 +9,8 @@ import io.netty.buffer.ByteBuf;
 
 /**
  * HeartbeatRequestCodec
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/28
  */
 public class HeartbeatRequestCodec implements PayloadCodec<JoyQueueHeader, HeartbeatRequest>, Type {

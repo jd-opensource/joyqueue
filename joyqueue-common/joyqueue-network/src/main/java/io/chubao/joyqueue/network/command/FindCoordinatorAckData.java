@@ -5,8 +5,8 @@ import io.chubao.joyqueue.network.domain.BrokerNode;
 
 /**
  * FindCoordinatorAckData
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/18
  */
 public class FindCoordinatorAckData {

@@ -2,8 +2,8 @@ package io.chubao.joyqueue.broker.limit.config;
 
 /**
  * RateLimiterConfig
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/5/17
  */
 public class LimiterConfig {

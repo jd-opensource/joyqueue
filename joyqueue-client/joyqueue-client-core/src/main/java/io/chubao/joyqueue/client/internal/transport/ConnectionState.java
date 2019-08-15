@@ -8,8 +8,8 @@ import java.util.Set;
 
 /**
  * ConnectionState
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/2/12
  */
 public class ConnectionState {

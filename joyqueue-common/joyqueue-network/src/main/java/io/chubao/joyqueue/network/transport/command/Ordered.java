@@ -2,8 +2,8 @@ package io.chubao.joyqueue.network.transport.command;
 
 /**
  * Ordered
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/27
  */
 public interface Ordered {

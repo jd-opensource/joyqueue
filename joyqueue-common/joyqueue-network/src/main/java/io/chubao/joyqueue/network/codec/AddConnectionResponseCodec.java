@@ -10,8 +10,8 @@ import io.netty.buffer.ByteBuf;
 
 /**
  * AddConnectionResponseCodec
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/29
  */
 public class AddConnectionResponseCodec implements PayloadCodec<JoyQueueHeader, AddConnectionResponse>, Type {

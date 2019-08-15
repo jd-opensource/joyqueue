@@ -8,8 +8,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * MemberTimeoutDelayedOperation
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/5
  */
 public class MemberTimeoutDelayedOperation extends AbstractDelayedOperation {

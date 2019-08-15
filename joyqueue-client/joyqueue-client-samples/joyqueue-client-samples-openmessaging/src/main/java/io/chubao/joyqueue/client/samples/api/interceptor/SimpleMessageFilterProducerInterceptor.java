@@ -10,8 +10,8 @@ import java.util.List;
 
 /**
  * SimpleMessageFilterProducerInterceptor
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/8
  */
 // 简单消息过滤实现

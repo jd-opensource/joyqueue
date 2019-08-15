@@ -23,8 +23,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * MetadataUpdater
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/1/2
  */
 public class MetadataUpdater extends Service {

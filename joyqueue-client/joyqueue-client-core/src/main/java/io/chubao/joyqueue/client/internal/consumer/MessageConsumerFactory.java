@@ -15,8 +15,8 @@ import io.chubao.joyqueue.client.internal.transport.config.TransportConfig;
 
 /**
  * MessageConsumerFactory
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/1/10
  */
 public class MessageConsumerFactory {

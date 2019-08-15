@@ -7,8 +7,8 @@ import io.netty.buffer.ByteBuf;
 
 /**
  * JoyQueueProtocolHelper
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/28
  */
 public class JoyQueueProtocolHelper {

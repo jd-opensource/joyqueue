@@ -10,8 +10,8 @@ import java.util.List;
 
 /**
  * JoyQueueSimpleConsumerInterceptor
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/8
  */
 // Ordered接口提供getOrder方法，用于指定顺序，可以不实现

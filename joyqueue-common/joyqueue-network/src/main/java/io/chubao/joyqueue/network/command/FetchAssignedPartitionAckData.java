@@ -7,8 +7,8 @@ import java.util.List;
 
 /**
  * FetchAssignedPartitionAckData
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/17
  */
 public class FetchAssignedPartitionAckData {

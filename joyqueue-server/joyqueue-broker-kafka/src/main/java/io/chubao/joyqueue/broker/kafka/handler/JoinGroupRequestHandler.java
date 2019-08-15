@@ -25,8 +25,8 @@ import java.util.Map;
 
 /**
  * JoinGroupRequestHandler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/5
  */
 public class JoinGroupRequestHandler extends AbstractKafkaCommandHandler implements KafkaContextAware {

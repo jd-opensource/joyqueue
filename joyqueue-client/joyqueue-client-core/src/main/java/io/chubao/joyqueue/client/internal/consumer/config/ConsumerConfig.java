@@ -4,8 +4,8 @@ import io.chubao.joyqueue.client.internal.consumer.support.RoundRobinBrokerLoadB
 
 /**
  * ConsumerConfig
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/7
  */
 public class ConsumerConfig {

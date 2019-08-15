@@ -27,8 +27,8 @@ import java.net.UnknownHostException;
 
 /**
  * TransportClientSupport
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/13
  */
 public abstract class TransportClientSupport extends Service {

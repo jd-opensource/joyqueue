@@ -6,8 +6,8 @@ import java.util.List;
 
 /**
  * FindCoordinatorRequest
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/3
  */
 public class FindCoordinatorRequest extends JoyQueuePayload {

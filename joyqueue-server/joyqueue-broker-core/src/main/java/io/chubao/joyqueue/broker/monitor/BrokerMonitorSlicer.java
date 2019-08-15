@@ -13,8 +13,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * BrokerMonitorSlicer
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/6/12
  */
 public class BrokerMonitorSlicer extends Service implements Runnable {

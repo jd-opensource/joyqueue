@@ -5,8 +5,8 @@ import io.chubao.joyqueue.toolkit.lang.LifeCycle;
 
 /**
  * ExtensionService
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/13
  */
 @Deprecated

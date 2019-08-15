@@ -26,8 +26,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * ProduceMessageRollbackRequestHandler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/19
  */
 public class ProduceMessageRollbackRequestHandler implements JoyQueueCommandHandler, Type, BrokerContextAware {

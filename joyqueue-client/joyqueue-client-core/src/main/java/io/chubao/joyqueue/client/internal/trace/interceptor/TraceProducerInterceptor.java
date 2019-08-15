@@ -12,8 +12,8 @@ import java.util.List;
 
 /**
  * TraceProducerInterceptor
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/1/11
  */
 public class TraceProducerInterceptor implements ProducerInterceptor, Ordered {

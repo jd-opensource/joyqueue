@@ -2,8 +2,8 @@ package io.chubao.joyqueue.client.internal.producer.config;
 
 /**
  * SenderConfig
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/2/11
  */
 public class SenderConfig {

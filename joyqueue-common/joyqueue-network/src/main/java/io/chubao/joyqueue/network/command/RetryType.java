@@ -2,8 +2,8 @@ package io.chubao.joyqueue.network.command;
 
 /**
  * RetryType
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/12
  */
 public enum RetryType {

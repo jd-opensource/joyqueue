@@ -9,8 +9,8 @@ import java.util.Properties;
 
 /**
  * ClientConsts
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/3/5
  */
 public class ClientConsts {

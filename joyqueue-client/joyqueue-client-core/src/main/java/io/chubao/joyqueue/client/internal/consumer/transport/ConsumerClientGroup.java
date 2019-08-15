@@ -8,8 +8,8 @@ import java.util.List;
 
 /**
  * ConsumerClientGroup
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/2/12
  */
 public class ConsumerClientGroup {

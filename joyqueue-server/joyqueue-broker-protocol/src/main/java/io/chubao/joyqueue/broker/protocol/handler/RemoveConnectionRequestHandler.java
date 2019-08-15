@@ -16,8 +16,8 @@ import io.chubao.joyqueue.network.transport.command.Type;
 
 /**
  * RemoveConnectionRequestHandler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/30
  */
 public class RemoveConnectionRequestHandler implements JoyQueueCommandHandler, Type, BrokerContextAware {

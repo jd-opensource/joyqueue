@@ -6,8 +6,8 @@ import java.util.List;
 
 /**
  * RemoveConsumerRequest
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/10
  */
 public class RemoveConsumerRequest extends JoyQueuePayload {

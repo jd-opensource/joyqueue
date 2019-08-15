@@ -12,8 +12,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * RequestHandler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/24
  */
 public class RequestHandler {

@@ -4,8 +4,8 @@ import java.util.Objects;
 
 /**
  * TransactionOffset
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/16
  */
 public class TransactionOffset extends TransactionDomain {

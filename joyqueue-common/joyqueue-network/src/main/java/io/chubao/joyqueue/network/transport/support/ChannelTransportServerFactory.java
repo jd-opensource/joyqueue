@@ -7,8 +7,8 @@ import io.netty.channel.ChannelHandler;
 
 /**
  * ChannelTransportServerFactory
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/9/25
  */
 public class ChannelTransportServerFactory implements TransportServerFactory {

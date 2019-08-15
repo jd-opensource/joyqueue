@@ -13,8 +13,8 @@ import java.util.List;
 
 /**
  * TraceConsumerInterceptor
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/1/11
  */
 public class TraceConsumerInterceptor implements ConsumerInterceptor, Ordered {

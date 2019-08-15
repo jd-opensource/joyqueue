@@ -5,8 +5,8 @@ import org.apache.commons.lang3.StringUtils;
 
 /**
  * CompressorManager
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/1/2
  */
 public class CompressorManager {

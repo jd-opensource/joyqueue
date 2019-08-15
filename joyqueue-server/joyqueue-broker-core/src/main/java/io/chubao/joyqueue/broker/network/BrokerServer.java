@@ -12,8 +12,8 @@ import io.chubao.joyqueue.toolkit.service.Service;
 
 /**
  * BrokerServer
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/14
  */
 public class BrokerServer extends Service {

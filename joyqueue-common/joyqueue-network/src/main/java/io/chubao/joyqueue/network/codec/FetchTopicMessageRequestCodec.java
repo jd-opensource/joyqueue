@@ -14,8 +14,8 @@ import java.util.Map;
 
 /**
  * FetchTopicMessageRequestCodec
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/7
  */
 public class FetchTopicMessageRequestCodec implements PayloadCodec<JoyQueueHeader, FetchTopicMessageRequest>, Type {

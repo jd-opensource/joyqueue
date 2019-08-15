@@ -5,8 +5,8 @@ import io.chubao.joyqueue.toolkit.lang.LifeCycle;
 
 /**
  * TxFeedbackManager
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/1/3
  */
 public interface TxFeedbackManager extends LifeCycle {

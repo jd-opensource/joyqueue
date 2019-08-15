@@ -7,8 +7,8 @@ import java.util.Map;
 
 /**
  * AddPartitionsToTxnRequest
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/4
  */
 public class AddPartitionsToTxnRequest extends KafkaRequestOrResponse {

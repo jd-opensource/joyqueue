@@ -2,8 +2,8 @@ package io.chubao.joyqueue.network.command;
 
 /**
  * FetchAssignedPartitionData
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/12
  */
 public class FetchAssignedPartitionData {

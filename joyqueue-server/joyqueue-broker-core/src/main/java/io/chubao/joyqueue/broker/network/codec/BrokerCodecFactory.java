@@ -12,8 +12,8 @@ import java.util.List;
 
 /**
  * BrokerCodecFactory
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/21
  */
 public class BrokerCodecFactory implements CodecFactory {

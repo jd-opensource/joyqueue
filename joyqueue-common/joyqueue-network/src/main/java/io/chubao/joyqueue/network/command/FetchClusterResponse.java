@@ -7,8 +7,8 @@ import java.util.Map;
 
 /**
  * GetClusterAck
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/30
  */
 public class FetchClusterResponse extends JoyQueuePayload {

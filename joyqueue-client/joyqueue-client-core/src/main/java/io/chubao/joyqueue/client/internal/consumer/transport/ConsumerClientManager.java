@@ -12,8 +12,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * ConsumerClientManager
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/28
  */
 public class ConsumerClientManager extends Service {

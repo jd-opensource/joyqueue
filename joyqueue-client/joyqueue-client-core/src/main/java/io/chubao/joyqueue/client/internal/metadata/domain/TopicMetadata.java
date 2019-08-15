@@ -12,8 +12,8 @@ import java.util.Map;
 
 /**
  * TopicMetadata
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/3
  */
 public class TopicMetadata implements Serializable {

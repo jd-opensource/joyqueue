@@ -5,8 +5,8 @@ import io.openmessaging.extension.ExtensionHeader;
 
 /**
  * MessageExtensionAdapter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/3/1
  */
 public class MessageExtensionHeaderAdapter implements ExtensionHeader {

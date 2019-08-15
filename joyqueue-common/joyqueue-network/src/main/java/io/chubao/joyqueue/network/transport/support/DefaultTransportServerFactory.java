@@ -16,8 +16,8 @@ import io.chubao.joyqueue.toolkit.concurrent.EventBus;
 
 /**
  * DefaultTransportServerFactory
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/22
  */
 public class DefaultTransportServerFactory implements TransportServerFactory {

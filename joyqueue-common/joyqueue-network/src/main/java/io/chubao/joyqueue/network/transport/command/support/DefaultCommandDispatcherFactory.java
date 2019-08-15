@@ -12,8 +12,8 @@ import io.chubao.joyqueue.network.transport.config.TransportConfig;
 
 /**
  * DefaultCommandDispatcherFactory
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/16
  */
 public class DefaultCommandDispatcherFactory implements CommandDispatcherFactory {

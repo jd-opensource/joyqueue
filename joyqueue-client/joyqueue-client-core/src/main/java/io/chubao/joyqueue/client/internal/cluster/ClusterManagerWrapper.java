@@ -4,8 +4,8 @@ import io.chubao.joyqueue.client.internal.nameserver.NameServerConfig;
 
 /**
  * ClusterManagerWrapper
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/27
  */
 public class ClusterManagerWrapper extends ClusterManager {

@@ -8,8 +8,8 @@ import java.util.List;
 
 /**
  * PartitionAssignmentConverter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/6
  */
 public class PartitionAssignmentConverter {

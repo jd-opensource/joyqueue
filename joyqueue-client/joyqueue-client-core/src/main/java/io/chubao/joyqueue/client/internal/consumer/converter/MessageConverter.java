@@ -7,8 +7,8 @@ import java.util.List;
 
 /**
  * MessageConverter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/3
  */
 public interface MessageConverter extends Type<Byte> {

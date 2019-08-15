@@ -12,8 +12,8 @@ import java.util.List;
 
 /**
  * MessageConvertSupport
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/3
  */
 public class MessageConvertSupport {

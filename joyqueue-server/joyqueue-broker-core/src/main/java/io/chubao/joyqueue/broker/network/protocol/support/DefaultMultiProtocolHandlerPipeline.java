@@ -14,8 +14,8 @@ import java.util.Map;
 
 /**
  * DefaultMultiProtocolHandlerPipeline
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/13
  */
 @ChannelHandler.Sharable

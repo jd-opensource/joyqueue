@@ -27,8 +27,8 @@ import java.net.InetSocketAddress;
 
 /**
  * AddConnectionRequestHandler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/29
  */
 public class AddConnectionRequestHandler implements JoyQueueCommandHandler, Type, BrokerContextAware {

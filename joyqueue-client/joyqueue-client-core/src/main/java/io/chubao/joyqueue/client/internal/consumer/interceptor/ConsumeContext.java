@@ -12,8 +12,8 @@ import java.util.Set;
 
 /**
  * ConsumeContext
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/1/11
  */
 public class ConsumeContext {

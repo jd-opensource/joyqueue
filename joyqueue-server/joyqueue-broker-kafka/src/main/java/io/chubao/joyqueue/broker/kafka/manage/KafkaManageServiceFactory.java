@@ -8,8 +8,8 @@ import io.chubao.joyqueue.broker.kafka.manage.support.DefaultKafkaMonitorService
 
 /**
  * KafkaManageServiceFactory
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/13
  */
 public class KafkaManageServiceFactory {

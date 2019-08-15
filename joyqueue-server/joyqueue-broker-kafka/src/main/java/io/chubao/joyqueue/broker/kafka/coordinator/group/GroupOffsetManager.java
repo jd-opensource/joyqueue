@@ -34,8 +34,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * GroupOffsetManager
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/7
  */
 public class GroupOffsetManager extends Service {

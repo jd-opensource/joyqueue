@@ -9,8 +9,8 @@ import java.util.List;
 
 /**
  * AbstractPartitionSelector
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/10
  */
 public abstract class AbstractPartitionSelector implements PartitionSelector {

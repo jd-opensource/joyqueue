@@ -12,8 +12,8 @@ import java.util.List;
 
 /**
  * JoyQueueCommandHandlerFactory
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/28
  */
 public class JoyQueueCommandHandlerFactory extends DefaultCommandHandlerFactory {

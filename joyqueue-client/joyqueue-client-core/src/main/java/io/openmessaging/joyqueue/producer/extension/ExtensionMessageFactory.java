@@ -5,8 +5,8 @@ import io.openmessaging.message.MessageFactory;
 
 /**
  * ExtensionMessageFactory
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/7/1
  */
 public interface ExtensionMessageFactory extends MessageFactory {

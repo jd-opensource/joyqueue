@@ -7,8 +7,8 @@ import java.util.List;
 
 /**
  * ConsumerInterceptor
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/1/11
  */
 public interface ConsumerInterceptor extends BaseInterceptor {

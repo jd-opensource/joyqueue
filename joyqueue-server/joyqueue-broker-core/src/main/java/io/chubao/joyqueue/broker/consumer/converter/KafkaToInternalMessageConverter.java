@@ -21,8 +21,8 @@ import java.util.Map;
 
 /**
  * KafkaToInternalMessageConverter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/24
  */
 public class KafkaToInternalMessageConverter extends AbstractInternalMessageConverter {

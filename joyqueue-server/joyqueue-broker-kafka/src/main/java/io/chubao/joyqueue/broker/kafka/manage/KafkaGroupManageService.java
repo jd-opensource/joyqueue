@@ -2,8 +2,8 @@ package io.chubao.joyqueue.broker.kafka.manage;
 
 /**
  * KafkaGroupManageService
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/13
  */
 public interface KafkaGroupManageService {

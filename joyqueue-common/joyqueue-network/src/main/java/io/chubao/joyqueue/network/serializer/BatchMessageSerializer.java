@@ -13,8 +13,8 @@ import java.util.List;
 
 /**
  * BatchMessageSerializer
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/2
  */
 public class BatchMessageSerializer {

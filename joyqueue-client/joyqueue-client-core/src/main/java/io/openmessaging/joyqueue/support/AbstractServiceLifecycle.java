@@ -9,8 +9,8 @@ import io.openmessaging.joyqueue.config.ExceptionConverter;
 
 /**
  * AbstractServiceLifecycle
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/2/19
  */
 public abstract class AbstractServiceLifecycle extends Service implements ServiceLifecycle {

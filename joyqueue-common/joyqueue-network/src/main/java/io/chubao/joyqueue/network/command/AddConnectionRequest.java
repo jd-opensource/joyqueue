@@ -6,8 +6,8 @@ import io.chubao.joyqueue.network.transport.command.JoyQueuePayload;
 
 /**
  * AddConnection
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/29
  */
 public class AddConnectionRequest extends JoyQueuePayload {

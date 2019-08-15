@@ -12,8 +12,8 @@ import io.netty.buffer.ByteBuf;
 
 /**
  * AddConnectionRequestCodec
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/29
  */
 public class AddConnectionRequestCodec implements PayloadCodec<JoyQueueHeader, AddConnectionRequest>, Type {

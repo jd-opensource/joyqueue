@@ -8,8 +8,8 @@ import java.util.Map;
 
 /**
  * ProducePartitionGroupRequest
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/9
  */
 public class ProducePartitionGroupRequest {

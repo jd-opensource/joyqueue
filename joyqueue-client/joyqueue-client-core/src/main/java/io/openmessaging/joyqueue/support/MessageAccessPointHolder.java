@@ -4,8 +4,8 @@ import io.chubao.joyqueue.client.internal.MessageAccessPoint;
 
 /**
  * MessageAccessPointHolder
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/5/14
  */
 public class MessageAccessPointHolder {

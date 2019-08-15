@@ -7,8 +7,8 @@ import java.util.List;
 
 /**
  * CommitAckRequest
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/12
  */
 public class CommitAckRequest extends JoyQueuePayload {

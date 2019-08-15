@@ -16,8 +16,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * MessageProducerWrapper
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/27
  */
 public class MessageProducerWrapper extends Service implements MessageProducer {

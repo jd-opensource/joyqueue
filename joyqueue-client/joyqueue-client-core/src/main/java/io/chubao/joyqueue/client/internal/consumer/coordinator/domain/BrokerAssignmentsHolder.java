@@ -4,8 +4,8 @@ import io.chubao.joyqueue.toolkit.time.SystemClock;
 
 /**
  * BrokerAssignmentsHolder
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/11
  */
 public class BrokerAssignmentsHolder {

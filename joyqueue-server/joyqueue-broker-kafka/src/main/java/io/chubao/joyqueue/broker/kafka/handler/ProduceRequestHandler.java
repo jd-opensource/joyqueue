@@ -45,8 +45,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * ProduceRequestHandler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/6
  */
 public class ProduceRequestHandler extends AbstractKafkaCommandHandler implements KafkaContextAware {

@@ -2,8 +2,8 @@ package io.chubao.joyqueue.broker.protocol.coordinator.assignment.domain;
 
 /**
  * PartitionGroupAssignmentMetadata
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/5
  */
 public class PartitionGroupAssignmentMetadata {

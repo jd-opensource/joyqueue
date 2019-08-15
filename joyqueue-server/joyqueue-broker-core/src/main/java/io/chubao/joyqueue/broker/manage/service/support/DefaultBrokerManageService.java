@@ -21,8 +21,8 @@ import java.io.File;
 import java.util.List;
 
 /**
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/10/18
  */
 public class DefaultBrokerManageService implements BrokerManageService {

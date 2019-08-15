@@ -2,8 +2,8 @@ package io.chubao.joyqueue.monitor;
 
 /**
  * 入队信息
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/10/11
  */
 public class EnQueueMonitorInfo extends BaseMonitorInfo {

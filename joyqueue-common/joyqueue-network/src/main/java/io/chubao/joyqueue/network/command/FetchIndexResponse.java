@@ -5,8 +5,8 @@ import io.chubao.joyqueue.network.transport.command.JoyQueuePayload;
 
 /**
  * FetchIndexResponse
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/13
  */
 public class FetchIndexResponse extends JoyQueuePayload {

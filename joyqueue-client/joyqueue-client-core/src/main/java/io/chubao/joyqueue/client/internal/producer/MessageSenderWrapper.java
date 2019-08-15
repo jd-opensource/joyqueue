@@ -21,8 +21,8 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * MessageSenderWrapper
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/27
  */
 public class MessageSenderWrapper extends Service implements MessageSender {

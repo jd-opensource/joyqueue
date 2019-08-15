@@ -9,8 +9,8 @@ import io.netty.buffer.ByteBuf;
 
 /**
  * BooleanAckCodec
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/30
  */
 public class BooleanAckCodec implements PayloadCodec<JoyQueueHeader, BooleanAck>, Type {

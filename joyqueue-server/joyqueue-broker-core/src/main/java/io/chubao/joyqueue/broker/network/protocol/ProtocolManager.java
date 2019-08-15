@@ -17,8 +17,8 @@ import java.util.List;
 
 /**
  * ProtocolManager
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/13
  */
 public class ProtocolManager extends Service {

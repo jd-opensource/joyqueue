@@ -19,8 +19,8 @@ import io.chubao.joyqueue.toolkit.concurrent.EventBus;
 
 /**
  * MultiProtocolTransportServerFactory
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/14
  */
 public class MultiProtocolTransportServerFactory implements TransportServerFactory {

@@ -17,8 +17,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * FrontendServer
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/9/17
  */
 public class FrontendServer extends Service {

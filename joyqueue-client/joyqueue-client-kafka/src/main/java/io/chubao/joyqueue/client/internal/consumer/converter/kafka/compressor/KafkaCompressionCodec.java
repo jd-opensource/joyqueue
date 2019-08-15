@@ -2,8 +2,8 @@ package io.chubao.joyqueue.client.internal.consumer.converter.kafka.compressor;
 
 /**
  * KafkaCompressionCodec
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/6
  */
 public enum KafkaCompressionCodec {

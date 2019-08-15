@@ -5,8 +5,8 @@ import io.chubao.joyqueue.toolkit.config.PropertyDef;
 
 /**
  * KafkaConfigKey
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/5
  */
 public enum KafkaConfigKey implements PropertyDef {

@@ -19,8 +19,8 @@ import java.util.Map;
 
 /**
  * OffsetCommitRequestHandler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/5
  */
 public class OffsetCommitRequestHandler extends AbstractKafkaCommandHandler implements KafkaContextAware {

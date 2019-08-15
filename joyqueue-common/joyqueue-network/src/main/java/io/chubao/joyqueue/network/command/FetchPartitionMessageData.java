@@ -2,8 +2,8 @@ package io.chubao.joyqueue.network.command;
 
 /**
  * FetchPartitionData
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/7
  */
 public class FetchPartitionMessageData {

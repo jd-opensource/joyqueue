@@ -4,8 +4,8 @@ import io.chubao.joyqueue.toolkit.config.PropertyDef;
 
 /**
  * JoyQueueConfigKey
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/3
  */
 public enum JoyQueueConfigKey implements PropertyDef {

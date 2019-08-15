@@ -9,8 +9,8 @@ import java.net.SocketAddress;
 
 /**
  * TransportClient
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/13
  */
 public interface TransportClient extends LifeCycle {

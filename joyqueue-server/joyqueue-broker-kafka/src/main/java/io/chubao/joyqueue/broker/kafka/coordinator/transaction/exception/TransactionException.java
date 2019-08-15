@@ -5,8 +5,8 @@ import io.chubao.joyqueue.exception.JoyQueueCode;
 
 /**
  * TransactionException
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/10
  */
 public class TransactionException extends CoordinatorException {

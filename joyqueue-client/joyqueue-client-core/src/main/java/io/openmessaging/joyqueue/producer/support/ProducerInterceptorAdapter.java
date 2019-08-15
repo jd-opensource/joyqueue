@@ -12,8 +12,8 @@ import java.util.List;
 
 /**
  * ProducerInterceptorAdapter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/2/19
  */
 public class ProducerInterceptorAdapter implements ProducerInterceptor {

@@ -5,8 +5,8 @@ import io.chubao.joyqueue.domain.TopicName;
 
 /**
  * TxFeedbackCallback
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/10
  */
 public interface TxFeedbackCallback {

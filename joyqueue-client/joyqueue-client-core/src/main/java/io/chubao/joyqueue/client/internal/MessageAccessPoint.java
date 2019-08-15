@@ -11,8 +11,8 @@ import io.chubao.joyqueue.toolkit.lang.LifeCycle;
 
 /**
  * MessageAccessPoint
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/2/19
  */
 public interface MessageAccessPoint extends LifeCycle {

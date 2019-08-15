@@ -17,8 +17,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * KafkaChannelTransport
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/5/7
  */
 public class KafkaChannelTransport implements ChannelTransport {

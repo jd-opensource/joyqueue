@@ -17,8 +17,8 @@ import io.chubao.joyqueue.toolkit.service.Service;
 
 /**
  * brokermonitor
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/10/15
  */
 public class BrokerManageService extends Service {

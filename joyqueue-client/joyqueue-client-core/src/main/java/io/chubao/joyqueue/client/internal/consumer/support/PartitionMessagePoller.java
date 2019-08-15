@@ -35,8 +35,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * PartitionMessagePoller
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/14
  */
 public class PartitionMessagePoller extends Service implements MessagePoller {

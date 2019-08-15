@@ -4,8 +4,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * CoordinatorGroupExpiredMember
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/13
  */
 public class CoordinatorGroupExpiredMember {

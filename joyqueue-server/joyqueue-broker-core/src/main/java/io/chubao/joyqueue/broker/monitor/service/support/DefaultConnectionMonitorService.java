@@ -16,8 +16,8 @@ import java.util.Map;
 
 /**
  * ConnectionMonitorService
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/10/15
  */
 public class DefaultConnectionMonitorService implements ConnectionMonitorService {

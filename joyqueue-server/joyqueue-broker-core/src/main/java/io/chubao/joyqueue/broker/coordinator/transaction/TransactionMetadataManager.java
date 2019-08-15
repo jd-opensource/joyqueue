@@ -15,8 +15,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * TransactionMetadataManager
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/10
  */
 public class TransactionMetadataManager {

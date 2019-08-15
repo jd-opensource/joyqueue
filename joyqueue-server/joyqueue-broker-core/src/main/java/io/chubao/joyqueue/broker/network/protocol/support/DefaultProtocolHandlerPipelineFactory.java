@@ -11,8 +11,8 @@ import io.netty.channel.ChannelHandler;
 
 /**
  * DefaultProtocolHandlerPipelineFactory
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/14
  */
 public class DefaultProtocolHandlerPipelineFactory implements ProtocolHandlerPipelineFactory {

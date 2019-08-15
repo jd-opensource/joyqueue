@@ -13,8 +13,8 @@ import io.netty.buffer.ByteBuf;
 
 /**
  * JoyQueueCodec
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/10/22
  */
 public class JoyQueueCodec implements Codec {

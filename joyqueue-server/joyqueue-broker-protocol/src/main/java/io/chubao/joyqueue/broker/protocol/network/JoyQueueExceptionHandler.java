@@ -13,8 +13,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * joyqueue异常处理
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/28
  */
 public class JoyQueueExceptionHandler implements ExceptionHandler {

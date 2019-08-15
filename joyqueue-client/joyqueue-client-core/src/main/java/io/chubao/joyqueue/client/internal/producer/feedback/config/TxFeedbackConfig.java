@@ -2,8 +2,8 @@ package io.chubao.joyqueue.client.internal.producer.feedback.config;
 
 /**
  * TxFeedbackConfig
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/1/3
  */
 public class TxFeedbackConfig {

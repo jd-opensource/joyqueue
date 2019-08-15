@@ -2,8 +2,8 @@ package io.chubao.joyqueue.broker.limit.exception;
 
 /**
  * LimitException
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/5/16
  */
 public class LimitException extends RuntimeException {

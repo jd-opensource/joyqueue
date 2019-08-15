@@ -19,8 +19,8 @@ import java.util.List;
 
 /**
  * DescribeGroupsCodec
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/5
  */
 public class DescribeGroupsCodec implements KafkaPayloadCodec<DescribeGroupsResponse>, Type {

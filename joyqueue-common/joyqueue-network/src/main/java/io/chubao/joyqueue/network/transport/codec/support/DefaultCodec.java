@@ -8,8 +8,8 @@ import io.netty.buffer.ByteBuf;
 
 /**
  * DefaultCodec
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/13
  */
 public class DefaultCodec implements Codec {

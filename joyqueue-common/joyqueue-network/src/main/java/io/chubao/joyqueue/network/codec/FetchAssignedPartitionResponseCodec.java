@@ -17,8 +17,8 @@ import java.util.Map;
 
 /**
  * FetchAssignedPartitionResponseCodec
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/4
  */
 public class FetchAssignedPartitionResponseCodec implements PayloadCodec<JoyQueueHeader, FetchAssignedPartitionResponse>, Type {

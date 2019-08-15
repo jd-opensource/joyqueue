@@ -6,8 +6,8 @@ import io.netty.channel.ChannelHandler;
 
 /**
  * ChannelTransportServer
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/9/25
  */
 public class ChannelTransportServer extends TransportServerSupport {

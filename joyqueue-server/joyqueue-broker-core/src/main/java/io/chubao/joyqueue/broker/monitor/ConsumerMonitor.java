@@ -2,8 +2,8 @@ package io.chubao.joyqueue.broker.monitor;
 
 /**
  * 消费监控
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/10/10
  */
 public interface ConsumerMonitor {

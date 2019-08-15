@@ -4,8 +4,8 @@ import org.apache.commons.lang3.StringUtils;
 
 /**
  * NameServerConfig
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/29
  */
 public class NameServerConfig {

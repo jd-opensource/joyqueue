@@ -11,8 +11,8 @@ import java.util.List;
 
 /**
  * BrokerCommandHandlerFactory
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/2/28
  */
 public class BrokerCommandHandlerFactory extends DefaultCommandHandlerFactory {

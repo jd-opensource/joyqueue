@@ -7,8 +7,8 @@ import java.util.Map;
 
 /**
  * ListOffsetsResponse
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/5
  */
 public class ListOffsetsResponse extends KafkaRequestOrResponse {

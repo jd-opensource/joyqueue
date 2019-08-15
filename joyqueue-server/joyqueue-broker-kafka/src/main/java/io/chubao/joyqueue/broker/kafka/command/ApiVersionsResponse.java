@@ -7,8 +7,8 @@ import java.util.List;
 
 /**
  * ApiVersionsResponse
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/5
  */
 public class ApiVersionsResponse extends KafkaRequestOrResponse {

@@ -6,8 +6,8 @@ import java.util.Map;
 
 /**
  * producerstat po
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/10/12
  */
 public class ProducerStatPo extends BasePo {

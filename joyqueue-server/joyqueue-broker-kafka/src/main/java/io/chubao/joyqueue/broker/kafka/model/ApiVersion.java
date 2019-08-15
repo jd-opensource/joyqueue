@@ -2,8 +2,8 @@ package io.chubao.joyqueue.broker.kafka.model;
 
 /**
  * ApiVersion
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/5
  */
 public class ApiVersion {

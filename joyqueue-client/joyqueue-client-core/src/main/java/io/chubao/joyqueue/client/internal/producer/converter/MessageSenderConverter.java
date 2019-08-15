@@ -19,8 +19,8 @@ import java.util.List;
 
 /**
  * MessageSenderConverter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/28
  */
 public class MessageSenderConverter {

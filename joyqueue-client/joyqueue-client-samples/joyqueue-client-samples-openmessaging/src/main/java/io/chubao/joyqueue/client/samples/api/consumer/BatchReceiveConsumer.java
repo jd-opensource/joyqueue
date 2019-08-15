@@ -12,8 +12,8 @@ import java.util.List;
 
 /**
  * BatchReceiveConsumer
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/2/20
  */
 public class BatchReceiveConsumer {

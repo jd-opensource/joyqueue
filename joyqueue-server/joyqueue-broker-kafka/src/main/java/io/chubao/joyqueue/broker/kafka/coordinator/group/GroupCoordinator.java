@@ -18,8 +18,8 @@ import java.util.Map;
 
 /**
  * Coordinator
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/7
  */
 public class GroupCoordinator extends Service {

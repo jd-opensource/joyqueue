@@ -2,8 +2,8 @@ package io.chubao.joyqueue.message.exception;
 
 /**
  * 消息异常
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/9/4
  */
 public class MessageException extends RuntimeException {

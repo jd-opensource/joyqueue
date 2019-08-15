@@ -7,8 +7,8 @@ import java.util.List;
 
 /**
  * AsyncBatchSendCallback
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/20
  */
 public interface AsyncBatchSendCallback {

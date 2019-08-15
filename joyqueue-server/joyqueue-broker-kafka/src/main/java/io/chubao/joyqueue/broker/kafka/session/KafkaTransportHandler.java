@@ -20,8 +20,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * KafkaTransportHandler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/5/7
  */
 @ChannelHandler.Sharable

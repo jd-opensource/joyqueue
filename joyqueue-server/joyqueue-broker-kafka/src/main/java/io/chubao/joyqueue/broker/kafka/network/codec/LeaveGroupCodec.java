@@ -11,8 +11,8 @@ import io.netty.buffer.ByteBuf;
 
 /**
  * LeaveGroupCodec
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/5
  */
 public class LeaveGroupCodec implements KafkaPayloadCodec<LeaveGroupResponse>, Type {

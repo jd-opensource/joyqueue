@@ -2,8 +2,8 @@ package io.chubao.joyqueue.client.internal.common.ordered;
 
 /**
  * 排序
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/27
  */
 public interface Ordered {

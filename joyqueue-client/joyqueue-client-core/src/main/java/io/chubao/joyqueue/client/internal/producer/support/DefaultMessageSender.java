@@ -45,8 +45,8 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * DefaultMessageSender
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/10
  */
 public class DefaultMessageSender extends Service implements MessageSender {

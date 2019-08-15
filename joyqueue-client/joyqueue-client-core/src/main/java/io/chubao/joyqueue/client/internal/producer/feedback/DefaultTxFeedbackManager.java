@@ -22,8 +22,8 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * TxFeedbackManager
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/24
  */
 public class DefaultTxFeedbackManager extends Service implements TxFeedbackManager {

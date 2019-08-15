@@ -2,8 +2,8 @@ package io.chubao.joyqueue.broker.monitor;
 
 /**
  * ReplicationMonitor
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/16
  */
 public interface ReplicationMonitor {

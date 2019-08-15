@@ -2,8 +2,8 @@ package io.chubao.joyqueue.network.transport.command;
 
 /**
  * JoyQueuePayload
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/21
  */
 public abstract class JoyQueuePayload implements Payload, Type {

@@ -13,8 +13,8 @@ import java.util.Map;
 
 /**
  * AddConsumerResponseCodec
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/10
  */
 public class AddConsumerResponseCodec implements PayloadCodec<JoyQueueHeader, AddConsumerResponse>, Type {

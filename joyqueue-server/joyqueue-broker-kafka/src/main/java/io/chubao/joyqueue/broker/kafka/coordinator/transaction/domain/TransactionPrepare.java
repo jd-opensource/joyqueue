@@ -4,8 +4,8 @@ import java.util.Objects;
 
 /**
  * TransactionPrepare
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/12
  */
 public class TransactionPrepare extends TransactionDomain {

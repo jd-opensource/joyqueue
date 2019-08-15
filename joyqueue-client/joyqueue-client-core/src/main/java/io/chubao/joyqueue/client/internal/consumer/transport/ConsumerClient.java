@@ -29,8 +29,8 @@ import java.util.Map;
 
 /**
  * ConsumerClient
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/29
  */
 public class ConsumerClient {

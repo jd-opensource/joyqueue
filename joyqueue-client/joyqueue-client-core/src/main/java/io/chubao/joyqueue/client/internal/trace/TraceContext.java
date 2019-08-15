@@ -4,8 +4,8 @@ import io.chubao.joyqueue.toolkit.time.SystemClock;
 
 /**
  * TraceContext
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/1/3
  */
 public class TraceContext {

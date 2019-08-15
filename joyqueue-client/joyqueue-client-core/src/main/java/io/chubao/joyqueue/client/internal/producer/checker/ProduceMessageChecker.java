@@ -11,8 +11,8 @@ import java.util.List;
 
 /**
  * ProduceMessageChecker
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/20
  */
 public class ProduceMessageChecker {

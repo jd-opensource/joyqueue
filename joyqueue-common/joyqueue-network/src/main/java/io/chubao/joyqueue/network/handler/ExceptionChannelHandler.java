@@ -8,8 +8,8 @@ import io.netty.channel.ChannelHandlerContext;
 
 /**
  * ExceptionChannelHandler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/5
  */
 public class ExceptionChannelHandler extends ChannelHandlerAdapter {

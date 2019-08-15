@@ -9,8 +9,8 @@ import io.chubao.joyqueue.network.transport.support.DefaultTransportClientFactor
 
 /**
  * BrokerTransportClientFactory
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/9/21
  */
 public class BrokerTransportClientFactory extends DefaultTransportClientFactory {

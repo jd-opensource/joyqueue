@@ -13,8 +13,8 @@ import java.util.Map;
 
 /**
  * PartitionIndexReceiveConsumer
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/2/20
  */
 public class PartitionIndexReceiveConsumer {

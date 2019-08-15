@@ -22,8 +22,8 @@ import static com.jd.laf.web.vertx.config.VertxConfig.Builder.inherit;
 
 /**
  * RoutingVerticle
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/10/16
  */
 public class RoutingVerticle extends com.jd.laf.web.vertx.RoutingVerticle {

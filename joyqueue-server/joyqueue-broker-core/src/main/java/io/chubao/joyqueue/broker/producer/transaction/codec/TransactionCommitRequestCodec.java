@@ -13,8 +13,8 @@ import java.util.List;
 
 /**
  * TransactionCommitRequestCodec
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/12
  */
 public class TransactionCommitRequestCodec implements PayloadCodec<JoyQueueHeader, TransactionCommitRequest>, Type {

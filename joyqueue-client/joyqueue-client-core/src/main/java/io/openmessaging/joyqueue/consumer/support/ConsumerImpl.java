@@ -29,8 +29,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * ConsumerImpl
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/2/19
  */
 public class ConsumerImpl extends AbstractServiceLifecycle implements ExtensionConsumer {

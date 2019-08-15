@@ -14,8 +14,8 @@ import java.util.List;
 
 /**
  * AddConsumerRequestCodec
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/10
  */
 public class AddConsumerRequestCodec implements PayloadCodec<JoyQueueHeader, AddConsumerRequest>, Type {

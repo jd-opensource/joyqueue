@@ -5,8 +5,8 @@ import io.netty.channel.ChannelHandler;
 
 /**
  * ProtocolHandlerPipelineFactory
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/14
  */
 public interface ProtocolHandlerPipelineFactory {

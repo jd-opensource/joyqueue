@@ -2,8 +2,8 @@ package io.chubao.joyqueue.network.event;
 
 /**
  * TransportEventType
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/15
  */
 public enum TransportEventType {

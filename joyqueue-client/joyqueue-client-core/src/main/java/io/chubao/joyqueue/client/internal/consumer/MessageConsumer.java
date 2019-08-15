@@ -13,8 +13,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * MessageConsumer
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/1/10
  */
 public interface MessageConsumer extends LifeCycle {

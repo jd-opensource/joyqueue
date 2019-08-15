@@ -5,8 +5,8 @@ import io.chubao.joyqueue.broker.network.traffic.ProduceTrafficPayload;
 
 /**
  * LimitType
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/5/17
  */
 public enum LimitType {

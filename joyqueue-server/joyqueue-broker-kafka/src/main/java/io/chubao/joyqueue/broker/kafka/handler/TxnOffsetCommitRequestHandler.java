@@ -25,8 +25,8 @@ import java.util.Map;
 
 /**
  * TxnOffsetCommitRequestHandler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/4
  */
 public class TxnOffsetCommitRequestHandler implements KafkaCommandHandler, Type, KafkaContextAware {

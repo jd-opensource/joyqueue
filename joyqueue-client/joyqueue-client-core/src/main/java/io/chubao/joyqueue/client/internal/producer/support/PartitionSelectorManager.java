@@ -9,8 +9,8 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * PartitionSelectorManager
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/1/3
  */
 public class PartitionSelectorManager {

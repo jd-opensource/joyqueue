@@ -20,8 +20,8 @@ import java.util.Map;
 
 /**
  * FetchTopicMessageLongPollCallback
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/1/8
  */
 public class FetchTopicMessageLongPollCallback implements LongPollingCallback {

@@ -7,8 +7,8 @@ import io.chubao.joyqueue.client.internal.transport.config.TransportConfig;
 
 /**
  * MessageAccessPointFactory
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/2/19
  */
 public class MessageAccessPointFactory {

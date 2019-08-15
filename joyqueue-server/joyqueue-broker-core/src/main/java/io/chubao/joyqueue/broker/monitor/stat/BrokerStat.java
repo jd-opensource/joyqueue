@@ -9,8 +9,8 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * BrokerStat
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/16
  */
 public class BrokerStat implements Serializable {

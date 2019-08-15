@@ -21,8 +21,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * TransactionCleaner
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/1/2
  */
 public class TransactionCleaner extends Service implements Runnable {

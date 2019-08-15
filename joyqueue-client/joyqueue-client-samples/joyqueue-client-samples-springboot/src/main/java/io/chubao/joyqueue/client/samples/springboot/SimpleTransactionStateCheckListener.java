@@ -6,8 +6,8 @@ import io.openmessaging.spring.boot.annotation.OMSTransactionStateCheckListener;
 
 /**
  * TransactionStateCheckListener1
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/3/8
  */
 @OMSTransactionStateCheckListener

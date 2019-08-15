@@ -2,8 +2,8 @@ package io.chubao.joyqueue.broker.monitor.model;
 
 /**
  * 入队
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/10/12
  */
 public class EnQueueStatPo extends BasePo {

@@ -2,8 +2,8 @@ package io.chubao.joyqueue.monitor;
 
 /**
  * ReplicationMonitorInfo
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/16
  */
 public class ReplicationMonitorInfo extends BaseMonitorInfo {

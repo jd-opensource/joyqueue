@@ -6,8 +6,8 @@ import io.openmessaging.interceptor.Context;
 
 /**
  * ContextAdapter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/3/1
  */
 public class ContextAdapter implements Context {

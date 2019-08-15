@@ -19,8 +19,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * CoordinatorSessionManager
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/9
  */
 public class CoordinatorSessionManager extends Service {

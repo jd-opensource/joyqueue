@@ -12,8 +12,8 @@ import java.util.concurrent.Executors;
 
 /**
  * TopicMessageConsumerScheduler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/25
  */
 public class TopicMessageConsumerScheduler extends Service implements Runnable {

@@ -4,8 +4,8 @@ import io.chubao.joyqueue.exception.JoyQueueCode;
 
 /**
  * JoyQueueException
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/5
  */
 public class JoyQueueException extends RuntimeException {

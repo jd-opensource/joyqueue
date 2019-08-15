@@ -2,8 +2,8 @@ package io.chubao.joyqueue.broker.monitor;
 
 /**
  * BrokerMonitorConsts
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/10/15
  */
 public class BrokerMonitorConsts {

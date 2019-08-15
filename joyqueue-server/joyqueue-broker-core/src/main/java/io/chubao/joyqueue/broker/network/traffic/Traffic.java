@@ -10,8 +10,8 @@ import java.util.Map;
 
 /**
  * Traffic
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/5/16
  */
 public class Traffic {

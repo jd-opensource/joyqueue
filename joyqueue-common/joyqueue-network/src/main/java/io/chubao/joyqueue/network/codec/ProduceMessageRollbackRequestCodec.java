@@ -10,8 +10,8 @@ import io.netty.buffer.ByteBuf;
 
 /**
  * ProduceMessageRollbackRequestCodec
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/19
  */
 public class ProduceMessageRollbackRequestCodec implements PayloadCodec<JoyQueueHeader, ProduceMessageRollbackRequest>, Type {

@@ -29,8 +29,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * DelayedHeartbeat
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/7
  */
 public class DelayedHeartbeat extends DelayedOperation {

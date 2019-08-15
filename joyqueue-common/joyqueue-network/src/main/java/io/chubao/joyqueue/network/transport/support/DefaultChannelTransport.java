@@ -28,8 +28,8 @@ import java.util.concurrent.CountDownLatch;
 
 /**
  * DefaultChannelTransport
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/14
  */
 public class DefaultChannelTransport implements ChannelTransport {

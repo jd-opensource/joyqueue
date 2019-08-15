@@ -39,8 +39,8 @@ import java.util.Map;
 
 /**
  * FetchClusterRequestHandler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/30
  */
 public class FetchClusterRequestHandler implements JoyQueueCommandHandler, Type, BrokerContextAware {

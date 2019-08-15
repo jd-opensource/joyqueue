@@ -45,8 +45,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * ProduceMessageRequestHandler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/19
  */
 public class ProduceMessageRequestHandler implements JoyQueueCommandHandler, Type, JoyQueueContextAware {

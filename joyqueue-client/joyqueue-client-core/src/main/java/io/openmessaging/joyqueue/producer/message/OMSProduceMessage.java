@@ -5,8 +5,8 @@ import io.openmessaging.message.Message;
 
 /**
  * OMSProduceMessage
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/3/1
  */
 public class OMSProduceMessage extends ProduceMessage {

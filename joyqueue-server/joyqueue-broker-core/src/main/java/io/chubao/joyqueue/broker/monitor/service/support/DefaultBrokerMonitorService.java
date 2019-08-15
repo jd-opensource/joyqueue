@@ -24,8 +24,8 @@ import java.util.Map;
 
 /**
  * DefaultBrokerMonitorService
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/10/15
  */
 public class DefaultBrokerMonitorService implements BrokerMonitorService {

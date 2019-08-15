@@ -9,8 +9,8 @@ import java.util.Map;
 
 /**
  * GroupMemberMetadata
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/5
  */
 public class GroupMemberMetadata extends io.chubao.joyqueue.broker.coordinator.group.domain.GroupMemberMetadata {

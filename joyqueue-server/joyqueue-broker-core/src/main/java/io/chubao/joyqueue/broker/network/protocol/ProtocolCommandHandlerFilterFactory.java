@@ -12,8 +12,8 @@ import java.util.List;
 
 /**
  * ProtocolCommandHandlerFilterFactory
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/5/16
  */
 public class ProtocolCommandHandlerFilterFactory implements CommandHandlerFilterFactory {

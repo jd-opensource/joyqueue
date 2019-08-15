@@ -2,8 +2,8 @@ package io.chubao.joyqueue.broker.manage.service;
 
 /**
  * CoordinatorManageService
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/4
  */
 public interface CoordinatorManageService {

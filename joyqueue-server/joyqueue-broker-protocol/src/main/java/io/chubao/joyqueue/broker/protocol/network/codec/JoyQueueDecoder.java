@@ -11,8 +11,8 @@ import io.netty.buffer.ByteBuf;
 
 /**
  * JoyQueueDecoder
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/6/27
  */
 public class JoyQueueDecoder extends DefaultDecoder {

@@ -14,8 +14,8 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * MetadataCacheManager
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/12
  */
 public class MetadataCacheManager {

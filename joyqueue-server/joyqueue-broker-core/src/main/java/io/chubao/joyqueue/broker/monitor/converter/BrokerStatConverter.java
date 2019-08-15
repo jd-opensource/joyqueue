@@ -23,8 +23,8 @@ import java.util.Map;
 
 /**
  * converter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/10/12
  */
 // TODO 优化，拆分小方法

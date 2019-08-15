@@ -5,8 +5,8 @@ import io.chubao.joyqueue.network.transport.exception.TransportException;
 
 /**
  * CommandHandlerFilter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/16
  */
 public interface CommandHandlerFilter {

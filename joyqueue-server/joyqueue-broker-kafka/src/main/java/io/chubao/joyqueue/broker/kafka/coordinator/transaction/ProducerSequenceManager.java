@@ -11,8 +11,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * ProducerSequenceManager
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/6/14
  */
 public class ProducerSequenceManager {

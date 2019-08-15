@@ -4,8 +4,8 @@ import java.util.List;
 
 /**
  * getPartitionAssignment
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/6
  */
 public class PartitionAssignment {

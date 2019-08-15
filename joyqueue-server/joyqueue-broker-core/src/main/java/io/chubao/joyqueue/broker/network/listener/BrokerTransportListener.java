@@ -9,8 +9,8 @@ import io.chubao.joyqueue.toolkit.concurrent.EventListener;
 
 /**
  * BrokerTransportListener
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/10/10
  */
 public class BrokerTransportListener implements EventListener<TransportEvent> {

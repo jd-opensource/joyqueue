@@ -4,8 +4,8 @@ import io.chubao.joyqueue.broker.kafka.KafkaCommandType;
 
 /**
  * AddOffsetsToTxnResponse
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/4
  */
 public class AddOffsetsToTxnResponse extends KafkaRequestOrResponse {

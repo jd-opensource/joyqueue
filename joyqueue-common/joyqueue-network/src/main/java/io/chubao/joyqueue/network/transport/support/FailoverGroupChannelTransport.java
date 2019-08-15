@@ -25,8 +25,8 @@ import java.util.function.Function;
 
 /**
  * FailoverGroupChannelTransport
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/7/22
  */
 public class FailoverGroupChannelTransport implements ChannelTransport {

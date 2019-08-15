@@ -5,8 +5,8 @@ import io.openmessaging.message.Message;
 
 /**
  * SimpleMessageListener
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/3/6
  */
 public class SimpleMessageListener implements MessageListener {

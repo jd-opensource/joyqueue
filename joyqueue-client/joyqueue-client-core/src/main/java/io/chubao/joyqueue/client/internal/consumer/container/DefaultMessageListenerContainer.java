@@ -23,8 +23,8 @@ import java.util.Map;
 
 /**
  * DefaultMessageListenerContainer
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/25
  */
 public class DefaultMessageListenerContainer extends Service implements MessageListenerContainer {

@@ -38,8 +38,8 @@ import java.util.Map;
 
 /**
  * FetchTopicMessageRequestHandler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/7
  */
 public class FetchTopicMessageRequestHandler implements JoyQueueCommandHandler, Type, JoyQueueContextAware {

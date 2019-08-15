@@ -4,8 +4,8 @@ import java.util.Map;
 
 /**
  * KafkaBrokerMessage
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/9
  */
 public class KafkaBrokerMessage {

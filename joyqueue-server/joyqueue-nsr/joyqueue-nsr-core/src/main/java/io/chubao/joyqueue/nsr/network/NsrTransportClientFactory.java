@@ -10,8 +10,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * 客户端工厂
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/9/21
  */
 public class NsrTransportClientFactory extends DefaultTransportClientFactory {

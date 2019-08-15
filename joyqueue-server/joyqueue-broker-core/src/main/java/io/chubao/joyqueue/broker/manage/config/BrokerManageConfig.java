@@ -8,8 +8,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * broker监控配置
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/10/10
  */
 public class BrokerManageConfig {

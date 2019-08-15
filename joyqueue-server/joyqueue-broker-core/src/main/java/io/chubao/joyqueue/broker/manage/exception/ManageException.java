@@ -2,8 +2,8 @@ package io.chubao.joyqueue.broker.manage.exception;
 
 /**
  * manage
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/10/12
  */
 public class ManageException extends RuntimeException {

@@ -10,8 +10,8 @@ import java.util.List;
 
 /**
  * TransactionMetadataManager
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/10
  */
 public class TransactionMetadataManager {

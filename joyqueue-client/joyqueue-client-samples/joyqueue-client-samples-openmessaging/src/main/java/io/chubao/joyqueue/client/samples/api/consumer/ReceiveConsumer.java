@@ -9,8 +9,8 @@ import io.openmessaging.message.Message;
 
 /**
  * ReceiveConsumer
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/2/20
  */
 public class ReceiveConsumer {

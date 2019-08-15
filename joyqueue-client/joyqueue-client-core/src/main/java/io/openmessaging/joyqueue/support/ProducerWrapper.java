@@ -16,8 +16,8 @@ import java.util.Optional;
 
 /**
  * ProducerWrapper
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/5/14
  */
 public class ProducerWrapper implements ExtensionProducer {

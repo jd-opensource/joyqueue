@@ -7,8 +7,8 @@ import io.openmessaging.spring.boot.annotation.OMSInterceptor;
 
 /**
  * SimpleProducerInterceptor
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/3/8
  */
 @OMSInterceptor

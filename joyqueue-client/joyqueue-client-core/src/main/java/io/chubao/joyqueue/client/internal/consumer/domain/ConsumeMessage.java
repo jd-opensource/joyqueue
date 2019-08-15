@@ -9,8 +9,8 @@ import java.util.Map;
 
 /**
  * ConsumeMessage
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/7
  */
 public class ConsumeMessage implements Serializable {

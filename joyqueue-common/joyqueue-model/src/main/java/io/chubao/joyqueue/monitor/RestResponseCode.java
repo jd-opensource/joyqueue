@@ -2,8 +2,8 @@ package io.chubao.joyqueue.monitor;
 
 /**
  * RestResponseCode
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/10/16
  */
 public enum RestResponseCode {

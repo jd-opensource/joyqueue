@@ -9,8 +9,8 @@ import io.openmessaging.joyqueue.domain.JoyQueueTxFeedbackBuiltinKeys;
 
 /**
  * JoyQueueBuiltinKeys
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/2/19
  */
 public interface JoyQueueBuiltinKeys extends OMSBuiltinKeys, JoyQueueNameServerBuiltinKeys, JoyQueueTransportBuiltinKeys,

@@ -20,8 +20,8 @@ import java.util.Map;
 
 /**
  * ClusterMetadataConverter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/3
  */
 public class ClusterMetadataConverter {

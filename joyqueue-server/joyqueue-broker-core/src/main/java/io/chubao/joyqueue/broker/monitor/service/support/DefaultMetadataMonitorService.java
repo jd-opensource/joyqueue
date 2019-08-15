@@ -8,8 +8,8 @@ import io.chubao.joyqueue.broker.monitor.service.MetadataMonitorService;
 
 /**
  * DefaultMetadataMonitorService
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/2/11
  */
 public class DefaultMetadataMonitorService implements MetadataMonitorService {

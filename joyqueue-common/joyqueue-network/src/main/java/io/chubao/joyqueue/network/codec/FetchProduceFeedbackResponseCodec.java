@@ -15,8 +15,8 @@ import java.util.List;
 
 /**
  * FetchProduceFeedbackResponseCodec
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/19
  */
 public class FetchProduceFeedbackResponseCodec implements PayloadCodec<JoyQueueHeader, FetchProduceFeedbackResponse>, Type {

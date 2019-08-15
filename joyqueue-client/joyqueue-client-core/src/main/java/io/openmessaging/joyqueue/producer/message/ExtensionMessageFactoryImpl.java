@@ -9,8 +9,8 @@ import org.apache.commons.lang3.StringUtils;
 
 /**
  * ExtensionMessageFactoryImpl
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/3/1
  */
 public class ExtensionMessageFactoryImpl implements ExtensionMessageFactory {

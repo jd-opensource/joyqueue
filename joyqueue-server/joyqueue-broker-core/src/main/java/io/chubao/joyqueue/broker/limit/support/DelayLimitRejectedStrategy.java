@@ -10,8 +10,8 @@ import io.chubao.joyqueue.toolkit.delay.DelayedOperationManager;
 
 /**
  * DelayLimitRejectedStrategy
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/5/16
  */
 public class DelayLimitRejectedStrategy implements LimitRejectedStrategy {

@@ -13,8 +13,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * AbstractLimitFilter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/5/16
  */
 public abstract class AbstractLimitFilter implements ProtocolCommandHandlerFilter {

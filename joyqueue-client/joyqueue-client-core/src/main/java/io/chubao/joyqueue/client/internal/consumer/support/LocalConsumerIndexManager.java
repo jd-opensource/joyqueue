@@ -21,8 +21,8 @@ import java.util.Map;
 
 /**
  * LocalConsumerIndexManager
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/14
  */
 // TODO 代码优化

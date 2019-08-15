@@ -7,8 +7,8 @@ import io.chubao.joyqueue.toolkit.retry.RetryPolicy;
 
 /**
  * ProducerConfig
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/10
  */
 public class ProducerConfig {

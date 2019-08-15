@@ -8,8 +8,8 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * connectionStat
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/10/11
  */
 public class ConnectionStat {

@@ -8,8 +8,8 @@ import io.netty.handler.codec.MessageToByteEncoder;
 
 /**
  * NettyEncoder
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/14
  */
 public class NettyEncoder extends MessageToByteEncoder {

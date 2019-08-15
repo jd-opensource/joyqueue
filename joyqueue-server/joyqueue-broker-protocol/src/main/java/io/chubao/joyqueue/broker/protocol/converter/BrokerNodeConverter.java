@@ -7,8 +7,8 @@ import org.apache.commons.lang3.StringUtils;
 
 /**
  * BrokerNodeConverter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/3
  */
 public class BrokerNodeConverter {

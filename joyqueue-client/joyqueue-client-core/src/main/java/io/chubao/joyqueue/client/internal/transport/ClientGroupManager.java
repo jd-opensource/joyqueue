@@ -18,8 +18,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * ClientGroupManager
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/29
  */
 public class ClientGroupManager extends Service {

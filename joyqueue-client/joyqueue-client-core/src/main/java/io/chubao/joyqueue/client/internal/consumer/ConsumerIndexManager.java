@@ -11,8 +11,8 @@ import java.util.Map;
 
 /**
  * ConsumerIndexManager
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/12
  */
 public interface ConsumerIndexManager extends LifeCycle {

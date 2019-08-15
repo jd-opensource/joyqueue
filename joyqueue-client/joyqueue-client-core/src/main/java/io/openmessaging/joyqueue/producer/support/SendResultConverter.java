@@ -7,8 +7,8 @@ import java.util.List;
 
 /**
  * SendResultConverter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/2/20
  */
 public class SendResultConverter {

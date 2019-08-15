@@ -5,8 +5,8 @@ import io.openmessaging.producer.TransactionStateCheckListener;
 
 /**
  * TransactionalContextAdapter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/2/19
  */
 public class TransactionalContextAdapter implements TransactionStateCheckListener.TransactionalContext {

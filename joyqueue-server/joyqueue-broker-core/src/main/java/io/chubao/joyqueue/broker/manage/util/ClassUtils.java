@@ -7,8 +7,8 @@ import java.lang.reflect.Type;
 
 /**
  * ClassUtils
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/21
  */
 public class ClassUtils {

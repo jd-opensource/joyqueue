@@ -9,8 +9,8 @@ import java.util.List;
 
 /**
  * FetchPartitionData
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/7
  */
 public class FetchPartitionMessageAckData {

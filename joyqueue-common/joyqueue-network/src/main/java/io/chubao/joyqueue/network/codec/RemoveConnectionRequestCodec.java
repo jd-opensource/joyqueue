@@ -9,8 +9,8 @@ import io.netty.buffer.ByteBuf;
 
 /**
  * RemoveConnectionRequestCodec
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/30
  */
 public class RemoveConnectionRequestCodec implements PayloadCodec<JoyQueueHeader, RemoveConnectionRequest>, Type {

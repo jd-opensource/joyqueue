@@ -4,8 +4,8 @@ import io.chubao.joyqueue.client.internal.exception.ClientException;
 
 /**
  * ProducerException
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/20
  */
 public class ProducerException extends ClientException {

@@ -5,8 +5,8 @@ import io.openmessaging.consumer.MessageReceipt;
 
 /**
  * BatchMessageListenerContextAdapter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/2/20
  */
 public class BatchMessageListenerContextAdapter implements BatchMessageListener.Context {

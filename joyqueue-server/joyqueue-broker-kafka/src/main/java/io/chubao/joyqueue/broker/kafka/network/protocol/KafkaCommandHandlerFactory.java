@@ -13,8 +13,8 @@ import java.util.List;
 
 /**
  * KafkaCommandHandlerFactory
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/14
  */
 public class KafkaCommandHandlerFactory extends DefaultCommandHandlerFactory {

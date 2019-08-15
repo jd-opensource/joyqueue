@@ -11,8 +11,8 @@ import io.netty.buffer.ByteBuf;
 
 /**
  * FetchProduceFeedbackRequestCodec
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/19
  */
 public class FetchProduceFeedbackRequestCodec implements PayloadCodec<JoyQueueHeader, FetchProduceFeedbackRequest>, Type {

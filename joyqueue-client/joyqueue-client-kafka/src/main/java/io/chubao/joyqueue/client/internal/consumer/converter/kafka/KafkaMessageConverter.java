@@ -22,8 +22,8 @@ import java.util.Map;
 
 /**
  * KafkaMessageConverter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/3
  */
 public class KafkaMessageConverter implements MessageConverter {

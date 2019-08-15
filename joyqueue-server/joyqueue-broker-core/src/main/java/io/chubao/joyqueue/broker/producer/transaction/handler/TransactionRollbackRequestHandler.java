@@ -18,8 +18,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * TransactionRollbackRequestHandler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/12
  */
 public class TransactionRollbackRequestHandler implements CommandHandler, Type {

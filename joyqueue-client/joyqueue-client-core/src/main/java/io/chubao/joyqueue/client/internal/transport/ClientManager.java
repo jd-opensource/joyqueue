@@ -23,8 +23,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * ClientManager
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/28
  */
 // TODO 引用处理

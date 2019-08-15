@@ -6,8 +6,8 @@ import io.chubao.joyqueue.network.transport.command.Command;
 
 /**
  * BlockLimitRejectedStrategy
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/5/16
  */
 public class BlockLimitRejectedStrategy implements LimitRejectedStrategy {

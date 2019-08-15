@@ -21,8 +21,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * MessageConsumerWrapper
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/1/10
  */
 public class MessageConsumerWrapper extends Service implements MessageConsumer {

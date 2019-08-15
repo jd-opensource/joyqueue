@@ -6,8 +6,8 @@ import java.util.Map;
 
 /**
  * ClusterMetadata
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/30
  */
 public class ClusterMetadata {

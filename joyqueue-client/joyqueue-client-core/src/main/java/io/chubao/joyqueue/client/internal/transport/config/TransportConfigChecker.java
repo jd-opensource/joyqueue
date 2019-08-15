@@ -4,8 +4,8 @@ import com.google.common.base.Preconditions;
 
 /**
  * TransportConfigChecker
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/2/19
  */
 public class TransportConfigChecker {

@@ -23,8 +23,8 @@ package io.chubao.joyqueue.toolkit.delay;
 
 /**
  * AbstractDelayedOperation
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/12
  */
 public abstract class AbstractDelayedOperation extends DelayedOperation {

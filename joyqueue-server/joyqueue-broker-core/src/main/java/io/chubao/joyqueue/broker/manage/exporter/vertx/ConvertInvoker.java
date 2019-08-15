@@ -13,8 +13,8 @@ import java.util.Map;
 
 /**
  * ConvertInvoker
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/21
  */
 public class ConvertInvoker extends HandlerInvoker {

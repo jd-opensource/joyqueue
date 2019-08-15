@@ -10,8 +10,8 @@ import io.netty.buffer.ByteBuf;
 
 /**
  * ProduceMessagePrepareRequestCodec
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/19
  */
 public class ProduceMessagePrepareRequestCodec implements PayloadCodec<JoyQueueHeader, ProduceMessagePrepareRequest>, Type {

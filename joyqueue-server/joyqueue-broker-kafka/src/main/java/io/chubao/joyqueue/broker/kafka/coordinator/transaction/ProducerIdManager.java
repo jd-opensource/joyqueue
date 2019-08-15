@@ -4,8 +4,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * ProducerIdManager
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/11
  */
 public class ProducerIdManager {

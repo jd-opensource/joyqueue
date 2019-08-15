@@ -9,8 +9,8 @@ import org.apache.commons.lang3.StringUtils;
 
 /**
  * AbstractExtensionAdapter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/3/1
  */
 public abstract class AbstractExtensionAdapter implements Extension {

@@ -4,8 +4,8 @@ import java.io.Serializable;
 
 /**
  * RestResponse
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/10/10
  */
 public class RestResponse<T> implements Serializable {

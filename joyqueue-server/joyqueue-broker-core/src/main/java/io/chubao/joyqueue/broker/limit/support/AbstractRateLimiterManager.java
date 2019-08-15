@@ -9,8 +9,8 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * AbstractRateLimiterManager
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/5/16
  */
 public abstract class AbstractRateLimiterManager implements RateLimitManager {

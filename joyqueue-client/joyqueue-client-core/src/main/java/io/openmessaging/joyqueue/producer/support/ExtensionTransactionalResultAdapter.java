@@ -17,8 +17,8 @@ import java.util.List;
 
 /**
  * ExtensionTransactionalResultAdapter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/3/4
  */
 public class ExtensionTransactionalResultAdapter implements ExtensionTransactionalResult {

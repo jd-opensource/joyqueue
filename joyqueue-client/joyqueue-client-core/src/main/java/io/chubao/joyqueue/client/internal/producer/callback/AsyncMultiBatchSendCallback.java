@@ -8,8 +8,8 @@ import java.util.Map;
 
 /**
  * AsyncMultiBatchSendCallback
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/20
  */
 public interface AsyncMultiBatchSendCallback {

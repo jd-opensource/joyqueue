@@ -38,8 +38,8 @@ import java.util.Map;
 
 /**
  * DelayedJoin
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/7
  */
 public class DelayedJoin extends DelayedOperation {

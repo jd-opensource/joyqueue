@@ -12,8 +12,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * brokerstat保存调度
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/10/10
  */
 public class BrokerStatSaveScheduler extends Service implements Runnable {

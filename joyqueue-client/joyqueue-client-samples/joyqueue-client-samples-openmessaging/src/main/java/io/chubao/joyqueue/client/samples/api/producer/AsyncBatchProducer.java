@@ -14,8 +14,8 @@ import java.util.List;
 
 /**
  * AsyncBatchProducer
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/8
  */
 public class AsyncBatchProducer {

@@ -18,8 +18,8 @@ import java.util.Map;
 
 /**
  * ConsumerCoordinator
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/6
  */
 public class ConsumerCoordinator extends Service {

@@ -27,8 +27,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * TransactionProduceHandler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/6
  */
 public class TransactionProduceHandler {

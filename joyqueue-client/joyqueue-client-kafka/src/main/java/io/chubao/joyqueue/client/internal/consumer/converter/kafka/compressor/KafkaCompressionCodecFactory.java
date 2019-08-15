@@ -13,8 +13,8 @@ import java.util.zip.GZIPOutputStream;
 
 /**
  * KafkaCompressionCodecFactory
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/9
  */
 public final class KafkaCompressionCodecFactory {

@@ -4,8 +4,8 @@ import io.openmessaging.consumer.MessageListener;
 
 /**
  * MessageListenerContextAdapter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/2/20
  */
 public class MessageListenerContextAdapter implements MessageListener.Context {

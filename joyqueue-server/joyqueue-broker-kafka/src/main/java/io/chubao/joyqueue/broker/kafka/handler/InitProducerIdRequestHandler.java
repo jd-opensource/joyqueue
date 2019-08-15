@@ -19,8 +19,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * InitProducerIdRequestHandler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/4
  */
 public class InitProducerIdRequestHandler implements KafkaCommandHandler, Type, KafkaContextAware {

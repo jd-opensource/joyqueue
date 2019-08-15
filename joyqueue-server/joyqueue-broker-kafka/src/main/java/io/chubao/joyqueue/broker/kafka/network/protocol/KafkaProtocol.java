@@ -44,8 +44,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * kafka协议
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/21
  */
 public class KafkaProtocol extends Service implements ProtocolService, BrokerContextAware, CommandHandlerProvider, ExceptionHandlerProvider {

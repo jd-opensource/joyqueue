@@ -5,8 +5,8 @@ import io.chubao.joyqueue.monitor.ConnectionMonitorInfo;
 
 /**
  * broker监控服务
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/10/10
  */
 public interface ConnectionMonitorService {

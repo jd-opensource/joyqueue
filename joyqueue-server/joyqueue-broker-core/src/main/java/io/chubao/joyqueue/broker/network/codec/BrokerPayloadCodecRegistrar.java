@@ -38,8 +38,8 @@ import io.chubao.joyqueue.server.retry.remote.command.codec.UpdateRetryCodec;
 
 /**
  * BrokerPayloadCodecRegistrar
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/21
  */
 // 使用BrokerPayloadCodec接口通过spi方式注册

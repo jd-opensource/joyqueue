@@ -5,8 +5,8 @@ import io.chubao.joyqueue.message.SourceType;
 
 /**
  * AbstractInternalMessageConverter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/24
  */
 public abstract class AbstractInternalMessageConverter implements MessageConverter {

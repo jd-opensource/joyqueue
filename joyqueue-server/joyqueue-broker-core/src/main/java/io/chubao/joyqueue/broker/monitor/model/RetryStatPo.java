@@ -2,8 +2,8 @@ package io.chubao.joyqueue.broker.monitor.model;
 
 /**
  * RetryStatPo
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/10/18
  */
 public class RetryStatPo {

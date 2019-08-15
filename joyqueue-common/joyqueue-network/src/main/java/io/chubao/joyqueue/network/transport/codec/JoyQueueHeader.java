@@ -10,8 +10,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * JoyQueueHeader
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/21
  */
 public class JoyQueueHeader implements Header {

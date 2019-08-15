@@ -7,8 +7,8 @@ import io.netty.channel.ChannelHandler;
 
 /**
  * DefaultMultiProtocolHandlerPipelineFactory
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/14
  */
 public class DefaultMultiProtocolHandlerPipelineFactory implements MultiProtocolHandlerPipelineFactory {

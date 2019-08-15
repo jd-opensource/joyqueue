@@ -18,8 +18,8 @@ import java.util.Map;
 
 /**
  * JoinGroupCodec
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/5
  */
 public class JoinGroupCodec implements KafkaPayloadCodec<JoinGroupResponse>, Type {

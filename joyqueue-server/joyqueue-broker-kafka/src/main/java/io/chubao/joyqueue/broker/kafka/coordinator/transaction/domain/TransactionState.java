@@ -2,8 +2,8 @@ package io.chubao.joyqueue.broker.kafka.coordinator.transaction.domain;
 
 /**
  * TransactionState
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/11
  */
 public enum TransactionState {

@@ -13,8 +13,8 @@ import java.util.List;
 
 /**
  * AddProducerRequestCodec
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/10
  */
 public class AddProducerRequestCodec implements PayloadCodec<JoyQueueHeader, AddProducerRequest>, Type {

@@ -6,8 +6,8 @@ import java.util.List;
 
 /**
  * ProduceMessageAckData
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/18
  */
 public class ProduceMessageAckData {

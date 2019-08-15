@@ -16,8 +16,8 @@ import java.util.Map;
 
 /**
  * MessageFetcherWrapper
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/27
  */
 public class MessageFetcherWrapper extends Service implements MessageFetcher {

@@ -14,8 +14,8 @@ import java.util.List;
 
 /**
  * MultiProtocolTransportServer
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/13
  */
 public class MultiProtocolTransportServer extends Service implements TransportServer {

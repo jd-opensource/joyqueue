@@ -6,8 +6,8 @@ import java.util.Map;
 
 /**
  * JoyQueueCommandType
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/28
  */
 public enum JoyQueueCommandType {

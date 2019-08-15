@@ -10,8 +10,8 @@ import java.io.OutputStream;
 
 /**
  * SnappyCompressor
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/2
  */
 public class SnappyCompressor implements Compressor {

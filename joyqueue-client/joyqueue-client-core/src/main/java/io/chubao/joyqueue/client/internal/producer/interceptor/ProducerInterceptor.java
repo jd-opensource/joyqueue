@@ -7,8 +7,8 @@ import java.util.List;
 
 /**
  * ProducerInterceptor
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/1/11
  */
 public interface ProducerInterceptor extends BaseInterceptor {

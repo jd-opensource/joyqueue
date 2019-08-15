@@ -5,8 +5,8 @@ import io.chubao.joyqueue.response.BooleanResponse;
 
 /**
  * MetadataMonitorService
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/2/11
  */
 public interface MetadataMonitorService {

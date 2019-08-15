@@ -15,8 +15,8 @@ import java.util.Map;
 
 /**
  * CommitAckResponseCodec
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/12
  */
 public class CommitAckResponseCodec implements PayloadCodec<JoyQueueHeader, CommitAckResponse>, Type {

@@ -11,8 +11,8 @@ import java.util.Map;
 
 /**
  * TopicMetadataConverter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/7
  */
 public class TopicMetadataConverter {

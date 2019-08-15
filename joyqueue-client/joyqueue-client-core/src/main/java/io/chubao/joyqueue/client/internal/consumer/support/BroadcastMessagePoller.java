@@ -19,8 +19,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * BroadcastMessagePoller
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/14
  */
 public class BroadcastMessagePoller extends Service implements MessagePoller {

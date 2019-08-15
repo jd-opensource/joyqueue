@@ -6,8 +6,8 @@ import io.chubao.joyqueue.broker.manage.service.CoordinatorManageService;
 
 /**
  * DefaultCoordinatorManageService
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/4
  */
 public class DefaultCoordinatorManageService implements CoordinatorManageService {

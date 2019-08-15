@@ -21,8 +21,8 @@
 //import java.util.Properties;
 //
 ///**
+// *
 // * author: gaohaoxiang
-// * email: gaohaoxiang@jd.com
 // * date: 2019/3/22
 // */
 //public class TransactionKafkaProducer {

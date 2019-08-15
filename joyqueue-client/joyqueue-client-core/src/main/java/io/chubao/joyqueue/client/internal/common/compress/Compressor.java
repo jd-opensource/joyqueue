@@ -7,8 +7,8 @@ import java.io.OutputStream;
 
 /**
  * Compressor
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/1/2
  */
 public interface Compressor extends Type<String> {

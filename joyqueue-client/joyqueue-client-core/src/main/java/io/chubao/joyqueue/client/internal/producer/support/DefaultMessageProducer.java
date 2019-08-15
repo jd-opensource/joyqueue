@@ -32,8 +32,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * DefaultMessageProducer
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/10
  */
 public class DefaultMessageProducer extends Service implements MessageProducer {

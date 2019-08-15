@@ -7,8 +7,8 @@ import java.util.List;
 
 /**
  * CoordinatorDetail
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/13
  */
 public class CoordinatorDetail {

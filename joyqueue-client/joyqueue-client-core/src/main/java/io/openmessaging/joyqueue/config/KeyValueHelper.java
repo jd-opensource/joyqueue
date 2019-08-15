@@ -4,8 +4,8 @@ import io.openmessaging.KeyValue;
 
 /**
  * KeyValueHelper
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/3/11
  */
 public class KeyValueHelper {

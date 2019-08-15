@@ -8,8 +8,8 @@ import java.util.List;
 
 /**
  * ExtensionManager
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/13
  */
 public class ExtensionManager extends Service {

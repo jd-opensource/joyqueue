@@ -8,8 +8,8 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * AppStat
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/16
  */
 public class AppStat implements Serializable {

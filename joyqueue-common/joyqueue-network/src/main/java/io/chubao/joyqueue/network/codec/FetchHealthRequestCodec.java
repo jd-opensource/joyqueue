@@ -9,8 +9,8 @@ import io.netty.buffer.ByteBuf;
 
 /**
  * FetchHealthRequestCodec
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/28
  */
 public class FetchHealthRequestCodec implements PayloadCodec<JoyQueueHeader, FetchHealthRequest>, Type {

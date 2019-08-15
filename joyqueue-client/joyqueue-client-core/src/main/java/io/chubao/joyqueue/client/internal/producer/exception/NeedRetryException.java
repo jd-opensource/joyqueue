@@ -2,8 +2,8 @@ package io.chubao.joyqueue.client.internal.producer.exception;
 
 /**
  * RetryException
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/26
  */
 public class NeedRetryException extends ProducerException {

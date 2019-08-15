@@ -4,8 +4,8 @@ import java.io.Serializable;
 
 /**
  * BrokerNode
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/29
  */
 public class BrokerNode implements Serializable {

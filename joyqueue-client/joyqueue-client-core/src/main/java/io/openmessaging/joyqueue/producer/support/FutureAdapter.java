@@ -5,8 +5,8 @@ import io.openmessaging.FutureListener;
 
 /**
  * FutureAdapter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/2/20
  */
 public class FutureAdapter<V> implements Future<V> {

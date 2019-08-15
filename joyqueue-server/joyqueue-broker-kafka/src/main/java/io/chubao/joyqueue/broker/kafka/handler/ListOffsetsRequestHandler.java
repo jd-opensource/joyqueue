@@ -25,8 +25,8 @@ import java.util.Map;
 
 /**
  * ListOffsetsRequestHandler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/5
  */
 public class ListOffsetsRequestHandler extends AbstractKafkaCommandHandler implements KafkaContextAware {

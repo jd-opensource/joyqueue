@@ -11,8 +11,8 @@ import io.chubao.joyqueue.client.internal.nameserver.NameServerConfig;
 import io.chubao.joyqueue.toolkit.service.Service;
 
 /**
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/27
  */
 public class MessageListenerContainerWrapper extends Service implements MessageListenerContainer {

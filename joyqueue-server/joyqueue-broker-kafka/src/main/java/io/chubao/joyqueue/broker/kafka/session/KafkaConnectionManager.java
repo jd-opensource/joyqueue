@@ -20,8 +20,8 @@ import java.net.SocketAddress;
 
 /**
  * kafka连接管理器
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/7/3
  */
 public class KafkaConnectionManager {

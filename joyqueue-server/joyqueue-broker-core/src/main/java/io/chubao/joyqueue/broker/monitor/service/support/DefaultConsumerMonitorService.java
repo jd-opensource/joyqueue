@@ -29,8 +29,8 @@ import java.util.Map;
 
 /**
  * ConsumerMonitorService
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/10/15
  */
 public class DefaultConsumerMonitorService implements ConsumerMonitorService {

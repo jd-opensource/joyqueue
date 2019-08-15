@@ -8,8 +8,8 @@ import java.util.Map;
 
 /**
  * ConsoleProducerConfig
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/6/26
  */
 public class ConsoleProducerConfig {

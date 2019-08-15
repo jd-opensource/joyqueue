@@ -2,8 +2,8 @@ package io.chubao.joyqueue.broker.protocol;
 
 /**
  * JoyQueueConsts
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/27
  */
 public class JoyQueueConsts {

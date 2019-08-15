@@ -20,8 +20,8 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * GroupMetadata
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/4
  */
 public class GroupMetadata extends io.chubao.joyqueue.broker.coordinator.group.domain.GroupMetadata {

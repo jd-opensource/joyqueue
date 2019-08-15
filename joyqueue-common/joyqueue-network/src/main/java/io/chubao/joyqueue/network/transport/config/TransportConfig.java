@@ -7,8 +7,8 @@ import io.chubao.joyqueue.toolkit.retry.RetryPolicy;
 
 /**
  * TransportConfig
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/13
  */
 public class TransportConfig {

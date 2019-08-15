@@ -7,8 +7,8 @@ import io.chubao.joyqueue.domain.ProducerPolicy;
 
 /**
  * PolicyConverter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/26
  */
 public class PolicyConverter {

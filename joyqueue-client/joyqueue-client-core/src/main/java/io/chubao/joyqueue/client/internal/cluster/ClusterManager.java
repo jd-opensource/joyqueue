@@ -18,8 +18,8 @@ import java.util.Map;
 
 /**
  * ClusterManager
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/28
  */
 public class ClusterManager extends Service {

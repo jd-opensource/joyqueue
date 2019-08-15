@@ -17,8 +17,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * DefaultRateLimiterManager
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/5/17
  */
 public class DefaultRateLimiterManager extends AbstractRateLimiterManager implements EventListener<MetaEvent> {

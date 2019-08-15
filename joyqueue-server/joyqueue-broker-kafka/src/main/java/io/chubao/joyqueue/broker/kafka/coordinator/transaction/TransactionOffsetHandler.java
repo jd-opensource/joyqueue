@@ -24,8 +24,8 @@ import java.util.Set;
 
 /**
  * TransactionOffsetHandler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/16
  */
 public class TransactionOffsetHandler extends Service {

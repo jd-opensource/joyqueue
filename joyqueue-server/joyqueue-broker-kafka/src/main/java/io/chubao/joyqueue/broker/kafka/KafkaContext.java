@@ -9,8 +9,8 @@ import io.chubao.joyqueue.broker.kafka.coordinator.transaction.TransactionIdMana
 
 /**
  * KafkaContext
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/7
  */
 public class KafkaContext {

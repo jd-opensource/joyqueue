@@ -20,8 +20,8 @@ import java.util.Map;
 
 /**
  * ProduceCodec
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/5
  */
 public class ProduceCodec implements KafkaPayloadCodec<ProduceResponse>, Type {

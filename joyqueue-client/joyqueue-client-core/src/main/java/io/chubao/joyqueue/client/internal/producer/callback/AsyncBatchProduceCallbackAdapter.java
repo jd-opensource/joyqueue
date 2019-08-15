@@ -7,8 +7,8 @@ import java.util.List;
 
 /**
  * AsyncBatchProduceCallbackAdapter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/27
  */
 public class AsyncBatchProduceCallbackAdapter implements AsyncBatchProduceCallback {

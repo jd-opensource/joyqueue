@@ -29,8 +29,8 @@ import java.util.Map;
 
 /**
  * DefaultConsumerIndexManager
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/12
  */
 // TODO 优化代码

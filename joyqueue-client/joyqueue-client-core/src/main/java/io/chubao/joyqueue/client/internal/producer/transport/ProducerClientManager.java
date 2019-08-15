@@ -13,8 +13,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * ProducerClientManager
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/28
  */
 public class ProducerClientManager extends Service {

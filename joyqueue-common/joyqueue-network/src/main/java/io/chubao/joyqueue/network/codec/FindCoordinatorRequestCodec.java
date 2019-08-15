@@ -13,8 +13,8 @@ import java.util.List;
 
 /**
  * FindCoordinatorRequestCodec
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/3
  */
 public class FindCoordinatorRequestCodec implements PayloadCodec<JoyQueueHeader, FindCoordinatorRequest>, Type {

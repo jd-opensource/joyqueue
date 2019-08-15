@@ -8,8 +8,8 @@ import java.util.Map;
 
 /**
  * CoordinatorMonitorService
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/4
  */
 public interface CoordinatorMonitorService {

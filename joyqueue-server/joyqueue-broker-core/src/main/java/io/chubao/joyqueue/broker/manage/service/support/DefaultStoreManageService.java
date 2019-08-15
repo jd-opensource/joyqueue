@@ -21,8 +21,8 @@ import java.util.stream.Collectors;
 
 /**
  * StoreManageService
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/10/18
  */
 public class DefaultStoreManageService implements StoreManageService {

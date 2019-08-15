@@ -2,8 +2,8 @@ package io.chubao.joyqueue.client.internal.exception;
 
 /**
  * ClientException
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/29
  */
 public class ClientException extends RuntimeException {

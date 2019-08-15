@@ -2,8 +2,8 @@ package io.chubao.joyqueue.network.protocol;
 
 /**
  * ProtocolException
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/9/14
  */
 public class ProtocolException extends RuntimeException {

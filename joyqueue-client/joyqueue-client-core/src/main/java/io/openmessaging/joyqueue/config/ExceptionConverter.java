@@ -11,8 +11,8 @@ import io.openmessaging.exception.OMSTimeOutException;
 
 /**
  * ClientExceptionConverter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/2/19
  */
 public class ExceptionConverter {

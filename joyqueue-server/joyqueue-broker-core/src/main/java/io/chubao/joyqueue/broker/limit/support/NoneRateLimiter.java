@@ -4,8 +4,8 @@ import io.chubao.joyqueue.broker.limit.RateLimiter;
 
 /**
  * NoneRateLimiter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/5/17
  */
 public class NoneRateLimiter implements RateLimiter {

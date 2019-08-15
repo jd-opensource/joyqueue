@@ -6,8 +6,8 @@ import java.util.List;
 
 /**
  * RemoveProducerRequest
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/10
  */
 public class RemoveProducerRequest extends JoyQueuePayload {

@@ -20,8 +20,8 @@ import io.netty.buffer.ByteBuf;
 
 /**
  * JoyQueueProtocol
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/27
  */
 public class JoyQueueProtocol extends Service implements ProtocolService, BrokerContextAware, ExceptionHandlerProvider {

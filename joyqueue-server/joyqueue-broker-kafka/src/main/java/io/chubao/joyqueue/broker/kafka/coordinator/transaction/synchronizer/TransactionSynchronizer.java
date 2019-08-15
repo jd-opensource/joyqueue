@@ -20,8 +20,8 @@ import java.util.Set;
 
 /**
  * TransactionSynchronizer
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/12
  */
 public class TransactionSynchronizer extends Service {

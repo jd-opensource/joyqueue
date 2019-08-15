@@ -9,8 +9,8 @@ import java.util.Properties;
 
 /**
  * SystemConfigLoader
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/6/26
  */
 public class SystemConfigLoader {

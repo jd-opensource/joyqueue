@@ -19,8 +19,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * RemoveConsumerRequestHandler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/28
  */
 public class RemoveConsumerRequestHandler implements JoyQueueCommandHandler, Type, BrokerContextAware {

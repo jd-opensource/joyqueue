@@ -10,8 +10,8 @@ import java.util.List;
 
 /**
  * BatchMessageListenerAdapter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/2/20
  */
 public class BatchMessageListenerAdapter implements BatchMessageListener {

@@ -8,8 +8,8 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * CompletableFutureAsyncBatchProduceCallback
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/7/25
  */
 public class CompletableFutureAsyncBatchProduceCallback implements AsyncBatchProduceCallback {

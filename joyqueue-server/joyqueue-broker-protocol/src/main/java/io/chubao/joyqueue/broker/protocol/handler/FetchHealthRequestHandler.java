@@ -9,8 +9,8 @@ import io.chubao.joyqueue.network.transport.command.Type;
 
 /**
  * FetchHealthRequestHandler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/28
  */
 public class FetchHealthRequestHandler implements JoyQueueCommandHandler, Type {

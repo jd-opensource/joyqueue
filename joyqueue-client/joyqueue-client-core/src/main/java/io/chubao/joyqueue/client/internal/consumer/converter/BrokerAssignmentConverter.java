@@ -14,8 +14,8 @@ import java.util.Map;
 
 /**
  * BrokerAssignmentConverter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/17
  */
 public class BrokerAssignmentConverter {

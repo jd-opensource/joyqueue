@@ -12,8 +12,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * WeightedRoundRobinPartitionSelector
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/27
  */
 @Extension(singleton = false)

@@ -15,8 +15,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * TxFeedbackScheduler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/24
  */
 public class TxFeedbackScheduler extends Service {

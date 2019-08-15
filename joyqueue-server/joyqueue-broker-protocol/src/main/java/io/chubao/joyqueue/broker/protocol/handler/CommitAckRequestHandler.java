@@ -40,8 +40,8 @@ import java.util.Map;
 
 /**
  * CommitAckRequestHandler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/12
  */
 public class CommitAckRequestHandler implements JoyQueueCommandHandler, Type, BrokerContextAware {

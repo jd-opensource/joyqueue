@@ -14,8 +14,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * ProduceHandler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/6
  */
 public class ProduceHandler {

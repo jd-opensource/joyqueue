@@ -2,8 +2,8 @@ package io.chubao.joyqueue.broker.kafka.coordinator.transaction;
 
 /**
  * TransactionIdManager
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/12
  */
 public class TransactionIdManager {

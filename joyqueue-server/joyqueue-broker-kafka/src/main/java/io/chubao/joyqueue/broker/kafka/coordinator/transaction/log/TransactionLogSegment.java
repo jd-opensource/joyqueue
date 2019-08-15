@@ -23,8 +23,8 @@ import java.util.List;
 
 /**
  * TransactionLogSegment
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/25
  */
 public class TransactionLogSegment {

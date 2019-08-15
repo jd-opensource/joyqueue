@@ -11,8 +11,8 @@ import io.netty.buffer.ByteBuf;
 
 /**
  * EndTxnCodec
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/4
  */
 public class EndTxnCodec implements KafkaPayloadCodec<EndTxnResponse>, Type {

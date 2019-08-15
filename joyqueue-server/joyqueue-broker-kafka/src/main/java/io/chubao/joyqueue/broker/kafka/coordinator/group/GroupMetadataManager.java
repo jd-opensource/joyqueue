@@ -9,8 +9,8 @@ import java.util.List;
 
 /**
  * GroupMetadataManager
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/5
  */
 public class GroupMetadataManager {

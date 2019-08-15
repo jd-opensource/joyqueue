@@ -8,8 +8,8 @@ import java.util.List;
 
 /**
  * JoyQueueToKafkaMessageConverter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/3
  */
 public class JoyQueueToKafkaMessageConverter extends AbstarctKafkaMessageConverter {

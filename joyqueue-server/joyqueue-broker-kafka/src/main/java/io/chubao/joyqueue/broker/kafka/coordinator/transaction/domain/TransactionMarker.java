@@ -2,8 +2,8 @@ package io.chubao.joyqueue.broker.kafka.coordinator.transaction.domain;
 
 /**
  * TransactionMarker
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/15
  */
 public class TransactionMarker extends TransactionDomain {

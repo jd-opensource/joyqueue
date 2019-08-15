@@ -26,8 +26,8 @@ import java.util.Set;
 
 /**
  * FetchClusterResponseCodec
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/30
  */
 public class FetchClusterResponseCodec implements PayloadCodec<JoyQueueHeader, FetchClusterResponse>, Type {

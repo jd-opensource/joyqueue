@@ -11,8 +11,8 @@ import java.util.List;
 
 /**
  * CommandHandlerInvocation
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/16
  */
 public class CommandHandlerInvocation {

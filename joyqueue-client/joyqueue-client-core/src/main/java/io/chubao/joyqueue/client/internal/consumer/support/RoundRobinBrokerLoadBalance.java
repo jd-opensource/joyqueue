@@ -10,8 +10,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * RoundRobinBrokerLoadBalance
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/11
  */
 @Extension(singleton = false)

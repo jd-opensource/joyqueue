@@ -7,8 +7,8 @@ import java.util.List;
 
 /**
  * TransactionCommitRequest
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/12
  */
 public class TransactionCommitRequest extends JoyQueuePayload {

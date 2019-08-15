@@ -4,8 +4,8 @@ import io.chubao.joyqueue.broker.kafka.message.exception.UnknownCodecException;
 
 /**
  * KafkaCompressionCodec
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/6
  */
 public enum KafkaCompressionCodec {

@@ -33,8 +33,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * MessagingAccessPointImpl
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/2/18
  */
 public class MessagingAccessPointImpl implements MessagingAccessPoint {

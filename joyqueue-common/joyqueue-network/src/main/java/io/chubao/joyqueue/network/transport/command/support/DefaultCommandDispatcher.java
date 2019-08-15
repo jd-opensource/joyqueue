@@ -12,8 +12,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * DefaultCommandDispatcher
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/13
  */
 public class DefaultCommandDispatcher implements CommandDispatcher {

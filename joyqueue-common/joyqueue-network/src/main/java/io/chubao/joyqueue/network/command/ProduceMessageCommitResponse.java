@@ -5,8 +5,8 @@ import io.chubao.joyqueue.network.transport.command.JoyQueuePayload;
 
 /**
  * ProduceMessageCommitResponse
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/18
  */
 public class ProduceMessageCommitResponse extends JoyQueuePayload {

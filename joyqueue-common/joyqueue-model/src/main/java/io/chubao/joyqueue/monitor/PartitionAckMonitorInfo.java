@@ -2,8 +2,8 @@ package io.chubao.joyqueue.monitor;
 
 /**
  * PartitionAckMonitorInfo
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/30
  */
 public class PartitionAckMonitorInfo extends BaseMonitorInfo {

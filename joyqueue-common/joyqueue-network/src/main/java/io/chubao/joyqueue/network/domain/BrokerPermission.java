@@ -2,8 +2,8 @@ package io.chubao.joyqueue.network.domain;
 
 /**
  * BrokerPermission
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/6/27
  */
 public class BrokerPermission {

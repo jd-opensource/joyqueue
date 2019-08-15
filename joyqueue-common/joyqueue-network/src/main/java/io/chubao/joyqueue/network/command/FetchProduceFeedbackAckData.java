@@ -2,8 +2,8 @@ package io.chubao.joyqueue.network.command;
 
 /**
  * FetchProduceFeedbackAckData
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/18
  */
 public class FetchProduceFeedbackAckData {

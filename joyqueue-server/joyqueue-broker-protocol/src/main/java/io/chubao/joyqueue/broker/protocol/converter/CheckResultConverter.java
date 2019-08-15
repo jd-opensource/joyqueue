@@ -6,8 +6,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * CheckResultConverter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/1/3
  */
 public class CheckResultConverter {

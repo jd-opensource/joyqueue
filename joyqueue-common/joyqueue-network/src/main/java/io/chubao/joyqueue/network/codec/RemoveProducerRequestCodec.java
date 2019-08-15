@@ -13,8 +13,8 @@ import java.util.List;
 
 /**
  * RemoveProducerRequestCodec
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/10
  */
 public class RemoveProducerRequestCodec implements PayloadCodec<JoyQueueHeader, RemoveProducerRequest>, Type {

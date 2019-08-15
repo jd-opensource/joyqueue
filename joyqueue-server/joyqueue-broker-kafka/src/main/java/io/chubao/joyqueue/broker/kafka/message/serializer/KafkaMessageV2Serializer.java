@@ -16,8 +16,8 @@ import java.util.Map;
 
 /**
  * KafkaMessageV2Serializer
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/11
  */
 public class KafkaMessageV2Serializer extends AbstractKafkaMessageSerializer {

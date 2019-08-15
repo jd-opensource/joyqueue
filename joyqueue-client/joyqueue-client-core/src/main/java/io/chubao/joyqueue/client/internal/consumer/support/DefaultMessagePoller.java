@@ -36,8 +36,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * DefaultMessagePoller
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/11
  */
 public class DefaultMessagePoller extends Service implements MessagePoller {

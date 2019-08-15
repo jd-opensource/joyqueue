@@ -8,8 +8,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * 异常处理
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/9/17
  */
 public class BrokerExceptionHandler implements ExceptionHandler {

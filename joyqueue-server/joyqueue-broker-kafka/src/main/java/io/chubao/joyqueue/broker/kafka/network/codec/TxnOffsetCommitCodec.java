@@ -18,8 +18,8 @@ import java.util.Map;
 
 /**
  * TxnOffsetCommitCodec
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/4
  */
 public class TxnOffsetCommitCodec implements KafkaPayloadCodec<TxnOffsetCommitResponse>, Type {

@@ -22,8 +22,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * ConsumerLocalIndexStore
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/14
  */
 public class ConsumerLocalIndexStore extends Service {

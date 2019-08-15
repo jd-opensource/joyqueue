@@ -18,8 +18,8 @@ import java.util.Map;
 
 /**
  * kafka连接处理
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/7/3
  */
 @ChannelHandler.Sharable

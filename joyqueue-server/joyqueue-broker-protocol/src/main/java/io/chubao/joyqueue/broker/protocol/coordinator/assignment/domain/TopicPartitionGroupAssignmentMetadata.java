@@ -6,8 +6,8 @@ import java.util.Map;
 
 /**
  * TopicPartitionGroupAssignmentMetadata
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/5
  */
 public class TopicPartitionGroupAssignmentMetadata {

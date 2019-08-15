@@ -5,8 +5,8 @@ import java.util.Set;
 
 /**
  * ProducerPolicy
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/26
  */
 public class ProducerPolicy {

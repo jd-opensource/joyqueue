@@ -22,8 +22,8 @@ import java.util.Set;
 
 /**
  * TopicMetadataCodec
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/5
  */
 public class TopicMetadataCodec implements KafkaPayloadCodec<TopicMetadataResponse>, Type {

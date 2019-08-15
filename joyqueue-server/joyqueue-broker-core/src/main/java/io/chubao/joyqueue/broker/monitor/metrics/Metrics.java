@@ -8,8 +8,8 @@ import com.codahale.metrics.Snapshot;
 
 /**
  * metrics
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/10/11
  */
 public class Metrics {

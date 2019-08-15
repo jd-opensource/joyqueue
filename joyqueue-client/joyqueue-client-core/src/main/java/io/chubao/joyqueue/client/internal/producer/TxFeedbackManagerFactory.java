@@ -14,8 +14,8 @@ import io.chubao.joyqueue.client.internal.transport.config.TransportConfig;
 
 /**
  * TxFeedbackManagerFactory
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/1/3
  */
 public class TxFeedbackManagerFactory {

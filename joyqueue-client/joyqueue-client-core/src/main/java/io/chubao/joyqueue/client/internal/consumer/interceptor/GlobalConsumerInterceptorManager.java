@@ -9,8 +9,8 @@ import java.util.stream.StreamSupport;
 
 /**
  * GlobalConsumerInterceptorManager
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/1/11
  */
 public class GlobalConsumerInterceptorManager {

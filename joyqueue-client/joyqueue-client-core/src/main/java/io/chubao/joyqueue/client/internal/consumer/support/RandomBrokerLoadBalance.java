@@ -9,8 +9,8 @@ import java.util.List;
 
 /**
  * RandomBrokerLoadBalance
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/12
  */
 public class RandomBrokerLoadBalance implements BrokerLoadBalance {

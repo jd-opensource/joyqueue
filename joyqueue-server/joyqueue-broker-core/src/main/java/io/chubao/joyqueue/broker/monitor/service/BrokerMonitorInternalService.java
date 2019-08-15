@@ -6,8 +6,8 @@ import io.chubao.joyqueue.monitor.BrokerStartupInfo;
 
 /**
  * broker monitor service
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/10/15
  */
 public interface BrokerMonitorInternalService {

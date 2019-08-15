@@ -6,8 +6,8 @@ import java.util.Map;
 
 /**
  * KafkaCommandType
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/5
  */
 public enum KafkaCommandType {

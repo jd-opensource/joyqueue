@@ -17,8 +17,8 @@ import java.util.Map;
 
 /**
  * AddPartitionsToTxnCodec
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/4
  */
 public class AddPartitionsToTxnCodec implements KafkaPayloadCodec<AddPartitionsToTxnResponse>, Type {

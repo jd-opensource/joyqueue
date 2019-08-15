@@ -12,8 +12,8 @@ import java.util.List;
 
 /**
  * KafkaCodecFactory
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/21
  */
 public class KafkaCodecFactory implements CodecFactory {

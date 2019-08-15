@@ -10,8 +10,8 @@ import java.util.Set;
 
 /**
  * ContextAttributeAdapter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/3/1
  */
 // TODO 缺少默认值方法

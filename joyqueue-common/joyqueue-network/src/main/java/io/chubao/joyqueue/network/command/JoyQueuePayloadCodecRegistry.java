@@ -47,8 +47,8 @@ import io.chubao.joyqueue.network.transport.codec.PayloadCodecFactory;
 
 /**
  * JoyQueuePayloadCodecRegistry
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/28
  */
 public class JoyQueuePayloadCodecRegistry {

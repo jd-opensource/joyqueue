@@ -10,8 +10,8 @@ import java.util.List;
 
 /**
  * ConnectionManageService
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/10/18
  */
 public class DefaultConnectionManageService implements ConnectionManageService {

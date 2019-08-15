@@ -17,8 +17,8 @@ import java.util.List;
 
 /**
  * kafka消息和broker消息的转换
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/8/28
  */
 public class KafkaMessageConverter {

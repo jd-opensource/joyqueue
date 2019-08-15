@@ -16,8 +16,8 @@ import java.util.Map;
 
 /**
  * FindCoordinatorResponseCodec
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/3
  */
 public class FindCoordinatorResponseCodec implements PayloadCodec<JoyQueueHeader, FindCoordinatorResponse>, Type {

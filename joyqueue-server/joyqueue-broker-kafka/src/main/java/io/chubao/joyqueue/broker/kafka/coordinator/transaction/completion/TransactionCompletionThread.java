@@ -5,8 +5,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * TransactionCompletionThread
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/22
  */
 public class TransactionCompletionThread implements Runnable {

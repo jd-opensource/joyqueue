@@ -20,8 +20,8 @@ import io.chubao.joyqueue.server.retry.remote.handler.RemoteRetryMessageHandler;
 
 /**
  * BrokerCommandHandlerRegistrar
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/9/17
  */
 // 用BrokerCommandHandler作为处理接口，通过spi方式加载

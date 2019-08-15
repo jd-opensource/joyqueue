@@ -30,8 +30,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * ProduceMessagePrepareRequestHandler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/19
  */
 public class ProduceMessagePrepareRequestHandler implements JoyQueueCommandHandler, Type, BrokerContextAware {

@@ -14,8 +14,8 @@ import org.apache.commons.lang3.StringUtils;
 
 /**
  * FindCoordinatorRequestCodec
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/11/5
  */
 public class FindCoordinatorCodec implements KafkaPayloadCodec<FindCoordinatorResponse>, Type {

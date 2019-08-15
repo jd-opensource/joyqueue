@@ -18,8 +18,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * EndTxnRequestHandler
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/4
  */
 public class EndTxnRequestHandler implements KafkaCommandHandler, Type, KafkaContextAware {

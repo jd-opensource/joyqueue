@@ -9,8 +9,8 @@ import java.util.List;
 
 /**
  * JoyQueueToInternalMessageConverter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/4/24
  */
 public class JoyQueueToInternalMessageConverter extends AbstractInternalMessageConverter {
