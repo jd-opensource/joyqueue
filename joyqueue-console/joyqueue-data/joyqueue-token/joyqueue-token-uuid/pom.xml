@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
+    Copyright 2019 The JoyQueue Authors.
+
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -19,7 +21,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>joyqueue-token</artifactId>
-        <groupId>io.chubao.joyqueue</groupId>
+        <groupId>io.chubao</groupId>
         <version>4.1.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -31,7 +33,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.chubao.joyqueue</groupId>
+            <groupId>io.chubao</groupId>
             <artifactId>joyqueue-token-api</artifactId>
         </dependency>
     </dependencies>

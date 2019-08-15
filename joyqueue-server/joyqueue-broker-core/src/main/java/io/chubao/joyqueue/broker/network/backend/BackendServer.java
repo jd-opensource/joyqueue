@@ -1,4 +1,6 @@
 /**
+ * Copyright 2019 The JoyQueue Authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,8 +31,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * 后端服务
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/9/17
  */
 public class BackendServer extends Service {

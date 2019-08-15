@@ -1,4 +1,6 @@
 /**
+ * Copyright 2019 The JoyQueue Authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,8 +44,8 @@ import java.util.Map;
 
 /**
  * DefaultConsumerIndexManager
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/12
  */
 // TODO 优化代码

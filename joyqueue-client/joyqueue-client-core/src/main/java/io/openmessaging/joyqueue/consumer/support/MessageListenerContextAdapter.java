@@ -1,4 +1,6 @@
 /**
+ * Copyright 2019 The JoyQueue Authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,8 +19,8 @@ import io.openmessaging.consumer.MessageListener;
 
 /**
  * MessageListenerContextAdapter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/2/20
  */
 public class MessageListenerContextAdapter implements MessageListener.Context {

@@ -1,4 +1,6 @@
 /**
+ * Copyright 2019 The JoyQueue Authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,8 +25,8 @@ import io.netty.buffer.ByteBuf;
 
 /**
  * ProduceMessageCommitRequestCodec
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/12/19
  */
 public class ProduceMessageCommitRequestCodec implements PayloadCodec<JoyQueueHeader, ProduceMessageCommitRequest>, Type {

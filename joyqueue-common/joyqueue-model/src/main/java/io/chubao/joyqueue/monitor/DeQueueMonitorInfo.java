@@ -1,4 +1,6 @@
 /**
+ * Copyright 2019 The JoyQueue Authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,8 +17,8 @@ package io.chubao.joyqueue.monitor;
 
 /**
  * 出队信息
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/10/11
  */
 public class DeQueueMonitorInfo extends BaseMonitorInfo {

@@ -1,4 +1,6 @@
 /**
+ * Copyright 2019 The JoyQueue Authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,8 +37,8 @@ import static com.jd.laf.web.vertx.config.VertxConfig.Builder.inherit;
 
 /**
  * RoutingVerticle
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2018/10/16
  */
 public class RoutingVerticle extends com.jd.laf.web.vertx.RoutingVerticle {
