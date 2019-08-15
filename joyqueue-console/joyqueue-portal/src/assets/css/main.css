@@ -1,27 +1,14 @@
-/**
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 @charset "utf-8";
 /* CSS Document */
 
-.search .el-input__inner, 
-.search .el-input-group__prepend, 
+.search .el-input__inner,
+.search .el-input-group__prepend,
 .search .el-input-group__append,
 .search .el-select-dropdown,
 .search .el-button{
   border-radius: 0;
 }
-.search .el-input-group__append, 
+.search .el-input-group__append,
 .search .el-input-group__prepend{
   background-color: #eff2f7; color: #000; font-size: 16px; border: none;
 }
@@ -42,7 +29,7 @@
 .el-table td, .el-table th{padding-top: 6px;padding-bottom: 6px;}
 .el-table th{background-color: #eff2f7; color: #000; font-size: 16px;}
 
-.table-operates .el-button:first-child:focus, 
+.table-operates .el-button:first-child:focus,
 .table-operates .el-button:first-child:hover{
 	color: #606266;
 	background-color: #fff;
@@ -53,7 +40,7 @@
 
 .el-pagination{margin-top: 10px; text-align: right;}
 .el-pagination .btn-prev{border: 1px solid #e9edf3; border-right: 0}
-.el-pagination .btn-next{border: 1px solid #e9edf3;} 
+.el-pagination .btn-next{border: 1px solid #e9edf3;}
 .el-pager li{border: 1px solid #e9edf3; background-color: #fff; border-right: 0;}
 .el-pager li.active{ color: #fff; background-color: #50bfff;}
 
