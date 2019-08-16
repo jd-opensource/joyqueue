@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -17,7 +18,7 @@ import java.util.List;
 public class JournalkeeperConfig {
 
     private static final String NODE_SPLITTER = ",";
-    private static final String WORING_DIR = "/journalkeeper_nameserver";
+    private static final String DEFAULT_WORKING_DIR = "/journalkeeper_nameserver";
 
     protected static final Logger logger = LoggerFactory.getLogger(JournalkeeperConfig.class);
 
@@ -35,12 +36,20 @@ public class JournalkeeperConfig {
         return PropertySupplier.getValue(propertySupplier, JournalkeeperConfigKey.ROLE);
     }
 
+    public String getLocal() {
+        return PropertySupplier.getValue(propertySupplier, JournalkeeperConfigKey.LOCAL);
+    }
+
     public List<String> getNodes() {
         String nodes = PropertySupplier.getValue(propertySupplier, JournalkeeperConfigKey.NODES);
         if (StringUtils.isBlank(nodes)) {
-            return null;
+            return Collections.emptyList();
         }
         return Arrays.asList(nodes.split(NODE_SPLITTER));
+    }
+
+    public int getWaitLeaderTimeout() {
+        return PropertySupplier.getValue(propertySupplier, JournalkeeperConfigKey.WAIT_LEADER_TIMEOUT);
     }
 
     public String getWorkingDir() {
@@ -48,7 +57,11 @@ public class JournalkeeperConfig {
         if (StringUtils.isNotBlank(dir)) {
             return dir;
         }
-        return propertySupplier.getProperty(Property.APPLICATION_DATA_PATH) + WORING_DIR;
+        return propertySupplier.getProperty(Property.APPLICATION_DATA_PATH).getString() + DEFAULT_WORKING_DIR;
+    }
+
+    public String getInitFile() {
+        return PropertySupplier.getValue(propertySupplier, JournalkeeperConfigKey.INIT_FILE);
     }
 
     public int getSnapshotStep() {

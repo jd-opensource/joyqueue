@@ -86,6 +86,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -181,6 +182,15 @@ public class NameServer extends Service implements NameService, PropertySupplier
                     .expireAfterWrite(nameServerConfig.getCacheExpireTime(), TimeUnit.MILLISECONDS)
                     .build();
         }
+        // TODO 临时
+        Executors.newScheduledThreadPool(1).scheduleWithFixedDelay(() -> {
+            metaCache.appTokens.clear();
+            metaCache.brokerConfigs.clear();
+            metaCache.consumerConfigs.clear();
+            metaCache.producerConfigs.clear();
+            metaCache.dataCenterMap.clear();
+            metaCache.topicConfigs.clear();
+        }, 0, 10, TimeUnit.MILLISECONDS);
     }
 
 
@@ -378,9 +388,6 @@ public class NameServer extends Service implements NameService, PropertySupplier
     @Override
     public TopicConfig getTopicConfig(TopicName topic) {
         // TODO 临时
-        if (true) {
-            return reloadTopicConfig(topic);
-        }
         TopicConfig topicConfig = metaCache.topicConfigs.get(topic);
         if (null != topicConfig) {
             return topicConfig;

@@ -15,6 +15,8 @@
  */
 package io.chubao.joyqueue.broker.monitor.service;
 
+import io.chubao.joyqueue.domain.Consumer;
+import io.chubao.joyqueue.domain.Producer;
 import io.chubao.joyqueue.domain.TopicConfig;
 import io.chubao.joyqueue.response.BooleanResponse;
 
@@ -54,4 +56,24 @@ public interface MetadataMonitorService {
      * @return 结果
      */
     BooleanResponse getWritableResult(String topic, String app, String address);
+
+    /**
+     * 获取消费者元数据
+     *
+     * @param topic 主题
+     * @param app 应用
+     * @param isCluster true - 从ClusterManager获取，false - 从NameServer获取
+     * @return 元数据
+     */
+    Consumer getConsumerMetadataByTopicAndApp(String topic, String app, boolean isCluster);
+
+    /**
+     * 获取生产者元数据
+     *
+     * @param topic 主题
+     * @param app 应用
+     * @param isCluster true - 从ClusterManager获取，false - 从NameServer获取
+     * @return 元数据
+     */
+    Producer getProducerMetadataByTopicAndApp(String topic, String app, boolean isCluster);
 }

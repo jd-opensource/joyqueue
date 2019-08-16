@@ -29,9 +29,24 @@ import io.chubao.joyqueue.broker.monitor.service.PartitionMonitorService;
 import io.chubao.joyqueue.broker.monitor.service.ProducerMonitorService;
 import io.chubao.joyqueue.broker.monitor.service.TopicMonitorService;
 import io.chubao.joyqueue.broker.monitor.stat.BrokerStatExt;
+import io.chubao.joyqueue.domain.Consumer;
+import io.chubao.joyqueue.domain.Producer;
 import io.chubao.joyqueue.domain.TopicConfig;
 import io.chubao.joyqueue.model.Pager;
-import io.chubao.joyqueue.monitor.*;
+import io.chubao.joyqueue.monitor.ArchiveMonitorInfo;
+import io.chubao.joyqueue.monitor.BrokerMonitorInfo;
+import io.chubao.joyqueue.monitor.BrokerStartupInfo;
+import io.chubao.joyqueue.monitor.ConnectionMonitorDetailInfo;
+import io.chubao.joyqueue.monitor.ConnectionMonitorInfo;
+import io.chubao.joyqueue.monitor.ConsumerMonitorInfo;
+import io.chubao.joyqueue.monitor.ConsumerPartitionGroupMonitorInfo;
+import io.chubao.joyqueue.monitor.ConsumerPartitionMonitorInfo;
+import io.chubao.joyqueue.monitor.PartitionGroupMonitorInfo;
+import io.chubao.joyqueue.monitor.PartitionMonitorInfo;
+import io.chubao.joyqueue.monitor.ProducerMonitorInfo;
+import io.chubao.joyqueue.monitor.ProducerPartitionGroupMonitorInfo;
+import io.chubao.joyqueue.monitor.ProducerPartitionMonitorInfo;
+import io.chubao.joyqueue.monitor.TopicMonitorInfo;
 import io.chubao.joyqueue.response.BooleanResponse;
 
 import java.util.List;
@@ -291,5 +306,15 @@ public class DefaultBrokerMonitorService implements BrokerMonitorService {
     @Override
     public BooleanResponse getWritableResult(String topic, String app, String address) {
         return metadataMonitorService.getWritableResult(topic, app, address);
+    }
+
+    @Override
+    public Consumer getConsumerMetadataByTopicAndApp(String topic, String app, boolean isCluster) {
+        return metadataMonitorService.getConsumerMetadataByTopicAndApp(topic, app, isCluster);
+    }
+
+    @Override
+    public Producer getProducerMetadataByTopicAndApp(String topic, String app, boolean isCluster) {
+        return metadataMonitorService.getProducerMetadataByTopicAndApp(topic, app, isCluster);
     }
 }

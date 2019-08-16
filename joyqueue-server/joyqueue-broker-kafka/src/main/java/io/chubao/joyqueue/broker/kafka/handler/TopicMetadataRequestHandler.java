@@ -38,7 +38,6 @@ import io.chubao.joyqueue.domain.TopicName;
 import io.chubao.joyqueue.network.transport.Transport;
 import io.chubao.joyqueue.network.transport.command.Command;
 import io.chubao.joyqueue.nsr.NameService;
-import io.chubao.joyqueue.nsr.ignite.model.IgniteBaseModel;
 import io.chubao.joyqueue.toolkit.delay.AbstractDelayedOperation;
 import io.chubao.joyqueue.toolkit.delay.DelayedOperationKey;
 import io.chubao.joyqueue.toolkit.delay.DelayedOperationManager;
@@ -120,7 +119,8 @@ public class TopicMetadataRequestHandler extends AbstractKafkaCommandHandler imp
     }
 
     protected Map<String, TopicConfig> getAllTopicConfigs(String clientId) {
-        String[] appGroup = clientId.split(IgniteBaseModel.SEPARATOR_SPLIT);
+        // TODO 常量
+        String[] appGroup = clientId.split(".");
         Map<TopicName, TopicConfig> consumers = nameService.getTopicConfigByApp(clientId, Subscription.Type.CONSUMPTION);
         Map<TopicName, TopicConfig> producers = nameService.getTopicConfigByApp(appGroup[0], Subscription.Type.PRODUCTION);
 

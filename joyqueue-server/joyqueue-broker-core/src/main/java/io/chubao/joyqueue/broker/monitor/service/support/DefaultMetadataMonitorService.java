@@ -16,10 +16,12 @@
 package io.chubao.joyqueue.broker.monitor.service.support;
 
 import io.chubao.joyqueue.broker.cluster.ClusterManager;
+import io.chubao.joyqueue.broker.monitor.service.MetadataMonitorService;
+import io.chubao.joyqueue.domain.Consumer;
+import io.chubao.joyqueue.domain.Producer;
 import io.chubao.joyqueue.domain.TopicConfig;
 import io.chubao.joyqueue.domain.TopicName;
 import io.chubao.joyqueue.response.BooleanResponse;
-import io.chubao.joyqueue.broker.monitor.service.MetadataMonitorService;
 
 /**
  * DefaultMetadataMonitorService
@@ -55,5 +57,25 @@ public class DefaultMetadataMonitorService implements MetadataMonitorService {
     public BooleanResponse getWritableResult(String topic, String app, String address) {
         TopicName topicName = TopicName.parse(topic);
         return clusterManager.checkWritable(topicName, app, address);
+    }
+
+    @Override
+    public Consumer getConsumerMetadataByTopicAndApp(String topic, String app, boolean isCluster) {
+        TopicName topicName = TopicName.parse(topic);
+        if (isCluster) {
+            return clusterManager.tryGetConsumer(topicName, app);
+        } else {
+            return clusterManager.getNameService().getConsumerByTopicAndApp(topicName, app);
+        }
+    }
+
+    @Override
+    public Producer getProducerMetadataByTopicAndApp(String topic, String app, boolean isCluster) {
+        TopicName topicName = TopicName.parse(topic);
+        if (isCluster) {
+            return clusterManager.tryGetProducer(topicName, app);
+        } else {
+            return clusterManager.getNameService().getProducerByTopicAndApp(topicName, app);
+        }
     }
 }

@@ -59,7 +59,7 @@ public class CompositionTopicService implements TopicService {
             try {
                 journalkeeperTopicService.addTopic(topic, partitionGroups);
             } catch (Exception e) {
-                logger.error("addTopic journalkeeper exception, params: {}, {}", topic, partitionGroups, e);
+                logger.error("add journalkeeper exception, params: {}, {}", topic, partitionGroups, e);
             }
         }
     }

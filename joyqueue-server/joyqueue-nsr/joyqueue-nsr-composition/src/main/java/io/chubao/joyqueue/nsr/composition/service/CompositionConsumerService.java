@@ -48,22 +48,38 @@ public class CompositionConsumerService implements ConsumerService {
 
     @Override
     public Consumer getByTopicAndApp(TopicName topic, String app) {
-        return null;
+        if (config.isReadIgnite()) {
+            return igniteConsumerService.getByTopicAndApp(topic, app);
+        } else {
+            return journalkeeperConsumerService.getByTopicAndApp(topic, app);
+        }
     }
 
     @Override
     public List<Consumer> getByTopic(TopicName topic, boolean withConfig) {
-        return null;
+        if (config.isReadIgnite()) {
+            return igniteConsumerService.getByTopic(topic, withConfig);
+        } else {
+            return journalkeeperConsumerService.getByTopic(topic, withConfig);
+        }
     }
 
     @Override
     public List<Consumer> getByApp(String app, boolean withConfig) {
-        return null;
+        if (config.isReadIgnite()) {
+            return igniteConsumerService.getByApp(app, withConfig);
+        } else {
+            return journalkeeperConsumerService.getByApp(app, withConfig);
+        }
     }
 
     @Override
     public List<Consumer> getConsumerByClientType(byte clientType) {
-        return null;
+        if (config.isReadIgnite()) {
+            return igniteConsumerService.getConsumerByClientType(clientType);
+        } else {
+            return journalkeeperConsumerService.getConsumerByClientType(clientType);
+        }
     }
 
     @Override

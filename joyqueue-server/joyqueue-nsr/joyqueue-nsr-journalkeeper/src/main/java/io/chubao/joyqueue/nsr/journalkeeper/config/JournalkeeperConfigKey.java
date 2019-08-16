@@ -10,22 +10,25 @@ import io.chubao.joyqueue.toolkit.network.IpUtil;
  */
 public enum JournalkeeperConfigKey implements PropertyDef {
 
-    PREFIX("nsr.journalkeeper", "VOTER", PropertyDef.Type.STRING),
-    ROLE("nsr.journalkeeper.role", "VOTER", PropertyDef.Type.STRING),
-    PORT("nsr.journalkeeper.port", 50095, PropertyDef.Type.STRING),
-    NODES("nsr.journalkeeper.votes", IpUtil.getLocalIp(), PropertyDef.Type.STRING),
-    WORKING_DIR("nsr.journalkeeper.working.dir", null, PropertyDef.Type.STRING),
+    PREFIX("nameserver.journalkeeper", null, PropertyDef.Type.STRING),
+    ROLE("nameserver.journalkeeper.role", "VOTER", PropertyDef.Type.STRING),
+    PORT("nameserver.journalkeeper.port", 50095, PropertyDef.Type.INT),
+    LOCAL("nameserver.journalkeeper.local", IpUtil.getLocalIp(), PropertyDef.Type.STRING),
+    NODES("nameserver.journalkeeper.nodes", null, PropertyDef.Type.STRING),
+    WAIT_LEADER_TIMEOUT("nameserver.journalkeeper.waitLeaderTimeout", 1000 * 30, PropertyDef.Type.INT),
+    WORKING_DIR("nameserver.journalkeeper.working.dir", null, PropertyDef.Type.STRING),
+    INIT_FILE("nameserver.journalkeeper.init.file", "/journalkeeper/nameserver.sql", PropertyDef.Type.STRING),
 
-    SNAPSHOT_STEP("nsr.journalkeeper.snapshot.step", 0, PropertyDef.Type.INT),
+    SNAPSHOT_STEP("nameserver.journalkeeper.snapshot.step", 0, PropertyDef.Type.INT),
 
-    RPC_TIMEOUT("nsr.journalkeeper.rpc.timeout", 1000 * 1, PropertyDef.Type.INT),
+    RPC_TIMEOUT("nameserver.journalkeeper.rpc.timeout", 1000 * 1, PropertyDef.Type.INT),
 
-    FLUSH_INTERVAL("nsr.journalkeeper.flush.interval", 50, PropertyDef.Type.INT),
+    FLUSH_INTERVAL("nameserver.journalkeeper.flush.interval", 50, PropertyDef.Type.INT),
 
-    STATE_BATCH_SIZE("nsr.journalkeeper.state.batch.size", 1024 * 1024 * 1, PropertyDef.Type.INT),
+    STATE_BATCH_SIZE("nameserver.journalkeeper.state.batch.size", 1024 * 1024 * 1, PropertyDef.Type.INT),
 
-    METRIC_ENABLE("nsr.journalkeeper.metric.enable", false, PropertyDef.Type.BOOLEAN),
-    METRIC_PRINT_INTERVAL("nsr.journalkeeper.metric.print.interval", 0, PropertyDef.Type.INT),
+    METRIC_ENABLE("nameserver.journalkeeper.metric.enable", false, PropertyDef.Type.BOOLEAN),
+    METRIC_PRINT_INTERVAL("nameserver.journalkeeper.metric.print.interval", 0, PropertyDef.Type.INT),
 
     ;
 
