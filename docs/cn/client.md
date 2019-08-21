@@ -14,7 +14,7 @@ JoyQueue 支持Openmessaging协议，并提供Java版本的原生客户端。此
 <dependency>
     <groupId>io.chubao</groupId>
     <artifactId>joyqueue-client-all</artifactId>
-    <version>4.1.0</version>
+    <version>4.1.1</version>
 </dependency>
 ```
 
