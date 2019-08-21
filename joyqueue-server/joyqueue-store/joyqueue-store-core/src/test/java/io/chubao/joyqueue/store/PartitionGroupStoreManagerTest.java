@@ -200,7 +200,7 @@ public class PartitionGroupStoreManagerTest {
 
         destroyStore();
         if (null == bufferPool) {
-            bufferPool = new PreloadBufferPool();
+            bufferPool = PreloadBufferPool.getInstance();
             bufferPool.addPreLoad(128 * 1024 * 1024, 2, 4);
             bufferPool.addPreLoad(512 * 1024, 2, 4);
         }
@@ -337,7 +337,7 @@ public class PartitionGroupStoreManagerTest {
                     repeat = false;
                 } catch (TimeoutException ignored) {
                 }
-            logger.info("Index: {}, {}...", index, Format.formatTraffic(index * 1024));
+            logger.info("Index: {}, {}...", index, Format.formatSize(index * 1024));
         }
 
 
@@ -593,7 +593,7 @@ public class PartitionGroupStoreManagerTest {
 
         PartitionGroupStoreSupport.init(groupBase, partitions);
         if (null == bufferPool) {
-            bufferPool = new PreloadBufferPool(10000L);
+            bufferPool = PreloadBufferPool.getInstance();
             bufferPool.addPreLoad(128 * 1024 * 1024, 2, 4);
             bufferPool.addPreLoad(512 * 1024, 2, 4);
         }
@@ -619,7 +619,6 @@ public class PartitionGroupStoreManagerTest {
             store = null;
         }
         if (null != bufferPool) {
-            bufferPool.close();
             bufferPool = null;
         }
     }

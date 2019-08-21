@@ -60,9 +60,7 @@ public class ThrowableSupplier implements ErrorSupplier {
         }
 
         return Responses.error(RuntimeError.getCode(), RuntimeError.getStatus(),
-                StringUtils.isNotBlank(throwable.getMessage()) ? throwable.getMessage()
-                        : (StringUtils.isNotBlank(throwable.toString())
-                        ? throwable.toString(): RuntimeError.getMessage()));
+                (StringUtils.isNotBlank(throwable.toString()) ? throwable.toString(): RuntimeError.getMessage()));
     }
 
     @Override

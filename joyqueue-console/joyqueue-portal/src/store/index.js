@@ -44,6 +44,18 @@ const state = {
   },
   cookieName: 'sso.jd.com',
   urls: {
+  },
+  uIds: {
+    producer: {
+      detail: 'pd',
+      summary: 'pt'
+    },
+    consumer: {
+      detail: 'cd',
+      summary: 'ct'
+    },
+    broker: 'broker',
+    host: 'host'
   }
 }
 
@@ -104,6 +116,9 @@ const getters = {
   },
   urls: state => {
     return state.urls
+  },
+  uIds: state => {
+    return state.uIds
   }
 }
 const mutations = {

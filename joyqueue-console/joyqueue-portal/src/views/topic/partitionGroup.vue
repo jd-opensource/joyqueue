@@ -6,12 +6,6 @@
           <icon name="plus-circle" style="margin-left: 3px;"/>
         </d-button>
         <slot name="extendBtn"></slot>
-        <d-button v-if="showBrokerChart" @click="goBrokerChart" class="button">Broker监控
-          <icon name="cpu" style="margin-left: 3px;"/>
-        </d-button>
-        <d-button v-if="showHostChart" @click="goHostChart" class="button">主机监控
-          <icon name="monitor" style="margin-left: 3px;"/>
-        </d-button>
         <d-button type="primary" @click="getList" class="button">刷新
           <icon name="refresh-cw" style="margin-left: 3px;"></icon>
         </d-button>
@@ -67,7 +61,6 @@ import GroupPosition from './groupPosition.vue'
 import groupMerge from './groupMerge.vue'
 import groupNew from './groupNew.vue'
 import crud from '../../mixins/crud.js'
-import {getTopicCode} from '../../utils/common.js'
 
 export default {
   name: 'partitionGroup',
@@ -82,14 +75,6 @@ export default {
   },
   mixins: [ crud ],
   props: {
-    showHostChart: {
-      type: Boolean,
-      default: false
-    },
-    showBrokerChart: {
-      type: Boolean,
-      default: false
-    }
   },
   data () {
     return {
@@ -301,30 +286,6 @@ export default {
           this.$set(this.tableData.rowData, i, this.tableData.rowData[i])
         })
       }
-    },
-    goBrokerChart () {
-      apiRequest.get(this.urls.getUrl + '/broker', {}, {}).then((data) => {
-        let url = data.data || ''
-        if (url.indexOf('?') < 0) {
-          url += '?'
-        } else if (!url.endsWith('?')) {
-          url += '&'
-        }
-        url = url + 'var-topic=' + getTopicCode(this.searchData.topic, this.searchData.namespace)
-        window.open(url)
-      })
-    },
-    goHostChart () {
-      apiRequest.get(this.urls.getUrl + '/host', {}, {}).then((data) => {
-        let url = data.data || ''
-        if (url.indexOf('?') < 0) {
-          url += '?'
-        } else if (!url.endsWith('?')) {
-          url += '&'
-        }
-        url = url + 'var-topic=' + getTopicCode(this.searchData.topic, this.searchData.namespace)
-        window.open(url)
-      })
     },
     goDetail (item) {
       this.groupDetailDialogData = {groupNo: item.groupNo, topic: this.searchData.topic, namespace: this.searchData.namespace}

@@ -267,9 +267,9 @@ export default {
     },
     blankStyle () {
       if (!this.data.operates || this.data.operates === []) {
-        return { 'margin-top': `20px` }
+        return { 'margin-top': `25px` }
       } else {
-        let height = 27 * this.data.operates.length
+        let height = 25 * this.data.operates.length + 25
         return { 'margin-top': `${height}px` }
       }
     }

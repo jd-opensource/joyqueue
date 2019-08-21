@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="headLine2">
-      <d-date-picker v-model="times" type="daterange" class="input4" range-separator="至"
+      <d-date-picker v-model="times" type="datetimerange" size="large" class="input5" range-separator="至"
                      start-placeholder="开始日期" end-placeholder="结束日期" value-format="timestamp"
                      :default-time="['00:00:00', '23:59:59']" @on-enter="getList">
         <span slot="prepend">日期范围</span>
@@ -188,8 +188,8 @@ export default {
       },
       multipleSelection: [],
       times: [
-        new Date(new Date().setHours(0, 0, 0, 0)),
-        new Date(new Date().setHours(23, 59, 59, 0))
+        new Date().setHours(0, 0, 0, 0),
+        new Date().setHours(23, 59, 59, 0)
       ]
     }
   },

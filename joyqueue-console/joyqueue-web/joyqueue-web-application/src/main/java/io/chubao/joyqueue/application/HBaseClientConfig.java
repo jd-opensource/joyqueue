@@ -15,16 +15,15 @@
  */
 package io.chubao.joyqueue.application;
 
-import io.chubao.joyqueue.server.archive.store.api.ArchiveStore;
 import com.jd.laf.extension.ExtensionPoint;
 import com.jd.laf.extension.ExtensionPointLazy;
+import io.chubao.joyqueue.server.archive.store.api.ArchiveStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
 
 /**
  * Created by wangxiaofei1 on 2018/12/19.
@@ -35,10 +34,13 @@ public class HBaseClientConfig {
     private static final Logger logger = LoggerFactory.getLogger(HBaseClientConfig.class);
     private ExtensionPoint<ArchiveStore, String> archiveStores = new ExtensionPointLazy<>(ArchiveStore.class);
 
-    @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
+    @Value("${hbase.namespace:joyqueue}")
+    private String namespace;
+
     @Bean(value="archiveStore", destroyMethod="stop")
     public ArchiveStore getArchiveStore(){
         ArchiveStore archiveStore =  archiveStores.get();
+        archiveStore.setNameSpace(namespace);
         if (archiveStore != null) {
             try {
                 archiveStore.start();

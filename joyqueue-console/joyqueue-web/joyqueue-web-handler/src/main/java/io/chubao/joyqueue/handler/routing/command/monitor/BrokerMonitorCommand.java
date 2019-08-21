@@ -365,8 +365,13 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
      */
     @Path("startInfo")
     public Response startInfo(@QueryParam("brokerId") Long brokerId) throws Exception {
-        BrokerStartupInfo brokerStartupInfo = brokerTopicMonitorService.getStartupInfo(brokerId);
-        return Responses.success(brokerStartupInfo);
+        try {
+            BrokerStartupInfo brokerStartupInfo = brokerTopicMonitorService.getStartupInfo(brokerId);
+            return Responses.success(brokerStartupInfo);
+        } catch (Exception e) {
+            logger.error("query broker start info error.", e);
+            return Responses.error(ErrorCode.NoTipError.getCode(), ErrorCode.NoTipError.getStatus(), e.getMessage());
+        }
     }
 
     @Override
