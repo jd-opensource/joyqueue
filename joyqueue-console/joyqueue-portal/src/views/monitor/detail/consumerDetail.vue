@@ -18,12 +18,12 @@
         <detail-table ref="coordinatorInfo" :doSearch="doSearch" :colData="coordinatorInfo.colData"
                       :urls="coordinatorInfo.urls" :search="search"/>
       </d-tab-pane>
-      <d-tab-pane v-if="$store.getters.isAdmin" label="消费组成员" name="coordinatorGroupMember" icon="file-text"
+      <d-tab-pane label="消费组成员" name="coordinatorGroupMember" icon="file-text"
                   :closable="false">
         <coordinator-group-member ref="coordinatorGroupMember" :doSearch="doSearch" :search="search"
                                :colData="coordinatorGroupMember.colData" :urls="coordinatorGroupMember.urls"/>
       </d-tab-pane>
-      <d-tab-pane v-if="$store.getters.isAdmin" label="消费组过期成员" name="coordinatorGroupExpiredMember"
+      <d-tab-pane  label="消费组过期成员" name="coordinatorGroupExpiredMember"
                   icon="file-text" :closable="false">
         <detail-table ref="coordinatorGroupExpiredMember" :doSearch="doSearch" :search="search"
                    :col-data="coordinatorGroupExpiredMember.colData" :urls="coordinatorGroupExpiredMember.urls"/>
