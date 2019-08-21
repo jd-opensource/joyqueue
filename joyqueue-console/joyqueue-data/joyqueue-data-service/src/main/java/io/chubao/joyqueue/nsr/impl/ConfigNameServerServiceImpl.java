@@ -16,16 +16,12 @@
 package io.chubao.joyqueue.nsr.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.TypeReference;
-import io.chubao.joyqueue.model.PageResult;
-import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.convert.NsrConfigConverter;
 import io.chubao.joyqueue.model.domain.Config;
 import io.chubao.joyqueue.model.domain.OperLog;
-import io.chubao.joyqueue.model.query.QConfig;
-import io.chubao.joyqueue.nsr.model.ConfigQuery;
 import io.chubao.joyqueue.nsr.ConfigNameServerService;
 import io.chubao.joyqueue.nsr.NameServerBase;
+import io.chubao.joyqueue.nsr.model.ConfigQuery;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -41,8 +37,8 @@ public class ConfigNameServerServiceImpl extends NameServerBase implements Confi
     public static final String UPDATE_CONFIG="/config/update";
     public static final String REMOVE_CONFIG="/config/remove";
     public static final String GETBYID_CONFIG="/config/getById";
+    public static final String GETBYGROUPANDKEY="/config/getByGroupAndKey";
     public static final String LIST_CONFIG="/config/list";
-    public static final String FINDBYQUERY_CONFIG="/config/findByQuery";
 
     private NsrConfigConverter nsrConfigConverter = new NsrConfigConverter();
 
@@ -79,18 +75,6 @@ public class ConfigNameServerServiceImpl extends NameServerBase implements Confi
         String result = postWithLog(REMOVE_CONFIG, nsrConfig,OperLog.Type.CONFIG.value(),OperLog.OperType.DELETE.value(),nsrConfig.getId());
         return isSuccess(result);
     }
-    @Override
-    public List<Config> findByQuery(QConfig qConfig) throws Exception {
-        ConfigQuery configQuery = new ConfigQuery();
-        if (qConfig != null) {
-            configQuery.setGroup(qConfig.getGroup());
-            configQuery.setKey(qConfig.getKey());
-            configQuery.setKeyword(qConfig.getKeyword());
-        }
-        String result = post(LIST_CONFIG, configQuery);
-        List<io.chubao.joyqueue.domain.Config> configList = JSON.parseArray(result).toJavaList(io.chubao.joyqueue.domain.Config.class);
-        return configList.stream().map(config -> nsrConfigConverter.revert(config)).collect(Collectors.toList());
-    }
 
     @Override
     public Config findById(String s) throws Exception {
@@ -100,21 +84,20 @@ public class ConfigNameServerServiceImpl extends NameServerBase implements Confi
     }
 
     @Override
-    public PageResult<Config> findByQuery(QPageQuery<QConfig> query) throws Exception {
-        QPageQuery<ConfigQuery> pageQuery = new QPageQuery<>();
-        pageQuery.setPagination(query.getPagination());
+    public Config findByGroupAndKey(String group, String key) throws Exception {
         ConfigQuery configQuery = new ConfigQuery();
-        if (query.getQuery() != null ) {
-            configQuery.setKey(query.getQuery().getKey());
-            configQuery.setGroup(query.getQuery().getGroup());
-            configQuery.setKeyword(query.getQuery().getKeyword());
-        }
-        pageQuery.setQuery(configQuery);
-        String result = post(FINDBYQUERY_CONFIG,pageQuery);
-        PageResult<io.chubao.joyqueue.domain.Config> pageResult = JSON.parseObject(result,new TypeReference<PageResult<io.chubao.joyqueue.domain.Config>>(){});
-        PageResult<Config> configPageResult = new PageResult<>();
-        configPageResult.setPagination(pageResult.getPagination());
-        configPageResult.setResult(pageResult.getResult().stream().map(config -> nsrConfigConverter.revert(config)).collect(Collectors.toList()));
-        return configPageResult;
+        configQuery.setGroup(group);
+        configQuery.setKey(key);
+
+        String result = post(GETBYGROUPANDKEY, configQuery);
+        io.chubao.joyqueue.domain.Config nsrConfig = JSON.parseObject(result, io.chubao.joyqueue.domain.Config.class);
+        return nsrConfigConverter.revert(nsrConfig);
+    }
+
+    @Override
+    public List<Config> getAll() throws Exception {
+        String result = post(LIST_CONFIG, null);
+        List<io.chubao.joyqueue.domain.Config> configList = JSON.parseArray(result).toJavaList(io.chubao.joyqueue.domain.Config.class);
+        return configList.stream().map(config -> nsrConfigConverter.revert(config)).collect(Collectors.toList());
     }
 }

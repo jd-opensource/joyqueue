@@ -160,7 +160,7 @@ public class TopicServiceImpl implements TopicService {
             try {
                 topicResult = topicNameServerService.findByQuery(query);
             } catch (Exception e) {
-                throw new ServiceException(IGNITE_RPC_ERROR, "query topic by name server error.");
+                throw new ServiceException(NAMESERVER_RPC_ERROR, "query topic by name server error.");
             }
         } else {
             topicResult = topicNameServerService.findUnsubscribedByQuery(query);

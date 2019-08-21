@@ -16,7 +16,52 @@
 package io.chubao.joyqueue.nsr.service;
 
 import io.chubao.joyqueue.domain.Namespace;
-import io.chubao.joyqueue.nsr.model.NamespaceQuery;
 
-public interface NamespaceService extends DataService<Namespace, NamespaceQuery, String> {
+import java.util.List;
+
+public interface NamespaceService {
+
+    /**
+     * 获取所有
+     *
+     * @return
+     */
+    List<Namespace> getAll();
+
+    /**
+     * 根据code获取
+     *
+     * @param code
+     * @return
+     */
+    Namespace getByCode(String code);
+
+    /**
+     * 根据ID获取
+     *
+     * @param id
+     * @return
+     */
+    Namespace getById(String id);
+
+    /**
+     * 添加
+     *
+     * @param namespace
+     */
+    Namespace add(Namespace namespace);
+
+    /**
+     * 根据ID更新
+     *
+     * @param namespace
+     */
+    Namespace update(Namespace namespace);
+
+    /**
+     * 根据id删除
+     *
+     * @param id
+     */
+    void delete(String id);
 }

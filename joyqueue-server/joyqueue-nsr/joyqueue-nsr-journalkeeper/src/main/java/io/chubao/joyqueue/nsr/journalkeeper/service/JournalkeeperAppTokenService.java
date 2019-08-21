@@ -1,11 +1,9 @@
 package io.chubao.joyqueue.nsr.journalkeeper.service;
 
 import io.chubao.joyqueue.domain.AppToken;
-import io.chubao.joyqueue.model.PageResult;
-import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.nsr.journalkeeper.converter.AppTokenConverter;
+import io.chubao.joyqueue.nsr.journalkeeper.domain.AppTokenDTO;
 import io.chubao.joyqueue.nsr.journalkeeper.repository.AppTokenRepository;
-import io.chubao.joyqueue.nsr.model.AppTokenQuery;
 import io.chubao.joyqueue.nsr.service.AppTokenService;
 
 import java.util.List;
@@ -24,47 +22,34 @@ public class JournalkeeperAppTokenService implements AppTokenService {
     }
 
     @Override
+    public AppToken getById(long id) {
+        return AppTokenConverter.convert(appTokenRepository.getById(id));
+    }
+
+    @Override
     public AppToken getByAppAndToken(String app, String token) {
         return AppTokenConverter.convert(appTokenRepository.getByAppAndToken(app, token));
     }
 
     @Override
-    public AppToken getById(Long id) {
-        return AppTokenConverter.convert(appTokenRepository.getById(id));
+    public List<AppToken> getByApp(String app) {
+        return AppTokenConverter.convert(appTokenRepository.getByApp(app));
     }
 
     @Override
-    public AppToken get(AppToken model) {
-        return getById(model.getId());
+    public AppToken add(AppToken appToken) {
+        AppTokenDTO appTokenDTO = appTokenRepository.add(AppTokenConverter.convert(appToken));
+        return AppTokenConverter.convert(appTokenDTO);
     }
 
     @Override
-    public void addOrUpdate(AppToken appToken) {
-        appTokenRepository.add(AppTokenConverter.convert(appToken));
+    public AppToken update(AppToken appToken) {
+        AppTokenDTO appTokenDTO = appTokenRepository.add(AppTokenConverter.convert(appToken));
+        return AppTokenConverter.convert(appTokenDTO);
     }
 
     @Override
-    public void deleteById(Long id) {
-
-    }
-
-    @Override
-    public void delete(AppToken model) {
-
-    }
-
-    @Override
-    public List<AppToken> list() {
-        return null;
-    }
-
-    @Override
-    public List<AppToken> list(AppTokenQuery query) {
-        return null;
-    }
-
-    @Override
-    public PageResult<AppToken> pageQuery(QPageQuery<AppTokenQuery> pageQuery) {
-        return null;
+    public void delete(long id) {
+        appTokenRepository.deleteById(id);
     }
 }

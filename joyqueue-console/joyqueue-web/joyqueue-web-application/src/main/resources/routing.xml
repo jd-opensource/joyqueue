@@ -64,7 +64,7 @@
                handlers="validateApplication applicationToken#get render"
                errors="error"/>
         <route inherit="post"
-               path="/v1/application/:appId/token/search"
+               path="/v1/application/:appId/token/getByApp"
                handlers="validateApplication applicationToken#search render"
                errors="error"/>
         <route inherit="post"

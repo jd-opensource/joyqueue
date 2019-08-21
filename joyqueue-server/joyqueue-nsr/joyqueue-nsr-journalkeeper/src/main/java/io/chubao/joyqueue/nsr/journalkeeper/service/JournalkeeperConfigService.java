@@ -1,11 +1,8 @@
 package io.chubao.joyqueue.nsr.journalkeeper.service;
 
 import io.chubao.joyqueue.domain.Config;
-import io.chubao.joyqueue.model.PageResult;
-import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.nsr.journalkeeper.converter.ConfigConverter;
 import io.chubao.joyqueue.nsr.journalkeeper.repository.ConfigRepository;
-import io.chubao.joyqueue.nsr.model.ConfigQuery;
 import io.chubao.joyqueue.nsr.service.ConfigService;
 
 import java.util.List;
@@ -24,62 +21,32 @@ public class JournalkeeperConfigService implements ConfigService {
     }
 
     @Override
+    public Config getById(String id) {
+        return ConfigConverter.convert(configRepository.getById(id));
+    }
+
+    @Override
     public Config getByGroupAndKey(String group, String key) {
         return ConfigConverter.convert(configRepository.getByKeyAndGroup(key, group));
     }
 
     @Override
-    public void add(Config config) {
-        configRepository.add(ConfigConverter.convert(config));
+    public Config add(Config config) {
+        return ConfigConverter.convert(configRepository.add(ConfigConverter.convert(config)));
     }
 
     @Override
-    public void update(Config config) {
-
+    public Config update(Config config) {
+        return ConfigConverter.convert(configRepository.update(ConfigConverter.convert(config)));
     }
 
     @Override
-    public void remove(Config config) {
-
+    public void delete(String id) {
+        configRepository.deleteById(id);
     }
 
     @Override
-    public Config getById(String id) {
-        return null;
-    }
-
-    @Override
-    public Config get(Config model) {
-        return null;
-    }
-
-    @Override
-    public void addOrUpdate(Config config) {
-
-    }
-
-    @Override
-    public void deleteById(String id) {
-
-    }
-
-    @Override
-    public void delete(Config model) {
-
-    }
-
-    @Override
-    public List<Config> list() {
-        return null;
-    }
-
-    @Override
-    public List<Config> list(ConfigQuery query) {
-        return null;
-    }
-
-    @Override
-    public PageResult<Config> pageQuery(QPageQuery<ConfigQuery> pageQuery) {
-        return null;
+    public List<Config> getAll() {
+        return ConfigConverter.convert(configRepository.getAll());
     }
 }

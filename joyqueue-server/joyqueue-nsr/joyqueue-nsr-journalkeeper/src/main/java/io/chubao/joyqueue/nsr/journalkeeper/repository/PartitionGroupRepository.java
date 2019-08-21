@@ -15,15 +15,28 @@ public class PartitionGroupRepository extends BaseRepository {
     private static final String TABLE = "partition_group";
     private static final String COLUMNS = "id, namespace, topic, `group`, leader, isrs, term, partitions, learners, " +
             "replicas, out_sync_replicas, elect_type, rec_leader";
+    private static final String UPDATE_COLUMNS = "namespace = ?, topic = ?, `group` = ?, leader = ?, isrs = ?, term = ?, partitions = ?, learners = ?, " +
+            "replicas = ?, out_sync_replicas = ?, elect_type = ?, rec_leader = ?";
 
+    private static final String GET_BY_ID = String.format("SELECT %s FROM %s WHERE id = ?",
+            COLUMNS, TABLE);
     private static final String GET_BY_TOPIC_AND_GROUP = String.format("SELECT %s FROM %s WHERE topic = ? AND namespace = ? AND group = ?",
             COLUMNS, TABLE);
     private static final String GET_BY_TOPIC = String.format("SELECT %s FROM %s WHERE topic = ? AND namespace = ?",
             COLUMNS, TABLE);
-    private static final String ADD = String.format("INSERT INTO %s(%s) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)", TABLE, COLUMNS);
+    private static final String ADD = String.format("INSERT INTO %s(%s) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            TABLE, COLUMNS);
+    private static final String UPDATE_BY_ID = String.format("UPDATE %s SET %s WHERE id = ?",
+            TABLE, UPDATE_COLUMNS);
+    private static final String DELETE_BY_ID = String.format("DELETE FROM %s WHERE id = ?",
+            TABLE);
 
     public PartitionGroupRepository(SQLOperator sqlOperator) {
         super(sqlOperator);
+    }
+
+    public PartitionGroupDTO getById(String id) {
+        return queryOnce(PartitionGroupDTO.class, GET_BY_ID, id);
     }
 
     public PartitionGroupDTO getByTopicAndGroup(String topic, String namespace, int group) {
@@ -40,5 +53,17 @@ public class PartitionGroupRepository extends BaseRepository {
                 partitionGroupDTO.getTerm(), partitionGroupDTO.getPartitions(), partitionGroupDTO.getLearners(),
                 partitionGroupDTO.getReplicas(), partitionGroupDTO.getOutSyncReplicas(), partitionGroupDTO.getElectType(), partitionGroupDTO.getRecLeader());
         return partitionGroupDTO;
+    }
+
+    public PartitionGroupDTO update(PartitionGroupDTO partitionGroupDTO) {
+        update(UPDATE_BY_ID, partitionGroupDTO.getNamespace(), partitionGroupDTO.getTopic(), partitionGroupDTO.getGroup(),
+                partitionGroupDTO.getLeader(), partitionGroupDTO.getIsrs(), partitionGroupDTO.getTerm(), partitionGroupDTO.getPartitions(),
+                partitionGroupDTO.getLearners(), partitionGroupDTO.getReplicas(), partitionGroupDTO.getOutSyncReplicas(),
+                partitionGroupDTO.getElectType(), partitionGroupDTO.getRecLeader(), partitionGroupDTO.getId());
+        return partitionGroupDTO;
+    }
+
+    public int delete(String id) {
+        return delete(DELETE_BY_ID, id);
     }
 }

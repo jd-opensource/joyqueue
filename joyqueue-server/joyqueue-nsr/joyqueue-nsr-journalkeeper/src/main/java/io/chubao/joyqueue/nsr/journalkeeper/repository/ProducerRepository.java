@@ -14,11 +14,20 @@ public class ProducerRepository extends BaseRepository {
 
     private static final String TABLE = "producer";
     private static final String COLUMNS = "id, topic, namespace, app, client_type, produce_policy, limit_policy";
+    private static final String UPDATE_COLUMNS = "topic = ?, namespace = ?, app = ?, client_type = ?, produce_policy = ?, limit_policy = ?";
 
-    private static final String GET_BY_TOPIC_AND_APP = String.format("SELECT %s FROM %s WHERE topic = ? AND namespace = ? AND app = ?", COLUMNS, TABLE);
-    private static final String GET_BY_TOPIC = String.format("SELECT %s FROM %s WHERE topic = ? AND namespace = ?", COLUMNS, TABLE);
-    private static final String GET_BY_APP = String.format("SELECT %s FROM %s WHERE app = ?", COLUMNS, TABLE);
-    private static final String ADD = String.format("INSERT INTO %s(%s) VALUES(?,?,?,?,?,?,?)", TABLE, COLUMNS);
+    private static final String GET_BY_TOPIC_AND_APP = String.format("SELECT %s FROM %s WHERE topic = ? AND namespace = ? AND app = ?",
+            COLUMNS, TABLE);
+    private static final String GET_BY_TOPIC = String.format("SELECT %s FROM %s WHERE topic = ? AND namespace = ?",
+            COLUMNS, TABLE);
+    private static final String GET_BY_APP = String.format("SELECT %s FROM %s WHERE app = ?",
+            COLUMNS, TABLE);
+    private static final String ADD = String.format("INSERT INTO %s(%s) VALUES(?,?,?,?,?,?,?)",
+            TABLE, COLUMNS);
+    private static final String UPDATE_BY_ID = String.format("UPDATE %s SET %s WHERE id = ?",
+            TABLE, UPDATE_COLUMNS);
+    private static final String DELETE_BY_ID = String.format("DELETE FROM %s WHERE id = ?",
+            TABLE);
 
     public ProducerRepository(SQLOperator sqlOperator) {
         super(sqlOperator);
@@ -40,5 +49,15 @@ public class ProducerRepository extends BaseRepository {
         insert(ADD, consumerDTO.getId(), consumerDTO.getTopic(), consumerDTO.getNamespace(), consumerDTO.getApp(),
                 consumerDTO.getClientType(), consumerDTO.getProducePolicy(), consumerDTO.getLimitPolicy());
         return consumerDTO;
+    }
+
+    public ProducerDTO update(ProducerDTO consumerDTO) {
+        update(UPDATE_BY_ID, consumerDTO.getTopic(), consumerDTO.getNamespace(), consumerDTO.getApp(),
+                consumerDTO.getClientType(), consumerDTO.getProducePolicy(), consumerDTO.getLimitPolicy(), consumerDTO.getId());
+        return consumerDTO;
+    }
+
+    public int delete(String id) {
+        return delete(DELETE_BY_ID, id);
     }
 }

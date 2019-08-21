@@ -2,8 +2,10 @@ package io.chubao.joyqueue.nsr.journalkeeper.service;
 
 import io.chubao.joyqueue.domain.Broker;
 import io.chubao.joyqueue.model.PageResult;
+import io.chubao.joyqueue.model.Pagination;
 import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.nsr.journalkeeper.converter.BrokerConverter;
+import io.chubao.joyqueue.nsr.journalkeeper.domain.BrokerDTO;
 import io.chubao.joyqueue.nsr.journalkeeper.repository.BrokerRepository;
 import io.chubao.joyqueue.nsr.model.BrokerQuery;
 import io.chubao.joyqueue.nsr.service.BrokerService;
@@ -34,55 +36,49 @@ public class JournalkeeperBrokerService implements BrokerService {
     }
 
     @Override
-    public List<Broker> getByIds(List<Integer> ids) {
+    public List<Broker> getByIds(List<Long> ids) {
         return BrokerConverter.convert(brokerRepository.getByIds(ids));
     }
 
     @Override
-    public void update(Broker broker) {
-
+    public Broker update(Broker broker) {
+        return BrokerConverter.convert(brokerRepository.update(BrokerConverter.convert(broker)));
     }
 
     @Override
-    public Broker getById(Integer id) {
+    public Broker getById(long id) {
         return BrokerConverter.convert(brokerRepository.getById(id));
     }
 
     @Override
-    public Broker get(Broker model) {
-        return getById(model.getId());
+    public Broker add(Broker broker) {
+        return BrokerConverter.convert(brokerRepository.add(BrokerConverter.convert(broker)));
     }
 
     @Override
-    public void addOrUpdate(Broker broker) {
-        if (getById(broker.getId()) != null) {
-            return;
+    public void delete(long id) {
+        brokerRepository.deleteById(id);
+    }
+
+    @Override
+    public List<Broker> getAll() {
+        return BrokerConverter.convert(brokerRepository.getAll());
+    }
+
+    @Override
+    public PageResult<Broker> search(QPageQuery<BrokerQuery> pageQuery) {
+        int count = brokerRepository.getSearchCount(pageQuery.getQuery());
+        List<BrokerDTO> brokers = null;
+        if (count != 0) {
+            brokers = brokerRepository.search(pageQuery.getQuery());
         }
-        brokerRepository.add(BrokerConverter.convert(broker));
-    }
 
-    @Override
-    public void deleteById(Integer id) {
+        Pagination pagination = pageQuery.getPagination();
+        pagination.setTotalRecord(count);
 
-    }
-
-    @Override
-    public void delete(Broker model) {
-
-    }
-
-    @Override
-    public List<Broker> list() {
-        return null;
-    }
-
-    @Override
-    public List<Broker> list(BrokerQuery query) {
-        return null;
-    }
-
-    @Override
-    public PageResult<Broker> pageQuery(QPageQuery<BrokerQuery> pageQuery) {
-        return null;
+        PageResult<Broker> result = new PageResult();
+        result.setPagination(pagination);
+        result.setResult(BrokerConverter.convert(brokers));
+        return result;
     }
 }

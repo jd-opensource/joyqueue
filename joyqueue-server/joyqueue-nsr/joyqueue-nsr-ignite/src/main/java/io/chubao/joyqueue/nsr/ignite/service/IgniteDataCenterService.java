@@ -19,12 +19,9 @@ import com.google.inject.Inject;
 import io.chubao.joyqueue.domain.DataCenter;
 import io.chubao.joyqueue.event.DataCenterEvent;
 import io.chubao.joyqueue.event.MetaEvent;
-import io.chubao.joyqueue.model.PageResult;
-import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.nsr.ignite.dao.DataCenterDao;
 import io.chubao.joyqueue.nsr.ignite.model.IgniteDataCenter;
 import io.chubao.joyqueue.nsr.message.Messenger;
-import io.chubao.joyqueue.nsr.model.DataCenterQuery;
 import io.chubao.joyqueue.nsr.service.DataCenterService;
 import org.apache.ignite.Ignition;
 import org.apache.ignite.transactions.Transaction;
@@ -53,16 +50,12 @@ public class IgniteDataCenterService implements DataCenterService {
     }
 
     @Override
-    public DataCenter get(DataCenter model) {
-        return this.getById(new IgniteDataCenter(model).getId());
-    }
-
-    @Override
-    public void addOrUpdate(DataCenter dataCenter) {
+    public DataCenter add(DataCenter dataCenter) {
         try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
             dataCenterDao.addOrUpdate(new IgniteDataCenter(dataCenter));
             this.publishEvent(DataCenterEvent.add(dataCenter.getRegion(),dataCenter.getCode(),dataCenter.getUrl()));
             tx.commit();
+            return dataCenter;
         } catch (Exception e) {
             String message = String.format("add data center.", dataCenter.toString());
             logger.error(message, e);
@@ -70,20 +63,30 @@ public class IgniteDataCenterService implements DataCenterService {
         }
 
     }
+
+    @Override
+    public DataCenter update(DataCenter dataCenter) {
+        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
+            dataCenterDao.addOrUpdate(new IgniteDataCenter(dataCenter));
+            this.publishEvent(DataCenterEvent.add(dataCenter.getRegion(),dataCenter.getCode(),dataCenter.getUrl()));
+            tx.commit();
+            return dataCenter;
+        } catch (Exception e) {
+            String message = String.format("add data center.", dataCenter.toString());
+            logger.error(message, e);
+            throw new RuntimeException(message, e);
+        }
+    }
+
     public void publishEvent(MetaEvent event) {
         messenger.publish(event);
     }
 
     @Override
-    public void deleteById(String id) {
-        dataCenterDao.deleteById(id);
-    }
-
-    @Override
-    public void delete(DataCenter dataCenter) {
-
+    public void delete(String id) {
+        IgniteDataCenter dataCenter = dataCenterDao.findById(id);
         try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
-            this.deleteById(new IgniteDataCenter(dataCenter).getId());
+            dataCenterDao.deleteById(id);
             this.publishEvent(DataCenterEvent.remove(dataCenter.getRegion(),dataCenter.getCode(),dataCenter.getUrl()));
             tx.commit();
         } catch (Exception e) {
@@ -95,19 +98,8 @@ public class IgniteDataCenterService implements DataCenterService {
     }
 
     @Override
-    public List<DataCenter> list() {
-        return this.list(null);
-    }
-
-    @Override
-    public List<DataCenter> list(DataCenterQuery query) {
-        return convert(dataCenterDao.list(query));
-    }
-
-    @Override
-    public PageResult<DataCenter> pageQuery(QPageQuery<DataCenterQuery> pageQuery) {
-        PageResult<IgniteDataCenter> iDatacenters = dataCenterDao.pageQuery(pageQuery);
-        return new PageResult<>(iDatacenters.getPagination(), convert(iDatacenters.getResult()));
+    public List<DataCenter> getAll() {
+        return convert(dataCenterDao.list(null));
     }
 
     private List<DataCenter> convert(List<IgniteDataCenter> dataCenters) {

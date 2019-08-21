@@ -184,7 +184,7 @@ public class NameServer extends Service implements NameService, PropertySupplier
         }
         // TODO 临时
         Executors.newScheduledThreadPool(1).scheduleWithFixedDelay(() -> {
-            metaCache.appTokens.clear();
+            metaCache.appTokens.cleanUp();
             metaCache.brokerConfigs.clear();
             metaCache.consumerConfigs.clear();
             metaCache.producerConfigs.clear();
@@ -460,18 +460,25 @@ public class NameServer extends Service implements NameService, PropertySupplier
 
     @Override
     public AppToken getAppToken(String app, String token) {
-        AppToken appToken = reloadAppToken(app, token);
-        if (appToken == null) {
-            reloadAppToken();
-            appToken =  metaCache.appTokens.get(createAppTokenCacheKey(app, token));
+        AppToken appToken = null;
+        try {
+            appToken = metaCache.appTokens.get(createAppTokenCacheKey(app, token), new Callable<AppToken>() {
+                @Override
+                public AppToken call() throws Exception {
+                    return metaManager.findAppToken(app, token);
+                }
+            });
+        } catch (ExecutionException e) {
+            logger.error("find app token exception, app: {}, token: {}", app, token, e);
+            return null;
         }
-
         return appToken;
     }
 
 
 
 
+    // TODO brokerId改成long
     @Override
     public Broker register(Integer brokerId, String brokerIp, Integer port) {
         Broker broker = null;
@@ -919,11 +926,15 @@ public class NameServer extends Service implements NameService, PropertySupplier
         }
     }
 
+    // TODO 参数化
     protected class MetaCache {
         /**
          * app tokens
          */
-        private Map<String, AppToken> appTokens = new ConcurrentHashMap<>();
+        private Cache<String, AppToken> appTokens = CacheBuilder.newBuilder()
+                .expireAfterWrite(1000 * 60 * 1, TimeUnit.MILLISECONDS)
+                .maximumSize(10240)
+                .build();
         /**
          * 数据中心
          */
@@ -1017,26 +1028,6 @@ public class NameServer extends Service implements NameService, PropertySupplier
         }
         return serviceProvider;
     }
-
-
-    private AppToken reloadAppToken(String app, String token) {
-        AppToken appToken = metaManager.findAppToken(app, token);
-        if (appToken != null) {
-            metaCache.appTokens.put(createAppTokenCacheKey(app, token), appToken);
-        }
-        return appToken;
-    }
-
-
-    private void reloadAppToken() {
-        List<AppToken> appTokens = metaManager.listAppToken();
-        if (!CollectionUtils.isEmpty(appTokens)) {
-            for (AppToken appToken : appTokens) {
-                metaCache.appTokens.put(createAppTokenCacheKey(appToken.getApp(), appToken.getToken()), appToken);
-            }
-        }
-    }
-
 
     private String createAppTokenCacheKey(String app, String token) {
         return app + "@" + token;

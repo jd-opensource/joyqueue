@@ -19,12 +19,9 @@ import com.google.inject.Inject;
 import io.chubao.joyqueue.domain.Config;
 import io.chubao.joyqueue.event.ConfigEvent;
 import io.chubao.joyqueue.event.MetaEvent;
-import io.chubao.joyqueue.model.PageResult;
-import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.nsr.ignite.dao.ConfigDao;
 import io.chubao.joyqueue.nsr.ignite.model.IgniteConfig;
 import io.chubao.joyqueue.nsr.message.Messenger;
-import io.chubao.joyqueue.nsr.model.ConfigQuery;
 import io.chubao.joyqueue.nsr.service.ConfigService;
 import org.apache.ignite.Ignition;
 import org.apache.ignite.transactions.Transaction;
@@ -58,11 +55,12 @@ public class IgniteConfigService implements ConfigService {
     }
 
     @Override
-    public void add(Config config) {
+    public Config add(Config config) {
         try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
-            this.addOrUpdate(new IgniteConfig(config));
+            configDao.addOrUpdate(new IgniteConfig(config));
             this.publishEvent(ConfigEvent.add(config.getGroup(), config.getKey(), config.getValue()));
             tx.commit();
+            return config;
         } catch (Exception e) {
             String message = String.format("add config group [%s] key [%s] error", config.getGroup(), config.getKey());
             logger.error(message, e);
@@ -71,11 +69,12 @@ public class IgniteConfigService implements ConfigService {
     }
 
     @Override
-    public void update(Config config) {
+    public Config update(Config config) {
         try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
-            this.addOrUpdate(new IgniteConfig(config));
+            configDao.addOrUpdate(new IgniteConfig(config));
             this.publishEvent(ConfigEvent.update(config.getGroup(), config.getKey(), config.getValue()));
             tx.commit();
+            return config;
         } catch (Exception e) {
             String message = String.format("update config group [%s] key [%s] error", config.getGroup(), config.getKey());
             logger.error(message, e);
@@ -84,9 +83,10 @@ public class IgniteConfigService implements ConfigService {
     }
 
     @Override
-    public void remove(Config config) {
+    public void delete(String id) {
+        IgniteConfig config = configDao.findById(id);
         try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
-            this.deleteById(IgniteConfig.getId(config.getGroup(), config.getKey()));
+            configDao.deleteById(id);
             this.publishEvent(ConfigEvent.remove(config.getGroup(), config.getKey(), config.getValue()));
             tx.commit();
         } catch (Exception e) {
@@ -104,49 +104,15 @@ public class IgniteConfigService implements ConfigService {
         return new IgniteConfig(model);
     }
 
-
     @Override
     public Config getById(String id) {
         return configDao.findById(id);
     }
 
     @Override
-    public Config get(Config model) {
-        return configDao.findById(toIgniteModel(model).getId());
+    public List<Config> getAll() {
+        return convert(configDao.list(null));
     }
-
-    @Override
-    public void addOrUpdate(Config config) {
-        configDao.addOrUpdate(toIgniteModel(config));
-    }
-
-    @Override
-    public void deleteById(String id) {
-        configDao.deleteById(id);
-    }
-
-    @Override
-    public void delete(Config model) {
-        configDao.deleteById(toIgniteModel(model).getId());
-    }
-
-    @Override
-    public List<Config> list() {
-        return this.list(null);
-    }
-
-    @Override
-    public List<Config> list(ConfigQuery query) {
-
-        return convert(configDao.list(query));
-    }
-
-    @Override
-    public PageResult<Config> pageQuery(QPageQuery<ConfigQuery> pageQuery) {
-        PageResult<IgniteConfig> iConfigs = configDao.pageQuery(pageQuery);
-        return new PageResult<>(iConfigs.getPagination(), convert(iConfigs.getResult()));
-    }
-
 
     private List<Config> convert(List<IgniteConfig> iConfigs) {
         if (iConfigs == null) {

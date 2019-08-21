@@ -87,26 +87,28 @@ public class IgniteBrokerService implements BrokerService {
     }
 
     @Override
-    public Broker getById(Integer id) {
-        return brokerDao.findById(id);
+    public Broker getById(long id) {
+        return brokerDao.findById(Integer.valueOf(String.valueOf(id)));
     }
+
     @Override
-    public List<Broker> getByIds(List<Integer> ids) {
+    public List<Broker> getByIds(List<Long> ids) {
         if (ids == null || ids.size() <=0){
             return null;
         }
-        return ids.stream().map(brokerId-> brokerDao.findById(brokerId)).filter(broker -> broker != null).collect(Collectors.toList());
+        return ids.stream().map(brokerId-> brokerDao.findById(Integer.valueOf(String.valueOf(brokerId)))).filter(broker -> broker != null).collect(Collectors.toList());
     }
 
     @Override
-    public Broker get(Broker model) {
-        return brokerDao.findById(model.getId());
+    public List<Broker> getAll() {
+        return convert(brokerDao.list(new BrokerQuery()));
     }
 
     @Override
-    public void addOrUpdate(Broker broker) {
-        brokerDao.addOrUpdate(toIgniteModel(broker));
+    public Broker add(Broker broker) {
+        brokerDao.add(toIgniteModel(broker));
         publishEvent(BrokerEvent.event(broker));
+        return broker;
     }
 
     public void publishEvent(MetaEvent event) {
@@ -119,39 +121,26 @@ public class IgniteBrokerService implements BrokerService {
     }
 
     @Override
-    public void update(Broker broker) {
+    public Broker update(Broker broker) {
         try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
-            this.addOrUpdate(new IgniteBroker(broker));
+            brokerDao.addOrUpdate(new IgniteBroker(broker));
             this.publishEvent(BrokerEvent.event(broker));
             tx.commit();
+            return broker;
         } catch (Exception e) {
             String message = String.format("update broker [%s] error", JSON.toJSON(broker));
             logger.error(message, e);
             throw new RuntimeException(message, e);
         }
     }
+
     @Override
-    public void deleteById(Integer id) {
-        brokerDao.deleteById(id);
+    public void delete(long id) {
+        brokerDao.deleteById(Integer.valueOf(String.valueOf(id)));
     }
 
     @Override
-    public void delete(Broker model) {
-        brokerDao.deleteById(model.getId());
-    }
-
-    @Override
-    public List<Broker> list() {
-        return this.list(null);
-    }
-
-    @Override
-    public List<Broker> list(BrokerQuery query) {
-        return convert(brokerDao.list(query));
-    }
-
-    @Override
-    public PageResult<Broker> pageQuery(QPageQuery<BrokerQuery> pageQuery) {
+    public PageResult<Broker> search(QPageQuery<BrokerQuery> pageQuery) {
         PageResult<IgniteBroker> iBrokers = brokerDao.pageQuery(pageQuery);
 
         return new PageResult<>(iBrokers.getPagination(), convert(iBrokers.getResult()));

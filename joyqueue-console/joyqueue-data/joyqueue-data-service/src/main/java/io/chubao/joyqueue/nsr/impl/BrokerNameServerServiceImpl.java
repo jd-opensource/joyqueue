@@ -18,16 +18,16 @@ package io.chubao.joyqueue.nsr.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.TypeReference;
+import io.chubao.joyqueue.convert.NsrBrokerConverter;
 import io.chubao.joyqueue.model.PageResult;
 import io.chubao.joyqueue.model.QPageQuery;
-import io.chubao.joyqueue.convert.NsrBrokerConverter;
 import io.chubao.joyqueue.model.domain.Broker;
 import io.chubao.joyqueue.model.domain.Identity;
 import io.chubao.joyqueue.model.domain.OperLog;
 import io.chubao.joyqueue.model.query.QBroker;
-import io.chubao.joyqueue.nsr.model.BrokerQuery;
 import io.chubao.joyqueue.nsr.BrokerNameServerService;
 import io.chubao.joyqueue.nsr.NameServerBase;
+import io.chubao.joyqueue.nsr.model.BrokerQuery;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -46,7 +46,7 @@ public class BrokerNameServerServiceImpl extends NameServerBase implements Broke
     public static final String LIST_BROKER="/broker/list";
     public static final String GETBYID_BROKER="/broker/getById";
     public static final String GETBYIDS_BROKER="/broker/getByIds";
-    public static final String FINDBYQUERY_BROKER="/broker/findByQuery";
+    public static final String SEARCH_BROKER="/broker/search";
     NsrBrokerConverter nsrBrokerConverter = new NsrBrokerConverter();
 
     @Override
@@ -57,13 +57,13 @@ public class BrokerNameServerServiceImpl extends NameServerBase implements Broke
     }
 
     @Override
-    public PageResult<Broker> findByQuery(QPageQuery<QBroker> query) {
+    public PageResult<Broker> search(QPageQuery<QBroker> query) {
         QPageQuery<BrokerQuery> queryQPageQuery = new QPageQuery<>();
         queryQPageQuery.setPagination(query.getPagination());
         queryQPageQuery.setQuery(brokerQueryConvert(query.getQuery()));
         try {
             PageResult<Broker> pageResult = new PageResult<>();
-            String result = post(FINDBYQUERY_BROKER,queryQPageQuery);
+            String result = post(SEARCH_BROKER,queryQPageQuery);
             PageResult<io.chubao.joyqueue.domain.Broker> brokerPageResult = JSON.parseObject(result,new TypeReference<PageResult<io.chubao.joyqueue.domain.Broker>>(){});
             pageResult.setPagination(brokerPageResult.getPagination());
             pageResult.setResult(brokerPageResult.getResult().stream().map(broker -> nsrBrokerConverter.revert(broker)).collect(Collectors.toList()));
@@ -117,14 +117,7 @@ public class BrokerNameServerServiceImpl extends NameServerBase implements Broke
     }
 
     @Override
-    public List<Broker> findByQuery(QBroker query) throws Exception {
-        BrokerQuery brokerQuery = brokerQueryConvert(query);
-        List<io.chubao.joyqueue.domain.Broker> nsrBrokers = JSONArray.parseArray(post(LIST_BROKER,brokerQuery), io.chubao.joyqueue.domain.Broker.class);
-        return nsrBrokers.stream().map(broker -> nsrBrokerConverter.revert(broker)).collect(Collectors.toList());
-    }
-
-    @Override
-    public List<Broker> getByIdsBroker(List<Integer> ids) throws Exception {
+    public List<Broker> getByIdsBroker(List<Long> ids) throws Exception {
         String result = post(GETBYIDS_BROKER,ids);
 
         List<io.chubao.joyqueue.domain.Broker> brokerList = JSON.parseArray(result, io.chubao.joyqueue.domain.Broker.class);

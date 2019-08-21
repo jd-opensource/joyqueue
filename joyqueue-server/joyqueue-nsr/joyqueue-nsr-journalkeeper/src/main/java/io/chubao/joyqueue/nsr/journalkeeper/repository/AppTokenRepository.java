@@ -16,11 +16,14 @@ public class AppTokenRepository extends BaseRepository {
 
     private static final String TABLE = "app_token";
     private static final String COLUMNS = "id, app, token, effective_time, expiration_time";
+    private static final String UPDATE_COLUMNS = "app = ?, token = ?, effective_time = ?, expiration_time = ?";
 
     private static final String GET_BY_ID = String.format("SELECT %s FROM %s WHERE id = ?", COLUMNS, TABLE);
     private static final String GET_BY_APP_AND_CODE = String.format("SELECT %s FROM %s WHERE app = ? AND code = ?", COLUMNS, TABLE);
     private static final String GET_BY_APP = String.format("SELECT %s FROM %s WHERE app = ? AND code = ?", COLUMNS, TABLE);
     private static final String ADD = String.format("INSERT INTO %s(%s) VALUES(?,?,?,?,?)", TABLE, COLUMNS);
+    private static final String UPDATE_BY_ID = String.format("UPDATE %s SET %s WHERE id = ?", TABLE, UPDATE_COLUMNS);
+    private static final String DELETE_BY_ID = String.format("DELETE FROM %s WHERE id = ?", TABLE);
 
     public AppTokenRepository(SQLOperator sqlOperator) {
         super(sqlOperator);
@@ -43,5 +46,16 @@ public class AppTokenRepository extends BaseRepository {
         insert(ADD, appTokenDTO.getId(), appTokenDTO.getApp(), appTokenDTO.getToken(),
                 format.format(appTokenDTO.getEffectiveTime()), format.format(appTokenDTO.getExpirationTime()));
         return appTokenDTO;
+    }
+
+    public AppTokenDTO update(AppTokenDTO appTokenDTO) {
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        update(UPDATE_BY_ID, appTokenDTO.getApp(), appTokenDTO.getToken(), format.format(appTokenDTO.getEffectiveTime()),
+                format.format(appTokenDTO.getExpirationTime()), appTokenDTO.getId());
+        return appTokenDTO;
+    }
+
+    public int deleteById(long id) {
+        return delete(DELETE_BY_ID, id);
     }
 }

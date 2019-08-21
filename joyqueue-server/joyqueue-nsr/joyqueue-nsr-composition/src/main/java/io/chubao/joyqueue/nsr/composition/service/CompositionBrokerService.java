@@ -50,7 +50,7 @@ public class CompositionBrokerService implements BrokerService {
     }
 
     @Override
-    public List<Broker> getByIds(List<Integer> ids) {
+    public List<Broker> getByIds(List<Long> ids) {
         if (config.isReadIgnite()) {
             return igniteBrokerService.getByIds(ids);
         } else {
@@ -59,9 +59,10 @@ public class CompositionBrokerService implements BrokerService {
     }
 
     @Override
-    public void update(Broker broker) {
+    public Broker update(Broker broker) {
+        Broker result = null;
         if (config.isWriteIgnite()) {
-            igniteBrokerService.update(broker);
+            result = igniteBrokerService.update(broker);
         }
         if (config.isWriteJournalkeeper()) {
             try {
@@ -70,10 +71,11 @@ public class CompositionBrokerService implements BrokerService {
                 logger.error("update journalkeeper exception, params: {}", broker, e);
             }
         }
+        return result;
     }
 
     @Override
-    public Broker getById(Integer id) {
+    public Broker getById(long id) {
         if (config.isReadIgnite()) {
             return igniteBrokerService.getById(id);
         } else {
@@ -82,36 +84,29 @@ public class CompositionBrokerService implements BrokerService {
     }
 
     @Override
-    public Broker get(Broker model) {
-        if (config.isReadIgnite()) {
-            return igniteBrokerService.get(model);
-        } else {
-            return journalkeeperBrokerService.get(model);
-        }
-    }
-
-    @Override
-    public void addOrUpdate(Broker broker) {
+    public Broker add(Broker broker) {
+        Broker result = null;
         if (config.isWriteIgnite()) {
-            igniteBrokerService.addOrUpdate(broker);
+            result = igniteBrokerService.add(broker);
         }
         if (config.isWriteJournalkeeper()) {
             try {
-                journalkeeperBrokerService.addOrUpdate(broker);
+                journalkeeperBrokerService.add(broker);
             } catch (Exception e) {
                 logger.error("addOrUpdate journalkeeper exception, params: {}", broker, e);
             }
         }
+        return result;
     }
 
     @Override
-    public void deleteById(Integer id) {
+    public void delete(long id) {
         if (config.isWriteIgnite()) {
-            igniteBrokerService.deleteById(id);
+            igniteBrokerService.delete(id);
         }
         if (config.isWriteJournalkeeper()) {
             try {
-                journalkeeperBrokerService.deleteById(id);
+                journalkeeperBrokerService.delete(id);
             } catch (Exception e) {
                 logger.error("deleteById journalkeeper exception, params: {}", id, e);
             }
@@ -119,43 +114,20 @@ public class CompositionBrokerService implements BrokerService {
     }
 
     @Override
-    public void delete(Broker model) {
-        if (config.isWriteIgnite()) {
-            igniteBrokerService.delete(model);
-        }
-        if (config.isWriteJournalkeeper()) {
-            try {
-                journalkeeperBrokerService.delete(model);
-            } catch (Exception e) {
-                logger.error("deleteById journalkeeper exception, params: {}", model, e);
-            }
+    public List<Broker> getAll() {
+        if (config.isReadIgnite()) {
+            return igniteBrokerService.getAll();
+        } else {
+            return journalkeeperBrokerService.getAll();
         }
     }
 
     @Override
-    public List<Broker> list() {
+    public PageResult<Broker> search(QPageQuery<BrokerQuery> pageQuery) {
         if (config.isReadIgnite()) {
-            return igniteBrokerService.list();
+            return igniteBrokerService.search(pageQuery);
         } else {
-            return journalkeeperBrokerService.list();
-        }
-    }
-
-    @Override
-    public List<Broker> list(BrokerQuery query) {
-        if (config.isReadIgnite()) {
-            return igniteBrokerService.list(query);
-        } else {
-            return journalkeeperBrokerService.list(query);
-        }
-    }
-
-    @Override
-    public PageResult<Broker> pageQuery(QPageQuery<BrokerQuery> pageQuery) {
-        if (config.isReadIgnite()) {
-            return igniteBrokerService.pageQuery(pageQuery);
-        } else {
-            return journalkeeperBrokerService.pageQuery(pageQuery);
+            return journalkeeperBrokerService.search(pageQuery);
         }
     }
 }

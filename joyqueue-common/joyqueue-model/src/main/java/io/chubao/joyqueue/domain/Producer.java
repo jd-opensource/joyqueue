@@ -29,6 +29,7 @@ import java.util.Set;
  * 下午2:41 2018/8/13
  */
 public class Producer extends Subscription {
+
     /**
      * 客户端类型
      */

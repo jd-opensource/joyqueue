@@ -15,16 +15,20 @@
  */
 package io.chubao.joyqueue.handler.routing.command.broker;
 
-import io.chubao.joyqueue.handler.error.ConfigException;
-import io.chubao.joyqueue.handler.routing.command.NsrCommandSupport;
-import io.chubao.joyqueue.model.domain.Broker;
-import io.chubao.joyqueue.model.query.QBroker;
-import io.chubao.joyqueue.service.BrokerService;
+import com.google.common.base.Preconditions;
 import com.jd.laf.web.vertx.annotation.Body;
 import com.jd.laf.web.vertx.annotation.Path;
 import com.jd.laf.web.vertx.annotation.QueryParam;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
+import io.chubao.joyqueue.handler.annotation.PageQuery;
+import io.chubao.joyqueue.handler.error.ConfigException;
+import io.chubao.joyqueue.handler.routing.command.NsrCommandSupport;
+import io.chubao.joyqueue.model.PageResult;
+import io.chubao.joyqueue.model.QPageQuery;
+import io.chubao.joyqueue.model.domain.Broker;
+import io.chubao.joyqueue.model.query.QBroker;
+import io.chubao.joyqueue.service.BrokerService;
 import org.apache.commons.net.telnet.TelnetClient;
 
 import static io.chubao.joyqueue.handler.Constants.ID;
@@ -34,6 +38,14 @@ import static io.chubao.joyqueue.handler.Constants.ID;
  * Date: 2018/10/17
  */
 public class BrokerCommand extends NsrCommandSupport<Broker,BrokerService,QBroker> {
+
+    @Path("search")
+    public Response pageQuery(@PageQuery QPageQuery<QBroker> qPageQuery) throws Exception {
+        Preconditions.checkArgument(qPageQuery!=null, "Illegal args.");
+
+        PageResult<Broker> result  = service.search(qPageQuery);
+        return Responses.success(result.getPagination(), result.getResult());
+    }
 
     @Override
     @Path("delete")

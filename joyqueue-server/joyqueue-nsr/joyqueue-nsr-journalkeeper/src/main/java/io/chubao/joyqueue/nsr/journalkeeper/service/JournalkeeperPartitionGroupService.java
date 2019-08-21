@@ -2,11 +2,8 @@ package io.chubao.joyqueue.nsr.journalkeeper.service;
 
 import io.chubao.joyqueue.domain.PartitionGroup;
 import io.chubao.joyqueue.domain.TopicName;
-import io.chubao.joyqueue.model.PageResult;
-import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.nsr.journalkeeper.converter.PartitionGroupConverter;
 import io.chubao.joyqueue.nsr.journalkeeper.repository.PartitionGroupRepository;
-import io.chubao.joyqueue.nsr.model.PartitionGroupQuery;
 import io.chubao.joyqueue.nsr.service.PartitionGroupService;
 
 import java.util.List;
@@ -25,7 +22,12 @@ public class JournalkeeperPartitionGroupService implements PartitionGroupService
     }
 
     @Override
-    public PartitionGroup findByTopicAndGroup(TopicName topic, int group) {
+    public PartitionGroup getById(String id) {
+        return PartitionGroupConverter.convert(partitionGroupRepository.getById(id));
+    }
+
+    @Override
+    public PartitionGroup getByTopicAndGroup(TopicName topic, int group) {
         return PartitionGroupConverter.convert(partitionGroupRepository.getByTopicAndGroup(topic.getCode(), topic.getNamespace(), group));
     }
 
@@ -35,42 +37,17 @@ public class JournalkeeperPartitionGroupService implements PartitionGroupService
     }
 
     @Override
-    public PartitionGroup getById(String id) {
-        return null;
+    public PartitionGroup add(PartitionGroup partitionGroup) {
+        return PartitionGroupConverter.convert(partitionGroupRepository.add(PartitionGroupConverter.convert(partitionGroup)));
     }
 
     @Override
-    public PartitionGroup get(PartitionGroup model) {
-        return null;
+    public PartitionGroup update(PartitionGroup partitionGroup) {
+        return PartitionGroupConverter.convert(partitionGroupRepository.update(PartitionGroupConverter.convert(partitionGroup)));
     }
 
     @Override
-    public void addOrUpdate(PartitionGroup partitionGroup) {
-
-    }
-
-    @Override
-    public void deleteById(String id) {
-
-    }
-
-    @Override
-    public void delete(PartitionGroup model) {
-
-    }
-
-    @Override
-    public List<PartitionGroup> list() {
-        return null;
-    }
-
-    @Override
-    public List<PartitionGroup> list(PartitionGroupQuery query) {
-        return null;
-    }
-
-    @Override
-    public PageResult<PartitionGroup> pageQuery(QPageQuery<PartitionGroupQuery> pageQuery) {
-        return null;
+    public void delete(String id) {
+        partitionGroupRepository.delete(id);
     }
 }

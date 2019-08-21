@@ -34,7 +34,7 @@ public class PartitionGroupReplica  extends BaseNsrModel implements Comparable<P
     private Namespace namespace;
     private Topic topic;
     private int groupNo;
-    private int brokerId;
+    private long brokerId;
     private int role = ROLE_DYNAMIC;
     private Broker broker;
     protected List<Integer> outSyncReplicas = new ArrayList<>();
@@ -71,11 +71,11 @@ public class PartitionGroupReplica  extends BaseNsrModel implements Comparable<P
         this.groupNo = groupNo;
     }
 
-    public int getBrokerId() {
+    public long getBrokerId() {
         return brokerId;
     }
 
-    public void setBrokerId(int brokerId) {
+    public void setBrokerId(long brokerId) {
         this.brokerId = brokerId;
     }
 
@@ -97,6 +97,6 @@ public class PartitionGroupReplica  extends BaseNsrModel implements Comparable<P
 
     @Override
     public int compareTo(PartitionGroupReplica o) {
-        return this.getBrokerId()-o.getBrokerId();
+        return Long.compare(brokerId, o.getBrokerId());
     }
 }

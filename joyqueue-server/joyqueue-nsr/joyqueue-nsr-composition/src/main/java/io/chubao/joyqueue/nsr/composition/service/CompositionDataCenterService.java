@@ -1,10 +1,7 @@
 package io.chubao.joyqueue.nsr.composition.service;
 
 import io.chubao.joyqueue.domain.DataCenter;
-import io.chubao.joyqueue.model.PageResult;
-import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.nsr.composition.config.CompositionConfig;
-import io.chubao.joyqueue.nsr.model.DataCenterQuery;
 import io.chubao.joyqueue.nsr.service.DataCenterService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,80 +38,57 @@ public class CompositionDataCenterService implements DataCenterService {
     }
 
     @Override
-    public DataCenter get(DataCenter model) {
-        if (config.isReadIgnite()) {
-            return igniteDataCenterService.get(model);
-        } else {
-            return journalkeeperDataCenterService.get(model);
-        }
-    }
-
-    @Override
-    public void addOrUpdate(DataCenter dataCenter) {
+    public DataCenter add(DataCenter dataCenter) {
+        DataCenter result = null;
         if (config.isWriteIgnite()) {
-            igniteDataCenterService.addOrUpdate(dataCenter);
+            result = igniteDataCenterService.add(dataCenter);
         }
         if (config.isWriteJournalkeeper()) {
             try {
-                journalkeeperDataCenterService.addOrUpdate(dataCenter);
+                journalkeeperDataCenterService.add(dataCenter);
             } catch (Exception e) {
-                logger.error("addOrUpdate journalkeeper exception, params: {}", dataCenter, e);
+                logger.error("add journalkeeper exception, params: {}", dataCenter, e);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public DataCenter update(DataCenter dataCenter) {
+        DataCenter result = null;
+        if (config.isWriteIgnite()) {
+            result = igniteDataCenterService.update(dataCenter);
+        }
+        if (config.isWriteJournalkeeper()) {
+            try {
+                journalkeeperDataCenterService.update(dataCenter);
+            } catch (Exception e) {
+                logger.error("update journalkeeper exception, params: {}", dataCenter, e);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public void delete(String id) {
+        if (config.isWriteIgnite()) {
+            igniteDataCenterService.delete(id);
+        }
+        if (config.isWriteJournalkeeper()) {
+            try {
+                journalkeeperDataCenterService.delete(id);
+            } catch (Exception e) {
+                logger.error("delete journalkeeper exception, params: {}", id, e);
             }
         }
     }
 
     @Override
-    public void deleteById(String id) {
-        if (config.isWriteIgnite()) {
-            igniteDataCenterService.deleteById(id);
-        }
-        if (config.isWriteJournalkeeper()) {
-            try {
-                journalkeeperDataCenterService.deleteById(id);
-            } catch (Exception e) {
-                logger.error("deleteById journalkeeper exception, params: {}", id, e);
-            }
-        }
-    }
-
-    @Override
-    public void delete(DataCenter model) {
-        if (config.isWriteIgnite()) {
-            igniteDataCenterService.delete(model);
-        }
-        if (config.isWriteJournalkeeper()) {
-            try {
-                journalkeeperDataCenterService.delete(model);
-            } catch (Exception e) {
-                logger.error("delete journalkeeper exception, params: {}", model, e);
-            }
-        }
-    }
-
-    @Override
-    public List<DataCenter> list() {
+    public List<DataCenter> getAll() {
         if (config.isReadIgnite()) {
-            return igniteDataCenterService.list();
+            return igniteDataCenterService.getAll();
         } else {
-            return journalkeeperDataCenterService.list();
-        }
-    }
-
-    @Override
-    public List<DataCenter> list(DataCenterQuery query) {
-        if (config.isReadIgnite()) {
-            return igniteDataCenterService.list(query);
-        } else {
-            return journalkeeperDataCenterService.list(query);
-        }
-    }
-
-    @Override
-    public PageResult<DataCenter> pageQuery(QPageQuery<DataCenterQuery> pageQuery) {
-        if (config.isReadIgnite()) {
-            return igniteDataCenterService.pageQuery(pageQuery);
-        } else {
-            return journalkeeperDataCenterService.pageQuery(pageQuery);
+            return journalkeeperDataCenterService.getAll();
         }
     }
 }

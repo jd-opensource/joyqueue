@@ -16,7 +16,6 @@
 package io.chubao.joyqueue.nsr;
 
 import io.chubao.joyqueue.model.domain.Producer;
-import io.chubao.joyqueue.model.query.QProducer;
 import io.chubao.joyqueue.nsr.model.ProducerQuery;
 
 import java.util.List;
@@ -24,7 +23,7 @@ import java.util.List;
 /**
  * Created by wangxiaofei1 on 2019/1/2.
  */
-public interface ProducerNameServerService extends NsrService<Producer,QProducer,String> {
+public interface ProducerNameServerService extends NsrService<Producer, String> {
 
     List<Producer> syncProducer(byte clientType) throws Exception;
 

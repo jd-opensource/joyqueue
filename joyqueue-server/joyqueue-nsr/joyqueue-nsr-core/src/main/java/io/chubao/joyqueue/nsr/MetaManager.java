@@ -164,7 +164,7 @@ public class MetaManager extends Service {
      * @return
      */
     public boolean addBroker(Broker broker) {
-        brokerService.addOrUpdate(broker);
+        brokerService.add(broker);
         return true;
     }
 
@@ -175,7 +175,7 @@ public class MetaManager extends Service {
      * @return
      */
     public Consumer addConsumer(Consumer consumer) {
-        consumerService.addOrUpdate(consumer);
+        consumerService.add(consumer);
         metaMessenger.publish(ConsumerEvent.add(consumer.getTopic(), consumer.getApp()));
         return consumer;
     }
@@ -202,7 +202,7 @@ public class MetaManager extends Service {
         Consumer consumer = new Consumer();
         consumer.setTopic(topic);
         consumer.setApp(app);
-        consumerService.delete(consumer);
+        consumerService.delete(consumer.getId());
         metaMessenger.publish(ConsumerEvent.remove(topic, app));
         return true;
     }
@@ -255,7 +255,7 @@ public class MetaManager extends Service {
      * @return
      */
     public List<Consumer> getConsumer(String app) {
-        return consumerService.getByApp(app, false);
+        return consumerService.getByApp(app);
     }
 
     /**
@@ -265,7 +265,7 @@ public class MetaManager extends Service {
      * @return
      */
     public List<Consumer> getConsumerByTopic(TopicName topic) {
-        return consumerService.getByTopic(topic, true);
+        return consumerService.getByTopic(topic);
     }
 
     /**
@@ -293,7 +293,7 @@ public class MetaManager extends Service {
      * @return
      */
     public Set<TopicName> getTopicByBroker(Integer brokerId) {
-        List<Replica> list = partitionGroupReplicaService.findByBrokerId(brokerId);
+        List<Replica> list = partitionGroupReplicaService.getByBrokerId(brokerId);
         Set<TopicName> topics = new HashSet<>();
         if (null != list && list.size() > 0) {
             list.forEach(replica -> topics.add(replica.getTopic()));
@@ -308,7 +308,7 @@ public class MetaManager extends Service {
      * @return
      */
     public List<Replica> getReplicaByBroker(Integer brokerId) {
-        return partitionGroupReplicaService.findByBrokerId(brokerId);
+        return partitionGroupReplicaService.getByBrokerId(brokerId);
     }
 
 
@@ -334,21 +334,12 @@ public class MetaManager extends Service {
     }
 
     /**
-     * list app token
-     *
-     * @return
-     */
-    public List<AppToken> listAppToken() {
-        return appTokenService.list();
-    }
-
-    /**
      * get broker
      *
      * @return
      */
     public List<Broker> getAllBrokers() {
-        return brokerService.list();
+        return brokerService.getAll();
     }
 
     /**
@@ -357,7 +348,7 @@ public class MetaManager extends Service {
      * @return
      */
     public Collection<DataCenter> getAllDataCenter() {
-        return dataCenterService.list();
+        return dataCenterService.getAll();
     }
 
     /**
@@ -387,7 +378,7 @@ public class MetaManager extends Service {
      * @return
      */
     public List<Config> getAllConfigs() {
-        return configService.list();
+        return configService.getAll();
     }
 
     /**
@@ -415,12 +406,12 @@ public class MetaManager extends Service {
      * @param partitionGroup
      */
     public void updatePartitionGroup(PartitionGroup partitionGroup) {
-        PartitionGroup group = partitionGroupService.get(partitionGroup);
+        PartitionGroup group = partitionGroupService.getById(partitionGroup.getId());
         if (group != null){
             group.setIsrs(partitionGroup.getIsrs());
             group.setLeader(partitionGroup.getLeader());
             group.setTerm(partitionGroup.getTerm());
-            partitionGroupService.addOrUpdate(group);
+            partitionGroupService.update(group);
             metaMessenger.publish(PartitionGroupEvent.update(partitionGroup.getTopic(), partitionGroup.getGroup()));
         }
 

@@ -23,7 +23,7 @@ public class BrokerQuery implements Query {
     /**
      * brokerId
      */
-    private int brokerId;
+    private long brokerId;
     /**
      * IP
      */
@@ -50,11 +50,11 @@ public class BrokerQuery implements Query {
         this.ip = ip;
     }
 
-    public int getBrokerId() {
+    public long getBrokerId() {
         return brokerId;
     }
 
-    public void setBrokerId(int brokerId) {
+    public void setBrokerId(long brokerId) {
         this.brokerId = brokerId;
     }
 

@@ -17,16 +17,13 @@ package io.chubao.joyqueue.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import io.chubao.joyqueue.domain.PartitionGroup;
-import io.chubao.joyqueue.convert.CodeConverter;
 import io.chubao.joyqueue.exception.ServiceException;
 import io.chubao.joyqueue.model.domain.Broker;
-import io.chubao.joyqueue.model.domain.Namespace;
-import io.chubao.joyqueue.model.domain.Topic;
 import io.chubao.joyqueue.model.domain.TopicPartitionGroup;
-import io.chubao.joyqueue.service.LeaderService;
 import io.chubao.joyqueue.nsr.BrokerNameServerService;
 import io.chubao.joyqueue.nsr.PartitionGroupServerService;
 import io.chubao.joyqueue.nsr.TopicNameServerService;
+import io.chubao.joyqueue.service.LeaderService;
 import io.chubao.joyqueue.util.NullUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,7 +79,7 @@ public class LeaderServiceImpl implements LeaderService {
 
 
     @Override
-    public Map.Entry<PartitionGroup, Broker> findPartitionGroupLeaderBrokerDetail(String namespace,String topic,int groupNo) {
+    public Map.Entry<PartitionGroup, Broker> findPartitionGroupLeaderBrokerDetail(String namespace,String topic,int groupNo) throws Exception {
         List<TopicPartitionGroup> topicPartitionGroups=new ArrayList<>();
         TopicPartitionGroup topicPartitionGroup=partitionGroupServerService.findByTopicAndGroup(namespace,topic,groupNo);
         topicPartitionGroups.add(topicPartitionGroup);
@@ -92,10 +89,9 @@ public class LeaderServiceImpl implements LeaderService {
         }else return null;
     }
 
-
     @Override
-    public Map.Entry<PartitionGroup, Broker> findPartitionLeaderBrokerDetail(String namespace, String topic, int partition) {
-        List<TopicPartitionGroup> topicPartitionGroups=partitionGroupServerService.findByTopic(CodeConverter.convertTopic(new Namespace(namespace),new Topic(topic)).getFullName());
+    public Map.Entry<PartitionGroup, Broker> findPartitionLeaderBrokerDetail(String namespace, String topic, int partition) throws Exception {
+        List<TopicPartitionGroup> topicPartitionGroups=partitionGroupServerService.findByTopic(topic, namespace);
         TopicPartitionGroup tp=null;
         for(TopicPartitionGroup t:topicPartitionGroups){
             Set<Short> partitions=parsePartitions(t);
@@ -118,8 +114,8 @@ public class LeaderServiceImpl implements LeaderService {
          *
          * deal local single broker test,单机部署 无主
          **/
-        Set<Integer> brokerIds =  partitionGroups.stream().map(
-                partitionGroup -> partitionGroup.getLeader()).collect(Collectors.toSet());
+        Set<Long> brokerIds =  partitionGroups.stream().map(
+                partitionGroup -> Long.valueOf(String.valueOf(partitionGroup.getLeader()))).collect(Collectors.toSet());
 //        List<Broker> brokers=brokerRepository.findByIds(brokerIds);
         List<Broker> brokers = null;
         try {
@@ -135,14 +131,14 @@ public class LeaderServiceImpl implements LeaderService {
     }
 
     @Override
-    public List<Map.Entry<PartitionGroup, Broker>> findPartitionGroupLeaderBrokerDetail(String topic,String namespace) {
+    public List<Map.Entry<PartitionGroup, Broker>> findPartitionGroupLeaderBrokerDetail(String topic,String namespace) throws Exception {
         return findPartitionGroupLeaderBrokerDetail(partitionGroupServerService.findByTopic(topic,namespace));
 
     }
 
 
     @Override
-    public Map<Short, Broker> findPartitionLeaderBrokerDetail(String topic, String namespace) {
+    public Map<Short, Broker> findPartitionLeaderBrokerDetail(String topic, String namespace) throws Exception {
         Map<Short,Broker> partitionBrokerMap=new HashMap<>();
         List<Map.Entry<PartitionGroup, Broker>> partitionGroupBrokers=findPartitionGroupLeaderBrokerDetail(partitionGroupServerService.findByTopic(topic,namespace));
         for(Map.Entry<PartitionGroup, Broker> e:partitionGroupBrokers){
@@ -174,7 +170,7 @@ public class LeaderServiceImpl implements LeaderService {
       List<Broker> brokers= null;
       try {
           //去重broker id
-          List<Integer> brokerIdList =  brokerIds.stream().distinct().collect(Collectors.toList());
+          List<Long> brokerIdList =  brokerIds.stream().distinct().map(brokerId -> Long.valueOf(String.valueOf(brokerId))).collect(Collectors.toList());
           brokers = brokerNameServerService.getByIdsBroker(brokerIdList);
       } catch (Exception e) {
           logger.error("brokerNameServerService.getByIdsBroker error",e);

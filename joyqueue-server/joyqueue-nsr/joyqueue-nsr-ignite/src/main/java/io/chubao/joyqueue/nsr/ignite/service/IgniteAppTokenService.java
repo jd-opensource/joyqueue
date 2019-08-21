@@ -17,8 +17,6 @@ package io.chubao.joyqueue.nsr.ignite.service;
 
 
 import io.chubao.joyqueue.domain.AppToken;
-import io.chubao.joyqueue.model.PageResult;
-import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.nsr.ignite.dao.AppTokenDao;
 import io.chubao.joyqueue.nsr.ignite.model.IgniteAppToken;
 import io.chubao.joyqueue.nsr.model.AppTokenQuery;
@@ -45,51 +43,37 @@ public class IgniteAppTokenService implements AppTokenService {
     }
 
     @Override
-    public PageResult<AppToken> pageQuery(QPageQuery pageQuery) {
-        return appTokenDao.pageQuery(pageQuery);
-    }
-
-    @Override
-    public AppToken getById(Long id) {
+    public AppToken getById(long id) {
         return appTokenDao.findById(id);
     }
 
     @Override
-    public AppToken get(AppToken model) {
-        return this.getById(toIgniteModel(model).getId());
+    public AppToken add(AppToken appToken) {
+        appTokenDao.add(toIgniteModel(appToken));
+        return appToken;
     }
 
     @Override
-    public void addOrUpdate(AppToken appToken) {
-        appTokenDao.addOrUpdate(toIgniteModel(appToken));
+    public AppToken update(AppToken appToken) {
+        return null;
     }
 
     @Override
-    public void deleteById(Long id) {
+    public void delete(long id) {
         appTokenDao.deleteById(id);
     }
 
     @Override
-    public void delete(AppToken model) {
-        appTokenDao.deleteById(toIgniteModel(model).getId());
+    public List<AppToken> getByApp(String app) {
+        AppTokenQuery appTokenQuery = new AppTokenQuery();
+        appTokenQuery.setApp(app);
+        return convert(appTokenDao.list(appTokenQuery));
     }
-
-    @Override
-    public List<AppToken> list() {
-        return this.list(null);
-    }
-
-    @Override
-    public List<AppToken> list(AppTokenQuery query) {
-        return convert(appTokenDao.list(query));
-    }
-
 
     @Override
     public AppToken getByAppAndToken(String app, String token) {
-
         AppTokenQuery query = new AppTokenQuery(app, token);
-        List<AppToken> list = list(query);
+        List<AppToken> list = convert(appTokenDao.list(query));
         if (null == list || list.size() < 1) {
             return null;
         }

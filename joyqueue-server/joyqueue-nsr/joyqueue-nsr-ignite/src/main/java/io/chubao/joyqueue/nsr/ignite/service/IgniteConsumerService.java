@@ -20,11 +20,8 @@ import io.chubao.joyqueue.domain.Consumer;
 import io.chubao.joyqueue.domain.TopicName;
 import io.chubao.joyqueue.event.ConsumerEvent;
 import io.chubao.joyqueue.event.MetaEvent;
-import io.chubao.joyqueue.model.PageResult;
-import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.nsr.ignite.dao.ConsumerConfigDao;
 import io.chubao.joyqueue.nsr.ignite.dao.ConsumerDao;
-import io.chubao.joyqueue.nsr.ignite.model.IgniteBaseModel;
 import io.chubao.joyqueue.nsr.ignite.model.IgniteConsumer;
 import io.chubao.joyqueue.nsr.ignite.model.IgniteConsumerConfig;
 import io.chubao.joyqueue.nsr.message.Messenger;
@@ -42,7 +39,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * @author wylixiaobin
@@ -72,51 +68,21 @@ public class IgniteConsumerService implements ConsumerService {
     }
 
     @Override
-    public Consumer get(Consumer model) {
-        return this.getById(toIgniteModel(model).getId());
-    }
-
-    @Override
-    public void deleteByTopicAndApp(TopicName topic, String app) {
-        deleteById(IgniteConsumer.getId(topic, app));
-    }
-
     public Consumer getByTopicAndApp(TopicName topic, String app) {
         return getById(IgniteConsumer.getId(topic, app));
     }
 
-    public List<Consumer> getByTopic(TopicName topic, boolean withConfig) {
+    @Override
+    public List<Consumer> getByTopic(TopicName topic) {
         ConsumerQuery consumerQuery = new ConsumerQuery(topic.getCode(), topic.getNamespace());
         List<IgniteConsumer> igniteConsumers = consumerDao.list(consumerQuery);
         if (null == igniteConsumers || igniteConsumers.size() < 1) return Collections.emptyList();
         Map<String, IgniteConsumerConfig> configs = new HashMap<>();
-        if (withConfig) {
-            List<IgniteConsumerConfig> igniteConsumerConfigs = consumerConfigDao.list(consumerQuery);
-            if (null != igniteConsumerConfigs && igniteConsumerConfigs.size() > 0) {
-                igniteConsumerConfigs.forEach(config -> {
-                    configs.put(config.getId(), config);
-                });
-            }
-        }
-        List<Consumer> consumers = new ArrayList<>();
-        igniteConsumers.forEach(consumer -> {
-            consumers.add(consumer.fillConfig(configs.get(consumer.getId())));
-        });
-        return consumers;
-    }
-
-    public List<Consumer> getByApp(String app, boolean withConfig) {
-        ConsumerQuery consumerQuery = new ConsumerQuery(app);
-        List<IgniteConsumer> igniteConsumers = consumerDao.list(consumerQuery);
-        if (null == igniteConsumers || igniteConsumers.size() < 1) return null;
-        Map<String, IgniteConsumerConfig> configs = new HashMap<>();
-        if (withConfig) {
-            List<IgniteConsumerConfig> igniteConsumerConfigs = consumerConfigDao.list(consumerQuery);
-            if (null != igniteConsumerConfigs && igniteConsumerConfigs.size() > 0) {
-                igniteConsumerConfigs.forEach(config -> {
-                    configs.put(config.getId(), config);
-                });
-            }
+        List<IgniteConsumerConfig> igniteConsumerConfigs = consumerConfigDao.list(consumerQuery);
+        if (null != igniteConsumerConfigs && igniteConsumerConfigs.size() > 0) {
+            igniteConsumerConfigs.forEach(config -> {
+                configs.put(config.getId(), config);
+            });
         }
         List<Consumer> consumers = new ArrayList<>();
         igniteConsumers.forEach(consumer -> {
@@ -126,77 +92,36 @@ public class IgniteConsumerService implements ConsumerService {
     }
 
     @Override
-    public void addOrUpdate(Consumer consumer) {
-        Transaction tx = Ignition.ignite().transactions().tx();
-        boolean commit = false;
-        try {
-            if (null == tx) {
-                tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED);
-                commit = true;
-            }
-            IgniteConsumer igConsumer = toIgniteModel(consumer);
-            consumerDao.addOrUpdate(igConsumer);
-            if (null != consumer.getConsumerPolicy() || null != consumer.getRetryPolicy() || consumer.getLimitPolicy() != null) {
-                consumerConfigDao.addOrUpdate(new IgniteConsumerConfig(igConsumer));
-            }
-            if (commit) tx.commit();
-        } catch (Exception e) {
-            if (commit) tx.rollback();
-            throw new RuntimeException("ConsumerService addOrUpdate error", e);
-        } finally {
-            if (commit) tx.close();
+    public List<Consumer> getByApp(String app) {
+        ConsumerQuery consumerQuery = new ConsumerQuery(app);
+        List<IgniteConsumer> igniteConsumers = consumerDao.list(consumerQuery);
+        if (null == igniteConsumers || igniteConsumers.size() < 1) return null;
+        Map<String, IgniteConsumerConfig> configs = new HashMap<>();
+            List<IgniteConsumerConfig> igniteConsumerConfigs = consumerConfigDao.list(consumerQuery);
+        if (null != igniteConsumerConfigs && igniteConsumerConfigs.size() > 0) {
+            igniteConsumerConfigs.forEach(config -> {
+                configs.put(config.getId(), config);
+            });
         }
+        List<Consumer> consumers = new ArrayList<>();
+        igniteConsumers.forEach(consumer -> {
+            consumers.add(consumer.fillConfig(configs.get(consumer.getId())));
+        });
+        return consumers;
     }
-
 
     public IgniteConsumer toIgniteModel(Consumer model) {
         return new IgniteConsumer(model);
     }
 
     @Override
-    public void deleteById(String id) {
-        Transaction tx = Ignition.ignite().transactions().tx();
-        boolean commit = false;
-        try {
-            if (null == tx) {
-                tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED);
-                commit = true;
-            }
-            consumerDao.deleteById(id);
-            consumerConfigDao.deleteById(String.valueOf(id));
-            if (commit) tx.commit();
-        } catch (Exception e) {
-            if (commit) tx.rollback();
-            throw new RuntimeException("ConsumerService deleteById error", e);
-        } finally {
-            if (commit) tx.close();
-        }
+    public void delete(String id) {
+        consumerDao.deleteById(id);
     }
 
     @Override
-    public void delete(Consumer model) {
-        this.deleteById(toIgniteModel(model).getId());
-    }
-
-    @Override
-    public List<Consumer> list() {
-        return list(null);
-    }
-
-    @Override
-    public List<Consumer> list(ConsumerQuery query) {
-        return convert(consumerDao.list(query));
-    }
-
-    @Override
-    public PageResult<Consumer> pageQuery(QPageQuery<ConsumerQuery> pageQuery) {
-        PageResult<IgniteConsumer> pageResult = consumerDao.pageQuery(pageQuery);
-        if (pageResult != null && pageResult.getResult() != null) {
-            pageResult.getResult().stream().map(consumer -> {
-                consumer.fillConfig(consumerConfigDao.findById(consumer.getId()));
-                return consumer;
-            }).collect(Collectors.toList());
-        }return new PageResult<>(pageResult.getPagination(), convert(pageResult.getResult()));
+    public List<Consumer> getAll() {
+        return convert(consumerDao.list(null));
     }
 
     public List<Consumer> getConsumerByClientType(byte clientType) {
@@ -205,12 +130,17 @@ public class IgniteConsumerService implements ConsumerService {
         return convert(consumerDao.list(query));
     }
 
-
-    public void add(Consumer consumer) {
+    @Override
+    public Consumer add(Consumer consumer) {
         try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
-            this.addOrUpdate(new IgniteConsumer(consumer));
+            IgniteConsumer igConsumer = toIgniteModel(consumer);
+            consumerDao.addOrUpdate(igConsumer);
+            if (null != consumer.getConsumerPolicy() || null != consumer.getRetryPolicy() || consumer.getLimitPolicy() != null) {
+                consumerConfigDao.addOrUpdate(new IgniteConsumerConfig(igConsumer));
+            }
             tx.commit();
             this.publishEvent(ConsumerEvent.add(consumer.getTopic(), consumer.getApp()));
+            return consumer;
         } catch (Exception e) {
             String message = String.format("add consumer [%s] ,topic [%s] error", consumer.getApp(), consumer.getTopic());
             logger.error(message, e);
@@ -218,25 +148,19 @@ public class IgniteConsumerService implements ConsumerService {
         }
     }
 
-    public void update(Consumer consumer) {
+    @Override
+    public Consumer update(Consumer consumer) {
         try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
-            this.addOrUpdate(new IgniteConsumer(consumer));
+            IgniteConsumer igConsumer = toIgniteModel(consumer);
+            consumerDao.addOrUpdate(igConsumer);
+            if (null != consumer.getConsumerPolicy() || null != consumer.getRetryPolicy() || consumer.getLimitPolicy() != null) {
+                consumerConfigDao.addOrUpdate(new IgniteConsumerConfig(igConsumer));
+            }
             tx.commit();
-            this.publishEvent(ConsumerEvent.update(consumer.getTopic(), consumer.getApp()));
+            this.publishEvent(ConsumerEvent.add(consumer.getTopic(), consumer.getApp()));
+            return consumer;
         } catch (Exception e) {
-            String message = String.format("update consumer [%s] ,topic [%s] error", consumer.getApp(), consumer.getTopic());
-            logger.error(message, e);
-            throw new RuntimeException(message, e);
-        }
-    }
-
-    public void remove(Consumer consumer) {
-        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
-            this.deleteById(new StringBuffer(consumer.getTopic().getFullName()).append(IgniteBaseModel.SPLICE).append(consumer.getApp()).toString());
-            tx.commit();
-            this.publishEvent(ConsumerEvent.remove(consumer.getTopic(), consumer.getApp()));
-        } catch (Exception e) {
-            String message = String.format("remove consumer [%s] ,topic [%s] error", consumer.getApp(), consumer.getTopic());
+            String message = String.format("add consumer [%s] ,topic [%s] error", consumer.getApp(), consumer.getTopic());
             logger.error(message, e);
             throw new RuntimeException(message, e);
         }

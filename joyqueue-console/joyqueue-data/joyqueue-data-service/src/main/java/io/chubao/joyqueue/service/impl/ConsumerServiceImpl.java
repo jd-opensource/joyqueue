@@ -16,23 +16,16 @@
 package io.chubao.joyqueue.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import io.chubao.joyqueue.model.ListQuery;
-import io.chubao.joyqueue.model.PageResult;
-import io.chubao.joyqueue.model.QPageQuery;
+import com.google.common.base.Preconditions;
 import io.chubao.joyqueue.convert.CodeConverter;
-import io.chubao.joyqueue.model.domain.Application;
 import io.chubao.joyqueue.model.domain.Consumer;
 import io.chubao.joyqueue.model.domain.Identity;
 import io.chubao.joyqueue.model.domain.Topic;
-import io.chubao.joyqueue.model.domain.User;
-import io.chubao.joyqueue.model.query.QApplication;
-import io.chubao.joyqueue.model.query.QConsumer;
-import io.chubao.joyqueue.service.ApplicationService;
-import io.chubao.joyqueue.service.ConsumerService;
 import io.chubao.joyqueue.nsr.ConsumerNameServerService;
 import io.chubao.joyqueue.nsr.TopicNameServerService;
-import com.google.common.base.Preconditions;
-import io.chubao.joyqueue.util.LocalSession;
+import io.chubao.joyqueue.service.ApplicationService;
+import io.chubao.joyqueue.service.ConsumerService;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +34,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service("consumerService")
 public class ConsumerServiceImpl  implements ConsumerService {
@@ -80,25 +72,6 @@ public class ConsumerServiceImpl  implements ConsumerService {
         return consumerNameServerService.findById(s);
     }
 
-    @Override
-    public PageResult<Consumer> findByQuery(QPageQuery<QConsumer> query) throws Exception {
-        User user = LocalSession.getSession().getUser();
-        if (query.getQuery() != null && query.getQuery().getApp() != null){
-            query.getQuery().setReferer(query.getQuery().getApp().getCode());
-            query.getQuery().setApp(null);
-        }
-        if (user.getRole() == User.UserRole.NORMAL.value()) {
-            QApplication qApplication = new QApplication();
-            qApplication.setUserId(user.getId());
-            qApplication.setAdmin(false);
-            List<Application> applicationList = applicationService.findByQuery(new ListQuery<>(qApplication));
-            if (applicationList == null || applicationList.size() <=0 ) return PageResult.empty();
-            List<String> appCodes = applicationList.stream().map(application -> application.getCode()).collect(Collectors.toList());
-            query.getQuery().setAppList(appCodes);
-        }
-        return consumerNameServerService.findByQuery(query);
-    }
-
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
     @Override
     public int delete(Consumer consumer) {
@@ -130,25 +103,13 @@ public class ConsumerServiceImpl  implements ConsumerService {
     }
 
     @Override
-    public List<Consumer> findByQuery(QConsumer query) throws Exception {
-        return consumerNameServerService.findByQuery(query);
-    }
-
-    @Override
     public Consumer findByTopicAppGroup(String namespace, String topic, String app, String group) {
         try {
-            QConsumer qConsumer = new QConsumer();
-//            qConsumer.setReferer(app);
-            qConsumer.setApp(new Identity(CodeConverter.convertApp(new Identity(app), group)));
-            //consumer表没存group
-            if (group !=null) {
-                qConsumer.setApp(new Identity(CodeConverter.convertApp(new Identity(app), group)));
+            if (StringUtils.isNotBlank(group)) {
+                return consumerNameServerService.findByTopicAndApp(topic, namespace, CodeConverter.convertApp(new Identity(app), group));
+            } else {
+                return consumerNameServerService.findByTopicAndApp(topic, namespace, app);
             }
-            qConsumer.setNamespace(namespace);
-            qConsumer.setTopic(new Topic(topic));
-            List<Consumer> consumerList = consumerNameServerService.findByQuery(qConsumer);
-            if (consumerList == null || consumerList.size() <= 0)return null;
-            return consumerList.get(0);
         } catch (Exception e) {
             logger.error("findByTopicAppGroup error",e);
             throw new RuntimeException("findByTopicAppGroup error",e);

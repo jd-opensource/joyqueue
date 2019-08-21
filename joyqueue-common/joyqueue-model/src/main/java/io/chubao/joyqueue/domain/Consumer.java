@@ -32,6 +32,7 @@ import java.util.Set;
  * 下午3:23 2018/7/31
  */
 public class Consumer extends Subscription {
+
     /**
      * 客户端类型
      */

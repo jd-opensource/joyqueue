@@ -125,6 +125,8 @@ public class JournalkeeperServiceManager extends Service {
             return (T) journalkeeperAppTokenService;
         } else if (service.equals(Messenger.class)) {
             return (T) journalkeeperMessenger;
+        } else if (service.equals(SQLOperator.class)) {
+            return (T) sqlOperator;
         }
         throw new UnsupportedOperationException(service.getName());
     }

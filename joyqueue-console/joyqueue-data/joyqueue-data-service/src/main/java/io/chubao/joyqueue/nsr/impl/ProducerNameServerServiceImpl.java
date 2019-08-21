@@ -166,7 +166,7 @@ public class ProducerNameServerServiceImpl extends NameServerBase implements Pro
             if (list == null || list.size() <=0) return null;
             return list.get(0);
         } catch (Exception e) {
-            throw new ServiceException(ServiceException.IGNITE_RPC_ERROR,e.getMessage());
+            throw new ServiceException(ServiceException.NAMESERVER_RPC_ERROR,e.getMessage());
         }
     }
     private ProducerQuery producerQueryConvert(QProducer query){

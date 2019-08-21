@@ -47,7 +47,7 @@ public class JournalkeeperServiceProvider extends Service implements ServiceProv
     @Override
     protected void validate() throws Exception {
         Properties journalkeeperProperties = convertProperties(config, propertySupplier.getProperties());
-        List<URI> nodes = convertToUri(config.getLocal(), config.getNodes(), config.getPort());
+        List<URI> nodes = convertNodeUri(config.getLocal(), config.getNodes(), config.getPort());
 
         if (Server.Roll.VOTER.name().equals(config.getRole())
                 || RaftServer.Roll.OBSERVER.name().equals(config.getRole())) {
@@ -84,7 +84,7 @@ public class JournalkeeperServiceProvider extends Service implements ServiceProv
         return result;
     }
 
-    protected List<URI> convertToUri(String local, List<String> nodes, int port) {
+    protected List<URI> convertNodeUri(String local, List<String> nodes, int port) {
         List<URI> nodesUri = Lists.newArrayList();
         nodesUri.add(URI.create(String.format("journalkeeper://%s:%s", local, port)));
         for (String node : nodes) {

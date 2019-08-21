@@ -1,10 +1,7 @@
 package io.chubao.joyqueue.nsr.composition.service;
 
-import io.chubao.joyqueue.nsr.composition.config.CompositionConfig;
 import io.chubao.joyqueue.domain.Config;
-import io.chubao.joyqueue.model.PageResult;
-import io.chubao.joyqueue.model.QPageQuery;
-import io.chubao.joyqueue.nsr.model.ConfigQuery;
+import io.chubao.joyqueue.nsr.composition.config.CompositionConfig;
 import io.chubao.joyqueue.nsr.service.ConfigService;
 
 import java.util.List;
@@ -28,62 +25,32 @@ public class CompositionConfigService implements ConfigService {
     }
 
     @Override
-    public Config getByGroupAndKey(String group, String key) {
-        return igniteConfigService.getByGroupAndKey(group, key);
-    }
-
-    @Override
-    public void add(Config config) {
-        igniteConfigService.add(config);
-    }
-
-    @Override
-    public void update(Config config) {
-        igniteConfigService.update(config);
-    }
-
-    @Override
-    public void remove(Config config) {
-        igniteConfigService.remove(config);
-    }
-
-    @Override
     public Config getById(String id) {
         return igniteConfigService.getById(id);
     }
 
     @Override
-    public Config get(Config model) {
-        return igniteConfigService.get(model);
+    public Config getByGroupAndKey(String group, String key) {
+        return igniteConfigService.getByGroupAndKey(group, key);
     }
 
     @Override
-    public void addOrUpdate(Config config) {
-        igniteConfigService.addOrUpdate(config);
+    public List<Config> getAll() {
+        return igniteConfigService.getAll();
     }
 
     @Override
-    public void deleteById(String id) {
-        igniteConfigService.deleteById(id);
+    public Config add(Config config) {
+        return igniteConfigService.add(config);
     }
 
     @Override
-    public void delete(Config model) {
-        igniteConfigService.delete(model);
+    public Config update(Config config) {
+        return igniteConfigService.update(config);
     }
 
     @Override
-    public List<Config> list() {
-        return igniteConfigService.list();
-    }
-
-    @Override
-    public List<Config> list(ConfigQuery query) {
-        return igniteConfigService.list(query);
-    }
-
-    @Override
-    public PageResult<Config> pageQuery(QPageQuery<ConfigQuery> pageQuery) {
-        return igniteConfigService.pageQuery(pageQuery);
+    public void delete(String id) {
+        igniteConfigService.delete(id);
     }
 }

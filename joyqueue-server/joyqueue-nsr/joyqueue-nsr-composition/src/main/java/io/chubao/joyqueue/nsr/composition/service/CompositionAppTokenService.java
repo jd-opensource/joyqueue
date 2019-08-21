@@ -1,10 +1,7 @@
 package io.chubao.joyqueue.nsr.composition.service;
 
 import io.chubao.joyqueue.domain.AppToken;
-import io.chubao.joyqueue.model.PageResult;
-import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.nsr.composition.config.CompositionConfig;
-import io.chubao.joyqueue.nsr.model.AppTokenQuery;
 import io.chubao.joyqueue.nsr.service.AppTokenService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +29,15 @@ public class CompositionAppTokenService implements AppTokenService {
     }
 
     @Override
+    public List<AppToken> getByApp(String app) {
+        if (config.isReadIgnite()) {
+            return igniteAppTokenService.getByApp(app);
+        } else {
+            return journalkeeperAppTokenService.getByApp(app);
+        }
+    }
+
+    @Override
     public AppToken getByAppAndToken(String app, String token) {
         if (config.isReadIgnite()) {
             return igniteAppTokenService.getByAppAndToken(app, token);
@@ -41,7 +47,7 @@ public class CompositionAppTokenService implements AppTokenService {
     }
 
     @Override
-    public AppToken getById(Long id) {
+    public AppToken getById(long id) {
         if (config.isReadIgnite()) {
             return igniteAppTokenService.getById(id);
         } else {
@@ -50,80 +56,48 @@ public class CompositionAppTokenService implements AppTokenService {
     }
 
     @Override
-    public AppToken get(AppToken model) {
-        if (config.isReadIgnite()) {
-            return igniteAppTokenService.get(model);
-        } else {
-            return journalkeeperAppTokenService.get(model);
-        }
-    }
-
-    @Override
-    public void addOrUpdate(AppToken appToken) {
+    public AppToken add(AppToken appToken) {
+        AppToken result = null;
         if (config.isWriteIgnite()) {
-            igniteAppTokenService.addOrUpdate(appToken);
+            result = igniteAppTokenService.add(appToken);
         }
         if (config.isWriteJournalkeeper()) {
             try {
-                journalkeeperAppTokenService.addOrUpdate(appToken);
+                return journalkeeperAppTokenService.add(appToken);
             } catch (Exception e) {
-                logger.error("addOrUpdate journalkeeper exception, params: {}", appToken, e);
+                logger.error("add journalkeeper exception, params: {}", appToken, e);
             }
         }
+        return result;
     }
 
     @Override
-    public void deleteById(Long id) {
+    public AppToken update(AppToken appToken) {
+        AppToken result = null;
         if (config.isWriteIgnite()) {
-            igniteAppTokenService.deleteById(id);
+            result = igniteAppTokenService.update(appToken);
         }
         if (config.isWriteJournalkeeper()) {
             try {
-                journalkeeperAppTokenService.deleteById(id);
+                return journalkeeperAppTokenService.update(appToken);
+            } catch (Exception e) {
+                logger.error("update journalkeeper exception, params: {}", appToken, e);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public void delete(long id) {
+        if (config.isWriteIgnite()) {
+            igniteAppTokenService.delete(id);
+        }
+        if (config.isWriteJournalkeeper()) {
+            try {
+                journalkeeperAppTokenService.delete(id);
             } catch (Exception e) {
                 logger.error("deleteById journalkeeper exception, params: {}", id, e);
             }
-        }
-    }
-
-    @Override
-    public void delete(AppToken model) {
-        if (config.isWriteIgnite()) {
-            igniteAppTokenService.delete(model);
-        }
-        if (config.isWriteJournalkeeper()) {
-            try {
-                journalkeeperAppTokenService.delete(model);
-            } catch (Exception e) {
-                logger.error("delete journalkeeper exception, params: {}", model, e);
-            }
-        }
-    }
-
-    @Override
-    public List<AppToken> list() {
-        if (config.isReadIgnite()) {
-            return igniteAppTokenService.list();
-        } else {
-            return journalkeeperAppTokenService.list();
-        }
-    }
-
-    @Override
-    public List<AppToken> list(AppTokenQuery query) {
-        if (config.isReadIgnite()) {
-            return igniteAppTokenService.list(query);
-        } else {
-            return journalkeeperAppTokenService.list(query);
-        }
-    }
-
-    @Override
-    public PageResult<AppToken> pageQuery(QPageQuery<AppTokenQuery> pageQuery) {
-        if (config.isReadIgnite()) {
-            return igniteAppTokenService.pageQuery(pageQuery);
-        } else {
-            return journalkeeperAppTokenService.pageQuery(pageQuery);
         }
     }
 }

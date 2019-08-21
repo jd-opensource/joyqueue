@@ -215,15 +215,11 @@ public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService 
     }
     private List<String> getAppByTopic(SubscribeType subscribeType,String topic) throws Exception {
         if (subscribeType == SubscribeType.CONSUMER) {
-            QConsumer qConsumer = new QConsumer();
-            qConsumer.setTopic(new Topic(topic));
-            List<Consumer> consumerList =  consumerService.findByQuery(qConsumer);
+            List<Consumer> consumerList =  consumerService.findByTopic(topic, null);
             return consumerList.stream().map(consumer -> CodeConverter.convertApp(consumer.getApp(),consumer.getSubscribeGroup())).collect(Collectors.toList());
 
         } else if (subscribeType == SubscribeType.PRODUCER) {
-            QProducer qProducer = new QProducer();
-            qProducer.setTopic(new Topic(topic));
-            List<Producer> producerList =  producerService.findByQuery(qProducer);
+            List<Producer> producerList =  producerService.findByTopicAppGroup(topic, null);
             return producerList.stream().map(producer -> producer.getApp().getCode()).collect(Collectors.toList());
         }
         return new ArrayList<>();

@@ -2,10 +2,7 @@ package io.chubao.joyqueue.nsr.composition.service;
 
 import io.chubao.joyqueue.domain.Replica;
 import io.chubao.joyqueue.domain.TopicName;
-import io.chubao.joyqueue.model.PageResult;
-import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.nsr.composition.config.CompositionConfig;
-import io.chubao.joyqueue.nsr.model.ReplicaQuery;
 import io.chubao.joyqueue.nsr.service.PartitionGroupReplicaService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,57 +30,29 @@ public class CompositionPartitionGroupReplicaService implements PartitionGroupRe
     }
 
     @Override
-    public void deleteByTopic(TopicName topic) {
-        if (config.isWriteIgnite()) {
-            ignitePartitionGroupReplicaService.deleteByTopic(topic);
-        }
-        if (config.isWriteJournalkeeper()) {
-            try {
-                journalkeeperPartitionGroupReplicaService.deleteByTopic(topic);
-            } catch (Exception e) {
-                logger.error("deleteByTopic journalkeeper exception, params: {}", topic, e);
-            }
-        }
-    }
-
-    @Override
-    public void deleteByTopicAndPartitionGroup(TopicName topic, int groupNo) {
-        if (config.isWriteIgnite()) {
-            ignitePartitionGroupReplicaService.deleteByTopicAndPartitionGroup(topic, groupNo);
-        }
-        if (config.isWriteJournalkeeper()) {
-            try {
-                journalkeeperPartitionGroupReplicaService.deleteByTopicAndPartitionGroup(topic, groupNo);
-            } catch (Exception e) {
-                logger.error("deleteByTopicAndPartitionGroup journalkeeper exception, params: {}, {}", topic, groupNo, e);
-            }
-        }
-    }
-
-    @Override
-    public List<Replica> findByTopic(TopicName topic) {
+    public List<Replica> getByTopic(TopicName topic) {
         if (config.isReadIgnite()) {
-            return ignitePartitionGroupReplicaService.findByTopic(topic);
+            return ignitePartitionGroupReplicaService.getByTopic(topic);
         } else {
-            return journalkeeperPartitionGroupReplicaService.findByTopic(topic);
+            return journalkeeperPartitionGroupReplicaService.getByTopic(topic);
         }
     }
 
     @Override
-    public List<Replica> findByTopicAndGrPartitionGroup(TopicName topic, int groupNo) {
+    public List<Replica> getByTopicAndGroup(TopicName topic, int groupNo) {
         if (config.isReadIgnite()) {
-            return ignitePartitionGroupReplicaService.findByTopicAndGrPartitionGroup(topic, groupNo);
+            return ignitePartitionGroupReplicaService.getByTopicAndGroup(topic, groupNo);
         } else {
-            return journalkeeperPartitionGroupReplicaService.findByTopicAndGrPartitionGroup(topic, groupNo);
+            return journalkeeperPartitionGroupReplicaService.getByTopicAndGroup(topic, groupNo);
         }
     }
 
     @Override
-    public List<Replica> findByBrokerId(Integer brokerId) {
+    public List<Replica> getByBrokerId(Integer brokerId) {
         if (config.isReadIgnite()) {
-            return ignitePartitionGroupReplicaService.findByBrokerId(brokerId);
+            return ignitePartitionGroupReplicaService.getByBrokerId(brokerId);
         } else {
-            return journalkeeperPartitionGroupReplicaService.findByBrokerId(brokerId);
+            return journalkeeperPartitionGroupReplicaService.getByBrokerId(brokerId);
         }
     }
 
@@ -97,80 +66,48 @@ public class CompositionPartitionGroupReplicaService implements PartitionGroupRe
     }
 
     @Override
-    public Replica get(Replica model) {
-        if (config.isReadIgnite()) {
-            return ignitePartitionGroupReplicaService.get(model);
-        } else {
-            return journalkeeperPartitionGroupReplicaService.get(model);
-        }
-    }
-
-    @Override
-    public void addOrUpdate(Replica replica) {
+    public Replica add(Replica replica) {
+        Replica result = null;
         if (config.isWriteIgnite()) {
-            ignitePartitionGroupReplicaService.addOrUpdate(replica);
+            result = ignitePartitionGroupReplicaService.add(replica);
         }
         if (config.isWriteJournalkeeper()) {
             try {
-                journalkeeperPartitionGroupReplicaService.addOrUpdate(replica);
+                journalkeeperPartitionGroupReplicaService.add(replica);
             } catch (Exception e) {
-                logger.error("addOrUpdate journalkeeper exception, params: {}", replica, e);
+                logger.error("add journalkeeper exception, params: {}", replica, e);
             }
         }
+        return result;
     }
 
     @Override
-    public void deleteById(String id) {
+    public Replica update(Replica replica) {
+        Replica result = null;
         if (config.isWriteIgnite()) {
-            ignitePartitionGroupReplicaService.deleteById(id);
+            result = ignitePartitionGroupReplicaService.update(replica);
         }
         if (config.isWriteJournalkeeper()) {
             try {
-                journalkeeperPartitionGroupReplicaService.deleteById(id);
+                journalkeeperPartitionGroupReplicaService.update(replica);
             } catch (Exception e) {
-                logger.error("deleteById journalkeeper exception, params: {}", id, e);
+                logger.error("update journalkeeper exception, params: {}", replica, e);
             }
         }
+        return result;
     }
 
     @Override
-    public void delete(Replica model) {
+    public void delete(String id) {
         if (config.isWriteIgnite()) {
-            ignitePartitionGroupReplicaService.delete(model);
+            ignitePartitionGroupReplicaService.delete(id);
         }
         if (config.isWriteJournalkeeper()) {
             try {
-                journalkeeperPartitionGroupReplicaService.delete(model);
+                journalkeeperPartitionGroupReplicaService.delete(id);
             } catch (Exception e) {
-                logger.error("delete journalkeeper exception, params: {}", model, e);
+                logger.error("delete journalkeeper exception, params: {}", id, e);
             }
-        }
-    }
-
-    @Override
-    public List<Replica> list() {
-        if (config.isReadIgnite()) {
-            return ignitePartitionGroupReplicaService.list();
-        } else {
-            return journalkeeperPartitionGroupReplicaService.list();
-        }
-    }
-
-    @Override
-    public List<Replica> list(ReplicaQuery query) {
-        if (config.isReadIgnite()) {
-            return ignitePartitionGroupReplicaService.list(query);
-        } else {
-            return journalkeeperPartitionGroupReplicaService.list(query);
-        }
-    }
-
-    @Override
-    public PageResult<Replica> pageQuery(QPageQuery<ReplicaQuery> pageQuery) {
-        if (config.isReadIgnite()) {
-            return ignitePartitionGroupReplicaService.pageQuery(pageQuery);
-        } else {
-            return journalkeeperPartitionGroupReplicaService.pageQuery(pageQuery);
         }
     }
 }

@@ -28,7 +28,7 @@ import java.util.List;
 /**
  * Created by wangxiaofei1 on 2019/1/2.
  */
-public interface TopicNameServerService extends NsrService<Topic,QTopic,String> {
+public interface TopicNameServerService extends NsrService<Topic, String> {
     /**
      * 添加主题
      * @param

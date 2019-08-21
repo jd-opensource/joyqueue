@@ -45,7 +45,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import static io.chubao.joyqueue.exception.ServiceException.IGNITE_RPC_ERROR;
+import static io.chubao.joyqueue.exception.ServiceException.NAMESERVER_RPC_ERROR;
 
 /**
  * Created by wangxiaofei1 on 2019/1/2.
@@ -248,7 +248,7 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
         try {
             throw new RuntimeException("请使用addTopic接口");
         } catch (Exception e) {
-            throw new ServiceException(IGNITE_RPC_ERROR,e.getMessage());
+            throw new ServiceException(NAMESERVER_RPC_ERROR,e.getMessage());
         }
     }
 
@@ -277,7 +277,7 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
             if (pageResult == null || pageResult.getResult() == null) return PageResult.empty();
             return new PageResult<>(pageResult.getPagination(),pageResult.getResult().stream().map(topic -> nsrTopicConverter.revert(topic)).collect(Collectors.toList()));
         } catch (Exception e) {
-            throw new ServiceException(IGNITE_RPC_ERROR, e.getMessage());
+            throw new ServiceException(NAMESERVER_RPC_ERROR, e.getMessage());
         }
     }
 
@@ -288,7 +288,7 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
             if (topics == null || topics.size() <=0) return null;
             return topics.get(0);
         } catch (Exception e) {
-            throw new ServiceException(IGNITE_RPC_ERROR,e.getMessage());
+            throw new ServiceException(NAMESERVER_RPC_ERROR,e.getMessage());
         }
     }
 
@@ -298,7 +298,7 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
             io.chubao.joyqueue.domain.Topic nsrToic= JSON.parseObject(post(GETBYID_TOPIC,id), io.chubao.joyqueue.domain.Topic.class);
             return nsrTopicConverter.revert(nsrToic);
         } catch (Exception e) {
-            throw new ServiceException(IGNITE_RPC_ERROR,e.getMessage());
+            throw new ServiceException(NAMESERVER_RPC_ERROR,e.getMessage());
         }
     }
     private TopicQuery topicQueryConvert(QTopic qTopic){
