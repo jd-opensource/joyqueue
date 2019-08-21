@@ -269,7 +269,7 @@ export default {
       if (!this.data.operates || this.data.operates === []) {
         return { 'margin-top': `20px` }
       } else {
-        let height = 20 * this.data.operates.length
+        let height = 27 * this.data.operates.length
         return { 'margin-top': `${height}px` }
       }
     }

@@ -80,7 +80,7 @@ public class Metric {
                                         .mapToLong(instance -> instance.getAndResetTraffic(name))
                                         .sum() * 1000L / intervalMs;
                             }
-                            return String.format("%s: %s/S", name, Format.formatSize(cps));
+                            return String.format("%s: %s/S", name, Format.formatTraffic(cps));
                         }),
 
                 Arrays.stream(latencies)

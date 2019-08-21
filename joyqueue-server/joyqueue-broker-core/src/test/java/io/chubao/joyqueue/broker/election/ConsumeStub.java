@@ -205,4 +205,9 @@ public class ConsumeStub implements Consume {
         return 0;
     }
 
+    @Override
+    public void releasePartition(String topic, String app, short partition) {
+
+    }
+
 }

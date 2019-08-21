@@ -117,6 +117,44 @@ public class HBaseSerializer {
         return new Pair<>(bufferKey.array(), bufferVal.array());
     }
 
+    /**
+     * key: topicId(4) + businessId(16) + sendTime(8) + messageId(16) 总长度：44
+     * value: brokerId(4) + appId(4) + clientIp(16) + sendTime(8) + compassType(2) + messageBody(变长) + businessId(变长)
+     *
+     * @param sendLog
+     * @return
+     */
+    public static Pair<byte[], byte[]> convertSendLogToKVBytes4BizId(SendLog sendLog) throws GeneralSecurityException {
+        ByteBuffer bufferKey = ByteBuffer.allocate(44);
+        bufferKey.putInt(sendLog.getTopicId());
+        bufferKey.put(Md5.INSTANCE.encrypt(sendLog.getBusinessId().getBytes(Charset.forName("utf-8")), null));
+        bufferKey.putLong(sendLog.getSendTime());
+        bufferKey.put(Md5.INSTANCE.encrypt(sendLog.getMessageId().getBytes(Charset.forName("utf-8")), null));
+
+
+        // value
+        byte[] messageBody = sendLog.getMessageBody();
+        byte[] businessIdBytes = sendLog.getBusinessId().getBytes(Charset.forName("utf-8"));
+        int size = 4 + 4 + 16 + 8 + 2 + 4 + messageBody.length + 4 + businessIdBytes.length;
+        ByteBuffer bufferVal = ByteBuffer.allocate(size);
+        bufferVal.putInt(sendLog.getBrokerId());
+        bufferVal.putInt(sendLog.getAppId());
+
+        // clientIP
+        byte[] clientIpBytes16 = new byte[16];
+        byte[] clientIpBytes = sendLog.getClientIp();
+        System.arraycopy(clientIpBytes, 0, clientIpBytes16,0, Math.min(clientIpBytes.length, clientIpBytes16.length));
+        bufferVal.put(clientIpBytes16);
+
+        bufferVal.putShort(sendLog.getCompressType());
+        bufferVal.putInt(messageBody.length);
+        bufferVal.put(messageBody);
+        bufferVal.putInt(businessIdBytes.length);
+        bufferVal.put(businessIdBytes);
+
+        return new Pair<>(bufferKey.array(), bufferVal.array());
+    }
+
     public static SendLog readSendLog(Pair<byte[], byte[]> pair) {
         SendLog log = new SendLog();
 
@@ -129,6 +167,50 @@ public class HBaseSerializer {
         // 业务主键（MD5后的）
         byte[] businessId = new byte[16];
         wrap.get(businessId);
+        // 消息ID（MD5后的）
+        byte[] messageId = new byte[16];
+        wrap.get(messageId);
+        log.setBytesMessageId(messageId);
+        log.setMessageId(byteArrayToHexStr(messageId));
+
+        byte[] value = pair.getValue();
+        ByteBuffer valWrap = ByteBuffer.wrap(value);
+        // brokerID
+        log.setBrokerId(valWrap.getInt());
+        // 应用ID
+        log.setAppId(valWrap.getInt());
+        // 客户端IP
+        byte[] clientIp = new byte[16];
+        valWrap.get(clientIp);
+        log.setClientIp(clientIp);
+        // 压缩类型
+        log.setCompressType(valWrap.getShort());
+        // 消息体
+        int msgBodySize = valWrap.getInt();
+        byte[] messageBody = new byte[msgBodySize];
+        valWrap.get(messageBody);
+        log.setMessageBody(messageBody);
+        // 业务主键
+        int bizSize = valWrap.getInt();
+        byte[] businessIdBytes = new byte[bizSize];
+        valWrap.get(businessIdBytes);
+        log.setBusinessId(new String(businessIdBytes, Charset.forName("utf-8")));
+
+        return log;
+    }
+
+    public static SendLog readSendLog4BizId(Pair<byte[], byte[]> pair) {
+        SendLog log = new SendLog();
+
+        byte[] key = pair.getKey();
+        ByteBuffer wrap = ByteBuffer.wrap(key);
+        // 主题ID
+        log.setTopicId(wrap.getInt());
+        // 业务主键（MD5后的）
+        byte[] businessId = new byte[16];
+        wrap.get(businessId);
+        // 发送时间
+        log.setSendTime(wrap.getLong());
         // 消息ID（MD5后的）
         byte[] messageId = new byte[16];
         wrap.get(messageId);

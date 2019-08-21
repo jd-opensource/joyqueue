@@ -40,9 +40,9 @@ import static io.chubao.joyqueue.exception.ServiceException.INTERNAL_SERVER_ERRO
 public class AsyncHttpClient {
     private static final Logger logger= LoggerFactory.getLogger(AsyncHttpClient.class);
     private static CloseableHttpAsyncClient httpclient = HttpAsyncClients.custom().setDefaultRequestConfig(RequestConfig.custom()
-            .setConnectTimeout(600)
-            .setSocketTimeout(700)
-            .setConnectionRequestTimeout(500).build()).build();
+            .setConnectTimeout(2000)
+            .setSocketTimeout(2000)
+            .setConnectionRequestTimeout(2000).build()).build();
     public static void AsyncRequest(HttpUriRequest request, FutureCallback<HttpResponse> asyncCallBack){
          httpclient.start();
          request.setHeader("Content-Type", "application/json;charset=utf-8");

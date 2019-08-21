@@ -311,7 +311,7 @@ public class DBMessageRetry implements MessageRetry<Long> {
             // 遍历重试消息ID
             for (long messageId : messageIds) {
                 // 获取重试数据
-                Long nextRetryTime = getNextRetryTime(messageId, topic);
+                Long nextRetryTime = getNextRetryTime(messageId, topic, app);
                 if (nextRetryTime != null) {
                     // 计算下次重试时间
                     if (nextRetryTime <= 0) {
@@ -353,7 +353,7 @@ public class DBMessageRetry implements MessageRetry<Long> {
      * @return
      * @throws JoyQueueException
      */
-    protected Long getNextRetryTime(long id, String topic) throws JoyQueueException {
+    protected Long getNextRetryTime(long id, String topic, String app) throws JoyQueueException {
         Connection connection = null;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
@@ -376,7 +376,7 @@ public class DBMessageRetry implements MessageRetry<Long> {
                 long startTime = createTime.getTime(); // 临时存放创建时间
                 int retryCount = resultSet.getInt(3);
 
-                nextRetryTime = retryPolicy.getTime(SystemClock.now(), retryCount, startTime);
+                nextRetryTime = retryPolicyProvider.getPolicy(TopicName.parse(topic), app).getTime(SystemClock.now(), retryCount, startTime);
             }
         } catch (Exception e) {
             throw new JoyQueueException(JoyQueueCode.CN_DB_ERROR, e);

@@ -94,4 +94,11 @@ public interface ArchiveStore extends LifeCycle {
      * @throws JoyQueueException
      */
     List<ConsumeLog> scanConsumeLog(String messageId,Integer count) throws JoyQueueException;
+
+    /**
+     * 设置归档存储的命名空间
+     *
+     * @param nameSpace
+     */
+    void setNameSpace(String nameSpace);
 }

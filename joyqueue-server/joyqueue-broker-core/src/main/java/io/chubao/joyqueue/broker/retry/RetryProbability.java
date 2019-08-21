@@ -31,9 +31,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RetryProbability extends Service {
 
     // 选择重试概率的最大值
-    private int maxProbability = 100;
+    private int maxProbability = 200;
     // 选择重试概率的最小值
-    private int minProbability = 2;
+    private int minProbability = 5;
     // 选择重试概率的默认值
     private int defaultProbability = 5;
 

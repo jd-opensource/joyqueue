@@ -62,7 +62,8 @@ export default {
           endTime: '',
           sendTime: '',
           messageId: '',
-          count: 10
+          count: 10,
+          rowKeyStart: ''
         }
       }
     },
@@ -217,8 +218,10 @@ export default {
       this.search.endTime = this.times[1]
       if (isNext) {
         this.search.sendTime = oldData[oldData.length - 1].sendTime
+        this.search.rowKeyStart = oldData[oldData.length - 1].rowKeyStart
       } else {
         this.search.sendTime = this.search.beginTime
+        this.search.rowKeyStart = '';
       }
       apiRequest.post(this.urlOrigin.search, {}, this.search).then((data) => {
         this.tableData.rowData = data.data

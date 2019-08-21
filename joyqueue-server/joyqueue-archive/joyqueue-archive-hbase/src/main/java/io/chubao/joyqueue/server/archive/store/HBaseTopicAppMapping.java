@@ -53,9 +53,12 @@ public class HBaseTopicAppMapping {
     private Map<Integer, String> appIdMappingCache = new ConcurrentHashMap<>();
     // hbase客户端
     private HBaseClient hbaseClient;
+    // 命名空间
+    private String namespace;
 
-    public HBaseTopicAppMapping(HBaseClient hbaseClient) {
+    public HBaseTopicAppMapping(String namespace, HBaseClient hbaseClient) {
         this.hbaseClient = hbaseClient;
+        this.namespace = namespace;
     }
 
     /**
@@ -134,7 +137,7 @@ public class HBaseTopicAppMapping {
      * @throws InterruptedException
      */
     private int getIdFromHBase(String autoIncreaseKey, String name, int invokeTimes) throws InterruptedException, IOException {
-        byte[] bytes = hbaseClient.get(mappingTable, cf, col, Bytes.toBytes(name));
+        byte[] bytes = hbaseClient.get(namespace, mappingTable, cf, col, Bytes.toBytes(name));
         // 如果未初始化、尝试未占位
         if ((bytes == null || bytes.length == 0)
                 && compareAndSwap(name, null, 0 + "")) {
@@ -162,7 +165,7 @@ public class HBaseTopicAppMapping {
     }
 
     private boolean compareAndSwap(String rowKey, String expect, String value) throws IOException {
-        return hbaseClient.checkAndPut(mappingTable, cf, col, Bytes.toBytes(rowKey),
+        return hbaseClient.checkAndPut(namespace, mappingTable, cf, col, Bytes.toBytes(rowKey),
                 expect == null ? null : Bytes.toBytes(expect), value == null ? null : Bytes.toBytes(value));
     }
 
@@ -176,7 +179,7 @@ public class HBaseTopicAppMapping {
         String idStr = null;
         int newAutoIncreaseId = 1;
         do {
-            byte[] bytes = hbaseClient.get(mappingTable, cf, col, Bytes.toBytes(autoIncreaseKey));
+            byte[] bytes = hbaseClient.get(namespace, mappingTable, cf, col, Bytes.toBytes(autoIncreaseKey));
             if (bytes != null) {
                 idStr = Bytes.toString(bytes);
                 newAutoIncreaseId = Integer.parseInt(idStr) + 1;
@@ -204,7 +207,7 @@ public class HBaseTopicAppMapping {
         String value = rowKey.split(separator)[1];
         list.add(new Pair<>(Bytes.toBytes(key), Bytes.toBytes(value)));
         // 批量插入
-        hbaseClient.put(mappingTable, cf, col, list);
+        hbaseClient.put(namespace, mappingTable, cf, col, list);
     }
 
     /**
@@ -216,7 +219,7 @@ public class HBaseTopicAppMapping {
      * @throws IOException
      */
     private String getNameFromHBase(byte[] cf, byte[] col, String key) throws IOException {
-        byte[] bytes = hbaseClient.get(mappingTable, cf, col, Bytes.toBytes(key));
+        byte[] bytes = hbaseClient.get(namespace, mappingTable, cf, col, Bytes.toBytes(key));
         return Bytes.toString(bytes);
     }
 

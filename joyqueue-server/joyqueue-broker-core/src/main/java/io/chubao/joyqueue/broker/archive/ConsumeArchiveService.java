@@ -86,6 +86,9 @@ public class ConsumeArchiveService extends Service {
         if (archiveStore == null) {
             archiveStore = Plugins.ARCHIVESTORE.get();
         }
+        archiveStore.setNameSpace(archiveConfig.getNamespace());
+        logger.info("Get archive store namespace [{}] by archive config.", archiveConfig.getNamespace());
+
         Preconditions.checkArgument(archiveStore != null, "archive store can not be null.");
 
         this.repository = new ArchiveMappedFileRepository(archiveConfig.getArchivePath());
@@ -542,6 +545,12 @@ public class ConsumeArchiveService extends Service {
          * @return
          */
         private List<String> getArchivedFileList() {
+            // 没有调用到readOne方法，不会初始化rFile，防止空指针，加一下判断
+            if (rFile == null) {
+                logger.info("Can not get archive file list cause by consume archive read file have no init.");
+                return null;
+            }
+
             File file = new File(baseDir);
             String[] list = file.list();
             if (list == null) {

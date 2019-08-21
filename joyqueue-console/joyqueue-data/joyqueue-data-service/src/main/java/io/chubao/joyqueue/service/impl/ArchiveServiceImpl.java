@@ -124,6 +124,9 @@ public class ArchiveServiceImpl implements ArchiveService {
         if (qArchive.getSendTime() != null) {
             startRow.setTime(qArchive.getSendTime().getTime());
         }
+        if (NullUtil.isNotBlank(qArchive.getRowKeyStart())) {
+            queryCondition.setStartRowKeyByteArr(qArchive.getRowKeyStart());
+        }
         queryCondition.setStartRowKey(startRow);
 
         //设置结束row

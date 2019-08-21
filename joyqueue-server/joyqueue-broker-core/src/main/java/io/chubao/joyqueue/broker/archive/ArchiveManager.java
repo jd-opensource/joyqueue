@@ -71,7 +71,7 @@ public class ArchiveManager extends Service {
             archiveConfig = new ArchiveConfig(context == null ? null : context.getPropertySupplier());
         }
         if (sendArchiveService == null) {
-            this.sendArchiveService = new ProduceArchiveService(archiveConfig, context.getClusterManager(), context.getConsume());
+            this.sendArchiveService = new ProduceArchiveService(archiveConfig, context.getClusterManager(), context.getConsume(), context.getMessageConvertSupport());
         }
         if (consumeArchiveService == null) {
             this.consumeArchiveService = new ConsumeArchiveService(archiveConfig, context.getClusterManager());

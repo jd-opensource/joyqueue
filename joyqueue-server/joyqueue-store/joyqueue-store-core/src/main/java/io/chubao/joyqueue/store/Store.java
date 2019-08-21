@@ -118,8 +118,7 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
             this.scheduledExecutor = Executors.newScheduledThreadPool(SCHEDULE_EXECUTOR_THREADS, new NamedThreadFactory("Store-Scheduled-Executor"));
         }
         if (bufferPool == null) {
-            System.setProperty(PreloadBufferPool.PRINT_METRIC_INTERVAL_MS_KEY, String.valueOf(config.getPrintMetricIntervalMs()));
-            this.bufferPool = PreloadBufferPool.getInstance();
+            this.bufferPool = new PreloadBufferPool(config.getPrintMetricIntervalMs());
         }
         this.bufferPool.addPreLoad(config.getIndexFileSize(), config.getPreLoadBufferCoreCount(), config.getPreLoadBufferMaxCount());
         this.bufferPool.addPreLoad(config.getMessageFileSize(), config.getPreLoadBufferCoreCount(), config.getPreLoadBufferMaxCount());

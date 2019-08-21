@@ -17,8 +17,8 @@ package io.chubao.joyqueue.store;
 
 import io.chubao.joyqueue.domain.QosLevel;
 import io.chubao.joyqueue.exception.JoyQueueCode;
+import io.chubao.joyqueue.store.file.PositioningStore;
 import io.chubao.joyqueue.store.message.MessageParser;
-import io.chubao.joyqueue.store.nsm.VirtualThreadExecutor;
 import io.chubao.joyqueue.store.utils.MessageUtils;
 import io.chubao.joyqueue.store.utils.PreloadBufferPool;
 import io.chubao.joyqueue.toolkit.concurrent.EventFuture;
@@ -28,6 +28,7 @@ import io.chubao.joyqueue.toolkit.util.BaseDirUtils;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +41,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -47,6 +49,12 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import static io.chubao.joyqueue.store.PartitionGroupStoreManager.Config.DEFAULT_FLUSH_INTERVAL_MS;
+import static io.chubao.joyqueue.store.PartitionGroupStoreManager.Config.DEFAULT_MAX_DIRTY_SIZE;
+import static io.chubao.joyqueue.store.PartitionGroupStoreManager.Config.DEFAULT_MAX_MESSAGE_LENGTH;
+import static io.chubao.joyqueue.store.PartitionGroupStoreManager.Config.DEFAULT_WRITE_REQUEST_CACHE_SIZE;
+import static io.chubao.joyqueue.store.PartitionGroupStoreManager.Config.DEFAULT_WRITE_TIMEOUT_MS;
 
 /**
  * @author liyue25
@@ -61,7 +69,6 @@ public class PartitionGroupStoreManagerTest {
     private File base = null;
     private File groupBase = null;
     private PartitionGroupStoreManager store;
-    private VirtualThreadExecutor virtualThreadPool;
     private PreloadBufferPool bufferPool;
 
     @Test
@@ -105,6 +112,35 @@ public class PartitionGroupStoreManagerTest {
         }
 
         Assert.assertEquals(0L, length);
+
+    }
+
+    @Ignore
+    @Test
+    public void loopTest() throws IOException, InterruptedException, ExecutionException {
+        short partition = 4;
+        List<ByteBuffer> messages = MessageUtils.build(1024, 1024);
+        WriteRequest [] writeRequests = messages.stream().map(b -> new WriteRequest(partition, b)).toArray(WriteRequest[]::new);
+        CompletableFuture.allOf(
+                CompletableFuture.runAsync(() -> {
+                    for(;;) {
+                        store.asyncWrite(QosLevel.RECEIVE, null, writeRequests);
+                    }
+                }),
+                CompletableFuture.runAsync(() -> {
+                    long index = 0 ;
+                    for (;;) {
+                        try {
+
+                            index += store.read(partition, index, 1024, -1).getMessages().length;
+                        } catch (PositionOverflowException ignored) {}
+                        catch (Throwable e) {
+                            logger.warn("ReadException: ", e);
+                        }
+                    }
+                })
+        ).get();
+
 
     }
 
@@ -163,15 +199,19 @@ public class PartitionGroupStoreManagerTest {
         store.rePartition(new Short[] {1, 2, 5});
 
         destroyStore();
-        if (null == virtualThreadPool) virtualThreadPool = new VirtualThreadExecutor(500, 100, 10, 1000, 4);
         if (null == bufferPool) {
-            bufferPool = PreloadBufferPool.getInstance();
+            bufferPool = new PreloadBufferPool();
+            bufferPool.addPreLoad(128 * 1024 * 1024, 2, 4);
+            bufferPool.addPreLoad(512 * 1024, 2, 4);
         }
+        PartitionGroupStoreManager.Config config = new PartitionGroupStoreManager.Config(DEFAULT_MAX_MESSAGE_LENGTH, DEFAULT_WRITE_REQUEST_CACHE_SIZE, DEFAULT_FLUSH_INTERVAL_MS,
+                DEFAULT_WRITE_TIMEOUT_MS, DEFAULT_MAX_DIRTY_SIZE, 6000,
+                new PositioningStore.Config(128 * 1024 * 1024),
+                new PositioningStore.Config(512 * 1024));
 
-        this.store = new PartitionGroupStoreManager(topic, partitionGroup, groupBase, new PartitionGroupStoreManager.Config(),
+        this.store = new PartitionGroupStoreManager(topic, partitionGroup, groupBase, config,
                 bufferPool,
-                Executors.newSingleThreadScheduledExecutor(),
-                virtualThreadPool);
+                Executors.newSingleThreadScheduledExecutor());
         this.store.recover();
         this.store.start();
         this.store.enable();
@@ -297,7 +337,7 @@ public class PartitionGroupStoreManagerTest {
                     repeat = false;
                 } catch (TimeoutException ignored) {
                 }
-            logger.info("Index: {}, {}...", index, Format.formatSize(index * 1024));
+            logger.info("Index: {}, {}...", index, Format.formatTraffic(index * 1024));
         }
 
 
@@ -419,8 +459,7 @@ public class PartitionGroupStoreManagerTest {
 
         store = new PartitionGroupStoreManager(topic, partitionGroup, groupBase, new PartitionGroupStoreManager.Config(),
                 bufferPool,
-                Executors.newSingleThreadScheduledExecutor(),
-                virtualThreadPool);
+                Executors.newSingleThreadScheduledExecutor());
         store.recover();
         store.start();
         store.enable();
@@ -553,15 +592,20 @@ public class PartitionGroupStoreManagerTest {
     private void prepareStore() throws Exception {
 
         PartitionGroupStoreSupport.init(groupBase, partitions);
-        if (null == virtualThreadPool) virtualThreadPool = new VirtualThreadExecutor(500, 100, 10, 1000, 4);
         if (null == bufferPool) {
-            bufferPool = PreloadBufferPool.getInstance();
+            bufferPool = new PreloadBufferPool(10000L);
+            bufferPool.addPreLoad(128 * 1024 * 1024, 2, 4);
+            bufferPool.addPreLoad(512 * 1024, 2, 4);
         }
 
-        this.store = new PartitionGroupStoreManager(topic, partitionGroup, groupBase, new PartitionGroupStoreManager.Config(),
+        PartitionGroupStoreManager.Config config = new PartitionGroupStoreManager.Config(DEFAULT_MAX_MESSAGE_LENGTH, DEFAULT_WRITE_REQUEST_CACHE_SIZE, DEFAULT_FLUSH_INTERVAL_MS,
+                DEFAULT_WRITE_TIMEOUT_MS, DEFAULT_MAX_DIRTY_SIZE, 6000,
+                new PositioningStore.Config(128 * 1024 * 1024),
+                new PositioningStore.Config(512 * 1024));
+
+        this.store = new PartitionGroupStoreManager(topic, partitionGroup, groupBase, config,
                 bufferPool,
-                Executors.newSingleThreadScheduledExecutor(),
-                virtualThreadPool);
+                Executors.newSingleThreadScheduledExecutor());
         this.store.recover();
         this.store.start();
         this.store.enable();
@@ -574,12 +618,8 @@ public class PartitionGroupStoreManagerTest {
             store.close();
             store = null;
         }
-        if (null != virtualThreadPool) {
-            virtualThreadPool.stop();
-            virtualThreadPool = null;
-        }
-
         if (null != bufferPool) {
+            bufferPool.close();
             bufferPool = null;
         }
     }

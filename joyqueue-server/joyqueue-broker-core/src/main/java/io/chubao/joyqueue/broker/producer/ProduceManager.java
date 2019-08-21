@@ -54,7 +54,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -168,12 +167,14 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
      * @author lining11
      * Date: 2018/8/17
      */
+    @Override
     public PutResult putMessage(Producer producer, List<BrokerMessage> msgs, QosLevel qosLevel) throws JoyQueueException {
         // 超时时间
         int timeout = clusterManager.getProducerPolicy(TopicName.parse(producer.getTopic()), producer.getApp()).getTimeOut();
         return putMessage(producer, msgs, qosLevel, timeout);
     }
 
+    @Override
     public PutResult putMessage(Producer producer, List<BrokerMessage> msgs, QosLevel qosLevel, int timeout) throws JoyQueueException {
         // 开始写入时间
         long startWritePoint = SystemClock.now();
@@ -220,16 +221,14 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
         // 判断是否是事务消息
         String txId = msgs.get(0).getTxId();
 
-        if (config.getBrokerQosLevel() != -1) {
-            qosLevel = QosLevel.valueOf(config.getBrokerQosLevel());
-        }
         if (config.getBrokerQosLevel(producer.getTopic()) != -1) {
             qosLevel = QosLevel.valueOf(config.getBrokerQosLevel(producer.getTopic()));
+        } else if (config.getBrokerQosLevel() != -1) {
+            qosLevel = QosLevel.valueOf(config.getBrokerQosLevel());
         }
 
         if (StringUtils.isNotEmpty(txId)) {
-            //TODO 超时时间计算错误
-            writeTxMessageAsync(producer, msgs, txId, endTime, eventListener);
+            writeTxMessageAsync(producer, msgs, txId, timeout, eventListener);
         } else {
             writeMessagesAsync(producer, msgs, qosLevel, endTime, eventListener);
         }
@@ -258,14 +257,14 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
      *
      * @param msgs
      * @param txId
-     * @param endTime
+     * @param timeout
      * @return
      * @throws JoyQueueException
      */
-    private void writeTxMessageAsync(Producer producer, List<BrokerMessage> msgs, String txId, long endTime, EventListener<WriteResult> eventListener) throws JoyQueueException {
+    private void writeTxMessageAsync(Producer producer, List<BrokerMessage> msgs, String txId, long timeout, EventListener<WriteResult> eventListener) throws JoyQueueException {
         ByteBuffer[] byteBuffers = generateRByteBufferList(msgs);
         try {
-            WriteResult writeResult = transactionManager.putMessage(producer, txId, byteBuffers).get(endTime, TimeUnit.MILLISECONDS);
+            WriteResult writeResult = transactionManager.putMessage(producer, txId, byteBuffers).get(timeout, TimeUnit.MILLISECONDS);
             eventListener.onEvent(writeResult);
         } catch (Exception e) {
             logger.error("writeTxMessageAsync exception, producer: {}", producer, e);
@@ -295,12 +294,16 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
         // 分配消息对于的分区分组
         Map<PartitionGroup, List<WriteRequest>> dispatchedMsgs = dispatchPartition(msgs, partitions);
         // 分区分组集合
+        /*
         Set<PartitionGroup> partitionGroupSet = dispatchedMsgs.keySet();
         PartitionGroup oneGroup = partitionGroupSet.stream().findFirst().get();
+        */
         // 服务水平级别
-        for (PartitionGroup partitionGroup : partitionGroupSet) {
+        for (Map.Entry<PartitionGroup, List<WriteRequest>> dispatchEntry : dispatchedMsgs.entrySet()) {
+            PartitionGroup partitionGroup = dispatchEntry.getKey();
+            List<WriteRequest> writeRequests = dispatchEntry.getValue();
+
             PartitionGroupStore partitionStore = store.getStore(topic, partitionGroup.getGroup(), qosLevel);
-            List<WriteRequest> writeRequests = dispatchedMsgs.get(partitionGroup);
             // 异步写入磁盘
             Future<WriteResult> writeResultFuture = partitionStore.asyncWrite(writeRequests.toArray(new WriteRequest[]{}));
             // 同步等待写入完成
@@ -334,19 +337,22 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
         // 分配消息对于的分区分组
         Map<PartitionGroup, List<WriteRequest>> dispatchedMsgs = dispatchPartition(msgs, partitions);
         // 分区分组集合
+        /*
         Set<PartitionGroup> partitionGroupSet = dispatchedMsgs.keySet();
         PartitionGroup oneGroup = partitionGroupSet.stream().findFirst().get();
+        */
         // 服务水平级别
-        for (PartitionGroup partitionGroup : partitionGroupSet) {
+        for (Map.Entry<PartitionGroup, List<WriteRequest>> dispatchEntry : dispatchedMsgs.entrySet()) {
+            PartitionGroup partitionGroup = dispatchEntry.getKey();
             if (logger.isDebugEnabled()) {
                 logger.debug("ProduceManager writeMessageAsync topic:[{}], partitionGroup:[{}]]", topic, partitionGroup);
             }
+            List<WriteRequest> writeRequests = dispatchEntry.getValue();
             PartitionGroupStore partitionStore = store.getStore(topic, partitionGroup.getGroup(), qosLevel);
-            List<WriteRequest> writeRequests = dispatchedMsgs.get(partitionGroup);
-            long startTime = SystemClock.now();
 
+            long startTime = SystemClock.now();
             // 异步写入磁盘
-            if(null != metric) {
+            if (null != metric) {
                 long t0 = System.nanoTime();
 
                 partitionStore.asyncWrite(new MetricEventListener(t0, startTime, metric, eventListener, topic, app, partitionGroup.getGroup(), writeRequests),
@@ -536,6 +542,7 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
      *
      * @param tx 事务消息命令
      */
+    @Override
     public TransactionId putTransactionMessage(Producer producer, JoyQueueLog tx) throws JoyQueueException {
         if (tx.getType() == JoyQueueLog.TYPE_TX_PREPARE) {
             return transactionManager.prepare(producer, (BrokerPrepare) tx);

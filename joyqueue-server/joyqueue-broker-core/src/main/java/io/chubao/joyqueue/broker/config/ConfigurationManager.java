@@ -49,6 +49,7 @@ public class ConfigurationManager extends Service implements EventListener<NameS
     private static final String CONFIGURATION_VERSION = "_CONFIGURATION_VERSION_";
     private static final String DEFAULT_CONFIG_PATH = "joyqueue.properties";
     private static final String GROUP_SPLITTER = ",";
+    private static final String ALL_GROUP = "all";
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationManager.class);
     private ConfigProvider configProvider;
@@ -166,8 +167,9 @@ public class ConfigurationManager extends Service implements EventListener<NameS
                 configuration.addProperty(config.getKey(), null);
             } else {
                 // 如果group为空或group包含自身ip配置才生效
-                if (StringUtils.isBlank(config.getGroup()) ||
-                        ArrayUtils.contains(config.getGroup().split(GROUP_SPLITTER), IpUtil.getLocalIp())) {
+                if (StringUtils.isBlank(config.getGroup())
+                        || ALL_GROUP.equals(config.getGroup())
+                        || ArrayUtils.contains(config.getGroup().split(GROUP_SPLITTER), IpUtil.getLocalIp())) {
                     logger.info("add config {}, value is {}", config.getKey(), config.getValue());
                     configuration.addProperty(config.getKey(), config.getValue());
                 } else {

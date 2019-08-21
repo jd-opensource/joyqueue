@@ -187,6 +187,7 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
      * @return  producer or consumer
      *
      */
+    @Override
     public BrokerMonitorRecord find(Subscribe subscribe){
         this.checkArgument(subscribe);
         List<BrokerMonitorRecord> monitorRecords = findMonitorOnBroker(subscribe);
