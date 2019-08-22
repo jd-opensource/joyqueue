@@ -390,7 +390,7 @@ public class Serializer extends AbstractSerializer {
     }
 
 
-    public static void write(final TopicConfig topicConfig, final ByteBuf out) throws Exception {
+    public static void write(final TopicConfig topicConfig, final ByteBuf out, int version) throws Exception {
         // 2 1 string
         write(topicConfig.getName().getFullName(), out);
         // 3 short
@@ -415,7 +415,7 @@ public class Serializer extends AbstractSerializer {
             out.writeInt(topicConfig.getPartitionGroups().size());
             // 9 array
             for (PartitionGroup group : topicConfig.getPartitionGroups().values()) {
-                write(group, out);
+                write(group, out, version);
             }
         }
     }
@@ -495,7 +495,7 @@ public class Serializer extends AbstractSerializer {
         return appToken;
     }
 
-    public static void write(final PartitionGroup partitionGroup, final ByteBuf out) throws Exception {
+    public static void write(final PartitionGroup partitionGroup, final ByteBuf out, int version) throws Exception {
         Serializer.write(partitionGroup.getTopic().getFullName(), out);
         out.writeInt(partitionGroup.getLeader());
         if(null == partitionGroup.getIsrs()){
@@ -542,6 +542,7 @@ public class Serializer extends AbstractSerializer {
                 Serializer.write(broker,out);
             }
         }
+
         out.writeInt(partitionGroup.getRecLeader());
     }
 

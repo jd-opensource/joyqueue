@@ -56,7 +56,7 @@ public class SubscribeAckCodec implements PayloadCodec<Header, SubscribeAck>, Ty
         buffer.writeShort(configSize);
         if (configSize > 0) {
             for (TopicConfig config : topicConfigs) {
-                Serializer.write(config, buffer);
+                Serializer.write(config, buffer, payload.getHeader().getVersion());
             }
         }
     }

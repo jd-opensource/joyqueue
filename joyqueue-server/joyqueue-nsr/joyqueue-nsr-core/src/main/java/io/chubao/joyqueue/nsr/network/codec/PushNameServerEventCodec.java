@@ -19,6 +19,7 @@ import com.alibaba.fastjson.JSON;
 import io.chubao.joyqueue.event.MetaEvent;
 import io.chubao.joyqueue.event.NameServerEvent;
 import io.chubao.joyqueue.network.serializer.Serializer;
+import io.chubao.joyqueue.network.transport.codec.JoyQueueHeader;
 import io.chubao.joyqueue.network.transport.command.Header;
 import io.chubao.joyqueue.network.transport.command.Type;
 import io.chubao.joyqueue.nsr.network.NsrPayloadCodec;
@@ -41,10 +42,18 @@ public class PushNameServerEventCodec implements NsrPayloadCodec<PushNameServerE
 
     @Override
     public void encode(PushNameServerEvent payload, ByteBuf buffer) throws Exception {
-        NameServerEvent event = payload.getEvent();
-        buffer.writeInt(event.getBrokerId());
-        Serializer.write(JSON.toJSONString(event.getMetaEvent()),buffer,Serializer.SHORT_SIZE);
-        Serializer.write(event.getMetaEvent().getTypeName(),buffer);
+        if (payload.getHeader().getVersion() >= JoyQueueHeader.VERSION_V2) {
+            NameServerEvent event = payload.getEvent();
+            buffer.writeInt(event.getBrokerId());
+            Serializer.write(JSON.toJSONString(event.getMetaEvent()),buffer,Serializer.SHORT_SIZE);
+            Serializer.write(event.getMetaEvent().getTypeName(),buffer);
+        } else if (payload.getHeader().getVersion() >= JoyQueueHeader.VERSION_V1) {
+            // TODO 临时兼容逻辑，后续去掉
+            NameServerEvent event = payload.getEvent();
+            buffer.writeInt(event.getBrokerId());
+            Serializer.write(JSON.toJSONString(event.getMetaEvent()),buffer,Serializer.SHORT_SIZE);
+            Serializer.write(event.getMetaEvent().getTypeName().replace("io.chubao.joyqueue", "com.jd.joyqueue"),buffer);
+        }
     }
 
     @Override
