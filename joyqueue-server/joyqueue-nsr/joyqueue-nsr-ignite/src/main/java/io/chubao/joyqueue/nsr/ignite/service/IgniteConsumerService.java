@@ -166,6 +166,10 @@ public class IgniteConsumerService implements ConsumerService {
         }
     }
 
+    public List<Consumer> list(ConsumerQuery query) {
+        return convert(consumerDao.list(query));
+    }
+
     public void publishEvent(MetaEvent event) {
         messenger.publish(event);
     }

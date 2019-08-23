@@ -27,7 +27,7 @@ import java.util.List;
  * @author wylixiaobin
  * Date: 2018/10/17
  */
-public interface BrokerService extends NsrService<Broker, Long> {
+public interface BrokerService extends NsrService<Broker, Integer> {
 
 //    /**
 //     * 生成Broker
@@ -38,7 +38,7 @@ public interface BrokerService extends NsrService<Broker, Long> {
 //
 //    Broker findByIp(String ip);
 
-    List<Broker> getByIdsBroker(List<Long> ids) throws Exception;
+    List<Broker> getByIdsBroker(List<Integer> ids) throws Exception;
     /**
      * 同步所有broker
      * @throws Exception

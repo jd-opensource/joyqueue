@@ -16,7 +16,6 @@
 package io.chubao.joyqueue.nsr;
 
 import io.chubao.joyqueue.model.domain.Producer;
-import io.chubao.joyqueue.nsr.model.ProducerQuery;
 
 import java.util.List;
 
@@ -25,10 +24,14 @@ import java.util.List;
  */
 public interface ProducerNameServerService extends NsrService<Producer, String> {
 
-    List<Producer> syncProducer(byte clientType) throws Exception;
+//    List<Producer> syncProducer(byte clientType) throws Exception;
 
-    List<Producer> getListProducer(ProducerQuery producerQuery) throws Exception;
+//    List<Producer> getListProducer(ProducerQuery producerQuery) throws Exception;
 
-    Producer findByTopicAppGroup(String namespace,  String topic, String app);
+    Producer findByTopicAppGroup(String namespace,  String topic, String app) throws Exception;
+
+    List<Producer> findByApp(String app) throws Exception;
+
+    List<Producer> findByTopic(String topic, String namespace) throws Exception;
 
 }

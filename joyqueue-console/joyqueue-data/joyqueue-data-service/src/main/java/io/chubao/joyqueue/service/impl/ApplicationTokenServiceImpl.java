@@ -83,6 +83,15 @@ public class ApplicationTokenServiceImpl implements ApplicationTokenService {
     }
 
     @Override
+    public List<ApplicationToken> findByApp(String code) {
+        try {
+            return appTokenNameServerService.findByApp(code);
+        } catch (Exception e) {
+            throw new RuntimeException("findByAppAndToken,exception",e);
+        }
+    }
+
+    @Override
     public ApplicationToken findByAppAndToken(String app, String token) {
 //        return repository.findByAppAndToken(app,token);
         try {

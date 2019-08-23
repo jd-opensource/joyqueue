@@ -27,7 +27,9 @@ import java.util.List;
  */
 public interface PartitionGroupReplicaService extends NsrService<PartitionGroupReplica, String> {
 
-    List<PartitionGroupReplica> getByTopic(String topic, String namespace) throws Exception;
+    List<PartitionGroupReplica> getByTopic(String topic, String namespace);
+
+    List<PartitionGroupReplica> getByTopicAndGroup(String topic, String namespace, int group);
 
     /**
      *扩容

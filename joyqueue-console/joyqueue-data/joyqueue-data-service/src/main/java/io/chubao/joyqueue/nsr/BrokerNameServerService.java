@@ -25,9 +25,9 @@ import java.util.List;
 /**
  * Created by wangxiaofei1 on 2019/1/2.
  */
-public interface BrokerNameServerService extends NsrService<Broker, Long> {
+public interface BrokerNameServerService extends NsrService<Broker, Integer> {
 
-    List<Broker> getByIdsBroker(List<Long> ids) throws Exception;
+    List<Broker> getByIdsBroker(List<Integer> ids) throws Exception;
     /**
      * 同步所有broker
      * @throws Exception

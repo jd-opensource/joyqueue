@@ -48,6 +48,6 @@ public class JournalkeeperPartitionGroupService implements PartitionGroupService
 
     @Override
     public void delete(String id) {
-        partitionGroupRepository.delete(id);
+        partitionGroupRepository.deleteById(id);
     }
 }

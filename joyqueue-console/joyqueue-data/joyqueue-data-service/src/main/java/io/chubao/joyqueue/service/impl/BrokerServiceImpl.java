@@ -59,7 +59,7 @@ public class BrokerServiceImpl implements BrokerService {
     private PartitionGroupReplicaService partitionGroupReplicaService;
 
     @Override
-    public Broker findById(Long id) throws Exception {
+    public Broker findById(Integer id) throws Exception {
         return brokerNameServerService.findById(id);
     }
 
@@ -72,9 +72,9 @@ public class BrokerServiceImpl implements BrokerService {
         }
         return replicas.stream().map(replica -> {
                 try {
-                    return this.findById(new Long(replica.getBrokerId()));
+                    return this.findById(replica.getBrokerId());
                 } catch (Exception e) {
-                    logger.error(String.format("can not find broker with id %s"), replica.getBroker().getId());
+                    logger.error(String.format("can not find broker with id %s"), replica.getBrokerId());
                     return null;
                 }
             }).collect(Collectors.collectingAndThen(Collectors.toCollection(() ->
@@ -87,10 +87,10 @@ public class BrokerServiceImpl implements BrokerService {
         qBrokerGroupRelated.setBrokerGroupId(group);
         List<BrokerGroupRelated> brokerGroupRelateds = brokerGroupRelatedService.findByQuery(new ListQuery<>(qBrokerGroupRelated));
 
-        List<Long> brokerIds = new ArrayList<>();
+        List<Integer> brokerIds = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(brokerGroupRelateds)) {
             for (BrokerGroupRelated brokerGroupRelated : brokerGroupRelateds) {
-                brokerIds.add(brokerGroupRelated.getId());
+                brokerIds.add(Integer.valueOf(String.valueOf(brokerGroupRelated.getId())));
             }
         }
 
@@ -135,7 +135,7 @@ public class BrokerServiceImpl implements BrokerService {
         brokerListQuery.setQuery(qBrokerGroupRelated);
         List<BrokerGroupRelated> brokerList = brokerGroupRelatedService.findByQuery(brokerListQuery);
         if (brokerList != null && brokerList.size() > 0) {
-            List<Long> brokerIdList = brokerList.stream().map(broker -> broker.getId()).collect(Collectors.toList());
+            List<Integer> brokerIdList = brokerList.stream().map(broker -> Integer.valueOf(String.valueOf(broker.getId()))).collect(Collectors.toList());
             qBroker.setInBrokerIds(brokerIdList);
         } else {
             if (qBrokerGroupRelated.getGroup() != null) {
@@ -179,7 +179,7 @@ public class BrokerServiceImpl implements BrokerService {
     }
 
     @Override
-    public List<Broker> getByIdsBroker(List<Long> ids) throws Exception {
+    public List<Broker> getByIdsBroker(List<Integer> ids) throws Exception {
         return brokerNameServerService.getByIdsBroker(ids);
     }
 

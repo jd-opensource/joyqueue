@@ -24,7 +24,7 @@ import java.util.List;
  */
 public interface PartitionGroupServerService extends NsrService<TopicPartitionGroup, String> {
 
-    List<TopicPartitionGroup> findByTopic(String topic,String namespace) throws Exception;
+    List<TopicPartitionGroup> findByTopic(String topic,String namespace);
 
-    TopicPartitionGroup findByTopicAndGroup(String namespace, String topic, Integer groupNo) throws Exception;
+    TopicPartitionGroup findByTopicAndGroup(String namespace, String topic, Integer groupNo);
 }

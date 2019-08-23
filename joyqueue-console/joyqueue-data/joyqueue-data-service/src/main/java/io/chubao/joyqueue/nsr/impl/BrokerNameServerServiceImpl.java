@@ -50,7 +50,7 @@ public class BrokerNameServerServiceImpl extends NameServerBase implements Broke
     NsrBrokerConverter nsrBrokerConverter = new NsrBrokerConverter();
 
     @Override
-    public Broker findById(Long id) throws Exception {
+    public Broker findById(Integer id) throws Exception {
         String result = post(GETBYID_BROKER,id);
         io.chubao.joyqueue.domain.Broker nsrBroker = JSON.parseObject(result, io.chubao.joyqueue.domain.Broker.class);
         return nsrBrokerConverter.revert(nsrBroker);
@@ -117,7 +117,7 @@ public class BrokerNameServerServiceImpl extends NameServerBase implements Broke
     }
 
     @Override
-    public List<Broker> getByIdsBroker(List<Long> ids) throws Exception {
+    public List<Broker> getByIdsBroker(List<Integer> ids) throws Exception {
         String result = post(GETBYIDS_BROKER,ids);
 
         List<io.chubao.joyqueue.domain.Broker> brokerList = JSON.parseArray(result, io.chubao.joyqueue.domain.Broker.class);

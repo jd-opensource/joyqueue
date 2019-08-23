@@ -85,8 +85,13 @@ public class PartitionGroupReplicaServiceImpl  implements PartitionGroupReplicaS
     }
 
     @Override
-    public List<PartitionGroupReplica> getByTopic(String topic, String namespace) throws Exception {
+    public List<PartitionGroupReplica> getByTopic(String topic, String namespace) {
         return replicaServerService.findByTopic(topic, namespace);
+    }
+
+    @Override
+    public List<PartitionGroupReplica> getByTopicAndGroup(String topic, String namespace, int group) {
+        return replicaServerService.findByTopicAndGroup(topic, namespace, group);
     }
 
     @Override

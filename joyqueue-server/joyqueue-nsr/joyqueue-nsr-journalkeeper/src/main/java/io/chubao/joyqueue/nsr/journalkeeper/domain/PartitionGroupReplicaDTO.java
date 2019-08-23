@@ -7,7 +7,7 @@ import io.chubao.joyqueue.nsr.journalkeeper.helper.Column;
  * author: gaohaoxiang
  * date: 2019/8/16
  */
-public class PartitionGroupReplicaDTO {
+public class PartitionGroupReplicaDTO extends BaseDTO {
 
     private String id;
     private String topic;
@@ -15,6 +15,18 @@ public class PartitionGroupReplicaDTO {
     @Column(alias = "broker_id")
     private Long brokerId;
     private Integer group;
+
+    public PartitionGroupReplicaDTO() {
+
+    }
+
+    public PartitionGroupReplicaDTO(String id, String topic, String namespace, Long brokerId, Integer group) {
+        this.id = id;
+        this.topic = topic;
+        this.namespace = namespace;
+        this.brokerId = brokerId;
+        this.group = group;
+    }
 
     public String getId() {
         return id;

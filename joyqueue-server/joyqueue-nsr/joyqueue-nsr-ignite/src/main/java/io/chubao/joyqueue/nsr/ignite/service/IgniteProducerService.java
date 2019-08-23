@@ -20,8 +20,6 @@ import io.chubao.joyqueue.domain.Producer;
 import io.chubao.joyqueue.domain.TopicName;
 import io.chubao.joyqueue.event.MetaEvent;
 import io.chubao.joyqueue.event.ProducerEvent;
-import io.chubao.joyqueue.model.PageResult;
-import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.nsr.ignite.dao.ProducerConfigDao;
 import io.chubao.joyqueue.nsr.ignite.dao.ProducerDao;
 import io.chubao.joyqueue.nsr.ignite.model.IgniteProducer;
@@ -41,7 +39,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * @author wylixiaobin
@@ -61,31 +58,23 @@ public class IgniteProducerService implements ProducerService {
     @Inject
     protected Messenger messenger;
 
-
-    @Override
-    public void deleteByTopicAndApp(TopicName topic, String app) {
-        deleteById(IgniteProducer.getId(topic, app));
-    }
-
     @Override
     public Producer getByTopicAndApp(TopicName topic, String app) {
         return getById(IgniteProducer.getId(topic, app));
     }
 
     @Override
-    public List<Producer> getByTopic(TopicName topic, boolean withConfig) { ProducerQuery producerQuery = new ProducerQuery(topic.getCode(), topic.getNamespace());
+    public List<Producer> getByTopic(TopicName topic) { ProducerQuery producerQuery = new ProducerQuery(topic.getCode(), topic.getNamespace());
         List<IgniteProducer> igniteProducers = producerDao.list(producerQuery);
         if (null == igniteProducers || igniteProducers.size() < 1) {
             return Collections.emptyList();
         }
         Map<String, IgniteProducerConfig> configs = new HashMap<>();
-        if (withConfig) {
-            List<IgniteProducerConfig> igniteProducerConfigs = producerConfigDao.list(producerQuery);
-            if (null != igniteProducerConfigs && igniteProducerConfigs.size() > 0) {
-                igniteProducerConfigs.forEach(config -> {
-                    configs.put(config.getId(), config);
-                });
-            }
+        List<IgniteProducerConfig> igniteProducerConfigs = producerConfigDao.list(producerQuery);
+        if (null != igniteProducerConfigs && igniteProducerConfigs.size() > 0) {
+            igniteProducerConfigs.forEach(config -> {
+                configs.put(config.getId(), config);
+            });
         }
         List<Producer> producers = new ArrayList<>();
         igniteProducers.forEach(producer -> {
@@ -94,20 +83,19 @@ public class IgniteProducerService implements ProducerService {
         return producers;
     }
 
-    public List<Producer> getByApp(String app, boolean withConfig) {
+    @Override
+    public List<Producer> getByApp(String app) {
         ProducerQuery producerQuery = new ProducerQuery(app);
         List<IgniteProducer> igniteProducers = producerDao.list(producerQuery);
         if (null == igniteProducers || igniteProducers.size() < 1) {
             return null;
         }
         Map<String, IgniteProducerConfig> configs = new HashMap<>();
-        if (withConfig) {
-            List<IgniteProducerConfig> igniteProducerConfigs = producerConfigDao.list(producerQuery);
-            if (null != igniteProducerConfigs && igniteProducerConfigs.size() > 0) {
-                igniteProducerConfigs.forEach(config -> {
-                    configs.put(config.getId(), config);
-                });
-            }
+        List<IgniteProducerConfig> igniteProducerConfigs = producerConfigDao.list(producerQuery);
+        if (null != igniteProducerConfigs && igniteProducerConfigs.size() > 0) {
+            igniteProducerConfigs.forEach(config -> {
+                configs.put(config.getId(), config);
+            });
         }
         List<Producer> producers = new ArrayList<>();
         igniteProducers.forEach(producer -> {
@@ -126,12 +114,7 @@ public class IgniteProducerService implements ProducerService {
     }
 
     @Override
-    public Producer get(Producer model) {
-        return producerDao.findById(toIgniteModel(model).getId());
-    }
-
-    @Override
-    public void addOrUpdate(Producer producer) {
+    public Producer add(Producer producer) {
         Transaction tx = Ignition.ignite().transactions().tx();
         boolean commit = false;
         try {
@@ -146,6 +129,32 @@ public class IgniteProducerService implements ProducerService {
             if (commit) {
                 tx.commit();
             }
+            this.publishEvent(ProducerEvent.add(producer.getTopic(), producer.getApp()));
+            return producer;
+        } catch (Exception e) {
+            if (commit) tx.rollback();
+            throw new RuntimeException("producerService addOrUpdate error", e);
+        }
+    }
+
+    @Override
+    public Producer update(Producer producer) {
+        Transaction tx = Ignition.ignite().transactions().tx();
+        boolean commit = false;
+        try {
+            if (null == tx) {
+                tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED);
+                commit = true;
+            }
+            producerDao.addOrUpdate(toIgniteModel(producer));
+            if (null != producer.getProducerPolicy() || producer.getLimitPolicy() != null) {
+                producerConfigDao.addOrUpdate(new IgniteProducerConfig(new IgniteProducer(producer)));
+            }
+            if (commit) {
+                tx.commit();
+            }
+            this.publishEvent(ProducerEvent.add(producer.getTopic(), producer.getApp()));
+            return producer;
         } catch (Exception e) {
             if (commit) tx.rollback();
             throw new RuntimeException("producerService addOrUpdate error", e);
@@ -157,7 +166,8 @@ public class IgniteProducerService implements ProducerService {
     }
 
     @Override
-    public void deleteById(String id) {
+    public void delete(String id) {
+        Producer producer = getById(id);
         Transaction tx = Ignition.ignite().transactions().tx();
         boolean commit = false;
         try {
@@ -168,78 +178,19 @@ public class IgniteProducerService implements ProducerService {
             producerDao.deleteById(id);
             producerConfigDao.deleteById(id);
             if (commit) tx.commit();
+            this.publishEvent(ProducerEvent.remove(producer.getTopic(), producer.getApp()));
         } catch (Exception e) {
             if (commit) tx.rollback();
             throw new RuntimeException("delete producer error.", e);
         }
     }
 
-    @Override
-    public List<Producer> list() {
-        return convert(producerDao.list(null));
-    }
-
-    @Override
-    public PageResult<Producer> pageQuery(QPageQuery pageQuery) {
-        PageResult<IgniteProducer> pageResult = producerDao.pageQuery(pageQuery);
-        if (pageResult != null && pageResult.getResult() != null) {
-            pageResult.getResult().stream().map(producer -> {
-                producer.fillConfig(producerConfigDao.findById(producer.getId()));
-                return producer;
-            }).collect(Collectors.toList());
-        }
-        return new PageResult(pageResult.getPagination(),pageResult.getResult());
-    }
-
-    @Override
-    public List<Producer> list(ProducerQuery query) {
-        return convert(producerDao.list(query));
-    }
-
-    @Override
-    public void delete(Producer model) {
-        producerDao.deleteById(toIgniteModel(model).getId());
-    }
-
-    public void add(Producer producer) {
-        Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED);
-        try {
-            this.addOrUpdate(new IgniteProducer(producer));
-            tx.commit();
-            this.publishEvent(ProducerEvent.add(producer.getTopic(), producer.getApp()));
-        } catch (Exception e) {
-            logger.error("add producer [{}] ,topic [{}] error", producer.getApp(), producer.getTopic(), e);
-            tx.rollback();
-        }
-    }
-
-    public void update(Producer producer) {
-        Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED);
-        try {
-            this.addOrUpdate(new IgniteProducer(producer));
-            tx.commit();
-            this.publishEvent(ProducerEvent.update(producer.getTopic(), producer.getApp()));
-        } catch (Exception e) {
-            tx.rollback();
-            logger.error("update producer [{}] ,topic [{}] error", producer.getApp(), producer.getTopic(), e);
-        }
-    }
-
-    public void remove(Producer producer) {
-        Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED);
-        try {
-            this.delete(producer);
-            tx.commit();
-            this.publishEvent(ProducerEvent.remove(producer.getTopic(), producer.getApp()));
-        } catch (Exception e) {
-            tx.rollback();
-            logger.error("remove producer [{}] ,topic [{}] error", producer.getApp(), producer.getTopic(), e);
-
-        }
-    }
-
     public void publishEvent(MetaEvent event) {
         messenger.publish(event);
+    }
+
+    public List<Producer> list(ProducerQuery query) {
+        return convert(producerDao.list(query));
     }
 
     public List<Producer> getProducerByClientType(byte clientType) {

@@ -81,7 +81,14 @@ public interface TopicNameServerService extends NsrService<Topic, String> {
      * @param query
      * @return
      */
-    PageResult<Topic> findUnsubscribedByQuery(QPageQuery<QTopic> query);
+    PageResult<Topic> findUnsubscribedByQuery(QPageQuery<QTopic> query) throws Exception;
+
+    /**
+     * 查询
+     * @param query
+     * @return
+     */
+    PageResult<Topic> search(QPageQuery<QTopic> query) throws Exception;
 
     /**
      * 根据code查询

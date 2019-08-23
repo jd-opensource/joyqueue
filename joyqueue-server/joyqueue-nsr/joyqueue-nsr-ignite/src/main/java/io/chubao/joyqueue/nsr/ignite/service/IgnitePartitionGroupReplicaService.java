@@ -81,6 +81,24 @@ public class IgnitePartitionGroupReplicaService implements PartitionGroupReplica
         replicaDao.deleteById(id);
     }
 
+    public void addOrUpdate(Replica replica) {
+        replicaDao.addOrUpdate(toIgniteModel(replica));
+    }
+
+    public void deleteByTopicAndPartitionGroup(TopicName topic, int groupNo) {
+        List<Replica> replicas = getByTopicAndGroup(topic, groupNo);
+        if (replicas != null) {
+            replicas.forEach(rp -> delete(rp.getId()));
+        }
+    }
+
+    public void deleteByTopic(TopicName topic) {
+        List<Replica> replicas = getByTopic(topic);
+        if (replicas != null) {
+            replicas.forEach(rp -> delete(rp.getId()));
+        }
+    }
+
     List<Replica> convert(List<IgnitePartitionGroupReplica> replicas) {
         List<Replica> result = new ArrayList<>();
 

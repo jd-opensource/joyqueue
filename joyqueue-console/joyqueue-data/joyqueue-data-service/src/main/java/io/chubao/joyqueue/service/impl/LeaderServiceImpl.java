@@ -79,7 +79,7 @@ public class LeaderServiceImpl implements LeaderService {
 
 
     @Override
-    public Map.Entry<PartitionGroup, Broker> findPartitionGroupLeaderBrokerDetail(String namespace,String topic,int groupNo) throws Exception {
+    public Map.Entry<PartitionGroup, Broker> findPartitionGroupLeaderBrokerDetail(String namespace,String topic,int groupNo) {
         List<TopicPartitionGroup> topicPartitionGroups=new ArrayList<>();
         TopicPartitionGroup topicPartitionGroup=partitionGroupServerService.findByTopicAndGroup(namespace,topic,groupNo);
         topicPartitionGroups.add(topicPartitionGroup);
@@ -90,7 +90,7 @@ public class LeaderServiceImpl implements LeaderService {
     }
 
     @Override
-    public Map.Entry<PartitionGroup, Broker> findPartitionLeaderBrokerDetail(String namespace, String topic, int partition) throws Exception {
+    public Map.Entry<PartitionGroup, Broker> findPartitionLeaderBrokerDetail(String namespace, String topic, int partition) {
         List<TopicPartitionGroup> topicPartitionGroups=partitionGroupServerService.findByTopic(topic, namespace);
         TopicPartitionGroup tp=null;
         for(TopicPartitionGroup t:topicPartitionGroups){
@@ -114,8 +114,8 @@ public class LeaderServiceImpl implements LeaderService {
          *
          * deal local single broker test,单机部署 无主
          **/
-        Set<Long> brokerIds =  partitionGroups.stream().map(
-                partitionGroup -> Long.valueOf(String.valueOf(partitionGroup.getLeader()))).collect(Collectors.toSet());
+        Set<Integer> brokerIds =  partitionGroups.stream().map(
+                partitionGroup -> partitionGroup.getLeader()).collect(Collectors.toSet());
 //        List<Broker> brokers=brokerRepository.findByIds(brokerIds);
         List<Broker> brokers = null;
         try {
@@ -131,14 +131,14 @@ public class LeaderServiceImpl implements LeaderService {
     }
 
     @Override
-    public List<Map.Entry<PartitionGroup, Broker>> findPartitionGroupLeaderBrokerDetail(String topic,String namespace) throws Exception {
+    public List<Map.Entry<PartitionGroup, Broker>> findPartitionGroupLeaderBrokerDetail(String topic,String namespace) {
         return findPartitionGroupLeaderBrokerDetail(partitionGroupServerService.findByTopic(topic,namespace));
 
     }
 
 
     @Override
-    public Map<Short, Broker> findPartitionLeaderBrokerDetail(String topic, String namespace) throws Exception {
+    public Map<Short, Broker> findPartitionLeaderBrokerDetail(String topic, String namespace) {
         Map<Short,Broker> partitionBrokerMap=new HashMap<>();
         List<Map.Entry<PartitionGroup, Broker>> partitionGroupBrokers=findPartitionGroupLeaderBrokerDetail(partitionGroupServerService.findByTopic(topic,namespace));
         for(Map.Entry<PartitionGroup, Broker> e:partitionGroupBrokers){
@@ -170,7 +170,7 @@ public class LeaderServiceImpl implements LeaderService {
       List<Broker> brokers= null;
       try {
           //去重broker id
-          List<Long> brokerIdList =  brokerIds.stream().distinct().map(brokerId -> Long.valueOf(String.valueOf(brokerId))).collect(Collectors.toList());
+          List<Integer> brokerIdList =  brokerIds.stream().distinct().map(brokerId -> brokerId).collect(Collectors.toList());
           brokers = brokerNameServerService.getByIdsBroker(brokerIdList);
       } catch (Exception e) {
           logger.error("brokerNameServerService.getByIdsBroker error",e);

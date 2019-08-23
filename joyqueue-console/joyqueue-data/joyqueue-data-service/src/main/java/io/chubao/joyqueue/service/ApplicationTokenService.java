@@ -42,6 +42,14 @@ public interface ApplicationTokenService extends NsrService<ApplicationToken,Lon
     List<ApplicationToken> findByApp(long appId);
 
     /**
+     * 根据应用的code 查询 应用的token信息
+     *
+     * @param code
+     * @return
+     */
+    List<ApplicationToken> findByApp(String code);
+
+    /**
      * 根据应用id+token 查询 token信息
      *
      * @param app

@@ -49,7 +49,7 @@ public class ReplicaServerServiceImpl extends NameServerBase implements ReplicaS
     }
 
     @Override
-    public List<PartitionGroupReplica> findByTopic(String topic, String namespace) throws Exception {
+    public List<PartitionGroupReplica> findByTopic(String topic, String namespace) {
         ReplicaQuery replicaQuery = new ReplicaQuery();
         replicaQuery.setTopic(topic);
         replicaQuery.setNamespace(namespace);
@@ -60,7 +60,7 @@ public class ReplicaServerServiceImpl extends NameServerBase implements ReplicaS
     }
 
     @Override
-    public List<PartitionGroupReplica> findByTopicAndGroup(String topic, String namespace, int group) throws Exception {
+    public List<PartitionGroupReplica> findByTopicAndGroup(String topic, String namespace, int group) {
         ReplicaQuery replicaQuery = new ReplicaQuery();
         replicaQuery.setTopic(topic);
         replicaQuery.setNamespace(namespace);

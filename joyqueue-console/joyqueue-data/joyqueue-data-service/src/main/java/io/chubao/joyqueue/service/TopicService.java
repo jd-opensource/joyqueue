@@ -40,21 +40,21 @@ public interface TopicService extends NsrService<Topic ,String> {
      * @param brokers
      * @param operator 操作人
      */
-    void addWithBrokerGroup(Topic topic, BrokerGroup brokerGroup, List<Broker> brokers, Identity operator);
+    void addWithBrokerGroup(Topic topic, BrokerGroup brokerGroup, List<Broker> brokers, Identity operator) throws Exception;
 
     /**
      * 查询未订阅的topics
      * @param query
      * @return
      */
-    PageResult<Topic> findUnsubscribedByQuery(QPageQuery<QTopic> query);
+    PageResult<Topic> findUnsubscribedByQuery(QPageQuery<QTopic> query) throws Exception;
 
     /**
      * 查询某个app下未订阅的topics
      * @param query
      * @return
      */
-    PageResult<AppUnsubscribedTopic> findAppUnsubscribedByQuery(QPageQuery<QTopic> query);
+    PageResult<AppUnsubscribedTopic> findAppUnsubscribedByQuery(QPageQuery<QTopic> query) throws Exception;
 
     /**
      * 根据topic code和namespace code查找topic
@@ -62,6 +62,8 @@ public interface TopicService extends NsrService<Topic ,String> {
      * @param code
      * @return
      */
-    Topic findByCode(String namespaceCode, String code);
+    Topic findByCode(String namespaceCode, String code) throws Exception;
+
+    PageResult<Topic> search(QPageQuery<QTopic> query) throws Exception;
 
 }

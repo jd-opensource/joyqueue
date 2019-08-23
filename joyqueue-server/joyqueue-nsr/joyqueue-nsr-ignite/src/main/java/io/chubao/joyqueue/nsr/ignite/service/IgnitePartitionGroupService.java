@@ -19,8 +19,6 @@ import com.alibaba.fastjson.JSON;
 import com.google.inject.Inject;
 import io.chubao.joyqueue.domain.PartitionGroup;
 import io.chubao.joyqueue.domain.TopicName;
-import io.chubao.joyqueue.model.PageResult;
-import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.nsr.ignite.dao.PartitionGroupDao;
 import io.chubao.joyqueue.nsr.ignite.model.IgnitePartitionGroup;
 import io.chubao.joyqueue.nsr.model.PartitionGroupQuery;
@@ -46,7 +44,7 @@ public class IgnitePartitionGroupService implements PartitionGroupService {
     }
 
     @Override
-    public PartitionGroup findByTopicAndGroup(TopicName topic, int group) {
+    public PartitionGroup getByTopicAndGroup(TopicName topic, int group) {
         return getById(IgnitePartitionGroup.getId(topic, group));
     }
 
@@ -55,6 +53,24 @@ public class IgnitePartitionGroupService implements PartitionGroupService {
         return convert(partitionGroupDao.list(new PartitionGroupQuery(topic.getCode(), topic.getNamespace())));
     }
 
+    @Override
+    public PartitionGroup add(PartitionGroup partitionGroup) {
+        logger.info("partitiongroup add partitionGroup:{}", JSON.toJSONString(partitionGroup));
+        partitionGroupDao.addOrUpdate(toIgniteModel(partitionGroup));
+        return partitionGroup;
+    }
+
+    @Override
+    public PartitionGroup update(PartitionGroup partitionGroup) {
+        logger.info("partitiongroup update partitionGroup:{}", JSON.toJSONString(partitionGroup));
+        partitionGroupDao.addOrUpdate(toIgniteModel(partitionGroup));
+        return partitionGroup;
+    }
+
+    @Override
+    public void delete(String id) {
+        partitionGroupDao.deleteById(id);
+    }
 
     public IgnitePartitionGroup toIgniteModel(PartitionGroup model) {
         return new IgnitePartitionGroup(model);
@@ -65,41 +81,10 @@ public class IgnitePartitionGroupService implements PartitionGroupService {
         return partitionGroupDao.findById(id);
     }
 
-    @Override
-    public PartitionGroup get(PartitionGroup model) {
-        return partitionGroupDao.findById(toIgniteModel(model).getId());
-    }
-
-    @Override
-    public void addOrUpdate(PartitionGroup partitionGroup) {
-        logger.info("partitiongroup addorUpdate partitionGroup:{}", JSON.toJSONString(partitionGroup));
+    public PartitionGroup addOrUpdate(PartitionGroup partitionGroup) {
+        logger.info("partitiongroup addOrUpdate partitionGroup:{}", JSON.toJSONString(partitionGroup));
         partitionGroupDao.addOrUpdate(toIgniteModel(partitionGroup));
-    }
-
-    @Override
-    public void deleteById(String id) {
-        partitionGroupDao.deleteById(id);
-    }
-
-    @Override
-    public void delete(PartitionGroup model) {
-        partitionGroupDao.deleteById(toIgniteModel(model).getId());
-    }
-
-    @Override
-    public List<PartitionGroup> list() {
-        return list(null);
-    }
-
-    @Override
-    public List<PartitionGroup> list(PartitionGroupQuery query) {
-        return convert(partitionGroupDao.list(query));
-    }
-
-    @Override
-    public PageResult<PartitionGroup> pageQuery(QPageQuery<PartitionGroupQuery> pageQuery) {
-        PageResult<IgnitePartitionGroup> pageResult = partitionGroupDao.pageQuery(pageQuery);
-        return new PageResult<>(pageResult.getPagination(), convert(pageResult.getResult()));
+        return partitionGroup;
     }
 
     List<PartitionGroup> convert(List<IgnitePartitionGroup> groups) {

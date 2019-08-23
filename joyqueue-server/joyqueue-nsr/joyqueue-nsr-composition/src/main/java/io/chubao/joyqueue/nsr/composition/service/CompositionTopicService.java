@@ -42,6 +42,15 @@ public class CompositionTopicService implements TopicService {
     }
 
     @Override
+    public PageResult<Topic> search(QPageQuery<TopicQuery> pageQuery) {
+        if (config.isReadIgnite()) {
+            return igniteTopicService.search(pageQuery);
+        } else {
+            return journalkeeperTopicService.search(pageQuery);
+        }
+    }
+
+    @Override
     public PageResult<Topic> findUnsubscribedByQuery(QPageQuery<TopicQuery> pageQuery) {
         if (config.isReadIgnite()) {
             return igniteTopicService.findUnsubscribedByQuery(pageQuery);
@@ -146,6 +155,22 @@ public class CompositionTopicService implements TopicService {
     }
 
     @Override
+    public Topic update(Topic topic) {
+        Topic result = null;
+        if (config.isWriteIgnite()) {
+            result = igniteTopicService.update(topic);
+        }
+        if (config.isWriteJournalkeeper()) {
+            try {
+                journalkeeperTopicService.update(topic);
+            } catch (Exception e) {
+                logger.error("update journalkeeper exception, params: {}", topic, e);
+            }
+        }
+        return result;
+    }
+
+    @Override
     public Topic getById(String id) {
         if (config.isReadIgnite()) {
             return igniteTopicService.getById(id);
@@ -155,80 +180,11 @@ public class CompositionTopicService implements TopicService {
     }
 
     @Override
-    public Topic get(Topic model) {
+    public List<Topic> getAll() {
         if (config.isReadIgnite()) {
-            return igniteTopicService.get(model);
+            return igniteTopicService.getAll();
         } else {
-            return journalkeeperTopicService.get(model);
-        }
-    }
-
-    @Override
-    public void addOrUpdate(Topic topic) {
-        if (config.isWriteIgnite()) {
-            igniteTopicService.addOrUpdate(topic);
-        }
-        if (config.isWriteJournalkeeper()) {
-            try {
-                journalkeeperTopicService.addOrUpdate(topic);
-            } catch (Exception e) {
-                logger.error("addOrUpdate journalkeeper exception, params: {}", topic, e);
-            }
-        }
-    }
-
-    @Override
-    public void deleteById(String id) {
-        if (config.isWriteIgnite()) {
-            igniteTopicService.deleteById(id);
-        }
-        if (config.isWriteJournalkeeper()) {
-            try {
-                journalkeeperTopicService.deleteById(id);
-            } catch (Exception e) {
-                logger.error("deleteById journalkeeper exception, params: {}", id, e);
-            }
-        }
-    }
-
-    @Override
-    public void delete(Topic model) {
-        if (config.isWriteIgnite()) {
-            igniteTopicService.delete(model);
-        }
-        if (config.isWriteJournalkeeper()) {
-            try {
-                journalkeeperTopicService.delete(model);
-            } catch (Exception e) {
-                logger.error("delete journalkeeper exception, params: {}", model, e);
-            }
-        }
-    }
-
-    @Override
-    public List<Topic> list() {
-        if (config.isReadIgnite()) {
-            return igniteTopicService.list();
-        } else {
-            return journalkeeperTopicService.list();
-        }
-    }
-
-    @Override
-    public List<Topic> list(TopicQuery query) {
-        if (config.isReadIgnite()) {
-            return igniteTopicService.list(query);
-        } else {
-            return journalkeeperTopicService.list(query);
-        }
-    }
-
-    @Override
-    public PageResult<Topic> pageQuery(QPageQuery<TopicQuery> pageQuery) {
-        if (config.isReadIgnite()) {
-            return igniteTopicService.pageQuery(pageQuery);
-        } else {
-            return journalkeeperTopicService.pageQuery(pageQuery);
+            return journalkeeperTopicService.getAll();
         }
     }
 }

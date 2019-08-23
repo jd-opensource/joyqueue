@@ -1,10 +1,7 @@
 package io.chubao.joyqueue.nsr.composition.service;
 
 import io.chubao.joyqueue.domain.Namespace;
-import io.chubao.joyqueue.model.PageResult;
-import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.nsr.composition.config.CompositionConfig;
-import io.chubao.joyqueue.nsr.model.NamespaceQuery;
 import io.chubao.joyqueue.nsr.service.NamespaceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +29,24 @@ public class CompositionNamespaceService implements NamespaceService {
     }
 
     @Override
+    public List<Namespace> getAll() {
+        if (config.isReadIgnite()) {
+            return igniteNamespaceService.getAll();
+        } else {
+            return journalkeeperNamespaceService.getAll();
+        }
+    }
+
+    @Override
+    public Namespace getByCode(String code) {
+        if (config.isReadIgnite()) {
+            return igniteNamespaceService.getByCode(code);
+        } else {
+            return journalkeeperNamespaceService.getByCode(code);
+        }
+    }
+
+    @Override
     public Namespace getById(String id) {
         if (config.isReadIgnite()) {
             return igniteNamespaceService.getById(id);
@@ -41,80 +56,48 @@ public class CompositionNamespaceService implements NamespaceService {
     }
 
     @Override
-    public Namespace get(Namespace model) {
-        if (config.isReadIgnite()) {
-            return igniteNamespaceService.get(model);
-        } else {
-            return journalkeeperNamespaceService.get(model);
-        }
-    }
-
-    @Override
-    public void addOrUpdate(Namespace namespace) {
+    public Namespace add(Namespace namespace) {
+        Namespace result = null;
         if (config.isWriteIgnite()) {
-            igniteNamespaceService.addOrUpdate(namespace);
+            result = igniteNamespaceService.add(namespace);
         }
         if (config.isWriteJournalkeeper()) {
             try {
-                journalkeeperNamespaceService.addOrUpdate(namespace);
+                journalkeeperNamespaceService.add(namespace);
             } catch (Exception e) {
-                logger.error("addOrUpdate journalkeeper exception, params: {}", namespace, e);
+                logger.error("add journalkeeper exception, params: {}", namespace, e);
             }
         }
+        return result;
     }
 
     @Override
-    public void deleteById(String id) {
+    public Namespace update(Namespace namespace) {
+        Namespace result = null;
         if (config.isWriteIgnite()) {
-            igniteNamespaceService.deleteById(id);
+            result = igniteNamespaceService.update(namespace);
         }
         if (config.isWriteJournalkeeper()) {
             try {
-                journalkeeperNamespaceService.deleteById(id);
+                journalkeeperNamespaceService.update(namespace);
             } catch (Exception e) {
-                logger.error("deleteById journalkeeper exception, params: {}", id, e);
+                logger.error("update journalkeeper exception, params: {}", namespace, e);
             }
         }
+        return result;
     }
 
     @Override
-    public void delete(Namespace model) {
+    public void delete(String id) {
         if (config.isWriteIgnite()) {
-            igniteNamespaceService.delete(model);
+            igniteNamespaceService.delete(id);
         }
         if (config.isWriteJournalkeeper()) {
             try {
-                journalkeeperNamespaceService.delete(model);
+                journalkeeperNamespaceService.delete(id);
             } catch (Exception e) {
-                logger.error("delete journalkeeper exception, params: {}", model, e);
+                logger.error("delete journalkeeper exception, params: {}", id, e);
             }
-        }
-    }
-
-    @Override
-    public List<Namespace> list() {
-        if (config.isReadIgnite()) {
-            return igniteNamespaceService.list();
-        } else {
-            return journalkeeperNamespaceService.list();
-        }
-    }
-
-    @Override
-    public List<Namespace> list(NamespaceQuery query) {
-        if (config.isReadIgnite()) {
-            return igniteNamespaceService.list(query);
-        } else {
-            return journalkeeperNamespaceService.list(query);
-        }
-    }
-
-    @Override
-    public PageResult<Namespace> pageQuery(QPageQuery<NamespaceQuery> pageQuery) {
-        if (config.isReadIgnite()) {
-            return igniteNamespaceService.pageQuery(pageQuery);
-        } else {
-            return journalkeeperNamespaceService.pageQuery(pageQuery);
         }
     }
 }

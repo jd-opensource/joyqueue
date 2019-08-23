@@ -211,7 +211,7 @@ public class MetaManager extends Service {
         Producer producer = new Producer();
         producer.setTopic(topic);
         producer.setApp(app);
-        producerService.delete(producer);
+        producerService.delete(producer.getId());
         metaMessenger.publish(ProducerEvent.remove(topic, app));
         return true;
     }
@@ -234,7 +234,7 @@ public class MetaManager extends Service {
      * @return
      */
     public List<Producer> getProducer(String app) {
-        return producerService.getByApp(app, false);
+        return producerService.getByApp(app);
     }
 
     /**
@@ -272,7 +272,7 @@ public class MetaManager extends Service {
      * get producer
      */
     public List<Producer> getProducerByTopic(TopicName topic) {
-        return producerService.getByTopic(topic, true);
+        return producerService.getByTopic(topic);
     }
 
     /**
@@ -387,7 +387,7 @@ public class MetaManager extends Service {
      * @return
      */
     public List<Topic> getAllTopics() {
-        return topicService.list();
+        return topicService.getAll();
     }
 
     /**

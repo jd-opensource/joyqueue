@@ -38,7 +38,7 @@ public class NamespaceServiceImpl implements NamespaceService {
 
 
     @Override
-    public Namespace findByCode(String code) {
+    public Namespace findByCode(String code) throws Exception {
         return nameSpaceServerService.findByCode(code);
     }
 
@@ -48,7 +48,7 @@ public class NamespaceServiceImpl implements NamespaceService {
     }
 
     @Override
-    public List<Namespace> findAll() {
+    public List<Namespace> findAll() throws Exception {
         return nameSpaceServerService.findAll();
     }
 

@@ -34,7 +34,7 @@ public interface LeaderService {
      *  @return  partitionGroup list ,contain broker id
      *  or null, if not found
      **/
-    List<PartitionGroup> findPartitionGroupLeaderBroker(String topic,String namespace) throws Exception;
+    List<PartitionGroup> findPartitionGroupLeaderBroker(String topic,String namespace);
 
     /***
      *
@@ -42,7 +42,7 @@ public interface LeaderService {
      *  @param topic
      *  @return  Broker list or null ,if not found
      **/
-    List<Broker> findLeaderBroker(String topic,String namespace) throws Exception;
+    List<Broker> findLeaderBroker(String topic,String namespace);
 
 
     /***
@@ -53,7 +53,7 @@ public interface LeaderService {
      *  @param groupNo
      *  @return  a pair of partitionGroup,Broker list or null ,if not found
      **/
-    Map.Entry<PartitionGroup, Broker> findPartitionGroupLeaderBrokerDetail(String namespace,String topic,int groupNo) throws Exception;
+    Map.Entry<PartitionGroup, Broker> findPartitionGroupLeaderBrokerDetail(String namespace,String topic,int groupNo);
 
 
 
@@ -64,20 +64,20 @@ public interface LeaderService {
      *  @param partition
      *  @return  a pair of partitionGroup,Broker list or null ,if not found
      **/
-    Map.Entry<PartitionGroup, Broker> findPartitionLeaderBrokerDetail(String namespace,String topic,int partition) throws Exception;
+    Map.Entry<PartitionGroup, Broker> findPartitionLeaderBrokerDetail(String namespace,String topic,int partition);
 
     /**
      * @return  <PartitionGroup,Broker> kv list,parition group with leader broker detail
      *
      **/
-    List<Map.Entry<PartitionGroup,Broker>> findPartitionGroupLeaderBrokerDetail(String topic,String namespace) throws Exception;
+    List<Map.Entry<PartitionGroup,Broker>> findPartitionGroupLeaderBrokerDetail(String topic,String namespace);
 
 
     /**
      * @return  <PartitionGroup,Broker> kv list,parition group with leader broker detail
      *
      **/
-    Map<Short,Broker> findPartitionLeaderBrokerDetail(String topic,String namespace) throws Exception;
+    Map<Short,Broker> findPartitionLeaderBrokerDetail(String topic,String namespace);
 
 
 

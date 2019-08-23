@@ -117,6 +117,16 @@ public class ConsumerServiceImpl  implements ConsumerService {
     }
 
     @Override
+    public List<Consumer> findByTopic(String topic, String namespace) throws Exception {
+        return consumerNameServerService.findByTopic(topic, namespace);
+    }
+
+    @Override
+    public List<Consumer> findByApp(String app) throws Exception {
+        return consumerNameServerService.findByApp(app);
+    }
+
+    @Override
     public List<String> findAllSubscribeGroups() {
         try {
             return consumerNameServerService.findAllSubscribeGroups();

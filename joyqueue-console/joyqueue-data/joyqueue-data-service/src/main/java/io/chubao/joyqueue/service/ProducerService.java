@@ -18,8 +18,14 @@ package io.chubao.joyqueue.service;
 import io.chubao.joyqueue.model.domain.Producer;
 import io.chubao.joyqueue.nsr.NsrService;
 
+import java.util.List;
+
 public interface ProducerService extends NsrService<Producer, String> {
 
     Producer findByTopicAppGroup(String namespace,String topic,String app);
+
+    List<Producer> findByTopic(String namespace, String topic);
+
+    List<Producer> findByApp(String app);
 
 }

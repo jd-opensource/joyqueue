@@ -88,7 +88,7 @@ public class JournalkeeperServiceManager extends Service {
         configRepository = new ConfigRepository(sqlOperator);
         appTokenRepository = new AppTokenRepository(sqlOperator);
 
-        journalkeeperTopicService = new JournalkeeperTopicService(topicRepository, partitionGroupRepository);
+        journalkeeperTopicService = new JournalkeeperTopicService(topicRepository, partitionGroupRepository, partitionGroupReplicaRepository);
         journalkeeperPartitionGroupService = new JournalkeeperPartitionGroupService(partitionGroupRepository);
         journalkeeperPartitionGroupReplicaService = new JournalkeeperPartitionGroupReplicaService(partitionGroupReplicaRepository);
         journalkeeperBrokerService = new JournalkeeperBrokerService(brokerRepository);

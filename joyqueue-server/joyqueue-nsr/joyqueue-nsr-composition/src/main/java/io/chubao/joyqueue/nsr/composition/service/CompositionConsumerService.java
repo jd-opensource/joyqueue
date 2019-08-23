@@ -2,10 +2,7 @@ package io.chubao.joyqueue.nsr.composition.service;
 
 import io.chubao.joyqueue.domain.Consumer;
 import io.chubao.joyqueue.domain.TopicName;
-import io.chubao.joyqueue.model.PageResult;
-import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.nsr.composition.config.CompositionConfig;
-import io.chubao.joyqueue.nsr.model.ConsumerQuery;
 import io.chubao.joyqueue.nsr.service.ConsumerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,20 +30,6 @@ public class CompositionConsumerService implements ConsumerService {
     }
 
     @Override
-    public void deleteByTopicAndApp(TopicName topic, String app) {
-        if (config.isWriteIgnite()) {
-            igniteConsumerService.deleteByTopicAndApp(topic, app);
-        }
-        if (config.isWriteJournalkeeper()) {
-            try {
-                journalkeeperConsumerService.deleteByTopicAndApp(topic, app);
-            } catch (Exception e) {
-                logger.error("deleteByTopicAndApp journalkeeper exception, params: {}, {}", topic, app, e);
-            }
-        }
-    }
-
-    @Override
     public Consumer getByTopicAndApp(TopicName topic, String app) {
         if (config.isReadIgnite()) {
             return igniteConsumerService.getByTopicAndApp(topic, app);
@@ -56,36 +39,37 @@ public class CompositionConsumerService implements ConsumerService {
     }
 
     @Override
-    public List<Consumer> getByTopic(TopicName topic, boolean withConfig) {
+    public List<Consumer> getByTopic(TopicName topic) {
         if (config.isReadIgnite()) {
-            return igniteConsumerService.getByTopic(topic, withConfig);
+            return igniteConsumerService.getByTopic(topic);
         } else {
-            return journalkeeperConsumerService.getByTopic(topic, withConfig);
+            return journalkeeperConsumerService.getByTopic(topic);
         }
     }
 
     @Override
-    public List<Consumer> getByApp(String app, boolean withConfig) {
+    public List<Consumer> getByApp(String app) {
         if (config.isReadIgnite()) {
-            return igniteConsumerService.getByApp(app, withConfig);
+            return igniteConsumerService.getByApp(app);
         } else {
-            return journalkeeperConsumerService.getByApp(app, withConfig);
+            return journalkeeperConsumerService.getByApp(app);
         }
     }
 
     @Override
-    public List<Consumer> getConsumerByClientType(byte clientType) {
+    public List<Consumer> getAll() {
         if (config.isReadIgnite()) {
-            return igniteConsumerService.getConsumerByClientType(clientType);
+            return igniteConsumerService.getAll();
         } else {
-            return journalkeeperConsumerService.getConsumerByClientType(clientType);
+            return journalkeeperConsumerService.getAll();
         }
     }
 
     @Override
-    public void add(Consumer consumer) {
+    public Consumer add(Consumer consumer) {
+        Consumer result = null;
         if (config.isWriteIgnite()) {
-            igniteConsumerService.add(consumer);
+            result = igniteConsumerService.add(consumer);
         }
         if (config.isWriteJournalkeeper()) {
             try {
@@ -94,12 +78,14 @@ public class CompositionConsumerService implements ConsumerService {
                 logger.error("add journalkeeper exception, params: {}", consumer, e);
             }
         }
+        return result;
     }
 
     @Override
-    public void update(Consumer consumer) {
+    public Consumer update(Consumer consumer) {
+        Consumer result = null;
         if (config.isWriteIgnite()) {
-            igniteConsumerService.update(consumer);
+            result = igniteConsumerService.update(consumer);
         }
         if (config.isWriteJournalkeeper()) {
             try {
@@ -108,18 +94,19 @@ public class CompositionConsumerService implements ConsumerService {
                 logger.error("update journalkeeper exception, params: {}", consumer, e);
             }
         }
+        return result;
     }
 
     @Override
-    public void remove(Consumer consumer) {
+    public void delete(String id) {
         if (config.isWriteIgnite()) {
-            igniteConsumerService.remove(consumer);
+            igniteConsumerService.delete(id);
         }
         if (config.isWriteJournalkeeper()) {
             try {
-                journalkeeperConsumerService.remove(consumer);
+                journalkeeperConsumerService.delete(id);
             } catch (Exception e) {
-                logger.error("remove journalkeeper exception, params: {}", consumer, e);
+                logger.error("delete journalkeeper exception, params: {}", id, e);
             }
         }
     }
@@ -130,84 +117,6 @@ public class CompositionConsumerService implements ConsumerService {
             return igniteConsumerService.getById(id);
         } else {
             return journalkeeperConsumerService.getById(id);
-        }
-    }
-
-    @Override
-    public Consumer get(Consumer model) {
-        if (config.isReadIgnite()) {
-            return igniteConsumerService.get(model);
-        } else {
-            return journalkeeperConsumerService.get(model);
-        }
-    }
-
-    @Override
-    public void addOrUpdate(Consumer consumer) {
-        if (config.isWriteIgnite()) {
-            igniteConsumerService.addOrUpdate(consumer);
-        }
-        if (config.isWriteJournalkeeper()) {
-            try {
-                journalkeeperConsumerService.addOrUpdate(consumer);
-            } catch (Exception e) {
-                logger.error("addOrUpdate journalkeeper exception, params: {}", consumer, e);
-            }
-        }
-    }
-
-    @Override
-    public void deleteById(String id) {
-        if (config.isWriteIgnite()) {
-            igniteConsumerService.deleteById(id);
-        }
-        if (config.isWriteJournalkeeper()) {
-            try {
-                journalkeeperConsumerService.deleteById(id);
-            } catch (Exception e) {
-                logger.error("deleteById journalkeeper exception, params: {}", id, e);
-            }
-        }
-    }
-
-    @Override
-    public void delete(Consumer model) {
-        if (config.isWriteIgnite()) {
-            igniteConsumerService.delete(model);
-        }
-        if (config.isWriteJournalkeeper()) {
-            try {
-                journalkeeperConsumerService.delete(model);
-            } catch (Exception e) {
-                logger.error("delete journalkeeper exception, params: {}", model, e);
-            }
-        }
-    }
-
-    @Override
-    public List<Consumer> list() {
-        if (config.isReadIgnite()) {
-            return igniteConsumerService.list();
-        } else {
-            return journalkeeperConsumerService.list();
-        }
-    }
-
-    @Override
-    public List<Consumer> list(ConsumerQuery query) {
-        if (config.isReadIgnite()) {
-            return igniteConsumerService.list(query);
-        } else {
-            return journalkeeperConsumerService.list(query);
-        }
-    }
-
-    @Override
-    public PageResult<Consumer> pageQuery(QPageQuery<ConsumerQuery> pageQuery) {
-        if (config.isReadIgnite()) {
-            return igniteConsumerService.pageQuery(pageQuery);
-        } else {
-            return journalkeeperConsumerService.pageQuery(pageQuery);
         }
     }
 }

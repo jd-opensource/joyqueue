@@ -63,7 +63,7 @@ public class PartitionGroupRepository extends BaseRepository {
         return partitionGroupDTO;
     }
 
-    public int delete(String id) {
+    public int deleteById(String id) {
         return delete(DELETE_BY_ID, id);
     }
 }

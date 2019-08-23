@@ -59,7 +59,7 @@ public class PartitionGroupReplicaCommand extends NsrCommandSupport<PartitionGro
             TopicPartitionGroup partitionGroup = topicPartitionGroupService.findByTopicAndGroup(query.getTopic().getNamespace().getCode(), query.getTopic().getCode(), query.getGroupNo());
             if (partitionGroup != null) {
                 for (Integer brokerId : partitionGroup.getReplicas()) {
-                    Broker broker = brokerService.findById(Long.valueOf(String.valueOf(brokerId)));
+                    Broker broker = brokerService.findById(brokerId);
                     if (broker != null) {
                         brokers.add(broker);
                     }
@@ -143,8 +143,7 @@ public class PartitionGroupReplicaCommand extends NsrCommandSupport<PartitionGro
         TopicPartitionGroup topicPartitionGroup = new TopicPartitionGroup();
         topicPartitionGroup.setTopic(model.getTopic());
         topicPartitionGroup.setNamespace(model.getNamespace());
-        // TODO brokerId
-        topicPartitionGroup.setLeader(Integer.valueOf(String.valueOf(model.getBrokerId())));
+        topicPartitionGroup.setLeader(model.getBrokerId());
         topicPartitionGroup.setGroupNo(model.getGroupNo());
         topicPartitionGroup.setOutSyncReplicas(model.getOutSyncReplicas());
         int count = topicPartitionGroupService.leaderChange(topicPartitionGroup);

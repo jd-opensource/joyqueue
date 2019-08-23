@@ -25,8 +25,8 @@ import java.util.List;
  * Created by chenyanying3 on 2018-11-18.
  */
 public interface NamespaceService extends NsrService<Namespace, String> {
-    Namespace findByCode(String code);
+    Namespace findByCode(String code) throws Exception;
 
-    List<Namespace> findAll();
+    List<Namespace> findAll() throws Exception;
 
 }

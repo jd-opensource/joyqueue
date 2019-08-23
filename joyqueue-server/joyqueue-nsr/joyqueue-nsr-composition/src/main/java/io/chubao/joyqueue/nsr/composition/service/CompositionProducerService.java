@@ -2,10 +2,7 @@ package io.chubao.joyqueue.nsr.composition.service;
 
 import io.chubao.joyqueue.domain.Producer;
 import io.chubao.joyqueue.domain.TopicName;
-import io.chubao.joyqueue.model.PageResult;
-import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.nsr.composition.config.CompositionConfig;
-import io.chubao.joyqueue.nsr.model.ProducerQuery;
 import io.chubao.joyqueue.nsr.service.ProducerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,16 +30,11 @@ public class CompositionProducerService implements ProducerService {
     }
 
     @Override
-    public void deleteByTopicAndApp(TopicName topic, String app) {
-        if (config.isWriteIgnite()) {
-            igniteProducerService.deleteByTopicAndApp(topic, app);
-        }
-        if (config.isWriteJournalkeeper()) {
-            try {
-                journalkeeperProducerService.deleteByTopicAndApp(topic, app);
-            } catch (Exception e) {
-                logger.error("deleteByTopicAndApp journalkeeper exception, params: {}, {}", topic, app, e);
-            }
+    public Producer getById(String id) {
+        if (config.isReadIgnite()) {
+            return igniteProducerService.getById(id);
+        } else {
+            return journalkeeperProducerService.getById(id);
         }
     }
 
@@ -56,27 +48,28 @@ public class CompositionProducerService implements ProducerService {
     }
 
     @Override
-    public List<Producer> getByTopic(TopicName topic, boolean withConfig) {
+    public List<Producer> getByTopic(TopicName topic) {
         if (config.isReadIgnite()) {
-            return igniteProducerService.getByTopic(topic, withConfig);
+            return igniteProducerService.getByTopic(topic);
         } else {
-            return journalkeeperProducerService.getByTopic(topic, withConfig);
+            return journalkeeperProducerService.getByTopic(topic);
         }
     }
 
     @Override
-    public List<Producer> getByApp(String app, boolean withConfig) {
+    public List<Producer> getByApp(String app) {
         if (config.isReadIgnite()) {
-            return igniteProducerService.getByApp(app, withConfig);
+            return igniteProducerService.getByApp(app);
         } else {
-            return journalkeeperProducerService.getByApp(app, withConfig);
+            return journalkeeperProducerService.getByApp(app);
         }
     }
 
     @Override
-    public void add(Producer producer) {
+    public Producer add(Producer producer) {
+        Producer result = null;
         if (config.isWriteIgnite()) {
-            igniteProducerService.add(producer);
+            result = igniteProducerService.add(producer);
         }
         if (config.isWriteJournalkeeper()) {
             try {
@@ -85,12 +78,14 @@ public class CompositionProducerService implements ProducerService {
                 logger.error("add journalkeeper exception, params: {}", producer, e);
             }
         }
+        return result;
     }
 
     @Override
-    public void update(Producer producer) {
+    public Producer update(Producer producer) {
+        Producer result = null;
         if (config.isWriteIgnite()) {
-            igniteProducerService.update(producer);
+            result = igniteProducerService.update(producer);
         }
         if (config.isWriteJournalkeeper()) {
             try {
@@ -99,115 +94,20 @@ public class CompositionProducerService implements ProducerService {
                 logger.error("update journalkeeper exception, params: {}", producer, e);
             }
         }
+        return result;
     }
 
     @Override
-    public void remove(Producer producer) {
+    public void delete(String id) {
         if (config.isWriteIgnite()) {
-            igniteProducerService.remove(producer);
+            igniteProducerService.delete(id);
         }
         if (config.isWriteJournalkeeper()) {
             try {
-                journalkeeperProducerService.remove(producer);
+                journalkeeperProducerService.delete(id);
             } catch (Exception e) {
-                logger.error("remove journalkeeper exception, params: {}", producer, e);
+                logger.error("delete journalkeeper exception, params: {}", id, e);
             }
-        }
-    }
-
-    @Override
-    public List<Producer> getProducerByClientType(byte clientType) {
-        if (config.isReadIgnite()) {
-            return igniteProducerService.getProducerByClientType(clientType);
-        } else {
-            return journalkeeperProducerService.getProducerByClientType(clientType);
-        }
-    }
-
-    @Override
-    public Producer getById(String id) {
-        if (config.isReadIgnite()) {
-            return igniteProducerService.getById(id);
-        } else {
-            return journalkeeperProducerService.getById(id);
-        }
-    }
-
-    @Override
-    public Producer get(Producer model) {
-        if (config.isReadIgnite()) {
-            return igniteProducerService.get(model);
-        } else {
-            return journalkeeperProducerService.get(model);
-        }
-    }
-
-    @Override
-    public void addOrUpdate(Producer producer) {
-        if (config.isWriteIgnite()) {
-            igniteProducerService.addOrUpdate(producer);
-        }
-        if (config.isWriteJournalkeeper()) {
-            try {
-                journalkeeperProducerService.addOrUpdate(producer);
-            } catch (Exception e) {
-                logger.error("addOrUpdate journalkeeper exception, params: {}", producer, e);
-            }
-        }
-    }
-
-    @Override
-    public void deleteById(String id) {
-        if (config.isWriteIgnite()) {
-            igniteProducerService.deleteById(id);
-        }
-        if (config.isWriteJournalkeeper()) {
-            try {
-                journalkeeperProducerService.deleteById(id);
-            } catch (Exception e) {
-                logger.error("deleteById journalkeeper exception, params: {}", id, e);
-            }
-        }
-    }
-
-    @Override
-    public void delete(Producer model) {
-        if (config.isWriteIgnite()) {
-            igniteProducerService.delete(model);
-        }
-        if (config.isWriteJournalkeeper()) {
-            try {
-                journalkeeperProducerService.delete(model);
-            } catch (Exception e) {
-                logger.error("delete journalkeeper exception, params: {}", model, e);
-            }
-        }
-    }
-
-    @Override
-    public List<Producer> list() {
-        if (config.isReadIgnite()) {
-            return igniteProducerService.list();
-        } else {
-            return journalkeeperProducerService.list();
-        }
-    }
-
-    @Override
-    public List<Producer> list(ProducerQuery query) {
-        if (config.isReadIgnite()) {
-            return igniteProducerService.list(query);
-        } else {
-            return journalkeeperProducerService.list(query);
-        }
-    }
-
-    @Override
-    public PageResult<Producer> pageQuery(QPageQuery<ProducerQuery> pageQuery) {
-        if (config.isReadIgnite()) {
-            return igniteProducerService.pageQuery(pageQuery);
-        } else {
-            return journalkeeperProducerService.pageQuery(pageQuery);
         }
     }
 }

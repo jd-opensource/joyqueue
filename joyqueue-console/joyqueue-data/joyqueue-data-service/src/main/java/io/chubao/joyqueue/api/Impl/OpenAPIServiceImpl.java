@@ -43,11 +43,8 @@ import io.chubao.joyqueue.model.domain.Topic;
 import io.chubao.joyqueue.model.domain.TopicPubSub;
 import io.chubao.joyqueue.model.domain.User;
 import io.chubao.joyqueue.model.exception.BusinessException;
-import io.chubao.joyqueue.model.query.QApplicationToken;
 import io.chubao.joyqueue.model.query.QBroker;
 import io.chubao.joyqueue.model.query.QBrokerGroup;
-import io.chubao.joyqueue.model.query.QConsumer;
-import io.chubao.joyqueue.model.query.QProducer;
 import io.chubao.joyqueue.model.query.QTopic;
 import io.chubao.joyqueue.monitor.PartitionAckMonitorInfo;
 import io.chubao.joyqueue.monitor.PartitionLeaderAckMonitorInfo;
@@ -125,7 +122,7 @@ public class OpenAPIServiceImpl implements OpenAPIService {
         QPageQuery<QTopic> qPageQuery = new QPageQuery();
         qPageQuery.setQuery(new QTopic()); //empty
         qPageQuery.setPagination(pagination);
-        PageResult<Topic> topicPageResult = topicService.findByQuery(qPageQuery);
+        PageResult<Topic> topicPageResult = topicService.search(qPageQuery);
         List<Topic> topics = topicPageResult.getResult();
         List<TopicPubSub> pubSubs = new ArrayList(topics.size());
         for (Topic topic : topics) {
@@ -146,12 +143,8 @@ public class OpenAPIServiceImpl implements OpenAPIService {
      * @return topic pub/sub info
      **/
     TopicPubSub findTopicPubsub(Topic topic) throws Exception {
-        QConsumer qConsumer = new QConsumer();
-        QProducer qProducer = new QProducer();
-        qConsumer.setTopic(topic);
-        qProducer.setTopic(topic);
-        List<Consumer> consumers = consumerService.findByQuery(qConsumer);
-        List<Producer> producers = producerService.findByQuery(qProducer);
+        List<Consumer> consumers = consumerService.findByTopic(topic.getCode(), topic.getNamespace().getCode());
+        List<Producer> producers = producerService.findByTopic(topic.getNamespace().getCode(), topic.getCode());
         TopicPubSub pubSub = new TopicPubSub();
 
         List<String> ips = new ArrayList<>();
@@ -198,29 +191,18 @@ public class OpenAPIServiceImpl implements OpenAPIService {
 
     @Override
     public List<Consumer> queryConsumerTopicByApp(String app) throws Exception {
-        QConsumer qConsumer = new QConsumer();
-        qConsumer.setReferer(app);
-        return consumerService.findByQuery(qConsumer);
+        return consumerService.findByApp(app);
     }
 
     @Override
     public List<Consumer> findConsumers(String topic, String namespace) throws Exception {
-        Topic topiC = new Topic(topic);
-        topiC.setNamespace(new Namespace(namespace));
-        QConsumer qConsumer = new QConsumer();
-        qConsumer.setNamespace(namespace);
-        qConsumer.setTopic(topiC);
-        List<Consumer> consumers = consumerService.findByQuery(qConsumer);
+        List<Consumer> consumers = consumerService.findByTopic(topic, namespace);
         return consumers;
     }
 
     @Override
     public List<Producer> findProducers(String topic, String namespace) throws Exception {
-        Topic topiC = new Topic(topic);
-        topiC.setNamespace(new Namespace(namespace));
-        QProducer qProducer = new QProducer();
-        qProducer.setTopic(topiC);
-        List<Producer> producers = producerService.findByQuery(qProducer);
+        List<Producer> producers = producerService.findByTopic(namespace, topic);
         return producers;
     }
 
@@ -334,14 +316,7 @@ public class OpenAPIServiceImpl implements OpenAPIService {
 
     @Override
     public boolean delApplication(Application application) throws Exception {
-        QConsumer qconsumer = new QConsumer();
-        QProducer qProducer = new QProducer();
-        Identity app = new Identity();
-        app.setId(application.getId());
-        app.setCode(application.getCode());
-        qconsumer.setApp(app);
-        qProducer.setApp(app);
-        if (!NullUtil.isEmpty(consumerService.findByQuery(qconsumer)) || !NullUtil.isEmpty(producerService.findByQuery(qProducer)))
+        if (!NullUtil.isEmpty(consumerService.findByApp(application.getCode())) || !NullUtil.isEmpty(producerService.findByApp(application.getCode())))
             throw new ServiceException(BAD_REQUEST, "please unSubscribe/Publish  all  topics you have !");
         application = applicationService.findByCode(application.getCode());
         return applicationService.delete(application) > 0 ? true : false;
@@ -510,9 +485,8 @@ public class OpenAPIServiceImpl implements OpenAPIService {
 
     @Override
     public List<ApplicationToken> tokens(String app) {
-        QApplicationToken qApplicationToken = new QApplicationToken(new Identity(app), null);
         try {
-            return applicationTokenService.findByQuery(qApplicationToken);
+            return applicationTokenService.findByApp(app);
         } catch (Exception e) {
             throw new ServiceException(INTERNAL_SERVER_ERROR, e.getMessage());
         }

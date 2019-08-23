@@ -70,7 +70,7 @@ public class PartitionGroupServerServiceImpl extends NameServerBase implements P
     }
 
     @Override
-    public TopicPartitionGroup findByTopicAndGroup(String namespace, String topic, Integer groupNo) throws Exception {
+    public TopicPartitionGroup findByTopicAndGroup(String namespace, String topic, Integer groupNo) {
         PartitionGroupQuery query = new PartitionGroupQuery();
         query.setTopic(topic);
         query.setNamespace(namespace);
@@ -82,7 +82,7 @@ public class PartitionGroupServerServiceImpl extends NameServerBase implements P
     }
 
     @Override
-    public List<TopicPartitionGroup> findByTopic(String topic, String namespace) throws Exception {
+    public List<TopicPartitionGroup> findByTopic(String topic, String namespace) {
         PartitionGroupQuery query = new PartitionGroupQuery();
         query.setTopic(topic);
         query.setNamespace(namespace);

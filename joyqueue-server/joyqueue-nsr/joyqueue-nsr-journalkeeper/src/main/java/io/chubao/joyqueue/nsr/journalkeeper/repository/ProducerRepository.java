@@ -16,6 +16,8 @@ public class ProducerRepository extends BaseRepository {
     private static final String COLUMNS = "id, topic, namespace, app, client_type, produce_policy, limit_policy";
     private static final String UPDATE_COLUMNS = "topic = ?, namespace = ?, app = ?, client_type = ?, produce_policy = ?, limit_policy = ?";
 
+    private static final String GET_BY_ID = String.format("SELECT %s FROM %s WHERE id = ?",
+            COLUMNS, TABLE);
     private static final String GET_BY_TOPIC_AND_APP = String.format("SELECT %s FROM %s WHERE topic = ? AND namespace = ? AND app = ?",
             COLUMNS, TABLE);
     private static final String GET_BY_TOPIC = String.format("SELECT %s FROM %s WHERE topic = ? AND namespace = ?",
@@ -31,6 +33,10 @@ public class ProducerRepository extends BaseRepository {
 
     public ProducerRepository(SQLOperator sqlOperator) {
         super(sqlOperator);
+    }
+
+    public ProducerDTO getById(String id) {
+        return queryOnce(ProducerDTO.class, GET_BY_ID, id);
     }
 
     public ProducerDTO getByTopicAndApp(String topic, String namespace, String app) {
@@ -57,7 +63,7 @@ public class ProducerRepository extends BaseRepository {
         return consumerDTO;
     }
 
-    public int delete(String id) {
+    public int deleteById(String id) {
         return delete(DELETE_BY_ID, id);
     }
 }

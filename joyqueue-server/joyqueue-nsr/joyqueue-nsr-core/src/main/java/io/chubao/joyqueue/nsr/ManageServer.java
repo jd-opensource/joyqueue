@@ -120,6 +120,17 @@ public class ManageServer extends Service {
         Router router = Router.router(vertx);
         router.route().handler(BodyHandler.create());
         /** topic  **/
+        router.post("/topic/getByCode").handler(routingContext -> {
+            try{
+                TopicQuery topicQuery = JSON.parseObject(routingContext.getBodyAsString(), TopicQuery.class);
+                routingContext.response()
+                        .putHeader(CONTENT_TYPE, APPLICATION_JSON)
+                        .end(JSON.toJSONString(topicService.getTopicByCode(topicQuery.getNamespace(), topicQuery.getCode())));
+            }catch (Exception e){
+                logger.error("topic add errpr,request[{}]",routingContext.getBodyAsString(),e);
+                routingContext.fail(e);
+            }
+        });
         router.post("/topic/getById").handler(routingContext -> {
             try{
                 String bodyTxt = routingContext.getBodyAsString();
@@ -144,23 +155,15 @@ public class ManageServer extends Service {
                 routingContext.fail(e);
             }
         });
-        router.post("/topic/findByQuery").handler(routingContext -> {
+        router.post("/topic/search").handler(routingContext -> {
             try{
                 String bodyTxt = routingContext.getBodyAsString();
-                PageResult<Topic> pageResult = topicService.pageQuery(JSON.parseObject(bodyTxt,new TypeReference<QPageQuery<TopicQuery>>(){}));
+                PageResult<Topic> pageResult = topicService.search(JSON.parseObject(bodyTxt,new TypeReference<QPageQuery<TopicQuery>>(){}));
                 routingContext.response()
                         .putHeader(CONTENT_TYPE, APPLICATION_JSON)
                         .end(JSON.toJSONString(pageResult));
             }catch (Exception e){
                 logger.error("topic findByQuery errpr,request[{}]",routingContext.getBodyAsString(),e);
-                routingContext.fail(e);
-            }
-        });
-        router.post("/topic/list").handler(routingContext -> {
-            try{
-                routingContext.response().putHeader(CONTENT_TYPE, APPLICATION_JSON).end(JSONArray.toJSONString(topicService.list(JSON.parseObject(routingContext.getBodyAsString(),TopicQuery.class))));
-            }catch (Exception e){
-                logger.error("producer list error",e);
                 routingContext.fail(e);
             }
         });
@@ -188,7 +191,7 @@ public class ManageServer extends Service {
         });
         router.post("/topic/update").handler(routingContext -> {
             try{
-                topicService.addOrUpdate(JSONObject.parseObject(routingContext.getBodyAsString(), Topic.class));
+                topicService.update(JSONObject.parseObject(routingContext.getBodyAsString(), Topic.class));
                 routingContext.response().end("success");
             }catch (Exception e){
                 logger.error("topic update errpr,request[{}]",routingContext.getBodyAsString(),e);
@@ -241,6 +244,8 @@ public class ManageServer extends Service {
                 routingContext.fail(e);
             }
         });
+
+
         /** producer  **/
         router.post("/producer/getById").handler(routingContext -> {
             try{
@@ -271,37 +276,39 @@ public class ManageServer extends Service {
         });
         router.post("/producer/remove").handler(routingContext -> {
             try {
-                producerService.remove(JSONObject.parseObject(routingContext.getBodyAsString(), Producer.class));
+                producerService.delete(JSONObject.parseObject(routingContext.getBodyAsString(), Producer.class).getId());
                 routingContext.response().end("success");
             }catch (Exception e){
                 logger.error("producer remove error,request[{}]",routingContext.getBodyAsString(),e);
                 routingContext.fail(e);
             }
         });
-        router.post("/producer/list").handler(routingContext -> {
+        router.post("/producer/getByTopic").handler(routingContext -> {
             try{
-            routingContext.response().putHeader(CONTENT_TYPE, APPLICATION_JSON).
-                    end(JSONArray.toJSONString(producerService.getProducerByClientType(JSONObject.parseObject(routingContext.getBodyAsString()).getByte("client_type"))));
+                ProducerQuery producerQuery = JSON.parseObject(routingContext.getBodyAsString(), ProducerQuery.class);
+                routingContext.response().putHeader(CONTENT_TYPE, APPLICATION_JSON).
+                    end(JSONArray.toJSONString(producerService.getByTopic(TopicName.parse(producerQuery.getTopic(), producerQuery.getNamespace()))));
             }catch (Exception e){
                 logger.error("producer list error",e);
                 routingContext.fail(e);
             }
         });
-        router.post("/producer/getList").handler(routingContext -> {
+        router.post("/producer/getByTopicAndApp").handler(routingContext -> {
             try{
+                ProducerQuery producerQuery = JSON.parseObject(routingContext.getBodyAsString(), ProducerQuery.class);
                 routingContext.response().putHeader(CONTENT_TYPE, APPLICATION_JSON).
-                        end(JSONArray.toJSONString(producerService.list(JSON.parseObject(routingContext.getBodyAsString(), ProducerQuery.class))));
+                        end(JSONArray.toJSONString(producerService.getByTopicAndApp(TopicName.parse(producerQuery.getTopic(), producerQuery.getNamespace()), producerQuery.getApp())));
             }catch (Exception e){
                 logger.error("producer getlist error request[{}]",routingContext.getBodyAsString(),e);
                 routingContext.fail(e);
             }
         });
 
-        router.post("/producer/findByQuery").handler(routingContext -> {
+        router.post("/producer/getByApp").handler(routingContext -> {
             try {
-                QPageQuery<ProducerQuery> pageQuery = JSONObject.parseObject(routingContext.getBodyAsString(), new TypeReference<QPageQuery<ProducerQuery>>(){});
-                PageResult<Producer> pageResult= producerService.pageQuery(pageQuery);
-                routingContext.response().putHeader(CONTENT_TYPE, APPLICATION_JSON).end(JSON.toJSONString(pageResult));
+                ProducerQuery producerQuery = JSON.parseObject(routingContext.getBodyAsString(), ProducerQuery.class);
+                routingContext.response().putHeader(CONTENT_TYPE, APPLICATION_JSON).
+                        end(JSONArray.toJSONString(producerService.getByApp(producerQuery.getApp())));
             } catch (Exception e){
                 logger.error("producer findByQuery error",e);
                 routingContext.fail(e);

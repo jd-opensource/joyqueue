@@ -31,13 +31,12 @@ import io.chubao.joyqueue.model.PageResult;
 import io.chubao.joyqueue.model.Pagination;
 import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.network.codec.NullPayloadCodec;
-import io.chubao.joyqueue.network.transport.codec.JoyQueueHeader;
-import io.chubao.joyqueue.network.transport.codec.support.JoyQueueCodec;
-import io.chubao.joyqueue.nsr.network.codec.OperatePartitionGroupCodec;
 import io.chubao.joyqueue.network.command.CommandType;
 import io.chubao.joyqueue.network.transport.Transport;
 import io.chubao.joyqueue.network.transport.TransportClient;
+import io.chubao.joyqueue.network.transport.codec.JoyQueueHeader;
 import io.chubao.joyqueue.network.transport.codec.PayloadCodecFactory;
+import io.chubao.joyqueue.network.transport.codec.support.JoyQueueCodec;
 import io.chubao.joyqueue.network.transport.command.Command;
 import io.chubao.joyqueue.network.transport.command.Direction;
 import io.chubao.joyqueue.network.transport.config.ClientConfig;
@@ -52,15 +51,11 @@ import io.chubao.joyqueue.nsr.message.Messenger;
 import io.chubao.joyqueue.nsr.model.ConsumerQuery;
 import io.chubao.joyqueue.nsr.model.ProducerQuery;
 import io.chubao.joyqueue.nsr.model.TopicQuery;
+import io.chubao.joyqueue.nsr.network.codec.OperatePartitionGroupCodec;
 import io.chubao.joyqueue.nsr.network.command.CreatePartitionGroup;
 import io.chubao.joyqueue.nsr.network.command.OperatePartitionGroup;
 import io.chubao.joyqueue.nsr.network.command.RemovePartitionGroup;
 import io.chubao.joyqueue.nsr.network.command.UpdatePartitionGroup;
-import io.chubao.joyqueue.nsr.service.BrokerService;
-import io.chubao.joyqueue.nsr.service.ConsumerService;
-import io.chubao.joyqueue.nsr.service.PartitionGroupReplicaService;
-import io.chubao.joyqueue.nsr.service.PartitionGroupService;
-import io.chubao.joyqueue.nsr.service.ProducerService;
 import io.chubao.joyqueue.nsr.service.TopicService;
 import io.chubao.joyqueue.toolkit.lang.Pair;
 import org.apache.ignite.Ignition;
@@ -86,15 +81,15 @@ import java.util.stream.Collectors;
 public class IgniteTopicService implements TopicService {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
     @Inject
-    private PartitionGroupService partitionGroupService;
+    private IgnitePartitionGroupService partitionGroupService;
     @Inject
-    private BrokerService brokerService;
+    private IgniteBrokerService brokerService;
     @Inject
-    private PartitionGroupReplicaService partitionGroupReplicaService;
+    private IgnitePartitionGroupReplicaService partitionGroupReplicaService;
     @Inject
-    private ProducerService producerService;
+    private IgniteProducerService producerService;
     @Inject
-    private ConsumerService consumerService;
+    private IgniteConsumerService consumerService;
     @Inject
     protected Messenger messenger;
 
@@ -131,7 +126,7 @@ public class IgniteTopicService implements TopicService {
         TopicQuery topicQuery = pageQuery.getQuery();
         Pagination pagination = pageQuery.getPagination();
         pageResult.setPagination(pagination);
-        List<Topic> topicList = list(pageQuery.getQuery());
+        List<Topic> topicList = convert(topicDao.list(pageQuery.getQuery()));
         if(topicList != null && topicList.size() >0) {
             if (topicQuery.getSubscribeType() != null) {
                 if (topicQuery.getSubscribeType() == 1) {
@@ -186,11 +181,11 @@ public class IgniteTopicService implements TopicService {
     @Override
     public void addTopic(Topic topic, List<PartitionGroup> partitionGroups) {
         try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
-            Topic oldTopic = get(topic);
+            Topic oldTopic = getTopicByCode(topic.getName().getNamespace(), topic.getName().getCode());
             if (oldTopic != null) {
                 throw new Exception(String.format("topic:%s is aleady exsit",topic.getName()));
             }
-            this.addOrUpdate(new IgniteTopic(topic));
+            topicDao.addOrUpdate(new IgniteTopic(topic));
             //TODO 删除可能比较危险
             TopicName topicName = topic.getName();
             partitionGroupReplicaService.deleteByTopic(topicName);
@@ -269,11 +264,11 @@ public class IgniteTopicService implements TopicService {
         TopicName topicName = topic.getName();
         try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
             List<PartitionGroup> partitionGroups = partitionGroupService.getByTopic(topicName);
-            this.deleteById(topicName.getFullName());
+            topicDao.deleteById(topicName.getFullName());
             partitionGroupReplicaService.deleteByTopic(topicName);
             if (null != partitionGroups){
                 for (PartitionGroup group : partitionGroups) {
-                    partitionGroupService.deleteById(((IgnitePartitionGroup) group).getId());
+                    partitionGroupService.delete(((IgnitePartitionGroup) group).getId());
                     for (Integer brokerId : group.getReplicas()) {
                         Broker broker = (Broker) brokerService.getById(brokerId);
                         Transport transport = null;
@@ -327,7 +322,7 @@ public class IgniteTopicService implements TopicService {
             }
             Topic topic = getById(group.getTopic().getFullName());
             topic.setPartitions((short) (topic.getPartitions()+group.getPartitions().size()));
-            addOrUpdate(topic);
+            topicDao.addOrUpdate(new IgniteTopic(topic));
             partitionGroupService.addOrUpdate(new IgnitePartitionGroup(group));
             for (Integer brokerId : group.getReplicas()) {
                 Broker broker = (Broker) brokerService.getById(brokerId);
@@ -393,7 +388,7 @@ public class IgniteTopicService implements TopicService {
 
             Topic topic = getById(topicName.getFullName());
             topic.setPartitions((short) (topic.getPartitions()-group.getPartitions().size()));
-            addOrUpdate(topic);
+            topicDao.addOrUpdate(new IgniteTopic(topic));
 
             partitionGroupReplicaService.deleteByTopicAndPartitionGroup(topicName, groupNo);
             group = partitionGroupService.getById(topicName.getFullName() + IgniteBaseModel.SPLICE + group.getGroup());
@@ -401,7 +396,7 @@ public class IgniteTopicService implements TopicService {
                 logger.error("topic {} group {} not exist",topicName.getFullName(),groupNo);
                 return;
             }
-            partitionGroupService.deleteById(topicName.getFullName() + IgniteBaseModel.SPLICE + group.getGroup());
+            partitionGroupService.delete(topicName.getFullName() + IgniteBaseModel.SPLICE + group.getGroup());
             for (Integer brokerId : group.getReplicas()) {
                 Broker broker = brokerService.getById(brokerId);
                 command = new Command(new JoyQueueHeader(Direction.REQUEST, CommandType.NSR_REMOVE_PARTITIONGROUP), new RemovePartitionGroup(group));
@@ -501,7 +496,7 @@ public class IgniteTopicService implements TopicService {
                 //更新topic  partitions
                 Topic topic = getById(group.getTopic().getFullName());
                 topic.setPartitions((short) (topic.getPartitions()+(groupNew.getPartitions().size()- groupOld.getPartitions().size())));
-                addOrUpdate(topic);
+                topicDao.addOrUpdate(new IgniteTopic(topic));
 
                 groupToUpdae.setPartitions(groupNew.getPartitions());
                 commands.add(new Pair(groupOld.getReplicas(), new Command(new JoyQueueHeader(Direction.REQUEST, CommandType.NSR_UPDATE_PARTITIONGROUP), new UpdatePartitionGroup(groupToUpdae))));
@@ -628,12 +623,17 @@ public class IgniteTopicService implements TopicService {
     public List<PartitionGroup> getPartitionGroup(String namespace, String topic, Object[] groups) {
         List<PartitionGroup> list = new ArrayList<>();
         for (Object group : groups) {
-            PartitionGroup partitionGroup = partitionGroupService.findByTopicAndGroup(new TopicName(topic, namespace), Integer.parseInt(group.toString()));
+            PartitionGroup partitionGroup = partitionGroupService.getByTopicAndGroup(new TopicName(topic, namespace), Integer.parseInt(group.toString()));
             if (null != partitionGroup){
                 list.add(partitionGroup);
             }
         }
         return list;
+    }
+
+    @Override
+    public Topic update(Topic topic) {
+        return null;
     }
 
     //@Override
@@ -647,37 +647,7 @@ public class IgniteTopicService implements TopicService {
     }
 
     @Override
-    public Topic get(Topic model) {
-        return topicDao.findById(toIgniteModel(model).getId());
-    }
-
-    @Override
-    public void addOrUpdate(Topic topic) {
-        topicDao.addOrUpdate(toIgniteModel(topic));
-    }
-
-    @Override
-    public void deleteById(String id) {
-        topicDao.deleteById(id);
-    }
-
-    @Override
-    public void delete(Topic model) {
-        topicDao.deleteById(toIgniteModel(model).getId());
-    }
-
-    @Override
-    public List<Topic> list() {
-        return convert(topicDao.list(null));
-    }
-
-    @Override
-    public List<Topic> list(TopicQuery query) {
-        return convert(topicDao.list(query));
-    }
-
-    @Override
-    public PageResult<Topic> pageQuery(QPageQuery<TopicQuery> pageQuery) {
+    public PageResult<Topic> search(QPageQuery<TopicQuery> pageQuery) {
         PageResult<IgniteTopic> topics = topicDao.pageQuery(pageQuery);
         PageResult<Topic> result = new PageResult<>();
         result.setResult(convert(topics.getResult()));
@@ -685,6 +655,10 @@ public class IgniteTopicService implements TopicService {
         return result;
     }
 
+    @Override
+    public List<Topic> getAll() {
+        return convert(topicDao.list(null));
+    }
 
     public static final List<Topic> convert(List<IgniteTopic> igniteTopics) {
         if (igniteTopics != null && !igniteTopics.isEmpty()) {

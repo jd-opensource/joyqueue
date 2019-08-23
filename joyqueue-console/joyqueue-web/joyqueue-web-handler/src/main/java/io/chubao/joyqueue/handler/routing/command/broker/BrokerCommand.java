@@ -50,7 +50,7 @@ public class BrokerCommand extends NsrCommandSupport<Broker,BrokerService,QBroke
     @Override
     @Path("delete")
     public Response delete(@QueryParam(ID) String id) throws Exception {
-        Broker newModel = service.findById(Long.valueOf(id));
+        Broker newModel = service.findById(Integer.valueOf(id));
         int count = service.delete(newModel);
         if (count <= 0) {
             throw new ConfigException(deleteErrorCode());
@@ -61,7 +61,7 @@ public class BrokerCommand extends NsrCommandSupport<Broker,BrokerService,QBroke
 
     @Path("get")
     public Response get(@QueryParam(ID) Long id) throws Exception {
-        Broker newModel = service.findById(id);
+        Broker newModel = service.findById(Integer.valueOf(String.valueOf(id)));
         if (newModel == null) {
             throw new ConfigException(getErrorCode());
         }
