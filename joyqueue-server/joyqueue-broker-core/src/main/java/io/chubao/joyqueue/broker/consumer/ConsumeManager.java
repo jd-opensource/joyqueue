@@ -456,7 +456,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
         String app = consumer.getApp();
         Preconditions.checkArgument(topic != null, "topic can not be null.");
         Preconditions.checkArgument(app != null, "app can not be null.");
-        Preconditions.checkArgument(index > -1, "index can not be negative.");
+//        Preconditions.checkArgument(index > -1, "index can not be negative.");
 
         positionManager.updateLastMsgPullIndex(TopicName.parse(topic), app, partition, index);
     }
@@ -509,7 +509,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
         String app = consumer.getApp();
         Preconditions.checkArgument(topic != null, "topic can not be null.");
         Preconditions.checkArgument(app != null, "app can not be null.");
-        Preconditions.checkArgument(index > -1, "index can not be negative.");
+//        Preconditions.checkArgument(index > -1, "index can not be negative.");
 
         positionManager.updateLastMsgAckIndex(TopicName.parse(topic), app, partition, index);
     }
