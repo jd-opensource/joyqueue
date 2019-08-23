@@ -16,15 +16,14 @@
 package io.chubao.joyqueue.nsr.network.codec;
 
 import io.chubao.joyqueue.domain.PartitionGroup;
-
-import io.chubao.joyqueue.nsr.network.NsrPayloadCodec;
-import io.chubao.joyqueue.nsr.network.command.CreatePartitionGroup;
-import io.chubao.joyqueue.nsr.network.command.RemovePartitionGroup;
 import io.chubao.joyqueue.network.serializer.Serializer;
 import io.chubao.joyqueue.network.transport.command.Header;
 import io.chubao.joyqueue.network.transport.command.Types;
+import io.chubao.joyqueue.nsr.network.NsrPayloadCodec;
+import io.chubao.joyqueue.nsr.network.command.CreatePartitionGroup;
 import io.chubao.joyqueue.nsr.network.command.NsrCommandType;
 import io.chubao.joyqueue.nsr.network.command.OperatePartitionGroup;
+import io.chubao.joyqueue.nsr.network.command.RemovePartitionGroup;
 import io.chubao.joyqueue.nsr.network.command.UpdatePartitionGroup;
 import io.netty.buffer.ByteBuf;
 
@@ -63,7 +62,7 @@ public class OperatePartitionGroupCodec implements NsrPayloadCodec<OperatePartit
     @Override
     public void encode(OperatePartitionGroup payload, ByteBuf buffer) throws Exception {
         PartitionGroup partitionGroup = payload.getPartitionGroup();
-        Serializer.write(partitionGroup, buffer);
+        Serializer.write(partitionGroup, buffer, payload.getHeader().getVersion());
         buffer.writeBoolean(payload.isRollback());
     }
 }

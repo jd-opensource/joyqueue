@@ -40,6 +40,8 @@ public class SendLog {
     private short partition;
     private long index;
 
+    private String rowKeyStart;
+
     public String getTopic() {
         return topic;
     }
@@ -158,5 +160,13 @@ public class SendLog {
 
     public void setIndex(long index) {
         this.index = index;
+    }
+
+    public String getRowKeyStart() {
+        return rowKeyStart;
+    }
+
+    public void setRowKeyStart(String rowKeyStart) {
+        this.rowKeyStart = rowKeyStart;
     }
 }

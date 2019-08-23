@@ -1,5 +1,19 @@
 <template>
   <div>
+    <div class="ml20 mt30">
+      <d-button-group>
+        <slot name="extendBtn"></slot>
+        <d-button v-if="showBrokerChart" @click="goBrokerChart" class="button">Broker监控
+          <icon name="cpu" style="margin-left: 3px;"/>
+        </d-button>
+        <d-button v-if="showHostChart" @click="goHostChart" class="button">主机监控
+          <icon name="monitor" style="margin-left: 3px;"/>
+        </d-button>
+        <d-button type="primary" @click="getList" class="button">刷新
+          <icon name="refresh-cw" style="margin-left: 3px;"></icon>
+        </d-button>
+      </d-button-group>
+    </div>
     <my-table :data="tableData" :showPin="showTablePin" style="height: 400px;overflow-y:auto" :showPagination="false"/>
   </div>
 </template>
@@ -15,13 +29,25 @@ export default {
   components: {MyTable},
   mixins: [crud],
   props: {
-    topicId: ''
+    topicId: {
+     type: String,
+     default: ''
+   },
+   showBrokerChart: {
+     type: Boolean,
+     default: true
+   },
+   showHostChart: {
+     type: Boolean,
+     default: true
+   }
   },
   data () {
     return {
       urls: {
         search: `/broker/findByTopic`,
-        startInfo: '/monitor/start'
+        startInfo: '/monitor/start',
+        getUrl: `/grafana/getRedirectUrl`
       },
       tableData: {
         rowData: [],
@@ -47,6 +73,10 @@ export default {
             key: 'revision'
           }
         ]
+      },
+      monitorUId: {
+        broker: this.$store.getters.uIds.broker,
+        host: this.$store.getters.uIds.host
       }
     }
   },
@@ -72,7 +102,31 @@ export default {
         }
         this.$set(this.tableData.rowData, i, this.tableData.rowData[i])
       })
-    }
+    },
+     goBrokerChart () {
+       apiRequest.get(this.urls.getUrl + '/' + this.monitorUId.broker, {}, {}).then((data) => {
+         let url = data.data || ''
+         if (url.indexOf('?') < 0) {
+           url += '?'
+         } else if (!url.endsWith('?')) {
+           url += '&'
+         }
+         url = url + 'var-topic=' + this.topicId
+         window.open(url)
+       })
+     },
+     goHostChart () {
+       apiRequest.get(this.urls.getUrl + '/' + this.monitorUId.host, {}, {}).then((data) => {
+         let url = data.data || ''
+         if (url.indexOf('?') < 0) {
+           url += '?'
+         } else if (!url.endsWith('?')) {
+           url += '&'
+         }
+         url = url + 'var-topic=' + this.topicId
+         window.open(url)
+       })
+     }
   }
 }
 </script>

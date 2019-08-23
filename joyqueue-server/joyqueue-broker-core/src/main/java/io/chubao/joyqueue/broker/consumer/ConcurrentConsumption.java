@@ -591,9 +591,12 @@ class ConcurrentConsumption extends Service {
      */
     private synchronized void addToExpireQueue(ConsumePartition consumePartition, PartitionSegment partitionSegment) {
         ConcurrentLinkedQueue<PartitionSegment> queue = expireQueueMap.get(consumePartition);
-        if (queue != null) {
+        if (queue == null) {
             queue = new ConcurrentLinkedQueue<>();
-            expireQueueMap.putIfAbsent(consumePartition, queue);
+            ConcurrentLinkedQueue<PartitionSegment> pre = expireQueueMap.putIfAbsent(consumePartition, queue);
+            if (pre != null) {
+                queue = pre;
+            }
         }
         queue.add(partitionSegment);
 

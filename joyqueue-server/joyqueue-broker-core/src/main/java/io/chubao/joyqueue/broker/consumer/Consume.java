@@ -184,4 +184,13 @@ public interface Consume {
      */
     long getLastAckTimeByPartition(TopicName topic, String app, short partition);
 
+    /**
+     * 释放分区占用
+     *
+     * @param topic
+     * @param app
+     * @param partition
+     */
+    void releasePartition(String topic, String app, short partition);
+
 }

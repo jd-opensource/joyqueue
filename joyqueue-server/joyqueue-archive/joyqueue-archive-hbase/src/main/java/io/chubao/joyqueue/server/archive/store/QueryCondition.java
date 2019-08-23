@@ -33,6 +33,8 @@ public class QueryCondition implements Query {
 
     private RowKey rowKey; // 指定RowKey查询
 
+    private byte[] startRowKeyByteArr;
+
     public int getCount() {
         return count;
     }
@@ -63,6 +65,15 @@ public class QueryCondition implements Query {
 
     public void setRowKey(RowKey rowKey) {
         this.rowKey = rowKey;
+    }
+
+    public byte[] getStartRowKeyByteArr() {
+        return startRowKeyByteArr;
+    }
+
+    public void setStartRowKeyByteArr(String startRowKeyByteArr) {
+        byte[] bytes = HBaseSerializer.hexStrToByteArray(startRowKeyByteArr);
+        this.startRowKeyByteArr = bytes;
     }
 
     /**

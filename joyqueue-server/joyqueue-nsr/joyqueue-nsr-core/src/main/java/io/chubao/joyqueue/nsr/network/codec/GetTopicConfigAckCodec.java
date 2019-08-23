@@ -44,7 +44,7 @@ public class GetTopicConfigAckCodec implements NsrPayloadCodec<GetTopicConfigAck
             return;
         }
         buffer.writeBoolean(true);
-        Serializer.write(payload.getTopicConfig(),buffer);
+        Serializer.write(payload.getTopicConfig(),buffer, payload.getHeader().getVersion());
     }
 
     @Override

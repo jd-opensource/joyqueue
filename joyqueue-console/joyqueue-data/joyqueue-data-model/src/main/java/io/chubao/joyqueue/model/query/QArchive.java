@@ -36,6 +36,8 @@ public class QArchive implements Query {
 
     private int count = 100;
 
+    private String rowKeyStart;
+
     public QArchive() {
     }
 
@@ -93,5 +95,13 @@ public class QArchive implements Query {
 
     public void setCount(int count) {
         this.count = count;
+    }
+
+    public String getRowKeyStart() {
+        return rowKeyStart;
+    }
+
+    public void setRowKeyStart(String rowKeyStart) {
+        this.rowKeyStart = rowKeyStart;
     }
 }

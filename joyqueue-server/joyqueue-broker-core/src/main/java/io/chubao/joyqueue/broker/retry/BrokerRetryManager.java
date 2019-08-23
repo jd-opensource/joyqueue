@@ -15,12 +15,16 @@
  */
 package io.chubao.joyqueue.broker.retry;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.jd.laf.extension.ExtensionManager;
 import io.chubao.joyqueue.broker.BrokerContext;
 import io.chubao.joyqueue.broker.BrokerContextAware;
 import io.chubao.joyqueue.broker.cluster.ClusterManager;
 import io.chubao.joyqueue.broker.network.support.BrokerTransportClientFactory;
 import io.chubao.joyqueue.domain.Broker;
 import io.chubao.joyqueue.domain.Consumer;
+import io.chubao.joyqueue.domain.TopicName;
 import io.chubao.joyqueue.event.BrokerEvent;
 import io.chubao.joyqueue.event.EventType;
 import io.chubao.joyqueue.event.MetaEvent;
@@ -39,7 +43,6 @@ import io.chubao.joyqueue.toolkit.config.Property;
 import io.chubao.joyqueue.toolkit.config.PropertySupplier;
 import io.chubao.joyqueue.toolkit.retry.RetryPolicy;
 import io.chubao.joyqueue.toolkit.service.Service;
-import com.jd.laf.extension.ExtensionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +50,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import static io.chubao.joyqueue.domain.Broker.DEFAULT_RETRY_TYPE;
 
@@ -83,19 +87,7 @@ public class BrokerRetryManager extends Service implements MessageRetry<Long>, B
         super.validate();
 
         if (retryPolicyProvider == null) {
-            retryPolicyProvider = (topic, app) -> {
-                Consumer consumerByTopicAndApp = nameService.getConsumerByTopicAndApp(topic, app);
-                if (consumerByTopicAndApp == null) {
-                    logger.debug("nameService.getConsumerByTopicAndApp is null by topic:[{}], app:[{}]", topic, app);
-                    return new RetryPolicy();
-                }
-                RetryPolicy retryPolicy = consumerByTopicAndApp.getRetryPolicy();
-                if (retryPolicy == null) {
-                    logger.debug("consumerByTopicAndApp.getRetryPolicy() is null by topic:[{}], app:[{}]", topic, app);
-                    return new RetryPolicy();
-                }
-                return consumerByTopicAndApp.getRetryPolicy();
-            };
+            retryPolicyProvider =  new RetryPolicyProviderImpl();
         }
 
         if (remoteRetryProvider == null) {
@@ -122,6 +114,54 @@ public class BrokerRetryManager extends Service implements MessageRetry<Long>, B
                 }
             };
         }
+    }
+
+    class RetryPolicyProviderImpl implements RetryPolicyProvider {
+
+        // 通过CacheBuilder构建一个缓存实例
+        private final Cache<String, RetryPolicy> cache = CacheBuilder.newBuilder()
+                .maximumSize(1000000) // 设置缓存的最大容量
+                .expireAfterWrite(1, TimeUnit.MINUTES) // 设置缓存在写入一分钟后失效
+                .concurrencyLevel(Runtime.getRuntime().availableProcessors()) // 设置并发级别为10
+                .recordStats() // 开启缓存统计
+                .build();
+
+        @Override
+        public RetryPolicy getPolicy(TopicName topic, String app) {
+            String cacheKey = getKey(topic, app);
+            // 尝试从缓存获取
+            RetryPolicy retryPolicy = cache.getIfPresent(cacheKey);
+            if (retryPolicy == null) {
+                Consumer consumerByTopicAndApp = nameService.getConsumerByTopicAndApp(topic, app);
+                if (consumerByTopicAndApp == null) {
+                    logger.debug("nameService.getConsumerByTopicAndApp is null by topic:[{}], app:[{}]", topic, app);
+
+                    retryPolicy = new RetryPolicy();
+                    cache.put(cacheKey, retryPolicy);
+                    return retryPolicy;
+                }
+
+                retryPolicy = consumerByTopicAndApp.getRetryPolicy();
+                if (retryPolicy == null) {
+                    logger.debug("consumerByTopicAndApp.getRetryPolicy() is null by topic:[{}], app:[{}]", topic, app);
+
+                    retryPolicy = new RetryPolicy();
+                    cache.put(cacheKey, retryPolicy);
+                    return retryPolicy;
+                } else {
+                    logger.debug("Get RetryPolicy:[{}] by topic:[{}], app:[{}], ", retryPolicy.toString(), topic.getFullName(), app);
+                }
+
+                cache.put(cacheKey, retryPolicy);
+                return retryPolicy;
+            }
+            return retryPolicy;
+        }
+
+        private String getKey(TopicName topic, String app) {
+            return topic.getFullName() + ":" + app;
+        }
+
     }
 
     @Override

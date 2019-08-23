@@ -20,17 +20,20 @@ import io.chubao.joyqueue.broker.Plugins;
 import io.chubao.joyqueue.broker.buffer.Serializer;
 import io.chubao.joyqueue.broker.cluster.ClusterManager;
 import io.chubao.joyqueue.broker.consumer.Consume;
+import io.chubao.joyqueue.broker.consumer.MessageConvertSupport;
 import io.chubao.joyqueue.broker.consumer.model.PullResult;
 import io.chubao.joyqueue.domain.TopicConfig;
 import io.chubao.joyqueue.domain.TopicName;
 import io.chubao.joyqueue.exception.JoyQueueException;
 import io.chubao.joyqueue.message.BrokerMessage;
+import io.chubao.joyqueue.message.SourceType;
 import io.chubao.joyqueue.network.session.Consumer;
 import io.chubao.joyqueue.server.archive.store.api.ArchiveStore;
 import io.chubao.joyqueue.server.archive.store.model.AchivePosition;
 import io.chubao.joyqueue.server.archive.store.model.SendLog;
 import io.chubao.joyqueue.store.PositionUnderflowException;
 import io.chubao.joyqueue.toolkit.concurrent.LoopThread;
+import io.chubao.joyqueue.toolkit.concurrent.NamedThreadFactory;
 import io.chubao.joyqueue.toolkit.lang.Close;
 import io.chubao.joyqueue.toolkit.service.Service;
 import io.chubao.joyqueue.toolkit.time.SystemClock;
@@ -42,6 +45,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -50,8 +54,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -97,23 +102,30 @@ public class ProduceArchiveService extends Service {
     private LoopThread writeMsgThread;
 
     private ArchiveConfig archiveConfig;
+    private MessageConvertSupport messageConvertSupport;
 
-    public ProduceArchiveService(ArchiveConfig archiveConfig, ClusterManager clusterManager, Consume consume) {
+    public ProduceArchiveService(ArchiveConfig archiveConfig, ClusterManager clusterManager, Consume consume, MessageConvertSupport messageConvertSupport) {
         this.clusterManager = clusterManager;
         this.consume = consume;
         this.archiveConfig = archiveConfig;
+        this.messageConvertSupport = messageConvertSupport;
     }
 
     @Override
     protected void validate() throws Exception {
         super.validate();
         archiveStore = archiveStore != null ? archiveStore : Plugins.ARCHIVESTORE.get();
+        archiveStore.setNameSpace(archiveConfig.getNamespace());
+
+        logger.info("Get archive store namespace [{}] by archive config.", archiveConfig.getNamespace());
+
         Preconditions.checkArgument(archiveStore != null, "archive store can not be null.");
         Preconditions.checkArgument(archiveConfig != null, "archive config can not be null.");
 
         this.batchNum = archiveConfig.getReadBatchNum();
         this.archiveQueue = new LinkedBlockingDeque<>(archiveConfig.getLogQueueSize());
-        this.executorService = Executors.newFixedThreadPool(archiveConfig.getWriteThreadNum());
+        this.executorService = new ThreadPoolExecutor(archiveConfig.getWriteThreadNum(), archiveConfig.getWriteThreadNum(),
+                0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(archiveConfig.getThreadPoolQueueSize()), new NamedThreadFactory("sendLog-archive"), new ThreadPoolExecutor.CallerRunsPolicy());
         this.updateItemThread = LoopThread.builder()
                 .sleepTime(1000 * 10, 1000 * 10)
                 .name("UpdateArchiveItem-Thread")
@@ -227,10 +239,9 @@ public class ProduceArchiveService extends Service {
             if (pullResult.getBuffers().size() == 0) {
                 put2PauseMap(item.getTopic(), item.getPartition());
             } else {
-                // 加入缓存队列
-                putSendLog2Queue(pullResult);
+                int size = putSendLog2Queue(pullResult);
                 // 更新下次拉取位置(当前位置序号 + 拉取到的消息条数)
-                item.setReadIndex(item.getReadIndex() + pullResult.getBuffers().size());
+                item.setReadIndex(item.getReadIndex() + size);
                 // 计数
                 counter += pullResult.getBuffers().size();
             }
@@ -271,15 +282,42 @@ public class ProduceArchiveService extends Service {
      * @param pullResult
      * @throws Exception
      */
-    private void putSendLog2Queue(PullResult pullResult) throws Exception {
+    private int putSendLog2Queue(PullResult pullResult) throws Exception {
+        int readCount = 0;
         List<ByteBuffer> buffers = pullResult.getBuffers();
         for (ByteBuffer buffer : buffers) {
-            BrokerMessage brokerMessage = Serializer.readBrokerMessage(buffer);
-            brokerMessage.setTopic(pullResult.getTopic());
-            brokerMessage.setPartition(pullResult.getPartition());
-            SendLog sendLog = convert(brokerMessage, buffer);
-            archiveQueue.put(sendLog);
+
+            List<BrokerMessage> brokerMessageList = parseMessage(buffer);
+
+            for (BrokerMessage brokerMessage : brokerMessageList) {
+                brokerMessage.setTopic(pullResult.getTopic());
+                brokerMessage.setPartition(pullResult.getPartition());
+                SendLog sendLog = convert(brokerMessage, buffer);
+                archiveQueue.put(sendLog);
+            }
+
+            readCount += brokerMessageList.size();
         }
+
+        return readCount;
+    }
+
+    /**
+     * 解析消息
+     *
+     * @param buffer
+     * @return
+     * @throws Exception
+     */
+    private List<BrokerMessage> parseMessage(ByteBuffer buffer) throws Exception {
+        BrokerMessage brokerMessage = Serializer.readBrokerMessage(buffer);
+        List<BrokerMessage> brokerMessageList = new LinkedList<>();
+        if (brokerMessage.getSource() == SourceType.KAFKA.getValue() && brokerMessage.isBatch()) {
+            brokerMessageList = messageConvertSupport.convertBatch(brokerMessage, SourceType.INTERNAL.getValue());
+        } else {
+            brokerMessageList.add(brokerMessage);
+        }
+        return brokerMessageList;
     }
 
     /**

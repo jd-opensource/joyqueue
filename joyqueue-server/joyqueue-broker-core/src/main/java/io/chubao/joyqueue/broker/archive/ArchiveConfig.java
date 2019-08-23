@@ -78,4 +78,12 @@ public class ArchiveConfig {
     public boolean isStartArchive() {
         return PropertySupplier.getValue(propertySupplier, ArchiveConfigKey.ARCHIVE_SWITCH);
     }
+
+    public int getThreadPoolQueueSize() {
+        return PropertySupplier.getValue(propertySupplier, ArchiveConfigKey.ARCHIVE_THREAD_POOL_QUEUE_SIZE);
+    }
+
+    public String getNamespace() {
+        return PropertySupplier.getValue(propertySupplier, ArchiveConfigKey.ARCHIVE_STORE_NAMESPACE);
+    }
 }

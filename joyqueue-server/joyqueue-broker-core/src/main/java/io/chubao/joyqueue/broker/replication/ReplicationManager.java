@@ -15,6 +15,7 @@
  */
 package io.chubao.joyqueue.broker.replication;
 
+import com.google.common.base.Preconditions;
 import io.chubao.joyqueue.broker.consumer.Consume;
 import io.chubao.joyqueue.broker.election.DefaultElectionNode;
 import io.chubao.joyqueue.broker.election.ElectionConfig;
@@ -35,7 +36,6 @@ import io.chubao.joyqueue.store.StoreService;
 import io.chubao.joyqueue.store.replication.ReplicableStore;
 import io.chubao.joyqueue.toolkit.concurrent.EventListener;
 import io.chubao.joyqueue.toolkit.concurrent.NamedThreadFactory;
-import com.google.common.base.Preconditions;
 import io.chubao.joyqueue.toolkit.lang.Close;
 import io.chubao.joyqueue.toolkit.service.Service;
 import org.slf4j.Logger;
@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -69,6 +70,7 @@ public class ReplicationManager extends Service {
     private TransportClient transportClient;
     private ExecutorService replicateExecutor;
     private ScheduledExecutorService replicateTimerExecutor;
+    private BlockingDeque replicateQueue;
 
     public ReplicationManager(ElectionConfig electionConfig, StoreService storeService,
                               Consume consume, BrokerMonitor brokerMonitor) {
@@ -88,19 +90,43 @@ public class ReplicationManager extends Service {
         replicaGroups = new ConcurrentHashMap<>();
 
         ClientConfig clientConfig = new ClientConfig();
-        clientConfig.setIoThreadName("joyqueue-replication-io-eventLoop");
-        clientConfig.setMaxAsync(1000);
+        clientConfig.setIoThreadName("JournalqReplication-IO-EventLoop");
+        clientConfig.setMaxAsync(2000);
+        clientConfig.setIoThread(64);
+        clientConfig.setSocketBufferSize(1024 * 1024 * 1);
         transportClient = new BrokerTransportClientFactory().create(clientConfig);
         transportClient.start();
 
         EventListener<TransportEvent> clientEventListener = new ClientEventListener();
         transportClient.addListener(clientEventListener);
 
+        replicateQueue = new LinkedBlockingDeque<>(electionConfig.getCommandQueueSize());
         replicateExecutor = new ThreadPoolExecutor(electionConfig.getReplicateThreadNumMin(), electionConfig.getReplicateThreadNumMax(),
-                60, TimeUnit.SECONDS, new LinkedBlockingDeque<>(electionConfig.getCommandQueueSize()),
+                60, TimeUnit.SECONDS, replicateQueue,
                 new NamedThreadFactory("Replicate-sendCommand"));
 
-         replicateTimerExecutor = Executors.newScheduledThreadPool(electionConfig.getTimerScheduleThreadNum());
+        replicateTimerExecutor = Executors.newScheduledThreadPool(electionConfig.getTimerScheduleThreadNum());
+
+        replicateTimerExecutor.scheduleWithFixedDelay(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    ConcurrentHashMap<TopicPartitionGroup, ReplicaGroup> replicaGroups = ReplicationManager.this.replicaGroups;
+                    int replicaGroupCount = 0;
+                    int replicaLeaderCount = 0;
+                    for (ReplicaGroup replicaGroup : replicaGroups.values()) {
+                        replicaGroupCount++;
+                        if (replicaGroup.isLeader()) {
+                            replicaLeaderCount++;
+                        }
+                    }
+                    logger.info("ReplicationManager, managed replica group count {} ,leader count {} , replicate queue capacity is {}, current size is {}",
+                            replicaGroupCount, replicaLeaderCount, electionConfig.getCommandQueueSize(), replicateQueue.size());
+                } catch (Throwable th) {
+                    logger.warn("ReplicateManger schedule error.", th);
+                }
+            }
+        }, 30, 30, TimeUnit.SECONDS);
     }
 
     @Override
@@ -112,7 +138,7 @@ public class ReplicationManager extends Service {
     }
 
     public synchronized ReplicaGroup createReplicaGroup(String topic, int partitionGroup, List<DefaultElectionNode> allNodes,
-                          Set<Integer> learners, int localReplicaId, int leaderId, BrokerMonitor brokerMonitor) throws ElectionException {
+                                                        Set<Integer> learners, int localReplicaId, int leaderId, BrokerMonitor brokerMonitor) throws ElectionException {
         TopicPartitionGroup topicPartitionGroup = new TopicPartitionGroup(topic, partitionGroup);
         ReplicaGroup replicaGroup = replicaGroups.get(topicPartitionGroup);
         if (replicaGroup != null) {

@@ -166,6 +166,7 @@ public class ConfigurationManager extends Service implements EventListener<NameS
                 logger.info("delete config {}", config.getKey());
                 configuration.addProperty(config.getKey(), null);
             } else {
+                // 如果group为空或group包含自身ip配置才生效
                 if (StringUtils.isBlank(config.getGroup())
                         || ALL_GROUP.equals(config.getGroup())
                         || ArrayUtils.contains(config.getGroup().split(GROUP_SPLITTER), IpUtil.getLocalIp())) {

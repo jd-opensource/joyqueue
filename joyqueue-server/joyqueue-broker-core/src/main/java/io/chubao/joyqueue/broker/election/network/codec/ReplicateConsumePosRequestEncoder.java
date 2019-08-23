@@ -18,6 +18,7 @@ package io.chubao.joyqueue.broker.election.network.codec;
 import io.chubao.joyqueue.broker.election.command.ReplicateConsumePosRequest;
 import io.chubao.joyqueue.network.command.CommandType;
 import io.chubao.joyqueue.network.serializer.Serializer;
+import io.chubao.joyqueue.network.transport.codec.JoyQueueHeader;
 import io.chubao.joyqueue.network.transport.codec.PayloadEncoder;
 import io.chubao.joyqueue.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
@@ -30,8 +31,11 @@ import io.netty.buffer.ByteBuf;
 public class ReplicateConsumePosRequestEncoder implements PayloadEncoder<ReplicateConsumePosRequest>, Type {
     @Override
     public void encode(final ReplicateConsumePosRequest request, ByteBuf buffer) throws Exception {
-//        Serializer.write(request.getConsumePositions(), buffer, Serializer.SHORT_SIZE);
-        Serializer.write(request.getConsumePositions(), buffer, Serializer.INT_SIZE);
+        if (request.getHeader().getVersion() >= JoyQueueHeader.VERSION_V2) {
+            Serializer.write(request.getConsumePositions(), buffer, Serializer.INT_SIZE);
+        } else if (request.getHeader().getVersion() >= JoyQueueHeader.VERSION_V1) {
+            Serializer.write(request.getConsumePositions(), buffer, Serializer.SHORT_SIZE);
+        }
     }
 
     @Override

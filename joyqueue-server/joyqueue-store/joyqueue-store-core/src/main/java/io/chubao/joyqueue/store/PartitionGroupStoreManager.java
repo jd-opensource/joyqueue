@@ -1170,7 +1170,9 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                 ByteBuffer log = store.read(position);
                 if (log != null) {
                     int logTerm = MessageParser.getInt(log, MessageParser.TERM);
-                    if (logTerm >= 0) term = logTerm;
+                    if (logTerm >= 0) {
+                        term = logTerm;
+                    }
                 } else {
                     throw new ReadException(String.format("Read log failed! store: %s, position: %d.", store.base().getAbsolutePath(), position));
                 }

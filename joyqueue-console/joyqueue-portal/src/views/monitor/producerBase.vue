@@ -191,7 +191,11 @@ export default {
           addOrUpdae: `/producer/config/addOrUpdate`
         }
       },
-      configData: {}
+      configData: {},
+      monitorUIds: {
+        detail: this.$store.getters.uIds.producer.detail,
+        summary: this.$store.getters.uIds.producer.summary
+      }
     }
   },
   methods: {
@@ -281,7 +285,7 @@ export default {
         window.open(replaceChartUrl(this.monitorUrls.summary, item.topic.namespace.code,
           item.topic.code, item.app.code))
       } else {
-        apiRequest.get(this.urls.getUrl + '/pt', {}, {}).then((data) => {
+        apiRequest.get(this.urls.getUrl + '/' + this.monitorUIds.summary, {}, {}).then((data) => {
           let url = data.data || ''
           if (url.indexOf('?') < 0) {
             url += '?'
@@ -298,7 +302,7 @@ export default {
         window.open(replaceChartUrl(this.monitorUrls.detail, item.topic.namespace.code,
           item.topic.code, item.app.code))
       } else {
-        apiRequest.get(this.urls.getUrl + '/pd', {}, {}).then((data) => {
+        apiRequest.get(this.urls.getUrl + '/' + this.monitorUIds.detail, {}, {}).then((data) => {
           let url = data.data || ''
           if (url.indexOf('?') < 0) {
             url += '?'

@@ -122,7 +122,9 @@ public class StoreCleanManager extends Service {
     }
 
     private void clean() {
-        LOG.info("Start scheduled StoreCleaningStrategy task use class: <{}>!!!", brokerStoreConfig.getCleanStrategyClass());
+        if (LOG.isDebugEnabled()) {
+            LOG.info("Start scheduled StoreCleaningStrategy task use class: <{}>!!!", brokerStoreConfig.getCleanStrategyClass());
+        }
         List<TopicConfig> topicConfigs = clusterManager.getTopics();
         if (topicConfigs != null && topicConfigs.size() > 0) {
             for (TopicConfig topicConfig : topicConfigs) {
@@ -145,8 +147,10 @@ public class StoreCleanManager extends Service {
                                 }
                                 StoreCleaningStrategy cleaningStrategy = cleaningStrategyMap.get(brokerStoreConfig.getCleanStrategyClass());
                                 if (cleaningStrategy != null) {
-                                    LOG.debug("Begin store clean topic: <{}>, partition group: <{}>, partition ack map: <{}>",
-                                            topicConfig.getName().getFullName(), partitionGroup.getGroup(), partitionAckMap);
+                                    if (LOG.isDebugEnabled()){
+                                        LOG.info("Begin store clean topic: <{}>, partition group: <{}>, partition ack map: <{}>",
+                                                topicConfig.getName().getFullName(), partitionGroup.getGroup(), partitionAckMap);
+                                    }
                                     cleaningStrategy.deleteIfNeeded(storeService.getStore(topicConfig.getName().getFullName(), partitionGroup.getGroup()), partitionAckMap);
                                 }
                             }

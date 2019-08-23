@@ -70,6 +70,11 @@ public class AddProducerRequestHandler implements JoyQueueCommandHandler, Type, 
         Map<String, String> result = Maps.newHashMap();
 
         for (String topic : addProducerRequest.getTopics()) {
+            if (connection.containsProducer(topic, addProducerRequest.getApp())) {
+                result.put(topic, connection.getProducer(topic, addProducerRequest.getApp()));
+                continue;
+            }
+
             TopicName topicName = TopicName.parse(topic);
 
             if (clusterManager.tryGetProducer(topicName, addProducerRequest.getApp()) == null) {

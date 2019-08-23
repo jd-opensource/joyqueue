@@ -55,7 +55,7 @@ public class GetTopicConfigByBrokerAckCodec implements NsrPayloadCodec<GetTopicC
         }
         buffer.writeInt(topicConfigs.size());
         for(TopicConfig topicConfig : topicConfigs.values()){
-            Serializer.write(topicConfig,buffer);
+            Serializer.write(topicConfig,buffer, payload.getHeader().getVersion());
         }
     }
 

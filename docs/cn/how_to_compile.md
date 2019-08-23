@@ -38,4 +38,4 @@ mvn -Dmaven.test.skip install
 
 * **JoyQueue Server**: joyqueue/joyqueue-distribution/joyqueue-distribution-server/target
 * **JoyQueue Web**: joyqueue/joyqueue-distribution/joyqueue-distribution-web/target
-* **JoyQueue Client**: joyqueue/joyqueue-client/joyqueue-client-all-shaded/target/joyqueue-client-all-shaded-4.1.0.jar
+* **JoyQueue Client**: joyqueue/joyqueue-client/joyqueue-client-all-shaded/target/joyqueue-client-all-shaded-4.1.1.jar

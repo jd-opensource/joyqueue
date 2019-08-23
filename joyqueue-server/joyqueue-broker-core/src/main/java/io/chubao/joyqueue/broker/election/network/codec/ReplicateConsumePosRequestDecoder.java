@@ -16,10 +16,10 @@
 package io.chubao.joyqueue.broker.election.network.codec;
 
 import io.chubao.joyqueue.broker.election.command.ReplicateConsumePosRequest;
-import io.chubao.joyqueue.network.transport.codec.JoyQueueHeader;
-import io.chubao.joyqueue.network.transport.codec.PayloadDecoder;
 import io.chubao.joyqueue.network.command.CommandType;
 import io.chubao.joyqueue.network.serializer.Serializer;
+import io.chubao.joyqueue.network.transport.codec.JoyQueueHeader;
+import io.chubao.joyqueue.network.transport.codec.PayloadDecoder;
 import io.chubao.joyqueue.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
 
@@ -32,11 +32,11 @@ import io.netty.buffer.ByteBuf;
 public class ReplicateConsumePosRequestDecoder implements PayloadDecoder<JoyQueueHeader>, Type {
     @Override
     public Object decode(final JoyQueueHeader header, final ByteBuf buffer) throws Exception {
-        String consumePositions;
-        if (header.getVersion() == JoyQueueHeader.VERSION_V1) {
-            consumePositions = Serializer.readString(buffer, Serializer.SHORT_SIZE);
-        } else {
+        String consumePositions = null;
+        if (header.getVersion() >= JoyQueueHeader.VERSION_V2) {
             consumePositions = Serializer.readString(buffer, Serializer.INT_SIZE);
+        } else if (header.getVersion() >= JoyQueueHeader.VERSION_V1) {
+            consumePositions = Serializer.readString(buffer, Serializer.SHORT_SIZE);
         }
         return new ReplicateConsumePosRequest(consumePositions);
     }

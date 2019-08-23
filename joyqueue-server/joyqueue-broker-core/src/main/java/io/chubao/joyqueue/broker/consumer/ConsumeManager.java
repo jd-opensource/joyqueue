@@ -641,4 +641,9 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
         return lastAckTime.get();
     }
 
+    @Override
+    public void releasePartition(String topic, String app, short partition) {
+        partitionManager.releasePartition(new ConsumePartition(topic, app, partition));
+    }
+
 }

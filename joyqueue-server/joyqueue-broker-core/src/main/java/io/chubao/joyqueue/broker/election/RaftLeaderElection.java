@@ -81,6 +81,8 @@ public class RaftLeaderElection extends LeaderElection  {
     private ScheduledFuture voteTimerFuture;
     private ScheduledFuture heartbeatTimerFuture;
     private ScheduledFuture transferLeaderTimerFuture;
+    private ScheduledFuture reportLeaderFuture;
+    private ScheduledFuture leaderRebalanceFuture;
     private ExecutorService electionExecutor;
 
     private long lastRebalanceTime;
@@ -123,10 +125,10 @@ public class RaftLeaderElection extends LeaderElection  {
 
         resetElectionTimer();
 
-        electionTimerExecutor.scheduleAtFixedRate(this::rebalanceLeader,
+        leaderRebalanceFuture = electionTimerExecutor.scheduleAtFixedRate(this::rebalanceLeader,
                 60 + new Random().nextInt(60), 60, TimeUnit.SECONDS);
 
-        electionTimerExecutor.scheduleAtFixedRate(this::reportLeadership,
+        reportLeaderFuture = electionTimerExecutor.scheduleAtFixedRate(this::reportLeadership,
                 60 + new Random().nextInt(60), 60, TimeUnit.SECONDS);
 
         logger.info("Raft leader election of {}, local node {}, all node {} started, " +
@@ -142,6 +144,13 @@ public class RaftLeaderElection extends LeaderElection  {
 
         nodeOffline(currentTerm);
         replicaGroup.stop();
+
+        if (leaderRebalanceFuture != null) {
+            leaderRebalanceFuture.cancel(true);
+        }
+        if (reportLeaderFuture != null) {
+            reportLeaderFuture.cancel(true);
+        }
 
         super.doStop();
 
@@ -279,8 +288,9 @@ public class RaftLeaderElection extends LeaderElection  {
             long prevPosition = replicableStore.position(rightPosition, -1);
             int term = replicableStore.getEntryTerm(prevPosition);
 
-            logger.info("Partition group {}/node {} get last log term elapse {} ms",
-                    topicPartitionGroup, localNode, SystemClock.now() - startTime);
+            logger.info("Partition group {}/node {} get last log term elapse {} ms, " +
+                            "previous position is {}, term is {}",
+                    topicPartitionGroup, localNode, SystemClock.now() - startTime, prevPosition, term);
 
             return term;
 
@@ -796,12 +806,13 @@ public class RaftLeaderElection extends LeaderElection  {
         }
 
         if (request.getTerm() < currentTerm) {
-            logger.info("Partition group {}/node {} receive append entries request, current term {} " +
-                        "is bigger than request term {}",
-                    topicPartitionGroup, localNode, currentTerm, request.getTerm());
+            logger.info("Partition group {}/node {} receive append entries request from {}, current term {} " +
+                            "is bigger than request term {}, length is {}",
+                    topicPartitionGroup, localNode, currentTerm, request.getLeaderId(),
+                    request.getTerm(), request.getEntriesLength());
             return new Command(new JoyQueueHeader(Direction.RESPONSE, CommandType.RAFT_APPEND_ENTRIES_RESPONSE),
-                               new AppendEntriesResponse.Build().success(false).term(currentTerm)
-                                       .nextPosition(request.getStartPosition()).build());
+                    new AppendEntriesResponse.Build().success(false).term(currentTerm)
+                            .nextPosition(request.getStartPosition()).build());
         }
 
         checkStepDown(request.getTerm(), request.getLeaderId());
@@ -907,9 +918,9 @@ public class RaftLeaderElection extends LeaderElection  {
                 topicPartitionGroup, localNode, node.getNodeId(), response.getTerm());
 
         if (response.getTerm() > currentTerm) {
-            logger.info("Partition group{}/node{} receive heartbeat response, " +
+            logger.info("Partition group{}/node{} receive heartbeat response from {}, " +
                             "response term {} is greater than current term {}",
-                    topicPartitionGroup, localNode, response.getTerm(), currentTerm);
+                    topicPartitionGroup, localNode, node, response.getTerm(), currentTerm);
             stepDown(response.getTerm());
         }
     }
@@ -1230,10 +1241,20 @@ public class RaftLeaderElection extends LeaderElection  {
     }
 
     /**
-     * Report leader ship to name server
+     * Report leadership to name server
      */
     private void reportLeadership() {
-        if (electionConfig.enableReportLeaderPeriodically() && isLeader()) {
+        if (!isStarted()) {
+            logger.info("Partition group {}/node {} election is close when report leader",
+                    topicPartitionGroup, localNode);
+            return;
+        }
+
+        logger.info("Partition group {}/node {} enable report leader periodically is {}, state is {}",
+                topicPartitionGroup, localNode,
+                electionConfig.enableReportLeaderPeriodically(), state());
+
+        if (electionConfig.enableReportLeaderPeriodically() && state() == LEADER) {
             updateMetadata(localNodeId, currentTerm);
         }
     }
@@ -1272,33 +1293,38 @@ public class RaftLeaderElection extends LeaderElection  {
      * Rebalance leader if needed
      */
     private void rebalanceLeader() {
-        int recommendLeader = getRecommendLeader();
-
-        if (recommendLeader == INVALID_NODE_ID) {
-            logger.debug("Partition group {}/node {} rebalance leader, recommend leader is -1",
+        if (!isStarted()) {
+            logger.info("Partition group {}/node {} election is close when rebalance leader",
                     topicPartitionGroup, localNode);
             return;
         }
 
-        logger.info("Partition group {}/node {} rebalance leader, recommend leader is {}, lag length is {} " +
-                        "last rebalance time is {}, enable is {}",
-                topicPartitionGroup, localNode, recommendLeader,
-                replicaGroup.lagLength(recommendLeader), lastRebalanceTime,
-                electionConfig.enableRebalanceLeader());
+        try {
+            int recommendLeader = getRecommendLeader();
 
-        if (shouldRebalanceLeader(recommendLeader)) {
-            try {
+            if (recommendLeader == INVALID_NODE_ID) {
+                logger.info("Partition group {}/node {} rebalance leader, recommend leader is -1",
+                        topicPartitionGroup, localNode);
+                return;
+            }
+
+            logger.info("Partition group {}/node {} rebalance leader, recommend leader is {}, lag length is {} " +
+                            "last rebalance time is {}, enable is {}",
+                    topicPartitionGroup, localNode, recommendLeader,
+                    replicaGroup.lagLength(recommendLeader), lastRebalanceTime,
+                    electionConfig.enableRebalanceLeader());
+
+            if (shouldRebalanceLeader(recommendLeader)) {
                 logger.info("Partition group {}/node {} transfer leadership to {}",
                         topicPartitionGroup, localNode, recommendLeader);
 
                 transferLeadership(recommendLeader);
 
                 lastRebalanceTime = SystemClock.now();
-
-            } catch (Exception e) {
-                logger.info("Partition group {}/node {} transfer leadership fail",
-                        topicPartitionGroup, localNode, e);
             }
+        } catch (Exception e) {
+            logger.info("Partition group {}/node {} rebalance leader fail",
+                    topicPartitionGroup, localNode, e);
         }
     }
 

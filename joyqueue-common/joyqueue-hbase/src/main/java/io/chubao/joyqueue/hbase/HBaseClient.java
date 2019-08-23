@@ -29,6 +29,7 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.Table;
+import org.apache.hadoop.hbase.filter.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +49,7 @@ public class HBaseClient implements LifeCycle {
 
     public Connection conn = null;
 
-    private final String nameSpace = "joyqueue";
+//    private final String nameSpace = "journalq";
 
     private String hBaseConfigPath = "hBase-client-config.xml";
 
@@ -86,7 +87,7 @@ public class HBaseClient implements LifeCycle {
         Close.close(conn);
     }
 
-    public void put(String tableName, byte[] cf, byte[] col, List<Pair<byte[], byte[]>> pairList) throws IOException {
+    public void put(String nameSpace, String tableName, byte[] cf, byte[] col, List<Pair<byte[], byte[]>> pairList) throws IOException {
         Table table = conn.getTable(TableName.valueOf(nameSpace, tableName));
 
         List<Put> list = new LinkedList<>();
@@ -99,7 +100,7 @@ public class HBaseClient implements LifeCycle {
         table.put(list);
     }
 
-    public void put(String tableName, byte[] cf, byte[] col, byte[] rowKey, byte[] val) throws IOException {
+    public void put(String nameSpace, String tableName, byte[] cf, byte[] col, byte[] rowKey, byte[] val) throws IOException {
         Table table = conn.getTable(TableName.valueOf(nameSpace, tableName));
         Put put = new Put(rowKey);
         put.addColumn(cf, col, val);
@@ -107,13 +108,16 @@ public class HBaseClient implements LifeCycle {
     }
 
 
-    public List<Pair<byte[], byte[]>> scan(ScanParameters args) throws IOException {
+    public List<Pair<byte[], byte[]>> scan(String nameSpace, ScanParameters args) throws IOException {
         List<Pair<byte[], byte[]>> list = new LinkedList<>();
         Table table = conn.getTable(TableName.valueOf(nameSpace, args.getTableName()));
 
         Scan scan = new Scan().withStartRow(args.getStartRowKey(), false).setLimit(args.getRowCount());
         if (args.getStopRowKey() != null) {
             scan.withStopRow(args.getStopRowKey(), true);
+        }
+        if (args.getFilter() != null) {
+            scan.setFilter(args.getFilter());
         }
 
         ResultScanner scanner = table.getScanner(scan);
@@ -122,14 +126,14 @@ public class HBaseClient implements LifeCycle {
         return list;
     }
 
-    public byte[] get(String tableName, byte[] cf, byte[] col, byte[] rowKey) throws IOException {
+    public byte[] get(String nameSpace, String tableName, byte[] cf, byte[] col, byte[] rowKey) throws IOException {
         Table table = conn.getTable(TableName.valueOf(nameSpace, tableName));
         Get get = new Get(rowKey);
         Result result = table.get(get);
         return result.getValue(cf, col);
     }
 
-    public Pair<byte[], byte[]> getKV(String tableName, byte[] cf, byte[] col, byte[] rowKey) throws IOException {
+    public Pair<byte[], byte[]> getKV(String nameSpace, String tableName, byte[] cf, byte[] col, byte[] rowKey) throws IOException {
         Table table = conn.getTable(TableName.valueOf(nameSpace, tableName));
 
         Get get = new Get(rowKey);
@@ -138,7 +142,7 @@ public class HBaseClient implements LifeCycle {
         return new Pair<>(result.getRow(), result.getValue(cf, col));
     }
 
-    public boolean checkAndPut(String tableName, byte[] cf, byte[] col, byte[] rowKey, byte[] expect, byte[] value) throws IOException {
+    public boolean checkAndPut(String nameSpace, String tableName, byte[] cf, byte[] col, byte[] rowKey, byte[] expect, byte[] value) throws IOException {
         Table table = conn.getTable(TableName.valueOf(nameSpace, tableName));
 
         Put put = new Put(rowKey);
@@ -157,6 +161,7 @@ public class HBaseClient implements LifeCycle {
         private byte[] startRowKey;
         private byte[] stopRowKey;
         private int rowCount;
+        private Filter filter;
 
         public String getTableName() {
             return tableName;
@@ -204,6 +209,14 @@ public class HBaseClient implements LifeCycle {
 
         public void setRowCount(int rowCount) {
             this.rowCount = rowCount;
+        }
+
+        public Filter getFilter() {
+            return filter;
+        }
+
+        public void setFilter(Filter filter) {
+            this.filter = filter;
         }
     }
 

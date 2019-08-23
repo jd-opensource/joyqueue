@@ -94,6 +94,18 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
     private static final String PG_SLICE_DEQUEUE_MIN = "pg_slice_dequeue_min";
     private static final String PG_SLICE_DEQUEUE_AVG = "pg_slice_dequeue_avg";
 
+    private static final String PG_REPLICATE = "pg_replicate";
+    private static final String PG_REPLICATE_TP99 = "pg_replicate_tp99";
+    private static final String PG_REPLICATE_TP90 = "pg_replicate_tp90";
+    private static final String PG_REPLICATE_MAX = "pg_replicate_max";
+    private static final String PG_REPLICATE_AVG = "pg_replicate_avg";
+
+    private static final String PG_RECEIVE = "pg_receive";
+    private static final String PG_RECEIVE_TP99 = "pg_receive_tp99";
+    private static final String PG_RECEIVE_TP90 = "pg_receive_tp90";
+    private static final String PG_RECEIVE_MAX = "pg_receive_max";
+    private static final String PG_RECEIVE_AVG = "pg_receive_avg";
+
     private static final String PG_SLICE_ENQUEUE = "pg_slice_enqueue";
     private static final String PG_SLICE_ENQUEUE_SIZE = "pg_slice_enqueue_size";
     private static final String PG_SLICE_ENQUEUE_TP99 = "pg_slice_enqueue_tp99";
@@ -116,6 +128,10 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
     private boolean partitionGroup = true;
 
     private boolean pending = true;
+
+    private boolean replicate = true;
+
+    private boolean receive = true;
 
 
     @Override
@@ -152,7 +168,136 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
             result.addAll(buildPending(brokerId, time, topicPending));
         }
 
+        if (replicate) {
+            result.addAll(buildReplicate(brokerId, time, brokerStat));
+        }
+
+        if (receive) {
+            result.addAll(buildReceive(brokerId, time, brokerStat));
+        }
         return result;
+    }
+
+    private List<MonitorRecord> buildReceive(String brokerId, long time, BrokerStat brokerStat) {
+        List<MonitorRecord> result = new ArrayList<>();
+
+        ConcurrentMap<String, TopicStat> repStats = brokerStat.getTopicStats();
+        for (String topic : repStats.keySet()) {
+            ConcurrentMap<Integer, PartitionGroupStat> pgStats = repStats.get(topic).getPartitionGroupStatMap();
+            for (Integer pg : pgStats.keySet()) {
+                result.addAll(buildReceiveRecord(topic, pg, pgStats.get(pg), brokerId, time));
+            }
+        }
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Receive size : {}", result.size());
+        }
+
+        return result;
+    }
+
+    private List<MonitorRecord> buildReceiveRecord(String topic, Integer pg, PartitionGroupStat partitionGroupStat, String brokerId, long time) {
+        List<MonitorRecord> result = new ArrayList<>();
+        MonitorRecord receiveAvg = new MonitorRecord();
+        fillRecord(receiveAvg, time);
+        receiveAvg.brokerId(brokerId);
+        receiveAvg.topic(topic);
+        receiveAvg.partitionGroup(pg.toString());
+        MonitorRecord receiveTP99;
+        MonitorRecord receiveTP90;
+        MonitorRecord receiveMax;
+        MonitorRecord receive;
+        try {
+            receiveTP99 = (MonitorRecord) receiveAvg.clone();
+            receiveTP90 = (MonitorRecord) receiveAvg.clone();
+            receiveMax = (MonitorRecord) receiveAvg.clone();
+            receive = (MonitorRecord) receiveAvg.clone();
+        } catch (CloneNotSupportedException e) {
+            logger.error("build Receive monitor data error!", e);
+            return result;
+        }
+
+        EnQueueStat repStat = partitionGroupStat.getReplicationStat().getAppendStat();
+        receiveAvg.setMetric(PG_RECEIVE_AVG);
+        receiveAvg.setValue(repStat.getAvg());
+        receiveTP99.setMetric(PG_RECEIVE_TP99);
+        receiveTP99.setValue(repStat.getTp99());
+        receiveTP90.setMetric(PG_RECEIVE_TP90);
+        receiveTP90.setValue(repStat.getTp90());
+        receiveMax.setMetric(PG_RECEIVE_MAX);
+        receiveMax.setValue(repStat.getMax());
+        receive.setMetric(PG_RECEIVE);
+        receive.setValue(repStat.getOneMinuteRate());
+
+        result.add(receiveAvg);
+        result.add(receiveTP99);
+        result.add(receiveTP90);
+        result.add(receiveMax);
+        result.add(receive);
+
+        return result;
+    }
+
+    private List<MonitorRecord> buildReplicate(String brokerId, long time, BrokerStat brokerStat) {
+
+        List<MonitorRecord> result = new ArrayList<>();
+
+        ConcurrentMap<String, TopicStat> repStats = brokerStat.getTopicStats();
+        for (String topic : repStats.keySet()) {
+            ConcurrentMap<Integer, PartitionGroupStat> pgStats = repStats.get(topic).getPartitionGroupStatMap();
+            for (Integer pg : pgStats.keySet()) {
+                result.addAll(buildRepRecord(topic, pg, pgStats.get(pg), brokerId, time));
+            }
+        }
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Replicate size : {}", result.size());
+        }
+
+        return result;
+    }
+
+    private List<MonitorRecord> buildRepRecord(String topic, Integer pg, PartitionGroupStat partitionGroupStat, String brokerId, long time) {
+        List<MonitorRecord> result = new ArrayList<>();
+        MonitorRecord replicateAvg = new MonitorRecord();
+        fillRecord(replicateAvg, time);
+        replicateAvg.brokerId(brokerId);
+        replicateAvg.topic(topic);
+        replicateAvg.partitionGroup(pg.toString());
+        MonitorRecord replicateTP99;
+        MonitorRecord replicateTP90;
+        MonitorRecord replicateMax;
+        MonitorRecord replicate;
+        try {
+            replicateTP99 = (MonitorRecord) replicateAvg.clone();
+            replicateTP90 = (MonitorRecord) replicateAvg.clone();
+            replicateMax = (MonitorRecord) replicateAvg.clone();
+            replicate = (MonitorRecord) replicateAvg.clone();
+        } catch (CloneNotSupportedException e) {
+            logger.error("build Rep monitor data error!", e);
+            return result;
+        }
+
+        EnQueueStat repStat = partitionGroupStat.getReplicationStat().getReplicaStat();
+        replicateAvg.setMetric(PG_REPLICATE_AVG);
+        replicateAvg.setValue(repStat.getAvg());
+        replicateTP99.setMetric(PG_REPLICATE_TP99);
+        replicateTP99.setValue(repStat.getTp99());
+        replicateTP90.setMetric(PG_REPLICATE_TP90);
+        replicateTP90.setValue(repStat.getTp90());
+        replicateMax.setMetric(PG_REPLICATE_MAX);
+        replicateMax.setValue(repStat.getMax());
+        replicate.setMetric(PG_REPLICATE);
+        replicate.setValue(repStat.getOneMinuteRate());
+
+        result.add(replicateAvg);
+        result.add(replicateTP99);
+        result.add(replicateTP90);
+        result.add(replicateMax);
+        result.add(replicate);
+
+        return result;
+
     }
 
     private List<MonitorRecord> buildPending(String brokerId, long time, Map topicPending) {
@@ -491,7 +636,10 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
 
             records.addAll(emptyRecords);
         }
-        logger.info("Producer records:" + records.size());
+        if (logger.isDebugEnabled()) {
+            logger.info("Producer records:" + records.size());
+
+        }
 
         return records;
 
@@ -541,7 +689,9 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
     private List<MonitorRecord> getConsumerRecord(AppStat appStat, String topic, long time, String brokerId) {
         List<MonitorRecord> records = new ArrayList<>();
 
-        logger.info("Start collect consume records!");
+        if (logger.isDebugEnabled()) {
+            logger.info("Start collect consume records!");
+        }
         String app = appStat.getApp();
 
         MonitorRecord deQueue = new MonitorRecord();
@@ -573,7 +723,9 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
 
             records.addAll(emptyRecords);
         }
-        logger.info("consume records:" + records.size());
+        if (logger.isDebugEnabled()) {
+            logger.info("consume records:" + records.size());
+        }
         return records;
     }
 

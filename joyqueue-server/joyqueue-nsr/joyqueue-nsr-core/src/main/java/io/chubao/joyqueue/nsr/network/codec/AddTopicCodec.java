@@ -51,7 +51,7 @@ public class AddTopicCodec implements NsrPayloadCodec<AddTopic>, Type {
         List<PartitionGroup> partitionGroupList = payload.getPartitionGroups();
         buffer.writeInt(partitionGroupList.size());
         for(PartitionGroup group : partitionGroupList){
-            Serializer.write(group,buffer);
+            Serializer.write(group,buffer, payload.getHeader().getVersion());
         }
     }
 

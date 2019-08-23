@@ -253,7 +253,7 @@ public class PartitionManager {
             return false;
         }
 
-        int val = random.nextInt(100);
+        int val = random.nextInt(1000);
         // 重试管理中获取从重试分区消费的概率
         int rate = retryProbability.getProbability(consumer.getJoint());
         if (rate >= val) {

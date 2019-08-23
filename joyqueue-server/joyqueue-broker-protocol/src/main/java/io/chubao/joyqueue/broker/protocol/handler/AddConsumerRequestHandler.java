@@ -70,6 +70,11 @@ public class AddConsumerRequestHandler implements JoyQueueCommandHandler, Type, 
         Map<String, String> result = Maps.newHashMap();
 
         for (String topic : addConsumerRequest.getTopics()) {
+            if (connection.containsConsumer(topic, addConsumerRequest.getApp())) {
+                result.put(topic, connection.getConsumer(topic, addConsumerRequest.getApp()));
+                continue;
+            }
+
             TopicName topicName = TopicName.parse(topic);
 
             if (clusterManager.tryGetConsumerPolicy(topicName, addConsumerRequest.getApp()) == null) {

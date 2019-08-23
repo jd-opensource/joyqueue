@@ -53,59 +53,92 @@ public class GrafanaUtils {
     public static final String DELIMITER_REG = "[\\pP\\pZ\\pS]";
     public static final String VARIABLE_SYMBOL = "$";
 
+    private static final Object configMutex = new Object();
+    private static final Object variableMutex = new Object();
+    private static final Object metricMutex = new Object();
+    private static final Object urlMutex = new Object();
+
     public static GrafanaConfig getConfig() {
-        if (config == null) {
-            return load("grafana/grafana.xml");
+        if (config != null) {
+            return config;
         }
-        return config;
+
+        synchronized (configMutex) {
+            if (config == null) {
+                config = load("grafana.xml");
+            }
+            return config;
+        }
     }
 
     public static Map<String, GrafanaVariable> getVariables() {
-        if (variables == null) {
-            if (getConfig() != null) {
-                variables = Maps.newConcurrentMap();
-                getConfig().getVariables().forEach(v -> variables.put(v.getName(), v));
-            }
+        if (variables != null) {
+            return variables;
         }
-        return variables;
+
+        synchronized (variableMutex) {
+            if (variables == null) {
+                Map<String, GrafanaVariable> map = Maps.newConcurrentMap();
+                getConfig().getVariables().forEach(v -> map.put(v.getName(), v));
+                variables = map;
+            }
+            return variables;
+        }
     }
 
     public static Map<String, List<String>> getMetrics() {
-        if (metrics == null) {
-            if (getConfig() != null) {
-                metrics = Maps.newConcurrentMap();
-                getConfig().getDashboards().forEach(d -> d.getMetricVariables().stream().forEach(v -> {
-                    String delimiter = getDelimiter(v.getTarget());
-                    String key = v.getName() + delimiter + d.getUid();
-                    metrics.put(key, v.getMetrics().stream().map(m -> m.getName()).collect(Collectors.toList()));
-                }));
-            }
+        if (metrics != null) {
+            return metrics;
         }
-        return metrics;
+
+        synchronized (metricMutex) {
+            if (metrics == null) {
+                if (getConfig() != null) {
+                    Map<String, List<String>> map = Maps.newConcurrentMap();
+                    getConfig().getDashboards().forEach(d -> {
+                        if (d.getMetricVariables() != null) {
+                            d.getMetricVariables().stream().forEach(v -> {
+                                String delimiter = getDelimiter(v.getTarget());
+                                String key = v.getName() + delimiter + d.getUid();
+                                map.put(key, v.getMetrics().stream().map(m -> m.getName()).collect(Collectors.toList()));
+                            });
+                        }
+                    });
+                    metrics = map;
+                }
+            }
+            return metrics;
+        }
     }
 
     public static Map<String, String> getUrls() {
-        if (urls == null) {
-            if (getConfig() != null) {
-                urls = Maps.newConcurrentMap();
-                String baseUrl = getConfig().getUrl();
-                if (StringUtils.isBlank(baseUrl)) {
-                    throw new ConfigException(ErrorCode.InvalidConfiguration, "can not found url property at grafana.xml");
-                }
-                getConfig().getDashboards().forEach(c -> {
-                    if (StringUtils.isBlank(c.getUrl())) {
-                        logger.error(String.format("can not found path property of dashboard with name %s at grafana.xml", c.getTitle()));
-                        return;
-                    }
-                    if (StringUtils.isBlank(c.getUid())) {
-                        logger.error(String.format("can not found uid property of dashboard with name %s at grafana.xml", c.getTitle()));
-                        return;
-                    }
-                    urls.put(c.getUid(), baseUrl + c.getUrl());
-                });
-            }
+        if (urls != null) {
+            return urls;
         }
-        return urls;
+
+        synchronized (urlMutex) {
+            if (urls == null) {
+                if (getConfig() != null) {
+                    urls = Maps.newConcurrentMap();
+                    String baseUrl = getConfig().getUrl();
+                    if (StringUtils.isBlank(baseUrl)) {
+                        throw new ConfigException(ErrorCode.InvalidConfiguration, "can not found url property at grafana.xml");
+                    }
+                    getConfig().getDashboards().forEach(c -> {
+                        if (StringUtils.isBlank(c.getUrl())) {
+                            logger.error(String.format("can not found path property of dashboard with name %s at grafana.xml", c.getTitle()));
+                            return;
+                        }
+                        if (StringUtils.isBlank(c.getUid())) {
+                            logger.error(String.format("can not found uid property of dashboard with name %s at grafana.xml", c.getTitle()));
+                            return;
+                        }
+                        urls.put(c.getUid(), baseUrl + c.getUrl());
+                    });
+                }
+            }
+            return urls;
+        }
     }
 
     private static GrafanaConfig load(String file) {
@@ -113,7 +146,7 @@ public class GrafanaUtils {
             logger.info("loading grafana.xml");
             return new XmlMapper().readValue(
                     StringUtils.toEncodedString(IOUtils.toByteArray(GrafanaUtils.class.getClassLoader().getResourceAsStream(file)),
-                    StandardCharsets.UTF_8), GrafanaConfig.class);
+                            StandardCharsets.UTF_8), GrafanaConfig.class);
         } catch (IOException e) {
             throw new ConfigException(ErrorCode.ConfigurationNotExists, "load file grafana.xml error.");
         }
@@ -179,14 +212,27 @@ public class GrafanaUtils {
     public static String getMetricCode(String uid, String name, String granularity) {
         StringBuffer result = new StringBuffer("");
         getConfig().getDashboards().stream().filter(c ->
-                c.getUid().equals(uid)).findAny().ifPresent(c ->
+                c.getUid().equals(uid)).findAny().ifPresent(c -> {
+            if (c.getMetricVariables() != null) {
                 c.getMetricVariables().stream().forEach(v ->
                         v.getMetrics().stream().filter(m ->
                                 m.getName().equals(name)).findAny().ifPresent(m ->
                                 m.getGranularities().stream().filter(g ->
                                         g.getName().equals(granularity)).findAny().ifPresent(g ->
-                                        result.append(g.getCode()).append(",")))));
+                                        result.append(g.getCode()).append(","))));
+            }
+        });
         return result.length()==0? null:result.deleteCharAt(result.length()-1).toString();
+    }
+
+    public static void main(String[] args) {
+//        Broker broker = new Broker();
+//        broker.setIp("127.0.0.1");
+//        broker.setPort(80);
+//        broker.setId(12343434);
+//        getResult(broker, "$ip:$port$port[$id]");
+        load("grafana.xml");
+        getKey("metrics:uid:$granularity:*");
     }
 
 }
