@@ -42,7 +42,7 @@ public class JoyQueueHeader implements Header {
     private static final AtomicInteger requestIdGenerator = new AtomicInteger(0);
 
     // 版本
-    private byte version;
+    private byte version = CURRENT_VERSION;
     // ack
     private QosLevel qosLevel;
     // 方向

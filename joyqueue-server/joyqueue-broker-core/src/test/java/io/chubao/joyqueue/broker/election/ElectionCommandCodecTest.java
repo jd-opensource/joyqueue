@@ -86,6 +86,8 @@ public class ElectionCommandCodecTest {
                 .startPosition(startPosition)
                 .term(term)
                 .build();
+        request.setHeader(new JoyQueueHeader());
+
         AppendEntriesRequestEncoder encoder = new AppendEntriesRequestEncoder();
         ByteBuf byteBuf = Unpooled.buffer(512);
         encoder.encode(request, byteBuf);
@@ -155,6 +157,7 @@ public class ElectionCommandCodecTest {
     public void testReplicateConsumePosRequestCodec() throws Exception {
         String consumePosition = new String("{\"app\":\"logbookApi.lgbk18\",\"topic\":\"logbook18-HT\"}:[{\"ackCurIndex\":1589049464,\"ackStartIndex\":-1,\"partition\":0,\"partitionGroup\":0,\"pullCurIndex\":0,\"pullStartIndex\":0}]");
         ReplicateConsumePosRequest request = new ReplicateConsumePosRequest(consumePosition);
+        request.setHeader(new JoyQueueHeader());
 
         ReplicateConsumePosRequestEncoder encoder = new ReplicateConsumePosRequestEncoder();
         ByteBuf byteBuf = Unpooled.buffer(512);
@@ -171,6 +174,7 @@ public class ElectionCommandCodecTest {
     public void testReplicateConsumePosResponseCodec() {
         final boolean success = true;
         ReplicateConsumePosResponse request = new ReplicateConsumePosResponse(success);
+        request.setHeader(new JoyQueueHeader());
 
         ReplicateConsumePosResponseEncoder encoder = new ReplicateConsumePosResponseEncoder();
         ByteBuf byteBuf = Unpooled.buffer(512);
@@ -189,6 +193,7 @@ public class ElectionCommandCodecTest {
         final TopicPartitionGroup topicPartitionGroup = new TopicPartitionGroup("test", 1);
 
         TimeoutNowRequest request = new TimeoutNowRequest(topicPartitionGroup, term);
+        request.setHeader(new JoyQueueHeader());
 
         TimeoutNowRequestEncoder encoder = new TimeoutNowRequestEncoder();
         ByteBuf byteBuf = Unpooled.buffer(512);
@@ -232,6 +237,7 @@ public class ElectionCommandCodecTest {
         final boolean preVote = true;
 
         VoteRequest request = new VoteRequest(topicPartitionGroup, term, candidateId, lastLogTerm, lastLogPos, preVote);
+        request.setHeader(new JoyQueueHeader());
 
         VoteRequestEncoder encoder = new VoteRequestEncoder();
         ByteBuf byteBuf = Unpooled.buffer(512);
