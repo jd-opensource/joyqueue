@@ -20,9 +20,9 @@ public class PartitionGroupRepository extends BaseRepository {
 
     private static final String GET_BY_ID = String.format("SELECT %s FROM %s WHERE id = ?",
             COLUMNS, TABLE);
-    private static final String GET_BY_TOPIC_AND_GROUP = String.format("SELECT %s FROM %s WHERE topic = ? AND namespace = ? AND group = ?",
+    private static final String GET_BY_TOPIC_AND_GROUP = String.format("SELECT %s FROM %s WHERE topic = ? AND namespace = ? AND `group` = ? ORDER BY `group`",
             COLUMNS, TABLE);
-    private static final String GET_BY_TOPIC = String.format("SELECT %s FROM %s WHERE topic = ? AND namespace = ?",
+    private static final String GET_BY_TOPIC = String.format("SELECT %s FROM %s WHERE topic = ? AND namespace = ? ORDER BY `group`",
             COLUMNS, TABLE);
     private static final String ADD = String.format("INSERT INTO %s(%s) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)",
             TABLE, COLUMNS);

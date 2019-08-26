@@ -38,7 +38,7 @@ public class ReplicaServerServiceImpl extends NameServerBase implements ReplicaS
     public static final String UPDATE_REPLICA = "/replica/update";
     public static final String GETBYID_REPLICA = "/replica/getById";
     public static final String GETBYTOPIC_REPLICA = "/replica/getByTopic";
-    public static final String GETBYTOPICANDGROUP_REPLICA = "/replica/getByTopic";
+    public static final String GETBYTOPICANDGROUP_REPLICA = "/replica/getByTopicAndGroup";
     private NsrReplicaConverter nsrReplicaConverter = new NsrReplicaConverter();
 
     @Override

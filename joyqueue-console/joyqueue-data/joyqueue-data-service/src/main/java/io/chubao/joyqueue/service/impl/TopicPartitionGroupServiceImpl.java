@@ -63,7 +63,7 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
 
         TopicPartitionGroup group = null;
         try {
-            group = partitionGroupServerService.findByTopicAndGroup(topic, namespace, groupNo);
+            group = partitionGroupServerService.findByTopicAndGroup(namespace, topic, groupNo);
         } catch (Exception e) {
             logger.error("findByQuery error",e);
             throw new RuntimeException(e);
@@ -99,6 +99,11 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
             logger.error(errorMsg, e);
             throw new ServiceException(INTERNAL_SERVER_ERROR, errorMsg);
         }
+    }
+
+    @Override
+    public List<TopicPartitionGroup> findByTopic(String namespace, String topic) {
+        return partitionGroupServerService.findByTopic(namespace, topic);
     }
 
     @Override

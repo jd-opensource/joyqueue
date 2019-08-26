@@ -28,6 +28,7 @@ import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.model.domain.Config;
 import io.chubao.joyqueue.model.query.QConfig;
 import io.chubao.joyqueue.service.ConfigService;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +48,15 @@ public class ConfigCommand extends NsrCommandSupport<Config,ConfigService,QConfi
         QConfig qConfig = qPageQuery.getQuery();
 
         for (Config config : allConfigs) {
-            if (config.getKey().equals(qConfig.getKey()) || config.getGroup().equals(qConfig.getGroup())) {
+            if (StringUtils.isNotBlank(qConfig.getKey()) && StringUtils.isNotBlank(qConfig.getGroup())) {
+                if (config.getKey().equals(qConfig.getKey()) || config.getGroup().equals(qConfig.getGroup())) {
+                    configs.add(config);
+                }
+            } else if (StringUtils.isNotBlank(qConfig.getKey())) {
+                if (config.getKey().equals(qConfig.getKey())) {
+                    configs.add(config);
+                }
+            } else {
                 configs.add(config);
             }
         }

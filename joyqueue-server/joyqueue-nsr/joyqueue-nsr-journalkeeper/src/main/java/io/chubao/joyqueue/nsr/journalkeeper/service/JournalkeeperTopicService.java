@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import io.chubao.joyqueue.domain.PartitionGroup;
 import io.chubao.joyqueue.domain.Topic;
 import io.chubao.joyqueue.model.PageResult;
+import io.chubao.joyqueue.model.Pagination;
 import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.nsr.exception.NsrException;
 import io.chubao.joyqueue.nsr.journalkeeper.TransactionContext;
@@ -54,12 +55,25 @@ public class JournalkeeperTopicService implements TopicService {
 
     @Override
     public PageResult<Topic> search(QPageQuery<TopicQuery> pageQuery) {
-        return null;
+        int count = topicRepository.getSearchCount(pageQuery.getQuery());
+        List<TopicDTO> topics = null;
+        if (count != 0) {
+            topics = topicRepository.search(pageQuery);
+        }
+
+        Pagination pagination = pageQuery.getPagination();
+        pagination.setTotalRecord(count);
+
+        PageResult<Topic> result = new PageResult();
+        result.setPagination(pagination);
+        result.setResult(TopicConverter.convert(topics));
+        return result;
     }
 
+    // TODO 临时查询全部
     @Override
     public PageResult<Topic> findUnsubscribedByQuery(QPageQuery<TopicQuery> pageQuery) {
-        return null;
+        return search(pageQuery);
     }
 
     @Override
@@ -112,7 +126,7 @@ public class JournalkeeperTopicService implements TopicService {
             List<PartitionGroupReplicaDTO> partitionGroupReplicas = partitionGroupReplicaRepository.getByTopic(topicDTO.getCode(), topicDTO.getNamespace());
 
             for (PartitionGroupDTO partitionGroup : partitionGroups) {
-                partitionGroupRepository.delete(partitionGroup.getId());
+                partitionGroupRepository.deleteById(partitionGroup.getId());
             }
 
             for (PartitionGroupReplicaDTO partitionGroupReplica : partitionGroupReplicas) {
@@ -172,15 +186,17 @@ public class JournalkeeperTopicService implements TopicService {
             throw new NsrException(String.format("topic:%s is not exist", group.getTopic()));
         }
 
+        PartitionGroupDTO partitionGroup = partitionGroupRepository.getByTopicAndGroup(topicDTO.getCode(), topicDTO.getNamespace(), group.getGroup());
+        List<PartitionGroupReplicaDTO> partitionGroupReplicas = partitionGroupReplicaRepository.getByTopicAndGroup(topicDTO.getCode(), topicDTO.getNamespace(), group.getGroup());
+
+        if (partitionGroup == null) {
+            throw new NsrException(String.format("topic: %s, partitionGroup: %s is not exist", group.getTopic().getFullName(), group.getGroup()));
+        }
+
         TransactionContext.beginTransaction();
 
         try {
-            List<PartitionGroupDTO> partitionGroups = partitionGroupRepository.getByTopic(topicDTO.getCode(), topicDTO.getNamespace());
-            List<PartitionGroupReplicaDTO> partitionGroupReplicas = partitionGroupReplicaRepository.getByTopic(topicDTO.getCode(), topicDTO.getNamespace());
-
-            for (PartitionGroupDTO partitionGroup : partitionGroups) {
-                partitionGroupRepository.delete(partitionGroup.getId());
-            }
+            partitionGroupRepository.deleteById(partitionGroup.getId());
 
             for (PartitionGroupReplicaDTO partitionGroupReplica : partitionGroupReplicas) {
                 partitionGroupReplicaRepository.deleteById(partitionGroupReplica.getId());

@@ -20,7 +20,7 @@ public class PartitionGroupReplicaRepository extends BaseRepository {
             COLUMNS, TABLE);
     private static final String GET_BY_TOPIC = String.format("SELECT %s FROM %s WHERE topic = ? AND namespace = ?",
             COLUMNS, TABLE);
-    private static final String GET_BY_TOPIC_AND_GROUP = String.format("SELECT %s FROM %s WHERE topic = ? AND namespace = ? AND group = ?",
+    private static final String GET_BY_TOPIC_AND_GROUP = String.format("SELECT %s FROM %s WHERE topic = ? AND namespace = ? AND `group` = ?",
             COLUMNS, TABLE);
     private static final String GET_BY_BROKER = String.format("SELECT %s FROM %s WHERE broker_id = ?",
             COLUMNS, TABLE);

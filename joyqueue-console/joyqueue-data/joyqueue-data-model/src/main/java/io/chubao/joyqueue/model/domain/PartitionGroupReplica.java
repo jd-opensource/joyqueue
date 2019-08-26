@@ -36,6 +36,7 @@ public class PartitionGroupReplica  extends BaseNsrModel implements Comparable<P
     private int groupNo;
     private int brokerId;
     private int role = ROLE_DYNAMIC;
+    private Broker broker;
     protected List<Integer> outSyncReplicas = new ArrayList<>();
 
     public Namespace getNamespace() {
@@ -84,6 +85,14 @@ public class PartitionGroupReplica  extends BaseNsrModel implements Comparable<P
 
     public void setOutSyncReplicas(List<Integer> outSyncReplicas) {
         this.outSyncReplicas = outSyncReplicas;
+    }
+
+    public void setBroker(Broker broker) {
+        this.broker = broker;
+    }
+
+    public Broker getBroker() {
+        return broker;
     }
 
     @Override

@@ -70,7 +70,7 @@ public class JournalkeeperBrokerService implements BrokerService {
         int count = brokerRepository.getSearchCount(pageQuery.getQuery());
         List<BrokerDTO> brokers = null;
         if (count != 0) {
-            brokers = brokerRepository.search(pageQuery.getQuery());
+            brokers = brokerRepository.search(pageQuery);
         }
 
         Pagination pagination = pageQuery.getPagination();

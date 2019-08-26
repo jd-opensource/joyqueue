@@ -16,22 +16,47 @@
 package io.chubao.joyqueue.handler.routing.command.topic;
 
 
-import io.chubao.joyqueue.handler.error.ConfigException;
-import io.chubao.joyqueue.handler.routing.command.NsrCommandSupport;
-import io.chubao.joyqueue.model.domain.Subscribe;
-import io.chubao.joyqueue.model.domain.TopicPartitionGroup;
-import io.chubao.joyqueue.model.query.QTopicPartitionGroup;
-import io.chubao.joyqueue.service.TopicPartitionGroupService;
 import com.jd.laf.web.vertx.annotation.Body;
 import com.jd.laf.web.vertx.annotation.Path;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
+import io.chubao.joyqueue.handler.annotation.PageQuery;
+import io.chubao.joyqueue.handler.error.ConfigException;
+import io.chubao.joyqueue.handler.routing.command.NsrCommandSupport;
+import io.chubao.joyqueue.model.PageResult;
+import io.chubao.joyqueue.model.Pagination;
+import io.chubao.joyqueue.model.QPageQuery;
+import io.chubao.joyqueue.model.domain.Subscribe;
+import io.chubao.joyqueue.model.domain.TopicPartitionGroup;
+import io.chubao.joyqueue.model.query.QTopicPartitionGroup;
+import io.chubao.joyqueue.service.TopicPartitionGroupService;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Topic partition group command
  * Created by chenyanying3 on 2018-10-19
  */
 public class TopicPartitionGroupCommand extends NsrCommandSupport<TopicPartitionGroup, TopicPartitionGroupService, QTopicPartitionGroup> {
+
+    @Path("search")
+    public Response pageQuery(@PageQuery QPageQuery<QTopicPartitionGroup> qPageQuery) throws Exception {
+        QTopicPartitionGroup query = qPageQuery.getQuery();
+        List<TopicPartitionGroup> topicPartitionGroups = Collections.emptyList();
+
+        if (query.getTopic() != null) {
+            topicPartitionGroups = service.findByTopic(query.getNamespace(), query.getTopic());
+        }
+
+        Pagination pagination = qPageQuery.getPagination();
+        pagination.setTotalRecord(topicPartitionGroups.size());
+
+        PageResult<TopicPartitionGroup> result = new PageResult();
+        result.setPagination(pagination);
+        result.setResult(topicPartitionGroups);
+        return Responses.success(result.getPagination(), result.getResult());
+    }
 
     @Path("findByTopic")
     public Response findByTopic(@Body Subscribe subscribe) throws Exception {

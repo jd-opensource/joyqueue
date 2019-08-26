@@ -37,7 +37,7 @@ import io.chubao.joyqueue.service.TopicPartitionGroupService;
 import org.apache.commons.collections.CollectionUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -52,41 +52,42 @@ public class PartitionGroupReplicaCommand extends NsrCommandSupport<PartitionGro
 
     @Path("search")
     public Response pageQuery(@PageQuery QPageQuery<QPartitionGroupReplica> qPageQuery) throws Exception {
-        List<Broker> brokers = Collections.emptyList();
+        List<PartitionGroupReplica> partitionGroupReplicas = new LinkedList<>();
         QPartitionGroupReplica query = qPageQuery.getQuery();
 
         if (query.getTopic() != null) {
-            TopicPartitionGroup partitionGroup = topicPartitionGroupService.findByTopicAndGroup(query.getTopic().getNamespace().getCode(), query.getTopic().getCode(), query.getGroupNo());
-            if (partitionGroup != null) {
-                for (Integer brokerId : partitionGroup.getReplicas()) {
-                    Broker broker = brokerService.findById(brokerId);
+            List<PartitionGroupReplica> queryResult = service.getByTopicAndGroup(query.getTopic().getCode(), query.getTopic().getNamespace().getCode(), query.getGroupNo());
+            if (queryResult != null) {
+                for (PartitionGroupReplica partitionGroupReplica : queryResult) {
+                    Broker broker = brokerService.findById(partitionGroupReplica.getBrokerId());
                     if (broker != null) {
-                        brokers.add(broker);
+                        partitionGroupReplica.setBroker(broker);
+                        partitionGroupReplicas.add(partitionGroupReplica);
                     }
                 }
             }
         }
 
         Pagination pagination = qPageQuery.getPagination();
-        pagination.setTotalRecord(brokers.size());
+        pagination.setTotalRecord(partitionGroupReplicas.size());
 
-        PageResult<Broker> result = new PageResult();
+        PageResult<PartitionGroupReplica> result = new PageResult();
         result.setPagination(pagination);
-        result.setResult(brokers);
+        result.setResult(partitionGroupReplicas);
         return Responses.success(result.getPagination(), result.getResult());
     }
 
     @Path("searchBrokerToScale")
     public Response toScaleSearch(@PageQuery QPageQuery<QPartitionGroupReplica> qPageQuery) throws Exception {
         QPartitionGroupReplica query = qPageQuery.getQuery();
-        List<PartitionGroupReplica> partitionGroupReplicas = service.getByTopic(query.getTopic().getCode(), query.getNamespace().getCode());
+        List<PartitionGroupReplica> partitionGroupReplicas = service.getByTopicAndGroup(query.getTopic().getCode(), query.getNamespace().getCode(), query.getGroupNo());
 
         QPageQuery<QBroker> brokerQuery = new QPageQuery(qPageQuery.getPagination(), new QBroker());
         brokerQuery.getQuery().setKeyword(qPageQuery.getQuery().getKeyword());
         PageResult<Broker> brokerPage = brokerService.search(brokerQuery);
+        List<Broker> brokers = new ArrayList<>();
 
         if (CollectionUtils.isNotEmpty(partitionGroupReplicas) && CollectionUtils.isNotEmpty(brokerPage.getResult())) {
-            List<Broker> brokers = new ArrayList<>();
             for (Broker broker : brokerPage.getResult()) {
                 boolean isMatch = false;
                 for (PartitionGroupReplica partitionGroupReplica : partitionGroupReplicas) {
@@ -101,7 +102,7 @@ public class PartitionGroupReplicaCommand extends NsrCommandSupport<PartitionGro
             }
         }
 
-        return Responses.success(brokerPage.getPagination(), brokerPage.getResult());
+        return Responses.success(brokerPage.getPagination(), brokers);
     }
 
     @Path("searchBrokerToAddNew")

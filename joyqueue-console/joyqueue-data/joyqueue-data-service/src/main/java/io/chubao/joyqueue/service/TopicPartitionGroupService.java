@@ -31,6 +31,7 @@ public interface TopicPartitionGroupService extends NsrService<TopicPartitionGro
    TopicPartitionGroup findByTopicAndGroup(String namespace, String topic,  Integer groupNo);
 
    List<TopicPartitionGroup> findByTopic(Namespace namespace, Topic topic);
+   List<TopicPartitionGroup> findByTopic(String namespace, String topic);
    int removePartition(TopicPartitionGroup model) throws Exception;
    int addPartition(TopicPartitionGroup model) throws Exception;
 

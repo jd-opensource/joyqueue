@@ -1,10 +1,13 @@
 package io.chubao.joyqueue.nsr.journalkeeper.repository;
 
+import io.chubao.joyqueue.model.Pagination;
+import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.nsr.journalkeeper.domain.BrokerDTO;
 import io.chubao.joyqueue.nsr.model.BrokerQuery;
 import io.journalkeeper.sql.client.SQLOperator;
+import org.apache.commons.lang3.StringUtils;
 
-import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -19,10 +22,10 @@ public class BrokerRepository extends BaseRepository {
     private static final String UPDATE_COLUMNS = "ip = ?, port = ?, data_center = ?, retry_type = ?, permission = ?";
 
     private static final String GET_BY_ID = String.format("SELECT %s FROM %s WHERE id = ?", COLUMNS, TABLE);
-    private static final String GET_BY_IP_AND_PORT = String.format("SELECT %s FROM %s WHERE ip = ? AND port = ?", COLUMNS, TABLE);
-    private static final String GET_BY_RETRY_TYPE = String.format("SELECT %s FROM %s WHERE retry_type = ?", COLUMNS, TABLE);
+    private static final String GET_BY_IP_AND_PORT = String.format("SELECT %s FROM %s WHERE ip = ? AND port = ? ORDER BY ip", COLUMNS, TABLE);
+    private static final String GET_BY_RETRY_TYPE = String.format("SELECT %s FROM %s WHERE retry_type = ? ORDER BY ip", COLUMNS, TABLE);
     private static final String GET_BY_IDS = String.format("SELECT %s FROM %s WHERE id in ", COLUMNS, TABLE);
-    private static final String GET_ALL = String.format("SELECT %s FROM %s", COLUMNS, TABLE);
+    private static final String GET_ALL = String.format("SELECT %s FROM %s ORDER BY ip", COLUMNS, TABLE);
     private static final String ADD = String.format("INSERT INTO %s(%s) VALUES(?,?,?,?,?,?)", TABLE, COLUMNS);
     private static final String UPDATE_BY_ID = String.format("UPDATE %s SET %s WHERE id = ?", UPDATE_COLUMNS, TABLE);
     private static final String DELETE_BY_ID = String.format("DELETE FROM %s WHERE id = ?", TABLE);
@@ -46,13 +49,13 @@ public class BrokerRepository extends BaseRepository {
     public List<BrokerDTO> getByIds(List<Long> ids) {
         StringBuilder idsSql = new StringBuilder();
         idsSql.append("(");
-        for (Long id : ids) {
-            idsSql.append(id);
-            idsSql.append(",");
+        for (int i = 0; i < ids.size(); i++) {
+            idsSql.append("?");
+            if (i != ids.size() - 1) {
+                idsSql.append(",");
+            }
         }
-        idsSql.substring(0, idsSql.length());
         idsSql.append(")");
-
         return query(BrokerDTO.class, GET_BY_IDS + idsSql.toString(), ids);
     }
 
@@ -60,17 +63,49 @@ public class BrokerRepository extends BaseRepository {
         return query(BrokerDTO.class, GET_ALL);
     }
 
-    // TODO 实现
-    public int getSearchCount(BrokerQuery brokerQuery) {
-        return 0;
+    public int getSearchCount(BrokerQuery query) {
+        List<Object> params = new LinkedList<>();
+        String sql = getSearchSql(String.format("SELECT COUNT(*) FROM %s WHERE 1 = 1", TABLE), query, params);
+
+        return count(sql, params.toArray(new Object[]{}));
     }
 
-    public List<BrokerDTO> search(BrokerQuery brokerQuery) {
-        return Collections.emptyList();
+    public List<BrokerDTO> search(QPageQuery<BrokerQuery> pageQuery) {
+        Pagination pagination = pageQuery.getPagination();
+        List<Object> params = new LinkedList<>();
+        StringBuilder sql = new StringBuilder(getSearchSql(String.format("SELECT %s FROM %s WHERE 1 = 1", COLUMNS, TABLE), pageQuery.getQuery(), params));
+
+        if (pagination != null) {
+            sql.append(String.format(" LIMIT %s, %s", ((pagination.getPage() - 1) * pagination.getSize()), pagination.getSize()));
+        }
+
+        return query(BrokerDTO.class, sql.toString(), params.toArray(new Object[]{}));
     }
 
-    protected String getSearchSql(BrokerQuery brokerQuery) {
-        return null;
+    protected String getSearchSql(String prefix, BrokerQuery query, List<Object> params) {
+        StringBuilder sql = new StringBuilder(prefix);
+
+        if (StringUtils.isNotBlank(query.getIp())) {
+            sql.append(" AND ip = ?");
+            params.add(query.getIp());
+        }
+
+        if (query.getPort() > 0) {
+            sql.append(" AND port = ?");
+            params.add(query.getPort());
+        }
+
+        if (StringUtils.isNotBlank(query.getRetryType())) {
+            sql.append(" AND retry_type = ?");
+            params.add(query.getRetryType());
+        }
+
+        if (StringUtils.isNotBlank(query.getKeyword())) {
+            sql.append(" AND (ip = ? OR id = ?)");
+            params.add(query.getKeyword());
+            params.add(query.getKeyword());
+        }
+        return sql.toString();
     }
 
     public BrokerDTO add(BrokerDTO brokerDTO) {

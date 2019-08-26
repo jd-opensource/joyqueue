@@ -35,6 +35,7 @@ public class ConsumerConverter {
         consumerDTO.setTopic(consumer.getTopic().getCode());
         consumerDTO.setNamespace(consumer.getTopic().getNamespace());
         consumerDTO.setApp(consumer.getApp());
+        consumerDTO.setReferer(consumer.getApp());
         return consumerDTO;
     }
 

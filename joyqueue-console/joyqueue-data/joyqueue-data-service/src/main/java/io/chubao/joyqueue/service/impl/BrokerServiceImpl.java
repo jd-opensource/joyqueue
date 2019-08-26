@@ -190,6 +190,18 @@ public class BrokerServiceImpl implements BrokerService {
 
     @Override
     public PageResult<Broker> search(QPageQuery<QBroker> qPageQuery) throws Exception {
-        return brokerNameServerService.search(qPageQuery);
+        PageResult<Broker> pageResult = brokerNameServerService.search(qPageQuery);
+        if (pageResult !=null && pageResult.getResult() != null && pageResult.getResult().size() >0) {
+            List<Broker> brokerList = pageResult.getResult();
+            brokerList.stream().map(broker -> {
+                BrokerGroupRelated brokerRelated = brokerGroupRelatedService.findById(broker.getId());
+                if (brokerRelated != null && brokerRelated.getGroup() != null) {
+                    broker.setGroup(brokerRelated.getGroup());
+                    broker.setStatus(0);
+                }
+                return broker;
+            }).collect(Collectors.toList());
+        }
+        return pageResult;
     }
 }

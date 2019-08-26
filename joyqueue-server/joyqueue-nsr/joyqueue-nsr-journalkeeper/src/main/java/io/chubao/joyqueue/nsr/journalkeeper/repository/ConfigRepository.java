@@ -17,8 +17,8 @@ public class ConfigRepository extends BaseRepository {
     private static final String UPDATE_COLUMNS = "key = ?, value = ?, `group` = ?";
 
     private static final String GET_BY_ID = String.format("SELECT %s FROM %s WHERE id = ?", COLUMNS, TABLE);
-    private static final String GET_BY_KEY_AND_GROUP = String.format("SELECT %s FROM %s WHERE key = ? AND group = ?", COLUMNS, TABLE);
-    private static final String GET_ALL = String.format("SELECT %s FROM %s", COLUMNS, TABLE);
+    private static final String GET_BY_KEY_AND_GROUP = String.format("SELECT %s FROM %s WHERE key = ? AND group = ? ORDER BY key", COLUMNS, TABLE);
+    private static final String GET_ALL = String.format("SELECT %s FROM %s ORDER BY key", COLUMNS, TABLE);
     private static final String ADD = String.format("INSERT INTO %s(%s) VALUES(?,?,?,?)", TABLE, COLUMNS);
     private static final String UPDATE_BY_ID = String.format("UPDATE %s SET %s WHERE id = ?", TABLE, UPDATE_COLUMNS);
     private static final String DELETE_BY_ID = String.format("DELETE FROM %s WHERE id = ?", TABLE);

@@ -18,11 +18,11 @@ public class ProducerRepository extends BaseRepository {
 
     private static final String GET_BY_ID = String.format("SELECT %s FROM %s WHERE id = ?",
             COLUMNS, TABLE);
-    private static final String GET_BY_TOPIC_AND_APP = String.format("SELECT %s FROM %s WHERE topic = ? AND namespace = ? AND app = ?",
+    private static final String GET_BY_TOPIC_AND_APP = String.format("SELECT %s FROM %s WHERE topic = ? AND namespace = ? AND app = ? ORDER BY topic",
             COLUMNS, TABLE);
-    private static final String GET_BY_TOPIC = String.format("SELECT %s FROM %s WHERE topic = ? AND namespace = ?",
+    private static final String GET_BY_TOPIC = String.format("SELECT %s FROM %s WHERE topic = ? AND namespace = ? ORDER BY topic",
             COLUMNS, TABLE);
-    private static final String GET_BY_APP = String.format("SELECT %s FROM %s WHERE app = ?",
+    private static final String GET_BY_APP = String.format("SELECT %s FROM %s WHERE app = ? ORDER BY topic",
             COLUMNS, TABLE);
     private static final String ADD = String.format("INSERT INTO %s(%s) VALUES(?,?,?,?,?,?,?)",
             TABLE, COLUMNS);

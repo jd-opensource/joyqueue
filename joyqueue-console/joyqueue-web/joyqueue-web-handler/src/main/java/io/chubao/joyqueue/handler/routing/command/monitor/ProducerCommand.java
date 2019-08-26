@@ -20,8 +20,12 @@ import com.jd.laf.web.vertx.annotation.Path;
 import com.jd.laf.web.vertx.annotation.QueryParam;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
+import io.chubao.joyqueue.handler.annotation.PageQuery;
 import io.chubao.joyqueue.handler.error.ConfigException;
 import io.chubao.joyqueue.handler.routing.command.NsrCommandSupport;
+import io.chubao.joyqueue.model.PageResult;
+import io.chubao.joyqueue.model.Pagination;
+import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.model.domain.PartitionGroupWeight;
 import io.chubao.joyqueue.model.domain.Producer;
 import io.chubao.joyqueue.model.domain.ProducerConfig;
@@ -37,6 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -54,6 +59,26 @@ public class ProducerCommand extends NsrCommandSupport<Producer, ProducerService
     private TopicPartitionGroupService topicPartitionGroupService;
     @Value(nullable = false)
     protected ProducerNameServerService producerNameServerService;
+
+    @Path("search")
+    public Response pageQuery(@PageQuery QPageQuery<QProducer> qPageQuery) throws Exception {
+        QProducer query = qPageQuery.getQuery();
+        List<Producer> producers = Collections.emptyList();
+
+        if (query.getApp() != null) {
+            producers = service.findByApp(query.getApp().getCode());
+        } else if (query.getTopic() != null) {
+            producers = service.findByTopic(query.getTopic().getNamespace().getCode(), query.getTopic().getCode());
+        }
+
+        Pagination pagination = qPageQuery.getPagination();
+        pagination.setTotalRecord(producers.size());
+
+        PageResult<Producer> result = new PageResult();
+        result.setPagination(pagination);
+        result.setResult(producers);
+        return Responses.success(result.getPagination(), result.getResult());
+    }
 
     @Override
     @Path("delete")

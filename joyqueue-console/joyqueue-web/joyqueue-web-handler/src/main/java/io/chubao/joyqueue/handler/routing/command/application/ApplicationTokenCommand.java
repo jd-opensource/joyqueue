@@ -35,6 +35,7 @@ import io.chubao.joyqueue.model.domain.Identity;
 import io.chubao.joyqueue.model.query.QApplicationToken;
 import io.chubao.joyqueue.service.ApplicationTokenService;
 
+import java.util.Collections;
 import java.util.List;
 
 import static io.chubao.joyqueue.handler.Constants.APPLICATION;
@@ -47,6 +48,24 @@ import static io.chubao.joyqueue.handler.Constants.ID;
 public class ApplicationTokenCommand extends NsrCommandSupport<ApplicationToken, ApplicationTokenService, QApplicationToken> {
     @Value(APPLICATION)
     protected Application application;
+
+    @Path("search")
+    public Response search(@PageQuery QPageQuery<QApplicationToken> qPageQuery) throws Exception {
+        QApplicationToken query = qPageQuery.getQuery();
+        List<ApplicationToken> producers = Collections.emptyList();
+
+        if (query.getApplication() != null) {
+            producers = service.findByApp(query.getApplication().getCode());
+        }
+
+        Pagination pagination = qPageQuery.getPagination();
+        pagination.setTotalRecord(producers.size());
+
+        PageResult<ApplicationToken> result = new PageResult();
+        result.setPagination(pagination);
+        result.setResult(producers);
+        return Responses.success(result.getPagination(), result.getResult());
+    }
 
     @Path("getByApp")
     public Response pageQuery(@PageQuery QPageQuery<QApplicationToken> qPageQuery) throws Exception {

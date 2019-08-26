@@ -76,7 +76,7 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
      * @throws Exception
      */
     @Override
-    public String addTopic(Topic topic, List<TopicPartitionGroup> partitionGroups) throws Exception {
+    public String addTopic(Topic topic, List<TopicPartitionGroup> partitionGroups) {
         JSONObject request = new JSONObject();
         io.chubao.joyqueue.domain.Topic nsrTopic = new io.chubao.joyqueue.domain.Topic();
         //数据组装
@@ -116,7 +116,7 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
      * @throws Exception
      */
     @Override
-    public int removeTopic(Topic topic) throws Exception {
+    public int removeTopic(Topic topic) {
         io.chubao.joyqueue.domain.Topic nsrTopic = new io.chubao.joyqueue.domain.Topic();
         nsrTopic.setName(CodeConverter.convertTopic(topic.getNamespace(),topic));
         nsrTopic.setType(io.chubao.joyqueue.domain.Topic.Type.valueOf((byte)topic.getType()));
@@ -129,7 +129,7 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
      * @throws Exception
      */
     @Override
-    public String addPartitionGroup(TopicPartitionGroup group) throws Exception {
+    public String addPartitionGroup(TopicPartitionGroup group) {
         PartitionGroup partitionGroup = new PartitionGroup();
         partitionGroup.setPartitions(Arrays.stream(group.getPartitions().substring(1,group.getPartitions().length()-1).split(",")).map(s->Short.parseShort(s.trim())).collect(Collectors.toSet()));
         partitionGroup.setGroup(group.getGroupNo());
@@ -154,7 +154,7 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
      * @throws Exception
      */
     @Override
-    public String removePartitionGroup(TopicPartitionGroup group) throws Exception {
+    public String removePartitionGroup(TopicPartitionGroup group) {
         PartitionGroup partitionGroup = new PartitionGroup();
         partitionGroup.setGroup(group.getGroupNo());
         Set<Short> partitions = Arrays.stream(group.getPartitions().substring(1, group.getPartitions().length()-1).split(",")).map(m-> Short.parseShort(m.trim())).collect(Collectors.toSet());
@@ -170,7 +170,7 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
      * @throws Exception
      */
     @Override
-    public List<Integer> updatePartitionGroup(TopicPartitionGroup group) throws Exception {
+    public List<Integer> updatePartitionGroup(TopicPartitionGroup group) {
         PartitionGroup partitionGroup = new PartitionGroup();
         partitionGroup.setPartitions(Arrays.stream(group.getPartitions().substring(1,group.getPartitions().length()-1).split(",")).map(s->Short.parseShort(s.trim())).collect(Collectors.toSet()));
         partitionGroup.setGroup(group.getGroupNo());
@@ -210,7 +210,7 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
         return isSuccess(result);
     }
     @Override
-    public List<PartitionGroup> findPartitionGroupMaster(List<TopicPartitionGroup> topicPartitionGroups) throws Exception {
+    public List<PartitionGroup> findPartitionGroupMaster(List<TopicPartitionGroup> topicPartitionGroups) {
         if(NullUtil.isEmpty(topicPartitionGroups)) {
             return null;
         }

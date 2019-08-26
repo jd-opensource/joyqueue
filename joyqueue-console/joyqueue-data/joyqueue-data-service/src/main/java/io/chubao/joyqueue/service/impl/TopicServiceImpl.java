@@ -149,7 +149,7 @@ public class TopicServiceImpl implements TopicService {
     }
 
     @Override
-    public PageResult<Topic> findUnsubscribedByQuery(QPageQuery<QTopic> query) throws Exception {
+    public PageResult<Topic> findUnsubscribedByQuery(QPageQuery<QTopic> query) {
         if (query == null) {
             return PageResult.empty();
         }
@@ -159,7 +159,7 @@ public class TopicServiceImpl implements TopicService {
     }
 
     @Override
-    public PageResult<AppUnsubscribedTopic> findAppUnsubscribedByQuery(QPageQuery<QTopic> query) throws Exception {
+    public PageResult<AppUnsubscribedTopic> findAppUnsubscribedByQuery(QPageQuery<QTopic> query) {
         if (query == null) {
             return PageResult.empty();
         }
@@ -274,7 +274,7 @@ public class TopicServiceImpl implements TopicService {
     }
 
     @Override
-    public PageResult<Topic> search(QPageQuery<QTopic> query) throws Exception {
+    public PageResult<Topic> search(QPageQuery<QTopic> query) {
         return topicNameServerService.search(query);
     }
 }

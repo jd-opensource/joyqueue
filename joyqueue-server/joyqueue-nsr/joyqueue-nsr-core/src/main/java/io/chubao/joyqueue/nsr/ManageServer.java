@@ -730,7 +730,7 @@ public class ManageServer extends Service {
                 routingContext.fail(e);
             }
         });
-        router.post("/partitiongroup/getByTopicAndGroup").handler(routingContext -> {
+        router.post("/partitiongroup/getByTopic").handler(routingContext -> {
             try {
                 PartitionGroupQuery query = JSONObject.parseObject(routingContext.getBodyAsString(), PartitionGroupQuery.class);
                 List<PartitionGroup> result = partitionGroupService.getByTopic(TopicName.parse(query.getTopic(), query.getNamespace()));
