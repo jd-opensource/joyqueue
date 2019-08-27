@@ -245,8 +245,11 @@ export default {
           id: '',
           code: ''
         }
-      }
-
+      },
+       monitorUIds: {
+         detail: this.$store.getters.uIds.consumer.detail,
+         summary: this.$store.getters.uIds.consumer.summary
+       }
     }
   },
   methods: {
@@ -348,7 +351,7 @@ export default {
         window.open(replaceChartUrl(this.monitorUrls.summary, item.topic.namespace.code,
           item.topic.code, getAppCode(item.app, item.subscribeGroup)))
       } else {
-        apiRequest.get(this.urls.getUrl + '/ct', {}, {}).then((data) => {
+        apiRequest.get(this.urls.getUrl + '/' + this.monitorUIds.summary, {}, {}).then((data) => {
           if (data.data) {
             let url = data.data
             if (url.indexOf('?') < 0) {
@@ -368,7 +371,7 @@ export default {
         window.open(replaceChartUrl(this.monitorUrls.detail, item.topic.namespace.code,
           item.topic.code, getAppCode(item.app, item.subscribeGroup)))
       } else {
-        apiRequest.get(this.urls.getUrl + '/cd', {}, {}).then((data) => {
+        apiRequest.get(this.urls.getUrl + '/' + this.monitorUIds.detail, {}, {}).then((data) => {
           if (data.data) {
             let url = data.data
             if (url.indexOf('?') < 0) {
@@ -427,13 +430,8 @@ export default {
       })
     },
     configConsumerConfirm () {
-      this.$refs.configForm.submitForm().then(data => {
-        // resolve(data);
-        this.addOrUpdateConfig()
-      }).catch(() => {
-        // reject(error)
-        // this.$Message.error(error);
-      }) // validate
+      let configData = this.$refs.configForm.getFormData()
+      this.config(configData, 'configDialog')
     },
     config (configData, dialog) {
       apiRequest.post(this.configDialog.urls.addOrUpdate, {}, configData).then((data) => {

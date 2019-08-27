@@ -1,6 +1,6 @@
 # JoyQueue | 快乐队列
 
-[![Maven Central](https://img.shields.io/maven-central/v/com.jd.joyqueue/joyqueue-client?color=brightgreen)](https://search.maven.org/search?q=com.jd.joyqueue)
+[![Maven Central](https://img.shields.io/maven-central/v/io.chubao.joyqueue/joyqueue-client?color=brightgreen)](https://search.maven.org/search?q=io.chubao.joyqueue)
 [![GitHub release](https://img.shields.io/badge/release-download-orange.svg)](https://github.com/joyqueue/joyqueue/releases)
 ![GitHub](https://img.shields.io/github/license/joyqueue/joyqueue)
 

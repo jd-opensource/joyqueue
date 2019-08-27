@@ -1,4 +1,6 @@
 /**
+ * Copyright 2019 The JoyQueue Authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,9 +16,9 @@
 package io.openmessaging.joyqueue.producer.support;
 
 import com.google.common.collect.Lists;
-import com.jd.joyqueue.client.internal.producer.MessageProducer;
-import com.jd.joyqueue.client.internal.producer.TransactionMessageProducer;
-import com.jd.joyqueue.client.internal.producer.domain.ProduceMessage;
+import io.chubao.joyqueue.client.internal.producer.MessageProducer;
+import io.chubao.joyqueue.client.internal.producer.TransactionMessageProducer;
+import io.chubao.joyqueue.client.internal.producer.domain.ProduceMessage;
 import com.google.common.base.Preconditions;
 import io.openmessaging.joyqueue.config.ExceptionConverter;
 import io.openmessaging.joyqueue.producer.ExtensionTransactionalResult;
@@ -30,8 +32,8 @@ import java.util.List;
 
 /**
  * ExtensionTransactionalResultAdapter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/3/4
  */
 public class ExtensionTransactionalResultAdapter implements ExtensionTransactionalResult {
@@ -87,7 +89,7 @@ public class ExtensionTransactionalResultAdapter implements ExtensionTransaction
             Preconditions.checkArgument(message instanceof MessageAdapter, "message is not supported");
 
             MessageAdapter messageAdapter = (MessageAdapter) message;
-            com.jd.joyqueue.client.internal.producer.domain.SendResult sendResult = transactionMessageProducer.send(messageAdapter.getProduceMessage());
+            io.chubao.joyqueue.client.internal.producer.domain.SendResult sendResult = transactionMessageProducer.send(messageAdapter.getProduceMessage());
             return SendResultConverter.convert(sendResult);
         } catch (Throwable cause) {
             throw ExceptionConverter.convertProduceException(cause);
@@ -100,7 +102,7 @@ public class ExtensionTransactionalResultAdapter implements ExtensionTransaction
             Preconditions.checkArgument(CollectionUtils.isNotEmpty(messages), "messages can not be null");
 
             List<ProduceMessage> produceMessages = checkAndConvertMessage(messages);
-            List<com.jd.joyqueue.client.internal.producer.domain.SendResult> sendResults = transactionMessageProducer.batchSend(produceMessages);
+            List<io.chubao.joyqueue.client.internal.producer.domain.SendResult> sendResults = transactionMessageProducer.batchSend(produceMessages);
             return SendResultConverter.convert(sendResults);
         } catch (Throwable cause) {
             throw ExceptionConverter.convertProduceException(cause);

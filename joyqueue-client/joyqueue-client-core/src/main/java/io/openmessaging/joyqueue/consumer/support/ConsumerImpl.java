@@ -1,4 +1,6 @@
 /**
+ * Copyright 2019 The JoyQueue Authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,10 +15,10 @@
  */
 package io.openmessaging.joyqueue.consumer.support;
 
-import com.jd.joyqueue.client.internal.consumer.MessageConsumer;
-import com.jd.joyqueue.client.internal.consumer.domain.ConsumeMessage;
-import com.jd.joyqueue.client.internal.consumer.domain.ConsumeReply;
-import com.jd.joyqueue.network.command.RetryType;
+import io.chubao.joyqueue.client.internal.consumer.MessageConsumer;
+import io.chubao.joyqueue.client.internal.consumer.domain.ConsumeMessage;
+import io.chubao.joyqueue.client.internal.consumer.domain.ConsumeReply;
+import io.chubao.joyqueue.network.command.RetryType;
 import com.google.common.base.Preconditions;
 import io.openmessaging.consumer.BatchMessageListener;
 import io.openmessaging.consumer.MessageListener;
@@ -42,8 +44,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * ConsumerImpl
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/2/19
  */
 public class ConsumerImpl extends AbstractServiceLifecycle implements ExtensionConsumer {

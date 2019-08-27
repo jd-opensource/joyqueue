@@ -1,5 +1,7 @@
 #!/bin/sh
 #
+# Copyright 2019 The JoyQueue Authors.
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -51,4 +53,4 @@ OPTS_MEMORY=${OPTS_MEMORY#*=}
   -classpath "$CLASSPATH" \
   -Dbasedir="$BASEDIR" \
   -Dfile.encoding="UTF-8" \
-  com.jd.joyqueue.broker.Launcher
+  io.chubao.joyqueue.broker.Launcher

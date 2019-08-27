@@ -1,4 +1,6 @@
 /**
+ * Copyright 2019 The JoyQueue Authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,16 +16,16 @@
 package io.openmessaging.joyqueue.extension;
 
 import com.google.common.collect.Lists;
-import com.jd.joyqueue.client.internal.metadata.domain.PartitionMetadata;
-import com.jd.joyqueue.client.internal.metadata.domain.TopicMetadata;
+import io.chubao.joyqueue.client.internal.metadata.domain.PartitionMetadata;
+import io.chubao.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import io.openmessaging.extension.QueueMetaData;
 
 import java.util.List;
 
 /**
  * QueueMetaDataAdapter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/3/1
  */
 public class QueueMetaDataAdapter implements QueueMetaData {

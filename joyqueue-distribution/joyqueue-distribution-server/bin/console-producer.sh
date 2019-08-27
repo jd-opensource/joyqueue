@@ -1,5 +1,7 @@
 #!/bin/sh
 #
+# Copyright 2019 The JoyQueue Authors.
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,4 +15,5 @@
 # limitations under the License.
 #
 
-exec $(dirname $0)/run-class.sh com.jd.joyqueue.tools.ConsoleProducer "$@"
+
+exec $(dirname $0)/run-class.sh io.chubao.joyqueue.tools.ConsoleProducer "$@"

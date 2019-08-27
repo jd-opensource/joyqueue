@@ -1,4 +1,6 @@
 /**
+ * Copyright 2019 The JoyQueue Authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +15,14 @@
  */
 package io.openmessaging.joyqueue.extension;
 
-import com.jd.joyqueue.client.internal.metadata.domain.PartitionMetadata;
-import com.jd.joyqueue.network.domain.BrokerNode;
+import io.chubao.joyqueue.client.internal.metadata.domain.PartitionMetadata;
+import io.chubao.joyqueue.network.domain.BrokerNode;
 import io.openmessaging.extension.QueueMetaData;
 
 /**
  * PartitionAdapter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/3/1
  */
 public class PartitionAdapter implements QueueMetaData.Partition {
