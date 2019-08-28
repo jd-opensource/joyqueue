@@ -306,7 +306,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
             long validPosition = indexStore.right();
             IndexItem currentIndex, previousIndex = null;
 
-            while ((validPosition -= IndexItem.STORAGE_SIZE) >= IndexItem.STORAGE_SIZE) { //第一条索引有可能是全0，这是合法的。
+            while ((validPosition -= IndexItem.STORAGE_SIZE) >= indexStore.left() + IndexItem.STORAGE_SIZE) { //第一条索引有可能是全0，这是合法的。
                 if(null == previousIndex) {
                     currentIndex = indexStore.read(validPosition);
                 } else {
