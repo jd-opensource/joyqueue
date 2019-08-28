@@ -1005,6 +1005,22 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         }
     }
 
+    @Override
+    public void clear(long position) throws IOException {
+        stopFlushThread();
+        try {
+            for (Partition partition : partitionMap.values()) {
+                partition.store.setRight(0L);
+            }
+            store.clear(position);
+        } finally {
+            startFlushThread();
+        }
+    }
+
+
+
+
     private void rollback(long position) throws IOException {
 
         boolean clearIndexStore = position <= leftPosition() || position > rightPosition();
