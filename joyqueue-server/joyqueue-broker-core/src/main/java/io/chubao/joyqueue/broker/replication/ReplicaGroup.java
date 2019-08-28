@@ -709,7 +709,16 @@ public class ReplicaGroup extends Service {
                             topicPartitionGroup, localReplicaId, usTime() - startTimeUs);
                 }
 
-                if (request.getStartPosition() != replicableStore.rightPosition()) {
+                // 如果是从Leader的最小位置开始复制，并且Follower当前的最小位置比Leader还小，那直接清空Follower的所有数据
+                if (request.getLeftPosition() == request.getStartPosition() &&
+                        request.getLeftPosition() > replicableStore.leftPosition()) {
+                    replicableStore.clear(request.getStartPosition());
+                    logger.info("Partition group {}/node {} clear, position is {}, write position is {}, " +
+                                    "left position is {}, elapse {} us",
+                            topicPartitionGroup, localReplicaId, request.getStartPosition(),
+                            replicableStore.rightPosition(), request.getLeftPosition(), usTime() - startTimeUs);
+
+                } else  if (request.getStartPosition() != replicableStore.rightPosition()) {
                     replicableStore.setRightPosition(request.getStartPosition());
 
                     logger.info("Partition group {}/node {} set right position, position is {}, write position is {}, " +

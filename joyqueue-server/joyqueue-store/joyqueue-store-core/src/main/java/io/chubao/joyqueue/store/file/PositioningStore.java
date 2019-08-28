@@ -82,6 +82,28 @@ public class PositioningStore<T> implements Closeable {
         return flushPosition.get();
     }
 
+    public void clear(long position) {
+        logger.info("Clear store, new position: {}, store: {}...",
+                Format.formatWithComma(position),
+                base.getAbsolutePath());
+
+        try {
+            // 注意锁的顺序必须一致，避免死锁。
+            flushLock.lock();
+            writeLock.lock();
+            deleteLock.lock();
+            clear();
+            this.leftPosition.set(position);
+            this.rightPosition.set(position);
+            this.flushPosition.set(position);
+            resetWriteStoreFile();
+        } finally {
+            deleteLock.unlock();
+            writeLock.unlock();
+            flushLock.unlock();
+        }
+    }
+
     /**
      * 将位置回滚到position
      * 与如下操作不能并发：
@@ -113,8 +135,8 @@ public class PositioningStore<T> implements Closeable {
                 rollbackFiles(position);
                 this.rightPosition.set(position);
                 if (this.flushPosition() > position) this.flushPosition.set(position);
-                resetWriteStoreFile();
             }
+            resetWriteStoreFile();
         } finally {
             deleteLock.unlock();
             writeLock.unlock();
