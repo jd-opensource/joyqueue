@@ -463,7 +463,7 @@ public class ManageServer extends Service {
         router.post("/broker/getByIds").handler(routingContext -> {
             try {
                 routingContext.response().putHeader(CONTENT_TYPE, APPLICATION_JSON)
-                        .end(JSON.toJSONString(brokerService.getByIds(JSON.parseArray(routingContext.getBodyAsString(),Long.class))));
+                        .end(JSON.toJSONString(brokerService.getByIds(JSON.parseArray(routingContext.getBodyAsString(),Integer.class))));
             }catch (Exception e){
                 logger.error("broker  getById error",routingContext.getBodyAsString(),e);
                 routingContext.fail(e);

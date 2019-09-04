@@ -19,6 +19,7 @@ import com.google.common.base.Preconditions;
 import io.chubao.joyqueue.broker.archive.ArchiveManager;
 import io.chubao.joyqueue.broker.cluster.ClusterManager;
 import io.chubao.joyqueue.broker.config.BrokerConfig;
+import io.chubao.joyqueue.broker.config.BrokerStoreConfig;
 import io.chubao.joyqueue.broker.config.Configuration;
 import io.chubao.joyqueue.broker.config.ConfigurationManager;
 import io.chubao.joyqueue.broker.consumer.Consume;
@@ -37,6 +38,7 @@ import io.chubao.joyqueue.broker.network.BrokerServer;
 import io.chubao.joyqueue.broker.network.protocol.ProtocolManager;
 import io.chubao.joyqueue.broker.producer.Produce;
 import io.chubao.joyqueue.broker.retry.BrokerRetryManager;
+import io.chubao.joyqueue.broker.store.StoreInitializer;
 import io.chubao.joyqueue.broker.store.StoreManager;
 import io.chubao.joyqueue.domain.Config;
 import io.chubao.joyqueue.domain.Consumer;
@@ -45,6 +47,7 @@ import io.chubao.joyqueue.network.transport.config.ServerConfig;
 import io.chubao.joyqueue.network.transport.config.TransportConfigSupport;
 import io.chubao.joyqueue.nsr.NameService;
 import io.chubao.joyqueue.nsr.config.NameServerConfigKey;
+import io.chubao.joyqueue.nsr.nameservice.CompensatedNameService;
 import io.chubao.joyqueue.security.Authentication;
 import io.chubao.joyqueue.server.retry.api.MessageRetry;
 import io.chubao.joyqueue.store.StoreService;
@@ -83,6 +86,7 @@ public class BrokerService extends Service {
     private Produce produce;
     private Consume consume;
     private StoreService storeService;
+    private StoreInitializer storeInitializer;
     private ElectionService electionService;
     private MessageRetry retryManager;
     private BrokerContext brokerContext;
@@ -183,6 +187,9 @@ public class BrokerService extends Service {
         this.electionService = getElectionService(brokerContext);
         this.brokerContext.electionService(electionService);
 
+        this.storeInitializer = new StoreInitializer(new BrokerStoreConfig(configuration), nameService,
+                clusterManager, storeService, electionService);
+
         // manage service
         this.brokerManageService = new BrokerManageService(new BrokerManageConfig(configuration,brokerConfig),
                 brokerMonitorService,
@@ -252,8 +259,11 @@ public class BrokerService extends Service {
         Property property = configuration.getProperty(NAMESERVICE_NAME);
         NameService nameService = Plugins.NAMESERVICE.get(property == null ? DEFAULT_NAMESERVICE_NAME : property.getString());
         Preconditions.checkArgument(nameService != null, "nameService not found!");
+
+        CompensatedNameService compensatedNameService = new CompensatedNameService(nameService);
         enrichIfNecessary(nameService, brokerContext);
-        return nameService;
+        enrichIfNecessary(compensatedNameService, brokerContext);
+        return compensatedNameService;
     }
 
 
@@ -313,6 +323,7 @@ public class BrokerService extends Service {
         startIfNecessary(nameService);
         startIfNecessary(clusterManager);
         startIfNecessary(storeService);
+        startIfNecessary(storeInitializer);
         startIfNecessary(sessionManager);
         startIfNecessary(retryManager);
         startIfNecessary(brokerMonitorService);
@@ -357,11 +368,13 @@ public class BrokerService extends Service {
         destroy(brokerServer);
         destroy(protocolManager);
         destroy(electionService);
+        destroy(produce);
         destroy(consume);
         destroy(coordinatorService);
         destroy(sessionManager);
         destroy(clusterManager);
         destroy(storeManager);
+        destroy(storeInitializer);
         destroy(storeService);
         destroy(configurationManager);
         destroy(retryManager);

@@ -190,6 +190,7 @@ public class BrokerServiceImpl implements BrokerService {
 
     @Override
     public PageResult<Broker> search(QPageQuery<QBroker> qPageQuery) throws Exception {
+        // TODO 分组处理
         PageResult<Broker> pageResult = brokerNameServerService.search(qPageQuery);
         if (pageResult !=null && pageResult.getResult() != null && pageResult.getResult().size() >0) {
             List<Broker> brokerList = pageResult.getResult();

@@ -24,6 +24,8 @@ public class PartitionGroupRepository extends BaseRepository {
             COLUMNS, TABLE);
     private static final String GET_BY_TOPIC = String.format("SELECT %s FROM %s WHERE topic = ? AND namespace = ? ORDER BY `group`",
             COLUMNS, TABLE);
+    private static final String GET_ALL = String.format("SELECT %s FROM %s",
+            COLUMNS, TABLE);
     private static final String ADD = String.format("INSERT INTO %s(%s) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)",
             TABLE, COLUMNS);
     private static final String UPDATE_BY_ID = String.format("UPDATE %s SET %s WHERE id = ?",
@@ -45,6 +47,10 @@ public class PartitionGroupRepository extends BaseRepository {
 
     public List<PartitionGroupDTO> getByTopic(String topic, String namespace) {
         return query(PartitionGroupDTO.class, GET_BY_TOPIC, topic, namespace);
+    }
+
+    public List<PartitionGroupDTO> getAll() {
+        return query(PartitionGroupDTO.class, GET_ALL);
     }
 
     public PartitionGroupDTO add(PartitionGroupDTO partitionGroupDTO) {

@@ -147,7 +147,7 @@ public interface TopicService {
      *
      * @return
      */
-    List<PartitionGroup> getPartitionGroup(String namesapce, String topic, Object[] groups);
+    List<PartitionGroup> getPartitionGroup(String namespace, String topic, Object[] groups);
 
     /**
      * 更新主题

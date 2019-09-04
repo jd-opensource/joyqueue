@@ -41,7 +41,8 @@ public class BrokerStoreConfig {
         MAX_STORE_TIME("store.max.store.time", DEFAULT_MAX_STORE_TIME, Type.LONG),
         DO_NOT_DELETE_CONSUMED("store.clean.donot.delete.consumed", DEFAULT_DO_NOT_DELETE_CONSUMED, Type.BOOLEAN),
         CLEAN_SCHEDULE_BEGIN("store.clean.schedule.begin", DEFAULT_STORE_CLEAN_SCHEDULE_BEGIN, Type.LONG),
-        CLEAN_SCHEDULE_END("store.clean.schedule.end", DEFAULT_STORE_CLEAN_SCHEDULE_END, Type.LONG);
+        CLEAN_SCHEDULE_END("store.clean.schedule.end", DEFAULT_STORE_CLEAN_SCHEDULE_END, Type.LONG),
+        FORCE_RESTORE("store.force.restore", false, Type.BOOLEAN);
 
         private String name;
         private Object value;
@@ -91,5 +92,9 @@ public class BrokerStoreConfig {
 
     public long getStoreCleanScheduleEnd() {
         return PropertySupplier.getValue(propertySupplier, BrokerStoreConfigKey.CLEAN_SCHEDULE_END, DEFAULT_STORE_CLEAN_SCHEDULE_END);
+    }
+
+    public boolean getForceRestore() {
+        return PropertySupplier.getValue(propertySupplier, BrokerStoreConfigKey.FORCE_RESTORE);
     }
 }

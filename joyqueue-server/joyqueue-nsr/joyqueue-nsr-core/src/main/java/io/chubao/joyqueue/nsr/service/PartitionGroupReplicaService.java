@@ -26,7 +26,6 @@ import java.util.List;
  * @author lixiaobin6
  * 下午3:11 2018/8/13
  */
-// TODO brokerId
 public interface PartitionGroupReplicaService {
 
     /**

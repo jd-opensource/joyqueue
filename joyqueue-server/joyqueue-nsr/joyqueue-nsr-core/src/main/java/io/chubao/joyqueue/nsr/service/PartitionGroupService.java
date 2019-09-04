@@ -54,6 +54,12 @@ public interface PartitionGroupService {
     List<PartitionGroup> getByTopic(TopicName topic);
 
     /**
+     * 查询全部
+     * @return
+     */
+    List<PartitionGroup> getAll();
+
+    /**
      * 添加
      *
      * @param partitionGroup

@@ -146,15 +146,19 @@ public class TransactionHandler extends Service {
                 }
                 if (partitionGroup == null) {
                     partitionMetadataAndErrors.add(new PartitionMetadataAndError(partition, KafkaErrorCode.UNKNOWN_TOPIC_OR_PARTITION.getCode()));
-                } else if (partitionGroup.getLeaderBroker() == null) {
+                } else if (partitionGroup.getLeader() == null || partitionGroup.getLeader() <= 0) {
                     partitionMetadataAndErrors.add(new PartitionMetadataAndError(partition, KafkaErrorCode.NOT_LEADER_FOR_PARTITION.getCode()));
                 } else {
-                    Broker broker = partitionGroup.getLeaderBroker();
-                    TransactionPrepare prepare = new TransactionPrepare(topic.getFullName(), (short) partition.intValue(),
-                            transactionMetadata.getApp(), broker.getId(), broker.getIp(), broker.getPort(),
-                            transactionMetadata.getId(), transactionMetadata.getProducerId(), transactionMetadata.getProducerEpoch(),
-                            transactionMetadata.getEpoch(), transactionMetadata.getTimeout(), SystemClock.now());
-                    prepareSet.add(prepare);
+                    Broker broker = nameService.getBroker(partitionGroup.getLeader());
+                    if (broker == null) {
+                        partitionMetadataAndErrors.add(new PartitionMetadataAndError(partition, KafkaErrorCode.NOT_LEADER_FOR_PARTITION.getCode()));
+                    } else {
+                        TransactionPrepare prepare = new TransactionPrepare(topic.getFullName(), (short) partition.intValue(),
+                                transactionMetadata.getApp(), broker.getId(), broker.getIp(), broker.getPort(),
+                                transactionMetadata.getId(), transactionMetadata.getProducerId(), transactionMetadata.getProducerEpoch(),
+                                transactionMetadata.getEpoch(), transactionMetadata.getTimeout(), SystemClock.now());
+                        prepareSet.add(prepare);
+                    }
                 }
             }
         }

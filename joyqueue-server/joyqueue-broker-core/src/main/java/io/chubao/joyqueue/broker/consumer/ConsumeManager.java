@@ -32,7 +32,6 @@ import io.chubao.joyqueue.broker.monitor.SessionManager;
 import io.chubao.joyqueue.domain.Consumer.ConsumerPolicy;
 import io.chubao.joyqueue.domain.PartitionGroup;
 import io.chubao.joyqueue.domain.TopicName;
-import io.chubao.joyqueue.event.ConsumerEvent;
 import io.chubao.joyqueue.event.EventType;
 import io.chubao.joyqueue.event.MetaEvent;
 import io.chubao.joyqueue.exception.JoyQueueCode;
@@ -42,6 +41,7 @@ import io.chubao.joyqueue.message.MessageLocation;
 import io.chubao.joyqueue.network.session.Connection;
 import io.chubao.joyqueue.network.session.Consumer;
 import io.chubao.joyqueue.network.session.Joint;
+import io.chubao.joyqueue.nsr.event.UpdateConsumerEvent;
 import io.chubao.joyqueue.server.retry.api.MessageRetry;
 import io.chubao.joyqueue.store.PartitionGroupStore;
 import io.chubao.joyqueue.store.StoreService;
@@ -594,15 +594,15 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
     /**
      * 更新消费配置事件
      */
-    class UpdateConsumeListener implements EventListener {
+    class UpdateConsumeListener implements EventListener<MetaEvent> {
 
         @Override
-        public void onEvent(Object event) {
-            if (((MetaEvent) event).getEventType() == EventType.UPDATE_CONSUMER) {
-                ConsumerEvent updateConsumerEvent = (ConsumerEvent) event;
+        public void onEvent(MetaEvent event) {
+            if (event.getEventType() == EventType.UPDATE_CONSUMER) {
+                UpdateConsumerEvent updateConsumerEvent = (UpdateConsumerEvent) event;
                 logger.info("listen update consume event.");
                 try {
-                    ConsumerPolicy consumerPolicy = clusterManager.getConsumerPolicy(updateConsumerEvent.getTopic(), updateConsumerEvent.getApp());
+                    ConsumerPolicy consumerPolicy = clusterManager.getConsumerPolicy(updateConsumerEvent.getTopic(), updateConsumerEvent.getNewConsumer().getApp());
                     Integer readRetryProbability = consumerPolicy.getReadRetryProbability();
                     partitionManager.resetRetryProbability(readRetryProbability);
                 } catch (JoyQueueException e) {

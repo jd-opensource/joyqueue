@@ -34,7 +34,7 @@ public interface BrokerService {
      * @param id
      * @return
      */
-    Broker getById(long id);
+    Broker getById(int id);
 
     /**
      * 根据IP和端口获取Broker
@@ -57,7 +57,7 @@ public interface BrokerService {
      * @param ids
      * @return
      */
-    List<Broker> getByIds(List<Long> ids);
+    List<Broker> getByIds(List<Integer> ids);
 
     /**
      * 获取全部
@@ -90,5 +90,5 @@ public interface BrokerService {
      *
      * @param id
      */
-    void delete(long id);
+    void delete(int id);
 }

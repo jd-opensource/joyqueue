@@ -26,6 +26,8 @@ public class TopicRepository extends BaseRepository {
     private static final String GET_BY_ID = String.format("SELECT %s FROM %s WHERE id = ?", COLUMNS, TABLE);
     private static final String ADD = String.format("INSERT INTO %s(%s) VALUES(?,?,?,?,?,?)", TABLE, COLUMNS);
     private static final String UPDATE_BY_ID = String.format("UPDATE %s SET %s WHERE id = ?", TABLE, UPDATE_COLUMNS);
+    private static final String UPDATE_INCR_PARTITION_BY_ID = String.format("UPDATE %s SET partitions = partitions + ? WHERE id = ?", TABLE);
+    private static final String UPDATE_DECR_PARTITION_BY_ID = String.format("UPDATE %s SET partitions = partitions - ? WHERE id = ?", TABLE);
     private static final String DELETE_BY_ID = String.format("DELETE FROM %s WHERE id = ?", TABLE);
 
     public TopicRepository(SQLOperator sqlOperator) {
@@ -83,7 +85,7 @@ public class TopicRepository extends BaseRepository {
 
         if (StringUtils.isNotBlank(query.getKeyword())) {
             sql.append(" AND code LIKE ?");
-            params.add(query.getKeyword() + "*");
+            params.add(query.getKeyword() + "%");
         }
         return sql.toString();
     }
@@ -98,6 +100,14 @@ public class TopicRepository extends BaseRepository {
         update(UPDATE_BY_ID, topicDTO.getCode(), topicDTO.getNamespace(), topicDTO.getPartitions(),
                 topicDTO.getPriorityPartitions(), topicDTO.getType(), topicDTO.getId());
         return topicDTO;
+    }
+
+    public int incrPartitions(String id, int value) {
+        return update(UPDATE_INCR_PARTITION_BY_ID, value, id);
+    }
+
+    public int decrPartitions(String id, int value) {
+        return update(UPDATE_DECR_PARTITION_BY_ID, value, id);
     }
 
     public int deleteById(String id) {

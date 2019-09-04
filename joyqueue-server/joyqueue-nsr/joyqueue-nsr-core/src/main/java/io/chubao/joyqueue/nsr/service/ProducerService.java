@@ -61,6 +61,12 @@ public interface ProducerService {
     List<Producer> getByApp(String app);
 
     /**
+     * 查询全部
+     * @return
+     */
+    List<Producer> getAll();
+
+    /**
      * 添加
      *
      * @param producer

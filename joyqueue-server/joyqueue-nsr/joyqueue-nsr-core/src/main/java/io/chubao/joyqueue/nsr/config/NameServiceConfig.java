@@ -34,8 +34,56 @@ public class NameServiceConfig {
         return clientConfig;
     }
 
-    public String getNamserverAddress() {
+    public String getNameserverAddress() {
         return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_ADDRESS);
+    }
+
+    public boolean getAllMetadataCacheEnable() {
+        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_ALL_METADATA_CACHE_ENABLE);
+    }
+
+    public int getAllMetadataCacheExpireTime() {
+        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_ALL_METADATA_CACHE_EXPIRE_TIME);
+    }
+
+    public int getCompensationInterval() {
+        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_COMPENSATION_INTERVAL);
+    }
+
+    public boolean getCompensationTopicEnable() {
+        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_COMPENSATION_TOPIC_ENABLE);
+    }
+
+    public boolean getCompensationBrokerEnable() {
+        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_COMPENSATION_BROKER_ENABLE);
+    }
+
+    public boolean getCompensationProducerEnable() {
+        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_COMPENSATION_PRODUCER_ENABLE);
+    }
+
+    public boolean getCompensationConsumerEnable() {
+        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_COMPENSATION_CONSUMER_ENABLE);
+    }
+
+    public boolean getCompensationDataCenterEnable() {
+        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_COMPENSATION_DATACENTER_ENABLE);
+    }
+
+    public boolean getCompensationConfigEnable() {
+        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_COMPENSATION_CONFIG_ENABLE);
+    }
+
+    public boolean getCompensationCacheEnable() {
+        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_COMPENSATION_CACHE_ENABLE);
+    }
+
+    public String getMessengerType() {
+        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_MESSENGER_TYPE);
+    }
+
+    public boolean getMessengerIgniteEnable() {
+        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_MESSENGER_IGNITE_ENABLE);
     }
 
     public int getThinTransportTimeout() {

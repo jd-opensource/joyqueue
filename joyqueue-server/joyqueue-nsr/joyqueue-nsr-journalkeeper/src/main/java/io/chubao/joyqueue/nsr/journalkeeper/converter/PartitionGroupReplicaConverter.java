@@ -16,6 +16,10 @@ import java.util.List;
  */
 public class PartitionGroupReplicaConverter {
 
+    public static String generateId(String topic, int group, int replica) {
+        return String.format("%s_%s_%s", topic, group, replica);
+    }
+
     public static PartitionGroupReplicaDTO convert(Replica replica) {
         if (replica == null) {
             return null;

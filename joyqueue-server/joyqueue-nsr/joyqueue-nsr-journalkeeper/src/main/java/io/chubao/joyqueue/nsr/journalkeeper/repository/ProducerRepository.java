@@ -24,6 +24,8 @@ public class ProducerRepository extends BaseRepository {
             COLUMNS, TABLE);
     private static final String GET_BY_APP = String.format("SELECT %s FROM %s WHERE app = ? ORDER BY topic",
             COLUMNS, TABLE);
+    private static final String GET_ALL = String.format("SELECT %s FROM %s",
+            COLUMNS, TABLE);
     private static final String ADD = String.format("INSERT INTO %s(%s) VALUES(?,?,?,?,?,?,?)",
             TABLE, COLUMNS);
     private static final String UPDATE_BY_ID = String.format("UPDATE %s SET %s WHERE id = ?",
@@ -49,6 +51,10 @@ public class ProducerRepository extends BaseRepository {
 
     public List<ProducerDTO> getByApp(String app) {
         return query(ProducerDTO.class, GET_BY_APP, app);
+    }
+
+    public List<ProducerDTO> getAll() {
+        return query(ProducerDTO.class, GET_ALL);
     }
 
     public ProducerDTO add(ProducerDTO consumerDTO) {

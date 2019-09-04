@@ -15,6 +15,7 @@
  */
 package io.chubao.joyqueue.event;
 
+@Deprecated
 public class ConfigEvent extends MetaEvent {
     private String group;
     private String key;

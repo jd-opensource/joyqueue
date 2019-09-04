@@ -27,7 +27,7 @@ public class BrokerRepository extends BaseRepository {
     private static final String GET_BY_IDS = String.format("SELECT %s FROM %s WHERE id in ", COLUMNS, TABLE);
     private static final String GET_ALL = String.format("SELECT %s FROM %s ORDER BY ip", COLUMNS, TABLE);
     private static final String ADD = String.format("INSERT INTO %s(%s) VALUES(?,?,?,?,?,?)", TABLE, COLUMNS);
-    private static final String UPDATE_BY_ID = String.format("UPDATE %s SET %s WHERE id = ?", UPDATE_COLUMNS, TABLE);
+    private static final String UPDATE_BY_ID = String.format("UPDATE %s SET %s WHERE id = ?", TABLE, UPDATE_COLUMNS);
     private static final String DELETE_BY_ID = String.format("DELETE FROM %s WHERE id = ?", TABLE);
 
     public BrokerRepository(SQLOperator sqlOperator) {
@@ -46,7 +46,7 @@ public class BrokerRepository extends BaseRepository {
         return query(BrokerDTO.class, GET_BY_RETRY_TYPE, retryType);
     }
 
-    public List<BrokerDTO> getByIds(List<Long> ids) {
+    public List<BrokerDTO> getByIds(List ids) {
         StringBuilder idsSql = new StringBuilder();
         idsSql.append("(");
         for (int i = 0; i < ids.size(); i++) {

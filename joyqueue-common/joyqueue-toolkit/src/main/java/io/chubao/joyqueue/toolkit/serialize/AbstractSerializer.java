@@ -18,6 +18,7 @@ package io.chubao.joyqueue.toolkit.serialize;
 import io.chubao.joyqueue.toolkit.io.Compressors;
 import io.chubao.joyqueue.toolkit.io.Zip;
 import com.google.common.base.Charsets;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -168,7 +169,7 @@ public abstract class AbstractSerializer {
      */
     public static String read(final ByteBuffer in, final int length, final boolean compressed, String charset) throws Exception {
         if (length <= 0) {
-            return null;
+            return StringUtils.EMPTY;
         }
         byte[] bytes = readBytes(in, length);
         try {

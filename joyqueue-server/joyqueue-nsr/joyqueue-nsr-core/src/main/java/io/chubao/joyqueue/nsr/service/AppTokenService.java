@@ -50,6 +50,12 @@ public interface AppTokenService {
     List<AppToken> getByApp(String app);
 
     /**
+     * 查询全部
+     * @return
+     */
+    List<AppToken> getAll();
+
+    /**
      * 添加
      * @param appToken
      * @return

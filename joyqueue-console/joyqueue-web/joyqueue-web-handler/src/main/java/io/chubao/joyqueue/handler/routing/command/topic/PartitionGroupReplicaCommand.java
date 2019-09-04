@@ -87,7 +87,7 @@ public class PartitionGroupReplicaCommand extends NsrCommandSupport<PartitionGro
         PageResult<Broker> brokerPage = brokerService.search(brokerQuery);
         List<Broker> brokers = new ArrayList<>();
 
-        if (CollectionUtils.isNotEmpty(partitionGroupReplicas) && CollectionUtils.isNotEmpty(brokerPage.getResult())) {
+        if (CollectionUtils.isNotEmpty(partitionGroupReplicas)) {
             for (Broker broker : brokerPage.getResult()) {
                 boolean isMatch = false;
                 for (PartitionGroupReplica partitionGroupReplica : partitionGroupReplicas) {
@@ -100,6 +100,8 @@ public class PartitionGroupReplicaCommand extends NsrCommandSupport<PartitionGro
                     brokers.add(broker);
                 }
             }
+        } else {
+            brokers.addAll(brokerPage.getResult());
         }
 
         return Responses.success(brokerPage.getPagination(), brokers);

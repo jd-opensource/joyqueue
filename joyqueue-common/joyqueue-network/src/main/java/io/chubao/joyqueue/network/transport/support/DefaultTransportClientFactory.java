@@ -42,6 +42,10 @@ public class DefaultTransportClientFactory implements TransportClientFactory {
     private ExceptionHandler exceptionHandler;
     private EventBus<TransportEvent> transportEventBus;
 
+    public DefaultTransportClientFactory() {
+
+    }
+
     public DefaultTransportClientFactory(Codec codec) {
         this(codec, (CommandHandlerFactory) null);
     }
