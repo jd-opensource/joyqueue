@@ -9,16 +9,17 @@ import io.chubao.joyqueue.toolkit.config.PropertyDef;
  */
 public enum MessengerConfigKey implements PropertyDef {
 
-    SESSION_EXPIRE_TIME("nameserver.messenger.session.expire.time", 1000 * 60 * 5, Type.INT),
-    SESSION_TIMEOUT("nameserver.messenger.session.timeout", 1000 * 5, Type.INT),
-    PUBLISH_TIMEOUT("nameserver.messenger.publish.timeout", 1000 * 10, Type.INT),
-    PUBLISH_FORCE("nameserver.messenger.publish.force", false, Type.BOOLEAN),
-    HEARTBEAT_INTERVAL("nameserver.messenger.heartbeat.interval", 1000 * 10, Type.INT),
-    HEARTBEAT_TIMEOUT("nameserver.messenger.heartbeat.timeout", 300, Type.INT),
-    PORT("nameserver.messenger.port", 50093, Type.INT);
+    SESSION_EXPIRE_TIME("nameservice.messenger.session.expire.time", 1000 * 60 * 5, Type.INT),
+    SESSION_TIMEOUT("nameservice.messenger.session.timeout", 1000 * 5, Type.INT),
+    PUBLISH_TIMEOUT("nameservice.messenger.publish.timeout", 1000 * 10, Type.INT),
+    PUBLISH_FORCE("nameservice.messenger.publish.force", false, Type.BOOLEAN),
+    PUBLISH_IGNORE_CONNECTION_ERROR("nameservice.messenger.publish.ignore.connection.error", true, Type.BOOLEAN),
+    HEARTBEAT_INTERVAL("nameservice.messenger.heartbeat.interval", 1000 * 10, Type.INT),
+    HEARTBEAT_TIMEOUT("nameservice.messenger.heartbeat.timeout", 300, Type.INT),
+    PORT("nameservice.messenger.port", 50093, Type.INT);
 
-    public static final String MESSENGER_SERVER_CONFIG_PREFIX = "nameserver.messenger.server.";
-    public static final String MESSENGER_CLIENT_CONFIG_PREFIX = "nameserver.messenger.client.";
+    public static final String MESSENGER_SERVER_CONFIG_PREFIX = "nameservice.messenger.server.";
+    public static final String MESSENGER_CLIENT_CONFIG_PREFIX = "nameservice.messenger.client.";
 
     private String name;
     private Object value;

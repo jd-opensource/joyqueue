@@ -131,7 +131,7 @@
         <module>joyqueue-common</module>
         <module>joyqueue-server</module>
         <!-- TODO 临时-->
-        <!--<module>joyqueue-console</module>-->
+        <module>joyqueue-console</module>
         <!--<module>joyqueue-client</module>-->
         <!--<module>joyqueue-openmessaging</module>-->
         <!--<module>docker</module>-->

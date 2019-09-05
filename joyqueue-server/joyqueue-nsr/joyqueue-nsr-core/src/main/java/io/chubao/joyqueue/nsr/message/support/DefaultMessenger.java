@@ -9,6 +9,7 @@ import io.chubao.joyqueue.network.transport.TransportServer;
 import io.chubao.joyqueue.network.transport.command.Command;
 import io.chubao.joyqueue.network.transport.command.CommandCallback;
 import io.chubao.joyqueue.network.transport.command.JoyQueueCommand;
+import io.chubao.joyqueue.network.transport.exception.TransportException;
 import io.chubao.joyqueue.nsr.config.MessengerConfig;
 import io.chubao.joyqueue.nsr.exception.MessengerException;
 import io.chubao.joyqueue.nsr.message.MessageListener;
@@ -96,13 +97,30 @@ public class DefaultMessenger extends Service implements Messenger<MetaEvent>, P
                                 logger.warn("messenger publish error, event: {}, id: {}, ip: {}, port: {}",
                                         event, broker.getId(), broker.getIp(), broker.getPort(), cause);
 
-                                success[0] = false;
+                                boolean isSuccess = false;
+                                if (cause instanceof TransportException.RequestErrorException) {
+                                    if (config.getPublishIgnoreConnectionError()) {
+                                        isSuccess = true;
+                                    }
+                                }
+
+                                success[0] = isSuccess;
                                 latch.countDown();
                             }
                         });
+            } catch (TransportException.ConnectionException e) {
+                logger.warn("create session exception, event: {}, brokerId: {}, brokerIp: {}, brokerPort: {}",
+                        event, broker.getId(), broker.getIp(), broker.getPort(), e);
+
+                if (config.getPublishIgnoreConnectionError()) {
+                    latch.countDown();
+                } else {
+                    success[0] = false;
+                }
             } catch (Exception e) {
                 logger.warn("create session exception, event: {}, brokerId: {}, brokerIp: {}, brokerPort: {}",
                         event, broker.getId(), broker.getIp(), broker.getPort(), e);
+
                 success[0] = false;
             }
         }

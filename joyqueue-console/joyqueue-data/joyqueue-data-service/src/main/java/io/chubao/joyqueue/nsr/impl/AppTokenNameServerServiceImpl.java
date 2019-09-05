@@ -106,7 +106,7 @@ public class AppTokenNameServerServiceImpl extends NameServerBase implements App
         AppTokenQuery appTokenQuery = new AppTokenQuery();
         appTokenQuery.setApp(app);
         appTokenQuery.setToken(token);
-        String result = post(GETBYAPP_TOKEN, appTokenQuery);
+        String result = post(GETBYAPPANDTOKEN_TOKEN, appTokenQuery);
         AppToken appToken = JSON.parseObject(result,AppToken.class);
         return nsrAppTokenConverter.convert(appToken);
     }

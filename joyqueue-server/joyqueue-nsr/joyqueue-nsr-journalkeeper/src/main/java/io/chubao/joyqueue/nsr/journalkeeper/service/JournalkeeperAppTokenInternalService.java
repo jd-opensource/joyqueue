@@ -49,7 +49,7 @@ public class JournalkeeperAppTokenInternalService implements AppTokenInternalSer
 
     @Override
     public AppToken update(AppToken appToken) {
-        AppTokenDTO appTokenDTO = appTokenRepository.add(AppTokenConverter.convert(appToken));
+        AppTokenDTO appTokenDTO = appTokenRepository.update(AppTokenConverter.convert(appToken));
         return AppTokenConverter.convert(appTokenDTO);
     }
 

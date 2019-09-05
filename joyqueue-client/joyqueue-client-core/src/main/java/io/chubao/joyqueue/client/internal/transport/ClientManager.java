@@ -23,7 +23,6 @@ import io.chubao.joyqueue.client.internal.transport.config.TransportConfigChecke
 import io.chubao.joyqueue.exception.JoyQueueCode;
 import io.chubao.joyqueue.network.domain.BrokerNode;
 import io.chubao.joyqueue.network.transport.TransportClient;
-import io.chubao.joyqueue.network.transport.codec.support.JoyQueueCodec;
 import io.chubao.joyqueue.network.transport.config.ClientConfig;
 import io.chubao.joyqueue.network.transport.support.DefaultTransportClientFactory;
 import io.chubao.joyqueue.toolkit.concurrent.NamedThreadFactory;
@@ -64,7 +63,7 @@ public class ClientManager extends Service {
     @Override
     protected void validate() throws Exception {
         clientGroupManager = new ClientGroupManager(transportConfig);
-        transportClient = new DefaultTransportClientFactory(new JoyQueueCodec()).create(convertToClientConfig(transportConfig));
+        transportClient = new DefaultTransportClientFactory().create(convertToClientConfig(transportConfig));
         heartbeatThreadScheduler = Executors.newScheduledThreadPool(1, new NamedThreadFactory("joyqueue-client-heartbeat"));
     }
 

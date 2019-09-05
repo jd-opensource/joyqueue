@@ -53,6 +53,10 @@ public class MessengerConfig {
         return propertySupplier.getValue(MessengerConfigKey.PUBLISH_FORCE);
     }
 
+    public boolean getPublishIgnoreConnectionError() {
+        return propertySupplier.getValue(MessengerConfigKey.PUBLISH_IGNORE_CONNECTION_ERROR);
+    }
+
     public int getHeartbeatTimeout() {
         return propertySupplier.getValue(MessengerConfigKey.HEARTBEAT_TIMEOUT);
     }

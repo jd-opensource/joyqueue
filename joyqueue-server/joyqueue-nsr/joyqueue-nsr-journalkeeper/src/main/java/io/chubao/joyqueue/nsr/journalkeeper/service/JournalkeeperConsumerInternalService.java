@@ -3,6 +3,7 @@ package io.chubao.joyqueue.nsr.journalkeeper.service;
 import io.chubao.joyqueue.domain.Consumer;
 import io.chubao.joyqueue.domain.TopicName;
 import io.chubao.joyqueue.nsr.journalkeeper.converter.ConsumerConverter;
+import io.chubao.joyqueue.nsr.journalkeeper.domain.ConsumerDTO;
 import io.chubao.joyqueue.nsr.journalkeeper.repository.ConsumerRepository;
 import io.chubao.joyqueue.nsr.service.internal.ConsumerInternalService;
 
@@ -48,7 +49,10 @@ public class JournalkeeperConsumerInternalService implements ConsumerInternalSer
 
     @Override
     public Consumer add(Consumer consumer) {
-        return ConsumerConverter.convert(consumerRepository.add(ConsumerConverter.convert(consumer)));
+        // TODO group处理
+        ConsumerDTO consumerDTO = ConsumerConverter.convert(consumer);
+        consumerDTO.setReferer(consumerDTO.getApp().split("\\.")[0]);
+        return ConsumerConverter.convert(consumerRepository.add(consumerDTO));
     }
 
     @Override

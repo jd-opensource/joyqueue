@@ -52,18 +52,22 @@ public class ApplicationTokenCommand extends NsrCommandSupport<ApplicationToken,
     @Path("search")
     public Response search(@PageQuery QPageQuery<QApplicationToken> qPageQuery) throws Exception {
         QApplicationToken query = qPageQuery.getQuery();
-        List<ApplicationToken> producers = Collections.emptyList();
+        List<ApplicationToken> appTokens = Collections.emptyList();
 
         if (query.getApplication() != null) {
-            producers = service.findByApp(query.getApplication().getCode());
+            appTokens = service.findByApp(query.getApplication().getCode());
+        }
+
+        if (application != null) {
+            appTokens = service.findByApp(application.getCode());
         }
 
         Pagination pagination = qPageQuery.getPagination();
-        pagination.setTotalRecord(producers.size());
+        pagination.setTotalRecord(appTokens.size());
 
         PageResult<ApplicationToken> result = new PageResult();
         result.setPagination(pagination);
-        result.setResult(producers);
+        result.setResult(appTokens);
         return Responses.success(result.getPagination(), result.getResult());
     }
 

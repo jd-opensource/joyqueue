@@ -6,6 +6,7 @@ import com.google.common.cache.RemovalNotification;
 import io.chubao.joyqueue.domain.Broker;
 import io.chubao.joyqueue.network.transport.Transport;
 import io.chubao.joyqueue.network.transport.TransportClient;
+import io.chubao.joyqueue.network.transport.exception.TransportException;
 import io.chubao.joyqueue.nsr.config.MessengerConfig;
 import io.chubao.joyqueue.nsr.message.support.network.transport.MessengerTransportClientFactory;
 import io.chubao.joyqueue.toolkit.concurrent.NamedThreadFactory;
@@ -80,7 +81,7 @@ public class MessengerSessionManager extends Service {
         return getOrCreateSession(broker.getId(), broker.getIp(), broker.getBackEndPort());
     }
 
-    public MessengerSession getOrCreateSession(int brokerId, String brokerHost, int brokerPort) {
+    public MessengerSession getOrCreateSession(int brokerId, String brokerHost, int brokerPort) throws TransportException {
         maybeInitHeartbeat();
         try {
             return sessions.get(brokerId, () -> {
@@ -89,8 +90,8 @@ public class MessengerSessionManager extends Service {
                 return new MessengerSession(brokerId, brokerHost, brokerPort, config, transport);
             });
         } catch (ExecutionException e) {
-            throw new RuntimeException(String.format("create session failed, broker: {id: %s, ip: %s, port: %s}",
-                    brokerId, brokerHost, brokerPort), e);
+            throw new TransportException.ConnectionException(String.format("create session failed, broker: {id: %s, ip: %s, port: %s}",
+                    brokerId, brokerHost, brokerPort), e.getCause());
         }
     }
 

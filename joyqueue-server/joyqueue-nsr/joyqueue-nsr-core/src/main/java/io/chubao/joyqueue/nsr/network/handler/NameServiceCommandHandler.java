@@ -345,10 +345,6 @@ public class NameServiceCommandHandler implements NsrCommandHandler, Types, com.
 
         @Override
         public void onEvent(NameServerEvent event) {
-            if (!config.getMessengerIgniteEnable()) {
-                return;
-            }
-
             try {
                 logger.info("will publish event [{}]", event);
                 if (event == null || event.getBrokerId() == null) {

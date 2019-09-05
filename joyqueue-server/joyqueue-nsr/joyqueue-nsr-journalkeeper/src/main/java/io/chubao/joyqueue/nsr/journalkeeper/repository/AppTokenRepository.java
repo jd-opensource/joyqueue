@@ -20,7 +20,7 @@ public class AppTokenRepository extends BaseRepository {
 
     private static final String GET_BY_ID = String.format("SELECT %s FROM %s WHERE id = ?", COLUMNS, TABLE);
     private static final String GET_BY_APP_AND_CODE = String.format("SELECT %s FROM %s WHERE app = ? AND token = ?", COLUMNS, TABLE);
-    private static final String GET_BY_APP = String.format("SELECT %s FROM %s WHERE app = ? AND token = ?", COLUMNS, TABLE);
+    private static final String GET_BY_APP = String.format("SELECT %s FROM %s WHERE app = ?", COLUMNS, TABLE);
     private static final String GET_ALL = String.format("SELECT %s FROM %s", COLUMNS, TABLE);
     private static final String ADD = String.format("INSERT INTO %s(%s) VALUES(?,?,?,?,?)", TABLE, COLUMNS);
     private static final String UPDATE_BY_ID = String.format("UPDATE %s SET %s WHERE id = ?", TABLE, UPDATE_COLUMNS);
