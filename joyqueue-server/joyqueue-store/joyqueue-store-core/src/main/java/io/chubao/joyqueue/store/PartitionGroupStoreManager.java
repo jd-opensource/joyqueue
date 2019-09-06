@@ -306,7 +306,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
             long validPosition = indexStore.right();
             IndexItem currentIndex, previousIndex = null;
 
-            while ((validPosition -= IndexItem.STORAGE_SIZE) >= IndexItem.STORAGE_SIZE) { //第一条索引有可能是全0，这是合法的。
+            while ((validPosition -= IndexItem.STORAGE_SIZE) >= indexStore.left() + IndexItem.STORAGE_SIZE) { //第一条索引有可能是全0，这是合法的。
                 if(null == previousIndex) {
                     currentIndex = indexStore.read(validPosition);
                 } else {
@@ -1004,6 +1004,22 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
             startFlushThread();
         }
     }
+
+    @Override
+    public void clear(long position) throws IOException {
+        stopFlushThread();
+        try {
+            for (Partition partition : partitionMap.values()) {
+                partition.store.setRight(0L);
+            }
+            store.clear(position);
+        } finally {
+            startFlushThread();
+        }
+    }
+
+
+
 
     private void rollback(long position) throws IOException {
 

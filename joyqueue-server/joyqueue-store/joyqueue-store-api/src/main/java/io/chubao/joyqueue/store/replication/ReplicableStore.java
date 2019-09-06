@@ -63,6 +63,8 @@ public interface ReplicableStore {
      */
     long leftPosition();
 
+    void clear(long position) throws IOException;
+
     /**
      * 当前日志提交的位置
      */
