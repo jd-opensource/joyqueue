@@ -18,9 +18,9 @@ package io.chubao.joyqueue.broker.kafka.coordinator.group.delay;
 import io.chubao.joyqueue.broker.kafka.KafkaErrorCode;
 import io.chubao.joyqueue.broker.kafka.coordinator.group.GroupBalanceManager;
 import io.chubao.joyqueue.broker.kafka.coordinator.group.GroupMetadataManager;
+import io.chubao.joyqueue.broker.kafka.coordinator.group.domain.GroupJoinGroupResult;
 import io.chubao.joyqueue.broker.kafka.coordinator.group.domain.GroupMemberMetadata;
 import io.chubao.joyqueue.broker.kafka.coordinator.group.domain.GroupMetadata;
-import io.chubao.joyqueue.broker.kafka.coordinator.group.domain.GroupJoinGroupResult;
 import io.chubao.joyqueue.broker.kafka.coordinator.group.domain.GroupState;
 import io.chubao.joyqueue.toolkit.delay.DelayedOperation;
 import org.apache.commons.collections.CollectionUtils;
@@ -76,7 +76,6 @@ public class DelayedJoin extends DelayedOperation {
     }
 
     protected void doComplete() {
-        // TODO 临时日志
         logger.info("group {} delay join", group.getId());
 
         List<GroupMemberMetadata> failedMembers = group.getNotYetRejoinedMembers();
@@ -89,10 +88,11 @@ public class DelayedJoin extends DelayedOperation {
         }
 
         // 如果member为空，那么移除group
+        // TODO 去掉移除逻辑试试
         if (group.isMemberEmpty()) {
             logger.info("group {} generation {} is dead and removed", group.getId(), group.getGenerationId());
             group.transitionStateTo(GroupState.DEAD);
-            groupMetadataManager.removeGroup(group);
+//            groupMetadataManager.removeGroup(group);
             return;
         }
 

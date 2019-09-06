@@ -15,13 +15,19 @@
  */
 package io.chubao.joyqueue.handler.routing.command.topic;
 
-import io.chubao.joyqueue.handler.routing.command.NsrCommandSupport;
-import io.chubao.joyqueue.model.domain.Namespace;
-import io.chubao.joyqueue.model.query.QNamespace;
-import io.chubao.joyqueue.service.NamespaceService;
 import com.jd.laf.web.vertx.annotation.Path;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
+import io.chubao.joyqueue.handler.annotation.PageQuery;
+import io.chubao.joyqueue.handler.routing.command.NsrCommandSupport;
+import io.chubao.joyqueue.model.PageResult;
+import io.chubao.joyqueue.model.Pagination;
+import io.chubao.joyqueue.model.QPageQuery;
+import io.chubao.joyqueue.model.domain.Namespace;
+import io.chubao.joyqueue.model.query.QNamespace;
+import io.chubao.joyqueue.service.NamespaceService;
+
+import java.util.List;
 
 /**
  * 命名空间 处理器
@@ -29,9 +35,22 @@ import com.jd.laf.web.vertx.response.Responses;
  */
 public class NamespaceCommand extends NsrCommandSupport<Namespace, NamespaceService, QNamespace> {
 
+    @Path("search")
+    public Response pageQuery(@PageQuery QPageQuery<QNamespace> qPageQuery) throws Exception {
+        List<Namespace> namespaces = service.findAll();
+
+        Pagination pagination = qPageQuery.getPagination();
+        pagination.setTotalRecord(namespaces.size());
+
+        PageResult<Namespace> result = new PageResult();
+        result.setPagination(pagination);
+        result.setResult(namespaces);
+        return Responses.success(result.getPagination(), result.getResult());
+    }
+
     @Path("findAll")
     public Response findAll() throws Exception {
-        return Responses.success(service.findByQuery(new QNamespace()));
+        return Responses.success(service.findAll());
     }
 
 }

@@ -95,7 +95,7 @@
         </dependency>
         <dependency>
             <groupId>io.chubao</groupId>
-            <artifactId>joyqueue-nsr-ignite</artifactId>
+            <artifactId>joyqueue-nsr-composition</artifactId>
         </dependency>
         <dependency>
             <groupId>io.chubao</groupId>

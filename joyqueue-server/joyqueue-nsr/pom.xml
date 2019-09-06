@@ -35,6 +35,8 @@
         <module>joyqueue-nsr-admin</module>
         <module>joyqueue-nsr-core</module>
         <module>joyqueue-nsr-ignite</module>
+        <module>joyqueue-nsr-journalkeeper</module>
+        <module>joyqueue-nsr-composition</module>
     </modules>
     <dependencies>
 

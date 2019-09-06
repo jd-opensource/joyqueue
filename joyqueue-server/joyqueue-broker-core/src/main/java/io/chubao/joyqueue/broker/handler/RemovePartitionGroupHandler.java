@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
  * @author wylixiaobin
  * Date: 2018/10/8
  */
+@Deprecated
 public class RemovePartitionGroupHandler implements CommandHandler, Type {
     private static Logger logger = LoggerFactory.getLogger(RemovePartitionGroupHandler.class);
     private ElectionService electionService;
@@ -52,6 +53,10 @@ public class RemovePartitionGroupHandler implements CommandHandler, Type {
 
     @Override
     public Command handle(Transport transport, Command command) throws TransportException {
+        // TODO 临时
+        if (true) {
+            return BooleanAck.build();
+        }
         if (command == null) {
             logger.error("CreatePartitionGroupHandler request command is null");
             return null;

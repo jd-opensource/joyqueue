@@ -20,6 +20,9 @@ import io.chubao.joyqueue.domain.Config;
 import io.chubao.joyqueue.event.ConfigEvent;
 import io.chubao.joyqueue.event.EventType;
 import io.chubao.joyqueue.event.NameServerEvent;
+import io.chubao.joyqueue.nsr.event.AddConfigEvent;
+import io.chubao.joyqueue.nsr.event.RemoveConfigEvent;
+import io.chubao.joyqueue.nsr.event.UpdateConfigEvent;
 import io.chubao.joyqueue.toolkit.concurrent.EventBus;
 import io.chubao.joyqueue.toolkit.concurrent.EventListener;
 import io.chubao.joyqueue.toolkit.config.Property;
@@ -175,6 +178,7 @@ public class ConfigurationManager extends Service implements EventListener<NameS
                 } else {
                     logger.info("config {} group not match, value is {}, group is {}, ", config.getKey(), config.getValue(), config.getGroup());
                 }
+
             }
         }
     }
@@ -182,9 +186,25 @@ public class ConfigurationManager extends Service implements EventListener<NameS
 
     @Override
     public void onEvent(NameServerEvent event) {
-        if (event.getMetaEvent() instanceof ConfigEvent) {
-            ConfigEvent configEvent = (ConfigEvent) event.getMetaEvent();
-            doUpdateProperty(configEvent.getEventType(), new Config(configEvent.getGroup(), configEvent.getKey(), configEvent.getValue()));
+        switch (event.getEventType()) {
+            case ADD_CONFIG: {
+                AddConfigEvent addConfigEvent = (AddConfigEvent) event.getMetaEvent();
+                Config config = addConfigEvent.getConfig();
+                doUpdateProperty(addConfigEvent.getEventType(), new Config(config.getGroup(), config.getKey(), config.getValue()));
+                break;
+            }
+            case UPDATE_CONFIG: {
+                UpdateConfigEvent updateConfigEvent = (UpdateConfigEvent) event.getMetaEvent();
+                Config config = updateConfigEvent.getNewConfig();
+                doUpdateProperty(updateConfigEvent.getEventType(), new Config(config.getGroup(), config.getKey(), config.getValue()));
+                break;
+            }
+            case REMOVE_CONFIG: {
+                RemoveConfigEvent removeConfigEvent = (RemoveConfigEvent) event.getMetaEvent();
+                Config config = removeConfigEvent.getConfig();
+                doUpdateProperty(removeConfigEvent.getEventType(), new Config(config.getGroup(), config.getKey(), config.getValue()));
+                break;
+            }
         }
     }
 

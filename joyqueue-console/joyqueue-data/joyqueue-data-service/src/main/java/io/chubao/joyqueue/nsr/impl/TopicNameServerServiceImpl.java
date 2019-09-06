@@ -19,22 +19,22 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
-import io.chubao.joyqueue.domain.PartitionGroup;
-import io.chubao.joyqueue.domain.TopicName;
-import io.chubao.joyqueue.model.PageResult;
-import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.convert.CodeConverter;
 import io.chubao.joyqueue.convert.NsrTopicConverter;
+import io.chubao.joyqueue.domain.PartitionGroup;
+import io.chubao.joyqueue.domain.TopicName;
 import io.chubao.joyqueue.exception.ServiceException;
+import io.chubao.joyqueue.model.PageResult;
+import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.model.domain.OperLog;
 import io.chubao.joyqueue.model.domain.PartitionGroupMaster;
 import io.chubao.joyqueue.model.domain.PartitionGroupReplica;
 import io.chubao.joyqueue.model.domain.Topic;
 import io.chubao.joyqueue.model.domain.TopicPartitionGroup;
 import io.chubao.joyqueue.model.query.QTopic;
-import io.chubao.joyqueue.nsr.model.TopicQuery;
 import io.chubao.joyqueue.nsr.NameServerBase;
 import io.chubao.joyqueue.nsr.TopicNameServerService;
+import io.chubao.joyqueue.nsr.model.TopicQuery;
 import io.chubao.joyqueue.util.NullUtil;
 import org.springframework.stereotype.Service;
 
@@ -45,7 +45,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import static io.chubao.joyqueue.exception.ServiceException.IGNITE_RPC_ERROR;
+import static io.chubao.joyqueue.exception.ServiceException.NAMESERVER_RPC_ERROR;
 
 /**
  * Created by wangxiaofei1 on 2019/1/2.
@@ -60,11 +60,11 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
     public static final String UPDATE_PARTITION_GROUP="/topic/updatePartitionGroup";
     public static final String LEADER_CHANGE="/topic/leaderChange";
     public static final String FIND_PARTITION_GROUP_MASTER="/topic/getPartitionGroup";
-    public static final String FINDBYQUERY_TOPIC="/topic/findByQuery";
-    public static final String LIST_TOPIC="/topic/list";
     public static final String GETBYID_TOPIC="/topic/getById";
     public static final String UPDATE_TOPIC="/topic/update";
     public static final String UNSUB_TOPIC="/topic/findUnsubscribedByQuery";
+    public static final String SEARCH_TOPIC="/topic/search";
+    public static final String GETBYCODE_TOPIC="/topic/getByCode";
 
     private NsrTopicConverter nsrTopicConverter = new NsrTopicConverter();
 
@@ -76,7 +76,7 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
      * @throws Exception
      */
     @Override
-    public String addTopic(Topic topic, List<TopicPartitionGroup> partitionGroups) throws Exception {
+    public String addTopic(Topic topic, List<TopicPartitionGroup> partitionGroups) {
         JSONObject request = new JSONObject();
         io.chubao.joyqueue.domain.Topic nsrTopic = new io.chubao.joyqueue.domain.Topic();
         //数据组装
@@ -116,7 +116,7 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
      * @throws Exception
      */
     @Override
-    public int removeTopic(Topic topic) throws Exception {
+    public int removeTopic(Topic topic) {
         io.chubao.joyqueue.domain.Topic nsrTopic = new io.chubao.joyqueue.domain.Topic();
         nsrTopic.setName(CodeConverter.convertTopic(topic.getNamespace(),topic));
         nsrTopic.setType(io.chubao.joyqueue.domain.Topic.Type.valueOf((byte)topic.getType()));
@@ -129,7 +129,7 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
      * @throws Exception
      */
     @Override
-    public String addPartitionGroup(TopicPartitionGroup group) throws Exception {
+    public String addPartitionGroup(TopicPartitionGroup group) {
         PartitionGroup partitionGroup = new PartitionGroup();
         partitionGroup.setPartitions(Arrays.stream(group.getPartitions().substring(1,group.getPartitions().length()-1).split(",")).map(s->Short.parseShort(s.trim())).collect(Collectors.toSet()));
         partitionGroup.setGroup(group.getGroupNo());
@@ -154,7 +154,7 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
      * @throws Exception
      */
     @Override
-    public String removePartitionGroup(TopicPartitionGroup group) throws Exception {
+    public String removePartitionGroup(TopicPartitionGroup group) {
         PartitionGroup partitionGroup = new PartitionGroup();
         partitionGroup.setGroup(group.getGroupNo());
         Set<Short> partitions = Arrays.stream(group.getPartitions().substring(1, group.getPartitions().length()-1).split(",")).map(m-> Short.parseShort(m.trim())).collect(Collectors.toSet());
@@ -170,7 +170,7 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
      * @throws Exception
      */
     @Override
-    public List<Integer> updatePartitionGroup(TopicPartitionGroup group) throws Exception {
+    public List<Integer> updatePartitionGroup(TopicPartitionGroup group) {
         PartitionGroup partitionGroup = new PartitionGroup();
         partitionGroup.setPartitions(Arrays.stream(group.getPartitions().substring(1,group.getPartitions().length()-1).split(",")).map(s->Short.parseShort(s.trim())).collect(Collectors.toSet()));
         partitionGroup.setGroup(group.getGroupNo());
@@ -210,7 +210,7 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
         return isSuccess(result);
     }
     @Override
-    public List<PartitionGroup> findPartitionGroupMaster(List<TopicPartitionGroup> topicPartitionGroups) throws Exception {
+    public List<PartitionGroup> findPartitionGroupMaster(List<TopicPartitionGroup> topicPartitionGroups) {
         if(NullUtil.isEmpty(topicPartitionGroups)) {
             return null;
         }
@@ -226,16 +226,6 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
         return JSON.parseArray(post(FIND_PARTITION_GROUP_MASTER, partitionGroupMaster), PartitionGroup.class);
     }
 
-
-    @Override
-    public PageResult<Topic> findByQuery(QPageQuery<QTopic> query) throws Exception {
-        TopicQuery topicQuery = topicQueryConvert(query.getQuery());
-        String result = post(FINDBYQUERY_TOPIC,new QPageQuery<>(query.getPagination(),topicQuery));
-        PageResult<io.chubao.joyqueue.domain.Topic> pageResult = JSON.parseObject(result,new TypeReference<PageResult<io.chubao.joyqueue.domain.Topic>>(){});
-        if (pageResult == null || pageResult.getResult() == null) return PageResult.empty();
-        return new PageResult<>(pageResult.getPagination(),pageResult.getResult().stream().map(topic -> nsrTopicConverter.revert(topic)).collect(Collectors.toList()));
-    }
-
     @Override
     public int delete(Topic model) throws Exception {
         io.chubao.joyqueue.domain.Topic nsrTopic = nsrTopicConverter.convert(model);
@@ -248,7 +238,7 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
         try {
             throw new RuntimeException("请使用addTopic接口");
         } catch (Exception e) {
-            throw new ServiceException(IGNITE_RPC_ERROR,e.getMessage());
+            throw new ServiceException(NAMESERVER_RPC_ERROR,e.getMessage());
         }
     }
 
@@ -260,12 +250,16 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
     }
 
     @Override
-    public List<Topic> findByQuery(QTopic query) throws Exception {
-        TopicQuery topicQuery = topicQueryConvert(query);
-        String result = post(LIST_TOPIC,topicQuery);
-        List<io.chubao.joyqueue.domain.Topic> topics = JSON.parseArray(result, io.chubao.joyqueue.domain.Topic.class);
-        if (topics == null || topics.size() <=0 )return null;
-        return topics.stream().map(topic -> nsrTopicConverter.revert(topic)).collect(Collectors.toList());
+    public PageResult<Topic> search(QPageQuery<QTopic> query) {
+        try {
+            TopicQuery topicQuery = topicQueryConvert(query.getQuery());
+            String result =  post(UNSUB_TOPIC,new QPageQuery<>(query.getPagination(),topicQuery));
+            PageResult<io.chubao.joyqueue.domain.Topic> pageResult = JSON.parseObject(result,new TypeReference<PageResult<io.chubao.joyqueue.domain.Topic>>(){});
+            if (pageResult == null || pageResult.getResult() == null) return PageResult.empty();
+            return new PageResult<>(pageResult.getPagination(),pageResult.getResult().stream().map(topic -> nsrTopicConverter.revert(topic)).collect(Collectors.toList()));
+        } catch (Exception e) {
+            throw new ServiceException(NAMESERVER_RPC_ERROR, e.getMessage());
+        }
     }
 
     @Override
@@ -277,18 +271,20 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
             if (pageResult == null || pageResult.getResult() == null) return PageResult.empty();
             return new PageResult<>(pageResult.getPagination(),pageResult.getResult().stream().map(topic -> nsrTopicConverter.revert(topic)).collect(Collectors.toList()));
         } catch (Exception e) {
-            throw new ServiceException(IGNITE_RPC_ERROR, e.getMessage());
+            throw new ServiceException(NAMESERVER_RPC_ERROR, e.getMessage());
         }
     }
 
     @Override
     public Topic findByCode(String namespaceCode, String code) {
         try {
-            List<Topic> topics = findByQuery(new QTopic(namespaceCode,code));
-            if (topics == null || topics.size() <=0) return null;
-            return topics.get(0);
+            TopicQuery topicQuery = new TopicQuery();
+            topicQuery.setNamespace(namespaceCode);
+            topicQuery.setCode(code);
+            io.chubao.joyqueue.domain.Topic nsrToic= JSON.parseObject(post(GETBYCODE_TOPIC, topicQuery), io.chubao.joyqueue.domain.Topic.class);
+            return nsrTopicConverter.revert(nsrToic);
         } catch (Exception e) {
-            throw new ServiceException(IGNITE_RPC_ERROR,e.getMessage());
+            throw new ServiceException(NAMESERVER_RPC_ERROR,e.getMessage());
         }
     }
 
@@ -298,7 +294,7 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
             io.chubao.joyqueue.domain.Topic nsrToic= JSON.parseObject(post(GETBYID_TOPIC,id), io.chubao.joyqueue.domain.Topic.class);
             return nsrTopicConverter.revert(nsrToic);
         } catch (Exception e) {
-            throw new ServiceException(IGNITE_RPC_ERROR,e.getMessage());
+            throw new ServiceException(NAMESERVER_RPC_ERROR,e.getMessage());
         }
     }
     private TopicQuery topicQueryConvert(QTopic qTopic){

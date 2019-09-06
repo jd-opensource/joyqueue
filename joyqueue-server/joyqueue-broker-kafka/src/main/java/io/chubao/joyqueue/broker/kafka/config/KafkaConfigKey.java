@@ -40,7 +40,7 @@ public enum KafkaConfigKey implements PropertyDef {
     OFFSET_SYNC_TIMEOUT("kafka.offset.sync.timeout", 1000 * 3, Type.INT),
 
     // 事务同步超时
-    TRANSACTION_SYNC_TIMEOUT("kafka.offset.sync.timeout", 1000 * 3, Type.INT),
+    TRANSACTION_SYNC_TIMEOUT("kafka.transaction.sync.timeout", 1000 * 3, Type.INT),
     // 事务超时
     TRANSACTION_TIMEOUT("kafka.transaction.timeout", 1000 * 60 * 30, Type.INT),
     // 事务日志写入级别

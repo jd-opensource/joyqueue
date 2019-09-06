@@ -115,4 +115,12 @@ public class NsrCommandType {
     public static final int NSR_REMOVE_PARTITIONGROUP = 125;
     //删除partitionGroup
     public static final int NSR_LEADERCHANAGE_PARTITIONGROUP = 124;
+
+    // 推送请求
+    public static final int NSR_MESSENGER_PUBLISH_REQUEST = 125;
+    // 心跳
+    public static final int NSR_MESSENGER_HEARTBEAT_REQUEST = 126;
+    // 返回所有元数据
+    public static final int NSR_GET_ALL_METADATA_REQUEST = 127;
+    public static final int NSR_GET_ALL_METADATA_RESPONSE = -127;
 }

@@ -16,14 +16,9 @@
 package io.chubao.joyqueue.nsr.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.TypeReference;
-import io.chubao.joyqueue.model.PageResult;
-import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.convert.NsrNameSpaceConverter;
 import io.chubao.joyqueue.model.domain.Namespace;
 import io.chubao.joyqueue.model.domain.OperLog;
-import io.chubao.joyqueue.model.query.QNamespace;
-import io.chubao.joyqueue.nsr.model.NamespaceQuery;
 import io.chubao.joyqueue.nsr.NameServerBase;
 import io.chubao.joyqueue.nsr.NameSpaceServerService;
 import org.springframework.stereotype.Service;
@@ -43,24 +38,19 @@ public class NameSpaceServerServiceImpl extends NameServerBase implements NameSp
     public static final String UPDATE_NAMESPACE="/namespace/update";
     public static final String LIST_NAMESPACE="/namespace/list";
     public static final String GETBYID_NAMESPACE="/namespace/getById";
-    public static final String FINDBYQUERY_NAMESPACE="/namespace/findByQuery";
+    public static final String GETBYCODE_NAMESPACE="/namespace/getById";
 
     private NsrNameSpaceConverter nsrNameSpaceConverter = new NsrNameSpaceConverter();
 
     @Override
-    public Namespace findByCode(String code) {
-        QNamespace qNamespace =new QNamespace();
-        qNamespace.setCode(code);
-        try {
-            return findByQuery(qNamespace).get(0);
-        } catch (Exception e) {
-            logger.error("findByCode exception",e);
-        }
-        return null;
+    public Namespace findByCode(String code) throws Exception {
+        String result = post(GETBYCODE_NAMESPACE, code);
+        io.chubao.joyqueue.domain.Namespace namespace = JSON.parseObject(result, io.chubao.joyqueue.domain.Namespace.class);
+        return nsrNameSpaceConverter.revert(namespace);
     }
 
     @Override
-    public int add(Namespace model){
+    public int add(Namespace model) throws Exception {
         io.chubao.joyqueue.domain.Namespace namespace = nsrNameSpaceConverter.convert(model);
         String result= postWithLog(ADD_NAMESPACE,namespace,NAMESPACE.value(), OperLog.OperType.ADD.value(),namespace.getCode());
         return isSuccess(result);
@@ -74,43 +64,22 @@ public class NameSpaceServerServiceImpl extends NameServerBase implements NameSp
     }
 
     @Override
-    public PageResult<Namespace> findByQuery(QPageQuery<QNamespace> query) throws Exception {
-        QPageQuery<NamespaceQuery> queryQPageQuery =new QPageQuery<>();
-        queryQPageQuery.setPagination(query.getPagination());
-        if (query.getQuery()!= null) {
-            NamespaceQuery namespaceQuery = new NamespaceQuery();
-            namespaceQuery.setCode(query.getQuery().getCode());
-            queryQPageQuery.setQuery(namespaceQuery);
-        }
-        String result = post(FINDBYQUERY_NAMESPACE,queryQPageQuery);
-        PageResult<io.chubao.joyqueue.domain.Namespace> namespacePageResult = JSON.parseObject(result,new TypeReference<PageResult<io.chubao.joyqueue.domain.Namespace>>(){});
-        PageResult<Namespace> namespacePageResult1 = new PageResult<>();
-        namespacePageResult1.setPagination(namespacePageResult.getPagination());
-        namespacePageResult1.setResult(namespacePageResult.getResult().stream().map(namespace -> nsrNameSpaceConverter.revert(namespace)).collect(Collectors.toList()));
-        return namespacePageResult1;
-    }
-
-    @Override
-    public int delete(Namespace model) {
+    public int delete(Namespace model) throws Exception {
         io.chubao.joyqueue.domain.Namespace namespace = nsrNameSpaceConverter.convert(model);
         String result = postWithLog(REMOVE_NAMESPACE,namespace,NAMESPACE.value(), OperLog.OperType.UPDATE.value(),namespace.getCode());
         return isSuccess(result);
     }
 
     @Override
-    public int update(Namespace model) {
+    public int update(Namespace model) throws Exception {
         io.chubao.joyqueue.domain.Namespace namespace = nsrNameSpaceConverter.convert(model);
         String result = postWithLog(UPDATE_NAMESPACE,namespace,NAMESPACE.value(), OperLog.OperType.UPDATE.value(),namespace.getCode());
         return isSuccess(result);
     }
 
     @Override
-    public List<Namespace> findByQuery(QNamespace query) throws Exception {
-        NamespaceQuery namespaceQuery = new NamespaceQuery();
-        if (query != null) {
-            namespaceQuery.setCode(query.getCode());
-        }
-        String result = post(LIST_NAMESPACE,namespaceQuery);
+    public List<Namespace> findAll() throws Exception {
+        String result = post(LIST_NAMESPACE, null);
         List<io.chubao.joyqueue.domain.Namespace> namespaceList = JSON.parseArray(result).toJavaList(io.chubao.joyqueue.domain.Namespace.class);
         return namespaceList.stream().map(namespace -> nsrNameSpaceConverter.revert(namespace)).collect(Collectors.toList());
     }

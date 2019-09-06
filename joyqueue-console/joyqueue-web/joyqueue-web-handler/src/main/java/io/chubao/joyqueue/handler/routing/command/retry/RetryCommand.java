@@ -15,30 +15,7 @@
  */
 package io.chubao.joyqueue.handler.routing.command.retry;
 
-import io.chubao.joyqueue.domain.ConsumeRetry;
-import io.chubao.joyqueue.exception.JoyQueueException;
-import io.chubao.joyqueue.handler.annotation.Operator;
-import io.chubao.joyqueue.handler.annotation.PageQuery;
-import io.chubao.joyqueue.message.BrokerMessage;
-import io.chubao.joyqueue.model.PageResult;
-import io.chubao.joyqueue.model.QPageQuery;
-import io.chubao.joyqueue.handler.util.RetryUtils;
-import io.chubao.joyqueue.model.domain.ApplicationUser;
-import io.chubao.joyqueue.model.domain.BaseModel;
-import io.chubao.joyqueue.model.domain.Consumer;
-import io.chubao.joyqueue.model.domain.Identity;
-import io.chubao.joyqueue.model.domain.Retry;
-import io.chubao.joyqueue.model.domain.Topic;
-import io.chubao.joyqueue.model.domain.User;
-import io.chubao.joyqueue.model.query.QConsumer;
-import io.chubao.joyqueue.model.query.QRetry;
-import io.chubao.joyqueue.service.ApplicationUserService;
-import io.chubao.joyqueue.service.ConsumerService;
-import io.chubao.joyqueue.service.RetryService;
 import com.google.common.base.Strings;
-import io.chubao.joyqueue.toolkit.time.SystemClock;
-import io.chubao.joyqueue.util.LocalSession;
-import io.chubao.joyqueue.util.serializer.Serializer;
 import com.jd.laf.binding.annotation.Value;
 import com.jd.laf.web.vertx.Command;
 import com.jd.laf.web.vertx.annotation.CRequest;
@@ -47,6 +24,26 @@ import com.jd.laf.web.vertx.annotation.QueryParam;
 import com.jd.laf.web.vertx.pool.Poolable;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
+import io.chubao.joyqueue.domain.ConsumeRetry;
+import io.chubao.joyqueue.exception.JoyQueueException;
+import io.chubao.joyqueue.handler.annotation.Operator;
+import io.chubao.joyqueue.handler.annotation.PageQuery;
+import io.chubao.joyqueue.handler.util.RetryUtils;
+import io.chubao.joyqueue.message.BrokerMessage;
+import io.chubao.joyqueue.model.PageResult;
+import io.chubao.joyqueue.model.QPageQuery;
+import io.chubao.joyqueue.model.domain.ApplicationUser;
+import io.chubao.joyqueue.model.domain.BaseModel;
+import io.chubao.joyqueue.model.domain.Identity;
+import io.chubao.joyqueue.model.domain.Retry;
+import io.chubao.joyqueue.model.domain.User;
+import io.chubao.joyqueue.model.query.QRetry;
+import io.chubao.joyqueue.service.ApplicationUserService;
+import io.chubao.joyqueue.service.ConsumerService;
+import io.chubao.joyqueue.service.RetryService;
+import io.chubao.joyqueue.toolkit.time.SystemClock;
+import io.chubao.joyqueue.util.LocalSession;
+import io.chubao.joyqueue.util.serializer.Serializer;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import org.slf4j.Logger;
@@ -58,10 +55,10 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import static io.chubao.joyqueue.handler.Constants.ID;
-import static io.chubao.joyqueue.handler.Constants.IDS;
 import static com.jd.laf.web.vertx.response.Response.HTTP_BAD_REQUEST;
 import static com.jd.laf.web.vertx.response.Response.HTTP_INTERNAL_ERROR;
+import static io.chubao.joyqueue.handler.Constants.ID;
+import static io.chubao.joyqueue.handler.Constants.IDS;
 
 /**
  * Created by wangxiaofei1 on 2018/12/5.
@@ -193,18 +190,7 @@ public class RetryCommand implements Command<Response>, Poolable {
     }
 
     private boolean hasSubscribe(String topic, String app) {
-        QConsumer qConsumer =  new QConsumer();
-        qConsumer.setApp(new Identity(app));
-        qConsumer.setTopic(new Topic(topic));
-        List<Consumer> consumerList = null;
-        try {
-            consumerList = consumerService.findByQuery(qConsumer);
-        } catch (Exception e) {
-        }
-        if (consumerList != null && consumerList.size() > 0) {
-            return true;
-        }
-        return false;
+        return consumerService.findByTopicAppGroup(null, topic, app, null) != null;
     }
 
     private boolean hasPrivilege(String app) {

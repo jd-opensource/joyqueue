@@ -64,7 +64,7 @@
                handlers="validateApplication applicationToken#get render"
                errors="error"/>
         <route inherit="post"
-               path="/v1/application/:appId/token/search"
+               path="/v1/application/:appId/token/getByApp"
                handlers="validateApplication applicationToken#search render"
                errors="error"/>
         <route inherit="post"
@@ -251,9 +251,9 @@
         <route inherit="get"
                path="/v1/producer/get/:id" handlers="producer#get render"
                errors="error"/>
-        <route inherit="get"
-               path="/v1/producer/syncMqttClient" handlers="producer#syncMqttClient render"
-               errors="error"/>
+        <!--<route inherit="get"-->
+               <!--path="/v1/producer/syncMqttClient" handlers="producer#syncMqttClient render"-->
+               <!--errors="error"/>-->
 
         <route inherit="get"
                path="/v1/producer/weight/:id" handlers="producer#weight render"
@@ -281,9 +281,9 @@
         <route inherit="get"
                path="/v1/consumer/get/:id" handlers="consumer#get render"
                errors="error"/>
-        <route inherit="get"
-               path="/v1/consumer/syncMqttClient" handlers="consumer#syncMqttClient render"
-               errors="error"/>
+        <!--<route inherit="get"-->
+               <!--path="/v1/consumer/syncMqttClient" handlers="consumer#syncMqttClient render"-->
+               <!--errors="error"/>-->
         <route inherit="post"
                path="/v1/consumer/add" handlers="consumer#add render"
                errors="error" />

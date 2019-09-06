@@ -26,12 +26,6 @@ import io.chubao.joyqueue.domain.Producer;
 import io.chubao.joyqueue.domain.Replica;
 import io.chubao.joyqueue.domain.Topic;
 import io.chubao.joyqueue.domain.TopicName;
-import io.chubao.joyqueue.event.ConsumerEvent;
-import io.chubao.joyqueue.event.MetaEvent;
-import io.chubao.joyqueue.event.PartitionGroupEvent;
-import io.chubao.joyqueue.event.ProducerEvent;
-import io.chubao.joyqueue.nsr.message.MessageListener;
-import io.chubao.joyqueue.nsr.message.Messenger;
 import io.chubao.joyqueue.nsr.service.AppTokenService;
 import io.chubao.joyqueue.nsr.service.BrokerService;
 import io.chubao.joyqueue.nsr.service.ConfigService;
@@ -67,12 +61,10 @@ public class MetaManager extends Service {
     private ConfigService configService;
     private DataCenterService dataCenterService;
     private AppTokenService appTokenService;
-    private Messenger<MetaEvent> metaMessenger;
 
     /**
      * construct
      *
-     * @param messenger
      * @param configService
      * @param topicService
      * @param brokerService
@@ -83,8 +75,7 @@ public class MetaManager extends Service {
      * @param appTokenService
      * @param dataCenterService
      */
-    public MetaManager(Messenger messenger,
-                       ConfigService configService,
+    public MetaManager(ConfigService configService,
                        TopicService topicService,
                        BrokerService brokerService,
                        ConsumerService consumerService,
@@ -94,7 +85,6 @@ public class MetaManager extends Service {
                        AppTokenService appTokenService,
                        DataCenterService dataCenterService) {
 
-        Preconditions.checkArgument(messenger != null, "messenger can not be null");
         Preconditions.checkArgument(topicService != null, "topic service can not be null");
         Preconditions.checkArgument(brokerService != null, "broker service can not be null");
         Preconditions.checkArgument(consumerService != null, "consumer service can not be null");
@@ -103,7 +93,6 @@ public class MetaManager extends Service {
         Preconditions.checkArgument(partitionGroupService != null, "partition group service can not be null");
         Preconditions.checkArgument(partitionGroupReplicaService != null, "partition group replica service can not be null");
         this.topicService = topicService;
-        this.metaMessenger = messenger;
         this.brokerService = brokerService;
         this.configService = configService;
         this.consumerService = consumerService;
@@ -164,7 +153,12 @@ public class MetaManager extends Service {
      * @return
      */
     public boolean addBroker(Broker broker) {
-        brokerService.addOrUpdate(broker);
+        brokerService.add(broker);
+        return true;
+    }
+
+    public boolean updateBroker(Broker broker) {
+        brokerService.update(broker);
         return true;
     }
 
@@ -175,8 +169,7 @@ public class MetaManager extends Service {
      * @return
      */
     public Consumer addConsumer(Consumer consumer) {
-        consumerService.addOrUpdate(consumer);
-        metaMessenger.publish(ConsumerEvent.add(consumer.getTopic(), consumer.getApp()));
+        consumerService.add(consumer);
         return consumer;
     }
 
@@ -187,7 +180,6 @@ public class MetaManager extends Service {
      */
     public Producer addProducer(Producer producer) {
         producerService.add(producer);
-        metaMessenger.publish(ProducerEvent.add(producer.getTopic(), producer.getApp()));
         return producer;
     }
 
@@ -202,8 +194,7 @@ public class MetaManager extends Service {
         Consumer consumer = new Consumer();
         consumer.setTopic(topic);
         consumer.setApp(app);
-        consumerService.delete(consumer);
-        metaMessenger.publish(ConsumerEvent.remove(topic, app));
+        consumerService.delete(consumer.getId());
         return true;
     }
 
@@ -211,8 +202,7 @@ public class MetaManager extends Service {
         Producer producer = new Producer();
         producer.setTopic(topic);
         producer.setApp(app);
-        producerService.delete(producer);
-        metaMessenger.publish(ProducerEvent.remove(topic, app));
+        producerService.delete(producer.getId());
         return true;
     }
 
@@ -234,7 +224,7 @@ public class MetaManager extends Service {
      * @return
      */
     public List<Producer> getProducer(String app) {
-        return producerService.getByApp(app, false);
+        return producerService.getByApp(app);
     }
 
     /**
@@ -255,7 +245,7 @@ public class MetaManager extends Service {
      * @return
      */
     public List<Consumer> getConsumer(String app) {
-        return consumerService.getByApp(app, false);
+        return consumerService.getByApp(app);
     }
 
     /**
@@ -265,14 +255,14 @@ public class MetaManager extends Service {
      * @return
      */
     public List<Consumer> getConsumerByTopic(TopicName topic) {
-        return consumerService.getByTopic(topic, true);
+        return consumerService.getByTopic(topic);
     }
 
     /**
      * get producer
      */
     public List<Producer> getProducerByTopic(TopicName topic) {
-        return producerService.getByTopic(topic, true);
+        return producerService.getByTopic(topic);
     }
 
     /**
@@ -293,7 +283,7 @@ public class MetaManager extends Service {
      * @return
      */
     public Set<TopicName> getTopicByBroker(Integer brokerId) {
-        List<Replica> list = partitionGroupReplicaService.findByBrokerId(brokerId);
+        List<Replica> list = partitionGroupReplicaService.getByBrokerId(brokerId);
         Set<TopicName> topics = new HashSet<>();
         if (null != list && list.size() > 0) {
             list.forEach(replica -> topics.add(replica.getTopic()));
@@ -308,7 +298,7 @@ public class MetaManager extends Service {
      * @return
      */
     public List<Replica> getReplicaByBroker(Integer brokerId) {
-        return partitionGroupReplicaService.findByBrokerId(brokerId);
+        return partitionGroupReplicaService.getByBrokerId(brokerId);
     }
 
 
@@ -334,21 +324,12 @@ public class MetaManager extends Service {
     }
 
     /**
-     * list app token
-     *
-     * @return
-     */
-    public List<AppToken> listAppToken() {
-        return appTokenService.list();
-    }
-
-    /**
      * get broker
      *
      * @return
      */
     public List<Broker> getAllBrokers() {
-        return brokerService.list();
+        return brokerService.getAll();
     }
 
     /**
@@ -357,7 +338,7 @@ public class MetaManager extends Service {
      * @return
      */
     public Collection<DataCenter> getAllDataCenter() {
-        return dataCenterService.list();
+        return dataCenterService.getAll();
     }
 
     /**
@@ -387,7 +368,7 @@ public class MetaManager extends Service {
      * @return
      */
     public List<Config> getAllConfigs() {
-        return configService.list();
+        return configService.getAll();
     }
 
     /**
@@ -396,7 +377,23 @@ public class MetaManager extends Service {
      * @return
      */
     public List<Topic> getAllTopics() {
-        return topicService.list();
+        return topicService.getAll();
+    }
+
+    public List<PartitionGroup> getAllPartitionGroups() {
+        return partitionGroupService.getAll();
+    }
+
+    public List<Consumer> getAllConsumers() {
+        return consumerService.getAll();
+    }
+
+    public List<Producer> getAllProducers() {
+        return producerService.getAll();
+    }
+
+    public List<AppToken> getAllAppToken() {
+        return appTokenService.getAll();
     }
 
     /**
@@ -415,24 +412,14 @@ public class MetaManager extends Service {
      * @param partitionGroup
      */
     public void updatePartitionGroup(PartitionGroup partitionGroup) {
-        PartitionGroup group = partitionGroupService.get(partitionGroup);
+        PartitionGroup group = partitionGroupService.getById(partitionGroup.getId());
         if (group != null){
             group.setIsrs(partitionGroup.getIsrs());
             group.setLeader(partitionGroup.getLeader());
             group.setTerm(partitionGroup.getTerm());
-            partitionGroupService.addOrUpdate(group);
-            metaMessenger.publish(PartitionGroupEvent.update(partitionGroup.getTopic(), partitionGroup.getGroup()));
+            topicService.updatePartitionGroup(group);
         }
 
-    }
-
-    /**
-     * add listener
-     *
-     * @param listener
-     */
-    public void addListener(MessageListener listener) {
-        metaMessenger.addListener(listener);
     }
 
     /**

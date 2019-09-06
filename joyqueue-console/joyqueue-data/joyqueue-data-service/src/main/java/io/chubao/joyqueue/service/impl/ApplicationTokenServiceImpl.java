@@ -16,16 +16,12 @@
 package io.chubao.joyqueue.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import io.chubao.joyqueue.model.PageResult;
-import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.exception.ServiceException;
 import io.chubao.joyqueue.model.domain.Application;
 import io.chubao.joyqueue.model.domain.ApplicationToken;
-import io.chubao.joyqueue.model.domain.Identity;
-import io.chubao.joyqueue.model.query.QApplicationToken;
+import io.chubao.joyqueue.nsr.AppTokenNameServerService;
 import io.chubao.joyqueue.service.ApplicationService;
 import io.chubao.joyqueue.service.ApplicationTokenService;
-import io.chubao.joyqueue.nsr.AppTokenNameServerService;
 import io.chubao.joyqueue.token.TokenSupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +48,7 @@ public class ApplicationTokenServiceImpl implements ApplicationTokenService {
 
     @Override
     public int countByAppId(final long appId) {
-        return findByAppId(appId).size();
+        return findByApp(appId).size();
     }
 
     @Override
@@ -77,10 +73,19 @@ public class ApplicationTokenServiceImpl implements ApplicationTokenService {
     }
 
     @Override
-    public List<ApplicationToken> findByAppId(final long appId) {
+    public List<ApplicationToken> findByApp(final long appId) {
         Application application = applicationService.findById(appId);
         try {
-            return appTokenNameServerService.findByQuery(new QApplicationToken(new Identity(application.getCode()),null));
+            return appTokenNameServerService.findByApp(application.getCode());
+        } catch (Exception e) {
+            throw new RuntimeException("findByAppAndToken,exception",e);
+        }
+    }
+
+    @Override
+    public List<ApplicationToken> findByApp(String code) {
+        try {
+            return appTokenNameServerService.findByApp(code);
         } catch (Exception e) {
             throw new RuntimeException("findByAppAndToken,exception",e);
         }
@@ -90,12 +95,7 @@ public class ApplicationTokenServiceImpl implements ApplicationTokenService {
     public ApplicationToken findByAppAndToken(String app, String token) {
 //        return repository.findByAppAndToken(app,token);
         try {
-            List<ApplicationToken> appTokenList = appTokenNameServerService.findByQuery(new QApplicationToken(new Identity(app),token));
-            if (appTokenList != null && appTokenList.size() > 0) {
-                return appTokenList.get(0);
-            } else {
-                return null;
-            }
+            return appTokenNameServerService.findByAppAndToken(app, token);
         } catch (Exception e) {
             throw new RuntimeException("findByAppAndToken", e);//回滚
         }
@@ -106,7 +106,7 @@ public class ApplicationTokenServiceImpl implements ApplicationTokenService {
         try {
             return appTokenNameServerService.findById(id);
         } catch (Exception e) {
-            throw new ServiceException(ServiceException.IGNITE_RPC_ERROR,e.getMessage());
+            throw new ServiceException(ServiceException.NAMESERVER_RPC_ERROR,e.getMessage());
         }
     }
 
@@ -123,11 +123,6 @@ public class ApplicationTokenServiceImpl implements ApplicationTokenService {
     }
 
     @Override
-    public List<ApplicationToken> findByQuery(QApplicationToken query) throws Exception {
-        return appTokenNameServerService.findByQuery(query);
-    }
-
-    @Override
     public int delete(ApplicationToken model) {
         try {
             appTokenNameServerService.delete(model);
@@ -137,36 +132,5 @@ public class ApplicationTokenServiceImpl implements ApplicationTokenService {
             throw new RuntimeException(errorMsg, e);//回滚
         }
         return 1;
-    }
-
-//    @Override
-//    public List<ApplicationToken> findByQuery(ListQuery<QApplicationToken> query) {
-//        try {
-//            QApplicationToken qApplicationToken = null;
-//            String app = null;
-//            String token = null;
-//            if (query != null) {
-//                qApplicationToken = query.getQuery();
-//                if (qApplicationToken != null){
-//                   token = qApplicationToken.getToken();
-//                   if (qApplicationToken.getApplication() != null) {
-//                       app = qApplicationToken.getApplication().getCode();
-//                   }
-//                }
-//            }
-//            return appTokenNameServerService.findByAppAndToken(app,token);
-//        } catch (Exception e) {
-//            logger.error("findByAppAndToken error",e);
-//            throw new RuntimeException(e);
-//        }
-//    }
-
-    @Override
-    public PageResult<ApplicationToken> findByQuery(QPageQuery<QApplicationToken> query) {
-        try {
-           return appTokenNameServerService.findByQuery(query);
-        } catch (Exception e) {
-            throw new RuntimeException("findByQueryAppToken exption",e);
-        }
     }
 }

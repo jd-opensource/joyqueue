@@ -58,6 +58,7 @@
 
 <script>
 import form from '../../mixins/form.js'
+import {deepCopy} from '../../utils/assist.js'
 
 export default {
   name: 'consumer-config-form',

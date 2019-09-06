@@ -18,7 +18,6 @@ package io.chubao.joyqueue.nsr.service;
 
 import io.chubao.joyqueue.domain.Producer;
 import io.chubao.joyqueue.domain.TopicName;
-import io.chubao.joyqueue.nsr.model.ProducerQuery;
 
 import java.util.List;
 
@@ -26,14 +25,15 @@ import java.util.List;
  * @author lixiaobin6
  * 下午3:11 2018/8/13
  */
-public interface ProducerService  extends DataService<Producer, ProducerQuery, String> {
+public interface ProducerService {
+
     /**
-     * 根据Topic，APP删除
+     * 根据id查找
      *
-     * @param topic
-     * @param app
+     * @param id
+     * @return
      */
-    void deleteByTopicAndApp(TopicName topic, String app);
+    Producer getById(String id);
 
     /**
      * 根据Topic和APP查找
@@ -48,46 +48,43 @@ public interface ProducerService  extends DataService<Producer, ProducerQuery, S
      * 根据Topic查找
      *
      * @param topic
-     * @param withConfig
      * @return
      */
-    List<Producer> getByTopic(TopicName topic, boolean withConfig);
+    List<Producer> getByTopic(TopicName topic);
 
     /**
      * 根据APP查找
      *
      * @param app
-     * @param withConfig
      * @return
      */
-    List<Producer> getByApp(String app, boolean withConfig);
+    List<Producer> getByApp(String app);
+
+    /**
+     * 查询全部
+     * @return
+     */
+    List<Producer> getAll();
 
     /**
      * 添加
      *
      * @param producer
      */
-    void add(Producer producer);
+    Producer add(Producer producer);
 
     /**
      * 更新
      *
      * @param producer
      */
-    void update(Producer producer);
+    Producer update(Producer producer);
 
     /**
      * 删除
      *
-     * @param producer
+     * @param id
      */
-    void remove(Producer producer);
+    void delete(String id);
 
-    /**
-     * 根据客户端类型获取生产者
-     *
-     * @param clientType
-     * @return
-     */
-    List<Producer> getProducerByClientType(byte clientType);}
-
+}

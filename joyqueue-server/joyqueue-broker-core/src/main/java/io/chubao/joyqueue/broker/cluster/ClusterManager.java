@@ -15,7 +15,9 @@
  */
 package io.chubao.joyqueue.broker.cluster;
 
+import com.alibaba.fastjson.JSON;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 import io.chubao.joyqueue.broker.BrokerContext;
 import io.chubao.joyqueue.broker.config.BrokerConfig;
 import io.chubao.joyqueue.domain.AppToken;
@@ -27,17 +29,27 @@ import io.chubao.joyqueue.domain.Producer;
 import io.chubao.joyqueue.domain.Subscription;
 import io.chubao.joyqueue.domain.TopicConfig;
 import io.chubao.joyqueue.domain.TopicName;
-import io.chubao.joyqueue.event.BrokerEvent;
 import io.chubao.joyqueue.event.ConsumerEvent;
 import io.chubao.joyqueue.event.EventType;
 import io.chubao.joyqueue.event.MetaEvent;
 import io.chubao.joyqueue.event.NameServerEvent;
-import io.chubao.joyqueue.event.PartitionGroupEvent;
 import io.chubao.joyqueue.event.ProducerEvent;
-import io.chubao.joyqueue.event.TopicEvent;
 import io.chubao.joyqueue.exception.JoyQueueCode;
 import io.chubao.joyqueue.exception.JoyQueueException;
 import io.chubao.joyqueue.nsr.NameService;
+import io.chubao.joyqueue.nsr.event.AddConsumerEvent;
+import io.chubao.joyqueue.nsr.event.AddPartitionGroupEvent;
+import io.chubao.joyqueue.nsr.event.AddProducerEvent;
+import io.chubao.joyqueue.nsr.event.AddTopicEvent;
+import io.chubao.joyqueue.nsr.event.RemoveConsumerEvent;
+import io.chubao.joyqueue.nsr.event.RemovePartitionGroupEvent;
+import io.chubao.joyqueue.nsr.event.RemoveProducerEvent;
+import io.chubao.joyqueue.nsr.event.RemoveTopicEvent;
+import io.chubao.joyqueue.nsr.event.UpdateBrokerEvent;
+import io.chubao.joyqueue.nsr.event.UpdateConsumerEvent;
+import io.chubao.joyqueue.nsr.event.UpdatePartitionGroupEvent;
+import io.chubao.joyqueue.nsr.event.UpdateProducerEvent;
+import io.chubao.joyqueue.nsr.event.UpdateTopicEvent;
 import io.chubao.joyqueue.response.BooleanResponse;
 import io.chubao.joyqueue.toolkit.concurrent.EventBus;
 import io.chubao.joyqueue.toolkit.concurrent.EventListener;
@@ -59,10 +71,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -70,7 +79,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -95,8 +103,6 @@ public class ClusterManager extends Service {
     private MetaDataLocalCache localCache;
     // 元数据事件
     private EventBus<MetaEvent> eventBus = new EventBus("CLUSTER_MANAGER_EVENT");
-    // K=事件, V=监听集合; 事件对于监听此事件的监听器集合
-    private Map<EventType, List<EventListener<MetaEvent>>> eventListeners = new HashMap<>();
 
     private BrokerContext brokerContext;
 
@@ -134,7 +140,6 @@ public class ClusterManager extends Service {
         super.doStart();
         localCache.start();
         eventBus.start();
-        eventBus.addListener(event -> listenEvent(event));
         register();
         localCache.initCache();
         logger.info("clusterManager is started");
@@ -157,45 +162,6 @@ public class ClusterManager extends Service {
         }
         brokerConfig.setBroker(broker);
         writeBroker(broker.getId());
-    }
-
-    /**
-     * 监听元数据变更事件
-     *
-     * @param event
-     */
-    private void listenEvent(MetaEvent event) {
-        try {
-            readLock.lock();
-            // 获取对于监听
-            List<EventListener<MetaEvent>> eventListeners = this.eventListeners.get(event.getEventType());
-            if (CollectionUtils.isNotEmpty(eventListeners)) {
-                // 发布事件
-                eventListeners.stream().forEach(listener -> eventBus.add(event, listener));
-            }
-        } finally {
-            readLock.unlock();
-        }
-    }
-
-    /**
-     * 添加元数据变更的事件监听
-     *
-     * @param event    事件集合
-     * @param listener 事件监听
-     */
-    public void addListener(EventType event, EventListener<MetaEvent> listener) {
-        try {
-            writeLock.lock();
-            List<EventListener<MetaEvent>> eventListeners = this.eventListeners.get(event);
-            if (eventListeners == null) {
-                eventListeners = new ArrayList<>();
-                this.eventListeners.put(event, eventListeners);
-            }
-            eventListeners.add(listener);
-        } finally {
-            writeLock.unlock();
-        }
     }
 
     /**
@@ -646,7 +612,7 @@ public class ClusterManager extends Service {
         }
         TopicConfig topicConfig = getTopicConfig(topic);
         PartitionGroup group = topicConfig.fetchPartitionGroupByPartition(partition);
-        if (!group.getLeader().equals(broker.getId())) {
+        if (group == null || !group.getLeader().equals(broker.getId())) {
             logger.error("topic[{}],app[{}],partition[{}],error[{}]", topic, app,partition, JoyQueueCode.FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER.getMessage());
             return BooleanResponse.failed(JoyQueueCode.FW_PRODUCE_MESSAGE_BROKER_NOT_LEADER);
         }
@@ -732,7 +698,7 @@ public class ClusterManager extends Service {
         }
         TopicConfig topicConfig = getTopicConfig(topic);
         PartitionGroup group = topicConfig.fetchPartitionGroupByPartition(partition);
-        if (!group.getLeader().equals(broker.getId())) {
+        if (group == null || !group.getLeader().equals(broker.getId())) {
             logger.error("topic[{}],app[{}],partition[{}],error[{}]", topic, app,partition, JoyQueueCode.FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER.getMessage());
             return BooleanResponse.failed(JoyQueueCode.FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER);
         }
@@ -816,17 +782,7 @@ public class ClusterManager extends Service {
      * @return
      */
     public List<Broker> getLocalRetryBroker() {
-        List<Broker> brokers = nameService.getAllBrokers();
-        List<Broker> localRetryBrokers = new LinkedList<>();
-        if (brokers != null) {
-            for (Broker broker : brokers) {
-                if (!Broker.DEFAULT_RETRY_TYPE.equals(broker.getRetryType())) {
-                    localRetryBrokers.add(broker);
-                }
-            }
-        }
-
-        return localRetryBrokers;
+        return nameService.getBrokerByRetryType(Broker.DEFAULT_RETRY_TYPE);
     }
 
 
@@ -906,42 +862,45 @@ public class ClusterManager extends Service {
          */
         protected void initCache() {
             buildTopicConfigCaches();
-            timerUpdateAllExecutor.scheduleWithFixedDelay(() -> {
-                try {
-                    logger.info("begin update all topicConfigs");
-                    Map<TopicName, TopicConfig> topicConfigNew = nameService.getTopicConfigByBroker(brokerConfig.getBrokerId());
-                    if(logger.isDebugEnabled()){
-                        logger.debug("allTopicConfigs {}",topicConfigNew);
-                    }
-                    if (null != topicConfigNew && topicConfigNew.size() > 0) {
-                        Map<String, TopicConfig> topicConfigOld = topicConfigCache;
-                        for (Map.Entry<String, TopicConfig> entry : topicConfigOld.entrySet()) {
-                            TopicName topicName = TopicName.parse(entry.getKey());
-                            if (!topicConfigNew.containsKey(topicName)) {
-                                topicConfigOld.remove(topicName.getFullName());
-                                eventBus.add(TopicEvent.remove(topicName));
-                                consumerCache.remove(topicName.getFullName());
-                                producerCache.remove(topicName.getFullName());
-                                topicPartitionsCache.remove(topicName.getFullName());
-                            }
-                        }
-                        for (Map.Entry<TopicName, TopicConfig> entry : topicConfigNew.entrySet()) {
-                            TopicName topicName = entry.getKey();
-                            buildTopicConfigCache(entry.getValue());
-                            if (!topicConfigOld.containsKey(topicName.getFullName())) {
-                                eventBus.add(TopicEvent.add(topicName));
-                            }
 
-                            updateConsumerCache(topicName);
-                            updateProducerCache(topicName);
-                            // 补偿订阅事件
-                            compensateAddConsumeEvent(topicName);
-                        }
-                    }
-                } catch (Exception e) {
-                    logger.error("update all topicConfigs error", e);
-                }
-            }, 1, 1, TimeUnit.MINUTES);
+            // TODO 不需要补偿
+//            timerUpdateAllExecutor.scheduleWithFixedDelay(() -> {
+//                try {
+//                    logger.info("begin update all topicConfigs");
+//                    Map<TopicName, TopicConfig> topicConfigNew = nameService.getTopicConfigByBroker(brokerConfig.getBrokerId());
+//                    if(logger.isDebugEnabled()){
+//                        logger.debug("allTopicConfigs {}",topicConfigNew);
+//                    }
+//                    if (null != topicConfigNew && topicConfigNew.size() > 0) {
+//                        Map<String, TopicConfig> topicConfigOld = topicConfigCache;
+//                        for (Map.Entry<String, TopicConfig> entry : topicConfigOld.entrySet()) {
+//                            TopicName topicName = TopicName.parse(entry.getKey());
+//                            if (!topicConfigNew.containsKey(topicName)) {
+//                                topicConfigOld.remove(topicName.getFullName());
+//                                eventBus.add(TopicEvent.remove(topicName));
+//                                consumerCache.remove(topicName.getFullName());
+//                                producerCache.remove(topicName.getFullName());
+//                                topicPartitionsCache.remove(topicName.getFullName());
+//                            }
+//                        }
+//                        for (Map.Entry<TopicName, TopicConfig> entry : topicConfigNew.entrySet()) {
+//                            TopicName topicName = entry.getKey();
+//                            buildTopicConfigCache(entry.getValue());
+//                            if (!topicConfigOld.containsKey(topicName.getFullName())) {
+//                                eventBus.add(TopicEvent.add(topicName));
+//                            }
+//
+//                            updateConsumerCache(topicName);
+//                            updateProducerCache(topicName);
+//                            // 补偿订阅事件
+//                            compensateAddConsumeEvent(topicName);
+//                            compensateAddProduceEvent(topicName);
+//                        }
+//                    }
+//                } catch (Exception e) {
+//                    logger.error("update all topicConfigs error", e);
+//                }
+//            }, 1, 1, TimeUnit.MINUTES);
         }
 
         /**
@@ -1004,6 +963,11 @@ public class ClusterManager extends Service {
             return consumerByTopic;
         }
 
+        protected Consumer buildConsumeCache(Consumer consumer) {
+            consumerCache.get(consumer.getTopic().getFullName()).put(consumer.getApp(), new CacheConsumer(consumer, SystemClock.now()));
+            return consumer;
+        }
+
         protected Consumer getConsumerByTopicAndApp(TopicName topic, String app) {
             if (!consumerCache.containsKey(topic.getFullName())) {
                 logger.warn("topic {} is not exist on this broker", topic.getFullName());
@@ -1056,6 +1020,11 @@ public class ClusterManager extends Service {
             return producerByTopic;
         }
 
+        protected Producer buildProduceCache(Producer producer) {
+            producerCache.get(producer.getTopic().getFullName()).put(producer.getApp(), new CacheProducer(producer));
+            return producer;
+        }
+
 
         public ConcurrentMap<String, TopicConfig> getTopicConfigCache() {
             return topicConfigCache;
@@ -1100,6 +1069,33 @@ public class ClusterManager extends Service {
         }
 
         /**
+         * 补偿生产
+         * @param topicName
+         */
+        private void compensateAddProduceEvent(TopicName topicName) {
+            List<Producer> producerByTopic = nameService.getProducerByTopic(topicName);
+            ConcurrentHashMap<String, CacheProducer> localProducerCache = producerCache.get(topicName.getFullName());
+            producerByTopic.stream().forEach(producer -> {
+                if (producer != null) {
+                    String app = producer.getApp();
+                    if (!localProducerCache.contains(app)) {
+                        // 如果本地缓存不包含这个订阅关系，则补偿一个订阅关系事件
+                        ProducerEvent producerEvent = new ProducerEvent();
+                        producerEvent.setEventType(EventType.ADD_PRODUCER);
+                        producerEvent.setApp(app);
+                        producerEvent.setTopic(topicName);
+
+                        // 添加订阅事件
+                        eventBus.add(producerEvent);
+                    }
+
+                    // 添加到本地缓存
+                    localProducerCache.put(app, new CacheProducer(producer));
+                }
+            });
+        }
+
+        /**
          * 补偿订阅事件
          * </br>
          * 远程拉取主题的所有订阅者和本地缓存对比，如果本地缓存没有，则补偿一个订阅事件
@@ -1120,10 +1116,10 @@ public class ClusterManager extends Service {
 
                         // 添加订阅事件
                         eventBus.add(consumerEvent);
-
-                        // 添加到本地缓存
-                        localConsumeCache.put(app, new CacheConsumer(consumer));
                     }
+
+                    // 添加到本地缓存
+                    localConsumeCache.put(app, new CacheConsumer(consumer));
                 }
             });
         }
@@ -1177,6 +1173,10 @@ public class ClusterManager extends Service {
             return start.get();
         }
 
+        protected void publishEvent(MetaEvent event) {
+            eventBus.inform(event);
+        }
+
         /**
          * 主题信息更新事件处理
          */
@@ -1184,112 +1184,125 @@ public class ClusterManager extends Service {
 
             @Override
             public void onEvent(NameServerEvent event) {
-                try {
-                    if (!brokerConfig.getBrokerId().equals(event.getBrokerId())) {
-                        return;
-                    }
-                    logger.info("event[{}]", event);
-                    /**
-                     * 新添topic，通知所有的partitionGroup
-                     * 1.
-                     */
-                    if (event.getMetaEvent() instanceof TopicEvent) {
-                        switch (event.getEventType()) {
-                            case ADD_TOPIC:
-                                TopicConfig topicConfig = buildTopicConfigCache(((TopicEvent) event.getMetaEvent()).getTopic());
-                                for (PartitionGroup group : topicConfig.fetchPartitionGroupByBrokerId(brokerConfig.getBrokerId())) {
-                                    //storeService.createPartitionGroup(group.getTopic(), group.getGroup(), group.getPartitions().toArray(new Short[0]),
-                                    // group.getReplicaGroups().stream().mapToInt(replica->(int)replica).toArray());
-                                    if(group.getReplicas().contains(brokerConfig.getBrokerId())){
-                                        eventBus.add(PartitionGroupEvent.add(group.getTopic(), group.getGroup()));
-                                    }
-                                }
-                                break;
-                            case UPDATE_TOPIC:
-                                // 主题新增/更新事件
-                                buildTopicConfigCache(((TopicEvent) event.getMetaEvent()).getTopic());
-                                break;
-                            case REMOVE_TOPIC:
-                                TopicConfig topicConfigRemove = topicConfigCache.remove(((TopicEvent) event.getMetaEvent()).getTopic().getFullName());
-                                consumerCache.remove(topicConfigRemove.getName().getFullName());
-                                producerCache.remove(topicConfigRemove.getName().getFullName());
-                                for (PartitionGroup group : topicConfigRemove.fetchPartitionGroupByBrokerId(brokerConfig.getBrokerId())) {
-                                    //storeService.removePartitionGroup(group.getTopic(), group.getGroup());
-                                    eventBus.add(PartitionGroupEvent.remove(group.getTopic(), group.getGroup()));
-                                }
-                                break;
-                            default:break;
-                        }
-                    } else if (event.getMetaEvent() instanceof PartitionGroupEvent) {
-                        PartitionGroup groupOld = getTopicConfig(((PartitionGroupEvent) event.getMetaEvent()).getTopic()).
-                                fetchPartitionGroupByGroup(((PartitionGroupEvent) event.getMetaEvent()).getPartitionGroup());
-                        TopicConfig topicConfig = buildTopicConfigCache(((PartitionGroupEvent) event.getMetaEvent()).getTopic());
-                        PartitionGroup groupNew = topicConfig.fetchPartitionGroupByGroup(((PartitionGroupEvent) event.getMetaEvent()).getPartitionGroup());
-                        Set<Integer> brokerIds = new HashSet<>();
-                        if (groupOld != null) {
-                            brokerIds.addAll(groupOld.getReplicas());
-                        }
-                        if (groupNew != null) {
-                            brokerIds.addAll(groupNew.getReplicas());
-                        }
-                        if (!brokerIds.contains(brokerConfig.getBrokerId())) {
-                            return;
-                        }
-                        switch (event.getEventType()) {
-                            case ADD_PARTITION_GROUP:
-                                //PartitionGroup新增事件
-                                //storeService.createPartitionGroup(group.getTopic(), group.getGroup(), group.getPartitions().toArray(new Short[0]),
-                                // group.getReplicaGroups().stream().mapToInt(replica->(int)replica).toArray());
-                                eventBus.add(PartitionGroupEvent.add(topicConfig.getName(), groupNew.getGroup()));
-                                break;
-                            case UPDATE_PARTITION_GROUP:
-                                // PartitionGroup更新事件,只会通知partitionGroup的leader
-                                //storeService.createOrUpdatePartitionGroup(group.getTopic(), group.getGroup(), (Short[]) group.getPartitions().toArray());
-                                eventBus.add(PartitionGroupEvent.update(groupNew.getTopic(), groupNew.getGroup()));
-                                break;
-                            case REMOVE_PARTITION_GROUP:
-                                /**
-                                 * 删除partitionGroup时候通知到所有相关的broker
-                                 */
-                                //storeService.removePartitionGroup(group.getTopic(), group.getGroup());
-                                eventBus.add(PartitionGroupEvent.remove(topicConfig.getName(), ((PartitionGroupEvent) event.getMetaEvent()).getPartitionGroup()));
-                                break;
-                            default:
-                                break;
-                        }
-                    } else {
-                        switch (event.getMetaEvent().getEventType()) {
-                            case ADD_CONSUMER:
-                            case UPDATE_CONSUMER:
-                                //consumer update add
-                                ConsumerEvent consumerEvent = (ConsumerEvent) event.getMetaEvent();
-                                buildConsumeCache(consumerEvent.getTopic(), consumerEvent.getApp());
-                                break;
-                            case REMOVE_CONSUMER:
-                                ConsumerEvent removeConsumerEvent = (ConsumerEvent) event.getMetaEvent();
-                                consumerCache.get(removeConsumerEvent.getTopic().getFullName()).remove(removeConsumerEvent.getApp());
-                                break;
-                            case ADD_PRODUCER:
-                            case UPDATE_PRODUCER:
-                                // 主题新增事件
-                                ProducerEvent producerEvent = (ProducerEvent) event.getMetaEvent();
-                                buildProduceCache(producerEvent.getTopic(), producerEvent.getApp());
-                                break;
-                            case REMOVE_PRODUCER:
-                                ProducerEvent removeProducerEvent = (ProducerEvent) event.getMetaEvent();
-                                producerCache.get(removeProducerEvent.getTopic()).remove(removeProducerEvent.getApp());
-                                break;
-                            case UPDATE_BROKER:
-                                BrokerEvent brokerEvent = (BrokerEvent) event.getMetaEvent();
-                                broker.setPermission(brokerEvent.getBroker().getPermission());
-                                break;
-                            default:break;
-                        }
-                        eventBus.add(event.getMetaEvent());
-                    }
-                } catch (Exception e) {
-                    logger.error(String.format("clusterManager event[%s] error", event), e);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("onEvent, event: {}", JSON.toJSONString(event));
                 }
+
+                switch (event.getEventType()) {
+                    case ADD_TOPIC: {
+                        AddTopicEvent addTopicEvent = (AddTopicEvent) event.getMetaEvent();
+                        TopicConfig topicConfig = TopicConfig.toTopicConfig(addTopicEvent.getTopic(), addTopicEvent.getPartitionGroups());
+                        buildTopicConfigCache(topicConfig);
+                        break;
+                    }
+                    case UPDATE_TOPIC: {
+                        UpdateTopicEvent updateTopicEvent = (UpdateTopicEvent) event.getMetaEvent();
+                        TopicConfig oldTopicConfig = topicConfigCache.get(updateTopicEvent.getOldTopic().getName().getFullName());
+                        TopicConfig newTopicConfig = TopicConfig.toTopicConfig(updateTopicEvent.getNewTopic());
+                        newTopicConfig.setPartitionGroups(oldTopicConfig.getPartitionGroups());
+                        buildTopicConfigCache(newTopicConfig);
+                        break;
+                    }
+                    case REMOVE_TOPIC: {
+                        RemoveTopicEvent removeTopicEvent = (RemoveTopicEvent) event.getMetaEvent();
+                        TopicConfig topicConfig = topicConfigCache.remove(removeTopicEvent.getTopic().getName().getFullName());
+                        if (topicConfig == null) {
+                            break;
+                        }
+                        topicPartitionsCache.remove(topicConfig.getName().getFullName());
+                        consumerCache.remove(topicConfig.getName().getFullName());
+                        producerCache.remove(topicConfig.getName().getFullName());
+                        for (PartitionGroup partitionGroup : topicConfig.fetchPartitionGroupByBrokerId(brokerConfig.getBrokerId())) {
+                            publishEvent(new RemovePartitionGroupEvent(topicConfig.getName(), partitionGroup));
+                        }
+                        break;
+                    }
+                    case ADD_PARTITION_GROUP: {
+                        AddPartitionGroupEvent addPartitionGroupEvent = (AddPartitionGroupEvent) event.getMetaEvent();
+                        PartitionGroup partitionGroup = addPartitionGroupEvent.getPartitionGroup();
+                        TopicConfig topicConfig = topicConfigCache.get(addPartitionGroupEvent.getTopic().getFullName());
+                        if (topicConfig == null) {
+                            topicConfig = buildTopicConfigCache(addPartitionGroupEvent.getTopic());
+                        }
+
+                        Map<Integer, PartitionGroup> topicPartitionGroups = Maps.newHashMap(topicConfig.getPartitionGroups());
+                        topicPartitionGroups.put(addPartitionGroupEvent.getPartitionGroup().getGroup(), partitionGroup);
+                        topicConfig.setPartitionGroups(topicPartitionGroups);
+
+                        topicPartitionsCache.remove(topicConfig.getName().getFullName());
+                        break;
+                    }
+                    case UPDATE_PARTITION_GROUP: {
+                        UpdatePartitionGroupEvent updatePartitionGroupEvent = (UpdatePartitionGroupEvent) event.getMetaEvent();
+                        PartitionGroup oldPartitionGroup = updatePartitionGroupEvent.getOldPartitionGroup();
+                        PartitionGroup newPartitionGroup = updatePartitionGroupEvent.getNewPartitionGroup();
+                        TopicConfig topicConfig = topicConfigCache.get(updatePartitionGroupEvent.getTopic().getFullName());
+                        if (topicConfig == null) {
+                            topicConfig = buildTopicConfigCache(updatePartitionGroupEvent.getTopic());
+                        }
+
+                        Map<Integer, PartitionGroup> topicPartitionGroups = Maps.newHashMap(topicConfig.getPartitionGroups());
+                        topicPartitionGroups.put(newPartitionGroup.getGroup(), newPartitionGroup);
+                        topicConfig.setPartitionGroups(topicPartitionGroups);
+
+                        topicPartitionsCache.remove(topicConfig.getName().getFullName());
+                        break;
+                    }
+                    case REMOVE_PARTITION_GROUP: {
+                        RemovePartitionGroupEvent removePartitionGroupEvent = (RemovePartitionGroupEvent) event.getMetaEvent();
+                        PartitionGroup partitionGroup = removePartitionGroupEvent.getPartitionGroup();
+                        TopicConfig topicConfig = topicConfigCache.get(removePartitionGroupEvent.getTopic().getFullName());
+                        if (topicConfig == null) {
+                            topicConfig = buildTopicConfigCache(removePartitionGroupEvent.getTopic());
+                        }
+
+                        Map<Integer, PartitionGroup> topicPartitionGroups = Maps.newHashMap(topicConfig.getPartitionGroups());
+                        topicPartitionGroups.remove(removePartitionGroupEvent.getPartitionGroup().getGroup());
+                        topicConfig.setPartitionGroups(topicPartitionGroups);
+
+                        topicPartitionsCache.remove(topicConfig.getName().getFullName());
+                        break;
+                    }
+                    case ADD_CONSUMER: {
+                        AddConsumerEvent addConsumerEvent = (AddConsumerEvent) event.getMetaEvent();
+                        buildConsumeCache(addConsumerEvent.getConsumer());
+                        break;
+                    }
+                    case UPDATE_CONSUMER: {
+                        UpdateConsumerEvent updateConsumerEvent = (UpdateConsumerEvent) event.getMetaEvent();
+                        buildConsumeCache(updateConsumerEvent.getNewConsumer());
+                        break;
+                    }
+                    case REMOVE_CONSUMER: {
+                        RemoveConsumerEvent removeConsumerEvent = (RemoveConsumerEvent) event.getMetaEvent();
+                        CacheConsumer consumer = consumerCache.get(removeConsumerEvent.getTopic().getFullName()).remove(removeConsumerEvent.getConsumer().getApp());
+                        break;
+                    }
+                    case ADD_PRODUCER: {
+                        AddProducerEvent addProducerEvent = (AddProducerEvent) event.getMetaEvent();
+                        buildProduceCache(addProducerEvent.getProducer());
+                        break;
+                    }
+                    case UPDATE_PRODUCER: {
+                        UpdateProducerEvent updateProducerEvent = (UpdateProducerEvent) event.getMetaEvent();
+                        buildProduceCache(updateProducerEvent.getNewProducer());
+                        break;
+                    }
+                    case REMOVE_PRODUCER: {
+                        RemoveProducerEvent removeProducerEvent = (RemoveProducerEvent) event.getMetaEvent();
+                        CacheProducer producer = producerCache.get(removeProducerEvent.getTopic()).remove(removeProducerEvent.getProducer().getApp());
+                        break;
+                    }
+                    case UPDATE_BROKER: {
+                        UpdateBrokerEvent updateBrokerEvent = (UpdateBrokerEvent) event.getMetaEvent();
+                        if (broker != null) {
+                            broker.setPermission(updateBrokerEvent.getNewBroker().getPermission());
+                            broker.setRetryType(updateBrokerEvent.getNewBroker().getRetryType());
+                        }
+                        break;
+                    }
+                }
+                publishEvent(event.getMetaEvent());
             }
         }
 

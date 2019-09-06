@@ -19,10 +19,9 @@ import com.alibaba.fastjson.JSON;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.chubao.joyqueue.event.MetaEvent;
-import io.chubao.joyqueue.nsr.ignite.model.IgniteMessage;
 import io.chubao.joyqueue.nsr.ignite.dao.IgniteMessageDao;
+import io.chubao.joyqueue.nsr.ignite.model.IgniteMessage;
 import io.chubao.joyqueue.nsr.message.MessageListener;
-import io.chubao.joyqueue.nsr.message.Messenger;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteMessaging;
 import org.apache.ignite.events.CacheEvent;
@@ -37,7 +36,7 @@ import java.util.UUID;
 
 
 @Singleton
-public class IgniteMessenger implements Messenger<MetaEvent> {
+public class IgniteMessenger {
     private static Logger logger = LoggerFactory.getLogger(IgniteMessenger.class);
     private IgniteMessageDao msg;
     private IgniteMessaging igniteMessaging;
@@ -50,7 +49,6 @@ public class IgniteMessenger implements Messenger<MetaEvent> {
         igniteMessaging = ignite.message();
     }
 
-    @Override
     public void publish(MetaEvent event) {
         IgniteMessage igniteMessage = new IgniteMessage(event.getClass().getTypeName(), JSON.toJSONString(event));
         logger.info("begin public message [{}]",igniteMessage.getContent());
@@ -58,7 +56,6 @@ public class IgniteMessenger implements Messenger<MetaEvent> {
         igniteMessaging.send(EVENT_TOPIC,JSON.toJSONString(igniteMessage));
     }
 
-    @Override
     public void addListener(MessageListener listener) {
         IgniteTableListener messageListener = new IgniteTableListener(listener);
         IgniteTopicListener topicListener = new IgniteTopicListener(listener);
@@ -69,7 +66,7 @@ public class IgniteMessenger implements Messenger<MetaEvent> {
         else ignite.message(ignite.cluster().forLocal()).remoteListen(EVENT_TOPIC,topicListener);
     }
 
-    static class IgniteTableListener implements IgniteBiPredicate<UUID, CacheEvent>{
+    static class IgniteTableListener implements IgniteBiPredicate<UUID, CacheEvent> {
         private static Logger logger = LoggerFactory.getLogger(IgniteTableListener.class);
         private MessageListener listener;
         IgniteTableListener(MessageListener listener){

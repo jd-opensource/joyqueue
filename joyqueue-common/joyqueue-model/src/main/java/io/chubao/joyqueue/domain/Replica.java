@@ -36,6 +36,17 @@ public class Replica implements Serializable {
      */
     protected int brokerId;
 
+    public Replica() {
+
+    }
+
+    public Replica(String id, TopicName topic, int group, int brokerId) {
+        this.id = id;
+        this.topic = topic;
+        this.group = group;
+        this.brokerId = brokerId;
+    }
+
     public String getId() {
         return id;
     }

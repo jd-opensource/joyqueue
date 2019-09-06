@@ -104,7 +104,7 @@ export default {
   data () {
     return {
       urls: {
-        search: `/application/${this.$route.query.id}/token/search`,
+        search: `/application/${this.$route.query.id}/token/getByApp`,
         add: `/application/${this.$route.query.id}/token/add`,
         edit: `/application/${this.$route.query.id}/token/update`,
         del: `/application/${this.$route.query.id}/token/delete`

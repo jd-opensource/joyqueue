@@ -18,7 +18,6 @@ package io.chubao.joyqueue.nsr.service;
 
 import io.chubao.joyqueue.domain.Replica;
 import io.chubao.joyqueue.domain.TopicName;
-import io.chubao.joyqueue.nsr.model.ReplicaQuery;
 
 import java.util.List;
 
@@ -27,28 +26,22 @@ import java.util.List;
  * @author lixiaobin6
  * 下午3:11 2018/8/13
  */
-public interface PartitionGroupReplicaService extends DataService<Replica, ReplicaQuery, String> {
-    /**
-     * 根据Topic删除
-     *
-     * @param topic
-     */
-    void deleteByTopic(TopicName topic);
+public interface PartitionGroupReplicaService {
 
     /**
-     * 根据partitionGroup删除
+     * 根据ID获取
      *
-     * @param topic
-     * @param groupNo
+     * @param id
+     * @return
      */
-    void deleteByTopicAndPartitionGroup(TopicName topic, int groupNo);
+    Replica getById(String id);
 
     /**
      * 根据Topic查找
      ** @param topic
      * @return
      */
-    List<Replica> findByTopic(TopicName topic);
+    List<Replica> getByTopic(TopicName topic);
 
     /**
      * 根据Topic和PartitionGroup查找
@@ -57,7 +50,7 @@ public interface PartitionGroupReplicaService extends DataService<Replica, Repli
      * @param groupNo
      * @return
      */
-    List<Replica> findByTopicAndGrPartitionGroup(TopicName topic, int groupNo);
+    List<Replica> getByTopicAndGroup(TopicName topic, int groupNo);
 
     /**
      * 根据BrokerId查找
@@ -65,5 +58,32 @@ public interface PartitionGroupReplicaService extends DataService<Replica, Repli
      * @param brokerId
      * @return
      */
-    List<Replica> findByBrokerId(Integer brokerId);
+    List<Replica> getByBrokerId(Integer brokerId);
+
+    /**
+     * 查询全部
+     * @return
+     */
+    List<Replica> getAll();
+
+    /**
+     * 添加
+     *
+     * @param replica
+     */
+    Replica add(Replica replica);
+
+    /**
+     * 根据ID更新
+     *
+     * @param replica
+     */
+    Replica update(Replica replica);
+
+    /**
+     * 根据id删除
+     *
+     * @param id
+     */
+    void delete(String id);
 }

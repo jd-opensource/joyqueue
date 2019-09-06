@@ -15,8 +15,12 @@
  */
 package io.chubao.joyqueue.broker.monitor.service;
 
+import io.chubao.joyqueue.domain.Consumer;
+import io.chubao.joyqueue.domain.Producer;
 import io.chubao.joyqueue.domain.TopicConfig;
 import io.chubao.joyqueue.response.BooleanResponse;
+
+import java.util.List;
 
 /**
  * MetadataMonitorService
@@ -54,4 +58,73 @@ public interface MetadataMonitorService {
      * @return 结果
      */
     BooleanResponse getWritableResult(String topic, String app, String address);
+
+    /**
+     * 获取消费者元数据
+     *
+     * @param topic 主题
+     * @param app 应用
+     * @param isCluster true - 从ClusterManager获取，false - 从NameServer获取
+     * @return 元数据
+     */
+    Consumer getConsumerMetadataByTopicAndApp(String topic, String app, boolean isCluster);
+
+    /**
+     * 获取生产者元数据
+     *
+     * @param topic 主题
+     * @param app 应用
+     * @param isCluster true - 从ClusterManager获取，false - 从NameServer获取
+     * @return 元数据
+     */
+    Producer getProducerMetadataByTopicAndApp(String topic, String app, boolean isCluster);
+
+    /**
+     * 导出数据
+     * @return
+     */
+    Object exportMetadata(String source);
+
+    /**
+     * 同步数据
+     * @param source
+     * @param target
+     * @return
+     */
+    Object syncMetadata(String source, String target);
+
+    /**
+     * 查询元数据
+     * @param operator
+     * @param params
+     * @return
+     */
+    Object queryMetadata(String source, String operator, List<Object> params);
+
+    /**
+     * 插入元数据
+     * @param source
+     * @param operator
+     * @param params
+     * @return
+     */
+    Object insertMetadata(String source, String operator, List<Object> params);
+
+    /**
+     * 更新元数据
+     * @param source
+     * @param operator
+     * @param params
+     * @return
+     */
+    Object updateMetadata(String source, String operator, List<Object> params);
+
+    /**
+     * 删除元数据
+     * @param source
+     * @param operator
+     * @param params
+     * @return
+     */
+    Object deleteMetadata(String source, String operator, List<Object> params);
 }

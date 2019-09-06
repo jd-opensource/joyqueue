@@ -16,34 +16,21 @@
 package io.chubao.joyqueue.nsr.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
-import io.chubao.joyqueue.domain.ClientType;
-import io.chubao.joyqueue.domain.TopicName;
-import io.chubao.joyqueue.model.PageResult;
-import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.convert.CodeConverter;
 import io.chubao.joyqueue.convert.NsrConsumerConverter;
+import io.chubao.joyqueue.domain.ClientType;
 import io.chubao.joyqueue.model.domain.Consumer;
-import io.chubao.joyqueue.model.domain.Identity;
-import io.chubao.joyqueue.model.domain.Namespace;
 import io.chubao.joyqueue.model.domain.OperLog;
-import io.chubao.joyqueue.model.domain.Topic;
 import io.chubao.joyqueue.model.query.QConsumer;
-import io.chubao.joyqueue.nsr.model.ConsumerQuery;
 import io.chubao.joyqueue.nsr.ConsumerNameServerService;
 import io.chubao.joyqueue.nsr.NameServerBase;
-import io.chubao.joyqueue.toolkit.security.EscapeUtils;
+import io.chubao.joyqueue.nsr.model.ConsumerQuery;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static io.chubao.joyqueue.model.domain.Namespace.DEFAULT_NAMESPACE_CODE;
-import static io.chubao.joyqueue.model.domain.Namespace.DEFAULT_NAMESPACE_ID;
 
 /**
  * Created by wangxiaofei1 on 2019/1/2.
@@ -53,10 +40,11 @@ public class ConsumerNameServerServiceImpl extends NameServerBase implements Con
     public static final String ADD_CONSUMER="/consumer/add";
     public static final String UPDATE_CONSUMER="/consumer/update";
     public static final String REMOVE_CONSUMER="/consumer/remove";
-    public static final String CONSUMER_GETALL_BY_CLIENTTYPE="/consumer/list";
-    public static final String LIST_CONSUMER="/consumer/getList";
+    public static final String GETALL_CONSUMER="/consumer/list";
+    public static final String GETTOPICAPP_CONSUMER="/consumer/getByTopicAndApp";
+    public static final String GETBYAPP_CONSUMER="/consumer/getByApp";
+    public static final String GETBYTOPIC_CONSUMER="/consumer/getByTopic";
     public static final String GETBYID_CONSUMER="/consumer/getById";
-    public static final String FINDBYQUERY_CONSUMER="/consumer/findByQuery";
 
     private NsrConsumerConverter nsrConsumerConverter = new NsrConsumerConverter();
 
@@ -98,47 +86,6 @@ public class ConsumerNameServerServiceImpl extends NameServerBase implements Con
         return isSuccess(result);
     }
 
-    public List<Consumer> syncConsumer(byte clientType) throws Exception{
-        JSONObject request = new JSONObject();
-        request.put("client_type",clientType);
-        List<io.chubao.joyqueue.domain.Consumer>  nsrConsumers = JSONArray.parseArray(post(CONSUMER_GETALL_BY_CLIENTTYPE,request), io.chubao.joyqueue.domain.Consumer.class);
-        List<Consumer> consumerList = new ArrayList<>(nsrConsumers.size());
-        nsrConsumers.forEach(nsrConsumer->{
-            Consumer consumer = new Consumer();
-            TopicName nt = nsrConsumer.getTopic();
-            String[] ag = nsrConsumer.getApp().split(TopicName.TOPIC_SEPARATOR_SPLIT);
-            consumer.setApp(new Identity(null,ag[0]));
-            if(nt.getNamespace().equals(TopicName.DEFAULT_NAMESPACE)){
-                consumer.setNamespace(new Namespace(DEFAULT_NAMESPACE_ID, DEFAULT_NAMESPACE_CODE));
-            }else{
-                consumer.setNamespace(new Namespace(null,nt.getNamespace()));
-            }
-            consumer.setTopic(new Topic(null,EscapeUtils.reEscapeTopic(nt.getCode())));
-            consumer.setSubscribeGroup(ag[1]);
-            consumer.setClientType(nsrConsumer.getClientType().value());
-            consumerList.add(consumer);
-        });
-        return consumerList;
-    }
-    @Override
-    public PageResult<Consumer> findByQuery(QPageQuery<QConsumer> query) throws Exception {
-        QPageQuery<ConsumerQuery> pageQuery = new QPageQuery<>();
-        pageQuery.setPagination(query.getPagination());
-        pageQuery.setQuery(qConsumerConvert(query.getQuery()));
-        String result = post(FINDBYQUERY_CONSUMER,pageQuery);
-        PageResult<io.chubao.joyqueue.domain.Consumer> pageResult = JSON.parseObject(result,new TypeReference<PageResult<io.chubao.joyqueue.domain.Consumer>>(){});
-
-        PageResult<Consumer> consumerPageResult = new PageResult<>();
-        consumerPageResult.setPagination(pageResult.getPagination());
-        consumerPageResult.setResult(pageResult.getResult().stream().map(consumer -> nsrConsumerConverter.revert(consumer)).collect(Collectors.toList()));
-        return consumerPageResult;
-    }
-    @Override
-    public List<Consumer> findByQuery(QConsumer qConsumer) throws Exception {
-        String result = post(LIST_CONSUMER,qConsumerConvert(qConsumer));
-        List<io.chubao.joyqueue.domain.Consumer> consumerList = JSON.parseArray(result).toJavaList(io.chubao.joyqueue.domain.Consumer.class);
-        return consumerList.stream().map(consumer -> nsrConsumerConverter.revert(consumer)).collect(Collectors.toList());
-    }
     @Override
     public Consumer findById(String  id) throws Exception {
         String result = post(GETBYID_CONSUMER,id);
@@ -147,9 +94,49 @@ public class ConsumerNameServerServiceImpl extends NameServerBase implements Con
     }
 
     @Override
+    public List<Consumer> findAll() throws Exception {
+        String result = post(GETALL_CONSUMER, null);
+        List<io.chubao.joyqueue.domain.Consumer> consumerList = JSON.parseArray(result).toJavaList(io.chubao.joyqueue.domain.Consumer.class);
+        return consumerList.stream().map(consumer -> nsrConsumerConverter.revert(consumer)).collect(Collectors.toList());
+    }
+
+    @Override
+    public Consumer findByTopicAndApp(String topic, String namespace, String app) throws Exception {
+        ConsumerQuery consumerQuery = new ConsumerQuery();
+        consumerQuery.setTopic(topic);
+        consumerQuery.setNamespace(namespace);
+        consumerQuery.setApp(app);
+
+        String result = post(GETTOPICAPP_CONSUMER, consumerQuery);
+        io.chubao.joyqueue.domain.Consumer consumer = JSON.parseObject(result, io.chubao.joyqueue.domain.Consumer.class);
+        return nsrConsumerConverter.revert(consumer);
+    }
+
+    @Override
+    public List<Consumer> findByApp(String app) throws Exception {
+        ConsumerQuery consumerQuery = new ConsumerQuery();
+        consumerQuery.setApp(app);
+
+        String result = post(GETBYAPP_CONSUMER, consumerQuery);
+        List<io.chubao.joyqueue.domain.Consumer> consumerList = JSON.parseArray(result).toJavaList(io.chubao.joyqueue.domain.Consumer.class);
+        return consumerList.stream().map(consumer -> nsrConsumerConverter.revert(consumer)).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Consumer> findByTopic(String topic, String namespace) throws Exception {
+        ConsumerQuery consumerQuery = new ConsumerQuery();
+        consumerQuery.setTopic(topic);
+        consumerQuery.setNamespace(namespace);
+
+        String result = post(GETBYTOPIC_CONSUMER, consumerQuery);
+        List<io.chubao.joyqueue.domain.Consumer> consumerList = JSON.parseArray(result).toJavaList(io.chubao.joyqueue.domain.Consumer.class);
+        return consumerList.stream().map(consumer -> nsrConsumerConverter.revert(consumer)).collect(Collectors.toList());
+    }
+
+    @Override
     public List<String> findAllSubscribeGroups() throws Exception {
         //todo 不要查全部consumer
-        List<Consumer> consumerList = findByQuery(new QConsumer());
+        List<Consumer> consumerList = findAll();
         if (consumerList != null && consumerList.size() > 0) {
             return consumerList.stream().map(consumer -> consumer.getSubscribeGroup())
                     .filter(sg -> StringUtils.isNotBlank(sg)).collect(Collectors.toList());

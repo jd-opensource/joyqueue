@@ -15,33 +15,33 @@
  */
 package io.chubao.joyqueue.handler.routing.command.monitor;
 
-import io.chubao.joyqueue.domain.ClientType;
-import io.chubao.joyqueue.domain.TopicName;
-import io.chubao.joyqueue.handler.error.ConfigException;
-import io.chubao.joyqueue.handler.routing.command.NsrCommandSupport;
-import io.chubao.joyqueue.model.domain.Application;
-import io.chubao.joyqueue.model.domain.PartitionGroupWeight;
-import io.chubao.joyqueue.model.domain.Producer;
-import io.chubao.joyqueue.model.domain.ProducerConfig;
-import io.chubao.joyqueue.model.domain.Topic;
-import io.chubao.joyqueue.model.domain.TopicPartitionGroup;
-import io.chubao.joyqueue.model.query.QProducer;
-import io.chubao.joyqueue.service.ApplicationService;
-import io.chubao.joyqueue.service.ProducerService;
-import io.chubao.joyqueue.service.TopicPartitionGroupService;
-import io.chubao.joyqueue.service.TopicService;
-import io.chubao.joyqueue.nsr.ProducerNameServerService;
-import io.chubao.joyqueue.util.NullUtil;
 import com.jd.laf.binding.annotation.Value;
 import com.jd.laf.web.vertx.annotation.Path;
 import com.jd.laf.web.vertx.annotation.QueryParam;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
+import io.chubao.joyqueue.handler.annotation.PageQuery;
+import io.chubao.joyqueue.handler.error.ConfigException;
+import io.chubao.joyqueue.handler.routing.command.NsrCommandSupport;
+import io.chubao.joyqueue.model.PageResult;
+import io.chubao.joyqueue.model.Pagination;
+import io.chubao.joyqueue.model.QPageQuery;
+import io.chubao.joyqueue.model.domain.PartitionGroupWeight;
+import io.chubao.joyqueue.model.domain.Producer;
+import io.chubao.joyqueue.model.domain.ProducerConfig;
+import io.chubao.joyqueue.model.domain.TopicPartitionGroup;
+import io.chubao.joyqueue.model.query.QProducer;
+import io.chubao.joyqueue.nsr.ProducerNameServerService;
+import io.chubao.joyqueue.service.ApplicationService;
+import io.chubao.joyqueue.service.ProducerService;
+import io.chubao.joyqueue.service.TopicPartitionGroupService;
+import io.chubao.joyqueue.service.TopicService;
+import io.chubao.joyqueue.util.NullUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -59,6 +59,26 @@ public class ProducerCommand extends NsrCommandSupport<Producer, ProducerService
     private TopicPartitionGroupService topicPartitionGroupService;
     @Value(nullable = false)
     protected ProducerNameServerService producerNameServerService;
+
+    @Path("search")
+    public Response pageQuery(@PageQuery QPageQuery<QProducer> qPageQuery) throws Exception {
+        QProducer query = qPageQuery.getQuery();
+        List<Producer> producers = Collections.emptyList();
+
+        if (query.getApp() != null) {
+            producers = service.findByApp(query.getApp().getCode());
+        } else if (query.getTopic() != null) {
+            producers = service.findByTopic(query.getTopic().getNamespace().getCode(), query.getTopic().getCode());
+        }
+
+        Pagination pagination = qPageQuery.getPagination();
+        pagination.setTotalRecord(producers.size());
+
+        PageResult<Producer> result = new PageResult();
+        result.setPagination(pagination);
+        result.setResult(producers);
+        return Responses.success(result.getPagination(), result.getResult());
+    }
 
     @Override
     @Path("delete")
@@ -98,53 +118,53 @@ public class ProducerCommand extends NsrCommandSupport<Producer, ProducerService
      * @return
      * @throws Exception
      */
-    @Path("syncMqttClient")
-    public Response syncMqttProducers() throws Exception{
-        int successCount = 0;
-        int failCount = 0;
-        List<Producer> producerList = producerNameServerService.syncProducer(ClientType.MQTT.value());
-        Map<String,Topic> topicMap = new HashMap<>();
-        Map<String,Application> appMap = new HashMap<>();
-        for(Producer producer : producerList){
-            try {
-                Topic topic = topicMap.get(producer.getNamespace().getCode() +TopicName.TOPIC_SEPARATOR+ producer.getTopic().getCode());
-                if (null == topic) {
-                    topic = topicService.findByCode(producer.getNamespace().getCode(), producer.getTopic().getCode());
-                    if(null==topic){
-                        logger.error("namespace {} topic {} 不存在",producer.getNamespace().getCode(),producer.getTopic().getCode());
-                        failCount++;
-                        continue;
-                    }
-                    topicMap.put(producer.getNamespace().getCode() +TopicName.TOPIC_SEPARATOR + producer.getTopic().getCode(), topic);
-                }
-                producer.getTopic().setId(topic.getId());
-                producer.getNamespace().setId(topic.getNamespace().getId());
-                Application application = appMap.get(producer.getApp().getCode());
-                if (null == application) {
-                    application = applicationService.findByCode(producer.getApp().getCode());
-                    if(null==application){
-                        logger.error("application {} 不存在",producer.getApp().getCode());
-                        failCount++;
-                        continue;
-                    }
-                    appMap.put(application.getCode(), application);
-                }
-                producer.getApp().setId(application.getId());
-                Producer producerExist = service.findByTopicAppGroup(producer.getNamespace().getCode(), producer.getTopic().getCode(), producer.getApp().getCode());
-                if (null != producerExist) {
-                    producer.setId(producerExist.getId());
-                    service.update(producer);
-                } else {
-                    service.add(producer);
-                }
-                successCount++;
-            }catch (Exception e){
-                failCount++;
-                logger.error("同步producer[{}]异常",producer.getNamespace().getCode() + TopicName.TOPIC_SEPARATOR + producer.getTopic().getCode()+TopicName.TOPIC_SEPARATOR+producer.getApp(),e);
-            }
-        }
-        return Responses.success("同步mqtt producer成功"+successCount+"条,失败"+failCount+"条");
-    }
+//    @Path("syncMqttClient")
+//    public Response syncMqttProducers() throws Exception{
+//        int successCount = 0;
+//        int failCount = 0;
+//        List<Producer> producerList = producerNameServerService.syncProducer(ClientType.MQTT.value());
+//        Map<String,Topic> topicMap = new HashMap<>();
+//        Map<String,Application> appMap = new HashMap<>();
+//        for(Producer producer : producerList){
+//            try {
+//                Topic topic = topicMap.get(producer.getNamespace().getCode() +TopicName.TOPIC_SEPARATOR+ producer.getTopic().getCode());
+//                if (null == topic) {
+//                    topic = topicService.findByCode(producer.getNamespace().getCode(), producer.getTopic().getCode());
+//                    if(null==topic){
+//                        logger.error("namespace {} topic {} 不存在",producer.getNamespace().getCode(),producer.getTopic().getCode());
+//                        failCount++;
+//                        continue;
+//                    }
+//                    topicMap.put(producer.getNamespace().getCode() +TopicName.TOPIC_SEPARATOR + producer.getTopic().getCode(), topic);
+//                }
+//                producer.getTopic().setId(topic.getId());
+//                producer.getNamespace().setId(topic.getNamespace().getId());
+//                Application application = appMap.get(producer.getApp().getCode());
+//                if (null == application) {
+//                    application = applicationService.findByCode(producer.getApp().getCode());
+//                    if(null==application){
+//                        logger.error("application {} 不存在",producer.getApp().getCode());
+//                        failCount++;
+//                        continue;
+//                    }
+//                    appMap.put(application.getCode(), application);
+//                }
+//                producer.getApp().setId(application.getId());
+//                Producer producerExist = service.findByTopicAppGroup(producer.getNamespace().getCode(), producer.getTopic().getCode(), producer.getApp().getCode());
+//                if (null != producerExist) {
+//                    producer.setId(producerExist.getId());
+//                    service.update(producer);
+//                } else {
+//                    service.add(producer);
+//                }
+//                successCount++;
+//            }catch (Exception e){
+//                failCount++;
+//                logger.error("同步producer[{}]异常",producer.getNamespace().getCode() + TopicName.TOPIC_SEPARATOR + producer.getTopic().getCode()+TopicName.TOPIC_SEPARATOR+producer.getApp(),e);
+//            }
+//        }
+//        return Responses.success("同步mqtt producer成功"+successCount+"条,失败"+failCount+"条");
+//    }
 
 
 

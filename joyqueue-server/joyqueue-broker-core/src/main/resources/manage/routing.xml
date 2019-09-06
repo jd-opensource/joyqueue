@@ -118,6 +118,22 @@
                handlers="brokerMonitorService.getReadableResult"/>
         <route path="/monitor/topic/:topic/app/:app/writable" inherit="get"
                handlers="brokerMonitorService.getWritableResult"/>
+        <route path="/monitor/topic/:topic/app/:app/consumer/metadata" inherit="get"
+               handlers="brokerMonitorService.getConsumerMetadataByTopicAndApp"/>
+        <route path="/monitor/topic/:topic/app/:app/producer/metadata" inherit="get"
+               handlers="brokerMonitorService.getProducerMetadataByTopicAndApp"/>
+        <route path="/monitor/metadata/export" inherit="get"
+               handlers="brokerMonitorService.exportMetadata"/>
+        <route path="/monitor/metadata/sync" inherit="post"
+               handlers="brokerMonitorService.syncMetadata"/>
+        <route path="/monitor/metadata/query" inherit="post"
+               handlers="brokerMonitorService.queryMetadata"/>
+        <route path="/monitor/metadata/insert" inherit="post"
+               handlers="brokerMonitorService.insertMetadata"/>
+        <route path="/monitor/metadata/update" inherit="post"
+               handlers="brokerMonitorService.updateMetadata"/>
+        <route path="/monitor/metadata/delete" inherit="post"
+               handlers="brokerMonitorService.deleteMetadata"/>
 
         <!-- manage -->
         <!-- topic app -->

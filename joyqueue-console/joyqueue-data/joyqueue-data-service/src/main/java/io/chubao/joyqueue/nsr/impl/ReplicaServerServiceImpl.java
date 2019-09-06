@@ -16,18 +16,13 @@
 package io.chubao.joyqueue.nsr.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.TypeReference;
-import io.chubao.joyqueue.domain.Replica;
-import io.chubao.joyqueue.model.PageResult;
-import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.convert.NsrReplicaConverter;
+import io.chubao.joyqueue.domain.Replica;
 import io.chubao.joyqueue.model.domain.OperLog;
 import io.chubao.joyqueue.model.domain.PartitionGroupReplica;
-import io.chubao.joyqueue.model.domain.Topic;
-import io.chubao.joyqueue.model.query.QPartitionGroupReplica;
-import io.chubao.joyqueue.nsr.model.ReplicaQuery;
 import io.chubao.joyqueue.nsr.NameServerBase;
 import io.chubao.joyqueue.nsr.ReplicaServerService;
+import io.chubao.joyqueue.nsr.model.ReplicaQuery;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -41,10 +36,9 @@ public class ReplicaServerServiceImpl extends NameServerBase implements ReplicaS
     public static final String ADD_REPLICA = "/replica/add";
     public static final String REMOVE_REPLICA = "/replica/remove";
     public static final String UPDATE_REPLICA = "/replica/update";
-    public static final String LIST_REPLICA = "/replica/list";
     public static final String GETBYID_REPLICA = "/replica/getById";
-    public static final String DELETEBYID_REPLICA = "/replica/deleteById";
-    public static final String FINDBYQUERY_REPLICA = "/replica/findByQuery";
+    public static final String GETBYTOPIC_REPLICA = "/replica/getByTopic";
+    public static final String GETBYTOPICANDGROUP_REPLICA = "/replica/getByTopicAndGroup";
     private NsrReplicaConverter nsrReplicaConverter = new NsrReplicaConverter();
 
     @Override
@@ -55,21 +49,26 @@ public class ReplicaServerServiceImpl extends NameServerBase implements ReplicaS
     }
 
     @Override
-    public PageResult<PartitionGroupReplica> findByQuery(QPageQuery<QPartitionGroupReplica> query) throws Exception {
-        ReplicaQuery replicaQuery =null;
-        if (query != null && query.getQuery() != null) {
-            QPartitionGroupReplica queryQuery = query.getQuery();
-            replicaQuery = new ReplicaQuery(queryQuery.getTopic().getCode(),queryQuery.getNamespace().getCode(),queryQuery.getGroupNo());
-        }
-        QPageQuery<ReplicaQuery> replicaQueryQPageQuery = new QPageQuery<>(query.getPagination(),replicaQuery);
+    public List<PartitionGroupReplica> findByTopic(String topic, String namespace) {
+        ReplicaQuery replicaQuery = new ReplicaQuery();
+        replicaQuery.setTopic(topic);
+        replicaQuery.setNamespace(namespace);
 
-        String result = post(FINDBYQUERY_REPLICA,replicaQueryQPageQuery);
+        String result = post(GETBYTOPIC_REPLICA, replicaQuery);
+        List<Replica> replicas = JSON.parseArray(result,Replica.class);
+        return replicas.stream().map(replica -> nsrReplicaConverter.revert(replica)).collect(Collectors.toList());
+    }
 
-        PageResult<Replica> replicaPageResult = JSON.parseObject(result,new TypeReference<PageResult<Replica>>(){});
-        if (replicaPageResult == null || replicaPageResult.getResult() == null) {
-            return PageResult.empty();
-        }
-        return new PageResult<>(replicaPageResult.getPagination(), replicaPageResult.getResult().stream().map(replica -> nsrReplicaConverter.revert(replica)).collect(Collectors.toList()));
+    @Override
+    public List<PartitionGroupReplica> findByTopicAndGroup(String topic, String namespace, int group) {
+        ReplicaQuery replicaQuery = new ReplicaQuery();
+        replicaQuery.setTopic(topic);
+        replicaQuery.setNamespace(namespace);
+        replicaQuery.setGroup(group);
+
+        String result = post(GETBYTOPICANDGROUP_REPLICA, replicaQuery);
+        List<Replica> replicas = JSON.parseArray(result,Replica.class);
+        return replicas.stream().map(replica -> nsrReplicaConverter.revert(replica)).collect(Collectors.toList());
     }
 
     @Override
@@ -91,68 +90,5 @@ public class ReplicaServerServiceImpl extends NameServerBase implements ReplicaS
         Replica replica = nsrReplicaConverter.convert(model);
         String result = postWithLog(UPDATE_REPLICA,replica,OperLog.Type.REPLICA.value(),OperLog.OperType.UPDATE.value(),replica.getTopic().getCode());
         return isSuccess(result);
-    }
-
-    @Override
-    public List<PartitionGroupReplica> findByQuery(QPartitionGroupReplica query) throws Exception{
-        try {
-            ReplicaQuery replicaQuery =null;
-            if (query != null) {
-                replicaQuery = new ReplicaQuery();
-                if (query.getTopic() != null) {
-                    replicaQuery.setTopic(query.getTopic().getCode());
-                }
-                if (query.getNamespace() != null) {
-                    replicaQuery.setNamespace(query.getNamespace().getCode());
-                }
-                replicaQuery.setGroup(query.getGroupNo());
-            }
-            String result = post(LIST_REPLICA,replicaQuery);
-            List<Replica> replicas = JSON.parseArray(result,Replica.class);
-            if (replicas == null || replicas.size() <=0) {
-                return null;
-            }
-            return replicas.stream().map(replica -> nsrReplicaConverter.revert(replica)).collect(Collectors.toList());
-        } catch (Exception e) {
-            logger.error("LIST_REPLICA error",e);
-            throw new RuntimeException("LIST_REPLICA error",e);
-        }
-    }
-
-    @Override
-    public int deleteByGroup(String topic, int groupNo) {
-        try {
-            List<PartitionGroupReplica>  list = findByQuery(new QPartitionGroupReplica(new Topic(topic),groupNo));
-            for (PartitionGroupReplica partitionGroupReplica : list) {
-                delete(partitionGroupReplica);
-            }
-        } catch (Exception e) {
-            logger.error("deleteByGroup error",e);
-        }
-        return 1;
-    }
-
-    @Override
-    public List<PartitionGroupReplica> findByTopic(String topic) {
-
-        try {
-           return findByQuery(new QPartitionGroupReplica(new Topic(topic)));
-        } catch (Exception e) {
-            logger.error("findByTopic error",e);
-        }
-        return null;
-    }
-
-    @Override
-    public int deleteByTopic(String topic) {
-        try {
-            List<PartitionGroupReplica>  list = findByQuery(new QPartitionGroupReplica(new Topic(topic)));
-            for (PartitionGroupReplica partitionGroupReplica : list) {
-                delete(partitionGroupReplica);
-            }
-        } catch (Exception e) {
-            logger.error("deleteByTopic error",e);
-        }
-        return 1;
     }
 }

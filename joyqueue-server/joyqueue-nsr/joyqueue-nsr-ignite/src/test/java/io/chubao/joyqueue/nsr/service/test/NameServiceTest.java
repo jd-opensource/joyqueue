@@ -16,9 +16,9 @@
 package io.chubao.joyqueue.nsr.service.test;
 
 import io.chubao.joyqueue.domain.*;
-import io.chubao.joyqueue.nsr.NameServer;
+import io.chubao.joyqueue.nsr.nameservice.NameServer;
 import io.chubao.joyqueue.nsr.NameService;
-import io.chubao.joyqueue.nsr.ThinNameService;
+import io.chubao.joyqueue.nsr.nameservice.ThinNameService;
 import io.chubao.joyqueue.nsr.config.NameServiceConfig;
 import io.chubao.joyqueue.toolkit.config.PropertySupplier;
 import io.chubao.joyqueue.toolkit.io.Files;
@@ -158,8 +158,8 @@ public class NameServiceTest {
 
     @Test
     public void getAllTopics() {
-        Set<String> topicConfigs = nameService.getAllTopics();
-        topicConfigs = nameService.getAllTopics();
+        Set<String> topicConfigs = nameService.getAllTopicCodes();
+        topicConfigs = nameService.getAllTopicCodes();
         System.out.println(Arrays.toString(topicConfigs.toArray()));
     }
 

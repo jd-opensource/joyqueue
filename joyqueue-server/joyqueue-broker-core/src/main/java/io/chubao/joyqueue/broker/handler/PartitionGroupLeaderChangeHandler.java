@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
  * @author wylixiaobin
  * Date: 2019/3/7
  */
+@Deprecated
 public class PartitionGroupLeaderChangeHandler implements CommandHandler, Type {
     private static Logger logger = LoggerFactory.getLogger(PartitionGroupLeaderChangeHandler.class);
     private ElectionService electionService;
@@ -47,6 +48,10 @@ public class PartitionGroupLeaderChangeHandler implements CommandHandler, Type {
 
     @Override
     public Command handle(Transport transport, Command command) {
+        // TODO 临时
+        if (true) {
+            return BooleanAck.build();
+        }
         if (command == null) {
             logger.error("PartitionGroupLeaderChangeHandler request command is null");
             return null;

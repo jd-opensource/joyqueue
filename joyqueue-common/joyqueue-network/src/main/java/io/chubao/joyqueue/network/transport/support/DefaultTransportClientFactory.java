@@ -20,6 +20,7 @@ import io.chubao.joyqueue.network.transport.RequestBarrier;
 import io.chubao.joyqueue.network.transport.TransportClient;
 import io.chubao.joyqueue.network.transport.TransportClientFactory;
 import io.chubao.joyqueue.network.transport.codec.Codec;
+import io.chubao.joyqueue.network.transport.codec.support.JoyQueueCodec;
 import io.chubao.joyqueue.network.transport.command.handler.CommandHandlerFactory;
 import io.chubao.joyqueue.network.transport.command.handler.ExceptionHandler;
 import io.chubao.joyqueue.network.transport.command.handler.filter.CommandHandlerFilterFactory;
@@ -41,6 +42,10 @@ public class DefaultTransportClientFactory implements TransportClientFactory {
     private CommandHandlerFactory commandHandlerFactory;
     private ExceptionHandler exceptionHandler;
     private EventBus<TransportEvent> transportEventBus;
+
+    public DefaultTransportClientFactory() {
+        this(new JoyQueueCodec());
+    }
 
     public DefaultTransportClientFactory(Codec codec) {
         this(codec, (CommandHandlerFactory) null);

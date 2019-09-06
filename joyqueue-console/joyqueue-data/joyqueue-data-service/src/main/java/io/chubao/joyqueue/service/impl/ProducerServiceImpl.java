@@ -16,21 +16,13 @@
 package io.chubao.joyqueue.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import io.chubao.joyqueue.model.ListQuery;
-import io.chubao.joyqueue.model.PageResult;
-import io.chubao.joyqueue.model.QPageQuery;
-import io.chubao.joyqueue.model.domain.Application;
+import com.google.common.base.Preconditions;
 import io.chubao.joyqueue.model.domain.Producer;
 import io.chubao.joyqueue.model.domain.Topic;
-import io.chubao.joyqueue.model.domain.User;
-import io.chubao.joyqueue.model.query.QApplication;
-import io.chubao.joyqueue.model.query.QProducer;
-import io.chubao.joyqueue.service.ApplicationService;
-import io.chubao.joyqueue.service.ProducerService;
 import io.chubao.joyqueue.nsr.ProducerNameServerService;
 import io.chubao.joyqueue.nsr.TopicNameServerService;
-import com.google.common.base.Preconditions;
-import io.chubao.joyqueue.util.LocalSession;
+import io.chubao.joyqueue.service.ApplicationService;
+import io.chubao.joyqueue.service.ProducerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +31,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service("producerService")
 public class ProducerServiceImpl  implements ProducerService {
@@ -86,21 +77,6 @@ public class ProducerServiceImpl  implements ProducerService {
     }
 
     @Override
-    public PageResult<Producer> findByQuery(QPageQuery<QProducer> query) throws Exception {
-        User user = LocalSession.getSession().getUser();
-        if (user.getRole() == User.UserRole.NORMAL.value()) {
-            QApplication qApplication = new QApplication();
-            qApplication.setUserId(user.getId());
-            qApplication.setAdmin(false);
-            List<Application> applicationList = applicationService.findByQuery(new ListQuery<>(qApplication));
-            if (applicationList == null || applicationList.size() <=0 ) return PageResult.empty();
-            List<String> appCodes = applicationList.stream().map(application -> application.getCode()).collect(Collectors.toList());
-            query.getQuery().setAppList(appCodes);
-        }
-        return producerNameServerService.findByQuery(query);
-    }
-
-    @Override
     public int delete(Producer producer) {
         //Validate
         checkArgument(producer);
@@ -140,13 +116,33 @@ public class ProducerServiceImpl  implements ProducerService {
     }
 
     @Override
-    public List<Producer> findByQuery(QProducer query) throws Exception {
-        return producerNameServerService.findByQuery(query);
+    public List<Producer> findByTopic(String namespace, String topic) {
+        try {
+            return producerNameServerService.findByTopic(topic, namespace);
+        } catch (Exception e) {
+            logger.error("findByTopic producer with nameServer failed, producer is {}, {}", namespace, topic, e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public List<Producer> findByApp(String app) {
+        try {
+            return producerNameServerService.findByApp(app);
+        } catch (Exception e) {
+            logger.error("findByApp producer with nameServer failed, producer is {}", app, e);
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public Producer findByTopicAppGroup(String namespace, String topic, String app) {
-        return producerNameServerService.findByTopicAppGroup(namespace,topic,app);
+        try {
+            return producerNameServerService.findByTopicAppGroup(namespace, topic, app);
+        } catch (Exception e) {
+            logger.error("findByTopicAppGroup producer with nameServer failed, producer is {}, {}, {}", namespace, topic, app, e);
+            throw new RuntimeException(e);
+        }
     }
 
     private void checkArgument(Producer producer) {

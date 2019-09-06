@@ -16,17 +16,13 @@
 package io.chubao.joyqueue.nsr.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.TypeReference;
-import io.chubao.joyqueue.domain.AppToken;
-import io.chubao.joyqueue.model.PageResult;
-import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.convert.NsrAppTokenConverter;
+import io.chubao.joyqueue.domain.AppToken;
 import io.chubao.joyqueue.model.domain.ApplicationToken;
 import io.chubao.joyqueue.model.domain.OperLog;
-import io.chubao.joyqueue.model.query.QApplicationToken;
-import io.chubao.joyqueue.nsr.model.AppTokenQuery;
 import io.chubao.joyqueue.nsr.AppTokenNameServerService;
 import io.chubao.joyqueue.nsr.NameServerBase;
+import io.chubao.joyqueue.nsr.model.AppTokenQuery;
 import io.chubao.joyqueue.toolkit.time.SystemClock;
 import org.springframework.stereotype.Service;
 
@@ -43,8 +39,8 @@ public class AppTokenNameServerServiceImpl extends NameServerBase implements App
     public static final String UPDATE_TOKEN="/apptoken/update";
     public static final String REMOVE_TOKEN="/apptoken/remove";
     public static final String GETBYID_TOKEN="/apptoken/getById";
-    public static final String FINDBYQUERY_TOKEN="/apptoken/findByQuery";
-    public static final String LIST_TOKEN="/apptoken/list";
+    public static final String GETBYAPP_TOKEN="/apptoken/findByApp";
+    public static final String GETBYAPPANDTOKEN_TOKEN="/apptoken/findByAppAndToken";
 
     private NsrAppTokenConverter nsrAppTokenConverter = new NsrAppTokenConverter();
 
@@ -97,35 +93,22 @@ public class AppTokenNameServerServiceImpl extends NameServerBase implements App
     }
 
     @Override
-    public List<ApplicationToken> findByQuery(QApplicationToken qApplicationToken) throws Exception {
+    public List<ApplicationToken> findByApp(String app) throws Exception {
         AppTokenQuery appTokenQuery = new AppTokenQuery();
-        if (qApplicationToken != null) {
-            appTokenQuery.setApp(qApplicationToken.getApplication().getCode());
-            appTokenQuery.setToken(qApplicationToken.getToken());
-        }
-        String result = post(LIST_TOKEN,appTokenQuery);
+        appTokenQuery.setApp(app);
+        String result = post(GETBYAPP_TOKEN, appTokenQuery);
         List<AppToken> appTokenList = JSON.parseArray(result,AppToken.class);
         return appTokenList.stream().map(appToken -> nsrAppTokenConverter.convert(appToken)).collect(Collectors.toList());
     }
 
-
     @Override
-    public PageResult<ApplicationToken> findByQuery(QPageQuery<QApplicationToken> query) throws Exception {
-        QPageQuery<AppTokenQuery> pageQuery = new QPageQuery<>();
-        pageQuery.setPagination(query.getPagination());
+    public ApplicationToken findByAppAndToken(String app, String token) throws Exception {
         AppTokenQuery appTokenQuery = new AppTokenQuery();
-        if (query != null && query.getQuery() !=null && query.getQuery().getApplication() != null) {
-            appTokenQuery.setApp(query.getQuery().getApplication().getCode());
-            appTokenQuery.setToken(query.getQuery().getToken());
-        }
-        pageQuery.setQuery(appTokenQuery);
-        String result = post(FINDBYQUERY_TOKEN,pageQuery);
-        PageResult<AppToken> pageResult = JSON.parseObject(result,new TypeReference<PageResult<AppToken>>(){});
-
-        PageResult<ApplicationToken> pageResult2 = new PageResult<>();
-        pageResult2.setPagination(pageResult.getPagination());
-        pageResult2.setResult(pageResult.getResult().stream().map(appToken -> nsrAppTokenConverter.convert(appToken)).collect(Collectors.toList()));
-        return pageResult2;
+        appTokenQuery.setApp(app);
+        appTokenQuery.setToken(token);
+        String result = post(GETBYAPPANDTOKEN_TOKEN, appTokenQuery);
+        AppToken appToken = JSON.parseObject(result,AppToken.class);
+        return nsrAppTokenConverter.convert(appToken);
     }
 
 }

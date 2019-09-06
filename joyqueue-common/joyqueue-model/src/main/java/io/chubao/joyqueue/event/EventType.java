@@ -104,8 +104,15 @@ public enum EventType {
     REMOVE_CONFIG,
 
     /**
+     * 新增broker
+     */
+    ADD_BROKER,
+
+    /**
      * 更新broker
      */
-    UPDATE_BROKER
+    UPDATE_BROKER,
+
+    LEADER_CHANGE;
 
 }

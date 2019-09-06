@@ -119,6 +119,7 @@ public class TopicMetadataRequestHandler extends AbstractKafkaCommandHandler imp
     }
 
     protected Map<String, TopicConfig> getAllTopicConfigs(String clientId) {
+        // TODO 常量
         String[] appGroup = clientId.split("\\.");
         Map<TopicName, TopicConfig> consumers = nameService.getTopicConfigByApp(clientId, Subscription.Type.CONSUMPTION);
         Map<TopicName, TopicConfig> producers = nameService.getTopicConfigByApp(appGroup[0], Subscription.Type.PRODUCTION);

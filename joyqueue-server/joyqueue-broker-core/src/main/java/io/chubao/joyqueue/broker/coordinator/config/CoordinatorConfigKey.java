@@ -31,8 +31,6 @@ public enum CoordinatorConfigKey implements PropertyDef {
     GROUP_TOPIC_PARTITIONS("coordinator.group.topic.partitions", (short) 10, Type.SHORT),
     // 协调者过期时间
     GROUP_EXPIRE_TIME("coordinator.group.expire.time", 1000 * 60 * 60 * 1, Type.INT),
-    // 协调者最多group
-    GROUP_MAX_NUM("coordinator.group.max.num", 1024 * 10, Type.INT),
 
     // 事务协调者主题
     TRANSACTION_TOPIC_CODE("coordinator.transaction.topic.code", "__transaction_coordinators", Type.STRING),

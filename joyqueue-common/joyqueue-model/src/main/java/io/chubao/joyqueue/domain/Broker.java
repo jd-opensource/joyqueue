@@ -140,7 +140,6 @@ public class Broker implements Serializable {
         return port + 3;
     }
 
-
     @Override
     public boolean equals(Object o) {
         if (this == o){
@@ -152,7 +151,8 @@ public class Broker implements Serializable {
         Broker broker = (Broker) o;
         return id == broker.id &&
                 port == broker.port &&
-                Objects.equals(ip, broker.ip);
+                Objects.equals(ip, broker.ip) &&
+                Objects.equals(permission, broker.permission);
     }
 
     public enum PermissionEnum {

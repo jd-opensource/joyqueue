@@ -15,13 +15,9 @@
  */
 package io.chubao.joyqueue.service.impl;
 
-import io.chubao.joyqueue.model.PageResult;
-import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.model.domain.DataCenter;
-import io.chubao.joyqueue.model.query.QDataCenter;
-import io.chubao.joyqueue.nsr.model.DataCenterQuery;
-import io.chubao.joyqueue.service.DataCenterService;
 import io.chubao.joyqueue.nsr.DataCenterNameServerService;
+import io.chubao.joyqueue.service.DataCenterService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,37 +36,12 @@ public class DataCenterServiceImpl implements DataCenterService {
 
     @Override
     public List<DataCenter> findAllDataCenter() throws Exception {
-        return   dataCenterNameServerService.findAllDataCenter(null);
+        return   dataCenterNameServerService.findAllDataCenter();
     }
 
     @Override
     public DataCenter findById(String s) throws Exception {
         return dataCenterNameServerService.findById(s);
-    }
-
-    @Override
-    public PageResult<DataCenter> findByQuery(QPageQuery<QDataCenter> query) {
-        try {
-            return dataCenterNameServerService.findByQuery(query);
-        } catch (Exception e) {
-            logger.error("findByQuery exception",e);
-            throw new RuntimeException("",e);
-        }
-    }
-
-    @Override
-    public List<DataCenter> findByQuery(QDataCenter query) {
-        DataCenterQuery dataCenterQuery = new DataCenterQuery();
-        if (query != null) {
-            dataCenterQuery.setRegion(query.getRegion());
-            dataCenterQuery.setCode(query.getCode());
-        }
-        try {
-            return dataCenterNameServerService.findAllDataCenter(dataCenterQuery);
-        } catch (Exception e) {
-            logger.error("findByQuery exception",e);
-            throw new RuntimeException(e);
-        }
     }
 
     @Override

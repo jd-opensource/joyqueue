@@ -55,7 +55,7 @@ public class GetTopicsHandler implements JoyQueueCommandHandler, Type, BrokerCon
         GetTopics getTopics = (GetTopics) command.getPayload();
         Set<String> topics = new HashSet<>();
         if(StringUtils.isBlank(getTopics.getApp())){
-            topics.addAll(nameService.getAllTopics());
+            topics.addAll(nameService.getAllTopicCodes());
         }else {
             topics.addAll(nameService.getTopics(getTopics.getApp(), Subscription.Type.valueOf((byte)getTopics.getSubscribeType())));
         }
