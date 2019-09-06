@@ -15,13 +15,34 @@
  */
 package io.chubao.joyqueue.broker.monitor.service.support;
 
+import com.google.common.collect.Maps;
+import com.jd.laf.extension.ExtensionPoint;
+import com.jd.laf.extension.ExtensionPointLazy;
 import io.chubao.joyqueue.broker.cluster.ClusterManager;
 import io.chubao.joyqueue.broker.monitor.service.MetadataMonitorService;
 import io.chubao.joyqueue.domain.Consumer;
 import io.chubao.joyqueue.domain.Producer;
 import io.chubao.joyqueue.domain.TopicConfig;
 import io.chubao.joyqueue.domain.TopicName;
+import io.chubao.joyqueue.nsr.InternalServiceProvider;
+import io.chubao.joyqueue.nsr.MetadataSynchronizer;
+import io.chubao.joyqueue.nsr.service.internal.AppTokenInternalService;
+import io.chubao.joyqueue.nsr.service.internal.BrokerInternalService;
+import io.chubao.joyqueue.nsr.service.internal.ConfigInternalService;
+import io.chubao.joyqueue.nsr.service.internal.ConsumerInternalService;
+import io.chubao.joyqueue.nsr.service.internal.DataCenterInternalService;
+import io.chubao.joyqueue.nsr.service.internal.NamespaceInternalService;
+import io.chubao.joyqueue.nsr.service.internal.OperationInternalService;
+import io.chubao.joyqueue.nsr.service.internal.PartitionGroupInternalService;
+import io.chubao.joyqueue.nsr.service.internal.PartitionGroupReplicaInternalService;
+import io.chubao.joyqueue.nsr.service.internal.ProducerInternalService;
+import io.chubao.joyqueue.nsr.service.internal.TopicInternalService;
 import io.chubao.joyqueue.response.BooleanResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * DefaultMetadataMonitorService
@@ -31,10 +52,16 @@ import io.chubao.joyqueue.response.BooleanResponse;
  */
 public class DefaultMetadataMonitorService implements MetadataMonitorService {
 
+    protected static final Logger logger = LoggerFactory.getLogger(DefaultMetadataMonitorService.class);
+
+    private static final ExtensionPoint<InternalServiceProvider, String> SERVICE_PROVIDER_POINT = new ExtensionPointLazy<>(InternalServiceProvider.class);
+
     private ClusterManager clusterManager;
+    private MetadataSynchronizer metadataSynchronizer;
 
     public DefaultMetadataMonitorService(ClusterManager clusterManager) {
         this.clusterManager = clusterManager;
+        this.metadataSynchronizer = new MetadataSynchronizer();
     }
 
     @Override
@@ -77,5 +104,81 @@ public class DefaultMetadataMonitorService implements MetadataMonitorService {
         } else {
             return clusterManager.getNameService().getProducerByTopicAndApp(topicName, app);
         }
+    }
+
+    @Override
+    public Object exportMetadata(String source) {
+        InternalServiceProvider internalServiceProvider = SERVICE_PROVIDER_POINT.get(source);
+        if (internalServiceProvider == null) {
+            return "source not exist";
+        }
+
+        Map<String, Object> result = Maps.newHashMap();
+        result.put("topic", internalServiceProvider.getService(TopicInternalService.class).getAll());
+        result.put("partitionGroup", internalServiceProvider.getService(PartitionGroupInternalService.class).getAll());
+        result.put("partitionGroupReplica", internalServiceProvider.getService(PartitionGroupReplicaInternalService.class).getAll());
+        result.put("broker", internalServiceProvider.getService(BrokerInternalService.class).getAll());
+        result.put("consumer", internalServiceProvider.getService(ConsumerInternalService.class).getAll());
+        result.put("producer", internalServiceProvider.getService(ProducerInternalService.class).getAll());
+        result.put("dataCenter", internalServiceProvider.getService(DataCenterInternalService.class).getAll());
+        result.put("namespace", internalServiceProvider.getService(NamespaceInternalService.class).getAll());
+        result.put("config", internalServiceProvider.getService(ConfigInternalService.class).getAll());
+        result.put("appToken", internalServiceProvider.getService(AppTokenInternalService.class).getAll());
+        return result;
+    }
+
+    @Override
+    public Object syncMetadata(String source, String target) {
+        InternalServiceProvider sourceInternalServiceProvider = SERVICE_PROVIDER_POINT.get(source);
+        InternalServiceProvider targetInternalServiceProvider = SERVICE_PROVIDER_POINT.get(target);
+
+        if (sourceInternalServiceProvider == null) {
+            return "source not exist";
+        }
+        if (targetInternalServiceProvider == null) {
+            return "target not exist";
+        }
+
+        return metadataSynchronizer.sync(sourceInternalServiceProvider, targetInternalServiceProvider);
+    }
+
+    @Override
+    public Object queryMetadata(String source, String operator, List<Object> params) {
+        InternalServiceProvider sourceInternalServiceProvider = SERVICE_PROVIDER_POINT.get(source);
+        if (sourceInternalServiceProvider == null) {
+            return "source not exist";
+        }
+        OperationInternalService operationInternalService = sourceInternalServiceProvider.getService(OperationInternalService.class);
+        return operationInternalService.query(operator, params);
+    }
+
+    @Override
+    public Object insertMetadata(String source, String operator, List<Object> params) {
+        InternalServiceProvider sourceInternalServiceProvider = SERVICE_PROVIDER_POINT.get(source);
+        if (sourceInternalServiceProvider == null) {
+            return "source not exist";
+        }
+        OperationInternalService operationInternalService = sourceInternalServiceProvider.getService(OperationInternalService.class);
+        return operationInternalService.insert(operator, params);
+    }
+
+    @Override
+    public Object updateMetadata(String source, String operator, List<Object> params) {
+        InternalServiceProvider sourceInternalServiceProvider = SERVICE_PROVIDER_POINT.get(source);
+        if (sourceInternalServiceProvider == null) {
+            return "source not exist";
+        }
+        OperationInternalService operationInternalService = sourceInternalServiceProvider.getService(OperationInternalService.class);
+        return operationInternalService.update(operator, params);
+    }
+
+    @Override
+    public Object deleteMetadata(String source, String operator, List<Object> params) {
+        InternalServiceProvider sourceInternalServiceProvider = SERVICE_PROVIDER_POINT.get(source);
+        if (sourceInternalServiceProvider == null) {
+            return "source not exist";
+        }
+        OperationInternalService operationInternalService = sourceInternalServiceProvider.getService(OperationInternalService.class);
+        return operationInternalService.delete(operator, params);
     }
 }

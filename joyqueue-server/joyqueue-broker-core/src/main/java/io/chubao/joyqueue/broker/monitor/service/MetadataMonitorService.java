@@ -20,6 +20,8 @@ import io.chubao.joyqueue.domain.Producer;
 import io.chubao.joyqueue.domain.TopicConfig;
 import io.chubao.joyqueue.response.BooleanResponse;
 
+import java.util.List;
+
 /**
  * MetadataMonitorService
  *
@@ -76,4 +78,53 @@ public interface MetadataMonitorService {
      * @return 元数据
      */
     Producer getProducerMetadataByTopicAndApp(String topic, String app, boolean isCluster);
+
+    /**
+     * 导出数据
+     * @return
+     */
+    Object exportMetadata(String source);
+
+    /**
+     * 同步数据
+     * @param source
+     * @param target
+     * @return
+     */
+    Object syncMetadata(String source, String target);
+
+    /**
+     * 查询元数据
+     * @param operator
+     * @param params
+     * @return
+     */
+    Object queryMetadata(String source, String operator, List<Object> params);
+
+    /**
+     * 插入元数据
+     * @param source
+     * @param operator
+     * @param params
+     * @return
+     */
+    Object insertMetadata(String source, String operator, List<Object> params);
+
+    /**
+     * 更新元数据
+     * @param source
+     * @param operator
+     * @param params
+     * @return
+     */
+    Object updateMetadata(String source, String operator, List<Object> params);
+
+    /**
+     * 删除元数据
+     * @param source
+     * @param operator
+     * @param params
+     * @return
+     */
+    Object deleteMetadata(String source, String operator, List<Object> params);
 }

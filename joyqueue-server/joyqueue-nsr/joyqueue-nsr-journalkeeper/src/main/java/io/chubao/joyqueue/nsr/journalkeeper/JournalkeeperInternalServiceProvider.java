@@ -121,4 +121,9 @@ public class JournalkeeperInternalServiceProvider extends Service implements Int
     public <T> T getService(Class<T> service) {
         return journalkeeperInternalServiceManager.getService(service);
     }
+
+    @Override
+    public String type() {
+        return JournalkeeperConsts.TYPE;
+    }
 }

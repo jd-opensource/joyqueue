@@ -1,10 +1,12 @@
 package io.chubao.joyqueue.broker.store;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.primitives.Shorts;
 import io.chubao.joyqueue.broker.cluster.ClusterManager;
 import io.chubao.joyqueue.broker.config.BrokerStoreConfig;
+import io.chubao.joyqueue.broker.election.ElectionException;
 import io.chubao.joyqueue.broker.election.ElectionService;
 import io.chubao.joyqueue.domain.Broker;
 import io.chubao.joyqueue.domain.PartitionGroup;
@@ -21,11 +23,13 @@ import io.chubao.joyqueue.nsr.event.UpdatePartitionGroupEvent;
 import io.chubao.joyqueue.store.StoreService;
 import io.chubao.joyqueue.toolkit.concurrent.EventListener;
 import io.chubao.joyqueue.toolkit.service.Service;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -62,26 +66,45 @@ public class StoreInitializer extends Service implements EventListener<MetaEvent
     }
 
     protected void restore() {
-        int brokerId = clusterManager.getBrokerId();
-        List<Replica> replicas = nameService.getReplicaByBroker(brokerId);
-        if (null != replicas) {
-            for (Replica replica : replicas) {
-                PartitionGroup group = clusterManager.getPartitionGroupByGroup(replica.getTopic(),replica.getGroup());
-                if (group.getReplicas().contains(brokerId)) {
-                    logger.info("begin restore topic {},group.no {} group {}",replica.getTopic().getFullName(),replica.getGroup(),group);
-                    if (config.getForceRestore()) {
-                        if (storeService.partitionGroupExists(group.getTopic().getFullName(), group.getGroup())) {
-                            storeService.restorePartitionGroup(group.getTopic().getFullName(), group.getGroup());
-                        } else {
-                            logger.warn("store not found, createPartitionGroup, topic {},group.no {} group {}",replica.getTopic().getFullName(),replica.getGroup(),group);
-                            storeService.createPartitionGroup(replica.getTopic().getFullName(), group.getGroup(), Shorts.toArray(group.getPartitions()));
-                        }
-                    } else {
-                        storeService.restorePartitionGroup(group.getTopic().getFullName(), group.getGroup());
-                    }
-                    //electionService.onPartitionGroupCreate(group.getElectType(), group.getGroupTopic(), group.getGroup(),
-                    //        new ArrayList<>(group.getBrokers().values()), group.getLearners(), brokerId, group.getLeader());
-                }
+        Broker broker = clusterManager.getBroker();
+        List<Replica> replicas = nameService.getReplicaByBroker(broker.getId());
+        if (CollectionUtils.isEmpty(replicas)) {
+            return;
+        }
+
+        for (Replica replica : replicas) {
+            PartitionGroup group = clusterManager.getPartitionGroupByGroup(replica.getTopic(),replica.getGroup());
+            if (group == null) {
+                logger.warn("group is null topic {},replica {}", replica.getTopic(), replica.getGroup());
+                throw new RuntimeException(String.format("group is null topic %s,replica %s", replica.getTopic(), replica.getGroup()));
+            }
+            if (!group.getReplicas().contains(broker.getId())) {
+                continue;
+            }
+            doRestore(group, replica, broker);
+        }
+    }
+
+    protected void doRestore(PartitionGroup group, Replica replica, Broker broker) {
+        logger.info("begin restore topic {},group.no {} group {}",replica.getTopic().getFullName(),replica.getGroup(),group);
+
+        if (!config.getForceRestore()) {
+            storeService.restorePartitionGroup(group.getTopic().getFullName(), group.getGroup());
+            return;
+        }
+
+        if (storeService.partitionGroupExists(group.getTopic().getFullName(), group.getGroup())) {
+            storeService.restorePartitionGroup(group.getTopic().getFullName(), group.getGroup());
+        } else {
+            logger.warn("store not found, createPartitionGroup, topic {},group.no {} group {}",replica.getTopic().getFullName(),replica.getGroup(),group);
+            storeService.createPartitionGroup(replica.getTopic().getFullName(), group.getGroup(), Shorts.toArray(group.getPartitions()));
+            try {
+                Map<Integer, Broker> newBrokers = Maps.newHashMap(group.getBrokers());
+                newBrokers.put(broker.getId(), broker);
+                electionService.onPartitionGroupCreate(group.getElectType(), group.getTopic(), group.getGroup(),
+                        new ArrayList<>(newBrokers.values()), group.getLearners(), broker.getId(), group.getLeader());
+            } catch (ElectionException e) {
+                logger.info("election create partitionGroup exception, topic {},group.no {} group {}",replica.getTopic().getFullName(),replica.getGroup(),group, e);
             }
         }
     }

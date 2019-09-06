@@ -26,7 +26,6 @@ import java.util.List;
  * @author lixiaobin6
  * 下午3:11 2018/8/13
  */
-// TODO brokerId
 public interface PartitionGroupReplicaInternalService {
 
     /**
@@ -60,6 +59,12 @@ public interface PartitionGroupReplicaInternalService {
      * @return
      */
     List<Replica> getByBrokerId(Integer brokerId);
+
+    /**
+     * 查询全部
+     * @return
+     */
+    List<Replica> getAll();
 
     /**
      * 添加

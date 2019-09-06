@@ -17,9 +17,6 @@ import java.util.List;
  */
 public class JournalkeeperConfig {
 
-    private static final String NODE_SPLITTER = ",";
-    private static final String DEFAULT_WORKING_DIR = "/journalkeeper_nameserver";
-
     protected static final Logger logger = LoggerFactory.getLogger(JournalkeeperConfig.class);
 
     private PropertySupplier propertySupplier;
@@ -45,7 +42,7 @@ public class JournalkeeperConfig {
         if (StringUtils.isBlank(nodes)) {
             return Collections.emptyList();
         }
-        return Arrays.asList(nodes.split(NODE_SPLITTER));
+        return Arrays.asList(nodes.split(JournalkeeperConfigKey.NODE_SPLITTER));
     }
 
     public int getWaitLeaderTimeout() {
@@ -57,7 +54,7 @@ public class JournalkeeperConfig {
         if (StringUtils.isNotBlank(dir)) {
             return dir;
         }
-        return propertySupplier.getProperty(Property.APPLICATION_DATA_PATH).getString() + DEFAULT_WORKING_DIR;
+        return propertySupplier.getProperty(Property.APPLICATION_DATA_PATH).getString() + JournalkeeperConfigKey.DEFAULT_WORKING_DIR;
     }
 
     public String getInitFile() {

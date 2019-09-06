@@ -17,7 +17,7 @@ public enum JournalkeeperConfigKey implements PropertyDef {
     NODES("nameserver.journalkeeper.nodes", null, PropertyDef.Type.STRING),
     WAIT_LEADER_TIMEOUT("nameserver.journalkeeper.waitLeaderTimeout", 1000 * 30, PropertyDef.Type.INT),
     WORKING_DIR("nameserver.journalkeeper.working.dir", null, PropertyDef.Type.STRING),
-    INIT_FILE("nameserver.journalkeeper.init.file", "/journalkeeper/nameserver.sql", PropertyDef.Type.STRING),
+    INIT_FILE("nameserver.journalkeeper.init.file", "/journalkeeper/nameserver/schema.sql", PropertyDef.Type.STRING),
 
     SNAPSHOT_STEP("nameserver.journalkeeper.snapshot.step", 0, PropertyDef.Type.INT),
 
@@ -31,6 +31,9 @@ public enum JournalkeeperConfigKey implements PropertyDef {
     METRIC_PRINT_INTERVAL("nameserver.journalkeeper.metric.print.interval", 0, PropertyDef.Type.INT),
 
     ;
+
+    public static final String NODE_SPLITTER = ",";
+    public static final String DEFAULT_WORKING_DIR = "/journalkeeper/nameserver";
 
     private String name;
     private Object value;

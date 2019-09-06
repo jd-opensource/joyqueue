@@ -632,6 +632,11 @@ public class IgniteTopicInternalService implements TopicInternalService {
     }
 
     @Override
+    public Topic add(Topic topic) {
+        return null;
+    }
+
+    @Override
     public Topic update(Topic topic) {
         return null;
     }

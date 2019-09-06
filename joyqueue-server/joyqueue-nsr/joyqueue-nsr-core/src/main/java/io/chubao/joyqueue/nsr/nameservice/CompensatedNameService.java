@@ -394,4 +394,8 @@ public class CompensatedNameService extends Service implements NameService, Prop
     public void addEvent(NameServerEvent event) {
         eventBus.add(event);
     }
+
+    public NameService getDelegate() {
+        return delegate;
+    }
 }

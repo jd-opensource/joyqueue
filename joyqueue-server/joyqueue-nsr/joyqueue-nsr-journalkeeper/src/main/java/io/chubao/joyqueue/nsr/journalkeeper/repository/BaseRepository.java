@@ -13,7 +13,7 @@ import java.util.List;
  * author: gaohaoxiang
  * date: 2019/8/15
  */
-public abstract class BaseRepository {
+public class BaseRepository {
 
     private SQLOperator sqlOperator;
 

@@ -289,4 +289,9 @@ public class IgniteInternalServiceProvider extends Service implements Module, In
         super.doStop();
         IgnitionEx.stop(name, true, true);
     }
+
+    @Override
+    public String type() {
+        return "type";
+    }
 }

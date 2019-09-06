@@ -42,6 +42,11 @@ public class JournalkeeperPartitionGroupReplicaInternalService implements Partit
     }
 
     @Override
+    public List<Replica> getAll() {
+        return PartitionGroupReplicaConverter.convert(partitionGroupReplicaRepository.getAll());
+    }
+
+    @Override
     public Replica add(Replica replica) {
         return PartitionGroupReplicaConverter.convert(partitionGroupReplicaRepository.add(PartitionGroupReplicaConverter.convert(replica)));
     }

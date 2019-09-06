@@ -24,6 +24,8 @@ public class PartitionGroupReplicaRepository extends BaseRepository {
             COLUMNS, TABLE);
     private static final String GET_BY_BROKER = String.format("SELECT %s FROM %s WHERE broker_id = ?",
             COLUMNS, TABLE);
+    private static final String GET_ALL = String.format("SELECT %s FROM %s",
+            COLUMNS, TABLE);
     private static final String ADD = String.format("INSERT INTO %s(%s) VALUES(?,?,?,?,?)",
             TABLE, COLUMNS);
     private static final String UPDATE_BY_ID = String.format("UPDATE %s SET %s WHERE id = ?",
@@ -49,6 +51,10 @@ public class PartitionGroupReplicaRepository extends BaseRepository {
 
     public List<PartitionGroupReplicaDTO> getByBrokerId(long brokerId) {
         return query(PartitionGroupReplicaDTO.class, GET_BY_BROKER, brokerId);
+    }
+
+    public List<PartitionGroupReplicaDTO> getAll() {
+        return query(PartitionGroupReplicaDTO.class, GET_ALL);
     }
 
     public PartitionGroupReplicaDTO add(PartitionGroupReplicaDTO partitionGroupReplicaDTO) {

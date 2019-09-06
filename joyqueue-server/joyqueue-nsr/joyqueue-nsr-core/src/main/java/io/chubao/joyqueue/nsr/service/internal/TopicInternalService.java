@@ -150,6 +150,13 @@ public interface TopicInternalService {
     List<PartitionGroup> getPartitionGroup(String namespace, String topic, Object[] groups);
 
     /**
+     * 添加主题
+     * @param topic
+     * @return
+     */
+    Topic add(Topic topic);
+
+    /**
      * 更新主题
      * @param topic
      * @return

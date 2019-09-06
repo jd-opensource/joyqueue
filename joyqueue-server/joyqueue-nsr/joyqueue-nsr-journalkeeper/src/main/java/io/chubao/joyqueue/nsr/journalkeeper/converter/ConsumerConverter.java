@@ -40,7 +40,7 @@ public class ConsumerConverter {
     }
 
     protected static String generateId(Consumer consumer) {
-        return String.format("%s.%s", consumer.getTopic().getFullName(), consumer.getApp());
+        return String.format("%s_%s", consumer.getTopic().getFullName(), consumer.getApp());
     }
 
     public static Consumer convert(ConsumerDTO consumerDTO) {

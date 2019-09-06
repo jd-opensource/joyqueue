@@ -66,6 +66,15 @@ public class CompositionPartitionGroupReplicaInternalService implements Partitio
     }
 
     @Override
+    public List<Replica> getAll() {
+        if (config.isReadIgnite()) {
+            return ignitePartitionGroupReplicaService.getAll();
+        } else {
+            return journalkeeperPartitionGroupReplicaService.getAll();
+        }
+    }
+
+    @Override
     public Replica add(Replica replica) {
         Replica result = null;
         if (config.isWriteIgnite()) {

@@ -16,6 +16,10 @@ import java.util.List;
  */
 public class PartitionGroupReplicaConverter {
 
+    public static String generateId(Replica replica) {
+        return generateId(replica.getTopic().getFullName(), replica.getGroup(), replica.getBrokerId());
+    }
+
     public static String generateId(String topic, int group, int replica) {
         return String.format("%s_%s_%s", topic, group, replica);
     }
@@ -25,7 +29,7 @@ public class PartitionGroupReplicaConverter {
             return null;
         }
         PartitionGroupReplicaDTO partitionGroupReplicaDTO = new PartitionGroupReplicaDTO();
-        partitionGroupReplicaDTO.setId(replica.getId());
+        partitionGroupReplicaDTO.setId(generateId(replica));
         partitionGroupReplicaDTO.setTopic(replica.getTopic().getCode());
         partitionGroupReplicaDTO.setNamespace(replica.getTopic().getNamespace());
         partitionGroupReplicaDTO.setGroup(replica.getGroup());

@@ -202,6 +202,11 @@ public class JournalkeeperTopicInternalService implements TopicInternalService {
     }
 
     @Override
+    public Topic add(Topic topic) {
+        return TopicConverter.convert(topicRepository.add(TopicConverter.convert(topic)));
+    }
+
+    @Override
     public Topic update(Topic topic) {
         return TopicConverter.convert(topicRepository.update(TopicConverter.convert(topic)));
     }

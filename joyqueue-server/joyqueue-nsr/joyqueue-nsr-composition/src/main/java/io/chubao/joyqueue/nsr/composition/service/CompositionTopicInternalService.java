@@ -155,6 +155,22 @@ public class CompositionTopicInternalService implements TopicInternalService {
     }
 
     @Override
+    public Topic add(Topic topic) {
+        Topic result = null;
+        if (config.isWriteIgnite()) {
+            result = igniteTopicService.add(topic);
+        }
+        if (config.isWriteJournalkeeper()) {
+            try {
+                journalkeeperTopicService.add(topic);
+            } catch (Exception e) {
+                logger.error("add journalkeeper exception, params: {}", topic, e);
+            }
+        }
+        return result;
+    }
+
+    @Override
     public Topic update(Topic topic) {
         Topic result = null;
         if (config.isWriteIgnite()) {

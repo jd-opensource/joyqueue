@@ -1,6 +1,7 @@
 package io.chubao.joyqueue.nsr.journalkeeper;
 
 import io.chubao.joyqueue.nsr.journalkeeper.repository.AppTokenRepository;
+import io.chubao.joyqueue.nsr.journalkeeper.repository.BaseRepository;
 import io.chubao.joyqueue.nsr.journalkeeper.repository.BrokerRepository;
 import io.chubao.joyqueue.nsr.journalkeeper.repository.ConfigRepository;
 import io.chubao.joyqueue.nsr.journalkeeper.repository.ConsumerRepository;
@@ -16,6 +17,7 @@ import io.chubao.joyqueue.nsr.journalkeeper.service.JournalkeeperConfigInternalS
 import io.chubao.joyqueue.nsr.journalkeeper.service.JournalkeeperConsumerInternalService;
 import io.chubao.joyqueue.nsr.journalkeeper.service.JournalkeeperDataCenterInternalService;
 import io.chubao.joyqueue.nsr.journalkeeper.service.JournalkeeperNamespaceInternalService;
+import io.chubao.joyqueue.nsr.journalkeeper.service.JournalkeeperOperationInternalService;
 import io.chubao.joyqueue.nsr.journalkeeper.service.JournalkeeperPartitionGroupInternalService;
 import io.chubao.joyqueue.nsr.journalkeeper.service.JournalkeeperPartitionGroupReplicaInternalService;
 import io.chubao.joyqueue.nsr.journalkeeper.service.JournalkeeperProducerInternalService;
@@ -27,6 +29,7 @@ import io.chubao.joyqueue.nsr.service.internal.ConfigInternalService;
 import io.chubao.joyqueue.nsr.service.internal.ConsumerInternalService;
 import io.chubao.joyqueue.nsr.service.internal.DataCenterInternalService;
 import io.chubao.joyqueue.nsr.service.internal.NamespaceInternalService;
+import io.chubao.joyqueue.nsr.service.internal.OperationInternalService;
 import io.chubao.joyqueue.nsr.service.internal.PartitionGroupInternalService;
 import io.chubao.joyqueue.nsr.service.internal.PartitionGroupReplicaInternalService;
 import io.chubao.joyqueue.nsr.service.internal.ProducerInternalService;
@@ -68,6 +71,7 @@ public class JournalkeeperInternalServiceManager extends Service {
     private JournalkeeperConfigInternalService journalkeeperConfigInternalService;
     private JournalkeeperAppTokenInternalService journalkeeperAppTokenInternalService;
     private JournalkeeperTransactionInternalService journalkeeperTransactionInternalService;
+    private JournalkeeperOperationInternalService journalkeeperOperationInternalService;
 
     public JournalkeeperInternalServiceManager(SQLClient sqlClient, SQLOperator sqlOperator) {
         this.sqlClient = sqlClient;
@@ -98,6 +102,7 @@ public class JournalkeeperInternalServiceManager extends Service {
         journalkeeperConfigInternalService = new JournalkeeperConfigInternalService(configRepository);
         journalkeeperAppTokenInternalService = new JournalkeeperAppTokenInternalService(appTokenRepository);
         journalkeeperTransactionInternalService = new JournalkeeperTransactionInternalService();
+        journalkeeperOperationInternalService = new JournalkeeperOperationInternalService(new BaseRepository(sqlOperator));
     }
 
     public <T> T getService(Class<T> service) {
@@ -123,8 +128,8 @@ public class JournalkeeperInternalServiceManager extends Service {
             return (T) journalkeeperAppTokenInternalService;
         } else if (service.equals(TransactionInternalService.class)) {
             return (T) journalkeeperTransactionInternalService;
-        } else if (service.equals(SQLOperator.class)) {
-            return (T) sqlOperator;
+        } else if (service.equals(OperationInternalService.class)) {
+            return (T) journalkeeperOperationInternalService;
         }
         throw new UnsupportedOperationException(service.getName());
     }

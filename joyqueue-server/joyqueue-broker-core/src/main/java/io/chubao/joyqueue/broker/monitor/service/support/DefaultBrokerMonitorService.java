@@ -317,4 +317,34 @@ public class DefaultBrokerMonitorService implements BrokerMonitorService {
     public Producer getProducerMetadataByTopicAndApp(String topic, String app, boolean isCluster) {
         return metadataMonitorService.getProducerMetadataByTopicAndApp(topic, app, isCluster);
     }
+
+    @Override
+    public Object exportMetadata(String source) {
+        return metadataMonitorService.exportMetadata(source);
+    }
+
+    @Override
+    public Object syncMetadata(String source, String target) {
+        return metadataMonitorService.syncMetadata(source, target);
+    }
+
+    @Override
+    public Object queryMetadata(String source, String operator, List<Object> params) {
+        return metadataMonitorService.queryMetadata(source, operator, params);
+    }
+
+    @Override
+    public Object updateMetadata(String source, String operator, List<Object> params) {
+        return metadataMonitorService.updateMetadata(source, operator, params);
+    }
+
+    @Override
+    public Object insertMetadata(String source, String operator, List<Object> params) {
+        return metadataMonitorService.insertMetadata(source, operator, params);
+    }
+
+    @Override
+    public Object deleteMetadata(String source, String operator, List<Object> params) {
+        return metadataMonitorService.deleteMetadata(source, operator, params);
+    }
 }

@@ -103,4 +103,9 @@ public class CompositionInternalServiceProvider extends Service implements Inter
             return serviceProvider.getService(service);
         }
     }
+
+    @Override
+    public String type() {
+        return "composition";
+    }
 }

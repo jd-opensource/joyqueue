@@ -65,6 +65,11 @@ public class IgnitePartitionGroupReplicaInternalService implements PartitionGrou
     }
 
     @Override
+    public List<Replica> getAll() {
+        return convert(replicaDao.list(null));
+    }
+
+    @Override
     public Replica add(Replica replica) {
         replicaDao.addOrUpdate(toIgniteModel(replica));
         return replica;

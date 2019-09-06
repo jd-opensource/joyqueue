@@ -41,6 +41,11 @@ public class DefaultPartitionGroupReplicaService implements PartitionGroupReplic
     }
 
     @Override
+    public List<Replica> getAll() {
+        return partitionGroupReplicaInternalService.getAll();
+    }
+
+    @Override
     public Replica add(Replica replica) {
         return partitionGroupReplicaInternalService.add(replica);
     }
