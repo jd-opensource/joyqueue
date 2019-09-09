@@ -28,10 +28,6 @@ import io.chubao.joyqueue.nsr.ignite.model.IgniteConsumer;
 import io.chubao.joyqueue.nsr.ignite.model.IgniteConsumerConfig;
 import io.chubao.joyqueue.nsr.model.ConsumerQuery;
 import io.chubao.joyqueue.nsr.service.internal.ConsumerInternalService;
-import org.apache.ignite.Ignition;
-import org.apache.ignite.transactions.Transaction;
-import org.apache.ignite.transactions.TransactionConcurrency;
-import org.apache.ignite.transactions.TransactionIsolation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -148,13 +144,12 @@ public class IgniteConsumerInternalService implements ConsumerInternalService {
 
     @Override
     public Consumer add(Consumer consumer) {
-        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
+        try {
             IgniteConsumer igConsumer = toIgniteModel(consumer);
             consumerDao.addOrUpdate(igConsumer);
             if (null != consumer.getConsumerPolicy() || null != consumer.getRetryPolicy() || consumer.getLimitPolicy() != null) {
                 consumerConfigDao.addOrUpdate(new IgniteConsumerConfig(igConsumer));
             }
-            tx.commit();
             this.publishEvent(ConsumerEvent.add(consumer.getTopic(), consumer.getApp()));
             return consumer;
         } catch (Exception e) {
@@ -166,13 +161,12 @@ public class IgniteConsumerInternalService implements ConsumerInternalService {
 
     @Override
     public Consumer update(Consumer consumer) {
-        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
+        try {
             IgniteConsumer igConsumer = toIgniteModel(consumer);
             consumerDao.addOrUpdate(igConsumer);
             if (null != consumer.getConsumerPolicy() || null != consumer.getRetryPolicy() || consumer.getLimitPolicy() != null) {
                 consumerConfigDao.addOrUpdate(new IgniteConsumerConfig(igConsumer));
             }
-            tx.commit();
             this.publishEvent(ConsumerEvent.add(consumer.getTopic(), consumer.getApp()));
             return consumer;
         } catch (Exception e) {

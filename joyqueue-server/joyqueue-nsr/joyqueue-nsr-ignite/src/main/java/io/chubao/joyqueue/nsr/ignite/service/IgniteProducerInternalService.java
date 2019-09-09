@@ -28,10 +28,6 @@ import io.chubao.joyqueue.nsr.ignite.model.IgniteProducer;
 import io.chubao.joyqueue.nsr.ignite.model.IgniteProducerConfig;
 import io.chubao.joyqueue.nsr.model.ProducerQuery;
 import io.chubao.joyqueue.nsr.service.internal.ProducerInternalService;
-import org.apache.ignite.Ignition;
-import org.apache.ignite.transactions.Transaction;
-import org.apache.ignite.transactions.TransactionConcurrency;
-import org.apache.ignite.transactions.TransactionIsolation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -136,48 +132,28 @@ public class IgniteProducerInternalService implements ProducerInternalService {
 
     @Override
     public Producer add(Producer producer) {
-        Transaction tx = Ignition.ignite().transactions().tx();
-        boolean commit = false;
         try {
-            if (null == tx) {
-                tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED);
-                commit = true;
-            }
             producerDao.addOrUpdate(toIgniteModel(producer));
             if (null != producer.getProducerPolicy() || producer.getLimitPolicy() != null) {
                 producerConfigDao.addOrUpdate(new IgniteProducerConfig(new IgniteProducer(producer)));
             }
-            if (commit) {
-                tx.commit();
-            }
             this.publishEvent(ProducerEvent.add(producer.getTopic(), producer.getApp()));
             return producer;
         } catch (Exception e) {
-            if (commit) tx.rollback();
             throw new RuntimeException("producerService addOrUpdate error", e);
         }
     }
 
     @Override
     public Producer update(Producer producer) {
-        Transaction tx = Ignition.ignite().transactions().tx();
-        boolean commit = false;
         try {
-            if (null == tx) {
-                tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED);
-                commit = true;
-            }
             producerDao.addOrUpdate(toIgniteModel(producer));
             if (null != producer.getProducerPolicy() || producer.getLimitPolicy() != null) {
                 producerConfigDao.addOrUpdate(new IgniteProducerConfig(new IgniteProducer(producer)));
             }
-            if (commit) {
-                tx.commit();
-            }
             this.publishEvent(ProducerEvent.add(producer.getTopic(), producer.getApp()));
             return producer;
         } catch (Exception e) {
-            if (commit) tx.rollback();
             throw new RuntimeException("producerService addOrUpdate error", e);
         }
     }
@@ -189,19 +165,11 @@ public class IgniteProducerInternalService implements ProducerInternalService {
     @Override
     public void delete(String id) {
         Producer producer = getById(id);
-        Transaction tx = Ignition.ignite().transactions().tx();
-        boolean commit = false;
         try {
-            if (null == tx) {
-                tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED);
-                commit = true;
-            }
             producerDao.deleteById(id);
             producerConfigDao.deleteById(id);
-            if (commit) tx.commit();
             this.publishEvent(ProducerEvent.remove(producer.getTopic(), producer.getApp()));
         } catch (Exception e) {
-            if (commit) tx.rollback();
             throw new RuntimeException("delete producer error.", e);
         }
     }

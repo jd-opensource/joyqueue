@@ -58,10 +58,6 @@ import io.chubao.joyqueue.nsr.network.command.RemovePartitionGroup;
 import io.chubao.joyqueue.nsr.network.command.UpdatePartitionGroup;
 import io.chubao.joyqueue.nsr.service.internal.TopicInternalService;
 import io.chubao.joyqueue.toolkit.lang.Pair;
-import org.apache.ignite.Ignition;
-import org.apache.ignite.transactions.Transaction;
-import org.apache.ignite.transactions.TransactionConcurrency;
-import org.apache.ignite.transactions.TransactionIsolation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -180,7 +176,7 @@ public class IgniteTopicInternalService implements TopicInternalService {
      */
     @Override
     public void addTopic(Topic topic, List<PartitionGroup> partitionGroups) {
-        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
+        try {
             Topic oldTopic = getTopicByCode(topic.getName().getNamespace(), topic.getName().getCode());
             if (oldTopic != null) {
                 throw new Exception(String.format("topic:%s is aleady exsit",topic.getName()));
@@ -221,7 +217,6 @@ public class IgniteTopicInternalService implements TopicInternalService {
                     }
                 }
             }
-            tx.commit();
             this.publishEvent(TopicEvent.add(topicName));
 
         } catch (Exception e) {
@@ -262,7 +257,7 @@ public class IgniteTopicInternalService implements TopicInternalService {
     @Override
     public void removeTopic(Topic topic) {
         TopicName topicName = topic.getName();
-        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
+        try {
             List<PartitionGroup> partitionGroups = partitionGroupService.getByTopic(topicName);
             topicDao.deleteById(topicName.getFullName());
             partitionGroupReplicaService.deleteByTopic(topicName);
@@ -292,7 +287,6 @@ public class IgniteTopicInternalService implements TopicInternalService {
                     }
                 }
             }
-            tx.commit();
             this.publishEvent(TopicEvent.remove(topicName));
         } catch (Exception e) {
             String msg = String.format("remove topic error[%s]", topicName.getFullName());
@@ -315,7 +309,7 @@ public class IgniteTopicInternalService implements TopicInternalService {
         Command command = null;
         Transport transport = null;
         Command response = null;
-        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
+        try {
 
             if (group.getElectType().type() == PartitionGroup.ElectType.fix.type()) {
                 group.setLeader(group.getReplicas().iterator().next());
@@ -345,7 +339,6 @@ public class IgniteTopicInternalService implements TopicInternalService {
                     }
                 }
             }
-            tx.commit();
             this.publishEvent(PartitionGroupEvent.add(group.getTopic(), group.getGroup()));
         } catch (Exception e) {
             logger.error("add topic partition group ",e);
@@ -384,7 +377,7 @@ public class IgniteTopicInternalService implements TopicInternalService {
         Transport transport = null;
         TopicName topicName = group.getTopic();
         int groupNo = group.getGroup();
-        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
+        try {
 
             Topic topic = getById(topicName.getFullName());
             topic.setPartitions((short) (topic.getPartitions()-group.getPartitions().size()));
@@ -417,7 +410,6 @@ public class IgniteTopicInternalService implements TopicInternalService {
                     }
                 }
             }
-            tx.commit();
             this.publishEvent(PartitionGroupEvent.remove(group.getTopic(), group.getGroup()));
         } catch (Exception e) {
             throw new RuntimeException("add topic error", e);
@@ -484,7 +476,7 @@ public class IgniteTopicInternalService implements TopicInternalService {
     public Collection<Integer> updatePartitionGroup(PartitionGroup group) {
         List<Pair<Set<Integer>, Command>> commands = new ArrayList<>();
         List<Pair<Set<Integer>, Command>> rollbackCommands = new ArrayList<>();
-        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
+        try {
             final PartitionGroup groupOld = partitionGroupService.getById(group.getTopic().getFullName() + IgniteBaseModel.SPLICE + group.getGroup());
             final PartitionGroup groupNew = group;
             groupNew.setLeader(groupOld.getLeader());
@@ -574,7 +566,6 @@ public class IgniteTopicInternalService implements TopicInternalService {
                 }
             }
             partitionGroupService.addOrUpdate(new IgnitePartitionGroup(group));
-            tx.commit();
             this.publishEvent(PartitionGroupEvent.update(group.getTopic(), group.getGroup()));
             return Collections.emptyList();
         } catch (Exception e) {
@@ -604,6 +595,12 @@ public class IgniteTopicInternalService implements TopicInternalService {
             }
             throw new RuntimeException("update topic PartitionGroup error", e);
         }
+    }
+
+    @Override
+    public void leaderReport(PartitionGroup group) {
+        partitionGroupService.update(group);
+        this.publishEvent(PartitionGroupEvent.update(group.getTopic(), group.getGroup()));
     }
 
     public void publishEvent(MetaEvent event) {

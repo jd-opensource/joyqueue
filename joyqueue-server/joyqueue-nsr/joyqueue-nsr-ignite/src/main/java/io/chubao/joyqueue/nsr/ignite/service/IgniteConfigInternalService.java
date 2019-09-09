@@ -23,10 +23,6 @@ import io.chubao.joyqueue.nsr.ignite.dao.ConfigDao;
 import io.chubao.joyqueue.nsr.ignite.message.IgniteMessenger;
 import io.chubao.joyqueue.nsr.ignite.model.IgniteConfig;
 import io.chubao.joyqueue.nsr.service.internal.ConfigInternalService;
-import org.apache.ignite.Ignition;
-import org.apache.ignite.transactions.Transaction;
-import org.apache.ignite.transactions.TransactionConcurrency;
-import org.apache.ignite.transactions.TransactionIsolation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,10 +52,9 @@ public class IgniteConfigInternalService implements ConfigInternalService {
 
     @Override
     public Config add(Config config) {
-        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
+        try {
             configDao.addOrUpdate(new IgniteConfig(config));
             this.publishEvent(ConfigEvent.add(config.getGroup(), config.getKey(), config.getValue()));
-            tx.commit();
             return config;
         } catch (Exception e) {
             String message = String.format("add config group [%s] key [%s] error", config.getGroup(), config.getKey());
@@ -70,10 +65,9 @@ public class IgniteConfigInternalService implements ConfigInternalService {
 
     @Override
     public Config update(Config config) {
-        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
+        try {
             configDao.addOrUpdate(new IgniteConfig(config));
             this.publishEvent(ConfigEvent.update(config.getGroup(), config.getKey(), config.getValue()));
-            tx.commit();
             return config;
         } catch (Exception e) {
             String message = String.format("update config group [%s] key [%s] error", config.getGroup(), config.getKey());
@@ -85,10 +79,9 @@ public class IgniteConfigInternalService implements ConfigInternalService {
     @Override
     public void delete(String id) {
         IgniteConfig config = configDao.findById(id);
-        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
+        try {
             configDao.deleteById(id);
             this.publishEvent(ConfigEvent.remove(config.getGroup(), config.getKey(), config.getValue()));
-            tx.commit();
         } catch (Exception e) {
             String message = String.format("remove config group [%s] key [%s] error", config.getGroup(), config.getKey());
             logger.error(message, e);

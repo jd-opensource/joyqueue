@@ -411,15 +411,8 @@ public class MetaManager extends Service {
      *
      * @param partitionGroup
      */
-    public void updatePartitionGroup(PartitionGroup partitionGroup) {
-        PartitionGroup group = partitionGroupService.getById(partitionGroup.getId());
-        if (group != null){
-            group.setIsrs(partitionGroup.getIsrs());
-            group.setLeader(partitionGroup.getLeader());
-            group.setTerm(partitionGroup.getTerm());
-            topicService.updatePartitionGroup(group);
-        }
-
+    public void leaderReport(PartitionGroup partitionGroup) {
+        topicService.leaderReport(partitionGroup);
     }
 
     /**

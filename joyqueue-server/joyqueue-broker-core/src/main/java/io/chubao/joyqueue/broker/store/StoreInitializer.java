@@ -1,12 +1,10 @@
 package io.chubao.joyqueue.broker.store;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.primitives.Shorts;
 import io.chubao.joyqueue.broker.cluster.ClusterManager;
 import io.chubao.joyqueue.broker.config.BrokerStoreConfig;
-import io.chubao.joyqueue.broker.election.ElectionException;
 import io.chubao.joyqueue.broker.election.ElectionService;
 import io.chubao.joyqueue.domain.Broker;
 import io.chubao.joyqueue.domain.PartitionGroup;
@@ -29,7 +27,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -98,14 +95,15 @@ public class StoreInitializer extends Service implements EventListener<MetaEvent
         } else {
             logger.warn("store not found, createPartitionGroup, topic {},group.no {} group {}",replica.getTopic().getFullName(),replica.getGroup(),group);
             storeService.createPartitionGroup(replica.getTopic().getFullName(), group.getGroup(), Shorts.toArray(group.getPartitions()));
-            try {
-                Map<Integer, Broker> newBrokers = Maps.newHashMap(group.getBrokers());
-                newBrokers.put(broker.getId(), broker);
-                electionService.onPartitionGroupCreate(group.getElectType(), group.getTopic(), group.getGroup(),
-                        new ArrayList<>(newBrokers.values()), group.getLearners(), broker.getId(), group.getLeader());
-            } catch (ElectionException e) {
-                logger.info("election create partitionGroup exception, topic {},group.no {} group {}",replica.getTopic().getFullName(),replica.getGroup(),group, e);
-            }
+            // TODO 有问题
+//            try {
+//                Map<Integer, Broker> newBrokers = Maps.newHashMap(group.getBrokers());
+//                newBrokers.put(broker.getId(), broker);
+//                electionService.onPartitionGroupCreate(group.getElectType(), group.getTopic(), group.getGroup(),
+//                        new ArrayList<>(newBrokers.values()), group.getLearners(), broker.getId(), group.getLeader());
+//            } catch (ElectionException e) {
+//                logger.info("election create partitionGroup exception, topic {},group.no {} group {}",replica.getTopic().getFullName(),replica.getGroup(),group, e);
+//            }
         }
     }
 

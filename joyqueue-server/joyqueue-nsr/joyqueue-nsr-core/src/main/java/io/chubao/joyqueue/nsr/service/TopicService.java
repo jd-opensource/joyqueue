@@ -135,6 +135,12 @@ public interface TopicService {
     Collection<Integer> updatePartitionGroup(PartitionGroup group);
 
     /**
+     * leader上报
+     * @param group
+     */
+    void leaderReport(PartitionGroup group);
+
+    /**
      * 指定leader
      * @param group
      */

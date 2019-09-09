@@ -25,6 +25,7 @@ import io.chubao.joyqueue.network.transport.command.Command;
 import io.chubao.joyqueue.network.transport.command.Type;
 import io.chubao.joyqueue.network.transport.command.handler.CommandHandler;
 import io.chubao.joyqueue.network.transport.exception.TransportException;
+import io.chubao.joyqueue.nsr.config.NameServiceConfig;
 import io.chubao.joyqueue.nsr.network.command.NsrCommandType;
 import io.chubao.joyqueue.nsr.network.command.RemovePartitionGroup;
 import io.chubao.joyqueue.store.StoreService;
@@ -40,10 +41,12 @@ public class RemovePartitionGroupHandler implements CommandHandler, Type {
     private static Logger logger = LoggerFactory.getLogger(RemovePartitionGroupHandler.class);
     private ElectionService electionService;
     private StoreService storeService;
+    private NameServiceConfig config;
 
     public RemovePartitionGroupHandler(BrokerContext brokerContext) {
         this.electionService = brokerContext.getElectionService();
         this.storeService = brokerContext.getStoreService();
+        this.config = new NameServiceConfig(brokerContext.getPropertySupplier());
     }
 
     @Override
@@ -53,8 +56,7 @@ public class RemovePartitionGroupHandler implements CommandHandler, Type {
 
     @Override
     public Command handle(Transport transport, Command command) throws TransportException {
-        // TODO 临时
-        if (true) {
+        if (!config.getMessengerIgniteEnable()) {
             return BooleanAck.build();
         }
         if (command == null) {

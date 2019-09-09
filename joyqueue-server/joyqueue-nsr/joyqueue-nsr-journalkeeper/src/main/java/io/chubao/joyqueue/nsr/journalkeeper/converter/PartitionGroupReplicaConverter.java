@@ -21,7 +21,7 @@ public class PartitionGroupReplicaConverter {
     }
 
     public static String generateId(String topic, int group, int replica) {
-        return String.format("%s_%s_%s", topic, group, replica);
+        return String.format("%s.%s.%s", topic, group, replica);
     }
 
     public static PartitionGroupReplicaDTO convert(Replica replica) {

@@ -23,10 +23,6 @@ import io.chubao.joyqueue.nsr.ignite.dao.DataCenterDao;
 import io.chubao.joyqueue.nsr.ignite.message.IgniteMessenger;
 import io.chubao.joyqueue.nsr.ignite.model.IgniteDataCenter;
 import io.chubao.joyqueue.nsr.service.internal.DataCenterInternalService;
-import org.apache.ignite.Ignition;
-import org.apache.ignite.transactions.Transaction;
-import org.apache.ignite.transactions.TransactionConcurrency;
-import org.apache.ignite.transactions.TransactionIsolation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,10 +47,9 @@ public class IgniteDataCenterInternalService implements DataCenterInternalServic
 
     @Override
     public DataCenter add(DataCenter dataCenter) {
-        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
+        try {
             dataCenterDao.addOrUpdate(new IgniteDataCenter(dataCenter));
             this.publishEvent(DataCenterEvent.add(dataCenter.getRegion(),dataCenter.getCode(),dataCenter.getUrl()));
-            tx.commit();
             return dataCenter;
         } catch (Exception e) {
             String message = String.format("add data center.", dataCenter.toString());
@@ -66,10 +61,9 @@ public class IgniteDataCenterInternalService implements DataCenterInternalServic
 
     @Override
     public DataCenter update(DataCenter dataCenter) {
-        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
+        try {
             dataCenterDao.addOrUpdate(new IgniteDataCenter(dataCenter));
             this.publishEvent(DataCenterEvent.add(dataCenter.getRegion(),dataCenter.getCode(),dataCenter.getUrl()));
-            tx.commit();
             return dataCenter;
         } catch (Exception e) {
             String message = String.format("add data center.", dataCenter.toString());
@@ -85,10 +79,9 @@ public class IgniteDataCenterInternalService implements DataCenterInternalServic
     @Override
     public void delete(String id) {
         IgniteDataCenter dataCenter = dataCenterDao.findById(id);
-        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
+        try {
             dataCenterDao.deleteById(id);
             this.publishEvent(DataCenterEvent.remove(dataCenter.getRegion(),dataCenter.getCode(),dataCenter.getUrl()));
-            tx.commit();
         } catch (Exception e) {
             String message = String.format("delete data center.", dataCenter.toString());
             logger.error(message, e);

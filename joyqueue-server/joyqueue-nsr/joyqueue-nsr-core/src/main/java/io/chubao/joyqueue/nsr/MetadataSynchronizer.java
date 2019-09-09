@@ -38,10 +38,10 @@ public class MetadataSynchronizer {
     protected static final Logger logger = LoggerFactory.getLogger(MetadataSynchronizer.class);
 
     public Object sync(InternalServiceProvider sourceInternalServiceProvider, InternalServiceProvider targetInternalServiceProvider) {
-        Object syncTopicResult = syncTopic(sourceInternalServiceProvider, targetInternalServiceProvider);
+        Object syncBrokerResult = syncBroker(sourceInternalServiceProvider, targetInternalServiceProvider);
         Object syncPartitionGroupResult = syncPartitionGroup(sourceInternalServiceProvider, targetInternalServiceProvider);
         Object syncPartitionGroupReplicaResult = syncPartitionGroupReplica(sourceInternalServiceProvider, targetInternalServiceProvider);
-        Object syncBrokerResult = syncBroker(sourceInternalServiceProvider, targetInternalServiceProvider);
+        Object syncTopicResult = syncTopic(sourceInternalServiceProvider, targetInternalServiceProvider);
         Object syncConsumerResult = syncConsumer(sourceInternalServiceProvider, targetInternalServiceProvider);
         Object syncProducerResult = syncProducer(sourceInternalServiceProvider, targetInternalServiceProvider);
         Object syncDataCenterResult = syncDataCenter(sourceInternalServiceProvider, targetInternalServiceProvider);
@@ -50,10 +50,10 @@ public class MetadataSynchronizer {
         Object syncAppTokenResult = syncAppToken(sourceInternalServiceProvider, targetInternalServiceProvider);
 
         Map<String, Object> result = Maps.newHashMap();
-        result.put("topic", syncTopicResult);
+        result.put("broker", syncBrokerResult);
         result.put("partitionGroup", syncPartitionGroupResult);
         result.put("partitionGroupReplica", syncPartitionGroupReplicaResult);
-        result.put("broker", syncBrokerResult);
+        result.put("topic", syncTopicResult);
         result.put("consumer", syncConsumerResult);
         result.put("producer", syncProducerResult);
         result.put("dataCenter", syncDataCenterResult);

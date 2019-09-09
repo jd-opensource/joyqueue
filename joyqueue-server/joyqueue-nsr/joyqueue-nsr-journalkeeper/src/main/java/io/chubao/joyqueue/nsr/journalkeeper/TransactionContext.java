@@ -8,6 +8,7 @@ import io.journalkeeper.sql.client.SQLTransactionOperator;
  * author: gaohaoxiang
  * date: 2019/8/15
  */
+// TODO 事务过期处理
 public class TransactionContext {
 
     private static final ThreadLocal<SQLTransactionOperator> transactionThreadLocal = new ThreadLocal<>();
@@ -55,5 +56,13 @@ public class TransactionContext {
         } finally {
             transactionThreadLocal.remove();
         }
+    }
+
+    public static void close() {
+        SQLTransactionOperator transactionOperator = transactionThreadLocal.get();
+        if (transactionOperator == null) {
+            throw new UnsupportedOperationException("transaction not exist");
+        }
+        transactionThreadLocal.remove();
     }
 }

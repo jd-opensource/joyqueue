@@ -16,6 +16,7 @@
 package io.chubao.joyqueue.domain;
 
 import com.google.common.collect.Maps;
+import org.apache.commons.collections.MapUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -112,6 +113,9 @@ public class TopicConfig extends Topic implements Serializable {
 
     private Map<Short, PartitionGroup> buildPartitionGroupMap(Map<Integer,PartitionGroup> partitionGroups) {
         Map<Short, PartitionGroup> result = Maps.newHashMap();
+        if (MapUtils.isEmpty(partitionGroups)) {
+            return result;
+        }
         for (PartitionGroup partitionGroup : partitionGroups.values()) {
             for (Short partition : partitionGroup.getPartitions()) {
                 result.put(partition, partitionGroup);

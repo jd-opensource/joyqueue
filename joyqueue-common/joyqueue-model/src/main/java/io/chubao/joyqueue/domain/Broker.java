@@ -149,10 +149,7 @@ public class Broker implements Serializable {
             return false;
         }
         Broker broker = (Broker) o;
-        return id == broker.id &&
-                port == broker.port &&
-                Objects.equals(ip, broker.ip) &&
-                Objects.equals(permission, broker.permission);
+        return id == broker.id;
     }
 
     public enum PermissionEnum {
@@ -197,7 +194,7 @@ public class Broker implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, ip, port);
+        return Objects.hash(id);
     }
 
     @Override

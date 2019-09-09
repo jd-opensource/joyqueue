@@ -35,7 +35,7 @@ public class ProducerConverter {
     }
 
     protected static String generateId(Producer producer) {
-        return String.format("%s_%s", producer.getTopic().getFullName(), producer.getApp());
+        return String.format("%s.%s", producer.getTopic().getFullName(), producer.getApp());
     }
 
     public static Producer convert(ProducerDTO producerDTO) {

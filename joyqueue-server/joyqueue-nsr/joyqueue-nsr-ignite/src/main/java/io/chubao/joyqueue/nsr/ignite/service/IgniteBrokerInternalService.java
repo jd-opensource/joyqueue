@@ -28,10 +28,6 @@ import io.chubao.joyqueue.nsr.ignite.message.IgniteMessenger;
 import io.chubao.joyqueue.nsr.ignite.model.IgniteBroker;
 import io.chubao.joyqueue.nsr.model.BrokerQuery;
 import io.chubao.joyqueue.nsr.service.internal.BrokerInternalService;
-import org.apache.ignite.Ignition;
-import org.apache.ignite.transactions.Transaction;
-import org.apache.ignite.transactions.TransactionConcurrency;
-import org.apache.ignite.transactions.TransactionIsolation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -122,10 +118,9 @@ public class IgniteBrokerInternalService implements BrokerInternalService {
 
     @Override
     public Broker update(Broker broker) {
-        try (Transaction tx = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED)) {
+        try {
             brokerDao.addOrUpdate(new IgniteBroker(broker));
             this.publishEvent(BrokerEvent.event(broker));
-            tx.commit();
             return broker;
         } catch (Exception e) {
             String message = String.format("update broker [%s] error", JSON.toJSON(broker));
