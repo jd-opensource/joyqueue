@@ -34,6 +34,7 @@ import java.util.Set;
  * author: gaohaoxiang
  * date: 2019/8/28
  */
+// TODO 如果启动后元数据和选举不一致，以元数据为准
 public class StoreInitializer extends Service implements EventListener<MetaEvent> {
 
     protected static final Logger logger = LoggerFactory.getLogger(StoreInitializer.class);

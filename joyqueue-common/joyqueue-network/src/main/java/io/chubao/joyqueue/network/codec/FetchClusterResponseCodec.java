@@ -165,9 +165,6 @@ public class FetchClusterResponseCodec implements PayloadCodec<JoyQueueHeader, F
         if (header.getVersion() >= JoyQueueHeader.VERSION_V2) {
             result.setSysCode(buffer.readInt());
             result.setPermission(buffer.readInt());
-        } else {
-            result.setWritable(true);
-            result.setReadable(true);
         }
         return result;
     }

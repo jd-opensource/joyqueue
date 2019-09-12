@@ -8,7 +8,6 @@ import io.journalkeeper.sql.client.SQLTransactionOperator;
  * author: gaohaoxiang
  * date: 2019/8/15
  */
-// TODO 事务过期处理
 public class TransactionContext {
 
     private static final ThreadLocal<SQLTransactionOperator> transactionThreadLocal = new ThreadLocal<>();

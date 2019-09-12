@@ -261,7 +261,7 @@ public abstract class AbstractSerializer {
      */
     public static byte[] getBytes(final String value, final Charset charset) {
         if (value == null) {
-            return new byte[0];
+            return null;
         }
 
         byte[] bytes;

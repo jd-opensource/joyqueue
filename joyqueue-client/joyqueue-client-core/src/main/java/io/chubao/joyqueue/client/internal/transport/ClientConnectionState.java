@@ -126,6 +126,10 @@ public class ClientConnectionState {
         if (StringUtils.isBlank(addConnectionResponse.getNotification())) {
             return;
         }
+        doHandleNotification(addConnectionResponse);
+    }
+
+    protected void doHandleNotification(AddConnectionResponse addConnectionResponse) {
         logger.warn("{}", addConnectionResponse.getNotification());
     }
 

@@ -34,7 +34,6 @@ import io.chubao.joyqueue.network.transport.command.CommandCallback;
 import io.chubao.joyqueue.network.transport.command.Direction;
 import io.chubao.joyqueue.store.replication.ReplicableStore;
 import io.chubao.joyqueue.toolkit.concurrent.EventBus;
-
 import io.chubao.joyqueue.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,11 +43,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static io.chubao.joyqueue.broker.election.ElectionEvent.Type.LEADER_FOUND;
 import static io.chubao.joyqueue.broker.election.ElectionEvent.Type.START_ELECTION;
@@ -1264,6 +1263,9 @@ public class RaftLeaderElection extends LeaderElection  {
         TopicConfig topicConfig = clusterManager.getNameService().getTopicConfig(
                 TopicName.parse(topicPartitionGroup.getTopic()));
         PartitionGroup pg = topicConfig.getPartitionGroups().get(topicPartitionGroup.getPartitionGroupId());
+        if (pg.getRecLeader() == null) {
+            return INVALID_NODE_ID;
+        }
         return pg.getRecLeader();
     }
 

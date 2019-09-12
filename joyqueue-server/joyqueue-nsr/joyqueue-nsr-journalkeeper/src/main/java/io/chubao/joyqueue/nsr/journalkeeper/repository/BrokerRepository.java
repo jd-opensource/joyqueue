@@ -101,9 +101,13 @@ public class BrokerRepository extends BaseRepository {
         }
 
         if (StringUtils.isNotBlank(query.getKeyword())) {
-            sql.append(" AND (ip = ? OR id = ?)");
-            params.add(query.getKeyword());
-            params.add(query.getKeyword());
+            if (StringUtils.isNumeric(query.getKeyword())) {
+                sql.append(" AND id = ?");
+                params.add(query.getKeyword());
+            } else {
+                sql.append(" AND ip LIKE");
+                params.add(query.getKeyword() + "%s");
+            }
         }
         return sql.toString();
     }

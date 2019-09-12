@@ -78,6 +78,6 @@ public class TxFeedbackScheduler extends Service {
             scheduleThreadPool.shutdown();
         }
 
-        logger.info("{} feedbackp is stopped", topic);
+        logger.info("{} feedback is stopped", topic);
     }
 }
