@@ -17,11 +17,14 @@ package io.chubao.joyqueue.service;
 
 
 import io.chubao.joyqueue.manage.PartitionGroupPosition;
-import io.chubao.joyqueue.monitor.ArchiveMonitorInfo;
+import io.chubao.joyqueue.model.BrokerMetadata;
+import io.chubao.joyqueue.model.domain.Broker;
 import io.chubao.joyqueue.model.domain.BrokerClient;
-import io.chubao.joyqueue.model.domain.ConnectionMonitorInfoWithIp;
 import io.chubao.joyqueue.model.domain.BrokerMonitorRecord;
+import io.chubao.joyqueue.model.domain.ConnectionMonitorInfoWithIp;
 import io.chubao.joyqueue.model.domain.Subscribe;
+import io.chubao.joyqueue.monitor.ArchiveMonitorInfo;
+
 import java.util.List;
 
 /**
@@ -121,6 +124,14 @@ public interface BrokerMonitorService {
      **/
     List<ConnectionMonitorInfoWithIp> findConnectionOnBroker(Subscribe subscribe);
 
+    /**
+     * 查找Broker元数据
+     * @param broker
+     * @param topicFullName
+     * @param group
+     * @return
+     */
+    BrokerMetadata findBrokerMetadata(Broker broker, String topicFullName, int group);
 
     /**
      * 获取

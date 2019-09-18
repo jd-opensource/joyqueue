@@ -26,7 +26,6 @@ import io.chubao.joyqueue.store.index.IndexItem;
 import io.chubao.joyqueue.store.index.IndexSerializer;
 import io.chubao.joyqueue.store.message.BatchMessageParser;
 import io.chubao.joyqueue.store.message.MessageParser;
-import io.chubao.joyqueue.store.nsm.VirtualThread;
 import io.chubao.joyqueue.store.nsm.VirtualThreadExecutor;
 import io.chubao.joyqueue.store.replication.ReplicableStore;
 import io.chubao.joyqueue.store.utils.PreloadBufferPool;
@@ -45,6 +44,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -54,9 +54,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -76,31 +73,29 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
     private final File base;
     private final String topic;
     private final int partitionGroup;
-    private final CallbackPositioningBelt flushCallbackBelt, commitCallbackBelt;
+    private final Map<QosLevel, CallbackPositioningBelt> callbackMap = new HashMap<>(3);
     private final Map<Short, Partition> partitionMap = new ConcurrentHashMap<>();
     private final Config config;
     private final QosStore[] qosStores =
             {new QosStore(this, QosLevel.ONE_WAY),
                     new QosStore(this, QosLevel.RECEIVE),
                     new QosStore(this, QosLevel.PERSISTENCE),
-                    new QosStore(this, QosLevel.REPLICATION)
+                    new QosStore(this, QosLevel.REPLICATION),
+                    new QosStore(this, QosLevel.ALL)
             };
     private final ScheduledExecutorService scheduledExecutorService;
     private final PreloadBufferPool bufferPool;
-    private final VirtualThreadExecutor virtualThreadPool;
-    private final VirtualThread callbackVirtualThread = this::callbackVT;
     private final LoopThread writeLoopThread, flushLoopThread;
     private final LoopThread metricThread;
     private final BlockingQueue<WriteCommand> writeCommandCache;
     private long replicationPosition;
     private long indexPosition;
-    private final VirtualThread writeVirtualThread = this::writeVT;
     private AtomicBoolean started, enabled;
     private int term; // 当前轮次
     private Metric produceMetrics = null, consumeMetrics = null;
     private Metric.MetricInstance produceMetric = null, consumeMetric;
-    private ScheduledFuture callbackFeature;
     private final Lock writeLock = new ReentrantLock();
+
 
     public PartitionGroupStoreManager(String topic, int partitionGroup, File base, Config config,
                                       PreloadBufferPool bufferPool,
@@ -124,6 +119,9 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         this.bufferPool = bufferPool;
         this.started = new AtomicBoolean(false);
         this.enabled = new AtomicBoolean(false);
+        this.callbackMap.put(QosLevel.PERSISTENCE, new CallbackPositioningBelt());
+        this.callbackMap.put(QosLevel.REPLICATION, new CallbackPositioningBelt());
+        this.callbackMap.put(QosLevel.ALL, new CallbackPositioningBelt());
         StoreMessageSerializer storeMessageSerializer = new StoreMessageSerializer(config.maxMessageLength);
         this.store = new PositioningStore<>(base, config.storeConfig, bufferPool, storeMessageSerializer);
         if (!base.isDirectory()) {
@@ -132,9 +130,6 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         this.replicationPosition = store.flushPosition();
         term = getMaxTerm(store);
 
-        flushCallbackBelt = new CallbackPositioningBelt();
-        commitCallbackBelt = new CallbackPositioningBelt();
-        this.virtualThreadPool = virtualThreadPool;
         this.writeLoopThread = LoopThread.builder()
                 .name(String.format("WriteThread-%s-%d", topic, partitionGroup))
                 .doWork(this::write)
@@ -147,6 +142,12 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                 .sleepTime(config.flushIntervalMs, config.flushIntervalMs)
                 .onException(e -> logger.warn("Flush Exception: ", e))
                 .build();
+//        this.callbackThread = LoopThread.builder()
+//                .name(String.format("CallbackThread-%s-%d", topic, partitionGroup))
+//                .doWork(this::fireCallbacks)
+//                .sleepTime(config.flushIntervalMs, config.flushIntervalMs)
+//                .onException(e -> logger.warn("Callback Exception: ", e))
+//                .build();
         this.metricThread = initMetrics(config);
     }
 
@@ -185,7 +186,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
             indexPosition = recoverPartitions();
             logger.info("Building indices ...");
             recoverIndices();
-        } catch (Throwable e) {
+        } catch (IOException e) {
             throw new StoreInitializeException(e);
         }
     }
@@ -288,7 +289,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
 
         Short[] partitionIndices = loadPartitionIndices(indexBase);
 
-        if (partitionIndices == null) return indexPosition;
+        if (partitionIndices == null) return store.left();
 
         for (short partitionIndex : partitionIndices) {
 
@@ -324,7 +325,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
 
             partitionMap.put(partitionIndex, new Partition(indexStore));
 
-            if (indexStore.right() > 0) {
+            if (indexStore.right() - indexStore.left() > 0) {
 
 
                 // 2. 如果最后一条索引是批消息的索引，需要检查其完整性
@@ -336,10 +337,10 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                                 Format.formatWithComma(
                                         indexStore.right() - IndexItem.STORAGE_SIZE)));
                 // 检查对应的消息是否批消息，如果是批消息检查这一批消息的索引的完整性，如不完整直接截掉这个批消息的已存储的所有索引
-                lastIndexItem = verifyBatchMessage(lastIndexItem, indexStore, store);
+                verifyBatchMessage(lastIndexItem, indexStore, store);
 
                 // 如果indexPosition大于当前分区索引的最大消息位置， 向前移动indexPosition
-                long indexedMessagePosition = lastIndexItem.getOffset() + lastIndexItem.getLength();
+                long indexedMessagePosition = lastIndexItem.getOffset();
 
                 logger.info("Topic: {}, group: {}, partition: {}, maxIndexedMessageOffset: {}.", topic,
                         partitionGroup, partitionIndex, Format.formatWithComma(indexedMessagePosition));
@@ -350,6 +351,8 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                             Format.formatWithComma(indexedMessagePosition));
                     indexPosition = indexedMessagePosition;
                 }
+            } else {
+                indexPosition = store.left();
             }
         }
 
@@ -389,7 +392,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         return partitionIndices;
     }
 
-    private IndexItem verifyBatchMessage(IndexItem lastIndexItem, PositioningStore<IndexItem> indexStore, PositioningStore<ByteBuffer> store) throws IOException {
+    private void verifyBatchMessage(IndexItem lastIndexItem, PositioningStore<IndexItem> indexStore, PositioningStore<ByteBuffer> store) throws IOException {
 
         if (lastIndexItem.getOffset() < store.right()) {
             ByteBuffer msg = store.read(lastIndexItem.getOffset());
@@ -398,14 +401,16 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                 long startIndex = MessageParser.getLong(msg, MessageParser.INDEX);
 
                 if (indexStore.right() < (batchSize + startIndex) * IndexItem.STORAGE_SIZE) {
-                    logger.info("Incomplete batch message indices found, roll back index store to {}.",
-                            Format.formatWithComma(startIndex * IndexItem.STORAGE_SIZE));
+                    logger.info("Incomplete batch message indices found, roll back index store to {}, " +
+                                    "index: {}, message position: {}, store: {}.",
+                            Format.formatWithComma(startIndex * IndexItem.STORAGE_SIZE),
+                            Format.formatWithComma(lastIndexItem.getIndex()),
+                            Format.formatWithComma(lastIndexItem.getOffset()),
+                            indexStore.base().getAbsolutePath());
                     indexStore.setRight(startIndex * IndexItem.STORAGE_SIZE);
-                    lastIndexItem = indexStore.read(indexStore.right() - IndexItem.STORAGE_SIZE);
                 }
             }
         }
-        return lastIndexItem;
     }
 
     public String getTopic() {
@@ -630,6 +635,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         }
         try {
             writeCommand = writeCommandCache.take();
+
             if (null != produceMetric) {
                 produceMetric.addTraffic("WriteTraffic", Arrays.stream(writeCommand.messages).mapToInt(ByteBuffer::remaining).sum());
             }
@@ -687,26 +693,23 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         callback.position = position;
 
         // 处理回调
-        switch (writeCommand.qosLevel) {
-            case PERSISTENCE:
-                flushCallbackBelt.put(callback);
-                break;
-            case REPLICATION:
-                commitCallbackBelt.put(callback);
-                break;
+        CallbackPositioningBelt belt = callbackMap.get(writeCommand.qosLevel);
+        if(null != belt) {
+            belt.put(callback);
         }
     }
 
-    private boolean callbackVT() {
-        boolean ret = false;
-        try {
-            if (flushCallbackBelt.getFirst().position <= flushPosition()) {
-                flushCallbackBelt.callbackBefore(flushPosition());
-                ret = true;
-            }
-        } catch (NoSuchElementException ignored) {
-        }
-        return ret;
+
+    private void fireCallbacks() {
+        CallbackPositioningBelt belt = this.callbackMap.get(QosLevel.REPLICATION);
+        belt.callbackBefore(this.commitPosition());
+
+        belt = this.callbackMap.get(QosLevel.PERSISTENCE);
+        belt.callbackBefore(this.flushPosition());
+
+        belt = this.callbackMap.get(QosLevel.ALL);
+        belt.callbackBefore(Math.min(this.flushPosition(), this.commitPosition()));
+
     }
 
     private void flush() {
@@ -716,13 +719,17 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                 long t0 = System.nanoTime();
                 long before = store.flushPosition();
                 flushed = store.flush() | flushIndices();
-
                 if (null != produceMetric && flushed) {
                     long t1 = System.nanoTime();
                     produceMetric.addTraffic("FlushTraffic", store.flushPosition() - before);
                     produceMetric.addLatency("FlushLatency", t1 - t0);
                     produceMetric.addCounter("FlushCount", 1);
                 }
+                if(flushed) {
+                    callbackMap.get(QosLevel.PERSISTENCE).callbackBefore(flushPosition());
+                }
+//                this.callbackThread.wakeup();
+
             } while (flushed);
         } catch (IOException e) {
             logger.warn("Exception:", e);
@@ -837,32 +844,22 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         if (config.printMetricIntervalMs > 0) {
             metricThread.start();
         }
-        startCallbackThread();
+//        startCallbackThread();
         startFlushThread();
         started.set(true);
     }
 
+//    private void startCallbackThread() {
+//        this.callbackThread.start();
+//    }
 
     private void startFlushThread() {
         flushLoopThread.start();
     }
 
-    private void startCallbackThread() {
-        if (null != virtualThreadPool) {
-            this.virtualThreadPool.start(callbackVirtualThread, config.flushIntervalMs, String.format("CallbackThread-%s-%d", topic, partitionGroup));
-        } else {
-            callbackFeature = scheduledExecutorService.scheduleAtFixedRate(this::callbackVT,
-                    ThreadLocalRandom.current().nextLong(500L, 1000L),
-                    config.flushIntervalMs, TimeUnit.MILLISECONDS);
-        }
-    }
 
     private void startWriteThread() {
-        if (null != virtualThreadPool) {
-            this.virtualThreadPool.start(writeVirtualThread, String.format("WriteThread-%s-%d", topic, partitionGroup));
-        } else {
-            this.writeLoopThread.start();
-        }
+        this.writeLoopThread.start();
     }
 
     @Override
@@ -872,25 +869,26 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         // 此时logger已经被关闭，无法使用。
         try {
             if (started.compareAndSet(true, false)) {
-                long stopTimeout = 5000L;
                 System.out.println("Waiting for flush finished...");
-                long t0 = SystemClock.now();
                 try {
-                    while (SystemClock.now() - t0 < stopTimeout &&
-                            !isAllStoreClean()) {
+                    while (!isAllStoreClean()) {
                         Thread.sleep(50);
                     }
                 } catch (InterruptedException e) {
                     logger.error(e.getMessage(), e);
                 }
+                System.out.println("Stopping flush thread...");
                 stopFlushThread();
-                stopCallbackThread(stopTimeout);
+                System.out.println("Stopping callback thread...");
+
+//                stopCallbackThread();
                 if (config.printMetricIntervalMs > 0) {
                     metricThread.stop();
                 }
+                System.out.println("Store stopped. " + base.getAbsolutePath());
             }
         } catch (Throwable t) {
-           logger.error(t.getMessage(),t);
+            logger.error(t.getMessage(),t);
         }
     }
 
@@ -898,51 +896,16 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         return Stream.concat(Stream.of(store), partitionMap.values().stream().map(partition -> partition.store)).allMatch(PositioningStore::isClean);
     }
 
-    private void stopCallbackThread(long stopTimeout) throws TimeoutException {
-        if (null != virtualThreadPool) {
-            safeStop("Stopping callback thread...", callbackVirtualThread);
-        } else {
-            stopAndWaitScheduledFeature(callbackFeature, stopTimeout);
-        }
-    }
+//    private void stopCallbackThread() {
+//        this.callbackThread.stop();
+//    }
 
     private void stopFlushThread() {
         flushLoopThread.stop();
     }
 
     private void stopWriteThread() {
-        if (null != virtualThreadPool) {
-            safeStop("Stopping write thread...", writeVirtualThread);
-        } else {
-            writeLoopThread.stop();
-        }
-    }
-
-    private void safeStop(String s, VirtualThread flushVirtualThread) {
-        logger.info(s);
-        System.out.println(s);
-        try {
-            this.virtualThreadPool.stop(flushVirtualThread);
-        } catch (InterruptedException e) {
-            logger.warn("Exception: ", e);
-        }
-    }
-
-    private void stopAndWaitScheduledFeature(ScheduledFuture scheduledFuture, long timeout) throws TimeoutException {
-        if (scheduledFuture != null) {
-            long t0 = SystemClock.now();
-            while (!scheduledFuture.isDone()) {
-                if (SystemClock.now() - t0 > timeout) {
-                    throw new TimeoutException("Wait for async job timeout!");
-                }
-                scheduledFuture.cancel(true);
-                try {
-                    Thread.sleep(50);
-                } catch (InterruptedException e) {
-                    logger.warn("Exception: ", e);
-                }
-            }
-        }
+        writeLoopThread.stop();
     }
 
     @Override
@@ -1005,6 +968,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         }
     }
 
+
     @Override
     public void clear(long position) throws IOException {
         stopFlushThread();
@@ -1017,7 +981,6 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
             startFlushThread();
         }
     }
-
 
 
 
@@ -1090,6 +1053,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         }
         try {
             verifyState(false);
+
             long t0 = System.nanoTime();
             if (waitForFlush()) {
                 throw new TimeoutException("Wait for flush timeout! The broker is too much busy to write data to disks.");
@@ -1147,7 +1111,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                 }
                 throw t;
             }
-        }finally {
+        } finally {
             writeLock.unlock();
         }
     }
@@ -1170,12 +1134,19 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
      */
     @Override
     public void commit(long position) {
-        commitCallbackBelt.callbackBefore(position);
+        CallbackPositioningBelt belt;
         if (position > replicationPosition) {
             replicationPosition = position;
+            belt = this.callbackMap.get(QosLevel.REPLICATION);
+            belt.callbackBefore(this.commitPosition());
+
         }
 
+        belt = this.callbackMap.get(QosLevel.ALL);
+        belt.callbackBefore(Math.min(this.flushPosition(), this.commitPosition()));
 
+
+//        callbackThread.wakeup();
     }
 
     @Override
@@ -1343,8 +1314,8 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
 
     public static class Config {
         public static final int DEFAULT_MAX_MESSAGE_LENGTH = 4 * 1024 * 1024;
-        public static final int DEFAULT_WRITE_REQUEST_CACHE_SIZE = 1024;
-        public static final long DEFAULT_FLUSH_INTERVAL_MS = 20L;
+        public static final int DEFAULT_WRITE_REQUEST_CACHE_SIZE = 128;
+        public static final long DEFAULT_FLUSH_INTERVAL_MS = 50L;
         public static final long DEFAULT_WRITE_TIMEOUT_MS = 3000L;
         public static final long DEFAULT_MAX_DIRTY_SIZE = 10L * 1024 * 1024;
         public static final long DEFAULT_PRINT_METRIC_INTERVAL_MS = 0L;
@@ -1434,19 +1405,21 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
          * NOT Thread-safe!!!!!!
          */
         void callbackBefore(long position) {
-            callbackPosition.set(position);
+
             try {
-                while (getFirst().position <= position) {
-                    Callback callback = removeFirst();
-                    callback.listener.onEvent(new WriteResult(JoyQueueCode.SUCCESS, callback.indices));
+                if(position > callbackPosition.get()) {
+                    callbackPosition.set(position);
+                    while (getFirst().position <= position) {
+                        Callback callback = removeFirst();
+                        callback.listener.onEvent(new WriteResult(JoyQueueCode.SUCCESS, callback.indices));
+                    }
                 }
                 long deadline = SystemClock.now() - EVENT_TIMEOUT_MILLS;
                 while (getFirst().timestamp < deadline) {
                     Callback callback = removeFirst();
                     callback.listener.onEvent(new WriteResult(JoyQueueCode.SE_WRITE_TIMEOUT, null));
                 }
-            } catch (NoSuchElementException ignored) {
-            }
+            } catch (NoSuchElementException ignored) {}
         }
 
         void put(Callback callback) {

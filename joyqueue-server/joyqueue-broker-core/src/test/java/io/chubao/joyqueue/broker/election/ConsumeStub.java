@@ -16,12 +16,16 @@
 package io.chubao.joyqueue.broker.election;
 
 import io.chubao.joyqueue.broker.consumer.Consume;
+import io.chubao.joyqueue.broker.consumer.model.ConsumePartition;
 import io.chubao.joyqueue.broker.consumer.model.PullResult;
+import io.chubao.joyqueue.broker.consumer.position.model.Position;
 import io.chubao.joyqueue.domain.TopicName;
 import io.chubao.joyqueue.exception.JoyQueueException;
 import io.chubao.joyqueue.message.MessageLocation;
 import io.chubao.joyqueue.network.session.Connection;
 import io.chubao.joyqueue.network.session.Consumer;
+
+import java.util.Map;
 
 
 /**
@@ -38,7 +42,8 @@ public class ConsumeStub implements Consume {
      * @return
      * @throws JoyQueueException
      */
-    public PullResult getMessage(Consumer consumer, int count, int ackTimeout) throws JoyQueueException {
+    @Override
+    public PullResult getMessage(Consumer consumer, int count, int ackTimeout) throws JoyQueueException{
         return null;
     }
 
@@ -52,6 +57,7 @@ public class ConsumeStub implements Consume {
      * @return
      * @throws JoyQueueException
      */
+    @Override
     public PullResult getMessage(Consumer consumer, short partition, long index, int count) throws JoyQueueException {
         return null;
     }
@@ -65,6 +71,7 @@ public class ConsumeStub implements Consume {
      * @return 是否成功
      * @throws JoyQueueException
      */
+    @Override
     public boolean acknowledge(MessageLocation[] locations, Consumer consumer, Connection connection, boolean isSuccessAck) throws JoyQueueException {
         return true;
     }
@@ -75,6 +82,7 @@ public class ConsumeStub implements Consume {
      * @param consumer 消费者
      * @return 是否有空闲分区
      */
+    @Override
     public boolean hasFreePartition(Consumer consumer) {
         return true;
     }
@@ -85,6 +93,7 @@ public class ConsumeStub implements Consume {
      * @param consumer 消费者
      * @param index    消息序号
      */
+    @Override
     public void setPullIndex(Consumer consumer, short partition, long index) {}
 
     /**
@@ -94,6 +103,7 @@ public class ConsumeStub implements Consume {
      * @param partition 分区
      * @return 消息序号
      */
+    @Override
     public long getPullIndex(Consumer consumer, short partition) {
         return 0;
     }
@@ -104,6 +114,7 @@ public class ConsumeStub implements Consume {
      * @param consumer 消费者
      * @param index    消息序号
      */
+    @Override
     public void setAckIndex(Consumer consumer, short partition, long index) {}
 
     /**
@@ -113,6 +124,7 @@ public class ConsumeStub implements Consume {
      * @param partition 分区
      * @return 消息序号
      */
+    @Override
     public long getAckIndex(Consumer consumer, short partition) {
         return 0;
     }
@@ -124,8 +136,24 @@ public class ConsumeStub implements Consume {
      * @param app   应用
      * @return
      */
+    @Override
     public boolean resetPullIndex(String topic, String app) {
         return true;
+    }
+
+    @Override
+    public boolean setConsumePosition(Map<ConsumePartition, Position>  consumeInfoJson) {
+        return false;
+    }
+
+    @Override
+    public Map<ConsumePartition, Position> getConsumePositionByGroup(TopicName topic, String app, int partitionGroup) {
+        return null;
+    }
+
+    @Override
+    public Map<ConsumePartition, Position> getConsumePositionByGroup(TopicName topic, int partitionGroup) {
+        return null;
     }
 
     /**
@@ -134,6 +162,7 @@ public class ConsumeStub implements Consume {
      * @param topic 消费主题
      * @param app   应用
      */
+
     public void addConsumer(String topic, String app) {}
 
     /**
@@ -143,27 +172,6 @@ public class ConsumeStub implements Consume {
      * @param app   应用
      */
     public void removeConsumer(String topic, String app) {}
-
-    /**
-     * 保存消息位置
-     *
-     * @param consumeInfoJson 消息位置信息json字符串
-     * @return
-     */
-    public boolean setConsumeInfo(String consumeInfoJson) {
-        return true;
-    }
-
-    /**
-     * 获取指定主题+应用+分组的消费位置
-     *
-     * @param topic          消费主题
-     * @param app            应用
-     * @param partitionGroup 分区分组
-     */
-    public String getConsumeInfoByGroup(TopicName topic, String app, int partitionGroup) {
-        return "test";
-    }
 
     @Override
     public long getMinIndex(Consumer consumer, short partition) {
@@ -196,18 +204,7 @@ public class ConsumeStub implements Consume {
     public long getStartIndex(Consumer consumer, short partition) {return 0L;}
 
     @Override
-    public long getLastPullTimeByPartition(TopicName topic, String app, short partition) {
-        return 0;
-    }
-
-    @Override
-    public long getLastAckTimeByPartition(TopicName topic, String app, short partition) {
-        return 0;
-    }
-
-    @Override
     public void releasePartition(String topic, String app, short partition) {
 
     }
-
 }

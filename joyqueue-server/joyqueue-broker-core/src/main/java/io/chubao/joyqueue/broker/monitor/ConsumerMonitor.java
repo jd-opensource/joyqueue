@@ -15,6 +15,8 @@
  */
 package io.chubao.joyqueue.broker.monitor;
 
+import io.chubao.joyqueue.broker.monitor.stat.ConsumerStat;
+
 /**
  * 消费监控
  *
@@ -35,6 +37,15 @@ public interface ConsumerMonitor {
      */
     void onGetMessage(String topic, String app, int partitionGroup, short partition, long count, long size, double time);
 
+    /**
+     * 确认消费位置
+     *
+     * @param topic
+     * @param app
+     * @param partitionGroup
+     * @param partition
+     */
+    void onAckMessage(String topic, String app, int partitionGroup, short partition);
     /**
      * 重试消息
      * @param topic
@@ -68,4 +79,13 @@ public interface ConsumerMonitor {
      * @param count
      */
     void onRetryFailure(String topic, String app, long count);
+
+    /**
+     * 消费监控统计
+     *
+     * @param topic
+     * @param app
+     * @return
+     */
+    ConsumerStat getConsumerStat(String topic, String app);
 }

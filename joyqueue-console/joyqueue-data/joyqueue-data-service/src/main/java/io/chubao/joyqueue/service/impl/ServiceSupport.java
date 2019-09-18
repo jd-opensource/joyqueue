@@ -57,7 +57,7 @@ public abstract class ServiceSupport<M extends BaseModel,R extends Repository<M>
 
         if (repository instanceof Uniqueable) {
             if (((Uniqueable<M>) repository).exists(model) != null) {
-                throw new ValidationException(UNIQUE_EXCEPTION_STATUS, getUniqueExceptionMessage());
+                throw new ValidationException(UNIQUE_EXCEPTION_STATUS, "应用用户已经存在！");
             }
         }
 

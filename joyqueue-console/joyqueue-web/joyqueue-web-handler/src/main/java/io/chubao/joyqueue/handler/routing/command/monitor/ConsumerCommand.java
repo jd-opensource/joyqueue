@@ -15,6 +15,12 @@
  */
 package io.chubao.joyqueue.handler.routing.command.monitor;
 
+import com.jd.laf.binding.annotation.Value;
+import com.jd.laf.web.vertx.annotation.Body;
+import com.jd.laf.web.vertx.annotation.Path;
+import com.jd.laf.web.vertx.annotation.QueryParam;
+import com.jd.laf.web.vertx.response.Response;
+import com.jd.laf.web.vertx.response.Responses;
 import io.chubao.joyqueue.domain.ClientType;
 import io.chubao.joyqueue.domain.TopicName;
 import io.chubao.joyqueue.handler.error.ConfigException;
@@ -26,16 +32,10 @@ import io.chubao.joyqueue.model.domain.Consumer;
 import io.chubao.joyqueue.model.domain.ConsumerConfig;
 import io.chubao.joyqueue.model.domain.Topic;
 import io.chubao.joyqueue.model.query.QConsumer;
+import io.chubao.joyqueue.nsr.ConsumerNameServerService;
 import io.chubao.joyqueue.service.ApplicationService;
 import io.chubao.joyqueue.service.ConsumerService;
 import io.chubao.joyqueue.service.TopicService;
-import io.chubao.joyqueue.nsr.ConsumerNameServerService;
-import com.jd.laf.binding.annotation.Value;
-import com.jd.laf.web.vertx.annotation.Body;
-import com.jd.laf.web.vertx.annotation.Path;
-import com.jd.laf.web.vertx.annotation.QueryParam;
-import com.jd.laf.web.vertx.response.Response;
-import com.jd.laf.web.vertx.response.Responses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +44,7 @@ import java.util.List;
 import java.util.Map;
 
 import static io.chubao.joyqueue.handler.Constants.ID;
+import static io.chubao.joyqueue.handler.Constants.TOPIC;
 
 
 public class ConsumerCommand extends NsrCommandSupport<Consumer, ConsumerService, QConsumer> {
@@ -155,6 +156,11 @@ public class ConsumerCommand extends NsrCommandSupport<Consumer, ConsumerService
     @Path("findAllSubscribeGroups")
     public Response findAllSubscribeGroups() throws Exception {
         return Responses.success(service.findAllSubscribeGroups());
+    }
+
+    @Path("findAppsByTopic")
+    public Response findAppsByTopic(@QueryParam(TOPIC)String topic) throws Exception {
+        return Responses.success(service.findAppsByTopic(topic));
     }
 
 }

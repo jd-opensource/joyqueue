@@ -18,11 +18,11 @@
         <result property="status" column="status" jdbcType="BIGINT"/>
     </resultMap>
     <sql id="baseColumn">
-        id as id,
-        app_id as `app.id`,
-        app_code as `app.code`,
-        user_id as `user.id`,
-        user_code as `app.code`,
+        id,
+        app_id,
+        app_code,
+        user_id,
+        user_code,
         create_time,
         create_by,
         create_by_code,
@@ -32,7 +32,7 @@
          `status`
     </sql>
     <insert id="add" parameterType="ApplicationUser" useGeneratedKeys="true" keyProperty="id">
-        insert into application_user
+        insert into `application_user`
         (
         app_id,
         app_code,
@@ -48,8 +48,8 @@
         (
         #{application.id},
         #{application.code},
-        #{user_id},
-        #{user_code},
+        #{user.id},
+        #{user.code},
         now(),
         #{createBy.id},
         #{createBy.code},
@@ -85,6 +85,28 @@
           application_user
         WHERE id=#{id}
     </select>
+
+    <select id="exists" parameterType="ApplicationUser" resultMap="baseResultMap">
+        SELECT
+        <include refid="baseColumn"/>
+        FROM
+        application_user
+        WHERE app_id = #{application.id}
+        AND user_id = #{user.id}
+        AND status > -1
+        limit 0,1
+    </select>
+
+    <update id="state" parameterType="user">
+        UPDATE
+        application_user
+        SET
+        `status` = #{status},
+        `update_by` = #{updateBy.id},
+        `update_time` = #{updateTime}
+        WHERE
+        id = #{id}
+    </update>
 
     <select id="findByAppId" parameterType="long" resultMap="baseResultMap">
         SELECT

@@ -15,8 +15,12 @@
  */
 package io.chubao.joyqueue.broker.election.command;
 
-import io.chubao.joyqueue.network.transport.command.JoyQueuePayload;
+import io.chubao.joyqueue.broker.consumer.model.ConsumePartition;
+import io.chubao.joyqueue.broker.consumer.position.model.Position;
 import io.chubao.joyqueue.network.command.CommandType;
+import io.chubao.joyqueue.network.transport.command.JoyQueuePayload;
+
+import java.util.Map;
 
 /**
  * author: zhuduohui
@@ -24,14 +28,21 @@ import io.chubao.joyqueue.network.command.CommandType;
  * date: 2018/8/15
  */
 public class ReplicateConsumePosRequest extends JoyQueuePayload {
-    private String consumePositions;
+    private Map<ConsumePartition, Position> consumePositions;
 
-    public ReplicateConsumePosRequest(String consumePositions) {
+    public Map<ConsumePartition, Position> getConsumePositions() {
+        return consumePositions;
+    }
+
+    public void setConsumePositions(Map<ConsumePartition, Position> consumePositions) {
         this.consumePositions = consumePositions;
     }
 
-    public String getConsumePositions() {
-        return consumePositions;
+    public ReplicateConsumePosRequest(Map<ConsumePartition, Position> consumePositions) {
+        this.consumePositions = consumePositions;
+    }
+
+    public ReplicateConsumePosRequest() {
     }
 
     @Override

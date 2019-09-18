@@ -80,14 +80,23 @@
     <update id="update" parameterType="application">
         UPDATE application
         SET
-          `system`=#{system},
-          `department`=#{department},
-          `owner_id`=#{owner.id},
-          `owner_code`=#{owner.code},
-          `sign`=#{sign},
-          description=#{description}
-          update_time=#{updateTime},
-          update_by=#{updateBy.id}
+        <if test="system != null">
+            `system`=#{system},
+        </if>
+        <if test="department != null">
+            `department`=#{department},
+        </if>
+        <if test="owner != null">
+            `owner_id`=#{owner.id},
+            `owner_code`=#{owner.code},
+        </if>
+        <if test="description != null">
+            description=#{description},
+        </if>
+        `sign`=#{sign},
+        status=#{status},
+        update_time=#{updateTime},
+        update_by=#{updateBy.id}
         WHERE
         id=#{id}
     </update>

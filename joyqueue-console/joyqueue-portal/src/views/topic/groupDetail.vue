@@ -7,7 +7,7 @@
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
     </div>
-    <my-table :optional="true" :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
+    <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
               @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange" @on-del="del" @on-leader="leader">
     </my-table>
 
@@ -38,7 +38,8 @@ export default {
       urls: {
         search: '/partitionGroupReplica/search',
         del: '/partitionGroupReplica/delete',
-        leader: '/partitionGroupReplica/leader'
+        leader: '/partitionGroupReplica/leader',
+        findMetadata: '/monitor/broker/metadata'
       },
       searchData: {
         keyword: ''
@@ -47,24 +48,29 @@ export default {
         rowData: [{}],
         colData: [
           {
-            title: 'brokerId',
-            key: 'brokerId'
+            title: 'BrokerId',
+            key: 'brokerId',
+            width: '10%'
           },
           {
-            title: 'Broker分组',
-            key: 'groupNo'
+            title: '分组',
+            key: 'groupNo',
+            width: '6%'
           },
           {
             title: 'IP',
-            key: 'broker.ip'
+            key: 'broker.ip',
+            width: '12%'
           },
           {
             title: '端口',
-            key: 'broker.port'
+            key: 'broker.port',
+            width: '6%'
           },
           {
-            title: '状态',
+            title: '角色',
             key: 'role',
+            width: '10%',
             render: (h, params) => {
               let label
               switch (params.item.role) {
@@ -86,6 +92,33 @@ export default {
               }
               return h('label', {}, label)
             }
+          },
+          {
+            title: 'BrokerLeader',
+            key: 'leaderAddress',
+            width: '20%',
+            render: (h, params) => {
+              let label = ''
+              if (params.item['leaderBrokerId']) {
+                label = params.item['leaderBrokerId'] + ':' + params.item['leaderIp']
+              }
+              return h('label', {}, label)
+            }
+          },
+          {
+            title: '数据中心',
+            key: 'dataCenter',
+            width: '6%'
+          },
+          {
+            title: '权限',
+            key: 'permission',
+            width: '10%'
+          },
+          {
+            title: '重试类型',
+            key: 'retryType',
+            width: '10%'
           }
         ],
         btns: [
@@ -144,8 +177,21 @@ export default {
         this.page.page = data.pagination.page
         this.page.size = data.pagination.size
         this.tableData.rowData = data.data
-        this.showTablePin = false
+        for (let i = 0; i < this.tableData.rowData.length; i++) {
+          this.getMetadata(this.tableData.rowData[i], i)
+        }
       })
+    },
+    getMetadata (row, index) {
+      let brokerId = row.brokerId
+      let topicFullName = getTopicCode(this.data.topic, this.data.namespace)
+      let group = this.data.groupNo
+
+      apiRequest.getBase(this.urls.findMetadata + '/' + brokerId + '/' + topicFullName + '/' + group, {}, false)
+        .then((data) => {
+          this.tableData.rowData[index] = Object.assign(row, data.data || [])
+          this.$set(this.tableData.rowData, index, this.tableData.rowData[index])
+        })
     }
   },
   mounted () {

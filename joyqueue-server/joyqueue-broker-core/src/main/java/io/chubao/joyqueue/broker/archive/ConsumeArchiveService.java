@@ -137,11 +137,17 @@ public class ConsumeArchiveService extends Service {
      */
     private void readAndWrite() throws JoyQueueException, InterruptedException {
         // 读信息，一次读指定条数
-        List<ConsumeLog> list = readConsumeLog(archiveConfig.getReadBatchNum());
+        List<ConsumeLog> list = readConsumeLog(archiveConfig.getConsumeBatchNum());
         if (list.size() > 0) {
             // 调用存储接口写数据
             archiveStore.putConsumeLog(list);
             logger.debug("Write consumeLogs size:{} to archive store.", list.size());
+
+            int consumeWriteDelay = archiveConfig.getConsumeWriteDelay();
+            if (consumeWriteDelay > 0) {
+                Thread.sleep(consumeWriteDelay);
+            }
+
         } else {
             Thread.sleep(100);
         }

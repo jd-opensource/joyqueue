@@ -63,7 +63,20 @@ export default {
         },
         {
           title: '限制IP发送',
-          key: 'config.blackList'
+          key: 'config.blackList',
+          render: (h, params) => {
+            const value = params.item.config ? params.item.config.blackList : '' // '192.168.0.3,192.168.0.3,192.168.0.3,192.168.0.3,192.168.0.3,192.168.0.3,192.168.0.3'
+            return h('d-tooltip', {
+              props: {
+                content: value
+              }
+            }, [h('div', {
+              attrs: {
+                style: 'width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;'
+              }
+            }, value)]
+            )
+          }
         },
         {
           title: '归档',

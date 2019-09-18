@@ -786,6 +786,25 @@ public class ClusterManager extends Service {
         return appList;
     }
 
+    /**
+     * 获取订阅了当前broker上topic的app
+     *
+     * @param topic
+     * @return
+     */
+    public List<String> getLocalSubscribeAppByTopic(TopicName topic) {
+        List<String> result = Collections.emptyList();
+
+        if (topic != null) {
+            Map<String, MetaDataLocalCache.CacheConsumer> consumers = localCache.getTopicConsumers(topic);
+            if (consumers != null) {
+                result = new ArrayList<>(consumers.keySet());
+            }
+        }
+
+        return result;
+    }
+
     public AppToken getAppToken(String app, String token) {
         return nameService.getAppToken(app, token);
     }

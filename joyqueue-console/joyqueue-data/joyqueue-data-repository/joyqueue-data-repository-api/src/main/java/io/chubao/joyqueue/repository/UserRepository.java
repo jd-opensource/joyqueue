@@ -106,7 +106,7 @@ public interface UserRepository extends PageRepository<User, QUser> {
      * @param userId
      * @return
      */
-    ApplicationUser findAppUserByAppIdAndUserId(long appId, long userId);
+    ApplicationUser findAppUserByAppIdAndUserId(@Param("appId") long appId, @Param("userId") long userId);
 
     /**
      * 判断所属关系

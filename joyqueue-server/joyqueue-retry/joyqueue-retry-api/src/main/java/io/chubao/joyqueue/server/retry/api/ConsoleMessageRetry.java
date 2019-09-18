@@ -28,7 +28,7 @@ public interface ConsoleMessageRetry<T> extends MessageRetry<T> {
 
     PageResult<ConsumeRetry> queryConsumeRetryList(RetryQueryCondition retryQueryCondition) throws JoyQueueException;
 
-    ConsumeRetry getConsumeRetryById(Long id) throws JoyQueueException;
+    ConsumeRetry getConsumeRetryById(Long id,String topic) throws JoyQueueException;
 
     void updateStatus(String topic, String app, T[] messageId, RetryStatus status, long updateTime, int updateBy) throws Exception;
 
