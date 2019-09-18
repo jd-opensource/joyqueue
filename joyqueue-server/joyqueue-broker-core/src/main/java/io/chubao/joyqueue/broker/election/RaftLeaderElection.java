@@ -230,7 +230,7 @@ public class RaftLeaderElection extends LeaderElection  {
      * @param node 增加的节点
      */
     @Override
-    public void addNode(DefaultElectionNode node) {
+    public void addNode(DefaultElectionNode node) throws ElectionException {
         allNodes.put(node.getNodeId(), node);
         updateElectionMetadata();
 

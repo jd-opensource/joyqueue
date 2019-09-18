@@ -496,7 +496,6 @@ public class IgniteTopicService implements TopicService {
             groupNew.setIsrs(groupOld.getIsrs());
             groupNew.setTerm(groupOld.getTerm());
             PartitionGroup groupToUpdae = groupOld;
-            partitionGroupReplicaService.deleteByTopicAndPartitionGroup(group.getTopic(), group.getGroup());
             if (groupNew.getPartitions().size() != groupOld.getPartitions().size()) {
                 //更新topic  partitions
                 Topic topic = getById(group.getTopic().getFullName());
@@ -518,6 +517,7 @@ public class IgniteTopicService implements TopicService {
                 groupToUpdae = groupToUpdae.clone();
                 groupToUpdae.getReplicas().add(brokerId);
                 commands.add(new Pair<>(brokerAddToNotice, new Command(new JoyQueueHeader(Direction.REQUEST, CommandType.NSR_UPDATE_PARTITIONGROUP), new UpdatePartitionGroup(groupToUpdae))));
+                partitionGroupReplicaService.addOrUpdate(new IgnitePartitionGroupReplica(group.getTopic(), brokerId, group.getGroup()));
             }
             Set<Integer> brokerAddToRemove = new TreeSet<>(brokerAddToNotice);
             for (Integer brokerId : replicasRemove) {
@@ -527,6 +527,7 @@ public class IgniteTopicService implements TopicService {
                 commands.add(new Pair<>(new TreeSet<>(brokerAddToRemove),
                         new Command(new JoyQueueHeader(Direction.REQUEST, CommandType.NSR_UPDATE_PARTITIONGROUP), new UpdatePartitionGroup(groupToUpdae))));
                 brokerAddToRemove.remove(brokerId);
+                partitionGroupReplicaService.delete(new IgnitePartitionGroupReplica(group.getTopic(), brokerId, group.getGroup()));
             }
             if(null==groupToUpdae.getReplicas()||groupToUpdae.getReplicas().size()<1){
                 group.setLeader(-1);

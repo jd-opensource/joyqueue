@@ -20,7 +20,7 @@
 
     <my-table :showPagination="false" :showPin="showTablePin" :data="tableData" :page="page" @on-size-change="handleSizeChange"
               @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
-              @on-consume="consume" @on-download="download" @on-retry="retry">
+              @on-consume="consume" @on-download="download" @on-retry="retryInit">
     </my-table>
 
     <div style="text-align: right; margin-right: 50px">
@@ -33,6 +33,13 @@
     <my-dialog :dialog="showDialog">
       <my-table :showPagination="false" :data="consumeData" style="padding: 0px">
       </my-table>
+    </my-dialog>
+
+    <my-dialog :dialog="retryDialog" @on-dialog-confirm="configConfirm" @on-dialog-cancel="dialogCancel('retryDialog')">
+      <d-select v-model="retry.app" style="width:200px">
+        <span slot="prepend">消费者</span>
+        <d-option v-for="item in retry.appList" :value="item" :key="item">{{ item }}</d-option>
+      </d-select>
     </my-dialog>
   </div>
 </template>
@@ -93,7 +100,8 @@ export default {
         search: '/archive/search',
         consume: '/archive/consume',
         download: '/archive/download',
-        retry: '/archive/retry'
+        retry: '/archive/retry',
+        getApps:'/consumer/findAppsByTopic/topic'
       },
       firstDis: true,
       nextDis: true,
@@ -102,6 +110,17 @@ export default {
         title: '消费记录',
         showFooter: false,
         width: '1000px'
+      },
+      retryDialog: {
+        visible: false,
+        title: '归档转重试',
+        showFooter: true,
+        width: '300px'
+      },
+      retry: {
+        appList:[],
+        app:'',
+        item:{}
       },
       consumeData: {
         rowData: [],
@@ -238,8 +257,16 @@ export default {
         this.$Message.success('下载成功')
       })
     },
-    retry (item) {
-      apiRequest.post(this.urlOrigin.retry, {}, item).then(data => {
+    retryInit(item) {
+      this.retryDialog.visible = true;
+      this.retry.item = item;
+      apiRequest.get(this.urlOrigin.getApps + '/' + item.topic).then((data) => {
+        this.retry.appList = data.data
+      })
+    },
+    configConfirm () {
+      this.retry.item.app = this.retry.app;
+      apiRequest.post(this.urlOrigin.retry, {}, this.retry.item).then(data => {
         this.$Message.success('操作成功')
       })
     },

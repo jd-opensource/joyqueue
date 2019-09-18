@@ -122,7 +122,7 @@ public class ProduceArchiveService extends Service {
         Preconditions.checkArgument(archiveStore != null, "archive store can not be null.");
         Preconditions.checkArgument(archiveConfig != null, "archive config can not be null.");
 
-        this.batchNum = archiveConfig.getReadBatchNum();
+        this.batchNum = archiveConfig.getProduceBatchNum();
         this.archiveQueue = new LinkedBlockingDeque<>(archiveConfig.getLogQueueSize());
         this.executorService = new ThreadPoolExecutor(archiveConfig.getWriteThreadNum(), archiveConfig.getWriteThreadNum(),
                 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(archiveConfig.getThreadPoolQueueSize()), new NamedThreadFactory("sendLog-archive"), new ThreadPoolExecutor.CallerRunsPolicy());
@@ -216,8 +216,9 @@ public class ProduceArchiveService extends Service {
                 continue;
             }
             PullResult pullResult;
+            long readIndex = item.getReadIndex();
             try {
-                pullResult = consume.getMessage(new Consumer(item.topic, ""), item.partition, item.getReadIndex(), batchNum);
+                pullResult = consume.getMessage(new Consumer(item.topic, ""), item.partition, readIndex, batchNum);
             } catch (Throwable th) {
                 logger.error("read message from topic:" + item.topic + " partition:" + item.partition
                         + " index:" + item.getReadIndex() + " error.", th);
@@ -236,18 +237,23 @@ public class ProduceArchiveService extends Service {
                 continue;
             }
 
-            if (pullResult.getBuffers().size() == 0) {
+            int messageSize = pullResult.getBuffers().size();
+            if (messageSize == 0) {
                 put2PauseMap(item.getTopic(), item.getPartition());
             } else {
+                // 加入缓存队列
                 int size = putSendLog2Queue(pullResult);
-                // 更新下次拉取位置(当前位置序号 + 拉取到的消息条数)
-                item.setReadIndex(item.getReadIndex() + size);
+                // 更新下次拉取位置(当前位置序号 + 拉取到的消息条数, 要避免覆盖写线程回滚的位置)
+                item.setReadIndex(readIndex + size, readIndex);
                 // 计数
-                counter += pullResult.getBuffers().size();
+                counter += messageSize;
+                if (logger.isDebugEnabled()) {
+                    logger.info("produce archive: {} messages put into the archive queue.", size);
+                }
             }
         }
         if (counter == 0) {
-            Thread.sleep(10);
+            Thread.sleep(1);
         }
     }
 
@@ -502,10 +508,10 @@ public class ProduceArchiveService extends Service {
     /**
      * 发送归档项
      */
-    class SendArchiveItem {
+    static class SendArchiveItem {
         private final String topic;
         private final Short partition;
-        private AtomicLong readIndex; // 读序号
+        private AtomicLong readIndex = new AtomicLong(0); // 读序号
 
         SendArchiveItem(String topic, Short partition) {
             this.topic = topic;
@@ -519,11 +525,26 @@ public class ProduceArchiveService extends Service {
             return readIndex.get();
         }
 
-        public void setReadIndex(long index) {
-            if (this.readIndex == null) {
-                this.readIndex = new AtomicLong(index);
-            } else {
-                this.readIndex.set(index);
+        public synchronized void setReadIndex(long index) {
+            this.readIndex.set(index);
+        }
+
+        /**
+         * 设置读取位置
+         * 避免回滚的位置被覆盖造成丢消息
+         *
+         * @param expectIndex
+         * @param previousIndex
+         */
+        public void setReadIndex(long expectIndex, long previousIndex) {
+            if (readIndex.get() < previousIndex) {
+                return;
+            }
+            synchronized (this) {
+                if (readIndex.get() < previousIndex) {
+                    return;
+                }
+                setReadIndex(expectIndex);
             }
         }
 

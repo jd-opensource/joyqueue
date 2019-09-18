@@ -25,6 +25,7 @@ import Switch from './switch'
 import Spin from './spin'
 import Notification from './notification'
 import Tag from './tag'
+import Tooltip from './tooltip'
 
 const components = [
   Row,
@@ -71,7 +72,8 @@ const components = [
   Switch,
   Spin,
   Notification,
-  Tag
+  Tag,
+  Tooltip
 ]
 
 const install = function (Vue, opts = {}) {

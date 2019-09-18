@@ -15,6 +15,9 @@
  */
 package io.chubao.joyqueue.broker.election.network.codec;
 
+import com.alibaba.fastjson.JSON;
+import io.chubao.joyqueue.broker.consumer.model.ConsumePartition;
+import io.chubao.joyqueue.broker.consumer.position.model.Position;
 import io.chubao.joyqueue.broker.election.command.ReplicateConsumePosRequest;
 import io.chubao.joyqueue.network.command.CommandType;
 import io.chubao.joyqueue.network.serializer.Serializer;
@@ -22,6 +25,8 @@ import io.chubao.joyqueue.network.transport.codec.JoyQueueHeader;
 import io.chubao.joyqueue.network.transport.codec.PayloadEncoder;
 import io.chubao.joyqueue.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
+
+import java.util.Map;
 
 /**
  * author: zhuduohui
@@ -31,10 +36,17 @@ import io.netty.buffer.ByteBuf;
 public class ReplicateConsumePosRequestEncoder implements PayloadEncoder<ReplicateConsumePosRequest>, Type {
     @Override
     public void encode(final ReplicateConsumePosRequest request, ByteBuf buffer) throws Exception {
-        if (request.getHeader().getVersion() >= JoyQueueHeader.VERSION_V2) {
-            Serializer.write(request.getConsumePositions(), buffer, Serializer.INT_SIZE);
-        } else if (request.getHeader().getVersion() >= JoyQueueHeader.VERSION_V1) {
-            Serializer.write(request.getConsumePositions(), buffer, Serializer.SHORT_SIZE);
+        Map<ConsumePartition, Position> consumePositions = request.getConsumePositions();
+        int bodyLength = Serializer.INT_SIZE;
+
+        if (request.getHeader().getVersion() == JoyQueueHeader.VERSION_V1) {
+            bodyLength = Serializer.SHORT_SIZE;
+        }
+
+        if (consumePositions == null) {
+            Serializer.write((String) null, buffer, bodyLength);
+        } else {
+            Serializer.write(JSON.toJSONString(request.getConsumePositions()), buffer, bodyLength);
         }
     }
 

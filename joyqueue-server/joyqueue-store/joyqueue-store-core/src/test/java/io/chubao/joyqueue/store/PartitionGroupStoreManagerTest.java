@@ -22,6 +22,7 @@ import io.chubao.joyqueue.store.message.MessageParser;
 import io.chubao.joyqueue.store.utils.MessageUtils;
 import io.chubao.joyqueue.store.utils.PreloadBufferPool;
 import io.chubao.joyqueue.toolkit.concurrent.EventFuture;
+import io.chubao.joyqueue.toolkit.concurrent.LoopThread;
 import io.chubao.joyqueue.toolkit.format.Format;
 import io.chubao.joyqueue.toolkit.time.SystemClock;
 import io.chubao.joyqueue.toolkit.util.BaseDirUtils;
@@ -73,10 +74,17 @@ public class PartitionGroupStoreManagerTest {
 
     @Test
     public void writeReadTest() throws Exception {
+
+        writeReadTest(QosLevel.RECEIVE);
+        after();
+        before();
         writeReadTest(QosLevel.PERSISTENCE);
         after();
         before();
-        writeReadTest(QosLevel.RECEIVE);
+        writeReadTest(QosLevel.REPLICATION);
+        after();
+        before();
+        writeReadTest(QosLevel.ALL);
 
     }
 
@@ -112,6 +120,70 @@ public class PartitionGroupStoreManagerTest {
         }
 
         Assert.assertEquals(0L, length);
+
+    }
+
+    @Ignore
+    @Test
+    public void writePerformanceTest() throws InterruptedException {
+        writePerformanceTest(5L * 1024 * 1024 * 1024, 1024, 10, false, QosLevel.REPLICATION);
+    }
+
+    private void writePerformanceTest(long totalBytes, int msgSize, int batchCount, boolean sync, QosLevel qosLevel) throws InterruptedException {
+        List<ByteBuffer> messages = MessageUtils.build(batchCount, msgSize);
+        int size = messages.get(0).remaining();
+        int [] intPartitions = new int [partitions.length];
+        for (int i = 0; i < intPartitions.length; i++) {
+            intPartitions[i] = partitions[i];
+        }
+        List<WriteRequest []> partitionsAndWriteRequests =
+                Arrays.stream(intPartitions).mapToObj(
+                        intPartition -> (messages.stream().map(b -> new WriteRequest((short ) intPartition, b)).toArray(WriteRequest[]::new))
+                ).collect(Collectors.toList());
+
+
+        LoopThread commitThread = LoopThread.builder()
+                .name(String.format("CommitThread-%s-%d", topic, partitionGroup))
+                .doWork(()-> store.commit(store.rightPosition()))
+                .sleepTime(0L, 0L)
+                .onException(e -> logger.warn("Commit Exception: ", e))
+                .build();
+        commitThread.start();
+
+        try {
+            long t0 = SystemClock.now();
+            int partitionIndex = 0;
+            long currentBytes = 0L;
+            long writeCount = 0L;
+
+            while (currentBytes < totalBytes) {
+                WriteRequest [] writeRequests = partitionsAndWriteRequests.get(partitionIndex);
+                partitionIndex ++;
+                if(partitionIndex >= partitionsAndWriteRequests.size()) {
+                    partitionIndex = 0;
+                }
+                EventFuture<WriteResult> eventFuture = new EventFuture<>();
+                store.asyncWrite(qosLevel, eventFuture, writeRequests);
+                if(sync) {
+                    eventFuture.get();
+                }
+                currentBytes += batchCount * size;
+                writeCount += batchCount;
+            }
+            long t1 = SystemClock.now();
+
+            logger.info("QOS level: {}, {}, total writes {}, takes {}ms, qps: {}, traffic: {}, msg size: {}, batch count: {}",
+                    qosLevel,
+                    sync ? "SYNC": "ASYNC",
+                    Format.formatTraffic(currentBytes),
+                    t1 - t0,
+                    Format.formatWithComma(1000L * writeCount / (t1 - t0)),
+                    Format.formatTraffic(1000L * currentBytes / (t1 - t0)),
+                    msgSize, batchCount);
+
+        } finally {
+            commitThread.stop();
+        }
 
     }
 
@@ -154,24 +226,38 @@ public class PartitionGroupStoreManagerTest {
         long length = messages.stream().mapToInt(Buffer::remaining).sum();
 
         final EventFuture<WriteResult> future = new EventFuture<>();
-        store.asyncWrite(qosLevel, future, messages.stream().map(b -> new WriteRequest(partition, b)).toArray(WriteRequest[]::new));
+        LoopThread commitThread = LoopThread.builder()
+                .name(String.format("CommitThread-%s-%d", topic, partitionGroup))
+                .doWork(()-> store.commit(store.rightPosition()))
+                .sleepTime(0L, 10L)
+                .onException(e -> logger.warn("Commit Exception: ", e))
+                .build();
+        commitThread.start();
+        try {
+            store.asyncWrite(qosLevel, future, messages.stream().map(b -> new WriteRequest(partition, b)).toArray(WriteRequest[]::new));
+
+            WriteResult writeResult = future.get();
+            Assert.assertEquals(JoyQueueCode.SUCCESS, writeResult.getCode());
+
+            // 等待建索引都完成
+            long t0 = SystemClock.now();
+            while (SystemClock.now() - t0 < timeout && store.indexPosition() < length) {
+                Thread.sleep(10L);
+            }
 
 
-        // 等待建索引都完成
-        long t0 = SystemClock.now();
-        while (SystemClock.now() - t0 < timeout && store.indexPosition() < length) {
-            Thread.sleep(10L);
-        }
+            for (int i = 0; i < messages.size(); i++) {
+                ByteBuffer writeBuffer = messages.get(i);
+                writeBuffer.clear();
 
-        for (int i = 0; i < messages.size(); i++) {
-            ByteBuffer writeBuffer = messages.get(i);
-            writeBuffer.clear();
-
-            ReadResult readResult = store.read(partition, i, 1, 0);
-            Assert.assertEquals(JoyQueueCode.SUCCESS, readResult.getCode());
-            Assert.assertEquals(1, readResult.getMessages().length);
-            ByteBuffer readBuffer = readResult.getMessages()[0];
-            Assert.assertEquals(writeBuffer, readBuffer);
+                ReadResult readResult = store.read(partition, i, 1, 0);
+                Assert.assertEquals(JoyQueueCode.SUCCESS, readResult.getCode());
+                Assert.assertEquals(1, readResult.getMessages().length);
+                ByteBuffer readBuffer = readResult.getMessages()[0];
+                Assert.assertEquals(writeBuffer, readBuffer);
+            }
+        } finally {
+            commitThread.stop();
         }
     }
     @Test
@@ -598,7 +684,10 @@ public class PartitionGroupStoreManagerTest {
             bufferPool.addPreLoad(512 * 1024, 2, 4);
         }
 
-        PartitionGroupStoreManager.Config config = new PartitionGroupStoreManager.Config(DEFAULT_MAX_MESSAGE_LENGTH, DEFAULT_WRITE_REQUEST_CACHE_SIZE, DEFAULT_FLUSH_INTERVAL_MS,
+        PartitionGroupStoreManager.Config config = new PartitionGroupStoreManager.Config(
+                DEFAULT_MAX_MESSAGE_LENGTH,
+                DEFAULT_WRITE_REQUEST_CACHE_SIZE,
+                1L,
                 DEFAULT_WRITE_TIMEOUT_MS, DEFAULT_MAX_DIRTY_SIZE, 6000,
                 new PositioningStore.Config(128 * 1024 * 1024),
                 new PositioningStore.Config(512 * 1024));

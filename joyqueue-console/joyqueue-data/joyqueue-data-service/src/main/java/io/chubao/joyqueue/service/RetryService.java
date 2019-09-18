@@ -29,7 +29,7 @@ public interface RetryService {
 
     PageResult<ConsumeRetry> findByQuery(QPageQuery<QRetry> qRetryQPageQuery) throws JoyQueueException;
 
-    ConsumeRetry getDataById(Long id) throws JoyQueueException;
+    ConsumeRetry getDataById(Long id,String topic) throws JoyQueueException;
 
     void add(RetryMessageModel retryMessageModel);
 

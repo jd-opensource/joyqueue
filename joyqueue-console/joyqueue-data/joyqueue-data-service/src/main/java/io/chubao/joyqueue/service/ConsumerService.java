@@ -28,4 +28,6 @@ public interface ConsumerService extends NsrService<Consumer, QConsumer,String> 
 
     List<String> findAllSubscribeGroups();
 
+    List<String> findAppsByTopic(String topic) throws Exception;
+
 }

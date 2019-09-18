@@ -23,18 +23,11 @@ import io.chubao.joyqueue.broker.election.ElectionException;
 import io.chubao.joyqueue.broker.election.TopicPartitionGroup;
 import io.chubao.joyqueue.broker.monitor.BrokerMonitor;
 import io.chubao.joyqueue.broker.network.support.BrokerTransportClientFactory;
-import io.chubao.joyqueue.network.event.TransportEvent;
 import io.chubao.joyqueue.network.transport.Transport;
-import io.chubao.joyqueue.network.transport.TransportAttribute;
 import io.chubao.joyqueue.network.transport.TransportClient;
-import io.chubao.joyqueue.network.transport.command.Command;
-import io.chubao.joyqueue.network.transport.command.CommandCallback;
 import io.chubao.joyqueue.network.transport.config.ClientConfig;
-import io.chubao.joyqueue.network.transport.exception.TransportException;
-import io.chubao.joyqueue.network.transport.support.DefaultTransportAttribute;
 import io.chubao.joyqueue.store.StoreService;
 import io.chubao.joyqueue.store.replication.ReplicableStore;
-import io.chubao.joyqueue.toolkit.concurrent.EventListener;
 import io.chubao.joyqueue.toolkit.concurrent.NamedThreadFactory;
 import io.chubao.joyqueue.toolkit.lang.Close;
 import io.chubao.joyqueue.toolkit.service.Service;
@@ -90,15 +83,12 @@ public class ReplicationManager extends Service {
         replicaGroups = new ConcurrentHashMap<>();
 
         ClientConfig clientConfig = new ClientConfig();
-        clientConfig.setIoThreadName("JournalqReplication-IO-EventLoop");
-        clientConfig.setMaxAsync(2000);
-        clientConfig.setIoThread(64);
+        clientConfig.setIoThreadName("joyqueue-Replication-IO-EventLoop");
+        clientConfig.setMaxAsync(100);
+        clientConfig.setIoThread(32);
         clientConfig.setSocketBufferSize(1024 * 1024 * 1);
         transportClient = new BrokerTransportClientFactory().create(clientConfig);
         transportClient.start();
-
-        EventListener<TransportEvent> clientEventListener = new ClientEventListener();
-        transportClient.addListener(clientEventListener);
 
         replicateQueue = new LinkedBlockingDeque<>(electionConfig.getCommandQueueSize());
         replicateExecutor = new ThreadPoolExecutor(electionConfig.getReplicateThreadNumMin(), electionConfig.getReplicateThreadNumMax(),
@@ -155,7 +145,7 @@ public class ReplicationManager extends Service {
                     "%d failed, replicable store is null", topic, partitionGroup));
         }
         replicaGroup = new ReplicaGroup(topicPartitionGroup, this, replicableStore, electionConfig,
-                consume, replicateExecutor, brokerMonitor, allNodes, learners, localReplicaId, leaderId);
+                consume, replicateExecutor, brokerMonitor, allNodes, learners, localReplicaId, leaderId,transportClient);
         try {
             replicaGroup.start();
         } catch (Exception e) {
@@ -186,54 +176,5 @@ public class ReplicationManager extends Service {
                     "replication group is null", topic, partitionGroup);
         }
         return replicaGroup;
-    }
-
-
-    /**
-     * 向目标节点发送命令，采用异步方式
-     * @param address 目标broker地址, ip + ":" + port
-     * @param command 要发送的命令
-     * @throws TransportException
-     */
-    void sendCommand(String address, Command command, int timeout, CommandCallback callback) throws TransportException {
-        Transport transport = sessions.get(address);
-        if (transport == null) {
-            synchronized (sessions) {
-                transport = sessions.get(address);
-                if (transport == null) {
-                    logger.info("Replication manager create transport of {}", address);
-
-                    transport = transportClient.createTransport(address);
-                    TransportAttribute attribute = transport.attr();
-                    if (attribute == null) {
-                        attribute = new DefaultTransportAttribute();
-                        transport.attr(attribute);
-                    }
-                    attribute.set("address", address);
-
-                    sessions.put(address, transport);
-                }
-            }
-        }
-
-        transport.async(command, timeout, callback);
-    }
-
-    private class ClientEventListener implements EventListener<TransportEvent> {
-        @Override
-        public void onEvent(TransportEvent event) {
-            switch (event.getType()) {
-                case CONNECT:
-                    break;
-                case EXCEPTION:
-                case CLOSE:
-                    TransportAttribute attribute = event.getTransport().attr();
-                    sessions.remove(attribute.get("address"));
-                    logger.info("Replication manager transport of {} closed", (String)attribute.get("address"));
-                    break;
-                default:
-                    break;
-            }
-        }
     }
 }

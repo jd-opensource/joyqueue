@@ -180,13 +180,7 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
         long startWritePoint = SystemClock.now();
         // 超时时间点
         long endTime = timeout + startWritePoint;
-
-        if (config.getBrokerQosLevel() != -1) {
-            qosLevel = QosLevel.valueOf(config.getBrokerQosLevel());
-        }
-        if (config.getBrokerQosLevel(producer.getTopic()) != -1) {
-            qosLevel = QosLevel.valueOf(config.getBrokerQosLevel(producer.getTopic()));
-        }
+        qosLevel = getConfigQosLevel(producer, qosLevel);
 
         // 写入消息
         // 判断是否是事务消息
@@ -221,11 +215,7 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
         // 判断是否是事务消息
         String txId = msgs.get(0).getTxId();
 
-        if (config.getBrokerQosLevel(producer.getTopic()) != -1) {
-            qosLevel = QosLevel.valueOf(config.getBrokerQosLevel(producer.getTopic()));
-        } else if (config.getBrokerQosLevel() != -1) {
-            qosLevel = QosLevel.valueOf(config.getBrokerQosLevel());
-        }
+        qosLevel = getConfigQosLevel(producer, qosLevel);
 
         if (StringUtils.isNotEmpty(txId)) {
             writeTxMessageAsync(producer, msgs, txId, timeout, eventListener);
@@ -380,6 +370,19 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
         writeRequests.forEach(writeRequest -> {
             brokerMonitor.onPutMessage(topic, app, partitionGroup, writeRequest.getPartition(), writeRequest.getBatchSize(), writeRequest.getBuffer().limit(), now - startTime);
         });
+    }
+
+    protected QosLevel getConfigQosLevel(Producer producer, QosLevel qosLevel) {
+        if (config.getTopicQosLevel(producer.getTopic()) != -1) {
+            return QosLevel.valueOf(config.getTopicQosLevel(producer.getTopic()));
+        }
+        if (config.getAppQosLevel(producer.getApp()) != -1) {
+            return QosLevel.valueOf(config.getAppQosLevel(producer.getApp()));
+        }
+        if (config.getBrokerQosLevel() != -1) {
+            return QosLevel.valueOf(config.getBrokerQosLevel());
+        }
+        return qosLevel;
     }
 
     class MetricEventListener implements EventListener<WriteResult> {

@@ -15,8 +15,8 @@
  */
 package io.chubao.joyqueue.broker.consumer.position;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.TypeReference;
+import com.google.common.base.Preconditions;
+import com.jd.laf.extension.ExtensionManager;
 import io.chubao.joyqueue.broker.cluster.ClusterManager;
 import io.chubao.joyqueue.broker.consumer.ConsumeConfig;
 import io.chubao.joyqueue.broker.consumer.model.ConsumePartition;
@@ -34,21 +34,20 @@ import io.chubao.joyqueue.store.PartitionGroupStore;
 import io.chubao.joyqueue.store.StoreService;
 import io.chubao.joyqueue.toolkit.concurrent.EventListener;
 import io.chubao.joyqueue.toolkit.concurrent.LoopThread;
-import com.google.common.base.Preconditions;
 import io.chubao.joyqueue.toolkit.service.Service;
 import io.chubao.joyqueue.toolkit.time.SystemClock;
-import com.jd.laf.extension.ExtensionManager;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -60,7 +59,7 @@ public class PositionManager extends Service {
 
     private static Logger logger = LoggerFactory.getLogger(PositionManager.class);
     // 存储服务
-    StoreService storeService;
+    private StoreService storeService;
     // 集群管理
     private ClusterManager clusterManager;
     // 消费配置
@@ -154,52 +153,61 @@ public class PositionManager extends Service {
         return lastAckTimeTrace;
     }
 
+    public Map<ConsumePartition, Position> getConsumePosition(TopicName topic, String app, int partitionGroup) {
+        final List<String> appList;
+        if (app == null) {
+            appList = clusterManager.getLocalSubscribeAppByTopic(topic);
+        } else {
+            appList = Arrays.asList(app);
+        }
+
+        Map<ConsumePartition, Position> consumeInfo = new HashMap<>();
+
+        if (appList != null && !appList.isEmpty()) {
+            List<PartitionGroup> partitionGroupList = clusterManager.getPartitionGroup(topic);
+            for (PartitionGroup group : partitionGroupList) {
+                if (group.getGroup() == partitionGroup) {
+                    Set<Short> partitions = group.getPartitions();
+                    partitions.stream().forEach(partition ->
+                            appList.stream().forEach(element -> {
+                                ConsumePartition consumePartition = new ConsumePartition(topic.getFullName(), element, partition);
+                                consumePartition.setPartitionGroup(partitionGroup);
+                                Position position = positionStore.get(consumePartition);
+                                consumeInfo.put(consumePartition, position);
+                            })
+                    );
+                    break;
+                }
+            }
+        }
+
+        return consumeInfo;
+    }
+
     /**
-     * 根据主题+应用+分区分组获取消费位置信息
+     * 根据主题+分区分组获取消费位置信息
      *
      * @param topic
-     * @param app
      * @param partitionGroup
      * @return
      */
-    public String getConsumePosition(TopicName topic, String app, int partitionGroup) {
-        final List<String> appList = new ArrayList<>();
-        if (app == null) {
-            appList.addAll(clusterManager.getAppByTopic(topic));
-        } else {
-            appList.add(app);
-        }
-        Map<ConsumePartition, Position> consumeInfo = new HashMap<>();
-        List<PartitionGroup> partitionGroupList = clusterManager.getPartitionGroup(topic);
-        for (PartitionGroup group : partitionGroupList) {
-            if (group.getGroup() == partitionGroup) {
-                Set<Short> partitions = group.getPartitions();
-                partitions.stream().forEach(partition ->
-                        appList.stream().forEach(element -> {
-                            ConsumePartition consumePartition = new ConsumePartition(topic.getFullName(), element, partition);
-                            consumePartition.setPartitionGroup(partitionGroup);
-                            Position position = positionStore.get(consumePartition);
-                            consumeInfo.put(consumePartition, position);
-                        })
-                );
-            }
-        }
-        return JSON.toJSONString(consumeInfo);
+    public Map<ConsumePartition, Position> getConsumePosition(TopicName topic, int partitionGroup) {
+        return getConsumePosition(topic, null, partitionGroup);
     }
 
     /**
      * 消费位置复制，可覆盖
      *
-     * @param consumeInfoStr
+     * @param consumePositions
      * @return
      */
-    public boolean setConsumePosition(String consumeInfoStr) {
+    public boolean setConsumePosition(Map<ConsumePartition, Position> consumePositions) {
         try {
-            // 将json解析成对象
-            Map<ConsumePartition, Position> consumePositionMap = JSON.parseObject(consumeInfoStr, new TypeReference<Map<ConsumePartition, Position>>() {
-            });
+            if (consumePositions == null) {
+                return false;
+            }
             // 替换内存中的位置信息
-            Set<Map.Entry<ConsumePartition, Position>> entries = consumePositionMap.entrySet();
+            Set<Map.Entry<ConsumePartition, Position>> entries = consumePositions.entrySet();
             entries.stream().forEach(entry -> {
                 ConsumePartition key = entry.getKey();
                 Position val = entry.getValue();
@@ -409,21 +417,6 @@ public class PositionManager extends Service {
 
 
     /**
-     * 增加指定分区的拉取消息序号
-     *
-     * @param topic     消费主题
-     * @param app       消费应用
-     * @param partition 消费分区
-     * @param count     增加的连续序号
-     * @return 是否更新成功
-     */
-    public boolean increaseMsgPullIndex(TopicName topic, String app, short partition, int count) throws JoyQueueException {
-        long lastMsgPullIndex = getLastMsgPullIndex(topic, app, partition);
-        long updateMsgPullIndex = lastMsgPullIndex + count;
-        return updateLastMsgPullIndex(topic, app, partition, updateMsgPullIndex);
-    }
-
-    /**
      * 获取指定分区写入的最大消息序号
      *
      * @param topic     消费主题
@@ -526,13 +519,13 @@ public class PositionManager extends Service {
      * @param topic          主题
      * @param partitionGroup 分区分组
      */
-    private void addPartitionGroup(TopicName topic, int partitionGroup) {
+    private synchronized void addPartitionGroup(TopicName topic, int partitionGroup) {
         PartitionGroup partitionGroupByGroup = clusterManager.getPartitionGroupByGroup(topic, partitionGroup);
         List<String> appList = clusterManager.getAppByTopic(topic);
         Set<Short> partitions = partitionGroupByGroup.getPartitions();
 
         logger.debug("add partitionGroup appList:[{}], partitions:[{}]", appList.toString(), partitions.toString());
-
+        AtomicBoolean changed = new AtomicBoolean(false);
         partitions.stream().forEach(partition -> {
             // 获取当前（主题+分区）的最大消息序号
             long currentIndex = getMaxMsgIndex(topic, partition);
@@ -545,13 +538,27 @@ public class PositionManager extends Service {
                 // 为新订阅的应用初始化消费位置对象
                 Position position = new Position(currentIndex, currentIndex, currentIndex, currentIndex);
 
-                positionStore.putIfAbsent(consumePartition, position);
+                Position previous = positionStore.putIfAbsent(consumePartition, position);
 
-                logger.info("Add consume partition by topic:{}, app:{}, partition:{}, curIndex:{}", topic.getFullName(), app, partition, currentIndexVal);
+                //如果当前应答位置大于索引的最大位置，则将最大位置设置为应答位置（当移除PartitionGroup事件没有通知到的情况下可能会出现）
+                if (previous != null) {
+                    long ackCurIndex = previous.getAckCurIndex();
+                    if (ackCurIndex > currentIndex) {
+                        previous.setAckCurIndex(currentIndex);
+                        changed.set(true);
+                        logger.warn("Update consume position topic:{}, app:{}, partition:{}, curIndex:{}, ackIndex:{}", topic.getFullName(), app, partition, currentIndexVal, ackCurIndex);
+                    }
+                } else {
+                    changed.set(true);
+                    logger.info("Add consume partition topic:{}, app:{}, partition:{}, curIndex:{}", topic.getFullName(), app, partition, currentIndexVal);
+                }
+
             });
         });
 
-        positionStore.forceFlush();
+        if (changed.get()) {
+            positionStore.forceFlush();
+        }
     }
 
     /**
@@ -560,15 +567,16 @@ public class PositionManager extends Service {
      * @param topic          主题
      * @param partitionGroup 分区分组
      */
-    private void removePartitionGroup(TopicName topic, int partitionGroup) {
-        logger.debug("remove partitionGroup topic:[{}], partitionGroup:[{}]", topic.getFullName(), partitionGroup);
-
+    private synchronized void removePartitionGroup(TopicName topic, int partitionGroup) {
+        logger.info("remove partitionGroup topic:[{}], partitionGroup:[{}]", topic.getFullName(), partitionGroup);
         Iterator<ConsumePartition> iterator = positionStore.iterator();
         while(iterator.hasNext()) {
             ConsumePartition consumePartition = iterator.next();
-            if (consumePartition != null && consumePartition.getPartitionGroup() == partitionGroup && StringUtils.equals(consumePartition.getTopic(), topic.getFullName())) {
-                iterator.remove();
+            if (consumePartition != null &&
+                    consumePartition.getPartitionGroup() == partitionGroup &&
+                    StringUtils.equals(consumePartition.getTopic(), topic.getFullName())) {
 
+                iterator.remove();
                 logger.info("Remove ConsumePartition by topic:{}, app:{}, partition:{}", consumePartition.getTopic(), consumePartition.getApp(), consumePartition.getPartition());
             }
         }

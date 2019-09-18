@@ -15,6 +15,8 @@
  */
 package io.chubao.joyqueue.broker.election;
 
+import io.chubao.joyqueue.broker.consumer.model.ConsumePartition;
+import io.chubao.joyqueue.broker.consumer.position.model.Position;
 import io.chubao.joyqueue.broker.election.command.AppendEntriesRequest;
 import io.chubao.joyqueue.broker.election.command.AppendEntriesResponse;
 import io.chubao.joyqueue.broker.election.command.ReplicateConsumePosRequest;
@@ -46,6 +48,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ElectionCommandCodecTest {
 
@@ -155,8 +159,9 @@ public class ElectionCommandCodecTest {
 
     @Test
     public void testReplicateConsumePosRequestCodec() throws Exception {
-        String consumePosition = new String("{\"app\":\"logbookApi.lgbk18\",\"topic\":\"logbook18-HT\"}:[{\"ackCurIndex\":1589049464,\"ackStartIndex\":-1,\"partition\":0,\"partitionGroup\":0,\"pullCurIndex\":0,\"pullStartIndex\":0}]");
-        ReplicateConsumePosRequest request = new ReplicateConsumePosRequest(consumePosition);
+        Map<ConsumePartition, Position> consumePositions = new HashMap<>();
+        consumePositions.put(new ConsumePartition("logbook18-HT", "logbookApi.lgbk18", Short.valueOf("0")), new Position(-1,-1,-1,-1));
+        ReplicateConsumePosRequest request = new ReplicateConsumePosRequest(consumePositions);
         request.setHeader(new JoyQueueHeader());
 
         ReplicateConsumePosRequestEncoder encoder = new ReplicateConsumePosRequestEncoder();
@@ -167,7 +172,7 @@ public class ElectionCommandCodecTest {
         JoyQueueHeader header = new JoyQueueHeader(request.type());
         ReplicateConsumePosRequest decodeRequest = (ReplicateConsumePosRequest)decoder.decode(header, byteBuf);
 
-        Assert.assertEquals(decodeRequest.getConsumePositions(), consumePosition);
+        Assert.assertEquals(decodeRequest.getConsumePositions().size(), consumePositions.size());
     }
 
     @Test

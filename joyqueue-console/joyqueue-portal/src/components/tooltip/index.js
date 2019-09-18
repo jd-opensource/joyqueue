@@ -1,6 +1,4 @@
-/**
- * Copyright 2019 The JoyQueue Authors.
- *
+/*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +11,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.chubao.joyqueue.service;
+import Tooltip from './tooltip'
 
-import io.chubao.joyqueue.model.Uniqueable;
-import io.chubao.joyqueue.model.domain.ApplicationUser;
-import io.chubao.joyqueue.model.query.QApplicationUser;
-
-/**
- * 应用-用户关联关系 服务
- * Created by chenyanying on 2018-10-17.
- */
-public interface ApplicationUserService extends PageService<ApplicationUser, QApplicationUser>, Uniqueable<ApplicationUser> {
-    ApplicationUser findByUserApp(String user, String app);
-    int deleteByAppId(long appId);
-}
+export default Tooltip
