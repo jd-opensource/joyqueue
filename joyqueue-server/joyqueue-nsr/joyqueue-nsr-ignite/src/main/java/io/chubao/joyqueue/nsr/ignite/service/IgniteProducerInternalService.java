@@ -85,7 +85,7 @@ public class IgniteProducerInternalService implements ProducerInternalService {
         ProducerQuery producerQuery = new ProducerQuery(app);
         List<IgniteProducer> igniteProducers = producerDao.list(producerQuery);
         if (null == igniteProducers || igniteProducers.size() < 1) {
-            return null;
+            return Collections.emptyList();
         }
         Map<String, IgniteProducerConfig> configs = new HashMap<>();
         List<IgniteProducerConfig> igniteProducerConfigs = producerConfigDao.list(producerQuery);

@@ -15,6 +15,7 @@
  */
 package io.chubao.joyqueue.broker.monitor.service.support;
 
+import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
 import com.jd.laf.extension.ExtensionPoint;
 import com.jd.laf.extension.ExtensionPointLazy;
@@ -38,11 +39,14 @@ import io.chubao.joyqueue.nsr.service.internal.PartitionGroupReplicaInternalServ
 import io.chubao.joyqueue.nsr.service.internal.ProducerInternalService;
 import io.chubao.joyqueue.nsr.service.internal.TopicInternalService;
 import io.chubao.joyqueue.response.BooleanResponse;
+import io.chubao.joyqueue.toolkit.concurrent.NamedThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * DefaultMetadataMonitorService
@@ -58,6 +62,10 @@ public class DefaultMetadataMonitorService implements MetadataMonitorService {
 
     private ClusterManager clusterManager;
     private MetadataSynchronizer metadataSynchronizer;
+    private String source;
+    private String target;
+    private int interval;
+    private ExecutorService syncThreadPool;
 
     public DefaultMetadataMonitorService(ClusterManager clusterManager) {
         this.clusterManager = clusterManager;
@@ -128,18 +136,51 @@ public class DefaultMetadataMonitorService implements MetadataMonitorService {
     }
 
     @Override
-    public Object syncMetadata(String source, String target) {
-        InternalServiceProvider sourceInternalServiceProvider = SERVICE_PROVIDER_POINT.get(source);
-        InternalServiceProvider targetInternalServiceProvider = SERVICE_PROVIDER_POINT.get(target);
+    public Object syncMetadata(String source, String target, int interval) {
+        this.source = source;
+        this.target = target;
+        this.interval = interval;
 
-        if (sourceInternalServiceProvider == null) {
-            return "source not exist";
-        }
-        if (targetInternalServiceProvider == null) {
-            return "target not exist";
-        }
+        if (interval != 0) {
+            if (syncThreadPool == null) {
+                syncThreadPool = Executors.newFixedThreadPool(1, new NamedThreadFactory("joyqueue-metadata-synchronizer"));
+                syncThreadPool.execute(() -> {
+                    while (true) {
+                        InternalServiceProvider sourceInternalServiceProvider = SERVICE_PROVIDER_POINT.get(this.source);
+                        InternalServiceProvider targetInternalServiceProvider = SERVICE_PROVIDER_POINT.get(this.target);
 
-        return metadataSynchronizer.sync(sourceInternalServiceProvider, targetInternalServiceProvider);
+                        if (sourceInternalServiceProvider == null) {
+                            logger.warn("source not exist");
+                        }
+
+                        if (targetInternalServiceProvider == null) {
+                            logger.warn("target not exist");
+                        }
+
+                        Object result = metadataSynchronizer.sync(sourceInternalServiceProvider, targetInternalServiceProvider);
+                        logger.info("sync result: {}", JSON.toJSONString(result));
+                        try {
+                            Thread.currentThread().sleep(this.interval);
+                        } catch (InterruptedException e) {
+                        }
+                    }
+                });
+            }
+            return "success";
+        } else {
+            InternalServiceProvider sourceInternalServiceProvider = SERVICE_PROVIDER_POINT.get(source);
+            InternalServiceProvider targetInternalServiceProvider = SERVICE_PROVIDER_POINT.get(target);
+
+            if (sourceInternalServiceProvider == null) {
+                return "source not exist";
+            }
+
+            if (targetInternalServiceProvider == null) {
+                return "target not exist";
+            }
+
+            return metadataSynchronizer.sync(sourceInternalServiceProvider, targetInternalServiceProvider);
+        }
     }
 
     @Override

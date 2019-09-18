@@ -102,7 +102,7 @@ public class Subscription implements Serializable {
         if (this == o){
             return true;
         }
-        if (o == null || getClass() != o.getClass()){
+        if (o == null || !(o instanceof Subscription)){
             return false;
         }
         Subscription that = (Subscription) o;

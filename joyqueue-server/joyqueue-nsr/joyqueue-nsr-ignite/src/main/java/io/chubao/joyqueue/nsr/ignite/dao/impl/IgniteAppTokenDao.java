@@ -80,7 +80,7 @@ public class IgniteAppTokenDao implements AppTokenDao {
 
     @Override
     public void add(IgniteAppToken model) {
-        igniteDao.getById(new IgniteAppToken(model).getId());
+        igniteDao.addOrUpdate(new IgniteAppToken(model));
     }
 
     @Override

@@ -436,6 +436,13 @@ public class PositionManager extends Service {
     private long getMaxMsgIndex(TopicName topic, short partition) {
         Integer partitionGroupId = clusterManager.getPartitionGroupId(topic, partition);
         PartitionGroupStore store = storeService.getStore(topic.getFullName(), partitionGroupId);
+
+        // TODO 很小几率在添加group时空指针
+        if (store == null) {
+            logger.warn("store not exist, topic: {}, partitionGroup: {}, partition: {}", topic, partitionGroupId, partition);
+            return 0;
+        }
+
         long rightIndex = store.getRightIndex(partition);
         return rightIndex;
     }

@@ -31,6 +31,6 @@ public class GetAllMetadataResponse extends JoyQueuePayload {
 
     @Override
     public int type() {
-        return NsrCommandType.NSR_GET_ALL_METADATA_REQUEST;
+        return NsrCommandType.NSR_GET_ALL_METADATA_RESPONSE;
     }
 }

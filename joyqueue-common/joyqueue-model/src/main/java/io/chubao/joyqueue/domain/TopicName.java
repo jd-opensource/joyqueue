@@ -15,8 +15,8 @@
  */
 package io.chubao.joyqueue.domain;
 
-import com.google.common.collect.Maps;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Objects;
@@ -114,7 +114,7 @@ public class TopicName {
         if (this == o){
             return true;
         }
-        if (o == null || getClass() != o.getClass()){
+        if (o == null || !(o instanceof TopicName)){
             return false;
         }
         TopicName that = (TopicName) o;

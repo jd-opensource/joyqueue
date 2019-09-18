@@ -56,7 +56,7 @@ public class PartitionGroupReplicaCommand extends NsrCommandSupport<PartitionGro
         QPartitionGroupReplica query = qPageQuery.getQuery();
 
         if (query.getTopic() != null) {
-            List<PartitionGroupReplica> queryResult = service.getByTopicAndGroup(query.getTopic().getCode(), query.getTopic().getNamespace().getCode(), query.getGroupNo());
+            List<PartitionGroupReplica> queryResult = service.getByTopicAndGroup(query.getTopic().getCode(), query.getNamespace().getCode(), query.getGroupNo());
             if (queryResult != null) {
                 for (PartitionGroupReplica partitionGroupReplica : queryResult) {
                     Broker broker = brokerService.findById(partitionGroupReplica.getBrokerId());

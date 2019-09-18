@@ -23,6 +23,8 @@ import io.chubao.joyqueue.broker.monitor.model.BrokerStatPo;
 import io.chubao.joyqueue.broker.monitor.stat.BrokerStat;
 import io.chubao.joyqueue.toolkit.io.DoubleCopy;
 import io.chubao.joyqueue.toolkit.service.Service;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +37,6 @@ import java.io.IOException;
  * author: gaohaoxiang
  * date: 2018/10/10
  */
-// TODO 新版持久化判断处理
 public class BrokerStatManager extends Service {
 
     protected static final Logger logger = LoggerFactory.getLogger(BrokerStatManager.class);
@@ -44,6 +45,7 @@ public class BrokerStatManager extends Service {
     private BrokerMonitorConfig config;
     private BrokerStat brokerStat;
     private File statFile;
+    private File newStatFile;
 
     private BrokerStatDoubleCopy brokerStatDoubleCopy;
 
@@ -51,13 +53,41 @@ public class BrokerStatManager extends Service {
         this.brokerId = brokerId;
         this.config = config;
         this.statFile = new File(config.getStatSaveFile());
+        this.newStatFile = new File(config.getStatSaveFileNew());
         try {
-            this.brokerStatDoubleCopy = new BrokerStatDoubleCopy(brokerId, config, statFile);
-            this.brokerStatDoubleCopy.recover();
+            this.brokerStatDoubleCopy = new BrokerStatDoubleCopy(brokerId, config, newStatFile);
+            this.brokerStat = recover();
         } catch (IOException e) {
             throw new MonitorException(e);
         }
-        this.brokerStat = this.brokerStatDoubleCopy.getBrokerStat();
+    }
+
+    protected BrokerStat recover() throws IOException {
+        if (newStatFile.exists()) {
+            this.brokerStatDoubleCopy.recover();
+            BrokerStat brokerStat = this.brokerStatDoubleCopy.getBrokerStat();
+            return brokerStat;
+        } else {
+            if (!statFile.exists()) {
+                return new BrokerStat(brokerId);
+            }
+
+            String stat = FileUtils.readFileToString(statFile);
+
+            if (StringUtils.isBlank(stat)) {
+                return new BrokerStat(brokerId);
+            }
+
+            BrokerStatPo brokerStatPo = JSON.parseObject(stat, BrokerStatPo.class);
+
+            if (brokerStatPo.getVersion() != BrokerStat.VERSION) {
+                logger.warn("broker stat check version failed, current: {}, required: {}", brokerStatPo.getVersion(), BrokerStat.VERSION);
+                return new BrokerStat(brokerId);
+            }
+
+            brokerStatPo.setBrokerId(brokerId);
+            return BrokerStatConverter.convert(brokerStatPo);
+        }
     }
 
     @Override

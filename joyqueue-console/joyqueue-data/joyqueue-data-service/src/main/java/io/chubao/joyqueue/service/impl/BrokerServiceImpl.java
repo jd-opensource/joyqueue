@@ -15,6 +15,7 @@
  */
 package io.chubao.joyqueue.service.impl;
 
+import io.chubao.joyqueue.domain.TopicName;
 import io.chubao.joyqueue.model.ListQuery;
 import io.chubao.joyqueue.model.PageResult;
 import io.chubao.joyqueue.model.QPageQuery;
@@ -65,7 +66,8 @@ public class BrokerServiceImpl implements BrokerService {
 
     @Override
     public List<Broker> findByTopic(String topic) throws Exception {
-        List<PartitionGroupReplica> replicas = partitionGroupReplicaService.getByTopic(topic, null);
+        TopicName topicName = TopicName.parse(topic);
+        List<PartitionGroupReplica> replicas = partitionGroupReplicaService.getByTopic(topicName.getCode(), topicName.getNamespace());
         if (NullUtil.isEmpty(replicas)) {
             logger.error(String.format("can not find partitionGroup by topic, topic is %s", topic));
             return null;

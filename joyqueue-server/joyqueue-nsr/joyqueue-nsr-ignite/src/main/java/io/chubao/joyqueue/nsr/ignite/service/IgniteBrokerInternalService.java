@@ -90,7 +90,7 @@ public class IgniteBrokerInternalService implements BrokerInternalService {
     @Override
     public List<Broker> getByIds(List<Integer> ids) {
         if (ids == null || ids.size() <=0){
-            return null;
+            return Collections.emptyList();
         }
         return ids.stream().map(brokerId-> brokerDao.findById(brokerId)).filter(broker -> broker != null).collect(Collectors.toList());
     }

@@ -20,7 +20,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.chubao</groupId>
-    <version>4.1.1-SNAPSHOT</version>
+    <version>4.1.2-SNAPSHOT</version>
     <artifactId>joyqueue</artifactId>
     <packaging>pom</packaging>
     <url>https://github.com/joyqueue/joyqueue</url>
@@ -131,7 +131,7 @@
         <module>joyqueue-common</module>
         <module>joyqueue-server</module>
         <!-- TODO 临时-->
-        <!--<module>joyqueue-console</module>-->
+        <module>joyqueue-console</module>
         <!--<module>joyqueue-client</module>-->
         <!--<module>joyqueue-openmessaging</module>-->
         <!--<module>docker</module>-->

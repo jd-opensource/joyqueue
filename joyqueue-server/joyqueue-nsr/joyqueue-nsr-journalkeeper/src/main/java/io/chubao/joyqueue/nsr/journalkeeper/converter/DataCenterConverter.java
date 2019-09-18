@@ -20,7 +20,7 @@ public class DataCenterConverter {
             return null;
         }
         DataCenterDTO dataCenterDTO = new DataCenterDTO();
-        dataCenterDTO.setId(dataCenter.getCode());
+        dataCenterDTO.setId(dataCenter.getId());
         dataCenterDTO.setCode(dataCenter.getCode());
         dataCenterDTO.setName(dataCenter.getName());
         dataCenterDTO.setRegion(dataCenter.getRegion());

@@ -76,7 +76,7 @@ public class ConsumerCommand extends NsrCommandSupport<Consumer, ConsumerService
     @Path("add")
     public Response add(@Body Consumer consumer) throws Exception {
         //validate unique
-        Consumer currentConsumer = service.findByTopicAppGroup(consumer.getNamespace().getCode(), consumer.getTopic().getCode(), consumer.getApp().getCode(), consumer.getSubscribeGroup());
+        Consumer currentConsumer = service.findByTopicAppGroup(consumer.getTopic().getNamespace().getCode(), consumer.getTopic().getCode(), consumer.getApp().getCode(), consumer.getSubscribeGroup());
         if (currentConsumer != null) {
             throw new ConfigException(ErrorCode.BadRequest, "consumer already exists!");
         }

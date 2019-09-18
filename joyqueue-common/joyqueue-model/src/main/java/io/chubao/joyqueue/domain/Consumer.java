@@ -107,8 +107,9 @@ public class Consumer extends Subscription {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || !(o instanceof Consumer)) return false;
         if (!super.equals(o)) return false;
+
         Consumer consumer = (Consumer) o;
         return clientType == consumer.clientType &&
                 topicType == consumer.topicType &&

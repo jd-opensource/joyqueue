@@ -89,9 +89,10 @@ public interface MetadataMonitorService {
      * 同步数据
      * @param source
      * @param target
+     * @param interval
      * @return
      */
-    Object syncMetadata(String source, String target);
+    Object syncMetadata(String source, String target, int interval);
 
     /**
      * 查询元数据
