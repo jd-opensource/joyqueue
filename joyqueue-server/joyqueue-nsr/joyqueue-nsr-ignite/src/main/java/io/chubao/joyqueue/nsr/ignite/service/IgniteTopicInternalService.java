@@ -514,7 +514,7 @@ public class IgniteTopicInternalService implements TopicInternalService {
                 commands.add(new Pair<>(new TreeSet<>(brokerAddToRemove),
                         new Command(new JoyQueueHeader(Direction.REQUEST, CommandType.NSR_UPDATE_PARTITIONGROUP), new UpdatePartitionGroup(groupToUpdae))));
                 brokerAddToRemove.remove(brokerId);
-                partitionGroupReplicaService.delete(new IgnitePartitionGroupReplica(group.getTopic(), brokerId, group.getGroup()));
+                partitionGroupReplicaService.delete(new IgnitePartitionGroupReplica(group.getTopic(), brokerId, group.getGroup()).getId());
             }
             if(null==groupToUpdae.getReplicas()||groupToUpdae.getReplicas().size()<1){
                 group.setLeader(-1);

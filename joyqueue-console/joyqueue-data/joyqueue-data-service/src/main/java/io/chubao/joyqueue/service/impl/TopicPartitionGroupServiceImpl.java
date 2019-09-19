@@ -38,6 +38,7 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import static io.chubao.joyqueue.exception.ServiceException.INTERNAL_SERVER_ERROR;
+import static io.chubao.joyqueue.exception.ServiceException.NAMESERVER_RPC_ERROR;
 import static io.chubao.joyqueue.exception.ServiceException.BAD_REQUEST;
 
 /**

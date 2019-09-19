@@ -208,6 +208,11 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
             }
         }
 
+        if (config.getLogDetail(clientId)) {
+            logger.info("fetch message, app: {}, partition: {}, offset: {}, result: {}",
+                    clientId, partition, offset, kafkaBrokerMessages.size());
+        }
+
         FetchResponse.PartitionResponse fetchResponsePartitionData = new FetchResponse.PartitionResponse(partition, KafkaErrorCode.NONE.getCode(), kafkaBrokerMessages);
         fetchResponsePartitionData.setBytes(currentBytes);
         fetchResponsePartitionData.setLogStartOffset(minIndex);

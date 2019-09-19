@@ -229,8 +229,10 @@ public class TopicServiceImpl implements TopicService {
                 String.format("topic %s exists related consumers", CodeConverter.convertTopic(model.getNamespace(), model).getFullName()));
         Preconditions.checkArgument(NullUtil.isEmpty(partitionGroupServerService.findByTopic(model.getCode(), model.getNamespace().getCode())),
                 String.format("topic %s exists related partitionGroup", CodeConverter.convertTopic(model.getNamespace(), model).getFullName()));
-        Preconditions.checkArgument(NullUtil.isEmpty(replicaServerService.findByQuery(new QPartitionGroupReplica(model, model.getNamespace()))),
-                String.format("topic %s exists related partitions", CodeConverter.convertTopic(model.getNamespace(), model).getFullName()));
+
+        // TODO 需要处理
+//        Preconditions.checkArgument(NullUtil.isEmpty(replicaServerService.findByTopicAndGroup(model.getCode(), model.getNamespace().getCode()))),
+//                String.format("topic %s exists related partitions", CodeConverter.convertTopic(model.getNamespace(), model).getFullName());
         //delete related partition groups
         try {
 //            List<TopicPartitionGroup> groups = partitionGroupServerService.findByTopic(model.getCode(), model.getNamespace().getCode());
