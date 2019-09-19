@@ -79,9 +79,8 @@ public class RetryServiceImpl implements RetryService {
     }
 
     @Override
-    public ConsumeRetry getDataById(Long id) throws JoyQueueException {
-        check();
-        return consoleMessageRetry.getConsumeRetryById(id);
+    public ConsumeRetry getDataById(Long id,String topic) throws JoyQueueException {
+        return consoleMessageRetry.getConsumeRetryById(id,topic);
     }
 
     @Override

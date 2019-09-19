@@ -39,6 +39,7 @@ import java.util.stream.Collectors;
 
 import static io.chubao.joyqueue.exception.ServiceException.INTERNAL_SERVER_ERROR;
 import static io.chubao.joyqueue.exception.ServiceException.NAMESERVER_RPC_ERROR;
+import static io.chubao.joyqueue.exception.ServiceException.BAD_REQUEST;
 
 /**
  * topic partition group service implement
@@ -164,6 +165,9 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
         model.setPartitions(Arrays.toString(partitions.toArray()));
         model.setReplicaGroups(topicPartitionGroup.getReplicaGroups());
         try {
+            if (model.getReplicaGroups() == null || model.getReplicaGroups().size() <=0) {
+                throw new ServiceException(BAD_REQUEST,"副本不能为空");
+            }
             topicNameServerService.updatePartitionGroup(model);
         } catch (Exception e) {
             String errorMsg = "更新partitionGroup，同步NameServer失败";
@@ -193,11 +197,17 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
             throw new ServiceException(INTERNAL_SERVER_ERROR, "数据异常");
         }
         for(int i=currentPartitions-1;i>topic.getPartitions()-1;i--){
+            if(!partitions.contains(i)){
+                throw new ServiceException(BAD_REQUEST,"请先缩减partition"+i+"所在partitionGroup,否则会导致不连续");
+            }
             partitions.remove(i);
         }
         model.setPartitions(Arrays.toString(partitions.toArray()));
         model.setReplicaGroups(topicPartitionGroup.getReplicaGroups());
         try {
+            if (model.getReplicaGroups() == null || model.getReplicaGroups().size() <=0) {
+                throw new ServiceException(BAD_REQUEST,"副本不能为空");
+            }
             topicNameServerService.updatePartitionGroup(model);
         } catch (Exception e) {
             String errorMsg = "更新partitionGroup，同步NameServer失败";
@@ -227,7 +237,16 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
 
     @Override
     public int delete(TopicPartitionGroup model) {
-
+        Topic topic = topicNameServerService.findByCode(model.getNamespace().getCode(),model.getTopic().getCode());
+        int currentPartitions = topic.getPartitions();
+        Set<Integer> partitions = Arrays.stream(model.getPartitions().substring(1,model.getPartitions().length()-1).split(",")).
+                map(m->Integer.valueOf(m.trim())).collect(Collectors.toSet());
+        topic.setPartitions(topic.getPartitions()-partitions.size());
+        for(int i=currentPartitions-1;i>topic.getPartitions()-1;i--){
+            if(!partitions.contains(i)){
+                throw new ServiceException(BAD_REQUEST,"请先删除partition"+i+"所在partitionGroup");
+            }
+        }
         try {
             topicNameServerService.removePartitionGroup(model);
         } catch (Exception e) {

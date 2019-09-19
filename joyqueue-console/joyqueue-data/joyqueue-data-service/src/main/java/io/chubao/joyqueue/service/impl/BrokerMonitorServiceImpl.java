@@ -17,6 +17,8 @@ package io.chubao.joyqueue.service.impl;
 
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.google.common.base.Preconditions;
 import io.chubao.joyqueue.async.BrokerClusterQuery;
 import io.chubao.joyqueue.async.BrokerMonitorClusterQuery;
 import io.chubao.joyqueue.async.RetrieveProvider;
@@ -27,6 +29,7 @@ import io.chubao.joyqueue.manage.PartitionGroupMetric;
 import io.chubao.joyqueue.manage.PartitionGroupPosition;
 import io.chubao.joyqueue.manage.PartitionMetric;
 import io.chubao.joyqueue.manage.PartitionPosition;
+import io.chubao.joyqueue.model.BrokerMetadata;
 import io.chubao.joyqueue.model.domain.Broker;
 import io.chubao.joyqueue.model.domain.BrokerClient;
 import io.chubao.joyqueue.model.domain.BrokerMonitorRecord;
@@ -55,10 +58,10 @@ import io.chubao.joyqueue.service.BrokerMonitorService;
 import io.chubao.joyqueue.service.BrokerRestUrlMappingService;
 import io.chubao.joyqueue.service.LeaderService;
 import io.chubao.joyqueue.service.TopicPartitionGroupService;
-import com.google.common.base.Preconditions;
 import io.chubao.joyqueue.util.HttpUtil;
 import io.chubao.joyqueue.util.NullUtil;
 import io.chubao.joyqueue.util.UrlEncoderUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.AopContext;
@@ -77,6 +80,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import static io.chubao.joyqueue.exception.ServiceException.INTERNAL_SERVER_ERROR;
+import static io.chubao.joyqueue.exception.ServiceException.NOT_FOUND;
 import static io.chubao.joyqueue.model.domain.Consumer.CONSUMER_TYPE;
 import static io.chubao.joyqueue.model.domain.Producer.PRODUCER_TYPE;
 import static io.chubao.joyqueue.util.JSONParser.parse;
@@ -541,14 +545,14 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
                 restPartitionGroupsMonitor=parse(r,RestResponse.class,PartitionGroupMonitorInfo.class,true);
                 List<PartitionGroupMonitorInfo> producerPartitionGroupMonitors= restPartitionGroupsMonitor.getData();
                 for(PartitionGroupMonitorInfo p:producerPartitionGroupMonitors) {
-                            record= new BrokerMonitorRecord();
-                            record.setPartitionGroup(p.getPartitionGroup());
-                            record.setIp(ipWithPort);
-                            record.setEnQuence(p.getEnQueue());
-                            record.setDeQuence(p.getDeQueue());
-                            monitorRecords.add(record);
-                    }
+                    record= new BrokerMonitorRecord();
+                    record.setPartitionGroup(p.getPartitionGroup());
+                    record.setIp(ipWithPort);
+                    record.setEnQuence(p.getEnQueue());
+                    record.setDeQuence(p.getDeQueue());
+                    monitorRecords.add(record);
                 }
+            }
         }catch (Exception e){
             logger.info("broker asyncQueryOnBroker occurs parse exception.", e);
             throw new ServiceException(INTERNAL_SERVER_ERROR,e.getMessage());
@@ -637,6 +641,54 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
             return archiveMonitorRest.getData();
         }catch (Exception e){
             logger.error("archive monitor",e);
+            throw new ServiceException(INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
+
+    /**
+     * 查询Broker上的元数据
+     * @param broker
+     * @param group 分组
+     * @param topicFullName
+     * @return
+     */
+    @Override
+    public BrokerMetadata findBrokerMetadata(Broker broker, String topicFullName, int group) {
+        String ip = broker.getIp();
+        int port = broker.getMonitorPort();
+        Integer id = new Integer((int) broker.getId());
+        Preconditions.checkArgument(StringUtils.isNotEmpty(ip) && port > 0 && id > 0
+                && StringUtils.isNotEmpty(topicFullName), "query broker metadata params incorrect.");
+
+        RestResponse<JSONObject> response;
+        try{
+            String url = String.format(urlMappingService.urlTemplate("topicPartitionGroupMetadata"), ip, String.valueOf(port), topicFullName);
+            String body = HttpUtil.get(url);
+            response = parse(body, RestResponse.class, JSONObject.class,false);
+            if (response.getCode() != 200) {
+                String msg = String.format("query broker %s metadata under topic %s error. response code %s", ip + ":" + port, topicFullName, response.getCode());
+                logger.error(msg);
+                throw new ServiceException(NOT_FOUND, msg);
+            }
+            JSONObject data = response.getData();
+            try {
+                JSONObject pgObj = (JSONObject) ((JSONObject) data.get("partitionGroups")).get(group);
+                JSONObject leaderObj = (JSONObject) pgObj.get("leaderBroker");
+                JSONObject obj = (JSONObject) ((JSONObject) pgObj.get("brokers")).get(id);
+                obj.put("leaderAddress", leaderObj.get("address"));
+                obj.put("leaderBrokerId", leaderObj.get("id"));
+                obj.put("leaderRetryType", leaderObj.get("retryType"));
+                obj.put("leaderPermission", leaderObj.get("permission"));
+                obj.put("leaderIp", leaderObj.get("ip"));
+                obj.put("leaderPort", leaderObj.get("port"));
+                return JSONObject.toJavaObject(obj, BrokerMetadata.class);
+            } catch (Exception e) {
+                String msg = String.format("transform the response data of the broker %s metadata under topic %s error.", ip + ":" + port, topicFullName);
+                logger.error(msg, e);
+                throw new ServiceException(INTERNAL_SERVER_ERROR, msg, e);
+            }
+        }catch (Exception e){
+            logger.error("query broker metadata error.", e);
             throw new ServiceException(INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }

@@ -48,6 +48,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -99,31 +100,33 @@ public class TopicServiceImpl implements TopicService {
         if (topic.getPartitions() < brokers.size()) {
             partitionGroupNum = topic.getPartitions();
         }
+
+        int step = topic.getPartitions()/partitionGroupNum;
+        int surplus = topic.getPartitions()%partitionGroupNum;
+        int index = 0;
+        List partitions = new ArrayList(topic.getPartitions());
+        for(int i = 0;i<topic.getPartitions();i++){
+            partitions.add(i);
+        }
         List<TopicPartitionGroup> partitionGroups = new ArrayList<>(partitionGroupNum);
-        //创建partitiongroup
-        for(int i =0;i<partitionGroupNum;i++){
+        for(int i = 0,j=0;i<partitionGroupNum;i++,j++){
+            //创建partitiongroup
             TopicPartitionGroup partitionGroup = new TopicPartitionGroup();
             partitionGroup.setNamespace(topic.getNamespace());
             partitionGroup.setTopic(topic);
             partitionGroup.setGroupNo(i);
             partitionGroup.setElectType(TopicPartitionGroup.ElectType.valueOf(topic.getElectType()).type());
+            if(j<surplus){
+                partitionGroup.setPartitionSet(new HashSet<>(partitions.subList(index,index+step+1)));
+                index = index+step+1;
+            }else{
+                partitionGroup.setPartitionSet(new HashSet<>(partitions.subList(index,index+step)));
+                index = index+step;
+            }
+            partitionGroup.setPartitions(Arrays.toString(partitionGroup.getPartitionSet().toArray()));
             partitionGroups.add(partitionGroup);
         }
-
-        //每个paritiongroup分配 parition
-        int groupstart = 0;
-        int index = 0;
-        int step = topic.getPartitions()/partitionGroupNum;
-        for(int i =0;i<topic.getPartitions();i++){
-            TopicPartitionGroup partitionGroup = partitionGroups.get(groupstart);
-            partitionGroup.addPartition(i);
-            partitionGroup.setPartitions(Arrays.toString(partitionGroup.getPartitionSet().toArray()));
-            index++;
-            if(index==step&&groupstart<partitionGroupNum-1){
-                groupstart++;
-                index=0;
-            }
-        }
+        //
         //每个paritiongroup分配broker及指定推荐leader
         for(int k=0; k<partitionGroups.size();k++){
             TopicPartitionGroup partitionGroup = partitionGroups.get(k);
@@ -135,13 +138,19 @@ public class TopicServiceImpl implements TopicService {
                 replica.setTopic(partitionGroup.getTopic());
                 replica.setBrokerId(Long.valueOf(broker.getId()).intValue());
                 if(partitionGroup.getElectType().equals(TopicPartitionGroup.ElectType.fix.type())){
-                    if(j==0)replica.setRole(PartitionGroupReplica.ROLE_MASTER);
-                    else replica.setRole(PartitionGroupReplica.ROLE_DYNAMIC);
+                    if(j==0){
+                        replica.setRole(PartitionGroupReplica.ROLE_MASTER);
+                    }
+                    else {
+                        replica.setRole(PartitionGroupReplica.ROLE_DYNAMIC);
+                    }
                 }else{
                     replica.setRole(PartitionGroupReplica.ROLE_DYNAMIC);
                 }
                 partitionGroup.getReplicaGroups().add(replica);
-                if ((j-k)==brokers.size())break;
+                if ((j-k)==brokers.size()){
+                    break;
+                }
             }
             partitionGroup.setRecLeader(Integer.valueOf(String.valueOf(brokers.get(k).getId())));
         }
@@ -218,6 +227,12 @@ public class TopicServiceImpl implements TopicService {
                 String.format("topic %s exists related producers", CodeConverter.convertTopic(model.getNamespace(), model).getFullName()));
         Preconditions.checkArgument(NullUtil.isEmpty(consumerNameServerService.findByTopic(model.getCode(), model.getNamespace().getCode())),
                 String.format("topic %s exists related consumers", CodeConverter.convertTopic(model.getNamespace(), model).getFullName()));
+        Preconditions.checkArgument(NullUtil.isEmpty(partitionGroupServerService.findByTopic(model.getCode(), model.getNamespace().getCode())),
+                String.format("topic %s exists related partitionGroup", CodeConverter.convertTopic(model.getNamespace(), model).getFullName()));
+
+        // TODO 需要处理
+//        Preconditions.checkArgument(NullUtil.isEmpty(replicaServerService.findByTopicAndGroup(model.getCode(), model.getNamespace().getCode()))),
+//                String.format("topic %s exists related partitions", CodeConverter.convertTopic(model.getNamespace(), model).getFullName());
         //delete related partition groups
         try {
 //            List<TopicPartitionGroup> groups = partitionGroupServerService.findByTopic(model.getCode(), model.getNamespace().getCode());

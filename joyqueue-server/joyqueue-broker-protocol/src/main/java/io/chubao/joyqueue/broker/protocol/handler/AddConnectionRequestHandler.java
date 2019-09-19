@@ -73,10 +73,13 @@ public class AddConnectionRequestHandler implements JoyQueueCommandHandler, Type
                     JoyQueueCode.CN_AUTHENTICATION_ERROR.getMessage() + String.format(", app: %s", addConnectionRequest.getApp()));
         }
 
-        Connection connection = buildConnection(transport, addConnectionRequest);
-        if (sessionManager.addConnection(connection)) {
-            // 绑定连接
-            SessionHelper.setConnection(transport, connection);
+        Connection connection = SessionHelper.getConnection(transport);
+        if (connection == null) {
+            connection = buildConnection(transport, addConnectionRequest);
+            if (sessionManager.addConnection(connection)) {
+                // 绑定连接
+                SessionHelper.setConnection(transport, connection);
+            }
         }
 
         AddConnectionResponse addConnectionResponse = new AddConnectionResponse();

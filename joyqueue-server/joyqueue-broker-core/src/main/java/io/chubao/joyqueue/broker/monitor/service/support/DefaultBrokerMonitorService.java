@@ -324,8 +324,8 @@ public class DefaultBrokerMonitorService implements BrokerMonitorService {
     }
 
     @Override
-    public Object syncMetadata(String source, String target) {
-        return metadataMonitorService.syncMetadata(source, target);
+    public Object syncMetadata(String source, String target, int interval) {
+        return metadataMonitorService.syncMetadata(source, target, interval);
     }
 
     @Override

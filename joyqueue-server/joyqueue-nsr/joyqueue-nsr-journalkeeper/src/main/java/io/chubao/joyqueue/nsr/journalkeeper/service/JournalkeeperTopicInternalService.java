@@ -185,8 +185,12 @@ public class JournalkeeperTopicInternalService implements TopicInternalService {
     }
 
     @Override
+    public void leaderReport(PartitionGroup group) {
+        partitionGroupRepository.updateLeader(PartitionGroupConverter.convert(group));
+    }
+
+    @Override
     public void leaderChange(PartitionGroup group) {
-        partitionGroupRepository.update(PartitionGroupConverter.convert(group));
     }
 
     @Override

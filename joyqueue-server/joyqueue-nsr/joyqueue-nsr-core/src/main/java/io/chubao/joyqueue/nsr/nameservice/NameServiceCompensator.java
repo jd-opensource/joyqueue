@@ -93,55 +93,58 @@ public class NameServiceCompensator extends Service {
             TopicConfig newTopicConfig = currentTopicEntry.getValue();
             TopicConfig oldTopicConfig = oldCache.getTopicConfigMap().get(currentTopicEntry.getKey());
 
-            if (!oldTopicConfig.isReplica(brokerId) && !newTopicConfig.isReplica(brokerId)) {
-                continue;
-            }
-
             // 新增topic
             if (oldTopicConfig == null) {
-                publishEvent(new AddTopicEvent(newTopicConfig, Lists.newArrayList(newTopicConfig.getPartitionGroups().values())));
+                if (newTopicConfig.isReplica(brokerId)) {
+                    publishEvent(new AddTopicEvent(newTopicConfig, Lists.newArrayList(newTopicConfig.getPartitionGroups().values())));
 
-                for (Map.Entry<Integer, PartitionGroup> entry : newTopicConfig.getPartitionGroups().entrySet()) {
-                    publishEvent(new AddPartitionGroupEvent(newTopicConfig.getName(), entry.getValue()));
+                    for (Map.Entry<Integer, PartitionGroup> entry : newTopicConfig.getPartitionGroups().entrySet()) {
+                        publishEvent(new AddPartitionGroupEvent(newTopicConfig.getName(), entry.getValue()));
+                    }
                 }
             } else {
-                // 更新topic
-                if (!compareTopic(oldTopicConfig, newTopicConfig)) {
-                    publishEvent(new UpdateTopicEvent(oldTopicConfig, newTopicConfig));
-                }
+                // topic副本变化
+                if (oldTopicConfig.isReplica(brokerId) && !newTopicConfig.isReplica(brokerId)) {
+                    for (PartitionGroup partitionGroup : oldTopicConfig.fetchPartitionGroupByBrokerId(brokerId)) {
+                        publishEvent(new RemovePartitionGroupEvent(oldTopicConfig.getName(), partitionGroup));
+                    }
+                } else {
+                    if (newTopicConfig.isReplica(brokerId)) {
+                        // 更新topic
+                        if (!compareTopic(oldTopicConfig, newTopicConfig)) {
+                            publishEvent(new UpdateTopicEvent(oldTopicConfig, newTopicConfig));
+                        }
 
-                // 更新partitionGroup
-                for (Map.Entry<Integer, PartitionGroup> newPartitionGroupEntry : newTopicConfig.getPartitionGroups().entrySet()) {
-                    PartitionGroup oldPartitionGroup = oldTopicConfig.getPartitionGroups().get(newPartitionGroupEntry.getKey());
-                    if (oldPartitionGroup == null) {
-                        publishEvent(new AddPartitionGroupEvent(newTopicConfig.getName(), oldPartitionGroup));
-                    } else {
-                        if (!comparePartitionGroup(oldPartitionGroup, newPartitionGroupEntry.getValue())) {
-                            publishEvent(new UpdatePartitionGroupEvent(newTopicConfig.getName(), oldPartitionGroup, newPartitionGroupEntry.getValue()));
+                        // 更新partitionGroup
+                        for (PartitionGroup newPartition : newTopicConfig.fetchPartitionGroupByBrokerId(brokerId)) {
+                            PartitionGroup oldPartitionGroup = oldTopicConfig.getPartitionGroups().get(newPartition.getGroup());
+                            if (oldPartitionGroup == null || !oldPartitionGroup.getReplicas().contains(brokerId)) {
+                                publishEvent(new AddPartitionGroupEvent(newTopicConfig.getName(), oldPartitionGroup));
+                            } else {
+                                if (!comparePartitionGroup(oldPartitionGroup, newPartition)) {
+                                    publishEvent(new UpdatePartitionGroupEvent(newTopicConfig.getName(), oldPartitionGroup, newPartition));
+                                }
+                            }
+                        }
+
+                        // 删除partitionGroup
+                        for (PartitionGroup oldPartitionGroup : oldTopicConfig.fetchPartitionGroupByBrokerId(brokerId)) {
+                            PartitionGroup newPartitionGroup = newTopicConfig.getPartitionGroups().get(oldPartitionGroup.getGroup());
+                            if (newPartitionGroup == null || !newPartitionGroup.getReplicas().contains(brokerId)) {
+                                publishEvent(new RemovePartitionGroupEvent(newTopicConfig.getName(), oldPartitionGroup));
+                            }
                         }
                     }
-                }
-
-                // 删除partitionGroup
-                for (Map.Entry<Integer, PartitionGroup> oldPartitionGroupEntry : oldTopicConfig.getPartitionGroups().entrySet()) {
-                    if (newTopicConfig.getPartitionGroups().containsKey(oldPartitionGroupEntry.getKey())) {
-                        continue;
-                    }
-                    publishEvent(new RemovePartitionGroupEvent(newTopicConfig.getName(), oldPartitionGroupEntry.getValue()));
                 }
             }
         }
 
         // 删除topic
         for (Map.Entry<TopicName, TopicConfig> oldTopicEntry : oldCache.getTopicConfigMap().entrySet()) {
-            if (!oldTopicEntry.getValue().isReplica(brokerId)) {
-                continue;
+            TopicConfig newTopic = newCache.getTopicConfigMap().get(oldTopicEntry.getKey());
+            if (oldTopicEntry.getValue().isReplica(brokerId) && newTopic == null) {
+                publishEvent(new RemoveTopicEvent(oldTopicEntry.getValue(), Lists.newArrayList(oldTopicEntry.getValue().getPartitionGroups().values())));
             }
-            if (newCache.getTopicConfigMap().containsKey(oldTopicEntry.getKey())) {
-                continue;
-            }
-
-            publishEvent(new RemoveTopicEvent(oldTopicEntry.getValue(), Lists.newArrayList(oldTopicEntry.getValue().getPartitionGroups().values())));
         }
     }
 
@@ -179,75 +182,91 @@ public class NameServiceCompensator extends Service {
 
     protected void compensateProducer(NameServiceCache oldCache, NameServiceCache newCache) {
         for (Producer newProducer : newCache.getAllProducers()) {
-            TopicConfig topicConfig = newCache.getTopicConfigMap().get(newProducer.getTopic());
-            if (topicConfig == null || !topicConfig.isReplica(brokerId)) {
-                continue;
-            }
+            TopicConfig newTopicConfig = newCache.getTopicConfigMap().get(newProducer.getTopic());
+            TopicConfig oldTopicConfig = oldCache.getTopicConfigMap().get(newProducer.getTopic());
 
             Map<TopicName, Producer> oldTopicProducerMap = oldCache.getProducerAppMap().get(newProducer.getApp());
             Producer oldProducer = (oldTopicProducerMap == null ? null : oldTopicProducerMap.get(newProducer.getTopic()));
+
+            if (newTopicConfig == null || !newTopicConfig.isReplica(brokerId)) {
+                continue;
+            }
+
             if (oldProducer == null) {
                 // 新增producer
                 publishEvent(new AddProducerEvent(newProducer.getTopic(), newProducer));
             } else {
-                // 更新broker
-                if (!compareProducer(oldProducer, newProducer)) {
-                    publishEvent(new UpdateProducerEvent(newProducer.getTopic(), oldProducer, newProducer));
+                if (oldTopicConfig == null || !oldTopicConfig.isReplica(brokerId)) {
+                    publishEvent(new AddProducerEvent(newProducer.getTopic(), newProducer));
+                } else {
+                    // 更新producer
+                    if (!compareProducer(oldProducer, newProducer)) {
+                        publishEvent(new UpdateProducerEvent(newProducer.getTopic(), oldProducer, newProducer));
+                    }
                 }
             }
         }
 
         // 删除producer
         for (Producer oldProducer : oldCache.getAllProducers()) {
-            TopicConfig topicConfig = newCache.getTopicConfigMap().get(oldProducer.getTopic());
-            if (topicConfig == null || !topicConfig.isReplica(brokerId)) {
-                continue;
-            }
+            TopicConfig newTopicConfig = newCache.getTopicConfigMap().get(oldProducer.getTopic());
+            TopicConfig oldTopicConfig = oldCache.getTopicConfigMap().get(oldProducer.getTopic());
 
             Map<TopicName, Producer> newTopicProducerMap = newCache.getProducerAppMap().get(oldProducer.getApp());
             Producer newProducer = (newTopicProducerMap == null ? null : newTopicProducerMap.get(oldProducer.getTopic()));
-            if (newProducer != null) {
-                continue;
-            }
 
-            publishEvent(new RemoveProducerEvent(oldProducer.getTopic(), oldProducer));
+            if (newProducer == null) {
+                publishEvent(new RemoveProducerEvent(oldProducer.getTopic(), oldProducer));
+            } else if ((newTopicConfig == null || !newTopicConfig.isReplica(brokerId))
+                    && (oldTopicConfig != null && oldTopicConfig.isReplica(brokerId))) {
+
+                publishEvent(new RemoveProducerEvent(oldProducer.getTopic(), oldProducer));
+            }
         }
     }
 
     protected void compensateConsumer(NameServiceCache oldCache, NameServiceCache newCache) {
         for (Consumer newConsumer : newCache.getAllConsumers()) {
-            TopicConfig topicConfig = newCache.getTopicConfigMap().get(newConsumer.getTopic());
-            if (topicConfig == null || !topicConfig.isReplica(brokerId)) {
-                continue;
-            }
+            TopicConfig newTopicConfig = newCache.getTopicConfigMap().get(newConsumer.getTopic());
+            TopicConfig oldTopicConfig = oldCache.getTopicConfigMap().get(newConsumer.getTopic());
 
             Map<TopicName, Consumer> oldTopicConsumerMap = oldCache.getConsumerAppMap().get(newConsumer.getApp());
             Consumer oldConsumer = (oldTopicConsumerMap == null ? null : oldTopicConsumerMap.get(newConsumer.getTopic()));
+
+            if (newTopicConfig == null || !newTopicConfig.isReplica(brokerId)) {
+                continue;
+            }
+
             if (oldConsumer == null) {
                 // 新增consumer
                 publishEvent(new AddConsumerEvent(newConsumer.getTopic(), newConsumer));
             } else {
-                // 更新consumer
-                if (!compareConsumer(oldConsumer, newConsumer)) {
-                    publishEvent(new UpdateConsumerEvent(newConsumer.getTopic(), oldConsumer, newConsumer));
+                if (oldTopicConfig == null || !oldTopicConfig.isReplica(brokerId)) {
+                    publishEvent(new AddConsumerEvent(newConsumer.getTopic(), newConsumer));
+                } else {
+                    // 更新consumer
+                    if (!compareConsumer(oldConsumer, newConsumer)) {
+                        publishEvent(new UpdateConsumerEvent(newConsumer.getTopic(), oldConsumer, newConsumer));
+                    }
                 }
             }
         }
 
         // 删除consumer
         for (Consumer oldConsumer : oldCache.getAllConsumers()) {
-            TopicConfig topicConfig = newCache.getTopicConfigMap().get(oldConsumer.getTopic());
-            if (topicConfig == null || !topicConfig.isReplica(brokerId)) {
-                continue;
-            }
+            TopicConfig newTopicConfig = newCache.getTopicConfigMap().get(oldConsumer.getTopic());
+            TopicConfig oldTopicConfig = oldCache.getTopicConfigMap().get(oldConsumer.getTopic());
 
             Map<TopicName, Consumer> newTopicConsumerMap = newCache.getConsumerAppMap().get(oldConsumer.getApp());
             Consumer newConsumer = (newTopicConsumerMap == null ? null : newTopicConsumerMap.get(oldConsumer.getTopic()));
-            if (newConsumer != null) {
-                continue;
-            }
 
-            publishEvent(new RemoveConsumerEvent(oldConsumer.getTopic(), oldConsumer));
+            if (newConsumer == null) {
+                publishEvent(new RemoveConsumerEvent(oldConsumer.getTopic(), oldConsumer));
+            } else if ((newTopicConfig == null || !newTopicConfig.isReplica(brokerId))
+                    && (oldTopicConfig != null && oldTopicConfig.isReplica(brokerId))) {
+
+                publishEvent(new RemoveConsumerEvent(oldConsumer.getTopic(), oldConsumer));
+            }
         }
     }
 

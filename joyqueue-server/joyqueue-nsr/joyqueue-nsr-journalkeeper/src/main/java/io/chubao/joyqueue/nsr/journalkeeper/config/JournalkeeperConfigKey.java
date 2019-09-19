@@ -21,7 +21,7 @@ public enum JournalkeeperConfigKey implements PropertyDef {
 
     SNAPSHOT_STEP("nameserver.journalkeeper.snapshot.step", 0, PropertyDef.Type.INT),
 
-    RPC_TIMEOUT("nameserver.journalkeeper.rpc.timeout", 1000 * 1, PropertyDef.Type.INT),
+    RPC_TIMEOUT("nameserver.journalkeeper.rpc.timeout", 1000 * 60 * 1, PropertyDef.Type.INT),
 
     FLUSH_INTERVAL("nameserver.journalkeeper.flush.interval", 50, PropertyDef.Type.INT),
 

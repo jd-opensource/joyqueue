@@ -28,7 +28,7 @@ public class ConfigConverter {
     }
 
     protected static String generateId(Config config) {
-        return String.format("%s_%s", config.getKey(), config.getGroup());
+        return String.format("%s.%s", config.getGroup(), config.getKey());
     }
 
     public static Config convert(ConfigDTO configDTO) {

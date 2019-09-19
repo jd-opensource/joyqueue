@@ -55,10 +55,11 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import static com.jd.laf.web.vertx.response.Response.HTTP_BAD_REQUEST;
-import static com.jd.laf.web.vertx.response.Response.HTTP_INTERNAL_ERROR;
 import static io.chubao.joyqueue.handler.Constants.ID;
 import static io.chubao.joyqueue.handler.Constants.IDS;
+import static io.chubao.joyqueue.handler.Constants.TOPIC;
+import static com.jd.laf.web.vertx.response.Response.HTTP_BAD_REQUEST;
+import static com.jd.laf.web.vertx.response.Response.HTTP_INTERNAL_ERROR;
 
 /**
  * Created by wangxiaofei1 on 2018/12/5.
@@ -96,8 +97,8 @@ public class RetryCommand implements Command<Response>, Poolable {
      * @throws Exception
      */
     @Path("recovery")
-    public Response recovery(@QueryParam(ID) Long id) throws Exception {
-        ConsumeRetry retry = retryService.getDataById(id);
+    public Response recovery(@QueryParam(ID) Long id,@QueryParam(TOPIC)String topic) throws Exception {
+        ConsumeRetry retry = retryService.getDataById(id,topic);
         if (retry != null && (retry.getStatus() == Retry.StatusEnum.RETRY_DELETE.getValue() ||
                 retry.getStatus() == Retry.StatusEnum.RETRY_OUTOFDATE.getValue()) ||
                 retry.getStatus() == Retry.StatusEnum.RETRY_SUCCESS.getValue()) {
@@ -118,8 +119,8 @@ public class RetryCommand implements Command<Response>, Poolable {
      * @throws Exception
      */
     @Path("download")
-    public void download(@QueryParam(ID) Long id) throws Exception {
-        ConsumeRetry retry = retryService.getDataById(id);
+    public void download(@QueryParam(ID) Long id,@QueryParam(TOPIC)String topic) throws Exception {
+        ConsumeRetry retry = retryService.getDataById(id,topic);
         if (retry != null) {
             HttpServerResponse response = request.response();
             byte[] data = retry.getData();
@@ -142,8 +143,8 @@ public class RetryCommand implements Command<Response>, Poolable {
     }
 
     @Path("delete")
-    public Response delete(@QueryParam(ID) Long id) throws Exception {
-        ConsumeRetry retry = retryService.getDataById(id);
+    public Response delete(@QueryParam(ID) Long id,@QueryParam(TOPIC) String topic) throws Exception {
+        ConsumeRetry retry = retryService.getDataById(id,topic);
         retry.setStatus((short) BaseModel.DELETED);
         retry.setUpdateBy(operator.getId().intValue());
         retry.setUpdateTime(SystemClock.now());
@@ -160,7 +161,7 @@ public class RetryCommand implements Command<Response>, Poolable {
     public Response batchDelete(@QueryParam(IDS) String ids) throws Exception {
         List<String> idList= Arrays.asList(ids.split(","));
         for (String id : idList) {
-            delete(Long.valueOf(id));
+//            delete(Long.valueOf(id));
         }
         return Responses.success();
     }
@@ -174,7 +175,7 @@ public class RetryCommand implements Command<Response>, Poolable {
     public Response batchRecovery(@QueryParam(IDS) String ids) throws Exception {
         List<String> idList= Arrays.asList(ids.split(","));
         for (String id : idList) {
-            recovery(Long.valueOf(id));
+//            recovery(Long.valueOf(id));
         }
         return Responses.success();
     }

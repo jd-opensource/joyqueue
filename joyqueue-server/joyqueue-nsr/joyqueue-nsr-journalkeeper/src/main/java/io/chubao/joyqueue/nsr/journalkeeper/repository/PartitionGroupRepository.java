@@ -30,6 +30,8 @@ public class PartitionGroupRepository extends BaseRepository {
             TABLE, COLUMNS);
     private static final String UPDATE_BY_ID = String.format("UPDATE %s SET %s WHERE id = ?",
             TABLE, UPDATE_COLUMNS);
+    private static final String UPDATE_LEADER_BY_ID = String.format("UPDATE %s SET leader = ?, term = ?, isrs = ? WHERE id = ?",
+            TABLE);
     private static final String DELETE_BY_ID = String.format("DELETE FROM %s WHERE id = ?",
             TABLE);
 
@@ -58,6 +60,12 @@ public class PartitionGroupRepository extends BaseRepository {
                 partitionGroupDTO.getGroup(), partitionGroupDTO.getLeader(), partitionGroupDTO.getIsrs(),
                 partitionGroupDTO.getTerm(), partitionGroupDTO.getPartitions(), partitionGroupDTO.getLearners(),
                 partitionGroupDTO.getReplicas(), partitionGroupDTO.getOutSyncReplicas(), partitionGroupDTO.getElectType(), partitionGroupDTO.getRecLeader());
+        return partitionGroupDTO;
+    }
+
+    public PartitionGroupDTO updateLeader(PartitionGroupDTO partitionGroupDTO) {
+        update(UPDATE_LEADER_BY_ID, partitionGroupDTO.getLeader(), partitionGroupDTO.getTerm(), partitionGroupDTO.getIsrs(),
+                partitionGroupDTO.getId());
         return partitionGroupDTO;
     }
 

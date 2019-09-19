@@ -15,13 +15,14 @@
  */
 package io.chubao.joyqueue.broker.index.handler;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import io.chubao.joyqueue.broker.BrokerContext;
 import io.chubao.joyqueue.broker.consumer.Consume;
 import io.chubao.joyqueue.broker.index.command.ConsumeIndexStoreRequest;
 import io.chubao.joyqueue.broker.index.command.ConsumeIndexStoreResponse;
 import io.chubao.joyqueue.broker.index.model.IndexAndMetadata;
 import io.chubao.joyqueue.domain.QosLevel;
-import io.chubao.joyqueue.domain.TopicName;
 import io.chubao.joyqueue.exception.JoyQueueCode;
 import io.chubao.joyqueue.exception.JoyQueueException;
 import io.chubao.joyqueue.network.command.CommandType;
@@ -38,6 +39,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by zhuduohui on 2018/9/7.
@@ -47,6 +51,11 @@ public class ConsumeIndexStoreHandler implements CommandHandler, Type {
 
     private BrokerContext brokerContext;
     private Consume consume;
+
+    // 参数化
+    private final Cache<String, Long> commitIndexCache = CacheBuilder.newBuilder()
+            .expireAfterAccess(1000 * 60 * 1, TimeUnit.MILLISECONDS)
+            .build();
 
     public ConsumeIndexStoreHandler(BrokerContext brokerContext) {
         this.brokerContext = brokerContext;
@@ -96,13 +105,36 @@ public class ConsumeIndexStoreHandler implements CommandHandler, Type {
 
     private void setConsumeIndex(String topic, short partition, String app, long offset, long commitTime) throws JoyQueueException {
         Consumer consumer = new Consumer(topic, app);
-        if (consume.getLastAckTimeByPartition(TopicName.parse(topic), app, partition) > commitTime) {
+        long lastCommitTime = getLastCommitTime(topic, partition, app);
+        if (lastCommitTime > commitTime) {
             return;
         }
+
         consume.setAckIndex(consumer, partition, offset);
         consume.setStartAckIndex(consumer, partition, -1);
+        putLastCommitIndex(topic, partition, app, commitTime);
     }
 
+    protected long getLastCommitTime(String topic, short partition, String app) {
+        try {
+            return commitIndexCache.get(generateIndexKey(topic, partition, app), new Callable<Long>() {
+                @Override
+                public Long call() throws Exception {
+                    return 0L;
+                }
+            });
+        } catch (ExecutionException e) {
+            return 0L;
+        }
+    }
+
+    protected void putLastCommitIndex(String topic, short partition, String app, long commitTime) {
+        commitIndexCache.put(generateIndexKey(topic, partition, app), commitTime);
+    }
+
+    protected String generateIndexKey(String topic, short partition, String app) {
+        return String.format("%s_%s_%s", topic, partition, app);
+    }
 
     @Override
     public int type() {

@@ -42,7 +42,6 @@ public class JoyQueueEncoder extends DefaultEncoder {
         if (command.getPayload() instanceof JoyQueuePayload) {
             fillHeader((JoyQueueHeader) command.getHeader(), (JoyQueuePayload) command.getPayload());
         }
-        command.getHeader().setVersion(JoyQueueHeader.CURRENT_VERSION);
         super.encode(obj, buffer);
     }
 

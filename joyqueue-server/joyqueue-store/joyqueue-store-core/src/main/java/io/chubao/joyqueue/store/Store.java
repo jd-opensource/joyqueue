@@ -298,17 +298,21 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
     private PartitionGroupStoreManager.Config getPartitionGroupConfig(StoreConfig config) {
 
         PositioningStore.Config messageConfig = getMessageStoreConfig(config);
-        PositioningStore.Config indexConfig = new PositioningStore.Config(config.getIndexFileSize(),
-                config.getFileHeaderSize());
+        PositioningStore.Config indexConfig = getIndexStoreConfig(config);
         return new PartitionGroupStoreManager.Config(
                 config.getMaxMessageLength(), config.getWriteRequestCacheSize(), config.getFlushIntervalMs(),
                 config.getWriteTimeoutMs(), config.getMaxDirtySize(),
                 config.getPrintMetricIntervalMs(), messageConfig, indexConfig);
     }
 
+    private PositioningStore.Config getIndexStoreConfig(StoreConfig config) {
+        return new PositioningStore.Config(config.getIndexFileSize(),
+                config.getFileHeaderSize(), config.getDiskFullRatio());
+    }
+
     private PositioningStore.Config getMessageStoreConfig(StoreConfig config) {
         return new PositioningStore.Config(config.getMessageFileSize(),
-                config.getFileHeaderSize());
+                config.getFileHeaderSize(), config.getDiskFullRatio());
     }
 
     /**
@@ -419,12 +423,11 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
 
     List<Integer> partitionGroups(String topic) {
         return storeMap.keySet().stream()
-                .filter(k -> k.startsWith(topic + "/"))
+                .filter(k -> k.matches("^" + topic + "/\\d+$"))
                 .map(k -> k.substring(topic.length() + 1))
                 .map(Integer::parseInt)
                 .collect(Collectors.toList());
     }
-
     PartitionGroupStoreManager partitionGroupStore(String topic, int partitionGroup) {
         return storeMap.get(topic + "/" + partitionGroup);
     }

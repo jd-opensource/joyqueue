@@ -80,8 +80,9 @@ public class Producer extends Subscription {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || !(o instanceof Producer)) return false;
         if (!super.equals(o)) return false;
+
         Producer producer = (Producer) o;
         return clientType == producer.clientType &&
                 Objects.equals(producerPolicy, producer.producerPolicy) &&

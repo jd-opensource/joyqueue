@@ -42,6 +42,6 @@ public class JournalkeeperDataCenterInternalService implements DataCenterInterna
 
     @Override
     public void delete(String id) {
-        dataCenterRepository.delete(id);
+        dataCenterRepository.deleteById(id);
     }
 }

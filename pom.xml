@@ -20,7 +20,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.chubao</groupId>
-    <version>4.1.1-SNAPSHOT</version>
+    <version>4.1.2-SNAPSHOT</version>
     <artifactId>joyqueue</artifactId>
     <packaging>pom</packaging>
     <url>https://github.com/joyqueue/joyqueue</url>
@@ -835,6 +835,7 @@
                                 <exclude>src/main/resources/**</exclude>
                                 <exclude>**/node_modules/**</exclude>
                                 <exclude>**/joyqueue-portal/**</exclude>
+                                <exclude>**/joyqueue-portal/static/**</exclude>
                                 <exclude>**/joyqueue-portal/node/**</exclude>
                                 <exclude>**/*.vue</exclude>
                                 <exclude>**/*.js</exclude>

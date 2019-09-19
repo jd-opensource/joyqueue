@@ -46,6 +46,7 @@ public class PositioningStore<T> implements Closeable {
     private final Logger logger = LoggerFactory.getLogger(PositioningStore.class);
     private final int fileHeaderSize;
     private final int fileDataSize;
+    private final int diskFullRatio;
     private final File base;
     private final LogSerializer<T> serializer;
     private final PreloadBufferPool bufferPool;
@@ -66,6 +67,12 @@ public class PositioningStore<T> implements Closeable {
         this.base = base;
         this.fileHeaderSize = config.fileHeaderSize;
         this.fileDataSize = config.fileDataSize;
+        if(config.diskFullRatio <= 0 || config.diskFullRatio > 100) {
+            logger.warn("Invalid config diskFullRatio: {}, using default: {}.", config.diskFullRatio, Config.DEFAULT_DISK_FULL_RATIO);
+            diskFullRatio = Config.DEFAULT_DISK_FULL_RATIO;
+        } else {
+            diskFullRatio = config.diskFullRatio;
+        }
         this.bufferPool = bufferPool;
         this.serializer = serializer;
     }
@@ -386,19 +393,20 @@ public class PositioningStore<T> implements Closeable {
         if ((present = storeFileMap.putIfAbsent(position, storeFile)) != null) {
             storeFile = present;
         } else {
-            checkDiskFreeSpace(base, fileDataSize + fileHeaderSize);
+            checkDiskFreeSpace(base);
         }
         logger.info("Store file created, leftPosition: {}, rightPosition: {}, flushPosition: {}, base: {}.",
                 Format.formatWithComma(left()),
                 Format.formatWithComma(right()),
                 Format.formatWithComma(flushPosition()),
                 base.getAbsolutePath()
-                );
+        );
         return storeFile;
     }
 
-    private void checkDiskFreeSpace(File file, long fileSize) {
-        if(file.getFreeSpace() < fileSize) {
+    private void checkDiskFreeSpace(File file) {
+
+        if((file.getTotalSpace() - file.getFreeSpace()) * 100 >  file.getTotalSpace() * diskFullRatio) {
             throw new DiskFullException(file);
         }
     }
@@ -653,6 +661,7 @@ public class PositioningStore<T> implements Closeable {
     public static class Config {
         public static final int DEFAULT_FILE_HEADER_SIZE = 128;
         public static final int DEFAULT_FILE_DATA_SIZE = 128 * 1024 * 1024;
+        public static final int DEFAULT_DISK_FULL_RATIO = 90;
 
         /**
          * 文件头长度
@@ -662,6 +671,8 @@ public class PositioningStore<T> implements Closeable {
          * 文件内数据最大长度
          */
         private final int fileDataSize;
+
+        private final int diskFullRatio;
 
         public Config() {
             this(DEFAULT_FILE_DATA_SIZE,
@@ -674,8 +685,12 @@ public class PositioningStore<T> implements Closeable {
         }
 
         public Config(int fileDataSize, int fileHeaderSize) {
+            this(fileDataSize, fileHeaderSize, DEFAULT_DISK_FULL_RATIO);
+        }
+        public Config(int fileDataSize, int fileHeaderSize, int diskFullRatio) {
             this.fileDataSize = fileDataSize;
             this.fileHeaderSize = fileHeaderSize;
+            this.diskFullRatio = diskFullRatio;
         }
     }
 

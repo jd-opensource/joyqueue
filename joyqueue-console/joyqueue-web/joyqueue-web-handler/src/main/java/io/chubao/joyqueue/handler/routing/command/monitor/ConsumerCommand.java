@@ -42,6 +42,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static io.chubao.joyqueue.handler.Constants.ID;
+import static io.chubao.joyqueue.handler.Constants.TOPIC;
 
 
 public class ConsumerCommand extends NsrCommandSupport<Consumer, ConsumerService, QConsumer> {
@@ -76,7 +77,7 @@ public class ConsumerCommand extends NsrCommandSupport<Consumer, ConsumerService
     @Path("add")
     public Response add(@Body Consumer consumer) throws Exception {
         //validate unique
-        Consumer currentConsumer = service.findByTopicAppGroup(consumer.getNamespace().getCode(), consumer.getTopic().getCode(), consumer.getApp().getCode(), consumer.getSubscribeGroup());
+        Consumer currentConsumer = service.findByTopicAppGroup(consumer.getTopic().getNamespace().getCode(), consumer.getTopic().getCode(), consumer.getApp().getCode(), consumer.getSubscribeGroup());
         if (currentConsumer != null) {
             throw new ConfigException(ErrorCode.BadRequest, "consumer already exists!");
         }
@@ -172,6 +173,11 @@ public class ConsumerCommand extends NsrCommandSupport<Consumer, ConsumerService
     @Path("findAllSubscribeGroups")
     public Response findAllSubscribeGroups() throws Exception {
         return Responses.success(service.findAllSubscribeGroups());
+    }
+
+    @Path("findAppsByTopic")
+    public Response findAppsByTopic(@QueryParam(TOPIC)String topic) throws Exception {
+        return Responses.success(service.findAppsByTopic(topic));
     }
 
 }

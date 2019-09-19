@@ -56,4 +56,12 @@ public class TransactionContext {
             transactionThreadLocal.remove();
         }
     }
+
+    public static void close() {
+        SQLTransactionOperator transactionOperator = transactionThreadLocal.get();
+        if (transactionOperator == null) {
+            throw new UnsupportedOperationException("transaction not exist");
+        }
+        transactionThreadLocal.remove();
+    }
 }

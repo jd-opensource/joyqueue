@@ -22,7 +22,7 @@ public class TopicRepository extends BaseRepository {
     private static final String UPDATE_COLUMNS = "code = ?, namespace = ?, partitions = ?, priority_partitions = ?, type = ?";
 
     private static final String GET_ALL = String.format("SELECT %s FROM %s ORDER BY code", COLUMNS, TABLE);
-    private static final String GET_BY_CODE = String.format("SELECT %s FROM %s WHERE code = ? AND namespace = ? ORDER BY code", COLUMNS, TABLE);
+    private static final String GET_BY_CODE = String.format("SELECT %s FROM %s WHERE code = ? AND namespace = ?", COLUMNS, TABLE);
     private static final String GET_BY_ID = String.format("SELECT %s FROM %s WHERE id = ?", COLUMNS, TABLE);
     private static final String ADD = String.format("INSERT INTO %s(%s) VALUES(?,?,?,?,?,?)", TABLE, COLUMNS);
     private static final String UPDATE_BY_ID = String.format("UPDATE %s SET %s WHERE id = ?", TABLE, UPDATE_COLUMNS);

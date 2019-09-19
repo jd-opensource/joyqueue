@@ -28,6 +28,19 @@ public class ProduceConfig {
         this.propertySupplier = propertySupplier;
     }
 
+    public int getTopicQosLevel(String topic) {
+        return PropertySupplier.getValue(propertySupplier,
+                ProducerConfigKey.TOPIC_QOS_LEVEL_PREFIX.getName() + topic,
+                ProducerConfigKey.TOPIC_QOS_LEVEL_PREFIX.getType(),
+                ProducerConfigKey.TOPIC_QOS_LEVEL_PREFIX.getValue());
+    }
+
+    public int getAppQosLevel(String app) {
+        return PropertySupplier.getValue(propertySupplier,
+                ProducerConfigKey.APP_QOS_LEVEL_PREFIX.getName() + app,
+                ProducerConfigKey.APP_QOS_LEVEL_PREFIX.getType(),
+                ProducerConfigKey.APP_QOS_LEVEL_PREFIX.getValue());
+    }
 
     public int getFeedbackTimeout() {
         return PropertySupplier.getValue(propertySupplier, ProducerConfigKey.FEEDBACK_TIMEOUT);
@@ -51,13 +64,6 @@ public class ProduceConfig {
 
     public int getBrokerQosLevel() {
         return PropertySupplier.getValue(propertySupplier, ProducerConfigKey.BROKER_QOS_LEVEL);
-    }
-
-    public int getBrokerQosLevel(String topic) {
-        return PropertySupplier.getValue(propertySupplier,
-                ProducerConfigKey.BROKER_QOS_LEVEL_PREFIX.getName() + topic,
-                ProducerConfigKey.BROKER_QOS_LEVEL_PREFIX.getType(),
-                ProducerConfigKey.BROKER_QOS_LEVEL_PREFIX.getValue());
     }
 
     public long getPrintMetricIntervalMs() {

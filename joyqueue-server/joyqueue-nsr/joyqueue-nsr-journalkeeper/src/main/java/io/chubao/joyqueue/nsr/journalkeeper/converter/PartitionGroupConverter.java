@@ -39,7 +39,7 @@ public class PartitionGroupConverter {
     }
 
     protected static String generateId(PartitionGroup partitionGroup) {
-        return String.format("%s_%s", partitionGroup.getTopic().getFullName(), partitionGroup.getGroup());
+        return String.format("%s.%s", partitionGroup.getTopic().getFullName(), partitionGroup.getGroup());
     }
 
     public static PartitionGroup convert(PartitionGroupDTO partitionGroupDTO) {

@@ -263,6 +263,7 @@ public class NameServer extends Service implements NameService, PropertySupplier
                 topic, partitionGroup, leaderBrokerId, termId);
         TopicConfig topicConfig = getTopicConfig(topic);
         if (topicConfig == null) {
+            logger.warn("topic not exist, topic: {}, partitionGroup: {}, leaderBrokerId: {}", topic, partitionGroup, leaderBrokerId);
             return;
         }
         PartitionGroup group = null;
@@ -285,7 +286,7 @@ public class NameServer extends Service implements NameService, PropertySupplier
         group.setIsrs(isrId);
         group.setLeader(leaderBrokerId);
         group.setTerm(termId);
-        metaManager.updatePartitionGroup(group);
+        metaManager.leaderReport(group);
     }
 
     @Override
@@ -577,6 +578,9 @@ public class NameServer extends Service implements NameService, PropertySupplier
         for (Topic topic : topics) {
             TopicConfig topicConfig = TopicConfig.toTopicConfig(topic);
             Map<Integer, PartitionGroup> topicPartitionGroups = partitionGroupMap.get(topic.getName());
+            if (topicPartitionGroups == null) {
+                topicPartitionGroups = Maps.newHashMap();
+            }
 
             topicConfig.setPartitionGroups(topicPartitionGroups);
             result.put(topicConfig.getName(), topicConfig);

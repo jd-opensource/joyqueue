@@ -132,6 +132,20 @@ public class CompositionTopicInternalService implements TopicInternalService {
     }
 
     @Override
+    public void leaderReport(PartitionGroup group) {
+        if (config.isWriteIgnite()) {
+            igniteTopicService.leaderReport(group);
+        }
+        if (config.isWriteJournalkeeper()) {
+            try {
+                journalkeeperTopicService.leaderReport(group);
+            } catch (Exception e) {
+                logger.error("leaderReport journalkeeper exception, params: {}", group, e);
+            }
+        }
+    }
+
+    @Override
     public void leaderChange(PartitionGroup group) {
         if (config.isWriteIgnite()) {
             igniteTopicService.leaderChange(group);

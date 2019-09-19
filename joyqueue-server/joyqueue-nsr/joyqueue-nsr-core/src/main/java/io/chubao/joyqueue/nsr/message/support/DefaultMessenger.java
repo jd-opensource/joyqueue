@@ -108,7 +108,7 @@ public class DefaultMessenger extends Service implements Messenger<MetaEvent>, P
                                 latch.countDown();
                             }
                         });
-            } catch (TransportException.ConnectionException e) {
+            } catch (Exception e) {
                 logger.warn("create session exception, event: {}, brokerId: {}, brokerIp: {}, brokerPort: {}",
                         event, broker.getId(), broker.getIp(), broker.getPort(), e);
 
@@ -117,11 +117,6 @@ public class DefaultMessenger extends Service implements Messenger<MetaEvent>, P
                 } else {
                     success[0] = false;
                 }
-            } catch (Exception e) {
-                logger.warn("create session exception, event: {}, brokerId: {}, brokerIp: {}, brokerPort: {}",
-                        event, broker.getId(), broker.getIp(), broker.getPort(), e);
-
-                success[0] = false;
             }
         }
 
@@ -158,9 +153,13 @@ public class DefaultMessenger extends Service implements Messenger<MetaEvent>, P
         }
 
         for (Broker broker : brokers) {
-            MessengerPublishRequest messengerPublishRequest = new MessengerPublishRequest(event);
-            messengerSessionManager.getOrCreateSession(broker.getId(), broker.getIp(), config.getPort())
-                    .oneway(new JoyQueueCommand(messengerPublishRequest), config.getSessionTimeout());
+            try {
+                MessengerPublishRequest messengerPublishRequest = new MessengerPublishRequest(event);
+                messengerSessionManager.getOrCreateSession(broker.getId(), broker.getIp(), config.getPort())
+                        .oneway(new JoyQueueCommand(messengerPublishRequest), config.getSessionTimeout());
+            } catch (Exception e) {
+                logger.warn("messenger fastPublish failed, event: {}, broker: {}", event, broker);
+            }
         }
     }
 

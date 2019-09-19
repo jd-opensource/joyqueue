@@ -42,6 +42,10 @@ public class BrokerMonitorConfig {
         return brokerConfig.getAndCreateDataPath() + propertySupplier.getValue(BrokerMonitorConfigKey.STAT_SAVE_FILE);
     }
 
+    public String getStatSaveFileNew() {
+        return brokerConfig.getAndCreateDataPath() + propertySupplier.getValue(BrokerMonitorConfigKey.STAT_SAVE_FILE_NEW);
+    }
+
     public int getStatSaveInterval() {
         return propertySupplier.getValue(BrokerMonitorConfigKey.STAT_SAVE_INTERVAL);
     }

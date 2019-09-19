@@ -15,28 +15,6 @@
  */
 package io.chubao.joyqueue.handler.routing.command.monitor;
 
-import io.chubao.joyqueue.domain.Broker;
-import io.chubao.joyqueue.handler.annotation.PageQuery;
-import io.chubao.joyqueue.model.PageResult;
-import io.chubao.joyqueue.model.QPageQuery;
-import io.chubao.joyqueue.model.domain.BrokerClient;
-import io.chubao.joyqueue.model.domain.BrokerMonitorRecord;
-import io.chubao.joyqueue.model.domain.BrokerTopicMonitor;
-import io.chubao.joyqueue.model.domain.ConnectionMonitorInfoWithIp;
-import io.chubao.joyqueue.model.domain.SimplifiedBrokeMessage;
-import io.chubao.joyqueue.model.domain.Subscribe;
-import io.chubao.joyqueue.monitor.BrokerMessageInfo;
-import io.chubao.joyqueue.monitor.BrokerMonitorInfo;
-import io.chubao.joyqueue.monitor.BrokerStartupInfo;
-import io.chubao.joyqueue.monitor.Client;
-import io.chubao.joyqueue.handler.error.ErrorCode;
-import io.chubao.joyqueue.model.query.QMonitor;
-import io.chubao.joyqueue.model.query.QPartitionGroupMonitor;
-import io.chubao.joyqueue.service.BrokerMessageService;
-import io.chubao.joyqueue.service.BrokerMonitorService;
-import io.chubao.joyqueue.service.BrokerTopicMonitorService;
-import io.chubao.joyqueue.service.CoordinatorMonitorService;
-import io.chubao.joyqueue.util.NullUtil;
 import com.jd.laf.binding.annotation.Value;
 import com.jd.laf.web.vertx.Command;
 import com.jd.laf.web.vertx.annotation.Body;
@@ -45,6 +23,30 @@ import com.jd.laf.web.vertx.annotation.QueryParam;
 import com.jd.laf.web.vertx.pool.Poolable;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
+import io.chubao.joyqueue.domain.Broker;
+import io.chubao.joyqueue.handler.annotation.PageQuery;
+import io.chubao.joyqueue.handler.error.ErrorCode;
+import io.chubao.joyqueue.model.BrokerMetadata;
+import io.chubao.joyqueue.model.PageResult;
+import io.chubao.joyqueue.model.QPageQuery;
+import io.chubao.joyqueue.model.domain.BrokerClient;
+import io.chubao.joyqueue.model.domain.BrokerMonitorRecord;
+import io.chubao.joyqueue.model.domain.BrokerTopicMonitor;
+import io.chubao.joyqueue.model.domain.ConnectionMonitorInfoWithIp;
+import io.chubao.joyqueue.model.domain.SimplifiedBrokeMessage;
+import io.chubao.joyqueue.model.domain.Subscribe;
+import io.chubao.joyqueue.model.query.QMonitor;
+import io.chubao.joyqueue.model.query.QPartitionGroupMonitor;
+import io.chubao.joyqueue.monitor.BrokerMessageInfo;
+import io.chubao.joyqueue.monitor.BrokerMonitorInfo;
+import io.chubao.joyqueue.monitor.BrokerStartupInfo;
+import io.chubao.joyqueue.monitor.Client;
+import io.chubao.joyqueue.service.BrokerMessageService;
+import io.chubao.joyqueue.service.BrokerMonitorService;
+import io.chubao.joyqueue.service.BrokerService;
+import io.chubao.joyqueue.service.BrokerTopicMonitorService;
+import io.chubao.joyqueue.service.CoordinatorMonitorService;
+import io.chubao.joyqueue.util.NullUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,6 +67,9 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
 
     @Value
     private BrokerTopicMonitorService brokerTopicMonitorService;
+
+    @Value
+    private BrokerService brokerService;
 
     @Override
     public Response execute() throws Exception {
@@ -370,6 +375,30 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
             return Responses.success(brokerStartupInfo);
         } catch (Exception e) {
             logger.error("query broker start info error.", e);
+            return Responses.error(ErrorCode.NoTipError.getCode(), ErrorCode.NoTipError.getStatus(), e.getMessage());
+        }
+    }
+
+    /**
+     * broker启动信息
+     * @param brokerId
+     * @return
+     */
+    @Path("findBrokerMetadata")
+    public Response findBrokerMetadata(@QueryParam("brokerId") Long brokerId, @QueryParam("topicFullName") String topicFullName,
+                                       @QueryParam("group") Integer group) throws Exception {
+        io.chubao.joyqueue.model.domain.Broker broker = brokerService.findById(brokerId);
+        if (broker == null) {
+            String msg = String.format("can not find broker with id %s", brokerId);
+            logger.error(msg);
+            return Responses.error(ErrorCode.NoTipError.getCode(), ErrorCode.NoTipError.getStatus(), msg);
+        }
+
+        try {
+            BrokerMetadata brokerMetadata = brokerMonitorService.findBrokerMetadata(broker, topicFullName, group);
+            return Responses.success(brokerMetadata);
+        } catch (Exception e) {
+            logger.error("query broker metadata error.", e);
             return Responses.error(ErrorCode.NoTipError.getCode(), ErrorCode.NoTipError.getStatus(), e.getMessage());
         }
     }

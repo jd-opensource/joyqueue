@@ -15,27 +15,32 @@
  */
 package io.chubao.joyqueue.handler.routing.command.application;
 
-import io.chubao.joyqueue.handler.annotation.PageQuery;
-import io.chubao.joyqueue.handler.error.ConfigException;
-import io.chubao.joyqueue.handler.error.ErrorCode;
-import io.chubao.joyqueue.handler.routing.command.CommandSupport;
-import io.chubao.joyqueue.model.domain.Application;
-import io.chubao.joyqueue.model.domain.ApplicationUser;
-import io.chubao.joyqueue.model.domain.Identity;
-import io.chubao.joyqueue.model.domain.User;
-import io.chubao.joyqueue.model.QPageQuery;
-import io.chubao.joyqueue.model.query.QUser;
-import io.chubao.joyqueue.service.UserService;
-import io.chubao.joyqueue.sync.SyncService;
-import com.jd.laf.web.vertx.annotation.Body;
 import com.jd.laf.binding.annotation.Value;
+import com.jd.laf.web.vertx.annotation.Body;
 import com.jd.laf.web.vertx.annotation.Path;
 import com.jd.laf.web.vertx.annotation.QueryParam;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
+import io.chubao.joyqueue.handler.annotation.PageQuery;
+import io.chubao.joyqueue.handler.error.ConfigException;
+import io.chubao.joyqueue.handler.error.ErrorCode;
+import io.chubao.joyqueue.handler.routing.command.CommandSupport;
+import io.chubao.joyqueue.model.QPageQuery;
+import io.chubao.joyqueue.model.domain.Application;
+import io.chubao.joyqueue.model.domain.ApplicationUser;
+import io.chubao.joyqueue.model.domain.BaseModel;
+import io.chubao.joyqueue.model.domain.Identity;
+import io.chubao.joyqueue.model.domain.User;
+import io.chubao.joyqueue.model.query.QUser;
+import io.chubao.joyqueue.service.ApplicationUserService;
+import io.chubao.joyqueue.service.UserService;
+import io.chubao.joyqueue.sync.SyncService;
+
+import java.util.Date;
 
 import static io.chubao.joyqueue.handler.Constants.APPLICATION;
 import static io.chubao.joyqueue.handler.Constants.APP_ID;
+import static io.chubao.joyqueue.handler.Constants.USER_ID;
 
 
 /**
@@ -48,6 +53,8 @@ public class ApplicationUserCommand extends CommandSupport<ApplicationUser, User
     protected UserService userService;
     @Value(nullable = false)
     protected SyncService syncService;
+    @Value(nullable = false)
+    protected ApplicationUserService applicationUserService;
     @Value(APPLICATION)
     protected Application application;
 
@@ -76,8 +83,8 @@ public class ApplicationUserCommand extends CommandSupport<ApplicationUser, User
 //            user = syncService.addOrUpdateUser(info);
         }
         applicationUser.setUser(user.identity());
-        //3.保存appUser
-        int count = userService.addAppUser(applicationUser);
+        // 3. 保存appUser
+        int count = applicationUserService.add(applicationUser);
         if (count <= 0) {
             throw new ConfigException(addErrorCode());
         }
@@ -95,6 +102,16 @@ public class ApplicationUserCommand extends CommandSupport<ApplicationUser, User
             qPageQuery.getQuery().setAppId(appId);
         }
         return super.pageQuery(qPageQuery);
+    }
+
+    @Path("delete")
+    public Response delete(@QueryParam(APP_ID) Long appId, @QueryParam(USER_ID) Long userId) throws Exception {
+        ApplicationUser appUser = service.findAppUserByAppIdAndUserId(appId, userId);
+        appUser.setStatus(BaseModel.DELETED);
+        appUser.setUpdateBy(operator);
+        appUser.setUpdateTime(new Date());
+        applicationUserService.deleteById(appUser.getId());
+        return Responses.success();
     }
 
 }

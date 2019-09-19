@@ -9,6 +9,7 @@ import io.chubao.joyqueue.toolkit.config.PropertySupplier;
 import io.chubao.joyqueue.toolkit.config.PropertySupplierAware;
 import io.chubao.joyqueue.toolkit.service.Service;
 import io.journalkeeper.core.api.RaftServer;
+import io.journalkeeper.core.server.AbstractServer;
 import io.journalkeeper.core.server.Server;
 import io.journalkeeper.sql.client.SQLClient;
 import io.journalkeeper.sql.client.SQLClientAccessPoint;
@@ -17,6 +18,8 @@ import io.journalkeeper.sql.client.support.DefaultSQLOperator;
 import io.journalkeeper.sql.server.SQLServer;
 import io.journalkeeper.sql.server.SQLServerAccessPoint;
 import io.journalkeeper.sql.state.config.SQLConfigs;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.util.List;
@@ -29,6 +32,8 @@ import java.util.concurrent.TimeUnit;
  * date: 2019/8/12
  */
 public class JournalkeeperInternalServiceProvider extends Service implements InternalServiceProvider, PropertySupplierAware {
+
+    protected static final Logger logger = LoggerFactory.getLogger(JournalkeeperInternalServiceProvider.class);
 
     private PropertySupplier propertySupplier;
     private JournalkeeperConfig config;
@@ -48,6 +53,8 @@ public class JournalkeeperInternalServiceProvider extends Service implements Int
     protected void validate() throws Exception {
         Properties journalkeeperProperties = convertProperties(config, propertySupplier.getProperties());
         List<URI> nodes = convertNodeUri(config.getLocal(), config.getNodes(), config.getPort());
+
+        logger.info("nodes: {}", nodes);
 
         if (Server.Roll.VOTER.name().equals(config.getRole())
                 || RaftServer.Roll.OBSERVER.name().equals(config.getRole())) {
@@ -73,13 +80,13 @@ public class JournalkeeperInternalServiceProvider extends Service implements Int
             }
         }
 
-        result.setProperty(Server.Config.SNAPSHOT_STEP_KEY, String.valueOf(config.getSnapshotStep()));
-        result.setProperty(Server.Config.RPC_TIMEOUT_MS_KEY, String.valueOf(config.getRpcTimeout()));
-        result.setProperty(Server.Config.FLUSH_INTERVAL_MS_KEY, String.valueOf(config.getFlushInterval()));
-        result.setProperty(Server.Config.WORKING_DIR_KEY, String.valueOf(config.getWorkingDir()));
-        result.setProperty(Server.Config.GET_STATE_BATCH_SIZE_KEY, String.valueOf(config.getStateBatchSize()));
-        result.setProperty(Server.Config.ENABLE_METRIC_KEY, String.valueOf(config.getMetricEnable()));
-        result.setProperty(Server.Config.PRINT_METRIC_INTERVAL_SEC_KEY, String.valueOf(config.getMetricPrintInterval()));
+        result.setProperty(AbstractServer.Config.SNAPSHOT_STEP_KEY, String.valueOf(config.getSnapshotStep()));
+        result.setProperty(AbstractServer.Config.RPC_TIMEOUT_MS_KEY, String.valueOf(config.getRpcTimeout()));
+        result.setProperty(AbstractServer.Config.FLUSH_INTERVAL_MS_KEY, String.valueOf(config.getFlushInterval()));
+        result.setProperty(AbstractServer.Config.WORKING_DIR_KEY, String.valueOf(config.getWorkingDir()));
+        result.setProperty(AbstractServer.Config.GET_STATE_BATCH_SIZE_KEY, String.valueOf(config.getStateBatchSize()));
+        result.setProperty(AbstractServer.Config.ENABLE_METRIC_KEY, String.valueOf(config.getMetricEnable()));
+        result.setProperty(AbstractServer.Config.PRINT_METRIC_INTERVAL_SEC_KEY, String.valueOf(config.getMetricPrintInterval()));
         result.setProperty(SQLConfigs.INIT_FILE, config.getInitFile());
         return result;
     }
@@ -88,6 +95,9 @@ public class JournalkeeperInternalServiceProvider extends Service implements Int
         List<URI> nodesUri = Lists.newArrayList();
         nodesUri.add(URI.create(String.format("journalkeeper://%s:%s", local, port)));
         for (String node : nodes) {
+            if (local.equals(node)) {
+                continue;
+            }
             nodesUri.add(URI.create(String.format("journalkeeper://%s:%s", node, port)));
         }
         return nodesUri;

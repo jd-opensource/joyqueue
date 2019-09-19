@@ -17,14 +17,23 @@ package io.chubao.joyqueue.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import io.chubao.joyqueue.convert.CodeConverter;
+import io.chubao.joyqueue.model.ListQuery;
+import io.chubao.joyqueue.model.domain.AppName;
+import io.chubao.joyqueue.model.domain.Application;
 import io.chubao.joyqueue.model.domain.Consumer;
 import io.chubao.joyqueue.model.domain.Identity;
 import io.chubao.joyqueue.model.domain.Topic;
+import io.chubao.joyqueue.model.domain.User;
+import io.chubao.joyqueue.model.query.QApplication;
+import io.chubao.joyqueue.model.query.QConsumer;
 import io.chubao.joyqueue.nsr.ConsumerNameServerService;
 import io.chubao.joyqueue.nsr.TopicNameServerService;
 import io.chubao.joyqueue.service.ApplicationService;
 import io.chubao.joyqueue.service.ConsumerService;
+import io.chubao.joyqueue.util.LocalSession;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +43,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service("consumerService")
 public class ConsumerServiceImpl  implements ConsumerService {
@@ -136,6 +146,30 @@ public class ConsumerServiceImpl  implements ConsumerService {
         }
     }
 
+    @Override
+    public List<String> findAppsByTopic(String topic) throws Exception {
+        User user = LocalSession.getSession().getUser();
+        QConsumer query = new QConsumer(new Topic(topic));
+        if (user.getRole() == User.UserRole.NORMAL.value()) {
+            QApplication qApplication = new QApplication();
+            qApplication.setUserId(user.getId());
+            qApplication.setAdmin(false);
+            List<Application> applicationList = applicationService.findByQuery(new ListQuery<>(qApplication));
+            if (applicationList == null || applicationList.size() <=0 ) return Lists.newArrayList();
+            List<String> appCodes = applicationList.stream().map(application -> application.getCode()).collect(Collectors.toList());
+            query.setAppList(appCodes);
+        }
+        List<Consumer> consumers = Lists.newLinkedList();
+        for (String app : query.getAppList()) {
+            List appConsumers = consumerNameServerService.findByApp(app);
+            if (CollectionUtils.isNotEmpty(appConsumers)) {
+                consumers.addAll(appConsumers);
+            }
+        }
+
+        List<String> apps = consumers.stream().map(m-> AppName.parse(m.getApp().getCode(),m.getSubscribeGroup()).getFullName()).collect(Collectors.toList());
+        return apps;
+    }
 
     private void checkArgument(Consumer consumer) {
         Preconditions.checkArgument(consumer != null && consumer.getId() != null, "invalidate consumer arg.");
