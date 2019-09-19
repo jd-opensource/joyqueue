@@ -39,6 +39,7 @@ import io.chubao.joyqueue.nsr.event.UpdatePartitionGroupEvent;
 import io.chubao.joyqueue.toolkit.concurrent.EventListener;
 import io.chubao.joyqueue.toolkit.network.IpUtil;
 import io.chubao.joyqueue.toolkit.service.Service;
+import io.chubao.joyqueue.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -116,6 +117,13 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
     }
 
     @Override
+    public ConsumerStat getConsumerStat(String topic, String app) {
+        TopicStat topicStat = brokerStat.getOrCreateTopicStat(topic);
+        AppStat appStat = topicStat.getOrCreateAppStat(app);
+        return appStat.getConsumerStat();
+    }
+
+    @Override
     public void onGetMessage(String topic, String app, int partitionGroup, short partition, long count, long size, double time) {
         if (!config.isEnable()) {
             return;
@@ -138,6 +146,19 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
 //            partitionGroupStat.getDeQueueStat().mark(time, size, count);
 //            partitionStat.getDeQueueStat().mark(time, size, count);
         brokerStat.getDeQueueStat().mark(time, size, count);
+    }
+
+    @Override
+    public void onAckMessage(String topic, String app, int partitionGroup, short partition) {
+        if (!config.isEnable()) {
+            return;
+        }
+        brokerStat.getOrCreateTopicStat(topic).
+                getOrCreateAppStat(app)
+                .getConsumerStat()
+                .getOrCreatePartitionGroupStat(partitionGroup).
+                getOrCreatePartitionStat(partition).
+                lastAckTime(SystemClock.now());
     }
 
     @Override

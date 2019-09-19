@@ -79,7 +79,9 @@ public class AppendEntriesRequestHandler implements CommandHandler, Type {
                     JoyQueueCode.CT_MESSAGE_BODY_NULL.getCode());
         }
 
-        logger.debug("Receive append entries request {} from {}", request, transport.remoteAddress());
+        if(logger.isDebugEnabled()){
+            logger.debug("Receive append entries request {} from {}", request, transport.remoteAddress());
+        }
 
         try {
             LeaderElection leaderElection = electionManager.getLeaderElection(request.getTopic(),

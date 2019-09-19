@@ -59,12 +59,15 @@ public class ArchiveConfig {
         }
     }
 
-    public int getWriteBatchNum() {
-        return PropertySupplier.getValue(propertySupplier, ArchiveConfigKey.WRITE_BATCH_NUM);
+    public int getConsumeBatchNum() {
+        return PropertySupplier.getValue(propertySupplier, ArchiveConfigKey.CONSUME_BATCH_NUM);
+    }
+    public int getConsumeWriteDelay() {
+        return PropertySupplier.getValue(propertySupplier, ArchiveConfigKey.CONSUME_WRITE_DELAY);
     }
 
-    public int getReadBatchNum() {
-        return PropertySupplier.getValue(propertySupplier, ArchiveConfigKey.READ_BATCH_NUM);
+    public int getProduceBatchNum() {
+        return PropertySupplier.getValue(propertySupplier, ArchiveConfigKey.PRODUCE_BATCH_NUM);
     }
 
     public int getLogQueueSize() {

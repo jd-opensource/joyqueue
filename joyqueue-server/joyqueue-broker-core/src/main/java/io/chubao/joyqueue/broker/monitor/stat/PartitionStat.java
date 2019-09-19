@@ -15,6 +15,8 @@
  */
 package io.chubao.joyqueue.broker.monitor.stat;
 
+import io.chubao.joyqueue.toolkit.time.SystemClock;
+
 import java.io.Serializable;
 
 /**
@@ -32,10 +34,31 @@ public class PartitionStat implements Serializable {
     private EnQueueStat enQueueStat = new EnQueueStat();
     private DeQueueStat deQueueStat = new DeQueueStat();
 
+    //最后拉取时间
+    private long lastPullTime = SystemClock.now();
+    //最后应答时间
+    private long lastAckTime = lastPullTime;
+
     public PartitionStat(String topic, String app, short partition) {
         this.topic = topic;
         this.app = app;
         this.partition = partition;
+    }
+
+    public long getLastPullTime() {
+        return lastPullTime;
+    }
+
+    public long getLastAckTime() {
+        return lastAckTime;
+    }
+
+    public void lastPullTime(long lastPullTime) {
+        this.lastPullTime = lastPullTime;
+    }
+
+    public void lastAckTime(long lastAckTime){
+        this.lastAckTime = lastAckTime;
     }
 
     public String getTopic() {

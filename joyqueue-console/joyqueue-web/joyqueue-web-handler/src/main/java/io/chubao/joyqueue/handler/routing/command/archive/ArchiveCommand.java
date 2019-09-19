@@ -106,7 +106,7 @@ public class ArchiveCommand implements Command<Response>, Poolable {
             return Responses.error(HTTP_BAD_REQUEST,"topic,sendTime,businessId,messageId 不能为空");
         }
         SendLog sendLog = archiveService.findSendLog(archive.getTopic(),archive.getSendTime(),archive.getBusinessId(),archive.getMessageId());
-        retryService.add(convertMessageLog(sendLog));
+        retryService.add(convertMessageLog(sendLog,archive.getApp()));
         return Responses.success();
     }
 
@@ -180,13 +180,13 @@ public class ArchiveCommand implements Command<Response>, Poolable {
         return builder.toString();
     }
 
-    private RetryMessageModel convertMessageLog(final SendLog sendLog) throws Exception {
+    private RetryMessageModel convertMessageLog(final SendLog sendLog,String app) throws Exception {
         //sendLog 转brokermessage
 //        BrokerMessage brokerMessage = brokerMessageConvert(sendLog);
 //        int size = Serializer.sizeOf(brokerMessage);
 //        ByteBuffer byteBuffer = ByteBuffer.allocate(size);
 //        Serializer.write(brokerMessage, byteBuffer,size);
-        RetryMessageModel retry = retryConvert(sendLog);
+        RetryMessageModel retry = retryConvert(sendLog,app);
 //        retry.setBrokerMessage(byteBuffer.array());
         retry.setBrokerMessage(sendLog.getMessageBody());
         return retry;
@@ -205,9 +205,9 @@ public class ArchiveCommand implements Command<Response>, Poolable {
 //        return brokerMessage;
 //    }
 
-    private RetryMessageModel retryConvert(final SendLog sendLog){
+    private RetryMessageModel retryConvert(final SendLog sendLog,String app){
         RetryMessageModel retry = new RetryMessageModel();
-        retry.setApp(sendLog.getApp());
+        retry.setApp(app);
         retry.setTopic(sendLog.getTopic());
         retry.setBusinessId(sendLog.getBusinessId());
         retry.setPartition((short) 255);

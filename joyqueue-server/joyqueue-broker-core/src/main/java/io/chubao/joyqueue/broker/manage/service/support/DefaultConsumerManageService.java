@@ -19,7 +19,8 @@ import com.google.common.collect.Lists;
 import io.chubao.joyqueue.broker.cluster.ClusterManager;
 import io.chubao.joyqueue.broker.consumer.Consume;
 import io.chubao.joyqueue.broker.manage.service.ConsumerManageService;
-import io.chubao.joyqueue.domain.TopicName;
+import io.chubao.joyqueue.broker.monitor.ConsumerMonitor;
+import io.chubao.joyqueue.broker.monitor.stat.PartitionStat;
 import io.chubao.joyqueue.exception.JoyQueueException;
 import io.chubao.joyqueue.monitor.PartitionAckMonitorInfo;
 import io.chubao.joyqueue.network.session.Consumer;
@@ -42,12 +43,15 @@ public class DefaultConsumerManageService implements ConsumerManageService {
     private StoreManagementService storeManagementService;
     private StoreService storeService;
     private ClusterManager clusterManager;
+    private ConsumerMonitor consumerMonitor;
 
-    public DefaultConsumerManageService(Consume consume, StoreManagementService storeManagementService, StoreService storeService, ClusterManager clusterManager) {
+    public DefaultConsumerManageService(Consume consume, StoreManagementService storeManagementService, StoreService storeService,
+                                        ClusterManager clusterManager,ConsumerMonitor consumerMonitor) {
         this.consume = consume;
         this.storeManagementService = storeManagementService;
         this.storeService = storeService;
         this.clusterManager = clusterManager;
+        this.consumerMonitor = consumerMonitor;
     }
 
     @Override
@@ -91,8 +95,9 @@ public class DefaultConsumerManageService implements ConsumerManageService {
                     continue;
                 }
                 long index = consume.getAckIndex(consumer, partitionMetric.getPartition());
-                long lastAckTime = consume.getLastAckTimeByPartition(TopicName.parse(consumer.getTopic()), consumer.getApp(), partitionMetric.getPartition());
-                long lastPullTime = consume.getLastPullTimeByPartition(TopicName.parse(consumer.getTopic()), consumer.getApp(), partitionMetric.getPartition());
+                PartitionStat partitionStat = consumerMonitor.getConsumerStat(consumer.getTopic(), consumer.getApp()).getPartitionStat(partitionMetric.getPartition());
+                long lastAckTime = partitionStat.getLastAckTime();
+                long lastPullTime = partitionStat.getLastPullTime();
                 result.add(new PartitionAckMonitorInfo(partitionMetric.getPartition(), index, lastPullTime, lastAckTime, partitionMetric.getLeftIndex(), partitionMetric.getRightIndex()));
             }
         }

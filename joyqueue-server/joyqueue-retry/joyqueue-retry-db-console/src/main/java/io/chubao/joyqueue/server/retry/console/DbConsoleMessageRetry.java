@@ -80,7 +80,7 @@ public class DbConsoleMessageRetry implements ConsoleMessageRetry<Long> {
         return isStartFlag;
     }
 
-    private static final String GET_BYID = "select * from message_retry where id = ?";
+    private static final String GET_BYID = "select * from message_retry where id = ? and topic = ?";
     private static final String QUERY_SQL = "select * from message_retry where topic = ? and app = ? and status = ? ";
     private static final String COUNT_SQL = "select count(*) from message_retry where topic = ? and app = ? and status = ? ";
 
@@ -136,7 +136,7 @@ public class DbConsoleMessageRetry implements ConsoleMessageRetry<Long> {
         }
     }
     @Override
-    public ConsumeRetry getConsumeRetryById(Long id) throws JoyQueueException {
+    public ConsumeRetry getConsumeRetryById(Long id,String topic) throws JoyQueueException {
 
         try {
             ConsumeRetry consumeRetry = DaoUtil.queryObject(dataSource, GET_BYID, new DaoUtil.QueryCallback<ConsumeRetry>() {
@@ -168,6 +168,7 @@ public class DbConsoleMessageRetry implements ConsoleMessageRetry<Long> {
                 @Override
                 public void before(PreparedStatement statement) throws Exception {
                     statement.setLong(1, id);
+                    statement.setString(2,topic);
                 }
             });
             return consumeRetry;

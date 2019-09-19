@@ -23,13 +23,14 @@ import io.chubao.joyqueue.toolkit.config.PropertyDef;
  * Created by chengzhiliang on 2018/12/6.
  */
 public enum ArchiveConfigKey implements PropertyDef {
-    WRITE_BATCH_NUM("archive.write.batch.num", 1000, Type.INT),
-    READ_BATCH_NUM("archive.read.batch.num", 1000, Type.INT),
-    LOG_QUEUE_SIZE("archive.send.log.queue.size", 10000, Type.INT),
+    CONSUME_BATCH_NUM("archive.consume.batch.num", 1000, Type.INT),
+    CONSUME_WRITE_DELAY("archive.consume.write.delay", 1, Type.INT),
+    PRODUCE_BATCH_NUM("archive.produce.batch.num", 10, Type.INT),
+    LOG_QUEUE_SIZE("archive.send.log.queue.size", 1000, Type.INT),
     WRITE_THREAD_NUM("archive.thread.num", 5, Type.INT),
     ARCHIVE_SWITCH("archive.switch", true, Type.BOOLEAN),
     ARCHIVE_THREAD_POOL_QUEUE_SIZE("archive.thread.pool.queue.size", 10, Type.INT),
-    ARCHIVE_STORE_NAMESPACE("archive.store.namespace", "joyqueue", Type.STRING);
+    ARCHIVE_STORE_NAMESPACE("archive.store.namespace", "journalq", Type.STRING);
 
     private String name;
     private Object value;

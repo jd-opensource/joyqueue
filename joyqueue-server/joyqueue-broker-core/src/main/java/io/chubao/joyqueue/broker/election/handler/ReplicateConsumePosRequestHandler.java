@@ -15,22 +15,26 @@
  */
 package io.chubao.joyqueue.broker.election.handler;
 
+import com.google.common.base.Preconditions;
+import io.chubao.joyqueue.broker.BrokerContext;
 import io.chubao.joyqueue.broker.consumer.Consume;
+import io.chubao.joyqueue.broker.consumer.model.ConsumePartition;
+import io.chubao.joyqueue.broker.consumer.position.model.Position;
 import io.chubao.joyqueue.broker.election.ElectionConfig;
 import io.chubao.joyqueue.broker.election.command.ReplicateConsumePosRequest;
 import io.chubao.joyqueue.broker.election.command.ReplicateConsumePosResponse;
-import io.chubao.joyqueue.broker.BrokerContext;
+import io.chubao.joyqueue.network.command.CommandType;
+import io.chubao.joyqueue.network.transport.Transport;
 import io.chubao.joyqueue.network.transport.codec.JoyQueueHeader;
 import io.chubao.joyqueue.network.transport.command.Command;
-import io.chubao.joyqueue.network.command.CommandType;
 import io.chubao.joyqueue.network.transport.command.Direction;
 import io.chubao.joyqueue.network.transport.command.Type;
 import io.chubao.joyqueue.network.transport.command.handler.CommandHandler;
-import io.chubao.joyqueue.network.transport.Transport;
 import io.chubao.joyqueue.network.transport.exception.TransportException;
-import com.google.common.base.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
 
 /**
  * author: zhuduohui
@@ -65,7 +69,7 @@ public class ReplicateConsumePosRequestHandler implements CommandHandler, Type {
         }
 
         ReplicateConsumePosRequest request = (ReplicateConsumePosRequest)command.getPayload();
-        boolean success;
+        boolean success=false;
         JoyQueueHeader header = new JoyQueueHeader(Direction.RESPONSE, CommandType.REPLICATE_CONSUME_POS_RESPONSE);
         ReplicateConsumePosResponse response = new ReplicateConsumePosResponse(false);
 
@@ -79,7 +83,8 @@ public class ReplicateConsumePosRequestHandler implements CommandHandler, Type {
         }
 
         try {
-            success = consume.setConsumeInfo(request.getConsumePositions());
+            Map<ConsumePartition, Position> consumePositions = request.getConsumePositions();
+            consume.setConsumePosition(consumePositions);
             response.setSuccess(success);
         } catch (Exception e) {
             logger.warn("Set consume info {} fail", request.getConsumePositions(), e);

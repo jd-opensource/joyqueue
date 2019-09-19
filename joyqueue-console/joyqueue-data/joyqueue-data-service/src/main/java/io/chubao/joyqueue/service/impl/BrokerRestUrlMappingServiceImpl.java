@@ -73,6 +73,7 @@ public class BrokerRestUrlMappingServiceImpl implements BrokerRestUrlMappingServ
     private String getTopicAppPartitionIndexByTimePath="/manage/topic/%s/app/%s/partition/%s/ackByTime?timestamp=%s";
     /** topic */
     private String topicPartitionGroupsMonitorPath ="/monitor/topic/%s/app/%s/partitionGroups";
+    private String topicPartitionGroupMetadataPath="/monitor/topic/%s/metadata?isCluster=true";
 
     /** partition group*/
     private String partitionGroupCoordinatorInfoMonitorPath="/monitor/coordinator/group/%s/detail"; // groupId

@@ -50,6 +50,15 @@ public class Format {
         return NumberFormat.getNumberInstance(Locale.US).format(position);
     }
 
+    public static String formatTraffic(long size) {
+        if (size <= 0) {
+            return "0";
+        }
+        final String[] units = new String[]{"B", "kB", "MB", "GB", "TB"};
+        int digitGroups = (int) (Math.log10(size) / Math.log10(1024));
+        return new DecimalFormat("#,##0.#").format(size / Math.pow(1024, digitGroups)) + " " + units[digitGroups];
+    }
+
     /**
      * copied from https://stackoverflow.com/questions/3263892/format-file-size-as-mb-gb-etc/5599842#5599842
      */

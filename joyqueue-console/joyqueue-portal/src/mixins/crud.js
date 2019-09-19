@@ -61,7 +61,7 @@ export default {
         },
         query: {}
       }
-      for (var key in this.searchData) {
+      for (let key in this.searchData) {
         if (this.searchData.hasOwnProperty(key)) {
           obj.query[key] = this.searchData[key]
         }
@@ -186,10 +186,13 @@ export default {
         this.$Message.success(successMsg)
         this.getList()
       } else if (data.code === this.$store.getters.validationCode) { // invalid inputs
+        console.log(1)
         let errors = (data.message || '').split('|')
-        if (!errors || errors.length < 2) {
+        if (!errors || errors.length === 0) {
           this.$Message.error(errors || errorMsg)
-        } else {
+        } else if (errors.length === 1) {
+          this.$Message.error(errors[0] || errorMsg)
+        } else if (errors.length === 2) {
           let error = {}
           errors[0].split(',').forEach(field => {
             error[field] = errors[1]

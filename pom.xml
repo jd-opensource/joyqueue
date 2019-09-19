@@ -835,6 +835,7 @@
                                 <exclude>src/main/resources/**</exclude>
                                 <exclude>**/node_modules/**</exclude>
                                 <exclude>**/joyqueue-portal/**</exclude>
+                                <exclude>**/joyqueue-portal/static/**</exclude>
                                 <exclude>**/joyqueue-portal/node/**</exclude>
                                 <exclude>**/*.vue</exclude>
                                 <exclude>**/*.js</exclude>

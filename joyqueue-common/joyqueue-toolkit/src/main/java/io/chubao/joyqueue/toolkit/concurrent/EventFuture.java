@@ -116,14 +116,13 @@ public class EventFuture<R> implements Future<R>,EventListener<R>{
      */
     @Override
     public R get() throws InterruptedException {
-        if(!done) {
-            lock.lock();
-            try {
+        lock.lock();
+        try {
+            if(!done) {
                 condition.await();
-            }finally {
-                lock.unlock();
             }
-
+        }finally {
+            lock.unlock();
         }
         return result;
     }
@@ -135,23 +134,22 @@ public class EventFuture<R> implements Future<R>,EventListener<R>{
      * @param timeout the maximum time to wait
      * @param unit    the time unit of the timeout argument
      * @return the computed result
-     * @throws java.util.concurrent.CancellationException if the computation was cancelled
      * @throws InterruptedException  if the current thread was interrupted
      *                               while waiting
      */
     @Override
     public R get(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException {
-        if(!done) {
-            lock.lock();
-            try {
-                if(!condition.await(timeout, unit)) {
+        lock.lock();
+        try {
+            if(!done) {
+                if (!condition.await(timeout, unit)) {
                     throw new TimeoutException();
                 }
-            }finally {
-                lock.unlock();
             }
-
+        }finally {
+            lock.unlock();
         }
+
         return result;
     }
 }

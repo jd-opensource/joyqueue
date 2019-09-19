@@ -136,6 +136,23 @@ public class ConsumerServiceImpl  implements ConsumerService {
         }
     }
 
+    @Override
+    public List<String> findAppsByTopic(String topic) throws Exception {
+        User user = LocalSession.getSession().getUser();
+        QConsumer query = new QConsumer(new Topic(topic));
+        if (user.getRole() == User.UserRole.NORMAL.value()) {
+            QApplication qApplication = new QApplication();
+            qApplication.setUserId(user.getId());
+            qApplication.setAdmin(false);
+            List<Application> applicationList = applicationService.findByQuery(new ListQuery<>(qApplication));
+            if (applicationList == null || applicationList.size() <=0 ) return Lists.newArrayList();
+            List<String> appCodes = applicationList.stream().map(application -> application.getCode()).collect(Collectors.toList());
+            query.setAppList(appCodes);
+        }
+        List<Consumer> consumers = findByQuery(query);
+        List<String> apps = consumers.stream().map(m-> AppName.parse(m.getApp().getCode(),m.getSubscribeGroup()).getFullName()).collect(Collectors.toList());
+        return apps;
+    }
 
     private void checkArgument(Consumer consumer) {
         Preconditions.checkArgument(consumer != null && consumer.getId() != null, "invalidate consumer arg.");

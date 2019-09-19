@@ -32,7 +32,16 @@ import io.chubao.joyqueue.broker.manage.service.support.DefaultMessageManageServ
 import io.chubao.joyqueue.broker.manage.service.support.DefaultStoreManageService;
 import io.chubao.joyqueue.broker.monitor.BrokerMonitor;
 import io.chubao.joyqueue.broker.monitor.service.BrokerMonitorService;
-import io.chubao.joyqueue.broker.monitor.service.support.*;
+import io.chubao.joyqueue.broker.monitor.service.support.DefaultArchiveMonitorService;
+import io.chubao.joyqueue.broker.monitor.service.support.DefaultBrokerMonitorInternalService;
+import io.chubao.joyqueue.broker.monitor.service.support.DefaultBrokerMonitorService;
+import io.chubao.joyqueue.broker.monitor.service.support.DefaultConnectionMonitorService;
+import io.chubao.joyqueue.broker.monitor.service.support.DefaultConsumerMonitorService;
+import io.chubao.joyqueue.broker.monitor.service.support.DefaultCoordinatorMonitorService;
+import io.chubao.joyqueue.broker.monitor.service.support.DefaultMetadataMonitorService;
+import io.chubao.joyqueue.broker.monitor.service.support.DefaultPartitionMonitorService;
+import io.chubao.joyqueue.broker.monitor.service.support.DefaultProducerMonitorService;
+import io.chubao.joyqueue.broker.monitor.service.support.DefaultTopicMonitorService;
 import io.chubao.joyqueue.broker.monitor.stat.BrokerStat;
 import io.chubao.joyqueue.monitor.BrokerStartupInfo;
 import io.chubao.joyqueue.nsr.NameService;
@@ -40,9 +49,9 @@ import io.chubao.joyqueue.server.retry.api.MessageRetry;
 import io.chubao.joyqueue.store.StoreManagementService;
 import io.chubao.joyqueue.store.StoreService;
 import io.chubao.joyqueue.toolkit.service.Service;
+import io.chubao.joyqueue.toolkit.time.SystemClock;
 
 import java.io.InputStream;
-import java.util.Date;
 import java.util.Properties;
 
 /**
@@ -116,7 +125,7 @@ public class BrokerManageServiceManager extends Service {
         ConnectionManageService connectionManageService = new DefaultConnectionManageService(brokerMonitor.getSessionManager());
         DefaultMessageManageService messageManageService = new DefaultMessageManageService(consume, storeManagementService, messageConvertSupport);
         DefaultStoreManageService storeManageService = new DefaultStoreManageService(storeManagementService);
-        DefaultConsumerManageService consumerManageService = new DefaultConsumerManageService(consume, storeManagementService, storeService, clusterManager);
+        DefaultConsumerManageService consumerManageService = new DefaultConsumerManageService(consume, storeManagementService, storeService, clusterManager,brokerMonitor);
         DefaultCoordinatorManageService coordinatorManageService = new DefaultCoordinatorManageService(coordinatorService);
         DefaultElectionManageService electionManageService = new DefaultElectionManageService(electionManager);
         return new DefaultBrokerManageService(connectionManageService, messageManageService, storeManageService, consumerManageService, coordinatorManageService, electionManageService);
@@ -124,7 +133,7 @@ public class BrokerManageServiceManager extends Service {
 
     protected BrokerStartupInfo newBrokerStartInfo() {
         BrokerStartupInfo brokerStartupInfo = new BrokerStartupInfo();
-        brokerStartupInfo.setStartupTime(new Date().getTime());
+        brokerStartupInfo.setStartupTime(SystemClock.now());
 
         String revision = null;
         String commitDate = null;

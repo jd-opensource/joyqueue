@@ -31,4 +31,6 @@ public interface ConsumerService extends NsrService<Consumer, String> {
 
     List<String> findAllSubscribeGroups();
 
+    List<String> findAppsByTopic(String topic) throws Exception;
+
 }

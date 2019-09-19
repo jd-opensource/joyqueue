@@ -55,7 +55,8 @@ const state = {
       summary: 'ct'
     },
     broker: 'broker',
-    host: 'host'
+    host: 'host',
+    partitionGroup: 'pg'
   }
 }
 

@@ -15,6 +15,7 @@
  */
 package io.chubao.joyqueue.repository;
 
+import io.chubao.joyqueue.model.Uniqueable;
 import io.chubao.joyqueue.model.domain.ApplicationUser;
 import io.chubao.joyqueue.model.query.QApplicationUser;
 import org.springframework.stereotype.Repository;
@@ -24,7 +25,7 @@ import org.springframework.stereotype.Repository;
  * Created by chenyanying3 on 2018-10-15
  */
 @Repository
-public interface ApplicationUserRepository extends PageRepository<ApplicationUser, QApplicationUser> {
+public interface ApplicationUserRepository extends PageRepository<ApplicationUser, QApplicationUser>, Uniqueable<ApplicationUser> {
     ApplicationUser findByUserApp(ApplicationUser applicationUser);
     int deleteByAppId(long appId);
 }

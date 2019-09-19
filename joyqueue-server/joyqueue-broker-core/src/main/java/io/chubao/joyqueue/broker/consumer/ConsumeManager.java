@@ -23,7 +23,6 @@ import io.chubao.joyqueue.broker.archive.ConsumeArchiveService;
 import io.chubao.joyqueue.broker.buffer.Serializer;
 import io.chubao.joyqueue.broker.cluster.ClusterManager;
 import io.chubao.joyqueue.broker.consumer.model.ConsumePartition;
-import io.chubao.joyqueue.broker.consumer.model.OwnerShip;
 import io.chubao.joyqueue.broker.consumer.model.PullResult;
 import io.chubao.joyqueue.broker.consumer.position.PositionManager;
 import io.chubao.joyqueue.broker.consumer.position.model.Position;
@@ -50,7 +49,6 @@ import io.chubao.joyqueue.toolkit.lang.Close;
 import io.chubao.joyqueue.toolkit.service.Service;
 import io.chubao.joyqueue.toolkit.time.SystemClock;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,8 +100,6 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
     private ConsumeConfig consumeConfig;
     // 会话管理
     private SessionManager sessionManager;
-    // 最近拉取/应答时间跟踪器
-    private Map<ConsumePartition, /* 最新拉取时间 */ AtomicLong> lastPullTimeTrace = new ConcurrentHashMap<>();
 
     public ConsumeManager() {
         //do nothing
@@ -168,19 +164,19 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
     }
 
     @Override
-    public void start() throws Exception {
-        super.start();
+    protected void doStart() throws Exception {
+        super.doStart();
         partitionConsumption.start();
         concurrentConsumption.start();
         positionManager.start();
-
+        clusterManager.addListener(new SubscriptionListener());
         registerEventListener(clusterManager);
         logger.info("ConsumeManager is started.");
     }
 
     @Override
-    public void stop() {
-        super.stop();
+    protected void doStop() {
+        super.doStop();
         Close.close(partitionConsumption);
         Close.close(messageRetry);
         Close.close(partitionConsumption);
@@ -233,14 +229,13 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
                     pullResult = partitionConsumption.getMessage4Sequence(consumer, sequencePartition, count, ackTimeout);
                     break;
                 case CONCURRENT:
-                    pullResult = concurrentConsumption.getMessage(consumer, count, ackTimeout, accessTimes);
+                    pullResult = concurrentConsumption.getMessage(consumer, count, ackTimeout, accessTimes, consumerPolicy.getConcurrent());
                     break;
                 default:
-                    break;
+                    throw new JoyQueueException(JoyQueueCode.CN_PARAM_ERROR, "invalid consume strategy");
             }
         } catch (JoyQueueException ex) {
             // 连续异常计数
-            partitionManager.increaseSerialErr(new OwnerShip(consumer));
             throw ex;
         }
         // 监控逻辑
@@ -255,11 +250,6 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
             }
             monitor(pullResult, startTime, consumer, group);
         }
-        // 正常返回清除连续出错异常计数
-        partitionManager.clearSerialErr(consumer);
-
-        // 最近拉取消息时间记录
-        markLastPullTime(pullResult.getTopic(), pullResult.getApp(), pullResult.getPartition());
 
         return pullResult;
     }
@@ -343,10 +333,6 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
             PullResult pullResult = partitionConsumption.getMsgByPartitionAndIndex(consumer, group, partition, index, count);
             // 监控逻辑
             monitor(pullResult, startTime, consumer, group);
-
-            // 最近拉取消息时间记录
-            markLastPullTime(pullResult.getTopic(), pullResult.getApp(), pullResult.getPartition());
-
             return pullResult;
         } catch (IOException e) {
             logger.warn(e.getMessage(), e);
@@ -410,7 +396,11 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
         if (isSuccess) {
             // 释放占用
             partitionManager.releasePartition(consumePartition);
+            // 更新最后应答时间
+            brokerMonitor.onAckMessage(consumer.getTopic(), consumer.getApp(), consumePartition.getPartitionGroup(), consumePartition.getPartition());
+            //TODO 归档逻辑放到 handler里可能更合适
             archiveIfNecessary(consumerPolicy, connection, locations);
+
         }
 
         return isSuccess;
@@ -511,7 +501,11 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
         Preconditions.checkArgument(app != null, "app can not be null.");
 //        Preconditions.checkArgument(index > -1, "index can not be negative.");
 
+        Integer partitionGroupId = clusterManager.getPartitionGroupId(TopicName.parse(consumer.getTopic()), partition);
+        Preconditions.checkArgument(partitionGroupId != null, "partitionGroupId can not be null.");
+
         positionManager.updateLastMsgAckIndex(TopicName.parse(topic), app, partition, index);
+        brokerMonitor.onAckMessage(consumer.getTopic(), consumer.getApp(), partitionGroupId, partition);
     }
 
     @Override
@@ -543,21 +537,32 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
     }
 
     @Override
-    public boolean setConsumeInfo(String consumeInfoJson) {
-        if (StringUtils.isEmpty(consumeInfoJson)) {
+    public boolean setConsumePosition(Map<ConsumePartition, Position> consumePositions) {
+        if (consumePositions == null || consumePositions.isEmpty()) {
             return false;
         }
-        return positionManager.setConsumePosition(consumeInfoJson);
+        return positionManager.setConsumePosition(consumePositions);
     }
 
     @Override
-    public String getConsumeInfoByGroup(TopicName topic, String app, int partitionGroup) {
+    public Map<ConsumePartition, Position> getConsumePositionByGroup(TopicName topic, String app, int partitionGroup) {
         List<PartitionGroup> partitionGroupList = clusterManager.getPartitionGroup(topic);
         if (CollectionUtils.isEmpty(partitionGroupList)) {
             return null;
         }
         return positionManager.getConsumePosition(topic, app, partitionGroup);
     }
+
+    @Override
+    public Map<ConsumePartition, Position> getConsumePositionByGroup(TopicName topic, int partitionGroup) {
+        List<PartitionGroup> partitionGroupList = clusterManager.getPartitionGroup(topic);
+        if (CollectionUtils.isEmpty(partitionGroupList)) {
+            return null;
+        }
+        return positionManager.getConsumePosition(topic, partitionGroup);
+    }
+
+
 
     @Override
     public long getMinIndex(Consumer consumer, short partition) {
@@ -573,24 +578,6 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
         Integer partitionGroupId = clusterManager.getPartitionGroupId(TopicName.parse(topic), partition);
         PartitionGroupStore store = storeService.getStore(topic, partitionGroupId);
         return store.getRightIndex(partition);
-    }
-
-    /**
-     * 标记最后一次拉取时间
-     *
-     * @param topic
-     * @param app
-     * @param partition
-     */
-    private void markLastPullTime(String topic, String app, short partition) {
-        ConsumePartition consumePartition = new ConsumePartition(topic, app, partition);
-        AtomicLong lastPullTime = lastPullTimeTrace.get(consumePartition);
-        if (lastPullTime == null) {
-            lastPullTime = new AtomicLong(SystemClock.now());
-            lastPullTimeTrace.put(consumePartition, lastPullTime);
-        } else {
-            lastPullTime.set(SystemClock.now());
-        }
     }
 
     /**
@@ -615,35 +602,24 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
     }
 
     @Override
-    public long getLastPullTimeByPartition(TopicName topic, String app, short partition) {
-        ConsumePartition consumePartition = new ConsumePartition(topic.getFullName(), app, partition);
-        AtomicLong lastPullTime = lastPullTimeTrace.get(consumePartition);
-        AtomicLong lastPullNullTime = lastPullTimeTrace.get(new ConsumePartition(topic.getFullName(), app, (short)-1));
-        if (lastPullTime == null && lastPullNullTime == null) {
-            return -1;
-        }
-        if (lastPullTime == null && lastPullNullTime != null) {
-            return lastPullNullTime.longValue();
-        }
-        if (lastPullTime != null && lastPullNullTime != null && lastPullTime.longValue() < lastPullNullTime.longValue()) {
-            return lastPullNullTime.longValue();
-        }
-        return lastPullTime.get();
-    }
-
-    @Override
-    public long getLastAckTimeByPartition(TopicName topic, String app, short partition) {
-        ConsumePartition consumePartition = new ConsumePartition(topic.getFullName(), app, partition);
-        AtomicLong lastAckTime = positionManager.getLastAckTimeTrace().get(consumePartition);
-        if (lastAckTime == null) {
-            return -1;
-        }
-        return lastAckTime.get();
-    }
-
-    @Override
     public void releasePartition(String topic, String app, short partition) {
         partitionManager.releasePartition(new ConsumePartition(topic, app, partition));
+    }
+
+
+    /**
+     * 监听删除消费者事件，将消费计数器移除
+     */
+    class SubscriptionListener implements EventListener<MetaEvent> {
+
+        @Override
+        public void onEvent(MetaEvent event) {
+            if (event.getEventType() == EventType.REMOVE_CONSUMER) {
+                ConsumerEvent removeConsumerEvent = (ConsumerEvent) event;
+                logger.info("Listen clusterManger. RemoveConsumer, Event:[{}]", removeConsumerEvent);
+                consumeCounter.remove(new Joint(removeConsumerEvent.getTopic().getCode(), removeConsumerEvent.getApp()));
+            }
+        }
     }
 
 }

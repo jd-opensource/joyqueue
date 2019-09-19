@@ -60,11 +60,11 @@ public class DBMessageRetry implements MessageRetry<Long> {
     private static final String QUERY_COUNT_SQL =
             "select count(1) from message_retry where status = " + RetryStatus.RETRY_ING.getValue() + " and topic = ? and app = ?";
     private static final String ERROR_UPDATE_SQL = "update message_retry set retry_time = ?, " +
-            "retry_count = retry_count + 1, update_time = ?, status = ? where id = ? and status = " + RetryStatus.RETRY_ING.getValue();
+            "retry_count = retry_count + 1, update_time = ?, status = ? where topic = ? and app = ? and id = ? and status = " + RetryStatus.RETRY_ING.getValue();
     private static final String EXPIRE_UPDATE_SQL = "update message_retry set status = " + RetryStatus.RETRY_EXPIRE.getValue() + ", " +
-            "update_time = ? where id = ? and status = " + RetryStatus.RETRY_ING.getValue();
+            "update_time = ? where topic = ? and app = ? and id = ? and status = " + RetryStatus.RETRY_ING.getValue();
     private static final String SUCCESS_UPDATE_SQL = "update message_retry set status = " + RetryStatus.RETRY_SUCCESS.getValue() + ", " +
-            "retry_count = retry_count + 1, update_time = ? where id = ? and status = " + RetryStatus.RETRY_ING.getValue();
+            "retry_count = retry_count + 1, update_time = ? where topic = ? and app = ? and id = ? and status = " + RetryStatus.RETRY_ING.getValue();
     private static final String CREATE_SQL = "insert into message_retry (message_id, business_id, topic, app, " +
             "send_time, expire_time, retry_time, retry_count, status, data, exception, create_time, " +
             "update_time) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";

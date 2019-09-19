@@ -15,12 +15,16 @@
  */
 package io.chubao.joyqueue.broker.consumer;
 
+import io.chubao.joyqueue.broker.consumer.model.ConsumePartition;
 import io.chubao.joyqueue.broker.consumer.model.PullResult;
+import io.chubao.joyqueue.broker.consumer.position.model.Position;
 import io.chubao.joyqueue.domain.TopicName;
 import io.chubao.joyqueue.exception.JoyQueueException;
+import io.chubao.joyqueue.message.MessageLocation;
 import io.chubao.joyqueue.network.session.Connection;
 import io.chubao.joyqueue.network.session.Consumer;
-import io.chubao.joyqueue.message.MessageLocation;
+
+import java.util.Map;
 
 /**
  * Created by chengzhiliang on 2018/8/16.
@@ -136,7 +140,7 @@ public interface Consume {
      * @param consumeInfoJson 消息位置信息json字符串
      * @return
      */
-    boolean setConsumeInfo(String consumeInfoJson);
+    boolean setConsumePosition(Map<ConsumePartition, Position> consumeInfoJson);
 
     /**
      * 获取指定主题+应用+分组的消费位置
@@ -145,7 +149,16 @@ public interface Consume {
      * @param app            应用
      * @param partitionGroup 分区分组
      */
-    String getConsumeInfoByGroup(TopicName topic, String app, int partitionGroup);
+    Map<ConsumePartition, Position> getConsumePositionByGroup(TopicName topic, String app, int partitionGroup);
+
+
+    /**
+     * 获取指定主题+分组的消费位置
+     *
+     * @param topic          消费主题
+     * @param partitionGroup 分区分组
+     */
+    Map<ConsumePartition, Position> getConsumePositionByGroup(TopicName topic, int partitionGroup);
 
     /**
      * 获取指定分区最小的消息序号
@@ -164,25 +177,6 @@ public interface Consume {
      * @return
      */
     long getMaxIndex(Consumer consumer, short partition);
-
-    /**
-     * 获取最近一次拉取消息时间
-     *
-     * @param topic
-     * @param app
-     * @param partition
-     * @return
-     */
-    long getLastPullTimeByPartition(TopicName topic, String app, short partition);
-
-    /**
-     * 获取最近一次应答消息时间
-     * @param topic
-     * @param app
-     * @param partition
-     * @return
-     */
-    long getLastAckTimeByPartition(TopicName topic, String app, short partition);
 
     /**
      * 释放分区占用

@@ -42,6 +42,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static io.chubao.joyqueue.handler.Constants.ID;
+import static io.chubao.joyqueue.handler.Constants.TOPIC;
 
 
 public class ConsumerCommand extends NsrCommandSupport<Consumer, ConsumerService, QConsumer> {
@@ -172,6 +173,11 @@ public class ConsumerCommand extends NsrCommandSupport<Consumer, ConsumerService
     @Path("findAllSubscribeGroups")
     public Response findAllSubscribeGroups() throws Exception {
         return Responses.success(service.findAllSubscribeGroups());
+    }
+
+    @Path("findAppsByTopic")
+    public Response findAppsByTopic(@QueryParam(TOPIC)String topic) throws Exception {
+        return Responses.success(service.findAppsByTopic(topic));
     }
 
 }

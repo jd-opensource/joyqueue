@@ -15,26 +15,39 @@
  */
 package io.chubao.joyqueue.handler.routing.command.application;
 
+import com.jd.laf.binding.annotation.Value;
+import com.jd.laf.web.vertx.annotation.Path;
+import com.jd.laf.web.vertx.annotation.QueryParam;
+import com.jd.laf.web.vertx.response.Response;
+import com.jd.laf.web.vertx.response.Responses;
 import io.chubao.joyqueue.handler.annotation.PageQuery;
-import io.chubao.joyqueue.model.ListQuery;
-import io.chubao.joyqueue.model.PageResult;
 import io.chubao.joyqueue.handler.error.ConfigException;
 import io.chubao.joyqueue.handler.error.ErrorCode;
 import io.chubao.joyqueue.handler.routing.command.CommandSupport;
+import io.chubao.joyqueue.model.ListQuery;
+import io.chubao.joyqueue.model.PageResult;
+import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.model.domain.Application;
+import io.chubao.joyqueue.model.domain.Identity;
 import io.chubao.joyqueue.model.domain.TopicUnsubscribedApplication;
 import io.chubao.joyqueue.model.domain.User;
 import io.chubao.joyqueue.model.query.QApplication;
-import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.service.ApplicationService;
-import com.jd.laf.web.vertx.annotation.Path;
-import com.jd.laf.web.vertx.response.Response;
-import com.jd.laf.web.vertx.response.Responses;
+import io.chubao.joyqueue.service.UserService;
+
+import javax.validation.constraints.NotNull;
+
+import static io.chubao.joyqueue.handler.Constants.ID;
+import static io.chubao.joyqueue.handler.Constants.USER_ID;
 
 /**
  * Created by wangxiaofei1 on 2018/10/19.
  */
 public class ApplicationCommand extends CommandSupport<Application,ApplicationService,QApplication> {
+
+    @Value
+    @NotNull
+    protected UserService userService;
 
     @Override
     @Path("search")
@@ -77,5 +90,13 @@ public class ApplicationCommand extends CommandSupport<Application,ApplicationSe
     @Path("findAll")
     public Response findAll() throws Exception {
        return Responses.success(service.findByQuery(new ListQuery<>(new QApplication())));
+    }
+
+    @Path("setOwner")
+    public Response setOwner(@QueryParam(ID) Long id, @QueryParam(USER_ID) Long userId) throws Exception {
+        Application application = service.findById(id);
+        User user = userService.findById(userId);
+        application.setOwner(new Identity(user.getId(), user.getCode()));
+        return Responses.success(service.update(application));
     }
 }

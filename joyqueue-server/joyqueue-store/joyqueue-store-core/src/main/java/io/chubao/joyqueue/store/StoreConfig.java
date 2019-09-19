@@ -90,6 +90,8 @@ public class StoreConfig {
 
     private long maxDirtySize = PartitionGroupStoreManager.Config.DEFAULT_MAX_DIRTY_SIZE;
 
+    private int diskFullRatio = PositioningStore.Config.DEFAULT_DISK_FULL_RATIO;
+
 
     private PropertySupplier propertySupplier;
 
@@ -216,6 +218,14 @@ public class StoreConfig {
 
     public void setPrintMetricIntervalMs(long printMetricIntervalMs) {
         this.printMetricIntervalMs = printMetricIntervalMs;
+    }
+
+    public int getDiskFullRatio() {
+        return PropertySupplier.getValue(propertySupplier, StoreConfigKey.DISK_FULL_RATIO, this.diskFullRatio);
+    }
+
+    public void setDiskFullRatio(int diskFullRatio) {
+        this.diskFullRatio = diskFullRatio;
     }
 }
 

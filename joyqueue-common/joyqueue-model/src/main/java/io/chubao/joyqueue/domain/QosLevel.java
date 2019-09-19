@@ -28,11 +28,13 @@ public enum QosLevel {
      * RECEIVE: Broker收到消息后应答；
      * PERSISTENCE：Broker将消息写入磁盘后应答；
      * REPLICATION：Broker将消息复制到集群大多数节点后应答，默认值；
+     * ALL：REPLICATION && PERSISTENCE；
      */
     ONE_WAY(0),
     RECEIVE(1),
     PERSISTENCE(2),
-    REPLICATION(3);
+    REPLICATION(3),
+    ALL(4);
 
     private int value;
 
@@ -52,6 +54,8 @@ public enum QosLevel {
                 return RECEIVE;
             case 2:
                 return PERSISTENCE;
+            case 4:
+                return ALL;
             default:
                 return REPLICATION;
         }

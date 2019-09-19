@@ -17,8 +17,11 @@ package io.chubao.joyqueue.broker.replication;
 
 import com.google.common.base.Preconditions;
 import io.chubao.joyqueue.broker.consumer.Consume;
+import io.chubao.joyqueue.broker.consumer.model.ConsumePartition;
+import io.chubao.joyqueue.broker.consumer.position.model.Position;
 import io.chubao.joyqueue.broker.election.DefaultElectionNode;
 import io.chubao.joyqueue.broker.election.ElectionConfig;
+import io.chubao.joyqueue.broker.election.ElectionException;
 import io.chubao.joyqueue.broker.election.ElectionNode;
 import io.chubao.joyqueue.broker.election.LeaderElection;
 import io.chubao.joyqueue.broker.election.TopicPartitionGroup;
@@ -31,12 +34,18 @@ import io.chubao.joyqueue.broker.election.command.TimeoutNowResponse;
 import io.chubao.joyqueue.broker.monitor.BrokerMonitor;
 import io.chubao.joyqueue.domain.TopicName;
 import io.chubao.joyqueue.network.command.CommandType;
+import io.chubao.joyqueue.network.event.TransportEvent;
+import io.chubao.joyqueue.network.transport.Transport;
+import io.chubao.joyqueue.network.transport.TransportAttribute;
+import io.chubao.joyqueue.network.transport.TransportClient;
 import io.chubao.joyqueue.network.transport.codec.JoyQueueHeader;
 import io.chubao.joyqueue.network.transport.command.Command;
 import io.chubao.joyqueue.network.transport.command.CommandCallback;
 import io.chubao.joyqueue.network.transport.command.Direction;
 import io.chubao.joyqueue.network.transport.exception.TransportException;
+import io.chubao.joyqueue.network.transport.support.DefaultTransportAttribute;
 import io.chubao.joyqueue.store.replication.ReplicableStore;
+import io.chubao.joyqueue.toolkit.concurrent.EventListener;
 import io.chubao.joyqueue.toolkit.service.Service;
 import io.chubao.joyqueue.toolkit.time.SystemClock;
 import io.chubao.joyqueue.toolkit.validate.annotation.NotNull;
@@ -45,7 +54,10 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.ExecutorService;
@@ -91,6 +103,8 @@ public class ReplicaGroup extends Service {
 
     private Consume consume;
     private BrokerMonitor brokerMonitor;
+    private final ConcurrentMap<String, Transport> sessions = new ConcurrentHashMap<>();
+    private final TransportClient transportClient;
 
     private static final long ONE_SECOND_NANO = 1000 * 1000 * 1000;
     private static final long ONE_MS_NANO     = 1000 * 1000;
@@ -99,7 +113,8 @@ public class ReplicaGroup extends Service {
     ReplicaGroup(TopicPartitionGroup topicPartitionGroup, ReplicationManager replicationManager,
                  ReplicableStore replicableStore, ElectionConfig electionConfig,
                  Consume consume, ExecutorService replicateExecutor, BrokerMonitor brokerMonitor,
-                 List<DefaultElectionNode> allNodes, Set<Integer> learners, int localReplicaId, int leaderId
+                 List<DefaultElectionNode> allNodes, Set<Integer> learners, int localReplicaId, int leaderId,
+                 TransportClient transportClient
     ) {
         Preconditions.checkArgument(electionConfig != null, "election config is null");
         Preconditions.checkArgument(topicPartitionGroup != null, "topic partition group is null");
@@ -108,7 +123,7 @@ public class ReplicaGroup extends Service {
         Preconditions.checkArgument(brokerMonitor != null, "broker monitor is null");
         Preconditions.checkArgument(replicateExecutor != null, "replicate executor is null");
         Preconditions.checkArgument(replicableStore != null, "replicable store is null");
-
+        Preconditions.checkArgument(transportClient !=null, "transport client can not be null");
         this.electionConfig = electionConfig;
         this.topicPartitionGroup = topicPartitionGroup;
         this.replicationManager = replicationManager;
@@ -118,6 +133,7 @@ public class ReplicaGroup extends Service {
         this.brokerMonitor = brokerMonitor;
         this.replicateExecutor = replicateExecutor;
         this.replicableStore = replicableStore;
+        this.transportClient = transportClient;
 
         replicas = allNodes.stream()
                 .map(n -> new Replica(n.getNodeId(), n.getAddress()))
@@ -132,6 +148,8 @@ public class ReplicaGroup extends Service {
     public void doStart() throws Exception {
         super.doStart();
 
+        transportClient.addListener(new ClientEventListener());
+
         replicateResponseQueue = new DelayQueue<>();
 
         replicateThread = new ReplicateThread("ReplicateThread-" + topicPartitionGroup.toString());
@@ -144,7 +162,16 @@ public class ReplicaGroup extends Service {
             replicateThread.interrupt();
             try {
                 Thread.sleep(10);
-            } catch (InterruptedException ignored) {}
+            } catch (InterruptedException ignored) {
+            }
+        }
+
+        if (sessions != null && !sessions.isEmpty()) {
+            for (Transport transport : sessions.values()) {
+                if (transport != null) {
+                    transport.stop();
+                }
+            }
         }
 
         super.doStop();
@@ -156,19 +183,27 @@ public class ReplicaGroup extends Service {
 
     /**
      * 添加节点
+     *
      * @param node 要添加的节点
      */
-    public synchronized void addNode(ElectionNode node) {
-        Replica newReplica = new Replica(node.getNodeId(), node.getAddress());
-        newReplica.nextPosition(replicableStore.rightPosition());
+    public synchronized void addNode(ElectionNode node) throws ElectionException {
+        try {
+            Replica newReplica = new Replica(node.getNodeId(), node.getAddress());
+            //至少复制一个消息，保证没有消息的时候也能将原先的消息复制到slave
+            long nextReplicate = replicableStore.position(replicableStore.rightPosition(), -1);
+            newReplica.nextPosition(nextReplicate);
 
-        replicas.add(newReplica);
+            replicas.add(newReplica);
 
-        replicateResponseQueue.put(new DelayedCommand(ONE_SECOND_NANO, newReplica.replicaId()));
+            replicateResponseQueue.put(new DelayedCommand(ONE_SECOND_NANO, newReplica.replicaId()));
 
-        for (Replica replica : replicas) {
-            logger.info("Partition group {}/node {} add node, replica {}'s next position is {}",
-                    topicPartitionGroup, localReplicaId, replica.replicaId(), replica.nextPosition());
+            for (Replica replica : replicas) {
+                logger.info("Partition group {}/node {} add node, replica {}'s next position is {}",
+                        topicPartitionGroup, localReplicaId, replica.replicaId(), replica.nextPosition());
+            }
+        } catch (Exception e) {
+            logger.error("add node error.", e);
+            throw new ElectionException("add node error.", e);
         }
     }
 
@@ -389,7 +424,7 @@ public class ReplicaGroup extends Service {
                                 topicPartitionGroup, leaderId, request, replica.replicaId(), usTime() - startTimeUs);
                     }
 
-                    replicationManager.sendCommand(replica.getAddress(), new Command(header, request),
+                    this.sendCommand(replica.getAddress(), new Command(header, request),
                             electionConfig.getSendCommandTimeout(),
                             new AppendEntriesRequestCallback(replica, startTimeUs, request.getEntriesLength()));
 
@@ -594,11 +629,11 @@ public class ReplicaGroup extends Service {
         try {
             replicateExecutor.submit(() -> {
                 try {
-
-                    String consumePositions = consume.getConsumeInfoByGroup(TopicName.parse(topicPartitionGroup.getTopic()),
-                            null, topicPartitionGroup.getPartitionGroupId());
+                    long replicateStartTime = SystemClock.now();
+                    Map<ConsumePartition, Position> consumePositions = consume.getConsumePositionByGroup(TopicName.parse(topicPartitionGroup.getTopic()),
+                            topicPartitionGroup.getPartitionGroupId());
                     if (consumePositions == null) {
-                        logger.info("Partition group {}/node {} get consumer info return null",
+                        logger.warn("Partition group {}/node {} get consumer info return null",
                                 topicPartitionGroup, localReplicaId);
                         return;
                     }
@@ -611,12 +646,13 @@ public class ReplicaGroup extends Service {
                                 topicPartitionGroup, localReplicaId, consumePositions, replica.replicaId());
                     }
 
-                    replicationManager.sendCommand(replica.getAddress(), new Command(header, request),
+                    this.sendCommand(replica.getAddress(), new Command(header, request),
                             electionConfig.getSendCommandTimeout(), new ReplicateConsumePosRequestCallback(replica));
 
                     long elapsed = SystemClock.now() - now;
                     if (elapsed > 5) {
-                        logger.info("Finished replicate consume position, topic partition group {}, elapsed {}", topicPartitionGroup.toString(), elapsed);
+                        logger.info("Finished replicate consume position, topic partition group {}, total elapsed {}, process elapsed {} ",
+                                topicPartitionGroup.toString(), elapsed, SystemClock.now() - replicateStartTime);
                     }
                 } catch (Exception e) {
                     logger.warn("Partition group {}/node {} send replicate consume pos message fail",
@@ -922,10 +958,58 @@ public class ReplicaGroup extends Service {
         TimeoutNowRequest request = new TimeoutNowRequest(topicPartitionGroup, currentTerm);
         JoyQueueHeader header = new JoyQueueHeader(Direction.REQUEST, CommandType.RAFT_TIMEOUT_NOW_REQUEST);
 
-        replicationManager.sendCommand(getReplica(transferee).getAddress(), new Command(header, request),
+        sendCommand(getReplica(transferee).getAddress(), new Command(header, request),
                 electionConfig.getSendCommandTimeout(), new TimeoutNowRequestCallback());
     }
 
+    /**
+     * 向目标节点发送命令，采用异步方式
+     * @param address 目标broker地址, ip + ":" + port
+     * @param command 要发送的命令
+     * @throws TransportException
+     */
+    protected void sendCommand(String address, Command command, int timeout, CommandCallback callback) throws TransportException {
+        Transport transport = sessions.get(address);
+        if (transport == null) {
+            synchronized (sessions) {
+                transport = sessions.get(address);
+                if (transport == null) {
+                    logger.info("Replication manager create transport of {}", address);
+
+                    transport = transportClient.createTransport(address);
+                    TransportAttribute attribute = transport.attr();
+                    if (attribute == null) {
+                        attribute = new DefaultTransportAttribute();
+                        transport.attr(attribute);
+                    }
+                    attribute.set("address", address);
+                    sessions.put(address, transport);
+                }
+            }
+        }
+
+        transport.async(command, timeout, callback);
+    }
+
+
+
+    private class ClientEventListener implements EventListener<TransportEvent> {
+        @Override
+        public void onEvent(TransportEvent event) {
+            switch (event.getType()) {
+                case CONNECT:
+                    break;
+                case EXCEPTION:
+                case CLOSE:
+                    TransportAttribute attribute = event.getTransport().attr();
+                    sessions.remove(attribute.get("address"));
+                    logger.info("Replication manager transport of {} closed", (String)attribute.get("address"));
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
 
     private class DelayedCommand implements Delayed {
         private long startTimeNs;

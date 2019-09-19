@@ -15,6 +15,7 @@
  */
 package io.chubao.joyqueue.store;
 
+import io.chubao.joyqueue.store.file.PositioningStore;
 import io.chubao.joyqueue.toolkit.config.PropertyDef;
 
 import static io.chubao.joyqueue.store.PartitionGroupStoreManager.Config.DEFAULT_FLUSH_INTERVAL_MS;
@@ -74,6 +75,8 @@ public enum StoreConfigKey implements PropertyDef {
     FILE_HEADER_SIZE("store.file.header.size", DEFAULT_FILE_HEADER_SIZE, Type.INT),
 
     MAX_DIRTY_SIZE("store.max.dirty.size", DEFAULT_MAX_DIRTY_SIZE, Type.LONG),
+
+    DISK_FULL_RATIO("store.disk.full.ratio", PositioningStore.Config.DEFAULT_DISK_FULL_RATIO, Type.INT),
 
     PRINT_METRIC_INTERVAL_MS("print.metric.interval", StoreConfig.DEFAULT_PRINT_METRIC_INTERVAL_MS, Type.LONG);
 
