@@ -387,7 +387,7 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
     @Path("findBrokerMetadata")
     public Response findBrokerMetadata(@QueryParam("brokerId") Long brokerId, @QueryParam("topicFullName") String topicFullName,
                                        @QueryParam("group") Integer group) throws Exception {
-        io.chubao.joyqueue.model.domain.Broker broker = brokerService.findById(brokerId);
+        io.chubao.joyqueue.model.domain.Broker broker = brokerService.findById(Integer.valueOf(String.valueOf(brokerId)));
         if (broker == null) {
             String msg = String.format("can not find broker with id %s", brokerId);
             logger.error(msg);
