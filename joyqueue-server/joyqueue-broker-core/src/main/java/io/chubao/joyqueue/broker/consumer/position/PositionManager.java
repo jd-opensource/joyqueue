@@ -15,8 +15,6 @@
  */
 package io.chubao.joyqueue.broker.consumer.position;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.TypeReference;
 import com.google.common.base.Preconditions;
 import com.jd.laf.extension.ExtensionManager;
 import io.chubao.joyqueue.broker.cluster.ClusterManager;

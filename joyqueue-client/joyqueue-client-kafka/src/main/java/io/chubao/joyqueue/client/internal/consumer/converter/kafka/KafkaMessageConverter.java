@@ -180,7 +180,7 @@ public class KafkaMessageConverter implements MessageConverter {
         result.setBatch(true);
 
         int headerCount = KafkaBufferUtils.readVarint(buffer);
-        if (headerCount != 0) {
+        if (headerCount > 0) {
             Map<String, String> headers = Maps.newHashMap();
             for (int i = 0; i < headerCount; i++) {
                 String key = new String(KafkaBufferUtils.readVarBytes(buffer), Charsets.UTF_8);

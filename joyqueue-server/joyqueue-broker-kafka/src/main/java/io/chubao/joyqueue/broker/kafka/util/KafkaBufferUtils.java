@@ -204,7 +204,7 @@ public class KafkaBufferUtils {
 
     public static byte[] readBytes(ByteBuffer buffer) {
         int length = buffer.getInt();
-        if (length < 0) {
+        if (length <= 0) {
             return null;
         }
         byte[] result = new byte[length];
@@ -214,7 +214,7 @@ public class KafkaBufferUtils {
 
     public static byte[] readVarBytes(ByteBuffer buffer) {
         int length = readVarint(buffer);
-        if (length < 0) {
+        if (length <= 0) {
             return null;
         }
         byte[] result = new byte[length];

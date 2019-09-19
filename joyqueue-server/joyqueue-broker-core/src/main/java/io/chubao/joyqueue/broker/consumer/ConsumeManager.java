@@ -40,6 +40,7 @@ import io.chubao.joyqueue.message.MessageLocation;
 import io.chubao.joyqueue.network.session.Connection;
 import io.chubao.joyqueue.network.session.Consumer;
 import io.chubao.joyqueue.network.session.Joint;
+import io.chubao.joyqueue.nsr.event.RemoveConsumerEvent;
 import io.chubao.joyqueue.nsr.event.UpdateConsumerEvent;
 import io.chubao.joyqueue.server.retry.api.MessageRetry;
 import io.chubao.joyqueue.store.PartitionGroupStore;
@@ -615,9 +616,9 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
         @Override
         public void onEvent(MetaEvent event) {
             if (event.getEventType() == EventType.REMOVE_CONSUMER) {
-                ConsumerEvent removeConsumerEvent = (ConsumerEvent) event;
+                RemoveConsumerEvent removeConsumerEvent = (RemoveConsumerEvent) event;
                 logger.info("Listen clusterManger. RemoveConsumer, Event:[{}]", removeConsumerEvent);
-                consumeCounter.remove(new Joint(removeConsumerEvent.getTopic().getCode(), removeConsumerEvent.getApp()));
+                consumeCounter.remove(new Joint(removeConsumerEvent.getTopic().getCode(), removeConsumerEvent.getConsumer().getApp()));
             }
         }
     }
