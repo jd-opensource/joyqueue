@@ -18,21 +18,17 @@ package io.chubao.joyqueue.broker.monitor.service.support;
 import io.chubao.joyqueue.broker.coordinator.domain.CoordinatorDetail;
 import io.chubao.joyqueue.broker.coordinator.group.domain.GroupMemberMetadata;
 import io.chubao.joyqueue.broker.coordinator.group.domain.GroupMetadata;
-import io.chubao.joyqueue.broker.monitor.service.ArchiveMonitorService;
-import io.chubao.joyqueue.broker.monitor.service.BrokerMonitorInternalService;
-import io.chubao.joyqueue.broker.monitor.service.BrokerMonitorService;
-import io.chubao.joyqueue.broker.monitor.service.ConnectionMonitorService;
-import io.chubao.joyqueue.broker.monitor.service.ConsumerMonitorService;
-import io.chubao.joyqueue.broker.monitor.service.CoordinatorMonitorService;
-import io.chubao.joyqueue.broker.monitor.service.MetadataMonitorService;
-import io.chubao.joyqueue.broker.monitor.service.PartitionMonitorService;
-import io.chubao.joyqueue.broker.monitor.service.ProducerMonitorService;
-import io.chubao.joyqueue.broker.monitor.service.TopicMonitorService;
+import io.chubao.joyqueue.broker.election.ElectionNode;
+import io.chubao.joyqueue.broker.monitor.service.*;
 import io.chubao.joyqueue.broker.monitor.stat.BrokerStatExt;
+import io.chubao.joyqueue.broker.monitor.stat.JVMStat;
+import io.chubao.joyqueue.broker.monitor.stat.ReplicaLagStat;
+import io.chubao.joyqueue.broker.monitor.stat.ReplicaNodeStat;
 import io.chubao.joyqueue.domain.TopicConfig;
 import io.chubao.joyqueue.model.Pager;
 import io.chubao.joyqueue.monitor.*;
 import io.chubao.joyqueue.response.BooleanResponse;
+import io.chubao.joyqueue.toolkit.vm.GCEventListener;
 
 import java.util.List;
 import java.util.Map;
@@ -228,6 +224,16 @@ public class DefaultBrokerMonitorService implements BrokerMonitorService {
     public Pager<TopicMonitorInfo> getTopicInfos(int page, int pageSize) {
         return topicMonitorService.getTopicInfos(page, pageSize);
     }
+    @Override
+    public void addGcEventListener(GCEventListener listener) {
+        brokerMonitorInternalService.addGcEventListener(listener);
+    }
+
+    @Override
+    public JVMStat getJVMState() {
+        return brokerMonitorInternalService.getJVMState();
+    }
+
 
     @Override
     public TopicMonitorInfo getTopicInfoByTopic(String topic) {
@@ -291,5 +297,25 @@ public class DefaultBrokerMonitorService implements BrokerMonitorService {
     @Override
     public BooleanResponse getWritableResult(String topic, String app, String address) {
         return metadataMonitorService.getWritableResult(topic, app, address);
+    }
+
+    @Override
+    public List<ReplicaLagStat> lagState(String topic, int partitionGroup) {
+        return partitionMonitorService.lagState(topic,partitionGroup);
+    }
+
+    @Override
+    public ReplicaNodeStat getReplicaState(String topic, int partitionGroup) {
+        return partitionMonitorService.getReplicaState(topic,partitionGroup);
+    }
+
+    @Override
+    public List<ReplicaLagStat> getPartitionGroupReplicaLagInfo(String topic, int partitionGroup) {
+        return partitionMonitorService.getPartitionGroupReplicaLagInfo(topic,partitionGroup);
+    }
+
+    @Override
+    public ElectionNode.State getPartitionGroupNodeState(String topic, int partitionGroup) {
+        return partitionMonitorService.getPartitionGroupNodeState(topic,partitionGroup);
     }
 }

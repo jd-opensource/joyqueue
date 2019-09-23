@@ -44,6 +44,9 @@ public class TopicPartitionGroup {
         return partitionGroupId;
     }
 
+    public void setPartitionGroupId(int partitionGroupId) {
+        this.partitionGroupId = partitionGroupId;
+    }
     @Override
     public int hashCode() {
         return topic.hashCode() + partitionGroupId;

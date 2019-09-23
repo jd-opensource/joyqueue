@@ -19,14 +19,14 @@ import io.chubao.joyqueue.broker.cluster.ClusterManager;
 import io.chubao.joyqueue.broker.election.command.AppendEntriesRequest;
 import io.chubao.joyqueue.broker.election.command.AppendEntriesResponse;
 import io.chubao.joyqueue.broker.replication.ReplicaGroup;
-import io.chubao.joyqueue.network.transport.codec.JoyQueueHeader;
 import io.chubao.joyqueue.domain.PartitionGroup;
 import io.chubao.joyqueue.network.command.CommandType;
+import io.chubao.joyqueue.network.transport.codec.JoyQueueHeader;
 import io.chubao.joyqueue.network.transport.command.Command;
 import io.chubao.joyqueue.network.transport.command.Direction;
 import io.chubao.joyqueue.store.replication.ReplicableStore;
-
 import io.chubao.joyqueue.toolkit.concurrent.EventBus;
+import io.chubao.joyqueue.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,7 +74,8 @@ public class FixLeaderElection extends LeaderElection {
         updateElectionMetadata();
 
         electionEventManager.add(new ElectionEvent(ElectionEvent.Type.LEADER_FOUND, 0,
-                leaderId, topicPartitionGroup));
+                leaderId, topicPartitionGroup, SystemClock.now()));
+
     }
 
     @Override
@@ -106,7 +107,7 @@ public class FixLeaderElection extends LeaderElection {
             updateElectionMetadata();
 
             electionEventManager.add(new ElectionEvent(ElectionEvent.Type.LEADER_FOUND, 0,
-                    leaderId, topicPartitionGroup));
+                    leaderId, topicPartitionGroup,SystemClock.now()));
         } else {
             this.leaderId = leaderId;
         }

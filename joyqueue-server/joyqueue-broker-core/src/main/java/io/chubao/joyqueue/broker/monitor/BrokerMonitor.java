@@ -17,15 +17,11 @@ package io.chubao.joyqueue.broker.monitor;
 
 import com.google.common.collect.Lists;
 import io.chubao.joyqueue.broker.cluster.ClusterManager;
+import io.chubao.joyqueue.broker.election.ElectionEvent;
+import io.chubao.joyqueue.broker.election.ElectionNode;
+import io.chubao.joyqueue.broker.election.TopicPartitionGroup;
 import io.chubao.joyqueue.broker.monitor.config.BrokerMonitorConfig;
-import io.chubao.joyqueue.broker.monitor.stat.AppStat;
-import io.chubao.joyqueue.broker.monitor.stat.BrokerStat;
-import io.chubao.joyqueue.broker.monitor.stat.ConsumerStat;
-import io.chubao.joyqueue.broker.monitor.stat.PartitionGroupStat;
-import io.chubao.joyqueue.broker.monitor.stat.PartitionStat;
-import io.chubao.joyqueue.broker.monitor.stat.ProducerStat;
-import io.chubao.joyqueue.broker.monitor.stat.ReplicationStat;
-import io.chubao.joyqueue.broker.monitor.stat.TopicStat;
+import io.chubao.joyqueue.broker.monitor.stat.*;
 import io.chubao.joyqueue.domain.PartitionGroup;
 import io.chubao.joyqueue.event.ConsumerEvent;
 import io.chubao.joyqueue.event.MetaEvent;
@@ -179,6 +175,17 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
         replicationStat.getAppendStat().mark(time, size, count);
         brokerStat.getReplicationStat().getAppendStat().mark(time, size, count);
     }
+
+    @Override
+    public void onReplicaStateChange(String topic, int partitionGroup, ElectionNode.State newState) {
+        if (!config.isEnable()) {
+            return;
+        }
+        ReplicationStat replicationStat = brokerStat.getOrCreateTopicStat(topic).getOrCreatePartitionGroupStat(partitionGroup).getReplicationStat();
+        replicationStat.getStat().setState(newState);
+        replicationStat.getStat().setTimestamp(SystemClock.now());
+    }
+
 
     @Override
     public void onGetRetry(String topic, String app, long count, double time) {
@@ -380,6 +387,24 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
 
     public SessionManager getSessionManager() {
         return sessionManager;
+    }
+
+
+
+    public class ElectionListener implements EventListener<ElectionEvent>{
+
+        @Override
+        public void onEvent(ElectionEvent event) {
+            // event.
+            TopicPartitionGroup partitionGroup= event.getTopicPartitionGroup();
+            if(partitionGroup!=null) {
+                PartitionGroupStat partitionGroupStat= brokerStat.getOrCreateTopicStat(partitionGroup.getTopic()).getOrCreatePartitionGroupStat(partitionGroup.getPartitionGroupId());
+                ElectionEventStat electionStat= partitionGroupStat.getElectionStat();
+                electionStat.setState(event.getEventType());
+                electionStat.setTerm(event.getTerm());
+                electionStat.setTimestamp(event.getTimestamp());
+            }
+        }
     }
 
     /**

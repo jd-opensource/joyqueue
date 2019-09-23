@@ -12,6 +12,8 @@
                handlers="brokerMonitorService.getExtendBrokerStat"/>
         <route path="/metrics" inherit="get"
                handlers="brokerMonitorService.getExtendBrokerStat"/>
+        <route path="/monitor/broker/jvm/state" inherit="get"
+               handlers="brokerMonitorService.getJVMState"/>
 
         <!-- connection -->
         <route path="/monitor/connections" inherit="get"
@@ -52,6 +54,12 @@
                handlers="brokerMonitorService.getPartitionGroupInfosByTopic"/>
         <route path="/monitor/topic/:topic/partitionGroup/:partitionGroupId" inherit="get"
                handlers="brokerMonitorService.getPartitionGroupInfoByTopic"/>
+
+        <route path="/monitor/topic/replica/lag/:topic/partitionGroup/:partitionGroupId" inherit="get"
+               handlers="brokerMonitorService.getPartitionGroupReplicaLagInfo"/>
+
+        <route path="/monitor/topic/node/state/:topic/partitionGroup/:partitionGroupId" inherit="get"
+               handlers="brokerMonitorService.getPartitionGroupNodeState"/>
 
         <!-- topic app -->
         <!-- connection -->

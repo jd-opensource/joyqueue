@@ -16,15 +16,15 @@
 package io.chubao.joyqueue.broker.monitor.service.support;
 
 import com.google.common.collect.Lists;
+import io.chubao.joyqueue.broker.election.ElectionNode;
+import io.chubao.joyqueue.broker.election.ElectionService;
 import io.chubao.joyqueue.broker.monitor.converter.BrokerMonitorConverter;
 import io.chubao.joyqueue.broker.monitor.service.PartitionMonitorService;
+import io.chubao.joyqueue.broker.monitor.stat.*;
+import io.chubao.joyqueue.broker.replication.ReplicaGroup;
+import io.chubao.joyqueue.domain.TopicName;
 import io.chubao.joyqueue.monitor.PartitionGroupMonitorInfo;
 import io.chubao.joyqueue.monitor.PartitionMonitorInfo;
-import io.chubao.joyqueue.broker.monitor.stat.AppStat;
-import io.chubao.joyqueue.broker.monitor.stat.BrokerStat;
-import io.chubao.joyqueue.broker.monitor.stat.PartitionGroupStat;
-import io.chubao.joyqueue.broker.monitor.stat.PartitionStat;
-import io.chubao.joyqueue.broker.monitor.stat.TopicStat;
 import io.chubao.joyqueue.store.StoreManagementService;
 
 import java.util.List;
@@ -40,10 +40,11 @@ public class DefaultPartitionMonitorService implements PartitionMonitorService {
 
     private BrokerStat brokerStat;
     private StoreManagementService storeManagementService;
-
-    public DefaultPartitionMonitorService(BrokerStat brokerStat, StoreManagementService storeManagementService) {
+    private ElectionService electionManager;
+    public DefaultPartitionMonitorService(BrokerStat brokerStat, StoreManagementService storeManagementService, ElectionService electionManager) {
         this.brokerStat = brokerStat;
         this.storeManagementService = storeManagementService;
+        this.electionManager=electionManager;
     }
 
     @Override
@@ -95,6 +96,28 @@ public class DefaultPartitionMonitorService implements PartitionMonitorService {
     }
 
     @Override
+    public List<ReplicaLagStat> getPartitionGroupReplicaLagInfo(String topic, int partitionGroup) {
+        ReplicaGroup replicaGroup=electionManager.getReplicaGroup(TopicName.parse(topic),partitionGroup);
+        if(replicaGroup!=null) {
+            return replicaGroup.lagStats();
+        }else{
+            return Lists.newArrayList();
+        }
+    }
+
+    @Override
+    public ElectionNode.State getPartitionGroupNodeState(String topic, int partitionGroup) {
+        TopicStat topicStat= brokerStat.getTopicStats().get(topic);
+        if(topicStat!=null) {
+            PartitionGroupStat partitionGroupStat=   topicStat.getPartitionGroupStatMap().get(partitionGroup);
+            if(partitionGroupStat!=null){
+                return partitionGroupStat.getReplicationStat().getStat().getState();
+            }
+        }
+        return null;
+    }
+
+    @Override
     public List<PartitionGroupMonitorInfo> getPartitionGroupInfosByTopic(String topic) {
         TopicStat topicStat = brokerStat.getOrCreateTopicStat(topic);
         List<PartitionGroupMonitorInfo> result = Lists.newLinkedList();
@@ -121,6 +144,24 @@ public class DefaultPartitionMonitorService implements PartitionMonitorService {
             result.add(partitionGroupMonitorInfo);
         }
         return result;
+    }
+
+    @Override
+    public List<ReplicaLagStat> lagState(String topic, int partitionGroup) {
+        ReplicaGroup replicaGroup=electionManager.getReplicaGroup(TopicName.parse(topic),partitionGroup);
+        if(replicaGroup==null){
+            return Lists.newLinkedList();
+        }
+        return replicaGroup.lagStats();
+    }
+
+    @Override
+    public ReplicaNodeStat getReplicaState(String topic, int partitionGroup) {
+        ReplicaNodeStat replicaNodeStat= brokerStat.getOrCreateTopicStat(topic).getOrCreatePartitionGroupStat(partitionGroup).getReplicationStat().getStat();
+        replicaNodeStat.setBrokerId(brokerStat.getBrokerId());
+        replicaNodeStat.getPartitionGroup().setTopic(topic);
+        replicaNodeStat.getPartitionGroup().setPartitionGroupId(partitionGroup);
+        return replicaNodeStat;
     }
 
     protected PartitionGroupMonitorInfo convertPartitionGroupMonitorInfo(PartitionGroupStat partitionGroupStat) {

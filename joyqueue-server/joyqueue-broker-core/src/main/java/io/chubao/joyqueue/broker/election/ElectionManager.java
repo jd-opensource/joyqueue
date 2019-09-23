@@ -152,7 +152,7 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
 
         electionEventManager = new EventBus<>("LeaderElectionEvent");
         electionEventManager.start();
-
+        addListener(brokerMonitor.new ElectionListener());
         leaderElections = new ConcurrentHashMap<>();
 
         ClientConfig clientConfig = new ClientConfig();
@@ -327,6 +327,11 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
 
     public LeaderElection getLeaderElection(String topic, int partitionGroup) {
         return leaderElections.get(new TopicPartitionGroup(topic, partitionGroup));
+    }
+
+    @Override
+    public ReplicaGroup getReplicaGroup(TopicName topic, int partitionGroup) {
+        return replicationManager.getReplicaGroup(topic.getFullName(),partitionGroup);
     }
 
     /**

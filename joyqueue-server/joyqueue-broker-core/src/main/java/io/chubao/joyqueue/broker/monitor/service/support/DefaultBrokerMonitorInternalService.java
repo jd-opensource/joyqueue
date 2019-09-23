@@ -15,29 +15,24 @@
  */
 package io.chubao.joyqueue.broker.monitor.service.support;
 
+import com.sun.management.GcInfo;
 import io.chubao.joyqueue.broker.cluster.ClusterManager;
 import io.chubao.joyqueue.broker.consumer.Consume;
 import io.chubao.joyqueue.broker.election.ElectionService;
 import io.chubao.joyqueue.broker.monitor.converter.BrokerMonitorConverter;
 import io.chubao.joyqueue.broker.monitor.exception.MonitorException;
 import io.chubao.joyqueue.broker.monitor.service.BrokerMonitorInternalService;
-import io.chubao.joyqueue.monitor.BrokerMonitorInfo;
-import io.chubao.joyqueue.monitor.BrokerStartupInfo;
-import io.chubao.joyqueue.monitor.ElectionMonitorInfo;
-import io.chubao.joyqueue.monitor.NameServerMonitorInfo;
-import io.chubao.joyqueue.monitor.StoreMonitorInfo;
+import io.chubao.joyqueue.broker.monitor.stat.*;
+import io.chubao.joyqueue.broker.replication.ReplicaGroup;
+import io.chubao.joyqueue.domain.TopicName;
+import io.chubao.joyqueue.monitor.*;
 import io.chubao.joyqueue.network.session.Consumer;
 import io.chubao.joyqueue.nsr.NameService;
-import io.chubao.joyqueue.broker.monitor.stat.BrokerStat;
-import io.chubao.joyqueue.broker.monitor.stat.BrokerStatExt;
-import io.chubao.joyqueue.broker.monitor.stat.ConsumerPendingStat;
-import io.chubao.joyqueue.broker.monitor.stat.PartitionGroupPendingStat;
-import io.chubao.joyqueue.broker.monitor.stat.TopicPendingStat;
-import io.chubao.joyqueue.broker.monitor.stat.TopicStat;
 import io.chubao.joyqueue.store.StoreManagementService;
 import io.chubao.joyqueue.store.StoreService;
 import io.chubao.joyqueue.toolkit.format.Format;
 import io.chubao.joyqueue.toolkit.lang.Online;
+import io.chubao.joyqueue.toolkit.vm.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,6 +57,8 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
     private ElectionService electionService;
     private ClusterManager clusterManager;
     private BrokerStartupInfo brokerStartupInfo;
+    private JVMMonitorService jvmMonitorService;
+    private DefaultGCNotificationParser gcNotificationParser;
 
     public DefaultBrokerMonitorInternalService(BrokerStat brokerStat, Consume consume,
                                                StoreManagementService storeManagementService,
@@ -75,6 +72,10 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
         this.electionService = electionManager;
         this.clusterManager = clusterManager;
         this.brokerStartupInfo = brokerStartupInfo;
+        this.jvmMonitorService=new GarbageCollectorMonitor();
+        this.gcNotificationParser=new DefaultGCNotificationParser();
+        this.gcNotificationParser.addListener(new DefaultGCEventListener(brokerStat.getJvmStat()));
+        this.jvmMonitorService.addGCEventListener(gcNotificationParser);
     }
 
     @Override
@@ -112,6 +113,12 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
     public BrokerStatExt getExtendBrokerStat(long timeStamp) {
        BrokerStatExt statExt=new BrokerStatExt(brokerStat);
        statExt.setTimeStamp(timeStamp);
+
+        getJVMState(); // update current jvm state
+        JVMStat recentJvmStat= statExt.getBrokerStat().getJvmStat().getRecentSnapshot();
+        // update snapshot jvm memory state
+        recentJvmStat.setMemoryStat(statExt.getBrokerStat().getJvmStat().getMemoryStat());
+
        Map<String, TopicPendingStat>  topicPendingStatMap=statExt.getTopicPendingStatMap();
        Map<String, TopicStat>  topicStatMap=brokerStat.getTopicStats();
        Map<String,ConsumerPendingStat> consumerPendingStatMap;
@@ -175,8 +182,26 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
             logger.info("bug",e);
             throw new MonitorException(e);
         }
+        // replicas lag state
+        snapshotReplicaLag();
+        // runtime memory usage state
         runtimeMemoryUsageState(statExt);
         return statExt;
+    }
+
+    /**
+     *   Leader replica snapshots
+     *   lag size for followers to leader
+     **/
+    public void snapshotReplicaLag(){
+        Map<String, TopicStat>  topicStatMap=brokerStat.getTopicStats();
+        for(TopicStat topicStat:topicStatMap.values()){
+            Map<Integer,PartitionGroupStat> partitionGroupStatMap= topicStat.getPartitionGroupStatMap();
+            for(PartitionGroupStat partitionGroupStat:partitionGroupStatMap.values()){
+                ReplicaGroup replicaGroup=electionService.getReplicaGroup(TopicName.parse(partitionGroupStat.getTopic()),partitionGroupStat.getPartitionGroup());
+                partitionGroupStat.getReplicationStat().setReplicaLagStats(replicaGroup.lagStats());
+            }
+        }
     }
 
     @Override
@@ -193,4 +218,43 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
        brokerStatExt.setHeap(memoryMXBean.getHeapMemoryUsage());
        brokerStatExt.setNonHeap(memoryMXBean.getNonHeapMemoryUsage());
    }
+
+    @Override
+    public JVMStat getJVMState() {
+        JVMStat jvmStat=brokerStat.getJvmStat();
+        jvmStat.setMemoryStat(jvmMonitorService.memSnapshot());
+        return jvmStat;
+    }
+
+
+    @Override
+    public void addGcEventListener(GCEventListener listener) {
+        this.gcNotificationParser.addListener(listener);
+    }
+
+    /**
+     *  GC event listener
+     *
+     **/
+    public class DefaultGCEventListener implements GCEventListener{
+
+        private JVMStat jvmStat;
+        public DefaultGCEventListener(JVMStat jvmStat){
+            this.jvmStat=jvmStat;
+        }
+        @Override
+        public void handleNotification(GCEvent event) {
+            GcInfo gcInfo=event.getGcInfo().getGcInfo()   ;
+            if(event.getType() == GCEventType.END_OF_MAJOR||event.getType() == GCEventType.END_OF_MINOR){
+                jvmStat.getTotalGcTime().addAndGet(gcInfo.getDuration());
+                jvmStat.getTotalGcTimes().incrementAndGet();
+            }
+            if(event.getType() == GCEventType.END_OF_MAJOR){
+                jvmStat.getOldGcTimes().mark(gcInfo.getDuration(),1);
+            }else if(event.getType()== GCEventType.END_OF_MINOR){
+                jvmStat.getEdenGcTimes().mark(gcInfo.getDuration(),1);
+            }
+            //System.out.println(String.format("old %d   , young %d ",jvmStat.getOldGcTimes().getCount(),jvmStat.getEdenGcTimes().getCount()));
+        }
+    }
 }
