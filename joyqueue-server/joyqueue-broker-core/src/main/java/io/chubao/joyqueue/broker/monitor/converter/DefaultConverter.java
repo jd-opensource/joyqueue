@@ -136,7 +136,7 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
     private static final String PG_SLICE_ENQUEUE_AVG = "pg_slice_enqueue_avg";
 
     private static final String PG_SLICE_REPLICA="pg_slice_replica";
-    private static final String PG_SLICE_REPLICA_LAG="pg_slice_replica_lag";
+    private static final String PG_SLICE_REPLICA_LOG_MAX_POSITION="pg_slice_replica_log_max_position";
 
 
 
@@ -449,22 +449,17 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
      **/
     public List<MonitorRecord> buildReplicaLag(PartitionGroupStat partitionGroupStat,String brokerId,String topic,
                                                String app,Integer partitionGroup,long timestampMs){
-        List<MonitorRecord> records=new ArrayList();
-        List<ReplicaLagStat> lagStats= partitionGroupStat.getReplicationStat().getReplicaLagStats();
-
-        for(ReplicaLagStat stat:lagStats){
-            MonitorRecord replicaRecord = new MonitorRecord();
-            fillRecord(replicaRecord, timestampMs);
-            replicaRecord.setValue(stat.getLag());
-            // not current broker id
-            replicaRecord.brokerId(Integer.toString(stat.getBrokerId()));
-            replicaRecord.topic(topic);
-            replicaRecord.app(app);
-            replicaRecord.setMetric(PG_SLICE_REPLICA_LAG);
-            replicaRecord.partitionGroup(partitionGroup.toString());
-            records.add(replicaRecord);
-        }
-        return records;
+        long maxLogPosition= partitionGroupStat.getReplicationStat().getMaxLogPosition();
+        MonitorRecord replicaRecord = new MonitorRecord();
+        fillRecord(replicaRecord, timestampMs);
+        replicaRecord.setValue(maxLogPosition);
+        // not current broker id
+        replicaRecord.brokerId(brokerId);
+        replicaRecord.topic(topic);
+        replicaRecord.app(app);
+        replicaRecord.setMetric(PG_SLICE_REPLICA_LOG_MAX_POSITION);
+        replicaRecord.partitionGroup(partitionGroup.toString());
+        return Lists.newArrayList(replicaRecord);
     }
 
 

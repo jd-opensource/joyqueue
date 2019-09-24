@@ -23,8 +23,6 @@ import io.chubao.joyqueue.broker.monitor.converter.BrokerMonitorConverter;
 import io.chubao.joyqueue.broker.monitor.exception.MonitorException;
 import io.chubao.joyqueue.broker.monitor.service.BrokerMonitorInternalService;
 import io.chubao.joyqueue.broker.monitor.stat.*;
-import io.chubao.joyqueue.broker.replication.ReplicaGroup;
-import io.chubao.joyqueue.domain.TopicName;
 import io.chubao.joyqueue.monitor.*;
 import io.chubao.joyqueue.network.session.Consumer;
 import io.chubao.joyqueue.nsr.NameService;
@@ -190,16 +188,16 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
     }
 
     /**
-     *   Leader replica snapshots
-     *   lag size for followers to leader
+     *  Replica log max position snapshots
+     *
      **/
     public void snapshotReplicaLag(){
         Map<String, TopicStat>  topicStatMap=brokerStat.getTopicStats();
         for(TopicStat topicStat:topicStatMap.values()){
             Map<Integer,PartitionGroupStat> partitionGroupStatMap= topicStat.getPartitionGroupStatMap();
             for(PartitionGroupStat partitionGroupStat:partitionGroupStatMap.values()){
-                ReplicaGroup replicaGroup=electionService.getReplicaGroup(TopicName.parse(partitionGroupStat.getTopic()),partitionGroupStat.getPartitionGroup());
-                partitionGroupStat.getReplicationStat().setReplicaLagStats(replicaGroup.lagStats());
+                StoreManagementService.PartitionGroupMetric partitionGroupMetric=storeManagementService.partitionGroupMetric(partitionGroupStat.getTopic(),partitionGroupStat.getPartitionGroup());
+                partitionGroupStat.getReplicationStat().setMaxLogPosition(partitionGroupMetric.getRightPosition());
             }
         }
     }
@@ -257,4 +255,5 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
             //System.out.println(String.format("old %d   , young %d ",jvmStat.getOldGcTimes().getCount(),jvmStat.getEdenGcTimes().getCount()));
         }
     }
+
 }

@@ -22,7 +22,6 @@ import io.chubao.joyqueue.broker.consumer.position.model.Position;
 import io.chubao.joyqueue.broker.election.*;
 import io.chubao.joyqueue.broker.election.command.*;
 import io.chubao.joyqueue.broker.monitor.BrokerMonitor;
-import io.chubao.joyqueue.broker.monitor.stat.ReplicaLagStat;
 import io.chubao.joyqueue.domain.TopicName;
 import io.chubao.joyqueue.network.command.CommandType;
 import io.chubao.joyqueue.network.event.TransportEvent;
@@ -44,7 +43,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -219,36 +217,6 @@ public class ReplicaGroup extends Service {
                 .filter(r -> r.replicaId() == replicaId)
                 .findFirst()
                 .orElse(null);
-    }
-
-    /**
-     *  Log相对于leader的lag
-     *  @return all replicas lag state to leader if local replica is leader or empty
-     *
-     **/
-    public List<ReplicaLagStat> lagStats(){
-        List<ReplicaLagStat> stats=new ArrayList();
-        if(state==LEADER){
-            Replica leader=getReplica(leaderId);
-            long leaderWritePosSnapshot= leader.writePosition();
-            if(leader!=null){
-                for(Replica r:replicas){
-                    boolean isLeader=r.replicaId()==leaderId;
-                    long replicaNextPosition=isLeader?leaderWritePosSnapshot:r.nextPosition();
-                    long diff=leaderWritePosSnapshot-replicaNextPosition ;
-                    if(diff<0){
-                        logger.info("something wrong,topic {}, partition group {},follower {} lag {} is negative",
-                                r.getTopicPartitionGroup().topic,r.getTopicPartitionGroup().getPartitionGroupId(),r.replicaId(),diff);
-                    }
-                    ReplicaLagStat lagStat=new ReplicaLagStat();
-                    lagStat.setLag(diff);
-                    lagStat.setLeader(isLeader);
-                    lagStat.setBrokerId(r.replicaId());
-                    stats.add(lagStat);
-                }
-            }
-        }
-        return stats;
     }
 
 

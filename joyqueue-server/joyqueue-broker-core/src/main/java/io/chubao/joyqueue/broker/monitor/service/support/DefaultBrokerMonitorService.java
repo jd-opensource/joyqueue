@@ -22,14 +22,12 @@ import io.chubao.joyqueue.broker.election.ElectionNode;
 import io.chubao.joyqueue.broker.monitor.service.*;
 import io.chubao.joyqueue.broker.monitor.stat.BrokerStatExt;
 import io.chubao.joyqueue.broker.monitor.stat.JVMStat;
-import io.chubao.joyqueue.broker.monitor.stat.ReplicaLagStat;
 import io.chubao.joyqueue.broker.monitor.stat.ReplicaNodeStat;
 import io.chubao.joyqueue.domain.TopicConfig;
 import io.chubao.joyqueue.model.Pager;
 import io.chubao.joyqueue.monitor.*;
 import io.chubao.joyqueue.response.BooleanResponse;
 import io.chubao.joyqueue.toolkit.vm.GCEventListener;
-
 import java.util.List;
 import java.util.Map;
 
@@ -299,23 +297,18 @@ public class DefaultBrokerMonitorService implements BrokerMonitorService {
         return metadataMonitorService.getWritableResult(topic, app, address);
     }
 
-    @Override
-    public List<ReplicaLagStat> lagState(String topic, int partitionGroup) {
-        return partitionMonitorService.lagState(topic,partitionGroup);
-    }
+
 
     @Override
     public ReplicaNodeStat getReplicaState(String topic, int partitionGroup) {
         return partitionMonitorService.getReplicaState(topic,partitionGroup);
     }
 
-    @Override
-    public List<ReplicaLagStat> getPartitionGroupReplicaLagInfo(String topic, int partitionGroup) {
-        return partitionMonitorService.getPartitionGroupReplicaLagInfo(topic,partitionGroup);
-    }
 
     @Override
     public ElectionNode.State getPartitionGroupNodeState(String topic, int partitionGroup) {
         return partitionMonitorService.getPartitionGroupNodeState(topic,partitionGroup);
     }
+
+
 }

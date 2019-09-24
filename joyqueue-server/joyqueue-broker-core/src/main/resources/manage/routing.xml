@@ -55,9 +55,6 @@
         <route path="/monitor/topic/:topic/partitionGroup/:partitionGroupId" inherit="get"
                handlers="brokerMonitorService.getPartitionGroupInfoByTopic"/>
 
-        <route path="/monitor/topic/replica/lag/:topic/partitionGroup/:partitionGroupId" inherit="get"
-               handlers="brokerMonitorService.getPartitionGroupReplicaLagInfo"/>
-
         <route path="/monitor/topic/node/state/:topic/partitionGroup/:partitionGroupId" inherit="get"
                handlers="brokerMonitorService.getPartitionGroupNodeState"/>
 

@@ -16,7 +16,6 @@
 package io.chubao.joyqueue.broker.monitor.stat;
 
 import java.io.Serializable;
-import java.util.List;
 
 /**
  * ReplicationStat
@@ -35,8 +34,8 @@ public class ReplicationStat implements Serializable {
     private EnQueueStat appendStat = new EnQueueStat();
     // partition group replica state
     private ReplicaNodeStat stat=new ReplicaNodeStat();
-
-    private List<ReplicaLagStat> replicaLagStats;
+    // partition group replica max log position
+    private long  maxLogPosition;
 
     public ReplicationStat() {
     }
@@ -58,12 +57,13 @@ public class ReplicationStat implements Serializable {
         return replicaStat;
     }
 
-    public List<ReplicaLagStat> getReplicaLagStats() {
-        return replicaLagStats;
+
+    public long getMaxLogPosition() {
+        return maxLogPosition;
     }
 
-    public void setReplicaLagStats(List<ReplicaLagStat> replicaLagStats) {
-        this.replicaLagStats = replicaLagStats;
+    public void setMaxLogPosition(long maxLogPosition) {
+        this.maxLogPosition = maxLogPosition;
     }
 
     public EnQueueStat getAppendStat() {

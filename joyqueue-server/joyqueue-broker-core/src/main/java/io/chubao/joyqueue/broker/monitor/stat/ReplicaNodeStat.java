@@ -29,9 +29,6 @@ public class ReplicaNodeStat {
     private volatile  ElectionNode.State state;
     private long timestamp;
     private int  brokerId;
-    // last interval snapshot value
-    private long recentSnapshot;
-//    private transient  EnumStateMetric stateMetric=new EnumStateMetric(ElectionNode.State.values().length-1);
     private TopicPartitionGroup partitionGroup;
 
     public ReplicaNodeStat(int brokerId, TopicPartitionGroup topicPartitionGroup, ElectionNode.State state, long timestamp){
@@ -51,27 +48,8 @@ public class ReplicaNodeStat {
 
     public void setState(ElectionNode.State state) {
         this.state = state;
-//        this.stateMetric.updateState(state.ordinal());
     }
 
-//    /**
-//     * Snapshot the interval state value and clear
-//     * contain frequency and state sequence
-//     **/
-//    public long intervalSnapshot(){
-//        this.recentSnapshot= stateMetric.snapshotValue();
-//             stateMetric.clear();
-//        return recentSnapshot;
-//    }
-//
-//    /**
-//     * Last interval snapshot value
-//     **/
-//    public long getRecentSnapshot() {
-//        if(recentSnapshot==0)
-//          return intervalSnapshot();
-//        else return recentSnapshot;
-//    }
 
     public long getTimestamp() {
         return timestamp;

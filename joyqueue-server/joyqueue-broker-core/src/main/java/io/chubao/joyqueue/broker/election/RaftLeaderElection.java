@@ -446,7 +446,7 @@ public class RaftLeaderElection extends LeaderElection  {
 
         updateElectionMetadata();
         electionEventManager.add(new ElectionEvent(START_ELECTION,
-                currentTerm, INVALID_NODE_ID, topicPartitionGroup,SystemClock.now()));
+                currentTerm, INVALID_NODE_ID, topicPartitionGroup));
 
         resetVoteTimer();
 
@@ -970,7 +970,7 @@ public class RaftLeaderElection extends LeaderElection  {
             updateElectionMetadata();
             updateMetadata(leaderId, currentTerm);
             electionEventManager.add(new ElectionEvent(LEADER_FOUND,
-                    currentTerm, localNode.getNodeId(), topicPartitionGroup,SystemClock.now()));
+                    currentTerm, localNode.getNodeId(), topicPartitionGroup));
             cancelElectionTimer();
             cancelVoteTimer();
         } catch (Exception e) {
@@ -1004,7 +1004,7 @@ public class RaftLeaderElection extends LeaderElection  {
         updateElectionMetadata();
         updateMetadata(leaderId, currentTerm);
         electionEventManager.add(new ElectionEvent(LEADER_FOUND,
-                currentTerm, leaderId, topicPartitionGroup,SystemClock.now()));
+                currentTerm, leaderId, topicPartitionGroup));
 
         cancelHeartbeatTimer();
     }

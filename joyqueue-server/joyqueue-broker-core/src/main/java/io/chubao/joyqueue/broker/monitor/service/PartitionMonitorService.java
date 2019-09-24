@@ -16,7 +16,6 @@
 package io.chubao.joyqueue.broker.monitor.service;
 
 import io.chubao.joyqueue.broker.election.ElectionNode;
-import io.chubao.joyqueue.broker.monitor.stat.ReplicaLagStat;
 import io.chubao.joyqueue.broker.monitor.stat.ReplicaNodeStat;
 import io.chubao.joyqueue.monitor.PartitionGroupMonitorInfo;
 import io.chubao.joyqueue.monitor.PartitionMonitorInfo;
@@ -77,18 +76,6 @@ public interface PartitionMonitorService {
     PartitionGroupMonitorInfo getPartitionGroupInfoByTopic(String topic, int partitionGroup);
 
 
-
-    /**
-     * 获取partitionGroup replica lag info
-     *
-     * @param topic          主题
-     * @param partitionGroup partitionGroup
-     * @return  replica lag info if leader or empty
-     */
-    List<ReplicaLagStat> getPartitionGroupReplicaLagInfo(String topic, int partitionGroup);
-
-
-
     /**
      * 获取partitionGroup node state info  info
      *
@@ -115,14 +102,6 @@ public interface PartitionMonitorService {
      * @return 分区组监控信息
      */
     PartitionGroupMonitorInfo getPartitionGroupInfoByTopicAndApp(String topic, String app, int partitionGroup);
-
-    /**
-     *  Replica log相对于leader的lag
-     *  @return all replicas lag state to leader if local replica is leader or empty
-     *
-     **/
-    List<ReplicaLagStat> lagState(String topic, int partitionGroup);
-
 
     /**
      * Replica state with timestamp

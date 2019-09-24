@@ -25,15 +25,13 @@ public class ElectionEvent {
     private Type eventType;
     private int term;
     private int leaderId;
-    private long timestamp;
     private TopicPartitionGroup topicPartitionGroup;
 
-    public ElectionEvent(Type eventType, int term, int leaderId, TopicPartitionGroup topicPartitionGroup,long timestampMs) {
+    public ElectionEvent(Type eventType, int term, int leaderId, TopicPartitionGroup topicPartitionGroup) {
         this.eventType = eventType;
         this.term = term;
         this.leaderId = leaderId;
         this.topicPartitionGroup = topicPartitionGroup;
-        this.timestamp=timestampMs;
     }
     public Type getEventType() {
         return eventType;
@@ -45,14 +43,6 @@ public class ElectionEvent {
 
     public int getLeaderId() {
         return leaderId;
-    }
-
-    public long getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
     }
 
     public TopicPartitionGroup getTopicPartitionGroup() {

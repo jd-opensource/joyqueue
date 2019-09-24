@@ -21,8 +21,6 @@ import io.chubao.joyqueue.broker.election.ElectionService;
 import io.chubao.joyqueue.broker.monitor.converter.BrokerMonitorConverter;
 import io.chubao.joyqueue.broker.monitor.service.PartitionMonitorService;
 import io.chubao.joyqueue.broker.monitor.stat.*;
-import io.chubao.joyqueue.broker.replication.ReplicaGroup;
-import io.chubao.joyqueue.domain.TopicName;
 import io.chubao.joyqueue.monitor.PartitionGroupMonitorInfo;
 import io.chubao.joyqueue.monitor.PartitionMonitorInfo;
 import io.chubao.joyqueue.store.StoreManagementService;
@@ -95,15 +93,6 @@ public class DefaultPartitionMonitorService implements PartitionMonitorService {
         return convertPartitionGroupMonitorInfo(partitionGroupStat);
     }
 
-    @Override
-    public List<ReplicaLagStat> getPartitionGroupReplicaLagInfo(String topic, int partitionGroup) {
-        ReplicaGroup replicaGroup=electionManager.getReplicaGroup(TopicName.parse(topic),partitionGroup);
-        if(replicaGroup!=null) {
-            return replicaGroup.lagStats();
-        }else{
-            return Lists.newArrayList();
-        }
-    }
 
     @Override
     public ElectionNode.State getPartitionGroupNodeState(String topic, int partitionGroup) {
@@ -144,15 +133,6 @@ public class DefaultPartitionMonitorService implements PartitionMonitorService {
             result.add(partitionGroupMonitorInfo);
         }
         return result;
-    }
-
-    @Override
-    public List<ReplicaLagStat> lagState(String topic, int partitionGroup) {
-        ReplicaGroup replicaGroup=electionManager.getReplicaGroup(TopicName.parse(topic),partitionGroup);
-        if(replicaGroup==null){
-            return Lists.newLinkedList();
-        }
-        return replicaGroup.lagStats();
     }
 
     @Override

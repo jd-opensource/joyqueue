@@ -52,13 +52,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 /**
@@ -329,10 +323,7 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
         return leaderElections.get(new TopicPartitionGroup(topic, partitionGroup));
     }
 
-    @Override
-    public ReplicaGroup getReplicaGroup(TopicName topic, int partitionGroup) {
-        return replicationManager.getReplicaGroup(topic.getFullName(),partitionGroup);
-    }
+
 
     /**
      * 恢复选举的元数据
@@ -368,6 +359,9 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
     int getLeaderElectionCount() {
         return leaderElections.size();
     }
+
+
+
 
     /**
      * 根据schema创建election，fixed或者raft

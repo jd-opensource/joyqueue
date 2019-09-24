@@ -70,7 +70,7 @@ public class BrokerMessageServiceImpl implements BrokerMessageService {
             @Override
             public String getKey(Broker broker, PartitionGroup partitionGroup,short partition ,Subscribe condition) {
                 brokers.add(broker);
-                return broker.getIp()+":"+broker.getPort();
+                return broker.getIp()+":"+broker.getMonitorPort();
             }
             @Override
             public String getPath(String pathTemplate,PartitionGroup partitionGroup,short partition,Subscribe condition) {

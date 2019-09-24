@@ -402,7 +402,7 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
                 ElectionEventStat electionStat= partitionGroupStat.getElectionStat();
                 electionStat.setState(event.getEventType());
                 electionStat.setTerm(event.getTerm());
-                electionStat.setTimestamp(event.getTimestamp());
+                electionStat.setTimestamp(SystemClock.now());
             }
         }
     }

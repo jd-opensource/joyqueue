@@ -15,7 +15,6 @@
  */
 package io.chubao.joyqueue.broker.election;
 
-import io.chubao.joyqueue.broker.replication.ReplicaGroup;
 import io.chubao.joyqueue.domain.Broker;
 import io.chubao.joyqueue.domain.PartitionGroup;
 import io.chubao.joyqueue.domain.TopicName;
@@ -115,14 +114,6 @@ public interface ElectionService {
      */
     LeaderElection getLeaderElection(TopicName topic, int partitionGroup);
 
-    /**
-     * Get replica of the topic partition group
-     * @param topic  topic
-     * @param partitionGroup  partition group
-     * @return  partition group replica
-     *
-     **/
-    ReplicaGroup getReplicaGroup(TopicName topic, int partitionGroup);
     /**
      * Sync election meta data from name service
      */
