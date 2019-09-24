@@ -18,9 +18,9 @@ package io.chubao.joyqueue.broker.monitor.service.support;
 import io.chubao.joyqueue.broker.coordinator.domain.CoordinatorDetail;
 import io.chubao.joyqueue.broker.coordinator.group.domain.GroupMemberMetadata;
 import io.chubao.joyqueue.broker.coordinator.group.domain.GroupMetadata;
-import io.chubao.joyqueue.broker.election.ElectionNode;
 import io.chubao.joyqueue.broker.monitor.service.*;
 import io.chubao.joyqueue.broker.monitor.stat.BrokerStatExt;
+import io.chubao.joyqueue.broker.monitor.stat.ElectionEventStat;
 import io.chubao.joyqueue.broker.monitor.stat.JVMStat;
 import io.chubao.joyqueue.broker.monitor.stat.ReplicaNodeStat;
 import io.chubao.joyqueue.domain.TopicConfig;
@@ -306,9 +306,7 @@ public class DefaultBrokerMonitorService implements BrokerMonitorService {
 
 
     @Override
-    public ElectionNode.State getPartitionGroupNodeState(String topic, int partitionGroup) {
-        return partitionMonitorService.getPartitionGroupNodeState(topic,partitionGroup);
+    public ElectionEventStat getReplicaRecentElectionEvent(String topic, int partitionGroup) {
+        return partitionMonitorService.getReplicaRecentElectionEvent(topic,partitionGroup);
     }
-
-
 }

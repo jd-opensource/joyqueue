@@ -16,7 +16,6 @@
 package io.chubao.joyqueue.broker.monitor.service.support;
 
 import com.google.common.collect.Lists;
-import io.chubao.joyqueue.broker.election.ElectionNode;
 import io.chubao.joyqueue.broker.election.ElectionService;
 import io.chubao.joyqueue.broker.monitor.converter.BrokerMonitorConverter;
 import io.chubao.joyqueue.broker.monitor.service.PartitionMonitorService;
@@ -95,12 +94,12 @@ public class DefaultPartitionMonitorService implements PartitionMonitorService {
 
 
     @Override
-    public ElectionNode.State getPartitionGroupNodeState(String topic, int partitionGroup) {
+    public ElectionEventStat getReplicaRecentElectionEvent(String topic, int partitionGroup) {
         TopicStat topicStat= brokerStat.getTopicStats().get(topic);
         if(topicStat!=null) {
             PartitionGroupStat partitionGroupStat=   topicStat.getPartitionGroupStatMap().get(partitionGroup);
             if(partitionGroupStat!=null){
-                return partitionGroupStat.getReplicationStat().getStat().getState();
+                return partitionGroupStat.getElectionEventStat();
             }
         }
         return null;
@@ -139,10 +138,9 @@ public class DefaultPartitionMonitorService implements PartitionMonitorService {
     public ReplicaNodeStat getReplicaState(String topic, int partitionGroup) {
         ReplicaNodeStat replicaNodeStat= brokerStat.getOrCreateTopicStat(topic).getOrCreatePartitionGroupStat(partitionGroup).getReplicationStat().getStat();
         replicaNodeStat.setBrokerId(brokerStat.getBrokerId());
-        replicaNodeStat.getPartitionGroup().setTopic(topic);
-        replicaNodeStat.getPartitionGroup().setPartitionGroupId(partitionGroup);
         return replicaNodeStat;
     }
+
 
     protected PartitionGroupMonitorInfo convertPartitionGroupMonitorInfo(PartitionGroupStat partitionGroupStat) {
         StoreManagementService.PartitionGroupMetric partitionGroupMetric = storeManagementService.partitionGroupMetric(partitionGroupStat.getTopic(), partitionGroupStat.getPartitionGroup());

@@ -399,7 +399,7 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
             TopicPartitionGroup partitionGroup= event.getTopicPartitionGroup();
             if(partitionGroup!=null) {
                 PartitionGroupStat partitionGroupStat= brokerStat.getOrCreateTopicStat(partitionGroup.getTopic()).getOrCreatePartitionGroupStat(partitionGroup.getPartitionGroupId());
-                ElectionEventStat electionStat= partitionGroupStat.getElectionStat();
+                ElectionEventStat electionStat= partitionGroupStat.getElectionEventStat();
                 electionStat.setState(event.getEventType());
                 electionStat.setTerm(event.getTerm());
                 electionStat.setTimestamp(SystemClock.now());

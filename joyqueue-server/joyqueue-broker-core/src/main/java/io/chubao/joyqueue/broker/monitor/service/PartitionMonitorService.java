@@ -15,11 +15,12 @@
  */
 package io.chubao.joyqueue.broker.monitor.service;
 
-import io.chubao.joyqueue.broker.election.ElectionNode;
+
+
+import io.chubao.joyqueue.broker.monitor.stat.ElectionEventStat;
 import io.chubao.joyqueue.broker.monitor.stat.ReplicaNodeStat;
 import io.chubao.joyqueue.monitor.PartitionGroupMonitorInfo;
 import io.chubao.joyqueue.monitor.PartitionMonitorInfo;
-
 import java.util.List;
 
 /**
@@ -77,13 +78,13 @@ public interface PartitionMonitorService {
 
 
     /**
-     * 获取partitionGroup node state info  info
+     * 获取 partitionGroup replica 最近一次选举事件
      *
      * @param topic          主题
      * @param partitionGroup partitionGroup
      * @return Node election state  or null if partition group not exist
      */
-    ElectionNode.State getPartitionGroupNodeState(String topic, int partitionGroup);
+    ElectionEventStat getReplicaRecentElectionEvent(String topic, int partitionGroup);
 
     /**
      * 获取主题的所有分区组监控信息
@@ -109,7 +110,6 @@ public interface PartitionMonitorService {
      *
      **/
     ReplicaNodeStat getReplicaState(String topic, int partitionGroup);
-
 
     /**
      * 获取主题下应用所有分区组的监控信息
