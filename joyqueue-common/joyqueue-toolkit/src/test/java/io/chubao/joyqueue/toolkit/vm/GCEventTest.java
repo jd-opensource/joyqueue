@@ -13,19 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/**
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+
 package io.chubao.joyqueue.toolkit.vm;
 
 import com.sun.management.GarbageCollectionNotificationInfo;
@@ -94,7 +82,7 @@ public class GCEventTest {
         GarbageCollectorMonitor gcMonitor=new GarbageCollectorMonitor();
         MemoryStat stat=gcMonitor.memSnapshot();
         StringBuilder builder=new StringBuilder();
-        ByteBuffer byteBuffer=ByteBuffer.allocateDirect(1024*1024*1024);
+        ByteBuffer byteBuffer=ByteBuffer.allocateDirect(2*1024*1024);
         long direct=SharedSecrets.getJavaNioAccess().getDirectBufferPool().getMemoryUsed();
 
         builder.append("heap:").append("init ").append(stat.getHeapInit()).append(" bytes,")
