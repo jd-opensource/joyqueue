@@ -33,10 +33,10 @@ public class JVMStat {
     private AtomicLong  totalGcTime;
 
     // interval eden gc times
-    private transient LoadMetric edenGcTimes;
+    private  LoadMetric edenGcTimes;
 
     // interval old gc times
-    private transient   LoadMetric oldGcTimes;
+    private  LoadMetric oldGcTimes;
     // snapshot
     private   MemoryStat memoryStat;
 
@@ -104,6 +104,7 @@ public class JVMStat {
      * Recent interval snapshot
      *
      **/
+    @JSONField(serialize =false)
     public JVMStat getRecentSnapshot() {
         if(recentSnapshot==null){
             recentSnapshot=snapshot();
@@ -117,7 +118,7 @@ public class JVMStat {
 
     /**
      *
-     * Last interval snapshot
+     * Snapshot and reset
      *
      **/
     @JSONField(serialize =false)

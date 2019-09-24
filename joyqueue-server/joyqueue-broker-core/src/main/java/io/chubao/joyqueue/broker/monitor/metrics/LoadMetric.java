@@ -13,6 +13,7 @@
  */
 package io.chubao.joyqueue.broker.monitor.metrics;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.codahale.metrics.*;
 
 /**
@@ -39,6 +40,7 @@ public class LoadMetric implements Metered, Sampling {
      * Load metric snapshot
      *
      **/
+    @JSONField(serialize = false)
     public LoadMetric getIntervalLoadMetric(){
        LoadMetric snapshot= new LoadMetric(meter,histogram);
                   reset();
