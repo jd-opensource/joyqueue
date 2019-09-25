@@ -1,4 +1,6 @@
 /**
+ * Copyright 2019 The JoyQueue Authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +15,9 @@
  */
 package io.openmessaging.joyqueue.config;
 
-import com.jd.joyqueue.client.internal.exception.ClientException;
-import com.jd.joyqueue.exception.JoyQueueCode;
-import com.jd.joyqueue.network.transport.exception.TransportException;
+import io.chubao.joyqueue.client.internal.exception.ClientException;
+import io.chubao.joyqueue.exception.JoyQueueCode;
+import io.chubao.joyqueue.network.transport.exception.TransportException;
 import io.openmessaging.exception.OMSDestinationException;
 import io.openmessaging.exception.OMSMessageFormatException;
 import io.openmessaging.exception.OMSRuntimeException;
@@ -24,8 +26,8 @@ import io.openmessaging.exception.OMSTimeOutException;
 
 /**
  * ClientExceptionConverter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/2/19
  */
 public class ExceptionConverter {

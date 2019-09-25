@@ -1,4 +1,6 @@
 /**
+ * Copyright 2019 The JoyQueue Authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,10 +15,10 @@
  */
 package io.openmessaging.joyqueue.producer.support;
 
-import com.jd.joyqueue.client.internal.producer.domain.ProduceMessage;
-import com.jd.joyqueue.client.internal.producer.domain.SendResult;
-import com.jd.joyqueue.client.internal.producer.interceptor.ProduceContext;
-import com.jd.joyqueue.client.internal.producer.interceptor.ProducerInterceptor;
+import io.chubao.joyqueue.client.internal.producer.domain.ProduceMessage;
+import io.chubao.joyqueue.client.internal.producer.domain.SendResult;
+import io.chubao.joyqueue.client.internal.producer.interceptor.ProduceContext;
+import io.chubao.joyqueue.client.internal.producer.interceptor.ProducerInterceptor;
 import io.openmessaging.interceptor.Context;
 import io.openmessaging.joyqueue.producer.interceptor.ContextAdapter;
 import io.openmessaging.joyqueue.producer.message.OMSProduceMessage;
@@ -25,8 +27,8 @@ import java.util.List;
 
 /**
  * ProducerInterceptorAdapter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/2/19
  */
 public class ProducerInterceptorAdapter implements ProducerInterceptor {

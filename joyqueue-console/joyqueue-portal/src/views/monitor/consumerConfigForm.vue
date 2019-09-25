@@ -22,7 +22,7 @@
         <d-form-item label="延迟消费(ms):" prop="delay" style="width:46%" label-width="90px">
           <d-input placeholder="请输入值,最大延迟1小时" v-model.number="formData.delay" style="width:130%"/>
         </d-form-item>
-        <d-form-item label="并行消费:" style="width:46%; padding-left:35px">
+        <d-form-item label="并行消费:" prop="concurrent" style="width:46%; padding-left:35px">
           <d-input placeholder="请输入并行数,范围1-50,默认1" v-model.number="formData.concurrent" style="width:130%"/>
         </d-form-item>
         <d-form-item label="禁止消费IP:" style="width:100%" label-width="90px" >
@@ -42,6 +42,15 @@
                      placeholder="格式如下:key1:value1, key2:value2"/>
           </d-form-item>
         </div>
+        <label class="gray_line"></label>
+          <div class="bottom">
+              <d-form-item label="重试次数:" prop="maxRetrys" style="width:46%" label-width="90px">
+                <d-input placeholder="默认无限制" v-model="formData.maxRetrysStr" style="width:130%"/>
+              </d-form-item>
+              <d-form-item label="过期时间:" prop="expireTime" label-width="115px">
+                <d-input placeholder="单位ms，默认3天" v-model="formData.expireTimeStr" style="width:130%"/>
+              </d-form-item>
+          </div>
       </div>
     </d-form>
   </div>
@@ -81,7 +90,8 @@ export default {
   },
   data () {
     let numberValidator = (rule, value, callback) => {
-      // console.log(rule);
+      console.log(22)
+      console.log(rule)
       if ((rule.min !== undefined && value < rule.min) || (rule.max !== undefined && value > rule.max)) {
         callback(new Error(rule.hint))
       } else {
@@ -89,34 +99,64 @@ export default {
       }
     }
     return {
-      formData: this.data,
+      formData: {},
       rules: {
         ackTimeout:
             [
+              // {pattern: /^[1-9]+[0-9]{1,39}$/, message: '时时间至少为1s', trigger: 'change'}
               {validator: numberValidator, type: 'number', trigger: 'change', min: 1000, hint: '超时时间至少为1s', required: false}
             ],
-        delay:
-            [
-              {validator: numberValidator, type: 'number', trigger: 'change', min: 0, max: 3600000, hint: '延时必需大于等于0，且不超过3600s', required: false}
-            ],
+        delay: [
+          {validator: numberValidator, type: 'number', trigger: 'change', min: 0, max: 3600000, hint: '延时必需大于等于0，且不超过3600s', required: false}
+        ],
         batchSize:
             [
               {validator: numberValidator, type: 'number', trigger: 'change', max: 100, min: 1, hint: '批量大小1~100', required: false}
             ],
-        concurrent:
+        concurrent: [
+          {validator: numberValidator, type: 'number', trigger: 'change', max: 50, min: 1, hint: '并行度1~50', required: false}
+        ],
+        maxRetrys:
           [
-            {validator: numberValidator, type: 'number', trigger: 'change', max: 50, min: 1, hint: '并行度1~50', required: false}
+            {validator: numberValidator, type: 'number', trigger: 'change', max: 999, min: 0, hint: '重试次数0~999', required: false}
+          ],
+        expireTime:
+          [
+            {validator: numberValidator, type: 'number', trigger: 'change', max: 259200000, min: 0, hint: '过期时间', required: false}
           ]
-
       }
     }
   },
   methods: {
     getFormData () {
-      // this.submitForm()
-      return this.formData
+      let data = deepCopy(this.formData)
+      if (!data.maxRetrysStr) {
+        data.maxRetrys = 0
+      } else {
+        data.maxRetrys = parseInt(data.maxRetrysStr)
+      }
+      if (!data.expireTimeStr) {
+        data.expireTime = 0
+      } else {
+        data.expireTime = parseInt(data.expireTimeStr)
+      }
+      return data
+    }
+  },
+  mounted () {
+    this.formData = this.data
+
+    if (!this.data.maxRetrys) {
+      this.formData.maxRetrysStr = ''
+    } else {
+      this.formData.maxRetrysStr = this.data.maxRetrys.toString()
     }
 
+    if (!this.formData.maxRetrys) {
+      this.formData.expireTimeStr = ''
+    } else {
+      this.formData.expireTimeStr = this.data.expireTime.toString()
+    }
   }
 }
 </script>

@@ -15,8 +15,9 @@
       </d-button-group>
     </div>
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
-              @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange">
-    </my-table>
+                  @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
+                  @on-del="del" @on-owner="setOwner">
+        </my-table>
 
     <!--添加用户-->
     <my-dialog :dialog="addDialog" @on-dialog-confirm="addConfirm()" @on-dialog-cancel="addCancel()">
@@ -35,6 +36,8 @@
 import myTable from '../../components/common/myTable.vue'
 import myDialog from '../../components/common/myDialog.vue'
 import crud from '../../mixins/crud.js'
+import apiRequest from '../../utils/apiRequest.js'
+
 export default {
   name: 'application',
   components: {
@@ -46,35 +49,63 @@ export default {
     return {
       urls: {
         search: `/application/${this.$route.query.id}/user/search`,
-        add: `/application/${this.$route.query.id}/user/add`
+        add: `/application/${this.$route.query.id}/user/add`,
+        findApp: `/application/get/${this.$route.query.id}`,
+        del: `/application/${this.$route.query.id}/user/delete`,
+        setOwner: `/application/${this.$route.query.id}/user/setOwner`
       },
       searchData: {
         keyword: ''
       },
+      appOwner: '',
       tableData: {
         rowData: [],
         colData: [
-          {
-            title: 'erp',
-            key: 'code'
-          },
-          {
-            title: '中文名',
-            key: 'name'
-          },
-          {
-            title: '所属部门',
-            key: 'orgName'
-          },
-          {
-            title: '邮箱',
-            key: 'email'
-          },
-          {
-            title: '手机号',
-            key: 'mobile'
-          }
-        ]
+            {
+              title: 'erp',
+              key: 'code',
+              width: '12%'
+            },
+            {
+              title: '中文名',
+              key: 'name',
+              width: '12%'
+            },
+            {
+              title: '所属部门',
+              key: 'orgName',
+              width: '25%'
+            },
+            {
+              title: '邮箱',
+              key: 'email',
+              width: '13%'
+            },
+            {
+              title: '手机号',
+              key: 'mobile',
+              width: '10%'
+            },
+            {
+              title: '是否是负责人',
+              key: 'isOwner',
+              width: '10%'
+            }
+          ],
+         btns: [
+           {
+             txt: '移除',
+             method: 'on-del',
+             bindKey: 'canDel',
+             bindVal: 1
+           },
+           {
+             txt: '设置为负责人',
+             method: 'on-owner',
+             bindKey: 'canOwner',
+             bindVal: 1
+           }
+         ]
       },
       multipleSelection: [],
       addDialog: {
@@ -92,6 +123,74 @@ export default {
   computed: {
   },
   methods: {
+    setOwner (item) {
+      let _this = this
+      this.$Dialog.confirm({
+        title: '提示',
+        content: '确定设置为应用负责人吗？'
+      }).then(() => {
+        this.update(_this.urls.setOwner + '/' + item.id, {}, '设置成功', '设置失败')
+      })
+    },
+    getList () {
+      this.showTablePin = true
+      let data = this.getSearchVal()
+      let _this = this
+      apiRequest.post(this.urls.search, {}, data).then((data) => {
+        if (data === '') {
+          return
+        }
+
+        let users = data.data || []
+
+        // 查app
+        apiRequest.get(_this.urls.findApp, {}).then((app) => {
+          if (app && app.data && app.data.owner) {
+            _this.appOwner = app.data.owner.code
+          } else {
+            _this.appOwner = ''
+          }
+
+          console.log(_this.$store.getters.loginUserName)
+          users.forEach(user => {
+            user['canOwner'] = 0
+            user['canDel'] = 0
+            user['isOwner'] = ''
+
+            if (_this.$store.getters.isAdmin) { // 管理员
+              user['canDel'] = 1
+              user['canOwner'] = 1
+              if (_this.appOwner && user.code === _this.appOwner) { // owner不能不能重复设置为负责人
+                user['canOwner'] = 0
+                user['canDel'] = 0
+              }
+            } else if (_this.appOwner && _this.$store.getters.loginUserName === _this.appOwner) { // 负责人
+              if (user.code !== app.data.owner.code) { // owner不能删除自己，不能重复设置为负责人，但是可以删除、设置其他人为联系人
+                user['canOwner'] = 1
+                user['canDel'] = 1
+              }
+            } else { // 普通用户
+              if (user.code === _this.$store.getters.loginUserName) { // 普通应用用户只能删除自己
+                user['canDel'] = 1
+              }
+            }
+
+            if (_this.appOwner && user.code === _this.appOwner) { // 加是否是负责人列
+              user['isOwner'] = '是'
+            }
+          })
+
+          data.pagination = data.pagination || {
+            totalRecord: data.data.length
+          }
+          _this.page.total = data.pagination.totalRecord
+          _this.page.page = data.pagination.page
+          _this.page.size = data.pagination.size
+          _this.tableData.rowData = users
+          _this.showTablePin = false
+        })
+      })
+    }
   },
   // watch: {
   //   '$route' (to, from) {

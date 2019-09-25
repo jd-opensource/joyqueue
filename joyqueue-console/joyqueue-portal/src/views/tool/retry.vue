@@ -11,9 +11,10 @@
         <span slot="prepend">状态</span>
         <d-option v-for="item in statusList" :value="item.key" :key="item.key">{{ item.value }}</d-option>
       </d-select>
-      <d-date-picker class="input4"
+      <d-date-picker class="input5"
                      v-model="times"
-                     type="daterange"
+                     size="large"
+                     type="datetimerange"
                      range-separator="至"
                      start-placeholder="开始日期"
                      end-placeholder="结束日期"
@@ -31,7 +32,7 @@
 
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
               @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
-              @on-del="del" @on-download="download">
+              @on-del="del" @on-download="download" @on-recovery="recovery">
     </my-table>
   </div>
 </template>
@@ -156,8 +157,7 @@ export default {
         },
         query: {
           topic: this.search.topic,
-          // app: this.search.app,
-          app: this.$route.query.app,
+          app: this.search.app,
           status: this.search.status,
           businessId: this.businessId
         }
@@ -187,12 +187,21 @@ export default {
       })
     },
     download (item) {
-      apiRequest.get(this.urlOrigin.download + '/' + item.id).then()
+      document.location.assign("/v1"+this.urls.download+'/' +item.id+'/topic/'+item.topic)
+      // apiRequest.get(this.urlOrigin.download + '/' + item.id).then()
     },
     recovery (item) {
-      apiRequest.put(this.urlOrigin.recovery + '/' + item.id).then(data => {
+      apiRequest.put(this.urlOrigin.recovery + '/' + item.id +'/topic/'+item.topic).then(data => {
         this.$Dialog.success({
           content: '恢复成功'
+        })
+        this.getList()
+      })
+    },
+    del (item) {
+      apiRequest.delete(this.urlOrigin.del + '/' + item.id +'/topic/'+item.topic).then(data => {
+        this.$Dialog.success({
+          content: '删除成功'
         })
         this.getList()
       })

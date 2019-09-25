@@ -6,21 +6,16 @@
           <icon name="plus-circle" style="margin-left: 3px;"/>
         </d-button>
         <slot name="extendBtn"></slot>
-        <d-button v-if="showBrokerChart" @click="goBrokerChart" class="button">Broker监控
-          <icon name="cpu" style="margin-left: 3px;"/>
-        </d-button>
-        <d-button v-if="showHostChart" @click="goHostChart" class="button">主机监控
-          <icon name="monitor" style="margin-left: 3px;"/>
-        </d-button>
         <d-button type="primary" @click="getList" class="button">刷新
           <icon name="refresh-cw" style="margin-left: 3px;"></icon>
         </d-button>
       </d-button-group>
     </div>
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
-              @on-current-change="handleCurrentChange" @on-view-detail="goDetail" @on-scale="groupScale"
-              @on-merge="groupMerge" @on-del="del" @on-addPartition="addPartition" @on-removePartition="removePartition" @on-position="goPosition">
-    </my-table>
+                  @on-current-change="handleCurrentChange" @on-view-detail="goDetail" @on-scale="groupScale"
+                  @on-merge="groupMerge" @on-del="del" @on-addPartition="addPartition" @on-removePartition="removePartition"
+                  @on-position="goPosition" @on-replication="goReplicationChart">
+        </my-table>
 
     <!--详情-->
     <my-dialog :dialog="groupDetailDialog" @on-dialog-confirm="groupDetailConfirm()" @on-dialog-cancel="groupDetailCancel()">
@@ -52,8 +47,9 @@
     </my-dialog>
     <!--扩容-->
     <my-dialog :dialog="groupNewDialog" @on-dialog-confirm="groupNewConfirm()" @on-dialog-cancel="groupNewCancel()">
-      <group-new :data="groupNewDialogData" @on-dialog-confirm="groupNewConfirm()" @on-dialog-cancel="groupNewCancel()"  @on-partition-group-change="topicUpdate"></group-new>
-    </my-dialog>
+          <group-new :data="groupNewDialogData" @on-dialog-confirm="groupNewConfirm()" @on-dialog-cancel="groupNewCancel()"
+                     @on-partition-group-change="topicUpdate"></group-new>
+        </my-dialog>
   </div>
 </template>
 
@@ -67,7 +63,6 @@ import GroupPosition from './groupPosition.vue'
 import groupMerge from './groupMerge.vue'
 import groupNew from './groupNew.vue'
 import crud from '../../mixins/crud.js'
-import {getTopicCode} from '../../utils/common.js'
 
 export default {
   name: 'partitionGroup',
@@ -82,14 +77,6 @@ export default {
   },
   mixins: [ crud ],
   props: {
-    showHostChart: {
-      type: Boolean,
-      default: false
-    },
-    showBrokerChart: {
-      type: Boolean,
-      default: false
-    }
   },
   data () {
     return {
@@ -196,29 +183,37 @@ export default {
             method: 'on-removePartition'
           },
           {
+            txt: '删除',
+            method: 'on-del'
+          },
+          {
             txt: '主从同步监控',
             method: 'on-position'
+          },
+          {
+            txt: '复制性能监控图表',
+            method: 'on-replication'
           }
         ]
       },
       groupDetailDialog: {
         visible: false,
         title: '详情',
-        width: 800,
+        width: 1350,
         showFooter: false
       },
       groupDetailDialogData: {},
       positionDialog: {
         visible: false,
         title: '主从同步监控',
-        width: 800,
+        width: 850,
         showFooter: false
       },
       positionDialogData: {},
       groupScaleDialog: {
         visible: false,
         title: '增加副本',
-        width: 800,
+        width: 850,
         showFooter: false
       },
       groupScaleDialogData: {},
@@ -257,7 +252,8 @@ export default {
         partitions: 0
       },
       newGroupData: {
-      }
+      },
+      monitorUId: this.$store.getters.uIds.partitionGroup
     }
   },
   computed: {
@@ -302,30 +298,6 @@ export default {
         })
       }
     },
-    goBrokerChart () {
-      apiRequest.get(this.urls.getUrl + '/broker', {}, {}).then((data) => {
-        let url = data.data || ''
-        if (url.indexOf('?') < 0) {
-          url += '?'
-        } else if (!url.endsWith('?')) {
-          url += '&'
-        }
-        url = url + 'var-topic=' + getTopicCode(this.searchData.topic, this.searchData.namespace)
-        window.open(url)
-      })
-    },
-    goHostChart () {
-      apiRequest.get(this.urls.getUrl + '/host', {}, {}).then((data) => {
-        let url = data.data || ''
-        if (url.indexOf('?') < 0) {
-          url += '?'
-        } else if (!url.endsWith('?')) {
-          url += '&'
-        }
-        url = url + 'var-topic=' + getTopicCode(this.searchData.topic, this.searchData.namespace)
-        window.open(url)
-      })
-    },
     goDetail (item) {
       this.groupDetailDialogData = {groupNo: item.groupNo, topic: this.searchData.topic, namespace: this.searchData.namespace}
       this.groupDetailDialog.visible = true
@@ -339,6 +311,18 @@ export default {
     goPosition (item) {
       this.positionDialogData = {groupNo: item.groupNo, topic: this.searchData.topic, namespace: this.searchData.namespace}
       this.positionDialog.visible = true
+    },
+    goReplicationChart (item) {
+      apiRequest.get(this.urls.getUrl + '/' + this.monitorUId, {}, {}).then((data) => {
+        let url = data.data || ''
+        if (url.indexOf('?') < 0) {
+          url += '?'
+        } else if (!url.endsWith('?')) {
+          url += '&'
+        }
+        url = url + 'var-topic=' + this.$route.query.id + '&var-partitionGroup=' + item.groupNo
+        window.open(url)
+      })
     },
     positionConfirm () {
 

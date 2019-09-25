@@ -1,4 +1,6 @@
 /**
+ * Copyright 2019 The JoyQueue Authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,9 +17,9 @@ package io.openmessaging.joyqueue.producer.support;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
-import com.jd.joyqueue.client.internal.MessageAccessPoint;
-import com.jd.joyqueue.client.internal.producer.MessageProducer;
-import com.jd.joyqueue.client.internal.producer.feedback.config.TxFeedbackConfig;
+import io.chubao.joyqueue.client.internal.MessageAccessPoint;
+import io.chubao.joyqueue.client.internal.producer.MessageProducer;
+import io.chubao.joyqueue.client.internal.producer.feedback.config.TxFeedbackConfig;
 import io.openmessaging.Future;
 import io.openmessaging.ServiceLifeState;
 import io.openmessaging.extension.Extension;
@@ -39,8 +41,8 @@ import java.util.Set;
 
 /**
  * TransactionProducerImpl
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/2/22
  */
 public class TransactionProducerImpl implements ExtensionProducer {

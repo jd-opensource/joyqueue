@@ -47,6 +47,9 @@
         <route inherit="get"
                path="/v1/application/findAll" handlers="validateAdmin application#findAll render"
                errors="error"/>
+        <route inherit="put"
+               path="/v1/application/:id/user/setOwner/:userId" handlers="application#setOwner render"
+               errors="error"/>
 
         <!--application user 操作 -->
         <route inherit="post"
@@ -56,6 +59,10 @@
         <route inherit="post"
                path="/v1/application/:appId/user/add"
                handlers="validateApplication applicationUser#add render"
+               errors="error"/>
+        <route inherit="delete"
+               path="/v1/application/:appId/user/delete/:userId"
+               handlers="validateApplication applicationUser#delete render"
                errors="error"/>
 
         <!--application token 操作-->
@@ -295,12 +302,13 @@
 
         <route inherit="get"
                path="/v1/consumer/findAllSubscribeGroups" handlers="consumer#findAllSubscribeGroups render"/>
+        <route inherit="get"
+               path="/v1/consumer/findAppsByTopic/topic/:topic" handlers="consumer#findApspByTopic render"/>
 
         <!-- consumer Config -->
         <route inherit="post"
                path="/v1/consumer/config/addOrUpdate" handlers="consumer#configAddOrUpdate render"
                errors="error"/>
-
 
         <!--consume offset-->
         <route inherit="post"
@@ -385,6 +393,10 @@
                errors="error"/>
         <route inherit="get"
                path="/v1/monitor/start/:brokerId" handlers="brokerMonitor#startInfo render"
+               errors="error"/>
+
+        <route inherit="get"
+               path="/v1/monitor/broker/metadata/:brokerId/:topicFullName/:group" handlers="brokerMonitor#findBrokerMetadata render"
                errors="error"/>
 
 
@@ -472,14 +484,13 @@
                path="/v1/retry/search" handlers="retry#search render"
                errors="error"/>
         <route inherit="delete"
-               path="/v1/retry/delete/:id" handlers="retry#delete render"
+               path="/v1/retry/delete/:id/topic/:topic" handlers="retry#delete render"
                errors="error"/>
-
         <route inherit="put"
-               path="/v1/retry/recovery/:id" handlers="retry#recovery render"
+               path="/v1/retry/recovery/:id/topic/:topic" handlers="retry#recovery render"
                errors="error"/>
         <route inherit="get"
-               path="/v1/retry/download/:id" handlers="retry#download render"
+               path="/v1/retry/download/:id/topic/:topic" handlers="retry#download render"
                errors="error"/>
         <route inherit="get"
                path="/v1/retry/isServerEnabled" handlers="retry#isServerEnabled render"

@@ -1,4 +1,6 @@
 /**
+ * Copyright 2019 The JoyQueue Authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,13 +15,13 @@
  */
 package io.openmessaging.joyqueue.producer.support;
 
-import com.jd.joyqueue.client.internal.producer.domain.TransactionStatus;
+import io.chubao.joyqueue.client.internal.producer.domain.TransactionStatus;
 import io.openmessaging.producer.TransactionStateCheckListener;
 
 /**
  * TransactionalContextAdapter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/2/19
  */
 public class TransactionalContextAdapter implements TransactionStateCheckListener.TransactionalContext {

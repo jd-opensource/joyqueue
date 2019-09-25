@@ -1,4 +1,6 @@
 /**
+ * Copyright 2019 The JoyQueue Authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,12 +15,12 @@
  */
 package io.openmessaging.joyqueue.config;
 
-import com.jd.joyqueue.client.internal.consumer.config.ConsumerConfig;
-import com.jd.joyqueue.client.internal.nameserver.NameServerConfig;
-import com.jd.joyqueue.client.internal.producer.config.ProducerConfig;
-import com.jd.joyqueue.client.internal.producer.feedback.config.TxFeedbackConfig;
-import com.jd.joyqueue.client.internal.transport.config.TransportConfig;
-import com.jd.joyqueue.domain.QosLevel;
+import io.chubao.joyqueue.client.internal.consumer.config.ConsumerConfig;
+import io.chubao.joyqueue.client.internal.nameserver.NameServerConfig;
+import io.chubao.joyqueue.client.internal.producer.config.ProducerConfig;
+import io.chubao.joyqueue.client.internal.producer.feedback.config.TxFeedbackConfig;
+import io.chubao.joyqueue.client.internal.transport.config.TransportConfig;
+import io.chubao.joyqueue.domain.QosLevel;
 import io.openmessaging.KeyValue;
 import io.openmessaging.joyqueue.domain.JoyQueueConsumerBuiltinKeys;
 import io.openmessaging.joyqueue.domain.JoyQueueNameServerBuiltinKeys;
@@ -28,8 +30,8 @@ import io.openmessaging.joyqueue.domain.JoyQueueTxFeedbackBuiltinKeys;
 
 /**
  * KeyValueConverter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/2/19
  */
 public class KeyValueConverter {

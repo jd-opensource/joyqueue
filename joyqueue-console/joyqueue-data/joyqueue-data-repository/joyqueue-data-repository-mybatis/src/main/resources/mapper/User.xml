@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.jd.joyqueue.repository.UserRepository">
+<mapper namespace="io.chubao.joyqueue.repository.UserRepository">
     <resultMap id="baseResultMap" type="User">
         <result property="id" column="id" jdbcType="BIGINT"/>
         <result property="code" column="code" jdbcType="VARCHAR"/>
@@ -225,15 +225,17 @@
         <include refid="baseColumn"/>
         from `user` u
         <if test="query.appId != null ">
-            INNER JOIN application_user au ON u.id=au.user_id AND au.app_id=#{query.appId}
+            INNER JOIN application_user au ON u.id=au.user_id AND au.app_id=#{query.appId} AND au.status > -1 AND u.status > -1
         </if>
         <where>
+            1 = 1
             <if test="query.keyword != null and query.keyword != '' ">
-                (u.`code` like concat('%', #{query.keyword},'%' ) or u.`name` like concat('%', #{query.keyword},'%' ))
+                and (u.`code` like concat('%', #{query.keyword},'%' ) or u.`name` like concat('%', #{query.keyword},'%' ))
             </if>
             <if test="query.status != null ">
                 and u.`status`=#{status}
             </if>
+            and u.`status` > -1
         </where>
         order by u.id desc
     </select>

@@ -1,4 +1,6 @@
 /**
+ * Copyright 2019 The JoyQueue Authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +15,8 @@
  */
 package io.openmessaging.joyqueue.support;
 
-import com.jd.joyqueue.exception.JoyQueueCode;
-import com.jd.joyqueue.toolkit.service.Service;
+import io.chubao.joyqueue.exception.JoyQueueCode;
+import io.chubao.joyqueue.toolkit.service.Service;
 import io.openmessaging.ServiceLifeState;
 import io.openmessaging.ServiceLifecycle;
 import io.openmessaging.exception.OMSRuntimeException;
@@ -22,8 +24,8 @@ import io.openmessaging.joyqueue.config.ExceptionConverter;
 
 /**
  * AbstractServiceLifecycle
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/2/19
  */
 public abstract class AbstractServiceLifecycle extends Service implements ServiceLifecycle {

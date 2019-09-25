@@ -1,5 +1,7 @@
 #!/bin/bash
 #
+# Copyright 2019 The JoyQueue Authors.
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,7 +16,6 @@
 #
 
 
-
 if [ -d "./lib" ]; then
         CLASSPATH=$CLASSPATH:lib/*
 else
@@ -27,6 +28,6 @@ fi
 JVM_MEM="-Xms4G -Xmx4G -XX:+UseG1GC"
 JVM_GC_LOG=" -XX:+PrintGCDetails -XX:+PrintGCApplicationStoppedTime  -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=5 -XX:GCLogFileSize=64m  -Xloggc:/dev/shm/benchmark-client-gc_%p.log"
 
-java  -cp $CLASSPATH $JVM_MEM com.jd.joyqueue.nsr.admin.TopicAdmin $*
+java  -cp $CLASSPATH $JVM_MEM io.chubao.joyqueue.nsr.admin.TopicAdmin $*
 
 

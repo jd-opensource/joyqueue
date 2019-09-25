@@ -1,4 +1,6 @@
 /**
+ * Copyright 2019 The JoyQueue Authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,16 +15,16 @@
  */
 package io.openmessaging.joyqueue.consumer.support;
 
-import com.jd.joyqueue.client.internal.consumer.MessageListener;
-import com.jd.joyqueue.client.internal.consumer.domain.ConsumeMessage;
-import com.jd.joyqueue.client.internal.consumer.exception.IgnoreAckException;
+import io.chubao.joyqueue.client.internal.consumer.MessageListener;
+import io.chubao.joyqueue.client.internal.consumer.domain.ConsumeMessage;
+import io.chubao.joyqueue.client.internal.consumer.exception.IgnoreAckException;
 import io.openmessaging.joyqueue.consumer.message.MessageConverter;
 import io.openmessaging.message.Message;
 
 /**
  * MessageListenerAdapter
+ *
  * author: gaohaoxiang
- * email: gaohaoxiang@jd.com
  * date: 2019/2/20
  */
 public class MessageListenerAdapter implements MessageListener {

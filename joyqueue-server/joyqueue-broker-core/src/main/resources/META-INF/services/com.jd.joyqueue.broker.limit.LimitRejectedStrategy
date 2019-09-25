@@ -1,4 +1,0 @@
-com.jd.joyqueue.broker.limit.support.BlockLimitRejectedStrategy
-com.jd.joyqueue.broker.limit.support.DelayLimitRejectedStrategy
-com.jd.joyqueue.broker.limit.support.ExceptionLimitRejectedStrategy
-com.jd.joyqueue.broker.limit.support.NoneLimitRejectedStrategy

@@ -1,4 +1,6 @@
 /**
+ * Copyright 2019 The JoyQueue Authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +15,7 @@
  */
 package io.openmessaging.spring.config;
 
-import io.openmessaging.interceptor.ConsumerInterceptor;
-import io.openmessaging.interceptor.ProducerInterceptor;
+import io.openmessaging.producer.TransactionStateCheckListener;
 import io.openmessaging.spring.OMSSpringConsts;
 import io.openmessaging.spring.support.ProducerContainer;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -101,7 +102,7 @@ public class ProducerBeanDefinitionParser extends AbstractBeanDefinitionParser {
             parserContext.getRegistry().registerBeanDefinition(listenerBeanId, listenerBeanDefinition);
         }
 
-        if (!ProducerInterceptor.class.isAssignableFrom(listenerClass) && !ConsumerInterceptor.class.isAssignableFrom(listenerClass)) {
+        if (!TransactionStateCheckListener.class.isAssignableFrom(listenerClass)) {
             throw new IllegalArgumentException(String.format("%s type error, need TransactionStateCheckListener", listenerClassName));
         }
 

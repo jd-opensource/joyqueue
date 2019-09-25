@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="headLine2">
-      <d-date-picker v-model="times" type="daterange" class="input4" range-separator="至"
+      <d-date-picker v-model="times" type="datetimerange" size="large" class="input5" range-separator="至"
                      start-placeholder="开始日期" end-placeholder="结束日期" value-format="timestamp"
                      :default-time="['00:00:00', '23:59:59']" @on-enter="getList">
         <span slot="prepend">日期范围</span>
@@ -20,7 +20,7 @@
 
     <my-table :showPagination="false" :showPin="showTablePin" :data="tableData" :page="page" @on-size-change="handleSizeChange"
               @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
-              @on-consume="consume" @on-download="download" @on-retry="retry">
+              @on-consume="consume" @on-download="download" @on-retry="retryInit">
     </my-table>
 
     <div style="text-align: right; margin-right: 50px">
@@ -33,6 +33,13 @@
     <my-dialog :dialog="showDialog">
       <my-table :showPagination="false" :data="consumeData" style="padding: 0px">
       </my-table>
+    </my-dialog>
+
+    <my-dialog :dialog="retryDialog" @on-dialog-confirm="configConfirm" @on-dialog-cancel="dialogCancel('retryDialog')">
+      <d-select v-model="retry.app" style="width:200px">
+        <span slot="prepend">消费者</span>
+        <d-option v-for="item in retry.appList" :value="item" :key="item">{{ item }}</d-option>
+      </d-select>
     </my-dialog>
   </div>
 </template>
@@ -62,7 +69,8 @@ export default {
           endTime: '',
           sendTime: '',
           messageId: '',
-          count: 10
+          count: 10,
+          rowKeyStart: ''
         }
       }
     },
@@ -92,7 +100,8 @@ export default {
         search: '/archive/search',
         consume: '/archive/consume',
         download: '/archive/download',
-        retry: '/archive/retry'
+        retry: '/archive/retry',
+        getApps:'/consumer/findAppsByTopic/topic'
       },
       firstDis: true,
       nextDis: true,
@@ -101,6 +110,17 @@ export default {
         title: '消费记录',
         showFooter: false,
         width: '1000px'
+      },
+      retryDialog: {
+        visible: false,
+        title: '归档转重试',
+        showFooter: true,
+        width: '300px'
+      },
+      retry: {
+        appList:[],
+        app:'',
+        item:{}
       },
       consumeData: {
         rowData: [],
@@ -187,8 +207,8 @@ export default {
       },
       multipleSelection: [],
       times: [
-        new Date(new Date().setHours(0, 0, 0, 0)),
-        new Date(new Date().setHours(23, 59, 59, 0))
+        new Date().setHours(0, 0, 0, 0),
+        new Date().setHours(23, 59, 59, 0)
       ]
     }
   },
@@ -217,8 +237,10 @@ export default {
       this.search.endTime = this.times[1]
       if (isNext) {
         this.search.sendTime = oldData[oldData.length - 1].sendTime
+        this.search.rowKeyStart = oldData[oldData.length - 1].rowKeyStart
       } else {
         this.search.sendTime = this.search.beginTime
+        this.search.rowKeyStart = '';
       }
       apiRequest.post(this.urlOrigin.search, {}, this.search).then((data) => {
         this.tableData.rowData = data.data
@@ -235,8 +257,16 @@ export default {
         this.$Message.success('下载成功')
       })
     },
-    retry (item) {
-      apiRequest.post(this.urlOrigin.retry, {}, item).then(data => {
+    retryInit(item) {
+      this.retryDialog.visible = true;
+      this.retry.item = item;
+      apiRequest.get(this.urlOrigin.getApps + '/' + item.topic).then((data) => {
+        this.retry.appList = data.data
+      })
+    },
+    configConfirm () {
+      this.retry.item.app = this.retry.app;
+      apiRequest.post(this.urlOrigin.retry, {}, this.retry.item).then(data => {
         this.$Message.success('操作成功')
       })
     },
