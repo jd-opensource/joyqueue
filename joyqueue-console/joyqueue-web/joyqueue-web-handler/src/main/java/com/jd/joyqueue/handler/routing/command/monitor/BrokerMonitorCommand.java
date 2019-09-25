@@ -243,7 +243,7 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
     @Path("previewMessage")
     public Response previewMessage(@Body Subscribe subscribe){
         int defaultCount=10;
-        List<SimplifiedBrokeMessage> messages=brokerMessageService.previewPendingMessage(subscribe,defaultCount);
+        List<SimplifiedBrokeMessage> messages=brokerMessageService.previewMessage(subscribe,defaultCount);
         return Responses.success(messages);
     }
 

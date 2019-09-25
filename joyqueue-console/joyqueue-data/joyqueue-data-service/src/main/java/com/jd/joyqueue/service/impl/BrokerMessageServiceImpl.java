@@ -61,7 +61,7 @@ public class BrokerMessageServiceImpl implements BrokerMessageService {
     private HttpRestService httpRestService;
 
     @Override
-    public List<SimplifiedBrokeMessage> previewPendingMessage(Subscribe subscribe, int count) {
+    public List<SimplifiedBrokeMessage> previewMessage(Subscribe subscribe, int count) {
         List<SimplifiedBrokeMessage> simplifiedBrokeMessages=new ArrayList<>();
         List<Broker> brokers=new ArrayList<>();
         Future<Map<String,String >> resultFuture= brokerClusterQuery.asyncQueryOnBroker(subscribe, new RetrieveProvider<Subscribe>() {

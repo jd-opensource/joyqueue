@@ -31,12 +31,11 @@ public interface BrokerMessageService {
 
     /**
      *  积压消息预览，即将消费的消息
-     *  @param topic 消息主题
-     *  @param app   消息应用
+     *  @param subscribe 消息主题\消息应用
      *  @param count 获取的消息条数
      *
      * */
-    List<SimplifiedBrokeMessage> previewPendingMessage(Subscribe subscribe,int count);
+    List<SimplifiedBrokeMessage> previewMessage(Subscribe subscribe, int count);
 
     /**
      * 预览最新的消息
