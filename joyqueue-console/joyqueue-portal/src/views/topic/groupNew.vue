@@ -2,8 +2,8 @@
   <div>
     <div style="margin-left: 20px;">
       <d-form :model="addData" inline label-width="850">
-        <d-form-item label="队列数量：" required style="margin-right: 20px;">
-          <d-input v-model="addData.partitions" placeholder="请输入数字"  style="width: 150px"></d-input>
+        <d-form-item label="队列(数或者列表)：" required style="margin-right: 20px;">
+          <d-input v-model="addData.partitions" placeholder="输入数字或[1,2,3]"  style="width: 150px"></d-input>
         </d-form-item>
         <d-form-item label="选举类型：" required style="margin-right: 20px;">
           <d-select v-model="addData.electType" value="0" placeholder="请选择" style="width: 100px">
@@ -12,7 +12,7 @@
           </d-select>
         </d-form-item>
         <d-form-item label="推荐leader：" required style="margin-right: 20px;">
-          <d-select v-model="addData.recLeader" placeholder="请先勾选表格中broker" style="width: 170px">
+          <d-select v-model="addData.recLeader" placeholder="请先勾选表格中broker" style="width: 120px">
             <d-option v-for="item in addData.replicaGroups" :value="item.brokerId" :key="item.id">{{item.brokerId}}</d-option>
           </d-select>
         </d-form-item>
