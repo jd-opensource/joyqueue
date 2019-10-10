@@ -75,7 +75,7 @@
         <dependency>
             <groupId>io.chubao</groupId>
             <artifactId>joyqueue-archive-hbase</artifactId>
-            <scope>runtime</scope>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>io.chubao</groupId>

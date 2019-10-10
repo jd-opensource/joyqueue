@@ -16,6 +16,7 @@ import io.chubao.joyqueue.domain.Subscription;
 import io.chubao.joyqueue.domain.TopicConfig;
 import io.chubao.joyqueue.domain.TopicName;
 import io.chubao.joyqueue.nsr.config.NameServiceConfig;
+import io.chubao.joyqueue.nsr.exception.NsrException;
 import io.chubao.joyqueue.nsr.util.DCWrapper;
 import io.chubao.joyqueue.toolkit.service.Service;
 import org.apache.commons.lang3.StringUtils;
@@ -205,22 +206,27 @@ public class NameServiceCacheManager extends Service {
     }
 
     public Broker getBroker(int brokerId) {
+        checkCacheStatus();
         return cache.getBrokerMap().get(brokerId);
     }
 
     public List<Broker> getAllBrokers() {
+        checkCacheStatus();
         return cache.getAllBrokers();
     }
 
     public TopicConfig getTopicConfig(TopicName topic) {
+        checkCacheStatus();
         return cache.getTopicConfigMap().get(topic);
     }
 
     public Set<String> getAllTopicCodes() {
+        checkCacheStatus();
         return Sets.newHashSet(cache.getAllTopicCodes());
     }
 
     public Set<String> getTopics(String app, Subscription.Type subscription) {
+        checkCacheStatus();
         if (Subscription.Type.PRODUCTION.equals(subscription)) {
             Map<TopicName, Producer> producerMap = cache.getProducerAppMap().get(app);
             if (producerMap == null) {
@@ -247,10 +253,12 @@ public class NameServiceCacheManager extends Service {
     }
 
     public Map<TopicName, TopicConfig> getTopicConfigByBroker(Integer brokerId) {
+        checkCacheStatus();
         return cache.getTopicConfigBrokerMap().get(brokerId);
     }
 
     public Producer getProducerByTopicAndApp(TopicName topic, String app) {
+        checkCacheStatus();
         Map<String, Producer> producerMap = cache.getProducerTopicMap().get(topic);
         if (producerMap == null) {
             return null;
@@ -259,6 +267,7 @@ public class NameServiceCacheManager extends Service {
     }
 
     public Consumer getConsumerByTopicAndApp(TopicName topic, String app) {
+        checkCacheStatus();
         Map<String, Consumer> consumerMap = cache.getConsumerTopicMap().get(topic);
         if (consumerMap == null) {
             return null;
@@ -267,6 +276,7 @@ public class NameServiceCacheManager extends Service {
     }
 
     public Map<TopicName, TopicConfig> getTopicConfigByApp(String subscribeApp, Subscription.Type subscribe) {
+        checkCacheStatus();
         if (Subscription.Type.PRODUCTION.equals(subscribe)) {
             Map<TopicName, Producer> producerMap = cache.getProducerAppMap().get(subscribeApp);
             if (producerMap == null) {
@@ -301,6 +311,7 @@ public class NameServiceCacheManager extends Service {
     }
 
     public DataCenter getDataCenter(String ip) {
+        checkCacheStatus();
         for (DCWrapper dataCenter : cache.getAllDataCenters()) {
             if (dataCenter.match(ip)) {
                 return dataCenter.getDataCenter();
@@ -310,6 +321,7 @@ public class NameServiceCacheManager extends Service {
     }
 
     public String getConfig(String group, String key) {
+        checkCacheStatus();
         List<Config> configs = cache.getAllConfigs();
         for (Config config : configs) {
             if (StringUtils.equals(config.getGroup(), group) && StringUtils.equals(config.getKey(), key)) {
@@ -320,10 +332,12 @@ public class NameServiceCacheManager extends Service {
     }
 
     public List<Config> getAllConfigs() {
+        checkCacheStatus();
         return cache.getAllConfigs();
     }
 
     public List<Broker> getBrokerByRetryType(String retryType) {
+        checkCacheStatus();
         List<Broker> result = Lists.newLinkedList();
         for (Broker broker : cache.getAllBrokers()) {
             if (StringUtils.equals(broker.getRetryType(), retryType)) {
@@ -334,6 +348,7 @@ public class NameServiceCacheManager extends Service {
     }
 
     public List<Consumer> getConsumerByTopic(TopicName topic) {
+        checkCacheStatus();
         Map<String, Consumer> consumerMap = cache.getConsumerTopicMap().get(topic);
         if (consumerMap == null) {
             return Collections.emptyList();
@@ -342,6 +357,7 @@ public class NameServiceCacheManager extends Service {
     }
 
     public List<Producer> getProducerByTopic(TopicName topic) {
+        checkCacheStatus();
         Map<String, Producer> producerMap = cache.getProducerTopicMap().get(topic);
         if (producerMap == null) {
             return Collections.emptyList();
@@ -350,6 +366,7 @@ public class NameServiceCacheManager extends Service {
     }
 
     public List<Replica> getReplicaByBroker(Integer brokerId) {
+        checkCacheStatus();
         Map<TopicName, TopicConfig> brokerTopicConfigMap = cache.getTopicConfigBrokerMap().get(brokerId);
         if (brokerTopicConfigMap == null) {
             return Collections.emptyList();
@@ -368,6 +385,7 @@ public class NameServiceCacheManager extends Service {
     }
 
     public AppToken getAppToken(String app, String token) {
+        checkCacheStatus();
         List<AppToken> appTokens = cache.getAllAppTokenMap().get(app);
         if (appTokens == null) {
             return null;
@@ -380,8 +398,11 @@ public class NameServiceCacheManager extends Service {
         return null;
     }
 
-    public ReentrantLock getLock() {
-        return lock;
+    protected void checkCacheStatus() {
+        if (cache != null) {
+            return;
+        }
+        throw new NsrException();
     }
 
     public NameServiceCache getCache() {

@@ -290,7 +290,7 @@ public class PositionManager extends Service {
         PartitionGroupStore store = storeService.getStore(topic.getFullName(), partitionGroupId);
 
         long leftIndex = store.getLeftIndex(partition);
-        if (index < leftIndex) {
+        if (index < leftIndex && index != -1) {
             throw new JoyQueueException(JoyQueueCode.SE_INDEX_UNDERFLOW , "index less than leftIndex error.");
         }
 

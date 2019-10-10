@@ -17,6 +17,7 @@ package io.chubao.joyqueue.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.base.Preconditions;
+import io.chubao.joyqueue.domain.TopicName;
 import io.chubao.joyqueue.model.domain.Producer;
 import io.chubao.joyqueue.model.domain.Topic;
 import io.chubao.joyqueue.nsr.ProducerNameServerService;
@@ -138,7 +139,8 @@ public class ProducerServiceImpl  implements ProducerService {
     @Override
     public Producer findByTopicAppGroup(String namespace, String topic, String app) {
         try {
-            return producerNameServerService.findByTopicAppGroup(namespace, topic, app);
+            TopicName topicName = TopicName.parse(topic);
+            return producerNameServerService.findByTopicAppGroup(namespace, topicName.getCode(), app);
         } catch (Exception e) {
             logger.error("findByTopicAppGroup producer with nameServer failed, producer is {}, {}, {}", namespace, topic, app, e);
             throw new RuntimeException(e);

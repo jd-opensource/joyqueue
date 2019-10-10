@@ -37,6 +37,12 @@ public class PushNameServerEventCodec implements NsrPayloadCodec<PushNameServerE
         int brokerId = buffer.readInt();
         String eventValue = Serializer.readString(buffer,Serializer.SHORT_SIZE);
         String typeName = Serializer.readString(buffer);
+
+        // TODO 临时兼容逻辑，后续去掉
+        if (typeName.startsWith("com.jd.joyqueue")) {
+            typeName = typeName.replace("com.jd.journalq", "io.chubao.joyqueue");
+        }
+
         return new PushNameServerEvent().event(new NameServerEvent((MetaEvent)JSON.parseObject(eventValue, Class.forName(typeName)),brokerId));
     }
 
@@ -52,7 +58,7 @@ public class PushNameServerEventCodec implements NsrPayloadCodec<PushNameServerE
             NameServerEvent event = payload.getEvent();
             buffer.writeInt(event.getBrokerId());
             Serializer.write(JSON.toJSONString(event.getMetaEvent()),buffer,Serializer.SHORT_SIZE);
-            Serializer.write(event.getMetaEvent().getTypeName().replace("io.chubao.joyqueue", "com.jd.joyqueue"),buffer);
+            Serializer.write(event.getMetaEvent().getTypeName().replace("io.chubao.joyqueue", "com.jd.journalq"), buffer);
         }
     }
 

@@ -69,33 +69,27 @@ public class NameServiceCompensateThread extends Service implements Runnable {
     }
 
     protected void doCompensate() {
-        nameServiceCacheManager.getLock().lock();
-        try {
-            NameServiceCache oldCache = nameServiceCacheManager.getCache();
-
-            if (oldCache.isLatest(config.getCompensationInterval())) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("doCompensate, cache is latest, oldCache: {}", JSON.toJSONString(oldCache));
-                }
-                return;
-            }
-
+        NameServiceCache oldCache = nameServiceCacheManager.getCache();
+        if (oldCache.isLatest(config.getCompensationInterval())) {
             if (logger.isDebugEnabled()) {
-                logger.debug("doCompensate pre, oldCache: {}", JSON.toJSONString(oldCache));
+                logger.debug("doCompensate, cache is latest, oldCache: {}", JSON.toJSONString(oldCache));
             }
-
-            AllMetadata allMetadata = delegate.getAllMetadata();
-            NameServiceCache newCache = nameServiceCacheManager.buildCache(allMetadata);
-
-            if (logger.isDebugEnabled()) {
-                logger.debug("doCompensate, oldCache: {}, newCache: {}, metadata: {}",
-                        JSON.toJSONString(oldCache), JSON.toJSONString(newCache), JSON.toJSONString(allMetadata));
-            }
-
-            nameServiceCompensator.compensate(oldCache, newCache);
-            nameServiceCacheManager.fillCache(newCache);
-        } finally {
-            nameServiceCacheManager.getLock().unlock();
+            return;
         }
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("doCompensate pre, oldCache: {}", JSON.toJSONString(oldCache));
+        }
+
+        AllMetadata allMetadata = delegate.getAllMetadata();
+        NameServiceCache newCache = nameServiceCacheManager.buildCache(allMetadata);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("doCompensate, oldCache: {}, newCache: {}, metadata: {}",
+                    JSON.toJSONString(oldCache), JSON.toJSONString(newCache), JSON.toJSONString(allMetadata));
+        }
+
+        nameServiceCompensator.compensate(oldCache, newCache);
+        nameServiceCacheManager.fillCache(newCache);
     }
 }

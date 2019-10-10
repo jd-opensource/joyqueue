@@ -253,7 +253,7 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
     public PageResult<Topic> search(QPageQuery<QTopic> query) {
         try {
             TopicQuery topicQuery = topicQueryConvert(query.getQuery());
-            String result =  post(UNSUB_TOPIC,new QPageQuery<>(query.getPagination(),topicQuery));
+            String result =  post(SEARCH_TOPIC,new QPageQuery<>(query.getPagination(),topicQuery));
             PageResult<io.chubao.joyqueue.domain.Topic> pageResult = JSON.parseObject(result,new TypeReference<PageResult<io.chubao.joyqueue.domain.Topic>>(){});
             if (pageResult == null || pageResult.getResult() == null) return PageResult.empty();
             return new PageResult<>(pageResult.getPagination(),pageResult.getResult().stream().map(topic -> nsrTopicConverter.revert(topic)).collect(Collectors.toList()));

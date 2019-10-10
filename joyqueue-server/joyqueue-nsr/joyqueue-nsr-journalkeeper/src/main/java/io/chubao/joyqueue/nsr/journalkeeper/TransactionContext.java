@@ -22,9 +22,6 @@ public class TransactionContext {
     }
 
     public static void beginTransaction() {
-        if (transactionThreadLocal.get() != null) {
-            return;
-        }
         SQLTransactionOperator transactionOperator = sqlOperator.beginTransaction();
         transactionThreadLocal.set(transactionOperator);
     }
@@ -38,11 +35,8 @@ public class TransactionContext {
         if (transactionOperator == null) {
             throw new UnsupportedOperationException("transaction not exist");
         }
-        try {
-            transactionOperator.commit();
-        } finally {
-            transactionThreadLocal.remove();
-        }
+        transactionOperator.commit();
+        transactionThreadLocal.remove();
     }
 
     public static void rollback() {
@@ -50,11 +44,8 @@ public class TransactionContext {
         if (transactionOperator == null) {
             throw new UnsupportedOperationException("transaction not exist");
         }
-        try {
-            transactionOperator.rollback();
-        } finally {
-            transactionThreadLocal.remove();
-        }
+        transactionOperator.rollback();
+        transactionThreadLocal.remove();
     }
 
     public static void close() {

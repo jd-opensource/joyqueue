@@ -8,6 +8,7 @@ import io.chubao.joyqueue.network.transport.codec.support.JoyQueueCodec;
 import io.chubao.joyqueue.network.transport.command.support.DefaultCommandHandlerFactory;
 import io.chubao.joyqueue.network.transport.config.ServerConfig;
 import io.chubao.joyqueue.network.transport.support.DefaultTransportServerFactory;
+import io.chubao.joyqueue.nsr.config.MessengerConfig;
 import io.chubao.joyqueue.nsr.message.support.network.codec.MessengerHeartbeatRequestCodec;
 import io.chubao.joyqueue.nsr.message.support.network.codec.MessengerPublishRequestCodec;
 import io.chubao.joyqueue.nsr.message.support.network.handler.MessengerHeartbeatRequestHandler;
@@ -22,16 +23,17 @@ import io.chubao.joyqueue.toolkit.concurrent.EventBus;
 public class MessengerTransportServerFactory implements TransportServerFactory {
 
     private TransportServerFactory transportServerFactory;
+    private MessengerConfig config;
     private EventBus eventBus;
 
-    public MessengerTransportServerFactory(EventBus eventBus) {
+    public MessengerTransportServerFactory(MessengerConfig config, EventBus eventBus) {
         PayloadCodecFactory payloadCodecFactory = new PayloadCodecFactory();
         payloadCodecFactory.register(new MessengerPublishRequestCodec());
         payloadCodecFactory.register(new MessengerHeartbeatRequestCodec());
         payloadCodecFactory.register(new BooleanAckCodec());
 
         DefaultCommandHandlerFactory commandHandlerFactory = new DefaultCommandHandlerFactory();
-        commandHandlerFactory.register(new MessengerPublishRequestHandler(eventBus));
+        commandHandlerFactory.register(new MessengerPublishRequestHandler(config, eventBus));
         commandHandlerFactory.register(new MessengerHeartbeatRequestHandler());
 
         this.eventBus = eventBus;

@@ -203,13 +203,16 @@ public class GroupOffsetManager extends Service {
                                 }
 
                                 for (Map.Entry<Integer, Short> partitionEntry : topicEntry.getValue().entrySet()) {
-                                    partitions.add(new OffsetMetadataAndError(partitionEntry.getKey(), OffsetAndMetadata.INVALID_OFFSET, OffsetAndMetadata.NO_METADATA,
-                                            KafkaErrorCode.joyQueueCodeFor(partitionEntry.getValue())));
+                                    OffsetMetadataAndError offsetMetadataAndError = new OffsetMetadataAndError(partitionEntry.getKey(), OffsetAndMetadata.INVALID_OFFSET, OffsetAndMetadata.NO_METADATA,
+                                            KafkaErrorCode.joyQueueCodeFor(partitionEntry.getValue()));
 
                                     if (partitionEntry.getValue() != JoyQueueCode.SUCCESS.getCode()) {
                                         logger.error("save offset failed, broker: {}, topic: {}, partition: {}, group: {}, code: {}",
                                                 broker, topic, partitionEntry.getKey(), groupId, JoyQueueCode.valueOf(partitionEntry.getValue()));
                                     }
+
+                                    offsetMetadataAndError.setError(KafkaErrorCode.NONE.getCode());
+                                    partitions.add(offsetMetadataAndError);
                                 }
                             }
                             latch.countDown();

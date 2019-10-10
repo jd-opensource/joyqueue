@@ -347,7 +347,7 @@ public class DefaultMessageConsumer extends Service implements MessageConsumer {
         Preconditions.checkArgument(StringUtils.isNotBlank(topic), "topic not blank");
 
         String topicFullName = NameServerHelper.getTopicFullName(topic, nameServerConfig);
-        return clusterManager.fetchTopicMetadata(topicFullName, config.getApp());
+        return clusterManager.fetchTopicMetadata(topicFullName, config.getAppFullName());
     }
 
     protected void checkState() {

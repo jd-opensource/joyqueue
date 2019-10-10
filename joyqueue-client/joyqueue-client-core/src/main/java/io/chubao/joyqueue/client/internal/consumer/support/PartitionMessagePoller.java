@@ -277,9 +277,9 @@ public class PartitionMessagePoller extends Service implements MessagePoller {
     }
 
     protected List<ConsumeMessage> doPollPartitionInternal(BrokerNode brokerNode, String topic, short partition, int batchSize, long timeout, TimeUnit timeoutUnit, PollerListener listener) {
-        FetchIndexData indexData = consumerIndexManager.fetchIndex(topic, messagePollerInner.getAppFullName(), partition, config.getTimeout());
+        FetchIndexData indexData = consumerIndexManager.fetchIndex(topic, config.getAppFullName(), partition, config.getTimeout());
         if (!indexData.getCode().equals(JoyQueueCode.SUCCESS)) {
-            logger.error("fetch index error, topic: {}, partition: {}, app: {}, error:{}", topic, partition, messagePollerInner.getAppFullName(), indexData.getCode().getMessage());
+            logger.error("fetch index error, topic: {}, partition: {}, app: {}, error:{}", topic, partition, config.getAppFullName(), indexData.getCode().getMessage());
             return messagePollerInner.buildPollEmptyResult(listener);
         }
 
@@ -321,7 +321,7 @@ public class PartitionMessagePoller extends Service implements MessagePoller {
             throw new IllegalArgumentException(String.format("topic %s reply is empty", topic));
         }
 
-        JoyQueueCode result = consumerIndexManager.commitReply(topicMetadata.getTopic(), replyList, messagePollerInner.getAppFullName(), config.getTimeout());
+        JoyQueueCode result = consumerIndexManager.commitReply(topicMetadata.getTopic(), replyList, config.getAppFullName(), config.getTimeout());
         if (!result.equals(JoyQueueCode.SUCCESS)) {
             // TODO 临时日志
             logger.warn("commit ack error, topic : {}, code: {}, error: {}", topic, result.getCode(), result.getMessage());
@@ -340,7 +340,7 @@ public class PartitionMessagePoller extends Service implements MessagePoller {
         Preconditions.checkArgument(StringUtils.isNotBlank(topic), "topic not blank");
 
         String topicFullName = messagePollerInner.getTopicFullName(topic);
-        return clusterManager.fetchTopicMetadata(topicFullName, messagePollerInner.getAppFullName());
+        return clusterManager.fetchTopicMetadata(topicFullName, config.getAppFullName());
     }
 
     protected void checkState() {

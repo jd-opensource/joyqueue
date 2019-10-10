@@ -21,6 +21,7 @@ import io.journalkeeper.sql.state.config.SQLConfigs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.net.URI;
 import java.util.List;
 import java.util.Properties;
@@ -47,29 +48,6 @@ public class JournalkeeperInternalServiceProvider extends Service implements Int
     public void setSupplier(PropertySupplier propertySupplier) {
         this.propertySupplier = propertySupplier;
         this.config = new JournalkeeperConfig(propertySupplier);
-    }
-
-    @Override
-    protected void validate() throws Exception {
-        Properties journalkeeperProperties = convertProperties(config, propertySupplier.getProperties());
-        List<URI> nodes = convertNodeUri(config.getLocal(), config.getNodes(), config.getPort());
-
-        logger.info("nodes: {}", nodes);
-
-        if (Server.Roll.VOTER.name().equals(config.getRole())
-                || RaftServer.Roll.OBSERVER.name().equals(config.getRole())) {
-
-            Server.Roll role = Server.Roll.valueOf(config.getRole());
-            SQLServerAccessPoint serverAccessPoint = new SQLServerAccessPoint(journalkeeperProperties);
-            this.sqlServer = serverAccessPoint.createServer(nodes.get(0), nodes, role);
-            this.sqlClient = this.sqlServer.getClient();
-        } else {
-            SQLClientAccessPoint clientAccessPoint = new SQLClientAccessPoint(journalkeeperProperties);
-            this.sqlClient = clientAccessPoint.createClient(nodes);
-        }
-        this.sqlOperator = new DefaultSQLOperator(this.sqlClient);
-        TransactionContext.init(sqlOperator);
-        this.journalkeeperInternalServiceManager = new JournalkeeperInternalServiceManager(this.sqlClient, this.sqlOperator);
     }
 
     protected Properties convertProperties(JournalkeeperConfig config, List<Property> properties) {
@@ -105,13 +83,33 @@ public class JournalkeeperInternalServiceProvider extends Service implements Int
 
     @Override
     protected void doStart() throws Exception {
-        if (sqlServer != null) {
+        Properties journalkeeperProperties = convertProperties(config, propertySupplier.getProperties());
+        List<URI> nodes = convertNodeUri(config.getLocal(), config.getNodes(), config.getPort());
+
+        logger.info("nodes: {}", nodes);
+
+        if (Server.Roll.VOTER.name().equals(config.getRole())
+                || RaftServer.Roll.OBSERVER.name().equals(config.getRole())) {
+
+            Server.Roll role = Server.Roll.valueOf(config.getRole());
+            SQLServerAccessPoint serverAccessPoint = new SQLServerAccessPoint(journalkeeperProperties);
+            this.sqlServer = serverAccessPoint.createServer(nodes.get(0), nodes, role);
+
+            if (!new File(config.getWorkingDir()).exists()) {
+                sqlServer.init();
+            }
+
             sqlServer.start();
             sqlServer.waitForLeaderReady(config.getWaitLeaderTimeout(), TimeUnit.MILLISECONDS);
+            this.sqlClient = this.sqlServer.getClient();
+        } else {
+            SQLClientAccessPoint clientAccessPoint = new SQLClientAccessPoint(journalkeeperProperties);
+            this.sqlClient = clientAccessPoint.createClient(nodes);
         }
-        if (journalkeeperInternalServiceManager != null) {
-            journalkeeperInternalServiceManager.start();
-        }
+        this.sqlOperator = new DefaultSQLOperator(this.sqlClient);
+        TransactionContext.init(sqlOperator);
+        this.journalkeeperInternalServiceManager = new JournalkeeperInternalServiceManager(this.sqlClient, this.sqlOperator);
+        this.journalkeeperInternalServiceManager.start();
     }
 
     @Override

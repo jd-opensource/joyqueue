@@ -53,18 +53,16 @@ public class MemberTimeoutDelayedOperation extends AbstractDelayedOperation {
 
     @Override
     protected void onExpiration() {
-        synchronized (group) {
-            if (!group.getMembers().containsKey(member.getId()) || !member.isExpired()) {
-                return;
-            }
-
-            logger.info("joyqueue consumer {} is expired, release assigned partition, connection: {}, latestHeartbeat: {}", member.getId(), member.getConnectionHost(), member.getLatestHeartbeat());
-
-            if (member.getTimeoutCallback() != null) {
-                member.getTimeoutCallback().onCompletion(group, member);
-            }
-            group.addExpiredMember(member);
-            group.getMembers().remove(member.getId(), member);
+        if (!group.getMembers().containsKey(member.getId()) || !member.isExpired()) {
+            return;
         }
+
+        logger.info("joyqueue consumer {} is expired, release assigned partition, connection: {}, latestHeartbeat: {}", member.getId(), member.getConnectionHost(), member.getLatestHeartbeat());
+
+        if (member.getTimeoutCallback() != null) {
+            member.getTimeoutCallback().onCompletion(group, member);
+        }
+        group.addExpiredMember(member);
+        group.getMembers().remove(member.getId(), member);
     }
 }

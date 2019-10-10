@@ -100,7 +100,7 @@ public class ProducerImpl extends AbstractServiceLifecycle implements ExtensionP
                         if (cause == null) {
                             future.setValue(result);
                         } else {
-                            future.setThrowable(cause);
+                            future.setThrowable(handleProduceException(cause));
                         }
                     });
             return future;
@@ -147,7 +147,7 @@ public class ProducerImpl extends AbstractServiceLifecycle implements ExtensionP
                         if (cause == null) {
                             future.setValue(result);
                         } else {
-                            future.setThrowable(cause);
+                            future.setThrowable(handleProduceException(cause));
                         }
                     });
             return future;

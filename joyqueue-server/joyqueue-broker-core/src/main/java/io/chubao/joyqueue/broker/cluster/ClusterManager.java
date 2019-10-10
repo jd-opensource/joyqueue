@@ -1276,7 +1276,7 @@ public class ClusterManager extends Service {
                         }
 
                         Map<Integer, PartitionGroup> topicPartitionGroups = Maps.newHashMap(topicConfig.getPartitionGroups());
-                        topicPartitionGroups.remove(removePartitionGroupEvent.getPartitionGroup().getGroup());
+                        topicPartitionGroups.remove(partitionGroup.getGroup());
                         topicConfig.setPartitionGroups(topicPartitionGroups);
 
                         topicPartitionsCache.remove(topicConfig.getName().getFullName());
@@ -1294,7 +1294,10 @@ public class ClusterManager extends Service {
                     }
                     case REMOVE_CONSUMER: {
                         RemoveConsumerEvent removeConsumerEvent = (RemoveConsumerEvent) event.getMetaEvent();
-                        CacheConsumer consumer = consumerCache.get(removeConsumerEvent.getTopic().getFullName()).remove(removeConsumerEvent.getConsumer().getApp());
+                        ConcurrentHashMap<String, CacheConsumer> topicConsumerCache = consumerCache.get(removeConsumerEvent.getTopic().getFullName());
+                        if (topicConsumerCache != null) {
+                            topicConsumerCache.remove(removeConsumerEvent.getConsumer().getApp());
+                        }
                         break;
                     }
                     case ADD_PRODUCER: {
@@ -1309,7 +1312,10 @@ public class ClusterManager extends Service {
                     }
                     case REMOVE_PRODUCER: {
                         RemoveProducerEvent removeProducerEvent = (RemoveProducerEvent) event.getMetaEvent();
-                        CacheProducer producer = producerCache.get(removeProducerEvent.getTopic()).remove(removeProducerEvent.getProducer().getApp());
+                        ConcurrentHashMap<String, CacheProducer> topicProducerCache = producerCache.get(removeProducerEvent.getTopic().getFullName());
+                        if (topicProducerCache != null) {
+                            topicProducerCache.remove(removeProducerEvent.getProducer().getApp());
+                        }
                         break;
                     }
                     case UPDATE_BROKER: {

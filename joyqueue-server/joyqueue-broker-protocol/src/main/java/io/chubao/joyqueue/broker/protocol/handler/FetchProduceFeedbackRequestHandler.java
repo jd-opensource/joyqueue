@@ -77,7 +77,7 @@ public class FetchProduceFeedbackRequestHandler implements JoyQueueCommandHandle
         if (!checkResult.isSuccess()) {
             logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport,
                     fetchProduceFeedbackRequest.getTopic(), fetchProduceFeedbackRequest.getApp(), checkResult.getJoyQueueCode());
-            return new Command(new FetchProduceFeedbackResponse(CheckResultConverter.convertCommonCode(checkResult.getJoyQueueCode())));
+            return new Command(new FetchProduceFeedbackResponse(CheckResultConverter.convertCommonCode(command.getHeader().getVersion(), checkResult.getJoyQueueCode())));
         }
 
         FetchProduceFeedbackResponse fetchProduceFeedbackResponse = FetchProduceFeedback(connection, fetchProduceFeedbackRequest);
