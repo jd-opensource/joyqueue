@@ -19,6 +19,7 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import io.chubao.joyqueue.convert.CodeConverter;
+import io.chubao.joyqueue.domain.TopicName;
 import io.chubao.joyqueue.model.ListQuery;
 import io.chubao.joyqueue.model.domain.AppName;
 import io.chubao.joyqueue.model.domain.Application;
@@ -115,10 +116,11 @@ public class ConsumerServiceImpl  implements ConsumerService {
     @Override
     public Consumer findByTopicAppGroup(String namespace, String topic, String app, String group) {
         try {
+            TopicName topicName = TopicName.parse(topic);
             if (StringUtils.isNotBlank(group)) {
-                return consumerNameServerService.findByTopicAndApp(topic, namespace, CodeConverter.convertApp(new Identity(app), group));
+                return consumerNameServerService.findByTopicAndApp(topicName.getCode(), namespace, CodeConverter.convertApp(new Identity(app), group));
             } else {
-                return consumerNameServerService.findByTopicAndApp(topic, namespace, app);
+                return consumerNameServerService.findByTopicAndApp(topicName.getCode(), namespace, app);
             }
         } catch (Exception e) {
             logger.error("findByTopicAppGroup error",e);

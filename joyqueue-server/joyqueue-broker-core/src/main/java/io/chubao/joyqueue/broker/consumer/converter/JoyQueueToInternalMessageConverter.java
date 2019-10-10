@@ -36,6 +36,7 @@ public class JoyQueueToInternalMessageConverter extends AbstractInternalMessageC
             return message;
         }
         message.setBody(message.getDecompressedBody());
+        message.setCompressed(false);
         return message;
     }
 

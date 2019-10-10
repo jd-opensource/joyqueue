@@ -90,7 +90,7 @@ public class FetchPartitionMessageRequestHandler implements JoyQueueCommandHandl
                 if (!checkResult.isSuccess()) {
                     logger.warn("checkReadable failed, transport: {}, topic: {}, partition: {}, app: {}, code: {}", transport,
                             consumer.getTopic(), partition, consumer.getApp(), checkResult.getJoyQueueCode());
-                    buildFetchPartitionMessageAckData(topic, entry.getValue(), CheckResultConverter.convertFetchCode(checkResult.getJoyQueueCode()), result);
+                    buildFetchPartitionMessageAckData(topic, entry.getValue(), CheckResultConverter.convertFetchCode(command.getHeader().getVersion(), checkResult.getJoyQueueCode()), result);
                     traffic.record(topic, 0);
                     continue;
                 }

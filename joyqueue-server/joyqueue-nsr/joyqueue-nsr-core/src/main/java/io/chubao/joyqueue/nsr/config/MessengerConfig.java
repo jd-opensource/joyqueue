@@ -49,6 +49,18 @@ public class MessengerConfig {
         return propertySupplier.getValue(MessengerConfigKey.PUBLISH_TIMEOUT);
     }
 
+    public int getHandlerThreads() {
+        return propertySupplier.getValue(MessengerConfigKey.HANDLER_THREADS);
+    }
+
+    public int getHandlerQueues() {
+        return propertySupplier.getValue(MessengerConfigKey.HANDLER_QUEUES);
+    }
+
+    public int getHandlerKeepalive() {
+        return propertySupplier.getValue(MessengerConfigKey.HANDLER_KEEPALIVE);
+    }
+
     public boolean getPublishForce() {
         return propertySupplier.getValue(MessengerConfigKey.PUBLISH_FORCE);
     }

@@ -93,7 +93,7 @@ public class FetchTopicMessageRequestHandler implements JoyQueueCommandHandler, 
             BooleanResponse checkResult = clusterManager.checkReadable(TopicName.parse(topic), fetchTopicMessageRequest.getApp(), connection.getHost());
             if (!checkResult.isSuccess()) {
                 logger.warn("checkReadable failed, transport: {}, topic: {}, app: {}, code: {}", transport, topic, fetchTopicMessageRequest.getApp(), checkResult.getJoyQueueCode());
-                result.put(topic, new FetchTopicMessageAckData(CheckResultConverter.convertFetchCode(checkResult.getJoyQueueCode())));
+                result.put(topic, new FetchTopicMessageAckData(CheckResultConverter.convertFetchCode(command.getHeader().getVersion(), checkResult.getJoyQueueCode())));
                 traffic.record(topic, 0);
                 continue;
             }
@@ -103,7 +103,7 @@ public class FetchTopicMessageRequestHandler implements JoyQueueCommandHandler, 
 
             if (consumer == null) {
                 logger.warn("consumer is not exists, transport: {}", transport);
-                result.put(topic, new FetchTopicMessageAckData(CheckResultConverter.convertFetchCode(JoyQueueCode.FW_CONSUMER_NOT_EXISTS)));
+                result.put(topic, new FetchTopicMessageAckData(CheckResultConverter.convertFetchCode(command.getHeader().getVersion(), JoyQueueCode.FW_CONSUMER_NOT_EXISTS)));
                 continue;
             }
 

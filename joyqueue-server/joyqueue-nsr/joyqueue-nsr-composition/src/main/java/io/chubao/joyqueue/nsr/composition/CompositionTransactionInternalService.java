@@ -31,7 +31,11 @@ public class CompositionTransactionInternalService implements TransactionInterna
             igniteTransactionInternalService.begin();
         }
         if (config.isWriteJournalkeeper()) {
-            journalkeeperTransactionInternalService.begin();
+            try {
+                journalkeeperTransactionInternalService.begin();
+            } catch (Exception e) {
+                logger.info("journalkeeper transaction begin exception", e);
+            }
         }
     }
 
@@ -41,7 +45,11 @@ public class CompositionTransactionInternalService implements TransactionInterna
             igniteTransactionInternalService.commit();
         }
         if (config.isWriteJournalkeeper()) {
-            journalkeeperTransactionInternalService.commit();
+            try {
+                journalkeeperTransactionInternalService.commit();
+            } catch (Exception e) {
+                logger.info("journalkeeper transaction commit exception", e);
+            }
         }
     }
 
@@ -51,7 +59,11 @@ public class CompositionTransactionInternalService implements TransactionInterna
             igniteTransactionInternalService.rollback();
         }
         if (config.isWriteJournalkeeper()) {
-            journalkeeperTransactionInternalService.rollback();
+            try {
+                journalkeeperTransactionInternalService.rollback();
+            } catch (Exception e) {
+                logger.info("journalkeeper transaction rollback exception", e);
+            }
         }
     }
 }

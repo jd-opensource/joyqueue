@@ -51,8 +51,11 @@ public class DefaultMessenger extends Service implements Messenger<MetaEvent>, P
 
     @Override
     protected void doStart() throws Exception {
+        config.getServerConfig().setIoThread(1);
         config.getServerConfig().setPort(config.getPort());
-        messengerTransportServer = new MessengerTransportServerFactory(eventBus).bind(config.getServerConfig());
+        config.getServerConfig().setIoThreadName("joyqueue-messenger-io-eventLoop");
+        config.getServerConfig().setAcceptThreadName("joyqueue-messenger-accept-eventLoop");
+        messengerTransportServer = new MessengerTransportServerFactory(config, eventBus).bind(config.getServerConfig());
         messengerTransportServer.start();
         messengerSessionManager.start();
         eventBus.start();

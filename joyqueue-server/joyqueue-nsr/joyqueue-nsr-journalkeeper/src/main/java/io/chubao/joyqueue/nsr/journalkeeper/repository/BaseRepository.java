@@ -24,12 +24,7 @@ public class BaseRepository {
     public String insert(String sql, Object... params) {
         SQLTransactionOperator transactionOperator = TransactionContext.getTransactionOperator();
         if (transactionOperator != null) {
-            try {
-                return transactionOperator.insert(sql, params);
-            } catch (Exception e) {
-                TransactionContext.close();
-                throw e;
-            }
+            return transactionOperator.insert(sql, params);
         } else {
             return sqlOperator.insert(sql, params);
         }
@@ -38,12 +33,7 @@ public class BaseRepository {
     public int update(String sql, Object... params) {
         SQLTransactionOperator transactionOperator = TransactionContext.getTransactionOperator();
         if (transactionOperator != null) {
-            try {
-                return transactionOperator.update(sql, params);
-            } catch (Exception e) {
-                TransactionContext.close();
-                throw e;
-            }
+            return transactionOperator.update(sql, params);
         } else {
             return sqlOperator.update(sql, params);
         }
@@ -52,12 +42,7 @@ public class BaseRepository {
     public int delete(String sql, Object... params) {
         SQLTransactionOperator transactionOperator = TransactionContext.getTransactionOperator();
         if (transactionOperator != null) {
-            try {
-                return transactionOperator.delete(sql, params);
-            } catch (Exception e) {
-                TransactionContext.close();
-                throw e;
-            }
+            return transactionOperator.delete(sql, params);
         } else {
             return sqlOperator.delete(sql, params);
         }
@@ -66,12 +51,7 @@ public class BaseRepository {
     public ResultSet query(String sql, Object... params) {
         SQLTransactionOperator transactionOperator = TransactionContext.getTransactionOperator();
         if (transactionOperator != null) {
-            try {
-                return transactionOperator.query(sql, params);
-            } catch (Exception e) {
-                TransactionContext.close();
-                throw e;
-            }
+            return transactionOperator.query(sql, params);
         } else {
             return sqlOperator.query(sql, params);
         }

@@ -1280,7 +1280,10 @@ public class RaftLeaderElection extends LeaderElection  {
                 !allNodes.containsKey(recommendLeader)) {
             return false;
         }
-        if (replicaGroup.lagLength(recommendLeader) > electionConfig.getTransferLeaderMinLag()) {
+
+        long recommendLeaderLag = replicaGroup.lagLength(recommendLeader);
+        if (recommendLeaderLag == ElectionNode.INVALID_LAG_LENGTH ||
+                replicaGroup.lagLength(recommendLeader) > electionConfig.getTransferLeaderMinLag()) {
             return false;
         }
 

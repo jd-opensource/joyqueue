@@ -2,6 +2,8 @@ package io.chubao.joyqueue.nsr.journalkeeper.service;
 
 import io.chubao.joyqueue.nsr.journalkeeper.TransactionContext;
 import io.chubao.joyqueue.nsr.service.internal.TransactionInternalService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * JournalkeeperTransactionInternalService
@@ -9,6 +11,8 @@ import io.chubao.joyqueue.nsr.service.internal.TransactionInternalService;
  * date: 2019/8/27
  */
 public class JournalkeeperTransactionInternalService implements TransactionInternalService {
+
+    protected static final Logger logger = LoggerFactory.getLogger(JournalkeeperTransactionInternalService.class);
 
     @Override
     public void begin() {
@@ -22,6 +26,10 @@ public class JournalkeeperTransactionInternalService implements TransactionInter
 
     @Override
     public void rollback() {
-        TransactionContext.rollback();
+        try {
+            TransactionContext.rollback();
+        } catch (Exception e) {
+            logger.error("transaction rollback error", e);
+        }
     }
 }

@@ -91,8 +91,10 @@ public class DelayedJoin extends DelayedOperation {
         // TODO 去掉移除逻辑试试
         if (group.isMemberEmpty()) {
             logger.info("group {} generation {} is dead and removed", group.getId(), group.getGenerationId());
-            group.transitionStateTo(GroupState.PREPARINGREBALANCE);
+//            group.transitionStateTo(GroupState.DEAD);
 //            groupMetadataManager.removeGroup(group);
+
+            group.reset();
             return;
         }
 

@@ -34,17 +34,17 @@ public class ExceptionConverter {
 
     public static OMSRuntimeException convertRuntimeException(Throwable cause) {
         if (cause instanceof OMSRuntimeException) {
-            throw (OMSRuntimeException) cause;
+            return (OMSRuntimeException) cause;
         } else if (cause instanceof IllegalArgumentException) {
             return new OMSRuntimeException(JoyQueueCode.CN_PARAM_ERROR.getCode(), cause.getMessage(), cause);
         } else if (cause instanceof ClientException) {
             ClientException clientException = (ClientException) cause;
             if (clientException.getCause() instanceof TransportException.RequestTimeoutException) {
-                throw new OMSTimeOutException(JoyQueueCode.CN_REQUEST_TIMEOUT.getCode(), clientException.getMessage(), cause);
+                return new OMSTimeOutException(JoyQueueCode.CN_REQUEST_TIMEOUT.getCode(), clientException.getMessage(), cause);
             }
             JoyQueueCode joyQueueCode = JoyQueueCode.valueOf(clientException.getCode());
             if (joyQueueCode.equals(JoyQueueCode.FW_TOPIC_NOT_EXIST) || joyQueueCode.equals(JoyQueueCode.FW_PRODUCER_NOT_EXISTS)) {
-                throw new OMSSecurityException(joyQueueCode.getCode(), clientException.getMessage(), cause);
+                return new OMSSecurityException(joyQueueCode.getCode(), clientException.getMessage(), cause);
             }
             return new OMSRuntimeException(((ClientException) cause).getCode(), cause.getMessage(), cause);
         } else {
@@ -56,17 +56,17 @@ public class ExceptionConverter {
         if (cause instanceof ClientException) {
             ClientException clientException = (ClientException) cause;
             if (clientException.getCause() instanceof TransportException.RequestTimeoutException) {
-                throw new OMSTimeOutException(JoyQueueCode.CN_REQUEST_TIMEOUT.getCode(), clientException.getMessage(), cause);
+                return new OMSTimeOutException(JoyQueueCode.CN_REQUEST_TIMEOUT.getCode(), clientException.getMessage(), cause);
             }
             JoyQueueCode joyQueueCode = JoyQueueCode.valueOf(clientException.getCode());
             if (joyQueueCode.equals(JoyQueueCode.FW_TOPIC_NOT_EXIST) || joyQueueCode.equals(JoyQueueCode.FW_PRODUCER_NOT_EXISTS)) {
-                throw new OMSSecurityException(joyQueueCode.getCode(), clientException.getMessage(), cause);
+                return new OMSSecurityException(joyQueueCode.getCode(), clientException.getMessage(), cause);
             }
             if (joyQueueCode.equals(JoyQueueCode.CN_PARAM_ERROR)) {
-                throw new OMSMessageFormatException(joyQueueCode.getCode(), clientException.getMessage(), cause);
+                return new OMSMessageFormatException(joyQueueCode.getCode(), clientException.getMessage(), cause);
             }
             if (joyQueueCode.equals(JoyQueueCode.CN_SERVICE_NOT_AVAILABLE)) {
-                throw new OMSDestinationException(joyQueueCode.getCode(), clientException.getMessage(), cause);
+                return new OMSDestinationException(joyQueueCode.getCode(), clientException.getMessage(), cause);
             }
             return new OMSRuntimeException(clientException.getCode(), clientException.getMessage(), cause);
         } else {
@@ -78,14 +78,14 @@ public class ExceptionConverter {
         if (cause instanceof ClientException) {
             ClientException clientException = (ClientException) cause;
             if (clientException.getCause() instanceof TransportException.RequestTimeoutException) {
-                throw new OMSTimeOutException(JoyQueueCode.CN_REQUEST_TIMEOUT.getCode(), clientException.getMessage(), cause);
+                return new OMSTimeOutException(JoyQueueCode.CN_REQUEST_TIMEOUT.getCode(), clientException.getMessage(), cause);
             }
             JoyQueueCode joyQueueCode = JoyQueueCode.valueOf(clientException.getCode());
             if (joyQueueCode.equals(JoyQueueCode.FW_TOPIC_NOT_EXIST) || joyQueueCode.equals(JoyQueueCode.FW_CONSUMER_NOT_EXISTS)) {
-                throw new OMSSecurityException(joyQueueCode.getCode(), clientException.getMessage(), cause);
+                return new OMSSecurityException(joyQueueCode.getCode(), clientException.getMessage(), cause);
             }
             if (joyQueueCode.equals(JoyQueueCode.CN_SERVICE_NOT_AVAILABLE)) {
-                throw new OMSDestinationException(joyQueueCode.getCode(), clientException.getMessage(), cause);
+                return new OMSDestinationException(joyQueueCode.getCode(), clientException.getMessage(), cause);
             }
             return new OMSRuntimeException(((ClientException) cause).getCode(), cause.getMessage(), cause);
         } else {
