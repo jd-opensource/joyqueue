@@ -158,7 +158,7 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
 
         Set<Integer> partitions = Arrays.stream(topicPartitionGroup.getPartitions().substring(1,topicPartitionGroup.getPartitions().length()-1).split(",")).
                 map(m->Integer.valueOf(m.trim())).collect(Collectors.toSet());
-        if(model.getPartitionCount().startsWith(PARTITIONS_PREFIX)&&model.getPartitions().endsWith(PARTITIONS_SUFFIX)) {
+        if(model.getPartitionCount().startsWith(PARTITIONS_PREFIX)&&model.getPartitionCount().endsWith(PARTITIONS_SUFFIX)) {
             String partitionList= model.getPartitionCount();
             String[] increPartitions=partitionList.substring(1,partitionList.length()-1).split(PARTITIONS_SPLIT);
             List<TopicPartitionGroup> partitionGroups=findByTopic(model.getNamespace(),model.getTopic());
