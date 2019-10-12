@@ -52,6 +52,9 @@ import static io.chubao.joyqueue.exception.ServiceException.BAD_REQUEST;
 public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupService {
     private final Logger logger = LoggerFactory.getLogger(TopicPartitionGroupServiceImpl.class);
 
+    private final String PARTITIONS_SPLIT=",";
+    private final String PARTITIONS_PREFIX="[";
+    private final String PARTITIONS_SUFFIX="]";
     @Autowired
     private TopicNameServerService topicNameServerService;
 
@@ -104,7 +107,7 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
             throw new ServiceException(INTERNAL_SERVER_ERROR, errorMsg);
         }
     }
-
+    // 支持指定 partition or partition数量，递增生成partition
     @Override
     public int add(TopicPartitionGroup model) {
         Topic topic = topicNameServerService.findByCode(model.getNamespace().getCode(),model.getTopic().getCode());
@@ -122,12 +125,20 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
         } else {
             model.setGroupNo(0);
         }
-        topic.setPartitions(topic.getPartitions()+Integer.valueOf(model.getPartitions()));
-        for(int i =currentPartitions;i<topic.getPartitions();i++){
-            model.getPartitionSet().add(i);
+        // 支持添加指定 partition,用","分割
+        if(model.getPartitions().startsWith(PARTITIONS_PREFIX)&&model.getPartitions().endsWith(PARTITIONS_SUFFIX)){
+           String partitionList= model.getPartitions();
+           String[] partitions=partitionList.substring(1,partitionList.length()-1).split(PARTITIONS_SPLIT);
+           for(String p:partitions){
+               model.getPartitionSet().add(Integer.parseInt(p));
+           }
+        }else {
+            topic.setPartitions(topic.getPartitions() + Integer.valueOf(model.getPartitions()));
+            for (int i = currentPartitions; i < topic.getPartitions(); i++) {
+                model.getPartitionSet().add(i);
+            }
         }
         model.setPartitions(Arrays.toString(model.getPartitionSet().toArray()));
-
         try {
             topicNameServerService.addPartitionGroup(model);
         } catch (Exception e) {
@@ -148,23 +159,29 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
     public int addPartition(TopicPartitionGroup model) throws Exception {
         Topic topic = topicNameServerService.findByCode(model.getNamespace().getCode(),model.getTopic().getCode());
         TopicPartitionGroup topicPartitionGroup = findByTopicAndGroup(model.getNamespace().getCode(),model.getTopic().getCode(),model.getGroupNo());
-
-        int currentPartitions = topic.getPartitions();
-        topic.setPartitions(topic.getPartitions()+Integer.valueOf(model.getPartitionCount()));
         Set<Integer> partitions = Arrays.stream(topicPartitionGroup.getPartitions().substring(1,topicPartitionGroup.getPartitions().length()-1).split(",")).
                 map(m->Integer.valueOf(m.trim())).collect(Collectors.toSet());
-
-        if (model.getPartitionCount()<=0) {
-            throw new ServiceException(INTERNAL_SERVER_ERROR, "数据异常");
-        }
-        for(int i =currentPartitions;i<topic.getPartitions();i++){
-            partitions.add(i);
+        if(model.getPartitionCount().startsWith(PARTITIONS_PREFIX)&&model.getPartitions().endsWith(PARTITIONS_SUFFIX)) {
+            String partitionList= model.getPartitionCount();
+            String[] increPartitions=partitionList.substring(1,partitionList.length()-1).split(PARTITIONS_SPLIT);
+            for(String p:increPartitions){
+                partitions.add(Integer.parseInt(p));
+            }
+        }else {
+            int currentPartitions = topic.getPartitions();
+            topic.setPartitions(topic.getPartitions()+Integer.valueOf(model.getPartitionCount()));
+            if (Integer.valueOf(model.getPartitionCount()) <= 0) {
+                throw new ServiceException(INTERNAL_SERVER_ERROR, "数据异常");
+            }
+            for (int i = currentPartitions; i < topic.getPartitions(); i++) {
+                partitions.add(i);
+            }
         }
         model.setPartitions(Arrays.toString(partitions.toArray()));
         model.setReplicaGroups(topicPartitionGroup.getReplicaGroups());
         try {
-            if (model.getReplicaGroups() == null || model.getReplicaGroups().size() <=0) {
-                throw new ServiceException(BAD_REQUEST,"副本不能为空");
+            if (model.getReplicaGroups() == null || model.getReplicaGroups().size() <= 0) {
+                throw new ServiceException(BAD_REQUEST, "副本不能为空");
             }
             topicNameServerService.updatePartitionGroup(model);
         } catch (Exception e) {
@@ -191,7 +208,7 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
         Set<Integer> partitions = Arrays.stream(topicPartitionGroup.getPartitions().substring(1,topicPartitionGroup.getPartitions().length()-1).split(",")).
                 map(m->Integer.valueOf(m.trim())).collect(Collectors.toSet());
         //如果缩减数小于，已有partition数，则更改失败
-        if (model.getPartitionCount()>= partitions.size()) {
+        if (Integer.valueOf(model.getPartitionCount())>= partitions.size()) {
             throw new ServiceException(INTERNAL_SERVER_ERROR, "数据异常");
         }
         for(int i=currentPartitions-1;i>topic.getPartitions()-1;i--){

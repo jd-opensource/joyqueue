@@ -35,8 +35,8 @@
     </my-dialog>
     <!--增加分区数-->
     <my-dialog :dialog="addPartitionDialog" @on-dialog-confirm="addPartitionConfirm()" @on-dialog-cancel="addPartitionCancel()"  >
-      <d-input v-model="addPartitionDialogData.partitionCount" placeholder="请输入增加分区数" style="width: 400px">
-        <span slot="prepend">增加分区数</span>
+      <d-input v-model="addPartitionDialogData.partitionCount" placeholder="请输入增加分区(数或分区列表[1,2])" style="width: 400px">
+        <span slot="prepend">增加分区</span>
       </d-input>
     </my-dialog>
     <!--减少分区数-->
@@ -373,6 +373,7 @@ export default {
       apiRequest.post(this.urls.addPartition, {}, this.addPartitionDialogData).then(() => {
         this.addPartitionDialog.visible = false
         this.getList()
+        this.topicUpdate()
       })
     },
     addPartitionCancel () {
@@ -389,6 +390,7 @@ export default {
       apiRequest.post(this.urls.removePartition, {}, this.removePartitionDialogData).then((data) => {
         this.removePartitionDialog.visible = false
         this.getList()
+        this.topicUpdate()
       })
     },
     removePartitionCancel () {
