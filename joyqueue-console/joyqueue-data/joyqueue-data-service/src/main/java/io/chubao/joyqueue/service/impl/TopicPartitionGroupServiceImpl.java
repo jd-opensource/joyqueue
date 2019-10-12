@@ -33,11 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.chubao.joyqueue.exception.ServiceException.IGNITE_RPC_ERROR;
@@ -159,13 +155,23 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
     public int addPartition(TopicPartitionGroup model) throws Exception {
         Topic topic = topicNameServerService.findByCode(model.getNamespace().getCode(),model.getTopic().getCode());
         TopicPartitionGroup topicPartitionGroup = findByTopicAndGroup(model.getNamespace().getCode(),model.getTopic().getCode(),model.getGroupNo());
+
         Set<Integer> partitions = Arrays.stream(topicPartitionGroup.getPartitions().substring(1,topicPartitionGroup.getPartitions().length()-1).split(",")).
                 map(m->Integer.valueOf(m.trim())).collect(Collectors.toSet());
         if(model.getPartitionCount().startsWith(PARTITIONS_PREFIX)&&model.getPartitions().endsWith(PARTITIONS_SUFFIX)) {
             String partitionList= model.getPartitionCount();
             String[] increPartitions=partitionList.substring(1,partitionList.length()-1).split(PARTITIONS_SPLIT);
+            List<TopicPartitionGroup> partitionGroups=findByTopic(model.getNamespace(),model.getTopic());
+            // 所有的partition
+            Set<Integer> partitionSet=new HashSet();
+            for(TopicPartitionGroup pg:partitionGroups) {
+                partitionSet.addAll(Arrays.stream(pg.getPartitions().substring(1,
+                        pg.getPartitions().length() - 1).split(",")).map(m -> Integer.valueOf(m.trim())).collect(Collectors.toSet()));
+            }
             for(String p:increPartitions){
-                partitions.add(Integer.parseInt(p));
+                if(!partitionSet.contains(p)) {
+                    partitions.add(Integer.parseInt(p));
+                }
             }
         }else {
             int currentPartitions = topic.getPartitions();
