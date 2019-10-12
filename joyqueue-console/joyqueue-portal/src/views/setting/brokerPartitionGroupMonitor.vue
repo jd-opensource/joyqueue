@@ -1,5 +1,6 @@
 <template>
   <div>
+      <p> 主题分组数(partitionGroup)：{{broker.partitionGroups}};分组Leader数:{{broker.leaders}}</p>
       <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
                 @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
                 @on-edit="edit">
@@ -12,6 +13,7 @@ import myTable from '../../components/common/myTable.vue'
 import myDialog from '../../components/common/myDialog.vue'
 import crud from '../../mixins/crud.js'
 import ClientConnection from '../monitor/detail/clientConnection'
+import apiRequest from '../../utils/apiRequest.js'
 
 export default {
   name: 'brokerPartitionGroupMonitor',
@@ -36,12 +38,17 @@ export default {
       },
       searchRules: {
       },
+      broker:{},
       tableData: {
         rowData: [],
         colData: [
           {
             title: '主题',
             key: 'topic'
+          },
+          {
+            title: '存储大小',
+            key: 'storageSize'
           },
           {
             title: 'partitionGroup',
@@ -55,6 +62,42 @@ export default {
               if (list != undefined) {
                 for (var i = 0; i < list.length; i++) {
                   var p = h('div', {style: 'border-bottom: 1px solid #ECECEC;'}, list[i].partitionGroup)
+                  html.push(p)
+                }
+              }
+              return h('div', {}, html)
+            }
+          },
+          {
+            title: '分组存储大小',
+            key: 'partitionGroupMetricList',
+            render: (h, params) => {
+              var list = params.item.partitionGroupMetricList
+              if (list!= null && list.length > 0) {
+                list = list.slice().sort((a,b) => a.partitionGroup-b.partitionGroup)
+              }
+              var html = []
+              if (list != undefined) {
+                for (var i = 0; i < list.length; i++) {
+                  var p = h('div', {style: 'border-bottom: 1px solid #ECECEC;'},list[i].storageSize)
+                  html.push(p)
+                }
+              }
+              return h('div', {}, html)
+            }
+          },
+          {
+            title: 'leader',
+            key: 'partitionGroupMetricList',
+            render: (h, params) => {
+              var list = params.item.partitionGroupMetricList
+              if (list!= null && list.length > 0) {
+                list = list.slice().sort((a,b) => a.partitionGroup-b.partitionGroup)
+              }
+              var html = []
+              if (list != undefined) {
+                for (var i = 0; i < list.length; i++) {
+                  var p = h('div', {style: 'border-bottom: 1px solid #ECECEC;'},list[i].leader)
                   html.push(p)
                 }
               }
@@ -92,6 +135,26 @@ export default {
     }
   },
   methods: {
+    getList(){
+      this.showTablePin = true
+      let searchKey = this.getSearchVal()
+      apiRequest.post(this.urlOrigin.search, {}, searchKey).then((data) => {
+        if (data === '') {
+          return
+        }
+        let realData=data.data||{}
+        realData.data =realData.result  || []
+        realData.pagination = realData.pagination || {
+          totalRecord: realData.data.length
+        }
+        this.broker=realData.extras;
+        this.page.total = realData.pagination.totalRecord
+        this.page.page = realData.pagination.page
+        this.page.size = realData.pagination.size
+        this.tableData.rowData = realData.data
+        this.showTablePin = false
+      })
+    }
   },
   mounted () {
     this.getList()

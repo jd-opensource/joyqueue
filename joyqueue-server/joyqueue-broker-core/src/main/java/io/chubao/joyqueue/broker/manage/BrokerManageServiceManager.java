@@ -124,7 +124,7 @@ public class BrokerManageServiceManager extends Service {
     protected BrokerManageService newBrokerManageService() {
         ConnectionManageService connectionManageService = new DefaultConnectionManageService(brokerMonitor.getSessionManager());
         DefaultMessageManageService messageManageService = new DefaultMessageManageService(consume, storeManagementService, messageConvertSupport);
-        DefaultStoreManageService storeManageService = new DefaultStoreManageService(storeManagementService);
+        DefaultStoreManageService storeManageService = new DefaultStoreManageService(storeManagementService,clusterManager,storeService);
         DefaultConsumerManageService consumerManageService = new DefaultConsumerManageService(consume, storeManagementService, storeService, clusterManager,brokerMonitor);
         DefaultCoordinatorManageService coordinatorManageService = new DefaultCoordinatorManageService(coordinatorService);
         DefaultElectionManageService electionManageService = new DefaultElectionManageService(electionManager);

@@ -23,10 +23,7 @@ import io.chubao.joyqueue.broker.manage.service.ElectionManageService;
 import io.chubao.joyqueue.broker.manage.service.MessageManageService;
 import io.chubao.joyqueue.broker.manage.service.StoreManageService;
 import io.chubao.joyqueue.exception.JoyQueueException;
-import io.chubao.joyqueue.manage.IndexItem;
-import io.chubao.joyqueue.manage.PartitionGroupMetric;
-import io.chubao.joyqueue.manage.PartitionMetric;
-import io.chubao.joyqueue.manage.TopicMetric;
+import io.chubao.joyqueue.manage.*;
 import io.chubao.joyqueue.monitor.BrokerMessageInfo;
 import io.chubao.joyqueue.monitor.PartitionAckMonitorInfo;
 import org.slf4j.Logger;
@@ -247,4 +244,8 @@ public class DefaultBrokerManageService implements BrokerManageService {
         electionManageService.updateTerm(topic, partitionGroup, term);
     }
 
+    @Override
+    public List<SortedTopic> sortedTopics() {
+        return storeManageService.sortedTopics();
+    }
 }

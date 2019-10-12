@@ -16,17 +16,13 @@
 package io.chubao.joyqueue.service.impl;
 
 import io.chubao.joyqueue.convert.CodeConverter;
+import io.chubao.joyqueue.domain.BrokerPartitionGroupLeaderInfo;
 import io.chubao.joyqueue.manage.PartitionGroupMetric;
+import io.chubao.joyqueue.manage.SortedTopic;
 import io.chubao.joyqueue.model.PageResult;
 import io.chubao.joyqueue.model.Pagination;
 import io.chubao.joyqueue.model.QPageQuery;
-import io.chubao.joyqueue.model.domain.Broker;
-import io.chubao.joyqueue.model.domain.BrokerTopicMonitor;
-import io.chubao.joyqueue.model.domain.BrokerTopicMonitorRecord;
-import io.chubao.joyqueue.model.domain.Consumer;
-import io.chubao.joyqueue.model.domain.Producer;
-import io.chubao.joyqueue.model.domain.SubscribeType;
-import io.chubao.joyqueue.model.domain.Topic;
+import io.chubao.joyqueue.model.domain.*;
 import io.chubao.joyqueue.model.query.QConsumer;
 import io.chubao.joyqueue.model.query.QMonitor;
 import io.chubao.joyqueue.model.query.QProducer;
@@ -75,20 +71,31 @@ public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService 
             Pagination pagination = qPageQuery.getPagination();
             QMonitor qMonitor = qPageQuery.getQuery();
             Broker broker = brokerService.findById(qMonitor.getBrokerId());
-            List<String> toplicList = queryTopicList(broker);
-            pagination.setTotalRecord(toplicList.size());
+            List<SortedTopic> topicList = querySortedTopicList(broker);
+            pagination.setTotalRecord(topicList.size());
             int toIndex= pagination.getStart()+pagination.getSize();
             if (toIndex >pagination.getTotalRecord()) {
                 toIndex = pagination.getTotalRecord();
             }
             List<BrokerTopicMonitor> brokerTopicMonitorList = new ArrayList<>();
-            for (String topic: toplicList.subList(pagination.getStart(),toIndex)) {
+            int totalPartitionGroupLeaders=0;
+            int totalPartitionGroups=0;
+            for (SortedTopic sortedTopic: topicList.subList(pagination.getStart(),toIndex)) {
                 BrokerTopicMonitor brokerTopicMonitor = new BrokerTopicMonitor();
-                List<PartitionGroupMetric> partitionGroupMetricList = getPartitionGroup(topic,broker);
-                brokerTopicMonitor.setTopic(topic);
+                List<PartitionGroupMetric> partitionGroupMetricList = getPartitionGroup(sortedTopic.getTopic(),broker);
+                brokerTopicMonitor.setTopic(sortedTopic.getTopic());
                 brokerTopicMonitor.setPartitionGroupMetricList(partitionGroupMetricList);
+                // 存储大小
+                brokerTopicMonitor.setStorageSize(sortedTopic.getValue());
                 brokerTopicMonitorList.add(brokerTopicMonitor);
+
+                totalPartitionGroupLeaders+=sortedTopic.getPartitionGroupLeaders();
+                totalPartitionGroups+=sortedTopic.getPartitionGroups();
             }
+            BrokerPartitionGroupLeaderInfo info=new BrokerPartitionGroupLeaderInfo();
+            info.setLeaders(totalPartitionGroupLeaders);
+            info.setPartitionGroups(totalPartitionGroups);
+            pageResult.setExtras(info);
             pageResult.setPagination(pagination);
             pageResult.setResult(brokerTopicMonitorList);
         } catch (Exception e) {
@@ -304,6 +311,22 @@ public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService 
         args[0]=broker.getIp();
         args[1]=String.valueOf(broker.getMonitorPort());
         RestResponse<List<String>> restResponse = httpRestService.get(path,String.class,true,args);
+        if (restResponse != null && restResponse.getData() != null) {
+            return restResponse.getData();
+        }
+        return null;
+    }
+
+    /**
+     * 查询topicList
+     * @return
+     */
+    private List<SortedTopic> querySortedTopicList(Broker  broker) throws Exception {
+        String path="sortedTopicList";
+        String[] args=new String[2];
+        args[0]=broker.getIp();
+        args[1]=String.valueOf(broker.getMonitorPort());
+        RestResponse<List<SortedTopic>> restResponse = httpRestService.get(path, SortedTopic.class,true,args);
         if (restResponse != null && restResponse.getData() != null) {
             return restResponse.getData();
         }

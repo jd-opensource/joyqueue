@@ -24,8 +24,13 @@ import java.util.List;
  */
 public class BrokerTopicMonitor {
     private String topic;
+    private long storageSize;
     private List<BrokerTopicMonitorRecord> brokerTopicMonitorRecordList;
     private List<PartitionGroupMetric> partitionGroupMetricList;
+    /**
+     * broker partition group leader count
+     **/
+    private int partitionGroupLeaders;
 
     public String getTopic() {
         return topic;
@@ -49,5 +54,21 @@ public class BrokerTopicMonitor {
 
     public void setPartitionGroupMetricList(List<PartitionGroupMetric> partitionGroupMetricList) {
         this.partitionGroupMetricList = partitionGroupMetricList;
+    }
+
+    public long getStorageSize() {
+        return storageSize;
+    }
+
+    public void setStorageSize(long storageSize) {
+        this.storageSize = storageSize;
+    }
+
+    public int getPartitionGroupLeaders() {
+        return partitionGroupLeaders;
+    }
+
+    public void setPartitionGroupLeaders(int partitionGroupLeaders) {
+        this.partitionGroupLeaders = partitionGroupLeaders;
     }
 }

@@ -191,7 +191,7 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
     public Response partitionGroupMonitor(@PageQuery QPageQuery<QMonitor> qPageQuery){
         try {
             PageResult<BrokerTopicMonitor> pageResult = brokerTopicMonitorService.queryTopicsPartitionMointor(qPageQuery);
-            return new Response(pageResult.getResult(), pageResult.getPagination());
+            return new Response(pageResult);
         } catch (Exception e) {
         logger.error("query broker monitor info error.", e);
         return Responses.error(ErrorCode.NoTipError.getCode(), ErrorCode.NoTipError.getStatus(), e.getMessage());

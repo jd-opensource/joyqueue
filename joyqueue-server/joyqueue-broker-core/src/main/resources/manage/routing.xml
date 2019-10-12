@@ -173,6 +173,8 @@
                handlers="brokerManageService.readPartitionGroupStore"/>
         <route path="/manage/topic/list" inherit="get"
                handlers="brokerManageService.topics"/>
+        <route path="/manage/sorted/topic/list" inherit="get"
+               handlers="brokerManageService.sortedTopics"/>
         <route path="/manage/topic/:topic/partitionGroup/detail" inherit="get"
                handlers="brokerManageService.partitionGroups"/>
 

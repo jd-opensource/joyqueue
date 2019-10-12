@@ -16,13 +16,13 @@
 package io.chubao.joyqueue.broker.manage.service.support;
 
 import com.google.common.collect.Lists;
+import io.chubao.joyqueue.broker.cluster.ClusterManager;
 import io.chubao.joyqueue.broker.manage.converter.StoreManageConverter;
 import io.chubao.joyqueue.broker.manage.service.StoreManageService;
-import io.chubao.joyqueue.manage.IndexItem;
-import io.chubao.joyqueue.manage.PartitionGroupMetric;
-import io.chubao.joyqueue.manage.PartitionMetric;
-import io.chubao.joyqueue.manage.TopicMetric;
+import io.chubao.joyqueue.manage.*;
+import io.chubao.joyqueue.store.PartitionGroupStore;
 import io.chubao.joyqueue.store.StoreManagementService;
+import io.chubao.joyqueue.store.StoreService;
 import io.chubao.joyqueue.store.message.MessageParser;
 import org.apache.commons.lang3.StringUtils;
 
@@ -44,9 +44,12 @@ public class DefaultStoreManageService implements StoreManageService {
     private static final String TOPICS_DIR = "topics";
 
     private StoreManagementService storeManagementService;
-
-    public DefaultStoreManageService(StoreManagementService storeManagementService) {
+    private ClusterManager clusterManager;
+    private StoreService storeService;
+    public DefaultStoreManageService(StoreManagementService storeManagementService, ClusterManager clusterManager, StoreService storeService) {
         this.storeManagementService = storeManagementService;
+        this.clusterManager=clusterManager;
+        this.storeService=storeService;
     }
 
     @Override
@@ -89,6 +92,38 @@ public class DefaultStoreManageService implements StoreManageService {
     }
 
     @Override
+    public List<SortedTopic> sortedTopics() {
+        List<String> topics=topics();
+        List<SortedTopic> sortedTopics=new ArrayList();
+        for(String t:topics){
+            SortedTopic sortedTopic=new SortedTopic();
+            sortedTopic.setTopic(t);
+            String partitionGroupPath=TOPICS_DIR+"/"+t;
+            File[] partitionGroupFiles = storeManagementService.listFiles(partitionGroupPath);
+            long topicTotalStorageSize=0;
+            int leaders=0;
+            for (File file :partitionGroupFiles) {
+               int partitionGroup= Long.valueOf(file.getName()).intValue();
+                PartitionGroupStore pgStore = storeService.getStore(t,partitionGroup);
+                if(pgStore!=null) {
+                    topicTotalStorageSize+=pgStore.getTotalPhysicalStorageSize();
+                }
+                leaders+=clusterManager.isLeader(t,partitionGroup)?1:0;
+            }
+            sortedTopic.setPartitionGroups(partitionGroupFiles.length);
+            sortedTopic.setPartitionGroupLeaders(leaders);
+            sortedTopic.setValue(topicTotalStorageSize);
+            sortedTopics.add(sortedTopic);
+        }
+        sortedTopics.sort(Comparator.comparing(SortedTopic::getValue).reversed());
+        int i=0;
+        for(SortedTopic t:sortedTopics){
+            t.setOrder(++i);
+        }
+        return sortedTopics;
+    }
+
+    @Override
     public List<PartitionGroupMetric> partitionGroups(String topic) {
         String partitionGroupPath=TOPICS_DIR+"/"+topic;
         File[] partitionGroupFiles = storeManagementService.listFiles(partitionGroupPath);
@@ -102,6 +137,12 @@ public class DefaultStoreManageService implements StoreManageService {
                 partitionGroupMetric.setPartitionGroup(Long.valueOf(file.getName()).intValue());
             }
             partitionGroupMetric.setPartitions(partitions);
+            // leader and storage info
+            partitionGroupMetric.setLeader(clusterManager.isLeader(topic,partitionGroupMetric.getPartitionGroup()));
+            PartitionGroupStore pgStore = storeService.getStore(topic,partitionGroupMetric.getPartitionGroup());
+            if(pgStore!=null) {
+                partitionGroupMetric.setStorageSize(pgStore.getTotalPhysicalStorageSize());
+            }
             partitionGroupMetrics.add(partitionGroupMetric);
         }
         return partitionGroupMetrics;

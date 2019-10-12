@@ -15,10 +15,7 @@
  */
 package io.chubao.joyqueue.broker.manage.service;
 
-import io.chubao.joyqueue.manage.IndexItem;
-import io.chubao.joyqueue.manage.PartitionGroupMetric;
-import io.chubao.joyqueue.manage.PartitionMetric;
-import io.chubao.joyqueue.manage.TopicMetric;
+import io.chubao.joyqueue.manage.*;
 
 import java.io.File;
 import java.util.List;
@@ -93,6 +90,13 @@ public interface StoreManageService {
      * @return 主题名列表
      */
     List<String> topics();
+
+    /**
+     * 根据占用存储大小排序的主题列表
+     *
+     * @return  有序的主题列表
+     **/
+    List<SortedTopic> sortedTopics();
 
     /**
      * 获取主题下所有分区的度量信息

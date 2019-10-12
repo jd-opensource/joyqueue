@@ -27,6 +27,8 @@ public class PartitionGroupMetric implements Serializable {
     private long flushPosition;
     private long replicationPosition;
     private String  partitions;
+    private boolean leader;
+    private long storageSize;
 
     public int getPartitionGroup() {
         return partitionGroup;
@@ -90,5 +92,21 @@ public class PartitionGroupMetric implements Serializable {
 
     public void setPartitions(String partitions) {
         this.partitions = partitions;
+    }
+
+    public boolean isLeader() {
+        return leader;
+    }
+
+    public void setLeader(boolean leader) {
+        this.leader = leader;
+    }
+
+    public long getStorageSize() {
+        return storageSize;
+    }
+
+    public void setStorageSize(long storageSize) {
+        this.storageSize = storageSize;
     }
 }

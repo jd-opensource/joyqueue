@@ -33,6 +33,7 @@ public class Pagination {
     //总的页数
     private int pages;
 
+
     public Pagination() {
     }
 
@@ -98,6 +99,7 @@ public class Pagination {
             this.page = page > pages ? pages : page;
         }
     }
+
 
     public int getPage() {
         return page;

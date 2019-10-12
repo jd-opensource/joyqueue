@@ -87,7 +87,7 @@ public class BrokerRestUrlMappingServiceImpl implements BrokerRestUrlMappingServ
 
     /** store **/
     private String topicListPath = "/manage/topic/list";
-
+    private String sortedTopicListPath = "/manage/sorted/topic/list";
     /** broker **/
     private String brokerMonitorPath = "/monitor/broker";
     private String startupInfoPath = "/startInfo";
