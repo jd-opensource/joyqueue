@@ -24,7 +24,11 @@ import io.chubao.joyqueue.manage.PartitionMetric;
 import io.chubao.joyqueue.manage.TopicMetric;
 import io.chubao.joyqueue.store.StoreManagementService;
 import io.chubao.joyqueue.store.message.MessageParser;
+import io.chubao.joyqueue.toolkit.io.Directory;
+import io.chubao.joyqueue.toolkit.io.Files;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.nio.ByteBuffer;
@@ -41,8 +45,9 @@ import java.util.stream.Collectors;
  * date: 2018/10/18
  */
 public class DefaultStoreManageService implements StoreManageService {
+    private Logger logger= LoggerFactory.getLogger(DefaultStoreManageService.class);
     private static final String TOPICS_DIR = "topics";
-
+    private static final String DEL_PREFIX = ".d.";
     private StoreManagementService storeManagementService;
 
     public DefaultStoreManageService(StoreManagementService storeManagementService) {
@@ -81,6 +86,33 @@ public class DefaultStoreManageService implements StoreManageService {
 
     @Override
     public void removeTopic(String topic) {
+    }
+
+    @Override
+    public Directory storeTreeView() {
+        String topics=TOPICS_DIR;
+        Directory directory=new Directory();
+        directory.setName(topics);
+        directory.setChildren(new ArrayList());
+        File[] topicList=storeManagementService.listFiles(topics);
+        for(File f:topicList){
+            Directory child=new Directory();
+            Files.tree(f.getPath(),child);
+            directory.getChildren().add(child);
+        }
+        return directory;
+    }
+
+    @Override
+    public boolean deleteGarbageFile(String fileName) {
+        File file=new File(fileName);
+        if(file.exists()&&file.getName().startsWith(DEL_PREFIX)){
+            //if(file.isDirectory())
+            Files.deleteDirectory(file);
+            logger.info("delete file {}",file.getName());
+            return true;
+        }
+        return false;
     }
 
     @Override

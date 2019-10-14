@@ -31,6 +31,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
 
 /**
  * 文件工具类
@@ -585,6 +586,32 @@ public abstract class Files {
             }
         }
         return result;
+    }
+
+    /**
+     *  tree directory
+     *
+     **/
+    public static void  tree(String path,Directory directory){
+        File file=new File(path);
+        if(file.exists()){
+          directory.setName(file.getName());
+          directory.setPath(path);
+          File[] files=file.listFiles();
+          if(files.length>0){
+              directory.setChildren(new ArrayList<>());
+          }
+          for(File f:files){
+              Directory child=new Directory();
+              if(f.isDirectory()){
+                  tree(f.getPath(),child);
+              }else {
+                  child.setName(f.getName());
+                  child.setPath(f.getPath());
+              }
+              directory.getChildren().add(child);
+            }
+        }
     }
 
 }

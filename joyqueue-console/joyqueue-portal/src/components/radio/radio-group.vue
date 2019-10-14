@@ -78,9 +78,9 @@ export default {
   },
   methods: {
     updateValue () {
-      this.childrens = findComponentsDownward(this, `${Config.namePrefix}Radio`)
-      if (this.childrens) {
-        this.childrens.forEach(child => {
+      this.children = findComponentsDownward(this, `${Config.namePrefix}Radio`)
+      if (this.children) {
+        this.children.forEach(child => {
           child.currentValue = this.currentValue === child.label
           child.group = true
         })

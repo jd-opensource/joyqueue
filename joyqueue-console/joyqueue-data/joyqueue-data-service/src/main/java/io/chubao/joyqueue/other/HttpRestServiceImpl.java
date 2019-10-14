@@ -75,4 +75,26 @@ public class HttpRestServiceImpl implements HttpRestService {
             throw new ServiceException(ServiceException.IO_ERROR, e.getMessage());
         }
     }
+
+    @Override
+    public <T> RestResponse<T> delete(String pathKey, Class dataClass, boolean isList, String... args) {
+        String urlTemplate= urlMappingService.urlTemplate(pathKey);
+        String url;
+        if(!NullUtil.isEmpty(args)){
+            //args= UrlEncoderUtil.encodeParam(args);
+            url= String.format(urlTemplate,args);
+        }else{
+            url=urlTemplate;
+        }
+        try {
+            logger.info("http request:"+url);
+            String responseString = HttpUtil.delete(url);
+            return JSONParser.parse(responseString, RestResponse.class, dataClass, isList);
+        }catch (ServiceException e){
+            logger.info("proxy monitor exception",e);
+            throw e;
+        }catch (Exception e){
+            throw new ServiceException(ServiceException.IO_ERROR, e.getMessage());
+        }
+    }
 }
