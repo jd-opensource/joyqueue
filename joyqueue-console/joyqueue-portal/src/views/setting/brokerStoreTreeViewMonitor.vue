@@ -77,29 +77,7 @@ export default {
         bufferPoolMonitorInfo: {
         }
       },
-      treeData:[{
-          label: '目录 1',
-          children: [{
-            label: '目录 1-1',
-            children: [{
-              label: '文件 1'
-            }]
-          }]
-        },
-        {
-          label: '目录 2',
-          children: [{
-            label: '目录 2-1',
-            children: [{
-              label: '文件 2'
-            }]
-          }, {
-            label: '目录 2-2',
-            children: [{
-              label: '文件 3'
-            }]
-          }]
-        }]
+      treeData:[]
 
     }
   },
