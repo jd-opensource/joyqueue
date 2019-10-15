@@ -20,6 +20,7 @@ import java.util.List;
 public class Directory {
     private String name;
     private String path;
+    private boolean directory;
     private List<Directory> children;
 
     public String getName() {
@@ -44,5 +45,13 @@ public class Directory {
 
     public void setChildren(List<Directory> children) {
         this.children = children;
+    }
+
+    public boolean isDirectory() {
+        return directory;
+    }
+
+    public void setDirectory(boolean directory) {
+        this.directory = directory;
     }
 }

@@ -90,14 +90,16 @@ public interface StoreManageService {
 
     /**
      * Store tree view
+     * @param recursive  recurse child directory if true
      **/
-    Directory storeTreeView();
+    Directory storeTreeView(boolean recursive);
 
     /**
      * 删除已被软删除的文件
-     *
+     * @param fileName  file name
+     * @param retain  保留目录 if true
      **/
-    boolean deleteGarbageFile(String fileName);
+    boolean deleteGarbageFile(String fileName,boolean retain);
     /**
      * 获取所有主题名
      *

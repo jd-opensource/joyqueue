@@ -385,9 +385,9 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
      * @return
      */
     @Path("storeTreeView")
-    public Response storeTreeView(@QueryParam("brokerId") Integer brokerId) throws Exception {
+    public Response storeTreeView(@QueryParam("brokerId") Integer brokerId,@QueryParam("recursive") boolean recursive) throws Exception {
         try {
-            Directory directory = brokerManageService.storeTreeView(brokerId);
+            Directory directory = brokerManageService.storeTreeView(brokerId,recursive);
             return Responses.success(directory);
         } catch (Exception e) {
             logger.error("query broker store tree view error.", e);
@@ -401,9 +401,11 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
      * @return
      */
     @Path("garbageFile")
-    public Response  deleteGarbageFile(@QueryParam("brokerId") Integer brokerId,@QueryParam("fileName") String fileName) throws Exception {
+    public Response  deleteGarbageFile(@QueryParam("brokerId") Integer brokerId,
+                                       @QueryParam("fileName") String fileName,
+                                       @QueryParam("retain") boolean retain) throws Exception {
         try {
-            boolean result = brokerManageService.deleteGarbageFile(brokerId,fileName);
+            boolean result = brokerManageService.deleteGarbageFile(brokerId,fileName,retain);
             return Responses.success(result);
         } catch (Exception e) {
             logger.error("query broker store tree view error.", e);

@@ -400,10 +400,10 @@
                errors="error"/>
 
         <route inherit="get"
-               path="/v1/monitor/broker/storeTreeView/:brokerId" handlers="brokerMonitor#storeTreeView render"
+               path="/v1/monitor/broker/storeTreeView/:brokerId/:recursive" handlers="brokerMonitor#storeTreeView render"
                errors="error"/>
         <route inherit="delete"
-               path="/v1/manage/broker/garbageFile/:brokerId/:fileName" handlers="brokerMonitor#garbageFile render"
+               path="/v1/manage/broker/garbageFile" handlers="brokerMonitor#garbageFile render"
                errors="error"/>
 
 

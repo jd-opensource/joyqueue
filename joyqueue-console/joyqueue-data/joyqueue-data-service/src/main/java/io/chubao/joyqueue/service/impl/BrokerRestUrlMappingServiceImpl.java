@@ -87,8 +87,8 @@ public class BrokerRestUrlMappingServiceImpl implements BrokerRestUrlMappingServ
 
     /** store **/
     private String topicListPath = "/manage/topic/list";
-    private String storeTreeViewPath = "/manage/store/tree/view";
-    private String deleteGarbageFilePath = "/manage/store/delete/garbage/file/%s"; // filename
+    private String storeTreeViewPath = "/manage/store/tree/view/%s"; // recursive
+    private String deleteGarbageFilePath = "/manage/store/delete/garbage/file/%s/%s"; // filename|retain
 
     /** broker **/
     private String brokerMonitorPath = "/monitor/broker";

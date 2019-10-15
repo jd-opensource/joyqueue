@@ -21,15 +21,16 @@ public interface BrokerManageService {
 
     /**
      * Broker store tree view
+     * @param recursive  recurse child directory if true
      * @return store tree view
      **/
-    Directory storeTreeView(int brokerId);
+    Directory storeTreeView(int brokerId,boolean recursive);
 
     /**
      * Delete garbage file on broker, which name start with .d.
      * @return true if delete success
      **/
-    boolean deleteGarbageFile(int brokerId,String path);
+    boolean deleteGarbageFile(int brokerId,String path,boolean retain);
 
 
 

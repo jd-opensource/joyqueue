@@ -249,12 +249,12 @@ public class DefaultBrokerManageService implements BrokerManageService {
     }
 
     @Override
-    public Directory storeTreeView() {
-        return storeManageService.storeTreeView();
+    public Directory storeTreeView(boolean recursive) {
+        return storeManageService.storeTreeView(recursive);
     }
 
     @Override
-    public boolean deleteGarbageFile(String fileName) {
-        return storeManageService.deleteGarbageFile(fileName);
+    public boolean deleteGarbageFile(String fileName,boolean retain) {
+        return storeManageService.deleteGarbageFile(fileName,retain);
     }
 }

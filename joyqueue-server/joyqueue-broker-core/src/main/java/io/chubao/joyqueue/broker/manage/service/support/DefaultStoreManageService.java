@@ -89,26 +89,37 @@ public class DefaultStoreManageService implements StoreManageService {
     }
 
     @Override
-    public Directory storeTreeView() {
+    public Directory storeTreeView(boolean recursive) {
         String topics=TOPICS_DIR;
         Directory directory=new Directory();
         directory.setName(topics);
-        directory.setChildren(new ArrayList());
         File[] topicList=storeManagementService.listFiles(topics);
-        for(File f:topicList){
-            Directory child=new Directory();
-            Files.tree(f.getPath(),child);
+        directory.setDirectory(true);
+        if(topicList.length>0){
+            directory.setChildren(new ArrayList());
+        }
+        //Arrays.sort(topicList,Comparator.comparing(File::getName));
+        Files.sortByName(topicList);
+        // recurse to child
+        for (File f : topicList) {
+            Directory child = new Directory();
+            Files.tree(f.getPath(),recursive, child);
             directory.getChildren().add(child);
         }
         return directory;
     }
 
     @Override
-    public boolean deleteGarbageFile(String fileName) {
+    public boolean deleteGarbageFile(String fileName,boolean retain) {
         File file=new File(fileName);
-        if(file.exists()&&file.getName().startsWith(DEL_PREFIX)){
-            //if(file.isDirectory())
-            Files.deleteDirectory(file);
+        if(file.exists()&&file.getName().contains(DEL_PREFIX)){
+            if(retain&&file.isDirectory()){
+                 for(File f:file.listFiles()){
+                     Files.deleteDirectory(f);
+                 }
+            }else {
+                Files.deleteDirectory(file);
+            }
             logger.info("delete file {}",file.getName());
             return true;
         }

@@ -22,6 +22,7 @@ import io.chubao.joyqueue.other.HttpRestService;
 import io.chubao.joyqueue.service.BrokerManageService;
 import io.chubao.joyqueue.service.BrokerService;
 import io.chubao.joyqueue.toolkit.io.Directory;
+import io.chubao.joyqueue.util.UrlEncoderUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,16 +40,18 @@ public class BrokerManageServiceImpl implements BrokerManageService {
     @Autowired
     protected BrokerService brokerService;
     @Override
-    public Directory storeTreeView(int brokerId) {
+    public Directory storeTreeView(int brokerId,boolean recursive) {
         try {
             Broker broker = brokerService.findById(Long.valueOf(brokerId));
             String path="storeTreeView";
-            String[] args=new String[2];
+            String[] args=new String[3];
             args[0]=broker.getIp();
             args[1]=String.valueOf(broker.getMonitorPort());
+            args[2]=String.valueOf(recursive);
             RestResponse<Directory> restResponse = httpRestService.get(path,Directory.class,false,args);
             if (restResponse != null && restResponse.getData() != null) {
-                return restResponse.getData();
+                Directory directory= restResponse.getData();
+                return directory;
             }
         }catch (Exception e){
             throw new ServiceException(ServiceException.INTERNAL_SERVER_ERROR,e.getMessage());
@@ -57,15 +60,16 @@ public class BrokerManageServiceImpl implements BrokerManageService {
     }
 
     @Override
-    public boolean deleteGarbageFile(int brokerId, String fileName) {
+    public boolean deleteGarbageFile(int brokerId, String fileName,boolean retain) {
         try {
             Broker broker = brokerService.findById(Long.valueOf(brokerId));
             String path="deleteGarbageFile";
-            String[] args=new String[3];
+            String[] args=new String[4];
             args[0]=broker.getIp();
             args[1]=String.valueOf(broker.getMonitorPort());
-            args[2]=fileName;
-            RestResponse<Boolean> restResponse = httpRestService.delete(path,Boolean.class,false,args);
+            args[2]= fileName;
+            args[3]=String.valueOf(retain);
+            RestResponse<Boolean> restResponse = httpRestService.delete(path,Boolean.class,false,UrlEncoderUtil.encodeParam(args));
             if (restResponse != null && restResponse.getData() != null) {
                 return restResponse.getData();
             }

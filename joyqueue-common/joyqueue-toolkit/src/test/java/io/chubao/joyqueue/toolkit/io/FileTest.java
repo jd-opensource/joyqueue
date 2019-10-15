@@ -23,7 +23,7 @@ public class FileTest {
     public void tree(){
         Directory directory=new Directory();
         String path="/export/Data/journalq/";
-        Files.tree(path,directory);
+        Files.tree(path,true,directory);
         System.out.println(directory);
     }
 }

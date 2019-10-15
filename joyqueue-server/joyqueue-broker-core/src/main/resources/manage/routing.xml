@@ -176,9 +176,9 @@
         <route path="/manage/topic/:topic/partitionGroup/detail" inherit="get"
                handlers="brokerManageService.partitionGroups"/>
 
-        <route path="/manage/store/tree/view" inherit="get"
+        <route path="/manage/store/tree/view/:recursive" inherit="get"
                handlers="brokerManageService.storeTreeView"/>
-        <route path="/manage/store/delete/garbage/file/:name" inherit="delete"
+        <route path="/manage/store/delete/garbage/file/:fileName/:retain" inherit="delete"
                handlers="brokerManageService.deleteGarbageFile"/>
 
 
