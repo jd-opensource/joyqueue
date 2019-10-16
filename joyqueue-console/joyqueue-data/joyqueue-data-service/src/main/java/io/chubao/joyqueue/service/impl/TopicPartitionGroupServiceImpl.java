@@ -125,8 +125,12 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
         if(model.getPartitions().startsWith(PARTITIONS_PREFIX)&&model.getPartitions().endsWith(PARTITIONS_SUFFIX)){
            String partitionList= model.getPartitions();
            String[] partitions=partitionList.substring(1,partitionList.length()-1).split(PARTITIONS_SPLIT);
+            Set<Integer> existedPartitionSet=partition(model.getNamespace(),model.getTopic());
            for(String p:partitions){
-               model.getPartitionSet().add(Integer.parseInt(p));
+               int newPartition=Integer.parseInt(p);
+               if(!existedPartitionSet.contains(newPartition)) {
+                   model.getPartitionSet().add(newPartition);
+               }
            }
         }else {
             topic.setPartitions(topic.getPartitions() + Integer.valueOf(model.getPartitions()));
@@ -163,13 +167,9 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
             String[] increPartitions=partitionList.substring(1,partitionList.length()-1).split(PARTITIONS_SPLIT);
             List<TopicPartitionGroup> partitionGroups=findByTopic(model.getNamespace(),model.getTopic());
             // 所有的partition
-            Set<Integer> partitionSet=new HashSet();
-            for(TopicPartitionGroup pg:partitionGroups) {
-                partitionSet.addAll(Arrays.stream(pg.getPartitions().substring(1,
-                        pg.getPartitions().length() - 1).split(",")).map(m -> Integer.valueOf(m.trim())).collect(Collectors.toSet()));
-            }
+            Set<Integer> existedPartitionSet=partition(model.getNamespace(),model.getTopic());
             for(String p:increPartitions){
-                if(!partitionSet.contains(p)) {
+                if(!existedPartitionSet.contains(p)) {
                     partitions.add(Integer.parseInt(p));
                 }
             }
@@ -196,6 +196,22 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
             throw new ServiceException(INTERNAL_SERVER_ERROR, errorMsg);//回滚
         }
         return 1;
+    }
+
+    /**
+     * @param namespace  topic namespace
+     * @param topic  topic
+     * @return topic partition set
+     **/
+    public Set<Integer> partition(Namespace namespace,Topic topic){
+        List<TopicPartitionGroup> partitionGroups=findByTopic(namespace,topic);
+        // 所有的partition
+        Set<Integer> partitionSet=new HashSet();
+        for(TopicPartitionGroup pg:partitionGroups) {
+            partitionSet.addAll(Arrays.stream(pg.getPartitions().substring(1,
+                    pg.getPartitions().length() - 1).split(",")).map(m -> Integer.valueOf(m.trim())).collect(Collectors.toSet()));
+        }
+        return partitionSet;
     }
 
     /**
