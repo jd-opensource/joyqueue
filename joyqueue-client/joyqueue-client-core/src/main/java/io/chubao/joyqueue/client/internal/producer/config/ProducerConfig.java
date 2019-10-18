@@ -37,7 +37,7 @@ public class ProducerConfig {
 
     private boolean failover = true;
     private RetryPolicy retryPolicy = new RetryPolicy(1000 * 1, 2);
-    private QosLevel qosLevel = QosLevel.RECEIVE;
+    private QosLevel qosLevel = QosLevel.REPLICATION;
 
     private boolean compress = true;
     private String compressType = ZlibCompressor.NAME;

@@ -113,8 +113,19 @@ public class DefaultConsumerMonitorService implements ConsumerMonitorService {
 
     @Override
     public ConsumerPartitionMonitorInfo getConsumerPartitionInfoByTopicAndApp(String topic, String app, short partition) {
+        StoreManagementService.TopicMetric topicMetric = storeManagementService.topicMetric(topic);
         ConsumerStat consumerStat = brokerStat.getOrCreateTopicStat(topic).getOrCreateAppStat(app).getConsumerStat();
-        return convertConsumerPartitionMonitorInfo(consumerStat, partition);
+        for (StoreManagementService.PartitionGroupMetric partitionGroupMetric : topicMetric.getPartitionGroupMetrics()) {
+            for (StoreManagementService.PartitionMetric partitionMetric : partitionGroupMetric.getPartitionMetrics()) {
+                if (!clusterManager.isLeader(topic, partitionMetric.getPartition())) {
+                    continue;
+                }
+                if (partitionMetric.getPartition() == partition) {
+                    return convertConsumerPartitionMonitorInfo(consumerStat, partition);
+                }
+            }
+        }
+        return null;
     }
 
     @Override
@@ -176,6 +187,8 @@ public class DefaultConsumerMonitorService implements ConsumerMonitorService {
 
     protected ConsumerPartitionMonitorInfo convertConsumerPartitionMonitorInfo(ConsumerStat consumerStat, short partition) {
         PendingMonitorInfo pendingMonitorInfo = new PendingMonitorInfo();
+        int partitionGroup = 0;
+
         try {
             Consumer consumer = new Consumer(consumerStat.getTopic(), consumerStat.getApp());
             StoreManagementService.TopicMetric topicMetric = storeManagementService.topicMetric(consumerStat.getTopic());
@@ -186,8 +199,9 @@ public class DefaultConsumerMonitorService implements ConsumerMonitorService {
                         if (ackIndex < 0) {
                             ackIndex = 0;
                         }
+                        partitionGroup = partitionGroupMetric.getPartitionGroup();
                         if (ackIndex >= partitionMetric.getRightIndex()) {
-                            continue;
+                            break;
                         }
                         pendingMonitorInfo.setCount(partitionMetric.getRightIndex() - ackIndex);
                         break;
@@ -203,7 +217,8 @@ public class DefaultConsumerMonitorService implements ConsumerMonitorService {
         consumerPartitionMonitorInfo.setApp(consumerStat.getApp());
         consumerPartitionMonitorInfo.setPartition(partition);
 
-        consumerPartitionMonitorInfo.setDeQueue(BrokerMonitorConverter.convertDeQueueMonitorInfo(consumerStat.getPartitionStat(partition).getDeQueueStat()));
+        consumerPartitionMonitorInfo.setDeQueue(BrokerMonitorConverter.convertDeQueueMonitorInfo(
+                consumerStat.getOrCreatePartitionGroupStat(partitionGroup).getOrCreatePartitionStat(partition).getDeQueueStat()));
         consumerPartitionMonitorInfo.setPending(pendingMonitorInfo);
 
         return consumerPartitionMonitorInfo;

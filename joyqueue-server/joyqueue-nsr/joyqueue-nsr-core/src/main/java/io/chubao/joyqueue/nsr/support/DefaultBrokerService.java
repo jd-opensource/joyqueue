@@ -87,15 +87,15 @@ public class DefaultBrokerService implements BrokerService {
 
         try {
             brokerInternalService.update(broker);
-            messenger.publish(new UpdateBrokerEvent(oldBroker, broker), broker);
             transactionInternalService.commit();
-            return broker;
         } catch (Exception e) {
-            logger.error("updateBroker exception, id: {}", broker, e);
-            messenger.fastPublish(new UpdateBrokerEvent(broker, oldBroker), broker);
+            logger.error("updateBroker exception, broker: {}", broker, e);
             transactionInternalService.rollback();
             throw new NsrException(e);
         }
+
+        messenger.publish(new UpdateBrokerEvent(oldBroker, broker), broker);
+        return broker;
     }
 
     @Override

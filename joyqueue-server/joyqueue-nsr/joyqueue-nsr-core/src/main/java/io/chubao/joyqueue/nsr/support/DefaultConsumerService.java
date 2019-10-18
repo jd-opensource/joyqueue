@@ -96,15 +96,15 @@ public class DefaultConsumerService implements ConsumerService {
 
         try {
             consumerInternalService.add(consumer);
-            messenger.publish(new AddConsumerEvent(consumer.getTopic(), consumer), replicas);
             transactionInternalService.commit();
-            return consumer;
         } catch (Exception e) {
             logger.error("addConsumer exception, topic: {}, app: {}", consumer.getTopic(), consumer.getApp(), e);
-            messenger.fastPublish(new RemoveConsumerEvent(consumer.getTopic(), consumer), replicas);
             transactionInternalService.rollback();
             throw new NsrException(e);
         }
+
+        messenger.publish(new AddConsumerEvent(consumer.getTopic(), consumer), replicas);
+        return consumer;
     }
 
     @Override
@@ -128,15 +128,15 @@ public class DefaultConsumerService implements ConsumerService {
 
         try {
             consumerInternalService.update(consumer);
-            messenger.publish(new UpdateConsumerEvent(consumer.getTopic(), oldConsumer, consumer), replicas);
             transactionInternalService.commit();
-            return consumer;
         } catch (Exception e) {
             logger.error("updateConsumer exception, topic: {}, app: {}", consumer.getTopic(), consumer.getApp(), e);
-            messenger.fastPublish(new UpdateConsumerEvent(consumer.getTopic(), oldConsumer, consumer), replicas);
             transactionInternalService.rollback();
             throw new NsrException(e);
         }
+
+        messenger.publish(new UpdateConsumerEvent(consumer.getTopic(), oldConsumer, consumer), replicas);
+        return consumer;
     }
 
     @Override
@@ -160,14 +160,14 @@ public class DefaultConsumerService implements ConsumerService {
 
         try {
             consumerInternalService.delete(id);
-            messenger.publish(new RemoveConsumerEvent(consumer.getTopic(), consumer), replicas);
             transactionInternalService.commit();
         } catch (Exception e) {
             logger.error("deleteConsumer exception, topic: {}, app: {}", consumer.getTopic(), consumer.getApp(), e);
-            messenger.fastPublish(new AddConsumerEvent(consumer.getTopic(), consumer), replicas);
             transactionInternalService.rollback();
             throw new NsrException(e);
         }
+
+        messenger.publish(new RemoveConsumerEvent(consumer.getTopic(), consumer), replicas);
     }
 
     protected List<Broker> getReplicas(List<PartitionGroup> partitionGroups) {
