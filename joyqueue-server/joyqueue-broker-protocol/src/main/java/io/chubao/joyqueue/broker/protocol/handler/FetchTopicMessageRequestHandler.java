@@ -80,7 +80,7 @@ public class FetchTopicMessageRequestHandler implements JoyQueueCommandHandler, 
         Connection connection = SessionHelper.getConnection(transport);
 
         if (connection == null || !connection.isAuthorized(fetchTopicMessageRequest.getApp())) {
-            logger.warn("connection is not exists, transport: {}, app: {}", transport, fetchTopicMessageRequest.getApp());
+            logger.warn("connection is not exists, transport: {}, app: {}, topics: {}", transport, fetchTopicMessageRequest.getApp(), fetchTopicMessageRequest.getTopics().keySet());
             return BooleanAck.build(JoyQueueCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
@@ -102,7 +102,7 @@ public class FetchTopicMessageRequestHandler implements JoyQueueCommandHandler, 
             Consumer consumer = (StringUtils.isBlank(consumerId) ? null : sessionManager.getConsumerById(consumerId));
 
             if (consumer == null) {
-                logger.warn("consumer is not exists, transport: {}", transport);
+                logger.warn("connection is not exists, transport: {}, app: {}, topics: {}", transport, fetchTopicMessageRequest.getApp(), fetchTopicMessageRequest.getTopics().keySet());
                 result.put(topic, new FetchTopicMessageAckData(CheckResultConverter.convertFetchCode(command.getHeader().getVersion(), JoyQueueCode.FW_CONSUMER_NOT_EXISTS)));
                 continue;
             }

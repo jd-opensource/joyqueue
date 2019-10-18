@@ -1,9 +1,9 @@
 package io.chubao.joyqueue.nsr.journalkeeper.repository;
 
-import io.chubao.joyqueue.nsr.journalkeeper.TransactionContext;
+import io.chubao.joyqueue.nsr.journalkeeper.BatchOperationContext;
 import io.chubao.joyqueue.nsr.journalkeeper.helper.ResultSetHelper;
+import io.journalkeeper.sql.client.BatchSQLOperator;
 import io.journalkeeper.sql.client.SQLOperator;
-import io.journalkeeper.sql.client.SQLTransactionOperator;
 import io.journalkeeper.sql.client.domain.ResultSet;
 
 import java.util.List;
@@ -22,39 +22,42 @@ public class BaseRepository {
     }
 
     public String insert(String sql, Object... params) {
-        SQLTransactionOperator transactionOperator = TransactionContext.getTransactionOperator();
-        if (transactionOperator != null) {
-            return transactionOperator.insert(sql, params);
+        BatchSQLOperator batchSQLOperator = BatchOperationContext.getBatchSQLOperator();
+        if (batchSQLOperator != null) {
+            batchSQLOperator.insert(sql, params);
+            return null;
         } else {
-            return sqlOperator.insert(sql, params);
+            Object result = sqlOperator.insert(sql, params);
+            if (result == null) {
+                return null;
+            } else {
+                return result.toString();
+            }
         }
     }
 
     public int update(String sql, Object... params) {
-        SQLTransactionOperator transactionOperator = TransactionContext.getTransactionOperator();
-        if (transactionOperator != null) {
-            return transactionOperator.update(sql, params);
+        BatchSQLOperator batchSQLOperator = BatchOperationContext.getBatchSQLOperator();
+        if (batchSQLOperator != null) {
+            batchSQLOperator.update(sql, params);
+            return 0;
         } else {
             return sqlOperator.update(sql, params);
         }
     }
 
     public int delete(String sql, Object... params) {
-        SQLTransactionOperator transactionOperator = TransactionContext.getTransactionOperator();
-        if (transactionOperator != null) {
-            return transactionOperator.delete(sql, params);
+        BatchSQLOperator batchSQLOperator = BatchOperationContext.getBatchSQLOperator();
+        if (batchSQLOperator != null) {
+            batchSQLOperator.delete(sql, params);
+            return 0;
         } else {
             return sqlOperator.delete(sql, params);
         }
     }
 
     public ResultSet query(String sql, Object... params) {
-        SQLTransactionOperator transactionOperator = TransactionContext.getTransactionOperator();
-        if (transactionOperator != null) {
-            return transactionOperator.query(sql, params);
-        } else {
-            return sqlOperator.query(sql, params);
-        }
+        return sqlOperator.query(sql, params);
     }
 
     public int count(String sql, Object... params) {

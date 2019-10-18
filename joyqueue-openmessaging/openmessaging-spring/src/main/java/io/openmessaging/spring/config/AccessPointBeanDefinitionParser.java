@@ -24,8 +24,10 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.util.StringValueResolver;
 import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
 
@@ -37,13 +39,20 @@ import java.util.List;
  * @version OMS 1.0.0
  * @since OMS 1.0.0
  */
-public class AccessPointBeanDefinitionParser implements BeanDefinitionParser {
+public class AccessPointBeanDefinitionParser implements BeanDefinitionParser, EmbeddedValueResolverAware {
 
     private static final String ATTRIBUTE_ID = "id";
     private static final String ATTRIBUTE_URL = "url";
     private static final String ELEMENT_ATTRIBUTE = "attribute";
     private static final String ELEMENT_ATTRIBUTE_KEY = "key";
     private static final String ELEMENT_ATTRIBUTE_VALUE = "value";
+
+    private StringValueResolver stringValueResolver;
+
+    @Override
+    public void setEmbeddedValueResolver(StringValueResolver resolver) {
+        this.stringValueResolver = resolver;
+    }
 
     @Override
     public BeanDefinition parse(Element element, ParserContext parserContext) {
@@ -72,8 +81,8 @@ public class AccessPointBeanDefinitionParser implements BeanDefinitionParser {
         List<Element> attributeElements = DomUtils.getChildElementsByTagName(element, ELEMENT_ATTRIBUTE);
 
         for (Element attributeElement : attributeElements) {
-            String key = attributeElement.getAttribute(ELEMENT_ATTRIBUTE_KEY);
-            String value = attributeElement.getAttribute(ELEMENT_ATTRIBUTE_VALUE);
+            String key = stringValueResolver.resolveStringValue(attributeElement.getAttribute(ELEMENT_ATTRIBUTE_KEY));
+            String value = stringValueResolver.resolveStringValue(attributeElement.getAttribute(ELEMENT_ATTRIBUTE_VALUE));
             attributes.put(key, value);
         }
         return attributes;

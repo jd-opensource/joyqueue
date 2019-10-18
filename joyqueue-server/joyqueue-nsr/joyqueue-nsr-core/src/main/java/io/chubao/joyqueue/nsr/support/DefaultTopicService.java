@@ -102,14 +102,14 @@ public class DefaultTopicService implements TopicService {
 
         try {
             topicInternalService.addTopic(topic, partitionGroups);
-            messenger.publish(new AddTopicEvent(topic, partitionGroups), replicas);
             transactionInternalService.commit();
         } catch (Exception e) {
             logger.error("addTopic exception, topic: {}, partitionGroups: {}", topic, partitionGroups, e);
-            messenger.fastPublish(new RemoveTopicEvent(topic, partitionGroups), replicas);
             transactionInternalService.rollback();
             throw new NsrException(e);
         }
+
+        messenger.publish(new AddTopicEvent(topic, partitionGroups), replicas);
     }
 
     @Override
@@ -134,14 +134,14 @@ public class DefaultTopicService implements TopicService {
 
         try {
             topicInternalService.removeTopic(topic);
-            messenger.publish(new RemoveTopicEvent(topic, partitionGroups), replicas);
             transactionInternalService.commit();
         } catch (Exception e) {
             logger.error("removeTopic exception, topic: {}, partitionGroups: {}", topic, partitionGroups, e);
-            messenger.fastPublish(new AddTopicEvent(topic, partitionGroups), replicas);
             transactionInternalService.rollback();
             throw new NsrException(e);
         }
+
+        messenger.publish(new RemoveTopicEvent(topic, partitionGroups), replicas);
     }
 
     @Override
@@ -168,14 +168,14 @@ public class DefaultTopicService implements TopicService {
             }
 
             topicInternalService.addPartitionGroup(partitionGroup);
-            messenger.publish(new AddPartitionGroupEvent(partitionGroup.getTopic(), partitionGroup), replicas);
             transactionInternalService.commit();
         } catch (Exception e) {
             logger.error("addPartitionGroup exception, topic: {}, partitionGroup: {}", partitionGroup.getTopic(), partitionGroup.getGroup(), e);
-            messenger.fastPublish(new RemovePartitionGroupEvent(partitionGroup.getTopic(), partitionGroup), replicas);
             transactionInternalService.rollback();
             throw new NsrException(e);
         }
+
+        messenger.publish(new AddPartitionGroupEvent(partitionGroup.getTopic(), partitionGroup), replicas);
     }
 
     @Override
@@ -203,14 +203,14 @@ public class DefaultTopicService implements TopicService {
 
         try {
             topicInternalService.removePartitionGroup(partitionGroup);
-            messenger.publish(new RemovePartitionGroupEvent(partitionGroup.getTopic(), oldPartitionGroup), replicas);
             transactionInternalService.commit();
         } catch (Exception e) {
             logger.error("removePartitionGroup exception, topic: {}, partitionGroup: {}", partitionGroup.getTopic(), partitionGroup.getGroup(), e);
-            messenger.fastPublish(new AddPartitionGroupEvent(partitionGroup.getTopic(), oldPartitionGroup), replicas);
             transactionInternalService.rollback();
             throw new NsrException(e);
         }
+
+        messenger.publish(new RemovePartitionGroupEvent(partitionGroup.getTopic(), oldPartitionGroup), replicas);
     }
 
     @Override
@@ -250,15 +250,15 @@ public class DefaultTopicService implements TopicService {
 
         try {
             topicInternalService.updatePartitionGroup(partitionGroup);
-            messenger.publish(new UpdatePartitionGroupEvent(partitionGroup.getTopic(), oldPartitionGroup, partitionGroup), Lists.newArrayList(replicas));
             transactionInternalService.commit();
-            return Collections.emptyList();
         } catch (Exception e) {
             logger.error("updatePartitionGroup exception, topic: {}, partitionGroup: {}", partitionGroup.getTopic(), partitionGroup.getGroup(), e);
-            messenger.fastPublish(new UpdatePartitionGroupEvent(partitionGroup.getTopic(), partitionGroup, oldPartitionGroup), Lists.newArrayList(replicas));
             transactionInternalService.rollback();
             throw new NsrException(e);
         }
+
+        messenger.publish(new UpdatePartitionGroupEvent(partitionGroup.getTopic(), oldPartitionGroup, partitionGroup), Lists.newArrayList(replicas));
+        return Collections.emptyList();
     }
 
     @Override
@@ -285,14 +285,14 @@ public class DefaultTopicService implements TopicService {
 
         try {
             topicInternalService.leaderReport(newPartitionGroup);
-            messenger.publish(new UpdatePartitionGroupEvent(oldPartitionGroup.getTopic(), oldPartitionGroup, newPartitionGroup), replicas);
             transactionInternalService.commit();
         } catch (Exception e) {
             logger.error("leader report exception, topic: {}, partitionGroup: {}", newPartitionGroup.getTopic(), newPartitionGroup.getGroup(), e);
-            messenger.fastPublish(new UpdatePartitionGroupEvent(newPartitionGroup.getTopic(), newPartitionGroup, oldPartitionGroup), replicas);
             transactionInternalService.rollback();
             throw new NsrException(e);
         }
+
+        messenger.publish(new UpdatePartitionGroupEvent(oldPartitionGroup.getTopic(), oldPartitionGroup, newPartitionGroup), replicas);
     }
 
     @Override
@@ -323,16 +323,14 @@ public class DefaultTopicService implements TopicService {
 
         try {
             topicInternalService.leaderChange(group);
-            messenger.publish(new LeaderChangeEvent(group.getTopic(), oldPartitionGroup, group), leader);
             transactionInternalService.commit();
         } catch (Exception e) {
             logger.error("leaderChange exception, topic: {}, partitionGroup: {}", group.getTopic(), group.getGroup(), e);
-            if (oldLeader != null) {
-                messenger.fastPublish(new LeaderChangeEvent(group.getTopic(), group, oldPartitionGroup), oldLeader);
-            }
             transactionInternalService.rollback();
             throw new NsrException(e);
         }
+
+        messenger.publish(new LeaderChangeEvent(group.getTopic(), oldPartitionGroup, group), leader);
     }
 
     @Override
@@ -360,15 +358,16 @@ public class DefaultTopicService implements TopicService {
         List<Broker> replicas = getReplicas(partitionGroups);
         try {
             topicInternalService.update(topic);
-            messenger.publish(new UpdateTopicEvent(oldTopic, topic), replicas);
             transactionInternalService.commit();
-            return topic;
         } catch (Exception e) {
             logger.error("removeTopic exception, topic: {}, partitionGroups: {}", topic, partitionGroups, e);
             messenger.publish(new UpdateTopicEvent(topic, oldTopic), replicas);
             transactionInternalService.rollback();
             throw new NsrException(e);
         }
+
+        messenger.publish(new UpdateTopicEvent(oldTopic, topic), replicas);
+        return topic;
     }
 
     protected void fillBroker(PartitionGroup partitionGroup) {

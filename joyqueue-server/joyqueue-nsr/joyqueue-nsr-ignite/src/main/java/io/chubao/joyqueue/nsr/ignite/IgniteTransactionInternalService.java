@@ -18,7 +18,7 @@ public class IgniteTransactionInternalService implements TransactionInternalServ
     @Override
     public void begin() {
         if (transactionThreadLocal.get() != null) {
-            return;
+            throw new UnsupportedOperationException("transport is exist");
         }
         Transaction transaction = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED);
         transactionThreadLocal.set(transaction);

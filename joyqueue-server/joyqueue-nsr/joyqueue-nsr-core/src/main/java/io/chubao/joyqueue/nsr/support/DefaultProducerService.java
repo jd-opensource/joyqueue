@@ -96,15 +96,15 @@ public class DefaultProducerService implements ProducerService {
 
         try {
             producerInternalService.add(producer);
-            messenger.publish(new AddProducerEvent(producer.getTopic(), producer), replicas);
             transactionInternalService.commit();
-            return producer;
         } catch (Exception e) {
             logger.error("addProducer exception, topic: {}, app: {}", producer.getTopic(), producer.getApp(), e);
-            messenger.fastPublish(new RemoveProducerEvent(producer.getTopic(), producer), replicas);
             transactionInternalService.rollback();
             throw new NsrException(e);
         }
+
+        messenger.publish(new AddProducerEvent(producer.getTopic(), producer), replicas);
+        return producer;
     }
 
     @Override
@@ -128,15 +128,15 @@ public class DefaultProducerService implements ProducerService {
 
         try {
             producerInternalService.update(producer);
-            messenger.publish(new UpdateProducerEvent(producer.getTopic(), oldProducer, producer), replicas);
             transactionInternalService.commit();
-            return producer;
         } catch (Exception e) {
             logger.error("updateProducer exception, topic: {}, app: {}", producer.getTopic(), producer.getApp(), e);
-            messenger.fastPublish(new UpdateProducerEvent(producer.getTopic(), producer, oldProducer), replicas);
             transactionInternalService.rollback();
             throw new NsrException(e);
         }
+
+        messenger.publish(new UpdateProducerEvent(producer.getTopic(), oldProducer, producer), replicas);
+        return producer;
     }
 
     @Override
@@ -160,14 +160,14 @@ public class DefaultProducerService implements ProducerService {
 
         try {
             producerInternalService.delete(id);
-            messenger.publish(new RemoveProducerEvent(producer.getTopic(), producer), replicas);
             transactionInternalService.commit();
         } catch (Exception e) {
             logger.error("deleteProducer exception, topic: {}, app: {}", producer.getTopic(), producer.getApp(), e);
-            messenger.fastPublish(new AddProducerEvent(producer.getTopic(), producer), replicas);
             transactionInternalService.rollback();
             throw new NsrException(e);
         }
+
+        messenger.publish(new RemoveProducerEvent(producer.getTopic(), producer), replicas);
     }
 
     protected List<Broker> getReplicas(List<PartitionGroup> partitionGroups) {

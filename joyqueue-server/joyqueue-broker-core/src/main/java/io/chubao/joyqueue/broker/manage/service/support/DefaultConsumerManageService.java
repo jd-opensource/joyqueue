@@ -95,7 +95,8 @@ public class DefaultConsumerManageService implements ConsumerManageService {
                     continue;
                 }
                 long index = consume.getAckIndex(consumer, partitionMetric.getPartition());
-                PartitionStat partitionStat = consumerMonitor.getConsumerStat(consumer.getTopic(), consumer.getApp()).getPartitionStat(partitionMetric.getPartition());
+                PartitionStat partitionStat = consumerMonitor.getConsumerStat(consumer.getTopic(), consumer.getApp())
+                        .getOrCreatePartitionGroupStat(partitionGroupMetric.getPartitionGroup()).getOrCreatePartitionStat(partitionMetric.getPartition());
                 long lastAckTime = partitionStat.getLastAckTime();
                 long lastPullTime = partitionStat.getLastPullTime();
                 result.add(new PartitionAckMonitorInfo(partitionMetric.getPartition(), index, lastPullTime, lastAckTime, partitionMetric.getLeftIndex(), partitionMetric.getRightIndex()));

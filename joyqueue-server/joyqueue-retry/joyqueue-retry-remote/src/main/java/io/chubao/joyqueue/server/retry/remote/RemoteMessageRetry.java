@@ -32,6 +32,7 @@ import io.chubao.joyqueue.server.retry.remote.command.GetRetryCount;
 import io.chubao.joyqueue.server.retry.remote.command.GetRetryCountAck;
 import io.chubao.joyqueue.server.retry.remote.command.PutRetry;
 import io.chubao.joyqueue.server.retry.remote.command.UpdateRetry;
+import io.chubao.joyqueue.server.retry.remote.config.RemoteRetryConfig;
 import io.chubao.joyqueue.server.retry.remote.config.RemoteRetryConfigKey;
 import io.chubao.joyqueue.toolkit.concurrent.LoopThread;
 import io.chubao.joyqueue.toolkit.config.PropertySupplier;
@@ -74,6 +75,7 @@ public class RemoteMessageRetry implements MessageRetry<Long> {
     private RemoteRetryProvider remoteRetryProvider;
     // 重试主题策略
     private RetryPolicyProvider retryPolicyProvider;
+    private RemoteRetryConfig config;
 
 
     public RemoteMessageRetry(RemoteRetryProvider remoteRetryProvider) {
@@ -246,14 +248,15 @@ public class RemoteMessageRetry implements MessageRetry<Long> {
      */
     protected Command sync(final Command request) throws JoyQueueException {
         Transport transport = transports.get();
-        return transport.sync(request);
+        return transport.sync(request, config.getTransportTimeout());
     }
 
     @Override
     public void setSupplier(PropertySupplier supplier) {
         this.propertySupplier = supplier;
-        this.remoteRetryLimitThread = propertySupplier.getValue(RemoteRetryConfigKey.REMOTE_RETRY_LIMIT_THREADS);
-        this.remoteRetryUpdateInterval = propertySupplier.getValue(RemoteRetryConfigKey.REMOTE_RETRY_UPDATE_INTERVAL);
+        this.config = new RemoteRetryConfig(supplier);
+        this.remoteRetryLimitThread = config.getLimitThreads();
+        this.remoteRetryUpdateInterval = config.getUpdateInterval();
     }
 
     /**

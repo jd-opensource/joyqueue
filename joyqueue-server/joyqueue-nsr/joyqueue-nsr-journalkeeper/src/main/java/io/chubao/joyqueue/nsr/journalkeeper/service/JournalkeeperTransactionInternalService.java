@@ -1,6 +1,6 @@
 package io.chubao.joyqueue.nsr.journalkeeper.service;
 
-import io.chubao.joyqueue.nsr.journalkeeper.TransactionContext;
+import io.chubao.joyqueue.nsr.journalkeeper.BatchOperationContext;
 import io.chubao.joyqueue.nsr.service.internal.TransactionInternalService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,18 +16,18 @@ public class JournalkeeperTransactionInternalService implements TransactionInter
 
     @Override
     public void begin() {
-        TransactionContext.beginTransaction();
+        BatchOperationContext.begin();
     }
 
     @Override
     public void commit() {
-        TransactionContext.commit();
+        BatchOperationContext.commit();
     }
 
     @Override
     public void rollback() {
         try {
-            TransactionContext.rollback();
+            BatchOperationContext.rollback();
         } catch (Exception e) {
             logger.error("transaction rollback error", e);
         }
