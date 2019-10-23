@@ -33,7 +33,7 @@ Run unit test
 
 ## Running JoyQueue
 
-Lunch JoyQueue with single node is useful for development and testing. Once you install finish, 
+Lunch JoyQueue with single node is useful for development and testing. Once mvn install finished, 
 binary package(.tar.gz) can be found on joyqueue-distribution server/web module target directory.
 Unpack them and run JoyQueue server and portal respectively. 
 
