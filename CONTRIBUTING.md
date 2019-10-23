@@ -51,7 +51,35 @@ Unpack them and run JoyQueue server and portal respectively.
 
 ## Contribution flow
 
+A rough outline of what a contribution's workflow looks like:
 
-## Format of the commit message
+1. Submit or select an issue you want to handle. 
+2. Fork this repo, develop and test your code changes.
+3. Submit a pull request against this repo's master branch.
+   - Attaching related issue number  
+4. Your pull request may be merged once all configured checks pass,including:
+   - passed tests in CI.
+   - Review from At least one maintainer
+      
+
+## Committing 
+
+Rebase commits is preferred to make more readable commit history.
+
+### Commit messages
+
+Commit messages should be in the following format:
+   * Describe what is done
+   * Use the active voice
+   * Capitalize fist word
+   * Reference the Github issue by number 
+   
+Examples
+
+```
+  bad:  A new storage metric 
+  good: Introduce a new storage monitor metric (#34)
+  
+```   
 
  
