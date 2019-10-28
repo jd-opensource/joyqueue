@@ -56,6 +56,7 @@ Visit [Documentation Index](./docs/cn/index.md)。
 ## Contributing
 
 We are dedicate to building high-quality messaging platform product. So any thoughts, pull requests, or issues are appreciated.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for details on submitting patches and the contribution workflow.
 
 ## License
 

@@ -38,7 +38,7 @@ binary package(.tar.gz) can be found on joyqueue-distribution server/web module 
 Unpack them and run JoyQueue server and portal respectively. 
 
 * Run JoyQueue server 
-
+ 
 ```
  bin/server-start.sh
  
