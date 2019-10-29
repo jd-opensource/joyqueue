@@ -392,7 +392,9 @@ public class BrokerService extends Service {
 
     private void startIfNecessary(Object object) throws Exception {
         if (object instanceof LifeCycle) {
-            ((LifeCycle) object).start();
+            if (!((LifeCycle) object).isStarted()) {
+                ((LifeCycle) object).start();
+            }
         }
     }
 

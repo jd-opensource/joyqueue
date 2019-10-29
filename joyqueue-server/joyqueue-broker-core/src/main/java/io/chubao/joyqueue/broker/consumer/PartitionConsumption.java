@@ -15,6 +15,7 @@
  */
 package io.chubao.joyqueue.broker.consumer;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import io.chubao.joyqueue.broker.archive.ArchiveManager;
 import io.chubao.joyqueue.broker.archive.ConsumeArchiveService;
@@ -37,7 +38,6 @@ import io.chubao.joyqueue.store.PositionOverflowException;
 import io.chubao.joyqueue.store.PositionUnderflowException;
 import io.chubao.joyqueue.store.ReadResult;
 import io.chubao.joyqueue.store.StoreService;
-import com.google.common.base.Preconditions;
 import io.chubao.joyqueue.toolkit.network.IpUtil;
 import io.chubao.joyqueue.toolkit.service.Service;
 import io.chubao.joyqueue.toolkit.stat.TPStatUtil;
@@ -207,39 +207,28 @@ class PartitionConsumption extends Service {
     protected PullResult getMsgByPartitionAndIndex(Consumer consumer, int group, short partition, long index, int count) throws JoyQueueException, IOException {
         PullResult pullResult = new PullResult(consumer, (short) -1, new ArrayList<>(0));
         try {
-            long startTime = System.nanoTime();
-
-            PartitionGroupStore store = storeService.getStore(consumer.getTopic(), group);
-            ReadResult readRst = store.read(partition, index, count, Long.MAX_VALUE);
-
-            TPStatUtil.append(monitorKey, startTime, System.nanoTime());
-
-            if (readRst.getCode() == JoyQueueCode.SUCCESS) {
-                ByteBuffer[] byteBufferArr = readRst.getMessages();
-                if (byteBufferArr == null) {
-                    // 没有拉到消息直接返回
-                    return pullResult;
-                }
-
-                List<ByteBuffer> byteBuffers = Lists.newArrayList(byteBufferArr);
-                if (StringUtils.isNotEmpty(consumer.getApp()) &&
-                        (!consumer.getType().equals(Consumer.ConsumeType.INTERNAL) && !consumer.getType().equals(Consumer.ConsumeType.KAFKA))) {
-
-                    io.chubao.joyqueue.domain.Consumer consumerConfig = clusterManager.tryGetConsumer(TopicName.parse(consumer.getTopic()), consumer.getApp());
-
-                    if (consumerConfig != null) {
-                        // 过滤消息
-                        byteBuffers = filterMessageSupport.filter(consumerConfig, byteBuffers, new FilterCallbackImpl(consumer));
-
-                        // 开启延迟消费，过滤未到消费时间的消息
-                        byteBuffers = delayHandler.handle(consumerConfig.getConsumerPolicy(), byteBuffers);
-                    }
-                }
-
-                pullResult = new PullResult(consumer, partition, byteBuffers);
-            } else {
-                logger.error("read message error, error code[{}]", readRst.getCode());
+            PullResult readResult = getMsgByPartitionAndIndex(consumer.getTopic(), group, partition, index, count);
+            if (readResult.getBuffers() == null) {
+                // 没有拉到消息直接返回
+                return pullResult;
             }
+
+            List<ByteBuffer> byteBuffers = readResult.getBuffers();
+            if (StringUtils.isNotEmpty(consumer.getApp()) &&
+                    (!Consumer.ConsumeType.INTERNAL.equals(consumer.getType()) && !Consumer.ConsumeType.KAFKA.equals(consumer.getType()))) {
+
+                io.chubao.joyqueue.domain.Consumer consumerConfig = clusterManager.tryGetConsumer(TopicName.parse(consumer.getTopic()), consumer.getApp());
+
+                if (consumerConfig != null) {
+                    // 过滤消息
+                    byteBuffers = filterMessageSupport.filter(consumerConfig, byteBuffers, new FilterCallbackImpl(consumer));
+
+                    // 开启延迟消费，过滤未到消费时间的消息
+                    byteBuffers = delayHandler.handle(consumerConfig.getConsumerPolicy(), byteBuffers);
+                }
+            }
+
+            pullResult = new PullResult(consumer, partition, byteBuffers);
         } catch (PositionOverflowException overflow) {
             logger.debug("PositionOverflow,topic:{},partition:{},index:{}", consumer.getTopic(), partition, index);
             if (overflow.getPosition() != overflow.getRight()) {
@@ -251,6 +240,25 @@ class PartitionConsumption extends Service {
         }
 
         return pullResult;
+    }
+
+    protected PullResult getMsgByPartitionAndIndex(String topic, int group, short partition, long index, int count) throws JoyQueueException, IOException {
+        long startTime = System.nanoTime();
+        PullResult result = new PullResult(topic, null, partition, null);
+
+        PartitionGroupStore store = storeService.getStore(topic, group);
+        ReadResult readRst = store.read(partition, index, count, Long.MAX_VALUE);
+
+        TPStatUtil.append(monitorKey, startTime, System.nanoTime());
+
+        if (readRst.getCode() == JoyQueueCode.SUCCESS) {
+            result.setBuffers(Lists.newArrayList(readRst.getMessages()));
+            return result;
+        } else {
+            logger.error("read message error, error code[{}]", readRst.getCode());
+            result.setCode(readRst.getCode());
+            return result;
+        }
     }
 
     /**

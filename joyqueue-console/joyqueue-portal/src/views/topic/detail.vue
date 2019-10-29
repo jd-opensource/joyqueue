@@ -1,24 +1,22 @@
 <template>
   <detail-slot ref="detail">
-    <template slot-scope="prop">
-      <div class="detail mb20">
-        <div class="title">{{prop.detail.id}}</div>
-        <grid-row :gutter="16">
-          <grid-col span="8">
-            <span>队列数:</span>
-            <span>{{prop.detail.partitions}}</span>
-          </grid-col>
-<!--          <grid-col span="8">-->
-<!--            <span>标签:</span>-->
-<!--            <span>{{prop.detail.labels}}</span>-->
-<!--          </grid-col>-->
-          <grid-col span="8">
-            <span>备注:</span>
-            <span>{{prop.detail.description}}</span>
-          </grid-col>
-        </grid-row>
-      </div>
-    </template>
+    <div class="detail mb20">
+      <div class="title">{{prop.detail.id}}</div>
+      <grid-row :gutter="16">
+        <grid-col span="8">
+          <span>队列数:</span>
+          <span>{{prop.detail.partitions}}</span>
+        </grid-col>
+        <grid-col span="8">
+          <span>标签:</span>
+          <span>{{prop.detail.labels}}</span>
+        </grid-col>
+        <grid-col span="8">
+          <span>备注:</span>
+          <span>{{prop.detail.description}}</span>
+        </grid-col>
+      </grid-row>
+    </div>
     <template slot="tabs" :closable="false">
       <d-tab-pane label="生产者" name="producer" icon="user-plus" :closable="false">
         <producer ref="producer" :search="search" @on-detail="openProducerDetailTab"/>

@@ -140,6 +140,22 @@ public class Client extends Service {
         connectionState.handleDisconnection();
     }
 
+    @Override
+    protected void doStart() throws Exception {
+        if (node.getPort() <= 0) {
+            transport = transportClient.createTransport(node.getHost(), transportConfig.getSendTimeout());
+        } else {
+            transport = transportClient.createTransport(new InetSocketAddress(node.getHost(), node.getPort()), transportConfig.getSendTimeout());
+        }
+    }
+
+    @Override
+    protected void doStop() {
+        if (transport != null) {
+            transport.stop();
+        }
+    }
+
     public ClientState getState() {
         switch (transport.state()) {
             case CONNECTED: {
@@ -166,21 +182,5 @@ public class Client extends Service {
 
     public long getLastUseTime() {
         return connectionState.getLastUseTime();
-    }
-
-    @Override
-    protected void doStart() throws Exception {
-        if (node.getPort() <= 0) {
-            transport = transportClient.createTransport(node.getHost(), transportConfig.getSendTimeout());
-        } else {
-            transport = transportClient.createTransport(new InetSocketAddress(node.getHost(), node.getPort()), transportConfig.getSendTimeout());
-        }
-    }
-
-    @Override
-    protected void doStop() {
-        if (transport != null) {
-            transport.stop();
-        }
     }
 }

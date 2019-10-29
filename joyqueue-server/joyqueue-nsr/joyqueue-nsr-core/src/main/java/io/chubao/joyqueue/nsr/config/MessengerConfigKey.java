@@ -11,11 +11,12 @@ public enum MessengerConfigKey implements PropertyDef {
 
     SESSION_EXPIRE_TIME("nameservice.messenger.session.expire.time", 1000 * 60 * 5, Type.INT),
     SESSION_TIMEOUT("nameservice.messenger.session.timeout", 1000 * 5, Type.INT),
+    PUBLISH_ENABLE("nameservice.messenger.publish.enable", true, Type.BOOLEAN),
     PUBLISH_TIMEOUT("nameservice.messenger.publish.timeout", 1000 * 10, Type.INT),
     HANDLER_THREADS("nameservice.messenger.handler.threads", Runtime.getRuntime().availableProcessors(), Type.INT),
     HANDLER_KEEPALIVE("nameservice.messenger.handler.keepalive", 1000 * 60, Type.INT),
     HANDLER_QUEUES("nameservice.messenger.handler.queues", 1024, Type.INT),
-    PUBLISH_FORCE("nameservice.messenger.publish.force", false, Type.BOOLEAN),
+    PUBLISH_FORCE("nameservice.messenger.publish.force", true, Type.BOOLEAN),
     PUBLISH_IGNORE_CONNECTION_ERROR("nameservice.messenger.publish.ignore.connection.error", true, Type.BOOLEAN),
     HEARTBEAT_INTERVAL("nameservice.messenger.heartbeat.interval", 1000 * 10, Type.INT),
     HEARTBEAT_TIMEOUT("nameservice.messenger.heartbeat.timeout", 300, Type.INT),

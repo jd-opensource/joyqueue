@@ -218,7 +218,7 @@ public class ProduceArchiveService extends Service {
             PullResult pullResult;
             long readIndex = item.getReadIndex();
             try {
-                pullResult = consume.getMessage(new Consumer(item.topic, ""), item.partition, readIndex, batchNum);
+                pullResult = consume.getMessage(item.topic, item.partition, readIndex, batchNum);
             } catch (Throwable th) {
                 logger.error("read message from topic:" + item.topic + " partition:" + item.partition
                         + " index:" + item.getReadIndex() + " error.", th);

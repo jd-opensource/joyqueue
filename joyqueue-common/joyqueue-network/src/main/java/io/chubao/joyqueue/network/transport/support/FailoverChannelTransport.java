@@ -199,6 +199,16 @@ public class FailoverChannelTransport implements ChannelTransport {
         return delegate.toString();
     }
 
+    @Override
+    public int hashCode() {
+        return delegate.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return delegate.equals(obj);
+    }
+
     protected boolean checkChannel() {
         if (isChannelActive()) {
             return true;
@@ -243,7 +253,7 @@ public class FailoverChannelTransport implements ChannelTransport {
                 logger.info("reconnect transport success, transport: {}", newTransport);
             }
 
-            transportEventBus.add(new TransportEvent(TransportEventType.RECONNECT, newTransport));
+            transportEventBus.inform(new TransportEvent(TransportEventType.RECONNECT, this));
             return true;
         } catch (Throwable t) {
             if (logger.isDebugEnabled()) {

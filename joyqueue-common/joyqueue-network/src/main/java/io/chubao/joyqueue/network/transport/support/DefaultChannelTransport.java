@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.SocketAddress;
 import java.nio.channels.ClosedChannelException;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 
@@ -61,6 +62,7 @@ public class DefaultChannelTransport implements ChannelTransport {
         this.channel = channel;
         this.barrier = barrier;
         this.config = barrier.getConfig();
+        this.address = channel.remoteAddress();
     }
 
     public DefaultChannelTransport(Channel channel, RequestBarrier barrier, SocketAddress address) {
@@ -353,6 +355,18 @@ public class DefaultChannelTransport implements ChannelTransport {
     @Override
     public String toString() {
         return channel.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ChannelTransport)) return false;
+        return Objects.equals(o.toString(), this.toString());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(address);
     }
 
     /**

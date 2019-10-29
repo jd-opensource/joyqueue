@@ -51,7 +51,7 @@ public class NameServiceCacheEventListener implements MessageListener<MetaEvent>
 
     @Override
     public void onEvent(MetaEvent event) {
-        // 不是原子操作
+        // TODO 不是原子操作
         // 删除，修改topic, producer，consumer需要优化
         NameServiceCache cache = nameServiceCacheManager.getCache();
         switch (event.getEventType()) {

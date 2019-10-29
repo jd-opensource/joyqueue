@@ -32,7 +32,7 @@ public class BatchOperationContext {
     public static void commit() {
         BatchSQLOperator batchSQLOperator = batchOperatorThreadLocal.get();
         if (batchSQLOperator == null) {
-            throw new UnsupportedOperationException("transaction not exist");
+            throw new UnsupportedOperationException("batch not exist");
         }
         batchSQLOperator.commit();
         batchOperatorThreadLocal.remove();
@@ -41,7 +41,7 @@ public class BatchOperationContext {
     public static void rollback() {
         BatchSQLOperator batchSQLOperator = batchOperatorThreadLocal.get();
         if (batchSQLOperator == null) {
-            throw new UnsupportedOperationException("transaction not exist");
+            throw new UnsupportedOperationException("batch not exist");
         }
         batchOperatorThreadLocal.remove();
     }
@@ -49,7 +49,7 @@ public class BatchOperationContext {
     public static void close() {
         BatchSQLOperator batchSQLOperator = batchOperatorThreadLocal.get();
         if (batchSQLOperator == null) {
-            throw new UnsupportedOperationException("transaction not exist");
+            throw new UnsupportedOperationException("batch not exist");
         }
         batchOperatorThreadLocal.remove();
     }

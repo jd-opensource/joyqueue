@@ -201,7 +201,7 @@ public class DefaultConsumerMonitorService implements ConsumerMonitorService {
                         }
                         partitionGroup = partitionGroupMetric.getPartitionGroup();
                         if (ackIndex >= partitionMetric.getRightIndex()) {
-                            break;
+                            continue;
                         }
                         pendingMonitorInfo.setCount(partitionMetric.getRightIndex() - ackIndex);
                         break;

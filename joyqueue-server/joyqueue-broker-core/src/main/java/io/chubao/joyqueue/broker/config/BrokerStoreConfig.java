@@ -42,7 +42,7 @@ public class BrokerStoreConfig {
         DO_NOT_DELETE_CONSUMED("store.clean.donot.delete.consumed", DEFAULT_DO_NOT_DELETE_CONSUMED, Type.BOOLEAN),
         CLEAN_SCHEDULE_BEGIN("store.clean.schedule.begin", DEFAULT_STORE_CLEAN_SCHEDULE_BEGIN, Type.LONG),
         CLEAN_SCHEDULE_END("store.clean.schedule.end", DEFAULT_STORE_CLEAN_SCHEDULE_END, Type.LONG),
-        FORCE_RESTORE("store.force.restore", false, Type.BOOLEAN);
+        FORCE_RESTORE("store.force.restore", true, Type.BOOLEAN);
 
         private String name;
         private Object value;

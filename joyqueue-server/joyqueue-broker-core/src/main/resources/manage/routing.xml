@@ -5,11 +5,15 @@
         <!-- broker -->
         <route path="/monitor/broker" inherit="get"
                handlers="brokerMonitorService.getBrokerInfo"/>
+
+        <!-- deprecated -->
         <route path="/startInfo" inherit="get"
                handlers="brokerMonitorService.getStartInfo"/>
 
+        <!-- deprecated -->
         <route path="/monitor/broker/brokerStatExt" inherit="get"
                handlers="brokerMonitorService.getExtendBrokerStat"/>
+
         <route path="/metrics" inherit="get"
                handlers="brokerMonitorService.getExtendBrokerStat"/>
 

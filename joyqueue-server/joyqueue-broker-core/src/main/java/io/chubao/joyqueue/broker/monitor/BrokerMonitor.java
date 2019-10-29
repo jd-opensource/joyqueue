@@ -40,11 +40,14 @@ import io.chubao.joyqueue.toolkit.concurrent.EventListener;
 import io.chubao.joyqueue.toolkit.network.IpUtil;
 import io.chubao.joyqueue.toolkit.service.Service;
 import io.chubao.joyqueue.toolkit.time.SystemClock;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
 /**
@@ -80,9 +83,22 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
     @Override
     protected void doStart() throws Exception {
         brokerStat = brokerStatManager.getBrokerStat();
+        clearInvalidStat(brokerStat);
         sessionManager.addListener(this);
-
         clusterManager.addListener(new MonitorMateDataListener());
+    }
+
+    protected void clearInvalidStat(BrokerStat brokerStat) {
+        for (Map.Entry<String, TopicStat> topicStatEntry : brokerStat.getTopicStats().entrySet()) {
+            TopicStat topicStat = topicStatEntry.getValue();
+            Iterator<Map.Entry<String, AppStat>> iterator = topicStat.getAppStats().entrySet().iterator();
+            while (iterator.hasNext()) {
+                Map.Entry<String, AppStat> appStatEntry = iterator.next();
+                if (StringUtils.isBlank(appStatEntry.getValue().getApp())) {
+                    iterator.remove();
+                }
+            }
+        }
     }
 
     @Override

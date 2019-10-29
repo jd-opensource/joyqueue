@@ -132,11 +132,11 @@
         <module>joyqueue-server</module>
         <!-- TODO 临时-->
         <module>joyqueue-console</module>
-        <!--<module>joyqueue-client</module>-->
-        <!--<module>joyqueue-openmessaging</module>-->
+        <module>joyqueue-client</module>
+        <module>joyqueue-openmessaging</module>
         <!--<module>docker</module>-->
         <!--<module>joyqueue-distribution</module>-->
-        <!--<module>toolkit</module>-->
+        <module>toolkit</module>
     </modules>
 
     <dependencyManagement>

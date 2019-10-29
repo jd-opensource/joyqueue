@@ -19,6 +19,7 @@ import io.chubao.joyqueue.nsr.event.AddDataCenterEvent;
 import io.chubao.joyqueue.nsr.event.AddPartitionGroupEvent;
 import io.chubao.joyqueue.nsr.event.AddProducerEvent;
 import io.chubao.joyqueue.nsr.event.AddTopicEvent;
+import io.chubao.joyqueue.nsr.event.CompensateEvent;
 import io.chubao.joyqueue.nsr.event.RemoveBrokerEvent;
 import io.chubao.joyqueue.nsr.event.RemoveConfigEvent;
 import io.chubao.joyqueue.nsr.event.RemoveConsumerEvent;
@@ -86,6 +87,9 @@ public class NameServiceCompensator extends Service {
         if (config.getCompensationConfigEnable()) {
             compensateConfig(oldCache, newCache);
         }
+        if (config.getCompensationEventEnable()) {
+            publishEvent(new CompensateEvent(oldCache, newCache));
+        }
     }
 
     protected void compensateTopic(NameServiceCache oldCache, NameServiceCache newCache) {
@@ -105,7 +109,7 @@ public class NameServiceCompensator extends Service {
             } else {
                 // topic副本变化
                 if (oldTopicConfig.isReplica(brokerId) && !newTopicConfig.isReplica(brokerId)) {
-                    for (PartitionGroup partitionGroup : oldTopicConfig.fetchPartitionGroupByBrokerId(brokerId)) {
+                    for (PartitionGroup partitionGroup : oldTopicConfig.fetchTopicPartitionGroupsByBrokerId(brokerId)) {
                         publishEvent(new RemovePartitionGroupEvent(oldTopicConfig.getName(), partitionGroup));
                     }
                 } else {
@@ -116,19 +120,19 @@ public class NameServiceCompensator extends Service {
                         }
 
                         // 更新partitionGroup
-                        for (PartitionGroup newPartition : newTopicConfig.fetchPartitionGroupByBrokerId(brokerId)) {
-                            PartitionGroup oldPartitionGroup = oldTopicConfig.getPartitionGroups().get(newPartition.getGroup());
+                        for (PartitionGroup newPartitionGroup : newTopicConfig.fetchTopicPartitionGroupsByBrokerId(brokerId)) {
+                            PartitionGroup oldPartitionGroup = oldTopicConfig.getPartitionGroups().get(newPartitionGroup.getGroup());
                             if (oldPartitionGroup == null || !oldPartitionGroup.getReplicas().contains(brokerId)) {
-                                publishEvent(new AddPartitionGroupEvent(newTopicConfig.getName(), oldPartitionGroup));
+                                publishEvent(new AddPartitionGroupEvent(newTopicConfig.getName(), newPartitionGroup));
                             } else {
-                                if (!comparePartitionGroup(oldPartitionGroup, newPartition)) {
-                                    publishEvent(new UpdatePartitionGroupEvent(newTopicConfig.getName(), oldPartitionGroup, newPartition));
+                                if (!comparePartitionGroup(oldPartitionGroup, newPartitionGroup)) {
+                                    publishEvent(new UpdatePartitionGroupEvent(newTopicConfig.getName(), oldPartitionGroup, newPartitionGroup));
                                 }
                             }
                         }
 
                         // 删除partitionGroup
-                        for (PartitionGroup oldPartitionGroup : oldTopicConfig.fetchPartitionGroupByBrokerId(brokerId)) {
+                        for (PartitionGroup oldPartitionGroup : oldTopicConfig.fetchTopicPartitionGroupsByBrokerId(brokerId)) {
                             PartitionGroup newPartitionGroup = newTopicConfig.getPartitionGroups().get(oldPartitionGroup.getGroup());
                             if (newPartitionGroup == null || !newPartitionGroup.getReplicas().contains(brokerId)) {
                                 publishEvent(new RemovePartitionGroupEvent(newTopicConfig.getName(), oldPartitionGroup));
@@ -326,7 +330,7 @@ public class NameServiceCompensator extends Service {
         NameServerEvent nameServerEvent = new NameServerEvent();
         nameServerEvent.setMetaEvent(event);
         nameServerEvent.setEventType(event.getEventType());
-        eventBus.add(nameServerEvent);
+        eventBus.inform(nameServerEvent);
     }
 
     protected boolean compareTopic(TopicConfig topicConfig1, TopicConfig topicConfig2) {

@@ -40,7 +40,6 @@ public class NameServiceCompensateThread extends Service implements Runnable {
 
     @Override
     protected void doStart() throws Exception {
-        doFillCache();
         started = true;
         compensationThread.start();
     }
@@ -48,7 +47,6 @@ public class NameServiceCompensateThread extends Service implements Runnable {
     @Override
     protected void doStop() {
         started = false;
-        compensationThread.interrupt();
     }
 
     @Override
@@ -63,9 +61,14 @@ public class NameServiceCompensateThread extends Service implements Runnable {
         }
     }
 
-    protected void doFillCache() {
+    public void fillCache() {
+        NameServiceCache oldCache = nameServiceCacheManager.getCache();
+        if (oldCache != null) {
+            return;
+        }
         AllMetadata allMetadata = delegate.getAllMetadata();
-        nameServiceCacheManager.fillCache(allMetadata);
+        NameServiceCache newCache = nameServiceCacheManager.buildCache(allMetadata);
+        nameServiceCacheManager.fillCache(newCache);
     }
 
     protected void doCompensate() {
@@ -74,6 +77,7 @@ public class NameServiceCompensateThread extends Service implements Runnable {
             if (logger.isDebugEnabled()) {
                 logger.debug("doCompensate, cache is latest, oldCache: {}", JSON.toJSONString(oldCache));
             }
+            nameServiceCacheManager.fillCache(oldCache);
             return;
         }
 

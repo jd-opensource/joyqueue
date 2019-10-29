@@ -48,6 +48,7 @@ import io.chubao.joyqueue.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -324,6 +325,12 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
     public LeaderElection getLeaderElection(TopicName topic, int partitionGroup) {
         return getLeaderElection(topic.getFullName(), partitionGroup);
     }
+
+    @Override
+    public List<LeaderElection> getLeaderElections() {
+        return new ArrayList<>(leaderElections.values());
+    }
+
 
     public LeaderElection getLeaderElection(String topic, int partitionGroup) {
         return leaderElections.get(new TopicPartitionGroup(topic, partitionGroup));

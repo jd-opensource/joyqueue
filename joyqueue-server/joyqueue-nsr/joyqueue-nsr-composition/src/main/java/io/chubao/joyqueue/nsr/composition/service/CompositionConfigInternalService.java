@@ -3,6 +3,8 @@ package io.chubao.joyqueue.nsr.composition.service;
 import io.chubao.joyqueue.domain.Config;
 import io.chubao.joyqueue.nsr.composition.config.CompositionConfig;
 import io.chubao.joyqueue.nsr.service.internal.ConfigInternalService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -12,6 +14,8 @@ import java.util.List;
  * date: 2019/8/12
  */
 public class CompositionConfigInternalService implements ConfigInternalService {
+
+    protected static final Logger logger = LoggerFactory.getLogger(CompositionConfigInternalService.class);
 
     private CompositionConfig config;
     private ConfigInternalService igniteConfigService;
@@ -41,16 +45,39 @@ public class CompositionConfigInternalService implements ConfigInternalService {
 
     @Override
     public Config add(Config config) {
-        return igniteConfigService.add(config);
+        Config result = igniteConfigService.add(config);
+        if (this.config.isWriteJournalkeeper()) {
+            try {
+                journalkeeperConfigService.add(config);
+            } catch (Exception e) {
+                logger.error("update journalkeeper exception, params: {}", config, e);
+            }
+        }
+        return result;
     }
 
     @Override
     public Config update(Config config) {
-        return igniteConfigService.update(config);
+        Config result = igniteConfigService.update(config);
+        if (this.config.isWriteJournalkeeper()) {
+            try {
+                journalkeeperConfigService.update(config);
+            } catch (Exception e) {
+                logger.error("update journalkeeper exception, params: {}", config, e);
+            }
+        }
+        return result;
     }
 
     @Override
     public void delete(String id) {
         igniteConfigService.delete(id);
+        if (this.config.isWriteJournalkeeper()) {
+            try {
+                journalkeeperConfigService.delete(id);
+            } catch (Exception e) {
+                logger.error("update journalkeeper exception, params: {}", id, e);
+            }
+        }
     }
 }

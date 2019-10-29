@@ -70,7 +70,7 @@ public class DefaultMessenger extends Service implements Messenger<MetaEvent>, P
 
     @Override
     public void publish(MetaEvent event, List<Broker> brokers) {
-        if (CollectionUtils.isEmpty(brokers)) {
+        if (!config.getPublishEnable() || CollectionUtils.isEmpty(brokers)) {
             return;
         }
 
@@ -112,14 +112,12 @@ public class DefaultMessenger extends Service implements Messenger<MetaEvent>, P
                             }
                         });
             } catch (Exception e) {
-                logger.warn("create session exception, event: {}, brokerId: {}, brokerIp: {}, brokerPort: {}",
-                        event, broker.getId(), broker.getIp(), broker.getPort(), e);
-
-                if (config.getPublishIgnoreConnectionError()) {
-                    latch.countDown();
-                } else {
+                if (!config.getPublishIgnoreConnectionError()) {
                     success[0] = false;
+                    logger.warn("create session exception, event: {}, brokerId: {}, brokerIp: {}, brokerPort: {}",
+                            event, broker.getId(), broker.getIp(), broker.getPort(), e);
                 }
+                latch.countDown();
             }
         }
 
@@ -136,8 +134,8 @@ public class DefaultMessenger extends Service implements Messenger<MetaEvent>, P
             throw new MessengerException("messenger publish exception", e);
         }
 
-        if (!config.getPublishForce()) {
-            if (!success[0]) {
+        if (!success[0]) {
+            if (!config.getPublishForce()) {
                 logger.warn("messenger publish failed, event: {}, brokers: {}", event, brokers);
                 throw new MessengerException("messenger publish failed");
             }

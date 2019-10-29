@@ -102,6 +102,10 @@ public abstract class LeaderElection extends Service {
         return replicaGroup;
     }
 
+    public TopicPartitionGroup getTopicPartitionGroup() {
+        return topicPartitionGroup;
+    }
+
     /**
      * 更新元数据
      * @param leaderId leader id

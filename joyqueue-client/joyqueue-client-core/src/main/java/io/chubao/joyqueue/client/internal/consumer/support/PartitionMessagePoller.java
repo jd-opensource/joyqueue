@@ -294,8 +294,9 @@ public class PartitionMessagePoller extends Service implements MessagePoller {
             if (e.getCode() == JoyQueueCode.FW_FETCH_MESSAGE_INDEX_OUT_OF_RANGE.getCode()) {
                 consumerIndexManager.resetIndex(topic, config.getApp(), partition, config.getTimeout());
                 return messagePollerInner.buildPollEmptyResult(listener);
+            } else {
+                throw e;
             }
-            throw e;
         }
     }
 

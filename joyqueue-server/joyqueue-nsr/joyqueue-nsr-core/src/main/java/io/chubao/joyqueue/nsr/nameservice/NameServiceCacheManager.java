@@ -23,11 +23,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * NameServiceCacheManager
@@ -40,11 +40,22 @@ public class NameServiceCacheManager extends Service {
 
     private NameServiceConfig config;
 
-    private ReentrantLock lock = new ReentrantLock();
+    private NameServiceCacheDoubleCopy nameServiceCacheDoubleCopy;
     private volatile NameServiceCache cache;
 
     public NameServiceCacheManager(NameServiceConfig config) {
         this.config = config;
+    }
+
+    @Override
+    protected void validate() throws Exception {
+        nameServiceCacheDoubleCopy = new NameServiceCacheDoubleCopy(new File(config.getAllMetadataCacheFile()));
+    }
+
+    @Override
+    protected void doStart() throws Exception {
+        nameServiceCacheDoubleCopy.recover();
+        this.cache = nameServiceCacheDoubleCopy.getCache();
     }
 
     public NameServiceCache buildCache(AllMetadata allMetadata) {
@@ -183,26 +194,13 @@ public class NameServiceCacheManager extends Service {
         cache.setAllAppTokenMap(allAppTokenMap);
         cache.setAllDataCenters(allDataCenterWrappers);
         cache.setDataCenterCodeMap(dataCenterWrapperCodeMap);
+        cache.updateLastTimestamp();
         return cache;
     }
 
     public void fillCache(NameServiceCache cache) {
+        nameServiceCacheDoubleCopy.flush(cache);
         this.cache = cache;
-    }
-
-    public NameServiceCache fillCache(AllMetadata allMetadata) {
-        NameServiceCache cache = buildCache(allMetadata);
-        cache.updateLastTimestamp();
-        fillCache(cache);
-        return cache;
-    }
-
-    public void lock() {
-        lock.lock();
-    }
-
-    public void unlock() {
-        lock.unlock();
     }
 
     public Broker getBroker(int brokerId) {

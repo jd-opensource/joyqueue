@@ -17,8 +17,10 @@ package io.chubao.joyqueue.broker.cluster;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.chubao.joyqueue.broker.BrokerContext;
+import io.chubao.joyqueue.broker.cluster.event.CompensateEvent;
 import io.chubao.joyqueue.broker.config.BrokerConfig;
 import io.chubao.joyqueue.domain.AppToken;
 import io.chubao.joyqueue.domain.Broker;
@@ -57,6 +59,7 @@ import io.chubao.joyqueue.toolkit.lang.LifeCycle;
 import io.chubao.joyqueue.toolkit.service.Service;
 import io.chubao.joyqueue.toolkit.time.SystemClock;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -771,6 +774,18 @@ public class ClusterManager extends Service {
         return result;
     }
 
+    public List<Consumer> getLocalSubscribeByTopic(TopicName topic) {
+        Map<String, MetaDataLocalCache.CacheConsumer> consumers = localCache.getTopicConsumers(topic);
+        if (MapUtils.isEmpty(consumers)) {
+            return Collections.emptyList();
+        }
+        List<Consumer> result = Lists.newLinkedList();
+        for (Map.Entry<String, MetaDataLocalCache.CacheConsumer> entry : consumers.entrySet()) {
+            result.add(entry.getValue().getConsumer());
+        }
+        return result;
+    }
+
     public AppToken getAppToken(String app, String token) {
         return nameService.getAppToken(app, token);
     }
@@ -1231,7 +1246,7 @@ public class ClusterManager extends Service {
                         topicPartitionsCache.remove(topicConfig.getName().getFullName());
                         consumerCache.remove(topicConfig.getName().getFullName());
                         producerCache.remove(topicConfig.getName().getFullName());
-                        for (PartitionGroup partitionGroup : topicConfig.fetchPartitionGroupByBrokerId(brokerConfig.getBrokerId())) {
+                        for (PartitionGroup partitionGroup : topicConfig.fetchTopicPartitionGroupsByBrokerId(brokerConfig.getBrokerId())) {
                             publishEvent(new RemovePartitionGroupEvent(topicConfig.getName(), partitionGroup));
                         }
                         break;
@@ -1326,8 +1341,16 @@ public class ClusterManager extends Service {
                         }
                         break;
                     }
+                    case COMPENSATE: {
+                        io.chubao.joyqueue.nsr.event.CompensateEvent compensateEvent = (io.chubao.joyqueue.nsr.event.CompensateEvent) event.getMetaEvent();
+                        publishEvent(new CompensateEvent(compensateEvent.getNewCache().getTopicConfigBrokerMap().get(getBrokerId())));
+                        break;
+                    }
                 }
-                publishEvent(event.getMetaEvent());
+
+                if (!event.getEventType().equals(EventType.COMPENSATE)) {
+                    publishEvent(event.getMetaEvent());
+                }
             }
         }
 

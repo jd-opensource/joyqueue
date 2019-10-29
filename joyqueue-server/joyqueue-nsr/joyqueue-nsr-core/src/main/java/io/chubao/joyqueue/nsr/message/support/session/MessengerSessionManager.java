@@ -85,8 +85,8 @@ public class MessengerSessionManager extends Service {
         maybeInitHeartbeat();
         try {
             return sessions.get(brokerId, () -> {
-                logger.info("create session, id: {}, ip: {}, port: {}", brokerId, brokerHost, brokerPort);
                 Transport transport = client.createTransport(new InetSocketAddress(brokerHost, brokerPort));
+                logger.info("create session, id: {}, ip: {}, port: {}", brokerId, brokerHost, brokerPort);
                 return new MessengerSession(brokerId, brokerHost, brokerPort, config, transport);
             });
         } catch (ExecutionException e) {

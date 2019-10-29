@@ -85,7 +85,7 @@ public class TopicRepository extends BaseRepository {
 
         if (StringUtils.isNotBlank(query.getKeyword())) {
             sql.append(" AND code LIKE ?");
-            params.add(query.getKeyword() + "%");
+            params.add("%" + query.getKeyword() + "%");
         }
         return sql.toString();
     }

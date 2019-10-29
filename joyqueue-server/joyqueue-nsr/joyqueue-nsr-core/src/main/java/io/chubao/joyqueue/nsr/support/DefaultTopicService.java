@@ -243,6 +243,10 @@ public class DefaultTopicService implements TopicService {
         replicas.addAll(oldReplicas);
         replicas.addAll(newReplicas);
 
+        partitionGroup.setLeader(oldPartitionGroup.getLeader());
+        partitionGroup.setIsrs(oldPartitionGroup.getIsrs());
+        partitionGroup.setTerm(oldPartitionGroup.getTerm());
+
         if (CollectionUtils.isEmpty(partitionGroup.getReplicas())) {
             partitionGroup.setLeader(-1);
             partitionGroup.setTerm(0);

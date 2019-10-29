@@ -19,6 +19,7 @@ import io.chubao.joyqueue.domain.TopicName;
 import io.chubao.joyqueue.event.NameServerEvent;
 import io.chubao.joyqueue.nsr.NameService;
 import io.chubao.joyqueue.nsr.config.NameServiceConfig;
+import io.chubao.joyqueue.nsr.exception.NsrException;
 import io.chubao.joyqueue.nsr.message.Messenger;
 import io.chubao.joyqueue.toolkit.concurrent.EventBus;
 import io.chubao.joyqueue.toolkit.concurrent.EventListener;
@@ -74,12 +75,19 @@ public class CompensatedNameService extends Service implements NameService, Prop
         delegate.start();
         eventBus.start();
 
-        messenger.addListener(new NameServiceCacheEventListener(config, nameServiceCacheManager));
-        messenger.addListener(new NameServiceEventListenerAdapter(eventBus));
-
         nameServiceCacheManager.start();
         nameServiceCompensator.start();
-        nameServiceCompensateThread.start();
+        nameServiceCompensateThread.fillCache();
+    }
+
+    protected void doStartCompensate() {
+        try {
+            nameServiceCompensateThread.start();
+        } catch (Exception e) {
+            throw new NsrException(e);
+        }
+        messenger.addListener(new NameServiceCacheEventListener(config, nameServiceCacheManager));
+        messenger.addListener(new NameServiceEventListenerAdapter(eventBus));
     }
 
     @Override
@@ -229,6 +237,7 @@ public class CompensatedNameService extends Service implements NameService, Prop
         Broker broker = delegate.register(brokerId, brokerIp, port);
         this.brokerId = broker.getId();
         this.nameServiceCompensator.setBrokerId(this.brokerId);
+        doStartCompensate();
         return broker;
     }
 

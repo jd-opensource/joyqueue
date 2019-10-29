@@ -20,7 +20,11 @@ import io.chubao.joyqueue.toolkit.config.PropertyDef;
 public enum NameServiceConfigKey implements PropertyDef {
 
     NAMESERVER_ADDRESS("nameservice.serverAddress", "127.0.0.1:50092", Type.STRING),
+    NAMESERVER_HANDLER_THREADS("nameservice.handler.threads", Runtime.getRuntime().availableProcessors(), Type.INT),
+    NAMESERVER_HANDLER_QUEUES("nameservice.handler.queues", 1024, Type.INT),
+    NAMESERVER_HANDLER_KEEPALIVE("nameservice.messenger.handler.keepalive", 1000 * 60, Type.INT),
     NAMESERVER_ALL_METADATA_CACHE_ENABLE("nameservice.allmetadata.cache.enable", true, Type.BOOLEAN),
+    NAMESERVER_ALL_METADATA_CACHE_FILE("nameservice.allmetadata.cache.file", "/metadata/cache", Type.STRING),
     NAMESERVER_ALL_METADATA_CACHE_EXPIRE_TIME("nameservice.allmetadata.cache.expire.time", 1000 * 1, Type.INT),
     NAMESERVER_COMPENSATION_DELAY("nameservice.compensation.delay", 1000 * 60 * 1, Type.INT),
     NAMESERVER_COMPENSATION_INTERVAL("nameservice.compensation.interval", 1000 * 30, Type.INT),
@@ -30,6 +34,7 @@ public enum NameServiceConfigKey implements PropertyDef {
     NAMESERVER_COMPENSATION_CONSUMER_ENABLE("nameservice.compensation.consumer.enable", true, Type.BOOLEAN),
     NAMESERVER_COMPENSATION_DATACENTER_ENABLE("nameservice.compensation.datacenter.enable", true, Type.BOOLEAN),
     NAMESERVER_COMPENSATION_CONFIG_ENABLE("nameservice.compensation.config.enable", true, Type.BOOLEAN),
+    NAMESERVER_COMPENSATION_EVENT_ENABLE("nameservice.compensation.event.enable", true, Type.BOOLEAN),
     NAMESERVER_COMPENSATION_CACHE_ENABLE("nameservice.compensation.cache.enable", false, Type.BOOLEAN),
     NAMESERVER_MESSENGER_TYPE("nameservice.messenger.type", "default", Type.STRING),
     NAMESERVER_MESSENGER_IGNITE_ENABLE("nameservice.messenger.ignite.enable", false, Type.BOOLEAN), // TODO 临时配置，是否启用ignite推送

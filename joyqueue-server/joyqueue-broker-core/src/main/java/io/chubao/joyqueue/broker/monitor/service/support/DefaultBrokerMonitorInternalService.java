@@ -21,6 +21,12 @@ import io.chubao.joyqueue.broker.election.ElectionService;
 import io.chubao.joyqueue.broker.monitor.converter.BrokerMonitorConverter;
 import io.chubao.joyqueue.broker.monitor.exception.MonitorException;
 import io.chubao.joyqueue.broker.monitor.service.BrokerMonitorInternalService;
+import io.chubao.joyqueue.broker.monitor.stat.BrokerStat;
+import io.chubao.joyqueue.broker.monitor.stat.BrokerStatExt;
+import io.chubao.joyqueue.broker.monitor.stat.ConsumerPendingStat;
+import io.chubao.joyqueue.broker.monitor.stat.PartitionGroupPendingStat;
+import io.chubao.joyqueue.broker.monitor.stat.TopicPendingStat;
+import io.chubao.joyqueue.broker.monitor.stat.TopicStat;
 import io.chubao.joyqueue.monitor.BrokerMonitorInfo;
 import io.chubao.joyqueue.monitor.BrokerStartupInfo;
 import io.chubao.joyqueue.monitor.ElectionMonitorInfo;
@@ -28,12 +34,6 @@ import io.chubao.joyqueue.monitor.NameServerMonitorInfo;
 import io.chubao.joyqueue.monitor.StoreMonitorInfo;
 import io.chubao.joyqueue.network.session.Consumer;
 import io.chubao.joyqueue.nsr.NameService;
-import io.chubao.joyqueue.broker.monitor.stat.BrokerStat;
-import io.chubao.joyqueue.broker.monitor.stat.BrokerStatExt;
-import io.chubao.joyqueue.broker.monitor.stat.ConsumerPendingStat;
-import io.chubao.joyqueue.broker.monitor.stat.PartitionGroupPendingStat;
-import io.chubao.joyqueue.broker.monitor.stat.TopicPendingStat;
-import io.chubao.joyqueue.broker.monitor.stat.TopicStat;
 import io.chubao.joyqueue.store.StoreManagementService;
 import io.chubao.joyqueue.store.StoreService;
 import io.chubao.joyqueue.toolkit.format.Format;
@@ -104,6 +104,7 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
         brokerMonitorInfo.setElection(electionMonitorInfo);
 
         brokerMonitorInfo.setBufferPoolMonitorInfo(storeService.monitorInfo());
+        brokerMonitorInfo.setStartupInfo(brokerStartupInfo);
         return brokerMonitorInfo;
     }
 

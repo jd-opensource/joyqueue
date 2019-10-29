@@ -139,13 +139,11 @@ public class BrokerStatManager extends Service {
         @Override
         protected void parse(byte[] data) {
             try {
-                String stat = new String(data);
-
                 if (logger.isDebugEnabled()) {
-                    logger.debug("load broker stat, value: {}, file: {}", stat, statFile);
+                    logger.debug("load broker stat, value: {}, file: {}", new String(data), statFile);
                 }
 
-                BrokerStatPo brokerStatPo = JSON.parseObject(stat, BrokerStatPo.class);
+                BrokerStatPo brokerStatPo = JSON.parseObject(data, BrokerStatPo.class);
 
                 if (brokerStatPo.getVersion() != BrokerStat.VERSION) {
                     logger.warn("broker stat check version failed, current: {}, required: {}", brokerStatPo.getVersion(), BrokerStat.VERSION);

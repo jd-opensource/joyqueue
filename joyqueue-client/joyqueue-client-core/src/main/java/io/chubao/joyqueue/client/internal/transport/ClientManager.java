@@ -62,6 +62,8 @@ public class ClientManager extends Service {
 
     @Override
     protected void validate() throws Exception {
+        transportConfig = transportConfig.copy();
+        transportConfig.getRetryPolicy().setMaxRetrys(0);
         clientGroupManager = new ClientGroupManager(transportConfig);
         transportClient = new DefaultTransportClientFactory().create(convertToClientConfig(transportConfig));
         heartbeatThreadScheduler = Executors.newScheduledThreadPool(1, new NamedThreadFactory("joyqueue-client-heartbeat"));
