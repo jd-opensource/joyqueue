@@ -347,4 +347,19 @@ public class DefaultBrokerMonitorService implements BrokerMonitorService {
     public Object deleteMetadata(String source, String operator, List<Object> params) {
         return metadataMonitorService.deleteMetadata(source, operator, params);
     }
+
+    @Override
+    public String getMetadataCluster() {
+        return metadataMonitorService.getMetadataCluster();
+    }
+
+    @Override
+    public String addMetadataNode(String uri) {
+        return metadataMonitorService.addMetadataNode(uri);
+    }
+
+    @Override
+    public String removeMetadataNode(String uri) {
+        return metadataMonitorService.removeMetadataNode(uri);
+    }
 }

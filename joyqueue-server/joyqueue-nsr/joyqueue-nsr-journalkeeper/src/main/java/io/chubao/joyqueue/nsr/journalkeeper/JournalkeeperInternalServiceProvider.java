@@ -101,7 +101,7 @@ public class JournalkeeperInternalServiceProvider extends Service implements Int
         }
         this.sqlOperator = new DefaultSQLOperator(this.sqlClient);
         BatchOperationContext.init(sqlOperator);
-        this.journalkeeperInternalServiceManager = new JournalkeeperInternalServiceManager(this.sqlClient, this.sqlOperator);
+        this.journalkeeperInternalServiceManager = new JournalkeeperInternalServiceManager(this.sqlServer, this.sqlClient, this.sqlOperator);
         this.journalkeeperInternalServiceManager.start();
     }
 

@@ -4,6 +4,7 @@ import io.chubao.joyqueue.nsr.InternalServiceProvider;
 import io.chubao.joyqueue.nsr.composition.config.CompositionConfig;
 import io.chubao.joyqueue.nsr.composition.service.CompositionAppTokenInternalService;
 import io.chubao.joyqueue.nsr.composition.service.CompositionBrokerInternalService;
+import io.chubao.joyqueue.nsr.composition.service.CompositionClusterInternalService;
 import io.chubao.joyqueue.nsr.composition.service.CompositionConfigInternalService;
 import io.chubao.joyqueue.nsr.composition.service.CompositionConsumerInternalService;
 import io.chubao.joyqueue.nsr.composition.service.CompositionDataCenterInternalService;
@@ -14,6 +15,7 @@ import io.chubao.joyqueue.nsr.composition.service.CompositionProducerInternalSer
 import io.chubao.joyqueue.nsr.composition.service.CompositionTopicInternalService;
 import io.chubao.joyqueue.nsr.service.internal.AppTokenInternalService;
 import io.chubao.joyqueue.nsr.service.internal.BrokerInternalService;
+import io.chubao.joyqueue.nsr.service.internal.ClusterInternalService;
 import io.chubao.joyqueue.nsr.service.internal.ConfigInternalService;
 import io.chubao.joyqueue.nsr.service.internal.ConsumerInternalService;
 import io.chubao.joyqueue.nsr.service.internal.DataCenterInternalService;
@@ -48,6 +50,7 @@ public class CompositionInternalServiceManager extends Service {
     private CompositionProducerInternalService compositionProducerInternalService;
     private CompositionTopicInternalService compositionTopicInternalService;
     private CompositionTransactionInternalService compositionTransactionInternalService;
+    private CompositionClusterInternalService compositionClusterInternalService;
 
     public CompositionInternalServiceManager(CompositionConfig config, InternalServiceProvider serviceProvider, InternalServiceProvider igniteServiceProvider,
                                              InternalServiceProvider journalkeeperServiceProvider) {
@@ -81,6 +84,8 @@ public class CompositionInternalServiceManager extends Service {
                 journalkeeperServiceProvider.getService(TopicInternalService.class));
         compositionTransactionInternalService = new CompositionTransactionInternalService(config, igniteServiceProvider.getService(TransactionInternalService.class),
                 journalkeeperServiceProvider.getService(TransactionInternalService.class));
+        compositionClusterInternalService = new CompositionClusterInternalService(config, null,
+                journalkeeperServiceProvider.getService(ClusterInternalService.class));
     }
 
     public <T> T getService(Class<T> service) {
@@ -106,6 +111,8 @@ public class CompositionInternalServiceManager extends Service {
             return (T) compositionTopicInternalService;
         } else if (service.equals(TransactionInternalService.class)) {
             return (T) compositionTransactionInternalService;
+        } else if (service.equals(ClusterInternalService.class)) {
+            return (T) compositionClusterInternalService;
         }
         throw new UnsupportedOperationException(service.getName());
     }

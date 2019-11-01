@@ -29,6 +29,7 @@ import io.chubao.joyqueue.nsr.InternalServiceProvider;
 import io.chubao.joyqueue.nsr.MetadataSynchronizer;
 import io.chubao.joyqueue.nsr.service.internal.AppTokenInternalService;
 import io.chubao.joyqueue.nsr.service.internal.BrokerInternalService;
+import io.chubao.joyqueue.nsr.service.internal.ClusterInternalService;
 import io.chubao.joyqueue.nsr.service.internal.ConfigInternalService;
 import io.chubao.joyqueue.nsr.service.internal.ConsumerInternalService;
 import io.chubao.joyqueue.nsr.service.internal.DataCenterInternalService;
@@ -43,6 +44,7 @@ import io.chubao.joyqueue.toolkit.concurrent.NamedThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -221,5 +223,26 @@ public class DefaultMetadataMonitorService implements MetadataMonitorService {
         }
         OperationInternalService operationInternalService = sourceInternalServiceProvider.getService(OperationInternalService.class);
         return operationInternalService.delete(operator, params);
+    }
+
+    @Override
+    public String getMetadataCluster() {
+        InternalServiceProvider internalServiceProvider = SERVICE_PROVIDER_POINT.get();
+        ClusterInternalService clusterInternalService = internalServiceProvider.getService(ClusterInternalService.class);
+        return clusterInternalService.getCluster();
+    }
+
+    @Override
+    public String addMetadataNode(String uri) {
+        InternalServiceProvider internalServiceProvider = SERVICE_PROVIDER_POINT.get();
+        ClusterInternalService clusterInternalService = internalServiceProvider.getService(ClusterInternalService.class);
+        return clusterInternalService.addNode(URI.create(uri));
+    }
+
+    @Override
+    public String removeMetadataNode(String uri) {
+        InternalServiceProvider internalServiceProvider = SERVICE_PROVIDER_POINT.get();
+        ClusterInternalService clusterInternalService = internalServiceProvider.getService(ClusterInternalService.class);
+        return clusterInternalService.removeNode(URI.create(uri));
     }
 }

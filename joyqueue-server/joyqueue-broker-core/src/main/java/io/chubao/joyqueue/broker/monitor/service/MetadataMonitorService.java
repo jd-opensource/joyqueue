@@ -128,4 +128,24 @@ public interface MetadataMonitorService {
      * @return
      */
     Object deleteMetadata(String source, String operator, List<Object> params);
+
+    /**
+     * 查询集群信息
+     * @return
+     */
+    String getMetadataCluster();
+
+    /**
+     * 添加集群节点
+     * @param uri
+     * @return
+     */
+    String addMetadataNode(String uri);
+
+    /**
+     * 删除集群节点
+     * @param uri
+     * @return
+     */
+    String removeMetadataNode(String uri);
 }

@@ -138,6 +138,12 @@
                handlers="brokerMonitorService.updateMetadata"/>
         <route path="/monitor/metadata/delete" inherit="post"
                handlers="brokerMonitorService.deleteMetadata"/>
+        <route path="/monitor/metadata/cluster" inherit="get"
+               handlers="brokerMonitorService.getMetadataCluster"/>
+        <route path="/monitor/metadata/node" inherit="post"
+               handlers="brokerMonitorService.addMetadataNode"/>
+        <route path="/monitor/metadata/node" inherit="delete"
+               handlers="brokerMonitorService.removeMetadataNode"/>
 
         <!-- manage -->
         <!-- topic app -->

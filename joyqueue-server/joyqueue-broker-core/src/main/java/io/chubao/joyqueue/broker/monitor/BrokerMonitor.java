@@ -27,6 +27,7 @@ import io.chubao.joyqueue.broker.monitor.stat.ProducerStat;
 import io.chubao.joyqueue.broker.monitor.stat.ReplicationStat;
 import io.chubao.joyqueue.broker.monitor.stat.TopicStat;
 import io.chubao.joyqueue.domain.PartitionGroup;
+import io.chubao.joyqueue.domain.TopicName;
 import io.chubao.joyqueue.event.MetaEvent;
 import io.chubao.joyqueue.monitor.Client;
 import io.chubao.joyqueue.network.session.Connection;
@@ -89,13 +90,24 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
     }
 
     protected void clearInvalidStat(BrokerStat brokerStat) {
-        for (Map.Entry<String, TopicStat> topicStatEntry : brokerStat.getTopicStats().entrySet()) {
-            TopicStat topicStat = topicStatEntry.getValue();
-            Iterator<Map.Entry<String, AppStat>> iterator = topicStat.getAppStats().entrySet().iterator();
-            while (iterator.hasNext()) {
-                Map.Entry<String, AppStat> appStatEntry = iterator.next();
-                if (StringUtils.isBlank(appStatEntry.getValue().getApp())) {
-                    iterator.remove();
+        Iterator<Map.Entry<String, TopicStat>> topicIterator = brokerStat.getTopicStats().entrySet().iterator();
+        while (topicIterator.hasNext()) {
+            TopicStat topicStat = topicIterator.next().getValue();
+            TopicName topic = TopicName.parse(topicStat.getTopic());
+            if (clusterManager.getTopicConfig(topic) == null) {
+                topicIterator.remove();
+                continue;
+            }
+
+            Iterator<Map.Entry<String, AppStat>> appIterator = topicStat.getAppStats().entrySet().iterator();
+            while (appIterator.hasNext()) {
+                Map.Entry<String, AppStat> appStatEntry = appIterator.next();
+                AppStat appStat = appStatEntry.getValue();
+                if (StringUtils.isBlank(appStat.getApp())) {
+                    appIterator.remove();
+                } else if (clusterManager.tryGetConsumer(topic, appStat.getApp()) == null
+                            && clusterManager.tryGetProducer(topic, appStat.getApp()) == null) {
+                    appIterator.remove();
                 }
             }
         }

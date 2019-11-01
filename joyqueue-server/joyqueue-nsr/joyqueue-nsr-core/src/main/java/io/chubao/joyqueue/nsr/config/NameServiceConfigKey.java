@@ -27,7 +27,7 @@ public enum NameServiceConfigKey implements PropertyDef {
     NAMESERVER_ALL_METADATA_CACHE_FILE("nameservice.allmetadata.cache.file", "/metadata/cache", Type.STRING),
     NAMESERVER_ALL_METADATA_CACHE_EXPIRE_TIME("nameservice.allmetadata.cache.expire.time", 1000 * 1, Type.INT),
     NAMESERVER_COMPENSATION_DELAY("nameservice.compensation.delay", 1000 * 60 * 1, Type.INT),
-    NAMESERVER_COMPENSATION_INTERVAL("nameservice.compensation.interval", 1000 * 30, Type.INT),
+    NAMESERVER_COMPENSATION_INTERVAL("nameservice.compensation.interval", 1000 * 10, Type.INT),
     NAMESERVER_COMPENSATION_TOPIC_ENABLE("nameservice.compensation.topic.enable", true, Type.BOOLEAN),
     NAMESERVER_COMPENSATION_BROKER_ENABLE("nameservice.compensation.broker.enable", true, Type.BOOLEAN),
     NAMESERVER_COMPENSATION_PRODUCER_ENABLE("nameservice.compensation.producer.enable", true, Type.BOOLEAN),

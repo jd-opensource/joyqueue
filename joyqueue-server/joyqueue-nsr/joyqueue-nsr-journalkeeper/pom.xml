@@ -32,7 +32,7 @@
         </dependency>
         <dependency>
             <groupId>io.journalkeeper</groupId>
-            <artifactId>journalkeeper-sql-druid</artifactId>
+            <artifactId>journalkeeper-metric-dropwizard</artifactId>
             <version>${journalkeeper.version}</version>
         </dependency>
         <dependency>
