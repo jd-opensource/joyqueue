@@ -27,6 +27,7 @@ import io.chubao.joyqueue.broker.consumer.MessageConvertSupport;
 import io.chubao.joyqueue.broker.coordinator.CoordinatorService;
 import io.chubao.joyqueue.broker.coordinator.config.CoordinatorConfig;
 import io.chubao.joyqueue.broker.election.ElectionService;
+import io.chubao.joyqueue.broker.extension.ExtensionManager;
 import io.chubao.joyqueue.broker.helper.AwareHelper;
 import io.chubao.joyqueue.broker.manage.BrokerManageService;
 import io.chubao.joyqueue.broker.manage.config.BrokerManageConfig;
@@ -67,9 +68,6 @@ import java.util.List;
 
 /**
  * BrokerService
- *
- * author: gaohaoxiang
- * date: 2018/8/14
  */
 public class BrokerService extends Service {
     private static final Logger logger = LoggerFactory.getLogger(BrokerService.class);
@@ -93,10 +91,10 @@ public class BrokerService extends Service {
     private ConfigurationManager configurationManager;
     private StoreManager storeManager;
     private NameService nameService;
-
     private CoordinatorService coordinatorService;
     private ArchiveManager archiveManager;
     private MessageConvertSupport messageConvertSupport;
+    private ExtensionManager extensionManager;
     private String[] args;
 
     public BrokerService() {
@@ -121,10 +119,11 @@ public class BrokerService extends Service {
         logger.info("Broker data path: {}.", dataPath);
 
         this.brokerContext.brokerConfig(brokerConfig);
+        this.extensionManager = new ExtensionManager(brokerContext);
+        this.extensionManager.before();
 
         //start name service first
         this.nameService = getNameService(brokerContext, configuration);
-        this.nameService.start();
         this.brokerContext.nameService(nameService);
 
         // build and start context manager
@@ -216,6 +215,7 @@ public class BrokerService extends Service {
         this.brokerContext.producerPolicy(buildGlobalProducePolicy(configuration));
         //build consume policy
         this.brokerContext.consumerPolicy(buildGlobalConsumePolicy(configuration));
+        this.extensionManager.after();
 
     }
 
@@ -320,7 +320,6 @@ public class BrokerService extends Service {
 
     @Override
     protected void doStart() throws Exception {
-        startIfNecessary(nameService);
         startIfNecessary(clusterManager);
         startIfNecessary(storeService);
         startIfNecessary(storeInitializer);
@@ -332,7 +331,9 @@ public class BrokerService extends Service {
         //must start after store manager
         startIfNecessary(storeManager);
         startIfNecessary(electionService);
+        startIfNecessary(extensionManager);
         startIfNecessary(protocolManager);
+        startIfNecessary(nameService);
         startIfNecessary(brokerServer);
         startIfNecessary(coordinatorService);
         startIfNecessary(brokerManageService);
@@ -367,6 +368,7 @@ public class BrokerService extends Service {
 
         destroy(brokerServer);
         destroy(protocolManager);
+        destroy(extensionManager);
         destroy(electionService);
         destroy(produce);
         destroy(consume);

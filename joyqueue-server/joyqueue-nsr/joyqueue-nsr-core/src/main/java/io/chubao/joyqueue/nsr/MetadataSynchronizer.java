@@ -40,17 +40,17 @@ public class MetadataSynchronizer {
 
     protected static final Logger logger = LoggerFactory.getLogger(MetadataSynchronizer.class);
 
-    public Object sync(InternalServiceProvider sourceInternalServiceProvider, InternalServiceProvider targetInternalServiceProvider) {
-        Object syncBrokerResult = syncBroker(sourceInternalServiceProvider, targetInternalServiceProvider);
-        Object syncPartitionGroupResult = syncPartitionGroup(sourceInternalServiceProvider, targetInternalServiceProvider);
-        Object syncPartitionGroupReplicaResult = syncPartitionGroupReplica(sourceInternalServiceProvider, targetInternalServiceProvider);
-        Object syncTopicResult = syncTopic(sourceInternalServiceProvider, targetInternalServiceProvider);
-        Object syncConsumerResult = syncConsumer(sourceInternalServiceProvider, targetInternalServiceProvider);
-        Object syncProducerResult = syncProducer(sourceInternalServiceProvider, targetInternalServiceProvider);
-        Object syncDataCenterResult = syncDataCenter(sourceInternalServiceProvider, targetInternalServiceProvider);
-        Object syncNamespaceResult = syncNamespace(sourceInternalServiceProvider, targetInternalServiceProvider);
-        Object syncConfigResult = syncConfig(sourceInternalServiceProvider, targetInternalServiceProvider);
-        Object syncAppTokenResult = syncAppToken(sourceInternalServiceProvider, targetInternalServiceProvider);
+    public Object sync(InternalServiceProvider sourceInternalServiceProvider, InternalServiceProvider targetInternalServiceProvider, boolean onlyCompare) {
+        Object syncBrokerResult = syncBroker(sourceInternalServiceProvider, targetInternalServiceProvider, onlyCompare);
+        Object syncPartitionGroupResult = syncPartitionGroup(sourceInternalServiceProvider, targetInternalServiceProvider, onlyCompare);
+        Object syncPartitionGroupReplicaResult = syncPartitionGroupReplica(sourceInternalServiceProvider, targetInternalServiceProvider, onlyCompare);
+        Object syncTopicResult = syncTopic(sourceInternalServiceProvider, targetInternalServiceProvider, onlyCompare);
+        Object syncConsumerResult = syncConsumer(sourceInternalServiceProvider, targetInternalServiceProvider, onlyCompare);
+        Object syncProducerResult = syncProducer(sourceInternalServiceProvider, targetInternalServiceProvider, onlyCompare);
+        Object syncDataCenterResult = syncDataCenter(sourceInternalServiceProvider, targetInternalServiceProvider, onlyCompare);
+        Object syncNamespaceResult = syncNamespace(sourceInternalServiceProvider, targetInternalServiceProvider, onlyCompare);
+        Object syncConfigResult = syncConfig(sourceInternalServiceProvider, targetInternalServiceProvider, onlyCompare);
+        Object syncAppTokenResult = syncAppToken(sourceInternalServiceProvider, targetInternalServiceProvider, onlyCompare);
 
         Map<String, Object> result = Maps.newHashMap();
         result.put("broker", syncBrokerResult);
@@ -66,7 +66,7 @@ public class MetadataSynchronizer {
         return result;
     }
 
-    protected Object syncTopic(InternalServiceProvider sourceInternalServiceProvider, InternalServiceProvider targetInternalServiceProvider) {
+    protected Object syncTopic(InternalServiceProvider sourceInternalServiceProvider, InternalServiceProvider targetInternalServiceProvider, boolean onlyCompare) {
         TopicInternalService sourceService = sourceInternalServiceProvider.getService(TopicInternalService.class);
         TopicInternalService targetService = targetInternalServiceProvider.getService(TopicInternalService.class);
 
@@ -78,10 +78,10 @@ public class MetadataSynchronizer {
             targetService.update((Topic) item);
         }, (item) -> {
             targetService.add((Topic) item);
-        });
+        }, onlyCompare);
     }
 
-    protected Object syncPartitionGroup(InternalServiceProvider sourceInternalServiceProvider, InternalServiceProvider targetInternalServiceProvider) {
+    protected Object syncPartitionGroup(InternalServiceProvider sourceInternalServiceProvider, InternalServiceProvider targetInternalServiceProvider, boolean onlyCompare) {
         PartitionGroupInternalService sourceService = sourceInternalServiceProvider.getService(PartitionGroupInternalService.class);
         PartitionGroupInternalService targetService = targetInternalServiceProvider.getService(PartitionGroupInternalService.class);
 
@@ -93,10 +93,10 @@ public class MetadataSynchronizer {
             targetService.delete(((PartitionGroup) item).getId());
         }, (item) -> {
             targetService.add((PartitionGroup) item);
-        });
+        }, onlyCompare);
     }
 
-    protected Object syncPartitionGroupReplica(InternalServiceProvider sourceInternalServiceProvider, InternalServiceProvider targetInternalServiceProvider) {
+    protected Object syncPartitionGroupReplica(InternalServiceProvider sourceInternalServiceProvider, InternalServiceProvider targetInternalServiceProvider, boolean onlyCompare) {
         PartitionGroupReplicaInternalService sourceService = sourceInternalServiceProvider.getService(PartitionGroupReplicaInternalService.class);
         PartitionGroupReplicaInternalService targetService = targetInternalServiceProvider.getService(PartitionGroupReplicaInternalService.class);
 
@@ -108,10 +108,10 @@ public class MetadataSynchronizer {
             targetService.delete(((Replica) item).getId());
         }, (item) -> {
             targetService.add((Replica) item);
-        });
+        }, onlyCompare);
     }
 
-    protected Object syncBroker(InternalServiceProvider sourceInternalServiceProvider, InternalServiceProvider targetInternalServiceProvider) {
+    protected Object syncBroker(InternalServiceProvider sourceInternalServiceProvider, InternalServiceProvider targetInternalServiceProvider, boolean onlyCompare) {
         BrokerInternalService sourceService = sourceInternalServiceProvider.getService(BrokerInternalService.class);
         BrokerInternalService targetService = targetInternalServiceProvider.getService(BrokerInternalService.class);
 
@@ -123,10 +123,10 @@ public class MetadataSynchronizer {
             targetService.delete(((Broker) item).getId());
         }, (item) -> {
             targetService.add((Broker) item);
-        });
+        }, onlyCompare);
     }
 
-    protected Object syncConsumer(InternalServiceProvider sourceInternalServiceProvider, InternalServiceProvider targetInternalServiceProvider) {
+    protected Object syncConsumer(InternalServiceProvider sourceInternalServiceProvider, InternalServiceProvider targetInternalServiceProvider, boolean onlyCompare) {
         ConsumerInternalService sourceService = sourceInternalServiceProvider.getService(ConsumerInternalService.class);
         ConsumerInternalService targetService = targetInternalServiceProvider.getService(ConsumerInternalService.class);
 
@@ -138,10 +138,10 @@ public class MetadataSynchronizer {
             targetService.delete(((Consumer) item).getId());
         }, (item) -> {
             targetService.add((Consumer) item);
-        });
+        }, onlyCompare);
     }
 
-    protected Object syncProducer(InternalServiceProvider sourceInternalServiceProvider, InternalServiceProvider targetInternalServiceProvider) {
+    protected Object syncProducer(InternalServiceProvider sourceInternalServiceProvider, InternalServiceProvider targetInternalServiceProvider, boolean onlyCompare) {
         ProducerInternalService sourceService = sourceInternalServiceProvider.getService(ProducerInternalService.class);
         ProducerInternalService targetService = targetInternalServiceProvider.getService(ProducerInternalService.class);
 
@@ -153,10 +153,10 @@ public class MetadataSynchronizer {
             targetService.delete(((Producer) item).getId());
         }, (item) -> {
             targetService.add((Producer) item);
-        });
+        }, onlyCompare);
     }
 
-    protected Object syncDataCenter(InternalServiceProvider sourceInternalServiceProvider, InternalServiceProvider targetInternalServiceProvider) {
+    protected Object syncDataCenter(InternalServiceProvider sourceInternalServiceProvider, InternalServiceProvider targetInternalServiceProvider, boolean onlyCompare) {
         DataCenterInternalService sourceService = sourceInternalServiceProvider.getService(DataCenterInternalService.class);
         DataCenterInternalService targetService = targetInternalServiceProvider.getService(DataCenterInternalService.class);
 
@@ -168,10 +168,10 @@ public class MetadataSynchronizer {
             targetService.delete(((DataCenter) item).getId());
         }, (item) -> {
             targetService.add((DataCenter) item);
-        });
+        }, onlyCompare);
     }
 
-    protected Object syncNamespace(InternalServiceProvider sourceInternalServiceProvider, InternalServiceProvider targetInternalServiceProvider) {
+    protected Object syncNamespace(InternalServiceProvider sourceInternalServiceProvider, InternalServiceProvider targetInternalServiceProvider, boolean onlyCompare) {
         NamespaceInternalService sourceService = sourceInternalServiceProvider.getService(NamespaceInternalService.class);
         NamespaceInternalService targetService = targetInternalServiceProvider.getService(NamespaceInternalService.class);
 
@@ -183,10 +183,10 @@ public class MetadataSynchronizer {
             targetService.delete(((Namespace) item).getCode());
         }, (item) -> {
             targetService.add((Namespace) item);
-        });
+        }, onlyCompare);
     }
 
-    protected Object syncConfig(InternalServiceProvider sourceInternalServiceProvider, InternalServiceProvider targetInternalServiceProvider) {
+    protected Object syncConfig(InternalServiceProvider sourceInternalServiceProvider, InternalServiceProvider targetInternalServiceProvider, boolean onlyCompare) {
         ConfigInternalService sourceService = sourceInternalServiceProvider.getService(ConfigInternalService.class);
         ConfigInternalService targetService = targetInternalServiceProvider.getService(ConfigInternalService.class);
 
@@ -198,10 +198,10 @@ public class MetadataSynchronizer {
             targetService.delete(((Config) item).getId());
         }, (item) -> {
             targetService.add((Config) item);
-        });
+        }, onlyCompare);
     }
 
-    protected Object syncAppToken(InternalServiceProvider sourceInternalServiceProvider, InternalServiceProvider targetInternalServiceProvider) {
+    protected Object syncAppToken(InternalServiceProvider sourceInternalServiceProvider, InternalServiceProvider targetInternalServiceProvider, boolean onlyCompare) {
         AppTokenInternalService sourceService = sourceInternalServiceProvider.getService(AppTokenInternalService.class);
         AppTokenInternalService targetService = targetInternalServiceProvider.getService(AppTokenInternalService.class);
 
@@ -213,11 +213,11 @@ public class MetadataSynchronizer {
             targetService.delete(((AppToken) item).getId());
         }, (item) -> {
             targetService.add((AppToken) item);
-        });
+        }, onlyCompare);
     }
 
     protected Object sync(String name, Callable<List> getAllCallable, Function<Object, Object> findFunction
-            , java.util.function.Consumer<Object> deleteConsumer, java.util.function.Consumer<Object> addConsumer) {
+            , java.util.function.Consumer<Object> deleteConsumer, java.util.function.Consumer<Object> addConsumer, boolean onlyCompare) {
         try {
             int success = 0;
             int failure = 0;
@@ -240,7 +240,9 @@ public class MetadataSynchronizer {
                     }
                 } else {
                     try {
-                        addConsumer.accept(item);
+                        if (!onlyCompare) {
+                            addConsumer.accept(item);
+                        }
                         success++;
                     } catch (Exception e) {
                         logger.error("add target {} error, data: {}, message: {}", JSON.toJSONString(item), e.toString());

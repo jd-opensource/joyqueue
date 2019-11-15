@@ -336,6 +336,15 @@ public class PartitionMessagePoller extends Service implements MessagePoller {
     }
 
     @Override
+    public FetchIndexData fetchIndex(String topic, short partition) {
+        checkState();
+        Preconditions.checkArgument(StringUtils.isNotBlank(topic), "topic not blank");
+
+        TopicMetadata topicMetadata = messagePollerInner.getAndCheckTopicMetadata(topic);
+        return consumerIndexManager.fetchIndex(topicMetadata.getTopic(), config.getAppFullName(), partition, config.getTimeout());
+    }
+
+    @Override
     public TopicMetadata getTopicMetadata(String topic) {
         checkState();
         Preconditions.checkArgument(StringUtils.isNotBlank(topic), "topic not blank");

@@ -81,6 +81,14 @@ public class DefaultProducerService implements ProducerService {
         if (topicInternalService.getTopicByCode(producer.getTopic().getNamespace(), producer.getTopic().getCode()) == null) {
             throw new NsrException(String.format("topic: %s is not exist", producer.getTopic()));
         }
+        if (producerInternalService.getByTopicAndApp(producer.getTopic(), producer.getApp()) != null) {
+            throw new NsrException(String.format("producer: %s,%s is not exist", producer.getTopic(), producer.getApp()));
+        }
+
+        logger.info("addProducer, topic: {}, app: {}", producer.getTopic(), producer.getApp());
+
+        List<PartitionGroup> partitionGroups = partitionGroupInternalService.getByTopic(producer.getTopic());
+        List<Broker> replicas = getReplicas(partitionGroups);
 
         try {
             transactionInternalService.begin();
@@ -88,11 +96,6 @@ public class DefaultProducerService implements ProducerService {
             logger.error("beginTransaction exception, topic: {}, app: {}", producer.getTopic(), producer.getApp(), e);
             throw new NsrException(e);
         }
-
-        logger.info("addProducer, topic: {}, app: {}", producer.getTopic(), producer.getApp());
-
-        List<PartitionGroup> partitionGroups = partitionGroupInternalService.getByTopic(producer.getTopic());
-        List<Broker> replicas = getReplicas(partitionGroups);
 
         try {
             producerInternalService.add(producer);
@@ -114,17 +117,17 @@ public class DefaultProducerService implements ProducerService {
             throw new NsrException(String.format("topic: %s, producer: %s is not exist", producer.getTopic(), producer.getApp()));
         }
 
+        logger.info("updateProducer, topic: {}, app: {}", producer.getTopic(), producer.getApp());
+
+        List<PartitionGroup> partitionGroups = partitionGroupInternalService.getByTopic(producer.getTopic());
+        List<Broker> replicas = getReplicas(partitionGroups);
+
         try {
             transactionInternalService.begin();
         } catch (Exception e) {
             logger.error("beginTransaction exception, topic: {}, app: {}", producer.getTopic(), producer.getApp(), e);
             throw new NsrException(e);
         }
-
-        logger.info("updateProducer, topic: {}, app: {}", producer.getTopic(), producer.getApp());
-
-        List<PartitionGroup> partitionGroups = partitionGroupInternalService.getByTopic(producer.getTopic());
-        List<Broker> replicas = getReplicas(partitionGroups);
 
         try {
             producerInternalService.update(producer);
@@ -146,17 +149,17 @@ public class DefaultProducerService implements ProducerService {
             throw new NsrException(String.format("producer: %s is not exist", id));
         }
 
+        logger.info("deleteProducer, topic: {}, app: {}", producer.getTopic(), producer.getApp());
+
+        List<PartitionGroup> partitionGroups = partitionGroupInternalService.getByTopic(producer.getTopic());
+        List<Broker> replicas = getReplicas(partitionGroups);
+
         try {
             transactionInternalService.begin();
         } catch (Exception e) {
             logger.error("beginTransaction exception, topic: {}, app: {}", producer.getTopic(), producer.getApp(), e);
             throw new NsrException(e);
         }
-
-        logger.info("deleteProducer, topic: {}, app: {}", producer.getTopic(), producer.getApp());
-
-        List<PartitionGroup> partitionGroups = partitionGroupInternalService.getByTopic(producer.getTopic());
-        List<Broker> replicas = getReplicas(partitionGroups);
 
         try {
             producerInternalService.delete(id);

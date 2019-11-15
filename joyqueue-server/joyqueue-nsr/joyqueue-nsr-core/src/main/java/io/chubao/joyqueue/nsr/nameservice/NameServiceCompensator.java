@@ -300,7 +300,7 @@ public class NameServiceCompensator extends Service {
 
     protected void compensateConfig(NameServiceCache oldCache, NameServiceCache newCache) {
         for (Config newConfig : newCache.getAllConfigs()) {
-            Config oldConfig = oldCache.getConfigKeyMap().get(newConfig.getKey());
+            Config oldConfig = oldCache.getConfigKeyMap().get(newConfig.getId());
             if (oldConfig == null) {
                 // 新增config
                 publishEvent(new AddConfigEvent(newConfig));
@@ -314,7 +314,7 @@ public class NameServiceCompensator extends Service {
 
         // 删除config
         for (Config oldConfig : oldCache.getAllConfigs()) {
-            if (newCache.getConfigKeyMap().containsKey(oldConfig.getKey())) {
+            if (newCache.getConfigKeyMap().containsKey(oldConfig.getId())) {
                 continue;
             }
 

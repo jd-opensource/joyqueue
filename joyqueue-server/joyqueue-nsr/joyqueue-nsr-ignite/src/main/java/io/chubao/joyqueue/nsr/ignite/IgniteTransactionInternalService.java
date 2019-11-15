@@ -20,7 +20,8 @@ public class IgniteTransactionInternalService implements TransactionInternalServ
         if (transactionThreadLocal.get() != null) {
             throw new UnsupportedOperationException("transport is exist");
         }
-        Transaction transaction = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED);
+        // TODO 临时处理超时时间
+        Transaction transaction = Ignition.ignite().transactions().txStart(TransactionConcurrency.PESSIMISTIC, TransactionIsolation.READ_COMMITTED, 1000 * 60, 0);
         transactionThreadLocal.set(transaction);
     }
 

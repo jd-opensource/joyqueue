@@ -18,7 +18,7 @@ package io.chubao.joyqueue.network.codec;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import io.chubao.joyqueue.exception.JoyQueueCode;
-import io.chubao.joyqueue.network.command.FetchIndexAckData;
+import io.chubao.joyqueue.network.command.FetchIndexData;
 import io.chubao.joyqueue.network.command.FetchIndexResponse;
 import io.chubao.joyqueue.network.command.JoyQueueCommandType;
 import io.chubao.joyqueue.network.serializer.Serializer;
@@ -39,7 +39,7 @@ public class FetchIndexResponseCodec implements PayloadCodec<JoyQueueHeader, Fet
 
     @Override
     public FetchIndexResponse decode(JoyQueueHeader header, ByteBuf buffer) throws Exception {
-        Table<String, Short, FetchIndexAckData> result = HashBasedTable.create();
+        Table<String, Short, FetchIndexData> result = HashBasedTable.create();
         short topicSize = buffer.readShort();
         for (int i = 0; i < topicSize; i++) {
             String topic = Serializer.readString(buffer, Serializer.SHORT_SIZE);
@@ -48,8 +48,16 @@ public class FetchIndexResponseCodec implements PayloadCodec<JoyQueueHeader, Fet
                 short partition = buffer.readShort();
                 long index = buffer.readLong();
                 JoyQueueCode code = JoyQueueCode.valueOf(buffer.readInt());
-                FetchIndexAckData fetchIndexAckData = new FetchIndexAckData(index, code);
-                result.put(topic, partition, fetchIndexAckData);
+                long leftIndex = -1;
+                long rightIndex = -1;
+
+                if (header.getVersion() >= JoyQueueHeader.VERSION_V3) {
+                    leftIndex = buffer.readLong();
+                    rightIndex = buffer.readLong();
+                }
+
+                FetchIndexData fetchIndexData = new FetchIndexData(index, leftIndex, rightIndex, code);
+                result.put(topic, partition, fetchIndexData);
             }
         }
 
@@ -61,14 +69,19 @@ public class FetchIndexResponseCodec implements PayloadCodec<JoyQueueHeader, Fet
     @Override
     public void encode(FetchIndexResponse payload, ByteBuf buffer) throws Exception {
         buffer.writeShort(payload.getData().rowMap().size());
-        for (Map.Entry<String, Map<Short, FetchIndexAckData>> topicEntry : payload.getData().rowMap().entrySet()) {
+        for (Map.Entry<String, Map<Short, FetchIndexData>> topicEntry : payload.getData().rowMap().entrySet()) {
             Serializer.write(topicEntry.getKey(), buffer, Serializer.SHORT_SIZE);
             buffer.writeShort(topicEntry.getValue().size());
-            for (Map.Entry<Short, FetchIndexAckData> partitionEntry : topicEntry.getValue().entrySet()) {
-                FetchIndexAckData fetchIndexAckData = partitionEntry.getValue();
+            for (Map.Entry<Short, FetchIndexData> partitionEntry : topicEntry.getValue().entrySet()) {
+                FetchIndexData fetchIndexData = partitionEntry.getValue();
                 buffer.writeShort(partitionEntry.getKey());
-                buffer.writeLong(fetchIndexAckData.getIndex());
-                buffer.writeInt(fetchIndexAckData.getCode().getCode());
+                buffer.writeLong(fetchIndexData.getIndex());
+                buffer.writeInt(fetchIndexData.getCode().getCode());
+
+                if (payload.getHeader().getVersion() >= JoyQueueHeader.VERSION_V3) {
+                    buffer.writeLong(fetchIndexData.getLeftIndex());
+                    buffer.writeLong(fetchIndexData.getRightIndex());
+                }
             }
         }
     }

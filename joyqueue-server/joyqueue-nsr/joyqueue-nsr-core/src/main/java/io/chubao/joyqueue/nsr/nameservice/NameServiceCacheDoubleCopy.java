@@ -3,6 +3,7 @@ package io.chubao.joyqueue.nsr.nameservice;
 import com.alibaba.fastjson.JSON;
 import io.chubao.joyqueue.nsr.exception.NsrException;
 import io.chubao.joyqueue.toolkit.io.DoubleCopy;
+import io.chubao.joyqueue.toolkit.io.ZipUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,13 +42,19 @@ public class NameServiceCacheDoubleCopy extends DoubleCopy {
 
     @Override
     protected byte[] serialize() {
-        byte[] json = JSON.toJSONBytes(entry);
+        try {
+            byte[] json = JSON.toJSONBytes(entry);
+            json = ZipUtil.compress(json);
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("save nameservice cache, value: {}, file: {}", new String(json), file);
+            if (logger.isDebugEnabled()) {
+                logger.debug("save nameservice cache, value: {}, file: {}", new String(json), file);
+            }
+
+            return json;
+        } catch (Exception e) {
+            logger.error("serialize cache exception", e);
+            return new byte[0];
         }
-
-        return json;
     }
 
     @Override
@@ -57,6 +64,7 @@ public class NameServiceCacheDoubleCopy extends DoubleCopy {
                 logger.debug("load nameservice cache, value: {}, file: {}", new String(data), file);
             }
 
+            data = ZipUtil.decompress(data).getBytes();
             NameServiceCacheEntry entry = JSON.parseObject(data, NameServiceCacheEntry.class);
 
             if (entry.getVersion() != CURRENT_VERSION) {
@@ -68,7 +76,7 @@ public class NameServiceCacheDoubleCopy extends DoubleCopy {
         } catch (Exception e) {
             logger.error("load nameservice cache exception, file: {}", file, e);
             if (e instanceof NsrException) {
-                throw e;
+                throw (NsrException) e;
             } else {
                 throw new NsrException(e);
             }

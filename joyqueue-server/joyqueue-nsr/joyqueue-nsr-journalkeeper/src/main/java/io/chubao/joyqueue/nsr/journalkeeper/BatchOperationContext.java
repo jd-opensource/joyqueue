@@ -39,10 +39,6 @@ public class BatchOperationContext {
     }
 
     public static void rollback() {
-        BatchSQLOperator batchSQLOperator = batchOperatorThreadLocal.get();
-        if (batchSQLOperator == null) {
-            throw new UnsupportedOperationException("batch not exist");
-        }
         batchOperatorThreadLocal.remove();
     }
 

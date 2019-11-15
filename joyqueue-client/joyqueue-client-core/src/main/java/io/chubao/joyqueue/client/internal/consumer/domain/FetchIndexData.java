@@ -26,18 +26,18 @@ import io.chubao.joyqueue.exception.JoyQueueCode;
 public class FetchIndexData {
 
     private long index;
+    private long leftIndex;
+    private long rightIndex;
     private JoyQueueCode code;
-
-    public FetchIndexData() {
-
-    }
 
     public FetchIndexData(JoyQueueCode code) {
         this.code = code;
     }
 
-    public FetchIndexData(long index, JoyQueueCode code) {
+    public FetchIndexData(long index, long leftIndex, long rightIndex, JoyQueueCode code) {
         this.index = index;
+        this.leftIndex = leftIndex;
+        this.rightIndex = rightIndex;
         this.code = code;
     }
 
@@ -47,6 +47,22 @@ public class FetchIndexData {
 
     public void setIndex(long index) {
         this.index = index;
+    }
+
+    public void setLeftIndex(long leftIndex) {
+        this.leftIndex = leftIndex;
+    }
+
+    public long getLeftIndex() {
+        return leftIndex;
+    }
+
+    public void setRightIndex(long rightIndex) {
+        this.rightIndex = rightIndex;
+    }
+
+    public long getRightIndex() {
+        return rightIndex;
     }
 
     public JoyQueueCode getCode() {

@@ -121,7 +121,7 @@ public class FetchPartitionMessageRequestHandler implements JoyQueueCommandHandl
         fetchPartitionMessageAckData.setBuffers(Collections.emptyList());
         try {
             long minIndex = consume.getMinIndex(consumer, partition);
-            long maxIndex = consume.getMinIndex(consumer, partition);
+            long maxIndex = consume.getMaxIndex(consumer, partition);
             if (index == FetchPartitionMessageRequest.NONE_INDEX) {
                 index = consume.getAckIndex(consumer, partition);
                 if (index < minIndex) {

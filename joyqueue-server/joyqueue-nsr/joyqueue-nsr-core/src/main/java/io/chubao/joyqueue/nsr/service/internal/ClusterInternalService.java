@@ -1,6 +1,7 @@
 package io.chubao.joyqueue.nsr.service.internal;
 
 import java.net.URI;
+import java.util.List;
 
 /**
  * ClusterInternalService
@@ -28,4 +29,11 @@ public interface ClusterInternalService {
      * @return
      */
     String removeNode(URI uri);
+
+    /**
+     * 更新节点
+     * @param uris
+     * @return
+     */
+    String updateNodes(List<URI> uris);
 }

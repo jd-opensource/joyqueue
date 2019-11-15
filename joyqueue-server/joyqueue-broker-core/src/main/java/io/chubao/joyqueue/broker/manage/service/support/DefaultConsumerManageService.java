@@ -15,21 +15,27 @@
  */
 package io.chubao.joyqueue.broker.manage.service.support;
 
+import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import io.chubao.joyqueue.broker.cluster.ClusterManager;
 import io.chubao.joyqueue.broker.consumer.Consume;
 import io.chubao.joyqueue.broker.manage.service.ConsumerManageService;
 import io.chubao.joyqueue.broker.monitor.ConsumerMonitor;
 import io.chubao.joyqueue.broker.monitor.stat.PartitionStat;
+import io.chubao.joyqueue.domain.PartitionGroup;
+import io.chubao.joyqueue.domain.TopicConfig;
 import io.chubao.joyqueue.exception.JoyQueueException;
 import io.chubao.joyqueue.monitor.PartitionAckMonitorInfo;
 import io.chubao.joyqueue.network.session.Consumer;
 import io.chubao.joyqueue.store.PartitionGroupStore;
 import io.chubao.joyqueue.store.StoreManagementService;
 import io.chubao.joyqueue.store.StoreService;
+import org.apache.commons.collections.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * ConsumerManageService
@@ -172,6 +178,30 @@ public class DefaultConsumerManageService implements ConsumerManageService {
         }
         return partitionAckMonitorInfos;
     }
+
+    @Override
+    public String initConsumerAckIndexes() throws JoyQueueException {
+        Map<String, List<String>> result = Maps.newHashMap();
+        for (TopicConfig topicConfig : clusterManager.getTopics()) {
+            List<String> apps = Lists.newLinkedList();
+            result.put(topicConfig.getName().getFullName(), apps);
+            List<io.chubao.joyqueue.domain.Consumer> consumers = clusterManager.getLocalConsumersByTopic(topicConfig.getName());
+
+            if (CollectionUtils.isEmpty(consumers)) {
+                continue;
+            }
+            for (PartitionGroup partitionGroup : topicConfig.fetchPartitionGroupByBrokerId(clusterManager.getBrokerId())) {
+                for (Short partition : partitionGroup.getPartitions()) {
+                    for (io.chubao.joyqueue.domain.Consumer consumer : consumers) {
+                        apps.add(consumer.getApp());
+                        consume.setAckIndex(new Consumer(consumer.getTopic().getFullName(), consumer.getApp()), partition, 0);
+                    }
+                }
+            }
+        }
+        return JSON.toJSONString(result);
+    }
+
     protected boolean setPartitionAckIndexByTime(String topic, String app, int partitionGroup, short partition, long timestamp) throws JoyQueueException {
         PartitionGroupStore store = storeService.getStore(topic, partitionGroup);
         long index = store.getIndex(partition, timestamp);

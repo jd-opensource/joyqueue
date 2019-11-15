@@ -25,6 +25,7 @@ import io.chubao.joyqueue.client.internal.consumer.MessageListener;
 import io.chubao.joyqueue.client.internal.consumer.config.ConsumerConfig;
 import io.chubao.joyqueue.client.internal.consumer.domain.ConsumeMessage;
 import io.chubao.joyqueue.client.internal.consumer.domain.ConsumeReply;
+import io.chubao.joyqueue.client.internal.consumer.domain.FetchIndexData;
 import io.chubao.joyqueue.client.internal.consumer.exception.ConsumerException;
 import io.chubao.joyqueue.client.internal.consumer.interceptor.ConsumerInterceptor;
 import io.chubao.joyqueue.client.internal.consumer.interceptor.ConsumerInterceptorManager;
@@ -339,6 +340,14 @@ public class DefaultMessageConsumer extends Service implements MessageConsumer {
         checkState();
         checkSubscribe();
         return topicMessageConsumer.getMessagePoller().replyOnce(subscribeTopic, reply);
+    }
+
+    @Override
+    public FetchIndexData fetchIndex(short partition) {
+        checkState();
+        checkSubscribe();
+
+        return topicMessageConsumer.getMessagePoller().fetchIndex(subscribeTopic, partition);
     }
 
     @Override

@@ -234,7 +234,11 @@ public class ClusterManager extends Service {
      * @return
      */
     public PartitionGroup getPartitionGroupByGroup(TopicName topic, int group) {
-        return getTopicConfig(topic).fetchPartitionGroupByGroup(group);
+        TopicConfig topicConfig = getTopicConfig(topic);
+        if (topicConfig == null) {
+            return null;
+        }
+        return topicConfig.fetchPartitionGroupByGroup(group);
     }
 
     /**
@@ -774,7 +778,19 @@ public class ClusterManager extends Service {
         return result;
     }
 
-    public List<Consumer> getLocalSubscribeByTopic(TopicName topic) {
+    public List<Producer> getLocalProducersByTopic(TopicName topic) {
+        Map<String, MetaDataLocalCache.CacheProducer> producers = localCache.getTopicProducers(topic);
+        if (MapUtils.isEmpty(producers)) {
+            return Collections.emptyList();
+        }
+        List<Producer> result = Lists.newLinkedList();
+        for (Map.Entry<String, MetaDataLocalCache.CacheProducer> entry : producers.entrySet()) {
+            result.add(entry.getValue().getProducer());
+        }
+        return result;
+    }
+
+    public List<Consumer> getLocalConsumersByTopic(TopicName topic) {
         Map<String, MetaDataLocalCache.CacheConsumer> consumers = localCache.getTopicConsumers(topic);
         if (MapUtils.isEmpty(consumers)) {
             return Collections.emptyList();
@@ -944,6 +960,7 @@ public class ClusterManager extends Service {
             Map<TopicName, TopicConfig> topicConfigByBroker = nameService.getTopicConfigByBroker(brokerConfig.getBrokerId());
             if (null != topicConfigByBroker) {
                 for (Map.Entry<TopicName, TopicConfig> entry : topicConfigByBroker.entrySet()) {
+                    logger.info("build topic config, topic: {}", entry.getKey());
                     buildTopicConfigCache(entry.getValue());
                 }
             }
@@ -970,6 +987,7 @@ public class ClusterManager extends Service {
             return null;
         }
         private TopicConfig buildTopicConfigCache(TopicConfig topicConfig) {
+            logger.info("build topic cache, topic: {}", topicConfig.getName());
             TopicName topic = topicConfig.getName();
             topicConfigCache.put(topic.getFullName(), topicConfig);
             topicPartitionsCache.put(topic.getFullName(),topicConfig.fetchPartitionByBroker(broker.getId()));
@@ -990,6 +1008,7 @@ public class ClusterManager extends Service {
          */
 
         protected Consumer buildConsumeCache(TopicName topic, String app) {
+            logger.info("build consumer cache, topic: {}, app", topic, app);
             Consumer consumerByTopic = nameService.getConsumerByTopicAndApp(topic, app);
             if (null != consumerByTopic) {
                 consumerCache.get(topic.getFullName()).put(app, new CacheConsumer(consumerByTopic, SystemClock.now()));
@@ -998,6 +1017,7 @@ public class ClusterManager extends Service {
         }
 
         protected Consumer buildConsumeCache(Consumer consumer) {
+            logger.info("build consumer cache, topic: {}, app", consumer.getTopic(), consumer.getApp());
             consumerCache.get(consumer.getTopic().getFullName()).put(consumer.getApp(), new CacheConsumer(consumer, SystemClock.now()));
             return consumer;
         }
@@ -1047,6 +1067,7 @@ public class ClusterManager extends Service {
          * @param app   应用
          */
         protected Producer buildProduceCache(TopicName topic, String app) {
+            logger.info("build producer cache, topic: {}, app", topic, app);
             Producer producerByTopic = nameService.getProducerByTopicAndApp(topic, app);
             if (null != producerByTopic) {
                 producerCache.get(topic.getFullName()).put(app, new CacheProducer(producerByTopic));
@@ -1055,6 +1076,7 @@ public class ClusterManager extends Service {
         }
 
         protected Producer buildProduceCache(Producer producer) {
+            logger.info("build producer cache, topic: {}, app", producer.getTopic(), producer.getApp());
             producerCache.get(producer.getTopic().getFullName()).put(producer.getApp(), new CacheProducer(producer));
             return producer;
         }
@@ -1232,6 +1254,9 @@ public class ClusterManager extends Service {
                     case UPDATE_TOPIC: {
                         UpdateTopicEvent updateTopicEvent = (UpdateTopicEvent) event.getMetaEvent();
                         TopicConfig oldTopicConfig = topicConfigCache.get(updateTopicEvent.getOldTopic().getName().getFullName());
+                        if (oldTopicConfig == null) {
+                            break;
+                        }
                         TopicConfig newTopicConfig = TopicConfig.toTopicConfig(updateTopicEvent.getNewTopic());
                         newTopicConfig.setPartitionGroups(oldTopicConfig.getPartitionGroups());
                         buildTopicConfigCache(newTopicConfig);

@@ -90,7 +90,8 @@ public class IgniteConsumerInternalService implements ConsumerInternalService {
 
     @Override
     public List<Consumer> getByApp(String app) {
-        ConsumerQuery consumerQuery = new ConsumerQuery(app);
+        ConsumerQuery consumerQuery = new ConsumerQuery();
+        consumerQuery.setReferer(app);
         List<IgniteConsumer> igniteConsumers = consumerDao.list(consumerQuery);
         if (null == igniteConsumers || igniteConsumers.size() < 1) Collections.emptyList();
         Map<String, IgniteConsumerConfig> configs = new HashMap<>();

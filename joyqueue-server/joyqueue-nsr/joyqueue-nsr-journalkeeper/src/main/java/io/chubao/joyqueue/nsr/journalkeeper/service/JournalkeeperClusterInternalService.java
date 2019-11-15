@@ -59,4 +59,17 @@ public class JournalkeeperClusterInternalService implements ClusterInternalServi
             throw new NsrException(e);
         }
     }
+
+    @Override
+    public String updateNodes(List<URI> uris) {
+        try {
+            ClusterConfiguration clusterConfiguration = sqlClient.getAdminClient().getClusterConfiguration().get();
+            List<URI> oldConfig = clusterConfiguration.getVoters();
+            List<URI> newConfig = uris;
+            sqlClient.getAdminClient().updateVoters(oldConfig, newConfig);
+            return String.format("{'oldConfig':'%s', 'newConfig':'%s'}", oldConfig, newConfig);
+        } catch (Exception e) {
+            throw new NsrException(e);
+        }
+    }
 }

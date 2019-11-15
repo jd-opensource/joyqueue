@@ -19,15 +19,18 @@ import io.chubao.joyqueue.nsr.config.NameServiceConfig;
 import io.chubao.joyqueue.nsr.exception.NsrException;
 import io.chubao.joyqueue.nsr.util.DCWrapper;
 import io.chubao.joyqueue.toolkit.service.Service;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * NameServiceCacheManager
@@ -42,6 +45,7 @@ public class NameServiceCacheManager extends Service {
 
     private NameServiceCacheDoubleCopy nameServiceCacheDoubleCopy;
     private volatile NameServiceCache cache;
+    private ReentrantLock lock = new ReentrantLock();
 
     public NameServiceCacheManager(NameServiceConfig config) {
         this.config = config;
@@ -50,6 +54,10 @@ public class NameServiceCacheManager extends Service {
     @Override
     protected void validate() throws Exception {
         nameServiceCacheDoubleCopy = new NameServiceCacheDoubleCopy(new File(config.getAllMetadataCacheFile()));
+    }
+
+    public static void main(String[] args) throws Exception {
+        System.out.println(URLEncoder.encode("operator=UPDATE topic set partitions = ? where code = ?&params=[\"96\", \"ghx_test_0\"]"));
     }
 
     @Override
@@ -79,7 +87,7 @@ public class NameServiceCacheManager extends Service {
 
         Map<String /** app **/, List<AppToken>> allAppTokenMap = Maps.newHashMapWithExpectedSize(brokerMap.size());
         List<DCWrapper> allDataCenterWrappers = Lists.newLinkedList();
-        Map<String /** key **/, Config> configKeyMap = Maps.newHashMapWithExpectedSize(allConfigs.size());
+        Map<String /** id **/, Config> configKeyMap = Maps.newHashMapWithExpectedSize(allConfigs.size());
         Map<String /** code **/, DCWrapper> dataCenterWrapperCodeMap = Maps.newHashMapWithExpectedSize(allDataCenterWrappers.size());
 
         for (Map.Entry<TopicName, TopicConfig> topicEntry : topicConfigMap.entrySet()) {
@@ -167,7 +175,7 @@ public class NameServiceCacheManager extends Service {
         }
 
         for (Config config : allConfigs) {
-            configKeyMap.put(config.getKey(), config);
+            configKeyMap.put(config.getId(), config);
         }
 
         for (DataCenter dataCenter : allDataCenters) {
@@ -194,7 +202,6 @@ public class NameServiceCacheManager extends Service {
         cache.setAllAppTokenMap(allAppTokenMap);
         cache.setAllDataCenters(allDataCenterWrappers);
         cache.setDataCenterCodeMap(dataCenterWrapperCodeMap);
-        cache.updateLastTimestamp();
         return cache;
     }
 
@@ -252,7 +259,7 @@ public class NameServiceCacheManager extends Service {
 
     public Map<TopicName, TopicConfig> getTopicConfigByBroker(Integer brokerId) {
         checkCacheStatus();
-        return cache.getTopicConfigBrokerMap().get(brokerId);
+        return ObjectUtils.defaultIfNull(cache.getTopicConfigBrokerMap().get(brokerId), Collections.emptyMap());
     }
 
     public Producer getProducerByTopicAndApp(TopicName topic, String app) {
@@ -405,5 +412,17 @@ public class NameServiceCacheManager extends Service {
 
     public NameServiceCache getCache() {
         return cache;
+    }
+
+    public void lock() {
+        lock.lock();
+    }
+
+    public void unlock() {
+        lock.unlock();
+    }
+
+    public boolean isLocked() {
+        return lock.isLocked();
     }
 }

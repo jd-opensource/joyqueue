@@ -90,9 +90,10 @@ public interface MetadataMonitorService {
      * @param source
      * @param target
      * @param interval
+     * @param onlyCompare
      * @return
      */
-    Object syncMetadata(String source, String target, int interval);
+    Object syncMetadata(String source, String target, int interval, boolean onlyCompare);
 
     /**
      * 查询元数据
@@ -148,4 +149,11 @@ public interface MetadataMonitorService {
      * @return
      */
     String removeMetadataNode(String uri);
+
+    /**
+     * 更新集群节点
+     * @param uris
+     * @return
+     */
+    String updateMetadataNode(List<String> uris);
 }

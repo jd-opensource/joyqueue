@@ -18,11 +18,11 @@ public class ProducerRepository extends BaseRepository {
 
     private static final String GET_BY_ID = String.format("SELECT %s FROM %s WHERE id = ?",
             COLUMNS, TABLE);
-    private static final String GET_BY_TOPIC_AND_APP = String.format("SELECT %s FROM %s WHERE topic = ? AND namespace = ? AND app = ? ORDER BY topic",
+    private static final String GET_BY_TOPIC_AND_APP = String.format("SELECT %s FROM %s WHERE topic = ? AND namespace = ? AND app = ? ORDER BY id",
             COLUMNS, TABLE);
-    private static final String GET_BY_TOPIC = String.format("SELECT %s FROM %s WHERE topic = ? AND namespace = ? ORDER BY topic",
+    private static final String GET_BY_TOPIC = String.format("SELECT %s FROM %s WHERE topic = ? AND namespace = ? ORDER BY id",
             COLUMNS, TABLE);
-    private static final String GET_BY_APP = String.format("SELECT %s FROM %s WHERE app = ? ORDER BY topic",
+    private static final String GET_BY_APP = String.format("SELECT %s FROM %s WHERE app = ? ORDER BY id",
             COLUMNS, TABLE);
     private static final String GET_ALL = String.format("SELECT %s FROM %s",
             COLUMNS, TABLE);

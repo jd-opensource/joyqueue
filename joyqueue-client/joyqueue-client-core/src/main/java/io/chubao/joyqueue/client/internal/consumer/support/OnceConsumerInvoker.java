@@ -59,7 +59,7 @@ public class OnceConsumerInvoker implements ConsumerInvoker {
     }
 
     @Override
-    public List<ConsumeReply> invoke(final ConsumeContext context) {
+    public List<ConsumeReply> invoke(ConsumeContext context) {
         List<ConsumeReply> result = Lists.newArrayListWithCapacity(messages.size());
 
         for (ConsumeMessage message : messages) {

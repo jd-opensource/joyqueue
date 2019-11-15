@@ -28,7 +28,7 @@ public enum JournalkeeperConfigKey implements PropertyDef {
     STATE_BATCH_SIZE("nameserver.journalkeeper.state.batch.size", 1024 * 1024 * 1, PropertyDef.Type.INT),
 
     METRIC_ENABLE("nameserver.journalkeeper.metric.enable", false, PropertyDef.Type.BOOLEAN),
-    METRIC_PRINT_INTERVAL("nameserver.journalkeeper.metric.print.interval", 0, PropertyDef.Type.INT),
+    METRIC_PRINT_INTERVAL("nameserver.journalkeeper.metric.print.interval", 5, PropertyDef.Type.INT),
 
     ;
 

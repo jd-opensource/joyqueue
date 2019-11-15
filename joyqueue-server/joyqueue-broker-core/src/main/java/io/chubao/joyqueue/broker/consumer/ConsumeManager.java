@@ -53,6 +53,7 @@ import io.chubao.joyqueue.toolkit.lang.Close;
 import io.chubao.joyqueue.toolkit.service.Service;
 import io.chubao.joyqueue.toolkit.time.SystemClock;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -648,9 +649,13 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
         }
 
         Map<TopicName, TopicConfig> localTopics = clusterManager.getNameService().getTopicConfigByBroker(clusterManager.getBrokerId());
+        if (MapUtils.isEmpty(localTopics)) {
+            return;
+        }
+
         for (Map.Entry<TopicName, TopicConfig> topicEntry : localTopics.entrySet()) {
             TopicConfig topicConfig = topicEntry.getValue();
-            List<io.chubao.joyqueue.domain.Consumer> broadcastConsumers = Lists.newArrayList(clusterManager.getLocalSubscribeByTopic(topicConfig.getName()));
+            List<io.chubao.joyqueue.domain.Consumer> broadcastConsumers = Lists.newArrayList(clusterManager.getLocalConsumersByTopic(topicConfig.getName()));
             Iterator<io.chubao.joyqueue.domain.Consumer> iterator = broadcastConsumers.iterator();
             while (iterator.hasNext()) {
                 io.chubao.joyqueue.domain.Consumer consumer = iterator.next();

@@ -29,7 +29,7 @@ import java.util.Map;
  */
 public class ProduceMessage implements Serializable {
 
-    public static final short NONE_PARTITION = -1;
+    public static final short NONE_PARTITION = Short.MIN_VALUE;
     public static final String NONE_PARTITION_KEY = null;
 
     private String topic;

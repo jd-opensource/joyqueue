@@ -178,6 +178,8 @@
             handlers="brokerManageService.getTopicAckIndexByTime"/>
         <route path="/manage/topic/:topic/app/:app/ackByTime" inherit="put"
                handlers="brokerManageService.setAckIndexesByTime"/>
+        <route path="/manage/consumer/ack/init" inherit="post"
+               handlers="brokerManageService.initConsumerAckIndexes"/>
 
         <!-- store -->
         <!-- topic -->

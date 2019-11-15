@@ -36,6 +36,7 @@ public class NameServiceCompensateThread extends Service implements Runnable {
     @Override
     protected void validate() throws Exception {
         compensationThread = new Thread(this, "joyqueue-nameservice-compensation");
+        compensationThread.setDaemon(true);
     }
 
     @Override
@@ -54,46 +55,52 @@ public class NameServiceCompensateThread extends Service implements Runnable {
         while (started) {
             try {
                 doCompensate();
-                Thread.currentThread().sleep(config.getCompensationInterval());
             } catch (Exception e) {
                 logger.error("compensate exception", e);
             }
-        }
-    }
-
-    public void fillCache() {
-        NameServiceCache oldCache = nameServiceCacheManager.getCache();
-        if (oldCache != null) {
-            return;
-        }
-        AllMetadata allMetadata = delegate.getAllMetadata();
-        NameServiceCache newCache = nameServiceCacheManager.buildCache(allMetadata);
-        nameServiceCacheManager.fillCache(newCache);
-    }
-
-    protected void doCompensate() {
-        NameServiceCache oldCache = nameServiceCacheManager.getCache();
-        if (oldCache.isLatest(config.getCompensationInterval())) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("doCompensate, cache is latest, oldCache: {}", JSON.toJSONString(oldCache));
+            try {
+                Thread.currentThread().sleep(config.getCompensationInterval());
+            } catch (InterruptedException e) {
             }
-            nameServiceCacheManager.fillCache(oldCache);
-            return;
         }
+    }
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("doCompensate pre, oldCache: {}", JSON.toJSONString(oldCache));
+    public void doCompensate() {
+        NameServiceCache oldCache = nameServiceCacheManager.getCache();
+        if (oldCache == null) {
+            AllMetadata allMetadata = delegate.getAllMetadata();
+            NameServiceCache newCache = nameServiceCacheManager.buildCache(allMetadata);
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("doCompensate, newCache: {}, metadata: {}", JSON.toJSONString(newCache), JSON.toJSONString(allMetadata));
+            }
+
+            nameServiceCacheManager.fillCache(newCache);
+        } else {
+            if (nameServiceCacheManager.isLocked()) {
+                return;
+            }
+
+            int oldVersion = oldCache.getVersion();
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("doCompensate pre, oldCache: {}", JSON.toJSONString(oldCache));
+            }
+
+            AllMetadata allMetadata = delegate.getAllMetadata();
+            NameServiceCache newCache = nameServiceCacheManager.buildCache(allMetadata);
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("doCompensate, oldCache: {}, newCache: {}, metadata: {}",
+                        JSON.toJSONString(oldCache), JSON.toJSONString(newCache), JSON.toJSONString(allMetadata));
+            }
+
+            if (!nameServiceCacheManager.isLocked() && oldCache.getVersion() == oldVersion) {
+                if (config.getCompensationEnable()) {
+                    nameServiceCompensator.compensate(oldCache, newCache);
+                }
+                nameServiceCacheManager.fillCache(newCache);
+            }
         }
-
-        AllMetadata allMetadata = delegate.getAllMetadata();
-        NameServiceCache newCache = nameServiceCacheManager.buildCache(allMetadata);
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("doCompensate, oldCache: {}, newCache: {}, metadata: {}",
-                    JSON.toJSONString(oldCache), JSON.toJSONString(newCache), JSON.toJSONString(allMetadata));
-        }
-
-        nameServiceCompensator.compensate(oldCache, newCache);
-        nameServiceCacheManager.fillCache(newCache);
     }
 }

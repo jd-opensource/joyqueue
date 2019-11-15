@@ -191,11 +191,11 @@ public class TopicConfig extends Topic implements Serializable {
     //TODO 性能差，需要排查下并发问题
     public List<Short> fetchPartitionByBroker(int brokerId) {
         List<Short> partitions = new ArrayList<>();
-            for (PartitionGroup group : partitionGroups.values()) {
-                if (group.getLeader().equals(brokerId)){
-                    partitions.addAll(group.getPartitions());
-                }
+        for (PartitionGroup group : partitionGroups.values()) {
+            if (group.getLeader().equals(brokerId)){
+                partitions.addAll(group.getPartitions());
             }
+        }
         return partitions;
     }
 

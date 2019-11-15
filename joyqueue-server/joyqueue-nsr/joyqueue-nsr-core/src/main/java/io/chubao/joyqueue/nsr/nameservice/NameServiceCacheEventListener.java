@@ -51,9 +51,16 @@ public class NameServiceCacheEventListener implements MessageListener<MetaEvent>
 
     @Override
     public void onEvent(MetaEvent event) {
-        // TODO 不是原子操作
+        nameServiceCacheManager.lock();
+        try {
+            doOnEvent(event, nameServiceCacheManager.getCache());
+        } finally {
+            nameServiceCacheManager.unlock();
+        }
+    }
+
+    protected void doOnEvent(MetaEvent event, NameServiceCache cache) {
         // 删除，修改topic, producer，consumer需要优化
-        NameServiceCache cache = nameServiceCacheManager.getCache();
         switch (event.getEventType()) {
             case ADD_TOPIC: {
                 AddTopicEvent addTopicEvent = (AddTopicEvent) event;
@@ -357,6 +364,5 @@ public class NameServiceCacheEventListener implements MessageListener<MetaEvent>
                 break;
             }
         }
-        cache.updateLastTimestamp();
     }
 }

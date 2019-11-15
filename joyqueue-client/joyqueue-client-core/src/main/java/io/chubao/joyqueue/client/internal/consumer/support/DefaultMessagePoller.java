@@ -32,6 +32,7 @@ import io.chubao.joyqueue.client.internal.consumer.coordinator.domain.BrokerAssi
 import io.chubao.joyqueue.client.internal.consumer.coordinator.domain.BrokerAssignmentsHolder;
 import io.chubao.joyqueue.client.internal.consumer.domain.ConsumeMessage;
 import io.chubao.joyqueue.client.internal.consumer.domain.ConsumeReply;
+import io.chubao.joyqueue.client.internal.consumer.domain.FetchIndexData;
 import io.chubao.joyqueue.client.internal.consumer.exception.ConsumerException;
 import io.chubao.joyqueue.client.internal.consumer.transport.ConsumerClientManager;
 import io.chubao.joyqueue.client.internal.metadata.domain.PartitionMetadata;
@@ -330,6 +331,15 @@ public class DefaultMessagePoller extends Service implements MessagePoller {
     @Override
     public JoyQueueCode replyOnce(String topic, ConsumeReply reply) {
         return reply(topic, Lists.newArrayList(reply));
+    }
+
+    @Override
+    public FetchIndexData fetchIndex(String topic, short partition) {
+        checkState();
+        Preconditions.checkArgument(StringUtils.isNotBlank(topic), "topic not blank");
+
+        TopicMetadata topicMetadata = messagePollerInner.getAndCheckTopicMetadata(topic);
+        return consumerIndexManager.fetchIndex(topicMetadata.getTopic(), config.getAppFullName(), partition, config.getTimeout());
     }
 
     @Override

@@ -95,7 +95,7 @@
         </dependency>
         <dependency>
             <groupId>io.chubao</groupId>
-            <artifactId>joyqueue-nsr-composition</artifactId>
+            <artifactId>joyqueue-nsr-journalkeeper</artifactId>
         </dependency>
         <dependency>
             <groupId>io.chubao</groupId>

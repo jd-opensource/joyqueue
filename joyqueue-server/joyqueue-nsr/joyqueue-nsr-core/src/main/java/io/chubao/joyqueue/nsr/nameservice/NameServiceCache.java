@@ -8,7 +8,6 @@ import io.chubao.joyqueue.domain.Producer;
 import io.chubao.joyqueue.domain.TopicConfig;
 import io.chubao.joyqueue.domain.TopicName;
 import io.chubao.joyqueue.nsr.util.DCWrapper;
-import io.chubao.joyqueue.toolkit.time.SystemClock;
 
 import java.util.List;
 import java.util.Map;
@@ -28,12 +27,12 @@ public class NameServiceCache {
     private Map<TopicName /** topic **/, Map<String /** app **/, Consumer>> consumerTopicMap;
     private List<Consumer> allConsumers;
     private List<Config> allConfigs;
-    private Map<String /** key **/, Config> configKeyMap;
+    private Map<String /** id **/, Config> configKeyMap;
     private Map<String /** app **/, List<AppToken>> allAppTokenMap;
     private List<DCWrapper> allDataCenters;
     private Map<String /** code **/, DCWrapper> dataCenterCodeMap;
 
-    private volatile long lastTimestamp;
+    private volatile int version = 0;
 
     public Map<Integer, Broker> getBrokerMap() {
         return brokerMap;
@@ -171,19 +170,11 @@ public class NameServiceCache {
         this.dataCenterCodeMap = dataCenterCodeMap;
     }
 
-    public boolean isLatest(int interval) {
-        return SystemClock.now() - lastTimestamp <= interval;
+    public int getVersion() {
+        return version;
     }
 
-    public void updateLastTimestamp() {
-        this.lastTimestamp = SystemClock.now();
-    }
-
-    public void setLastTimestamp(long lastTimestamp) {
-        this.lastTimestamp = lastTimestamp;
-    }
-
-    public long getLastTimestamp() {
-        return lastTimestamp;
+    public void updateVersion() {
+        version++;
     }
 }

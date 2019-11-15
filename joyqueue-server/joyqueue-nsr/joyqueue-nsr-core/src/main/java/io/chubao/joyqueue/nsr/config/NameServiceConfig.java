@@ -67,6 +67,10 @@ public class NameServiceConfig {
         return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_ALL_METADATA_CACHE_EXPIRE_TIME);
     }
 
+    public boolean getCompensationEnable() {
+        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_COMPENSATION_ENABLE);
+    }
+
     public int getCompensationInterval() {
         return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_COMPENSATION_INTERVAL);
     }
@@ -101,6 +105,10 @@ public class NameServiceConfig {
 
     public boolean getCompensationCacheEnable() {
         return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_COMPENSATION_CACHE_ENABLE);
+    }
+
+    public boolean getCompensationErrorCacheEnable() {
+        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_COMPENSATION_ERROR_CACHE_ENABLE);
     }
 
     public String getMessengerType() {

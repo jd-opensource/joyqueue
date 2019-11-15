@@ -42,7 +42,8 @@ public class DefaultKafkaGroupManageService implements KafkaGroupManageService {
         if (group == null) {
             return false;
         }
-        return groupCoordinator.removeGroup(group);
+        group.reset();
+        return true;
     }
 
     @Override
@@ -52,7 +53,7 @@ public class DefaultKafkaGroupManageService implements KafkaGroupManageService {
             return false;
         }
 
-        groupCoordinator.removeGroup(group);
+        group.reset();
 
         for (GroupMemberMetadata groupMemberMetadata : group.getAllMembers()) {
             if (groupMemberMetadata.getAwaitingJoinCallback() != null) {

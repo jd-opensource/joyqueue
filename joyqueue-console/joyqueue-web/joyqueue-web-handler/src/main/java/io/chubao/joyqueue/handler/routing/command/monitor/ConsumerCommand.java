@@ -15,6 +15,7 @@
  */
 package io.chubao.joyqueue.handler.routing.command.monitor;
 
+import com.google.common.collect.Lists;
 import com.jd.laf.binding.annotation.Value;
 import com.jd.laf.web.vertx.annotation.Body;
 import com.jd.laf.web.vertx.annotation.Path;
@@ -35,10 +36,13 @@ import io.chubao.joyqueue.nsr.ConsumerNameServerService;
 import io.chubao.joyqueue.service.ApplicationService;
 import io.chubao.joyqueue.service.ConsumerService;
 import io.chubao.joyqueue.service.TopicService;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import static io.chubao.joyqueue.handler.Constants.ID;
@@ -63,6 +67,17 @@ public class ConsumerCommand extends NsrCommandSupport<Consumer, ConsumerService
             consumers = service.findByApp(query.getApp().getCode());
         } else if (query.getTopic() != null) {
             consumers = service.findByTopic(query.getTopic().getCode(), query.getTopic().getNamespace().getCode());
+        }
+
+        if (CollectionUtils.isNotEmpty(consumers) && qPageQuery.getQuery() != null && StringUtils.isNotBlank(qPageQuery.getQuery().getKeyword())) {
+            consumers = Lists.newArrayList(consumers);
+            Iterator<Consumer> iterator = consumers.iterator();
+            while (iterator.hasNext()) {
+                Consumer consumer = iterator.next();
+                if (!consumer.getTopic().getCode().equals(qPageQuery.getQuery().getKeyword())) {
+                    iterator.remove();
+                }
+            }
         }
 
         Pagination pagination = qPageQuery.getPagination();

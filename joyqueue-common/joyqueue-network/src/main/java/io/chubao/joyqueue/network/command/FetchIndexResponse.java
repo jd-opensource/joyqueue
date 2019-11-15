@@ -26,18 +26,18 @@ import io.chubao.joyqueue.network.transport.command.JoyQueuePayload;
  */
 public class FetchIndexResponse extends JoyQueuePayload {
 
-    private Table<String, Short, FetchIndexAckData> data;
+    private Table<String, Short, FetchIndexData> data;
 
     @Override
     public int type() {
         return JoyQueueCommandType.FETCH_INDEX_RESPONSE.getCode();
     }
 
-    public void setData(Table<String, Short, FetchIndexAckData> data) {
+    public void setData(Table<String, Short, FetchIndexData> data) {
         this.data = data;
     }
 
-    public Table<String, Short, FetchIndexAckData> getData() {
+    public Table<String, Short, FetchIndexData> getData() {
         return data;
     }
 }

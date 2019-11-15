@@ -112,8 +112,7 @@ export default {
           },
           {
             txt: '限流',
-            method: 'on-rateLimit',
-            isAdmin: true
+            method: 'on-rateLimit'
           }
         ]
       }
@@ -222,6 +221,7 @@ export default {
       this.openDialog('weightDialog')
     },
     openRateLimitDialog (item) {
+      this.configData = item.config || {}
       this.rateLimitDialog.limitTps = item.config.limitTps
       this.configData['producerId'] = item.id
       this.rateLimitDialog.limitTraffic = item.config.limitTraffic
@@ -273,11 +273,9 @@ export default {
       this.config(configData, 'weightDialog')
     },
     rateLimitConfirm () {
-      let configData = {
-        producerId: this.configData.producerId,
-        limitTps: this.$refs.rateLimit.tps,
-        limitTraffic: this.$refs.rateLimit.traffic
-      }
+      let configData = this.configData
+      configData.limitTps = this.$refs.rateLimit.tps
+      configData.limitTraffic = this.$refs.rateLimit.traffic
       this.config(configData, 'rateLimitDialog')
     },
     goSummaryChart (item) {

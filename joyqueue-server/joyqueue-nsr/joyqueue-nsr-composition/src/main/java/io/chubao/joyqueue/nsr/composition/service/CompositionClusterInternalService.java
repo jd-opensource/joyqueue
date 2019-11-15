@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
+import java.util.List;
 
 /**
  * CompositionClusterInternalService
@@ -39,5 +40,10 @@ public class CompositionClusterInternalService implements ClusterInternalService
     @Override
     public String removeNode(URI uri) {
         return journalkeeperClusterInternalService.removeNode(uri);
+    }
+
+    @Override
+    public String updateNodes(List<URI> uris) {
+        return journalkeeperClusterInternalService.updateNodes(uris);
     }
 }

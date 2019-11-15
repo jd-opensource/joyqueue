@@ -114,7 +114,7 @@ CREATE TABLE IF NOT EXISTS `config` (
 	`id` varchar(255) NOT NULL,
 	`key` varchar(255),
 	`value` varchar(255),
-	`group` varchar(255),
+	`group` varchar(1024),
 	PRIMARY KEY (`id`)
 );
 CREATE INDEX IF NOT EXISTS idx_key_group ON config(`key`, `group`);

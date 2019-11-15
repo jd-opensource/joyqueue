@@ -19,13 +19,13 @@ public class ConsumerRepository extends BaseRepository {
 
     private static final String GET_BY_ID = String.format("SELECT %s FROM %s WHERE id = ?",
             COLUMNS, TABLE);
-    private static final String GET_BY_TOPIC_AND_APP = String.format("SELECT %s FROM %s WHERE topic = ? AND namespace = ? AND app = ? ORDER BY topic",
+    private static final String GET_BY_TOPIC_AND_APP = String.format("SELECT %s FROM %s WHERE topic = ? AND namespace = ? AND app = ? ORDER BY id",
             COLUMNS, TABLE);
-    private static final String GET_BY_TOPIC = String.format("SELECT %s FROM %s WHERE topic = ? AND namespace = ? ORDER BY topic",
+    private static final String GET_BY_TOPIC = String.format("SELECT %s FROM %s WHERE topic = ? AND namespace = ? ORDER BY id",
             COLUMNS, TABLE);
-    private static final String GET_BY_APP = String.format("SELECT %s FROM %s WHERE app = ? OR referer = ? ORDER BY topic",
+    private static final String GET_BY_APP = String.format("SELECT %s FROM %s WHERE app = ? OR referer = ? ORDER BY id",
             COLUMNS, TABLE);
-    private static final String GET_ALL = String.format("SELECT %s FROM %s ORDER BY topic",
+    private static final String GET_ALL = String.format("SELECT %s FROM %s ORDER BY id",
             COLUMNS, TABLE);
     private static final String ADD = String.format("INSERT INTO %s(%s) VALUES(?,?,?,?,?,?,?,?,?,?)",
             TABLE, COLUMNS);

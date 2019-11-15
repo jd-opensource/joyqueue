@@ -16,6 +16,8 @@
 package io.chubao.joyqueue.nsr.nameservice;
 
 import com.google.common.base.Preconditions;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jd.laf.extension.ExtensionPoint;
@@ -43,6 +45,7 @@ import io.chubao.joyqueue.nsr.MetaManager;
 import io.chubao.joyqueue.nsr.NameService;
 import io.chubao.joyqueue.nsr.ServiceProvider;
 import io.chubao.joyqueue.nsr.config.NameServerConfig;
+import io.chubao.joyqueue.nsr.exception.NsrException;
 import io.chubao.joyqueue.nsr.network.NsrTransportServerFactory;
 import io.chubao.joyqueue.nsr.service.AppTokenService;
 import io.chubao.joyqueue.nsr.service.BrokerService;
@@ -76,6 +79,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -125,45 +131,50 @@ public class NameServer extends Service implements NameService, PropertySupplier
     public static ExtensionPoint<ServiceProvider, String> serviceProviderPoint = new ExtensionPointLazy<>(ServiceProvider.class);
     private static final Logger logger = LoggerFactory.getLogger(NameServer.class);
 
+    private Cache<String, Map<TopicName, TopicConfig>> appTopicCache;
+
     public NameServer() {
-        // do nothing
+
     }
 
     @Override
-    protected void validate() throws Exception {
-        super.validate();
-        if (nameServerConfig == null) {
-            nameServerConfig = new NameServerConfig(propertySupplier);
-        }
-        if (serviceProvider == null){
-            serviceProvider = loadServiceProvider(propertySupplier);
-        }
-        if (metaManager == null) {
-            metaManager = buildMetaManager();
-        }
-        if (transportServerFactory == null) {
-            this.transportServerFactory = new NsrTransportServerFactory(this, propertySupplier);
-        }
-        if (manageServer == null) {
-            this.manageServer = buildManageServer();
-        }
-        if (transportServer == null){
-            this.transportServer = buildTransportServer();
-        }
-    }
+    public void setSupplier(PropertySupplier supplier) {
+        try {
+            propertySupplier = supplier;
+            if (nameServerConfig == null) {
+                nameServerConfig = new NameServerConfig(propertySupplier);
+            }
+            if (serviceProvider == null){
+                serviceProvider = loadServiceProvider(propertySupplier);
+            }
+            if (metaManager == null) {
+                metaManager = buildMetaManager();
+            }
+            if (transportServerFactory == null) {
+                this.transportServerFactory = new NsrTransportServerFactory(this, propertySupplier);
+            }
+            if (manageServer == null) {
+                this.manageServer = buildManageServer();
+            }
+            if (transportServer == null){
+                this.transportServer = buildTransportServer();
+            }
+            if (appTopicCache == null) {
+                this.appTopicCache = CacheBuilder.newBuilder()
+                        .expireAfterWrite(nameServerConfig.getCacheExpireTime(), TimeUnit.MILLISECONDS)
+                        .build();
+            }
 
+            this.manageServer.setManagerPort(nameServerConfig.getManagerPort());
 
-
-    @Override
-    public void doStart() throws Exception {
-        super.doStart();
-        this.manageServer.setManagerPort(nameServerConfig.getManagerPort());
-
-        this.metaManager.start();
-        this.eventManager.start();
-        this.transportServer.start();
-        this.manageServer.start();
-        logger.info("nameServer is started");
+            this.metaManager.start();
+            this.eventManager.start();
+            this.transportServer.start();
+            this.manageServer.start();
+            logger.info("nameServer is started");
+        } catch (Exception e) {
+            throw new NsrException(e);
+        }
     }
 
     @Override
@@ -318,7 +329,11 @@ public class NameServer extends Service implements NameService, PropertySupplier
                 Map<Integer, Broker> brokerMap = new HashMap<>();
                 group.getReplicas().forEach(brokerId -> {
                     if (!brokerMap.containsKey(brokerId)) {
-                        brokerMap.put(brokerId, getBroker(brokerId));
+                        Broker broker = getBroker(brokerId);
+                        if (broker == null) {
+                            throw new NsrException(String.format("broker %s not exist, topic: %s, group: {}", brokerId, topicName, group.getGroup()));
+                        }
+                        brokerMap.put(brokerId, broker);
                     }
                 });
                 group.setBrokers(brokerMap);
@@ -376,9 +391,15 @@ public class NameServer extends Service implements NameService, PropertySupplier
         Map<TopicName,TopicConfig> map = new HashMap<>();
         List<Replica> replicas = metaManager.getReplicaByBroker(brokerId);
         for(Replica replica:replicas){
-            if(!map.containsKey(replica.getTopic())){
-                map.put(replica.getTopic(),getTopicConfig(replica.getTopic()));
+            if (map.containsKey(replica.getTopic())){
+                continue;
             }
+            TopicConfig topicConfig = getTopicConfig(replica.getTopic());
+            if (topicConfig == null) {
+                logger.error("topic not exist, topic: {}, brokerId: {}", replica.getTopic(), brokerId);
+                continue;
+            }
+            map.put(replica.getTopic(), getTopicConfig(replica.getTopic()));
         }
         return map;
     }
@@ -447,6 +468,25 @@ public class NameServer extends Service implements NameService, PropertySupplier
 
     @Override
     public Map<TopicName, TopicConfig> getTopicConfigByApp(String subscribeApp, Subscription.Type subscribe) {
+        if (nameServerConfig.getCacheEnable()) {
+            try {
+                return appTopicCache.get(subscribeApp + "_" + String.valueOf(subscribe), new Callable<Map<TopicName, TopicConfig>>() {
+                    @Override
+                    public Map<TopicName, TopicConfig> call() throws Exception {
+                        return doGetTopicConfigByApp(subscribeApp, subscribe);
+                    }
+                });
+            } catch (ExecutionException e) {
+                logger.error("getTopicConfigByApp exception, subscribeApp: {}, subscribe: {}",
+                        subscribeApp, subscribe);
+                return Maps.newHashMap();
+            }
+        } else {
+            return doGetTopicConfigByApp(subscribeApp, subscribe);
+        }
+    }
+
+    public Map<TopicName, TopicConfig> doGetTopicConfigByApp(String subscribeApp, Subscription.Type subscribe) {
         Map<TopicName, TopicConfig> appTopicConfigs = new HashMap<>();
 
         List<? extends Subscription> subscriptions = null;
@@ -608,11 +648,6 @@ public class NameServer extends Service implements NameService, PropertySupplier
     @Override
     public String type() {
         return "server";
-    }
-
-    @Override
-    public void setSupplier(PropertySupplier supplier) {
-        this.propertySupplier = supplier;
     }
 
     private ManageServer buildManageServer() {

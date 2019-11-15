@@ -1,5 +1,6 @@
 package io.chubao.joyqueue.nsr.composition.service;
 
+import com.google.common.collect.Lists;
 import io.chubao.joyqueue.domain.Config;
 import io.chubao.joyqueue.nsr.composition.config.CompositionConfig;
 import io.chubao.joyqueue.nsr.service.internal.ConfigInternalService;
@@ -40,7 +41,11 @@ public class CompositionConfigInternalService implements ConfigInternalService {
 
     @Override
     public List<Config> getAll() {
-        return igniteConfigService.getAll();
+        List<Config> configs = igniteConfigService.getAll();
+        List<Config> result = Lists.newArrayList(configs);
+        result.add(0, new Config(null, "current.nameserver.composition.read.source", this.config.getReadSource()));
+        result.add(1, new Config(null, "current.nameserver.composition.write.source", this.config.getWriteSource()));
+        return result;
     }
 
     @Override

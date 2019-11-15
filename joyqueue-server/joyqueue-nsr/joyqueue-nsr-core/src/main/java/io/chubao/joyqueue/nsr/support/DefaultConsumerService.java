@@ -81,6 +81,14 @@ public class DefaultConsumerService implements ConsumerService {
         if (topicInternalService.getTopicByCode(consumer.getTopic().getNamespace(), consumer.getTopic().getCode()) == null) {
             throw new NsrException(String.format("topic: %s is not exist", consumer.getTopic()));
         }
+        if (consumerInternalService.getByTopicAndApp(consumer.getTopic(), consumer.getApp()) != null) {
+            throw new NsrException(String.format("consumer: %s,%s is exist", consumer.getTopic(), consumer.getApp()));
+        }
+
+        logger.info("addConsumer, topic: {}, app: {}", consumer.getTopic(), consumer.getApp());
+
+        List<PartitionGroup> partitionGroups = partitionGroupInternalService.getByTopic(consumer.getTopic());
+        List<Broker> replicas = getReplicas(partitionGroups);
 
         try {
             transactionInternalService.begin();
@@ -88,11 +96,6 @@ public class DefaultConsumerService implements ConsumerService {
             logger.error("beginTransaction exception, topic: {}, app: {}", consumer.getTopic(), consumer.getApp(), e);
             throw new NsrException(e);
         }
-
-        logger.info("addConsumer, topic: {}, app: {}", consumer.getTopic(), consumer.getApp());
-
-        List<PartitionGroup> partitionGroups = partitionGroupInternalService.getByTopic(consumer.getTopic());
-        List<Broker> replicas = getReplicas(partitionGroups);
 
         try {
             consumerInternalService.add(consumer);
@@ -114,17 +117,17 @@ public class DefaultConsumerService implements ConsumerService {
             throw new NsrException(String.format("topic: %s, consumer: %s is not exist", oldConsumer.getTopic(), oldConsumer.getApp()));
         }
 
+        logger.info("updateConsumer, topic: {}, app: {}", consumer.getTopic(), consumer.getApp());
+
+        List<PartitionGroup> partitionGroups = partitionGroupInternalService.getByTopic(consumer.getTopic());
+        List<Broker> replicas = getReplicas(partitionGroups);
+
         try {
             transactionInternalService.begin();
         } catch (Exception e) {
             logger.error("beginTransaction exception, topic: {}, app: {}", consumer.getTopic(), consumer.getApp(), e);
             throw new NsrException(e);
         }
-
-        logger.info("updateConsumer, topic: {}, app: {}", consumer.getTopic(), consumer.getApp());
-
-        List<PartitionGroup> partitionGroups = partitionGroupInternalService.getByTopic(consumer.getTopic());
-        List<Broker> replicas = getReplicas(partitionGroups);
 
         try {
             consumerInternalService.update(consumer);
@@ -146,17 +149,17 @@ public class DefaultConsumerService implements ConsumerService {
             throw new NsrException(String.format("consumer: %s is not exist", id));
         }
 
+        logger.info("deleteConsumer, topic: {}, app: {}", consumer.getTopic(), consumer.getApp());
+
+        List<PartitionGroup> partitionGroups = partitionGroupInternalService.getByTopic(consumer.getTopic());
+        List<Broker> replicas = getReplicas(partitionGroups);
+
         try {
             transactionInternalService.begin();
         } catch (Exception e) {
             logger.error("beginTransaction exception, topic: {}, app: {}", consumer.getTopic(), consumer.getApp(), e);
             throw new NsrException(e);
         }
-
-        logger.info("deleteConsumer, topic: {}, app: {}", consumer.getTopic(), consumer.getApp());
-
-        List<PartitionGroup> partitionGroups = partitionGroupInternalService.getByTopic(consumer.getTopic());
-        List<Broker> replicas = getReplicas(partitionGroups);
 
         try {
             consumerInternalService.delete(id);

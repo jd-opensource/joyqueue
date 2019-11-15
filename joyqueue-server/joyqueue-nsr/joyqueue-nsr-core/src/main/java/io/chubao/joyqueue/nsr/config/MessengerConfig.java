@@ -78,7 +78,7 @@ public class MessengerConfig {
     }
 
     public int getHeartbeatInterval() {
-        return propertySupplier.getValue(MessengerConfigKey.HEARTBEAT_TIMEOUT);
+        return propertySupplier.getValue(MessengerConfigKey.HEARTBEAT_INTERVAL);
     }
 
     public int getPort() {

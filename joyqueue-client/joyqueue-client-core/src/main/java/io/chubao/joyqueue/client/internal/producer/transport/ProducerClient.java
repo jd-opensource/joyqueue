@@ -20,12 +20,12 @@ import io.chubao.joyqueue.client.internal.transport.ClientState;
 import io.chubao.joyqueue.network.command.FetchProduceFeedbackRequest;
 import io.chubao.joyqueue.network.command.FetchProduceFeedbackResponse;
 import io.chubao.joyqueue.network.command.ProduceMessageCommitRequest;
+import io.chubao.joyqueue.network.command.ProduceMessageCommitResponse;
+import io.chubao.joyqueue.network.command.ProduceMessageData;
 import io.chubao.joyqueue.network.command.ProduceMessagePrepareRequest;
 import io.chubao.joyqueue.network.command.ProduceMessagePrepareResponse;
 import io.chubao.joyqueue.network.command.ProduceMessageRequest;
 import io.chubao.joyqueue.network.command.ProduceMessageResponse;
-import io.chubao.joyqueue.network.command.ProduceMessageCommitResponse;
-import io.chubao.joyqueue.network.command.ProduceMessageData;
 import io.chubao.joyqueue.network.command.ProduceMessageRollbackRequest;
 import io.chubao.joyqueue.network.command.ProduceMessageRollbackResponse;
 import io.chubao.joyqueue.network.command.TxStatus;
@@ -57,6 +57,8 @@ public class ProducerClient {
             ProducerClient oldProducerClient = client.getAttribute().putIfAbsent(CLIENT_PRODUCER_CACHE_KEY, producerClient);
             if (oldProducerClient != null) {
                 producerClient = oldProducerClient;
+            } else {
+                producerClient.getClient().addListener(new ProducerClientConnectionListener(producerClient.getClient().getTransport(), producerClient));
             }
         }
         return producerClient;
@@ -122,6 +124,10 @@ public class ProducerClient {
         fetchProduceFeedbackRequest.setCount(count);
         fetchProduceFeedbackRequest.setLongPollTimeout((int) longPollTimeout);
         return (FetchProduceFeedbackResponse) client.sync(new JoyQueueCommand(fetchProduceFeedbackRequest), timeout).getPayload();
+    }
+
+    public void addProducers() {
+        connectionState.handleAddProducers();
     }
 
     public void addProducers(Collection<String> topics, String app) {

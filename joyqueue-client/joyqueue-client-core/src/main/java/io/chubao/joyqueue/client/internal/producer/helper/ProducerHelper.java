@@ -21,6 +21,7 @@ import io.chubao.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import io.chubao.joyqueue.client.internal.producer.PartitionSelector;
 import io.chubao.joyqueue.client.internal.producer.domain.ProduceMessage;
 
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -52,10 +53,16 @@ public class ProducerHelper {
         return partitionSelector.select(messages.get(0), topicMetadata, partitions);
     }
 
-    public static List<PartitionMetadata> filterBlackList(List<PartitionMetadata> partitions, List<PartitionMetadata> partitionBlackList) {
+    public static List<PartitionMetadata> filterBlackList(List<PartitionMetadata> partitions, List<PartitionMetadata> blackPartitionList) {
         List<PartitionMetadata> newPartitions = Lists.newArrayList(partitions);
-        for (PartitionMetadata blackPartitionMetadata : partitionBlackList) {
-            newPartitions.remove(blackPartitionMetadata);
+        Iterator<PartitionMetadata> newPartitionIterator = newPartitions.iterator();
+        while (newPartitionIterator.hasNext()) {
+            PartitionMetadata newPartition = newPartitionIterator.next();
+            for (PartitionMetadata blackPartition : blackPartitionList) {
+                if (blackPartition.getId() == newPartition.getId() || blackPartition.getPartitionGroupId() == newPartition.getPartitionGroupId()) {
+                    newPartitionIterator.remove();
+                }
+            }
         }
         return newPartitions;
     }

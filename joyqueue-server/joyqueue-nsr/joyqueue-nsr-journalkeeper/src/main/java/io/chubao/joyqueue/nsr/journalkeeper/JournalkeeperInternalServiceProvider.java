@@ -8,6 +8,7 @@ import io.chubao.joyqueue.toolkit.config.Property;
 import io.chubao.joyqueue.toolkit.config.PropertySupplier;
 import io.chubao.joyqueue.toolkit.config.PropertySupplierAware;
 import io.chubao.joyqueue.toolkit.service.Service;
+import io.journalkeeper.core.api.ClusterConfiguration;
 import io.journalkeeper.core.api.RaftServer;
 import io.journalkeeper.core.server.AbstractServer;
 import io.journalkeeper.core.server.Server;
@@ -18,6 +19,7 @@ import io.journalkeeper.sql.client.support.DefaultSQLOperator;
 import io.journalkeeper.sql.server.SQLServer;
 import io.journalkeeper.sql.server.SQLServerAccessPoint;
 import io.journalkeeper.sql.state.config.SQLConfigs;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,31 +70,47 @@ public class JournalkeeperInternalServiceProvider extends Service implements Int
         return result;
     }
 
-    protected List<URI> convertNodeUri(String local, List<String> nodes, int port) {
-        List<URI> nodesUri = Lists.newArrayList();
-        nodesUri.add(URI.create(String.format("journalkeeper://%s:%s", local, port)));
-        for (String node : nodes) {
-            if (local.equals(node)) {
-                continue;
-            }
-            nodesUri.add(URI.create(String.format("journalkeeper://%s:%s", node, port)));
-        }
-        return nodesUri;
-    }
-
     @Override
     protected void doStart() throws Exception {
         Properties journalkeeperProperties = convertProperties(config, propertySupplier.getProperties());
-        List<URI> nodes = convertNodeUri(config.getLocal(), config.getNodes(), config.getPort());
+        URI currentNode = URI.create(String.format("journalkeeper://%s:%s", config.getLocal(), config.getPort()));
+        List<URI> nodes = getNodeUris(config.getLocal(), config.getNodes(), config.getPort());
 
         if (Server.Roll.VOTER.name().equals(config.getRole())
                 || RaftServer.Roll.OBSERVER.name().equals(config.getRole())) {
 
             Server.Roll role = Server.Roll.valueOf(config.getRole());
             SQLServerAccessPoint serverAccessPoint = new SQLServerAccessPoint(journalkeeperProperties);
-            this.sqlServer = serverAccessPoint.createServer(nodes.get(0), nodes, role);
 
-            sqlServer.start();
+            if (CollectionUtils.isNotEmpty(nodes) && !nodes.contains(currentNode)) {
+                sqlServer = serverAccessPoint.createServer(currentNode, nodes, role);
+
+                if (!sqlServer.isInitialized()) {
+                    logger.info("journalkeeper cluster not initialized, current: {}, nodes: {}", currentNode, nodes);
+                    sqlServer.tryStart();
+                    sqlServer.waitClusterReady(config.getWaitLeaderTimeout(), TimeUnit.MILLISECONDS);
+
+                    ClusterConfiguration clusterConfiguration = sqlServer.getAdminClient().getClusterConfiguration().get();
+                    logger.info("get journalkeeper cluster, leader: {}, voters: {}", clusterConfiguration.getLeader(), clusterConfiguration.getVoters());
+
+                    List<URI> currentVoters = clusterConfiguration.getVoters();
+                    if (!currentVoters.contains(currentNode)) {
+                        List<URI> newVoters = Lists.newArrayList(currentVoters);
+                        newVoters.add(currentNode);
+                        logger.info("update journalkeeper cluster, oldVoters: {}, newVoters: {}", currentVoters, newVoters);
+                        sqlServer.getAdminClient().updateVoters(currentVoters, newVoters).get();
+                    }
+                } else {
+                    sqlServer.tryStart();
+                }
+            } else {
+                if (CollectionUtils.isEmpty(nodes)) {
+                    nodes.add(currentNode);
+                }
+                sqlServer = serverAccessPoint.createServer(currentNode, nodes, role);
+                sqlServer.tryStart();
+            }
+
             sqlServer.waitClusterReady(config.getWaitLeaderTimeout(), TimeUnit.MILLISECONDS);
             this.sqlClient = this.sqlServer.getClient();
         } else {
@@ -103,6 +121,17 @@ public class JournalkeeperInternalServiceProvider extends Service implements Int
         BatchOperationContext.init(sqlOperator);
         this.journalkeeperInternalServiceManager = new JournalkeeperInternalServiceManager(this.sqlServer, this.sqlClient, this.sqlOperator);
         this.journalkeeperInternalServiceManager.start();
+    }
+
+    protected List<URI> getNodeUris(String local, List<String> nodes, int port) {
+        List<URI> nodesUri = Lists.newArrayList();
+        for (String node : nodes) {
+            if (local.equals(node)) {
+                continue;
+            }
+            nodesUri.add(URI.create(String.format("journalkeeper://%s:%s", node, port)));
+        }
+        return nodesUri;
     }
 
     @Override

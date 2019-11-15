@@ -52,6 +52,7 @@ public class GetAllMetadataRequestHandler implements NsrCommandHandler, Property
                 }
             }
         }, "joyqueue-allmetadata-cache-refresh");
+        this.refreshCacheThread.setDaemon(true);
         this.refreshCacheThread.start();
     }
 

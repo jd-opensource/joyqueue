@@ -47,14 +47,14 @@ public class AppTokenRepository extends BaseRepository {
     }
 
     public AppTokenDTO add(AppTokenDTO appTokenDTO) {
-        DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         insert(ADD, appTokenDTO.getId(), appTokenDTO.getApp(), appTokenDTO.getToken(),
                 format.format(appTokenDTO.getEffectiveTime()), format.format(appTokenDTO.getExpirationTime()));
         return appTokenDTO;
     }
 
     public AppTokenDTO update(AppTokenDTO appTokenDTO) {
-        DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         update(UPDATE_BY_ID, appTokenDTO.getApp(), appTokenDTO.getToken(), format.format(appTokenDTO.getEffectiveTime()),
                 format.format(appTokenDTO.getExpirationTime()), appTokenDTO.getId());
         return appTokenDTO;

@@ -19,7 +19,7 @@ public enum MessengerConfigKey implements PropertyDef {
     PUBLISH_FORCE("nameservice.messenger.publish.force", true, Type.BOOLEAN),
     PUBLISH_IGNORE_CONNECTION_ERROR("nameservice.messenger.publish.ignore.connection.error", true, Type.BOOLEAN),
     HEARTBEAT_INTERVAL("nameservice.messenger.heartbeat.interval", 1000 * 10, Type.INT),
-    HEARTBEAT_TIMEOUT("nameservice.messenger.heartbeat.timeout", 300, Type.INT),
+    HEARTBEAT_TIMEOUT("nameservice.messenger.heartbeat.timeout", 1000, Type.INT),
     PORT("nameservice.messenger.port", 50093, Type.INT);
 
     public static final String MESSENGER_SERVER_CONFIG_PREFIX = "nameservice.messenger.server.";
