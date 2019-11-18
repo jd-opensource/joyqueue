@@ -56,7 +56,6 @@ public class GetAllMetadataResponseCodec implements NsrPayloadCodec<GetAllMetada
         buffer.writeBytes(json);
     }
 
-    // TODO 抛runtime不太合适
     public static Object parseJson(byte[] json, Class<?> type) {
         try {
             return JSON.parseObject(ZipUtil.decompress(json), type);

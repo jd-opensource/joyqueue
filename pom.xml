@@ -130,13 +130,12 @@
     <modules>
         <module>joyqueue-common</module>
         <module>joyqueue-server</module>
-        <!-- TODO 临时-->
         <module>joyqueue-console</module>
         <module>joyqueue-client</module>
-        <!--<module>joyqueue-openmessaging</module>-->
-        <!--<module>docker</module>-->
-        <!--<module>joyqueue-distribution</module>-->
-        <!--<module>toolkit</module>-->
+        <module>joyqueue-openmessaging</module>
+        <module>docker</module>
+        <module>joyqueue-distribution</module>
+        <module>toolkit</module>
     </modules>
 
     <dependencyManagement>
@@ -748,21 +747,6 @@
         </pluginManagement>
 
         <plugins>
-            <!-- TODO 临时-->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>2.2.1</version>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <goals>
-                            <goal>jar-no-fork</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

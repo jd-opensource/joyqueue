@@ -69,7 +69,6 @@ public class Message implements Serializable {
     // 消息体校验码
     protected long bodyCRC;
     // 消息体
-    // TODO buffer body，消费解压
     protected byte[] body;
     // 属性
     protected Map<String, String> attributes;

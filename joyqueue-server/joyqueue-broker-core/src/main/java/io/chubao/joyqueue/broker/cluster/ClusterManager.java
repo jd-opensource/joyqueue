@@ -912,45 +912,6 @@ public class ClusterManager extends Service {
          */
         protected void initCache() {
             buildTopicConfigCaches();
-
-            // TODO 不需要补偿
-//            timerUpdateAllExecutor.scheduleWithFixedDelay(() -> {
-//                try {
-//                    logger.info("begin update all topicConfigs");
-//                    Map<TopicName, TopicConfig> topicConfigNew = nameService.getTopicConfigByBroker(brokerConfig.getBrokerId());
-//                    if(logger.isDebugEnabled()){
-//                        logger.debug("allTopicConfigs {}",topicConfigNew);
-//                    }
-//                    if (null != topicConfigNew && topicConfigNew.size() > 0) {
-//                        Map<String, TopicConfig> topicConfigOld = topicConfigCache;
-//                        for (Map.Entry<String, TopicConfig> entry : topicConfigOld.entrySet()) {
-//                            TopicName topicName = TopicName.parse(entry.getKey());
-//                            if (!topicConfigNew.containsKey(topicName)) {
-//                                topicConfigOld.remove(topicName.getFullName());
-//                                eventBus.add(TopicEvent.remove(topicName));
-//                                consumerCache.remove(topicName.getFullName());
-//                                producerCache.remove(topicName.getFullName());
-//                                topicPartitionsCache.remove(topicName.getFullName());
-//                            }
-//                        }
-//                        for (Map.Entry<TopicName, TopicConfig> entry : topicConfigNew.entrySet()) {
-//                            TopicName topicName = entry.getKey();
-//                            buildTopicConfigCache(entry.getValue());
-//                            if (!topicConfigOld.containsKey(topicName.getFullName())) {
-//                                eventBus.add(TopicEvent.add(topicName));
-//                            }
-//
-//                            updateConsumerCache(topicName);
-//                            updateProducerCache(topicName);
-//                            // 补偿订阅事件
-//                            compensateAddConsumeEvent(topicName);
-//                            compensateAddProduceEvent(topicName);
-//                        }
-//                    }
-//                } catch (Exception e) {
-//                    logger.error("update all topicConfigs error", e);
-//                }
-//            }, 1, 1, TimeUnit.MINUTES);
         }
 
         /**
