@@ -55,7 +55,7 @@ public class TopicConverter {
         Topic topic = new Topic();
         topic.setName(TopicName.parse(topicDTO.getCode(), topicDTO.getNamespace()));
         topic.setPartitions(topicDTO.getPartitions());
-        topic.setType(Topic.Type.TOPIC);
+        topic.setType(Topic.Type.valueOf(topicDTO.getType()));
         topic.setPriorityPartitions(ArrayHelper.toShortSet(topicDTO.getPriorityPartitions()));
         return topic;
     }

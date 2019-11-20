@@ -52,7 +52,12 @@ public class CompositionTopicInternalService implements TopicInternalService {
         if (config.isReadIgnite()) {
             return igniteTopicService.getTopicByCode(namespace, topic);
         } else {
-            return journalkeeperTopicService.getTopicByCode(namespace, topic);
+            try {
+                return journalkeeperTopicService.getTopicByCode(namespace, topic);
+            } catch (Exception e) {
+                logger.error("getTopicByCode exception, namespace: {}, topic: {}", namespace, topic, e);
+                return igniteTopicService.getTopicByCode(namespace, topic);
+            }
         }
     }
 
@@ -61,7 +66,12 @@ public class CompositionTopicInternalService implements TopicInternalService {
         if (config.isReadIgnite()) {
             return igniteTopicService.search(pageQuery);
         } else {
-            return journalkeeperTopicService.search(pageQuery);
+            try {
+                return journalkeeperTopicService.search(pageQuery);
+            } catch (Exception e) {
+                logger.error("search exception, pageQuery: {}", pageQuery, e);
+                return igniteTopicService.search(pageQuery);
+            }
         }
     }
 
@@ -70,7 +80,12 @@ public class CompositionTopicInternalService implements TopicInternalService {
         if (config.isReadIgnite()) {
             return igniteTopicService.findUnsubscribedByQuery(pageQuery);
         } else {
-            return journalkeeperTopicService.findUnsubscribedByQuery(pageQuery);
+            try {
+                return journalkeeperTopicService.findUnsubscribedByQuery(pageQuery);
+            } catch (Exception e) {
+                logger.error("findUnsubscribedByQuery exception, pageQuery: {}", pageQuery, e);
+                return igniteTopicService.findUnsubscribedByQuery(pageQuery);
+            }
         }
     }
 
@@ -220,7 +235,12 @@ public class CompositionTopicInternalService implements TopicInternalService {
         if (config.isReadIgnite()) {
             return igniteTopicService.getById(id);
         } else {
-            return journalkeeperTopicService.getById(id);
+            try {
+                return journalkeeperTopicService.getById(id);
+            } catch (Exception e) {
+                logger.error("getById exception, id: {}", id, e);
+                return igniteTopicService.getById(id);
+            }
         }
     }
 
@@ -229,7 +249,12 @@ public class CompositionTopicInternalService implements TopicInternalService {
         if (config.isReadIgnite()) {
             return igniteTopicService.getAll();
         } else {
-            return journalkeeperTopicService.getAll();
+            try {
+                return journalkeeperTopicService.getAll();
+            } catch (Exception e) {
+                logger.error("getAll exception", e);
+                return igniteTopicService.getAll();
+            }
         }
     }
 }

@@ -48,7 +48,12 @@ public class CompositionNamespaceInternalService implements NamespaceInternalSer
         if (config.isReadIgnite()) {
             return igniteNamespaceService.getAll();
         } else {
-            return journalkeeperNamespaceService.getAll();
+            try {
+                return journalkeeperNamespaceService.getAll();
+            } catch (Exception e) {
+                logger.error("getAll exception", e);
+                return igniteNamespaceService.getAll();
+            }
         }
     }
 
@@ -57,7 +62,12 @@ public class CompositionNamespaceInternalService implements NamespaceInternalSer
         if (config.isReadIgnite()) {
             return igniteNamespaceService.getByCode(code);
         } else {
-            return journalkeeperNamespaceService.getByCode(code);
+            try {
+                return journalkeeperNamespaceService.getByCode(code);
+            } catch (Exception e) {
+                logger.error("getByCode exception, code: {}", code, e);
+                return igniteNamespaceService.getByCode(code);
+            }
         }
     }
 
@@ -66,7 +76,12 @@ public class CompositionNamespaceInternalService implements NamespaceInternalSer
         if (config.isReadIgnite()) {
             return igniteNamespaceService.getById(id);
         } else {
-            return journalkeeperNamespaceService.getById(id);
+            try {
+                return journalkeeperNamespaceService.getById(id);
+            } catch (Exception e) {
+                logger.error("getById exception, id: {}", id, e);
+                return igniteNamespaceService.getById(id);
+            }
         }
     }
 

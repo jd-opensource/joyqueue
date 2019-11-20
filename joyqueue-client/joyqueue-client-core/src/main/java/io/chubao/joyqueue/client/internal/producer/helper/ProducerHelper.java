@@ -59,8 +59,9 @@ public class ProducerHelper {
         while (newPartitionIterator.hasNext()) {
             PartitionMetadata newPartition = newPartitionIterator.next();
             for (PartitionMetadata blackPartition : blackPartitionList) {
-                if (blackPartition.getId() == newPartition.getId() || blackPartition.getPartitionGroupId() == newPartition.getPartitionGroupId()) {
+                if (blackPartition.getPartitionGroupId() == newPartition.getPartitionGroupId()) {
                     newPartitionIterator.remove();
+                    break;
                 }
             }
         }

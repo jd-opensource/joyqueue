@@ -126,9 +126,9 @@ public class MessageProducerInner extends Service {
         List<BrokerNode> brokers = getRegionBrokers(topicMetadata);
         brokers = filterNotAvailableBrokers(brokers);
         List<PartitionMetadata> partitions = getBrokerPartitions(topicMetadata, brokers);
-        PartitionMetadata partition = dispatchPartitions(messages, topicMetadata, partitions, null);
 
-        return doBatchSend(messages, topicMetadata, partition, partitions, txId, timeout, timeoutUnit, isOneway, failover, callback);
+        return doBatchSend(messages, topicMetadata, null, partitions,
+                txId, timeout, timeoutUnit, isOneway, failover, callback);
     }
 
     public List<SendResult> doBatchSend(List<ProduceMessage> messages, TopicMetadata topicMetadata, PartitionMetadata partition, List<PartitionMetadata> partitions,
@@ -172,6 +172,10 @@ public class MessageProducerInner extends Service {
         int retryLimit = (failover ? retryPolicy.getMaxRetrys() : 0);
         Exception lastException = null;
         List<SendResult> result = null;
+
+        if (partition == null) {
+            partition = dispatchPartitions(messages, topicMetadata, partitions, blackPartitionList);
+        }
 
         for (int i = 0; i <= retryLimit; i++) {
             if (retryTimes != 0 && failover) {
@@ -387,11 +391,6 @@ public class MessageProducerInner extends Service {
     }
 
     public boolean isFailover(List<ProduceMessage> messages) {
-        for (ProduceMessage message : messages) {
-            if (message.getPartition() != ProduceMessage.NONE_PARTITION) {
-                return false;
-            }
-        }
-        return true;
+        return (messages.get(0).getPartition() == ProduceMessage.NONE_PARTITION);
     }
 }

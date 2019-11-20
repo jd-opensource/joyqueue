@@ -49,7 +49,12 @@ public class CompositionPartitionGroupReplicaInternalService implements Partitio
         if (config.isReadIgnite()) {
             return ignitePartitionGroupReplicaService.getByTopic(topic);
         } else {
-            return journalkeeperPartitionGroupReplicaService.getByTopic(topic);
+            try {
+                return journalkeeperPartitionGroupReplicaService.getByTopic(topic);
+            } catch (Exception e) {
+                logger.error("getByTopic exception, topic: {}", topic, e);
+                return ignitePartitionGroupReplicaService.getByTopic(topic);
+            }
         }
     }
 
@@ -58,7 +63,12 @@ public class CompositionPartitionGroupReplicaInternalService implements Partitio
         if (config.isReadIgnite()) {
             return ignitePartitionGroupReplicaService.getByTopicAndGroup(topic, groupNo);
         } else {
-            return journalkeeperPartitionGroupReplicaService.getByTopicAndGroup(topic, groupNo);
+            try {
+                return journalkeeperPartitionGroupReplicaService.getByTopicAndGroup(topic, groupNo);
+            } catch (Exception e) {
+                logger.error("getByTopicAndGroup exception, topic: {}, groupNo: {}", topic, groupNo, e);
+                return ignitePartitionGroupReplicaService.getByTopicAndGroup(topic, groupNo);
+            }
         }
     }
 
@@ -67,7 +77,12 @@ public class CompositionPartitionGroupReplicaInternalService implements Partitio
         if (config.isReadIgnite()) {
             return ignitePartitionGroupReplicaService.getByBrokerId(brokerId);
         } else {
-            return journalkeeperPartitionGroupReplicaService.getByBrokerId(brokerId);
+            try {
+                return journalkeeperPartitionGroupReplicaService.getByBrokerId(brokerId);
+            } catch (Exception e) {
+                logger.error("getByBrokerId exception, brokerId: {}", brokerId, e);
+                return ignitePartitionGroupReplicaService.getByBrokerId(brokerId);
+            }
         }
     }
 
@@ -76,7 +91,12 @@ public class CompositionPartitionGroupReplicaInternalService implements Partitio
         if (config.isReadIgnite()) {
             return ignitePartitionGroupReplicaService.getById(id);
         } else {
-            return journalkeeperPartitionGroupReplicaService.getById(id);
+            try {
+                return journalkeeperPartitionGroupReplicaService.getById(id);
+            } catch (Exception e) {
+                logger.error("getById exception", e);
+                return ignitePartitionGroupReplicaService.getById(id);
+            }
         }
     }
 
@@ -85,7 +105,12 @@ public class CompositionPartitionGroupReplicaInternalService implements Partitio
         if (config.isReadIgnite()) {
             return ignitePartitionGroupReplicaService.getAll();
         } else {
-            return journalkeeperPartitionGroupReplicaService.getAll();
+            try {
+                return journalkeeperPartitionGroupReplicaService.getAll();
+            } catch (Exception e) {
+                logger.error("getAll exception", e);
+                return ignitePartitionGroupReplicaService.getAll();
+            }
         }
     }
 

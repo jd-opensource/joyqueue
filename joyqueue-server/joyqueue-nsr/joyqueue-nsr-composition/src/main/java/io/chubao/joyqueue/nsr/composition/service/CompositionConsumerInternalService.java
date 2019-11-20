@@ -49,7 +49,12 @@ public class CompositionConsumerInternalService implements ConsumerInternalServi
         if (config.isReadIgnite()) {
             return igniteConsumerService.getByTopicAndApp(topic, app);
         } else {
-            return journalkeeperConsumerService.getByTopicAndApp(topic, app);
+            try {
+                return journalkeeperConsumerService.getByTopicAndApp(topic, app);
+            } catch (Exception e) {
+                logger.error("getByTopicAndApp exception, topic: {}, app: {}", topic, app, e);
+                return igniteConsumerService.getByTopicAndApp(topic, app);
+            }
         }
     }
 
@@ -58,7 +63,12 @@ public class CompositionConsumerInternalService implements ConsumerInternalServi
         if (config.isReadIgnite()) {
             return igniteConsumerService.getByTopic(topic);
         } else {
-            return journalkeeperConsumerService.getByTopic(topic);
+            try {
+                return journalkeeperConsumerService.getByTopic(topic);
+            } catch (Exception e) {
+                logger.error("getByTopic exception, topic: {}", topic, e);
+                return igniteConsumerService.getByTopic(topic);
+            }
         }
     }
 
@@ -67,7 +77,12 @@ public class CompositionConsumerInternalService implements ConsumerInternalServi
         if (config.isReadIgnite()) {
             return igniteConsumerService.getByApp(app);
         } else {
-            return journalkeeperConsumerService.getByApp(app);
+            try {
+                return journalkeeperConsumerService.getByApp(app);
+            } catch (Exception e) {
+                logger.error("getByApp exception, app: {}", app, e);
+                return igniteConsumerService.getByApp(app);
+            }
         }
     }
 
@@ -76,7 +91,12 @@ public class CompositionConsumerInternalService implements ConsumerInternalServi
         if (config.isReadIgnite()) {
             return igniteConsumerService.getAll();
         } else {
-            return journalkeeperConsumerService.getAll();
+            try {
+                return journalkeeperConsumerService.getAll();
+            } catch (Exception e) {
+                logger.error("getAll exception", e);
+                return igniteConsumerService.getAll();
+            }
         }
     }
 
@@ -131,7 +151,12 @@ public class CompositionConsumerInternalService implements ConsumerInternalServi
         if (config.isReadIgnite()) {
             return igniteConsumerService.getById(id);
         } else {
-            return journalkeeperConsumerService.getById(id);
+            try {
+                return journalkeeperConsumerService.getById(id);
+            } catch (Exception e) {
+                logger.error("getById exception, id: {}", id, e);
+                return igniteConsumerService.getById(id);
+            }
         }
     }
 }

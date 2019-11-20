@@ -51,7 +51,12 @@ public class CompositionBrokerInternalService implements BrokerInternalService {
         if (config.isReadIgnite()) {
             return igniteBrokerService.getByIpAndPort(brokerIp, brokerPort);
         } else {
-            return journalkeeperBrokerService.getByIpAndPort(brokerIp, brokerPort);
+            try {
+                return journalkeeperBrokerService.getByIpAndPort(brokerIp, brokerPort);
+            } catch (Exception e) {
+                logger.error("getByIpAndPort exception, brokerIp: {}, brokerPort: {}", brokerIp, brokerPort, e);
+                return igniteBrokerService.getByIpAndPort(brokerIp, brokerPort);
+            }
         }
     }
 
@@ -60,7 +65,12 @@ public class CompositionBrokerInternalService implements BrokerInternalService {
         if (config.isReadIgnite()) {
             return igniteBrokerService.getByRetryType(retryType);
         } else {
-            return journalkeeperBrokerService.getByRetryType(retryType);
+            try {
+                return journalkeeperBrokerService.getByRetryType(retryType);
+            } catch (Exception e) {
+                logger.error("getByRetryType exception, retryType: {}", retryType, e);
+                return igniteBrokerService.getByRetryType(retryType);
+            }
         }
     }
 
@@ -69,7 +79,12 @@ public class CompositionBrokerInternalService implements BrokerInternalService {
         if (config.isReadIgnite()) {
             return igniteBrokerService.getByIds(ids);
         } else {
-            return journalkeeperBrokerService.getByIds(ids);
+            try {
+                return journalkeeperBrokerService.getByIds(ids);
+            } catch (Exception e) {
+                logger.error("getByIds exception, ids: {}", ids, e);
+                return igniteBrokerService.getByIds(ids);
+            }
         }
     }
 
@@ -94,7 +109,12 @@ public class CompositionBrokerInternalService implements BrokerInternalService {
         if (config.isReadIgnite()) {
             return igniteBrokerService.getById(id);
         } else {
-            return journalkeeperBrokerService.getById(id);
+            try {
+                return journalkeeperBrokerService.getById(id);
+            } catch (Exception e) {
+                logger.error("getById exception, id", id, e);
+                return igniteBrokerService.getById(id);
+            }
         }
     }
 
@@ -133,7 +153,12 @@ public class CompositionBrokerInternalService implements BrokerInternalService {
         if (config.isReadIgnite()) {
             return igniteBrokerService.getAll();
         } else {
-            return journalkeeperBrokerService.getAll();
+            try {
+                return journalkeeperBrokerService.getAll();
+            } catch (Exception e) {
+                logger.error("getAll exception", e);
+                return igniteBrokerService.getAll();
+            }
         }
     }
 
@@ -142,7 +167,12 @@ public class CompositionBrokerInternalService implements BrokerInternalService {
         if (config.isReadIgnite()) {
             return igniteBrokerService.search(pageQuery);
         } else {
-            return journalkeeperBrokerService.search(pageQuery);
+            try {
+                return journalkeeperBrokerService.search(pageQuery);
+            } catch (Exception e) {
+                logger.error("search exception, pageQuery: {}", pageQuery, e);
+                return igniteBrokerService.search(pageQuery);
+            }
         }
     }
 }

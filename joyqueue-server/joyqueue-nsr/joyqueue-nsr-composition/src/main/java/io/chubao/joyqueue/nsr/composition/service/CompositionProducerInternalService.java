@@ -49,7 +49,12 @@ public class CompositionProducerInternalService implements ProducerInternalServi
         if (config.isReadIgnite()) {
             return igniteProducerService.getById(id);
         } else {
-            return journalkeeperProducerService.getById(id);
+            try {
+                return journalkeeperProducerService.getById(id);
+            } catch (Exception e) {
+                logger.error("getById exception, id: {}", id, e);
+                return igniteProducerService.getById(id);
+            }
         }
     }
 
@@ -58,7 +63,12 @@ public class CompositionProducerInternalService implements ProducerInternalServi
         if (config.isReadIgnite()) {
             return igniteProducerService.getByTopicAndApp(topic, app);
         } else {
-            return journalkeeperProducerService.getByTopicAndApp(topic, app);
+            try {
+                return journalkeeperProducerService.getByTopicAndApp(topic, app);
+            } catch (Exception e) {
+                logger.error("getByTopicAndApp exception, topic: {}, app: {}", topic, app, e);
+                return igniteProducerService.getByTopicAndApp(topic, app);
+            }
         }
     }
 
@@ -67,7 +77,12 @@ public class CompositionProducerInternalService implements ProducerInternalServi
         if (config.isReadIgnite()) {
             return igniteProducerService.getByTopic(topic);
         } else {
-            return journalkeeperProducerService.getByTopic(topic);
+            try {
+                return journalkeeperProducerService.getByTopic(topic);
+            } catch (Exception e) {
+                logger.error("getByTopic exception, topic: {}", topic, e);
+                return igniteProducerService.getByTopic(topic);
+            }
         }
     }
 
@@ -76,7 +91,12 @@ public class CompositionProducerInternalService implements ProducerInternalServi
         if (config.isReadIgnite()) {
             return igniteProducerService.getByApp(app);
         } else {
-            return journalkeeperProducerService.getByApp(app);
+            try {
+                return journalkeeperProducerService.getByApp(app);
+            } catch (Exception e) {
+                logger.error("getByApp exception, app: {}", app, e);
+                return igniteProducerService.getByApp(app);
+            }
         }
     }
 
@@ -85,7 +105,12 @@ public class CompositionProducerInternalService implements ProducerInternalServi
         if (config.isReadIgnite()) {
             return igniteProducerService.getAll();
         } else {
-            return journalkeeperProducerService.getAll();
+            try {
+                return journalkeeperProducerService.getAll();
+            } catch (Exception e) {
+                logger.error("getAll exception", e);
+                return igniteProducerService.getAll();
+            }
         }
     }
 

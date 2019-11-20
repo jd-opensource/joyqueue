@@ -162,7 +162,7 @@ public class ProduceMessage implements Serializable {
 
     @Override
     public String toString() {
-        return "ProduceMessageRequest{" +
+        return "ProduceMessage{" +
                 "topic='" + topic + '\'' +
                 ", partition=" + partition +
                 ", partitionKey='" + partitionKey + '\'' +

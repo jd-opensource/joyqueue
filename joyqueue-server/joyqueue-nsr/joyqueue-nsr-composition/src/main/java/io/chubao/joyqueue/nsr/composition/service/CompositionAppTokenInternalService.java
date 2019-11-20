@@ -48,7 +48,12 @@ public class CompositionAppTokenInternalService implements AppTokenInternalServi
         if (config.isReadIgnite()) {
             return igniteAppTokenService.getByApp(app);
         } else {
-            return journalkeeperAppTokenService.getByApp(app);
+            try {
+                return journalkeeperAppTokenService.getByApp(app);
+            } catch (Exception e) {
+                logger.error("getByApp exception, app: {}", app, e);
+                return igniteAppTokenService.getByApp(app);
+            }
         }
     }
 
@@ -57,7 +62,12 @@ public class CompositionAppTokenInternalService implements AppTokenInternalServi
         if (config.isReadIgnite()) {
             return igniteAppTokenService.getByAppAndToken(app, token);
         } else {
-            return journalkeeperAppTokenService.getByAppAndToken(app, token);
+            try {
+                return journalkeeperAppTokenService.getByAppAndToken(app, token);
+            } catch (Exception e) {
+                logger.error("getByAppAndToken exception, app: {}, token: {}", app, token, e);
+                return igniteAppTokenService.getByAppAndToken(app, token);
+            }
         }
     }
 
@@ -66,7 +76,12 @@ public class CompositionAppTokenInternalService implements AppTokenInternalServi
         if (config.isReadIgnite()) {
             return igniteAppTokenService.getById(id);
         } else {
-            return journalkeeperAppTokenService.getById(id);
+            try {
+                return journalkeeperAppTokenService.getById(id);
+            } catch (Exception e) {
+                logger.error("getById exception, id: {}", id, e);
+                return igniteAppTokenService.getById(id);
+            }
         }
     }
 
@@ -75,7 +90,12 @@ public class CompositionAppTokenInternalService implements AppTokenInternalServi
         if (config.isReadIgnite()) {
             return igniteAppTokenService.getAll();
         } else {
-            return journalkeeperAppTokenService.getAll();
+            try {
+                return journalkeeperAppTokenService.getAll();
+            } catch (Exception e) {
+                logger.error("getAll exception", e);
+                return igniteAppTokenService.getAll();
+            }
         }
     }
 

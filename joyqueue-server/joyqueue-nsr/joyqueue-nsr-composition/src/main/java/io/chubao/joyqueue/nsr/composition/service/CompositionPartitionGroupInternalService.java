@@ -49,7 +49,12 @@ public class CompositionPartitionGroupInternalService implements PartitionGroupI
         if (config.isReadIgnite()) {
             return ignitePartitionGroupService.getByTopicAndGroup(topic, group);
         } else {
-            return journalkeeperPartitionGroupService.getByTopicAndGroup(topic, group);
+            try {
+                return journalkeeperPartitionGroupService.getByTopicAndGroup(topic, group);
+            } catch (Exception e) {
+                logger.error("getByTopicAndGroup exception, topic: {}, group: {}", topic, group, e);
+                return ignitePartitionGroupService.getByTopicAndGroup(topic, group);
+            }
         }
     }
 
@@ -58,7 +63,12 @@ public class CompositionPartitionGroupInternalService implements PartitionGroupI
         if (config.isReadIgnite()) {
             return ignitePartitionGroupService.getByTopic(topic);
         } else {
-            return journalkeeperPartitionGroupService.getByTopic(topic);
+            try {
+                return journalkeeperPartitionGroupService.getByTopic(topic);
+            } catch (Exception e) {
+                logger.error("getByTopic exception, topic: {}", topic, e);
+                return ignitePartitionGroupService.getByTopic(topic);
+            }
         }
     }
 
@@ -67,7 +77,12 @@ public class CompositionPartitionGroupInternalService implements PartitionGroupI
         if (config.isReadIgnite()) {
             return ignitePartitionGroupService.getById(id);
         } else {
-            return journalkeeperPartitionGroupService.getById(id);
+            try {
+                return journalkeeperPartitionGroupService.getById(id);
+            } catch (Exception e) {
+                logger.error("getById exception, id: {}", id, e);
+                return ignitePartitionGroupService.getById(id);
+            }
         }
     }
 
@@ -76,7 +91,12 @@ public class CompositionPartitionGroupInternalService implements PartitionGroupI
         if (config.isReadIgnite()) {
             return ignitePartitionGroupService.getAll();
         } else {
-            return journalkeeperPartitionGroupService.getAll();
+            try {
+                return journalkeeperPartitionGroupService.getAll();
+            } catch (Exception e) {
+                logger.error("getAll exception", e);
+                return ignitePartitionGroupService.getAll();
+            }
         }
     }
 

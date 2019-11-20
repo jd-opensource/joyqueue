@@ -48,7 +48,12 @@ public class CompositionDataCenterInternalService implements DataCenterInternalS
         if (config.isReadIgnite()) {
             return igniteDataCenterService.getById(id);
         } else {
-            return journalkeeperDataCenterService.getById(id);
+            try {
+                return journalkeeperDataCenterService.getById(id);
+            } catch (Exception e) {
+                logger.error("getById exception, id: {}", id, e);
+                return igniteDataCenterService.getById(id);
+            }
         }
     }
 
@@ -103,7 +108,12 @@ public class CompositionDataCenterInternalService implements DataCenterInternalS
         if (config.isReadIgnite()) {
             return igniteDataCenterService.getAll();
         } else {
-            return journalkeeperDataCenterService.getAll();
+            try {
+                return journalkeeperDataCenterService.getAll();
+            } catch (Exception e) {
+                logger.error("getAll exception", e);
+                return igniteDataCenterService.getAll();
+            }
         }
     }
 }

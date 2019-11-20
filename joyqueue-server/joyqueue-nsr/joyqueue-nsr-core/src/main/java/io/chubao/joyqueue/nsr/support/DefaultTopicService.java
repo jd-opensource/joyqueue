@@ -296,6 +296,10 @@ public class DefaultTopicService implements TopicService {
             throw new NsrException(String.format("topic: %s, group: %s is not exist", oldPartitionGroup.getTopic(), oldPartitionGroup.getGroup()));
         }
 
+        if (oldPartitionGroup.getLeader().equals(group.getLeader()) && oldPartitionGroup.getTerm().equals(group.getTerm())) {
+            return;
+        }
+
         PartitionGroup newPartitionGroup = oldPartitionGroup.clone();
         newPartitionGroup.setIsrs(group.getIsrs());
         newPartitionGroup.setLeader(group.getLeader());

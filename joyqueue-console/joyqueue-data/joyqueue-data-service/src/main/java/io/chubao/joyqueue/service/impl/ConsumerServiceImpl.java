@@ -67,6 +67,10 @@ public class ConsumerServiceImpl  implements ConsumerService {
         try {
             //Find topic
             Topic topic = topicNameServerService.findById(consumer.getTopic().getId());
+            if (topic.getType() == Topic.TOPIC_TYPE_SEQUENTIAL && consumer.getTopicType() == Topic.TOPIC_TYPE_BROADCAST) {
+                throw new IllegalArgumentException("broadcast subscriptions are not allowed for sequential topics");
+            }
+
             consumer.setTopic(topic);
             consumer.setNamespace(topic.getNamespace());
 
