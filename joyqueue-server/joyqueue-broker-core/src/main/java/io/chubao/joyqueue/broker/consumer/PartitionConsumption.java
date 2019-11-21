@@ -124,26 +124,20 @@ class PartitionConsumption extends Service {
 
         PullResult pullResult = new PullResult(consumer, (short) -1, new ArrayList<>(0));
 
-        if (partitionManager.isRetry(consumer)) {
-            // 消费待重试的消息
-            List<RetryMessageModel> retryMsgList = messageRetry.getRetry(consumer.getTopic(), consumer.getApp(), (short) 1, 0L);
-            if (CollectionUtils.isNotEmpty(retryMsgList) && retryMsgList.size() > 0) {
-                pullResult = brokerMessage2PullResult(consumer, retryMsgList);
-                // 读到重试消息，增加下次读到重试队列的概率（优先处理重试消息）
-                partitionManager.increaseRetryProbability(consumer);
-            } else {
-                // 读不到重试消息，则降低下次读重试队列的概率
-                partitionManager.decreaseRetryProbability(consumer);
-            }
-        }
+
         List<Short> priorityPartitionList = partitionManager.getPriorityPartition(TopicName.parse(consumer.getTopic()));
-        if (pullResult.getBuffers().size() < 1 && priorityPartitionList.size() > 0) {
+        if (priorityPartitionList.size() > 0) {
             // 高优先级分区消费
             pullResult = getFromPartition(consumer, priorityPartitionList, count, ackTimeout, accessTimes);
         }
-        if (pullResult.getBuffers().size() < 1) {
+
+        if (pullResult.count() < 1) {
             // 消费普通分区消息
             List<Short> partitionList = clusterManager.getMasterPartitionList(TopicName.parse(consumer.getTopic()));
+            if (partitionManager.isRetry(consumer)) {
+                partitionList = new ArrayList<>(partitionList);
+                partitionList.add(Partition.RETRY_PARTITION_ID);
+            }
             pullResult = getFromPartition(consumer, partitionList, count, ackTimeout, accessTimes);
         }
 
@@ -290,6 +284,14 @@ class PartitionConsumption extends Service {
         // 初始化默认
         PullResult pullResult = new PullResult(consumer, (short) -1, new ArrayList<>(0));
         if (partitionManager.tryOccupyPartition(consumer, partition, ackTimeout)) {
+            if (partition == Partition.RETRY_PARTITION_ID) {
+                pullResult = getRetryMessage(consumer, pullResult);
+                if (pullResult.count() < 1) {
+                    // 出现异常释放分区占用
+                    partitionManager.releasePartition(consumer, partition);
+                }
+                return pullResult;
+            }
             int partitionGroup = clusterManager.getPartitionGroupId(TopicName.parse(consumer.getTopic()), partition);
             long index = positionManager.getLastMsgAckIndex(TopicName.parse(consumer.getTopic()), consumer.getApp(), partition);
             try {
@@ -325,13 +327,32 @@ class PartitionConsumption extends Service {
                 partitionManager.releasePartition(consumer, partition);
 
                 if (ex instanceof PositionOverflowException) {
-                    pullResult.setCode(JoyQueueCode.SE_INDEX_OVERFLOW);
+                    long rightIndex = ((PositionOverflowException) ex).getRight();
+                    if (rightIndex < index) {
+                        pullResult.setCode(JoyQueueCode.SE_INDEX_OVERFLOW);
+                        logger.error(ex.getMessage(), ex);
+                    }
                 } else if (ex instanceof PositionUnderflowException) {
                     pullResult.setCode(JoyQueueCode.SE_INDEX_UNDERFLOW);
+                    logger.error(ex.getMessage(), ex);
                 } else {
                     logger.error("get message error, consumer: {}, partition: {}", consumer, partition, ex);
                 }
             }
+        }
+        return pullResult;
+    }
+
+    private PullResult getRetryMessage(Consumer consumer, PullResult pullResult) throws JoyQueueException {
+        // 消费待重试的消息
+        List<RetryMessageModel> retryMsgList = messageRetry.getRetry(consumer.getTopic(), consumer.getApp(), (short) 1, 0L);
+        if (CollectionUtils.isNotEmpty(retryMsgList) && retryMsgList.size() > 0) {
+            pullResult = brokerMessage2PullResult(consumer, retryMsgList);
+            // 读到重试消息，增加下次读到重试队列的概率（优先处理重试消息）
+            partitionManager.increaseRetryProbability(consumer);
+        } else {
+            // 读不到重试消息，则降低下次读重试队列的概率
+            partitionManager.decreaseRetryProbability(consumer);
         }
         return pullResult;
     }
@@ -365,6 +386,9 @@ class PartitionConsumption extends Service {
      */
     private ByteBuffer[] readMessages(Consumer consumer, int partitionGroup, short partition, long index, int count) throws IOException {
         PartitionGroupStore store = storeService.getStore(consumer.getTopic(), partitionGroup);
+        if (index < store.getLeftIndex(partition) || index >= store.getRightIndex(partition)) {
+            return null;
+        }
         try {
             ReadResult readRst = store.read(partition, index, count, Long.MAX_VALUE);
             if (readRst.getCode() == JoyQueueCode.SUCCESS) {

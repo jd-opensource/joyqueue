@@ -22,10 +22,8 @@ import io.chubao.joyqueue.store.replication.ReplicableStore;
 import io.chubao.joyqueue.store.transaction.TransactionStore;
 import io.chubao.joyqueue.store.transaction.TransactionStoreManager;
 import io.chubao.joyqueue.store.utils.PreloadBufferPool;
-import io.chubao.joyqueue.toolkit.concurrent.NamedThreadFactory;
 import io.chubao.joyqueue.toolkit.config.PropertySupplier;
 import io.chubao.joyqueue.toolkit.config.PropertySupplierAware;
-import io.chubao.joyqueue.toolkit.lang.Close;
 import io.chubao.joyqueue.toolkit.service.Service;
 import io.chubao.joyqueue.toolkit.time.SystemClock;
 import org.slf4j.Logger;
@@ -39,8 +37,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.stream.Collectors;
 
 /**
@@ -88,7 +84,6 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
     private StoreConfig config;
     private PreloadBufferPool bufferPool;
     private File base;
-    private ScheduledExecutorService scheduledExecutor;
     private PropertySupplier propertySupplier;
     private StoreLock storeLock;
 
@@ -113,9 +108,6 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
         if (storeLock == null) {
             storeLock = new StoreLock(new File(base, "lock"));
             storeLock.lock();
-        }
-        if (scheduledExecutor == null) {
-            this.scheduledExecutor = Executors.newScheduledThreadPool(SCHEDULE_EXECUTOR_THREADS, new NamedThreadFactory("Store-Scheduled-Executor"));
         }
         if (bufferPool == null) {
             System.setProperty(PreloadBufferPool.PRINT_METRIC_INTERVAL_MS_KEY, String.valueOf(config.getPrintMetricIntervalMs()));
@@ -150,8 +142,6 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
             p.disable();
             p.stop();
         });
-
-        Close.close(scheduledExecutor);
 
         storeLock.unlock();
 
@@ -272,8 +262,7 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
             File groupBase = new File(base, getPartitionGroupRelPath(topic, partitionGroup));
             partitionGroupStoreManger = new PartitionGroupStoreManager(topic, partitionGroup, groupBase
                     , getPartitionGroupConfig(config)
-                    , bufferPool
-                    , scheduledExecutor);
+                    , bufferPool);
             partitionGroupStoreManger.recover();
             if (isStarted()) {
                 partitionGroupStoreManger.start();

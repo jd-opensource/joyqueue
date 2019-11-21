@@ -32,15 +32,16 @@ import io.chubao.joyqueue.model.domain.BaseModel;
 import io.chubao.joyqueue.model.domain.Identity;
 import io.chubao.joyqueue.model.domain.User;
 import io.chubao.joyqueue.model.query.QUser;
+import io.chubao.joyqueue.service.ApplicationService;
 import io.chubao.joyqueue.service.ApplicationUserService;
 import io.chubao.joyqueue.service.UserService;
-import io.chubao.joyqueue.sync.SyncService;
 
 import java.util.Date;
 
 import static io.chubao.joyqueue.handler.Constants.APPLICATION;
 import static io.chubao.joyqueue.handler.Constants.APP_ID;
 import static io.chubao.joyqueue.handler.Constants.USER_ID;
+import static io.chubao.joyqueue.handler.Constants.APP_CODE;
 
 
 /**
@@ -52,9 +53,9 @@ public class ApplicationUserCommand extends CommandSupport<ApplicationUser, User
     @Value(nullable = false)
     protected UserService userService;
     @Value(nullable = false)
-    protected SyncService syncService;
-    @Value(nullable = false)
     protected ApplicationUserService applicationUserService;
+    @Value(nullable = false)
+    protected ApplicationService applicationService;
     @Value(APPLICATION)
     protected Application application;
 
@@ -104,6 +105,19 @@ public class ApplicationUserCommand extends CommandSupport<ApplicationUser, User
         return super.pageQuery(qPageQuery);
     }
 
+    @Path("getByAppCode")
+    public Response getByAppCode(@QueryParam(APP_CODE) String appCode) throws Exception {
+        Application app = applicationService.findByCode(appCode);
+        if (app == null) {
+            throw new ConfigException(ErrorCode.ApplicationNotExists, String.format("can not app find by code %s", appCode));
+        }
+        QPageQuery<QUser> qPageQuery = new QPageQuery<>();
+        QUser qUser = new QUser();
+        qUser.setAppId(app.getId());
+        qPageQuery.setQuery(qUser);
+        return super.pageQuery(qPageQuery);
+    }
+
     @Path("delete")
     public Response delete(@QueryParam(APP_ID) Long appId, @QueryParam(USER_ID) Long userId) throws Exception {
         ApplicationUser appUser = service.findAppUserByAppIdAndUserId(appId, userId);
@@ -112,6 +126,16 @@ public class ApplicationUserCommand extends CommandSupport<ApplicationUser, User
         appUser.setUpdateTime(new Date());
         applicationUserService.deleteById(appUser.getId());
         return Responses.success();
+    }
+
+    @Override
+    public void clean() {
+        super.clean();
+        applicationUserService = null;
+        appId = null;
+        userService = null;
+        applicationService = null;
+        application = null;
     }
 
 }

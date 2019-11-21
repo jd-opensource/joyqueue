@@ -36,4 +36,17 @@ public class CompressorTest {
             Assert.assertEquals(test, result);
         }
     }
+
+    @Test
+    public void testZipCompress() throws IOException {
+        int count = Integer.MAX_VALUE;
+        String test = "热烈庆祝中华人民共和国成立70周年";
+        Compressor compressor = Zlib.INSTANCE;
+        for (int i = 0; i < count; i ++) {
+            byte[] data = Compressors.compress(test, compressor);
+            String result = Compressors.decompress(data, Charsets.UTF_8, compressor);
+            Assert.assertEquals(test, result);
+        }
+    }
+
 }

@@ -68,8 +68,18 @@ export default {
         {
           title: '禁止IP消费',
           key: 'config.blackList',
-          formatter (item) {
-            return item.config === undefined ? '' : item.config.blackList
+          render: (h, params) => {
+            const value = params.item.config ? params.item.config.blackList : ''
+            return h('d-tooltip', {
+                props: {
+                  content: value
+                }
+              }, [h('div', {
+                attrs: {
+                  style: 'width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;'
+                }
+              }, value)]
+            )
           }
         },
         {

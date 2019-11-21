@@ -517,19 +517,14 @@ class ConcurrentConsumption extends Service {
             } else {
                 logger.error("read message error, error code[{}]", readRst.getCode());
             }
-        } catch (Exception ex) {
-            if (ex instanceof PositionOverflowException) {
-                long rightIndex = storeService.getManageService().partitionMetric(consumer.getTopic(), partition).getRightIndex();
-                if (rightIndex < index) {
-                    pullResult.setCode(JoyQueueCode.SE_INDEX_OVERFLOW);
-                    logger.error(ex.getMessage(), ex);
-                }
-            } else if (ex instanceof PositionUnderflowException) {
-                pullResult.setCode(JoyQueueCode.SE_INDEX_UNDERFLOW);
-                logger.error(ex.getMessage(), ex);
-            } else {
-                logger.error("get message error, consumer: {}, partition: {}", consumer, partition, ex);
+        } catch (PositionOverflowException e) {
+            if(e.getRight() < index) {
+                pullResult.setCode(JoyQueueCode.SE_INDEX_OVERFLOW);
             }
+        } catch (PositionUnderflowException e) {
+            pullResult.setCode(JoyQueueCode.SE_INDEX_UNDERFLOW);
+        } catch (Exception ex) {
+            logger.error("get message error, consumer: {}, partition: {}", consumer, partition, ex);
         }
 
         return pullResult;

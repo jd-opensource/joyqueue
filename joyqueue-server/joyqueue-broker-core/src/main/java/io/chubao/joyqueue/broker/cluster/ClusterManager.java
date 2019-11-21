@@ -55,6 +55,7 @@ import io.chubao.joyqueue.nsr.event.UpdateTopicEvent;
 import io.chubao.joyqueue.response.BooleanResponse;
 import io.chubao.joyqueue.toolkit.concurrent.EventBus;
 import io.chubao.joyqueue.toolkit.concurrent.EventListener;
+import io.chubao.joyqueue.toolkit.config.PropertySupplier;
 import io.chubao.joyqueue.toolkit.lang.LifeCycle;
 import io.chubao.joyqueue.toolkit.service.Service;
 import io.chubao.joyqueue.toolkit.time.SystemClock;
@@ -83,6 +84,8 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static io.chubao.joyqueue.broker.consumer.ConsumeConfigKey.RETRY_RANDOM_BOUND;
 
 /**
  * 集群管理
@@ -394,6 +397,10 @@ public class ClusterManager extends Service {
             throw new JoyQueueException(JoyQueueCode.FW_CONSUMER_NOT_EXISTS);
         }
         return getConsumerPolicyOrDefault(consumer);
+    }
+
+    public int getRetryRandomBound() {
+        return PropertySupplier.getValue(brokerContext.getPropertySupplier(), RETRY_RANDOM_BOUND);
     }
 
     /**

@@ -448,7 +448,7 @@ public class ConsumeArchiveService extends Service {
          * @return
          */
         private boolean checkFileEndFlag(MappedByteBuffer rMap) {
-            if (rMap.position() + 1 < pageSize) {
+            if (rMap.position() + 1 <= pageSize) {
                 if (rMap.get() == Byte.MAX_VALUE) {
                     return true;
                 } else {

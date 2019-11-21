@@ -26,7 +26,6 @@ import io.chubao.joyqueue.store.index.IndexItem;
 import io.chubao.joyqueue.store.index.IndexSerializer;
 import io.chubao.joyqueue.store.message.BatchMessageParser;
 import io.chubao.joyqueue.store.message.MessageParser;
-import io.chubao.joyqueue.store.nsm.VirtualThreadExecutor;
 import io.chubao.joyqueue.store.replication.ReplicableStore;
 import io.chubao.joyqueue.store.utils.PreloadBufferPool;
 import io.chubao.joyqueue.toolkit.concurrent.EventListener;
@@ -53,7 +52,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -83,7 +81,6 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                     new QosStore(this, QosLevel.REPLICATION),
                     new QosStore(this, QosLevel.ALL)
             };
-    private final ScheduledExecutorService scheduledExecutorService;
     private final PreloadBufferPool bufferPool;
     private final LoopThread writeLoopThread, flushLoopThread;
     private final LoopThread metricThread;
@@ -96,21 +93,12 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
     private Metric.MetricInstance produceMetric = null, consumeMetric;
     private final Lock writeLock = new ReentrantLock();
 
+    private AtomicLong lastCheckDiskSpaceTimestamp = new AtomicLong(0L);
+    private volatile boolean isDiskFull = false;
+    private static final long CHECK_DISK_SPACE_COOL_DOWN = 1000L;
 
     public PartitionGroupStoreManager(String topic, int partitionGroup, File base, Config config,
-                                      PreloadBufferPool bufferPool,
-                                      ScheduledExecutorService scheduledExecutorService) {
-        this(topic, partitionGroup, base, config,
-                bufferPool,
-                scheduledExecutorService, null);
-    }
-
-
-    public PartitionGroupStoreManager(String topic, int partitionGroup, File base, Config config,
-                                      PreloadBufferPool bufferPool,
-                                      ScheduledExecutorService scheduledExecutorService,
-                                      VirtualThreadExecutor virtualThreadPool) {
-        this.scheduledExecutorService = scheduledExecutorService;
+                                      PreloadBufferPool bufferPool) {
         this.base = base;
         this.topic = topic;
         this.partitionGroup = partitionGroup;
@@ -369,10 +357,6 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         return current.getLength() > 0 && current.getOffset() > previous.getOffset();
     }
 
-    private boolean isAllZero(IndexItem indexItem) {
-        return indexItem.getLength() == 0 && indexItem.getOffset() == 0;
-    }
-
     private Short[] loadPartitionIndices(File indexBase) {
         Short[] partitionIndices = null;
         File[] files = indexBase.listFiles(file -> file.isDirectory() && file.getName().matches("^\\d+$"));
@@ -472,9 +456,6 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                 continue;
             }
             try {
-                //FIXME: 偶尔会发生索引长度错误导致读消息抛异常，
-                // 临时解决方案是捕获异常后，再用不传长度的方法试一次。
-                // 另，用带长度的方法读性能更好。
                 ByteBuffer log;
                 try {
                     log = store.read(indexItem.getOffset(), indexItem.getLength());
@@ -554,8 +535,6 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                 MessageParser.setLong(byteBuffer, MessageParser.INDEX, indices[i]);
                 indexItem.setIndex(indices[i]);
 
-                int l = MessageParser.getInt(byteBuffer, MessageParser.LENGTH);
-                long p = position;
                 // 写入消息
                 position = store.append(byteBuffer);
                 // 写入索引
@@ -565,24 +544,11 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                     indexItem.setBatchMessage(true);
                     indexItem.setBatchMessageSize(batchSize);
                 }
-                //TODO: 临时增加检查索引长度不正确问题
-                if (indexItem.getLength() != l) {
-                    logger.warn("检测到写入索引长度不正确：" +
-                                    "indexItem.length: {}, length from message: {}, position: {}, topic={}, " +
-                                    "partitionGroup={}, partition={}, index={}.",
-                            indexItem.getLength(), l, p, topic, partitionGroup,
-                            indexItem.getPartition(), indexItem.getIndex());
-                }
                 writeIndex(indexItem, partition.store);
                 flushLoopThread.wakeup();
             }
         } catch (Throwable t) {
-            logger.warn("Write failed, rollback to position: {}, topic={}, partitionGroup={}.", start, topic, partitionGroup, t);
-            try {
-                setRightPosition(start);
-            } catch (Throwable e) {
-                logger.warn("Rollback failed, rollback to position: {}, topic={}, partitionGroup={}.", start, topic, partitionGroup, e);
-            }
+            onWriteException(start, t);
             throw t;
         }
         return indices;
@@ -605,27 +571,6 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         }
         indexBuffer.flip();
         indexStore.appendByteBuffer(indexBuffer);
-    }
-
-    @Deprecated
-    private boolean writeVT() {
-        boolean ret = false;
-        WriteCommand writeCommand;
-        if (null != (writeCommand = writeCommandCache.poll())) {
-            try {
-                if (waitForFlush()) {
-                    writeCommand.eventListener.onEvent(new WriteResult(JoyQueueCode.SE_WRITE_TIMEOUT, null));
-                } else {
-                    long[] indices = write(writeCommand.messages);
-                    handleCallback(writeCommand, store.right(), indices);
-                }
-                ret = true;
-            } catch (Throwable t) {
-                if (writeCommand.eventListener != null)
-                    writeCommand.eventListener.onEvent(new WriteResult(JoyQueueCode.SE_WRITE_FAILED, null));
-            }
-        }
-        return ret;
     }
 
     private void write() throws IOException, InterruptedException {
@@ -659,15 +604,15 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         } catch (DiskFullException e) {
             if (null != writeCommand && writeCommand.eventListener != null)
                 writeCommand.eventListener.onEvent(new WriteResult(JoyQueueCode.SE_DISK_FULL, null));
-            throw e;
+            logger.warn("Write failed, cause: disk full! Store: {}.", base.getAbsolutePath());
         } catch (IllegalStateException e) {
             if (null != writeCommand && writeCommand.eventListener != null)
                 writeCommand.eventListener.onEvent(new WriteResult(JoyQueueCode.CY_STATUS_ERROR, null));
-            throw e;
+            logger.warn("Write failed, cause: store disabled! Store: {}.", base.getAbsolutePath());
         } catch (Throwable t) {
             if (null != writeCommand && writeCommand.eventListener != null)
                 writeCommand.eventListener.onEvent(new WriteResult(JoyQueueCode.SE_WRITE_FAILED, null));
-            throw t;
+            logger.warn("Write failed, cause: exception! Store: {}.", base.getAbsolutePath(), t);
         } finally {
             writeLock.unlock();
         }
@@ -697,19 +642,6 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         if(null != belt) {
             belt.put(callback);
         }
-    }
-
-
-    private void fireCallbacks() {
-        CallbackPositioningBelt belt = this.callbackMap.get(QosLevel.REPLICATION);
-        belt.callbackBefore(this.commitPosition());
-
-        belt = this.callbackMap.get(QosLevel.PERSISTENCE);
-        belt.callbackBefore(this.flushPosition());
-
-        belt = this.callbackMap.get(QosLevel.ALL);
-        belt.callbackBefore(Math.min(this.flushPosition(), this.commitPosition()));
-
     }
 
     private void flush() {
@@ -754,8 +686,24 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         return ret;
     }
 
-    void asyncWrite(QosLevel qosLevel, EventListener<WriteResult> eventListener, WriteRequest... writeRequests) {
+    private boolean isDiskFull() {
+        long timestamp = lastCheckDiskSpaceTimestamp.get();
+        if(SystemClock.now() - timestamp > CHECK_DISK_SPACE_COOL_DOWN && // 超过冷却时间了
+                lastCheckDiskSpaceTimestamp.compareAndSet(timestamp, SystemClock.now())) { // 避免并发修改 isDiskFull
+            isDiskFull = store.isDiskFull();
+        }
+        return isDiskFull;
+    }
 
+    void asyncWrite(QosLevel qosLevel, EventListener<WriteResult> eventListener, WriteRequest... writeRequests) {
+        if(isDiskFull()) {
+            try {
+                Thread.sleep(1000L);
+                if (eventListener != null)
+                    eventListener.onEvent(new WriteResult(JoyQueueCode.SE_DISK_FULL, null));
+            } catch (InterruptedException ignored) {}
+            return;
+        }
         if (!enabled.get())
             throw new WriteException(String.format("Store disabled! topic: %s, partitionGroup: %d.", topic, partitionGroup));
         ByteBuffer[] messages = new ByteBuffer[writeRequests.length];
@@ -1103,16 +1051,27 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
 
                 return position;
             } catch (Throwable t) {
-                logger.warn("Write failed, rollback to position: {}, topic={}, partitionGroup={}.", start, topic, partitionGroup, t);
-                try {
-                    setRightPosition(start);
-                } catch (Throwable e) {
-                    logger.warn("Rollback failed, rollback to position: {}, topic={}, partitionGroup={}.", start, topic, partitionGroup, e);
-                }
+                onWriteException(start, t);
                 throw t;
             }
         } finally {
             writeLock.unlock();
+        }
+    }
+
+    private void onWriteException(long start, Throwable t) {
+        try {
+            setRightPosition(start);
+        } catch (Throwable e) {
+            logger.warn("Rollback failed, rollback to position: {}, topic={}, partitionGroup={}.", start, topic, partitionGroup, e);
+        }
+        if (t instanceof DiskFullException) {
+            try {
+                Thread.sleep(1000L);
+            } catch (InterruptedException ignored) {
+            }
+        } else {
+            logger.warn("Write failed, rollback to position: {}, topic={}, partitionGroup={}.", start, topic, partitionGroup, t);
         }
     }
 

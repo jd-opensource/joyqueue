@@ -44,7 +44,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeoutException;
@@ -296,8 +295,7 @@ public class PartitionGroupStoreManagerTest {
                 new PositioningStore.Config(512 * 1024));
 
         this.store = new PartitionGroupStoreManager(topic, partitionGroup, groupBase, config,
-                bufferPool,
-                Executors.newSingleThreadScheduledExecutor());
+                bufferPool);
         this.store.recover();
         this.store.start();
         this.store.enable();
@@ -544,8 +542,7 @@ public class PartitionGroupStoreManagerTest {
         }
 
         store = new PartitionGroupStoreManager(topic, partitionGroup, groupBase, new PartitionGroupStoreManager.Config(),
-                bufferPool,
-                Executors.newSingleThreadScheduledExecutor());
+                bufferPool);
         store.recover();
         store.start();
         store.enable();
@@ -693,8 +690,7 @@ public class PartitionGroupStoreManagerTest {
                 new PositioningStore.Config(512 * 1024));
 
         this.store = new PartitionGroupStoreManager(topic, partitionGroup, groupBase, config,
-                bufferPool,
-                Executors.newSingleThreadScheduledExecutor());
+                bufferPool);
         this.store.recover();
         this.store.start();
         this.store.enable();

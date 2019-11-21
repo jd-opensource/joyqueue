@@ -28,6 +28,9 @@
       <d-button class="button2" type="primary" @click="getList">查询
         <icon name="search" style="margin-left: 3px;"></icon>
       </d-button>
+      <d-button class="button2" type="primary" @click="batchDeleteTip">批量删除
+        <icon name="search" style="margin-left: 3px;"></icon>
+      </d-button>
     </div>
 
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
@@ -67,7 +70,8 @@ export default {
         search: '/retry/search',
         del: '/retry/delete',
         download: '/retry/download',
-        recovery: '/retry/recovery'
+        recovery: '/retry/recovery',
+        batchDelete: '/retry/batchDelete'
       },
       businessId: '',
       statusList: [
@@ -184,6 +188,45 @@ export default {
         this.page.size = data.pagination.size
         this.tableData.rowData = data.data
         this.showTablePin = false
+      })
+    },
+    batchDeleteTip(){
+      this.$Dialog.confirm({
+        title: '提示',
+        content: '将按查询条件(所有分页)批量删除重试数据'
+      }).then(() => {
+        this.batchDelete();
+      // this.$Message.info('点击了「确认」按钮')
+    }).catch(() => {
+        // this.$Message.info('点击了「取消」按钮')
+      })
+    },
+    batchDelete(){
+
+      let data = {
+        topic: this.search.topic,
+        app: this.search.app,
+        status: this.search.status,
+        businessId: this.businessId
+      }
+
+      if (this.times && this.times.length === 2) {
+        data.beginTime = this.times[0]
+        data.endTime = this.times[1]
+      } else {
+        data.beginTime = ''
+        data.endTime = ''
+      }
+      apiRequest.post(this.urlOrigin.batchDelete, {}, data).then((data) => {
+        if (data == 200) {
+          this.$Dialog.success({
+            content: '批量删除成功'
+          })
+        }} else {
+          this.$Dialog.error({
+            content: data.message
+          })
+        }
       })
     },
     download (item) {

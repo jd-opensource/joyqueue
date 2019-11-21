@@ -121,6 +121,15 @@ public class RetryServiceImpl implements RetryService {
         consoleMessageRetry.updateStatus(retry.getTopic(),retry.getApp(),messageIds, RetryStatus.RETRY_ING,retry.getUpdateTime(),retry.getUpdateBy());
     }
 
+    /*
+     * @param retry
+     * @return
+     */
+    @Override
+    public void batchDelete(RetryQueryCondition retryQueryCondition, Long updateTime, int updateBy) throws Exception {
+        consoleMessageRetry.batchUpdateStatus(retryQueryCondition, RetryStatus.RETRY_DELETE,updateTime,updateBy);
+    }
+
     /**
      * 重试服务是否可用
      * @return
