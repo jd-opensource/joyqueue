@@ -391,7 +391,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
             int messageCount = 0;
             int messageSize = 0;
             for (ByteBuffer buffer : pullResult.getBuffers()) {
-                messageSize += (buffer.limit() - buffer.position());
+                messageSize += buffer.limit();
                 BrokerMessage brokerMessage = Serializer.readBrokerMessageHeader(buffer);
                 if (brokerMessage.isBatch()) {
                     messageCount += brokerMessage.getFlag();

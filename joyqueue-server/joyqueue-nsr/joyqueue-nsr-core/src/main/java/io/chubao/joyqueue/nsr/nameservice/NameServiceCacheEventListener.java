@@ -379,5 +379,6 @@ public class NameServiceCacheEventListener implements MessageListener<MetaEvent>
                 break;
             }
         }
+        nameServiceCacheManager.updateVersion();
     }
 }

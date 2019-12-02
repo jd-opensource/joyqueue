@@ -42,6 +42,7 @@ import io.chubao.joyqueue.nsr.service.internal.ProducerInternalService;
 import io.chubao.joyqueue.nsr.service.internal.TopicInternalService;
 import io.chubao.joyqueue.response.BooleanResponse;
 import io.chubao.joyqueue.toolkit.concurrent.NamedThreadFactory;
+import io.chubao.joyqueue.toolkit.config.Property;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -257,6 +258,24 @@ public class DefaultMetadataMonitorService implements MetadataMonitorService {
         }
         OperationInternalService operationInternalService = sourceInternalServiceProvider.getService(OperationInternalService.class);
         return operationInternalService.delete(operator, params);
+    }
+
+    @Override
+    public String getConfigMetadata(String key) {
+        Property property = clusterManager.getPropertySupplier().getProperty(key);
+        if (property == null) {
+            return null;
+        }
+        return String.valueOf(property.getValue());
+    }
+
+    @Override
+    public List<String> getConfigsMetadata() {
+        List<String> result = Lists.newLinkedList();
+        for (Property property : clusterManager.getPropertySupplier().getProperties()) {
+            result.add(String.valueOf(property.getValue()));
+        }
+        return result;
     }
 
     @Override

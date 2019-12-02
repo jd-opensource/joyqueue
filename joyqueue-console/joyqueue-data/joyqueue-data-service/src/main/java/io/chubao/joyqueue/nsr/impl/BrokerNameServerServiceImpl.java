@@ -127,7 +127,7 @@ public class BrokerNameServerServiceImpl extends NameServerBase implements Broke
 
     @Override
     public List<Broker> syncBrokers() throws Exception {
-        List<io.chubao.joyqueue.domain.Broker>  nsrBrokers = JSONArray.parseArray(post(LIST_BROKER,null), io.chubao.joyqueue.domain.Broker.class);
+        List<Broker>  nsrBrokers = JSONArray.parseArray(post(LIST_BROKER,null), Broker.class);
         List<Broker> brokerList = new ArrayList<>(nsrBrokers.size());
         nsrBrokers.forEach(nsrBroker->{
             Broker broker = new Broker();
@@ -147,7 +147,7 @@ public class BrokerNameServerServiceImpl extends NameServerBase implements Broke
      */
     @Override
     public int delete(Broker broker) throws Exception {
-        io.chubao.joyqueue.domain.Broker nsrBroker = new io.chubao.joyqueue.domain.Broker();
+        Broker nsrBroker = new Broker();
         nsrBroker.setIp(broker.getIp());
         nsrBroker.setRetryType(broker.getRetryType());
         nsrBroker.setPort(broker.getPort());

@@ -144,19 +144,23 @@ public class TopicConfig extends Topic implements Serializable {
         List<Partition> metadataList = new ArrayList<>();
             for (PartitionGroup group : partitionGroups.values()) {
                 for (Short partition : group.getPartitions()) {
-                    Set<Broker> irs = new HashSet<>(null == group.getIsrs() ? 0 : group.getIsrs().size());
+                    Set<Broker> isrs = new HashSet<>(null == group.getIsrs() ? 0 : group.getIsrs().size());
                     Set<Broker> replicas = new HashSet<>(null == group.getReplicas() ? 0 : group.getReplicas().size());
                     if (null != group.getIsrs()){
                         for (Integer brokerId : group.getIsrs()) {
-                            irs.add(group.getBrokers().get(brokerId));
+                            if (group.getBrokers().get(brokerId) != null) {
+                                isrs.add(group.getBrokers().get(brokerId));
+                            }
                         }
                     }
                     if (null != group.getReplicas()){
                         for (Integer brokerId : group.getReplicas()) {
-                            replicas.add(group.getBrokers().get(brokerId));
+                            if (group.getBrokers().get(brokerId) != null) {
+                                replicas.add(group.getBrokers().get(brokerId));
+                            }
                         }
                     }
-                    metadataList.add(new Partition(partition, group.getBrokers().get(group.getLeader()), irs, replicas));
+                    metadataList.add(new Partition(partition, group.getBrokers().get(group.getLeader()), replicas, isrs));
                 }
             }
         return metadataList;

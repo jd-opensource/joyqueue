@@ -206,6 +206,7 @@ public class JournalkeeperTopicInternalService implements TopicInternalService {
 
     @Override
     public void leaderChange(PartitionGroup group) {
+
     }
 
     @Override

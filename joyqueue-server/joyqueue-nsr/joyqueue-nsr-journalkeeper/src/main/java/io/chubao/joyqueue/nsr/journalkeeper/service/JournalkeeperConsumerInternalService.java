@@ -66,7 +66,6 @@ public class JournalkeeperConsumerInternalService implements ConsumerInternalSer
     public Consumer add(Consumer consumer) {
         // TODO group处理
         ConsumerDTO consumerDTO = ConsumerConverter.convert(consumer);
-        consumerDTO.setReferer(consumerDTO.getApp().split("\\.")[0]);
         return ConsumerConverter.convert(consumerRepository.add(consumerDTO));
     }
 

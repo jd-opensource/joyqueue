@@ -74,8 +74,8 @@ public class KafkaConnectionHandler extends ChannelDuplexHandler {
                 kafkaConnectionManager.addProducer(transport, entry.getKey());
             }
         } else if (payload instanceof FindCoordinatorRequest) {
-            FindCoordinatorRequest findCoordinatorRequest = (FindCoordinatorRequest) payload;
-            kafkaConnectionManager.addGroup(transport, findCoordinatorRequest.getCoordinatorKey());
+//            FindCoordinatorRequest findCoordinatorRequest = (FindCoordinatorRequest) payload;
+//            kafkaConnectionManager.addGroup(transport, findCoordinatorRequest.getCoordinatorKey());
         }
     }
 }

@@ -15,6 +15,8 @@
  */
 package io.chubao.joyqueue.broker.consumer.position.model;
 
+import java.util.Objects;
+
 /**
  * 位置信息（消费序号/拉取序号）
  * <p>
@@ -29,6 +31,7 @@ public class Position implements Cloneable {
     private volatile long pullStartIndex;
     // 结束拉取序号
     private volatile long pullCurIndex;
+    private volatile boolean ack = false;
 
     public Position() {
 
@@ -74,6 +77,28 @@ public class Position implements Cloneable {
         return pullCurIndex;
     }
 
+    public boolean isAck() {
+        return ack;
+    }
+
+    public void setAck(boolean ack) {
+        this.ack = ack;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Position position = (Position) o;
+        return ackStartIndex == position.ackStartIndex &&
+                ackCurIndex == position.ackCurIndex;
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(ackStartIndex, ackCurIndex);
+    }
 
     @Override
     public Position clone() throws CloneNotSupportedException {

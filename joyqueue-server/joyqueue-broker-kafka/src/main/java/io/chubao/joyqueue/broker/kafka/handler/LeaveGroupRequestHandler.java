@@ -15,12 +15,12 @@
  */
 package io.chubao.joyqueue.broker.kafka.handler;
 
-import io.chubao.joyqueue.broker.kafka.KafkaContextAware;
-import io.chubao.joyqueue.broker.kafka.coordinator.group.GroupCoordinator;
 import io.chubao.joyqueue.broker.kafka.KafkaCommandType;
 import io.chubao.joyqueue.broker.kafka.KafkaContext;
+import io.chubao.joyqueue.broker.kafka.KafkaContextAware;
 import io.chubao.joyqueue.broker.kafka.command.LeaveGroupRequest;
 import io.chubao.joyqueue.broker.kafka.command.LeaveGroupResponse;
+import io.chubao.joyqueue.broker.kafka.coordinator.group.GroupCoordinator;
 import io.chubao.joyqueue.network.transport.Transport;
 import io.chubao.joyqueue.network.transport.command.Command;
 import org.slf4j.Logger;
@@ -46,7 +46,8 @@ public class LeaveGroupRequestHandler extends AbstractKafkaCommandHandler implem
     @Override
     public Command handle(Transport transport, Command command) {
         LeaveGroupRequest leaveGroupRequest = (LeaveGroupRequest) command.getPayload();
-        short errorCode = groupCoordinator.handleLeaveGroup(leaveGroupRequest.getGroupId(), leaveGroupRequest.getMemberId());
+        String groupId = leaveGroupRequest.getGroupId();
+        short errorCode = groupCoordinator.handleLeaveGroup(groupId, leaveGroupRequest.getMemberId());
         LeaveGroupResponse leaveGroupResponse = new LeaveGroupResponse(errorCode);
         return new Command(leaveGroupResponse);
     }

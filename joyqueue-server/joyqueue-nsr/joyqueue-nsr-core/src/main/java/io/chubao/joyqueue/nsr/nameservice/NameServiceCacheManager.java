@@ -61,6 +61,7 @@ public class NameServiceCacheManager extends Service {
     private NameServiceCacheDoubleCopy nameServiceCacheDoubleCopy;
     private volatile NameServiceCache cache;
     private ReentrantLock lock = new ReentrantLock();
+    private volatile int version = 0;
 
     public NameServiceCacheManager(NameServiceConfig config) {
         this.config = config;
@@ -439,5 +440,13 @@ public class NameServiceCacheManager extends Service {
 
     public boolean isLocked() {
         return lock.isLocked();
+    }
+
+    public int getVersion() {
+        return version;
+    }
+
+    public void updateVersion() {
+        version++;
     }
 }

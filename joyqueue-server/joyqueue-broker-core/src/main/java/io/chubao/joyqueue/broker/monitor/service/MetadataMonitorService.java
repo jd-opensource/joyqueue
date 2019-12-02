@@ -131,6 +131,18 @@ public interface MetadataMonitorService {
     Object deleteMetadata(String source, String operator, List<Object> params);
 
     /**
+     * 返回所有配置元数据
+     * @return
+     */
+    String getConfigMetadata(String key);
+
+    /**
+     * 返回所有配置元数据
+     * @return
+     */
+    List<String> getConfigsMetadata();
+
+    /**
      * 查询集群信息
      * @return
      */

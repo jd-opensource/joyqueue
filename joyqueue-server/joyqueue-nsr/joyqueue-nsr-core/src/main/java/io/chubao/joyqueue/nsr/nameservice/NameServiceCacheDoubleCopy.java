@@ -82,7 +82,7 @@ public class NameServiceCacheDoubleCopy extends DoubleCopy {
             data = ZipUtil.decompress(data).getBytes();
             NameServiceCacheEntry entry = JSON.parseObject(data, NameServiceCacheEntry.class);
 
-            if (entry.getVersion() != CURRENT_VERSION) {
+            if (entry != null && entry.getVersion() != CURRENT_VERSION) {
                 logger.warn("nameservice cache check version failed, current: {}, required: {}", entry.getVersion(), CURRENT_VERSION);
                 throw new NsrException("check version failed");
             }

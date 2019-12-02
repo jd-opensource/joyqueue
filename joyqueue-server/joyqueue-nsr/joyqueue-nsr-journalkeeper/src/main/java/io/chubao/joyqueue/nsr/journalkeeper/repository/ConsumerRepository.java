@@ -28,7 +28,7 @@ import java.util.List;
 public class ConsumerRepository extends BaseRepository {
 
     private static final String TABLE = "consumer";
-    private static final String COLUMNS = "id, topic, namespace, app, topic_type, client_type, referer, consume_policy, retry_policy, limit_policy";
+    private static final String COLUMNS = "id, topic, namespace, app, topic_type, client_type, referer, `group`, consume_policy, retry_policy, limit_policy";
     private static final String UPDATE_COLUMNS = "topic = ?, namespace = ?, app = ?, topic_type = ?, client_type = ?, " +
             "referer = ?, consume_policy = ?, retry_policy = ?, limit_policy = ?";
 
@@ -42,7 +42,7 @@ public class ConsumerRepository extends BaseRepository {
             COLUMNS, TABLE);
     private static final String GET_ALL = String.format("SELECT %s FROM %s ORDER BY id",
             COLUMNS, TABLE);
-    private static final String ADD = String.format("INSERT INTO %s(%s) VALUES(?,?,?,?,?,?,?,?,?,?)",
+    private static final String ADD = String.format("INSERT INTO %s(%s) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
             TABLE, COLUMNS);
     private static final String UPDATE_BY_ID = String.format("UPDATE %s SET %s WHERE id = ?",
             TABLE, UPDATE_COLUMNS);
@@ -75,8 +75,8 @@ public class ConsumerRepository extends BaseRepository {
 
     public ConsumerDTO add(ConsumerDTO consumerDTO) {
         insert(ADD, consumerDTO.getId(), consumerDTO.getTopic(), consumerDTO.getNamespace(), consumerDTO.getApp(),
-                consumerDTO.getTopicType(), consumerDTO.getClientType(), consumerDTO.getReferer(), consumerDTO.getConsumePolicy(),
-                consumerDTO.getRetryPolicy(), consumerDTO.getLimitPolicy());
+                consumerDTO.getTopicType(), consumerDTO.getClientType(), consumerDTO.getReferer(), consumerDTO.getGroup(),
+                consumerDTO.getConsumePolicy(), consumerDTO.getRetryPolicy(), consumerDTO.getLimitPolicy());
         return consumerDTO;
     }
 

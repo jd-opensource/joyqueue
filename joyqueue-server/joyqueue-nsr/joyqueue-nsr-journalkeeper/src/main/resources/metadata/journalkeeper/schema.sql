@@ -58,6 +58,7 @@ CREATE TABLE IF NOT EXISTS `consumer` (
 	`app` varchar(255),
 	`topic_type` tinyint(1),
 	`client_type` tinyint(1),
+	`group` varchar(255),
 	`referer` varchar(255),
 	`consume_policy` varchar(1024),
 	`retry_policy` varchar(1024),

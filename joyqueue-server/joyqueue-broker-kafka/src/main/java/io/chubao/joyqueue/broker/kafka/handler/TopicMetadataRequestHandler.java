@@ -203,12 +203,16 @@ public class TopicMetadataRequestHandler extends AbstractKafkaCommandHandler imp
                 errorCode = KafkaErrorCode.LEADER_NOT_AVAILABLE.getCode();
             }
 
-            for (Broker replica : partition.getReplicas()) {
-                replicas.add(new KafkaBroker(replica.getId(), replica.getIp(), replica.getPort()));
+            if (CollectionUtils.isNotEmpty(partition.getReplicas())) {
+                for (Broker replica : partition.getReplicas()) {
+                    replicas.add(new KafkaBroker(replica.getId(), replica.getIp(), replica.getPort()));
+                }
             }
 
-            for (Broker isr : partition.getIsrs()) {
-                isrs.add(new KafkaBroker(isr.getId(), isr.getIp(), isr.getPort()));
+            if (CollectionUtils.isNotEmpty(partition.getIsrs())) {
+                for (Broker isr : partition.getIsrs()) {
+                    isrs.add(new KafkaBroker(isr.getId(), isr.getIp(), isr.getPort()));
+                }
             }
 
             KafkaPartitionMetadata kafkaPartitionMetadata = new KafkaPartitionMetadata(partition.getPartitionId(), leader, replicas, isrs, errorCode);

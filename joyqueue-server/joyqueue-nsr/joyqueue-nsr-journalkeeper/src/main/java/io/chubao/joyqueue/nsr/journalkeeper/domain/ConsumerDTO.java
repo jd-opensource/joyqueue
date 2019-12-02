@@ -32,6 +32,7 @@ public class ConsumerDTO extends BaseDTO {
     private Byte topicType;
     @Column(alias = "client_type")
     private Byte clientType;
+    private String group;
     private String referer;
     @Column(alias = "consume_policy")
     private String consumePolicy;
@@ -86,6 +87,14 @@ public class ConsumerDTO extends BaseDTO {
 
     public void setClientType(Byte clientType) {
         this.clientType = clientType;
+    }
+
+    public void setGroup(String group) {
+        this.group = group;
+    }
+
+    public String getGroup() {
+        return group;
     }
 
     public String getReferer() {

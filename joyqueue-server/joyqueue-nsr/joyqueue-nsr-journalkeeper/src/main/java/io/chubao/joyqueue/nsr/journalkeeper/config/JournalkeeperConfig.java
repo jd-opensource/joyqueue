@@ -76,8 +76,12 @@ public class JournalkeeperConfig {
         return PropertySupplier.getValue(propertySupplier, JournalkeeperConfigKey.INIT_FILE);
     }
 
-    public int getSnapshotStep() {
-        return PropertySupplier.getValue(propertySupplier, JournalkeeperConfigKey.SNAPSHOT_STEP);
+    public int getSnapshotIntervalSec() {
+        return PropertySupplier.getValue(propertySupplier, JournalkeeperConfigKey.SNAPSHOT_INTERVAL_SEC);
+    }
+
+    public int getJournalRetentionMin() {
+        return PropertySupplier.getValue(propertySupplier, JournalkeeperConfigKey.JOURNAL_RETENTION_MIN_KEY);
     }
 
     public int getRpcTimeout() {

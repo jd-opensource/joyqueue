@@ -132,6 +132,7 @@ public class NameServer extends Service implements NameService, PropertySupplier
     private static final Logger logger = LoggerFactory.getLogger(NameServer.class);
 
     private Cache<String, Map<TopicName, TopicConfig>> appTopicCache;
+    private Cache<String, Optional<TopicConfig>> topicCache;
 
     public NameServer() {
 
@@ -161,6 +162,11 @@ public class NameServer extends Service implements NameService, PropertySupplier
             }
             if (appTopicCache == null) {
                 this.appTopicCache = CacheBuilder.newBuilder()
+                        .expireAfterWrite(nameServerConfig.getCacheExpireTime(), TimeUnit.MILLISECONDS)
+                        .build();
+            }
+            if (topicCache == null) {
+                this.topicCache = CacheBuilder.newBuilder()
                         .expireAfterWrite(nameServerConfig.getCacheExpireTime(), TimeUnit.MILLISECONDS)
                         .build();
             }
@@ -317,6 +323,22 @@ public class NameServer extends Service implements NameService, PropertySupplier
 
     @Override
     public TopicConfig getTopicConfig(TopicName topicName) {
+        if (nameServerConfig.getCacheEnable()) {
+            try {
+                Optional<TopicConfig> result = topicCache.get(topicName.getFullName(), () -> {
+                    return Optional.ofNullable(doGetTopicConfig(topicName));
+                });
+                return (result.isPresent() ? result.get() : null);
+            } catch (Exception e) {
+                logger.error("getTopicConfig exception, topicName: {}", topicName, e);
+                throw new NsrException(e);
+            }
+        } else {
+            return doGetTopicConfig(topicName);
+        }
+    }
+
+    protected TopicConfig doGetTopicConfig(TopicName topicName) {
         Topic topic = metaManager.getTopicByName(topicName);
         if (null == topic) {
             return null;

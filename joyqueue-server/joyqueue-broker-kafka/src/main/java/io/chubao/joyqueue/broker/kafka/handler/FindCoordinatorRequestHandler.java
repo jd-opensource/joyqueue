@@ -62,7 +62,8 @@ public class FindCoordinatorRequestHandler extends AbstractKafkaCommandHandler i
     public Command handle(Transport transport, Command command) {
         FindCoordinatorRequest findCoordinatorRequest = (FindCoordinatorRequest) command.getPayload();
         CoordinatorType coordinatorType = ObjectUtils.defaultIfNull(findCoordinatorRequest.getCoordinatorType(), CoordinatorType.GROUP);
-        String coordinatorKey = findCoordinatorRequest.getCoordinatorKey();
+//        String coordinatorKey = findCoordinatorRequest.getCoordinatorKey();
+        String coordinatorKey = findCoordinatorRequest.getClientId();
         if (coordinatorType.equals(CoordinatorType.TRANSACTION)) {
             coordinatorKey = findCoordinatorRequest.getClientId();
         }

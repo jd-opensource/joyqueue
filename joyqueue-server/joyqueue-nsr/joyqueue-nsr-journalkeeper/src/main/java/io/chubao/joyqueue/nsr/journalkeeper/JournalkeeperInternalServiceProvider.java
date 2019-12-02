@@ -74,7 +74,8 @@ public class JournalkeeperInternalServiceProvider extends Service implements Int
             }
         }
 
-        result.setProperty(AbstractServer.Config.SNAPSHOT_STEP_KEY, String.valueOf(config.getSnapshotStep()));
+        result.setProperty(AbstractServer.Config.SNAPSHOT_INTERVAL_SEC_KEY, String.valueOf(config.getSnapshotIntervalSec()));
+        result.setProperty(AbstractServer.Config.JOURNAL_RETENTION_MIN_KEY, String.valueOf(config.getJournalRetentionMin()));
         result.setProperty(AbstractServer.Config.RPC_TIMEOUT_MS_KEY, String.valueOf(config.getRpcTimeout()));
         result.setProperty(AbstractServer.Config.FLUSH_INTERVAL_MS_KEY, String.valueOf(config.getFlushInterval()));
         result.setProperty(AbstractServer.Config.WORKING_DIR_KEY, String.valueOf(config.getWorkingDir()));

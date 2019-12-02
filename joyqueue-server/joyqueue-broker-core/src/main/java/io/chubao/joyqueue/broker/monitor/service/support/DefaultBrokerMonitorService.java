@@ -349,6 +349,16 @@ public class DefaultBrokerMonitorService implements BrokerMonitorService {
     }
 
     @Override
+    public String getConfigMetadata(String key) {
+        return metadataMonitorService.getConfigMetadata(key);
+    }
+
+    @Override
+    public List<String> getConfigsMetadata() {
+        return metadataMonitorService.getConfigsMetadata();
+    }
+
+    @Override
     public String getMetadataCluster() {
         return metadataMonitorService.getMetadataCluster();
     }

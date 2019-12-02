@@ -140,18 +140,6 @@ public class Broker implements Serializable {
         return port + 3;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o){
-            return true;
-        }
-        if (o == null || !(o instanceof Broker)){
-            return false;
-        }
-        Broker broker = (Broker) o;
-        return id == broker.id;
-    }
-
     public enum PermissionEnum {
         FULL(0,"FULL"),
         READ(1,"READ"),
@@ -192,9 +180,23 @@ public class Broker implements Serializable {
         }
     }
 
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || !(o instanceof Broker)) return false;
+        Broker broker = (Broker) o;
+        return id == broker.id &&
+                port == broker.port &&
+                Objects.equals(ip, broker.ip) &&
+                Objects.equals(dataCenter, broker.dataCenter) &&
+                Objects.equals(retryType, broker.retryType) &&
+                permission == broker.permission;
+    }
+
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(id, ip, port, dataCenter, retryType, permission);
     }
 
     @Override

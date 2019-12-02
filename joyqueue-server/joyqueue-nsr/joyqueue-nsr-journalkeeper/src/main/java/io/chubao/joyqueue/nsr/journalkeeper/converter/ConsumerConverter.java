@@ -50,7 +50,12 @@ public class ConsumerConverter {
         consumerDTO.setTopic(consumer.getTopic().getCode());
         consumerDTO.setNamespace(consumer.getTopic().getNamespace());
         consumerDTO.setApp(consumer.getApp());
-        consumerDTO.setReferer(consumer.getApp());
+        consumerDTO.setReferer(consumerDTO.getApp().split("\\.")[0]);
+
+        String[] group = consumer.getApp().split("\\.");
+        if (group.length == 2) {
+            consumerDTO.setGroup(group[1]);
+        }
         return consumerDTO;
     }
 

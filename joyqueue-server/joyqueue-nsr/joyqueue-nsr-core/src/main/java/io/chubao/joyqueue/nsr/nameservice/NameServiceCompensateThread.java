@@ -96,7 +96,7 @@ public class NameServiceCompensateThread extends Service implements Runnable {
                 return;
             }
 
-            int oldVersion = oldCache.getVersion();
+            int oldVersion = nameServiceCacheManager.getVersion();
 
             if (logger.isDebugEnabled()) {
                 logger.debug("doCompensate pre, oldCache: {}", JSON.toJSONString(oldCache));
@@ -110,7 +110,7 @@ public class NameServiceCompensateThread extends Service implements Runnable {
                         JSON.toJSONString(oldCache), JSON.toJSONString(newCache), JSON.toJSONString(allMetadata));
             }
 
-            if (!nameServiceCacheManager.isLocked() && oldCache.getVersion() == oldVersion) {
+            if (!nameServiceCacheManager.isLocked() && nameServiceCacheManager.getVersion() == oldVersion) {
                 if (config.getCompensationEnable()) {
                     nameServiceCompensator.compensate(oldCache, newCache);
                 }

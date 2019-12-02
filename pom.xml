@@ -117,7 +117,6 @@
         <hbase.version>1.4.8</hbase.version>
         <mockito2.version>2.8.9</mockito2.version>
         <git-commit-id-pulgin.version>2.1.10</git-commit-id-pulgin.version>
-        <openmessaging-spring.version>0.0.1-SNAPSHOT</openmessaging-spring.version>
         <openmessaging-api.version>1.0.0-alpha</openmessaging-api.version>
         <asm.version>6.2.1</asm.version>
         <jackson-dataformat.version>2.9.9</jackson-dataformat.version>
@@ -607,12 +606,12 @@
             <dependency>
                 <groupId>io.chubao</groupId>
                 <artifactId>openmessaging-spring</artifactId>
-                <version>${openmessaging-spring.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.chubao</groupId>
                 <artifactId>openmessaging-spring-boot-starter</artifactId>
-                <version>${openmessaging-spring.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.openmessaging</groupId>

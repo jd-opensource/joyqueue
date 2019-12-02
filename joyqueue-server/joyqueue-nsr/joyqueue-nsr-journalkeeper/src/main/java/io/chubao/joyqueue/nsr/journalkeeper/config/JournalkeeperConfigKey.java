@@ -34,7 +34,9 @@ public enum JournalkeeperConfigKey implements PropertyDef {
     WORKING_DIR("nameserver.journalkeeper.working.dir", null, PropertyDef.Type.STRING),
     INIT_FILE("nameserver.journalkeeper.init.file", "/metadata/journalkeeper/schema.sql", PropertyDef.Type.STRING),
 
-    SNAPSHOT_STEP("nameserver.journalkeeper.snapshot.step", 0, PropertyDef.Type.INT),
+    SNAPSHOT_INTERVAL_SEC("nameserver.journalkeeper.snapshot.interval.sec", 0, PropertyDef.Type.INT),
+
+    JOURNAL_RETENTION_MIN_KEY("nameserver.journalkeeper.journal.retention.min", 0, PropertyDef.Type.INT),
 
     RPC_TIMEOUT("nameserver.journalkeeper.rpc.timeout", 1000 * 60 * 1, PropertyDef.Type.INT),
 

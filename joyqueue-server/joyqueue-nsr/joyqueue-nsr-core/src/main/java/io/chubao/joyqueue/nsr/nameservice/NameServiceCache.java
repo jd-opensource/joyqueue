@@ -184,12 +184,4 @@ public class NameServiceCache {
     public void setDataCenterCodeMap(Map<String, DCWrapper> dataCenterCodeMap) {
         this.dataCenterCodeMap = dataCenterCodeMap;
     }
-
-    public int getVersion() {
-        return version;
-    }
-
-    public void updateVersion() {
-        version++;
-    }
 }

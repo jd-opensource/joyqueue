@@ -399,6 +399,10 @@ public class ClusterManager extends Service {
         return getConsumerPolicyOrDefault(consumer);
     }
 
+    public PropertySupplier getPropertySupplier() {
+        return brokerContext.getPropertySupplier();
+    }
+
     public int getRetryRandomBound() {
         return PropertySupplier.getValue(brokerContext.getPropertySupplier(), RETRY_RANDOM_BOUND);
     }
@@ -669,12 +673,14 @@ public class ClusterManager extends Service {
         Boolean paused = consumerPolicy.getPaused();
         if (paused) {
             // 暂停消费
+            logger.info("topic is paused, topic: {}, app: {}", topic, app);
             return BooleanResponse.failed(JoyQueueCode.FW_FETCH_TOPIC_MESSAGE_PAUSED);
         }
         Set<String> blackList = consumerPolicy.getBlackList();
         if (blackList != null) {
             // 是否在消费黑名单内
             if (blackList.stream().anyMatch(ip -> ip.equals(address))) {
+                logger.info("app client ip not readable, topic: {}, app: {}, ip: {}", topic, app, address);
                 return BooleanResponse.failed(JoyQueueCode.FW_GET_MESSAGE_APP_CLIENT_IP_NOT_READ);
             }
         }

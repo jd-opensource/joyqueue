@@ -16,6 +16,7 @@
 package io.chubao.joyqueue.nsr.ignite.service;
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import io.chubao.joyqueue.domain.Consumer;
 import io.chubao.joyqueue.domain.TopicName;
@@ -28,6 +29,7 @@ import io.chubao.joyqueue.nsr.ignite.model.IgniteConsumer;
 import io.chubao.joyqueue.nsr.ignite.model.IgniteConsumerConfig;
 import io.chubao.joyqueue.nsr.model.ConsumerQuery;
 import io.chubao.joyqueue.nsr.service.internal.ConsumerInternalService;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +38,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author wylixiaobin
@@ -90,22 +93,46 @@ public class IgniteConsumerInternalService implements ConsumerInternalService {
 
     @Override
     public List<Consumer> getByApp(String app) {
-        ConsumerQuery consumerQuery = new ConsumerQuery();
-        consumerQuery.setReferer(app);
-        List<IgniteConsumer> igniteConsumers = consumerDao.list(consumerQuery);
-        if (null == igniteConsumers || igniteConsumers.size() < 1) Collections.emptyList();
+        Set<IgniteConsumer> consumers = Sets.newHashSet();
+
+        ConsumerQuery referConsumerQuery = new ConsumerQuery();
+        referConsumerQuery.setReferer(app);
+        List<IgniteConsumer> refererConsumers = consumerDao.list(referConsumerQuery);
+
+        ConsumerQuery appConsumerQuery = new ConsumerQuery();
+        appConsumerQuery.setApp(app);
+        List<IgniteConsumer> appConsumers = consumerDao.list(appConsumerQuery);
+
+        if (CollectionUtils.isNotEmpty(refererConsumers)) {
+            consumers.addAll(refererConsumers);
+        }
+
+        if (CollectionUtils.isNotEmpty(appConsumers)) {
+            consumers.addAll(appConsumers);
+        }
+
+        if (null == consumers || consumers.size() < 1) Collections.emptyList();
         Map<String, IgniteConsumerConfig> configs = new HashMap<>();
-            List<IgniteConsumerConfig> igniteConsumerConfigs = consumerConfigDao.list(consumerQuery);
-        if (null != igniteConsumerConfigs && igniteConsumerConfigs.size() > 0) {
-            igniteConsumerConfigs.forEach(config -> {
+        List<IgniteConsumerConfig> refererConsumerConfigs = consumerConfigDao.list(referConsumerQuery);
+        List<IgniteConsumerConfig> appConsumerConfigs = consumerConfigDao.list(appConsumerQuery);
+
+        if (CollectionUtils.isNotEmpty(refererConsumerConfigs)) {
+            refererConsumerConfigs.forEach(config -> {
                 configs.put(config.getId(), config);
             });
         }
-        List<Consumer> consumers = new ArrayList<>();
-        igniteConsumers.forEach(consumer -> {
-            consumers.add(consumer.fillConfig(configs.get(consumer.getId())));
+
+        if (CollectionUtils.isNotEmpty(appConsumerConfigs)) {
+            appConsumerConfigs.forEach(config -> {
+                configs.put(config.getId(), config);
+            });
+        }
+
+        List<Consumer> result = new ArrayList<>();
+        consumers.forEach(consumer -> {
+            result.add(consumer.fillConfig(configs.get(consumer.getId())));
         });
-        return consumers;
+        return result;
     }
 
     public IgniteConsumer toIgniteModel(Consumer model) {

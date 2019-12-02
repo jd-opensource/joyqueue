@@ -247,14 +247,17 @@ public class MetadataSynchronizer {
                 if (targetItem != null) {
                     if (!item.equals(targetItem)) {
                         logger.info("not equals, source: {}, target: {}", item, targetItem);
-                        deleteConsumer.accept(item);
-                        addConsumer.accept(item);
+                        if (!onlyCompare) {
+                            deleteConsumer.accept(item);
+                            addConsumer.accept(item);
+                        }
                         success++;
                     } else {
                         failure++;
                     }
                 } else {
                     try {
+                        logger.info("not exist, source: {}, target: {}", item, targetItem);
                         if (!onlyCompare) {
                             addConsumer.accept(item);
                         }
