@@ -15,6 +15,7 @@
  */
 package io.chubao.joyqueue.service;
 
+import io.chubao.joyqueue.domain.TopicName;
 import io.chubao.joyqueue.model.PageResult;
 import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.model.domain.AppUnsubscribedTopic;
@@ -65,5 +66,13 @@ public interface TopicService extends NsrService<Topic ,String> {
     Topic findByCode(String namespaceCode, String code);
 
     PageResult<Topic> search(QPageQuery<QTopic> query);
+
+    /**
+     * 查询broker 上所有的 topic full name
+     * @param brokerId
+     * @return topic full name list
+     **/
+
+    List<TopicName> findTopic(String brokerId) throws Exception;
 
 }

@@ -743,13 +743,23 @@ public class ManageServer extends Service {
 
 
         /** replica **/
+        router.post("/replica/getByBroker").handler(routingContext -> {
+            try{
+                ReplicaQuery replicaQuery = JSONObject.parseObject(routingContext.getBodyAsString(), ReplicaQuery.class);
+                routingContext.response().putHeader(CONTENT_TYPE, APPLICATION_JSON)
+                        .end(JSON.toJSONString(partitionGroupReplicaService.getByBrokerId(replicaQuery.getBrokerId())));
+            }catch (Exception e){
+                logger.error("replica getByBroker error",e);
+                routingContext.fail(e);
+            }
+        });
         router.post("/replica/getByTopic").handler(routingContext -> {
             try{
                 ReplicaQuery replicaQuery = JSONObject.parseObject(routingContext.getBodyAsString(), ReplicaQuery.class);
                 routingContext.response().putHeader(CONTENT_TYPE, APPLICATION_JSON)
                         .end(JSON.toJSONString(partitionGroupReplicaService.getByTopic(TopicName.parse(replicaQuery.getTopic(), replicaQuery.getNamespace()))));
             }catch (Exception e){
-                logger.error("replica getById error",e);
+                logger.error("replica getByTopic error",e);
                 routingContext.fail(e);
             }
         });
@@ -759,7 +769,7 @@ public class ManageServer extends Service {
                 routingContext.response().putHeader(CONTENT_TYPE, APPLICATION_JSON)
                         .end(JSON.toJSONString(partitionGroupReplicaService.getByTopicAndGroup(TopicName.parse(replicaQuery.getTopic(), replicaQuery.getNamespace()), replicaQuery.getGroup())));
             }catch (Exception e){
-                logger.error("replica getById error",e);
+                logger.error("replica getByTopicAndGroup error",e);
                 routingContext.fail(e);
             }
         });

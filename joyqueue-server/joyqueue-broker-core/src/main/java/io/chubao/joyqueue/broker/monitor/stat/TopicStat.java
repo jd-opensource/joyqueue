@@ -37,6 +37,9 @@ public class TopicStat implements Serializable {
     private ConcurrentMap<String /** app **/, AppStat> appStatMap = Maps.newConcurrentMap();
     private ConcurrentMap<Integer /** partitionGroupId **/, PartitionGroupStat> partitionGroupStatMap = Maps.newConcurrentMap();
 
+    // 不能放这
+    private long storeSize;
+
     public TopicStat(String topic) {
         this.topic = topic;
     }
@@ -107,5 +110,13 @@ public class TopicStat implements Serializable {
 
     public ConcurrentMap<Integer, PartitionGroupStat> getPartitionGroupStatMap() {
         return partitionGroupStatMap;
+    }
+
+    public void setStoreSize(long storeSize) {
+        this.storeSize = storeSize;
+    }
+
+    public long getStoreSize() {
+        return storeSize;
     }
 }

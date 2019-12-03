@@ -135,6 +135,7 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
         }
 
         TopicStat topicStat = brokerStat.getOrCreateTopicStat(topic);
+        topicStat.getEnQueueStat().mark(time, size, count);
         AppStat appStat = topicStat.getOrCreateAppStat(app);
 //            PartitionGroupStat partitionGroupStat = appStat.getOrCreatePartitionGroupStat(partitionGroup);
 //            PartitionStat partitionStat = partitionGroupStat.getOrCreatePartitionStat(partition);
@@ -167,6 +168,8 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
             return;
         }
         TopicStat topicStat = brokerStat.getOrCreateTopicStat(topic);
+        topicStat.getDeQueueStat().mark(time, size, count);
+
         AppStat appStat = topicStat.getOrCreateAppStat(app);
 //            PartitionGroupStat partitionGroupStat = appStat.getOrCreatePartitionGroupStat(partitionGroup);
 //            PartitionStat partitionStat = partitionGroupStat.getOrCreatePartitionStat(partition);

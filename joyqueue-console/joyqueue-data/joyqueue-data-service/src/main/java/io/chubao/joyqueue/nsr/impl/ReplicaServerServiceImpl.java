@@ -39,6 +39,7 @@ public class ReplicaServerServiceImpl extends NameServerBase implements ReplicaS
     public static final String GETBYID_REPLICA = "/replica/getById";
     public static final String GETBYTOPIC_REPLICA = "/replica/getByTopic";
     public static final String GETBYTOPICANDGROUP_REPLICA = "/replica/getByTopicAndGroup";
+    public static final String GETBYBROKER_REPLICA = "/replica/getByBroker";
     private NsrReplicaConverter nsrReplicaConverter = new NsrReplicaConverter();
 
     @Override
@@ -91,4 +92,15 @@ public class ReplicaServerServiceImpl extends NameServerBase implements ReplicaS
         String result = postWithLog(UPDATE_REPLICA,replica,OperLog.Type.REPLICA.value(),OperLog.OperType.UPDATE.value(),replica.getTopic().getCode());
         return isSuccess(result);
     }
+
+    @Override
+    public List<PartitionGroupReplica> findPartitionGroupReplica(int brokerId) throws Exception {
+        ReplicaQuery replicaQuery = new ReplicaQuery();
+        replicaQuery.setBrokerId(brokerId);
+
+        String result = post(GETBYBROKER_REPLICA, replicaQuery);
+        List<Replica> replicas = JSON.parseArray(result,Replica.class);
+        return replicas.stream().map(replica -> nsrReplicaConverter.revert(replica)).collect(Collectors.toList());
+    }
+
 }

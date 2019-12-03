@@ -27,6 +27,9 @@
         <route inherit="get"
                path="/v1/application/get/:id" handlers="validateApplication validateApplicationMember application#get render"
                errors="error"/>
+        <route inherit="get"
+               path="/v1/application/getByCode/:appCode" handlers="validateApplication validateApplicationMember application#getByCode render"
+               errors="error"/>
         <route inherit="post"
                path="/v1/application/add" handlers="validateAdmin application#add render"
                errors="error"/>

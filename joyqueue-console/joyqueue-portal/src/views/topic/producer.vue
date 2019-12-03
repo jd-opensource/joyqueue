@@ -7,6 +7,7 @@
 </template>
 
 <script>
+import Vue from 'vue'
 import producerBase from '../monitor/producerBase.vue'
 import {getAppCode, yesOrNoBtnRender, openOrCloseBtnRender, clientTypeSelectRender,
   clientTypeBtnRender} from '../../utils/common.js'
@@ -25,17 +26,43 @@ export default {
     return {
       keywordTip: '请输入应用',
       keywordName: '应用',
+      width: 80,
       colData: [
         {
           title: '应用',
           key: 'app.code',
-          formatter (row) {
-            return getAppCode(row.app, row.subscribeGroup)
+          formatter(row) {
+              return getAppCode(row.app, row.subscribeGroup)
+          },
+          render: (h, params) => {
+            const app = params.item.app
+            return h('d-button', {
+                props: {
+                    type: 'borderless',
+                    color: 'primary'
+                },
+                style: {
+                    color: '#3366FF'
+                },
+                on: {
+                    click: () => {
+                        this.$router.push({
+                            name: `/${this.$i18n.locale}/application/detail`,
+                            query: {
+                                id: app.id,
+                                app: app.code,
+                                tab: 'producer'
+                            }
+                        })
+                    }
+                }
+            }, app.code)
           }
         },
         {
           title: '主题',
-          key: 'topic.code'
+          key: 'topic.code',
+          width: 100
         },
         {
           title: '命名空间',
@@ -47,11 +74,27 @@ export default {
         // },
         {
           title: '连接数',
-          key: 'connections'
+          key: 'connections',
+          width: 100,
+          render: (h, params) => {
+            const connections = params.item.connections
+            const formatNumFilter = Vue.filter('formatNum')
+            return h('label', formatNumFilter(connections))
+          }
         },
         {
           title: '入队数',
-          key: 'enQuence.count'
+          key: 'enQuence.count',
+          width: 150,
+          render: (h, params) => {
+            const enQuence = params.item.enQuence
+            if (!enQuence) {
+              return h('label', '')
+            } else {
+              const formatNumFilter = Vue.filter('formatNum')
+              return h('label', formatNumFilter(enQuence.count))
+            }
+          }
         },
         {
           title: '生产权重',

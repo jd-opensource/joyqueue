@@ -13,25 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.chubao.joyqueue.nsr;
+package io.chubao.joyqueue.toolkit.vm;
 
-import io.chubao.joyqueue.model.domain.PartitionGroupReplica;
-
-import java.util.List;
 
 /**
- * Created by wangxiaofei1 on 2019/1/3.
- */
-public interface ReplicaServerService extends NsrService<PartitionGroupReplica, String> {
+ *  GC event type
+ *
+ *
+ **/
+public enum GCEventType {
 
-    List<PartitionGroupReplica> findByTopic(String topic, String namespace);
+    END_OF_MINOR("end of minor GC",0),
+    END_OF_MAJOR("end of major GC",1);
+    private String name;
+    private int value;
+    GCEventType(String name,int value){
+        this.name=name;
+        this.value=value;
+    }
 
-    List<PartitionGroupReplica> findByTopicAndGroup(String topic, String namespace, int group);
+    public static GCEventType typeOf(String name) {
+       GCEventType[] types= values();
+       for(GCEventType t:types){
+           if(t.name.equals(name)){
+               return t;
+           }
+       }
+       return null;
+    }
 
-    /**
-     * 根据 broker id 查询 partition group replica
-     *
-     **/
-    List<PartitionGroupReplica>  findPartitionGroupReplica(int brokerId) throws Exception;
+
 
 }

@@ -17,7 +17,7 @@
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
               @on-detail-chart="goDetailChart" @on-current-change="handleCurrentChange" @on-detail="openDetailTab"
               @on-config="openConfigDialog" @on-weight="openWeightDialog" @on-cancel-subscribe="cancelSubscribe"
-              @on-summary-chart="goSummaryChart" @on-performance-chart="goPerformanceChart" @on-rateLimit="openRateLimitDialog"/>
+              @on-summary-chart="goSummaryChart" @on-performance-chart="goPerformanceChart" @on-rateLimit="openRateLimitDialog" @on-del="del"/>
 
     <!--生产订阅弹出框-->
     <my-dialog :dialog="subscribeDialog" @on-dialog-cancel="dialogCancel('subscribeDialog')">
@@ -113,6 +113,11 @@ export default {
           {
             txt: '限流',
             method: 'on-rateLimit'
+          },
+          {
+              txt: '删除',
+              method: 'on-del',
+              isAdmin: true
           }
         ]
       }

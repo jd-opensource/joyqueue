@@ -316,6 +316,21 @@ export function subscribeGroupAutoCompleteRender (h, params, subscribeRef) {
   })
 }
 
+export function subscribeGroupInputRender (h, params, subscribeRef) {
+  return h('d-input', {
+    props: {
+      value: params.item.subscribeGroup,
+      placeholder: '请输入订阅分组'
+    },
+    on: {
+      input: (item) => {
+      params.item.subscribeGroup = (item.value || item) || ''
+      subscribeRef.tableData.rowData[params.index] = params.item
+    }
+  }
+})
+}
+
 export function replaceChartUrl (url, namespaceCode, topicCode, appFullName) {
   if (!url || url === '') {
     return undefined

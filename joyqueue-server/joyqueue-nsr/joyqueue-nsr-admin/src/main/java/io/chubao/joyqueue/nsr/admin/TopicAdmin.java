@@ -399,7 +399,7 @@ public class TopicAdmin extends AbstractAdmin {
         Consumer.ConsumerPolicy  consumerPolicy= Consumer.ConsumerPolicy.Builder.build()
                 .ackTimeout(pubSubArg.consumerPolicyArg.ackTimeout)
                 .paused(pubSubArg.consumerPolicyArg.paused)
-                .archive(pubSubArg.consumerPolicyArg.paused)
+                .archive(pubSubArg.consumerPolicyArg.archive)
                 .blackList(pubSubArg.consumerPolicyArg.blackList)
                 .delay(pubSubArg.consumerPolicyArg.delay)
                 .batchSize(pubSubArg.consumerPolicyArg.batchSize==null?null:pubSubArg.consumerPolicyArg.batchSize.shortValue())

@@ -1,7 +1,7 @@
 <template>
   <div class="form">
     <d-form ref="form" :model="formData" :rules="rules" label-width="70px" inline label-position="left"
-            style="height:460px; overflow-y:auto; width:100%">
+            style="height:580px; overflow-y:auto; width:100%">
       <div class="top">
         <d-form-item label="消费归档:" style="width:30%">
           <d-switch v-model="formData.archive"></d-switch>
@@ -45,10 +45,10 @@
         <label class="gray_line"></label>
           <div class="bottom">
               <d-form-item label="重试次数:" prop="maxRetrys" style="width:46%" label-width="90px">
-                <d-input placeholder="默认无限制" v-model="formData.maxRetrysStr" style="width:130%"/>
+                <d-input placeholder="默认无限制" v-model.number="formData.maxRetrys" style="width:130%"/>
               </d-form-item>
               <d-form-item label="过期时间:" prop="expireTime" label-width="115px">
-                <d-input placeholder="单位ms，默认3天" v-model="formData.expireTimeStr" style="width:130%"/>
+                <d-input placeholder="单位ms，默认3天" v-model.number="formData.expireTime" style="width:130%"/>
               </d-form-item>
           </div>
       </div>
@@ -62,101 +62,156 @@ import {deepCopy} from '../../utils/assist.js'
 
 export default {
   name: 'consumer-config-form',
-  mixins: [ form ],
+  mixins: [form],
   props: {
-    type: 0, // add or edit form
-    data: {
-      type: Object,
-      default: function () {
-        return {
-          nearBy: false,
-          single: false,
-          paused: false,
-          archive: false,
-          retry: true,
-          ackTimeout: undefined,
-          batchSize: undefined,
-          maxRetrys: 0,
-          maxRetryDelay: 300000,
-          retryDelay: 0,
-          useExponentialBackOff: 0,
-          backOffMultiplier: 0,
-          expireTime: 3.0,
-          delay: undefined,
-          concurrent: 1,
-          blackList: ''
-        }
+      type: 0, // add or edit form
+      data: {
+          type: Object,
+          default: function () {
+              return {
+                  nearBy: false,
+                  single: false,
+                  paused: false,
+                  archive: false,
+                  retry: true,
+                  ackTimeout: undefined,
+                  batchSize: undefined,
+                  maxRetrys: 0,
+                  maxRetryDelay: 300000,
+                  retryDelay: 0,
+                  useExponentialBackOff: 0,
+                  backOffMultiplier: 0,
+                  expireTime: 3.0,
+                  delay: undefined,
+                  concurrent: 1,
+                  blackList: ''
+              }
+          }
       }
-    }
   },
-  data () {
+  data() {
     let numberValidator = (rule, value, callback) => {
-      console.log(22)
-      console.log(rule)
-      if ((rule.min !== undefined && value < rule.min) || (rule.max !== undefined && value > rule.max)) {
-        callback(new Error(rule.hint))
-      } else {
-        callback()
-      }
+        if ((rule.min !== undefined && value < rule.min) || (rule.max !== undefined && value > rule.max)) {
+            callback(new Error(rule.hint))
+        } else {
+            callback()
+        }
     }
     return {
-      formData: {},
-      rules: {
-        ackTimeout:
-            [
-              // {pattern: /^[1-9]+[0-9]{1,39}$/, message: '时时间至少为1s', trigger: 'change'}
-              {validator: numberValidator, type: 'number', trigger: 'change', min: 1000, hint: '超时时间至少为1s', required: false}
+        formData: {},
+        rules: {
+            ackTimeout:
+                [
+                    // {pattern: /^[1-9]+[0-9]{1,39}$/, message: '时时间至少为1s', trigger: 'change'}
+                    {
+                        validator: numberValidator,
+                        type: 'number',
+                        trigger: 'change',
+                        min: 1000,
+                        hint: '超时时间至少为1s',
+                        required: false
+                    }
+                ],
+            delay: [
+                {
+                    validator: numberValidator,
+                    type: 'number',
+                    trigger: 'change',
+                    min: 0,
+                    max: 3600000,
+                    hint: '延时必需大于等于0，且不超过3600s',
+                    required: false
+                }
             ],
-        delay: [
-          {validator: numberValidator, type: 'number', trigger: 'change', min: 0, max: 3600000, hint: '延时必需大于等于0，且不超过3600s', required: false}
-        ],
-        batchSize:
-            [
-              {validator: numberValidator, type: 'number', trigger: 'change', max: 100, min: 1, hint: '批量大小1~100', required: false}
+            batchSize:
+                [
+                    {
+                        validator: numberValidator,
+                        type: 'number',
+                        trigger: 'change',
+                        max: 100,
+                        min: 1,
+                        hint: '批量大小1~100',
+                        required: false
+                    }
+                ],
+            concurrent: [
+                {
+                    validator: numberValidator,
+                    type: 'number',
+                    trigger: 'change',
+                    max: 50,
+                    min: 1,
+                    hint: '并行度1~50',
+                    required: false
+                }
             ],
-        concurrent: [
-          {validator: numberValidator, type: 'number', trigger: 'change', max: 50, min: 1, hint: '并行度1~50', required: false}
-        ],
-        maxRetrys:
-          [
-            {validator: numberValidator, type: 'number', trigger: 'change', max: 999, min: 0, hint: '重试次数0~999', required: false}
-          ],
-        expireTime:
-          [
-            {validator: numberValidator, type: 'number', trigger: 'change', max: 259200000, min: 0, hint: '过期时间', required: false}
-          ]
-      }
+            maxRetrys:
+                [
+                    {
+                        validator: numberValidator,
+                        type: 'number',
+                        trigger: 'change',
+                        max: 999,
+                        min: 0,
+                        hint: '重试次数0~999',
+                        required: false
+                    }
+                ],
+            expireTime:
+                [
+                    {
+                        validator: numberValidator,
+                        type: 'number',
+                        trigger: 'change',
+                        max: 259200000,
+                        min: 0,
+                        hint: '过期时间0~259200000',
+                        required: false
+                    }
+                ]
+        }
     }
-  },
-  methods: {
-    getFormData () {
-      let data = deepCopy(this.formData)
-      if (!data.maxRetrysStr) {
-        data.maxRetrys = 0
-      } else {
-        data.maxRetrys = parseInt(data.maxRetrysStr)
-      }
-      if (!data.expireTimeStr) {
-        data.expireTime = 0
-      } else {
-        data.expireTime = parseInt(data.expireTimeStr)
-      }
-      return data
-    }
-  },
-  mounted () {
-    this.formData = this.data
+},
+methods: {
+    getFormData() {
+        let data = deepCopy(this.formData)
+        // if (!data.maxRetrysStr) {
+        //   data.maxRetrys = 0
+        // } else {
+        //   data.maxRetrys = parseInt(data.maxRetrysStr)
+        // }
+        // if (!data.expireTimeStr) {
+        //   data.expireTime = 0
+        // } else {
+        //   data.expireTime = parseInt(data.expireTimeStr)
+        // }
+        return data
+    },
+    validate(callback) {
+        this.$refs['form'].validate((valid) => {
+            if (valid) {
+                callback && callback()
+            } else {
+                this.$Message.error('校验失败')
+                return false
+            }
+        })
+    },
+    mounted() {
+        this.formData = this.data
 
-    if (!this.data.maxRetrys) {
-      this.formData.maxRetrysStr = ''
-    } else {
-      this.formData.maxRetrysStr = this.data.maxRetrys.toString()
-    }
+        if (!this.data.maxRetrys) {
+            this.formData.maxRetrysStr = ''
+        } else {
+            this.formData.maxRetrysStr = this.data.maxRetrys.toString()
+        }
 
-    if (!this.formData.maxRetrys) {
-      this.formData.expireTimeStr = ''
-    } else {
-      this.formData.expireTimeStr = this.data.expireTime.toString()
+        if (!this.formData.maxRetrys) {
+            this.formData.expireTimeStr = ''
+        } else {
+            this.formData.expireTimeStr = this.data.expireTime.toString()
+        }
     }
   }
 }

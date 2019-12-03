@@ -20,7 +20,7 @@
               @on-detail-chart="goDetailChart" @on-current-change="handleCurrentChange" @on-detail="openDetailTab"
               @on-msg-preview="openMsgPreviewDialog" @on-msg-detail="openMsgDetailDialog" @on-config="openConfigDialog"
               @on-performance-chart="goPerformanceChart" @on-summary-chart="goSummaryChart"  @on-rateLimit="openRateLimitDialog"
-              @on-size-change="handleSizeChange" @on-cancel-subscribe="cancelSubscribe"/>
+              @on-size-change="handleSizeChange" @on-cancel-subscribe="cancelSubscribe" @on-del="del"/>
 
     <!--Consumer subscribe dialog-->
     <my-dialog :dialog="subscribeDialog" @on-dialog-cancel="dialogCancel('subscribeDialog')">
@@ -129,7 +129,13 @@ export default {
           },
           {
             txt: '限流',
-            method: 'on-rateLimit'
+            method: 'on-rateLimit',
+            isAdmin: true
+          },
+          {
+            txt: '删除',
+            method: 'on-del',
+            isAdmin: true
           }
         ]
       }
@@ -198,7 +204,7 @@ export default {
       configDialog: {
         visible: false,
         title: '消费者配置详情',
-        width: '800',
+        width: '1000',
         showFooter: true,
         urls: {
           addOrUpdate: `/consumer/config/addOrUpdate`,
@@ -428,8 +434,10 @@ export default {
       })
     },
     configConsumerConfirm () {
-      let configData = this.$refs.configForm.getFormData()
-      this.config(configData, 'configDialog')
+      this.$refs['configForm'].validate(() => {
+          let configData = this.$refs.configForm.getFormData()
+          this.config(configData, 'configDialog')
+      })
     },
     config (configData, dialog) {
       apiRequest.post(this.configDialog.urls.addOrUpdate, {}, configData).then((data) => {

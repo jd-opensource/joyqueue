@@ -39,7 +39,7 @@ public class CompressorTest {
 
     @Test
     public void testZipCompress() throws IOException {
-        int count = Integer.MAX_VALUE;
+        int count = 10;
         String test = "热烈庆祝中华人民共和国成立70周年";
         Compressor compressor = Zlib.INSTANCE;
         for (int i = 0; i < count; i ++) {

@@ -7,6 +7,7 @@
 </template>
 
 <script>
+import Vue from 'vue'
 import consumerBase from '../monitor/consumerBase.vue'
 import {getAppCode, openOrCloseBtnRender, clientTypeSelectRender,
   clientTypeBtnRender, topicTypeBtnRender, baseBtnRender, subscribeGroupAutoCompleteRender} from '../../utils/common.js'
@@ -27,16 +28,40 @@ export default {
       keywordName: '应用',
       isRetryEnable: false,
       colData: [
-        {
-          title: '应用',
-          key: 'app.code',
-          formatter (row) {
-            return getAppCode(row.app, row.subscribeGroup)
-          }
+          {
+            title: '应用',
+            key: 'app.code',
+            width: 80,
+            render: (h, params) => {
+                const app = params.item.app
+                const appFullName = getAppCode(app, params.item.subscribeGroup)
+                return h('d-button', {
+                    props: {
+                        type: 'borderless',
+                        color: 'primary'
+                    },
+                    style: {
+                        color: '#3366FF'
+                    },
+                    on: {
+                        click: () => {
+                            this.$router.push({
+                                name: `/${this.$i18n.locale}/application/detail`,
+                                query: {
+                                    id: app.id,
+                                    app: app.code,
+                                    tab: 'consumer'
+                                }
+                            })
+                        }
+                    }
+                }, appFullName)
+            }
         },
         {
           title: '主题',
-          key: 'topic.code'
+          key: 'topic.code',
+          width: 100
         },
         {
           title: '命名空间',
@@ -44,19 +69,70 @@ export default {
         },
         {
           title: '连接数',
-          key: 'connections'
+          key: 'connections',
+          width: 100,
+          render: (h, params) => {
+            const connections = params.item.connections
+            const formatNumFilter = Vue.filter('formatNum')
+            return h('label', formatNumFilter(connections))
+          }
         },
         {
           title: '积压数',
-          key: 'pending.count'
+          key: 'pending.count',
+          width: 150,
+          render: (h, params) => {
+              const pending = params.item.pending
+              if (!pending) {
+                return h('label', '')
+              } else {
+                const formatNumFilter = Vue.filter('formatNum')
+                return h('label', formatNumFilter(pending.count))
+              }
+          }
         },
         {
           title: '出队数',
-          key: 'deQuence.count'
+          key: 'deQuence.count',
+          width: 150,
+          render: (h, params) => {
+            const deQuence = params.item.deQuence
+            if (!deQuence) {
+              return h('label', '')
+            } else {
+              const formatNumFilter = Vue.filter('formatNum')
+              return h('label', formatNumFilter(deQuence.count))
+            }
+          }
         },
         {
           title: '重试数',
-          key: 'retry.count'
+          key: 'retry.count',
+          width: 100,
+          render: (h, params) => {
+            const retry = params.item.retry
+            const formatNumFilter = Vue.filter('formatNum')
+            return h('label', {
+              style: {
+                  cursor: 'pointer',
+                  color: '#3366FF'
+              },
+              on: {
+                click: () => {
+                  this.$router.push({
+                    name: `/${this.$i18n.locale}/topic/detail`,
+                    query: {
+                      id: params.item.topic.code,
+                      app: getAppCode(params.item.app, params.item.subscribeGroup),
+                      topic: params.item.topic.code,
+                      namespace: params.item.namespace.code,
+                      tab: 'retry'
+                    }
+                  })
+                }
+              }
+            }, retry === undefined ? 0 : formatNumFilter(retry.count))
+          }
         },
         {
           title: '消息类型',

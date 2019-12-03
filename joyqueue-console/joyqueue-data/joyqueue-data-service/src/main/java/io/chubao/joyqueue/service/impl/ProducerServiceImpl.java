@@ -17,13 +17,18 @@ package io.chubao.joyqueue.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.base.Preconditions;
+import io.chubao.joyqueue.convert.CodeConverter;
 import io.chubao.joyqueue.domain.TopicName;
+import io.chubao.joyqueue.model.domain.Application;
+import io.chubao.joyqueue.model.domain.Identity;
 import io.chubao.joyqueue.model.domain.Producer;
 import io.chubao.joyqueue.model.domain.Topic;
 import io.chubao.joyqueue.nsr.ProducerNameServerService;
 import io.chubao.joyqueue.nsr.TopicNameServerService;
 import io.chubao.joyqueue.service.ApplicationService;
 import io.chubao.joyqueue.service.ProducerService;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,7 +79,7 @@ public class ProducerServiceImpl  implements ProducerService {
 
     @Override
     public Producer findById(String s) throws Exception {
-        return producerNameServerService.findById(s);
+        return fillProducer(producerNameServerService.findById(s));
     }
 
     @Override
@@ -119,7 +124,7 @@ public class ProducerServiceImpl  implements ProducerService {
     @Override
     public List<Producer> findByTopic(String namespace, String topic) {
         try {
-            return producerNameServerService.findByTopic(topic, namespace);
+            return fillProducers(producerNameServerService.findByTopic(topic, namespace));
         } catch (Exception e) {
             logger.error("findByTopic producer with nameServer failed, producer is {}, {}", namespace, topic, e);
             throw new RuntimeException(e);
@@ -129,7 +134,7 @@ public class ProducerServiceImpl  implements ProducerService {
     @Override
     public List<Producer> findByApp(String app) {
         try {
-            return producerNameServerService.findByApp(app);
+            return fillProducers(producerNameServerService.findByApp(app));
         } catch (Exception e) {
             logger.error("findByApp producer with nameServer failed, producer is {}", app, e);
             throw new RuntimeException(e);
@@ -140,7 +145,7 @@ public class ProducerServiceImpl  implements ProducerService {
     public Producer findByTopicAppGroup(String namespace, String topic, String app) {
         try {
             TopicName topicName = TopicName.parse(topic);
-            return producerNameServerService.findByTopicAppGroup(namespace, topicName.getCode(), app);
+            return fillProducer(producerNameServerService.findByTopicAppGroup(namespace, topicName.getCode(), app));
         } catch (Exception e) {
             logger.error("findByTopicAppGroup producer with nameServer failed, producer is {}, {}, {}", namespace, topic, app, e);
             throw new RuntimeException(e);
@@ -149,6 +154,30 @@ public class ProducerServiceImpl  implements ProducerService {
 
     private void checkArgument(Producer producer) {
         Preconditions.checkArgument(producer != null, "invalidate producer arg.");
+    }
+
+    protected List<Producer> fillProducers(List<Producer> producers) {
+        if (CollectionUtils.isEmpty(producers)) {
+            return producers;
+        }
+        for (Producer producer : producers) {
+            fillProducer(producer);
+        }
+        return producers;
+    }
+
+    protected Producer fillProducer(Producer producer) {
+        Identity app = producer.getApp();
+        if (app == null || StringUtils.isBlank(app.getCode())) {
+            return producer;
+        }
+
+        Application application = applicationService.findByCode(CodeConverter.convertAppFullName(app.getCode()).getCode());
+        if (application != null) {
+            app.setId(application.getId());
+            app.setName(application.getName());
+        }
+        return producer;
     }
 
 }

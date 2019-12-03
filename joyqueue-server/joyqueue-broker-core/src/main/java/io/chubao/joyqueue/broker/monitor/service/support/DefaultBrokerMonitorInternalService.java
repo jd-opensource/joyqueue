@@ -1,12 +1,12 @@
 /**
  * Copyright 2019 The JoyQueue Authors.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,6 +15,7 @@
  */
 package io.chubao.joyqueue.broker.monitor.service.support;
 
+import com.sun.management.GcInfo;
 import io.chubao.joyqueue.broker.cluster.ClusterManager;
 import io.chubao.joyqueue.broker.consumer.Consume;
 import io.chubao.joyqueue.broker.election.ElectionService;
@@ -23,8 +24,10 @@ import io.chubao.joyqueue.broker.monitor.service.BrokerMonitorInternalService;
 import io.chubao.joyqueue.broker.monitor.stat.BrokerStat;
 import io.chubao.joyqueue.broker.monitor.stat.BrokerStatExt;
 import io.chubao.joyqueue.broker.monitor.stat.ConsumerPendingStat;
+import io.chubao.joyqueue.broker.monitor.stat.JVMStat;
 import io.chubao.joyqueue.broker.monitor.stat.PartitionGroupPendingStat;
 import io.chubao.joyqueue.broker.monitor.stat.TopicPendingStat;
+import io.chubao.joyqueue.broker.monitor.stat.TopicStat;
 import io.chubao.joyqueue.domain.TopicConfig;
 import io.chubao.joyqueue.monitor.BrokerMonitorInfo;
 import io.chubao.joyqueue.monitor.BrokerStartupInfo;
@@ -33,10 +36,17 @@ import io.chubao.joyqueue.monitor.NameServerMonitorInfo;
 import io.chubao.joyqueue.monitor.StoreMonitorInfo;
 import io.chubao.joyqueue.network.session.Consumer;
 import io.chubao.joyqueue.nsr.NameService;
+import io.chubao.joyqueue.store.PartitionGroupStore;
 import io.chubao.joyqueue.store.StoreManagementService;
 import io.chubao.joyqueue.store.StoreService;
 import io.chubao.joyqueue.toolkit.format.Format;
 import io.chubao.joyqueue.toolkit.lang.Online;
+import io.chubao.joyqueue.toolkit.vm.DefaultGCNotificationParser;
+import io.chubao.joyqueue.toolkit.vm.GCEvent;
+import io.chubao.joyqueue.toolkit.vm.GCEventListener;
+import io.chubao.joyqueue.toolkit.vm.GCEventType;
+import io.chubao.joyqueue.toolkit.vm.GarbageCollectorMonitor;
+import io.chubao.joyqueue.toolkit.vm.JVMMonitorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,6 +72,9 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
     private ElectionService electionService;
     private ClusterManager clusterManager;
     private BrokerStartupInfo brokerStartupInfo;
+    private JVMMonitorService jvmMonitorService;
+    private DefaultGCNotificationParser gcNotificationParser;
+
 
     public DefaultBrokerMonitorInternalService(BrokerStat brokerStat, Consume consume,
                                                StoreManagementService storeManagementService,
@@ -75,6 +88,9 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
         this.electionService = electionManager;
         this.clusterManager = clusterManager;
         this.brokerStartupInfo = brokerStartupInfo;
+        this.jvmMonitorService = new GarbageCollectorMonitor();
+        this.gcNotificationParser = new DefaultGCNotificationParser();
+        this.gcNotificationParser.addListener((new DefaultGCEventListener(brokerStat.getJvmStat())));
     }
 
     @Override
@@ -108,17 +124,26 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
         return brokerMonitorInfo;
     }
 
-
+    // BrokerStatExt里所有对象单独生成bean，不能复用monitor的bean
     @Override
     public BrokerStatExt getExtendBrokerStat(long timeStamp) {
         BrokerStatExt statExt = new BrokerStatExt(brokerStat);
         statExt.setTimeStamp(timeStamp);
+        brokerStat.getJvmStat().setMemoryStat(jvmMonitorService.memSnapshot());
         Map<String, TopicPendingStat> topicPendingStatMap = statExt.getTopicPendingStatMap();
 
         for (TopicConfig topic : clusterManager.getTopics()) {
+            TopicStat topicStat = brokerStat.getOrCreateTopicStat(topic.getName().getFullName());
             TopicPendingStat topicPendingStat = new TopicPendingStat();
             topicPendingStat.setTopic(topic.getName().getFullName());
             topicPendingStatMap.put(topic.getName().getFullName(), topicPendingStat);
+
+            long storageSize = 0;
+            List<PartitionGroupStore> partitionGroupStores = storeService.getStore(topicStat.getTopic());
+            for (PartitionGroupStore pgStore : partitionGroupStores) {
+                storageSize += pgStore.getTotalPhysicalStorageSize();
+            }
+            topicStat.setStoreSize(storageSize);
 
             long topicPending = 0;
             List<io.chubao.joyqueue.domain.Consumer> consumers = clusterManager.getLocalConsumersByTopic(topic.getName());
@@ -164,7 +189,6 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
             }
             topicPendingStat.setPending(topicPending);
         }
-
         runtimeMemoryUsageState(statExt);
         return statExt;
     }
@@ -173,6 +197,34 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
     public BrokerStartupInfo getStartInfo() {
         return brokerStartupInfo;
     }
+
+    /**
+     *  GC event listener
+     *
+     **/
+    public class DefaultGCEventListener implements GCEventListener {
+
+        private JVMStat jvmStat;
+
+        public DefaultGCEventListener(JVMStat jvmStat) {
+            this.jvmStat = jvmStat;
+        }
+
+        @Override
+        public void handleNotification(GCEvent event) {
+            GcInfo gcInfo = event.getGcInfo().getGcInfo();
+            if (event.getType() == GCEventType.END_OF_MAJOR || event.getType() == GCEventType.END_OF_MINOR) {
+                jvmStat.getTotalGcTime().addAndGet(gcInfo.getDuration());
+                jvmStat.getTotalGcTimes().incrementAndGet();
+            }
+            if (event.getType() == GCEventType.END_OF_MAJOR) {
+                jvmStat.getOldGcTimes().mark(gcInfo.getDuration(), 1);
+            } else if (event.getType() == GCEventType.END_OF_MINOR) {
+                jvmStat.getEdenGcTimes().mark(gcInfo.getDuration(), 1);
+            }
+        }
+    }
+
 
     /**
      * fill heap and non-heap memory usage state of current
