@@ -21,6 +21,13 @@ import io.chubao.joyqueue.toolkit.config.PropertyDef;
  * @author chengzhiliang on 2018/10/22.
  */
 public enum ConsumeConfigKey implements PropertyDef {
+
+    // 重试随机范围
+    RETRY_RANDOM_BOUND("retry.random.bound", 1000, Type.INT),
+    BROADCAST_INDEX_RESET_ENABLE("consume.broadcast.index.reset.enable", true, Type.BOOLEAN),
+    BROADCAST_INDEX_RESET_INTERVAL("consume.broadcast.index.reset.interval", 1000 * 60 * 5, Type.INT),
+    BROADCAST_INDEX_RESET_TIME("consume.broadcast.index.reset.time", 1000 * 60 * 60 * 24 * 2, Type.INT),
+
     ;
     private String name;
     private Object value;

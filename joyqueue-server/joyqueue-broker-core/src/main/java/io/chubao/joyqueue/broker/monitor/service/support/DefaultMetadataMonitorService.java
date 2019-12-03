@@ -16,6 +16,7 @@
 package io.chubao.joyqueue.broker.monitor.service.support;
 
 import com.alibaba.fastjson.JSON;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jd.laf.extension.ExtensionPoint;
 import com.jd.laf.extension.ExtensionPointLazy;
@@ -29,6 +30,7 @@ import io.chubao.joyqueue.nsr.InternalServiceProvider;
 import io.chubao.joyqueue.nsr.MetadataSynchronizer;
 import io.chubao.joyqueue.nsr.service.internal.AppTokenInternalService;
 import io.chubao.joyqueue.nsr.service.internal.BrokerInternalService;
+import io.chubao.joyqueue.nsr.service.internal.ClusterInternalService;
 import io.chubao.joyqueue.nsr.service.internal.ConfigInternalService;
 import io.chubao.joyqueue.nsr.service.internal.ConsumerInternalService;
 import io.chubao.joyqueue.nsr.service.internal.DataCenterInternalService;
@@ -40,9 +42,12 @@ import io.chubao.joyqueue.nsr.service.internal.ProducerInternalService;
 import io.chubao.joyqueue.nsr.service.internal.TopicInternalService;
 import io.chubao.joyqueue.response.BooleanResponse;
 import io.chubao.joyqueue.toolkit.concurrent.NamedThreadFactory;
+import io.chubao.joyqueue.toolkit.config.Property;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -116,7 +121,12 @@ public class DefaultMetadataMonitorService implements MetadataMonitorService {
 
     @Override
     public Object exportMetadata(String source) {
-        InternalServiceProvider internalServiceProvider = SERVICE_PROVIDER_POINT.get(source);
+        InternalServiceProvider internalServiceProvider = null;
+        if (StringUtils.isBlank(source)) {
+            internalServiceProvider = SERVICE_PROVIDER_POINT.get();
+        } else {
+            internalServiceProvider = SERVICE_PROVIDER_POINT.get(source);
+        }
         if (internalServiceProvider == null) {
             return "source not exist";
         }
@@ -136,14 +146,17 @@ public class DefaultMetadataMonitorService implements MetadataMonitorService {
     }
 
     @Override
-    public Object syncMetadata(String source, String target, int interval) {
+    public Object syncMetadata(String source, String target, int interval, boolean onlyCompare) {
         this.source = source;
         this.target = target;
         this.interval = interval;
 
         if (interval != 0) {
-            if (syncThreadPool == null) {
-                syncThreadPool = Executors.newFixedThreadPool(1, new NamedThreadFactory("joyqueue-metadata-synchronizer"));
+            if (interval > 0) {
+                if (syncThreadPool != null) {
+                    syncThreadPool.shutdown();
+                }
+                syncThreadPool = Executors.newFixedThreadPool(1, new NamedThreadFactory("joyqueue-metadata-synchronizer", true));
                 syncThreadPool.execute(() -> {
                     while (true) {
                         InternalServiceProvider sourceInternalServiceProvider = SERVICE_PROVIDER_POINT.get(this.source);
@@ -157,7 +170,7 @@ public class DefaultMetadataMonitorService implements MetadataMonitorService {
                             logger.warn("target not exist");
                         }
 
-                        Object result = metadataSynchronizer.sync(sourceInternalServiceProvider, targetInternalServiceProvider);
+                        Object result = metadataSynchronizer.sync(sourceInternalServiceProvider, targetInternalServiceProvider, onlyCompare);
                         logger.info("sync result: {}", JSON.toJSONString(result));
                         try {
                             Thread.currentThread().sleep(this.interval);
@@ -165,6 +178,10 @@ public class DefaultMetadataMonitorService implements MetadataMonitorService {
                         }
                     }
                 });
+            } else {
+                if (syncThreadPool != null) {
+                    syncThreadPool.shutdown();
+                }
             }
             return "success";
         } else {
@@ -179,13 +196,18 @@ public class DefaultMetadataMonitorService implements MetadataMonitorService {
                 return "target not exist";
             }
 
-            return metadataSynchronizer.sync(sourceInternalServiceProvider, targetInternalServiceProvider);
+            return metadataSynchronizer.sync(sourceInternalServiceProvider, targetInternalServiceProvider, onlyCompare);
         }
     }
 
     @Override
     public Object queryMetadata(String source, String operator, List<Object> params) {
-        InternalServiceProvider sourceInternalServiceProvider = SERVICE_PROVIDER_POINT.get(source);
+        InternalServiceProvider sourceInternalServiceProvider = null;
+        if (StringUtils.isBlank(source)) {
+            sourceInternalServiceProvider = SERVICE_PROVIDER_POINT.get();
+        } else {
+            sourceInternalServiceProvider = SERVICE_PROVIDER_POINT.get(source);
+        }
         if (sourceInternalServiceProvider == null) {
             return "source not exist";
         }
@@ -195,7 +217,12 @@ public class DefaultMetadataMonitorService implements MetadataMonitorService {
 
     @Override
     public Object insertMetadata(String source, String operator, List<Object> params) {
-        InternalServiceProvider sourceInternalServiceProvider = SERVICE_PROVIDER_POINT.get(source);
+        InternalServiceProvider sourceInternalServiceProvider = null;
+        if (StringUtils.isBlank(source)) {
+            sourceInternalServiceProvider = SERVICE_PROVIDER_POINT.get();
+        } else {
+            sourceInternalServiceProvider = SERVICE_PROVIDER_POINT.get(source);
+        }
         if (sourceInternalServiceProvider == null) {
             return "source not exist";
         }
@@ -205,7 +232,12 @@ public class DefaultMetadataMonitorService implements MetadataMonitorService {
 
     @Override
     public Object updateMetadata(String source, String operator, List<Object> params) {
-        InternalServiceProvider sourceInternalServiceProvider = SERVICE_PROVIDER_POINT.get(source);
+        InternalServiceProvider sourceInternalServiceProvider = null;
+        if (StringUtils.isBlank(source)) {
+            sourceInternalServiceProvider = SERVICE_PROVIDER_POINT.get();
+        } else {
+            sourceInternalServiceProvider = SERVICE_PROVIDER_POINT.get(source);
+        }
         if (sourceInternalServiceProvider == null) {
             return "source not exist";
         }
@@ -215,11 +247,67 @@ public class DefaultMetadataMonitorService implements MetadataMonitorService {
 
     @Override
     public Object deleteMetadata(String source, String operator, List<Object> params) {
-        InternalServiceProvider sourceInternalServiceProvider = SERVICE_PROVIDER_POINT.get(source);
+        InternalServiceProvider sourceInternalServiceProvider = null;
+        if (StringUtils.isBlank(source)) {
+            sourceInternalServiceProvider = SERVICE_PROVIDER_POINT.get();
+        } else {
+            sourceInternalServiceProvider = SERVICE_PROVIDER_POINT.get(source);
+        }
         if (sourceInternalServiceProvider == null) {
             return "source not exist";
         }
         OperationInternalService operationInternalService = sourceInternalServiceProvider.getService(OperationInternalService.class);
         return operationInternalService.delete(operator, params);
+    }
+
+    @Override
+    public String getConfigMetadata(String key) {
+        Property property = clusterManager.getPropertySupplier().getProperty(key);
+        if (property == null) {
+            return null;
+        }
+        return String.valueOf(property.getValue());
+    }
+
+    @Override
+    public List<String> getConfigsMetadata() {
+        List<String> result = Lists.newLinkedList();
+        for (Property property : clusterManager.getPropertySupplier().getProperties()) {
+            result.add(String.valueOf(property.getValue()));
+        }
+        return result;
+    }
+
+    @Override
+    public String getMetadataCluster() {
+        InternalServiceProvider internalServiceProvider = SERVICE_PROVIDER_POINT.get();
+        ClusterInternalService clusterInternalService = internalServiceProvider.getService(ClusterInternalService.class);
+        return clusterInternalService.getCluster();
+    }
+
+    @Override
+    public String addMetadataNode(String uri) {
+        InternalServiceProvider internalServiceProvider = SERVICE_PROVIDER_POINT.get();
+        ClusterInternalService clusterInternalService = internalServiceProvider.getService(ClusterInternalService.class);
+        return clusterInternalService.addNode(URI.create(uri));
+    }
+
+    @Override
+    public String removeMetadataNode(String uri) {
+        InternalServiceProvider internalServiceProvider = SERVICE_PROVIDER_POINT.get();
+        ClusterInternalService clusterInternalService = internalServiceProvider.getService(ClusterInternalService.class);
+        return clusterInternalService.removeNode(URI.create(uri));
+    }
+
+    @Override
+    public String updateMetadataNode(List<String> uris) {
+        InternalServiceProvider internalServiceProvider = SERVICE_PROVIDER_POINT.get();
+        ClusterInternalService clusterInternalService = internalServiceProvider.getService(ClusterInternalService.class);
+
+        List<URI> param = Lists.newArrayListWithCapacity(uris.size());
+        for (String uri : uris) {
+            param.add(URI.create(uri));
+        }
+        return clusterInternalService.updateNodes(param);
     }
 }

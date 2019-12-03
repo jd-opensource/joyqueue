@@ -48,6 +48,7 @@ import io.chubao.joyqueue.network.transport.command.Direction;
 import io.chubao.joyqueue.network.transport.exception.TransportException;
 import io.chubao.joyqueue.nsr.NameService;
 import io.chubao.joyqueue.nsr.config.NameServiceConfig;
+import io.chubao.joyqueue.nsr.exception.NsrException;
 import io.chubao.joyqueue.nsr.network.NsrTransportClientFactory;
 import io.chubao.joyqueue.nsr.network.command.AddTopic;
 import io.chubao.joyqueue.nsr.network.command.GetAllBrokers;
@@ -141,8 +142,8 @@ public class ThinNameService extends Service implements NameService, PropertySup
     }
 
     @Override
-    protected void validate() throws Exception {
-        super.validate();
+    public void setSupplier(PropertySupplier supplier) {
+        this.propertySupplier = supplier;
         if (nameServiceConfig == null) {
             nameServiceConfig = new NameServiceConfig(propertySupplier);
         }
@@ -152,6 +153,12 @@ public class ThinNameService extends Service implements NameService, PropertySup
                     .build();
         }
         clientTransport = new ClientTransport(nameServiceConfig,this);
+        try {
+            eventBus.start();
+            clientTransport.start();
+        } catch (Exception e) {
+            throw new NsrException(e);
+        }
     }
 
     @Override
@@ -485,13 +492,6 @@ public class ThinNameService extends Service implements NameService, PropertySup
     }
 
     @Override
-    protected void doStart() throws Exception {
-        super.doStart();
-        eventBus.start();
-        clientTransport.start();
-    }
-
-    @Override
     protected void doStop() {
         super.doStop();
         Close.close(clientTransport);
@@ -544,12 +544,6 @@ public class ThinNameService extends Service implements NameService, PropertySup
     public Object type() {
         return "thin";
     }
-
-    @Override
-    public void setSupplier(PropertySupplier supplier) {
-        this.propertySupplier = supplier;
-    }
-
 
     private class ClientTransport implements EventListener<TransportEvent>, LifeCycle {
         private AtomicBoolean started = new AtomicBoolean(false);

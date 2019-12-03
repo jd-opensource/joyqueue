@@ -18,22 +18,26 @@ package io.chubao.joyqueue.network.command;
 import io.chubao.joyqueue.exception.JoyQueueCode;
 
 /**
- * FetchIndexAckData
+ * FetchIndexData
  *
  * author: gaohaoxiang
  * date: 2018/12/13
  */
-public class FetchIndexAckData {
+public class FetchIndexData {
 
     private long index;
+    private long leftIndex;
+    private long rightIndex;
     private JoyQueueCode code;
 
-    public FetchIndexAckData() {
+    public FetchIndexData() {
 
     }
 
-    public FetchIndexAckData(long index, JoyQueueCode code) {
+    public FetchIndexData(long index, long leftIndex, long rightIndex, JoyQueueCode code) {
         this.index = index;
+        this.leftIndex = leftIndex;
+        this.rightIndex = rightIndex;
         this.code = code;
     }
 
@@ -43,6 +47,22 @@ public class FetchIndexAckData {
 
     public void setIndex(long index) {
         this.index = index;
+    }
+
+    public void setLeftIndex(long leftIndex) {
+        this.leftIndex = leftIndex;
+    }
+
+    public long getLeftIndex() {
+        return leftIndex;
+    }
+
+    public void setRightIndex(long rightIndex) {
+        this.rightIndex = rightIndex;
+    }
+
+    public long getRightIndex() {
+        return rightIndex;
     }
 
     public JoyQueueCode getCode() {

@@ -150,7 +150,8 @@ public class DefaultTransactionMessageProducer implements TransactionMessageProd
             ProducerHelper.setPartitions(messages, transactionPartition.getId());
         }
 
-        return messageProducerInner.doBatchSend(messages, topicMetadata, transactionPartition, null, prepare.getTxId(), timeout, timeoutUnit, false, false, null);
+        return messageProducerInner.doBatchSend(messages, topicMetadata, transactionPartition, null,
+                prepare.getTxId(), timeout, timeoutUnit, false, false, null);
     }
 
     protected SendPrepareResult doPrepare(PartitionMetadata partition) {

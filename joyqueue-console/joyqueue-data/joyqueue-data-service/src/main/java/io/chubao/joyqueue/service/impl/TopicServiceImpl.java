@@ -16,7 +16,9 @@
 package io.chubao.joyqueue.service.impl;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import io.chubao.joyqueue.convert.CodeConverter;
+import io.chubao.joyqueue.domain.TopicName;
 import io.chubao.joyqueue.exception.ServiceException;
 import io.chubao.joyqueue.model.PageResult;
 import io.chubao.joyqueue.model.QPageQuery;
@@ -37,6 +39,7 @@ import io.chubao.joyqueue.nsr.ProducerNameServerService;
 import io.chubao.joyqueue.nsr.ReplicaServerService;
 import io.chubao.joyqueue.nsr.TopicNameServerService;
 import io.chubao.joyqueue.service.TopicService;
+import io.chubao.joyqueue.util.EnvironmentUtil;
 import io.chubao.joyqueue.util.NullUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -50,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static io.chubao.joyqueue.exception.ServiceException.BAD_REQUEST;
@@ -83,6 +87,12 @@ public class TopicServiceImpl implements TopicService {
         if (oldTopic != null) {
             throw new DuplicateKeyException("topic aleady exist");
         }
+
+        if (EnvironmentUtil.isTest()) {
+            topic.setElectType(TopicPartitionGroup.ElectType.fix.type());
+            brokers = Lists.newArrayList(brokers.get(0));
+        }
+
         List<TopicPartitionGroup> partitionGroups = addPartitionGroup(topic, brokers);
         try {
             topicNameServerService.addTopic(topic, partitionGroups);
@@ -286,6 +296,18 @@ public class TopicServiceImpl implements TopicService {
             namespaceCode = Namespace.DEFAULT_NAMESPACE_CODE;
         }
         return topicNameServerService.findByCode(namespaceCode, code);
+    }
+
+    @Override
+    public List<TopicName> findTopic(String brokerId) throws Exception {
+        List<PartitionGroupReplica> replicas=replicaServerService.findPartitionGroupReplica(Integer.parseInt(brokerId));
+        Set<TopicName> topicCodes=new HashSet<>();
+        replicas.stream().forEach(r->{
+            TopicName tn= TopicName.parse(r.getTopic().getCode(),r.getNamespace().getCode());
+            tn.getFullName();
+            topicCodes.add(tn);
+        });
+        return Lists.newArrayList(topicCodes);
     }
 
     @Override

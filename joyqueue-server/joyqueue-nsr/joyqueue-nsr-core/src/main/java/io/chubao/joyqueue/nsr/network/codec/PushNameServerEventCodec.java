@@ -39,7 +39,7 @@ public class PushNameServerEventCodec implements NsrPayloadCodec<PushNameServerE
         String typeName = Serializer.readString(buffer);
 
         // TODO 临时兼容逻辑，后续去掉
-        if (typeName.startsWith("com.jd.joyqueue")) {
+        if (typeName.startsWith("com.jd.journalq")) {
             typeName = typeName.replace("com.jd.journalq", "io.chubao.joyqueue");
         }
 

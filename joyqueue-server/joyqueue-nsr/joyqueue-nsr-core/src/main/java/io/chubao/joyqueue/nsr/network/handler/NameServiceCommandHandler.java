@@ -41,6 +41,7 @@ import io.chubao.joyqueue.network.transport.command.Command;
 import io.chubao.joyqueue.network.transport.command.CommandCallback;
 import io.chubao.joyqueue.network.transport.command.Direction;
 import io.chubao.joyqueue.network.transport.command.Types;
+import io.chubao.joyqueue.network.transport.command.provider.ExecutorServiceProvider;
 import io.chubao.joyqueue.network.transport.support.DefaultTransportAttribute;
 import io.chubao.joyqueue.nsr.NameService;
 import io.chubao.joyqueue.nsr.config.NameServiceConfig;
@@ -86,6 +87,7 @@ import io.chubao.joyqueue.nsr.network.command.PushNameServerEvent;
 import io.chubao.joyqueue.nsr.network.command.Register;
 import io.chubao.joyqueue.nsr.network.command.RegisterAck;
 import io.chubao.joyqueue.toolkit.concurrent.EventListener;
+import io.chubao.joyqueue.toolkit.concurrent.NamedThreadFactory;
 import io.chubao.joyqueue.toolkit.config.PropertySupplier;
 import io.chubao.joyqueue.toolkit.config.PropertySupplierAware;
 import org.apache.commons.lang3.StringUtils;
@@ -98,21 +100,34 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author wylixiaobin
  * Date: 2019/3/14
  */
-public class NameServiceCommandHandler implements NsrCommandHandler, Types, com.jd.laf.extension.Type<String>, EventListener<TransportEvent>, PropertySupplierAware {
+public class NameServiceCommandHandler implements NsrCommandHandler, Types, com.jd.laf.extension.Type<String>, EventListener<TransportEvent>, PropertySupplierAware, ExecutorServiceProvider {
     private static final Logger logger = LoggerFactory.getLogger(NameServiceCommandHandler.class);
 
     private NameService nameService;
     private NameServiceConfig config;
     private final Map<Integer, Transport> nsrClients = new ConcurrentHashMap<>();
 
+    private ExecutorService executeThreadPool;
+
     @Override
     public void setSupplier(PropertySupplier supplier) {
         this.config = new NameServiceConfig(supplier);
+        this.executeThreadPool = new ThreadPoolExecutor(config.getHandlerThreads(), config.getHandlerThreads(),
+                config.getHandlerKeepalive(), TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(config.getHandlerQueues()), new NamedThreadFactory("joyqueue-nameservice-handler"));
+    }
+
+    @Override
+    public ExecutorService getExecutorService(Transport transport, Command command) {
+        return executeThreadPool;
     }
 
     @Override

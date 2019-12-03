@@ -204,7 +204,7 @@ export default {
     handleBlur (event) {
       this.$emit('on-blur', event)
       if (!findComponentUpward(this, ['DatePicker', 'TimePicker', 'Cascader', 'Search'])) {
-        this.dispatch(`${Config.namePrefix}FormItem`, 'on-form-blur', this.currentValue)
+        this.dispatch(`${Config.namePrefix}FormItem`, `${Config.localePrefix}.form.blur`, this.currentValue)
       }
     },
     handleInput (event) {
@@ -224,7 +224,7 @@ export default {
       })
       this.currentValue = value
       if (!findComponentUpward(this, ['DatePicker', 'TimePicker', 'Cascader', 'Search'])) {
-        this.dispatch(`${Config.namePrefix}FormItem`, 'on-form-change', value)
+        this.dispatch(`${Config.namePrefix}FormItem`, `${Config.localePrefix}.form.change`, value)
       }
     },
     resizeTextarea () {

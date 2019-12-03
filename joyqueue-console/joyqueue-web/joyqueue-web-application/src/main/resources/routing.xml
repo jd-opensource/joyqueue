@@ -27,6 +27,9 @@
         <route inherit="get"
                path="/v1/application/get/:id" handlers="validateApplication validateApplicationMember application#get render"
                errors="error"/>
+        <route inherit="get"
+               path="/v1/application/getByCode/:appCode" handlers="validateApplication validateApplicationMember application#getByCode render"
+               errors="error"/>
         <route inherit="post"
                path="/v1/application/add" handlers="validateAdmin application#add render"
                errors="error"/>
@@ -63,6 +66,10 @@
         <route inherit="delete"
                path="/v1/application/:appId/user/delete/:userId"
                handlers="validateApplication applicationUser#delete render"
+               errors="error"/>
+        <route inherit="get"
+               path="/v1/application/user/get/:appCode"
+               handlers="validateApplication applicationUser#getByAppCode render"
                errors="error"/>
 
         <!--application token 操作-->
@@ -111,6 +118,9 @@
 
         <route inherit="get"
                path="/v1/user/getByCode/:code" handlers="validateAdmin user#getByCode render"
+               errors="error"/>
+        <route inherit="get"
+               path="/v1/user/getByRole/:role" handlers="user#getByRole render"
                errors="error"/>
 
         <!--配置 操作 -->
@@ -494,6 +504,9 @@
                errors="error"/>
         <route inherit="get"
                path="/v1/retry/isServerEnabled" handlers="retry#isServerEnabled render"
+               errors="error"/>
+        <route inherit="post"
+               path="/v1/retry/batchDelete" handlers="retry#batchDelete render"
                errors="error"/>
 
         <!-- archive -->

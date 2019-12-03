@@ -1,3 +1,18 @@
+/**
+ * Copyright 2019 The JoyQueue Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.chubao.joyqueue.nsr.nameservice;
 
 import com.alibaba.fastjson.JSON;
@@ -19,6 +34,7 @@ import io.chubao.joyqueue.nsr.event.AddDataCenterEvent;
 import io.chubao.joyqueue.nsr.event.AddPartitionGroupEvent;
 import io.chubao.joyqueue.nsr.event.AddProducerEvent;
 import io.chubao.joyqueue.nsr.event.AddTopicEvent;
+import io.chubao.joyqueue.nsr.event.CompensateEvent;
 import io.chubao.joyqueue.nsr.event.RemoveBrokerEvent;
 import io.chubao.joyqueue.nsr.event.RemoveConfigEvent;
 import io.chubao.joyqueue.nsr.event.RemoveConsumerEvent;
@@ -86,6 +102,9 @@ public class NameServiceCompensator extends Service {
         if (config.getCompensationConfigEnable()) {
             compensateConfig(oldCache, newCache);
         }
+        if (config.getCompensationEventEnable()) {
+            publishEvent(new CompensateEvent(oldCache, newCache));
+        }
     }
 
     protected void compensateTopic(NameServiceCache oldCache, NameServiceCache newCache) {
@@ -105,7 +124,7 @@ public class NameServiceCompensator extends Service {
             } else {
                 // topic副本变化
                 if (oldTopicConfig.isReplica(brokerId) && !newTopicConfig.isReplica(brokerId)) {
-                    for (PartitionGroup partitionGroup : oldTopicConfig.fetchPartitionGroupByBrokerId(brokerId)) {
+                    for (PartitionGroup partitionGroup : oldTopicConfig.fetchTopicPartitionGroupsByBrokerId(brokerId)) {
                         publishEvent(new RemovePartitionGroupEvent(oldTopicConfig.getName(), partitionGroup));
                     }
                 } else {
@@ -116,19 +135,19 @@ public class NameServiceCompensator extends Service {
                         }
 
                         // 更新partitionGroup
-                        for (PartitionGroup newPartition : newTopicConfig.fetchPartitionGroupByBrokerId(brokerId)) {
-                            PartitionGroup oldPartitionGroup = oldTopicConfig.getPartitionGroups().get(newPartition.getGroup());
+                        for (PartitionGroup newPartitionGroup : newTopicConfig.fetchTopicPartitionGroupsByBrokerId(brokerId)) {
+                            PartitionGroup oldPartitionGroup = oldTopicConfig.getPartitionGroups().get(newPartitionGroup.getGroup());
                             if (oldPartitionGroup == null || !oldPartitionGroup.getReplicas().contains(brokerId)) {
-                                publishEvent(new AddPartitionGroupEvent(newTopicConfig.getName(), oldPartitionGroup));
+                                publishEvent(new AddPartitionGroupEvent(newTopicConfig.getName(), newPartitionGroup));
                             } else {
-                                if (!comparePartitionGroup(oldPartitionGroup, newPartition)) {
-                                    publishEvent(new UpdatePartitionGroupEvent(newTopicConfig.getName(), oldPartitionGroup, newPartition));
+                                if (!comparePartitionGroup(oldPartitionGroup, newPartitionGroup)) {
+                                    publishEvent(new UpdatePartitionGroupEvent(newTopicConfig.getName(), oldPartitionGroup, newPartitionGroup));
                                 }
                             }
                         }
 
                         // 删除partitionGroup
-                        for (PartitionGroup oldPartitionGroup : oldTopicConfig.fetchPartitionGroupByBrokerId(brokerId)) {
+                        for (PartitionGroup oldPartitionGroup : oldTopicConfig.fetchTopicPartitionGroupsByBrokerId(brokerId)) {
                             PartitionGroup newPartitionGroup = newTopicConfig.getPartitionGroups().get(oldPartitionGroup.getGroup());
                             if (newPartitionGroup == null || !newPartitionGroup.getReplicas().contains(brokerId)) {
                                 publishEvent(new RemovePartitionGroupEvent(newTopicConfig.getName(), oldPartitionGroup));
@@ -296,7 +315,7 @@ public class NameServiceCompensator extends Service {
 
     protected void compensateConfig(NameServiceCache oldCache, NameServiceCache newCache) {
         for (Config newConfig : newCache.getAllConfigs()) {
-            Config oldConfig = oldCache.getConfigKeyMap().get(newConfig.getKey());
+            Config oldConfig = oldCache.getConfigKeyMap().get(newConfig.getId());
             if (oldConfig == null) {
                 // 新增config
                 publishEvent(new AddConfigEvent(newConfig));
@@ -310,7 +329,7 @@ public class NameServiceCompensator extends Service {
 
         // 删除config
         for (Config oldConfig : oldCache.getAllConfigs()) {
-            if (newCache.getConfigKeyMap().containsKey(oldConfig.getKey())) {
+            if (newCache.getConfigKeyMap().containsKey(oldConfig.getId())) {
                 continue;
             }
 
@@ -326,7 +345,7 @@ public class NameServiceCompensator extends Service {
         NameServerEvent nameServerEvent = new NameServerEvent();
         nameServerEvent.setMetaEvent(event);
         nameServerEvent.setEventType(event.getEventType());
-        eventBus.add(nameServerEvent);
+        eventBus.inform(nameServerEvent);
     }
 
     protected boolean compareTopic(TopicConfig topicConfig1, TopicConfig topicConfig2) {

@@ -58,6 +58,7 @@ CREATE TABLE IF NOT EXISTS `consumer` (
 	`app` varchar(255),
 	`topic_type` tinyint(1),
 	`client_type` tinyint(1),
+	`group` varchar(255),
 	`referer` varchar(255),
 	`consume_policy` varchar(1024),
 	`retry_policy` varchar(1024),
@@ -114,7 +115,7 @@ CREATE TABLE IF NOT EXISTS `config` (
 	`id` varchar(255) NOT NULL,
 	`key` varchar(255),
 	`value` varchar(255),
-	`group` varchar(255),
+	`group` varchar(1024),
 	PRIMARY KEY (`id`)
 );
 CREATE INDEX IF NOT EXISTS idx_key_group ON config(`key`, `group`);

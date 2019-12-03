@@ -117,10 +117,10 @@ public class NsrCommandType {
     public static final int NSR_LEADERCHANAGE_PARTITIONGROUP = 124;
 
     // 推送请求
-    public static final int NSR_MESSENGER_PUBLISH_REQUEST = 125;
+    public static final int NSR_MESSENGER_PUBLISH_REQUEST = 50;
     // 心跳
-    public static final int NSR_MESSENGER_HEARTBEAT_REQUEST = 126;
+    public static final int NSR_MESSENGER_HEARTBEAT_REQUEST = 51;
     // 返回所有元数据
-    public static final int NSR_GET_ALL_METADATA_REQUEST = 127;
-    public static final int NSR_GET_ALL_METADATA_RESPONSE = -127;
+    public static final int NSR_GET_ALL_METADATA_REQUEST = 52;
+    public static final int NSR_GET_ALL_METADATA_RESPONSE = -52;
 }

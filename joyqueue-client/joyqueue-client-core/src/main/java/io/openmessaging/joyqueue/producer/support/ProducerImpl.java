@@ -98,7 +98,7 @@ public class ProducerImpl extends AbstractServiceLifecycle implements ExtensionP
             messageProducer.sendAsync(messageAdapter.getProduceMessage())
                     .whenComplete((result, cause) -> {
                         if (cause == null) {
-                            future.setValue(result);
+                            future.setValue(SendResultConverter.convert(result));
                         } else {
                             future.setThrowable(handleProduceException(cause));
                         }
@@ -145,7 +145,7 @@ public class ProducerImpl extends AbstractServiceLifecycle implements ExtensionP
             messageProducer.batchSendAsync(produceMessages)
                     .whenComplete((result, cause) -> {
                         if (cause == null) {
-                            future.setValue(result);
+                            future.setValue(SendResultConverter.convert(result.get(0)));
                         } else {
                             future.setThrowable(handleProduceException(cause));
                         }

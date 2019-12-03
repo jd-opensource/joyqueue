@@ -61,6 +61,7 @@ public class DefaultChannelTransport implements ChannelTransport {
         this.channel = channel;
         this.barrier = barrier;
         this.config = barrier.getConfig();
+        this.address = channel.remoteAddress();
     }
 
     public DefaultChannelTransport(Channel channel, RequestBarrier barrier, SocketAddress address) {
@@ -97,7 +98,7 @@ public class DefaultChannelTransport implements ChannelTransport {
         // 同步调用
         ResponseFuture future = new ResponseFuture(this, command, sendTimeout, null,
                 null, null, new CountDownLatch(1));
-        barrier.put(command.getHeader().getRequestId(), future);
+        barrier.putSyncFuture(command.getHeader().getRequestId(), future);
         // 发送数据,应答成功回来或超时会自动释放command
         channel.writeAndFlush(command).addListener(new ResponseListener(future, barrier));
 
@@ -164,7 +165,7 @@ public class DefaultChannelTransport implements ChannelTransport {
                 logger.warn("async command(type {}, request id {}) already exist",
                         command.getHeader().getType(), command.getHeader().getRequestId());
             }
-            barrier.put(command.getHeader().getRequestId(), future);
+            barrier.putAsyncFuture(command.getHeader().getRequestId(), future);
             // 应答回来的时候或超时会自动释放command
             channel.writeAndFlush(command).addListener(new ResponseListener(future, barrier));
 

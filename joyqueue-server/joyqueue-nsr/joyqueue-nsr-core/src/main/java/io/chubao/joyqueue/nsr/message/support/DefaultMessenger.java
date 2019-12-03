@@ -1,3 +1,18 @@
+/**
+ * Copyright 2019 The JoyQueue Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.chubao.joyqueue.nsr.message.support;
 
 import com.google.common.collect.Lists;
@@ -70,7 +85,7 @@ public class DefaultMessenger extends Service implements Messenger<MetaEvent>, P
 
     @Override
     public void publish(MetaEvent event, List<Broker> brokers) {
-        if (CollectionUtils.isEmpty(brokers)) {
+        if (!config.getPublishEnable() || CollectionUtils.isEmpty(brokers)) {
             return;
         }
 
@@ -112,14 +127,12 @@ public class DefaultMessenger extends Service implements Messenger<MetaEvent>, P
                             }
                         });
             } catch (Exception e) {
-                logger.warn("create session exception, event: {}, brokerId: {}, brokerIp: {}, brokerPort: {}",
-                        event, broker.getId(), broker.getIp(), broker.getPort(), e);
-
-                if (config.getPublishIgnoreConnectionError()) {
-                    latch.countDown();
-                } else {
+                if (!config.getPublishIgnoreConnectionError()) {
                     success[0] = false;
+                    logger.warn("create session exception, event: {}, brokerId: {}, brokerIp: {}, brokerPort: {}",
+                            event, broker.getId(), broker.getIp(), broker.getPort(), e);
                 }
+                latch.countDown();
             }
         }
 
@@ -136,8 +149,8 @@ public class DefaultMessenger extends Service implements Messenger<MetaEvent>, P
             throw new MessengerException("messenger publish exception", e);
         }
 
-        if (!config.getPublishForce()) {
-            if (!success[0]) {
+        if (!success[0]) {
+            if (!config.getPublishForce()) {
                 logger.warn("messenger publish failed, event: {}, brokers: {}", event, brokers);
                 throw new MessengerException("messenger publish failed");
             }

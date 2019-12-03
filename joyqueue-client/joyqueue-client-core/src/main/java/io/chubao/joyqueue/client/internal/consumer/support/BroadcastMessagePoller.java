@@ -21,6 +21,7 @@ import io.chubao.joyqueue.client.internal.consumer.MessagePoller;
 import io.chubao.joyqueue.client.internal.consumer.config.ConsumerConfig;
 import io.chubao.joyqueue.client.internal.consumer.domain.ConsumeMessage;
 import io.chubao.joyqueue.client.internal.consumer.domain.ConsumeReply;
+import io.chubao.joyqueue.client.internal.consumer.domain.FetchIndexData;
 import io.chubao.joyqueue.client.internal.consumer.transport.ConsumerClientManager;
 import io.chubao.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import io.chubao.joyqueue.client.internal.nameserver.NameServerConfig;
@@ -175,6 +176,11 @@ public class BroadcastMessagePoller extends Service implements MessagePoller {
     @Override
     public JoyQueueCode replyOnce(String topic, ConsumeReply reply) {
         return delegate.replyOnce(topic, reply);
+    }
+
+    @Override
+    public FetchIndexData fetchIndex(String topic, short partition) {
+        return delegate.fetchIndex(topic, partition);
     }
 
     @Override

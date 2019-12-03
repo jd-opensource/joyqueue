@@ -67,6 +67,10 @@ public class ConsumerServiceImpl  implements ConsumerService {
         try {
             //Find topic
             Topic topic = topicNameServerService.findById(consumer.getTopic().getId());
+            if (topic.getType() == Topic.TOPIC_TYPE_SEQUENTIAL && consumer.getTopicType() == Topic.TOPIC_TYPE_BROADCAST) {
+                throw new IllegalArgumentException("broadcast subscriptions are not allowed for sequential topics");
+            }
+
             consumer.setTopic(topic);
             consumer.setNamespace(topic.getNamespace());
 
@@ -80,7 +84,7 @@ public class ConsumerServiceImpl  implements ConsumerService {
 
     @Override
     public Consumer findById(String s) throws Exception {
-        return consumerNameServerService.findById(s);
+        return fillConsumer(consumerNameServerService.findById(s));
     }
 
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
@@ -118,9 +122,9 @@ public class ConsumerServiceImpl  implements ConsumerService {
         try {
             TopicName topicName = TopicName.parse(topic);
             if (StringUtils.isNotBlank(group)) {
-                return consumerNameServerService.findByTopicAndApp(topicName.getCode(), namespace, CodeConverter.convertApp(new Identity(app), group));
+                return fillConsumer(consumerNameServerService.findByTopicAndApp(topicName.getCode(), namespace, CodeConverter.convertApp(new Identity(app), group)));
             } else {
-                return consumerNameServerService.findByTopicAndApp(topicName.getCode(), namespace, app);
+                return fillConsumer(consumerNameServerService.findByTopicAndApp(topicName.getCode(), namespace, app));
             }
         } catch (Exception e) {
             logger.error("findByTopicAppGroup error",e);
@@ -130,12 +134,12 @@ public class ConsumerServiceImpl  implements ConsumerService {
 
     @Override
     public List<Consumer> findByTopic(String topic, String namespace) throws Exception {
-        return consumerNameServerService.findByTopic(topic, namespace);
+        return fillConsumers(consumerNameServerService.findByTopic(topic, namespace));
     }
 
     @Override
     public List<Consumer> findByApp(String app) throws Exception {
-        return consumerNameServerService.findByApp(app);
+        return fillConsumers(consumerNameServerService.findByApp(app));
     }
 
     @Override
@@ -175,6 +179,33 @@ public class ConsumerServiceImpl  implements ConsumerService {
 
     private void checkArgument(Consumer consumer) {
         Preconditions.checkArgument(consumer != null && consumer.getId() != null, "invalidate consumer arg.");
+    }
+
+    protected List<Consumer> fillConsumers(List<Consumer> consumers) {
+        if (CollectionUtils.isEmpty(consumers)) {
+            return consumers;
+        }
+        for (Consumer consumer : consumers) {
+            fillConsumer(consumer);
+        }
+        return consumers;
+    }
+
+    protected Consumer fillConsumer(Consumer consumer) {
+        if (consumer == null) {
+            return null;
+        }
+        Identity app = consumer.getApp();
+        if (app == null || StringUtils.isBlank(app.getCode())) {
+            return consumer;
+        }
+
+        Application application = applicationService.findByCode(CodeConverter.convertAppFullName(app.getCode()).getCode());
+        if (application != null) {
+            app.setId(application.getId());
+            app.setName(application.getName());
+        }
+        return consumer;
     }
 
 }

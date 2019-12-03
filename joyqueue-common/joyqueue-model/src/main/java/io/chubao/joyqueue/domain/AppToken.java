@@ -83,8 +83,8 @@ public class AppToken implements Serializable {
         return Objects.equals(id, appToken.id) &&
                 Objects.equals(app, appToken.app) &&
                 Objects.equals(token, appToken.token) &&
-                Objects.equals(effectiveTime, appToken.effectiveTime) &&
-                Objects.equals(expirationTime, appToken.expirationTime);
+                Objects.equals(effectiveTime.getTime() / 1000, appToken.effectiveTime.getTime()  / 1000) &&
+                Objects.equals(expirationTime.getTime() / 1000, appToken.expirationTime.getTime() / 1000);
     }
 
     @Override

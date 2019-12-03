@@ -198,21 +198,26 @@ public class RemoteMessageRetry implements MessageRetry<Long> {
     public int countRetry(final String topic, final String app) throws JoyQueueException {
         checkStarted();
 
-        if (topic == null || topic.trim().isEmpty() || app == null || app.trim().isEmpty()) {
-            return 0;
+        try {
+            if (topic == null || topic.trim().isEmpty() || app == null || app.trim().isEmpty()) {
+                return 0;
+            }
+
+            GetRetryCount getRetryCountPayload = new GetRetryCount().topic(topic).app(app);
+            Command getRetryCountCommand = new Command(
+                    new JoyQueueHeader(Direction.REQUEST, CommandType.GET_RETRY_COUNT), getRetryCountPayload);
+            Command ack = sync(getRetryCountCommand);
+
+            if (ack.getHeader().getStatus() != JoyQueueCode.SUCCESS.getCode()) {
+                throw new JoyQueueException(JoyQueueCode.RETRY_COUNT, "");
+            }
+
+            GetRetryCountAck payload = (GetRetryCountAck) ack.getPayload();
+            return payload != null ? payload.getCount() : 0;
+        } catch (Exception e) {
+            logger.error("countRetry exception, topic: {}, app: {}", topic, app, e);
+            return -1;
         }
-
-        GetRetryCount getRetryCountPayload = new GetRetryCount().topic(topic).app(app);
-        Command getRetryCountCommand = new Command(
-                new JoyQueueHeader(Direction.REQUEST, CommandType.GET_RETRY_COUNT), getRetryCountPayload);
-        Command ack = sync(getRetryCountCommand);
-
-        if (ack.getHeader().getStatus() != JoyQueueCode.SUCCESS.getCode()) {
-            throw new JoyQueueException(JoyQueueCode.RETRY_COUNT, "");
-        }
-
-        GetRetryCountAck payload = (GetRetryCountAck) ack.getPayload();
-        return payload != null ? payload.getCount() : 0;
     }
 
     /**

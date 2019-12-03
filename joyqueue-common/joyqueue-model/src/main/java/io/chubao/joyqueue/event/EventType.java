@@ -113,6 +113,10 @@ public enum EventType {
      */
     UPDATE_BROKER,
 
-    LEADER_CHANGE;
+    LEADER_CHANGE,
+
+    COMPENSATE,
+
+    ;
 
 }

@@ -48,6 +48,13 @@ public class ConsumerStat {
         return partitionGroupStat;
     }
 
+    public void clear() {
+        deQueueStat = new DeQueueStat();
+        retryStat = new RetryStat();
+        connectionStat = new ConnectionStat();
+        partitionGroupStatMap.clear();
+    }
+
     public String getTopic() {
         return topic;
     }

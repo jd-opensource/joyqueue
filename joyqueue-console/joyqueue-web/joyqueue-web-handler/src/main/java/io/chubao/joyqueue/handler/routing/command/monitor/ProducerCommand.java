@@ -15,6 +15,7 @@
  */
 package io.chubao.joyqueue.handler.routing.command.monitor;
 
+import com.google.common.collect.Lists;
 import com.jd.laf.binding.annotation.Value;
 import com.jd.laf.web.vertx.annotation.Path;
 import com.jd.laf.web.vertx.annotation.QueryParam;
@@ -37,11 +38,14 @@ import io.chubao.joyqueue.service.ProducerService;
 import io.chubao.joyqueue.service.TopicPartitionGroupService;
 import io.chubao.joyqueue.service.TopicService;
 import io.chubao.joyqueue.util.NullUtil;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -69,6 +73,17 @@ public class ProducerCommand extends NsrCommandSupport<Producer, ProducerService
             producers = service.findByApp(query.getApp().getCode());
         } else if (query.getTopic() != null) {
             producers = service.findByTopic(query.getTopic().getNamespace().getCode(), query.getTopic().getCode());
+        }
+
+        if (CollectionUtils.isNotEmpty(producers) && qPageQuery.getQuery() != null && StringUtils.isNotBlank(qPageQuery.getQuery().getKeyword())) {
+            producers = Lists.newArrayList(producers);
+            Iterator<Producer> iterator = producers.iterator();
+            while (iterator.hasNext()) {
+                Producer producer = iterator.next();
+                if (!producer.getTopic().getCode().equals(qPageQuery.getQuery().getKeyword())) {
+                    iterator.remove();
+                }
+            }
         }
 
         Pagination pagination = qPageQuery.getPagination();

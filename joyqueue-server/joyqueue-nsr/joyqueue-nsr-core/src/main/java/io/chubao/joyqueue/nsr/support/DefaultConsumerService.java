@@ -1,3 +1,18 @@
+/**
+ * Copyright 2019 The JoyQueue Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.chubao.joyqueue.nsr.support;
 
 import com.google.common.collect.Lists;
@@ -81,6 +96,14 @@ public class DefaultConsumerService implements ConsumerService {
         if (topicInternalService.getTopicByCode(consumer.getTopic().getNamespace(), consumer.getTopic().getCode()) == null) {
             throw new NsrException(String.format("topic: %s is not exist", consumer.getTopic()));
         }
+        if (consumerInternalService.getByTopicAndApp(consumer.getTopic(), consumer.getApp()) != null) {
+            throw new NsrException(String.format("consumer: %s,%s is exist", consumer.getTopic(), consumer.getApp()));
+        }
+
+        logger.info("addConsumer, topic: {}, app: {}", consumer.getTopic(), consumer.getApp());
+
+        List<PartitionGroup> partitionGroups = partitionGroupInternalService.getByTopic(consumer.getTopic());
+        List<Broker> replicas = getReplicas(partitionGroups);
 
         try {
             transactionInternalService.begin();
@@ -88,11 +111,6 @@ public class DefaultConsumerService implements ConsumerService {
             logger.error("beginTransaction exception, topic: {}, app: {}", consumer.getTopic(), consumer.getApp(), e);
             throw new NsrException(e);
         }
-
-        logger.info("addConsumer, topic: {}, app: {}", consumer.getTopic(), consumer.getApp());
-
-        List<PartitionGroup> partitionGroups = partitionGroupInternalService.getByTopic(consumer.getTopic());
-        List<Broker> replicas = getReplicas(partitionGroups);
 
         try {
             consumerInternalService.add(consumer);
@@ -114,17 +132,17 @@ public class DefaultConsumerService implements ConsumerService {
             throw new NsrException(String.format("topic: %s, consumer: %s is not exist", oldConsumer.getTopic(), oldConsumer.getApp()));
         }
 
+        logger.info("updateConsumer, topic: {}, app: {}", consumer.getTopic(), consumer.getApp());
+
+        List<PartitionGroup> partitionGroups = partitionGroupInternalService.getByTopic(consumer.getTopic());
+        List<Broker> replicas = getReplicas(partitionGroups);
+
         try {
             transactionInternalService.begin();
         } catch (Exception e) {
             logger.error("beginTransaction exception, topic: {}, app: {}", consumer.getTopic(), consumer.getApp(), e);
             throw new NsrException(e);
         }
-
-        logger.info("updateConsumer, topic: {}, app: {}", consumer.getTopic(), consumer.getApp());
-
-        List<PartitionGroup> partitionGroups = partitionGroupInternalService.getByTopic(consumer.getTopic());
-        List<Broker> replicas = getReplicas(partitionGroups);
 
         try {
             consumerInternalService.update(consumer);
@@ -146,17 +164,17 @@ public class DefaultConsumerService implements ConsumerService {
             throw new NsrException(String.format("consumer: %s is not exist", id));
         }
 
+        logger.info("deleteConsumer, topic: {}, app: {}", consumer.getTopic(), consumer.getApp());
+
+        List<PartitionGroup> partitionGroups = partitionGroupInternalService.getByTopic(consumer.getTopic());
+        List<Broker> replicas = getReplicas(partitionGroups);
+
         try {
             transactionInternalService.begin();
         } catch (Exception e) {
             logger.error("beginTransaction exception, topic: {}, app: {}", consumer.getTopic(), consumer.getApp(), e);
             throw new NsrException(e);
         }
-
-        logger.info("deleteConsumer, topic: {}, app: {}", consumer.getTopic(), consumer.getApp());
-
-        List<PartitionGroup> partitionGroups = partitionGroupInternalService.getByTopic(consumer.getTopic());
-        List<Broker> replicas = getReplicas(partitionGroups);
 
         try {
             consumerInternalService.delete(id);

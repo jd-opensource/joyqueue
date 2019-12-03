@@ -82,7 +82,7 @@
         <guava.version>21.0</guava.version>
         <amq.core.version>5.6.0</amq.core.version>
         <amq.client.version>5.1.0</amq.client.version>
-        <snappy-java.version>1.1.2.6</snappy-java.version>
+        <snappy-java.version>1.1.7.3</snappy-java.version>
         <lz4.version>1.3.0</lz4.version>
         <jcommander.version>1.72</jcommander.version>
         <concurrentlinkedhashmap-lru.version>1.4.2</concurrentlinkedhashmap-lru.version>
@@ -117,7 +117,6 @@
         <hbase.version>1.4.8</hbase.version>
         <mockito2.version>2.8.9</mockito2.version>
         <git-commit-id-pulgin.version>2.1.10</git-commit-id-pulgin.version>
-        <openmessaging-spring.version>0.0.1-SNAPSHOT</openmessaging-spring.version>
         <openmessaging-api.version>1.0.0-alpha</openmessaging-api.version>
         <asm.version>6.2.1</asm.version>
         <jackson-dataformat.version>2.9.9</jackson-dataformat.version>
@@ -130,13 +129,12 @@
     <modules>
         <module>joyqueue-common</module>
         <module>joyqueue-server</module>
-        <!-- TODO 临时-->
         <module>joyqueue-console</module>
-        <!--<module>joyqueue-client</module>-->
-        <!--<module>joyqueue-openmessaging</module>-->
-        <!--<module>docker</module>-->
-        <!--<module>joyqueue-distribution</module>-->
-        <!--<module>toolkit</module>-->
+        <module>joyqueue-client</module>
+        <module>joyqueue-openmessaging</module>
+        <module>docker</module>
+        <module>joyqueue-distribution</module>
+        <module>toolkit</module>
     </modules>
 
     <dependencyManagement>
@@ -444,6 +442,11 @@
             </dependency>
             <dependency>
                 <groupId>io.chubao</groupId>
+                <artifactId>joyqueue-nsr-journalkeeper</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.chubao</groupId>
                 <artifactId>joyqueue-broker-monitor-pth</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -603,12 +606,12 @@
             <dependency>
                 <groupId>io.chubao</groupId>
                 <artifactId>openmessaging-spring</artifactId>
-                <version>${openmessaging-spring.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.chubao</groupId>
                 <artifactId>openmessaging-spring-boot-starter</artifactId>
-                <version>${openmessaging-spring.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.openmessaging</groupId>
@@ -725,8 +728,7 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven-surefire-plugin.version}</version>
                     <configuration>
-                        <!-- TODO 临时-->
-                        <skipTests>true</skipTests>
+                        <skipTests>false</skipTests>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -743,7 +745,6 @@
         </pluginManagement>
 
         <plugins>
-            <!-- TODO 临时-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
@@ -757,7 +758,6 @@
                     </execution>
                 </executions>
             </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

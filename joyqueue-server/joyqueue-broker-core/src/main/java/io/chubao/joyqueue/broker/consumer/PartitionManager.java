@@ -111,7 +111,7 @@ public class PartitionManager {
                     increaseSerialErr(previous);
 
                     // 日志记录下占用过期分区和连接信息
-                    logger.debug("expire occupy partition:[{}], connectionId:[{}]", consumePartition, consumer.getConnectionId());
+                    logger.warn("expire occupy partition:[{}], connectionId:[{}]", consumePartition, consumer.getConnectionId());
                 }
             } else {
                 // 分区没有被占用，占用当前分区
@@ -247,14 +247,20 @@ public class PartitionManager {
      * @return 是否重试
      */
     protected boolean isRetry(Consumer consumer) throws JoyQueueException {
+
+        int randomBound = clusterManager.getRetryRandomBound();
+        if (randomBound <= 0) {
+            return false;
+        }
+
         Boolean retry = clusterManager.getConsumerPolicy(TopicName.parse(consumer.getTopic()), consumer.getApp()).getRetry();
         List<Short> masterPartitionList = clusterManager.getMasterPartitionList(TopicName.parse(consumer.getTopic()));
-        if (!retry.booleanValue() || !masterPartitionList.contains((short)0)) {
+        if (!retry.booleanValue() || !masterPartitionList.contains((short) 0)) {
             logger.debug("retry enable is false.");
             return false;
         }
 
-        int val = random.nextInt(1000);
+        int val = random.nextInt(randomBound);
         // 重试管理中获取从重试分区消费的概率
         int rate = retryProbability.getProbability(consumer.getJoint());
         if (rate >= val) {

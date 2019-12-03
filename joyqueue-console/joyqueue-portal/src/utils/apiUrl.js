@@ -5,7 +5,8 @@ export default {
   '/application': {
     search: '/application/search',
     add: '/application/add',
-    del: '/application/delete'
+    del: '/application/delete',
+    getByCode: '/application/getByCode/'
   },
   '/application/detail': {
     detail: '/application/get'
@@ -16,8 +17,6 @@ export default {
     edit: '/topic/update',
     del: '/topic/delete',
     searchBrokerGroup: '/brokerGroup/findAll',
-    editLabelData: '/topic/topicLabel',
-    eidtLabel: '/topic/updateLabel.do',
     getUrl: `/grafana/getRedirectUrl`
   },
   '/topic/detail': {

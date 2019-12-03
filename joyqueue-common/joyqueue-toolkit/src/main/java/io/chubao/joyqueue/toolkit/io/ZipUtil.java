@@ -20,8 +20,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.zip.DataFormatException;
-import java.util.zip.Deflater;
-import java.util.zip.Inflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -160,7 +158,7 @@ public class ZipUtil {
         }
         ByteArrayOutputStream bos = new ByteArrayOutputStream(size);
 
-        Deflater deflater = new Deflater();
+        ZipDeflater deflater = new ZipDeflater();
         deflater.reset();
         deflater.setInput(src, offset, size);
         deflater.finish();
@@ -195,7 +193,7 @@ public class ZipUtil {
             return null;
         }
         ByteArrayOutputStream bos = new ByteArrayOutputStream(size * 4);
-        Inflater inflater = new Inflater();
+        ZipInflater inflater = new ZipInflater();
         inflater.reset();
         inflater.setInput(buf, offset, size);
         int len;

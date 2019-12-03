@@ -28,9 +28,10 @@ import org.slf4j.LoggerFactory;
  * date: 2018/10/10
  */
 public class BrokerManageConfig {
-    protected static final Logger logger = LoggerFactory.getLogger(BrokerManageConfig.class);
-    private BrokerConfig brokerConfig;
 
+    protected static final Logger logger = LoggerFactory.getLogger(BrokerManageConfig.class);
+
+    private BrokerConfig brokerConfig;
     private PropertySupplier propertySupplier;
 
     public BrokerManageConfig() {

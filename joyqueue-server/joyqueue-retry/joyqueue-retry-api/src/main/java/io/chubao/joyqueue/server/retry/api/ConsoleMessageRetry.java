@@ -32,4 +32,5 @@ public interface ConsoleMessageRetry<T> extends MessageRetry<T> {
 
     void updateStatus(String topic, String app, T[] messageId, RetryStatus status, long updateTime, int updateBy) throws Exception;
 
+    void batchUpdateStatus(RetryQueryCondition retryQueryCondition, RetryStatus status, long updateTime, int updateBy) throws Exception;
 }

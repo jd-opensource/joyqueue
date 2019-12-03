@@ -49,6 +49,10 @@ public class MessengerConfig {
         return propertySupplier.getValue(MessengerConfigKey.PUBLISH_TIMEOUT);
     }
 
+    public boolean getPublishEnable() {
+        return propertySupplier.getValue(MessengerConfigKey.PUBLISH_ENABLE);
+    }
+
     public int getHandlerThreads() {
         return propertySupplier.getValue(MessengerConfigKey.HANDLER_THREADS);
     }
@@ -74,7 +78,7 @@ public class MessengerConfig {
     }
 
     public int getHeartbeatInterval() {
-        return propertySupplier.getValue(MessengerConfigKey.HEARTBEAT_TIMEOUT);
+        return propertySupplier.getValue(MessengerConfigKey.HEARTBEAT_INTERVAL);
     }
 
     public int getPort() {

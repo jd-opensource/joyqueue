@@ -42,12 +42,10 @@ public class MemberTimeoutDelayedOperation extends AbstractDelayedOperation {
 
     @Override
     protected boolean tryComplete() {
-        synchronized (group) {
-            if (member.isExpired()) {
-                return forceComplete();
-            } else {
-                return false;
-            }
+        if (member.isExpired()) {
+            return forceComplete();
+        } else {
+            return false;
         }
     }
 

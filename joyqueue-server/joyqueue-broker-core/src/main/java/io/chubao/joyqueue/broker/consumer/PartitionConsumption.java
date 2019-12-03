@@ -15,6 +15,7 @@
  */
 package io.chubao.joyqueue.broker.consumer;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import io.chubao.joyqueue.broker.archive.ArchiveManager;
 import io.chubao.joyqueue.broker.archive.ConsumeArchiveService;
@@ -37,7 +38,6 @@ import io.chubao.joyqueue.store.PositionOverflowException;
 import io.chubao.joyqueue.store.PositionUnderflowException;
 import io.chubao.joyqueue.store.ReadResult;
 import io.chubao.joyqueue.store.StoreService;
-import com.google.common.base.Preconditions;
 import io.chubao.joyqueue.toolkit.network.IpUtil;
 import io.chubao.joyqueue.toolkit.service.Service;
 import io.chubao.joyqueue.toolkit.stat.TPStatUtil;
@@ -124,26 +124,20 @@ class PartitionConsumption extends Service {
 
         PullResult pullResult = new PullResult(consumer, (short) -1, new ArrayList<>(0));
 
-        if (partitionManager.isRetry(consumer)) {
-            // 消费待重试的消息
-            List<RetryMessageModel> retryMsgList = messageRetry.getRetry(consumer.getTopic(), consumer.getApp(), (short) 1, 0L);
-            if (CollectionUtils.isNotEmpty(retryMsgList) && retryMsgList.size() > 0) {
-                pullResult = brokerMessage2PullResult(consumer, retryMsgList);
-                // 读到重试消息，增加下次读到重试队列的概率（优先处理重试消息）
-                partitionManager.increaseRetryProbability(consumer);
-            } else {
-                // 读不到重试消息，则降低下次读重试队列的概率
-                partitionManager.decreaseRetryProbability(consumer);
-            }
-        }
+
         List<Short> priorityPartitionList = partitionManager.getPriorityPartition(TopicName.parse(consumer.getTopic()));
-        if (pullResult.getBuffers().size() < 1 && priorityPartitionList.size() > 0) {
+        if (priorityPartitionList.size() > 0) {
             // 高优先级分区消费
             pullResult = getFromPartition(consumer, priorityPartitionList, count, ackTimeout, accessTimes);
         }
-        if (pullResult.getBuffers().size() < 1) {
+
+        if (pullResult.count() < 1) {
             // 消费普通分区消息
             List<Short> partitionList = clusterManager.getMasterPartitionList(TopicName.parse(consumer.getTopic()));
+            if (partitionManager.isRetry(consumer)) {
+                partitionList = new ArrayList<>(partitionList);
+                partitionList.add(Partition.RETRY_PARTITION_ID);
+            }
             pullResult = getFromPartition(consumer, partitionList, count, ackTimeout, accessTimes);
         }
 
@@ -207,39 +201,28 @@ class PartitionConsumption extends Service {
     protected PullResult getMsgByPartitionAndIndex(Consumer consumer, int group, short partition, long index, int count) throws JoyQueueException, IOException {
         PullResult pullResult = new PullResult(consumer, (short) -1, new ArrayList<>(0));
         try {
-            long startTime = System.nanoTime();
-
-            PartitionGroupStore store = storeService.getStore(consumer.getTopic(), group);
-            ReadResult readRst = store.read(partition, index, count, Long.MAX_VALUE);
-
-            TPStatUtil.append(monitorKey, startTime, System.nanoTime());
-
-            if (readRst.getCode() == JoyQueueCode.SUCCESS) {
-                ByteBuffer[] byteBufferArr = readRst.getMessages();
-                if (byteBufferArr == null) {
-                    // 没有拉到消息直接返回
-                    return pullResult;
-                }
-
-                List<ByteBuffer> byteBuffers = Lists.newArrayList(byteBufferArr);
-                if (StringUtils.isNotEmpty(consumer.getApp()) &&
-                        (!consumer.getType().equals(Consumer.ConsumeType.INTERNAL) && !consumer.getType().equals(Consumer.ConsumeType.KAFKA))) {
-
-                    io.chubao.joyqueue.domain.Consumer consumerConfig = clusterManager.tryGetConsumer(TopicName.parse(consumer.getTopic()), consumer.getApp());
-
-                    if (consumerConfig != null) {
-                        // 过滤消息
-                        byteBuffers = filterMessageSupport.filter(consumerConfig, byteBuffers, new FilterCallbackImpl(consumer));
-
-                        // 开启延迟消费，过滤未到消费时间的消息
-                        byteBuffers = delayHandler.handle(consumerConfig.getConsumerPolicy(), byteBuffers);
-                    }
-                }
-
-                pullResult = new PullResult(consumer, partition, byteBuffers);
-            } else {
-                logger.error("read message error, error code[{}]", readRst.getCode());
+            PullResult readResult = getMsgByPartitionAndIndex(consumer.getTopic(), group, partition, index, count);
+            if (readResult.getBuffers() == null) {
+                // 没有拉到消息直接返回
+                return pullResult;
             }
+
+            List<ByteBuffer> byteBuffers = readResult.getBuffers();
+            if (StringUtils.isNotEmpty(consumer.getApp()) &&
+                    (!Consumer.ConsumeType.INTERNAL.equals(consumer.getType()) && !Consumer.ConsumeType.KAFKA.equals(consumer.getType()))) {
+
+                io.chubao.joyqueue.domain.Consumer consumerConfig = clusterManager.tryGetConsumer(TopicName.parse(consumer.getTopic()), consumer.getApp());
+
+                if (consumerConfig != null) {
+                    // 过滤消息
+                    byteBuffers = filterMessageSupport.filter(consumerConfig, byteBuffers, new FilterCallbackImpl(consumer));
+
+                    // 开启延迟消费，过滤未到消费时间的消息
+                    byteBuffers = delayHandler.handle(consumerConfig.getConsumerPolicy(), byteBuffers);
+                }
+            }
+
+            pullResult = new PullResult(consumer, partition, byteBuffers);
         } catch (PositionOverflowException overflow) {
             logger.debug("PositionOverflow,topic:{},partition:{},index:{}", consumer.getTopic(), partition, index);
             if (overflow.getPosition() != overflow.getRight()) {
@@ -251,6 +234,25 @@ class PartitionConsumption extends Service {
         }
 
         return pullResult;
+    }
+
+    protected PullResult getMsgByPartitionAndIndex(String topic, int group, short partition, long index, int count) throws JoyQueueException, IOException {
+        long startTime = System.nanoTime();
+        PullResult result = new PullResult(topic, null, partition, null);
+
+        PartitionGroupStore store = storeService.getStore(topic, group);
+        ReadResult readRst = store.read(partition, index, count, Long.MAX_VALUE);
+
+        TPStatUtil.append(monitorKey, startTime, System.nanoTime());
+
+        if (readRst.getCode() == JoyQueueCode.SUCCESS) {
+            result.setBuffers(Lists.newArrayList(readRst.getMessages()));
+            return result;
+        } else {
+            logger.error("read message error, error code[{}]", readRst.getCode());
+            result.setCode(readRst.getCode());
+            return result;
+        }
     }
 
     /**
@@ -282,6 +284,14 @@ class PartitionConsumption extends Service {
         // 初始化默认
         PullResult pullResult = new PullResult(consumer, (short) -1, new ArrayList<>(0));
         if (partitionManager.tryOccupyPartition(consumer, partition, ackTimeout)) {
+            if (partition == Partition.RETRY_PARTITION_ID) {
+                pullResult = getRetryMessage(consumer, pullResult);
+                if (pullResult.count() < 1) {
+                    // 出现异常释放分区占用
+                    partitionManager.releasePartition(consumer, partition);
+                }
+                return pullResult;
+            }
             int partitionGroup = clusterManager.getPartitionGroupId(TopicName.parse(consumer.getTopic()), partition);
             long index = positionManager.getLastMsgAckIndex(TopicName.parse(consumer.getTopic()), consumer.getApp(), partition);
             try {
@@ -317,13 +327,32 @@ class PartitionConsumption extends Service {
                 partitionManager.releasePartition(consumer, partition);
 
                 if (ex instanceof PositionOverflowException) {
-                    pullResult.setCode(JoyQueueCode.SE_INDEX_OVERFLOW);
+                    long rightIndex = ((PositionOverflowException) ex).getRight();
+                    if (rightIndex < index) {
+                        pullResult.setCode(JoyQueueCode.SE_INDEX_OVERFLOW);
+                        logger.error(ex.getMessage(), ex);
+                    }
                 } else if (ex instanceof PositionUnderflowException) {
                     pullResult.setCode(JoyQueueCode.SE_INDEX_UNDERFLOW);
+                    logger.error(ex.getMessage(), ex);
                 } else {
                     logger.error("get message error, consumer: {}, partition: {}", consumer, partition, ex);
                 }
             }
+        }
+        return pullResult;
+    }
+
+    private PullResult getRetryMessage(Consumer consumer, PullResult pullResult) throws JoyQueueException {
+        // 消费待重试的消息
+        List<RetryMessageModel> retryMsgList = messageRetry.getRetry(consumer.getTopic(), consumer.getApp(), (short) 1, 0L);
+        if (CollectionUtils.isNotEmpty(retryMsgList) && retryMsgList.size() > 0) {
+            pullResult = brokerMessage2PullResult(consumer, retryMsgList);
+            // 读到重试消息，增加下次读到重试队列的概率（优先处理重试消息）
+            partitionManager.increaseRetryProbability(consumer);
+        } else {
+            // 读不到重试消息，则降低下次读重试队列的概率
+            partitionManager.decreaseRetryProbability(consumer);
         }
         return pullResult;
     }
@@ -357,6 +386,9 @@ class PartitionConsumption extends Service {
      */
     private ByteBuffer[] readMessages(Consumer consumer, int partitionGroup, short partition, long index, int count) throws IOException {
         PartitionGroupStore store = storeService.getStore(consumer.getTopic(), partitionGroup);
+        if (index < store.getLeftIndex(partition) || index >= store.getRightIndex(partition)) {
+            return null;
+        }
         try {
             ReadResult readRst = store.read(partition, index, count, Long.MAX_VALUE);
             if (readRst.getCode() == JoyQueueCode.SUCCESS) {

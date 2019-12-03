@@ -17,6 +17,7 @@ package io.chubao.joyqueue.broker.kafka.handler;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import io.chubao.joyqueue.broker.cluster.ClusterManager;
 import io.chubao.joyqueue.broker.helper.SessionHelper;
 import io.chubao.joyqueue.broker.kafka.KafkaAcknowledge;
@@ -47,6 +48,10 @@ import io.chubao.joyqueue.network.transport.Transport;
 import io.chubao.joyqueue.network.transport.command.Command;
 import io.chubao.joyqueue.response.BooleanResponse;
 import io.chubao.joyqueue.toolkit.concurrent.EventListener;
+import io.chubao.joyqueue.toolkit.delay.AbstractDelayedOperation;
+import io.chubao.joyqueue.toolkit.delay.DelayedOperation;
+import io.chubao.joyqueue.toolkit.delay.DelayedOperationKey;
+import io.chubao.joyqueue.toolkit.delay.DelayedOperationManager;
 import io.chubao.joyqueue.toolkit.network.IpUtil;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
@@ -75,6 +80,7 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
     private ProducerSequenceManager producerSequenceManager;
     private SessionManager sessionManager;
     private KafkaConfig config;
+    private DelayedOperationManager<DelayedOperation> delayPurgatory;
 
     @Override
     public void setKafkaContext(KafkaContext kafkaContext) {
@@ -86,11 +92,13 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
         this.producerSequenceManager = kafkaContext.getProducerSequenceManager();
         this.sessionManager = kafkaContext.getBrokerContext().getSessionManager();
         this.config = kafkaContext.getConfig();
+        this.delayPurgatory = new DelayedOperationManager<>("kafka-produce-delay");
+        this.delayPurgatory.start();
     }
 
     @Override
-    public Command handle(Transport transport, Command command) {
-        ProduceRequest produceRequest = (ProduceRequest) command.getPayload();
+    public Command handle(Transport transport, Command request) {
+        ProduceRequest produceRequest = (ProduceRequest) request.getPayload();
         KafkaAcknowledge kafkaAcknowledge = KafkaAcknowledge.valueOf(produceRequest.getRequiredAcks());
         QosLevel qosLevel = KafkaAcknowledge.convertToQosLevel(kafkaAcknowledge);
         String clientId = KafkaClientHelper.parseClient(produceRequest.getClientId());
@@ -103,6 +111,7 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
         byte[] clientAddress = IpUtil.toByte((InetSocketAddress) transport.remoteAddress());
         Connection connection = SessionHelper.getConnection(transport);
         Traffic traffic = new Traffic(clientId);
+        boolean[] isNeedDelay = {false};
 
         for (Map.Entry<String, List<ProduceRequest.PartitionRequest>> entry : partitionRequestMap.entrySet()) {
             TopicName topic = TopicName.parse(entry.getKey());
@@ -120,6 +129,7 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
                     buildPartitionResponse(partitionRequest.getPartition(), null, checkCode, partitionRequest.getMessages(), partitionResponses);
                     traffic.record(topic.getFullName(), 0);
                     latch.countDown();
+                    isNeedDelay[0] = true;
                     continue;
                 }
                 splitByPartitionGroup(topicConfig, topic, producer, clientAddress, traffic, partitionRequest, partitionGroupRequestMap);
@@ -135,6 +145,9 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
                                 partitionResponses.add(new ProduceResponse.PartitionResponse(partition, ProduceResponse.PartitionResponse.NONE_OFFSET, produceResponse.getErrorCode()));
                                 latch.countDown();
                             }
+                        }
+                        if (produceResponse.getErrorCode() != KafkaErrorCode.NONE.getCode()) {
+                            isNeedDelay[0] = true;
                         }
                     }
                 };
@@ -155,14 +168,27 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
         try {
             boolean isDone = latch.await(Math.min(produceRequest.getAckTimeoutMs(), config.getProduceTimeout()), TimeUnit.MILLISECONDS);
             if (!isDone) {
+                isNeedDelay[0] = true;
                 logger.warn("wait produce timeout, transport: {}, app: {}, topics: {}", transport.remoteAddress(), clientId, produceRequest.getPartitionRequests().keySet());
             }
         } catch (InterruptedException e) {
             logger.error("wait produce exception, transport: {}, app: {}, topics: {}", transport.remoteAddress(), clientId, produceRequest.getPartitionRequests().keySet(), e);
         }
 
-        ProduceResponse response = new ProduceResponse(traffic, partitionResponseMap);
-        return new Command(response);
+        ProduceResponse produceResponse = new ProduceResponse(traffic, partitionResponseMap);
+        Command response = new Command(produceResponse);
+
+        if (isNeedDelay[0] && config.getProduceDelayEnable()) {
+            delayPurgatory.tryCompleteElseWatch(new AbstractDelayedOperation(config.getProduceDelay()) {
+                @Override
+                protected void onComplete() {
+                    transport.acknowledge(request, response);
+                }
+            }, Sets.newHashSet(new DelayedOperationKey()));
+            return null;
+        } else {
+            return response;
+        }
     }
 
     protected short checkPartitionRequest(Transport transport, ProduceRequest produceRequest, ProduceRequest.PartitionRequest partitionRequest,

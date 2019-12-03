@@ -23,6 +23,7 @@ import io.chubao.joyqueue.client.internal.consumer.MessageListener;
 import io.chubao.joyqueue.client.internal.consumer.config.ConsumerConfig;
 import io.chubao.joyqueue.client.internal.consumer.domain.ConsumeMessage;
 import io.chubao.joyqueue.client.internal.consumer.domain.ConsumeReply;
+import io.chubao.joyqueue.client.internal.consumer.domain.FetchIndexData;
 import io.chubao.joyqueue.client.internal.consumer.interceptor.ConsumerInterceptor;
 import io.chubao.joyqueue.client.internal.consumer.transport.ConsumerClientManager;
 import io.chubao.joyqueue.client.internal.metadata.domain.TopicMetadata;
@@ -240,6 +241,11 @@ public class MessageConsumerWrapper extends Service implements MessageConsumer {
     @Override
     public JoyQueueCode replyOnce(ConsumeReply reply) {
         return delegate.replyOnce(reply);
+    }
+
+    @Override
+    public FetchIndexData fetchIndex(short partition) {
+        return delegate.fetchIndex(partition);
     }
 
     @Override

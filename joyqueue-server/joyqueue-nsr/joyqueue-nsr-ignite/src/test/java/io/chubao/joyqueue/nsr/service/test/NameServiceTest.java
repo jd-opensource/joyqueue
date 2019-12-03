@@ -21,6 +21,7 @@ import io.chubao.joyqueue.nsr.NameService;
 import io.chubao.joyqueue.nsr.nameservice.ThinNameService;
 import io.chubao.joyqueue.nsr.config.NameServiceConfig;
 import io.chubao.joyqueue.toolkit.config.PropertySupplier;
+import io.chubao.joyqueue.toolkit.config.PropertySupplierAware;
 import io.chubao.joyqueue.toolkit.io.Files;
 import io.chubao.joyqueue.toolkit.lang.Close;
 import io.chubao.joyqueue.toolkit.network.IpUtil;
@@ -65,6 +66,9 @@ public class NameServiceTest {
         nameServer.start();
 
         nameService = new ThinNameService(nameServiceConfig);
+        if (nameService instanceof PropertySupplierAware) {
+            ((PropertySupplierAware) nameService).setSupplier(new PropertySupplier.MapSupplier(properties));
+        }
         nameService.start();
 
     }

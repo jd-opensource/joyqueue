@@ -254,6 +254,10 @@ public class PositionManager extends Service {
      * @return 是否更新成功
      */
     public boolean updateLastMsgAckIndex(TopicName topic, String app, short partition, long index) throws JoyQueueException {
+        return updateLastMsgAckIndex(topic, app, partition, index, true);
+    }
+
+    public boolean updateLastMsgAckIndex(TopicName topic, String app, short partition, long index, boolean isUpdatePullIndex) throws JoyQueueException {
         logger.debug("Update last ack index, topic:{}, app:{}, partition:{}, index:{}", topic, app, partition, index);
         // 检查索引有效性
         checkIndex(topic, partition, index);
@@ -264,6 +268,9 @@ public class PositionManager extends Service {
         Position position = positionStore.get(consumePartition);
         if (position != null) {
             position.setAckCurIndex(index);
+            if (isUpdatePullIndex) {
+                position.setPullCurIndex(-1);
+            }
         } else {
             logger.error("Position is null, topic:{}, app:{}, partition:{}, index:{}", topic, app, partition, index);
             // 补偿逻辑：如果当前broker是指定partition对应partitionGroup的leader，则按照给定index初始化Position，否则不处理

@@ -1,3 +1,18 @@
+/**
+ * Copyright 2019 The JoyQueue Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.chubao.joyqueue.nsr.composition.service;
 
 import io.chubao.joyqueue.domain.PartitionGroup;
@@ -37,7 +52,12 @@ public class CompositionTopicInternalService implements TopicInternalService {
         if (config.isReadIgnite()) {
             return igniteTopicService.getTopicByCode(namespace, topic);
         } else {
-            return journalkeeperTopicService.getTopicByCode(namespace, topic);
+            try {
+                return journalkeeperTopicService.getTopicByCode(namespace, topic);
+            } catch (Exception e) {
+                logger.error("getTopicByCode exception, namespace: {}, topic: {}", namespace, topic, e);
+                return igniteTopicService.getTopicByCode(namespace, topic);
+            }
         }
     }
 
@@ -46,7 +66,12 @@ public class CompositionTopicInternalService implements TopicInternalService {
         if (config.isReadIgnite()) {
             return igniteTopicService.search(pageQuery);
         } else {
-            return journalkeeperTopicService.search(pageQuery);
+            try {
+                return journalkeeperTopicService.search(pageQuery);
+            } catch (Exception e) {
+                logger.error("search exception, pageQuery: {}", pageQuery, e);
+                return igniteTopicService.search(pageQuery);
+            }
         }
     }
 
@@ -55,7 +80,12 @@ public class CompositionTopicInternalService implements TopicInternalService {
         if (config.isReadIgnite()) {
             return igniteTopicService.findUnsubscribedByQuery(pageQuery);
         } else {
-            return journalkeeperTopicService.findUnsubscribedByQuery(pageQuery);
+            try {
+                return journalkeeperTopicService.findUnsubscribedByQuery(pageQuery);
+            } catch (Exception e) {
+                logger.error("findUnsubscribedByQuery exception, pageQuery: {}", pageQuery, e);
+                return igniteTopicService.findUnsubscribedByQuery(pageQuery);
+            }
         }
     }
 
@@ -205,7 +235,12 @@ public class CompositionTopicInternalService implements TopicInternalService {
         if (config.isReadIgnite()) {
             return igniteTopicService.getById(id);
         } else {
-            return journalkeeperTopicService.getById(id);
+            try {
+                return journalkeeperTopicService.getById(id);
+            } catch (Exception e) {
+                logger.error("getById exception, id: {}", id, e);
+                return igniteTopicService.getById(id);
+            }
         }
     }
 
@@ -214,7 +249,12 @@ public class CompositionTopicInternalService implements TopicInternalService {
         if (config.isReadIgnite()) {
             return igniteTopicService.getAll();
         } else {
-            return journalkeeperTopicService.getAll();
+            try {
+                return journalkeeperTopicService.getAll();
+            } catch (Exception e) {
+                logger.error("getAll exception", e);
+                return igniteTopicService.getAll();
+            }
         }
     }
 }

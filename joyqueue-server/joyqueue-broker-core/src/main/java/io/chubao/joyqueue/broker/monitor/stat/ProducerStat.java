@@ -47,6 +47,12 @@ public class ProducerStat {
         return partitionGroupStat;
     }
 
+    public void clear() {
+        enQueueStat = new EnQueueStat();
+        connectionStat = new ConnectionStat();
+        partitionGroupStatMap.clear();
+    }
+
     public String getTopic() {
         return topic;
     }

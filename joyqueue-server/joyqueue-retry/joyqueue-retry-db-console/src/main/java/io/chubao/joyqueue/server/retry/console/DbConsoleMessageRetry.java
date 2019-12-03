@@ -261,6 +261,35 @@ public class DbConsoleMessageRetry implements ConsoleMessageRetry<Long> {
         }
     }
 
+    private static String BATCH_UPDATE_SQL = "update message_retry set status = ?,update_time = ?, update_by = ? where topic = ? and app = ? and send_time >= ? and send_time <= ? and status = ?";
+
+    @Override
+    public void batchUpdateStatus(RetryQueryCondition retryQueryCondition, RetryStatus status,long updateTime, int updateBy) throws Exception {
+        if (StringUtils.isNotEmpty(retryQueryCondition.getBusinessId())) {
+            BATCH_UPDATE_SQL += "and businessId = ?";
+        }
+        int update = DaoUtil.update(dataSource,1, BATCH_UPDATE_SQL, (statement, target) -> {
+
+            statement.setShort(1, status.getValue());
+            statement.setTimestamp(2, new Timestamp(updateTime));
+            statement.setInt(3, updateBy);
+            statement.setString(4, retryQueryCondition.getTopic());
+            statement.setString(5, retryQueryCondition.getApp());
+            statement.setTimestamp(6, new Timestamp(retryQueryCondition.getStartTime()));
+            statement.setTimestamp(7, new Timestamp(retryQueryCondition.getEndTime()));
+            statement.setInt(8, retryQueryCondition.getStatus());
+
+            if (StringUtils.isNotEmpty(retryQueryCondition.getBusinessId())) {
+                statement.setString(9, retryQueryCondition.getBusinessId());
+            }
+        });
+        if (update > 0) {
+            logger.info("update retry message success by retryQueryCondition:{}, status:{}, sendStartTime:{}, sendEndTime:{}",retryQueryCondition , status);
+        } else {
+            logger.error("update retry message error by retryQueryCondition:{}, status:{}, sendStartTime:{}, sendEndTime:{}", retryQueryCondition, status);
+        }
+    }
+
     @Override
     public void addRetry(List<RetryMessageModel> retryMessageModelList) throws JoyQueueException {
         dbMessageRetry.addRetry(retryMessageModelList);

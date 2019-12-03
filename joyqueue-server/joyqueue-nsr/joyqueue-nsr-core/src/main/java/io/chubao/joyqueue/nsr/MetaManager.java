@@ -477,5 +477,9 @@ public class MetaManager extends Service {
     public ConfigService getConfigService() {
         return configService;
     }
+
+    public AppTokenService getAppTokenService() {
+        return appTokenService;
+    }
 }
 

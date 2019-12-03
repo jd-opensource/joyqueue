@@ -1,3 +1,18 @@
+/**
+ * Copyright 2019 The JoyQueue Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.chubao.joyqueue.nsr.composition.service;
 
 import io.chubao.joyqueue.domain.AppToken;
@@ -33,7 +48,12 @@ public class CompositionAppTokenInternalService implements AppTokenInternalServi
         if (config.isReadIgnite()) {
             return igniteAppTokenService.getByApp(app);
         } else {
-            return journalkeeperAppTokenService.getByApp(app);
+            try {
+                return journalkeeperAppTokenService.getByApp(app);
+            } catch (Exception e) {
+                logger.error("getByApp exception, app: {}", app, e);
+                return igniteAppTokenService.getByApp(app);
+            }
         }
     }
 
@@ -42,7 +62,12 @@ public class CompositionAppTokenInternalService implements AppTokenInternalServi
         if (config.isReadIgnite()) {
             return igniteAppTokenService.getByAppAndToken(app, token);
         } else {
-            return journalkeeperAppTokenService.getByAppAndToken(app, token);
+            try {
+                return journalkeeperAppTokenService.getByAppAndToken(app, token);
+            } catch (Exception e) {
+                logger.error("getByAppAndToken exception, app: {}, token: {}", app, token, e);
+                return igniteAppTokenService.getByAppAndToken(app, token);
+            }
         }
     }
 
@@ -51,7 +76,12 @@ public class CompositionAppTokenInternalService implements AppTokenInternalServi
         if (config.isReadIgnite()) {
             return igniteAppTokenService.getById(id);
         } else {
-            return journalkeeperAppTokenService.getById(id);
+            try {
+                return journalkeeperAppTokenService.getById(id);
+            } catch (Exception e) {
+                logger.error("getById exception, id: {}", id, e);
+                return igniteAppTokenService.getById(id);
+            }
         }
     }
 
@@ -60,7 +90,12 @@ public class CompositionAppTokenInternalService implements AppTokenInternalServi
         if (config.isReadIgnite()) {
             return igniteAppTokenService.getAll();
         } else {
-            return journalkeeperAppTokenService.getAll();
+            try {
+                return journalkeeperAppTokenService.getAll();
+            } catch (Exception e) {
+                logger.error("getAll exception", e);
+                return igniteAppTokenService.getAll();
+            }
         }
     }
 

@@ -324,8 +324,8 @@ public class DefaultBrokerMonitorService implements BrokerMonitorService {
     }
 
     @Override
-    public Object syncMetadata(String source, String target, int interval) {
-        return metadataMonitorService.syncMetadata(source, target, interval);
+    public Object syncMetadata(String source, String target, int interval, boolean onlyCompare) {
+        return metadataMonitorService.syncMetadata(source, target, interval, onlyCompare);
     }
 
     @Override
@@ -346,5 +346,35 @@ public class DefaultBrokerMonitorService implements BrokerMonitorService {
     @Override
     public Object deleteMetadata(String source, String operator, List<Object> params) {
         return metadataMonitorService.deleteMetadata(source, operator, params);
+    }
+
+    @Override
+    public String getConfigMetadata(String key) {
+        return metadataMonitorService.getConfigMetadata(key);
+    }
+
+    @Override
+    public List<String> getConfigsMetadata() {
+        return metadataMonitorService.getConfigsMetadata();
+    }
+
+    @Override
+    public String getMetadataCluster() {
+        return metadataMonitorService.getMetadataCluster();
+    }
+
+    @Override
+    public String addMetadataNode(String uri) {
+        return metadataMonitorService.addMetadataNode(uri);
+    }
+
+    @Override
+    public String removeMetadataNode(String uri) {
+        return metadataMonitorService.removeMetadataNode(uri);
+    }
+
+    @Override
+    public String updateMetadataNode(List<String> uris) {
+        return metadataMonitorService.updateMetadataNode(uris);
     }
 }

@@ -69,7 +69,6 @@ public class ReplicateConsumePosRequestHandler implements CommandHandler, Type {
         }
 
         ReplicateConsumePosRequest request = (ReplicateConsumePosRequest)command.getPayload();
-        boolean success=false;
         JoyQueueHeader header = new JoyQueueHeader(Direction.RESPONSE, CommandType.REPLICATE_CONSUME_POS_RESPONSE);
         ReplicateConsumePosResponse response = new ReplicateConsumePosResponse(false);
 
@@ -85,7 +84,7 @@ public class ReplicateConsumePosRequestHandler implements CommandHandler, Type {
         try {
             Map<ConsumePartition, Position> consumePositions = request.getConsumePositions();
             consume.setConsumePosition(consumePositions);
-            response.setSuccess(success);
+            response.setSuccess(true);
         } catch (Exception e) {
             logger.warn("Set consume info {} fail", request.getConsumePositions(), e);
         }

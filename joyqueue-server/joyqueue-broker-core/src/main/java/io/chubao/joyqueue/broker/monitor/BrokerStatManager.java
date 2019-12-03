@@ -22,6 +22,7 @@ import io.chubao.joyqueue.broker.monitor.exception.MonitorException;
 import io.chubao.joyqueue.broker.monitor.model.BrokerStatPo;
 import io.chubao.joyqueue.broker.monitor.stat.BrokerStat;
 import io.chubao.joyqueue.toolkit.io.DoubleCopy;
+import io.chubao.joyqueue.toolkit.io.ZipUtil;
 import io.chubao.joyqueue.toolkit.service.Service;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -126,26 +127,31 @@ public class BrokerStatManager extends Service {
 
         @Override
         protected byte[] serialize() {
-            BrokerStatPo brokerStatPo = BrokerStatConverter.convertToPo(brokerStat);
-            String stat = JSON.toJSONString(brokerStatPo);
+            try {
+                BrokerStatPo brokerStatPo = BrokerStatConverter.convertToPo(brokerStat);
+                byte[] stat = JSON.toJSONBytes(brokerStatPo);
+                stat = ZipUtil.compress(stat);
 
-            if (logger.isDebugEnabled()) {
-                logger.debug("save broker stat, value: {}, file: {}", stat, statFile);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("save broker stat, value: {}, file: {}", new String(stat), statFile);
+                }
+
+                return stat;
+            } catch (Exception e) {
+                logger.error("serialize stat exception", e);
+                return new byte[0];
             }
-
-            return stat.getBytes();
         }
 
         @Override
         protected void parse(byte[] data) {
             try {
-                String stat = new String(data);
-
                 if (logger.isDebugEnabled()) {
-                    logger.debug("load broker stat, value: {}, file: {}", stat, statFile);
+                    logger.debug("load broker stat, value: {}, file: {}", new String(data), statFile);
                 }
 
-                BrokerStatPo brokerStatPo = JSON.parseObject(stat, BrokerStatPo.class);
+                data = ZipUtil.decompress(data).getBytes();
+                BrokerStatPo brokerStatPo = JSON.parseObject(data, BrokerStatPo.class);
 
                 if (brokerStatPo.getVersion() != BrokerStat.VERSION) {
                     logger.warn("broker stat check version failed, current: {}, required: {}", brokerStatPo.getVersion(), BrokerStat.VERSION);

@@ -52,11 +52,12 @@ public class AddOffsetsToTxnRequestHandler implements KafkaCommandHandler, Type,
     public Command handle(Transport transport, Command command) {
         AddOffsetsToTxnRequest addOffsetsToTxnRequest = (AddOffsetsToTxnRequest) command.getPayload();
         String clientId = KafkaClientHelper.parseClient(addOffsetsToTxnRequest.getClientId());
+        String groupId = clientId;
         AddOffsetsToTxnResponse response = null;
 
         try {
             boolean isSuccess = transactionCoordinator.handleAddOffsetsToTxn(clientId, addOffsetsToTxnRequest.getTransactionId(),
-                    addOffsetsToTxnRequest.getGroupId(), addOffsetsToTxnRequest.getProducerId(), addOffsetsToTxnRequest.getProducerEpoch());
+                    groupId, addOffsetsToTxnRequest.getProducerId(), addOffsetsToTxnRequest.getProducerEpoch());
             response = new AddOffsetsToTxnResponse(KafkaErrorCode.NONE.getCode());
         } catch (TransactionException e) {
             logger.warn("add offsets to txn exception, code: {}, message: {}, request: {}", e.getCode(), e.getMessage(), addOffsetsToTxnRequest);

@@ -1,3 +1,18 @@
+/**
+ * Copyright 2019 The JoyQueue Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.chubao.joyqueue.nsr.composition.service;
 
 import io.chubao.joyqueue.domain.Replica;
@@ -34,7 +49,12 @@ public class CompositionPartitionGroupReplicaInternalService implements Partitio
         if (config.isReadIgnite()) {
             return ignitePartitionGroupReplicaService.getByTopic(topic);
         } else {
-            return journalkeeperPartitionGroupReplicaService.getByTopic(topic);
+            try {
+                return journalkeeperPartitionGroupReplicaService.getByTopic(topic);
+            } catch (Exception e) {
+                logger.error("getByTopic exception, topic: {}", topic, e);
+                return ignitePartitionGroupReplicaService.getByTopic(topic);
+            }
         }
     }
 
@@ -43,7 +63,12 @@ public class CompositionPartitionGroupReplicaInternalService implements Partitio
         if (config.isReadIgnite()) {
             return ignitePartitionGroupReplicaService.getByTopicAndGroup(topic, groupNo);
         } else {
-            return journalkeeperPartitionGroupReplicaService.getByTopicAndGroup(topic, groupNo);
+            try {
+                return journalkeeperPartitionGroupReplicaService.getByTopicAndGroup(topic, groupNo);
+            } catch (Exception e) {
+                logger.error("getByTopicAndGroup exception, topic: {}, groupNo: {}", topic, groupNo, e);
+                return ignitePartitionGroupReplicaService.getByTopicAndGroup(topic, groupNo);
+            }
         }
     }
 
@@ -52,7 +77,12 @@ public class CompositionPartitionGroupReplicaInternalService implements Partitio
         if (config.isReadIgnite()) {
             return ignitePartitionGroupReplicaService.getByBrokerId(brokerId);
         } else {
-            return journalkeeperPartitionGroupReplicaService.getByBrokerId(brokerId);
+            try {
+                return journalkeeperPartitionGroupReplicaService.getByBrokerId(brokerId);
+            } catch (Exception e) {
+                logger.error("getByBrokerId exception, brokerId: {}", brokerId, e);
+                return ignitePartitionGroupReplicaService.getByBrokerId(brokerId);
+            }
         }
     }
 
@@ -61,7 +91,12 @@ public class CompositionPartitionGroupReplicaInternalService implements Partitio
         if (config.isReadIgnite()) {
             return ignitePartitionGroupReplicaService.getById(id);
         } else {
-            return journalkeeperPartitionGroupReplicaService.getById(id);
+            try {
+                return journalkeeperPartitionGroupReplicaService.getById(id);
+            } catch (Exception e) {
+                logger.error("getById exception", e);
+                return ignitePartitionGroupReplicaService.getById(id);
+            }
         }
     }
 
@@ -70,7 +105,12 @@ public class CompositionPartitionGroupReplicaInternalService implements Partitio
         if (config.isReadIgnite()) {
             return ignitePartitionGroupReplicaService.getAll();
         } else {
-            return journalkeeperPartitionGroupReplicaService.getAll();
+            try {
+                return journalkeeperPartitionGroupReplicaService.getAll();
+            } catch (Exception e) {
+                logger.error("getAll exception", e);
+                return ignitePartitionGroupReplicaService.getAll();
+            }
         }
     }
 

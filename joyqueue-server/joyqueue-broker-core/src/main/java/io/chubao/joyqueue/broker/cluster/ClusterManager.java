@@ -17,8 +17,10 @@ package io.chubao.joyqueue.broker.cluster;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.chubao.joyqueue.broker.BrokerContext;
+import io.chubao.joyqueue.broker.cluster.event.CompensateEvent;
 import io.chubao.joyqueue.broker.config.BrokerConfig;
 import io.chubao.joyqueue.domain.AppToken;
 import io.chubao.joyqueue.domain.Broker;
@@ -53,10 +55,12 @@ import io.chubao.joyqueue.nsr.event.UpdateTopicEvent;
 import io.chubao.joyqueue.response.BooleanResponse;
 import io.chubao.joyqueue.toolkit.concurrent.EventBus;
 import io.chubao.joyqueue.toolkit.concurrent.EventListener;
+import io.chubao.joyqueue.toolkit.config.PropertySupplier;
 import io.chubao.joyqueue.toolkit.lang.LifeCycle;
 import io.chubao.joyqueue.toolkit.service.Service;
 import io.chubao.joyqueue.toolkit.time.SystemClock;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,6 +84,8 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static io.chubao.joyqueue.broker.consumer.ConsumeConfigKey.RETRY_RANDOM_BOUND;
 
 /**
  * 集群管理
@@ -231,7 +237,11 @@ public class ClusterManager extends Service {
      * @return
      */
     public PartitionGroup getPartitionGroupByGroup(TopicName topic, int group) {
-        return getTopicConfig(topic).fetchPartitionGroupByGroup(group);
+        TopicConfig topicConfig = getTopicConfig(topic);
+        if (topicConfig == null) {
+            return null;
+        }
+        return topicConfig.fetchPartitionGroupByGroup(group);
     }
 
     /**
@@ -387,6 +397,14 @@ public class ClusterManager extends Service {
             throw new JoyQueueException(JoyQueueCode.FW_CONSUMER_NOT_EXISTS);
         }
         return getConsumerPolicyOrDefault(consumer);
+    }
+
+    public PropertySupplier getPropertySupplier() {
+        return brokerContext.getPropertySupplier();
+    }
+
+    public int getRetryRandomBound() {
+        return PropertySupplier.getValue(brokerContext.getPropertySupplier(), RETRY_RANDOM_BOUND);
     }
 
     /**
@@ -655,12 +673,14 @@ public class ClusterManager extends Service {
         Boolean paused = consumerPolicy.getPaused();
         if (paused) {
             // 暂停消费
+            logger.info("topic is paused, topic: {}, app: {}", topic, app);
             return BooleanResponse.failed(JoyQueueCode.FW_FETCH_TOPIC_MESSAGE_PAUSED);
         }
         Set<String> blackList = consumerPolicy.getBlackList();
         if (blackList != null) {
             // 是否在消费黑名单内
             if (blackList.stream().anyMatch(ip -> ip.equals(address))) {
+                logger.info("app client ip not readable, topic: {}, app: {}, ip: {}", topic, app, address);
                 return BooleanResponse.failed(JoyQueueCode.FW_GET_MESSAGE_APP_CLIENT_IP_NOT_READ);
             }
         }
@@ -768,6 +788,30 @@ public class ClusterManager extends Service {
             }
         }
 
+        return result;
+    }
+
+    public List<Producer> getLocalProducersByTopic(TopicName topic) {
+        Map<String, MetaDataLocalCache.CacheProducer> producers = localCache.getTopicProducers(topic);
+        if (MapUtils.isEmpty(producers)) {
+            return Collections.emptyList();
+        }
+        List<Producer> result = Lists.newLinkedList();
+        for (Map.Entry<String, MetaDataLocalCache.CacheProducer> entry : producers.entrySet()) {
+            result.add(entry.getValue().getProducer());
+        }
+        return result;
+    }
+
+    public List<Consumer> getLocalConsumersByTopic(TopicName topic) {
+        Map<String, MetaDataLocalCache.CacheConsumer> consumers = localCache.getTopicConsumers(topic);
+        if (MapUtils.isEmpty(consumers)) {
+            return Collections.emptyList();
+        }
+        List<Consumer> result = Lists.newLinkedList();
+        for (Map.Entry<String, MetaDataLocalCache.CacheConsumer> entry : consumers.entrySet()) {
+            result.add(entry.getValue().getConsumer());
+        }
         return result;
     }
 
@@ -881,45 +925,6 @@ public class ClusterManager extends Service {
          */
         protected void initCache() {
             buildTopicConfigCaches();
-
-            // TODO 不需要补偿
-//            timerUpdateAllExecutor.scheduleWithFixedDelay(() -> {
-//                try {
-//                    logger.info("begin update all topicConfigs");
-//                    Map<TopicName, TopicConfig> topicConfigNew = nameService.getTopicConfigByBroker(brokerConfig.getBrokerId());
-//                    if(logger.isDebugEnabled()){
-//                        logger.debug("allTopicConfigs {}",topicConfigNew);
-//                    }
-//                    if (null != topicConfigNew && topicConfigNew.size() > 0) {
-//                        Map<String, TopicConfig> topicConfigOld = topicConfigCache;
-//                        for (Map.Entry<String, TopicConfig> entry : topicConfigOld.entrySet()) {
-//                            TopicName topicName = TopicName.parse(entry.getKey());
-//                            if (!topicConfigNew.containsKey(topicName)) {
-//                                topicConfigOld.remove(topicName.getFullName());
-//                                eventBus.add(TopicEvent.remove(topicName));
-//                                consumerCache.remove(topicName.getFullName());
-//                                producerCache.remove(topicName.getFullName());
-//                                topicPartitionsCache.remove(topicName.getFullName());
-//                            }
-//                        }
-//                        for (Map.Entry<TopicName, TopicConfig> entry : topicConfigNew.entrySet()) {
-//                            TopicName topicName = entry.getKey();
-//                            buildTopicConfigCache(entry.getValue());
-//                            if (!topicConfigOld.containsKey(topicName.getFullName())) {
-//                                eventBus.add(TopicEvent.add(topicName));
-//                            }
-//
-//                            updateConsumerCache(topicName);
-//                            updateProducerCache(topicName);
-//                            // 补偿订阅事件
-//                            compensateAddConsumeEvent(topicName);
-//                            compensateAddProduceEvent(topicName);
-//                        }
-//                    }
-//                } catch (Exception e) {
-//                    logger.error("update all topicConfigs error", e);
-//                }
-//            }, 1, 1, TimeUnit.MINUTES);
         }
 
         /**
@@ -929,6 +934,7 @@ public class ClusterManager extends Service {
             Map<TopicName, TopicConfig> topicConfigByBroker = nameService.getTopicConfigByBroker(brokerConfig.getBrokerId());
             if (null != topicConfigByBroker) {
                 for (Map.Entry<TopicName, TopicConfig> entry : topicConfigByBroker.entrySet()) {
+                    logger.info("build topic config, topic: {}", entry.getKey());
                     buildTopicConfigCache(entry.getValue());
                 }
             }
@@ -955,6 +961,7 @@ public class ClusterManager extends Service {
             return null;
         }
         private TopicConfig buildTopicConfigCache(TopicConfig topicConfig) {
+            logger.info("build topic cache, topic: {}", topicConfig.getName());
             TopicName topic = topicConfig.getName();
             topicConfigCache.put(topic.getFullName(), topicConfig);
             topicPartitionsCache.put(topic.getFullName(),topicConfig.fetchPartitionByBroker(broker.getId()));
@@ -975,6 +982,7 @@ public class ClusterManager extends Service {
          */
 
         protected Consumer buildConsumeCache(TopicName topic, String app) {
+            logger.info("build consumer cache, topic: {}, app", topic, app);
             Consumer consumerByTopic = nameService.getConsumerByTopicAndApp(topic, app);
             if (null != consumerByTopic) {
                 consumerCache.get(topic.getFullName()).put(app, new CacheConsumer(consumerByTopic, SystemClock.now()));
@@ -983,6 +991,7 @@ public class ClusterManager extends Service {
         }
 
         protected Consumer buildConsumeCache(Consumer consumer) {
+            logger.info("build consumer cache, topic: {}, app", consumer.getTopic(), consumer.getApp());
             consumerCache.get(consumer.getTopic().getFullName()).put(consumer.getApp(), new CacheConsumer(consumer, SystemClock.now()));
             return consumer;
         }
@@ -1032,6 +1041,7 @@ public class ClusterManager extends Service {
          * @param app   应用
          */
         protected Producer buildProduceCache(TopicName topic, String app) {
+            logger.info("build producer cache, topic: {}, app", topic, app);
             Producer producerByTopic = nameService.getProducerByTopicAndApp(topic, app);
             if (null != producerByTopic) {
                 producerCache.get(topic.getFullName()).put(app, new CacheProducer(producerByTopic));
@@ -1040,6 +1050,7 @@ public class ClusterManager extends Service {
         }
 
         protected Producer buildProduceCache(Producer producer) {
+            logger.info("build producer cache, topic: {}, app", producer.getTopic(), producer.getApp());
             producerCache.get(producer.getTopic().getFullName()).put(producer.getApp(), new CacheProducer(producer));
             return producer;
         }
@@ -1217,6 +1228,9 @@ public class ClusterManager extends Service {
                     case UPDATE_TOPIC: {
                         UpdateTopicEvent updateTopicEvent = (UpdateTopicEvent) event.getMetaEvent();
                         TopicConfig oldTopicConfig = topicConfigCache.get(updateTopicEvent.getOldTopic().getName().getFullName());
+                        if (oldTopicConfig == null) {
+                            break;
+                        }
                         TopicConfig newTopicConfig = TopicConfig.toTopicConfig(updateTopicEvent.getNewTopic());
                         newTopicConfig.setPartitionGroups(oldTopicConfig.getPartitionGroups());
                         buildTopicConfigCache(newTopicConfig);
@@ -1231,7 +1245,7 @@ public class ClusterManager extends Service {
                         topicPartitionsCache.remove(topicConfig.getName().getFullName());
                         consumerCache.remove(topicConfig.getName().getFullName());
                         producerCache.remove(topicConfig.getName().getFullName());
-                        for (PartitionGroup partitionGroup : topicConfig.fetchPartitionGroupByBrokerId(brokerConfig.getBrokerId())) {
+                        for (PartitionGroup partitionGroup : topicConfig.fetchTopicPartitionGroupsByBrokerId(brokerConfig.getBrokerId())) {
                             publishEvent(new RemovePartitionGroupEvent(topicConfig.getName(), partitionGroup));
                         }
                         break;
@@ -1326,8 +1340,16 @@ public class ClusterManager extends Service {
                         }
                         break;
                     }
+                    case COMPENSATE: {
+                        io.chubao.joyqueue.nsr.event.CompensateEvent compensateEvent = (io.chubao.joyqueue.nsr.event.CompensateEvent) event.getMetaEvent();
+                        publishEvent(new CompensateEvent(compensateEvent.getNewCache().getTopicConfigBrokerMap().get(getBrokerId())));
+                        break;
+                    }
                 }
-                publishEvent(event.getMetaEvent());
+
+                if (!event.getEventType().equals(EventType.COMPENSATE)) {
+                    publishEvent(event.getMetaEvent());
+                }
             }
         }
 

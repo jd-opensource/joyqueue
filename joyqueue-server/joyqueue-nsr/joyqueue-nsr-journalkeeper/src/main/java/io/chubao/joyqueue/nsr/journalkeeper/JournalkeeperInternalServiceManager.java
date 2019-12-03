@@ -1,3 +1,18 @@
+/**
+ * Copyright 2019 The JoyQueue Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.chubao.joyqueue.nsr.journalkeeper;
 
 import io.chubao.joyqueue.nsr.journalkeeper.repository.AppTokenRepository;
@@ -13,6 +28,7 @@ import io.chubao.joyqueue.nsr.journalkeeper.repository.ProducerRepository;
 import io.chubao.joyqueue.nsr.journalkeeper.repository.TopicRepository;
 import io.chubao.joyqueue.nsr.journalkeeper.service.JournalkeeperAppTokenInternalService;
 import io.chubao.joyqueue.nsr.journalkeeper.service.JournalkeeperBrokerInternalService;
+import io.chubao.joyqueue.nsr.journalkeeper.service.JournalkeeperClusterInternalService;
 import io.chubao.joyqueue.nsr.journalkeeper.service.JournalkeeperConfigInternalService;
 import io.chubao.joyqueue.nsr.journalkeeper.service.JournalkeeperConsumerInternalService;
 import io.chubao.joyqueue.nsr.journalkeeper.service.JournalkeeperDataCenterInternalService;
@@ -25,6 +41,7 @@ import io.chubao.joyqueue.nsr.journalkeeper.service.JournalkeeperTopicInternalSe
 import io.chubao.joyqueue.nsr.journalkeeper.service.JournalkeeperTransactionInternalService;
 import io.chubao.joyqueue.nsr.service.internal.AppTokenInternalService;
 import io.chubao.joyqueue.nsr.service.internal.BrokerInternalService;
+import io.chubao.joyqueue.nsr.service.internal.ClusterInternalService;
 import io.chubao.joyqueue.nsr.service.internal.ConfigInternalService;
 import io.chubao.joyqueue.nsr.service.internal.ConsumerInternalService;
 import io.chubao.joyqueue.nsr.service.internal.DataCenterInternalService;
@@ -38,6 +55,7 @@ import io.chubao.joyqueue.nsr.service.internal.TransactionInternalService;
 import io.chubao.joyqueue.toolkit.service.Service;
 import io.journalkeeper.sql.client.SQLClient;
 import io.journalkeeper.sql.client.SQLOperator;
+import io.journalkeeper.sql.server.SQLServer;
 
 /**
  * JournalkeeperInternalServiceManager
@@ -46,6 +64,7 @@ import io.journalkeeper.sql.client.SQLOperator;
  */
 public class JournalkeeperInternalServiceManager extends Service {
 
+    private SQLServer sqlServer;
     private SQLClient sqlClient;
     private SQLOperator sqlOperator;
 
@@ -72,8 +91,10 @@ public class JournalkeeperInternalServiceManager extends Service {
     private JournalkeeperAppTokenInternalService journalkeeperAppTokenInternalService;
     private JournalkeeperTransactionInternalService journalkeeperTransactionInternalService;
     private JournalkeeperOperationInternalService journalkeeperOperationInternalService;
+    private JournalkeeperClusterInternalService journalkeeperClusterInternalService;
 
-    public JournalkeeperInternalServiceManager(SQLClient sqlClient, SQLOperator sqlOperator) {
+    public JournalkeeperInternalServiceManager(SQLServer sqlServer, SQLClient sqlClient, SQLOperator sqlOperator) {
+        this.sqlServer = sqlServer;
         this.sqlClient = sqlClient;
         this.sqlOperator = sqlOperator;
     }
@@ -103,6 +124,7 @@ public class JournalkeeperInternalServiceManager extends Service {
         journalkeeperAppTokenInternalService = new JournalkeeperAppTokenInternalService(appTokenRepository);
         journalkeeperTransactionInternalService = new JournalkeeperTransactionInternalService();
         journalkeeperOperationInternalService = new JournalkeeperOperationInternalService(new BaseRepository(sqlOperator));
+        journalkeeperClusterInternalService = new JournalkeeperClusterInternalService(sqlClient);
     }
 
     public <T> T getService(Class<T> service) {
@@ -130,6 +152,8 @@ public class JournalkeeperInternalServiceManager extends Service {
             return (T) journalkeeperTransactionInternalService;
         } else if (service.equals(OperationInternalService.class)) {
             return (T) journalkeeperOperationInternalService;
+        } else if (service.equals(ClusterInternalService.class)) {
+            return (T) journalkeeperClusterInternalService;
         }
         throw new UnsupportedOperationException(service.getName());
     }

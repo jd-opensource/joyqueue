@@ -1,3 +1,18 @@
+/**
+ * Copyright 2019 The JoyQueue Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.chubao.joyqueue.nsr.support;
 
 import com.google.common.collect.Lists;
@@ -81,6 +96,14 @@ public class DefaultProducerService implements ProducerService {
         if (topicInternalService.getTopicByCode(producer.getTopic().getNamespace(), producer.getTopic().getCode()) == null) {
             throw new NsrException(String.format("topic: %s is not exist", producer.getTopic()));
         }
+        if (producerInternalService.getByTopicAndApp(producer.getTopic(), producer.getApp()) != null) {
+            throw new NsrException(String.format("producer: %s,%s is not exist", producer.getTopic(), producer.getApp()));
+        }
+
+        logger.info("addProducer, topic: {}, app: {}", producer.getTopic(), producer.getApp());
+
+        List<PartitionGroup> partitionGroups = partitionGroupInternalService.getByTopic(producer.getTopic());
+        List<Broker> replicas = getReplicas(partitionGroups);
 
         try {
             transactionInternalService.begin();
@@ -88,11 +111,6 @@ public class DefaultProducerService implements ProducerService {
             logger.error("beginTransaction exception, topic: {}, app: {}", producer.getTopic(), producer.getApp(), e);
             throw new NsrException(e);
         }
-
-        logger.info("addProducer, topic: {}, app: {}", producer.getTopic(), producer.getApp());
-
-        List<PartitionGroup> partitionGroups = partitionGroupInternalService.getByTopic(producer.getTopic());
-        List<Broker> replicas = getReplicas(partitionGroups);
 
         try {
             producerInternalService.add(producer);
@@ -114,17 +132,17 @@ public class DefaultProducerService implements ProducerService {
             throw new NsrException(String.format("topic: %s, producer: %s is not exist", producer.getTopic(), producer.getApp()));
         }
 
+        logger.info("updateProducer, topic: {}, app: {}", producer.getTopic(), producer.getApp());
+
+        List<PartitionGroup> partitionGroups = partitionGroupInternalService.getByTopic(producer.getTopic());
+        List<Broker> replicas = getReplicas(partitionGroups);
+
         try {
             transactionInternalService.begin();
         } catch (Exception e) {
             logger.error("beginTransaction exception, topic: {}, app: {}", producer.getTopic(), producer.getApp(), e);
             throw new NsrException(e);
         }
-
-        logger.info("updateProducer, topic: {}, app: {}", producer.getTopic(), producer.getApp());
-
-        List<PartitionGroup> partitionGroups = partitionGroupInternalService.getByTopic(producer.getTopic());
-        List<Broker> replicas = getReplicas(partitionGroups);
 
         try {
             producerInternalService.update(producer);
@@ -146,17 +164,17 @@ public class DefaultProducerService implements ProducerService {
             throw new NsrException(String.format("producer: %s is not exist", id));
         }
 
+        logger.info("deleteProducer, topic: {}, app: {}", producer.getTopic(), producer.getApp());
+
+        List<PartitionGroup> partitionGroups = partitionGroupInternalService.getByTopic(producer.getTopic());
+        List<Broker> replicas = getReplicas(partitionGroups);
+
         try {
             transactionInternalService.begin();
         } catch (Exception e) {
             logger.error("beginTransaction exception, topic: {}, app: {}", producer.getTopic(), producer.getApp(), e);
             throw new NsrException(e);
         }
-
-        logger.info("deleteProducer, topic: {}, app: {}", producer.getTopic(), producer.getApp());
-
-        List<PartitionGroup> partitionGroups = partitionGroupInternalService.getByTopic(producer.getTopic());
-        List<Broker> replicas = getReplicas(partitionGroups);
 
         try {
             producerInternalService.delete(id);

@@ -199,7 +199,7 @@ export default {
       configDialog: {
         visible: false,
         title: '消费者配置详情',
-        width: '800',
+        width: '1000',
         showFooter: true,
         urls: {
           addOrUpdate: `/consumer/config/addOrUpdate`,
@@ -295,17 +295,16 @@ export default {
       this.configDialog.visible = true
     },
     openRateLimitDialog (item) {
+      this.configData = item.config || {}
       this.rateLimitDialog.limitTps = item.config.limitTps
       this.configConsumerData['consumerId'] = item.id
       this.rateLimitDialog.limitTraffic = item.config.limitTraffic
       this.rateLimitDialog.visible = true
     },
     rateLimitConfirm () {
-      let configData = {
-        consumerId: this.configConsumerData.consumerId,
-        limitTps: this.$refs.rateLimit.tps,
-        limitTraffic: this.$refs.rateLimit.traffic
-      }
+      let configData = this.configData
+      configData.limitTps = this.$refs.rateLimit.tps
+      configData.limitTraffic = this.$refs.rateLimit.traffic
       this.config(configData, 'rateLimitDialog')
     },
     cancelSubscribe (item) {
@@ -430,8 +429,10 @@ export default {
       })
     },
     configConsumerConfirm () {
-      let configData = this.$refs.configForm.getFormData()
-      this.config(configData, 'configDialog')
+      this.$refs['configForm'].validate(() => {
+          let configData = this.$refs.configForm.getFormData()
+          this.config(configData, 'configDialog')
+      })
     },
     config (configData, dialog) {
       apiRequest.post(this.configDialog.urls.addOrUpdate, {}, configData).then((data) => {

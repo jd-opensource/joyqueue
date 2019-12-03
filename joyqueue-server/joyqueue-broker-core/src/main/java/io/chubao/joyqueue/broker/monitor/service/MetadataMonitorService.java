@@ -90,9 +90,10 @@ public interface MetadataMonitorService {
      * @param source
      * @param target
      * @param interval
+     * @param onlyCompare
      * @return
      */
-    Object syncMetadata(String source, String target, int interval);
+    Object syncMetadata(String source, String target, int interval, boolean onlyCompare);
 
     /**
      * 查询元数据
@@ -128,4 +129,43 @@ public interface MetadataMonitorService {
      * @return
      */
     Object deleteMetadata(String source, String operator, List<Object> params);
+
+    /**
+     * 返回所有配置元数据
+     * @return
+     */
+    String getConfigMetadata(String key);
+
+    /**
+     * 返回所有配置元数据
+     * @return
+     */
+    List<String> getConfigsMetadata();
+
+    /**
+     * 查询集群信息
+     * @return
+     */
+    String getMetadataCluster();
+
+    /**
+     * 添加集群节点
+     * @param uri
+     * @return
+     */
+    String addMetadataNode(String uri);
+
+    /**
+     * 删除集群节点
+     * @param uri
+     * @return
+     */
+    String removeMetadataNode(String uri);
+
+    /**
+     * 更新集群节点
+     * @param uris
+     * @return
+     */
+    String updateMetadataNode(List<String> uris);
 }

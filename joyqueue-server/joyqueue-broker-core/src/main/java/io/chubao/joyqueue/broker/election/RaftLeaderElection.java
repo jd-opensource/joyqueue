@@ -1254,7 +1254,14 @@ public class RaftLeaderElection extends LeaderElection  {
                 electionConfig.enableReportLeaderPeriodically(), state());
 
         if (electionConfig.enableReportLeaderPeriodically() && state() == LEADER) {
-            updateMetadata(localNodeId, currentTerm);
+            if (electionConfig.enableReportLeaderPeriodicallyForce()) {
+                updateMetadata(localNodeId, currentTerm);
+            } else {
+                PartitionGroup partitionGroup = clusterManager.getPartitionGroupByGroup(TopicName.parse(topicPartitionGroup.getTopic()), topicPartitionGroup.getPartitionGroupId());
+                if (partitionGroup != null && partitionGroup.getTerm() != null && !partitionGroup.getTerm().equals(currentTerm)) {
+                    updateMetadata(localNodeId, currentTerm);
+                }
+            }
         }
     }
 

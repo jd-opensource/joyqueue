@@ -1,3 +1,18 @@
+/**
+ * Copyright 2019 The JoyQueue Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.chubao.joyqueue.nsr.nameservice;
 
 import com.google.common.collect.Lists;
@@ -19,10 +34,13 @@ import io.chubao.joyqueue.nsr.config.NameServiceConfig;
 import io.chubao.joyqueue.nsr.exception.NsrException;
 import io.chubao.joyqueue.nsr.util.DCWrapper;
 import io.chubao.joyqueue.toolkit.service.Service;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -40,11 +58,28 @@ public class NameServiceCacheManager extends Service {
 
     private NameServiceConfig config;
 
-    private ReentrantLock lock = new ReentrantLock();
+    private NameServiceCacheDoubleCopy nameServiceCacheDoubleCopy;
     private volatile NameServiceCache cache;
+    private ReentrantLock lock = new ReentrantLock();
+    private volatile int version = 0;
 
     public NameServiceCacheManager(NameServiceConfig config) {
         this.config = config;
+    }
+
+    @Override
+    protected void validate() throws Exception {
+        nameServiceCacheDoubleCopy = new NameServiceCacheDoubleCopy(new File(config.getAllMetadataCacheFile()));
+    }
+
+    public static void main(String[] args) throws Exception {
+        System.out.println(URLEncoder.encode("operator=UPDATE topic set partitions = ? where code = ?&params=[\"96\", \"ghx_test_0\"]"));
+    }
+
+    @Override
+    protected void doStart() throws Exception {
+        nameServiceCacheDoubleCopy.recover();
+        this.cache = nameServiceCacheDoubleCopy.getCache();
     }
 
     public NameServiceCache buildCache(AllMetadata allMetadata) {
@@ -68,7 +103,7 @@ public class NameServiceCacheManager extends Service {
 
         Map<String /** app **/, List<AppToken>> allAppTokenMap = Maps.newHashMapWithExpectedSize(brokerMap.size());
         List<DCWrapper> allDataCenterWrappers = Lists.newLinkedList();
-        Map<String /** key **/, Config> configKeyMap = Maps.newHashMapWithExpectedSize(allConfigs.size());
+        Map<String /** id **/, Config> configKeyMap = Maps.newHashMapWithExpectedSize(allConfigs.size());
         Map<String /** code **/, DCWrapper> dataCenterWrapperCodeMap = Maps.newHashMapWithExpectedSize(allDataCenterWrappers.size());
 
         for (Map.Entry<TopicName, TopicConfig> topicEntry : topicConfigMap.entrySet()) {
@@ -156,7 +191,7 @@ public class NameServiceCacheManager extends Service {
         }
 
         for (Config config : allConfigs) {
-            configKeyMap.put(config.getKey(), config);
+            configKeyMap.put(config.getId(), config);
         }
 
         for (DataCenter dataCenter : allDataCenters) {
@@ -187,22 +222,8 @@ public class NameServiceCacheManager extends Service {
     }
 
     public void fillCache(NameServiceCache cache) {
+        nameServiceCacheDoubleCopy.flush(cache);
         this.cache = cache;
-    }
-
-    public NameServiceCache fillCache(AllMetadata allMetadata) {
-        NameServiceCache cache = buildCache(allMetadata);
-        cache.updateLastTimestamp();
-        fillCache(cache);
-        return cache;
-    }
-
-    public void lock() {
-        lock.lock();
-    }
-
-    public void unlock() {
-        lock.unlock();
     }
 
     public Broker getBroker(int brokerId) {
@@ -254,7 +275,7 @@ public class NameServiceCacheManager extends Service {
 
     public Map<TopicName, TopicConfig> getTopicConfigByBroker(Integer brokerId) {
         checkCacheStatus();
-        return cache.getTopicConfigBrokerMap().get(brokerId);
+        return ObjectUtils.defaultIfNull(cache.getTopicConfigBrokerMap().get(brokerId), Collections.emptyMap());
     }
 
     public Producer getProducerByTopicAndApp(TopicName topic, String app) {
@@ -407,5 +428,25 @@ public class NameServiceCacheManager extends Service {
 
     public NameServiceCache getCache() {
         return cache;
+    }
+
+    public void lock() {
+        lock.lock();
+    }
+
+    public void unlock() {
+        lock.unlock();
+    }
+
+    public boolean isLocked() {
+        return lock.isLocked();
+    }
+
+    public int getVersion() {
+        return version;
+    }
+
+    public void updateVersion() {
+        version++;
     }
 }

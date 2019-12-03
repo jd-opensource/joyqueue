@@ -26,6 +26,7 @@ import io.chubao.joyqueue.domain.Subscription;
 import io.chubao.joyqueue.domain.Topic;
 import io.chubao.joyqueue.domain.TopicConfig;
 import io.chubao.joyqueue.domain.TopicName;
+import io.chubao.joyqueue.domain.TopicType;
 import io.chubao.joyqueue.message.BrokerMessage;
 import io.chubao.joyqueue.message.BrokerPrepare;
 import io.chubao.joyqueue.message.BrokerRollback;
@@ -47,6 +48,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import static io.chubao.joyqueue.network.transport.codec.JoyQueueHeader.VERSION_V2;
+import static io.chubao.joyqueue.network.transport.codec.JoyQueueHeader.VERSION_V3;
 
 /**
  * 负责broker端消息的序列化
@@ -747,6 +749,10 @@ public class Serializer extends AbstractSerializer {
             out.writeInt(limitPolicy.getTps());
             out.writeInt(limitPolicy.getTraffic());
         }
+
+        if (version >= VERSION_V3) {
+            out.writeByte(consumer.getTopicType().code());
+        }
     }
     public static Consumer readConsumer(int version, final ByteBuf in) throws Exception {
         Consumer consumer = new Consumer();
@@ -793,6 +799,10 @@ public class Serializer extends AbstractSerializer {
             limitPolicy.setTps(in.readInt());
             limitPolicy.setTraffic(in.readInt());
             consumer.setLimitPolicy(limitPolicy);
+        }
+
+        if (version >= VERSION_V3) {
+            consumer.setTopicType(TopicType.valueOf(in.readByte()));
         }
 
         return consumer;

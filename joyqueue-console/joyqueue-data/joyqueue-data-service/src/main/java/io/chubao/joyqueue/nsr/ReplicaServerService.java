@@ -27,4 +27,11 @@ public interface ReplicaServerService extends NsrService<PartitionGroupReplica, 
     List<PartitionGroupReplica> findByTopic(String topic, String namespace);
 
     List<PartitionGroupReplica> findByTopicAndGroup(String topic, String namespace, int group);
+
+    /**
+     * 根据 broker id 查询 partition group replica
+     *
+     **/
+    List<PartitionGroupReplica>  findPartitionGroupReplica(int brokerId) throws Exception;
+
 }
