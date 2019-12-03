@@ -20,7 +20,7 @@
               @on-detail-chart="goDetailChart" @on-current-change="handleCurrentChange" @on-detail="openDetailTab"
               @on-msg-preview="openMsgPreviewDialog" @on-msg-detail="openMsgDetailDialog" @on-config="openConfigDialog"
               @on-performance-chart="goPerformanceChart" @on-summary-chart="goSummaryChart"  @on-rateLimit="openRateLimitDialog"
-              @on-size-change="handleSizeChange" @on-cancel-subscribe="cancelSubscribe" @on-del="del"/>
+              @on-size-change="handleSizeChange" @on-cancel-subscribe="cancelSubscribe"/>
 
     <!--Consumer subscribe dialog-->
     <my-dialog :dialog="subscribeDialog" @on-dialog-cancel="dialogCancel('subscribeDialog')">
@@ -130,11 +130,6 @@ export default {
           {
             txt: '限流',
             method: 'on-rateLimit',
-            isAdmin: true
-          },
-          {
-            txt: '删除',
-            method: 'on-del',
             isAdmin: true
           }
         ]

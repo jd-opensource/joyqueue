@@ -15,7 +15,6 @@
  */
 package io.chubao.joyqueue.nsr;
 
-import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
 import io.chubao.joyqueue.domain.AppToken;
 import io.chubao.joyqueue.domain.Broker;
@@ -88,9 +87,13 @@ public class MetadataSynchronizer {
         return sync("topic", () -> {
             return sourceService.getAll();
         }, (item) -> {
+            return sourceService.getTopicByCode(((Topic) item).getName().getNamespace(), ((Topic) item).getName().getCode());
+        }, () -> {
+            return targetService.getAll();
+        }, (item) -> {
             return targetService.getTopicByCode(((Topic) item).getName().getNamespace(), ((Topic) item).getName().getCode());
         }, (item) -> {
-            targetService.update((Topic) item);
+            targetService.removeTopic((Topic) item);
         }, (item) -> {
             targetService.add((Topic) item);
         }, onlyCompare);
@@ -102,6 +105,10 @@ public class MetadataSynchronizer {
 
         return sync("partitionGroup", () -> {
             return sourceService.getAll();
+        }, (item) -> {
+            return sourceService.getById(((PartitionGroup) item).getId());
+        }, () -> {
+            return targetService.getAll();
         }, (item) -> {
             return targetService.getById(((PartitionGroup) item).getId());
         }, (item) -> {
@@ -118,6 +125,10 @@ public class MetadataSynchronizer {
         return sync("replica", () -> {
             return sourceService.getAll();
         }, (item) -> {
+            return sourceService.getById(((Replica) item).getId());
+        }, () -> {
+            return targetService.getAll();
+        }, (item) -> {
             return targetService.getById(((Replica) item).getId());
         }, (item) -> {
             targetService.delete(((Replica) item).getId());
@@ -132,6 +143,10 @@ public class MetadataSynchronizer {
 
         return sync("broker", () -> {
             return sourceService.getAll();
+        }, (item) -> {
+            return sourceService.getById(((Broker) item).getId());
+        }, () -> {
+            return targetService.getAll();
         }, (item) -> {
             return targetService.getById(((Broker) item).getId());
         }, (item) -> {
@@ -148,6 +163,10 @@ public class MetadataSynchronizer {
         return sync("consumer", () -> {
             return sourceService.getAll();
         }, (item) -> {
+            return sourceService.getById(((Consumer) item).getId());
+        }, () -> {
+            return targetService.getAll();
+        }, (item) -> {
             return targetService.getById(((Consumer) item).getId());
         }, (item) -> {
             targetService.delete(((Consumer) item).getId());
@@ -163,6 +182,10 @@ public class MetadataSynchronizer {
         return sync("producer", () -> {
             return sourceService.getAll();
         }, (item) -> {
+            return sourceService.getById(((Producer) item).getId());
+        }, () -> {
+            return targetService.getAll();
+        }, (item) -> {
             return targetService.getById(((Producer) item).getId());
         }, (item) -> {
             targetService.delete(((Producer) item).getId());
@@ -175,12 +198,16 @@ public class MetadataSynchronizer {
         DataCenterInternalService sourceService = sourceInternalServiceProvider.getService(DataCenterInternalService.class);
         DataCenterInternalService targetService = targetInternalServiceProvider.getService(DataCenterInternalService.class);
 
-        return sync("dataCenter", () -> {
+        return sync("datacenter", () -> {
             return sourceService.getAll();
         }, (item) -> {
-            return targetService.getById(((DataCenter) item).getId());
+            return sourceService.getById(((DataCenter) item).getCode());
+        }, () -> {
+            return targetService.getAll();
         }, (item) -> {
-            targetService.delete(((DataCenter) item).getId());
+            return targetService.getById(((DataCenter) item).getCode());
+        }, (item) -> {
+            targetService.delete(((DataCenter) item).getCode());
         }, (item) -> {
             targetService.add((DataCenter) item);
         }, onlyCompare);
@@ -193,7 +220,11 @@ public class MetadataSynchronizer {
         return sync("namespace", () -> {
             return sourceService.getAll();
         }, (item) -> {
-            return targetService.getByCode(((Namespace) item).getCode());
+            return sourceService.getById(((Namespace) item).getCode());
+        }, () -> {
+            return targetService.getAll();
+        }, (item) -> {
+            return targetService.getById(((Namespace) item).getCode());
         }, (item) -> {
             targetService.delete(((Namespace) item).getCode());
         }, (item) -> {
@@ -207,6 +238,10 @@ public class MetadataSynchronizer {
 
         return sync("config", () -> {
             return sourceService.getAll();
+        }, (item) -> {
+            return sourceService.getById(((Config) item).getId());
+        }, () -> {
+            return targetService.getAll();
         }, (item) -> {
             return targetService.getById(((Config) item).getId());
         }, (item) -> {
@@ -223,6 +258,10 @@ public class MetadataSynchronizer {
         return sync("apptoken", () -> {
             return sourceService.getAll();
         }, (item) -> {
+            return sourceService.getById(((AppToken) item).getId());
+        }, () -> {
+            return targetService.getAll();
+        }, (item) -> {
             return targetService.getById(((AppToken) item).getId());
         }, (item) -> {
             targetService.delete(((AppToken) item).getId());
@@ -231,40 +270,36 @@ public class MetadataSynchronizer {
         }, onlyCompare);
     }
 
-    protected Object sync(String name, Callable<List> getAllCallable, Function<Object, Object> findFunction
-            , java.util.function.Consumer<Object> deleteConsumer, java.util.function.Consumer<Object> addConsumer, boolean onlyCompare) {
+    protected Object sync(String name, Callable<List> sourceAllCallable, Function<Object, Object> sourceFindFunction
+            , Callable<List> targetAllCallable, Function<Object, Object> targetFindFunction
+            , java.util.function.Consumer<Object> targetDeleteConsumer, java.util.function.Consumer<Object> targetAddConsumer, boolean onlyCompare) {
         try {
             int success = 0;
             int failure = 0;
+            int delete = 0;
 
-            long startTime = SystemClock.now();
-            List source = getAllCallable.call();
-            logger.info("get {} source, data: {}, time: {}", name, source.size(), SystemClock.now() - startTime);
+            long sourceStartTime = SystemClock.now();
+            List sourceList = sourceAllCallable.call();
+            logger.info("get {} source, data: {}, time: {}", name, sourceList.size(), SystemClock.now() - sourceStartTime);
 
-            for (int i = 0; i < source.size(); i++) {
-                Object item = source.get(i);
-                Object targetItem = findFunction.apply(item);
-                if (targetItem != null) {
-                    if (!item.equals(targetItem)) {
-                        logger.info("not equals, source: {}, target: {}", item, targetItem);
+            for (int i = 0; i < sourceList.size(); i++) {
+                Object sourceItem = sourceList.get(i);
+                Object targetItem = targetFindFunction.apply(sourceItem);
+                if (targetItem == null) {
+                    logger.info("not exist, source: {}, target: {}", sourceItem, targetItem);
+                    if (!onlyCompare) {
+                        targetAddConsumer.accept(sourceItem);
+                    }
+                    success++;
+                } else {
+                    if (!sourceItem.equals(targetItem)) {
+                        logger.info("not equals, source: {}, target: {}", sourceItem, targetItem);
                         if (!onlyCompare) {
-                            deleteConsumer.accept(item);
-                            addConsumer.accept(item);
+                            targetDeleteConsumer.accept(sourceItem);
+                            targetAddConsumer.accept(sourceItem);
                         }
                         success++;
                     } else {
-                        failure++;
-                    }
-                } else {
-                    try {
-                        logger.info("not exist, source: {}, target: {}", item, targetItem);
-                        if (!onlyCompare) {
-                            addConsumer.accept(item);
-                        }
-                        success++;
-                    } catch (Exception e) {
-                        logger.error("add target {} error, data: {}, message: {}", JSON.toJSONString(item), e.toString());
-                        logger.debug("add target {} error, data: {}", JSON.toJSONString(item), e);
                         failure++;
                     }
                 }
@@ -273,7 +308,24 @@ public class MetadataSynchronizer {
                     logger.info("sync {}, index: {}", name, i);
                 }
             }
-            return String.format("success %s, failure: %s", success, failure);
+
+            long targetStartTime = SystemClock.now();
+            List targetList = targetAllCallable.call();
+            logger.info("get {} target, data: {}, time: {}", name, targetList.size(), SystemClock.now() - targetStartTime);
+
+            for (int i = 0; i < targetList.size(); i++) {
+                Object targetItem = targetList.get(i);
+                Object sourceItem = sourceFindFunction.apply(targetItem);
+                if (sourceItem == null) {
+                    logger.info("source not exist, target: {}", targetItem);
+                    if (!onlyCompare) {
+                        targetDeleteConsumer.accept(targetItem);
+                    }
+                    delete++;
+                    logger.info("delete {}, index: {}", name, i);
+                }
+            }
+            return String.format("success %d, failure: %d, delete: %d", success, failure, delete);
         } catch (Exception e) {
             logger.error("sync exception", e);
             return null;

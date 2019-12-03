@@ -167,6 +167,9 @@ public class ProducerServiceImpl  implements ProducerService {
     }
 
     protected Producer fillProducer(Producer producer) {
+        if (producer == null) {
+            return null;
+        }
         Identity app = producer.getApp();
         if (app == null || StringUtils.isBlank(app.getCode())) {
             return producer;

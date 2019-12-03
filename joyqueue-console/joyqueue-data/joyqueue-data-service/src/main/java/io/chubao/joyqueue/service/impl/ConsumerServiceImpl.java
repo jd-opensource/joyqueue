@@ -192,6 +192,9 @@ public class ConsumerServiceImpl  implements ConsumerService {
     }
 
     protected Consumer fillConsumer(Consumer consumer) {
+        if (consumer == null) {
+            return null;
+        }
         Identity app = consumer.getApp();
         if (app == null || StringUtils.isBlank(app.getCode())) {
             return consumer;
