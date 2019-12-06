@@ -15,6 +15,8 @@
  */
 package io.chubao.joyqueue.nsr.journalkeeper.config;
 
+import io.chubao.joyqueue.config.BrokerConfigKeys;
+import io.chubao.joyqueue.helper.PortHelper;
 import io.chubao.joyqueue.toolkit.config.Property;
 import io.chubao.joyqueue.toolkit.config.PropertySupplier;
 import org.apache.commons.lang3.StringUtils;
@@ -41,7 +43,7 @@ public class JournalkeeperConfig {
     }
 
     public int getPort() {
-        return PropertySupplier.getValue(propertySupplier, JournalkeeperConfigKey.PORT);
+        return PortHelper.getJournalkeeperPort(propertySupplier.getValue(BrokerConfigKeys.FRONTEND_SERVER_PORT));
     }
 
     public String getRole() {

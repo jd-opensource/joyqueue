@@ -31,7 +31,6 @@ import io.chubao.joyqueue.broker.extension.ExtensionManager;
 import io.chubao.joyqueue.broker.helper.AwareHelper;
 import io.chubao.joyqueue.broker.manage.BrokerManageService;
 import io.chubao.joyqueue.broker.manage.config.BrokerManageConfig;
-import io.chubao.joyqueue.broker.manage.config.BrokerManageConfigKey;
 import io.chubao.joyqueue.broker.monitor.BrokerMonitorService;
 import io.chubao.joyqueue.broker.monitor.SessionManager;
 import io.chubao.joyqueue.broker.monitor.config.BrokerMonitorConfig;
@@ -44,10 +43,10 @@ import io.chubao.joyqueue.broker.store.StoreManager;
 import io.chubao.joyqueue.domain.Config;
 import io.chubao.joyqueue.domain.Consumer;
 import io.chubao.joyqueue.domain.Producer;
+import io.chubao.joyqueue.helper.PortHelper;
 import io.chubao.joyqueue.network.transport.config.ServerConfig;
 import io.chubao.joyqueue.network.transport.config.TransportConfigSupport;
 import io.chubao.joyqueue.nsr.NameService;
-import io.chubao.joyqueue.nsr.config.NameServerConfigKey;
 import io.chubao.joyqueue.nsr.nameservice.CompensatedNameService;
 import io.chubao.joyqueue.security.Authentication;
 import io.chubao.joyqueue.server.retry.api.MessageRetry;
@@ -234,28 +233,8 @@ public class BrokerService extends Service {
         // broker.backend-server.transport.server.port	50089	内部端口，JoyQueue Server各节点之间通信的端口
 
         key = BrokerConfig.BROKER_BACKEND_SERVER_CONFIG_PREFIX + TransportConfigSupport.TRANSPORT_SERVER_PORT;
-        port += 1;
-        configuration.addProperty(key, String.valueOf(port));
-
-        // manager.export.port	50090	Broker监控服务的端口
-        key = BrokerManageConfigKey.EXPORT_PORT.getName();
-        port += 1;
-        configuration.addProperty(key, String.valueOf(port));
-
-        // nameserver.nsr.manage.port	50091	JoyQueue Server rest API 端口
-
-        key = NameServerConfigKey.NAMESERVER_MANAGE_PORT.getName();
-        port += 1;
-        configuration.addProperty(key, String.valueOf(port));
-
-        // nameserver.transport.server.port	50092	内部端口，JoyQueue Server各节点之间通信的端口。
-
-        key = NameServerConfigKey.NAMESERVER_SERVICE_PORT.getName();
-        port += 1;
-        configuration.addProperty(key, String.valueOf(port));
-
+        configuration.addProperty(key, String.valueOf(PortHelper.getBackendPort(port)));
     }
-
 
     private NameService getNameService(BrokerContext brokerContext, Configuration configuration) {
         Property property = configuration.getProperty(NAMESERVICE_NAME);
@@ -345,7 +324,7 @@ public class BrokerService extends Service {
 
 
     private void printConfig() {
-        StringBuffer buffer = new StringBuffer("broker start with configuration:").append('\n');
+        StringBuilder buffer = new StringBuilder("broker start with configuration:").append('\n');
         if (configurationManager != null && configurationManager.getConfiguration() != null) {
             List<Property> properties = new ArrayList<>(configurationManager.getConfiguration().getProperties());
             Collections.sort(properties, Comparator.comparing(Property::getKey));
@@ -356,13 +335,17 @@ public class BrokerService extends Service {
         }
 
         logger.info(buffer.toString());
-        logger.info("broker.id[{}],ip[{}],frontPort[{}],backendPort[{}],monitorPort[{}],nameServer port[{}]",
+        logger.info("broker.id[{}],ip[{}],frontPort[{}],backendPort[{}],monitorPort[{}],nameServerManager port[{}]," +
+                        "nameServer port[{}],messenger port[{}],journalkeeper port[{}]",
                 brokerConfig.getBrokerId(),
                 clusterManager.getBroker().getIp(),
                 brokerConfig.getFrontendConfig().getPort(),
                 brokerConfig.getBackendConfig().getPort(),
                 brokerConfig.getBroker().getMonitorPort(),
-                brokerConfig.getBroker().getManagerPort());
+                brokerConfig.getBroker().getNameServerManagerPort(),
+                brokerConfig.getBroker().getNameServerPort(),
+                brokerConfig.getBroker().getMessengerConfig(),
+                brokerConfig.getBroker().getJournalkeeperPort());
     }
 
     @Override

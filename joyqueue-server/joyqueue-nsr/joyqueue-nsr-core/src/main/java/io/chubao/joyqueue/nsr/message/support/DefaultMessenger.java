@@ -95,7 +95,7 @@ public class DefaultMessenger extends Service implements Messenger<MetaEvent>, P
         for (Broker broker : brokers) {
             MessengerPublishRequest messengerPublishRequest = new MessengerPublishRequest(event);
             try {
-                messengerSessionManager.getOrCreateSession(broker.getId(), broker.getIp(), config.getPort())
+                messengerSessionManager.getOrCreateSession(broker.getId(), broker.getIp(), broker.getMessengerConfig())
                         .async(new JoyQueueCommand(messengerPublishRequest), config.getSessionTimeout(), new CommandCallback() {
                             @Override
                             public void onSuccess(Command request, Command response) {
@@ -171,7 +171,7 @@ public class DefaultMessenger extends Service implements Messenger<MetaEvent>, P
         for (Broker broker : brokers) {
             try {
                 MessengerPublishRequest messengerPublishRequest = new MessengerPublishRequest(event);
-                messengerSessionManager.getOrCreateSession(broker.getId(), broker.getIp(), config.getPort())
+                messengerSessionManager.getOrCreateSession(broker.getId(), broker.getIp(), broker.getMessengerConfig())
                         .oneway(new JoyQueueCommand(messengerPublishRequest), config.getSessionTimeout());
             } catch (Exception e) {
                 logger.warn("messenger fastPublish failed, event: {}, broker: {}", event, broker);

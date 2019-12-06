@@ -27,7 +27,6 @@ public enum JournalkeeperConfigKey implements PropertyDef {
 
     PREFIX("nameserver.journalkeeper", null, PropertyDef.Type.STRING),
     ROLE("nameserver.journalkeeper.role", "VOTER", PropertyDef.Type.STRING),
-    PORT("nameserver.journalkeeper.port", 50095, PropertyDef.Type.INT),
     LOCAL("nameserver.journalkeeper.local", IpUtil.getLocalIp(), PropertyDef.Type.STRING),
     NODES("nameserver.journalkeeper.nodes", null, PropertyDef.Type.STRING),
     WAIT_LEADER_TIMEOUT("nameserver.journalkeeper.waitLeaderTimeout", 1000 * 30, PropertyDef.Type.INT),

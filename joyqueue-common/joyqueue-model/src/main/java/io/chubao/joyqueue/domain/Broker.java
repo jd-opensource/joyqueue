@@ -16,6 +16,8 @@
 package io.chubao.joyqueue.domain;
 
 
+import io.chubao.joyqueue.helper.PortHelper;
+
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -119,7 +121,7 @@ public class Broker implements Serializable {
     //TODO 是否可以删掉
     @Transient
     public int getBackEndPort() {
-        return port + 1;
+        return PortHelper.getBackendPort(port);
     }
 
     /**
@@ -128,7 +130,7 @@ public class Broker implements Serializable {
      */
     @Transient
     public int getMonitorPort() {
-        return port + 2;
+        return PortHelper.getMonitorPort(port);
     }
 
     /**
@@ -136,8 +138,35 @@ public class Broker implements Serializable {
      * BrokerManage
      */
     @Transient
-    public int getManagerPort() {
-        return port + 3;
+    public int getNameServerManagerPort() {
+        return PortHelper.getNameServerManagerPort(port);
+    }
+
+    /**
+     * nameserver port
+     * @return
+     */
+    @Transient
+    public int getNameServerPort() {
+        return PortHelper.getNameServerPort(port);
+    }
+
+    /**
+     * messenger config
+     * @return
+     */
+    @Transient
+    public int getMessengerConfig() {
+        return PortHelper.getMessengerPort(port);
+    }
+
+    /**
+     * journalkeeper port
+     * @return
+     */
+    @Transient
+    public int getJournalkeeperPort() {
+        return PortHelper.getJournalkeeperPort(port);
     }
 
     public enum PermissionEnum {
