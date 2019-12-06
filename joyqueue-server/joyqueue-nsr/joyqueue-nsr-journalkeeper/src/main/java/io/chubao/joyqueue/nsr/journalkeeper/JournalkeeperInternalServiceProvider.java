@@ -90,7 +90,7 @@ public class JournalkeeperInternalServiceProvider extends Service implements Int
     protected void doStart() throws Exception {
         Properties journalkeeperProperties = convertProperties(config, propertySupplier.getProperties());
         URI currentNode = URI.create(String.format("journalkeeper://%s:%s", config.getLocal(), config.getPort()));
-        List<URI> nodes = getNodeUris(config.getLocal(), config.getNodes(), config.getPort());
+        List<URI> nodes = parseNodeUris(currentNode, config.getNodes());
 
         if (Server.Roll.VOTER.name().equals(config.getRole())
                 || RaftServer.Roll.OBSERVER.name().equals(config.getRole())) {
@@ -139,13 +139,15 @@ public class JournalkeeperInternalServiceProvider extends Service implements Int
         this.journalkeeperInternalServiceManager.start();
     }
 
-    protected List<URI> getNodeUris(String local, List<String> nodes, int port) {
+    public static void main(String[] args) {
+        System.out.println(parseNodeUris(URI.create("journalkeeper://127.0.0.1:50088"), Lists.newArrayList("127.0.0.1:50088", "127.0.0.1:50089")));
+    }
+
+    protected static List<URI> parseNodeUris(URI currentNode, List<String> nodes) {
         List<URI> nodesUri = Lists.newArrayList();
         for (String node : nodes) {
-            if (local.equals(node)) {
-                continue;
-            }
-            nodesUri.add(URI.create(String.format("journalkeeper://%s:%s", node, port)));
+            String[] split = node.split(":");
+            nodesUri.add(URI.create(String.format("journalkeeper://%s:%s", split[0], split[1])));
         }
         return nodesUri;
     }

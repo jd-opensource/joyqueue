@@ -15,6 +15,8 @@
  */
 package io.chubao.joyqueue.nsr.config;
 
+import io.chubao.joyqueue.config.BrokerConfigKeys;
+import io.chubao.joyqueue.helper.PortHelper;
 import io.chubao.joyqueue.network.transport.config.ClientConfig;
 import io.chubao.joyqueue.network.transport.config.ServerConfig;
 import io.chubao.joyqueue.network.transport.config.TransportConfigSupport;
@@ -82,7 +84,7 @@ public class MessengerConfig {
     }
 
     public int getPort() {
-        return propertySupplier.getValue(MessengerConfigKey.PORT);
+        return PortHelper.getMessengerPort(propertySupplier.getValue(BrokerConfigKeys.FRONTEND_SERVER_PORT));
     }
 
     public ServerConfig getServerConfig() {

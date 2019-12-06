@@ -216,7 +216,7 @@ public class NameServer extends Service implements NameService, PropertySupplier
         if (subscription.getType() == Subscription.Type.CONSUMPTION) {
             TopicName topic = subscription.getTopic();
             String app = subscription.getApp();
-            TopicConfig topicConfig = getTopicConfig(topic);
+            TopicConfig topicConfig = doGetTopicConfig(topic);
             if (null == topicConfig){
                 return null;
             }
@@ -233,7 +233,7 @@ public class NameServer extends Service implements NameService, PropertySupplier
         } else if (subscription.getType() == Subscription.Type.PRODUCTION) {
             TopicName topic = subscription.getTopic();
             String app = subscription.getApp();
-            TopicConfig topicConfig = getTopicConfig(topic);
+            TopicConfig topicConfig = doGetTopicConfig(topic);
             if (null == topicConfig) return null;
             Producer producer = metaManager.getProducer(topic, app);
             if (null == producer) {
@@ -253,13 +253,13 @@ public class NameServer extends Service implements NameService, PropertySupplier
     @Override
     public void unSubscribe(Subscription subscription) {
         if (subscription.getType() == Subscription.Type.CONSUMPTION) {
-            TopicConfig topicConfig = getTopicConfig(subscription.getTopic());
+            TopicConfig topicConfig = doGetTopicConfig(subscription.getTopic());
             if (null == topicConfig){
                 return;
             }
             metaManager.removeConsumer(subscription.getTopic(), subscription.getApp());
         } else if (subscription.getType() == Subscription.Type.PRODUCTION) {
-            TopicConfig topicConfig = getTopicConfig(subscription.getTopic());
+            TopicConfig topicConfig = doGetTopicConfig(subscription.getTopic());
             if (null == topicConfig) return;
             metaManager.removeProducer(subscription.getTopic(), subscription.getApp());
         } else {
@@ -278,7 +278,7 @@ public class NameServer extends Service implements NameService, PropertySupplier
     public void leaderReport(TopicName topic, int partitionGroup, int leaderBrokerId, Set<Integer> isrId, int termId) {
         logger.info("Leader report, topic is {}, partition group is {}, leader is {}, term is {}",
                 topic, partitionGroup, leaderBrokerId, termId);
-        TopicConfig topicConfig = getTopicConfig(topic);
+        TopicConfig topicConfig = doGetTopicConfig(topic);
         if (topicConfig == null) {
             logger.warn("topic not exist, topic: {}, partitionGroup: {}, leaderBrokerId: {}", topic, partitionGroup, leaderBrokerId);
             return;
@@ -416,12 +416,12 @@ public class NameServer extends Service implements NameService, PropertySupplier
             if (map.containsKey(replica.getTopic())){
                 continue;
             }
-            TopicConfig topicConfig = getTopicConfig(replica.getTopic());
+            TopicConfig topicConfig = doGetTopicConfig(replica.getTopic());
             if (topicConfig == null) {
                 logger.error("topic not exist, topic: {}, brokerId: {}", replica.getTopic(), brokerId);
                 continue;
             }
-            map.put(replica.getTopic(), getTopicConfig(replica.getTopic()));
+            map.put(replica.getTopic(), doGetTopicConfig(replica.getTopic()));
         }
         return map;
     }
@@ -523,7 +523,7 @@ public class NameServer extends Service implements NameService, PropertySupplier
 
         if (null != subscriptions) {
             subscriptions.forEach(p -> {
-                TopicConfig topicConfig = getTopicConfig(p.getTopic());
+                TopicConfig topicConfig = doGetTopicConfig(p.getTopic());
                 if (null != topicConfig) {
                     appTopicConfigs.put(p.getTopic(), topicConfig);
                 }
