@@ -36,10 +36,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 import static io.chubao.joyqueue.broker.config.Configuration.DEFAULT_CONFIGURATION_PRIORITY;
 
@@ -61,9 +58,10 @@ public class ConfigurationManager extends Service implements EventListener<NameS
 
     private Configuration configuration;
     private String configPath = DEFAULT_CONFIG_PATH;
-
+    private String[] args;
+    private List<Property> overrideProperties;
     public ConfigurationManager(String[] args) {
-
+         this.args= args;
     }
     private void parseParams(Configuration configuration, String[] args) {
         //TODO 解析参数
@@ -75,6 +73,21 @@ public class ConfigurationManager extends Service implements EventListener<NameS
         }
     }
 
+    /**
+     * Parse config from args
+     **/
+    private void parseConfigFromArgs() throws Exception{
+        if(args!=null&&args.length>0){
+            this.configPath=args[0];
+        }
+        if(args!=null&&args.length>1){
+            String[] overrideArgs=new String[args.length-1];
+            System.arraycopy(args,1,overrideArgs,0,overrideArgs.length);
+            overrideProperties = OptionParser.parse(overrideArgs);
+        }
+
+    }
+
     public Configuration getConfiguration() {
         Preconditions.checkState(isStarted(), "config manager not not started yet.");
         return this.configuration;
@@ -84,6 +97,7 @@ public class ConfigurationManager extends Service implements EventListener<NameS
     protected void validate() throws Exception {
         super.validate();
         SystemConfigLoader.load();
+        parseConfigFromArgs();
         if (configuration == null) {
             this.configuration = buildConfiguration();
         }
@@ -118,7 +132,19 @@ public class ConfigurationManager extends Service implements EventListener<NameS
         } else {
             logger.info("No {} in classpath, using default.", this.configPath);
         }
+        overrideProperties(configuration);
         return configuration;
+    }
+
+    /**
+     * Override properties by args
+     **/
+    private void overrideProperties(Configuration config){
+        if(overrideProperties!=null){
+            for(Property pro:overrideProperties) {
+                config.addProperty(pro.getKey(),pro.getString());
+            }
+        }
     }
 
     public void setConfigProvider(ConfigProvider configProvider) {
