@@ -1,9 +1,23 @@
+/**
+ * Copyright 2019 The JoyQueue Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.chubao.joyqueue.tools.launch;
 
 import io.chubao.joyqueue.toolkit.time.SystemClock;
 
 import java.io.*;
-import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -73,24 +87,21 @@ public class JavaProcessLauncher {
      *
      **/
     public void tailAndFindSignLine(InputStream inputStream, OutputStream outputStream, long timeoutMs) throws Exception{
-        Scanner reader = new Scanner(inputStream);
-        DataOutputStream logs=new DataOutputStream(new BufferedOutputStream(new FileOutputStream(this.log)));
+//        Scanner reader = new Scanner(inputStream);
+//        DataOutputStream logs=new DataOutputStream(new BufferedOutputStream(new FileOutputStream(this.log)));
+        BufferedReader bufferedReader = new BufferedReader(new FileReader(this.log));
         boolean success=false;
         while(timeoutMs>SystemClock.now()) {
-            if(reader.hasNext()) {
-                String cur = reader.nextLine();
+            String cur;
+            if((cur = bufferedReader.readLine())!=null) {
                 System.out.println(cur);
-                logs.writeUTF(cur);
-                logs.writeUTF(String.valueOf("\n"));
-                if (cur != null && cur.contains(startSignLine)) {
+                if (cur.contains(startSignLine)) {
                     success = true;
                     break;
                 }
             }
         }
-        logs.flush();
-        logs.close();
-        reader.close();
+        bufferedReader.close();
         if(!success){
             throw new TimeoutException("Read sign line timeout !");
         }else{
