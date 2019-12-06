@@ -3,11 +3,13 @@ package io.chubao.joyqueue;
 import io.chubao.joyqueue.broker.Launcher;
 import io.chubao.joyqueue.broker.config.Args;
 import io.chubao.joyqueue.broker.config.ConfigDef;
+import io.chubao.joyqueue.toolkit.network.IpUtil;
 import io.chubao.joyqueue.tools.launch.JavaProcessLauncher;
 import org.junit.After;
 import org.junit.Test;
 
 import java.io.File;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -23,9 +25,10 @@ public class LauncherTest {
         String log= ROOT_DIR+"/second/Logs/info.log";
         String cacheDir =ROOT_DIR+"/second/cache";
         String journalKeeperDir= ROOT_DIR+"/second/jk";
-        JavaProcessLauncher launcher=launchBroker(DEFAULT_CONFIG,60088,60093,cacheDir,
-                                                    journalKeeperDir, 60095,dataDir,log);
-        launcher.destroy();
+        String journalKeeperNodes = String.format("%s", IpUtil.getLocalIp()+":"+String.valueOf(60088+6));
+        FutureTask<JavaProcessLauncher> launcher=launchBroker(DEFAULT_CONFIG,60088,60093,cacheDir,
+                                                    journalKeeperDir, 60095,dataDir,log,journalKeeperNodes);
+        launcher.get().destroy();
         System.out.println("destroy launcher");
 
     }
@@ -38,8 +41,8 @@ public class LauncherTest {
         String cacheDir =ROOT_DIR+"/fisrt/cache";
         String journalKeeperDir= ROOT_DIR+"/first/jk";
 
-        JavaProcessLauncher firstBroker=launchBroker(DEFAULT_CONFIG,50088,50093,cacheDir,
-                                                    journalKeeperDir,50095,dataDir,log);
+        FutureTask<JavaProcessLauncher> firstBroker=launchBroker(DEFAULT_CONFIG,50088,50093,cacheDir,
+                                                    journalKeeperDir,50095,dataDir,log,null);
         Thread.sleep(10);
 
          dataDir= ROOT_DIR+"/second/Data";
@@ -47,12 +50,55 @@ public class LauncherTest {
          cacheDir =ROOT_DIR+"/second/cache";
          journalKeeperDir= ROOT_DIR+"/second/jk";
 
-        JavaProcessLauncher secondBroker=launchBroker(DEFAULT_CONFIG,60088,60093,cacheDir,
-                                                        journalKeeperDir, 60095,dataDir,log);
+        FutureTask<JavaProcessLauncher> secondBroker=launchBroker(DEFAULT_CONFIG,60088,60093,cacheDir,
+                                                        journalKeeperDir, 60095,dataDir,log,null);
 
-        firstBroker.destroy();
-        secondBroker.destroy();
+        firstBroker.get().destroy();
+        secondBroker.get().destroy();
         System.out.println("destroy all processes");
+    }
+
+
+    @Test
+    public void launchClusterBroker() throws Exception{
+        int firstPort=40088;
+        int secondPort=50088;
+        int thirdPort= 60088;
+        String journalKeeperNodes = String.format("%s,%s,%s",IpUtil.getLocalIp()+":"+String.valueOf(firstPort+6),
+                IpUtil.getLocalIp()+":"+String.valueOf(secondPort+6),IpUtil.getLocalIp()+":"+String.valueOf(thirdPort+6));
+
+        String dataDir= ROOT_DIR+"/first/Data";
+        String log= ROOT_DIR+"/first/Logs/info.log";
+        String cacheDir =ROOT_DIR+"/first/cache";
+        String journalKeeperDir= ROOT_DIR+"/first/jk";
+
+        FutureTask<JavaProcessLauncher> firstBroker=launchBroker(DEFAULT_CONFIG,firstPort,50093,cacheDir,
+                journalKeeperDir,50095,dataDir,log,journalKeeperNodes);
+        Thread.sleep(10);
+
+        dataDir= ROOT_DIR+"/second/Data";
+        log= ROOT_DIR+"/second/Logs/info.log";
+        cacheDir =ROOT_DIR+"/second/cache";
+        journalKeeperDir= ROOT_DIR+"/second/jk";
+
+        FutureTask<JavaProcessLauncher> secondBroker=launchBroker(DEFAULT_CONFIG,secondPort,60093,cacheDir,
+                journalKeeperDir, 60095,dataDir,log,journalKeeperNodes);
+
+        dataDir= ROOT_DIR+"/third/Data";
+        log= ROOT_DIR+"/third/Logs/info.log";
+        cacheDir =ROOT_DIR+"/third/cache";
+        journalKeeperDir= ROOT_DIR+"/third/jk";
+
+        FutureTask<JavaProcessLauncher> thirdBroker=launchBroker(DEFAULT_CONFIG,thirdPort,60093,cacheDir,
+                journalKeeperDir, 60095,dataDir,log,journalKeeperNodes);
+
+        Thread.sleep(TimeUnit.MINUTES.toMillis(10));
+
+        firstBroker.get().destroy();
+        secondBroker.get().destroy();
+        thirdBroker.get().destroy();
+        System.out.println("destroy all processes");
+
     }
 
 
@@ -60,15 +106,19 @@ public class LauncherTest {
      * Launcher broker process with config
      *
      **/
-    public JavaProcessLauncher launchBroker(String configFile, int port, int nameServiceMessagerPort, String nameServiceCachePath,
-                                            String nameServerJournalKeeperWorkingDir, int nameServerJournalKeeperPort, String storePath, String logFile) throws Exception{
+    public FutureTask<JavaProcessLauncher> launchBroker(String configFile, int port, int nameServiceMessagerPort, String nameServiceCachePath,
+                                            String nameServerJournalKeeperWorkingDir, int nameServerJournalKeeperPort, String storePath,
+                                            String logFile,String journalKeeperNodes) throws Exception{
         Args args=new Args();
         args.append(ConfigDef.APPLICATION_DATA_PATH.key(),storePath);
         args.append(ConfigDef.TRANSPORT_SERVER_PORT.key(),String.valueOf(port));
-        args.append(ConfigDef.NAME_SERVICE_CACHE_PATH.key(),nameServiceCachePath);
-        args.append(ConfigDef.NAME_SERVICE_MESSAGE_PORT.key(),String.valueOf(nameServiceMessagerPort));
-        args.append(ConfigDef.NAME_SERVER_JOURNALKEEPER_PORT.key(),String.valueOf(nameServerJournalKeeperPort));
-        args.append(ConfigDef.NAME_SERVER_JOURNALKEEPER_WORKING_DIR.key(),nameServerJournalKeeperWorkingDir);
+        if(journalKeeperNodes!=null) {
+            args.append(ConfigDef.NAME_SERVER_JOURNAL_KEEPER_NODES.key(), journalKeeperNodes);
+        }
+        //args.append(ConfigDef.NAME_SERVICE_CACHE_PATH.key(),nameServiceCachePath);
+//        args.append(ConfigDef.NAME_SERVICE_MESSAGE_PORT.key(),String.valueOf(nameServiceMessagerPort));
+//        args.append(ConfigDef.NAME_SERVER_JOURNALKEEPER_PORT.key(),String.valueOf(nameServerJournalKeeperPort));
+//        args.append(ConfigDef.NAME_SERVER_JOURNALKEEPER_WORKING_DIR.key(),nameServerJournalKeeperWorkingDir);
         String[] argPairs= args.build();
         String[] finalArgs;
         if(argPairs.length>0){
@@ -79,10 +129,20 @@ public class LauncherTest {
             finalArgs =new String[1];
             finalArgs[0]= configFile;
         }
-        JavaProcessLauncher launcher=new JavaProcessLauncher(Launcher.class,finalArgs,logFile,"JoyQueue is started");
-        launcher.start();
-        launcher.waitForReady(60,TimeUnit.SECONDS);
-        return  launcher;
+        FutureTask<JavaProcessLauncher> futureTask=new FutureTask(()->{
+            JavaProcessLauncher launcher = new JavaProcessLauncher(Launcher.class, finalArgs, logFile, "JoyQueue is started");
+            try {
+                launcher.start();
+                launcher.waitForReady(60, TimeUnit.SECONDS);
+            }catch (Exception e){
+                System.out.println(e.getMessage());
+            }
+            return launcher;
+        });
+        Thread thread=new Thread(futureTask);
+        thread.start();
+        //return  futureTask.get;
+        return futureTask;
     }
 
     @After

@@ -47,9 +47,9 @@ public class JavaProcessLauncher {
         if(!log.exists()){
             log.createNewFile();
         }
-//        builder.redirectError(log);
-//        builder.redirectOutput(log);
-//        builder.redirectInput(log);
+        builder.redirectError(log);
+        builder.redirectOutput(log);
+        builder.redirectInput(log);
         process=builder.start();
         System.out.println("starting process success");
 

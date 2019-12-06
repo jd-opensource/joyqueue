@@ -11,8 +11,9 @@ public enum ConfigDef {
     TRANSPORT_SERVER_PORT("broker.frontend-server.","transport.server.port","broker port"),
     NAME_SERVICE_MESSAGE_PORT("nameservice.","messenger.port", "name service message port"),
     NAME_SERVICE_CACHE_PATH("nameservice.","allmetadata.cache.file","name service cache path"),
-    NAME_SERVER_JOURNALKEEPER_PORT("nameserver.","journalkeeper.port","bookeeper name server port "),
-    NAME_SERVER_JOURNALKEEPER_WORKING_DIR("nameserver.","journalkeeper.working.dir"," journalkeeper working dir ");
+    NAME_SERVER_JOURNAL_KEEPER_PORT("nameserver.","journalkeeper.port","bookeeper name server port "),
+    NAME_SERVER_JOURNAL_KEEPER_WORKING_DIR("nameserver.","journalkeeper.working.dir"," journalkeeper working dir "),
+    NAME_SERVER_JOURNAL_KEEPER_NODES("nameserver.","journalkeeper.nodes","journal keeper cluster config");
     private  String region;
     private String name;
     private String desc;
