@@ -96,4 +96,14 @@ public class Replica implements Serializable {
 
         return Objects.hash(id, topic, group, brokerId);
     }
+
+    @Override
+    public String toString() {
+        return "Replica{" +
+                "id='" + id + '\'' +
+                ", topic=" + topic +
+                ", group=" + group +
+                ", brokerId=" + brokerId +
+                '}';
+    }
 }

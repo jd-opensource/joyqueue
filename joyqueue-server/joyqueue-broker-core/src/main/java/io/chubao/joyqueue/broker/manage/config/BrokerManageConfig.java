@@ -16,6 +16,8 @@
 package io.chubao.joyqueue.broker.manage.config;
 
 import io.chubao.joyqueue.broker.config.BrokerConfig;
+import io.chubao.joyqueue.config.BrokerConfigKeys;
+import io.chubao.joyqueue.helper.PortHelper;
 import io.chubao.joyqueue.toolkit.config.PropertySupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +45,6 @@ public class BrokerManageConfig {
     }
 
     public int getExportPort() {
-        return PropertySupplier.getValue(propertySupplier,BrokerManageConfigKey.EXPORT_PORT, brokerConfig.getBroker().getMonitorPort());
+        return PortHelper.getMonitorPort(propertySupplier.getValue(BrokerConfigKeys.FRONTEND_SERVER_PORT));
     }
 }
