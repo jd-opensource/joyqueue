@@ -78,7 +78,7 @@ public class JavaProcessLauncher {
              }else{
                  long startTimeMs= SystemClock.now();
                  long timeOutMs=startTimeMs + unit.toMillis(timeout);
-                 tailAndFindSignLine(process.getInputStream(),process.getOutputStream(),timeOutMs);
+                 tailAndFindSignLine(timeOutMs);
              }
     }
 
@@ -86,9 +86,7 @@ public class JavaProcessLauncher {
      * Tail process output and read until sign line or timeout
      *
      **/
-    public void tailAndFindSignLine(InputStream inputStream, OutputStream outputStream, long timeoutMs) throws Exception{
-//        Scanner reader = new Scanner(inputStream);
-//        DataOutputStream logs=new DataOutputStream(new BufferedOutputStream(new FileOutputStream(this.log)));
+    public void tailAndFindSignLine(long timeoutMs) throws Exception{
         BufferedReader bufferedReader = new BufferedReader(new FileReader(this.log));
         boolean success=false;
         while(timeoutMs>SystemClock.now()) {

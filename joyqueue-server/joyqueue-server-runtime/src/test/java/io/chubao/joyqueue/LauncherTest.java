@@ -28,14 +28,15 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Instance Launcher
+ * Launch multiple MQ nodes on single machine
+ *
  **/
 public class LauncherTest {
 
     private String DEFAULT_CONFIG="joyqueue.properties";
     private String ROOT_DIR ="/tmp/joyqueue";
     @Test
-    public void launchSecondBroker() throws  Exception{
+    public void launchOneBroker() throws  Exception{
         String dataDir= ROOT_DIR+"/second/Data";
         String log= ROOT_DIR+"/second/Logs/info.log";
         String journalKeeperNodes = String.format("%s", IpUtil.getLocalIp()+":"+String.valueOf(60088+6));
@@ -77,7 +78,6 @@ public class LauncherTest {
 
 
         FutureTask<JavaProcessLauncher> firstBroker=launchBroker(DEFAULT_CONFIG,firstPort,dataDir,log,journalKeeperNodes);
-        Thread.sleep(10);
 
         dataDir= ROOT_DIR+"/second/Data";
         log= ROOT_DIR+"/second/Logs/info.log";
@@ -89,11 +89,11 @@ public class LauncherTest {
         log= ROOT_DIR+"/third/Logs/info.log";
         FutureTask<JavaProcessLauncher> thirdBroker=launchBroker(DEFAULT_CONFIG,thirdPort,dataDir,log,journalKeeperNodes);
 
-        Thread.sleep(TimeUnit.MINUTES.toMillis(10));
-
-        firstBroker.get().destroy();
-        secondBroker.get().destroy();
-        thirdBroker.get().destroy();
+        // mock 2 minutes test logic
+        Thread.sleep(TimeUnit.MINUTES.toMillis(2));
+        firstBroker.get(10,TimeUnit.SECONDS).destroy();
+        secondBroker.get(10,TimeUnit.SECONDS).destroy();
+        thirdBroker.get(10,TimeUnit.SECONDS).destroy();
         System.out.println("destroy all processes");
 
     }
