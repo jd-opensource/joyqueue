@@ -14,39 +14,33 @@
  * limitations under the License.
  */
 package io.chubao.joyqueue.tools.launch;
-
-import io.chubao.joyqueue.toolkit.time.SystemClock;
-
-import java.io.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+
 
 /**
  * Launcher a new process
  *
  **/
 public class JavaProcessLauncher {
+    protected static final Logger logger = LoggerFactory.getLogger(JavaProcessLauncher.class);
     private Class mainClass;
     private String[] args;
-    private String logFile;
-    private File log;
-    private String startSignLine;
     private Process process;
-    public JavaProcessLauncher(Class mainClass, String[] args, String logFile, String startSignLine){
+    public JavaProcessLauncher(Class mainClass, String[] args){
         this.mainClass= mainClass;
         this.args= args;
-        this.logFile= logFile;
-        this.startSignLine=startSignLine;
     }
 
     /**
      * Start process
      *
      **/
-    public void start() throws Exception{
+    public void start(String sign) throws Exception{
         String classpath = System.getProperty("java.class.path");
-        System.out.println(String.format("Using class path:%s",classpath));
-        System.out.println(String.format("Launch main class:%s",mainClass.getName()));
+        logger.info(String.format("Using class path:%s",classpath));
+        logger.info(String.format("Launch main class:%s",mainClass.getName()));
         String[] defaultCommands=new String[]{"java","-cp",classpath,mainClass.getName()};
         String[] commands=new String[defaultCommands.length+args.length];
         for(int i=0;i<defaultCommands.length;i++){
@@ -54,58 +48,24 @@ public class JavaProcessLauncher {
         }
         System.arraycopy(args,0,commands,defaultCommands.length,args.length);
         ProcessBuilder builder=new ProcessBuilder(commands);
-         this.log=new File(logFile);
-        if(!log.getParentFile().exists()){
-            log.getParentFile().mkdirs();
-        }
-        if(!log.exists()){
-            log.createNewFile();
-        }
-        builder.redirectError(log);
-        builder.redirectOutput(log);
-        builder.redirectInput(log);
+        builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+        builder.redirectError();
+        builder.redirectInput();
         process=builder.start();
-        System.out.println("starting process success");
+
+        process.getInputStream().close();
+        System.out.println("starting process");
 
     }
+
     /**
      * Wait for process start ready
      *
      **/
-    public void waitForReady(int timeout, TimeUnit unit) throws Exception{
-             if(startSignLine==null){
-                 process.waitFor(timeout,unit);
-             }else{
-                 long startTimeMs= SystemClock.now();
-                 long timeOutMs=startTimeMs + unit.toMillis(timeout);
-                 tailAndFindSignLine(timeOutMs);
-             }
+    public boolean waitForReady(int timeout, TimeUnit unit) throws Exception{
+        return process.waitFor(timeout,unit);
     }
 
-    /**
-     * Tail process output and read until sign line or timeout
-     *
-     **/
-    public void tailAndFindSignLine(long timeoutMs) throws Exception{
-        BufferedReader bufferedReader = new BufferedReader(new FileReader(this.log));
-        boolean success=false;
-        while(timeoutMs>SystemClock.now()) {
-            String cur;
-            if((cur = bufferedReader.readLine())!=null) {
-                System.out.println(cur);
-                if (cur.contains(startSignLine)) {
-                    success = true;
-                    break;
-                }
-            }
-        }
-        bufferedReader.close();
-        if(!success){
-            throw new TimeoutException("Read sign line timeout !");
-        }else{
-            System.out.println(String.format("Find sign line: %s",startSignLine));
-        }
-    }
 
     /**
      *

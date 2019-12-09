@@ -49,4 +49,11 @@ public interface BrokerMonitorInternalService {
      */
     @Deprecated
     BrokerStartupInfo getStartInfo();
+
+
+    /**
+     * Broker 启动标志位
+     *
+     **/
+    boolean started();
 }

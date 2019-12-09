@@ -18,6 +18,7 @@ package io.chubao.joyqueue.broker.monitor.stat;
 
 import com.google.common.collect.Maps;
 import io.chubao.joyqueue.broker.monitor.BrokerMonitorConsts;
+import io.chubao.joyqueue.toolkit.service.Activity;
 
 import java.io.Serializable;
 import java.util.concurrent.ConcurrentMap;
@@ -35,6 +36,7 @@ public class BrokerStat implements Serializable {
     public static final int VERSION = BrokerMonitorConsts.STAT_VERSION;
 
     private Integer brokerId;
+    private Activity.ServiceState brokerStartState= Activity.ServiceState.STARTING;
     private JVMStat jvmStat = new JVMStat();
     private ConnectionStat connectionStat = new ConnectionStat();
     private EnQueueStat enQueueStat = new EnQueueStat();
@@ -87,4 +89,11 @@ public class BrokerStat implements Serializable {
         this.jvmStat = jvmStat;
     }
 
+    public Activity.ServiceState getBrokerStartState() {
+        return brokerStartState;
+    }
+
+    public void setBrokerStartState(Activity.ServiceState brokerStartState) {
+        this.brokerStartState = brokerStartState;
+    }
 }

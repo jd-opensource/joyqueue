@@ -15,17 +15,26 @@
  */
 package io.chubao.joyqueue;
 
+import com.alibaba.fastjson.JSON;
 import io.chubao.joyqueue.broker.Launcher;
 import io.chubao.joyqueue.broker.config.Args;
 import io.chubao.joyqueue.broker.config.ConfigDef;
+import io.chubao.joyqueue.domain.Broker;
+import io.chubao.joyqueue.monitor.RestResponse;
+import io.chubao.joyqueue.monitor.RestResponseCode;
+import io.chubao.joyqueue.toolkit.URL;
+import io.chubao.joyqueue.toolkit.io.Files;
 import io.chubao.joyqueue.toolkit.network.IpUtil;
+import io.chubao.joyqueue.toolkit.network.http.Get;
+import io.chubao.joyqueue.toolkit.time.SystemClock;
 import io.chubao.joyqueue.tools.launch.JavaProcessLauncher;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Test;
-
 import java.io.File;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Launch multiple MQ nodes on single machine
@@ -34,15 +43,29 @@ import java.util.concurrent.TimeUnit;
 public class LauncherTest {
 
     private String DEFAULT_CONFIG="joyqueue.properties";
-    private String ROOT_DIR ="/tmp/joyqueue";
+    private String DEFAULT_JOYQUEUE="joyqueue";
+    private String ROOT_DIR =System.getProperty("java.io.tmpdir")+DEFAULT_JOYQUEUE;
+
+    public void makeSureDirectoryExist(String path){
+        File root=new File(path);
+        if(!root.exists()){
+            root.mkdirs();
+        }
+    }
     @Test
-    public void launchOneBroker() throws  Exception{
+    public void launchOneBroker(){
         String dataDir= ROOT_DIR+"/second/Data";
-        String log= ROOT_DIR+"/second/Logs/info.log";
-        String journalKeeperNodes = String.format("%s", IpUtil.getLocalIp()+":"+String.valueOf(60088+6));
-        FutureTask<JavaProcessLauncher> launcher=launchBroker(DEFAULT_CONFIG,60088,dataDir,log,journalKeeperNodes);
-        launcher.get().destroy();
-        System.out.println("destroy launcher");
+        makeSureDirectoryExist(dataDir);
+        Broker broker=new Broker();
+        broker.setPort(60088);
+        String journalKeeperNodes = String.format("%s", IpUtil.getLocalIp()+":"+String.valueOf(broker.getJournalkeeperPort()));
+        FutureTask<JavaProcessLauncher> launcher=launchBroker(DEFAULT_CONFIG,broker,dataDir,journalKeeperNodes);
+        long timeout=60;
+        TimeUnit unit= TimeUnit.SECONDS;
+        boolean launchSuccess=waitBrokerStart(launcher,timeout,unit);
+        Assert.assertTrue(launchSuccess);
+
+
 
     }
 
@@ -50,52 +73,86 @@ public class LauncherTest {
     @Test
     public void launchMultiBroker() throws  Exception{
         String dataDir= ROOT_DIR+"/first/Data";
-        String log= ROOT_DIR+"/first/Logs/info.log";
-        FutureTask<JavaProcessLauncher> firstBroker=launchBroker(DEFAULT_CONFIG,50088,dataDir,log,null);
+        makeSureDirectoryExist(dataDir);
+        Broker firstPort=new Broker();
+        firstPort.setPort(40088);
+        FutureTask<JavaProcessLauncher> firstBroker=launchBroker(DEFAULT_CONFIG,firstPort,dataDir,null);
         Thread.sleep(10);
 
-         dataDir= ROOT_DIR+"/second/Data";
-         log= ROOT_DIR+"/second/Logs/info.log";
 
-        FutureTask<JavaProcessLauncher> secondBroker=launchBroker(DEFAULT_CONFIG,60088,dataDir,log,null);
+        Broker secondPort=new Broker();
+        secondPort.setPort(50088);
+        dataDir= ROOT_DIR+"/second/Data";
+        makeSureDirectoryExist(dataDir);
+        FutureTask<JavaProcessLauncher> secondBroker=launchBroker(DEFAULT_CONFIG,secondPort,dataDir,null);
 
-        firstBroker.get().destroy();
-        secondBroker.get().destroy();
-        System.out.println("destroy all processes");
+        Broker thirdPort=new Broker();
+        thirdPort.setPort(60088);
+        dataDir= ROOT_DIR+"/third/Data";
+        makeSureDirectoryExist(dataDir);
+        FutureTask<JavaProcessLauncher> thirdBroker=launchBroker(DEFAULT_CONFIG,thirdPort,dataDir,null);
+        long timeout=60;
+        TimeUnit unit= TimeUnit.SECONDS;
+        boolean allBrokerStart=waitBrokerStart(firstBroker,timeout,unit);
+                allBrokerStart=waitBrokerStart(secondBroker,timeout,unit)&&allBrokerStart;
+                allBrokerStart=waitBrokerStart(thirdBroker,timeout,unit)&&allBrokerStart;
+        Assert.assertTrue(allBrokerStart);
     }
-
 
     @Test
     public void launchClusterBroker() throws Exception{
-        int firstPort=40088;
-        int secondPort=50088;
-        int thirdPort= 60088;
-        String journalKeeperNodes = String.format("%s,%s,%s",IpUtil.getLocalIp()+":"+String.valueOf(firstPort+6),
-                IpUtil.getLocalIp()+":"+String.valueOf(secondPort+6),IpUtil.getLocalIp()+":"+String.valueOf(thirdPort+6));
+        Broker firstPort=new Broker();
+        firstPort.setPort(40088);
+
+        Broker secondPort=new Broker();
+        secondPort.setPort(50088);
+
+        Broker thirdPort=new Broker();
+        thirdPort.setPort(60088);
+
+        String journalKeeperNodes = String.format("%s,%s,%s",IpUtil.getLocalIp()+":"+String.valueOf(firstPort.getJournalkeeperPort()),
+                IpUtil.getLocalIp()+":"+String.valueOf(secondPort.getJournalkeeperPort()),IpUtil.getLocalIp()+":"+String.valueOf(thirdPort.getJournalkeeperPort()));
 
         String dataDir= ROOT_DIR+"/first/Data";
-        String log= ROOT_DIR+"/first/Logs/info.log";
+        makeSureDirectoryExist(dataDir);
 
-
-        FutureTask<JavaProcessLauncher> firstBroker=launchBroker(DEFAULT_CONFIG,firstPort,dataDir,log,journalKeeperNodes);
+        FutureTask<JavaProcessLauncher> firstBroker=launchBroker(DEFAULT_CONFIG,firstPort,dataDir,journalKeeperNodes);
 
         dataDir= ROOT_DIR+"/second/Data";
-        log= ROOT_DIR+"/second/Logs/info.log";
+        makeSureDirectoryExist(dataDir);
 
-
-        FutureTask<JavaProcessLauncher> secondBroker=launchBroker(DEFAULT_CONFIG,secondPort,dataDir,log,journalKeeperNodes);
+        FutureTask<JavaProcessLauncher> secondBroker=launchBroker(DEFAULT_CONFIG,secondPort,dataDir,journalKeeperNodes);
 
         dataDir= ROOT_DIR+"/third/Data";
-        log= ROOT_DIR+"/third/Logs/info.log";
-        FutureTask<JavaProcessLauncher> thirdBroker=launchBroker(DEFAULT_CONFIG,thirdPort,dataDir,log,journalKeeperNodes);
+        makeSureDirectoryExist(dataDir);
+
+        FutureTask<JavaProcessLauncher> thirdBroker=launchBroker(DEFAULT_CONFIG,thirdPort,dataDir,journalKeeperNodes);
 
         // mock 2 minutes test logic
-        Thread.sleep(TimeUnit.MINUTES.toMillis(2));
-        firstBroker.get(10,TimeUnit.SECONDS).destroy();
-        secondBroker.get(10,TimeUnit.SECONDS).destroy();
-        thirdBroker.get(10,TimeUnit.SECONDS).destroy();
+        // make sure release all process
+        long timeout=60;
+        TimeUnit unit= TimeUnit.SECONDS;
+        boolean clusterStartSuccessful=waitBrokerStart(firstBroker,timeout,unit);
+        clusterStartSuccessful=waitBrokerStart(secondBroker,timeout,unit)&&clusterStartSuccessful;
+        clusterStartSuccessful=waitBrokerStart(thirdBroker,timeout,unit)&&clusterStartSuccessful;
         System.out.println("destroy all processes");
+        Assert.assertTrue(clusterStartSuccessful);
 
+    }
+
+    /**
+     *  Wait broker start success or timeout
+     **/
+    public boolean waitBrokerStart( FutureTask<JavaProcessLauncher> broker,long timeout,TimeUnit unit){
+        boolean startSuccessful=false;
+        try {
+            broker.get(timeout, unit).destroy();
+            startSuccessful = true;
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+
+        }
+        return startSuccessful;
     }
 
 
@@ -103,11 +160,11 @@ public class LauncherTest {
      * Launcher broker process with config
      *
      **/
-    public FutureTask<JavaProcessLauncher> launchBroker(String configFile, int port, String storePath,
-                                            String logFile,String journalKeeperNodes) throws Exception{
+    public FutureTask<JavaProcessLauncher> launchBroker(String configFile, Broker broker, String storePath,
+                                            String journalKeeperNodes){
         Args args=new Args();
         args.append(ConfigDef.APPLICATION_DATA_PATH.key(),storePath);
-        args.append(ConfigDef.TRANSPORT_SERVER_PORT.key(),String.valueOf(port));
+        args.append(ConfigDef.TRANSPORT_SERVER_PORT.key(),String.valueOf(broker.getPort()));
         if(journalKeeperNodes!=null) {
             args.append(ConfigDef.NAME_SERVER_JOURNAL_KEEPER_NODES.key(), journalKeeperNodes);
         }
@@ -121,28 +178,57 @@ public class LauncherTest {
             finalArgs =new String[1];
             finalArgs[0]= configFile;
         }
+        String  localIp= IpUtil.getLocalIp();
         FutureTask<JavaProcessLauncher> futureTask=new FutureTask(()->{
-            JavaProcessLauncher launcher = new JavaProcessLauncher(Launcher.class, finalArgs, logFile, "JoyQueue is started");
+            JavaProcessLauncher launcher = new JavaProcessLauncher(Launcher.class, finalArgs);
+            launcher.start(String.valueOf(broker.getPort()));
             try {
-                launcher.start();
-                launcher.waitForReady(60, TimeUnit.SECONDS);
+                waitBrokerReady(localIp, broker.getMonitorPort(), 60, TimeUnit.SECONDS);
+                return launcher;
             }catch (Exception e){
-                System.out.println(e.getMessage());
+                launcher.destroy();
+                throw  e;
             }
-            return launcher;
+
         });
         Thread thread=new Thread(futureTask);
         thread.start();
-        //return  futureTask.get;
         return futureTask;
+    }
+
+    /**
+     *
+     * @return true if broker ready
+     * @throws TimeoutException
+     *
+     **/
+    public boolean waitBrokerReady(String host,int port,long timeout,TimeUnit unit) throws Exception {
+        URL url= URL.valueOf(String.format("http://%s:%s/started",host,port));
+        Get  http= Get.Builder.build().connectionTimeout((int)TimeUnit.MILLISECONDS.toMillis(30))
+                .socketTimeout((int)TimeUnit.MILLISECONDS.toMillis(10)).create();
+        long timeoutMs= SystemClock.now()+unit.toMillis(timeout);
+        do{
+            try {
+                Thread.sleep(1000);
+                String startSign = http.get(url);
+                RestResponse<Boolean> restResponse=JSON.parseObject(startSign, RestResponse.class);
+                if (restResponse != null&& restResponse.getCode()== RestResponseCode.SUCCESS.getCode() &&restResponse.getData()!=null&&restResponse.getData()) {
+                    return true;
+                }
+
+            }catch (Exception e){
+                System.out.println(e.getMessage());
+            }
+        }while(timeoutMs>SystemClock.now());
+        throw  new TimeoutException("wait for broker ready timeout! ");
     }
 
     @After
     public void cleanup(){
+        System.out.print("clean up");
         File root=new File(ROOT_DIR);
         if(root.exists()){
-           // root.listFiles()
-            root.delete();
+            Files.deleteDirectory(root);
         }
     }
 }

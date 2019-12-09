@@ -10,6 +10,9 @@
         <route path="/startInfo" inherit="get"
                handlers="brokerMonitorService.getStartInfo"/>
 
+        <route path="/started" inherit="get"
+               handlers="brokerMonitorService.started"/>
+
         <!-- deprecated -->
         <route path="/monitor/broker/brokerStatExt" inherit="get"
                handlers="brokerMonitorService.getExtendBrokerStat"/>

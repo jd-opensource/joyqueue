@@ -92,6 +92,8 @@ public class JournalkeeperInternalServiceProvider extends Service implements Int
         URI currentNode = URI.create(String.format("journalkeeper://%s:%s", config.getLocal(), config.getPort()));
         List<URI> nodes = parseNodeUris(currentNode, config.getNodes());
 
+        logger.error("broker start errror{},{}", currentNode,nodes);
+//        logger.error("broker start errror{}", currentNode);
         if (Server.Roll.VOTER.name().equals(config.getRole())
                 || RaftServer.Roll.OBSERVER.name().equals(config.getRole())) {
 

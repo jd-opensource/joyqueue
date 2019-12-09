@@ -56,7 +56,8 @@ import java.util.Map;
  * author: gaohaoxiang
  * date: 2018/11/16
  */
-public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerMonitor, ReplicationMonitor, SessionMonitor, EventListener<SessionManager.SessionEvent> {
+public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerMonitor, ReplicationMonitor, SessionMonitor, EventListener<SessionManager.SessionEvent>
+,BrokerStartMonitor{
 
     private static final Logger logger = LoggerFactory.getLogger(BrokerMonitor.class);
 
@@ -68,7 +69,6 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
 
     // 统计基础汇总信息
     private BrokerStat brokerStat;
-
     public BrokerMonitor() {
 
     }
@@ -534,5 +534,10 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
             }
         }
 
+    }
+
+    @Override
+    public void onBrokerStartFinish() {
+        this.brokerStat.setBrokerStartState(ServiceState.STARTED);
     }
 }

@@ -63,9 +63,6 @@ public class ConfigurationManager extends Service implements EventListener<NameS
     public ConfigurationManager(String[] args) {
          this.args= args;
     }
-    private void parseParams(Configuration configuration, String[] args) {
-        //TODO 解析参数
-    }
 
     public ConfigurationManager(String configPath) {
         if (configPath != null && !configPath.isEmpty()) {

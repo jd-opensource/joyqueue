@@ -25,7 +25,7 @@ public interface PropertyParser {
 
     /**
      * Parser property from string
-     * @param name property name
+     * @param property  property string
      *
      **/
     Property parse(String property) throws Exception;

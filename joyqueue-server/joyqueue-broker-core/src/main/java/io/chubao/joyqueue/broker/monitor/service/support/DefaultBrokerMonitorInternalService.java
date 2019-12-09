@@ -41,6 +41,7 @@ import io.chubao.joyqueue.store.StoreManagementService;
 import io.chubao.joyqueue.store.StoreService;
 import io.chubao.joyqueue.toolkit.format.Format;
 import io.chubao.joyqueue.toolkit.lang.Online;
+import io.chubao.joyqueue.toolkit.service.Activity;
 import io.chubao.joyqueue.toolkit.vm.DefaultGCNotificationParser;
 import io.chubao.joyqueue.toolkit.vm.GCEvent;
 import io.chubao.joyqueue.toolkit.vm.GCEventListener;
@@ -234,5 +235,14 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
         MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
         brokerStatExt.setHeap(memoryMXBean.getHeapMemoryUsage());
         brokerStatExt.setNonHeap(memoryMXBean.getNonHeapMemoryUsage());
+    }
+
+    @Override
+    public boolean started() {
+        if(brokerStat.getBrokerStartState()== Activity.ServiceState.STARTED){
+            return true;
+        }else{
+            return false;
+        }
     }
 }

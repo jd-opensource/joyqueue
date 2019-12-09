@@ -16,10 +16,15 @@
 package io.chubao.joyqueue.broker.config;
 
 import io.chubao.joyqueue.toolkit.config.Property;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-
-
+/**
+ * Equal split property
+ *
+ **/
 public class EqualSplitPropertyParser implements PropertyParser {
+    protected static final Logger logger = LoggerFactory.getLogger(EqualSplitPropertyParser.class);
 
     private static final String SPLIT="=";
     private static  final int LENGTH= 2;
@@ -33,7 +38,9 @@ public class EqualSplitPropertyParser implements PropertyParser {
         if(kv.length == LENGTH){
             return  new Property(null,kv[0],kv[1],0,0);
         }else{
-            throw new IllegalArgumentException(String.format("override properties with key%value ", SPLIT));
+            //throw new IllegalArgumentException(String.format("override properties with key%value ", SPLIT));
+            logger.info("ignore property {}",property);
+            return null;
         }
     }
 }

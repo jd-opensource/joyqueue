@@ -320,6 +320,7 @@ public class BrokerService extends Service {
         startIfNecessary(brokerManageService);
         startIfNecessary(archiveManager);
         printConfig();
+        this.brokerMonitorService.getBrokerMonitor().onBrokerStartFinish();
     }
 
 
