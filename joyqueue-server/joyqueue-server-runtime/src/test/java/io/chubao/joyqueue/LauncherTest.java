@@ -46,7 +46,7 @@ public class LauncherTest {
 
     private String DEFAULT_CONFIG="joyqueue.properties";
     private String DEFAULT_JOYQUEUE="joyqueue";
-    private String ROOT_DIR =System.getProperty("java.io.tmpdir")+DEFAULT_JOYQUEUE;
+    private String ROOT_DIR =System.getProperty("java.io.tmpdir")+ File.separator+DEFAULT_JOYQUEUE;
 
     public void makeSureDirectoryExist(String path){
         File root=new File(path);
@@ -65,7 +65,7 @@ public class LauncherTest {
     }
     @Test
     public void launchOneBroker(){
-        String dataDir= ROOT_DIR+"/second/Data";
+        String dataDir= ROOT_DIR+File.separator+String.format("second%ssData",File.separator);
         makeSureDirectoryExist(dataDir);
         Broker broker=new Broker();
         broker.setPort(60088);
@@ -90,7 +90,7 @@ public class LauncherTest {
     public void launchMultiBroker() throws  Exception{
 
 
-        String dataDir= ROOT_DIR+"/first/Data";
+        String dataDir= ROOT_DIR+File.separator+String.format("first%sData",File.separator);
         makeSureDirectoryExist(dataDir);
         Broker firstPort=new Broker();
         firstPort.setPort(40088);
@@ -104,7 +104,7 @@ public class LauncherTest {
 
         Broker secondPort=new Broker();
         secondPort.setPort(50088);
-        dataDir= ROOT_DIR+"/second/Data";
+        dataDir= ROOT_DIR+File.separator+String.format("second%sData",File.separator);
         makeSureDirectoryExist(dataDir);
         FutureTask<JavaProcessLauncher> secondBroker=launchBroker(DEFAULT_CONFIG,secondPort,dataDir,null,timeout,unit);
 
@@ -137,19 +137,19 @@ public class LauncherTest {
         String journalKeeperNodes = String.format("%s,%s,%s",IpUtil.getLocalIp()+":"+String.valueOf(firstPort.getJournalkeeperPort()),
                 IpUtil.getLocalIp()+":"+String.valueOf(secondPort.getJournalkeeperPort()),IpUtil.getLocalIp()+":"+String.valueOf(thirdPort.getJournalkeeperPort()));
 
-        String dataDir= ROOT_DIR+"/first/Data";
+        String dataDir= ROOT_DIR+File.separator+String.format("first%sData",File.separator);
         makeSureDirectoryExist(dataDir);
         long timeout=60 * 5;
         TimeUnit unit= TimeUnit.SECONDS;
 
         FutureTask<JavaProcessLauncher> firstBroker=launchBroker(DEFAULT_CONFIG,firstPort,dataDir,journalKeeperNodes,timeout,unit);
 
-        dataDir= ROOT_DIR+"/second/Data";
+        dataDir= ROOT_DIR+File.separator+String.format("second%sData",File.separator);
         makeSureDirectoryExist(dataDir);
 
         FutureTask<JavaProcessLauncher> secondBroker=launchBroker(DEFAULT_CONFIG,secondPort,dataDir,journalKeeperNodes,timeout,unit);
 
-        dataDir= ROOT_DIR+"/third/Data";
+        dataDir= ROOT_DIR+File.separator+String.format("third%sData",File.separator);
         makeSureDirectoryExist(dataDir);
 
         FutureTask<JavaProcessLauncher> thirdBroker=launchBroker(DEFAULT_CONFIG,thirdPort,dataDir,journalKeeperNodes,timeout,unit);

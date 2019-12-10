@@ -30,7 +30,7 @@ public class JavaProcessLauncher {
     private Class mainClass;
     private String[] args;
     private Process process;
-    private String  ROOT_DIR=System.getProperty("java.io.tmpdir")+"logs";
+    private String  ROOT_DIR=System.getProperty("java.io.tmpdir")+File.separator+"logs";
     public JavaProcessLauncher(Class mainClass, String[] args){
         this.mainClass= mainClass;
         this.args= args;
@@ -78,7 +78,7 @@ public class JavaProcessLauncher {
         if(!file.exists()){
             file.mkdirs();
         }
-        File log=new File(ROOT_DIR+"/"+sign+".log");
+        File log=new File(ROOT_DIR+File.separator+sign+".log");
         log.createNewFile();
         builder.redirectOutput(log);
 
