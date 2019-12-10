@@ -16,6 +16,8 @@
 package io.chubao.joyqueue.tools.launch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.io.File;
+import java.lang.reflect.Field;
 import java.util.concurrent.TimeUnit;
 
 
@@ -49,12 +51,35 @@ public class JavaProcessLauncher {
         System.arraycopy(args,0,commands,defaultCommands.length,args.length);
         ProcessBuilder builder=new ProcessBuilder(commands);
         builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
-        builder.redirectError();
-        builder.redirectInput();
+//        redirectOutputToLog(sign,builder);
+        builder.redirectErrorStream(true);
         process=builder.start();
+        process.getOutputStream().close();
+        if (process.getClass().getName().equals("java.lang.UNIXProcess")) {
+            Field pidField = process.getClass().getDeclaredField("pid");
+            pidField.setAccessible(true);
+            int pid = (int) pidField.get(process);
+            logger.info("starting process {},{}",sign,pid);
+        } else {
+            logger.info("starting process {}",sign);
+        }
 
-        process.getInputStream().close();
-        System.out.println("starting process");
+
+    }
+
+    /**
+     * For local debug use
+     * @param sign  a unique sign for the process
+     *
+     **/
+    public void redirectOutputToLog(String sign,ProcessBuilder builder) throws Exception{
+        File file=new File("/tmp/joyqueue/log");
+        if(!file.exists()){
+            file.mkdirs();
+        }
+        File log=new File(file.getPath()+"/"+sign+".log");
+        log.createNewFile();
+        builder.redirectOutput(log);
 
     }
 
@@ -65,7 +90,6 @@ public class JavaProcessLauncher {
     public boolean waitForReady(int timeout, TimeUnit unit) throws Exception{
         return process.waitFor(timeout,unit);
     }
-
 
     /**
      *
