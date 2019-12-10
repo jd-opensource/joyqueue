@@ -50,6 +50,7 @@ public class LauncherTest {
 
     public void makeSureDirectoryExist(String path){
         File root=new File(path);
+        System.out.println("path:"+path);
         if(!root.exists()){
             root.mkdirs();
         }else{
