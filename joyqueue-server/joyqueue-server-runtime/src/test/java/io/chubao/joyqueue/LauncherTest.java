@@ -75,7 +75,9 @@ public class LauncherTest {
         FutureTask<JavaProcessLauncher> launcher=launchBroker(DEFAULT_CONFIG,broker,dataDir,journalKeeperNodes,timeout,unit);
 
         BrokerStartState launchSuccess=waitBrokerStart(launcher);
-        launchSuccess.getLauncher().destroy();
+        if(launchSuccess.getLauncher()!=null) {
+            launchSuccess.getLauncher().destroy();
+        }
         Assert.assertTrue(launchSuccess.state);
 
 

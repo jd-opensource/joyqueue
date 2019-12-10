@@ -30,6 +30,7 @@ public class JavaProcessLauncher {
     private Class mainClass;
     private String[] args;
     private Process process;
+    private String  ROOT_DIR=System.getProperty("java.io.tmpdir")+"logs";
     public JavaProcessLauncher(Class mainClass, String[] args){
         this.mainClass= mainClass;
         this.args= args;
@@ -50,8 +51,8 @@ public class JavaProcessLauncher {
         }
         System.arraycopy(args,0,commands,defaultCommands.length,args.length);
         ProcessBuilder builder=new ProcessBuilder(commands);
-        builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
-//        redirectOutputToLog(sign,builder);
+//        builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+        redirectOutputToLog(sign,builder);
         builder.redirectErrorStream(true);
         process=builder.start();
         process.getOutputStream().close();
@@ -73,11 +74,11 @@ public class JavaProcessLauncher {
      *
      **/
     public void redirectOutputToLog(String sign,ProcessBuilder builder) throws Exception{
-        File file=new File("/tmp/joyqueue/log");
+        File file=new File(ROOT_DIR);
         if(!file.exists()){
             file.mkdirs();
         }
-        File log=new File(file.getPath()+"/"+sign+".log");
+        File log=new File(ROOT_DIR+"/"+sign+".log");
         log.createNewFile();
         builder.redirectOutput(log);
 
