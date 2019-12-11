@@ -224,7 +224,7 @@ public class CompensatedNameService extends Service implements NameService, Prop
             setNameserverAvailable();
             return topicConfig;
         } catch (Exception e) {
-            logger.error("getTopicConfig exception, topic: {]", topic, e);
+            logger.error("getTopicConfig exception, topic: {}", topic, e);
             setNameserverNotAvailable();
             if (config.getCompensationErrorCacheEnable()) {
                 return nameServiceCacheManager.getTopicConfig(topic);
