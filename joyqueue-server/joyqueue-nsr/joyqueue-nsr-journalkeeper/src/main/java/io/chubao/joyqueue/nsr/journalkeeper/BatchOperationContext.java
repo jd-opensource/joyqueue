@@ -37,9 +37,6 @@ public class BatchOperationContext {
     }
 
     public static void begin() {
-        if (batchOperatorThreadLocal.get() != null) {
-            throw new UnsupportedOperationException("batch is exist");
-        }
         BatchSQLOperator batchSQLOperator = sqlOperator.beginBatch();
         batchOperatorThreadLocal.set(batchSQLOperator);
     }

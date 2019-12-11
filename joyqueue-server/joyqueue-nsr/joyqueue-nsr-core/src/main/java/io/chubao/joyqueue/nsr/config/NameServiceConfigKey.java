@@ -36,8 +36,9 @@ import io.chubao.joyqueue.toolkit.config.PropertyDef;
     NAMESERVER_COMPENSATION_CONFIG_ENABLE("nameservice.compensation.config.enable", true, Type.BOOLEAN),
     NAMESERVER_COMPENSATION_EVENT_ENABLE("nameservice.compensation.event.enable", true, Type.BOOLEAN),
     NAMESERVER_COMPENSATION_CACHE_ENABLE("nameservice.compensation.cache.enable", false, Type.BOOLEAN),
-    NAMESERVER_COMPENSATION_ERROR_RETRY_INTERVAL("nameservice.compensation.error.retry.interval", 1000 * 30, Type.INT),
+    NAMESERVER_COMPENSATION_ERROR_RETRY_INTERVAL("nameservice.compensation.error.retry.interval", 1000 * 10, Type.INT),
     NAMESERVER_COMPENSATION_ERROR_CACHE_ENABLE("nameservice.compensation.error.cache.enable", true, Type.BOOLEAN),
+    NAMESERVER_COMPENSATION_ERROR_THRESHOLD("nameservice.compensation.error.threshold", 10, Type.INT),
     NAMESERVER_MESSENGER_TYPE("nameservice.messenger.type", "default", Type.STRING),
     NAMESERVER_MESSENGER_IGNITE_ENABLE("nameservice.messenger.ignite.enable", false, Type.BOOLEAN), // TODO 临时配置，是否启用ignite推送
     NAMESERVER_THIN_TRANSPORT_TIMEOUT("nameservice.thin.transport.timeout", 1000 * 1, Type.INT),

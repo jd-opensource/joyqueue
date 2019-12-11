@@ -216,7 +216,7 @@ public class RemoteMessageRetry implements MessageRetry<Long> {
             return payload != null ? payload.getCount() : 0;
         } catch (Exception e) {
             logger.error("countRetry exception, topic: {}, app: {}", topic, app, e);
-            return -1;
+            return 0;
         }
     }
 

@@ -63,7 +63,7 @@ public class TransportConfig {
     // 异步回调线程数量
     private int callbackThreads = Systems.getCores();
     // 默认发送数据包超时时间
-    private int sendTimeout = 1000 * 5;
+    private int sendTimeout = 1000 * 1;
 
     /*** 重试策略配置 ***/
     // 最大重试次数(无限制)
@@ -81,7 +81,7 @@ public class TransportConfig {
     // 重试
     private RetryPolicy retryPolicy;
     // 清理间隔
-    private int clearInterval = 1000 * 3;
+    private int clearInterval = 1000 * 1;
 
 
     public RetryPolicy getRetryPolicy() {

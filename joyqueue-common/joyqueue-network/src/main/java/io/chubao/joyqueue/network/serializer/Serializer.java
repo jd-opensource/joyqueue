@@ -699,6 +699,9 @@ public class Serializer extends AbstractSerializer {
         write(consumer.getTopic().getFullName(),out);
         out.writeByte(consumer.getType().getValue());
         out.writeByte(consumer.getClientType().value());
+        if (version >= VERSION_V3) {
+            out.writeByte(consumer.getTopicType().code());
+        }
         Consumer.ConsumerPolicy consumerPolicy = consumer.getConsumerPolicy();
         RetryPolicy retryPolicy = consumer.getRetryPolicy();
         boolean hasConsumerPolicy = (null != consumerPolicy);
@@ -749,10 +752,6 @@ public class Serializer extends AbstractSerializer {
             out.writeInt(limitPolicy.getTps());
             out.writeInt(limitPolicy.getTraffic());
         }
-
-        if (version >= VERSION_V3) {
-            out.writeByte(consumer.getTopicType().code());
-        }
     }
     public static Consumer readConsumer(int version, final ByteBuf in) throws Exception {
         Consumer consumer = new Consumer();
@@ -760,6 +759,9 @@ public class Serializer extends AbstractSerializer {
         consumer.setTopic(TopicName.parse(readString(in)));
         consumer.setType(Subscription.Type.valueOf(in.readByte()));
         consumer.setClientType(ClientType.valueOf(in.readByte()));
+        if (version >= VERSION_V3) {
+            consumer.setTopicType(TopicType.valueOf(in.readByte()));
+        }
         boolean hasConsumerPolicy = in.readBoolean();
         if(hasConsumerPolicy){
             Consumer.ConsumerPolicy.Builder consumerPolicy = Consumer.ConsumerPolicy.Builder.build();
@@ -799,10 +801,6 @@ public class Serializer extends AbstractSerializer {
             limitPolicy.setTps(in.readInt());
             limitPolicy.setTraffic(in.readInt());
             consumer.setLimitPolicy(limitPolicy);
-        }
-
-        if (version >= VERSION_V3) {
-            consumer.setTopicType(TopicType.valueOf(in.readByte()));
         }
 
         return consumer;
