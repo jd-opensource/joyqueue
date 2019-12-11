@@ -41,7 +41,7 @@ public class NameServiceCacheDoubleCopy extends DoubleCopy {
         this.file = file;
     }
 
-    public void flush(NameServiceCache cache) {
+    public void flush(AllMetadataCache cache) {
         if (entry == null) {
             entry = new NameServiceCacheEntry(CURRENT_VERSION, cache);
         } else {
@@ -98,7 +98,7 @@ public class NameServiceCacheDoubleCopy extends DoubleCopy {
         }
     }
 
-    public NameServiceCache getCache() {
+    public AllMetadataCache getCache() {
         if (entry == null) {
             return null;
         }
@@ -107,13 +107,13 @@ public class NameServiceCacheDoubleCopy extends DoubleCopy {
 
     public static class NameServiceCacheEntry {
         private int version;
-        private NameServiceCache cache;
+        private AllMetadataCache cache;
 
         NameServiceCacheEntry() {
 
         }
 
-        NameServiceCacheEntry(int version, NameServiceCache cache) {
+        NameServiceCacheEntry(int version, AllMetadataCache cache) {
             this.version = version;
             this.cache = cache;
         }
@@ -126,11 +126,11 @@ public class NameServiceCacheDoubleCopy extends DoubleCopy {
             this.version = version;
         }
 
-        public NameServiceCache getCache() {
+        public AllMetadataCache getCache() {
             return cache;
         }
 
-        public void setCache(NameServiceCache cache) {
+        public void setCache(AllMetadataCache cache) {
             this.cache = cache;
         }
     }

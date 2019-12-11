@@ -81,10 +81,13 @@ public class NameServiceCompensateThread extends Service implements Runnable {
     }
 
     public void doCompensate() {
-        NameServiceCache oldCache = nameServiceCacheManager.getCache();
+        if (!config.getCompensationEnable()) {
+            return;
+        }
+        AllMetadataCache oldCache = nameServiceCacheManager.getCache();
         if (oldCache == null) {
             AllMetadata allMetadata = delegate.getAllMetadata();
-            NameServiceCache newCache = nameServiceCacheManager.buildCache(allMetadata);
+            AllMetadataCache newCache = nameServiceCacheManager.buildCache(allMetadata);
 
             if (logger.isDebugEnabled()) {
                 logger.debug("doCompensate, newCache: {}, metadata: {}", JSON.toJSONString(newCache), JSON.toJSONString(allMetadata));
@@ -103,7 +106,7 @@ public class NameServiceCompensateThread extends Service implements Runnable {
             }
 
             AllMetadata allMetadata = delegate.getAllMetadata();
-            NameServiceCache newCache = nameServiceCacheManager.buildCache(allMetadata);
+            AllMetadataCache newCache = nameServiceCacheManager.buildCache(allMetadata);
 
             if (logger.isDebugEnabled()) {
                 logger.debug("doCompensate, oldCache: {}, newCache: {}, metadata: {}",

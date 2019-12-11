@@ -90,6 +90,10 @@ public class JournalkeeperConfig {
         return PropertySupplier.getValue(propertySupplier, JournalkeeperConfigKey.RPC_TIMEOUT);
     }
 
+    public int getExecuteTimeout() {
+        return PropertySupplier.getValue(propertySupplier, JournalkeeperConfigKey.EXECUTE_TIMEOUT);
+    }
+
     public int getFlushInterval() {
         return PropertySupplier.getValue(propertySupplier, JournalkeeperConfigKey.FLUSH_INTERVAL);
     }

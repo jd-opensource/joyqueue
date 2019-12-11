@@ -25,6 +25,7 @@ import io.chubao.joyqueue.domain.Topic;
 import io.chubao.joyqueue.domain.TopicConfig;
 import io.chubao.joyqueue.domain.TopicName;
 import io.chubao.joyqueue.event.MetaEvent;
+import io.chubao.joyqueue.event.NameServerEvent;
 import io.chubao.joyqueue.nsr.config.NameServiceConfig;
 import io.chubao.joyqueue.nsr.event.AddConsumerEvent;
 import io.chubao.joyqueue.nsr.event.AddPartitionGroupEvent;
@@ -40,6 +41,7 @@ import io.chubao.joyqueue.nsr.event.UpdatePartitionGroupEvent;
 import io.chubao.joyqueue.nsr.event.UpdateProducerEvent;
 import io.chubao.joyqueue.nsr.event.UpdateTopicEvent;
 import io.chubao.joyqueue.nsr.message.MessageListener;
+import io.chubao.joyqueue.toolkit.concurrent.EventBus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,10 +59,12 @@ public class NameServiceCacheEventListener implements MessageListener<MetaEvent>
     protected static final Logger logger = LoggerFactory.getLogger(NameServiceCacheEventListener.class);
 
     private NameServiceConfig config;
+    private EventBus<NameServerEvent> eventBus;
     private NameServiceCacheManager nameServiceCacheManager;
 
-    public NameServiceCacheEventListener(NameServiceConfig config, NameServiceCacheManager nameServiceCacheManager) {
+    public NameServiceCacheEventListener(NameServiceConfig config, EventBus<NameServerEvent> eventBus, NameServiceCacheManager nameServiceCacheManager) {
         this.config = config;
+        this.eventBus = eventBus;
         this.nameServiceCacheManager = nameServiceCacheManager;
     }
 
@@ -68,14 +72,17 @@ public class NameServiceCacheEventListener implements MessageListener<MetaEvent>
     public void onEvent(MetaEvent event) {
         nameServiceCacheManager.lock();
         try {
-            doOnEvent(event, nameServiceCacheManager.getCache());
+            AllMetadataCache newCache = nameServiceCacheManager.getCache().clone();
+            doUpdateCache(event, newCache);
+            doOnEvent(event);
+            nameServiceCacheManager.fillCache(newCache);
+            nameServiceCacheManager.updateVersion();
         } finally {
             nameServiceCacheManager.unlock();
         }
     }
 
-    protected void doOnEvent(MetaEvent event, NameServiceCache cache) {
-        // 删除，修改topic, producer，consumer需要优化
+    protected void doUpdateCache(MetaEvent event, AllMetadataCache cache) {
         switch (event.getEventType()) {
             case ADD_TOPIC: {
                 AddTopicEvent addTopicEvent = (AddTopicEvent) event;
@@ -379,6 +386,12 @@ public class NameServiceCacheEventListener implements MessageListener<MetaEvent>
                 break;
             }
         }
-        nameServiceCacheManager.updateVersion();
+    }
+
+    protected void doOnEvent(MetaEvent event) {
+        NameServerEvent nameServerEvent = new NameServerEvent();
+        nameServerEvent.setMetaEvent(event);
+        nameServerEvent.setEventType(event.getEventType());
+        eventBus.inform(nameServerEvent);
     }
 }

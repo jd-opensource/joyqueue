@@ -17,7 +17,7 @@ package io.chubao.joyqueue.nsr.event;
 
 import io.chubao.joyqueue.event.EventType;
 import io.chubao.joyqueue.event.MetaEvent;
-import io.chubao.joyqueue.nsr.nameservice.NameServiceCache;
+import io.chubao.joyqueue.nsr.nameservice.AllMetadataCache;
 
 /**
  * CompensateEvent
@@ -26,31 +26,31 @@ import io.chubao.joyqueue.nsr.nameservice.NameServiceCache;
  */
 public class CompensateEvent extends MetaEvent {
 
-    private NameServiceCache oldCache;
-    private NameServiceCache newCache;
+    private AllMetadataCache oldCache;
+    private AllMetadataCache newCache;
 
     public CompensateEvent() {
 
     }
 
-    public CompensateEvent(NameServiceCache oldCache, NameServiceCache newCache) {
+    public CompensateEvent(AllMetadataCache oldCache, AllMetadataCache newCache) {
         this.oldCache = oldCache;
         this.newCache = newCache;
     }
 
-    public NameServiceCache getOldCache() {
+    public AllMetadataCache getOldCache() {
         return oldCache;
     }
 
-    public void setOldCache(NameServiceCache oldCache) {
+    public void setOldCache(AllMetadataCache oldCache) {
         this.oldCache = oldCache;
     }
 
-    public NameServiceCache getNewCache() {
+    public AllMetadataCache getNewCache() {
         return newCache;
     }
 
-    public void setNewCache(NameServiceCache newCache) {
+    public void setNewCache(AllMetadataCache newCache) {
         this.newCache = newCache;
     }
 

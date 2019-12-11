@@ -29,7 +29,7 @@ public enum JournalkeeperConfigKey implements PropertyDef {
     ROLE("nameserver.journalkeeper.role", "VOTER", PropertyDef.Type.STRING),
     LOCAL("nameserver.journalkeeper.local", IpUtil.getLocalIp(), PropertyDef.Type.STRING),
     NODES("nameserver.journalkeeper.nodes", null, PropertyDef.Type.STRING),
-    WAIT_LEADER_TIMEOUT("nameserver.journalkeeper.waitLeaderTimeout", 1000 * 30, PropertyDef.Type.INT),
+    WAIT_LEADER_TIMEOUT("nameserver.journalkeeper.waitLeaderTimeout", 1000 * 60 * 5, PropertyDef.Type.INT),
     WORKING_DIR("nameserver.journalkeeper.working.dir", null, PropertyDef.Type.STRING),
     INIT_FILE("nameserver.journalkeeper.init.file", "/metadata/journalkeeper/schema.sql", PropertyDef.Type.STRING),
 
@@ -38,6 +38,7 @@ public enum JournalkeeperConfigKey implements PropertyDef {
     JOURNAL_RETENTION_MIN_KEY("nameserver.journalkeeper.journal.retention.min", 0, PropertyDef.Type.INT),
 
     RPC_TIMEOUT("nameserver.journalkeeper.rpc.timeout", 1000 * 60 * 1, PropertyDef.Type.INT),
+    EXECUTE_TIMEOUT("nameserver.journalkeeper.execute.timeout", 1000 * 3, PropertyDef.Type.INT),
 
     FLUSH_INTERVAL("nameserver.journalkeeper.flush.interval", 50, PropertyDef.Type.INT),
 

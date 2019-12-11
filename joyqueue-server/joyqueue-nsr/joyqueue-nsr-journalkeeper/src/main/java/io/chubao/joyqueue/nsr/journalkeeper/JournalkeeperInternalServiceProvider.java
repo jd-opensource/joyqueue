@@ -82,6 +82,7 @@ public class JournalkeeperInternalServiceProvider extends Service implements Int
         result.setProperty(AbstractServer.Config.GET_STATE_BATCH_SIZE_KEY, String.valueOf(config.getStateBatchSize()));
         result.setProperty(AbstractServer.Config.ENABLE_METRIC_KEY, String.valueOf(config.getMetricEnable()));
         result.setProperty(AbstractServer.Config.PRINT_METRIC_INTERVAL_SEC_KEY, String.valueOf(config.getMetricPrintInterval()));
+        result.setProperty(SQLConfigs.TIMEOUT, String.valueOf(config.getExecuteTimeout()));
         result.setProperty(SQLConfigs.INIT_FILE, config.getInitFile());
         return result;
     }
@@ -99,35 +100,17 @@ public class JournalkeeperInternalServiceProvider extends Service implements Int
             SQLServerAccessPoint serverAccessPoint = new SQLServerAccessPoint(journalkeeperProperties);
 
             if (CollectionUtils.isNotEmpty(nodes) && !nodes.contains(currentNode)) {
-                sqlServer = serverAccessPoint.createServer(currentNode, nodes, role);
-
-                if (!sqlServer.isInitialized()) {
-                    logger.info("journalkeeper cluster not initialized, current: {}, nodes: {}", currentNode, nodes);
-                    sqlServer.tryStart();
-                    sqlServer.waitClusterReady(config.getWaitLeaderTimeout(), TimeUnit.MILLISECONDS);
-
-                    ClusterConfiguration clusterConfiguration = sqlServer.getAdminClient().getClusterConfiguration().get();
-                    logger.info("get journalkeeper cluster, leader: {}, voters: {}", clusterConfiguration.getLeader(), clusterConfiguration.getVoters());
-
-                    List<URI> currentVoters = clusterConfiguration.getVoters();
-                    if (!currentVoters.contains(currentNode)) {
-                        List<URI> newVoters = Lists.newArrayList(currentVoters);
-                        newVoters.add(currentNode);
-                        logger.info("update journalkeeper cluster, oldVoters: {}, newVoters: {}", currentVoters, newVoters);
-                        sqlServer.getAdminClient().updateVoters(currentVoters, newVoters).get();
-                    }
-                } else {
-                    sqlServer.tryStart();
-                }
+                joinCluster(currentNode, nodes, serverAccessPoint);
+                nodes.add(currentNode);
             } else {
                 if (CollectionUtils.isEmpty(nodes)) {
                     nodes.add(currentNode);
                 }
-                sqlServer = serverAccessPoint.createServer(currentNode, nodes, role);
-                sqlServer.tryStart();
             }
 
-            sqlServer.waitClusterReady(config.getWaitLeaderTimeout(), TimeUnit.MILLISECONDS);
+            this.sqlServer = serverAccessPoint.createServer(currentNode, nodes, role);
+            this.sqlServer.tryStart();
+            this.sqlServer.waitClusterReady(config.getWaitLeaderTimeout(), TimeUnit.MILLISECONDS);
             this.sqlClient = this.sqlServer.getClient();
         } else {
             SQLClientAccessPoint clientAccessPoint = new SQLClientAccessPoint(journalkeeperProperties);
@@ -137,6 +120,25 @@ public class JournalkeeperInternalServiceProvider extends Service implements Int
         BatchOperationContext.init(sqlOperator);
         this.journalkeeperInternalServiceManager = new JournalkeeperInternalServiceManager(this.sqlServer, this.sqlClient, this.sqlOperator);
         this.journalkeeperInternalServiceManager.start();
+    }
+
+    protected void joinCluster(URI currentNode, List<URI> nodes, SQLServerAccessPoint serverAccessPoint) throws Exception {
+        SQLServer remoteServer = serverAccessPoint.createRemoteServer(currentNode, nodes);
+        ClusterConfiguration clusterConfiguration = remoteServer.getAdminClient().getClusterConfiguration().get();
+        logger.info("get journalkeeper cluster, leader: {}, voters: {}", clusterConfiguration.getLeader(), clusterConfiguration.getVoters());
+
+        List<URI> currentVoters = clusterConfiguration.getVoters();
+        if (!currentVoters.contains(currentNode)) {
+            List<URI> newVoters = Lists.newArrayList(currentVoters);
+            newVoters.add(currentNode);
+            logger.info("update journalkeeper cluster, oldVoters: {}, newVoters: {}", currentVoters, newVoters);
+            try {
+                remoteServer.getAdminClient().updateVoters(currentVoters, newVoters).get(1000 * 1, TimeUnit.MILLISECONDS);
+            } catch (Exception e) {
+                logger.warn("update journalkeeper cluster exception, oldVoters: {}, newVoters: {}", currentVoters, newVoters, e);
+            }
+        }
+        remoteServer.stop();
     }
 
     protected static List<URI> parseNodeUris(URI currentNode, List<String> nodes) {

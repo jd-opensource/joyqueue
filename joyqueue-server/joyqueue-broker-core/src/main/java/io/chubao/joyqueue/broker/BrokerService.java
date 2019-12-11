@@ -342,7 +342,7 @@ public class BrokerService extends Service {
                 brokerConfig.getBroker().getMonitorPort(),
                 brokerConfig.getBroker().getNameServerManagerPort(),
                 brokerConfig.getBroker().getNameServerPort(),
-                brokerConfig.getBroker().getMessengerConfig(),
+                brokerConfig.getBroker().getMessengerPort(),
                 brokerConfig.getBroker().getJournalkeeperPort());
     }
 

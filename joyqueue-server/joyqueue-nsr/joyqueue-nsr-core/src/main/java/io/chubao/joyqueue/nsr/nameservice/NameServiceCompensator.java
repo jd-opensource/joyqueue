@@ -80,7 +80,7 @@ public class NameServiceCompensator extends Service {
         this.brokerId = brokerId;
     }
 
-    public void compensate(NameServiceCache oldCache, NameServiceCache newCache) {
+    public void compensate(AllMetadataCache oldCache, AllMetadataCache newCache) {
         if (brokerId <= 0) {
             return;
         }
@@ -107,7 +107,7 @@ public class NameServiceCompensator extends Service {
         }
     }
 
-    protected void compensateTopic(NameServiceCache oldCache, NameServiceCache newCache) {
+    protected void compensateTopic(AllMetadataCache oldCache, AllMetadataCache newCache) {
         for (Map.Entry<TopicName, TopicConfig> currentTopicEntry : newCache.getTopicConfigMap().entrySet()) {
             TopicConfig newTopicConfig = currentTopicEntry.getValue();
             TopicConfig oldTopicConfig = oldCache.getTopicConfigMap().get(currentTopicEntry.getKey());
@@ -167,7 +167,7 @@ public class NameServiceCompensator extends Service {
         }
     }
 
-    protected void compensateBroker(NameServiceCache oldCache, NameServiceCache newCache) {
+    protected void compensateBroker(AllMetadataCache oldCache, AllMetadataCache newCache) {
         for (Map.Entry<Integer, Broker> newBrokerEntry : newCache.getBrokerMap().entrySet()) {
             Broker oldBroker = oldCache.getBrokerMap().get(newBrokerEntry.getKey());
 
@@ -199,7 +199,7 @@ public class NameServiceCompensator extends Service {
         }
     }
 
-    protected void compensateProducer(NameServiceCache oldCache, NameServiceCache newCache) {
+    protected void compensateProducer(AllMetadataCache oldCache, AllMetadataCache newCache) {
         for (Producer newProducer : newCache.getAllProducers()) {
             TopicConfig newTopicConfig = newCache.getTopicConfigMap().get(newProducer.getTopic());
             TopicConfig oldTopicConfig = oldCache.getTopicConfigMap().get(newProducer.getTopic());
@@ -244,7 +244,7 @@ public class NameServiceCompensator extends Service {
         }
     }
 
-    protected void compensateConsumer(NameServiceCache oldCache, NameServiceCache newCache) {
+    protected void compensateConsumer(AllMetadataCache oldCache, AllMetadataCache newCache) {
         for (Consumer newConsumer : newCache.getAllConsumers()) {
             TopicConfig newTopicConfig = newCache.getTopicConfigMap().get(newConsumer.getTopic());
             TopicConfig oldTopicConfig = oldCache.getTopicConfigMap().get(newConsumer.getTopic());
@@ -289,7 +289,7 @@ public class NameServiceCompensator extends Service {
         }
     }
 
-    protected void compensateDataCenter(NameServiceCache oldCache, NameServiceCache newCache) {
+    protected void compensateDataCenter(AllMetadataCache oldCache, AllMetadataCache newCache) {
         for (DCWrapper newDataCenter : newCache.getAllDataCenters()) {
             DCWrapper oldDataCenter = oldCache.getDataCenterCodeMap().get(newDataCenter.getDataCenter().getCode());
             if (oldDataCenter == null) {
@@ -313,7 +313,7 @@ public class NameServiceCompensator extends Service {
         }
     }
 
-    protected void compensateConfig(NameServiceCache oldCache, NameServiceCache newCache) {
+    protected void compensateConfig(AllMetadataCache oldCache, AllMetadataCache newCache) {
         for (Config newConfig : newCache.getAllConfigs()) {
             Config oldConfig = oldCache.getConfigKeyMap().get(newConfig.getId());
             if (oldConfig == null) {

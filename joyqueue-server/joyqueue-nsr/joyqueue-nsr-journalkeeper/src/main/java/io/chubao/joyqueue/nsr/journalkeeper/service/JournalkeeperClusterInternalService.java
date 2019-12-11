@@ -16,14 +16,19 @@
 package io.chubao.joyqueue.nsr.journalkeeper.service;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import io.chubao.joyqueue.nsr.exception.NsrException;
 import io.chubao.joyqueue.nsr.service.internal.ClusterInternalService;
+import io.chubao.joyqueue.toolkit.network.IpUtil;
 import io.journalkeeper.core.api.ClusterConfiguration;
+import io.journalkeeper.core.api.ServerStatus;
 import io.journalkeeper.sql.client.SQLClient;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 /**
  * JournalkeeperClusterInternalService
@@ -41,7 +46,18 @@ public class JournalkeeperClusterInternalService implements ClusterInternalServi
     @Override
     public String getCluster() {
         try {
-            return JSON.toJSONString(sqlClient.getAdminClient().getClusterConfiguration().get());
+            Map<String, Object> result = Maps.newHashMap();
+            ClusterConfiguration clusterConfiguration = sqlClient.getAdminClient().getClusterConfiguration().get();
+
+            for (URI voter : clusterConfiguration.getVoters()) {
+                if (voter.getHost().equals(IpUtil.getLocalIp())) {
+                    ServerStatus serverStatus = sqlClient.getAdminClient().getServerStatus(voter).get();
+                    result.put("status", serverStatus);
+                }
+            }
+
+            result.put("cluster", clusterConfiguration);
+            return JSON.toJSONString(result, SerializerFeature.DisableCircularReferenceDetect);
         } catch (Exception e) {
             throw new NsrException(e);
         }

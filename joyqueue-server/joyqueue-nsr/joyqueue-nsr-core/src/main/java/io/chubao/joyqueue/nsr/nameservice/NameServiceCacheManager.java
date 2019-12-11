@@ -59,7 +59,7 @@ public class NameServiceCacheManager extends Service {
     private NameServiceConfig config;
 
     private NameServiceCacheDoubleCopy nameServiceCacheDoubleCopy;
-    private volatile NameServiceCache cache;
+    private volatile AllMetadataCache cache;
     private ReentrantLock lock = new ReentrantLock();
     private volatile int version = 0;
 
@@ -82,7 +82,7 @@ public class NameServiceCacheManager extends Service {
         this.cache = nameServiceCacheDoubleCopy.getCache();
     }
 
-    public NameServiceCache buildCache(AllMetadata allMetadata) {
+    public AllMetadataCache buildCache(AllMetadata allMetadata) {
         Map<Integer, Broker> brokerMap = Maps.newHashMap(allMetadata.getBrokers());
         Map<TopicName, TopicConfig> topicConfigMap = Maps.newHashMap(allMetadata.getTopics());
         List<Producer> allProducers = Lists.newLinkedList(allMetadata.getProducers());
@@ -200,7 +200,7 @@ public class NameServiceCacheManager extends Service {
             dataCenterWrapperCodeMap.put(dataCenter.getCode(), dcWrapper);
         }
 
-        NameServiceCache cache = new NameServiceCache();
+        AllMetadataCache cache = new AllMetadataCache();
         cache.setAllBrokers(allBrokers);
         cache.setBrokerMap(brokerMap);
         cache.setTopicConfigMap(topicConfigMap);
@@ -221,7 +221,7 @@ public class NameServiceCacheManager extends Service {
         return cache;
     }
 
-    public void fillCache(NameServiceCache cache) {
+    public void fillCache(AllMetadataCache cache) {
         nameServiceCacheDoubleCopy.flush(cache);
         this.cache = cache;
     }
@@ -426,7 +426,7 @@ public class NameServiceCacheManager extends Service {
         throw new NsrException();
     }
 
-    public NameServiceCache getCache() {
+    public AllMetadataCache getCache() {
         return cache;
     }
 

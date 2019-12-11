@@ -15,6 +15,8 @@
  */
 package io.chubao.joyqueue.nsr.nameservice;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import io.chubao.joyqueue.domain.AppToken;
 import io.chubao.joyqueue.domain.Broker;
 import io.chubao.joyqueue.domain.Config;
@@ -27,7 +29,7 @@ import io.chubao.joyqueue.nsr.util.DCWrapper;
 import java.util.List;
 import java.util.Map;
 
-public class NameServiceCache {
+public class AllMetadataCache {
 
     private Map<Integer /** brokerId **/, Broker> brokerMap;
     private List<Broker> allBrokers;
@@ -46,8 +48,6 @@ public class NameServiceCache {
     private Map<String /** app **/, List<AppToken>> allAppTokenMap;
     private List<DCWrapper> allDataCenters;
     private Map<String /** code **/, DCWrapper> dataCenterCodeMap;
-
-    private volatile int version = 0;
 
     public Map<Integer, Broker> getBrokerMap() {
         return brokerMap;
@@ -183,5 +183,27 @@ public class NameServiceCache {
 
     public void setDataCenterCodeMap(Map<String, DCWrapper> dataCenterCodeMap) {
         this.dataCenterCodeMap = dataCenterCodeMap;
+    }
+
+    public AllMetadataCache clone() {
+        AllMetadataCache allMetadataCache = new AllMetadataCache();
+        allMetadataCache.setBrokerMap(Maps.newHashMap(brokerMap));
+        allMetadataCache.setAllBrokers(Lists.newArrayList(allBrokers));
+        allMetadataCache.setTopicConfigMap(Maps.newHashMap(topicConfigMap));
+        allMetadataCache.setAllTopicConfigs(Lists.newArrayList(allTopicConfigs));
+        allMetadataCache.setAllTopicCodes(Lists.newArrayList(allTopicCodes));
+        allMetadataCache.setTopicConfigBrokerMap(Maps.newHashMap(topicConfigBrokerMap));
+        allMetadataCache.setProducerTopicMap(Maps.newHashMap(producerTopicMap));
+        allMetadataCache.setProducerAppMap(Maps.newHashMap(producerAppMap));
+        allMetadataCache.setAllProducers(Lists.newArrayList(allProducers));
+        allMetadataCache.setConsumerAppMap(Maps.newHashMap(consumerAppMap));
+        allMetadataCache.setConsumerTopicMap(Maps.newHashMap(consumerTopicMap));
+        allMetadataCache.setAllConsumers(Lists.newArrayList(allConsumers));
+        allMetadataCache.setAllConfigs(Lists.newArrayList(allConfigs));
+        allMetadataCache.setConfigKeyMap(Maps.newHashMap(configKeyMap));
+        allMetadataCache.setAllAppTokenMap(Maps.newHashMap(allAppTokenMap));
+        allMetadataCache.setAllDataCenters(Lists.newArrayList(allDataCenters));
+        allMetadataCache.setDataCenterCodeMap(Maps.newHashMap(dataCenterCodeMap));
+        return allMetadataCache;
     }
 }
