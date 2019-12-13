@@ -51,4 +51,12 @@ public interface ClusterInternalService {
      * @return
      */
     String updateNodes(List<URI> uris);
+
+    /**
+     * 执行集群命令
+     * @param command
+     * @param args
+     * @return
+     */
+    String execute(String command, List<String> args);
 }

@@ -168,4 +168,12 @@ public interface MetadataMonitorService {
      * @return
      */
     String updateMetadataNode(List<String> uris);
+
+    /**
+     * 执行命令
+     * @param command
+     * @param args
+     * @return
+     */
+    String executeMetadataCommand(String command, List<String> args);
 }

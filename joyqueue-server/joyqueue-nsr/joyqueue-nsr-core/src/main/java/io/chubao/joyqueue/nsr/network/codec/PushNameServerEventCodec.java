@@ -48,7 +48,7 @@ public class PushNameServerEventCodec implements NsrPayloadCodec<PushNameServerE
 
     @Override
     public void encode(PushNameServerEvent payload, ByteBuf buffer) throws Exception {
-        if (payload.getHeader().getVersion() >= JoyQueueHeader.VERSION_V2) {
+        if (payload.getHeader().getVersion() >= JoyQueueHeader.VERSION_V3) {
             NameServerEvent event = payload.getEvent();
             buffer.writeInt(event.getBrokerId());
             Serializer.write(JSON.toJSONString(event.getMetaEvent()),buffer,Serializer.SHORT_SIZE);

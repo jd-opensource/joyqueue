@@ -377,4 +377,9 @@ public class DefaultBrokerMonitorService implements BrokerMonitorService {
     public String updateMetadataNode(List<String> uris) {
         return metadataMonitorService.updateMetadataNode(uris);
     }
+
+    @Override
+    public String executeMetadataCommand(String command, List<String> args) {
+        return metadataMonitorService.executeMetadataCommand(command, args);
+    }
 }

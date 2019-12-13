@@ -103,4 +103,34 @@ public class JournalkeeperClusterInternalService implements ClusterInternalServi
             throw new NsrException(e);
         }
     }
+
+    @Override
+    public String execute(String command, List<String> args) {
+        try {
+            Object result = null;
+            switch (command) {
+                case "getSnapshots": {
+                    result = sqlClient.getAdminClient().getSnapshots().get();
+                    break;
+                }
+                case "takeSnapshot": {
+                    sqlClient.getAdminClient().takeSnapshot().get();
+                    result = "success";
+                    break;
+                }
+                case "recoverSnapshot": {
+                    sqlClient.getAdminClient().recoverSnapshot(Integer.valueOf(args.get(0))).get();
+                    result = "success";
+                    break;
+                }
+                default: {
+                    result = "unsupported";
+                    break;
+                }
+            }
+            return JSON.toJSONString(result, SerializerFeature.DisableCircularReferenceDetect);
+        } catch (Exception e) {
+            throw new NsrException(e);
+        }
+    }
 }
