@@ -20,6 +20,7 @@ import io.chubao.joyqueue.toolkit.time.SystemClock;
 
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -43,6 +44,7 @@ public abstract class LoopThread implements Runnable,LifeCycle{
     private static final int STATE_STARTING = 2;
     private static final int STATE_RUNNING = 3;
     private AtomicInteger state = new AtomicInteger(STATE_STOPPED);
+    private AtomicBoolean needToWakeUp = new AtomicBoolean(false);
     /**
      * 每次循环需要执行的代码。
      */
@@ -109,24 +111,36 @@ public abstract class LoopThread implements Runnable,LifeCycle{
         if(state.compareAndSet(STATE_STARTING, STATE_RUNNING) ) {
             while (state.get() == STATE_RUNNING) {
 
-                long t0 = SystemClock.now();
+                long t0 = System.nanoTime();
                 try {
-                    wakeupLock.lock();
-                    if (condition()) doWork();
-                    long t1 = SystemClock.now();
-
-                    // 为了避免空转CPU高，如果执行时间过短，等一会儿再进行下一次循环
-                    if (t1 - t0 < minSleep) {
-                        wakeupCondition.await(minSleep < maxSleep ? ThreadLocalRandom.current().nextLong(minSleep, maxSleep) : minSleep, TimeUnit.MILLISECONDS);
+                    if(condition()) {
+                        doWork();
                     }
+
                 } catch (InterruptedException i) {
                     Thread.currentThread().interrupt();
                 } catch (Throwable t) {
                     if (!handleException(t)) {
                         break;
                     }
-                } finally {
-                    wakeupLock.unlock();
+                }
+                try {
+                    long t1 = System.nanoTime();
+
+                    // 为了避免空转CPU高，如果执行时间过短，等一会儿再进行下一次循环
+                    if (t1 - t0 < minSleep * 100000L) {
+
+                        wakeupLock.lock();
+                        try {
+                            needToWakeUp.set(true);
+                            wakeupCondition.await(minSleep < maxSleep ? ThreadLocalRandom.current().nextLong(minSleep, maxSleep) : minSleep, TimeUnit.MILLISECONDS);
+
+                        } finally {
+                            wakeupLock.unlock();
+                        }
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                 }
             }
         }
@@ -137,7 +151,8 @@ public abstract class LoopThread implements Runnable,LifeCycle{
      * 唤醒任务如果任务在Sleep
      */
     public synchronized void wakeup() {
-        if(wakeupLock.tryLock()) {
+        if(needToWakeUp.compareAndSet(true, false)) {
+            wakeupLock.lock();
             try {
                 wakeupCondition.signal();
             } finally {

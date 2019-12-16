@@ -468,7 +468,7 @@ public class PartitionGroupStoreManagerTest {
         destroyStore();
         destroyBaseDir();
         prepareBaseDir();
-        prepareStore();
+        initAndRecoverStore();
         store.disable();
         // 3. 模拟FOLLOWER 写入消息
         position = 0L;
@@ -615,38 +615,51 @@ public class PartitionGroupStoreManagerTest {
             r.position(r.position() + MessageParser.getInt(r, MessageParser.LENGTH));
         }
     }
+    @Test
+    public void checkpointTest() throws Exception {
+        int count = 1024;
+        short partition = 4;
+        List<ByteBuffer> messages = MessageUtils.build(count, 1024);
 
-    private long getPositionByQosLevel(QosLevel qosLevel, PartitionGroupStoreManager store) {
-        switch (qosLevel) {
+        long length = messages.stream().mapToInt(Buffer::remaining).sum();
 
-            case REPLICATION:
-                return store.commitPosition();
-            default:
-                return store.rightPosition();
+        final EventFuture<WriteResult> future = new EventFuture<>();
+
+        store.asyncWrite(QosLevel.PERSISTENCE, future, messages.stream().map(b -> new WriteRequest(partition, b)).toArray(WriteRequest[]::new));
+
+        WriteResult writeResult = future.get();
+        Assert.assertEquals(JoyQueueCode.SUCCESS, writeResult.getCode());
+
+        logger.info("Waiting checkpoint saved...");
+
+        File checkpointFile = new File(groupBase, PartitionGroupStoreManager.CHECKPOINT_FILE);
+
+        while (!checkpointFile.isFile()) {
+            Thread.sleep(100L);
         }
-    }
+        Thread.sleep(100L);
 
+        destroyStore();
+        recoverStore();
 
-    private void enrich(ByteBuffer byteBuffer, short partition, long index, int term) {
+        for (int i = 0; i < messages.size(); i++) {
+            ByteBuffer writeBuffer = messages.get(i);
+            writeBuffer.clear();
 
-        // 分区
-        MessageParser.setShort(byteBuffer, MessageParser.PARTITION, partition);
-        // 索引
-        MessageParser.setLong(byteBuffer, MessageParser.INDEX, index);
+            ReadResult readResult = store.read(partition, i, 1, 0);
+            Assert.assertEquals(JoyQueueCode.SUCCESS, readResult.getCode());
+            Assert.assertEquals(1, readResult.getMessages().length);
+            ByteBuffer readBuffer = readResult.getMessages()[0];
+            Assert.assertEquals(writeBuffer, readBuffer);
+        }
 
-        // 轮次
-        MessageParser.setInt(byteBuffer, MessageParser.TERM, term);
-
-        // 存储时间：与发送时间的差值
-        MessageParser.setInt(byteBuffer, MessageParser.STORAGE_TIMESTAMP,
-                (int) (SystemClock.now() - MessageParser.getLong(byteBuffer, MessageParser.CLIENT_TIMESTAMP)));
 
     }
 
     @Before
     public void before() throws Exception {
         prepareBaseDir();
-        prepareStore();
+        initAndRecoverStore();
     }
 
     @After
@@ -672,9 +685,14 @@ public class PartitionGroupStoreManagerTest {
 
     }
 
-    private void prepareStore() throws Exception {
+    private void initAndRecoverStore() throws Exception {
 
         PartitionGroupStoreSupport.init(groupBase, partitions);
+
+        recoverStore();
+    }
+
+    private void recoverStore() {
         if (null == bufferPool) {
             bufferPool = PreloadBufferPool.getInstance();
             bufferPool.addPreLoad(128 * 1024 * 1024, 2, 4);
