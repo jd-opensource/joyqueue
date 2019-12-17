@@ -28,7 +28,6 @@ import io.chubao.joyqueue.toolkit.network.IpUtil;
 import io.chubao.joyqueue.toolkit.network.http.Get;
 import io.chubao.joyqueue.toolkit.time.SystemClock;
 import io.chubao.joyqueue.tools.launch.JavaProcessLauncher;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -124,7 +123,7 @@ public class LauncherTest {
     @Ignore
     @Test
     public void launchClusterBroker(){
-
+        makeSureDirectoryExist(ROOT_DIR);
         Broker firstPort=new Broker();
         firstPort.setPort(40088);
 
@@ -156,7 +155,6 @@ public class LauncherTest {
 
         // mock 2 minutes test logic
         // make sure release all process
-
 
         BrokerStartState firstState=waitBrokerStart(firstBroker);
         BrokerStartState secondState=waitBrokerStart(secondBroker);
@@ -280,6 +278,8 @@ public class LauncherTest {
         args.append(ConfigDef.TRANSPORT_SERVER_PORT.key(),String.valueOf(broker.getPort()));
         if(journalKeeperNodes!=null) {
             args.append(ConfigDef.NAME_SERVER_JOURNAL_KEEPER_NODES.key(), journalKeeperNodes);
+//            args.append("nameserver.journalkeeper.sql.timeout", String.valueOf(1000 * 60 * 1));
+//            args.append("nameserver.journalkeeper.waitLeaderTimeout", String.valueOf(1000 * 60 * 5));
         }
         String[] argPairs= args.build();
         String[] finalArgs;
@@ -293,8 +293,8 @@ public class LauncherTest {
         }
         String  localIp= IpUtil.getLocalIp();
         FutureTask<JavaProcessLauncher> futureTask=new FutureTask(()->{
-            JavaProcessLauncher launcher = new JavaProcessLauncher(Launcher.class, finalArgs);
-            launcher.start(String.valueOf(broker.getPort()));
+            JavaProcessLauncher launcher = new JavaProcessLauncher(Launcher.class, finalArgs,String.valueOf(broker.getPort()));
+            launcher.start();
             try {
                 waitBrokerReady(localIp, broker.getMonitorPort(), timeout, unit);
                 return launcher;
@@ -334,14 +334,5 @@ public class LauncherTest {
             }
         }while(timeoutMs>SystemClock.now());
         throw  new TimeoutException("wait for broker ready timeout! ");
-    }
-
-    @After
-    public void cleanup(){
-        System.out.print("clean up");
-        File root=new File(ROOT_DIR);
-        if(root.exists()){
-            Files.deleteDirectory(root);
-        }
     }
 }

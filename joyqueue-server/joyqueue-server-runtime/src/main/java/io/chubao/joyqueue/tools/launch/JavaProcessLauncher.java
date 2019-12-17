@@ -30,17 +30,20 @@ public class JavaProcessLauncher {
     private Class mainClass;
     private String[] args;
     private Process process;
+    private String name;
     private String  ROOT_DIR=System.getProperty("java.io.tmpdir")+File.separator+"logs";
-    public JavaProcessLauncher(Class mainClass, String[] args){
+    private File logFile;
+    public JavaProcessLauncher(Class mainClass, String[] args,String name){
         this.mainClass= mainClass;
         this.args= args;
+        this.name=name;
     }
 
     /**
      * Start process
      *
      **/
-    public void start(String sign) throws Exception{
+    public void start() throws Exception{
         String classpath = System.getProperty("java.class.path");
         logger.info(String.format("Using class path:%s",classpath));
         logger.info(String.format("Launch main class:%s",mainClass.getName()));
@@ -51,8 +54,8 @@ public class JavaProcessLauncher {
         }
         System.arraycopy(args,0,commands,defaultCommands.length,args.length);
         ProcessBuilder builder=new ProcessBuilder(commands);
-//        builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
-        redirectOutputToLog(sign,builder);
+//      builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+        redirectOutputToLog(this.name,builder);
         builder.redirectErrorStream(true);
         process=builder.start();
         process.getOutputStream().close();
@@ -60,9 +63,9 @@ public class JavaProcessLauncher {
             Field pidField = process.getClass().getDeclaredField("pid");
             pidField.setAccessible(true);
             int pid = (int) pidField.get(process);
-            logger.info("starting process {},{}",sign,pid);
+            logger.info("starting process {},{}",this.name,pid);
         } else {
-            logger.info("starting process {}",sign);
+            logger.info("starting process {}",this.name);
         }
 
 
@@ -78,9 +81,9 @@ public class JavaProcessLauncher {
         if(!file.exists()){
             file.mkdirs();
         }
-        File log=new File(ROOT_DIR+File.separator+sign+".log");
-        log.createNewFile();
-        builder.redirectOutput(log);
+        logFile =new File(ROOT_DIR+File.separator+sign+".log");
+        logFile.createNewFile();
+        builder.redirectOutput(logFile);
 
     }
 
@@ -98,6 +101,11 @@ public class JavaProcessLauncher {
      *
      **/
     public void destroy(){
+        logger.info("destroy {}",this.name);
         process.destroy();
+        if(logFile!=null&&logFile.exists()){
+            logFile.delete();
+        }
+
     }
 }
