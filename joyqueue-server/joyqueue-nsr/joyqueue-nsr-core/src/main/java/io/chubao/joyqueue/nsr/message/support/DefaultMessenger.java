@@ -95,7 +95,7 @@ public class DefaultMessenger extends Service implements Messenger<MetaEvent>, P
         for (Broker broker : brokers) {
             MessengerPublishRequest messengerPublishRequest = new MessengerPublishRequest(event);
             try {
-                messengerSessionManager.getOrCreateSession(broker.getId(), broker.getIp(), broker.getMessengerConfig())
+                messengerSessionManager.getOrCreateSession(broker.getId(), broker.getIp(), broker.getMessengerPort())
                         .async(new JoyQueueCommand(messengerPublishRequest), config.getSessionTimeout(), new CommandCallback() {
                             @Override
                             public void onSuccess(Command request, Command response) {
@@ -103,7 +103,7 @@ public class DefaultMessenger extends Service implements Messenger<MetaEvent>, P
 
                                 if (booleanAck.getHeader().getStatus() != JoyQueueCode.SUCCESS.getCode()) {
                                     logger.warn("messenger publish error, event: {}, id: {}, ip: {}, port: {}, code: {}",
-                                            event, broker.getId(), broker.getIp(), broker.getPort(), booleanAck.type());
+                                            event, broker.getId(), broker.getIp(), broker.getMessengerPort(), booleanAck.type());
 
                                     success[0] = false;
                                 }
@@ -113,7 +113,7 @@ public class DefaultMessenger extends Service implements Messenger<MetaEvent>, P
                             @Override
                             public void onException(Command request, Throwable cause) {
                                 logger.warn("messenger publish error, event: {}, id: {}, ip: {}, port: {}",
-                                        event, broker.getId(), broker.getIp(), broker.getPort(), cause);
+                                        event, broker.getId(), broker.getIp(), broker.getMessengerPort(), cause);
 
                                 boolean isSuccess = false;
                                 if (cause instanceof TransportException.RequestErrorException) {
@@ -130,7 +130,7 @@ public class DefaultMessenger extends Service implements Messenger<MetaEvent>, P
                 if (!config.getPublishIgnoreConnectionError()) {
                     success[0] = false;
                     logger.warn("create session exception, event: {}, brokerId: {}, brokerIp: {}, brokerPort: {}",
-                            event, broker.getId(), broker.getIp(), broker.getPort(), e);
+                            event, broker.getId(), broker.getIp(), broker.getMessengerPort(), e);
                 }
                 latch.countDown();
             }
@@ -171,7 +171,7 @@ public class DefaultMessenger extends Service implements Messenger<MetaEvent>, P
         for (Broker broker : brokers) {
             try {
                 MessengerPublishRequest messengerPublishRequest = new MessengerPublishRequest(event);
-                messengerSessionManager.getOrCreateSession(broker.getId(), broker.getIp(), broker.getMessengerConfig())
+                messengerSessionManager.getOrCreateSession(broker.getId(), broker.getIp(), broker.getMessengerPort())
                         .oneway(new JoyQueueCommand(messengerPublishRequest), config.getSessionTimeout());
             } catch (Exception e) {
                 logger.warn("messenger fastPublish failed, event: {}, broker: {}", event, broker);

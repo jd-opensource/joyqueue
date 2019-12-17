@@ -15,8 +15,11 @@
  */
 package io.chubao.joyqueue.store;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import io.chubao.joyqueue.domain.QosLevel;
 import io.chubao.joyqueue.exception.JoyQueueCode;
+import io.chubao.joyqueue.store.file.Checkpoint;
 import io.chubao.joyqueue.store.file.DiskFullException;
 import io.chubao.joyqueue.store.file.PositioningStore;
 import io.chubao.joyqueue.store.file.RollBackException;
@@ -39,8 +42,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -96,6 +102,9 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
     private AtomicLong lastCheckDiskSpaceTimestamp = new AtomicLong(0L);
     private volatile boolean isDiskFull = false;
     private static final long CHECK_DISK_SPACE_COOL_DOWN = 1000L;
+    private static final long FLUSH_CHECKPOINT_INTERVAL_MS = 60 * 1000L;
+    private long lastFlushCheckpointTimestamp = 0L;
+    static final String CHECKPOINT_FILE= "checkpoint.json";
 
     public PartitionGroupStoreManager(String topic, int partitionGroup, File base, Config config,
                                       PreloadBufferPool bufferPool) {
@@ -130,12 +139,6 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                 .sleepTime(config.flushIntervalMs, config.flushIntervalMs)
                 .onException(e -> logger.warn("Flush Exception: ", e))
                 .build();
-//        this.callbackThread = LoopThread.builder()
-//                .name(String.format("CallbackThread-%s-%d", topic, partitionGroup))
-//                .doWork(this::fireCallbacks)
-//                .sleepTime(config.flushIntervalMs, config.flushIntervalMs)
-//                .onException(e -> logger.warn("Callback Exception: ", e))
-//                .build();
         this.metricThread = initMetrics(config);
     }
 
@@ -172,6 +175,8 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
             store.recover();
             logger.info("Recovering index store...");
             indexPosition = recoverPartitions();
+            logger.info("Recovering the checkpoint ...");
+            indexPosition = recoverCheckpoint();
             logger.info("Building indices ...");
             recoverIndices();
         } catch (IOException e) {
@@ -264,6 +269,45 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
             maxTerm = getEntryTerm(store.toLogStart(store.right()));
         }
         return maxTerm;
+    }
+//    恢复PartitionGroup时，PartitionGroupStoreManager#recoverIndices方法中，增加如下逻辑：
+//
+//    读取checkpoint文件，检查每个分区的下一条索引序号是否大于等于checkpoint中记录的索引序号；
+//    如果是，使用checkpoint中记录的indexPosition继续恢复索引；
+//    否则，使用目前的逻辑计算出的indexPosition继续恢复索引。
+    private long recoverCheckpoint() {
+        try {
+            File checkpointFile =  new File(base, CHECKPOINT_FILE);
+            if(checkpointFile.isFile()) {
+                byte[] serializedData = new byte[(int) checkpointFile.length()];
+                try (FileInputStream fis = new FileInputStream(checkpointFile)) {
+                    if (serializedData.length != fis.read(serializedData)) {
+                        throw new IOException("File length not match!");
+                    }
+                }
+                String jsonString = new String(serializedData, StandardCharsets.UTF_8);
+                Checkpoint checkpoint = JSON.parseObject(jsonString, Checkpoint.class);
+
+                if (checkpoint.getIndexPosition() > indexPosition &&
+                        checkpoint.getPartitions().entrySet().stream()
+                                .allMatch(entry -> {
+                                    short partition = entry.getKey();
+                                    long index = entry.getValue();
+                                    Partition p = partitionMap.get(partition);
+                                    return null != p && p.store.right() >= index * IndexItem.STORAGE_SIZE;
+
+
+                                })) {
+                    logger.info("Using indexPosition: {} from the checkpoint file.", checkpoint.getIndexPosition());
+                    return checkpoint.getIndexPosition();
+                }
+            } else {
+                logger.info("Checkpoint file is NOT found, continue recover...");
+            }
+        } catch (Throwable t) {
+            logger.warn("Recover checkpoint exception, continue recover...", t);
+        }
+        return indexPosition;
     }
 
     private long recoverPartitions() throws IOException {
@@ -605,6 +649,8 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
             if (null != writeCommand && writeCommand.eventListener != null)
                 writeCommand.eventListener.onEvent(new WriteResult(JoyQueueCode.SE_DISK_FULL, null));
             logger.warn("Write failed, cause: disk full! Store: {}.", base.getAbsolutePath());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         } catch (IllegalStateException e) {
             if (null != writeCommand && writeCommand.eventListener != null)
                 writeCommand.eventListener.onEvent(new WriteResult(JoyQueueCode.CY_STATUS_ERROR, null));
@@ -661,8 +707,9 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                     callbackMap.get(QosLevel.PERSISTENCE).callbackBefore(flushPosition());
                 }
 //                this.callbackThread.wakeup();
-
+                flushCheckpointPeriodically();
             } while (flushed);
+
         } catch (IOException e) {
             logger.warn("Exception:", e);
         }
@@ -763,6 +810,59 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         return partitionMap.values().stream().map(p -> p.store).collect(Collectors.toSet());
     }
 
+    long deleteMinStoreMessages(long targetDeleteTimeline, Map<Short, Long> partitionAckMap, boolean doNotDeleteConsumed) throws IOException {
+        long deletedSize = 0L;
+
+        // 计算最小索引的消息位置
+        long minMessagePosition = -1L;
+        for (Map.Entry<Short, Long> partition : partitionAckMap.entrySet()) {
+            Short p = partition.getKey();
+            long minPartitionIndex = partition.getValue();
+            PositioningStore<IndexItem> indexStore = indexStore(p);
+            if (indexStore != null) {
+                if (minPartitionIndex != Long.MAX_VALUE && doNotDeleteConsumed) {
+                    minPartitionIndex *= IndexItem.STORAGE_SIZE;
+                } else {
+                    minPartitionIndex = Long.MAX_VALUE;
+                }
+                if (targetDeleteTimeline <= 0) {
+                    // 依次删除每个分区p索引中最左侧的文件 满足当前分区p的最小消费位置之前的文件块
+                    if (indexStore.fileCount() > 1 && indexStore.meetMinStoreFile(minPartitionIndex) > 1) {
+                        deletedSize += indexStore.physicalDeleteLeftFile();
+                        if (logger.isDebugEnabled()){
+                            logger.info("Delete PositioningStore physical index file by size, partition: <{}>, offset position: <{}>", p, minPartitionIndex);
+                        }
+                    }
+                } else {
+                    // 依次删除每个分区p索引中最左侧的文件 满足当前分区p的最小消费位置之前的以及最长时间戳的文件块
+                    if (indexStore.fileCount() > 1 && indexStore.meetMinStoreFile(minPartitionIndex) > 1 && indexStore.isEarly(targetDeleteTimeline, minPartitionIndex)) {
+                        deletedSize += indexStore.physicalDeleteLeftFile();
+                        if (logger.isDebugEnabled()){
+                            logger.info("Delete PositioningStore physical index file by time, partition: <{}>, offset position: <{}>", p, minPartitionIndex);
+                        }
+                    }
+                }
+
+                try {
+                    long storeMinMessagePosition = indexStore.read(indexStore.left()).getOffset();
+                    if (minMessagePosition < 0 || minMessagePosition > storeMinMessagePosition) {
+                        minMessagePosition = storeMinMessagePosition;
+                    }
+                } catch (PositionOverflowException ignored) {
+                }
+            }
+        }
+
+        if (minMessagePosition >= 0) {
+            deletedSize += store.physicalDeleteTo(minMessagePosition);
+            if (logger.isDebugEnabled()) {
+                logger.info("Delete PositioningStore physical message file, offset position: <{}>", minMessagePosition);
+            }
+        }
+
+        return deletedSize;
+    }
+
     /**
      * 重新分区
      */
@@ -827,6 +927,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                 }
                 System.out.println("Stopping flush thread...");
                 stopFlushThread();
+                flushCheckpoint();
                 System.out.println("Stopping callback thread...");
 
 //                stopCallbackThread();
@@ -948,6 +1049,30 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         }
 
         store.setRight(position);
+
+        if(indexPosition < position) {
+            indexPosition = position;
+            flushCheckpoint();
+        }
+
+    }
+
+    private void flushCheckpointPeriodically() throws IOException {
+        if(SystemClock.now() > lastFlushCheckpointTimestamp + FLUSH_CHECKPOINT_INTERVAL_MS) {
+            flushCheckpoint();
+            lastFlushCheckpointTimestamp = SystemClock.now();
+        }
+    }
+    private void flushCheckpoint() throws IOException {
+        Checkpoint checkpoint = new Checkpoint(indexPosition, partitionMap.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().store.right() / IndexItem.STORAGE_SIZE)));
+        byte [] serializedData = JSON.toJSONString(checkpoint,
+                SerializerFeature.PrettyFormat, SerializerFeature.DisableCircularReferenceDetect).getBytes(StandardCharsets.UTF_8);
+
+        File checkpointFile =  new File(base, CHECKPOINT_FILE);
+        try(FileOutputStream fos = new FileOutputStream(checkpointFile)) {
+            fos.write(serializedData);
+        }
     }
 
 

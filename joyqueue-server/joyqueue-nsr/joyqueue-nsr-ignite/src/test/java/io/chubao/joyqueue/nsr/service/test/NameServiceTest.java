@@ -45,7 +45,7 @@ public class NameServiceTest {
         System.out.println("before....................");
         Map properties = new HashMap();
 
-        int nameServerPort = 50002;
+        int nameServerPort = 50092;
         Files.deleteDirectory(dataRoot);
         Files.createDirectory(dataRoot);
         properties.put("application.data.path", dataRoot);

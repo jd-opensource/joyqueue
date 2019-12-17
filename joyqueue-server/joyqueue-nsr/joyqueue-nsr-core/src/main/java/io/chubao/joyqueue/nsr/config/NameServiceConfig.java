@@ -111,6 +111,10 @@ public class NameServiceConfig {
         return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_COMPENSATION_ERROR_CACHE_ENABLE);
     }
 
+    public int getCompensationErrorThreshold() {
+        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_COMPENSATION_ERROR_THRESHOLD);
+    }
+
     public int getCompensationErrorRetryInterval() {
         return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_COMPENSATION_ERROR_RETRY_INTERVAL);
     }

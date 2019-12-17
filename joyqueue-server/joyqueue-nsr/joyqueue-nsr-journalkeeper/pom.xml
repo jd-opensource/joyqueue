@@ -29,7 +29,7 @@
     <artifactId>joyqueue-nsr-journalkeeper</artifactId>
 
     <properties>
-        <journalkeeper.version>0.1.3</journalkeeper.version>
+        <journalkeeper.version>0.1.4-SNAPSHOT</journalkeeper.version>
     </properties>
 
     <dependencies>

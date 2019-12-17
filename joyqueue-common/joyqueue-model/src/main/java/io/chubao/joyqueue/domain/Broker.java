@@ -156,7 +156,7 @@ public class Broker implements Serializable {
      * @return
      */
     @Transient
-    public int getMessengerConfig() {
+    public int getMessengerPort() {
         return PortHelper.getMessengerPort(port);
     }
 
