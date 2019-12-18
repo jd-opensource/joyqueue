@@ -111,7 +111,7 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
 
         List<TopicPartitionGroup> groups = null;
         try {
-            groups = partitionGroupServerService.findByQuery(new QTopicPartitionGroup(new Topic(model.getTopic().getCode())));
+             groups = partitionGroupServerService.findByQuery(new QTopicPartitionGroup(new Topic(model.getTopic().getCode())));
         } catch (Exception e) {
             logger.error("partitionGroupServerService.findByQuery",e);
             throw new ServiceException(IGNITE_RPC_ERROR,e.getMessage());

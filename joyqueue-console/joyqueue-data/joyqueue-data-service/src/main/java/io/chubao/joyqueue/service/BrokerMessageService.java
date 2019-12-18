@@ -38,7 +38,7 @@ public interface BrokerMessageService {
      *  @param count 获取的消息条数
      *
      * */
-    List<SimplifiedBrokeMessage> previewPendingMessage(Subscribe subscribe,int count);
+    List<SimplifiedBrokeMessage> previewMessage(Subscribe subscribe, int count);
 
     /**
      * 预览最新的消息

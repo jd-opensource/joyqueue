@@ -184,6 +184,7 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
         snapshotReplicaLag();
         // runtime memory usage state
         runtimeMemoryUsageState(statExt);
+        runtimeStorageOccupy(brokerStat);
         return statExt;
     }
 
@@ -256,4 +257,13 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
         }
     }
 
+   /**
+    *  store storage size
+    **/
+   public void runtimeStorageOccupy(BrokerStat stat){
+       double totalSpace=storeManagementService.totalSpace();
+       double freeSpace=storeManagementService.freeSpace();
+       int percentage=(int)((1-freeSpace/totalSpace)*100);
+       stat.setStoragePercent(percentage);
+   }
 }

@@ -21,11 +21,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.methods.*;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -123,6 +119,18 @@ public class HttpUtil {
         put.setEntity(new StringEntity(content));
         return processResponse(executeRequest(put), put);
     }
+
+    /**
+     * @param url request monitorUrl
+     * @throws Exception when request network failed or response http status is not ok
+     * @return string
+     **/
+    public static String delete(String url) throws Exception {
+        HttpDelete delete = new HttpDelete(url);
+        return processResponse(executeRequest(delete), delete);
+    }
+
+
 
 
     /**
