@@ -36,8 +36,11 @@ import java.util.Map;
 public class BrokerRestUrlMappingServiceImpl implements BrokerRestUrlMappingService {
     private Logger logger= LoggerFactory.getLogger(BrokerRestUrlMappingServiceImpl.class);
 
-    /** message preview path  */
+    /** message preview pending path  */
     private static final String pendingByteMessagePath="/manage/topic/%s/app/%s/message/pending?count=%s";
+    /** message preview path  */
+    private static final String previewMessagePath="/manage/topic/%s/app/%s/message/view?count=%s";
+
     private String lastestMessagePath="/manage/topic/%s/app/%s/message/last";
     private String partitoinMessagePath="/manage/topic/%s/app/%s/partition/%d/message";
 
@@ -88,6 +91,9 @@ public class BrokerRestUrlMappingServiceImpl implements BrokerRestUrlMappingServ
     /** store **/
     private String topicListPath = "/manage/topic/list";
     private String sortedTopicListPath = "/manage/sorted/topic/list";
+    private String storeTreeViewPath = "/manage/store/tree/view/%s"; // recursive
+    private String deleteGarbageFilePath = "/manage/store/delete/garbage/file/%s/%s"; // filename|retain
+
     /** broker **/
     private String brokerMonitorPath = "/monitor/broker";
     private String startupInfoPath = "/startInfo";

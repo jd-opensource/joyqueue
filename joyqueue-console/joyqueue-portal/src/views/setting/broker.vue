@@ -120,6 +120,10 @@ export default {
             method: 'on-edit'
           },
           {
+            txt: '删除',
+            method: 'on-del'
+          },
+          {
             txt: '归档监控',
             method: 'on-archiveMonitor'
           },

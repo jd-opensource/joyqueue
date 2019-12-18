@@ -63,14 +63,14 @@ public class BrokerMessageServiceImpl implements BrokerMessageService {
     private HttpRestService httpRestService;
 
     @Override
-    public List<SimplifiedBrokeMessage> previewPendingMessage(Subscribe subscribe, int count) {
+    public List<SimplifiedBrokeMessage> previewMessage(Subscribe subscribe, int count) {
         List<SimplifiedBrokeMessage> simplifiedBrokeMessages=new ArrayList<>();
         List<Broker> brokers=new ArrayList<>();
         Future<Map<String,String >> resultFuture= brokerClusterQuery.asyncQueryOnBroker(subscribe, new RetrieveProvider<Subscribe>() {
             @Override
             public String getKey(Broker broker, PartitionGroup partitionGroup,short partition ,Subscribe condition) {
                 brokers.add(broker);
-                return broker.getIp()+":"+broker.getPort();
+                return broker.getIp()+":"+broker.getMonitorPort();
             }
             @Override
             public String getPath(String pathTemplate,PartitionGroup partitionGroup,short partition,Subscribe condition) {
@@ -78,7 +78,7 @@ public class BrokerMessageServiceImpl implements BrokerMessageService {
                         subscribe.getType()== SubscribeType.PRODUCER?subscribe.getApp().getCode():CodeConverter.convertApp(subscribe.getApp(),
                                 subscribe.getSubscribeGroup()),String.valueOf(count)));
             }
-        },"pendingByteMessage" ," pending message");
+        },"previewMessage" ," preview pending or last message");
         Map<String/*request key*/, String/*response*/> resultMap= brokerClusterQuery.get(resultFuture,TIMEOUT,TimeUnit.MILLISECONDS);
         SimplifiedBrokeMessage message;
         RestResponse<List<BrokerMessageInfo>> brokerMessageResponse;

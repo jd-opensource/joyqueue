@@ -26,6 +26,7 @@ import io.chubao.joyqueue.exception.JoyQueueException;
 import io.chubao.joyqueue.manage.*;
 import io.chubao.joyqueue.monitor.BrokerMessageInfo;
 import io.chubao.joyqueue.monitor.PartitionAckMonitorInfo;
+import io.chubao.joyqueue.toolkit.io.Directory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -247,5 +248,15 @@ public class DefaultBrokerManageService implements BrokerManageService {
     @Override
     public List<SortedTopic> sortedTopics() {
         return storeManageService.sortedTopics();
+    }
+
+    @Override
+    public Directory storeTreeView(boolean recursive) {
+        return storeManageService.storeTreeView(recursive);
+    }
+
+    @Override
+    public boolean deleteGarbageFile(String fileName,boolean retain) {
+        return storeManageService.deleteGarbageFile(fileName,retain);
     }
 }

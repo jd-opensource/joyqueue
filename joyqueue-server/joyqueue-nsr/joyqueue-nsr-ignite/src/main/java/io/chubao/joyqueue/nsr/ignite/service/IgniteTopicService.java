@@ -326,6 +326,7 @@ public class IgniteTopicService implements TopicService {
                 group.setLeader(group.getReplicas().iterator().next());
             }
             Topic topic = getById(group.getTopic().getFullName());
+            //topic.get
             topic.setPartitions((short) (topic.getPartitions()+group.getPartitions().size()));
             addOrUpdate(topic);
             partitionGroupService.addOrUpdate(new IgnitePartitionGroup(group));
