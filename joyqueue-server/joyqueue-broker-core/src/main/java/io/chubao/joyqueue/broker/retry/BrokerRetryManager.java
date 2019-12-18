@@ -25,13 +25,13 @@ import io.chubao.joyqueue.broker.network.support.BrokerTransportClientFactory;
 import io.chubao.joyqueue.domain.Broker;
 import io.chubao.joyqueue.domain.Consumer;
 import io.chubao.joyqueue.domain.TopicName;
-import io.chubao.joyqueue.event.BrokerEvent;
 import io.chubao.joyqueue.event.EventType;
 import io.chubao.joyqueue.event.MetaEvent;
 import io.chubao.joyqueue.exception.JoyQueueException;
 import io.chubao.joyqueue.network.transport.TransportClient;
 import io.chubao.joyqueue.network.transport.config.ClientConfig;
 import io.chubao.joyqueue.nsr.NameService;
+import io.chubao.joyqueue.nsr.event.UpdateBrokerEvent;
 import io.chubao.joyqueue.server.retry.NullMessageRetry;
 import io.chubao.joyqueue.server.retry.api.MessageRetry;
 import io.chubao.joyqueue.server.retry.api.RetryPolicyProvider;
@@ -257,7 +257,8 @@ public class BrokerRetryManager extends Service implements MessageRetry<Long>, B
             try {
                 if (event.getEventType() == EventType.UPDATE_BROKER) {
                     logger.info("listen update broker event.");
-                    Broker broker = ((BrokerEvent) event).getBroker();
+                    UpdateBrokerEvent updateBrokerEvent = (UpdateBrokerEvent) event;
+                    Broker broker = updateBrokerEvent.getNewBroker();
                     String type = broker != null ? broker.getRetryType() : null;
                     if (type != null && !type.equals(retryType)) {
                         MessageRetry messageRetry = loadRetryManager(type);

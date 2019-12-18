@@ -26,6 +26,7 @@ import io.chubao.joyqueue.domain.Subscription;
 import io.chubao.joyqueue.domain.Topic;
 import io.chubao.joyqueue.domain.TopicConfig;
 import io.chubao.joyqueue.domain.TopicName;
+import io.chubao.joyqueue.domain.TopicType;
 import io.chubao.joyqueue.message.BrokerMessage;
 import io.chubao.joyqueue.message.BrokerPrepare;
 import io.chubao.joyqueue.message.BrokerRollback;
@@ -47,6 +48,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import static io.chubao.joyqueue.network.transport.codec.JoyQueueHeader.VERSION_V2;
+import static io.chubao.joyqueue.network.transport.codec.JoyQueueHeader.VERSION_V3;
 
 /**
  * 负责broker端消息的序列化
@@ -697,6 +699,9 @@ public class Serializer extends AbstractSerializer {
         write(consumer.getTopic().getFullName(),out);
         out.writeByte(consumer.getType().getValue());
         out.writeByte(consumer.getClientType().value());
+        if (version >= VERSION_V3) {
+            out.writeByte(consumer.getTopicType().code());
+        }
         Consumer.ConsumerPolicy consumerPolicy = consumer.getConsumerPolicy();
         RetryPolicy retryPolicy = consumer.getRetryPolicy();
         boolean hasConsumerPolicy = (null != consumerPolicy);
@@ -754,6 +759,9 @@ public class Serializer extends AbstractSerializer {
         consumer.setTopic(TopicName.parse(readString(in)));
         consumer.setType(Subscription.Type.valueOf(in.readByte()));
         consumer.setClientType(ClientType.valueOf(in.readByte()));
+        if (version >= VERSION_V3) {
+            consumer.setTopicType(TopicType.valueOf(in.readByte()));
+        }
         boolean hasConsumerPolicy = in.readBoolean();
         if(hasConsumerPolicy){
             Consumer.ConsumerPolicy.Builder consumerPolicy = Consumer.ConsumerPolicy.Builder.build();

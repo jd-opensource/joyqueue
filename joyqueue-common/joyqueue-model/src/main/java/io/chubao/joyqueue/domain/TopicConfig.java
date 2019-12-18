@@ -16,6 +16,7 @@
 package io.chubao.joyqueue.domain;
 
 import com.google.common.collect.Maps;
+import org.apache.commons.collections.MapUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -59,8 +60,30 @@ public class TopicConfig extends Topic implements Serializable {
         return config;
     }
 
+    public static TopicConfig toTopicConfig(Topic topic, List<PartitionGroup> partitionGroups) {
+        if (topic == null) {
+            return null;
+        }
+        TopicConfig config = toTopicConfig(topic);
+        Map<Integer, PartitionGroup> partitionGroupMap = Maps.newHashMap();
+        for (PartitionGroup partitionGroup : partitionGroups) {
+            partitionGroupMap.put(partitionGroup.getGroup(), partitionGroup);
+        }
+        config.setPartitionGroups(partitionGroupMap);
+        return config;
+    }
+
     public Map<Integer,PartitionGroup> getPartitionGroups() {
         return partitionGroups;
+    }
+
+    public boolean isReplica(int brokerId) {
+        for (Map.Entry<Integer, PartitionGroup> entry : partitionGroups.entrySet()) {
+            if (entry.getValue().getReplicas().contains(brokerId)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public List<PartitionGroup> fetchPartitionGroupByBrokerId(int brokerId) {
@@ -90,6 +113,9 @@ public class TopicConfig extends Topic implements Serializable {
 
     private Map<Short, PartitionGroup> buildPartitionGroupMap(Map<Integer,PartitionGroup> partitionGroups) {
         Map<Short, PartitionGroup> result = Maps.newHashMap();
+        if (MapUtils.isEmpty(partitionGroups)) {
+            return result;
+        }
         for (PartitionGroup partitionGroup : partitionGroups.values()) {
             for (Short partition : partitionGroup.getPartitions()) {
                 result.put(partition, partitionGroup);
@@ -118,19 +144,23 @@ public class TopicConfig extends Topic implements Serializable {
         List<Partition> metadataList = new ArrayList<>();
             for (PartitionGroup group : partitionGroups.values()) {
                 for (Short partition : group.getPartitions()) {
-                    Set<Broker> irs = new HashSet<>(null == group.getIsrs() ? 0 : group.getIsrs().size());
+                    Set<Broker> isrs = new HashSet<>(null == group.getIsrs() ? 0 : group.getIsrs().size());
                     Set<Broker> replicas = new HashSet<>(null == group.getReplicas() ? 0 : group.getReplicas().size());
                     if (null != group.getIsrs()){
                         for (Integer brokerId : group.getIsrs()) {
-                            irs.add(group.getBrokers().get(brokerId));
+                            if (group.getBrokers().get(brokerId) != null) {
+                                isrs.add(group.getBrokers().get(brokerId));
+                            }
                         }
                     }
                     if (null != group.getReplicas()){
                         for (Integer brokerId : group.getReplicas()) {
-                            replicas.add(group.getBrokers().get(brokerId));
+                            if (group.getBrokers().get(brokerId) != null) {
+                                replicas.add(group.getBrokers().get(brokerId));
+                            }
                         }
                     }
-                    metadataList.add(new Partition(partition, group.getBrokers().get(group.getLeader()), irs, replicas));
+                    metadataList.add(new Partition(partition, group.getBrokers().get(group.getLeader()), replicas, isrs));
                 }
             }
         return metadataList;
@@ -165,11 +195,11 @@ public class TopicConfig extends Topic implements Serializable {
     //TODO 性能差，需要排查下并发问题
     public List<Short> fetchPartitionByBroker(int brokerId) {
         List<Short> partitions = new ArrayList<>();
-            for (PartitionGroup group : partitionGroups.values()) {
-                if (group.getLeader().equals(brokerId)){
-                    partitions.addAll(group.getPartitions());
-                }
+        for (PartitionGroup group : partitionGroups.values()) {
+            if (group.getLeader().equals(brokerId)){
+                partitions.addAll(group.getPartitions());
             }
+        }
         return partitions;
     }
 

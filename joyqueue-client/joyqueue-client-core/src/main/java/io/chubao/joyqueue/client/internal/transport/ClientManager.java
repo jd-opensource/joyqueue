@@ -23,7 +23,6 @@ import io.chubao.joyqueue.client.internal.transport.config.TransportConfigChecke
 import io.chubao.joyqueue.exception.JoyQueueCode;
 import io.chubao.joyqueue.network.domain.BrokerNode;
 import io.chubao.joyqueue.network.transport.TransportClient;
-import io.chubao.joyqueue.network.transport.codec.support.JoyQueueCodec;
 import io.chubao.joyqueue.network.transport.config.ClientConfig;
 import io.chubao.joyqueue.network.transport.support.DefaultTransportClientFactory;
 import io.chubao.joyqueue.toolkit.concurrent.NamedThreadFactory;
@@ -42,7 +41,6 @@ import java.util.concurrent.TimeUnit;
  * author: gaohaoxiang
  * date: 2018/11/28
  */
-// TODO 引用处理
 public class ClientManager extends Service {
 
     protected static final Logger logger = LoggerFactory.getLogger(ClientManager.class);
@@ -63,8 +61,9 @@ public class ClientManager extends Service {
 
     @Override
     protected void validate() throws Exception {
+        transportConfig = transportConfig.copy();
         clientGroupManager = new ClientGroupManager(transportConfig);
-        transportClient = new DefaultTransportClientFactory(new JoyQueueCodec()).create(convertToClientConfig(transportConfig));
+        transportClient = new DefaultTransportClientFactory().create(convertToClientConfig(transportConfig));
         heartbeatThreadScheduler = Executors.newScheduledThreadPool(1, new NamedThreadFactory("joyqueue-client-heartbeat"));
     }
 
@@ -98,7 +97,6 @@ public class ClientManager extends Service {
         try {
             Client client = new Client(node, transportConfig, transportClient, nameServerConfig);
             client.start();
-            client.handleAddConnection();
             return client;
         } catch (Exception e) {
             throw new ClientException(e);
@@ -107,9 +105,7 @@ public class ClientManager extends Service {
 
     public Client getOrCreateClient(BrokerNode node) {
         checkState();
-        Client client = doGetOrCreateClientGroup(node).getClient();
-        client.handleAddConnection();
-        return client;
+        return doGetOrCreateClientGroup(node).getClient();
     }
 
     public Client doGetOrCreateClient(BrokerNode node) {
@@ -149,7 +145,6 @@ public class ClientManager extends Service {
             return null;
         }
         Client client = clientGroup.getClient();
-        client.handleAddConnection();
         return client;
     }
 
@@ -158,9 +153,6 @@ public class ClientManager extends Service {
         ClientGroup clientGroup = clientGroupManager.getClientGroup(node);
         if (clientGroup == null) {
             return;
-        }
-        for (Client client : clientGroup.getClients()) {
-            client.handleDisconnection();
         }
         clientGroupManager.closeClientGroup(clientGroup);
     }

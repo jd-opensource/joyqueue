@@ -15,12 +15,9 @@
  */
 package io.chubao.joyqueue.service.impl;
 
-import io.chubao.joyqueue.model.PageResult;
-import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.model.domain.Namespace;
-import io.chubao.joyqueue.model.query.QNamespace;
-import io.chubao.joyqueue.service.NamespaceService;
 import io.chubao.joyqueue.nsr.NameSpaceServerService;
+import io.chubao.joyqueue.service.NamespaceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +38,7 @@ public class NamespaceServiceImpl implements NamespaceService {
 
 
     @Override
-    public Namespace findByCode(String code) {
+    public Namespace findByCode(String code) throws Exception {
         return nameSpaceServerService.findByCode(code);
     }
 
@@ -51,13 +48,8 @@ public class NamespaceServiceImpl implements NamespaceService {
     }
 
     @Override
-    public PageResult<Namespace> findByQuery(QPageQuery<QNamespace> query) {
-        try {
-            return nameSpaceServerService.findByQuery(query);
-        } catch (Exception e) {
-            logger.error("findByQuery exception",e);
-            throw new RuntimeException(e);
-        }
+    public List<Namespace> findAll() throws Exception {
+        return nameSpaceServerService.findAll();
     }
 
     @Override
@@ -85,11 +77,6 @@ public class NamespaceServiceImpl implements NamespaceService {
         } catch (Exception e) {
             throw new RuntimeException("update",e);
         }
-    }
-
-    @Override
-    public List<Namespace> findByQuery(QNamespace query) throws Exception {
-        return nameSpaceServerService.findByQuery(query);
     }
 
 }

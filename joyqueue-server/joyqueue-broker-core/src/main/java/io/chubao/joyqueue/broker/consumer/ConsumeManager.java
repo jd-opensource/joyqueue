@@ -16,6 +16,7 @@
 package io.chubao.joyqueue.broker.consumer;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import io.chubao.joyqueue.broker.BrokerContext;
 import io.chubao.joyqueue.broker.BrokerContextAware;
 import io.chubao.joyqueue.broker.archive.ArchiveManager;
@@ -30,8 +31,9 @@ import io.chubao.joyqueue.broker.monitor.BrokerMonitor;
 import io.chubao.joyqueue.broker.monitor.SessionManager;
 import io.chubao.joyqueue.domain.Consumer.ConsumerPolicy;
 import io.chubao.joyqueue.domain.PartitionGroup;
+import io.chubao.joyqueue.domain.TopicConfig;
 import io.chubao.joyqueue.domain.TopicName;
-import io.chubao.joyqueue.event.ConsumerEvent;
+import io.chubao.joyqueue.domain.TopicType;
 import io.chubao.joyqueue.event.EventType;
 import io.chubao.joyqueue.event.MetaEvent;
 import io.chubao.joyqueue.exception.JoyQueueCode;
@@ -41,6 +43,8 @@ import io.chubao.joyqueue.message.MessageLocation;
 import io.chubao.joyqueue.network.session.Connection;
 import io.chubao.joyqueue.network.session.Consumer;
 import io.chubao.joyqueue.network.session.Joint;
+import io.chubao.joyqueue.nsr.event.RemoveConsumerEvent;
+import io.chubao.joyqueue.nsr.event.UpdateConsumerEvent;
 import io.chubao.joyqueue.server.retry.api.MessageRetry;
 import io.chubao.joyqueue.store.PartitionGroupStore;
 import io.chubao.joyqueue.store.StoreService;
@@ -49,14 +53,20 @@ import io.chubao.joyqueue.toolkit.lang.Close;
 import io.chubao.joyqueue.toolkit.service.Service;
 import io.chubao.joyqueue.toolkit.time.SystemClock;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -100,6 +110,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
     private ConsumeConfig consumeConfig;
     // 会话管理
     private SessionManager sessionManager;
+    private Timer resetBroadcastIndexTimer;
 
     public ConsumeManager() {
         //do nothing
@@ -161,6 +172,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
         this.brokerContext.positionManager(positionManager);
         this.partitionConsumption = new PartitionConsumption(clusterManager, storeService, partitionManager, positionManager, messageRetry, filterMessageSupport, archiveManager);
         this.concurrentConsumption = new ConcurrentConsumption(clusterManager, storeService, partitionManager, messageRetry, positionManager, filterMessageSupport, archiveManager, sessionManager);
+        this.resetBroadcastIndexTimer = new Timer("joyqueuue-consume-reset-broadcast-index-timer");
     }
 
     @Override
@@ -171,6 +183,12 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
         positionManager.start();
         clusterManager.addListener(new SubscriptionListener());
         registerEventListener(clusterManager);
+        resetBroadcastIndexTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                doResetBroadcastIndex();
+            }
+        }, consumeConfig.getBroadcastIndexResetInterval(), consumeConfig.getBroadcastIndexResetInterval());
         logger.info("ConsumeManager is started.");
     }
 
@@ -181,6 +199,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
         Close.close(messageRetry);
         Close.close(partitionConsumption);
         Close.close(concurrentConsumption);
+        resetBroadcastIndexTimer.cancel();
         logger.info("ConsumeManager is stopped.");
     }
 
@@ -340,6 +359,24 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
         }
     }
 
+    @Override
+    public PullResult getMessage(String topic, short partition, long index, int count) throws JoyQueueException {
+        Preconditions.checkArgument(StringUtils.isNotBlank(topic), "主题不能为空");
+        Preconditions.checkArgument(partition >= 0, "分区不能小于0");
+        Preconditions.checkArgument(index >= 0, "消费序号不能小于0");
+        Preconditions.checkArgument(count > 0, "消费条数不能小于或等于0");
+
+        Integer group = partitionManager.getGroupByPartition(TopicName.parse(topic), partition);
+        Preconditions.checkArgument(group != null && group >= 0, "找不到主题[" + topic + "]" + ",分区[" + partition + "]的分区组");
+
+        try {
+            return partitionConsumption.getMsgByPartitionAndIndex(topic, group, partition, index, count);
+        } catch (Exception e) {
+            logger.warn(e.getMessage(), e);
+            throw new JoyQueueException(JoyQueueCode.SE_IO_ERROR, e);
+        }
+    }
+
     /**
      * 监控逻辑
      *
@@ -354,7 +391,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
             int messageCount = 0;
             int messageSize = 0;
             for (ByteBuffer buffer : pullResult.getBuffers()) {
-                messageSize += (buffer.limit() - buffer.position());
+                messageSize += buffer.limit();
                 BrokerMessage brokerMessage = Serializer.readBrokerMessageHeader(buffer);
                 if (brokerMessage.isBatch()) {
                     messageCount += brokerMessage.getFlag();
@@ -583,15 +620,15 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
     /**
      * 更新消费配置事件
      */
-    class UpdateConsumeListener implements EventListener {
+    class UpdateConsumeListener implements EventListener<MetaEvent> {
 
         @Override
-        public void onEvent(Object event) {
-            if (((MetaEvent) event).getEventType() == EventType.UPDATE_CONSUMER) {
-                ConsumerEvent updateConsumerEvent = (ConsumerEvent) event;
+        public void onEvent(MetaEvent event) {
+            if (event.getEventType() == EventType.UPDATE_CONSUMER) {
+                UpdateConsumerEvent updateConsumerEvent = (UpdateConsumerEvent) event;
                 logger.info("listen update consume event.");
                 try {
-                    ConsumerPolicy consumerPolicy = clusterManager.getConsumerPolicy(updateConsumerEvent.getTopic(), updateConsumerEvent.getApp());
+                    ConsumerPolicy consumerPolicy = clusterManager.getConsumerPolicy(updateConsumerEvent.getTopic(), updateConsumerEvent.getNewConsumer().getApp());
                     Integer readRetryProbability = consumerPolicy.getReadRetryProbability();
                     partitionManager.resetRetryProbability(readRetryProbability);
                 } catch (JoyQueueException e) {
@@ -606,6 +643,70 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
         partitionManager.releasePartition(new ConsumePartition(topic, app, partition));
     }
 
+    protected void doResetBroadcastIndex() {
+        if (!consumeConfig.getBroadcastIndexResetEnable()) {
+            return;
+        }
+
+        Map<TopicName, TopicConfig> localTopics = clusterManager.getNameService().getTopicConfigByBroker(clusterManager.getBrokerId());
+        if (MapUtils.isEmpty(localTopics)) {
+            return;
+        }
+
+        for (Map.Entry<TopicName, TopicConfig> topicEntry : localTopics.entrySet()) {
+            TopicConfig topicConfig = topicEntry.getValue();
+            List<io.chubao.joyqueue.domain.Consumer> broadcastConsumers = Lists.newArrayList(clusterManager.getLocalConsumersByTopic(topicConfig.getName()));
+            Iterator<io.chubao.joyqueue.domain.Consumer> iterator = broadcastConsumers.iterator();
+            while (iterator.hasNext()) {
+                io.chubao.joyqueue.domain.Consumer consumer = iterator.next();
+                if (!consumer.getTopicType().equals(TopicType.BROADCAST)) {
+                    iterator.remove();
+                }
+            }
+
+            if (CollectionUtils.isEmpty(broadcastConsumers)) {
+                continue;
+            }
+
+            for (Map.Entry<Integer, PartitionGroup> partitionGroupEntry : topicConfig.getPartitionGroups().entrySet()) {
+                PartitionGroup partitionGroup = partitionGroupEntry.getValue();
+                if (!Objects.equals(partitionGroup.getLeader(), clusterManager.getBrokerId())) {
+                    continue;
+                }
+                doResetBroadcastIndex(topicConfig, partitionGroup, broadcastConsumers);
+            }
+        }
+    }
+
+    protected void doResetBroadcastIndex(TopicConfig topic, PartitionGroup partitionGroup, List<io.chubao.joyqueue.domain.Consumer> consumers) {
+        PartitionGroupStore store = storeService.getStore(topic.getName().getFullName(), partitionGroup.getGroup());
+        if (store == null) {
+            logger.warn("reset broadcast index failed, store not exist, topic: {}, group: {}", topic.getName(), partitionGroup.getGroup());
+            return;
+        }
+
+        long timestamp = SystemClock.now() - consumeConfig.getBroadcastIndexResetTime();
+        for (Short partition : partitionGroup.getPartitions()) {
+            long index = store.getIndex(partition, timestamp);
+            if (index < 0) {
+                continue;
+            }
+            for (io.chubao.joyqueue.domain.Consumer consumer : consumers) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("reset broadcast index, topic: {}, group: {}, partition: {}, index: {}, app: {}",
+                            topic.getName(), partitionGroup.getGroup(), partition, index, consumer.getApp());
+                }
+
+                try {
+                    setAckIndex(new Consumer(consumer.getTopic().getFullName(), consumer.getApp()), partition, index);
+                } catch (JoyQueueException e) {
+                    logger.debug("reset broadcast index exception, topic: {}, group: {}, partition: {}, index: {}, app: {}",
+                            topic.getName(), partitionGroup.getGroup(), partition, index, consumer.getApp(), e);
+                }
+            }
+        }
+    }
+
 
     /**
      * 监听删除消费者事件，将消费计数器移除
@@ -615,9 +716,9 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
         @Override
         public void onEvent(MetaEvent event) {
             if (event.getEventType() == EventType.REMOVE_CONSUMER) {
-                ConsumerEvent removeConsumerEvent = (ConsumerEvent) event;
+                RemoveConsumerEvent removeConsumerEvent = (RemoveConsumerEvent) event;
                 logger.info("Listen clusterManger. RemoveConsumer, Event:[{}]", removeConsumerEvent);
-                consumeCounter.remove(new Joint(removeConsumerEvent.getTopic().getCode(), removeConsumerEvent.getApp()));
+                consumeCounter.remove(new Joint(removeConsumerEvent.getTopic().getCode(), removeConsumerEvent.getConsumer().getApp()));
             }
         }
     }

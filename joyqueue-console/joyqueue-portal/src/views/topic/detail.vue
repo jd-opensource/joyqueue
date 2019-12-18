@@ -8,10 +8,10 @@
             <span>队列数:</span>
             <span>{{prop.detail.partitions}}</span>
           </grid-col>
-<!--          <grid-col span="8">-->
-<!--            <span>标签:</span>-->
-<!--            <span>{{prop.detail.labels}}</span>-->
-<!--          </grid-col>-->
+          <grid-col span="8">
+            <span>标签:</span>
+            <span>{{prop.detail.labels}}</span>
+          </grid-col>
           <grid-col span="8">
             <span>备注:</span>
             <span>{{prop.detail.description}}</span>

@@ -103,6 +103,10 @@ public interface StoreManagementService {
         public void setPartitionGroupMetrics(PartitionGroupMetric[] partitionGroupMetrics) {
             this.partitionGroupMetrics = partitionGroupMetrics;
         }
+
+        public boolean isUsabled() {
+            return !topic.startsWith(".");
+        }
     }
 
     class PartitionGroupMetric {

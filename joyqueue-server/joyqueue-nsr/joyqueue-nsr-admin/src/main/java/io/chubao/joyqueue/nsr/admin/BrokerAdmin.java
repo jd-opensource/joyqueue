@@ -55,7 +55,7 @@ public class BrokerAdmin extends AbstractAdmin {
         @Parameter(names = { "--key" }, description = "broker query keyword ", required = false)
         public String key;
         @Parameter(names = { "-b", "--brokers" }, description = "brokers id list", required = false)
-        public List<Long> brokers=new ArrayList<>();
+        public List<Integer> brokers=new ArrayList<>();
     }
 
     public static void main(String[] args){

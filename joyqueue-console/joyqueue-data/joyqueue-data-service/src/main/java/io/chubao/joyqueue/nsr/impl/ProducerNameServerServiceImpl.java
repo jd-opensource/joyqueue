@@ -16,34 +16,20 @@
 package io.chubao.joyqueue.nsr.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
 import io.chubao.joyqueue.convert.CodeConverter;
 import io.chubao.joyqueue.convert.NsrProducerConverter;
 import io.chubao.joyqueue.domain.ClientType;
-import io.chubao.joyqueue.domain.TopicName;
-import io.chubao.joyqueue.exception.ServiceException;
-import io.chubao.joyqueue.model.PageResult;
-import io.chubao.joyqueue.model.QPageQuery;
-import io.chubao.joyqueue.model.domain.Identity;
-import io.chubao.joyqueue.model.domain.Namespace;
 import io.chubao.joyqueue.model.domain.OperLog;
 import io.chubao.joyqueue.model.domain.Producer;
-import io.chubao.joyqueue.model.domain.Topic;
 import io.chubao.joyqueue.model.query.QProducer;
 import io.chubao.joyqueue.nsr.NameServerBase;
 import io.chubao.joyqueue.nsr.ProducerNameServerService;
 import io.chubao.joyqueue.nsr.model.ProducerQuery;
-import io.chubao.joyqueue.toolkit.security.EscapeUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static io.chubao.joyqueue.model.domain.Namespace.DEFAULT_NAMESPACE_CODE;
-import static io.chubao.joyqueue.model.domain.Namespace.DEFAULT_NAMESPACE_ID;
 
 /**
  * Created by wangxiaofei1 on 2019/1/2.
@@ -54,10 +40,10 @@ public class ProducerNameServerServiceImpl extends NameServerBase implements Pro
     public static final String ADD_PRODUCER="/producer/add";
     public static final String UPDATE_PRODUCER="/producer/update";
     public static final String REMOVE_PRODUCER="/producer/remove";
-    public static final String PRODUCER_GETALL_BY_CLIENTTYPE="/producer/list";
-    public static final String LIST_PRODUCER="/producer/getList";
     public static final String GETBYID_PRODUCER="/producer/getById";
-    public static final String FINDBYQUERY_PRODUCER="/producer/findByQuery";
+    public static final String GETBYTOPIC_PRODUCER="/producer/getByTopic";
+    public static final String GETBYTOPICANDAPP_PRODUCER="/producer/getByTopicAndApp";
+    public static final String GETBYAPP_PRODUCER="/producer/getByApp";
 
     private NsrProducerConverter nsrProducerConverter = new NsrProducerConverter();
 
@@ -85,12 +71,6 @@ public class ProducerNameServerServiceImpl extends NameServerBase implements Pro
         return isSuccess(result1);
     }
 
-    @Override
-    public List<Producer> findByQuery(QProducer query) throws Exception {
-        ProducerQuery producerQuery = producerQueryConvert(query);
-        return getListProducer(producerQuery);
-    }
-
     /**
      * 删除producer
      * @param producer
@@ -106,48 +86,49 @@ public class ProducerNameServerServiceImpl extends NameServerBase implements Pro
         return isSuccess(result);
     }
 
-    @Override
-    public List<Producer> syncProducer(byte clientType) throws Exception {
-        JSONObject request = new JSONObject();
-        request.put("client_type",clientType);
-        List<io.chubao.joyqueue.domain.Producer>  nsrProducers = JSONArray.parseArray(post(PRODUCER_GETALL_BY_CLIENTTYPE,request), io.chubao.joyqueue.domain.Producer.class);
-        List<Producer> producerList = new ArrayList<>(nsrProducers.size());
-        nsrProducers.forEach(nsrProducer->{
-            Producer producer = new Producer();
-            TopicName nt = nsrProducer.getTopic();
-            producer.setApp(new Identity(null,nsrProducer.getApp()));
-            if(nt.getNamespace().equals(TopicName.DEFAULT_NAMESPACE)){
-                producer.setNamespace(new Namespace(DEFAULT_NAMESPACE_ID, DEFAULT_NAMESPACE_CODE));
-            }else{
-                producer.setNamespace(new Namespace(nt.getNamespace()));
-            }
-            producer.setTopic(new Topic(null,EscapeUtils.reEscapeTopic(nt.getCode())));
-            //producer.setSubscribeGroup(ag[1]);
-            producer.setClientType(nsrProducer.getClientType().value());
-            producerList.add(producer);
-        });
-        return producerList;
-    }
+//    @Override
+//    public List<Producer> syncProducer(byte clientType) throws Exception {
+//        JSONObject request = new JSONObject();
+//        request.put("client_type",clientType);
+//        List<io.chubao.joyqueue.domain.Producer>  nsrProducers = JSONArray.parseArray(post(PRODUCER_GETALL_BY_CLIENTTYPE,request), io.chubao.joyqueue.domain.Producer.class);
+//        List<Producer> producerList = new ArrayList<>(nsrProducers.size());
+//        nsrProducers.forEach(nsrProducer->{
+//            Producer producer = new Producer();
+//            TopicName nt = nsrProducer.getTopic();
+//            producer.setApp(new Identity(null,nsrProducer.getApp()));
+//            if(nt.getNamespace().equals(TopicName.DEFAULT_NAMESPACE)){
+//                producer.setNamespace(new Namespace(DEFAULT_NAMESPACE_ID, DEFAULT_NAMESPACE_CODE));
+//            }else{
+//                producer.setNamespace(new Namespace(nt.getNamespace()));
+//            }
+//            producer.setTopic(new Topic(null,EscapeUtils.reEscapeTopic(nt.getCode())));
+//            //producer.setSubscribeGroup(ag[1]);
+//            producer.setClientType(nsrProducer.getClientType().value());
+//            producerList.add(producer);
+//        });
+//        return producerList;
+//    }
+
 
     @Override
-    public PageResult<Producer> findByQuery(QPageQuery<QProducer> query) throws Exception {
-        QPageQuery<ProducerQuery> pageQuery = new QPageQuery<>();
-        pageQuery.setPagination(query.getPagination());
-        pageQuery.setQuery(producerQueryConvert(query.getQuery()));
-        String result = post(FINDBYQUERY_PRODUCER,pageQuery);
-        PageResult<io.chubao.joyqueue.domain.Producer> pageResult = JSON.parseObject(result,new TypeReference<PageResult<io.chubao.joyqueue.domain.Producer>>(){});
-
-        PageResult<Producer> producerPageResult = new PageResult<>();
-        producerPageResult.setPagination(pageResult.getPagination());
-        producerPageResult.setResult(pageResult.getResult().stream().map(producer -> nsrProducerConverter.revert(producer)).collect(Collectors.toList()));
-        return producerPageResult;
-    }
-    @Override
-    public List<Producer> getListProducer(ProducerQuery producerQuery) throws Exception {
-        String result = post(LIST_PRODUCER,producerQuery);
+    public List<Producer> findByApp(String app) throws Exception {
+        ProducerQuery producerQuery = new ProducerQuery();
+        producerQuery.setApp(app);
+        String result = post(GETBYAPP_PRODUCER,producerQuery);
         List<io.chubao.joyqueue.domain.Producer> producerList = JSON.parseArray(result).toJavaList(io.chubao.joyqueue.domain.Producer.class);
         return producerList.stream().map(producer -> nsrProducerConverter.revert(producer)).collect(Collectors.toList());
     }
+
+    @Override
+    public List<Producer> findByTopic(String topic, String namespace) throws Exception {
+        ProducerQuery producerQuery = new ProducerQuery();
+        producerQuery.setTopic(topic);
+        producerQuery.setNamespace(namespace);
+        String result = post(GETBYTOPIC_PRODUCER,producerQuery);
+        List<io.chubao.joyqueue.domain.Producer> producerList = JSON.parseArray(result).toJavaList(io.chubao.joyqueue.domain.Producer.class);
+        return producerList.stream().map(producer -> nsrProducerConverter.revert(producer)).collect(Collectors.toList());
+    }
+
     @Override
     public Producer findById(String nsrProducerId) throws Exception {
         String result = post(GETBYID_PRODUCER,nsrProducerId);
@@ -156,18 +137,14 @@ public class ProducerNameServerServiceImpl extends NameServerBase implements Pro
     }
 
     @Override
-    public Producer findByTopicAppGroup(String namespace, String topic, String app) {
+    public Producer findByTopicAppGroup(String namespace, String topic, String app) throws Exception {
         ProducerQuery producerQuery = new ProducerQuery();
-        producerQuery.setApp(app);
-        producerQuery.setNamespace(namespace);
         producerQuery.setTopic(topic);
-        try {
-            List<Producer> list = getListProducer(producerQuery);
-            if (list == null || list.size() <=0) return null;
-            return list.get(0);
-        } catch (Exception e) {
-            throw new ServiceException(ServiceException.IGNITE_RPC_ERROR,e.getMessage());
-        }
+        producerQuery.setNamespace(namespace);
+        producerQuery.setApp(app);
+        String result = post(GETBYTOPICANDAPP_PRODUCER,producerQuery);
+        io.chubao.joyqueue.domain.Producer producer = JSON.parseObject(result, io.chubao.joyqueue.domain.Producer.class);
+        return nsrProducerConverter.revert(producer);
     }
     private ProducerQuery producerQueryConvert(QProducer query){
         ProducerQuery producerQuery = new ProducerQuery();

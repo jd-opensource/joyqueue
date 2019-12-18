@@ -35,6 +35,7 @@ public class BrokerStat implements Serializable {
     public static final int VERSION = BrokerMonitorConsts.STAT_VERSION;
 
     private Integer brokerId;
+    private JVMStat jvmStat = new JVMStat();
     // 存储占比
     private Integer storagePercent;
     private ConnectionStat connectionStat = new ConnectionStat();
@@ -87,4 +88,13 @@ public class BrokerStat implements Serializable {
     public Integer getBrokerId() {
         return brokerId;
     }
+
+    public JVMStat getJvmStat() {
+        return jvmStat;
+    }
+
+    public void setJvmStat(JVMStat jvmStat) {
+        this.jvmStat = jvmStat;
+    }
+
 }

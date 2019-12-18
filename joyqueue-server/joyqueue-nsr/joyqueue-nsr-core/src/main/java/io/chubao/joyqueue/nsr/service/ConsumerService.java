@@ -17,7 +17,6 @@ package io.chubao.joyqueue.nsr.service;
 
 import io.chubao.joyqueue.domain.Consumer;
 import io.chubao.joyqueue.domain.TopicName;
-import io.chubao.joyqueue.nsr.model.ConsumerQuery;
 
 import java.util.List;
 
@@ -25,15 +24,14 @@ import java.util.List;
  * @author lixiaobin6
  * 下午3:11 2018/8/13
  */
-public interface ConsumerService extends DataService<Consumer, ConsumerQuery, String> {
+public interface ConsumerService {
 
     /**
-     * 根据Topic,APP删除消费者
-     *
-     * @param topic
-     * @param app
+     * 根据id
+     * @param id
+     * @return
      */
-    void deleteByTopicAndApp(TopicName topic, String app);
+    Consumer getById(String id);
 
     /**
      * 根据topic,app获取消费者
@@ -48,34 +46,30 @@ public interface ConsumerService extends DataService<Consumer, ConsumerQuery, St
      * 根据topic获取消费者
      *
      * @param topic
-     * @param withConfig
      * @return
      */
-    List<Consumer> getByTopic(TopicName topic, boolean withConfig);
+    List<Consumer> getByTopic(TopicName topic);
 
     /**
      * 根据APP获取消费者
      *
      * @param app
-     * @param withConfig
      * @return
      */
-    List<Consumer> getByApp(String app, boolean withConfig);
+    List<Consumer> getByApp(String app);
 
     /**
-     * 根据客户端类型获取消费者
-     *
-     * @param clientType
+     * 查询全部
      * @return
      */
-    List<Consumer> getConsumerByClientType(byte clientType);
+    List<Consumer> getAll();
 
     /**
      * 添加消费者
      *
      * @param consumer
      */
-    void add(Consumer consumer);
+    Consumer add(Consumer consumer);
 
     /**
      * 更新消费者
@@ -83,12 +77,12 @@ public interface ConsumerService extends DataService<Consumer, ConsumerQuery, St
      * @param consumer
      */
 
-    void update(Consumer consumer);
+    Consumer update(Consumer consumer);
 
     /**
      * 删除消费者
      *
-     * @param consumer
+     * @param id
      */
-    void remove(Consumer consumer);
+    void delete(String id);
 }

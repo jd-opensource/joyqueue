@@ -37,6 +37,9 @@ public class TopicStat implements Serializable {
     private ConcurrentMap<String /** app **/, AppStat> appStatMap = Maps.newConcurrentMap();
     private ConcurrentMap<Integer /** partitionGroupId **/, PartitionGroupStat> partitionGroupStatMap = Maps.newConcurrentMap();
 
+    // 不能放这
+    private long storeSize;
+
     public TopicStat(String topic) {
         this.topic = topic;
     }
@@ -69,6 +72,22 @@ public class TopicStat implements Serializable {
         return appStat;
     }
 
+    public void removePartitionGroup(int partitionGroup) {
+        partitionGroupStatMap.remove(partitionGroup);
+        for (Map.Entry<String, AppStat> entry : appStatMap.entrySet()) {
+            entry.getValue().removePartitionGroup(partitionGroup);
+        }
+    }
+
+    public void removePartition(short partition) {
+        for (Map.Entry<Integer, PartitionGroupStat> entry : partitionGroupStatMap.entrySet()) {
+            entry.getValue().getPartitionStatMap().remove(partition);
+        }
+        for (Map.Entry<String, AppStat> entry : appStatMap.entrySet()) {
+            entry.getValue().removePartition(partition);
+        }
+    }
+
     public String getTopic() {
         return topic;
     }
@@ -91,5 +110,13 @@ public class TopicStat implements Serializable {
 
     public ConcurrentMap<Integer, PartitionGroupStat> getPartitionGroupStatMap() {
         return partitionGroupStatMap;
+    }
+
+    public void setStoreSize(long storeSize) {
+        this.storeSize = storeSize;
+    }
+
+    public long getStoreSize() {
+        return storeSize;
     }
 }

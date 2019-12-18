@@ -110,6 +110,11 @@ public class DefaultBrokerManageService implements BrokerManageService {
     }
 
     @Override
+    public String initConsumerAckIndexes() throws JoyQueueException {
+        return consumerManageService.initConsumerAckIndexes();
+    }
+
+    @Override
     public List<PartitionAckMonitorInfo> getTopicAckIndexByTime(String topic, String app, long timestamp) {
         return consumerManageService.getTopicAckIndexByTime(topic,app,timestamp);
     }
@@ -254,7 +259,7 @@ public class DefaultBrokerManageService implements BrokerManageService {
     public Directory storeTreeView(boolean recursive) {
         return storeManageService.storeTreeView(recursive);
     }
-
+    BrokerTopicMonitorServiceImpl
     @Override
     public boolean deleteGarbageFile(String fileName,boolean retain) {
         return storeManageService.deleteGarbageFile(fileName,retain);

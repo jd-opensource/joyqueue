@@ -25,6 +25,7 @@ import io.chubao.joyqueue.model.domain.Topic;
  * Created by wangxiaofei1 on 2019/1/3.
  */
 public class NsrReplicaConverter extends Converter<PartitionGroupReplica,Replica> {
+
     @Override
     protected Replica forward(PartitionGroupReplica partitionGroupReplica) {
         Replica replica = new Replica();

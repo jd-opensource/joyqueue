@@ -16,15 +16,18 @@
 package io.chubao.joyqueue.service;
 
 import io.chubao.joyqueue.model.domain.Config;
-import io.chubao.joyqueue.model.query.QConfig;
 import io.chubao.joyqueue.nsr.NsrService;
+
+import java.util.List;
 
 /**
  * Created by wangxiaofei1 on 2018/10/17.
  */
-public interface ConfigService extends NsrService<Config,QConfig,String> {
+public interface ConfigService extends NsrService<Config, String> {
 
 //    List<DataCenter> findAllDataCenter();
 
-    Config findByGroupAndKey(String group, String key);
+    Config findByGroupAndKey(String group, String key) throws Exception;
+
+    List<Config> getAll() throws Exception;
 }

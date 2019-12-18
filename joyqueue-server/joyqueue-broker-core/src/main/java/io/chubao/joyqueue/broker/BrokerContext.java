@@ -38,9 +38,7 @@ import io.chubao.joyqueue.store.StoreService;
 import io.chubao.joyqueue.toolkit.config.PropertySupplier;
 
 /**
- * broker上下文
- *
- * author: gaohaoxiang
+ * BrokerContext
  * date: 2018/8/21
  */
 public class BrokerContext {

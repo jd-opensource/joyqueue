@@ -19,6 +19,8 @@ import io.chubao.joyqueue.network.transport.command.support.DefaultCommandHandle
 import io.chubao.joyqueue.nsr.NameService;
 import io.chubao.joyqueue.nsr.NameServiceAware;
 import io.chubao.joyqueue.nsr.NsrPlugins;
+import io.chubao.joyqueue.toolkit.config.PropertySupplier;
+import io.chubao.joyqueue.toolkit.config.PropertySupplierAware;
 
 /**
  * @author wylixiaobin
@@ -29,18 +31,21 @@ abstract class NsrCommandHandlerFactory extends DefaultCommandHandlerFactory {
 
     public abstract void doWithHandler(NsrCommandHandler nsrCommandHandler);
 
-    public void register(NameService nameService) {
+    public void register(NameService nameService, PropertySupplier propertySupplier) {
         NsrPlugins.nsrCommandHandlerPlugins.metas(getType()).forEach(meta -> {
             NsrCommandHandler commandHandler = meta.getTarget();
-            enrichIfNecessary(commandHandler, nameService);
+            enrichIfNecessary(commandHandler, nameService, propertySupplier);
             register(commandHandler);
             doWithHandler(meta.getTarget());
         });
     }
 
-    public static void enrichIfNecessary(Object obj, NameService nameService) {
+    public static void enrichIfNecessary(Object obj, NameService nameService, PropertySupplier propertySupplier) {
         if (obj == null) {
             return;
+        }
+        if (obj instanceof PropertySupplierAware) {
+            ((PropertySupplierAware) obj).setSupplier(propertySupplier);
         }
         if (obj instanceof NameServiceAware) {
             ((NameServiceAware) obj).setNameService(nameService);

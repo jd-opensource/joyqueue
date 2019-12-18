@@ -68,6 +68,16 @@ export function getAppCodeByCode (appCode, subscribeGroup) {
   return appCode + '.' + subscribeGroup
 }
 
+export function resolveAppCode (appCode) {
+  if (appCode === undefined) {
+    return undefined
+  } else if (appCode.indexOf('.') < 0) {
+    return appCode
+  } else {
+    return appCode.split('.')[0]
+  }
+}
+
 export function getCodeRule () {
   return [
     {required: true, message: '请输入英文名', trigger: 'change'},
@@ -86,6 +96,13 @@ export function getCodeRule3 () {
   return [
     {required: true, message: '请输入英文名', trigger: 'change'},
     {pattern: /^[a-zA-Z]+[a-zA-Z0-9/._-]{1,39}[a-zA-Z0-9]+$/, message: '英文名格式不匹配', trigger: 'change'}
+  ]
+}
+
+export function getErpsRule () {
+  return [
+    {required: true, message: '请输入Erp，多个以,隔开，不能有空格', trigger: 'change'},
+    {pattern: /^([a-zA-Z]+[0-9]*,)*[a-zA-Z]+[0-9]*$/, message: 'Erp格式不匹配', trigger: 'change'}
   ]
 }
 
@@ -297,6 +314,21 @@ export function subscribeGroupAutoCompleteRender (h, params, subscribeRef) {
       }
     }
   })
+}
+
+export function subscribeGroupInputRender (h, params, subscribeRef) {
+  return h('d-input', {
+    props: {
+      value: params.item.subscribeGroup,
+      placeholder: '请输入订阅分组'
+    },
+    on: {
+      input: (item) => {
+      params.item.subscribeGroup = (item.value || item) || ''
+      subscribeRef.tableData.rowData[params.index] = params.item
+    }
+  }
+})
 }
 
 export function replaceChartUrl (url, namespaceCode, topicCode, appFullName) {

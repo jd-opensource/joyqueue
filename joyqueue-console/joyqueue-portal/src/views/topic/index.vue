@@ -203,30 +203,6 @@ export default {
       this.$router.push({name: `/${this.$i18n.locale}/topic/detail`,
         query: { id: item.id, topic: item.code, namespace: item.namespace.code }})
     },
-    // editLabel (item) {
-    //   this.openDialog('editLabelDialog')
-    //   apiRequest.get(apiUrl['/topic'].editLabelData + '/' + item.id).then((data) => {
-    //
-    //   })
-    //   this.editLabelData = item
-    // },
-    // editLabelConfirm () {
-    //   let data = {
-    //     id: this.editLabelData.id,
-    //     bs: this.editLabelData.bs,
-    //     labels: [{'bs': this.editLabelData.bs}]
-    //   }
-    //   apiRequest.post(this.urlOrigin.editLabel, {}, data).then((data) => {
-    //     this.editLabelDialog.visible = false
-    //     this.$Dialog.success({
-    //       content: '修改成功'
-    //     })
-    //     this.getList()
-    //   })
-    // },
-    // editLabelCancel () {
-    //   this.editLabelDialog.visible = false
-    // },
     addBrokerGroup (item) {
       this.openDialog('addBrokerGroupDialog')
       this.addBrokerGroupData = item

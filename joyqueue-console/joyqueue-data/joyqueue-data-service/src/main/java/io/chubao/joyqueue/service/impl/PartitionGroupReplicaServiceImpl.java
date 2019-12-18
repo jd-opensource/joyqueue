@@ -15,19 +15,14 @@
  */
 package io.chubao.joyqueue.service.impl;
 
-import io.chubao.joyqueue.model.PageResult;
-import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.exception.ServiceException;
-import io.chubao.joyqueue.model.domain.Broker;
-import io.chubao.joyqueue.model.domain.BrokerGroupRelated;
 import io.chubao.joyqueue.model.domain.PartitionGroupReplica;
 import io.chubao.joyqueue.model.domain.TopicPartitionGroup;
-import io.chubao.joyqueue.model.query.QPartitionGroupReplica;
-import io.chubao.joyqueue.service.BrokerGroupRelatedService;
-import io.chubao.joyqueue.service.PartitionGroupReplicaService;
 import io.chubao.joyqueue.nsr.BrokerNameServerService;
 import io.chubao.joyqueue.nsr.ReplicaServerService;
 import io.chubao.joyqueue.nsr.TopicNameServerService;
+import io.chubao.joyqueue.service.BrokerGroupRelatedService;
+import io.chubao.joyqueue.service.PartitionGroupReplicaService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +30,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static io.chubao.joyqueue.exception.ServiceException.INTERNAL_SERVER_ERROR;
 
@@ -68,6 +62,7 @@ public class PartitionGroupReplicaServiceImpl  implements PartitionGroupReplicaS
         }
         return result;
     }
+
     @Override
     public int removeWithNameservice(PartitionGroupReplica replica, TopicPartitionGroup partitionGroup) {
         int result = 1;
@@ -90,20 +85,13 @@ public class PartitionGroupReplicaServiceImpl  implements PartitionGroupReplicaS
     }
 
     @Override
-    public PageResult<PartitionGroupReplica> findByQuery(QPageQuery<QPartitionGroupReplica> query) throws Exception {
-        PageResult<PartitionGroupReplica>  partitionGroupReplicaPageResult = replicaServerService.findByQuery(query);
-        if (partitionGroupReplicaPageResult != null && partitionGroupReplicaPageResult.getResult() != null) {
-            partitionGroupReplicaPageResult.getResult().stream().map(partitionGroupReplica -> {
-                try {
-                    Broker broker = brokerNameServerService.findById(Long.valueOf(partitionGroupReplica.getBrokerId()));
-                    partitionGroupReplica.setBroker(broker);
-                } catch (Exception e) {
-                    logger.error("findById error",e);
-                }
-                return partitionGroupReplica;
-            }).collect(Collectors.toList());
-        }
-        return partitionGroupReplicaPageResult;
+    public List<PartitionGroupReplica> getByTopic(String topic, String namespace) {
+        return replicaServerService.findByTopic(topic, namespace);
+    }
+
+    @Override
+    public List<PartitionGroupReplica> getByTopicAndGroup(String topic, String namespace, int group) {
+        return replicaServerService.findByTopicAndGroup(topic, namespace, group);
     }
 
     @Override
@@ -119,25 +107,5 @@ public class PartitionGroupReplicaServiceImpl  implements PartitionGroupReplicaS
     @Override
     public int update(PartitionGroupReplica model) throws Exception {
         return replicaServerService.update(model);
-    }
-
-    @Override
-    public List<PartitionGroupReplica> findByQuery(QPartitionGroupReplica query) throws Exception {
-        List<PartitionGroupReplica> replicas =  replicaServerService.findByQuery(query);
-        if (replicas != null && replicas.size() > 0) {
-            replicas.stream().forEach(replica -> {
-                try {
-                    Broker broker = brokerNameServerService.findById(Long.valueOf(replica.getBrokerId()));
-                    BrokerGroupRelated brokerGroupRelatedId = brokerGroupRelatedService.findById(Long.valueOf(replica.getBrokerId()));
-                    if (brokerGroupRelatedId != null) {
-                        broker.setGroup(brokerGroupRelatedId.getGroup());
-                    }
-                    replica.setBroker(broker);
-                } catch (Exception e) {
-                    logger.error("findById error",e);
-                }
-            });
-        }
-        return replicas;
     }
 }

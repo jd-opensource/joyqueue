@@ -15,6 +15,8 @@
  */
 package io.chubao.joyqueue.domain;
 
+import java.util.Objects;
+
 /**
  * @author wylixiaobin
  * Date: 2018/8/30
@@ -93,5 +95,20 @@ public class DataCenter {
         this.url = url;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || !(o instanceof DataCenter)) return false;
+        DataCenter that = (DataCenter) o;
+        return Objects.equals(code, that.code) &&
+                Objects.equals(name, that.name) &&
+                Objects.equals(region, that.region) &&
+                Objects.equals(url, that.url);
+    }
 
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(code, name, region, url);
+    }
 }

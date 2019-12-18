@@ -72,7 +72,7 @@ public class ProduceMessageRollbackRequestHandler implements JoyQueueCommandHand
         if (!checkResult.isSuccess()) {
             logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport,
                     produceMessageRollbackRequest.getTopic(), produceMessageRollbackRequest.getApp(), checkResult.getJoyQueueCode());
-            return new Command(new ProduceMessageRollbackResponse(CheckResultConverter.convertCommonCode(checkResult.getJoyQueueCode())));
+            return new Command(new ProduceMessageRollbackResponse(CheckResultConverter.convertCommonCode(command.getHeader().getVersion(), checkResult.getJoyQueueCode())));
         }
 
         ProduceMessageRollbackResponse produceMessageRollbackResponse = produceMessageRollback(connection, produceMessageRollbackRequest);

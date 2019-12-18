@@ -43,3 +43,5 @@ io.chubao.joyqueue.nsr.network.codec.NsrSubscribeCodec
 io.chubao.joyqueue.nsr.network.codec.NsrSubscribeAckCodec
 io.chubao.joyqueue.nsr.network.codec.NsrUnSubscribeCodec
 io.chubao.joyqueue.nsr.network.codec.NsrAuthorizationCodec
+io.chubao.joyqueue.nsr.network.codec.GetAllMetadataRequestCodec
+io.chubao.joyqueue.nsr.network.codec.GetAllMetadataResponseCodec

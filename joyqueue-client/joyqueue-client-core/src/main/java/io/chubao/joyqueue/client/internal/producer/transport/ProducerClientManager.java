@@ -21,7 +21,6 @@ import io.chubao.joyqueue.client.internal.transport.ClientGroup;
 import io.chubao.joyqueue.client.internal.transport.ClientManager;
 import io.chubao.joyqueue.client.internal.transport.config.TransportConfig;
 import io.chubao.joyqueue.network.domain.BrokerNode;
-import io.chubao.joyqueue.toolkit.retry.RetryPolicy;
 import io.chubao.joyqueue.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,7 +91,6 @@ public class ProducerClientManager extends Service {
     @Override
     protected void validate() throws Exception {
         transportConfig = transportConfig.copy();
-        transportConfig.setRetryPolicy(new RetryPolicy(0, 0));
         clientManager = new ClientManager(transportConfig, nameServerConfig);
     }
 

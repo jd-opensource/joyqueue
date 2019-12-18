@@ -45,7 +45,7 @@ public class ValidateTokenOfApplicationHandler extends ValidateHandler {
         try {
             token = appTokenId == null ? null : applicationTokenService.findById(appTokenId);
         } catch (Exception e) {
-            throw new ServiceException(ServiceException.IGNITE_RPC_ERROR,e.getMessage());
+            throw new ServiceException(ServiceException.NAMESERVER_RPC_ERROR,e.getMessage());
         }
         if (app == null) {
             throw new ConfigException(ErrorCode.ApplicationNotExists);

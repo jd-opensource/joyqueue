@@ -15,13 +15,13 @@
  */
 package io.chubao.joyqueue.broker.kafka.handler;
 
+import io.chubao.joyqueue.broker.kafka.KafkaCommandType;
+import io.chubao.joyqueue.broker.kafka.KafkaContext;
 import io.chubao.joyqueue.broker.kafka.KafkaContextAware;
+import io.chubao.joyqueue.broker.kafka.command.DescribeGroupsRequest;
 import io.chubao.joyqueue.broker.kafka.command.DescribeGroupsResponse;
 import io.chubao.joyqueue.broker.kafka.coordinator.group.GroupCoordinator;
 import io.chubao.joyqueue.broker.kafka.coordinator.group.domain.GroupDescribe;
-import io.chubao.joyqueue.broker.kafka.KafkaCommandType;
-import io.chubao.joyqueue.broker.kafka.KafkaContext;
-import io.chubao.joyqueue.broker.kafka.command.DescribeGroupsRequest;
 import io.chubao.joyqueue.network.transport.Transport;
 import io.chubao.joyqueue.network.transport.command.Command;
 

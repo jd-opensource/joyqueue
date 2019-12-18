@@ -42,7 +42,7 @@ public class QBroker implements Query {
 
     private List<Integer> notInBrokerIds;
 
-    private List<Long> inBrokerIds;
+    private List<Integer> inBrokerIds;
 
     public String getRetryType() {
         return retryType;
@@ -108,11 +108,11 @@ public class QBroker implements Query {
         this.notInBrokerIds = notInBrokerIds;
     }
 
-    public List<Long> getInBrokerIds() {
+    public List<Integer> getInBrokerIds() {
         return inBrokerIds;
     }
 
-    public void setInBrokerIds(List<Long> inBrokerIds) {
+    public void setInBrokerIds(List<Integer> inBrokerIds) {
         this.inBrokerIds = inBrokerIds;
     }
 

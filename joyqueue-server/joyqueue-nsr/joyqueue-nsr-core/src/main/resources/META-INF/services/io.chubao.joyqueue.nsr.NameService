@@ -1,2 +1,2 @@
-io.chubao.joyqueue.nsr.NameServer
-io.chubao.joyqueue.nsr.ThinNameService
+io.chubao.joyqueue.nsr.nameservice.NameServer
+io.chubao.joyqueue.nsr.nameservice.ThinNameService

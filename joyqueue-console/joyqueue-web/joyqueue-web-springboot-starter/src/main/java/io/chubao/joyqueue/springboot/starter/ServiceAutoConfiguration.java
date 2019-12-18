@@ -29,6 +29,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @ComponentScan(value = {
         "io.chubao.joyqueue.nsr.impl",
         "io.chubao.joyqueue.service.impl",
+        "io.chubao.joyqueue.util",
         "io.chubao.joyqueue.async",
         "io.chubao.joyqueue.other",})
 @MapperScan(basePackages = {"io.chubao.joyqueue.repository"})

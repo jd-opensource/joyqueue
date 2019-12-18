@@ -41,8 +41,10 @@ import io.chubao.joyqueue.network.transport.command.Command;
 import io.chubao.joyqueue.network.transport.command.CommandCallback;
 import io.chubao.joyqueue.network.transport.command.Direction;
 import io.chubao.joyqueue.network.transport.command.Types;
+import io.chubao.joyqueue.network.transport.command.provider.ExecutorServiceProvider;
 import io.chubao.joyqueue.network.transport.support.DefaultTransportAttribute;
 import io.chubao.joyqueue.nsr.NameService;
+import io.chubao.joyqueue.nsr.config.NameServiceConfig;
 import io.chubao.joyqueue.nsr.message.MessageListener;
 import io.chubao.joyqueue.nsr.network.NsrCommandHandler;
 import io.chubao.joyqueue.nsr.network.command.AddTopic;
@@ -85,6 +87,9 @@ import io.chubao.joyqueue.nsr.network.command.PushNameServerEvent;
 import io.chubao.joyqueue.nsr.network.command.Register;
 import io.chubao.joyqueue.nsr.network.command.RegisterAck;
 import io.chubao.joyqueue.toolkit.concurrent.EventListener;
+import io.chubao.joyqueue.toolkit.concurrent.NamedThreadFactory;
+import io.chubao.joyqueue.toolkit.config.PropertySupplier;
+import io.chubao.joyqueue.toolkit.config.PropertySupplierAware;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,16 +100,35 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author wylixiaobin
  * Date: 2019/3/14
  */
-public class NameServiceCommandHandler implements NsrCommandHandler, Types, com.jd.laf.extension.Type<String>, EventListener<TransportEvent> {
+public class NameServiceCommandHandler implements NsrCommandHandler, Types, com.jd.laf.extension.Type<String>, EventListener<TransportEvent>, PropertySupplierAware, ExecutorServiceProvider {
     private static final Logger logger = LoggerFactory.getLogger(NameServiceCommandHandler.class);
 
     private NameService nameService;
+    private NameServiceConfig config;
     private final Map<Integer, Transport> nsrClients = new ConcurrentHashMap<>();
+
+    private ExecutorService executeThreadPool;
+
+    @Override
+    public void setSupplier(PropertySupplier supplier) {
+        this.config = new NameServiceConfig(supplier);
+        this.executeThreadPool = new ThreadPoolExecutor(config.getHandlerThreads(), config.getHandlerThreads(),
+                config.getHandlerKeepalive(), TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(config.getHandlerQueues()), new NamedThreadFactory("joyqueue-nameservice-handler"));
+    }
+
+    @Override
+    public ExecutorService getExecutorService(Transport transport, Command command) {
+        return executeThreadPool;
+    }
 
     @Override
     public int[] types() {
@@ -154,7 +178,7 @@ public class NameServiceCommandHandler implements NsrCommandHandler, Types, com.
                 response = new Command(new GetAllConfigsAck().configs(nameService.getAllConfigs()));
                 break;
             case NsrCommandType.GET_ALL_TOPICS:
-                response = new Command(new GetAllTopicsAck().topicNames(nameService.getAllTopics()));
+                response = new Command(new GetAllTopicsAck().topicNames(nameService.getAllTopicCodes()));
                 break;
             case NsrCommandType.GET_APP_TOKEN:
                 GetAppToken getAppToken = (GetAppToken) command.getPayload();
@@ -226,7 +250,7 @@ public class NameServiceCommandHandler implements NsrCommandHandler, Types, com.
                 GetTopics getTopics = (GetTopics) command.getPayload();
                 Set<String> topicNames = null;
                 if (StringUtils.isBlank(getTopics.getApp())) {
-                    topicNames = nameService.getAllTopics();
+                    topicNames = nameService.getAllTopicCodes();
                 } else {
                     topicNames = nameService.getTopics(getTopics.getApp(), Subscription.Type.valueOf((byte) getTopics.getSubscribeType()));
                 }

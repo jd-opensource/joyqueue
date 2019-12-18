@@ -197,7 +197,11 @@ public class TransactionCommitSynchronizer extends Service {
             if (partitionGroup == null) {
                 continue;
             }
-            Broker broker = partitionGroup.getLeaderBroker();
+            Integer leader = partitionGroup.getLeader();
+            if (leader == null || leader <= 0) {
+                continue;
+            }
+            Broker broker = nameService.getBroker(leader);
             if (broker == null) {
                 continue;
             }

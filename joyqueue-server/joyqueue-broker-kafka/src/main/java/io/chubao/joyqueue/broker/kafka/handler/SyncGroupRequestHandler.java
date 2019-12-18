@@ -16,14 +16,15 @@
 package io.chubao.joyqueue.broker.kafka.handler;
 
 import com.google.common.collect.Maps;
-import io.chubao.joyqueue.broker.kafka.KafkaContextAware;
-import io.chubao.joyqueue.broker.kafka.command.SyncGroupAssignment;
-import io.chubao.joyqueue.broker.kafka.coordinator.group.GroupCoordinator;
-import io.chubao.joyqueue.broker.kafka.coordinator.group.callback.SyncCallback;
 import io.chubao.joyqueue.broker.kafka.KafkaCommandType;
 import io.chubao.joyqueue.broker.kafka.KafkaContext;
+import io.chubao.joyqueue.broker.kafka.KafkaContextAware;
+import io.chubao.joyqueue.broker.kafka.command.SyncGroupAssignment;
 import io.chubao.joyqueue.broker.kafka.command.SyncGroupRequest;
 import io.chubao.joyqueue.broker.kafka.command.SyncGroupResponse;
+import io.chubao.joyqueue.broker.kafka.coordinator.group.GroupCoordinator;
+import io.chubao.joyqueue.broker.kafka.coordinator.group.callback.SyncCallback;
+import io.chubao.joyqueue.broker.kafka.helper.KafkaClientHelper;
 import io.chubao.joyqueue.network.transport.Transport;
 import io.chubao.joyqueue.network.transport.command.Command;
 import io.chubao.joyqueue.network.transport.exception.TransportException;
@@ -54,9 +55,10 @@ public class SyncGroupRequestHandler extends AbstractKafkaCommandHandler impleme
     @Override
     public Command handle(Transport transport, Command command) {
         SyncGroupRequest syncGroupRequest = (SyncGroupRequest) command.getPayload();
+        String groupId = KafkaClientHelper.parseClient(syncGroupRequest.getClientId());
 
         logger.info("sync group, groupId = {}, clientId = {}, memberId = {}",
-                syncGroupRequest.getGroupId(), syncGroupRequest.getClientId(), syncGroupRequest.getMemberId());
+                groupId, syncGroupRequest.getClientId(), syncGroupRequest.getMemberId());
 
         SyncCallback callback = new SyncCallback() {
             @Override
@@ -66,7 +68,7 @@ public class SyncGroupRequestHandler extends AbstractKafkaCommandHandler impleme
         };
 
         groupCoordinator.handleSyncGroup(
-                syncGroupRequest.getGroupId(),
+                groupId,
                 syncGroupRequest.getGenerationId(),
                 syncGroupRequest.getMemberId(),
                 buildAssignmentMap(syncGroupRequest.getGroupAssignment()),

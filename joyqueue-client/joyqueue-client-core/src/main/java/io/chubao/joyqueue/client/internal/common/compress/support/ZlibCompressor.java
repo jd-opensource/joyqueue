@@ -16,12 +16,12 @@
 package io.chubao.joyqueue.client.internal.common.compress.support;
 
 import io.chubao.joyqueue.client.internal.common.compress.Compressor;
+import io.chubao.joyqueue.toolkit.io.ZipDeflater;
+import io.chubao.joyqueue.toolkit.io.ZipInflater;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.zip.DataFormatException;
-import java.util.zip.Deflater;
-import java.util.zip.Inflater;
 
 /**
  * ZlibCompressor
@@ -35,7 +35,7 @@ public class ZlibCompressor implements Compressor {
 
     @Override
     public void compress(byte[] bytes, int offset, int size, OutputStream out) throws IOException {
-        Deflater deflater = new Deflater();
+        ZipDeflater deflater = new ZipDeflater();
         deflater.reset();
         deflater.setInput(bytes, offset, size);
         deflater.finish();
@@ -53,7 +53,7 @@ public class ZlibCompressor implements Compressor {
 
     @Override
     public void decompress(byte[] bytes, int offset, int size, OutputStream out) throws IOException {
-        Inflater inflater = new Inflater();
+        ZipInflater inflater = new ZipInflater();
         inflater.reset();
         inflater.setInput(bytes, offset, size);
         int len;

@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -29,6 +30,7 @@ import java.util.Set;
  * 下午2:41 2018/8/13
  */
 public class Producer extends Subscription {
+
     /**
      * 客户端类型
      */
@@ -75,6 +77,24 @@ public class Producer extends Subscription {
         return limitPolicy;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || !(o instanceof Producer)) return false;
+        if (!super.equals(o)) return false;
+
+        Producer producer = (Producer) o;
+        return clientType == producer.clientType &&
+                Objects.equals(producerPolicy, producer.producerPolicy) &&
+                Objects.equals(limitPolicy, producer.limitPolicy);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(super.hashCode(), clientType, producerPolicy, limitPolicy);
+    }
+
     /**
      * 限流策略
      */
@@ -105,6 +125,21 @@ public class Producer extends Subscription {
 
         public Integer getTraffic() {
             return traffic;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ProducerLimitPolicy that = (ProducerLimitPolicy) o;
+            return Objects.equals(tps, that.tps) &&
+                    Objects.equals(traffic, that.traffic);
+        }
+
+        @Override
+        public int hashCode() {
+
+            return Objects.hash(tps, traffic);
         }
     }
 
@@ -191,6 +226,25 @@ public class Producer extends Subscription {
 
         public void setTimeOut(Integer timeOut) {
             this.timeOut = timeOut;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ProducerPolicy that = (ProducerPolicy) o;
+            return Objects.equals(nearby, that.nearby) &&
+                    Objects.equals(single, that.single) &&
+                    Objects.equals(archive, that.archive) &&
+                    Objects.equals(weight, that.weight) &&
+                    Objects.equals(blackList, that.blackList) &&
+                    Objects.equals(timeOut, that.timeOut);
+        }
+
+        @Override
+        public int hashCode() {
+
+            return Objects.hash(nearby, single, archive, weight, blackList, timeOut);
         }
 
         public static class Builder {

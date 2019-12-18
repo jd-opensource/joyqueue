@@ -21,17 +21,17 @@
                 :value="visibleDate"
                 size="small"
                 @input="val => userInputDate = val"
-                @change="handleVisibleDateChange" />
+                @on-change="handleVisibleDateChange" />
             </span>
             <span :class="[datePickerCls + '__editor-wrap']" v-click-outside="handleTimePickClose">
               <d-input
                 ref="input"
-                @focus="timePickerVisible = true"
+                @on-focus="timePickerVisible = true"
                 :placeholder="t(localePrefix + 'selectTime')"
                 :value="visibleTime"
                 size="small"
                 @input="val => userInputTime = val"
-                @change="handleVisibleTimeChange" />
+                @on-change="handleVisibleTimeChange" />
               <time-picker
                 ref="timepicker"
                 :time-arrow-control="arrowControl"

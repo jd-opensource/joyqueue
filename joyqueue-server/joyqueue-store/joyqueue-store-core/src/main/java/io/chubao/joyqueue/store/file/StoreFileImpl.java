@@ -68,7 +68,7 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
     // 当前写入位置
     private int writePosition = 0;
     private long timestamp = -1L;
-    private AtomicBoolean flushGate = new AtomicBoolean(false);
+    private AtomicBoolean positionLock = new AtomicBoolean(false);
 
 
     public StoreFileImpl(long filePosition, File base, int headerSize, LogSerializer<T> serializer, PreloadBufferPool bufferPool, int maxFileDataLength) {
@@ -123,7 +123,7 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
         } else if (bufferType == MAPPED_BUFFER) {
             unloadUnsafe();
         }
-        ByteBuffer buffer = bufferPool.allocateDirect( this);
+        ByteBuffer buffer = bufferPool.allocateDirect(this);
         loadDirectBuffer(buffer);
     }
 
@@ -326,19 +326,23 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
     public int flush() throws IOException {
         long stamp = bufferLock.readLock();
         try {
-            if (writePosition > flushPosition) {
-                if (flushGate.compareAndSet(false, true)) {
-                    try (RandomAccessFile raf = new RandomAccessFile(file, "rw"); FileChannel fileChannel = raf.getChannel()) {
+            if (positionLock.compareAndSet(false, true)) {
+                try (RandomAccessFile raf = new RandomAccessFile(file, "rw"); FileChannel fileChannel = raf.getChannel()) {
+                    if (writePosition > flushPosition) {
                         if (flushPosition == 0) {
                             writeTimestamp(fileChannel);
                         }
                         return flushPageBuffer(fileChannel);
-                    } finally {
-                        flushGate.compareAndSet(true, false);
                     }
-                } else {
-                    throw new ConcurrentModificationException();
+                } catch (Throwable t) {
+                    logger.warn("StoreFileImpl flush exception! file: {}, flushPosition: {}, writePosition: {}.",
+                            file.getAbsolutePath(), flushPosition, writePosition, t);
+                    throw t;
+                } finally {
+                    positionLock.compareAndSet(true, false);
                 }
+            } else {
+                throw new ConcurrentModificationException();
             }
             return 0;
         } finally {
@@ -365,23 +369,23 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
     // Not thread safe!
     @Override
     public void rollback(int position) throws IOException {
-        if (position < writePosition) {
-            writePosition = position;
+        while (!positionLock.compareAndSet(false, true)) {
+            Thread.yield();
         }
-        if (position < flushPosition) {
-            if (flushGate.compareAndSet(false, true)) {
-                try {
-                    flushPosition = position;
-                    try (RandomAccessFile raf = new RandomAccessFile(file, "rw"); FileChannel fileChannel = raf.getChannel()) {
-                        fileChannel.truncate(position + headerSize);
-                    }
-                } finally {
-                    flushGate.compareAndSet(true, false);
-                }
-            } else {
-                throw new ConcurrentModificationException();
+        try {
+            if (position < writePosition) {
+                writePosition = position;
             }
+            if (position < flushPosition) {
+                flushPosition = position;
+                try (RandomAccessFile raf = new RandomAccessFile(file, "rw"); FileChannel fileChannel = raf.getChannel()) {
+                    fileChannel.truncate(position + headerSize);
+                }
+            }
+        } finally {
+            positionLock.compareAndSet(true, false);
         }
+
     }
 
     @Override

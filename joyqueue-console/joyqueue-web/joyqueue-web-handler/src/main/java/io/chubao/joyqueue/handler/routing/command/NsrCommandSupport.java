@@ -16,23 +16,6 @@
 package io.chubao.joyqueue.handler.routing.command;
 
 import com.alibaba.fastjson.JSON;
-import io.chubao.joyqueue.exception.ValidationException;
-import io.chubao.joyqueue.handler.annotation.GenericValue;
-import io.chubao.joyqueue.handler.annotation.Operator;
-import io.chubao.joyqueue.handler.annotation.PageQuery;
-import io.chubao.joyqueue.handler.error.ConfigException;
-import io.chubao.joyqueue.handler.error.ErrorCode;
-import io.chubao.joyqueue.handler.message.AuditLogMessage;
-import io.chubao.joyqueue.model.PageResult;
-import io.chubao.joyqueue.model.QKeyword;
-import io.chubao.joyqueue.model.QOperator;
-import io.chubao.joyqueue.model.QPageQuery;
-import io.chubao.joyqueue.model.Query;
-import io.chubao.joyqueue.model.domain.Identity;
-import io.chubao.joyqueue.model.domain.OperLog;
-import io.chubao.joyqueue.model.domain.User;
-import io.chubao.joyqueue.nsr.NsrService;
-import com.google.common.base.Preconditions;
 import com.jd.laf.binding.annotation.Value;
 import com.jd.laf.web.vertx.Command;
 import com.jd.laf.web.vertx.annotation.Body;
@@ -42,8 +25,18 @@ import com.jd.laf.web.vertx.annotation.QueryParam;
 import com.jd.laf.web.vertx.pool.Poolable;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
+import io.chubao.joyqueue.exception.ValidationException;
+import io.chubao.joyqueue.handler.annotation.GenericValue;
+import io.chubao.joyqueue.handler.annotation.Operator;
+import io.chubao.joyqueue.handler.error.ConfigException;
+import io.chubao.joyqueue.handler.error.ErrorCode;
+import io.chubao.joyqueue.handler.message.AuditLogMessage;
+import io.chubao.joyqueue.model.Query;
+import io.chubao.joyqueue.model.domain.Identity;
+import io.chubao.joyqueue.model.domain.OperLog;
+import io.chubao.joyqueue.model.domain.User;
+import io.chubao.joyqueue.nsr.NsrService;
 import io.vertx.core.Vertx;
-import org.apache.commons.lang3.StringUtils;
 
 import static io.chubao.joyqueue.handler.Constants.ID;
 import static io.chubao.joyqueue.handler.Constants.USER_KEY;
@@ -74,28 +67,28 @@ public abstract class NsrCommandSupport<M, S extends NsrService, Q extends Query
         operator = null;
     }
 
-    @Path("search")
-    public Response pageQuery(@PageQuery QPageQuery<Q> qPageQuery) throws Exception {
-        Preconditions.checkArgument(qPageQuery!=null, "Illegal args.");
-        if(qPageQuery.getQuery() != null) {
-            if (qPageQuery.getQuery() instanceof QOperator) {
-                QOperator query = (QOperator) qPageQuery.getQuery();
-                query.setUserId(session.getId());
-                query.setRole(session.getRole());
-                query.setUserCode(session.getCode());
-                query.setUserName(session.getName());
-                query.setAdmin(session.getRole()==User.UserRole.ADMIN.value() ? Boolean.TRUE : Boolean.FALSE);
-            }
-            if (qPageQuery.getQuery() instanceof QKeyword) {
-                String keyword = ((QKeyword) qPageQuery.getQuery()).getKeyword();
-                ((QKeyword) qPageQuery.getQuery()).setKeyword(StringUtils.isBlank(keyword)? null:keyword.trim());
-            }
-        }
-
-        PageResult<M> result  = service.findByQuery(qPageQuery);
-
-        return Responses.success(result.getPagination(), result.getResult());
-    }
+//    @Path("search")
+//    public Response pageQuery(@PageQuery QPageQuery<Q> qPageQuery) throws Exception {
+//        Preconditions.checkArgument(qPageQuery!=null, "Illegal args.");
+//        if(qPageQuery.getQuery() != null) {
+//            if (qPageQuery.getQuery() instanceof QOperator) {
+//                QOperator query = (QOperator) qPageQuery.getQuery();
+//                query.setUserId(session.getId());
+//                query.setRole(session.getRole());
+//                query.setUserCode(session.getCode());
+//                query.setUserName(session.getName());
+//                query.setAdmin(session.getRole()==User.UserRole.ADMIN.value() ? Boolean.TRUE : Boolean.FALSE);
+//            }
+//            if (qPageQuery.getQuery() instanceof QKeyword) {
+//                String keyword = ((QKeyword) qPageQuery.getQuery()).getKeyword();
+//                ((QKeyword) qPageQuery.getQuery()).setKeyword(StringUtils.isBlank(keyword)? null:keyword.trim());
+//            }
+//        }
+//
+//        PageResult<M> result  = service.findByQuery(qPageQuery);
+//
+//        return Responses.success(result.getPagination(), result.getResult());
+//    }
 
     @Path("add")
     public Response add(@Body M model) throws Exception {

@@ -268,7 +268,11 @@ public class ReplicaGroup extends Service {
      * @return lag length
      */
     public long lagLength(int replicaId) {
-        return replicableStore.rightPosition() - getReplica(replicaId).writePosition();
+        Replica replica = getReplica(replicaId);
+        if (replica == null) {
+            return ElectionNode.INVALID_LAG_LENGTH;
+        }
+        return replicableStore.rightPosition() - replica.writePosition();
     }
 
     /**

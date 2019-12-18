@@ -54,11 +54,9 @@ public class CheckResultConverter {
 
     public static short convertFetchCode(JoyQueueCode code) {
         switch (code) {
-            case FW_TOPIC_NO_PARTITIONGROUP: {
-                return KafkaErrorCode.NOT_LEADER_FOR_PARTITION.getCode();
-            }
+            case FW_TOPIC_NO_PARTITIONGROUP:
             case FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER: {
-                return KafkaErrorCode.LEADER_NOT_AVAILABLE.getCode();
+                return KafkaErrorCode.NOT_LEADER_FOR_PARTITION.getCode();
             }
             case FW_BROKER_NOT_READABLE:
             case FW_FETCH_TOPIC_MESSAGE_PAUSED:

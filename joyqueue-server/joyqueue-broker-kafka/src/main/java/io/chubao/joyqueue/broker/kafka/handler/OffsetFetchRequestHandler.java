@@ -22,6 +22,7 @@ import io.chubao.joyqueue.broker.kafka.command.OffsetFetchRequest;
 import io.chubao.joyqueue.broker.kafka.command.OffsetFetchResponse;
 import io.chubao.joyqueue.broker.kafka.config.KafkaConfig;
 import io.chubao.joyqueue.broker.kafka.coordinator.group.GroupCoordinator;
+import io.chubao.joyqueue.broker.kafka.helper.KafkaClientHelper;
 import io.chubao.joyqueue.broker.kafka.model.OffsetMetadataAndError;
 import io.chubao.joyqueue.network.transport.Transport;
 import io.chubao.joyqueue.network.transport.command.Command;
@@ -53,7 +54,8 @@ public class OffsetFetchRequestHandler extends AbstractKafkaCommandHandler imple
     @Override
     public Command handle(Transport transport, Command command) {
         OffsetFetchRequest offsetFetchRequest = (OffsetFetchRequest) command.getPayload();
-        String groupId = offsetFetchRequest.getGroupId();
+//        String groupId = offsetFetchRequest.getGroupId();
+        String groupId = KafkaClientHelper.parseClient(offsetFetchRequest.getClientId());
         Map<String, List<Integer>> topicAndPartitions = offsetFetchRequest.getTopicAndPartitions();
         Map<String, List<OffsetMetadataAndError>> result = groupCoordinator.handleFetchOffsets(groupId, topicAndPartitions);
 

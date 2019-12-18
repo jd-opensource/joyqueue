@@ -22,10 +22,13 @@ import io.chubao.joyqueue.manage.SortedTopic;
 import io.chubao.joyqueue.model.PageResult;
 import io.chubao.joyqueue.model.Pagination;
 import io.chubao.joyqueue.model.QPageQuery;
-import io.chubao.joyqueue.model.domain.*;
-import io.chubao.joyqueue.model.query.QConsumer;
+import io.chubao.joyqueue.model.domain.Broker;
+import io.chubao.joyqueue.model.domain.BrokerTopicMonitor;
+import io.chubao.joyqueue.model.domain.BrokerTopicMonitorRecord;
+import io.chubao.joyqueue.model.domain.Consumer;
+import io.chubao.joyqueue.model.domain.Producer;
+import io.chubao.joyqueue.model.domain.SubscribeType;
 import io.chubao.joyqueue.model.query.QMonitor;
-import io.chubao.joyqueue.model.query.QProducer;
 import io.chubao.joyqueue.monitor.BrokerMonitorInfo;
 import io.chubao.joyqueue.monitor.BrokerStartupInfo;
 import io.chubao.joyqueue.monitor.Client;
@@ -42,7 +45,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -70,9 +72,10 @@ public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService 
         try {
             Pagination pagination = qPageQuery.getPagination();
             QMonitor qMonitor = qPageQuery.getQuery();
-            Broker broker = brokerService.findById(qMonitor.getBrokerId());
+            Broker broker = brokerService.findById(qMonitor.getBrokerId().intValue());
             List<SortedTopic> topicList = querySortedTopicList(broker);
             pagination.setTotalRecord(topicList.size());
+
             int toIndex= pagination.getStart()+pagination.getSize();
             if (toIndex >pagination.getTotalRecord()) {
                 toIndex = pagination.getTotalRecord();
@@ -116,7 +119,7 @@ public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService 
         try {
             Pagination pagination = qPageQuery.getPagination();
             QMonitor qMonitor = qPageQuery.getQuery();
-            Broker broker = brokerService.findById(qMonitor.getBrokerId());
+            Broker broker = brokerService.findById(Integer.valueOf(String.valueOf(qMonitor.getBrokerId())));
             ConnectionMonitorDetailInfo connectionMonitorDetailInfo = getConnectMonitorDetail(broker);
             if (connectionMonitorDetailInfo != null) {
                 List<Client> clients=connectionMonitorDetailInfo.getClients();
@@ -149,7 +152,7 @@ public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService 
         try {
             Pagination pagination = qPageQuery.getPagination();
             QMonitor qMonitor = qPageQuery.getQuery();
-            Broker broker = brokerService.findById(qMonitor.getBrokerId());
+            Broker broker = brokerService.findById(Integer.valueOf(String.valueOf(qMonitor.getBrokerId())));
             List<String> toplicList = queryTopicList(broker);
             pagination.setTotalRecord(toplicList.size());
             int fromIndx= pagination.getStart()+pagination.getSize();
@@ -179,9 +182,10 @@ public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService 
      * @param brokerId
      * @return
      */
+    @Override
     public BrokerMonitorInfo findBrokerMonitor(Long brokerId){
         try {
-            Broker broker = brokerService.findById(brokerId);
+            Broker broker = brokerService.findById(Integer.valueOf(String.valueOf(brokerId)));
             return queryBrokerMonitor(broker);
         } catch (Exception e) {
             logger.error("findBrokerMonitor exception",e);
@@ -193,8 +197,9 @@ public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService 
      * @param brokerId
      * @return
      */
+    @Override
     public BrokerStartupInfo getStartupInfo(Long brokerId) throws Exception {
-        Broker broker = brokerService.findById(brokerId);
+        Broker broker = brokerService.findById(Integer.valueOf(String.valueOf(brokerId)));
         return getStartInfo(broker);
     }
     private BrokerTopicMonitor getMonitorByAppAndTopic(String topic,List<String> appList,Broker broker,SubscribeType type) throws Exception {
@@ -222,15 +227,11 @@ public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService 
     }
     private List<String> getAppByTopic(SubscribeType subscribeType,String topic) throws Exception {
         if (subscribeType == SubscribeType.CONSUMER) {
-            QConsumer qConsumer = new QConsumer();
-            qConsumer.setTopic(new Topic(topic));
-            List<Consumer> consumerList =  consumerService.findByQuery(qConsumer);
+            List<Consumer> consumerList =  consumerService.findByTopic(topic, null);
             return consumerList.stream().map(consumer -> CodeConverter.convertApp(consumer.getApp(),consumer.getSubscribeGroup())).collect(Collectors.toList());
 
         } else if (subscribeType == SubscribeType.PRODUCER) {
-            QProducer qProducer = new QProducer();
-            qProducer.setTopic(new Topic(topic));
-            List<Producer> producerList =  producerService.findByQuery(qProducer);
+            List<Producer> producerList =  producerService.findByTopic(null, topic);
             return producerList.stream().map(producer -> producer.getApp().getCode()).collect(Collectors.toList());
         }
         return new ArrayList<>();

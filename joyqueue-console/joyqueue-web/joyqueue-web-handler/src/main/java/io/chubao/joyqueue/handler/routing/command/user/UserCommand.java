@@ -35,6 +35,7 @@ import com.jd.laf.web.vertx.response.Responses;
 import static io.chubao.joyqueue.handler.Constants.CODE;
 import static io.chubao.joyqueue.handler.Constants.ID;
 import static io.chubao.joyqueue.handler.Constants.USER_KEY;
+import static io.chubao.joyqueue.handler.Constants.ROLE;
 
 /**
  * @author wylixiaobin
@@ -74,6 +75,11 @@ public class UserCommand extends CommandSupport<User, UserService, QUser> {
     @Path("getByCode")
     public Response getByCode(@QueryParam(CODE) String code) {
         return Responses.success(service.findByCode(code));
+    }
+
+    @Path("getByRole")
+    public Response getByRole(@QueryParam(ROLE) Integer role) {
+        return Responses.success(service.findByRole(role));
     }
 
 

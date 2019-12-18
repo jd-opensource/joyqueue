@@ -30,6 +30,7 @@ import io.chubao.joyqueue.domain.Partition;
 import io.chubao.joyqueue.domain.TopicName;
 import io.chubao.joyqueue.exception.JoyQueueCode;
 import io.chubao.joyqueue.exception.JoyQueueException;
+import io.chubao.joyqueue.message.BrokerMessage;
 import io.chubao.joyqueue.message.MessageLocation;
 import io.chubao.joyqueue.network.session.Connection;
 import io.chubao.joyqueue.network.session.Consumer;
@@ -40,7 +41,6 @@ import io.chubao.joyqueue.store.PositionOverflowException;
 import io.chubao.joyqueue.store.PositionUnderflowException;
 import io.chubao.joyqueue.store.ReadResult;
 import io.chubao.joyqueue.store.StoreService;
-import io.chubao.joyqueue.store.message.MessageParser;
 import io.chubao.joyqueue.toolkit.concurrent.EventListener;
 import io.chubao.joyqueue.toolkit.concurrent.LoopThread;
 import io.chubao.joyqueue.toolkit.lang.Close;
@@ -127,7 +127,7 @@ class ConcurrentConsumption extends Service {
 
         moveExpireThread = LoopThread.builder()
                 .sleepTime(1000 * 5, 1000 * 5)
-                .name("joyqueue-concurrent-consumption-move-expire-Thread")
+                .name("JournalQ-concurrent-consumption-move-expire-Thread")
                 .onException(e -> logger.warn("Exception:", e))
                 .doWork(() -> {
                     moveSegment2ExpireQueue();
@@ -137,7 +137,7 @@ class ConcurrentConsumption extends Service {
 
         cleanExpireThread = LoopThread.builder()
                 .sleepTime(1000 * 5, 1000 * 5)
-                .name("joyqueue-concurrent-consumption-clean-expire-Thread")
+                .name("JournalQ-concurrent-consumption-clean-expire-Thread")
                 .onException(e -> logger.warn("Exception:", e))
                 .doWork(() -> {
                     cleanExpireQueue();
@@ -173,7 +173,7 @@ class ConcurrentConsumption extends Service {
      * @param accessTimes 访问次数用于均匀读取每个分区
      * @return 读取的消息
      */
-    protected PullResult getMessage(Consumer consumer, int count, long ackTimeout, long accessTimes, int concurrent) throws JoyQueueException {
+    public PullResult getMessage(Consumer consumer, int count, long ackTimeout, long accessTimes, int concurrent) throws JoyQueueException {
         // 消费普通分区消息
         List<Short> partitionList = clusterManager.getMasterPartitionList(TopicName.parse(consumer.getTopic()));
         // 首先尝试从过期未应答队列获取分区段进行消费
@@ -182,27 +182,28 @@ class ConcurrentConsumption extends Service {
         if (partitionSegment != null) {
             // 尝试从过期未应答队列读
             pullResult = getFromExpireAckQueue(consumer, partitionSegment, accessTimes);
-        }
-        if (pullResult.getBuffers().size() < 1 && partitionManager.isRetry(consumer)) {
-            // 消费待重试的消息
-            List<RetryMessageModel> retryMessage = messageRetry.getRetry(consumer.getTopic(), consumer.getApp(), (short) count, 0);
-            List<ByteBuffer> messages = convert(retryMessage);
-            pullResult.setBuffers(messages);
-            if (messages.size() > 0) {
-                // 读到重试消息，增加下次读到重试队列的概率（优先处理重试消息）
-                partitionManager.increaseRetryProbability(consumer);
+        } else {
+            if (partitionManager.isRetry(consumer)) {
+                // 消费待重试的消息
+                List<RetryMessageModel> retryMessage = messageRetry.getRetry(consumer.getTopic(), consumer.getApp(), (short) count, 0);
+                List<ByteBuffer> messages = convert(retryMessage);
+                pullResult.setBuffers(messages);
+                if (messages.size() > 0) {
+                    // 读到重试消息，增加下次读到重试队列的概率（优先处理重试消息）
+                    partitionManager.increaseRetryProbability(consumer);
+                } else {
+                    // 读不到重试消息，则降低下次读重试队列的概率
+                    partitionManager.decreaseRetryProbability(consumer);
+                }
             } else {
-                // 读不到重试消息，则降低下次读重试队列的概率
-                partitionManager.decreaseRetryProbability(consumer);
+                List<Short> priorityPartitionList = partitionManager.getPriorityPartition(TopicName.parse(consumer.getTopic()));
+                if (priorityPartitionList.size() > 0) {
+                    // 高优先级分区消费
+                    pullResult = getFromPartition(consumer, priorityPartitionList, count, ackTimeout, accessTimes, concurrent);
+                } else {
+                    pullResult = getFromPartition(consumer, partitionList, count, ackTimeout, accessTimes, concurrent);
+                }
             }
-        }
-        List<Short> priorityPartitionList = partitionManager.getPriorityPartition(TopicName.parse(consumer.getTopic()));
-        if (pullResult.getBuffers().size() < 1 && priorityPartitionList.size() > 0) {
-            // 高优先级分区消费
-            pullResult = getFromPartition(consumer, priorityPartitionList, count, ackTimeout, accessTimes, concurrent);
-        }
-        if (pullResult.getBuffers().size() < 1) {
-            pullResult = getFromPartition(consumer, partitionList, count, ackTimeout, accessTimes, concurrent);
         }
 
         return pullResult;
@@ -308,16 +309,27 @@ class ConcurrentConsumption extends Service {
      */
     private PullResult getFromExpireAckQueue(Consumer consumer, PartitionSegment partitionSegment, long ackTimeout) throws JoyQueueException {
         short partition = partitionSegment.getPartition();
-        int segmentCount = (int) (partitionSegment.getEndIndex() - partitionSegment.getStartIndex()) + 1;
-        long index = partitionSegment.getStartIndex();
-        PullResult pullResult = readMessages(consumer, partition, index, segmentCount);
-        int msgCount = pullResult.getBuffers().size();
-        //TODO 什么情况下会取不到消息
-        if (msgCount > 0) {
-            // 记录并行消费分区段，用于应答比对
-            trackConsumeDetail(consumer, partition, partitionSegment.getStartIndex(), partitionSegment.getEndIndex(), ackTimeout, false);
+        synchronized (lockInstance.getLockInstance(consumer.getTopic(), consumer.getApp(), partition)) {
+            int segmentCount = (int) (partitionSegment.getEndIndex() - partitionSegment.getStartIndex()) + 1;
+            long index = partitionSegment.getStartIndex();
+            PullResult pullResult = readMessages(consumer, partition, index, segmentCount);
+            int msgCount = pullResult.getBuffers().size();
+
+            List<Long> indexList = new ArrayList<>();
+            for (int j = 0; j < msgCount; j++) {
+                indexList.add(index + j);
+            }
+
+            logger.info("readExpireMessages, partition: {}, index: {}, size: {}", partition, indexList,
+                    expireQueueMap.get(new ConsumePartition(partitionSegment.getTopic(), partitionSegment.getApp(), partitionSegment.getPartition())).size());
+
+            //TODO 什么情况下会取不到消息
+            if (msgCount > 0) {
+                // 记录并行消费分区段，用于应答比对
+                trackConsumeDetail(consumer, partition, partitionSegment.getStartIndex(), partitionSegment.getEndIndex(), ackTimeout, false);
+            }
+            return pullResult;
         }
-        return pullResult;
     }
 
 
@@ -339,20 +351,26 @@ class ConcurrentConsumption extends Service {
             listIndex = partitionManager.selectPartitionIndex(partitionSize, listIndex + i, accessTimes);
             short partition = partitionList.get(listIndex);
 
-            if (isExceedConcurrent(consumer, partition, concurrent)) {
-                //超过并行度取下一个Partition
-                continue;
-            }
-
             // 同步进行分区操作
             synchronized (lockInstance.getLockInstance(consumer.getTopic(), consumer.getApp(), partition)) {
+                if (isExceedConcurrent(consumer, partition, concurrent)) {
+                    //超过并行度取下一个Partition
+                    continue;
+                }
+
                 // 获取消息拉取位置
                 long pullIndex = getPullIndex(consumer, partition);
+
                 logger.debug("get pull index:{}, topic:{}, app:{}, partition:{}", pullIndex, consumer.getTopic(), consumer.getApp(), partition);
                 // 读取消息结果
                 pullResult = readMessages(consumer, partition, pullIndex, count);
                 int msgCount = count(pullResult);
                 if (msgCount > 0) {
+                    List<Long> indexList = new ArrayList<>();
+                    for (int j = 0; j < msgCount; j++) {
+                        indexList.add(pullIndex + j);
+                    }
+
                     // 更新最新拉取位置，即下次开始拉取的序号
                     long newPullIndex = pullIndex + msgCount;
                     logger.debug("set new pull index:{}, topic:{}, app:{}, partition:{}", newPullIndex, consumer.getTopic(), consumer.getApp(), partition);
@@ -373,11 +391,12 @@ class ConcurrentConsumption extends Service {
         int count = 0;
         List<ByteBuffer> buffers = pullResult.getBuffers();
         for (ByteBuffer buffer : buffers) {
-            short batchSize = MessageParser.getShort(buffer, MessageParser.FLAG);
-            if (batchSize <= 1) {
-                batchSize = 1;
+            BrokerMessage header = Serializer.readBrokerMessageHeader(buffer);
+            if (header.isBatch()) {
+                count += header.getFlag();
+            } else {
+                count += 1;
             }
-            count += batchSize;
         }
         return count;
     }
@@ -437,7 +456,7 @@ class ConcurrentConsumption extends Service {
         for (Short partition : partitionList) {
             ConsumePartition consumePartition = new ConsumePartition(consumer.getTopic(), consumer.getApp(), partition);
             ConcurrentLinkedQueue<PartitionSegment> partitionSegmentQueue = expireQueueMap.get(consumePartition);
-            if (partitionSegmentQueue != null) {
+            if (partitionSegmentQueue != null && !partitionSegmentQueue.isEmpty()) {
                 return partitionSegmentQueue.poll();
             }
         }
@@ -464,6 +483,10 @@ class ConcurrentConsumption extends Service {
         if (isReset != null && isReset) {
             // 已经初始化，直接获取拉取到的序号
             pullIndex = positionManager.getLastMsgPullIndex(topicName, app, partition);
+            if (pullIndex == -1) {
+                concurrentConsumeCache.remove(consumePartition);
+                positionManager.updateLastMsgPullIndex(topicName, app, partition, positionManager.getLastMsgAckIndex(topicName, app, partition));
+            }
         } else {
             // 还没有初始化，重置拉取位置
             // 主题+应用+分组+分区的最后应答位置
@@ -517,19 +540,14 @@ class ConcurrentConsumption extends Service {
             } else {
                 logger.error("read message error, error code[{}]", readRst.getCode());
             }
-        } catch (Exception ex) {
-            if (ex instanceof PositionOverflowException) {
-                long rightIndex = storeService.getManageService().partitionMetric(consumer.getTopic(), partition).getRightIndex();
-                if (rightIndex < index) {
-                    pullResult.setCode(JoyQueueCode.SE_INDEX_OVERFLOW);
-                    logger.error(ex.getMessage(), ex);
-                }
-            } else if (ex instanceof PositionUnderflowException) {
-                pullResult.setCode(JoyQueueCode.SE_INDEX_UNDERFLOW);
-                logger.error(ex.getMessage(), ex);
-            } else {
-                logger.error("get message error, consumer: {}, partition: {}", consumer, partition, ex);
+        } catch (PositionOverflowException e) {
+            if(e.getRight() < index) {
+                pullResult.setCode(JoyQueueCode.SE_INDEX_OVERFLOW);
             }
+        } catch (PositionUnderflowException e) {
+            pullResult.setCode(JoyQueueCode.SE_INDEX_UNDERFLOW);
+        } catch (Exception ex) {
+            logger.error("get message error, consumer: {}, partition: {}", consumer, partition, ex);
         }
 
         return pullResult;
@@ -567,6 +585,17 @@ class ConcurrentConsumption extends Service {
         segmentConsumeMap.put(partitionSegment, expire);
         if (increaseCounter){
             increaseConcurrentCounter(new ConsumePartition(topic, app, partition));
+
+            List<Position> positions = concurrentConsumeCache.get(new ConsumePartition(topic, app, partition));
+            if (positions == null) {
+                positions = new ArrayList<>();
+                List<Position> oldPositions = concurrentConsumeCache.putIfAbsent(new ConsumePartition(topic, app, partition), positions);
+                if (oldPositions != null) {
+                    positions = oldPositions;
+                }
+            }
+
+            positions.add(new Position(startIndex, endIndex, -1, -1));
         }
     }
 
@@ -591,23 +620,27 @@ class ConcurrentConsumption extends Service {
         if (partition == Partition.RETRY_PARTITION_ID) {
             return retryAck(topic, app, locations, isSuccessAck);
         }
+
+        long[] locationArray = new long[locations.length];
+        for (int i = 0; i < locations.length; i++) {
+            locationArray[i] = locations[i].getIndex();
+        }
+        logger.debug("pre ack, partition: {}, index: {}", partition, locationArray);
+
         // 连续顺序
         long[] indexArr = AcknowledgeSupport.sortMsgLocation(locations);
         if (indexArr != null) {
             PartitionSegment partitionSegment = new PartitionSegment(topic, app, partition, indexArr[0], indexArr[1]);
             ConsumePartition consumePartition = new ConsumePartition(topic, app, partition);
-            if (segmentConsumeMap.containsKey(partitionSegment) || isExpireQueueContains(consumePartition, partitionSegment)) {
+            synchronized (lockInstance.getLockInstance(consumePartition)) {
                 // 尝试更新应答位置
-                boolean updateSuccess = tryUpdateAckPosition(consumePartition, indexArr);
-                if (updateSuccess) {
-                    // 从分区段消费记录中移除
-                    segmentConsumeMap.remove(partitionSegment);
-                    // 从过期未应答队列中移除
-                    removeFromExpireQueue(consumePartition, partitionSegment);
-                    // 设置应答成功
-                    isSuccess = true;
-                }
-
+                tryUpdateAckPosition(consumePartition, indexArr);
+                // 从分区段消费记录中移除
+                segmentConsumeMap.remove(partitionSegment);
+                // 从过期未应答队列中移除
+                removeFromExpireQueue(consumePartition, partitionSegment);
+                // 设置应答成功
+                isSuccess = true;
                 releaseConcurrentCounter(consumePartition);
             }
         }
@@ -687,10 +720,14 @@ class ConcurrentConsumption extends Service {
                 queue = pre;
             }
         }
-        queue.add(partitionSegment);
+        if (queue.contains(partitionSegment)) {
+            return;
+        }
+        queue.offer(partitionSegment);
 
         // 记录下超时未应答队列的情况
         long size = queue.size();
+        logger.debug("add expire queue, partition: {}, size: {}, start: {}, end: {}", partitionSegment.getPartition(), size, partitionSegment.getStartIndex(), partitionSegment.getEndIndex());
         logger.debug("expire queue size is:[{}], partitionInfo:[{}], ", size, consumePartition);
         if (queue.size() > 10000) {
             logger.info("expire queue size is:[{}], partitionInfo:[{}], ", size, consumePartition);
@@ -701,18 +738,21 @@ class ConcurrentConsumption extends Service {
      * 将过期未应答的分区段移动到过期队列
      */
     private void moveSegment2ExpireQueue() {
-        Iterator<PartitionSegment> iterator = segmentConsumeMap.keySet().iterator();
-        long now = SystemClock.now();
+        Iterator<Map.Entry<PartitionSegment, Long>> iterator = segmentConsumeMap.entrySet().iterator();
         while (iterator.hasNext()) {
-            PartitionSegment next = iterator.next();
+            Map.Entry<PartitionSegment, Long> entry = iterator.next();
+            PartitionSegment next = entry.getKey();
             ConsumePartition consumePartition = new ConsumePartition(next.getTopic(), next.getApp(), next.getPartition());
             synchronized (lockInstance.getLockInstance(consumePartition)) {
-                Long expireTime = segmentConsumeMap.get(next);
-                if (expireTime != null && expireTime >= now) {
+                if (!segmentConsumeMap.containsKey(next)) {
+                    continue;
+                }
+                long expireTime = entry.getValue();
+                long now = SystemClock.now();
+                if (expireTime >= now) {
                     addToExpireQueue(consumePartition, next);
-                    segmentConsumeMap.remove(next);
-                    releaseConcurrentCounter(consumePartition);
-
+                    iterator.remove();
+//                    releaseConcurrentCounter(consumePartition);
                 }
             }
         }
@@ -754,25 +794,68 @@ class ConcurrentConsumption extends Service {
      * @param consumePartition 分区消费
      * @param indexArr         应答分区段的开始序号和结束序号
      */
-    private boolean tryUpdateAckPosition(ConsumePartition consumePartition, long[] indexArr) throws JoyQueueException {
-        synchronized (lockInstance.getLockInstance(consumePartition)) {
-            String topic = consumePartition.getTopic();
-            String app = consumePartition.getApp();
-            short partition = consumePartition.getPartition();
-            // 添加到该分区的应答分区段集合
-            addAckSegment(consumePartition, indexArr[0], indexArr[1]);
-            // 排序、合并，并返回第一个分区段
-            Position position = sortAndMerge(consumePartition);
-            // 查询应答位置
-            long lastMsgAckIndex = positionManager.getLastMsgAckIndex(TopicName.parse(topic), app, partition);
-            if (position.getAckStartIndex() <= lastMsgAckIndex && position.getAckCurIndex() >= lastMsgAckIndex) {
-                // 将当前序号向后移动一位
-                long updateMsgAckIndex = position.getAckCurIndex() + 1;
-                positionManager.updateLastMsgAckIndex(TopicName.parse(topic), app, partition, updateMsgAckIndex);
-                return true;
-            } else {
-                return false;
+    private void tryUpdateAckPosition(ConsumePartition consumePartition, long[] indexArr) throws JoyQueueException {
+        String topic = consumePartition.getTopic();
+        String app = consumePartition.getApp();
+        short partition = consumePartition.getPartition();
+
+        // 查询应答位置
+        long lastMsgAckIndex = positionManager.getLastMsgAckIndex(TopicName.parse(topic), app, partition);
+        List<Position> positions = sortPositions(consumePartition);
+        Position currentPosition = null;
+
+        if (CollectionUtils.isEmpty(positions)) {
+            logger.warn("current position is null, positions is empty, partition: {}, startIndex: {}, endIndex: {}",
+                    partition, indexArr[0], indexArr[1]);
+            return;
+        }
+
+        for (Position position : positions) {
+            if (position.getAckStartIndex() == indexArr[0] && position.getAckCurIndex() == indexArr[1]) {
+                currentPosition = position;
+                break;
             }
+        }
+
+        if (currentPosition == null) {
+            logger.warn("current position is null, partition: {}, startIndex: {}, endIndex: {}",
+                    partition, indexArr[0], indexArr[1]);
+            return;
+        }
+
+        if (currentPosition.isAck()) {
+            return;
+        }
+
+        // 排序、并返回第一个分区段
+        Position headPosition = positions.get(0);
+        currentPosition.setAck(true);
+
+        if (headPosition.isAck() && headPosition.getAckStartIndex() == lastMsgAckIndex) {
+            List<Position> committedPositions = Lists.newLinkedList();
+
+            for (int i = 0; i < positions.size(); i++) {
+                Position position = positions.get(i);
+                if (position.isAck() && position.getAckStartIndex() == lastMsgAckIndex) {
+                    lastMsgAckIndex = position.getAckCurIndex() + 1;
+                    committedPositions.add(position);
+                } else {
+                    break;
+                }
+            }
+
+            if (committedPositions.isEmpty()) {
+                logger.info("commit index failed, partition: {}, head: {}, index: {}",
+                        partition, headPosition.getAckStartIndex(), lastMsgAckIndex);
+            } else {
+                positions.removeAll(committedPositions);
+                concurrentConsumeCache.put(consumePartition, positions);
+                positionManager.updateLastMsgAckIndex(TopicName.parse(topic), app, partition, lastMsgAckIndex, false);
+
+                logger.debug("commit index, partition: {}, index: {}", partition, lastMsgAckIndex);
+            }
+        } else {
+            logger.debug("commit index failed, partition: {}, head: {}, index: {}, ack: {}", partition, headPosition.getAckStartIndex(), lastMsgAckIndex, headPosition.isAck());
         }
     }
 
@@ -790,6 +873,9 @@ class ConcurrentConsumption extends Service {
             concurrentConsumeCache.put(consumePartition, positionList);
         }
         Position position = new Position(ackStartIndex, ackCurIndex, -1, -1);
+        if (positionList.contains(position)) {
+            return;
+        }
         positionList.add(position);
     }
 
@@ -800,17 +886,15 @@ class ConcurrentConsumption extends Service {
      * @param consumePartition 消费分区
      * @return 应答位置
      */
-    private Position sortAndMerge(ConsumePartition consumePartition) {
+    private List<Position> sortPositions(ConsumePartition consumePartition) {
         List<Position> positionList = concurrentConsumeCache.get(consumePartition);
-        if (positionList.size() == 0) {
+        if (CollectionUtils.isEmpty(positionList)) {
             return null;
         }
         // 将分区段按照拉取消息的起始序号进行排序
         List<Position> sortPositionList = sortByAckStartIndex(positionList);
-        // 将连续相邻的分区段合并
-        List<Position> mergePositionList = mergeSequenceSegment(sortPositionList);
-        concurrentConsumeCache.put(consumePartition, mergePositionList);
-        return mergePositionList.get(0);
+        concurrentConsumeCache.put(consumePartition, sortPositionList);
+        return sortPositionList;
     }
 
     /**
@@ -820,7 +904,7 @@ class ConcurrentConsumption extends Service {
      * @return
      */
     private List<Position> sortByAckStartIndex(List<Position> list) {
-        return list.stream().sorted((thisPosition, thatPosition) -> (int) (thisPosition.getAckStartIndex() - thatPosition.getAckStartIndex())).collect(Collectors.toList());
+        return Lists.newArrayList(list).stream().sorted((thisPosition, thatPosition) -> Long.compare(thisPosition.getAckStartIndex(), thatPosition.getAckStartIndex())).collect(Collectors.toList());
     }
 
     /**
@@ -838,29 +922,25 @@ class ConcurrentConsumption extends Service {
             return sortPositionList;
         }
         List<Position> mergeList = new ArrayList<>();
-        // 初始化两个待比较的值
-        Position last = null;
-        Position next = null;
-        int i = 0;
-        int size = sortPositionList.size();
-        while (i < size) {
-            if (i == 0) {
-                last = sortPositionList.get(i);
-                next = sortPositionList.get(i += 1);
+
+        for (int i = 0; i < sortPositionList.size(); i++) {
+            Position current = sortPositionList.get(i);
+            Position last = current;
+            int skipIndex = 0;
+
+            for (int j = i + 1; j < sortPositionList.size(); j++) {
+                Position next = sortPositionList.get(j);
+                Position mergedPosition = tryMergeTwoSegment(last, next);
+                if (mergedPosition != null) {
+                    last = mergedPosition;
+                    skipIndex ++;
+                } else {
+                    break;
+                }
             }
-            Position newPosition = tryMergeTwoSegment(last, next);
-            if (newPosition == null) {
-                mergeList.add(last);
-                last = next;
-            } else {
-                last = newPosition;
-            }
-            if (i + 1 < size) {
-                next = sortPositionList.get(i + 1);
-            } else {
-                mergeList.add(last);
-            }
-            i++;
+
+            mergeList.add(last);
+            i += skipIndex;
         }
 
         return mergeList;
@@ -1006,12 +1086,12 @@ class ConcurrentConsumption extends Service {
 
         @Override
         public void onEvent(SessionManager.SessionEvent event) {
-            if (event.getType() == SessionManager.SessionEventType.RemoveConsumer) {
-                logger.info("Listen SessionManager.SessionEventType.RemoveConsumer, Event:[{}]", event);
-
-                Consumer consumer = event.getConsumer();
-                movePartitionSegmentToExpire(consumer);
-            }
+//            if (event.getType() == SessionManager.SessionEventType.RemoveConsumer) {
+//                logger.info("Listen SessionManager.SessionEventType.RemoveConsumer, Event:[{}]", event);
+//
+//                Consumer consumer = event.getConsumer();
+//                movePartitionSegmentToExpire(consumer);
+//            }
         }
 
         /**
@@ -1032,5 +1112,4 @@ class ConcurrentConsumption extends Service {
             }
         }
     }
-
 }

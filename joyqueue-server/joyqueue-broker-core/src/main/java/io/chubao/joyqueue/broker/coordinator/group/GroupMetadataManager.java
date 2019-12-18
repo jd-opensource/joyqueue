@@ -48,7 +48,6 @@ public class GroupMetadataManager {
         this.config = config;
         this.groupCache = CacheBuilder.newBuilder()
                 .expireAfterAccess(config.getGroupExpireTime(), TimeUnit.MILLISECONDS)
-                .maximumSize(config.getGroupMaxNum())
                 .build();
     }
 

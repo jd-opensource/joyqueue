@@ -38,7 +38,7 @@ public interface BrokerClusterQuery<C> {
      * @param logkey
      * @return
      */
-    Future<Map<String, String>> asyncQueryAllBroker(String namespace,String topic,Integer groupNo, String path,String logkey) throws Exception;
+    Future<Map<String, String>> asyncQueryAllBroker(String namespace,String topic,Integer groupNo, String path,String logkey);
     /**
      * @param condition  查询条件
      * @param provider   provider path and result key

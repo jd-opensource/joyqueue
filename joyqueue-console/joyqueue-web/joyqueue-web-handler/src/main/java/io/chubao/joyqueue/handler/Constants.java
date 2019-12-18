@@ -83,6 +83,10 @@ public interface Constants {
      */
     String APP_USER = "appUser";
     /**
+     * 角色
+     */
+    String ROLE = "role";
+    /**
      * 用户会话的键
      */
     String USER_KEY = Environment.USER_KEY;

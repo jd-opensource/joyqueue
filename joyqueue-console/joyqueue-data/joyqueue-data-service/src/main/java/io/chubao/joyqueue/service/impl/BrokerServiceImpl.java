@@ -15,21 +15,21 @@
  */
 package io.chubao.joyqueue.service.impl;
 
+import io.chubao.joyqueue.domain.TopicName;
 import io.chubao.joyqueue.model.ListQuery;
 import io.chubao.joyqueue.model.PageResult;
 import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.model.domain.Broker;
 import io.chubao.joyqueue.model.domain.BrokerGroupRelated;
 import io.chubao.joyqueue.model.domain.PartitionGroupReplica;
-import io.chubao.joyqueue.model.domain.Topic;
 import io.chubao.joyqueue.model.query.QBroker;
 import io.chubao.joyqueue.model.query.QBrokerGroupRelated;
-import io.chubao.joyqueue.model.query.QPartitionGroupReplica;
 import io.chubao.joyqueue.nsr.BrokerNameServerService;
 import io.chubao.joyqueue.service.BrokerGroupRelatedService;
 import io.chubao.joyqueue.service.BrokerService;
 import io.chubao.joyqueue.service.PartitionGroupReplicaService;
 import io.chubao.joyqueue.util.NullUtil;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,24 +60,23 @@ public class BrokerServiceImpl implements BrokerService {
     private PartitionGroupReplicaService partitionGroupReplicaService;
 
     @Override
-    public Broker findById(Long id) throws Exception {
+    public Broker findById(Integer id) throws Exception {
         return brokerNameServerService.findById(id);
     }
 
     @Override
     public List<Broker> findByTopic(String topic) throws Exception {
-        QPartitionGroupReplica qReplica = new QPartitionGroupReplica();
-        qReplica.setTopic(new Topic(topic));
-        List<PartitionGroupReplica> replicas = partitionGroupReplicaService.findByQuery(qReplica);
+        TopicName topicName = TopicName.parse(topic);
+        List<PartitionGroupReplica> replicas = partitionGroupReplicaService.getByTopic(topicName.getCode(), topicName.getNamespace());
         if (NullUtil.isEmpty(replicas)) {
             logger.error(String.format("can not find partitionGroup by topic, topic is %s", topic));
             return null;
         }
         return replicas.stream().map(replica -> {
                 try {
-                    return this.findById(new Long(replica.getBrokerId()));
+                    return this.findById(replica.getBrokerId());
                 } catch (Exception e) {
-                    logger.error(String.format("can not find broker with id %s"), replica.getBroker().getId());
+                    logger.error(String.format("can not find broker with id %s"), replica.getBrokerId());
                     return null;
                 }
             }).collect(Collectors.collectingAndThen(Collectors.toCollection(() ->
@@ -85,32 +84,19 @@ public class BrokerServiceImpl implements BrokerService {
     }
 
     @Override
-    public PageResult<Broker> findByQuery(QPageQuery<QBroker> query) {
-        try {
-            if(query != null && query.getQuery() != null) {
-                List<Long> brokerIds = getBrokerIdByGroupIds(query.getQuery());
-                if (brokerIds == null) {
-                    return PageResult.empty();
-                }
-                query.getQuery().setInBrokerIds(brokerIds);
+    public List<Broker> findByGroup(long group) throws Exception {
+        QBrokerGroupRelated qBrokerGroupRelated = new QBrokerGroupRelated();
+        qBrokerGroupRelated.setBrokerGroupId(group);
+        List<BrokerGroupRelated> brokerGroupRelateds = brokerGroupRelatedService.findByQuery(new ListQuery<>(qBrokerGroupRelated));
+
+        List<Integer> brokerIds = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(brokerGroupRelateds)) {
+            for (BrokerGroupRelated brokerGroupRelated : brokerGroupRelateds) {
+                brokerIds.add(Integer.valueOf(String.valueOf(brokerGroupRelated.getId())));
             }
-            PageResult<Broker> pageResult = brokerNameServerService.findByQuery(query);
-            if (pageResult !=null && pageResult.getResult() != null && pageResult.getResult().size() >0) {
-                List<Broker> brokerList = pageResult.getResult();
-                brokerList.stream().map(broker -> {
-                    BrokerGroupRelated brokerRelated = brokerGroupRelatedService.findById(broker.getId());
-                    if (brokerRelated != null && brokerRelated.getGroup() != null) {
-                        broker.setGroup(brokerRelated.getGroup());
-                        broker.setStatus(0);
-                    }
-                    return broker;
-                }).collect(Collectors.toList());
-            }
-            return pageResult;
-        } catch (Exception e) {
-            logger.error("findByQuery error",e);
-            throw new RuntimeException("findByQuery error",e);
         }
+
+        return getByIdsBroker(brokerIds);
     }
 
     @Override
@@ -144,14 +130,6 @@ public class BrokerServiceImpl implements BrokerService {
     }
 
     @Override
-    public List<Broker> findByQuery(QBroker query) throws Exception {
-        if(query != null) {
-            query.setInBrokerIds(getBrokerIdByGroupIds(query));
-        }
-        return brokerNameServerService.findByQuery(query);
-    }
-
-    @Override
     public List<Broker> queryBrokerList(QBroker qBroker) throws Exception {
         ListQuery<QBrokerGroupRelated> brokerListQuery = new ListQuery<>();
         QBrokerGroupRelated qBrokerGroupRelated = new QBrokerGroupRelated();
@@ -159,14 +137,14 @@ public class BrokerServiceImpl implements BrokerService {
         brokerListQuery.setQuery(qBrokerGroupRelated);
         List<BrokerGroupRelated> brokerList = brokerGroupRelatedService.findByQuery(brokerListQuery);
         if (brokerList != null && brokerList.size() > 0) {
-            List<Long> brokerIdList = brokerList.stream().map(broker -> broker.getId()).collect(Collectors.toList());
+            List<Integer> brokerIdList = brokerList.stream().map(broker -> Integer.valueOf(String.valueOf(broker.getId()))).collect(Collectors.toList());
             qBroker.setInBrokerIds(brokerIdList);
         } else {
             if (qBrokerGroupRelated.getGroup() != null) {
                 return new ArrayList<>();
             }
         }
-        return brokerNameServerService.findByQuery(qBroker);
+        return brokerNameServerService.getByIdsBroker(qBroker.getInBrokerIds());
     }
 
     /**
@@ -210,5 +188,23 @@ public class BrokerServiceImpl implements BrokerService {
     @Override
     public List<Broker> syncBrokers() throws Exception {
         return brokerNameServerService.syncBrokers();
+    }
+
+    @Override
+    public PageResult<Broker> search(QPageQuery<QBroker> qPageQuery) throws Exception {
+        // TODO 分组处理
+        PageResult<Broker> pageResult = brokerNameServerService.search(qPageQuery);
+        if (pageResult !=null && pageResult.getResult() != null && pageResult.getResult().size() >0) {
+            List<Broker> brokerList = pageResult.getResult();
+            brokerList.stream().map(broker -> {
+                BrokerGroupRelated brokerRelated = brokerGroupRelatedService.findById(broker.getId());
+                if (brokerRelated != null && brokerRelated.getGroup() != null) {
+                    broker.setGroup(brokerRelated.getGroup());
+                    broker.setStatus(0);
+                }
+                return broker;
+            }).collect(Collectors.toList());
+        }
+        return pageResult;
     }
 }

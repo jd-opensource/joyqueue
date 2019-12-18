@@ -47,5 +47,6 @@ public interface BrokerMonitorInternalService {
      *
      * @return
      */
+    @Deprecated
     BrokerStartupInfo getStartInfo();
 }

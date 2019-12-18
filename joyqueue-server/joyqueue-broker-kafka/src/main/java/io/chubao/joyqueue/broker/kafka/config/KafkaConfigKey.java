@@ -40,7 +40,7 @@ public enum KafkaConfigKey implements PropertyDef {
     OFFSET_SYNC_TIMEOUT("kafka.offset.sync.timeout", 1000 * 3, Type.INT),
 
     // 事务同步超时
-    TRANSACTION_SYNC_TIMEOUT("kafka.offset.sync.timeout", 1000 * 3, Type.INT),
+    TRANSACTION_SYNC_TIMEOUT("kafka.transaction.sync.timeout", 1000 * 3, Type.INT),
     // 事务超时
     TRANSACTION_TIMEOUT("kafka.transaction.timeout", 1000 * 60 * 30, Type.INT),
     // 事务日志写入级别
@@ -56,16 +56,16 @@ public enum KafkaConfigKey implements PropertyDef {
     // 事务日志app
     TRANSACTION_LOG_APP("coordinator.transaction.log.app", "__transaction_log", PropertyDef.Type.STRING),
 
-    // 拉取批量大小
-    FETCH_BATCH_SIZE("kafka.fetch.batch.size", 10, Type.INT),
     // 元数据延迟
-    METADATA_DELAY("kafka.metadata.delay", true, Type.BOOLEAN),
+    METADATA_DELAY_ENABLE("kafka.metadata.delay.enable", true, Type.BOOLEAN),
+    METADATA_DELAY("kafka.metadata.delay", 1000 * 1, Type.INT),
     // 拉取延迟
     FETCH_DELAY("kafka.fetch.delay", true, Type.BOOLEAN),
     // 写入超时
     PRODUCE_TIMEOUT("kafka.produce.timeout", 1000 * 3, Type.INT),
-    // 通信acquire超时
-    TRANSPORT_ACQUIRE_TIMEOUT("kafka.transport.acquire.timeout", 1000 * 3, Type.INT),
+    // 生产延迟
+    PRODUCE_DELAY_ENABLE("kafka.produce.delay.enable", true, Type.BOOLEAN),
+    PRODUCE_DELAY("kafka.produce.delay", 1000 * 1, Type.INT),
     // 详细日志
     LOG_DETAIL("kafka.log.detail", false, Type.BOOLEAN),
     LOG_DETAIL_PREFIX("kafka.log.detail.", false, Type.BOOLEAN),

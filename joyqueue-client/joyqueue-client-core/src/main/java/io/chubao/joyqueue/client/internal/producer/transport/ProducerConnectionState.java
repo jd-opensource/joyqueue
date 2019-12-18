@@ -20,7 +20,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import io.chubao.joyqueue.network.command.AddProducerRequest;
 import io.chubao.joyqueue.network.command.RemoveProducerRequest;
-import io.chubao.joyqueue.network.transport.TransportAttribute;
 import io.chubao.joyqueue.network.transport.command.JoyQueueCommand;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -45,14 +44,28 @@ public class ProducerConnectionState {
 
     protected static final Logger logger = LoggerFactory.getLogger(ProducerConnectionState.class);
 
-    private static final String ADDED_PRODUCER_KEY = "_CLIENT_ADDED_PRODUCER_";
     private static final AtomicLong SEQUENCE = new AtomicLong();
 
     private ProducerClient producerClient;
+    private ConcurrentMap<String, Set<String>> producerMap = Maps.newConcurrentMap();
     private ReentrantReadWriteLock producerLock = new ReentrantReadWriteLock();
 
     public ProducerConnectionState(ProducerClient producerClient) {
         this.producerClient = producerClient;
+    }
+
+    public void handleAddProducers() {
+        if (MapUtils.isEmpty(producerMap)) {
+            return;
+        }
+        try {
+            for (Map.Entry<String, Set<String>> entry : producerMap.entrySet()) {
+                doHandleAddProducers(Lists.newArrayList(entry.getValue()), entry.getKey());
+            }
+        } catch (Exception e) {
+            logger.error("add producer exception, producerMap: {}", producerMap, e);
+            producerMap.clear();
+        }
     }
 
     public void handleAddProducers(Collection<String> topics, String app) {
@@ -107,11 +120,10 @@ public class ProducerConnectionState {
     }
 
     public void handleRemoveProducers() {
-        ConcurrentMap<String, Set<String>> appTopicMap = getOrCreateAddedTopicMap();
-        if (MapUtils.isEmpty(appTopicMap)) {
+        if (MapUtils.isEmpty(producerMap)) {
             return;
         }
-        for (Map.Entry<String, Set<String>> entry : appTopicMap.entrySet()) {
+        for (Map.Entry<String, Set<String>> entry : producerMap.entrySet()) {
             doHandleRemoveProducers(Lists.newArrayList(entry.getValue()), entry.getKey());
         }
     }
@@ -145,32 +157,15 @@ public class ProducerConnectionState {
         }
     }
 
-    protected ConcurrentMap<String, Set<String>> getOrCreateAddedTopicMap() {
-        TransportAttribute attribute = producerClient.getAttribute();
-        return attribute.get(ADDED_PRODUCER_KEY);
-    }
-
     protected Set<String> getOrCreateAddedTopicSet(String app) {
-        TransportAttribute attribute = producerClient.getAttribute();
-        ConcurrentMap<String, Set<String>> appMap = attribute.get(ADDED_PRODUCER_KEY);
-
-        if (appMap == null) {
-            appMap = Maps.newConcurrentMap();
-            ConcurrentMap<String, Set<String>> oldAppMap = attribute.putIfAbsent(ADDED_PRODUCER_KEY, appMap);
-            if (oldAppMap != null) {
-                appMap = oldAppMap;
-            }
-        }
-
-        Set<String> topicSet = appMap.get(app);
+        Set<String> topicSet = producerMap.get(app);
         if (topicSet == null) {
             topicSet = Sets.newConcurrentHashSet();
-            Set<String> oldTopicSet = appMap.putIfAbsent(app, topicSet);
+            Set<String> oldTopicSet = producerMap.putIfAbsent(app, topicSet);
             if (oldTopicSet != null) {
                 topicSet = oldTopicSet;
             }
         }
-
         return topicSet;
     }
 }

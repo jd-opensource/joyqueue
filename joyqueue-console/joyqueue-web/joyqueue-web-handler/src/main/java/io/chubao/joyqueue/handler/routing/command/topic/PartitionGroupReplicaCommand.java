@@ -15,12 +15,17 @@
  */
 package io.chubao.joyqueue.handler.routing.command.topic;
 
-import com.google.common.primitives.Ints;
+import com.jd.laf.binding.annotation.Value;
+import com.jd.laf.web.vertx.annotation.Body;
+import com.jd.laf.web.vertx.annotation.Path;
+import com.jd.laf.web.vertx.response.Response;
+import com.jd.laf.web.vertx.response.Responses;
 import io.chubao.joyqueue.handler.annotation.PageQuery;
-import io.chubao.joyqueue.model.PageResult;
-import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.handler.error.ConfigException;
 import io.chubao.joyqueue.handler.routing.command.NsrCommandSupport;
+import io.chubao.joyqueue.model.PageResult;
+import io.chubao.joyqueue.model.Pagination;
+import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.model.domain.Broker;
 import io.chubao.joyqueue.model.domain.PartitionGroupReplica;
 import io.chubao.joyqueue.model.domain.TopicPartitionGroup;
@@ -29,13 +34,10 @@ import io.chubao.joyqueue.model.query.QPartitionGroupReplica;
 import io.chubao.joyqueue.service.BrokerService;
 import io.chubao.joyqueue.service.PartitionGroupReplicaService;
 import io.chubao.joyqueue.service.TopicPartitionGroupService;
-import io.chubao.joyqueue.util.NullUtil;
-import com.jd.laf.binding.annotation.Value;
-import com.jd.laf.web.vertx.annotation.Body;
-import com.jd.laf.web.vertx.annotation.Path;
-import com.jd.laf.web.vertx.response.Response;
-import com.jd.laf.web.vertx.response.Responses;
+import org.apache.commons.collections.CollectionUtils;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -47,32 +49,71 @@ public class PartitionGroupReplicaCommand extends NsrCommandSupport<PartitionGro
     private BrokerService brokerService;
     @Value(nullable = false)
     private TopicPartitionGroupService topicPartitionGroupService;
-    @Path("searchBrokerToScale")
-    public Response toScaleSearch(@PageQuery QPageQuery<QPartitionGroupReplica> qPageQuery) throws Exception {
-        List<PartitionGroupReplica> list = service.findByQuery(qPageQuery.getQuery());
-        QPageQuery<QBroker> brokerQuery = new QPageQuery(qPageQuery.getPagination(),new QBroker());
-        if (NullUtil.isNotEmpty(list)) {
-            brokerQuery.getQuery().setNotInBrokerIds(Ints.asList(list.stream().mapToInt(
-                    replica -> Long.valueOf(replica.getBrokerId()).intValue()).toArray()));
-            Broker broker = list.get(0).getBroker();
-            if (broker != null && broker.getGroup() != null) {
-                brokerQuery.getQuery().setBrokerGroupId(broker.getGroup().getId());
+
+    @Path("search")
+    public Response pageQuery(@PageQuery QPageQuery<QPartitionGroupReplica> qPageQuery) throws Exception {
+        List<PartitionGroupReplica> partitionGroupReplicas = new LinkedList<>();
+        QPartitionGroupReplica query = qPageQuery.getQuery();
+
+        if (query.getTopic() != null) {
+            List<PartitionGroupReplica> queryResult = service.getByTopicAndGroup(query.getTopic().getCode(), query.getNamespace().getCode(), query.getGroupNo());
+            if (queryResult != null) {
+                for (PartitionGroupReplica partitionGroupReplica : queryResult) {
+                    Broker broker = brokerService.findById(partitionGroupReplica.getBrokerId());
+                    if (broker != null) {
+                        partitionGroupReplica.setBroker(broker);
+                        partitionGroupReplicas.add(partitionGroupReplica);
+                    }
+                }
             }
         }
-        brokerQuery.getQuery().setKeyword(qPageQuery.getQuery().getKeyword());
-        PageResult<Broker> result = brokerService.findByQuery(brokerQuery);
+
+        Pagination pagination = qPageQuery.getPagination();
+        pagination.setTotalRecord(partitionGroupReplicas.size());
+
+        PageResult<PartitionGroupReplica> result = new PageResult();
+        result.setPagination(pagination);
+        result.setResult(partitionGroupReplicas);
         return Responses.success(result.getPagination(), result.getResult());
     }
+
+    @Path("searchBrokerToScale")
+    public Response toScaleSearch(@PageQuery QPageQuery<QPartitionGroupReplica> qPageQuery) throws Exception {
+        QPartitionGroupReplica query = qPageQuery.getQuery();
+        List<PartitionGroupReplica> partitionGroupReplicas = service.getByTopicAndGroup(query.getTopic().getCode(), query.getNamespace().getCode(), query.getGroupNo());
+
+        QPageQuery<QBroker> brokerQuery = new QPageQuery(qPageQuery.getPagination(), new QBroker());
+        brokerQuery.getQuery().setKeyword(qPageQuery.getQuery().getKeyword());
+        PageResult<Broker> brokerPage = brokerService.search(brokerQuery);
+        List<Broker> brokers = new ArrayList<>();
+
+        if (CollectionUtils.isNotEmpty(partitionGroupReplicas)) {
+            for (Broker broker : brokerPage.getResult()) {
+                boolean isMatch = false;
+                for (PartitionGroupReplica partitionGroupReplica : partitionGroupReplicas) {
+                    if (partitionGroupReplica.getBrokerId() == broker.getId()) {
+                        isMatch = true;
+                        break;
+                    }
+                }
+                if (!isMatch) {
+                    brokers.add(broker);
+                }
+            }
+        } else {
+            brokers.addAll(brokerPage.getResult());
+        }
+
+        return Responses.success(brokerPage.getPagination(), brokers);
+    }
+
     @Path("searchBrokerToAddNew")
     public Response toAddNewPartitionGroupSearch(@PageQuery QPageQuery<QPartitionGroupReplica> qPageQuery) throws Exception {
-        List<PartitionGroupReplica > list = service.findByQuery(qPageQuery.getQuery());
-        QPageQuery<QBroker> brokerQuery = new QPageQuery(qPageQuery.getPagination(),new QBroker());
-        if(null!=list && list.size()>0 && list.get(0).getBroker() != null) {
-            brokerQuery.getQuery().setBrokerGroupId(list.get(0).getBroker().getGroup().getId());
-        }
-        PageResult<Broker> result = brokerService.findByQuery(brokerQuery);
-        return Responses.success(result.getPagination(), result.getResult());
+        QPageQuery<QBroker> brokerQuery = new QPageQuery(qPageQuery.getPagination(), new QBroker());
+        PageResult<Broker> brokerPage = brokerService.search(brokerQuery);
+        return Responses.success(brokerPage.getPagination(), brokerPage.getResult());
     }
+
     @Override
     @Path("add")
     public Response add(@Body PartitionGroupReplica model) throws Exception {
@@ -99,6 +140,7 @@ public class PartitionGroupReplicaCommand extends NsrCommandSupport<PartitionGro
         }
         return Responses.success(replica);
     }
+
     @Path("leader")
     public Response leaderChange(@Body PartitionGroupReplica model) throws Exception {
         TopicPartitionGroup topicPartitionGroup = new TopicPartitionGroup();

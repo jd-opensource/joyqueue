@@ -62,34 +62,35 @@ public class FindCoordinatorRequestHandler extends AbstractKafkaCommandHandler i
     public Command handle(Transport transport, Command command) {
         FindCoordinatorRequest findCoordinatorRequest = (FindCoordinatorRequest) command.getPayload();
         CoordinatorType coordinatorType = ObjectUtils.defaultIfNull(findCoordinatorRequest.getCoordinatorType(), CoordinatorType.GROUP);
-        String coordinatorKey = findCoordinatorRequest.getCoordinatorKey();
+//        String coordinatorKey = findCoordinatorRequest.getCoordinatorKey();
+        String coordinatorKey = findCoordinatorRequest.getClientId();
         if (coordinatorType.equals(CoordinatorType.TRANSACTION)) {
             coordinatorKey = findCoordinatorRequest.getClientId();
         }
         coordinatorKey = KafkaClientHelper.parseClient(coordinatorKey);
 
         if (StringUtils.isBlank(coordinatorKey)) {
-            logger.warn("coordinatorKey error, coordinatorKey: {}", coordinatorKey);
+            logger.warn("coordinatorKey error, coordinatorKey: {}, transport: {}", coordinatorKey, transport);
             return new Command(new FindCoordinatorResponse(KafkaErrorCode.INVALID_GROUP_ID.getCode(), KafkaBroker.INVALID));
         }
 
         Broker coordinator = null;
         if (coordinatorType.equals(CoordinatorType.GROUP)) {
             if (!nameService.hasSubscribe(coordinatorKey, Subscription.Type.CONSUMPTION)) {
-                logger.warn("find subscribe for coordinatorKey {}, subscribe not exist", coordinatorKey);
+                logger.warn("find subscribe for coordinatorKey {}, subscribe not exist, {}", coordinatorKey, transport);
                 return new Command(new FindCoordinatorResponse(KafkaErrorCode.GROUP_AUTHORIZATION_FAILED.getCode(), KafkaBroker.INVALID));
             }
             coordinator = groupCoordinator.findCoordinator(coordinatorKey);
         } else if (coordinatorType.equals(CoordinatorType.TRANSACTION)) {
             if (!nameService.hasSubscribe(coordinatorKey, Subscription.Type.PRODUCTION)) {
-                logger.warn("find subscribe for coordinatorKey {}, subscribe not exist", coordinatorKey);
+                logger.warn("find subscribe for coordinatorKey {}, subscribe not exist, {}", coordinatorKey, transport);
                 return new Command(new FindCoordinatorResponse(KafkaErrorCode.TRANSACTIONAL_ID_AUTHORIZATION_FAILED.getCode(), KafkaBroker.INVALID));
             }
             coordinator = transactionCoordinator.findCoordinator(coordinatorKey);
         }
 
         if (coordinator == null) {
-            logger.error("find coordinator for coordinatorKey {}, coordinator is null", coordinatorKey);
+            logger.error("find coordinator for coordinatorKey {}, coordinator is null, {}", coordinatorKey, transport);
             return new Command(new FindCoordinatorResponse(KafkaErrorCode.COORDINATOR_NOT_AVAILABLE.getCode(), KafkaBroker.INVALID));
         }
 

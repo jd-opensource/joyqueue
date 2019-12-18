@@ -48,10 +48,6 @@ public class CoordinatorConfig {
         return PropertySupplier.getValue(propertySupplier, CoordinatorConfigKey.GROUP_EXPIRE_TIME);
     }
 
-    public int getGroupMaxNum() {
-        return PropertySupplier.getValue(propertySupplier, CoordinatorConfigKey.GROUP_MAX_NUM);
-    }
-
     public TopicName getTransactionTopic() {
         return TopicName.parse(PropertySupplier.getValue(propertySupplier, CoordinatorConfigKey.TRANSACTION_TOPIC_CODE));
     }
@@ -69,7 +65,7 @@ public class CoordinatorConfig {
     }
 
     public int getTransactionMaxNum() {
-        return PropertySupplier.getValue(propertySupplier, CoordinatorConfigKey.GROUP_MAX_NUM);
+        return PropertySupplier.getValue(propertySupplier, CoordinatorConfigKey.TRANSACTION_MAX_NUM);
     }
 
     public int getSessionTimeout() {

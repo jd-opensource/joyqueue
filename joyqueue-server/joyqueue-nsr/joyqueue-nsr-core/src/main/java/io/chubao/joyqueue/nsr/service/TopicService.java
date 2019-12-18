@@ -29,8 +29,17 @@ import java.util.List;
  * @author  lixiaobin6
  * 下午3:11 2018/8/13
  */
-public interface TopicService extends DataService<Topic, TopicQuery, String> {
+public interface TopicService {
+
     /**
+     * 根据id查询
+     * @param id
+     * @return
+     */
+    Topic getById(String id);
+
+    /**
+     * 根据code查询
      * @param namespace
      * @param topic
      * @return
@@ -38,11 +47,25 @@ public interface TopicService extends DataService<Topic, TopicQuery, String> {
     Topic getTopicByCode(String namespace, String topic);
 
     /**
+     * 分页查询
+     *
+     * @param pageQuery
+     * @return
+     */
+    PageResult<Topic> search(QPageQuery<TopicQuery> pageQuery);
+
+    /**
      * 查询未订阅消息
      * @param pageQuery
      * @return
      */
     PageResult<Topic> findUnsubscribedByQuery(QPageQuery<TopicQuery> pageQuery);
+
+    /**
+     * 查询所有主题
+     * @return
+     */
+    List<Topic> getAll();
 
 
     /**
@@ -112,6 +135,12 @@ public interface TopicService extends DataService<Topic, TopicQuery, String> {
     Collection<Integer> updatePartitionGroup(PartitionGroup group);
 
     /**
+     * leader上报
+     * @param group
+     */
+    void leaderReport(PartitionGroup group);
+
+    /**
      * 指定leader
      * @param group
      */
@@ -124,5 +153,12 @@ public interface TopicService extends DataService<Topic, TopicQuery, String> {
      *
      * @return
      */
-    List<PartitionGroup> getPartitionGroup(String namesapce, String topic, Object[] groups);
+    List<PartitionGroup> getPartitionGroup(String namespace, String topic, Object[] groups);
+
+    /**
+     * 更新主题
+     * @param topic
+     * @return
+     */
+    Topic update(Topic topic);
 }

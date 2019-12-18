@@ -15,23 +15,27 @@
  */
 package io.chubao.joyqueue.client.internal.transport;
 
+import com.google.common.collect.Lists;
 import io.chubao.joyqueue.client.internal.exception.ClientException;
 import io.chubao.joyqueue.client.internal.nameserver.NameServerConfig;
 import io.chubao.joyqueue.client.internal.transport.config.TransportConfig;
 import io.chubao.joyqueue.exception.JoyQueueException;
 import io.chubao.joyqueue.network.command.HeartbeatRequest;
 import io.chubao.joyqueue.network.domain.BrokerNode;
+import io.chubao.joyqueue.network.event.TransportEvent;
 import io.chubao.joyqueue.network.transport.Transport;
 import io.chubao.joyqueue.network.transport.TransportAttribute;
 import io.chubao.joyqueue.network.transport.TransportClient;
 import io.chubao.joyqueue.network.transport.command.Command;
 import io.chubao.joyqueue.network.transport.command.CommandCallback;
 import io.chubao.joyqueue.network.transport.command.JoyQueueCommand;
+import io.chubao.joyqueue.toolkit.concurrent.EventListener;
 import io.chubao.joyqueue.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
+import java.util.List;
 import java.util.concurrent.Future;
 
 /**
@@ -51,6 +55,7 @@ public class Client extends Service {
     private Transport transport;
 
     private ClientConnectionState connectionState;
+    private List<EventListener<TransportEvent>> listeners = Lists.newCopyOnWriteArrayList();
 
     public Client(BrokerNode node, TransportConfig transportConfig, TransportClient transportClient, NameServerConfig nameServerConfig) {
         this.node = node;
@@ -140,6 +145,27 @@ public class Client extends Service {
         connectionState.handleDisconnection();
     }
 
+    @Override
+    protected void doStart() throws Exception {
+        if (node.getPort() <= 0) {
+            transport = transportClient.createTransport(node.getHost(), transportConfig.getSendTimeout());
+        } else {
+            transport = transportClient.createTransport(new InetSocketAddress(node.getHost(), node.getPort()), transportConfig.getSendTimeout());
+        }
+        handleAddConnection();
+        addListener(new ClientConnectionListener(transport, this));
+    }
+
+    @Override
+    protected void doStop() {
+        if (transport != null) {
+            transport.stop();
+        }
+        for (EventListener<TransportEvent> listener : listeners) {
+            transportClient.removeListener(listener);
+        }
+    }
+
     public ClientState getState() {
         switch (transport.state()) {
             case CONNECTED: {
@@ -168,19 +194,13 @@ public class Client extends Service {
         return connectionState.getLastUseTime();
     }
 
-    @Override
-    protected void doStart() throws Exception {
-        if (node.getPort() <= 0) {
-            transport = transportClient.createTransport(node.getHost(), transportConfig.getSendTimeout());
-        } else {
-            transport = transportClient.createTransport(new InetSocketAddress(node.getHost(), node.getPort()), transportConfig.getSendTimeout());
-        }
+    public void addListener(EventListener<TransportEvent> listener) {
+        listeners.add(listener);
+        transportClient.addListener(listener);
     }
 
-    @Override
-    protected void doStop() {
-        if (transport != null) {
-            transport.stop();
-        }
+    public void removeListener(EventListener<TransportEvent> listener) {
+        listeners.remove(listener);
+        transportClient.removeListener(listener);
     }
 }

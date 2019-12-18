@@ -85,6 +85,19 @@ public class RetryQueryCondition {
     public void setPagination(Pagination pagination) {
         this.pagination = pagination;
     }
+
+    @Override
+    public String toString() {
+        return "RetryQueryCondition{" +
+                "topic='" + topic + '\'' +
+                ", app='" + app + '\'' +
+                ", status=" + status +
+                ", startTime=" + startTime +
+                ", endTime=" + endTime +
+                ", businessId='" + businessId + '\'' +
+                ", pagination=" + pagination +
+                '}';
+    }
 }
 
 

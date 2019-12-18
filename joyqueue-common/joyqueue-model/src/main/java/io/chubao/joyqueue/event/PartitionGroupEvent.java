@@ -17,6 +17,7 @@ package io.chubao.joyqueue.event;
 
 import io.chubao.joyqueue.domain.TopicName;
 
+@Deprecated
 public class PartitionGroupEvent extends MetaEvent {
     private TopicName topic;
     private Integer partitionGroup;

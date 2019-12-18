@@ -86,7 +86,7 @@ public class ProduceMessagePrepareRequestHandler implements JoyQueueCommandHandl
         if (!checkResult.isSuccess()) {
             logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport, produceMessagePrepareRequest,
                     produceMessagePrepareRequest.getApp(), checkResult.getJoyQueueCode());
-            return new Command(new ProduceMessagePrepareResponse(CheckResultConverter.convertCommonCode(checkResult.getJoyQueueCode())));
+            return new Command(new ProduceMessagePrepareResponse(CheckResultConverter.convertCommonCode(command.getHeader().getVersion(), checkResult.getJoyQueueCode())));
         }
 
         ProduceMessagePrepareResponse produceMessagePrepareResponse = produceMessagePrepare(producer, connection, produceMessagePrepareRequest);

@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -193,6 +194,29 @@ public class PartitionGroup implements Serializable {
 
     public void setLearners(Set<Integer> learners) {
         this.learners = learners;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || !(o instanceof PartitionGroup)) return false;
+        PartitionGroup that = (PartitionGroup) o;
+        return group == that.group &&
+                Objects.equals(topic, that.topic) &&
+                Objects.equals(partitions, that.partitions) &&
+                Objects.equals(leader, that.leader) &&
+                Objects.equals(recLeader, that.recLeader) &&
+                Objects.equals(term, that.term) &&
+                Objects.equals(replicas, that.replicas) &&
+                Objects.equals(isrs, that.isrs) &&
+                Objects.equals(learners, that.learners) &&
+                electType == that.electType;
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(topic, group, partitions, leader, recLeader, term, replicas, isrs, learners, electType);
     }
 
     public enum ElectType {

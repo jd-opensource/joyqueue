@@ -23,8 +23,6 @@ import io.chubao.joyqueue.message.BrokerMessage;
 import io.chubao.joyqueue.message.SourceType;
 import io.chubao.joyqueue.toolkit.network.IpUtil;
 import io.chubao.joyqueue.toolkit.time.SystemClock;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import java.net.InetSocketAddress;
 import java.util.List;
@@ -50,7 +48,7 @@ public class KafkaMessageConverter {
     public static KafkaBrokerMessage toKafkaBrokerMessage(String topic, int partition, BrokerMessage brokerMessage) {
         KafkaBrokerMessage kafkaBrokerMessage = new KafkaBrokerMessage();
         kafkaBrokerMessage.setOffset(brokerMessage.getMsgIndexNo());
-        kafkaBrokerMessage.setKey(StringUtils.isNotBlank(brokerMessage.getBusinessId()) ? brokerMessage.getBusinessId().getBytes(Charsets.UTF_8) : null);
+        kafkaBrokerMessage.setKey(brokerMessage.getBusinessId() == null ? null : brokerMessage.getBusinessId().getBytes(Charsets.UTF_8));
         kafkaBrokerMessage.setValue(brokerMessage.getByteBody());
         kafkaBrokerMessage.setBatch(brokerMessage.isBatch());
         kafkaBrokerMessage.setFlag(brokerMessage.getFlag());
@@ -79,7 +77,7 @@ public class KafkaMessageConverter {
         brokerMessage.setPartition((short) partition);
         brokerMessage.setCompressed(false);
         brokerMessage.setClientIp(clientAddress);
-        brokerMessage.setBusinessId(ArrayUtils.isNotEmpty(kafkaBrokerMessage.getKey()) ? new String(kafkaBrokerMessage.getKey(), Charsets.UTF_8) : null);
+        brokerMessage.setBusinessId(kafkaBrokerMessage.getKey() == null ? null : new String(kafkaBrokerMessage.getKey(), Charsets.UTF_8));
         brokerMessage.setBody(kafkaBrokerMessage.getValue());
         brokerMessage.setStartTime(SystemClock.now());
         brokerMessage.setSource(SourceType.KAFKA.getValue());
