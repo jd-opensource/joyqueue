@@ -16,21 +16,21 @@
 package io.chubao.joyqueue.broker.consumer;
 
 import com.alibaba.fastjson.JSON;
+import com.jd.laf.extension.ExtensionManager;
 import io.chubao.joyqueue.broker.cluster.ClusterManager;
 import io.chubao.joyqueue.broker.consumer.filter.FilterCallback;
 import io.chubao.joyqueue.broker.consumer.filter.FilterPipeline;
 import io.chubao.joyqueue.broker.consumer.filter.MessageFilter;
 import io.chubao.joyqueue.domain.Consumer;
 import io.chubao.joyqueue.domain.TopicName;
-import io.chubao.joyqueue.event.ConsumerEvent;
 import io.chubao.joyqueue.event.EventType;
 import io.chubao.joyqueue.event.MetaEvent;
 import io.chubao.joyqueue.exception.JoyQueueCode;
 import io.chubao.joyqueue.exception.JoyQueueException;
+import io.chubao.joyqueue.nsr.event.UpdateConsumerEvent;
 import io.chubao.joyqueue.toolkit.concurrent.EventListener;
 import io.chubao.joyqueue.toolkit.security.Hex;
 import io.chubao.joyqueue.toolkit.security.Md5;
-import com.jd.laf.extension.ExtensionManager;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -170,16 +170,16 @@ class FilterMessageSupport {
     /**
      * 监听消费配置变化，更新过滤管道
      */
-    class updateConsumeListener implements EventListener {
+    class updateConsumeListener implements EventListener<MetaEvent> {
 
         @Override
-        public void onEvent(Object event) {
-            if (((MetaEvent) event).getEventType() == EventType.UPDATE_CONSUMER) {
-                ConsumerEvent updateConsumerEvent = (ConsumerEvent) event;
+        public void onEvent(MetaEvent event) {
+            if (event.getEventType() == EventType.UPDATE_CONSUMER) {
+                UpdateConsumerEvent updateConsumerEvent = (UpdateConsumerEvent) event;
                 logger.info("listen update consume event to update filter pipeline.");
 
                 // 更新消息过滤管道
-                updateFilterRuleCache(updateConsumerEvent.getTopic(), updateConsumerEvent.getApp());
+                updateFilterRuleCache(updateConsumerEvent.getTopic(), updateConsumerEvent.getNewConsumer().getApp());
             }
         }
     }

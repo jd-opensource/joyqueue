@@ -369,13 +369,6 @@ public class PositioningStore<T> implements Closeable {
                 if (!storeFile.isClean()) storeFile.flush();
                 if (flushPosition() < storeFile.position() + storeFile.flushPosition()) {
                     flushPosition.set(storeFile.position() + storeFile.flushPosition());
-                } else {
-                    // 永远不会走到这里，除非程序bug了。
-                    throw new CorruptedLogException(String.format("ZERO length flushed! " +
-                                    "File: position: %d, rightPosition: %d, flushPosition: %d. " +
-                                    "Store: rightPosition: %d, flushPosition: %d, leftPosition: %d, store: %s.",
-                            storeFile.position(), storeFile.writePosition(), storeFile.flushPosition(),
-                            right(), flushPosition(), left(), base.getAbsolutePath()));
                 }
                 return true;
             } finally {
@@ -385,15 +378,11 @@ public class PositioningStore<T> implements Closeable {
         return false;
     }
 
-
     private StoreFile<T> createStoreFile(long position) {
-
         StoreFile<T> storeFile = new StoreFileImpl<>(position, base, fileHeaderSize, serializer, bufferPool, fileDataSize);
         StoreFile<T> present;
         if ((present = storeFileMap.putIfAbsent(position, storeFile)) != null) {
             storeFile = present;
-        } else {
-            checkDiskFreeSpace(base);
         }
         logger.info("Store file created, leftPosition: {}, rightPosition: {}, flushPosition: {}, base: {}.",
                 Format.formatWithComma(left()),
@@ -402,6 +391,10 @@ public class PositioningStore<T> implements Closeable {
                 base.getAbsolutePath()
         );
         return storeFile;
+    }
+
+    public boolean isDiskFull() {
+        return (base.getTotalSpace() - base.getFreeSpace()) * 100 >  base.getTotalSpace() * diskFullRatio;
     }
 
     private void checkDiskFreeSpace(File file) {

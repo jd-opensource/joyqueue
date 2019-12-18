@@ -42,7 +42,7 @@ public class BrokerManageServiceImpl implements BrokerManageService {
     @Override
     public Directory storeTreeView(int brokerId,boolean recursive) {
         try {
-            Broker broker = brokerService.findById(Long.valueOf(brokerId));
+            Broker broker = brokerService.findById(brokerId);
             String path="storeTreeView";
             String[] args=new String[3];
             args[0]=broker.getIp();
@@ -62,7 +62,7 @@ public class BrokerManageServiceImpl implements BrokerManageService {
     @Override
     public boolean deleteGarbageFile(int brokerId, String fileName,boolean retain) {
         try {
-            Broker broker = brokerService.findById(Long.valueOf(brokerId));
+            Broker broker = brokerService.findById(brokerId);
             String path="deleteGarbageFile";
             String[] args=new String[4];
             args[0]=broker.getIp();

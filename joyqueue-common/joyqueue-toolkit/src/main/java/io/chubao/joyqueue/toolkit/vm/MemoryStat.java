@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-
 package io.chubao.joyqueue.toolkit.vm;
 
 public class MemoryStat {
     private long heapInit;
     private long heapMax;
+
     private long heapCommitted;
     private long heapUsed;
     private long nonHeapInit;
     private long nonHeapMax;
     private long nonHeapCommitted;
+
     private long nonHeapUsed;
     // allocated by ByteBuffer.allocateDirect()
 

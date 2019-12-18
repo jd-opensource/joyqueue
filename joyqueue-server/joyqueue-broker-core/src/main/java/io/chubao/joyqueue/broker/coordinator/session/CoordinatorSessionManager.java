@@ -72,6 +72,9 @@ public class CoordinatorSessionManager extends Service {
         if (client != null) {
             client.stop();
         }
+        if (sessions != null) {
+            sessions.cleanUp();
+        }
     }
 
     public CoordinatorSession getSession(Broker broker) {

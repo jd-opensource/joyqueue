@@ -21,6 +21,8 @@ import io.chubao.joyqueue.broker.monitor.converter.BrokerStatConverter;
 import io.chubao.joyqueue.broker.monitor.exception.MonitorException;
 import io.chubao.joyqueue.broker.monitor.model.BrokerStatPo;
 import io.chubao.joyqueue.broker.monitor.stat.BrokerStat;
+import io.chubao.joyqueue.toolkit.io.DoubleCopy;
+import io.chubao.joyqueue.toolkit.io.ZipUtil;
 import io.chubao.joyqueue.toolkit.service.Service;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -36,7 +38,6 @@ import java.io.IOException;
  * author: gaohaoxiang
  * date: 2018/10/10
  */
-// TODO 定期清理
 public class BrokerStatManager extends Service {
 
     protected static final Logger logger = LoggerFactory.getLogger(BrokerStatManager.class);
@@ -45,37 +46,36 @@ public class BrokerStatManager extends Service {
     private BrokerMonitorConfig config;
     private BrokerStat brokerStat;
     private File statFile;
+    private File newStatFile;
+
+    private BrokerStatDoubleCopy brokerStatDoubleCopy;
 
     public BrokerStatManager(Integer brokerId, BrokerMonitorConfig config) {
         this.brokerId = brokerId;
         this.config = config;
         this.statFile = new File(config.getStatSaveFile());
-        this.brokerStat = load();
-    }
-
-    @Override
-    protected void doStop() {
-        save();
-    }
-
-    public BrokerStat getBrokerStat() {
-        return this.brokerStat;
-    }
-
-    public BrokerStat load() {
+        this.newStatFile = new File(config.getStatSaveFileNew());
         try {
+            this.brokerStatDoubleCopy = new BrokerStatDoubleCopy(brokerId, config, newStatFile);
+            this.brokerStat = recover();
+        } catch (IOException e) {
+            throw new MonitorException(e);
+        }
+    }
+
+    protected BrokerStat recover() throws IOException {
+        if (newStatFile.exists()) {
+            this.brokerStatDoubleCopy.recover();
+            BrokerStat brokerStat = this.brokerStatDoubleCopy.getBrokerStat();
+            return brokerStat;
+        } else {
             if (!statFile.exists()) {
                 return new BrokerStat(brokerId);
             }
 
             String stat = FileUtils.readFileToString(statFile);
 
-            if (logger.isDebugEnabled()) {
-                logger.debug("load broker stat, value: {}, file: {}", stat, statFile);
-            }
-
             if (StringUtils.isBlank(stat)) {
-                logger.warn("load broker stat error, value: {}, file: {}", stat, statFile);
                 return new BrokerStat(brokerId);
             }
 
@@ -88,24 +88,87 @@ public class BrokerStatManager extends Service {
 
             brokerStatPo.setBrokerId(brokerId);
             return BrokerStatConverter.convert(brokerStatPo);
-        } catch (Exception e) {
-            logger.error("load broker stat exception, statFile: {}", statFile, e);
-            throw new MonitorException("load broker stat exception", e);
         }
     }
 
+    @Override
+    protected void doStop() {
+        brokerStatDoubleCopy.flush();
+    }
+
+    public BrokerStat getBrokerStat() {
+        return this.brokerStat;
+    }
+
     public void save() {
-        try {
-            BrokerStatPo brokerStatPo = BrokerStatConverter.convertToPo(brokerStat);
-            String stat = JSON.toJSONString(brokerStatPo);
+        brokerStatDoubleCopy.flush();
+    }
 
-            if (logger.isDebugEnabled()) {
-                logger.debug("save broker stat, value: {}, file: {}", stat, statFile);
+    public static class BrokerStatDoubleCopy extends DoubleCopy {
+
+        private Integer brokerId;
+        private BrokerMonitorConfig config;
+        private File statFile;
+
+        private BrokerStat brokerStat;
+
+        public BrokerStatDoubleCopy(Integer brokerId, BrokerMonitorConfig config, File statFile) throws IOException {
+            super(statFile, Integer.MAX_VALUE);
+            this.brokerId = brokerId;
+            this.config = config;
+            this.statFile = statFile;
+            this.brokerStat = new BrokerStat(brokerId);
+        }
+
+        @Override
+        protected String getName() {
+            return "BrokerStat";
+        }
+
+        @Override
+        protected byte[] serialize() {
+            try {
+                BrokerStatPo brokerStatPo = BrokerStatConverter.convertToPo(brokerStat);
+                byte[] stat = JSON.toJSONBytes(brokerStatPo);
+                stat = ZipUtil.compress(stat);
+
+                if (logger.isDebugEnabled()) {
+                    logger.debug("save broker stat, value: {}, file: {}", new String(stat), statFile);
+                }
+
+                return stat;
+            } catch (Exception e) {
+                logger.error("serialize stat exception", e);
+                return new byte[0];
             }
+        }
 
-            FileUtils.write(statFile, stat);
-        } catch (IOException e) {
-            logger.error("save broker stat exception, statFile: {}", statFile, e);
+        @Override
+        protected void parse(byte[] data) {
+            try {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("load broker stat, value: {}, file: {}", new String(data), statFile);
+                }
+
+                data = ZipUtil.decompress(data).getBytes();
+                BrokerStatPo brokerStatPo = JSON.parseObject(data, BrokerStatPo.class);
+
+                if (brokerStatPo.getVersion() != BrokerStat.VERSION) {
+                    logger.warn("broker stat check version failed, current: {}, required: {}", brokerStatPo.getVersion(), BrokerStat.VERSION);
+                    brokerStat = new BrokerStat(brokerId);
+                    return;
+                }
+
+                brokerStatPo.setBrokerId(brokerId);
+                brokerStat = BrokerStatConverter.convert(brokerStatPo);
+            } catch (Exception e) {
+                logger.error("load broker stat exception, statFile: {}", statFile, e);
+                throw new MonitorException("load broker stat exception", e);
+            }
+        }
+
+        public BrokerStat getBrokerStat() {
+            return brokerStat;
         }
     }
 }

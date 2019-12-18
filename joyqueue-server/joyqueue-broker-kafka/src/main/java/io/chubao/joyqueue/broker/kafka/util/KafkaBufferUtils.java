@@ -18,7 +18,6 @@ package io.chubao.joyqueue.broker.kafka.util;
 import com.google.common.base.Charsets;
 import io.chubao.joyqueue.toolkit.security.Crc32;
 import io.netty.buffer.ByteBuf;
-import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -294,7 +293,7 @@ public class KafkaBufferUtils {
     }
 
     public static void writeBytes(byte[] value, ByteBuf buffer) {
-        if (ArrayUtils.isEmpty(value)) {
+        if (value == null) {
             buffer.writeInt(-1);
         } else {
             buffer.writeInt(value.length);
@@ -303,7 +302,7 @@ public class KafkaBufferUtils {
     }
 
     public static void writeVarBytes(byte[] value, ByteBuf buffer) {
-        if (ArrayUtils.isEmpty(value)) {
+        if (value == null) {
             writeVarint(-1, buffer);
         } else {
             writeVarint(value.length, buffer);

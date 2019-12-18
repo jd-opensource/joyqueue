@@ -16,7 +16,6 @@
 package io.chubao.joyqueue.network.transport;
 
 import io.chubao.joyqueue.network.transport.support.DefaultChannelTransport;
-import io.chubao.joyqueue.network.transport.support.DefaultTransportAttribute;
 import io.netty.channel.Channel;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
@@ -44,8 +43,7 @@ public class TransportHelper {
     }
 
     public static ChannelTransport newTransport(Channel channel, RequestBarrier requestBarrier) {
-        TransportAttribute transportAttribute = newTransportAttribute();
-        return new DefaultChannelTransport(channel, transportAttribute, requestBarrier);
+        return new DefaultChannelTransport(channel, requestBarrier);
     }
 
     public static void setTransport(Channel channel, ChannelTransport transport) {
@@ -54,9 +52,5 @@ public class TransportHelper {
 
     public static ChannelTransport getTransport(Channel channel) {
         return channel.attr(TRANSPORT_CACHE_ATTR).get();
-    }
-
-    protected static TransportAttribute newTransportAttribute() {
-        return new DefaultTransportAttribute();
     }
 }

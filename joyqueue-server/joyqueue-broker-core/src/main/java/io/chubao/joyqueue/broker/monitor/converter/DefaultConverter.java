@@ -90,6 +90,7 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
     private static final String TOPIC_SLICE_DEQUEUE_MAX = "topic_slice_dequeue_max";
     private static final String TOPIC_SLICE_DEQUEUE_MIN = "topic_slice_dequeue_min";
     private static final String TOPIC_SLICE_DEQUEUE_AVG = "topic_slice_dequeue_avg";
+    private static final String TOPIC_SLICE_STORAGE_SIZE = "topic_slice_storage_size";
 
     private static final String APP_SLICE_DEQUEUE = "app_slice_dequeue";
     private static final String APP_SLICE_DEQUEUE_SIZE = "app_slice_dequeue_size";
@@ -729,6 +730,15 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
                 deQueueRecords.get(6).setValue(topics.get(tsKey).getDeQueueStat().getTp90());
                 records.addAll(deQueueRecords);
             }
+
+            // topic storage size monitor record
+            String[] topicStorageMetric={TOPIC_SLICE_STORAGE_SIZE};
+            List<MonitorRecord> topicStorageRecords = buildEmptyRecords(enQueue, topicStorageMetric);
+            if(topicStorageRecords!=null&&topicStorageRecords.size()>0){
+                topicStorageRecords.get(0).setValue(topics.get(tsKey).getStoreSize());
+                records.addAll(topicStorageRecords);
+            }
+
 
         }
         return records;

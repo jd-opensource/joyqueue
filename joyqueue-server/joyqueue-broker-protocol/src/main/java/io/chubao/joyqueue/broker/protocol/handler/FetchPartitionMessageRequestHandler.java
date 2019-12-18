@@ -90,7 +90,7 @@ public class FetchPartitionMessageRequestHandler implements JoyQueueCommandHandl
                 if (!checkResult.isSuccess()) {
                     logger.warn("checkReadable failed, transport: {}, topic: {}, partition: {}, app: {}, code: {}", transport,
                             consumer.getTopic(), partition, consumer.getApp(), checkResult.getJoyQueueCode());
-                    buildFetchPartitionMessageAckData(topic, entry.getValue(), CheckResultConverter.convertFetchCode(checkResult.getJoyQueueCode()), result);
+                    buildFetchPartitionMessageAckData(topic, entry.getValue(), CheckResultConverter.convertFetchCode(command.getHeader().getVersion(), checkResult.getJoyQueueCode()), result);
                     traffic.record(topic, 0);
                     continue;
                 }
@@ -120,16 +120,25 @@ public class FetchPartitionMessageRequestHandler implements JoyQueueCommandHandl
         FetchPartitionMessageAckData fetchPartitionMessageAckData = new FetchPartitionMessageAckData();
         fetchPartitionMessageAckData.setBuffers(Collections.emptyList());
         try {
+            long minIndex = consume.getMinIndex(consumer, partition);
+            long maxIndex = consume.getMaxIndex(consumer, partition);
             if (index == FetchPartitionMessageRequest.NONE_INDEX) {
                 index = consume.getAckIndex(consumer, partition);
+                if (index < minIndex) {
+                    logger.warn("fetchPartitionMessage exception, index reset to minIndex, transport: {}, consumer: {}, partition: {}, index: {}, minIndex: {}, maxIndex: {}",
+                            transport, consumer, partition, index, minIndex, maxIndex);
+                    index = minIndex;
+                }
             }
-            if (index < consume.getMinIndex(consumer, partition) || index > consume.getMaxIndex(consumer, partition)) {
-                logger.warn("fetchPartitionMessage exception, index ou of range, transport: {}, consumer: {}, partition: {}, index: {}", transport, consumer, partition, index);
+            if (index < minIndex || index > maxIndex) {
+                logger.warn("fetchPartitionMessage exception, index ou of range, transport: {}, consumer: {}, partition: {}, index: {}, minIndex: {}, maxIndex: {}",
+                        transport, consumer, partition, index, minIndex, maxIndex);
                 fetchPartitionMessageAckData.setCode(JoyQueueCode.FW_FETCH_MESSAGE_INDEX_OUT_OF_RANGE);
             } else {
                 PullResult pullResult = consume.getMessage(consumer, partition, index, count);
                 if (!pullResult.getCode().equals(JoyQueueCode.SUCCESS)) {
-                    logger.error("fetchPartitionMessage exception, transport: {}, consumer: {}, partition: {}, index: {}", transport, consumer, partition, index);
+                    logger.error("fetchPartitionMessage exception, transport: {}, consumer: {}, partition: {}, index: {}, minIndex: {}, maxIndex: {}",
+                            transport, consumer, partition, index, minIndex, maxIndex);
                 }
                 fetchPartitionMessageAckData.setBuffers(pullResult.getBuffers());
                 fetchPartitionMessageAckData.setCode(pullResult.getCode());

@@ -16,14 +16,15 @@
 package io.chubao.joyqueue.broker.kafka.handler;
 
 import com.google.common.collect.Maps;
+import io.chubao.joyqueue.broker.kafka.KafkaCommandType;
+import io.chubao.joyqueue.broker.kafka.KafkaContext;
 import io.chubao.joyqueue.broker.kafka.KafkaContextAware;
+import io.chubao.joyqueue.broker.kafka.command.JoinGroupRequest;
+import io.chubao.joyqueue.broker.kafka.command.JoinGroupResponse;
 import io.chubao.joyqueue.broker.kafka.coordinator.group.GroupCoordinator;
 import io.chubao.joyqueue.broker.kafka.coordinator.group.callback.JoinCallback;
 import io.chubao.joyqueue.broker.kafka.coordinator.group.domain.GroupJoinGroupResult;
-import io.chubao.joyqueue.broker.kafka.KafkaCommandType;
-import io.chubao.joyqueue.broker.kafka.KafkaContext;
-import io.chubao.joyqueue.broker.kafka.command.JoinGroupRequest;
-import io.chubao.joyqueue.broker.kafka.command.JoinGroupResponse;
+import io.chubao.joyqueue.broker.kafka.helper.KafkaClientHelper;
 import io.chubao.joyqueue.broker.kafka.util.KafkaBufferUtils;
 import io.chubao.joyqueue.network.transport.Transport;
 import io.chubao.joyqueue.network.transport.command.Command;
@@ -58,9 +59,10 @@ public class JoinGroupRequestHandler extends AbstractKafkaCommandHandler impleme
     @Override
     public Command handle(Transport transport, Command command) {
         JoinGroupRequest joinGroupRequest = (JoinGroupRequest) command.getPayload();
+        String groupId = KafkaClientHelper.parseClient(joinGroupRequest.getClientId());
 
         logger.info("join group, groupId = {}, clientId = {}, memberId = {}, ip = {}",
-                joinGroupRequest.getGroupId(), joinGroupRequest.getClientId(),
+                groupId, joinGroupRequest.getClientId(),
                 joinGroupRequest.getMemberId(), transport.remoteAddress().toString());
 
         JoinCallback callback = new JoinCallback() {
@@ -71,7 +73,7 @@ public class JoinGroupRequestHandler extends AbstractKafkaCommandHandler impleme
         };
 
         groupCoordinator.handleJoinGroup(
-                joinGroupRequest.getGroupId(),
+                groupId,
                 joinGroupRequest.getMemberId(),
                 joinGroupRequest.getClientId(),
                 transport.remoteAddress().toString(),

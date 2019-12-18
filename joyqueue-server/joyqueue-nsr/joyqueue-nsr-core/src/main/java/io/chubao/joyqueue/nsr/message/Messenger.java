@@ -16,20 +16,48 @@
 package io.chubao.joyqueue.nsr.message;
 
 
+import com.jd.laf.extension.Type;
+import io.chubao.joyqueue.domain.Broker;
+import io.chubao.joyqueue.event.MetaEvent;
+import io.chubao.joyqueue.toolkit.lang.LifeCycle;
+
+import java.util.List;
+
 /**
  * @param <E>
  */
-public interface Messenger<E> {
-    /**
-     * 广播消息
-     *
-     * @param e
-     */
-    void publish(E e);
+public interface Messenger<E extends MetaEvent> extends LifeCycle, Type<String> {
 
     /**
-     * 添加监听
-     *
+     * 推送消息
+     * @param event
+     * @param brokers
+     */
+    void publish(E event, List<Broker> brokers);
+
+    /**
+     * 推送消息
+     * @param event
+     * @param brokers
+     */
+    void publish(E event, Broker... brokers);
+
+    /**
+     * 推送消息
+     * @param event
+     * @param brokers
+     */
+    void fastPublish(E event, List<Broker> brokers);
+
+    /**
+     * 推送消息
+     * @param event
+     * @param brokers
+     */
+    void fastPublish(E event, Broker... brokers);
+
+    /**
+     * 添加监听器
      * @param listener
      */
     void addListener(MessageListener listener);

@@ -9,6 +9,7 @@ import store from './store'
 import router from './router'
 import App from './App'
 import DUI from './components'
+import './filter' // 过滤器
 
 import i18n from './i18n'
 

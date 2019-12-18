@@ -17,6 +17,7 @@ package io.chubao.joyqueue.client.internal.consumer;
 
 import io.chubao.joyqueue.client.internal.consumer.domain.ConsumeMessage;
 import io.chubao.joyqueue.client.internal.consumer.domain.ConsumeReply;
+import io.chubao.joyqueue.client.internal.consumer.domain.FetchIndexData;
 import io.chubao.joyqueue.client.internal.consumer.interceptor.ConsumerInterceptor;
 import io.chubao.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import io.chubao.joyqueue.exception.JoyQueueCode;
@@ -103,6 +104,9 @@ public interface MessageConsumer extends LifeCycle {
     JoyQueueCode reply(List<ConsumeReply> replyList);
 
     JoyQueueCode replyOnce(ConsumeReply reply);
+
+    // index
+    FetchIndexData fetchIndex(short partition);
 
     // metadata
     TopicMetadata getTopicMetadata(String topic);

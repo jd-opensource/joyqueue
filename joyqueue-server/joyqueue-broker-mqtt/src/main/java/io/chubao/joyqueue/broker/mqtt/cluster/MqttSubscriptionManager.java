@@ -117,7 +117,7 @@ public class MqttSubscriptionManager extends Service {
         @Override
         public void run() {
             // todo topic主题不区分类型 所以获取全部主题量会很大 这里后续要优化
-            Set<String> origTopics = nameService.getAllTopics();
+            Set<String> origTopics = nameService.getAllTopicCodes();
             if (origTopics != null && origTopics.size() > 0) {
                 LOG.info("Topic updater data size: {}", origTopics.size());
                 for (String tn : origTopics) {

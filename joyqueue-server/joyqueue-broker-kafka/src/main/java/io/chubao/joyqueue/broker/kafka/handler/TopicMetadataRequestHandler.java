@@ -97,11 +97,11 @@ public class TopicMetadataRequestHandler extends AbstractKafkaCommandHandler imp
                     transport, clientId, topicMetadataRequest, topicMetadataResponse);
         }
 
-        if (config.getMetadataDelay() && CollectionUtils.isEmpty(topicMetadata)) {
+        if (CollectionUtils.isEmpty(topicMetadata) && config.getMetadataDelayEnable()) {
             logger.info("get topic metadata, topics: {}, address: {}, metadata: {}, app: {}",
                     topicMetadataRequest.getTopics(), transport.remoteAddress(), JSON.toJSONString(topicMetadata), topicMetadataRequest.getClientId());
 
-            delayPurgatory.tryCompleteElseWatch(new AbstractDelayedOperation(1000 * 1) {
+            delayPurgatory.tryCompleteElseWatch(new AbstractDelayedOperation(config.getMetadataDelay()) {
                 @Override
                 protected void onComplete() {
                     transport.acknowledge(command, response);
@@ -119,6 +119,7 @@ public class TopicMetadataRequestHandler extends AbstractKafkaCommandHandler imp
     }
 
     protected Map<String, TopicConfig> getAllTopicConfigs(String clientId) {
+        // TODO 常量
         String[] appGroup = clientId.split("\\.");
         Map<TopicName, TopicConfig> consumers = nameService.getTopicConfigByApp(clientId, Subscription.Type.CONSUMPTION);
         Map<TopicName, TopicConfig> producers = nameService.getTopicConfigByApp(appGroup[0], Subscription.Type.PRODUCTION);
@@ -202,12 +203,16 @@ public class TopicMetadataRequestHandler extends AbstractKafkaCommandHandler imp
                 errorCode = KafkaErrorCode.LEADER_NOT_AVAILABLE.getCode();
             }
 
-            for (Broker replica : partition.getReplicas()) {
-                replicas.add(new KafkaBroker(replica.getId(), replica.getIp(), replica.getPort()));
+            if (CollectionUtils.isNotEmpty(partition.getReplicas())) {
+                for (Broker replica : partition.getReplicas()) {
+                    replicas.add(new KafkaBroker(replica.getId(), replica.getIp(), replica.getPort()));
+                }
             }
 
-            for (Broker isr : partition.getIsrs()) {
-                isrs.add(new KafkaBroker(isr.getId(), isr.getIp(), isr.getPort()));
+            if (CollectionUtils.isNotEmpty(partition.getIsrs())) {
+                for (Broker isr : partition.getIsrs()) {
+                    isrs.add(new KafkaBroker(isr.getId(), isr.getIp(), isr.getPort()));
+                }
             }
 
             KafkaPartitionMetadata kafkaPartitionMetadata = new KafkaPartitionMetadata(partition.getPartitionId(), leader, replicas, isrs, errorCode);

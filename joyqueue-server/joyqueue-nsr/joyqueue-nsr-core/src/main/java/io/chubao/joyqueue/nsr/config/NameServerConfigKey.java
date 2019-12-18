@@ -24,8 +24,6 @@ import io.chubao.joyqueue.toolkit.config.PropertyDef;
 public enum NameServerConfigKey implements PropertyDef {
     NAMESERVICE_NAME("nameserver.nsr.name", "local", Type.STRING),
     NAMESERVER_ADDRESS("nameserver.nsr.address", "127.0.0.1:50092", Type.STRING),
-    NAMESERVER_SERVICE_PORT("nameserver.nsr.service.port", 50092, Type.INT),
-    NAMESERVER_MANAGE_PORT("nameserver.nsr.manage.port", 50091, Type.INT),
     NAMESERVER_CACHE_ENABLE("nameserver.nsr.cache.enable", true, Type.BOOLEAN),
     NAMESERVER_CACHE_EXPIRE_TIME("nameserver.nsr.cache.expire.time", 1000 * 1, Type.INT);
 

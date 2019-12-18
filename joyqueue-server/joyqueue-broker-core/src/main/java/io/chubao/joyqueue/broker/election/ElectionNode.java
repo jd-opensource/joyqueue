@@ -23,6 +23,7 @@ package io.chubao.joyqueue.broker.election;
  */
 public interface ElectionNode {
     int INVALID_NODE_ID = -1;
+    int INVALID_LAG_LENGTH = -1;
 
     /**
      * 获取节点当前状态

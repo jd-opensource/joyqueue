@@ -66,6 +66,16 @@ public class AppStat implements Serializable {
         return partitionGroupStat;
     }
 
+    public void removePartitionGroup(int partitionGroup) {
+        partitionGroupStatMap.remove(partitionGroup);
+    }
+
+    public void removePartition(short partition) {
+        for (Map.Entry<Integer, PartitionGroupStat> entry : partitionGroupStatMap.entrySet()) {
+            entry.getValue().getPartitionStatMap().remove(partition);
+        }
+    }
+
     public String getTopic() {
         return topic;
     }

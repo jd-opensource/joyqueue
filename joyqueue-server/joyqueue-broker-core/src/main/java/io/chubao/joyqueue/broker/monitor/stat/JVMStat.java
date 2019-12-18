@@ -46,11 +46,13 @@ public class JVMStat {
     // 最新的 snapshot
     private transient JVMStat recentSnapshot;
 
+
     public JVMStat(){
        this(new AtomicLong(),new AtomicLong(),new LoadMetric(),new LoadMetric(),null);
     }
 
     public JVMStat(AtomicLong totalGcTimes, AtomicLong totalGcTime, LoadMetric edenGcTimes, LoadMetric oldGcTimes, MemoryStat memoryStat){
+
         //总 gc 次数
         this.totalGcTimes=totalGcTimes;
         //总 gc 耗时
@@ -101,7 +103,6 @@ public class JVMStat {
         this.memoryStat = memoryStat;
     }
 
-
     /**
      *
      * Recent interval snapshot
@@ -122,6 +123,7 @@ public class JVMStat {
     /**
      *
      * Snapshot and reset
+
      *
      **/
     @JSONField(serialize =false)
@@ -130,3 +132,4 @@ public class JVMStat {
        return recentSnapshot;
     }
 }
+

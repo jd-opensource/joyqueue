@@ -32,6 +32,7 @@ import io.chubao.joyqueue.client.internal.consumer.coordinator.domain.BrokerAssi
 import io.chubao.joyqueue.client.internal.consumer.coordinator.domain.BrokerAssignmentsHolder;
 import io.chubao.joyqueue.client.internal.consumer.domain.ConsumeMessage;
 import io.chubao.joyqueue.client.internal.consumer.domain.ConsumeReply;
+import io.chubao.joyqueue.client.internal.consumer.domain.FetchIndexData;
 import io.chubao.joyqueue.client.internal.consumer.exception.ConsumerException;
 import io.chubao.joyqueue.client.internal.consumer.transport.ConsumerClientManager;
 import io.chubao.joyqueue.client.internal.metadata.domain.PartitionMetadata;
@@ -289,7 +290,7 @@ public class DefaultMessagePoller extends Service implements MessagePoller {
 
         BrokerAssignments brokerAssignments = null;
         if (config.isLoadBalance()) {
-            brokerAssignments = consumerCoordinator.fetchBrokerAssignment(topicMetadata, messagePollerInner.getAppFullName(), config.getSessionTimeout());
+            brokerAssignments = consumerCoordinator.fetchBrokerAssignment(topicMetadata, config.getAppFullName(), config.getSessionTimeout());
             brokerAssignments = messagePollerInner.filterNotAvailableBrokers(brokerAssignments);
             if (brokerAssignments == null || CollectionUtils.isEmpty(brokerAssignments.getAssignments())) {
                 if (config.isFailover()) {
@@ -319,9 +320,8 @@ public class DefaultMessagePoller extends Service implements MessagePoller {
             throw new IllegalArgumentException(String.format("topic %s reply is empty", topic));
         }
 
-        JoyQueueCode result = consumerIndexManager.commitReply(topicMetadata.getTopic(), replyList, messagePollerInner.getAppFullName(), config.getTimeout());
+        JoyQueueCode result = consumerIndexManager.commitReply(topicMetadata.getTopic(), replyList, config.getAppFullName(), config.getTimeout());
         if (!result.equals(JoyQueueCode.SUCCESS)) {
-            // TODO 临时日志
             logger.warn("commit ack error, topic : {}, code: {}, error: {}", topic, result.getCode(), result.getMessage());
         }
         return result;
@@ -333,12 +333,21 @@ public class DefaultMessagePoller extends Service implements MessagePoller {
     }
 
     @Override
+    public FetchIndexData fetchIndex(String topic, short partition) {
+        checkState();
+        Preconditions.checkArgument(StringUtils.isNotBlank(topic), "topic not blank");
+
+        TopicMetadata topicMetadata = messagePollerInner.getAndCheckTopicMetadata(topic);
+        return consumerIndexManager.fetchIndex(topicMetadata.getTopic(), config.getAppFullName(), partition, config.getTimeout());
+    }
+
+    @Override
     public TopicMetadata getTopicMetadata(String topic) {
         checkState();
         Preconditions.checkArgument(StringUtils.isNotBlank(topic), "topic not blank");
 
         String topicFullName = messagePollerInner.getTopicFullName(topic);
-        return clusterManager.fetchTopicMetadata(topicFullName, messagePollerInner.getAppFullName());
+        return clusterManager.fetchTopicMetadata(topicFullName, config.getAppFullName());
     }
 
     protected void checkState() {

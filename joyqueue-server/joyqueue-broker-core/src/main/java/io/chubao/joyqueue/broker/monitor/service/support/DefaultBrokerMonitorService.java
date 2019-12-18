@@ -23,9 +23,24 @@ import io.chubao.joyqueue.broker.monitor.stat.BrokerStatExt;
 import io.chubao.joyqueue.broker.monitor.stat.ElectionEventStat;
 import io.chubao.joyqueue.broker.monitor.stat.JVMStat;
 import io.chubao.joyqueue.broker.monitor.stat.ReplicaNodeStat;
+import io.chubao.joyqueue.domain.Consumer;
+import io.chubao.joyqueue.domain.Producer;
 import io.chubao.joyqueue.domain.TopicConfig;
 import io.chubao.joyqueue.model.Pager;
-import io.chubao.joyqueue.monitor.*;
+import io.chubao.joyqueue.monitor.ArchiveMonitorInfo;
+import io.chubao.joyqueue.monitor.BrokerMonitorInfo;
+import io.chubao.joyqueue.monitor.BrokerStartupInfo;
+import io.chubao.joyqueue.monitor.ConnectionMonitorDetailInfo;
+import io.chubao.joyqueue.monitor.ConnectionMonitorInfo;
+import io.chubao.joyqueue.monitor.ConsumerMonitorInfo;
+import io.chubao.joyqueue.monitor.ConsumerPartitionGroupMonitorInfo;
+import io.chubao.joyqueue.monitor.ConsumerPartitionMonitorInfo;
+import io.chubao.joyqueue.monitor.PartitionGroupMonitorInfo;
+import io.chubao.joyqueue.monitor.PartitionMonitorInfo;
+import io.chubao.joyqueue.monitor.ProducerMonitorInfo;
+import io.chubao.joyqueue.monitor.ProducerPartitionGroupMonitorInfo;
+import io.chubao.joyqueue.monitor.ProducerPartitionMonitorInfo;
+import io.chubao.joyqueue.monitor.TopicMonitorInfo;
 import io.chubao.joyqueue.response.BooleanResponse;
 import io.chubao.joyqueue.toolkit.vm.GCEventListener;
 import java.util.List;
@@ -307,6 +322,75 @@ public class DefaultBrokerMonitorService implements BrokerMonitorService {
 
     @Override
     public ElectionEventStat getReplicaRecentElectionEvent(String topic, int partitionGroup) {
-        return partitionMonitorService.getReplicaRecentElectionEvent(topic,partitionGroup);
+        return partitionMonitorService.getReplicaRecentElectionEvent(topic, partitionGroup);
+    }
+    @Override
+    public Consumer getConsumerMetadataByTopicAndApp(String topic, String app, boolean isCluster) {
+        return metadataMonitorService.getConsumerMetadataByTopicAndApp(topic, app, isCluster);
+    }
+
+    @Override
+    public Producer getProducerMetadataByTopicAndApp(String topic, String app, boolean isCluster) {
+        return metadataMonitorService.getProducerMetadataByTopicAndApp(topic, app, isCluster);
+    }
+
+    @Override
+    public Object exportMetadata(String source) {
+        return metadataMonitorService.exportMetadata(source);
+    }
+
+    @Override
+    public Object syncMetadata(String source, String target, int interval, boolean onlyCompare) {
+        return metadataMonitorService.syncMetadata(source, target, interval, onlyCompare);
+    }
+
+    @Override
+    public Object queryMetadata(String source, String operator, List<Object> params) {
+        return metadataMonitorService.queryMetadata(source, operator, params);
+    }
+
+    @Override
+    public Object updateMetadata(String source, String operator, List<Object> params) {
+        return metadataMonitorService.updateMetadata(source, operator, params);
+    }
+
+    @Override
+    public Object insertMetadata(String source, String operator, List<Object> params) {
+        return metadataMonitorService.insertMetadata(source, operator, params);
+    }
+
+    @Override
+    public Object deleteMetadata(String source, String operator, List<Object> params) {
+        return metadataMonitorService.deleteMetadata(source, operator, params);
+    }
+
+    @Override
+    public String getConfigMetadata(String key) {
+        return metadataMonitorService.getConfigMetadata(key);
+    }
+
+    @Override
+    public List<String> getConfigsMetadata() {
+        return metadataMonitorService.getConfigsMetadata();
+    }
+
+    @Override
+    public String getMetadataCluster() {
+        return metadataMonitorService.getMetadataCluster();
+    }
+
+    @Override
+    public String addMetadataNode(String uri) {
+        return metadataMonitorService.addMetadataNode(uri);
+    }
+
+    @Override
+    public String removeMetadataNode(String uri) {
+        return metadataMonitorService.removeMetadataNode(uri);
+    }
+
+    @Override
+    public String updateMetadataNode(List<String> uris) {
+        return metadataMonitorService.updateMetadataNode(uris);
     }
 }

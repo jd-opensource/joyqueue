@@ -15,29 +15,28 @@
  */
 package io.chubao.joyqueue.handler.routing.command.topic;
 
-import io.chubao.joyqueue.handler.annotation.PageQuery;
-import io.chubao.joyqueue.model.PageResult;
-import io.chubao.joyqueue.model.QPageQuery;
-import io.chubao.joyqueue.handler.error.ConfigException;
-import io.chubao.joyqueue.handler.error.ErrorCode;
-import io.chubao.joyqueue.handler.routing.command.NsrCommandSupport;
-import io.chubao.joyqueue.model.domain.AppUnsubscribedTopic;
-import io.chubao.joyqueue.model.domain.Broker;
-import io.chubao.joyqueue.model.domain.Topic;
-import io.chubao.joyqueue.model.domain.User;
-import io.chubao.joyqueue.model.query.QBroker;
-import io.chubao.joyqueue.model.query.QTopic;
-import io.chubao.joyqueue.service.BrokerService;
-import io.chubao.joyqueue.service.ConsumerService;
-import io.chubao.joyqueue.service.ProducerService;
-import io.chubao.joyqueue.service.TopicPartitionGroupService;
-import io.chubao.joyqueue.service.TopicService;
 import com.google.common.base.Preconditions;
 import com.jd.laf.binding.annotation.Value;
 import com.jd.laf.web.vertx.annotation.Body;
 import com.jd.laf.web.vertx.annotation.Path;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
+import io.chubao.joyqueue.handler.annotation.PageQuery;
+import io.chubao.joyqueue.handler.error.ConfigException;
+import io.chubao.joyqueue.handler.error.ErrorCode;
+import io.chubao.joyqueue.handler.routing.command.NsrCommandSupport;
+import io.chubao.joyqueue.model.PageResult;
+import io.chubao.joyqueue.model.QPageQuery;
+import io.chubao.joyqueue.model.domain.AppUnsubscribedTopic;
+import io.chubao.joyqueue.model.domain.Broker;
+import io.chubao.joyqueue.model.domain.Topic;
+import io.chubao.joyqueue.model.domain.User;
+import io.chubao.joyqueue.model.query.QTopic;
+import io.chubao.joyqueue.service.BrokerService;
+import io.chubao.joyqueue.service.ConsumerService;
+import io.chubao.joyqueue.service.ProducerService;
+import io.chubao.joyqueue.service.TopicPartitionGroupService;
+import io.chubao.joyqueue.service.TopicService;
 
 import java.util.List;
 
@@ -54,6 +53,12 @@ public class TopicCommand extends NsrCommandSupport<Topic, TopicService, QTopic>
     protected ConsumerService consumerService;
     @Value(nullable = false)
     protected ProducerService producerService;
+
+    @Path("search")
+    public Response pageQuery(@PageQuery QPageQuery<QTopic> qPageQuery) throws Exception {
+        PageResult<Topic> result = service.search(qPageQuery);
+        return Responses.success(result.getPagination(), result.getResult());
+    }
 
     @Path("addWithBrokerGroup")
     public Response addWithBrokerGroup(@Body Topic topic) throws Exception {
@@ -78,9 +83,7 @@ public class TopicCommand extends NsrCommandSupport<Topic, TopicService, QTopic>
             new ConfigException(ErrorCode.BadRequest);
         }
         //新建主题
-        QBroker qBroker = new QBroker();
-        qBroker.setBrokerGroupId(topic.getBrokerGroup().getId());
-        List<Broker> brokerList = brokerService.findByQuery(qBroker);
+        List<Broker> brokerList = brokerService.findByGroup(topic.getBrokerGroup().getId());
         Preconditions.checkArgument(null==brokerList||brokerList.size()<1,topic.getBrokerGroup().getCode()+"分组暂时无可用broker");
         topic.setBrokers(brokerList);
         if(topic.getReplica()>brokerList.size())topic.setReplica(brokerList.size());
@@ -94,7 +97,7 @@ public class TopicCommand extends NsrCommandSupport<Topic, TopicService, QTopic>
         if (qTopic == null) {
             throw new ConfigException(ErrorCode.BadRequest);
         }
-        qTopic.setUserId(session.getId());
+        qTopic.setUserId(Long.valueOf(String.valueOf(session.getId())));
         qTopic.setAdmin(session.getRole()== User.UserRole.ADMIN.value() ? Boolean.TRUE : Boolean.FALSE);
         qTopic.setKeyword(qTopic.getKeyword()==null?null:qTopic.getKeyword().trim());
         PageResult<AppUnsubscribedTopic> result = service.findAppUnsubscribedByQuery(qPageQuery);

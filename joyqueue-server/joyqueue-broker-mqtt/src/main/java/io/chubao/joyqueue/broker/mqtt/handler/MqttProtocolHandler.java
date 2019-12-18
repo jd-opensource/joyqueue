@@ -290,7 +290,7 @@ public class MqttProtocolHandler extends Service {
     public void processPublish(Channel client, MqttPublishMessage publishMessage) {
         String clientID = NettyAttrManager.getAttrClientId(client);
         if (Strings.isNullOrEmpty(clientID)) {
-            LOG.error("ClientID is null or empty for publish, aborting... publish message trace: <{}>", publishMessage.toString());
+            LOG.error("ClientID is null or empty for publish, aborting... publishEvent message trace: <{}>", publishMessage.toString());
             client.close().addListener(CLOSE_ON_FAILURE);
             return;
         }

@@ -137,6 +137,10 @@ public class ElectionConfig {
         return PropertySupplier.getValue(propertySupplier, ElectionConfigKey.ENABLE_REPORT_LEADER_PERIODICALLY);
     }
 
+    public boolean enableReportLeaderPeriodicallyForce() {
+        return PropertySupplier.getValue(propertySupplier, ElectionConfigKey.ENABLE_REPORT_LEADER_PERIODICALLY_FORCE);
+    }
+
     public boolean getOutputConsumePos() {
         return PropertySupplier.getValue(propertySupplier, ElectionConfigKey.OUTPUT_CONSUME_POS);
     }

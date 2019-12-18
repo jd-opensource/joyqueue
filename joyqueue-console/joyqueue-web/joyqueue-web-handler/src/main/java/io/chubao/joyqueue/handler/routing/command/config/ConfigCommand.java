@@ -15,17 +15,23 @@
  */
 package io.chubao.joyqueue.handler.routing.command.config;
 
-import io.chubao.joyqueue.handler.annotation.PageQuery;
-import io.chubao.joyqueue.handler.error.ConfigException;
-import io.chubao.joyqueue.handler.routing.command.NsrCommandSupport;
-import io.chubao.joyqueue.model.domain.Config;
-import io.chubao.joyqueue.model.query.QConfig;
-import io.chubao.joyqueue.model.QPageQuery;
-import io.chubao.joyqueue.service.ConfigService;
 import com.jd.laf.web.vertx.annotation.Path;
 import com.jd.laf.web.vertx.annotation.QueryParam;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
+import io.chubao.joyqueue.handler.annotation.PageQuery;
+import io.chubao.joyqueue.handler.error.ConfigException;
+import io.chubao.joyqueue.handler.routing.command.NsrCommandSupport;
+import io.chubao.joyqueue.model.PageResult;
+import io.chubao.joyqueue.model.Pagination;
+import io.chubao.joyqueue.model.QPageQuery;
+import io.chubao.joyqueue.model.domain.Config;
+import io.chubao.joyqueue.model.query.QConfig;
+import io.chubao.joyqueue.service.ConfigService;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static io.chubao.joyqueue.handler.Constants.ID;
 
@@ -35,14 +41,35 @@ import static io.chubao.joyqueue.handler.Constants.ID;
  */
 public class ConfigCommand extends NsrCommandSupport<Config,ConfigService,QConfig> {
 
-    @Override
     @Path("search")
     public Response pageQuery(@PageQuery QPageQuery<QConfig> qPageQuery) throws Exception {
-        if (qPageQuery.getQuery()== null) {
-            qPageQuery.setQuery(new QConfig());
+        List<Config> allConfigs = service.getAll();
+        List<Config> configs = new ArrayList<>();
+        QConfig qConfig = qPageQuery.getQuery();
+
+        for (Config config : allConfigs) {
+            if (StringUtils.isNotBlank(qConfig.getKey()) && StringUtils.isNotBlank(qConfig.getGroup())) {
+                if (config.getKey().equals(qConfig.getKey()) || config.getGroup().equals(qConfig.getGroup())) {
+                    configs.add(config);
+                }
+            } else if (StringUtils.isNotBlank(qConfig.getKey())) {
+                if (config.getKey().equals(qConfig.getKey())) {
+                    configs.add(config);
+                }
+            } else {
+                configs.add(config);
+            }
         }
-        return super.pageQuery(qPageQuery);
+
+        Pagination pagination = qPageQuery.getPagination();
+        pagination.setTotalRecord(configs.size());
+
+        PageResult<Config> result = new PageResult();
+        result.setPagination(pagination);
+        result.setResult(configs);
+        return Responses.success(result.getPagination(), result.getResult());
     }
+
     @Override
     @Path("delete")
     public Response delete(@QueryParam(ID) String id) throws Exception {

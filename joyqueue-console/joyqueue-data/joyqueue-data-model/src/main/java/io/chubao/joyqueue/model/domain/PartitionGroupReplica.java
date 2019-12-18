@@ -79,14 +79,6 @@ public class PartitionGroupReplica  extends BaseNsrModel implements Comparable<P
         this.brokerId = brokerId;
     }
 
-    public Broker getBroker() {
-        return broker;
-    }
-
-    public void setBroker(Broker broker) {
-        this.broker = broker;
-    }
-
     public List<Integer> getOutSyncReplicas() {
         return outSyncReplicas;
     }
@@ -95,8 +87,16 @@ public class PartitionGroupReplica  extends BaseNsrModel implements Comparable<P
         this.outSyncReplicas = outSyncReplicas;
     }
 
+    public void setBroker(Broker broker) {
+        this.broker = broker;
+    }
+
+    public Broker getBroker() {
+        return broker;
+    }
+
     @Override
     public int compareTo(PartitionGroupReplica o) {
-        return this.getBrokerId()-o.getBrokerId();
+        return Long.compare(brokerId, o.getBrokerId());
     }
 }

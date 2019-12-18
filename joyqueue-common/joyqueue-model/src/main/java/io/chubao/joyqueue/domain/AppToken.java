@@ -17,6 +17,7 @@ package io.chubao.joyqueue.domain;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * @author wylixiaobin
@@ -72,6 +73,24 @@ public class AppToken implements Serializable {
 
     public void setExpirationTime(Date expirationTime) {
         this.expirationTime = expirationTime;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || !(o instanceof AppToken)) return false;
+        AppToken appToken = (AppToken) o;
+        return Objects.equals(id, appToken.id) &&
+                Objects.equals(app, appToken.app) &&
+                Objects.equals(token, appToken.token) &&
+                Objects.equals(effectiveTime.getTime() / 1000, appToken.effectiveTime.getTime()  / 1000) &&
+                Objects.equals(expirationTime.getTime() / 1000, appToken.expirationTime.getTime() / 1000);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(id, app, token, effectiveTime, expirationTime);
     }
 
     @Override

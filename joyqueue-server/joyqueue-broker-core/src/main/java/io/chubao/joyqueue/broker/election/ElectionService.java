@@ -115,6 +115,12 @@ public interface ElectionService {
     LeaderElection getLeaderElection(TopicName topic, int partitionGroup);
 
     /**
+     * Get all leader election
+     * @return leader election
+     */
+    List<LeaderElection> getLeaderElections();
+
+    /**
      * Sync election meta data from name service
      */
     void syncElectionMetadataFromNameService();

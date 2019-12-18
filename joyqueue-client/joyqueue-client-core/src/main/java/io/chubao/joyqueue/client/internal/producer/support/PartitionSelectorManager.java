@@ -15,10 +15,10 @@
  */
 package io.chubao.joyqueue.client.internal.producer.support;
 
-import com.google.common.collect.Maps;
-import io.chubao.joyqueue.client.internal.producer.PartitionSelector;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 import io.chubao.joyqueue.client.internal.Plugins;
+import io.chubao.joyqueue.client.internal.producer.PartitionSelector;
 
 import java.util.concurrent.ConcurrentMap;
 
@@ -46,7 +46,7 @@ public class PartitionSelectorManager {
 
     private PartitionSelector create(String selectorType) {
         PartitionSelector selector = Plugins.PARTITION_SELECTOR.get(selectorType);
-        Preconditions.checkArgument(selector != null, String.format("no partition selector found. type: %s", selectorType));
+        Preconditions.checkArgument(selector != null, String.format("partition selector not found. type: %s", selectorType));
         return selector;
     }
 }

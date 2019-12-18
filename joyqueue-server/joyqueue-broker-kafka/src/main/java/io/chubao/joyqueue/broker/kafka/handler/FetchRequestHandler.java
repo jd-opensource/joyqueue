@@ -83,13 +83,13 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
         this.clusterManager = kafkaContext.getBrokerContext().getClusterManager();
         this.messageConvertSupport = kafkaContext.getBrokerContext().getMessageConvertSupport();
         this.sessionManager = kafkaContext.getBrokerContext().getSessionManager();
-        this.delayPurgatory = new DelayedOperationManager<>("kafka-fetch-wait");
+        this.delayPurgatory = new DelayedOperationManager<>("kafka-fetch-delay");
         this.delayPurgatory.start();
     }
 
     @Override
-    public Command handle(Transport transport, Command command) {
-        FetchRequest fetchRequest = (FetchRequest) command.getPayload();
+    public Command handle(Transport transport, Command request) {
+        FetchRequest fetchRequest = (FetchRequest) request.getPayload();
         Map<String, List<FetchRequest.PartitionRequest>> partitionRequestMap = fetchRequest.getPartitionRequests();
         String clientId = KafkaClientHelper.parseClient(fetchRequest.getClientId());
         String clientIp = ((InetSocketAddress) transport.remoteAddress()).getHostString();
@@ -102,6 +102,11 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
         for (Map.Entry<String, List<FetchRequest.PartitionRequest>> entry : partitionRequestMap.entrySet()) {
             TopicName topic = TopicName.parse(entry.getKey());
             List<FetchResponse.PartitionResponse> partitionResponses = Lists.newArrayListWithCapacity(entry.getValue().size());
+
+            Connection connection = SessionHelper.getConnection(transport);
+            String consumerId = connection.getConsumer(topic.getFullName(), clientId);
+            Consumer consumer = sessionManager.getConsumerById(consumerId);
+            io.chubao.joyqueue.domain.Consumer.ConsumerPolicy consumerPolicy = clusterManager.tryGetConsumerPolicy(topic, clientId);
 
             for (FetchRequest.PartitionRequest partitionRequest : entry.getValue()) {
                 int partition = partitionRequest.getPartition();
@@ -122,7 +127,7 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
 
                 long offset = partitionRequest.getOffset();
                 int partitionMaxBytes = partitionRequest.getMaxBytes();
-                FetchResponse.PartitionResponse partitionResponse = fetchMessage(transport, topic, partition, clientId, offset, partitionMaxBytes);
+                FetchResponse.PartitionResponse partitionResponse = fetchMessage(transport, consumer, consumerPolicy, topic, partition, clientId, offset, partitionMaxBytes);
 
                 currentBytes += partitionResponse.getBytes();
                 partitionResponses.add(partitionResponse);
@@ -137,11 +142,11 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
         Command response = new Command(fetchResponse);
 
         // 如果当前拉取消息量小于最小限制，那么延迟响应
-        if (config.getFetchDelay() && fetchRequest.getMinBytes() > currentBytes && fetchRequest.getMaxWait() > 0) {
+        if (fetchRequest.getMinBytes() > currentBytes && fetchRequest.getMaxWait() > 0 && config.getFetchDelay()) {
             delayPurgatory.tryCompleteElseWatch(new AbstractDelayedOperation(fetchRequest.getMaxWait()) {
                 @Override
                 protected void onComplete() {
-                    transport.acknowledge(command, response);
+                    transport.acknowledge(request, response);
                 }
             }, Sets.newHashSet(new DelayedOperationKey()));
             return null;
@@ -150,10 +155,8 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
         return response;
     }
 
-    private FetchResponse.PartitionResponse fetchMessage(Transport transport, TopicName topic, int partition, String clientId, long offset, int maxBytes) {
-        Connection connection = SessionHelper.getConnection(transport);
-        String consumerId = connection.getConsumer(topic.getFullName(), clientId);
-        Consumer consumer = sessionManager.getConsumerById(consumerId);
+    private FetchResponse.PartitionResponse fetchMessage(Transport transport, Consumer consumer, io.chubao.joyqueue.domain.Consumer.ConsumerPolicy consumerPolicy,
+                                                         TopicName topic, int partition, String clientId, long offset, int maxBytes) {
         long minIndex = consume.getMinIndex(consumer, (short) partition);
         long maxIndex = consume.getMaxIndex(consumer, (short) partition);
 
@@ -164,7 +167,7 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
         }
 
         List<KafkaBrokerMessage> kafkaBrokerMessages = Lists.newLinkedList();
-        int batchSize = config.getFetchBatchSize();
+        int batchSize = consumerPolicy.getBatchSize();
         int currentBytes = 0;
 
         // 判断总体长度
@@ -206,6 +209,11 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
                 logger.error("fetch message exception, consumer: {}, partition: {}, offset: {}, batchSize: {}", consumer, partition, offset, batchSize, e);
                 break;
             }
+        }
+
+        if (config.getLogDetail(clientId)) {
+            logger.info("fetch message, transport: {}, app: {}, partition: {}, offset: {}, result: {}",
+                    transport, clientId, partition, offset, kafkaBrokerMessages.size());
         }
 
         FetchResponse.PartitionResponse fetchResponsePartitionData = new FetchResponse.PartitionResponse(partition, KafkaErrorCode.NONE.getCode(), kafkaBrokerMessages);

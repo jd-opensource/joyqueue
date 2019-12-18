@@ -277,9 +277,9 @@ public class PartitionMessagePoller extends Service implements MessagePoller {
     }
 
     protected List<ConsumeMessage> doPollPartitionInternal(BrokerNode brokerNode, String topic, short partition, int batchSize, long timeout, TimeUnit timeoutUnit, PollerListener listener) {
-        FetchIndexData indexData = consumerIndexManager.fetchIndex(topic, messagePollerInner.getAppFullName(), partition, config.getTimeout());
+        FetchIndexData indexData = consumerIndexManager.fetchIndex(topic, config.getAppFullName(), partition, config.getTimeout());
         if (!indexData.getCode().equals(JoyQueueCode.SUCCESS)) {
-            logger.error("fetch index error, topic: {}, partition: {}, app: {}, error:{}", topic, partition, messagePollerInner.getAppFullName(), indexData.getCode().getMessage());
+            logger.error("fetch index error, topic: {}, partition: {}, app: {}, error:{}", topic, partition, config.getAppFullName(), indexData.getCode().getMessage());
             return messagePollerInner.buildPollEmptyResult(listener);
         }
 
@@ -294,8 +294,9 @@ public class PartitionMessagePoller extends Service implements MessagePoller {
             if (e.getCode() == JoyQueueCode.FW_FETCH_MESSAGE_INDEX_OUT_OF_RANGE.getCode()) {
                 consumerIndexManager.resetIndex(topic, config.getApp(), partition, config.getTimeout());
                 return messagePollerInner.buildPollEmptyResult(listener);
+            } else {
+                throw e;
             }
-            throw e;
         }
     }
 
@@ -321,9 +322,8 @@ public class PartitionMessagePoller extends Service implements MessagePoller {
             throw new IllegalArgumentException(String.format("topic %s reply is empty", topic));
         }
 
-        JoyQueueCode result = consumerIndexManager.commitReply(topicMetadata.getTopic(), replyList, messagePollerInner.getAppFullName(), config.getTimeout());
+        JoyQueueCode result = consumerIndexManager.commitReply(topicMetadata.getTopic(), replyList, config.getAppFullName(), config.getTimeout());
         if (!result.equals(JoyQueueCode.SUCCESS)) {
-            // TODO 临时日志
             logger.warn("commit ack error, topic : {}, code: {}, error: {}", topic, result.getCode(), result.getMessage());
         }
         return result;
@@ -335,12 +335,21 @@ public class PartitionMessagePoller extends Service implements MessagePoller {
     }
 
     @Override
+    public FetchIndexData fetchIndex(String topic, short partition) {
+        checkState();
+        Preconditions.checkArgument(StringUtils.isNotBlank(topic), "topic not blank");
+
+        TopicMetadata topicMetadata = messagePollerInner.getAndCheckTopicMetadata(topic);
+        return consumerIndexManager.fetchIndex(topicMetadata.getTopic(), config.getAppFullName(), partition, config.getTimeout());
+    }
+
+    @Override
     public TopicMetadata getTopicMetadata(String topic) {
         checkState();
         Preconditions.checkArgument(StringUtils.isNotBlank(topic), "topic not blank");
 
         String topicFullName = messagePollerInner.getTopicFullName(topic);
-        return clusterManager.fetchTopicMetadata(topicFullName, messagePollerInner.getAppFullName());
+        return clusterManager.fetchTopicMetadata(topicFullName, config.getAppFullName());
     }
 
     protected void checkState() {

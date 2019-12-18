@@ -29,7 +29,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class TimeLogAspectImpl {
     private static final Logger logger= LoggerFactory.getLogger(TimeLogAspectImpl.class);
-//    @Around("execution(* com.jd.journalq.service.BrokerMonitorService.*(..))&&execution(* com.jd.journalq.nsr.*.*(..))")
+//    @Around("execution(* io.chubao.joyqueue.service.BrokerMonitorService.*(..))&&execution(* io.chubao.joyqueue.nsr.*.*(..))")
 
     @Around("execution(* io.chubao.joyqueue.service.BrokerMonitorService.*(..))")
     public Object around(ProceedingJoinPoint joinPoint){

@@ -19,6 +19,7 @@ import com.google.common.base.Preconditions;
 import io.chubao.joyqueue.broker.archive.ArchiveManager;
 import io.chubao.joyqueue.broker.cluster.ClusterManager;
 import io.chubao.joyqueue.broker.config.BrokerConfig;
+import io.chubao.joyqueue.broker.config.BrokerStoreConfig;
 import io.chubao.joyqueue.broker.config.Configuration;
 import io.chubao.joyqueue.broker.config.ConfigurationManager;
 import io.chubao.joyqueue.broker.consumer.Consume;
@@ -26,10 +27,10 @@ import io.chubao.joyqueue.broker.consumer.MessageConvertSupport;
 import io.chubao.joyqueue.broker.coordinator.CoordinatorService;
 import io.chubao.joyqueue.broker.coordinator.config.CoordinatorConfig;
 import io.chubao.joyqueue.broker.election.ElectionService;
+import io.chubao.joyqueue.broker.extension.ExtensionManager;
 import io.chubao.joyqueue.broker.helper.AwareHelper;
 import io.chubao.joyqueue.broker.manage.BrokerManageService;
 import io.chubao.joyqueue.broker.manage.config.BrokerManageConfig;
-import io.chubao.joyqueue.broker.manage.config.BrokerManageConfigKey;
 import io.chubao.joyqueue.broker.monitor.BrokerMonitorService;
 import io.chubao.joyqueue.broker.monitor.SessionManager;
 import io.chubao.joyqueue.broker.monitor.config.BrokerMonitorConfig;
@@ -37,14 +38,16 @@ import io.chubao.joyqueue.broker.network.BrokerServer;
 import io.chubao.joyqueue.broker.network.protocol.ProtocolManager;
 import io.chubao.joyqueue.broker.producer.Produce;
 import io.chubao.joyqueue.broker.retry.BrokerRetryManager;
+import io.chubao.joyqueue.broker.store.StoreInitializer;
 import io.chubao.joyqueue.broker.store.StoreManager;
 import io.chubao.joyqueue.domain.Config;
 import io.chubao.joyqueue.domain.Consumer;
 import io.chubao.joyqueue.domain.Producer;
+import io.chubao.joyqueue.helper.PortHelper;
 import io.chubao.joyqueue.network.transport.config.ServerConfig;
 import io.chubao.joyqueue.network.transport.config.TransportConfigSupport;
 import io.chubao.joyqueue.nsr.NameService;
-import io.chubao.joyqueue.nsr.config.NameServerConfigKey;
+import io.chubao.joyqueue.nsr.nameservice.CompensatedNameService;
 import io.chubao.joyqueue.security.Authentication;
 import io.chubao.joyqueue.server.retry.api.MessageRetry;
 import io.chubao.joyqueue.store.StoreService;
@@ -64,9 +67,6 @@ import java.util.List;
 
 /**
  * BrokerService
- *
- * author: gaohaoxiang
- * date: 2018/8/14
  */
 public class BrokerService extends Service {
     private static final Logger logger = LoggerFactory.getLogger(BrokerService.class);
@@ -83,16 +83,17 @@ public class BrokerService extends Service {
     private Produce produce;
     private Consume consume;
     private StoreService storeService;
+    private StoreInitializer storeInitializer;
     private ElectionService electionService;
     private MessageRetry retryManager;
     private BrokerContext brokerContext;
     private ConfigurationManager configurationManager;
     private StoreManager storeManager;
     private NameService nameService;
-
     private CoordinatorService coordinatorService;
     private ArchiveManager archiveManager;
     private MessageConvertSupport messageConvertSupport;
+    private ExtensionManager extensionManager;
     private String[] args;
 
     public BrokerService() {
@@ -117,10 +118,11 @@ public class BrokerService extends Service {
         logger.info("Broker data path: {}.", dataPath);
 
         this.brokerContext.brokerConfig(brokerConfig);
+        this.extensionManager = new ExtensionManager(brokerContext);
+        this.extensionManager.before();
 
         //start name service first
         this.nameService = getNameService(brokerContext, configuration);
-        this.nameService.start();
         this.brokerContext.nameService(nameService);
 
         // build and start context manager
@@ -183,6 +185,9 @@ public class BrokerService extends Service {
         this.electionService = getElectionService(brokerContext);
         this.brokerContext.electionService(electionService);
 
+        this.storeInitializer = new StoreInitializer(new BrokerStoreConfig(configuration), nameService,
+                clusterManager, storeService, electionService);
+
         // manage service
         this.brokerManageService = new BrokerManageService(new BrokerManageConfig(configuration,brokerConfig),
                 brokerMonitorService,
@@ -209,6 +214,7 @@ public class BrokerService extends Service {
         this.brokerContext.producerPolicy(buildGlobalProducePolicy(configuration));
         //build consume policy
         this.brokerContext.consumerPolicy(buildGlobalConsumePolicy(configuration));
+        this.extensionManager.after();
 
     }
 
@@ -225,35 +231,18 @@ public class BrokerService extends Service {
         // broker.backend-server.transport.server.port	50089	内部端口，JoyQueue Server各节点之间通信的端口
 
         key = BrokerConfig.BROKER_BACKEND_SERVER_CONFIG_PREFIX + TransportConfigSupport.TRANSPORT_SERVER_PORT;
-        port += 1;
-        configuration.addProperty(key, String.valueOf(port));
-
-        // manager.export.port	50090	Broker监控服务的端口
-        key = BrokerManageConfigKey.EXPORT_PORT.getName();
-        port += 1;
-        configuration.addProperty(key, String.valueOf(port));
-
-        // nameserver.nsr.manage.port	50091	JoyQueue Server rest API 端口
-
-        key = NameServerConfigKey.NAMESERVER_MANAGE_PORT.getName();
-        port += 1;
-        configuration.addProperty(key, String.valueOf(port));
-
-        // nameserver.transport.server.port	50092	内部端口，JoyQueue Server各节点之间通信的端口。
-
-        key = NameServerConfigKey.NAMESERVER_SERVICE_PORT.getName();
-        port += 1;
-        configuration.addProperty(key, String.valueOf(port));
-
+        configuration.addProperty(key, String.valueOf(PortHelper.getBackendPort(port)));
     }
-
 
     private NameService getNameService(BrokerContext brokerContext, Configuration configuration) {
         Property property = configuration.getProperty(NAMESERVICE_NAME);
         NameService nameService = Plugins.NAMESERVICE.get(property == null ? DEFAULT_NAMESERVICE_NAME : property.getString().trim());
         Preconditions.checkArgument(nameService != null, "nameService not found!");
+
+        CompensatedNameService compensatedNameService = new CompensatedNameService(nameService);
         enrichIfNecessary(nameService, brokerContext);
-        return nameService;
+        enrichIfNecessary(compensatedNameService, brokerContext);
+        return compensatedNameService;
     }
 
 
@@ -310,9 +299,9 @@ public class BrokerService extends Service {
 
     @Override
     protected void doStart() throws Exception {
-        startIfNecessary(nameService);
         startIfNecessary(clusterManager);
         startIfNecessary(storeService);
+        startIfNecessary(storeInitializer);
         startIfNecessary(sessionManager);
         startIfNecessary(retryManager);
         startIfNecessary(brokerMonitorService);
@@ -321,7 +310,9 @@ public class BrokerService extends Service {
         //must start after store manager
         startIfNecessary(storeManager);
         startIfNecessary(electionService);
+        startIfNecessary(extensionManager);
         startIfNecessary(protocolManager);
+        startIfNecessary(nameService);
         startIfNecessary(brokerServer);
         startIfNecessary(coordinatorService);
         startIfNecessary(brokerManageService);
@@ -331,7 +322,7 @@ public class BrokerService extends Service {
 
 
     private void printConfig() {
-        StringBuffer buffer = new StringBuffer("broker start with configuration:").append('\n');
+        StringBuilder buffer = new StringBuilder("broker start with configuration:").append('\n');
         if (configurationManager != null && configurationManager.getConfiguration() != null) {
             List<Property> properties = new ArrayList<>(configurationManager.getConfiguration().getProperties());
             Collections.sort(properties, Comparator.comparing(Property::getKey));
@@ -342,13 +333,17 @@ public class BrokerService extends Service {
         }
 
         logger.info(buffer.toString());
-        logger.info("broker.id[{}],ip[{}],frontPort[{}],backendPort[{}],monitorPort[{}],nameServer port[{}]",
+        logger.info("broker.id[{}],ip[{}],frontPort[{}],backendPort[{}],monitorPort[{}],nameServerManager port[{}]," +
+                        "nameServer port[{}],messenger port[{}],journalkeeper port[{}]",
                 brokerConfig.getBrokerId(),
                 clusterManager.getBroker().getIp(),
                 brokerConfig.getFrontendConfig().getPort(),
                 brokerConfig.getBackendConfig().getPort(),
                 brokerConfig.getBroker().getMonitorPort(),
-                brokerConfig.getBroker().getManagerPort());
+                brokerConfig.getBroker().getNameServerManagerPort(),
+                brokerConfig.getBroker().getNameServerPort(),
+                brokerConfig.getBroker().getMessengerPort(),
+                brokerConfig.getBroker().getJournalkeeperPort());
     }
 
     @Override
@@ -356,12 +351,15 @@ public class BrokerService extends Service {
 
         destroy(brokerServer);
         destroy(protocolManager);
+        destroy(extensionManager);
         destroy(electionService);
+        destroy(produce);
         destroy(consume);
         destroy(coordinatorService);
         destroy(sessionManager);
         destroy(clusterManager);
         destroy(storeManager);
+        destroy(storeInitializer);
         destroy(storeService);
         destroy(configurationManager);
         destroy(retryManager);
@@ -379,7 +377,9 @@ public class BrokerService extends Service {
 
     private void startIfNecessary(Object object) throws Exception {
         if (object instanceof LifeCycle) {
-            ((LifeCycle) object).start();
+            if (!((LifeCycle) object).isStarted()) {
+                ((LifeCycle) object).start();
+            }
         }
     }
 

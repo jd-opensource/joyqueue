@@ -15,7 +15,6 @@
  */
 
 package io.chubao.joyqueue.broker.monitor.metrics;
-
 import com.alibaba.fastjson.annotation.JSONField;
 import com.codahale.metrics.*;
 
@@ -115,3 +114,4 @@ public class LoadMetric implements Metered, Sampling {
         return histogram.getSnapshot();
     }
 }
+

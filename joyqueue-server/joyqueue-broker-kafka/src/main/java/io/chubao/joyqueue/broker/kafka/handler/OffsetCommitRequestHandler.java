@@ -23,6 +23,7 @@ import io.chubao.joyqueue.broker.kafka.command.OffsetCommitRequest;
 import io.chubao.joyqueue.broker.kafka.command.OffsetCommitResponse;
 import io.chubao.joyqueue.broker.kafka.config.KafkaConfig;
 import io.chubao.joyqueue.broker.kafka.coordinator.group.GroupCoordinator;
+import io.chubao.joyqueue.broker.kafka.helper.KafkaClientHelper;
 import io.chubao.joyqueue.broker.kafka.model.OffsetMetadataAndError;
 import io.chubao.joyqueue.network.transport.Transport;
 import io.chubao.joyqueue.network.transport.command.Command;
@@ -54,8 +55,9 @@ public class OffsetCommitRequestHandler extends AbstractKafkaCommandHandler impl
     @Override
     public Command handle(Transport transport, Command command) {
         OffsetCommitRequest offsetCommitRequest = (OffsetCommitRequest) command.getPayload();
+        String groupId = KafkaClientHelper.parseClient(offsetCommitRequest.getClientId());
 
-        Map<String, List<OffsetMetadataAndError>> result = groupCoordinator.handleCommitOffsets(offsetCommitRequest.getGroupId(), offsetCommitRequest.getMemberId(),
+        Map<String, List<OffsetMetadataAndError>> result = groupCoordinator.handleCommitOffsets(groupId, offsetCommitRequest.getMemberId(),
                 offsetCommitRequest.getGroupGenerationId(), offsetCommitRequest.getOffsets());
 
         if (config.getLogDetail(offsetCommitRequest.getClientId())) {

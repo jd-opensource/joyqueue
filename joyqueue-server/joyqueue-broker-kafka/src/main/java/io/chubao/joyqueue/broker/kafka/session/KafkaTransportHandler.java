@@ -15,7 +15,6 @@
  */
 package io.chubao.joyqueue.broker.kafka.session;
 
-import io.chubao.joyqueue.broker.kafka.KafkaCommandType;
 import io.chubao.joyqueue.broker.kafka.command.ProduceRequest;
 import io.chubao.joyqueue.broker.kafka.config.KafkaConfig;
 import io.chubao.joyqueue.network.transport.ChannelTransport;
@@ -30,8 +29,6 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * KafkaTransportHandler
@@ -74,22 +71,10 @@ public class KafkaTransportHandler extends ChannelDuplexHandler {
             TransportHelper.setTransport(channel, transport);
         }
 
-        int type = ((Command) msg).getHeader().getType();
-        if (type == KafkaCommandType.METADATA.getCode()
-                || type == KafkaCommandType.FIND_COORDINATOR.getCode()
-                || type == KafkaCommandType.LIST_OFFSETS.getCode()
-                || type == KafkaCommandType.PRODUCE.getCode()
-                || type == KafkaCommandType.FETCH.getCode()) {
-            if (!((KafkaChannelTransport) transport).tryAcquire(config.getTransportAcquireTimeout(), TimeUnit.MILLISECONDS)) {
-                logger.warn("transport acquire failed, transport: {}, type: {}", transport, type);
-            }
-        } else {
-            ((KafkaChannelTransport) transport).tryAcquire();
-        }
-
-        if (((Command) msg).getPayload() instanceof ProduceRequest
-                && ((ProduceRequest) ((Command) msg).getPayload()).getRequiredAcks() == 0) {
-            ((KafkaChannelTransport) transport).release();
+        Command command = (Command) msg;
+        if (!(command.getPayload() instanceof ProduceRequest
+                && ((ProduceRequest) command.getPayload()).getRequiredAcks() == 0)) {
+            ((KafkaChannelTransport) transport).acquire(command);
         }
 
         super.channelRead(ctx, msg);

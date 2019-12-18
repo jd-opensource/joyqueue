@@ -17,6 +17,7 @@ package io.chubao.joyqueue.event;
 
 import io.chubao.joyqueue.domain.Broker;
 
+@Deprecated
 public class BrokerEvent extends MetaEvent {
     private Broker broker;
 

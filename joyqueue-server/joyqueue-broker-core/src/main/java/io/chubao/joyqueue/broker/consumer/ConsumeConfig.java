@@ -48,6 +48,18 @@ public class ConsumeConfig {
         return consumePositionPath;
     }
 
+    public boolean getBroadcastIndexResetEnable() {
+        return propertySupplier.getValue(ConsumeConfigKey.BROADCAST_INDEX_RESET_ENABLE);
+    }
+
+    public int getBroadcastIndexResetInterval() {
+        return propertySupplier.getValue(ConsumeConfigKey.BROADCAST_INDEX_RESET_INTERVAL);
+    }
+
+    public int getBroadcastIndexResetTime() {
+        return propertySupplier.getValue(ConsumeConfigKey.BROADCAST_INDEX_RESET_TIME);
+    }
+
     public void setConsumePositionPath(String consumePositionPath) {
         this.consumePositionPath = consumePositionPath;
     }

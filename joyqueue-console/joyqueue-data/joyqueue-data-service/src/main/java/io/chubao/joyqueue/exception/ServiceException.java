@@ -64,7 +64,7 @@ public class ServiceException extends DataException {
      */
     public static final int THIRD_PARTY_ERROR = 600;
 
-    public static final int IGNITE_RPC_ERROR = 10001;
+    public static final int NAMESERVER_RPC_ERROR = 10001;
 
 
     protected ServiceException() {

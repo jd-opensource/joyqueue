@@ -16,14 +16,9 @@
 package io.chubao.joyqueue.nsr.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.TypeReference;
-import io.chubao.joyqueue.model.PageResult;
-import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.convert.NsrDataCenterConverter;
 import io.chubao.joyqueue.model.domain.DataCenter;
 import io.chubao.joyqueue.model.domain.OperLog;
-import io.chubao.joyqueue.model.query.QDataCenter;
-import io.chubao.joyqueue.nsr.model.DataCenterQuery;
 import io.chubao.joyqueue.nsr.DataCenterNameServerService;
 import io.chubao.joyqueue.nsr.NameServerBase;
 import org.springframework.stereotype.Service;
@@ -41,7 +36,6 @@ public class DataCenterNameServerServiceImpl extends NameServerBase implements D
     public static final String UPDATE_DATACENTER="/datacenter/update";
     public static final String REMOVE_DATACENTER="/datacenter/remove";
     public static final String GETBYID_DATACENTER="/datacenter/getById";
-    public static final String FINDBYQUERY_DATACENTER="/datacenter/findByQuery";
     private static final String LIST_DATACENTER="/datacenter/list";
 
     private NsrDataCenterConverter nsrDataCenterConverter = new NsrDataCenterConverter();
@@ -52,8 +46,8 @@ public class DataCenterNameServerServiceImpl extends NameServerBase implements D
      * @throws Exception
      */
     @Override
-    public List<DataCenter> findAllDataCenter(DataCenterQuery dataCenterQuery) throws Exception {
-        String result = post(LIST_DATACENTER,dataCenterQuery);
+    public List<DataCenter> findAllDataCenter() throws Exception {
+        String result = post(LIST_DATACENTER, null);
         List<io.chubao.joyqueue.domain.DataCenter> dataCenterList = JSON.parseArray(result).toJavaList(io.chubao.joyqueue.domain.DataCenter.class);
         return dataCenterList.stream().map(dataCenter -> nsrDataCenterConverter.revert(dataCenter)).collect(Collectors.toList());
     }
@@ -73,11 +67,6 @@ public class DataCenterNameServerServiceImpl extends NameServerBase implements D
     }
 
     @Override
-    public List<DataCenter> findByQuery(QDataCenter query) throws Exception {
-        return null;
-    }
-
-    @Override
     public int delete(DataCenter dataCenter) throws Exception {
         io.chubao.joyqueue.domain.DataCenter nsrConfig = nsrDataCenterConverter.convert(dataCenter);
         String result = postWithLog(REMOVE_DATACENTER, nsrConfig,OperLog.Type.DATA_CENTER.value(),OperLog.OperType.DELETE.value(),nsrConfig.getId());
@@ -90,24 +79,4 @@ public class DataCenterNameServerServiceImpl extends NameServerBase implements D
         io.chubao.joyqueue.domain.DataCenter nsrDataCenter = JSON.parseObject(result, io.chubao.joyqueue.domain.DataCenter.class);
         return nsrDataCenterConverter.revert(nsrDataCenter);
     }
-
-    @Override
-    public PageResult<DataCenter> findByQuery(QPageQuery<QDataCenter> query) throws Exception {
-        QPageQuery<DataCenterQuery> pageQuery = new QPageQuery<>();
-        pageQuery.setPagination(query.getPagination());
-        DataCenterQuery dataCenterQuery = new DataCenterQuery();
-        if (query.getQuery() != null ) {
-            dataCenterQuery.setCode(query.getQuery().getCode());
-            dataCenterQuery.setRegion(query.getQuery().getRegion());
-        }
-        pageQuery.setQuery(dataCenterQuery);
-        String result = post(FINDBYQUERY_DATACENTER,pageQuery);
-
-        PageResult<DataCenter> pageResult2 = new PageResult<>();
-        PageResult<io.chubao.joyqueue.domain.DataCenter> pageResult = JSON.parseObject(result,new TypeReference<PageResult<io.chubao.joyqueue.domain.DataCenter>>(){});
-        pageResult2.setPagination(pageResult.getPagination());
-        pageResult2.setResult(pageResult.getResult().stream().map(dataCenter -> nsrDataCenterConverter.revert(dataCenter)).collect(Collectors.toList()));
-        return pageResult2;
-    }
-
 }

@@ -31,7 +31,7 @@ public class BrokerMonitorInfo extends BaseMonitorInfo {
     private NameServerMonitorInfo nameServer;
     private ElectionMonitorInfo election;
     private BufferPoolMonitorInfo bufferPoolMonitorInfo;
-
+    private BrokerStartupInfo startupInfo;
 
     public ConnectionMonitorInfo getConnection() {
         return connection;
@@ -95,5 +95,13 @@ public class BrokerMonitorInfo extends BaseMonitorInfo {
 
     public void setBufferPoolMonitorInfo(BufferPoolMonitorInfo bufferPoolMonitorInfo) {
         this.bufferPoolMonitorInfo = bufferPoolMonitorInfo;
+    }
+
+    public BrokerStartupInfo getStartupInfo() {
+        return startupInfo;
+    }
+
+    public void setStartupInfo(BrokerStartupInfo startupInfo) {
+        this.startupInfo = startupInfo;
     }
 }

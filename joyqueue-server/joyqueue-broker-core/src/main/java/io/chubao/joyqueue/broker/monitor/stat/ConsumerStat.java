@@ -17,7 +17,6 @@ package io.chubao.joyqueue.broker.monitor.stat;
 
 import com.google.common.collect.Maps;
 
-import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
 /**
@@ -40,16 +39,6 @@ public class ConsumerStat {
         this.app = app;
     }
 
-    public PartitionStat getPartitionStat(short partition) {
-        for (Map.Entry<Integer, PartitionGroupStat> entry : partitionGroupStatMap.entrySet()) {
-            PartitionStat partitionStat = entry.getValue().getPartitionStatMap().get(partition);
-            if (partitionStat != null) {
-                return partitionStat;
-            }
-        }
-        return new PartitionStat(topic, app, partition);
-    }
-
     public PartitionGroupStat getOrCreatePartitionGroupStat(int partitionGroup) {
         PartitionGroupStat partitionGroupStat = partitionGroupStatMap.get(partitionGroup);
         if (partitionGroupStat == null) {
@@ -57,6 +46,13 @@ public class ConsumerStat {
             partitionGroupStat = partitionGroupStatMap.get(partitionGroup);
         }
         return partitionGroupStat;
+    }
+
+    public void clear() {
+        deQueueStat = new DeQueueStat();
+        retryStat = new RetryStat();
+        connectionStat = new ConnectionStat();
+        partitionGroupStatMap.clear();
     }
 
     public String getTopic() {

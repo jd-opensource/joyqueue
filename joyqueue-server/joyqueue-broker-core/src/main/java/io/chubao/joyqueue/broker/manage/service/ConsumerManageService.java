@@ -123,4 +123,11 @@ public interface ConsumerManageService {
      * @throws JoyQueueException
      */
     boolean setAckIndexesByTime(String topic, String app, long timestamp) throws JoyQueueException;
+
+    /**
+     * 初始化消费ack
+     * @return
+     * @throws JoyQueueException
+     */
+    String initConsumerAckIndexes() throws JoyQueueException;
 }

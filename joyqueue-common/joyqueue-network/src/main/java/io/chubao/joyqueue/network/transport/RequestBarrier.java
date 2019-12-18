@@ -80,8 +80,18 @@ public class RequestBarrier {
      * @param requestId 请求ID
      * @param future    异步调用
      */
-    public void put(final int requestId, final ResponseFuture future) {
+    public void putAsyncFuture(final int requestId, final ResponseFuture future) {
+        futures.put(requestId, future);
         startClearTimerIfNecessary();
+    }
+
+    /**
+     * 缓存异步调用
+     *
+     * @param requestId 请求ID
+     * @param future    异步调用
+     */
+    public void putSyncFuture(final int requestId, final ResponseFuture future) {
         futures.put(requestId, future);
     }
 

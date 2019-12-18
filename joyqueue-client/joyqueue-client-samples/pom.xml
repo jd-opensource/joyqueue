@@ -22,7 +22,7 @@
     <parent>
         <artifactId>joyqueue-client</artifactId>
         <groupId>io.chubao</groupId>
-        <version>4.1.1-SNAPSHOT</version>
+        <version>4.1.2-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -36,10 +36,6 @@
         <module>joyqueue-client-samples-springboot</module>
         <module>joyqueue-client-samples-kafka</module>
     </modules>
-
-    <properties>
-        <openmessaging-spring.version>0.0.1-SNAPSHOT</openmessaging-spring.version>
-    </properties>
 
     <dependencies>
         <dependency>
@@ -62,7 +58,7 @@
             <dependency>
                 <groupId>io.chubao</groupId>
                 <artifactId>openmessaging-spring</artifactId>
-                <version>${openmessaging-spring.version}</version>
+                <version>${project.version}</version>
             </dependency>
 <!--            <dependency>-->
 <!--                <groupId>io.chubao</groupId>-->

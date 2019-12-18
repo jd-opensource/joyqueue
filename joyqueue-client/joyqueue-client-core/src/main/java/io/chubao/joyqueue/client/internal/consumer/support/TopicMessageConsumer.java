@@ -58,6 +58,7 @@ public class TopicMessageConsumer extends Service {
     private TopicMessageConsumerDispatcher messageConsumerDispatcher;
     private TopicMessageConsumerScheduler messageConsumerScheduler;
     private MessageListenerManager messageListenerManager = new MessageListenerManager();
+    private String appFullName;
 
     public TopicMessageConsumer(String topic, ConsumerConfig config, NameServerConfig nameServerConfig, ClusterManager clusterManager,
                                 ClusterClientManager clusterClientManager, ConsumerClientManager consumerClientManager) {
@@ -120,7 +121,7 @@ public class TopicMessageConsumer extends Service {
 
     protected MessagePoller createMessageConsumer(String topic) {
         TopicName topicName = TopicName.parse(NameServerHelper.getTopicFullName(topic, nameServerConfig));
-        TopicMetadata topicMetadata = clusterManager.fetchTopicMetadata(topicName.getFullName(), config.getApp());
+        TopicMetadata topicMetadata = clusterManager.fetchTopicMetadata(topicName.getFullName(), config.getAppFullName());
 
         if (topicMetadata == null || topicMetadata.getConsumerPolicy() == null) {
             throw new ConsumerException(String.format("topic %s is not exist", topic), JoyQueueCode.FW_TOPIC_NOT_EXIST.getCode());

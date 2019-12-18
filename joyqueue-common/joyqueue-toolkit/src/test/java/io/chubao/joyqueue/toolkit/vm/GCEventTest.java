@@ -40,6 +40,7 @@ public class GCEventTest {
         GCEventListener gcEventListener=(GCEvent t)->{
             GarbageCollectionNotificationInfo notificationInfo=t.getGcInfo();
             GcInfo gcInfo=notificationInfo.getGcInfo();
+
             builder.append(t.getType().name()+
                     ";gc cause: "+ notificationInfo.getGcCause()+
                     ";gc action: "+ notificationInfo.getGcAction()+
@@ -83,18 +84,22 @@ public class GCEventTest {
         MemoryStat stat=gcMonitor.memSnapshot();
         StringBuilder builder=new StringBuilder();
         ByteBuffer byteBuffer=ByteBuffer.allocateDirect(2*1024*1024);
+
         long direct=SharedSecrets.getJavaNioAccess().getDirectBufferPool().getMemoryUsed();
 
         builder.append("heap:").append("init ").append(stat.getHeapInit()).append(" bytes,")
                 .append("used ").append(stat.getHeapUsed()).append(" bytes,")
+
                 .append("committed ").append(stat.getHeapCommitted()).append(" bytes,")
                 .append("max ").append(stat.getHeapMax()).append(" bytes\n");
 
         builder.append("non-heap:").append("init ").append(stat.getNonHeapInit()).append(" bytes,")
                 .append("used ").append(stat.getNonHeapUsed()).append(" bytes,")
                 .append("committed ").append(stat.getNonHeapCommitted()).append(" bytes,")
+
                 .append("max ").append(stat.getNonHeapMax()).append(" bytes\n");
         System.out.println(builder.toString());
         System.out.println("direct:"+direct);
     }
+
 }

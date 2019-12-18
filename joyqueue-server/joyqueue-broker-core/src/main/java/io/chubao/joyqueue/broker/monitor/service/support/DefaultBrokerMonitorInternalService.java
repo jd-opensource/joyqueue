@@ -1,12 +1,12 @@
 /**
  * Copyright 2019 The JoyQueue Authors.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,22 +20,40 @@ import io.chubao.joyqueue.broker.cluster.ClusterManager;
 import io.chubao.joyqueue.broker.consumer.Consume;
 import io.chubao.joyqueue.broker.election.ElectionService;
 import io.chubao.joyqueue.broker.monitor.converter.BrokerMonitorConverter;
-import io.chubao.joyqueue.broker.monitor.exception.MonitorException;
 import io.chubao.joyqueue.broker.monitor.service.BrokerMonitorInternalService;
 import io.chubao.joyqueue.broker.monitor.stat.*;
-import io.chubao.joyqueue.monitor.*;
 import io.chubao.joyqueue.network.session.Consumer;
 import io.chubao.joyqueue.nsr.NameService;
+import io.chubao.joyqueue.broker.monitor.stat.BrokerStat;
+import io.chubao.joyqueue.broker.monitor.stat.BrokerStatExt;
+import io.chubao.joyqueue.broker.monitor.stat.ConsumerPendingStat;
+import io.chubao.joyqueue.broker.monitor.stat.JVMStat;
+import io.chubao.joyqueue.broker.monitor.stat.PartitionGroupPendingStat;
+import io.chubao.joyqueue.broker.monitor.stat.TopicPendingStat;
+import io.chubao.joyqueue.broker.monitor.stat.TopicStat;
+import io.chubao.joyqueue.domain.TopicConfig;
+import io.chubao.joyqueue.monitor.BrokerMonitorInfo;
+import io.chubao.joyqueue.monitor.BrokerStartupInfo;
+import io.chubao.joyqueue.monitor.ElectionMonitorInfo;
+import io.chubao.joyqueue.monitor.NameServerMonitorInfo;
+import io.chubao.joyqueue.monitor.StoreMonitorInfo;
+import io.chubao.joyqueue.store.PartitionGroupStore;
 import io.chubao.joyqueue.store.StoreManagementService;
 import io.chubao.joyqueue.store.StoreService;
 import io.chubao.joyqueue.toolkit.format.Format;
 import io.chubao.joyqueue.toolkit.lang.Online;
-import io.chubao.joyqueue.toolkit.vm.*;
+import io.chubao.joyqueue.toolkit.vm.DefaultGCNotificationParser;
+import io.chubao.joyqueue.toolkit.vm.GCEvent;
+import io.chubao.joyqueue.toolkit.vm.GCEventListener;
+import io.chubao.joyqueue.toolkit.vm.GCEventType;
+import io.chubao.joyqueue.toolkit.vm.GarbageCollectorMonitor;
+import io.chubao.joyqueue.toolkit.vm.JVMMonitorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -45,7 +63,7 @@ import java.util.Map;
  * date: 2018/10/15
  */
 public class DefaultBrokerMonitorInternalService implements BrokerMonitorInternalService {
-    private static final Logger logger= LoggerFactory.getLogger(DefaultBrokerMonitorInternalService.class);
+    private static final Logger logger = LoggerFactory.getLogger(DefaultBrokerMonitorInternalService.class);
 
     private BrokerStat brokerStat;
     private Consume consume;
@@ -58,13 +76,14 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
     private JVMMonitorService jvmMonitorService;
     private DefaultGCNotificationParser gcNotificationParser;
 
+
     public DefaultBrokerMonitorInternalService(BrokerStat brokerStat, Consume consume,
                                                StoreManagementService storeManagementService,
                                                NameService nameService, StoreService storeService,
                                                ElectionService electionManager, ClusterManager clusterManager, BrokerStartupInfo brokerStartupInfo) {
         this.brokerStat = brokerStat;
         this.consume = consume;
-        this.storeManagementService=storeManagementService;
+        this.storeManagementService = storeManagementService;
         this.nameService = nameService;
         this.storeService = storeService;
         this.electionService = electionManager;
@@ -74,6 +93,7 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
         this.gcNotificationParser=new DefaultGCNotificationParser();
         this.gcNotificationParser.addListener(new DefaultGCEventListener(brokerStat.getJvmStat()));
         this.jvmMonitorService.addGCEventListener(gcNotificationParser);
+
     }
 
     @Override
@@ -85,7 +105,7 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
         brokerMonitorInfo.setReplication(BrokerMonitorConverter.convertReplicationMonitorInfo(brokerStat.getReplicationStat()));
 
         StoreMonitorInfo storeMonitorInfo = new StoreMonitorInfo();
-        storeMonitorInfo.setStarted(storeService instanceof Online?((Online) storeService).isStarted():true);
+        storeMonitorInfo.setStarted(storeService instanceof Online ? ((Online) storeService).isStarted() : true);
         storeMonitorInfo.setFreeSpace(Format.formatSize(storeManagementService.freeSpace()));
         storeMonitorInfo.setTotalSpace(Format.formatSize(storeManagementService.totalSpace()));
 
@@ -103,82 +123,77 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
         brokerMonitorInfo.setElection(electionMonitorInfo);
 
         brokerMonitorInfo.setBufferPoolMonitorInfo(storeService.monitorInfo());
+        brokerMonitorInfo.setStartupInfo(brokerStartupInfo);
         return brokerMonitorInfo;
     }
 
-
+    // BrokerStatExt里所有对象单独生成bean，不能复用monitor的bean
     @Override
     public BrokerStatExt getExtendBrokerStat(long timeStamp) {
-       BrokerStatExt statExt=new BrokerStatExt(brokerStat);
-       statExt.setTimeStamp(timeStamp);
+        BrokerStatExt statExt=new BrokerStatExt(brokerStat);
+        statExt.setTimeStamp(timeStamp);
+        getJVMState(); // update current jvm state and memory stat
+        statExt.getBrokerStat().getJvmStat().getRecentSnapshot();
+        statExt.setTimeStamp(timeStamp);
+        brokerStat.getJvmStat().setMemoryStat(jvmMonitorService.memSnapshot());
+        Map<String, TopicPendingStat> topicPendingStatMap = statExt.getTopicPendingStatMap();
 
-        getJVMState(); // update current jvm state
-        JVMStat recentJvmStat= statExt.getBrokerStat().getJvmStat().getRecentSnapshot();
-        // update snapshot jvm memory state
-        recentJvmStat.setMemoryStat(statExt.getBrokerStat().getJvmStat().getMemoryStat());
+        for (TopicConfig topic : clusterManager.getTopics()) {
+            TopicStat topicStat = brokerStat.getOrCreateTopicStat(topic.getName().getFullName());
+            TopicPendingStat topicPendingStat = new TopicPendingStat();
+            topicPendingStat.setTopic(topic.getName().getFullName());
+            topicPendingStatMap.put(topic.getName().getFullName(), topicPendingStat);
 
-       Map<String, TopicPendingStat>  topicPendingStatMap=statExt.getTopicPendingStatMap();
-       Map<String, TopicStat>  topicStatMap=brokerStat.getTopicStats();
-       Map<String,ConsumerPendingStat> consumerPendingStatMap;
-       Map<Integer,PartitionGroupPendingStat> partitionGroupPendingStatMap;
-       Map<Short,Long> partitionPendStatMap;
-       TopicPendingStat topicPendingStat;
-       ConsumerPendingStat consumerPendingStat;
-       PartitionGroupPendingStat partitionGroupPendingStat;
-       Integer partitionGroupId;
-       Consumer consumer;
-       Long pending;
-       Long topicPending=0L;
-       Long consumerPending=0L;
-       Long partitionGroupPending=0L;
-       try {
-       for( TopicStat topicStat :topicStatMap.values()){
-            topicPendingStat=new TopicPendingStat();
-            topicPendingStat.setTopic(topicStat.getTopic());
-            topicPendingStatMap.put(topicStat.getTopic(),topicPendingStat);
-            for(String app:topicStat.getAppStats().keySet()){
-                     consumer=new Consumer(topicStat.getTopic(),app);
-                     consumerPendingStat=new ConsumerPendingStat();
-                     consumerPendingStat.setApp(app);
-                     consumerPendingStat.setTopic(topicStat.getTopic());
-                     consumerPendingStatMap=topicPendingStat.getPendingStatSubMap();
-                     consumerPendingStatMap.put(app,consumerPendingStat);
-                     partitionGroupPendingStatMap=consumerPendingStat.getPendingStatSubMap();
-                    StoreManagementService.TopicMetric topicMetric = storeManagementService.topicMetric(consumer.getTopic());
-                    for (StoreManagementService.PartitionGroupMetric partitionGroupMetric : topicMetric.getPartitionGroupMetrics()) {
-                         partitionGroupId=partitionGroupMetric.getPartitionGroup();
-                         partitionGroupPendingStat=new PartitionGroupPendingStat();
-                         partitionGroupPendingStat.setPartitionGroup(partitionGroupId);
-                         partitionGroupPendingStat.setTopic(topicStat.getTopic());
-                         partitionGroupPendingStat.setApp(app);
-                         partitionGroupPendingStatMap.put(partitionGroupId,partitionGroupPendingStat);
-                        for (StoreManagementService.PartitionMetric partitionMetric : partitionGroupMetric.getPartitionMetrics()) {
-                                if (!clusterManager.isLeader(topicStat.getTopic(), partitionMetric.getPartition())) {
-                                    continue;
-                                }
-                                long ackIndex = consume.getAckIndex(consumer, partitionMetric.getPartition());
-                                if (ackIndex < 0) {
-                                    ackIndex = 0;
-                                }
-                                pending=partitionMetric.getRightIndex() - ackIndex;
-                                partitionPendStatMap=partitionGroupPendingStat.getPendingStatSubMap();
-                                partitionPendStatMap.put(partitionMetric.getPartition(),pending);
-                                partitionGroupPending+=pending;
-                            }
-                          partitionGroupPendingStat.setPending(partitionGroupPending);
-                          consumerPending+=partitionGroupPending;
-                          partitionGroupPending=0L; //clear
-                    }
-                    consumerPendingStat.setPending(consumerPending);
-                    topicPending+=consumerPending;
-                    consumerPending=0L;// clear
+            long storageSize = 0;
+            List<PartitionGroupStore> partitionGroupStores = storeService.getStore(topicStat.getTopic());
+            for (PartitionGroupStore pgStore : partitionGroupStores) {
+                storageSize += pgStore.getTotalPhysicalStorageSize();
             }
-           topicPendingStat.setPending(topicPending);
-           topicPending=0L; //clear
-          }
-        } catch (Exception e) {
-            logger.info("bug",e);
-            throw new MonitorException(e);
+            topicStat.setStoreSize(storageSize);
+
+            long topicPending = 0;
+            List<io.chubao.joyqueue.domain.Consumer> consumers = clusterManager.getLocalConsumersByTopic(topic.getName());
+
+            for (io.chubao.joyqueue.domain.Consumer consumer : consumers) {
+                long consumerPending = 0;
+                ConsumerPendingStat consumerPendingStat = new ConsumerPendingStat();
+                consumerPendingStat.setApp(consumer.getApp());
+                consumerPendingStat.setTopic(consumer.getTopic().getFullName());
+                Map<String, ConsumerPendingStat> consumerPendingStatMap = topicPendingStat.getPendingStatSubMap();
+                consumerPendingStatMap.put(consumer.getApp(), consumerPendingStat);
+                Map<Integer, PartitionGroupPendingStat> partitionGroupPendingStatMap = consumerPendingStat.getPendingStatSubMap();
+
+                StoreManagementService.TopicMetric topicMetric = storeManagementService.topicMetric(consumer.getTopic().getFullName());
+                for (StoreManagementService.PartitionGroupMetric partitionGroupMetric : topicMetric.getPartitionGroupMetrics()) {
+                    if (!clusterManager.isLeader(consumer.getTopic().getFullName(), partitionGroupMetric.getPartitionGroup())) {
+                        continue;
+                    }
+
+                    long partitionGroupPending = 0;
+                    int partitionGroupId = partitionGroupMetric.getPartitionGroup();
+                    PartitionGroupPendingStat partitionGroupPendingStat = new PartitionGroupPendingStat();
+                    partitionGroupPendingStat.setPartitionGroup(partitionGroupId);
+                    partitionGroupPendingStat.setTopic(consumer.getTopic().getFullName());
+                    partitionGroupPendingStat.setApp(consumer.getApp());
+                    partitionGroupPendingStatMap.put(partitionGroupId, partitionGroupPendingStat);
+
+                    for (StoreManagementService.PartitionMetric partitionMetric : partitionGroupMetric.getPartitionMetrics()) {
+                        long ackIndex = consume.getAckIndex(new Consumer(consumer.getTopic().getFullName(), consumer.getApp()), partitionMetric.getPartition());
+                        if (ackIndex < 0) {
+                            ackIndex = 0;
+                        }
+                        long partitionPending = partitionMetric.getRightIndex() - ackIndex;
+                        Map<Short, Long> partitionPendStatMap = partitionGroupPendingStat.getPendingStatSubMap();
+                        partitionPendStatMap.put(partitionMetric.getPartition(), partitionPending);
+                        partitionGroupPending += partitionPending;
+                    }
+                    partitionGroupPendingStat.setPending(partitionGroupPending);
+                    consumerPending += partitionGroupPending;
+                }
+                consumerPendingStat.setPending(consumerPending);
+                topicPending += consumerPending;
+            }
+            topicPendingStat.setPending(topicPending);
         }
         // replicas lag state
         snapshotReplicaLag();
@@ -209,6 +224,34 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
     }
 
     /**
+     *  GC event listener
+     *
+     **/
+    public class DefaultGCEventListener implements GCEventListener {
+
+        private JVMStat jvmStat;
+
+        public DefaultGCEventListener(JVMStat jvmStat) {
+            this.jvmStat = jvmStat;
+        }
+
+        @Override
+        public void handleNotification(GCEvent event) {
+            GcInfo gcInfo = event.getGcInfo().getGcInfo();
+            if (event.getType() == GCEventType.END_OF_MAJOR || event.getType() == GCEventType.END_OF_MINOR) {
+                jvmStat.getTotalGcTime().addAndGet(gcInfo.getDuration());
+                jvmStat.getTotalGcTimes().incrementAndGet();
+            }
+            if (event.getType() == GCEventType.END_OF_MAJOR) {
+                jvmStat.getOldGcTimes().mark(gcInfo.getDuration(), 1);
+            } else if (event.getType() == GCEventType.END_OF_MINOR) {
+                jvmStat.getEdenGcTimes().mark(gcInfo.getDuration(), 1);
+            }
+        }
+    }
+
+
+    /**
     * fill heap and non-heap memory usage state of current
     *
     **/
@@ -231,31 +274,6 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
         this.gcNotificationParser.addListener(listener);
     }
 
-    /**
-     *  GC event listener
-     *
-     **/
-    public class DefaultGCEventListener implements GCEventListener{
-
-        private JVMStat jvmStat;
-        public DefaultGCEventListener(JVMStat jvmStat){
-            this.jvmStat=jvmStat;
-        }
-        @Override
-        public void handleNotification(GCEvent event) {
-            GcInfo gcInfo=event.getGcInfo().getGcInfo()   ;
-            if(event.getType() == GCEventType.END_OF_MAJOR||event.getType() == GCEventType.END_OF_MINOR){
-                jvmStat.getTotalGcTime().addAndGet(gcInfo.getDuration());
-                jvmStat.getTotalGcTimes().incrementAndGet();
-            }
-            if(event.getType() == GCEventType.END_OF_MAJOR){
-                jvmStat.getOldGcTimes().mark(gcInfo.getDuration(),1);
-            }else if(event.getType()== GCEventType.END_OF_MINOR){
-                jvmStat.getEdenGcTimes().mark(gcInfo.getDuration(),1);
-            }
-            //System.out.println(String.format("old %d   , young %d ",jvmStat.getOldGcTimes().getCount(),jvmStat.getEdenGcTimes().getCount()));
-        }
-    }
 
    /**
     *  store storage size

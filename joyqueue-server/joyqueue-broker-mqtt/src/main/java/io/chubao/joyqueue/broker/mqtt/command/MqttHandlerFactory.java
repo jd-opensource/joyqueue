@@ -39,7 +39,7 @@ public class MqttHandlerFactory implements CommandHandlerFactory {
     }
 
     public void register(Handler handler) {
-        logger.warn("register handler type: {}, handler: {}", handler.type(), handler);
+        logger.debug("register handler type: {}, handler: {}", handler.type(), handler);
         handlers.add(handler);
     }
 

@@ -42,6 +42,9 @@ public class ProduceMessageChecker {
         if (StringUtils.isBlank(produceMessage.getBody()) && ArrayUtils.isEmpty(produceMessage.getBodyBytes())) {
             throwCheckException("message body is not empty");
         }
+        if (produceMessage.getPartition() != ProduceMessage.NONE_PARTITION && produceMessage.getPartition() < 0) {
+            throwCheckException("message body is not exist");
+        }
         if (StringUtils.isNotBlank(produceMessage.getBody()) && produceMessage.getBody().length() > config.getBodyLengthLimit()) {
             throwCheckException(String.format("body is too long, it must less than %s characters", config.getBodyLengthLimit()));
         }
@@ -55,6 +58,7 @@ public class ProduceMessageChecker {
 
     public static void checkMessages(List<ProduceMessage> produceMessages, ProducerConfig config) {
         String topic = null;
+        short partition = -1;
         int length = 0;
         for (ProduceMessage produceMessage : produceMessages) {
             checkMessage(produceMessage, config);
@@ -64,6 +68,12 @@ public class ProduceMessageChecker {
                 topic = produceMessage.getTopic();
             } else if (!produceMessage.getTopic().equals(topic)) {
                 throwCheckException("batch messages must single topic");
+            }
+
+            if (partition == -1) {
+                partition = produceMessage.getPartition();
+            } else if (produceMessage.getPartition() != partition) {
+                throwCheckException("batch messages must single partition");
             }
 
             // 计算总长度

@@ -15,6 +15,8 @@
  */
 package io.chubao.joyqueue.service;
 
+import io.chubao.joyqueue.model.PageResult;
+import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.model.domain.Broker;
 import io.chubao.joyqueue.model.query.QBroker;
 import io.chubao.joyqueue.nsr.NsrService;
@@ -25,7 +27,7 @@ import java.util.List;
  * @author wylixiaobin
  * Date: 2018/10/17
  */
-public interface BrokerService extends NsrService<Broker,QBroker,Long> {
+public interface BrokerService extends NsrService<Broker, Integer> {
 
 //    /**
 //     * 生成Broker
@@ -45,6 +47,10 @@ public interface BrokerService extends NsrService<Broker,QBroker,Long> {
 
     List<Broker> findByTopic(String topic) throws Exception;
 
+    List<Broker> findByGroup(long group) throws Exception;
+
     List<Broker> queryBrokerList(QBroker qBroker) throws Exception;
+
+    PageResult<Broker> search(QPageQuery<QBroker> qPageQuery) throws Exception;
 
 }

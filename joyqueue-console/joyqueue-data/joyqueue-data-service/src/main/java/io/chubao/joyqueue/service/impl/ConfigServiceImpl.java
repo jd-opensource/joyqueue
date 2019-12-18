@@ -16,12 +16,9 @@
 package io.chubao.joyqueue.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import io.chubao.joyqueue.model.PageResult;
-import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.model.domain.Config;
-import io.chubao.joyqueue.model.query.QConfig;
-import io.chubao.joyqueue.service.ConfigService;
 import io.chubao.joyqueue.nsr.ConfigNameServerService;
+import io.chubao.joyqueue.service.ConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -33,7 +30,7 @@ import java.util.List;
  * Created by wangxiaofei1 on 2018/10/17.
  */
 @Service("configService")
-public class ConfigServiceImpl  implements ConfigService {
+public class ConfigServiceImpl implements ConfigService {
     private static final Logger logger = LoggerFactory.getLogger(ConfigServiceImpl.class);
 
     @Resource
@@ -63,11 +60,6 @@ public class ConfigServiceImpl  implements ConfigService {
     }
 
     @Override
-    public List<Config> findByQuery(QConfig query) throws Exception {
-        return configNameServerService.findByQuery(query);
-    }
-
-    @Override
     public int delete(Config model) {
         try {
             configNameServerService.delete(model);
@@ -79,42 +71,22 @@ public class ConfigServiceImpl  implements ConfigService {
         return 1;
     }
 
-//    @Override
-//    public List<DataCenter> findAllDataCenter() {
-//        List<Config> result = repository.findByQuery(new ListQuery<>(new QConfig(Config.GROUP_DATACENTER)));
-//        if(null==result)return null;
-//        List<DataCenter> dataCenters = new ArrayList<>();
-//        result.forEach(config -> dataCenters.add((DataCenter) dataCenterConfigConverter.convert(config)));
-//        return dataCenters;
-//    }
-
     @Override
     public Config findByGroupAndKey(String group, String key) {
         try {
-            QConfig qConfig = new QConfig();
-            qConfig.setGroup(group);
-            qConfig.setKey(key);
-            List<Config> configList =  configNameServerService.findByQuery(qConfig);
-            if (configList!= null && configList.size() > 0) {
-                return configList.get(0);
-            }
-            return null;
+            return configNameServerService.findByGroupAndKey(group, key);
         } catch (Exception e) {
             throw new RuntimeException("getListConfig exception",e);
         }
     }
 
     @Override
-    public Config findById(String s) throws Exception {
-        return configNameServerService.findById(s);
+    public List<Config> getAll() throws Exception {
+        return configNameServerService.getAll();
     }
 
     @Override
-    public PageResult<Config> findByQuery(QPageQuery<QConfig> query) {
-        try {
-            return configNameServerService.findByQuery(query);
-        } catch (Exception e) {
-            throw new RuntimeException("findByQuery error",e);
-        }
+    public Config findById(String s) throws Exception {
+        return configNameServerService.findById(s);
     }
 }

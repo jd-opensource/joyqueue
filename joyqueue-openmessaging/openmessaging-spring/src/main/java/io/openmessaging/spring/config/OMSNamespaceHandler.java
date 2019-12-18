@@ -27,6 +27,7 @@ public class OMSNamespaceHandler extends NamespaceHandlerSupport {
 
     @Override
     public void init() {
+        registerBeanDefinitionParser("attribute", new AttributeBeanDefinitionParser());
         registerBeanDefinitionParser("access-point", new AccessPointBeanDefinitionParser());
         registerBeanDefinitionParser("producer", new ProducerBeanDefinitionParser());
         registerBeanDefinitionParser("consumer", new ConsumerBeanDefinitionParser());

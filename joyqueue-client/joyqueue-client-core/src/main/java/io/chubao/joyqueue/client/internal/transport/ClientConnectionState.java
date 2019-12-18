@@ -44,8 +44,6 @@ public class ClientConnectionState {
 
     protected static final Logger logger = LoggerFactory.getLogger(ClientConnectionState.class);
 
-    private static final String ADDED_CONNECTION_KEY = "_CLIENT_ADDED_CONNECTION_";
-    private static final String DISCONNECTED_KEY = "_CLIENT_DISCONNECTED_";
     private static final String CONNECTION_INFO_KEY = "_CLIENT_CONNECTION_INFO_";
 
     private static final AtomicLong SEQUENCE = new AtomicLong();
@@ -62,20 +60,6 @@ public class ClientConnectionState {
     }
 
     public void handleAddConnection() {
-        if (client.getAttribute().contains(ADDED_CONNECTION_KEY)) {
-            return;
-        }
-        doHandleAddConnection();
-    }
-
-    public void handleDisconnection() {
-        if (client.getAttribute().contains(DISCONNECTED_KEY)) {
-            return;
-        }
-        doHandleDisconnection();
-    }
-
-    protected void doHandleAddConnection() {
         AddConnectionRequest addConnectionRequest = new AddConnectionRequest();
         ClientId clientId = new ClientId();
 
@@ -108,7 +92,6 @@ public class ClientConnectionState {
             handleNotification(addConnectionResponse);
 
             client.getAttribute().set(CONNECTION_INFO_KEY, clientConnectionInfo);
-            client.getAttribute().set(ADDED_CONNECTION_KEY, true);
         } catch (ClientException e) {
             int code = e.getCode();
             String error = e.getMessage();
@@ -126,10 +109,14 @@ public class ClientConnectionState {
         if (StringUtils.isBlank(addConnectionResponse.getNotification())) {
             return;
         }
+        doHandleNotification(addConnectionResponse);
+    }
+
+    protected void doHandleNotification(AddConnectionResponse addConnectionResponse) {
         logger.warn("{}", addConnectionResponse.getNotification());
     }
 
-    protected void doHandleDisconnection() {
+    public void handleDisconnection() {
         ClientConnectionInfo connectionInfo = getConnectionInfo();
         if (connectionInfo == null) {
             return;
@@ -139,11 +126,9 @@ public class ClientConnectionState {
 
         try {
             Command response = client.sync(new JoyQueueCommand(removeConnectionRequest));
-            client.getAttribute().set(DISCONNECTED_KEY, true);
         } catch (Exception e) {
             logger.debug("client removeConnection error, connection: {}", removeConnectionRequest, e);
         } finally {
-            client.getAttribute().remove(ADDED_CONNECTION_KEY);
             client.getAttribute().remove(CONNECTION_INFO_KEY);
         }
     }

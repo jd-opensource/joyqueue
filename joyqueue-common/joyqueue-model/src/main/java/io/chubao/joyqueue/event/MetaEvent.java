@@ -31,6 +31,9 @@ public abstract class MetaEvent implements Serializable {
     }
 
     public EventType getEventType() {
+        if (eventType == null) {
+            eventType = EventType.valueOf(getTypeName());
+        }
         return eventType;
     }
 

@@ -115,7 +115,7 @@ public class MessagePollerInner extends Service {
         ConsumerPolicy consumerPolicy = topicMetadata.getConsumerPolicy();
         timeout = timeoutUnit.toMillis(timeout);
         String topic = topicMetadata.getTopic();
-        String app = getAppFullName();
+        String app = config.getAppFullName();
         long ackTimeout = (config.getAckTimeout() == ConsumerConfig.NONE_ACK_TIMEOUT ? consumerPolicy.getAckTimeout() : config.getAckTimeout());
 
         if (listener == null) {
@@ -181,7 +181,7 @@ public class MessagePollerInner extends Service {
                                                     long index, int batchSize, long timeout, TimeUnit timeoutUnit, PollerListener listener) {
         timeout = timeoutUnit.toMillis(timeout);
         String topic = topicMetadata.getTopic();
-        String app = getAppFullName();
+        String app = config.getAppFullName();
 
         if (listener == null) {
             FetchMessageData fetchMessageData = (index == FETCH_PARTITION_NONE_INDEX ?
@@ -265,7 +265,7 @@ public class MessagePollerInner extends Service {
     protected TraceCaller buildTraceCaller(TopicMetadata topicMetadata) {
         return TraceBuilder.newInstance()
                 .topic(topicMetadata.getTopic())
-                .app(getAppFullName())
+                .app(config.getAppFullName())
                 .namespace(nameServerConfig.getNamespace())
                 .type(TraceType.CONSUMER_FETCH)
                 .begin();
@@ -330,7 +330,7 @@ public class MessagePollerInner extends Service {
     }
 
     public TopicMetadata getAndCheckTopicMetadata(String topic) {
-        TopicMetadata topicMetadata = clusterManager.fetchTopicMetadata(getTopicFullName(topic), getAppFullName());
+        TopicMetadata topicMetadata = clusterManager.fetchTopicMetadata(getTopicFullName(topic), config.getAppFullName());
         if (topicMetadata == null) {
             throw new ConsumerException(String.format("topic %s is not exist", topic), JoyQueueCode.FW_TOPIC_NOT_EXIST.getCode());
         }
@@ -342,17 +342,5 @@ public class MessagePollerInner extends Service {
 
     public String getTopicFullName(String topic) {
         return NameServerHelper.getTopicFullName(topic, nameServerConfig);
-    }
-
-    // TODO group处理
-    public String getAppFullName() {
-        if (appFullName == null) {
-            if (StringUtils.isBlank(config.getGroup())) {
-                appFullName = config.getApp();
-            } else {
-                appFullName = config.getApp() + "." + config.getGroup();
-            }
-        }
-        return appFullName;
     }
 }

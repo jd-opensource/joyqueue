@@ -15,6 +15,8 @@
  */
 package io.chubao.joyqueue.domain;
 
+import java.util.Objects;
+
 /**
  * @author wylixiaobin
  * Date: 2018/9/4
@@ -60,6 +62,22 @@ public class Config {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || !(o instanceof Config)) return false;
+        Config config = (Config) o;
+        return Objects.equals(group, config.group) &&
+                Objects.equals(key, config.key) &&
+                Objects.equals(value, config.value);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(group, key, value);
     }
 
     @Override
