@@ -27,6 +27,9 @@
         <route inherit="get"
                path="/v1/application/get/:id" handlers="validateApplication validateApplicationMember application#get render"
                errors="error"/>
+        <route inherit="get"
+               path="/v1/application/getByCode/:appCode" handlers="validateApplication validateApplicationMember application#getByCode render"
+               errors="error"/>
         <route inherit="post"
                path="/v1/application/add" handlers="validateAdmin application#add render"
                errors="error"/>
@@ -64,6 +67,10 @@
                path="/v1/application/:appId/user/delete/:userId"
                handlers="validateApplication applicationUser#delete render"
                errors="error"/>
+        <route inherit="get"
+               path="/v1/application/user/get/:appCode"
+               handlers="validateApplication applicationUser#getByAppCode render"
+               errors="error"/>
 
         <!--application token 操作-->
         <route inherit="get"
@@ -71,7 +78,7 @@
                handlers="validateApplication applicationToken#get render"
                errors="error"/>
         <route inherit="post"
-               path="/v1/application/:appId/token/search"
+               path="/v1/application/:appId/token/getByApp"
                handlers="validateApplication applicationToken#search render"
                errors="error"/>
         <route inherit="post"
@@ -111,6 +118,9 @@
 
         <route inherit="get"
                path="/v1/user/getByCode/:code" handlers="validateAdmin user#getByCode render"
+               errors="error"/>
+        <route inherit="get"
+               path="/v1/user/getByRole/:role" handlers="user#getByRole render"
                errors="error"/>
 
         <!--配置 操作 -->
@@ -258,9 +268,9 @@
         <route inherit="get"
                path="/v1/producer/get/:id" handlers="producer#get render"
                errors="error"/>
-        <route inherit="get"
-               path="/v1/producer/syncMqttClient" handlers="producer#syncMqttClient render"
-               errors="error"/>
+        <!--<route inherit="get"-->
+               <!--path="/v1/producer/syncMqttClient" handlers="producer#syncMqttClient render"-->
+               <!--errors="error"/>-->
 
         <route inherit="get"
                path="/v1/producer/weight/:id" handlers="producer#weight render"
@@ -288,9 +298,9 @@
         <route inherit="get"
                path="/v1/consumer/get/:id" handlers="consumer#get render"
                errors="error"/>
-        <route inherit="get"
-               path="/v1/consumer/syncMqttClient" handlers="consumer#syncMqttClient render"
-               errors="error"/>
+        <!--<route inherit="get"-->
+               <!--path="/v1/consumer/syncMqttClient" handlers="consumer#syncMqttClient render"-->
+               <!--errors="error"/>-->
         <route inherit="post"
                path="/v1/consumer/add" handlers="consumer#add render"
                errors="error" />
@@ -494,6 +504,9 @@
                errors="error"/>
         <route inherit="get"
                path="/v1/retry/isServerEnabled" handlers="retry#isServerEnabled render"
+               errors="error"/>
+        <route inherit="post"
+               path="/v1/retry/batchDelete" handlers="retry#batchDelete render"
                errors="error"/>
 
         <!-- archive -->

@@ -27,8 +27,9 @@ import org.slf4j.LoggerFactory;
 
 import java.net.SocketAddress;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * KafkaChannelTransport
@@ -41,7 +42,8 @@ public class KafkaChannelTransport implements ChannelTransport {
     protected static final Logger logger = LoggerFactory.getLogger(KafkaChannelTransport.class);
 
     private ChannelTransport delegate;
-    private Semaphore semaphore = new Semaphore(1, true);
+    private ConcurrentLinkedQueue<Command> requestQueue = new ConcurrentLinkedQueue<>();
+    private ConcurrentMap<Command, Command> responseMap = new ConcurrentHashMap<>();
 
     public KafkaChannelTransport(ChannelTransport delegate) {
         this.delegate = delegate;
@@ -93,16 +95,26 @@ public class KafkaChannelTransport implements ChannelTransport {
     }
 
     @Override
-    public void acknowledge(Command request, Command response) throws TransportException {
-        acknowledge(request, response, null);
+    public synchronized void acknowledge(Command request, Command response) throws TransportException {
+        responseMap.put(request, response);
+        while ((request = requestQueue.peek()) != null) {
+            Command queueRequest = request;
+            Command queueResponse = responseMap.get(queueRequest);
+            if (queueResponse == null) {
+                break;
+            }
+
+            delegate.getChannel().eventLoop().execute(() -> {
+                delegate.acknowledge(queueRequest, queueResponse);
+            });
+            responseMap.remove(queueRequest);
+            requestQueue.remove(queueRequest);
+        }
     }
 
     @Override
     public void acknowledge(Command request, Command response, CommandCallback callback) throws TransportException {
-        delegate.getChannel().eventLoop().execute(() -> {
-            delegate.acknowledge(request, response, callback);
-        });
-        release();
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -130,29 +142,8 @@ public class KafkaChannelTransport implements ChannelTransport {
         delegate.stop();
     }
 
-    public boolean tryAcquire() {
-        return semaphore.tryAcquire();
-    }
-
-    public boolean tryAcquire(int timeout, TimeUnit timeUnit) {
-        try {
-            return semaphore.tryAcquire(timeout, timeUnit);
-        } catch (InterruptedException e) {
-            logger.error("wait acquire exception", e);
-            return false;
-        }
-    }
-
-    public void acquire() {
-        try {
-            semaphore.acquire();
-        } catch (InterruptedException e) {
-            logger.error("wait acquire exception", e);
-        }
-    }
-
-    public void release() {
-        semaphore.release();
+    public void acquire(Command request) {
+        requestQueue.offer(request);
     }
 
     @Override

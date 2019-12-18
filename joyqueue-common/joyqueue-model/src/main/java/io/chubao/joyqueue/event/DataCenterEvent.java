@@ -15,6 +15,7 @@
  */
 package io.chubao.joyqueue.event;
 
+@Deprecated
 public class DataCenterEvent extends MetaEvent {
     /**
      * 区域

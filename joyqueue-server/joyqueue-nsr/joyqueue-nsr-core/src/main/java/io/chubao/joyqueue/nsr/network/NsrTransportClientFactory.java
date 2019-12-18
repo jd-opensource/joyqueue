@@ -20,20 +20,24 @@ import io.chubao.joyqueue.network.transport.command.handler.CommandHandlerFactor
 import io.chubao.joyqueue.network.transport.command.handler.ExceptionHandler;
 import io.chubao.joyqueue.network.transport.support.DefaultTransportClientFactory;
 import io.chubao.joyqueue.nsr.NameService;
+import io.chubao.joyqueue.toolkit.config.PropertySupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * 客户端工厂
- *
- * author: gaohaoxiang
  * date: 2018/9/21
  */
 public class NsrTransportClientFactory extends DefaultTransportClientFactory {
     private static NsrCommandHandlerFactory nsrCommandHandlerFactory = new NsrClientCommandHandlerFactory();
-    public NsrTransportClientFactory(NameService nameService) {
+
+    public NsrTransportClientFactory() {
         this(nsrCommandHandlerFactory);
-        nsrCommandHandlerFactory.register(nameService);
+    }
+
+    public NsrTransportClientFactory(NameService nameService, PropertySupplier propertySupplier) {
+        this(nsrCommandHandlerFactory);
+        nsrCommandHandlerFactory.register(nameService, propertySupplier);
     }
 
     public NsrTransportClientFactory(CommandHandlerFactory commandHandlerFactory) {

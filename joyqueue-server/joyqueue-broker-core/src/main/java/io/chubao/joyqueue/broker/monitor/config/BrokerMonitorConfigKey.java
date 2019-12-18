@@ -27,6 +27,7 @@ public enum BrokerMonitorConfigKey implements PropertyDef {
 
     ENABLE("stat.enable", true, PropertyDef.Type.BOOLEAN),
     STAT_SAVE_FILE("stat.save.file", "/store/stat", PropertyDef.Type.STRING),
+    STAT_SAVE_FILE_NEW("stat.save.file.new", "/monitor/stat", PropertyDef.Type.STRING),
     STAT_SAVE_INTERVAL("stat.save.interval", 1000 * 30, PropertyDef.Type.INT),
 
     ;

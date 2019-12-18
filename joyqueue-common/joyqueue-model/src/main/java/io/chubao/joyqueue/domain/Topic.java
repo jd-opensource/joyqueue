@@ -16,6 +16,7 @@
 package io.chubao.joyqueue.domain;
 
 import java.io.Serializable;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -76,23 +77,18 @@ public class Topic implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-
-        if (this == o){
-            return true;
-        }
-        if (o == null || !(o instanceof Topic)){
-            return false;
-        }
-        if (name == null || ((Topic) o).getName() == null){
-            return false;
-        }
-
-        return name.equals(((Topic) o).getName());
+        if (this == o) return true;
+        if (o == null || !(o instanceof Topic)) return false;
+        Topic topic = (Topic) o;
+        return partitions == topic.partitions &&
+                Objects.equals(name, topic.name) &&
+                type == topic.type &&
+                Objects.equals(priorityPartitions, topic.priorityPartitions);
     }
 
     @Override
     public int hashCode() {
-        return name == null ? 0 : name.hashCode();
+        return Objects.hash(name, partitions, type, priorityPartitions);
     }
 
     /**

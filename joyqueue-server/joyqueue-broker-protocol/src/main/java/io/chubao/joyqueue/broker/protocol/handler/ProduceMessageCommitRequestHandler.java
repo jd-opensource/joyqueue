@@ -72,7 +72,7 @@ public class ProduceMessageCommitRequestHandler implements JoyQueueCommandHandle
         if (!checkResult.isSuccess()) {
             logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport,
                     produceMessageCommitRequest.getTopic(), produceMessageCommitRequest.getApp(), checkResult.getJoyQueueCode());
-            return new Command(new ProduceMessageCommitResponse(CheckResultConverter.convertCommonCode(checkResult.getJoyQueueCode())));
+            return new Command(new ProduceMessageCommitResponse(CheckResultConverter.convertCommonCode(command.getHeader().getVersion(), checkResult.getJoyQueueCode())));
         }
 
         ProduceMessageCommitResponse produceMessageCommitResponse = produceMessageCommit(connection, produceMessageCommitRequest);

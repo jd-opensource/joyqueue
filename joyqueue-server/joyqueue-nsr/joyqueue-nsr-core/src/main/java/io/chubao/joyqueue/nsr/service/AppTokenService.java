@@ -17,13 +17,21 @@ package io.chubao.joyqueue.nsr.service;
 
 
 import io.chubao.joyqueue.domain.AppToken;
-import io.chubao.joyqueue.nsr.model.AppTokenQuery;
+
+import java.util.List;
 
 /**
  * @author lixiaobin6
  * 下午3:11 2018/8/13
  */
-public interface AppTokenService extends DataService<AppToken, AppTokenQuery, Long> {
+public interface AppTokenService {
+
+    /**
+     * 根据id查询
+     * @param id
+     * @return
+     */
+    AppToken getById(long id);
 
     /**
      * 根据app和token查询数据
@@ -33,4 +41,37 @@ public interface AppTokenService extends DataService<AppToken, AppTokenQuery, Lo
      * @return
      */
     AppToken getByAppAndToken(String app, String token);
+
+    /**
+     * 根据app查询
+     * @param app
+     * @return
+     */
+    List<AppToken> getByApp(String app);
+
+    /**
+     * 查询全部
+     * @return
+     */
+    List<AppToken> getAll();
+
+    /**
+     * 添加
+     * @param appToken
+     * @return
+     */
+    AppToken add(AppToken appToken);
+
+    /**
+     * 修改
+     * @param appToken
+     * @return
+     */
+    AppToken update(AppToken appToken);
+
+    /**
+     * 删除
+     * @param id
+     */
+    void delete(long id);
 }

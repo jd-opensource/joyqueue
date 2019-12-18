@@ -16,11 +16,23 @@
 package io.chubao.joyqueue.nsr;
 
 import io.chubao.joyqueue.model.domain.ApplicationToken;
-import io.chubao.joyqueue.model.query.QApplicationToken;
+
+import java.util.List;
 
 /**
  * Created by wangxiaofei1 on 2019/1/2.
  */
-public interface AppTokenNameServerService extends NsrService<ApplicationToken,QApplicationToken,Long> {
+public interface AppTokenNameServerService {
 
+    ApplicationToken findById(Long id) throws Exception;
+
+    int delete(ApplicationToken model) throws Exception;
+
+    int add(ApplicationToken model) throws Exception;
+
+    int update(ApplicationToken model) throws Exception;
+
+    List<ApplicationToken> findByApp(String app) throws Exception;
+
+    ApplicationToken findByAppAndToken(String app, String token) throws Exception;
 }

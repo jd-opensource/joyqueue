@@ -16,19 +16,13 @@
 package io.chubao.joyqueue.nsr.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.TypeReference;
-import io.chubao.joyqueue.domain.PartitionGroup;
-import io.chubao.joyqueue.model.PageResult;
-import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.convert.NsrPartitionGroupConverter;
-import io.chubao.joyqueue.model.domain.Namespace;
+import io.chubao.joyqueue.domain.PartitionGroup;
 import io.chubao.joyqueue.model.domain.OperLog;
-import io.chubao.joyqueue.model.domain.Topic;
 import io.chubao.joyqueue.model.domain.TopicPartitionGroup;
-import io.chubao.joyqueue.model.query.QTopicPartitionGroup;
-import io.chubao.joyqueue.nsr.model.PartitionGroupQuery;
 import io.chubao.joyqueue.nsr.NameServerBase;
 import io.chubao.joyqueue.nsr.PartitionGroupServerService;
+import io.chubao.joyqueue.nsr.model.PartitionGroupQuery;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -42,9 +36,9 @@ public class PartitionGroupServerServiceImpl extends NameServerBase implements P
     public static final String ADD_PARTITIONGROUP="/partitiongroup/add";
     public static final String REMOVE_PARTITIONGROUP="/partitiongroup/remove";
     public static final String UPDATE_PARTITIONGROUP="/partitiongroup/update";
-    public static final String LIST_PARTITIONGROUP="/partitiongroup/list";
     public static final String GETBYID_PARTITIONGROUP="/partitiongroup/getById";
-    public static final String FINDBYQUERY_PARTITIONGROUP="/partitiongroup/findByQuery";
+    public static final String GETBYTOPIC_PARTITIONGROUP="/partitiongroup/getByTopic";
+    public static final String GETBYTOPICANDGROUP_PARTITIONGROUP="/partitiongroup/getByTopicAndGroup";
     private NsrPartitionGroupConverter nsrPartitionGroupConverter = new NsrPartitionGroupConverter();
 
     @Override
@@ -52,27 +46,6 @@ public class PartitionGroupServerServiceImpl extends NameServerBase implements P
         String result = post(GETBYID_PARTITIONGROUP,s);
         PartitionGroup partitionGroup = JSON.parseObject(result,PartitionGroup.class);
         return nsrPartitionGroupConverter.revert(partitionGroup);
-    }
-
-    @Override
-    public PageResult<TopicPartitionGroup> findByQuery(QPageQuery<QTopicPartitionGroup> query) throws Exception {
-        PartitionGroupQuery partitionGroupQuery =null;
-        if (query != null && query.getQuery() != null) {
-            QTopicPartitionGroup queryQuery = query.getQuery();
-            partitionGroupQuery = new PartitionGroupQuery(queryQuery.getTopic().getCode(),queryQuery.getNamespace().getCode());
-            partitionGroupQuery.setKeyword(query.getQuery().getKeyword());
-        }
-        QPageQuery<PartitionGroupQuery> partitionGroupQueryQPageQuery = new QPageQuery<>(query.getPagination(),partitionGroupQuery);
-
-        String result = post(FINDBYQUERY_PARTITIONGROUP,partitionGroupQueryQPageQuery);
-
-        PageResult<PartitionGroup> partitionGroupPageResult = JSON.parseObject(result,new TypeReference<PageResult<PartitionGroup>>(){});
-        if (partitionGroupPageResult == null || partitionGroupPageResult.getResult() == null) {
-            return PageResult.empty();
-        }
-        return new PageResult<>(partitionGroupPageResult.getPagination(),
-                partitionGroupPageResult.getResult().stream().map(partitionGroup -> nsrPartitionGroupConverter.revert(partitionGroup)).collect(Collectors.toList()));
-
     }
 
     @Override
@@ -97,67 +70,25 @@ public class PartitionGroupServerServiceImpl extends NameServerBase implements P
     }
 
     @Override
-    public List<TopicPartitionGroup> findByQuery(QTopicPartitionGroup query) throws Exception {
-        PartitionGroupQuery partitionGroupQuery =null;
-        if (query != null) {
-            partitionGroupQuery = new PartitionGroupQuery();
-            if (query.getTopic() != null) {
-                partitionGroupQuery.setTopic(query.getTopic().getCode());
-            }
-            if (query.getNamespace() != null) {
-                partitionGroupQuery.setNamespace(query.getNamespace().getCode());
-            }
-            if (query.getGroup() != null) {
-                partitionGroupQuery.setGroup(query.getGroup());
-            }
-        }
-        String result = post(LIST_PARTITIONGROUP,partitionGroupQuery);
-        List<PartitionGroup> replicas = JSON.parseArray(result,PartitionGroup.class);
-        if (replicas == null ) {
-            return null;
-        }
-        return replicas.stream().map(partitionGroup -> nsrPartitionGroupConverter.revert(partitionGroup)).collect(Collectors.toList());
-    }
-
-    @Override
-    public List<TopicPartitionGroup> findByTopic(String topic) {
-        QTopicPartitionGroup qTopicPartitionGroup = new QTopicPartitionGroup(new Topic(topic));
-        try {
-            return findByQuery(qTopicPartitionGroup);
-        } catch (Exception e) {
-            logger.error("findByTopic exception",e);
-        }
-        return null;
-    }
-
-    @Override
     public TopicPartitionGroup findByTopicAndGroup(String namespace, String topic, Integer groupNo) {
-        QTopicPartitionGroup qTopicPartitionGroup = new QTopicPartitionGroup(new Topic(topic),new Namespace(namespace),groupNo);
-        try {
-            List<TopicPartitionGroup> topicPartitionGroups = findByQuery(qTopicPartitionGroup);
-            if (topicPartitionGroups == null || topicPartitionGroups.size() <= 0) {
-                return null;
-            }
-            return topicPartitionGroups.get(0);
-        } catch (Exception e) {
-            logger.error("findByTopicAndGroup exception",e);
-        }
-        return null;
+        PartitionGroupQuery query = new PartitionGroupQuery();
+        query.setTopic(topic);
+        query.setNamespace(namespace);
+        query.setGroup(groupNo);
+
+        String result = post(GETBYTOPICANDGROUP_PARTITIONGROUP, query);
+        PartitionGroup partitionGroup = JSON.parseObject(result, PartitionGroup.class);
+        return nsrPartitionGroupConverter.revert(partitionGroup);
     }
 
     @Override
     public List<TopicPartitionGroup> findByTopic(String topic, String namespace) {
+        PartitionGroupQuery query = new PartitionGroupQuery();
+        query.setTopic(topic);
+        query.setNamespace(namespace);
 
-        QTopicPartitionGroup qTopicPartitionGroup=new QTopicPartitionGroup();
-        Topic topiC=new Topic(topic);
-        Namespace namespacE=new Namespace(namespace);
-        qTopicPartitionGroup.setTopic(topiC);
-        qTopicPartitionGroup.setNamespace(namespacE);
-        try {
-           return  findByQuery(qTopicPartitionGroup);
-        }catch (Exception e){
-            logger.error("findByTopic and namespace exception",e);
-        }
-        return null;
+        String result = post(GETBYTOPIC_PARTITIONGROUP, query);
+        List<PartitionGroup> partitionGroups = JSON.parseArray(result, PartitionGroup.class);
+        return partitionGroups.stream().map(partitionGroup -> nsrPartitionGroupConverter.revert(partitionGroup)).collect(Collectors.toList());
     }
 }

@@ -341,6 +341,13 @@ public class GroupMetadata extends io.chubao.joyqueue.broker.coordinator.group.d
         }
     }
 
+    public void reset() {
+        state = GroupState.EMPTY;
+        leaderId = null;
+        newMemberAdded = false;
+        getMembers().clear();
+    }
+
     @Override
     public String toString() {
         return String.format("[%s,%s,%s,%s]", getId(), protocolType, getState(), getMembers());

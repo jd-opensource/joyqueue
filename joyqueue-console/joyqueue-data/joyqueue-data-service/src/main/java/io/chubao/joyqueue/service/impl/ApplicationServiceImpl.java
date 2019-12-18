@@ -15,22 +15,20 @@
  */
 package io.chubao.joyqueue.service.impl;
 
-import io.chubao.joyqueue.model.ListQuery;
+import com.google.common.base.Preconditions;
 import io.chubao.joyqueue.exception.ServiceException;
 import io.chubao.joyqueue.exception.ValidationException;
+import io.chubao.joyqueue.model.ListQuery;
 import io.chubao.joyqueue.model.PageResult;
+import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.model.domain.Application;
 import io.chubao.joyqueue.model.domain.ApplicationToken;
+import io.chubao.joyqueue.model.domain.ApplicationUser;
 import io.chubao.joyqueue.model.domain.Consumer;
-import io.chubao.joyqueue.model.domain.Identity;
 import io.chubao.joyqueue.model.domain.Producer;
 import io.chubao.joyqueue.model.domain.TopicUnsubscribedApplication;
 import io.chubao.joyqueue.model.domain.User;
 import io.chubao.joyqueue.model.query.QApplication;
-import io.chubao.joyqueue.model.QPageQuery;
-import io.chubao.joyqueue.model.query.QApplicationToken;
-import io.chubao.joyqueue.model.query.QConsumer;
-import io.chubao.joyqueue.model.query.QProducer;
 import io.chubao.joyqueue.nsr.AppTokenNameServerService;
 import io.chubao.joyqueue.nsr.ConsumerNameServerService;
 import io.chubao.joyqueue.nsr.ProducerNameServerService;
@@ -38,7 +36,6 @@ import io.chubao.joyqueue.repository.ApplicationRepository;
 import io.chubao.joyqueue.service.ApplicationService;
 import io.chubao.joyqueue.service.ApplicationUserService;
 import io.chubao.joyqueue.service.UserService;
-import com.google.common.base.Preconditions;
 import io.chubao.joyqueue.util.NullUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,15 +94,18 @@ public class ApplicationServiceImpl extends PageServiceSupport<Application, QApp
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
     public int delete(final Application app) {
         try {
+            ApplicationUser application = applicationUserService.findById(app.getId());
+            Preconditions.checkArgument(application != null, "application not exist");
+
             //validate topic related producers and consumers
-            Preconditions.checkArgument(NullUtil.isEmpty(producerNameServerService.findByQuery(new QProducer(new Identity(app.getId(), app.getCode())))),
-                    String.format("app %s exists related producers", app.getCode()));
-            Preconditions.checkArgument(NullUtil.isEmpty(consumerNameServerService.findByQuery(new QConsumer(app.getCode()))),
+            Preconditions.checkArgument(NullUtil.isEmpty(producerNameServerService.findByApp(app.getCode()),
+                    String.format("app %s exists related producers", app.getCode())));
+            Preconditions.checkArgument(NullUtil.isEmpty(consumerNameServerService.findByApp(app.getCode())),
                     String.format("app %s exists related consumers", app.getCode()));
             //delete related app users
             applicationUserService.deleteByAppId(app.getId());
             //delete related app tokens
-            List<ApplicationToken> tokens = appTokenNameServerService.findByQuery(new QApplicationToken(app.getCode()));
+            List<ApplicationToken> tokens = appTokenNameServerService.findByApp(app.getCode());
             if (NullUtil.isNotEmpty(tokens)) {
                 for (ApplicationToken t : tokens) {
                     appTokenNameServerService.delete(t);
@@ -166,13 +166,9 @@ public class ApplicationServiceImpl extends PageServiceSupport<Application, QApp
             topicUnsubscribedApp.setSubscribeType(query.getQuery().getSubscribeType());
             if (query.getQuery().getSubscribeType() == Consumer.CONSUMER_TYPE) {
                 //find consumer list by topic and app refer, then set showDefaultSubscribeGroup property
-                QConsumer qConsumer = new QConsumer();
-                qConsumer.setTopic(query.getQuery().getTopic());
-                qConsumer.setNamespace(query.getQuery().getTopic().getNamespace().getCode());
-                qConsumer.setReferer(app.getCode());
                 try {
-                    List<Consumer> consumers = consumerNameServerService.findByQuery(qConsumer);
-                    topicUnsubscribedApp.setSubscribeGroupExist((consumers == null || consumers.size() < 1) ? false : true);
+                    Consumer consumer = consumerNameServerService.findByTopicAndApp(query.getQuery().getTopic().getCode(), query.getQuery().getTopic().getNamespace().getCode(), app.getCode());
+                    topicUnsubscribedApp.setSubscribeGroupExist(consumer != null);
                 } catch (Exception e) {
                     logger.error("can not find consumer list by topic and app refer.", e);
                     topicUnsubscribedApp.setSubscribeGroupExist(true);
@@ -187,13 +183,10 @@ public class ApplicationServiceImpl extends PageServiceSupport<Application, QApp
             List<String> noInCodes = null;
             if (query.getSubscribeType() != null) {
                 if (query.getSubscribeType() == Producer.PRODUCER_TYPE) {
-                    QProducer qProducer = new QProducer();
-
                     if (query.getTopic() == null ) {
                         throw new RuntimeException("topic is null");
                     }
-                    qProducer.setTopic(query.getTopic());
-                    List<Producer> producerList = producerNameServerService.findByQuery(qProducer);
+                    List<Producer> producerList = producerNameServerService.findByTopic(query.getTopic().getCode(), query.getTopic().getNamespace().getCode());
                     if (producerList == null)return null;
                     noInCodes = producerList.stream().map(producer -> producer.getApp().getCode()).collect(Collectors.toList());
                 }

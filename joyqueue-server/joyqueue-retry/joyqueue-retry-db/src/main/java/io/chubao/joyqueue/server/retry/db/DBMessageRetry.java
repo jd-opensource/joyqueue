@@ -74,7 +74,7 @@ public class DBMessageRetry implements MessageRetry<Long> {
     private static final String QUERY_ENTITY_SQL = "select id, create_time, retry_count from message_retry where id = ? and topic = ?";
     private static final String QUERY_ID_RETRY_TIME_SQL =
             "select id, retry_time from message_retry where status = " + RetryStatus.RETRY_ING.getValue() +
-                    " and topic = ? and app = ? and retry_time < NOW() order by id asc limit ?";
+                    " and topic = ? and app = ? and retry_time < NOW() limit ?";
 
     // 数据源
     private DataSource dataSource;

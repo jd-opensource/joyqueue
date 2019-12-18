@@ -16,6 +16,7 @@
 package io.chubao.joyqueue.domain;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * @author wylixiaobin
@@ -35,6 +36,17 @@ public class Replica implements Serializable {
      * Broker ID
      */
     protected int brokerId;
+
+    public Replica() {
+
+    }
+
+    public Replica(String id, TopicName topic, int group, int brokerId) {
+        this.id = id;
+        this.topic = topic;
+        this.group = group;
+        this.brokerId = brokerId;
+    }
 
     public String getId() {
         return id;
@@ -68,4 +80,30 @@ public class Replica implements Serializable {
         this.brokerId = brokerId;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || !(o instanceof Replica)) return false;
+        Replica replica = (Replica) o;
+
+        return group == replica.group &&
+                brokerId == replica.brokerId &&
+                Objects.equals(topic, replica.topic);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(id, topic, group, brokerId);
+    }
+
+    @Override
+    public String toString() {
+        return "Replica{" +
+                "id='" + id + '\'' +
+                ", topic=" + topic +
+                ", group=" + group +
+                ", brokerId=" + brokerId +
+                '}';
+    }
 }

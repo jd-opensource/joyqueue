@@ -12,6 +12,8 @@ broker.frontend-server.transport.server.port | 50088 | JoyQueue Server与客户�
  -- | broker.frontend-server.transport.server.port + 2（50090） | JoyQueue Server rest API 端口，
  -- | broker.frontend-server.transport.server.port + 3（50091） | JoyQueue Web 使用这个端口与JoyQueue Server通信。
  -- | broker.frontend-server.transport.server.port + 4（50092） | 内部端口，JoyQueue Server 元数据服务端口。
+ -- | broker.frontend-server.transport.server.port + 5（50093） | 内部端口，JoyQueue Server 元数据推送端口。
+ -- | broker.frontend-server.transport.server.port + 6（50094） | 内部端口，JoyQueue Server Journalkeeper端口。
  broker.opts.memory | -Xms2G -Xmx2G -server  -Xss256K -XX:SurvivorRatio=8 -XX:+UseConcMarkSweepGC -XX:+UseCMSCompactAtFullCollection -XX:CMSInitiatingOccupancyFraction=70 -XX:+CMSParallelRemarkEnabled -XX:SoftRefLRUPolicyMSPerMB=0 -XX:CMSMaxAbortablePrecleanTime=20 -XX:-OmitStackTraceInFastThrow -XX:MaxDirectMemorySize=2G | jvm 参数。
 store.message.file.size | 128 MB | 消息文件大小
 store.index.file.size | 512 KB | 索引文件大小

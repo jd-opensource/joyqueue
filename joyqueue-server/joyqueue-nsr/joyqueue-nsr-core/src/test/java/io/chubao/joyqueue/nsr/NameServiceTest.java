@@ -122,9 +122,9 @@ public class NameServiceTest{
 //    }
 //
 //    @Test
-//    public void getAllTopics() {
-//        Set<String> topicConfigs = nameService.getAllTopics();
-//        topicConfigs = nameService.getAllTopics();
+//    public void getAllTopicCodes() {
+//        Set<String> topicConfigs = nameService.getAllTopicCodes();
+//        topicConfigs = nameService.getAllTopicCodes();
 //        System.out.println(Arrays.toString(topicConfigs.toArray()));
 //    }
 //

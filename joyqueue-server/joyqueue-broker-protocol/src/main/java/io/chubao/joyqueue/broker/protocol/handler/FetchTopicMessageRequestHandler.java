@@ -80,7 +80,7 @@ public class FetchTopicMessageRequestHandler implements JoyQueueCommandHandler, 
         Connection connection = SessionHelper.getConnection(transport);
 
         if (connection == null || !connection.isAuthorized(fetchTopicMessageRequest.getApp())) {
-            logger.warn("connection is not exists, transport: {}, app: {}", transport, fetchTopicMessageRequest.getApp());
+            logger.warn("connection is not exists, transport: {}, app: {}, topics: {}", transport, fetchTopicMessageRequest.getApp(), fetchTopicMessageRequest.getTopics().keySet());
             return BooleanAck.build(JoyQueueCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
@@ -93,7 +93,7 @@ public class FetchTopicMessageRequestHandler implements JoyQueueCommandHandler, 
             BooleanResponse checkResult = clusterManager.checkReadable(TopicName.parse(topic), fetchTopicMessageRequest.getApp(), connection.getHost());
             if (!checkResult.isSuccess()) {
                 logger.warn("checkReadable failed, transport: {}, topic: {}, app: {}, code: {}", transport, topic, fetchTopicMessageRequest.getApp(), checkResult.getJoyQueueCode());
-                result.put(topic, new FetchTopicMessageAckData(CheckResultConverter.convertFetchCode(checkResult.getJoyQueueCode())));
+                result.put(topic, new FetchTopicMessageAckData(CheckResultConverter.convertFetchCode(command.getHeader().getVersion(), checkResult.getJoyQueueCode())));
                 traffic.record(topic, 0);
                 continue;
             }
@@ -102,8 +102,8 @@ public class FetchTopicMessageRequestHandler implements JoyQueueCommandHandler, 
             Consumer consumer = (StringUtils.isBlank(consumerId) ? null : sessionManager.getConsumerById(consumerId));
 
             if (consumer == null) {
-                logger.warn("consumer is not exists, transport: {}", transport);
-                result.put(topic, new FetchTopicMessageAckData(CheckResultConverter.convertFetchCode(JoyQueueCode.FW_CONSUMER_NOT_EXISTS)));
+                logger.warn("connection is not exists, transport: {}, app: {}, topics: {}", transport, fetchTopicMessageRequest.getApp(), fetchTopicMessageRequest.getTopics().keySet());
+                result.put(topic, new FetchTopicMessageAckData(CheckResultConverter.convertFetchCode(command.getHeader().getVersion(), JoyQueueCode.FW_CONSUMER_NOT_EXISTS)));
                 continue;
             }
 

@@ -16,7 +16,9 @@
 package io.chubao.joyqueue.service.impl;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import io.chubao.joyqueue.convert.CodeConverter;
+import io.chubao.joyqueue.domain.TopicName;
 import io.chubao.joyqueue.exception.ServiceException;
 import io.chubao.joyqueue.model.PageResult;
 import io.chubao.joyqueue.model.QPageQuery;
@@ -30,9 +32,6 @@ import io.chubao.joyqueue.model.domain.PartitionGroupReplica;
 import io.chubao.joyqueue.model.domain.Topic;
 import io.chubao.joyqueue.model.domain.TopicPartitionGroup;
 import io.chubao.joyqueue.model.exception.DuplicateKeyException;
-import io.chubao.joyqueue.model.query.QConsumer;
-import io.chubao.joyqueue.model.query.QPartitionGroupReplica;
-import io.chubao.joyqueue.model.query.QProducer;
 import io.chubao.joyqueue.model.query.QTopic;
 import io.chubao.joyqueue.nsr.ConsumerNameServerService;
 import io.chubao.joyqueue.nsr.PartitionGroupServerService;
@@ -40,6 +39,7 @@ import io.chubao.joyqueue.nsr.ProducerNameServerService;
 import io.chubao.joyqueue.nsr.ReplicaServerService;
 import io.chubao.joyqueue.nsr.TopicNameServerService;
 import io.chubao.joyqueue.service.TopicService;
+import io.chubao.joyqueue.util.EnvironmentUtil;
 import io.chubao.joyqueue.util.NullUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -53,11 +53,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static io.chubao.joyqueue.exception.ServiceException.BAD_REQUEST;
-import static io.chubao.joyqueue.exception.ServiceException.IGNITE_RPC_ERROR;
 import static io.chubao.joyqueue.exception.ServiceException.INTERNAL_SERVER_ERROR;
+import static io.chubao.joyqueue.exception.ServiceException.NAMESERVER_RPC_ERROR;
 
 /**
  * 主题服务实现
@@ -86,6 +87,12 @@ public class TopicServiceImpl implements TopicService {
         if (oldTopic != null) {
             throw new DuplicateKeyException("topic aleady exist");
         }
+
+        if (EnvironmentUtil.isTest()) {
+            topic.setElectType(TopicPartitionGroup.ElectType.fix.type());
+            brokers = Lists.newArrayList(brokers.get(0));
+        }
+
         List<TopicPartitionGroup> partitionGroups = addPartitionGroup(topic, brokers);
         try {
             topicNameServerService.addTopic(topic, partitionGroups);
@@ -165,7 +172,9 @@ public class TopicServiceImpl implements TopicService {
         if (query == null) {
             return PageResult.empty();
         }
-        return topicNameServerService.findUnsubscribedByQuery(query);
+        // TODO 方法不对
+//        return topicNameServerService.findUnsubscribedByQuery(query);
+        return topicNameServerService.search(query);
     }
 
     @Override
@@ -182,12 +191,14 @@ public class TopicServiceImpl implements TopicService {
         //consumer do not filter by app, because it can be expand by subscribe group property
         if (query.getQuery().getSubscribeType() == Consumer.CONSUMER_TYPE) {
             try {
-                topicResult = topicNameServerService.findByQuery(query);
+                topicResult = topicNameServerService.search(query);
             } catch (Exception e) {
-                throw new ServiceException(IGNITE_RPC_ERROR, "query topic by name server error.");
+                throw new ServiceException(NAMESERVER_RPC_ERROR, "query topic by name server error.");
             }
         } else {
-            topicResult = topicNameServerService.findUnsubscribedByQuery(query);
+            // TODO 方法不对
+//            topicResult = topicNameServerService.findUnsubscribedByQuery(query);
+            topicResult = topicNameServerService.search(query);
         }
 
         if (NullUtil.isEmpty(topicResult.getResult())) {
@@ -201,13 +212,9 @@ public class TopicServiceImpl implements TopicService {
 
             if (query.getQuery().getSubscribeType() == Consumer.CONSUMER_TYPE && StringUtils.isNotBlank(query.getQuery().getApp().getCode())) {
                 //find consumer list by topic and app refer, then set showDefaultSubscribeGroup property
-                QConsumer qConsumer = new QConsumer();
-                qConsumer.setTopic(topic);
-                qConsumer.setNamespace(topic.getNamespace().getCode());
-                qConsumer.setReferer(query.getQuery().getApp().getCode());
                 try {
-                    List<Consumer> consumers = consumerNameServerService.findByQuery(qConsumer);
-                    appUnsubscribedTopic.setSubscribeGroupExist((consumers != null && consumers.size() > 0) ? Boolean.TRUE : Boolean.FALSE);
+                    Consumer consumer = consumerNameServerService.findByTopicAndApp(topic.getCode(), topic.getNamespace().getCode(), query.getQuery().getApp().getCode());
+                    appUnsubscribedTopic.setSubscribeGroupExist(consumer != null);
                 } catch (Exception e) {
                     logger.error("can not find consumer list by topic and app refer.", e);
                     appUnsubscribedTopic.setSubscribeGroupExist(Boolean.TRUE);
@@ -223,22 +230,19 @@ public class TopicServiceImpl implements TopicService {
     }
 
     @Override
-    public PageResult<Topic> findByQuery(QPageQuery<QTopic> query) throws Exception {
-        return topicNameServerService.findByQuery(query);
-    }
-
-    @Override
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
     public int delete(Topic model) throws Exception {
         //validate topic related producers and consumers
-        Preconditions.checkArgument(NullUtil.isEmpty(producerNameServerService.findByQuery(new QProducer(model))),
+        Preconditions.checkArgument(NullUtil.isEmpty(producerNameServerService.findByTopic(model.getCode(), model.getNamespace().getCode())),
                 String.format("topic %s exists related producers", CodeConverter.convertTopic(model.getNamespace(), model).getFullName()));
-        Preconditions.checkArgument(NullUtil.isEmpty(consumerNameServerService.findByQuery(new QConsumer(model))),
+        Preconditions.checkArgument(NullUtil.isEmpty(consumerNameServerService.findByTopic(model.getCode(), model.getNamespace().getCode())),
                 String.format("topic %s exists related consumers", CodeConverter.convertTopic(model.getNamespace(), model).getFullName()));
         Preconditions.checkArgument(NullUtil.isEmpty(partitionGroupServerService.findByTopic(model.getCode(), model.getNamespace().getCode())),
                 String.format("topic %s exists related partitionGroup", CodeConverter.convertTopic(model.getNamespace(), model).getFullName()));
-        Preconditions.checkArgument(NullUtil.isEmpty(replicaServerService.findByQuery(new QPartitionGroupReplica(model, model.getNamespace()))),
-                String.format("topic %s exists related partitions", CodeConverter.convertTopic(model.getNamespace(), model).getFullName()));
+
+        // TODO 需要处理
+//        Preconditions.checkArgument(NullUtil.isEmpty(replicaServerService.findByTopicAndGroup(model.getCode(), model.getNamespace().getCode()))),
+//                String.format("topic %s exists related partitions", CodeConverter.convertTopic(model.getNamespace(), model).getFullName());
         //delete related partition groups
         try {
 //            List<TopicPartitionGroup> groups = partitionGroupServerService.findByTopic(model.getCode(), model.getNamespace().getCode());
@@ -287,11 +291,6 @@ public class TopicServiceImpl implements TopicService {
     }
 
     @Override
-    public List<Topic> findByQuery(QTopic query) throws Exception {
-        return topicNameServerService.findByQuery(query);
-    }
-
-    @Override
     public Topic findByCode(String namespaceCode, String code) {
         if (namespaceCode == null) {
             namespaceCode = Namespace.DEFAULT_NAMESPACE_CODE;
@@ -299,4 +298,20 @@ public class TopicServiceImpl implements TopicService {
         return topicNameServerService.findByCode(namespaceCode, code);
     }
 
+    @Override
+    public List<TopicName> findTopic(String brokerId) throws Exception {
+        List<PartitionGroupReplica> replicas=replicaServerService.findPartitionGroupReplica(Integer.parseInt(brokerId));
+        Set<TopicName> topicCodes=new HashSet<>();
+        replicas.stream().forEach(r->{
+            TopicName tn= TopicName.parse(r.getTopic().getCode(),r.getNamespace().getCode());
+            tn.getFullName();
+            topicCodes.add(tn);
+        });
+        return Lists.newArrayList(topicCodes);
+    }
+
+    @Override
+    public PageResult<Topic> search(QPageQuery<QTopic> query) {
+        return topicNameServerService.search(query);
+    }
 }

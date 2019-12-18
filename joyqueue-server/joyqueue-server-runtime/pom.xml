@@ -22,7 +22,7 @@
     <parent>
         <artifactId>joyqueue-server</artifactId>
         <groupId>io.chubao</groupId>
-        <version>4.1.1-SNAPSHOT</version>
+        <version>4.1.2-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -75,7 +75,7 @@
         <dependency>
             <groupId>io.chubao</groupId>
             <artifactId>joyqueue-archive-hbase</artifactId>
-            <scope>runtime</scope>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>io.chubao</groupId>
@@ -95,7 +95,7 @@
         </dependency>
         <dependency>
             <groupId>io.chubao</groupId>
-            <artifactId>joyqueue-nsr-ignite</artifactId>
+            <artifactId>joyqueue-nsr-journalkeeper</artifactId>
         </dependency>
         <dependency>
             <groupId>io.chubao</groupId>

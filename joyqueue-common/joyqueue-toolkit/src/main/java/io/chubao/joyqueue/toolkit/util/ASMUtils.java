@@ -23,7 +23,10 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
@@ -35,49 +38,67 @@ import java.util.concurrent.ConcurrentMap;
 public class ASMUtils {
 
     private static final ConcurrentMap<String /** class **/, ClassReader> classReaderCache = Maps.newConcurrentMap();
+    private static final ConcurrentMap<Class<?> /** class **/, ConcurrentMap<String /** methodName **/, Map<String, Class<?>>>> paramsCache = Maps.newConcurrentMap();
 
     /**
-     * 获得方法参数名称和类型, 最好不要频繁调用
-     * 会按照参数顺序返回，基本类型会转换为包装类型
+     * 获得方法参数名称和类型, 基本类型会转换为包装类型
      * 没处理重载方法
      *
      * @param type
-     * @param method
+     * @param methodName
      * @return
      */
-    // TODO 简单实现，需要过滤掉局部变量
-    public static Map<String /** name **/, Class<?> /** type**/> getParams(Class<?> type, String method) {
+    public static Map<String /** name **/, Class<?> /** type**/> getParams(Class<?> type, String methodName) {
+        ConcurrentMap<String, Map<String, Class<?>>> methodParamsCache = paramsCache.get(type);
+        if (methodParamsCache == null) {
+            methodParamsCache = new ConcurrentHashMap<>();
+            ConcurrentMap<String, Map<String, Class<?>>> oldMethodParamsCache = paramsCache.putIfAbsent(type, methodParamsCache);
+            if (oldMethodParamsCache != null) {
+                methodParamsCache = oldMethodParamsCache;
+            }
+        }
+
+        Map<String, Class<?>> result = methodParamsCache.get(methodName);
+        if (result != null) {
+            return result;
+        }
+
+        result = doGetParams(type, methodName);
+        methodParamsCache.put(methodName, result);
+        return result;
+    }
+
+    protected static Map<String /** name **/, Class<?> /** type**/> doGetParams(Class<?> type, String methodName) {
         if (type.isInterface()) {
             throw new UnsupportedOperationException();
         }
 
-        String className = type.getName();
-        ClassReader classReader = classReaderCache.get(className);
-        if (classReader == null) {
-            try {
-                classReader = new ClassReader(className.replace(".", "/"));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            if (classReaderCache.putIfAbsent(className, classReader) != null) {
-                classReader = classReaderCache.get(className);
+        Method[] targetMethod = new Method[1];
+        for (Method method : type.getMethods()) {
+            if (method.getName().equals(methodName)) {
+                targetMethod[0] = method;
+                break;
             }
         }
 
+        if (targetMethod[0] == null) {
+            return Collections.emptyMap();
+        }
+
         Map<String, Class<?>> result = Maps.newLinkedHashMap();
-        classReader.accept(new ClassVisitor(Opcodes.ASM6) {
+
+        getClassReader(type).accept(new ClassVisitor(Opcodes.ASM6) {
             @Override
             public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
-                if (!name.equals(method)) {
+                if (!name.equals(methodName)) {
                     return super.visitMethod(access, name, descriptor, signature, exceptions);
                 }
                 return new MethodVisitor(Opcodes.ASM6) {
                     @Override
                     public void visitLocalVariable(String name, String descriptor, String signature, Label start, Label end, int index) {
-                        if (name.equals("this")) {
-                            return;
+                        if (!name.equals("this") && index <= targetMethod[0].getParameterTypes().length) {
+                            result.put(name, convertType(descriptor));
                         }
-                        result.put(name, convertType(descriptor));
                         super.visitLocalVariable(name, descriptor, signature, start, end, index);
                     }
                 };
@@ -114,5 +135,22 @@ public class ASMUtils {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    protected static ClassReader getClassReader(Class<?> type) {
+        String className = type.getName();
+        ClassReader classReader = classReaderCache.get(className);
+        if (classReader == null) {
+            try {
+                classReader = new ClassReader(className.replace(".", "/"));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            ClassReader oldClassReader = classReaderCache.putIfAbsent(className, classReader);
+            if (oldClassReader != null) {
+                classReader = oldClassReader;
+            }
+        }
+        return classReader;
     }
 }

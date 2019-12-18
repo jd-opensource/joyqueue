@@ -39,6 +39,7 @@ import javax.validation.constraints.NotNull;
 
 import static io.chubao.joyqueue.handler.Constants.ID;
 import static io.chubao.joyqueue.handler.Constants.USER_ID;
+import static io.chubao.joyqueue.handler.Constants.APP_CODE;
 
 /**
  * Created by wangxiaofei1 on 2018/10/19.
@@ -99,4 +100,10 @@ public class ApplicationCommand extends CommandSupport<Application,ApplicationSe
         application.setOwner(new Identity(user.getId(), user.getCode()));
         return Responses.success(service.update(application));
     }
+
+    @Path("getByCode")
+    public Response getByCode(@QueryParam(APP_CODE) String appCode) throws Exception {
+        return Responses.success(service.findByCode(appCode));
+    }
+
 }

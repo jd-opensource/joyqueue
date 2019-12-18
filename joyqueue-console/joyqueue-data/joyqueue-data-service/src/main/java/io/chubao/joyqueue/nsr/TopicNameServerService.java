@@ -28,40 +28,40 @@ import java.util.List;
 /**
  * Created by wangxiaofei1 on 2019/1/2.
  */
-public interface TopicNameServerService extends NsrService<Topic,QTopic,String> {
+public interface TopicNameServerService extends NsrService<Topic, String> {
     /**
      * 添加主题
      * @param
      * @param topic
      * @param partitionGroups
-     * @throws Exception
+     * @
      */
-    String addTopic(Topic topic, List<TopicPartitionGroup> partitionGroups) throws Exception;
+    String addTopic(Topic topic, List<TopicPartitionGroup> partitionGroups) ;
     /**
      * 删除主题
      * @param
      * @param topic
-     * @throws Exception
+     * @
      */
-    int removeTopic(Topic topic) throws Exception;
+    int removeTopic(Topic topic) ;
 
     /**
      * 添加partitionGroup
      * @param partitionGroups
-     * @throws Exception
+     * @
      */
-    String addPartitionGroup(TopicPartitionGroup partitionGroups) throws Exception;
+    String addPartitionGroup(TopicPartitionGroup partitionGroups) ;
     /**
      * 移除partitionGroup
-     * @throws Exception
+     * @
      */
-    String removePartitionGroup(TopicPartitionGroup group) throws Exception;
+    String removePartitionGroup(TopicPartitionGroup group) ;
     /**
      * 添加partitionGroup
      * @param partitionGroups
-     * @throws Exception
+     * @
      */
-    List<Integer> updatePartitionGroup(TopicPartitionGroup partitionGroups) throws Exception;
+    List<Integer> updatePartitionGroup(TopicPartitionGroup partitionGroups);
 
     /**
      * leader改变
@@ -72,9 +72,9 @@ public interface TopicNameServerService extends NsrService<Topic,QTopic,String> 
      * 查找Master
      * @param replicas
      * @return
-     * @throws Exception
+     * @
      */
-    List<PartitionGroup> findPartitionGroupMaster(List<TopicPartitionGroup> replicas) throws Exception;
+    List<PartitionGroup> findPartitionGroupMaster(List<TopicPartitionGroup> replicas);
 
     /**
      * 查询未订阅的topic
@@ -82,6 +82,13 @@ public interface TopicNameServerService extends NsrService<Topic,QTopic,String> 
      * @return
      */
     PageResult<Topic> findUnsubscribedByQuery(QPageQuery<QTopic> query);
+
+    /**
+     * 查询
+     * @param query
+     * @return
+     */
+    PageResult<Topic> search(QPageQuery<QTopic> query);
 
     /**
      * 根据code查询

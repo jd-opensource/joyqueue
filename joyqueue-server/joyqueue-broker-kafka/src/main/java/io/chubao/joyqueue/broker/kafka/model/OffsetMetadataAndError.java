@@ -83,7 +83,7 @@ public class OffsetMetadataAndError {
 
     @Override
     public String toString() {
-        return String.format("OffsetMetadataAndError[%d,%s,%d]", offset, metadata, error);
+        return String.format("OffsetMetadataAndError[%d, %d,%s,%d]", partition, offset, metadata, error);
     }
 
 }

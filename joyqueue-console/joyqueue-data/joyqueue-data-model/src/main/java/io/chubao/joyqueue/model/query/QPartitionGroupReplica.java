@@ -24,6 +24,7 @@ public class QPartitionGroupReplica  extends QKeyword implements Query {
     private Topic topic;
     private Namespace namespace;
     private int groupNo = -1;
+    private int brokerId;
 
     public QPartitionGroupReplica() {
     }
@@ -65,4 +66,13 @@ public class QPartitionGroupReplica  extends QKeyword implements Query {
     public void setGroupNo(int groupNo) {
         this.groupNo = groupNo;
     }
+
+    public int getBrokerId() {
+        return brokerId;
+    }
+
+    public void setBrokerId(int brokerId) {
+        this.brokerId = brokerId;
+    }
+
 }

@@ -116,7 +116,7 @@ public class ProduceMessageRequestHandler implements JoyQueueCommandHandler, Typ
                     connection.getHost(), produceMessageData.getMessages().get(0).getPartition());
             if (!checkResult.isSuccess()) {
                 logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport, topic, produceMessageRequest.getApp(), checkResult.getJoyQueueCode());
-                resultData.put(topic, buildResponse(produceMessageData, CheckResultConverter.convertProduceCode(checkResult.getJoyQueueCode())));
+                resultData.put(topic, buildResponse(produceMessageData, CheckResultConverter.convertProduceCode(command.getHeader().getVersion(), checkResult.getJoyQueueCode())));
                 traffic.record(topic, 0);
                 latch.countDown();
                 continue;

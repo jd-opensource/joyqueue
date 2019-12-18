@@ -23,6 +23,7 @@ import io.chubao.joyqueue.network.transport.support.DefaultTransportServerFactor
 import io.chubao.joyqueue.nsr.NameService;
 import io.chubao.joyqueue.toolkit.concurrent.EventBus;
 import io.chubao.joyqueue.toolkit.concurrent.EventListener;
+import io.chubao.joyqueue.toolkit.config.PropertySupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,9 +37,9 @@ public class NsrTransportServerFactory extends DefaultTransportServerFactory {
     private static NsrCommandHandlerFactory nsrCommandHandlerFactory = new NsrServerCommandHandlerFactory();
     protected static EventBus<TransportEvent> eventBus = new EventBus<>();
 
-    public NsrTransportServerFactory(NameService nameService) {
+    public NsrTransportServerFactory(NameService nameService, PropertySupplier propertySupplier) {
         this(NsrCodecFactory.getInstance(), nsrCommandHandlerFactory, new NsrExceptionHandler(), eventBus);
-        nsrCommandHandlerFactory.register(nameService);
+        nsrCommandHandlerFactory.register(nameService, propertySupplier);
     }
 
     public NsrTransportServerFactory(Codec codec, CommandHandlerFactory commandHandlerFactory, ExceptionHandler exceptionHandler, EventBus<TransportEvent> eventBus) {

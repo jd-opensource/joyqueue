@@ -78,17 +78,21 @@ public class LocalConsumerIndexManager extends Service implements ConsumerIndexM
             logger.error("resetIndex error, topic: {}, partition: {}, error: {}", topic, partition, fetchIndexData.getCode());
             return fetchIndexData.getCode();
         }
-        consumerIndexStore.saveIndex(topic, app, partition, fetchIndexData.getIndex());
+        if (fetchIndexData.getLeftIndex() >= 0) {
+            consumerIndexStore.saveIndex(topic, app, partition, fetchIndexData.getLeftIndex());
+        } else {
+            consumerIndexStore.saveIndex(topic, app, partition, fetchIndexData.getIndex());
+        }
         return JoyQueueCode.SUCCESS;
     }
 
     @Override
     public FetchIndexData fetchIndex(String topic, String app, short partition, long timeout) {
         LocalIndexData localIndexData = consumerIndexStore.fetchIndex(topic, app, partition);
+        FetchIndexData fetchIndexData = delegate.fetchIndex(topic, app, partition, timeout);
         if (localIndexData != null && !isExpired(localIndexData)) {
-            return new FetchIndexData(localIndexData.getIndex(), JoyQueueCode.SUCCESS);
+            return new FetchIndexData(localIndexData.getIndex(), fetchIndexData.getLeftIndex(), fetchIndexData.getRightIndex(), JoyQueueCode.SUCCESS);
         } else {
-            FetchIndexData fetchIndexData = delegate.fetchIndex(topic, app, partition, timeout);
             if (!fetchIndexData.getCode().equals(JoyQueueCode.SUCCESS)) {
                 logger.error("batchFetch index error, topic: {}, partition: {}, error: {}", topic, partition, fetchIndexData.getCode());
             } else {
@@ -114,6 +118,7 @@ public class LocalConsumerIndexManager extends Service implements ConsumerIndexM
         for (Map.Entry<String, List<Short>> topicEntry : topicMap.entrySet()) {
             String topic = topicEntry.getKey();
             for (Short partition : topicEntry.getValue()) {
+                FetchIndexData fetchIndexData = delegate.fetchIndex(topic, app, partition, timeout);
                 LocalIndexData localIndexData = consumerIndexStore.fetchIndex(topic, app, partition);
                 if (localIndexData == null || isExpired(localIndexData)) {
                     if (updateTopicMap == null) {
@@ -126,7 +131,7 @@ public class LocalConsumerIndexManager extends Service implements ConsumerIndexM
                     }
                     partitions.add(partition);
                 } else {
-                    result.put(topic, partition, new FetchIndexData(localIndexData.getIndex(), JoyQueueCode.SUCCESS));
+                    result.put(topic, partition, new FetchIndexData(localIndexData.getIndex(), fetchIndexData.getLeftIndex(), fetchIndexData.getRightIndex(), JoyQueueCode.SUCCESS));
                 }
             }
         }

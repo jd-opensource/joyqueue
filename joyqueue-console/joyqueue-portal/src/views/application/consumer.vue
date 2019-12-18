@@ -7,9 +7,10 @@
 </template>
 
 <script>
+import Vue from 'vue'
 import consumerBase from '../monitor/consumerBase.vue'
-import {getAppCode, openOrCloseBtnRender, clientTypeSelectRender,
-  clientTypeBtnRender, topicTypeBtnRender, baseBtnRender, subscribeGroupAutoCompleteRender} from '../../utils/common.js'
+import { getAppCode, openOrCloseBtnRender, clientTypeSelectRender,
+    clientTypeBtnRender, topicTypeBtnRender, baseBtnRender, subscribeGroupAutoCompleteRender, getTopicCodeByCode } from '../../utils/common.js'
 
 export default {
   name: 'consumer',
@@ -29,13 +30,35 @@ export default {
         {
           title: '应用',
           key: 'app.code',
+          width: 80,
           formatter (row) {
             return getAppCode(row.app, row.subscribeGroup)
           }
         },
         {
           title: '主题',
-          key: 'topic.code'
+          key: 'topic.code',
+          width: 100,
+            render: (h, params) => {
+                const topic = params.item.topic
+                const namespace = params.item.namespace
+                const topicId = getTopicCodeByCode(topic.code, namespace.code)
+                return h('d-button', {
+                    props: {
+                        type: 'borderless',
+                        color: 'primary'
+                    },
+                    style: {
+                        color: '#3366FF'
+                    },
+                    on: {
+                        click: () => {
+                            this.$router.push({name: `/${this.$i18n.locale}/topic/detail`,
+                                query: { id: topicId, topic: topic.code, namespace: topic.namespace.code, tab: 'consumer' }})
+                        }
+                    }
+                }, topic.code)
+            }
         },
         {
           title: '命名空间',
@@ -47,19 +70,73 @@ export default {
         // },
         {
           title: '连接数',
-          key: 'connections'
+          key: 'connections',
+          width: 100,
+          render: (h, params) => {
+            const connections = params.item.connections
+            const formatNumFilter = Vue.filter('formatNum')
+            return h('label', formatNumFilter(connections))
+          }
         },
         {
           title: '积压数',
-          key: 'pending.count'
+          key: 'pending.count',
+          width: 150,
+          render: (h, params) => {
+            const pending = params.item.pending
+            if (!pending) {
+              return h('label', '')
+            } else {
+              const formatNumFilter = Vue.filter('formatNum')
+              return h('label', formatNumFilter(pending.count))
+            }
+          }
         },
         {
           title: '出队数',
-          key: 'deQuence.count'
+          key: 'deQuence.count',
+          width: 150,
+          render: (h, params) => {
+            const deQuence = params.item.deQuence
+            if (!deQuence) {
+              return h('label', '')
+            } else {
+              const formatNumFilter = Vue.filter('formatNum')
+              return h('label', formatNumFilter(deQuence.count))
+            }
+          }
         },
         {
           title: '重试数',
-          key: 'retry.count'
+          key: 'retry.count',
+          width: 100,
+          render: (h, params) => {
+            const retry = params.item.retry
+            const formatNumFilter = Vue.filter('formatNum')
+            return h('d-button', {
+              props: {
+                type: 'borderless',
+                color: 'primary'
+              },
+              style: {
+                color: '#3366FF'
+              },
+              on: {
+                click: () => {
+                  this.$router.push({
+                    name: `/${this.$i18n.locale}/topic/detail`,
+                    query: {
+                      id: params.item.topic.code,
+                      app: getAppCode(params.item.app, params.item.subscribeGroup),
+                      topic: params.item.topic.code,
+                      namespace: params.item.namespace.code,
+                      tab: 'retry'
+                    }
+                  })
+                }
+              }
+            }, retry === undefined ? 0 : formatNumFilter(retry.count))
+          }
         },
         {
           title: '消息类型',
@@ -161,7 +238,8 @@ export default {
         ],
         urls: {
           add: `/consumer/add`,
-          search: `/topic/unsubscribed/search`
+          search: `/topic/unsubscribed/search`,
+          del: `/consumer/delete/`
         }
       },
       // 消费详情

@@ -63,7 +63,7 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
     private BrokerMessageService  brokerMessageService;
 
     @Value
-    CoordinatorMonitorService coordinatorMonitorService;
+    private CoordinatorMonitorService coordinatorMonitorService;
 
     @Value
     private BrokerTopicMonitorService brokerTopicMonitorService;
@@ -380,6 +380,7 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
     }
 
     /**
+     * TODO 改成post方法,topicFullName可能存在
      * broker启动信息
      * @param brokerId
      * @return
@@ -387,7 +388,7 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
     @Path("findBrokerMetadata")
     public Response findBrokerMetadata(@QueryParam("brokerId") Long brokerId, @QueryParam("topicFullName") String topicFullName,
                                        @QueryParam("group") Integer group) throws Exception {
-        io.chubao.joyqueue.model.domain.Broker broker = brokerService.findById(brokerId);
+        io.chubao.joyqueue.model.domain.Broker broker = brokerService.findById(Integer.valueOf(String.valueOf(brokerId)));
         if (broker == null) {
             String msg = String.format("can not find broker with id %s", brokerId);
             logger.error(msg);

@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -32,6 +33,7 @@ import java.util.Set;
  * 下午3:23 2018/7/31
  */
 public class Consumer extends Subscription {
+
     /**
      * 客户端类型
      */
@@ -102,6 +104,26 @@ public class Consumer extends Subscription {
         return limitPolicy;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || !(o instanceof Consumer)) return false;
+        if (!super.equals(o)) return false;
+
+        Consumer consumer = (Consumer) o;
+        return clientType == consumer.clientType &&
+                topicType == consumer.topicType &&
+                Objects.equals(retryPolicy, consumer.retryPolicy) &&
+                Objects.equals(consumerPolicy, consumer.consumerPolicy) &&
+                Objects.equals(limitPolicy, consumer.limitPolicy);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(super.hashCode(), clientType, topicType, retryPolicy, consumerPolicy, limitPolicy);
+    }
+
     /**
      * 限流策略
      */
@@ -132,6 +154,21 @@ public class Consumer extends Subscription {
 
         public Integer getTraffic() {
             return traffic;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ConsumerLimitPolicy that = (ConsumerLimitPolicy) o;
+            return Objects.equals(tps, that.tps) &&
+                    Objects.equals(traffic, that.traffic);
+        }
+
+        @Override
+        public int hashCode() {
+
+            return Objects.hash(tps, traffic);
         }
     }
 
@@ -314,6 +351,33 @@ public class Consumer extends Subscription {
 
         public Map<String, String> getFilters() {
             return filters;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ConsumerPolicy that = (ConsumerPolicy) o;
+            return Objects.equals(nearby, that.nearby) &&
+                    Objects.equals(paused, that.paused) &&
+                    Objects.equals(archive, that.archive) &&
+                    Objects.equals(retry, that.retry) &&
+                    Objects.equals(seq, that.seq) &&
+                    Objects.equals(ackTimeout, that.ackTimeout) &&
+                    Objects.equals(batchSize, that.batchSize) &&
+                    Objects.equals(concurrent, that.concurrent) &&
+                    Objects.equals(delay, that.delay) &&
+                    Objects.equals(blackList, that.blackList) &&
+                    Objects.equals(errTimes, that.errTimes) &&
+                    Objects.equals(maxPartitionNum, that.maxPartitionNum) &&
+                    Objects.equals(readRetryProbability, that.readRetryProbability) &&
+                    Objects.equals(filters, that.filters);
+        }
+
+        @Override
+        public int hashCode() {
+
+            return Objects.hash(nearby, paused, archive, retry, seq, ackTimeout, batchSize, concurrent, delay, blackList, errTimes, maxPartitionNum, readRetryProbability, filters);
         }
 
         public static class Builder {

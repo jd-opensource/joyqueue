@@ -15,22 +15,19 @@
  */
 package io.chubao.joyqueue.broker.store;
 
+import com.google.common.base.Preconditions;
 import io.chubao.joyqueue.broker.BrokerContext;
 import io.chubao.joyqueue.broker.BrokerContextAware;
 import io.chubao.joyqueue.broker.cluster.ClusterManager;
+import io.chubao.joyqueue.broker.config.BrokerStoreConfig;
 import io.chubao.joyqueue.broker.election.ElectionService;
-import io.chubao.joyqueue.domain.PartitionGroup;
-import io.chubao.joyqueue.domain.Replica;
 import io.chubao.joyqueue.nsr.NameService;
 import io.chubao.joyqueue.store.StoreService;
 import io.chubao.joyqueue.toolkit.config.PropertySupplier;
 import io.chubao.joyqueue.toolkit.config.PropertySupplierAware;
-import com.google.common.base.Preconditions;
 import io.chubao.joyqueue.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
 
 /**
  * 存储管理器
@@ -46,6 +43,8 @@ public class StoreManager extends Service implements BrokerContextAware, Propert
     private StoreCleanManager storeCleanManager;
     private ElectionService electionService;
 
+    private BrokerStoreConfig config;
+
     public StoreManager(StoreService storeService , NameService nameService, ClusterManager clusterManager, ElectionService electionService) {
         this.storeService = storeService;
         this.nameService = nameService;
@@ -57,6 +56,7 @@ public class StoreManager extends Service implements BrokerContextAware, Propert
     protected void validate() throws Exception {
         super.validate();
         Preconditions.checkArgument(brokerContext != null, "broker context can not be null");
+        config = new BrokerStoreConfig(brokerContext.getPropertySupplier());
         storeCleanManager = new StoreCleanManager(
                 propertySupplier,
                 storeService,
@@ -67,26 +67,11 @@ public class StoreManager extends Service implements BrokerContextAware, Propert
 
     @Override
     public void doStop() {
-        super.stop();
         storeCleanManager.stop();
     }
 
     @Override
     public void doStart() throws Exception {
-        super.doStart();
-        int brokerId = clusterManager.getBrokerId();
-        List<Replica> replicas = nameService.getReplicaByBroker(brokerId);
-        if (null != replicas) {
-            for (Replica replica : replicas) {
-                PartitionGroup group = clusterManager.getPartitionGroupByGroup(replica.getTopic(),replica.getGroup());
-                if (group.getReplicas().contains(brokerId)) {
-                    logger.info("begin restore topic {},group.no {} group {}",replica.getTopic().getFullName(),replica.getGroup(),group);
-                    storeService.restorePartitionGroup(group.getTopic().getFullName(), group.getGroup());
-                    //electionService.onPartitionGroupCreate(group.getElectType(), group.getGroupTopic(), group.getGroup(),
-                    //        new ArrayList<>(group.getBrokers().values()), group.getLearners(), brokerId, group.getLeader());
-                }
-            }
-        }
         storeCleanManager.start();
     }
 

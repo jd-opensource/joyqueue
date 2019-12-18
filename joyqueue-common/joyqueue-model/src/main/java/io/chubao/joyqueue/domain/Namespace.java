@@ -15,6 +15,8 @@
  */
 package io.chubao.joyqueue.domain;
 
+import java.util.Objects;
+
 /**
  * 命名空间
  */
@@ -43,5 +45,20 @@ public class Namespace {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || !(o instanceof Namespace)) return false;
+        Namespace namespace = (Namespace) o;
+        return Objects.equals(code, namespace.code) &&
+                Objects.equals(name, namespace.name);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(code, name);
     }
 }

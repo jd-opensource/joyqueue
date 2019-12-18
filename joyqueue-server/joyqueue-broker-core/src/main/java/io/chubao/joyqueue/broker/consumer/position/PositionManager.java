@@ -24,12 +24,15 @@ import io.chubao.joyqueue.broker.consumer.position.model.Position;
 import io.chubao.joyqueue.domain.Consumer;
 import io.chubao.joyqueue.domain.PartitionGroup;
 import io.chubao.joyqueue.domain.TopicName;
-import io.chubao.joyqueue.event.ConsumerEvent;
 import io.chubao.joyqueue.event.EventType;
 import io.chubao.joyqueue.event.MetaEvent;
-import io.chubao.joyqueue.event.PartitionGroupEvent;
 import io.chubao.joyqueue.exception.JoyQueueCode;
 import io.chubao.joyqueue.exception.JoyQueueException;
+import io.chubao.joyqueue.nsr.event.AddConsumerEvent;
+import io.chubao.joyqueue.nsr.event.AddPartitionGroupEvent;
+import io.chubao.joyqueue.nsr.event.RemoveConsumerEvent;
+import io.chubao.joyqueue.nsr.event.RemovePartitionGroupEvent;
+import io.chubao.joyqueue.nsr.event.UpdatePartitionGroupEvent;
 import io.chubao.joyqueue.store.PartitionGroupStore;
 import io.chubao.joyqueue.store.StoreService;
 import io.chubao.joyqueue.toolkit.concurrent.EventListener;
@@ -251,6 +254,10 @@ public class PositionManager extends Service {
      * @return 是否更新成功
      */
     public boolean updateLastMsgAckIndex(TopicName topic, String app, short partition, long index) throws JoyQueueException {
+        return updateLastMsgAckIndex(topic, app, partition, index, true);
+    }
+
+    public boolean updateLastMsgAckIndex(TopicName topic, String app, short partition, long index, boolean isUpdatePullIndex) throws JoyQueueException {
         logger.debug("Update last ack index, topic:{}, app:{}, partition:{}, index:{}", topic, app, partition, index);
         // 检查索引有效性
         checkIndex(topic, partition, index);
@@ -261,6 +268,9 @@ public class PositionManager extends Service {
         Position position = positionStore.get(consumePartition);
         if (position != null) {
             position.setAckCurIndex(index);
+            if (isUpdatePullIndex) {
+                position.setPullCurIndex(-1);
+            }
         } else {
             logger.error("Position is null, topic:{}, app:{}, partition:{}, index:{}", topic, app, partition, index);
             // 补偿逻辑：如果当前broker是指定partition对应partitionGroup的leader，则按照给定index初始化Position，否则不处理
@@ -287,7 +297,7 @@ public class PositionManager extends Service {
         PartitionGroupStore store = storeService.getStore(topic.getFullName(), partitionGroupId);
 
         long leftIndex = store.getLeftIndex(partition);
-        if (index < leftIndex) {
+        if (index < leftIndex && index != -1) {
             throw new JoyQueueException(JoyQueueCode.SE_INDEX_UNDERFLOW , "index less than leftIndex error.");
         }
 
@@ -426,6 +436,13 @@ public class PositionManager extends Service {
     private long getMaxMsgIndex(TopicName topic, short partition) {
         Integer partitionGroupId = clusterManager.getPartitionGroupId(topic, partition);
         PartitionGroupStore store = storeService.getStore(topic.getFullName(), partitionGroupId);
+
+        // TODO 很小几率在添加group时空指针
+        if (store == null) {
+            logger.warn("store not exist, topic: {}, partitionGroup: {}, partition: {}", topic, partitionGroupId, partition);
+            return 0;
+        }
+
         long rightIndex = store.getRightIndex(partition);
         return rightIndex;
     }
@@ -519,10 +536,9 @@ public class PositionManager extends Service {
      * @param topic          主题
      * @param partitionGroup 分区分组
      */
-    private synchronized void addPartitionGroup(TopicName topic, int partitionGroup) {
-        PartitionGroup partitionGroupByGroup = clusterManager.getPartitionGroupByGroup(topic, partitionGroup);
+    private void addPartitionGroup(TopicName topic, PartitionGroup partitionGroup) {
         List<String> appList = clusterManager.getAppByTopic(topic);
-        Set<Short> partitions = partitionGroupByGroup.getPartitions();
+        Set<Short> partitions = partitionGroup.getPartitions();
 
         logger.debug("add partitionGroup appList:[{}], partitions:[{}]", appList.toString(), partitions.toString());
         AtomicBoolean changed = new AtomicBoolean(false);
@@ -533,7 +549,7 @@ public class PositionManager extends Service {
 
             appList.stream().forEach(app -> {
                 ConsumePartition consumePartition = new ConsumePartition(topic.getFullName(), app, partition);
-                consumePartition.setPartitionGroup(partitionGroup);
+                consumePartition.setPartitionGroup(partitionGroup.getGroup());
 
                 // 为新订阅的应用初始化消费位置对象
                 Position position = new Position(currentIndex, currentIndex, currentIndex, currentIndex);
@@ -567,13 +583,13 @@ public class PositionManager extends Service {
      * @param topic          主题
      * @param partitionGroup 分区分组
      */
-    private synchronized void removePartitionGroup(TopicName topic, int partitionGroup) {
+    private synchronized void removePartitionGroup(TopicName topic, PartitionGroup partitionGroup) {
         logger.info("remove partitionGroup topic:[{}], partitionGroup:[{}]", topic.getFullName(), partitionGroup);
         Iterator<ConsumePartition> iterator = positionStore.iterator();
         while(iterator.hasNext()) {
             ConsumePartition consumePartition = iterator.next();
             if (consumePartition != null &&
-                    consumePartition.getPartitionGroup() == partitionGroup &&
+                    consumePartition.getPartitionGroup() == partitionGroup.getGroup() &&
                     StringUtils.equals(consumePartition.getTopic(), topic.getFullName())) {
 
                 iterator.remove();
@@ -587,17 +603,16 @@ public class PositionManager extends Service {
     /**
      * 添加事件
      */
-    class AddConsumeListener implements EventListener {
+    class AddConsumeListener implements EventListener<MetaEvent> {
 
         @Override
-        public void onEvent(Object event) {
+        public void onEvent(MetaEvent event) {
             try {
-                if (((MetaEvent) event).getEventType() == EventType.ADD_CONSUMER) {
-                    ConsumerEvent addConsumerEvent = (ConsumerEvent) event;
-
+                if (event.getEventType() == EventType.ADD_CONSUMER) {
+                    AddConsumerEvent addConsumerEvent = (AddConsumerEvent) event;
                     logger.info("listen add consume event:[{}]", addConsumerEvent.toString());
 
-                    addConsumer(addConsumerEvent.getTopic(), addConsumerEvent.getApp());
+                    addConsumer(addConsumerEvent.getTopic(), addConsumerEvent.getConsumer().getApp());
                 }
             } catch (Exception ex) {
                 logger.error("AddConsumeListener error.", ex);
@@ -608,17 +623,16 @@ public class PositionManager extends Service {
     /**
      * 移除事件
      */
-    class RemoveConsumeListener implements EventListener {
+    class RemoveConsumeListener implements EventListener<MetaEvent> {
 
         @Override
-        public void onEvent(Object event) {
+        public void onEvent(MetaEvent event) {
             try {
-                if (((MetaEvent) event).getEventType() == EventType.REMOVE_CONSUMER) {
-                    ConsumerEvent removeConsumerEvent = (ConsumerEvent) event;
-
+                if (event.getEventType() == EventType.REMOVE_CONSUMER) {
+                    RemoveConsumerEvent removeConsumerEvent = (RemoveConsumerEvent) event;
                     logger.info("listen remove consume event:[{}]", removeConsumerEvent.toString());
 
-                    removeConsumer(removeConsumerEvent.getTopic(), removeConsumerEvent.getApp());
+                    removeConsumer(removeConsumerEvent.getTopic(), removeConsumerEvent.getConsumer().getApp());
                 }
             } catch (Exception ex) {
                 logger.error("RemoveConsumeListener error.", ex);
@@ -629,17 +643,16 @@ public class PositionManager extends Service {
     /**
      * 添加分区分组事件
      */
-    class AddPartitionGroupListener implements EventListener {
+    class AddPartitionGroupListener implements EventListener<MetaEvent> {
 
         @Override
-        public void onEvent(Object event) {
+        public void onEvent(MetaEvent event) {
             try {
-                if (((MetaEvent) event).getEventType() == EventType.ADD_PARTITION_GROUP) {
-                    PartitionGroupEvent partitionGroupEvent = (PartitionGroupEvent) event;
+                if (event.getEventType() == EventType.ADD_PARTITION_GROUP) {
+                    AddPartitionGroupEvent addPartitionGroupEvent = (AddPartitionGroupEvent) event;
+                    logger.info("listen add partition group event:[{}]", addPartitionGroupEvent.toString());
 
-                    logger.info("listen add partition group event:[{}]", partitionGroupEvent.toString());
-
-                    addPartitionGroup(partitionGroupEvent.getTopic(), partitionGroupEvent.getPartitionGroup());
+                    addPartitionGroup(addPartitionGroupEvent.getTopic(), addPartitionGroupEvent.getPartitionGroup());
                 }
             } catch (Exception ex) {
                 logger.error("AddPartitionGroupListener error.", ex);
@@ -650,17 +663,16 @@ public class PositionManager extends Service {
     /**
      * 删除分区分组事件
      */
-    class RemovePartitionGroupListener implements EventListener {
+    class RemovePartitionGroupListener implements EventListener<MetaEvent> {
 
         @Override
-        public void onEvent(Object event) {
+        public void onEvent(MetaEvent event) {
             try {
-                if (((MetaEvent) event).getEventType() == EventType.REMOVE_PARTITION_GROUP) {
-                    PartitionGroupEvent partitionGroupEvent = (PartitionGroupEvent) event;
+                if (event.getEventType() == EventType.REMOVE_PARTITION_GROUP) {
+                    RemovePartitionGroupEvent removePartitionGroupEvent = (RemovePartitionGroupEvent) event;
+                    logger.info("listen remove partition group event:[{}]", removePartitionGroupEvent.toString());
 
-                    logger.info("listen remove partition group event:[{}]", partitionGroupEvent.toString());
-
-                    removePartitionGroup(partitionGroupEvent.getTopic(), partitionGroupEvent.getPartitionGroup());
+                    removePartitionGroup(removePartitionGroupEvent.getTopic(), removePartitionGroupEvent.getPartitionGroup());
                 }
             } catch (Exception ex) {
                 logger.error("RemovePartitionGroupListener error.", ex);
@@ -672,18 +684,18 @@ public class PositionManager extends Service {
     /**
      * 更新分区分组事件(添加分区或减少分区)
      */
-    class UpdatePartitionGroupListener implements EventListener {
+    class UpdatePartitionGroupListener implements EventListener<MetaEvent> {
 
         @Override
-        public void onEvent(Object event) {
+        public void onEvent(MetaEvent event) {
             try {
-                if (((MetaEvent) event).getEventType() == EventType.UPDATE_PARTITION_GROUP) {
-                    PartitionGroupEvent partitionGroupEvent = (PartitionGroupEvent) event;
+                if (event.getEventType() == EventType.UPDATE_PARTITION_GROUP) {
+                    UpdatePartitionGroupEvent updatePartitionGroupEvent = (UpdatePartitionGroupEvent) event;
 
-                    logger.info("listen update partition group event:[{}]", partitionGroupEvent.toString());
+                    logger.info("listen update partition group event:[{}]", updatePartitionGroupEvent.toString());
 
-                    TopicName topic = partitionGroupEvent.getTopic();
-                    int partitionGroup = partitionGroupEvent.getPartitionGroup();
+                    TopicName topic = updatePartitionGroupEvent.getTopic();
+                    PartitionGroup newPartitionGroup = updatePartitionGroupEvent.getNewPartitionGroup();
 
                     Set<Short> newPartitionSet = clusterManager.getTopicConfig(topic).fetchAllPartitions();
 
@@ -696,12 +708,11 @@ public class PositionManager extends Service {
                         }
                     }
 
-                    addPartitionGroup(topic, partitionGroup);
+                    addPartitionGroup(topic, newPartitionGroup);
                 }
             } catch (Exception ex) {
                 logger.error("UpdatePartitionGroupListener error.", ex);
             }
         }
     }
-
 }

@@ -22,17 +22,16 @@ import com.google.common.collect.Table;
 import io.chubao.joyqueue.client.internal.cluster.ClusterManager;
 import io.chubao.joyqueue.client.internal.consumer.ConsumerIndexManager;
 import io.chubao.joyqueue.client.internal.consumer.domain.ConsumeReply;
-import io.chubao.joyqueue.client.internal.consumer.domain.FetchIndexData;
 import io.chubao.joyqueue.client.internal.consumer.transport.ConsumerClient;
 import io.chubao.joyqueue.client.internal.consumer.transport.ConsumerClientManager;
 import io.chubao.joyqueue.client.internal.exception.ClientException;
 import io.chubao.joyqueue.client.internal.metadata.domain.PartitionMetadata;
 import io.chubao.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import io.chubao.joyqueue.exception.JoyQueueCode;
-import io.chubao.joyqueue.network.command.CommitAckResponse;
 import io.chubao.joyqueue.network.command.CommitAckData;
+import io.chubao.joyqueue.network.command.CommitAckResponse;
+import io.chubao.joyqueue.network.command.FetchIndexData;
 import io.chubao.joyqueue.network.command.FetchIndexResponse;
-import io.chubao.joyqueue.network.command.FetchIndexAckData;
 import io.chubao.joyqueue.network.domain.BrokerNode;
 import io.chubao.joyqueue.toolkit.service.Service;
 import org.apache.commons.collections.MapUtils;
@@ -67,10 +66,10 @@ public class DefaultConsumerIndexManager extends Service implements ConsumerInde
     }
 
     @Override
-    public FetchIndexData fetchIndex(String topic, String app, short partition, long timeout) {
+    public io.chubao.joyqueue.client.internal.consumer.domain.FetchIndexData fetchIndex(String topic, String app, short partition, long timeout) {
         Map<String, List<Short>> topicMap = Maps.newHashMap();
         topicMap.put(topic, Lists.newArrayList(partition));
-        Table<String, Short, FetchIndexData> batchFetchIndexResult = batchFetchIndex(topicMap, app, timeout);
+        Table<String, Short, io.chubao.joyqueue.client.internal.consumer.domain.FetchIndexData> batchFetchIndexResult = batchFetchIndex(topicMap, app, timeout);
         return batchFetchIndexResult.get(topic, partition);
     }
 
@@ -83,8 +82,8 @@ public class DefaultConsumerIndexManager extends Service implements ConsumerInde
     }
 
     @Override
-    public Table<String, Short, FetchIndexData> batchFetchIndex(Map<String, List<Short>> topicMap, String app, long timeout) {
-        Table<String, Short, FetchIndexData> result = HashBasedTable.create();
+    public Table<String, Short, io.chubao.joyqueue.client.internal.consumer.domain.FetchIndexData> batchFetchIndex(Map<String, List<Short>> topicMap, String app, long timeout) {
+        Table<String, Short, io.chubao.joyqueue.client.internal.consumer.domain.FetchIndexData> result = HashBasedTable.create();
         if (MapUtils.isEmpty(topicMap)) {
             return result;
         }
@@ -95,16 +94,18 @@ public class DefaultConsumerIndexManager extends Service implements ConsumerInde
                 ConsumerClient client = consumerClientManager.getOrCreateClient(entry.getKey());
                 FetchIndexResponse fetchIndexResponse = client.fetchIndex(entry.getValue(), app, timeout);
 
-                for (Map.Entry<String, Map<Short, FetchIndexAckData>> topicEntry : fetchIndexResponse.getData().rowMap().entrySet()) {
-                    for (Map.Entry<Short, FetchIndexAckData> partitionEntry : topicEntry.getValue().entrySet()) {
-                        result.put(topicEntry.getKey(), partitionEntry.getKey(), new FetchIndexData(partitionEntry.getValue().getIndex(), partitionEntry.getValue().getCode()));
+                for (Map.Entry<String, Map<Short, FetchIndexData>> topicEntry : fetchIndexResponse.getData().rowMap().entrySet()) {
+                    for (Map.Entry<Short, FetchIndexData> partitionEntry : topicEntry.getValue().entrySet()) {
+                        FetchIndexData value = partitionEntry.getValue();
+                        result.put(topicEntry.getKey(), partitionEntry.getKey(),
+                                new io.chubao.joyqueue.client.internal.consumer.domain.FetchIndexData(value.getIndex(), value.getLeftIndex(), value.getRightIndex(), value.getCode()));
                     }
                 }
             } catch (ClientException e) {
                 logger.error("fetchIndex exception, fetchMap: {}, app: {}", entry.getValue(), app, e);
                 for (Map.Entry<String, List<Short>> topicEntry : entry.getValue().entrySet()) {
                     for (Short partition : topicEntry.getValue()) {
-                        result.put(topicEntry.getKey(), partition, new FetchIndexData(JoyQueueCode.valueOf(e.getCode())));
+                        result.put(topicEntry.getKey(), partition, new io.chubao.joyqueue.client.internal.consumer.domain.FetchIndexData(JoyQueueCode.valueOf(e.getCode())));
                     }
                 }
             }
@@ -115,7 +116,7 @@ public class DefaultConsumerIndexManager extends Service implements ConsumerInde
                 if (result.contains(entry.getKey(), partition)) {
                     continue;
                 }
-                result.put(entry.getKey(), partition, new FetchIndexData(JoyQueueCode.CN_UNKNOWN_ERROR));
+                result.put(entry.getKey(), partition, new io.chubao.joyqueue.client.internal.consumer.domain.FetchIndexData(JoyQueueCode.CN_UNKNOWN_ERROR));
             }
         }
 

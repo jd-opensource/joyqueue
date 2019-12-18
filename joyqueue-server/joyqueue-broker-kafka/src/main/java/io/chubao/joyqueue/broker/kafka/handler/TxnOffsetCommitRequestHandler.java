@@ -59,10 +59,11 @@ public class TxnOffsetCommitRequestHandler implements KafkaCommandHandler, Type,
     public Command handle(Transport transport, Command command) {
         TxnOffsetCommitRequest txnOffsetCommitRequest = (TxnOffsetCommitRequest) command.getPayload();
         String clientId = KafkaClientHelper.parseClient(txnOffsetCommitRequest.getClientId());
+        String groupId = clientId;
         TxnOffsetCommitResponse response = null;
 
         try {
-            Map<String, List<PartitionMetadataAndError>> errors = transactionCoordinator.handleCommitOffset(clientId, txnOffsetCommitRequest.getTransactionId(), txnOffsetCommitRequest.getGroupId(),
+            Map<String, List<PartitionMetadataAndError>> errors = transactionCoordinator.handleCommitOffset(clientId, txnOffsetCommitRequest.getTransactionId(), groupId,
                     txnOffsetCommitRequest.getProducerId(), txnOffsetCommitRequest.getProducerEpoch(), txnOffsetCommitRequest.getPartitions());
             response = new TxnOffsetCommitResponse(errors);
         } catch (TransactionException e) {

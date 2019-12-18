@@ -26,15 +26,12 @@ import io.chubao.joyqueue.client.internal.consumer.interceptor.ConsumerInvocatio
 import io.chubao.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import io.chubao.joyqueue.client.internal.nameserver.NameServerConfig;
 import io.chubao.joyqueue.domain.ConsumerPolicy;
-import io.chubao.joyqueue.toolkit.concurrent.NamedThreadFactory;
 import io.chubao.joyqueue.toolkit.service.Service;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * TopicMessageConsumerDispatcher
@@ -52,7 +49,6 @@ public class TopicMessageConsumerDispatcher extends Service {
     private MessagePoller messagePoller;
     private MessageListenerManager messageListenerManager;
     private ConsumerInterceptorManager consumerInterceptorManager;
-    private ExecutorService listenerExecutor;
 
     public TopicMessageConsumerDispatcher(String topic, ConsumerConfig config, NameServerConfig nameServerConfig,
                                           MessagePoller messagePoller, MessageListenerManager messageListenerManager, ConsumerInterceptorManager consumerInterceptorManager) {
@@ -62,18 +58,6 @@ public class TopicMessageConsumerDispatcher extends Service {
         this.messagePoller = messagePoller;
         this.messageListenerManager = messageListenerManager;
         this.consumerInterceptorManager = consumerInterceptorManager;
-    }
-
-    @Override
-    protected void doStart() throws Exception {
-        listenerExecutor = Executors.newSingleThreadExecutor(new NamedThreadFactory(String.format("joyqueue-consumer-dispatcher-%s", topic)));
-    }
-
-    @Override
-    protected void doStop() {
-        if (listenerExecutor != null) {
-            listenerExecutor.shutdown();
-        }
     }
 
     public boolean dispatch() {
@@ -117,11 +101,11 @@ public class TopicMessageConsumerDispatcher extends Service {
     protected List<ConsumeReply> doBatchDispatch(TopicMetadata topicMetadata, ConsumerPolicy consumerPolicy,
                                                  List<ConsumeMessage> messages, List<BatchMessageListener> listeners) {
         return new ConsumerInvocation(config, topic, nameServerConfig, messages, consumerInterceptorManager,
-                new BatchConsumerInvoker(config, topicMetadata, consumerPolicy, messages, listeners, listenerExecutor)).invoke();
+                new BatchConsumerInvoker(config, topicMetadata, consumerPolicy, messages, listeners)).invoke();
     }
 
     protected List<ConsumeReply> doOnceDispatch(TopicMetadata topicMetadata, final ConsumerPolicy consumerPolicy, final List<ConsumeMessage> messages, final List<MessageListener> listeners) {
         return new ConsumerInvocation(config, topic, nameServerConfig, messages, consumerInterceptorManager,
-                new OnceConsumerInvoker(config, topicMetadata, consumerPolicy, messages, listeners, listenerExecutor)).invoke();
+                new OnceConsumerInvoker(config, topicMetadata, consumerPolicy, messages, listeners)).invoke();
     }
 }

@@ -9,10 +9,10 @@
       :styles="styles"
       @on-confirm="handleSave"
       @on-cancel="handleCancel"
-      :maskClosable="false"
-      :draggable="dialog.draggable || true"
+      :maskClosable="dialog.maskClosable || false"
+      :draggable="dialog.draggable || false"
       :resizable="dialog.resizable || true">
-      <slot></slot>
+  <slot></slot>
   </d-dialog>
 </template>
 

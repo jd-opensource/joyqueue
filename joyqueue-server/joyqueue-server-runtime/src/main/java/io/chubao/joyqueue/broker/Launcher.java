@@ -20,9 +20,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Launcher
- *
- * author: gaohaoxiang
- * date: 2018/8/27
  */
 public class Launcher {
 

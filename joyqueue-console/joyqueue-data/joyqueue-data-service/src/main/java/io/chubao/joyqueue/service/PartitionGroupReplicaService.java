@@ -17,14 +17,20 @@ package io.chubao.joyqueue.service;
 
 import io.chubao.joyqueue.model.domain.PartitionGroupReplica;
 import io.chubao.joyqueue.model.domain.TopicPartitionGroup;
-import io.chubao.joyqueue.model.query.QPartitionGroupReplica;
 import io.chubao.joyqueue.nsr.NsrService;
+
+import java.util.List;
 
 /**
  * 主题Broker分组 服务
  * Created by chenyanying3 on 2018-10-18
  */
-public interface PartitionGroupReplicaService extends NsrService<PartitionGroupReplica,QPartitionGroupReplica,String> {
+public interface PartitionGroupReplicaService extends NsrService<PartitionGroupReplica, String> {
+
+    List<PartitionGroupReplica> getByTopic(String topic, String namespace);
+
+    List<PartitionGroupReplica> getByTopicAndGroup(String topic, String namespace, int group);
+
     /**
      *扩容
      * @param replica

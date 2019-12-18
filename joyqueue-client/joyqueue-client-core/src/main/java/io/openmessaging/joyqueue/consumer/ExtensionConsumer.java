@@ -35,4 +35,6 @@ public interface ExtensionConsumer extends Consumer {
     Message receive(short partition, long index, long timeout);
 
     List<Message> batchReceive(short partition, long index, long timeout);
+
+    ConsumerIndex getIndex(short partition);
 }

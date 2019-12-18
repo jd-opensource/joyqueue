@@ -35,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
 import java.util.Date;
 
 /**
@@ -124,7 +125,7 @@ public class NameServerBase {
      * @return
      * @throws Exception
      */
-    public String post(String uri, Object obj) throws Exception {
+    public String post(String uri, Object obj) {
         HttpPost post = new HttpPost(nsrServiceProvider.getBaseUrl() + uri);
         if(null!=obj) {
             StringEntity entity = new StringEntity(JSON.toJSONString(obj), Charsets.UTF_8);//解决中文乱码问题
@@ -135,7 +136,7 @@ public class NameServerBase {
         return onResponse(HttpUtil.executeRequest(post),post);
     }
 
-    private String onResponse(CloseableHttpResponse response, HttpUriRequest request) throws Exception {
+    private String onResponse(CloseableHttpResponse response, HttpUriRequest request) {
         try {
             int statusCode = response.getStatusLine().getStatusCode();
             if (HttpStatus.SC_OK != statusCode) {
@@ -147,8 +148,14 @@ public class NameServerBase {
             logger.info("request[{}] response[{}]",request.toString(),result);
 
             return result;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         } finally {
-            response.close();
+            try {
+                response.close();
+            } catch (IOException e) {
+                logger.error("", e);
+            }
         }
     }
     private String getEscapeTopic(String topic){

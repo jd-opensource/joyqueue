@@ -20,7 +20,7 @@
     <parent>
         <artifactId>joyqueue</artifactId>
         <groupId>io.chubao</groupId>
-        <version>4.1.1-SNAPSHOT</version>
+        <version>4.1.2-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>joyqueue-docker</artifactId>

@@ -17,6 +17,7 @@ package io.chubao.joyqueue.event;
 
 import io.chubao.joyqueue.domain.TopicName;
 
+@Deprecated
 public class ConsumerEvent extends MetaEvent {
     private TopicName topic;
     private String app;

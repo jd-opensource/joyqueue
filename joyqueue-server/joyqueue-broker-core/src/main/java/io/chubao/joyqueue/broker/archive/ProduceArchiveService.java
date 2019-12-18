@@ -24,6 +24,7 @@ import io.chubao.joyqueue.broker.consumer.MessageConvertSupport;
 import io.chubao.joyqueue.broker.consumer.model.PullResult;
 import io.chubao.joyqueue.domain.TopicConfig;
 import io.chubao.joyqueue.domain.TopicName;
+import io.chubao.joyqueue.exception.JoyQueueCode;
 import io.chubao.joyqueue.exception.JoyQueueException;
 import io.chubao.joyqueue.message.BrokerMessage;
 import io.chubao.joyqueue.message.SourceType;
@@ -218,7 +219,7 @@ public class ProduceArchiveService extends Service {
             PullResult pullResult;
             long readIndex = item.getReadIndex();
             try {
-                pullResult = consume.getMessage(new Consumer(item.topic, ""), item.partition, readIndex, batchNum);
+                pullResult = consume.getMessage(item.topic, item.partition, readIndex, batchNum);
             } catch (Throwable th) {
                 logger.error("read message from topic:" + item.topic + " partition:" + item.partition
                         + " index:" + item.getReadIndex() + " error.", th);
@@ -234,6 +235,24 @@ public class ProduceArchiveService extends Service {
 
                 // 报错暂停一会
                 put2PauseMap(item.getTopic(), item.getPartition());
+                continue;
+            }
+
+            if (pullResult.getCode() == JoyQueueCode.SE_INDEX_UNDERFLOW) {
+                long minIndex = consume.getMinIndex(new Consumer(item.topic, ""), item.partition);
+                item.setReadIndex(minIndex);
+
+                logger.warn("repair read message position SendArchiveItem info:[{}], currentIndex:[{}]", item, minIndex);
+
+                continue;
+            }
+
+            if (pullResult.getCode() == JoyQueueCode.SE_INDEX_OVERFLOW) {
+                long maxIndex = consume.getMaxIndex(new Consumer(item.topic, ""), item.partition);
+                item.setReadIndex(maxIndex);
+
+                logger.warn("repair read message position SendArchiveItem info:[{}], currentIndex:[{}]", item, maxIndex);
+
                 continue;
             }
 

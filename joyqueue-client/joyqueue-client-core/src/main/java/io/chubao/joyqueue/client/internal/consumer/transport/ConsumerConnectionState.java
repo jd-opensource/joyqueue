@@ -20,7 +20,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import io.chubao.joyqueue.network.command.AddConsumerRequest;
 import io.chubao.joyqueue.network.command.RemoveConsumerRequest;
-import io.chubao.joyqueue.network.transport.TransportAttribute;
 import io.chubao.joyqueue.network.transport.command.JoyQueueCommand;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -45,25 +44,38 @@ public class ConsumerConnectionState {
 
     protected static final Logger logger = LoggerFactory.getLogger(ConsumerConnectionState.class);
 
-    private static final String ADDED_CONSUMER_KEY = "_CLIENT_ADDED_CONSUMER_";
-
     private static final AtomicLong SEQUENCE = new AtomicLong();
 
     private ConsumerClient consumerClient;
+    private ConcurrentMap<String, Set<String>> consumerMap = Maps.newConcurrentMap();
     private ReentrantReadWriteLock consumerLock = new ReentrantReadWriteLock();
 
     public ConsumerConnectionState(ConsumerClient consumerClient) {
         this.consumerClient = consumerClient;
     }
 
+    public void handleAddConsumers() {
+        if (MapUtils.isEmpty(consumerMap)) {
+            return;
+        }
+        try {
+            for (Map.Entry<String, Set<String>> entry : consumerMap.entrySet()) {
+                doHandleAddConsumers(Lists.newArrayList(entry.getValue()), entry.getKey());
+            }
+        } catch (Exception e) {
+            logger.error("add consumer exception, consumerMap: {}", consumerMap, e);
+            consumerMap.clear();
+        }
+    }
+
     public void handleAddConsumers(Collection<String> topics, String app) {
         consumerLock.readLock().lock();
         try {
-            Set<String> topicSet = getOrCreateAddedTopicSet(app);
+            Set<String> currentTopics = getOrCreateAddedTopicSet(app);
             List<String> addTopics = null;
 
             for (String topic : topics) {
-                if (!topicSet.contains(topic)) {
+                if (!currentTopics.contains(topic)) {
                     if (addTopics == null) {
                         addTopics = Lists.newLinkedList();
                     }
@@ -75,7 +87,7 @@ public class ConsumerConnectionState {
                 return;
             }
             if (doHandleAddConsumers(addTopics, app)) {
-                topicSet.addAll(addTopics);
+                currentTopics.addAll(addTopics);
             }
         } finally {
             consumerLock.readLock().unlock();
@@ -109,11 +121,10 @@ public class ConsumerConnectionState {
     }
 
     public void handleRemoveConsumers() {
-        ConcurrentMap<String, Set<String>> appTopicSet = getOrCreateAddedTopicSet();
-        if (MapUtils.isEmpty(appTopicSet)) {
+        if (MapUtils.isEmpty(consumerMap)) {
             return;
         }
-        for (Map.Entry<String, Set<String>> entry : appTopicSet.entrySet()) {
+        for (Map.Entry<String, Set<String>> entry : consumerMap.entrySet()) {
             doHandleRemoveConsumers(Lists.newArrayList(entry.getValue()), entry.getKey());
         }
     }
@@ -147,32 +158,15 @@ public class ConsumerConnectionState {
         }
     }
 
-    protected ConcurrentMap<String, Set<String>> getOrCreateAddedTopicSet() {
-        TransportAttribute attribute = consumerClient.getAttribute();
-        return attribute.get(ADDED_CONSUMER_KEY);
-    }
-
     protected Set<String> getOrCreateAddedTopicSet(String app) {
-        TransportAttribute attribute = consumerClient.getAttribute();
-        ConcurrentMap<String, Set<String>> appMap = attribute.get(ADDED_CONSUMER_KEY);
-
-        if (appMap == null) {
-            appMap = Maps.newConcurrentMap();
-            ConcurrentMap<String, Set<String>> oldAppMap = attribute.putIfAbsent(ADDED_CONSUMER_KEY, appMap);
-            if (oldAppMap != null) {
-                appMap = oldAppMap;
-            }
-        }
-
-        Set<String> topicSet = appMap.get(app);
+        Set<String> topicSet = consumerMap.get(app);
         if (topicSet == null) {
             topicSet = Sets.newConcurrentHashSet();
-            Set<String> oldTopicSet = appMap.putIfAbsent(app, topicSet);
+            Set<String> oldTopicSet = consumerMap.putIfAbsent(app, topicSet);
             if (oldTopicSet != null) {
                 topicSet = oldTopicSet;
             }
         }
-
         return topicSet;
     }
 }

@@ -22,7 +22,7 @@
     <parent>
         <artifactId>joyqueue-server</artifactId>
         <groupId>io.chubao</groupId>
-        <version>4.1.1-SNAPSHOT</version>
+        <version>4.1.2-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -35,6 +35,8 @@
         <module>joyqueue-nsr-admin</module>
         <module>joyqueue-nsr-core</module>
         <module>joyqueue-nsr-ignite</module>
+        <module>joyqueue-nsr-journalkeeper</module>
+        <module>joyqueue-nsr-composition</module>
     </modules>
     <dependencies>
 

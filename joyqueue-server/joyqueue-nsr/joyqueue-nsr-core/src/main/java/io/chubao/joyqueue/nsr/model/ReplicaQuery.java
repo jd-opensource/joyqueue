@@ -34,9 +34,7 @@ public class ReplicaQuery implements Query {
     }
 
     public ReplicaQuery(String topic, String namespace, int group) {
-        this.topic = topic;
-        this.namespace = namespace;
-        this.group = group;
+        this(topic, namespace, group, 0);
     }
 
 

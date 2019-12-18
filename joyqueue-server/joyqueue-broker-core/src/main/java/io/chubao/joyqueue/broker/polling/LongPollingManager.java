@@ -15,21 +15,22 @@
  */
 package io.chubao.joyqueue.broker.polling;
 
-import io.chubao.joyqueue.broker.consumer.Consume;
+import com.google.common.base.Preconditions;
+import com.jd.laf.extension.Converts;
 import io.chubao.joyqueue.broker.cluster.ClusterManager;
+import io.chubao.joyqueue.broker.consumer.Consume;
+import io.chubao.joyqueue.broker.consumer.model.PullResult;
 import io.chubao.joyqueue.broker.monitor.SessionManager;
 import io.chubao.joyqueue.domain.TopicName;
 import io.chubao.joyqueue.exception.JoyQueueCode;
 import io.chubao.joyqueue.network.session.Consumer;
 import io.chubao.joyqueue.network.session.Joint;
-import io.chubao.joyqueue.broker.consumer.model.PullResult;
 import io.chubao.joyqueue.toolkit.concurrent.NamedThreadFactory;
+import io.chubao.joyqueue.toolkit.config.Property;
 import io.chubao.joyqueue.toolkit.config.PropertySupplier;
-import com.google.common.base.Preconditions;
 import io.chubao.joyqueue.toolkit.service.Service;
 import io.chubao.joyqueue.toolkit.service.ServiceThread;
 import io.chubao.joyqueue.toolkit.time.SystemClock;
-import com.jd.laf.extension.Converts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -173,8 +174,11 @@ public class LongPollingManager extends Service {
 
     // 获取长轮训队列大小
     private int getLongPollingQueueSize() {
-        Object value = propertySupplier.getOrCreateProperty(LONG_POLLING_QUEUE_SIZE).getValue();
-        return value == null || Converts.getInteger(value) > MAX_LONG_POLLING_QUEUE_SIZE ? MAX_LONG_POLLING_QUEUE_SIZE : Converts.getInteger(value);
+        Property property = propertySupplier.getProperty(LONG_POLLING_QUEUE_SIZE);
+        if (property == null) {
+            return MAX_LONG_POLLING_QUEUE_SIZE;
+        }
+        return Converts.getInteger(property.getValue());
     }
 
     /**

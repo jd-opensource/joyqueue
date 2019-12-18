@@ -21,6 +21,7 @@ import io.chubao.joyqueue.model.PageResult;
 import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.model.query.QRetry;
 import io.chubao.joyqueue.server.retry.model.RetryMessageModel;
+import io.chubao.joyqueue.server.retry.model.RetryQueryCondition;
 
 /**
  * Created by wangxiaofei1 on 2018/12/5.
@@ -41,6 +42,8 @@ public interface RetryService {
     void recover(ConsumeRetry retry) throws Exception;
 
     void delete(ConsumeRetry retry) throws Exception;
+
+    void batchDelete(RetryQueryCondition retryQueryCondition, Long updateTime, int updateBy) throws Exception;
 
     /**
      * 重试服务是否可用

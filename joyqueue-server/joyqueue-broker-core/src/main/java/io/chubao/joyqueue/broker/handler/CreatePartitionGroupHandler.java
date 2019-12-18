@@ -30,6 +30,7 @@ import io.chubao.joyqueue.network.transport.command.Command;
 import io.chubao.joyqueue.network.transport.command.Type;
 import io.chubao.joyqueue.network.transport.command.handler.CommandHandler;
 import io.chubao.joyqueue.network.transport.exception.TransportException;
+import io.chubao.joyqueue.nsr.config.NameServiceConfig;
 import io.chubao.joyqueue.nsr.network.command.CreatePartitionGroup;
 import io.chubao.joyqueue.nsr.network.command.NsrCommandType;
 import io.chubao.joyqueue.store.StoreService;
@@ -44,15 +45,19 @@ import java.util.Set;
  * @author wylixiaobin
  * Date: 2018/10/8
  */
+@Deprecated
 public class CreatePartitionGroupHandler implements CommandHandler, Type {
     private static Logger logger = LoggerFactory.getLogger(CreatePartitionGroupHandler.class);
     private ClusterManager clusterManager;
     private ElectionService electionService;
     private StoreService storeService;
+    private NameServiceConfig config;
+
     public CreatePartitionGroupHandler(BrokerContext brokerContext) {
         this.clusterManager = brokerContext.getClusterManager();
         this.electionService = brokerContext.getElectionService();
         this.storeService = brokerContext.getStoreService();
+        this.config = new NameServiceConfig(brokerContext.getPropertySupplier());
     }
 
     @Override
@@ -62,6 +67,9 @@ public class CreatePartitionGroupHandler implements CommandHandler, Type {
 
     @Override
     public Command handle(Transport transport, Command command) throws TransportException {
+        if (!config.getMessengerIgniteEnable()) {
+            return BooleanAck.build();
+        }
         if (command == null) {
             logger.error("CreatePartitionGroupHandler request command is null");
             return null;

@@ -16,7 +16,44 @@
 package io.chubao.joyqueue.nsr.service;
 
 import io.chubao.joyqueue.domain.DataCenter;
-import io.chubao.joyqueue.nsr.model.DataCenterQuery;
 
-public interface DataCenterService extends DataService<DataCenter, DataCenterQuery, String> {
+import java.util.List;
+
+public interface DataCenterService {
+
+    /**
+     * 获取所有
+     *
+     * @return
+     */
+    List<DataCenter> getAll();
+
+    /**
+     * 根据ID获取
+     *
+     * @param id
+     * @return
+     */
+    DataCenter getById(String id);
+
+    /**
+     * 添加
+     *
+     * @param dataCenter
+     */
+    DataCenter add(DataCenter dataCenter);
+
+    /**
+     * 根据id更新
+     *
+     * @param dataCenter
+     */
+    DataCenter update(DataCenter dataCenter);
+
+    /**
+     * 根据id删除
+     *
+     * @param id
+     */
+    void delete(String id);
 }

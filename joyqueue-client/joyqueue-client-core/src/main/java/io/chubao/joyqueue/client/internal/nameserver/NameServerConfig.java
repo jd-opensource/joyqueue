@@ -31,12 +31,6 @@ public class NameServerConfig {
     private String region = StringUtils.EMPTY;
     // 作用域
     private String namespace = StringUtils.EMPTY;
-    // 用户名
-    @Deprecated
-    private String username;
-    // 密码
-    @Deprecated
-    private String password;
     // 应用
     private String app;
     // 令牌
@@ -72,22 +66,6 @@ public class NameServerConfig {
 
     public void setNamespace(String namespace) {
         this.namespace = namespace;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public String getApp() {
@@ -144,8 +122,6 @@ public class NameServerConfig {
                 "address='" + address + '\'' +
                 ", region='" + region + '\'' +
                 ", namespace='" + namespace + '\'' +
-                ", username='" + username + '\'' +
-                ", password='" + password + '\'' +
                 ", app='" + app + '\'' +
                 ", token='" + token + '\'' +
                 ", updateMetadataInterval=" + updateMetadataInterval +

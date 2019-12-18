@@ -23,7 +23,7 @@ public class BrokerQuery implements Query {
     /**
      * brokerId
      */
-    private int brokerId;
+    private long brokerId;
     /**
      * IP
      */
@@ -40,7 +40,7 @@ public class BrokerQuery implements Query {
 
     private String keyword;
 
-    private List<Long> brokerList;
+    private List<Integer> brokerList;
 
     public String getIp() {
         return ip;
@@ -50,11 +50,11 @@ public class BrokerQuery implements Query {
         this.ip = ip;
     }
 
-    public int getBrokerId() {
+    public long getBrokerId() {
         return brokerId;
     }
 
-    public void setBrokerId(int brokerId) {
+    public void setBrokerId(long brokerId) {
         this.brokerId = brokerId;
     }
 
@@ -82,11 +82,11 @@ public class BrokerQuery implements Query {
         this.keyword = keyword;
     }
 
-    public List<Long> getBrokerList() {
+    public List<Integer> getBrokerList() {
         return brokerList;
     }
 
-    public void setBrokerList(List<Long> brokerList) {
+    public void setBrokerList(List<Integer> brokerList) {
         this.brokerList = brokerList;
     }
 }

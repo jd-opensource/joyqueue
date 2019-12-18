@@ -16,11 +16,12 @@
 package io.chubao.joyqueue.nsr.service.test;
 
 import io.chubao.joyqueue.domain.*;
-import io.chubao.joyqueue.nsr.NameServer;
+import io.chubao.joyqueue.nsr.nameservice.NameServer;
 import io.chubao.joyqueue.nsr.NameService;
-import io.chubao.joyqueue.nsr.ThinNameService;
+import io.chubao.joyqueue.nsr.nameservice.ThinNameService;
 import io.chubao.joyqueue.nsr.config.NameServiceConfig;
 import io.chubao.joyqueue.toolkit.config.PropertySupplier;
+import io.chubao.joyqueue.toolkit.config.PropertySupplierAware;
 import io.chubao.joyqueue.toolkit.io.Files;
 import io.chubao.joyqueue.toolkit.lang.Close;
 import io.chubao.joyqueue.toolkit.network.IpUtil;
@@ -44,7 +45,7 @@ public class NameServiceTest {
         System.out.println("before....................");
         Map properties = new HashMap();
 
-        int nameServerPort = 50002;
+        int nameServerPort = 50092;
         Files.deleteDirectory(dataRoot);
         Files.createDirectory(dataRoot);
         properties.put("application.data.path", dataRoot);
@@ -65,6 +66,9 @@ public class NameServiceTest {
         nameServer.start();
 
         nameService = new ThinNameService(nameServiceConfig);
+        if (nameService instanceof PropertySupplierAware) {
+            ((PropertySupplierAware) nameService).setSupplier(new PropertySupplier.MapSupplier(properties));
+        }
         nameService.start();
 
     }
@@ -158,8 +162,8 @@ public class NameServiceTest {
 
     @Test
     public void getAllTopics() {
-        Set<String> topicConfigs = nameService.getAllTopics();
-        topicConfigs = nameService.getAllTopics();
+        Set<String> topicConfigs = nameService.getAllTopicCodes();
+        topicConfigs = nameService.getAllTopicCodes();
         System.out.println(Arrays.toString(topicConfigs.toArray()));
     }
 

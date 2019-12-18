@@ -62,6 +62,11 @@ public class ConsumeStub implements Consume {
         return null;
     }
 
+    @Override
+    public PullResult getMessage(String topic, short partition, long index, int count) {
+        return null;
+    }
+
     /**
      * 应答消息，不包含重试消息
      *

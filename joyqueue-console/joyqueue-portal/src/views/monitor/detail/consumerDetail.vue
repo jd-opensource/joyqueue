@@ -310,7 +310,7 @@ export default {
           },
           subscribeGroup: '',
           type: this.$store.getters.consumerType,
-          clientType: -1
+          clientType: this.$store.getters.clientType
         }
       }
     }
@@ -345,7 +345,7 @@ export default {
         this.$refs[name].search.topic.code = this.$route.query.topic || ''
         this.$refs[name].search.namespace.code = this.$route.query.namespace || ''
         this.$refs[name].search.subscribeGroup = this.$route.query.subscribeGroup || ''
-        this.$refs[name].search.clientType = this.$route.query.clientType || -1
+        this.$refs[name].search.clientType = this.$route.query.clientType != -1 ? this.$route.query.clientType : -1
 
         let routeName = ''
         if (this.detailType === this.$store.getters.appDetailType) {
@@ -361,7 +361,7 @@ export default {
             app: this.$route.query.app || '',
             topic: this.$route.query.topic || '',
             namespace: this.$route.query.namespace || '',
-            clientType: this.$route.query.clientType || -1,
+            clientType: this.$route.query.clientType != -1 ? this.$route.query.clientType : -1,
             subscribeGroup: this.$route.query.subscribeGroup || '',
             subTab: name,
             tab: this.$route.query.tab,
