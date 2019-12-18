@@ -164,8 +164,8 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
 
         Set<Integer> partitions = Arrays.stream(topicPartitionGroup.getPartitions().substring(1,topicPartitionGroup.getPartitions().length()-1).split(",")).
                 map(m->Integer.valueOf(m.trim())).collect(Collectors.toSet());
-        if(model.getPartitionCount().startsWith(PARTITIONS_PREFIX)&&model.getPartitionCount().endsWith(PARTITIONS_SUFFIX)) {
-            String partitionList= model.getPartitionCount();
+        if(model.getNewPartitionsOrCount().startsWith(PARTITIONS_PREFIX)&&model.getNewPartitionsOrCount().endsWith(PARTITIONS_SUFFIX)) {
+            String partitionList= model.getNewPartitionsOrCount();
             String[] increPartitions=partitionList.substring(1,partitionList.length()-1).split(PARTITIONS_SPLIT);
             List<TopicPartitionGroup> partitionGroups=findByTopic(model.getNamespace(),model.getTopic());
             // 所有的partition
@@ -177,8 +177,8 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
             }
         }else {
             int currentPartitions = topic.getPartitions();
-            topic.setPartitions(topic.getPartitions()+Integer.valueOf(model.getPartitionCount()));
-            if (Integer.valueOf(model.getPartitionCount()) <= 0) {
+            topic.setPartitions(topic.getPartitions()+Integer.valueOf(model.getNewPartitionsOrCount()));
+            if (Integer.valueOf(model.getNewPartitionsOrCount()) <= 0) {
                 throw new ServiceException(INTERNAL_SERVER_ERROR, "数据异常");
             }
             for (int i = currentPartitions; i < topic.getPartitions(); i++) {
@@ -228,11 +228,11 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
         TopicPartitionGroup topicPartitionGroup = findByTopicAndGroup(model.getNamespace().getCode(),model.getTopic().getCode(),model.getGroupNo());
 
         int currentPartitions = topic.getPartitions();
-        topic.setPartitions(topic.getPartitions()-Integer.valueOf(model.getPartitionCount()));
+        topic.setPartitions(topic.getPartitions()-Integer.valueOf(model.getNewPartitionsOrCount()));
         Set<Integer> partitions = Arrays.stream(topicPartitionGroup.getPartitions().substring(1,topicPartitionGroup.getPartitions().length()-1).split(",")).
                 map(m->Integer.valueOf(m.trim())).collect(Collectors.toSet());
         //如果缩减数小于，已有partition数，则更改失败
-        if (Integer.valueOf(model.getPartitionCount())>= partitions.size()) {
+        if (Integer.valueOf(model.getNewPartitionsOrCount())>= partitions.size()) {
             throw new ServiceException(INTERNAL_SERVER_ERROR, "数据异常");
         }
         for(int i=currentPartitions-1;i>topic.getPartitions()-1;i--){

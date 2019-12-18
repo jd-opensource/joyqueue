@@ -35,13 +35,13 @@
     </my-dialog>
     <!--增加分区数-->
     <my-dialog :dialog="addPartitionDialog" @on-dialog-confirm="addPartitionConfirm()" @on-dialog-cancel="addPartitionCancel()"  >
-      <d-input v-model="addPartitionDialogData.partitionCount" placeholder="请输入增加分区(数或分区列表[1,2])" style="width: 400px">
+      <d-input v-model="addPartitionDialogData.newPartitionsOrCount" placeholder="请输入增加分区(数或分区列表[1,2])" style="width: 400px">
         <span slot="prepend">增加分区</span>
       </d-input>
     </my-dialog>
     <!--减少分区数-->
     <my-dialog :dialog="removePartitionDialog" @on-dialog-confirm="removePartitionConfirm()" @on-dialog-cancel="removePartitionCancel()"  >
-      <d-input v-model="removePartitionDialogData.partitionCount" placeholder="请输入减少分区数" style="width: 400px">
+      <d-input v-model="removePartitionDialogData.newPartitionsOrCount" placeholder="请输入减少分区数" style="width: 400px">
         <span slot="prepend">减少分区数</span>
       </d-input>
     </my-dialog>

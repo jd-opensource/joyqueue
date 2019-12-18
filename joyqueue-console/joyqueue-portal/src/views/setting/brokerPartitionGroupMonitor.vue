@@ -143,15 +143,16 @@ export default {
           return
         }
         let realData=data.data||{}
-        realData.data =realData.result  || []
-        realData.pagination = realData.pagination || {
-          totalRecord: realData.data.length
+        let pageResult =realData.pageResult
+        pageResult.data =pageResult.result  || []
+        pageResult.pagination = pageResult.pagination || {
+          totalRecord: pageResult.data.length
         }
         this.broker=realData.extras;
-        this.page.total = realData.pagination.totalRecord
-        this.page.page = realData.pagination.page
-        this.page.size = realData.pagination.size
-        this.tableData.rowData = realData.data
+        this.page.total = pageResult.pagination.totalRecord
+        this.page.page = pageResult.pagination.page
+        this.page.size = pageResult.pagination.size
+        this.tableData.rowData = pageResult.data
         this.showTablePin = false
       })
     }

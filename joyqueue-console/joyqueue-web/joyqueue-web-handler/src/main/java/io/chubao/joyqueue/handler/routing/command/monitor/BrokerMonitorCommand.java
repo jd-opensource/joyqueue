@@ -28,6 +28,7 @@ import io.chubao.joyqueue.handler.annotation.PageQuery;
 import io.chubao.joyqueue.handler.error.ErrorCode;
 import io.chubao.joyqueue.model.BrokerMetadata;
 import io.chubao.joyqueue.model.PageResult;
+import io.chubao.joyqueue.model.PageWithExtra;
 import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.model.domain.BrokerClient;
 import io.chubao.joyqueue.model.domain.BrokerMonitorRecord;
@@ -189,7 +190,7 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
     @Path("partitionGroupMonitor")
     public Response partitionGroupMonitor(@PageQuery QPageQuery<QMonitor> qPageQuery){
         try {
-            PageResult<BrokerTopicMonitor> pageResult = brokerTopicMonitorService.queryTopicsPartitionMointor(qPageQuery);
+            PageWithExtra<BrokerTopicMonitor> pageResult = brokerTopicMonitorService.queryTopicsPartitionMonitor(qPageQuery);
             return new Response(pageResult);
         } catch (Exception e) {
         logger.error("query broker monitor info error.", e);

@@ -259,7 +259,6 @@ public class DefaultBrokerManageService implements BrokerManageService {
     public Directory storeTreeView(boolean recursive) {
         return storeManageService.storeTreeView(recursive);
     }
-    BrokerTopicMonitorServiceImpl
     @Override
     public boolean deleteGarbageFile(String fileName,boolean retain) {
         return storeManageService.deleteGarbageFile(fileName,retain);

@@ -20,6 +20,7 @@ import io.chubao.joyqueue.domain.BrokerPartitionGroupLeaderInfo;
 import io.chubao.joyqueue.manage.PartitionGroupMetric;
 import io.chubao.joyqueue.manage.SortedTopic;
 import io.chubao.joyqueue.model.PageResult;
+import io.chubao.joyqueue.model.PageWithExtra;
 import io.chubao.joyqueue.model.Pagination;
 import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.model.domain.Broker;
@@ -66,9 +67,10 @@ public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService 
 
 
     @Override
-    public PageResult<BrokerTopicMonitor> queryTopicsPartitionMointor(QPageQuery<QMonitor> qPageQuery)  {
+    public PageWithExtra<BrokerTopicMonitor> queryTopicsPartitionMonitor(QPageQuery<QMonitor> qPageQuery)  {
 
         PageResult<BrokerTopicMonitor> pageResult = new PageResult<>();
+        BrokerPartitionGroupLeaderInfo info=new BrokerPartitionGroupLeaderInfo();
         try {
             Pagination pagination = qPageQuery.getPagination();
             QMonitor qMonitor = qPageQuery.getQuery();
@@ -95,16 +97,19 @@ public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService 
                 totalPartitionGroupLeaders+=sortedTopic.getPartitionGroupLeaders();
                 totalPartitionGroups+=sortedTopic.getPartitionGroups();
             }
-            BrokerPartitionGroupLeaderInfo info=new BrokerPartitionGroupLeaderInfo();
+
             info.setLeaders(totalPartitionGroupLeaders);
             info.setPartitionGroups(totalPartitionGroups);
-            pageResult.setExtras(info);
             pageResult.setPagination(pagination);
             pageResult.setResult(brokerTopicMonitorList);
+
         } catch (Exception e) {
-            logger.error("queryTopicsPartitionMointor exception",e);
+            logger.error("queryTopicsPartitionMonitor exception",e);
         }
-        return pageResult;
+        PageWithExtra<BrokerTopicMonitor> result=new PageWithExtra();
+        result.setPageResult(pageResult);
+        result.setExtras(info);
+        return result;
     }
 
     /**

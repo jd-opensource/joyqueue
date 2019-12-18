@@ -29,7 +29,7 @@ public class TopicPartitionGroup implements Serializable {
     private int groupNo;
     private String partitions;
     private Integer electType;
-    private String partitionCount;
+    private String newPartitionsOrCount;
 
     private transient Integer leader;
     private transient Integer recLeader;
@@ -89,12 +89,12 @@ public class TopicPartitionGroup implements Serializable {
         this.electType = electType;
     }
 
-    public String getPartitionCount() {
-        return partitionCount;
+    public String getNewPartitionsOrCount() {
+        return newPartitionsOrCount;
     }
 
-    public void setPartitionCount(String partitionCount) {
-        this.partitionCount = partitionCount;
+    public void setNewPartitionsOrCount(String newPartitionsOrCount) {
+        this.newPartitionsOrCount = newPartitionsOrCount;
     }
 
     @Transient

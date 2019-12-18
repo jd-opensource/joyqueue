@@ -27,7 +27,6 @@ public class PageResult<M> {
     private Pagination pagination;
     //结果
     private List<M> result;
-    private Object extras;
 
     public PageResult() {
     }
@@ -55,14 +54,6 @@ public class PageResult<M> {
 
     public static <M> PageResult<M> empty() {
         return new PageResult<>(new Pagination(0), new ArrayList<>(0));
-    }
-
-    public Object getExtras() {
-        return extras;
-    }
-
-    public void setExtras(Object extras) {
-        this.extras = extras;
     }
 
     @Override
