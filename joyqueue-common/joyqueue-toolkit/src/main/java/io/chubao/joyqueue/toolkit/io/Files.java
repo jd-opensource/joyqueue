@@ -16,6 +16,7 @@
 package io.chubao.joyqueue.toolkit.io;
 
 import io.chubao.joyqueue.toolkit.lang.Close;
+import org.apache.commons.lang3.math.NumberUtils;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -31,6 +32,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 
 /**
  * 文件工具类
@@ -585,6 +589,59 @@ public abstract class Files {
             }
         }
         return result;
+    }
+
+    /**
+     *  tree directory
+     *
+     **/
+    public static void  tree(String path,boolean recursive,Directory directory){
+        File file=new File(path);
+        if(file.exists()) {
+            directory.setName(file.getName());
+            directory.setPath(path);
+            directory.setDirectory(file.isDirectory());
+            if(file.isDirectory()) {
+                File[] files = file.listFiles();
+                if (files.length > 0) {
+                    directory.setChildren(new ArrayList<>());
+                }
+                if (recursive) {
+                    sortByName(files);
+                    for (File f : files) {
+                        Directory child = new Directory();
+                        if (f.isDirectory()) {
+                            tree(f.getPath(), true, child);
+                        } else {
+                            child.setName(f.getName());
+                            child.setPath(f.getPath());
+                        }
+                        directory.getChildren().add(child);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 根据文件名是字符还是数字采用不同的排序
+     **/
+    public static void sortByName(File[] files){
+        boolean allNumbers=true;
+        for(File file:files){
+         if(!NumberUtils.isNumber(file.getName())){
+             allNumbers=false;
+             break;
+         }
+        }
+        if(allNumbers){
+            Arrays.sort(files,(a,b)->{
+               return (int)(Long.valueOf(a.getName())-Long.valueOf(b.getName()));
+            });
+        }else{
+            Arrays.sort(files, Comparator.comparing(File::getName));
+        }
+
     }
 
 }

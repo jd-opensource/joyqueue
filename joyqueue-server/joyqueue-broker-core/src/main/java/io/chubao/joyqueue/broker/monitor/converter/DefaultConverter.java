@@ -42,6 +42,7 @@ import java.util.concurrent.ConcurrentMap;
 public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRecord>> {
     private static final Logger logger = LoggerFactory.getLogger(DefaultConverter.class);
 
+    private static final String BROKER_SLICE_STORAGE = "broker_slice_storage";
     private static final String BROKER_SLICE_ENQUEUE = "broker_slice_enqueue";
     private static final String BROKER_SLICE_ENQUEUE_SIZE = "broker_slice_enqueue_size";
     private static final String BROKER_SLICE_ENQUEUE_TP99 = "broker_slice_enqueue_tp99";
@@ -462,10 +463,13 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
         MonitorRecord deQueueSize;
         MonitorRecord deQueueTp99;
         MonitorRecord deQueueTp90;
+        MonitorRecord storage;
 
         MonitorRecord connectionsRecord;
 
         try {
+            storage = (MonitorRecord) enQueue.clone();
+
             deQueueRecord = (MonitorRecord) enQueue.clone();
             deQueueSize = (MonitorRecord) enQueue.clone();
             enQueueSize = (MonitorRecord) enQueue.clone();
@@ -481,6 +485,9 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
             logger.error("clone monitor record error!", e);
             return records;
         }
+
+        storage.setMetric(BROKER_SLICE_STORAGE);
+        storage.setValue(brokerStat.getStoragePercent());
 
         enQueue.setMetric(BROKER_SLICE_ENQUEUE);
         enQueue.setValue(brokerStat.getEnQueueStat().getOneMinuteRate());
@@ -508,6 +515,8 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
         deQueueTp99.setValue(brokerStat.getDeQueueStat().getTp99());
         deQueueTp90.setValue(brokerStat.getDeQueueStat().getTp90());
 
+        // 存储占比
+        records.add(storage);
 
         records.add(deQueueRecord);
         records.add(deQueueSize);

@@ -190,6 +190,7 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
             topicPendingStat.setPending(topicPending);
         }
         runtimeMemoryUsageState(statExt);
+        runtimeStorageOccupy(brokerStat);
         return statExt;
     }
 
@@ -227,12 +228,22 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
 
 
     /**
-     * fill heap and non-heap memory usage state of current
-     *
-     **/
-    public void runtimeMemoryUsageState(BrokerStatExt brokerStatExt) {
-        MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
-        brokerStatExt.setHeap(memoryMXBean.getHeapMemoryUsage());
-        brokerStatExt.setNonHeap(memoryMXBean.getNonHeapMemoryUsage());
-    }
+    * fill heap and non-heap memory usage state of current
+    *
+    **/
+   public void runtimeMemoryUsageState(BrokerStatExt brokerStatExt){
+       MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
+       brokerStatExt.setHeap(memoryMXBean.getHeapMemoryUsage());
+       brokerStatExt.setNonHeap(memoryMXBean.getNonHeapMemoryUsage());
+   }
+
+   /**
+    *  store storage size
+    **/
+   public void runtimeStorageOccupy(BrokerStat stat){
+       double totalSpace=storeManagementService.totalSpace();
+       double freeSpace=storeManagementService.freeSpace();
+       int percentage=(int)((1-freeSpace/totalSpace)*100);
+       stat.setStoragePercent(percentage);
+   }
 }
