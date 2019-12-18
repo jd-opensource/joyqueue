@@ -35,6 +35,8 @@ public class BrokerStat implements Serializable {
     public static final int VERSION = BrokerMonitorConsts.STAT_VERSION;
 
     private Integer brokerId;
+    // 存储占比
+    private Integer storagePercent;
     private ConnectionStat connectionStat = new ConnectionStat();
     private EnQueueStat enQueueStat = new EnQueueStat();
     private DeQueueStat deQueueStat = new DeQueueStat();
@@ -52,6 +54,14 @@ public class BrokerStat implements Serializable {
             topicStat = topicStatMap.get(topic);
         }
         return topicStat;
+    }
+
+    public Integer getStoragePercent() {
+        return storagePercent;
+    }
+
+    public void setStoragePercent(Integer storagePercent) {
+        this.storagePercent = storagePercent;
     }
 
     public ConnectionStat getConnectionStat() {

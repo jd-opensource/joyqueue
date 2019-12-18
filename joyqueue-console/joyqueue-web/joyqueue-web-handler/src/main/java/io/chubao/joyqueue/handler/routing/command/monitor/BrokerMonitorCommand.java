@@ -41,11 +41,8 @@ import io.chubao.joyqueue.monitor.BrokerMessageInfo;
 import io.chubao.joyqueue.monitor.BrokerMonitorInfo;
 import io.chubao.joyqueue.monitor.BrokerStartupInfo;
 import io.chubao.joyqueue.monitor.Client;
-import io.chubao.joyqueue.service.BrokerMessageService;
-import io.chubao.joyqueue.service.BrokerMonitorService;
-import io.chubao.joyqueue.service.BrokerService;
-import io.chubao.joyqueue.service.BrokerTopicMonitorService;
-import io.chubao.joyqueue.service.CoordinatorMonitorService;
+import io.chubao.joyqueue.service.*;
+import io.chubao.joyqueue.toolkit.io.Directory;
 import io.chubao.joyqueue.util.NullUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -62,6 +59,8 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
     @Value
     private BrokerMessageService  brokerMessageService;
 
+    @Value
+    private BrokerManageService brokerManageService;
     @Value
     CoordinatorMonitorService coordinatorMonitorService;
 
@@ -379,6 +378,41 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
         }
     }
 
+
+    /**
+     * broker启动信息
+     * @param brokerId
+     * @return
+     */
+    @Path("storeTreeView")
+    public Response storeTreeView(@QueryParam("brokerId") Integer brokerId,@QueryParam("recursive") boolean recursive) throws Exception {
+        try {
+            Directory directory = brokerManageService.storeTreeView(brokerId,recursive);
+            return Responses.success(directory);
+        } catch (Exception e) {
+            logger.error("query broker store tree view error.", e);
+            return Responses.error(ErrorCode.NoTipError.getCode(), ErrorCode.NoTipError.getStatus(), e.getMessage());
+        }
+    }
+
+    /**
+     * broker启动信息
+     * @param brokerId
+     * @return
+     */
+    @Path("garbageFile")
+    public Response  deleteGarbageFile(@QueryParam("brokerId") Integer brokerId,
+                                       @QueryParam("fileName") String fileName,
+                                       @QueryParam("retain") boolean retain) throws Exception {
+        try {
+            boolean result = brokerManageService.deleteGarbageFile(brokerId,fileName,retain);
+            return Responses.success(result);
+        } catch (Exception e) {
+            logger.error("query broker store tree view error.", e);
+            return Responses.error(ErrorCode.NoTipError.getCode(), ErrorCode.NoTipError.getStatus(), e.getMessage());
+        }
+    }
+
     /**
      * broker启动信息
      * @param brokerId
@@ -402,6 +436,8 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
             return Responses.error(ErrorCode.NoTipError.getCode(), ErrorCode.NoTipError.getStatus(), e.getMessage());
         }
     }
+
+
 
     @Override
     public void clean() {
