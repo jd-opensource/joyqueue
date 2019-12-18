@@ -37,6 +37,10 @@
             <name>Rudy Steiner</name>
             <email>rudy_steiner@163.com</email>
         </developer>
+        <developer>
+            <name>Li Yue</name>
+            <email>liyue2008@gmail.com</email>
+        </developer>
     </developers>
     <licenses>
         <license>
@@ -46,9 +50,9 @@
         </license>
     </licenses>
     <scm>
-        <connection>scm:git:git@github.com:joyqueue/joyqueue.git</connection>
-        <developerConnection>scm:git@github.com:joyqueue/joyqueue.git</developerConnection>
-        <url>https://github.com/joyqueue/joyqueue.git</url>
+        <connection>scm:git:git@github.com:chubaostream/joyqueue.git</connection>
+        <developerConnection>scm:git@github.com:chubaostream/joyqueue.git</developerConnection>
+        <url>https://github.com/chubaostream/joyqueue.git</url>
     </scm>
 
     <distributionManagement>
@@ -63,6 +67,7 @@
     </distributionManagement>
 
     <properties>
+        <journalkeeper.version>0.1.4</journalkeeper.version>
         <fastjson.version>1.2.58</fastjson.version>
         <netty.version>4.1.27.Final</netty.version>
         <log4j.version>2.9.0</log4j.version>

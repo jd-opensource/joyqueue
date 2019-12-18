@@ -16,7 +16,6 @@
 package io.chubao.joyqueue.toolkit.concurrent;
 
 import io.chubao.joyqueue.toolkit.lang.LifeCycle;
-import io.chubao.joyqueue.toolkit.time.SystemClock;
 
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
