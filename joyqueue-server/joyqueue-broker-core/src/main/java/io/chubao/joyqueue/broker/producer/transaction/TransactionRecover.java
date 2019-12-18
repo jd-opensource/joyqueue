@@ -72,7 +72,7 @@ public class TransactionRecover {
 
             Iterator<ByteBuffer> readIterator = transactionStore.readIterator(storeId);
 
-            if (!readIterator.hasNext()) {
+            if (readIterator == null || !readIterator.hasNext()) {
                 isExpired = true;
             } else {
                 ByteBuffer byteBuffer = readIterator.next();

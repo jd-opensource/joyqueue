@@ -55,6 +55,18 @@ public interface Consume {
     PullResult getMessage(Consumer consumer, short partition, long index, int count) throws JoyQueueException;
 
     /**
+     * 指定分区、消息序号、获取消息条数获取消息
+     *
+     * @param topic     主题
+     * @param partition 分区
+     * @param index     索引位置
+     * @param count     获取消息条数
+     * @return
+     * @throws JoyQueueException
+     */
+    PullResult getMessage(String topic, short partition, long index, int count) throws JoyQueueException;
+
+    /**
      * 应答消息，不包含重试消息
      *
      * @param locations    应答消息

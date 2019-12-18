@@ -16,6 +16,7 @@
 package io.chubao.joyqueue.client.internal.consumer.config;
 
 import io.chubao.joyqueue.client.internal.consumer.support.RoundRobinBrokerLoadBalance;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * ConsumerConfig
@@ -50,6 +51,8 @@ public class ConsumerConfig {
     private int broadcastPersistInterval = 1000 * 10;
     private int broadcastIndexExpireTime = NONE_BROADCAST_INDEX_EXPIRE_TIME;
 
+    private volatile String appFullName;
+
     public ConsumerConfig copy() {
         ConsumerConfig consumerConfig = new ConsumerConfig();
         consumerConfig.setApp(app);
@@ -71,6 +74,18 @@ public class ConsumerConfig {
         consumerConfig.setBroadcastPersistInterval(broadcastPersistInterval);
         consumerConfig.setBroadcastIndexExpireTime(broadcastIndexExpireTime);
         return consumerConfig;
+    }
+
+    // TODO group处理
+    public String getAppFullName() {
+        if (appFullName == null) {
+            if (StringUtils.isBlank(group)) {
+                appFullName = app;
+            } else {
+                appFullName = app + "." + group;
+            }
+        }
+        return appFullName;
     }
 
     public String getApp() {

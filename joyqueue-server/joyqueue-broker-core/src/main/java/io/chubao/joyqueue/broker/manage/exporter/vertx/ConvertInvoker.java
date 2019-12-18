@@ -57,7 +57,7 @@ public class ConvertInvoker extends HandlerInvoker {
             return result;
         }
 
-        Converter converter =converters.get(target);
+        Converter converter = converters.get(target);
         if (converter == null) {
             return result;
         }

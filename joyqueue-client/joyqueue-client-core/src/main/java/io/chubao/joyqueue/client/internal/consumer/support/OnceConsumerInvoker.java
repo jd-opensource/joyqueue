@@ -27,15 +27,11 @@ import io.chubao.joyqueue.client.internal.consumer.interceptor.ConsumerInvoker;
 import io.chubao.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import io.chubao.joyqueue.domain.ConsumerPolicy;
 import io.chubao.joyqueue.network.command.RetryType;
+import io.chubao.joyqueue.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
  * OnceConsumerInvoker
@@ -52,53 +48,45 @@ public class OnceConsumerInvoker implements ConsumerInvoker {
     private ConsumerPolicy consumerPolicy;
     private List<ConsumeMessage> messages;
     private List<MessageListener> listeners;
-    private ExecutorService listenerExecutor;
 
     public OnceConsumerInvoker(ConsumerConfig config, TopicMetadata topicMetadata, ConsumerPolicy consumerPolicy,
-                               List<ConsumeMessage> messages, List<MessageListener> listeners, ExecutorService listenerExecutor) {
+                               List<ConsumeMessage> messages, List<MessageListener> listeners) {
         this.config = config;
         this.topicMetadata = topicMetadata;
         this.consumerPolicy = consumerPolicy;
         this.messages = messages;
         this.listeners = listeners;
-        this.listenerExecutor = listenerExecutor;
     }
 
     @Override
-    public List<ConsumeReply> invoke(final ConsumeContext context) {
+    public List<ConsumeReply> invoke(ConsumeContext context) {
         List<ConsumeReply> result = Lists.newArrayListWithCapacity(messages.size());
 
-        for (final ConsumeMessage message : messages) {
-            Future<?> future = listenerExecutor.submit(new Runnable() {
-                @Override
-                public void run() {
-                    if (context.isFilteredMessage(message)) {
-                        return;
-                    }
-                    for (MessageListener listener : listeners) {
-                        listener.onMessage(message);
-                    }
-                }
-            });
+        for (ConsumeMessage message : messages) {
+            if (context.isFilteredMessage(message)) {
+                continue;
+            }
 
+            long ackTimeout = (config.getAckTimeout() != ConsumerConfig.NONE_ACK_TIMEOUT ? config.getAckTimeout() : consumerPolicy.getAckTimeout());
             RetryType retryType = RetryType.NONE;
             try {
-                future.get(consumerPolicy.getAckTimeout(), TimeUnit.MILLISECONDS);
-            } catch (TimeoutException e) {
-                logger.warn("execute messageListener timeout, topic: {}, message: {}, listeners: {}", topicMetadata.getTopic(), message, listeners);
-                retryType = RetryType.TIMEOUT;
-            } catch (ExecutionException e) {
-                Throwable cause = e.getCause();
-                if (cause instanceof IgnoreAckException) {
+                long startTime = SystemClock.now();
+                for (MessageListener listener : listeners) {
+                    listener.onMessage(message);
+                }
+                long endTime = SystemClock.now();
+                if (endTime - startTime > ackTimeout) {
+                    logger.warn("execute messageListener timeout, topic: {}, message: {}, listeners: {}", topicMetadata.getTopic(), message, listeners);
+                    retryType = RetryType.TIMEOUT;
+                }
+            } catch (Exception e) {
+                if (e instanceof IgnoreAckException) {
                     logger.debug("execute messageListener, ignore ack, topic: {}, message: {}, listeners: {}", topicMetadata.getTopic(), message, listeners);
                     retryType = RetryType.OTHER;
                 } else {
-                    logger.error("execute messageListener exception, topic: {}, message: {}, listeners: {}", topicMetadata.getTopic(), message, listeners, cause);
+                    logger.error("execute messageListener exception, topic: {}, message: {}, listeners: {}", topicMetadata.getTopic(), message, listeners, e);
                     retryType = RetryType.EXCEPTION;
                 }
-            } catch (Exception e) {
-                logger.error("execute messageListener exception, topic: {}, message: {}, listeners: {}", topicMetadata.getTopic(), message, listeners, e);
-                retryType = RetryType.EXCEPTION;
             }
             result.add(new ConsumeReply(message.getPartition(), message.getIndex(), retryType));
         }

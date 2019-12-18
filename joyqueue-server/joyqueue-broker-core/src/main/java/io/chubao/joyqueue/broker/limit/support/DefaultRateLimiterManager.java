@@ -22,10 +22,16 @@ import io.chubao.joyqueue.broker.limit.config.LimiterConfig;
 import io.chubao.joyqueue.domain.Consumer;
 import io.chubao.joyqueue.domain.Producer;
 import io.chubao.joyqueue.domain.TopicName;
-import io.chubao.joyqueue.event.ConsumerEvent;
 import io.chubao.joyqueue.event.MetaEvent;
-import io.chubao.joyqueue.event.ProducerEvent;
-import io.chubao.joyqueue.event.TopicEvent;
+import io.chubao.joyqueue.nsr.event.AddConsumerEvent;
+import io.chubao.joyqueue.nsr.event.AddProducerEvent;
+import io.chubao.joyqueue.nsr.event.AddTopicEvent;
+import io.chubao.joyqueue.nsr.event.RemoveConsumerEvent;
+import io.chubao.joyqueue.nsr.event.RemoveProducerEvent;
+import io.chubao.joyqueue.nsr.event.RemoveTopicEvent;
+import io.chubao.joyqueue.nsr.event.UpdateConsumerEvent;
+import io.chubao.joyqueue.nsr.event.UpdateProducerEvent;
+import io.chubao.joyqueue.nsr.event.UpdateTopicEvent;
 import io.chubao.joyqueue.toolkit.concurrent.EventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,23 +91,50 @@ public class DefaultRateLimiterManager extends AbstractRateLimiterManager implem
     @Override
     public void onEvent(MetaEvent event) {
         switch (event.getEventType()) {
-            case ADD_CONSUMER:
-            case UPDATE_CONSUMER:
+            case ADD_CONSUMER: {
+                AddConsumerEvent addConsumerEvent = (AddConsumerEvent) event;
+                removeAppRateLimiter(addConsumerEvent.getTopic().getFullName(), addConsumerEvent.getConsumer().getApp());
+                break;
+            }
+            case UPDATE_CONSUMER: {
+                UpdateConsumerEvent updateConsumerEvent = (UpdateConsumerEvent) event;
+                removeAppRateLimiter(updateConsumerEvent.getTopic().getFullName(), updateConsumerEvent.getNewConsumer().getApp());
+                break;
+            }
             case REMOVE_CONSUMER: {
-                ConsumerEvent consumerEvent = (ConsumerEvent) event;
-                removeAppRateLimiter(consumerEvent.getTopic().getFullName(), consumerEvent.getApp());
+                RemoveConsumerEvent removeConsumerEvent = (RemoveConsumerEvent) event;
+                removeAppRateLimiter(removeConsumerEvent.getTopic().getFullName(), removeConsumerEvent.getConsumer().getApp());
+                break;
             }
-            case ADD_PRODUCER:
-            case UPDATE_PRODUCER:
+            case ADD_PRODUCER: {
+                AddProducerEvent addProducerEvent = (AddProducerEvent) event;
+                removeAppRateLimiter(addProducerEvent.getTopic().getFullName(), addProducerEvent.getProducer().getApp());
+                break;
+            }
+            case UPDATE_PRODUCER: {
+                UpdateProducerEvent updateProducerEvent = (UpdateProducerEvent) event;
+                removeAppRateLimiter(updateProducerEvent.getTopic().getFullName(), updateProducerEvent.getNewProducer().getApp());
+                break;
+            }
             case REMOVE_PRODUCER: {
-                ProducerEvent producerEvent = (ProducerEvent) event;
-                removeAppRateLimiter(producerEvent.getTopic().getFullName(), producerEvent.getApp());
+                RemoveProducerEvent removeProducerEvent = (RemoveProducerEvent) event;
+                removeAppRateLimiter(removeProducerEvent.getTopic().getFullName(), removeProducerEvent.getProducer().getApp());
+                break;
             }
-            case ADD_TOPIC:
-            case UPDATE_TOPIC:
+            case ADD_TOPIC: {
+                AddTopicEvent addTopicEvent = (AddTopicEvent) event;
+                removeTopicRateLimiter(addTopicEvent.getTopic().getName().getFullName());
+                break;
+            }
+            case UPDATE_TOPIC: {
+                UpdateTopicEvent updateTopicEvent = (UpdateTopicEvent) event;
+                removeTopicRateLimiter(updateTopicEvent.getNewTopic().getName().getFullName());
+                break;
+            }
             case REMOVE_TOPIC: {
-                TopicEvent topicEvent = (TopicEvent) event;
-                removeTopicRateLimiter(topicEvent.getTopic().getFullName());
+                RemoveTopicEvent topicEvent = (RemoveTopicEvent) event;
+                removeTopicRateLimiter(topicEvent.getTopic().getName().getFullName());
+                break;
             }
         }
     }

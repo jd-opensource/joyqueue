@@ -18,6 +18,7 @@ package io.openmessaging.joyqueue.consumer.support;
 import io.chubao.joyqueue.client.internal.consumer.MessageConsumer;
 import io.chubao.joyqueue.client.internal.consumer.domain.ConsumeMessage;
 import io.chubao.joyqueue.client.internal.consumer.domain.ConsumeReply;
+import io.chubao.joyqueue.client.internal.consumer.domain.FetchIndexData;
 import io.chubao.joyqueue.network.command.RetryType;
 import com.google.common.base.Preconditions;
 import io.openmessaging.consumer.BatchMessageListener;
@@ -28,6 +29,7 @@ import io.openmessaging.extension.Extension;
 import io.openmessaging.extension.QueueMetaData;
 import io.openmessaging.interceptor.ConsumerInterceptor;
 import io.openmessaging.joyqueue.config.ExceptionConverter;
+import io.openmessaging.joyqueue.consumer.ConsumerIndex;
 import io.openmessaging.joyqueue.consumer.ExtensionConsumer;
 import io.openmessaging.joyqueue.consumer.extension.ExtensionAdapter;
 import io.openmessaging.joyqueue.consumer.message.MessageConverter;
@@ -300,6 +302,12 @@ public class ConsumerImpl extends AbstractServiceLifecycle implements ExtensionC
     @Override
     public QueueMetaData getQueueMetaData(String queueName) {
         return getExtension().get().getQueueMetaData(queueName);
+    }
+
+    @Override
+    public ConsumerIndex getIndex(short partition) {
+        FetchIndexData fetchIndexData = messageConsumer.fetchIndex(partition);
+        return new ConsumerIndex(fetchIndexData.getIndex(), fetchIndexData.getLeftIndex(), fetchIndexData.getRightIndex());
     }
 
     protected OMSRuntimeException handleConsumeException(Throwable cause) {

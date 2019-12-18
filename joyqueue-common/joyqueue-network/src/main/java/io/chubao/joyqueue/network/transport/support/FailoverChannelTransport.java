@@ -229,25 +229,35 @@ public class FailoverChannelTransport implements ChannelTransport {
     }
 
     protected boolean reconnect() {
+        ChannelTransport newTransport = null;
+        ChannelTransport oldDelegate = this.delegate;
+
         try {
-            ChannelTransport newTransport = (ChannelTransport) transportClient.createTransport(address, connectionTimeout);
-            ChannelTransport delegate = this.delegate;
-            this.delegate = newTransport;
             try {
-                delegate.stop();
+                oldDelegate.stop();
             } catch (Throwable t) {
-                logger.warn("stop transport exception, transport: {}", newTransport, t);
+                logger.warn("stop transport exception, transport: {}", oldDelegate, t);
             }
 
+            newTransport = (ChannelTransport) transportClient.createTransport(address, connectionTimeout);
             if (logger.isInfoEnabled()) {
                 logger.info("reconnect transport success, transport: {}", newTransport);
             }
 
-            transportEventBus.add(new TransportEvent(TransportEventType.RECONNECT, newTransport));
+            this.delegate = newTransport;
+            transportEventBus.inform(new TransportEvent(TransportEventType.RECONNECT, this));
             return true;
         } catch (Throwable t) {
             if (logger.isDebugEnabled()) {
                 logger.debug("reconnect transport exception, address: {}", address, t);
+            }
+            if (newTransport != null) {
+                try {
+                    newTransport.stop();
+                } catch (Exception e) {
+                    logger.warn("stop newTransport exception, transport: {}", newTransport, t);
+                }
+                this.delegate = oldDelegate;
             }
             return false;
         } finally {

@@ -18,7 +18,6 @@ package io.chubao.joyqueue.nsr.service;
 
 import io.chubao.joyqueue.domain.PartitionGroup;
 import io.chubao.joyqueue.domain.TopicName;
-import io.chubao.joyqueue.nsr.model.PartitionGroupQuery;
 
 import java.util.List;
 
@@ -26,7 +25,16 @@ import java.util.List;
  * @author lixiaobin6
  * 下午3:11 2018/8/13
  */
-public interface PartitionGroupService extends DataService<PartitionGroup, PartitionGroupQuery, String> {
+public interface PartitionGroupService {
+
+    /**
+     * 根据ID获取
+     *
+     * @param id
+     * @return
+     */
+    PartitionGroup getById(String id);
+
     /**
      * 根据Topic和PartitionGroup查找
      * * @param namespace
@@ -35,7 +43,7 @@ public interface PartitionGroupService extends DataService<PartitionGroup, Parti
      * @param group
      * @return
      */
-    PartitionGroup findByTopicAndGroup(TopicName topic, int group);
+    PartitionGroup getByTopicAndGroup(TopicName topic, int group);
 
     /**
      * 根据Topic查找
@@ -44,4 +52,31 @@ public interface PartitionGroupService extends DataService<PartitionGroup, Parti
      * @return
      */
     List<PartitionGroup> getByTopic(TopicName topic);
+
+    /**
+     * 查询全部
+     * @return
+     */
+    List<PartitionGroup> getAll();
+
+    /**
+     * 添加
+     *
+     * @param partitionGroup
+     */
+    PartitionGroup add(PartitionGroup partitionGroup);
+
+    /**
+     * 根据ID更新
+     *
+     * @param partitionGroup
+     */
+    PartitionGroup update(PartitionGroup partitionGroup);
+
+    /**
+     * 根据id删除
+     *
+     * @param id
+     */
+    void delete(String id);
 }

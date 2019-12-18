@@ -27,7 +27,8 @@ import io.chubao.joyqueue.toolkit.network.IpUtil;
 public enum BrokerManageConfigKey implements PropertyDef {
 
     EXPORT_HOST("manager.export.host", IpUtil.getLocalIp(), PropertyDef.Type.STRING),
-    EXPORT_PORT("manager.export.port", 50090, PropertyDef.Type.INT);
+
+    ;
 
     private String name;
     private Object value;

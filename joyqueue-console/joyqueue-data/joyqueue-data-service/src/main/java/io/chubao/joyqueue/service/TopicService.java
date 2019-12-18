@@ -15,6 +15,7 @@
  */
 package io.chubao.joyqueue.service;
 
+import io.chubao.joyqueue.domain.TopicName;
 import io.chubao.joyqueue.model.PageResult;
 import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.model.domain.AppUnsubscribedTopic;
@@ -31,7 +32,7 @@ import java.util.List;
  * 主题服务
  * Created by chenyanying3 on 2018-10-18.
  */
-public interface TopicService extends NsrService<Topic, QTopic,String> {
+public interface TopicService extends NsrService<Topic ,String> {
 
     /**
      * 保存：带分组和Broker信息
@@ -63,5 +64,15 @@ public interface TopicService extends NsrService<Topic, QTopic,String> {
      * @return
      */
     Topic findByCode(String namespaceCode, String code);
+
+    PageResult<Topic> search(QPageQuery<QTopic> query);
+
+    /**
+     * 查询broker 上所有的 topic full name
+     * @param brokerId
+     * @return topic full name list
+     **/
+
+    List<TopicName> findTopic(String brokerId) throws Exception;
 
 }

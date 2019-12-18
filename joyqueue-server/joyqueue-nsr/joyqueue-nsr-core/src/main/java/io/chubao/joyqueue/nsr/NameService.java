@@ -15,6 +15,7 @@
  */
 package io.chubao.joyqueue.nsr;
 
+import io.chubao.joyqueue.domain.AllMetadata;
 import io.chubao.joyqueue.domain.AppToken;
 import io.chubao.joyqueue.domain.Broker;
 import io.chubao.joyqueue.domain.ClientType;
@@ -98,6 +99,7 @@ public interface NameService extends LifeCycle {
      *
      * @return
      */
+    @Deprecated
     List<Broker> getAllBrokers();
 
     /**
@@ -114,11 +116,11 @@ public interface NameService extends LifeCycle {
     TopicConfig getTopicConfig(TopicName topic);
 
     /**
-     * 获取所有主题
+     * 获取所有主题名
      *
      * @return
      */
-    Set<String> getAllTopics();
+    Set<String> getAllTopicCodes();
 
     /**
      * 获取app订阅的topic
@@ -194,6 +196,7 @@ public interface NameService extends LifeCycle {
      *
      * @return
      */
+    @Deprecated
     List<Config> getAllConfigs();
 
     /**
@@ -232,6 +235,12 @@ public interface NameService extends LifeCycle {
      * @return
      */
     AppToken getAppToken(String app, String token);
+
+    /**
+     * 返回所有元数据
+     * @return
+     */
+    AllMetadata getAllMetadata();
 
     /**
      * add listener

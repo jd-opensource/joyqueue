@@ -268,11 +268,17 @@ public class EventBus<E> implements LifeCycle {
         if (event == null) {
             return;
         }
+        Throwable throwable = null;
         for (EventListener<E> listener : listeners) {
             try {
                 listener.onEvent(event);
-            } catch (Throwable e) {
+            } catch (Throwable t) {
+                throwable = t;
             }
+        }
+
+        if (throwable != null) {
+            throw new RuntimeException(throwable);
         }
     }
 

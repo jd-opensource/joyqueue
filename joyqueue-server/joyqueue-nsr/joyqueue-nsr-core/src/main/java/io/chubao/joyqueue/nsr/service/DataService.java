@@ -26,6 +26,7 @@ import java.util.List;
  * @author wylixiaobin
  * Date: 2018/11/8
  */
+@Deprecated
 public interface DataService<T, Q extends Query, K> {
     /**
      * 根据ID获取

@@ -18,6 +18,7 @@
 import apiRequest from '../../utils/apiRequest.js'
 import myTable from '../../components/common/myTable.vue'
 import crud from '../../mixins/crud.js'
+import {getTopicCode} from '../../utils/common.js'
 export default {
   name: 'group-detail',
   components: {
@@ -177,6 +178,7 @@ export default {
         this.page.page = data.pagination.page
         this.page.size = data.pagination.size
         this.tableData.rowData = data.data
+        this.showTablePin = false
         for (let i = 0; i < this.tableData.rowData.length; i++) {
           this.getMetadata(this.tableData.rowData[i], i)
         }

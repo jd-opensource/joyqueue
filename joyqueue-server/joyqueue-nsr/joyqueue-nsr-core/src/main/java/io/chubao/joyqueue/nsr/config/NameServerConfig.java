@@ -15,6 +15,8 @@
  */
 package io.chubao.joyqueue.nsr.config;
 
+import io.chubao.joyqueue.config.BrokerConfigKeys;
+import io.chubao.joyqueue.helper.PortHelper;
 import io.chubao.joyqueue.network.transport.config.ServerConfig;
 import io.chubao.joyqueue.network.transport.config.TransportConfigSupport;
 import io.chubao.joyqueue.toolkit.config.PropertySupplier;
@@ -33,11 +35,11 @@ public class NameServerConfig {
     }
 
     public int getManagerPort() {
-        return propertySupplier.getValue(NameServerConfigKey.NAMESERVER_MANAGE_PORT);
+        return PortHelper.getNameServerManagerPort(propertySupplier.getValue(BrokerConfigKeys.FRONTEND_SERVER_PORT));
     }
 
     public int getServicePort() {
-        return propertySupplier.getValue(NameServerConfigKey.NAMESERVER_SERVICE_PORT);
+        return PortHelper.getNameServerPort(propertySupplier.getValue(BrokerConfigKeys.FRONTEND_SERVER_PORT));
     }
 
     public boolean getCacheEnable() {

@@ -16,6 +16,8 @@
 package io.chubao.joyqueue.domain;
 
 
+import io.chubao.joyqueue.helper.PortHelper;
+
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -119,7 +121,7 @@ public class Broker implements Serializable {
     //TODO 是否可以删掉
     @Transient
     public int getBackEndPort() {
-        return port + 1;
+        return PortHelper.getBackendPort(port);
     }
 
     /**
@@ -128,7 +130,7 @@ public class Broker implements Serializable {
      */
     @Transient
     public int getMonitorPort() {
-        return port + 2;
+        return PortHelper.getMonitorPort(port);
     }
 
     /**
@@ -136,23 +138,35 @@ public class Broker implements Serializable {
      * BrokerManage
      */
     @Transient
-    public int getManagerPort() {
-        return port + 3;
+    public int getNameServerManagerPort() {
+        return PortHelper.getNameServerManagerPort(port);
     }
 
+    /**
+     * nameserver port
+     * @return
+     */
+    @Transient
+    public int getNameServerPort() {
+        return PortHelper.getNameServerPort(port);
+    }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o){
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()){
-            return false;
-        }
-        Broker broker = (Broker) o;
-        return id == broker.id &&
-                port == broker.port &&
-                Objects.equals(ip, broker.ip);
+    /**
+     * messenger config
+     * @return
+     */
+    @Transient
+    public int getMessengerPort() {
+        return PortHelper.getMessengerPort(port);
+    }
+
+    /**
+     * journalkeeper port
+     * @return
+     */
+    @Transient
+    public int getJournalkeeperPort() {
+        return PortHelper.getJournalkeeperPort(port);
     }
 
     public enum PermissionEnum {
@@ -195,9 +209,23 @@ public class Broker implements Serializable {
         }
     }
 
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || !(o instanceof Broker)) return false;
+        Broker broker = (Broker) o;
+        return id == broker.id &&
+                port == broker.port &&
+                Objects.equals(ip, broker.ip) &&
+                Objects.equals(dataCenter, broker.dataCenter) &&
+                Objects.equals(retryType, broker.retryType) &&
+                permission == broker.permission;
+    }
+
     @Override
     public int hashCode() {
-        return Objects.hash(id, ip, port);
+        return Objects.hash(id, ip, port, dataCenter, retryType, permission);
     }
 
     @Override

@@ -25,7 +25,7 @@ public enum MqttConfigKey implements PropertyDef {
     EXECUTOR_SERVICE_CONNECTION("mqtt.executor.service.connection.name", "connect-executors", Type.STRING),
     EXECUTOR_SERVICE_PING("mqtt.executor.service.ping.name", "ping-executors", Type.STRING),
     EXECUTOR_SERVICE_SUBSCRIPTION("mqtt.executor.service.subscription.name", "subscription-executors", Type.STRING),
-    EXECUTOR_SERVICE_PUBLISH("mqtt.executor.service.publish.name", "publish-executors", Type.STRING),
+    EXECUTOR_SERVICE_PUBLISH("mqtt.executor.service.publish.name", "publishEvent-executors", Type.STRING),
     EXECUTOR_SERVICE_CONNECTION_THREAD("mqtt.executor.service.connection.threads", Runtime.getRuntime().availableProcessors() * 2, Type.INT),
     EXECUTOR_SERVICE_PING_THREAD("mqtt.executor.service.ping.threads", Runtime.getRuntime().availableProcessors() * 2, Type.INT),
     EXECUTOR_SERVICE_SUBSCRIPTION_THREAD("mqtt.executor.service.subscription.threads", Runtime.getRuntime().availableProcessors(), Type.INT),

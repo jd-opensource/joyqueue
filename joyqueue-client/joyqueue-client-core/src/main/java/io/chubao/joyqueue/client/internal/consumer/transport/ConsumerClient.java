@@ -20,17 +20,17 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Table;
 import io.chubao.joyqueue.client.internal.transport.Client;
 import io.chubao.joyqueue.client.internal.transport.ClientState;
+import io.chubao.joyqueue.network.command.CommitAckData;
 import io.chubao.joyqueue.network.command.CommitAckRequest;
 import io.chubao.joyqueue.network.command.CommitAckResponse;
-import io.chubao.joyqueue.network.command.CommitAckData;
 import io.chubao.joyqueue.network.command.FetchIndexRequest;
 import io.chubao.joyqueue.network.command.FetchIndexResponse;
+import io.chubao.joyqueue.network.command.FetchPartitionMessageData;
 import io.chubao.joyqueue.network.command.FetchPartitionMessageRequest;
 import io.chubao.joyqueue.network.command.FetchPartitionMessageResponse;
-import io.chubao.joyqueue.network.command.FetchPartitionMessageData;
+import io.chubao.joyqueue.network.command.FetchTopicMessageData;
 import io.chubao.joyqueue.network.command.FetchTopicMessageRequest;
 import io.chubao.joyqueue.network.command.FetchTopicMessageResponse;
-import io.chubao.joyqueue.network.command.FetchTopicMessageData;
 import io.chubao.joyqueue.network.transport.TransportAttribute;
 import io.chubao.joyqueue.network.transport.command.Command;
 import io.chubao.joyqueue.network.transport.command.CommandCallback;
@@ -65,6 +65,8 @@ public class ConsumerClient {
             ConsumerClient oldConsumerClient = client.getAttribute().putIfAbsent(CLIENT_CONSUMER_CACHE_KEY, consumerClient);
             if (oldConsumerClient != null) {
                 consumerClient = oldConsumerClient;
+            } else {
+                consumerClient.getClient().addListener(new ConsumerClientConnectionListener(consumerClient.getClient().getTransport(), consumerClient));
             }
         }
         return consumerClient;
@@ -120,6 +122,10 @@ public class ConsumerClient {
     public void asyncFetchPartitionMessage(Table<String, Short, Long> partitions, String app, int count, long timeout, CommandCallback callback) {
         FetchPartitionMessageRequest fetchPartitionMessageRequest = buildPartitionTopicMessageCommand(partitions, app, count);
         client.async(new JoyQueueCommand(fetchPartitionMessageRequest), timeout, callback);
+    }
+
+    public void addConsumers() {
+        connectionState.handleAddConsumers();
     }
 
     public void addConsumers(Collection<String> topics, String app) {

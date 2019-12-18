@@ -15,10 +15,10 @@
  */
 package io.chubao.joyqueue.network.codec;
 
+import io.chubao.joyqueue.network.command.BooleanAck;
 import io.chubao.joyqueue.network.command.CommandType;
 import io.chubao.joyqueue.network.transport.codec.JoyQueueHeader;
 import io.chubao.joyqueue.network.transport.codec.PayloadCodec;
-import io.chubao.joyqueue.network.command.BooleanAck;
 import io.chubao.joyqueue.network.transport.command.Type;
 import io.netty.buffer.ByteBuf;
 
@@ -32,7 +32,7 @@ public class BooleanAckCodec implements PayloadCodec<JoyQueueHeader, BooleanAck>
 
     @Override
     public Object decode(JoyQueueHeader header, ByteBuf buffer) throws Exception {
-        return null;
+        return new BooleanAck();
     }
 
     @Override

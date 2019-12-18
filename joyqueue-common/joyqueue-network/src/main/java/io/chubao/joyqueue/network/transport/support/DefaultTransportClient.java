@@ -22,7 +22,6 @@ import io.chubao.joyqueue.network.transport.RequestBarrier;
 import io.chubao.joyqueue.network.transport.Transport;
 import io.chubao.joyqueue.network.transport.TransportClient;
 import io.chubao.joyqueue.network.transport.TransportClientSupport;
-import io.chubao.joyqueue.network.transport.TransportHelper;
 import io.chubao.joyqueue.network.transport.codec.Codec;
 import io.chubao.joyqueue.network.transport.codec.support.NettyDecoder;
 import io.chubao.joyqueue.network.transport.codec.support.NettyEncoder;
@@ -104,7 +103,7 @@ public class DefaultTransportClient extends TransportClientSupport implements Tr
     @Override
     public Transport createTransport(SocketAddress address, long connectionTimeout) throws TransportException {
         Channel channel = createChannel(address, connectionTimeout);
-        return TransportHelper.newTransport(channel, requestBarrier);
+        return new DefaultChannelTransport(channel, requestBarrier, address);
     }
 
     @Override

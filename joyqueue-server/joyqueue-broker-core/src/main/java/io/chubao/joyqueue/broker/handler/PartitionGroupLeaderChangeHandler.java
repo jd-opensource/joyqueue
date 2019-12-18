@@ -24,6 +24,7 @@ import io.chubao.joyqueue.network.transport.Transport;
 import io.chubao.joyqueue.network.transport.command.Command;
 import io.chubao.joyqueue.network.transport.command.Type;
 import io.chubao.joyqueue.network.transport.command.handler.CommandHandler;
+import io.chubao.joyqueue.nsr.config.NameServiceConfig;
 import io.chubao.joyqueue.nsr.network.command.NsrCommandType;
 import io.chubao.joyqueue.nsr.network.command.UpdatePartitionGroup;
 import org.slf4j.Logger;
@@ -33,12 +34,15 @@ import org.slf4j.LoggerFactory;
  * @author wylixiaobin
  * Date: 2019/3/7
  */
+@Deprecated
 public class PartitionGroupLeaderChangeHandler implements CommandHandler, Type {
     private static Logger logger = LoggerFactory.getLogger(PartitionGroupLeaderChangeHandler.class);
     private ElectionService electionService;
+    private NameServiceConfig config;
 
     public PartitionGroupLeaderChangeHandler(BrokerContext brokerContext){
         this.electionService = brokerContext.getElectionService();
+        this.config = new NameServiceConfig(brokerContext.getPropertySupplier());
     }
     @Override
     public int type() {
@@ -47,6 +51,9 @@ public class PartitionGroupLeaderChangeHandler implements CommandHandler, Type {
 
     @Override
     public Command handle(Transport transport, Command command) {
+        if (!config.getMessengerIgniteEnable()) {
+            return BooleanAck.build();
+        }
         if (command == null) {
             logger.error("PartitionGroupLeaderChangeHandler request command is null");
             return null;

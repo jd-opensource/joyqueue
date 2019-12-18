@@ -15,13 +15,12 @@
  */
 package io.openmessaging.spring.config;
 
-import io.openmessaging.KeyValue;
-import io.openmessaging.OMS;
 import io.openmessaging.spring.OMSSpringConsts;
 import io.openmessaging.spring.support.AccessPointContainer;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.Assert;
@@ -42,8 +41,6 @@ public class AccessPointBeanDefinitionParser implements BeanDefinitionParser {
     private static final String ATTRIBUTE_ID = "id";
     private static final String ATTRIBUTE_URL = "url";
     private static final String ELEMENT_ATTRIBUTE = "attribute";
-    private static final String ELEMENT_ATTRIBUTE_KEY = "key";
-    private static final String ELEMENT_ATTRIBUTE_VALUE = "value";
 
     @Override
     public BeanDefinition parse(Element element, ParserContext parserContext) {
@@ -56,26 +53,24 @@ public class AccessPointBeanDefinitionParser implements BeanDefinitionParser {
             id = OMSSpringConsts.DEFAULT_ACCESS_POINT_ID;
         }
 
-        KeyValue attributes = parseAttributes(element, parserContext);
         BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.rootBeanDefinition(AccessPointContainer.class)
                 .addConstructorArgValue(id)
-                .addConstructorArgValue(url)
-                .addConstructorArgValue(attributes);
+                .addConstructorArgValue(url);
+        List<BeanDefinition> attributes = parseAttributes(beanDefinitionBuilder, element, parserContext);
+        beanDefinitionBuilder.addConstructorArgValue(attributes);
 
         AbstractBeanDefinition beanDefinition = beanDefinitionBuilder.getBeanDefinition();
         parserContext.getRegistry().registerBeanDefinition(id, beanDefinition);
         return beanDefinition;
     }
 
-    protected KeyValue parseAttributes(Element element, ParserContext parserContext) {
-        KeyValue attributes = OMS.newKeyValue();
+    protected List<BeanDefinition> parseAttributes(BeanDefinitionBuilder builder, Element element, ParserContext parserContext) {
         List<Element> attributeElements = DomUtils.getChildElementsByTagName(element, ELEMENT_ATTRIBUTE);
+        List<BeanDefinition> result = new ManagedList(attributeElements.size());
 
         for (Element attributeElement : attributeElements) {
-            String key = attributeElement.getAttribute(ELEMENT_ATTRIBUTE_KEY);
-            String value = attributeElement.getAttribute(ELEMENT_ATTRIBUTE_VALUE);
-            attributes.put(key, value);
+            result.add(parserContext.getDelegate().parseCustomElement(attributeElement, builder.getRawBeanDefinition()));
         }
-        return attributes;
+        return result;
     }
 }

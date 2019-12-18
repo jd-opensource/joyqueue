@@ -23,7 +23,6 @@ import io.chubao.joyqueue.network.transport.command.Command;
 import io.chubao.joyqueue.store.replication.ReplicableStore;
 import io.chubao.joyqueue.toolkit.concurrent.EventBus;
 import io.chubao.joyqueue.toolkit.service.Service;
-
 import io.chubao.joyqueue.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,6 +99,10 @@ public abstract class LeaderElection extends Service {
      */
     public ReplicaGroup getReplicaGroup() {
         return replicaGroup;
+    }
+
+    public TopicPartitionGroup getTopicPartitionGroup() {
+        return topicPartitionGroup;
     }
 
     /**

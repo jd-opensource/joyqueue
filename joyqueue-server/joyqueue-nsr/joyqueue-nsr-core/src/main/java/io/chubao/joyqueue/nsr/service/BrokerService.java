@@ -16,6 +16,8 @@
 package io.chubao.joyqueue.nsr.service;
 
 import io.chubao.joyqueue.domain.Broker;
+import io.chubao.joyqueue.model.PageResult;
+import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.nsr.model.BrokerQuery;
 
 import java.util.List;
@@ -24,7 +26,15 @@ import java.util.List;
  * @author lixiaobin6
  * 下午3:11 2018/8/13
  */
-public interface BrokerService extends DataService<Broker, BrokerQuery, Integer> {
+public interface BrokerService {
+
+    /**
+     * 根据ID获取
+     *
+     * @param id
+     * @return
+     */
+    Broker getById(int id);
 
     /**
      * 根据IP和端口获取Broker
@@ -49,6 +59,36 @@ public interface BrokerService extends DataService<Broker, BrokerQuery, Integer>
      */
     List<Broker> getByIds(List<Integer> ids);
 
+    /**
+     * 获取全部
+     * @return
+     */
+    List<Broker> getAll();
 
-    void update(Broker broker);
+    /**
+     * 搜索
+     *
+     * @param pageQuery
+     * @return
+     */
+    PageResult<Broker> search(QPageQuery<BrokerQuery> pageQuery);
+
+    /**
+     * 更新
+     * @param broker
+     */
+    Broker add(Broker broker);
+
+    /**
+     * 更新
+     * @param broker
+     */
+    Broker update(Broker broker);
+
+    /**
+     * 根据model删除
+     *
+     * @param id
+     */
+    void delete(int id);
 }

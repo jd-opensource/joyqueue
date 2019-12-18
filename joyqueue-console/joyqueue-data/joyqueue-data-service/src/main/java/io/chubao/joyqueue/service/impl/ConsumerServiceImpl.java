@@ -19,9 +19,8 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import io.chubao.joyqueue.convert.CodeConverter;
+import io.chubao.joyqueue.domain.TopicName;
 import io.chubao.joyqueue.model.ListQuery;
-import io.chubao.joyqueue.model.PageResult;
-import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.model.domain.AppName;
 import io.chubao.joyqueue.model.domain.Application;
 import io.chubao.joyqueue.model.domain.Consumer;
@@ -35,6 +34,8 @@ import io.chubao.joyqueue.nsr.TopicNameServerService;
 import io.chubao.joyqueue.service.ApplicationService;
 import io.chubao.joyqueue.service.ConsumerService;
 import io.chubao.joyqueue.util.LocalSession;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +67,10 @@ public class ConsumerServiceImpl  implements ConsumerService {
         try {
             //Find topic
             Topic topic = topicNameServerService.findById(consumer.getTopic().getId());
+            if (topic.getType() == Topic.TOPIC_TYPE_SEQUENTIAL && consumer.getTopicType() == Topic.TOPIC_TYPE_BROADCAST) {
+                throw new IllegalArgumentException("broadcast subscriptions are not allowed for sequential topics");
+            }
+
             consumer.setTopic(topic);
             consumer.setNamespace(topic.getNamespace());
 
@@ -79,26 +84,7 @@ public class ConsumerServiceImpl  implements ConsumerService {
 
     @Override
     public Consumer findById(String s) throws Exception {
-        return consumerNameServerService.findById(s);
-    }
-
-    @Override
-    public PageResult<Consumer> findByQuery(QPageQuery<QConsumer> query) throws Exception {
-        User user = LocalSession.getSession().getUser();
-        if (query.getQuery() != null && query.getQuery().getApp() != null){
-            query.getQuery().setReferer(query.getQuery().getApp().getCode());
-            query.getQuery().setApp(null);
-        }
-        if (user.getRole() == User.UserRole.NORMAL.value()) {
-            QApplication qApplication = new QApplication();
-            qApplication.setUserId(user.getId());
-            qApplication.setAdmin(false);
-            List<Application> applicationList = applicationService.findByQuery(new ListQuery<>(qApplication));
-            if (applicationList == null || applicationList.size() <=0 ) return PageResult.empty();
-            List<String> appCodes = applicationList.stream().map(application -> application.getCode()).collect(Collectors.toList());
-            query.getQuery().setAppList(appCodes);
-        }
-        return consumerNameServerService.findByQuery(query);
+        return fillConsumer(consumerNameServerService.findById(s));
     }
 
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
@@ -132,29 +118,28 @@ public class ConsumerServiceImpl  implements ConsumerService {
     }
 
     @Override
-    public List<Consumer> findByQuery(QConsumer query) throws Exception {
-        return consumerNameServerService.findByQuery(query);
-    }
-
-    @Override
     public Consumer findByTopicAppGroup(String namespace, String topic, String app, String group) {
         try {
-            QConsumer qConsumer = new QConsumer();
-//            qConsumer.setReferer(app);
-            qConsumer.setApp(new Identity(CodeConverter.convertApp(new Identity(app), group)));
-            //consumer表没存group
-            if (group !=null) {
-                qConsumer.setApp(new Identity(CodeConverter.convertApp(new Identity(app), group)));
+            TopicName topicName = TopicName.parse(topic);
+            if (StringUtils.isNotBlank(group)) {
+                return fillConsumer(consumerNameServerService.findByTopicAndApp(topicName.getCode(), namespace, CodeConverter.convertApp(new Identity(app), group)));
+            } else {
+                return fillConsumer(consumerNameServerService.findByTopicAndApp(topicName.getCode(), namespace, app));
             }
-            qConsumer.setNamespace(namespace);
-            qConsumer.setTopic(new Topic(topic));
-            List<Consumer> consumerList = consumerNameServerService.findByQuery(qConsumer);
-            if (consumerList == null || consumerList.size() <= 0)return null;
-            return consumerList.get(0);
         } catch (Exception e) {
             logger.error("findByTopicAppGroup error",e);
             throw new RuntimeException("findByTopicAppGroup error",e);
         }
+    }
+
+    @Override
+    public List<Consumer> findByTopic(String topic, String namespace) throws Exception {
+        return fillConsumers(consumerNameServerService.findByTopic(topic, namespace));
+    }
+
+    @Override
+    public List<Consumer> findByApp(String app) throws Exception {
+        return fillConsumers(consumerNameServerService.findByApp(app));
     }
 
     @Override
@@ -180,13 +165,47 @@ public class ConsumerServiceImpl  implements ConsumerService {
             List<String> appCodes = applicationList.stream().map(application -> application.getCode()).collect(Collectors.toList());
             query.setAppList(appCodes);
         }
-        List<Consumer> consumers = findByQuery(query);
+        List<Consumer> consumers = Lists.newLinkedList();
+        for (String app : query.getAppList()) {
+            List appConsumers = consumerNameServerService.findByApp(app);
+            if (CollectionUtils.isNotEmpty(appConsumers)) {
+                consumers.addAll(appConsumers);
+            }
+        }
+
         List<String> apps = consumers.stream().map(m-> AppName.parse(m.getApp().getCode(),m.getSubscribeGroup()).getFullName()).collect(Collectors.toList());
         return apps;
     }
 
     private void checkArgument(Consumer consumer) {
         Preconditions.checkArgument(consumer != null && consumer.getId() != null, "invalidate consumer arg.");
+    }
+
+    protected List<Consumer> fillConsumers(List<Consumer> consumers) {
+        if (CollectionUtils.isEmpty(consumers)) {
+            return consumers;
+        }
+        for (Consumer consumer : consumers) {
+            fillConsumer(consumer);
+        }
+        return consumers;
+    }
+
+    protected Consumer fillConsumer(Consumer consumer) {
+        if (consumer == null) {
+            return null;
+        }
+        Identity app = consumer.getApp();
+        if (app == null || StringUtils.isBlank(app.getCode())) {
+            return consumer;
+        }
+
+        Application application = applicationService.findByCode(CodeConverter.convertAppFullName(app.getCode()).getCode());
+        if (application != null) {
+            app.setId(application.getId());
+            app.setName(application.getName());
+        }
+        return consumer;
     }
 
 }

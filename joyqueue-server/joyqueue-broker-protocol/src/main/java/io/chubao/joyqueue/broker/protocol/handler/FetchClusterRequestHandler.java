@@ -95,9 +95,10 @@ public class FetchClusterRequestHandler implements JoyQueueCommandHandler, Type,
         fetchClusterResponse.setTopics(topics);
         fetchClusterResponse.setBrokers(brokers);
 
-        // TODO 临时日志
-        logger.debug("fetch cluster, address: {}, topics: {}, app: {}, metadata: {}",
-                transport, fetchClusterRequest.getTopics(), fetchClusterRequest.getApp(), JSON.toJSONString(fetchClusterResponse));
+        if (logger.isDebugEnabled()) {
+            logger.debug("fetch cluster, address: {}, topics: {}, app: {}, metadata: {}",
+                    transport, fetchClusterRequest.getTopics(), fetchClusterRequest.getApp(), JSON.toJSONString(fetchClusterResponse));
+        }
 
         return new Command(fetchClusterResponse);
     }

@@ -16,14 +16,22 @@
 package io.chubao.joyqueue.nsr.service;
 
 import io.chubao.joyqueue.domain.Config;
-import io.chubao.joyqueue.nsr.model.ConfigQuery;
+
+import java.util.List;
 
 
 /**
  * @author wylixiaobin
  * Date: 2018/9/4
  */
-public interface ConfigService extends DataService<Config, ConfigQuery, String> {
+public interface ConfigService {
+
+    /**
+     * 根据id
+     * @param id
+     * @return
+     */
+    Config getById(String id);
 
     /**
      * 根据分组和Key获取配置
@@ -35,11 +43,17 @@ public interface ConfigService extends DataService<Config, ConfigQuery, String> 
     Config getByGroupAndKey(String group, String key);
 
     /**
+     * 获取全部
+     * @return
+     */
+    List<Config> getAll();
+
+    /**
      * 添加配置
      *
      * @param config
      */
-    void add(Config config);
+    Config add(Config config);
 
     /**
      * 更新配置
@@ -47,12 +61,12 @@ public interface ConfigService extends DataService<Config, ConfigQuery, String> 
      * @param config
      */
 
-    void update(Config config);
+    Config update(Config config);
 
     /**
      * 删除配置
      *
-     * @param config
+     * @param id
      */
-    void remove(Config config);
+    void delete(String id);
 }

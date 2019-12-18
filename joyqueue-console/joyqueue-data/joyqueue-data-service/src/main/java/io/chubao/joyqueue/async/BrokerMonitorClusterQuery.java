@@ -19,12 +19,10 @@ package io.chubao.joyqueue.async;
 import io.chubao.joyqueue.domain.PartitionGroup;
 import io.chubao.joyqueue.domain.TopicName;
 import io.chubao.joyqueue.model.domain.Broker;
-import io.chubao.joyqueue.model.domain.Namespace;
 import io.chubao.joyqueue.model.domain.PartitionGroupReplica;
 import io.chubao.joyqueue.model.domain.Subscribe;
-import io.chubao.joyqueue.model.domain.Topic;
-import io.chubao.joyqueue.model.query.QPartitionGroupReplica;
 import io.chubao.joyqueue.service.BrokerRestUrlMappingService;
+import io.chubao.joyqueue.service.BrokerService;
 import io.chubao.joyqueue.service.LeaderService;
 import io.chubao.joyqueue.service.PartitionGroupReplicaService;
 import io.chubao.joyqueue.toolkit.time.SystemClock;
@@ -56,13 +54,18 @@ public class BrokerMonitorClusterQuery implements BrokerClusterQuery<Subscribe> 
     @Autowired
     protected PartitionGroupReplicaService partitionGroupReplicaService;
 
-    public Future<Map<String, String>> asyncQueryAllBroker(String namespace, String topic, Integer groupNo, String path, String logkey) throws Exception {
-        QPartitionGroupReplica qTopicPartitionGroup = new QPartitionGroupReplica();
-        qTopicPartitionGroup.setTopic(new Topic(topic));
-        qTopicPartitionGroup.setNamespace(new Namespace(namespace));
-        qTopicPartitionGroup.setGroupNo(groupNo);
-        List<PartitionGroupReplica> partitionGroupReplicas = partitionGroupReplicaService.findByQuery(qTopicPartitionGroup);
-        List<Broker> brokers = partitionGroupReplicas.stream().map(m -> m.getBroker()).collect(Collectors.toList());
+    @Autowired
+    private BrokerService brokerService;
+
+    public Future<Map<String, String>> asyncQueryAllBroker(String namespace, String topic, Integer groupNo, String path, String logkey) {
+        List<PartitionGroupReplica> partitionGroupReplicas = partitionGroupReplicaService.getByTopicAndGroup(topic, namespace, groupNo);
+        List<Broker> brokers = partitionGroupReplicas.stream().map(m -> {
+            try {
+                return brokerService.findById(m.getBrokerId());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }).collect(Collectors.toList());
         if (NullUtil.isEmpty(brokers)) {
             throw new IllegalStateException("topic leader broker or rest path not found");
         }

@@ -17,6 +17,7 @@ package io.chubao.joyqueue.broker.extension;
 
 import com.google.common.collect.Lists;
 import io.chubao.joyqueue.broker.BrokerContext;
+import io.chubao.joyqueue.toolkit.lang.LifeCycle;
 import io.chubao.joyqueue.toolkit.service.Service;
 
 import java.util.List;
@@ -35,30 +36,39 @@ public class ExtensionManager extends Service {
     public ExtensionManager(BrokerContext brokerContext) {
         this.brokerContext = brokerContext;
         this.extensionServices = loadExtensionServices();
-        initExtensionServices(extensionServices);
     }
 
     protected List<ExtensionService> loadExtensionServices() {
         return Lists.newArrayList(com.jd.laf.extension.ExtensionManager.getOrLoadExtensions(ExtensionService.class));
     }
 
-    protected void initExtensionServices(List<ExtensionService> extensionServices) {
+    public void before() {
         for (ExtensionService extensionService : extensionServices) {
-            extensionService.init(brokerContext);
+            extensionService.before(brokerContext);
+        }
+    }
+
+    public void after() {
+        for (ExtensionService extensionService : extensionServices) {
+            extensionService.after(brokerContext);
         }
     }
 
     @Override
     protected void doStart() throws Exception {
         for (ExtensionService extensionService : extensionServices) {
-            extensionService.start();
+            if (extensionService instanceof LifeCycle) {
+                ((LifeCycle) extensionService).start();
+            }
         }
     }
 
     @Override
     protected void doStop() {
         for (ExtensionService extensionService : extensionServices) {
-            extensionService.stop();
+            if (extensionService instanceof LifeCycle) {
+                ((LifeCycle) extensionService).stop();
+            }
         }
     }
 }

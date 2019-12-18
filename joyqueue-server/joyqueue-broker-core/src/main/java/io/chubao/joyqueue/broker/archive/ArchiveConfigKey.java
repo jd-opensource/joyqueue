@@ -28,7 +28,7 @@ public enum ArchiveConfigKey implements PropertyDef {
     PRODUCE_BATCH_NUM("archive.produce.batch.num", 10, Type.INT),
     LOG_QUEUE_SIZE("archive.send.log.queue.size", 1000, Type.INT),
     WRITE_THREAD_NUM("archive.thread.num", 5, Type.INT),
-    ARCHIVE_SWITCH("archive.switch", true, Type.BOOLEAN),
+    ARCHIVE_SWITCH("archive.switch", false, Type.BOOLEAN),
     ARCHIVE_THREAD_POOL_QUEUE_SIZE("archive.thread.pool.queue.size", 10, Type.INT),
     ARCHIVE_STORE_NAMESPACE("archive.store.namespace", "journalq", Type.STRING);
 

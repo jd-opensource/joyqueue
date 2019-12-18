@@ -130,8 +130,8 @@ public interface PropertySupplier {
         if (type == null) {
             throw new IllegalArgumentException("type can not be null");
         }
-        Property property = supplier.getOrCreateProperty(key);
-        Object value = property.getValue();
+        Property property = supplier.getProperty(key);
+        Object value = (property != null ? property.getValue() : defaultValue);
         switch (type) {
             case BOOLEAN:
                 return (T) Converts.getBoolean(value, Converts.getBoolean(defaultValue));
@@ -157,8 +157,10 @@ public interface PropertySupplier {
         }
         Object propertyValue = null;
         if(null != supplier) {
-            Property property = supplier.getOrCreateProperty(key.getName());
-            propertyValue = property.getValue();
+            Property property = supplier.getProperty(key.getName());
+            if (property != null) {
+                propertyValue = property.getValue();
+            }
         }
 
         Object defaultValue = key.getValue();

@@ -55,7 +55,11 @@ public class IgniteTopic extends Topic implements IgniteBaseModel, Binarylizable
     }
 
     public static String getId(String namespace, String topic) {
-        return new StringBuilder(30).append(namespace).append(SPLICE).append(topic).toString();
+        if (StringUtils.isBlank(namespace)) {
+            return topic;
+        } else {
+            return new StringBuilder(30).append(namespace).append(SPLICE).append(topic).toString();
+        }
     }
 
     @Override

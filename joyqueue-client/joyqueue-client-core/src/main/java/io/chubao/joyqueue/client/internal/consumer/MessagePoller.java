@@ -17,6 +17,7 @@ package io.chubao.joyqueue.client.internal.consumer;
 
 import io.chubao.joyqueue.client.internal.consumer.domain.ConsumeMessage;
 import io.chubao.joyqueue.client.internal.consumer.domain.ConsumeReply;
+import io.chubao.joyqueue.client.internal.consumer.domain.FetchIndexData;
 import io.chubao.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import io.chubao.joyqueue.exception.JoyQueueCode;
 import io.chubao.joyqueue.toolkit.lang.LifeCycle;
@@ -76,6 +77,9 @@ public interface MessagePoller extends LifeCycle {
     JoyQueueCode reply(String topic, List<ConsumeReply> replyList);
 
     JoyQueueCode replyOnce(String topic, ConsumeReply reply);
+
+    // index
+    FetchIndexData fetchIndex(String topic, short partition);
 
     // metadata
     TopicMetadata getTopicMetadata(String topic);

@@ -17,16 +17,13 @@ package io.chubao.joyqueue.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import io.chubao.joyqueue.domain.PartitionGroup;
-import io.chubao.joyqueue.convert.CodeConverter;
 import io.chubao.joyqueue.exception.ServiceException;
 import io.chubao.joyqueue.model.domain.Broker;
-import io.chubao.joyqueue.model.domain.Namespace;
-import io.chubao.joyqueue.model.domain.Topic;
 import io.chubao.joyqueue.model.domain.TopicPartitionGroup;
-import io.chubao.joyqueue.service.LeaderService;
 import io.chubao.joyqueue.nsr.BrokerNameServerService;
 import io.chubao.joyqueue.nsr.PartitionGroupServerService;
 import io.chubao.joyqueue.nsr.TopicNameServerService;
+import io.chubao.joyqueue.service.LeaderService;
 import io.chubao.joyqueue.util.NullUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,10 +89,9 @@ public class LeaderServiceImpl implements LeaderService {
         }else return null;
     }
 
-
     @Override
     public Map.Entry<PartitionGroup, Broker> findPartitionLeaderBrokerDetail(String namespace, String topic, int partition) {
-        List<TopicPartitionGroup> topicPartitionGroups=partitionGroupServerService.findByTopic(CodeConverter.convertTopic(new Namespace(namespace),new Topic(topic)).getFullName());
+        List<TopicPartitionGroup> topicPartitionGroups=partitionGroupServerService.findByTopic(topic, namespace);
         TopicPartitionGroup tp=null;
         for(TopicPartitionGroup t:topicPartitionGroups){
             Set<Short> partitions=parsePartitions(t);
@@ -174,7 +170,7 @@ public class LeaderServiceImpl implements LeaderService {
       List<Broker> brokers= null;
       try {
           //去重broker id
-          List<Integer> brokerIdList =  brokerIds.stream().distinct().collect(Collectors.toList());
+          List<Integer> brokerIdList =  brokerIds.stream().distinct().map(brokerId -> brokerId).collect(Collectors.toList());
           brokers = brokerNameServerService.getByIdsBroker(brokerIdList);
       } catch (Exception e) {
           logger.error("brokerNameServerService.getByIdsBroker error",e);

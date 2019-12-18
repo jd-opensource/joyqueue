@@ -51,6 +51,9 @@ public class DefaultTopicMonitorService implements TopicMonitorService {
         List<TopicMonitorInfo> data = Lists.newArrayListWithCapacity(pageSize);
 
         for (StoreManagementService.TopicMetric topicMetric : storeManagementService.storeMetrics()) {
+            if (!topicMetric.isUsabled()) {
+                continue;
+            }
             if (index >= startIndex && index < endIndex) {
                 TopicMonitorInfo topicMonitorInfo = getTopicInfoByTopic(topicMetric.getTopic());
                 TopicStat topicStat = brokerStat.getOrCreateTopicStat(topicMonitorInfo.getTopic());

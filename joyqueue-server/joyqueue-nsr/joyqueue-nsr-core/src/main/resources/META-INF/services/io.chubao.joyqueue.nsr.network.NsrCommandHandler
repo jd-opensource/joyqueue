@@ -1,2 +1,3 @@
 io.chubao.joyqueue.nsr.network.handler.NameServiceCommandHandler
 io.chubao.joyqueue.nsr.network.handler.PushNameServerEventHandler
+io.chubao.joyqueue.nsr.network.handler.GetAllMetadataRequestHandler

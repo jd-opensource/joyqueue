@@ -15,7 +15,7 @@
  */
 package io.chubao.joyqueue.client.internal.producer.config;
 
-import io.chubao.joyqueue.client.internal.common.compress.support.SnappyCompressor;
+import io.chubao.joyqueue.client.internal.common.compress.support.ZlibCompressor;
 import io.chubao.joyqueue.client.internal.producer.support.WeightedRoundRobinPartitionSelector;
 import io.chubao.joyqueue.domain.QosLevel;
 import io.chubao.joyqueue.toolkit.retry.RetryPolicy;
@@ -37,10 +37,10 @@ public class ProducerConfig {
 
     private boolean failover = true;
     private RetryPolicy retryPolicy = new RetryPolicy(1000 * 1, 2);
-    private QosLevel qosLevel = QosLevel.RECEIVE;
+    private QosLevel qosLevel = QosLevel.REPLICATION;
 
     private boolean compress = true;
-    private String compressType = SnappyCompressor.NAME;
+    private String compressType = ZlibCompressor.NAME;
     private int compressThreshold = 100;
 
     private boolean batch = true;

@@ -16,6 +16,7 @@
 package io.chubao.joyqueue.broker.protocol.converter;
 
 import io.chubao.joyqueue.exception.JoyQueueCode;
+import io.chubao.joyqueue.network.transport.codec.JoyQueueHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +30,7 @@ public class CheckResultConverter {
 
     protected static final Logger logger = LoggerFactory.getLogger(CheckResultConverter.class);
 
-    public static JoyQueueCode convertProduceCode(JoyQueueCode code) {
+    public static JoyQueueCode convertProduceCode(int version, JoyQueueCode code) {
         switch (code) {
             case FW_TOPIC_NOT_EXIST: {
                 return JoyQueueCode.FW_TOPIC_NOT_EXIST;
@@ -39,6 +40,9 @@ public class CheckResultConverter {
                 return JoyQueueCode.FW_PRODUCE_MESSAGE_BROKER_NOT_LEADER;
             }
             case FW_PUT_MESSAGE_TOPIC_NOT_WRITE: {
+                if (version == JoyQueueHeader.VERSION_V1) {
+                    return JoyQueueCode.CN_NO_PERMISSION;
+                }
                 return JoyQueueCode.FW_PUT_MESSAGE_TOPIC_NOT_WRITE;
             }
             case FW_PRODUCER_NOT_EXISTS: {
@@ -54,7 +58,7 @@ public class CheckResultConverter {
         }
     }
 
-    public static JoyQueueCode convertFetchCode(JoyQueueCode code) {
+    public static JoyQueueCode convertFetchCode(int version, JoyQueueCode code) {
         switch (code) {
             case FW_TOPIC_NOT_EXIST: {
                 return JoyQueueCode.FW_TOPIC_NOT_EXIST;
@@ -73,6 +77,9 @@ public class CheckResultConverter {
                 return JoyQueueCode.FW_CONSUMER_NOT_EXISTS;
             }
             case FW_BROKER_NOT_READABLE: {
+                if (version == JoyQueueHeader.VERSION_V1) {
+                    return JoyQueueCode.CN_NO_PERMISSION;
+                }
                 return JoyQueueCode.FW_BROKER_NOT_READABLE;
             }
             default : {
@@ -82,7 +89,7 @@ public class CheckResultConverter {
         }
     }
 
-    public static JoyQueueCode convertCommonCode(JoyQueueCode code) {
+    public static JoyQueueCode convertCommonCode(int version, JoyQueueCode code) {
         switch (code) {
             case FW_TOPIC_NO_PARTITIONGROUP:
             case FW_TOPIC_NOT_EXIST: {

@@ -41,6 +41,10 @@ public class BannerPrinter {
 
     public static void print() {
         InputStream inputStream = BannerPrinter.class.getClassLoader().getResourceAsStream(BANNER_RESOURCE);
+        if (inputStream == null) {
+            logger.warn("banner not exist, resource: {}", BANNER_RESOURCE);
+            return;
+        }
         try {
             String banner = IOUtils.toString(inputStream);
             Properties params = buildParams();

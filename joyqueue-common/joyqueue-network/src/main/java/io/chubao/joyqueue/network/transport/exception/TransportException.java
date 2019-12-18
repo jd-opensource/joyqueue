@@ -47,6 +47,10 @@ public class TransportException extends RuntimeException {
         this.code = code;
     }
 
+    public TransportException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
     public TransportException(String message, Throwable cause, int code) {
         super(message, cause);
         this.code = code;
@@ -73,8 +77,12 @@ public class TransportException extends RuntimeException {
             super(message, 20);
         }
 
-        protected ConnectionException(String message, int code) {
+        public ConnectionException(String message, int code) {
             super(message, code);
+        }
+
+        public ConnectionException(String message, Throwable t) {
+            super(message, t);
         }
 
         public static ConnectionException build(String address) {

@@ -16,7 +16,6 @@
 package io.chubao.joyqueue.broker.extension;
 
 import io.chubao.joyqueue.broker.BrokerContext;
-import io.chubao.joyqueue.toolkit.lang.LifeCycle;
 
 /**
  * ExtensionService
@@ -24,8 +23,9 @@ import io.chubao.joyqueue.toolkit.lang.LifeCycle;
  * author: gaohaoxiang
  * date: 2018/11/13
  */
-@Deprecated
-public interface ExtensionService extends LifeCycle {
+public interface ExtensionService {
 
-    void init(BrokerContext brokerContext);
+    void before(BrokerContext brokerContext);
+
+    void after(BrokerContext brokerContext);
 }
