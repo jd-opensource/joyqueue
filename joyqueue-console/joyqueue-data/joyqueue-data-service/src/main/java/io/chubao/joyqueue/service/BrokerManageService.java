@@ -13,9 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.chubao.joyqueue.toolkit.vm;
+package io.chubao.joyqueue.service;
 
-public enum  GCType {
+import io.chubao.joyqueue.toolkit.io.Directory;
+
+public interface BrokerManageService {
+
+    /**
+     * Broker store tree view
+     * @param recursive  recurse child directory if true
+     * @return store tree view
+     **/
+    Directory storeTreeView(int brokerId,boolean recursive);
+
+    /**
+     * Delete garbage file on broker, which name start with .d.
+     * @return true if delete success
+     **/
+    boolean deleteGarbageFile(int brokerId,String path,boolean retain);
+
 
 
 }

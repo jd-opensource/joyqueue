@@ -38,11 +38,13 @@ import java.util.concurrent.TimeUnit;
 import static io.chubao.joyqueue.exception.ServiceException.INTERNAL_SERVER_ERROR;
 
 public class AsyncHttpClient {
+
+    private static final int ASYNC_TIMEOUT=2000;
     private static final Logger logger= LoggerFactory.getLogger(AsyncHttpClient.class);
     private static CloseableHttpAsyncClient httpclient = HttpAsyncClients.custom().setDefaultRequestConfig(RequestConfig.custom()
-            .setConnectTimeout(2000)
-            .setSocketTimeout(2000)
-            .setConnectionRequestTimeout(2000).build()).build();
+            .setConnectTimeout(ASYNC_TIMEOUT)
+            .setSocketTimeout(ASYNC_TIMEOUT)
+            .setConnectionRequestTimeout(ASYNC_TIMEOUT).build()).build();
     public static void AsyncRequest(HttpUriRequest request, FutureCallback<HttpResponse> asyncCallBack){
          httpclient.start();
          request.setHeader("Content-Type", "application/json;charset=utf-8");

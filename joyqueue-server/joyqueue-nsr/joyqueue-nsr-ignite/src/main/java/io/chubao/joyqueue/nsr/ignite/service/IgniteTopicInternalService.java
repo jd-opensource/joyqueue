@@ -315,6 +315,7 @@ public class IgniteTopicInternalService implements TopicInternalService {
                 group.setLeader(group.getReplicas().iterator().next());
             }
             Topic topic = getById(group.getTopic().getFullName());
+            //topic.get
             topic.setPartitions((short) (topic.getPartitions()+group.getPartitions().size()));
             topicDao.addOrUpdate(new IgniteTopic(topic));
             partitionGroupService.addOrUpdate(new IgnitePartitionGroup(group));

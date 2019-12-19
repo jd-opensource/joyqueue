@@ -16,6 +16,8 @@
 
         <route path="/metrics" inherit="get"
                handlers="brokerMonitorService.getExtendBrokerStat"/>
+        <route path="/monitor/broker/jvm/state" inherit="get"
+               handlers="brokerMonitorService.getJVMState"/>
 
         <!-- connection -->
         <route path="/monitor/connections" inherit="get"
@@ -56,6 +58,12 @@
                handlers="brokerMonitorService.getPartitionGroupInfosByTopic"/>
         <route path="/monitor/topic/:topic/partitionGroup/:partitionGroupId" inherit="get"
                handlers="brokerMonitorService.getPartitionGroupInfoByTopic"/>
+
+        <route path="/monitor/topic/node/state/:topic/partitionGroup/:partitionGroupId" inherit="get"
+               handlers="brokerMonitorService.getReplicaState"/>
+
+        <route path="/monitor/topic/recent/election/event/:topic/partitionGroup/:partitionGroupId" inherit="get"
+               handlers="brokerMonitorService.getReplicaRecentElectionEvent"/>
 
         <!-- topic app -->
         <!-- connection -->
@@ -209,6 +217,14 @@
                handlers="brokerManageService.topics"/>
         <route path="/manage/topic/:topic/partitionGroup/detail" inherit="get"
                handlers="brokerManageService.partitionGroups"/>
+
+        <route path="/manage/store/tree/view/:recursive" inherit="get"
+               handlers="brokerManageService.storeTreeView"/>
+        <route path="/manage/store/delete/garbage/file/:fileName/:retain" inherit="delete"
+               handlers="brokerManageService.deleteGarbageFile"/>
+
+
+
 
 
 

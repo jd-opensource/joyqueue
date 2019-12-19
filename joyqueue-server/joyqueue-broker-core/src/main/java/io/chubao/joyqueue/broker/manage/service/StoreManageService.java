@@ -19,6 +19,7 @@ import io.chubao.joyqueue.manage.IndexItem;
 import io.chubao.joyqueue.manage.PartitionGroupMetric;
 import io.chubao.joyqueue.manage.PartitionMetric;
 import io.chubao.joyqueue.manage.TopicMetric;
+import io.chubao.joyqueue.toolkit.io.Directory;
 
 import java.io.File;
 import java.util.List;
@@ -87,6 +88,18 @@ public interface StoreManageService {
      */
     void removeTopic(String topic);
 
+    /**
+     * Store tree view
+     * @param recursive  recurse child directory if true
+     **/
+    Directory storeTreeView(boolean recursive);
+
+    /**
+     * 删除已被软删除的文件
+     * @param fileName  file name
+     * @param retain  保留目录 if true
+     **/
+    boolean deleteGarbageFile(String fileName,boolean retain);
     /**
      * 获取所有主题名
      *

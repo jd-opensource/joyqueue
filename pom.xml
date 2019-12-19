@@ -37,6 +37,10 @@
             <name>Rudy Steiner</name>
             <email>rudy_steiner@163.com</email>
         </developer>
+        <developer>
+            <name>Li Yue</name>
+            <email>liyue2008@gmail.com</email>
+        </developer>
     </developers>
     <licenses>
         <license>
@@ -46,9 +50,9 @@
         </license>
     </licenses>
     <scm>
-        <connection>scm:git:git@github.com:joyqueue/joyqueue.git</connection>
-        <developerConnection>scm:git@github.com:joyqueue/joyqueue.git</developerConnection>
-        <url>https://github.com/joyqueue/joyqueue.git</url>
+        <connection>scm:git:git@github.com:chubaostream/joyqueue.git</connection>
+        <developerConnection>scm:git@github.com:chubaostream/joyqueue.git</developerConnection>
+        <url>https://github.com/chubaostream/joyqueue.git</url>
     </scm>
 
     <distributionManagement>
@@ -63,6 +67,7 @@
     </distributionManagement>
 
     <properties>
+        <journalkeeper.version>0.1.4</journalkeeper.version>
         <fastjson.version>1.2.58</fastjson.version>
         <netty.version>4.1.27.Final</netty.version>
         <log4j.version>2.9.0</log4j.version>
@@ -75,7 +80,7 @@
         <commons-cli.version>1.4</commons-cli.version>
         <httpclient.version>4.5.2</httpclient.version>
         <httpasyncclient.version>4.1.4</httpasyncclient.version>
-        <jackson-databind.version>2.9.9.1</jackson-databind.version>
+        <jackson-databind.version>2.9.10</jackson-databind.version>
         <validation-api.version>2.0.1.Final</validation-api.version>
         <hibernate-validator.version>5.3.0.Final</hibernate-validator.version>
         <el.version>2.2.4</el.version>

@@ -19,18 +19,8 @@ import com.google.common.base.Preconditions;
 import io.chubao.joyqueue.broker.consumer.Consume;
 import io.chubao.joyqueue.broker.consumer.model.ConsumePartition;
 import io.chubao.joyqueue.broker.consumer.position.model.Position;
-import io.chubao.joyqueue.broker.election.DefaultElectionNode;
-import io.chubao.joyqueue.broker.election.ElectionConfig;
-import io.chubao.joyqueue.broker.election.ElectionException;
-import io.chubao.joyqueue.broker.election.ElectionNode;
-import io.chubao.joyqueue.broker.election.LeaderElection;
-import io.chubao.joyqueue.broker.election.TopicPartitionGroup;
-import io.chubao.joyqueue.broker.election.command.AppendEntriesRequest;
-import io.chubao.joyqueue.broker.election.command.AppendEntriesResponse;
-import io.chubao.joyqueue.broker.election.command.ReplicateConsumePosRequest;
-import io.chubao.joyqueue.broker.election.command.ReplicateConsumePosResponse;
-import io.chubao.joyqueue.broker.election.command.TimeoutNowRequest;
-import io.chubao.joyqueue.broker.election.command.TimeoutNowResponse;
+import io.chubao.joyqueue.broker.election.*;
+import io.chubao.joyqueue.broker.election.command.*;
 import io.chubao.joyqueue.broker.monitor.BrokerMonitor;
 import io.chubao.joyqueue.domain.TopicName;
 import io.chubao.joyqueue.network.command.CommandType;
@@ -56,18 +46,10 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.DelayQueue;
-import java.util.concurrent.Delayed;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
-import static io.chubao.joyqueue.broker.election.ElectionNode.State.FOLLOWER;
-import static io.chubao.joyqueue.broker.election.ElectionNode.State.LEADER;
-import static io.chubao.joyqueue.broker.election.ElectionNode.State.TRANSFERRING;
+import static io.chubao.joyqueue.broker.election.ElectionNode.State.*;
 
 /**
  * author: zhuduohui
@@ -237,12 +219,15 @@ public class ReplicaGroup extends Service {
                 .orElse(null);
     }
 
+
     /**
      * 设置当前节点状态
      * @param state 节点状态
      */
     public void setState(ElectionNode.State state) {
         this.state = state;
+        this.brokerMonitor.onReplicaStateChange(topicPartitionGroup.getTopic(),topicPartitionGroup.getPartitionGroupId(),state);
+
     }
 
     /**
@@ -604,7 +589,7 @@ public class ReplicaGroup extends Service {
         if (transferee != ElectionNode.INVALID_NODE_ID && replica.nextPosition() >= timeoutNowPosition) {
             sendTimeoutNowRequest(transferee);
         }
-
+        // sync leader write position by the way
         getReplica(leaderId).writePosition(replicableStore.rightPosition());
         replicasWithoutLearners.sort((r1, r2) ->
                 Long.valueOf(r1.writePosition()).compareTo(r2.writePosition()));

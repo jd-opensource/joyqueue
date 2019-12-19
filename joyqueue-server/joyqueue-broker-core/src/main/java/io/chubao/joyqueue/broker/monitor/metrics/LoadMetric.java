@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.chubao.joyqueue.broker.monitor.metrics;
 
+package io.chubao.joyqueue.broker.monitor.metrics;
+import com.alibaba.fastjson.annotation.JSONField;
 import com.codahale.metrics.*;
 
 /**
@@ -32,7 +33,7 @@ public class LoadMetric implements Metered, Sampling {
     public LoadMetric(){
         reset();
     }
-    public LoadMetric(Meter meter,Histogram histogram){
+    public LoadMetric(Meter meter, Histogram histogram){
         this.meter=meter;
         this.histogram=histogram;
     }
@@ -41,6 +42,7 @@ public class LoadMetric implements Metered, Sampling {
      * Load metric snapshot
      *
      **/
+    @JSONField(serialize = false)
     public LoadMetric getIntervalLoadMetric(){
        LoadMetric snapshot= new LoadMetric(meter,histogram);
                   reset();
@@ -112,3 +114,4 @@ public class LoadMetric implements Metered, Sampling {
         return histogram.getSnapshot();
     }
 }
+

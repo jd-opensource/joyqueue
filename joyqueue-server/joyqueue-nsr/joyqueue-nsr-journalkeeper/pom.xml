@@ -27,11 +27,6 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>joyqueue-nsr-journalkeeper</artifactId>
-
-    <properties>
-        <journalkeeper.version>0.1.4-SNAPSHOT</journalkeeper.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>io.chubao</groupId>

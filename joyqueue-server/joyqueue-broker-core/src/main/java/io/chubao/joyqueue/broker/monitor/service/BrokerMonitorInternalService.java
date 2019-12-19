@@ -16,8 +16,10 @@
 package io.chubao.joyqueue.broker.monitor.service;
 
 import io.chubao.joyqueue.broker.monitor.stat.BrokerStatExt;
+import io.chubao.joyqueue.broker.monitor.stat.JVMStat;
 import io.chubao.joyqueue.monitor.BrokerMonitorInfo;
 import io.chubao.joyqueue.monitor.BrokerStartupInfo;
+import io.chubao.joyqueue.toolkit.vm.GCEventListener;
 
 /**
  * broker monitor service
@@ -49,4 +51,18 @@ public interface BrokerMonitorInternalService {
      */
     @Deprecated
     BrokerStartupInfo getStartInfo();
+
+    /***
+     *
+     * GC event listener
+     *
+     **/
+    void addGcEventListener(GCEventListener listener);
+
+
+    /**
+     *  当前获取JVM 信息, realtime
+     *
+     **/
+    JVMStat getJVMState();
 }

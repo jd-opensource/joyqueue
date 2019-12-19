@@ -109,7 +109,7 @@ public class ConsumeArchiveService extends Service {
                 .sleepTime(1000 * 10, 1000 * 10)
                 .name("CleanArchiveFile-ConsumeLog-Thread")
                 .onException(e -> logger.error(e.getMessage(), e))
-                .doWork(repository::delArchivedFile)
+                .doWork(this::cleanAndRollWriteFile)
                 .build();
     }
 
@@ -139,9 +139,14 @@ public class ConsumeArchiveService extends Service {
         // 读信息，一次读指定条数
         List<ConsumeLog> list = readConsumeLog(archiveConfig.getConsumeBatchNum());
         if (list.size() > 0) {
+            long startTime = SystemClock.now();
+
             // 调用存储接口写数据
             archiveStore.putConsumeLog(list);
-            logger.debug("Write consumeLogs size:{} to archive store.", list.size());
+
+            long endTime = SystemClock.now();
+
+            logger.debug("Write consumeLogs size:{} to archive store, and elapsed time {}ms", list.size(), endTime - startTime);
 
             int consumeWriteDelay = archiveConfig.getConsumeWriteDelay();
             if (consumeWriteDelay > 0) {
@@ -149,8 +154,21 @@ public class ConsumeArchiveService extends Service {
             }
 
         } else {
+            if (repository.rFile != null && repository.rMap != null) {
+                logger.debug("read file name {}, read position {}", repository.rFile.getName(), repository.rMap.toString() );
+            } else {
+                logger.debug("read file is null.");
+            }
+
             Thread.sleep(100);
         }
+    }
+
+    private void cleanAndRollWriteFile() {
+        // 删除已归档文件
+        repository.delArchivedFile();
+        // 5分钟滚动生成一个新的写文件，旧文件可归档
+        repository.tryFinishCurWriteFile();
     }
 
     /**
@@ -323,6 +341,8 @@ public class ConsumeArchiveService extends Service {
             // 如果已经写满，则关闭流，等待下一次调用的时候初始化
             if (checkFileEndFlag(rwMap)) {
                 close();
+                // 如果最后一个文件写满了，则直接返回，下次调用append的时候新建一个文件写
+                return;
             }
             // 设置当前文件继续写入的位置
             position = rwMap.position();
@@ -333,7 +353,7 @@ public class ConsumeArchiveService extends Service {
          *
          * @param buffer
          */
-        public void append(ByteBuffer buffer) {
+        public synchronized void append(ByteBuffer buffer) {
             position += buffer.limit();
             // 首次创建文件
             if (rwMap == null) {
@@ -346,6 +366,11 @@ public class ConsumeArchiveService extends Service {
                 rwMap = null;
                 append(buffer);
             } else {
+                // buffer 为空时直接返回
+                if (buffer.limit() == 0) {
+                    logger.debug("append buffer limit is zero.");
+                    return;
+                }
                 // 先写一个开始标记
                 rwMap.put(Byte.MIN_VALUE);
                 // 记录一个标示位占用长度
@@ -415,6 +440,8 @@ public class ConsumeArchiveService extends Service {
 
                 return bytes;
             } else if (checkFileEndFlag(rMap)) {
+                logger.debug("Finish reading the file {}.{}", rFile, rMap.toString());
+
                 // 换文件
                 if (nextFile() != null) {
                     // 映射新文件
@@ -450,6 +477,7 @@ public class ConsumeArchiveService extends Service {
         private boolean checkFileEndFlag(MappedByteBuffer rMap) {
             if (rMap.position() + 1 <= pageSize) {
                 if (rMap.get() == Byte.MAX_VALUE) {
+                    rMap.position(rMap.position() - 1);
                     return true;
                 } else {
                     rMap.position(rMap.position() - 1);
@@ -496,19 +524,31 @@ public class ConsumeArchiveService extends Service {
         private File nextFile() {
             File file = new File(baseDir);
             String[] list = file.list();
-            if (list == null) {
+            if (list == null || list.length == 1) {
+                logger.debug("only one write file.");
+                // 归档文件目录下的没有文件，或者文件数等于1，则表示没有可归档文件，返回null
                 return null;
             }
+
+            logger.debug("archive file list {}", Arrays.toString(list));
+
             final String concurrentFileName = rFile == null ? "" : rFile.getName();
-            Optional<String> first = Arrays.asList(list).stream().filter(name -> name.compareTo(concurrentFileName) > 0)
-                    .sorted(Comparator.naturalOrder()).findFirst();
-            if (first.isPresent()) {
-                String fileName = first.get();
+            List<String> sorted = Arrays.asList(list).stream().filter(name -> name.compareTo(concurrentFileName) > 0)
+                    .sorted(Comparator.naturalOrder()).collect(Collectors.toList());
+
+            if (sorted.size() > 1) {
+                // 未归档文件数大于1，获取第1个未归档文件
+                String fileName = sorted.get(0);
                 File tempFile = new File(baseDir + fileName);
                 rFile = tempFile;
+
                 return rFile;
+            } else {
+                logger.debug("only one write file.");
             }
+
             return null;
+
         }
 
         /**
@@ -602,6 +642,26 @@ public class ConsumeArchiveService extends Service {
          */
         public long getPageSize() {
             return pageSize;
+        }
+
+        /**
+         * 结束当前正在写的文件
+         */
+        public synchronized void tryFinishCurWriteFile() {
+            if (rwFile == null) {
+                return;
+            }
+            // 5分钟滚动生成一个新的写文件
+            String name = rwFile.getName();
+            long now = SystemClock.now();
+            // position > 0 说明有归档记录写入文件，并且5分钟没有写满
+            if (position > 0 && now - Long.parseLong(name) >= 1000 * 60 * 1) {
+                // 直接将当前写文件的位置设置为文件大小，下次一次append的时候会新建一个文件继续写
+                position = pageSize;
+                append(ByteBuffer.wrap(new byte[0]));
+
+                logger.info("reset write file {} position {} to pageSize.", rwFile.getName(), rwMap.toString());
+            }
         }
     }
 

@@ -35,6 +35,8 @@ public class PartitionGroupStat implements Serializable {
     private EnQueueStat enQueueStat = new EnQueueStat();
     private DeQueueStat deQueueStat = new DeQueueStat();
     private ReplicationStat replicationStat = new ReplicationStat();
+    private ElectionEventStat electionEventStat =new ElectionEventStat();
+    // realtime state of Replica group, fill it before use
 
     private ConcurrentMap<Short /** partition **/, PartitionStat> partitionStatMap = Maps.newConcurrentMap();
 
@@ -69,6 +71,9 @@ public class PartitionGroupStat implements Serializable {
         return deQueueStat;
     }
 
+    public ElectionEventStat getElectionEventStat() {
+        return electionEventStat;
+    }
     public int getPartitionGroup() {
         return partitionGroup;
     }

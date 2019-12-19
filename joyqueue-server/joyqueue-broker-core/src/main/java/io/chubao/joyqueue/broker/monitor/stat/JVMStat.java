@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.chubao.joyqueue.broker.monitor.stat;
 
 import com.alibaba.fastjson.annotation.JSONField;
@@ -35,18 +36,23 @@ public class JVMStat {
     private AtomicLong  totalGcTime;
 
     // interval eden gc times
-    private transient LoadMetric edenGcTimes;
+    private  LoadMetric edenGcTimes;
 
     // interval old gc times
-    private transient  LoadMetric oldGcTimes;
+    private  LoadMetric oldGcTimes;
     // snapshot
-    private transient MemoryStat memoryStat;
+    private   MemoryStat memoryStat;
+
+    // 最新的 snapshot
+    private transient JVMStat recentSnapshot;
+
 
     public JVMStat(){
        this(new AtomicLong(),new AtomicLong(),new LoadMetric(),new LoadMetric(),null);
     }
 
-    public JVMStat(AtomicLong totalGcTimes,AtomicLong totalGcTime,LoadMetric edenGcTimes,LoadMetric oldGcTimes,MemoryStat memoryStat){
+    public JVMStat(AtomicLong totalGcTimes, AtomicLong totalGcTime, LoadMetric edenGcTimes, LoadMetric oldGcTimes, MemoryStat memoryStat){
+
         //总 gc 次数
         this.totalGcTimes=totalGcTimes;
         //总 gc 耗时
@@ -99,11 +105,31 @@ public class JVMStat {
 
     /**
      *
-     * Last interval snapshot
+     * Recent interval snapshot
+     *
+     **/
+    @JSONField(serialize =false)
+    public JVMStat getRecentSnapshot() {
+        if(recentSnapshot==null){
+            recentSnapshot=snapshot();
+        }
+        return recentSnapshot;
+    }
+
+    public void setRecentSnapshot(JVMStat recentSnapshot) {
+        this.recentSnapshot = recentSnapshot;
+    }
+
+    /**
+     *
+     * Snapshot and reset
+
      *
      **/
     @JSONField(serialize =false)
     public JVMStat snapshot(){
-       return new JVMStat(null,null,edenGcTimes.getIntervalLoadMetric(),oldGcTimes.getIntervalLoadMetric(),memoryStat);
+       recentSnapshot =new JVMStat(null,null,edenGcTimes.getIntervalLoadMetric(),oldGcTimes.getIntervalLoadMetric(),memoryStat);
+       return recentSnapshot;
     }
 }
+

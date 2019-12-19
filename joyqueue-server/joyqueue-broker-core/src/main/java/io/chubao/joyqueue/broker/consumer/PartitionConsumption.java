@@ -40,7 +40,6 @@ import io.chubao.joyqueue.store.ReadResult;
 import io.chubao.joyqueue.store.StoreService;
 import io.chubao.joyqueue.toolkit.network.IpUtil;
 import io.chubao.joyqueue.toolkit.service.Service;
-import io.chubao.joyqueue.toolkit.stat.TPStatUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -243,7 +242,6 @@ class PartitionConsumption extends Service {
         PartitionGroupStore store = storeService.getStore(topic, group);
         ReadResult readRst = store.read(partition, index, count, Long.MAX_VALUE);
 
-        TPStatUtil.append(monitorKey, startTime, System.nanoTime());
 
         if (readRst.getCode() == JoyQueueCode.SUCCESS) {
             result.setBuffers(Lists.newArrayList(readRst.getMessages()));
@@ -299,7 +297,6 @@ class PartitionConsumption extends Service {
 
                 ByteBuffer[] byteBuffers = readMessages(consumer, partitionGroup, partition, index, count);
 
-                TPStatUtil.append(monitorKey, startTime, System.nanoTime());
 
                 if (byteBuffers == null) {
                     // 如果没有拿到消息，则释放占用
