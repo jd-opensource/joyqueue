@@ -16,6 +16,7 @@
 package io.chubao.joyqueue;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import io.chubao.joyqueue.broker.Launcher;
 import io.chubao.joyqueue.broker.config.Args;
 import io.chubao.joyqueue.broker.config.ConfigDef;
@@ -32,7 +33,11 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -159,6 +164,8 @@ public class LauncherTest {
         BrokerStartState firstState=waitBrokerStart(firstBroker);
         BrokerStartState secondState=waitBrokerStart(secondBroker);
         BrokerStartState thirdState=waitBrokerStart(thirdBroker);
+        boolean clusterStartSuccessful=firstState.state&&secondState.state&&thirdState.state;
+        clusterStartSuccessful= clusterStartSuccessful&&checkClusterInfo(IpUtil.getLocalIp(),firstPort.getMonitorPort(),1,unit,journalKeeperNodes);
         if(firstState.getLauncher()!=null) {
             firstState.getLauncher().destroy();
         }
@@ -168,7 +175,6 @@ public class LauncherTest {
         if(thirdState.getLauncher()!=null){
             thirdState.getLauncher().destroy();
         }
-        boolean clusterStartSuccessful=firstState.state&&secondState.state&&thirdState.state;
         System.out.println("destroy all processes");
         Assert.assertTrue(clusterStartSuccessful);
 
@@ -188,6 +194,8 @@ public class LauncherTest {
 
         Broker thirdPort=new Broker();
         thirdPort.setPort(60088);
+        String expectJournalqKeeperNodes = String.format("%s,%s,%s",IpUtil.getLocalIp()+":"+String.valueOf(firstPort.getJournalkeeperPort()),
+                IpUtil.getLocalIp()+":"+String.valueOf(secondPort.getJournalkeeperPort()),IpUtil.getLocalIp()+":"+String.valueOf(thirdPort.getJournalkeeperPort()));
 
         String journalKeeperNodes = IpUtil.getLocalIp()+":"+String.valueOf(firstPort.getJournalkeeperPort());
         String dataDir= ROOT_DIR+"/first/Data";
@@ -213,7 +221,8 @@ public class LauncherTest {
         BrokerStartState thirdState=waitBrokerStart(thirdBroker);
         // mock 2 minutes test logic
         // make sure release all process
-
+        boolean clusterStartSuccessful=firstState.state&&secondState.state&&thirdState.state;
+        boolean metadata= clusterStartSuccessful&&checkClusterInfo(IpUtil.getLocalIp(),firstPort.getMonitorPort(),1,unit,expectJournalqKeeperNodes);
         if(firstState.getLauncher()!=null) {
             firstState.getLauncher().destroy();
         }
@@ -223,9 +232,9 @@ public class LauncherTest {
         if(thirdState.getLauncher()!=null){
             thirdState.getLauncher().destroy();
         }
-        boolean clusterStartSuccessful=firstState.state&&secondState.state&&thirdState.state;
         System.out.println("destroy all processes");
         Assert.assertTrue(clusterStartSuccessful);
+        Assert.assertTrue(metadata);
 
     }
 
@@ -307,6 +316,53 @@ public class LauncherTest {
         Thread thread=new Thread(futureTask);
         thread.start();
         return futureTask;
+    }
+
+    public boolean checkClusterInfo(String host,int port,long timeout,TimeUnit unit,String expectClusterInfo){
+
+        URL  url= URL.valueOf(String.format("http://%s:%s/monitor/metadata/cluster",host,port));
+        Get  http= Get.Builder.build().connectionTimeout((int)TimeUnit.MILLISECONDS.toMillis(30))
+                .socketTimeout((int)unit.toMillis(timeout)).create();
+        try{
+            String resp=http.get(url);
+            RestResponse<String> clusterMetadata=JSON.parseObject(resp, RestResponse.class);
+            JSONObject object=JSON.parseObject(clusterMetadata.getData()).getJSONObject("cluster");
+            String voters=parseJournalkeeperNodesFromVoter(object.getString("voters"));
+            if(voters!=null) {
+                Set<String> expectNodeSet=journalKeeperNodes(expectClusterInfo);
+                Set<String> actualNodeSet=journalKeeperNodes(voters);
+                return actualNodeSet.containsAll(expectNodeSet);
+            }
+        }catch (IOException ioe){
+           System.err.println(ioe.getMessage());
+        }
+        return false;
+    }
+
+    /**
+     * Parse JournalKeeper Nodes
+     **/
+    public String parseJournalkeeperNodesFromVoter(String voter){
+        if(voter==null||voter.length()==0){ return null;}
+        List<String> zknodes=JSON.parseArray(voter,String.class);
+        StringBuilder builder=new StringBuilder();
+        for(String node:zknodes){
+            builder.append(node.split("//")[1]).append(",");
+        }
+        int len= builder.length();
+        return builder.toString().substring(0,len-1);
+    }
+
+    /**
+     * Parse nodes set from String
+     **/
+    public Set<String> journalKeeperNodes(String nodes){
+        String[] ns=nodes.split(",");
+        Set<String> nodeSet=new HashSet<>();
+        for(String n:ns){
+            nodeSet.add(n);
+        }
+       return nodeSet;
     }
 
     /**
