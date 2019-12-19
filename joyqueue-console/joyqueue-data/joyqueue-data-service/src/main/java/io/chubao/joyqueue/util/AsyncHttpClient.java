@@ -39,7 +39,7 @@ import static io.chubao.joyqueue.exception.ServiceException.INTERNAL_SERVER_ERRO
 
 public class AsyncHttpClient {
 
-    private static final int ASYNC_TIMEOUT=5000;
+    private static final int ASYNC_TIMEOUT=2000;
     private static final Logger logger= LoggerFactory.getLogger(AsyncHttpClient.class);
     private static CloseableHttpAsyncClient httpclient = HttpAsyncClients.custom().setDefaultRequestConfig(RequestConfig.custom()
             .setConnectTimeout(ASYNC_TIMEOUT)
