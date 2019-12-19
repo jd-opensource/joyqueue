@@ -92,7 +92,7 @@ public class ConsumeOffsetServiceImpl implements ConsumeOffsetService {
             @Override
             public String getKey(Broker broker, PartitionGroup partitionGroup,short partition,Subscribe condition) {
                 brokers.add(broker);
-                return broker.getIp()+":"+broker.getPort();
+                return broker.getIp()+":"+broker.getMonitorPort();
             }
 
             @Override
@@ -244,7 +244,7 @@ public class ConsumeOffsetServiceImpl implements ConsumeOffsetService {
             @Override
             public String getKey(Broker broker, PartitionGroup partitionGroup,short partition, Subscribe condition) {
                 brokers.add(broker);
-                return broker.getIp()+":"+broker.getPort();
+                return broker.getIp()+":"+broker.getMonitorPort();
             }
         },"resetAppTopicOffsetByTime","reset consume topic Offset by time");
         Map<String/*request key*/, String/*response*/> resultMap= brokerCluster.get(resultFuture,TIMEOUT, TimeUnit.MILLISECONDS);

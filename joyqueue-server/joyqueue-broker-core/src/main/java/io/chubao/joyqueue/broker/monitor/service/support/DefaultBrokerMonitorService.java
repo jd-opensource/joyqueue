@@ -18,17 +18,11 @@ package io.chubao.joyqueue.broker.monitor.service.support;
 import io.chubao.joyqueue.broker.coordinator.domain.CoordinatorDetail;
 import io.chubao.joyqueue.broker.coordinator.group.domain.GroupMemberMetadata;
 import io.chubao.joyqueue.broker.coordinator.group.domain.GroupMetadata;
-import io.chubao.joyqueue.broker.monitor.service.ArchiveMonitorService;
-import io.chubao.joyqueue.broker.monitor.service.BrokerMonitorInternalService;
-import io.chubao.joyqueue.broker.monitor.service.BrokerMonitorService;
-import io.chubao.joyqueue.broker.monitor.service.ConnectionMonitorService;
-import io.chubao.joyqueue.broker.monitor.service.ConsumerMonitorService;
-import io.chubao.joyqueue.broker.monitor.service.CoordinatorMonitorService;
-import io.chubao.joyqueue.broker.monitor.service.MetadataMonitorService;
-import io.chubao.joyqueue.broker.monitor.service.PartitionMonitorService;
-import io.chubao.joyqueue.broker.monitor.service.ProducerMonitorService;
-import io.chubao.joyqueue.broker.monitor.service.TopicMonitorService;
+import io.chubao.joyqueue.broker.monitor.service.*;
 import io.chubao.joyqueue.broker.monitor.stat.BrokerStatExt;
+import io.chubao.joyqueue.broker.monitor.stat.ElectionEventStat;
+import io.chubao.joyqueue.broker.monitor.stat.JVMStat;
+import io.chubao.joyqueue.broker.monitor.stat.ReplicaNodeStat;
 import io.chubao.joyqueue.domain.Consumer;
 import io.chubao.joyqueue.domain.Producer;
 import io.chubao.joyqueue.domain.TopicConfig;
@@ -48,7 +42,7 @@ import io.chubao.joyqueue.monitor.ProducerPartitionGroupMonitorInfo;
 import io.chubao.joyqueue.monitor.ProducerPartitionMonitorInfo;
 import io.chubao.joyqueue.monitor.TopicMonitorInfo;
 import io.chubao.joyqueue.response.BooleanResponse;
-
+import io.chubao.joyqueue.toolkit.vm.GCEventListener;
 import java.util.List;
 import java.util.Map;
 
@@ -243,6 +237,16 @@ public class DefaultBrokerMonitorService implements BrokerMonitorService {
     public Pager<TopicMonitorInfo> getTopicInfos(int page, int pageSize) {
         return topicMonitorService.getTopicInfos(page, pageSize);
     }
+    @Override
+    public void addGcEventListener(GCEventListener listener) {
+        brokerMonitorInternalService.addGcEventListener(listener);
+    }
+
+    @Override
+    public JVMStat getJVMState() {
+        return brokerMonitorInternalService.getJVMState();
+    }
+
 
     @Override
     public TopicMonitorInfo getTopicInfoByTopic(String topic) {
@@ -308,6 +312,18 @@ public class DefaultBrokerMonitorService implements BrokerMonitorService {
         return metadataMonitorService.getWritableResult(topic, app, address);
     }
 
+
+
+    @Override
+    public ReplicaNodeStat getReplicaState(String topic, int partitionGroup) {
+        return partitionMonitorService.getReplicaState(topic,partitionGroup);
+    }
+
+
+    @Override
+    public ElectionEventStat getReplicaRecentElectionEvent(String topic, int partitionGroup) {
+        return partitionMonitorService.getReplicaRecentElectionEvent(topic, partitionGroup);
+    }
     @Override
     public Consumer getConsumerMetadataByTopicAndApp(String topic, String app, boolean isCluster) {
         return metadataMonitorService.getConsumerMetadataByTopicAndApp(topic, app, isCluster);

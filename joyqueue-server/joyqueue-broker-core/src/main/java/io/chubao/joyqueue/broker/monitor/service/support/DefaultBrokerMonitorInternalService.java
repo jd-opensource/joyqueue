@@ -21,6 +21,9 @@ import io.chubao.joyqueue.broker.consumer.Consume;
 import io.chubao.joyqueue.broker.election.ElectionService;
 import io.chubao.joyqueue.broker.monitor.converter.BrokerMonitorConverter;
 import io.chubao.joyqueue.broker.monitor.service.BrokerMonitorInternalService;
+import io.chubao.joyqueue.broker.monitor.stat.*;
+import io.chubao.joyqueue.network.session.Consumer;
+import io.chubao.joyqueue.nsr.NameService;
 import io.chubao.joyqueue.broker.monitor.stat.BrokerStat;
 import io.chubao.joyqueue.broker.monitor.stat.BrokerStatExt;
 import io.chubao.joyqueue.broker.monitor.stat.ConsumerPendingStat;
@@ -34,8 +37,6 @@ import io.chubao.joyqueue.monitor.BrokerStartupInfo;
 import io.chubao.joyqueue.monitor.ElectionMonitorInfo;
 import io.chubao.joyqueue.monitor.NameServerMonitorInfo;
 import io.chubao.joyqueue.monitor.StoreMonitorInfo;
-import io.chubao.joyqueue.network.session.Consumer;
-import io.chubao.joyqueue.nsr.NameService;
 import io.chubao.joyqueue.store.PartitionGroupStore;
 import io.chubao.joyqueue.store.StoreManagementService;
 import io.chubao.joyqueue.store.StoreService;
@@ -88,9 +89,11 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
         this.electionService = electionManager;
         this.clusterManager = clusterManager;
         this.brokerStartupInfo = brokerStartupInfo;
-        this.jvmMonitorService = new GarbageCollectorMonitor();
-        this.gcNotificationParser = new DefaultGCNotificationParser();
-        this.gcNotificationParser.addListener((new DefaultGCEventListener(brokerStat.getJvmStat())));
+        this.jvmMonitorService=new GarbageCollectorMonitor();
+        this.gcNotificationParser=new DefaultGCNotificationParser();
+        this.gcNotificationParser.addListener(new DefaultGCEventListener(brokerStat.getJvmStat()));
+        this.jvmMonitorService.addGCEventListener(gcNotificationParser);
+
     }
 
     @Override
@@ -127,7 +130,10 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
     // BrokerStatExt里所有对象单独生成bean，不能复用monitor的bean
     @Override
     public BrokerStatExt getExtendBrokerStat(long timeStamp) {
-        BrokerStatExt statExt = new BrokerStatExt(brokerStat);
+        BrokerStatExt statExt=new BrokerStatExt(brokerStat);
+        statExt.setTimeStamp(timeStamp);
+        getJVMState(); // update current jvm state and memory stat
+        statExt.getBrokerStat().getJvmStat().getRecentSnapshot();
         statExt.setTimeStamp(timeStamp);
         brokerStat.getJvmStat().setMemoryStat(jvmMonitorService.memSnapshot());
         Map<String, TopicPendingStat> topicPendingStatMap = statExt.getTopicPendingStatMap();
@@ -189,9 +195,27 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
             }
             topicPendingStat.setPending(topicPending);
         }
+        // replicas lag state
+        snapshotReplicaLag();
+        // runtime memory usage state
         runtimeMemoryUsageState(statExt);
         runtimeStorageOccupy(brokerStat);
         return statExt;
+    }
+
+    /**
+     *  Replica log max position snapshots
+     *
+     **/
+    public void snapshotReplicaLag(){
+        Map<String, TopicStat>  topicStatMap=brokerStat.getTopicStats();
+        for(TopicStat topicStat:topicStatMap.values()){
+            Map<Integer,PartitionGroupStat> partitionGroupStatMap= topicStat.getPartitionGroupStatMap();
+            for(PartitionGroupStat partitionGroupStat:partitionGroupStatMap.values()){
+                StoreManagementService.PartitionGroupMetric partitionGroupMetric=storeManagementService.partitionGroupMetric(partitionGroupStat.getTopic(),partitionGroupStat.getPartitionGroup());
+                partitionGroupStat.getReplicationStat().setMaxLogPosition(partitionGroupMetric.getRightPosition());
+            }
+        }
     }
 
     @Override
@@ -236,6 +260,20 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
        brokerStatExt.setHeap(memoryMXBean.getHeapMemoryUsage());
        brokerStatExt.setNonHeap(memoryMXBean.getNonHeapMemoryUsage());
    }
+
+    @Override
+    public JVMStat getJVMState() {
+        JVMStat jvmStat=brokerStat.getJvmStat();
+        jvmStat.setMemoryStat(jvmMonitorService.memSnapshot());
+        return jvmStat;
+    }
+
+
+    @Override
+    public void addGcEventListener(GCEventListener listener) {
+        this.gcNotificationParser.addListener(listener);
+    }
+
 
    /**
     *  store storage size

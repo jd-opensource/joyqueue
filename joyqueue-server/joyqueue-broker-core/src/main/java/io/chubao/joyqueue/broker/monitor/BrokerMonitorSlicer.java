@@ -112,7 +112,8 @@ public class BrokerMonitorSlicer extends Service implements Runnable {
                 }
             }
         }
-
+        // period snapshot
+        brokerMonitor.getBrokerStat().getJvmStat().snapshot();
         brokerMonitor.getBrokerStat().getReplicationStat().getAppendStat().slice();
         brokerMonitor.getBrokerStat().getReplicationStat().getReplicaStat().slice();
 

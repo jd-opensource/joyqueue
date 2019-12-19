@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.chubao.joyqueue.toolkit.vm;
 
+package io.chubao.joyqueue.toolkit.vm;
 import io.chubao.joyqueue.toolkit.service.Service;
 import sun.misc.SharedSecrets;
-
 import javax.management.NotificationEmitter;
 import javax.management.NotificationListener;
 import java.lang.management.GarbageCollectorMXBean;
@@ -52,13 +51,14 @@ public class GarbageCollectorMonitor extends Service implements JVMMonitorServic
         // heap
         stat.setHeapMax(heap.getMax());
         stat.setHeapInit(heap.getInit());
-        stat.setHeapCommited(heap.getCommitted());
+        stat.setHeapCommitted(heap.getCommitted());
         stat.setHeapUsed(heap.getUsed());
         // non-heap
-        stat.setNontHeapInit(nonHeap.getInit());
+        stat.setNonHeapInit(nonHeap.getInit());
         stat.setNonHeapMax(nonHeap.getMax());
         stat.setNonHeapUsed(nonHeap.getUsed());
-        stat.setNonHeapCommited(nonHeap.getCommitted());
+        stat.setNonHeapCommitted(nonHeap.getCommitted());
+
         // allocated by ByteBuffer.allocateDirect()
         stat.setDirectBufferSize(SharedSecrets.getJavaNioAccess().getDirectBufferPool().getMemoryUsed());
 

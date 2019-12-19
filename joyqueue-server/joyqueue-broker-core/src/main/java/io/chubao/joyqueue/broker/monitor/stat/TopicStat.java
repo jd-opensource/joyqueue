@@ -35,6 +35,7 @@ public class TopicStat implements Serializable {
     private EnQueueStat enQueueStat = new EnQueueStat();
     private DeQueueStat deQueueStat = new DeQueueStat();
     private ConcurrentMap<String /** app **/, AppStat> appStatMap = Maps.newConcurrentMap();
+    // topic level partition group state
     private ConcurrentMap<Integer /** partitionGroupId **/, PartitionGroupStat> partitionGroupStatMap = Maps.newConcurrentMap();
 
     // 不能放这

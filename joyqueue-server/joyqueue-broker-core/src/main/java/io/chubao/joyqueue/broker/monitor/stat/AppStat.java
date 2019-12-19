@@ -34,6 +34,7 @@ public class AppStat implements Serializable {
     private String topic;
     private String app;
     private ConnectionStat connectionStat = new ConnectionStat();
+    // app level partition group state
     private ConcurrentMap<Integer /** partitionGroupId **/, PartitionGroupStat> partitionGroupStatMap = Maps.newConcurrentMap();
 
     private ConsumerStat consumerStat;

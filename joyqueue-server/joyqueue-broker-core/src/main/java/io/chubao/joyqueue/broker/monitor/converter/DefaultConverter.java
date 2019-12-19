@@ -15,17 +15,13 @@
  */
 package io.chubao.joyqueue.broker.monitor.converter;
 
+import com.codahale.metrics.Snapshot;
+import com.google.common.collect.Lists;
 import io.chubao.joyqueue.broker.monitor.PendingStat;
-import io.chubao.joyqueue.broker.monitor.stat.AppStat;
-import io.chubao.joyqueue.broker.monitor.stat.BrokerStat;
-import io.chubao.joyqueue.broker.monitor.stat.BrokerStatExt;
-import io.chubao.joyqueue.broker.monitor.stat.DeQueueStat;
-import io.chubao.joyqueue.broker.monitor.stat.EnQueueStat;
-import io.chubao.joyqueue.broker.monitor.stat.PartitionGroupStat;
-import io.chubao.joyqueue.broker.monitor.stat.TopicPendingStat;
-import io.chubao.joyqueue.broker.monitor.stat.TopicStat;
+import io.chubao.joyqueue.broker.monitor.stat.*;
 import io.chubao.joyqueue.model.MonitorRecord;
 import io.chubao.joyqueue.toolkit.time.SystemClock;
+import io.chubao.joyqueue.toolkit.vm.MemoryStat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,8 +37,34 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRecord>> {
     private static final Logger logger = LoggerFactory.getLogger(DefaultConverter.class);
+    //broker heap state
+    private static final String BROKER_SLICE_HEAP="broker_slice_heap";
+    private static final String BROKER_SLICE_HEAP_INIT="broker_slice_heap_init";
+    private static final String BROKER_SLICE_HEAP_USED="broker_slice_heap_used";
+    private static final String BROKER_SLICE_HEAP_COMMITTED="broker_slice_heap_committed";
+    private static final String BROKER_SLICE_HEAP_MAX="broker_slice_heap_max";
+
+    private static final String BROKER_SLICE_NON_HEAP="broker_slice_non_heap";
+    private static final String BROKER_SLICE_NON_HEAP_INIT="broker_slice_non_heap_init";
+    private static final String BROKER_SLICE_NON_HEAP_USED="broker_slice_non_heap_used";
+    private static final String BROKER_SLICE_NON_HEAP_COMMITTED="broker_slice_non_heap_committed";
+    private static final String BROKER_SLICE_NON_HEAP_MAX="broker_slice_non_heap_max";
+
+    // young gc state
+    private static final String BROKER_SLICE_YOUNG_GC_TIMES="broker_slice_young_gc_times";
+    private static final String BROKER_SLICE_YOUNG_GC_ELAPSED="broker_slice_young_gc_elapsed";
+
+    // old gc state
+    private static final String BROKER_SLICE_OLD_GC_TIMES="broker_slice_old_gc_times";
+    private static final String BROKER_SLICE_OLD_GC_ELAPSED="broker_slice_old_gc_elapsed";
+
+
+
+    private static final String BROKER_SLICE_DIRECT_BUFFER_SIZE="broker_slice_direct_buffer_size";
+
 
     private static final String BROKER_SLICE_STORAGE = "broker_slice_storage";
+
     private static final String BROKER_SLICE_ENQUEUE = "broker_slice_enqueue";
     private static final String BROKER_SLICE_ENQUEUE_SIZE = "broker_slice_enqueue_size";
     private static final String BROKER_SLICE_ENQUEUE_TP99 = "broker_slice_enqueue_tp99";
@@ -115,6 +137,22 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
     private static final String PG_SLICE_ENQUEUE_MAX = "pg_slice_enqueue_max";
     private static final String PG_SLICE_ENQUEUE_MIN = "pg_slice_enqueue_min";
     private static final String PG_SLICE_ENQUEUE_AVG = "pg_slice_enqueue_avg";
+
+    private static final String PG_SLICE_REPLICA="pg_slice_replica";
+    private static final String PG_SLICE_REPLICA_LOG_MAX_POSITION="pg_slice_replica_log_max_position";
+
+
+
+    // replica state change serials
+    private static final String PG_SLICE_REPLICA_STAT="pg_slice_replica_state";
+
+    private static final String PG_SLICE_ELECTION="pg_slice_election";
+    // term and type
+    private static final String PG_SLICE_ELECTION_TERM="pg_slice_election_term";
+    private static final String PG_SLICE_ELECTION_TYPE="pg_slice_election_type";
+
+
+
 
     private static final String TOPIC_PENDING = "topic_pending";
     private static final String APP_PENDING = "app_pending";
@@ -372,6 +410,8 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
         ConcurrentMap<String, TopicStat> topics = brokerStat.getTopicStats();
 
         List<MonitorRecord> records = new ArrayList<>();
+
+        records.addAll(buildBrokerJVMState(brokerStat.getJvmStat().getRecentSnapshot(),brokerId,l));
         for (String tsKey : topics.keySet()) {
 
             ConcurrentMap<String, AppStat> appStats = topics.get(tsKey).getAppStats();
@@ -386,12 +426,125 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
                     if (pgs.get(key).getDeQueueStat() != null) {
                         records.addAll(buildDeQueueRecords(pgs.get(key).getDeQueueStat(), brokerId, l, tsKey, app, key));
                     }
-                }
 
+                }
+            }
+            // topic level partition group state
+            if(topics.get(tsKey)!= null) {
+                Map<Integer,PartitionGroupStat> partitionGroupStatMap=topics.get(tsKey).getPartitionGroupStatMap();
+                for(PartitionGroupStat partitionGroupStat: partitionGroupStatMap.values()) {
+                    records.addAll(buildReplicaLag(partitionGroupStat, brokerId, tsKey, null, partitionGroupStat.getPartitionGroup(), l));
+                    records.addAll(buildElectionAndReplicaState(partitionGroupStat, brokerId, tsKey, null, partitionGroupStat.getPartitionGroup(), l));
+
+                }
             }
         }
         return records;
     }
+
+
+    /**
+     * Build partition group replica lag
+     *
+     * @param partitionGroupStat current partition group stat
+     * @param timestampMs  broker state snapshot time in ms
+     *
+     **/
+    public List<MonitorRecord> buildReplicaLag(PartitionGroupStat partitionGroupStat,String brokerId,String topic,
+                                               String app,Integer partitionGroup,long timestampMs){
+        long maxLogPosition= partitionGroupStat.getReplicationStat().getMaxLogPosition();
+        MonitorRecord replicaRecord = new MonitorRecord();
+        fillRecord(replicaRecord, timestampMs);
+        replicaRecord.setValue(maxLogPosition);
+        // not current broker id
+        replicaRecord.brokerId(brokerId);
+        replicaRecord.topic(topic);
+        replicaRecord.app(app);
+        replicaRecord.setMetric(PG_SLICE_REPLICA_LOG_MAX_POSITION);
+        replicaRecord.partitionGroup(partitionGroup.toString());
+        return Lists.newArrayList(replicaRecord);
+    }
+
+
+
+
+
+    /**
+     * Build partition group election and replica state
+     * contain term and type
+     * @param partitionGroupStat current partition group stat
+     * @param timestampMs  broker state snapshot time in ms
+     *
+     **/
+    public List<MonitorRecord> buildElectionAndReplicaState(PartitionGroupStat partitionGroupStat,String brokerId,String topic,
+                                                            String app,Integer partitionGroup,long timestampMs){
+        MonitorRecord electionRecord = new MonitorRecord();
+        fillRecord(electionRecord, timestampMs);
+        // not current broker id
+        electionRecord.brokerId(brokerId);
+        // PG_SLICE_REPLICA_STAT is compose value
+        electionRecord.brokerId(partitionGroup.toString());
+        electionRecord.topic(topic);
+        electionRecord.app(app);
+        electionRecord.partitionGroup(partitionGroup.toString());
+        String[] metrics={PG_SLICE_ELECTION_TERM,PG_SLICE_ELECTION_TYPE,PG_SLICE_REPLICA_STAT};
+        List<MonitorRecord> electionAndReplicaRecords=buildEmptyRecords(electionRecord,metrics);
+        // term
+        electionAndReplicaRecords.get(0).setValue(partitionGroupStat.getElectionEventStat().getTerm());
+        // type
+        electionAndReplicaRecords.get(1).setValue(partitionGroupStat.getElectionEventStat().getState().ordinal());
+        // compose value
+        electionAndReplicaRecords.get(2).setValue(partitionGroupStat.getReplicationStat().getStat().getState().ordinal());
+        return electionAndReplicaRecords;
+    }
+
+
+    /**
+     *  Heap,non-heap, direct buffer size
+     *
+     **/
+    public List<MonitorRecord> buildBrokerJVMState(JVMStat jvmStat,String brokerId,long timestampMs){
+        MonitorRecord jvmRecord = new MonitorRecord();
+        fillRecord(jvmRecord, timestampMs);
+        // not current broker id
+        jvmRecord.brokerId(brokerId);
+        String[] jvmMetrics={BROKER_SLICE_HEAP_INIT,BROKER_SLICE_HEAP_USED,BROKER_SLICE_HEAP_COMMITTED,
+                BROKER_SLICE_HEAP_MAX,BROKER_SLICE_NON_HEAP_INIT,BROKER_SLICE_NON_HEAP_USED,
+                BROKER_SLICE_NON_HEAP_COMMITTED,BROKER_SLICE_NON_HEAP_MAX,
+                BROKER_SLICE_DIRECT_BUFFER_SIZE, BROKER_SLICE_YOUNG_GC_TIMES,
+                BROKER_SLICE_YOUNG_GC_ELAPSED,BROKER_SLICE_OLD_GC_TIMES,BROKER_SLICE_OLD_GC_ELAPSED};
+        // create a record for all metrics
+        List<MonitorRecord> jvmMonitorRecords=buildEmptyRecords(jvmRecord,jvmMetrics);
+        MemoryStat memoryState=jvmStat.getMemoryStat();
+        if(memoryState==null){
+            return Lists.newLinkedList();
+        }
+        jvmMonitorRecords.get(0).setValue(memoryState.getHeapInit());
+        jvmMonitorRecords.get(1).setValue(memoryState.getHeapUsed());
+        jvmMonitorRecords.get(2).setValue(memoryState.getHeapCommitted());
+        jvmMonitorRecords.get(3).setValue(memoryState.getHeapMax());
+
+        jvmMonitorRecords.get(4).setValue(memoryState.getNonHeapInit());
+        jvmMonitorRecords.get(5).setValue(memoryState.getNonHeapUsed());
+        jvmMonitorRecords.get(6).setValue(memoryState.getNonHeapCommitted());
+        jvmMonitorRecords.get(7).setValue(memoryState.getNonHeapMax());
+
+        jvmMonitorRecords.get(8).setValue(memoryState.getDirectBufferSize());
+
+        // old gc total elapsed time
+        jvmMonitorRecords.get(9).setValue(jvmStat.getOldGcTimes().getCount());
+        Snapshot oldSnapshot=jvmStat.getOldGcTimes().getSnapshot();
+        jvmMonitorRecords.get(10).setValue(oldSnapshot.getMean()*oldSnapshot.size());
+
+        // eden gc count and total elapsed time
+        Snapshot edenSnapshot=jvmStat.getEdenGcTimes().getSnapshot();
+        jvmMonitorRecords.get(11).setValue(jvmStat.getEdenGcTimes().getCount());
+        jvmMonitorRecords.get(12).setValue(edenSnapshot.getMean()*edenSnapshot.size());
+        return jvmMonitorRecords;
+    }
+
+
+
 
     private List<MonitorRecord> buildDeQueueRecords(DeQueueStat deQueueStat, String brokerId, long time, String tsKey, String app, Integer key) {
 

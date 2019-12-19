@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.chubao.joyqueue.toolkit.vm;
 
 import com.sun.management.GarbageCollectionNotificationInfo;
 import com.sun.management.GcInfo;
 import org.junit.Test;
 import sun.misc.SharedSecrets;
+
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
@@ -81,19 +83,23 @@ public class GCEventTest {
         GarbageCollectorMonitor gcMonitor=new GarbageCollectorMonitor();
         MemoryStat stat=gcMonitor.memSnapshot();
         StringBuilder builder=new StringBuilder();
-        ByteBuffer byteBuffer=ByteBuffer.allocateDirect(1024*1024*1024);
+        ByteBuffer byteBuffer=ByteBuffer.allocateDirect(2*1024*1024);
+
         long direct=SharedSecrets.getJavaNioAccess().getDirectBufferPool().getMemoryUsed();
 
         builder.append("heap:").append("init ").append(stat.getHeapInit()).append(" bytes,")
                 .append("used ").append(stat.getHeapUsed()).append(" bytes,")
-                .append("committed ").append(stat.getHeapCommited()).append(" bytes,")
+
+                .append("committed ").append(stat.getHeapCommitted()).append(" bytes,")
                 .append("max ").append(stat.getHeapMax()).append(" bytes\n");
 
-        builder.append("non-heap:").append("init ").append(stat.getNontHeapInit()).append(" bytes,")
+        builder.append("non-heap:").append("init ").append(stat.getNonHeapInit()).append(" bytes,")
                 .append("used ").append(stat.getNonHeapUsed()).append(" bytes,")
-                .append("committed ").append(stat.getNonHeapCommited()).append(" bytes,")
+                .append("committed ").append(stat.getNonHeapCommitted()).append(" bytes,")
+
                 .append("max ").append(stat.getNonHeapMax()).append(" bytes\n");
         System.out.println(builder.toString());
         System.out.println("direct:"+direct);
     }
+
 }

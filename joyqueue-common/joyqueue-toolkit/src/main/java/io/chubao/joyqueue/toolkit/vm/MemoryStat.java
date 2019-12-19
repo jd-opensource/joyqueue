@@ -13,16 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.chubao.joyqueue.toolkit.vm;
 
 public class MemoryStat {
     private long heapInit;
     private long heapMax;
-    private long heapCommited;
+
+    private long heapCommitted;
     private long heapUsed;
-    private long nontHeapInit;
+    private long nonHeapInit;
     private long nonHeapMax;
-    private long nonHeapCommited;
+    private long nonHeapCommitted;
+
     private long nonHeapUsed;
     // allocated by ByteBuffer.allocateDirect()
 
@@ -67,28 +70,28 @@ public class MemoryStat {
         this.heapInit = heapInit;
     }
 
-    public long getHeapCommited() {
-        return heapCommited;
+    public long getHeapCommitted() {
+        return heapCommitted;
     }
 
-    public void setHeapCommited(long heapCommited) {
-        this.heapCommited = heapCommited;
+    public void setHeapCommitted(long heapCommitted) {
+        this.heapCommitted = heapCommitted;
     }
 
-    public long getNontHeapInit() {
-        return nontHeapInit;
+    public long getNonHeapInit() {
+        return nonHeapInit;
     }
 
-    public void setNontHeapInit(long nontHeapInit) {
-        this.nontHeapInit = nontHeapInit;
+    public void setNonHeapInit(long nonHeapInit) {
+        this.nonHeapInit = nonHeapInit;
     }
 
-    public long getNonHeapCommited() {
-        return nonHeapCommited;
+    public long getNonHeapCommitted() {
+        return nonHeapCommitted;
     }
 
-    public void setNonHeapCommited(long nonHeapCommited) {
-        this.nonHeapCommited = nonHeapCommited;
+    public void setNonHeapCommitted(long nonHeapCommitted) {
+        this.nonHeapCommitted = nonHeapCommitted;
     }
 
     public long getDirectBufferSize() {

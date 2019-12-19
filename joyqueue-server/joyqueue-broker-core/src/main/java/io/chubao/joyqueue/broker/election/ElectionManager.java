@@ -153,7 +153,7 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
 
         electionEventManager = new EventBus<>("LeaderElectionEvent");
         electionEventManager.start();
-
+        addListener(brokerMonitor.new ElectionListener());
         leaderElections = new ConcurrentHashMap<>();
 
         ClientConfig clientConfig = new ClientConfig();
