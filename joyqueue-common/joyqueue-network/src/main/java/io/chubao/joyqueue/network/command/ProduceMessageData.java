@@ -69,10 +69,6 @@ public class ProduceMessageData {
         if (messages == null) {
             return 0;
         }
-        int size = 0;
-        for (BrokerMessage message : messages) {
-            size += message.getSize();
-        }
-        return size;
+        return messages.size();
     }
 }
