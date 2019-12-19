@@ -102,7 +102,7 @@ export function getCodeRule3 () {
 export function getErpsRule () {
   return [
     {required: true, message: '请输入Erp，多个以,隔开，不能有空格', trigger: 'change'},
-    {pattern: /^([a-zA-Z]+[0-9]*,)*[a-zA-Z]+[0-9]*$/, message: 'Erp格式不匹配', trigger: 'change'}
+    {pattern: /^([a-zA-Z0-9-._]+,)*[a-zA-Z0-9-._]+$/, message: 'Erp格式不匹配', trigger: 'change'}
   ]
 }
 
