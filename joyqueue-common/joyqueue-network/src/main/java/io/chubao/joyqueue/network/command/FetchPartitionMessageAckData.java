@@ -76,10 +76,6 @@ public class FetchPartitionMessageAckData {
         if (buffers == null) {
             return 0;
         }
-        int size = 0;
-        for (ByteBuffer buffer : buffers) {
-            size += buffer.limit();
-        }
-        return size;
+        return buffers.size();
     }
 }

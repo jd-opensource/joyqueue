@@ -313,7 +313,7 @@
         <route inherit="get"
                path="/v1/consumer/findAllSubscribeGroups" handlers="consumer#findAllSubscribeGroups render"/>
         <route inherit="get"
-               path="/v1/consumer/findAppsByTopic/topic/:topic" handlers="consumer#findApspByTopic render"/>
+               path="/v1/consumer/findAppsByTopic/topic/:topic" handlers="consumer#findAppsByTopic render"/>
 
         <!-- consumer Config -->
         <route inherit="post"

@@ -236,10 +236,10 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
         List<BrokerMessage> brokerMessages = Lists.newLinkedList();
         for (KafkaBrokerMessage message : partitionRequest.getMessages()) {
             BrokerMessage brokerMessage = KafkaMessageConverter.toBrokerMessage(producer.getTopic(), partitionRequest.getPartition(), producer.getApp(), clientAddress, message);
-            traffic.record(topic.getFullName(), brokerMessage.getSize());
             brokerMessages.add(brokerMessage);
         }
 
+        traffic.record(topic.getFullName(), partitionRequest.getMessages().size());
         producePartitionGroupRequest.getPartitions().add(partitionRequest.getPartition());
         producePartitionGroupRequest.getMessages().addAll(brokerMessages);
         producePartitionGroupRequest.getMessageMap().put(partitionRequest.getPartition(), brokerMessages);

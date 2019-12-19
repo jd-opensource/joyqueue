@@ -587,7 +587,7 @@ public class ClusterManager extends Service {
         }
         Set<String> blackList = producerPolicy != null ? producerPolicy.getBlackList() : null;
         if (blackList != null) {
-            if (blackList.stream().anyMatch(ip -> ip.equals(address))) {
+            if (blackList.stream().anyMatch(ip -> ip.trim().equals(address))) {
                 // 是否在生产黑名单内
                 logger.error("topic[{}] app[{}] cant't be write on broker [] in blacklist", topic, app, broker.getId() + "[" + broker.getIp() + ":" + broker.getPort() + "]");
                 return BooleanResponse.failed(JoyQueueCode.FW_PUT_MESSAGE_TOPIC_NOT_WRITE);
@@ -679,7 +679,7 @@ public class ClusterManager extends Service {
         Set<String> blackList = consumerPolicy.getBlackList();
         if (blackList != null) {
             // 是否在消费黑名单内
-            if (blackList.stream().anyMatch(ip -> ip.equals(address))) {
+            if (blackList.stream().anyMatch(ip -> ip.trim().equals(address))) {
                 logger.info("app client ip not readable, topic: {}, app: {}, ip: {}", topic, app, address);
                 return BooleanResponse.failed(JoyQueueCode.FW_GET_MESSAGE_APP_CLIENT_IP_NOT_READ);
             }

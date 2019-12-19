@@ -87,6 +87,7 @@ public class ReplicateConsumePosRequestHandler implements CommandHandler, Type {
             response.setSuccess(true);
         } catch (Exception e) {
             logger.warn("Set consume info {} fail", request.getConsumePositions(), e);
+            response.setSuccess(false);
         }
 
         return new Command(header, response);

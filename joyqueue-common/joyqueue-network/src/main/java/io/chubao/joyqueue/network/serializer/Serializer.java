@@ -47,7 +47,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import static io.chubao.joyqueue.network.transport.codec.JoyQueueHeader.VERSION_V2;
 import static io.chubao.joyqueue.network.transport.codec.JoyQueueHeader.VERSION_V3;
 
 /**
@@ -545,7 +544,9 @@ public class Serializer extends AbstractSerializer {
             }
         }
 
-        out.writeInt(partitionGroup.getRecLeader());
+        if (version >= VERSION_V3) {
+            out.writeInt(partitionGroup.getRecLeader());
+        }
     }
 
     public static PartitionGroup readPartitionGroup(final ByteBuf in, final int version) throws Exception {
@@ -586,7 +587,7 @@ public class Serializer extends AbstractSerializer {
         }
         group.setBrokers(brokers);
 
-        if (version >= VERSION_V2) {
+        if (version >= VERSION_V3) {
             group.setRecLeader(in.readInt());
         }
 

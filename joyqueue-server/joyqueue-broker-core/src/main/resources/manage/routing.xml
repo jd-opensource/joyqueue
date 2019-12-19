@@ -156,6 +156,8 @@
                handlers="brokerMonitorService.addMetadataNode"/>
         <route path="/monitor/metadata/node" inherit="delete"
                handlers="brokerMonitorService.removeMetadataNode"/>
+        <route path="/monitor/metadata/execute" inherit="post"
+               handlers="brokerMonitorService.executeMetadataCommand"/>
 
         <!-- manage -->
         <!-- topic app -->

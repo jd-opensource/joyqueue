@@ -61,4 +61,9 @@ public class CompositionClusterInternalService implements ClusterInternalService
     public String updateNodes(List<URI> uris) {
         return journalkeeperClusterInternalService.updateNodes(uris);
     }
+
+    @Override
+    public String execute(String command, List<String> args) {
+        return journalkeeperClusterInternalService.execute(command, args);
+    }
 }
