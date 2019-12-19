@@ -103,9 +103,9 @@ public class JavaProcessLauncher {
     public void destroy(){
         logger.info("destroy {}",this.name);
         process.destroy();
-        if(logFile!=null&&logFile.exists()){
-            logFile.delete();
-        }
+//        if(logFile!=null&&logFile.exists()){
+//            logFile.delete();
+//        }
 
     }
 }

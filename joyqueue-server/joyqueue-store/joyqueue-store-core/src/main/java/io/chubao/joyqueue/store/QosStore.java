@@ -17,12 +17,10 @@ package io.chubao.joyqueue.store;
 
 import io.chubao.joyqueue.domain.QosLevel;
 import io.chubao.joyqueue.store.file.PositioningStore;
-import io.chubao.joyqueue.store.index.IndexItem;
 import io.chubao.joyqueue.toolkit.concurrent.EventFuture;
 import io.chubao.joyqueue.toolkit.concurrent.EventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.Future;
