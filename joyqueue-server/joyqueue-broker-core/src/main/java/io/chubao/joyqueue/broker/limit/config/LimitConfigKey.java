@@ -29,7 +29,8 @@ public enum LimitConfigKey implements PropertyDef {
     ENABLE("limit.enable", true, PropertyDef.Type.BOOLEAN),
 
     // 限流后延时
-    DELAY("limit.delay", LimitConfig.DELAY_DYNAMIC, PropertyDef.Type.INT),
+//    DELAY("limit.delay", LimitConfig.DELAY_DYNAMIC, PropertyDef.Type.INT),
+    DELAY("limit.delay", 1000, PropertyDef.Type.INT),
 
     // 最大延时
     MAX_DELAY("limit.delay.max", 1000, PropertyDef.Type.INT),
