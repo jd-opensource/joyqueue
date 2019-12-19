@@ -108,7 +108,7 @@ public class KafkaMessageConverter implements MessageConverter {
         ByteBuffer buffer = ByteBuffer.wrap(body);
 
         for (int i = 0; i < message.getFlag(); i++) {
-            result.add(doConvertBatch(message, buffer));
+            result.add(doConvertBatch(message, buffer, i));
         }
         return result;
     }
@@ -153,12 +153,14 @@ public class KafkaMessageConverter implements MessageConverter {
         }
     }
 
-    protected BrokerMessage doConvertBatch(BrokerMessage message, ByteBuffer buffer) {
+    protected BrokerMessage doConvertBatch(BrokerMessage message, ByteBuffer buffer, int index) {
         BrokerMessage result = new BrokerMessage();
         result.setSize(KafkaBufferUtils.readVarint(buffer));
         buffer.get(); // attribute
         KafkaBufferUtils.readVarlong(buffer); // timestamp
-        result.setMsgIndexNo(KafkaBufferUtils.readVarint(buffer) + message.getMsgIndexNo());
+//        result.setMsgIndexNo(KafkaBufferUtils.readVarint(buffer) + message.getMsgIndexNo());
+        KafkaBufferUtils.readVarint(buffer); // offset
+        result.setMsgIndexNo(index + message.getMsgIndexNo());
 
         byte[] businessId = KafkaBufferUtils.readVarBytes(buffer);
         result.setTopic(message.getTopic());

@@ -201,13 +201,13 @@ public class MetadataSynchronizer {
         return sync("datacenter", () -> {
             return sourceService.getAll();
         }, (item) -> {
-            return sourceService.getById(((DataCenter) item).getCode());
+            return sourceService.getById(((DataCenter) item).getId());
         }, () -> {
             return targetService.getAll();
         }, (item) -> {
-            return targetService.getById(((DataCenter) item).getCode());
+            return targetService.getById(((DataCenter) item).getId());
         }, (item) -> {
-            targetService.delete(((DataCenter) item).getCode());
+            targetService.delete(((DataCenter) item).getId());
         }, (item) -> {
             targetService.add((DataCenter) item);
         }, onlyCompare);

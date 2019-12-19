@@ -637,7 +637,7 @@ public class ReplicaGroup extends Service {
                     Map<ConsumePartition, Position> consumePositions = consume.getConsumePositionByGroup(TopicName.parse(topicPartitionGroup.getTopic()),
                             topicPartitionGroup.getPartitionGroupId());
                     if (consumePositions == null) {
-                        logger.warn("Partition group {}/node {} get consumer info return null",
+                        logger.debug("Partition group {}/node {} get consumer info return null",
                                 topicPartitionGroup, localReplicaId);
                         return;
                     }
@@ -646,7 +646,7 @@ public class ReplicaGroup extends Service {
                     JoyQueueHeader header = new JoyQueueHeader(Direction.REQUEST, CommandType.REPLICATE_CONSUME_POS_REQUEST);
 
                     if (logger.isDebugEnabled() || electionConfig.getOutputConsumePos()) {
-                        logger.info("Partition group {}/node {} send consume position {} to node {}",
+                        logger.debug("Partition group {}/node {} send consume position {} to node {}",
                                 topicPartitionGroup, localReplicaId, consumePositions, replica.replicaId());
                     }
 

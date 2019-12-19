@@ -37,7 +37,7 @@ public class ConsumerConfig {
     private long timeout = 1000 * 10;
     private long pollTimeout = 1000 * 10;
     private long longPollTimeout = 1000 * 5;
-    private long interval = 0;
+    private long interval = 1;
     private long idleInterval = 1000 * 1;
     private long sessionTimeout = 1000 * 60 * 1;
     private int thread = 1;

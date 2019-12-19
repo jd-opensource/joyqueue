@@ -310,4 +310,11 @@ public class DefaultMetadataMonitorService implements MetadataMonitorService {
         }
         return clusterInternalService.updateNodes(param);
     }
+
+    @Override
+    public String executeMetadataCommand(String command, List<String> args) {
+        InternalServiceProvider internalServiceProvider = SERVICE_PROVIDER_POINT.get();
+        ClusterInternalService clusterInternalService = internalServiceProvider.getService(ClusterInternalService.class);
+        return clusterInternalService.execute(command, args);
+    }
 }

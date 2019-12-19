@@ -19,6 +19,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.chubao.joyqueue.client.internal.Plugins;
 import io.chubao.joyqueue.message.BrokerMessage;
+import io.chubao.joyqueue.message.SourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,7 +75,7 @@ public class MessageConvertSupport {
 
     public BrokerMessage convert(BrokerMessage message) {
         MessageConverter messageConverter = converterMap.get(message.getSource());
-        if (messageConverter == null) {
+        if (messageConverter == null && message.getSource() != SourceType.JOYQUEUE.getValue()) {
             logger.warn("message converter not found, source: {}, current: {}", message.getSource(), converterMap);
             return null;
         }
@@ -86,7 +87,7 @@ public class MessageConvertSupport {
 
     public List<BrokerMessage> convertBatch(BrokerMessage message) {
         MessageConverter messageConverter = converterMap.get(message.getSource());
-        if (messageConverter == null) {
+        if (messageConverter == null && message.getSource() != SourceType.JOYQUEUE.getValue()) {
             logger.warn("message converter not found, source: {}, current: {}", message.getSource(), converterMap);
             return null;
         }
