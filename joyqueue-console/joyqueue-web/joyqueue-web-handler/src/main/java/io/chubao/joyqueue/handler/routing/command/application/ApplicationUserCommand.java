@@ -25,6 +25,7 @@ import io.chubao.joyqueue.handler.annotation.PageQuery;
 import io.chubao.joyqueue.handler.error.ConfigException;
 import io.chubao.joyqueue.handler.error.ErrorCode;
 import io.chubao.joyqueue.handler.routing.command.CommandSupport;
+import io.chubao.joyqueue.model.Pagination;
 import io.chubao.joyqueue.model.QPageQuery;
 import io.chubao.joyqueue.model.domain.Application;
 import io.chubao.joyqueue.model.domain.ApplicationUser;
@@ -115,6 +116,7 @@ public class ApplicationUserCommand extends CommandSupport<ApplicationUser, User
         QUser qUser = new QUser();
         qUser.setAppId(app.getId());
         qPageQuery.setQuery(qUser);
+        qPageQuery.setPagination(Pagination.newPagination(0, Pagination.MAX_SIZE));
         return super.pageQuery(qPageQuery);
     }
 
