@@ -101,8 +101,8 @@ export function getCodeRule3 () {
 
 export function getErpsRule () {
   return [
-    {required: true, message: '请输入Erp，多个以,隔开，不能有空格', trigger: 'change'},
-    {pattern: /^([a-zA-Z]+[0-9]*,)*[a-zA-Z]+[0-9]*$/, message: 'Erp格式不匹配', trigger: 'change'}
+    {required: true, message: '支持字母、数字、减号(-)、下划线(_)和英文句号(.)，多个ERP用英文逗号(,)分隔，不能有空格。', trigger: 'change'},
+    {pattern: /^[\w-._]+(,[\w-._]+)*$/, message: 'ERP格式不匹配', trigger: 'change'}
   ]
 }
 
