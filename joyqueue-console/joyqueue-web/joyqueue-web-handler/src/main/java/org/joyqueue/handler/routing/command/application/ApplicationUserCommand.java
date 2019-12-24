@@ -26,6 +26,7 @@ import org.joyqueue.handler.error.ConfigException;
 import org.joyqueue.handler.error.ErrorCode;
 import org.joyqueue.handler.routing.command.CommandSupport;
 import org.joyqueue.handler.Constants;
+import org.joyqueue.model.Pagination;
 import org.joyqueue.model.QPageQuery;
 import org.joyqueue.model.domain.Application;
 import org.joyqueue.model.domain.ApplicationUser;
@@ -111,6 +112,7 @@ public class ApplicationUserCommand extends CommandSupport<ApplicationUser, User
         QUser qUser = new QUser();
         qUser.setAppId(app.getId());
         qPageQuery.setQuery(qUser);
+        qPageQuery.setPagination(Pagination.newPagination(0, Pagination.MAX_SIZE));
         return super.pageQuery(qPageQuery);
     }
 
