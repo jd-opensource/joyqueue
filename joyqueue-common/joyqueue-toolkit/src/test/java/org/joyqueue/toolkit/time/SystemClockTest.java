@@ -37,7 +37,7 @@ public class SystemClockTest {
             futureList.add(executor.submit(() -> {
                 try{
                     long time = SystemClock.now();
-                    for (long j = 0; j < 100000000l; j++) {
+                    for (long j = 0; j < 100l; j++) {
                         SystemClock.now();
                     }
                     return SystemClock.now() - time;
