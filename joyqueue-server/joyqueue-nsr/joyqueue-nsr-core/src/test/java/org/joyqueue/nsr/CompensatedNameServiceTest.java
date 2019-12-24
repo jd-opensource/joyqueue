@@ -70,11 +70,10 @@ public class CompensatedNameServiceTest {
 
         nameServiceTest = new NameServiceTest();
         compensatedNameService = new CompensatedNameService(nameServiceTest);
+        nameServiceTest.subscribe(new Subscription(TopicName.parse("test_topic"), "test_app", Subscription.Type.PRODUCTION), ClientType.JOYQUEUE);
+        nameServiceTest.subscribe(new Subscription(TopicName.parse("test_topic"), "test_app", Subscription.Type.CONSUMPTION), ClientType.JOYQUEUE);
         compensatedNameService.setSupplier(propertySupplier);
-
         compensatedNameService.register(1, "127.0.0.1", 50088);
-        compensatedNameService.subscribe(new Subscription(TopicName.parse("test_topic"), "test_app", Subscription.Type.PRODUCTION), ClientType.JOYQUEUE);
-        compensatedNameService.subscribe(new Subscription(TopicName.parse("test_topic"), "test_app", Subscription.Type.CONSUMPTION), ClientType.JOYQUEUE);
         compensatedNameService.start();
     }
 
