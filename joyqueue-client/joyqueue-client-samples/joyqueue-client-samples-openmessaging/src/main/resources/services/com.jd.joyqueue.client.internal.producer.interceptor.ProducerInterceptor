@@ -1,1 +1,1 @@
-io.chubao.joyqueue.client.samples.api.producer.JoyQueueSimpleProducerInterceptor
+org.joyqueue.client.samples.api.producer.JoyQueueSimpleProducerInterceptor

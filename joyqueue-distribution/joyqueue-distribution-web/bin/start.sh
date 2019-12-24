@@ -78,7 +78,7 @@ echo "$CLASSPATH"
   -classpath "$CLASSPATH" \
   -Dbasedir="$BASEDIR" \
   -Dfile.encoding="UTF-8" \
-  io.chubao.joyqueue.application.WebApplication
+  org.joyqueue.application.WebApplication
 
 
 # ------ wirte pid to file

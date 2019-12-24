@@ -21,7 +21,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>joyqueue-openmessaging</artifactId>
-        <groupId>io.chubao</groupId>
+        <groupId>org.joyqueue</groupId>
         <version>4.1.2-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -32,12 +32,12 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.chubao</groupId>
+            <groupId>org.joyqueue</groupId>
             <artifactId>openmessaging-spring</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.chubao</groupId>
+            <groupId>org.joyqueue</groupId>
             <artifactId>openmessaging-spring-boot-starter</artifactId>
             <version>${project.version}</version>
         </dependency>

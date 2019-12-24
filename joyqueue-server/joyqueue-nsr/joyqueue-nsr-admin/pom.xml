@@ -22,7 +22,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>joyqueue-nsr</artifactId>
-        <groupId>io.chubao</groupId>
+        <groupId>org.joyqueue</groupId>
         <version>4.1.2-SNAPSHOT</version>
     </parent>
     <artifactId>joyqueue-nsr-admin</artifactId>
@@ -31,7 +31,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.chubao</groupId>
+            <groupId>org.joyqueue</groupId>
             <artifactId>joyqueue-model</artifactId>
         </dependency>
         <dependency>
@@ -47,7 +47,7 @@
             <artifactId>httpasyncclient</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.chubao</groupId>
+            <groupId>org.joyqueue</groupId>
             <artifactId>joyqueue-nsr-core</artifactId>
         </dependency>
     </dependencies>

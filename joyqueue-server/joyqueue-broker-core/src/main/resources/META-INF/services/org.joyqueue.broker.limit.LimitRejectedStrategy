@@ -1,0 +1,4 @@
+org.joyqueue.broker.limit.support.BlockLimitRejectedStrategy
+org.joyqueue.broker.limit.support.DelayLimitRejectedStrategy
+org.joyqueue.broker.limit.support.ExceptionLimitRejectedStrategy
+org.joyqueue.broker.limit.support.NoneLimitRejectedStrategy

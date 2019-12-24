@@ -15,16 +15,16 @@
  */
 package io.openmessaging.joyqueue;
 
-import io.chubao.joyqueue.client.internal.MessageAccessPoint;
-import io.chubao.joyqueue.client.internal.MessageAccessPointFactory;
-import io.chubao.joyqueue.client.internal.consumer.MessageConsumer;
-import io.chubao.joyqueue.client.internal.consumer.config.ConsumerConfig;
-import io.chubao.joyqueue.client.internal.nameserver.NameServerConfig;
-import io.chubao.joyqueue.client.internal.producer.MessageProducer;
-import io.chubao.joyqueue.client.internal.producer.config.ProducerConfig;
-import io.chubao.joyqueue.client.internal.producer.feedback.config.TxFeedbackConfig;
-import io.chubao.joyqueue.client.internal.transport.config.TransportConfig;
-import io.chubao.joyqueue.exception.JoyQueueCode;
+import org.joyqueue.client.internal.MessageAccessPoint;
+import org.joyqueue.client.internal.MessageAccessPointFactory;
+import org.joyqueue.client.internal.consumer.MessageConsumer;
+import org.joyqueue.client.internal.consumer.config.ConsumerConfig;
+import org.joyqueue.client.internal.nameserver.NameServerConfig;
+import org.joyqueue.client.internal.producer.MessageProducer;
+import org.joyqueue.client.internal.producer.config.ProducerConfig;
+import org.joyqueue.client.internal.producer.feedback.config.TxFeedbackConfig;
+import org.joyqueue.client.internal.transport.config.TransportConfig;
+import org.joyqueue.exception.JoyQueueCode;
 import io.openmessaging.KeyValue;
 import io.openmessaging.MessagingAccessPoint;
 import io.openmessaging.consumer.Consumer;

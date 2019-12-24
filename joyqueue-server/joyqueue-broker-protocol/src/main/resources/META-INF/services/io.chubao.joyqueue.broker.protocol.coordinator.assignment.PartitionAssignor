@@ -1,2 +1,0 @@
-io.chubao.joyqueue.broker.protocol.coordinator.assignment.support.NonePartitionAssignor
-io.chubao.joyqueue.broker.protocol.coordinator.assignment.support.PartitionGroupBalancePartitionAssignor

@@ -1,3 +1,3 @@
-io.chubao.joyqueue.handler.binder.GenericValueBinder
-io.chubao.joyqueue.handler.binder.OperatorBinder
-io.chubao.joyqueue.handler.binder.PageQueryBinder
+org.joyqueue.handler.binder.GenericValueBinder
+org.joyqueue.handler.binder.OperatorBinder
+org.joyqueue.handler.binder.PageQueryBinder

@@ -53,4 +53,4 @@ OPTS_MEMORY=${OPTS_MEMORY#*=}
   -classpath "$CLASSPATH" \
   -Dbasedir="$BASEDIR" \
   -Dfile.encoding="UTF-8" \
-  io.chubao.joyqueue.broker.Launcher
+  org.joyqueue.broker.Launcher

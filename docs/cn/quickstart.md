@@ -28,7 +28,7 @@ $ joyqueue-server-4.1.0/bin/server-start.sh
 
 ......
 
-[19:17:13:180] [main] [INFO] - io.chubao.joyqueue.broker.BrokerService.printConfig(BrokerService.java:303) - broker.id[1562576766],ip[10.0.16.231],frontPort[50088],backendPort[50089],monitorPort[50090],nameServer port[50091]
+[19:17:13:180] [main] [INFO] - org.joyqueue.broker.BrokerService.printConfig(BrokerService.java:303) - broker.id[1562576766],ip[10.0.16.231],frontPort[50088],backendPort[50089],monitorPort[50090],nameServer port[50091]
       _              ___
      | | ___  _   _ / _ \ _   _  ___ _   _  ___
   _  | |/ _ \| | | | | | | | | |/ _ \ | | |/ _ \
@@ -38,7 +38,7 @@ $ joyqueue-server-4.1.0/bin/server-start.sh
 
  ver. 4.1.0
 
-[19:17:13:183] [main] [INFO] - io.chubao.joyqueue.broker.Launcher.main(Launcher.java:35) - JoyQueue is started
+[19:17:13:183] [main] [INFO] - org.joyqueue.broker.Launcher.main(Launcher.java:35) - JoyQueue is started
 ......
 ```
 
@@ -56,8 +56,8 @@ $ joyqueue-web-4.1.0/bin/start.sh
 
 ......
 2019-07-09 13:04:25.319 [main] INFO  com.jd.laf.web.vertx.spring.SpringVertx - success starting Vert.x
-2019-07-09 13:04:25.329 [main] INFO  io.chubao.joyqueue.application.WebApplication - Started WebApplication in 4.179 seconds (JVM running for 4.776)
-2019-07-09 13:04:25.331 [main] INFO  io.chubao.joyqueue.application.WebApplication - JoyQueue web started on port 10031.
+2019-07-09 13:04:25.329 [main] INFO  org.joyqueue.application.WebApplication - Started WebApplication in 4.179 seconds (JVM running for 4.776)
+2019-07-09 13:04:25.331 [main] INFO  org.joyqueue.application.WebApplication - JoyQueue web started on port 10031.
 
 ......
 ```

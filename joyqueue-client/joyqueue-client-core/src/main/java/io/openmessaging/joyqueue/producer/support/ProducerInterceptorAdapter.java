@@ -15,10 +15,10 @@
  */
 package io.openmessaging.joyqueue.producer.support;
 
-import io.chubao.joyqueue.client.internal.producer.domain.ProduceMessage;
-import io.chubao.joyqueue.client.internal.producer.domain.SendResult;
-import io.chubao.joyqueue.client.internal.producer.interceptor.ProduceContext;
-import io.chubao.joyqueue.client.internal.producer.interceptor.ProducerInterceptor;
+import org.joyqueue.client.internal.producer.domain.ProduceMessage;
+import org.joyqueue.client.internal.producer.domain.SendResult;
+import org.joyqueue.client.internal.producer.interceptor.ProduceContext;
+import org.joyqueue.client.internal.producer.interceptor.ProducerInterceptor;
 import io.openmessaging.interceptor.Context;
 import io.openmessaging.joyqueue.producer.interceptor.ContextAdapter;
 import io.openmessaging.joyqueue.producer.message.OMSProduceMessage;
