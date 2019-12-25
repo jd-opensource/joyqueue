@@ -63,7 +63,7 @@ public class CompensatedNameServiceTest {
         Map<String, Object> propertySupplierMap = new HashMap<>();
         propertySupplierMap.put(NameServiceConfigKey.NAMESERVER_MESSENGER_TYPE.getName(), "test");
         propertySupplierMap.put(NameServiceConfigKey.NAMESERVER_COMPENSATION_INTERVAL.getName(), 1000 * 60 * 1);
-        propertySupplierMap.put(NameServiceConfigKey.NAMESERVER_COMPENSATION_ERROR_RETRY_INTERVAL.getName(), 1000 * 60 * 1);
+        propertySupplierMap.put(NameServiceConfigKey.NAMESERVER_COMPENSATION_ERROR_RETRY_INTERVAL.getName(), 1000 * 10);
         propertySupplierMap.put(NameServiceConfigKey.NAMESERVER_COMPENSATION_ERROR_THRESHOLD.getName(), 3);
         propertySupplier = new PropertySupplier.MapSupplier(propertySupplierMap);
 
