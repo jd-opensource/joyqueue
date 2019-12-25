@@ -21,7 +21,7 @@ driverClass: io.openmessaging.benchmark.driver.kafka.JoyQueueKafkaBenchmarkDrive
 replicationFactor: 3
 
 topicConfig: |
-  min.insync.replicas=2
+  min.insync.replicas=1
 
 commonConfig: |
   bootstrap.servers=192.169.0.2:50088
