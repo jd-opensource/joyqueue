@@ -15,11 +15,11 @@
  */
 package io.openmessaging.joyqueue.consumer.support;
 
-import io.chubao.joyqueue.client.internal.consumer.MessageConsumer;
-import io.chubao.joyqueue.client.internal.consumer.domain.ConsumeMessage;
-import io.chubao.joyqueue.client.internal.consumer.domain.ConsumeReply;
-import io.chubao.joyqueue.client.internal.consumer.domain.FetchIndexData;
-import io.chubao.joyqueue.network.command.RetryType;
+import org.joyqueue.client.internal.consumer.MessageConsumer;
+import org.joyqueue.client.internal.consumer.domain.ConsumeMessage;
+import org.joyqueue.client.internal.consumer.domain.ConsumeReply;
+import org.joyqueue.client.internal.consumer.domain.FetchIndexData;
+import org.joyqueue.network.command.RetryType;
 import com.google.common.base.Preconditions;
 import io.openmessaging.consumer.BatchMessageListener;
 import io.openmessaging.consumer.MessageListener;

@@ -15,7 +15,7 @@
  */
 package io.openmessaging.joyqueue.consumer.message;
 
-import io.chubao.joyqueue.client.internal.consumer.domain.ConsumeMessage;
+import org.joyqueue.client.internal.consumer.domain.ConsumeMessage;
 import io.openmessaging.KeyValue;
 import io.openmessaging.consumer.MessageReceipt;
 import io.openmessaging.extension.ExtensionHeader;

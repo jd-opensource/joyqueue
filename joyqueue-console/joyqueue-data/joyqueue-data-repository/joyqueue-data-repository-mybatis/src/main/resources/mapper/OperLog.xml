@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="io.chubao.joyqueue.repository.OperLogRepository">
+<mapper namespace="org.joyqueue.repository.OperLogRepository">
     <resultMap id="BaseResultMap" type="OperLog">
         <id column="id" property="id" />
         <result column="type" property="type" />

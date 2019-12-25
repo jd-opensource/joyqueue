@@ -1,0 +1,2 @@
+org.joyqueue.client.internal.common.compress.support.ZlibCompressor
+org.joyqueue.client.internal.common.compress.support.SnappyCompressor

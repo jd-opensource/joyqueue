@@ -1,0 +1,12 @@
+org.joyqueue.broker.mqtt.handler.ConnectHandler
+org.joyqueue.broker.mqtt.handler.ConnectAckHandler
+org.joyqueue.broker.mqtt.handler.DisconnectHandler
+org.joyqueue.broker.mqtt.handler.PingReqHandler
+org.joyqueue.broker.mqtt.handler.PingRespHandler
+org.joyqueue.broker.mqtt.handler.SubscribeHandler
+org.joyqueue.broker.mqtt.handler.UnSubscribeHandler
+org.joyqueue.broker.mqtt.handler.PublishHandler
+org.joyqueue.broker.mqtt.handler.PublishAckHandler
+org.joyqueue.broker.mqtt.handler.PublishRecHandler
+org.joyqueue.broker.mqtt.handler.PublishRelHandler
+org.joyqueue.broker.mqtt.handler.PublishCompHandler

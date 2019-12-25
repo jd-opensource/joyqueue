@@ -15,7 +15,7 @@
  */
 package io.openmessaging.joyqueue.consumer.message;
 
-import io.chubao.joyqueue.client.internal.consumer.domain.ConsumeMessage;
+import org.joyqueue.client.internal.consumer.domain.ConsumeMessage;
 import io.openmessaging.message.Header;
 
 /**

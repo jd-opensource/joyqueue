@@ -1,5 +1,5 @@
-io.chubao.joyqueue.handler.error.ConfigExceptionSupplier
-io.chubao.joyqueue.handler.error.HttpStatusExceptionSupplier
-io.chubao.joyqueue.handler.error.SQLExceptionSupplier
-io.chubao.joyqueue.handler.error.ThrowableSupplier
-io.chubao.joyqueue.handler.error.ValidationExceptionSupplier
+org.joyqueue.handler.error.ConfigExceptionSupplier
+org.joyqueue.handler.error.HttpStatusExceptionSupplier
+org.joyqueue.handler.error.SQLExceptionSupplier
+org.joyqueue.handler.error.ThrowableSupplier
+org.joyqueue.handler.error.ValidationExceptionSupplier

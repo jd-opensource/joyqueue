@@ -16,4 +16,4 @@
 #
 
 
-exec $(dirname $0)/run-class.sh io.chubao.joyqueue.store.cli.RecoverStore "$@"
+exec $(dirname $0)/run-class.sh org.joyqueue.store.cli.RecoverStore "$@"

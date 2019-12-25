@@ -21,8 +21,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>joyqueue-client-samples</artifactId>
-        <groupId>io.chubao</groupId>
-        <version>4.1.2-SNAPSHOT</version>
+        <groupId>org.joyqueue</groupId>
+        <version>4.2.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -32,11 +32,11 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.chubao</groupId>
+            <groupId>org.joyqueue</groupId>
             <artifactId>joyqueue-client-all</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.chubao</groupId>
+            <groupId>org.joyqueue</groupId>
             <artifactId>openmessaging-spring</artifactId>
         </dependency>
     </dependencies>

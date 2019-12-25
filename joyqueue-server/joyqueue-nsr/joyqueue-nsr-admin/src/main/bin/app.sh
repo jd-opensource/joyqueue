@@ -28,6 +28,6 @@ fi
 JVM_MEM="-Xms4G -Xmx4G -XX:+UseG1GC"
 JVM_GC_LOG=" -XX:+PrintGCDetails -XX:+PrintGCApplicationStoppedTime  -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=5 -XX:GCLogFileSize=64m  -Xloggc:/dev/shm/benchmark-client-gc_%p.log"
 
-java -cp $CLASSPATH $JVM_MEM io.chubao.joyqueue.nsr.admin.AppAdmin $*
+java -cp $CLASSPATH $JVM_MEM org.joyqueue.nsr.admin.AppAdmin $*
 
 
