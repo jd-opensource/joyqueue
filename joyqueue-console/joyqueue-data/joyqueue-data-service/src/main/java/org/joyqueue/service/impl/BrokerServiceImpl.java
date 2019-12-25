@@ -15,6 +15,7 @@
  */
 package org.joyqueue.service.impl;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.model.ListQuery;
 import org.joyqueue.model.PageResult;
@@ -29,7 +30,6 @@ import org.joyqueue.service.BrokerGroupRelatedService;
 import org.joyqueue.service.BrokerService;
 import org.joyqueue.service.PartitionGroupReplicaService;
 import org.joyqueue.util.NullUtil;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +37,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -192,18 +193,27 @@ public class BrokerServiceImpl implements BrokerService {
 
     @Override
     public PageResult<Broker> search(QPageQuery<QBroker> qPageQuery) throws Exception {
-        // TODO 分组处理
+        if (qPageQuery.getPagination() != null) {
+            qPageQuery.getPagination().setSize(Integer.MAX_VALUE);
+        }
         PageResult<Broker> pageResult = brokerNameServerService.search(qPageQuery);
         if (pageResult !=null && pageResult.getResult() != null && pageResult.getResult().size() >0) {
             List<Broker> brokerList = pageResult.getResult();
-            brokerList.stream().map(broker -> {
+            Iterator<Broker> iterator = brokerList.iterator();
+            while (iterator.hasNext()) {
+                Broker broker = iterator.next();
                 BrokerGroupRelated brokerRelated = brokerGroupRelatedService.findById(broker.getId());
-                if (brokerRelated != null && brokerRelated.getGroup() != null) {
-                    broker.setGroup(brokerRelated.getGroup());
-                    broker.setStatus(0);
+                if (qPageQuery.getQuery().getBrokerGroupId() != 0) {
+                    if (!brokerRelated.getGroup().getId().equals(qPageQuery.getQuery().getBrokerGroupId())) {
+                        iterator.remove();
+                    }
+                } else {
+                    if (brokerRelated != null && brokerRelated.getGroup() != null) {
+                        broker.setGroup(brokerRelated.getGroup());
+                        broker.setStatus(0);
+                    }
                 }
-                return broker;
-            }).collect(Collectors.toList());
+            }
         }
         return pageResult;
     }
