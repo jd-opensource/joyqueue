@@ -37,6 +37,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -192,18 +193,27 @@ public class BrokerServiceImpl implements BrokerService {
 
     @Override
     public PageResult<Broker> search(QPageQuery<QBroker> qPageQuery) throws Exception {
-        // TODO 分组处理
+        if (qPageQuery.getPagination() != null) {
+            qPageQuery.getPagination().setSize(Integer.MAX_VALUE);
+        }
         PageResult<Broker> pageResult = brokerNameServerService.search(qPageQuery);
         if (pageResult !=null && pageResult.getResult() != null && pageResult.getResult().size() >0) {
             List<Broker> brokerList = pageResult.getResult();
-            brokerList.stream().map(broker -> {
+            Iterator<Broker> iterator = brokerList.iterator();
+            while (iterator.hasNext()) {
+                Broker broker = iterator.next();
                 BrokerGroupRelated brokerRelated = brokerGroupRelatedService.findById(broker.getId());
-                if (brokerRelated != null && brokerRelated.getGroup() != null) {
-                    broker.setGroup(brokerRelated.getGroup());
-                    broker.setStatus(0);
+                if (qPageQuery.getQuery().getBrokerGroupId() != 0) {
+                    if (!brokerRelated.getGroup().getId().equals(qPageQuery.getQuery().getBrokerGroupId())) {
+                        iterator.remove();
+                    }
+                } else {
+                    if (brokerRelated != null && brokerRelated.getGroup() != null) {
+                        broker.setGroup(brokerRelated.getGroup());
+                        broker.setStatus(0);
+                    }
                 }
-                return broker;
-            }).collect(Collectors.toList());
+            }
         }
         return pageResult;
     }

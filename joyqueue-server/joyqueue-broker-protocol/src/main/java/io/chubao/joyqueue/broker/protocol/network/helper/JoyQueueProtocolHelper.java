@@ -44,7 +44,6 @@ public class JoyQueueProtocolHelper {
                 && magic == JoyQueueHeader.MAGIC
                 && version >= 0
                 && identity >= 0
-                && requestId >= 0
                 && JoyQueueCommandType.contains(type));
     }
 }

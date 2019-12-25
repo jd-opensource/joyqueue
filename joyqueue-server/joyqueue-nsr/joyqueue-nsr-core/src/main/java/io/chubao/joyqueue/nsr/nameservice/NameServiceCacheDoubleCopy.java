@@ -29,6 +29,8 @@ public class NameServiceCacheDoubleCopy extends DoubleCopy {
 
     protected static final Logger logger = LoggerFactory.getLogger(NameServiceCacheDoubleCopy.class);
 
+    private static final int DEFAULT_MAX_LENGTH =  1024 * 1024 * 100;
+
     private static final int VERSION_V0 = 0;
     private static final int CURRENT_VERSION = VERSION_V0;
 
@@ -36,9 +38,13 @@ public class NameServiceCacheDoubleCopy extends DoubleCopy {
 
     private NameServiceCacheEntry entry;
 
-    public NameServiceCacheDoubleCopy(File file) throws IOException {
-        super(file, Integer.MAX_VALUE);
+    public NameServiceCacheDoubleCopy(File file, int maxLength) throws IOException {
+        super(file, maxLength);
         this.file = file;
+    }
+
+    public NameServiceCacheDoubleCopy(File file) throws IOException {
+        this(file, DEFAULT_MAX_LENGTH);
     }
 
     public void flush(AllMetadataCache cache) {

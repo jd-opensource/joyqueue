@@ -166,7 +166,15 @@ public class JoyQueueHeader implements Header {
     }
 
     protected int generateRequestId() {
-        return requestIdGenerator.incrementAndGet();
+        int id = requestIdGenerator.incrementAndGet();
+        if (id > 0) {
+            return id;
+        }
+        if (requestIdGenerator.compareAndSet(id, 0)) {
+            return 0;
+        } else {
+            return generateRequestId();
+        }
     }
 
     @Override

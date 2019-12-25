@@ -76,6 +76,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -260,7 +261,13 @@ public class ClusterManager extends Service {
      * @return
      */
     public List<TopicConfig> getTopics() {
-        return new ArrayList<>(localCache.getTopicConfigCache().values());
+        List<TopicConfig> result = Lists.newLinkedList();
+        for (Map.Entry<String, TopicConfig> entry : localCache.getTopicConfigCache().entrySet()) {
+            if (entry.getValue().isReplica(getBrokerId())) {
+                result.add(entry.getValue());
+            }
+        }
+        return result;
     }
 
     /**
@@ -845,7 +852,16 @@ public class ClusterManager extends Service {
      * @return
      */
     public List<Broker> getLocalRetryBroker() {
-        return nameService.getBrokerByRetryType(Broker.DEFAULT_RETRY_TYPE);
+        List<Broker> brokers = nameService.getAllBrokers();
+        List<Broker> localRetryBrokers = new LinkedList<>();
+        if (brokers != null) {
+            for (Broker broker : brokers) {
+                if (!Broker.DEFAULT_RETRY_TYPE.equals(broker.getRetryType())) {
+                    localRetryBrokers.add(broker);
+                }
+            }
+        }
+        return localRetryBrokers;
     }
 
 

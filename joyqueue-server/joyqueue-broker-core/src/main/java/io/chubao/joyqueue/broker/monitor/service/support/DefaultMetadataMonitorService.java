@@ -273,7 +273,7 @@ public class DefaultMetadataMonitorService implements MetadataMonitorService {
     public List<String> getConfigsMetadata() {
         List<String> result = Lists.newLinkedList();
         for (Property property : clusterManager.getPropertySupplier().getProperties()) {
-            result.add(String.valueOf(property.getValue()));
+            result.add(String.valueOf(property.getKey()) + ":" + String.valueOf(property.getValue()));
         }
         return result;
     }

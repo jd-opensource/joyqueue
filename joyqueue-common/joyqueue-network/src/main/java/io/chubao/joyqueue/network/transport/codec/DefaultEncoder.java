@@ -68,7 +68,15 @@ public class DefaultEncoder implements Encoder {
                 }
 
                 int oldVersion = header.getVersion();
-                header.setVersion(JoyQueueHeader.CURRENT_VERSION);
+                if (payload.getClass().getName().equals("io.chubao.joyqueue.nsr.network.command.CreatePartitionGroup")
+                        || payload.getClass().getName().equals("io.chubao.joyqueue.nsr.network.command.RemovePartitionGroup")
+                        || payload.getClass().getName().equals("io.chubao.joyqueue.nsr.network.command.UpdatePartitionGroup")) {
+                    header.setVersion(JoyQueueHeader.VERSION_V2);
+                    oldVersion = JoyQueueHeader.VERSION_V2;
+                } else {
+                    header.setVersion(JoyQueueHeader.CURRENT_VERSION);
+                }
+
                 headerCodec.encode(header, buffer);
 
                 header.setVersion(oldVersion);
