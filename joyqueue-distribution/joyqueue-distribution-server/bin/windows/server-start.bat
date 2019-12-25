@@ -15,4 +15,4 @@
 @REM
 
 
-"%~dp0run-class.bat" io.chubao.joyqueue.broker.Launcher
+"%~dp0run-class.bat" org.joyqueue.broker.Launcher

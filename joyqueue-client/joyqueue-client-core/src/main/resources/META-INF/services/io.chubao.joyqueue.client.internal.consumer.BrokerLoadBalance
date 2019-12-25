@@ -1,2 +1,0 @@
-io.chubao.joyqueue.client.internal.consumer.support.RoundRobinBrokerLoadBalance
-io.chubao.joyqueue.client.internal.consumer.support.RandomBrokerLoadBalance

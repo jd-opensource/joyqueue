@@ -15,7 +15,7 @@
  */
 package io.openmessaging.joyqueue.consumer.interceptor;
 
-import io.chubao.joyqueue.client.internal.consumer.interceptor.ConsumeContext;
+import org.joyqueue.client.internal.consumer.interceptor.ConsumeContext;
 import io.openmessaging.KeyValue;
 import io.openmessaging.interceptor.Context;
 

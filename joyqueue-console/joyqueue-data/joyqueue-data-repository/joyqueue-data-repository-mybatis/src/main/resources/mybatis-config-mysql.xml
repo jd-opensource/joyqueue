@@ -14,13 +14,13 @@
         <setting name="logImpl" value="STDOUT_LOGGING" />
     </settings>
     <typeAliases>
-        <package name="io.chubao.joyqueue.model.domain" />
-        <package name="io.chubao.joyqueue.model.query" />
-        <package name="io.chubao.joyqueue.model" />
+        <package name="org.joyqueue.model.domain" />
+        <package name="org.joyqueue.model.query" />
+        <package name="org.joyqueue.model" />
     </typeAliases>
     <plugins>
-        <plugin interceptor="io.chubao.joyqueue.repository.mybatis.interceptor.PageStatementInterceptor"/>
-        <plugin interceptor="io.chubao.joyqueue.repository.mybatis.interceptor.PageResultInterceptor"/>
+        <plugin interceptor="org.joyqueue.repository.mybatis.interceptor.PageStatementInterceptor"/>
+        <plugin interceptor="org.joyqueue.repository.mybatis.interceptor.PageResultInterceptor"/>
     </plugins>
 
 </configuration>
