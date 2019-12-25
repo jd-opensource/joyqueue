@@ -52,7 +52,8 @@ export default {
         colData: this.colData,
         btns: this.btns
       },
-      multipleSelection: []
+      multipleSelection: [],
+      selectedBrokers:[]
     }
   },
   methods: {
@@ -63,6 +64,15 @@ export default {
     getListByGroup (brokerGroupId) {
       this.getListByGroupAndbrokers(brokerGroupId, undefined)
     },
+    onBrokerLoadComplete(val){
+      this.$emit('on-broker-load-complete',val,tag=>{
+        for (let index=0; index<tag.length; index++) {
+          let row = {};
+          Object.assign(row, tag[index])
+          this.$set(this.tableData.rowData, index, row)
+        }
+      })
+    },
     getListByGroupAndbrokers (brokerGroupId, brokers) {
       let query = {}
       if (!brokerGroupId) {
@@ -71,6 +81,7 @@ export default {
         }
       } else {
         this.searchData.brokerGroupId = brokerGroupId
+        this.selectedBrokers = brokers
         query = {
           keyword: this.searchData.keyword,
           brokerGroupId: this.searchData.brokerGroupId
@@ -107,7 +118,11 @@ export default {
             }
           }
         })
+        this.onBrokerLoadComplete(this.tableData.rowData)
       })
+    },
+    getList(){
+      this.getListByGroupAndbrokers(this.searchData.brokerGroupId,this.selectedBrokers)
     }
   },
   mounted () {
