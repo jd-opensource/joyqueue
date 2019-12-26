@@ -1,0 +1,134 @@
+/**
+ * Copyright 2019 The JoyQueue Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.joyqueue.nsr.composition;
+
+import org.joyqueue.nsr.InternalServiceProvider;
+import org.joyqueue.nsr.composition.config.CompositionConfig;
+import org.joyqueue.nsr.composition.service.CompositionAppTokenInternalService;
+import org.joyqueue.nsr.composition.service.CompositionBrokerInternalService;
+import org.joyqueue.nsr.composition.service.CompositionClusterInternalService;
+import org.joyqueue.nsr.composition.service.CompositionConfigInternalService;
+import org.joyqueue.nsr.composition.service.CompositionConsumerInternalService;
+import org.joyqueue.nsr.composition.service.CompositionDataCenterInternalService;
+import org.joyqueue.nsr.composition.service.CompositionNamespaceInternalService;
+import org.joyqueue.nsr.composition.service.CompositionPartitionGroupInternalService;
+import org.joyqueue.nsr.composition.service.CompositionPartitionGroupReplicaInternalService;
+import org.joyqueue.nsr.composition.service.CompositionProducerInternalService;
+import org.joyqueue.nsr.composition.service.CompositionTopicInternalService;
+import org.joyqueue.nsr.service.internal.AppTokenInternalService;
+import org.joyqueue.nsr.service.internal.BrokerInternalService;
+import org.joyqueue.nsr.service.internal.ClusterInternalService;
+import org.joyqueue.nsr.service.internal.ConfigInternalService;
+import org.joyqueue.nsr.service.internal.ConsumerInternalService;
+import org.joyqueue.nsr.service.internal.DataCenterInternalService;
+import org.joyqueue.nsr.service.internal.NamespaceInternalService;
+import org.joyqueue.nsr.service.internal.PartitionGroupInternalService;
+import org.joyqueue.nsr.service.internal.PartitionGroupReplicaInternalService;
+import org.joyqueue.nsr.service.internal.ProducerInternalService;
+import org.joyqueue.nsr.service.internal.TopicInternalService;
+import org.joyqueue.nsr.service.internal.TransactionInternalService;
+import org.joyqueue.toolkit.service.Service;
+
+/**
+ * CompositionInternalServiceManager
+ * author: gaohaoxiang
+ * date: 2019/8/15
+ */
+public class CompositionInternalServiceManager extends Service {
+
+    private CompositionConfig config;
+    private InternalServiceProvider serviceProvider;
+    private InternalServiceProvider igniteServiceProvider;
+    private InternalServiceProvider journalkeeperServiceProvider;
+
+    private CompositionAppTokenInternalService compositionAppTokenInternalService;
+    private CompositionBrokerInternalService compositionBrokerInternalService;
+    private CompositionConfigInternalService compositionConfigInternalService;
+    private CompositionConsumerInternalService compositionConsumerInternalService;
+    private CompositionDataCenterInternalService compositionDataCenterInternalService;
+    private CompositionNamespaceInternalService compositionNamespaceInternalService;
+    private CompositionPartitionGroupInternalService compositionPartitionGroupInternalService;
+    private CompositionPartitionGroupReplicaInternalService compositionPartitionGroupReplicaInternalService;
+    private CompositionProducerInternalService compositionProducerInternalService;
+    private CompositionTopicInternalService compositionTopicInternalService;
+    private CompositionTransactionInternalService compositionTransactionInternalService;
+    private CompositionClusterInternalService compositionClusterInternalService;
+
+    public CompositionInternalServiceManager(CompositionConfig config, InternalServiceProvider serviceProvider, InternalServiceProvider igniteServiceProvider,
+                                             InternalServiceProvider journalkeeperServiceProvider) {
+        this.config = config;
+        this.serviceProvider = serviceProvider;
+        this.igniteServiceProvider = igniteServiceProvider;
+        this.journalkeeperServiceProvider = journalkeeperServiceProvider;
+    }
+
+    @Override
+    protected void validate() throws Exception {
+        compositionAppTokenInternalService = new CompositionAppTokenInternalService(config, igniteServiceProvider.getService(AppTokenInternalService.class),
+                journalkeeperServiceProvider.getService(AppTokenInternalService.class));
+        compositionBrokerInternalService = new CompositionBrokerInternalService(config, igniteServiceProvider.getService(BrokerInternalService.class),
+                journalkeeperServiceProvider.getService(BrokerInternalService.class));
+        compositionConfigInternalService = new CompositionConfigInternalService(config, igniteServiceProvider.getService(ConfigInternalService.class),
+                journalkeeperServiceProvider.getService(ConfigInternalService.class));
+        compositionConsumerInternalService = new CompositionConsumerInternalService(config, igniteServiceProvider.getService(ConsumerInternalService.class),
+                journalkeeperServiceProvider.getService(ConsumerInternalService.class));
+        compositionDataCenterInternalService = new CompositionDataCenterInternalService(config, igniteServiceProvider.getService(DataCenterInternalService.class),
+                journalkeeperServiceProvider.getService(DataCenterInternalService.class));
+        compositionNamespaceInternalService = new CompositionNamespaceInternalService(config, igniteServiceProvider.getService(NamespaceInternalService.class),
+                journalkeeperServiceProvider.getService(NamespaceInternalService.class));
+        compositionPartitionGroupInternalService = new CompositionPartitionGroupInternalService(config, igniteServiceProvider.getService(PartitionGroupInternalService.class),
+                journalkeeperServiceProvider.getService(PartitionGroupInternalService.class));
+        compositionPartitionGroupReplicaInternalService = new CompositionPartitionGroupReplicaInternalService(config, igniteServiceProvider.getService(PartitionGroupReplicaInternalService.class),
+                journalkeeperServiceProvider.getService(PartitionGroupReplicaInternalService.class));
+        compositionProducerInternalService = new CompositionProducerInternalService(config, igniteServiceProvider.getService(ProducerInternalService.class),
+                journalkeeperServiceProvider.getService(ProducerInternalService.class));
+        compositionTopicInternalService = new CompositionTopicInternalService(config, igniteServiceProvider.getService(TopicInternalService.class),
+                journalkeeperServiceProvider.getService(TopicInternalService.class));
+        compositionTransactionInternalService = new CompositionTransactionInternalService(config, igniteServiceProvider.getService(TransactionInternalService.class),
+                journalkeeperServiceProvider.getService(TransactionInternalService.class));
+        compositionClusterInternalService = new CompositionClusterInternalService(config, null,
+                journalkeeperServiceProvider.getService(ClusterInternalService.class));
+    }
+
+    public <T> T getService(Class<T> service) {
+        if (service.equals(AppTokenInternalService.class)) {
+            return (T) compositionAppTokenInternalService;
+        } else if (service.equals(BrokerInternalService.class)) {
+            return (T) compositionBrokerInternalService;
+        } else if (service.equals(ConfigInternalService.class)) {
+            return (T) compositionConfigInternalService;
+        } else if (service.equals(ConsumerInternalService.class)) {
+            return (T) compositionConsumerInternalService;
+        } else if (service.equals(DataCenterInternalService.class)) {
+            return (T) compositionDataCenterInternalService;
+        } else if (service.equals(NamespaceInternalService.class)) {
+            return (T) compositionNamespaceInternalService;
+        } else if (service.equals(PartitionGroupInternalService.class)) {
+            return (T) compositionPartitionGroupInternalService;
+        } else if (service.equals(PartitionGroupReplicaInternalService.class)) {
+            return (T) compositionPartitionGroupReplicaInternalService;
+        } else if (service.equals(ProducerInternalService.class)) {
+            return (T) compositionProducerInternalService;
+        } else if (service.equals(TopicInternalService.class)) {
+            return (T) compositionTopicInternalService;
+        } else if (service.equals(TransactionInternalService.class)) {
+            return (T) compositionTransactionInternalService;
+        } else if (service.equals(ClusterInternalService.class)) {
+            return (T) compositionClusterInternalService;
+        }
+        throw new UnsupportedOperationException(service.getName());
+    }
+}

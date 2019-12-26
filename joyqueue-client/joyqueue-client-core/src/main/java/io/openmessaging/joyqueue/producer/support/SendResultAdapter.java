@@ -25,9 +25,9 @@ import io.openmessaging.producer.SendResult;
  */
 public class SendResultAdapter implements SendResult {
 
-    private io.chubao.joyqueue.client.internal.producer.domain.SendResult sendResult;
+    private org.joyqueue.client.internal.producer.domain.SendResult sendResult;
 
-    public SendResultAdapter(io.chubao.joyqueue.client.internal.producer.domain.SendResult sendResult) {
+    public SendResultAdapter(org.joyqueue.client.internal.producer.domain.SendResult sendResult) {
         this.sendResult = sendResult;
     }
 

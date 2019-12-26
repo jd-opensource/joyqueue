@@ -17,9 +17,9 @@ package io.openmessaging.joyqueue.producer.support;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
-import io.chubao.joyqueue.client.internal.MessageAccessPoint;
-import io.chubao.joyqueue.client.internal.producer.MessageProducer;
-import io.chubao.joyqueue.client.internal.producer.feedback.config.TxFeedbackConfig;
+import org.joyqueue.client.internal.MessageAccessPoint;
+import org.joyqueue.client.internal.producer.MessageProducer;
+import org.joyqueue.client.internal.producer.feedback.config.TxFeedbackConfig;
 import io.openmessaging.Future;
 import io.openmessaging.ServiceLifeState;
 import io.openmessaging.extension.Extension;

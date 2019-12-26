@@ -1,0 +1,48 @@
+/**
+ * Copyright 2019 The JoyQueue Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.joyqueue.nsr.network.command;
+
+import org.joyqueue.domain.PartitionGroup;
+import org.joyqueue.network.transport.command.Types;
+
+public class UpdatePartitionGroup extends OperatePartitionGroup implements Types {
+    public UpdatePartitionGroup(PartitionGroup partitionGroup, boolean rollback) {
+        super(partitionGroup, rollback);
+    }
+
+    public UpdatePartitionGroup(PartitionGroup partitionGroup) {
+        super(partitionGroup);
+    }
+
+    @Override
+    public int type() {
+        return NsrCommandType.NSR_UPDATE_PARTITIONGROUP;
+    }
+
+    @Override
+    public String toString() {
+        return "UpdatePartitionGroup{" +
+                "rollback=" + rollback +
+                ", partitionGroup=" + partitionGroup +
+                ", type=" + type() +
+                '}';
+    }
+
+    @Override
+    public int[] types() {
+        return new int[]{type(),NsrCommandType.NSR_LEADERCHANAGE_PARTITIONGROUP};
+    }
+}

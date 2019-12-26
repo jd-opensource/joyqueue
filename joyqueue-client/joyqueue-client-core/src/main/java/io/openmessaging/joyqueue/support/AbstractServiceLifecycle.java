@@ -15,8 +15,8 @@
  */
 package io.openmessaging.joyqueue.support;
 
-import io.chubao.joyqueue.exception.JoyQueueCode;
-import io.chubao.joyqueue.toolkit.service.Service;
+import org.joyqueue.exception.JoyQueueCode;
+import org.joyqueue.toolkit.service.Service;
 import io.openmessaging.ServiceLifeState;
 import io.openmessaging.ServiceLifecycle;
 import io.openmessaging.exception.OMSRuntimeException;

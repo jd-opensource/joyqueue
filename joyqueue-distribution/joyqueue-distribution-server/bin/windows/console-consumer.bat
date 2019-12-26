@@ -15,4 +15,4 @@
 @REM
 
 
-"%~dp0run-class.bat" io.chubao.joyqueue.tools.ConsoleConsumer %*
+"%~dp0run-class.bat" org.joyqueue.tools.ConsoleConsumer %*

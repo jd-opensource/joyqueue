@@ -21,15 +21,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>joyqueue-server</artifactId>
-        <groupId>io.chubao</groupId>
-        <version>4.1.2-SNAPSHOT</version>
+        <groupId>org.joyqueue</groupId>
+        <version>4.2.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>joyqueue-broker-core</artifactId>
     <name>JoyQueue-Broker-Core</name>
     <description>Broker core library</description>
-    <version>4.1.2-SNAPSHOT</version>
+    <version>4.2.0-SNAPSHOT</version>
 
     <dependencies>
         <dependency>
@@ -50,7 +50,7 @@
             <artifactId>laf-extension-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.chubao</groupId>
+            <groupId>org.joyqueue</groupId>
             <artifactId>joyqueue-retry-api</artifactId>
         </dependency>
         <dependency>
@@ -62,19 +62,19 @@
             <artifactId>laf-vertx-web</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.chubao</groupId>
+            <groupId>org.joyqueue</groupId>
             <artifactId>joyqueue-model</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.chubao</groupId>
+            <groupId>org.joyqueue</groupId>
             <artifactId>joyqueue-toolkit</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.chubao</groupId>
+            <groupId>org.joyqueue</groupId>
             <artifactId>joyqueue-network</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.chubao</groupId>
+            <groupId>org.joyqueue</groupId>
             <artifactId>joyqueue-retry-remote</artifactId>
         </dependency>
         <dependency>
@@ -82,16 +82,16 @@
             <artifactId>fastjson</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.chubao</groupId>
+            <groupId>org.joyqueue</groupId>
             <artifactId>joyqueue-store-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.chubao</groupId>
+            <groupId>org.joyqueue</groupId>
             <artifactId>joyqueue-nsr-core</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>io.chubao</groupId>
+            <groupId>org.joyqueue</groupId>
             <artifactId>joyqueue-security</artifactId>
         </dependency>
 
@@ -102,9 +102,9 @@
         </dependency>
         <!--FIXME: 不要直接依赖实现-->
         <dependency>
-            <groupId>io.chubao</groupId>
+            <groupId>org.joyqueue</groupId>
             <artifactId>joyqueue-store-core</artifactId>
-            <version>4.1.2-SNAPSHOT</version>
+            <version>4.2.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -112,7 +112,7 @@
             <artifactId>commons-io</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.chubao</groupId>
+            <groupId>org.joyqueue</groupId>
             <artifactId>joyqueue-archive-api</artifactId>
         </dependency>
         <dependency>

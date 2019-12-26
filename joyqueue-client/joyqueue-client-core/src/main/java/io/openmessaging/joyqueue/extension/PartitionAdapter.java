@@ -15,8 +15,8 @@
  */
 package io.openmessaging.joyqueue.extension;
 
-import io.chubao.joyqueue.client.internal.metadata.domain.PartitionMetadata;
-import io.chubao.joyqueue.network.domain.BrokerNode;
+import org.joyqueue.client.internal.metadata.domain.PartitionMetadata;
+import org.joyqueue.network.domain.BrokerNode;
 import io.openmessaging.extension.QueueMetaData;
 
 /**

@@ -1,2 +1,2 @@
-io.chubao.joyqueue.handler.message.AuditLogMessageHandler
-io.chubao.joyqueue.handler.message.OperLogMessageHandler
+org.joyqueue.handler.message.AuditLogMessageHandler
+org.joyqueue.handler.message.OperLogMessageHandler
