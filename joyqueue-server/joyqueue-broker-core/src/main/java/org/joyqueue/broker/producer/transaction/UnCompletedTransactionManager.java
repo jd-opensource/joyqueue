@@ -15,16 +15,21 @@
  */
 package org.joyqueue.broker.producer.transaction;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.joyqueue.broker.producer.ProduceConfig;
 import org.joyqueue.network.session.Producer;
-import org.joyqueue.network.session.TransactionId;
+import org.joyqueue.store.StoreService;
+import org.joyqueue.store.transaction.TransactionStore;
 import org.joyqueue.toolkit.time.SystemClock;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * UnCompletedTransactionManager
@@ -33,88 +38,77 @@ import java.util.concurrent.ConcurrentMap;
  * date: 2019/1/2
  */
 public class UnCompletedTransactionManager {
-
+    private static final Logger logger = LoggerFactory.getLogger(UnCompletedTransactionManager.class);
     private ProduceConfig config;
 
-    private ConcurrentMap<String /** app **/, ConcurrentMap<String /** topic **/, ConcurrentMap<String /** txId **/, TransactionId>>> unCompleteTransaction = Maps.newConcurrentMap();
+    // 这里使用一个Map来保存正在执行反查的事务ID，可以确保正常情况下一个事务不会被超过多个Producer同时拉去反查。
+    private final Map<TransactionId , Long /* Timestamp of the next feedback */> feedbackTransactions = new ConcurrentHashMap<>();
 
-    public UnCompletedTransactionManager(ProduceConfig config) {
+
+    private final StoreService storeService;
+
+
+    public UnCompletedTransactionManager(ProduceConfig config, StoreService storeService) {
         this.config = config;
+        this.storeService = storeService;
     }
 
-    public boolean putTransaction(TransactionId transactionId) {
-        return getOrCreateTransactionMap(transactionId.getApp(), transactionId.getTopic()).put(transactionId.getTxId(), transactionId) == null;
-    }
-
-    public boolean removeTransaction(TransactionId transactionId) {
-        return removeTransaction(transactionId.getTopic(), transactionId.getApp(), transactionId.getTxId());
-    }
-
-    public boolean removeTransaction(String topic, String app, String txId) {
-        return getOrCreateTransactionMap(app, topic).remove(txId) != null;
+    void removeTransaction(TransactionId transactionId) {
+        feedbackTransactions.remove(transactionId);
     }
 
     public TransactionId getTransaction(String topic, String app, String txId) {
-        return getOrCreateTransactionMap(app, topic).get(txId);
+        return openingTransactionsStream(storeService.getTransactionStores(topic).stream())
+                .filter(transactionId -> txId.equals(transactionId.getTxId())).findAny().orElse(null);
     }
 
-    public int getTransactionCount(String topic, String app) {
-        return getOrCreateTransactionMap(app, topic).size();
+    private Stream<TransactionId> openingTransactionsStream(Stream<TransactionStore> storeStream) {
+        return storeStream
+                .flatMap(transactionStore -> {
+                    try {
+                        return transactionStore.getOpeningTransactions().stream();
+                    } catch (ExecutionException | InterruptedException e) {
+                        logger.warn("Query opening transactions exception! ", e);
+                    }
+                    return Stream.empty();
+                }).map(ctx -> {
+                    BrokerPrepareContext brokerPrepareContext = BrokerPrepareContext.fromMap(ctx.context());
+                    return new TransactionId(
+                            brokerPrepareContext.getTopic(),
+                            brokerPrepareContext.getApp(),
+                            brokerPrepareContext.getTxId(),
+                            brokerPrepareContext.getQueryId(),
+                            ctx.transactionId(),
+                            brokerPrepareContext.getSource(),
+                            brokerPrepareContext.getTimeout(),
+                            brokerPrepareContext.getStartTime(),
+                            brokerPrepareContext.getPartition()
+                    );
+                });
     }
-
     public List<TransactionId> getFeedback(Producer producer, int count) {
-        ConcurrentMap<String, TransactionId> transactionMap = getOrCreateTransactionMap(producer.getApp(), producer.getTopic());
-        List<TransactionId> result = Lists.newArrayListWithCapacity(count);
-        long now = SystemClock.now();
-        int index = 0;
-        for (Map.Entry<String, TransactionId> entry : transactionMap.entrySet()) {
-            TransactionId transactionId = entry.getValue();
 
-            // 不需要补偿或未超时
-            if (!transactionId.isFeedback() || !transactionId.isTimeout()) {
-                continue;
+        return openingTransactionsStream(storeService.getTransactionStores(producer.getTopic()).stream())
+                .filter(transactionId -> {
+            // no need feed back.
+            if (!transactionId.isFeedback()) {
+                return false;
             }
-
-            long lastQueryTimestamp = transactionId.getLastQueryTimestamp();
-
-            // 未到补偿时间
-            if (config.getFeedbackTimeout() > now - lastQueryTimestamp) {
-                continue;
-            }
-
-            // 更新查询时间
-            if (!transactionId.setLastQueryTimestamp(lastQueryTimestamp, now)) {
-                continue;
-            }
-            result.add(transactionId);
-            index++;
-
-            if (index >= count) {
-                break;
-            }
-        }
-        return result;
+            Long timestamp = feedbackTransactions.get(transactionId);
+            // Put the transaction into map again with updated timestamp
+            if (timestamp == null) { // Not exists in the map
+                // Put it into the map and wait a feedback timeout,
+                // in case of multiple produces feedback same transaction concurrently.
+                feedbackTransactions.putIfAbsent(transactionId, SystemClock.now() + config.getFeedbackTimeout());
+                return false;
+            } else return timestamp > SystemClock.now()
+                    && feedbackTransactions.remove(transactionId, timestamp) // Exists but expired and remove successfully.
+                    && feedbackTransactions.putIfAbsent(transactionId, SystemClock.now() + config.getFeedbackTimeout()) == null;
+        }).limit(count).collect(Collectors.toList());
     }
 
-    public ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<String, TransactionId>>> getTransactions() {
-        return unCompleteTransaction;
-    }
-
-    protected ConcurrentMap<String, TransactionId> getOrCreateTransactionMap(String app, String topic) {
-        ConcurrentMap<String, ConcurrentMap<String, TransactionId>> topicMap = unCompleteTransaction.get(app);
-        if (topicMap == null) {
-            topicMap = Maps.newConcurrentMap();
-            if (unCompleteTransaction.putIfAbsent(app, topicMap) != null) {
-                topicMap = unCompleteTransaction.get(app);
-            }
-        }
-        ConcurrentMap<String, TransactionId> transactionMap = topicMap.get(topic);
-        if (transactionMap == null) {
-            transactionMap = Maps.newConcurrentMap();
-            if (topicMap.putIfAbsent(topic, transactionMap) != null) {
-                transactionMap = topicMap.get(topic);
-            }
-        }
-        return transactionMap;
+    public Collection<TransactionId> getTransactions() {
+        return openingTransactionsStream(storeService.getAllTransactionStores().stream())
+                .collect(Collectors.toList());
     }
 }

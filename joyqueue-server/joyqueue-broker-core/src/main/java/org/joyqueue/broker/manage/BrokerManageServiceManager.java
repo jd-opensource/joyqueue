@@ -20,14 +20,12 @@ import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.consumer.MessageConvertSupport;
 import org.joyqueue.broker.coordinator.CoordinatorService;
-import org.joyqueue.broker.election.ElectionService;
 import org.joyqueue.broker.manage.service.BrokerManageService;
 import org.joyqueue.broker.manage.service.ConnectionManageService;
 import org.joyqueue.broker.manage.service.support.DefaultBrokerManageService;
 import org.joyqueue.broker.manage.service.support.DefaultConnectionManageService;
 import org.joyqueue.broker.manage.service.support.DefaultConsumerManageService;
 import org.joyqueue.broker.manage.service.support.DefaultCoordinatorManageService;
-import org.joyqueue.broker.manage.service.support.DefaultElectionManageService;
 import org.joyqueue.broker.manage.service.support.DefaultMessageManageService;
 import org.joyqueue.broker.manage.service.support.DefaultStoreManageService;
 import org.joyqueue.broker.monitor.BrokerMonitor;
@@ -73,14 +71,13 @@ public class BrokerManageServiceManager extends Service {
     private CoordinatorService coordinatorService;
     private ArchiveManager archiveManager;
     private NameService nameService;
-    private ElectionService electionManager;
     private MessageConvertSupport messageConvertSupport;
 
     public BrokerManageServiceManager(BrokerMonitor brokerMonitor, ClusterManager clusterManager,
                                       StoreManagementService storeManagementService,
                                       StoreService storeService, Consume consume,
                                       MessageRetry messageRetry, CoordinatorService coordinatorService,
-                                      ArchiveManager archiveManager, NameService nameService, ElectionService electionManager,
+                                      ArchiveManager archiveManager, NameService nameService,
                                       MessageConvertSupport messageConvertSupport) {
         this.brokerMonitor = brokerMonitor;
         this.clusterManager = clusterManager;
@@ -91,7 +88,6 @@ public class BrokerManageServiceManager extends Service {
         this.coordinatorService = coordinatorService;
         this.archiveManager = archiveManager;
         this.nameService = nameService;
-        this.electionManager = electionManager;
         this.messageConvertSupport = messageConvertSupport;
     }
 
@@ -105,12 +101,12 @@ public class BrokerManageServiceManager extends Service {
         BrokerStat brokerStat = brokerMonitor.getBrokerStat();
         BrokerStartupInfo brokerStartupInfo = newBrokerStartInfo();
         DefaultBrokerMonitorInternalService brokerMonitorInternalService = new DefaultBrokerMonitorInternalService(brokerStat, consume,
-                storeManagementService, nameService, storeService, electionManager, clusterManager, brokerStartupInfo);
+                storeManagementService, nameService, storeService, clusterManager, brokerStartupInfo);
         DefaultConnectionMonitorService connectionMonitorService = new DefaultConnectionMonitorService(brokerStat);
         DefaultConsumerMonitorService consumerMonitorService = new DefaultConsumerMonitorService(brokerStat, consume, storeManagementService, retryManager, clusterManager);
         DefaultProducerMonitorService producerMonitorService = new DefaultProducerMonitorService(brokerStat, storeManagementService, clusterManager);
         DefaultTopicMonitorService topicMonitorService = new DefaultTopicMonitorService(brokerStat,storeManagementService);
-        DefaultPartitionMonitorService partitionMonitorService = new DefaultPartitionMonitorService(brokerStat, storeManagementService,electionManager);
+        DefaultPartitionMonitorService partitionMonitorService = new DefaultPartitionMonitorService(brokerStat, storeManagementService);
         DefaultCoordinatorMonitorService coordinatorMonitorService = new DefaultCoordinatorMonitorService(coordinatorService);
         DefaultArchiveMonitorService archiveMonitorService = new DefaultArchiveMonitorService(archiveManager);
         DefaultMetadataMonitorService metadataMonitorService = new DefaultMetadataMonitorService(clusterManager);
@@ -127,8 +123,7 @@ public class BrokerManageServiceManager extends Service {
         DefaultStoreManageService storeManageService = new DefaultStoreManageService(storeManagementService);
         DefaultConsumerManageService consumerManageService = new DefaultConsumerManageService(consume, storeManagementService, storeService, clusterManager,brokerMonitor);
         DefaultCoordinatorManageService coordinatorManageService = new DefaultCoordinatorManageService(coordinatorService);
-        DefaultElectionManageService electionManageService = new DefaultElectionManageService(electionManager);
-        return new DefaultBrokerManageService(connectionManageService, messageManageService, storeManageService, consumerManageService, coordinatorManageService, electionManageService);
+        return new DefaultBrokerManageService(connectionManageService, messageManageService, storeManageService, consumerManageService, coordinatorManageService);
     }
 
     protected BrokerStartupInfo newBrokerStartInfo() {

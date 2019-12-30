@@ -16,10 +16,7 @@
 package org.joyqueue.broker.network.support;
 
 import org.joyqueue.broker.BrokerContext;
-import org.joyqueue.broker.election.handler.AppendEntriesRequestHandler;
-import org.joyqueue.broker.election.handler.ReplicateConsumePosRequestHandler;
-import org.joyqueue.broker.election.handler.TimeoutNowRequestHandler;
-import org.joyqueue.broker.election.handler.VoteRequestHandler;
+import org.joyqueue.broker.consumer.handler.ReplicateConsumePosRequestHandler;
 import org.joyqueue.broker.handler.CreatePartitionGroupHandler;
 import org.joyqueue.broker.handler.PartitionGroupLeaderChangeHandler;
 import org.joyqueue.broker.handler.RemovePartitionGroupHandler;
@@ -51,15 +48,10 @@ public class BrokerCommandHandlerRegistrar {
         commandHandlerFactory.register(CommandType.UPDATE_RETRY, remoteRetryMessageHandler);
         commandHandlerFactory.register(CommandType.GET_RETRY_COUNT, remoteRetryMessageHandler);
 
-        // raft related command
-        commandHandlerFactory.register(CommandType.RAFT_VOTE_REQUEST, new VoteRequestHandler(brokerContext));
-        commandHandlerFactory.register(CommandType.RAFT_APPEND_ENTRIES_REQUEST, new AppendEntriesRequestHandler(brokerContext));
-        commandHandlerFactory.register(CommandType.RAFT_TIMEOUT_NOW_REQUEST, new TimeoutNowRequestHandler(brokerContext));
-        commandHandlerFactory.register(CommandType.REPLICATE_CONSUME_POS_REQUEST, new ReplicateConsumePosRequestHandler(brokerContext));
-
         // consume position related command
         commandHandlerFactory.register(CommandType.CONSUME_INDEX_QUERY_REQUEST, new ConsumeIndexQueryHandler(brokerContext));
         commandHandlerFactory.register(CommandType.CONSUME_INDEX_STORE_REQUEST, new ConsumeIndexStoreHandler(brokerContext));
+        commandHandlerFactory.register(CommandType.REPLICATE_CONSUME_POS_REQUEST, new ReplicateConsumePosRequestHandler(brokerContext));
 
         //nameserver
         commandHandlerFactory.register(NsrCommandType.NSR_CREATE_PARTITIONGROUP, new CreatePartitionGroupHandler(brokerContext));

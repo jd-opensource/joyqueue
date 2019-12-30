@@ -22,6 +22,6 @@ package org.joyqueue.broker.manage.service;
  * date: 2018/10/15
  */
 public interface BrokerManageService extends ConnectionManageService, MessageManageService, StoreManageService, ConsumerManageService,
-        CoordinatorManageService, ElectionManageService {
+        CoordinatorManageService {
 
 }

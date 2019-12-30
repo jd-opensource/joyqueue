@@ -17,14 +17,10 @@ package org.joyqueue.broker.monitor;
 
 import com.google.common.collect.Lists;
 import org.joyqueue.broker.cluster.ClusterManager;
-import org.joyqueue.broker.election.ElectionEvent;
-import org.joyqueue.broker.election.ElectionNode;
-import org.joyqueue.broker.election.TopicPartitionGroup;
 import org.joyqueue.broker.monitor.config.BrokerMonitorConfig;
 import org.joyqueue.broker.monitor.stat.AppStat;
 import org.joyqueue.broker.monitor.stat.BrokerStat;
 import org.joyqueue.broker.monitor.stat.ConsumerStat;
-import org.joyqueue.broker.monitor.stat.ElectionEventStat;
 import org.joyqueue.broker.monitor.stat.PartitionGroupStat;
 import org.joyqueue.broker.monitor.stat.ProducerStat;
 import org.joyqueue.broker.monitor.stat.ReplicationStat;
@@ -225,18 +221,6 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
         replicationStat.getAppendStat().mark(time, size, count);
         brokerStat.getReplicationStat().getAppendStat().mark(time, size, count);
     }
-
-    @Override
-    public void onReplicaStateChange(String topic, int partitionGroup, ElectionNode.State newState) {
-        if (!config.isEnable()) {
-            return;
-        }
-        ReplicationStat replicationStat = brokerStat.getOrCreateTopicStat(topic).getOrCreatePartitionGroupStat(partitionGroup).getReplicationStat();
-        replicationStat.getStat().setState(newState);
-        replicationStat.getStat().setTimestamp(SystemClock.now());
-    }
-
-
     @Override
     public void onGetRetry(String topic, String app, long count, double time) {
         if (!config.isEnable()) {
@@ -439,23 +423,6 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
         return sessionManager;
     }
 
-
-
-    public class ElectionListener implements EventListener<ElectionEvent>{
-
-        @Override
-        public void onEvent(ElectionEvent event) {
-            // event.
-            TopicPartitionGroup partitionGroup= event.getTopicPartitionGroup();
-            if(partitionGroup!=null) {
-                PartitionGroupStat partitionGroupStat= brokerStat.getOrCreateTopicStat(partitionGroup.getTopic()).getOrCreatePartitionGroupStat(partitionGroup.getPartitionGroupId());
-                ElectionEventStat electionStat= partitionGroupStat.getElectionEventStat();
-                electionStat.setState(event.getEventType());
-                electionStat.setTerm(event.getTerm());
-                electionStat.setTimestamp(SystemClock.now());
-            }
-        }
-    }
 
     /**
      * 元数据监听

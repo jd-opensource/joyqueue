@@ -17,8 +17,6 @@ package org.joyqueue.broker.kafka.coordinator.transaction.synchronizer;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.joyqueue.broker.coordinator.session.CoordinatorSession;
-import org.joyqueue.broker.coordinator.session.CoordinatorSessionManager;
 import org.joyqueue.broker.index.command.ConsumeIndexStoreRequest;
 import org.joyqueue.broker.index.command.ConsumeIndexStoreResponse;
 import org.joyqueue.broker.index.model.IndexAndMetadata;
@@ -28,6 +26,8 @@ import org.joyqueue.broker.kafka.coordinator.transaction.domain.TransactionMetad
 import org.joyqueue.broker.kafka.coordinator.transaction.domain.TransactionOffset;
 import org.joyqueue.broker.kafka.coordinator.transaction.domain.TransactionPrepare;
 import org.joyqueue.broker.kafka.coordinator.transaction.helper.TransactionHelper;
+import org.joyqueue.broker.network.session.BrokerTransportManager;
+import org.joyqueue.broker.network.session.BrokerTransportSession;
 import org.joyqueue.broker.producer.transaction.command.TransactionCommitRequest;
 import org.joyqueue.domain.Broker;
 import org.joyqueue.domain.PartitionGroup;
@@ -59,11 +59,11 @@ public class TransactionCommitSynchronizer extends Service {
     protected static final Logger logger = LoggerFactory.getLogger(TransactionCommitSynchronizer.class);
 
     private KafkaConfig config;
-    private CoordinatorSessionManager sessionManager;
+    private BrokerTransportManager sessionManager;
     private TransactionIdManager transactionIdManager;
     private NameService nameService;
 
-    public TransactionCommitSynchronizer(KafkaConfig config, CoordinatorSessionManager sessionManager, TransactionIdManager transactionIdManager, NameService nameService) {
+    public TransactionCommitSynchronizer(KafkaConfig config, BrokerTransportManager sessionManager, TransactionIdManager transactionIdManager, NameService nameService) {
         this.config = config;
         this.sessionManager = sessionManager;
         this.transactionIdManager = transactionIdManager;
@@ -87,7 +87,7 @@ public class TransactionCommitSynchronizer extends Service {
                 txIds.add(txId);
             }
 
-            CoordinatorSession session = sessionManager.getOrCreateSession(broker);
+            BrokerTransportSession session = sessionManager.getOrCreateSession(broker);
             TransactionCommitRequest transactionCommitRequest = new TransactionCommitRequest(brokerPrepare.getTopic(), brokerPrepare.getApp(), txIds);
             session.async(new JoyQueueCommand(transactionCommitRequest), new CommandCallback() {
                 @Override
@@ -127,7 +127,7 @@ public class TransactionCommitSynchronizer extends Service {
             Map<String, Map<Integer, IndexAndMetadata>> saveOffsetParam = buildSaveOffsetParam(entry.getValue());
 
             try {
-                CoordinatorSession session = sessionManager.getOrCreateSession(broker);
+                BrokerTransportSession session = sessionManager.getOrCreateSession(broker);
                 ConsumeIndexStoreRequest indexStoreRequest = new ConsumeIndexStoreRequest(transactionMetadata.getApp(), saveOffsetParam);
                 Command request = new JoyQueueCommand(indexStoreRequest);
 

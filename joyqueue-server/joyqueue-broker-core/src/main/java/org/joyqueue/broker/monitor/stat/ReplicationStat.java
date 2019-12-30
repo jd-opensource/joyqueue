@@ -28,14 +28,8 @@ public class ReplicationStat implements Serializable {
     private String topic;
     private int partitionGroup;
 
-    // replication out on leader
     private EnQueueStat replicaStat = new EnQueueStat();
-    // replication in on follower
     private EnQueueStat appendStat = new EnQueueStat();
-    // partition group replica state
-    private ReplicaNodeStat stat=new ReplicaNodeStat();
-    // partition group replica max log position
-    private long  maxLogPosition;
 
     public ReplicationStat() {
     }
@@ -57,21 +51,7 @@ public class ReplicationStat implements Serializable {
         return replicaStat;
     }
 
-
-    public long getMaxLogPosition() {
-        return maxLogPosition;
-    }
-
-    public void setMaxLogPosition(long maxLogPosition) {
-        this.maxLogPosition = maxLogPosition;
-    }
-
     public EnQueueStat getAppendStat() {
         return appendStat;
     }
-
-    public ReplicaNodeStat getStat() {
-        return stat;
-    }
-
 }

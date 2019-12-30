@@ -123,6 +123,12 @@
             <groupId>com.beust</groupId>
             <artifactId>jcommander</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.journalkeeper</groupId>
+            <artifactId>journalkeeper-metric-dropwizard</artifactId>
+            <version>${journalkeeper.version}</version>
+            <scope>runtime</scope>
+        </dependency>
     </dependencies>
     <build>
         <resources>

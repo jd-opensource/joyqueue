@@ -16,7 +16,6 @@
 package org.joyqueue.broker.handler;
 
 import org.joyqueue.broker.BrokerContext;
-import org.joyqueue.broker.election.ElectionService;
 import org.joyqueue.domain.PartitionGroup;
 import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.network.command.BooleanAck;
@@ -39,12 +38,10 @@ import org.slf4j.LoggerFactory;
 @Deprecated
 public class RemovePartitionGroupHandler implements CommandHandler, Type {
     private static Logger logger = LoggerFactory.getLogger(RemovePartitionGroupHandler.class);
-    private ElectionService electionService;
     private StoreService storeService;
     private NameServiceConfig config;
 
     public RemovePartitionGroupHandler(BrokerContext brokerContext) {
-        this.electionService = brokerContext.getElectionService();
         this.storeService = brokerContext.getStoreService();
         this.config = new NameServiceConfig(brokerContext.getPropertySupplier());
     }
@@ -81,7 +78,7 @@ public class RemovePartitionGroupHandler implements CommandHandler, Type {
             logger.debug("topic[{}] remove partitionGroup[{}]", group.getTopic(), group.getGroup());
         }
         storeService.removePartitionGroup(group.getTopic().getFullName(), group.getGroup());
-        electionService.onPartitionGroupRemove(group.getTopic(), group.getGroup());
+//        electionService.onPartitionGroupRemove(group.getTopic(), group.getGroup());
     }
 
     private void rollback(Transport transport, Command command) {

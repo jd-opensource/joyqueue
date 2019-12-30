@@ -278,6 +278,20 @@ public class ClusterManager extends Service {
     }
 
     /**
+     * 获取本地broker上该topic对应的partitionGroup
+     *
+     * @param topic
+     * @return
+     */
+    public PartitionGroup getPartitionGroup(TopicName topic, int group) {
+        TopicConfig topicConfig = getTopicConfig(topic);
+        if (null == topicConfig) {
+            return null;
+        }
+        return topicConfig.getPartitionGroups().get(group);
+    }
+
+    /**
      * 获取本地broker上该topic对应的partitionGroup 包含replica
      *
      * @param topic

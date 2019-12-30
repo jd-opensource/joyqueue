@@ -26,7 +26,6 @@ import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.consumer.MessageConvertSupport;
 import org.joyqueue.broker.coordinator.CoordinatorService;
 import org.joyqueue.broker.coordinator.config.CoordinatorConfig;
-import org.joyqueue.broker.election.ElectionService;
 import org.joyqueue.broker.extension.ExtensionManager;
 import org.joyqueue.broker.helper.AwareHelper;
 import org.joyqueue.broker.manage.BrokerManageService;
@@ -36,10 +35,11 @@ import org.joyqueue.broker.monitor.SessionManager;
 import org.joyqueue.broker.monitor.config.BrokerMonitorConfig;
 import org.joyqueue.broker.network.BrokerServer;
 import org.joyqueue.broker.network.protocol.ProtocolManager;
+import org.joyqueue.broker.network.session.BrokerTransportConfig;
+import org.joyqueue.broker.network.session.BrokerTransportManager;
 import org.joyqueue.broker.producer.Produce;
 import org.joyqueue.broker.retry.BrokerRetryManager;
 import org.joyqueue.broker.store.StoreInitializer;
-import org.joyqueue.broker.store.StoreManager;
 import org.joyqueue.domain.Config;
 import org.joyqueue.domain.Consumer;
 import org.joyqueue.domain.Producer;
@@ -84,16 +84,15 @@ public class BrokerService extends Service {
     private Consume consume;
     private StoreService storeService;
     private StoreInitializer storeInitializer;
-    private ElectionService electionService;
     private MessageRetry retryManager;
     private BrokerContext brokerContext;
     private ConfigurationManager configurationManager;
-    private StoreManager storeManager;
     private NameService nameService;
     private CoordinatorService coordinatorService;
     private ArchiveManager archiveManager;
     private MessageConvertSupport messageConvertSupport;
     private ExtensionManager extensionManager;
+    private BrokerTransportManager brokerTransportManager;
     private String[] args;
 
     public BrokerService() {
@@ -118,6 +117,10 @@ public class BrokerService extends Service {
         logger.info("Broker data path: {}.", dataPath);
 
         this.brokerContext.brokerConfig(brokerConfig);
+
+        // broker transport manager
+        this.brokerTransportManager = new BrokerTransportManager(new BrokerTransportConfig(configuration));
+
         this.extensionManager = new ExtensionManager(brokerContext);
         this.extensionManager.before();
 
@@ -156,7 +159,7 @@ public class BrokerService extends Service {
 
         // new coordinator service
         this.coordinatorService = new CoordinatorService(new CoordinatorConfig(configuration),
-                clusterManager, nameService);
+                clusterManager, nameService, brokerTransportManager);
         this.brokerContext.coordinnatorService(this.coordinatorService);
 
         this.messageConvertSupport = new MessageConvertSupport();
@@ -181,12 +184,8 @@ public class BrokerService extends Service {
         this.consume = getConsume(brokerContext);
         this.brokerContext.consume(consume);
 
-        // build election
-        this.electionService = getElectionService(brokerContext);
-        this.brokerContext.electionService(electionService);
-
         this.storeInitializer = new StoreInitializer(new BrokerStoreConfig(configuration), nameService,
-                clusterManager, storeService, electionService);
+                clusterManager, storeService);
 
         // manage service
         this.brokerManageService = new BrokerManageService(new BrokerManageConfig(configuration,brokerConfig),
@@ -199,13 +198,9 @@ public class BrokerService extends Service {
                 coordinatorService,
                 archiveManager,
                 nameService,
-                electionService,
                 messageConvertSupport);
         this.brokerContext.brokerManageService(brokerManageService);
 
-        //build store manager
-        this.storeManager = new StoreManager(storeService, nameService, clusterManager, electionService);
-        enrichIfNecessary(storeManager, brokerContext);
         //build protocol manager
         this.protocolManager = new ProtocolManager(brokerContext);
         //build broker server
@@ -236,7 +231,7 @@ public class BrokerService extends Service {
 
     private NameService getNameService(BrokerContext brokerContext, Configuration configuration) {
         Property property = configuration.getProperty(NAMESERVICE_NAME);
-        NameService nameService = Plugins.NAMESERVICE.get(property == null ? DEFAULT_NAMESERVICE_NAME : property.getString().trim());
+        NameService nameService = Plugins.NAMESERVICE.get(property == null ? DEFAULT_NAMESERVICE_NAME : property.getString());
         Preconditions.checkArgument(nameService != null, "nameService not found!");
 
         CompensatedNameService compensatedNameService = new CompensatedNameService(nameService);
@@ -280,13 +275,6 @@ public class BrokerService extends Service {
         return consume;
     }
 
-    private ElectionService getElectionService(BrokerContext brokerContext) {
-        ElectionService electionService = Plugins.ELECTION.get();
-        Preconditions.checkArgument(electionService != null, "election service can not be null");
-        enrichIfNecessary(electionService, brokerContext);
-        return electionService;
-    }
-
     private Consumer.ConsumerPolicy buildGlobalConsumePolicy(PropertySupplier propertySupplier) {
         //TODO
         return new Consumer.ConsumerPolicy.Builder().create();
@@ -299,6 +287,7 @@ public class BrokerService extends Service {
 
     @Override
     protected void doStart() throws Exception {
+        startIfNecessary(brokerTransportManager);
         startIfNecessary(clusterManager);
         startIfNecessary(storeService);
         startIfNecessary(storeInitializer);
@@ -308,8 +297,6 @@ public class BrokerService extends Service {
         startIfNecessary(produce);
         startIfNecessary(consume);
         //must start after store manager
-        startIfNecessary(storeManager);
-        startIfNecessary(electionService);
         startIfNecessary(extensionManager);
         startIfNecessary(protocolManager);
         startIfNecessary(nameService);
@@ -352,13 +339,11 @@ public class BrokerService extends Service {
         destroy(brokerServer);
         destroy(protocolManager);
         destroy(extensionManager);
-        destroy(electionService);
         destroy(produce);
         destroy(consume);
         destroy(coordinatorService);
         destroy(sessionManager);
         destroy(clusterManager);
-        destroy(storeManager);
         destroy(storeInitializer);
         destroy(storeService);
         destroy(configurationManager);
@@ -367,7 +352,7 @@ public class BrokerService extends Service {
         destroy(brokerMonitorService);
         destroy(brokerManageService);
         destroy(nameService);
-
+        destroy(brokerTransportManager);
         logger.info("Broker stopped!!!!");
     }
 

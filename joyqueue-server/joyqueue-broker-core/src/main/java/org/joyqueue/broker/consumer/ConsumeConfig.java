@@ -48,6 +48,9 @@ public class ConsumeConfig {
         return consumePositionPath;
     }
 
+    public int getReplicateConsumePosInterval() {
+        return PropertySupplier.getValue(propertySupplier, ConsumeConfigKey.REPLICATE_CONSUME_POS_INTERVAL);
+    }
     public boolean getBroadcastIndexResetEnable() {
         return propertySupplier.getValue(ConsumeConfigKey.BROADCAST_INDEX_RESET_ENABLE);
     }

@@ -18,9 +18,11 @@ package org.joyqueue.broker.consumer.position;
 import com.google.common.base.Preconditions;
 import com.jd.laf.extension.ExtensionManager;
 import org.joyqueue.broker.cluster.ClusterManager;
+import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.consumer.ConsumeConfig;
 import org.joyqueue.broker.consumer.model.ConsumePartition;
 import org.joyqueue.broker.consumer.position.model.Position;
+import org.joyqueue.broker.network.session.BrokerTransportManager;
 import org.joyqueue.domain.Consumer;
 import org.joyqueue.domain.PartitionGroup;
 import org.joyqueue.domain.TopicName;
@@ -70,15 +72,18 @@ public class PositionManager extends Service {
     // 消费位点快照存储服务
     private PositionStore<ConsumePartition, Position> positionStore;
     // 补偿消费位置线程（10分钟跑一次）
-    private LoopThread thread;
+    private LoopThread compensationPositionThread;
+
+    private LoopThread replicationThread;
+    private final ConsumePositionReplicator consumePositionReplicator;
     // 最近应答时间跟踪器
     private Map<ConsumePartition, /* 最新应答时间 */ AtomicLong> lastAckTimeTrace = new ConcurrentHashMap<>();
 
-    public PositionManager(ClusterManager clusterManager, StoreService storeService, ConsumeConfig consumeConfig) {
+    public PositionManager(ClusterManager clusterManager, StoreService storeService, Consume consume, BrokerTransportManager brokerTransportManager, ConsumeConfig consumeConfig) {
         this.clusterManager = clusterManager;
         this.storeService = storeService;
         this.config = consumeConfig;
-
+        this.consumePositionReplicator = new ConsumePositionReplicator(storeService, consume, brokerTransportManager, clusterManager);
         Preconditions.checkArgument(this.config != null, "config can not be null");
     }
 
@@ -101,14 +106,21 @@ public class PositionManager extends Service {
 
         positionStore.start();
 
-        this.thread = LoopThread.builder()
+        this.compensationPositionThread = LoopThread.builder()
                 .sleepTime(1000 * 60 * 10, 1000 * 60 * 10)
                 .name("Check-Subscribe-Thread")
                 .onException(e -> logger.error(e.getMessage(), e))
                 .doWork(this::compensationPosition)
                 .build();
 
-        this.thread.start();
+        this.replicationThread = LoopThread.builder()
+                .sleepTime(config.getReplicateConsumePosInterval(), config.getBroadcastIndexResetInterval())
+                .name("Consume-Position-Replication-Thread")
+                .onException(e -> logger.error(e.getMessage(), e))
+                .doWork(consumePositionReplicator::replicateConsumePosition)
+                .build();
+
+        this.replicationThread.start();
 
         clusterManager.addListener(new AddConsumeListener());
         clusterManager.addListener(new RemoveConsumeListener());
@@ -141,7 +153,12 @@ public class PositionManager extends Service {
     @Override
     protected void doStop() {
         super.doStop();
-
+        if(null != this.compensationPositionThread) {
+            this.compensationPositionThread.stop();
+        }
+        if(null != this.replicationThread) {
+            this.replicationThread.stop();
+        }
         positionStore.stop();
 
         logger.info("PositionManager is stopped.");
@@ -436,6 +453,12 @@ public class PositionManager extends Service {
     private long getMaxMsgIndex(TopicName topic, short partition) {
         Integer partitionGroupId = clusterManager.getPartitionGroupId(topic, partition);
         PartitionGroupStore store = storeService.getStore(topic.getFullName(), partitionGroupId);
+
+        if (store == null) {
+            logger.warn("store not exist, topic: {}, partitionGroup: {}, partition: {}", topic, partitionGroupId, partition);
+            return 0;
+        }
+
         long rightIndex = store.getRightIndex(partition);
         return rightIndex;
     }
@@ -537,8 +560,7 @@ public class PositionManager extends Service {
         AtomicBoolean changed = new AtomicBoolean(false);
         partitions.stream().forEach(partition -> {
             // 获取当前（主题+分区）的最大消息序号
-            long currentIndex = getMaxMsgIndex(topic, partition);
-            long currentIndexVal = Math.max(currentIndex, 0);
+            long currentIndex = 0L;
 
             appList.stream().forEach(app -> {
                 ConsumePartition consumePartition = new ConsumePartition(topic.getFullName(), app, partition);
@@ -555,11 +577,11 @@ public class PositionManager extends Service {
                     if (ackCurIndex > currentIndex) {
                         previous.setAckCurIndex(currentIndex);
                         changed.set(true);
-                        logger.warn("Update consume position topic:{}, app:{}, partition:{}, curIndex:{}, ackIndex:{}", topic.getFullName(), app, partition, currentIndexVal, ackCurIndex);
+                        logger.warn("Update consume position topic:{}, app:{}, partition:{}, curIndex:{}, ackIndex:{}", topic.getFullName(), app, partition, currentIndex, ackCurIndex);
                     }
                 } else {
                     changed.set(true);
-                    logger.info("Add consume partition topic:{}, app:{}, partition:{}, curIndex:{}", topic.getFullName(), app, partition, currentIndexVal);
+                    logger.info("Add consume partition topic:{}, app:{}, partition:{}, curIndex:{}", topic.getFullName(), app, partition, currentIndex);
                 }
 
             });

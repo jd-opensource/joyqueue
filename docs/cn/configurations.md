@@ -7,13 +7,14 @@ JoyQueue Server的配置文件位于joyqueue-server/conf/joyqueue.properties。
 配置项 | 默认值 | 说明
 -- | -- | --
 application.data.path | ${HOME}/joyqueue | JoyQueue数据目录
-broker.frontend-server.transport.server.port | 50088 | JoyQueue Server与客户端通信的端口。JoyQueue Server 会启用**连续的5个端口**用于通信，默认为：50088 - 50092。如果修改客户端端口号，其它的端口会自动跟随修改。
+broker.frontend-server.transport.server.port | 50088 | JoyQueue Server与客户端通信的端口。JoyQueue Server 会启用**连续8个端口**用于通信，默认为：50088 - 50092。如果修改客户端端口号，其它的端口会自动跟随修改。
  -- | broker.frontend-server.transport.server.port + 1（50089） | 内部端口，JoyQueue Server各节点之间通信的端口
  -- | broker.frontend-server.transport.server.port + 2（50090） | JoyQueue Server rest API 端口，
  -- | broker.frontend-server.transport.server.port + 3（50091） | JoyQueue Web 使用这个端口与JoyQueue Server通信。
  -- | broker.frontend-server.transport.server.port + 4（50092） | 内部端口，JoyQueue Server 元数据服务端口。
  -- | broker.frontend-server.transport.server.port + 5（50093） | 内部端口，JoyQueue Server 元数据推送端口。
- -- | broker.frontend-server.transport.server.port + 6（50094） | 内部端口，JoyQueue Server Journalkeeper端口。
+ -- | broker.frontend-server.transport.server.port + 6（50094） | 内部端口，JoyQueue NameService 之间通信端口。
+ -- | broker.frontend-server.transport.server.port + 7（50095） | 内部端口，JoyQueue Server 各节点之间数据复制端口。
  broker.opts.memory | -Xms2G -Xmx2G -server  -Xss256K -XX:SurvivorRatio=8 -XX:+UseConcMarkSweepGC -XX:+UseCMSCompactAtFullCollection -XX:CMSInitiatingOccupancyFraction=70 -XX:+CMSParallelRemarkEnabled -XX:SoftRefLRUPolicyMSPerMB=0 -XX:CMSMaxAbortablePrecleanTime=20 -XX:-OmitStackTraceInFastThrow -XX:MaxDirectMemorySize=2G | jvm 参数。
 store.message.file.size | 128 MB | 消息文件大小
 store.index.file.size | 512 KB | 索引文件大小

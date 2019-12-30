@@ -24,11 +24,7 @@ import org.joyqueue.manage.PartitionMetric;
 import org.joyqueue.manage.TopicMetric;
 import org.joyqueue.store.StoreManagementService;
 import org.joyqueue.store.message.MessageParser;
-import org.joyqueue.toolkit.io.Directory;
-import org.joyqueue.toolkit.io.Files;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.nio.ByteBuffer;
@@ -45,9 +41,8 @@ import java.util.stream.Collectors;
  * date: 2018/10/18
  */
 public class DefaultStoreManageService implements StoreManageService {
-    private Logger logger= LoggerFactory.getLogger(DefaultStoreManageService.class);
     private static final String TOPICS_DIR = "topics";
-    private static final String DEL_PREFIX = ".d.";
+
     private StoreManagementService storeManagementService;
 
     public DefaultStoreManageService(StoreManagementService storeManagementService) {
@@ -86,44 +81,6 @@ public class DefaultStoreManageService implements StoreManageService {
 
     @Override
     public void removeTopic(String topic) {
-    }
-
-    @Override
-    public Directory storeTreeView(boolean recursive) {
-        String topics=TOPICS_DIR;
-        Directory directory=new Directory();
-        directory.setName(topics);
-        File[] topicList=storeManagementService.listFiles(topics);
-        directory.setDirectory(true);
-        if(topicList.length>0){
-            directory.setChildren(new ArrayList());
-        }
-        //Arrays.sort(topicList,Comparator.comparing(File::getName));
-        Files.sortByName(topicList);
-        // recurse to child
-        for (File f : topicList) {
-            Directory child = new Directory();
-            Files.tree(f.getPath(),recursive, child);
-            directory.getChildren().add(child);
-        }
-        return directory;
-    }
-
-    @Override
-    public boolean deleteGarbageFile(String fileName,boolean retain) {
-        File file=new File(fileName);
-        if(file.exists()&&file.getName().contains(DEL_PREFIX)){
-            if(retain&&file.isDirectory()){
-                 for(File f:file.listFiles()){
-                     Files.deleteDirectory(f);
-                 }
-            }else {
-                Files.deleteDirectory(file);
-            }
-            logger.info("delete file {}",file.getName());
-            return true;
-        }
-        return false;
     }
 
     @Override

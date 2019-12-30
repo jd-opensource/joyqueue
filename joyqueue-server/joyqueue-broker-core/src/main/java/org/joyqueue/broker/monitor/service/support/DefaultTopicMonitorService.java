@@ -51,7 +51,7 @@ public class DefaultTopicMonitorService implements TopicMonitorService {
         List<TopicMonitorInfo> data = Lists.newArrayListWithCapacity(pageSize);
 
         for (StoreManagementService.TopicMetric topicMetric : storeManagementService.storeMetrics()) {
-            if (!topicMetric.isUsabled()) {
+            if (!topicMetric.isUsable()) {
                 continue;
             }
             if (index >= startIndex && index < endIndex) {

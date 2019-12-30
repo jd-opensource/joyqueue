@@ -55,6 +55,8 @@ public class BrokerPrepare implements JoyQueueLog {
 
     private byte source;
 
+    private short partition;
+
     @Override
     public int getSize() {
         return size;
@@ -143,6 +145,14 @@ public class BrokerPrepare implements JoyQueueLog {
         return source;
     }
 
+    public short getPartition() {
+        return partition;
+    }
+    // TODO set partition to broker prepare
+    public void setPartition(short partition) {
+        this.partition = partition;
+    }
+
     @Override
     public String toString() {
         return "BrokerPrepare{" +
@@ -152,8 +162,11 @@ public class BrokerPrepare implements JoyQueueLog {
                 ", txId='" + txId + '\'' +
                 ", queryId='" + queryId + '\'' +
                 ", topic='" + topic + '\'' +
+                ", app='" + app + '\'' +
+                ", timeout=" + timeout +
                 ", attrs=" + attrs +
                 ", source=" + source +
+                ", partition=" + partition +
                 '}';
     }
 }

@@ -111,55 +111,6 @@ public class Serializer extends AbstractSerializer {
         slice.putLong(index);
     }
 
-    public static BrokerPrepare readBrokerPrepare(final ByteBuffer in) throws Exception {
-        BrokerPrepare prepare = new BrokerPrepare();
-        prepare.setSize(in.getInt());
-        //跳过2字节魔术字符
-        in.getShort();
-        //跳过1字节类型
-        in.get();
-        prepare.setStartTime(in.getLong());
-        //1字节主题
-        prepare.setTopic(Serializer.readString(in));
-        //app
-        prepare.setApp(Serializer.readString(in));
-        //2字节事务ID
-        prepare.setTxId(Serializer.readString(in, SHORT_SIZE));
-        //2字节事务查询ID
-        prepare.setQueryId(Serializer.readString(in, SHORT_SIZE));
-        //source
-        prepare.setSource(in.get());
-        return prepare;
-    }
-
-    public static ByteBuffer writeBrokerPrepare(BrokerPrepare prepare, ByteBuffer out) throws Exception {
-        int begin = out.position();
-        //长度占位
-        out.putInt(0);
-        //魔术字符
-        out.putShort(BrokerMessage.MAGIC_LOG_CODE);
-        //命令类型
-        out.put(prepare.getType());
-        //事务开启时间
-        out.putLong(prepare.getStartTime());
-        //主题
-        write(prepare.getTopic(), out);
-        //app
-        write(prepare.getApp(), out);
-        //事物ID
-        write(prepare.getTxId(), out, SHORT_SIZE);
-        //查询标识
-        write(prepare.getQueryId(), out, SHORT_SIZE);
-        // source
-        out.put(prepare.getSource());
-        // 重写总长度
-        int end = out.position();
-        int size = end - begin;
-        prepare.setSize(size);
-        out.putInt(begin, size);
-        return out;
-    }
-
     public static int sizeOfBrokerPrepare(BrokerPrepare prepare) throws Exception {
         // length + magic + type + startTime + topic + app + txId + queryId + source
         int length = 4 + 2 + 1 + 8 + 1 + 1 + 2 + 2 + 1;

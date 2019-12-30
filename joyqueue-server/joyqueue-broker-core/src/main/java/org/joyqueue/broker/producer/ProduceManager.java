@@ -21,6 +21,7 @@ import org.joyqueue.broker.BrokerContextAware;
 import org.joyqueue.broker.buffer.Serializer;
 import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.broker.monitor.BrokerMonitor;
+import org.joyqueue.broker.producer.transaction.TransactionId;
 import org.joyqueue.broker.producer.transaction.TransactionManager;
 import org.joyqueue.domain.PartitionGroup;
 import org.joyqueue.domain.QosLevel;
@@ -33,7 +34,6 @@ import org.joyqueue.message.BrokerPrepare;
 import org.joyqueue.message.BrokerRollback;
 import org.joyqueue.message.JoyQueueLog;
 import org.joyqueue.network.session.Producer;
-import org.joyqueue.network.session.TransactionId;
 import org.joyqueue.store.PartitionGroupStore;
 import org.joyqueue.store.StoreService;
 import org.joyqueue.store.WriteRequest;
@@ -136,7 +136,7 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
             logger.warn("The clusterManager is not started, try to start it!");
             clusterManager.start();
         }
-        transactionManager = new TransactionManager(config, store, clusterManager, brokerMonitor);
+        transactionManager = new TransactionManager(config, store);
 
         if(config.getPrintMetricIntervalMs() > 0) {
             metrics = new Metric("input", 1, new String [] {"callback", "async"},new String[]{"tps"}, new String [] {"traffic"});
@@ -293,9 +293,9 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
             PartitionGroup partitionGroup = dispatchEntry.getKey();
             List<WriteRequest> writeRequests = dispatchEntry.getValue();
 
-            PartitionGroupStore partitionStore = store.getStore(topic, partitionGroup.getGroup(), qosLevel);
+            PartitionGroupStore partitionStore = store.getStore(topic, partitionGroup.getGroup());
             // 异步写入磁盘
-            Future<WriteResult> writeResultFuture = partitionStore.asyncWrite(writeRequests.toArray(new WriteRequest[]{}));
+            Future<WriteResult> writeResultFuture = partitionStore.asyncWrite(qosLevel, writeRequests.toArray(new WriteRequest[]{}));
             // 同步等待写入完成
             WriteResult writeResult = syncWait(writeResultFuture, endTime - SystemClock.now());
             // 构造写入结果
@@ -338,7 +338,7 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
                 logger.debug("ProduceManager writeMessageAsync topic:[{}], partitionGroup:[{}]]", topic, partitionGroup);
             }
             List<WriteRequest> writeRequests = dispatchEntry.getValue();
-            PartitionGroupStore partitionStore = store.getStore(topic, partitionGroup.getGroup(), qosLevel);
+            PartitionGroupStore partitionStore = store.getStore(topic, partitionGroup.getGroup());
 
             long startTime = SystemClock.now();
             // 异步写入磁盘
@@ -346,6 +346,7 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
                 long t0 = System.nanoTime();
 
                 partitionStore.asyncWrite(new MetricEventListener(t0, startTime, metric, eventListener, topic, app, partitionGroup.getGroup(), writeRequests),
+                        qosLevel,
                         writeRequests.toArray(new WriteRequest[]{}));
 
                 long t1 = System.nanoTime();
@@ -356,7 +357,7 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
                 partitionStore.asyncWrite(event -> {
                     onPutMessage(topic, app, partitionGroup.getGroup(), startTime, writeRequests);
                     eventListener.onEvent(event);
-                }, writeRequests.toArray(new WriteRequest[]{}));
+                }, qosLevel, writeRequests.toArray(new WriteRequest[]{}));
             }
 
             if (qosLevel.equals(QosLevel.ONE_WAY)) {
@@ -550,9 +551,9 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
         if (tx.getType() == JoyQueueLog.TYPE_TX_PREPARE) {
             return transactionManager.prepare(producer, (BrokerPrepare) tx);
         } else if (tx.getType() == JoyQueueLog.TYPE_TX_COMMIT) {
-            return transactionManager.commit(producer, (BrokerCommit) tx);
+            return transactionManager.commit((BrokerCommit) tx);
         } else if (tx.getType() == JoyQueueLog.TYPE_TX_ROLLBACK) {
-            return transactionManager.rollback(producer, (BrokerRollback) tx);
+            return transactionManager.rollback((BrokerRollback) tx);
         } else {
             throw new JoyQueueException(JoyQueueCode.CN_COMMAND_UNSUPPORTED);
         }

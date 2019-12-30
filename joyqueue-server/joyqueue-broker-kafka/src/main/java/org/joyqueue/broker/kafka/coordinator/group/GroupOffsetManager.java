@@ -18,8 +18,6 @@ package org.joyqueue.broker.kafka.coordinator.group;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.joyqueue.broker.cluster.ClusterManager;
-import org.joyqueue.broker.coordinator.session.CoordinatorSession;
-import org.joyqueue.broker.coordinator.session.CoordinatorSessionManager;
 import org.joyqueue.broker.index.command.ConsumeIndexQueryRequest;
 import org.joyqueue.broker.index.command.ConsumeIndexQueryResponse;
 import org.joyqueue.broker.index.command.ConsumeIndexStoreRequest;
@@ -31,6 +29,8 @@ import org.joyqueue.broker.kafka.config.KafkaConfig;
 import org.joyqueue.broker.kafka.coordinator.group.domain.GroupMetadata;
 import org.joyqueue.broker.kafka.model.OffsetAndMetadata;
 import org.joyqueue.broker.kafka.model.OffsetMetadataAndError;
+import org.joyqueue.broker.network.session.BrokerTransportManager;
+import org.joyqueue.broker.network.session.BrokerTransportSession;
 import org.joyqueue.domain.Broker;
 import org.joyqueue.domain.TopicConfig;
 import org.joyqueue.domain.TopicName;
@@ -60,9 +60,9 @@ public class GroupOffsetManager extends Service {
     private KafkaConfig config;
     private ClusterManager clusterManager;
     private GroupMetadataManager groupMetadataManager;
-    private CoordinatorSessionManager sessionManager;
+    private BrokerTransportManager sessionManager;
 
-    public GroupOffsetManager(KafkaConfig config, ClusterManager clusterManager, GroupMetadataManager groupMetadataManager, CoordinatorSessionManager sessionManager) {
+    public GroupOffsetManager(KafkaConfig config, ClusterManager clusterManager, GroupMetadataManager groupMetadataManager, BrokerTransportManager sessionManager) {
         this.config = config;
         this.clusterManager = clusterManager;
         this.groupMetadataManager = groupMetadataManager;
@@ -78,7 +78,7 @@ public class GroupOffsetManager extends Service {
             Broker broker = entry.getKey();
 
             try {
-                CoordinatorSession session = sessionManager.getOrCreateSession(broker);
+                BrokerTransportSession session = sessionManager.getOrCreateSession(broker);
                 ConsumeIndexQueryRequest indexQueryRequest = new ConsumeIndexQueryRequest(groupId, entry.getValue());
                 Command request = new JoyQueueCommand(indexQueryRequest);
 
@@ -185,7 +185,7 @@ public class GroupOffsetManager extends Service {
             Broker broker = entry.getKey();
 
             try {
-                CoordinatorSession session = sessionManager.getOrCreateSession(broker);
+                BrokerTransportSession session = sessionManager.getOrCreateSession(broker);
                 ConsumeIndexStoreRequest indexStoreRequest = new ConsumeIndexStoreRequest(groupId, buildSaveOffsetParam(entry.getValue()));
                 Command request = new JoyQueueCommand(indexStoreRequest);
 

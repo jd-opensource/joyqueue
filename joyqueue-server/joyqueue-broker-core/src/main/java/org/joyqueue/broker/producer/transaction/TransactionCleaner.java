@@ -15,21 +15,12 @@
  */
 package org.joyqueue.broker.producer.transaction;
 
-import com.google.common.collect.Lists;
 import org.joyqueue.broker.producer.ProduceConfig;
-import org.joyqueue.network.session.TransactionId;
-import org.joyqueue.store.StoreService;
-import org.joyqueue.store.transaction.TransactionStore;
 import org.joyqueue.toolkit.concurrent.NamedThreadFactory;
 import org.joyqueue.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.ByteBuffer;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -45,15 +36,15 @@ public class TransactionCleaner extends Service implements Runnable {
     protected static final Logger logger = LoggerFactory.getLogger(TransactionCleaner.class);
 
     private ProduceConfig config;
-    private UnCompletedTransactionManager unCompletedTransactionManager;
-    private StoreService store;
+    private final UnCompletedTransactionManager unCompletedTransactionManager;
+    private final TransactionManager transactionManager;
 
     private ScheduledExecutorService clearThreadPool;
 
-    public TransactionCleaner(ProduceConfig config, UnCompletedTransactionManager unCompletedTransactionManager, StoreService store) {
+    public TransactionCleaner(ProduceConfig config, UnCompletedTransactionManager unCompletedTransactionManager, TransactionManager transactionManager) {
         this.config = config;
         this.unCompletedTransactionManager = unCompletedTransactionManager;
-        this.store = store;
+        this.transactionManager = transactionManager;
     }
 
     @Override
@@ -75,23 +66,9 @@ public class TransactionCleaner extends Service implements Runnable {
 
     @Override
     public void run() {
-        List<TransactionId> expiredTransactions = Lists.newLinkedList();
-        ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<String, TransactionId>>> appTransactions = unCompletedTransactionManager.getTransactions();
-        for (Map.Entry<String, ConcurrentMap<String, ConcurrentMap<String, TransactionId>>> appEntry : appTransactions.entrySet()) {
-            for (Map.Entry<String, ConcurrentMap<String, TransactionId>> topicEntry : appEntry.getValue().entrySet()) {
-                ConcurrentMap<String, TransactionId> transactions = topicEntry.getValue();
-                for (Map.Entry<String, TransactionId> transactionEntry : transactions.entrySet()) {
-                    TransactionId transactionId = transactionEntry.getValue();
-                    if (isExpired(transactionEntry.getValue())) {
-                        expiredTransactions.add(transactionId);
-                    }
-                }
-            }
-        }
-
-        for (TransactionId expiredTransaction : expiredTransactions) {
-            doClear(expiredTransaction);
-        }
+        unCompletedTransactionManager.getTransactions().stream()
+                .filter(this::isExpired)
+                .forEach(this::doClear);
     }
 
     protected boolean isExpired(TransactionId transactionId) {
@@ -103,22 +80,10 @@ public class TransactionCleaner extends Service implements Runnable {
         }
     }
 
-    protected void doClear(TransactionId transactionId) {
+    private void doClear(TransactionId transactionId) {
+
         try {
-            TransactionStore transactionStore = store.getTransactionStore(transactionId.getTopic());
-            if (transactionStore == null) {
-                logger.error("clear expired transaction error, store not exist, topic: {}, app : {}, txId: {}, storeId: {}",
-                        transactionId.getTopic(), transactionId.getApp(), transactionId.getTxId(), transactionId.getStoreId());
-                return;
-            }
-            Iterator<ByteBuffer> rByteBufferIterator = transactionStore.readIterator(transactionId.getStoreId());
-            if (rByteBufferIterator == null) {
-                logger.error("clear expired transaction error, store iterator not exist, topic: {}, app : {}, txId: {}, storeId: {}",
-                        transactionId.getTopic(), transactionId.getApp(), transactionId.getTxId(), transactionId.getStoreId());
-                return;
-            }
-            transactionStore.remove(transactionId.getStoreId());
-            unCompletedTransactionManager.removeTransaction(transactionId.getTopic(), transactionId.getApp(), transactionId.getTxId());
+            transactionManager.completeTransaction(false, transactionId);
             logger.info("clear expired transaction, topic: {}, app : {}, txId: {}, storeId: {}", transactionId.getTopic(), transactionId.getApp(), transactionId.getTxId(), transactionId.getStoreId());
         } catch (Exception e) {
             logger.error("clear expired transaction exception, topic: {}, app : {}, txId: {}, storeId: {}",

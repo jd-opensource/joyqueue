@@ -18,9 +18,9 @@ package org.joyqueue.broker.coordinator;
 import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.broker.coordinator.config.CoordinatorConfig;
 import org.joyqueue.broker.coordinator.domain.CoordinatorDetail;
-import org.joyqueue.broker.coordinator.session.CoordinatorSessionManager;
 import org.joyqueue.broker.coordinator.support.CoordinatorInitializer;
 import org.joyqueue.broker.coordinator.support.CoordinatorResolver;
+import org.joyqueue.broker.network.session.BrokerTransportManager;
 import org.joyqueue.domain.Broker;
 import org.joyqueue.domain.PartitionGroup;
 import org.joyqueue.domain.TopicConfig;
@@ -38,10 +38,10 @@ public class Coordinator {
     private ClusterManager clusterManager;
     private CoordinatorResolver coordinatorResolver;
     private CoordinatorInitializer coordinatorInitializer;
-    private CoordinatorSessionManager coordinatorSessionManager;
+    private BrokerTransportManager coordinatorSessionManager;
 
     public Coordinator(CoordinatorConfig config, ClusterManager clusterManager, CoordinatorResolver coordinatorResolver,
-                       CoordinatorInitializer coordinatorInitializer, CoordinatorSessionManager coordinatorSessionManager) {
+                       CoordinatorInitializer coordinatorInitializer, BrokerTransportManager coordinatorSessionManager) {
         this.config = config;
         this.clusterManager = clusterManager;
         this.coordinatorResolver = coordinatorResolver;
@@ -103,7 +103,7 @@ public class Coordinator {
         return coordinatorInitializer.init();
     }
 
-    public CoordinatorSessionManager getSessionManager() {
+    public BrokerTransportManager getSessionManager() {
         return coordinatorSessionManager;
     }
 }

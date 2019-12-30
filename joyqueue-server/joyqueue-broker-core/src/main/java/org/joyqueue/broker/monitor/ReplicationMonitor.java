@@ -15,8 +15,6 @@
  */
 package org.joyqueue.broker.monitor;
 
-import org.joyqueue.broker.election.ElectionNode;
-
 /**
  * ReplicationMonitor
  *
@@ -44,16 +42,4 @@ public interface ReplicationMonitor {
      * @param time
      */
     void onAppendReplicateMessage(String topic, int partitionGroup, long count, long size, double time);
-
-
-    /**
-     * Update replica state
-     * @param topic  update to topic
-     * @param partitionGroup partition group of topic
-     * @param newState  new state
-     *
-     **/
-    void onReplicaStateChange(String topic, int partitionGroup, ElectionNode.State newState);
-
-
 }

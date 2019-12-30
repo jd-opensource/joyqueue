@@ -16,13 +16,13 @@
 package org.joyqueue.broker.kafka.coordinator.transaction.synchronizer;
 
 import com.google.common.collect.Lists;
-import org.joyqueue.broker.coordinator.session.CoordinatorSession;
-import org.joyqueue.broker.coordinator.session.CoordinatorSessionManager;
 import org.joyqueue.broker.kafka.config.KafkaConfig;
 import org.joyqueue.broker.kafka.coordinator.transaction.TransactionIdManager;
 import org.joyqueue.broker.kafka.coordinator.transaction.domain.TransactionMetadata;
 import org.joyqueue.broker.kafka.coordinator.transaction.domain.TransactionPrepare;
 import org.joyqueue.broker.kafka.coordinator.transaction.helper.TransactionHelper;
+import org.joyqueue.broker.network.session.BrokerTransportManager;
+import org.joyqueue.broker.network.session.BrokerTransportSession;
 import org.joyqueue.broker.producer.transaction.command.TransactionRollbackRequest;
 import org.joyqueue.domain.Broker;
 import org.joyqueue.exception.JoyQueueCode;
@@ -50,10 +50,10 @@ public class TransactionAbortSynchronizer extends Service {
     protected static final Logger logger = LoggerFactory.getLogger(TransactionAbortSynchronizer.class);
 
     private KafkaConfig config;
-    private CoordinatorSessionManager sessionManager;
+    private BrokerTransportManager sessionManager;
     private TransactionIdManager transactionIdManager;
 
-    public TransactionAbortSynchronizer(KafkaConfig config, CoordinatorSessionManager sessionManager, TransactionIdManager transactionIdManager) {
+    public TransactionAbortSynchronizer(KafkaConfig config, BrokerTransportManager sessionManager, TransactionIdManager transactionIdManager) {
         this.config = config;
         this.sessionManager = sessionManager;
         this.transactionIdManager = transactionIdManager;
@@ -76,7 +76,7 @@ public class TransactionAbortSynchronizer extends Service {
                 txIds.add(txId);
             }
 
-            CoordinatorSession session = sessionManager.getOrCreateSession(broker);
+            BrokerTransportSession session = sessionManager.getOrCreateSession(broker);
             TransactionRollbackRequest transactionRollbackRequest = new TransactionRollbackRequest(brokerPrepare.getTopic(), brokerPrepare.getApp(), txIds);
             session.async(new JoyQueueCommand(transactionRollbackRequest), new CommandCallback() {
                 @Override

@@ -43,11 +43,6 @@ public enum CoordinatorConfigKey implements PropertyDef {
     // 最多事务数
     TRANSACTION_MAX_NUM("coordinator.transaction.max.num", 1024 * 10, Type.INT),
 
-    // session同步超时
-    SESSION_SYNC_TIMEOUT("coordinator.session.sync.timeout", 1000 * 3, Type.INT),
-    // session缓存时间
-    SESSION_EXPIRE_TIME("coordinator.session.expire.time", 1000 * 60 * 10, Type.INT),
-
     ;
 
     private String name;

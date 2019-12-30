@@ -17,8 +17,6 @@ package org.joyqueue.broker.monitor.service;
 
 
 
-import org.joyqueue.broker.monitor.stat.ElectionEventStat;
-import org.joyqueue.broker.monitor.stat.ReplicaNodeStat;
 import org.joyqueue.monitor.PartitionGroupMonitorInfo;
 import org.joyqueue.monitor.PartitionMonitorInfo;
 import java.util.List;
@@ -76,16 +74,6 @@ public interface PartitionMonitorService {
      */
     PartitionGroupMonitorInfo getPartitionGroupInfoByTopic(String topic, int partitionGroup);
 
-
-    /**
-     * 获取 partitionGroup replica 最近一次选举事件
-     *
-     * @param topic          主题
-     * @param partitionGroup partitionGroup
-     * @return Node election state  or null if partition group not exist
-     */
-    ElectionEventStat getReplicaRecentElectionEvent(String topic, int partitionGroup);
-
     /**
      * 获取主题的所有分区组监控信息
      *
@@ -103,13 +91,6 @@ public interface PartitionMonitorService {
      * @return 分区组监控信息
      */
     PartitionGroupMonitorInfo getPartitionGroupInfoByTopicAndApp(String topic, String app, int partitionGroup);
-
-    /**
-     * Replica state with timestamp
-     * @return Partition group replica node state
-     *
-     **/
-    ReplicaNodeStat getReplicaState(String topic, int partitionGroup);
 
     /**
      * 获取主题下应用所有分区组的监控信息

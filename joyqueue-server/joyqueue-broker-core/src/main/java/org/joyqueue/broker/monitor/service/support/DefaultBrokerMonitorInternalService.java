@@ -18,7 +18,6 @@ package org.joyqueue.broker.monitor.service.support;
 import com.sun.management.GcInfo;
 import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.broker.consumer.Consume;
-import org.joyqueue.broker.election.ElectionService;
 import org.joyqueue.broker.monitor.converter.BrokerMonitorConverter;
 import org.joyqueue.broker.monitor.service.BrokerMonitorInternalService;
 import org.joyqueue.broker.monitor.stat.BrokerStat;
@@ -37,7 +36,6 @@ import org.joyqueue.monitor.BrokerStartupInfo;
 import org.joyqueue.monitor.ElectionMonitorInfo;
 import org.joyqueue.monitor.NameServerMonitorInfo;
 import org.joyqueue.monitor.StoreMonitorInfo;
-import org.joyqueue.store.PartitionGroupStore;
 import org.joyqueue.store.StoreManagementService;
 import org.joyqueue.store.StoreService;
 import org.joyqueue.toolkit.format.Format;
@@ -53,6 +51,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -70,7 +69,6 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
     private StoreManagementService storeManagementService;
     private NameService nameService;
     private StoreService storeService;
-    private ElectionService electionService;
     private ClusterManager clusterManager;
     private BrokerStartupInfo brokerStartupInfo;
     private JVMMonitorService jvmMonitorService;
@@ -80,20 +78,17 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
     public DefaultBrokerMonitorInternalService(BrokerStat brokerStat, Consume consume,
                                                StoreManagementService storeManagementService,
                                                NameService nameService, StoreService storeService,
-                                               ElectionService electionManager, ClusterManager clusterManager, BrokerStartupInfo brokerStartupInfo) {
+                                               ClusterManager clusterManager, BrokerStartupInfo brokerStartupInfo) {
         this.brokerStat = brokerStat;
         this.consume = consume;
         this.storeManagementService = storeManagementService;
         this.nameService = nameService;
         this.storeService = storeService;
-        this.electionService = electionManager;
         this.clusterManager = clusterManager;
         this.brokerStartupInfo = brokerStartupInfo;
-        this.jvmMonitorService=new GarbageCollectorMonitor();
-        this.gcNotificationParser=new DefaultGCNotificationParser();
-        this.gcNotificationParser.addListener(new DefaultGCEventListener(brokerStat.getJvmStat()));
-        this.jvmMonitorService.addGCEventListener(gcNotificationParser);
-
+        this.jvmMonitorService = new GarbageCollectorMonitor();
+        this.gcNotificationParser = new DefaultGCNotificationParser();
+        this.gcNotificationParser.addListener((new DefaultGCEventListener(brokerStat.getJvmStat())));
     }
 
     @Override
@@ -113,7 +108,8 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
         nameServerMonitorInfo.setStarted(nameService.isStarted());
 
         ElectionMonitorInfo electionMonitorInfo = new ElectionMonitorInfo();
-        boolean electionStarted = electionService instanceof Online ? ((Online) electionService).isStarted() : true;
+        // TODO: 这个监控已经没意义了，是否要去掉？
+        boolean electionStarted = true;
         electionMonitorInfo.setStarted(electionStarted);
 
         brokerMonitorInfo.getReplication().setStarted(electionStarted);
@@ -144,11 +140,11 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
             topicPendingStat.setTopic(topic.getName().getFullName());
             topicPendingStatMap.put(topic.getName().getFullName(), topicPendingStat);
 
-            long storageSize = 0;
-            List<PartitionGroupStore> partitionGroupStores = storeService.getStore(topicStat.getTopic());
-            for (PartitionGroupStore pgStore : partitionGroupStores) {
-                storageSize += pgStore.getTotalPhysicalStorageSize();
-            }
+            long storageSize = Arrays.stream(storeManagementService.storeMetrics())
+                    .map(StoreManagementService.TopicMetric::getPartitionGroupMetrics)
+                    .flatMap(Arrays::stream)
+                    .mapToLong(StoreManagementService.PartitionGroupMetric::getStorageSize)
+                    .sum();
             topicStat.setStoreSize(storageSize);
 
             long topicPending = 0;
@@ -195,8 +191,6 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
             }
             topicPendingStat.setPending(topicPending);
         }
-        // replicas lag state
-        snapshotReplicaLag();
         // runtime memory usage state
         runtimeMemoryUsageState(statExt);
         runtimeStorageOccupy(brokerStat);
@@ -213,7 +207,6 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
             Map<Integer, PartitionGroupStat> partitionGroupStatMap= topicStat.getPartitionGroupStatMap();
             for(PartitionGroupStat partitionGroupStat:partitionGroupStatMap.values()){
                 StoreManagementService.PartitionGroupMetric partitionGroupMetric=storeManagementService.partitionGroupMetric(partitionGroupStat.getTopic(),partitionGroupStat.getPartitionGroup());
-                partitionGroupStat.getReplicationStat().setMaxLogPosition(partitionGroupMetric.getRightPosition());
             }
         }
     }

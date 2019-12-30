@@ -17,6 +17,7 @@ package org.joyqueue.broker.protocol.handler;
 
 import org.joyqueue.broker.BrokerContext;
 import org.joyqueue.broker.BrokerContextAware;
+import org.joyqueue.broker.producer.transaction.TransactionId;
 import org.joyqueue.broker.protocol.JoyQueueCommandHandler;
 import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.broker.protocol.converter.CheckResultConverter;
@@ -34,7 +35,6 @@ import org.joyqueue.network.command.ProduceMessagePrepareRequest;
 import org.joyqueue.network.command.ProduceMessagePrepareResponse;
 import org.joyqueue.network.session.Connection;
 import org.joyqueue.network.session.Producer;
-import org.joyqueue.network.session.TransactionId;
 import org.joyqueue.network.transport.Transport;
 import org.joyqueue.network.transport.command.Command;
 import org.joyqueue.network.transport.command.Type;

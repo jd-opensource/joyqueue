@@ -13,6 +13,7 @@ public class PortHelper {
     private static final int NAMESERVER_PORT_OFFSET = 4;
     private static final int MESSENGER_PORT_OFFSET = 5;
     private static final int JOURNALKEEPER_PORT_OFFSET = 6;
+    private static final int STORE_PORT_OFFSET = 7;
 
     public static int getBackendPort(int basePort) {
         return basePort + BACKEND_PORT_OFFSET;
@@ -37,4 +38,6 @@ public class PortHelper {
     public static int getJournalkeeperPort(int basePort) {
         return basePort + JOURNALKEEPER_PORT_OFFSET;
     }
+
+    public static int getStorePortOffset(int basePort) {return basePort + STORE_PORT_OFFSET;}
 }

@@ -16,15 +16,12 @@
 package org.joyqueue.broker.monitor.service.support;
 
 import com.google.common.collect.Lists;
-import org.joyqueue.broker.election.ElectionService;
 import org.joyqueue.broker.monitor.converter.BrokerMonitorConverter;
 import org.joyqueue.broker.monitor.service.PartitionMonitorService;
 import org.joyqueue.broker.monitor.stat.AppStat;
 import org.joyqueue.broker.monitor.stat.BrokerStat;
-import org.joyqueue.broker.monitor.stat.ElectionEventStat;
 import org.joyqueue.broker.monitor.stat.PartitionGroupStat;
 import org.joyqueue.broker.monitor.stat.PartitionStat;
-import org.joyqueue.broker.monitor.stat.ReplicaNodeStat;
 import org.joyqueue.broker.monitor.stat.TopicStat;
 import org.joyqueue.monitor.PartitionGroupMonitorInfo;
 import org.joyqueue.monitor.PartitionMonitorInfo;
@@ -43,11 +40,10 @@ public class DefaultPartitionMonitorService implements PartitionMonitorService {
 
     private BrokerStat brokerStat;
     private StoreManagementService storeManagementService;
-    private ElectionService electionManager;
-    public DefaultPartitionMonitorService(BrokerStat brokerStat, StoreManagementService storeManagementService, ElectionService electionManager) {
+
+    public DefaultPartitionMonitorService(BrokerStat brokerStat, StoreManagementService storeManagementService) {
         this.brokerStat = brokerStat;
         this.storeManagementService = storeManagementService;
-        this.electionManager=electionManager;
     }
 
     @Override
@@ -98,19 +94,6 @@ public class DefaultPartitionMonitorService implements PartitionMonitorService {
         return convertPartitionGroupMonitorInfo(partitionGroupStat);
     }
 
-
-    @Override
-    public ElectionEventStat getReplicaRecentElectionEvent(String topic, int partitionGroup) {
-        TopicStat topicStat= brokerStat.getTopicStats().get(topic);
-        if(topicStat!=null) {
-            PartitionGroupStat partitionGroupStat=   topicStat.getPartitionGroupStatMap().get(partitionGroup);
-            if(partitionGroupStat!=null){
-                return partitionGroupStat.getElectionEventStat();
-            }
-        }
-        return null;
-    }
-
     @Override
     public List<PartitionGroupMonitorInfo> getPartitionGroupInfosByTopic(String topic) {
         TopicStat topicStat = brokerStat.getOrCreateTopicStat(topic);
@@ -139,14 +122,6 @@ public class DefaultPartitionMonitorService implements PartitionMonitorService {
         }
         return result;
     }
-
-    @Override
-    public ReplicaNodeStat getReplicaState(String topic, int partitionGroup) {
-        ReplicaNodeStat replicaNodeStat= brokerStat.getOrCreateTopicStat(topic).getOrCreatePartitionGroupStat(partitionGroup).getReplicationStat().getStat();
-        replicaNodeStat.setBrokerId(brokerStat.getBrokerId());
-        return replicaNodeStat;
-    }
-
 
     protected PartitionGroupMonitorInfo convertPartitionGroupMonitorInfo(PartitionGroupStat partitionGroupStat) {
         StoreManagementService.PartitionGroupMetric partitionGroupMetric = storeManagementService.partitionGroupMetric(partitionGroupStat.getTopic(), partitionGroupStat.getPartitionGroup());

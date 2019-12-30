@@ -61,7 +61,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -168,7 +167,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
         }
         this.filterMessageSupport = new FilterMessageSupport(clusterManager);
         this.partitionManager = new PartitionManager(clusterManager, sessionManager);
-        this.positionManager = new PositionManager(clusterManager, storeService, consumeConfig);
+        this.positionManager = new PositionManager(clusterManager, storeService, this, brokerContext.brokerTransportManager(), consumeConfig);
         this.brokerContext.positionManager(positionManager);
         this.partitionConsumption = new PartitionConsumption(clusterManager, storeService, partitionManager, positionManager, messageRetry, filterMessageSupport, archiveManager);
         this.concurrentConsumption = new ConcurrentConsumption(clusterManager, storeService, partitionManager, messageRetry, positionManager, filterMessageSupport, archiveManager, sessionManager);
@@ -656,13 +655,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
         for (Map.Entry<TopicName, TopicConfig> topicEntry : localTopics.entrySet()) {
             TopicConfig topicConfig = topicEntry.getValue();
             List<org.joyqueue.domain.Consumer> broadcastConsumers = Lists.newArrayList(clusterManager.getLocalConsumersByTopic(topicConfig.getName()));
-            Iterator<org.joyqueue.domain.Consumer> iterator = broadcastConsumers.iterator();
-            while (iterator.hasNext()) {
-                org.joyqueue.domain.Consumer consumer = iterator.next();
-                if (!consumer.getTopicType().equals(TopicType.BROADCAST)) {
-                    iterator.remove();
-                }
-            }
+            broadcastConsumers.removeIf(consumer -> !consumer.getTopicType().equals(TopicType.BROADCAST));
 
             if (CollectionUtils.isEmpty(broadcastConsumers)) {
                 continue;

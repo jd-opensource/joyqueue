@@ -15,22 +15,10 @@
  */
 package org.joyqueue.broker.network.codec;
 
-import org.joyqueue.broker.election.network.codec.AppendEntriesRequestDecoder;
-import org.joyqueue.broker.election.network.codec.AppendEntriesRequestEncoder;
-import org.joyqueue.broker.election.network.codec.AppendEntriesResponseDecoder;
-import org.joyqueue.broker.election.network.codec.AppendEntriesResponseEncoder;
-import org.joyqueue.broker.election.network.codec.ReplicateConsumePosRequestDecoder;
-import org.joyqueue.broker.election.network.codec.ReplicateConsumePosRequestEncoder;
-import org.joyqueue.broker.election.network.codec.ReplicateConsumePosResponseDecoder;
-import org.joyqueue.broker.election.network.codec.ReplicateConsumePosResponseEncoder;
-import org.joyqueue.broker.election.network.codec.TimeoutNowRequestDecoder;
-import org.joyqueue.broker.election.network.codec.TimeoutNowRequestEncoder;
-import org.joyqueue.broker.election.network.codec.TimeoutNowResponseDecoder;
-import org.joyqueue.broker.election.network.codec.TimeoutNowResponseEncoder;
-import org.joyqueue.broker.election.network.codec.VoteRequestDecoder;
-import org.joyqueue.broker.election.network.codec.VoteRequestEncoder;
-import org.joyqueue.broker.election.network.codec.VoteResponseDecoder;
-import org.joyqueue.broker.election.network.codec.VoteResponseEncoder;
+import org.joyqueue.broker.consumer.codec.ReplicateConsumePosRequestDecoder;
+import org.joyqueue.broker.consumer.codec.ReplicateConsumePosRequestEncoder;
+import org.joyqueue.broker.consumer.codec.ReplicateConsumePosResponseDecoder;
+import org.joyqueue.broker.consumer.codec.ReplicateConsumePosResponseEncoder;
 import org.joyqueue.broker.index.network.codec.IndexQueryRequestDecoder;
 import org.joyqueue.broker.index.network.codec.IndexQueryRequestEncoder;
 import org.joyqueue.broker.index.network.codec.IndexQueryResponseDecoder;
@@ -72,20 +60,6 @@ public class BrokerPayloadCodecRegistrar {
         payloadCodecFactory.register(new GetRetryCountAckCodec());
         payloadCodecFactory.register(new PutRetryCodec());
         payloadCodecFactory.register(new UpdateRetryCodec());
-
-        // raft election command codec
-        payloadCodecFactory.register(new VoteRequestDecoder());
-        payloadCodecFactory.register(new VoteRequestEncoder());
-        payloadCodecFactory.register(new VoteResponseDecoder());
-        payloadCodecFactory.register(new VoteResponseEncoder());
-        payloadCodecFactory.register(new TimeoutNowRequestDecoder());
-        payloadCodecFactory.register(new TimeoutNowRequestEncoder());
-        payloadCodecFactory.register(new TimeoutNowResponseDecoder());
-        payloadCodecFactory.register(new TimeoutNowResponseEncoder());
-        payloadCodecFactory.register(new AppendEntriesRequestDecoder());
-        payloadCodecFactory.register(new AppendEntriesRequestEncoder());
-        payloadCodecFactory.register(new AppendEntriesResponseDecoder());
-        payloadCodecFactory.register(new AppendEntriesResponseEncoder());
 
         // index manage command codec
         payloadCodecFactory.register(new IndexQueryRequestDecoder());

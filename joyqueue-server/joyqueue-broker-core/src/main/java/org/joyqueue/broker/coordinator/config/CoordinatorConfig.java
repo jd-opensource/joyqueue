@@ -67,12 +67,4 @@ public class CoordinatorConfig {
     public int getTransactionMaxNum() {
         return PropertySupplier.getValue(propertySupplier, CoordinatorConfigKey.TRANSACTION_MAX_NUM);
     }
-
-    public int getSessionTimeout() {
-        return PropertySupplier.getValue(propertySupplier, CoordinatorConfigKey.SESSION_SYNC_TIMEOUT);
-    }
-
-    public int getSessionExpireTime() {
-        return PropertySupplier.getValue(propertySupplier, CoordinatorConfigKey.SESSION_EXPIRE_TIME);
-    }
 }

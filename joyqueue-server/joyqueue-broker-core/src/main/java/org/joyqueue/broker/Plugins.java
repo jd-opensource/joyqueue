@@ -17,7 +17,6 @@ package org.joyqueue.broker;
 
 import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.consumer.MessageConverter;
-import org.joyqueue.broker.election.ElectionService;
 import org.joyqueue.broker.limit.LimitRejectedStrategy;
 import org.joyqueue.broker.producer.Produce;
 import org.joyqueue.nsr.NameService;
@@ -48,11 +47,6 @@ public interface Plugins {
      * 存储扩展点
      */
     ExtensionPoint<StoreService, String> STORE = new ExtensionPointLazy<>(StoreService.class, SpiLoader.INSTANCE, null, null);
-
-    /**
-     * 选举扩展点
-     */
-    ExtensionPoint<ElectionService, String> ELECTION = new ExtensionPointLazy<>(ElectionService.class, SpiLoader.INSTANCE, null, null);
 
     /**
      * 认证扩展点

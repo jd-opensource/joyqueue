@@ -32,6 +32,6 @@
     <packaging>pom</packaging>
     <modules>
         <module>joyqueue-store-api</module>
-        <module>joyqueue-store-core</module>
+        <module>joyqueue-store-journalkeeper</module>
     </modules>
 </project>

@@ -19,8 +19,6 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.primitives.Shorts;
 import org.joyqueue.broker.BrokerContext;
 import org.joyqueue.broker.cluster.ClusterManager;
-import org.joyqueue.broker.election.ElectionService;
-import org.joyqueue.domain.Broker;
 import org.joyqueue.domain.PartitionGroup;
 import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.exception.JoyQueueException;
@@ -33,13 +31,13 @@ import org.joyqueue.network.transport.exception.TransportException;
 import org.joyqueue.nsr.config.NameServiceConfig;
 import org.joyqueue.nsr.network.command.CreatePartitionGroup;
 import org.joyqueue.nsr.network.command.NsrCommandType;
+import org.joyqueue.store.PartitionGroupStore;
 import org.joyqueue.store.StoreService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * @author wylixiaobin
@@ -49,13 +47,11 @@ import java.util.Set;
 public class CreatePartitionGroupHandler implements CommandHandler, Type {
     private static Logger logger = LoggerFactory.getLogger(CreatePartitionGroupHandler.class);
     private ClusterManager clusterManager;
-    private ElectionService electionService;
     private StoreService storeService;
     private NameServiceConfig config;
 
     public CreatePartitionGroupHandler(BrokerContext brokerContext) {
         this.clusterManager = brokerContext.getClusterManager();
-        this.electionService = brokerContext.getElectionService();
         this.storeService = brokerContext.getStoreService();
         this.config = new NameServiceConfig(brokerContext.getPropertySupplier());
     }
@@ -96,18 +92,28 @@ public class CreatePartitionGroupHandler implements CommandHandler, Type {
     private void commit(PartitionGroup group) throws Exception {
         if(logger.isDebugEnabled())logger.debug("topic[{}] add partitionGroup[{}]",group.getTopic(),group.getGroup());
         //if (!storeService.partitionGroupExists(group.getTopic(),group.getGroup())) {
-            storeService.createPartitionGroup(group.getTopic().getFullName(), group.getGroup(), Shorts.toArray(group.getPartitions()));
+            PartitionGroupStore store = storeService.createPartitionGroup(
+                    group.getTopic().getFullName(),
+                    group.getGroup(),
+                    Shorts.toArray(group.getPartitions()),
+                    new ArrayList<>(group.getReplicas()),
+                    clusterManager.getBrokerId());
+            if(null != store) {
+                CountDownLatch latch = new CountDownLatch(1);
+                store.whenClusterReady(1000L).thenAccept(ready -> latch.countDown());
+                latch.await();
+            }
             //}
-            Set<Integer> replicas = group.getReplicas();
-            List<Broker> list = new ArrayList<>(replicas.size());
-            replicas.forEach(brokerId->{
-                list.add(clusterManager.getBrokerById(brokerId));
-            });
-            electionService.onPartitionGroupCreate(group.getElectType(),group.getTopic(),group.getGroup(),list,group.getLearners(),clusterManager.getBrokerId(),group.getLeader());
+//            Set<Integer> replicas = group.getReplicas();
+//            List<Broker> list = new ArrayList<>(replicas.size());
+//            replicas.forEach(brokerId->{
+//                list.add(clusterManager.getBrokerById(brokerId));
+//            });
+//            electionService.onPartitionGroupCreate(group.getElectType(),group.getTopic(),group.getGroup(),list,group.getLearners(),clusterManager.getBrokerId(),group.getLeader());
     }
     private void rollback(PartitionGroup group){
         if(logger.isDebugEnabled())logger.debug("topic[{}] remove partitionGroup[{}]",group.getTopic(),group.getGroup());
             storeService.removePartitionGroup(group.getTopic().getFullName(),group.getGroup());
-            electionService.onPartitionGroupRemove(group.getTopic(),group.getGroup());
+//            electionService.onPartitionGroupRemove(group.getTopic(),group.getGroup());
     }
 }

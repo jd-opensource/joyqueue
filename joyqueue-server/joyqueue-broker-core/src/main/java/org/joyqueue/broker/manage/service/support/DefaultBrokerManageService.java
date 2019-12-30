@@ -19,7 +19,6 @@ import org.joyqueue.broker.manage.service.BrokerManageService;
 import org.joyqueue.broker.manage.service.ConnectionManageService;
 import org.joyqueue.broker.manage.service.ConsumerManageService;
 import org.joyqueue.broker.manage.service.CoordinatorManageService;
-import org.joyqueue.broker.manage.service.ElectionManageService;
 import org.joyqueue.broker.manage.service.MessageManageService;
 import org.joyqueue.broker.manage.service.StoreManageService;
 import org.joyqueue.exception.JoyQueueException;
@@ -29,7 +28,6 @@ import org.joyqueue.manage.PartitionMetric;
 import org.joyqueue.manage.TopicMetric;
 import org.joyqueue.monitor.BrokerMessageInfo;
 import org.joyqueue.monitor.PartitionAckMonitorInfo;
-import org.joyqueue.toolkit.io.Directory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,17 +47,15 @@ public class DefaultBrokerManageService implements BrokerManageService {
     private StoreManageService storeManageService;
     private ConsumerManageService consumerManageService;
     private CoordinatorManageService coordinatorManageService;
-    private ElectionManageService electionManageService;
 
     public DefaultBrokerManageService(ConnectionManageService connectionManageService, MessageManageService messageManageService,
                                       StoreManageService storeManageService, ConsumerManageService consumerManageService,
-                                      CoordinatorManageService coordinatorManageService, ElectionManageService electionManageService) {
+                                      CoordinatorManageService coordinatorManageService) {
         this.connectionManageService = connectionManageService;
         this.messageManageService = messageManageService;
         this.storeManageService = storeManageService;
         this.consumerManageService = consumerManageService;
         this.coordinatorManageService = coordinatorManageService;
-        this.electionManageService = electionManageService;
     }
 
     @Override
@@ -231,35 +227,5 @@ public class DefaultBrokerManageService implements BrokerManageService {
         return coordinatorManageService.removeCoordinatorGroup(namespace, groupId);
     }
 
-    @Override
-    public void restoreElectionMetadata() {
-        electionManageService.restoreElectionMetadata();
-    }
 
-
-    @Override
-    public String describe() {
-        logger.info("Describe");
-        return electionManageService.describe();
-    }
-
-    @Override
-    public String describeTopic(String topic, int partitionGroup) {
-        return electionManageService.describeTopic(topic, partitionGroup);
-    }
-
-    @Override
-    public void updateTerm(String topic, int partitionGroup, int term) {
-        electionManageService.updateTerm(topic, partitionGroup, term);
-    }
-
-    @Override
-    public Directory storeTreeView(boolean recursive) {
-        return storeManageService.storeTreeView(recursive);
-    }
-
-    @Override
-    public boolean deleteGarbageFile(String fileName,boolean retain) {
-        return storeManageService.deleteGarbageFile(fileName,retain);
-    }
 }

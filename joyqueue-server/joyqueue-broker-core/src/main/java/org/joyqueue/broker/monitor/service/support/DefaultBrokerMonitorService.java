@@ -19,9 +19,7 @@ import org.joyqueue.broker.coordinator.domain.CoordinatorDetail;
 import org.joyqueue.broker.coordinator.group.domain.GroupMemberMetadata;
 import org.joyqueue.broker.coordinator.group.domain.GroupMetadata;
 import org.joyqueue.broker.monitor.stat.BrokerStatExt;
-import org.joyqueue.broker.monitor.stat.ElectionEventStat;
 import org.joyqueue.broker.monitor.stat.JVMStat;
-import org.joyqueue.broker.monitor.stat.ReplicaNodeStat;
 import org.joyqueue.broker.monitor.service.ArchiveMonitorService;
 import org.joyqueue.broker.monitor.service.BrokerMonitorInternalService;
 import org.joyqueue.broker.monitor.service.BrokerMonitorService;
@@ -321,18 +319,6 @@ public class DefaultBrokerMonitorService implements BrokerMonitorService {
         return metadataMonitorService.getWritableResult(topic, app, address);
     }
 
-
-
-    @Override
-    public ReplicaNodeStat getReplicaState(String topic, int partitionGroup) {
-        return partitionMonitorService.getReplicaState(topic,partitionGroup);
-    }
-
-
-    @Override
-    public ElectionEventStat getReplicaRecentElectionEvent(String topic, int partitionGroup) {
-        return partitionMonitorService.getReplicaRecentElectionEvent(topic, partitionGroup);
-    }
     @Override
     public Consumer getConsumerMetadataByTopicAndApp(String topic, String app, boolean isCluster) {
         return metadataMonitorService.getConsumerMetadataByTopicAndApp(topic, app, isCluster);

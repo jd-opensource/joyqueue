@@ -104,7 +104,7 @@ public interface StoreManagementService {
             this.partitionGroupMetrics = partitionGroupMetrics;
         }
 
-        public boolean isUsabled() {
+        public boolean isUsable() {
             return !topic.startsWith(".");
         }
     }
@@ -114,6 +114,7 @@ public interface StoreManagementService {
         private PartitionMetric [] partitionMetrics;
         // 最小位置、最大位置、已索引位置、刷盘位置、复制位置
         private long leftPosition, rightPosition, indexPosition, flushPosition, replicationPosition;
+        private long storageSize;
 
         public int getPartitionGroup() {
             return partitionGroup;
@@ -170,6 +171,14 @@ public interface StoreManagementService {
         public void setReplicationPosition(long replicationPosition) {
             this.replicationPosition = replicationPosition;
         }
+
+        public long getStorageSize() {
+            return storageSize;
+        }
+
+        public void setStorageSize(long storageSize) {
+            this.storageSize = storageSize;
+        }
     }
 
     class PartitionMetric {
@@ -198,45 +207,6 @@ public interface StoreManagementService {
 
         public void setRightIndex(long rightIndex) {
             this.rightIndex = rightIndex;
-        }
-    }
-
-    class CacheMetric {
-        long usedSize; // 当前用量
-        long maxSize; // 最大容量
-        private long accessCount;  // 请求次数
-        private long hitCount; // 命中次数
-
-        public long getUsedSize() {
-            return usedSize;
-        }
-
-        public void setUsedSize(long usedSize) {
-            this.usedSize = usedSize;
-        }
-
-        public long getMaxSize() {
-            return maxSize;
-        }
-
-        public void setMaxSize(long maxSize) {
-            this.maxSize = maxSize;
-        }
-
-        public long getAccessCount() {
-            return accessCount;
-        }
-
-        public void setAccessCount(long accessCount) {
-            this.accessCount = accessCount;
-        }
-
-        public long getHitCount() {
-            return hitCount;
-        }
-
-        public void setHitCount(long hitCount) {
-            this.hitCount = hitCount;
         }
     }
 }

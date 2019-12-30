@@ -19,10 +19,10 @@ import com.google.common.collect.Maps;
 import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.broker.coordinator.config.CoordinatorConfig;
 import org.joyqueue.broker.coordinator.group.GroupMetadataManager;
-import org.joyqueue.broker.coordinator.session.CoordinatorSessionManager;
 import org.joyqueue.broker.coordinator.support.CoordinatorInitializer;
 import org.joyqueue.broker.coordinator.support.CoordinatorResolver;
 import org.joyqueue.broker.coordinator.transaction.TransactionMetadataManager;
+import org.joyqueue.broker.network.session.BrokerTransportManager;
 import org.joyqueue.nsr.NameService;
 import org.joyqueue.toolkit.service.Service;
 
@@ -42,33 +42,23 @@ public class CoordinatorService extends Service {
 
     private CoordinatorInitializer coordinatorInitializer;
     private CoordinatorResolver coordinatorResolver;
-    private CoordinatorSessionManager coordinatorSessionManager;
     private Coordinator coordinator;
 
     private final ConcurrentMap<String, GroupMetadataManager> groupMetadataManagerMap = Maps.newConcurrentMap();
     private final ConcurrentMap<String, TransactionMetadataManager> transactionMetadataManagerMap = Maps.newConcurrentMap();
 
-    public CoordinatorService(CoordinatorConfig config, ClusterManager clusterManager, NameService nameService) {
+    public CoordinatorService(CoordinatorConfig config, ClusterManager clusterManager, NameService nameService, BrokerTransportManager brokerTransportManager) {
         this.config = config;
         this.clusterManager = clusterManager;
         this.nameService = nameService;
         this.coordinatorInitializer = new CoordinatorInitializer(config, clusterManager, nameService);
         this.coordinatorResolver = new CoordinatorResolver(config, clusterManager);
-        this.coordinatorSessionManager = new CoordinatorSessionManager(config);
-        this.coordinator = new Coordinator(config, clusterManager, coordinatorResolver, coordinatorInitializer, coordinatorSessionManager);
+        this.coordinator = new Coordinator(config, clusterManager, coordinatorResolver, coordinatorInitializer, brokerTransportManager);
     }
 
     @Override
     protected void doStart() throws Exception {
         coordinatorInitializer.init();
-        coordinatorSessionManager.start();
-    }
-
-    @Override
-    protected void doStop() {
-        if (coordinatorSessionManager != null) {
-            coordinatorSessionManager.stop();
-        }
     }
 
     public Coordinator getCoordinator() {

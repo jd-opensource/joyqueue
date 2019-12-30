@@ -59,12 +59,6 @@
         <route path="/monitor/topic/:topic/partitionGroup/:partitionGroupId" inherit="get"
                handlers="brokerMonitorService.getPartitionGroupInfoByTopic"/>
 
-        <route path="/monitor/topic/node/state/:topic/partitionGroup/:partitionGroupId" inherit="get"
-               handlers="brokerMonitorService.getReplicaState"/>
-
-        <route path="/monitor/topic/recent/election/event/:topic/partitionGroup/:partitionGroupId" inherit="get"
-               handlers="brokerMonitorService.getReplicaRecentElectionEvent"/>
-
         <!-- topic app -->
         <!-- connection -->
         <route path="/monitor/topic/:topic/app/:app/connections" inherit="get"
@@ -245,14 +239,5 @@
         <route path="/manage/coordinator/namespace/:namespace/group/:groupId" inherit="delete"
                handlers="brokerManageService.removeCoordinatorGroup"/>
 
-        <!-- election -->
-        <route path="/manage/election/metadata/restore" inherit="get"
-               handlers="brokerManageService.restoreElectionMetadata"/>
-        <route path="/manage/election/metadata/describe" inherit="get"
-               handlers="brokerManageService.describe"/>
-        <route path="/manage/election/metadata/describeTopic/topic/:topic/partitionGroup/:partitionGroup" inherit="get"
-               handlers="brokerManageService.describeTopic"/>
-        <route path="/manage/election/metadata/updateTerm/topic/:topic/partitionGroup/:partitionGroup/:term" inherit="get"
-               handlers="brokerManageService.updateTerm"/>
     </routes>
 </vertx>

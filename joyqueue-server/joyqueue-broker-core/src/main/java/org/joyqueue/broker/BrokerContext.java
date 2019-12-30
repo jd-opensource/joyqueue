@@ -22,11 +22,11 @@ import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.consumer.MessageConvertSupport;
 import org.joyqueue.broker.consumer.position.PositionManager;
 import org.joyqueue.broker.coordinator.CoordinatorService;
-import org.joyqueue.broker.election.ElectionService;
 import org.joyqueue.broker.manage.BrokerManageService;
 import org.joyqueue.broker.monitor.BrokerMonitor;
 import org.joyqueue.broker.monitor.BrokerMonitorService;
 import org.joyqueue.broker.monitor.SessionManager;
+import org.joyqueue.broker.network.session.BrokerTransportManager;
 import org.joyqueue.broker.producer.Produce;
 import org.joyqueue.domain.Broker;
 import org.joyqueue.domain.Consumer;
@@ -50,7 +50,6 @@ public class BrokerContext {
     private PositionManager positionManager;
     private Authentication authentication;
     private StoreService storeService;
-    private ElectionService electionService;
     private MessageRetry retryManager;
     private BrokerMonitorService brokerMonitorService;
     private BrokerManageService brokerManageService;
@@ -61,7 +60,7 @@ public class BrokerContext {
     private Consumer.ConsumerPolicy globalConsumerPolicy;
     private Producer.ProducerPolicy globalproducerPolicy;
     private MessageConvertSupport messageConvertSupport;
-
+    private BrokerTransportManager brokerTransportManager;
     public BrokerContext() {
     }
 
@@ -69,7 +68,7 @@ public class BrokerContext {
     @Deprecated
     public BrokerContext(BrokerConfig brokerConfig, SessionManager sessionManager, ClusterManager clusterManager,
                          Produce produce, Consume consume, Authentication authentication, StoreService storeService,
-                         ElectionService electionService, MessageRetry retryManager, BrokerMonitorService brokerMonitorService,
+                         MessageRetry retryManager, BrokerMonitorService brokerMonitorService,
                          BrokerManageService brokerManageService, NameService nameService, CoordinatorService coordinatorService) {
 
         this.brokerConfig = brokerConfig;
@@ -79,7 +78,6 @@ public class BrokerContext {
         this.consume = consume;
         this.authentication = authentication;
         this.storeService = storeService;
-        this.electionService = electionService;
         this.retryManager = retryManager;
         this.brokerMonitorService = brokerMonitorService;
         this.brokerManageService = brokerManageService;
@@ -127,10 +125,6 @@ public class BrokerContext {
         return storeService;
     }
 
-    public ElectionService getElectionService() {
-        return electionService;
-    }
-
     public MessageRetry getRetryManager() {
         return retryManager;
     }
@@ -172,7 +166,7 @@ public class BrokerContext {
     public ArchiveManager getArchiveManager() {
         return archiveManager;
     }
-
+    public BrokerTransportManager brokerTransportManager() {return brokerTransportManager; }
     public BrokerContext brokerConfig(BrokerConfig config) {
         this.brokerConfig = config;
         return this;
@@ -218,12 +212,6 @@ public class BrokerContext {
         return this;
     }
 
-    public BrokerContext electionService(ElectionService electionService) {
-        this.electionService = electionService;
-        return this;
-    }
-
-
     public BrokerContext retryManager(MessageRetry messageRetry) {
         this.retryManager = messageRetry;
         return this;
@@ -266,6 +254,11 @@ public class BrokerContext {
 
     public BrokerContext messageConvertSupport(MessageConvertSupport messageConvertSupport) {
         this.messageConvertSupport = messageConvertSupport;
+        return this;
+    }
+
+    public BrokerContext brokerTransportManager(BrokerTransportManager brokerTransportManager) {
+        this.brokerTransportManager = brokerTransportManager;
         return this;
     }
 

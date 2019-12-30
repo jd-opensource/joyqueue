@@ -20,7 +20,6 @@ import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.consumer.MessageConvertSupport;
 import org.joyqueue.broker.coordinator.CoordinatorService;
-import org.joyqueue.broker.election.ElectionService;
 import org.joyqueue.broker.manage.config.BrokerManageConfig;
 import org.joyqueue.broker.manage.exporter.BrokerManageExporter;
 import org.joyqueue.broker.monitor.BrokerMonitorService;
@@ -41,27 +40,19 @@ public class BrokerManageService extends Service {
     private BrokerManageConfig config;
     private BrokerManageServiceManager brokerManageServiceManager;
     private BrokerManageExporter brokerManageExporter;
-    private StoreService storeService;
-    private MessageRetry retryManager;
-    private CoordinatorService coordinatorService;
-    private ArchiveManager archiveManager;
-    private MessageConvertSupport messageConvertSupport;
 
     public BrokerManageService(BrokerManageConfig config, BrokerMonitorService brokerMonitorService,
                                ClusterManager clusterManager, StoreManagementService storeManagementService,
                                StoreService storeService, Consume consume,
                                MessageRetry retryManager, CoordinatorService coordinatorService,
-                               ArchiveManager archiveManager, NameService nameService, ElectionService electionManager,
+                               ArchiveManager archiveManager, NameService nameService,
                                MessageConvertSupport messageConvertSupport) {
         this.config = config;
-        this.storeService = storeService;
-        this.retryManager = retryManager;
-        this.coordinatorService = coordinatorService;
         this.brokerManageServiceManager = new BrokerManageServiceManager(brokerMonitorService.getBrokerMonitor(),
                 clusterManager, storeManagementService,
                 storeService, consume,
                 retryManager, coordinatorService,
-                archiveManager, nameService, electionManager, messageConvertSupport);
+                archiveManager, nameService, messageConvertSupport);
         this.brokerManageExporter = new BrokerManageExporter(config, brokerManageServiceManager);
     }
 

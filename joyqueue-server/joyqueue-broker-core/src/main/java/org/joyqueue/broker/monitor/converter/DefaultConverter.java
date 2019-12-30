@@ -434,78 +434,12 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
                     if (pgs.get(key).getDeQueueStat() != null) {
                         records.addAll(buildDeQueueRecords(pgs.get(key).getDeQueueStat(), brokerId, l, tsKey, app, key));
                     }
+                }
 
                 }
             }
-            // topic level partition group state
-            if(topics.get(tsKey)!= null) {
-                Map<Integer,PartitionGroupStat> partitionGroupStatMap=topics.get(tsKey).getPartitionGroupStatMap();
-                for(PartitionGroupStat partitionGroupStat: partitionGroupStatMap.values()) {
-                    records.addAll(buildReplicaLag(partitionGroupStat, brokerId, tsKey, null, partitionGroupStat.getPartitionGroup(), l));
-                    records.addAll(buildElectionAndReplicaState(partitionGroupStat, brokerId, tsKey, null, partitionGroupStat.getPartitionGroup(), l));
-
-                }
-            }
-        }
         return records;
     }
-
-
-    /**
-     * Build partition group replica lag
-     *
-     * @param partitionGroupStat current partition group stat
-     * @param timestampMs  broker state snapshot time in ms
-     *
-     **/
-    public List<MonitorRecord> buildReplicaLag(PartitionGroupStat partitionGroupStat,String brokerId,String topic,
-                                               String app,Integer partitionGroup,long timestampMs){
-        long maxLogPosition= partitionGroupStat.getReplicationStat().getMaxLogPosition();
-        MonitorRecord replicaRecord = new MonitorRecord();
-        fillRecord(replicaRecord, timestampMs);
-        replicaRecord.setValue(maxLogPosition);
-        // not current broker id
-        replicaRecord.brokerId(brokerId);
-        replicaRecord.topic(topic);
-        replicaRecord.app(app);
-        replicaRecord.setMetric(PG_SLICE_REPLICA_LOG_MAX_POSITION);
-        replicaRecord.partitionGroup(partitionGroup.toString());
-        return Lists.newArrayList(replicaRecord);
-    }
-
-
-
-
-
-    /**
-     * Build partition group election and replica state
-     * contain term and type
-     * @param partitionGroupStat current partition group stat
-     * @param timestampMs  broker state snapshot time in ms
-     *
-     **/
-    public List<MonitorRecord> buildElectionAndReplicaState(PartitionGroupStat partitionGroupStat,String brokerId,String topic,
-                                                            String app,Integer partitionGroup,long timestampMs){
-        MonitorRecord electionRecord = new MonitorRecord();
-        fillRecord(electionRecord, timestampMs);
-        // not current broker id
-        electionRecord.brokerId(brokerId);
-        // PG_SLICE_REPLICA_STAT is compose value
-        electionRecord.brokerId(partitionGroup.toString());
-        electionRecord.topic(topic);
-        electionRecord.app(app);
-        electionRecord.partitionGroup(partitionGroup.toString());
-        String[] metrics={PG_SLICE_ELECTION_TERM,PG_SLICE_ELECTION_TYPE,PG_SLICE_REPLICA_STAT};
-        List<MonitorRecord> electionAndReplicaRecords=buildEmptyRecords(electionRecord,metrics);
-        // term
-        electionAndReplicaRecords.get(0).setValue(partitionGroupStat.getElectionEventStat().getTerm());
-        // type
-        electionAndReplicaRecords.get(1).setValue(partitionGroupStat.getElectionEventStat().getState().ordinal());
-        // compose value
-        electionAndReplicaRecords.get(2).setValue(partitionGroupStat.getReplicationStat().getStat().getState().ordinal());
-        return electionAndReplicaRecords;
-    }
-
 
     /**
      *  Heap,non-heap, direct buffer size
@@ -550,9 +484,6 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
         jvmMonitorRecords.get(12).setValue(edenSnapshot.getMean()*edenSnapshot.size());
         return jvmMonitorRecords;
     }
-
-
-
 
     private List<MonitorRecord> buildDeQueueRecords(DeQueueStat deQueueStat, String brokerId, long time, String tsKey, String app, Integer key) {
 
