@@ -302,7 +302,7 @@ public class ConsumeArchiveService extends Service {
         private MappedByteBuffer rMap;
         // 随机读文件
         private RandomAccessFile rRaf;
-        // 读写文件通道
+        // 读文件通道
         private FileChannel rFileChannel;
 
 
@@ -411,6 +411,7 @@ public class ConsumeArchiveService extends Service {
          */
         private void mappedReadOnlyFile() {
             try {
+                closeCurrentReadFile();
                 rRaf = new RandomAccessFile(rFile, "r");
                 rFileChannel = rRaf.getChannel();
                 rMap = rFileChannel.map(FileChannel.MapMode.READ_ONLY, 0, pageSize);
@@ -506,14 +507,30 @@ public class ConsumeArchiveService extends Service {
         @Override
         public void close() {
             try {
-                if (rFileChannel != null) rFileChannel.close();
-                if (rRaf != null) rRaf.close();
-
-                if (rwFileChannel != null) rwFileChannel.close();
-                if (rwRaf != null) rwRaf.close();
+                closeCurrentReadFile();
+                closeCurrentWriteFile();
             } catch (IOException e) {
                 logger.error("delete read file error.", e);
             }
+        }
+
+        /**
+         * Close current read file
+         **/
+        public void closeCurrentReadFile() throws IOException{
+            if (rFileChannel != null){ rFileChannel.close();}
+            if (rRaf != null) {rRaf.close();}
+        }
+
+        /**
+         *
+         * Close current write file
+         *
+         **/
+
+        public void closeCurrentWriteFile() throws IOException{
+            if (rwFileChannel != null) {rwFileChannel.close();}
+            if (rwRaf != null) {rwRaf.close();}
         }
 
         /**
