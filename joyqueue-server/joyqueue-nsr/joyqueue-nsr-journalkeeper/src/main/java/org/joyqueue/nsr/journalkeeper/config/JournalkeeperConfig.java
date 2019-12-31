@@ -15,7 +15,7 @@
  */
 package org.joyqueue.nsr.journalkeeper.config;
 
-import org.joyqueue.config.BrokerConfigKeys;
+import org.joyqueue.config.BrokerConfigKey;
 import org.joyqueue.helper.PortHelper;
 import org.joyqueue.toolkit.config.Property;
 import org.joyqueue.toolkit.config.PropertySupplier;
@@ -43,7 +43,7 @@ public class JournalkeeperConfig {
     }
 
     public int getPort() {
-        return PortHelper.getJournalkeeperPort(propertySupplier.getValue(BrokerConfigKeys.FRONTEND_SERVER_PORT));
+        return PortHelper.getJournalkeeperPort(propertySupplier.getValue(BrokerConfigKey.FRONTEND_SERVER_PORT));
     }
 
     public String getRole() {

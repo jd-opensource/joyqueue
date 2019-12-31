@@ -16,6 +16,8 @@
 package org.joyqueue.broker.protocol.handler;
 
 import com.google.common.collect.Maps;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.consumer.model.PullResult;
@@ -37,14 +39,13 @@ import org.joyqueue.network.command.FetchTopicMessageAckData;
 import org.joyqueue.network.command.FetchTopicMessageData;
 import org.joyqueue.network.command.FetchTopicMessageRequest;
 import org.joyqueue.network.command.JoyQueueCommandType;
+import org.joyqueue.network.protocol.annotation.FetchHandler;
 import org.joyqueue.network.session.Connection;
 import org.joyqueue.network.session.Consumer;
 import org.joyqueue.network.transport.Transport;
 import org.joyqueue.network.transport.command.Command;
 import org.joyqueue.network.transport.command.Type;
 import org.joyqueue.response.BooleanResponse;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,6 +58,7 @@ import java.util.Map;
  * author: gaohaoxiang
  * date: 2018/12/7
  */
+@FetchHandler
 public class FetchTopicMessageRequestHandler implements JoyQueueCommandHandler, Type, JoyQueueContextAware {
 
     protected static final Logger logger = LoggerFactory.getLogger(FetchTopicMessageRequestHandler.class);

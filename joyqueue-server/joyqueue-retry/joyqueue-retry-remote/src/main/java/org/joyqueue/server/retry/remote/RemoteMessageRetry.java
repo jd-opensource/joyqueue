@@ -209,7 +209,8 @@ public class RemoteMessageRetry implements MessageRetry<Long> {
             Command ack = sync(getRetryCountCommand);
 
             if (ack.getHeader().getStatus() != JoyQueueCode.SUCCESS.getCode()) {
-                throw new JoyQueueException(JoyQueueCode.RETRY_COUNT, "");
+                logger.error("countRetry exception, topic: {}, app: {}, code: {}", topic, app, ack.getHeader().getStatus());
+                return 0;
             }
 
             GetRetryCountAck payload = (GetRetryCountAck) ack.getPayload();

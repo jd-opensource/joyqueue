@@ -76,9 +76,9 @@ public class AddConnectionRequestHandler implements JoyQueueCommandHandler, Type
         Connection connection = SessionHelper.getConnection(transport);
         if (connection == null) {
             connection = buildConnection(transport, addConnectionRequest);
-            if (sessionManager.addConnection(connection)) {
+            if (SessionHelper.putIfAbsentConnection(transport, connection)) {
                 // 绑定连接
-                SessionHelper.setConnection(transport, connection);
+                sessionManager.addConnection(connection);
             }
         }
 

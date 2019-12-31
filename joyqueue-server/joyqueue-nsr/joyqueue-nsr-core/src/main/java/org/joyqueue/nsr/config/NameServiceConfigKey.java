@@ -17,11 +17,11 @@ package org.joyqueue.nsr.config;
 
 import org.joyqueue.toolkit.config.PropertyDef;
 
-    public enum NameServiceConfigKey implements PropertyDef {
+public enum NameServiceConfigKey implements PropertyDef {
 
     NAMESERVER_ADDRESS("nameservice.serverAddress", "127.0.0.1:50092", Type.STRING),
-    NAMESERVER_HANDLER_THREADS("nameservice.handler.threads", Runtime.getRuntime().availableProcessors(), Type.INT),
-    NAMESERVER_HANDLER_QUEUES("nameservice.handler.queues", 1024, Type.INT),
+    NAMESERVER_HANDLER_THREADS("nameservice.handler.threads", Runtime.getRuntime().availableProcessors() * 4, Type.INT),
+    NAMESERVER_HANDLER_QUEUES("nameservice.handler.queues", 102400, Type.INT),
     NAMESERVER_HANDLER_KEEPALIVE("nameservice.messenger.handler.keepalive", 1000 * 60, Type.INT),
     NAMESERVER_ALL_METADATA_CACHE_ENABLE("nameservice.allmetadata.cache.enable", true, Type.BOOLEAN),
     NAMESERVER_ALL_METADATA_CACHE_FILE("nameservice.allmetadata.cache.file", "/metadata/cache", Type.STRING),

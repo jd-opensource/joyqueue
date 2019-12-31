@@ -19,6 +19,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.jd.laf.extension.Type;
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.domain.AllMetadata;
 import org.joyqueue.domain.AppToken;
 import org.joyqueue.domain.Broker;
@@ -39,7 +40,6 @@ import org.joyqueue.network.command.GetTopicsAck;
 import org.joyqueue.network.command.Subscribe;
 import org.joyqueue.network.command.SubscribeAck;
 import org.joyqueue.network.command.UnSubscribe;
-import org.joyqueue.network.event.TransportEvent;
 import org.joyqueue.network.transport.Transport;
 import org.joyqueue.network.transport.TransportClient;
 import org.joyqueue.network.transport.codec.JoyQueueHeader;
@@ -101,7 +101,6 @@ import org.joyqueue.toolkit.lang.Close;
 import org.joyqueue.toolkit.lang.LifeCycle;
 import org.joyqueue.toolkit.service.Service;
 import org.joyqueue.toolkit.time.SystemClock;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -546,33 +545,13 @@ public class ThinNameService extends Service implements NameService, PropertySup
         return "thin";
     }
 
-    private class ClientTransport implements EventListener<TransportEvent>, LifeCycle {
+    private class ClientTransport implements LifeCycle {
         private AtomicBoolean started = new AtomicBoolean(false);
         private TransportClient transportClient;
         protected final AtomicReference<Transport> transports = new AtomicReference<>();
 
         ClientTransport(NameServiceConfig config, NameService nameService) {
             this.transportClient = new NsrTransportClientFactory(nameService, propertySupplier).create(config.getClientConfig());
-            this.transportClient.addListener(this);
-        }
-
-
-        @Override
-        public void onEvent(TransportEvent event) {
-            Transport transport = event.getTransport();
-            switch (event.getType()) {
-                case CONNECT:
-                    registerToNsr();
-                    break;
-                case EXCEPTION:
-                case CLOSE:
-                    transports.set(null);
-                    transport.stop();
-                    logger.info("transport connect to nameServer closed. [{}] ", transport.toString());
-                    break;
-                default:
-                    break;
-            }
         }
 
         protected Transport getOrCreateTransport() throws TransportException {
@@ -583,6 +562,7 @@ public class ThinNameService extends Service implements NameService, PropertySup
                     if (transport == null) {
                         transport = transportClient.createTransport(nameServiceConfig.getNameserverAddress());
                         transports.set(transport);
+                        registerToNsr();
                     }
                     logger.info("create transport connect to nameServer [{}]", nameServiceConfig.getNameserverAddress());
                 }

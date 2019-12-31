@@ -140,8 +140,6 @@ public class SessionManager extends Service {
                 }
             }
         }
-
-        connection.getProducers().clear();
     }
 
     /**
@@ -162,7 +160,6 @@ public class SessionManager extends Service {
                 }
             }
         }
-        connection.getConsumers().clear();
     }
 
     /**
@@ -201,7 +198,8 @@ public class SessionManager extends Service {
             return false;
         }
 
-        if (connection.addConsumer(consumer.getTopic(), consumer.getApp(), consumer.getId()) && consumers.putIfAbsent(consumer.getId(), consumer) == null) {
+        if (connection.addConsumer(consumer.getTopic(), consumer.getApp(), consumer.getId())
+                && consumers.putIfAbsent(consumer.getId(), consumer) == null) {
             try {
                 // 成功则同步通知监听器
                 eventManager.inform(new SessionEvent(SessionEventType.AddConsumer, consumer));
@@ -287,7 +285,8 @@ public class SessionManager extends Service {
             return false;
         }
 
-        if (connection.addProducer(producer.getTopic(), producer.getApp(), producer.getId()) && producers.putIfAbsent(producer.getId(), producer) == null) {
+        if (connection.addProducer(producer.getTopic(), producer.getApp(), producer.getId())
+                && producers.putIfAbsent(producer.getId(), producer) == null) {
             try {
                 eventManager.inform(new SessionEvent(SessionEventType.AddProducer, producer));
             } catch (Exception e) {

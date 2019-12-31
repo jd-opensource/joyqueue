@@ -100,6 +100,8 @@ public class TransportConfigSupport {
                     transportConfig.setSendTimeout(property.getInteger());
                 } else if (fullKey.equals(keyPrefix + TRANSPORT_RETRY_DELAY)) {
                     transportConfig.getRetryPolicy().setRetryDelay(property.getInteger());
+                } else if (fullKey.equals(keyPrefix + TRANSPORT_RETRY_MAX)) {
+                    transportConfig.getRetryPolicy().setMaxRetrys(property.getInteger());
                 }
             }
 
@@ -127,6 +129,7 @@ public class TransportConfigSupport {
     public static final String TRANSPORT_CALL_NON_BLOCK_ONEWAY = "transport.nonBlockOneway";
     public static final String TRANSPORT_SEND_TIMEOUT = "transport.sendTimeout";
     public static final String TRANSPORT_RETRY_DELAY = "transport.retryDelay";
+    public static final String TRANSPORT_RETRY_MAX = "transport.retryMax";
 
     //server transport config
     public static final String TRANSPORT_SERVER_PORT = "transport.server.port";

@@ -15,10 +15,10 @@
  */
 package org.joyqueue.network.transport;
 
-import org.joyqueue.network.transport.support.DefaultChannelTransport;
 import io.netty.channel.Channel;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
+import org.joyqueue.network.transport.support.DefaultChannelTransport;
 
 /**
  * TransportHelper
@@ -36,7 +36,9 @@ public class TransportHelper {
 
         if (transport == null) {
             transport = newTransport(channel, requestBarrier);
-            attr.set(transport);
+            if (!attr.compareAndSet(null, transport)) {
+                transport = attr.get();
+            }
         }
 
         return transport;
@@ -48,6 +50,10 @@ public class TransportHelper {
 
     public static void setTransport(Channel channel, ChannelTransport transport) {
         channel.attr(TRANSPORT_CACHE_ATTR).set(transport);
+    }
+
+    public static boolean compareAndSet(Channel channel, ChannelTransport oldTransport, ChannelTransport newTransport) {
+        return channel.attr(TRANSPORT_CACHE_ATTR).compareAndSet(oldTransport, newTransport);
     }
 
     public static ChannelTransport getTransport(Channel channel) {

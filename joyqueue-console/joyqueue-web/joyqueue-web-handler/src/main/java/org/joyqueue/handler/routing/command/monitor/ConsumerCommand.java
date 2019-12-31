@@ -22,23 +22,25 @@ import com.jd.laf.web.vertx.annotation.Path;
 import com.jd.laf.web.vertx.annotation.QueryParam;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.joyqueue.handler.Constants;
 import org.joyqueue.handler.annotation.PageQuery;
 import org.joyqueue.handler.error.ConfigException;
 import org.joyqueue.handler.error.ErrorCode;
 import org.joyqueue.handler.routing.command.NsrCommandSupport;
-import org.joyqueue.handler.Constants;
 import org.joyqueue.model.PageResult;
 import org.joyqueue.model.Pagination;
 import org.joyqueue.model.QPageQuery;
 import org.joyqueue.model.domain.Consumer;
 import org.joyqueue.model.domain.ConsumerConfig;
+import org.joyqueue.model.domain.User;
 import org.joyqueue.model.query.QConsumer;
 import org.joyqueue.nsr.ConsumerNameServerService;
 import org.joyqueue.service.ApplicationService;
+import org.joyqueue.service.ApplicationUserService;
 import org.joyqueue.service.ConsumerService;
 import org.joyqueue.service.TopicService;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,6 +57,8 @@ public class ConsumerCommand extends NsrCommandSupport<Consumer, ConsumerService
     private TopicService topicService;
     @Value(nullable = false)
     private ConsumerNameServerService consumerNameServerService;
+    @Value(nullable = false)
+    private ApplicationUserService applicationUserService;
 
     @Path("search")
     public Response pageQuery(@PageQuery QPageQuery<QConsumer> qPageQuery) throws Exception {
@@ -73,6 +77,16 @@ public class ConsumerCommand extends NsrCommandSupport<Consumer, ConsumerService
             while (iterator.hasNext()) {
                 Consumer consumer = iterator.next();
                 if (!consumer.getTopic().getCode().equals(qPageQuery.getQuery().getKeyword())) {
+                    iterator.remove();
+                }
+            }
+        }
+
+        if (CollectionUtils.isNotEmpty(consumers) && session.getRole() != User.UserRole.ADMIN.value()) {
+            Iterator<Consumer> iterator = consumers.iterator();
+            while (iterator.hasNext()) {
+                Consumer consumer = iterator.next();
+                if (applicationUserService.findByUserApp(session.getCode(), consumer.getApp().getCode().split("\\.")[0]) == null) {
                     iterator.remove();
                 }
             }

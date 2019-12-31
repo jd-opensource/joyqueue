@@ -5,7 +5,8 @@
       "topic": "主题中心",
       "workflow": "流程中心",
       "tool": "系统工具",
-      "setting": "系统管理"
+      "setting": "系统管理",
+      "logout": "退出"
     },
     "tool": {
       "retry": "重试查询",
@@ -26,7 +27,8 @@
       "topic": "Topics",
       "workflow": "Workflow",
       "tool": "Tools",
-      "setting": "Setting"
+      "setting": "Setting",
+      "logout": "Sign Out"
     },
     "tool": {
       "retry": "Retry Query",

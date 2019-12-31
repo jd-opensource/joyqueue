@@ -16,6 +16,7 @@
 package org.joyqueue.broker.monitor;
 
 import com.google.common.collect.Lists;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.broker.election.ElectionEvent;
 import org.joyqueue.broker.election.ElectionNode;
@@ -45,7 +46,6 @@ import org.joyqueue.toolkit.concurrent.EventListener;
 import org.joyqueue.toolkit.network.IpUtil;
 import org.joyqueue.toolkit.service.Service;
 import org.joyqueue.toolkit.time.SystemClock;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -198,12 +198,12 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
         if (!config.isEnable()) {
             return;
         }
-        brokerStat.getOrCreateTopicStat(topic).
-                getOrCreateAppStat(app)
+        brokerStat.getOrCreateTopicStat(topic)
+                .getOrCreateAppStat(app)
                 .getConsumerStat()
-                .getOrCreatePartitionGroupStat(partitionGroup).
-                getOrCreatePartitionStat(partition).
-                lastAckTime(SystemClock.now());
+                .getOrCreatePartitionGroupStat(partitionGroup)
+                .getOrCreatePartitionStat(partition)
+                .lastAckTime(SystemClock.now());
     }
 
     @Override
@@ -485,16 +485,15 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
         private void removeConsumer(RemoveConsumerEvent removeConsumerEvent) {
             try {
                 org.joyqueue.domain.Consumer consumer = removeConsumerEvent.getConsumer();
-                TopicStat topicStat = brokerStat.getTopicStats().get(consumer.getTopic());
+                TopicStat topicStat = brokerStat.getTopicStats().get(consumer.getTopic().getFullName());
                 if (topicStat == null) {
                     return;
                 }
                 AppStat appStat = topicStat.getAppStats().get(consumer.getApp());
                 if (appStat != null) {
+                    appStat.getConsumerStat().clear();
                     if (clusterManager.tryGetProducer(consumer.getTopic(), consumer.getApp()) == null) {
                         topicStat.getAppStats().remove(consumer.getApp());
-                    } else {
-                        appStat.getConsumerStat().clear();
                     }
                 }
             } catch (Throwable th) {
@@ -506,16 +505,15 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
         private void removeProducer(RemoveProducerEvent removeProducerEvent) {
             try {
                 org.joyqueue.domain.Producer producer = removeProducerEvent.getProducer();
-                TopicStat topicStat = brokerStat.getTopicStats().get(producer.getTopic());
+                TopicStat topicStat = brokerStat.getTopicStats().get(producer.getTopic().getFullName());
                 if (topicStat == null) {
                     return;
                 }
                 AppStat appStat = topicStat.getAppStats().get(producer.getApp());
                 if (appStat != null) {
+                    appStat.getProducerStat().clear();
                     if (clusterManager.tryGetConsumer(producer.getTopic(), producer.getApp()) == null) {
                         topicStat.getAppStats().remove(producer.getApp());
-                    } else {
-                        appStat.getProducerStat().clear();
                     }
                 }
             } catch (Throwable th) {

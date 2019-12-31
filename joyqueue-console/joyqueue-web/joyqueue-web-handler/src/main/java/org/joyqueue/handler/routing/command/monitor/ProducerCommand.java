@@ -21,10 +21,12 @@ import com.jd.laf.web.vertx.annotation.Path;
 import com.jd.laf.web.vertx.annotation.QueryParam;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.joyqueue.handler.Constants;
 import org.joyqueue.handler.annotation.PageQuery;
 import org.joyqueue.handler.error.ConfigException;
 import org.joyqueue.handler.routing.command.NsrCommandSupport;
-import org.joyqueue.handler.Constants;
 import org.joyqueue.model.PageResult;
 import org.joyqueue.model.Pagination;
 import org.joyqueue.model.QPageQuery;
@@ -32,15 +34,15 @@ import org.joyqueue.model.domain.PartitionGroupWeight;
 import org.joyqueue.model.domain.Producer;
 import org.joyqueue.model.domain.ProducerConfig;
 import org.joyqueue.model.domain.TopicPartitionGroup;
+import org.joyqueue.model.domain.User;
 import org.joyqueue.model.query.QProducer;
 import org.joyqueue.nsr.ProducerNameServerService;
 import org.joyqueue.service.ApplicationService;
+import org.joyqueue.service.ApplicationUserService;
 import org.joyqueue.service.ProducerService;
 import org.joyqueue.service.TopicPartitionGroupService;
 import org.joyqueue.service.TopicService;
 import org.joyqueue.util.NullUtil;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,6 +64,8 @@ public class ProducerCommand extends NsrCommandSupport<Producer, ProducerService
     private TopicPartitionGroupService topicPartitionGroupService;
     @Value(nullable = false)
     protected ProducerNameServerService producerNameServerService;
+    @Value(nullable = false)
+    private ApplicationUserService applicationUserService;
 
     @Path("search")
     public Response pageQuery(@PageQuery QPageQuery<QProducer> qPageQuery) throws Exception {
@@ -80,6 +84,16 @@ public class ProducerCommand extends NsrCommandSupport<Producer, ProducerService
             while (iterator.hasNext()) {
                 Producer producer = iterator.next();
                 if (!producer.getTopic().getCode().equals(qPageQuery.getQuery().getKeyword())) {
+                    iterator.remove();
+                }
+            }
+        }
+
+        if (CollectionUtils.isNotEmpty(producers) && session.getRole() != User.UserRole.ADMIN.value()) {
+            Iterator<Producer> iterator = producers.iterator();
+            while (iterator.hasNext()) {
+                Producer producer = iterator.next();
+                if (applicationUserService.findByUserApp(session.getCode(), producer.getApp().getCode()) == null) {
                     iterator.remove();
                 }
             }
