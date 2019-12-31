@@ -58,14 +58,14 @@ public class ProtocolManager extends Service {
 
     public ProtocolManager(BrokerContext brokerContext) {
         this.brokerContext = brokerContext;
-        this.commonThreadPool = new ThreadPoolExecutor(brokerContext.getBrokerConfig().getServerCommonThreads(), brokerContext.getBrokerConfig().getServerCommonThreads()
-                ,1000 * 60L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(brokerContext.getBrokerConfig().getServerCommonThreadQueueSize()),
+        this.commonThreadPool = new ThreadPoolExecutor(brokerContext.getBrokerConfig().getServerCommonThreads(), brokerContext.getBrokerConfig().getServerCommonThreads(),
+                brokerContext.getBrokerConfig().getServerCommonThreadKeepalive(), TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(brokerContext.getBrokerConfig().getServerCommonThreadQueueSize()),
                 new NamedThreadFactory("joyqueue-frontend-common-threads"));
-        this.fetchThreadPool = new ThreadPoolExecutor(brokerContext.getBrokerConfig().getServerFetchThreads(), brokerContext.getBrokerConfig().getServerFetchThreads()
-                ,1000 * 60L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(brokerContext.getBrokerConfig().getServerFetchThreadQueueSize()),
+        this.fetchThreadPool = new ThreadPoolExecutor(brokerContext.getBrokerConfig().getServerFetchThreads(), brokerContext.getBrokerConfig().getServerFetchThreads(),
+                brokerContext.getBrokerConfig().getServerFetchThreadKeepalive(), TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(brokerContext.getBrokerConfig().getServerFetchThreadQueueSize()),
                 new NamedThreadFactory("joyqueue-frontend-fetch-threads"));
-        this.produceThreadPool = new ThreadPoolExecutor(brokerContext.getBrokerConfig().getServerProduceThreads(), brokerContext.getBrokerConfig().getServerProduceThreads()
-                ,1000 * 60L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(brokerContext.getBrokerConfig().getServerProduceThreadQueueSize()),
+        this.produceThreadPool = new ThreadPoolExecutor(brokerContext.getBrokerConfig().getServerProduceThreads(), brokerContext.getBrokerConfig().getServerProduceThreads(),
+                brokerContext.getBrokerConfig().getServerProduceThreadKeepalive(), TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(brokerContext.getBrokerConfig().getServerProduceThreadQueueSize()),
                 new NamedThreadFactory("joyqueue-frontend-produce-threads"));
         loadProtocols();
     }

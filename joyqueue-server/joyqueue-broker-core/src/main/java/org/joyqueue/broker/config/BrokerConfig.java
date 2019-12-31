@@ -135,6 +135,10 @@ public class BrokerConfig implements PropertySupplierAware {
         return propertySupplier.getValue(BrokerConfigKey.FRONTEND_SERVER_COMMON_THREADS);
     }
 
+    public int getServerCommonThreadKeepalive() {
+        return propertySupplier.getValue(BrokerConfigKey.FRONTEND_SERVER_COMMON_THREAD_KEEPALIVE);
+    }
+
     public int getServerCommonThreadQueueSize() {
         return propertySupplier.getValue(BrokerConfigKey.FRONTEND_SERVER_COMMON_THREAD_QUEUE_SIZE);
     }
@@ -143,12 +147,20 @@ public class BrokerConfig implements PropertySupplierAware {
         return propertySupplier.getValue(BrokerConfigKey.FRONTEND_SERVER_FETCH_THREADS);
     }
 
+    public int getServerFetchThreadKeepalive() {
+        return propertySupplier.getValue(BrokerConfigKey.FRONTEND_SERVER_FETCH_THREAD_KEEPALIVE);
+    }
+
     public int getServerFetchThreadQueueSize() {
         return propertySupplier.getValue(BrokerConfigKey.FRONTEND_SERVER_FETCH_THREAD_QUEUE_SIZE);
     }
 
     public int getServerProduceThreads() {
         return propertySupplier.getValue(BrokerConfigKey.FRONTEND_SERVER_PRODUCE_THREADS);
+    }
+
+    public int getServerProduceThreadKeepalive() {
+        return propertySupplier.getValue(BrokerConfigKey.FRONTEND_SERVER_PRODUCE_THREAD_KEEPALIVE);
     }
 
     public int getServerProduceThreadQueueSize() {
