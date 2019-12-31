@@ -87,7 +87,7 @@ import static org.joyqueue.model.domain.Producer.PRODUCER_TYPE;
 public class BrokerMonitorServiceImpl implements BrokerMonitorService {
     private Logger logger= LoggerFactory.getLogger(BrokerMonitorServiceImpl.class);
     private static final long TIMEOUT=60000;
-
+    private static final String COLON=":";
     @Resource(type = BrokerMonitorClusterQuery.class)
     private BrokerClusterQuery<Subscribe> brokerCluster;
     @Autowired
@@ -110,7 +110,7 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
             @Override
             public String getKey(Broker broker, PartitionGroup partitionGroup,short partition , Subscribe condition) {
                 brokers.add(broker);
-                return broker.getIp()+":"+broker.getMonitorPort();
+                return queryKey(COLON,broker.getIp(),String.valueOf(broker.getMonitorPort()));
             }
             @Override
             public String getPath(String pathTemplate,PartitionGroup partitionGroup,short partition ,Subscribe condition) {
@@ -133,7 +133,7 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
             String r;
             String hostWithPort;
             for(Broker b:brokers){
-                hostWithPort=b.getIp()+":"+b.getPort();
+                hostWithPort=queryKey(COLON,b.getIp(),String.valueOf(b.getMonitorPort()));
                 r= resultMap.get(hostWithPort);
                 if(NullUtil.isEmpty(r)){
                     logger.info(String.format("ignore %s monitor on broker %s ",JSON.toJSON(subscribe),b.getIp()));
@@ -164,6 +164,21 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
             throw new ServiceException(ServiceException.INTERNAL_SERVER_ERROR,e.getMessage());
          }
         return monitorRecords;
+    }
+
+    /**
+     * Multi key to String
+     * @param split  split
+     * @param keys  keys
+     **/
+    public String queryKey(String split,String... keys){
+        if(keys==null||keys.length==0) {return null;}
+        StringBuilder sb=new StringBuilder();
+        for(String k:keys){
+            sb.append(k).append(split);
+        }
+        sb.setLength(sb.length()-1);
+        return sb.toString();
     }
 
     @Override
@@ -202,7 +217,7 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
      * @return merged BrokerMonitorRecord or null if no monitor data
      **/
     public BrokerMonitorRecord merge(Subscribe subscribe,List<BrokerMonitorRecord> monitorRecords){
-        if(NullUtil.isEmpty(monitorRecords)) return null;
+        if(NullUtil.isEmpty(monitorRecords)){ return null;}
         BrokerMonitorRecord record=monitorRecords.get(0);
         if(monitorRecords.size()>1){
             for(int i=1;i<monitorRecords.size();i++){
@@ -234,7 +249,7 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
             @Override
             public String getKey(Broker broker,PartitionGroup partitionGroup,short partition ,Subscribe condition) {
                 brokers.add(broker);
-                return broker.getIp()+":"+broker.getMonitorPort();
+                return queryKey(COLON,broker.getIp(),String.valueOf(broker.getMonitorPort()));
             }
             @Override
             public String getPath(String pathTemplate,PartitionGroup partitionGroup,short partition ,Subscribe condition) {
@@ -293,7 +308,7 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
             @Override
             public String getKey(Broker broker,PartitionGroup partitionGroup,short partition ,Subscribe condition) {
                 brokers.add(broker);
-                return broker.getIp()+":"+broker.getMonitorPort();
+                return queryKey(COLON,broker.getIp(),String.valueOf(broker.getMonitorPort()));
             }
             @Override
             public String getPath(String pathTemplate,PartitionGroup partitionGroup,short partition ,Subscribe condition) {
@@ -314,7 +329,7 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
             String r;
             String hostWithPort;
             for(Broker b:brokers){
-                hostWithPort=b.getIp()+":"+b.getPort();
+                hostWithPort=queryKey(COLON,b.getIp(),String.valueOf(b.getMonitorPort()));
                 r= resultMap.get(hostWithPort);
                 if(NullUtil.isEmpty(r)){
                     logger.info(String.format("ignore %s partitions on broker %s ",JSON.toJSON(subscribe),b.getIp()));
@@ -363,7 +378,7 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
             for(int i=2;i<args.length;i++){   // fill args
                 args[i]=encodedArgs[i-2];
             }
-            String hostWithPort=b.getIp()+":"+b.getPort();
+            String hostWithPort=queryKey(COLON,b.getIp(),String.valueOf(b.getPort()));
             switch (subscribe.getType().value()){
                 case PRODUCER_TYPE:
                     restProducePartitionMonitor=httpRestService.get(pathKey,ProducerPartitionMonitorInfo.class,true,args);
@@ -393,7 +408,7 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
     public List<BrokerMonitorRecord> findMonitorOnPartitionGroupDetailForTopicApp(Subscribe subscribe, int partitionGroup) {
         checkArgument(subscribe);
         List<BrokerMonitorRecord> monitorRecords=findMonitorOnPartition(subscribe,partitionGroup);
-        if(NullUtil.isEmpty(monitorRecords)) return monitorRecords;
+        if(NullUtil.isEmpty(monitorRecords)) {return monitorRecords;}
         TopicPartitionGroup topicPartitionGroup=partitionGroupService.findByTopicAndGroup(subscribe.getNamespace().getCode() ,subscribe.getTopic().getCode(),partitionGroup);
         Set<Integer> partitionSet=new HashSet<>();
         //partitionSet.clear(); // clear cache
@@ -422,7 +437,7 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
      **/
     public List<BrokerMonitorRecord> attachPartitionGroupInfo(Subscribe subscribe, List<BrokerMonitorRecord> monitorRecords){
         List<TopicPartitionGroup> topicPartitionGroups=partitionGroupService.findByTopic(subscribe.getNamespace(),subscribe.getTopic());
-        Map<Integer/*partition*/,Integer/*partitionGroup*/>  partitionMap=new HashMap<>();
+        Map<Integer/*partition*/,Integer/*partitionGroup*/>  partitionMap=new HashMap();
         for(TopicPartitionGroup topicPartitionGroup:topicPartitionGroups){
             for(Integer p: topicPartitionGroup.getPartitionSet()){
                 partitionMap.put(p,topicPartitionGroup.getGroupNo());
@@ -514,7 +529,7 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
             @Override
             public String getKey(Broker broker,PartitionGroup partitionGroup, short partition , Subscribe condition) {
                 brokers.add(broker);
-                return broker.getIp()+":"+broker.getMonitorPort();
+                return queryKey(COLON,broker.getIp(),String.valueOf(broker.getMonitorPort()));
             }
             @Override
             public String getPath(String pathTemplate,PartitionGroup partitionGroup,short partition ,Subscribe condition) {
@@ -534,7 +549,7 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
             String r;
             String ipWithPort;
             for(Broker b:brokers){
-                ipWithPort=b.getIp()+":"+b.getPort();
+                ipWithPort=queryKey(COLON,b.getIp(),String.valueOf(b.getMonitorPort()));
                 r= resultMap.get(ipWithPort);
                 if(NullUtil.isEmpty(r)){
                     logger.info(String.format("ignore %s partition group on broker %s",JSON.toJSON(subscribe),b.getIp()));
@@ -568,7 +583,7 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
             @Override
             public String getKey(Broker broker, PartitionGroup partitionGroup,short partition , Subscribe condition) {
                 brokers.add(broker);
-                return broker.getIp()+":"+broker.getPort();
+                return queryKey(COLON,broker.getIp(),String.valueOf(broker.getMonitorPort()));
             }
             @Override
             public String getPath(String pathTemplate,PartitionGroup partitionGroup,short partition ,Subscribe condition) {
@@ -585,7 +600,7 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
             ConnectionMonitorInfoWithIp connectionMonitorInfoWithIp;
             ConnectionMonitorInfo con;
             for(Broker b:brokers){
-                hostWithPort=b.getIp()+":"+b.getPort();
+                hostWithPort=queryKey(COLON, b.getIp(),String.valueOf(b.getMonitorPort()));
                 r= resultMap.get(hostWithPort);
                 if(NullUtil.isEmpty(r)){
                     logger.info(String.format("ignore %s broker %s connection",JSON.toJSON(subscribe),b.getIp()));
@@ -807,7 +822,7 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
     public List<BrokerMonitorRecord> transferConsumerPartition(List<ConsumerPartitionMonitorInfo> consumerPartitionMonitors,String ipPort){
         BrokerMonitorRecord record;
         List<BrokerMonitorRecord> monitorRecords=new ArrayList<>();
-        if(NullUtil.isEmpty(consumerPartitionMonitors)) return monitorRecords;
+        if(NullUtil.isEmpty(consumerPartitionMonitors)) {return monitorRecords;}
         for(ConsumerPartitionMonitorInfo p:consumerPartitionMonitors) {
             record= new BrokerMonitorRecord();
             record.setIp(ipPort);
@@ -822,7 +837,7 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
     public List<BrokerMonitorRecord> transferProducerPartition(List<ProducerPartitionMonitorInfo> producerPartitionMonitorInfos,String ipPort){
         BrokerMonitorRecord record;
         List<BrokerMonitorRecord> monitorRecords=new ArrayList<>();
-        if(NullUtil.isEmpty(producerPartitionMonitorInfos)) return monitorRecords;
+        if(NullUtil.isEmpty(producerPartitionMonitorInfos)) {return monitorRecords;}
         for(ProducerPartitionMonitorInfo p:producerPartitionMonitorInfos) {
             record= new BrokerMonitorRecord();
             record.setPartition(p.getPartition());
