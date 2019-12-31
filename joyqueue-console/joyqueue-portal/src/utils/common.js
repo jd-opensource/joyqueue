@@ -81,42 +81,42 @@ export function resolveAppCode (appCode) {
 export function getCodeRule () {
   return [
     {required: true, message: '请输入英文名', trigger: 'change'},
-    {pattern: /^[a-zA-Z]+[a-zA-Z0-9_-]{1,120}[a-zA-Z0-9]+$/, message: '英文名格式不匹配', trigger: 'change'}
+    {pattern: /^[a-zA-Z]+[a-zA-Z0-9_-]{1,120}[a-zA-Z0-9]+$/, message: '支持字母、数字、下划线(_)和横线(-)，以英文字母开头，不超过120个字符', trigger: 'change'}
   ]
 }
 
 export function getCodeRule2 () {
   return [
     {required: true, message: '请输入英文名', trigger: 'change'},
-    {pattern: /^[a-zA-Z][a-zA-Z0-9]{2,20}$/, message: '英文名格式不匹配', trigger: 'change'}
+    {pattern: /^[a-zA-Z][a-zA-Z0-9]{2,20}$/, message: '支持英文字母和数字，以英文字母开头，长度在2-20个字符之间', trigger: 'change'}
   ]
 }
 
 export function getCodeRule3 () {
   return [
     {required: true, message: '请输入英文名', trigger: 'change'},
-    {pattern: /^[a-zA-Z]+[a-zA-Z0-9/._-]{1,39}[a-zA-Z0-9]+$/, message: '英文名格式不匹配', trigger: 'change'}
+    {pattern: /^[a-zA-Z]+[a-zA-Z0-9/._-]{1,39}[a-zA-Z0-9]+$/, message: '支持字母、数字、英文句号(.)、下划线(_)和横线(-)，以英文字母开头，不超过39个字符', trigger: 'change'}
   ]
 }
 
 export function getErpsRule () {
   return [
-    {required: true, message: '支持字母、数字、减号(-)、下划线(_)和英文句号(.)，多个ERP用英文逗号(,)分隔，不能有空格。', trigger: 'change'},
-    {pattern: /^[\w-._]+(,[\w-._]+)*$/, message: 'ERP格式不匹配', trigger: 'change'}
+    {required: true, message: '支持字母、数字、减号(-)、下划线(_)和英文句号(.)，多个ERP用英文逗号(,)分隔，不能有空格', trigger: 'change'},
+    {pattern: /^[\w-._]+(,[\w-._]+)*$/, message: '支持字母、数字、减号(-)、下划线(_)和英文句号(.)，多个ERP用英文逗号(,)分隔，不能有空格', trigger: 'change'}
   ]
 }
 
 export function getNameRule () {
   return [
     { required: true, message: '请输入中文名', trigger: 'change' },
-    {pattern: /^[\u4E00-\u9FA5a-zA-Z]+[\u4E00-\u9FA5a-zA-Z0-9/._-]{1,60}[\u4E00-\u9FA5a-zA-Z0-9]+$/, message: '中文名格式不匹配', trigger: 'change'}
+    {pattern: /^[\u4E00-\u9FA5a-zA-Z]+[\u4E00-\u9FA5a-zA-Z0-9/._-]{1,60}[\u4E00-\u9FA5a-zA-Z0-9]+$/, message: '支持中文、字母、数字、减号(-)、下划线(_)和英文句号(.)，以中英文字符开头，不超过60个字符', trigger: 'change'}
   ]
 }
 
 export function getSubscribeGroupRule () {
   return [
-    {required: true, message: '请输入英文名', trigger: 'change'},
-    {pattern: /^[a-zA-Z]+[a-zA-Z0-9/_-]{1,20}[a-zA-Z0-9]+$/, message: '英文名格式不匹配', trigger: 'change'}
+    {required: true, message: '请输入订阅分组', trigger: 'change'},
+    {pattern: /^[a-zA-Z]+[a-zA-Z0-9/_-]{1,20}[a-zA-Z0-9]+$/, message: '支持字母、数字、下划线(_)和横线(-)，以英文字母开头，不超过20个字符', trigger: 'change'}
   ]
 }
 
