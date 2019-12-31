@@ -1,7 +1,7 @@
 <template>
   <d-form ref="form" :model="formData" :rules="rules" label-width="100px" style="overflow-y:auto; width: 100%; padding-right: 20px">
     <d-form-item label="就近机房发送:">
-      <d-switch v-model="formData.nearBy" ></d-switch>
+      <d-switch v-model="formData.nearBy" :disabled="!nearbyConfigEnabled"></d-switch>
     </d-form-item>
     <d-form-item label="生产归档:" >
       <d-switch v-model="formData.archive" :disabled="!archiveConfigEnabled"></d-switch>
@@ -21,6 +21,10 @@ export default {
   props: {
     type: 0, // add or edit form
     archiveConfigEnabled: {
+      type: Boolean,
+      default: false
+    },
+    nearbyConfigEnabled: {
       type: Boolean,
       default: false
     },
