@@ -29,7 +29,9 @@
     <!--Config dialog-->
     <my-dialog :dialog="configDialog" @on-dialog-confirm="configConfirm" @on-dialog-cancel="dialogCancel('configDialog')">
       <grid-row :v-if="configDialogTip">{{configDialogTip}}</grid-row>
-      <producer-config-form ref="configForm" :data="configData" :archive-config-enabled="configData.archive || !forbidEnableArchive"/>
+      <producer-config-form ref="configForm" :data="configData"
+      :archive-config-enabled="configData.archive || !forbidEnableArchive"
+      :nearby-config-enabled="configData.nearBy || !forbidEnableNearby"/>
     </my-dialog>
     <my-dialog :dialog="weightDialog" @on-dialog-confirm="weightConfigConfirm" @on-dialog-cancel="dialogCancel('weightDialog')">
       <producer-weight-form ref="weightForm" :producerId="producerId"/>
@@ -128,7 +130,11 @@ export default {
     },
     forbidEnableArchive: { // 禁止开启归档
       type: Boolean,
-      default: true
+      default: false
+    },
+    forbidEnableNearby: { // 禁止开启归档
+      type: Boolean,
+      default: false
     }
   },
   data () {
