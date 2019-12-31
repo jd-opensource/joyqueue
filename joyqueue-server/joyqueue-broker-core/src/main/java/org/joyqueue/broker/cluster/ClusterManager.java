@@ -55,7 +55,6 @@ import org.joyqueue.nsr.event.UpdateConsumerEvent;
 import org.joyqueue.nsr.event.UpdatePartitionGroupEvent;
 import org.joyqueue.nsr.event.UpdateProducerEvent;
 import org.joyqueue.nsr.event.UpdateTopicEvent;
-import org.joyqueue.nsr.exception.NsrException;
 import org.joyqueue.response.BooleanResponse;
 import org.joyqueue.toolkit.concurrent.EventBus;
 import org.joyqueue.toolkit.concurrent.EventListener;
@@ -159,10 +158,6 @@ public class ClusterManager extends Service {
      */
     private void register() throws Exception {
         String localIp = brokerConfig.getFrontendConfig().getHost();
-        // TODO 临时判断
-        if (StringUtils.equals(localIp, "127.0.0.1")) {
-            throw new NsrException(String.format("local ip error，ip: %s", localIp));
-        }
         long port = brokerConfig.getFrontendConfig().getPort();
         Integer brokerId = readBroker();
         broker = nameService.register(brokerId, localIp, (int) port);

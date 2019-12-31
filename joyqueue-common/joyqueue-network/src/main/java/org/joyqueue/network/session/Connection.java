@@ -165,8 +165,6 @@ public class Connection {
         return namespace;
     }
 
-    private ConcurrentMap<String, String> temp = Maps.newConcurrentMap();
-
     public boolean addProducer(String topic, String app, String id) {
         return getOrCreateProducers(app).putIfAbsent(topic, id) == null;
     }
