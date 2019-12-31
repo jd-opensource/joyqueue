@@ -1268,14 +1268,12 @@ public class ClusterManager extends Service {
                     case ADD_PARTITION_GROUP: {
                         AddPartitionGroupEvent addPartitionGroupEvent = (AddPartitionGroupEvent) event.getMetaEvent();
                         PartitionGroup partitionGroup = addPartitionGroupEvent.getPartitionGroup();
-                        TopicConfig topicConfig = topicConfigCache.get(addPartitionGroupEvent.getTopic().getFullName());
-                        if (topicConfig == null) {
-                            topicConfig = buildTopicConfigCache(addPartitionGroupEvent.getTopic());
-                        }
+                        TopicConfig topicConfig = buildTopicConfigCache(addPartitionGroupEvent.getTopic());
 
                         Map<Integer, PartitionGroup> topicPartitionGroups = Maps.newHashMap(topicConfig.getPartitionGroups());
                         topicPartitionGroups.put(addPartitionGroupEvent.getPartitionGroup().getGroup(), partitionGroup);
                         topicConfig.setPartitionGroups(topicPartitionGroups);
+                        buildTopicConfigCache(topicConfig);
 
                         topicPartitionsCache.remove(topicConfig.getName().getFullName());
                         break;
@@ -1284,14 +1282,12 @@ public class ClusterManager extends Service {
                         UpdatePartitionGroupEvent updatePartitionGroupEvent = (UpdatePartitionGroupEvent) event.getMetaEvent();
                         PartitionGroup oldPartitionGroup = updatePartitionGroupEvent.getOldPartitionGroup();
                         PartitionGroup newPartitionGroup = updatePartitionGroupEvent.getNewPartitionGroup();
-                        TopicConfig topicConfig = topicConfigCache.get(updatePartitionGroupEvent.getTopic().getFullName());
-                        if (topicConfig == null) {
-                            topicConfig = buildTopicConfigCache(updatePartitionGroupEvent.getTopic());
-                        }
+                        TopicConfig topicConfig = buildTopicConfigCache(updatePartitionGroupEvent.getTopic());
 
                         Map<Integer, PartitionGroup> topicPartitionGroups = Maps.newHashMap(topicConfig.getPartitionGroups());
                         topicPartitionGroups.put(newPartitionGroup.getGroup(), newPartitionGroup);
                         topicConfig.setPartitionGroups(topicPartitionGroups);
+                        buildTopicConfigCache(topicConfig);
 
                         topicPartitionsCache.remove(topicConfig.getName().getFullName());
                         break;
@@ -1299,14 +1295,12 @@ public class ClusterManager extends Service {
                     case REMOVE_PARTITION_GROUP: {
                         RemovePartitionGroupEvent removePartitionGroupEvent = (RemovePartitionGroupEvent) event.getMetaEvent();
                         PartitionGroup partitionGroup = removePartitionGroupEvent.getPartitionGroup();
-                        TopicConfig topicConfig = topicConfigCache.get(removePartitionGroupEvent.getTopic().getFullName());
-                        if (topicConfig == null) {
-                            topicConfig = buildTopicConfigCache(removePartitionGroupEvent.getTopic());
-                        }
+                        TopicConfig topicConfig = buildTopicConfigCache(removePartitionGroupEvent.getTopic());
 
                         Map<Integer, PartitionGroup> topicPartitionGroups = Maps.newHashMap(topicConfig.getPartitionGroups());
                         topicPartitionGroups.remove(partitionGroup.getGroup());
                         topicConfig.setPartitionGroups(topicPartitionGroups);
+                        buildTopicConfigCache(topicConfig);
 
                         topicPartitionsCache.remove(topicConfig.getName().getFullName());
                         break;

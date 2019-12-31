@@ -44,6 +44,7 @@ import java.util.Map;
  * author: gaohaoxiang
  * date: 2019/4/4
  */
+@org.joyqueue.network.protocol.annotation.ProduceHandler
 public class TxnOffsetCommitRequestHandler implements KafkaCommandHandler, Type, KafkaContextAware {
 
     protected static final Logger logger = LoggerFactory.getLogger(TxnOffsetCommitRequestHandler.class);

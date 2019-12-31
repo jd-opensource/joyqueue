@@ -21,6 +21,7 @@ import org.joyqueue.domain.TopicConfig;
 import org.joyqueue.response.BooleanResponse;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * MetadataMonitorService
@@ -140,7 +141,7 @@ public interface MetadataMonitorService {
      * 返回所有配置元数据
      * @return
      */
-    List<String> getConfigsMetadata();
+    Map<String, String> getConfigsMetadata();
 
     /**
      * 查询集群信息

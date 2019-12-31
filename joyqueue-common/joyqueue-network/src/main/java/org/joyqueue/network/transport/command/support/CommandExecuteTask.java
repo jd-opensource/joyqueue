@@ -15,13 +15,13 @@
  */
 package org.joyqueue.network.transport.command.support;
 
+import org.joyqueue.network.transport.Transport;
 import org.joyqueue.network.transport.command.Command;
 import org.joyqueue.network.transport.command.handler.CommandHandler;
 import org.joyqueue.network.transport.command.handler.ExceptionHandler;
 import org.joyqueue.network.transport.command.handler.filter.CommandHandlerFilter;
 import org.joyqueue.network.transport.command.handler.filter.CommandHandlerFilterFactory;
 import org.joyqueue.network.transport.command.handler.filter.CommandHandlerInvocation;
-import org.joyqueue.network.transport.Transport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

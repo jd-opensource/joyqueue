@@ -17,6 +17,7 @@ package org.joyqueue.nsr.nameservice;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.domain.Broker;
 import org.joyqueue.domain.Config;
 import org.joyqueue.domain.Consumer;
@@ -52,7 +53,6 @@ import org.joyqueue.nsr.event.UpdateTopicEvent;
 import org.joyqueue.nsr.util.DCWrapper;
 import org.joyqueue.toolkit.concurrent.EventBus;
 import org.joyqueue.toolkit.service.Service;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -117,8 +117,8 @@ public class NameServiceCompensator extends Service {
                 if (newTopicConfig.isReplica(brokerId)) {
                     publishEvent(new AddTopicEvent(newTopicConfig, Lists.newArrayList(newTopicConfig.getPartitionGroups().values())));
 
-                    for (Map.Entry<Integer, PartitionGroup> entry : newTopicConfig.getPartitionGroups().entrySet()) {
-                        publishEvent(new AddPartitionGroupEvent(newTopicConfig.getName(), entry.getValue()));
+                    for (PartitionGroup partitionGroup : newTopicConfig.fetchPartitionGroupByBrokerId(brokerId)) {
+                        publishEvent(new AddPartitionGroupEvent(newTopicConfig.getName(), partitionGroup));
                     }
                 }
             } else {
@@ -161,7 +161,7 @@ public class NameServiceCompensator extends Service {
         // 删除topic
         for (Map.Entry<TopicName, TopicConfig> oldTopicEntry : oldCache.getTopicConfigMap().entrySet()) {
             TopicConfig newTopic = newCache.getTopicConfigMap().get(oldTopicEntry.getKey());
-            if (oldTopicEntry.getValue().isReplica(brokerId) && newTopic == null) {
+            if (newTopic == null && oldTopicEntry.getValue().isReplica(brokerId)) {
                 publishEvent(new RemoveTopicEvent(oldTopicEntry.getValue(), Lists.newArrayList(oldTopicEntry.getValue().getPartitionGroups().values())));
             }
         }
@@ -235,11 +235,14 @@ public class NameServiceCompensator extends Service {
             Producer newProducer = (newTopicProducerMap == null ? null : newTopicProducerMap.get(oldProducer.getTopic()));
 
             if (newProducer == null) {
-                publishEvent(new RemoveProducerEvent(oldProducer.getTopic(), oldProducer));
-            } else if ((newTopicConfig == null || !newTopicConfig.isReplica(brokerId))
-                    && (oldTopicConfig != null && oldTopicConfig.isReplica(brokerId))) {
-
-                publishEvent(new RemoveProducerEvent(oldProducer.getTopic(), oldProducer));
+                if (oldTopicConfig != null && oldTopicConfig.isReplica(brokerId)) {
+                    publishEvent(new RemoveProducerEvent(oldProducer.getTopic(), oldProducer));
+                }
+            } else {
+                if ((newTopicConfig == null || !newTopicConfig.isReplica(brokerId))
+                        && (oldTopicConfig != null && oldTopicConfig.isReplica(brokerId))) {
+                    publishEvent(new RemoveProducerEvent(oldProducer.getTopic(), oldProducer));
+                }
             }
         }
     }
@@ -280,11 +283,14 @@ public class NameServiceCompensator extends Service {
             Consumer newConsumer = (newTopicConsumerMap == null ? null : newTopicConsumerMap.get(oldConsumer.getTopic()));
 
             if (newConsumer == null) {
-                publishEvent(new RemoveConsumerEvent(oldConsumer.getTopic(), oldConsumer));
-            } else if ((newTopicConfig == null || !newTopicConfig.isReplica(brokerId))
-                    && (oldTopicConfig != null && oldTopicConfig.isReplica(brokerId))) {
-
-                publishEvent(new RemoveConsumerEvent(oldConsumer.getTopic(), oldConsumer));
+                if (oldTopicConfig != null && oldTopicConfig.isReplica(brokerId)) {
+                    publishEvent(new RemoveConsumerEvent(oldConsumer.getTopic(), oldConsumer));
+                }
+            } else {
+                if ((newTopicConfig == null || !newTopicConfig.isReplica(brokerId))
+                        && (oldTopicConfig != null && oldTopicConfig.isReplica(brokerId))) {
+                    publishEvent(new RemoveConsumerEvent(oldConsumer.getTopic(), oldConsumer));
+                }
             }
         }
     }

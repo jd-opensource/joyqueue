@@ -193,9 +193,6 @@ public class BrokerServiceImpl implements BrokerService {
 
     @Override
     public PageResult<Broker> search(QPageQuery<QBroker> qPageQuery) throws Exception {
-        if (qPageQuery.getPagination() != null) {
-            qPageQuery.getPagination().setSize(Integer.MAX_VALUE);
-        }
         PageResult<Broker> pageResult = brokerNameServerService.search(qPageQuery);
         if (pageResult !=null && pageResult.getResult() != null && pageResult.getResult().size() >0) {
             List<Broker> brokerList = pageResult.getResult();
@@ -203,15 +200,9 @@ public class BrokerServiceImpl implements BrokerService {
             while (iterator.hasNext()) {
                 Broker broker = iterator.next();
                 BrokerGroupRelated brokerRelated = brokerGroupRelatedService.findById(broker.getId());
-                if (qPageQuery.getQuery().getBrokerGroupId() != 0) {
-                    if (!brokerRelated.getGroup().getId().equals(qPageQuery.getQuery().getBrokerGroupId())) {
-                        iterator.remove();
-                    }
-                } else {
-                    if (brokerRelated != null && brokerRelated.getGroup() != null) {
-                        broker.setGroup(brokerRelated.getGroup());
-                        broker.setStatus(0);
-                    }
+                if (brokerRelated != null && brokerRelated.getGroup() != null) {
+                    broker.setGroup(brokerRelated.getGroup());
+                    broker.setStatus(0);
                 }
             }
         }

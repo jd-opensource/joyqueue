@@ -33,6 +33,11 @@
     <dependencies>
         <dependency>
             <groupId>org.joyqueue</groupId>
+            <artifactId>joyqueue-client-all</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.joyqueue</groupId>
             <artifactId>openmessaging-spring</artifactId>
             <version>${project.version}</version>
         </dependency>

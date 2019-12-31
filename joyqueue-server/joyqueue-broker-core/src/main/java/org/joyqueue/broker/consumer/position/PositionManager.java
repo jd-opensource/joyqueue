@@ -17,6 +17,7 @@ package org.joyqueue.broker.consumer.position;
 
 import com.google.common.base.Preconditions;
 import com.jd.laf.extension.ExtensionManager;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.broker.consumer.ConsumeConfig;
 import org.joyqueue.broker.consumer.model.ConsumePartition;
@@ -39,7 +40,6 @@ import org.joyqueue.toolkit.concurrent.EventListener;
 import org.joyqueue.toolkit.concurrent.LoopThread;
 import org.joyqueue.toolkit.service.Service;
 import org.joyqueue.toolkit.time.SystemClock;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -504,7 +504,7 @@ public class PositionManager extends Service {
             Position remove = positionStore.remove(consumePartition);
 
             logger.info("Remove ConsumePartition by topic:{}, app:{}, partition:{}, curIndex:{}",
-                    consumePartition.getTopic(), consumePartition.getApp(), consumePartition.getPartition(), remove.toString());
+                    consumePartition.getTopic(), consumePartition.getApp(), consumePartition.getPartition(), String.valueOf(remove));
         });
         // 落盘
         positionStore.forceFlush();

@@ -16,19 +16,26 @@
 package org.joyqueue.broker.network.protocol;
 
 import com.google.common.collect.Lists;
+import com.jd.laf.extension.ExtensionManager;
 import org.joyqueue.broker.BrokerContext;
 import org.joyqueue.broker.BrokerContextAware;
+import org.joyqueue.broker.network.protocol.support.ProtocolServerWrapper;
+import org.joyqueue.broker.network.protocol.support.ProtocolServiceWrapper;
 import org.joyqueue.network.protocol.Protocol;
 import org.joyqueue.network.protocol.ProtocolException;
 import org.joyqueue.network.protocol.ProtocolServer;
 import org.joyqueue.network.protocol.ProtocolService;
+import org.joyqueue.toolkit.concurrent.NamedThreadFactory;
 import org.joyqueue.toolkit.lang.LifeCycle;
 import org.joyqueue.toolkit.service.Service;
-import com.jd.laf.extension.ExtensionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * ProtocolManager
@@ -41,6 +48,9 @@ public class ProtocolManager extends Service {
     protected static final Logger logger = LoggerFactory.getLogger(ProtocolManager.class);
 
     private BrokerContext brokerContext;
+    private ExecutorService commonThreadPool;
+    private ExecutorService fetchThreadPool;
+    private ExecutorService produceThreadPool;
 
     private List<Protocol> protocols = Lists.newLinkedList();
     private List<ProtocolService> protocolServices = Lists.newLinkedList();
@@ -48,6 +58,15 @@ public class ProtocolManager extends Service {
 
     public ProtocolManager(BrokerContext brokerContext) {
         this.brokerContext = brokerContext;
+        this.commonThreadPool = new ThreadPoolExecutor(brokerContext.getBrokerConfig().getServerCommonThreads(), brokerContext.getBrokerConfig().getServerCommonThreads()
+                ,1000 * 60L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(brokerContext.getBrokerConfig().getServerCommonThreadQueueSize()),
+                new NamedThreadFactory("joyqueue-frontend-common-threads"));
+        this.fetchThreadPool = new ThreadPoolExecutor(brokerContext.getBrokerConfig().getServerFetchThreads(), brokerContext.getBrokerConfig().getServerFetchThreads()
+                ,1000 * 60L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(brokerContext.getBrokerConfig().getServerFetchThreadQueueSize()),
+                new NamedThreadFactory("joyqueue-frontend-fetch-threads"));
+        this.produceThreadPool = new ThreadPoolExecutor(brokerContext.getBrokerConfig().getServerProduceThreads(), brokerContext.getBrokerConfig().getServerProduceThreads()
+                ,1000 * 60L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(brokerContext.getBrokerConfig().getServerProduceThreadQueueSize()),
+                new NamedThreadFactory("joyqueue-frontend-produce-threads"));
         loadProtocols();
     }
 
@@ -89,6 +108,9 @@ public class ProtocolManager extends Service {
                 throw new ProtocolException(String.format("protocol %s stop failed", protocol.type()), e);
             }
         }
+        commonThreadPool.shutdown();
+        fetchThreadPool.shutdown();
+        produceThreadPool.shutdown();
     }
 
     protected List<Protocol> loadProtocols() {
@@ -97,10 +119,12 @@ public class ProtocolManager extends Service {
         List<ProtocolServer> protocolServers = doGetProtocolServers();
 
         for (ProtocolService protocolService : protocolServices) {
+            protocolService = new ProtocolServiceWrapper(protocolService, commonThreadPool, fetchThreadPool, produceThreadPool);
             register(protocolService);
             result.add(protocolService);
         }
         for (ProtocolServer protocolServer : protocolServers) {
+            protocolServer = new ProtocolServerWrapper(protocolServer, commonThreadPool, fetchThreadPool, produceThreadPool);
             register(protocolServer);
             result.add(protocolServer);
         }

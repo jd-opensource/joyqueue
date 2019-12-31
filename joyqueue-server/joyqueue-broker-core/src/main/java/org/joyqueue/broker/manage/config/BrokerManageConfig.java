@@ -16,7 +16,7 @@
 package org.joyqueue.broker.manage.config;
 
 import org.joyqueue.broker.config.BrokerConfig;
-import org.joyqueue.config.BrokerConfigKeys;
+import org.joyqueue.config.BrokerConfigKey;
 import org.joyqueue.helper.PortHelper;
 import org.joyqueue.toolkit.config.PropertySupplier;
 import org.slf4j.Logger;
@@ -45,6 +45,6 @@ public class BrokerManageConfig {
     }
 
     public int getExportPort() {
-        return PortHelper.getMonitorPort(propertySupplier.getValue(BrokerConfigKeys.FRONTEND_SERVER_PORT));
+        return PortHelper.getMonitorPort(propertySupplier.getValue(BrokerConfigKey.FRONTEND_SERVER_PORT));
     }
 }

@@ -70,17 +70,17 @@ public class CompositionInternalServiceProvider extends Service implements Inter
     @Override
     protected void doStart() throws Exception {
         if (igniteServiceProvider != null && journalkeeperServiceProvider != null) {
-            if (igniteServiceProvider instanceof PropertySupplierAware) {
-                ((PropertySupplierAware) igniteServiceProvider).setSupplier(propertySupplier);
-            }
-            if (igniteServiceProvider instanceof LifeCycle) {
-                ((LifeCycle) igniteServiceProvider).start();
-            }
             if (journalkeeperServiceProvider instanceof PropertySupplierAware) {
                 ((PropertySupplierAware) journalkeeperServiceProvider).setSupplier(propertySupplier);
             }
             if (journalkeeperServiceProvider instanceof LifeCycle) {
                 ((LifeCycle) journalkeeperServiceProvider).start();
+            }
+            if (igniteServiceProvider instanceof PropertySupplierAware) {
+                ((PropertySupplierAware) igniteServiceProvider).setSupplier(propertySupplier);
+            }
+            if (igniteServiceProvider instanceof LifeCycle) {
+                ((LifeCycle) igniteServiceProvider).start();
             }
             compositionInternalServiceManager.start();
         } else {
@@ -96,11 +96,11 @@ public class CompositionInternalServiceProvider extends Service implements Inter
     @Override
     protected void doStop() {
         if (igniteServiceProvider != null && journalkeeperServiceProvider != null) {
-            if (igniteServiceProvider instanceof LifeCycle) {
-                ((LifeCycle) igniteServiceProvider).stop();
-            }
             if (journalkeeperServiceProvider instanceof LifeCycle) {
                 ((LifeCycle) journalkeeperServiceProvider).stop();
+            }
+            if (igniteServiceProvider instanceof LifeCycle) {
+                ((LifeCycle) igniteServiceProvider).stop();
             }
         } else {
             if (serviceProvider instanceof LifeCycle) {

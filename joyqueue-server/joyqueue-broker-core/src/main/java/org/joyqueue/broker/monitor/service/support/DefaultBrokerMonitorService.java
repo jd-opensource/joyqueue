@@ -379,7 +379,7 @@ public class DefaultBrokerMonitorService implements BrokerMonitorService {
     }
 
     @Override
-    public List<String> getConfigsMetadata() {
+    public Map<String, String> getConfigsMetadata() {
         return metadataMonitorService.getConfigsMetadata();
     }
 

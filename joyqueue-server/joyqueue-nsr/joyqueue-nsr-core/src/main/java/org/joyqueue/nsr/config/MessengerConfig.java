@@ -15,7 +15,7 @@
  */
 package org.joyqueue.nsr.config;
 
-import org.joyqueue.config.BrokerConfigKeys;
+import org.joyqueue.config.BrokerConfigKey;
 import org.joyqueue.helper.PortHelper;
 import org.joyqueue.network.transport.config.ClientConfig;
 import org.joyqueue.network.transport.config.ServerConfig;
@@ -84,7 +84,7 @@ public class MessengerConfig {
     }
 
     public int getPort() {
-        return PortHelper.getMessengerPort(propertySupplier.getValue(BrokerConfigKeys.FRONTEND_SERVER_PORT));
+        return PortHelper.getMessengerPort(propertySupplier.getValue(BrokerConfigKey.FRONTEND_SERVER_PORT));
     }
 
     public ServerConfig getServerConfig() {

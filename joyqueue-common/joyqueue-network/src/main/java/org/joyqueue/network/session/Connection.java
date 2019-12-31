@@ -54,7 +54,7 @@ public class Connection {
     private ConcurrentMap<String /** app **/, ConcurrentMap<String /** topic **/, String /** id **/>> consumers = Maps.newConcurrentMap();
     // 创建时间
     private long createTime;
-    // 是否管理员
+    // 是否系统连接
     private boolean isSystem;
 
     public Connection() {
@@ -165,6 +165,8 @@ public class Connection {
         return namespace;
     }
 
+    private ConcurrentMap<String, String> temp = Maps.newConcurrentMap();
+
     public boolean addProducer(String topic, String app, String id) {
         return getOrCreateProducers(app).putIfAbsent(topic, id) == null;
     }
@@ -209,8 +211,9 @@ public class Connection {
         ConcurrentMap<String, String> topicMap = producers.get(app);
         if (topicMap == null) {
             topicMap = Maps.newConcurrentMap();
-            if (producers.putIfAbsent(app, topicMap) != null) {
-                topicMap = producers.get(app);
+            ConcurrentMap<String, String> oldTopicMap = producers.putIfAbsent(app, topicMap);
+            if (oldTopicMap != null) {
+                topicMap = oldTopicMap;
             }
         }
         return topicMap;
@@ -220,8 +223,9 @@ public class Connection {
         ConcurrentMap<String, String> topicMap = consumers.get(app);
         if (topicMap == null) {
             topicMap = Maps.newConcurrentMap();
-            if (consumers.putIfAbsent(app, topicMap) != null) {
-                topicMap = consumers.get(app);
+            ConcurrentMap<String, String> oldTopicMap = consumers.putIfAbsent(app, topicMap);
+            if (oldTopicMap != null) {
+                topicMap = oldTopicMap;
             }
         }
         return topicMap;
