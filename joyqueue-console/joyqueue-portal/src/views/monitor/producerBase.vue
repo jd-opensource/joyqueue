@@ -28,7 +28,8 @@
 
     <!--Config dialog-->
     <my-dialog :dialog="configDialog" @on-dialog-confirm="configConfirm" @on-dialog-cancel="dialogCancel('configDialog')">
-      <producer-config-form ref="configForm" :data="configData"/>
+      <grid-row :v-if="configDialogTip">{{configDialogTip}}</grid-row>
+      <producer-config-form ref="configForm" :data="configData" :archive-config-enabled="configData.archive || !forbidEnableArchive"/>
     </my-dialog>
     <my-dialog :dialog="weightDialog" @on-dialog-confirm="weightConfigConfirm" @on-dialog-cancel="dialogCancel('weightDialog')">
       <producer-weight-form ref="weightForm" :producerId="producerId"/>
@@ -86,19 +87,6 @@ export default {
             txt: '取消订阅',
             method: 'on-cancel-subscribe'
           }
-          // ,
-          // {
-          //   txt: '详情监控图表',
-          //   method: 'on-detail-chart'
-          // },
-          // {
-          //   txt: '汇总监控图表',
-          //   method: 'on-summary-chart'
-          // },
-          // {
-          //   txt: '性能监控图表',
-          //   method: 'on-performance-chart'
-          // }
         ]
       }
     },
@@ -133,6 +121,14 @@ export default {
     },
     monitorUrls: {// url variable format: [app], [topic], [namespace]
       type: Object
+    },
+    configDialogTip: {
+      type: String,
+      default: undefined
+    },
+    forbidEnableArchive: { // 禁止开启归档
+      type: Boolean,
+      default: true
     }
   },
   data () {
