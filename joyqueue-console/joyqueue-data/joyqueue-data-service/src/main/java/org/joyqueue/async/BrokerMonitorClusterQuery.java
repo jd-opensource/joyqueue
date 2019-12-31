@@ -57,7 +57,6 @@ public class BrokerMonitorClusterQuery implements BrokerClusterQuery<Subscribe> 
     @Autowired
     private BrokerService brokerService;
 
-    @Override
     public Future<Map<String, String>> asyncQueryAllBroker(String namespace, String topic, Integer groupNo, String path, String logkey) {
         List<PartitionGroupReplica> partitionGroupReplicas = partitionGroupReplicaService.getByTopicAndGroup(topic, namespace, groupNo);
         List<Broker> brokers = partitionGroupReplicas.stream().map(m -> {

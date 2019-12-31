@@ -54,8 +54,7 @@ export default {
       },
       brokerUrls: {
         search: `/broker/search`,
-        removeBroker: `/brokerGroup/updateBroker`,
-        startInfo: '/monitor/start'
+        removeBroker: `/brokerGroup/updateBroker`
       },
       brokerBtns: [
         {

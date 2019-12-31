@@ -142,7 +142,7 @@ public class ConsumeOffsetServiceImpl implements ConsumeOffsetService {
             partitionLeaderAckMonitorInfo = new PartitionLeaderAckMonitorInfo(p,false);
             Broker b = partitionBrokers.get(p.getPartition());
             if(!NullUtil.isEmpty(b)) {
-                String partitionLeaderBrokerKey = b.getIp() + ":" + b.getMonitorPort();
+                String partitionLeaderBrokerKey = b.getIp() + ":" + b.getPort();
                 if (partitionLeaderBrokerKey.equals(broker)) {
                     partitionLeaderAckMonitorInfo.setLeader(true);
                 }
@@ -188,11 +188,10 @@ public class ConsumeOffsetServiceImpl implements ConsumeOffsetService {
                 String pathKey = "getTopicAppOffset";
                 RestResponse<List<PartitionAckMonitorInfo>> restResponse = httpRestService.get(pathKey, PartitionAckMonitorInfo.class, true, args);
                 if (restResponse.getData() != null) {
-                   List<PartitionLeaderAckMonitorInfo>  partitionLeaderAckMonitorInfos=tagLeaderPartitionOffset(broker.getIp()+":"+broker.getMonitorPort(),restResponse.getData(),partitionBrokers);
+                   List<PartitionLeaderAckMonitorInfo>  partitionLeaderAckMonitorInfos=tagLeaderPartitionOffset(broker.getIp()+":"+broker.getPort(),restResponse.getData(),partitionBrokers);
                    for(PartitionLeaderAckMonitorInfo leaderAckMonitorInfo:partitionLeaderAckMonitorInfos) {
-                       if(leaderAckMonitorInfo.isLeader()) {
-                           partitionAckMonitorInfos.add(leaderAckMonitorInfo);
-                       }
+                       if(leaderAckMonitorInfo.isLeader())
+                            partitionAckMonitorInfos.add(leaderAckMonitorInfo);
                    }
                 }
             }
