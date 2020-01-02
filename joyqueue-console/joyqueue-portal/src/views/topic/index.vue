@@ -1,24 +1,30 @@
 <template>
   <div>
-    <div class="ml20 mt30">
-      <d-select v-model="searchData.type" placeholder="请选择类型" class="left mr5"
-                style="width:213px" @on-change="getList">
-        <span slot="prepend">主题类型</span>
-        <d-option value="-1" >全部</d-option>
-        <d-option value="0" >普通主题</d-option>
-        <d-option value="1" >广播主题</d-option>
-        <d-option value="2" >顺序主题</d-option>
-      </d-select>
-      <d-input v-model="searchData.keyword" placeholder="请输入英文名" class="left mr5"
-               style="width:213px" @on-enter="getList">
-        <span slot="prepend">关键词</span>
-      </d-input>
-      <d-button type="primary" color="success" @click="getList">查询<icon name="search" style="margin-left: 5px;"></icon></d-button>
-      <d-button v-if="$store.getters.isAdmin" type="primary" class="left ml10" @click="openDialog('addDialog')">添加主题<icon name="plus-circle" style="margin-left: 5px;"></icon></d-button>
-    </div>
+    <grid-row class="table-query">
+      <grid-col span="3" style="padding-right: 10px;">
+        <d-select v-model="searchData.type" placeholder="请选择类型"
+                   @on-change="getList">
+          <span slot="prepend">主题类型</span>
+          <d-option value="-1" >全部</d-option>
+          <d-option value="0" >普通主题</d-option>
+          <d-option value="1" >广播主题</d-option>
+          <d-option value="2" >顺序主题</d-option>
+        </d-select>
+      </grid-col>
+      <grid-col span="4">
+        <d-input v-model="searchData.keyword" placeholder="请输入英文名"
+                @on-enter="getList">
+          <d-button type="borderless" slot="suffix" @click="getList"><icon name="search" size="14" color="#CACACA" ></icon></d-button>
+        </d-input>
+      </grid-col>
+      <grid-col span="4" offset="13">
+        <d-button v-if="$store.getters.isAdmin" type="primary" class="right" @click="openDialog('addDialog')">添加主题<icon name="plus-circle" style="margin-left: 5px;"></icon></d-button>
+      </grid-col>
+    </grid-row>
+
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
               @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange" @on-view-detail="goDetail"
-              @on-add-brokerGroup="addBrokerGroup" @on-del="del">
+              @on-add-brokerGroup="addBrokerGroup" @on-del="del" operation-column-width="140">
     </my-table>
     <!--添加-->
     <my-dialog :dialog="addDialog" class="add-dialog" @on-dialog-cancel="dialogCancel('addDialog')" :styles="{top: '40px'}">
@@ -109,12 +115,9 @@ export default {
         rowData: [],
         colData: [
           {
-            title: 'ID',
-            key: 'id'
-          },
-          {
             title: '英文名',
             key: 'code',
+            width: 200,
             render: (h, params) => {
               return h('label', {
                 style: {
@@ -133,11 +136,13 @@ export default {
           },
           {
             title: '命名空间',
+            width: 200,
             key: 'namespace.code'
           },
           {
             title: '类型',
             key: 'type',
+            width: 80,
             render: (h, params) => {
               return basePrimaryBtnRender(h, params.item.type, [
                 {
@@ -161,21 +166,6 @@ export default {
           {
             title: '队列数',
             key: 'partitions'
-          },
-          {
-            title: '归档',
-            key: 'archive',
-            render: (h, params) => {
-              let txt = !params.item.archive ? '已关闭' : '已开启'
-              let color = !params.item.archive ? 'warning' : 'success'
-              return h('DButton', {
-                props: {
-                  size: 'small',
-                  borderless: true,
-                  color: color
-                }
-              }, txt)
-            }
           }
         ],
         btns: this.btns
@@ -260,6 +250,11 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .label{text-align: right; line-height: 32px;}
+.table-query {
+  width: 99%;
+  margin-top: 20px;
+  padding-right: 20px;
+  }
 .add-dialog{
   overflow: hidden;
 }

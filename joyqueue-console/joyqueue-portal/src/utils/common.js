@@ -157,9 +157,8 @@ export function basePrimaryBtnRender (h, value, valueTxtColorOptions) {
     }
   })
 
-  return h('d-button', {
+  return h('d-tag', {
     props: {
-      type: 'primary',
       size: 'small',
       color: color
     }

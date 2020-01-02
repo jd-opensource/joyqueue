@@ -1,15 +1,19 @@
 <template>
   <div>
-    <div class="ml20 mt30">
-      <d-input v-model="searchData.keyword" :placeholder="langConfig.placeholder1" class="left mr10"
-               style="width:300px" @on-enter="getList">
-        <span slot="prepend">关键词</span>
-        <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
+    <grid-row class="table-query">
+      <grid-col span="4">
+      <d-input v-model="searchData.keyword" :placeholder="langConfig.placeholder1" class="left mr10" style="width: 100%"
+        @on-enter="getList">
+        <d-button type="borderless" slot="suffix" @click="getList"><icon name="search" size="14" color="#CACACA"></icon></d-button>
       </d-input>
-      <d-button type="primary" @click="openDialog('addDialog')">新建应用<icon name="plus-circle" style="margin-left: 5px;"></icon></d-button>
-    </div>
+      </grid-col>
+      <grid-col span="4" offset="16">
+        <d-button type="primary" class="right" @click="openDialog('addDialog')">新建应用<icon name="plus-circle" style="margin-left: 5px;"></icon></d-button>
+      </grid-col>
+    </grid-row>
+
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange"
-              @on-selection-change="handleSelectionChange" @on-del="del" @on-view-detail="goDetail" >
+              @on-selection-change="handleSelectionChange" @on-del="del" @on-view-detail="goDetail" operation-column-width="140">
     </my-table>
 
     <!--新建弹出框-->
@@ -45,10 +49,6 @@ export default {
       tableData: {
         rowData: [],
         colData: [
-          {
-            title: curLangConfig['colData']['id'],
-            key: 'id'
-          },
           {
             title: curLangConfig['colData']['code'],
             key: 'code',
@@ -193,5 +193,9 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .label{text-align: right; line-height: 32px;}
-.val{}
+.table-query {
+  width: 99%;
+  margin-top: 20px;
+  padding-right: 20px;
+  }
 </style>
