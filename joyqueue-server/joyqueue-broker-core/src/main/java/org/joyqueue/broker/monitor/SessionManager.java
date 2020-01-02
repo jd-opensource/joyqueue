@@ -56,7 +56,7 @@ public class SessionManager extends Service {
     // 保存消费者信息
     private ConcurrentMap<String, Consumer> consumers = new ConcurrentHashMap<>();
     // 事件管理器
-    private EventBus<SessionEvent> eventManager = new EventBus<>();
+    private EventBus<SessionEvent> eventManager = new EventBus<>("joyqueue-frontend-session-eventBus");
 
     @Override
     protected void doStart() throws Exception {

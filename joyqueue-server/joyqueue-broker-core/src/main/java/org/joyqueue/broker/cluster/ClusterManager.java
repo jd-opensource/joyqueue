@@ -108,7 +108,7 @@ public class ClusterManager extends Service {
     // 集群管理本地缓存
     private MetaDataLocalCache localCache;
     // 元数据事件
-    private EventBus<MetaEvent> eventBus = new EventBus("CLUSTER_MANAGER_EVENT");
+    private EventBus<MetaEvent> eventBus = new EventBus("joyqueue-cluster-eventBus");
 
     private BrokerContext brokerContext;
 
