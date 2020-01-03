@@ -129,7 +129,7 @@ public class ThinNameService extends Service implements NameService, PropertySup
     /**
      * 事件管理器
      */
-    protected EventBus<NameServerEvent> eventBus = new EventBus<>("BROKER_THIN_NAMESERVICE_ENENT_BUS");
+    protected EventBus<NameServerEvent> eventBus = new EventBus<>("joyqueue-thin-nameservice-eventBus");
 
     private Cache<TopicName, TopicConfig> topicCache;
 

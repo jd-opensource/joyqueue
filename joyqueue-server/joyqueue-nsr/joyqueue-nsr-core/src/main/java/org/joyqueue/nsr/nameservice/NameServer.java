@@ -124,7 +124,7 @@ public class NameServer extends Service implements NameService, PropertySupplier
     /**
      * 事件管理器
      */
-    protected EventBus<NameServerEvent> eventManager = new EventBus<>("BROKER_NAMESERVER_EVENT_BUS");
+    protected EventBus<NameServerEvent> eventManager = new EventBus<>("joyqueue-nameserver-eventBus");
     /**
      * service provider
      */

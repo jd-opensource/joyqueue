@@ -17,6 +17,8 @@ package org.joyqueue.broker.consumer;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.broker.archive.ArchiveManager;
 import org.joyqueue.broker.archive.ConsumeArchiveService;
 import org.joyqueue.broker.buffer.Serializer;
@@ -40,8 +42,6 @@ import org.joyqueue.store.ReadResult;
 import org.joyqueue.store.StoreService;
 import org.joyqueue.toolkit.network.IpUtil;
 import org.joyqueue.toolkit.service.Service;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -497,10 +497,9 @@ class PartitionConsumption extends Service {
 
                 // 更新拉取位置(普通消费于并行消费来回切换之后需要用到实时的拉取位置)
                 positionManager.updateLastMsgPullIndex(TopicName.parse(consumer.getTopic()), consumer.getApp(), partition, updateMsgAckIndex);
-            } else if (lastMsgAckIndex >= indexArr[1]) {
-                isSuccess = true;
             } else {
-                logger.error("ack index : [{} - {}] is not continue, currentIndex is : [{}], consumer info is : {}", indexArr[0], indexArr[1], lastMsgAckIndex, consumer);
+                logger.error("ack index : [{} - {}] is not continue, partition: {}, currentIndex is : [{}], consumer info is : {}",
+                        indexArr[0], indexArr[1], partition, lastMsgAckIndex, consumer);
             }
         } else {
             throw new JoyQueueException(JoyQueueCode.FW_CONSUMER_ACK_FAIL, "ack index is not continue or repeatable!");
