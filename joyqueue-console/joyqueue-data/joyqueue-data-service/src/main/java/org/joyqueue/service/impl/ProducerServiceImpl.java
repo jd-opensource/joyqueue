@@ -179,6 +179,7 @@ public class ProducerServiceImpl  implements ProducerService {
         if (application != null) {
             app.setId(application.getId());
             app.setName(application.getName());
+            producer.setOwner(application.getOwner());
         }
         return producer;
     }

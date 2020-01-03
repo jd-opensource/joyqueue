@@ -52,6 +52,7 @@ export default {
           {
             title: curLangConfig['colData']['code'],
             key: 'code',
+            width: 200,
             render: (h, params) => {
               return h('label', {
                 style: {
@@ -68,6 +69,10 @@ export default {
                 }
               }, params.item.code)
             }
+          },
+          {
+            title: curLangConfig['colData']['description'],
+            key: 'description'
           }
         ],
         btns: [
