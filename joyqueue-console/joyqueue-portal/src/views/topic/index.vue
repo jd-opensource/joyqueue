@@ -24,7 +24,7 @@
 
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
               @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange" @on-view-detail="goDetail"
-              @on-add-brokerGroup="addBrokerGroup" @on-del="del" operation-column-width="140">
+              @on-add-brokerGroup="addBrokerGroup" @on-del="del" :operation-column-width="operationColumnWidth">
     </my-table>
     <!--添加-->
     <my-dialog :dialog="addDialog" class="add-dialog" @on-dialog-cancel="dialogCancel('addDialog')" :styles="{top: '40px'}">
@@ -103,6 +103,10 @@ export default {
           }
         ]
       }
+    },
+    operationColumnWidth: {
+      type: Number,
+      default: 140
     }
   },
   data () {

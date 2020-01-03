@@ -17,6 +17,7 @@ package org.joyqueue.handler.routing.command.monitor;
 
 import com.google.common.collect.Lists;
 import com.jd.laf.binding.annotation.Value;
+import com.jd.laf.web.vertx.annotation.Body;
 import com.jd.laf.web.vertx.annotation.Path;
 import com.jd.laf.web.vertx.annotation.QueryParam;
 import com.jd.laf.web.vertx.response.Response;
@@ -106,6 +107,20 @@ public class ProducerCommand extends NsrCommandSupport<Producer, ProducerService
         result.setPagination(pagination);
         result.setResult(producers);
         return Responses.success(result.getPagination(), result.getResult());
+    }
+
+    @Path("query-by-topic")
+    public Response queryByTopic(@Body QProducer qProducer) throws Exception {
+        if(qProducer.getTopic() == null || qProducer.getTopic().getCode() == null) {
+            return Responses.error(Response.HTTP_BAD_REQUEST, "Empty topic!");
+        }
+        String namespace = null;
+        String topic = qProducer.getTopic().getCode();
+        if(null != qProducer.getTopic().getNamespace()) {
+            namespace = qProducer.getTopic().getNamespace().getCode();
+        }
+        List<Producer> producers = service.findByTopic(namespace, topic);
+        return Responses.success(producers);
     }
 
     @Override
