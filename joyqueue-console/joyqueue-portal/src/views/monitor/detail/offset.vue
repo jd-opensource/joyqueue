@@ -1,19 +1,17 @@
 <template>
   <div>
+    <grid-row>
+      <grid-col span="24">
+      <d-button-group class="right" style="padding-right:50px">
+        <d-button @click="showResetOffset(undefined)" >按时间重置</d-button>
+        <d-button @click="setBound('MIN')" >全量最小</d-button>
+        <d-button @click="setBound('MAX')" >全量最大</d-button>
+      </d-button-group>
+      </grid-col>
+    </grid-row>
     <my-table :data="tableData" :showPin="showTablePin" :showPagination=false :page="page"
               @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange" @on-set-offset="showResetOffset"/>
     <label >共：{{page.total}} 条记录</label>
-    <grid-row type="flex" justify="end" >
-      <grid-col span="4">
-        <d-button type="primary" v-if="$store.getters.isAdmin" @click="showResetOffset(undefined)" class="left mr10">按时间重置</d-button>
-      </grid-col>
-      <grid-col span="4">
-        <d-button type="primary" v-if="$store.getters.isAdmin" @click="setBound('MIN')" class="left mr10">全量最小</d-button>
-      </grid-col>
-      <grid-col span="4" offset="2">
-          <d-button type="primary" v-if="$store.getters.isAdmin" @click="setBound('MAX')" class="left mr10" style="margin-right: 100px;">全量最大</d-button>
-      </grid-col>
-    </grid-row>
 
     <my-dialog  :dialog="resetDialog" @on-dialog-confirm="onConfirm"  @on-dialog-cancel="onCancel">
       <d-form ref="partitionOffset" :model="partitionInfo"  label-width="100px" style="height: 350px; overflow-y:auto; width: 100%; padding-right: 20px">
