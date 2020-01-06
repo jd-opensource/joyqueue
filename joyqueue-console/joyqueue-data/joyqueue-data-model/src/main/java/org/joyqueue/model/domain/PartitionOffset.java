@@ -38,4 +38,12 @@ public class PartitionOffset {
    public enum Location{
         MIN,MAX
     }
+
+    @Override
+    public String toString() {
+        return "PartitionOffset{" +
+                "partition=" + partition +
+                ", offset=" + offset +
+                '}';
+    }
 }
