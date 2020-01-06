@@ -11,7 +11,6 @@
         <d-button type="primary" class="right" @click="openDialog('addDialog')">新建应用<icon name="plus-circle" style="margin-left: 5px;"></icon></d-button>
       </grid-col>
     </grid-row>
-
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange"
               @on-selection-change="handleSelectionChange" @on-del="del" @on-view-detail="goDetail" operation-column-width="140">
     </my-table>
@@ -110,10 +109,6 @@ export default {
         rowData: [],
         colData: [
           {
-            title: this.langConfig['colData']['id'],
-            key: 'id'
-          },
-          {
             title: this.langConfig['colData']['code'],
             key: 'code',
             render: (h, params) => {
@@ -134,12 +129,8 @@ export default {
             }
           },
           {
-            title: this.langConfig['colData']['department'],
-            key: 'department'
-          },
-          {
-            title: this.langConfig['colData']['ownerCode'],
-            key: 'owner.code'
+            title: this.curLangConfig['colData']['description'],
+            key: 'description'
           }
         ],
         btns: [
