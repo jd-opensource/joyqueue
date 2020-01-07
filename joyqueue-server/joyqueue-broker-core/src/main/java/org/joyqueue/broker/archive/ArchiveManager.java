@@ -21,6 +21,8 @@ import org.joyqueue.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
+
 /**
  * Created by chengzhiliang on 2018/12/6.
  */
@@ -114,4 +116,12 @@ public class ArchiveManager extends Service {
         return consumeArchiveService.getRemainConsumeLogFileNum();
     }
 
+    /**
+     * 按主题获取未归档的发送日志条数
+     *
+     * @return 未归档的发送日志条数
+     */
+    public Map<String, Long> getSendBacklogNumByTopic() {
+        return sendArchiveService.getArchivePosition();
+    }
 }

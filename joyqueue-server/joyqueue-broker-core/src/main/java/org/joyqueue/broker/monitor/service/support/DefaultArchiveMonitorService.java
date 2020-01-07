@@ -19,6 +19,8 @@ import org.joyqueue.broker.archive.ArchiveManager;
 import org.joyqueue.broker.monitor.service.ArchiveMonitorService;
 import org.joyqueue.monitor.ArchiveMonitorInfo;
 
+import java.util.Map;
+
 /**
  * Created by chengzhiliang on 2018/12/18.
  */
@@ -41,12 +43,18 @@ public class DefaultArchiveMonitorService implements ArchiveMonitorService {
     }
 
     @Override
+    public Map<String, Long> getSendBackLogNumByTopic() {
+        return archiveManager.getSendBacklogNumByTopic();
+    }
+
+    @Override
     public ArchiveMonitorInfo getArchiveMonitorInfo() {
         long consumeBacklogNum = getConsumeBacklogNum();
         long sendBackLogNum = getSendBackLogNum();
         ArchiveMonitorInfo info = new ArchiveMonitorInfo();
         info.setConsumeBacklog(consumeBacklogNum);
         info.setConsumeBacklog(sendBackLogNum);
+        info.setTopicProduceBacklog(archiveManager.getSendBacklogNumByTopic());
 
         return info;
     }

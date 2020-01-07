@@ -15,21 +15,23 @@
  */
 package org.joyqueue.broker.archive;
 
+import com.google.common.base.Preconditions;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.joyqueue.broker.Plugins;
 import org.joyqueue.broker.cluster.ClusterManager;
+import org.joyqueue.broker.monitor.DefaultPointTracer;
 import org.joyqueue.exception.JoyQueueException;
 import org.joyqueue.message.MessageLocation;
 import org.joyqueue.network.session.Connection;
 import org.joyqueue.server.archive.store.api.ArchiveStore;
+import org.joyqueue.monitor.PointTracer;
 import org.joyqueue.server.archive.store.model.ConsumeLog;
 import org.joyqueue.toolkit.concurrent.LoopThread;
 import org.joyqueue.toolkit.lang.Close;
-import com.google.common.base.Preconditions;
 import org.joyqueue.toolkit.security.Md5;
 import org.joyqueue.toolkit.service.Service;
 import org.joyqueue.toolkit.time.SystemClock;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,11 +43,7 @@ import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.security.GeneralSecurityException;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -75,6 +73,8 @@ public class ConsumeArchiveService extends Service {
     // 负责删除已经归档本地文件
     private LoopThread cleanConsumeLogFileThread;
 
+    private PointTracer tracer;
+
     public ConsumeArchiveService(ArchiveConfig archiveConfig, ClusterManager clusterManager) {
         this.clusterManager = clusterManager;
         this.archiveConfig = archiveConfig;
@@ -94,6 +94,10 @@ public class ConsumeArchiveService extends Service {
         this.repository = new ArchiveMappedFileRepository(archiveConfig.getArchivePath());
         this.readByteCounter = new AtomicInteger(0);
 
+        tracer = Plugins.TRACERERVICE.get(archiveConfig.getTracerType());
+        if (tracer == null){
+            tracer = new DefaultPointTracer();
+        }
         this.readConsumeLogThread = LoopThread.builder()
                 .sleepTime(0, 10)
                 .name("ReadAndPutHBase-ConsumeLog-Thread")
@@ -142,7 +146,7 @@ public class ConsumeArchiveService extends Service {
             long startTime = SystemClock.now();
 
             // 调用存储接口写数据
-            archiveStore.putConsumeLog(list);
+            archiveStore.putConsumeLog(list, tracer);
 
             long endTime = SystemClock.now();
 
@@ -155,7 +159,7 @@ public class ConsumeArchiveService extends Service {
 
         } else {
             if (repository.rFile != null && repository.rMap != null) {
-                logger.debug("read file name {}, read position {}", repository.rFile.getName(), repository.rMap.toString() );
+                logger.debug("read file name {}, read position {}", repository.rFile.getName(), repository.rMap.toString());
             } else {
                 logger.debug("read file is null.");
             }
@@ -517,9 +521,13 @@ public class ConsumeArchiveService extends Service {
         /**
          * Close current read file
          **/
-        public void closeCurrentReadFile() throws IOException{
-            if (rFileChannel != null){ rFileChannel.close();}
-            if (rRaf != null) {rRaf.close();}
+        public void closeCurrentReadFile() throws IOException {
+            if (rFileChannel != null) {
+                rFileChannel.close();
+            }
+            if (rRaf != null) {
+                rRaf.close();
+            }
         }
 
         /**
@@ -528,9 +536,13 @@ public class ConsumeArchiveService extends Service {
          *
          **/
 
-        public void closeCurrentWriteFile() throws IOException{
-            if (rwFileChannel != null) {rwFileChannel.close();}
-            if (rwRaf != null) {rwRaf.close();}
+        public void closeCurrentWriteFile() throws IOException {
+            if (rwFileChannel != null) {
+                rwFileChannel.close();
+            }
+            if (rwRaf != null) {
+                rwRaf.close();
+            }
         }
 
 

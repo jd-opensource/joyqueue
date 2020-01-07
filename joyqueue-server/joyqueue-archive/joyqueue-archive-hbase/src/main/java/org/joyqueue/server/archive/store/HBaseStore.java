@@ -18,11 +18,10 @@ package org.joyqueue.server.archive.store;
 import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.exception.JoyQueueException;
 import org.joyqueue.hbase.HBaseClient;
+import org.joyqueue.monitor.TraceStat;
 import org.joyqueue.server.archive.store.api.ArchiveStore;
-import org.joyqueue.server.archive.store.model.AchivePosition;
-import org.joyqueue.server.archive.store.model.ConsumeLog;
-import org.joyqueue.server.archive.store.model.Query;
-import org.joyqueue.server.archive.store.model.SendLog;
+import org.joyqueue.monitor.PointTracer;
+import org.joyqueue.server.archive.store.model.*;
 import org.joyqueue.toolkit.lang.Pair;
 import org.joyqueue.toolkit.network.IpUtil;
 import org.joyqueue.toolkit.security.Md5;
@@ -110,7 +109,7 @@ public class HBaseStore implements ArchiveStore {
     }
 
     @Override
-    public void putConsumeLog(List<ConsumeLog> consumeLogList) throws JoyQueueException {
+    public void putConsumeLog(List<ConsumeLog> consumeLogList, PointTracer tracer) throws JoyQueueException {
         List<Pair<byte[], byte[]>> logList = new LinkedList<>();
         try {
             for (ConsumeLog consumeLog : consumeLogList) {
@@ -123,14 +122,16 @@ public class HBaseStore implements ArchiveStore {
                 logList.add(pair);
             }
 
+            TraceStat stat = tracer.begin("org.joyqueue.server.archive.store.HBaseStore.putConsumeLog");
             hBaseClient.put(namespace, consumeLogTable, cf, col, logList);
+            tracer.end(stat);
         } catch (IOException e) {
             throw new JoyQueueException(JoyQueueCode.SE_IO_ERROR, e);
         }
     }
 
     @Override
-    public void putSendLog(List<SendLog> sendLogList) throws JoyQueueException {
+    public void putSendLog(List<SendLog> sendLogList, PointTracer tracer) throws JoyQueueException {
         try {
             List<Pair<byte[], byte[]>> logList = new LinkedList<>();
             for (SendLog log : sendLogList) {
@@ -149,7 +150,9 @@ public class HBaseStore implements ArchiveStore {
 
             }
             // 写HBASE
+            TraceStat stat = tracer.begin("org.joyqueue.server.archive.store.HBaseStore.putSendLog");
             hBaseClient.put(namespace, sendLogTable, cf, col, logList);
+            tracer.end(stat);
         } catch (Exception e) {
             throw new JoyQueueException(JoyQueueCode.SE_IO_ERROR, e);
         }
