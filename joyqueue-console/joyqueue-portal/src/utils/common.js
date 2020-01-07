@@ -134,10 +134,9 @@ export function baseBtnRender (h, value, valueTxtColorOptions) {
     }
   })
 
-  return h('d-button', {
+  return h('d-tag', {
     props: {
       size: 'small',
-      borderless: true,
       color: color
     }
   }, txt)
