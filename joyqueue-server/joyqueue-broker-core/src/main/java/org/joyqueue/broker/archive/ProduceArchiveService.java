@@ -16,15 +16,16 @@
 package org.joyqueue.broker.archive;
 
 import com.google.common.base.Preconditions;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.broker.Plugins;
 import org.joyqueue.broker.buffer.Serializer;
 import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.consumer.MessageConvertSupport;
 import org.joyqueue.broker.consumer.model.PullResult;
+import org.joyqueue.broker.monitor.archive.ArchiveService;
 import org.joyqueue.domain.TopicConfig;
 import org.joyqueue.domain.TopicName;
-import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.exception.JoyQueueException;
 import org.joyqueue.message.BrokerMessage;
 import org.joyqueue.message.SourceType;
@@ -32,33 +33,19 @@ import org.joyqueue.network.session.Consumer;
 import org.joyqueue.server.archive.store.api.ArchiveStore;
 import org.joyqueue.server.archive.store.model.AchivePosition;
 import org.joyqueue.server.archive.store.model.SendLog;
+import org.joyqueue.store.PositionOverflowException;
 import org.joyqueue.store.PositionUnderflowException;
 import org.joyqueue.toolkit.concurrent.LoopThread;
 import org.joyqueue.toolkit.concurrent.NamedThreadFactory;
 import org.joyqueue.toolkit.lang.Close;
 import org.joyqueue.toolkit.service.Service;
 import org.joyqueue.toolkit.time.SystemClock;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.*;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -94,6 +81,8 @@ public class ProduceArchiveService extends Service {
     // 读不到消息暂停Map
     private final Map<String, Long> pauseMap = new HashMap<>();
 
+    private ArchiveService archiveService;
+
 
     // 负责监听元数据变化,并且同步归档位置
     private LoopThread updateItemThread;
@@ -123,6 +112,7 @@ public class ProduceArchiveService extends Service {
         Preconditions.checkArgument(archiveStore != null, "archive store can not be null.");
         Preconditions.checkArgument(archiveConfig != null, "archive config can not be null.");
 
+        archiveService = new ArchiveService(archiveConfig);
         this.batchNum = archiveConfig.getProduceBatchNum();
         this.archiveQueue = new LinkedBlockingDeque<>(archiveConfig.getLogQueueSize());
         this.executorService = new ThreadPoolExecutor(archiveConfig.getWriteThreadNum(), archiveConfig.getWriteThreadNum(),
@@ -168,7 +158,8 @@ public class ProduceArchiveService extends Service {
         updateItemThread.start();
         readMsgThread.start();
         writeMsgThread.start();
-        logger.info("produce archive service started.");
+        archiveService.start();
+        logger.info("produce archive archiveService started.");
     }
 
     @Override
@@ -179,7 +170,8 @@ public class ProduceArchiveService extends Service {
         Close.close(writeMsgThread);
         Close.close(executorService);
         Close.close(archiveStore);
-        logger.info("produce archive service stopped.");
+        Close.close(archiveService);
+        logger.info("produce archive archiveService stopped.");
     }
 
     /**
@@ -224,35 +216,28 @@ public class ProduceArchiveService extends Service {
                 logger.error("read message from topic:" + item.topic + " partition:" + item.partition
                         + " index:" + item.getReadIndex() + " error.", th);
 
-                if (th instanceof PositionUnderflowException) {
+                if (th.getCause() instanceof PositionUnderflowException) {
                     // 如果读取位置小于存储索引的最小位置，将位置重置为可读到的最小位置
-                    PositionUnderflowException positionException = (PositionUnderflowException) th;
 
-                    logger.info("repair read message position SendArchiveItem info:[{}], currentIndex:[{}]", item, positionException.getLeft());
+                    long minIndex = consume.getMinIndex(new Consumer(item.topic, ""), item.partition);
+                    item.setReadIndex(minIndex);
 
-                    item.setReadIndex(positionException.getLeft());
+                    logger.info("repair read message position SendArchiveItem info:[{}], currentIndex:[{}]", item, minIndex);
+
+                }
+
+                if (th.getCause() instanceof PositionOverflowException) {
+                    // 如果读取位置大于存储索引的最小位置，将位置重置为可读到的最小位置
+
+                    long maxIndex = consume.getMaxIndex(new Consumer(item.topic, ""), item.partition);
+                    item.setReadIndex(maxIndex);
+
+                    logger.warn("repair read message position SendArchiveItem info:[{}], currentIndex:[{}]", item, maxIndex);
+
                 }
 
                 // 报错暂停一会
                 put2PauseMap(item.getTopic(), item.getPartition());
-                continue;
-            }
-
-            if (pullResult.getCode() == JoyQueueCode.SE_INDEX_UNDERFLOW) {
-                long minIndex = consume.getMinIndex(new Consumer(item.topic, ""), item.partition);
-                item.setReadIndex(minIndex);
-
-                logger.warn("repair read message position SendArchiveItem info:[{}], currentIndex:[{}]", item, minIndex);
-
-                continue;
-            }
-
-            if (pullResult.getCode() == JoyQueueCode.SE_INDEX_OVERFLOW) {
-                long maxIndex = consume.getMaxIndex(new Consumer(item.topic, ""), item.partition);
-                item.setReadIndex(maxIndex);
-
-                logger.warn("repair read message position SendArchiveItem info:[{}], currentIndex:[{}]", item, maxIndex);
-
                 continue;
             }
 
@@ -388,7 +373,7 @@ public class ProduceArchiveService extends Service {
             executorService.submit(() -> {
                 try {
                     // 写入存储
-                    archiveStore.putSendLog(sendLogs);
+                    archiveStore.putSendLog(sendLogs, archiveService.getTracer());
                     logger.debug("Write sendLogs size:{} to archive store.", sendLogs.size());
                     // 写入计数（用于归档位置）
                     writeCounter(sendLogs);
@@ -476,6 +461,16 @@ public class ProduceArchiveService extends Service {
                 }
             }
         }
+    }
+
+    public Map<String, Long> getArchivePosition() {
+        Map<String, Long> result = new HashMap<>();
+        List<SendArchiveItem> allList = itemList.getAll();
+        for (SendArchiveItem sai : allList) {
+            result.put(sai.getTopic(), remainMessagesSum(sai.getTopic()));
+        }
+
+        return result;
     }
 
     /**

@@ -16,6 +16,7 @@
 package org.joyqueue.monitor;
 
 import java.io.Serializable;
+import java.util.Map;
 
 public class ArchiveMonitorInfo implements Serializable {
 
@@ -28,6 +29,12 @@ public class ArchiveMonitorInfo implements Serializable {
      *
      **/
     private long produceBacklog;
+
+    /**
+     * producer 安主题生产待归档记录数
+     *
+     **/
+    private Map<String, Long> topicProduceBacklog;
 
     public long getConsumeBacklog() {
         return consumeBacklog;
@@ -43,5 +50,13 @@ public class ArchiveMonitorInfo implements Serializable {
 
     public void setProduceBacklog(long produceBacklog) {
         this.produceBacklog = produceBacklog;
+    }
+
+    public Map<String, Long> getTopicProduceBacklog() {
+        return topicProduceBacklog;
+    }
+
+    public void setTopicProduceBacklog(Map<String, Long> topicProduceBacklog) {
+        this.topicProduceBacklog = topicProduceBacklog;
     }
 }

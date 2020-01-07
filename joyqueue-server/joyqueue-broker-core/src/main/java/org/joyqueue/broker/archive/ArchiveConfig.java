@@ -89,4 +89,9 @@ public class ArchiveConfig {
     public String getNamespace() {
         return PropertySupplier.getValue(propertySupplier, ArchiveConfigKey.ARCHIVE_STORE_NAMESPACE);
     }
+
+    public String getTracerType() {
+
+        return PropertySupplier.getValue(propertySupplier, ArchiveConfigKey.ARCHIVE_TRACER_TYPE);
+    }
 }

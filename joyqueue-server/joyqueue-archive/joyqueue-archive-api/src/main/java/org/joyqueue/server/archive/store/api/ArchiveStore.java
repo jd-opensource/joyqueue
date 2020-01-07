@@ -39,7 +39,7 @@ public interface ArchiveStore extends LifeCycle {
      * @param consumeLogs
      * @throws JoyQueueException
      */
-    void putConsumeLog(List<ConsumeLog> consumeLogs) throws JoyQueueException;
+    void putConsumeLog(List<ConsumeLog> consumeLogs, PointTracer tracer) throws JoyQueueException;
 
     /**
      * 持久化发送日志
@@ -47,7 +47,7 @@ public interface ArchiveStore extends LifeCycle {
      * @param sendLogs
      * @throws JoyQueueException
      */
-    void putSendLog(List<SendLog> sendLogs) throws JoyQueueException;
+    void putSendLog(List<SendLog> sendLogs, PointTracer tracer) throws JoyQueueException;
 
     /**
      * 持久化归档进度信息
