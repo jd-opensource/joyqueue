@@ -13,32 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.joyqueue.broker.monitor;
-
-import org.joyqueue.monitor.TraceStat;
-import org.joyqueue.monitor.PointTracer;
+package org.joyqueue.monitor;
 
 /**
  * @author lining11
- * Date: 2020/1/6
+ * Date: 2020/1/2
  */
-public class DefaultPointTracer implements PointTracer {
-
-    private TraceStat stat = new TraceStat();
+public class TraceStat {
 
 
-    @Override
-    public String type() {
-        return "default";
+    private String key;
+
+    public String getKey() {
+        return key;
     }
 
-    @Override
-    public TraceStat begin(String start) {
-        return stat;
-    }
-
-    @Override
-    public void end(TraceStat end) {
-
+    public void setKey(String key) {
+        this.key = key;
     }
 }
