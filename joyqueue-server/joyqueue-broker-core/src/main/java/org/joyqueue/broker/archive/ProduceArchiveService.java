@@ -362,35 +362,39 @@ public class ProduceArchiveService extends Service {
      * @throws JoyQueueException
      */
     private void write2Store() throws InterruptedException {
-        List<SendLog> sendLogs = new ArrayList<>(batchNum);
-        for (int i = 0; i < batchNum; i++) {
-            SendLog sendLog = archiveQueue.poll(10, TimeUnit.MILLISECONDS);
-            if (sendLog == null) {
-                break;
-            }
-            sendLogs.add(sendLog);
-        }
-        if (sendLogs.size() > 0) {
-            // 提交任务
-            executorService.submit(() -> {
-                try {
-                    // 写入存储
-                    archiveStore.putSendLog(sendLogs, tracer);
-                    logger.debug("Write sendLogs size:{} to archive store.", sendLogs.size());
-                    // 写入计数（用于归档位置）
-                    writeCounter(sendLogs);
-                } catch (JoyQueueException e) {
-                    // 写入存储失败
-                    hasStoreError.set(true);
-                    // 回滚读取位置
-                    rollBackReadIndex(sendLogs);
+        int readBatchSize;
+        do {
+            List<SendLog> sendLogs = new ArrayList<>(batchNum);
+            for (int i = 0; i < batchNum; i++) {
+                SendLog sendLog = archiveQueue.poll(10, TimeUnit.MILLISECONDS);
+                if (sendLog == null) {
+                    break;
                 }
-            });
-        }
-        if (hasStoreError.getAndSet(false)) {
-            // 操作存储失败，等待1000ms
-            Thread.sleep(1000);
-        }
+                sendLogs.add(sendLog);
+            }
+            readBatchSize=sendLogs.size();
+            if (readBatchSize> 0) {
+                // 提交任务
+                executorService.submit(() -> {
+                    try {
+                        // 写入存储
+                        archiveStore.putSendLog(sendLogs, tracer);
+                        logger.debug("Write sendLogs size:{} to archive store.", sendLogs.size());
+                        // 写入计数（用于归档位置）
+                        writeCounter(sendLogs);
+                    } catch (JoyQueueException e) {
+                        // 写入存储失败
+                        hasStoreError.set(true);
+                        // 回滚读取位置
+                        rollBackReadIndex(sendLogs);
+                    }
+                });
+            }
+            if (hasStoreError.getAndSet(false)) {
+                // 操作存储失败，等待1000ms
+                Thread.sleep(1000);
+            }
+        }while(readBatchSize==batchNum);
     }
 
     /**

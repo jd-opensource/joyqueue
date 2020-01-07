@@ -571,7 +571,7 @@ public class ConsumeArchiveService extends Service {
                 String fileName = sorted.get(0);
                 File tempFile = new File(baseDir + fileName);
                 rFile = tempFile;
-
+                logger.debug("current read consume event file {}",tempFile);
                 return rFile;
             } else {
                 logger.debug("only one write file.");
