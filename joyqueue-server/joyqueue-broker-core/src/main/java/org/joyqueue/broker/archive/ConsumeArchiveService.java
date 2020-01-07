@@ -15,22 +15,22 @@
  */
 package org.joyqueue.broker.archive;
 
+import com.google.common.base.Preconditions;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.joyqueue.broker.Plugins;
 import org.joyqueue.broker.cluster.ClusterManager;
-import org.joyqueue.broker.monitor.archive.ArchiveService;
 import org.joyqueue.exception.JoyQueueException;
 import org.joyqueue.message.MessageLocation;
 import org.joyqueue.network.session.Connection;
 import org.joyqueue.server.archive.store.api.ArchiveStore;
+import org.joyqueue.monitor.PointTracer;
 import org.joyqueue.server.archive.store.model.ConsumeLog;
 import org.joyqueue.toolkit.concurrent.LoopThread;
 import org.joyqueue.toolkit.lang.Close;
-import com.google.common.base.Preconditions;
 import org.joyqueue.toolkit.security.Md5;
 import org.joyqueue.toolkit.service.Service;
 import org.joyqueue.toolkit.time.SystemClock;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,7 +72,7 @@ public class ConsumeArchiveService extends Service {
     // 负责删除已经归档本地文件
     private LoopThread cleanConsumeLogFileThread;
 
-    private ArchiveService archiveService;
+    private PointTracer tracer;
 
     public ConsumeArchiveService(ArchiveConfig archiveConfig, ClusterManager clusterManager) {
         this.clusterManager = clusterManager;
@@ -93,8 +93,7 @@ public class ConsumeArchiveService extends Service {
         this.repository = new ArchiveMappedFileRepository(archiveConfig.getArchivePath());
         this.readByteCounter = new AtomicInteger(0);
 
-        archiveService = new ArchiveService(archiveConfig);
-
+        tracer = Plugins.TRACERERVICE.get(archiveConfig.getTracerType());
         this.readConsumeLogThread = LoopThread.builder()
                 .sleepTime(0, 10)
                 .name("ReadAndPutHBase-ConsumeLog-Thread")
@@ -121,7 +120,6 @@ public class ConsumeArchiveService extends Service {
         archiveStore.start();
         readConsumeLogThread.start();
         cleanConsumeLogFileThread.start();
-        archiveService.start();
     }
 
 
@@ -132,7 +130,6 @@ public class ConsumeArchiveService extends Service {
         Close.close(cleanConsumeLogFileThread);
         Close.close(repository);
         Close.close(archiveStore);
-        Close.close(archiveService);
     }
 
     /**
@@ -145,7 +142,7 @@ public class ConsumeArchiveService extends Service {
             long startTime = SystemClock.now();
 
             // 调用存储接口写数据
-            archiveStore.putConsumeLog(list,archiveService.getTracer());
+            archiveStore.putConsumeLog(list, tracer);
 
             long endTime = SystemClock.now();
 
@@ -520,9 +517,13 @@ public class ConsumeArchiveService extends Service {
         /**
          * Close current read file
          **/
-        public void closeCurrentReadFile() throws IOException{
-            if (rFileChannel != null){ rFileChannel.close();}
-            if (rRaf != null) {rRaf.close();}
+        public void closeCurrentReadFile() throws IOException {
+            if (rFileChannel != null) {
+                rFileChannel.close();
+            }
+            if (rRaf != null) {
+                rRaf.close();
+            }
         }
 
         /**
@@ -531,9 +532,13 @@ public class ConsumeArchiveService extends Service {
          *
          **/
 
-        public void closeCurrentWriteFile() throws IOException{
-            if (rwFileChannel != null) {rwFileChannel.close();}
-            if (rwRaf != null) {rwRaf.close();}
+        public void closeCurrentWriteFile() throws IOException {
+            if (rwFileChannel != null) {
+                rwFileChannel.close();
+            }
+            if (rwRaf != null) {
+                rwRaf.close();
+            }
         }
 
 

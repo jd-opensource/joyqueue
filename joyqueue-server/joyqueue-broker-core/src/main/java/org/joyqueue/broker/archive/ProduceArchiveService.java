@@ -23,7 +23,6 @@ import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.consumer.MessageConvertSupport;
 import org.joyqueue.broker.consumer.model.PullResult;
-import org.joyqueue.broker.monitor.archive.ArchiveService;
 import org.joyqueue.domain.TopicConfig;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.exception.JoyQueueException;
@@ -31,6 +30,7 @@ import org.joyqueue.message.BrokerMessage;
 import org.joyqueue.message.SourceType;
 import org.joyqueue.network.session.Consumer;
 import org.joyqueue.server.archive.store.api.ArchiveStore;
+import org.joyqueue.monitor.PointTracer;
 import org.joyqueue.server.archive.store.model.AchivePosition;
 import org.joyqueue.server.archive.store.model.SendLog;
 import org.joyqueue.store.PositionOverflowException;
@@ -81,7 +81,7 @@ public class ProduceArchiveService extends Service {
     // 读不到消息暂停Map
     private final Map<String, Long> pauseMap = new HashMap<>();
 
-    private ArchiveService archiveService;
+    private PointTracer tracer;
 
 
     // 负责监听元数据变化,并且同步归档位置
@@ -112,7 +112,7 @@ public class ProduceArchiveService extends Service {
         Preconditions.checkArgument(archiveStore != null, "archive store can not be null.");
         Preconditions.checkArgument(archiveConfig != null, "archive config can not be null.");
 
-        archiveService = new ArchiveService(archiveConfig);
+        tracer = Plugins.TRACERERVICE.get(archiveConfig.getTracerType());
         this.batchNum = archiveConfig.getProduceBatchNum();
         this.archiveQueue = new LinkedBlockingDeque<>(archiveConfig.getLogQueueSize());
         this.executorService = new ThreadPoolExecutor(archiveConfig.getWriteThreadNum(), archiveConfig.getWriteThreadNum(),
@@ -158,7 +158,6 @@ public class ProduceArchiveService extends Service {
         updateItemThread.start();
         readMsgThread.start();
         writeMsgThread.start();
-        archiveService.start();
         logger.info("produce archive archiveService started.");
     }
 
@@ -170,7 +169,6 @@ public class ProduceArchiveService extends Service {
         Close.close(writeMsgThread);
         Close.close(executorService);
         Close.close(archiveStore);
-        Close.close(archiveService);
         logger.info("produce archive archiveService stopped.");
     }
 
@@ -373,7 +371,7 @@ public class ProduceArchiveService extends Service {
             executorService.submit(() -> {
                 try {
                     // 写入存储
-                    archiveStore.putSendLog(sendLogs, archiveService.getTracer());
+                    archiveStore.putSendLog(sendLogs, tracer);
                     logger.debug("Write sendLogs size:{} to archive store.", sendLogs.size());
                     // 写入计数（用于归档位置）
                     writeCounter(sendLogs);

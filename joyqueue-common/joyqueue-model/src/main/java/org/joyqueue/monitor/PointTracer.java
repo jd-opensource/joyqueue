@@ -13,22 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.joyqueue.server.archive.store.model;
-
-/**
- * @author lining11
- * Date: 2020/1/2
- */
-public class TraceStat {
+package org.joyqueue.monitor;
 
 
-    private String key;
+import com.jd.laf.extension.Type;
 
-    public String getKey() {
-        return key;
-    }
+public interface PointTracer extends Type {
 
-    public void setKey(String key) {
-        this.key = key;
-    }
+    /**
+     *
+     * @param key 要跟踪的key
+     * @return end时要带的参数
+     */
+    TraceStat begin(String key);
+
+    /**
+     *
+     * @param end begin 方法的返回值，用来结束跟踪
+     */
+    void end(TraceStat end);
 }

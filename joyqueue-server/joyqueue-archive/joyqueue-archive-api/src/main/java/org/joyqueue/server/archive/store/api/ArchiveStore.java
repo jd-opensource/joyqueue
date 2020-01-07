@@ -16,6 +16,7 @@
 package org.joyqueue.server.archive.store.api;
 
 import org.joyqueue.exception.JoyQueueException;
+import org.joyqueue.monitor.PointTracer;
 import org.joyqueue.server.archive.store.model.AchivePosition;
 import org.joyqueue.server.archive.store.model.ConsumeLog;
 import org.joyqueue.server.archive.store.model.Query;

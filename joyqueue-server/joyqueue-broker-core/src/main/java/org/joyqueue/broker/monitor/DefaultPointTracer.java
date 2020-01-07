@@ -15,8 +15,8 @@
  */
 package org.joyqueue.broker.monitor;
 
-import org.joyqueue.server.archive.store.model.TraceStat;
-import org.joyqueue.server.archive.store.api.PointTracer;
+import org.joyqueue.monitor.TraceStat;
+import org.joyqueue.monitor.PointTracer;
 
 /**
  * @author lining11
