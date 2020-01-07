@@ -20,6 +20,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.joyqueue.broker.Plugins;
 import org.joyqueue.broker.cluster.ClusterManager;
+import org.joyqueue.broker.monitor.DefaultPointTracer;
 import org.joyqueue.exception.JoyQueueException;
 import org.joyqueue.message.MessageLocation;
 import org.joyqueue.network.session.Connection;
@@ -94,6 +95,9 @@ public class ConsumeArchiveService extends Service {
         this.readByteCounter = new AtomicInteger(0);
 
         tracer = Plugins.TRACERERVICE.get(archiveConfig.getTracerType());
+        if (tracer == null){
+            tracer = new DefaultPointTracer();
+        }
         this.readConsumeLogThread = LoopThread.builder()
                 .sleepTime(0, 10)
                 .name("ReadAndPutHBase-ConsumeLog-Thread")
