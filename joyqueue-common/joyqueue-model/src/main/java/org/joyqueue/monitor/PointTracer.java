@@ -13,43 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.joyqueue.broker.monitor.service;
+package org.joyqueue.monitor;
 
-import org.joyqueue.monitor.ArchiveMonitorInfo;
 
-import java.util.Map;
+import com.jd.laf.extension.Type;
 
-/**
- * Created by chengzhiliang on 2018/12/18.
- */
-public interface ArchiveMonitorService {
+public interface PointTracer extends Type {
 
     /**
-     * 获取消费归档数量
      *
-     * @return
+     * @param key 要跟踪的key
+     * @return end时要带的参数
      */
-    long getConsumeBacklogNum();
+    TraceStat begin(String key);
 
     /**
-     * 获取发送归档数量
      *
-     * @return
+     * @param end begin 方法的返回值，用来结束跟踪
      */
-    long getSendBackLogNum();
-
-    /**
-     * 按主题获取发送归档数量
-     *
-     * @return
-     */
-    Map<String, Long> getSendBackLogNumByTopic();
-
-    /**
-     * 获取归档监控
-     *
-     * @return
-     */
-    ArchiveMonitorInfo getArchiveMonitorInfo();
-
+    void end(TraceStat end);
 }

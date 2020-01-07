@@ -293,6 +293,11 @@ public class DefaultBrokerMonitorService implements BrokerMonitorService {
     }
 
     @Override
+    public Map<String, Long> getSendBackLogNumByTopic() {
+        return archiveMonitorService.getSendBackLogNumByTopic();
+    }
+
+    @Override
     public ArchiveMonitorInfo getArchiveMonitorInfo() {
         return archiveMonitorService.getArchiveMonitorInfo();
     }
