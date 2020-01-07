@@ -141,31 +141,35 @@ public class ConsumeArchiveService extends Service {
      */
     private void readAndWrite() throws JoyQueueException, InterruptedException {
         // 读信息，一次读指定条数
-        List<ConsumeLog> list = readConsumeLog(archiveConfig.getConsumeBatchNum());
-        if (list.size() > 0) {
-            long startTime = SystemClock.now();
+        int readBatchSize;
+        int batchSize=archiveConfig.getConsumeBatchNum();
+        do {
+            List<ConsumeLog> list = readConsumeLog(batchSize);
+            readBatchSize=list.size();
+            if (readBatchSize > 0) {
+                long startTime = SystemClock.now();
 
-            // 调用存储接口写数据
-            archiveStore.putConsumeLog(list, tracer);
+                // 调用存储接口写数据
+                archiveStore.putConsumeLog(list, tracer);
 
-            long endTime = SystemClock.now();
+                long endTime = SystemClock.now();
 
-            logger.debug("Write consumeLogs size:{} to archive store, and elapsed time {}ms", list.size(), endTime - startTime);
+                logger.debug("Write consumeLogs size:{} to archive store, and elapsed time {}ms", list.size(), endTime - startTime);
 
-            int consumeWriteDelay = archiveConfig.getConsumeWriteDelay();
-            if (consumeWriteDelay > 0) {
-                Thread.sleep(consumeWriteDelay);
-            }
+                int consumeWriteDelay = archiveConfig.getConsumeWriteDelay();
+                if (consumeWriteDelay > 0) {
+                    Thread.sleep(consumeWriteDelay);
+                }
 
-        } else {
-            if (repository.rFile != null && repository.rMap != null) {
-                logger.debug("read file name {}, read position {}", repository.rFile.getName(), repository.rMap.toString());
             } else {
-                logger.debug("read file is null.");
+                if (repository.rFile != null && repository.rMap != null) {
+                    logger.debug("read file name {}, read position {}", repository.rFile.getName(), repository.rMap.toString());
+                } else {
+                    logger.debug("read file is null.");
+                }
+                Thread.sleep(100);
             }
-
-            Thread.sleep(100);
-        }
+        }while(readBatchSize==batchSize);
     }
 
     private void cleanAndRollWriteFile() {

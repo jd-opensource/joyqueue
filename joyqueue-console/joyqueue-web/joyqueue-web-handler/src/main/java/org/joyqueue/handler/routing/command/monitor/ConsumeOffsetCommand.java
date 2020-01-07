@@ -37,8 +37,6 @@ import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
