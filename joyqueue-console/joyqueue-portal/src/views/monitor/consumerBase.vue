@@ -198,7 +198,7 @@ export default {
       configConsumerData: {},
       configDialog: {
         visible: false,
-        title: '消费者配置详情',
+        title: '消费配置',
         width: '1000',
         showFooter: true,
         urls: {
