@@ -218,7 +218,7 @@ public class HBaseStore implements ArchiveStore {
                 }
 
                 log.setClientIpStr(toIpString(log.getClientIp()));
-
+                log.setRowKeyStart(HBaseSerializer.byteArrayToHexStr(pair.getKey()));
                 String topicName = topicAppMapping.getTopicName(log.getTopicId());
                 log.setTopic(topicName);
 
