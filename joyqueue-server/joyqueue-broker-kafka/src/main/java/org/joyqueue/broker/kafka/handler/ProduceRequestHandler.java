@@ -18,7 +18,6 @@ package org.joyqueue.broker.kafka.handler;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.broker.helper.SessionHelper;
@@ -249,7 +248,7 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
             brokerMessages.add(brokerMessage);
         }
 
-        traffic.record(topic.getFullName(), CollectionUtils.size(partitionRequest.getMessages()));
+        traffic.record(topic.getFullName(), (partitionRequest.getMessages() == null ? 0 : partitionRequest.getMessages().size()));
         producePartitionGroupRequest.getPartitions().add(partitionRequest.getPartition());
         producePartitionGroupRequest.getMessages().addAll(brokerMessages);
         producePartitionGroupRequest.getMessageMap().put(partitionRequest.getPartition(), brokerMessages);
