@@ -1,9 +1,11 @@
-# JoyQueue | 快乐队列
+# JoyQueue
 
+[![License](https://img.shields.io/github/license/chubaostream/joyqueue)](./LICENSE)
+[![Release](https://img.shields.io/github/v/release/chubaostream/joyqueue)](https://github.com/chubaostream/joyqueue/releases)
 [![Maven Central](https://img.shields.io/maven-central/v/org.joyqueue/joyqueue-client?color=brightgreen)](https://search.maven.org/search?q=org.joyqueue)
-[![GitHub release](https://img.shields.io/badge/release-download-orange.svg)](https://github.com/chubaostream/joyqueue/releases)
-![GitHub](https://img.shields.io/github/license/chubaostream/joyqueue)
-![Travis CI](https://travis-ci.com/chubaostream/joyqueue.svg?branch=master)
+[![Last commit](https://img.shields.io/github/last-commit/chubaostream/joyqueue)](https://github.com/chubaostream/joyqueue/commits)
+[![Travis](https://img.shields.io/travis/chubaostream/joyqueue)](https://travis-ci.org/chubaostream/joyqueue)
+[![Coverage Status](https://coveralls.io/repos/github/chubaostream/joyqueue/badge.svg)](https://coveralls.io/github/chubaostream/joyqueue)
 
 [阅读中文版](docs/cn/README.md)
 
