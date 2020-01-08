@@ -51,7 +51,7 @@
     </licenses>
     <scm>
         <connection>scm:git:git@github.com:chubaostream/joyqueue.git</connection>
-        <developerConnection>scm:git@github.com:chubaostream/joyqueue.git</developerConnection>
+        <developerConnection>scm:git:git@github.com:chubaostream/joyqueue.git</developerConnection>
         <url>https://github.com/chubaostream/joyqueue.git</url>
         <tag>HEAD</tag>
     </scm>
