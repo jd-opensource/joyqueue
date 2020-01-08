@@ -395,7 +395,7 @@ public class ProduceArchiveService extends Service {
             }
             if (hasStoreError.getAndSet(false)) {
                 // 操作存储失败，等待1000ms
-                Thread.sleep(100);
+                Thread.sleep(1000);
             }
         }while(readBatchSize==batchNum);
     }
