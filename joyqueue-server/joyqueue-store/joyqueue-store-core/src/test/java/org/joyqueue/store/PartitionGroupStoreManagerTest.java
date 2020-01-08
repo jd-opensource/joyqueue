@@ -240,7 +240,7 @@ public class PartitionGroupStoreManagerTest {
 
             // 等待建索引都完成
             long t0 = SystemClock.now();
-            while (SystemClock.now() - t0 < timeout && store.indexPosition() < length) {
+            while (SystemClock.now() - t0 < timeout && (store.indexPosition() < length || store.commitPosition() < length)) {
                 Thread.sleep(10L);
             }
 
