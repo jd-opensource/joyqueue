@@ -218,7 +218,7 @@ public class HBaseStore implements ArchiveStore {
                 }
 
                 log.setClientIpStr(toIpString(log.getClientIp()));
-
+                log.setRowKeyStart(HBaseSerializer.byteArrayToHexStr(pair.getKey()));
                 String topicName = topicAppMapping.getTopicName(log.getTopicId());
                 log.setTopic(topicName);
 
@@ -284,7 +284,12 @@ public class HBaseStore implements ArchiveStore {
         scanParameters.setCf(cf);
         scanParameters.setCol(col);
         scanParameters.setRowCount(queryCondition.getCount());
-        scanParameters.setStartRowKey(createRowKey(queryCondition.getStartRowKey()));
+        byte[] startRowKeyByteArr = queryCondition.getStartRowKeyByteArr();
+        if (startRowKeyByteArr != null) {
+            scanParameters.setStartRowKey(startRowKeyByteArr);
+        } else {
+            scanParameters.setStartRowKey(createRowKey(queryCondition.getStartRowKey()));
+        }
         scanParameters.setStopRowKey(createRowKey(queryCondition.getStopRowKey()));
 
         /**
