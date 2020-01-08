@@ -43,7 +43,14 @@
 
     <!--Config dialog-->
     <my-dialog :dialog="configDialog" @on-dialog-confirm="configConsumerConfirm" @on-dialog-cancel="dialogCancel('configDialog')">
-      <consumer-config-form ref="configForm" :data="configConsumerData"/>
+      <consumer-config-form
+        ref="configForm"
+        :data="configConsumerData"
+        :tips="configDialogTips"
+        :archive-disabled="archiveConfigDisabled"
+        :nearby-disabled="nearbyConfigDisabled"
+        :concurrent-disabled="concurrentConfigDisabled"
+        />
     </my-dialog>
 
     <!--Rate limit dialog-->
@@ -77,6 +84,22 @@ export default {
     consumerConfigForm
   },
   props: {
+    configDialogTips: {
+      type: String,
+      default: undefined
+    },
+    archiveConfigDisabled: {
+      type: Boolean,
+      default: false
+    },
+    nearbyConfigDisabled: {
+      type: Boolean,
+      default: false
+    },
+    concurrentConfigDisabled: {
+      type: Boolean,
+      default: false
+    },
     keywordTip: {
       type: String
     },
