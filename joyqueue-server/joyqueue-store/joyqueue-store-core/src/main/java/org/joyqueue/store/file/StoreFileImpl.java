@@ -30,7 +30,6 @@ import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.ConcurrentModificationException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.StampedLock;
 
@@ -69,7 +68,10 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
     private int writePosition = 0;
     private long timestamp = -1L;
     private AtomicBoolean positionLock = new AtomicBoolean(false);
-
+    // 结束写入，文件不再可写
+    private boolean writeClosed = false;
+    // 已完成刷盘，所有数据都安全的写入到磁盘上了
+    private boolean flushClosed = false;
 
     public StoreFileImpl(long filePosition, File base, int headerSize, LogSerializer<T> serializer, PreloadBufferPool bufferPool, int maxFileDataLength) {
         this.filePosition = filePosition;
@@ -86,6 +88,10 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
 
     }
 
+    @Override
+    public void closeWrite() {
+        writeClosed = true;
+    }
     @Override
     public File file() {
         return file;
@@ -255,6 +261,9 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
 
     @Override
     public int append(T t) throws IOException {
+        if (writeClosed) {
+            throw new WriteException("File is not writable!");
+        }
         touch();
         long stamp = bufferLock.readLock();
         try {
@@ -289,6 +298,9 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
 
     @Override
     public int appendByteBuffer(ByteBuffer byteBuffer) throws IOException {
+        if (writeClosed) {
+            throw new WriteException("File is not writable!");
+        }
         touch();
         long stamp = bufferLock.readLock();
         try {
@@ -332,12 +344,19 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
             if (positionLock.compareAndSet(false, true)) {
                 try (RandomAccessFile raf = new RandomAccessFile(file, "rw");
                      FileChannel fileChannel = raf.getChannel()) {
+                    int ret = 0;
+
                     if (writePosition > flushPosition) {
                         if (flushPosition == 0) {
                             writeTimestamp(fileChannel);
                         }
-                        return flushPageBuffer(fileChannel);
+                        ret = flushPageBuffer(fileChannel);
                     }
+                    if (writeClosed && !flushClosed && flushPosition == writePosition) {
+                        fileChannel.force(true);
+                        flushClosed = true;
+                    }
+                    return ret;
                 } catch (Throwable t) {
                     logger.warn("StoreFileImpl flush exception! file: {}, flushPosition: {}, writePosition: {}.",
                             file.getAbsolutePath(), flushPosition, writePosition, t);
@@ -346,9 +365,8 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
                     positionLock.compareAndSet(true, false);
                 }
             } else {
-                throw new ConcurrentModificationException();
+                return 0;
             }
-            return 0;
         } finally {
             bufferLock.unlockRead(stamp);
         }
@@ -395,7 +413,7 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
 
     @Override
     public boolean isClean() {
-        return flushPosition >= writePosition;
+        return flushPosition >= writePosition && writeClosed == flushClosed;
     }
 
     @Override
