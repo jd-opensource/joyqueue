@@ -99,7 +99,7 @@ public class ConsumeArchiveService extends Service {
             tracer = new DefaultPointTracer();
         }
         this.readConsumeLogThread = LoopThread.builder()
-                .sleepTime(0, 10)
+                .sleepTime(1, 10)
                 .name("ReadAndPutHBase-ConsumeLog-Thread")
                 .onException(e -> {
                     logger.error(e.getMessage(), e);
@@ -141,31 +141,35 @@ public class ConsumeArchiveService extends Service {
      */
     private void readAndWrite() throws JoyQueueException, InterruptedException {
         // 读信息，一次读指定条数
-        List<ConsumeLog> list = readConsumeLog(archiveConfig.getConsumeBatchNum());
-        if (list.size() > 0) {
-            long startTime = SystemClock.now();
+        int readBatchSize;
+        int batchSize=archiveConfig.getConsumeBatchNum();
+        do {
+            List<ConsumeLog> list = readConsumeLog(batchSize);
+            readBatchSize=list.size();
+            if (readBatchSize > 0) {
+                long startTime = SystemClock.now();
 
-            // 调用存储接口写数据
-            archiveStore.putConsumeLog(list, tracer);
+                // 调用存储接口写数据
+                archiveStore.putConsumeLog(list, tracer);
 
-            long endTime = SystemClock.now();
+                long endTime = SystemClock.now();
 
-            logger.debug("Write consumeLogs size:{} to archive store, and elapsed time {}ms", list.size(), endTime - startTime);
+                logger.debug("Write consumeLogs size:{} to archive store, and elapsed time {}ms", list.size(), endTime - startTime);
 
-            int consumeWriteDelay = archiveConfig.getConsumeWriteDelay();
-            if (consumeWriteDelay > 0) {
-                Thread.sleep(consumeWriteDelay);
-            }
+                int consumeWriteDelay = archiveConfig.getConsumeWriteDelay();
+                if (consumeWriteDelay > 0) {
+                    Thread.sleep(consumeWriteDelay);
+                }
 
-        } else {
-            if (repository.rFile != null && repository.rMap != null) {
-                logger.debug("read file name {}, read position {}", repository.rFile.getName(), repository.rMap.toString());
             } else {
-                logger.debug("read file is null.");
+                if (repository.rFile != null && repository.rMap != null) {
+                    logger.debug("read file name {}, read position {}", repository.rFile.getName(), repository.rMap.toString());
+                } else {
+                    logger.debug("read file is null.");
+                }
+                break;
             }
-
-            Thread.sleep(100);
-        }
+        }while(readBatchSize==batchSize);
     }
 
     private void cleanAndRollWriteFile() {
@@ -362,6 +366,7 @@ public class ConsumeArchiveService extends Service {
             // 首次创建文件
             if (rwMap == null) {
                 newMappedRWFile();
+                // may notify reader
                 position = 0;
                 append(buffer);
             } else if (1 + position >= pageSize) {
@@ -571,7 +576,7 @@ public class ConsumeArchiveService extends Service {
                 String fileName = sorted.get(0);
                 File tempFile = new File(baseDir + fileName);
                 rFile = tempFile;
-
+                logger.debug("current read consume event file {}",tempFile);
                 return rFile;
             } else {
                 logger.debug("only one write file.");
