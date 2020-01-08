@@ -299,6 +299,9 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
 
     @Override
     public int appendByteBuffer(ByteBuffer byteBuffer) throws IOException {
+        if (writeClosed) {
+            throw new WriteException("File is not writable!");
+        }
         touch();
         long stamp = bufferLock.readLock();
         try {
