@@ -16,18 +16,20 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>joyqueue-server</artifactId>
         <groupId>org.joyqueue</groupId>
-        <version>4.2.1-SNAPSHOT</version>
+        <version>4.2.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>joyqueue-broker-core</artifactId>
     <name>JoyQueue-Broker-Core</name>
     <description>Broker core library</description>
-    <version>4.2.1-SNAPSHOT</version>
+    <version>4.2.0-SNAPSHOT</version>
 
     <dependencies>
         <dependency>
@@ -102,7 +104,7 @@
         <dependency>
             <groupId>org.joyqueue</groupId>
             <artifactId>joyqueue-store-core</artifactId>
-            <version>4.2.1-SNAPSHOT</version>
+            <version>4.2.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
