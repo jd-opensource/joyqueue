@@ -26,6 +26,9 @@ public enum  RemoteRetryConfigKey implements PropertyDef {
     REMOTE_RETRY_LIMIT_THREADS("retry.remote.retry.limit.thread", 10, Type.INT),
     REMOTE_RETRY_UPDATE_INTERVAL("retry.remote.retry.update.interval", 60000L, Type.LONG),
     REMOTE_RETRY_TRANSPORT_TIMEOUT("retry.remote.retry.transport.timeout", 1000, Type.INT),
+    REMOTE_RETRY_THREADS("retry.remote.retry.threads", Runtime.getRuntime().availableProcessors() * 4, Type.INT),
+    REMOTE_RETRY_THREAD_QUEUE_SIZE("retry.remote.retry.thread.queue.size", 1024, Type.INT),
+    REMOTE_RETRY_THREAD_KEEPALIVE("retry.remote.retry.thread.keepalive", 1000 * 60, Type.INT),
 
     ;
 

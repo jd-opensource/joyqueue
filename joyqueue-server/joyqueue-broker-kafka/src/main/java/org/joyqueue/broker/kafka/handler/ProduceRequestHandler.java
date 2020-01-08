@@ -248,7 +248,7 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
             brokerMessages.add(brokerMessage);
         }
 
-        traffic.record(topic.getFullName(), partitionRequest.getMessages().size());
+        traffic.record(topic.getFullName(), (partitionRequest.getMessages() == null ? 0 : partitionRequest.getMessages().size()));
         producePartitionGroupRequest.getPartitions().add(partitionRequest.getPartition());
         producePartitionGroupRequest.getMessages().addAll(brokerMessages);
         producePartitionGroupRequest.getMessageMap().put(partitionRequest.getPartition(), brokerMessages);

@@ -299,7 +299,9 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
             // 同步等待写入完成
             WriteResult writeResult = syncWait(writeResultFuture, endTime - SystemClock.now());
             // 构造写入结果
-            onPutMessage(topic, producer.getApp(), partitionGroup.getGroup(), startTime, writeRequests);
+            if (writeResult.getCode().equals(JoyQueueCode.SUCCESS)) {
+                onPutMessage(topic, producer.getApp(), partitionGroup.getGroup(), startTime, writeRequests);
+            }
 
             putResult.addWriteResult((short) partitionGroup.getGroup(), writeResult);
         }
@@ -354,7 +356,9 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
                 metric.addLatency("async", t1 - t0);
             } else {
                 partitionStore.asyncWrite(event -> {
-                    onPutMessage(topic, app, partitionGroup.getGroup(), startTime, writeRequests);
+                    if (event.getCode().equals(JoyQueueCode.SUCCESS)) {
+                        onPutMessage(topic, app, partitionGroup.getGroup(), startTime, writeRequests);
+                    }
                     eventListener.onEvent(event);
                 }, writeRequests.toArray(new WriteRequest[]{}));
             }
@@ -411,7 +415,9 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
         public void onEvent(WriteResult event) {
             long elapse = System.nanoTime() - t0;
             metric.addLatency("callback", elapse);
-            onPutMessage(topic, app, partitionGroup, startTime, writeRequests);
+            if (event.getCode().equals(JoyQueueCode.SUCCESS)) {
+                onPutMessage(topic, app, partitionGroup, startTime, writeRequests);
+            }
             eventListener.onEvent(event);
         }
     }
