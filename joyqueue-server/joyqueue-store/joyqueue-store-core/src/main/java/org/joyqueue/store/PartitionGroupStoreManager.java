@@ -499,6 +499,9 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
             if (null != lastIndexItem && indexItem.getOffset() == lastIndexItem.getOffset()) {
                 continue;
             }
+            if (indexItem.getOffset() >= commitPosition()) {
+                continue;
+            }
             try {
                 ByteBuffer log;
                 try {
