@@ -248,7 +248,7 @@ public class PartitionManager {
      */
     protected boolean isRetry(Consumer consumer) throws JoyQueueException {
 
-        int randomBound = clusterManager.getRetryRandomBound();
+        int randomBound = clusterManager.getRetryRandomBound(consumer.getTopic(), consumer.getApp());
         if (randomBound <= 0) {
             return false;
         }

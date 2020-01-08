@@ -30,6 +30,7 @@ import org.joyqueue.event.MetaEvent;
 import org.joyqueue.exception.JoyQueueException;
 import org.joyqueue.network.transport.TransportClient;
 import org.joyqueue.network.transport.config.ClientConfig;
+import org.joyqueue.network.transport.config.TransportConfigSupport;
 import org.joyqueue.nsr.NameService;
 import org.joyqueue.nsr.event.UpdateBrokerEvent;
 import org.joyqueue.server.retry.NullMessageRetry;
@@ -108,7 +109,7 @@ public class BrokerRetryManager extends Service implements MessageRetry<Long>, B
 
                 @Override
                 public TransportClient createTransportClient() {
-                    ClientConfig clientConfig = new ClientConfig();
+                    ClientConfig clientConfig = TransportConfigSupport.buildClientConfig(propertySupplier, "retry.remote.client");
                     clientConfig.setIoThreadName("joyqueue-retry-io-eventLoop");
                     return new BrokerTransportClientFactory().create(clientConfig);
                 }
