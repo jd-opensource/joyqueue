@@ -13,37 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.joyqueue.model.domain;
+package org.joyqueue.broker.monitor;
 
-public class PartitionOffset {
-    private  short partition;
-    private  long  offset;
+import org.joyqueue.monitor.TraceStat;
+import org.joyqueue.monitor.PointTracer;
 
-    public short getPartition() {
-        return partition;
-    }
+/**
+ * @author lining11
+ * Date: 2020/1/6
+ */
+public class DefaultPointTracer implements PointTracer {
 
-    public void setPartition(short partition) {
-        this.partition = partition;
-    }
+    private TraceStat stat = new TraceStat();
 
-    public long getOffset() {
-        return offset;
-    }
 
-    public void setOffset(long offset) {
-        this.offset = offset;
-    }
-
-   public enum Location{
-        MIN,MAX
+    @Override
+    public String type() {
+        return "default";
     }
 
     @Override
-    public String toString() {
-        return "PartitionOffset{" +
-                "partition=" + partition +
-                ", offset=" + offset +
-                '}';
+    public TraceStat begin(String start) {
+        return stat;
+    }
+
+    @Override
+    public void end(TraceStat end) {
+
     }
 }

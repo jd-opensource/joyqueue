@@ -203,4 +203,22 @@ public class Topic extends BaseNsrModel {
     public void setReplica(int replica) {
         this.replica = replica;
     }
+
+    @Override
+    public String toString() {
+        return "Topic{" +
+                "name='" + name + '\'' +
+                ", code='" + code + '\'' +
+                ", partitions=" + partitions +
+                ", archive=" + archive +
+                ", type=" + type +
+                ", electType=" + electType +
+                ", labels='" + labels + '\'' +
+                ", namespace=" + namespace +
+                ", brokerGroup=" + brokerGroup +
+                ", brokers=" + brokers +
+                ", brokerNum=" + brokerNum +
+                ", replica=" + replica +
+                '}';
+    }
 }

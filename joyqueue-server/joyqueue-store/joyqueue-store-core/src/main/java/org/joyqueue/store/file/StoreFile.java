@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 public interface StoreFile<T> extends Timed {
+    void closeWrite();
+
     /**
      * 对应的问题
      */
