@@ -99,7 +99,7 @@ public class ConsumeArchiveService extends Service {
             tracer = new DefaultPointTracer();
         }
         this.readConsumeLogThread = LoopThread.builder()
-                .sleepTime(0, 10)
+                .sleepTime(1, 10)
                 .name("ReadAndPutHBase-ConsumeLog-Thread")
                 .onException(e -> {
                     logger.error(e.getMessage(), e);
@@ -167,7 +167,7 @@ public class ConsumeArchiveService extends Service {
                 } else {
                     logger.debug("read file is null.");
                 }
-                Thread.sleep(100);
+                break;
             }
         }while(readBatchSize==batchSize);
     }
@@ -366,6 +366,7 @@ public class ConsumeArchiveService extends Service {
             // 首次创建文件
             if (rwMap == null) {
                 newMappedRWFile();
+                // may notify reader
                 position = 0;
                 append(buffer);
             } else if (1 + position >= pageSize) {
