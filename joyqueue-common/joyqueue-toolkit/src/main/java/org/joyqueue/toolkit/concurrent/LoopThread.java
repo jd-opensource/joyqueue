@@ -127,7 +127,7 @@ public abstract class LoopThread implements Runnable,LifeCycle{
                     long t1 = System.nanoTime();
 
                     // 为了避免空转CPU高，如果执行时间过短，等一会儿再进行下一次循环
-                    if (t1 - t0 < minSleep * 100000L) {
+                    if (t1 - t0 < minSleep * 1000000L) {
 
                         wakeupLock.lock();
                         try {
