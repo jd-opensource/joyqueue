@@ -506,19 +506,28 @@ public class ThinNameService extends Service implements NameService, PropertySup
         logger.info("name service stopped.");
     }
 
-    private Command send(Command request) throws TransportException {
+    protected Command send(Command request) throws TransportException {
         return send(request, nameServiceConfig.getThinTransportTimeout());
     }
 
-    private Command send(Command request, int timeout) throws TransportException {
+    protected Command send(Command request, int timeout) throws TransportException {
+        if (tracer == null) {
+            return doSend(request, timeout);
+        }
         TraceStat traceBegin = tracer.begin(TRACE_PREFIX + request.getPayload().getClass().getSimpleName());
+        try {
+            return doSend(request, timeout);
+        } finally {
+            tracer.end(traceBegin);
+        }
+    }
+
+    protected Command doSend(Command request, int timeout) throws TransportException {
         try {
             return clientTransport.getOrCreateTransport().sync(request, timeout);
         } catch (TransportException exception) {
             logger.error("send command to nameServer error request {}", request);
             throw exception;
-        } finally {
-            tracer.end(traceBegin);
         }
     }
 
