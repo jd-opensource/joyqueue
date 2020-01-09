@@ -649,6 +649,9 @@ public class ConsumeArchiveService extends Service {
         public int getLocalFileNum() {
             File file = new File(baseDir);
             String[] list = file.list();
+            if (list == null){
+                return 0;
+            }
             return list.length;
         }
 
