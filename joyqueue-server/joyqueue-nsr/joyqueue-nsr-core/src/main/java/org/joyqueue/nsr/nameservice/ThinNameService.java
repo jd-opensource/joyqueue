@@ -20,6 +20,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.jd.laf.extension.Type;
 import org.apache.commons.collections.CollectionUtils;
+import org.joyqueue.config.BrokerConfigKey;
 import org.joyqueue.domain.AllMetadata;
 import org.joyqueue.domain.AppToken;
 import org.joyqueue.domain.Broker;
@@ -35,6 +36,8 @@ import org.joyqueue.domain.Topic;
 import org.joyqueue.domain.TopicConfig;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.event.NameServerEvent;
+import org.joyqueue.monitor.PointTracer;
+import org.joyqueue.monitor.TraceStat;
 import org.joyqueue.network.command.GetTopics;
 import org.joyqueue.network.command.GetTopicsAck;
 import org.joyqueue.network.command.Subscribe;
@@ -48,6 +51,7 @@ import org.joyqueue.network.transport.command.CommandCallback;
 import org.joyqueue.network.transport.command.Direction;
 import org.joyqueue.network.transport.exception.TransportException;
 import org.joyqueue.nsr.NameService;
+import org.joyqueue.nsr.NsrPlugins;
 import org.joyqueue.nsr.config.NameServiceConfig;
 import org.joyqueue.nsr.exception.NsrException;
 import org.joyqueue.nsr.network.NsrTransportClientFactory;
@@ -100,7 +104,6 @@ import org.joyqueue.toolkit.config.PropertySupplierAware;
 import org.joyqueue.toolkit.lang.Close;
 import org.joyqueue.toolkit.lang.LifeCycle;
 import org.joyqueue.toolkit.service.Service;
-import org.joyqueue.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -121,7 +124,10 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ThinNameService extends Service implements NameService, PropertySupplierAware, Type {
     private static final Logger logger = LoggerFactory.getLogger(ThinNameService.class);
 
+    private static final String TRACE_PREFIX = "nameservice.thin.";
+
     private NameServiceConfig nameServiceConfig;
+    private PointTracer tracer;
 
     private ClientTransport clientTransport;
     private PropertySupplier propertySupplier;
@@ -152,6 +158,7 @@ public class ThinNameService extends Service implements NameService, PropertySup
                     .expireAfterWrite(nameServiceConfig.getThinCacheExpireTime(), TimeUnit.MILLISECONDS)
                     .build();
         }
+        tracer = NsrPlugins.TRACERERVICE.get((String) PropertySupplier.getValue(propertySupplier, BrokerConfigKey.TRACER_TYPE));
         clientTransport = new ClientTransport(nameServiceConfig,this);
         try {
             eventBus.start();
@@ -504,18 +511,14 @@ public class ThinNameService extends Service implements NameService, PropertySup
     }
 
     private Command send(Command request, int timeout) throws TransportException {
-        // TODO 临时监控
-        long startTime = SystemClock.now();
+        TraceStat traceBegin = tracer.begin(TRACE_PREFIX + request.getPayload().getClass().getSimpleName());
         try {
             return clientTransport.getOrCreateTransport().sync(request, timeout);
         } catch (TransportException exception) {
             logger.error("send command to nameServer error request {}", request);
             throw exception;
         } finally {
-            long time = SystemClock.now() - startTime;
-            if (time > 1000 * 1) {
-                logger.warn("thinNameService timeout, request: {}, time: {}", request, time);
-            }
+            tracer.end(traceBegin);
         }
     }
 
