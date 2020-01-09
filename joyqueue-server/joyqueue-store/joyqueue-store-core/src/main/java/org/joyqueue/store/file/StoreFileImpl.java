@@ -478,7 +478,7 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
 
     @Override
     public boolean isFree() {
-        return isClean();
+        return flushPosition >= writePosition;
     }
 
     @Override

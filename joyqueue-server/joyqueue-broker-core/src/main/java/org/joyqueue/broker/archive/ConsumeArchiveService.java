@@ -628,7 +628,7 @@ public class ConsumeArchiveService extends Service {
         private List<String> getArchivedFileList() {
             // 没有调用到readOne方法，不会初始化rFile，防止空指针，加一下判断
             if (rFile == null) {
-                logger.info("Can not get archive file list cause by consume archive read file have no init.");
+                logger.debug("Can not get archive file list cause by consume archive read file have no init.");
                 return null;
             }
 

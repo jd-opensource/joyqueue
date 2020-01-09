@@ -88,15 +88,16 @@ public class ConsumerRegistrar implements BeanPostProcessor, BeanFactoryAware, E
         OMSMessageListener classMessageListenerAnnotation = findClassMessageListenerAnnotation(beanClass);
 
         if (classMessageListenerAnnotation != null) {
-            registerListener(classMessageListenerAnnotation, getMessageListener(classMessageListenerAnnotation, bean));
+            checkMessageListener(classMessageListenerAnnotation, beanName);
+            registerListener(classMessageListenerAnnotation, beanName);
         } else {
             for (Method method : beanClass.getDeclaredMethods()) {
                 OMSMessageListener methodMessageListenerAnnotation = findMethodMessageListenerAnnotation(method);
                 if (methodMessageListenerAnnotation == null) {
                     continue;
                 }
-                Object messageListener = getMethodMessageListener(classMessageListenerAnnotation, bean, method);
-                registerListener(methodMessageListenerAnnotation, messageListener);
+                String messageListenerId = getMethodMessageListener(classMessageListenerAnnotation, beanName, method);
+                registerListener(methodMessageListenerAnnotation, messageListenerId);
             }
         }
 
@@ -111,14 +112,22 @@ public class ConsumerRegistrar implements BeanPostProcessor, BeanFactoryAware, E
         return AnnotationUtils.findAnnotation(method, OMSMessageListener.class);
     }
 
-    protected Object getMessageListener(OMSMessageListener messageListenerAnnotation, Object bean) {
-        if (!(bean instanceof MessageListener) && !(bean instanceof BatchMessageListener)) {
-            throw new IllegalArgumentException("listener type error, need MessageListener or BatchMessageListener");
+    protected void checkMessageListener(OMSMessageListener messageListenerAnnotation, String bean) {
+        BeanDefinitionRegistry beanDefinitionRegistry = (BeanDefinitionRegistry) beanFactory;
+        BeanDefinition listenerBeanDefinition = beanDefinitionRegistry.getBeanDefinition(bean);
+        Class<?> listenerClass;
+        try {
+            listenerClass = Class.forName(listenerBeanDefinition.getBeanClassName());
+        } catch (ClassNotFoundException e) {
+            throw new IllegalArgumentException(String.format("listener class not found, className: %s",
+                    listenerBeanDefinition.getBeanClassName()), e);
         }
-        return bean;
+        if (!MessageListener.class.isAssignableFrom(listenerClass) && !BatchMessageListener.class.isAssignableFrom(listenerClass)) {
+            throw new IllegalArgumentException(String.format("%s type error, need MessageListener or BatchMessageListener", listenerClass));
+        }
     }
 
-    protected Object getMethodMessageListener(OMSMessageListener messageListenerAnnotation, Object bean, Method method) {
+    protected String getMethodMessageListener(OMSMessageListener messageListenerAnnotation, String beanId, Method method) {
         Class<?>[] parameterTypes = method.getParameterTypes();
         Type[] genericParameterTypes = method.getGenericParameterTypes();
 
@@ -131,21 +140,34 @@ public class ConsumerRegistrar implements BeanPostProcessor, BeanFactoryAware, E
             throw new IllegalArgumentException("listener parameters error, need MessageListener.onReceived or BatchMessageListener.onReceived");
         }
 
+        BeanDefinitionRegistry beanDefinitionRegistry = (BeanDefinitionRegistry) beanFactory;
+        String id = String.format(CONSUMER_CONTAINER_ID, OMSSpringConsts.BEAN_ID_PREFIX, SEQUENCE.getAndIncrement());
+        BeanDefinition consumerBeanDefinition = null;
+
         if (isListener) {
-            return new MessageListenerReflectAdapter(bean, method);
+            consumerBeanDefinition = BeanDefinitionBuilder.rootBeanDefinition(MessageListenerReflectAdapter.class)
+                    .addConstructorArgValue(beanId)
+                    .addConstructorArgValue(method)
+                    .getBeanDefinition();
         } else {
-            return new BatchMessageListenerReflectAdapter(bean, method);
+            consumerBeanDefinition = BeanDefinitionBuilder.rootBeanDefinition(BatchMessageListenerReflectAdapter.class)
+                    .addConstructorArgValue(beanId)
+                    .addConstructorArgValue(method)
+                    .getBeanDefinition();
         }
+
+        beanDefinitionRegistry.registerBeanDefinition(id, consumerBeanDefinition);
+        return id;
     }
 
-    protected void registerListener(OMSMessageListener omsMessageListener, Object listenerBean) {
+    protected void registerListener(OMSMessageListener omsMessageListener, String listenerBeanId) {
         BeanDefinitionRegistry beanDefinitionRegistry = (BeanDefinitionRegistry) beanFactory;
         String id = String.format(CONSUMER_CONTAINER_ID, OMSSpringConsts.BEAN_ID_PREFIX, SEQUENCE.getAndIncrement());
 
         BeanDefinition consumerBeanDefinition = BeanDefinitionBuilder.rootBeanDefinition(ConsumerContainer.class)
                 .addConstructorArgValue(stringValueResolver.resolveStringValue(omsMessageListener.queueName()))
                 .addConstructorArgValue(accessPointContainer)
-                .addConstructorArgValue(listenerBean)
+                .addConstructorArgValue(listenerBeanId)
                 .getBeanDefinition();
 
         beanDefinitionRegistry.registerBeanDefinition(id, consumerBeanDefinition);

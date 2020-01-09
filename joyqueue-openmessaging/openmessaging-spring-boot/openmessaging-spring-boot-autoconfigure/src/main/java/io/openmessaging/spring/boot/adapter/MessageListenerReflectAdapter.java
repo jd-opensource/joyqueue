@@ -18,6 +18,9 @@ package io.openmessaging.spring.boot.adapter;
 import io.openmessaging.consumer.MessageListener;
 import io.openmessaging.exception.OMSRuntimeException;
 import io.openmessaging.message.Message;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 
 import java.lang.reflect.Method;
 
@@ -27,15 +30,24 @@ import java.lang.reflect.Method;
  * @version OMS 1.0.0
  * @since OMS 1.0.0
  */
-public class MessageListenerReflectAdapter implements MessageListener {
+public class MessageListenerReflectAdapter implements MessageListener, ApplicationContextAware {
 
-    private Object instance;
+    private String instanceId;
     private Method method;
 
-    public MessageListenerReflectAdapter(Object instance, Method method) {
-        this.instance = instance;
+    private ApplicationContext applicationContext;
+    private Object instance;
+
+    public MessageListenerReflectAdapter(String instanceId, Method method) {
+        this.instanceId = instanceId;
         this.method = method;
         this.method.setAccessible(true);
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
+        this.instance = applicationContext.getBean(instanceId);
     }
 
     @Override
