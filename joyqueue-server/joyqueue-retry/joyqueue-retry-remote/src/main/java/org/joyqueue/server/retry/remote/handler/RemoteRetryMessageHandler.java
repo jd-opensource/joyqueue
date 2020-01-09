@@ -24,6 +24,7 @@ import org.joyqueue.network.transport.codec.JoyQueueHeader;
 import org.joyqueue.network.transport.command.Command;
 import org.joyqueue.network.transport.command.Direction;
 import org.joyqueue.network.transport.command.handler.CommandHandler;
+import org.joyqueue.network.transport.command.provider.ExecutorServiceProvider;
 import org.joyqueue.network.transport.exception.TransportException;
 import org.joyqueue.server.retry.api.MessageRetry;
 import org.joyqueue.server.retry.model.RetryMessageModel;
@@ -33,26 +34,41 @@ import org.joyqueue.server.retry.remote.command.GetRetryCount;
 import org.joyqueue.server.retry.remote.command.GetRetryCountAck;
 import org.joyqueue.server.retry.remote.command.PutRetry;
 import org.joyqueue.server.retry.remote.command.UpdateRetry;
+import org.joyqueue.server.retry.remote.config.RemoteRetryConfigKey;
+import org.joyqueue.toolkit.concurrent.NamedThreadFactory;
+import org.joyqueue.toolkit.config.PropertySupplier;
 import org.joyqueue.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 消息重试远程重试处理器
  * <p>
  * Created by chengzhiliang on 2018/9/25.
  */
-public class RemoteRetryMessageHandler implements CommandHandler {
+public class RemoteRetryMessageHandler implements CommandHandler, ExecutorServiceProvider {
 
     protected static final Logger logger = LoggerFactory.getLogger(RemoteRetryMessageHandler.class);
 
     // 重试消息管理器
     private MessageRetry messageRetry;
+    private PropertySupplier propertySupplier;
 
-    public RemoteRetryMessageHandler(MessageRetry messageRetry) {
+    private ExecutorService threadPool;
+
+    public RemoteRetryMessageHandler(MessageRetry messageRetry, PropertySupplier propertySupplier) {
         this.messageRetry = messageRetry;
+        this.propertySupplier = propertySupplier;
+        this.threadPool = new ThreadPoolExecutor(propertySupplier.getValue(RemoteRetryConfigKey.REMOTE_RETRY_THREADS), propertySupplier.getValue(RemoteRetryConfigKey.REMOTE_RETRY_THREADS),
+                (int) propertySupplier.getValue(RemoteRetryConfigKey.REMOTE_RETRY_THREAD_KEEPALIVE), TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<>((int) propertySupplier.getValue(RemoteRetryConfigKey.REMOTE_RETRY_THREAD_QUEUE_SIZE)),
+                new NamedThreadFactory("joyqueue-retry-remote-threads"));
     }
 
     @Override
@@ -88,6 +104,11 @@ public class RemoteRetryMessageHandler implements CommandHandler {
                 logger.info("handle retry more than 100ms, Command:[{}]", command);
             }
         }
+    }
+
+    @Override
+    public ExecutorService getExecutorService(Transport transport, Command command) {
+        return threadPool;
     }
 
     private Command execute(PutRetry putRetry) throws JoyQueueException {

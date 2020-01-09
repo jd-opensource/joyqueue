@@ -18,6 +18,7 @@ package org.joyqueue.broker.consumer;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.broker.archive.ArchiveManager;
 import org.joyqueue.broker.archive.ConsumeArchiveService;
@@ -277,7 +278,9 @@ class PartitionConsumption extends Service {
      * @return 读取的消息
      */
     protected PullResult getMessage4Sequence(Consumer consumer, short partition, int count, long ackTimeout) throws JoyQueueException {
-        logger.debug("getMessage4Sequence by topic:[{}], app:[{}], partition:[{}], count:[{}], ackTimeout:[{}]", consumer.getTopic(), consumer.getApp(), partition, count, ackTimeout);
+        if (logger.isDebugEnabled()) {
+            logger.debug("try getMessage4Sequence by topic:[{}], app:[{}], partition:[{}], count:[{}], ackTimeout:[{}]", consumer.getTopic(), consumer.getApp(), partition, count, ackTimeout);
+        }
 
         // 初始化默认
         PullResult pullResult = new PullResult(consumer, (short) -1, new ArrayList<>(0));
@@ -293,8 +296,6 @@ class PartitionConsumption extends Service {
             int partitionGroup = clusterManager.getPartitionGroupId(TopicName.parse(consumer.getTopic()), partition);
             long index = positionManager.getLastMsgAckIndex(TopicName.parse(consumer.getTopic()), consumer.getApp(), partition);
             try {
-                long startTime = System.nanoTime();
-
                 ByteBuffer[] byteBuffers = readMessages(consumer, partitionGroup, partition, index, count);
 
 
@@ -318,6 +319,7 @@ class PartitionConsumption extends Service {
                     // 读不到消息释放占用
                     partitionManager.releasePartition(consumer, partition);
                 }
+
                 pullResult = new PullResult(consumer, partition, rByteBufferList);
             } catch (Exception ex) {
                 // 出现异常释放分区占用
@@ -389,6 +391,10 @@ class PartitionConsumption extends Service {
         try {
             ReadResult readRst = store.read(partition, index, count, Long.MAX_VALUE);
             if (readRst.getCode() == JoyQueueCode.SUCCESS) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("readMessage by topic:[{}], app:[{}], partition:[{}], consumer: [{}], count:[{}], result: {}",
+                            consumer.getTopic(), consumer.getApp(), partition, consumer, count, ArrayUtils.getLength(readRst.getMessages()));
+                }
                 return readRst.getMessages();
             } else {
                 logger.error("read message error, error code[{}]", readRst.getCode());

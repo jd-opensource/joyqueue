@@ -747,11 +747,8 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
 
     void asyncWrite(QosLevel qosLevel, EventListener<WriteResult> eventListener, WriteRequest... writeRequests) {
         if(isDiskFull()) {
-            try {
-                Thread.sleep(1000L);
-                if (eventListener != null)
-                    eventListener.onEvent(new WriteResult(JoyQueueCode.SE_DISK_FULL, null));
-            } catch (InterruptedException ignored) {}
+            if (eventListener != null)
+                eventListener.onEvent(new WriteResult(JoyQueueCode.SE_DISK_FULL, null));
             return;
         }
         if (!enabled.get())
