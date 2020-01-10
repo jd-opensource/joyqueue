@@ -3,6 +3,7 @@ package org.joyqueue.broker.network.protocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -23,6 +24,7 @@ public class ProtocolRejectedExecutionHandler implements RejectedExecutionHandle
 
     @Override
     public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
-        logger.error("reject {} request, task: {}, rejected from {}", name, r.toString(), executor.toString());
+    	throw new RejectedExecutionException(String.format("", "reject %s request, task: %s, rejected from %s", 
+    			name, r.toString(), executor.toString()));
     }
 }

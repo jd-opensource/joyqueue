@@ -26,6 +26,8 @@ import org.joyqueue.network.transport.exception.TransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.RejectedExecutionException;
+
 /**
  * joyqueue异常处理
  *
@@ -38,8 +40,13 @@ public class JoyQueueExceptionHandler implements ExceptionHandler {
 
     @Override
     public void handle(Transport transport, Command command, Throwable throwable) {
-        logger.error("process command exception, header: {}, payload: {}, transport: {}",
-                command.getHeader(), command.getPayload(), transport, throwable);
+    	if (throwable instanceof RejectedExecutionException) {
+    		logger.error("process command exception, header: {}, payload: {}, transport: {}",
+                    command.getHeader(), command.getPayload(), transport, throwable.toString());
+    	} else {
+    		logger.error("process command exception, header: {}, payload: {}, transport: {}",
+                    command.getHeader(), command.getPayload(), transport, throwable);
+    	}
 
         if (command.getHeader().getQosLevel().equals(QosLevel.ONE_WAY)) {
             return;
