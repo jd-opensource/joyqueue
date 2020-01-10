@@ -643,16 +643,6 @@ public class PositioningStore<T> implements Closeable {
         return storeFileMap.headMap(minIndexedPhysicalPosition).size();
     }
 
-    public boolean isEarly(long timestamp, long minIndexedPhysicalPosition) {
-        for (StoreFile<T> storeFile : storeFileMap.headMap(minIndexedPhysicalPosition).values()) {
-            if (storeFile.timestamp() > 0)
-                if (storeFile.timestamp() < timestamp) {
-                    return true;
-                }
-        }
-        return false;
-    }
-
     public static class Config {
         public static final int DEFAULT_FILE_HEADER_SIZE = 128;
         public static final int DEFAULT_FILE_DATA_SIZE = 128 * 1024 * 1024;

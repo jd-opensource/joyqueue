@@ -310,6 +310,9 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         return indexPosition;
     }
 
+    /**
+     * @return 返回需要重建索引的第一条消息偏移量
+     **/
     private long recoverPartitions() throws IOException {
         File indexBase = new File(base, "index");
         long indexPosition = store.right();
@@ -813,7 +816,8 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         return partitionMap.values().stream().map(p -> p.store).collect(Collectors.toSet());
     }
 
-    long deleteMinStoreMessages(long targetDeleteTimeline, Map<Short, Long> partitionAckMap, boolean doNotDeleteConsumed) throws IOException {
+
+    long clean(long time, Map<Short, Long> partitionAckMap, boolean keepUnconsumed) throws IOException {
         long deletedSize = 0L;
 
         // 计算最小索引的消息位置
@@ -823,12 +827,12 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
             long minPartitionIndex = partition.getValue();
             PositioningStore<IndexItem> indexStore = indexStore(p);
             if (indexStore != null) {
-                if (minPartitionIndex != Long.MAX_VALUE && doNotDeleteConsumed) {
+                if (minPartitionIndex != Long.MAX_VALUE && keepUnconsumed) {
                     minPartitionIndex *= IndexItem.STORAGE_SIZE;
                 } else {
                     minPartitionIndex = Long.MAX_VALUE;
                 }
-                if (targetDeleteTimeline <= 0) {
+                if (time <= 0) {
                     // 依次删除每个分区p索引中最左侧的文件 满足当前分区p的最小消费位置之前的文件块
                     if (indexStore.fileCount() > 1 && indexStore.meetMinStoreFile(minPartitionIndex) > 1) {
                         deletedSize += indexStore.physicalDeleteLeftFile();
@@ -838,7 +842,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                     }
                 } else {
                     // 依次删除每个分区p索引中最左侧的文件 满足当前分区p的最小消费位置之前的以及最长时间戳的文件块
-                    if (indexStore.fileCount() > 1 && indexStore.meetMinStoreFile(minPartitionIndex) > 1 && indexStore.isEarly(targetDeleteTimeline, minPartitionIndex)) {
+                    if (indexStore.fileCount() > 1 && indexStore.meetMinStoreFile(minPartitionIndex) > 1 && hasEarly(indexStore,time)) {
                         deletedSize += indexStore.physicalDeleteLeftFile();
                         if (logger.isDebugEnabled()){
                             logger.info("Delete PositioningStore physical index file by time, partition: <{}>, offset position: <{}>", p, minPartitionIndex);
@@ -865,6 +869,28 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
 
         return deletedSize;
     }
+
+    /**
+     *
+     * @param indexStore  partition index store
+     * @param time
+     * @return true if partition 的最早消息时间小于指定时间
+     *
+     **/
+    public boolean hasEarly(PositioningStore<IndexItem> indexStore,long time) throws IOException{
+        long left=indexStore.left();
+        IndexItem item=indexStore.read(left);
+        ByteBuffer message=store.read(item.getOffset());
+        // message send time
+        long clientTimestamp=MessageParser.getLong(message,MessageParser.CLIENT_TIMESTAMP);
+        if(clientTimestamp<time){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+
 
     /**
      * 重新分区
