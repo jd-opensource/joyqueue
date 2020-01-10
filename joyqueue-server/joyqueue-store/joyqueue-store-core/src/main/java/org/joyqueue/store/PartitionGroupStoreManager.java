@@ -171,14 +171,31 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
 
     public void recover() {
         try {
+
             logger.info("Recovering message store...");
             store.recover();
             logger.info("Recovering index store...");
             indexPosition = recoverPartitions();
+            long safeIndexPosition = indexPosition;
             logger.info("Recovering the checkpoint ...");
             indexPosition = recoverCheckpoint();
+            long checkPointIndexPosition = indexPosition;
             logger.info("Building indices ...");
-            recoverIndices();
+            try {
+                recoverIndices();
+            } catch (Throwable t) {
+                if (safeIndexPosition != indexPosition) {
+                    indexPosition = safeIndexPosition;
+                    logger.warn("Exception while recover indices using indexPosition {} from Checkpoint.json. " +
+                                    "Fall back safe index position {} and retry recover indices...",
+                            Format.formatWithComma(checkPointIndexPosition),
+                            Format.formatWithComma(safeIndexPosition), t);
+                    indexPosition = safeIndexPosition;
+                    recoverIndices();
+                } else {
+                    throw t;
+                }
+            }
         } catch (IOException e) {
             throw new StoreInitializeException(e);
         }
@@ -1034,7 +1051,10 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
 
 
     private void rollback(long position) throws IOException {
-
+        if(indexPosition < position) {
+            indexPosition = position;
+            flushCheckpoint();
+        }
         boolean clearIndexStore = position <= leftPosition() || position > rightPosition();
 
         // 如果store整个删除干净了，需要把index也删干净
@@ -1050,10 +1070,6 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
 
         store.setRight(position);
 
-        if(indexPosition < position) {
-            indexPosition = position;
-            flushCheckpoint();
-        }
 
     }
 
