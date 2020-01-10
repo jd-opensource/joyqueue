@@ -24,7 +24,7 @@ public class ProtocolRejectedExecutionHandler implements RejectedExecutionHandle
 
     @Override
     public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
-    	throw new RejectedExecutionException(String.format("", "reject %s request, task: %s, rejected from %s", 
+    	throw new RejectedExecutionException(String.format("reject %s request, task: %s, rejected from %s",
     			name, r.toString(), executor.toString()));
     }
 }

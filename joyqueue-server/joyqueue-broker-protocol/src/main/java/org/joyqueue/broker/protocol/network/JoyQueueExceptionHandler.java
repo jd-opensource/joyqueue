@@ -41,8 +41,8 @@ public class JoyQueueExceptionHandler implements ExceptionHandler {
     @Override
     public void handle(Transport transport, Command command, Throwable throwable) {
     	if (throwable instanceof RejectedExecutionException) {
-    		logger.error("process command exception, header: {}, payload: {}, transport: {}",
-                    command.getHeader(), command.getPayload(), transport, throwable.toString());
+    		logger.error("process command exception, header: {}, payload: {}, transport: {}, exception: {}",
+                    command.getHeader(), command.getPayload(), transport, throwable.getMessage());
     	} else {
     		logger.error("process command exception, header: {}, payload: {}, transport: {}",
                     command.getHeader(), command.getPayload(), transport, throwable);
