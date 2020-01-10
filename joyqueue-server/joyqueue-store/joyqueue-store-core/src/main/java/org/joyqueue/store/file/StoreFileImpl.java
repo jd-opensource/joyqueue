@@ -17,6 +17,7 @@ package org.joyqueue.store.file;
 
 import org.joyqueue.store.utils.BufferHolder;
 import org.joyqueue.store.utils.PreloadBufferPool;
+import org.joyqueue.toolkit.format.Format;
 import org.joyqueue.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +31,7 @@ import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.StampedLock;
 
@@ -478,7 +480,15 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
 
     @Override
     public boolean isFree() {
-        return flushPosition >= writePosition;
+        if(flushPosition >= writePosition) {
+            return true;
+        } else {
+            logger.info("Evict file not free, flushPosition: {}, writePosition: {}, writeClosed: {}, flushClosed: {}, " +
+                            "create time: {}, file: {}.",
+                    flushPosition, writePosition, writeClosed, flushClosed,
+                    Format.format(new Date(createTimestamp)), file.getAbsolutePath());
+           return false;
+        }
     }
 
     @Override
