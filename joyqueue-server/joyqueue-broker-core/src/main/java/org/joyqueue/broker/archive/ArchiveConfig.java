@@ -15,6 +15,7 @@
  */
 package org.joyqueue.broker.archive;
 
+import org.joyqueue.config.BrokerConfigKey;
 import org.joyqueue.toolkit.config.Property;
 import org.joyqueue.toolkit.config.PropertySupplier;
 
@@ -91,7 +92,6 @@ public class ArchiveConfig {
     }
 
     public String getTracerType() {
-
-        return PropertySupplier.getValue(propertySupplier, ArchiveConfigKey.ARCHIVE_TRACER_TYPE);
+        return PropertySupplier.getValue(propertySupplier, BrokerConfigKey.TRACER_TYPE);
     }
 }

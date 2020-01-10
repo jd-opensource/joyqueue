@@ -31,6 +31,7 @@ import org.joyqueue.broker.monitor.stat.ProducerStat;
 import org.joyqueue.broker.monitor.stat.ReplicationStat;
 import org.joyqueue.broker.monitor.stat.TopicStat;
 import org.joyqueue.domain.PartitionGroup;
+import org.joyqueue.domain.TopicConfig;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.event.MetaEvent;
 import org.joyqueue.monitor.Client;
@@ -97,7 +98,8 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
         while (topicIterator.hasNext()) {
             TopicStat topicStat = topicIterator.next().getValue();
             TopicName topic = TopicName.parse(topicStat.getTopic());
-            if (clusterManager.getTopicConfig(topic) == null) {
+            TopicConfig topicConfig = clusterManager.getTopicConfig(topic);
+            if (topicConfig == null || !topicConfig.isReplica(clusterManager.getBrokerId())) {
                 topicIterator.remove();
                 continue;
             }

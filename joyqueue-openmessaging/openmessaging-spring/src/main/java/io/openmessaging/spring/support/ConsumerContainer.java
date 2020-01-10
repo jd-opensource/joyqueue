@@ -22,6 +22,8 @@ import io.openmessaging.interceptor.ConsumerInterceptor;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 
 /**
  * Container for the consumer.
@@ -29,18 +31,24 @@ import org.springframework.beans.factory.InitializingBean;
  * @version OMS 1.0.0
  * @since OMS 1.0.0
  */
-public class ConsumerContainer implements InitializingBean, DisposableBean, FactoryBean {
+public class ConsumerContainer implements InitializingBean, DisposableBean, FactoryBean, ApplicationContextAware {
 
     private String queueName;
     private AccessPointContainer accessPointContainer;
-    private Object messageListener;
+    private String messageListenerId;
+    private ApplicationContext applicationContext;
 
     private Consumer consumer;
 
-    public ConsumerContainer(String queueName, AccessPointContainer accessPointContainer, Object messageListener) {
+    public ConsumerContainer(String queueName, AccessPointContainer accessPointContainer, String messageListenerId) {
         this.queueName = queueName;
         this.accessPointContainer = accessPointContainer;
-        this.messageListener = messageListener;
+        this.messageListenerId = messageListenerId;
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
     }
 
     @Override
@@ -51,6 +59,7 @@ public class ConsumerContainer implements InitializingBean, DisposableBean, Fact
         for (ConsumerInterceptor interceptor : accessPointContainer.getConsumerInterceptors()) {
             consumer.addInterceptor(interceptor);
         }
+        Object messageListener = applicationContext.getBean(messageListenerId);
         if (messageListener instanceof MessageListener) {
             consumer.bindQueue(queueName, (MessageListener) messageListener);
         } else if (messageListener instanceof BatchMessageListener) {

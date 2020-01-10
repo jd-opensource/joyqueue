@@ -115,7 +115,7 @@ public class RetryServiceImpl implements RetryService {
     public void delete(ConsumeRetry retry) throws Exception {
         check();
         Long[] messageIds = {Long.valueOf(retry.getId())};
-        consoleMessageRetry.updateStatus(retry.getTopic(),retry.getApp(),messageIds, RetryStatus.RETRY_ING,retry.getUpdateTime(),retry.getUpdateBy());
+        consoleMessageRetry.updateStatus(retry.getTopic(),retry.getApp(),messageIds, RetryStatus.RETRY_DELETE,retry.getUpdateTime(),retry.getUpdateBy());
     }
 
     /*

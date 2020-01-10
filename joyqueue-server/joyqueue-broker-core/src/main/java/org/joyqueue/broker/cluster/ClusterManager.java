@@ -1015,7 +1015,7 @@ public class ClusterManager extends Service {
          */
 
         protected Consumer buildConsumeCache(TopicName topic, String app) {
-            logger.info("build consumer cache, topic: {}, app", topic, app);
+            logger.info("build consumer cache, topic: {}, app: {}", topic, app);
             Consumer consumerByTopic = nameService.getConsumerByTopicAndApp(topic, app);
             if (null != consumerByTopic) {
                 consumerCache.get(topic.getFullName()).put(app, new CacheConsumer(consumerByTopic, SystemClock.now()));
@@ -1074,7 +1074,7 @@ public class ClusterManager extends Service {
          * @param app   应用
          */
         protected Producer buildProduceCache(TopicName topic, String app) {
-            logger.info("build producer cache, topic: {}, app", topic, app);
+            logger.info("build producer cache, topic: {}, app: {}", topic, app);
             Producer producerByTopic = nameService.getProducerByTopicAndApp(topic, app);
             if (null != producerByTopic) {
                 producerCache.get(topic.getFullName()).put(app, new CacheProducer(producerByTopic));

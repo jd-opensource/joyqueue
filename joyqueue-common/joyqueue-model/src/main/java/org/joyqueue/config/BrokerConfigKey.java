@@ -34,6 +34,7 @@ public enum BrokerConfigKey implements PropertyDef {
     FRONTEND_SERVER_PRODUCE_THREADS("broker.frontend-server.produce.threads", Runtime.getRuntime().availableProcessors() * 4, Type.INT),
     FRONTEND_SERVER_PRODUCE_THREAD_KEEPALIVE("broker.frontend-server.produce.thread.keepalive", 1000 * 60, Type.INT),
     FRONTEND_SERVER_PRODUCE_THREAD_QUEUE_SIZE("broker.frontend-server.produce.thread.queue.size", 102400, Type.INT),
+    TRACER_TYPE("broker.tracer.type", "default", Type.STRING),
 
     ;
 
