@@ -65,6 +65,13 @@ public class GlobalStorageLimitCleaningStrategy implements StoreCleaningStrategy
         return totalDeletedSize;
     }
 
+    /**
+     * 返回当前存储的状态
+     **/
+    public StorageState state(){
+        return storageState;
+    }
+
     @Override
     public void setSupplier(PropertySupplier supplier) {
         BrokerStoreConfig brokerStoreConfig = new BrokerStoreConfig(supplier);
